@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/echovisionlab/geul-web/compare/v0.1.0...v0.1.1) (2026-09-02)
+
+
+### Bug Fixes
+
+* harden package boundary and changelog parsing ([#7](https://github.com/echovisionlab/geul-web/issues/7)) ([56ad3e6](https://github.com/echovisionlab/geul-web/commit/56ad3e693d1284041524c8f0597f8bcb8380b3f0))
+
 ## 0.1.0 (2026-09-02)
 
 
