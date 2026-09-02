@@ -40,7 +40,7 @@ const FALLBACK_CHANGELOG_MARKDOWN = `## [${APP_VERSION}](https://github.com/echo
 * This preview is shown when the deployed app cannot read CHANGELOG.md.
 `;
 
-const RELEASE_HEADING_PATTERN = /^## \[([^\]]+)]\(([^)]+)\)(?: \(([^)]+)\))?$/;
+const RELEASE_HEADING_PATTERN = /^## (?:\[([^\]]+)]\(([^)]+)\)|([^\s(]+))(?: \(([^)]+)\))?$/;
 const GROUP_HEADING_PATTERN = /^###\s+(.+)$/;
 const BULLET_PATTERN = /^[*-]\s+(.+)$/;
 const INLINE_LINK_PATTERN = /\[([^\]]+)]\((https?:\/\/[^)\s]+)\)/g;
@@ -82,9 +82,9 @@ export function parseChangelogMarkdown(markdown: string): ChangelogRelease[] {
     if (releaseMatch) {
       commitCurrentRelease();
       currentRelease = {
-        version: releaseMatch[1],
-        url: releaseMatch[2] || null,
-        date: releaseMatch[3] || null,
+        version: releaseMatch[1] ?? releaseMatch[3],
+        url: releaseMatch[2] ?? null,
+        date: releaseMatch[4] ?? null,
         groups: [],
       };
       currentGroup = null;

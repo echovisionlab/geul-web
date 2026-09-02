@@ -1,7 +1,7 @@
 {
   "name": "@echovisionlab/geul-web",
   "version": "0.1.0",
-  "private": false,
+  "private": true,
   "description": "Geul web application.",
   "author": "state303 <state303@dsub.io>",
   "license": "PolyForm-Noncommercial-1.0.0",
