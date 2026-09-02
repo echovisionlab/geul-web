@@ -1,0 +1,275 @@
+/* MapLibre map view - theme-aware styling */
+
+.mgl-callout {
+  --accent: var(--mantine-primary-color-filled);
+  --callout-line-color: var(--accent);
+  --callout-hover-line-color: var(--accent);
+  --callout-text-color: var(--mantine-color-text);
+  --callout-hover-text-color: var(--callout-text-color);
+  --callout-current-text-color: var(--callout-text-color);
+  --callout-desc-color: var(--mantine-color-dimmed);
+  --callout-hover-desc-color: var(--callout-text-color);
+  --callout-current-desc-color: var(--callout-desc-color);
+  --callout-bg-color: transparent;
+  --callout-hover-bg-color: var(--callout-bg-color);
+  --callout-current-bg-color: var(--callout-bg-color);
+  --callout-offset-x: 20px;
+  --callout-offset-y: 20px;
+  --callout-line-length: 150px;
+  --callout-scale: 1;
+
+  position: relative;
+  display: block;
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  pointer-events: auto;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.mgl-callout:hover,
+.mgl-callout:focus-visible,
+.mgl-callout:has(.mgl-callout__card:hover),
+.mgl-callout:has(.mgl-callout__card:focus-visible),
+.mgl-callout:has(.mgl-callout__pin:hover),
+.mgl-callout:has(.mgl-callout__pin:focus-visible) {
+  --callout-line-color: var(--callout-hover-line-color);
+  --callout-current-text-color: var(--callout-hover-text-color);
+  --callout-current-desc-color: var(--callout-hover-desc-color);
+  --callout-current-bg-color: var(--callout-hover-bg-color);
+}
+
+/* Mobile scaling */
+@media (max-width: 768px) {
+  .mgl-callout {
+    --callout-scale: 0.75;
+  }
+}
+
+@media (max-width: 480px) {
+  .mgl-callout {
+    --callout-scale: 0.65;
+  }
+}
+
+/* Pin - centered at marker position */
+.mgl-callout__pin {
+  position: absolute;
+  width: calc(8px * var(--callout-scale));
+  height: calc(8px * var(--callout-scale));
+  background: var(--callout-line-color);
+  border-radius: 50%;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  pointer-events: auto;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+/* SVG lines - positioned dynamically via inline styles */
+.mgl-callout__lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+  transform: scale(var(--callout-scale));
+  transform-origin: 0 0;
+}
+
+.mgl-callout__path {
+  transition: stroke 160ms ease;
+}
+
+/* Text card */
+.mgl-callout__card {
+  position: absolute;
+  pointer-events: auto;
+  width: max-content;
+  background-color: var(--callout-current-bg-color);
+  padding: calc(2px * var(--callout-scale)) calc(4px * var(--callout-scale));
+  border-radius: 2px;
+  cursor: pointer;
+  transform-origin: left center;
+  scale: var(--callout-scale);
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    opacity 160ms ease;
+}
+
+.mgl-callout--left .mgl-callout__card {
+  transform-origin: right center;
+}
+
+.mgl-callout:hover .mgl-callout__card,
+.mgl-callout:focus-visible .mgl-callout__card,
+.mgl-callout:has(.mgl-callout__card:hover) .mgl-callout__card,
+.mgl-callout:has(.mgl-callout__card:focus-visible) .mgl-callout__card,
+.mgl-callout:has(.mgl-callout__pin:hover) .mgl-callout__card,
+.mgl-callout:has(.mgl-callout__pin:focus-visible) .mgl-callout__card {
+  background-color: var(--callout-current-bg-color);
+  box-shadow: 0 10px 28px rgb(15 23 42 / 0.16);
+  opacity: 1;
+}
+
+.mgl-callout:hover .mgl-callout__pin,
+.mgl-callout:focus-visible .mgl-callout__pin,
+.mgl-callout:has(.mgl-callout__card:hover) .mgl-callout__pin,
+.mgl-callout:has(.mgl-callout__card:focus-visible) .mgl-callout__pin,
+.mgl-callout:has(.mgl-callout__pin:hover) .mgl-callout__pin,
+.mgl-callout:has(.mgl-callout__pin:focus-visible) .mgl-callout__pin {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--callout-line-color) 18%, transparent);
+}
+
+.mgl-callout__name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--callout-current-text-color);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 160ms ease;
+}
+
+.mgl-callout__address,
+.mgl-callout__line {
+  font-size: 10px;
+  color: var(--callout-current-desc-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 160ms ease;
+}
+
+/* Direction: Right - diagonal up-right, horizontal extends right */
+.mgl-callout--right .mgl-callout__card {
+  top: calc(var(--callout-offset-y) * -1);
+  left: var(--callout-offset-x);
+  transform: translateY(-50%);
+}
+
+/* Direction: Left - diagonal up-left, horizontal extends left */
+.mgl-callout--left .mgl-callout__card {
+  top: calc(var(--callout-offset-y) * -1);
+  right: var(--callout-offset-x);
+  left: auto;
+  transform: translateY(-50%);
+}
+
+/* Custom Attribution - Always bottom-right */
+.mgl-attribution {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: rgb(128 128 128 / 0.7);
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.mgl-attribution a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.mgl-attribution a:hover {
+  text-decoration: underline;
+}
+
+.mgl-directions-modal {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 260px;
+  max-width: min(90%, 360px);
+  opacity: 0.95;
+}
+
+.mgl-directions-modal .mgl-directions-modal__option {
+  --text-button-color: var(--mantine-color-text);
+  --text-button-hover-color: var(--mantine-color-text);
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: 0;
+  background: var(--mantine-color-body);
+  color: var(--mantine-color-text);
+  cursor: pointer;
+  padding: var(--mantine-spacing-xs);
+  text-align: left;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease;
+}
+
+.mgl-directions-modal .mgl-directions-modal__option:not(:last-child) {
+  margin-bottom: var(--mantine-spacing-xs);
+}
+
+.mgl-directions-modal__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.mgl-directions-modal__icon svg {
+  display: block;
+}
+
+.mgl-directions-modal .mgl-directions-modal__option:hover,
+.mgl-directions-modal .mgl-directions-modal__option:focus-visible {
+  background: var(--mantine-color-default-hover);
+  border-color: var(--mantine-color-gray-5);
+  color: var(--mantine-color-text);
+  box-shadow: 0 12px 28px rgb(15 23 42 / 0.12);
+  outline: none;
+}
+
+/* Map cursor overrides */
+.mgl-not-draggable .maplibregl-canvas {
+  cursor: default;
+}
+
+/* Print-only static image */
+.mgl-print-image {
+  display: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media print {
+  /* Hide interactive map elements only when static print image is ready */
+  .mgl-print-ready .maplibregl-map,
+  .mgl-print-ready .maplibregl-canvas-container,
+  .mgl-print-ready .mgl-attribution,
+  .mgl-print-ready .mgl-callout {
+    display: none !important;
+  }
+
+  /* Show print image */
+  .mgl-print-ready .mgl-print-image {
+    display: block !important;
+  }
+}

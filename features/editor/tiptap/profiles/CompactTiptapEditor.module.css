@@ -1,0 +1,11 @@
+.content {
+  min-height: 120px;
+}
+
+.empty::before {
+  float: left;
+  height: 0;
+  color: var(--mantine-color-placeholder);
+  pointer-events: none;
+  content: attr(data-placeholder);
+}

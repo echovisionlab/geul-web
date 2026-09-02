@@ -1,0 +1,34 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": false,
+    "paths": {
+      "react/jsx-runtime.js": ["./node_modules/@types/react/jsx-runtime.d.ts"],
+      "monaco-editor/esm/vs/editor/editor.api": ["./node_modules/monaco-editor/esm/vs/editor/editor.api.d.ts"],
+      "typescript": ["./node_modules/@typescript/tooling"],
+      "@/*": ["./*"],
+      "@echovisionlab/geul-common": ["../geul-common/src/index.ts"],
+      "@echovisionlab/geul-common/*": ["../geul-common/src/*"],
+      "@echovisionlab/geul-event": ["../geul-event-contracts/packages/event/src/index.ts"],
+      "@echovisionlab/geul-telemetry": ["../geul-telemetry/src/index.ts"],
+      "@echovisionlab/geul-telemetry/*": ["../geul-telemetry/src/*.ts"],
+      "@echovisionlab/geul-proto/common/*": ["../geul-event-contracts/packages/proto/gen/api/common/v1/*"],
+      "@echovisionlab/geul-proto/content/*": ["../geul-event-contracts/packages/proto/gen/api/content/v1/*"],
+      "@echovisionlab/geul-proto/intra/*": ["../geul-event-contracts/packages/proto/gen/api/intra/v1/*"],
+      "@echovisionlab/geul-proto/policy/*": ["../geul-event-contracts/packages/proto/gen/api/policy/v1/*"],
+      "@echovisionlab/geul-proto/public/*": ["../geul-event-contracts/packages/proto/gen/api/open/v1/*"],
+      "@echovisionlab/geul-proto/secure/*": ["../geul-event-contracts/packages/proto/gen/api/manage/v1/*"]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    ".next",
+    ".next-*",
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx",
+    "**/*.story.ts",
+    "**/*.story.tsx",
+    "**/*.stories.ts",
+    "**/*.stories.tsx"
+  ]
+}

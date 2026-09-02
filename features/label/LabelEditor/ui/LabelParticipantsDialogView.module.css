@@ -1,0 +1,149 @@
+.addControls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--mantine-spacing-xs);
+  align-items: end;
+}
+
+.searchControl {
+  min-width: 0;
+}
+
+.roleControl {
+  display: grid;
+  width: max-content;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.roleWidthSizer,
+.roleSelectRoot {
+  grid-area: 1 / 1;
+}
+
+.roleWidthSizer {
+  display: grid;
+  width: max-content;
+  max-width: 100%;
+  visibility: hidden;
+  pointer-events: none;
+  font-size: var(--mantine-font-size-sm);
+  line-height: var(--mantine-line-height-sm);
+}
+
+.roleWidthSizer > span {
+  grid-area: 1 / 1;
+  padding-inline: var(--mantine-spacing-sm) calc(var(--mantine-spacing-sm) + 1.25rem);
+  white-space: nowrap;
+}
+
+.roleSelectRoot {
+  width: 100%;
+  min-width: 0;
+  contain: inline-size;
+}
+
+.roleSelectInput {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.participantRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  min-width: 0;
+}
+
+.participantIdentity,
+.participantText {
+  min-width: 0;
+}
+
+.participantIdentity {
+  flex: 1 1 auto;
+}
+
+.participantIdentity :global(.mantine-Avatar-root) {
+  flex-shrink: 0;
+}
+
+.participantText {
+  flex: 1 1 auto;
+}
+
+.inactiveStatus {
+  display: inline-flex;
+  flex: 0 0 1rem;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  color: var(--mantine-color-dimmed);
+  background: transparent;
+}
+
+.participantActions {
+  display: grid;
+  grid-template-columns: minmax(0, 9.5rem) auto auto;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+  min-width: 0;
+  justify-self: end;
+}
+
+.roleBadgeContainer {
+  display: inline-flex;
+  min-width: 0;
+  max-width: 9.5rem;
+  overflow: hidden;
+}
+
+.roleBadge {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.roleBadge :global(.mantine-Badge-label) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actionButton {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+@media (max-width: 36em) {
+  .addControls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .roleControl {
+    width: 100%;
+  }
+
+  .roleWidthSizer {
+    display: none;
+  }
+}
+
+@media (max-width: 26em) {
+  .participantRow {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--mantine-spacing-xs);
+  }
+
+  .participantActions {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    width: 100%;
+  }
+
+  .roleBadgeContainer {
+    max-width: 100%;
+  }
+}

@@ -1,0 +1,45 @@
+.previewContent {
+  line-height: 1.5;
+}
+
+.previewContent ul,
+.previewContent ol {
+  margin: 0.25em 0;
+  padding-left: 1.5em;
+}
+
+.previewContent li {
+  margin: 0.125em 0;
+}
+
+.previewContent p {
+  margin: 0.25em 0;
+}
+
+.previewContent strong {
+  font-weight: 600;
+}
+
+.previewContent a {
+  color: var(--mantine-color-blue-6);
+  text-decoration: underline;
+}
+
+.previewContent code {
+  padding: 0.125em 0.25em;
+  font-size: 0.9em;
+  background-color: var(--mantine-color-gray-1);
+  border-radius: 3px;
+}
+
+.previewContent blockquote {
+  padding-left: 0.75em;
+  margin: 0.5em 0;
+  color: var(--mantine-color-gray-7);
+  border-left: 3px solid var(--mantine-color-gray-4);
+}
+
+.previewStrikethrough,
+.previewStrikethrough * {
+  text-decoration: line-through;
+}

@@ -1,0 +1,59 @@
+.marker {
+  transition: transform 200ms ease-in-out;
+}
+
+:global(.gm-style-iw-c) {
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+:global(.gm-style-iw-d) {
+  overflow: hidden !important;
+}
+
+:global(.gm-style-iw-tc) {
+  display: none !important;
+}
+
+.infoContent {
+  display: flex;
+  flex-direction: row;
+  height: 120px;
+  background-color: var(--mantine-color-body);
+  color: var(--mantine-color-text);
+  border: 1px solid var(--mantine-color-default-border);
+}
+
+.imageContainer {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.imageSkeleton {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.noImage {
+  width: 120px;
+  height: 120px;
+  background-color: var(--mantine-color-default-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.textContent {
+  width: 194px;
+  padding: var(--mantine-spacing-xs);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  word-break: keep-all;
+}

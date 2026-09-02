@@ -1,0 +1,13 @@
+.content {
+  a {
+    color: var(--mantine-color-text);
+    text-decoration: none;
+    transition: color 100ms ease;
+  }
+
+  a:hover,
+  a:focus-visible {
+    color: var(--mantine-color-blue-6);
+    text-decoration: none;
+  }
+}

@@ -1,0 +1,56 @@
+.root {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.root[data-content-height='viewport'],
+.root[data-footer-layout='pinned'] {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+}
+
+.body {
+  min-width: 0;
+}
+
+.root[data-content-height='viewport'] .body,
+.root[data-footer-layout='pinned'] .body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.pinnedChrome {
+  position: sticky;
+  top: var(--app-shell-header-offset, 0);
+  z-index: 5;
+  min-width: 0;
+}
+
+.flowChrome {
+  position: relative;
+  z-index: 1;
+}
+
+@media print {
+  .root,
+  .root[data-content-height='viewport'] {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  .body,
+  .root[data-content-height='viewport'] .body {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .pinnedChrome {
+    position: static !important;
+  }
+}

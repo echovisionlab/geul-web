@@ -1,0 +1,58 @@
+.container {
+  position: fixed;
+  inset: 0;
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--mantine-color-body);
+}
+
+.content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+.mapContainer {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.formPanel {
+  width: 360px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--mantine-color-default-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Mobile: Floating search bar on top of map */
+.floatingSearch {
+  position: absolute;
+  top: var(--mantine-spacing-md);
+  left: var(--mantine-spacing-md);
+  right: var(--mantine-spacing-md);
+  z-index: 10;
+}
+
+/* Mobile: Bottom bar showing selected location */
+.bottomBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: var(--mantine-spacing-md);
+  background: var(--mantine-color-body);
+  border-top: 1px solid var(--mantine-color-default-border);
+  box-shadow: 0 -2px 8px rgb(0 0 0 / 0.1);
+}
+
+[data-mantine-color-scheme='dark'] .bottomBar {
+  box-shadow: 0 -2px 8px rgb(0 0 0 / 0.3);
+}

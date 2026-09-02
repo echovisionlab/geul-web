@@ -1,0 +1,68 @@
+.root {
+  position: fixed;
+  z-index: 10000;
+  inset: 0 0 auto;
+  height: 2px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 90ms ease-out;
+  contain: strict;
+}
+
+.root[data-phase='loading'],
+.root[data-phase='completing'] {
+  opacity: 1;
+}
+
+.bar {
+  width: 100%;
+  height: 100%;
+  background: var(--geul-brand-color, var(--mantine-primary-color-filled));
+  transform: scaleX(0.08);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.root[data-phase='loading'] .bar {
+  animation: route-progress-crawl 12s cubic-bezier(0.1, 0.35, 0.2, 1) forwards;
+}
+
+.root[data-phase='completing'] .bar {
+  transform: scaleX(1);
+  transition: transform 160ms ease-out;
+}
+
+@keyframes route-progress-crawl {
+  0% {
+    transform: scaleX(0.08);
+  }
+
+  18% {
+    transform: scaleX(0.42);
+  }
+
+  48% {
+    transform: scaleX(0.68);
+  }
+
+  75% {
+    transform: scaleX(0.82);
+  }
+
+  100% {
+    transform: scaleX(0.92);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root,
+  .bar {
+    transition-duration: 0.01ms !important;
+  }
+
+  .root[data-phase='loading'] .bar {
+    animation: none;
+    transform: scaleX(0.72);
+  }
+}

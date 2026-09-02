@@ -1,0 +1,129 @@
+/* Prevent flash of white on dark mode - CSS loads before JS */
+@media (prefers-color-scheme: dark) {
+  html:not([data-mantine-color-scheme='light']),
+  html:not([data-mantine-color-scheme='light']) body {
+    background-color: var(--mantine-color-body, #1a1b1e);
+    color-scheme: dark;
+  }
+}
+
+html[data-mantine-color-scheme='dark'] {
+  background-color: var(--mantine-color-body, #1a1b1e);
+  color-scheme: dark;
+}
+
+html[data-mantine-color-scheme='dark'] body {
+  background-color: var(--mantine-color-body, #1a1b1e) !important;
+}
+
+html[data-mantine-color-scheme='light'] {
+  background-color: var(--mantine-color-body, #fff);
+  color-scheme: light;
+}
+
+html[data-mantine-color-scheme='light'] body {
+  background-color: var(--mantine-color-body, #fff) !important;
+}
+
+/* Main content transparent - body background shows through */
+.mantine-AppShell-main {
+  background-color: transparent !important;
+}
+
+:root {
+  /* Site Settings branding. Interaction primary remains Mantine blue. */
+  --geul-brand-color: #b02d23;
+
+  --chrome-font-size: 0.75rem;
+  --chrome-section-font-size: 0.625rem;
+  --chrome-row-height: 2rem;
+  --chrome-section-row-height: 1.75rem;
+  --chrome-menu-row-height: 1.875rem;
+  --chrome-icon-size: 1rem;
+  --chrome-action-size: 2rem;
+  --chrome-compact-item-size: 2.5rem;
+  --chrome-rail-width: 3rem;
+  --header-height-base: 52px;
+  --header-height-sm: 64px;
+  --scroll-offset: var(--header-height-sm);
+
+  /* Durable editor color names resolve through this single light-theme palette. */
+  --editor-text-color-default: var(--mantine-color-text);
+  --editor-text-color-gray: #686764;
+  --editor-text-color-brown: #64473a;
+  --editor-text-color-red: #c62828;
+  --editor-text-color-orange: #995000;
+  --editor-text-color-yellow: #705a00;
+  --editor-text-color-green: #315c52;
+  --editor-text-color-blue: #0b6e99;
+  --editor-text-color-purple: #6940a5;
+  --editor-text-color-pink: #ad1a72;
+  --editor-background-color-default: transparent;
+  --editor-background-color-gray: #ebeced;
+  --editor-background-color-brown: #e9e5e3;
+  --editor-background-color-red: #fbe4e4;
+  --editor-background-color-orange: #f6e9d9;
+  --editor-background-color-yellow: #fbf3db;
+  --editor-background-color-green: #ddedea;
+  --editor-background-color-blue: #ddebf1;
+  --editor-background-color-purple: #eae4f2;
+  --editor-background-color-pink: #f4dfeb;
+
+  /* iPhone notch safe area */
+  --safe-area-top: env(safe-area-inset-top);
+  --safe-area-bottom: env(safe-area-inset-bottom);
+  --safe-area-left: env(safe-area-inset-left);
+  --safe-area-right: env(safe-area-inset-right);
+}
+
+[data-mantine-color-scheme='dark'] {
+  --editor-text-color-default: var(--mantine-color-text);
+  --editor-text-color-gray: #b4b3af;
+  --editor-text-color-brown: #d9a98e;
+  --editor-text-color-red: #ff8787;
+  --editor-text-color-orange: #ffa94d;
+  --editor-text-color-yellow: #ffe066;
+  --editor-text-color-green: #8ce99a;
+  --editor-text-color-blue: #74c0fc;
+  --editor-text-color-purple: #b197fc;
+  --editor-text-color-pink: #f783ac;
+  --editor-background-color-default: transparent;
+  --editor-background-color-gray: #373735;
+  --editor-background-color-brown: #453329;
+  --editor-background-color-red: #4a2929;
+  --editor-background-color-orange: #493224;
+  --editor-background-color-yellow: #463d24;
+  --editor-background-color-green: #273d35;
+  --editor-background-color-blue: #273b47;
+  --editor-background-color-purple: #372e49;
+  --editor-background-color-pink: #452b3b;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --scroll-offset: var(--header-height-base);
+  }
+}
+
+/* Carousel Control Buttons - visibility improvement */
+.mantine-Carousel-control {
+  background-color: rgb(255, 255, 255, 0.9);
+  border: 1px solid rgb(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgb(0, 0, 0, 0.15);
+  color: var(--mantine-color-dark-7);
+}
+
+.mantine-Carousel-control:hover {
+  background-color: rgb(255, 255, 255, 1);
+}
+
+/* Dark mode */
+[data-mantine-color-scheme='dark'] .mantine-Carousel-control {
+  background-color: rgb(0, 0, 0, 0.7);
+  border-color: rgb(255, 255, 255, 0.1);
+  color: var(--mantine-color-white);
+}
+
+[data-mantine-color-scheme='dark'] .mantine-Carousel-control:hover {
+  background-color: rgb(0, 0, 0, 0.85);
+}

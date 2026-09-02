@@ -1,0 +1,51 @@
+export {
+  createShaderExtension,
+  DEFAULT_SHADER_LABELS,
+  KOREAN_SHADER_LABELS,
+  SHADER_LABEL_KEYS,
+  ShaderNodeView,
+  resolveShaderViewMode,
+  type ShaderOptions,
+  type InsertShaderOptions,
+  type ShaderLabels,
+  type ShaderFilePickerProps,
+  type ShaderMode,
+} from './ShaderNode';
+export { ShaderPublicPreview, ShaderPreviewSurface, type ShaderPreviewLabels } from './ShaderPublicPreview';
+export {
+  createShaderPreviewWorkerRuntime,
+  type ShaderPreviewRuntime,
+  type ShaderPreviewRuntimeEvents,
+  type ShaderPreviewRuntimeFactory,
+  type ShaderAssetResolver,
+  type ShaderResolvedAsset,
+  type ShaderRuntimeRunOptions,
+} from './shader-preview-runtime';
+export {
+  DEFAULT_SHADER_PROGRAM,
+  EMPTY_SHADER_CHANNELS,
+  SHADER_STAGE_DEFINITIONS,
+  normalizeShaderChannels,
+  shaderProgramDocument,
+  validateShaderPassGraph,
+  type ShaderBufferName,
+  type ShaderChannel,
+  type ShaderChannelStage,
+  type ShaderProgramDocument,
+  type ShaderSamplerOptions,
+  type ShaderStage,
+  type ShaderVisualStage,
+} from './shader-program';
+export {
+  DEFAULT_SHADER_VERTEX_SOURCE,
+  DEFAULT_SHADER_FRAGMENT_SOURCE,
+  SHADER_MAX_SOURCE_LENGTH,
+  normalizeShaderError,
+  mapShaderCompileError,
+  validateShaderProgramSources,
+  validateShaderSource,
+  validateShaderStageSource,
+  type ShaderError,
+  type ShaderErrorKind,
+  type ShaderCompileSourceMap,
+} from './shader-source';

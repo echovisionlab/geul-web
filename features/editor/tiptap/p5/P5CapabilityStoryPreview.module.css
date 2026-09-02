@@ -1,0 +1,17 @@
+.root {
+  border-color: var(--mantine-color-default-border);
+  background: var(--mantine-color-body);
+}
+
+.source {
+  max-height: 22rem;
+  margin: 0;
+  overflow: auto;
+  padding: var(--mantine-spacing-sm);
+  color: var(--mantine-color-gray-1);
+  background: var(--mantine-color-dark-8);
+  font-family: var(--mantine-font-family-monospace);
+  font-size: var(--mantine-font-size-xs);
+  line-height: 1.55;
+  white-space: pre;
+}

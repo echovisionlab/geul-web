@@ -1,0 +1,80 @@
+.viewerSurface {
+  position: relative;
+  min-height: 220px;
+  padding: var(--mantine-spacing-md) clamp(var(--mantine-spacing-sm), 2.4vw, 32px);
+  user-select: none;
+}
+
+.listThumbnail {
+  width: 24px;
+  height: 24px;
+  overflow: hidden;
+}
+
+.folderPreview,
+.filePreview {
+  width: 100%;
+  height: 100%;
+}
+
+.folderPreview {
+  color: var(--mantine-color-yellow-7);
+}
+
+.filePreview {
+  color: var(--mantine-color-dimmed);
+}
+
+.listView {
+  min-width: 0;
+}
+
+.listView :global(th) {
+  height: 32px;
+  padding-block: 4px;
+  white-space: nowrap;
+}
+
+.listView :global(td) {
+  height: 36px;
+  padding-block: 4px;
+}
+
+.listView :global([data-datatable-desktop-row][data-selected]),
+.listView :global([data-datatable-mobile-row][data-selected]) {
+  background: var(--mantine-primary-color-light);
+}
+
+.listView :global([data-datatable-desktop-row]:focus-visible),
+.listView :global([data-datatable-mobile-row]:focus-visible) {
+  outline: 2px solid var(--mantine-primary-color-filled);
+  outline-offset: -2px;
+}
+
+.usageStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.marquee {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--mantine-primary-color-filled) 14%, transparent);
+  border: 1px solid var(--mantine-primary-color-filled);
+}
+
+.contextTarget {
+  position: fixed;
+  z-index: 400;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+@media (max-width: 47.99em) {
+  .viewerSurface {
+    padding-inline: var(--mantine-spacing-xs);
+  }
+}

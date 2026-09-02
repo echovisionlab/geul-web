@@ -1,0 +1,4 @@
+.itemSection > :where(svg, img) {
+  max-width: 16px;
+  max-height: 16px;
+}

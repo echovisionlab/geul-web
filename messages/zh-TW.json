@@ -1,0 +1,5443 @@
+{
+  "common": {
+    "actions": {
+      "save": "儲存",
+      "saveChanges": "儲存變更",
+      "create": "建立",
+      "add": "新增",
+      "dismiss": "關閉",
+      "confirm": "確認",
+      "cancel": "取消",
+      "close": "關閉",
+      "edit": "編輯",
+      "back": "返回",
+      "returnHome": "返回首頁",
+      "view": "檢視",
+      "open": "開啟",
+      "delete": "刪除",
+      "hide": "隱藏",
+      "share": "分享",
+      "print": "列印",
+      "markdown": "Markdown",
+      "continue": "繼續",
+      "openIn": "在...中開啟",
+      "change": "變更",
+      "connect": "連線",
+      "disconnect": "中斷連線",
+      "update": "更新",
+      "changeRole": "變更角色",
+      "ban": "封鎖",
+      "unban": "解除封鎖",
+      "copy": "複製",
+      "copied": "已複製",
+      "logIn": "登入",
+      "backToLogin": "返回登入",
+      "backToPrivacyPolicy": "返回隱私權政策",
+      "backToTermsOfService": "返回服務條款",
+      "logOut": "登出",
+      "remove": "移除",
+      "publish": "發布",
+      "unpublish": "取消發布",
+      "cancelSchedule": "取消排程",
+      "deleteVersion": "刪除版本",
+      "recoverAccount": "恢復帳戶",
+      "requestAccountDeletion": "請求刪除帳戶",
+      "activateNow": "立即啟用",
+      "createFirstVersion": "建立第一個版本",
+      "setAsDefault": "設為預設值",
+      "schedule": "排程",
+      "regenerateHtml": "重新產生 HTML",
+      "apply": "套用",
+      "refresh": "重新整理",
+      "clearAll": "全部清除",
+      "toggleNavigation": "切換導覽",
+      "toggleColorScheme": "切換色彩配置",
+      "sendVerificationEmail": "發送驗證郵件",
+      "sendConfirmationEmail": "發送確認郵件",
+      "sendTest": "發送測試",
+      "sendTestEmail": "發送測試郵件",
+      "reply": "回覆",
+      "insertVariable": "插入變數",
+      "acceptAll": "全部接受",
+      "rejectNonEssential": "拒絕非必要項",
+      "savePreferences": "儲存偏好設定",
+      "import": "匯入",
+      "export": "匯出",
+      "exportPdf": "匯出 PDF",
+      "newItem": "新{item}",
+      "createItem": "建立 {item}",
+      "addItem": "新增 {item}",
+      "upload": "上傳",
+      "uploadItem": "上傳 {item}",
+      "createNamed": "建立 \"{name}\"",
+      "searchItems": "搜尋 {items}...",
+      "tryAgain": "再試一次",
+      "openInNewTab": "在新分頁中開啟",
+      "unsubscribe": "取消訂閱"
+    },
+    "theme": {
+      "lightMode": "燈光模式",
+      "darkMode": "深色模式"
+    },
+    "providers": {
+      "google": "Google",
+      "github": "GitHub"
+    },
+    "aria": {
+      "viewProfile": "查看 {name} 個人資料"
+    },
+    "labels": {
+      "title": "標題",
+      "summary": "摘要",
+      "name": "名稱",
+      "key": "鍵",
+      "label": "標籤",
+      "fields": "欄位",
+      "subject": "主旨",
+      "event": "事件",
+      "status": "狀態",
+      "dashboard": "儀表板",
+      "created": "建立時間",
+      "updated": "更新時間",
+      "published": "已發布",
+      "type": "類型",
+      "edit": "編輯",
+      "role": "角色",
+      "email": "電子郵件",
+      "emailPreview": "郵件預覽",
+      "fromEmail": "寄件者電子郵件",
+      "fromNameOptional": "寄件者名稱（選填）",
+      "availableVariables": "可用變數 ({count, plural, one {# 個變數} other {# 個變數}})",
+      "password": "密碼",
+      "recipients": "收件者",
+      "language": "語言",
+      "locale": "語言環境",
+      "required": "必填",
+      "address": "地址",
+      "addressDetails": "地址詳細資訊",
+      "city": "城市",
+      "website": "網站",
+      "map": "地圖",
+      "companyName": "公司名稱",
+      "url": "URL",
+      "links": "連結",
+      "preview": "預覽",
+      "id": "ID",
+      "image": "圖片",
+      "file": "檔案",
+      "bio": "簡介",
+      "realName": "真實姓名",
+      "countryCode": "國家代碼",
+      "slug": "短標識",
+      "slugAutoModeEnabled": "與標題自動同步（點擊以停用）",
+      "slugAutoModeManual": "手動模式（點擊啟用自動同步）",
+      "submissions": "提交數",
+      "public": "公開",
+      "location": "地點",
+      "coordinates": "座標",
+      "lastEdited": "最後編輯",
+      "latitude": "緯度",
+      "longitude": "經度",
+      "author": "作者",
+      "authors": "作者",
+      "members": "成員",
+      "menu": "選單",
+      "tags": "標籤",
+      "account": "帳戶",
+      "profile": "個人資料",
+      "security": "安全性",
+      "options": "選項",
+      "overview": "概覽",
+      "actions": "操作",
+      "description": "說明",
+      "error": "錯誤",
+      "details": "詳細資訊",
+      "catalogNumber": "目錄號",
+      "country": "國家",
+      "street": "街道",
+      "region": "區域",
+      "postalCode": "郵遞區號",
+      "siteOrigin": "網站來源",
+      "logo": "標誌",
+      "logoLight": "淺色標誌",
+      "logoDark": "深色標誌",
+      "joined": "加入日期",
+      "subscribed": "訂閱日期",
+      "featured": "精選",
+      "order": "順序",
+      "sortOrder": "排序順序",
+      "releaseDate": "發行日期",
+      "version": "版本",
+      "versionHistory": "版本歷史",
+      "lastManualEdit": "最後手動編輯",
+      "lastUpdated": "最後更新",
+      "duration": "時長",
+      "length": "長度",
+      "hours": "小時",
+      "minutes": "分鐘",
+      "seconds": "秒",
+      "time": "時間",
+      "generationInfo": "生成資訊",
+      "body": "內文",
+      "content": "內容",
+      "bodyPreview": "內文預覽",
+      "source": "來源",
+      "audio": "音訊",
+      "video": "影片",
+      "creditedName": "署名名稱",
+      "background": "背景",
+      "managers": "管理員",
+      "collaborators": "協作者",
+      "width": "寬度",
+      "height": "高度",
+      "color": "顏色",
+      "top": "上",
+      "right": "右",
+      "bottom": "下",
+      "left": "左",
+      "fontSize": "字型大小",
+      "fontWeight": "字重",
+      "maxLength": "最大長度",
+      "lineHeight": "行高",
+      "opacity": "不透明度",
+      "effectiveFrom": "生效起始",
+      "effectiveDate": "生效日期",
+      "works": "作品",
+      "sentCount": "發送數量",
+      "estimatedCount": "預估數量",
+      "htmlContent": "HTML 內容",
+      "createdBy": "建立者",
+      "updatedBy": "更新者",
+      "social": "社群",
+      "settings": "設定",
+      "ogImage": "OG 圖像",
+      "priority": "優先順序",
+      "value": "值",
+      "text": "文字",
+      "caption": "說明文字",
+      "allUsers": "所有使用者",
+      "newsletter": "電子報"
+    },
+    "entities": {
+      "post": "文章",
+      "posts": "文章",
+      "page": "頁面",
+      "pages": "頁面",
+      "work": "作品",
+      "works": "作品",
+      "artist": "藝術家",
+      "artists": "藝術家",
+      "label": "廠牌",
+      "labels": "廠牌",
+      "form": "表單",
+      "forms": "表單",
+      "programEvent": "活動",
+      "programEvents": "活動",
+      "programEventType": "活動類型",
+      "programEventTypes": "活動類型",
+      "programEventSeries": "活動系列",
+      "series": "系列",
+      "category": "分類",
+      "categories": "分類",
+      "tag": "標籤",
+      "tags": "標籤",
+      "genre": "流派",
+      "genres": "流派",
+      "style": "風格",
+      "styles": "風格",
+      "format": "格式",
+      "formats": "格式",
+      "release": "發行",
+      "releases": "發行",
+      "track": "曲目",
+      "tracks": "曲目",
+      "credit": "製作人員",
+      "credits": "製作人員",
+      "client": "客戶",
+      "clients": "客戶",
+      "campaign": "活動",
+      "campaigns": "活動",
+      "audienceSegment": "受眾群體",
+      "audienceSegments": "受眾群體",
+      "user": "使用者",
+      "member": "成員",
+      "users": "使用者",
+      "userTag": "使用者標籤",
+      "userTags": "使用者標籤",
+      "menu": "選單",
+      "menus": "選單",
+      "emailLayout": "電子郵件版面",
+      "emailLayouts": "電子郵件版面",
+      "emailTemplate": "電子郵件範本",
+      "emailTemplates": "電子郵件範本",
+      "terms": "服務條款",
+      "privacy": "隱私權政策",
+      "mapTheme": "地圖主題",
+      "mapThemes": "地圖主題",
+      "mapPlace": "地圖地點",
+      "mapPlaces": "地圖地點",
+      "translations": "翻譯"
+    },
+    "messages": {
+      "noUsersFound": "未找到使用者",
+      "noVersionsFound": "未找到版本",
+      "typeAtLeast2Characters": "請至少輸入 2 個字元",
+      "itemCreated": "{item} 已建立",
+      "itemUpdated": "{item} 已更新",
+      "itemDeleted": "{item} 已刪除",
+      "itemRemoved": "{item} 已移除",
+      "itemPublished": "{item} 已發布",
+      "itemUnpublished": "{item} 已取消發布",
+      "cropItem": "裁剪 {item}",
+      "uploadFailed": "上傳檔案失敗",
+      "uploadImageFailed": "上傳圖片失敗",
+      "removeImageFailed": "刪除圖片失敗",
+      "deleteItemConfirm": "您確定要刪除此 {item} 嗎？此操作無法復原",
+      "deleteNamedItemConfirm": "您確定要刪除「{name}」嗎？此操作無法復原",
+      "confirmDeleteSelectedCount": "您確定要刪除 {count} 個已選項目嗎？此操作無法復原",
+      "deleteDraftVersionConfirm": "您確定要刪除此草稿版本嗎",
+      "confirmDeleteNamedRich": "您確定要刪除 <strong>{name}</strong> 嗎",
+      "activeCount": "{count} 個啟用項目",
+      "effectiveFromDate": "自 {date} 起生效",
+      "noUpdateRecorded": "尚未記錄更新",
+      "exportedEmails": "已匯出 {count, plural, one {# 封郵件} other {# 封郵件}}",
+      "formSubmittedSuccessfully": "您的回覆已成功提交",
+      "userDate": "{user} · {date}",
+      "scheduleActivationTitle": "安排啟用",
+      "scheduleActivationDescription": "選擇此版本何時生效。屆時將向所有有效帳號寄送通知郵件。",
+      "scheduleActivationNotice": "排程會向所有有效帳號寄送附帶預覽連結的通知郵件。",
+      "translationDetailUnavailable": "無法載入詳細翻譯資料。您仍然可以編輯目前公開翻譯",
+      "invalidConfirmationLinkFromEmail": "確認連結無效。請使用確認郵件中的連結",
+      "noPostsFound": "未找到文章",
+      "noWorksFound": "未找到作品",
+      "urlCopiedToClipboard": "URL 已複製到剪貼簿",
+      "failedToLoad": "無法載入資料。",
+      "relatedItemsWillBeUnlinked": "將解除 {count} 個相關項目的連結。"
+    },
+    "notifications": {
+      "categoryCreated": "類別已建立",
+      "tagCreated": "標籤已建立",
+      "tagDeleted": "標籤已刪除",
+      "uploadFailed": "上傳失敗",
+      "featuredImageUpdated": "特色圖片已更新",
+      "featuredImageRemoved": "特色圖片已移除",
+      "seriesCreated": "系列已建立",
+      "memberAdded": "已新增成員",
+      "memberRemoved": "成員已移除",
+      "createPlaceFailed": "建立地點失敗",
+      "placeCreatedAndLinked": "地點已建立並已關聯",
+      "applySummaryFailed": "套用摘要失敗",
+      "updateFailed": "更新失敗",
+      "exportFailed": "匯出失敗",
+      "postRemovedFromSeries": "文章已從系列中移除",
+      "ogGenerationRequested": "已請求產生 OG 圖像",
+      "ogRegenerationFailed": "重新產生 OG 圖像失敗",
+      "testEmailSent": "測試郵件已傳送",
+      "saveSuccess": "已儲存",
+      "saveFailed": "儲存失敗"
+    },
+    "errors": {
+      "generic": "發生問題。請再試一次。",
+      "unauthorized": "需要登入",
+      "entityWithThisKeyAlreadyExists": "已存在使用此鍵的{entity}。",
+      "entityNotFound": "找不到{entity}。",
+      "passwordMismatch": "密碼不相符",
+      "nameRequired": "名稱為必填項",
+      "passwordTooShort": "密碼長度至少為 8 個字元"
+    },
+    "timeRanges": {
+      "today": "今天",
+      "thisWeek": "本週",
+      "thisMonth": "本月"
+    },
+    "placeholders": {
+      "search": "搜尋...",
+      "searchByName": "按名稱搜尋...",
+      "searchByEmailOrName": "按電子郵件或姓名搜尋...",
+      "searchClients": "搜尋客戶...",
+      "searchPlaces": "搜尋地點...",
+      "emailExample": "你的@email.com",
+      "enterEmailAddress": "輸入您的電子郵件地址",
+      "exampleUrl": "https://example.com",
+      "website": "https://...",
+      "selectValues": "選擇值...",
+      "optionalDescription": "可選說明",
+      "placeName": "地點名稱",
+      "fullAddress": "完整地址",
+      "password": "輸入密碼",
+      "selectRoles": "選擇角色",
+      "searchPosts": "搜尋文章...",
+      "searchWorks": "搜尋作品...",
+      "searchTags": "搜尋標籤...",
+      "testEmail": "測試@email.com",
+      "testEmailExample": "test@example.com",
+      "noReplyEmail": "noreply@example.com",
+      "translationLiveRowMissing": "此語言目前尚無公開翻譯。儲存在這裡會立即建立一個",
+      "translationBodyPreviewUnavailable": "內文預覽不可用",
+      "selectDateAndTime": "選擇日期和時間",
+      "streetAddress": "街道地址",
+      "regionSubdivision": "州／省"
+    },
+    "uploadField": {
+      "instruction": "拖放或點擊上傳",
+      "constraints": "{formats} · 最大 {maxSize}",
+      "changeHint": "點擊圖片以替換",
+      "status": {
+        "preparingImage": "正在準備圖片",
+        "uploading": "上傳中"
+      }
+    },
+    "states": {
+      "anonymous": "匿名的",
+      "unknown": "未知",
+      "none": "無",
+      "untitled": "（無標題）",
+      "untitledPlain": "無題",
+      "untitledEntity": "無標題{entity}",
+      "noSubject": "（無主題）",
+      "unknownAuthor": "作者未知",
+      "connected": "已連接",
+      "connectingEditor": "正在連接到編輯器...",
+      "loadingPreview": "正在加載預覽...",
+      "loadingTags": "正在加載標籤...",
+      "notConnected": "未連接",
+      "offline": "離線",
+      "syncing": "正在同步...",
+      "synced": "已同步",
+      "notAvailable": "無法使用",
+      "generating": "生成...",
+      "true": "真的",
+      "false": "錯誤的",
+      "loading": "載入中..."
+    },
+    "roles": {
+      "admin": "行政",
+      "editor": "編輯",
+      "viewer": "觀眾",
+      "author": "作者",
+      "user": "使用者"
+    },
+    "statuses": {
+      "draft": "草稿",
+      "published": "已發布",
+      "failed": "失敗",
+      "applied": "Applied",
+      "default": "預設",
+      "custom": "自訂",
+      "archived": "已封存",
+      "scheduled": "已排程",
+      "active": "活躍",
+      "current": "目前",
+      "inProgress": "進行中",
+      "inactive": "未啟用",
+      "queued": "已排隊",
+      "running": "執行中",
+      "uploading": "上傳中",
+      "cancelled": "已取消",
+      "superseded": "已取代",
+      "sent": "已傳送",
+      "closed": "已關閉",
+      "banned": "已封鎖",
+      "pendingDeletion": "待刪除",
+      "deleted": "已刪除",
+      "pending": "待處理",
+      "verified": "已驗證",
+      "unsubscribed": "已取消訂閱",
+      "subscribed": "已訂閱",
+      "onboardingPending": "尚未完成引導"
+    }
+  },
+  "shell": {
+    "actions": {
+      "search": "搜尋",
+      "searchTooltip": "搜尋 ({shortcut})",
+      "signIn": "登入",
+      "cookieSettings": "Cookie 設定",
+      "language": "更改語言"
+    },
+    "language": {
+      "errorTitle": "無法更改語言",
+      "errorMessage": "請再試一次"
+    },
+    "footer": {
+      "siteInfo": "網站資訊",
+      "links": "連結",
+      "socialMedia": "社群媒體"
+    }
+  },
+  "adminShell": {
+    "subtitle": "管理面板",
+    "compactLabel": "行政",
+    "actions": {
+      "backToSite": "返回網站"
+    },
+    "sections": {
+      "content": "內容",
+      "music": "音樂",
+      "communications": "通訊",
+      "system": "系統"
+    },
+    "items": {
+      "mailSettings": "郵件設定"
+    }
+  },
+  "adminList": {
+    "dashboard": {
+      "stats": {
+        "totalUsers": "用戶總數",
+        "totalPosts": "貼文總數",
+        "totalPages": "總頁面面",
+        "totalComments": "評論總數"
+      }
+    },
+    "pages": {
+      "empty": "未找到頁面面"
+    },
+    "artists": {
+      "empty": "沒有找到藝術家"
+    },
+    "works": {
+      "deleteTitle": "刪除工作"
+    },
+    "labels": {
+      "empty": "沒有找到標籤"
+    },
+    "categories": {
+      "empty": "未找到類別",
+      "createTitle": "建立類別",
+      "editTitle": "編輯類別",
+      "deleteTitle": "刪除類別",
+      "namePlaceholder": "類別名稱",
+      "descriptionPlaceholder": "類別描述（可選）",
+      "updated": "類別已更新",
+      "deleted": "類別已刪除",
+      "deleteWarning": "此分類已被 {count, plural, one {# 篇貼文} other {# 篇貼文}} 使用。它們將從該分類中移除。"
+    },
+    "tags": {
+      "empty": "沒有找到標籤",
+      "createTitle": "建立標籤",
+      "editTitle": "編輯標籤",
+      "deleteTitle": "刪除標籤",
+      "namePlaceholder": "標籤名稱",
+      "updated": "標籤已更新",
+      "deleteWarning": "此標籤已被 {count, plural, one {# 篇貼文} other {# 篇貼文}} 使用。它們將不再帶有此標籤。"
+    },
+    "genres": {
+      "empty": "未找到流派",
+      "createTitle": "建立流派",
+      "editTitle": "編輯流派",
+      "deleteTitle": "刪除類型",
+      "namePlaceholder": "流派名稱",
+      "descriptionPlaceholder": "類型描述（可選）",
+      "created": "建立流派",
+      "updated": "類型已更新",
+      "deleted": "類型已刪除",
+      "deleteWarning": "此音樂類型與 {count, plural, one {# 個發行項目} other {# 個發行項目}} 相關。"
+    },
+    "styles": {
+      "empty": "沒有找到樣式",
+      "createTitle": "創作風格",
+      "editTitle": "編輯樣式",
+      "deleteTitle": "刪除樣式",
+      "namePlaceholder": "款式名稱",
+      "descriptionPlaceholder": "樣式描述（可選）",
+      "created": "風格已創建",
+      "updated": "款式更新",
+      "deleted": "樣式已刪除",
+      "deleteWarning": "此風格與 {count, plural, one {# 個發行項目} other {# 個發行項目}} 相關。"
+    },
+    "formats": {
+      "empty": "未找到格式",
+      "createTitle": "創建格式",
+      "editTitle": "編輯格式",
+      "deleteTitle": "刪除格式",
+      "namePlaceholder": "格式名稱（例如 CD、Vinyl、Digital）",
+      "editNamePlaceholder": "格式名稱",
+      "created": "格式已建立",
+      "updated": "格式已更新",
+      "deleted": "格式已刪除",
+      "deleteWarning": "此格式與 {count, plural, one {# 個發行項目} other {# 個發行項目}} 相關。"
+    },
+    "releases": {
+      "empty": "未找到任何版本"
+    },
+    "users": {
+      "empty": "沒有找到用戶"
+    },
+    "clients": {
+      "empty": "沒有找到客戶",
+      "deleteTitle": "刪除客戶端",
+      "deleteConfirm": "您確定要刪除 {name} 嗎",
+      "deleted": "客戶端已刪除"
+    },
+    "campaigns": {
+      "searchPlaceholder": "搜尋活動...",
+      "empty": "未找到廣告活動",
+      "subjectFallback": "無標題活動",
+      "deleteTitle": "刪除行銷活動",
+      "deleteConfirm": "您確定要刪除此廣告活動嗎",
+      "editAndSend": "編輯並已傳送",
+      "deleted": "廣告活動已刪除",
+      "recipients": "{count} 位收件人",
+      "statuses": {
+        "draft": "草稿",
+        "scheduled": "已排程",
+        "sending": "傳送中",
+        "sent": "已傳送",
+        "cancelled": "已取消",
+        "failed": "傳送失敗"
+      }
+    },
+    "audienceSegments": {
+      "description": "建立可重複使用的受眾群體，將行銷活動定位到特定群體",
+      "searchPlaceholder": "搜尋片段...",
+      "empty": "未找到段。建立一個針對特定受眾的產品",
+      "createTitle": "建立細分",
+      "editTitle": "編輯段",
+      "namePlaceholder": "段名稱",
+      "typePlaceholder": "選擇段類型",
+      "loading": "正在加載段...",
+      "includeArchived": "包含已封存",
+      "archive": "封存",
+      "archiveTitle": "封存受眾",
+      "archiveConfirm": "封存 {name}？將解除 {campaigns} 個行銷活動關係及 {files} 個檔案政策。{runs} 筆傳送記錄保持不變。",
+      "restore": "還原",
+      "restoreTitle": "還原受眾",
+      "restoreConfirm": "還原 {name}？先前的行銷活動排程與檔案下載政策不會自動還原。",
+      "created": "已建立段",
+      "updated": "細分已更新",
+      "archived": "受眾已封存",
+      "restored": "受眾已還原",
+      "config": {
+        "userTagsPlaceholderSelect": "選擇用戶標籤",
+        "rolesLabel": "角色",
+        "createdAfterLabel": "創建於之後",
+        "createdAfterPlaceholder": "開始日期",
+        "createdBeforeLabel": "之前創建",
+        "createdBeforePlaceholder": "結束日期",
+        "estimateCount": "估計數量",
+        "estimatedRecipients": "~{count, plural, one {# 位收件人} other {# 位收件人}}",
+        "allUsersHelp": "面向所有使用者。電子報資格由每個活動選擇。"
+      },
+      "types": {
+        "usersByFilter": "按篩選的用戶",
+        "allUsers": "所有使用者"
+      }
+    },
+    "series": {
+      "searchPlaceholder": "搜尋系列...",
+      "empty": "沒有找到系列",
+      "createTitle": "創建系列",
+      "deleteTitle": "刪除系列",
+      "deleteConfirm": "您確定要刪除該系列嗎？本系列中的貼文將被取消分配，但不會被刪除",
+      "titlePlaceholder": "系列標題",
+      "deleted": "系列已刪除"
+    },
+    "userTags": {
+      "description": "標籤可讓您對註冊用戶進行細分，以進行有針對性的活動",
+      "empty": "未找到用戶標籤。建立一個以開始使用",
+      "createTitle": "建立使用者標籤",
+      "deleteTitle": "刪除用戶標籤",
+      "deleteConfirm": "您確定要刪除 {name} 使用者標籤嗎",
+      "deleteAssignedWarning": "此標籤已指派給 {count, plural, one {# 位使用者} other {# 位使用者}}。將為他們移除該標籤。",
+      "namePlaceholder": "使用者標籤名稱"
+    },
+    "terms": {
+      "searchPlaceholder": "搜尋版本..."
+    },
+    "emailLayouts": {
+      "newItem": "新佈局",
+      "description": "電子郵件佈局使用一致的頁面首、頁面尾和樣式來包裝您的電子郵件內容。在電子郵件內文應顯示的位置使用內容佔位符",
+      "empty": "未找到電子郵件佈局。建立您的第一個佈局以開始",
+      "emptyFiltered": "未找到佈局",
+      "searchPlaceholder": "搜尋佈局...",
+      "loadPreviewFailed": "載入預覽失敗",
+      "created": "佈局已建立",
+      "delete": "刪除",
+      "deleted": "佈局已刪除",
+      "createTitle": "建立電子郵件佈局",
+      "deleteTitle": "刪除佈局",
+      "deleteConfirm": "要永久刪除「{name}」嗎？此操作無法復原。",
+      "deleteConflict": "此佈局正在使用中。請先從所有行銷活動與範本中移除，或等待進行中的傳送結束後再刪除。",
+      "previewTitle": "預覽：{name}",
+      "validation": {
+        "key": "鍵必須以小寫字母開頭，僅包含小寫字母、數字、底線和連字符",
+        "htmlContent": "HTML 必須包含內容佔位符"
+      },
+      "fields": {
+        "keyDescription": "唯一識別碼（允許小寫、連字符和底線）",
+        "htmlContentDescription": "必須包含將插入電子郵件正文的內容佔位符"
+      },
+      "placeholders": {
+        "key": "例如，預設佈局",
+        "name": "例如，預設佈局",
+        "htmlContent": "帶有內容佔位符的 HTML 模板"
+      },
+      "detail": {
+        "backTooltip": "返回電子郵件佈局",
+        "targetEditor": {
+          "title": "Translated text",
+          "description": "Edit only visible text and accessibility labels. HTML, CSS, links, and placeholders remain owned by the source layout.",
+          "empty": "This layout has no translatable text units.",
+          "textUnit": "Text",
+          "sourceValue": "Source: {value}",
+          "translatedValue": "This locale provides its own value.",
+          "sourceFallback": "Using the source value.",
+          "useSource": "Use source"
+        },
+        "viewModes": {
+          "split": "分裂",
+          "code": "程式碼"
+        },
+        "variables": {
+          "items": {
+            "content": "電子郵件正文 HTML。插入模板內容的必要佔位符",
+            "subject": "呈現的電子郵件主旨",
+            "siteName": "設定中的站點名稱",
+            "siteOrigin": "執行階段設定的網站來源。",
+            "logoEmailUrl": "網站設定中的電子郵件特定標誌 URL（如果已設定）",
+            "emailLang": "套用到已渲染郵件文件的語言代碼",
+            "emailDirection": "已渲染郵件文件的文字方向",
+            "emailFontFamily": "套用到已渲染郵件的 locale 感知 Noto 字體堆疊",
+            "emailFontStylesheetUrl": "用於 Geul 郵件字體的 CDN 樣式表 URL",
+            "recipientName": "收件者顯示名稱（如果可用）",
+            "recipientEmail": "收件者電子郵件地址（如果可用）",
+            "unsubscribeLink": "取消訂閱 URL（如果可用）"
+          }
+        },
+        "states": {
+          "loadingEditor": "正在載入編輯器..."
+        },
+        "preview": {
+          "serverLabel": "伺服器預覽",
+          "serverHelp": "伺服器端渲染預覽，包含範例變數：內容、主題、網站名稱。完全按照所示使用snake_case",
+          "iframeTitle": "電子郵件佈局預覽",
+          "errorLocation": "第 {line} 行",
+          "validationErrors": {
+            "EMPTY_CONTENT": "HTML 內容為空。",
+            "MISSING_CONTENT_PLACEHOLDER": "請新增一個 content 佔位符。",
+            "MULTIPLE_CONTENT_PLACEHOLDERS": "請只保留一個 content 佔位符。",
+            "MULTIPLE_HTML_DOCUMENTS": "請只保留一個 HTML 文件。",
+            "UNCLOSED_TAG": "請關閉所有 HTML 標籤。",
+            "UNAUTHORIZED": "需要驗證身分。",
+            "UNKNOWN_ERROR": "無法驗證版面配置，請再試一次。"
+          },
+          "empty": "開始編輯以查看預覽"
+        },
+        "previewSample": {
+          "headline": "歡迎",
+          "bodyPrimary": "這是將出現在版面配置內的範例電子郵件內容",
+          "bodySecondary": "感謝您的訂閱"
+        }
+      }
+    },
+    "emailTemplates": {
+      "newItem": "新模板",
+      "sectionTitle": "範本和作業",
+      "sectionDescription": "直接在表中分配事件。重新分配事件會將其從目前範本中移出",
+      "loadingAssignments": "正在載入作業...",
+      "assignedSummary": "已分配 {count} / {total}",
+      "unassignedCount": "{count} 未分配",
+      "missing": "缺失：{items}",
+      "andMore": "還有 {count} 更多",
+      "empty": "未找到電子郵件範本。",
+      "emptyFiltered": "沒有找到模板",
+      "searchPlaceholder": "搜尋模板...",
+      "notAssigned": "未分配",
+      "noEvents": "沒有活動",
+      "inactiveAssignmentError": "無法將非活動模板指派給事件",
+      "eventMappingUpdated": "事件映射已更新",
+      "created": "模板已建立",
+      "delete": "刪除",
+      "deleted": "模板已刪除",
+      "createTitle": "建立電子郵件模板",
+      "deleteTitle": "刪除模板",
+      "deleteConfirm": "要永久刪除「{name}」嗎？此操作無法復原。",
+      "deleteConflict": "此模板正在使用中。請先移除其觸發器，或等待進行中的傳送結束後再刪除。",
+      "validation": {
+        "key": "鍵必須是帶有連字符的小寫字母數字",
+        "subject": "主題為必填項"
+      },
+      "fields": {
+        "keyDescription": "唯一識別碼（小寫，允許使用連字符）"
+      },
+      "placeholders": {
+        "key": "例如，歡迎電子郵件",
+        "name": "例如，歡迎電子郵件",
+        "subject": "例如，歡迎來到您的網站",
+        "description": "簡要說明何時使用此模板"
+      },
+      "badges": {
+        "system": "系統"
+      },
+      "systemEvents": {
+        "account_deletion_confirm": {
+          "name": "帳號刪除確認",
+          "description": "當用戶請求刪除帳戶時已傳送"
+        },
+        "account_deletion_scheduled": {
+          "name": "已安排帳戶刪除",
+          "description": "確認並安排帳戶刪除後已傳送"
+        },
+        "account_deletion_cancelled": {
+          "name": "帳戶刪除已取消",
+          "description": "當用戶取消帳戶刪除時已傳送"
+        },
+        "account_deletion_complete": {
+          "name": "帳戶刪除完成",
+          "description": "當帳戶被永久刪除時已傳送"
+        },
+        "account_recovery_confirm": {
+          "name": "帳戶恢復確認",
+          "description": "當用戶請求帳戶恢復時已傳送"
+        },
+        "account_recovery_complete": {
+          "name": "帳戶恢復完成",
+          "description": "帳戶恢復完成時已傳送"
+        },
+        "primary_email_changed": {
+          "name": "主要電子郵件已變更",
+          "description": "帳戶主要電子郵件變更時傳送"
+        },
+        "email_added": {
+          "name": "已新增電子郵件",
+          "description": "新增用於電子郵件代碼登入的地址時傳送"
+        },
+        "email_removed": {
+          "name": "已移除電子郵件",
+          "description": "移除用於電子郵件代碼登入的地址時傳送"
+        },
+        "passkey_added": {
+          "name": "已新增通行密鑰",
+          "description": "新增通行密鑰時傳送"
+        },
+        "passkey_removed": {
+          "name": "已移除通行密鑰",
+          "description": "移除通行密鑰時傳送"
+        },
+        "social_login_added": {
+          "name": "已新增社交登入",
+          "description": "新增社交登入時傳送"
+        },
+        "social_login_removed": {
+          "name": "已移除社交登入",
+          "description": "移除社交登入時傳送"
+        },
+        "welcome": {
+          "name": "歡迎",
+          "description": "使用者首次登入的歡迎電子郵件"
+        },
+        "terms_update": {
+          "name": "條款更新通知",
+          "description": "在計劃更新服務條款時已傳送"
+        },
+        "terms_effective": {
+          "name": "條款現已生效",
+          "description": "服務條款生效時已傳送"
+        },
+        "privacy_update": {
+          "name": "隱私權政策更新通知",
+          "description": "當隱私權政策計劃更新時已傳送"
+        },
+        "privacy_effective": {
+          "name": "隱私權政策現已生效",
+          "description": "隱私權政策生效時已傳送"
+        },
+        "verification_code": {
+          "name": "信箱驗證碼",
+          "description": "傳送用於驗證電子郵件地址的代碼"
+        },
+        "login_code": {
+          "name": "登入代碼郵件",
+          "description": "傳送用於登入現有帳戶的代碼"
+        },
+        "registration_code": {
+          "name": "註冊代碼郵件",
+          "description": "傳送用於在建立帳戶前驗證電子郵件的代碼"
+        }
+      },
+      "detail": {
+        "backTooltip": "返回模板",
+        "viewModes": {
+          "split": "分裂"
+        },
+        "fields": {
+          "subjectPlaceholder": "電子郵件主題",
+          "layoutLabel": "佈局",
+          "layoutPlaceholder": "無佈局",
+          "noLayouts": "無佈局"
+        },
+        "variables": {
+          "noDescription": "無可用描述",
+          "catalog": {
+            "name": "姓名",
+            "site_name": "網站名稱",
+            "recipient_name": "收件人姓名（可為空）",
+            "recipient_email": "收件者電子郵件地址",
+            "confirm_url": "確認連結",
+            "expires_in": "連結過期時間",
+            "recover_url": "帳戶恢復連結",
+            "cancel_url": "取消連結",
+            "scheduled_date": "已排程刪除日期",
+            "grace_period": "距離永久刪除還有幾天",
+            "login_url": "登入頁面面連結",
+            "old_email": "以前的電子郵件地址",
+            "new_email": "新電子郵件地址",
+            "unsubscribe_link": "取消訂閱鏈接",
+            "preview_url": "預覽更新文件的連結",
+            "policy_title": "更新政策的標題",
+            "effective_date": "更新生效日期",
+            "terms_url": "連結到目前服務條款",
+            "privacy_url": "連結到目前隱私權政策",
+            "signout_all_url": "從所有會話註銷的鏈接",
+            "country": "新登入發生的國家/地區",
+            "location": "新登入發生的位置",
+            "ip": "新登入的IP位址",
+            "time": "新登入時間",
+            "device": "用於新登入的設備",
+            "provider": "登入方式（電子郵件、Google、GitHub）",
+            "verification_url": "電子郵件驗證連結",
+            "verification_code": "6位驗證碼",
+            "request_url": "建立驗證流程的初始請求 URL",
+            "expires_in_minutes": "代碼有效期（分鐘）",
+            "login_code": "6位數位登入碼",
+            "registration_code": "6位數註冊碼",
+            "to": "電子郵件收件者位址",
+            "identity_email": "帳戶電子郵件地址",
+            "identity_name": "帳戶名稱"
+          }
+        },
+        "preview": {
+          "subjectLabel": "主題：",
+          "empty": "開始編輯以查看預覽內容"
+        },
+        "modals": {
+          "test": {
+            "description": "輸入電子郵件地址以傳送此範本的測試",
+            "localeLabel": "傳送語言",
+            "localeHelp": "預設使用目前預覽語言，或選擇其他區域設定來驗證特定的本地化模板和佈局"
+          }
+        },
+        "notifications": {
+          "sendFailed": "已傳送失敗",
+          "updateLayoutFailed": "更新佈局失敗"
+        }
+      }
+    },
+    "mapPlaces": {
+      "empty": "沒有找到地方",
+      "created": "地點已創建",
+      "deleteWarning": "這可能會影響引用此地點的頁面或文章"
+    },
+    "mapThemes": {
+      "empty": "未找到地圖主題",
+      "notFound": "找不到地圖主題。",
+      "loadFailed": "無法載入地圖主題。",
+      "defaultDisabled": "這已經是預設主題。",
+      "deleteDisabled": {
+        "default": "請先選擇另一個預設主題再刪除。",
+        "last": "無法刪除最後一個地圖主題。"
+      },
+      "reloadRequired": {
+        "title": "需要重新整理",
+        "message": "此主題已由較新的修訂版本儲存。繼續編輯前請重新整理。",
+        "action": "重新整理"
+      },
+      "variants": {
+        "light": "光",
+        "dark": "黑暗的"
+      },
+      "defaults": {
+        "untitledName": "無標題主題",
+        "copyName": "{name}（副本）"
+      },
+      "copyModal": {
+        "title": "複製主題",
+        "description": "建立 {name} 的副本",
+        "nameLabel": "新名稱",
+        "namePlaceholder": "主題名稱"
+      },
+      "deleteModal": {
+        "title": "刪除主題",
+        "warning": "這可能會影響使用此主題的地圖區塊"
+      },
+      "notifications": {
+        "createFailed": "無法建立主題。",
+        "copyFailed": "無法複製主題。",
+        "deleteFailed": "無法刪除主題。",
+        "defaultUpdateFailed": "無法更新預設主題。",
+        "copied": "主題已複製",
+        "deleted": "主題已刪除",
+        "defaultUpdated": "預設主題已更新"
+      },
+      "editor": {
+        "notifications": {
+          "defaultSet": "主題設定為預設",
+          "variantRequired": "至少需要一種變體（淺色或深色）"
+        },
+        "controls": {
+          "map": {
+            "water": "水",
+            "land": "土地",
+            "road": "路",
+            "reset": "重置地圖"
+          },
+          "building": {
+            "title": "大樓",
+            "fill": "充滿",
+            "strokeEnabled": "啟用中風",
+            "stroke": "中風",
+            "reset": "重置建築物"
+          },
+          "attribution": {
+            "title": "歸因",
+            "color": "顏色",
+            "reset": "重置歸因"
+          },
+          "labels": {
+            "title": "標籤",
+            "areaRoad": "區域/道路",
+            "reset": "重置標籤"
+          },
+          "cluster": {
+            "title": "簇",
+            "bubble": "氣泡",
+            "hoverBubble": "懸停氣泡",
+            "count": "數數",
+            "hoverCount": "懸停計數",
+            "reset": "重置集群"
+          }
+        },
+        "callout": {
+          "title": "大喊",
+          "line": "線",
+          "hoverLine": "懸停線",
+          "hoverText": "懸停文本",
+          "hoverDescription": "懸停說明",
+          "hoverBackground": "懸停背景",
+          "scale": "規模",
+          "offsetX": "偏移 X",
+          "offsetY": "偏移 Y",
+          "reset": "重置標註",
+          "fields": {
+            "street": "街道"
+          }
+        },
+        "viewMode": {
+          "label": "查看模式",
+          "twoD": "QR 圖",
+          "threeD": "3D",
+          "mockPlaces": "模擬地點"
+        },
+        "mockPlaces": {
+          "one": {
+            "name": "樣品地點",
+            "address": "123 例街, 首爾, 韓國",
+            "street": "範例街123號",
+            "city": "鐘路區",
+            "region": "首爾",
+            "country": "韓國"
+          },
+          "three": {
+            "centralStation": {
+              "name": "中央車站",
+              "address": "1 車站廣場, 首爾, 韓國",
+              "street": "1 車站廣場",
+              "city": "中區",
+              "region": "首爾",
+              "country": "韓國"
+            },
+            "cityHall": {
+              "name": "市政府",
+              "address": "100 Main Street, 首爾, 韓國",
+              "street": "大街100號",
+              "city": "中區",
+              "region": "首爾",
+              "country": "韓國"
+            },
+            "artMuseum": {
+              "name": "藝術博物館",
+              "address": "文化大道 50 號, 首爾, 韓國",
+              "street": "文化大道50號",
+              "city": "鐘路區",
+              "region": "首爾",
+              "country": "韓國"
+            }
+          }
+        }
+      }
+    },
+    "menus": {
+      "title": "選單管理",
+      "createMenu": "建立選單",
+      "empty": "尚未建立菜單",
+      "created": "選單已創建",
+      "deleted": "選單已刪除",
+      "selectPrompt": "選擇一個選單來編輯其項目",
+      "itemsTitle": "選單項目",
+      "addItem": "新增項目",
+      "noItems": "沒有菜單項目。點擊“新增項目”即可開始",
+      "editMenuTitle": "編輯選單",
+      "menuNameLabel": "菜單名稱",
+      "menuNamePlaceholder": "例如，主導航、頁面腳鏈接",
+      "addMenuItemTitle": "新增選單項目",
+      "addSubmenuItemTitle": "新增子選單項目",
+      "labelPlaceholder": "選單項目標籤",
+      "linkType": "連結類型",
+      "labelLanguageMode": "標籤語言",
+      "labelLanguageTranslated": "使用翻譯",
+      "labelLanguageFixedLocale": "固定單一語言",
+      "customUrl": "自訂網址",
+      "urlPlaceholder": "https://... 或 /path",
+      "selectTarget": "選擇目標",
+      "targetPlaceholder": "選擇...",
+      "noTargets": "沒有找到物品",
+      "addSubmenu": "新增子選單",
+      "fixedLocalePlaceholder": "選擇語言",
+      "sourceLabel": "原文標籤",
+      "sourceLabelDescription": "此標籤屬於來源選單。公開選單會在翻譯面板中有訪客語言標籤時使用該標籤。",
+      "labelLanguageTranslatedDescription": "公開選單僅顯示與訪客語言完全相符的目前翻譯；否則顯示原文標籤。",
+      "labelLanguageFixedLocaleDescription": "公開選單始終使用所選語言顯示此項，不受訪客語言影響。如果該語言沒有即時標籤，則使用原文標籤。",
+      "translatedItemBadge": "訪客語言",
+      "fixedLocaleItemBadge": "固定：{locale}"
+    },
+    "emailEvents": {
+      "title": "Email Delivery",
+      "description": "Database email event logs have been removed. Delivery status is tracked through delivery runs, suppressions, structured logs, and metrics.",
+      "databaseLogsRemovedTitle": "Database event log removed",
+      "databaseLogsRemovedDescription": "The old email_event table is no longer used for operational mail logs. Campaign and legal notice analytics use delivery recipient state instead.",
+      "dashboardTitle": "Use observability dashboards",
+      "dashboardDescription": "Provider acceptance, worker failures, and delivery-run health should be monitored in Grafana/Loki/Mimir."
+    },
+    "clientsDetail": {
+      "newTitle": "新客戶",
+      "editTitle": "編輯客戶",
+      "namePlaceholder": "客戶名稱",
+      "created": "客戶已創建",
+      "updated": "客戶端更新"
+    }
+  },
+  "map": {
+    "loading": {
+      "connecting": "喚醒製圖師......",
+      "loading": "收集道路、標籤和當地八卦...",
+      "rendering": "令人信服的像素排列..."
+    },
+    "accessibility": {
+      "mapMarker": "{label} 標記",
+      "zoomIn": "放大",
+      "zoomOut": "縮小",
+      "resetNorth": "拖曳可旋轉地圖，點選可重設北向"
+    },
+    "directions": "路線"
+  },
+  "auth": {
+    "common": {
+      "checkYourEmailTitle": "檢查您的電子郵件",
+      "confirmDeletionTitle": "確認帳戶刪除",
+      "cancelDeletionTitle": "取消帳戶刪除",
+      "codeTiming": {
+        "expiresIn": "驗證碼將在 {time} 後到期",
+        "expired": "此驗證碼已到期。",
+        "resendIn": "{time} 後可傳送新驗證碼"
+      }
+    },
+    "metadata": {
+      "routes": {
+        "login": {
+          "title": "登入",
+          "description": "登入 {siteName}"
+        },
+        "loginFailed": {
+          "description": "{siteName} 登入錯誤"
+        },
+        "error": {
+          "title": "認證錯誤",
+          "description": "{siteName} 上的身份驗證錯誤"
+        },
+        "recoverAccount": {
+          "description": "恢復您的 {siteName} 帳戶"
+        },
+        "cancelDeletion": {
+          "description": "取消您的 {siteName} 帳戶刪除"
+        },
+        "confirmDeletion": {
+          "description": "確認刪除您的 {siteName} 帳戶"
+        },
+        "confirmRecovery": {
+          "title": "確認帳戶恢復",
+          "description": "確認您的 {siteName} 帳戶已恢復"
+        },
+        "verification": {
+          "title": "Verify Email",
+          "description": "Verify your email address on {siteName}"
+        }
+      }
+    },
+    "login": {
+      "title": "登入",
+      "continueWith": "繼續 {provider}",
+      "divider": "或者",
+      "legalNotice": "登入即表示您同意我們的<terms>服務條款</terms>和<privacy>隱私權政策</privacy>",
+      "loading": "正在載入登入表單...",
+      "redirecting": "正在重新導向至登入...",
+      "errors": {
+        "oauthFailed": "社群帳號登入失敗，請再試一次。",
+        "missingParams": "回調參數無效",
+        "invalidState": "無效狀態。請再試一次",
+        "tokenExchangeFailed": "無法完成身份驗證",
+        "noIdToken": "身份驗證回應不完整",
+        "invalidToken": "身份驗證令牌無效",
+        "accountBanned": "您的帳戶已被暫停",
+        "internalError": "發生意外錯誤",
+        "flowExpired": "您的登入會話已過期。請再試一次",
+        "loginFailed": "登入失敗。請再試一次",
+        "generic": "登入時長發生錯誤",
+        "rateLimited": "請稍候再要求新的驗證碼。{seconds} 秒後可重試。"
+      },
+      "accountLinking": {
+        "title": "確認你的帳戶",
+        "description": "請登入下方的現有帳戶。只有完成身分確認後，新的登入方式才會被連結。",
+        "confirmWithEmail": "透過電子郵件確認"
+      },
+      "passkey": "使用通行密鑰登入",
+      "passkeyUnavailable": "此瀏覽器不支援通行密鑰，請使用電子郵件或社群帳號登入。",
+      "emailCode": "使用電子郵件繼續",
+      "code": {
+        "title": "請查看電子郵件",
+        "description": "請輸入郵件中的 6 位驗證碼。無論帳號是否存在，都會顯示相同提示。",
+        "label": "6 位登入驗證碼",
+        "submit": "驗證並登入",
+        "resend": "傳送新驗證碼",
+        "differentEmail": "使用其他電子郵件",
+        "invalid": "驗證碼無效或已到期，請取得新驗證碼後再試一次。"
+      },
+      "securityReauthentication": {
+        "description": "為確保安全，請重新登入。完成身分驗證後將自動繼續您的要求。"
+      },
+      "newsletterIntent": {
+        "description": "登入後，我們會請您確認是否訂閱電子報。",
+        "applying": "正在設定電子報訂閱...",
+        "confirm": "您已登入。要訂閱電子報和活動郵件嗎？",
+        "failed": "您已登入，但無法儲存電子報訂閱。請再試一次。"
+      }
+    },
+    "loginFailed": {
+      "states": {
+        "generic": {
+          "message": "發生意外錯誤。請再試一次"
+        },
+        "accountPendingDeletion": {
+          "title": "帳戶待刪除",
+          "message": "您的帳戶已安排刪除。如果您變更主意，可以恢復您的帳戶"
+        },
+        "accountSuspended": {
+          "title": "帳戶被暫停",
+          "message": "您的帳戶已被暫停。如果您認為這是一個錯誤，請聯絡支援人員"
+        },
+        "sessionError": {
+          "title": "會話錯誤",
+          "message": "您的會話出現問題。請嘗試重新登入"
+        },
+        "securityError": {
+          "title": "安全錯誤",
+          "message": "發生安全錯誤。請再試一次"
+        },
+        "loginFailed": {
+          "title": "登入失敗",
+          "message": "登入時長發生錯誤。請再試一次"
+        }
+      },
+      "actions": {
+        "goHome": "回到首頁面"
+      }
+    },
+    "recoverAccount": {
+      "form": {
+        "title": "恢復您的帳戶",
+        "description": "如果您的帳戶正在等待刪除，請輸入您的電子郵件地址以接收恢復連結",
+        "emailLabel": "電子郵件",
+        "submit": "已傳送恢復連結"
+      },
+      "submitted": {
+        "alert": "如果使用此電子郵件的帳戶存在且正在等待刪除，則已傳送恢復電子郵件",
+        "description": "請檢查您的收件匣和垃圾郵件資料夾。恢復連結將在 24 小時後過期",
+        "tryAnotherEmail": "嘗試使用其他電子郵件"
+      }
+    },
+    "confirmDeletion": {
+      "success": {
+        "unknownDate": "已排程的刪除日期",
+        "description": "您的帳戶將在 {scheduledAt} 上永久刪除。您可以在此日期之前透過造訪恢復頁面面恢復您的帳戶",
+        "title": "已安排帳戶刪除"
+      },
+      "failure": {
+        "description": "確認連結可能無效或已過期。請從您的帳戶設定請求新的刪除連結",
+        "title": "確認失敗"
+      }
+    },
+    "confirmRecovery": {
+      "invalid": {
+        "title": "確認恢復",
+        "description": "恢復連結無效。請使用您的輔助電子郵件中的連結"
+      },
+      "success": {
+        "title": "帳戶已恢復",
+        "description": "您的帳戶已成功恢復。現在您可以登入並繼續使用您的帳戶"
+      },
+      "failure": {
+        "title": "恢復失敗",
+        "description": "恢復連結可能無效或已過期。請請求新的恢復連結"
+      },
+      "actions": {
+        "requestRecoveryLink": "請求恢復鏈接",
+        "requestNewLink": "請求新鏈接",
+        "goToLogin": "前往登入"
+      }
+    },
+    "cancelDeletion": {
+      "failure": {
+        "description": "取消連結可能無效或已過期。如果您的帳戶仍待刪除，您可以要求恢復連結",
+        "title": "取消失敗"
+      },
+      "invalid": {
+        "description": "取消連結無效。請使用您的帳戶刪除電子郵件中的連結"
+      },
+      "success": {
+        "description": "您的帳戶已重新啟動。現在您可以登入並繼續使用您的帳戶",
+        "title": "帳戶刪除已取消"
+      }
+    },
+    "verification": {
+      "loading": "Loading verification form...",
+      "redirecting": "Redirecting...",
+      "startOver": "Start over",
+      "errors": {
+        "flowNotFound": "Verification flow not found or expired",
+        "submit": "Failed to verify email",
+        "submitRetry": "Failed to verify email. Please try again.",
+        "emailRequired": "Enter the email address to verify.",
+        "sendVerificationEmail": "Failed to send verification email",
+        "cooldown": "Please wait {seconds} seconds before requesting another verification email.",
+        "alreadyExists": "This email is already registered.",
+        "currentVerified": "This email is already verified on this account.",
+        "invalidEmail": "Enter a valid email address."
+      },
+      "chooseMethod": {
+        "title": "Verify email",
+        "description": "Enter your email address and we will send you a verification code.",
+        "submit": "Send verification code"
+      },
+      "sentEmail": {
+        "description": "Enter the verification code from your email to continue.",
+        "codeLabel": "Verification code",
+        "submitting": "Checking code...",
+        "resend": "傳送新驗證碼"
+      },
+      "passedChallenge": {
+        "title": "Email verified",
+        "description": "Your email address has been verified.",
+        "action": "Back to security settings"
+      },
+      "applying": {
+        "checkAgain": "再次檢查",
+        "title": "電子郵件更新尚未完成",
+        "description": "驗證碼已通過，但電子郵件更新尚未完成。請再次確認。"
+      }
+    }
+  },
+  "home": {
+    "emptyState": {
+      "title": "你好世界",
+      "description": "請在「設定」中配置主頁面"
+    }
+  },
+  "unsubscribe": {
+    "metadata": {
+      "description": "退訂 {siteName} 時事通訊"
+    },
+    "token": {
+      "success": {
+        "title": "您已成功取消訂閱",
+        "description": "您將不再收到我們的電子報或活動郵件。"
+      },
+      "error": {
+        "title": "無法取消訂閱",
+        "description": "取消訂閱連結可能無效或已過期。請重試或聯絡我們尋求協助"
+      }
+    },
+    "actions": {
+      "unsubscribe": "退訂"
+    }
+  },
+  "featuredImage": {
+    "label": "特色圖片",
+    "alt": "特色圖片",
+    "hint": "點擊圖片以替換",
+    "cropTitle": "裁切特色圖片",
+    "empty": {
+      "editable": "拖放或點擊上傳 ({ratio})",
+      "readOnly": "沒有圖片"
+    },
+    "errors": {
+      "fileRejected": "檔案已被拒絕",
+      "fileTooLarge": "檔案過大。最大大小：{maxSize}",
+      "invalidFileType": "無效的檔案類型"
+    },
+    "actions": {
+      "changeAria": "變更特色圖片",
+      "removeAria": "移除特色圖片",
+      "remove": "移除圖片"
+    }
+  },
+  "artistPage": {
+    "labels": {
+      "group": "群組"
+    },
+    "details": {
+      "realName": "真實姓名"
+    },
+    "sections": {
+      "biography": "簡介",
+      "gallery": "圖片庫",
+      "tracks": "曲目 ({count})"
+    },
+    "tracks": {
+      "more": "+{count} 首更多曲目"
+    },
+    "works": {
+      "allTypes": "所有類型",
+      "empty": "沒有找到作品",
+      "loadMore": "載入更多（剩餘 {count} 項）"
+    },
+    "releases": {
+      "empty": "還沒有已發行的發行作品。"
+    }
+  },
+  "labelPage": {
+    "details": {
+      "parent": "上層",
+      "stats": "統計",
+      "statsValue": "{releases} 個發行，{artists} 位藝術家"
+    },
+    "sections": {
+      "releases": "發行 ({count})",
+      "artists": "藝術家 ({count})"
+    },
+    "lists": {
+      "showingReleases": "顯示 {shown}/{total} 個發行",
+      "showingArtists": "顯示 {shown}/{total} 位藝術家"
+    }
+  },
+  "searchCombobox": {
+    "typeAtLeast": "至少輸入 {count} 個字元",
+    "noResults": "找不到結果"
+  },
+  "mapPlaceSelect": {
+    "createNew": "建立新地點",
+    "clear": "清除"
+  },
+  "mapInsertModal": {
+    "title": "新增地圖",
+    "description": "搜尋地點，或建立一個新的",
+    "notifications": {
+      "createFailedPermissions": "創建地點失敗。請檢查權限並重試",
+      "createFailed": "創建地點失敗。請再試一次"
+    }
+  },
+  "createPlaceModal": {
+    "title": "建立新地點",
+    "searchPlaceholder": "搜尋導航和自動填充..",
+    "searchHelper": "搜尋自動填充，點擊 POI 圖標，或點擊地圖上的（桌面）/長按（行動裝置）",
+    "actions": {
+      "createAndAdd": "建立並新增"
+    }
+  },
+  "placeEditor": {
+    "title": "地點",
+    "selectLocation": "選擇位置",
+    "placeDetails": "地點詳情",
+    "notifications": {
+      "saved": "地點已儲存",
+      "deleted": "地點已刪除"
+    },
+    "deleteModal": {
+      "title": "刪除地點"
+    }
+  },
+  "artistManagers": {
+    "title": "擁有者和經理",
+    "role": "角色",
+    "owner": "擁有者",
+    "manager": "經理",
+    "inactive": "帳號已停用",
+    "makeOwner": "設為擁有者",
+    "makeManager": "設為經理",
+    "remove": "移除參與者",
+    "empty": "尚未指定參與者",
+    "lastOwner": "最後一位擁有者",
+    "notifications": {
+      "updated": "參與者已更新",
+      "removed": "參與者已移除"
+    }
+  },
+  "artistAdminDetail": {
+    "actions": {
+      "assignUsers": "指派使用者"
+    },
+    "gallery": {
+      "title": "圖片庫",
+      "makePrimary": "設為主圖",
+      "moveEarlier": "向前移動",
+      "moveLater": "向後移動"
+    },
+    "placeholders": {
+      "slug": "藝術家蛞蝓",
+      "name": "藝名/藝人姓名",
+      "realName": "法定名稱（可選）",
+      "countryCode": "例如，美國、韓國、日本",
+      "labels": "選擇廠牌...",
+      "parentArtist": "選擇上層藝術家..."
+    },
+    "relations": {
+      "parentArtist": "上層藝術家"
+    },
+    "descriptions": {
+      "labels": "此藝術家所屬的廠牌"
+    },
+    "title": "編輯藝術家"
+  },
+  "labelAdminDetail": {
+    "title": "編輯廠牌",
+    "actions": {
+      "backToLabels": "返回廠牌",
+      "assignUsers": "管理擁有者與管理者"
+    },
+    "fields": {
+      "parentLabel": "上層廠牌"
+    },
+    "placeholders": {
+      "name": "廠牌名稱",
+      "countryCode": "例如，德國、美國、韓國",
+      "parentLabel": "選擇上層廠牌（可選）"
+    }
+  },
+  "workCollaborators": {
+    "empty": "目前沒有協作者",
+    "notifications": {
+      "added": "協作者已新增",
+      "removed": "協作者已移除"
+    }
+  },
+  "comments": {
+    "section": {
+      "title": "評論",
+      "loading": "正在載入評論...",
+      "loadFailed": "載入評論失敗。請稍後再試。",
+      "disabled": "此貼文的評論已停用。",
+      "loginPrompt": "請<login>登入</login>後發表評論",
+      "loadMore": "載入更多評論",
+      "loadMoreCount": "載入 {count, plural, one {# 則更多評論} other {# 則更多評論}}"
+    },
+    "form": {
+      "placeholder": "寫評論...",
+      "replyPlaceholder": "寫回覆...",
+      "actions": {
+        "comment": "評論"
+      },
+      "notifications": {
+        "commentPosted": "評論已發佈",
+        "replyPosted": "回覆已發佈"
+      }
+    },
+    "item": {
+      "edited": "（已編輯）",
+      "editedTooltip": "已編輯 {value}",
+      "deleteModal": {
+        "title": "刪除評論",
+        "body": "確定要刪除此評論嗎？此操作無法復原。"
+      },
+      "states": {
+        "deletedUser": "已刪除使用者",
+        "deleted": "[已刪除]"
+      },
+      "actions": {
+        "moreOptions": "更多選項",
+        "showReplies": "顯示 {count, plural, one {# 則回覆} other {# 則回覆}}",
+        "hideReplies": "隱藏 {count, plural, one {# 則回覆} other {# 則回覆}}",
+        "moreReplies": "(+{count, plural, one {# 則更多} other {# 則更多}})",
+        "loadMoreReplies": "載入 {count, plural, one {# 則更多回覆} other {# 則更多回覆}}"
+      },
+      "notifications": {
+        "updated": "評論已更新",
+        "deleted": "評論已刪除",
+        "loadRepliesFailed": "載入回覆失敗"
+      }
+    }
+  },
+  "workView": {
+    "details": {
+      "period": "期間"
+    },
+    "actions": {
+      "editAria": "編輯作品"
+    },
+    "credits": {
+      "other": "其他"
+    },
+    "music": {
+      "released": "發行：{value}",
+      "spotify": "Spotify",
+      "bandcamp": "Bandcamp",
+      "soundcloud": "SoundCloud",
+      "youtube": "YouTube",
+      "openSpotify": "在 Spotify 開啟",
+      "openBandcamp": "在 Bandcamp 開啟",
+      "openSoundcloud": "在 SoundCloud 開啟",
+      "openYoutube": "在 YouTube 開啟"
+    },
+    "portfolio": {
+      "tech": "技術"
+    },
+    "article": {
+      "article": "文章",
+      "publication": "出版物",
+      "date": "日期"
+    },
+    "contribution": {
+      "project": "專案",
+      "role": "角色"
+    }
+  },
+  "settings": {
+    "page": {
+      "newsletterTitle": "通訊",
+      "cookiePreferencesTitle": "Cookie 偏好設定"
+    },
+    "languagePreference": {
+      "intro": "無論您在何處登錄，您的帳戶語言都會跟隨您。當您第一次進行身份驗證時，新帳戶將從您的瀏覽器語言中播種",
+      "label": "首選語言",
+      "save": "儲存語言",
+      "successTitle": "語言已更新",
+      "successMessage": "現在，此首選項已儲存到您的每個登入裝置的帳戶中",
+      "errorTitle": "錯誤",
+      "errorMessage": "無法更新語言首選項",
+      "helper": "此設定會儲存在您的帳戶中，並優先於您首次登入時使用的瀏覽器語言。"
+    },
+    "newsletter": {
+      "subscribedTitle": "已訂閱",
+      "subscribedAlert": "您已訂閱我們的電子報和活動電子郵件",
+      "unsubscribedAlert": "您還沒有訂閱我們的電子報",
+      "subscribe": "訂閱時事通訊",
+      "unsubscribe": "取消訂閱電子郵件",
+      "footer": "無論訂閱狀態如何，安全提醒與法律通知都會一律寄送。"
+    },
+    "cookieConsent": {
+      "syncError": "無法將同意同步到帳戶設定",
+      "savedAccount": "首選項已儲存並同步到您的帳戶",
+      "savedBrowser": "為此瀏覽器儲存的首選項",
+      "versionWarning": "我們將 cookie 策略更新為 v{version}。為了方便起見，您先前的選擇已載入。請再次儲存以確認",
+      "essentialIntro": "基本 cookie 始終處於活動狀態，用於身份驗證和核心網站操作",
+      "lastSynced": "上次同步：{value}",
+      "noRecord": "尚無伺服器端同意記錄"
+    }
+  },
+  "cookieConsentCommon": {
+    "essentialLabel": "基本 cookie（始終處於活動狀態）",
+    "analyticsLabel": "分析 cookie（Google分析）"
+  },
+  "nicknameField": {
+    "label": "暱稱",
+    "placeholder": "請輸入暱稱",
+    "checking": "正在檢查是否可用…",
+    "available": "此暱稱可以使用。",
+    "unavailable": "此暱稱已被使用。",
+    "checkFailed": "無法檢查暱稱是否可用，請再試一次。",
+    "invalid": "暱稱長度須為1至100個字元。"
+  },
+  "memberOnboarding": {
+    "title": "設定你的暱稱",
+    "description": "這是其他成員會看到的名稱，之後可在個人資料中修改。",
+    "submitFailed": "無法完成初始設定，請再試一次。"
+  },
+  "profile": {
+    "notifications": {
+      "successTitle": "成功",
+      "updated": "個人資料更新成功"
+    },
+    "fields": {
+      "uid": "使用者識別碼",
+      "bio": "簡介"
+    },
+    "placeholders": {
+      "name": "你的名字",
+      "bio": "告訴我們你自己"
+    },
+    "actions": {
+      "update": "更新個人資料"
+    }
+  },
+  "security": {
+    "notifications": {
+      "confirmationEmailSent": "確認郵件已已傳送",
+      "connectionFailed": "連線失敗",
+      "disconnectionFailed": "斷開連線失敗",
+      "disconnected": "已斷開連接",
+      "cannotUnlink": "無法取消連結",
+      "success": "成功",
+      "sessionRevoked": "會話已成功撤銷",
+      "sessionsRevoked": "所有其他會話均已註銷",
+      "failedToRevokeSession": "撤銷會話失敗",
+      "failedToRevokeSessions": "撤銷會話失敗",
+      "failedToRequestDeletion": "請求刪除帳戶失敗",
+      "cannotUnlinkMessage": "您必須至少有一種身份驗證方法",
+      "connectedMessage": "{provider} 帳戶連接成功",
+      "disconnectedMessage": "{provider} 已斷開連接",
+      "failedToUpdateMainEmail": "無法更新主要電子郵件",
+      "failedToLoad": "無法載入安全性設定"
+    },
+    "providerErrors": {
+      "accountAlreadyConnected": "此 {provider} 帳戶已連接到另一個使用者",
+      "signInCanceled": "使用 {provider} 登入已取消",
+      "alreadyLinkedElsewhere": "此 {provider} 帳戶已連結到其他地方",
+      "connectFailed": "連線帳戶失敗",
+      "mustKeepMethod": "您必須為此帳戶保留至少一種身份驗證方法",
+      "primaryEmailRequired": "解除此提供者前，請先選擇其他主要電子郵件。",
+      "disconnectFailed": "無法斷開 {provider} 的連接"
+    },
+    "connectedAccounts": {
+      "title": "已連結的社群登入",
+      "description": "管理連結至此帳號的社群登入方式"
+    },
+    "sessions": {
+      "title": "活躍會話",
+      "description": "檢查此帳戶的登入位置並撤銷您不信任的會話",
+      "thisDevice": "這個裝置",
+      "logoutOthers": "註銷所有其他會話",
+      "activeNow": "現在活躍",
+      "device": {
+        "desktop": "桌面",
+        "mobile": "移動的",
+        "tablet": "藥片"
+      },
+      "browser": {
+        "firefox": "火狐瀏覽器",
+        "edge": "邊緣",
+        "chrome": "鉻合金",
+        "safari": "狩獵之旅",
+        "opera": "歌劇"
+      },
+      "os": {
+        "windows": "視窗",
+        "macos": "macOS",
+        "linux": "Linux",
+        "android": "安卓",
+        "ios": "iOS系統"
+      },
+      "revoke": "撤銷此工作階段"
+    },
+    "email": {
+      "title": "主要電子郵件",
+      "description": "從已驗證的電子郵件中選擇用於接收通知與帳號訊息的地址。",
+      "addEmail": "新增電子郵件",
+      "canonical": "主要電子郵件",
+      "canonicalCannotRemove": "移除此地址前，請先選擇其他主要電子郵件。",
+      "setCanonical": "設為主要電子郵件",
+      "noEmail": "沒有設定電子郵件",
+      "helper": "目前只有一個已驗證地址可設為主要電子郵件。",
+      "selectLabel": "主要電子郵件",
+      "changeAction": "變更主要電子郵件",
+      "sources": {
+        "current": "目前主要電子郵件",
+        "emailCode": "電子郵件",
+        "pending": "等待驗證"
+      },
+      "messages": {
+        "pendingVerification": "此電子郵件已在等待驗證。你可以重新寄送驗證信。"
+      },
+      "mainEmailUpdated": "主要電子郵件已更新。",
+      "canonicalUpdated": "主要電子郵件已更新。"
+    },
+    "dangerZone": {
+      "title": "危險區",
+      "alert": "請求刪除帳戶將已傳送一封確認電子郵件。確認後，您的帳戶將安排在 30 天內刪除。您可以在此時長恢復您的帳戶",
+      "requestedAlert": "確認電子郵件已傳送至您的電子郵件地址。請檢查您的收件匣並點擊連結以確認您的刪除請求",
+      "requestedHelper": "該連結將在 24 小時後過期。確認後，您的帳戶將安排在 30 天內刪除",
+      "pendingIntro": "透過電子郵件確認後，您的帳戶將安排在 30 天內刪除。在此時長：",
+      "pendingItems": {
+        "logout": "您將立即登出",
+        "recover": "您可以隨時恢復您的帳戶",
+        "anonymous": "您的貼文和評論將保持“匿名”"
+      }
+    },
+    "mcpIntegration": {
+      "description": "將相容的 AI 用戶端連線至此端點。瀏覽器將開啟以完成登入與授權。",
+      "connectionsTitle": "Connected MCP clients",
+      "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
+      "connectionsEmpty": "No MCP clients are connected.",
+      "connectedAt": "Connected {date}",
+      "revoke": "Revoke",
+      "revokeTitle": "Revoke MCP access",
+      "revokeConfirmation": "Revoke MCP access for {client}? Its current token chain will stop working.",
+      "revokeSuccess": "MCP access was revoked.",
+      "revokeFailed": "Could not revoke MCP access.",
+      "loadFailed": "Could not load connected MCP clients."
+    },
+    "personalAccessTokens": {
+      "title": "個人存取權杖",
+      "description": "使用這一個人存取權杖呼叫 Geul 提供的 API。每個請求都會使用您帳戶目前的權限。Remote MCP 不接受此權杖。",
+      "empty": "尚未建立個人存取權杖。",
+      "regenerate": "重新產生",
+      "regenerateTitle": "重新產生個人存取權杖",
+      "regenerateConfirmation": "重新產生個人存取權杖？目前的憑證將立即停止運作。",
+      "deleteTitle": "刪除個人存取權杖",
+      "deleteConfirmation": "刪除個人存取權杖？此憑證將立即停止運作。",
+      "oneTimeTitle": "複製你的個人存取權杖",
+      "oneTimeWarning": "此密鑰只會顯示一次。請立即複製並安全保存。",
+      "secret": "密鑰",
+      "loadFailed": "無法載入個人存取權杖。",
+      "requestFailed": "個人存取權杖請求失敗。",
+      "copySuccess": "已複製個人存取權杖。",
+      "copyFailed": "無法複製個人存取權杖。"
+    },
+    "passkeys": {
+      "title": "通行密鑰",
+      "description": "使用此裝置或安全金鑰登入。你可以保存多個通行密鑰。",
+      "loading": "正在載入通行密鑰...",
+      "empty": "尚未註冊通行密鑰。",
+      "add": "新增通行密鑰",
+      "added": "新增於 {date}",
+      "lastMethod": "刪除此通行密鑰前，請先新增其他登入方式。",
+      "removeNamed": "刪除通行密鑰 {name}",
+      "reauth": "變更通行密鑰前請重新登入。",
+      "reauthAction": "重新登入",
+      "errors": {
+        "load": "無法載入通行密鑰。",
+        "remove": "無法刪除此通行密鑰。",
+        "unsupported": "此瀏覽器不支援通行密鑰。"
+      }
+    }
+  },
+  "posts": {
+    "empty": "沒有文章",
+    "createTooltip": "建立文章"
+  },
+  "series": {
+    "empty": "沒有系列",
+    "stats": {
+      "posts": "文章：{count}",
+      "managers": "管理員：{count}"
+    }
+  },
+  "seriesDetail": {
+    "slug": {
+      "autoDescription": "自動產生的說明",
+      "manualDescription": "手動說明"
+    },
+    "notifications": {
+      "updated": "系列已更新",
+      "statusUpdated": "系列狀態已更新",
+      "updateFailed": "無法更新系列",
+      "statusUpdateFailed": "無法更新系列狀態",
+      "postsUpdateFailed": "無法更新系列中的文章",
+      "accessChanged": "您對此系列的管理權限已變更。請重新整理後再試。"
+    },
+    "posts": {
+      "title": "文章 ({count})",
+      "columns": {
+        "order": "順序"
+      },
+      "actions": {
+        "moveUp": "上移",
+        "moveDown": "下移",
+        "remove": "移除"
+      }
+    }
+  },
+  "seriesMembers": {
+    "title": "管理員 ({count})",
+    "states": {
+      "loadFailed": "無法載入管理員"
+    },
+    "notifications": {
+      "added": "已新增管理員",
+      "removed": "已移除管理員",
+      "addFailed": "無法新增管理員",
+      "removeFailed": "無法移除管理員"
+    }
+  },
+  "works": {
+    "tabs": {
+      "editable": "可編輯"
+    },
+    "emptyEditable": "沒有可編輯作品",
+    "emptyCredits": "沒有署名",
+    "columns": {
+      "creditedAs": "署名為",
+      "creditType": "署名類型"
+    },
+    "types": {
+      "music_project": "音樂專案",
+      "portfolio": "作品集",
+      "article": "文章",
+      "contribution": "貢獻"
+    }
+  },
+  "artists": {
+    "empty": "沒有藝術家",
+    "searchPlaceholder": "搜尋藝術家..."
+  },
+  "forms": {
+    "empty": "沒有找到表單",
+    "searchPlaceholder": "搜尋表單..."
+  },
+  "formAdmin": {
+    "navigation": {
+      "backToForms": "返回表單",
+      "tabs": {
+        "builder": "建構器"
+      }
+    },
+    "status": {
+      "closed": "已關閉"
+    },
+    "statusActions": {
+      "reopen": "重新開啟"
+    },
+    "notifications": {
+      "deleted": "表單已刪除"
+    },
+    "deleteModal": {
+      "warning": "這也會刪除與此表單相關聯的所有提交"
+    },
+    "overview": {
+      "totalSubmissions": "提交總數"
+    },
+    "builder": {
+      "invalidSchema": "架構無效",
+      "title": "表單建構器",
+      "steps": "步驟",
+      "addStep": "新增步驟",
+      "field": {
+        "defaultValue": "預設值",
+        "defaultSelected": "預設選取",
+        "fieldNameUnique": "欄位名稱必須是唯一的",
+        "untitledField": "欄位",
+        "dragField": "拖曳字段 {name}",
+        "removeField": "刪除字段 {name}",
+        "placeholder": "佔位符",
+        "minDate": "最早日期",
+        "maxDate": "最大日期",
+        "timezone": "時區",
+        "browserDefault": "瀏覽器預設值",
+        "conditional": "有條件的",
+        "conditionalDescription": "僅當滿足條件時才顯示該字段",
+        "validators": "驗證器",
+        "noValidators": "沒有驗證器",
+        "defaultChecked": "預設選取",
+        "checkboxLabel": "複選框標籤",
+        "checkboxLabelDescription": "複選框旁邊顯示的標籤（例如，我同意條款）",
+        "options": "選項",
+        "removeOption": "刪除選項 {index}",
+        "addOption": "新增選項"
+      },
+      "schemaJson": "架構 JSON",
+      "defaults": {
+        "initialStepTitle": "歡迎",
+        "initialStepDescription": "這是一個新表單",
+        "newStepTitle": "新步驟",
+        "newFieldName": "新欄位"
+      },
+      "notifications": {
+        "cannotDeleteStepTitle": "無法刪除步驟",
+        "cannotDeleteStepMessage": "欄位「{fieldName}」在條件中由 {stepNames} 引用。首先刪除這些條件",
+        "cannotDeleteFieldTitle": "無法刪除字段",
+        "fieldReferencedMessage": "此欄位在條件中由 {stepNames} 引用。首先刪除這些條件"
+      },
+      "step": {
+        "dragStep": "拖曳步驟 {index}",
+        "removeStep": "刪除步驟 {index}",
+        "fieldsLabel": "字段 ({count})",
+        "fieldsCount": "（{count} 字段）",
+        "addField": "新增字段",
+        "hasCondition": "有條件"
+      },
+      "conditions": {
+        "excludeValuesPlaceholder": "排除值...",
+        "enterValuesPlaceholder": "輸入值，按 Enter...",
+        "enterValuesShortPlaceholder": "輸入值...",
+        "selectValuePlaceholder": "選擇一個值...",
+        "selectCompareValuePlaceholder": "選擇要比較的值...",
+        "selectDatePlaceholder": "選擇日期...",
+        "selectFieldPlaceholder": "選擇字段...",
+        "trueOption": "真",
+        "falseOption": "假",
+        "removeCondition": "刪除條件",
+        "logicAnd": "AND",
+        "logicOr": "OR",
+        "condition": "狀態",
+        "nestedGroup": "嵌套組",
+        "removeConditionGroup": "刪除條件群組",
+        "noConditions": "沒有條件。单击“添加”以添加条件",
+        "simple": "簡單",
+        "advanced": "進階 (AND/OR)",
+        "removeConditionAction": "刪除條件"
+      },
+      "validators": {
+        "length": "長度",
+        "count": "數量",
+        "date": "日期",
+        "age": "年齡",
+        "pattern": "模式",
+        "patternPlaceholder": "例如，^[A-Z]{3}$",
+        "customErrorMessage": "自訂錯誤訊息",
+        "optional": "可選",
+        "removeValidator": "刪除驗證器"
+      },
+      "fieldTypes": {
+        "textarea": "文字區域",
+        "tel": "電話",
+        "number": "數字",
+        "date": "日期",
+        "select": "選擇",
+        "multiselect": "多選",
+        "checkbox": "複選框",
+        "switch": "開關"
+      },
+      "predicates": {
+        "gt": "大於 (>)",
+        "gte": "至少（≥）",
+        "lt": "小於 (<)",
+        "lte": "至多（≤）",
+        "eq": "完全相同(=)",
+        "url": "網址",
+        "regex": "正規表示式",
+        "minDate": "最早日期",
+        "maxDate": "最晚日期",
+        "futureDate": "僅限未來日期",
+        "pastDate": "僅限過去日期",
+        "weekdayOnly": "僅限工作日",
+        "minAge": "最小年齡",
+        "maxAge": "最大年齡"
+      },
+      "operators": {
+        "eq": "=",
+        "neq": "≠",
+        "gt": ">",
+        "gte": "≥",
+        "lt": "<",
+        "lte": "≤",
+        "in": "任一",
+        "notIn": "不在其中",
+        "contains": "包含",
+        "containsAny": "包含任一",
+        "containsAll": "包含全部",
+        "exists": "存在"
+      }
+    },
+    "submissions": {
+      "dateRangePlaceholder": "日期範圍",
+      "newestFirst": "最新優先",
+      "oldestFirst": "最舊優先",
+      "clearFilters": "清除篩選條件",
+      "count": "{count, plural, one {# 筆提交} other {# 筆提交}}",
+      "filteredSuffix": "（已篩選）",
+      "table": {
+        "submitted": "提交時間"
+      },
+      "emptyFiltered": "沒有符合的提交",
+      "empty": "還沒有提交",
+      "actions": {
+        "deleteSubmission": "刪除提交"
+      },
+      "notifications": {
+        "deleted": "提交已刪除"
+      },
+      "deleteModal": {
+        "title": "刪除提交",
+        "body": "確定要刪除此提交嗎？"
+      }
+    },
+    "settings": {
+      "notifications": {
+        "managerAdded": "表單管理員已新增",
+        "managerRemoved": "表單管理員已移除"
+      },
+      "urlPublic": {
+        "title": "URL 與公開存取",
+        "allowPublic": "允許公開 URL 存取",
+        "setSlugFirst": "請先設定 slug 以啟用公開 URL 存取",
+        "directUrlEnabled": "可透過直接 URL 存取表單",
+        "embedOnly": "表單只能嵌入頁面"
+      },
+      "media": {
+        "title": "媒體預覽"
+      },
+      "previewLinks": {
+        "title": "預覽連結",
+        "description": "分享預覽連結以查看未發布的表單"
+      },
+      "dashboardLinks": {
+        "title": "儀表板連結",
+        "description": "分享儀表板連結，以便在沒有管理員存取權的情況下查看表單統計"
+      },
+      "managers": {
+        "adminControls": "管理控制",
+        "readOnly": "只讀",
+        "description": "管理員可以編輯此表單、查看提交以及管理分享連結。",
+        "searchPlaceholder": "搜尋要新增的使用者...",
+        "adminOnly": "只有管理員可以新增或移除管理員",
+        "empty": "尚未指派管理員",
+        "removeManager": "移除管理員 {name}"
+      },
+      "access": {
+        "title": "存取控制",
+        "passwordLabel": "存取密碼",
+        "passwordDescription": "留空即可公開存取",
+        "opensAtLabel": "開啟時間",
+        "opensAtDescription": "表單將從此日期起可存取",
+        "closesAtLabel": "關閉時間",
+        "closesAtDescription": "表單將在此日期後停止接受提交",
+        "selectDatePlaceholder": "選擇日期",
+        "maxSubmissionsLabel": "最大提交數量",
+        "maxSubmissionsDescription": "限制提交數量（留空代表無上限）",
+        "noLimit": "無限制"
+      },
+      "authRules": {
+        "title": "驗證規則",
+        "requireAuthLabel": "需要驗證",
+        "requireAuthDescription": "只有登入的使用者可以檢視和提交此表單",
+        "allowedRolesLabel": "允許的角色",
+        "allowedRolesDescription": "留空即可允許所有已驗證使用者",
+        "allowDuplicateLabel": "允許重複提交",
+        "allowDuplicateDescription": "允許使用者多次提交"
+      }
+    }
+  },
+  "dataTable": {
+    "aria": {
+      "sortBy": "按 {label} 排序",
+      "rowActions": "{label} 的操作"
+    },
+    "sort": {
+      "button": "排序",
+      "none": "沒有排序條件",
+      "selectAbove": "選擇上方欄位",
+      "selectFromLeft": "從左側面板選擇欄位",
+      "count": "{count, plural, one {# 個排序} other {# 個排序}}",
+      "aria": {
+        "reorder": "重新排序 {label}",
+        "moveUp": "將 {label} 向上移動",
+        "moveDown": "向下移動 {label}",
+        "toggleDirection": "切換 {label} 的排序方向",
+        "removeSort": "刪除 {label} 的排序"
+      }
+    },
+    "filter": {
+      "button": "篩選",
+      "operator": "運算子",
+      "values": "值",
+      "from": "從",
+      "to": "到",
+      "selectField": "選擇要配置的字段",
+      "activeFilters": "啟用的篩選條件",
+      "enterValue": "輸入值...",
+      "drawerTitle": "篩選",
+      "aria": {
+        "backToFields": "返回篩選字段",
+        "removeFilter": "刪除 {label} 的過濾器"
+      },
+      "operators": {
+        "eq": "等於",
+        "ne": "不等於",
+        "isNull": "為空",
+        "isNullNegated": "不為空",
+        "gt": "大於",
+        "gte": "至少",
+        "lt": "少於",
+        "lte": "最多",
+        "between": "之間",
+        "like": "包含（區分大小寫）",
+        "ilike": "包含",
+        "startsWith": "開始於",
+        "endsWith": "結束於",
+        "fulltext": "符合",
+        "in": "任一",
+        "contains": "包含全部",
+        "containedBy": "包含於",
+        "overlaps": "任一重疊",
+        "isEmpty": "是空的",
+        "isEmptyNegated": "不為空",
+        "jsonContains": "包含",
+        "hasKey": "有鍵",
+        "hasAnyKey": "有任一鍵"
+      }
+    },
+    "pagination": {
+      "firstPage": "第一頁",
+      "previousPage": "上一頁",
+      "nextPage": "下一頁",
+      "lastPage": "最後一頁",
+      "page": "第 {page} 頁"
+    }
+  },
+  "versionHistory": {
+    "restored": "恢復到 v{version}",
+    "empty": "尚無版本。長時間編輯期間會定期自動建立版本，編輯工作階段結束時也會建立版本",
+    "by": "由 {contributors}",
+    "systemOrLegacy": "系統或較早版本",
+    "restore": "恢復",
+    "restoreTitle": "恢復版本",
+    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
+    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
+    "restoreFailed": "Failed to restore the source document."
+  },
+  "shareLinks": {
+    "title": "分享連結",
+    "newLink": "新連結",
+    "create": "建立",
+    "createSuccess": "連結已建立",
+    "createError": "建立連結失敗",
+    "deleteSuccess": "連結已刪除",
+    "deleteError": "刪除連結失敗",
+    "invalidUrl": "無效網址",
+    "noLinks": "尚未建立連結",
+    "showLess": "顯示較少",
+    "showMore": "顯示更多 {count} 個",
+    "copyAria": "複製分享連結",
+    "openAria": "在新分頁中開啟分享連結",
+    "deleteAria": "刪除分享連結",
+    "labelOptional": "標籤（可選）",
+    "labelPlaceholder": "例如預覽連結",
+    "expiration": "到期日",
+    "expiresAt": "到期日",
+    "passwordOptional": "密碼（選填）",
+    "passwordPlaceholder": "留空表示不使用密碼",
+    "maximumExpiration": "最長有效期限為一年",
+    "expirationInvalid": "請選擇有效的未來到期時間",
+    "bypassFormPassword": "繞過表單密碼",
+    "bypassFormPasswordDescription": "如果停用，查看者必須輸入表單密碼",
+    "bypassAuthentication": "繞過身份驗證",
+    "bypassAuthenticationDescription": "若停用，檢視者必須輸入表單密碼",
+    "bypassRoleChecks": "繞過角色檢查",
+    "bypassRoleChecksDescription": "若啟用，分享連結會略過允許的角色限制",
+    "policies": {
+      "passwordBypass": "密碼繞過",
+      "passwordRequired": "需要密碼",
+      "passwordProtected": "受密碼保護",
+      "noPassword": "無密碼",
+      "authBypass": "身分驗證繞過",
+      "authEnforced": "強制身分驗證",
+      "roleBypass": "角色繞過",
+      "roleEnforced": "強制角色"
+    },
+    "expirationBadge": {
+      "expired": "已到期",
+      "daysLeft": "剩餘 {count}d",
+      "hoursLeft": "剩下 {count}h"
+    },
+    "presets": {
+      "1h": "1小時",
+      "6h": "6小時",
+      "12h": "12小時",
+      "24h": "24小時",
+      "3d": "3天",
+      "7d": "7天",
+      "14d": "14天",
+      "30d": "30天",
+      "90d": "90天",
+      "1y": "1年",
+      "never": "絕不",
+      "custom": "自訂"
+    }
+  },
+  "userAvatar": {
+    "label": "個人頭像",
+    "cropTitle": "裁切個人頭像",
+    "updated": "個人頭像已更新",
+    "removed": "個人頭像已移除"
+  },
+  "socialLinks": {
+    "label": "社群連結",
+    "addLink": "新增連結",
+    "platformPlaceholder": "平台",
+    "valuePlaceholder": "URL 或使用者名稱"
+  },
+  "termsPage": {
+    "active": {
+      "emptyTitle": "尚未發佈服務條款。",
+      "emptyDescription": "服務條款發佈後會顯示在這裡。"
+    },
+    "preview": {
+      "viewCurrent": "檢視目前服務條款"
+    },
+    "metadata": {
+      "description": "{siteName} 的服務條款"
+    }
+  },
+  "termsHistory": {
+    "title": "服務條款歷史",
+    "metadata": {
+      "description": "檢視 {siteName} 先前的服務條款版本"
+    }
+  },
+  "termsHistoryDetail": {
+    "metadata": {
+      "title": "服務條款存檔",
+      "description": "{siteName} 的存檔服務條款版本"
+    }
+  },
+  "privacyPage": {
+    "active": {
+      "emptyTitle": "尚未發佈隱私權政策。",
+      "emptyDescription": "隱私權政策發佈後會顯示在這裡。"
+    },
+    "preview": {
+      "viewCurrent": "檢視目前隱私權政策"
+    },
+    "metadata": {
+      "description": "{siteName} 的隱私權政策"
+    }
+  },
+  "privacyHistory": {
+    "title": "隱私權政策歷史",
+    "metadata": {
+      "description": "檢視 {siteName} 先前的隱私權政策版本"
+    }
+  },
+  "privacyHistoryDetail": {
+    "metadata": {
+      "title": "隱私權政策存檔",
+      "description": "{siteName} 的存檔隱私權政策版本"
+    }
+  },
+  "legalHistoryCommon": {
+    "actions": {
+      "newVersion": "新版本"
+    },
+    "dateRangeOpen": "{from} - 目前",
+    "dateRangeClosed": "{from} - {until}",
+    "columns": {
+      "effectivePeriod": "生效期間"
+    }
+  },
+  "legalHistoryDetailCommon": {
+    "notFound": "找不到或無法使用此版本。",
+    "backToHistory": "返回歷史",
+    "effectiveUntil": "有效至 {date}",
+    "viewCurrent": "檢視<link>目前版本</link>。",
+    "empty": "此版本沒有內容。"
+  },
+  "privacyEditor": {
+    "alerts": {
+      "active": "此版本目前有效。變更將影響線上隱私權政策。"
+    }
+  },
+  "termsEditor": {
+    "alerts": {
+      "active": "此版本目前有效。變更將影響線上服務條款。"
+    }
+  },
+  "legalEditorCommon": {
+    "alerts": {
+      "scheduled": "已排定於 {date} 生效",
+      "archived": "此版本為唯讀，以確保法律完整性。"
+    },
+    "preview": {
+      "tbd": "待定",
+      "empty": "沒有可預覽的內容。開始編輯以新增內容。"
+    },
+    "cancelScheduleModal": {
+      "confirmation": "確定要取消排定的啟用嗎？",
+      "description": "該版本將回到草稿狀態，並可再次編輯。",
+      "keepSchedule": "保留排程"
+    },
+    "activateModal": {
+      "warning": "這將立即啟用此版本。當前有效版本（如有）將被封存。",
+      "description": "系統會寄送電子郵件通知所有使用者新版本已生效。如果想提前通知並提供預覽連結，請使用「排程」。"
+    },
+    "notifications": {
+      "scheduled": "版本已排程啟用。通知電子郵件將會寄出。",
+      "scheduleFailed": "排程失敗",
+      "scheduleCancelled": "排程已取消",
+      "cancelScheduleFailed": "取消排程失敗",
+      "activated": "版本已啟用",
+      "activateFailed": "啟用失敗",
+      "deleted": "版本已刪除",
+      "deleteFailed": "刪除失敗",
+      "regenerated": "HTML 已成功重新生成",
+      "regenerateFailed": "重新生成 HTML 失敗",
+      "selectEffectiveDate": "請選擇生效日期"
+    }
+  },
+  "legalPageCommon": {
+    "active": {
+      "upcomingAlert": "新版本將於 {date} 生效。"
+    },
+    "preview": {
+      "invalid": "此預覽連結無效或已過期。",
+      "upcomingAlert": "此預覽將於 {date} 生效。",
+      "empty": "此預覽中沒有內容。"
+    }
+  },
+  "creditList": {
+    "groupAriaLabel": "{name} 致謝",
+    "groupName": "群組 {index}"
+  },
+  "sitemapPage": {
+    "metadata": {
+      "title": "網站地圖",
+      "description": "瀏覽 {siteName} 上的每個頁面和區塊"
+    },
+    "sections": {
+      "main": "主要"
+    },
+    "items": {
+      "home": "首頁",
+      "blog": "部落格"
+    },
+    "description": "瀏覽本網站上的所有頁面和內容。"
+  },
+  "generalError": {
+    "title": "出了點問題",
+    "description": "載入頁面面時發生錯誤。 <br></br>您可能沒有權限，或者您的會話可能已過期",
+    "actions": {
+      "goHome": "返回首頁"
+    }
+  },
+  "mediaCommon": {
+    "missing": {
+      "fileDeleted": "此檔案已刪除。",
+      "imageDeleted": "此圖片已刪除。",
+      "videoDeleted": "此影片已刪除。",
+      "audioDeleted": "此音訊已刪除。"
+    }
+  },
+  "postView": {
+    "series": {
+      "part": "第 {count} 部",
+      "previousFallback": "上一則",
+      "nextFallback": "下一則"
+    }
+  },
+  "releasePage": {
+    "previewTitle": "發行預覽",
+    "streaming": "串流",
+    "metadata": {
+      "fallbackDescription": "{title}",
+      "fallbackDescriptionWithArtists": "{artists} 的 {title}"
+    },
+    "types": {
+      "album": "專輯",
+      "ep": "EP",
+      "single": "單曲",
+      "compilation": "合輯"
+    }
+  },
+  "releaseEditor": {
+    "titleFallback": "未命名發行",
+    "sections": {
+      "basicInformation": "基本資訊",
+      "streamingLinks": "串流連結"
+    },
+    "artwork": {
+      "label": "封面圖"
+    },
+    "artists": {
+      "empty": "未指定藝人",
+      "modal": {
+        "title": "新增藝人"
+      },
+      "placeholders": {
+        "selectArtist": "選擇藝人"
+      }
+    },
+    "labels": {
+      "empty": "尚未指派廠牌",
+      "modal": {
+        "title": "新增廠牌"
+      },
+      "placeholders": {
+        "selectLabel": "選擇廠牌",
+        "catalogNumber": "例如，CAT-001"
+      }
+    },
+    "tags": {
+      "title": "類型、風格與格式",
+      "placeholders": {
+        "genres": "選擇類型",
+        "styles": "選擇款式",
+        "formats": "選擇格式"
+      }
+    },
+    "credits": {
+      "empty": "尚未指派署名",
+      "duplicate": "該信用已經存在",
+      "fields": {
+        "roleOptional": "角色（可選）",
+        "noteOptional": "備註（選填）"
+      },
+      "placeholders": {
+        "selectArtist": "選擇一位藝術家",
+        "selectUser": "選擇一個用戶",
+        "creditedName": "例如，約翰·多伊",
+        "role": "例如，製作人、歌手、混音",
+        "note": "例如：協助第 3 首曲目的人聲編輯"
+      }
+    },
+    "tracks": {
+      "empty": "還沒有曲目",
+      "addModal": {
+        "title": "新增曲目"
+      },
+      "placeholders": {
+        "title": "曲目標題",
+        "durationSeconds": "例如，240"
+      },
+      "deleteConfirm": "確定要刪除此曲目嗎？",
+      "creditsModal": {
+        "title": "曲目署名",
+        "empty": "沒有分配給該曲目的學分"
+      },
+      "messages": {
+        "createFailed": "新增曲目失敗"
+      },
+      "audio": {
+        "processing": "處理中...",
+        "ready": "音訊已就緒",
+        "uploadTooltip": "上傳音訊檔案",
+        "uploaded": "音訊已上傳，處理已開始",
+        "resumeExpired": "Upload session expired. Start a fresh upload."
+      }
+    }
+  },
+  "contentMetadata": {
+    "preview": {
+      "page": "頁面預覽",
+      "post": "文章預覽",
+      "work": "作品預覽"
+    }
+  },
+  "editorMetadata": {
+    "pageEdit": {
+      "title": "編輯頁面",
+      "description": "在 {siteName} 中編輯頁面內容"
+    },
+    "postEdit": {
+      "title": "編輯文章",
+      "description": "在 {siteName} 中編輯文章內容"
+    },
+    "workEdit": {
+      "title": "編輯作品",
+      "description": "在 {siteName} 中編輯作品詳細資料"
+    },
+    "artistEdit": {
+      "description": "在 {siteName} 中編輯藝術家詳細資料"
+    }
+  },
+  "postHeader": {
+    "actions": {
+      "editPost": "編輯文章",
+      "sharePost": "分享文章",
+      "printPost": "列印文章",
+      "exportMarkdown": "將文章匯出為 Markdown"
+    }
+  },
+  "cookieConsentBanner": {
+    "renewalNotice": "我們更新了 cookie 政策。請確認您的偏好以繼續可選分析",
+    "intro": "我們使用基本 cookie 進行身份驗證和網站操作，並使用可選的分析 cookie 來了解網站使用情況",
+    "learnMore": "查看我們的 <privacy>隱私權政策</privacy> 和 <terms>服務條款</terms>",
+    "actions": {
+      "hidePreferences": "隱藏偏好設定",
+      "customize": "自訂"
+    }
+  },
+  "publicForm": {
+    "logoLinkAria": "前往網站",
+    "previewMode": {
+      "title": "預覽模式",
+      "description": "這是透過共享連結進行的預覽。提交時會將表單資料顯示為 JSON"
+    },
+    "navigation": {
+      "previous": "上一頁",
+      "next": "下一頁",
+      "submit": "提交"
+    }
+  },
+  "locationSelector": {
+    "placeholder": "選擇位置..",
+    "clearSelection": "清除所選地點",
+    "emptySearch": "搜尋地圖地點",
+    "emptyResults": "沒有找到地點"
+  },
+  "notFoundPage": {
+    "title": "找不到頁面",
+    "description": "您要找的頁面不存在",
+    "goHome": "返回首頁"
+  },
+  "editorHeader": {
+    "actions": {
+      "changeStatus": "變更狀態"
+    },
+    "collab": {
+      "button": "協作",
+      "buttonWithStatus": "{status} · 協作",
+      "current": "目前",
+      "sections": {
+        "connection": "連線"
+      }
+    }
+  },
+  "urlSection": {
+    "description": "識別資訊、slug 與已解析的公開 URL",
+    "fields": {
+      "publicUrl": "公開 URL"
+    },
+    "placeholders": {
+      "slug": "我的自訂 slug"
+    },
+    "actions": {
+      "copyId": "複製 ID",
+      "copyUrl": "複製 URL"
+    },
+    "notifications": {
+      "copied": "{label} 已複製"
+    }
+  },
+  "formValidation": {
+    "required": "This field is required",
+    "invalidUrl": "Please enter a valid URL",
+    "invalidFormat": "Invalid format",
+    "invalidEmail": "Please enter a valid email",
+    "invalidPhoneNumber": "Invalid phone number",
+    "stringGt": "Must be more than {threshold} characters",
+    "stringGte": "Minimum {threshold} characters",
+    "stringLt": "Must be less than {threshold} characters",
+    "stringLte": "Maximum {threshold} characters",
+    "stringEq": "Must be exactly {threshold} characters",
+    "numberGt": "Must be greater than {threshold}",
+    "numberGte": "Minimum value is {threshold}",
+    "numberLt": "Must be less than {threshold}",
+    "numberLte": "Maximum value is {threshold}",
+    "numberEq": "Must be exactly {threshold}",
+    "arrayGt": "Select more than {threshold}",
+    "arrayGte": "Select at least {threshold}",
+    "arrayLt": "Select less than {threshold}",
+    "arrayLte": "Select at most {threshold}",
+    "arrayEq": "Select exactly {threshold}",
+    "dateMin": "Date must be on or after {date}",
+    "dateMax": "Date must be on or before {date}",
+    "futureDate": "Date must be in the future",
+    "pastDate": "Date must be in the past",
+    "weekdayOnly": "Please select a weekday",
+    "minAge": "Must be at least {age} years old",
+    "maxAge": "Must be at most {age} years old"
+  },
+  "phoneInput": {
+    "noResults": "找不到結果"
+  },
+  "tableOfContents": {
+    "title": "目錄"
+  },
+  "ogImagePreview": {
+    "alt": "Open Graph 預覽",
+    "empty": "OG 圖像尚未產生",
+    "actions": {
+      "regenerate": "重新產生 OG 圖像"
+    },
+    "statuses": {
+      "queued": "已排程",
+      "processing": "處理中",
+      "ready": "已完成",
+      "failed": "失敗",
+      "superseded": "已由較新的要求取代",
+      "cancelled": "已取消"
+    }
+  },
+  "ogImageSettings": {
+    "title": "OG 圖像設定",
+    "description": "配置 Open Graph 影像的外觀以進行社群媒體分享",
+    "runProgress": "已完成 {ready} · 失敗 {failed} · 處理中 {processing} · 已排程 {queued} · 總計 {total}",
+    "actions": {
+      "regenerateAll": "全部重新產生",
+      "resetToDefaults": "重設為預設值"
+    },
+    "tabs": {
+      "home": "首頁",
+      "content": "內容（文章/頁面/作品/表單）"
+    },
+    "notifications": {
+      "homeSaved": "主頁 OG 設定已儲存。正在重新產生主頁 OG 圖像..",
+      "contentSaved": "內容 OG 設定已儲存。正在重新產生所有內容 OG 圖像..",
+      "regeneratingAll": "所有 OG 影像將在背景重新生成",
+      "resetToDefaults": "重設為預設值。保存即可申請"
+    },
+    "shared": {
+      "sections": {
+        "livePreview": "即時預覽",
+        "siteTitle": "網站標題（備用）"
+      },
+      "helpers": {
+        "siteTitleFallback": "未配置徽標時顯示"
+      },
+      "preview": {
+        "alt": "OG 預覽",
+        "generating": "正在生成預覽..",
+        "updating": "更新中..",
+        "dimensions": "預覽尺寸：1200 x 630 像素（標準 OG 圖片尺寸）"
+      }
+    },
+    "home": {
+      "sections": {
+        "logoSize": "標誌大小"
+      },
+      "fields": {
+        "backgroundColor": "背景顏色"
+      },
+      "helpers": {
+        "logoCentered": "徽標將位於圖像的中心",
+        "previewDescription": "首頁 OG 圖片：標誌居中，無標題文本"
+      }
+    },
+    "content": {
+      "sections": {
+        "padding": "內距",
+        "logoPosition": "位置（距角落）"
+      },
+      "fields": {
+        "darkBackgroundColor": "深色背景顏色",
+        "darkBackgroundColorDescription": "當文章沒有特色圖片時使用",
+        "titleColor": "標題顏色",
+        "maxLengthDescription": "截斷前的字符",
+        "fontSizeThreshold": "字級閾值",
+        "fontSizeThresholdDescription": "當標題超過此長度時使用較小的字體",
+        "largeFontSize": "大字級",
+        "largeFontSizeDescription": "對於短標題",
+        "smallFontSize": "小字級",
+        "smallFontSizeDescription": "對於長標題"
+      },
+      "preview": {
+        "description": "內容 OG 圖片：標題居中，標誌位於右下角",
+        "testTitleDefault": "這是 OG 圖像預覽的範例標題",
+        "testTitleLabel": "測試標題",
+        "testTitleDescription": "輸入範例標題進行預覽",
+        "empty": "輸入標題以查看預覽"
+      }
+    }
+  },
+  "campaignEditor": {
+    "actions": {
+      "backToCampaigns": "返回活動",
+      "sendNow": "立即已傳送",
+      "sendCampaign": "已傳送活動",
+      "scheduleCampaign": "安排活動"
+    },
+    "layout": {
+      "none": "無佈局"
+    },
+    "target": {
+      "audienceLabel": "目標受眾",
+      "audiencePlaceholder": "選擇受眾",
+      "all": "所有使用者",
+      "unavailableAudience": "已封存或無法使用的受眾",
+      "unavailableAudienceDescription": "此行銷活動以已封存或無法使用的受眾為目標。請先選擇有效受眾，再排程或傳送。",
+      "audienceRequired": "請先選擇有效受眾，再排程或傳送。",
+      "audienceLoadError": "無法載入有效受眾。請在排程或傳送前重試。"
+    },
+    "fields": {
+      "recipientScope": "收件者",
+      "recipientScopeSubscribedUsers": "已訂閱使用者",
+      "recipientScopeAllMatchingUsers": "所有符合條件的使用者",
+      "recipientScopeAllMatchingUsersWarning": "包括已取消電子報訂閱的符合條件使用者。"
+    },
+    "preview": {
+      "frameTitle": "活動預覽",
+      "empty": "沒有可預覽的內容"
+    },
+    "testModal": {
+      "description": "輸入電子郵件地址以已傳送此活動的測試"
+    },
+    "sendModal": {
+      "warning": "這會將行銷活動已傳送至細分受眾群 {audience}。此操作無法撤銷",
+      "subject": "主題：{subject}",
+      "allMatchingUsersWarning": "包括已取消電子報訂閱的符合條件使用者。"
+    },
+    "scheduleModal": {
+      "description": "選擇已傳送此行銷活動的日期和時間",
+      "dateLabel": "已排程日期和時間",
+      "datePlaceholder": "選擇日期和時間",
+      "previousMonth": "上個月",
+      "nextMonth": "下個月",
+      "audience": "觀眾：{audience}",
+      "allMatchingUsersWarning": "包括已取消電子報訂閱的符合條件使用者。"
+    },
+    "notifications": {
+      "campaignSent": "活動已寄送給 {count, plural, one {# 位訂閱者} other {# 位訂閱者}}",
+      "campaignScheduled": "活動已安排",
+      "scheduleCancelled": "活動日程取消"
+    }
+  },
+  "campaignAnalytics": {
+    "actions": {
+      "backToCampaign": "返回活動"
+    },
+    "title": "活動分析",
+    "sentAt": "於 {date} {time} 已傳送",
+    "stats": {
+      "sent": "已傳送",
+      "failed": "失敗",
+      "blocked": "已封鎖",
+      "suppressed": "已抑制",
+      "skipped": "已略過"
+    },
+    "deliveryStatus": "傳送狀態",
+    "tooltips": {
+      "sent": "已傳送：{count}",
+      "failed": "失敗：{count}",
+      "blocked": "已封鎖：{count}",
+      "suppressed": "已抑制：{count}",
+      "skipped": "已略過：{count}"
+    },
+    "empty": "未找到收件人",
+    "recipientStatuses": {
+      "sent": "已傳送",
+      "queued": "佇列中",
+      "rendering": "轉譯中",
+      "sending": "傳送中",
+      "skipped": "已略過",
+      "transientFailed": "重試中",
+      "permanentFailed": "失敗",
+      "blocked": "已封鎖",
+      "suppressed": "已抑制"
+    }
+  },
+  "postEditor": {
+    "actions": {
+      "zenMode": "禪宗模式",
+      "exitZen": "退出禪宗模式"
+    },
+    "statusActions": {
+      "archive": "檔案",
+      "schedule": "排程",
+      "reschedule": "重新排程",
+      "cancelSchedule": "取消排程",
+      "republish": "重新發佈"
+    },
+    "participantsAction": "作者與協作者",
+    "schedule": {
+      "title": "排程發佈文章",
+      "rescheduleTitle": "變更發佈排程",
+      "schedule": "排程",
+      "reschedule": "變更排程",
+      "date": "日期",
+      "time": "時間",
+      "timeZone": "時區",
+      "previousPeriod": "上個月",
+      "nextPeriod": "下個月",
+      "required": "請選擇日期、時間和時區。",
+      "futureRequired": "請選擇未來的時間。",
+      "invalidLocalTime": "所選時區中不存在這個當地時間。",
+      "result": "將於 {value} 發佈",
+      "utcInstant": "UTC：{value}",
+      "dstNotice": "日光節約時間規則以所選時區為準。",
+      "scheduledFor": "排程於 {value} 發佈"
+    },
+    "shareLinksDescription": "未發佈內容的預覽連結",
+    "allowComments": "允許評論",
+    "tagSelector": {
+      "placeholder": "選擇標籤..",
+      "emptyMessage": "沒有可用的標籤",
+      "notFoundMessage": "沒有找到標籤"
+    },
+    "categorySelector": {
+      "placeholder": "選擇類別..",
+      "emptyMessage": "沒有可用的類別",
+      "notFoundMessage": "沒有找到類別"
+    },
+    "seriesSelector": {
+      "searchPlaceholder": "搜尋或建立...",
+      "states": {
+        "empty": "無可用系列",
+        "select": "選擇系列..",
+        "notMember": "您沒有可管理的系列",
+        "notFound": "沒有找到系列",
+        "unavailable": "目前系列已無法管理"
+      },
+      "actions": {
+        "createNamed": "+ 建立「{name}」"
+      },
+      "notifications": {
+        "assigned": "分配給系列的文章",
+        "reorderFailed": "系列重新排序失敗",
+        "createFailed": "無法建立系列",
+        "seriesUnavailable": "此系列已無法管理，原有歸屬已保留。",
+        "updateFailed": "無法變更文章系列，原有歸屬已保留。"
+      }
+    },
+    "notifications": {
+      "slugUpdateFailed": "無法更新 slug",
+      "deleted": "文章已刪除",
+      "published": "發佈文章",
+      "unpublished": "文章未發表",
+      "archived": "文章存檔",
+      "scheduled": "文章已排程",
+      "scheduleCancelled": "文章排程已取消",
+      "republished": "文章已重新發佈",
+      "permissionRevokedNavigationFailed": "無法離開編輯器，請再試一次。"
+    }
+  },
+  "postParticipants": {
+    "title": "作者與協作者",
+    "addSectionLabel": "新增參與者",
+    "memberLabel": "成員",
+    "roleLabel": "角色",
+    "roles": {
+      "author": "作者",
+      "collaborator": "協作者"
+    },
+    "empty": "尚未指定作者或協作者。",
+    "inactiveAuthority": "此成員已退出。",
+    "lastAuthor": "不能移除最後一位作者。",
+    "removeAuthor": "移除作者",
+    "adminOnlyRemoveAuthor": "只有管理員可以移除作者。",
+    "removeCollaborator": "移除協作者",
+    "cannotRemoveCollaborator": "您無權移除此協作者。",
+    "changeToAuthor": "將角色變更為作者",
+    "changeToCollaborator": "將角色變更為協作者",
+    "cannotChangeRole": "您無權變更此角色。",
+    "inactiveCannotChangeRole": "無法變更已停用參與者的角色。",
+    "notifications": {
+      "added": "已新增參與者",
+      "removed": "已移除參與者",
+      "roleChanged": "已變更參與者角色"
+    }
+  },
+  "postShareAccess": {
+    "title": "需要密碼",
+    "description": "請輸入此分享連結提供的密碼。",
+    "password": "密碼",
+    "submit": "開啟文章",
+    "errors": {
+      "incorrect_password": "密碼不正確。",
+      "not_found": "此分享文章已無法使用。"
+    }
+  },
+  "pageShareAccess": {
+    "title": "需要密碼",
+    "description": "請輸入分享連結提供的密碼。",
+    "password": "密碼",
+    "submit": "開啟頁面",
+    "errors": {
+      "incorrect_password": "密碼不正確。",
+      "not_found": "此分享頁面已無法使用。"
+    }
+  },
+  "labelShareAccess": {
+    "title": "需要密碼",
+    "description": "請輸入分享連結所提供的密碼。",
+    "password": "密碼",
+    "submit": "開啟廠牌",
+    "errors": {
+      "incorrect_password": "密碼不正確。",
+      "not_found": "此分享廠牌已無法使用。"
+    }
+  },
+  "artistShareAccess": {
+    "title": "需要密碼",
+    "description": "請輸入隨分享連結提供的密碼。",
+    "password": "密碼",
+    "submit": "開啟藝術家",
+    "errors": {
+      "incorrect_password": "密碼不正確。",
+      "not_found": "此分享藝術家已無法使用。"
+    }
+  },
+  "releaseShareAccess": {
+    "title": "需要密碼",
+    "description": "請輸入分享連結提供的密碼。",
+    "password": "密碼",
+    "submit": "開啟發行",
+    "errors": {
+      "incorrect_password": "密碼不正確。",
+      "not_found": "此分享發行已無法使用。"
+    }
+  },
+  "workShareAccess": {
+    "title": "需要密碼",
+    "description": "請輸入隨分享連結提供的密碼。",
+    "password": "密碼",
+    "submit": "開啟作品",
+    "errors": {
+      "incorrect_password": "密碼不正確。"
+    }
+  },
+  "workEditor": {
+    "shareLinksDescription": "未發佈作品的預覽連結",
+    "metaForm": {
+      "sections": {
+        "workDetails": "作品細節"
+      },
+      "labels": {
+        "from": "從",
+        "until": "直到",
+        "ongoing": "進行中",
+        "featured": "精選"
+      },
+      "descriptions": {
+        "untilCleared": "選中“正在進行”時清除",
+        "untilRequired": "除非選取“正在進行”，否則為必填項",
+        "ongoing": "將此作品標記為目前正在進行中",
+        "featured": "突出顯示該作品"
+      },
+      "placeholders": {
+        "selectYearMonth": "選擇年份和月份",
+        "untilDisabled": "選取「正在進行」時停用"
+      },
+      "musicProject": {
+        "title": "音樂項目詳情",
+        "fields": {
+          "spotifyUrl": "Spotify 網址",
+          "bandcampUrl": "Bandcamp 網址",
+          "soundcloudUrl": "SoundCloud 網址",
+          "youtubeUrl": "YouTube 網址"
+        }
+      },
+      "portfolio": {
+        "title": "投資組合詳情",
+        "fields": {
+          "projectUrl": "項目URL",
+          "technologies": "科技"
+        },
+        "placeholders": {
+          "addTechnology": "添加技術"
+        }
+      },
+      "article": {
+        "title": "文章詳情",
+        "fields": {
+          "externalUrl": "外部URL",
+          "publication": "出版品",
+          "publishedDate": "發表日期"
+        },
+        "placeholders": {
+          "publication": "媒體、部落格等"
+        }
+      },
+      "contribution": {
+        "title": "貢獻詳情",
+        "fields": {
+          "projectName": "項目名稱"
+        },
+        "placeholders": {
+          "projectName": "專案或組織",
+          "role": "您在專案中的角色"
+        }
+      }
+    },
+    "clients": {
+      "empty": "還沒有客戶",
+      "actions": {
+        "reorderClient": "重新訂購客戶端",
+        "openWebsite": "開啟客戶網站",
+        "removeClient": "刪除客戶端"
+      },
+      "search": {
+        "empty": "沒有找到客戶"
+      }
+    },
+    "notifications": {
+      "published": "作品已發佈",
+      "unpublished": "作品已取消發佈",
+      "deleted": "作品已刪除",
+      "updateFailed": "更新作業失敗"
+    }
+  },
+  "contentLayout": {
+    "contentHeight": "內容高度",
+    "content": "內容",
+    "viewport": "視窗",
+    "chrome": "內容列",
+    "footer": "頁尾",
+    "flow": "一般流",
+    "pinned": "固定"
+  },
+  "pageEditor": {
+    "shareLinksDescription": "未發布頁面的預覽鏈接",
+    "showTitleOnPage": "在頁面上顯示標題",
+    "slugValidation": {
+      "alreadyExists": "此 slug 已被使用。",
+      "invalidPath": "請輸入有效的頁面路徑，前後不要有空格。",
+      "emptySegment": "頁面路徑不能以 / 開頭或結尾，也不能包含空路徑區段。",
+      "dotSegment": "頁面路徑不能包含「.」或「..」路徑區段。",
+      "reservedRoute": "此路徑已由網站保留。請使用其他第一個區段。",
+      "checkFailed": "無法檢查此 slug 是否可用。請再試一次。"
+    },
+    "sectionTypes": {
+      "richText": "富文本",
+      "postList": "文章列表",
+      "postTable": "文章表",
+      "postMap": "郵政地圖",
+      "workMap": "作品地圖",
+      "workTable": "作品台",
+      "authorList": "作者名單",
+      "worksGallery": "作品列表",
+      "releasesGallery": "發行列表",
+      "artistGrid": "藝術家列表",
+      "form": "形式",
+      "immersiveScene": "沉浸式場景",
+      "columns": "專欄",
+      "programEventList": "活動列表",
+      "textMarquee": "文字跑馬燈",
+      "clientMarquee": "客戶跑馬燈",
+      "labelMarquee": "廠牌跑馬燈",
+      "externalVideo": "外部影片"
+    },
+    "externalVideo": {
+      "urlLabel": "影片 URL",
+      "urlDescription": "輸入 YouTube 或 Vimeo 影片 URL。",
+      "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+      "invalidUrl": "請輸入有效的 YouTube 或 Vimeo URL。",
+      "aspectRatioLabel": "寬高比",
+      "aspectRatioAuto": "自動",
+      "captionLabel": "說明文字",
+      "captionDescription": "顯示在影片下方的選填說明文字。",
+      "captionPlaceholder": "輸入說明文字...",
+      "emptyPreview": "輸入影片 URL 後即可查看預覽。",
+      "playerTitle": "嵌入式影片"
+    },
+    "sectionItem": {
+      "maxWidth": {
+        "full": "全寬",
+        "container": "容器（1200 像素）",
+        "narrow": "窄（800 像素）"
+      },
+      "settings": {
+        "title": "部分設定",
+        "tabs": {
+          "block": "區塊",
+          "section": "區段"
+        },
+        "backgroundPlaceholder": "透明的",
+        "maxWidth": "最大寬度",
+        "padding": "內邊距（像素）"
+      },
+      "actions": {
+        "drag": "拖曳 {section} 部分",
+        "openSettings": "打開 {section} 部分的設定",
+        "expand": "展開 {section} 部分",
+        "collapse": "折疊 {section} 部分",
+        "delete": "刪除 {section} 部分"
+      }
+    },
+    "columnsEditor": {
+      "badges": {
+        "columnCount": "{count} 列"
+      },
+      "columnCounts": {
+        "two": "2 列",
+        "three": "3 列",
+        "four": "4 列"
+      },
+      "ratios": {
+        "two": {
+          "equal": "1:1（平等）"
+        },
+        "three": {
+          "equal": "1:1:1（相等）"
+        },
+        "four": {
+          "equal": "1:1:1:1（相等）"
+        }
+      },
+      "stackOnMobile": "行動裝置上的堆疊",
+      "column": "列 {index}",
+      "menuLabel": "添加部分",
+      "emptyColumn": "空列 - 點選 + 新增內容",
+      "actions": {
+        "addSectionToColumn": "將部分新增至列 {index}",
+        "removeSectionFromColumn": "移除 {section}，位於第 {index} 欄"
+      }
+    },
+    "notifications": {
+      "published": "頁面已發布",
+      "unpublished": "頁面未發布",
+      "deleted": "頁面已刪除",
+      "slugUpdateFailed": "無法更新頁面 slug",
+      "confirmSummaryFailed": "無法確認摘要更新"
+    },
+    "mapEditor": {
+      "title": "地圖",
+      "placeCount": "{count} 個地點",
+      "fullscreen": "全螢幕",
+      "captionPlaceholder": "在地圖下方新增可選說明文字...",
+      "emptyState": "尚未選取任何地圖地點。",
+      "centerBadge": "中心",
+      "centeredTitle": "已設為中心",
+      "setAsCenterTitle": "設為中心",
+      "viewportQueryBadge": "視口查詢",
+      "withPlaceOnlyBadge": "僅含位置的文章",
+      "allPostsBadge": "所有文章",
+      "featuredOnlyBadge": "僅精選作品",
+      "allMappedWorksBadge": "所有已定位作品",
+      "filtersSection": "篩選",
+      "querySection": "查詢",
+      "mapSection": "地圖",
+      "allCategoriesPlaceholder": "所有分類",
+      "allSeriesPlaceholder": "所有系列",
+      "allAuthorsPlaceholder": "所有作者",
+      "allTagsPlaceholder": "所有標籤",
+      "workTypesLabel": "作品類型",
+      "workTypesPlaceholder": "所有作品類型",
+      "featuredOnlyLabel": "僅精選作品",
+      "onlyIncludePostsWithLocation": "僅包含有位置的文章",
+      "onlyWorksWithAssignedLocation": "只有已指定位置的作品才會顯示在地圖上。",
+      "primaryLabelLabel": "主要標籤",
+      "primaryLabelDescription": "控制每個地圖提示的第一行。",
+      "aspectRatioLabel": "長寬比",
+      "previewWidthLabel": "預覽寬度 (%)",
+      "defaultThemePlaceholder": "預設主題",
+      "sortByLabel": "排序方式"
+    },
+    "blockEditor": {
+      "sections": {
+        "filters": "篩選",
+        "defaultFilters": "預設篩選",
+        "layout": "版面配置",
+        "displayOptions": "顯示選項",
+        "sorting": "排序",
+        "content": "內容",
+        "marqueeBehavior": "跑馬燈行為",
+        "scenePlayback": "Playback",
+        "sceneRender": "Renderer",
+        "sceneMotion": "Motion",
+        "sceneUnits": "Units",
+        "sceneSettings": "Scene",
+        "sceneMesh": "Mesh",
+        "sceneTexture": "Texture",
+        "sceneTiming": "Timing",
+        "sceneAppearance": "Appearance",
+        "sceneParticles": "Particles"
+      },
+      "labels": {
+        "postTitle": "文章標題",
+        "workTitle": "作品標題",
+        "slidesToShow": "顯示投影片數",
+        "columns": "欄數",
+        "infiniteLoop": "無限循環",
+        "showIndicators": "顯示指示器",
+        "showFeaturedImage": "顯示精選圖片",
+        "imageAspectRatio": "圖片長寬比",
+        "showMeta": "顯示中繼資訊（日期、作者）",
+        "sortBy": "排序方式",
+        "numberOfPosts": "文章數量",
+        "showPagination": "顯示分頁",
+        "exposedFilters": "顯示的篩選項",
+        "exposedSorts": "顯示的排序項",
+        "rowsPerPage": "每頁列數",
+        "workTypes": "作品類型",
+        "releaseTypes": "發行類型",
+        "featuredWorksOnly": "僅顯示精選作品",
+        "numberOfAuthors": "作者數量",
+        "showBio": "顯示簡介",
+        "showSocialLinks": "顯示社群連結",
+        "maxArtists": "最大藝人數量",
+        "showImage": "顯示圖片",
+        "selectForm": "選擇表單",
+        "showFormTitle": "顯示表單標題",
+        "showTitle": "顯示標題",
+        "numberOfWorks": "作品數量",
+        "numberOfReleases": "發行數量",
+        "numberOfProgramEvents": "活動數量",
+        "programEventTypes": "活動類型",
+        "programEventSeries": "活動系列",
+        "timeWindow": "時間範圍",
+        "direction": "方向",
+        "speed": "速度",
+        "itemHeight": "項目高度",
+        "gap": "間距",
+        "openInNewTab": "在新分頁開啟連結",
+        "pauseOnHover": "滑過時暫停",
+        "source": "來源",
+        "linkMode": "連結",
+        "logoScale": "Logo 縮放",
+        "fallbackMode": "缺少 Logo 時",
+        "marqueeItemText": "文字",
+        "marqueeItemHref": "連結 URL",
+        "scrollHeight": "Scroll height",
+        "sceneHeight": "Scene height",
+        "unitHoldSeconds": "Unit hold",
+        "unitGapSeconds": "Unit gap",
+        "unitHoldOverrideSeconds": "Hold override",
+        "loop": "Loop",
+        "colorScheme": "Theme",
+        "backgroundColor": "Light background",
+        "darkBackgroundColor": "Dark background",
+        "backgroundEnabled": "場景背景",
+        "textureSize": "Particle count",
+        "particleSize": "Particle size",
+        "particleBrightness": "Light particle brightness",
+        "darkParticleBrightness": "Dark particle brightness",
+        "transitionWindow": "Text blend",
+        "transition": "Transition",
+        "rotationEnabled": "旋轉動畫",
+        "scrollRotationEnabled": "加入捲動旋轉",
+        "initialRotation": "初始旋轉",
+        "rotationSpeedAxes": "旋轉速度",
+        "scrollRotationAxes": "捲動旋轉",
+        "hoverEnabled": "指標互動",
+        "hoverRepelRadius": "懸停半徑",
+        "sceneUnit": "Unit",
+        "sceneUnitName": "Unit name",
+        "unitAttribution": "單元署名",
+        "meshSource": "Mesh source",
+        "fallbackMesh": "Built-in mesh",
+        "mesh": "Mesh",
+        "meshObjectName": "Mesh object",
+        "meshScale": "網格縮放",
+        "meshOffsetY": "網格高度偏移",
+        "meshUploadProgress": "Mesh upload progress",
+        "textureSource": "Light texture",
+        "fallbackColor": "Light color",
+        "color": "Light color",
+        "lightTextureUploadProgress": "Light texture upload progress",
+        "darkTextureSource": "Dark texture",
+        "darkFallbackColor": "Dark color",
+        "darkColor": "Dark color",
+        "darkTextureUploadProgress": "Dark texture upload progress",
+        "title": "Title",
+        "description": "說明",
+        "meshOptimization": "GLB optimization",
+        "meshOptimizationTargetRatio": "Target mesh ratio",
+        "selectedOptimizedMesh": "Selected compressed GLB",
+        "optimizedMeshSize": "Compressed size",
+        "meshOptimizationTriangles": "Triangles",
+        "textColorSource": "Text color",
+        "lightTextColor": "Light text",
+        "darkTextColorSource": "Dark text",
+        "darkTextColor": "Dark text color"
+      },
+      "fieldLabels": {
+        "year": "年",
+        "month": "月",
+        "untilYear": "截止年份",
+        "untilMonth": "截止月份",
+        "present": "進行中"
+      },
+      "badges": {
+        "posts": "{count} 篇文章",
+        "rows": "{count} 列",
+        "authors": "{count} 位作者",
+        "artists": "{count} 位藝人",
+        "works": "{count} 個作品",
+        "releases": "{count} 個發行"
+      },
+      "placeholders": {
+        "publishedByDefault": "預設為已發佈",
+        "allTypes": "所有類型",
+        "allLabels": "所有廠牌",
+        "allSeries": "所有系列"
+      },
+      "options": {
+        "layout": {
+          "grid": "網格",
+          "list": "列表",
+          "cards": "卡片",
+          "minimal": "極簡",
+          "carousel": "輪播"
+        },
+        "aspectRatio": {
+          "auto": "自動"
+        },
+        "sortBy": {
+          "dateAdded": "加入日期",
+          "startDate": "開始日期",
+          "endDate": "結束日期",
+          "publishedDate": "發布日期",
+          "updatedDate": "更新日期",
+          "title": "標題"
+        },
+        "sortOrder": {
+          "newest": "最新優先",
+          "oldest": "最舊優先",
+          "azOldest": "A-Z / 最舊優先",
+          "zaNewest": "Z-A / 最新優先"
+        },
+        "mapPrimaryLabel": {
+          "placeName": "地點名稱"
+        },
+        "colorScheme": {
+          "auto": "自動",
+          "light": "淺色",
+          "dark": "深色"
+        },
+        "labelMode": {
+          "inherit": "繼承",
+          "show": "顯示",
+          "hide": "隱藏"
+        },
+        "timeWindow": {
+          "upcoming": "即將開始",
+          "current": "進行中",
+          "past": "已結束",
+          "all": "全部"
+        },
+        "direction": {
+          "left": "向左",
+          "right": "向右"
+        },
+        "size": {
+          "sm": "小",
+          "md": "中",
+          "lg": "大",
+          "xl": "超大"
+        },
+        "source": {
+          "all": "全部",
+          "selected": "已選取"
+        },
+        "linkMode": {
+          "entity": "實體頁面",
+          "none": "無連結"
+        },
+        "logoScale": {
+          "contain": "完整顯示",
+          "fillHeight": "填滿高度"
+        },
+        "fallbackMode": {
+          "name": "顯示名稱",
+          "hide": "隱藏項目"
+        },
+        "immersiveSceneMesh": {
+          "sphere": "sphere",
+          "box": "box",
+          "torus": "torus",
+          "cone": "cone"
+        },
+        "meshSource": {
+          "primitive": "Primitive",
+          "file": "GLB"
+        },
+        "textureSource": {
+          "color": "Color",
+          "image": "Image",
+          "inherit": "Follow light"
+        },
+        "playback": {
+          "scroll": "Scroll",
+          "autoplay": "Autoplay"
+        },
+        "transition": {
+          "smooth": "Smooth",
+          "linear": "Linear"
+        },
+        "textColorSource": {
+          "theme": "Follow theme",
+          "custom": "Custom",
+          "inherit": "Follow light"
+        }
+      },
+      "actions": {
+        "addMarqueeItem": "新增項目",
+        "removeMarqueeItem": "移除項目",
+        "moveMarqueeItem": "調整項目順序",
+        "addSceneUnit": "Add unit",
+        "moveUnitUp": "Move unit up",
+        "moveUnitDown": "Move unit down",
+        "removeSceneUnit": "Remove unit",
+        "expandSceneUnit": "Expand unit",
+        "collapseSceneUnit": "Collapse unit",
+        "replaceMesh": "Replace GLB",
+        "uploadMesh": "Upload GLB",
+        "clearMeshAsset": "Clear mesh asset",
+        "cancelMeshUpload": "Cancel GLB upload",
+        "replaceTexture": "Replace light texture",
+        "uploadTexture": "Upload light texture",
+        "clearTextureAsset": "Clear texture",
+        "cancelTextureUpload": "Cancel light texture upload",
+        "replaceDarkTexture": "Replace dark texture",
+        "uploadDarkTexture": "Upload dark texture",
+        "clearDarkTextureAsset": "Clear dark texture",
+        "cancelDarkTextureUpload": "Cancel dark texture upload",
+        "generateOptimizedMesh": "Compress GLB",
+        "useOptimizedMesh": "Use compressed GLB",
+        "clearOptimizedMesh": "Use original GLB",
+        "deleteOptimizedMeshCandidate": "Delete compressed GLB"
+      },
+      "descriptions": {
+        "marqueeTextItems": "逐項新增文字。",
+        "unitAttribution": "選填 · 顯示於右下角 · 所有語言共用",
+        "rotationOverride": "留白的軸會繼承場景值。"
+      },
+      "empty": {
+        "marqueeItems": "尚無項目。"
+      },
+      "status": {
+        "meshOptimizationQueued": "GLB optimization queued.",
+        "meshOptimizationGenerated": "Optimized GLB generated.",
+        "meshOptimizationSelected": "Optimized GLB selected.",
+        "meshOptimizationCleared": "Original GLB selected.",
+        "meshOptimizationDeleted": "Compressed GLB deleted.",
+        "meshOptimizationDeleteFailed": "Compressed GLB could not be deleted.",
+        "meshOptimizationPending": "Queued",
+        "meshOptimizationProcessing": "Processing",
+        "meshOptimizationFailed": "Failed",
+        "meshOptimizationCancelled": "Cancelled",
+        "optimizedMeshCleanupFailed": "Optimized asset reference removed, but cleanup failed: {error}",
+        "optimizedMeshCleanupFailedDefault": "Optimized asset reference removed, but cleanup failed"
+      }
+    }
+  },
+  "editorCommon": {
+    "reloadRequired": {
+      "title": "需要重新載入",
+      "message": "編輯器開啟期間已儲存較新的版本。請重新載入後再繼續編輯。",
+      "action": "重新載入"
+    },
+    "permissionRevoked": {
+      "title": "編輯權限已被撤銷",
+      "message": "你已無權編輯此內容。權限撤銷後所做的變更不會被儲存。"
+    },
+    "sessionExpired": {
+      "title": "工作階段已過期",
+      "message": "登入工作階段已過期。重新登入後將返回同一編輯頁面。"
+    },
+    "externalVideoInsert": {
+      "title": "插入外部影片",
+      "urlLabel": "影片 URL",
+      "urlDescription": "支援 YouTube 與 Vimeo。",
+      "urlPlaceholder": "https://youtu.be/...",
+      "urlRequired": "請輸入影片 URL。",
+      "unsupportedUrl": "請使用支援的 YouTube 或 Vimeo 影片 URL。",
+      "labelLabel": "連結標籤（選填）",
+      "labelDescription": "標籤為空時會使用 URL。",
+      "labelPlaceholder": "錄製的工作階段",
+      "cancel": "取消",
+      "insert": "插入外部影片"
+    },
+    "uploadOverlay": {
+      "importingExternalImages": "正在匯入外部圖片..."
+    },
+    "notifications": {
+      "uploadFailedMessage": "上傳 {name} 失敗：{message}"
+    },
+    "media": {
+      "statuses": {
+        "uploading": "上傳中",
+        "processing": "處理中",
+        "ready": "已就緒",
+        "unknown": "未知",
+        "stage": {
+          "downloading": "下載中",
+          "processing": "處理中",
+          "uploading": "上傳中",
+          "processingHls": "HLS 處理中",
+          "uploadingHls": "HLS 上傳中",
+          "validating": "驗證中",
+          "finalizing": "正在完成",
+          "waveformProcessing": "正在產生波形",
+          "spectrogramProcessing": "正在產生頻譜圖",
+          "spectrogramUploading": "正在儲存頻譜圖",
+          "thumbnailProcessing": "正在產生縮圖",
+          "thumbnailUploading": "正在儲存縮圖",
+          "previewProcessing": "正在產生預覽",
+          "previewUploading": "正在儲存預覽"
+        },
+        "failed": "失敗"
+      },
+      "audioPlayer": {
+        "seekPlayback": "移動音訊播放位置",
+        "play": "播放音訊",
+        "pause": "暫停音訊",
+        "mute": "靜音",
+        "unmute": "取消靜音",
+        "volume": "音訊音量",
+        "original": "原始檔案",
+        "waveform": "波形",
+        "spectrogram": "頻譜圖",
+        "spectrogramAlt": "音訊頻譜圖",
+        "playback": "音訊播放",
+        "download": "下載"
+      },
+      "videoEditor": {
+        "processingOverlay": "正在處理影片..."
+      },
+      "attachmentEditor": {
+        "untitledFile": "未命名檔案"
+      },
+      "ingestDialog": {
+        "addItem": "新增{item}",
+        "replaceItem": "取代{item}",
+        "browse": "選擇檔案",
+        "or": "或",
+        "importFromUrl": "從 URL 匯入",
+        "directVideoUrlHelp": "僅支援影片檔案的直接網址。YouTube 或 Vimeo 請使用「外部影片」。",
+        "confirm": "插入",
+        "resumeAvailable": "Interrupted upload found",
+        "resumeInstructionNamed": "Select {name} again to continue the upload from where it stopped.",
+        "backToUpload": "上傳檔案",
+        "openLibrary": "檔案庫",
+        "unifiedDescription": "上傳檔案或從檔案庫中選取。",
+        "emptyTitle": "附加檔案",
+        "emptyDescription": "點擊或將檔案拖放到此處",
+        "selectFile": "選取檔案"
+      },
+      "videoPlayer": {
+        "regionLabel": "影片播放器",
+        "play": "播放影片",
+        "pause": "暫停影片",
+        "controls": {
+          "audioPlayer": "音訊播放器",
+          "videoPlayer": "視訊播放器",
+          "close": "關閉",
+          "closeModalDialog": "關閉對話框",
+          "mute": "靜音",
+          "unmute": "開啟音效",
+          "volumeLevel": "音量",
+          "progressBar": "進度列",
+          "playbackRate": " 播放速率",
+          "fullscreen": "全螢幕",
+          "exitFullscreen": "退出全螢幕",
+          "skipBackward": "倒退",
+          "skipForward": "前進",
+          "skipBackwardSeconds": "倒轉 {seconds} 秒",
+          "skipForwardSeconds": "快轉 {seconds} 秒",
+          "descriptions": "描述",
+          "subtitles": "字幕",
+          "audioTrack": "音軌",
+          "chapters": "章節",
+          "done": "完成",
+          "reset": "重置",
+          "live": "直播",
+          "playingInPictureInPicture": "Playing in picture-in-picture",
+          "videoPlayerLoading": "正在載入影片播放器。",
+          "currentTime": "目前時間",
+          "duration": "總共時間",
+          "remainingTime": "剩餘時間",
+          "streamType": "串流類型",
+          "seekToLivePlayingLive": "快轉至直播，目前為現場畫面",
+          "seekToLiveBehindLive": "快轉至直播，目前為稍早畫面",
+          "selected": ", 選擇",
+          "opensSubtitlesSettingsDialog": ", 開啟字幕設定對話框",
+          "modalWindow": "強制回應視窗",
+          "modalWindowText": "這是一個模態視窗。",
+          "captionSettingsDialog": "字幕設定對話框",
+          "beginningOfDialogWindow": "開始對話視窗。離開會取消並關閉視窗",
+          "restoreDefaultSettings": "恢復全部設定至預設值",
+          "endOfDialogWindow": "結束對話視窗",
+          "color": "顏色",
+          "opacity": "不透明度",
+          "text": "文字",
+          "background": "背景",
+          "window": "視窗",
+          "textEdgeStyle": "字型邊緣樣式",
+          "fontFamily": "字型系列",
+          "fontSize": "字型尺寸",
+          "none": "無",
+          "raised": "浮雕",
+          "depressed": "壓低",
+          "uniform": "均勻",
+          "dropShadow": "下陰影",
+          "proportionalSansSerif": "調和間距無襯線字型",
+          "monospaceSansSerif": "等寬無襯線字型",
+          "proportionalSerif": "調和間距襯線字型",
+          "monospaceSerif": "等寬襯線字型",
+          "casual": "輕便的",
+          "script": "手寫體",
+          "smallCaps": "小型大寫字體",
+          "white": "白",
+          "black": "黑",
+          "red": "紅",
+          "green": "綠",
+          "blue": "藍",
+          "yellow": "黃",
+          "magenta": "紫紅",
+          "cyan": "青",
+          "opaque": "不透明",
+          "semiTransparent": "半透明",
+          "transparent": "透明",
+          "isLoading": "正在載入{target}。",
+          "loaded": "載入完畢",
+          "textBackground": "文字背景",
+          "captionAreaBackground": "字幕區域背景",
+          "descriptionsOff": "關閉描述",
+          "subtitlesSettings": "字幕設定",
+          "subtitlesOff": "關閉字幕",
+          "defaultTrack": "預設"
+        }
+      }
+    },
+    "mapBlock": {
+      "clickToAddPlace": "點擊新增地點",
+      "captionPlaceholder": "新增說明文字...",
+      "clickToAddCaption": "點擊新增說明文字",
+      "externalPlaceholder": "地圖：{count} 個地點",
+      "viewOnGoogleMaps": "在 Google 地圖中查看 ({lat}, {lng})"
+    },
+    "mapPlacesModal": {
+      "title": "管理地點",
+      "searchPlaceholder": "搜尋並新增地點...",
+      "emptyState": "尚未新增任何地點",
+      "centerBadge": "中心",
+      "centeredTitle": "已設為中心",
+      "setAsCenterTitle": "設為中心"
+    },
+    "blockAlign": {
+      "left": "靠左對齊",
+      "center": "置中對齊",
+      "right": "靠右對齊"
+    },
+    "mathInline": {
+      "clickToEdit": "點擊編輯",
+      "convertToBlock": "轉換為區塊"
+    },
+    "mathInlineButton": {
+      "label": "行內公式"
+    },
+    "editor": {
+      "slashMenu": {
+        "placeholder": "輸入 '/' 查看指令",
+        "empty": "沒有項目",
+        "unavailable": "無法使用",
+        "groups": {
+          "headings": "標題",
+          "basic": "基礎",
+          "advanced": "進階功能",
+          "others": "其他",
+          "math": "數學",
+          "inline": "行內",
+          "embeds": "嵌入",
+          "media": "媒體",
+          "ai": "AI"
+        },
+        "items": {
+          "heading": {
+            "title": "一級標題",
+            "subtext": "用於頂級標題",
+            "aliases": "h\nheading1\nh1\n標題\n一級標題",
+            "group": "標題"
+          },
+          "heading2": {
+            "title": "二級標題",
+            "subtext": "用於關鍵部分",
+            "aliases": "h2\nheading2\nsubheading\n標題\n二級標題\n副標題",
+            "group": "標題"
+          },
+          "heading3": {
+            "title": "三級標題",
+            "subtext": "用於小節和分組標題",
+            "aliases": "h3\nheading3\nsubheading\n標題\n三級標題",
+            "group": "標題"
+          },
+          "paragraph": {
+            "title": "段落",
+            "subtext": "用於文件正文",
+            "aliases": "p\nparagraph\ntext\n正文",
+            "group": "基礎"
+          },
+          "bulletList": {
+            "title": "無序列表",
+            "subtext": "用於顯示無序列表",
+            "aliases": "ul\nli\nlist\nbulletlist\nbullet list\n列表\n無序列表",
+            "group": "基礎"
+          },
+          "numberedList": {
+            "title": "有序列表",
+            "subtext": "用於顯示有序列表",
+            "aliases": "ol\nli\nlist\nnumberedlist\nnumbered list\n列表\n有序列表",
+            "group": "基礎"
+          },
+          "checkList": {
+            "title": "檢查清單",
+            "subtext": "用於顯示帶有核取方塊的列表",
+            "aliases": "ul\nli\nchecklist\nchecked list\n列表\n檢查清單\n勾選列表\n核取方塊",
+            "group": "基礎"
+          },
+          "quote": {
+            "title": "引用",
+            "subtext": "引用或摘錄",
+            "aliases": "quotation\nblockquote\nbq",
+            "group": "基礎"
+          },
+          "callout": {
+            "title": "Callout",
+            "subtext": "Highlight content with an icon",
+            "aliases": "callout\nnotice\ninfo\naside",
+            "group": "Basic blocks"
+          },
+          "divider": {
+            "title": "分隔線",
+            "subtext": "分隔線區塊",
+            "aliases": "divider\nhr\nhorizontal rule",
+            "group": "基礎"
+          },
+          "codeBlock": {
+            "title": "程式碼區塊",
+            "subtext": "用於顯示帶有語法標記的程式碼區塊",
+            "aliases": "code\npre\n程式碼\n預格式",
+            "group": "基礎"
+          },
+          "table": {
+            "title": "表格",
+            "subtext": "插入可編輯的表格",
+            "aliases": "table\n表格",
+            "group": "進階功能"
+          },
+          "emoji": {
+            "title": "表情符號",
+            "subtext": "用於插入表情符號",
+            "aliases": "表情符號\nemoji\nface\nemote\n表情\n表情表達",
+            "group": "其他"
+          },
+          "mathBlock": {
+            "title": "數學區塊",
+            "subtext": "使用 LaTeX 顯示公式",
+            "aliases": "math\nequation\nlatex\nformula",
+            "group": "數學"
+          },
+          "inlineMath": {
+            "title": "行內數學",
+            "subtext": "行內 LaTeX 公式",
+            "aliases": "inline\ninline math\ninlinemath\nlatex\n$",
+            "group": "行內"
+          },
+          "map": {
+            "title": "地圖",
+            "subtext": "插入地圖位置",
+            "aliases": "map\nlocation\nplace\naddress",
+            "group": "嵌入"
+          },
+          "externalVideo": {
+            "title": "外部影片",
+            "subtext": "插入 YouTube 或 Vimeo 連結",
+            "aliases": "external video\nyoutube\nvimeo\nembed",
+            "group": "嵌入"
+          },
+          "p5Sketch": {
+            "title": "p5.js",
+            "subtext": "新增互動式 p5.js 草圖",
+            "aliases": "p5\np5.js\nsketch\ncreative coding",
+            "group": "嵌入"
+          },
+          "threeScene": {
+            "title": "Three.js",
+            "subtext": "新增互動式 Three.js 場景",
+            "aliases": "three\nthree.js\n3d\nscene",
+            "group": "嵌入"
+          },
+          "file": {
+            "title": "附件",
+            "subtext": "附加檔案（PDF、DOC、ZIP 等）",
+            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload",
+            "group": "媒體"
+          },
+          "aiAssistant": {
+            "title": "AI 助理",
+            "subtext": "使用 AI 撰寫、改善或轉換文字",
+            "aliases": "ai\nassistant\ngpt\nwrite\nimprove",
+            "group": "AI"
+          },
+          "shader": {
+            "title": "GLSL 著色器",
+            "subtext": "新增互動式 GLSL 著色器",
+            "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "group": "嵌入"
+          }
+        }
+      },
+      "formatting": {
+        "bold": "粗體",
+        "italic": "斜體",
+        "underline": "底線",
+        "strike": "刪除線",
+        "code": "程式碼標記",
+        "blockType": "區塊類型",
+        "alignment": "對齊",
+        "alignLeft": "靠左對齊",
+        "alignCenter": "置中對齊",
+        "alignRight": "靠右對齊",
+        "alignJustify": "兩端對齊",
+        "textColor": "文字",
+        "backgroundColor": "背景",
+        "nest": "巢狀",
+        "unnest": "取消巢狀",
+        "inlineMath": "行內公式",
+        "ai": "AI 助理"
+      },
+      "link": {
+        "create": "新增連結",
+        "edit": "編輯連結",
+        "remove": "清除連結",
+        "open": "在新分頁開啟",
+        "titlePlaceholder": "編輯標題",
+        "urlPlaceholder": "編輯連結網址"
+      },
+      "math": {
+        "inline": "行內公式",
+        "block": "數學區塊",
+        "clickToEdit": "點擊編輯",
+        "convertToBlock": "轉換為區塊"
+      },
+      "file": {
+        "add": "新增{item}",
+        "replace": "取代{item}",
+        "delete": "刪除",
+        "download": "下載",
+        "caption": "新增說明文字...",
+        "upload": "上傳檔案",
+        "embed": "插入",
+        "urlPlaceholder": "編輯連結網址"
+      },
+      "resize": {
+        "image": "調整大小 — 圖片",
+        "audio": "調整大小 — 音訊",
+        "video": "調整大小 — 影片",
+        "file": "調整大小 — 附件",
+        "map": "調整大小 — 地圖",
+        "externalVideo": "調整大小 — 外部影片",
+        "p5Sketch": "調整大小 — p5.js",
+        "threeScene": "調整大小 — Three.js",
+        "dragHandle": "拖曳以調整大小",
+        "shader": "調整大小 — GLSL 著色器"
+      },
+      "drag": {
+        "openBlockMenu": "開啟選單",
+        "addBlock": "新增區塊",
+        "delete": "刪除",
+        "colors": "顏色"
+      },
+      "colors": {
+        "text": "文字",
+        "background": "背景",
+        "names": {
+          "default": "自動",
+          "gray": "灰色",
+          "brown": "棕色",
+          "red": "紅色",
+          "orange": "橙色",
+          "yellow": "黃色",
+          "green": "綠色",
+          "blue": "藍色",
+          "purple": "紫色",
+          "pink": "粉色"
+        }
+      },
+      "table": {
+        "toolbarLabel": "編輯表格",
+        "addColumnLeft": "左側新增欄",
+        "addColumnRight": "右側新增欄",
+        "deleteColumn": "刪除欄",
+        "addRowAbove": "上方新增列",
+        "addRowBelow": "下方新增列",
+        "deleteRow": "刪除列",
+        "toggleHeaderRow": "列標題",
+        "toggleHeaderColumn": "欄標題",
+        "selectRow": "選取列",
+        "selectColumn": "選取欄",
+        "selectCells": "選取的儲存格",
+        "selectTable": "選取表格",
+        "deleteTable": "刪除表格",
+        "mergeCells": "合併儲存格",
+        "splitCell": "分割儲存格",
+        "alignLeft": "靠左對齊",
+        "alignCenter": "置中對齊",
+        "alignRight": "靠右對齊",
+        "alignTableLeft": "表格靠左對齊",
+        "alignTableCenter": "表格置中",
+        "alignTableRight": "表格靠右對齊",
+        "unavailable": "無法使用"
+      },
+      "map": {
+        "insert": "地圖",
+        "clickToAddPlace": "點擊新增地點",
+        "captionPlaceholder": "新增說明文字...",
+        "managePlaces": "管理地點"
+      },
+      "embeds": {
+        "map": "地圖",
+        "externalVideo": "外部影片",
+        "p5Sketch": "p5.js",
+        "threeScene": "Three.js",
+        "shader": "GLSL 著色器"
+      },
+      "runtimeLabels": {
+        "code": {
+          "edit": "編輯程式碼"
+        },
+        "p5": {
+          "title": "p5.js 草圖",
+          "edit": "編輯",
+          "source": "原始碼",
+          "preview": "預覽",
+          "run": "執行",
+          "stop": "停止",
+          "restart": "重新執行",
+          "copy": "複製",
+          "resetOriginal": "重設為原始版本",
+          "sourceInput": "p5.js 草圖 — 原始碼",
+          "copied": "已複製",
+          "running": "執行中",
+          "stopped": "已停止",
+          "error": "錯誤",
+          "resizeLeft": "從左側調整大小",
+          "resizeRight": "從右側調整大小",
+          "capabilities": "輸入與裝置",
+          "capabilitiesDescription": "此草圖只能使用已選取的功能。",
+          "suggestedByCode": "程式碼中正在使用",
+          "unsupportedCapability": "目前環境不可用",
+          "capabilityCamera": "攝影機",
+          "capabilityMicrophone": "麥克風",
+          "capabilityMotion": "動作感測器",
+          "capabilityMidi": "MIDI",
+          "capabilityGamepad": "遊戲手把",
+          "capabilitySerial": "序列埠",
+          "capabilityLocation": "位置資訊",
+          "capabilityBluetooth": "藍牙"
+        },
+        "three": {
+          "title": "Three.js 場景",
+          "edit": "編輯",
+          "source": "原始碼",
+          "preview": "預覽",
+          "run": "執行",
+          "stop": "停止",
+          "restart": "重新執行",
+          "copy": "複製",
+          "resetOriginal": "重設為原始版本",
+          "sourceInput": "Three.js 場景 — 原始碼",
+          "copied": "已複製",
+          "running": "執行中",
+          "stopped": "已停止",
+          "error": "錯誤",
+          "resizeLeft": "從左側調整大小",
+          "resizeRight": "從右側調整大小"
+        },
+        "externalVideo": {
+          "editLink": "編輯連結",
+          "showPreview": "顯示預覽",
+          "aspectRatio": "寬高比",
+          "automaticAspectRatio": "自動",
+          "alignLeft": "靠左對齊",
+          "alignCenter": "置中對齊",
+          "alignRight": "靠右對齊",
+          "youtubeTitle": "YouTube 影片",
+          "vimeoTitle": "Vimeo 影片"
+        },
+        "shader": {
+          "title": "GLSL 著色器",
+          "edit": "編輯",
+          "source": "原始碼",
+          "preview": "預覽",
+          "run": "執行",
+          "stop": "停止",
+          "restart": "重新執行",
+          "copy": "複製",
+          "copied": "已複製",
+          "running": "執行中",
+          "stopped": "已停止",
+          "error": "錯誤",
+          "resizeLeft": "從左側調整大小",
+          "resizeRight": "從右側調整大小",
+          "sourceInput": "GLSL 著色器 — 原始碼",
+          "availableInputs": "可用輸入",
+          "apiHint": "懸停",
+          "sharedStage": "共用宣告 · 無進入點"
+        }
+      },
+      "media": {
+        "browse": "選擇檔案",
+        "importFromUrl": "從 URL 匯入",
+        "embed": "插入",
+        "openLibrary": "檔案庫",
+        "uploadFiles": "上傳檔案",
+        "selectFile": "選取檔案"
+      }
+    }
+  },
+  "aiAssistant": {
+    "title": "AI 助理",
+    "modes": {
+      "modify": "修改",
+      "generate": "生成"
+    },
+    "placeholders": {
+      "modify": "我該如何修改這段文字",
+      "generate": "你想寫什麼"
+    },
+    "quickActions": {
+      "title": "快速操作",
+      "improve": "提升",
+      "fixSpelling": "修復拼字",
+      "simplify": "簡化",
+      "summarize": "總結",
+      "translateKorean": "韓國人",
+      "translateEnglish": "英語",
+      "continueWriting": "繼續寫作",
+      "brainstorm": "腦力激盪"
+    },
+    "sections": {
+      "original": "原文",
+      "result": "AI 結果"
+    },
+    "actions": {
+      "close": "關閉 AI 助理",
+      "submitPrompt": "提交自訂 AI 提示",
+      "stop": "停止",
+      "reject": "拒絕",
+      "retry": "重試",
+      "accept": "接受",
+      "insert": "插入"
+    },
+    "errors": {
+      "generic": "發生錯誤。請再試一次"
+    },
+    "notifications": {
+      "applyFailedTitle": "套用 AI 結果失敗",
+      "applyFailedMessage": "無法解析 AI 回應。請再試一次"
+    }
+  },
+  "mapControls": {
+    "managePlaces": "管理地點",
+    "managePlacesWithCount": "管理地點（{count}）",
+    "folders": {
+      "theme": "主題",
+      "camera": "相機",
+      "display": "展示",
+      "interaction": "交互作用"
+    },
+    "fields": {
+      "theme": "主題",
+      "colorScheme": "配色方案",
+      "areaLabels": "區域標籤",
+      "poiLabels": "POI 標籤",
+      "zoom": "飛漲",
+      "minZoom": "最小縮放",
+      "maxZoom": "最大縮放",
+      "pitch": "瀝青",
+      "bearing": "軸承",
+      "show3DBuildings": "3D 建築",
+      "autoRotate": "自動旋轉",
+      "rotateSpeed": "轉速",
+      "aspectRatio": "縱橫比",
+      "draggable": "可拖曳",
+      "zoomable": "可縮放",
+      "rotatable": "可旋轉",
+      "tiltable": "可傾斜",
+      "pinClickable": "引腳可點擊"
+    },
+    "themeOptions": {
+      "none": "沒有任何",
+      "systemSuffix": "（系統）"
+    },
+    "scheme": {
+      "auto": "汽車",
+      "light": "光",
+      "dark": "黑暗的"
+    },
+    "visibility": {
+      "inherit": "繼承",
+      "show": "展示",
+      "hide": "隱藏"
+    },
+    "settingsTitle": "地圖設定",
+    "copyValueTitle": "點擊複製{label}值"
+  },
+  "postMembers": {
+    "removeAria": "移除 {name}",
+    "roles": {
+      "owner": "擁有者"
+    },
+    "states": {
+      "memberFallback": "成員"
+    }
+  },
+  "workCredits": {
+    "divider": "或新增署名",
+    "empty": "目前沒有署名",
+    "ungroupedDrop": "拖曳到此處取消分組",
+    "actions": {
+      "createGroup": "建立分組",
+      "reorderGroup": "重新排序分組",
+      "reorderCredit": "重新排序署名",
+      "editGroup": "編輯分組",
+      "deleteGroup": "刪除分組",
+      "editRole": "編輯角色",
+      "removeCredit": "移除署名",
+      "saveEdit": "儲存變更",
+      "cancelEdit": "取消編輯"
+    },
+    "fields": {
+      "newGroupName": "新分組名稱",
+      "rolePlaceholder": "角色（例如作曲）",
+      "groupPlaceholder": "分組",
+      "creditNamePlaceholder": "輸入署名名稱",
+      "noGroup": "無分組"
+    },
+    "searchPlaceholders": {
+      "artist": "搜尋藝術家...",
+      "user": "搜尋使用者...",
+      "name": "輸入姓名..."
+    },
+    "emptyResults": {
+      "artist": "找不到藝術家",
+      "name": "找不到姓名"
+    },
+    "states": {
+      "unknownInitial": "？"
+    },
+    "notifications": {
+      "groupCreated": "分組已建立",
+      "groupDeleted": "分組已刪除",
+      "creditAdded": "署名已新增",
+      "creditRemoved": "署名已移除"
+    }
+  },
+  "metadataPanel": {
+    "title": "元數據",
+    "description": "從目前標題和摘要解決",
+    "healthChecks": "健康檢查",
+    "checks": {
+      "missingDescription": "摘要缺失，因此搜尋/社交描述將為空",
+      "longTitle": "有效標題很長，可能會在搜尋或社交預覽中被截斷",
+      "longDescription": "有效的描述很長，並且可能會在搜尋或社交預覽中被截斷"
+    },
+    "noWarnings": "沒有元資料警告",
+    "resolvedMetadata": "解析元數據"
+  },
+  "translationPanel": {
+    "description": "Review the source language and existing translation document for each locale.",
+    "actions": {
+      "expand": "擴張",
+      "collapse": "坍塌",
+      "regenerateAll": "Generate/regenerate all eligible locales",
+      "regenerateLocale": "再生",
+      "regenerateLocaleAria": "重新產生 {locale} 翻譯",
+      "generateLocale": "Generate",
+      "generateLocaleAria": "Generate {locale} translation"
+    },
+    "sourceLocale": {
+      "label": "原始語言",
+      "description": "這是用作該實體翻譯基礎的來源語言",
+      "confirm": {
+        "title": "變更來源語言",
+        "description": "Changing the source language updates only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically.",
+        "detail": "{locale} becomes the language of the editable source document. Existing target documents and translation jobs remain unchanged.",
+        "confirm": "更改並重新翻譯"
+      }
+    },
+    "activeEditLocale": {
+      "ariaLabel": "Switch content language. Current: {locale}",
+      "sourceOption": "{locale}（來源）",
+      "loading": "正在載入語言...",
+      "missingDescription": "No {locale} target document exists yet. Generate it from the translations panel.",
+      "bodyPreviewTitle": "{locale} 身體預覽",
+      "bodyPreviewDescription": "The existing translation document is shown with its structure and formatting.",
+      "bodyPreviewEmpty": "還沒有本地化的身體預覽",
+      "sharedStructureSectionDescription": "This section keeps shared layout or query settings from the source page; translated body content is read-only.",
+      "sectionFieldLabels": {
+        "caption": "標題",
+        "copyJson": "Scene copy"
+      }
+    },
+    "statuses": {
+      "missing": "遺失的",
+      "existing": "Existing"
+    },
+    "states": {
+      "loadFailed": "無法載入翻譯",
+      "missingTarget": "No target document yet.",
+      "sourceRow": "該語言環境是在主原始碼編輯器中編輯的",
+      "sourceEditorHint": "在主編輯器中編輯原始文字",
+      "updatedAt": "更新了{date}"
+    },
+    "notifications": {
+      "sourceLocaleUpdated": "來源語言已更新",
+      "sourceLocaleUpdateFailed": "更新來源語言失敗",
+      "allQueued": "所有語言環境的翻譯重新生成均已排隊",
+      "localeQueued": "翻譯重新產生已為此區域設定排隊",
+      "regenerateFailed": "無法對翻譯重新生成進行排隊"
+    }
+  },
+  "translationPanelMenu": {
+    "description": "Review source menu labels and existing translation documents.",
+    "sourceLocaleDescription": "The menu editor above owns structure, ordering, links, visibility, and source labels. Target translations below are read-only previews.",
+    "states": {
+      "sourcePreview": "來源標籤 ({locale})：{labels}",
+      "sourceEditorHint": "在主選單編輯器中編輯選單結構",
+      "missingTarget": "No labels are saved for this locale yet.",
+      "noItems": "還沒有本地化標籤",
+      "translationPreview": "Existing {locale} labels: {labels}"
+    },
+    "previewModal": {
+      "title": "{locale} menu translation preview",
+      "descriptions": {
+        "missing": "No public menu translation exists for this locale. The source is shown until an Admin generates it.",
+        "existing": "Shows the current public translated labels for this menu as read-only."
+      },
+      "fields": {
+        "linkType": "Link type",
+        "destination": "Destination",
+        "children": "Nested items",
+        "localizedLabelForLocale": "{locale} public label",
+        "sourceLabelForLocale": "{locale} source label",
+        "localizedLabelDescription": "The current translated label shown in public menus; it cannot be changed here.",
+        "sourceLabelDescription": "Comes from the source menu editor and cannot be changed here.",
+        "fixedLocaleLockedDescription": "This item is fixed to the {locale} label and is read-only."
+      },
+      "states": {
+        "detailUnavailable": "Detailed translated menu data could not be loaded.",
+        "noItems": "There are no menu items to preview."
+      }
+    }
+  },
+  "translationPanelEmail": {
+    "template": {
+      "description": "Manage the source language and existing translation documents for this email template.",
+      "sourceLocaleDescription": "來源模板控制主題、正文副本和執行時間變數名稱",
+      "states": {
+        "sourceEditorHint": "在主編輯器中編輯來源範本",
+        "noContent": "尚不存在翻譯的主題或正文"
+      }
+    },
+    "layout": {
+      "description": "Manage the source language and existing translation documents for this email layout.",
+      "sourceLocaleDescription": "來源佈局控制用於電子郵件呈現的包裝器 HTML 和結構佔位符名稱",
+      "states": {
+        "sourceEditorHint": "在主編輯器中編輯來源佈局",
+        "noContent": "尚不存在已翻譯的佈局 HTML"
+      }
+    }
+  },
+  "localizationNotice": {
+    "translated": {
+      "title": "Localized version",
+      "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
+    },
+    "fallback": {
+      "title": "後備語言",
+      "english": "要求的 {requested} 翻譯不可用，因此此頁面面顯示在 {displayed} 中",
+      "source": "要求的 {requested} 翻譯不可用，因此此頁面面顯示在原始 {source} 中"
+    },
+    "actions": {
+      "viewOriginal": "看原文 ({source})"
+    }
+  },
+  "contentLanguageMenu": {
+    "label": "查看翻譯",
+    "ariaLabel": "選擇查看語言，目前{locale}",
+    "sourceOption": "原件 ({locale})"
+  },
+  "translationOverviewPage": {
+    "actions": {
+      "openJobs": "開啟作業",
+      "openSettings": "開啟設定"
+    },
+    "stats": {
+      "totalLocales": "語言環境總數",
+      "sourceEntities": "來源實體",
+      "activeJobs": "工作正在進行中",
+      "existingEntries": "Existing translations"
+    },
+    "sections": {
+      "localeHealthTitle": "Translation state by locale",
+      "entityHealthTitle": "Translation state by entity type"
+    },
+    "columns": {
+      "policy": "政策",
+      "lastTargetUpdate": "Last target update",
+      "entity": "實體",
+      "existing": "Existing translations",
+      "sources": "來源",
+      "lastSourceUpdate": "最後一次來源更新"
+    },
+    "states": {
+      "loadFailed": "無法載入翻譯概述",
+      "emptyEntityHealth": "尚無實體健康數據"
+    },
+    "policy": {
+      "internal": "僅限內部",
+      "machineDisabled": "機器已禁用"
+    }
+  },
+  "translationJobsPage": {
+    "title": "翻譯工作",
+    "stats": {
+      "active": "{count} 正在進行中"
+    },
+    "columns": {
+      "entity": "實體"
+    },
+    "locale": {
+      "fromTo": "從 {source} 到 {target}"
+    },
+    "states": {
+      "loadFailed": "無法載入翻譯作業",
+      "empty": "還沒有翻譯工作"
+    },
+    "notifications": {
+      "cancelled": "翻譯工作已取消",
+      "cancelFailed": "無法取消翻譯作業"
+    }
+  },
+  "translationSettingsPage": {
+    "title": "翻譯設定",
+    "description": "Manage the default source language and automatic translation providers. An Admin explicitly starts translation generation from each editor.",
+    "actions": {
+      "jobs": "作業",
+      "save": "儲存設定",
+      "addProvider": "新增提供者",
+      "editProvider": "編輯提供者",
+      "deleteProvider": "刪除提供者",
+      "createProvider": "建立提供者"
+    },
+    "sections": {
+      "runtime": "Source defaults",
+      "runtimeDescription": "Set only the language used when a source language has not been established. Source changes never start translation generation automatically.",
+      "providers": "翻譯提供者",
+      "providersDescription": "管理機器翻譯提供者。至少有一個啟用且憑證有效的提供者後，翻譯生成才會啟用。"
+    },
+    "fields": {
+      "defaultLocale": {
+        "label": "預設區域設定",
+        "description": "當尚未設定來源區域設定以及請求未解析為支援的內容區域設定時使用"
+      },
+      "protectedTerms": {
+        "label": "Protected terms",
+        "description": "Exact case-sensitive spellings that translation generation must keep unchanged. No terms are learned or suggested automatically.",
+        "placeholder": "Add a protected term",
+        "examples": "Examples: Photoshop, React Native"
+      },
+      "providerName": {
+        "label": "提供者名稱"
+      },
+      "providerType": {
+        "label": "提供者類型"
+      },
+      "providerPriority": {
+        "label": "優先順序",
+        "description": "多個提供者啟用時，優先順序數值較低者會先執行。"
+      },
+      "providerActive": {
+        "label": "啟用",
+        "shortLabel": "啟用",
+        "description": "只有啟用的提供者可用於翻譯生成。"
+      },
+      "deeplApiKey": {
+        "label": "DeepL API 金鑰",
+        "descriptionEdit": "留空以保留已儲存的金鑰。"
+      },
+      "deeplApiBaseUrl": {
+        "label": "DeepL API 基礎 URL",
+        "description": "除非使用代理或專用端點，否則請使用預設值。"
+      },
+      "llmPreset": {
+        "label": "LLM 預設"
+      },
+      "llmApiKey": {
+        "label": "LLM API 金鑰",
+        "descriptionEdit": "留空可保留已儲存的金鑰。"
+      },
+      "llmApiBaseUrl": {
+        "label": "LLM API 基礎 URL",
+        "description": "OpenAI 相容端點必填；Gemini 可留空。"
+      },
+      "llmModel": {
+        "label": "模型",
+        "description": "用於翻譯生成的模型 ID。"
+      },
+      "llmInputPrice": {
+        "label": "輸入 USD / 100 萬 tokens",
+        "description": "用於 provider 比較和成本規劃的選填估算。"
+      },
+      "llmOutputPrice": {
+        "label": "輸出 USD / 100 萬 tokens",
+        "description": "用於 provider 比較和成本規劃的選填估算。"
+      },
+      "llmMaxContextTokens": {
+        "label": "最大上下文 tokens",
+        "description": "大型翻譯批次路由的選填提示。"
+      },
+      "llmMaxOutputTokens": {
+        "label": "最大輸出 tokens",
+        "description": "傳給相容 provider 的選填請求上限。"
+      },
+      "llmTemperature": {
+        "label": "Temperature",
+        "description": "較低值會讓結構化翻譯輸出更穩定。"
+      },
+      "llmSupportsJsonMode": {
+        "label": "結構化 JSON 模式",
+        "description": "當 provider 支援 JSON schema 或 JSON mode 回應時啟用。"
+      }
+    },
+    "states": {
+      "loadFailed": "無法載入翻譯設定"
+    },
+    "notifications": {
+      "saved": "已儲存翻譯設定",
+      "saveFailed": "無法儲存翻譯設定",
+      "providerCreated": "已建立翻譯提供者。",
+      "providerUpdated": "已更新翻譯提供者。",
+      "providerDeleted": "已刪除翻譯提供者。",
+      "providerSaveFailed": "儲存翻譯提供者失敗。",
+      "providerToggleFailed": "更新提供者狀態失敗。",
+      "providerDeleteFailed": "刪除翻譯提供者失敗。"
+    },
+    "generation": {
+      "enabled": "生成已啟用",
+      "disabled": "生成已停用"
+    },
+    "providerTypes": {
+      "deepl": "DeepL",
+      "llm": "LLM"
+    },
+    "providerStates": {
+      "empty": "尚未設定翻譯提供者。",
+      "active": "啟用",
+      "inactive": "停用",
+      "priority": "優先順序 {priority}",
+      "modelUnset": "未設定模型"
+    },
+    "validation": {
+      "providerNameRequired": "必須填寫提供者名稱。",
+      "providerApiKeyRequired": "此提供者需要 API 金鑰。",
+      "providerModelRequired": "LLM provider 需要模型。",
+      "providerBaseUrlRequired": "OpenAI 相容 LLM provider 需要 API 基礎 URL。"
+    },
+    "modal": {
+      "createProviderTitle": "建立翻譯提供者",
+      "editProviderTitle": "編輯翻譯提供者",
+      "deleteProviderTitle": "刪除翻譯提供者",
+      "deleteProviderMessage": "刪除 {name}？如果沒有剩餘啟用的提供者，翻譯生成將被停用。",
+      "credentialsSection": "憑證"
+    },
+    "llmPresets": {
+      "gemini": "Gemini",
+      "openaiCompatible": "OpenAI 相容"
+    }
+  },
+  "summaryField": {
+    "description": "用於預告片、清單、搜尋、分享和人工智慧可讀的描述",
+    "status": {
+      "idle": "就緒",
+      "generating": "產生",
+      "applying": "正在申請",
+      "stale": "產生結果已過期",
+      "applied": "已套用",
+      "ready": "待套用"
+    },
+    "actions": {
+      "generate": "產生摘要",
+      "apply": "應用總結"
+    },
+    "placeholders": {
+      "summary": "新增一個簡潔的摘要..."
+    },
+    "tooltips": {
+      "generatingNamed": "{name} 正在產生摘要",
+      "applyingNamed": "{name} 正在套用產生的摘要",
+      "readyNamed": "{name}已準備好產生的摘要"
+    },
+    "feedback": {
+      "failedDefault": "無法處理摘要產生",
+      "invalidJson": "AI 回應無法解析為摘要 JSON",
+      "alreadyRunning": "摘要生成已在運行",
+      "applyingGenerated": "應用產生的摘要",
+      "resetOlderSession": "已重設舊工作階段遺留的產生摘要狀態。",
+      "resetUnrestorable": "已重設無法還原的舊產生摘要狀態。",
+      "missingJobPayload": "摘要產生未返回作業有效負載",
+      "missingSuggestionPayload": "摘要產生已完成，無需建議負載",
+      "staleSuggestion": "這個建議已經過時了。在應用之前重新生成或駁回它",
+      "unableToApplyNow": "目前無法套用產生的摘要",
+      "applyFailed": "無法套用產生的摘要",
+      "applied": "應用產生的摘要",
+      "appliedJobUnresolved": "摘要已套用，但 AI 作業無法自動解決",
+      "dismissedJobUnresolved": "摘要建議已在本機關閉，但無法自動完成 AI job 狀態處理。",
+      "readyBeforeApplying": "請先套用或關閉產生的摘要。",
+      "readyToApply": "產生的摘要可以套用了。"
+    },
+    "ready": {
+      "title": "產生的摘要",
+      "suggestedSummary": "建議摘要",
+      "anotherCollaborator": "其他協作者",
+      "anotherCollaboratorFallback": "其他協作者已準備好產生的摘要。",
+      "anotherCollaboratorNamed": "{name}已準備好產生的摘要。"
+    }
+  },
+  "userProfile": {
+    "title": "使用者資料",
+    "joined": "加入於",
+    "banReason": "封鎖原因",
+    "actions": {
+      "ban": "封鎖",
+      "unban": "解除封鎖"
+    },
+    "states": {
+      "banned": "已封鎖"
+    },
+    "sections": {
+      "publishedPosts": "已發佈文章"
+    },
+    "empty": {
+      "noPublishedPosts": "目前沒有已發佈文章"
+    },
+    "modals": {
+      "ban": {
+        "title": "封鎖使用者",
+        "description": "要禁止的使用者：<strong>{name}</strong>",
+        "reasonLabel": "封鎖原因",
+        "reasonPlaceholder": "輸入禁止原因"
+      },
+      "role": {
+        "confirm": "更新角色"
+      },
+      "delete": {
+        "title": "刪除使用者",
+        "description": "要刪除的使用者：<strong>{name}</strong>",
+        "warning": "此操作無法復原"
+      },
+      "create": {
+        "title": "建立使用者"
+      },
+      "newsletterUnsubscribe": {
+        "title": "取消電子報訂閱",
+        "description": "取消 {name} 的電子報訂閱？"
+      }
+    },
+    "notifications": {
+      "roleUpdated": "角色已更新",
+      "userBanned": "使用者已封鎖",
+      "userUnbanned": "使用者已解除封鎖",
+      "userDeleted": "使用者已刪除",
+      "userCreated": "使用者已建立"
+    }
+  },
+  "adminUserDetail": {
+    "labels": {
+      "memberId": "成員 ID (UUID)"
+    },
+    "actions": {
+      "copyUuid": "複製UUID"
+    },
+    "alerts": {
+      "bannedTitle": "使用者被封鎖",
+      "reasonLabel": "原因",
+      "expiresLabel": "過期"
+    },
+    "placeholders": {
+      "name": "使用者名稱",
+      "bio": "告訴我們有關該用戶的信息"
+    },
+    "durations": {
+      "oneDay": "1 天",
+      "sevenDays": "7天",
+      "thirtyDays": "30天",
+      "permanent": "永恆的"
+    },
+    "modal": {
+      "title": "封鎖用戶",
+      "reasonLabel": "封鎖原因",
+      "reasonPlaceholder": "輸入封鎖原因"
+    },
+    "notifications": {
+      "updated": "使用者更新",
+      "banned": "使用者被封鎖",
+      "unbanned": "用戶被解封",
+      "userIdCopied": "已複製使用者 ID",
+      "userIdCopyFailed": "複製使用者 ID 失敗",
+      "emailSuppressionReleased": "已解除郵件傳送封鎖",
+      "mainEmailUpdated": "主要電子郵件已更新",
+      "ssoProviderRemoved": "已移除 SSO 提供者"
+    },
+    "auth": {
+      "emptyEmail": "無電子郵件",
+      "delivery": {
+        "title": "接收電子郵件",
+        "description": "活動、通知和帳戶郵件會傳送到選定的主要電子郵件。",
+        "changePlaceholder": "選擇已驗證信箱",
+        "changeHelp": "變更選擇後會立即儲存。"
+      },
+      "providers": {
+        "title": "已連接的 SSO 提供者",
+        "description": "與此帳戶連結的 OAuth 提供者。",
+        "empty": "沒有已連接的 SSO 提供者。",
+        "remove": "移除 SSO 提供者"
+      },
+      "sources": {
+        "current": "目前信箱",
+        "emailCode": "電子郵件登入"
+      },
+      "ban": {
+        "title": "封鎖狀態",
+        "description": "顯示此帳戶是否被封鎖以及是否可以保留作用中的工作階段。",
+        "record": "封鎖狀態",
+        "identityState": "Identity 狀態",
+        "metadataBanned": "已封鎖",
+        "metadataClear": "未封鎖",
+        "unknownState": "未知狀態"
+      }
+    },
+    "emailSuppression": {
+      "title": "郵件傳送已被封鎖",
+      "status": "已封鎖",
+      "description": "在地址變更或管理員解除之前，傳送到此地址的郵件會被略過。",
+      "reason": "原因",
+      "lastError": "最近錯誤",
+      "suppressedAt": "封鎖時間",
+      "release": "解除郵件封鎖"
+    },
+    "emailVerification": {
+      "verified": "電子郵件已驗證",
+      "unverified": "電子郵件未驗證"
+    }
+  },
+  "adminSettings": {
+    "site": {
+      "title": "站點設定",
+      "notifications": {
+        "saved": "設定已儲存",
+        "noChanges": "沒有要儲存的更改"
+      },
+      "validation": {
+        "invalidUrl": "網址格式無效",
+        "invalidEmail": "電子郵件格式無效",
+        "invalidHexColor": "十六進位顏色格式無效",
+        "invalidGoogleAnalyticsId": "Google Analytics ID 格式無效"
+      },
+      "sections": {
+        "general": {
+          "title": "一般的",
+          "contactEmails": "聯絡信箱",
+          "socialLinks": "社群連結",
+          "socialLinksDescription": "新增您的社群媒體資料。這些將顯示在網站頁面腳中"
+        },
+        "branding": {
+          "title": "品牌推廣"
+        },
+        "contentDisplay": {
+          "title": "內容與展示",
+          "navigation": "導航",
+          "navigationDescription": "選擇在每個位置顯示哪些選單"
+        },
+        "seo": {
+          "title": "搜尋引擎優化"
+        }
+      },
+      "fields": {
+        "siteTitle": {
+          "label": "網站標題",
+          "description": "您網站的名稱"
+        },
+        "companyName": {
+          "description": "法定企業名稱",
+          "placeholder": "艾克米公司"
+        },
+        "companyAddress": {
+          "description": "營業地址",
+          "placeholder": "123 Main St, 城市, 國家"
+        },
+        "taxId": {
+          "label": "稅號",
+          "description": "商業登記號碼",
+          "placeholder": "123-45-67890"
+        },
+        "legalEmail": {
+          "label": "法律信箱",
+          "description": "法律查詢（條款、隱私權等）",
+          "placeholder": "legal@example.com"
+        },
+        "supportEmail": {
+          "label": "支援電子郵件",
+          "description": "為了客戶支援",
+          "placeholder": "support@example.com"
+        },
+        "privacyEmail": {
+          "label": "隱私權電子郵件",
+          "description": "對於與隱私相關的請求（GDPR、資料刪除等）",
+          "placeholder": "隱私@example.com"
+        },
+        "primaryColor": {
+          "label": "品牌顏色",
+          "description": "用於網站識別、中繼資料和產生分享圖片的品牌顏色"
+        },
+        "defaultCommentsEnabled": {
+          "label": "預設啟用評論",
+          "description": "新貼文預設啟用評論"
+        },
+        "homepage": {
+          "label": "首頁面",
+          "description": "選擇一個頁面面用作主頁面",
+          "placeholder": "選擇一個頁面面"
+        },
+        "menuPlaceholder": "選擇選單",
+        "headerMenu": {
+          "label": "標題選單",
+          "description": "主導航顯示在網站徽標下方"
+        },
+        "secondaryLinks": {
+          "label": "二級連結",
+          "description": "連結顯示在標題頂部"
+        },
+        "footerMenu": {
+          "label": "頁面尾選單",
+          "description": "網站頁面腳中顯示的連結"
+        },
+        "avatarDropdownMenu": {
+          "label": "頭像下拉選單",
+          "description": "登入用戶的用戶頭像下拉列表中顯示的鏈接"
+        },
+        "siteDescription": {
+          "label": "站點描述",
+          "description": "用於 SEO 和社交共享的網站的簡短描述"
+        },
+        "googleAnalyticsId": {
+          "label": "Google分析 ID",
+          "description": "您的 Google Analytics（分析）追蹤 ID",
+          "placeholder": "G-XXXXXXXXX"
+        }
+      },
+      "assets": {
+        "errorMessage": "{label} 必須是 {mimeTypes}（最大 {maxSize}）",
+        "uploaded": "{label} 已上傳",
+        "removed": "{label} 已刪除",
+        "logo_light": {
+          "label": "淺色網站標誌",
+          "description": "用於淺色背景，並作為預設網站標誌。"
+        },
+        "logo_dark": {
+          "label": "深色網站標誌",
+          "description": "用於深色背景。留空時會使用淺色標誌。"
+        },
+        "logo_email": {
+          "label": "電子郵件標誌",
+          "description": "用於電子郵件範本和佈局。為了客戶端相容性，建議使用 PNG"
+        },
+        "favicon": {
+          "label": "網站圖示",
+          "description": "用於瀏覽器選項卡和書籤。"
+        },
+        "loader": {
+          "label": "網站載入器",
+          "description": "網站載入時顯示"
+        },
+        "site_og_background": {
+          "label": "首頁 OG 背景"
+        },
+        "privacy_og_background": {
+          "label": "隱私權政策 OG 背景"
+        },
+        "terms_og_background": {
+          "label": "服務條款 OG 背景"
+        }
+      }
+    },
+    "mail": {
+      "entity": "郵件適配器",
+      "title": "郵件適配器",
+      "description": "配置電子郵件傳送適配器。活動適配器在觸發時獨立已傳送電子郵件，並且每個適配器都會發出自己的完成事件",
+      "adapterTypes": {
+        "logging": "記錄（無操作）",
+        "ses": "AWSSES",
+        "smtp": "郵件傳輸協定"
+      },
+      "badges": {
+        "logging": "記錄",
+        "ses": "SES",
+        "smtp": "郵件傳輸協定"
+      },
+      "actions": {
+        "addAdapter": "新增適配器"
+      },
+      "sections": {
+        "adapters": {
+          "title": "配置的適配器",
+          "description": "當您需要並行交付或分階段故障轉移測試時，請使用多個適配器"
+        }
+      },
+      "empty": "未配置適配器",
+      "emptyDescription": "建立您的第一個郵件適配器以開始從系統已傳送電子郵件",
+      "validation": {
+        "fromEmailRequired": "需要來自電子郵件",
+        "invalidEmail": "電子郵件無效",
+        "hostRequired": "需要主機"
+      },
+      "notifications": {
+        "created": "適配器已建立",
+        "updated": "適配器已更新",
+        "deleted": "適配器已刪除",
+        "testFailed": "測試失敗：{error}",
+        "testSent": "測試郵件已傳送成功",
+        "configTestFailed": "配置測試失敗：{error}",
+        "configTestPassed": "配置測試通過",
+        "enterTestEmail": "先輸入測試郵箱",
+        "runConfigTestBeforeCreate": "建立之前運行成功的配置測試",
+        "sesSecretRequired": "儲存設定變更需要 SES 秘密存取金鑰",
+        "smtpPasswordRequired": "需要 SMTP 密碼才能儲存設定更改"
+      },
+      "fields": {
+        "namePlaceholder": "我的 SES 適配器",
+        "priority": {
+          "description": "首先嘗試較低的數字"
+        },
+        "active": {
+          "label": "活躍",
+          "description": "啟用此適配器"
+        }
+      },
+      "config": {
+        "logging": {
+          "description": "日誌記錄適配器不需要配置。電子郵件已記錄但未已傳送"
+        },
+        "ses": {
+          "sectionTitle": "AWS SES 配置",
+          "region": {
+            "placeholder": "美國東部1"
+          },
+          "accessKeyId": {
+            "label": "存取密鑰 ID",
+            "placeholder": "秋亞..."
+          },
+          "secretAccessKey": {
+            "label": "秘密存取密鑰",
+            "placeholder": "輸入秘密存取密鑰",
+            "descriptionEdit": "儲存 SES 配置變更時需要"
+          },
+          "fromName": {
+            "placeholder": "我的網站"
+          }
+        },
+        "smtp": {
+          "sectionTitle": "SMTP 配置",
+          "host": {
+            "label": "主持人",
+            "placeholder": "smtp.example.com"
+          },
+          "port": {
+            "label": "港口",
+            "placeholder": "第587章"
+          },
+          "secure": {
+            "label": "使用 TLS/SSL",
+            "description": "為連接埠 465 啟用此功能"
+          },
+          "user": {
+            "label": "使用者名稱",
+            "placeholder": "使用者@example.com"
+          },
+          "password": {
+            "descriptionEdit": "儲存 SMTP 配置變更時需要"
+          },
+          "fromName": {
+            "placeholder": "我的網站"
+          }
+        }
+      },
+      "preSaveTest": {
+        "title": "預先儲存配置測試",
+        "emailLabel": "測試電子郵件",
+        "action": "測試配置",
+        "ready": "配置已驗證。您可以建立此適配器",
+        "pending": "運行成功的配置測試以啟用建立"
+      },
+      "states": {
+        "saving": "儲存適配器。後端驗證在應用變更之前運行"
+      },
+      "modal": {
+        "createTitle": "建立郵件適配器",
+        "editTitle": "編輯郵件適配器"
+      },
+      "row": {
+        "priorityValue": "優先權 {value}",
+        "enableAdapter": "啟用適配器",
+        "testEmailLabel": "已傳送測試電子郵件",
+        "sendTestEmail": "已傳送測試"
+      },
+      "confirmDelete": "刪除這個適配器"
+    }
+  },
+  "formAccess": {
+    "states": {
+      "formNotFound": "找不到表單",
+      "unavailable": "無法存取表單"
+    },
+    "notPublic": {
+      "title": "私人表單",
+      "description": "此表單無法透過公開 URL 存取"
+    },
+    "passwordRequired": {
+      "title": "需要密碼",
+      "description": "此表單需要密碼才能查看",
+      "action": "輸入密碼"
+    },
+    "alreadySubmitted": {
+      "title": "已提交",
+      "description": "您已經提交了此表單"
+    },
+    "notYetOpen": {
+      "title": "表單尚未開放",
+      "description": "該表單尚未可供提交"
+    },
+    "closed": {
+      "title": "表單已關閉",
+      "description": "此表單不再接受提交"
+    },
+    "maxSubmissionsReached": {
+      "title": "已達到提交限制",
+      "description": "此表單已達到提交的最大數量"
+    },
+    "authRequired": {
+      "title": "需要登入",
+      "description": "您必須登入才能存取此表單",
+      "action": "前往登入"
+    },
+    "roleNotAllowed": {
+      "title": "拒絕訪問",
+      "description": "您無權存取此表單"
+    },
+    "serverError": {
+      "title": "伺服器錯誤",
+      "description": "伺服器發生錯誤。請稍後再試"
+    }
+  },
+  "formRenderer": {
+    "progressAria": "表單進度：{current}/{total} 步",
+    "preview": {
+      "title": "表單提交預覽",
+      "description": "以下是將要提交的資料預覽："
+    }
+  },
+  "formSuccessPage": {
+    "metadata": {
+      "fallbackTitle": "表單已提交",
+      "title": "{formTitle} - 已提交"
+    },
+    "title": "謝謝"
+  },
+  "formPasswordPage": {
+    "metadata": {
+      "fallbackTitle": "表單訪問",
+      "description": "輸入密碼以存取此表單"
+    },
+    "title": "密碼保護",
+    "description": "此表單需要密碼才能存取",
+    "errors": {
+      "passwordRequired": "密碼為必填項",
+      "incorrectPassword": "密碼不正確。"
+    }
+  },
+  "formDashboardPage": {
+    "metadata": {
+      "fallbackTitle": "表單儀表板",
+      "title": "{formTitle} - 儀表板",
+      "description": "表單提交統計與分析"
+    },
+    "states": {
+      "invalidLink": "儀表板連結無效"
+    },
+    "stats": {
+      "total": "總計"
+    },
+    "fieldStatistics": "欄位統計"
+  },
+  "embeddedForm": {
+    "states": {
+      "noFormSelected": "未選擇表單"
+    },
+    "password": {
+      "description": "輸入表單密碼以查看此嵌入式表單",
+      "requiredTitle": "需要密碼",
+      "requiredMessage": "請輸入密碼",
+      "incorrect": "密碼不正確。"
+    },
+    "submission": {
+      "failedTitle": "提交失敗",
+      "unknownError": "未知錯誤"
+    }
+  },
+  "mapView": {
+    "loading": "展開地圖集..",
+    "themeUnavailable": "無法載入地圖主題。"
+  },
+  "publicTables": {
+    "workColumns": {
+      "period": "期間",
+      "present": "目前"
+    }
+  },
+  "programEventAdmin": {
+    "list": {
+      "search": "搜尋",
+      "starts": "開始",
+      "empty": "找不到活動。"
+    },
+    "poster": {
+      "main": "主圖",
+      "drag": "拖曳海報",
+      "noPreview": "無預覽",
+      "remove": "移除",
+      "reorderFailed": "海報重新排序失敗"
+    },
+    "editor": {
+      "details": "活動詳情",
+      "series": "活動系列",
+      "seriesOrder": "系列順序",
+      "timezone": "時區",
+      "startsAt": "開始時間",
+      "endsAt": "結束時間",
+      "allDay": "全天",
+      "locationMode": "地點模式",
+      "ticketUrl": "票務 URL",
+      "streamUrl": "串流 URL",
+      "externalUrl": "外部 URL",
+      "participants": "參與者",
+      "textCredits": "文字署名",
+      "textCreditsDescription": "每行一個署名。需要角色時使用「角色: 姓名」格式。"
+    },
+    "locationModes": {
+      "mapPlace": "場地",
+      "online": "線上",
+      "hybrid": "混合",
+      "tba": "待定"
+    },
+    "public": {
+      "series": "系列",
+      "tickets": "票務",
+      "stream": "串流",
+      "link": "連結",
+      "participants": "參與者",
+      "empty": "找不到活動。",
+      "date": "日期",
+      "credits": "署名"
+    },
+    "series": {
+      "empty": "找不到活動系列。"
+    },
+    "types": {
+      "title": "活動類型",
+      "sortOrder": "排序",
+      "requiresPlace": "必須填寫場地",
+      "requiresStreamUrl": "必須填寫串流 URL",
+      "deleteTitle": "刪除活動類型",
+      "deleteMessage": "只有未被任何活動使用的類型才能刪除。"
+    }
+  },
+  "tools": {
+    "youtubeAudio": {
+      "title": "YouTube 音訊",
+      "description": "載入已驗證的 YouTube 音訊來源。預設輸出為 MP3，也可選擇其他格式。轉換會在此瀏覽器中完成。",
+      "sourceTitle": "YouTube 來源",
+      "sourceDescription": "伺服器會取得短期有效的音訊來源。轉換程序與完成的檔案都會保留在您的瀏覽器中。",
+      "urlLabel": "YouTube 網址",
+      "urlDescription": "貼上 youtube.com 或 youtu.be 影片網址。",
+      "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+      "resolve": "載入音訊",
+      "resolving": "正在載入音訊",
+      "ready": "來源已就緒",
+      "clear": "清除來源",
+      "metadataTitle": "YouTube 音訊",
+      "metadataDescription": "在瀏覽器中轉換已驗證的 YouTube 來源音訊。",
+      "errors": {
+        "INTERNAL_ERROR": "無法載入音訊來源。請再試一次。",
+        "INVALID_REQUEST": "請輸入有效的 YouTube 影片網址。",
+        "INVALID_UPSTREAM_RESPONSE": "YouTube 傳回了非預期的音訊來源。請嘗試其他影片。",
+        "REQUEST_ABORTED": "要求已取消。",
+        "SOURCE_EXPIRED": "此音訊來源已過期。請重新載入網址。",
+        "SOURCE_NOT_FOUND": "此音訊來源已無法使用。請重新載入網址。",
+        "UNAUTHORIZED": "請重新登入以使用此工具。",
+        "UNSUPPORTED_VIDEO": "此影片未提供受支援的有限長度音訊來源。",
+        "UPSTREAM_FAILURE": "目前無法載入 YouTube 音訊。請再試一次。"
+      }
+    },
+    "transcode": {
+      "title": "音訊轉碼器",
+      "targetIdle": "等待中",
+      "targetChecking": "檢查中",
+      "targetReady": "已就緒",
+      "targetError": "無法使用",
+      "dropTitle": "拖放或選取音訊檔案",
+      "dropDescription": "最多 10 個 · 不支援資料夾 · 僅在此裝置處理",
+      "chooseFiles": "選取音訊檔案",
+      "supportedFormatsLabel": "支援的格式",
+      "supportedFormats": "支援：CAF、AIFF/AIFC、WAV、FLAC、MP3、AAC/M4A、Ogg/Opus，以及 MP4、MOV、MKV/WebM 或 TS 中的音訊。逐一檔案檢查。",
+      "filesSelected": "檔案",
+      "outputSettings": "輸出設定",
+      "format": "格式",
+      "sampleRate": "取樣率",
+      "bitrate": "位元率",
+      "bitDepth": "位元深度",
+      "codec": "編解碼器",
+      "sampleFormat": "取樣格式",
+      "float": "浮點",
+      "integer": "整數 PCM",
+      "sourcePcmFloat": "{bitDepth} 位元浮點",
+      "sourcePcmInteger": "{bitDepth} 位元整數",
+      "sourcePcmSignedInteger": "{bitDepth} 位元有號整數",
+      "sourcePcmUnsignedInteger": "{bitDepth} 位元無號整數",
+      "automatic": "自動",
+      "unknownAudio": "音訊",
+      "channelCount": "{count, plural, other {# 個聲道}}",
+      "queue": "轉換佇列",
+      "convert": "轉換",
+      "cancelAll": "全部取消",
+      "clear": "清除",
+      "download": "下載",
+      "retry": "重試",
+      "cancel": "取消",
+      "remove": "移除",
+      "sourceValue": "來源檔案 ({value})",
+      "mono": "單聲道",
+      "stereo": "立體聲",
+      "targetWaitingForFiles": "新增支援的音訊檔案後，將檢查所選輸出格式。",
+      "targetCheckingMessage": "正在檢查此瀏覽器是否支援所選輸出格式。",
+      "targetReadyMessage": "此瀏覽器支援所選輸出格式。",
+      "engineLoading": "正在載入 {asset} 音訊引擎。",
+      "engineVerifying": "正在驗證 {asset} 音訊引擎。",
+      "engineLoadFailed": "無法載入 {asset} 音訊引擎。",
+      "capacityExceeded": "有 {count, number} 個檔案未新增。佇列最多可容納 {max, number} 個檔案。",
+      "statusInspectionQueued": "等待檢查",
+      "statusInspecting": "正在檢查",
+      "statusReady": "已就緒",
+      "statusQueued": "已加入佇列",
+      "statusConverting": "正在轉換",
+      "statusComplete": "已完成",
+      "statusUnsupported": "不支援",
+      "statusError": "錯誤",
+      "statusCancelled": "已取消",
+      "unsupportedInput": "這不是支援的音訊檔案。",
+      "unsupportedCodec": "此瀏覽器無法解碼該檔案中的音訊編解碼器。",
+      "inspectionFailed": "無法檢查檔案，請再試一次。",
+      "inspectionInconclusive": "瀏覽器無法在安全讀取限制內識別此音訊。請嘗試其他檔案或格式。",
+      "outputUnsupported": "此瀏覽器不支援所選輸出設定。",
+      "outputProbeFailed": "無法檢查輸出支援情況，請再試一次。",
+      "conversionFailed": "音訊轉換失敗。",
+      "conversionStorageLimitExceeded": "此瀏覽器的本機暫存空間不足以儲存預期的輸出。請選擇較小或壓縮格式，或改用支援大型本機輸出的瀏覽器重試。",
+      "conversionTargetSizeLimitExceeded": "所選輸出格式無法表示這麼大的檔案。請選擇其他格式，或降低取樣率、位元深度或聲道數。",
+      "cancelledMessage": "轉換已取消。",
+      "sourceSummary": "{container} · {sampleRate} · {channels} · {bitDepth}",
+      "outputSummary": "{preset} · {size}",
+      "progressLabel": "{phase} · {progress, number}%",
+      "phasePrepare": "準備中",
+      "phaseDecode": "解碼中",
+      "phaseEncode": "編碼中",
+      "phaseFinalize": "完成處理中",
+      "bytes": "{count, number} 位元組",
+      "storageOpfs": "瀏覽器私人儲存空間",
+      "storageMemory": "瀏覽器記憶體",
+      "metadataTitle": "音訊轉碼器",
+      "metadataDescription": "在瀏覽器中轉換音訊。檔案不會離開您的裝置。",
+      "outputSettingsHelper": "聲道維持不變。自動模式會為每個檔案選擇相容的取樣率。",
+      "processingDetails": "處理詳情",
+      "processingDetailsDescription": "使用均衡品質重新取樣。整數輸出使用抖動。大型 WAV 檔案使用 RF64。",
+      "bitDepthContainerEffective": "{containerBits} 位元容器 / {effectiveBits} 位元有效精度",
+      "constantBitrate": "CBR",
+      "variableBitrate": "VBR",
+      "preserveSource": "保留來源取樣率",
+      "unavailable": "無法使用",
+      "sampleRateAvailableFor": "{total, number} 個檔案中有 {supported, number} 個可用",
+      "sampleRateResetAutomatic": "先前的取樣率不適用於目前輸出設定，已改為自動。",
+      "targetAvailability": "可轉換 {available, number} 個檔案；{unavailable, number} 個檔案在目前設定下仍無法使用。",
+      "statusQueuedAvailability": "已將 {converting, number} 個檔案加入轉換佇列；{unavailable, number} 個仍無法使用。",
+      "statusConvertingAvailability": "正在轉換 {converting, number} 個檔案；{unavailable, number} 個仍無法使用。",
+      "statusCompleteAvailability": "已轉換 {converted, number} 個檔案；{unavailable, number} 個仍無法使用。",
+      "statusBatchResult": "執行完成：{eligible, number} 個符合條件，嘗試 {attempted, number} 個，成功 {succeeded, number} 個，失敗 {failed, number} 個，無法使用 {unavailable, number} 個。",
+      "outputEngineUnavailable": "無法啟動 {preset} 的執行階段引擎。請檢查網路或資源政策後重試。",
+      "outputChannelsUnsupported": "此輸出支援 {minimum, number}–{maximum, number} 個來源聲道，但此檔案有 {actual, number} 個。聲道會保持原樣，不會向下混音。",
+      "sourceInspectionMissing": "無法識別來源聲道數或取樣率。請選擇可讀取音訊中繼資料的檔案。",
+      "outputConfigurationUnavailable": "所選格式和編碼設定無法組成可用的輸出配置。",
+      "preserveSourceRateUnsupported": "此輸出無法保留來源取樣率 {sourceRate}。允許的取樣率：{allowed}。",
+      "sourceResamplingRateUnsupported": "{sourceRate} 的來源超出重新取樣範圍（{minimum}–{maximum}），只能直通至相容輸出。",
+      "targetResamplingRateUnsupported": "所選目標 {targetRate} 超出重新取樣範圍（{minimum}–{maximum}）。",
+      "automaticRateUnavailable": "自動模式無法為 {sourceRate} 的來源選擇有效取樣率。允許的輸出取樣率：{allowed}。",
+      "presetRateUnsupported": "此輸出不支援 {targetRate}。允許的取樣率：{allowed}。",
+      "notices": "開放原始碼授權"
+    }
+  },
+  "myMetadata": {
+    "description": "{siteName} 上的 {title} 頁面"
+  },
+  "fileManager": {
+    "title": "檔案",
+    "description": "在整個網站上傳、整理、檢查並重複使用檔案。",
+    "root": "檔案",
+    "search": "搜尋檔案與資料夾",
+    "searchScope": {
+      "label": "搜尋",
+      "currentFolder": "目前資料夾",
+      "allFiles": "所有檔案"
+    },
+    "empty": "找不到檔案或資料夾。",
+    "folderNotFound": "此資料夾已不存在。",
+    "inUse": "使用中",
+    "notInUse": "未使用",
+    "unknownMember": "系統",
+    "deletedMember": "已刪除成員",
+    "adminOnly": "只有管理員可以執行此操作。",
+    "generatedOutputs": {
+      "title": "產生的輸出",
+      "types": {
+        "thumbnail": "縮圖",
+        "hls": "串流媒體",
+        "spectrogram": "頻譜圖",
+        "waveform": "波形",
+        "favicon": "網站圖示",
+        "optimizedMesh": "最佳化網格"
+      },
+      "status": {
+        "processing": "處理中",
+        "ready": "已就緒",
+        "failed": "失敗"
+      }
+    },
+    "selectAll": "選取所有項目",
+    "selectItem": "選取{name}",
+    "sortBy": "依{name}排序",
+    "selectedCount": "已選取 {count} 個項目",
+    "itemCount": "{count} 個項目",
+    "searchResultCount": "找到 {count} 個結果",
+    "uploadProgress": "上傳中 {percentage}%",
+    "types": {
+      "all": "所有類型",
+      "images": "圖片",
+      "audio": "音訊",
+      "video": "影片",
+      "documents": "文件",
+      "folder": "資料夾"
+    },
+    "sort": {
+      "label": "排序",
+      "name": "名稱",
+      "newest": "最新",
+      "oldest": "最舊",
+      "size": "最大",
+      "smallest": "最小"
+    },
+    "actions": {
+      "upload": "上傳",
+      "newFolder": "新增資料夾",
+      "open": "開啟",
+      "preview": "預覽",
+      "move": "移動",
+      "moveHere": "移動到此處",
+      "returnToRoot": "返回檔案",
+      "gridView": "格狀檢視",
+      "listView": "列表檢視",
+      "loadMore": "載入更多",
+      "delete": "刪除",
+      "rename": "重新命名",
+      "download": "下載",
+      "close": "關閉",
+      "save": "儲存",
+      "cancel": "取消"
+    },
+    "columns": {
+      "name": "名稱",
+      "type": "類型",
+      "size": "大小",
+      "location": "位置",
+      "uploadedBy": "上傳者",
+      "uploadedAt": "日期",
+      "usages": "使用位置",
+      "usageStatus": "使用狀態",
+      "actions": "操作"
+    },
+    "messages": {
+      "uploaded": "檔案已上傳。"
+    },
+    "errors": {
+      "load": "無法載入檔案。",
+      "mutation": "檔案操作失敗。",
+      "upload": "檔案上傳失敗。",
+      "inUse": "使用中的檔案未被刪除。",
+      "unauthorized": "請登入後繼續。",
+      "forbidden": "你沒有執行此檔案操作的權限。",
+      "fileNotFound": "此檔案已不存在。",
+      "loadFile": "無法載入此檔案。",
+      "loadUsages": "無法載入此檔案的使用位置。",
+      "createFolder": "無法建立資料夾。",
+      "renameFolder": "無法重新命名資料夾。",
+      "moveFolder": "無法移動資料夾。",
+      "deleteFolder": "無法刪除資料夾。",
+      "renameFile": "無法重新命名檔案。",
+      "moveFiles": "無法移動選取的檔案。",
+      "inspectUsage": "無法檢查選取檔案的使用位置。",
+      "deleteFiles": "無法刪除選取的檔案。"
+    },
+    "dialogs": {
+      "chooseDestination": "開啟目的資料夾",
+      "create-folder": {
+        "title": "新增資料夾"
+      },
+      "rename-folder": {
+        "title": "重新命名資料夾"
+      },
+      "move-folder": {
+        "title": "移動資料夾"
+      },
+      "rename-file": {
+        "title": "重新命名檔案"
+      },
+      "move-files": {
+        "title": "移動檔案"
+      },
+      "targetFolderId": "目標資料夾 ID",
+      "extensionSeparate": ".{extension} 副檔名會分開保留。",
+      "rootWhenEmpty": "留空會移動到根目錄。",
+      "delete": {
+        "title": "刪除",
+        "folder": "刪除此資料夾及其下所有未使用的檔案？",
+        "files": "刪除選取的 {count} 個檔案？",
+        "blocked": "{count} 個檔案仍在使用，無法刪除。",
+        "totalUsages": "目前使用位置總數：{count}",
+        "byDomain": "依網域：{summary}",
+        "more": "另有 {count} 個。請在檔案詳細資料中查看完整清單。"
+      }
+    }
+  },
+  "fileDownloadAccess": {
+    "editor": {
+      "sectionTitle": "下載權限",
+      "sectionDescription": "設定誰可以下載原始檔案。",
+      "loading": "正在載入下載權限…",
+      "audienceLabel": "下載對象",
+      "audiences": {
+        "disabled": {
+          "label": "已停用",
+          "description": "訪客無法下載此檔案。"
+        },
+        "public": {
+          "label": "公開",
+          "description": "任何人都可以下載此檔案。"
+        },
+        "authenticated": {
+          "label": "已登入使用者",
+          "description": "任何已登入使用者都可以下載此檔案。"
+        },
+        "restricted": {
+          "label": "受眾",
+          "description": "只有所選受眾中的使用者可以下載此檔案。"
+        }
+      },
+      "segmentsLabel": "受眾",
+      "segmentsDescription": "選擇一個或多個現有受眾區隔。",
+      "segmentsPlaceholder": "選擇受眾",
+      "segmentsLoadError": "政策已載入，但無法載入受眾。",
+      "segmentsEmpty": "沒有可用的受眾區隔。",
+      "restrictedWithoutAudience": "此受限政策未指定受眾。在選取至少一個受眾之前，所有人的下載都會被拒絕。",
+      "segmentRequiresSubscription": "{name}（需要訂閱電子報）",
+      "additionalSelected": "另有 {count} 項已選取",
+      "loadMoreSegments": "載入更多受眾",
+      "loadError": "無法載入下載權限。",
+      "saveError": "無法儲存下載權限。",
+      "fileRequired": "請先儲存檔案，再設定下載權限。"
+    },
+    "public": {
+      "fileFallback": "檔案",
+      "unavailableFor": "無法下載 {name}",
+      "unavailable": "無法使用",
+      "signInFor": "登入後下載 {name}",
+      "downloadFor": "下載 {name}",
+      "signIn": "登入後下載",
+      "download": "下載",
+      "failed": "無法授權下載，請再試一次。"
+    }
+  }
+}

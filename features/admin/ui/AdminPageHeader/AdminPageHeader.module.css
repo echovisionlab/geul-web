@@ -1,0 +1,45 @@
+.root {
+  align-items: flex-start;
+}
+
+.titleStack {
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--mantine-spacing-xs);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.actionButton {
+  border-radius: 0;
+}
+
+.customAction {
+  display: inline-flex;
+  align-items: center;
+}
+
+.customAction :global(button),
+.customAction :global(a) {
+  border-radius: 0;
+}
+
+@media (max-width: 48em) {
+  .root {
+    align-items: stretch;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

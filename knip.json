@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["lib/image-loader.ts"],
+  "ignore": ["components/core/index.ts", "lib/types/**"],
+  "ignoreBinaries": ["go"],
+  "ignoreDependencies": ["server-only"],
+  "ignoreExportsUsedInFile": {
+    "interface": true,
+    "type": true
+  }
+}

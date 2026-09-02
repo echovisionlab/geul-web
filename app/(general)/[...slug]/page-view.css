@@ -1,0 +1,65 @@
+/* Page Content - Full Width */
+.page-content {
+  display: block;
+  width: 100%;
+}
+
+/* Public page sections and their view components fill the layout width. */
+.page-content .page-sections,
+.page-content .page-section,
+.page-content .post-list-block,
+.page-content .columns-block,
+.page-content .columns-section,
+.page-content .column-content,
+.page-content .section-block,
+.page-content [data-section-type] {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Table styles for rich-text sections */
+.rich-text-content table {
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.rich-text-content th,
+.rich-text-content td {
+  border: 1px solid var(--mantine-color-default-border);
+  padding: 0.5rem 0.75rem;
+}
+
+.rich-text-content th {
+  font-weight: 700;
+  text-align: left;
+  background-color: var(--mantine-color-gray-0);
+}
+
+[data-mantine-color-scheme='dark'] .rich-text-content th {
+  background-color: var(--mantine-color-dark-6);
+}
+
+/* Divider (hr) styles for rich-text sections */
+.rich-text-content hr {
+  border: none;
+  border-top: 1px solid var(--mantine-color-default-border);
+  margin: 0.5em 0;
+}
+
+/* Media blocks (image, video, audio) */
+.rich-text-content figure {
+  margin: 0;
+  padding: 3px 0;
+}
+
+.rich-text-content .media-block__caption,
+.rich-text-content figure figcaption {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--mantine-color-dimmed);
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  text-align: left;
+}

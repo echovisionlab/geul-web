@@ -1,0 +1,16 @@
+.contentFlow {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--mantine-spacing-md);
+}
+
+@media print {
+  .contentFlow {
+    display: block;
+  }
+
+  .contentFlow > * + * {
+    margin-top: 12pt;
+  }
+}

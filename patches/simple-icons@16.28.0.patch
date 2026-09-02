@@ -1,0 +1,9 @@
+diff --git a/data/simple-icons.d.ts b/data/simple-icons.d.ts
+index bb35984473c301093a3137734db2307ef794ce42..ca8573a0a79b4a54ac552a4946ecaf8ee88815dc 100644
+--- a/data/simple-icons.d.ts
++++ b/data/simple-icons.d.ts
+@@ -56,4 +56,3 @@ export type CustomLicense = {
+ declare const icons: IconData[];
+ 
+ export default icons;
+-export = icons;

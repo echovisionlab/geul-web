@@ -1,0 +1,46 @@
+name: ${GEUL_WEB_STACK_PROJECT_NAME:-geul-web}
+
+services:
+  web-prod:
+    image: ${GEUL_WEB_IMAGE:?set GEUL_WEB_IMAGE to a full image reference}
+    container_name: geul-web-prod
+    ports:
+      - '${GEUL_APP_STACK_WEB_PUBLIC_PORT:-3000}:3000'
+    environment:
+      # Server-side RPCs must enter Oathkeeper through the canonical API origin.
+      # Exact-origin access rules intentionally reject the internal container URL.
+      OATHKEEPER_URL: ${OATHKEEPER_URL:?set OATHKEEPER_URL to the canonical API origin}
+      KRATOS_URL: ${KRATOS_URL:?set KRATOS_URL}
+      KRATOS_ADMIN_URL: ${KRATOS_ADMIN_URL:?set KRATOS_ADMIN_URL}
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:?set SESSION_COOKIE_NAME}
+      HYDRA_ADMIN_URL: ${HYDRA_ADMIN_URL:?set HYDRA_ADMIN_URL}
+      MCP_OAUTH_ISSUER_URL: ${MCP_OAUTH_ISSUER_URL:?set MCP_OAUTH_ISSUER_URL}
+      HOST: ${HOST:?set HOST}
+      DRAFT_SECRET: ${DRAFT_SECRET:?set DRAFT_SECRET}
+      ENCRYPTION_SECRET: ${ENCRYPTION_SECRET:?set ENCRYPTION_SECRET}
+      PUBLIC_CDN_URL: ${PUBLIC_CDN_URL:?set PUBLIC_CDN_URL}
+      PUBLIC_API_URL: ${PUBLIC_API_URL:?set PUBLIC_API_URL}
+      SITE_ORIGIN: ${SITE_ORIGIN:?set SITE_ORIGIN}
+      PUBLIC_P5_RUNNER_URL: ${PUBLIC_P5_RUNNER_URL:-}
+      PUBLIC_EDITOR_IMAGE_MAX_SIZE_BYTES: ${PUBLIC_EDITOR_IMAGE_MAX_SIZE_BYTES:-31457280}
+      PUBLIC_GOOGLE_MAPS_API_KEY: ${PUBLIC_GOOGLE_MAPS_API_KEY:-}
+      AUTH_CODE_LIFESPAN_SECONDS: ${AUTH_CODE_LIFESPAN_SECONDS:-900}
+      AUTH_CODE_RESEND_COOLDOWN_SECONDS: ${AUTH_CODE_RESEND_COOLDOWN_SECONDS:-60}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:?set OTEL_EXPORTER_OTLP_ENDPOINT}
+      OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL:-http/protobuf}
+      OTEL_RESOURCE_ATTRIBUTES: ${OTEL_RESOURCE_ATTRIBUTES:-service.namespace=geul,deployment.environment=production,service.name=geul-web}
+    restart: unless-stopped
+    networks:
+      runtime:
+        aliases:
+          - geul-app-web-prod
+    healthcheck:
+      test: ['CMD-SHELL', 'wget --spider -q http://127.0.0.1:3000/api/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  runtime:
+    name: ${GEUL_APP_RUNTIME_NETWORK_NAME:-geul-runtime}
+    external: true

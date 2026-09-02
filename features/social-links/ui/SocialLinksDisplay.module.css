@@ -1,0 +1,17 @@
+.socialLink,
+.socialButton {
+  color: var(--mantine-color-dimmed);
+  line-height: 1;
+  transition:
+    color 150ms ease,
+    opacity 150ms ease;
+}
+
+.socialLink {
+  opacity: 0.68;
+}
+
+.socialLink:is(:hover, :focus-visible),
+.socialButton:is(:hover, :focus-visible, :focus-within) {
+  opacity: 1;
+}

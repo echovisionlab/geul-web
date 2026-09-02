@@ -1,0 +1,18 @@
+.trigger {
+  --text-button-width: auto;
+
+  max-width: 100%;
+  text-align: left;
+}
+
+.trigger[data-hover-accent='true']:focus-visible {
+  color: var(--text-button-hover-color);
+}
+
+.compactLabel {
+  display: block;
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  line-height: 1.35;
+}

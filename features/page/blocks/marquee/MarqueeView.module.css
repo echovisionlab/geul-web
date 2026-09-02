@@ -1,0 +1,125 @@
+.root {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  min-width: 0;
+  max-inline-size: 100%;
+  max-width: none;
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  animation-name: marquee-scroll-left;
+  animation-duration: var(--marquee-duration);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.lane {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.root[data-direction='right'] .track {
+  animation-name: marquee-scroll-right;
+}
+
+.root[data-pause-on-hover='true']:hover .track {
+  animation-play-state: paused;
+}
+
+.group {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--marquee-gap);
+  padding-inline-end: var(--marquee-gap);
+}
+
+.measureGroup {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(100%);
+}
+
+.item {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: var(--marquee-item-height);
+  color: var(--mantine-color-text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.link {
+  cursor: pointer;
+}
+
+.link:hover {
+  color: var(--mantine-color-anchor);
+}
+
+.logo {
+  display: block;
+  flex: 0 0 auto;
+  width: auto;
+  max-width: min(240px, 42vw);
+  max-height: var(--marquee-item-height);
+  border: 0;
+  object-fit: contain;
+}
+
+/* MarqueeLogoImage sets this only for loaded logos whose CSS box collapsed to 0x0. */
+.logo[data-size-fallback='true'] {
+  height: var(--marquee-item-height);
+}
+
+.root[data-logo-scale='fill-height'] .logo {
+  height: var(--marquee-item-height);
+  width: auto;
+}
+
+.text {
+  font-size: var(--marquee-text-size);
+  font-weight: 600;
+  line-height: 1;
+}
+
+@media (max-width: 48em) {
+  .text {
+    font-size: min(var(--marquee-text-size), 18px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    animation: none;
+    transform: none;
+  }
+}
+
+@keyframes marquee-scroll-left {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes marquee-scroll-right {
+  from {
+    transform: translate3d(-50%, 0, 0);
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}

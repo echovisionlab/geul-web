@@ -1,0 +1,307 @@
+.cardItem {
+  background: transparent;
+}
+
+.listItem {
+  background: transparent;
+}
+
+.hoverMedia {
+  position: relative;
+  overflow: hidden;
+}
+
+.hoverMedia::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 12%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.mediaImage,
+.mediaPlaceholder {
+  transition: filter 0.18s ease;
+}
+
+.mediaLink {
+  position: absolute;
+  inset: 0;
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.mediaLink:focus-visible {
+  outline: 2px solid var(--mantine-primary-color-filled);
+  outline-offset: 2px;
+}
+
+.listItem:has(.cardTitleLink:hover) .hoverMedia::after,
+.listItem:has(.cardTitleLink:focus-visible) .hoverMedia::after,
+.listItem:has(.hoverMedia:hover) .hoverMedia::after,
+.listItem:has(.hoverMedia:focus-within) .hoverMedia::after,
+.cardItem:has(.cardTitleLink:hover) .hoverMedia::after,
+.cardItem:has(.cardTitleLink:focus-visible) .hoverMedia::after,
+.cardItem:has(.hoverMedia:hover) .hoverMedia::after,
+.cardItem:has(.hoverMedia:focus-within) .hoverMedia::after {
+  opacity: 1;
+}
+
+.minimalItem {
+  background: transparent;
+  padding: 0 !important;
+}
+
+.minimalItem::after {
+  content: '';
+  display: block;
+  height: 1px;
+  margin: 0.5rem 0;
+  background: color-mix(in srgb, var(--mantine-color-default-border) 55%, transparent);
+}
+
+.minimalItem:last-child::after {
+  display: none;
+}
+
+.minimalContent {
+  min-width: 0;
+  padding: 0;
+}
+
+.listRow {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 0.875rem;
+  align-items: start;
+}
+
+.listMedia {
+  position: relative;
+  width: 96px;
+  min-width: 96px;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background-color: var(--mantine-color-gray-2);
+}
+
+.listContent {
+  min-width: 0;
+}
+
+.carouselCardLayout {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+  height: 100%;
+}
+
+.carouselCardMedia {
+  position: relative;
+  width: 132px;
+  min-width: 132px;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background-color: var(--mantine-color-gray-2);
+}
+
+.carouselCardContent {
+  min-width: 0;
+  justify-content: flex-start;
+}
+
+.galleryCard:hover {
+  opacity: 0.8;
+}
+
+.heroCarouselSlide {
+  aspect-ratio: 16 / 9;
+}
+
+@media (min-width: 48em) {
+  .heroCarouselSlide {
+    aspect-ratio: unset;
+    height: 400px;
+  }
+}
+
+.cardTitleWrap {
+  position: relative;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 0 0 4px;
+}
+
+.cardTitleLink {
+  display: inline-block;
+  width: fit-content;
+  max-width: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.cardTitleText {
+  display: block;
+  margin: 0;
+  padding: 0;
+  line-height: 1.02 !important;
+}
+
+.cardTitleWrap::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background: var(--mantine-primary-color-filled);
+  transition: width 0.3s ease-out;
+}
+
+.cardTitleLink:hover .cardTitleWrap::after,
+.cardTitleLink:focus-visible .cardTitleWrap::after,
+.listItem:has(.hoverMedia:hover) .cardTitleWrap::after,
+.listItem:has(.hoverMedia:focus-within) .cardTitleWrap::after,
+.cardItem:has(.hoverMedia:hover) .cardTitleWrap::after,
+.cardItem:has(.hoverMedia:focus-within) .cardTitleWrap::after {
+  width: 100%;
+}
+
+.heroOverlayContent {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 1.5rem;
+  color: white;
+  z-index: 2;
+}
+
+.heroOverlayShade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgb(0 0 0 / 90%) 0%,
+    rgb(0 0 0 / 62%) 34%,
+    rgb(0 0 0 / 24%) 62%,
+    rgb(0 0 0 / 8%) 100%
+  );
+}
+
+.heroTopContent {
+  min-width: 0;
+  align-self: start;
+  width: fit-content;
+  max-width: min(100%, 44rem);
+  padding: 0;
+  background: rgb(0 0 0 / 82%);
+  border: 1px solid rgb(255 255 255 / 16%);
+  box-shadow: none;
+}
+
+.heroBottomContent {
+  min-width: 0;
+  align-self: end;
+}
+
+.heroBottomRow {
+  min-width: 0;
+  align-self: end;
+}
+
+.heroMetaWrap {
+  min-width: 0;
+  flex: 1;
+}
+
+.heroMetaRow {
+  min-width: 0;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 70%);
+}
+
+.heroReadMoreButton {
+  align-self: flex-start;
+}
+
+.heroSummary,
+.heroMetaText {
+  text-shadow: 0 1px 3px rgb(0 0 0 / 75%);
+}
+
+.heroCarousel {
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.heroCarouselIndicators {
+  bottom: 0;
+  z-index: 3;
+}
+
+.heroCarouselIndicator {
+  width: 0.5rem;
+  height: 0.5rem;
+  opacity: 1;
+  background-color: transparent;
+  border: 0;
+  box-shadow: inset 0 0 0 1px var(--mantine-color-text);
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.heroCarouselIndicator[data-active] {
+  background-color: var(--mantine-primary-color-filled);
+  box-shadow: inset 0 0 0 1px var(--mantine-color-text);
+  transform: scale(1.12);
+}
+
+@media (max-width: 48em) {
+  .heroOverlayContent {
+    padding: 1rem;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  .heroTopContent {
+    max-width: 100%;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .carouselCardLayout {
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 0.875rem;
+  }
+
+  .listRow {
+    grid-template-columns: 84px minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .listMedia {
+    width: 84px;
+    min-width: 84px;
+  }
+
+  .carouselCardMedia {
+    width: 112px;
+    min-width: 112px;
+  }
+
+  .heroReadMoreButton {
+    align-self: flex-start;
+  }
+
+  .heroCarouselIndicators {
+    bottom: 0;
+  }
+}

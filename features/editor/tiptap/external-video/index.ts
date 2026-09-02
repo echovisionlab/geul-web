@@ -1,0 +1,15 @@
+export {
+  DEFAULT_TIPTAP_EXTERNAL_VIDEO_LABELS,
+  UnsupportedTiptapExternalVideoError,
+  assertTiptapExternalVideoSupport,
+  createTiptapExternalVideoExtension,
+  getTiptapStandaloneExternalVideos,
+  replaceParagraphWithTiptapExternalVideo,
+  updateTiptapExternalVideoLayout,
+  updateTiptapExternalVideoSource,
+  type TiptapExternalVideoOptions,
+  type TiptapExternalVideoLabels,
+  type TiptapExternalVideoLayout,
+  type TiptapExternalVideoSource,
+  type TiptapStandaloneExternalVideo,
+} from './ExternalVideoTiptapExtension';

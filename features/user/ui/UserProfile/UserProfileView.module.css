@@ -1,0 +1,32 @@
+.identity,
+.profileCopy {
+  min-width: 0;
+}
+
+.profileCopy {
+  flex: 1;
+}
+
+.longText {
+  overflow-wrap: anywhere;
+}
+
+.socialLink {
+  color: var(--mantine-color-dimmed);
+}
+
+.adminActions {
+  justify-content: flex-end;
+  max-width: 100%;
+}
+
+@media (max-width: 36em) {
+  .identity,
+  .adminActions {
+    width: 100%;
+  }
+
+  .adminActions {
+    justify-content: flex-start;
+  }
+}

@@ -1,0 +1,501 @@
+/*
+ * Mantine-token bridge for document DOM that cannot be composed from React
+ * primitives: materialized `.prose` HTML and Tiptap's generated block nodes.
+ * Feature chrome and block runtimes belong to their Feature CSS Modules/CSS.
+ */
+
+:is(.prose, .tiptap-editor) {
+  --document-list-indent: var(--mantine-spacing-lg);
+  --document-check-size: var(--mantine-font-size-sm);
+
+  color: var(--mantine-color-text);
+  font-family: var(--mantine-font-family);
+}
+
+/* Generated public blocks use the same vertical rhythm as Tiptap's block group. */
+.prose
+  > :is(h1, h2, h3, h4, h5, h6, p, ul, ol, blockquote, pre, hr, table, figure, aside, .check-list-item)
+  + :is(h1, h2, h3, h4, h5, h6, p, ul, ol, blockquote, pre, hr, table, figure, aside, .check-list-item) {
+  margin-block-start: var(--mantine-spacing-xs);
+}
+
+.prose [data-callout] {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--mantine-spacing-sm);
+  padding: var(--mantine-spacing-md);
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-default);
+}
+
+.prose [data-callout-icon] {
+  min-width: 1.5em;
+  font-size: var(--mantine-font-size-lg);
+  line-height: var(--mantine-line-height-md);
+  text-align: center;
+}
+
+.prose [data-callout-content] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-xs);
+  min-width: 0;
+}
+
+.prose [data-callout-copy] {
+  min-height: 1lh;
+}
+
+:is(.prose, .tiptap-editor) a {
+  color: var(--mantine-color-anchor);
+  text-decoration-color: currentcolor;
+  text-underline-offset: 0.125em;
+}
+
+:is(.prose, .tiptap-editor) a:hover {
+  color: var(--mantine-primary-color-filled-hover);
+}
+
+:is(.prose blockquote, .tiptap-editor [data-content-type='quote']) {
+  min-height: 1lh;
+  margin: 0;
+  padding-inline-start: var(--mantine-spacing-md);
+  border-inline-start: 2px solid var(--mantine-color-default-border);
+  color: var(--mantine-color-dimmed);
+  font-size: var(--mantine-font-size-md);
+  line-height: var(--mantine-line-height-md);
+  overflow-wrap: anywhere;
+}
+
+:is(.prose, .tiptap-editor) code {
+  font-family: var(--mantine-font-family-monospace);
+  font-size: var(--mantine-font-size-sm);
+}
+
+.prose pre {
+  overflow-x: auto;
+  margin: 0;
+  padding: var(--mantine-spacing-md);
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-default);
+  background: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+}
+
+:is(.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6, .tiptap-editor [data-content-type='heading']) {
+  margin: 0;
+  padding: 0;
+  font-family: var(--mantine-font-family-headings);
+  text-wrap: var(--mantine-heading-text-wrap);
+  scroll-margin-top: var(--scroll-offset);
+}
+
+:is(
+  .prose h1,
+  .tiptap-editor [data-content-type='heading']:not([data-level]),
+  .tiptap-editor [data-content-type='heading'][data-level='1']
+) {
+  font-size: var(--mantine-h1-font-size);
+  font-weight: var(--mantine-h1-font-weight);
+  line-height: var(--mantine-h1-line-height);
+}
+
+:is(.prose h2, .tiptap-editor [data-content-type='heading'][data-level='2']) {
+  font-size: var(--mantine-h2-font-size);
+  font-weight: var(--mantine-h2-font-weight);
+  line-height: var(--mantine-h2-line-height);
+}
+
+:is(.prose h3, .tiptap-editor [data-content-type='heading'][data-level='3']) {
+  font-size: var(--mantine-h3-font-size);
+  font-weight: var(--mantine-h3-font-weight);
+  line-height: var(--mantine-h3-line-height);
+}
+
+:is(.prose h4, .tiptap-editor [data-content-type='heading'][data-level='4']) {
+  font-size: var(--mantine-h4-font-size);
+  font-weight: var(--mantine-h4-font-weight);
+  line-height: var(--mantine-h4-line-height);
+}
+
+:is(.prose h5, .tiptap-editor [data-content-type='heading'][data-level='5']) {
+  font-size: var(--mantine-h5-font-size);
+  font-weight: var(--mantine-h5-font-weight);
+  line-height: var(--mantine-h5-line-height);
+}
+
+:is(.prose h6, .tiptap-editor [data-content-type='heading'][data-level='6']) {
+  font-size: var(--mantine-h6-font-size);
+  font-weight: var(--mantine-h6-font-weight);
+  line-height: var(--mantine-h6-line-height);
+}
+
+:is(.prose p, .tiptap-editor [data-content-type='paragraph']) {
+  min-height: 1lh;
+  margin: 0;
+  padding: 0;
+  font-size: var(--mantine-font-size-md);
+  font-weight: var(--mantine-font-weight-regular);
+  line-height: var(--mantine-line-height-md);
+}
+
+.prose :is(ul, ol) {
+  margin: 0;
+  padding: 0;
+  padding-inline-start: var(--document-list-indent);
+  font-size: var(--mantine-font-size-md);
+  line-height: var(--mantine-line-height-md);
+  list-style: none;
+}
+
+.prose :is(ul, ol) :is(ul, ol) {
+  margin-block-start: var(--mantine-spacing-xs);
+  margin-inline-start: var(--document-list-indent);
+}
+
+.prose ol {
+  counter-reset: public-numbered-list;
+}
+
+.prose li {
+  position: relative;
+  padding: 0;
+  line-height: var(--mantine-line-height-md);
+}
+
+.prose :is(ul, ol) > li::before {
+  position: absolute;
+  inset-inline-start: calc(-1 * var(--document-list-indent));
+  width: var(--document-list-indent);
+  font-family: var(--mantine-font-family);
+  font-size: var(--mantine-font-size-md);
+  line-height: var(--mantine-line-height-md);
+  text-align: end;
+  white-space: nowrap;
+}
+
+.prose ul > li::before {
+  content: '•\00a0';
+}
+
+.prose ol > li {
+  counter-increment: public-numbered-list;
+}
+
+.prose ol > li::before {
+  content: counter(public-numbered-list) '.\00a0';
+}
+
+.tiptap-editor .editor-block-group {
+  counter-reset: numbered-list;
+}
+
+:is(
+  .tiptap-editor [data-content-type='bulletListItem'],
+  .tiptap-editor [data-content-type='numberedListItem'],
+  .tiptap-editor [data-content-type='checkListItem']
+) {
+  position: relative;
+  padding-inline-start: var(--document-list-indent);
+  font-size: var(--mantine-font-size-md);
+  line-height: var(--mantine-line-height-md);
+}
+
+:is(
+  .tiptap-editor [data-content-type='bulletListItem'],
+  .tiptap-editor [data-content-type='numberedListItem']
+)::before {
+  position: absolute;
+  inset-inline-start: 0;
+  width: var(--document-list-indent);
+  font-family: var(--mantine-font-family);
+  font-size: var(--mantine-font-size-md);
+  line-height: var(--mantine-line-height-md);
+  text-align: end;
+  white-space: nowrap;
+}
+
+.tiptap-editor [data-content-type='bulletListItem']::before {
+  content: '•\00a0';
+}
+
+.tiptap-editor [data-content-type='numberedListItem'] {
+  counter-increment: numbered-list;
+}
+
+.tiptap-editor [data-content-type='numberedListItem']::before {
+  content: counter(numbered-list) '.\00a0';
+}
+
+.tiptap-editor [data-content-type='checkListItem']::before,
+.prose .check-list-item input,
+.prose ul > li[data-checked]::before {
+  box-sizing: border-box;
+  width: var(--document-check-size);
+  height: var(--document-check-size);
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-xs);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: calc(var(--document-check-size) - 2px);
+}
+
+.tiptap-editor [data-content-type='checkListItem']::before {
+  position: absolute;
+  inset-block-start: 0.3em;
+  inset-inline-start: 0;
+  content: '';
+}
+
+.prose .check-list-item {
+  position: relative;
+  min-height: 1lh;
+  padding-inline-start: var(--document-list-indent);
+  font-size: var(--mantine-font-size-md);
+  line-height: var(--mantine-line-height-md);
+}
+
+.prose .check-list-item input {
+  position: absolute;
+  inset-block-start: 0.3em;
+  inset-inline-start: 0;
+  appearance: none;
+  margin: 0;
+}
+
+.prose ul > li[data-checked]::before {
+  inset-block-start: 0.3em;
+  inset-inline-start: calc(-1 * var(--document-list-indent));
+  content: '';
+}
+
+.tiptap-editor [data-content-type='checkListItem'][data-checked='true']::before,
+.prose .check-list-item input:checked,
+.prose ul > li[data-checked='true']::before {
+  border-color: var(--mantine-primary-color-filled);
+  background-color: var(--mantine-primary-color-filled);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6l2.5 2.5L10 3' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+:is(.prose hr, .tiptap-editor [data-content-type='divider']) {
+  margin: var(--mantine-spacing-xs) 0;
+  border: 0;
+  border-block-start: 1px solid var(--mantine-color-default-border);
+}
+
+.prose table {
+  width: 100%;
+  margin: 0;
+  border-spacing: 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: var(--mantine-font-size-sm);
+  line-height: var(--mantine-line-height);
+  overflow-wrap: break-word;
+}
+
+.prose :is(th, td) {
+  padding: var(--mantine-spacing-xs);
+  border: 1px solid var(--mantine-color-default-border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.prose th {
+  background: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.prose figure {
+  margin: 0;
+  padding: 0;
+}
+
+.prose figure figcaption {
+  display: block;
+  width: 100%;
+  margin-block-start: var(--mantine-spacing-xs);
+  color: var(--mantine-color-dimmed);
+  font-size: var(--mantine-font-size-sm);
+  font-weight: var(--mantine-font-weight-regular);
+  line-height: var(--mantine-line-height-sm);
+  text-align: start;
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+}
+
+:is(.prose, .tiptap-editor) [data-text-alignment='left'] {
+  text-align: left;
+}
+
+:is(.prose, .tiptap-editor) [data-text-alignment='center'] {
+  text-align: center;
+}
+
+:is(.prose, .tiptap-editor) [data-text-alignment='right'] {
+  text-align: right;
+}
+
+:is(.prose, .tiptap-editor) [data-text-alignment='justify'] {
+  text-align: justify;
+}
+
+:is(.prose, .tiptap-editor) [data-text-color='gray'],
+:is(.prose, .tiptap-editor) [data-style-type='textColor']:is([stringvalue='gray'], [data-style-value='gray']) {
+  color: var(--editor-text-color-gray);
+}
+
+:is(.prose, .tiptap-editor) [data-text-color='brown'],
+:is(.prose, .tiptap-editor) [data-style-type='textColor']:is([stringvalue='brown'], [data-style-value='brown']) {
+  color: var(--editor-text-color-brown);
+}
+
+:is(.prose, .tiptap-editor) [data-text-color='red'],
+:is(.prose, .tiptap-editor) [data-style-type='textColor']:is([stringvalue='red'], [data-style-value='red']) {
+  color: var(--editor-text-color-red);
+}
+
+:is(.prose, .tiptap-editor) [data-text-color='orange'],
+:is(.prose, .tiptap-editor) [data-style-type='textColor']:is([stringvalue='orange'], [data-style-value='orange']) {
+  color: var(--editor-text-color-orange);
+}
+
+:is(.prose, .tiptap-editor) [data-text-color='yellow'],
+:is(.prose, .tiptap-editor) [data-style-type='textColor']:is([stringvalue='yellow'], [data-style-value='yellow']) {
+  color: var(--editor-text-color-yellow);
+}
+
+:is(.prose, .tiptap-editor) [data-text-color='green'],
+:is(.prose, .tiptap-editor) [data-style-type='textColor']:is([stringvalue='green'], [data-style-value='green']) {
+  color: var(--editor-text-color-green);
+}
+
+:is(.prose, .tiptap-editor) [data-text-color='blue'],
+:is(.prose, .tiptap-editor) [data-style-type='textColor']:is([stringvalue='blue'], [data-style-value='blue']) {
+  color: var(--editor-text-color-blue);
+}
+
+:is(.prose, .tiptap-editor) [data-text-color='purple'],
+:is(.prose, .tiptap-editor) [data-style-type='textColor']:is([stringvalue='purple'], [data-style-value='purple']) {
+  color: var(--editor-text-color-purple);
+}
+
+:is(.prose, .tiptap-editor) [data-text-color='pink'],
+:is(.prose, .tiptap-editor) [data-style-type='textColor']:is([stringvalue='pink'], [data-style-value='pink']) {
+  color: var(--editor-text-color-pink);
+}
+
+:is(.prose, .tiptap-editor) :is([data-bg-color='gray'], [data-background-color='gray']),
+:is(.prose, .tiptap-editor) [data-style-type='backgroundColor']:is([stringvalue='gray'], [data-style-value='gray']) {
+  background-color: var(--editor-background-color-gray);
+}
+
+:is(.prose, .tiptap-editor) :is([data-bg-color='brown'], [data-background-color='brown']),
+:is(.prose, .tiptap-editor) [data-style-type='backgroundColor']:is([stringvalue='brown'], [data-style-value='brown']) {
+  background-color: var(--editor-background-color-brown);
+}
+
+:is(.prose, .tiptap-editor) :is([data-bg-color='red'], [data-background-color='red']),
+:is(.prose, .tiptap-editor) [data-style-type='backgroundColor']:is([stringvalue='red'], [data-style-value='red']) {
+  background-color: var(--editor-background-color-red);
+}
+
+:is(.prose, .tiptap-editor) :is([data-bg-color='orange'], [data-background-color='orange']),
+:is(.prose, .tiptap-editor)
+  [data-style-type='backgroundColor']:is([stringvalue='orange'], [data-style-value='orange']) {
+  background-color: var(--editor-background-color-orange);
+}
+
+:is(.prose, .tiptap-editor) :is([data-bg-color='yellow'], [data-background-color='yellow']),
+:is(.prose, .tiptap-editor)
+  [data-style-type='backgroundColor']:is([stringvalue='yellow'], [data-style-value='yellow']) {
+  background-color: var(--editor-background-color-yellow);
+}
+
+:is(.prose, .tiptap-editor) :is([data-bg-color='green'], [data-background-color='green']),
+:is(.prose, .tiptap-editor) [data-style-type='backgroundColor']:is([stringvalue='green'], [data-style-value='green']) {
+  background-color: var(--editor-background-color-green);
+}
+
+:is(.prose, .tiptap-editor) :is([data-bg-color='blue'], [data-background-color='blue']),
+:is(.prose, .tiptap-editor) [data-style-type='backgroundColor']:is([stringvalue='blue'], [data-style-value='blue']) {
+  background-color: var(--editor-background-color-blue);
+}
+
+:is(.prose, .tiptap-editor) :is([data-bg-color='purple'], [data-background-color='purple']),
+:is(.prose, .tiptap-editor)
+  [data-style-type='backgroundColor']:is([stringvalue='purple'], [data-style-value='purple']) {
+  background-color: var(--editor-background-color-purple);
+}
+
+:is(.prose, .tiptap-editor) :is([data-bg-color='pink'], [data-background-color='pink']),
+:is(.prose, .tiptap-editor) [data-style-type='backgroundColor']:is([stringvalue='pink'], [data-style-value='pink']) {
+  background-color: var(--editor-background-color-pink);
+}
+
+/* Legacy materialized code retains its generated Shiki theme variables. */
+.prose pre.shiki {
+  background: var(--shiki-light-bg, var(--mantine-color-gray-0)) !important;
+  color: var(--shiki-light, var(--mantine-color-dark-9)) !important;
+}
+
+[data-mantine-color-scheme='dark'] .prose pre.shiki {
+  background: var(--shiki-dark-bg, var(--mantine-color-dark-6)) !important;
+  color: var(--shiki-dark, var(--mantine-color-gray-2)) !important;
+}
+
+[data-mantine-color-scheme='dark'] .prose pre.shiki span {
+  color: var(--shiki-dark, inherit) !important;
+}
+
+@media print {
+  [data-mantine-color-scheme] .prose pre.shiki {
+    overflow: visible;
+    background: var(--shiki-light-bg, #f6f8fa) !important;
+    color: var(--shiki-light, #24292f) !important;
+    white-space: normal !important;
+    break-inside: auto;
+    print-color-adjust: exact;
+  }
+
+  [data-mantine-color-scheme] .prose pre.shiki span {
+    color: var(--shiki-light, inherit) !important;
+  }
+
+  .prose pre.shiki > code,
+  .prose pre.shiki .line {
+    display: block;
+  }
+
+  .prose pre.shiki .line {
+    min-height: 1lh;
+    white-space: pre-wrap;
+    break-inside: avoid;
+  }
+
+  :is(.prose, .tiptap-editor) table {
+    break-inside: auto;
+  }
+
+  :is(.prose, .tiptap-editor) thead {
+    display: table-header-group;
+    break-inside: avoid;
+  }
+
+  :is(.prose, .tiptap-editor) tr {
+    break-inside: avoid;
+  }
+}
+
+.prose .math-block {
+  overflow-x: auto;
+  padding-block: var(--mantine-spacing-md);
+  text-align: center;
+}
+
+.prose .math-inline {
+  display: inline;
+}

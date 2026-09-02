@@ -1,0 +1,46 @@
+.root {
+  position: relative;
+  min-height: var(--immersive-scene-intrinsic-height);
+  overflow: clip;
+}
+
+.root[data-height-mode='scroll'] {
+  min-height: var(--immersive-scene-scroll-document-height);
+}
+
+.root[data-preview='true'] {
+  height: 100%;
+  min-height: 0;
+}
+
+.viewport {
+  position: relative;
+  height: var(--immersive-scene-intrinsic-height);
+  overflow: hidden;
+}
+
+.root[data-height-mode='scroll'] > .viewport {
+  position: sticky;
+  inset: 0;
+  top: 0;
+  height: 100vh;
+}
+
+.root[data-preview='true'] > .viewport {
+  height: 100%;
+  min-height: 360px;
+}
+
+:global([data-footer-layout='pinned']) .root[data-preview='false'][data-height-mode='intrinsic'] {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
+
+:global([data-footer-layout='pinned']) .root[data-preview='false'][data-height-mode='intrinsic'] > .viewport {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}

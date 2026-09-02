@@ -1,0 +1,28 @@
+.titleRoot,
+.titleWrapper {
+  width: 100%;
+  min-width: 0;
+  height: 20px;
+  min-height: 20px;
+  margin: 0;
+  padding: 0;
+}
+
+.titleInput.titleInput {
+  width: 100%;
+  min-width: 0;
+  height: 20px !important;
+  min-height: 20px !important;
+  margin: 0;
+  padding: 0 !important;
+  color: inherit;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent;
+  box-shadow: none !important;
+  font: inherit;
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 600;
+  line-height: 1.4;
+}

@@ -1,0 +1,90 @@
+.heroContent {
+  min-height: 232px;
+}
+
+@media (min-width: 48em) {
+  .heroContent {
+    min-height: 400px;
+  }
+}
+
+@media print {
+  .hero {
+    position: relative !important;
+    display: grid !important;
+    height: auto !important;
+    min-height: 62mm !important;
+    overflow: hidden !important;
+    margin: 0 0 8mm !important;
+    isolation: isolate;
+    break-inside: avoid;
+    print-color-adjust: exact;
+  }
+
+  .heroOverlay {
+    position: absolute !important;
+    display: block !important;
+    inset: 0 !important;
+    background: linear-gradient(to top, rgb(0 0 0 / 88%) 0%, rgb(0 0 0 / 52%) 56%, rgb(0 0 0 / 30%) 100%) !important;
+    print-color-adjust: exact;
+  }
+
+  .heroImage {
+    position: absolute !important;
+    display: block !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    margin: 0 !important;
+    object-fit: cover !important;
+    filter: brightness(0.62) saturate(0.88);
+    print-color-adjust: exact;
+  }
+
+  .heroContent {
+    position: relative !important;
+    z-index: 1 !important;
+    display: flex !important;
+    height: auto !important;
+    min-height: 62mm !important;
+    justify-content: flex-end !important;
+    padding: 8mm !important;
+    color: #fff !important;
+  }
+
+  .heroContent * {
+    color: #fff !important;
+  }
+
+  .titleStack {
+    position: static !important;
+    margin-bottom: 0 !important;
+  }
+
+  .heroTitle {
+    margin: 0 !important;
+    color: #fff !important;
+    font-size: 19pt !important;
+    line-height: 1.1 !important;
+  }
+
+  .heroMetadata {
+    position: static !important;
+    gap: 2mm !important;
+  }
+
+  .hero :global(.mantine-Badge-root),
+  .hero :global(.post-meta-chip) {
+    display: inline-flex !important;
+    color: #fff !important;
+    border: 1px solid rgb(255 255 255 / 55%) !important;
+    background: rgb(0 0 0 / 28%) !important;
+    transform: none !important;
+    print-color-adjust: exact;
+  }
+
+  .hero :global(.mantine-Avatar-root) {
+    border-color: rgb(255 255 255 / 72%) !important;
+  }
+}

@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Generated and build output
+.next/
+.next-integration-*/
+out/
+coverage/
+.coverage/
+storybook-static/
+
+# Test output
+test-results/
+
+# Tool caches and local artifacts
+.eslintcache
+.stylelintcache
+.cache/
+.parcel-cache/
+tmp/
+.artifacts/
+*.log
+
+# Package-manager and generated source files
+pnpm-lock.yaml
+lib/constants/phone-countries.ts

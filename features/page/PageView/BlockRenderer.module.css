@@ -1,0 +1,40 @@
+.sections,
+.section {
+  min-width: 0;
+}
+
+:global([data-footer-layout='pinned']) .sections {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+:global([data-footer-layout='pinned']) .section:has(> [data-immersive-scene][data-height-mode='intrinsic']) {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 0;
+  flex-direction: column;
+}
+
+@media print {
+  .sections,
+  :global([data-footer-layout='pinned']) .sections,
+  .section,
+  :global([data-footer-layout='pinned']) .section:has(> [data-immersive-scene][data-height-mode='intrinsic']) {
+    display: block !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  .section + .section {
+    margin-top: 6mm;
+  }
+
+  :global(.columns-section) {
+    display: block !important;
+  }
+
+  :global(.column-content + .column-content) {
+    margin-top: 6mm;
+  }
+}

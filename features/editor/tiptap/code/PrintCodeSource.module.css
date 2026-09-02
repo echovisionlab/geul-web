@@ -1,0 +1,62 @@
+.root {
+  display: none;
+}
+
+@media print {
+  .root {
+    display: block;
+    min-width: 0;
+    overflow: visible;
+    color: #24292f;
+    background: #f6f8fa;
+    font-family: var(--mantine-font-family-monospace);
+    font-size: 8.5pt;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+    tab-size: 2;
+    break-inside: auto;
+    print-color-adjust: exact;
+  }
+
+  .fallback,
+  .highlighted :global(pre.shiki) {
+    display: block;
+    overflow: visible;
+    padding: 8pt;
+    margin: 0;
+    color: #24292f !important;
+    border: 0 !important;
+    background: #f6f8fa !important;
+    font: inherit;
+    break-inside: auto !important;
+  }
+
+  .fallback {
+    white-space: pre-wrap;
+  }
+
+  .highlighted :global(pre.shiki) {
+    white-space: normal !important;
+  }
+
+  .fallback code,
+  .highlighted :global(pre.shiki > code) {
+    display: block;
+    padding: 0;
+    color: inherit !important;
+    border: 0 !important;
+    background: transparent !important;
+    font: inherit;
+  }
+
+  .highlighted :global(pre.shiki span) {
+    color: var(--shiki-light, inherit) !important;
+  }
+
+  .highlighted :global(pre.shiki .line) {
+    display: block;
+    min-height: 1lh;
+    white-space: pre-wrap;
+    break-inside: avoid;
+  }
+}

@@ -1,0 +1,51 @@
+.sequence {
+  min-height: 100vh;
+  padding: 32px;
+}
+
+.sequence.sequence :global([data-route-progress][data-phase='loading']) {
+  animation: route-progress-preview-visibility 1880ms linear forwards;
+}
+
+.sequence.sequence :global([data-route-progress][data-phase='loading'] [role='progressbar']) {
+  animation: route-progress-preview-fill 1880ms cubic-bezier(0.1, 0.35, 0.2, 1) forwards;
+}
+
+@keyframes route-progress-preview-visibility {
+  0%,
+  15.9% {
+    opacity: 0;
+  }
+
+  16%,
+  99% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes route-progress-preview-fill {
+  0%,
+  15.9% {
+    transform: scaleX(0.08);
+  }
+
+  90.4% {
+    transform: scaleX(0.92);
+  }
+
+  99%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sequence.sequence :global([data-route-progress][data-phase='loading']),
+  .sequence.sequence :global([data-route-progress][data-phase='loading'] [role='progressbar']) {
+    animation-duration: 0.01ms;
+  }
+}

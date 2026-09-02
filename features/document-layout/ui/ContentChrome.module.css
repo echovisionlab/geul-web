@@ -1,0 +1,40 @@
+.root {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--mantine-spacing-md);
+  width: 100%;
+  color: var(--mantine-color-text);
+  background: var(--mantine-color-body);
+}
+
+.root[data-tone='inverse'] {
+  color: rgb(244 247 251 / 94%);
+  background: transparent;
+  text-shadow: 0 1px 18px rgb(0 0 0 / 32%);
+}
+
+.titleSlot {
+  min-width: 0;
+}
+
+.title {
+  color: inherit;
+  overflow-wrap: anywhere;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  min-height: 2rem;
+}
+
+@media (max-width: 48em) {
+  .root {
+    gap: var(--mantine-spacing-sm);
+  }
+
+  .title {
+    font-size: var(--mantine-h2-font-size);
+  }
+}

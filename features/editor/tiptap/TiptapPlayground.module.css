@@ -1,0 +1,20 @@
+.playground {
+  width: 100%;
+}
+
+.previewHeader {
+  width: 100%;
+  margin-bottom: var(--mantine-spacing-xl);
+  break-after: avoid-page;
+}
+
+@media print {
+  .playground {
+    display: block;
+    padding: 0 !important;
+  }
+
+  .previewHeader {
+    margin-bottom: 0.8cm;
+  }
+}

@@ -1,0 +1,86 @@
+.root {
+  position: relative;
+  border-radius: 4px;
+}
+
+.inline {
+  display: inline-grid;
+  vertical-align: baseline;
+  cursor: text;
+}
+
+.inlineSource,
+.inlinePreview {
+  grid-area: 1 / 1;
+}
+
+.inlinePreview {
+  pointer-events: none;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.inline[data-renderable='true'] .inlineSource {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.inline[data-math-inline-editing='true'] .inlinePreview {
+  display: none;
+}
+
+.inline[data-math-inline-editing='true'] .inlineSource {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+  white-space: pre-wrap;
+}
+
+.inline[data-empty='true'] .inlineSource::before {
+  color: var(--mantine-color-dimmed);
+  content: '$';
+}
+
+.block {
+  display: block;
+  min-height: 3rem;
+  padding: 0.75rem;
+  border-radius: 0;
+  cursor: pointer;
+  text-align: center;
+}
+
+.block[data-selected='true'] {
+  outline: 1px solid var(--mantine-primary-color-filled);
+  outline-offset: 2px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.rendered {
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.error {
+  display: block;
+  margin-top: 0.4rem;
+  color: var(--mantine-color-red-6);
+  font-size: 0.75rem;
+  text-align: left;
+  white-space: pre-wrap;
+}

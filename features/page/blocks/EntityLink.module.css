@@ -1,0 +1,9 @@
+.link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.link:hover,
+.link:focus-visible {
+  color: var(--mantine-primary-color-filled);
+}

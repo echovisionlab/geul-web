@@ -1,0 +1,25 @@
+.caption,
+.captionInput {
+  text-align: left;
+}
+
+@media (max-width: 48em) {
+  .frame {
+    width: 100% !important;
+    margin-inline: 0 !important;
+  }
+}
+
+.caption {
+  display: block;
+  width: 100%;
+  min-height: 20px;
+  margin-top: 0.25rem;
+  padding: 0;
+  cursor: text;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: var(--mantine-font-size-sm);
+  color: var(--mantine-color-dimmed);
+}

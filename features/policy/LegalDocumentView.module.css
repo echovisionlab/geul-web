@@ -1,0 +1,46 @@
+@media print {
+  .document,
+  .content {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .document > * + * {
+    margin-top: 6mm;
+  }
+
+  .header,
+  .title,
+  .notice {
+    display: block !important;
+    break-inside: avoid;
+  }
+
+  .title > * + * {
+    margin-top: 2mm;
+  }
+
+  .metadata {
+    display: flex !important;
+  }
+
+  .content table {
+    break-inside: auto;
+  }
+
+  .content thead {
+    display: table-header-group;
+    break-inside: avoid;
+  }
+
+  .content tr {
+    break-inside: avoid;
+  }
+}
+
+.metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+}

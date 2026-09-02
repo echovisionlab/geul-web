@@ -1,0 +1,58 @@
+.userList {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.userLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+  min-width: 0;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  color: var(--user-inline-link-color, inherit);
+  text-decoration: none;
+  transition: color 0.15s ease;
+  vertical-align: middle;
+}
+
+.userLink:hover,
+.userLink:focus-visible {
+  color: var(--mantine-primary-color-filled);
+}
+
+.userAvatar {
+  flex-shrink: 0;
+  border: 2px solid var(--user-inline-avatar-border-color, transparent);
+  transition: border-color 0.15s ease;
+}
+
+.userLink:hover .userAvatar,
+.userLink:focus-visible .userAvatar {
+  border-color: var(--mantine-primary-color-filled);
+}
+
+.userLabel {
+  display: inline-block;
+  min-width: 0;
+  white-space: nowrap;
+  line-height: 1.1;
+}
+
+.userOverflowLabel {
+  display: inline-block;
+  white-space: nowrap;
+  color: var(--user-inline-link-color, inherit);
+  line-height: 1.1;
+  font-size: var(--mantine-font-size-xs);
+}
+
+.separator {
+  display: inline-block;
+  color: var(--user-inline-link-color, inherit);
+  white-space: nowrap;
+}

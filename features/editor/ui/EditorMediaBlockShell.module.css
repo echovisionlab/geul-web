@@ -1,0 +1,63 @@
+.frame {
+  max-width: 100%;
+}
+
+/* Shared selected-boundary chrome for independent editor blocks. */
+.frame[data-selected='true'] {
+  outline: 1px solid var(--mantine-primary-color-filled);
+  outline-offset: 2px;
+}
+
+.frame[data-selected='true'][data-suppress-static-text-selection='true'] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.frame[data-selected='true'][data-suppress-static-text-selection='true']
+  :is(input, textarea, [contenteditable='true']) {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.frame[data-selected='true'][data-suppress-static-text-selection='true'] select {
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+
+.resizeHandle {
+  position: absolute;
+  top: 50%;
+  z-index: 10;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.15s ease;
+}
+
+.resizeHandle[data-resize-direction='left'] {
+  left: -4px;
+}
+
+.resizeHandle[data-resize-direction='right'] {
+  right: -4px;
+}
+
+.frame:hover .resizeHandle,
+.frame[data-selected='true'] .resizeHandle,
+.frame[data-resizing='true'] .resizeHandle,
+.resizeHandle:focus-visible {
+  opacity: 1;
+}
+
+.dragShield {
+  position: absolute;
+  z-index: 9;
+  inset: 0;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+@media (max-width: 768px) {
+  .resizeHandle {
+    display: none;
+  }
+}

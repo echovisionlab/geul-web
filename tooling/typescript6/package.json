@@ -1,0 +1,13 @@
+{
+  "name": "typescript",
+  "version": "6.0.2",
+  "private": true,
+  "main": "./index.cjs",
+  "types": "./index.d.ts",
+  "bin": {
+    "tsc": "./bin/tsc.cjs"
+  },
+  "dependencies": {
+    "@typescript/typescript6": "6.0.2"
+  }
+}

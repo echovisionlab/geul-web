@@ -1,0 +1,25 @@
+.workspaceContent {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 3rem);
+  max-height: calc(100dvh - 3rem);
+}
+
+.workspaceHeader {
+  flex: 0 0 auto;
+}
+
+.workspaceBody {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 47.99em) {
+  .workspaceContent {
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+}

@@ -1,0 +1,47 @@
+.root {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--mantine-spacing-lg);
+  align-items: start;
+}
+
+.panel {
+  min-width: 0;
+}
+
+.heading {
+  padding-block: var(--mantine-spacing-xs);
+  border-block-end: 1px solid var(--mantine-color-default-border);
+  color: var(--mantine-color-dimmed);
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.surface {
+  min-width: 0;
+  padding-block: var(--mantine-spacing-md);
+}
+
+.publicSurface {
+  overflow: hidden;
+}
+
+/* The comparison isolates document styling from the authoring canvas chrome. */
+.authoringEditor :global(.ProseMirror) {
+  min-height: 0;
+  padding: 0;
+}
+
+@media (max-width: 62em) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

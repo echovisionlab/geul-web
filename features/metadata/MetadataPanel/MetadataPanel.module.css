@@ -1,0 +1,5 @@
+.warningIcon {
+  color: var(--mantine-color-yellow-6);
+  display: block;
+  transform: translateY(1px);
+}

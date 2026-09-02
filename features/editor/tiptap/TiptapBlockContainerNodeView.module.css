@@ -1,0 +1,104 @@
+.container {
+  position: relative;
+  width: 100%;
+}
+
+.content {
+  display: block;
+  width: 100%;
+}
+
+.container[data-container-kind='callout'] > .content {
+  padding: var(--mantine-spacing-md);
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-default);
+}
+
+.container[data-container-kind='callout'] > .content > [data-node-view-content-react] {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--mantine-spacing-sm);
+}
+
+.container[data-container-kind='callout'] > .content > [data-node-view-content-react] > [data-content-type='callout'] {
+  position: relative;
+  grid-column: 1 / -1;
+  min-width: 0;
+  min-height: var(--mantine-line-height-md);
+  padding-inline-start: calc(1.5em + var(--mantine-spacing-sm));
+}
+
+.container[data-container-kind='callout']
+  > .content
+  > [data-node-view-content-react]
+  > [data-content-type='callout']::before {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  width: 1.5em;
+  content: '💡';
+  font-size: var(--mantine-font-size-lg);
+  line-height: var(--mantine-line-height-md);
+  text-align: center;
+}
+
+.container[data-container-kind='callout']
+  > .content
+  > [data-node-view-content-react]
+  > [data-content-type='callout'][data-icon]::before {
+  content: attr(data-icon);
+}
+
+.container[data-container-kind='callout'][data-callout-icon-picker='true']
+  > .content
+  > [data-node-view-content-react]
+  > [data-content-type='callout']::before {
+  content: '';
+}
+
+.container[data-container-kind='callout'] > .content > [data-node-view-content-react] > [data-node-type='blockGroup'] {
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding-inline-start: calc(1.5em + var(--mantine-spacing-sm) + 1.75rem);
+  margin-top: 0;
+}
+
+.content > [data-node-view-content-react] > [data-node-type='blockGroup'] {
+  padding-inline-start: var(--mantine-spacing-lg);
+  margin-top: var(--mantine-spacing-xs);
+}
+
+.handle {
+  position: absolute;
+  top: 0;
+  inset-inline-start: -1.75rem;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 100ms ease;
+}
+
+.calloutIconPicker {
+  position: absolute;
+  z-index: 3;
+  inset-block-start: var(--mantine-spacing-sm);
+  inset-inline-start: var(--mantine-spacing-sm);
+}
+
+.container:hover > .handle,
+.container:focus-within > .handle,
+.container[data-selected='true'] > .handle {
+  opacity: 1;
+}
+
+/* Nested Blocks remain independently draggable, but only the deepest active
+ * Block owns the gutter. This mirrors container authoring without stacking a
+ * parent handle over a child handle or the Callout icon. */
+.container:has(.container:hover) > .handle,
+.container:has(.container:focus-within) > .handle {
+  opacity: 0;
+}
+
+.container:hover:not(:has(.container:hover)) > .handle,
+.container[data-selected='true'] > .handle {
+  opacity: 1;
+}

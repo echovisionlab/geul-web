@@ -1,0 +1,43 @@
+.sortableHeaderButton {
+  color: inherit;
+  transition: color 0.15s ease;
+}
+
+.sortableHeaderButton:hover,
+.sortableHeaderButton:focus-visible {
+  color: var(--mantine-primary-color-filled);
+}
+
+.sortableHeaderButton:disabled {
+  color: inherit;
+}
+
+.rowWithAction:has(.rowActionControl:focus-visible) {
+  outline: 2px solid var(--mantine-primary-color-filled);
+  outline-offset: -2px;
+}
+
+.rowActionControl {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+  clip-path: inset(50%);
+}
+
+.disabledRow {
+  opacity: 0.5;
+}
+
+.dimmedRow {
+  opacity: 0.5;
+}
+
+.dimmedRow:hover,
+.dimmedRow:focus-visible {
+  opacity: 0.72;
+}

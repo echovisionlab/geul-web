@@ -1,0 +1,8 @@
+/* Persisted map HTML is consumed outside the editor. Keep only its public contract styles global. */
+.map-block {
+  margin: 1rem 0;
+}
+
+.map-block-figure figcaption {
+  text-align: left;
+}

@@ -1,0 +1,11 @@
+.itemLink {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.itemLink:hover,
+.itemLink:focus-visible {
+  color: var(--mantine-primary-color-filled);
+  text-decoration: none;
+}

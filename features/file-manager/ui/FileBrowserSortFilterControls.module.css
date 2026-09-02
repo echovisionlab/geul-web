@@ -1,0 +1,14 @@
+.root,
+.control {
+  min-width: 0;
+}
+
+.control {
+  flex: 1 1 132px;
+}
+
+@media (max-width: 35.99em) {
+  .root {
+    width: 100%;
+  }
+}

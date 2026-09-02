@@ -1,0 +1,22 @@
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index cb4dde7ee7ebc13c366548610d88e24ea672fd03..eb06fd3319a38e1f78c6fc571610777dd07a94d9 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -103,7 +103,7 @@ type DiffEditorProps = {
+     onMount?: DiffOnMount;
+ };
+ 
+-declare function DiffEditor({ original, modified, language, originalLanguage, modifiedLanguage, originalModelPath, modifiedModelPath, keepCurrentOriginalModel, keepCurrentModifiedModel, theme, loading, options, height, width, className, wrapperProps, beforeMount, onMount, }: DiffEditorProps): JSX.Element;
++declare function DiffEditor({ original, modified, language, originalLanguage, modifiedLanguage, originalModelPath, modifiedModelPath, keepCurrentOriginalModel, keepCurrentModifiedModel, theme, loading, options, height, width, className, wrapperProps, beforeMount, onMount, }: DiffEditorProps): react.JSX.Element;
+ 
+ declare const _default$1: react.MemoExoticComponent<typeof DiffEditor>;
+ 
+@@ -222,7 +222,7 @@ type EditorProps = {
+     onValidate?: OnValidate;
+ };
+ 
+-declare function Editor({ defaultValue, defaultLanguage, defaultPath, value, language, path, theme, line, loading, options, overrideServices, saveViewState, keepCurrentModel, width, height, className, wrapperProps, beforeMount, onMount, onChange, onValidate, }: EditorProps): JSX.Element;
++declare function Editor({ defaultValue, defaultLanguage, defaultPath, value, language, path, theme, line, loading, options, overrideServices, saveViewState, keepCurrentModel, width, height, className, wrapperProps, beforeMount, onMount, onChange, onValidate, }: EditorProps): react.JSX.Element;
+ 
+ declare const _default: react.MemoExoticComponent<typeof Editor>;
+ 

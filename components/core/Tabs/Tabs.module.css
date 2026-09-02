@@ -1,0 +1,26 @@
+.root [role='tablist'] {
+  gap: 4px;
+}
+
+.root [role='tab'] {
+  min-height: var(--chrome-row-height);
+  padding: 4px 8px;
+  font-size: var(--chrome-font-size);
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+
+.root [role='tab'] > span[data-position] {
+  margin-inline: 0 6px;
+}
+
+.root [role='tab'] > span[data-position='right'] {
+  margin-inline: 6px 0;
+}
+
+.root [role='tab'] > span[data-position] > :is(svg, img) {
+  width: var(--chrome-icon-size);
+  height: var(--chrome-icon-size);
+  max-width: var(--chrome-icon-size);
+  max-height: var(--chrome-icon-size);
+}

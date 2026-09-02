@@ -1,0 +1,19 @@
+.icon {
+  --social-icon-brand-color: var(--social-icon-brand-light);
+
+  display: block;
+  flex: none;
+  color: currentcolor;
+}
+
+:global([data-mantine-color-scheme='dark']) .icon {
+  --social-icon-brand-color: var(--social-icon-brand-dark);
+}
+
+.icon[data-color-mode='brand'] {
+  color: var(--social-icon-brand-color);
+}
+
+:where(a, button):is(:hover, :focus-visible, :focus-within) .icon[data-color-mode='hoverBrand'] {
+  color: var(--social-icon-brand-color);
+}

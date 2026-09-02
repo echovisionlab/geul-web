@@ -1,0 +1,187 @@
+.root {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.toolbar {
+  display: grid;
+  grid-column: 1;
+  grid-row: 1;
+  grid-template-columns: minmax(120px, 1fr) auto minmax(250px, 340px) minmax(220px, 360px);
+  gap: var(--mantine-spacing-sm);
+  align-items: center;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md) var(--mantine-spacing-sm);
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+.path,
+.search,
+.sortFilter,
+.viewToggle {
+  min-width: 0;
+}
+
+.path {
+  grid-column: 1;
+}
+
+.viewToggle {
+  grid-column: 2;
+}
+
+.sortFilter {
+  grid-column: 3;
+}
+
+.search {
+  grid-column: 4;
+  margin-inline-end: var(--mantine-spacing-md);
+}
+
+.scopeBar {
+  grid-column: 1;
+  grid-row: 2;
+  min-width: 0;
+  min-height: 40px;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+.scopeControl {
+  min-width: 0;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.results {
+  position: relative;
+  grid-column: 1;
+  grid-row: 3;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.gridSurface {
+  min-height: 100%;
+  padding: var(--mantine-spacing-md);
+}
+
+.listSurface {
+  min-width: 0;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md) var(--mantine-spacing-md);
+}
+
+.centerState {
+  min-height: 280px;
+}
+
+.preview {
+  display: grid;
+  min-height: 12rem;
+  overflow: hidden;
+  place-items: center;
+}
+
+.detailValue {
+  min-width: 0;
+  max-width: 24rem;
+  text-align: end;
+}
+
+.footer {
+  flex: 0 0 auto;
+  min-height: 56px;
+  padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+  border-top: 1px solid var(--mantine-color-default-border);
+}
+
+.loadMoreSentinel {
+  height: 1px;
+}
+
+.loadMoreFallback {
+  display: flex;
+  margin: var(--mantine-spacing-sm) auto var(--mantine-spacing-md);
+}
+
+.contextTarget {
+  position: fixed;
+  z-index: 400;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+@media (max-width: 54.99em) {
+  .toolbar {
+    grid-template-columns: minmax(250px, 1fr) minmax(220px, 360px);
+  }
+
+  .path {
+    grid-column: 1;
+  }
+
+  .viewToggle {
+    grid-column: 2;
+    justify-self: end;
+  }
+
+  .sortFilter {
+    grid-column: 1;
+  }
+
+  .search {
+    grid-column: 2;
+    width: min(360px, 38vw);
+  }
+}
+
+@media (max-width: 47.99em) {
+  .toolbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-inline: var(--mantine-spacing-sm);
+  }
+
+  .path {
+    grid-column: 1;
+  }
+
+  .viewToggle {
+    grid-column: 2;
+    justify-self: end;
+  }
+
+  .sortFilter,
+  .search {
+    grid-column: 1 / -1;
+    width: auto;
+  }
+
+  .search {
+    margin-inline-end: 0;
+  }
+
+  .scopeBar {
+    padding-inline: var(--mantine-spacing-sm);
+    overflow-x: auto;
+  }
+
+  .gridSurface,
+  .listSurface {
+    padding-inline: var(--mantine-spacing-sm);
+  }
+
+  .footer {
+    padding-inline: var(--mantine-spacing-sm);
+  }
+}

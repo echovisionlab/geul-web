@@ -1,0 +1,22 @@
+.handle {
+  box-sizing: border-box;
+  width: 8px;
+  height: 30px;
+  padding: 0;
+  appearance: none;
+  background-color: var(--mantine-primary-color-filled);
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: 0;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.handle:is(:hover, :focus-visible) {
+  background-color: var(--mantine-primary-color-filled-hover);
+  border-color: var(--mantine-primary-color-filled);
+}
+
+.handle:focus-visible {
+  outline: 2px solid var(--mantine-primary-color-filled);
+  outline-offset: 2px;
+}

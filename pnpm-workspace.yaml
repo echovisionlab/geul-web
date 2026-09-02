@@ -1,0 +1,115 @@
+packages:
+  - '.'
+  - 'tooling/*'
+
+blockExoticSubdeps: false
+injectWorkspacePackages: true
+minimumReleaseAgeExclude:
+  - '@echovisionlab/*'
+
+overrides:
+  '@babel/core': 8.0.1
+  '@protobufjs/utf8': 1.1.1
+  '@types/dom-mediacapture-transform>@types/dom-webcodecs': 0.1.13
+  '@tiptap/core': 3.30.1
+  '@tiptap/extension-bold': 3.30.1
+  '@tiptap/extension-bubble-menu': 3.30.1
+  '@tiptap/extension-code': 3.30.1
+  '@tiptap/extension-floating-menu': 3.30.1
+  '@tiptap/extension-horizontal-rule': 3.30.1
+  '@tiptap/extension-italic': 3.30.1
+  '@tiptap/extension-paragraph': 3.30.1
+  '@tiptap/extension-strike': 3.30.1
+  '@tiptap/extension-text': 3.30.1
+  '@tiptap/extension-underline': 3.30.1
+  '@tiptap/extensions': 3.30.1
+  '@tiptap/pm': 3.30.1
+  '@tiptap/react': 3.30.1
+  '@xmldom/xmldom': 0.8.13
+  '@tootallnate/once': 3.0.1
+  brace-expansion@1: 1.1.18
+  brace-expansion@5: 5.0.9
+  dompurify: 3.4.13
+  fast-uri: 3.1.5
+  immer: 11.1.10
+  json-schema-migrate>ajv: 6.14.0
+  lodash: 4.18.1
+  next: 16.3.1
+  postcss: 8.5.26
+  protobufjs@7: 7.5.6
+  protobufjs@8: 8.0.2
+  prosemirror-model: 1.25.8
+  prosemirror-view: 1.41.9
+  uuid: 11.1.1
+  vite: 8.0.16
+  ws: 8.21.3
+  js-yaml: 4.3.1
+  webapi-parser>ajv: 6.14.0
+  '@storybook/builder-webpack5@10.5.8>typescript': workspace:*
+  '@storybook/nextjs@10.5.8>typescript': workspace:*
+  '@storybook/preset-react-webpack@10.5.8>typescript': workspace:*
+  '@storybook/react@10.5.8>typescript': workspace:*
+  '@storybook/react-docgen-typescript-plugin@1.0.6--canary.9.0c3f3b7.0>typescript': workspace:*
+  'fork-ts-checker-webpack-plugin@9.1.0>typescript': workspace:*
+  'react-docgen-typescript@2.4.0>typescript': workspace:*
+
+allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
+  core-js-pure: true
+  esbuild: true
+  protobufjs: true
+  sharp: true
+  unrs-resolver: true
+
+peerDependencyRules:
+  allowedVersions:
+    '@mantine/core': 9.5.1
+    '@mantine/hooks': 9.5.1
+  ignoreMissing:
+    - '@floating-ui/dom'
+    - '@mantine/utils'
+
+packageExtensions:
+  '@mantine/hooks@9.5.1':
+    peerDependencies:
+      react-dom: ^19.2.0
+  '@maplibre/maplibre-gl-style-spec@26.2.1':
+    dependencies:
+      '@types/geojson': 7946.0.16
+  '@storybook/builder-webpack5@10.5.8':
+    dependencies:
+      typescript: workspace:*
+  '@storybook/nextjs@10.5.8':
+    dependencies:
+      typescript: workspace:*
+  '@storybook/preset-react-webpack@10.5.8':
+    dependencies:
+      typescript: workspace:*
+  '@storybook/react@10.5.8':
+    dependencies:
+      typescript: workspace:*
+  'eslint-config-mantine@4.0.3':
+    dependencies:
+      typescript: npm:@typescript/typescript6@6.0.2
+  '@storybook/react-docgen-typescript-plugin@1.0.6--canary.9.0c3f3b7.0':
+    dependencies:
+      typescript: workspace:*
+  'fork-ts-checker-webpack-plugin@9.1.0':
+    dependencies:
+      typescript: workspace:*
+  'react-docgen-typescript@2.4.0':
+    dependencies:
+      typescript: workspace:*
+
+patchedDependencies:
+  '@dnd-kit/core@6.3.1': patches/@dnd-kit__core@6.3.1.patch
+  '@dnd-kit/sortable@10.0.0': patches/@dnd-kit__sortable@10.0.0.patch
+  '@maplibre/maplibre-gl-style-spec@26.2.1': patches/@maplibre__maplibre-gl-style-spec@26.2.1.patch
+  '@monaco-editor/react@4.7.0': patches/@monaco-editor__react@4.7.0.patch
+  '@stitches/react@1.2.8': patches/@stitches__react@1.2.8.patch
+  '@tabler/icons-react@3.46.0': patches/@tabler__icons-react@3.46.0.patch
+  '@types/dom-webcodecs@0.1.13': patches/@types__dom-webcodecs@0.1.13.patch
+  ast-types@0.16.1: patches/ast-types@0.16.1.patch
+  simple-icons@16.28.0: patches/simple-icons@16.28.0.patch
+  zustand@3.7.2: patches/zustand@3.7.2.patch

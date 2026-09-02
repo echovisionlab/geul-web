@@ -1,0 +1,26 @@
+diff --git a/types/stitches.d.ts b/types/stitches.d.ts
+index 846f281ad4e6877828d9ff03a473a643be1bd0ab..09dc8af1b86bde01732a7f58ffab18cf98cf9a9b 100644
+--- a/types/stitches.d.ts
++++ b/types/stitches.d.ts
+@@ -204,7 +204,7 @@ export default interface Stitches<
+ 	}
+ 	styled: {
+ 		<
+-			Type extends keyof JSX.IntrinsicElements | React.ComponentType<any> | Util.Function,
++			Type extends keyof React.JSX.IntrinsicElements | React.ComponentType<any> | Util.Function,
+ 			Composers extends (
+ 				| string
+ 				| React.ComponentType<any>
+diff --git a/types/styled-component.d.ts b/types/styled-component.d.ts
+index cdda8475a094ed691b06f3eef3538bf0aa98df5d..8da3534484870bbd9fa9fecab966a65a0b7bb582 100644
+--- a/types/styled-component.d.ts
++++ b/types/styled-component.d.ts
+@@ -2,7 +2,7 @@ import type * as React from 'react'
+ import type * as Util from './util'
+ 
+ 
+-export type IntrinsicElementsKeys = keyof JSX.IntrinsicElements;
++export type IntrinsicElementsKeys = keyof React.JSX.IntrinsicElements;
+ 
+ /** Returns a new Styled Component. */
+ export interface StyledComponent<

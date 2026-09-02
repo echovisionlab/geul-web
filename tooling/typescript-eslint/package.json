@@ -1,0 +1,23 @@
+{
+  "name": "typescript-eslint",
+  "version": "8.66.0",
+  "private": true,
+  "type": "module",
+  "main": "./index.cjs",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.mjs",
+      "require": "./index.cjs",
+      "default": "./index.cjs"
+    }
+  },
+  "types": "./index.d.ts",
+  "dependencies": {
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "typescript-eslint-upstream": "npm:typescript-eslint@8.66.0"
+  },
+  "peerDependencies": {
+    "eslint": "^8.57.0 || ^9.0.0 || ^10.0.0"
+  }
+}

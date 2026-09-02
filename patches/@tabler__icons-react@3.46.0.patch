@@ -1,0 +1,15 @@
+diff --git a/dist/tabler-icons-react.d.ts b/dist/tabler-icons-react.d.ts
+index a66dc515dc49c1d782fe42966e12380a3db03e97..36fe0d7f85e31f15c9edb7af5e30abc7754e235a 100644
+--- a/dist/tabler-icons-react.d.ts
++++ b/dist/tabler-icons-react.d.ts
+@@ -1,8 +1,8 @@
+ import * as react from 'react';
+-import { ReactSVG, FunctionComponent, ForwardRefExoticComponent, RefAttributes } from 'react';
++import { FunctionComponent, ForwardRefExoticComponent, RefAttributes } from 'react';
+ export { ReactNode } from 'react';
+ 
+-type IconNode = [elementName: keyof ReactSVG, attrs: Record<string, string>][];
++type IconNode = [elementName: keyof react.JSX.IntrinsicElements, attrs: Record<string, string>][];
+ interface IconProps extends Partial<Omit<React.ComponentPropsWithoutRef<'svg'>, 'stroke'>> {
+     size?: string | number;
+     stroke?: string | number;

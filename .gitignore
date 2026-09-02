@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Next.js
+.next/
+.next-integration-*/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Test and coverage output
+coverage/
+.coverage/
+test-results/
+storybook-static/
+tests/.test-env.json
+
+# Local artifacts
+tmp/
+.artifacts/
+public/providers/maplibre/
+public/vendors/p5/
+*.log
+.DS_Store
+*.tmp
+*.temp
+
+# Tool caches
+.idea/
+.eslintcache
+.stylelintcache
+.cache/
+.parcel-cache/

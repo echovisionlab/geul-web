@@ -1,0 +1,20 @@
+.wrapper {
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-sm);
+  min-height: 120px;
+}
+
+.wrapper[data-disabled='true'] {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Make editor fill container height */
+.wrapper :global(.bn-container) {
+  min-height: 120px;
+}
+
+.wrapper :global(.bn-editor) {
+  min-height: 120px;
+  padding: calc(var(--mantine-spacing-sm) + 2px);
+}

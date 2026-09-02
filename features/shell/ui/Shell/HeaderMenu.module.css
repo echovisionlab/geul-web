@@ -1,0 +1,41 @@
+.nav {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+}
+
+.link {
+  --text-button-min-height: var(--chrome-row-height);
+  --text-button-padding-block: 4px;
+  --text-button-padding-inline: 8px;
+  --text-button-line-height: 1.25;
+  --text-button-color: light-dark(var(--mantine-color-gray-7, #495057), var(--mantine-color-dark-0, #c9c9c9));
+  --text-button-hover-color: var(--text-button-color);
+  --text-button-font-size: var(--chrome-font-size);
+  --text-button-font-weight: 500;
+  display: flex;
+  min-height: var(--chrome-row-height);
+  align-items: center;
+  padding: 4px 8px;
+  line-height: 1.25;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 0;
+  text-decoration: none;
+  color: light-dark(var(--mantine-color-gray-7, #495057), var(--mantine-color-dark-0, #c9c9c9));
+  font-size: var(--chrome-font-size);
+  font-weight: 500;
+}
+
+.link:hover {
+  background-color: light-dark(var(--mantine-color-gray-0, #f8f9fa), var(--mantine-color-dark-6, #2e2e2e));
+}
+
+.link[data-active] {
+  background-color: light-dark(var(--mantine-color-gray-1, #f1f3f5), var(--mantine-color-dark-5, #3b3b3b));
+}
+
+.linkLabel {
+  margin-right: 0;
+}

@@ -1,0 +1,2 @@
+/* Compatibility import for existing editor consumers. Resize styling is local to
+ * EditorMediaBlockShell.module.css; remove this file's imports with those callers. */

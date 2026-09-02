@@ -1,0 +1,82 @@
+.trigger {
+  position: relative;
+  overflow: visible;
+}
+
+.trigger[data-count]::after {
+  position: absolute;
+  inset-block-start: -3px;
+  inset-inline-end: -3px;
+  display: grid;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  place-items: center;
+  color: var(--mantine-color-white);
+  border: 1px solid var(--mantine-color-body);
+  border-radius: 999px;
+  background: var(--mantine-primary-color-filled);
+  content: attr(data-count);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.intro {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+.list {
+  display: grid;
+}
+
+.option {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 12px;
+  cursor: pointer;
+}
+
+.option + .option {
+  border-top: 1px solid var(--mantine-color-default-border);
+}
+
+.option:hover {
+  background: var(--mantine-color-default-hover);
+}
+
+.option[data-suggested] {
+  background: color-mix(in srgb, var(--mantine-primary-color-light) 55%, transparent);
+}
+
+.option[data-unsupported] {
+  color: var(--mantine-color-dimmed);
+}
+
+.icon {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.optionBody {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 2px;
+}
+
+.api {
+  overflow: hidden;
+  color: var(--mantine-color-dimmed);
+  font-size: var(--mantine-font-size-xs);
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
