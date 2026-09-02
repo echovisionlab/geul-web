@@ -83,11 +83,22 @@ describe('parseChangelogMarkdown', () => {
     expect(releases[0].groups.flatMap((group) => group.items)).toHaveLength(3);
   });
 
-  it('keeps the checked-in changelog headed by the current app version', async () => {
-    const markdown = await readFile(path.join(process.cwd(), 'CHANGELOG.md'), 'utf8').catch(() => null);
+  it('keeps the checked-in changelog aligned with the release manifest', async () => {
+    const [markdown, manifestSource] = await Promise.all([
+      readFile(path.join(process.cwd(), 'CHANGELOG.md'), 'utf8').catch(() => null),
+      readFile(path.join(process.cwd(), '.release-please-manifest.json'), 'utf8'),
+    ]);
     expect(markdown).not.toBeNull();
 
     const releases = parseChangelogMarkdown(markdown ?? '');
-    expect(releases[0]?.version).toBe(APP_VERSION);
+    const manifest = JSON.parse(manifestSource) as Record<string, string>;
+
+    if (manifest['.']) {
+      expect(releases[0]?.version).toBe(APP_VERSION);
+      expect(manifest['.']).toBe(APP_VERSION);
+      return;
+    }
+
+    expect(releases).toEqual([]);
   });
 });

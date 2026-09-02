@@ -86,7 +86,23 @@ jobs:
 
           base_version, base_package = read_package(base_sha)
           head_version, head_package = read_package(head_sha)
-          if base_version == head_version or base_package != head_package:
+
+          def read_manifest(revision: str) -> dict:
+              raw = subprocess.check_output(
+                  ["git", "show", f"{revision}:.release-please-manifest.json"], text=True
+              )
+              manifest = json.loads(raw)
+              if not isinstance(manifest, dict):
+                  raise SystemExit(1)
+              return manifest
+
+          base_manifest = read_manifest(base_sha)
+          head_manifest = read_manifest(head_sha)
+          version_bumped = base_version != head_version
+          initial_version_recorded = (
+              "." not in base_manifest and head_manifest.get(".") == head_version
+          )
+          if base_package != head_package or not (version_bumped or initial_version_recorded):
               raise SystemExit(1)
           PY
             fi
