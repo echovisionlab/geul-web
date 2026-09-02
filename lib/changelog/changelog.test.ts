@@ -53,6 +53,34 @@ describe('parseChangelogMarkdown', () => {
     ]);
   });
 
+  it('parses unlinked release headings without inventing a URL', () => {
+    const releases = parseChangelogMarkdown(`## 0.1.0 (2026-09-02)
+
+### Features
+
+* publish the initial application
+`);
+
+    expect(releases).toEqual([
+      {
+        version: '0.1.0',
+        url: null,
+        date: '2026-09-02',
+        groups: [
+          {
+            title: 'Features',
+            items: [
+              {
+                rawText: 'publish the initial application',
+                parts: [{ type: 'text', text: 'publish the initial application' }],
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
   it('keeps the larger section when the same version appears more than once', () => {
     const releases = parseChangelogMarkdown(`## [0.1.1](https://example.com/small) (2026-04-08)
 
