@@ -106,8 +106,8 @@ importers:
         specifier: 0.1.1
         version: 0.1.1(mitt@3.0.1)(three-stdlib@2.36.1(three@0.185.1))(three@0.185.1)
       '@echovisionlab/youtube-audio':
-        specifier: 0.1.2
-        version: 0.1.2
+        specifier: 0.1.4
+        version: 0.1.4
       '@hocuspocus/provider':
         specifier: ^4.6.0
         version: 4.6.0(y-protocols@1.0.7(yjs@13.6.32))(yjs@13.6.32)
@@ -1185,8 +1185,8 @@ packages:
       three: '>=0.175.0 <0.186.0'
       three-stdlib: '>=2.35.15 <3.0.0'
 
-  '@echovisionlab/youtube-audio@0.1.2':
-    resolution: {integrity: sha512-CNi5M49/FcIgPXdCr4sg2y8JomvxNmelP0BfVDTlrCBLbBczqVc7UDa+EnCSs2QsVcT6dJM5RHR5cPyYqbKNOg==}
+  '@echovisionlab/youtube-audio@0.1.4':
+    resolution: {integrity: sha512-t6xkCp3RIsUAdc+NTlKIyAm+2oe+yjsAVtQ6Pwjt2VkdZ4QaGXgnSn69VQOSQoPA9eYKJSXozV99rBgZTy+gwg==}
     engines: {node: 24.19.0}
 
   '@emnapi/core@1.10.0':
@@ -8549,7 +8549,7 @@ snapshots:
       three: 0.185.1
       three-stdlib: 2.36.1(three@0.185.1)
 
-  '@echovisionlab/youtube-audio@0.1.2':
+  '@echovisionlab/youtube-audio@0.1.4':
     dependencies:
       youtubei.js: 18.0.0
 
