@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/echovisionlab/geul-web/compare/v0.1.1...v0.1.2) (2026-09-03)
+
+
+### Bug Fixes
+
+* update YouTube audio range source ([#9](https://github.com/echovisionlab/geul-web/issues/9)) ([c2dea01](https://github.com/echovisionlab/geul-web/commit/c2dea01b6b16a1e75be9568cf4020a215acf767e))
+
 ## [0.1.1](https://github.com/echovisionlab/geul-web/compare/v0.1.0...v0.1.1) (2026-09-02)
 
 
