@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/echovisionlab/geul-web/compare/v0.1.2...v0.1.3) (2026-09-04)
+
+
+### Bug Fixes
+
+* stabilize YouTube audio conversion state ([#11](https://github.com/echovisionlab/geul-web/issues/11)) ([9fe3f45](https://github.com/echovisionlab/geul-web/commit/9fe3f4579e09036d02514f085e954a2a222fa1fc))
+
 ## [0.1.2](https://github.com/echovisionlab/geul-web/compare/v0.1.1...v0.1.2) (2026-09-03)
 
 
