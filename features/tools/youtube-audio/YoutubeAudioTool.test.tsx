@@ -137,5 +137,6 @@ describe('YoutubeAudioTool', () => {
       expect.objectContaining({ keepalive: true, method: 'DELETE' }),
     );
     expect(props().resolvedTitle).toBeNull();
+    expect(props().url).toBe('');
   });
 });

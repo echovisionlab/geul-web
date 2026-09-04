@@ -103,7 +103,7 @@ describe('createAudioTranscoderRuntime', () => {
           basePath: 'codec-assets',
           kind: 'jsdelivr-github',
           repository: 'echovisionlab/audio-transcoder',
-          tag: 'v0.1.1',
+          tag: 'v0.1.2',
         },
       },
       concurrency: 1,
@@ -165,8 +165,8 @@ describe('createAudioTranscoderRuntime', () => {
   it('aborts a stalled browser codec probe at the application deadline', async () => {
     const harness = createHarness();
     let observedSignal: AbortSignal | undefined;
-    const blockingPool = {
-      ...harness.pool,
+    const blockingEngine = {
+      ...harness.engine,
       probeInputSupport: vi.fn(
         (_input: unknown, options?: { readonly signal?: AbortSignal }) =>
           new Promise<AudioStreamInputSupportResult>((_resolve, reject) => {
@@ -176,6 +176,10 @@ describe('createAudioTranscoderRuntime', () => {
             });
           }),
       ),
+    } as unknown as AudioTranscoderStreamWorkerEngine;
+    const blockingPool = {
+      ...harness.pool,
+      schedule: <T>(operation: (engine: AudioTranscoderStreamWorkerEngine) => Promise<T>) => operation(blockingEngine),
     } as unknown as AudioTranscoderStreamWorkerPool;
     const runtime = createAudioTranscoderRuntime({
       dependencies: {
@@ -189,6 +193,54 @@ describe('createAudioTranscoderRuntime', () => {
     await expect(runtime.probeInput(INPUT)).rejects.toThrow('probe deadline aborted');
     expect(observedSignal?.aborted).toBe(true);
     expect(observedSignal?.reason).toBeInstanceOf(DOMException);
+  });
+
+  it('keeps multiple queued input probes READY by starting deadlines after admission', async () => {
+    const harness = createHarness();
+    let queue = Promise.resolve();
+    const legacyProbeInputSupport = vi.fn(
+      (_input: unknown, options?: { readonly signal?: AbortSignal }) =>
+        new Promise<AudioStreamInputSupportResult>((resolve, reject) => {
+          const timer = setTimeout(() => resolve(INPUT_SUPPORT), 30);
+          options?.signal?.addEventListener(
+            'abort',
+            () => {
+              clearTimeout(timer);
+              reject(options.signal?.reason);
+            },
+            { once: true },
+          );
+        }),
+    );
+    const queuedPool = {
+      ...harness.pool,
+      probeInputSupport: legacyProbeInputSupport,
+      schedule: <T>(operation: (engine: AudioTranscoderStreamWorkerEngine) => Promise<T>) => {
+        const admitted = queue.then(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 30));
+          return operation(harness.engine);
+        });
+        queue = admitted.then(
+          () => undefined,
+          () => undefined,
+        );
+        return admitted;
+      },
+    } as unknown as AudioTranscoderStreamWorkerPool;
+    const runtime = createAudioTranscoderRuntime({
+      dependencies: {
+        ...harness.dependencies,
+        createPool: () => queuedPool,
+      },
+      pageHideTarget: null,
+      probeDeadlineMs: 20,
+    });
+
+    await expect(
+      Promise.all([runtime.probeInput(INPUT), runtime.probeInput(INPUT), runtime.probeInput(INPUT)]),
+    ).resolves.toEqual([INPUT_SUPPORT, INPUT_SUPPORT, INPUT_SUPPORT]);
+    expect(harness.probeInputSupport).toHaveBeenCalledTimes(3);
+    expect(legacyProbeInputSupport).not.toHaveBeenCalled();
   });
 
   it('retries an inconclusive input probe once at the documented maximum read budget', async () => {
@@ -555,11 +607,13 @@ function createHarness(options: HarnessOptions = {}) {
       return TRANSCODE_RESULT;
     },
   );
-  const engine = {
-    transcode: engineTranscode,
-  } as unknown as AudioTranscoderStreamWorkerEngine;
   const probeInputSupport = vi.fn(async () => INPUT_SUPPORT);
   const probeOutputSupport = vi.fn(async () => outputProbeResult);
+  const engine = {
+    probeInputSupport,
+    probeOutputSupport,
+    transcode: engineTranscode,
+  } as unknown as AudioTranscoderStreamWorkerEngine;
   const disposePool = vi.fn(async () => {
     order.push('pool.dispose');
     if (options.poolDisposeError !== undefined) {
@@ -615,6 +669,7 @@ function createHarness(options: HarnessOptions = {}) {
     disposeOutputSession,
     disposePackageArtifact,
     disposePool,
+    engine,
     engineTranscode,
     get createWasInsideSchedule() {
       return createWasInsideSchedule;
