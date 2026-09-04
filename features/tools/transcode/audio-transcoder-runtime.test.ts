@@ -103,7 +103,7 @@ describe('createAudioTranscoderRuntime', () => {
           basePath: 'codec-assets',
           kind: 'jsdelivr-github',
           repository: 'echovisionlab/audio-transcoder',
-          tag: 'v0.1.1',
+          tag: 'v0.1.2',
         },
       },
       concurrency: 1,

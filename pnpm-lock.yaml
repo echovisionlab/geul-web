@@ -88,8 +88,8 @@ importers:
         specifier: ^3.2.2
         version: 3.2.2(react@19.2.8)
       '@echovisionlab/audio-transcoder':
-        specifier: 0.1.1
-        version: 0.1.1
+        specifier: 0.1.2
+        version: 0.1.2
       '@echovisionlab/geul-common':
         specifier: 0.1.2
         version: 0.1.2(yjs@13.6.32)
@@ -106,8 +106,8 @@ importers:
         specifier: 0.1.1
         version: 0.1.1(mitt@3.0.1)(three-stdlib@2.36.1(three@0.185.1))(three@0.185.1)
       '@echovisionlab/youtube-audio':
-        specifier: 0.1.4
-        version: 0.1.4
+        specifier: 0.1.5
+        version: 0.1.5
       '@hocuspocus/provider':
         specifier: ^4.6.0
         version: 4.6.0(y-protocols@1.0.7(yjs@13.6.32))(yjs@13.6.32)
@@ -1155,8 +1155,8 @@ packages:
     peerDependencies:
       react: '>=16.8.0'
 
-  '@echovisionlab/audio-transcoder@0.1.1':
-    resolution: {integrity: sha512-2nprAsMQIi34v43tyTdV8+9KnFtAZ3PpQu2kJ+7Kfg0hlWS5wnPQZowBTtk48p2t4Q377OMUyNZb1Iiy9kX9GQ==}
+  '@echovisionlab/audio-transcoder@0.1.2':
+    resolution: {integrity: sha512-nHQ1TQP2I2gkeKhxlCLFczcWJzAkfCQXz2oFyegzbcG9Vvu3n19Uv09kVTiy4TdokhwB0eA9muf2ur+PQGktmw==}
     engines: {node: 24.19.0}
 
   '@echovisionlab/geul-common@0.1.2':
@@ -1185,8 +1185,8 @@ packages:
       three: '>=0.175.0 <0.186.0'
       three-stdlib: '>=2.35.15 <3.0.0'
 
-  '@echovisionlab/youtube-audio@0.1.4':
-    resolution: {integrity: sha512-t6xkCp3RIsUAdc+NTlKIyAm+2oe+yjsAVtQ6Pwjt2VkdZ4QaGXgnSn69VQOSQoPA9eYKJSXozV99rBgZTy+gwg==}
+  '@echovisionlab/youtube-audio@0.1.5':
+    resolution: {integrity: sha512-HaxhlyMHfp9eK3Qx/cgK+StsKORyAsSps1K511XJXVwmQY6+8l4twj50M/1Lb0F6linENH9ugLQ/KjxI2sdGIg==}
     engines: {node: 24.19.0}
 
   '@emnapi/core@1.10.0':
@@ -8519,7 +8519,7 @@ snapshots:
       react: 19.2.8
       tslib: 2.8.1
 
-  '@echovisionlab/audio-transcoder@0.1.1':
+  '@echovisionlab/audio-transcoder@0.1.2':
     dependencies:
       mediabunny: 1.55.1
 
@@ -8549,7 +8549,7 @@ snapshots:
       three: 0.185.1
       three-stdlib: 2.36.1(three@0.185.1)
 
-  '@echovisionlab/youtube-audio@0.1.4':
+  '@echovisionlab/youtube-audio@0.1.5':
     dependencies:
       youtubei.js: 18.0.0
 
