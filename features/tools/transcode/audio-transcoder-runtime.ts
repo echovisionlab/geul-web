@@ -221,11 +221,15 @@ export function createAudioTranscoderRuntime(
     probeInput(source, operationOptions = {}) {
       const pool = ensureResources().pool;
       const probe = (inputReadBytes: number | undefined) =>
-        withProbeDeadline(operationOptions.signal, probeDeadlineMs, (signal) =>
-          pool.probeInputSupport(source.input, {
-            ...(inputReadBytes === undefined ? {} : { inputReadBytes }),
-            signal,
-          }),
+        pool.schedule(
+          (engine) =>
+            withProbeDeadline(operationOptions.signal, probeDeadlineMs, (signal) =>
+              engine.probeInputSupport(source.input, {
+                ...(inputReadBytes === undefined ? {} : { inputReadBytes }),
+                signal,
+              }),
+            ),
+          { signal: operationOptions.signal },
         );
       return probe(operationOptions.inputReadBytes).catch((error: unknown) => {
         const maximumInputReadBytes = AUDIO_TRANSCODER_STREAM_CAPABILITIES.limits.buffers.maximumBytes;
@@ -240,8 +244,13 @@ export function createAudioTranscoderRuntime(
       });
     },
     probeOutput(target, operationOptions = {}) {
-      return withProbeDeadline(operationOptions.signal, probeDeadlineMs, (signal) =>
-        ensureResources().pool.probeOutputSupport(target, { signal }),
+      const pool = ensureResources().pool;
+      return pool.schedule(
+        (engine) =>
+          withProbeDeadline(operationOptions.signal, probeDeadlineMs, (signal) =>
+            engine.probeOutputSupport(target, { signal }),
+          ),
+        { signal: operationOptions.signal },
       );
     },
     transcode(request) {

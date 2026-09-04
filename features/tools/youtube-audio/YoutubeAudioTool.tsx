@@ -108,6 +108,7 @@ export function YoutubeAudioTool({ fetcher = fetch }: YoutubeAudioToolProps) {
     }
     resolvedRef.current = null;
     setResolved(null);
+    setUrl('');
     setErrorCode(null);
   }, [revoke]);
 
