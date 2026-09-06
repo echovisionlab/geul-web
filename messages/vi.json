@@ -5123,13 +5123,10 @@
   "tools": {
     "youtubeAudio": {
       "title": "Âm thanh YouTube",
-      "description": "Lưu âm thanh YouTube ở định dạng gốc hoặc chuyển đổi.",
-      "sourceTitle": "Nguồn YouTube",
-      "urlLabel": "URL YouTube",
-      "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+      "urlLabel": "Liên kết video",
+      "urlPlaceholder": "https://…",
       "resolve": "Tải âm thanh",
       "resolving": "Đang tải âm thanh",
-      "ready": "Nguồn đã sẵn sàng",
       "clear": "Xóa nguồn",
       "metadataTitle": "Âm thanh YouTube",
       "metadataDescription": "Chuyển đổi âm thanh từ nguồn YouTube đã xác thực trong trình duyệt của bạn.",

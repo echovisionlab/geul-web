@@ -128,13 +128,10 @@ export function YoutubeAudioTool({ fetcher = fetch }: YoutubeAudioToolProps) {
   const labels = useMemo<YoutubeAudioToolLabels>(
     () => ({
       title: t('title'),
-      description: t('description'),
-      sourceTitle: t('sourceTitle'),
       urlLabel: t('urlLabel'),
       urlPlaceholder: t('urlPlaceholder'),
       resolve: t('resolve'),
       resolving: t('resolving'),
-      ready: t('ready'),
       clear: t('clear'),
     }),
     [t],

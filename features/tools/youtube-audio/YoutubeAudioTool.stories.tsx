@@ -36,7 +36,6 @@ function LocalizedConverter(props: AudioTranscodeToolViewProps) {
   }
   const statusKeys = {
     inspecting: 'statusInspecting',
-    ready: 'statusReady',
     queued: 'statusQueued',
     converting: 'statusConverting',
     complete: 'statusComplete',
@@ -75,10 +74,8 @@ function LocalizedConverter(props: AudioTranscodeToolViewProps) {
 
 const labels: YoutubeAudioToolLabels = {
   title: 'YouTube Audio',
-  description: 'Save YouTube audio in its original format or convert it.',
-  sourceTitle: 'YouTube source',
-  urlLabel: 'YouTube URL',
-  urlPlaceholder: 'https://www.youtube.com/watch?v=...',
+  urlLabel: 'Video link',
+  urlPlaceholder: 'https://…',
   resolve: 'Load audio',
   resolving: 'Loading audio',
   ready: 'Source ready',

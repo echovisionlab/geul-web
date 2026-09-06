@@ -5123,13 +5123,10 @@
   "tools": {
     "youtubeAudio": {
       "title": "YouTube 音频",
-      "description": "以原始格式或所需格式保存 YouTube 音频。",
-      "sourceTitle": "YouTube 来源",
-      "urlLabel": "YouTube 网址",
-      "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+      "urlLabel": "视频链接",
+      "urlPlaceholder": "https://…",
       "resolve": "加载音频",
       "resolving": "正在加载音频",
-      "ready": "来源已就绪",
       "clear": "清除来源",
       "metadataTitle": "YouTube 音频",
       "metadataDescription": "在浏览器中转换经过身份验证的 YouTube 来源音频。",

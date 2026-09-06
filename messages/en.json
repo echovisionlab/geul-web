@@ -5123,13 +5123,10 @@
   "tools": {
     "youtubeAudio": {
       "title": "YouTube Audio",
-      "description": "Save YouTube audio in its original format or convert it.",
-      "sourceTitle": "YouTube source",
-      "urlLabel": "YouTube URL",
-      "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+      "urlLabel": "Video link",
+      "urlPlaceholder": "https://…",
       "resolve": "Load audio",
       "resolving": "Loading audio",
-      "ready": "Source ready",
       "clear": "Clear source",
       "metadataTitle": "YouTube Audio",
       "metadataDescription": "Convert audio from an authenticated YouTube source in your browser.",

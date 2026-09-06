@@ -5123,13 +5123,10 @@
   "tools": {
     "youtubeAudio": {
       "title": "YouTube オーディオ",
-      "description": "YouTube の音声を元の形式、またはお好みの形式で保存できます。",
-      "sourceTitle": "YouTube ソース",
-      "urlLabel": "YouTube URL",
-      "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+      "urlLabel": "動画リンク",
+      "urlPlaceholder": "https://…",
       "resolve": "オーディオを読み込む",
       "resolving": "オーディオを読み込み中",
-      "ready": "ソースの準備完了",
       "clear": "ソースをクリア",
       "metadataTitle": "YouTube オーディオ",
       "metadataDescription": "認証済みの YouTube ソースからオーディオをブラウザー内で変換します。",

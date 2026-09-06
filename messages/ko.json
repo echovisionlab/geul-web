@@ -5123,13 +5123,10 @@
   "tools": {
     "youtubeAudio": {
       "title": "YouTube 오디오",
-      "description": "YouTube 오디오를 원본 또는 원하는 형식으로 저장하세요.",
-      "sourceTitle": "YouTube 소스",
-      "urlLabel": "YouTube URL",
-      "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+      "urlLabel": "동영상 링크",
+      "urlPlaceholder": "https://…",
       "resolve": "오디오 불러오기",
       "resolving": "오디오 불러오는 중",
-      "ready": "소스 준비됨",
       "clear": "소스 지우기",
       "metadataTitle": "YouTube 오디오",
       "metadataDescription": "인증된 YouTube 소스의 오디오를 브라우저에서 변환합니다.",

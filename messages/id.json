@@ -5123,13 +5123,10 @@
   "tools": {
     "youtubeAudio": {
       "title": "Audio YouTube",
-      "description": "Simpan audio YouTube dalam format asli atau konversikan.",
-      "sourceTitle": "Sumber YouTube",
-      "urlLabel": "URL YouTube",
-      "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+      "urlLabel": "Tautan video",
+      "urlPlaceholder": "https://…",
       "resolve": "Muat audio",
       "resolving": "Memuat audio",
-      "ready": "Sumber siap",
       "clear": "Hapus sumber",
       "metadataTitle": "Audio YouTube",
       "metadataDescription": "Konversikan audio dari sumber YouTube terautentikasi di browser Anda.",

@@ -5123,13 +5123,10 @@
   "tools": {
     "youtubeAudio": {
       "title": "Аудио с YouTube",
-      "description": "Сохраните аудио YouTube в исходном или другом формате.",
-      "sourceTitle": "Источник YouTube",
-      "urlLabel": "URL YouTube",
-      "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+      "urlLabel": "Ссылка на видео",
+      "urlPlaceholder": "https://…",
       "resolve": "Загрузить аудио",
       "resolving": "Загрузка аудио",
-      "ready": "Источник готов",
       "clear": "Очистить источник",
       "metadataTitle": "Аудио с YouTube",
       "metadataDescription": "Преобразуйте аудио из авторизованного источника YouTube в браузере.",
