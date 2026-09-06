@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/echovisionlab/geul-web/compare/v0.1.3...v0.1.4) (2026-09-06)
+
+
+### Bug Fixes
+
+* streamline YouTube audio actions and original downloads ([#13](https://github.com/echovisionlab/geul-web/issues/13)) ([270d206](https://github.com/echovisionlab/geul-web/commit/270d206799225da828a9447ec48590a2387fd22f))
+
 ## [0.1.3](https://github.com/echovisionlab/geul-web/compare/v0.1.2...v0.1.3) (2026-09-04)
 
 
