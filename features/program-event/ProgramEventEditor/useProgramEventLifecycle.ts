@@ -40,6 +40,12 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
         notifications.show({ message: result.error, color: 'red' });
       }
     },
+    onError: (error) => {
+      notifications.show({
+        message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
+        color: 'red',
+      });
+    },
   });
 
   const mutateEditableEvent = useCallback(
@@ -49,6 +55,15 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
       }
     },
     [canEdit, update],
+  );
+  const saveEditableEvent = useCallback(
+    (data: ProgramEventUpdate) => {
+      if (!canEdit) {
+        return Promise.resolve({ error: tCommon('notifications.saveFailed') });
+      }
+      return update.mutateAsync(data);
+    },
+    [canEdit, tCommon, update],
   );
   const isEditable = useCallback(() => canEdit, [canEdit]);
 
@@ -177,6 +192,7 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
     statusOptions,
     isEditable,
     mutateEditableEvent,
+    saveEditableEvent,
     changeStatus,
     deleteEvent: { ...deleteEvent, mutate: requestDelete },
     isStatusChanging: publish.isPending || archive.isPending,

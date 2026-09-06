@@ -7,7 +7,6 @@ import { IconHistory } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Box, Stack, Text } from '@mantine/core';
-import { useDebouncedCallback } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { EditorHeader } from '@/features/editor/EditorHeader';
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
@@ -41,7 +40,7 @@ import { MapPlaceActionProvider } from '@/lib/contexts/MapPlaceActionContext';
 import { useWorkMeta, WorkMetaProvider, type WorkMeta, type WorkType } from '@/lib/contexts/WorkMetaContext';
 import { useOgImage } from '@/lib/hooks/useOgImage';
 import { useOgGenerationLookupSignal } from '@/lib/hooks/useOgGenerationLookupSignal';
-import { BlockRoomMetadataError, updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
+import { updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
 import { useSlugManagement } from '@/lib/hooks/useSlugManagement';
 import { toNullableSlug, toSlugInputValue } from '@/lib/utils/slug';
 import { WorkClientsSection } from './WorkClientsSection';
@@ -49,6 +48,9 @@ import { WorkCreditsSection } from './WorkCreditsSection';
 import { WorkFeaturedImageUploader } from './WorkFeaturedImageUploader';
 import { WorkMetaForm } from './WorkMetaForm';
 import { useWorkLifecycle } from './useWorkLifecycle';
+import { requireActionSuccess } from '@/lib/editor/require-action-success';
+import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
+import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
 
 interface ClientDetails {
   id: string;
@@ -225,6 +227,7 @@ function WorkEditorContent({
     onSuccess: (result, request) => {
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
+        return;
       }
       notifications.show({ message: tCommon('notifications.ogGenerationRequested'), color: 'blue' });
       ogImage.trackRequestedGeneration(result.generationId, request.targetKey);
@@ -330,38 +333,20 @@ function WorkEditorContent({
     setResidentSummary(activeEditLocale.displaySummary);
   }, [activeEditLocale.displaySummary, activeEditLocale.displayTitle, roomLocale]);
 
-  const updateResidentMetadata = useMutation({
-    mutationFn: (update: { locale: string; sourceTitle?: string; summary?: string | null }) => {
-      if (!bootstrap || !protocol) {
-        throw new Error('Work Block room is not ready.');
-      }
-      return updateBlockRoomLocaleMetadata(protocol, {
-        type: 'work',
-        ...update,
-      });
-    },
-    onSuccess: (ack) => {
-      acceptEpochAck(ack);
-    },
-    onError: (error) => {
-      if (error instanceof BlockRoomMetadataError && error.reloadRequired) {
-        reloadCanonical();
-      }
-      notifications.show({
-        message: error instanceof Error ? error.message : t('notifications.updateFailed'),
-        color: 'red',
-      });
-    },
+  const debouncedResidentMetadataUpdate = useDebouncedRoomMetadata({
+    connection: { protocol, bootstrap, acceptEpochAck, reloadCanonical },
+    document: `work:${workId}`,
+    delay: 500,
+    write: (protocol, update: { locale: string; sourceTitle?: string; summary?: string | null }) =>
+      updateBlockRoomLocaleMetadata(protocol, { type: 'work', ...update }),
   });
-  const debouncedResidentMetadataUpdate = useDebouncedCallback(
-    (update: { locale: string; sourceTitle?: string; summary?: string | null }) => {
-      updateResidentMetadata.mutate(update);
-    },
-    500,
-  );
-  const debouncedWorkFieldsUpdate = useDebouncedCallback((update: Parameters<typeof updateWorkFieldsAction>[1]) => {
-    updateWorkFields.mutate(update);
-  }, 500);
+  const debouncedWorkFieldsUpdate = useDebouncedPatch({
+    write: (update: Parameters<typeof updateWorkFieldsAction>[1]) =>
+      requireActionSuccess(updateWorkFields.mutateAsync(update)),
+    delay: 500,
+    scope: workId,
+    document: `work:${workId}`,
+  });
   const handleScopedLocaleTitleChange = useCallback(
     (value: string) => {
       if (!roomLocale || !currentLocaleCanEdit) {

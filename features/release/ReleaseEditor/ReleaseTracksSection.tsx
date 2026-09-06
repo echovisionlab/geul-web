@@ -33,7 +33,7 @@ import { ConfirmModal } from '@/components/core/Modal';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
 import { Tooltip } from '@/components/core/Tooltip';
 import { ConnectedFileDownloadPolicyEditor } from '@/features/media-download/ConnectedFileDownloadPolicyEditor';
-import { createTrackAction, deleteTrackAction, reorderTracksAction, updateTrackAction } from '@/lib/actions/track';
+import { createTrackAction, deleteTrackAction, updateTrackAction } from '@/lib/actions/track';
 import type { ReleaseTrackItem } from '@/lib/collab/schemas/release-fields.schema';
 import { useUploadSurfaceController } from '@/lib/hooks/useUploadSurfaceController';
 import type { MediaStatusLabels } from '@/lib/media/status';
@@ -53,6 +53,7 @@ import {
 } from './track-runtime';
 import { ReleaseTrackCreateView, secondsToTimePickerValue, timePickerValueToSeconds } from './ReleaseTrackCreateView';
 import { TrackCreditsEditorSection } from './TrackCreditsEditorSection';
+import { useTrackOrderSave } from './useTrackOrderSave';
 
 interface ReleaseTracksSectionProps {
   releaseId: string;
@@ -121,9 +122,7 @@ export function ReleaseTracksSection({ releaseId, idPrefix, tracks, onTracksChan
     mutationFn: (id: string) => deleteTrackAction(id),
   });
 
-  const reorderTracks = useMutation({
-    mutationFn: (trackIds: string[]) => reorderTracksAction(trackIds),
-  });
+  const saveTrackOrder = useTrackOrderSave({ releaseId, tracks, onTracksChange });
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -144,10 +143,7 @@ export function ReleaseTracksSection({ releaseId, idPrefix, tracks, onTracksChan
         ...track,
         track_number: index + 1,
       }));
-      // Update collab state immediately
-      onTracksChange(newOrder);
-      // Persist to DB
-      reorderTracks.mutate(newOrder.map((t) => t.id));
+      saveTrackOrder(newOrder);
     }
   };
 

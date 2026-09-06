@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { notifications } from '@mantine/notifications';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -13,6 +14,9 @@ let container: HTMLDivElement;
 let root: Root;
 let latest: ReturnType<typeof useWorkMeta> | null = null;
 const protocol = vi.hoisted(() => ({ updateMetadata: vi.fn(), getSnapshot: vi.fn() }));
+
+vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
+vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
 
 vi.mock('@/lib/actions/work', () => ({
   updateWorkFieldsAction: vi.fn().mockResolvedValue({ success: true }),
@@ -131,5 +135,42 @@ describe('WorkMetaProvider', () => {
 
     act(() => root.render(null));
     expect(staleSetter?.('late-file', 'https://example.com/late.jpg')).toBe(false);
+  });
+});
+
+describe('client save failures', () => {
+  it('rolls back a failed replacement and shows the actual error', async () => {
+    vi.mocked(updateWorkFieldsAction).mockResolvedValueOnce({ error: 'permission denied' });
+    renderProvider();
+    await act(async () => {
+      latest?.setClients(['unsaved']);
+    });
+    expect(latest?.clients).toEqual([]);
+    expect(notifications.show).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'permission denied', color: 'red' }),
+    );
+  });
+  it('serializes rapid replacements and rolls back to the last successful save', async () => {
+    let finish!: (result: { success: boolean }) => void;
+    vi.mocked(updateWorkFieldsAction)
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finish = resolve;
+          }),
+      )
+      .mockResolvedValueOnce({ error: 'offline' });
+    renderProvider();
+    await act(async () => {
+      latest?.setClients(['saved']);
+      latest?.setClients(['unsaved']);
+    });
+    expect(updateWorkFieldsAction).toHaveBeenCalledTimes(1);
+    expect(latest?.clients).toEqual(['unsaved']);
+    await act(async () => {
+      finish({ success: true });
+    });
+    expect(latest?.clients).toEqual(['saved']);
+    expect(updateWorkFieldsAction).toHaveBeenCalledTimes(2);
   });
 });

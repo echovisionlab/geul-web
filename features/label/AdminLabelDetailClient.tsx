@@ -8,7 +8,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Group, SimpleGrid, Stack, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { useDebouncedCallback } from '@mantine/hooks';
 import { Button } from '@/components/core/Button';
 import { EditorHeader, type StatusOption } from '@/features/editor/EditorHeader';
 import { EditorPermissionRevokedDialog } from '@/features/editor/EditorPermissionRevokedDialog';
@@ -32,7 +31,7 @@ import { publishLabelAction, unpublishLabelAction } from '@/lib/actions/label';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import {
-  BlockRoomMetadataError,
+  type BlockRoomDocumentMetadataPatch,
   updateBlockRoomDocumentMetadata,
   updateBlockRoomLocaleMetadata,
 } from '@/lib/collab/block-room-metadata';
@@ -44,6 +43,7 @@ import type { getLabelAdmin } from '@/lib/queries/label';
 import { listLabelsForSelector } from '@/lib/queries/label-browser';
 import { parseSocialLinks } from '@/lib/types/common/social-links';
 import type { LabelStatus } from '@/lib/types/label/model';
+import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 
 type AdminLabelData = NonNullable<Awaited<ReturnType<typeof getLabelAdmin>>>;
 
@@ -97,7 +97,7 @@ export function AdminLabelDetailClient({
   const { activeEditLocale, roomLocale } = localeSession;
   const { isEditingScopedLocale, hasScopedLocaleLiveRow, shouldUseLocaleDocument } = localeSession.mode;
   const blockRoom = useBlockRoomConnection('label', id, roomLocale);
-  const { provider, doc, bootstrap, protocol, isConnected, isSynced, acceptEpochAck, reloadCanonical } = blockRoom;
+  const { provider, doc, bootstrap, protocol, isConnected, isSynced } = blockRoom;
   const blockRoomController = useRichTextBlockRoomController('label', doc, roomLocale);
   const permissionRevocation = useEditorPermissionRevocation(provider, 'label', id);
   const canMutate = !permissionRevocation.blocked;
@@ -116,53 +116,21 @@ export function AdminLabelDetailClient({
   const descriptionEditorKey = `label-${roomLocale ?? 'source'}`;
   const [residentName, setResidentName] = useState(label.name);
   useEffect(() => setResidentName(activeEditLocale.displayTitle), [activeEditLocale.displayTitle, roomLocale]);
-  const updateLocaleMetadata = useMutation({
-    mutationFn: (input: { locale: string; title: string }) => {
-      if (!bootstrap || !protocol) {
-        throw new Error('Label Block room is not ready.');
-      }
-      return updateBlockRoomLocaleMetadata(protocol, { type: 'label', ...input });
-    },
-    onSuccess: acceptEpochAck,
-    onError: (error) => {
-      if (error instanceof BlockRoomMetadataError && error.reloadRequired) {
-        reloadCanonical();
-      }
-      notifications.show({
-        message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
-        color: 'red',
-      });
-    },
+
+  const debouncedLocaleMetadataUpdate = useDebouncedRoomMetadata({
+    connection: blockRoom,
+    document: `label:${id}`,
+    delay: 500,
+    write: (protocol, input: { locale: string; title: string }) =>
+      updateBlockRoomLocaleMetadata(protocol, { type: 'label', ...input }),
   });
-  const updateDocumentMetadata = useMutation({
-    mutationFn: (
-      input: Omit<Extract<Parameters<typeof updateBlockRoomDocumentMetadata>[1], { type: 'label' }>, 'type'>,
-    ) => {
-      if (!bootstrap || !protocol) {
-        throw new Error('Label Block room is not ready.');
-      }
-      return updateBlockRoomDocumentMetadata(protocol, { type: 'label', ...input });
-    },
-    onSuccess: acceptEpochAck,
-    onError: (error) => {
-      if (error instanceof BlockRoomMetadataError && error.reloadRequired) {
-        reloadCanonical();
-      }
-      notifications.show({
-        message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
-        color: 'red',
-      });
-    },
+  const debouncedDocumentMetadataUpdate = useDebouncedRoomMetadata({
+    connection: blockRoom,
+    document: `label:${id}`,
+    delay: 500,
+    write: (protocol, input: BlockRoomDocumentMetadataPatch<'label'>) =>
+      updateBlockRoomDocumentMetadata(protocol, { type: 'label', ...input }),
   });
-  const debouncedLocaleMetadataUpdate = useDebouncedCallback(
-    (input: { locale: string; title: string }) => updateLocaleMetadata.mutate(input),
-    500,
-  );
-  const debouncedDocumentMetadataUpdate = useDebouncedCallback(
-    (input: Omit<Extract<Parameters<typeof updateBlockRoomDocumentMetadata>[1], { type: 'label' }>, 'type'>) =>
-      updateDocumentMetadata.mutate(input),
-    500,
-  );
   const setField = useCallback(
     <K extends keyof typeof fields>(key: K, value: (typeof fields)[K]) => {
       if (!canEditNeutral) {

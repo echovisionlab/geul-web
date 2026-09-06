@@ -6,6 +6,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Alert } from '@/components/core/Alert';
 import { useTranslations } from 'next-intl';
 import { DataTableView, type DataTableRowSelectionState } from '@/components/core/DataTable';
 import { PageLoader } from '@/features/site/PageLoader';
@@ -147,6 +148,14 @@ export function ServerDataTableContent<T>({
       }),
     [columns, currentSorts, handleHeaderClick, isPending, sortConfig, t, tCommonLabels],
   );
+
+  if (result.error) {
+    return (
+      <Alert tone="danger" role="alert">
+        {result.error}
+      </Alert>
+    );
+  }
 
   return (
     <DataTableView

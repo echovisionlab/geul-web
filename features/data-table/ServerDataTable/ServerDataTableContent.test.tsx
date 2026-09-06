@@ -174,3 +174,20 @@ describe('ServerDataTableContent', () => {
     });
   });
 });
+
+it('renders fetch failure as an alert instead of an empty result', async () => {
+  await act(async () => {
+    root?.render(
+      <MantineProvider>
+        <ServerDataTableContent
+          columns={[]}
+          result={{ data: [], total: 0, page: 1, pageSize: 20, totalPages: 0, error: 'permission denied' }}
+          getRowKey={() => ''}
+          emptyMessage="No artists found"
+        />
+      </MantineProvider>,
+    );
+  });
+  expect(host?.querySelector('[role="alert"]')?.textContent).toContain('permission denied');
+  expect(host?.textContent).not.toContain('No artists found');
+});

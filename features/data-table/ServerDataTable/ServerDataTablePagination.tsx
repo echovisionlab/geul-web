@@ -30,6 +30,9 @@ export async function ServerDataTablePagination({
   basePath = '',
   reserveSpaceWhenHidden = false,
 }: ServerDataTablePaginationProps) {
+  if (result.error) {
+    return null;
+  }
   const t = await getTranslations('dataTable.pagination');
 
   return (

@@ -85,15 +85,21 @@ vi.mock('@tanstack/react-query', () => ({
   useMutation: ({
     mutationFn,
     onSuccess,
+    onError,
   }: {
     mutationFn: (vars: any) => Promise<any>;
-    onSuccess?: (result: any) => void;
+    onSuccess?: (result: any, vars: any) => void;
+    onError?: (error: unknown, vars: any) => void;
   }) => ({
     mutate: async (vars: any, options?: { onSuccess?: (result: any) => void }) => {
-      const result = await mutationFn(vars);
-      onSuccess?.(result);
-      options?.onSuccess?.(result);
-      return result;
+      try {
+        const result = await mutationFn(vars);
+        onSuccess?.(result, vars);
+        options?.onSuccess?.(result);
+        return result;
+      } catch (error) {
+        onError?.(error, vars);
+      }
     },
     isPending: false,
   }),
@@ -494,6 +500,52 @@ describe('ReleaseTracksSection', () => {
       expect.objectContaining({ id: 'track-1', track_number: 2 }),
     ]);
     expect(reorderTracksActionMock).toHaveBeenCalledWith(['track-2', 'track-1']);
+  });
+
+  it('restores saved track order and reports a rejected reorder', async () => {
+    reorderTracksActionMock.mockResolvedValueOnce({ error: 'permission denied' });
+    const onTracksChange = vi.fn();
+    const tracks: ReleaseTrackItem[] = [
+      {
+        id: 'track-1',
+        track_number: 1,
+        title: 'Intro',
+        duration_seconds: 90,
+        audio_attached: false,
+        processing_status: null,
+        credits: [],
+      },
+      {
+        id: 'track-2',
+        track_number: 2,
+        title: 'Outro',
+        duration_seconds: 120,
+        audio_attached: false,
+        processing_status: null,
+        credits: [],
+      },
+    ];
+
+    render(<ReleaseTracksSection releaseId="release-1" tracks={tracks} onTracksChange={onTracksChange} />);
+
+    expect(latestDragEndHandler).not.toBeNull();
+
+    act(() => {
+      latestDragEndHandler?.({
+        active: { id: 'track-2' },
+        over: { id: 'track-1' },
+      });
+    });
+
+    expect(onTracksChange).toHaveBeenCalledWith([
+      expect.objectContaining({ id: 'track-2', track_number: 1 }),
+      expect.objectContaining({ id: 'track-1', track_number: 2 }),
+    ]);
+    await flushUpdates();
+    expect(onTracksChange).toHaveBeenLastCalledWith(tracks);
+    expect(notifications.show).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'permission denied', color: 'red' }),
+    );
   });
 
   it('expands inline track editor when clicking a track title', async () => {

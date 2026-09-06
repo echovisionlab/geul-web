@@ -35,6 +35,11 @@ export type BlockRoomDocumentMetadataUpdate =
       parentLabelId?: string | null;
     };
 
+export type BlockRoomDocumentMetadataPatch<T extends BlockRoomDocumentMetadataUpdate['type']> = Omit<
+  Extract<BlockRoomDocumentMetadataUpdate, { type: T }>,
+  'type'
+>;
+
 export class BlockRoomMetadataError extends Error {
   constructor(
     message: string,

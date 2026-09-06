@@ -8,7 +8,6 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { SimpleGrid, Stack, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { useDebouncedCallback } from '@mantine/hooks';
 import { EditorHeader, type StatusOption } from '@/features/editor/EditorHeader';
 import { EditorPermissionRevokedDialog } from '@/features/editor/EditorPermissionRevokedDialog';
 import { EditorSessionExpiredDialog } from '@/features/editor/EditorSessionExpiredDialog';
@@ -39,7 +38,7 @@ import {
 } from '@/lib/actions/artist';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import {
-  BlockRoomMetadataError,
+  type BlockRoomDocumentMetadataPatch,
   updateBlockRoomDocumentMetadata,
   updateBlockRoomLocaleMetadata,
 } from '@/lib/collab/block-room-metadata';
@@ -51,6 +50,7 @@ import { useOgImage } from '@/lib/hooks/useOgImage';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { listLabelsForSelector } from '@/lib/queries/label-browser';
 import type { SocialLinks } from '@/lib/types/common/social-links';
+import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 
 type AdminArtistData = NonNullable<Awaited<ReturnType<typeof getArtistAdminAction>>>;
 type ArtistEditorStatus = 'draft' | 'published';
@@ -121,7 +121,7 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
   const { activeEditLocale, roomLocale } = localeSession;
   const { isEditingScopedLocale, hasScopedLocaleLiveRow, shouldUseLocaleDocument } = localeSession.mode;
   const blockRoom = useBlockRoomConnection('artist', id, roomLocale);
-  const { provider, doc, bootstrap, protocol, isConnected, isSynced, acceptEpochAck, reloadCanonical } = blockRoom;
+  const { provider, doc, bootstrap, protocol, isConnected, isSynced } = blockRoom;
   const blockRoomController = useRichTextBlockRoomController('artist', doc, roomLocale);
   const permissionRevocation = useEditorPermissionRevocation(provider, 'artist', id);
   const canMutate = !permissionRevocation.blocked;
@@ -161,53 +161,21 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
   useEffect(() => {
     setResidentName(activeEditLocale.displayTitle);
   }, [activeEditLocale.displayTitle, roomLocale]);
-  const updateLocaleMetadata = useMutation({
-    mutationFn: (input: { locale: string; title: string }) => {
-      if (!bootstrap || !protocol) {
-        throw new Error('Artist Block room is not ready.');
-      }
-      return updateBlockRoomLocaleMetadata(protocol, { type: 'artist', ...input });
-    },
-    onSuccess: acceptEpochAck,
-    onError: (error) => {
-      if (error instanceof BlockRoomMetadataError && error.reloadRequired) {
-        reloadCanonical();
-      }
-      notifications.show({
-        message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
-        color: 'red',
-      });
-    },
+
+  const debouncedLocaleMetadataUpdate = useDebouncedRoomMetadata({
+    connection: blockRoom,
+    document: `artist:${id}`,
+    delay: 500,
+    write: (protocol, input: { locale: string; title: string }) =>
+      updateBlockRoomLocaleMetadata(protocol, { type: 'artist', ...input }),
   });
-  const updateDocumentMetadata = useMutation({
-    mutationFn: (
-      input: Omit<Extract<Parameters<typeof updateBlockRoomDocumentMetadata>[1], { type: 'artist' }>, 'type'>,
-    ) => {
-      if (!bootstrap || !protocol) {
-        throw new Error('Artist Block room is not ready.');
-      }
-      return updateBlockRoomDocumentMetadata(protocol, { type: 'artist', ...input });
-    },
-    onSuccess: acceptEpochAck,
-    onError: (error) => {
-      if (error instanceof BlockRoomMetadataError && error.reloadRequired) {
-        reloadCanonical();
-      }
-      notifications.show({
-        message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
-        color: 'red',
-      });
-    },
+  const debouncedDocumentMetadataUpdate = useDebouncedRoomMetadata({
+    connection: blockRoom,
+    document: `artist:${id}`,
+    delay: 500,
+    write: (protocol, input: BlockRoomDocumentMetadataPatch<'artist'>) =>
+      updateBlockRoomDocumentMetadata(protocol, { type: 'artist', ...input }),
   });
-  const debouncedLocaleMetadataUpdate = useDebouncedCallback(
-    (input: { locale: string; title: string }) => updateLocaleMetadata.mutate(input),
-    500,
-  );
-  const debouncedDocumentMetadataUpdate = useDebouncedCallback(
-    (input: Omit<Extract<Parameters<typeof updateBlockRoomDocumentMetadata>[1], { type: 'artist' }>, 'type'>) =>
-      updateDocumentMetadata.mutate(input),
-    500,
-  );
   const setField = useCallback(
     <K extends keyof typeof fields>(key: K, value: (typeof fields)[K]) => {
       if (key !== 'status' && !canEditNeutral) {

@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
 const artistClient = vi.hoisted(() => ({
   getArtistEditorData: vi.fn(),
   listArtists: vi.fn(),
+  listArtistsAdmin: vi.fn(),
   listMyArtists: vi.fn(),
 }));
 const publicArtistClient = vi.hoisted(() => ({ get: vi.fn() }));
@@ -22,7 +23,12 @@ vi.mock('@/lib/api/server-client', () => ({
 vi.mock('@/lib/i18n/default-entity-name.server', () => ({ getLocalizedNewEntityName: vi.fn() }));
 vi.mock('@/lib/actions/og-generation', () => ({ regenerateOgImageAction: mocks.regenerateOgImageAction }));
 
-import { getArtistAdminAction, listArtistParentOptionsAction, regenerateArtistOgImageAction } from './artist';
+import {
+  listArtistsAdminAction,
+  getArtistAdminAction,
+  listArtistParentOptionsAction,
+  regenerateArtistOgImageAction,
+} from './artist';
 
 describe('Artist edit target lookup', () => {
   beforeEach(() => {
@@ -44,6 +50,17 @@ describe('Artist edit target lookup', () => {
       labelIds: [],
     });
     mocks.regenerateOgImageAction.mockResolvedValue({ runId: 'run-1', generationIds: ['generation-1'] });
+  });
+
+  it('distinguishes empty admin results from failed or forbidden requests', async () => {
+    artistClient.listArtistsAdmin.mockResolvedValueOnce({ artists: [], pagination: { total: 0 } });
+    expect(await listArtistsAdminAction({})).toMatchObject({ data: [], total: 0 });
+    artistClient.listArtistsAdmin.mockRejectedValueOnce(new Error('permission denied'));
+    expect(await listArtistsAdminAction({ page: 2, pageSize: 10 })).toMatchObject({
+      error: 'permission denied',
+      page: 2,
+      pageSize: 10,
+    });
   });
 
   it('resolves an authorized slug before requesting manage editor data', async () => {

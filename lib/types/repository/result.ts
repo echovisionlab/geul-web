@@ -3,6 +3,8 @@
  */
 export interface PaginatedQueryResult<T> {
   data: T[];
+  /** A failed fetch must not be presented as a successful empty result. */
+  error?: string;
   total: number;
   page: number;
   pageSize: number;
