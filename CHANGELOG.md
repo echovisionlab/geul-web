@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/echovisionlab/geul-web/compare/v0.1.4...v0.1.5) (2026-09-06)
+
+
+### Bug Fixes
+
+* **editor:** preserve queued edits and report save failures ([#15](https://github.com/echovisionlab/geul-web/issues/15)) ([4e3f8b3](https://github.com/echovisionlab/geul-web/commit/4e3f8b3c927058d1da958626dba9ced53b7a3818))
+
 ## [0.1.4](https://github.com/echovisionlab/geul-web/compare/v0.1.3...v0.1.4) (2026-09-06)
 
 
