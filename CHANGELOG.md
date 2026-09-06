@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.6](https://github.com/echovisionlab/geul-web/compare/v0.1.5...v0.1.6) (2026-09-06)
+
+
+### Bug Fixes
+
+* **ui:** simplify YouTube audio entry form ([#17](https://github.com/echovisionlab/geul-web/issues/17)) ([ffc0936](https://github.com/echovisionlab/geul-web/commit/ffc0936b3de8ac75cd13b56cf3e59a6c52004e20))
+
 ## [0.1.5](https://github.com/echovisionlab/geul-web/compare/v0.1.4...v0.1.5) (2026-09-06)
 
 
