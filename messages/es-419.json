@@ -5123,13 +5123,10 @@
   "tools": {
     "youtubeAudio": {
       "title": "Audio de YouTube",
-      "description": "Guarda el audio de YouTube en su formato original o conviértelo.",
-      "sourceTitle": "Fuente de YouTube",
-      "urlLabel": "URL de YouTube",
-      "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+      "urlLabel": "Enlace del video",
+      "urlPlaceholder": "https://…",
       "resolve": "Cargar audio",
       "resolving": "Cargando audio",
-      "ready": "Fuente lista",
       "clear": "Borrar fuente",
       "metadataTitle": "Audio de YouTube",
       "metadataDescription": "Convierte audio de una fuente de YouTube autenticada en tu navegador.",

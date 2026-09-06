@@ -5123,13 +5123,10 @@
   "tools": {
     "youtubeAudio": {
       "title": "เสียงจาก YouTube",
-      "description": "บันทึกเสียง YouTube ในรูปแบบต้นฉบับหรือแปลงเป็นรูปแบบที่ต้องการ",
-      "sourceTitle": "แหล่งที่มาจาก YouTube",
-      "urlLabel": "URL ของ YouTube",
-      "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+      "urlLabel": "ลิงก์วิดีโอ",
+      "urlPlaceholder": "https://…",
       "resolve": "โหลดเสียง",
       "resolving": "กำลังโหลดเสียง",
-      "ready": "แหล่งเสียงพร้อมแล้ว",
       "clear": "ล้างแหล่งเสียง",
       "metadataTitle": "เสียงจาก YouTube",
       "metadataDescription": "แปลงเสียงจากแหล่ง YouTube ที่ยืนยันสิทธิ์แล้วในเบราว์เซอร์ของคุณ",

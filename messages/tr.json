@@ -5123,13 +5123,10 @@
   "tools": {
     "youtubeAudio": {
       "title": "YouTube Sesi",
-      "description": "YouTube sesini özgün biçiminde kaydedin veya dönüştürün.",
-      "sourceTitle": "YouTube kaynağı",
-      "urlLabel": "YouTube URL'si",
-      "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+      "urlLabel": "Video bağlantısı",
+      "urlPlaceholder": "https://…",
       "resolve": "Sesi yükle",
       "resolving": "Ses yükleniyor",
-      "ready": "Kaynak hazır",
       "clear": "Kaynağı temizle",
       "metadataTitle": "YouTube Sesi",
       "metadataDescription": "Kimliği doğrulanmış bir YouTube kaynağındaki sesi tarayıcınızda dönüştürün.",

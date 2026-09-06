@@ -5123,13 +5123,10 @@
   "tools": {
     "youtubeAudio": {
       "title": "صوت YouTube",
-      "description": "احفظ صوت YouTube بصيغته الأصلية أو بصيغة تختارها.",
-      "sourceTitle": "مصدر YouTube",
-      "urlLabel": "رابط YouTube",
-      "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+      "urlLabel": "رابط الفيديو",
+      "urlPlaceholder": "https://…",
       "resolve": "تحميل الصوت",
       "resolving": "جارٍ تحميل الصوت",
-      "ready": "المصدر جاهز",
       "clear": "مسح المصدر",
       "metadataTitle": "صوت YouTube",
       "metadataDescription": "حوّل الصوت من مصدر YouTube موثّق داخل متصفحك.",

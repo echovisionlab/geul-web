@@ -12,13 +12,10 @@ const handlers = { onClear: vi.fn(), onResolve: vi.fn(), onUrlChange: vi.fn() };
 const baseProps: YoutubeAudioToolViewProps = {
   labels: {
     title: 'YouTube Audio',
-    description: 'Load and convert audio.',
-    sourceTitle: 'YouTube source',
-    urlLabel: 'YouTube URL',
-    urlPlaceholder: 'https://www.youtube.com/watch?v=...',
+    urlLabel: 'Video link',
+    urlPlaceholder: 'https://…',
     resolve: 'Load audio',
     resolving: 'Loading audio',
-    ready: 'Source ready',
     clear: 'Clear source',
   },
   url: '',
@@ -60,7 +57,7 @@ describe('YoutubeAudioToolView', () => {
     const input = container.querySelector<HTMLInputElement>('input[type="url"]');
     const form = container.querySelector('form');
     const submit = container.querySelector<HTMLButtonElement>('button[type="submit"]');
-    expect(input?.placeholder).toContain('youtube.com');
+    expect(input?.placeholder).toBe('https://…');
     expect(submit?.disabled).toBe(true);
 
     render({ url: 'https://youtu.be/abcdefghijk' });
@@ -76,7 +73,6 @@ describe('YoutubeAudioToolView', () => {
       url: 'invalid',
     });
     expect(container.textContent).toContain('Reference audio');
-    expect(container.textContent).toContain('Source ready');
     expect(container.textContent).toContain('Enter a valid YouTube URL.');
     expect(container.querySelector('[data-converter]')).not.toBeNull();
     const clear = Array.from(container.querySelectorAll('button')).find(

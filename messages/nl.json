@@ -5123,13 +5123,10 @@
   "tools": {
     "youtubeAudio": {
       "title": "YouTube-audio",
-      "description": "Sla YouTube-audio op in het oorspronkelijke formaat of converteer deze.",
-      "sourceTitle": "YouTube-bron",
-      "urlLabel": "YouTube-URL",
-      "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+      "urlLabel": "Videolink",
+      "urlPlaceholder": "https://…",
       "resolve": "Audio laden",
       "resolving": "Audio laden",
-      "ready": "Bron gereed",
       "clear": "Bron wissen",
       "metadataTitle": "YouTube-audio",
       "metadataDescription": "Converteer audio van een geverifieerde YouTube-bron in je browser.",

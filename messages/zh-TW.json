@@ -5123,13 +5123,10 @@
   "tools": {
     "youtubeAudio": {
       "title": "YouTube 音訊",
-      "description": "以原始格式或所需格式儲存 YouTube 音訊。",
-      "sourceTitle": "YouTube 來源",
-      "urlLabel": "YouTube 網址",
-      "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+      "urlLabel": "影片連結",
+      "urlPlaceholder": "https://…",
       "resolve": "載入音訊",
       "resolving": "正在載入音訊",
-      "ready": "來源已就緒",
       "clear": "清除來源",
       "metadataTitle": "YouTube 音訊",
       "metadataDescription": "在瀏覽器中轉換已驗證的 YouTube 來源音訊。",

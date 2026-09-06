@@ -5123,13 +5123,10 @@
   "tools": {
     "youtubeAudio": {
       "title": "Dźwięk z YouTube",
-      "description": "Zapisz dźwięk z YouTube w oryginalnym formacie lub go przekonwertuj.",
-      "sourceTitle": "Źródło YouTube",
-      "urlLabel": "Adres URL YouTube",
-      "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+      "urlLabel": "Link do filmu",
+      "urlPlaceholder": "https://…",
       "resolve": "Wczytaj dźwięk",
       "resolving": "Wczytywanie dźwięku",
-      "ready": "Źródło gotowe",
       "clear": "Wyczyść źródło",
       "metadataTitle": "Dźwięk z YouTube",
       "metadataDescription": "Konwertuj w przeglądarce dźwięk z uwierzytelnionego źródła YouTube.",
