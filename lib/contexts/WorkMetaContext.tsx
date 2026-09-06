@@ -1,6 +1,8 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { notifications } from '@mantine/notifications';
+import { useTranslations } from 'next-intl';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import type * as Y from 'yjs';
 import { updateWorkFieldsAction } from '@/lib/actions/work';
@@ -91,12 +93,37 @@ export function WorkMetaProvider({
     },
     [],
   );
+  const tCommon = useTranslations('common');
+  const confirmedClients = useRef(initialMeta.clients);
+  const clientsRequest = useRef(0);
+  const clientsSave = useRef(Promise.resolve());
   const setClients = useCallback(
     (clients: string[]) => {
       setField('clients', clients);
-      void updateWorkFieldsAction(workId, { clients });
+      const request = ++clientsRequest.current;
+      // Serialize replacements so a slower older request cannot overwrite a newer one.
+      clientsSave.current = clientsSave.current.then(async () => {
+        try {
+          const result = await updateWorkFieldsAction(workId, { clients });
+          if (result.error) {
+            throw new Error(result.error);
+          }
+          confirmedClients.current = clients;
+        } catch (error) {
+          if (!aliveRef.current) {
+            return;
+          }
+          if (request === clientsRequest.current) {
+            setField('clients', confirmedClients.current);
+          }
+          notifications.show({
+            message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
+            color: 'red',
+          });
+        }
+      });
     },
-    [setField, workId],
+    [setField, tCommon, workId],
   );
   const setFeaturedImage = useCallback(
     (_fileId: string | null, url: string | null) => {

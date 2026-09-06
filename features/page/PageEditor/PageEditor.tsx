@@ -35,7 +35,7 @@ import {
   updatePageShowTitleAction,
   updatePageSlugAction,
 } from '@/lib/actions/page';
-import { BlockRoomMetadataError, updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
+import { updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
 import { PageDocumentMetadataError, updatePageDocumentMetadata } from '@/lib/collab/page-document-metadata';
 import { createMapPlaceForBlockWithBrowserClient } from '@/lib/api/map-place-browser-client';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
@@ -52,6 +52,7 @@ import { PageFeaturedImageUploader } from './PageFeaturedImageUploader';
 import { PageEditorInterruptionDialogs } from './PageEditorInterruptionDialogs';
 import { SectionList } from './SectionList';
 import { resolvePageResidentMetadata } from './collaboration-mode';
+import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 
 interface PageEditorProps {
   pageId: string;
@@ -309,43 +310,19 @@ export function PageEditor({
     [canEditNeutral, publish, unpublish],
   );
 
-  const updateLocaleMetadata = useMutation({
-    mutationFn: (metadata: { title?: string; summary?: string | null }) => {
-      if (!canEditLocaleDocument || !bootstrap || !protocol || !roomLocale) {
-        throw new Error('Page Block room is not ready.');
-      }
-      return updateBlockRoomLocaleMetadata(protocol, {
-        type: 'page',
-        locale: roomLocale,
-        ...metadata,
-      });
-    },
-    onSuccess: acceptEpochAck,
-    onError: (error) => {
-      if (error instanceof BlockRoomMetadataError && error.reloadRequired) {
-        reloadCanonical();
-      }
-      notifications.show({
-        message: error instanceof Error ? error.message : tCommon('notifications.updateFailed'),
-        color: 'red',
-      });
-    },
+  const debouncedMetadataUpdate = useDebouncedRoomMetadata({
+    connection: { protocol, bootstrap, acceptEpochAck, reloadCanonical },
+    document: `page:${pageId}`,
+    delay: 500,
+    write: (protocol, metadata: { title?: string; summary?: string | null }) =>
+      updateBlockRoomLocaleMetadata(protocol, { type: 'page', locale: roomLocale!, ...metadata }),
   });
-  const debouncedTitleUpdate = useDebouncedCallback(
-    (value: string) => updateLocaleMetadata.mutate({ title: value }),
-    500,
-  );
-  const debouncedSummaryUpdate = useDebouncedCallback(
-    (value: string) => updateLocaleMetadata.mutate({ summary: value }),
-    500,
-  );
   useEffect(
     () => () => {
       debouncedLayoutUpdate.cancel();
-      debouncedTitleUpdate.cancel();
-      debouncedSummaryUpdate.cancel();
+      debouncedMetadataUpdate.cancel();
     },
-    [debouncedLayoutUpdate, debouncedSummaryUpdate, debouncedTitleUpdate, roomLocale],
+    [debouncedLayoutUpdate, debouncedMetadataUpdate, roomLocale],
   );
 
   const handleLocaleTitleChange = useCallback(
@@ -354,9 +331,9 @@ export function PageEditor({
         return;
       }
       setResidentTitle(value);
-      debouncedTitleUpdate(value);
+      debouncedMetadataUpdate({ title: value });
     },
-    [canEditLocaleDocument, debouncedTitleUpdate],
+    [canEditLocaleDocument, debouncedMetadataUpdate],
   );
 
   const handleShowTitleChange = useCallback(
@@ -389,9 +366,9 @@ export function PageEditor({
         return;
       }
       setResidentSummary(value);
-      debouncedSummaryUpdate(value);
+      debouncedMetadataUpdate({ summary: value });
     },
-    [canEditLocaleDocument, debouncedSummaryUpdate],
+    [canEditLocaleDocument, debouncedMetadataUpdate],
   );
 
   const pageStatusOptions = [

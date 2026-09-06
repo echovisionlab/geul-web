@@ -201,7 +201,14 @@ export async function listArtistsAdminAction(input: ArtistListInput) {
       totalPages: Math.ceil(total / limit),
     };
   } catch (err) {
-    return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
+    return {
+      data: [],
+      total: 0,
+      page: input.page ?? 1,
+      pageSize: input.pageSize ?? 20,
+      totalPages: 0,
+      error: err instanceof Error ? err.message : 'Failed to load artists.',
+    };
   }
 }
 

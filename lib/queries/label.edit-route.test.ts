@@ -3,6 +3,7 @@ import { Code, ConnectError } from '@connectrpc/connect';
 
 const mocks = vi.hoisted(() => ({
   publicGet: vi.fn(),
+  listLabelsAdmin: vi.fn(),
   getLabelEditorData: vi.fn(),
 }));
 
@@ -10,10 +11,11 @@ vi.mock('@/lib/api/server-client', () => ({
   createPublicLabelClientWithAuth: vi.fn(async () => ({ get: mocks.publicGet })),
   createLabelClient: vi.fn(async () => ({
     getLabelEditorData: mocks.getLabelEditorData,
+    listLabelsAdmin: mocks.listLabelsAdmin,
   })),
 }));
 
-import { getLabelForEdit } from './label';
+import { getLabelForEdit, listLabelsAdmin } from './label';
 
 describe('getLabelForEdit', () => {
   beforeEach(() => {
@@ -53,5 +55,14 @@ describe('getLabelForEdit', () => {
 
     await expect(getLabelForEdit('missing')).resolves.toBeNull();
     expect(mocks.getLabelEditorData).not.toHaveBeenCalled();
+  });
+});
+
+it('preserves an admin list failure and the requested page', async () => {
+  mocks.listLabelsAdmin.mockRejectedValueOnce(new Error('permission denied'));
+  expect(await listLabelsAdmin({ page: 3, pageSize: 10 })).toMatchObject({
+    error: 'permission denied',
+    page: 3,
+    pageSize: 10,
   });
 });

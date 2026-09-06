@@ -6,7 +6,6 @@ import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Stack, Text } from '@mantine/core';
-import { useDebouncedCallback } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { EditorHeader, type StatusOption } from '@/features/editor/EditorHeader';
 import { Textarea } from '@/components/core/Input';
@@ -24,6 +23,8 @@ import {
 } from '@/lib/actions/program-event';
 import { getUploadSelectionMimeTypes, UPLOAD_CONFIGS } from '@/lib/constants/upload-config';
 import { sanitizeSlugInput, toSlugInputValue } from '@/lib/utils/slug';
+import { requireActionSuccess } from '@/lib/editor/require-action-success';
+import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
 
 const posterConfig = UPLOAD_CONFIGS[UploadType.PROGRAM_EVENT_POSTER];
 
@@ -73,6 +74,12 @@ export function ProgramEventSeriesEditor({
       if ('error' in result && result.error) {
         notifications.show({ message: result.error, color: 'red' });
       }
+    },
+    onError: (error) => {
+      notifications.show({
+        message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
+        color: 'red',
+      });
     },
   });
   const updateSeriesStatus = useMutation({
@@ -134,10 +141,13 @@ export function ProgramEventSeriesEditor({
     },
   });
 
-  const debouncedUpdate = useDebouncedCallback(
-    (data: Parameters<typeof updateProgramEventSeriesAction>[1]) => updateSeries.mutate(data),
-    500,
-  );
+  const debouncedUpdate = useDebouncedPatch({
+    write: (data: Parameters<typeof updateProgramEventSeriesAction>[1]) =>
+      requireActionSuccess(updateSeries.mutateAsync(data)),
+    delay: 500,
+    scope: seriesId,
+    document: `program_event_series:${seriesId}`,
+  });
 
   const statusOptions: StatusOption<SeriesStatus>[] = [
     {

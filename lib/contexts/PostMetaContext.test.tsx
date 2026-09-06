@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { notifications } from '@mantine/notifications';
 import { act, StrictMode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -26,6 +27,9 @@ const localeRoom = vi.hoisted(() => ({
   },
   connect: vi.fn(),
 }));
+
+vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
+vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
 
 vi.mock('@/lib/collab/useBlockRoomConnection', () => ({
   useBlockRoomConnection: (...args: unknown[]) => {
@@ -187,4 +191,26 @@ describe('PostMetaProvider', () => {
     act(() => root.render(null));
     expect(staleSetFeaturedImage?.('late', 'https://example.com/late.jpg')).toBe(false);
   });
+});
+
+it('reports taxonomy failure and retries the retained fields together with the next edit', async () => {
+  vi.mocked(updatePostBlockRoomDocumentMetadata).mockRejectedValueOnce(new Error('permission denied'));
+  await renderProvider();
+  await act(async () => {
+    latest?.setCategoryIds(['category-2']);
+    await vi.advanceTimersByTimeAsync(250);
+  });
+  expect(notifications.show).toHaveBeenCalledWith(
+    expect.objectContaining({ message: 'permission denied', color: 'red' }),
+  );
+  expect(acceptEpochAck).not.toHaveBeenCalled();
+  await act(async () => {
+    latest?.setTagIds(['tag-2']);
+    await vi.advanceTimersByTimeAsync(250);
+  });
+  expect(updatePostBlockRoomDocumentMetadata).toHaveBeenLastCalledWith(protocol, {
+    categoryIds: ['category-2'],
+    tagIds: ['tag-2'],
+  });
+  expect(acceptEpochAck).toHaveBeenCalledOnce();
 });

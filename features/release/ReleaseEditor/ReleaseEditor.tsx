@@ -7,7 +7,6 @@ import { useTranslations } from 'next-intl';
 import { Group, SimpleGrid, Stack, Text } from '@mantine/core';
 import { DateInput, type DateValue } from '@mantine/dates';
 import { notifications } from '@mantine/notifications';
-import { useDebouncedCallback } from '@mantine/hooks';
 import { EditorHeader, type StatusOption } from '@/features/editor/EditorHeader';
 import { Select, TextInput } from '@/components/core/Input';
 import { SectionCard } from '@/components/core/Section';
@@ -26,7 +25,7 @@ import {
   updateReleaseSlugAction,
 } from '@/lib/actions/release';
 import type { ReleaseFields, ReleaseTrackItem } from '@/lib/collab/schemas/release-fields.schema';
-import { BlockRoomMetadataError, updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
+import { updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import { useRichTextBlockRoomController } from '@/features/editor/hooks/useBlockRoomTiptapController';
 import { useBlockRoomConnection } from '@/lib/collab/useBlockRoomConnection';
@@ -49,6 +48,9 @@ import { ReleaseDescriptionEditor } from './ReleaseDescriptionEditor';
 import { ReleaseLabelsSection } from './ReleaseLabelsSection';
 import { ReleaseTagsSection } from './ReleaseTagsSection';
 import { ReleaseTracksSection } from './ReleaseTracksSection';
+import { requireActionSuccess } from '@/lib/editor/require-action-success';
+import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
+import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
 
 interface ReleaseEditorProps {
   releaseId: string;
@@ -137,7 +139,7 @@ export function ReleaseEditor({
   const canEditTranslationSource = true;
   const { isEditingScopedLocale, shouldUseLocaleDocument } = localeSession.mode;
   const blockRoom = useBlockRoomConnection('release', releaseId, roomLocale);
-  const { provider, doc, bootstrap, protocol, isConnected, isSynced, acceptEpochAck, reloadCanonical } = blockRoom;
+  const { provider, doc, bootstrap, protocol, isConnected, isSynced } = blockRoom;
   const blockRoomController = useRichTextBlockRoomController('release', doc, roomLocale);
   const currentProvider = provider;
   const currentIsConnected = isConnected;
@@ -177,28 +179,7 @@ export function ReleaseEditor({
       ? { provider: currentProvider, controller: blockRoomController }
       : null;
   const localizedDescriptionSession = editorSession;
-  const updateLocaleMetadata = useMutation({
-    mutationFn: (input: {
-      locale: string;
-      title?: string;
-      creditNotes?: readonly { creditId: string; note: string }[];
-    }) => {
-      if (!bootstrap || !protocol) {
-        throw new Error('Release Block room is not ready.');
-      }
-      return updateBlockRoomLocaleMetadata(protocol, { type: 'release', ...input });
-    },
-    onSuccess: acceptEpochAck,
-    onError: (error) => {
-      if (error instanceof BlockRoomMetadataError && error.reloadRequired) {
-        reloadCanonical();
-      }
-      notifications.show({
-        message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
-        color: 'red',
-      });
-    },
-  });
+
   const updateReleaseFields = useMutation({
     mutationFn: (input: Parameters<typeof updateReleaseFieldsAction>[1]) => updateReleaseFieldsAction(releaseId, input),
     onSuccess: (result) => {
@@ -206,16 +187,29 @@ export function ReleaseEditor({
         notifications.show({ message: result.error, color: 'red' });
       }
     },
+    onError: (error) => {
+      notifications.show({
+        message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
+        color: 'red',
+      });
+    },
   });
-  const debouncedLocaleMetadataUpdate = useDebouncedCallback(
-    (input: { locale: string; title?: string; creditNotes?: readonly { creditId: string; note: string }[] }) =>
-      updateLocaleMetadata.mutate(input),
-    500,
-  );
-  const debouncedReleaseFieldsUpdate = useDebouncedCallback(
-    (input: Parameters<typeof updateReleaseFieldsAction>[1]) => updateReleaseFields.mutate(input),
-    500,
-  );
+  const debouncedLocaleMetadataUpdate = useDebouncedRoomMetadata({
+    connection: blockRoom,
+    document: `release:${releaseId}`,
+    delay: 500,
+    write: (
+      protocol,
+      input: { locale: string; title?: string; creditNotes?: readonly { creditId: string; note: string }[] },
+    ) => updateBlockRoomLocaleMetadata(protocol, { type: 'release', ...input }),
+  });
+  const debouncedReleaseFieldsUpdate = useDebouncedPatch({
+    write: (input: Parameters<typeof updateReleaseFieldsAction>[1]) =>
+      requireActionSuccess(updateReleaseFields.mutateAsync(input)),
+    delay: 500,
+    scope: releaseId,
+    document: `release:${releaseId}`,
+  });
   const setField = useCallback(
     <K extends keyof ReleaseFields>(key: K, value: ReleaseFields[K]) => {
       if (!canEditNeutral) {
@@ -249,6 +243,7 @@ export function ReleaseEditor({
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
+        return;
       }
       setStatus('published');
       notifications.show({

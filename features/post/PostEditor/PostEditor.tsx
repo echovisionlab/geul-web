@@ -36,7 +36,7 @@ import {
   createMapPlaceWithBrowserClient,
 } from '@/lib/api/map-place-browser-client';
 import type { PostMeta } from '@/lib/collab/post-meta';
-import { BlockRoomMetadataError, updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
+import { updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import { MapPlaceActionProvider } from '@/lib/contexts/MapPlaceActionContext';
 import { PostMetaProvider, usePostMeta } from '@/lib/contexts/PostMetaContext';
@@ -65,6 +65,7 @@ import { PostSessionExpiredDialog } from './PostSessionExpiredDialog';
 import { SeriesSelector } from './SeriesSelector';
 import { TagSelector } from './TagSelector';
 import { usePostLifecycle } from './usePostLifecycle';
+import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 
 interface PostEditorProps {
   postId: string;
@@ -349,35 +350,14 @@ function PostEditorContent({
     setResidentTitle(activeEditLocale.displayTitle);
     setResidentSummary(activeEditLocale.displaySummary);
   }, [activeEditLocale.displaySummary, activeEditLocale.displayTitle, roomLocale]);
-  const updateResidentMetadata = useMutation({
-    mutationFn: (update: { locale: string; title?: string | null; summary?: string | null }) => {
-      if (!bootstrap || !protocol) {
-        throw new Error('Post Block room is not ready.');
-      }
-      return updateBlockRoomLocaleMetadata(protocol, {
-        type: 'post',
-        ...update,
-      });
-    },
-    onSuccess: (ack) => {
-      acceptEpochAck(ack);
-    },
-    onError: (error) => {
-      if (error instanceof BlockRoomMetadataError && error.reloadRequired) {
-        reloadCanonical();
-      }
-      notifications.show({
-        message: error instanceof Error ? error.message : tCommonNotifications('updateFailed'),
-        color: 'red',
-      });
-    },
+
+  const debouncedResidentMetadataUpdate = useDebouncedRoomMetadata({
+    connection: { protocol, bootstrap, acceptEpochAck, reloadCanonical },
+    document: `post:${postId}`,
+    delay: 500,
+    write: (protocol, update: { locale: string; title?: string | null; summary?: string | null }) =>
+      updateBlockRoomLocaleMetadata(protocol, { type: 'post', ...update }),
   });
-  const debouncedResidentMetadataUpdate = useDebouncedCallback(
-    (update: { locale: string; title?: string | null; summary?: string | null }) => {
-      updateResidentMetadata.mutate(update);
-    },
-    500,
-  );
   useEffect(() => {
     debouncedResidentMetadataUpdate.cancel();
   }, [debouncedResidentMetadataUpdate, roomLocale]);

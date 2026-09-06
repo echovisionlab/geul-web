@@ -244,9 +244,10 @@ describe('release queries', () => {
     });
   });
 
-  it('returns empty/null responses for handled failures', async () => {
+  it('preserves list failures and handles unavailable public documents', async () => {
     releaseClient.listReleasesAdmin.mockRejectedValueOnce(new Error('offline'));
     await expect(queries.listReleasesAdmin({})).resolves.toEqual({
+      error: 'offline',
       data: [],
       total: 0,
       page: 1,
@@ -256,5 +257,14 @@ describe('release queries', () => {
 
     publicReleaseClient.get.mockRejectedValueOnce(new ConnectError('unavailable'));
     await expect(queries.getReleasePublic('missing')).resolves.toBeNull();
+  });
+});
+
+it('preserves admin list failure instead of reporting an empty successful list', async () => {
+  releaseClient.listReleasesAdmin.mockRejectedValueOnce(new Error('permission denied'));
+  expect(await queries.listReleasesAdmin({ page: 3, pageSize: 10 })).toMatchObject({
+    error: 'permission denied',
+    page: 3,
+    pageSize: 10,
   });
 });

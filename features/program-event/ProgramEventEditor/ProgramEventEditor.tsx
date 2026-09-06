@@ -30,7 +30,7 @@ import {
   createMapPlaceWithBrowserClient,
 } from '@/lib/api/map-place-browser-client';
 import type { ProgramEventPosterMedia } from '@/lib/collab/program-event-meta';
-import { BlockRoomMetadataError, updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
+import { updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import { MapPlaceActionProvider } from '@/lib/contexts/MapPlaceActionContext';
 import { useRichTextBlockRoomEditor } from '@/features/editor/hooks/useRichTextBlockRoomEditor';
@@ -46,6 +46,9 @@ import {
 } from './useProgramEventLifecycle';
 import type { ProgramEventEditorAction } from './program-event-actions';
 import type { ProgramEventLocationModeValue } from '@/lib/types/program-event/location-mode';
+import { requireActionSuccess } from '@/lib/editor/require-action-success';
+import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
+import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
 
 interface Option {
   id: string;
@@ -193,7 +196,7 @@ export function ProgramEventEditor({
     initialStatus,
     allowedActions: neutralAllowedActions,
   });
-  const { status, mutateEditableEvent } = lifecycle;
+  const { status, mutateEditableEvent, saveEditableEvent } = lifecycle;
   const timezoneSelectData = useMemo(() => {
     const options = COMMON_TIMEZONES.map((option) => ({
       value: option.value,
@@ -278,7 +281,12 @@ export function ProgramEventEditor({
     },
   });
 
-  const debouncedMetaUpdate = useDebouncedCallback((data: ProgramEventUpdate) => mutateEditableEvent(data), 500);
+  const debouncedMetaUpdate = useDebouncedPatch({
+    write: (data: ProgramEventUpdate) => requireActionSuccess(saveEditableEvent(data)),
+    delay: 500,
+    scope: eventId,
+    document: `program_event:${eventId}`,
+  });
   const debouncedRelationsUpdate = useDebouncedCallback(
     (next: { artists: string[]; labels: string[]; clients: string[] }) => {
       mutateEditableEvent({
@@ -289,35 +297,14 @@ export function ProgramEventEditor({
     },
     500,
   );
-  const updateResidentMetadata = useMutation({
-    mutationFn: (update: { locale: string; title?: string; summary?: string | null }) => {
-      if (!blockRoom.bootstrap || !blockRoom.protocol) {
-        throw new Error('Program Event Block room is not ready.');
-      }
-      return updateBlockRoomLocaleMetadata(blockRoom.protocol, {
-        type: 'program-event',
-        ...update,
-      });
-    },
-    onSuccess: (ack) => {
-      blockRoom.acceptEpochAck(ack);
-    },
-    onError: (error) => {
-      if (error instanceof BlockRoomMetadataError && error.reloadRequired) {
-        blockRoom.reloadCanonical();
-      }
-      notifications.show({
-        message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
-        color: 'red',
-      });
-    },
+
+  const debouncedResidentMetadataUpdate = useDebouncedRoomMetadata({
+    connection: blockRoom,
+    document: `program_event:${eventId}`,
+    delay: 500,
+    write: (protocol, update: { locale: string; title?: string; summary?: string | null }) =>
+      updateBlockRoomLocaleMetadata(protocol, { type: 'program-event', ...update }),
   });
-  const debouncedResidentMetadataUpdate = useDebouncedCallback(
-    (update: { locale: string; title?: string; summary?: string | null }) => {
-      updateResidentMetadata.mutate(update);
-    },
-    500,
-  );
 
   const handleTitleChange = useCallback(
     (value: string) => {

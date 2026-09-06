@@ -4,11 +4,11 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import type * as Y from 'yjs';
 import type { DocumentLayout } from '@echovisionlab/geul-common/collaboration/document-layout';
-import { useDebouncedCallback } from '@mantine/hooks';
 import type { PostMeta } from '@/lib/collab/post-meta';
 import { useLocaleDocumentSession, type LocaleDocumentSession } from '@/features/translation/useLocaleDocumentSession';
-import { BlockRoomMetadataError, updatePostBlockRoomDocumentMetadata } from '@/lib/collab/block-room-metadata';
+import { updatePostBlockRoomDocumentMetadata } from '@/lib/collab/block-room-metadata';
 import { useBlockRoomConnection, type BlockRoomConnection } from '@/lib/collab/useBlockRoomConnection';
+import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 
 interface PostMetaContextValue {
   slug: string | null;
@@ -79,44 +79,24 @@ export function PostMetaProvider({
   const { roomLocale } = localeSession;
   const blockRoom = useBlockRoomConnection('post', postId, roomLocale);
   const { provider, doc, isConnected, isSynced, bootstrap, protocol, acceptEpochAck, reloadCanonical } = blockRoom;
-  const pendingDocumentMetadataRef = useRef<{
-    categoryIds?: readonly string[];
-    tagIds?: readonly string[];
-  }>({});
-  const persistDocumentMetadata = useDebouncedCallback(async () => {
-    const update = pendingDocumentMetadataRef.current;
-    pendingDocumentMetadataRef.current = {};
-    if (!bootstrap || !protocol || (!update.categoryIds && !update.tagIds)) {
-      return;
-    }
-    try {
-      const ack = await updatePostBlockRoomDocumentMetadata(protocol, update);
-      acceptEpochAck(ack);
-    } catch (error) {
-      if (error instanceof BlockRoomMetadataError && error.reloadRequired) {
-        reloadCanonical();
-      }
-    }
-  }, 250);
+  const persistDocumentMetadata = useDebouncedRoomMetadata({
+    connection: blockRoom,
+    document: `post:${postId}`,
+    delay: 250,
+    write: (protocol, update: { categoryIds?: readonly string[]; tagIds?: readonly string[] }) =>
+      updatePostBlockRoomDocumentMetadata(protocol, update),
+  });
   const setCategoryIds = useCallback(
     (next: string[]) => {
       setCategoryIdsState(next);
-      pendingDocumentMetadataRef.current = {
-        ...pendingDocumentMetadataRef.current,
-        categoryIds: next,
-      };
-      persistDocumentMetadata();
+      persistDocumentMetadata({ categoryIds: next });
     },
     [persistDocumentMetadata],
   );
   const setTagIds = useCallback(
     (next: string[]) => {
       setTagIdsState(next);
-      pendingDocumentMetadataRef.current = {
-        ...pendingDocumentMetadataRef.current,
-        tagIds: next,
-      };
-      persistDocumentMetadata();
+      persistDocumentMetadata({ tagIds: next });
     },
     [persistDocumentMetadata],
   );

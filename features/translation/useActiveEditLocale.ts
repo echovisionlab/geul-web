@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   TranslationEntityType,
@@ -14,6 +15,7 @@ import { CONTENT_LANGUAGE_QUERY_PARAM } from '@/lib/translation/content-language
 import { extractTranslationContentPreview } from '@/lib/translation/contentPreview';
 import type { OgGenerationRunSignal } from '@/lib/types/og-generation';
 import type { TranslationLocaleSelectOption } from './locale-option-format';
+import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 
 export type EditorTranslationEntityType =
   | 'artist'
@@ -275,14 +277,27 @@ export function useActiveEditLocale({
     ? detailEntry?.contentText?.trim() || extractTranslationContentPreview(detailEntry?.contentJson) || ''
     : '';
 
+  const localeChangeRequest = useRef(0);
+  useEffect(
+    () => () => {
+      localeChangeRequest.current += 1;
+    },
+    [entityType, entityId, pathname, activeLocale],
+  );
   const setActiveLocale = useCallback(
-    (locale: string) => {
+    async (locale: string) => {
       const normalized = normalizeLocale(locale);
-      if (pathname && normalized) {
+      const request = ++localeChangeRequest.current;
+      if (
+        pathname &&
+        normalized &&
+        (await flushEditorSaves(`${entityType}:${entityId}`)) &&
+        request === localeChangeRequest.current
+      ) {
         router.replace(buildActiveEditLocaleHref(pathname, searchParams, normalized), { scroll: false });
       }
     },
-    [pathname, router, searchParams],
+    [entityType, entityId, pathname, router, searchParams],
   );
   return {
     isControlVisible: enabled && localeOptions.length > 0,
