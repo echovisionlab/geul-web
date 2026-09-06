@@ -4,6 +4,7 @@ import { Group, Stack, Text } from '@mantine/core';
 
 import type { ControlEmphasis, ControlTone } from '../control-style';
 import { IconButton } from './IconButton';
+import { Button } from '../Button';
 
 const tones: ControlTone[] = ['accent', 'neutral', 'positive', 'warning', 'danger'];
 const emphases: ControlEmphasis[] = ['strong', 'medium', 'low', 'outline'];
@@ -19,6 +20,22 @@ export default meta;
 type Story = StoryObj<typeof IconButton>;
 
 export const Quiet: Story = {};
+export const ButtonAlignedSizes: Story = {
+  render: () => (
+    <Stack gap="sm">
+      {(['xs', 'sm', 'md', 'lg', 'xl'] as const).map((size) => (
+        <Group key={size} gap="xs">
+          <Button size={size} emphasis="medium">
+            {size}
+          </Button>
+          <IconButton controlSize={size} label={`Delete ${size}`}>
+            <IconTrash size={size === 'xs' ? 15 : 18} aria-hidden />
+          </IconButton>
+        </Group>
+      ))}
+    </Stack>
+  ),
+};
 export const Primary: Story = {
   args: {
     tone: 'accent',

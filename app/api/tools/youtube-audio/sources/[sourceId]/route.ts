@@ -24,22 +24,58 @@ interface RouteParams {
 }
 
 export async function GET(request: Request, { params }: RouteParams) {
+  return readSource(request, await params, false);
+}
+
+export async function HEAD(request: Request, { params }: RouteParams) {
+  return readSource(request, await params, true);
+}
+
+async function readSource(request: Request, { sourceId }: { sourceId: string }, head: boolean) {
   const subject = await getYoutubeAudioSubject();
   if (subject === null) {
     return youtubeAudioNotFoundResponse();
   }
 
   try {
-    const { sourceId } = await params;
-    const sourceStore = createSingleYoutubeAudioSourceStore(
-      decryptYoutubeAudioSourceRecord(readYoutubeAudioSourceCookie(request, sourceId), env.ENCRYPTION_SECRET),
+    const record = decryptYoutubeAudioSourceRecord(
+      readYoutubeAudioSourceCookie(request, sourceId),
+      env.ENCRYPTION_SECRET,
     );
-    return await getYoutubeAudioService(await getBaseUrl(), sourceStore).read({
-      range: request.headers.get('range') ?? '',
+    const sourceStore = createSingleYoutubeAudioSourceStore(record);
+    const download = new URL(request.url).searchParams.get('download') === '1';
+    const browserRange = request.headers.get('range');
+    const downloadRange =
+      record && download
+        ? (browserRange ?? 'bytes=0-').replace(/^(bytes=\d+)-$/, `$1-${record.upstream.size - 1}`)
+        : (browserRange ?? '');
+    const response = await getYoutubeAudioService(await getBaseUrl(), sourceStore).read({
+      range: head ? 'bytes=0-0' : downloadRange,
       signal: request.signal,
       sourceId,
       subject,
     });
+    if (head) {
+      // Preflight checks ownership, expiry and upstream availability without reading the file.
+      await response.body?.cancel();
+      return new Response(null, { headers: youtubeAudioNoStoreHeaders });
+    }
+    if (!download || !record) {
+      return response;
+    }
+    const headers = new Headers(response.headers);
+    const fileName = record.upstream.fileName.toWellFormed().replace(/[\r\n]/g, '');
+    const encodedName = encodeURIComponent(fileName).replace(
+      /['()*]/g,
+      (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`,
+    );
+    headers.set('Content-Disposition', `attachment; filename="audio"; filename*=UTF-8''${encodedName}`);
+    headers.set('X-Content-Type-Options', 'nosniff');
+    if (browserRange === null) {
+      headers.delete('Content-Range');
+    }
+    // Hand the upstream stream directly to the browser; never buffer it as a Blob or ArrayBuffer.
+    return new Response(response.body, { headers, status: browserRange === null ? 200 : 206 });
   } catch (error) {
     return toYoutubeAudioErrorResponse(error);
   }

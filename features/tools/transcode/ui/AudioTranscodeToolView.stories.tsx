@@ -33,7 +33,8 @@ const labels: AudioTranscodeToolLabels = {
   convert: 'Convert',
   cancelAll: 'Cancel all',
   clear: 'Clear',
-  download: 'Download',
+  download: 'Download converted file',
+  downloadSource: 'Download original',
   retry: 'Retry',
   cancel: 'Cancel',
   remove: 'Remove',
@@ -224,6 +225,22 @@ export const Ready: Story = {
     files: readyFiles,
     canConvertAll: true,
     canClear: true,
+  },
+};
+
+export const OriginalDownload: Story = {
+  args: {
+    files: [
+      fileModel('youtube', 'video-audio.webm', 'ready', {
+        canDownloadSource: true,
+        sourceSummary: 'WebM · 48 kHz · Stereo · Opus',
+        outputSummary: null,
+      }),
+    ],
+    showFilePicker: false,
+    canConvertAll: true,
+    canClear: true,
+    onDownloadSource: () => {},
   },
 };
 

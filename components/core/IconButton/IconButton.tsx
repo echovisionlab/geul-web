@@ -1,7 +1,16 @@
 import { forwardRef } from 'react';
-import { ActionIcon, createPolymorphicComponent, type ActionIconProps } from '@mantine/core';
+import { ActionIcon, createPolymorphicComponent, type ActionIconProps, type MantineSize } from '@mantine/core';
 import { resolveControlStyle, type ControlEmphasis, type ControlTone } from '../control-style';
 import classes from './IconButton.module.css';
+
+// ActionIcon's named sizes differ from Button's. Use controlSize in mixed action rows.
+const BUTTON_CONTROL_HEIGHTS: Record<MantineSize, string> = {
+  xs: '1.875rem',
+  sm: '2.25rem',
+  md: '2.625rem',
+  lg: '3.125rem',
+  xl: '3.75rem',
+};
 
 export type IconButtonAccessibleName =
   | { label: string; 'aria-label'?: never; 'aria-labelledby'?: never }
@@ -13,6 +22,8 @@ export type IconButtonProps = Omit<ActionIconProps, 'aria-label' | 'aria-labelle
     tone?: ControlTone;
     emphasis?: ControlEmphasis;
     shape?: 'square' | 'circle';
+    /** Match the height of a Core Button with the same size; overrides standalone size. */
+    controlSize?: MantineSize;
   };
 
 function IconButtonInner(
@@ -24,6 +35,8 @@ function IconButtonInner(
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,
     className,
+    controlSize,
+    size,
     ...props
   }: IconButtonProps,
   ref: React.ForwardedRef<HTMLButtonElement>,
@@ -34,6 +47,7 @@ function IconButtonInner(
     <ActionIcon
       ref={ref}
       {...props}
+      size={controlSize ? `calc(${BUTTON_CONTROL_HEIGHTS[controlSize]} * var(--mantine-scale))` : size}
       color={style.color}
       variant={style.variant}
       radius={shape === 'circle' ? 'xl' : 0}
@@ -42,6 +56,7 @@ function IconButtonInner(
       data-tone={tone}
       data-emphasis={emphasis}
       data-shape={shape}
+      data-control-size={controlSize}
       className={[classes.root, className].filter(Boolean).join(' ')}
     />
   );

@@ -63,6 +63,7 @@ const labels: AudioTranscodeToolLabels = {
   cancelAll: 'Cancel all',
   clear: 'Clear',
   download: 'Download',
+  downloadSource: 'Download original',
   retry: 'Retry',
   cancel: 'Cancel',
   remove: 'Remove',
@@ -232,15 +233,17 @@ describe('AudioTranscodeToolView', () => {
       container.querySelectorAll<HTMLButtonElement>('[data-disclosure] button'),
     ).find((button) => button.textContent?.trim() === 'Processing details');
     expect(formatsDisclosure?.getAttribute('aria-expanded')).toBe('false');
-    expect(processingDisclosure).toBeUndefined();
+    expect(processingDisclosure?.getAttribute('aria-expanded')).toBe('false');
     expect(container.textContent).toContain('Processing details');
     expect(container.textContent).toContain('Large WAV files use RF64.');
 
     act(() => {
       formatsDisclosure?.click();
+      processingDisclosure?.click();
     });
 
     expect(formatsDisclosure?.getAttribute('aria-expanded')).toBe('true');
+    expect(processingDisclosure?.getAttribute('aria-expanded')).toBe('true');
     expect(container.textContent).toContain('Supported: CAF');
 
     const picked = new File(['picked'], 'picked.wav', { type: 'audio/wav' });
@@ -265,9 +268,11 @@ describe('AudioTranscodeToolView', () => {
   });
 
   it('forwards queue and row actions and renders completed downloads as download links', () => {
+    const onDownloadSource = vi.fn();
     renderView({
+      onDownloadSource,
       files: [
-        fileModel('ready'),
+        fileModel('ready', 'ready', { canDownloadSource: true }),
         fileModel('active', 'converting', {
           progress: 38,
           progressLabel: 'Converting active.wav: 38%',
@@ -300,6 +305,9 @@ describe('AudioTranscodeToolView', () => {
     expect(handlers.onRetry).toHaveBeenCalledWith('failed');
     expect(handlers.onCancel).toHaveBeenCalledWith('active');
     expect(handlers.onRemove).toHaveBeenCalledWith('ready');
+    act(() => container.querySelector<HTMLButtonElement>('[aria-label="Download original: ready.wav"]')?.click());
+    expect(onDownloadSource).toHaveBeenCalledWith('ready');
+    expect(container.querySelector('[aria-label="Download original: active.wav"]')).toBeNull();
 
     const download = container.querySelector<HTMLAnchorElement>('[aria-label="Download: done.wav"]');
     expect(download?.getAttribute('href')).toBe('blob:https://example.test/output');

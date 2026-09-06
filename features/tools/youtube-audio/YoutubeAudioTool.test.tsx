@@ -99,6 +99,7 @@ describe('YoutubeAudioTool', () => {
     expect(transcodeProps).toMatchObject({
       externalSource: {
         id: resolved.sourceId,
+        downloadUrl: `/api/tools/youtube-audio/sources/${resolved.sourceId}?download=1`,
         input: resolved.input,
         name: resolved.input.name,
         size: resolved.input.http.size,
