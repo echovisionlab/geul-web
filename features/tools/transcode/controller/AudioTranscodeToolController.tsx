@@ -29,6 +29,7 @@ import { formatConversionFailureMessage } from './audio-transcode-errors';
 import type { AudioTranscodeRow } from './audio-transcode-controller-model';
 import { formatTargetFailureMessage, projectAudioTranscodeFile } from './audio-transcode-view-model';
 import { runAudioConversionQueue } from './run-audio-conversion-queue';
+import { downloadOriginalAudio } from './download-original-audio';
 import { useAudioRowInspection } from './useAudioRowInspection';
 import { useAudioTargetProbe } from './useAudioTargetProbe';
 import { useAudioTranscoderRuntime, type AudioTranscoderRuntimeFactory } from './useAudioTranscoderRuntime';
@@ -65,6 +66,8 @@ export function AudioTranscodeToolController({
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [settingsNotice, setSettingsNotice] = useState<string | null>(null);
   const rowsRef = useRef(rows);
+  const sourceDownloadRef = useRef<AbortController | null>(null);
+  useEffect(() => () => sourceDownloadRef.current?.abort(), [externalSource?.id]);
   const nextIdRef = useRef(1);
   const externalSourceIdRef = useRef<string | null>(null);
   const { assetState, getRuntime, inspectionControllersRef, targetProbeControllerRef, conversionRunRef, disposedRef } =
@@ -505,6 +508,33 @@ export function AudioTranscodeToolController({
   }, [onExternalSourceRemove, updateRows]);
 
   const busy = rows.some((row) => row.status === 'queued' || row.status === 'converting');
+  const downloadSource = useCallback(
+    async (id: string) => {
+      const row = rowsRef.current.find((candidate) => candidate.id === id);
+      if (!row?.source.downloadUrl || (row.status !== 'ready' && row.status !== 'complete')) {
+        return;
+      }
+      sourceDownloadRef.current?.abort();
+      const controller = new AbortController();
+      sourceDownloadRef.current = controller;
+      setCapacityError(null);
+      try {
+        const result = await downloadOriginalAudio(row.source.downloadUrl, row.source.name, controller.signal);
+        if (result !== 'started') {
+          setCapacityError(t(result === 'expired' ? 'sourceDownloadExpired' : 'sourceDownloadFailed'));
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setCapacityError(t('sourceDownloadFailed'));
+        }
+      } finally {
+        if (sourceDownloadRef.current === controller) {
+          sourceDownloadRef.current = null;
+        }
+      }
+    },
+    [t],
+  );
   const canConvertAll =
     !busy &&
     targetStatus !== 'idle' &&
@@ -535,6 +565,7 @@ export function AudioTranscodeToolController({
       cancelAll: t('cancelAll'),
       clear: t('clear'),
       download: t('download'),
+      downloadSource: t('downloadSource'),
       retry: t('retry'),
       cancel: t('cancel'),
       remove: t('remove'),
@@ -601,6 +632,7 @@ export function AudioTranscodeToolController({
       onRetry={retryRow}
       onCancel={cancelRow}
       onRemove={removeRow}
+      onDownloadSource={downloadSource}
     />
   );
 }

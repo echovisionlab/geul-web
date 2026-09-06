@@ -55,6 +55,7 @@ export interface AudioTranscodeFileViewModel {
   progress: number | null;
   progressLabel: string | null;
   downloadHref: string | null;
+  canDownloadSource?: boolean;
   downloadName: string | null;
   canRetry: boolean;
   canCancel: boolean;
@@ -85,6 +86,7 @@ export interface AudioTranscodeToolLabels {
   cancelAll: string;
   clear: string;
   download: string;
+  downloadSource: string;
   retry: string;
   cancel: string;
   remove: string;
@@ -126,6 +128,7 @@ export interface AudioTranscodeToolViewProps {
   onRetry: (id: string) => void;
   onCancel: (id: string) => void;
   onRemove: (id: string) => void;
+  onDownloadSource?: (id: string) => void;
 }
 
 const FILE_STATUS_TONES: Record<AudioTranscodeFileStatus, StatusBadgeTone> = {
@@ -169,8 +172,10 @@ function targetStatusLabel(status: AudioTranscodeTargetStatus, labels: AudioTran
 function FileStatusIcon({ status }: { status: AudioTranscodeFileStatus }) {
   switch (status) {
     case 'inspecting':
-    case 'converting':
       return <Loader aria-hidden size="xs" />;
+    case 'converting':
+    case 'ready':
+      return null;
     case 'queued':
       return <IconArrowDown aria-hidden size={18} />;
     case 'complete':
@@ -178,8 +183,6 @@ function FileStatusIcon({ status }: { status: AudioTranscodeFileStatus }) {
     case 'unsupported':
     case 'error':
       return <IconAlertTriangle aria-hidden size={18} />;
-    case 'ready':
-      return <IconFileMusic aria-hidden size={18} />;
   }
 }
 
@@ -190,9 +193,10 @@ interface FileRowProps {
   onRetry: (id: string) => void;
   onCancel: (id: string) => void;
   onRemove: (id: string) => void;
+  onDownloadSource?: (id: string) => void;
 }
 
-function FileRow({ divided, file, labels, onRetry, onCancel, onRemove }: FileRowProps) {
+function FileRow({ divided, file, labels, onRetry, onCancel, onRemove, onDownloadSource }: FileRowProps) {
   const progress = clampProgress(file.progress);
   const isProgressVisible = file.status === 'converting' && file.progress !== null;
   const metadata = [file.sourceSummary, file.sizeLabel, file.outputSummary ? `→ ${file.outputSummary}` : null]
@@ -249,6 +253,17 @@ function FileRow({ divided, file, labels, onRetry, onCancel, onRemove }: FileRow
         </Group>
 
         <Flex gap="xs" justify={{ base: 'flex-start', sm: 'flex-end' }} wrap="wrap">
+          {file.canDownloadSource && onDownloadSource ? (
+            <Button
+              size="xs"
+              emphasis="medium"
+              leftSection={<IconDownload aria-hidden size={15} />}
+              onClick={() => onDownloadSource(file.id)}
+              aria-label={`${labels.downloadSource}: ${file.name}`}
+            >
+              {labels.downloadSource}
+            </Button>
+          ) : null}
           {file.status === 'complete' && file.downloadHref && file.downloadName ? (
             <Button
               component="a"
@@ -264,34 +279,34 @@ function FileRow({ divided, file, labels, onRetry, onCancel, onRemove }: FileRow
           ) : null}
           {file.canRetry ? (
             <IconButton
-              size="lg"
+              controlSize="xs"
               emphasis="low"
               aria-label={`${labels.retry}: ${file.name}`}
               onClick={() => onRetry(file.id)}
             >
-              <IconRefresh aria-hidden size={18} />
+              <IconRefresh aria-hidden size={15} />
             </IconButton>
           ) : null}
           {file.canCancel ? (
             <IconButton
-              size="lg"
+              controlSize="xs"
               tone="warning"
               emphasis="low"
               aria-label={`${labels.cancel}: ${file.name}`}
               onClick={() => onCancel(file.id)}
             >
-              <IconX aria-hidden size={18} />
+              <IconX aria-hidden size={15} />
             </IconButton>
           ) : null}
           {file.canRemove ? (
             <IconButton
-              size="lg"
+              controlSize="xs"
               tone="neutral"
               emphasis="low"
               aria-label={`${labels.remove}: ${file.name}`}
               onClick={() => onRemove(file.id)}
             >
-              <IconTrash aria-hidden size={18} />
+              <IconTrash aria-hidden size={15} />
             </IconButton>
           ) : null}
         </Flex>
@@ -334,6 +349,7 @@ export function AudioTranscodeToolView({
   onRetry,
   onCancel,
   onRemove,
+  onDownloadSource,
 }: AudioTranscodeToolViewProps) {
   const titleId = useId();
   const isAtCapacity = files.length >= maxFiles;
@@ -402,12 +418,16 @@ export function AudioTranscodeToolView({
               />
             ))}
           </SimpleGrid>
-          <Text size="xs" c="dimmed">
-            {labels.outputSettingsHelper}
-          </Text>
-          <Text size="xs" c="dimmed">
-            {labels.processingDetails}: {labels.processingDetailsDescription}
-          </Text>
+          <Disclosure label={labels.processingDetails} density="compact" contentIndent="small">
+            <Stack gap="xs">
+              <Text size="xs" c="dimmed">
+                {labels.outputSettingsHelper}
+              </Text>
+              <Text size="xs" c="dimmed">
+                {labels.processingDetailsDescription}
+              </Text>
+            </Stack>
+          </Disclosure>
           {settingsNotice ? (
             <Alert data-audio-transcode-settings-notice tone="accent">
               {settingsNotice}
@@ -439,7 +459,13 @@ export function AudioTranscodeToolView({
                       {labels.cancelAll}
                     </Button>
                   ) : (
-                    <Button size="xs" loading={isConverting} disabled={!canConvertAll} onClick={onConvertAll}>
+                    <Button
+                      size="xs"
+                      emphasis="medium"
+                      loading={isConverting}
+                      disabled={!canConvertAll}
+                      onClick={onConvertAll}
+                    >
                       {labels.convert}
                     </Button>
                   )}
@@ -503,6 +529,7 @@ export function AudioTranscodeToolView({
                     onRetry={onRetry}
                     onCancel={onCancel}
                     onRemove={onRemove}
+                    onDownloadSource={onDownloadSource}
                   />
                 ))}
               </Stack>

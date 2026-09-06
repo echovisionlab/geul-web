@@ -52,6 +52,24 @@ function renderIconButton(node: React.ReactNode): HTMLButtonElement {
 }
 
 describe('IconButton', () => {
+  it('matches a text-button control height without changing standalone sizes', () => {
+    const aligned = renderIconButton(
+      <IconButton label="Remove" controlSize="xs" size="lg">
+        X
+      </IconButton>,
+    );
+    expect(aligned.style.getPropertyValue('--ai-size')).toBe('calc(1.875rem * var(--mantine-scale))');
+    expect(aligned.getAttribute('data-control-size')).toBe('xs');
+
+    const standalone = renderIconButton(
+      <IconButton label="Remove" size="lg">
+        X
+      </IconButton>,
+    );
+    expect(standalone.style.getPropertyValue('--ai-size')).toBe('var(--ai-size-lg)');
+    expect(standalone.hasAttribute('data-control-size')).toBe(false);
+  });
+
   it('renders an accessible icon button', () => {
     const button = renderIconButton(<IconButton label="Edit">E</IconButton>);
 

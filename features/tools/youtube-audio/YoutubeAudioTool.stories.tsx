@@ -1,15 +1,83 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { Container } from '@mantine/core';
+import { useTranslations } from 'next-intl';
+import {
+  AudioTranscodeToolView,
+  type AudioTranscodeToolViewProps,
+  type AudioTranscodeToolLabels,
+} from '../transcode/ui';
 
-import { YoutubeAudioToolView, type YoutubeAudioToolLabels } from './YoutubeAudioToolView';
+import {
+  YoutubeAudioToolView,
+  type YoutubeAudioToolLabels,
+  type YoutubeAudioToolViewProps,
+} from './ui/YoutubeAudioToolView';
+
+function LocalizedSourceView(props: YoutubeAudioToolViewProps) {
+  const t = useTranslations('tools.youtubeAudio');
+  const translated = { ...props.labels };
+  for (const key of Object.keys(translated) as (keyof YoutubeAudioToolLabels)[]) {
+    translated[key] = t(key);
+  }
+  return (
+    <YoutubeAudioToolView
+      {...props}
+      labels={translated}
+      error={props.error === null ? null : t('errors.INVALID_REQUEST')}
+    />
+  );
+}
+
+function LocalizedConverter(props: AudioTranscodeToolViewProps) {
+  const t = useTranslations('tools.transcode');
+  const translated = { ...props.labels };
+  for (const key of Object.keys(translated) as (keyof AudioTranscodeToolLabels)[]) {
+    translated[key] = t(key);
+  }
+  const statusKeys = {
+    inspecting: 'statusInspecting',
+    ready: 'statusReady',
+    queued: 'statusQueued',
+    converting: 'statusConverting',
+    complete: 'statusComplete',
+    unsupported: 'statusUnsupported',
+    error: 'statusError',
+  } as const;
+  return (
+    <AudioTranscodeToolView
+      {...props}
+      labels={translated}
+      sampleRateOptions={props.sampleRateOptions.map((option) => ({
+        ...option,
+        label:
+          option.value === 'automatic'
+            ? t('automatic')
+            : option.value === 'source'
+              ? t('preserveSource')
+              : option.label,
+      }))}
+      encodingControls={props.encodingControls.map((control) => ({ ...control, label: t('bitrate') }))}
+      files={props.files.map((file) => ({
+        ...file,
+        statusLabel: t(statusKeys[file.status]),
+        sourceSummary: t('sourceSummary', {
+          container: 'M4A',
+          sampleRate: '48 kHz',
+          channels: t('stereo'),
+          bitDepth: 'AAC',
+        }),
+        progressLabel:
+          file.progress === null ? null : t('progressLabel', { phase: t('statusConverting'), progress: file.progress }),
+      }))}
+    />
+  );
+}
 
 const labels: YoutubeAudioToolLabels = {
   title: 'YouTube Audio',
-  description: 'Load a YouTube audio source as MP3 by default, or choose another output format.',
+  description: 'Save YouTube audio in its original format or convert it.',
   sourceTitle: 'YouTube source',
-  sourceDescription: 'The server resolves a short-lived audio source. Conversion stays in your browser.',
   urlLabel: 'YouTube URL',
-  urlDescription: 'Paste a youtube.com or youtu.be video URL.',
   urlPlaceholder: 'https://www.youtube.com/watch?v=...',
   resolve: 'Load audio',
   resolving: 'Loading audio',
@@ -42,7 +110,8 @@ const converterArgs = {
     convert: 'Convert',
     cancelAll: 'Cancel all',
     clear: 'Clear',
-    download: 'Download',
+    download: 'Download converted file',
+    downloadSource: 'Download original',
     retry: 'Retry',
     cancel: 'Cancel',
     remove: 'Remove',
@@ -53,7 +122,7 @@ const converterArgs = {
       name: 'field-recording-reference.m4a',
       sizeLabel: '5.8 MB',
       sourceSummary: 'M4A · 48 kHz · Stereo · AAC',
-      outputSummary: 'MP3 · 320 kbps CBR · 48 kHz · Stereo',
+      outputSummary: null,
       status: 'ready',
       statusLabel: 'Ready',
       message: null,
@@ -61,6 +130,7 @@ const converterArgs = {
       progressLabel: null,
       downloadHref: null,
       downloadName: null,
+      canDownloadSource: true,
       canRetry: false,
       canCancel: false,
       canRemove: true,
@@ -78,8 +148,9 @@ const converterArgs = {
     { value: 'mp3', label: 'MP3' },
     { value: 'flac', label: 'FLAC' },
   ],
-  sampleRate: 'source',
+  sampleRate: 'automatic',
   sampleRateOptions: [
+    { value: 'automatic', label: 'Automatic' },
     { value: 'source', label: 'Preserve source' },
     { value: '48000', label: '48 kHz' },
   ],
@@ -99,7 +170,7 @@ const converterArgs = {
   targetStatus: 'ready',
   targetMessage: null,
   capacityError: null,
-  statusMessage: 'The authenticated source is ready to convert locally.',
+  statusMessage: null,
   settingsNotice: null,
   canAddFiles: false,
   canConvertAll: true,
@@ -117,11 +188,13 @@ const converterArgs = {
   onRetry: () => {},
   onCancel: () => {},
   onRemove: () => {},
-};
+  onDownloadSource: () => {},
+} satisfies AudioTranscodeToolViewProps;
 
 const meta = {
   title: 'Feature/Tools/YouTube Audio',
   component: YoutubeAudioToolView,
+  render: (args) => <LocalizedSourceView {...args} />,
   tags: ['youtube-audio'],
   parameters: { layout: 'fullscreen' },
   decorators: [
@@ -160,10 +233,54 @@ export const Ready: Story = {
   args: {
     url: 'https://www.youtube.com/watch?v=abcdefghijk',
     resolvedTitle: 'Field recording reference',
+    converter: <LocalizedConverter {...converterArgs} />,
+  },
+};
+
+export const Converting: Story = {
+  args: {
+    ...Ready.args,
     converter: (
-      <div role="region" aria-label={converterArgs.labels.queue}>
-        <button type="button">{converterArgs.labels.convert}</button>
-      </div>
+      <LocalizedConverter
+        {...converterArgs}
+        canConvertAll={false}
+        canCancelAll
+        isConverting
+        files={[
+          {
+            ...converterArgs.files[0],
+            status: 'converting',
+            statusLabel: 'Converting',
+            progress: 38,
+            progressLabel: 'Converting: 38%',
+            canDownloadSource: false,
+            canCancel: true,
+            canRemove: false,
+          },
+        ]}
+      />
+    ),
+  },
+};
+
+export const Complete: Story = {
+  args: {
+    ...Ready.args,
+    converter: (
+      <LocalizedConverter
+        {...converterArgs}
+        canConvertAll={false}
+        files={[
+          {
+            ...converterArgs.files[0],
+            status: 'complete',
+            statusLabel: 'Complete',
+            outputSummary: 'MP3 · 320 kbps CBR · 8.5 MB',
+            downloadHref: 'data:audio/mpeg;base64,',
+            downloadName: 'field-recording-reference.mp3',
+          },
+        ]}
+      />
     ),
   },
 };

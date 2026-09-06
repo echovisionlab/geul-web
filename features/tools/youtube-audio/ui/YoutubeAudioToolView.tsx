@@ -15,9 +15,7 @@ export interface YoutubeAudioToolLabels {
   title: string;
   description: string;
   sourceTitle: string;
-  sourceDescription: string;
   urlLabel: string;
-  urlDescription: string;
   urlPlaceholder: string;
   resolve: string;
   resolving: string;
@@ -65,10 +63,9 @@ export function YoutubeAudioToolView({
           <Stack gap="md">
             <SectionHeader
               title={<span id={sourceTitleId}>{labels.sourceTitle}</span>}
-              description={labels.sourceDescription}
               actions={resolvedTitle ? <StatusBadge tone="positive">{labels.ready}</StatusBadge> : undefined}
             />
-            <Field label={labels.urlLabel} description={labels.urlDescription} htmlFor={urlId} error={error} required>
+            <Field label={labels.urlLabel} htmlFor={urlId} error={error} required>
               <TextInput
                 id={urlId}
                 type="url"
@@ -86,13 +83,14 @@ export function YoutubeAudioToolView({
                 {resolvedTitle}
               </Alert>
             ) : null}
-            <Group justify="flex-end">
+            <Group justify="flex-end" gap="xs">
               {resolvedTitle ? (
                 <Button
                   type="button"
+                  size="xs"
                   tone="neutral"
                   emphasis="low"
-                  leftSection={<IconTrash aria-hidden size={16} />}
+                  leftSection={<IconTrash aria-hidden size={15} />}
                   disabled={resolving}
                   onClick={onClear}
                 >
@@ -101,9 +99,11 @@ export function YoutubeAudioToolView({
               ) : null}
               <Button
                 type="submit"
+                size="xs"
+                emphasis="medium"
                 loading={resolving}
                 disabled={url.trim().length === 0}
-                leftSection={<IconBrandYoutube aria-hidden size={18} />}
+                leftSection={<IconBrandYoutube aria-hidden size={15} />}
               >
                 {resolving ? labels.resolving : labels.resolve}
               </Button>

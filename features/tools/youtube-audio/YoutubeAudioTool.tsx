@@ -118,6 +118,7 @@ export function YoutubeAudioTool({ fetcher = fetch }: YoutubeAudioToolProps) {
         ? null
         : {
             id: resolved.sourceId,
+            downloadUrl: `/api/tools/youtube-audio/sources/${encodeURIComponent(resolved.sourceId)}?download=1`,
             input: resolved.input,
             name: resolved.input.name,
             size: resolved.input.http.size,
@@ -129,9 +130,7 @@ export function YoutubeAudioTool({ fetcher = fetch }: YoutubeAudioToolProps) {
       title: t('title'),
       description: t('description'),
       sourceTitle: t('sourceTitle'),
-      sourceDescription: t('sourceDescription'),
       urlLabel: t('urlLabel'),
-      urlDescription: t('urlDescription'),
       urlPlaceholder: t('urlPlaceholder'),
       resolve: t('resolve'),
       resolving: t('resolving'),

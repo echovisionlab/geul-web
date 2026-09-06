@@ -53,6 +53,7 @@ export function projectAudioTranscodeFile(row: AudioTranscodeRow, t: Translate):
             progress,
           }),
     downloadHref: row.artifact?.url ?? null,
+    canDownloadSource: row.source.downloadUrl !== undefined && (row.status === 'ready' || row.status === 'complete'),
     downloadName: row.artifact?.name ?? null,
     canRetry: row.status === 'error',
     canCancel: row.status === 'inspecting' || row.status === 'queued' || row.status === 'converting',

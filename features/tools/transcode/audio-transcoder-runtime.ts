@@ -35,6 +35,8 @@ export const AUDIO_TRANSCODER_OUTPUT_NAMESPACE = 'audio-tools-transcode';
 export const AUDIO_TRANSCODER_PROBE_DEADLINE_MS = 15_000;
 
 export interface AudioTranscoderInputSource {
+  /** Consumer-owned same-origin endpoint for streaming the unmodified source. */
+  readonly downloadUrl?: string;
   readonly input: AudioStreamInput;
   readonly name: string;
   readonly size: number;

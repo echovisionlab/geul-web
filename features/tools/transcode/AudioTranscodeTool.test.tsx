@@ -47,6 +47,7 @@ afterEach(() => {
   act(() => root.unmount());
   container.remove();
   consoleErrorSpy.mockRestore();
+  vi.unstubAllGlobals();
 });
 
 describe('AudioTranscodeTool controller', () => {
@@ -54,6 +55,7 @@ describe('AudioTranscodeTool controller', () => {
     const harness = createRuntimeHarness();
     const externalSource = {
       id: 'source_12345678',
+      downloadUrl: '/api/tools/youtube-audio/sources/source_12345678?download=1',
       input: {
         http: {
           credentials: 'include' as const,
@@ -86,6 +88,14 @@ describe('AudioTranscodeTool controller', () => {
     expect(viewProps()).toMatchObject({ format: 'mp3', showFilePicker: false, title: null });
     expect(viewProps().encodingControls[0]).toMatchObject({ id: 'bitrate-bps', value: '320000' });
     expect(viewProps().files[0]).toMatchObject({ name: 'Reference.m4a', sizeLabel: '121 KB' });
+    expect(viewProps().files[0]?.canDownloadSource).toBe(true);
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 410 })));
+    await act(async () => {
+      await viewProps().onDownloadSource?.(externalSource.id);
+    });
+    expect(viewProps().capacityError).toBe(enMessages.tools.transcode.sourceDownloadExpired);
+    expect(viewProps().files[0]?.status).toBe('ready');
+    expect(harness.transcode).not.toHaveBeenCalled();
 
     act(() => viewProps().onConvertAll());
     await vi.waitFor(() => expect(viewProps().files[0]?.status).toBe('complete'));
