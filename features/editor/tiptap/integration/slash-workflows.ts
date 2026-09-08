@@ -5,7 +5,7 @@ import { applyTiptapSlashContent } from '../slash/execute';
 /** Applies an immediate custom node in exactly one editor document mutation. */
 export function createImmediateNodeWorkflow(
   editor: Editor,
-  nodeName: 'p5Sketch' | 'threeScene' | 'shader',
+  nodeName: 'p5Sketch' | 'threeScene' | 'shader' | 'mermaid',
 ): TiptapSlashWorkflowCallback {
   return (context) => {
     const nodeType = editor.schema.nodes[nodeName];

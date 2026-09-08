@@ -131,6 +131,7 @@ function buildSlashMenuMessages(messages: Messages['editorCommon']['editor']['sl
         ...messages.items.externalVideo,
         aliases: splitSlashAliases(messages.items.externalVideo.aliases),
       },
+      mermaid: { ...messages.items.mermaid, aliases: splitSlashAliases(messages.items.mermaid.aliases) },
       p5Sketch: { ...messages.items.p5Sketch, aliases: splitSlashAliases(messages.items.p5Sketch.aliases) },
       threeScene: { ...messages.items.threeScene, aliases: splitSlashAliases(messages.items.threeScene.aliases) },
       shader: { ...messages.items.shader, aliases: splitSlashAliases(messages.items.shader.aliases) },
@@ -645,6 +646,12 @@ export function TiptapAuthoringControls({
           aliases: slash('items.externalVideo.aliases').split('\n'),
           group: slash('items.externalVideo.group'),
         },
+        mermaid: {
+          title: slash('items.mermaid.title'),
+          subtext: slash('items.mermaid.subtext'),
+          aliases: slash('items.mermaid.aliases').split('\n'),
+          group: slash('items.mermaid.group'),
+        },
         p5Sketch: {
           title: slash('items.p5Sketch.title'),
           subtext: slash('items.p5Sketch.subtext'),
@@ -689,6 +696,7 @@ export function TiptapAuthoringControls({
         onAIAssistantActivate,
         onExternalVideoActivate,
       }),
+      mermaid: createImmediateNodeWorkflow(editor, 'mermaid'),
       p5: createImmediateNodeWorkflow(editor, 'p5Sketch'),
       three: createImmediateNodeWorkflow(editor, 'threeScene'),
       shader: createImmediateNodeWorkflow(editor, 'shader'),
@@ -708,6 +716,7 @@ export function TiptapAuthoringControls({
     const catalog = createTiptapSlashCatalog(messages, {
       capabilities: {
         emoji: capabilities.emoji !== false,
+        mermaid: capabilities.mermaid !== false,
         p5: capabilities.p5 !== false,
         shader: capabilities.shader !== false,
         three: capabilities.three !== false,

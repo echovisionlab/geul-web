@@ -46,6 +46,9 @@ export function localizedRichTextPlainText(blocks: readonly LocalizedRichTextBlo
         own =
           block.locale.content?.rows.flatMap((row) => row.cells.map((cell) => inline(cell.content))).join(' ') ?? '';
         break;
+      case 'mermaid':
+        own = block.locale.props?.title ?? '';
+        break;
       case 'divider':
       case 'p5-sketch':
       case 'three-scene':

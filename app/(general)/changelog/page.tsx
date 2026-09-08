@@ -49,7 +49,7 @@ export default async function ChangelogPage() {
           </Text>
         </Group>
         <Text c="dimmed" maw={720}>
-          Product updates, fixes, and internal release notes for Geul.
+          Product updates, fixes, and internal release notes.
         </Text>
       </Stack>
 

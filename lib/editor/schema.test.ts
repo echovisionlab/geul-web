@@ -21,6 +21,7 @@ describe('durable editor schemas', () => {
       'heading',
       'map',
       'math',
+      'mermaid',
       'numberedListItem',
       'p5Sketch',
       'paragraph',

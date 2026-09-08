@@ -122,7 +122,7 @@ export function buildSiteOrganizationJsonLd(site: SiteMetadataDocument): JsonLdV
     '@context': 'https://schema.org',
     '@type': 'Organization',
     '@id': organizationId(site),
-    name: site.companyName || site.siteTitle || 'Geul',
+    name: site.companyName || site.siteTitle || 'Site',
     url: site.canonicalOrigin,
     ...(site.logoUrl && { logo: site.logoUrl }),
     ...(site.socialLinks.length > 0 && { sameAs: site.socialLinks }),
@@ -137,7 +137,7 @@ export function buildSiteWebSiteJsonLd(site: SiteMetadataDocument): JsonLdValue 
     '@type': 'WebSite',
     '@id': websiteId(site),
     url: site.canonicalOrigin,
-    name: site.siteTitle || 'Geul',
+    name: site.siteTitle || 'Site',
     ...(description && { description }),
     publisher: { '@id': organizationId(site) },
   };

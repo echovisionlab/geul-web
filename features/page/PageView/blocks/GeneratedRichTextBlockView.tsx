@@ -1,5 +1,7 @@
 'use client';
 
+import { MermaidDiagram } from '@/features/mermaid/MermaidDiagram';
+
 import { useCallback, type ReactNode } from 'react';
 import katex from 'katex';
 import { useTranslations } from 'next-intl';
@@ -717,6 +719,8 @@ export function GeneratedRichTextBlockView({
           }}
         />
       );
+    case 'mermaid':
+      return <MermaidDiagram source={block.base.props?.source ?? ''} title={block.locale.props?.title ?? ''} />;
     case 'file':
       return <GeneratedFileBlock block={block} downloadOwner={downloadOwner} />;
     default:

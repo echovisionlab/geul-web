@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, createElement, type ComponentType, type ReactNode } from 'react';
+import { act, createElement, type ComponentProps, type ComponentType, type ReactNode } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -8,6 +8,8 @@ import { MantineProvider } from '@mantine/core';
 import type { SettingsFlow } from '@/features/auth/settings-flow';
 import { rememberPasskeySecurityContinuation } from '@/features/auth/security-reauthentication';
 import enMessages from '@/messages/en.json';
+import { ManifestProvider } from '@/lib/contexts/ManifestContext';
+import { DEFAULT_SITE_SETTINGS_VIEW } from '@/lib/types/site-setting/config';
 import { getPasskeyItems, PasskeySettingsSection } from './PasskeySettingsSection';
 
 const navigationMock = vi.hoisted(() => ({
@@ -33,6 +35,10 @@ const TestIntlProvider = NextIntlClientProvider as ComponentType<{
   locale: string;
   messages: typeof enMessages;
 }>;
+
+const TestManifestProvider = ManifestProvider as ComponentType<
+  Omit<ComponentProps<typeof ManifestProvider>, 'children'> & { children?: ReactNode }
+>;
 
 vi.mock('@/lib/public-runtime-config', () => ({
   getPublicAuthUrl: () => '/api/auth',
@@ -168,7 +174,20 @@ describe('getPasskeyItems', () => {
     ]);
   });
 
-  it('surfaces a cancelled settings add ceremony and leaves passkey registration retryable', async () => {
+  it('uses the current site name for registration and keeps cancellation retryable', async () => {
+    const creationOptions = {
+      publicKey: {
+        challenge: 'Y2hhbGxlbmdl',
+        rp: { id: 'site.example', name: 'Old site name' },
+        user: { id: 'dXNlcg', name: 'John Doe', displayName: 'John Doe' },
+        pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
+        authenticatorSelection: { residentKey: 'required', userVerification: 'required' },
+        excludeCredentials: [{ type: 'public-key', id: 'ZXhpc3Rpbmc' }],
+        extensions: { credProps: true },
+        timeout: 60000,
+        attestation: 'none',
+      },
+    };
     const settingsFlow: SettingsFlow = {
       id: 'settings-flow',
       ui: {
@@ -195,7 +214,7 @@ describe('getPasskeyItems', () => {
           {
             type: 'input',
             group: 'passkey',
-            attributes: { name: 'passkey_create_data', type: 'hidden', value: '{}' },
+            attributes: { name: 'passkey_create_data', type: 'hidden', value: JSON.stringify(creationOptions) },
           },
           {
             type: 'script',
@@ -209,7 +228,7 @@ describe('getPasskeyItems', () => {
       },
     };
     const cancellation = new DOMException('The operation was cancelled.', 'NotAllowedError');
-    const credentialCreate = vi.fn(() => Promise.reject(cancellation));
+    const credentialCreate = vi.fn((_options: typeof creationOptions) => Promise.reject(cancellation));
     vi.stubGlobal('PublicKeyCredential', class PublicKeyCredentialMock {});
     Object.defineProperty(window.navigator, 'credentials', {
       configurable: true,
@@ -217,16 +236,10 @@ describe('getPasskeyItems', () => {
     });
     (window as unknown as Record<string, unknown>).__oryWebAuthnInitialized = true;
     (window as unknown as Record<string, unknown>).oryPasskeySettingsRegistration = () => {
-      window.navigator.credentials
-        .create({
-          publicKey: {
-            challenge: new Uint8Array(),
-            rp: { name: 'Geul' },
-            user: { id: new Uint8Array(), name: 'John Doe', displayName: 'John Doe' },
-            pubKeyCredParams: [],
-          },
-        })
-        .catch(() => undefined);
+      // The Kratos settings runtime reads these options from the rendered form.
+      const data = document.querySelector<HTMLInputElement>('input[name="passkey_create_data"]');
+      const options = JSON.parse(data!.value);
+      window.navigator.credentials.create(options).catch(() => undefined);
     };
     vi.stubGlobal(
       'fetch',
@@ -236,16 +249,47 @@ describe('getPasskeyItems', () => {
         .mockResolvedValueOnce(jsonResponse({ ...settingsFlow, id: 'fresh-settings-flow' })),
     );
 
-    await act(async () => {
-      root.render(
-        createElement(
-          TestIntlProvider,
-          { locale: 'en', messages: enMessages },
-          createElement(MantineProvider, null, createElement(PasskeySettingsSection, { subjectId: 'member-1' })),
-        ),
-      );
-    });
-    await flush();
+    const renderSite = async (siteTitle: string) => {
+      await act(async () => {
+        root.render(
+          createElement(
+            TestIntlProvider,
+            { locale: 'en', messages: enMessages },
+            createElement(
+              MantineProvider,
+              null,
+              createElement(
+                TestManifestProvider,
+                {
+                  manifest: {
+                    settings: {
+                      ...DEFAULT_SITE_SETTINGS_VIEW,
+                      site_title: siteTitle,
+                      favicon_asset_set: null,
+                      site_og_image_url: null,
+                    },
+                    menus: {
+                      $typeName: 'api.open.v1.Menus',
+                      header: [],
+                      secondary: [],
+                      footer: [],
+                      avatarDropdown: [],
+                    },
+                  },
+                },
+                createElement(PasskeySettingsSection, { subjectId: 'member-1' }),
+              ),
+            ),
+          ),
+        );
+      });
+      await flush();
+    };
+    await renderSite('DSUB');
+    const createData = document.querySelector<HTMLInputElement>('input[name="passkey_create_data"]');
+    expect(JSON.parse(createData!.value).publicKey.rp).toEqual({ id: 'site.example', name: 'DSUB' });
+    await renderSite('Example Studio');
+    expect(JSON.parse(createData!.value).publicKey.rp.name).toBe('Example Studio');
 
     const addButton = document.querySelector<HTMLButtonElement>('[data-testid="security-add-passkey"]');
     expect(addButton?.disabled).toBe(false);
@@ -256,6 +300,10 @@ describe('getPasskeyItems', () => {
     await flush();
 
     expect(credentialCreate).toHaveBeenCalledTimes(1);
+    const submittedOptions = credentialCreate.mock.calls[0][0];
+    expect(submittedOptions.publicKey.rp.name).toBe('Example Studio');
+    submittedOptions.publicKey.rp.name = creationOptions.publicKey.rp.name;
+    expect(submittedOptions).toEqual(creationOptions);
     expect(document.body.textContent).toContain(enMessages.security.passkeys.errors.unsupported);
     expect(addButton?.disabled).toBe(false);
   });

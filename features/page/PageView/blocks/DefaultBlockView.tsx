@@ -1,5 +1,7 @@
 'use client';
 
+import { MermaidDiagram } from '@/features/mermaid/MermaidDiagram';
+
 import { useCallback } from 'react';
 import katex from 'katex';
 import { useTranslations } from 'next-intl';
@@ -107,6 +109,8 @@ export function DefaultBlockView({ block, requestedLocale }: DefaultBlockViewPro
       return <MathBlockView block={block} />;
     case 'code-block':
       return <CodeBlock block={block} />;
+    case 'mermaid':
+      return <MermaidDiagram source={executableSource(block)} title={getBlockPropString(block.props, 'title')} />;
     case 'p5-sketch':
     case 'three-scene':
     case 'shader':
@@ -489,7 +493,9 @@ function executableSource(block: Block): string {
   if (source) {
     return source;
   }
-  return block.type === 'p5Sketch' || block.type === 'threeScene' ? getBlockPropString(block.props, 'source') : '';
+  return block.type === 'p5Sketch' || block.type === 'threeScene' || block.type === 'mermaid'
+    ? getBlockPropString(block.props, 'source')
+    : '';
 }
 
 function exactKeys(value: Record<string, unknown>, keys: readonly string[]): boolean {

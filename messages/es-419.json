@@ -699,7 +699,7 @@
             "emailLang": "Código de idioma aplicado al documento de correo electrónico renderizado.",
             "emailDirection": "Dirección del texto del documento de correo electrónico renderizado.",
             "emailFontFamily": "Pila de fuentes Noto compatible con la configuración regional para el correo electrónico renderizado.",
-            "emailFontStylesheetUrl": "URL de hoja de estilo alojada en CDN para las fuentes de correo electrónico Geul.",
+            "emailFontStylesheetUrl": "URL de hoja de estilo alojada en CDN para las fuentes de correo electrónico.",
             "recipientName": "Nombre para mostrar del destinatario (cuando esté disponible).",
             "recipientEmail": "Dirección de correo electrónico del destinatario (cuando esté disponible).",
             "unsubscribeLink": "URL para cancelar la suscripción (cuando esté disponible)."
@@ -1724,7 +1724,7 @@
     },
     "personalAccessTokens": {
       "title": "Token de acceso personal",
-      "description": "Usa este único token de acceso personal con las API que ofrece Geul. Cada solicitud usa los permisos actuales de tu cuenta. Remote MCP no acepta este token.",
+      "description": "Usa este único token de acceso personal con las API que ofrece {siteName}. Cada solicitud usa los permisos actuales de tu cuenta. Remote MCP no acepta este token.",
       "empty": "No se ha creado ningún token de acceso personal.",
       "regenerate": "Regenerar",
       "regenerateTitle": "Regenerar token de acceso personal",
@@ -3090,7 +3090,8 @@
       "textMarquee": "Marco de texto",
       "clientMarquee": "Marquesina del cliente",
       "labelMarquee": "Marquesina de etiquetas",
-      "externalVideo": "Vídeo externo"
+      "externalVideo": "Vídeo externo",
+      "mermaid": "Mermaid"
     },
     "sectionItem": {
       "maxWidth": {
@@ -3840,6 +3841,12 @@
             "title": "Shader GLSL",
             "subtext": "Agrega un shader GLSL interactivo",
             "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "group": "Incrustaciones"
+          },
+          "mermaid": {
+            "title": "Mermaid",
+            "subtext": "Crear un diagrama a partir de texto",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
             "group": "Incrustaciones"
           }
         }
@@ -5437,5 +5444,12 @@
       "download": "Descargar",
       "failed": "No se pudo autorizar la descarga. Intentar otra vez."
     }
+  },
+  "mermaid": {
+    "source": "Código",
+    "title": "Descripción",
+    "empty": "Ingresa el código del diagrama",
+    "invalid": "Diagrama no válido",
+    "loading": "Generando…"
   }
 }

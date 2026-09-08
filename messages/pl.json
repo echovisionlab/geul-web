@@ -699,7 +699,7 @@
             "emailLang": "Kod języka zastosowany do renderowanego dokumentu e-mail.",
             "emailDirection": "Kierunek tekstu renderowanego dokumentu e-mail.",
             "emailFontFamily": "Stos czcionek Noto obsługujący ustawienia regionalne dla renderowanej wiadomości e-mail.",
-            "emailFontStylesheetUrl": "Adres URL arkusza stylów hostowanego przez CDN dla czcionek e-mail Geul.",
+            "emailFontStylesheetUrl": "Adres URL arkusza stylów hostowanego przez CDN dla czcionek e-mail.",
             "recipientName": "Wyświetlana nazwa odbiorcy (jeśli jest dostępna).",
             "recipientEmail": "Adres e-mail odbiorcy (jeśli jest dostępny).",
             "unsubscribeLink": "Adres URL rezygnacji z subskrypcji (jeśli jest dostępny)."
@@ -1724,7 +1724,7 @@
     },
     "personalAccessTokens": {
       "title": "Osobisty token dostępu",
-      "description": "Używaj tego jednego osobistego tokenu dostępu z interfejsami API udostępnianymi przez Geul. Każde żądanie korzysta z bieżących uprawnień konta. Remote MCP nie akceptuje tego tokenu.",
+      "description": "Używaj tego jednego osobistego tokenu dostępu z interfejsami API udostępnianymi przez {siteName}. Każde żądanie korzysta z bieżących uprawnień konta. Remote MCP nie akceptuje tego tokenu.",
       "empty": "Nie utworzono jeszcze żadnego osobistego tokenu dostępu.",
       "regenerate": "Wygeneruj ponownie",
       "regenerateTitle": "Wygeneruj ponownie osobisty token dostępu",
@@ -3090,7 +3090,8 @@
       "textMarquee": "Zaznacz tekst",
       "clientMarquee": "Namiot Klienta",
       "labelMarquee": "Oznaczenie etykiety",
-      "externalVideo": "Wideo zewnętrzne"
+      "externalVideo": "Wideo zewnętrzne",
+      "mermaid": "Mermaid"
     },
     "sectionItem": {
       "maxWidth": {
@@ -3840,6 +3841,12 @@
             "title": "Shader GLSL",
             "subtext": "Dodaj interaktywny shader GLSL",
             "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "group": "Osadzone"
+          },
+          "mermaid": {
+            "title": "Mermaid",
+            "subtext": "Utwórz diagram z tekstu",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
             "group": "Osadzone"
           }
         }
@@ -5437,5 +5444,12 @@
       "download": "Pobierać",
       "failed": "Nie można autoryzować pobierania. Spróbuj ponownie."
     }
+  },
+  "mermaid": {
+    "source": "Kod źródłowy",
+    "title": "Podpis",
+    "empty": "Wprowadź kod diagramu",
+    "invalid": "Nieprawidłowy diagram",
+    "loading": "Renderowanie…"
   }
 }

@@ -491,6 +491,7 @@ function extractGeneratedRichTextBlockLines(block: LocalizedRichTextBlock): stri
           .join(' '),
       );
       break;
+    case 'mermaid':
     case 'p5-sketch':
     case 'three-scene':
       pushLabeled(lines, formatBlockTypeLabel(block.kind), block.base.props?.source);

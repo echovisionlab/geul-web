@@ -92,6 +92,7 @@ const supportedBlocks = new Set([
   'checkListItem',
   'quote',
   'codeBlock',
+  'mermaid',
   'p5Sketch',
   'threeScene',
   'shader',
@@ -158,7 +159,7 @@ function validatePersistedWire(fragment: Y.XmlFragment): void {
     if (value instanceof Y.XmlText) {
       for (const part of value.toDelta()) {
         if (Object.keys(part.attributes ?? {}).length > 0) {
-          if (parentNodeName === 'p5Sketch' || parentNodeName === 'threeScene') {
+          if (parentNodeName === 'p5Sketch' || parentNodeName === 'threeScene' || parentNodeName === 'mermaid') {
             throw new Error(`Invalid durable editor ${parentNodeName} source content`);
           }
           if (parentNodeName?.startsWith('shader')) {
@@ -255,7 +256,7 @@ function validateExecutableProps(type: ExecutableBlockType, value: unknown): Rec
   return props;
 }
 
-function executableContentFromPm(nodes: PmJson[], type: ExecutableBlockType): InlineNode[] {
+function executableContentFromPm(nodes: PmJson[], type: ExecutableBlockType | 'mermaid'): InlineNode[] {
   return nodes.map((node) => {
     if (node.type !== 'text' || typeof node.text !== 'string' || node.marks !== undefined || node.attrs !== undefined) {
       throw new Error(`Invalid durable editor ${type} source content`);
@@ -487,7 +488,7 @@ function blockFromPm(container: PmJson): DurablePostBlock {
         ? tableFromPm(blockNode)
         : blockNode.type === 'shader'
           ? shaderContentFromPm(pmContent(blockNode.content))
-          : isExecutableBlockType(blockNode.type)
+          : isExecutableBlockType(blockNode.type) || blockNode.type === 'mermaid'
             ? executableContentFromPm(pmContent(blockNode.content), blockNode.type)
             : inlineFromPm(pmContent(blockNode.content)),
     children: nestedGroup ? pmContent(nestedGroup.content).map(blockFromPm) : [],
@@ -825,6 +826,9 @@ function blockHtml(block: DurablePostBlock, entityId?: string): string {
         ),
       )}><code>${escapeHtml(inline.map((node) => (node.type === 'text' ? (node.text ?? '') : '')).join(''))}</code></pre>`;
       break;
+    case 'mermaid':
+      html = `<figure data-content-type="mermaid"${attr('data-title', block.props.title)}><pre><code class="language-mermaid">${escapeHtml(executableSource(block))}</code></pre></figure>`;
+      break;
     case 'p5Sketch':
     case 'threeScene':
     case 'shader':
@@ -925,6 +929,9 @@ function blockMarkdown(block: DurablePostBlock, entityId: string): string {
           ? block.content.map((node) => (node.type === 'text' ? (node.text ?? '') : '')).join('')
           : '',
       );
+      break;
+    case 'mermaid':
+      markdown = fencedCode('mermaid', executableSource(block));
       break;
     case 'p5Sketch':
     case 'threeScene':

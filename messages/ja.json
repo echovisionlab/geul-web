@@ -699,7 +699,7 @@
             "emailLang": "レンダリングされるメール文書に適用される言語コードです",
             "emailDirection": "レンダリングされるメール文書の文字方向です",
             "emailFontFamily": "レンダリングされるメールに適用される locale 別の Noto フォントスタックです",
-            "emailFontStylesheetUrl": "Geul メールフォントを読み込む CDN スタイルシート URL です",
+            "emailFontStylesheetUrl": "メールフォントを読み込む CDN スタイルシート URL です",
             "recipientName": "受信者の表示名です（利用可能な場合）",
             "recipientEmail": "受信者のメールアドレスです（利用可能な場合）",
             "unsubscribeLink": "購読解除 URL です（利用可能な場合）"
@@ -1785,7 +1785,7 @@
     },
     "personalAccessTokens": {
       "title": "個人アクセストークン",
-      "description": "この1つの個人アクセストークンをGeulが提供するAPIで使用します。各リクエストには現在のアカウント権限が適用されます。Remote MCPではこのトークンを使用できません。",
+      "description": "この1つの個人アクセストークンを{siteName}が提供するAPIで使用します。各リクエストには現在のアカウント権限が適用されます。Remote MCPではこのトークンを使用できません。",
       "empty": "個人アクセストークンはまだ作成されていません。",
       "regenerate": "再生成",
       "regenerateTitle": "個人アクセストークンを再生成",
@@ -3090,7 +3090,8 @@
       "textMarquee": "テキストマーキー",
       "clientMarquee": "クライアントマーキー",
       "labelMarquee": "レーベルマーキー",
-      "externalVideo": "外部動画"
+      "externalVideo": "外部動画",
+      "mermaid": "Mermaid"
     },
     "externalVideo": {
       "urlLabel": "動画 URL",
@@ -3840,6 +3841,12 @@
             "title": "GLSLシェーダー",
             "subtext": "インタラクティブなGLSLシェーダーを追加します",
             "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "group": "埋め込み"
+          },
+          "mermaid": {
+            "title": "Mermaid",
+            "subtext": "テキストから図を作成",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
             "group": "埋め込み"
           }
         }
@@ -5437,5 +5444,12 @@
       "download": "ダウンロード",
       "failed": "ダウンロードを承認できませんでした。もう一度お試しください。"
     }
+  },
+  "mermaid": {
+    "source": "ソース",
+    "title": "キャプション",
+    "empty": "図のソースを入力",
+    "invalid": "図の構文を確認してください",
+    "loading": "描画中…"
   }
 }

@@ -27,6 +27,7 @@ import {
 } from '@/features/auth/security-reauthentication';
 import {
   getSettingsFlowCsrfToken,
+  getSettingsPasskeyCreateData,
   hasSettingsFlowError,
   isSettingsFlowFreshnessError,
   readSettingsFlowError,
@@ -34,6 +35,7 @@ import {
   type SettingsFlow,
 } from '@/features/auth/settings-flow';
 import { getPublicAuthUrl } from '@/lib/public-runtime-config';
+import { useSiteSettings } from '@/lib/contexts/ManifestContext';
 
 export interface PasskeyItem {
   id: string;
@@ -196,6 +198,7 @@ export function PasskeySettingsSection({
   onCredentialCountChange,
 }: PasskeySettingsSectionProps) {
   const t = useTranslations('security.passkeys');
+  const { settings } = useSiteSettings();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [flow, setFlow] = useState<SettingsFlow | null>(null);
@@ -391,7 +394,7 @@ export function PasskeySettingsSection({
             ? {
                 action: `${getPublicAuthUrl()}/self-service/settings?flow=${encodeURIComponent(flow.id)}`,
                 csrfToken: csrfToken ?? '',
-                createData: typeof createDataNode?.attributes.value === 'string' ? createDataNode.attributes.value : '',
+                createData: getSettingsPasskeyCreateData(createDataNode?.attributes.value, settings.site_title),
               }
             : null
         }

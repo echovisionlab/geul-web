@@ -16,7 +16,7 @@ import { RichTextProfile } from '@echovisionlab/geul-proto/content/block_content
 export type ContentBlockProfile = keyof typeof richTextProfiles;
 export type BlockFieldOwnership = 'shared' | 'locale' | 'source';
 
-type RichTextNodeViewKey = 'code' | 'file' | 'map' | 'p5' | 'shader' | 'table' | 'three' | null;
+type RichTextNodeViewKey = 'mermaid' | 'code' | 'file' | 'map' | 'p5' | 'shader' | 'table' | 'three' | null;
 
 type RichTextCommandKey = 'insert' | 'insert-table' | 'set-text-block';
 
@@ -49,6 +49,7 @@ export const richTextBlockRegistry = {
   map: registration('map', 'map', 'map', 'insert'),
   file: registration('file', 'file', 'file', 'insert'),
   callout: registration('callout', 'callout', null, 'insert'),
+  mermaid: registration('mermaid', 'mermaid', 'mermaid', 'insert'),
 } as const satisfies Record<RichTextBlockKind, RichTextAdapterRegistration>;
 
 function registration<TKind extends RichTextBlockKind>(
@@ -93,6 +94,7 @@ export const pageSectionRegistry = {
   map: pageRegistration('map'),
   'immersive-scene': pageRegistration('immersive-scene'),
   columns: pageRegistration('columns', 'columns'),
+  mermaid: pageRegistration('mermaid'),
 } as const satisfies Record<PageSectionKind, PageSectionAdapterRegistration>;
 
 function pageRegistration<TKind extends PageSectionKind>(

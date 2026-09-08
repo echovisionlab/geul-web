@@ -58,6 +58,8 @@ const config: StorybookConfig = {
       ...webpackConfig.resolve.alias,
       ...(localContractRoots
         ? {
+            // Keep local Common sources on the application's Yjs constructor.
+            yjs$: fileURLToPath(new URL('../node_modules/yjs/dist/yjs.mjs', import.meta.url)),
             '@echovisionlab/geul-common': localContractRoots.common,
             '@echovisionlab/geul-event': localContractRoots.event,
             '@echovisionlab/geul-telemetry': localContractRoots.telemetry,
@@ -65,6 +67,8 @@ const config: StorybookConfig = {
             '@echovisionlab/geul-telemetry/redaction': `${localContractRoots.telemetry}/redaction.ts`,
             '@echovisionlab/geul-telemetry/request-id': `${localContractRoots.telemetry}/request-id.ts`,
             '@echovisionlab/geul-telemetry/trace': `${localContractRoots.telemetry}/trace.ts`,
+            '@echovisionlab/geul-proto/content': `${localContractRoots.proto}/content/v1`,
+            '@echovisionlab/geul-proto/policy': `${localContractRoots.proto}/policy/v1`,
             '@echovisionlab/geul-proto/common': `${localContractRoots.proto}/common/v1`,
             '@echovisionlab/geul-proto/intra': `${localContractRoots.proto}/intra/v1`,
             '@echovisionlab/geul-proto/public': `${localContractRoots.proto}/open/v1`,

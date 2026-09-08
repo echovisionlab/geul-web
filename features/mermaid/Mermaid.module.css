@@ -1,0 +1,58 @@
+.diagram {
+  display: flex;
+  min-width: 0;
+  min-height: 100px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mantine-spacing-xs);
+  margin: 0;
+  padding: var(--mantine-spacing-md);
+  overflow: auto;
+  color: var(--mantine-color-text);
+  font-family: var(--mantine-font-family);
+  font-size: var(--mantine-font-size-sm);
+}
+
+.image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.message,
+.caption {
+  color: var(--mantine-color-dimmed);
+  font-size: var(--mantine-font-size-sm);
+}
+
+.error {
+  width: 100%;
+  color: var(--mantine-color-error);
+  font-size: var(--mantine-font-size-sm);
+}
+
+.error pre {
+  max-height: 200px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  font-size: var(--mantine-font-size-xs);
+  white-space: pre-wrap;
+}
+
+.editor {
+  width: 100%;
+  min-width: 0;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--mantine-spacing-md);
+}
+
+@media (max-width: 680px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

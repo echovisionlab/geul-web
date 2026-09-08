@@ -109,6 +109,10 @@ function materializePair(pair: BlockPair, children: readonly LocalizedRichTextBl
       assertLocaleKind(pair.locale.value, 'table');
       return pairedBlock(pair.block.id, 'table', pair.block.value.value, pair.locale.value.value, children);
     }
+    case 'mermaid': {
+      assertLocaleKind(pair.locale.value, 'mermaid');
+      return pairedBlock(pair.block.id, 'mermaid', pair.block.value.value, pair.locale.value.value, children);
+    }
     case 'p5Sketch': {
       assertLocaleKind(pair.locale.value, 'p5Sketch');
       return pairedBlock(pair.block.id, 'p5Sketch', pair.block.value.value, pair.locale.value.value, children);

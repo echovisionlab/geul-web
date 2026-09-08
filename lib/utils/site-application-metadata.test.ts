@@ -144,14 +144,14 @@ describe('site application metadata', () => {
         faviconAssetSet: null,
       }),
     ).toEqual({
-      name: 'Geul',
-      short_name: 'Geul',
+      name: 'Site',
+      short_name: 'Site',
       start_url: '/',
       display: 'standalone',
       theme_color: '#b02d23',
       background_color: '#ffffff',
       icons: undefined,
     });
-    expect(normalizeSiteApplicationTitle('   ')).toBe('Geul');
+    expect(normalizeSiteApplicationTitle('   ')).toBe('Site');
   });
 });

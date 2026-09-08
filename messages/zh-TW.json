@@ -699,7 +699,7 @@
             "emailLang": "套用到已渲染郵件文件的語言代碼",
             "emailDirection": "已渲染郵件文件的文字方向",
             "emailFontFamily": "套用到已渲染郵件的 locale 感知 Noto 字體堆疊",
-            "emailFontStylesheetUrl": "用於 Geul 郵件字體的 CDN 樣式表 URL",
+            "emailFontStylesheetUrl": "用於 郵件字體的 CDN 樣式表 URL",
             "recipientName": "收件者顯示名稱（如果可用）",
             "recipientEmail": "收件者電子郵件地址（如果可用）",
             "unsubscribeLink": "取消訂閱 URL（如果可用）"
@@ -1785,7 +1785,7 @@
     },
     "personalAccessTokens": {
       "title": "個人存取權杖",
-      "description": "使用這一個人存取權杖呼叫 Geul 提供的 API。每個請求都會使用您帳戶目前的權限。Remote MCP 不接受此權杖。",
+      "description": "使用這一個人存取權杖呼叫 {siteName} 提供的 API。每個請求都會使用您帳戶目前的權限。Remote MCP 不接受此權杖。",
       "empty": "尚未建立個人存取權杖。",
       "regenerate": "重新產生",
       "regenerateTitle": "重新產生個人存取權杖",
@@ -3090,7 +3090,8 @@
       "textMarquee": "文字跑馬燈",
       "clientMarquee": "客戶跑馬燈",
       "labelMarquee": "廠牌跑馬燈",
-      "externalVideo": "外部影片"
+      "externalVideo": "外部影片",
+      "mermaid": "Mermaid"
     },
     "externalVideo": {
       "urlLabel": "影片 URL",
@@ -3840,6 +3841,12 @@
             "title": "GLSL 著色器",
             "subtext": "新增互動式 GLSL 著色器",
             "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "group": "嵌入"
+          },
+          "mermaid": {
+            "title": "Mermaid",
+            "subtext": "用文字建立圖表",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
             "group": "嵌入"
           }
         }
@@ -5437,5 +5444,12 @@
       "download": "下載",
       "failed": "無法授權下載，請再試一次。"
     }
+  },
+  "mermaid": {
+    "source": "原始碼",
+    "title": "說明",
+    "empty": "輸入圖表原始碼",
+    "invalid": "圖表語法有誤",
+    "loading": "正在繪製…"
   }
 }

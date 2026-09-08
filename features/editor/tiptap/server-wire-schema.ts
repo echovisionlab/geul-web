@@ -25,6 +25,14 @@ const PostParagraphWireNode = TiptapNode.create({
   }),
 });
 
+const MermaidWireNode = TiptapNode.create({
+  name: 'mermaid',
+  group: 'blockContent',
+  content: 'text*',
+  marks: '',
+  addAttributes: () => ({ title: { default: '' } }),
+});
+
 const P5SketchWireNode = TiptapNode.create({
   name: 'p5Sketch',
   group: 'blockContent',
@@ -66,6 +74,7 @@ export function createPostWireSchema() {
   const baseWireNodes = createTiptapWireExtensions().filter((extension) => extension.name !== 'paragraph');
   const executableNodes: Extensions = [
     PostParagraphWireNode,
+    MermaidWireNode,
     P5SketchWireNode,
     ThreeSceneWireNode,
     ShaderWireNode,

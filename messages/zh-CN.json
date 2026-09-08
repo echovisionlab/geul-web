@@ -699,7 +699,7 @@
             "emailLang": "应用到已渲染邮件文档的语言代码",
             "emailDirection": "已渲染邮件文档的文本方向",
             "emailFontFamily": "应用到已渲染邮件的 locale 感知 Noto 字体栈",
-            "emailFontStylesheetUrl": "用于 Geul 邮件字体的 CDN 样式表 URL",
+            "emailFontStylesheetUrl": "用于 邮件字体的 CDN 样式表 URL",
             "recipientName": "收件人显示名称（如果可用）",
             "recipientEmail": "收件人电子邮件地址（如果可用）",
             "unsubscribeLink": "取消订阅 URL（如果可用）"
@@ -1785,7 +1785,7 @@
     },
     "personalAccessTokens": {
       "title": "个人访问令牌",
-      "description": "使用这一个人访问令牌调用 Geul 提供的 API。每个请求都会使用您账户的当前权限。Remote MCP 不接受此令牌。",
+      "description": "使用这一个人访问令牌调用 {siteName} 提供的 API。每个请求都会使用您账户的当前权限。Remote MCP 不接受此令牌。",
       "empty": "尚未创建个人访问令牌。",
       "regenerate": "重新生成",
       "regenerateTitle": "重新生成个人访问令牌",
@@ -3090,7 +3090,8 @@
       "textMarquee": "文本跑马灯",
       "clientMarquee": "客户跑马灯",
       "labelMarquee": "厂牌跑马灯",
-      "externalVideo": "外部视频"
+      "externalVideo": "外部视频",
+      "mermaid": "Mermaid"
     },
     "externalVideo": {
       "urlLabel": "视频 URL",
@@ -3840,6 +3841,12 @@
             "title": "GLSL 着色器",
             "subtext": "添加交互式 GLSL 着色器",
             "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "group": "嵌入"
+          },
+          "mermaid": {
+            "title": "Mermaid",
+            "subtext": "用文本创建图表",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
             "group": "嵌入"
           }
         }
@@ -5437,5 +5444,12 @@
       "download": "下载",
       "failed": "无法授权下载，请重试。"
     }
+  },
+  "mermaid": {
+    "source": "源码",
+    "title": "说明",
+    "empty": "输入图表源码",
+    "invalid": "图表语法有误",
+    "loading": "正在绘制…"
   }
 }

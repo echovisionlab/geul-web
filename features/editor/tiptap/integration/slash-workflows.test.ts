@@ -6,6 +6,7 @@ import enMessages from '@/messages/en.json';
 import { createTiptapEditorGeneration } from '../editor-generation';
 import { createP5SketchExtension } from '../p5';
 import { DEFAULT_P5_SKETCH_LABELS } from '../p5/p5-labels.fixtures';
+import { createMermaidExtension } from '../mermaid/mermaid-extension';
 import { createShaderExtension } from '../shader';
 import { createTiptapSlashCatalog } from '../slash/catalog';
 import { executeTiptapSlashItem } from '../slash/execute';
@@ -51,6 +52,7 @@ const messages: TiptapSlashMenuMessages = {
     inlineMath: slashItem('inlineMath'),
     map: slashItem('map'),
     externalVideo: slashItem('externalVideo'),
+    mermaid: slashItem('mermaid'),
     p5Sketch: slashItem('p5Sketch'),
     threeScene: slashItem('threeScene'),
     shader: slashItem('shader'),
@@ -79,6 +81,7 @@ function mount(content: JSONContent) {
       ...createTiptapWireExtensions(),
       createP5SketchExtension({ labels: DEFAULT_P5_SKETCH_LABELS }),
       createShaderExtension(),
+      createMermaidExtension(),
     ],
     content,
   });
@@ -147,6 +150,31 @@ function requireBlockId(value: JSONContent | undefined, message: string): string
 }
 
 describe('Tiptap slash workflow placement', () => {
+  it('inserts Mermaid after the existing paragraph with one durable mutation', () => {
+    const mounted = mount(doc([block('mermaid-prefix', 'Hello /mermaid')]));
+    const range = slashRange(mounted.editor, 'mermaid-prefix');
+    const callback = createImmediateNodeWorkflow(mounted.editor, 'mermaid');
+    const item = requireValue(
+      createTiptapSlashCatalog(messages, {
+        capabilities: { mermaid: true },
+        callbacks: { mermaid: callback },
+      }).find((candidate) => candidate.key === 'mermaid'),
+      'Mermaid slash item missing',
+    );
+    expect(executeTiptapSlashItem({ editor: mounted.editor, item, range, callbacks: { mermaid: callback } })).toEqual({
+      status: 'applied',
+      editorMutations: 1,
+    });
+    const inserted = containers(mounted.editor.getJSON());
+    expect(inserted).toHaveLength(2);
+    expect(inserted[0]).toMatchObject({
+      attrs: { id: 'mermaid-prefix' },
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Hello ' }] }],
+    });
+    expect(inserted[1]).toMatchObject({ content: [{ type: 'mermaid' }] });
+    mounted.destroy();
+  });
+
   it('inserts a Shader block through the same exact-anchor workflow', () => {
     const mounted = mount(doc([block('shader-prefix', 'Hello /shader')]));
     const range = slashRange(mounted.editor, 'shader-prefix');

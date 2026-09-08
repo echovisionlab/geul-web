@@ -46,6 +46,7 @@ export const richTextProseMirrorAdapters = {
   'p5-sketch': adapter('p5Sketch', 'source-text'),
   'three-scene': adapter('threeScene', 'source-text'),
   shader: adapter('shader', 'shader'),
+  mermaid: adapter('mermaid', 'source-text'),
   math: adapter('math', 'atom'),
   map: adapter('map', 'atom'),
   file: adapter('file', 'atom'),

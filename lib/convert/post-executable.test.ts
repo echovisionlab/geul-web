@@ -237,3 +237,20 @@ describe('post executable block conversion', () => {
     ).rejects.toThrow('Invalid durable editor p5Sketch source content');
   });
 });
+
+describe('Mermaid wire export', () => {
+  it('preserves the node, source, and caption while escaping HTML and exporting a Mermaid fence', async () => {
+    const source = 'flowchart LR\n A["<script>"] --> B';
+    const converted = await convertPostContent(
+      encodeLegacyWireDocument([
+        { id: 'mermaid', type: 'mermaid', props: { title: '<caption>' }, content: [{ type: 'text', text: source }] },
+      ]),
+      'post-mermaid',
+    );
+    expect(converted.json).toContainEqual(expect.objectContaining({ type: 'mermaid', props: { title: '<caption>' } }));
+    expect(converted.html).toContain('data-content-type="mermaid"');
+    expect(converted.html).toContain('&lt;script&gt;');
+    expect(converted.html).not.toContain('<script>');
+    expect(converted.markdown).toContain(`\`\`\`mermaid\n${source}\n\`\`\``);
+  });
+});

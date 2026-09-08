@@ -699,7 +699,7 @@
             "emailLang": "Language code applied to the rendered email document.",
             "emailDirection": "Text direction for the rendered email document.",
             "emailFontFamily": "Locale-aware Noto font stack for the rendered email.",
-            "emailFontStylesheetUrl": "CDN-hosted stylesheet URL for the Geul email fonts.",
+            "emailFontStylesheetUrl": "CDN-hosted stylesheet URL for the email fonts.",
             "recipientName": "Recipient display name (when available).",
             "recipientEmail": "Recipient email address (when available).",
             "unsubscribeLink": "Unsubscribe URL (when available)."
@@ -1724,7 +1724,7 @@
     },
     "personalAccessTokens": {
       "title": "Personal access token",
-      "description": "Use this single personal access token with APIs provided by Geul. Every request uses your current account permissions. Remote MCP does not accept this token.",
+      "description": "Use this single personal access token with APIs provided by {siteName}. Every request uses your current account permissions. Remote MCP does not accept this token.",
       "empty": "No personal access tokens have been created.",
       "regenerate": "Regenerate",
       "regenerateTitle": "Regenerate personal access token",
@@ -3090,7 +3090,8 @@
       "textMarquee": "Text Marquee",
       "clientMarquee": "Client Marquee",
       "labelMarquee": "Label Marquee",
-      "externalVideo": "External Video"
+      "externalVideo": "External Video",
+      "mermaid": "Mermaid"
     },
     "sectionItem": {
       "maxWidth": {
@@ -3840,6 +3841,12 @@
             "title": "GLSL shader",
             "subtext": "Add an interactive GLSL shader",
             "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "group": "Embeds"
+          },
+          "mermaid": {
+            "title": "Mermaid",
+            "subtext": "Create a diagram from text",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
             "group": "Embeds"
           }
         }
@@ -5437,5 +5444,12 @@
       "download": "Download",
       "failed": "The download could not be authorized. Try again."
     }
+  },
+  "mermaid": {
+    "source": "Source",
+    "title": "Caption",
+    "empty": "Add diagram source",
+    "invalid": "Invalid diagram",
+    "loading": "Rendering…"
   }
 }

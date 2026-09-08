@@ -699,7 +699,7 @@
             "emailLang": "Mã ngôn ngữ được áp dụng cho tài liệu email được hiển thị.",
             "emailDirection": "Hướng văn bản cho tài liệu email được hiển thị.",
             "emailFontFamily": "Ngăn xếp phông chữ Noto nhận biết ngôn ngữ cho email được hiển thị.",
-            "emailFontStylesheetUrl": "URL biểu định kiểu được lưu trữ trên CDN cho phông chữ email Geul.",
+            "emailFontStylesheetUrl": "URL biểu định kiểu được lưu trữ trên CDN cho phông chữ email.",
             "recipientName": "Tên hiển thị của người nhận (nếu có).",
             "recipientEmail": "Địa chỉ email người nhận (nếu có).",
             "unsubscribeLink": "URL hủy đăng ký (nếu có)."
@@ -1724,7 +1724,7 @@
     },
     "personalAccessTokens": {
       "title": "Mã truy cập cá nhân",
-      "description": "Dùng một mã truy cập cá nhân này với các API do Geul cung cấp. Mỗi yêu cầu sử dụng quyền hiện tại của tài khoản. Remote MCP không chấp nhận mã này.",
+      "description": "Dùng một mã truy cập cá nhân này với các API do {siteName} cung cấp. Mỗi yêu cầu sử dụng quyền hiện tại của tài khoản. Remote MCP không chấp nhận mã này.",
       "empty": "Chưa có mã truy cập cá nhân nào được tạo.",
       "regenerate": "Tạo lại",
       "regenerateTitle": "Tạo lại mã truy cập cá nhân",
@@ -3090,7 +3090,8 @@
       "textMarquee": "Vùng chọn văn bản",
       "clientMarquee": "Marquee khách hàng",
       "labelMarquee": "Nhãn Marquee",
-      "externalVideo": "Video bên ngoài"
+      "externalVideo": "Video bên ngoài",
+      "mermaid": "Mermaid"
     },
     "sectionItem": {
       "maxWidth": {
@@ -3840,6 +3841,12 @@
             "title": "Shader GLSL",
             "subtext": "Thêm shader GLSL tương tác",
             "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "group": "Nhúng"
+          },
+          "mermaid": {
+            "title": "Mermaid",
+            "subtext": "Tạo sơ đồ từ văn bản",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
             "group": "Nhúng"
           }
         }
@@ -5437,5 +5444,12 @@
       "download": "Tải xuống",
       "failed": "Việc tải xuống không thể được ủy quyền. Hãy thử lại."
     }
+  },
+  "mermaid": {
+    "source": "Mã nguồn",
+    "title": "Chú thích",
+    "empty": "Nhập mã nguồn sơ đồ",
+    "invalid": "Sơ đồ không hợp lệ",
+    "loading": "Đang vẽ…"
   }
 }

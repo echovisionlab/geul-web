@@ -15,6 +15,7 @@ import {
   regenerateMyPersonalAccessTokenAction,
   type PersonalAccessTokenActionError,
 } from '@/lib/actions/personal-access-token';
+import { usePersonalAccessTokenLabels } from './usePersonalAccessTokenLabels';
 import { useCopyToClipboard } from '@/lib/hooks/useCopyToClipboard';
 import {
   consumePersonalAccessTokenContinuation,
@@ -73,8 +74,7 @@ function SubjectPersonalAccessTokenSettings({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const t = useTranslations('security.personalAccessTokens');
-  const tCommonActions = useTranslations('common.actions');
-  const tCommonLabels = useTranslations('common.labels');
+  const labels = usePersonalAccessTokenLabels();
   const [tokens, setTokens] = useState(initialPersonalAccessTokens);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [secret, setSecret] = useState<PersonalAccessTokenSecretViewModel | null>(null);
@@ -208,26 +208,7 @@ function SubjectPersonalAccessTokenSettings({
       loadFailed={initialLoadFailed}
       pendingAction={pendingAction}
       secret={secret}
-      labels={{
-        title: t('title'),
-        description: t('description'),
-        empty: t('empty'),
-        created: tCommonLabels('created'),
-        create: tCommonActions('create'),
-        regenerate: t('regenerate'),
-        delete: tCommonActions('delete'),
-        copy: tCommonActions('copy'),
-        cancel: tCommonActions('cancel'),
-        close: tCommonActions('close'),
-        regenerateTitle: t('regenerateTitle'),
-        regenerateConfirmation: t('regenerateConfirmation'),
-        deleteTitle: t('deleteTitle'),
-        deleteConfirmation: t('deleteConfirmation'),
-        oneTimeTitle: t('oneTimeTitle'),
-        oneTimeWarning: t('oneTimeWarning'),
-        secret: t('secret'),
-        loadFailed: t('loadFailed'),
-      }}
+      labels={labels}
       onCreate={createToken}
       onRegenerate={regenerateToken}
       onDelete={deleteToken}

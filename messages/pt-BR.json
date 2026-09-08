@@ -699,7 +699,7 @@
             "emailLang": "Código de idioma aplicado ao documento de e-mail renderizado.",
             "emailDirection": "Direção do texto do documento de e-mail renderizado.",
             "emailFontFamily": "Pilha de fontes Noto sensível ao locale para o e-mail renderizado.",
-            "emailFontStylesheetUrl": "URL da folha de estilo hospedada no CDN para as fontes de e-mail do Geul.",
+            "emailFontStylesheetUrl": "URL da folha de estilo hospedada no CDN para as fontes de e-mail.",
             "recipientName": "Nome exibido do destinatário (quando disponível).",
             "recipientEmail": "Endereço de e-mail do destinatário (quando disponível).",
             "unsubscribeLink": "URL de cancelamento de inscrição (quando disponível)."
@@ -1785,7 +1785,7 @@
     },
     "personalAccessTokens": {
       "title": "Token de acesso pessoal",
-      "description": "Use este único token de acesso pessoal com as APIs fornecidas pela Geul. Cada solicitação usa as permissões atuais da sua conta. O Remote MCP não aceita este token.",
+      "description": "Use este único token de acesso pessoal com as APIs fornecidas pela {siteName}. Cada solicitação usa as permissões atuais da sua conta. O Remote MCP não aceita este token.",
       "empty": "Nenhum token de acesso pessoal foi criado.",
       "regenerate": "Gerar novamente",
       "regenerateTitle": "Gerar novamente o token de acesso pessoal",
@@ -3090,7 +3090,8 @@
       "textMarquee": "Marquee de texto",
       "clientMarquee": "Marquee de clientes",
       "labelMarquee": "Marquee de selos",
-      "externalVideo": "Vídeo externo"
+      "externalVideo": "Vídeo externo",
+      "mermaid": "Mermaid"
     },
     "externalVideo": {
       "urlLabel": "URL do vídeo",
@@ -3840,6 +3841,12 @@
             "title": "Shader GLSL",
             "subtext": "Adicione um shader GLSL interativo",
             "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "group": "Incorporações"
+          },
+          "mermaid": {
+            "title": "Mermaid",
+            "subtext": "Criar um diagrama a partir de texto",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
             "group": "Incorporações"
           }
         }
@@ -5437,5 +5444,12 @@
       "download": "Baixar",
       "failed": "Não foi possível autorizar o download. Tente novamente."
     }
+  },
+  "mermaid": {
+    "source": "Código",
+    "title": "Legenda",
+    "empty": "Insira o código do diagrama",
+    "invalid": "Diagrama inválido",
+    "loading": "Renderizando…"
   }
 }
