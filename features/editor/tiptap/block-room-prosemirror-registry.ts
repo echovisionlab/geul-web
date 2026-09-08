@@ -46,11 +46,11 @@ export const richTextProseMirrorAdapters = {
   'p5-sketch': adapter('p5Sketch', 'source-text'),
   'three-scene': adapter('threeScene', 'source-text'),
   shader: adapter('shader', 'shader'),
-  mermaid: adapter('mermaid', 'source-text'),
   math: adapter('math', 'atom'),
   map: adapter('map', 'atom'),
   file: adapter('file', 'atom'),
   callout: adapter('callout', 'inline'),
+  mermaid: adapter('mermaid', 'source-text'),
 } as const satisfies Record<RichTextBlockKind, RichTextProseMirrorAdapter>;
 
 function hasOwn<TObject extends object>(value: TObject, key: PropertyKey): key is keyof TObject {

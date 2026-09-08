@@ -44,7 +44,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@echovisionlab/audio-transcoder": "0.1.2",
-    "@echovisionlab/geul-common": "0.2.0",
+    "@echovisionlab/geul-common": "0.2.1",
     "@echovisionlab/geul-event": "0.2.0",
     "@echovisionlab/geul-proto": "0.2.0",
     "@echovisionlab/geul-telemetry": "0.1.0",

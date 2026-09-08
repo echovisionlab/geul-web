@@ -11,6 +11,7 @@ import { normalizeMapBlockPropsInput } from '@/lib/types/map-block/schema';
 import { createCollaborationExtension } from './collaboration';
 import { createP5SketchExtension } from './p5';
 import { KOREAN_P5_SKETCH_LABELS } from './p5/p5-labels.fixtures';
+import { createMermaidExtension } from './mermaid/mermaid-extension';
 import { createShaderExtension } from './shader';
 import { createThreeSceneExtension, KOREAN_THREE_SCENE_LABELS } from './three';
 import { createTiptapWireExtensions } from './wire-schema';
@@ -24,6 +25,7 @@ const wireSchema = getSchema([
   createP5SketchExtension({ labels: KOREAN_P5_SKETCH_LABELS }),
   createThreeSceneExtension({ labels: KOREAN_THREE_SCENE_LABELS }),
   createShaderExtension(),
+  createMermaidExtension(),
 ]);
 
 function block(id: string, content: JSONContent, children: JSONContent[] = []): JSONContent {
