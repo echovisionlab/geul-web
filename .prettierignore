@@ -26,5 +26,6 @@ tmp/
 pnpm-lock.yaml
 lib/constants/phone-countries.ts
 
-# Release Please owns generated changelog formatting.
+# Release Please owns generated release metadata formatting.
 /CHANGELOG.md
+/.release-please-manifest.json
