@@ -119,6 +119,7 @@ export function SectionList() {
     [publishedForms],
   );
   const sectionTypeLabels: Record<SectionType, string> = {
+    mermaid: t('sectionTypes.mermaid'),
     'rich-text': t('sectionTypes.richText'),
     'post-list': t('sectionTypes.postList'),
     'post-table': t('sectionTypes.postTable'),

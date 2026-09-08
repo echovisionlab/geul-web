@@ -929,7 +929,7 @@
     },
     "personalAccessTokens": {
       "title": "رمز الوصول الشخصي",
-      "description": "استخدم رمز الوصول الشخصي الواحد هذا مع خدمات API التي توفرها Geul. تنطبق صلاحيات حسابك الحالية على كل طلب. لا يُستخدم هذا الرمز مع Remote MCP.",
+      "description": "استخدم رمز الوصول الشخصي الواحد هذا مع خدمات API التي توفرها {siteName}. تنطبق صلاحيات حسابك الحالية على كل طلب. لا يُستخدم هذا الرمز مع Remote MCP.",
       "empty": "لم يتم إنشاء أي رمز وصول شخصي.",
       "regenerate": "إعادة إنشاء",
       "regenerateTitle": "إعادة إنشاء رمز الوصول الشخصي",
@@ -1187,7 +1187,7 @@
             "emailLang": "رمز اللغة المطبق على مستند البريد الإلكتروني المعروض",
             "emailDirection": "اتجاه النص في مستند البريد الإلكتروني المعروض",
             "emailFontFamily": "مجموعة خطوط Noto المناسبة للّغة في البريد الإلكتروني المعروض",
-            "emailFontStylesheetUrl": "رابط ملف الأنماط المستضاف على CDN لخطوط بريد Geul الإلكتروني",
+            "emailFontStylesheetUrl": "رابط ملف الأنماط المستضاف على CDN لخطوط بريد الإلكتروني",
             "recipientName": "اسم عرض المستلم إن كان متاحًا",
             "recipientEmail": "عنوان بريد المستلم إن كان متاحًا",
             "unsubscribeLink": "رابط إلغاء الاشتراك إن كان متاحًا"
@@ -3696,6 +3696,12 @@
             "subtext": "أضف تظليل GLSL تفاعليًا",
             "aliases": "shader\nglsl\nfragment shader\nshadertoy",
             "group": "التضمينات"
+          },
+          "mermaid": {
+            "title": "Mermaid",
+            "subtext": "إنشاء مخطط من النص",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
+            "group": "التضمينات"
           }
         }
       },
@@ -4150,7 +4156,8 @@
       "immersiveScene": "مشهد غامر",
       "columns": "أعمدة",
       "programEventList": "قائمة الأحداث",
-      "externalVideo": "فيديو خارجي"
+      "externalVideo": "فيديو خارجي",
+      "mermaid": "Mermaid"
     },
     "externalVideo": {
       "urlLabel": "رابط الفيديو",
@@ -5437,5 +5444,12 @@
       "download": "تنزيل",
       "failed": "تعذر السماح بالتنزيل. حاول مرة أخرى."
     }
+  },
+  "mermaid": {
+    "source": "المصدر",
+    "title": "التسمية",
+    "empty": "أدخل مصدر المخطط",
+    "invalid": "مخطط غير صالح",
+    "loading": "جارٍ الرسم…"
   }
 }

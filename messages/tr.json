@@ -699,7 +699,7 @@
             "emailLang": "İşlenen e-posta belgesine uygulanan dil kodu.",
             "emailDirection": "İşlenen e-posta belgesinin metin yönü.",
             "emailFontFamily": "İşlenen e-posta için yerel ayara duyarlı Noto yazı tipi yığını.",
-            "emailFontStylesheetUrl": "Geul e-posta yazı tipleri için CDN tarafından barındırılan stil sayfası URL'si.",
+            "emailFontStylesheetUrl": "e-posta yazı tipleri için CDN tarafından barındırılan stil sayfası URL'si.",
             "recipientName": "Alıcının görünen adı (varsa).",
             "recipientEmail": "Alıcı e-posta adresi (varsa).",
             "unsubscribeLink": "Abonelikten çıkma URL'si (mevcut olduğunda)."
@@ -1724,7 +1724,7 @@
     },
     "personalAccessTokens": {
       "title": "Kişisel erişim belirteci",
-      "description": "Bu tek kişisel erişim belirtecini Geul tarafından sunulan API’lerle kullanın. Her istek mevcut hesap izinlerinizi kullanır. Remote MCP bu belirteci kabul etmez.",
+      "description": "Bu tek kişisel erişim belirtecini {siteName} tarafından sunulan API’lerle kullanın. Her istek mevcut hesap izinlerinizi kullanır. Remote MCP bu belirteci kabul etmez.",
       "empty": "Henüz kişisel erişim belirteci oluşturulmadı.",
       "regenerate": "Yeniden oluştur",
       "regenerateTitle": "Kişisel erişim belirtecini yeniden oluştur",
@@ -3090,7 +3090,8 @@
       "textMarquee": "Metin Çerçevesi",
       "clientMarquee": "Müşteri Çerçevesi",
       "labelMarquee": "Etiket Çerçevesi",
-      "externalVideo": "Harici Video"
+      "externalVideo": "Harici Video",
+      "mermaid": "Mermaid"
     },
     "sectionItem": {
       "maxWidth": {
@@ -3840,6 +3841,12 @@
             "title": "GLSL gölgelendiricisi",
             "subtext": "Etkileşimli bir GLSL gölgelendiricisi ekleyin",
             "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "group": "Gömülenler"
+          },
+          "mermaid": {
+            "title": "Mermaid",
+            "subtext": "Metinden diyagram oluştur",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
             "group": "Gömülenler"
           }
         }
@@ -5437,5 +5444,12 @@
       "download": "İndirmek",
       "failed": "İndirme işlemine izin verilemedi. Tekrar deneyin."
     }
+  },
+  "mermaid": {
+    "source": "Kaynak",
+    "title": "Açıklama",
+    "empty": "Diyagram kaynağını girin",
+    "invalid": "Geçersiz diyagram",
+    "loading": "Oluşturuluyor…"
   }
 }

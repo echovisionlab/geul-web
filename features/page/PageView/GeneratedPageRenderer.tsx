@@ -1,3 +1,4 @@
+import { MermaidBlockView } from '@/features/page/blocks/mermaid/View';
 import { ArtistListViewStreaming } from '@/features/page/blocks/artist-grid/ViewServer';
 import { AuthorListViewStreaming } from '@/features/page/blocks/author-list/ViewServer';
 import { ClientMarqueeViewServer } from '@/features/page/blocks/client-marquee/ViewServer';
@@ -129,6 +130,8 @@ function GeneratedSectionContent({
       return (
         <ImmersiveSceneView sectionId={section.id} props={props} query={query} requestedLocale={requestedLocale} />
       );
+    case 'mermaid':
+      return <MermaidBlockView props={props} />;
     case 'external-video':
       return (
         <PageExternalVideoView sectionId={section.id} props={props} query={query} requestedLocale={requestedLocale} />

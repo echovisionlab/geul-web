@@ -20,6 +20,7 @@ const textBlockProps = {
 
 const editorBlockSpecs = {
   ...baseBlockSpecs,
+  mermaid: { content: 'text*', props: { title: { default: '' } } },
   p5Sketch: {
     content: 'text*',
     props: {

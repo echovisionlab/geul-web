@@ -699,7 +699,7 @@
             "emailLang": "รหัสภาษาที่ใช้กับเอกสารอีเมลที่แสดงผล",
             "emailDirection": "ทิศทางข้อความสำหรับเอกสารอีเมลที่แสดงผล",
             "emailFontFamily": "สแต็กแบบอักษร Noto ที่ทราบสถานที่สำหรับอีเมลที่แสดงผล",
-            "emailFontStylesheetUrl": "URL สไตล์ชีตที่โฮสต์โดย CDN สำหรับแบบอักษรอีเมล Geul",
+            "emailFontStylesheetUrl": "URL สไตล์ชีตที่โฮสต์โดย CDN สำหรับแบบอักษรอีเมล",
             "recipientName": "ชื่อที่แสดงของผู้รับ (ถ้ามี)",
             "recipientEmail": "ที่อยู่อีเมลของผู้รับ (ถ้ามี)",
             "unsubscribeLink": "ยกเลิกการสมัคร URL (เมื่อมี)"
@@ -1724,7 +1724,7 @@
     },
     "personalAccessTokens": {
       "title": "โทเค็นการเข้าถึงส่วนบุคคล",
-      "description": "ใช้โทเค็นการเข้าถึงส่วนบุคคลหนึ่งรายการนี้กับ API ที่ Geul ให้บริการ ทุกคำขอจะใช้สิทธิ์ปัจจุบันของบัญชีคุณ Remote MCP ไม่รับโทเค็นนี้",
+      "description": "ใช้โทเค็นการเข้าถึงส่วนบุคคลหนึ่งรายการนี้กับ API ที่ {siteName} ให้บริการ ทุกคำขอจะใช้สิทธิ์ปัจจุบันของบัญชีคุณ Remote MCP ไม่รับโทเค็นนี้",
       "empty": "ยังไม่มีการสร้างโทเค็นการเข้าถึงส่วนบุคคล",
       "regenerate": "สร้างใหม่",
       "regenerateTitle": "สร้างโทเค็นการเข้าถึงส่วนบุคคลใหม่",
@@ -3090,7 +3090,8 @@
       "textMarquee": "ข้อความปะรำ",
       "clientMarquee": "กระโจมลูกค้า",
       "labelMarquee": "ป้ายปะรำ",
-      "externalVideo": "วิดีโอภายนอก"
+      "externalVideo": "วิดีโอภายนอก",
+      "mermaid": "Mermaid"
     },
     "sectionItem": {
       "maxWidth": {
@@ -3840,6 +3841,12 @@
             "title": "เชเดอร์ GLSL",
             "subtext": "เพิ่มเชเดอร์ GLSL แบบโต้ตอบ",
             "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "group": "ฝัง"
+          },
+          "mermaid": {
+            "title": "Mermaid",
+            "subtext": "สร้างไดอะแกรมจากข้อความ",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
             "group": "ฝัง"
           }
         }
@@ -5437,5 +5444,12 @@
       "download": "ดาวน์โหลด",
       "failed": "ไม่สามารถอนุญาตการดาวน์โหลดได้ ลองอีกครั้ง"
     }
+  },
+  "mermaid": {
+    "source": "ซอร์ส",
+    "title": "คำบรรยาย",
+    "empty": "ป้อนซอร์สของไดอะแกรม",
+    "invalid": "ไดอะแกรมไม่ถูกต้อง",
+    "loading": "กำลังวาด…"
   }
 }

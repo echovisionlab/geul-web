@@ -7,6 +7,7 @@
 
 import {
   IconArticle,
+  IconSchema,
   IconBriefcase,
   IconBuildingStore,
   IconCalendarEvent,
@@ -57,6 +58,9 @@ import { LabelMarqueeViewServer } from './label-marquee/ViewServer';
 import { MapCanvasPreview, MapEditor, MapSettingsEditor } from './map/Editor';
 import { parseMapProps, type MapProps } from './map/schema';
 import { MapView } from './map/View';
+import { MermaidBlockEditor, MermaidSettingsEditor } from './mermaid/Editor';
+import { MermaidBlockView, MermaidCanvasPreview } from './mermaid/View';
+import { parseMermaidProps, type MermaidProps } from './mermaid/schema';
 import { PostListCanvasPreview, PostListEditor, PostListSettingsEditor } from './post-list/Editor';
 import { parsePostListProps, type PostListProps } from './post-list/schema';
 import { PostListView } from './post-list/View';
@@ -375,7 +379,22 @@ const immersiveSceneBlock: BlockDefinition<ImmersiveSceneProps> = {
 // Block Registry
 // ============================================================================
 
+const mermaidBlock: BlockDefinition<MermaidProps> = {
+  type: 'mermaid',
+  label: 'Mermaid',
+  icon: IconSchema,
+  category: 'content',
+  schema: pageBlockManifest.mermaid.schema,
+  parse: parseMermaidProps,
+  Editor: MermaidBlockEditor,
+  CanvasPreview: MermaidCanvasPreview,
+  SettingsEditor: MermaidSettingsEditor,
+  View: MermaidBlockView,
+  allowNested: isPageBlockNestable('mermaid'),
+};
+
 export const pageBlockRegistry: BlockRegistry = {
+  mermaid: mermaidBlock,
   'post-list': postListBlock,
   'post-table': postTableBlock,
   'post-map': postMapBlock,

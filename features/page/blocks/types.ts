@@ -34,6 +34,8 @@ export interface BlockSettingsEditorProps<T = Record<string, unknown>> {
   sectionId: string;
   props: Partial<T>;
   settings: SectionSettings;
+  /** Shared source controls must remain read-only for translators. */
+  allowSharedEdits?: boolean;
   updateSharedProps: (props: Record<string, unknown>) => void;
   updateLocalizedProps: (props: Record<string, unknown>) => void;
   updateSettings: (settings: Partial<SectionSettings>) => void;

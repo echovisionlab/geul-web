@@ -1,7 +1,7 @@
 import type { Metadata, MetadataRoute } from 'next';
 import type { FaviconAssetSetUrls } from '@/lib/queries/manifest';
 
-const DEFAULT_SITE_TITLE = 'Geul';
+const DEFAULT_SITE_TITLE = 'Site';
 const DEFAULT_THEME_COLOR = '#b02d23';
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 

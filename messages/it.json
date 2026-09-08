@@ -699,7 +699,7 @@
             "emailLang": "Codice lingua applicato al documento email renderizzato.",
             "emailDirection": "Direzione del testo del documento email renderizzato.",
             "emailFontFamily": "Stack di font Noto in base alla lingua per l'email renderizzata.",
-            "emailFontStylesheetUrl": "URL del foglio di stile ospitato su CDN per i font email Geul.",
+            "emailFontStylesheetUrl": "URL del foglio di stile ospitato su CDN per i font email.",
             "recipientName": "Nome visualizzato del destinatario (se disponibile).",
             "recipientEmail": "Indirizzo e-mail del destinatario (se disponibile).",
             "unsubscribeLink": "Annulla l'iscrizione URL (se disponibile)."
@@ -1785,7 +1785,7 @@
     },
     "personalAccessTokens": {
       "title": "Token di accesso personale",
-      "description": "Usa questo unico token di accesso personale con le API fornite da Geul. Ogni richiesta applica le autorizzazioni correnti del tuo account. Remote MCP non accetta questo token.",
+      "description": "Usa questo unico token di accesso personale con le API fornite da {siteName}. Ogni richiesta applica le autorizzazioni correnti del tuo account. Remote MCP non accetta questo token.",
       "empty": "Non è stato creato alcun token di accesso personale.",
       "regenerate": "Rigenera",
       "regenerateTitle": "Rigenera token di accesso personale",
@@ -3090,7 +3090,8 @@
       "textMarquee": "Marquee testo",
       "clientMarquee": "Marquee clienti",
       "labelMarquee": "Marquee etichette",
-      "externalVideo": "Video esterno"
+      "externalVideo": "Video esterno",
+      "mermaid": "Mermaid"
     },
     "externalVideo": {
       "urlLabel": "URL del video",
@@ -3840,6 +3841,12 @@
             "title": "Shader GLSL",
             "subtext": "Aggiungi uno shader GLSL interattivo",
             "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "group": "Incorporamenti"
+          },
+          "mermaid": {
+            "title": "Mermaid",
+            "subtext": "Crea un diagramma dal testo",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
             "group": "Incorporamenti"
           }
         }
@@ -5437,5 +5444,12 @@
       "download": "Scarica",
       "failed": "Non è stato possibile autorizzare il download. Riprova."
     }
+  },
+  "mermaid": {
+    "source": "Sorgente",
+    "title": "Didascalia",
+    "empty": "Inserisci il sorgente del diagramma",
+    "invalid": "Diagramma non valido",
+    "loading": "Rendering…"
   }
 }

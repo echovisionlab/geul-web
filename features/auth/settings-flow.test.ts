@@ -290,3 +290,48 @@ describe('auth settings flow', () => {
     });
   });
 });
+
+describe('settings passkey display name', () => {
+  it('preserves credential options while replacing only the RP display name', async () => {
+    const { getSettingsPasskeyCreateData } = await import('./settings-flow');
+    const original = {
+      publicKey: {
+        rp: { id: 'site.example', name: 'Old site name' },
+        challenge: 'Y2hhbGxlbmdl',
+        user: { id: 'dXNlcg', name: 'member', displayName: 'Member' },
+        pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
+        excludeCredentials: [{ type: 'public-key', id: 'ZXhpc3Rpbmc', transports: ['internal'] }],
+        authenticatorSelection: { residentKey: 'required', userVerification: 'required' },
+        extensions: { credProps: true },
+        attestation: 'none',
+        timeout: 60000,
+      },
+      mediation: 'optional',
+    };
+    const source = JSON.stringify(original);
+    for (const [title, expectedName] of [
+      ['DSUB', 'DSUB'],
+      [' Example Studio ', 'Example Studio'],
+      ['', 'Site'],
+    ]) {
+      const result = JSON.parse(getSettingsPasskeyCreateData(source, title));
+      expect(result.publicKey.rp.name).toBe(expectedName);
+      result.publicKey.rp.name = original.publicKey.rp.name;
+      expect(result).toEqual(original);
+    }
+    expect(JSON.stringify(original)).toBe(source);
+  });
+
+  it.each([
+    'invalid JSON',
+    'null',
+    '{}',
+    '[]',
+    '{"publicKey":null}',
+    '{"publicKey":{"rp":null}}',
+    '{"publicKey":{"rp":{"id":"site.example"}}}',
+  ])('leaves unsupported creation data unchanged: %s', async (source) => {
+    const { getSettingsPasskeyCreateData } = await import('./settings-flow');
+    expect(getSettingsPasskeyCreateData(source, 'DSUB')).toBe(source);
+  });
+});

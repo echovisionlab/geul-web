@@ -16,7 +16,7 @@ export type TiptapSlashNodeName =
   | 'table';
 
 export type TiptapSlashCapability =
-  'math' | 'table' | 'emoji' | 'map' | 'file' | 'externalVideo' | 'p5' | 'three' | 'shader' | 'ai';
+  'math' | 'table' | 'emoji' | 'map' | 'file' | 'externalVideo' | 'p5' | 'mermaid' | 'three' | 'shader' | 'ai';
 
 export type TiptapSlashWorkflow = Exclude<TiptapSlashCapability, 'math' | 'table'>;
 
@@ -109,6 +109,7 @@ type TiptapSlashMenuItemKey =
   | 'inlineMath'
   | 'map'
   | 'externalVideo'
+  | 'mermaid'
   | 'p5Sketch'
   | 'threeScene'
   | 'shader'

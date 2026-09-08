@@ -168,6 +168,9 @@ function blockMarkdown(pair: Pair, descendants: readonly string[], entityId: str
         })
         .join('\n\n');
       break;
+    case 'mermaid':
+      markdown = fencedCode('mermaid', pair.block.value.value.props?.source ?? '');
+      break;
     case 'math':
       markdown = `$$${pair.block.value.value.props?.latex ?? ''}$$`;
       break;

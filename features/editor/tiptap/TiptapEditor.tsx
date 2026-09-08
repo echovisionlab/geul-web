@@ -59,6 +59,7 @@ import {
 } from './menus/map-external';
 import { withTiptapMathExtensions } from './math';
 import { createP5SketchExtension, type P5SketchLabels } from './p5';
+import { createMermaidExtension } from './mermaid/mermaid-extension';
 import {
   createShaderExtension,
   type ShaderAssetResolver,
@@ -620,6 +621,7 @@ export function TiptapEditor({
         }).filter((extension) => !['table', 'tableRow', 'tableCell', 'tableHeader'].includes(extension.name)),
         ...createTiptapTableExtensions(),
       ]),
+      createMermaidExtension({ authoringMode }),
       createP5SketchExtension({
         labels: p5Labels,
         authoringMode,

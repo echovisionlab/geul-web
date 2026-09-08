@@ -25,3 +25,6 @@ tmp/
 # Package-manager and generated source files
 pnpm-lock.yaml
 lib/constants/phone-countries.ts
+
+# Release Please owns generated changelog formatting.
+/CHANGELOG.md

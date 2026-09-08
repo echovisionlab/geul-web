@@ -10,6 +10,7 @@ export function usePageSectionTypeLabels(): Record<SectionType, string> {
   const tCommonEntities = useTranslations('common.entities');
   return useMemo(
     () => ({
+      mermaid: t('sectionTypes.mermaid'),
       'rich-text': t('sectionTypes.richText'),
       'post-list': t('sectionTypes.postList'),
       'post-table': t('sectionTypes.postTable'),

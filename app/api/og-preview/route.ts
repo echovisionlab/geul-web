@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     }
 
     const ogSettings = {
-      siteTitle: settings.site_title || 'Geul',
+      siteTitle: settings.site_title || 'Site',
       primaryColor: settings.primary_color || '#b02d23',
       logoSvg: logoDataUrl,
     };

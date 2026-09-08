@@ -50,7 +50,7 @@ function sharedBlockValue(container: ProseMirrorNode): unknown {
     content:
       type === 'table'
         ? tableStructureValue(content)
-        : type === 'p5Sketch' || type === 'threeScene' || type === 'shader'
+        : type === 'p5Sketch' || type === 'threeScene' || type === 'shader' || type === 'mermaid'
           ? (content.toJSON().content ?? [])
           : undefined,
   };

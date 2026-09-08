@@ -37,6 +37,7 @@ const slashMessages = {
     inlineMath: splitItemAliases(serializedSlashMessages.items.inlineMath),
     map: splitItemAliases(serializedSlashMessages.items.map),
     externalVideo: splitItemAliases(serializedSlashMessages.items.externalVideo),
+    mermaid: splitItemAliases(serializedSlashMessages.items.mermaid),
     p5Sketch: splitItemAliases(serializedSlashMessages.items.p5Sketch),
     threeScene: splitItemAliases(serializedSlashMessages.items.threeScene),
     shader: splitItemAliases(serializedSlashMessages.items.shader),

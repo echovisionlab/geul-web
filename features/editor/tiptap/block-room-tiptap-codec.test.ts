@@ -40,7 +40,7 @@ function executableWireExtensions() {
 }
 
 function descriptor(
-  protoCase: 'paragraph' | 'file' | 'map' | 'shader' | 'table' | 'callout',
+  protoCase: 'paragraph' | 'file' | 'map' | 'shader' | 'table' | 'callout' | 'mermaid',
   id: string,
   basePayload: JsonObject,
   localePayload: JsonObject,
@@ -450,5 +450,16 @@ describe('Block-room Tiptap codec', () => {
     const parsed = parseDocument(editor.getJSON() as JSONContent);
     expect(splitPayload(parsed[0]!).locale.content).toEqual([{ text: { text: smile.emoji, styles: {} } }]);
     editor.destroy();
+  });
+});
+
+describe('Mermaid canonical wire', () => {
+  it('preserves source text in the shared payload and title in the locale payload', () => {
+    const base = { props: { source: 'flowchart LR\n  A --> B' } };
+    const locale = { props: { title: '설명' } };
+    const document = documentToTiptap([descriptor('mermaid', 'mermaid-block', base, locale)]);
+    const blocks = parseDocument(document);
+    expect(blocks[0]?.kind).toBe('mermaid');
+    expect(splitPayload(blocks[0]!)).toEqual({ base, locale });
   });
 });

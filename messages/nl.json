@@ -699,7 +699,7 @@
             "emailLang": "Taalcode die wordt toegepast op het gerenderde e-maildocument.",
             "emailDirection": "Tekstrichting voor het gerenderde e-maildocument.",
             "emailFontFamily": "Locale-afhankelijke Noto-lettertypestack voor de gerenderde e-mail.",
-            "emailFontStylesheetUrl": "Op CDN gehoste stylesheet-URL voor de Geul-e-maillettertypen.",
+            "emailFontStylesheetUrl": "Op CDN gehoste stylesheet-URL voor de e-maillettertypen.",
             "recipientName": "Weergavenaam van de ontvanger (indien beschikbaar).",
             "recipientEmail": "E-mailadres van de ontvanger (indien beschikbaar).",
             "unsubscribeLink": "Uitschrijf-URL (indien beschikbaar)."
@@ -1785,7 +1785,7 @@
     },
     "personalAccessTokens": {
       "title": "Persoonlijk toegangstoken",
-      "description": "Gebruik dit ene persoonlijke toegangstoken voor API’s van Geul. Elke aanvraag gebruikt je huidige accountrechten. Remote MCP accepteert dit token niet.",
+      "description": "Gebruik dit ene persoonlijke toegangstoken voor API’s van {siteName}. Elke aanvraag gebruikt je huidige accountrechten. Remote MCP accepteert dit token niet.",
       "empty": "Er zijn nog geen persoonlijke toegangstokens gemaakt.",
       "regenerate": "Opnieuw genereren",
       "regenerateTitle": "Persoonlijk toegangstoken opnieuw genereren",
@@ -3090,7 +3090,8 @@
       "textMarquee": "Tekstmarquee",
       "clientMarquee": "Klantmarquee",
       "labelMarquee": "Labelmarquee",
-      "externalVideo": "Externe video"
+      "externalVideo": "Externe video",
+      "mermaid": "Mermaid"
     },
     "externalVideo": {
       "urlLabel": "Video-URL",
@@ -3840,6 +3841,12 @@
             "title": "GLSL-shader",
             "subtext": "Voeg een interactieve GLSL-shader toe",
             "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "group": "Insluitingen"
+          },
+          "mermaid": {
+            "title": "Mermaid",
+            "subtext": "Maak een diagram van tekst",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
             "group": "Insluitingen"
           }
         }
@@ -5437,5 +5444,12 @@
       "download": "Downloaden",
       "failed": "De download kon niet worden geautoriseerd. Probeer het opnieuw."
     }
+  },
+  "mermaid": {
+    "source": "Broncode",
+    "title": "Bijschrift",
+    "empty": "Voer diagramcode in",
+    "invalid": "Ongeldig diagram",
+    "loading": "Bezig met tekenen…"
   }
 }

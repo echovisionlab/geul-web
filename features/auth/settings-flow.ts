@@ -1,5 +1,6 @@
 import { getPublicAuthUrl } from '@/lib/public-runtime-config';
 import { isValidUuid } from '@/lib/utils/validation';
+import { normalizeSiteApplicationTitle } from '@/lib/utils/site-application-metadata';
 
 interface SettingsFlowNode {
   attributes?: {
@@ -87,6 +88,31 @@ export function getSettingsFlowCsrfToken(flow: SettingsFlow): string | null {
     ?.map((node) => node.attributes)
     .find((attributes) => attributes?.name === 'csrf_token')?.value;
   return typeof value === 'string' && value.length > 0 ? value : null;
+}
+
+export function getSettingsPasskeyCreateData(value: unknown, siteTitle: string): string {
+  if (typeof value !== 'string') {
+    return '';
+  }
+  try {
+    const options: unknown = JSON.parse(value);
+    if (!options || typeof options !== 'object' || !('publicKey' in options)) {
+      return value;
+    }
+    const publicKey = options.publicKey;
+    if (!publicKey || typeof publicKey !== 'object' || !('rp' in publicKey)) {
+      return value;
+    }
+    const rp = publicKey.rp;
+    if (!rp || typeof rp !== 'object' || !('name' in rp) || typeof rp.name !== 'string') {
+      return value;
+    }
+    // Kratos reads this field before credentials.create; only the display name is site-owned.
+    rp.name = normalizeSiteApplicationTitle(siteTitle);
+    return JSON.stringify(options);
+  } catch {
+    return value;
+  }
 }
 
 type SettingsEmailVerificationTrait = 'pending_email';

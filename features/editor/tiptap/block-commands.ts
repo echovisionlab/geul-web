@@ -228,6 +228,27 @@ export function insertParagraphAfterSelectedBlock(editor: Editor): boolean {
   return true;
 }
 
+/** Leaves an embedded editor at the next Paragraph without duplicating existing content. */
+export function focusParagraphAfterSelectedBlock(editor: Editor, allowInsertion = false): boolean {
+  if (!editor.isEditable || editor.view.composing) {
+    return false;
+  }
+  const block = blockAtNodeSelection(editor);
+  if (!block) {
+    return false;
+  }
+  const nextBlock = block.parent.maybeChild(block.index + 1);
+  if (nextBlock?.firstChild?.type.name === 'paragraph') {
+    const position = block.position + block.node.nodeSize + 2;
+    editor.view.dispatch(
+      editor.state.tr.setSelection(TextSelection.create(editor.state.doc, position)).scrollIntoView(),
+    );
+    editor.view.focus();
+    return true;
+  }
+  return allowInsertion && insertParagraphAfterSelectedBlock(editor);
+}
+
 /** Inserts a locale-owned line break without creating or changing a durable block. */
 export function insertHardBreakInCurrentTextBlock(editor: Editor): boolean {
   const selected = directTextBlockAtSelection(editor);

@@ -72,7 +72,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = manifest.settings;
 
   const title = normalizeSiteApplicationTitle(settings.site_title);
-  const description = settings.meta_description?.trim() || 'Geul';
+  const description = settings.meta_description?.trim() || title;
 
   const siteOgImageUrl = settings.site_og_image_url ?? undefined;
   const applicationMetadata = buildSiteApplicationMetadata({

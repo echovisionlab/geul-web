@@ -7,6 +7,7 @@ import { formSchema } from './form/schema';
 import { immersiveSceneSchema } from './immersive-scene/schema';
 import { labelListSchema } from './label-list/schema';
 import { labelMarqueeSchema } from './label-marquee/schema';
+import { mermaidSchema } from './mermaid/schema';
 import { mapSchema } from './map/schema';
 import { postListSchema } from './post-list/schema';
 import { postMapSchema } from './post-map/schema';
@@ -34,6 +35,7 @@ function definePageBlock<TType extends string, TSchema extends z.ZodObject, TAll
 }
 
 export const pageBlockDefinitions = [
+  definePageBlock('mermaid', mermaidSchema, true),
   definePageBlock('rich-text', richTextSchema, true),
   definePageBlock('external-video', externalVideoSchema, true),
   definePageBlock('post-list', postListSchema, true),
