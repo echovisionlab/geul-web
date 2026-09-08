@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/echovisionlab/geul-web/compare/v0.1.6...v0.2.0) (2026-09-08)
+
+
+### Features
+
+* **editor:** add Mermaid blocks and configurable site branding ([#19](https://github.com/echovisionlab/geul-web/issues/19)) ([f810e01](https://github.com/echovisionlab/geul-web/commit/f810e01844ea3ef5aed052a609f2f171d13aac75))
+
 ## [0.1.6](https://github.com/echovisionlab/geul-web/compare/v0.1.5...v0.1.6) (2026-09-06)
 
 
