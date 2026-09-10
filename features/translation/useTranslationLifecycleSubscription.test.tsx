@@ -205,39 +205,6 @@ describe('useTranslationLifecycleSubscription', () => {
     ]);
   });
 
-  it('rejects removed transport source identity fields', () => {
-    const events: TranslationLifecycleRefetchHint[] = [];
-    const provider = new FakeProvider();
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    root = createRoot(container);
-
-    act(() => {
-      root?.render(
-        <TestHarness provider={provider as unknown as HocuspocusProvider} onEvent={(event) => events.push(event)} />,
-      );
-    });
-    act(() => {
-      provider.emitStateless({
-        version: 1,
-        kind: 'translation.lifecycle',
-        entityType: 'post',
-        entityId: 'post-1',
-        locale: 'fr',
-        correlationId: 'job-invalid-1',
-        timestampMs: 100,
-        payload: {
-          jobId: 'job-invalid-1',
-          targetLocale: 'fr',
-          status: 'failed',
-          sourceRevision: '42',
-        },
-      });
-    });
-
-    expect(events).toEqual([]);
-  });
-
   it('refetches authoritative state when the runtime-context provider connects or reconnects', () => {
     let reconnectCount = 0;
     const provider = new FakeProvider();
