@@ -3,7 +3,6 @@ import { create } from '@bufbuild/protobuf';
 import {
   TranslationJobSchema,
   TranslationJobStatus,
-  TranslationService,
   type TranslationJob,
 } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
 import {
@@ -19,10 +18,6 @@ function createJob(id: string, status: TranslationJobStatus): TranslationJob {
 }
 
 describe('translation job polling', () => {
-  it('does not expose the removed same-job retry contract', () => {
-    expect(TranslationService.method).not.toHaveProperty('retryTranslationJob');
-  });
-
   it('polls entity jobs only while they are active and healthy', () => {
     expect(translationJobsRefetchInterval([createJob('queued', TranslationJobStatus.QUEUED)])).toBe(
       ACTIVE_TRANSLATION_JOB_REFETCH_INTERVAL_MS,

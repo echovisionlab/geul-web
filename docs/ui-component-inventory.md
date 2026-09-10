@@ -11,14 +11,6 @@ code, and vendored dependencies. The inspected import manifest SHA-256 is
 Those counts and the manifest hash describe the baseline only; the migration notes below describe
 the current ownership state and are not a regenerated exhaustive import snapshot.
 
-Housekeeping update (`2026-08-09`): repeated Core input class construction now has one owner;
-fourteen Admin modal contexts use one typed factory; DataTable context no longer cycles through its
-compound root and client/server multi-sort use one view; Page Columns receives recursive rendering
-from PageEditor composition; image upload lifecycle, editor media drop handling, share-password UI,
-active editor locale controls, and map-feature query projection each have one implementation.
-Source-text, file-presence, and negative-import tests were removed; architectural correctness is
-kept by dependency direction and observable unit behavior instead.
-
 ShareLink validation and `/s/{token}` destination selection belong to server route/query controllers, not a visual component or Storybook-only branch. Public Artist, Label, legal-document, content, and form views keep their production Feature/Core composition; token previews only alter the controller query and cache/index/referrer policy.
 
 Counts use `consumer files / JSX root instances`. Hooks and compound-only APIs are called out
@@ -266,7 +258,7 @@ the gate strict without suppressing unfinished work.
 - Admin Site Settings is owned by `features/site/SiteSettingsForm`: the Feature composes canonical
   Core fields and sections, while the route owns queries, mutations, asset controllers, and maintenance.
   Its form and SetMany patch types exclude the read-only runtime `site_origin`, derived asset URLs,
-  relation projections, OG result state, and removed cache settings.
+  relation projections, and OG result state.
 - Scheduled legal ShareLink content is rendered by the prop-driven
   `features/policy/LegalShareDocumentView`. `/s/{token}` owns token, expiry and optional password proof;
   the Feature composes the shared Alert and Table of Contents without owning access authority.

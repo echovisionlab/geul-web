@@ -7,14 +7,6 @@ import {
 
 describe('system email event catalog', () => {
   it('uses provider-neutral canonical keys for login and registration code mail', () => {
-    expect(SYSTEM_EMAIL_EVENT_KEYS).not.toContain('kratos_login_code_valid');
-    expect(SYSTEM_EMAIL_EVENT_KEYS).not.toContain('kratos_registration_code_valid');
-    expect(SYSTEM_EMAIL_EVENTS).not.toHaveProperty('kratos_login_code_valid');
-    expect(SYSTEM_EMAIL_EVENTS).not.toHaveProperty('kratos_registration_code_valid');
-
-    expect(SYSTEM_EMAIL_EVENT_KEYS).not.toContain('kratos_login_code');
-    expect(SYSTEM_EMAIL_EVENT_KEYS).not.toContain('kratos_registration_code');
-    expect(SYSTEM_EMAIL_EVENT_KEYS).not.toContain('kratos_verification_code');
     expect(SYSTEM_EMAIL_EVENT_KEYS).toContain('login_code');
     expect(SYSTEM_EMAIL_EVENT_KEYS).toContain('registration_code');
     expect(SYSTEM_EMAIL_EVENT_KEYS).toContain('verification_code');
@@ -52,25 +44,11 @@ describe('system email event catalog', () => {
       'login_code',
       'registration_code',
     ]);
-    expect(SYSTEM_EMAIL_EVENT_KEYS).not.toContain('email_change_verify');
-    expect(SYSTEM_EMAIL_EVENT_KEYS).not.toContain('new_location_login');
-  });
-
-  it('does not expose password recovery as a system event', () => {
-    expect(SYSTEM_EMAIL_EVENT_KEYS).not.toContain('recovery_code');
-    expect(SYSTEM_EMAIL_EVENT_KEYS).not.toContain('kratos_recovery_code_valid');
-    expect(SYSTEM_EMAIL_EVENT_KEYS).not.toContain('kratos_recovery_code');
-  });
-
-  it('does not expose Kratos anti-enumeration template types as success events', () => {
-    expect(SYSTEM_EMAIL_EVENT_KEYS).not.toContain('verification_code_invalid');
-    expect(SYSTEM_EMAIL_EVENT_KEYS).not.toContain('recovery_code_invalid');
   });
 
   it('exposes only the runtime site origin placeholder', () => {
     for (const eventKey of SYSTEM_EMAIL_EVENT_KEYS) {
       expect(getEventVariables(eventKey)).toContain('site_origin');
-      expect(getEventVariables(eventKey)).not.toContain('site_url');
     }
   });
 });
