@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/echovisionlab/geul-web/compare/v0.2.0...v0.2.1) (2026-09-10)
+
+
+### Bug Fixes
+
+* **ci:** preserve generated release manifest formatting ([#21](https://github.com/echovisionlab/geul-web/issues/21)) ([52cc1dc](https://github.com/echovisionlab/geul-web/commit/52cc1dc5cbe15c1a1a92b0ccfa818a2628051ccf))
+
 ## [0.2.0](https://github.com/echovisionlab/geul-web/compare/v0.1.6...v0.2.0) (2026-09-08)
 
 
