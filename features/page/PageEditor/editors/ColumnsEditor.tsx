@@ -13,6 +13,7 @@ import { createBlockId } from '@/lib/editor/block-id';
 import type { SectionRendererProps } from '../SectionRendererContext';
 import { createDefaultSection, type ColumnData, type ColumnsSection, type SectionType } from '../types';
 import { usePageSectionTypeLabels } from '../usePageSectionTypeLabels';
+import { COLUMN_SECTION_MENU } from '../section-menu';
 
 interface ColumnsEditorProps {
   section: ColumnsSection;
@@ -21,30 +22,9 @@ interface ColumnsEditorProps {
 
 export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) {
   const t = useTranslations('pageEditor');
-  const tCommonEntities = useTranslations('common.entities');
   const { updateSection, editable, allowStructuralEdits } = usePageEditor();
   const canEditStructure = editable && allowStructuralEdits;
   const sectionTypeLabels = usePageSectionTypeLabels();
-  const sectionTypeOptions = useMemo<Array<{ value: SectionType; label: string }>>(
-    () => [
-      { value: 'rich-text', label: t('sectionTypes.richText') },
-      { value: 'post-list', label: t('sectionTypes.postList') },
-      { value: 'post-table', label: t('sectionTypes.postTable') },
-      { value: 'work-map', label: t('sectionTypes.workMap') },
-      { value: 'work-table', label: t('sectionTypes.workTable') },
-      { value: 'work-list', label: t('sectionTypes.worksGallery') },
-      { value: 'program-event-list', label: t('sectionTypes.programEventList') },
-      { value: 'release-list', label: t('sectionTypes.releasesGallery') },
-      { value: 'artist-list', label: t('sectionTypes.artistGrid') },
-      { value: 'label-list', label: tCommonEntities('labels') },
-      { value: 'text-marquee', label: t('sectionTypes.textMarquee') },
-      { value: 'client-marquee', label: t('sectionTypes.clientMarquee') },
-      { value: 'label-marquee', label: t('sectionTypes.labelMarquee') },
-      { value: 'author-list', label: t('sectionTypes.authorList') },
-      { value: 'external-video', label: t('sectionTypes.externalVideo') },
-    ],
-    [t, tCommonEntities],
-  );
   const columnCountOptions = useMemo(
     () => [
       { value: '2', label: t('columnsEditor.columnCounts.two') },
@@ -230,13 +210,13 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
                 </DropdownMenu.Target>
                 <DropdownMenu.Dropdown>
                   <DropdownMenu.Label>{t('columnsEditor.menuLabel')}</DropdownMenu.Label>
-                  {sectionTypeOptions.map((opt) => (
+                  {COLUMN_SECTION_MENU.map((type) => (
                     <DropdownMenu.Item
-                      key={opt.value}
+                      key={type}
                       disabled={!canEditStructure}
-                      onClick={() => addSectionToColumn(columnIndex, opt.value)}
+                      onClick={() => addSectionToColumn(columnIndex, type)}
                     >
-                      {opt.label}
+                      {sectionTypeLabels[type]}
                     </DropdownMenu.Item>
                   ))}
                 </DropdownMenu.Dropdown>

@@ -21,6 +21,8 @@ import { Select, TextInput } from '@/components/core/Input';
 import { usePageEditor } from '@/features/page/PageEditor/PageEditorContext';
 import { listPublishedForms } from '@/lib/queries/form-browser';
 import { SectionItem } from './SectionItem';
+import { SECTION_MENU } from './section-menu';
+import { usePageSectionTypeLabels } from './usePageSectionTypeLabels';
 import type { SectionType } from './types';
 
 type ConfiguredSectionType = 'external-video' | 'form';
@@ -105,8 +107,6 @@ export function PageSectionPreinsertDialog({
 
 export function SectionList() {
   const t = useTranslations('pageEditor');
-  const tCommonLabels = useTranslations('common.labels');
-  const tCommonEntities = useTranslations('common.entities');
   const { sections, addSection, deleteSection, moveSections, editable } = usePageEditor();
   const [pendingType, setPendingType] = useState<ConfiguredSectionType | null>(null);
   const { data: publishedForms, isLoading: formsLoading } = useQuery({
@@ -118,29 +118,7 @@ export function SectionList() {
     () => (publishedForms ?? []).map((form) => ({ value: form.id, label: form.title })),
     [publishedForms],
   );
-  const sectionTypeLabels: Record<SectionType, string> = {
-    mermaid: t('sectionTypes.mermaid'),
-    'rich-text': t('sectionTypes.richText'),
-    'post-list': t('sectionTypes.postList'),
-    'post-table': t('sectionTypes.postTable'),
-    'post-map': t('sectionTypes.postMap'),
-    'work-map': t('sectionTypes.workMap'),
-    'work-table': t('sectionTypes.workTable'),
-    'work-list': t('sectionTypes.worksGallery'),
-    'program-event-list': t('sectionTypes.programEventList'),
-    'release-list': t('sectionTypes.releasesGallery'),
-    'artist-list': t('sectionTypes.artistGrid'),
-    'label-list': tCommonEntities('labels'),
-    'text-marquee': t('sectionTypes.textMarquee'),
-    'client-marquee': t('sectionTypes.clientMarquee'),
-    'label-marquee': t('sectionTypes.labelMarquee'),
-    'author-list': t('sectionTypes.authorList'),
-    form: t('sectionTypes.form'),
-    map: tCommonLabels('map'),
-    'immersive-scene': t('sectionTypes.immersiveScene'),
-    'external-video': t('sectionTypes.externalVideo'),
-    columns: t('sectionTypes.columns'),
-  };
+  const sectionTypeLabels = usePageSectionTypeLabels();
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -213,7 +191,7 @@ export function SectionList() {
             </Button>
           </DropdownMenu.Target>
           <DropdownMenu.Dropdown>
-            {(Object.keys(sectionTypeLabels) as SectionType[]).map((type) => (
+            {SECTION_MENU.map((type) => (
               <DropdownMenu.Item key={type} onClick={() => handleAddSection(type)} data-page-section-add-item={type}>
                 {sectionTypeLabels[type]}
               </DropdownMenu.Item>

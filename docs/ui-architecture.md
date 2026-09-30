@@ -134,6 +134,8 @@ exists. Delayed translation delivery must not use that tracked origin.
   read routing or query state.
 - Recursive Page blocks receive their child-section renderer from the PageEditor composition
   boundary. A block implementation must not import the registry through `SectionContent`.
+- Page section insertion menus use `PageEditor/section-menu.ts` for presentation order and
+  `usePageSectionTypeLabels` for labels. Column menus retain their allowed subset in the same order.
 - Upload lifecycle and image-asset replacement are owned once in `features/upload`; domain editors
   provide validation, persistence, and labels instead of reimplementing the same state machine.
 
