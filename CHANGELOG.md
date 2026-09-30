@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.3](https://github.com/echovisionlab/geul-web/compare/v0.2.2...v0.2.3) (2026-09-30)
+
+
+### Bug Fixes
+
+* preserve editor content and enforce site API contracts ([38186b5](https://github.com/echovisionlab/geul-web/commit/38186b59488aad036d4751e73c6d2ced6ce70598))
+* preserve editor content and enforce site API contracts ([cd7e1a0](https://github.com/echovisionlab/geul-web/commit/cd7e1a077643ad534e2da9eff955c49ca128964c))
+
 ## [0.2.2](https://github.com/echovisionlab/geul-web/compare/v0.2.1...v0.2.2) (2026-09-30)
 
 
