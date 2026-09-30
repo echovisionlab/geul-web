@@ -112,7 +112,6 @@ interface PageEditorContextValue {
   deleteSection: (sectionId: string) => void;
   addSection: (type: SectionType, index?: number, initialProps?: Record<string, unknown>) => SectionMeta | null;
   moveSections: (fromIndex: number, toIndex: number) => void;
-  mergeSection: (section: SectionMeta) => SectionMeta;
 }
 
 const PageEditorContext = createContext<PageEditorContextValue | null>(null);
@@ -227,8 +226,6 @@ export function PageEditorProvider({
     [allowStructuralEdits, controller, editable, persistStructureChange, sections],
   );
 
-  const mergeSection = useCallback((section: SectionMeta) => section, []);
-
   const value = useMemo<PageEditorContextValue>(
     () => ({
       doc,
@@ -245,7 +242,6 @@ export function PageEditorProvider({
       deleteSection,
       addSection,
       moveSections,
-      mergeSection,
     }),
     [
       doc,
@@ -262,7 +258,6 @@ export function PageEditorProvider({
       deleteSection,
       addSection,
       moveSections,
-      mergeSection,
     ],
   );
 

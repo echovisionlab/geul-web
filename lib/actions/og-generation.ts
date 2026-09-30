@@ -1,6 +1,12 @@
 'use server';
 
-import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
+import { connectActionErrorCode, isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
+import {
+  actionFailure,
+  actionSuccess,
+  type ActionResult,
+  type LocalActionErrorCode,
+} from '@/lib/actions/action-result';
 import { Code } from '@connectrpc/connect';
 import { OgGenerationRunStatus } from '@echovisionlab/geul-proto/secure/admin_pb.ts';
 import { OgEntityType, OgGenerationStatus } from '@echovisionlab/geul-proto/secure/events_pb.ts';
@@ -49,10 +55,11 @@ function actionError(error: unknown, fallback: string): string {
     }
     return fallback;
   }
-  if (error instanceof Error && ['Locale is required to regenerate this OG image'].includes(error.message)) {
-    return error.message;
-  }
   return fallback;
+}
+
+function ogActionFailure(error: unknown, fallback: string, fallbackCode: LocalActionErrorCode) {
+  return actionFailure(actionError(error, fallback), connectActionErrorCode(error, fallbackCode));
 }
 
 function normalizeEntityId(entityType: OgGenerationEntityType, entityId?: string): string | undefined {
@@ -171,12 +178,15 @@ export async function regenerateOgImageAction(input: {
   entityType: OgGenerationEntityType;
   entityId?: string;
   selection: OgGenerationSelection;
-}): Promise<{ runId?: string; generationIds?: string[]; error?: string }> {
+}): Promise<ActionResult<{ runId: string; generationIds: string[] }>> {
   try {
     const entityId = normalizeEntityId(input.entityType, input.entityId);
     const fixedEntityId = getFixedOgTargetId(input.entityType);
     if (!fixedEntityId && !entityId) {
-      return { error: 'Entity ID is required to regenerate this OG image' };
+      return actionFailure('Entity ID is required to regenerate this OG image', 'ENTITY_ID_REQUIRED');
+    }
+    if (input.selection.type === 'locale' && !input.selection.locale.trim()) {
+      return actionFailure('Locale is required to regenerate this OG image', 'LOCALE_REQUIRED');
     }
     const client = await createAdminClient();
     const response = await client.regenerateOgImage({
@@ -184,24 +194,24 @@ export async function regenerateOgImageAction(input: {
       entityId: fixedEntityId ? undefined : entityId,
       selection: selectionToProto(input.selection),
     });
-    return { runId: response.runId, generationIds: [...response.generationIds] };
+    return actionSuccess({ runId: response.runId, generationIds: [...response.generationIds] });
   } catch (error) {
-    return { error: actionError(error, 'Failed to regenerate OG image') };
+    return ogActionFailure(error, 'Failed to regenerate OG image', 'OG_REGENERATE_FAILED');
   }
 }
 
 export async function getOgGenerationAction(
   generationId: string,
-): Promise<{ generation?: OgGenerationState; error?: string }> {
+): Promise<ActionResult<{ generation: OgGenerationState }>> {
   try {
     const client = await createAdminClient();
     const response = await client.getOgGeneration({ generationId: generationId.trim() });
     if (!response.generation) {
-      return { error: 'OG generation was not found' };
+      return actionFailure('OG generation was not found', 'OG_GENERATION_NOT_FOUND');
     }
-    return { generation: toGenerationState(response.generation) };
+    return actionSuccess({ generation: toGenerationState(response.generation) });
   } catch (error) {
-    return { error: actionError(error, 'Failed to load OG generation') };
+    return ogActionFailure(error, 'Failed to load OG generation', 'OG_GENERATION_LOAD_FAILED');
   }
 }
 
@@ -209,19 +219,19 @@ export async function getLatestOgGenerationAction(input: {
   entityType: OgGenerationEntityType;
   entityId?: string;
   locale?: string | null;
-}): Promise<{ generation?: OgGenerationState; error?: string }> {
+}): Promise<ActionResult<{ generation?: OgGenerationState }>> {
   try {
     const entityId = normalizeEntityId(input.entityType, input.entityId);
     if (!entityId) {
-      return { error: 'Entity ID is required to load the latest OG generation' };
+      return actionFailure('Entity ID is required to load the latest OG generation', 'ENTITY_ID_REQUIRED');
     }
     const locale = input.locale?.trim();
     const localeScoped = LOCALE_SCOPED_ENTITIES.has(input.entityType);
     if (localeScoped && !locale) {
-      return { error: 'Locale is required to load the latest OG generation' };
+      return actionFailure('Locale is required to load the latest OG generation', 'LOCALE_REQUIRED');
     }
     if (!localeScoped && locale) {
-      return { error: 'This OG target does not accept a locale' };
+      return actionFailure('This OG target does not accept a locale', 'LOCALE_NOT_ALLOWED');
     }
     const client = await createAdminClient();
     const response = await client.getLatestOgGeneration({
@@ -232,26 +242,26 @@ export async function getLatestOgGenerationAction(input: {
       },
     });
     if (!response.generation) {
-      return {};
+      return actionSuccess<{}>({});
     }
-    return { generation: toGenerationState(response.generation) };
+    return actionSuccess({ generation: toGenerationState(response.generation) });
   } catch (error) {
     if (isConnectErrorCode(error, Code.NotFound)) {
-      return {};
+      return actionSuccess<{}>({});
     }
-    return { error: actionError(error, 'Failed to load the latest OG generation') };
+    return ogActionFailure(error, 'Failed to load the latest OG generation', 'OG_LATEST_GENERATION_LOAD_FAILED');
   }
 }
 
-export async function getOgGenerationRunAction(runId: string): Promise<{ run?: OgGenerationRunState; error?: string }> {
+export async function getOgGenerationRunAction(runId: string): Promise<ActionResult<{ run: OgGenerationRunState }>> {
   try {
     const client = await createAdminClient();
     const response = await client.getOgGenerationRun({ runId: runId.trim() });
     if (!response.run) {
-      return { error: 'OG generation run was not found' };
+      return actionFailure('OG generation run was not found', 'OG_GENERATION_RUN_NOT_FOUND');
     }
     const run = response.run;
-    return {
+    return actionSuccess({
       run: {
         runId: run.runId,
         status: runStatusToUi(run.status),
@@ -279,8 +289,8 @@ export async function getOgGenerationRunAction(runId: string): Promise<{ run?: O
           };
         }),
       },
-    };
+    });
   } catch (error) {
-    return { error: actionError(error, 'Failed to load OG generation run') };
+    return ogActionFailure(error, 'Failed to load OG generation run', 'OG_GENERATION_RUN_LOAD_FAILED');
   }
 }

@@ -1,6 +1,8 @@
+import { fromJson } from '@bufbuild/protobuf';
 import { describe, expect, it } from 'vitest';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import {
+  RichTextBlockLocaleSchema,
   RichTextProfile,
   type LocalizedRichTextDocument,
   type RichTextBlock,
@@ -108,6 +110,16 @@ describe('materializeLocalizedRichTextTree', () => {
     expect(() => materializeLocalizedRichTextTree(value)).toThrow(
       `Localized rich-text Block ${CHILD_ID} has no locale payload.`,
     );
+  });
+
+  it('fails closed when a locale payload uses a different Block kind', () => {
+    const value = document();
+    value.localeOverlay!.blocks[1] = fromJson(RichTextBlockLocaleSchema, {
+      blockId: ROOT_ID,
+      heading: { props: {} },
+    });
+
+    expect(() => materializeLocalizedRichTextTree(value)).toThrow();
   });
 
   it('delegates UUID and catalog validation to the generated contract', () => {

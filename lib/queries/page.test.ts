@@ -149,6 +149,33 @@ describe('public page queries', () => {
     });
   });
 
+  it('shares the public Page projection while retaining token-only draft status', async () => {
+    getPublicPageRpcMock.mockResolvedValue({
+      page: {
+        id: 'page-draft',
+        slug: 'draft',
+        title: 'Draft',
+        status: PublicPageStatus.DRAFT,
+        showTitle: false,
+        document: localizedPageDocument('en'),
+        documentLayout: protoDocumentLayout,
+        localizationInfo: { displayedLocale: 'en' },
+      },
+      blockMedia: [],
+    });
+
+    const publicView = await getPageView('draft');
+    const tokenView = await getPageViewWithToken('draft', 'share-token', 'en');
+
+    expect(tokenView).toMatchObject({ ...publicView, status: 'draft' });
+    expect(getPublicPageRpcMock).toHaveBeenNthCalledWith(1, { slug: 'draft' });
+    expect(getPublicPageRpcMock).toHaveBeenNthCalledWith(2, {
+      slug: 'draft',
+      shareToken: 'share-token',
+      sharePassword: undefined,
+    });
+  });
+
   it('returns the authoritative typed document for draft and published responses', async () => {
     getPublicPageRpcMock.mockResolvedValue({
       page: {

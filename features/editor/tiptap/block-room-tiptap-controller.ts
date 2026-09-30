@@ -6,16 +6,9 @@ import {
   contentBlockProfileForRichTextProfile,
   profileSupportsParagraphExternalVideo,
 } from '@/features/editor/contract/block-registry';
-import {
-  documentToTiptap,
-  emptyLocalePayload,
-  flatten,
-  generatedData,
-  generatedLocaleData,
-  parseDocument,
-  splitPayload,
-} from './block-room-tiptap-codec';
+import { documentToTiptap, parseDocument, splitPayload } from './block-room-tiptap-codec';
 import { applyTiptapBlockPayload } from './block-room-tiptap-mutation-writer';
+import { planTiptapStructure, type PreviousTiptapBlock } from './block-room-tiptap-structure-plan';
 import { richTextProseMirrorAdapterForProtoCase } from './block-room-prosemirror-registry';
 import { createTiptapEditorGeneration, type TiptapEditorGeneration } from './editor-generation';
 import {
@@ -204,95 +197,40 @@ export class PostBlockRoomTiptapController {
 
   #applyDocument(value: JSONContent): void {
     const nextRoots = parseDocument(value, this.#projectionOptions());
-    const next = flatten(nextRoots);
-    const previousDescriptors = this.#previousDescriptors;
-    const previous = new Map(flattenDescriptor(previousDescriptors).map((block) => [block.id, block]));
-    const nextById = new Map(next.map((block) => [block.id, block]));
-    const workingOrders = new BlockOrderIndex(previousDescriptors);
-    const retainedAncestors = new Set<string>();
-    for (const block of next) {
-      let parentId = previous.get(block.id)?.parentId;
-      while (parentId && !retainedAncestors.has(parentId)) {
-        retainedAncestors.add(parentId);
-        parentId = previous.get(parentId)?.parentId;
-      }
-    }
+    const plan = planTiptapStructure(this.#previousDescriptors, nextRoots, this.#bridge.locales, this.#bridge.locale);
     this.#applyingRoom = true;
     try {
       this.#bridge.transact(() => {
-        // Remove complete discarded subtrees first so survivors need no moves
-        // just to account for a deleted sibling. Ancestors of surviving blocks
-        // stay resident until those blocks have moved out below.
-        for (const block of [...previous.values()].reverse()) {
-          if (!nextById.has(block.id) && !retainedAncestors.has(block.id)) {
-            this.#bridge.deleteBlock(block.id);
-            workingOrders.remove(block.id);
-          }
-        }
-        for (const block of next) {
-          const before = previous.get(block.id);
-          const payload = splitPayload(block);
-          const targetParentId = block.parentBlockId ?? null;
-          if (!before) {
-            const targetOrder = workingOrders.get(targetParentId) ?? [];
-            const locales = Object.fromEntries(
-              this.#bridge.locales.map((locale) => [
-                locale,
-                generatedLocaleData(
-                  block.protoCase,
-                  locale === this.#bridge.locale ? payload.locale : emptyLocalePayload(block.protoCase, payload.base),
-                ),
-              ]),
-            );
-            this.#bridge.insertBlock({
-              id: block.id,
-              data: generatedData(block.protoCase, payload.base),
-              localeData: locales,
-              parentBlockId: block.parentBlockId,
-              index: block.index,
-              anchor:
-                targetOrder.length > 0
-                  ? this.#bridge.createInsertionAnchor({ parentBlockId: block.parentBlockId, index: block.index })
-                  : undefined,
-            });
-            workingOrders.insert(targetParentId, block.index, block.id);
-            continue;
-          }
-          const current = workingOrders.locate(block.id);
-          if (!current) {
-            throw new Error(`Existing Block ${block.id} is missing from the structural order.`);
-          }
-          if (current.parentId !== targetParentId || current.index !== block.index) {
-            this.#bridge.moveBlock(block.id, { parentBlockId: block.parentBlockId, index: block.index });
-            workingOrders.remove(block.id);
-            workingOrders.insert(targetParentId, block.index, block.id);
-          }
-          if (before.adapter.protoCase !== block.protoCase) {
-            const localeData = Object.fromEntries(
-              this.#bridge.locales.map((locale) => [
-                locale,
-                generatedLocaleData(
-                  block.protoCase,
-                  locale === this.#bridge.locale ? payload.locale : emptyLocalePayload(block.protoCase, payload.base),
-                ),
-              ]),
-            );
-            this.#bridge.replaceBlockKind({
-              blockId: block.id,
-              expectedKind: before.adapter.kind,
-              data: generatedData(block.protoCase, payload.base),
-              localeData,
-            });
-            continue;
-          }
-          applyTiptapBlockPayload(this.#bridge, block, before, payload);
-        }
-        // Surviving children must leave a removed parent before its cascading
-        // deletion. Moves above also establish the final sibling order.
-        for (const block of [...previous.values()].reverse()) {
-          if (!nextById.has(block.id) && retainedAncestors.has(block.id)) {
-            this.#bridge.deleteBlock(block.id);
-            workingOrders.remove(block.id);
+        for (const operation of plan.operations) {
+          switch (operation.type) {
+            case 'delete':
+              this.#bridge.deleteBlock(operation.blockId);
+              break;
+            case 'insert':
+              this.#bridge.insertBlock({
+                id: operation.block.id,
+                ...operation.data,
+                ...operation.placement,
+                anchor: operation.needsAnchor ? this.#bridge.createInsertionAnchor(operation.placement) : undefined,
+              });
+              break;
+            case 'move':
+              this.#bridge.moveBlock(operation.blockId, operation.placement);
+              break;
+            case 'replace-kind':
+              this.#bridge.replaceBlockKind({
+                blockId: operation.block.id,
+                expectedKind: operation.previous.adapter.kind,
+                ...operation.data,
+              });
+              break;
+            case 'update-payload':
+              applyTiptapBlockPayload(this.#bridge, operation.block, operation.previous, operation.payload);
+              break;
+            default: {
+              const exhaustive: never = operation;
+              throw new Error(`Unsupported Tiptap structure operation: ${String(exhaustive)}`);
+            }
           }
         }
       });
@@ -326,11 +264,6 @@ export class PostBlockRoomTiptapController {
       this.#projectionOptions(),
     );
   }
-}
-
-interface LocatedBlock {
-  readonly parentId: string | null;
-  readonly index: number;
 }
 
 /** null means topology changed and the full structural diff is required. */
@@ -376,76 +309,11 @@ function changedPayloadContainers(before: ProseMirrorNode, after: ProseMirrorNod
   return visit(before.firstChild!, after.firstChild!) ? changed : null;
 }
 
-function descriptorOrders(
-  blocks: readonly ProseMirrorBlockDescriptor[],
-  parentId: string | null = null,
-  result = new Map<string | null, string[]>(),
-): Map<string | null, string[]> {
-  result.set(
-    parentId,
-    blocks.map((block) => block.id),
-  );
-  for (const block of blocks) {
-    descriptorOrders(block.children, block.id, result);
-  }
-  return result;
-}
-
-/** Index positions once; only affected sibling lists are reindexed on moves. */
-class BlockOrderIndex {
-  readonly #orders: Map<string | null, string[]>;
-  readonly #locations = new Map<string, LocatedBlock>();
-
-  constructor(blocks: readonly ProseMirrorBlockDescriptor[]) {
-    this.#orders = descriptorOrders(blocks);
-    for (const parentId of this.#orders.keys()) {
-      this.#reindex(parentId);
-    }
-  }
-
-  get(parentId: string | null): readonly string[] | undefined {
-    return this.#orders.get(parentId);
-  }
-
-  locate(blockId: string): LocatedBlock | undefined {
-    return this.#locations.get(blockId);
-  }
-
-  remove(blockId: string): void {
-    const current = this.locate(blockId);
-    if (!current) {
-      return;
-    }
-    this.#orders.get(current.parentId)?.splice(current.index, 1);
-    this.#locations.delete(blockId);
-    this.#reindex(current.parentId);
-  }
-
-  insert(parentId: string | null, index: number, blockId: string): void {
-    const order = this.#orders.get(parentId) ?? [];
-    if (index < 0 || index > order.length) {
-      throw new Error(`Block ${blockId} index ${index} is outside its target order.`);
-    }
-    order.splice(index, 0, blockId);
-    this.#orders.set(parentId, order);
-    this.#reindex(parentId);
-  }
-
-  #reindex(parentId: string | null): void {
-    this.#orders.get(parentId)?.forEach((id, index) => this.#locations.set(id, { parentId, index }));
-  }
-}
-
-interface FlatDescriptor extends ProseMirrorBlockDescriptor {
-  readonly parentId: string | null;
-  readonly position: number;
-}
-
 function findDescriptors(
   blocks: readonly ProseMirrorBlockDescriptor[],
   ids: ReadonlySet<string>,
-): ReadonlyMap<string, FlatDescriptor> {
-  const found = new Map<string, FlatDescriptor>();
+): ReadonlyMap<string, PreviousTiptapBlock> {
+  const found = new Map<string, PreviousTiptapBlock>();
   const visit = (siblings: readonly ProseMirrorBlockDescriptor[], parentId: string | null): void => {
     for (let position = 0; position < siblings.length; position += 1) {
       if (found.size === ids.size) {
@@ -460,16 +328,6 @@ function findDescriptors(
   };
   visit(blocks, null);
   return found;
-}
-
-function flattenDescriptor(
-  blocks: readonly ProseMirrorBlockDescriptor[],
-  parentId: string | null = null,
-): readonly FlatDescriptor[] {
-  return blocks.flatMap((block, position) => [
-    { ...block, parentId, position },
-    ...flattenDescriptor(block.children, block.id),
-  ]);
 }
 
 export function createPostBlockRoomTiptapController(bridge: BlockRoomProseMirrorBridge): PostBlockRoomTiptapController {

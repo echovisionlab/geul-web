@@ -65,6 +65,7 @@ describe('release actions', () => {
 
   it('maps release CRUD, status, and slug actions', async () => {
     await expect(actions.createReleaseAction({ title: 'Single', type: 'single' })).resolves.toEqual({
+      ok: true,
       data: { id: 'release-1' },
     });
     await expect(actions.getReleaseAdminAction('release-1')).resolves.toMatchObject({
@@ -72,13 +73,14 @@ describe('release actions', () => {
       type: 'ep',
       spotifyUrl: 'https://spotify.example',
     });
-    await expect(actions.publishReleaseAction('release-1')).resolves.toEqual({ success: true });
-    await expect(actions.unpublishReleaseAction('release-1')).resolves.toEqual({ success: true });
+    await expect(actions.publishReleaseAction('release-1')).resolves.toEqual({ ok: true, success: true });
+    await expect(actions.unpublishReleaseAction('release-1')).resolves.toEqual({ ok: true, success: true });
     await expect(actions.updateReleaseSlugAction('release-1', ' New Slug ')).resolves.toEqual({
+      ok: true,
       success: true,
       slug: ' New Slug ',
     });
-    await expect(actions.deleteReleaseAction('release-1')).resolves.toEqual({ success: true });
+    await expect(actions.deleteReleaseAction('release-1')).resolves.toEqual({ ok: true, success: true });
 
     expect(releaseClient.createRelease).toHaveBeenCalledWith({
       title: 'Single',
@@ -93,29 +95,34 @@ describe('release actions', () => {
 
   it('maps artwork and release relationship actions', async () => {
     await expect(actions.setReleaseArtworkAction('release-1', 'file-1')).resolves.toEqual({
+      ok: true,
       url: 'https://cdn.example/new-art.webp',
     });
     await expect(actions.deleteReleaseArtworkAction('release-1')).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(
       actions.setReleaseLabelsAction('release-1', [{ labelId: 'label-1', catalogNumber: 'CAT-1', sortOrder: 2 }]),
-    ).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true });
     await expect(actions.setReleaseGenresAction('release-1', ['genre-1'])).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(
       actions.setReleaseArtistsAction('release-1', [{ artistId: 'artist-1', sortOrder: 0 }]),
-    ).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true });
     await expect(actions.setReleaseCategoriesAction('release-1', ['cat-1'])).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(actions.setReleaseStylesAction('release-1', ['style-1'])).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(
       actions.setReleaseFormatsAction('release-1', [{ formatId: 'format-1', formatDescription: 'Gatefold' }]),
-    ).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true });
     await expect(
       actions.setReleaseCreditsAction('release-1', [
         {
@@ -127,7 +134,7 @@ describe('release actions', () => {
           sortOrder: 1,
         },
       ]),
-    ).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true });
 
     expect(releaseClient.setReleaseLabels).toHaveBeenCalledWith({
       releaseId: 'release-1',
@@ -151,8 +158,12 @@ describe('release actions', () => {
   it('uses the generated Release date oneof for set and explicit clear', async () => {
     const releaseDate = new Date('2026-06-01T00:00:00.000Z');
 
-    await expect(actions.updateReleaseFieldsAction('release-1', { releaseDate })).resolves.toEqual({ success: true });
+    await expect(actions.updateReleaseFieldsAction('release-1', { releaseDate })).resolves.toEqual({
+      ok: true,
+      success: true,
+    });
     await expect(actions.updateReleaseFieldsAction('release-1', { releaseDate: null })).resolves.toEqual({
+      ok: true,
       success: true,
     });
 
@@ -182,17 +193,23 @@ describe('release actions', () => {
 
     releaseClient.publishRelease.mockRejectedValueOnce(new ConnectError('missing', Code.NotFound));
     await expect(actions.publishReleaseAction('missing')).resolves.toEqual({
+      ok: false,
       error: 'Release not found',
+      errorCode: Code.NotFound,
     });
 
     releaseClient.setReleaseArtwork.mockRejectedValueOnce(new ConnectError('denied', Code.PermissionDenied));
     await expect(actions.setReleaseArtworkAction('release-1', 'file-1')).resolves.toEqual({
+      ok: false,
       error: 'No permission to edit this release',
+      errorCode: Code.PermissionDenied,
     });
 
     releaseClient.updateRelease.mockRejectedValueOnce(new ConnectError('private database detail', Code.Internal));
     await expect(actions.updateReleaseSlugAction('release-1', 'slug')).resolves.toEqual({
+      ok: false,
       error: 'Failed to update slug',
+      errorCode: Code.Internal,
     });
   });
 });

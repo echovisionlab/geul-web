@@ -17,6 +17,7 @@ import {
   unpublishPostAction,
 } from '@/lib/actions/post';
 import type { PostStatus } from '@/lib/types/post/model';
+import { getPostLifecycleStatusChoices, resolvePostLifecycleCommand } from './post-lifecycle-policy';
 import type { PostScheduleResolution } from './post-schedule';
 
 interface Options {
@@ -89,7 +90,8 @@ export function usePostLifecycle({
   const publish = useMutation({
     mutationFn: () => publishPostAction(postId),
     onSuccess: (result) => {
-      if (reportActionError(result.error)) {
+      if (!result.ok) {
+        reportActionError(result.error);
         return;
       }
       setStatus('published');
@@ -102,7 +104,8 @@ export function usePostLifecycle({
   const unpublish = useMutation({
     mutationFn: () => unpublishPostAction(postId),
     onSuccess: (result) => {
-      if (reportActionError(result.error)) {
+      if (!result.ok) {
+        reportActionError(result.error);
         return;
       }
       setStatus('draft');
@@ -113,7 +116,8 @@ export function usePostLifecycle({
   const archive = useMutation({
     mutationFn: () => archivePostAction(postId),
     onSuccess: (result) => {
-      if (reportActionError(result.error)) {
+      if (!result.ok) {
+        reportActionError(result.error);
         return;
       }
       setStatus('archived');
@@ -125,7 +129,8 @@ export function usePostLifecycle({
     mutationFn: (resolution: PostScheduleResolution) =>
       schedulePostAction(postId, resolution.instant, resolution.timeZone),
     onSuccess: (result, resolution) => {
-      if (reportActionError(result.error)) {
+      if (!result.ok) {
+        reportActionError(result.error);
         return;
       }
       setStatus('scheduled');
@@ -139,7 +144,8 @@ export function usePostLifecycle({
   const cancelSchedule = useMutation({
     mutationFn: () => cancelPostScheduleAction(postId),
     onSuccess: (result) => {
-      if (reportActionError(result.error)) {
+      if (!result.ok) {
+        reportActionError(result.error);
         return;
       }
       setStatus('draft');
@@ -152,7 +158,8 @@ export function usePostLifecycle({
   const republish = useMutation({
     mutationFn: () => republishPostAction(postId),
     onSuccess: (result) => {
-      if (reportActionError(result.error)) {
+      if (!result.ok) {
+        reportActionError(result.error);
         return;
       }
       setStatus('published');
@@ -163,7 +170,8 @@ export function usePostLifecycle({
   const deletePost = useMutation({
     mutationFn: () => deletePostAction(postId),
     onSuccess: (result) => {
-      if (reportActionError(result.error)) {
+      if (!result.ok) {
+        reportActionError(result.error);
         return;
       }
       notifications.show({ message: t('notifications.deleted'), color: 'red' });
@@ -172,78 +180,68 @@ export function usePostLifecycle({
   });
 
   const statusOptions = useMemo<StatusOption<PostStatus>[]>(() => {
-    const options: StatusOption<PostStatus>[] = [
-      {
-        value: status,
-        label: tCommon(`statuses.${status}`),
-        actionLabel: tCommon(`statuses.${status}`),
-        tone: postStatusTone(status),
-      },
-    ];
-    if ((permissions.canUnpublish || permissions.canCancelSchedule) && status !== 'draft') {
-      options.push({
-        value: 'draft',
-        label: tCommon('statuses.draft'),
-        actionLabel: status === 'scheduled' ? t('statusActions.cancelSchedule') : tCommon('actions.unpublish'),
-        tone: 'neutral',
-      });
-    }
-    if ((permissions.canPublishNow || permissions.canRepublish) && status !== 'published') {
-      options.push({
-        value: 'published',
-        label: tCommon('statuses.published'),
-        actionLabel: permissions.canRepublish ? t('statusActions.republish') : tCommon('actions.publish'),
-        tone: 'positive',
-      });
-    }
-    if (permissions.canSchedule && status !== 'scheduled') {
-      options.push({
-        value: 'scheduled',
-        label: tCommon('statuses.scheduled'),
-        actionLabel: t('statusActions.schedule'),
-        tone: 'neutral',
-      });
-    }
-    if (permissions.canArchive && status !== 'archived') {
-      options.push({
-        value: 'archived',
-        label: tCommon('statuses.archived'),
-        actionLabel: t('statusActions.archive'),
-        tone: 'warning',
-      });
-    }
-    return options;
-  }, [permissions, status, t, tCommon]);
+    return getPostLifecycleStatusChoices(status, allowed).map(({ status: targetStatus, command }) => {
+      let actionLabel: string;
+      switch (command) {
+        case null:
+          actionLabel = tCommon(`statuses.${targetStatus}`);
+          break;
+        case 'publish':
+          actionLabel = tCommon('actions.publish');
+          break;
+        case 'unpublish':
+          actionLabel = tCommon('actions.unpublish');
+          break;
+        case 'archive':
+          actionLabel = t('statusActions.archive');
+          break;
+        case 'openSchedule':
+          actionLabel = t('statusActions.schedule');
+          break;
+        case 'cancelSchedule':
+          actionLabel = t('statusActions.cancelSchedule');
+          break;
+        case 'republish':
+          actionLabel = t('statusActions.republish');
+          break;
+      }
+
+      return {
+        value: targetStatus,
+        label: tCommon(`statuses.${targetStatus}`),
+        actionLabel,
+        tone: postStatusTone(targetStatus),
+      };
+    });
+  }, [allowed, status, t, tCommon]);
 
   const changeStatus = useCallback(
     (nextStatus: PostStatus) => {
-      if (nextStatus === status) {
-        return;
-      }
-      if (nextStatus === 'published') {
-        if (status === 'archived' && permissions.canRepublish) {
-          republish.mutate();
-        } else if (permissions.canPublishNow) {
+      const command = resolvePostLifecycleCommand(status, nextStatus, allowed);
+      switch (command) {
+        case 'publish':
           publish.mutate();
-        }
-        return;
-      }
-      if (nextStatus === 'draft') {
-        if (status === 'scheduled' && permissions.canCancelSchedule) {
-          cancelSchedule.mutate();
-        } else if (permissions.canUnpublish) {
+          break;
+        case 'unpublish':
           unpublish.mutate();
-        }
-        return;
-      }
-      if (nextStatus === 'scheduled' && permissions.canSchedule) {
-        openSchedule();
-      }
-      if (nextStatus === 'archived' && permissions.canArchive) {
-        archive.mutate();
+          break;
+        case 'archive':
+          archive.mutate();
+          break;
+        case 'openSchedule':
+          openSchedule();
+          break;
+        case 'cancelSchedule':
+          cancelSchedule.mutate();
+          break;
+        case 'republish':
+          republish.mutate();
+          break;
+        case null:
+          break;
       }
     },
-    [archive, cancelSchedule, openSchedule, permissions, publish, republish, status, unpublish],
+    [allowed, archive, cancelSchedule, openSchedule, publish, republish, status, unpublish],
   );
 
   return {

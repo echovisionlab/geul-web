@@ -91,8 +91,8 @@ importers:
         specifier: 0.1.2
         version: 0.1.2
       '@echovisionlab/geul-common':
-        specifier: 0.2.3
-        version: 0.2.3(yjs@13.6.32)
+        specifier: 0.2.4
+        version: 0.2.4(yjs@13.6.32)
       '@echovisionlab/geul-event':
         specifier: 0.2.1
         version: 0.2.1(@echovisionlab/geul-proto@0.2.1)
@@ -100,11 +100,11 @@ importers:
         specifier: 0.2.1
         version: 0.2.1
       '@echovisionlab/geul-telemetry':
-        specifier: 0.1.0
-        version: 0.1.0
+        specifier: 0.1.3
+        version: 0.1.3
       '@echovisionlab/ionian':
-        specifier: 0.1.1
-        version: 0.1.1(mitt@3.0.1)(three-stdlib@2.36.1(three@0.185.1))(three@0.185.1)
+        specifier: 0.1.3
+        version: 0.1.3(mitt@3.0.1)(three-stdlib@2.36.1(three@0.185.1))(three@0.185.1)
       '@echovisionlab/youtube-audio':
         specifier: 0.1.5
         version: 0.1.5
@@ -1171,8 +1171,8 @@ packages:
     resolution: {integrity: sha512-nHQ1TQP2I2gkeKhxlCLFczcWJzAkfCQXz2oFyegzbcG9Vvu3n19Uv09kVTiy4TdokhwB0eA9muf2ur+PQGktmw==}
     engines: {node: 24.19.0}
 
-  '@echovisionlab/geul-common@0.2.3':
-    resolution: {integrity: sha512-wTFGwUHTQKZdett/BgcGNmdhanf8S0guhAAwamjyZJSre5peJRA8gIEFVkuZ15ceABeNxdIsR2fPPeZBBK9cJw==}
+  '@echovisionlab/geul-common@0.2.4':
+    resolution: {integrity: sha512-ndiJnibfjc14nhdJ0QGlsDKHYmJ1YvD6XROzW3qrfGK2w8y0U6Om94BozVijDIvbGKxNT9E2AO2he6dmSyWc+w==}
     engines: {node: 24.19.0}
     peerDependencies:
       yjs: ^13.6.32
@@ -1185,12 +1185,12 @@ packages:
   '@echovisionlab/geul-proto@0.2.1':
     resolution: {integrity: sha512-c86rtFJ1PMlH/cD/tNd4jetqc8Tk5eU3LHafNAhPZPWGemXmYGln5rko4MS3fHLLLFy3AuSrKjdea0SmX5RhOg==}
 
-  '@echovisionlab/geul-telemetry@0.1.0':
-    resolution: {integrity: sha512-qrlxOZdMj12WaBocoKppmnKwj9iaJ+kQ4W1dGpYu5EITPSbadSlv+C5bLzLWeg9XrqAv4E+DiGkQTG1UTJibUg==}
+  '@echovisionlab/geul-telemetry@0.1.3':
+    resolution: {integrity: sha512-nK2ZSM7T+3pthM/PiW7tD6dwDZCeRZDJ8E4V3COBrRqgUuYTJmlh2UkGzKKVCr5e0FcW7fM5Lq14pgAwbc5oKg==}
     engines: {node: 24.19.0}
 
-  '@echovisionlab/ionian@0.1.1':
-    resolution: {integrity: sha512-mt7TR6CpJd3pBiQtGrsKb9G9bZv78xG3HlrpAH3w23ZP5np4mhcjH6Ea/AFEyCkAdfG+KYAtnmeh3jDAmoL7cA==}
+  '@echovisionlab/ionian@0.1.3':
+    resolution: {integrity: sha512-3mK9H2siR6Qi03OdXV0LnCkwutAp1a0SJ8DFw31A+bu5oHnmV5+Ai/Iscv+wUwPnS9HFkPFHuRZdxXAQtpyNMw==}
     engines: {node: 24.19.0}
     peerDependencies:
       mitt: ^3.0.1
@@ -8807,7 +8807,7 @@ snapshots:
     dependencies:
       mediabunny: 1.55.1
 
-  '@echovisionlab/geul-common@0.2.3(yjs@13.6.32)':
+  '@echovisionlab/geul-common@0.2.4(yjs@13.6.32)':
     dependencies:
       '@bufbuild/protobuf': 2.14.0
       '@echovisionlab/geul-proto': 0.2.1
@@ -8823,11 +8823,11 @@ snapshots:
     dependencies:
       '@bufbuild/protobuf': 2.14.0
 
-  '@echovisionlab/geul-telemetry@0.1.0':
+  '@echovisionlab/geul-telemetry@0.1.3':
     dependencies:
       '@opentelemetry/api': 1.9.1
 
-  '@echovisionlab/ionian@0.1.1(mitt@3.0.1)(three-stdlib@2.36.1(three@0.185.1))(three@0.185.1)':
+  '@echovisionlab/ionian@0.1.3(mitt@3.0.1)(three-stdlib@2.36.1(three@0.185.1))(three@0.185.1)':
     dependencies:
       mitt: 3.0.1
       three: 0.185.1

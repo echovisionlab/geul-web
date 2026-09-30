@@ -40,6 +40,7 @@ import type { MediaStatusLabels } from '@/lib/media/status';
 import { useMediaProcessingRuntimeState } from '@/lib/media/use-media-processing-runtime-state';
 import { UploadType } from '@/lib/types/upload/model';
 import { isUploadResumeSuppressed, type UploadResumeSuppressionIdentity } from '@/lib/upload/resume-suppression';
+import type { UploadResumeState } from '@/lib/hooks/useUploadResumeNotice';
 import { TrackAudioUploader } from '../TrackAudioUploader';
 import { resolveReleaseTrackProcessingStatus } from './track-processing-status';
 import {
@@ -49,6 +50,7 @@ import {
   resolveTrackProgressIndicator,
   resolveTrackResumeIndicator,
   type ReleaseTrackRuntimeState,
+  type TrackProcessingLifecycle,
   type TrackUploadProgressState,
 } from './track-runtime';
 import { ReleaseTrackCreateView, secondsToTimePickerValue, timePickerValueToSeconds } from './ReleaseTrackCreateView';
@@ -318,6 +320,29 @@ export function ReleaseTracksSection({ releaseId, idPrefix, tracks, onTracksChan
     [],
   );
 
+  const renderTrackEditor = (track: ReleaseTrackItem) => {
+    if (expandedTrackId !== track.id) {
+      return null;
+    }
+
+    return (
+      <TrackRowEditorPanel
+        idPrefix={idPrefix}
+        track={track}
+        title={editTrackTitle}
+        durationSeconds={editTrackDuration}
+        onTitleChange={setEditTrackTitle}
+        onDurationChange={setEditTrackDuration}
+        onSave={handleUpdateTrack}
+        onClose={() => setExpandedTrackId(null)}
+        isSaving={updateTrack.isPending}
+        onCreditsChange={(newCredits) => {
+          onTracksChange(tracks.map((item) => (item.id === track.id ? { ...item, credits: newCredits } : item)));
+        }}
+      />
+    );
+  };
+
   return (
     <>
       <div id="release-tracks-section">
@@ -361,28 +386,7 @@ export function ReleaseTracksSection({ releaseId, idPrefix, tracks, onTracksChan
                           onDelete={() => handleDeleteTrack(track.id)}
                           uploadProgress={trackUploadProgress[track.id] ?? null}
                           onUploadProgressChange={handleTrackUploadProgressChange}
-                          editor={
-                            expandedTrackId === track.id ? (
-                              <TrackRowEditorPanel
-                                idPrefix={idPrefix}
-                                track={track}
-                                title={editTrackTitle}
-                                durationSeconds={editTrackDuration}
-                                onTitleChange={setEditTrackTitle}
-                                onDurationChange={setEditTrackDuration}
-                                onSave={handleUpdateTrack}
-                                onClose={() => setExpandedTrackId(null)}
-                                isSaving={updateTrack.isPending}
-                                onCreditsChange={(newCredits) => {
-                                  onTracksChange(
-                                    tracks.map((item) =>
-                                      item.id === track.id ? { ...item, credits: newCredits } : item,
-                                    ),
-                                  );
-                                }}
-                              />
-                            ) : null
-                          }
+                          editor={renderTrackEditor(track)}
                           idPrefix={idPrefix}
                           formatDuration={formatDuration}
                           showDivider={index < tracks.length - 1}
@@ -412,28 +416,7 @@ export function ReleaseTracksSection({ releaseId, idPrefix, tracks, onTracksChan
                             onDelete={() => handleDeleteTrack(track.id)}
                             uploadProgress={trackUploadProgress[track.id] ?? null}
                             onUploadProgressChange={handleTrackUploadProgressChange}
-                            editor={
-                              expandedTrackId === track.id ? (
-                                <TrackRowEditorPanel
-                                  idPrefix={idPrefix}
-                                  track={track}
-                                  title={editTrackTitle}
-                                  durationSeconds={editTrackDuration}
-                                  onTitleChange={setEditTrackTitle}
-                                  onDurationChange={setEditTrackDuration}
-                                  onSave={handleUpdateTrack}
-                                  onClose={() => setExpandedTrackId(null)}
-                                  isSaving={updateTrack.isPending}
-                                  onCreditsChange={(newCredits) => {
-                                    onTracksChange(
-                                      tracks.map((item) =>
-                                        item.id === track.id ? { ...item, credits: newCredits } : item,
-                                      ),
-                                    );
-                                  }}
-                                />
-                              ) : null
-                            }
+                            editor={renderTrackEditor(track)}
                             idPrefix={idPrefix}
                             formatDuration={formatDuration}
                           />
@@ -493,6 +476,117 @@ interface SortableTrackRowProps {
   uploadProgress: TrackUploadProgressState | null;
   formatDuration: (seconds: number | null) => string;
   editor?: React.ReactNode;
+}
+
+type TrackUploadProgressIndicator = NonNullable<ReturnType<typeof resolveTrackProgressIndicator>>;
+type TrackResumeIndicator = NonNullable<ReturnType<typeof resolveTrackResumeIndicator>>;
+
+interface TrackAudioViewProps {
+  idPrefix?: string;
+  track: SortableTrackRowProps['track'];
+  uploadProgress: TrackUploadProgressState | null;
+  processingLifecycle: TrackProcessingLifecycle | null;
+  suppressedResumeIdentity: UploadResumeSuppressionIdentity | null;
+}
+
+function TrackAudioStatusView({
+  idPrefix,
+  track,
+  uploadProgress,
+  processingLifecycle,
+  suppressedResumeIdentity,
+}: TrackAudioViewProps) {
+  return (
+    <TrackAudioUploader
+      trackId={track.id}
+      audioOriginalFileId={track.audio_original_file_id}
+      inputId={idPrefix ? `${idPrefix}-track-audio-${track.id}` : undefined}
+      processingStatus={resolveReleaseTrackProcessingStatus(track.processing_status)}
+      audioAttached={track.audio_attached}
+      activeUploadState={
+        uploadProgress
+          ? {
+              active: true,
+              progress: uploadProgress.progress,
+              stage: uploadProgress.stage ?? null,
+            }
+          : null
+      }
+      pendingUploadFileId={track.pending_upload_file_id}
+      pendingUploadAttemptId={track.pending_upload_attempt_id}
+      pendingUploadStatus={track.pending_upload_status}
+      pendingUploadStartedAt={track.pending_upload_started_at}
+      processingActive={processingLifecycle != null}
+      processingProgress={processingLifecycle?.progress}
+      suppressedResumeIdentity={suppressedResumeIdentity}
+      compact
+      mode="status-only"
+    />
+  );
+}
+
+interface TrackAudioUploadButtonViewProps extends Omit<TrackAudioViewProps, 'uploadProgress'> {
+  onUploadProgressChange: SortableTrackRowProps['onUploadProgressChange'];
+  onPendingUploadCancelled: (identity: UploadResumeSuppressionIdentity) => void;
+  backendResumeState: UploadResumeState;
+}
+
+function TrackAudioUploadButtonView({
+  idPrefix,
+  track,
+  processingLifecycle,
+  suppressedResumeIdentity,
+  onUploadProgressChange,
+  onPendingUploadCancelled,
+  backendResumeState,
+}: TrackAudioUploadButtonViewProps) {
+  return (
+    <TrackAudioUploader
+      trackId={track.id}
+      audioOriginalFileId={track.audio_original_file_id}
+      inputId={idPrefix ? `${idPrefix}-track-audio-upload-${track.id}` : undefined}
+      processingStatus={resolveReleaseTrackProcessingStatus(track.processing_status)}
+      audioAttached={track.audio_attached}
+      pendingUploadFileId={track.pending_upload_file_id}
+      pendingUploadAttemptId={track.pending_upload_attempt_id}
+      pendingUploadStatus={track.pending_upload_status}
+      pendingUploadStartedAt={track.pending_upload_started_at}
+      processingActive={processingLifecycle != null}
+      processingProgress={processingLifecycle?.progress}
+      onUploadProgressChange={onUploadProgressChange}
+      onPendingUploadCancelled={onPendingUploadCancelled}
+      suppressedResumeIdentity={suppressedResumeIdentity}
+      resumeStateOverride={backendResumeState}
+      compact
+      mode="button-only"
+    />
+  );
+}
+
+function TrackProgressDetails({ indicator }: { indicator: TrackUploadProgressIndicator }) {
+  return (
+    <>
+      <Group justify="space-between" gap="sm" wrap="nowrap">
+        <Text size="xs" c={indicator.color}>
+          {indicator.label}
+        </Text>
+        {indicator.progress != null ? (
+          <Text size="xs" c={indicator.color}>
+            {indicator.progress}%
+          </Text>
+        ) : null}
+      </Group>
+      <Progress value={indicator.progress ?? 0} size="xs" radius={0} color={indicator.color} />
+    </>
+  );
+}
+
+function TrackResumeMessage({ indicator }: { indicator: TrackResumeIndicator }) {
+  return (
+    <Text size="xs" c={indicator.color}>
+      {indicator.label}
+    </Text>
+  );
 }
 
 function useAnimatedEditorVisibility(expanded: boolean, editor?: React.ReactNode) {
@@ -736,52 +830,24 @@ function SortableTrackRow({
           </Text>
         </Table.Td>
         <Table.Td>
-          <TrackAudioUploader
-            trackId={track.id}
-            audioOriginalFileId={effectiveTrack.audio_original_file_id}
-            inputId={idPrefix ? `${idPrefix}-track-audio-${track.id}` : undefined}
-            processingStatus={resolveReleaseTrackProcessingStatus(effectiveTrack.processing_status)}
-            audioAttached={effectiveTrack.audio_attached}
-            activeUploadState={
-              uploadProgress
-                ? {
-                    active: true,
-                    progress: uploadProgress.progress,
-                    stage: uploadProgress.stage ?? null,
-                  }
-                : null
-            }
-            pendingUploadFileId={effectiveTrack.pending_upload_file_id}
-            pendingUploadAttemptId={effectiveTrack.pending_upload_attempt_id}
-            pendingUploadStatus={effectiveTrack.pending_upload_status}
-            pendingUploadStartedAt={effectiveTrack.pending_upload_started_at}
-            processingActive={processingLifecycle != null}
-            processingProgress={processingLifecycle?.progress}
+          <TrackAudioStatusView
+            idPrefix={idPrefix}
+            track={effectiveTrack}
+            uploadProgress={uploadProgress}
+            processingLifecycle={processingLifecycle}
             suppressedResumeIdentity={suppressedResumeIdentity}
-            compact
-            mode="status-only"
           />
         </Table.Td>
         <Table.Td>
           <Group gap={4} justify="flex-end" wrap="nowrap">
-            <TrackAudioUploader
-              trackId={track.id}
-              audioOriginalFileId={effectiveTrack.audio_original_file_id}
-              inputId={idPrefix ? `${idPrefix}-track-audio-upload-${track.id}` : undefined}
-              processingStatus={resolveReleaseTrackProcessingStatus(effectiveTrack.processing_status)}
-              audioAttached={effectiveTrack.audio_attached}
-              pendingUploadFileId={effectiveTrack.pending_upload_file_id}
-              pendingUploadAttemptId={effectiveTrack.pending_upload_attempt_id}
-              pendingUploadStatus={effectiveTrack.pending_upload_status}
-              pendingUploadStartedAt={effectiveTrack.pending_upload_started_at}
-              processingActive={processingLifecycle != null}
-              processingProgress={processingLifecycle?.progress}
+            <TrackAudioUploadButtonView
+              idPrefix={idPrefix}
+              track={effectiveTrack}
+              processingLifecycle={processingLifecycle}
+              suppressedResumeIdentity={suppressedResumeIdentity}
               onUploadProgressChange={onUploadProgressChange}
               onPendingUploadCancelled={handlePendingUploadCancelled}
-              suppressedResumeIdentity={suppressedResumeIdentity}
-              resumeStateOverride={backendResumeState}
-              compact
-              mode="button-only"
+              backendResumeState={backendResumeState}
             />
             <Tooltip label={tCommon('actions.delete')}>
               <IconButton
@@ -819,28 +885,9 @@ function SortableTrackRow({
           <Table.Td colSpan={5}>
             <Stack gap={6} py="xs">
               {resumeIndicator ? (
-                <Text size="xs" c={resumeIndicator.color}>
-                  {resumeIndicator.label}
-                </Text>
+                <TrackResumeMessage indicator={resumeIndicator} />
               ) : (
-                <>
-                  <Group justify="space-between" gap="sm" wrap="nowrap">
-                    <Text size="xs" c={progressIndicator.color}>
-                      {progressIndicator.label}
-                    </Text>
-                    {progressIndicator.progress != null ? (
-                      <Text size="xs" c={progressIndicator.color}>
-                        {progressIndicator.progress}%
-                      </Text>
-                    ) : null}
-                  </Group>
-                  <Progress
-                    value={progressIndicator.progress ?? 0}
-                    size="xs"
-                    radius={0}
-                    color={progressIndicator.color}
-                  />
-                </>
+                <TrackProgressDetails indicator={progressIndicator} />
               )}
             </Stack>
           </Table.Td>
@@ -963,51 +1010,23 @@ function SortableTrackListItem({
               <Text size="xs" c="dimmed">
                 {tCommon('labels.status')}
               </Text>
-              <TrackAudioUploader
-                trackId={track.id}
-                audioOriginalFileId={effectiveTrack.audio_original_file_id}
-                inputId={idPrefix ? `${idPrefix}-track-audio-${track.id}` : undefined}
-                processingStatus={resolveReleaseTrackProcessingStatus(effectiveTrack.processing_status)}
-                audioAttached={effectiveTrack.audio_attached}
-                activeUploadState={
-                  uploadProgress
-                    ? {
-                        active: true,
-                        progress: uploadProgress.progress,
-                        stage: uploadProgress.stage ?? null,
-                      }
-                    : null
-                }
-                pendingUploadFileId={effectiveTrack.pending_upload_file_id}
-                pendingUploadAttemptId={effectiveTrack.pending_upload_attempt_id}
-                pendingUploadStatus={effectiveTrack.pending_upload_status}
-                pendingUploadStartedAt={effectiveTrack.pending_upload_started_at}
-                processingActive={processingLifecycle != null}
-                processingProgress={processingLifecycle?.progress}
+              <TrackAudioStatusView
+                idPrefix={idPrefix}
+                track={effectiveTrack}
+                uploadProgress={uploadProgress}
+                processingLifecycle={processingLifecycle}
                 suppressedResumeIdentity={suppressedResumeIdentity}
-                compact
-                mode="status-only"
               />
             </Group>
             <Group gap="xs" wrap="nowrap">
-              <TrackAudioUploader
-                trackId={track.id}
-                audioOriginalFileId={effectiveTrack.audio_original_file_id}
-                inputId={idPrefix ? `${idPrefix}-track-audio-upload-${track.id}` : undefined}
-                processingStatus={resolveReleaseTrackProcessingStatus(effectiveTrack.processing_status)}
-                audioAttached={effectiveTrack.audio_attached}
-                pendingUploadFileId={effectiveTrack.pending_upload_file_id}
-                pendingUploadAttemptId={effectiveTrack.pending_upload_attempt_id}
-                pendingUploadStatus={effectiveTrack.pending_upload_status}
-                pendingUploadStartedAt={effectiveTrack.pending_upload_started_at}
-                processingActive={processingLifecycle != null}
-                processingProgress={processingLifecycle?.progress}
+              <TrackAudioUploadButtonView
+                idPrefix={idPrefix}
+                track={effectiveTrack}
+                processingLifecycle={processingLifecycle}
+                suppressedResumeIdentity={suppressedResumeIdentity}
                 onUploadProgressChange={onUploadProgressChange}
                 onPendingUploadCancelled={handlePendingUploadCancelled}
-                suppressedResumeIdentity={suppressedResumeIdentity}
-                resumeStateOverride={backendResumeState}
-                compact
-                mode="button-only"
+                backendResumeState={backendResumeState}
               />
               <Tooltip label={tCommon('actions.delete')}>
                 <IconButton
@@ -1025,35 +1044,14 @@ function SortableTrackListItem({
           {progressIndicator ? (
             <Stack gap={6} pt={2}>
               {resumeIndicator ? (
-                <Text size="xs" c={resumeIndicator.color}>
-                  {resumeIndicator.label}
-                </Text>
+                <TrackResumeMessage indicator={resumeIndicator} />
               ) : (
-                <>
-                  <Group justify="space-between" gap="sm" wrap="nowrap">
-                    <Text size="xs" c={progressIndicator.color}>
-                      {progressIndicator.label}
-                    </Text>
-                    {progressIndicator.progress != null ? (
-                      <Text size="xs" c={progressIndicator.color}>
-                        {progressIndicator.progress}%
-                      </Text>
-                    ) : null}
-                  </Group>
-                  <Progress
-                    value={progressIndicator.progress ?? 0}
-                    size="xs"
-                    radius={0}
-                    color={progressIndicator.color}
-                  />
-                </>
+                <TrackProgressDetails indicator={progressIndicator} />
               )}
             </Stack>
           ) : resumeIndicator ? (
             <Stack gap={6} pt={2}>
-              <Text size="xs" c={resumeIndicator.color}>
-                {resumeIndicator.label}
-              </Text>
+              <TrackResumeMessage indicator={resumeIndicator} />
             </Stack>
           ) : null}
           {shouldRenderEditor && cachedEditor ? (

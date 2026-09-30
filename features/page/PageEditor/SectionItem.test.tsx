@@ -8,7 +8,6 @@ import type { BlockSettingsSurfaceProps } from '../blocks/types';
 import type { SectionMeta } from './types';
 
 const pageEditorContext = vi.hoisted(() => ({
-  mergeSection: vi.fn((section: SectionMeta) => section),
   updateLocalizedSectionProps: vi.fn(),
   updateSection: vi.fn(),
 }));
@@ -103,7 +102,6 @@ function renderSection(section: SectionMeta) {
 
 beforeEach(async () => {
   ({ SectionItem } = await import('./SectionItem'));
-  pageEditorContext.mergeSection.mockImplementation((section: SectionMeta) => section);
   pageEditorContext.updateLocalizedSectionProps.mockReset();
   pageEditorContext.updateSection.mockReset();
   mockRegistry.getBlockDefinition.mockReturnValue({});

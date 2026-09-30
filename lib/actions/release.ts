@@ -1,6 +1,12 @@
 'use server';
 
-import { connectActionErrorMessage, isConnectErrorCode } from '@/lib/api/connect-error';
+import { connectActionErrorCode, connectActionErrorMessage, isConnectErrorCode } from '@/lib/api/connect-error';
+import {
+  actionFailure,
+  actionSuccess,
+  type ActionResult,
+  type LocalActionErrorCode,
+} from '@/lib/actions/action-result';
 import { revalidatePath } from 'next/cache';
 import { timestampDate, timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
@@ -12,18 +18,18 @@ import { toSlugInputValue } from '@/lib/utils/slug';
 function releaseActionFailure(
   error: unknown,
   fallback: string,
+  fallbackCode: LocalActionErrorCode,
   messages: Readonly<Partial<Record<Code, string>>> = {},
-): { error: string } {
-  return {
-    error: connectActionErrorMessage(error, fallback, {
-      [Code.Unauthenticated]: 'Unauthorized',
-      ...messages,
-    }),
-  };
+): { ok: false; error: string; errorCode: Code | LocalActionErrorCode } {
+  const message = connectActionErrorMessage(error, fallback, {
+    [Code.Unauthenticated]: 'Unauthorized',
+    ...messages,
+  });
+  return actionFailure(message.trim() ? message : fallback, connectActionErrorCode(error, fallbackCode));
 }
 
-function releaseEditorFailure(error: unknown, fallback: string): { error: string } {
-  return releaseActionFailure(error, fallback, {
+function releaseEditorFailure(error: unknown, fallback: string, fallbackCode: LocalActionErrorCode) {
+  return releaseActionFailure(error, fallback, fallbackCode, {
     [Code.NotFound]: 'Release not found',
     [Code.PermissionDenied]: 'No permission to edit this release',
   });
@@ -32,7 +38,7 @@ function releaseEditorFailure(error: unknown, fallback: string): { error: string
 export async function createReleaseAction(data: {
   title: string;
   type: 'album' | 'ep' | 'single' | 'compilation';
-}): Promise<{ data?: { id: string }; error?: string }> {
+}): Promise<ActionResult<{ data: { id: string } }>> {
   try {
     const client = await createReleaseClient();
     const release = await client.createRelease({
@@ -40,20 +46,20 @@ export async function createReleaseAction(data: {
       type: stringToReleaseType(data.type),
     });
     revalidatePath('/admin/releases');
-    return { data: { id: release.id } };
+    return actionSuccess({ data: { id: release.id } });
   } catch (err) {
-    return releaseActionFailure(err, 'Failed to create release');
+    return releaseActionFailure(err, 'Failed to create release', 'RELEASE_CREATE_FAILED');
   }
 }
 
-export async function deleteReleaseAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function deleteReleaseAction(id: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createReleaseClient();
     await client.deleteRelease({ id });
     revalidatePath('/admin/releases');
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    return releaseActionFailure(err, 'Failed to delete release');
+    return releaseActionFailure(err, 'Failed to delete release', 'RELEASE_DELETE_FAILED');
   }
 }
 
@@ -87,41 +93,41 @@ export async function getReleaseAdminAction(id: string) {
   }
 }
 
-export async function publishReleaseAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function publishReleaseAction(id: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createReleaseClient();
     await client.publishRelease({ id });
     revalidatePath('/admin/releases');
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    return releaseEditorFailure(err, 'Failed to publish release');
+    return releaseEditorFailure(err, 'Failed to publish release', 'RELEASE_PUBLISH_FAILED');
   }
 }
 
-export async function unpublishReleaseAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function unpublishReleaseAction(id: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createReleaseClient();
     await client.unpublishRelease({ id });
     revalidatePath('/admin/releases');
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    return releaseEditorFailure(err, 'Failed to unpublish release');
+    return releaseEditorFailure(err, 'Failed to unpublish release', 'RELEASE_UNPUBLISH_FAILED');
   }
 }
 
 export async function updateReleaseSlugAction(
   id: string,
   slug: string | null,
-): Promise<{ success?: boolean; slug?: string | null; error?: string }> {
+): Promise<ActionResult<{ success: true; slug: string | null }>> {
   try {
     const client = await createReleaseClient();
     await client.updateRelease({
       id,
       slug: toSlugInputValue(slug),
     });
-    return { success: true, slug };
+    return actionSuccess({ success: true, slug });
   } catch (err) {
-    return releaseEditorFailure(err, 'Failed to update slug');
+    return releaseEditorFailure(err, 'Failed to update slug', 'RELEASE_UPDATE_SLUG_FAILED');
   }
 }
 
@@ -135,7 +141,7 @@ export async function updateReleaseFieldsAction(
     bandcampUrl?: string | null;
     youtubeMusicUrl?: string | null;
   },
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createReleaseClient();
     await client.updateRelease({
@@ -153,9 +159,9 @@ export async function updateReleaseFieldsAction(
       youtubeMusicUrl: data.youtubeMusicUrl === null ? '' : data.youtubeMusicUrl,
     });
     revalidatePath(`/releases/${id}`);
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    return releaseEditorFailure(err, 'Failed to update release fields');
+    return releaseEditorFailure(err, 'Failed to update release fields', 'RELEASE_UPDATE_FIELDS_FAILED');
   }
 }
 
@@ -164,26 +170,26 @@ export async function updateReleaseFieldsAction(
 export async function setReleaseArtworkAction(
   releaseId: string,
   fileId: string,
-): Promise<{ url?: string; error?: string }> {
+): Promise<ActionResult<{ url?: string }>> {
   try {
     const client = await createReleaseClient();
     const response = await client.setReleaseArtwork({ releaseId, fileId });
-    return { url: response.artworkAsset?.url };
+    return actionSuccess({ url: response.artworkAsset?.url });
   } catch (err) {
-    return releaseActionFailure(err, 'Failed to set artwork', {
+    return releaseActionFailure(err, 'Failed to set artwork', 'RELEASE_SET_ARTWORK_FAILED', {
       [Code.NotFound]: 'Release or file not found',
       [Code.PermissionDenied]: 'No permission to edit this release',
     });
   }
 }
 
-export async function deleteReleaseArtworkAction(releaseId: string): Promise<{ success?: boolean; error?: string }> {
+export async function deleteReleaseArtworkAction(releaseId: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createReleaseClient();
     await client.deleteReleaseArtwork({ releaseId });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    return releaseEditorFailure(err, 'Failed to delete artwork');
+    return releaseEditorFailure(err, 'Failed to delete artwork', 'RELEASE_DELETE_ARTWORK_FAILED');
   }
 }
 
@@ -193,7 +199,7 @@ export async function deleteReleaseArtworkAction(releaseId: string): Promise<{ s
 export async function setReleaseLabelsAction(
   releaseId: string,
   labels: { labelId: string; catalogNumber?: string; sortOrder: number }[],
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createReleaseClient();
     await client.setReleaseLabels({
@@ -204,32 +210,32 @@ export async function setReleaseLabelsAction(
         sortOrder: l.sortOrder,
       })),
     });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    return releaseEditorFailure(err, 'Failed to update labels');
+    return releaseEditorFailure(err, 'Failed to update labels', 'RELEASE_UPDATE_LABELS_FAILED');
   }
 }
 
 export async function setReleaseGenresAction(
   releaseId: string,
   genreIds: string[],
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createReleaseClient();
     await client.setReleaseGenres({
       releaseId,
       genreIds,
     });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    return releaseEditorFailure(err, 'Failed to update genres');
+    return releaseEditorFailure(err, 'Failed to update genres', 'RELEASE_UPDATE_GENRES_FAILED');
   }
 }
 
 export async function setReleaseArtistsAction(
   releaseId: string,
   artists: { artistId: string; sortOrder: number }[],
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createReleaseClient();
     await client.setReleaseArtists({
@@ -239,48 +245,48 @@ export async function setReleaseArtistsAction(
         sortOrder: artist.sortOrder,
       })),
     });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    return releaseEditorFailure(err, 'Failed to update artists');
+    return releaseEditorFailure(err, 'Failed to update artists', 'RELEASE_UPDATE_ARTISTS_FAILED');
   }
 }
 
 export async function setReleaseCategoriesAction(
   releaseId: string,
   categoryIds: string[],
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createReleaseClient();
     await client.setReleaseCategories({
       releaseId,
       categoryIds,
     });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    return releaseEditorFailure(err, 'Failed to update categories');
+    return releaseEditorFailure(err, 'Failed to update categories', 'RELEASE_UPDATE_CATEGORIES_FAILED');
   }
 }
 
 export async function setReleaseStylesAction(
   releaseId: string,
   styleIds: string[],
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createReleaseClient();
     await client.setReleaseStyles({
       releaseId,
       styleIds,
     });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    return releaseEditorFailure(err, 'Failed to update styles');
+    return releaseEditorFailure(err, 'Failed to update styles', 'RELEASE_UPDATE_STYLES_FAILED');
   }
 }
 
 export async function setReleaseFormatsAction(
   releaseId: string,
   formats: { formatId: string; formatDescription?: string }[],
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createReleaseClient();
     await client.setReleaseFormats({
@@ -290,9 +296,9 @@ export async function setReleaseFormatsAction(
         formatDescription: f.formatDescription,
       })),
     });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    return releaseEditorFailure(err, 'Failed to update formats');
+    return releaseEditorFailure(err, 'Failed to update formats', 'RELEASE_UPDATE_FORMATS_FAILED');
   }
 }
 
@@ -306,7 +312,7 @@ export async function setReleaseCreditsAction(
     creditRole?: string | null;
     sortOrder: number;
   }[],
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createReleaseClient();
     await client.setReleaseCredits({
@@ -320,8 +326,8 @@ export async function setReleaseCreditsAction(
         sortOrder: c.sortOrder,
       })),
     });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    return releaseEditorFailure(err, 'Failed to update credits');
+    return releaseEditorFailure(err, 'Failed to update credits', 'RELEASE_UPDATE_CREDITS_FAILED');
   }
 }

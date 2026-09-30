@@ -146,3 +146,36 @@ is higher. There are no browser INP, paint, network, or persistence measurements
 The first Common v0.2.2 projection cost is retained in separate diagnostic runs;
 removing duplicate decoding, unchanged-style normalization, and unused payload
 allocation removes that extra work in v0.2.3.
+
+## Responsibility refactor comparison 2026 10 01
+
+The structural controller now creates a pure ordered plan before its room
+transaction; the controller still owns connection lifetime, synchronous remote
+projection and atomic application. Common separates inline input and UTF-16-safe
+text diff calculations from Yjs writes, and locale target resolution from value
+projection and presence storage. These changes retain the payload typing fast path
+and the existing observer routing.
+
+Three alternating comparisons use the unchanged fixtures described above. Before
+uses Web v0.2.4's controller (`bad9c7e`) and Common v0.2.3; after uses the extracted
+controller planner and published Common v0.2.4. Node 24.19.0, Vitest 4.1.10, jsdom,
+Proto, Yjs, other dependencies, warm-up, insertion positions and sample counts are
+identical. No other local tests or builds ran during the comparisons. The table
+reports the median of run medians and p95 values, not pooled percentiles.
+
+| Fixture                           | Before median (ms) | After median (ms) | Median change | Before / after p95 (ms) |
+| --------------------------------- | -----------------: | ----------------: | ------------: | ----------------------: |
+| Post 100 paragraphs               |               3.20 |              3.11 |         -2.8% |             4.47 / 4.39 |
+| Post 500 paragraphs               |              14.41 |             14.16 |         -1.7% |           15.29 / 14.84 |
+| Post 1000 paragraphs              |              27.66 |             27.39 |         -1.0% |           28.66 / 28.41 |
+| Page 500 paragraphs / 1 section   |              13.98 |             13.93 |         -0.4% |           24.87 / 21.94 |
+| Page 500 paragraphs / 5 sections  |              14.43 |             14.24 |         -1.3% |           16.18 / 16.14 |
+| Page 500 paragraphs / 20 sections |              14.73 |             14.87 |         +1.0% |           15.69 / 16.08 |
+
+Page notifications remain exactly one per edit. Small median differences in both
+directions do not establish a speed improvement; they provide a focused check
+that the responsibility changes retain previous input performance. This fixture
+does not measure structural edit latency, browser INP, paint, network, persistence,
+immersive scene GPU use or production memory. Raw records are
+`code-quality-performance-{before,after}-{1,2,3}-20261001.json` and the comparison
+JSON in the DSUB workspace.

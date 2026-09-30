@@ -39,13 +39,14 @@ vi.mock('@/lib/actions/share-link', () => ({
 describe('page actions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.regenerateOgImage.mockResolvedValue({ runId: 'run-1', generationIds: ['generation-1'] });
+    mocks.regenerateOgImage.mockResolvedValue({ ok: true, runId: 'run-1', generationIds: ['generation-1'] });
     mocks.createAdminClient.mockResolvedValue({ regenerateOgImage: mocks.regenerateOgImage });
     mocks.createPageClient.mockResolvedValue(pageClient);
   });
 
   it('regenerates the OG image for the active locale only', async () => {
     await expect(regeneratePageOgImageAction('page-1', ' ja ')).resolves.toEqual({
+      ok: true,
       success: true,
       runId: 'run-1',
       generationId: 'generation-1',
@@ -60,7 +61,9 @@ describe('page actions', () => {
 
   it('does not queue an unscoped OG regeneration', async () => {
     await expect(regeneratePageOgImageAction('page-1', '')).resolves.toEqual({
+      ok: false,
       error: 'Locale is required to regenerate this OG image',
+      errorCode: 'ACTION_INVALID_LOCALE',
     });
 
     expect(mocks.createAdminClient).not.toHaveBeenCalled();
@@ -72,7 +75,7 @@ describe('page actions', () => {
       throw new Error('cache unavailable');
     });
 
-    await expect(deletePageAdminAction('page-1')).resolves.toEqual({ success: true });
+    await expect(deletePageAdminAction('page-1')).resolves.toEqual({ ok: true, success: true });
     expect(pageClient.deletePage).toHaveBeenCalledWith({ id: 'page-1' });
   });
 
@@ -85,6 +88,7 @@ describe('page actions', () => {
     });
 
     await expect(setPageFeaturedImageAction('page-1', 'file-1')).resolves.toEqual({
+      ok: true,
       imageUrl: 'https://signed.example/page-thumbnail.webp',
       ogGenerationRunId: 'og-run-1',
     });
@@ -95,6 +99,8 @@ describe('page actions', () => {
     pageClient.updatePage.mockRejectedValueOnce(new ConnectError('duplicate', Code.AlreadyExists));
 
     await expect(updatePageSlugAction('page-1', 'some/where')).resolves.toMatchObject({
+      ok: false,
+      errorCode: Code.AlreadyExists,
       reason: 'alreadyExists',
     });
   });
@@ -103,6 +109,8 @@ describe('page actions', () => {
     pageClient.updatePage.mockRejectedValueOnce(new ConnectError('invalid', Code.InvalidArgument));
 
     await expect(updatePageSlugAction('page-1', 'about//team')).resolves.toMatchObject({
+      ok: false,
+      errorCode: Code.InvalidArgument,
       reason: 'emptySegment',
     });
   });

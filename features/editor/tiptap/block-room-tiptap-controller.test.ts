@@ -977,6 +977,63 @@ describe('incremental Block-room input boundaries', () => {
     }
   });
 
+  it('inserts a localized Block at its requested order with a relative anchor', () => {
+    const fixture = performanceBoundaryFixture();
+    const insertedId = '10000000-0000-4000-8000-000000000189';
+    const createAnchor = vi.spyOn(fixture.bridge, 'createInsertionAnchor');
+    try {
+      const document = fixture.editor.getJSON() as TestJsonNode;
+      document.content![0]!.content!.splice(1, 0, {
+        type: 'blockContainer',
+        attrs: { id: insertedId },
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Added locale payload' }] }],
+      });
+
+      fixture.editor.commands.setContent(document as JSONContent);
+
+      expect(createAnchor).toHaveBeenCalledExactlyOnceWith({ parentBlockId: undefined, index: 1 });
+      expect(fixture.bridge.readBlocks().map((block) => block.id)).toEqual([
+        fixture.ids[0],
+        insertedId,
+        fixture.ids[1],
+        fixture.ids[2],
+      ]);
+      expect(fixture.text(insertedId)).toBe('Added locale payload');
+    } finally {
+      createAnchor.mockRestore();
+      fixture.cleanup();
+    }
+  });
+
+  it('replaces an existing Block kind atomically and retains structural undo/redo', async () => {
+    const fixture = performanceBoundaryFixture();
+    try {
+      const document = fixture.editor.getJSON() as TestJsonNode;
+      const first = document.content![0]!.content![0]!;
+      first.content![0] = {
+        type: 'heading',
+        attrs: { level: 3 },
+        content: [{ type: 'text', text: 'Converted heading' }],
+      };
+
+      fixture.editor.commands.setContent(document as JSONContent);
+      expect(fixture.bridge.readBlocks()[0]?.adapter.kind).toBe('heading');
+
+      expect(undoBlockRoom(fixture.room)).toBe(true);
+      await Promise.resolve();
+      expect(fixture.bridge.readBlocks()[0]?.adapter.kind).toBe('paragraph');
+      const undone = fixture.editor.getJSON() as TestJsonNode;
+      expect(undone.content?.[0]?.content?.[0]?.attrs?.id).toBe(fixture.ids[0]);
+      expect(undone.content?.[0]?.content?.[0]?.content?.[0]?.type).toBe('paragraph');
+
+      expect(redoBlockRoom(fixture.room)).toBe(true);
+      await Promise.resolve();
+      expect(fixture.bridge.readBlocks()[0]?.adapter.kind).toBe('heading');
+    } finally {
+      fixture.cleanup();
+    }
+  });
+
   it('persists plugin-appended document changes after a selection-only transaction', () => {
     const room = new Y.Doc();
     hydrateCanonicalBlockRoom(room, 'post', 'ko', postDocument(), []);

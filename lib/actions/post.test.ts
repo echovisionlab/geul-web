@@ -56,7 +56,7 @@ describe('post actions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.createPostClient.mockResolvedValue(postClient);
-    mocks.regenerateOgImage.mockResolvedValue({ runId: 'run-1', generationIds: ['generation-1'] });
+    mocks.regenerateOgImage.mockResolvedValue({ ok: true, runId: 'run-1', generationIds: ['generation-1'] });
     mocks.createAdminClient.mockResolvedValue({ regenerateOgImage: mocks.regenerateOgImage });
     postClient.createPost.mockResolvedValue({ id: 'post-1' });
     postClient.setPostFeaturedImage.mockResolvedValue({
@@ -78,13 +78,13 @@ describe('post actions', () => {
         localeOverlays: [{ locale: 'ko', blocks: [] }],
       }),
     });
-    mocks.createShareLinkAction.mockResolvedValue({ shareLink: { id: 'share-1' } });
-    mocks.deleteShareLinkAction.mockResolvedValue({ success: true });
+    mocks.createShareLinkAction.mockResolvedValue({ ok: true, shareLink: { id: 'share-1' } });
+    mocks.deleteShareLinkAction.mockResolvedValue({ ok: true, success: true });
     mocks.listShareLinksAction.mockResolvedValue([{ id: 'share-1' }]);
   });
 
   it('maps CRUD and status server actions to the post service', async () => {
-    await expect(actions.createPostAction()).resolves.toEqual({ data: { id: 'post-1' } });
+    await expect(actions.createPostAction()).resolves.toEqual({ ok: true, data: { id: 'post-1' } });
     await expect(
       actions.updatePostAction('post-1', {
         slug: 'new-title',
@@ -96,21 +96,22 @@ describe('post actions', () => {
           footer: 'flow',
         },
       }),
-    ).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true });
     await expect(actions.updatePostSlugAction('post-1', ' New Slug ')).resolves.toEqual({
+      ok: true,
       success: true,
       slug: ' New Slug ',
     });
-    await expect(actions.publishPostAction('post-1')).resolves.toEqual({ success: true });
-    await expect(actions.unpublishPostAction('post-1')).resolves.toEqual({ success: true });
-    await expect(actions.archivePostAction('post-1')).resolves.toEqual({ success: true });
+    await expect(actions.publishPostAction('post-1')).resolves.toEqual({ ok: true, success: true });
+    await expect(actions.unpublishPostAction('post-1')).resolves.toEqual({ ok: true, success: true });
+    await expect(actions.archivePostAction('post-1')).resolves.toEqual({ ok: true, success: true });
     await expect(
       actions.schedulePostAction('post-1', new Date('2026-08-05T06:30:00.000Z'), 'Asia/Seoul'),
-    ).resolves.toEqual({ success: true });
-    await expect(actions.cancelPostScheduleAction('post-1')).resolves.toEqual({ success: true });
-    await expect(actions.republishPostAction('post-1')).resolves.toEqual({ success: true });
-    await expect(actions.deletePostAdminAction('post-1')).resolves.toEqual({ success: true });
-    await expect(actions.deletePostAction('post-2')).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true });
+    await expect(actions.cancelPostScheduleAction('post-1')).resolves.toEqual({ ok: true, success: true });
+    await expect(actions.republishPostAction('post-1')).resolves.toEqual({ ok: true, success: true });
+    await expect(actions.deletePostAdminAction('post-1')).resolves.toEqual({ ok: true, success: true });
+    await expect(actions.deletePostAction('post-2')).resolves.toEqual({ ok: true, success: true });
 
     expect(postClient.createPost).toHaveBeenCalledWith({
       title: 'Untitled Post',
@@ -145,23 +146,29 @@ describe('post actions', () => {
 
   it('maps media, taxonomy, member, share-link, OG, and markdown actions', async () => {
     await expect(actions.setPostFeaturedImageAction('post-1', 'file-1')).resolves.toEqual({
+      ok: true,
       imageUrl: 'https://cdn.example/post.webp',
       ogGenerationRunId: 'featured-run',
     });
     await expect(actions.removePostFeaturedImageAction('post-1')).resolves.toEqual({
+      ok: true,
       success: true,
       ogGenerationRunId: 'delete-featured-run',
     });
     await expect(actions.addPostAuthorAction('post-1', 'member-1')).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(actions.addPostCollaboratorAction('post-1', 'member-2')).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(actions.removePostAuthorAction('post-1', 'member-1')).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(actions.removePostCollaboratorAction('post-1', 'member-2')).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(actions.listPostShareLinksAction('post-1')).resolves.toEqual([{ id: 'share-1' }]);
@@ -171,18 +178,20 @@ describe('post actions', () => {
         label: 'Preview',
         password: 'preview-secret',
       }),
-    ).resolves.toEqual({ shareLink: { id: 'share-1' } });
-    await expect(actions.deletePostShareLinkAction('share-1')).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, shareLink: { id: 'share-1' } });
+    await expect(actions.deletePostShareLinkAction('share-1')).resolves.toEqual({ ok: true, success: true });
     await expect(actions.regeneratePostOgImageAction('post-1', ' ko ')).resolves.toEqual({
+      ok: true,
       success: true,
       runId: 'run-1',
       generationId: 'generation-1',
     });
     await expect(actions.getPostMarkdownAction('post-1')).resolves.toEqual({
+      ok: true,
       title: 'Post',
       markdown: '',
     });
-    await expect(actions.exportPostMarkdownAction('post-1')).resolves.toEqual({ markdown: '' });
+    await expect(actions.exportPostMarkdownAction('post-1')).resolves.toEqual({ ok: true, markdown: '' });
 
     expect(postClient.setPostFeaturedImage).toHaveBeenCalledWith({
       postId: 'post-1',
@@ -210,7 +219,9 @@ describe('post actions', () => {
 
   it('does not queue an unscoped OG regeneration', async () => {
     await expect(actions.regeneratePostOgImageAction('post-1', '')).resolves.toEqual({
+      ok: false,
       error: 'Locale is required to regenerate this OG image',
+      errorCode: 'ACTION_INVALID_LOCALE',
     });
 
     expect(mocks.createAdminClient).not.toHaveBeenCalled();
@@ -226,23 +237,31 @@ describe('post actions', () => {
         throw new Error('cache unavailable');
       });
 
-    await expect(actions.deletePostAdminAction('post-1')).resolves.toEqual({ success: true });
-    await expect(actions.deletePostAction('post-2')).resolves.toEqual({ success: true });
+    await expect(actions.deletePostAdminAction('post-1')).resolves.toEqual({ ok: true, success: true });
+    await expect(actions.deletePostAction('post-2')).resolves.toEqual({ ok: true, success: true });
     expect(postClient.deletePost).toHaveBeenCalledTimes(2);
   });
 
   it('returns user-facing authorization and backend errors', async () => {
     postClient.createPost.mockRejectedValueOnce(new ConnectError('missing auth', Code.Unauthenticated));
-    await expect(actions.createPostAction()).resolves.toEqual({ error: 'Unauthorized' });
+    await expect(actions.createPostAction()).resolves.toEqual({
+      ok: false,
+      error: 'Unauthorized',
+      errorCode: Code.Unauthenticated,
+    });
 
     postClient.deletePost.mockRejectedValueOnce(new ConnectError('denied', Code.PermissionDenied));
     await expect(actions.deletePostAdminAction('post-1')).resolves.toEqual({
+      ok: false,
       error: 'Unauthorized',
+      errorCode: Code.PermissionDenied,
     });
 
     postClient.publishPost.mockRejectedValueOnce(new Error('backend down'));
     await expect(actions.publishPostAction('post-1')).resolves.toEqual({
+      ok: false,
       error: 'backend down',
+      errorCode: 'POST_PUBLISH_FAILED',
     });
   });
 });

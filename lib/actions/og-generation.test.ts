@@ -74,6 +74,7 @@ describe('OG generation actions', () => {
     },
   ])('maps the $name target selection without sentinel strings', async ({ input, expected }) => {
     await expect(regenerateOgImageAction(input)).resolves.toEqual({
+      ok: true,
       runId: 'run-1',
       generationIds: ['generation-1'],
     });
@@ -152,12 +153,16 @@ describe('OG generation actions', () => {
 
   it('rejects mismatched target scopes before making an RPC', async () => {
     await expect(getLatestOgGenerationAction({ entityType: 'post', entityId: 'post-1' })).resolves.toEqual({
+      ok: false,
       error: 'Locale is required to load the latest OG generation',
+      errorCode: 'LOCALE_REQUIRED',
     });
     await expect(
       getLatestOgGenerationAction({ entityType: 'label', entityId: 'label-1', locale: 'ko' }),
     ).resolves.toEqual({
+      ok: false,
       error: 'This OG target does not accept a locale',
+      errorCode: 'LOCALE_NOT_ALLOWED',
     });
     await expect(
       regenerateOgImageAction({
@@ -165,7 +170,11 @@ describe('OG generation actions', () => {
         entityId: 'post-1',
         selection: { type: 'locale', locale: ' ' },
       }),
-    ).resolves.toEqual({ error: 'Locale is required to regenerate this OG image' });
+    ).resolves.toEqual({
+      ok: false,
+      error: 'Locale is required to regenerate this OG image',
+      errorCode: 'LOCALE_REQUIRED',
+    });
 
     expect(mocks.getLatestOgGeneration).not.toHaveBeenCalled();
     expect(mocks.regenerateOgImage).not.toHaveBeenCalled();
@@ -181,6 +190,7 @@ describe('OG generation actions', () => {
     });
 
     await expect(getOgGenerationAction(' generation-1 ')).resolves.toEqual({
+      ok: true,
       generation: {
         generationId: 'generation-1',
         runId: 'run-1',
@@ -222,6 +232,7 @@ describe('OG generation actions', () => {
     });
 
     await expect(getOgGenerationRunAction(' run-global ')).resolves.toEqual({
+      ok: true,
       run: {
         runId: 'run-global',
         status: 'processing',
@@ -256,13 +267,29 @@ describe('OG generation actions', () => {
         entityId: 'artist-1',
         selection: { type: 'locale', locale: 'ko' },
       }),
-    ).resolves.toEqual({ error: 'Forbidden' });
+    ).resolves.toEqual({ ok: false, error: 'Forbidden', errorCode: Code.PermissionDenied });
     await expect(
       regenerateOgImageAction({
         entityType: 'artist',
         entityId: 'artist-1',
         selection: { type: 'locale', locale: 'ko' },
       }),
-    ).resolves.toEqual({ error: 'Failed to regenerate OG image' });
+    ).resolves.toEqual({ ok: false, error: 'Failed to regenerate OG image', errorCode: Code.Internal });
+  });
+
+  it('treats an absent latest generation as a successful absence', async () => {
+    mocks.getLatestOgGeneration
+      .mockResolvedValueOnce({})
+      .mockRejectedValueOnce(new ConnectError('none', Code.NotFound));
+    await expect(
+      getLatestOgGenerationAction({ entityType: 'post', entityId: 'post-1', locale: 'ko' }),
+    ).resolves.toEqual({
+      ok: true,
+    });
+    await expect(
+      getLatestOgGenerationAction({ entityType: 'post', entityId: 'post-1', locale: 'ko' }),
+    ).resolves.toEqual({
+      ok: true,
+    });
   });
 });

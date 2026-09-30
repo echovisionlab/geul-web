@@ -1,6 +1,12 @@
 'use server';
 
-import { isConnectErrorCode } from '@/lib/api/connect-error';
+import { connectActionErrorCode, isConnectErrorCode } from '@/lib/api/connect-error';
+import {
+  actionFailure,
+  actionSuccess,
+  type ActionResult,
+  type LocalActionErrorCode,
+} from '@/lib/actions/action-result';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
 import { ShareLinkEntityType, type ShareLinkItem } from '@echovisionlab/geul-proto/secure/share_link_pb.ts';
@@ -9,6 +15,23 @@ import { env } from '@/lib/env';
 import { createLogger } from '@/lib/utils/logger';
 
 const logger = createLogger('share-link-actions');
+
+function shareLinkFailure(
+  err: unknown,
+  fallback: string,
+  fallbackCode: LocalActionErrorCode,
+  messageOverrides: Partial<Record<Code, string>>,
+) {
+  let message = err instanceof Error ? err.message : fallback;
+  if (isConnectErrorCode(err, Code.Unauthenticated)) {
+    message = messageOverrides[Code.Unauthenticated] ?? message;
+  } else if (isConnectErrorCode(err, Code.NotFound)) {
+    message = messageOverrides[Code.NotFound] ?? message;
+  } else if (isConnectErrorCode(err, Code.PermissionDenied)) {
+    message = messageOverrides[Code.PermissionDenied] ?? message;
+  }
+  return actionFailure(message.trim() ? message : fallback, connectActionErrorCode(err, fallbackCode));
+}
 
 function toAbsoluteShareUrl(rawUrl: string): string {
   if (/^https?:\/\//i.test(rawUrl)) {
@@ -55,7 +78,7 @@ export async function createShareLinkAction(
     expiresAt?: Date;
     password?: string;
   },
-): Promise<{ shareLink?: ShareLinkItem; error?: string }> {
+): Promise<ActionResult<{ shareLink: ShareLinkItem }>> {
   try {
     const client = await createShareLinkClient();
     const response = await client.createShareLink({
@@ -66,40 +89,32 @@ export async function createShareLinkAction(
       password: options?.password,
     });
     if (!response.shareLink) {
-      return { error: 'Failed to create share link' };
+      return actionFailure('Failed to create share link', 'SHARE_LINK_CREATE_FAILED');
     }
-    return { shareLink: prependHost(response.shareLink) };
+    return actionSuccess({ shareLink: prependHost(response.shareLink) });
   } catch (err) {
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Entity not found' };
-    }
-    if (isConnectErrorCode(err, Code.PermissionDenied)) {
-      return { error: 'No permission to create share link' };
-    }
     logger.error('Failed to create share link', { error: err });
-    return { error: err instanceof Error ? err.message : 'Failed to create share link' };
+    return shareLinkFailure(err, 'Failed to create share link', 'SHARE_LINK_CREATE_FAILED', {
+      [Code.Unauthenticated]: 'Unauthorized',
+      [Code.NotFound]: 'Entity not found',
+      [Code.PermissionDenied]: 'No permission to create share link',
+    });
   }
 }
 
-export async function deleteShareLinkAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function deleteShareLinkAction(id: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createShareLinkClient();
     const response = await client.deleteShareLink({ id });
-    return response.success ? { success: true } : { error: 'Failed to delete share link' };
+    return response.success
+      ? actionSuccess({ success: true })
+      : actionFailure('Failed to delete share link', 'SHARE_LINK_DELETE_FAILED');
   } catch (err) {
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Share link not found' };
-    }
-    if (isConnectErrorCode(err, Code.PermissionDenied)) {
-      return { error: 'No permission to delete share link' };
-    }
     logger.error('Failed to delete share link', { error: err });
-    return { error: err instanceof Error ? err.message : 'Failed to delete share link' };
+    return shareLinkFailure(err, 'Failed to delete share link', 'SHARE_LINK_DELETE_FAILED', {
+      [Code.Unauthenticated]: 'Unauthorized',
+      [Code.NotFound]: 'Share link not found',
+      [Code.PermissionDenied]: 'No permission to delete share link',
+    });
   }
 }

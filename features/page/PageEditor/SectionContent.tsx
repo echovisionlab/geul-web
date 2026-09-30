@@ -6,15 +6,14 @@ import { SectionRendererProvider, type SectionRendererProps } from './SectionRen
 import { DEFAULT_SECTION_SETTINGS } from './types';
 
 export function SectionContent({ section, isExpanded = true }: SectionRendererProps) {
-  const { mergeSection, editable } = usePageEditor();
-  const mergedSection = mergeSection(section);
+  const { editable } = usePageEditor();
   const CanvasPreview = getBlockDefinition(section.type)?.CanvasPreview;
   if (!editable && CanvasPreview) {
     return (
       <CanvasPreview
-        sectionId={mergedSection.id}
-        props={mergedSection.props || {}}
-        settings={mergedSection.settings ?? DEFAULT_SECTION_SETTINGS}
+        sectionId={section.id}
+        props={section.props || {}}
+        settings={section.settings ?? DEFAULT_SECTION_SETTINGS}
       />
     );
   }
@@ -26,7 +25,7 @@ export function SectionContent({ section, isExpanded = true }: SectionRendererPr
 
   return (
     <SectionRendererProvider renderer={SectionContent}>
-      <Editor sectionId={mergedSection.id} props={mergedSection.props || {}} isExpanded={isExpanded} />
+      <Editor sectionId={section.id} props={section.props || {}} isExpanded={isExpanded} />
     </SectionRendererProvider>
   );
 }
