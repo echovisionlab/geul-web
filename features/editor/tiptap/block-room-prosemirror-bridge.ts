@@ -26,7 +26,6 @@ import {
   replaceBlockRoomCollaborativeText,
   replaceBlockRoomPayloadArray,
   moveRichTextBlockNode,
-  observeCanonicalBlockRoom,
   replaceRichTextBlockData,
   roomLocale,
   roomLocaleRole,
@@ -39,6 +38,11 @@ import {
 } from '@echovisionlab/geul-common/collaboration/block-room-codec';
 import type * as Y from 'yjs';
 import { createBlockId, isBlockId } from '@/lib/editor/block-id';
+import {
+  blockRoomSnapshotNodeRoute,
+  changedBlockIds,
+  observeSharedBlockRoomChanges,
+} from '@/lib/collab/block-room-observation';
 import {
   richTextProseMirrorAdapterForProtoCase,
   type RichTextBlockProtoCase,
@@ -199,6 +203,10 @@ export class BlockRoomProseMirrorBridge {
   readBlocks(
     snapshot: CanonicalBlockRoomSnapshot = decodeCanonicalBlockRoom(this.#document, this.#documentType),
   ): readonly ProseMirrorBlockDescriptor[] {
+    return this.#readBlocks(snapshot);
+  }
+
+  #readBlocks(snapshot: CanonicalBlockRoomSnapshot): readonly ProseMirrorBlockDescriptor[] {
     const localeNodes = new Map(
       snapshot.localeOverlay.filter((node) => node.family === 'rich_text').map((node) => [node.id, node]),
     );
@@ -240,9 +248,56 @@ export class BlockRoomProseMirrorBridge {
   }
 
   observe(listener: (blocks: readonly ProseMirrorBlockDescriptor[]) => void): () => void {
-    return observeCanonicalBlockRoom(this.#document, this.#documentType, ({ snapshot }) =>
-      listener(this.readBlocks(snapshot)),
-    );
+    const knownBlockIds = new Set<string>();
+    const rememberBlocks = (blocks: readonly ProseMirrorBlockDescriptor[]): void => {
+      knownBlockIds.clear();
+      const collectIds = (nodes: readonly ProseMirrorBlockDescriptor[]): void => {
+        for (const node of nodes) {
+          knownBlockIds.add(node.id);
+          collectIds(node.children);
+        }
+      };
+      collectIds(blocks);
+    };
+    // Capture the last visible IDs so deletions can still be routed after the nodes disappear.
+    rememberBlocks(this.readBlocks());
+    return observeSharedBlockRoomChanges(this.#document, (change) => {
+      const { changeSet } = change;
+      const publish = (snapshot: CanonicalBlockRoomSnapshot = change.snapshot()): void => {
+        const blocks = this.#readBlocks(snapshot);
+        rememberBlocks(blocks);
+        listener(blocks);
+      };
+      if (changeSet.requiresFullDecode || changeSet.documentMetadataChanged || changeSet.documentLayoutChanged) {
+        publish();
+        return;
+      }
+
+      const changedIds = changedBlockIds(changeSet);
+      if (
+        changedIds.size === 0 &&
+        changeSet.affectedLocaleValueTargets.length === 0 &&
+        changeSet.changedContainerOrderKeys.length === 0
+      ) {
+        return;
+      }
+      if (this.#pageSectionId === undefined) {
+        publish();
+        return;
+      }
+      if (changedIds.has(this.#pageSectionId) || [...changedIds].some((blockId) => knownBlockIds.has(blockId))) {
+        publish();
+        return;
+      }
+
+      const snapshot = change.snapshot();
+      const affectsSection = [...changedIds].some(
+        (blockId) => blockRoomSnapshotNodeRoute(snapshot, blockId)?.pageSectionId === this.#pageSectionId,
+      );
+      if (affectsSection) {
+        publish(snapshot);
+      }
+    });
   }
 
   createInsertionAnchor(placement: Omit<RichTextBlockPlacementInput, 'anchor'>): Y.RelativePosition {
