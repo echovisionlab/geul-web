@@ -2,7 +2,7 @@
 
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { notifyManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -98,6 +98,8 @@ function render() {
 }
 
 beforeEach(() => {
+  // Keep query notifications asynchronous and prove assertions await rendering.
+  notifyManager.setScheduler((callback) => setTimeout(callback, 25));
   mocks.listEvents.mockReset();
   mocks.listTypes.mockReset().mockResolvedValue([]);
   container = document.createElement('div');
@@ -109,6 +111,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  notifyManager.setScheduler((callback) => setTimeout(callback, 0));
   act(() => root.unmount());
   queryClient.clear();
   container.remove();
