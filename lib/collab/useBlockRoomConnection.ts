@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   HocuspocusProvider,
   type onAuthenticationFailedParameters,
@@ -13,6 +13,12 @@ import {
   type BlockRoomDocumentType,
 } from '@/lib/collab/block-room-bootstrap';
 import { BlockRoomProtocolClient, type BlockRoomProtocolTransport } from '@/lib/collab/block-room-protocol';
+import {
+  createBlockRoomRecoverySnapshot,
+  matchesBlockRoomRecoveryScope,
+  retainBlockRoomRecoverySnapshot,
+  type BlockRoomRecoverySnapshot,
+} from '@/lib/collab/block-room-recovery';
 import { setHocuspocusResumeToken } from '@/lib/collab/hocuspocus-provider';
 import {
   registerInteractiveMutationUndoProvider,
@@ -40,11 +46,23 @@ export interface BlockRoomConnection {
   isSynced: boolean;
   isLoading: boolean;
   error: Error | null;
+  recoverySnapshot: BlockRoomRecoverySnapshot | null;
   reloadCanonical: () => void;
   acceptEpochAck: (ack: BlockRoomEpochAck) => boolean;
 }
 
-type BlockRoomConnectionState = Omit<BlockRoomConnection, 'reloadCanonical' | 'acceptEpochAck'>;
+type BlockRoomConnectionState = Omit<BlockRoomConnection, 'reloadCanonical' | 'acceptEpochAck' | 'recoverySnapshot'>;
+
+interface ResidentRecoverySource {
+  requestIdentity: string;
+  documentType: BlockRoomDocumentType;
+  entityId: string;
+  locale: string;
+  document: Y.Doc;
+  bootstrap: BlockRoomBootstrap | null;
+  admitted: boolean;
+  changedSinceAdmission: boolean;
+}
 
 function websocketUrl(type: BlockRoomDocumentType, entityId: string, locale: string): string {
   const websocketOrigin = window.location.origin.replace(/^http/u, 'ws');
@@ -99,10 +117,43 @@ export function useBlockRoomConnection(
   const requestIdentity = `${documentType}\u0000${entityId}\u0000${locale ?? ''}\u0000${generation}`;
   const [connection, setConnection] = useState<BlockRoomConnectionState>(() => emptyConnection());
   const [connectionIdentity, setConnectionIdentity] = useState(requestIdentity);
+  const [recoverySnapshot, setRecoverySnapshot] = useState<BlockRoomRecoverySnapshot | null>(null);
+  const residentRecoverySource = useRef<ResidentRecoverySource | null>(null);
+  const recoveryScope = { documentType, entityId, locale };
+
+  const captureRecoverySnapshot = useCallback(
+    (source: ResidentRecoverySource | null) => {
+      if (!source || source.requestIdentity !== requestIdentity || !source.admitted || !source.bootstrap) {
+        return;
+      }
+      const candidate = createBlockRoomRecoverySnapshot({
+        documentType: source.documentType,
+        entityId: source.entityId,
+        locale: source.locale,
+        admitted: source.admitted,
+        bootstrap: source.bootstrap,
+        yjsUpdate: Y.encodeStateAsUpdate(source.document),
+      });
+      if (!candidate) {
+        return;
+      }
+      const hasNewLocalChanges = source.changedSinceAdmission;
+      source.changedSinceAdmission = false;
+      setRecoverySnapshot((current) => retainBlockRoomRecoverySnapshot(current, candidate, hasNewLocalChanges));
+    },
+    [requestIdentity],
+  );
+
   const reloadCanonical = useCallback(() => {
+    captureRecoverySnapshot(residentRecoverySource.current);
     setConnection(emptyConnection());
     setGeneration((value) => value + 1);
-  }, []);
+  }, [captureRecoverySnapshot]);
+
+  useEffect(() => {
+    setRecoverySnapshot((current) => (matchesBlockRoomRecoveryScope(current, recoveryScope) ? current : null));
+  }, [documentType, entityId, locale]);
+
   const acceptEpochAck = useCallback(
     (ack: BlockRoomEpochAck): boolean => {
       if (connectionIdentity !== requestIdentity) {
@@ -111,6 +162,14 @@ export function useBlockRoomConnection(
       if (!canAcceptEpochAck(connection, ack, locale)) {
         reloadCanonical();
         return false;
+      }
+      const recoverySource = residentRecoverySource.current;
+      if (recoverySource?.requestIdentity === requestIdentity && recoverySource.admitted && recoverySource.bootstrap) {
+        recoverySource.bootstrap = {
+          ...recoverySource.bootstrap,
+          documentRevision: ack.documentRevision,
+          targetRevision: ack.targetRevision,
+        };
       }
       setConnection((value) => ({
         ...value,
@@ -135,6 +194,8 @@ export function useBlockRoomConnection(
     let residentProvider: HocuspocusProvider | null = null;
     let interactiveUndo: InteractiveMutationUndoRegistration | null = null;
     let roomProtocol: BlockRoomProtocolClient | null = null;
+    let updateListener: ((update: Uint8Array, origin: unknown) => void) | null = null;
+    let recoverySource: ResidentRecoverySource | null = null;
 
     const destroyResident = () => {
       roomProtocol?.destroy();
@@ -143,8 +204,15 @@ export function useBlockRoomConnection(
       interactiveUndo = null;
       residentProvider?.destroy();
       residentProvider = null;
+      if (residentDoc && updateListener) {
+        residentDoc.off('update', updateListener);
+        updateListener = null;
+      }
       residentDoc?.destroy();
       residentDoc = null;
+      if (residentRecoverySource.current === recoverySource) {
+        residentRecoverySource.current = null;
+      }
     };
 
     const scheduleCanonicalReload = () => {
@@ -152,6 +220,7 @@ export function useBlockRoomConnection(
         return;
       }
       reloadScheduled = true;
+      captureRecoverySnapshot(recoverySource);
       destroyResident();
       setConnection(emptyConnection());
       setGeneration((value) => value + 1);
@@ -194,6 +263,24 @@ export function useBlockRoomConnection(
     setConnection(emptyConnection());
     const document = new Y.Doc();
     residentDoc = document;
+    recoverySource = {
+      requestIdentity,
+      documentType,
+      entityId,
+      locale,
+      document,
+      bootstrap: null,
+      admitted: false,
+      changedSinceAdmission: false,
+    };
+    residentRecoverySource.current = recoverySource;
+    updateListener = (_update, origin) => {
+      // Hocuspocus applies incoming room updates with the provider as origin.
+      if (recoverySource?.admitted && origin !== residentProvider) {
+        recoverySource.changedSinceAdmission = true;
+      }
+    };
+    document.on('update', updateListener);
     let protocolReference: BlockRoomProtocolClient | null = null;
     const providerConfiguration = {
       url: websocketUrl(documentType, entityId, locale),
@@ -235,11 +322,18 @@ export function useBlockRoomConnection(
         }
       },
       onBootstrap: (bootstrap) => {
+        if (recoverySource) {
+          recoverySource.bootstrap = bootstrap;
+        }
         if (!disposed && !reloadScheduled) {
           setConnection((value) => ({ ...value, bootstrap }));
         }
       },
       onReady: () => {
+        if (recoverySource && !recoverySource.admitted) {
+          recoverySource.admitted = true;
+          recoverySource.changedSinceAdmission = false;
+        }
         if (!disposed && !reloadScheduled) {
           setConnection((value) => ({
             ...value,
@@ -263,8 +357,11 @@ export function useBlockRoomConnection(
       disposed = true;
       destroyResident();
     };
-  }, [documentType, entityId, generation, locale, requestIdentity]);
+  }, [captureRecoverySnapshot, documentType, entityId, generation, locale, requestIdentity]);
 
   const visibleConnection = connectionIdentity === requestIdentity ? connection : emptyConnection();
-  return { ...visibleConnection, reloadCanonical, acceptEpochAck };
+  const visibleRecoverySnapshot = matchesBlockRoomRecoveryScope(recoverySnapshot, recoveryScope)
+    ? recoverySnapshot
+    : null;
+  return { ...visibleConnection, recoverySnapshot: visibleRecoverySnapshot, reloadCanonical, acceptEpochAck };
 }

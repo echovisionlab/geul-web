@@ -3062,6 +3062,10 @@
     "pinned": "Đã ghim"
   },
   "pageEditor": {
+    "localRecovery": {
+      "message": "Bản chỉnh sửa cục bộ đã được giữ lại trước khi kết nối lại. Hãy tải xuống trước khi tải lại trang hoặc rời đi.",
+      "action": "Tải bản sao khôi phục"
+    },
     "shareLinksDescription": "Xem trước liên kết cho các trang chưa được xuất bản",
     "showTitleOnPage": "Hiển thị tiêu đề trên trang",
     "slugValidation": {

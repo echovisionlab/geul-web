@@ -11,6 +11,7 @@ export interface PageEditorCollaborationResult {
   isSynced: boolean;
   reloadCanonical: ReturnType<typeof useBlockRoomConnection>['reloadCanonical'];
   acceptEpochAck: ReturnType<typeof useBlockRoomConnection>['acceptEpochAck'];
+  recoverySnapshot: ReturnType<typeof useBlockRoomConnection>['recoverySnapshot'];
 }
 
 export function usePageEditorCollaboration(pageId: string, locale: string | null): PageEditorCollaborationResult {

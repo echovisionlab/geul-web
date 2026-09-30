@@ -3062,6 +3062,10 @@
     "pinned": "固定"
   },
   "pageEditor": {
+    "localRecovery": {
+      "message": "已保留重新连接前的本地编辑内容。请在刷新或离开前下载恢复副本。",
+      "action": "下载恢复副本"
+    },
     "shareLinksDescription": "未发布页面的预览链接",
     "showTitleOnPage": "在页面上显示标题",
     "slugValidation": {

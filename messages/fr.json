@@ -3062,6 +3062,10 @@
     "pinned": "Épinglé"
   },
   "pageEditor": {
+    "localRecovery": {
+      "message": "Votre copie locale a été conservée avant la reconnexion. Téléchargez-la avant de recharger la page ou de quitter.",
+      "action": "Télécharger la copie de récupération"
+    },
     "shareLinksDescription": "Liens d'aperçu pour les pages non publiées",
     "showTitleOnPage": "Afficher le titre sur la page",
     "slugValidation": {

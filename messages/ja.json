@@ -3062,6 +3062,10 @@
     "pinned": "固定"
   },
   "pageEditor": {
+    "localRecovery": {
+      "message": "再接続前の編集内容を保存しました。再読み込みや終了の前に復旧用コピーをダウンロードしてください。",
+      "action": "復旧用コピーをダウンロード"
+    },
     "shareLinksDescription": "未公開ページ用のプレビューリンク",
     "showTitleOnPage": "ページにタイトルを表示",
     "slugValidation": {

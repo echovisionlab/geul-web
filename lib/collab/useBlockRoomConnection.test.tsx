@@ -256,6 +256,7 @@ describe('useBlockRoomConnection', () => {
     expect(destroyDoc).toHaveBeenCalledOnce();
     expect(providerState.instances).toHaveLength(2);
     expect(providerState.instances[1]!.configuration.token).toBeUndefined();
+    expect(connection().recoverySnapshot).toBeNull();
   });
 
   it('opens a fresh resident when ready belongs to another bootstrap challenge', async () => {
@@ -270,6 +271,7 @@ describe('useBlockRoomConnection', () => {
     expect(first.destroy).toHaveBeenCalledOnce();
     expect(providerState.instances).toHaveLength(2);
     expect(providerState.instances[1]!.configuration.token).toBeUndefined();
+    expect(connection().recoverySnapshot).toBeNull();
   });
 
   it('destroys the resident and opens a fresh socket on reload_required', async () => {
@@ -278,6 +280,7 @@ describe('useBlockRoomConnection', () => {
     const firstDoc = first.configuration.document;
     const destroyDoc = vi.spyOn(firstDoc, 'destroy');
     admit(first);
+    firstDoc.getText('recovery-note').insert(0, 'local draft');
     expect(connection().doc).toBe(firstDoc);
 
     act(() =>
@@ -292,6 +295,47 @@ describe('useBlockRoomConnection', () => {
     expect(providerState.instances).toHaveLength(2);
     expect(connection().doc).toBeNull();
     expect(providerState.instances[1]!.configuration.token).toBeUndefined();
+    const originalSnapshot = connection().recoverySnapshot;
+    expect(originalSnapshot).toMatchObject({
+      documentType: 'page',
+      entityId,
+      locale: 'ko',
+      sourceLocale: 'ko',
+      documentRevision: 'b67328c4-668c-5bf2-8f1e-41465149ded6',
+      capturedAt: expect.any(Number),
+    });
+    expect(originalSnapshot?.yjsUpdate).toBeInstanceOf(Uint8Array);
+
+    const replayed = new Y.Doc();
+    Y.applyUpdate(replayed, originalSnapshot!.yjsUpdate);
+    expect(replayed.getText('recovery-note').toString()).toBe('local draft');
+
+    const second = providerState.instances[1]!;
+    admit(second);
+    expect(connection().doc).toBe(second.configuration.document);
+    expect(connection().doc?.getText('recovery-note').toString()).toBe('');
+    expect(connection().recoverySnapshot).toBe(originalSnapshot);
+
+    act(() =>
+      second.configuration.onStateless?.({
+        payload: JSON.stringify({ kind: 'reload_required', reason: 'reload_required' }),
+      }),
+    );
+    await act(async () => Promise.resolve());
+    expect(connection().recoverySnapshot).toBe(originalSnapshot);
+
+    const third = providerState.instances[2]!;
+    admit(third);
+    third.configuration.document.getText('recovery-note').insert(0, 'new local draft');
+    act(() => connection().reloadCanonical());
+    await act(async () => Promise.resolve());
+    const newerSnapshot = connection().recoverySnapshot;
+    expect(newerSnapshot).not.toBe(originalSnapshot);
+    const replayedNewer = new Y.Doc();
+    Y.applyUpdate(replayedNewer, newerSnapshot!.yjsUpdate);
+    expect(replayedNewer.getText('recovery-note').toString()).toBe('new local draft');
+    replayed.destroy();
+    replayedNewer.destroy();
   });
 
   it('opens a fresh tokenless resident when authentication rejects a stale resume token', async () => {
@@ -300,6 +344,7 @@ describe('useBlockRoomConnection', () => {
     const firstDoc = first.configuration.document;
     const destroyDoc = vi.spyOn(firstDoc, 'destroy');
     admit(first);
+    firstDoc.getText('recovery-note').insert(0, 'auth reload draft');
     expect(first.configuration.token).toBe('challenge-1');
 
     act(() => first.configuration.onAuthenticationFailed?.({ reason: 'reload_required' }));
@@ -308,8 +353,13 @@ describe('useBlockRoomConnection', () => {
     expect(first.destroy).toHaveBeenCalledOnce();
     expect(destroyDoc).toHaveBeenCalledOnce();
     expect(providerState.instances).toHaveLength(2);
+    expect(connection().recoverySnapshot).toMatchObject({ documentType: 'page', entityId, locale: 'ko' });
     expect(connection().doc).toBeNull();
     expect(providerState.instances[1]!.configuration.token).toBeUndefined();
+    const replayed = new Y.Doc();
+    Y.applyUpdate(replayed, connection().recoverySnapshot!.yjsUpdate);
+    expect(replayed.getText('recovery-note').toString()).toBe('auth reload draft');
+    replayed.destroy();
   });
 
   it('leaves non-epoch authentication failures to the editor interruption handler', async () => {
@@ -337,13 +387,21 @@ describe('useBlockRoomConnection', () => {
     expect(first.destroy).toHaveBeenCalledOnce();
     expect(destroyDoc).toHaveBeenCalledOnce();
     expect(providerState.instances).toHaveLength(2);
+    expect(connection().recoverySnapshot).toMatchObject({ documentType: 'page', entityId, locale: 'ko' });
   });
 
   it('never exposes the previous locale resident during a locale prop transition', async () => {
     await render();
     const first = providerState.instances[0]!;
     admit(first);
-    expect(connection().doc).toBe(first.configuration.document);
+    first.configuration.document.getText('recovery-note').insert(0, 'local draft');
+    act(() => connection().reloadCanonical());
+    await act(async () => Promise.resolve());
+    expect(connection().recoverySnapshot).not.toBeNull();
+
+    const refreshed = providerState.instances[1]!;
+    admit(refreshed);
+    expect(connection().doc).toBe(refreshed.configuration.document);
 
     await act(async () => {
       root?.render(<TestHarness locale="ja" />);
@@ -354,11 +412,31 @@ describe('useBlockRoomConnection', () => {
     expect(firstJapaneseRender?.connection).toMatchObject({
       provider: null,
       doc: null,
+      recoverySnapshot: null,
       isConnected: false,
       isSynced: false,
       isLoading: true,
     });
     expect(providerState.instances.at(-1)?.configuration.name).toBe(`page:${entityId}:ja`);
+    expect(connection().doc).toBeNull();
+    expect(connection().recoverySnapshot).toBeNull();
+  });
+
+  it('does not expose an entity recovery snapshot after switching entities', async () => {
+    await render();
+    const first = providerState.instances[0]!;
+    admit(first);
+    first.configuration.document.getText('recovery-note').insert(0, 'local draft');
+    act(() => connection().reloadCanonical());
+    await act(async () => Promise.resolve());
+    expect(connection().recoverySnapshot).not.toBeNull();
+
+    await act(async () => {
+      root?.render(<TestHarness id="33333333-3333-4333-8333-333333333333" />);
+      await Promise.resolve();
+    });
+
+    expect(connection().recoverySnapshot).toBeNull();
     expect(connection().doc).toBeNull();
   });
 

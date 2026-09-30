@@ -7,7 +7,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { ScrollArea, Stack, Text } from '@mantine/core';
 import { Checkbox } from '@/components/core/Input';
-import { useDebouncedCallback, useDisclosure } from '@mantine/hooks';
+import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { EditorHeader } from '@/features/editor/EditorHeader';
 import { useEditorPermissionRevocation } from '@/features/editor/useEditorPermissionRevocation';
@@ -53,6 +53,9 @@ import { PageEditorInterruptionDialogs } from './PageEditorInterruptionDialogs';
 import { SectionList } from './SectionList';
 import { resolvePageResidentMetadata } from './collaboration-mode';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
+import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
+import { PageRecoveryNotice } from './PageRecoveryNotice';
+import { usePageRecoveryDraft } from './usePageRecoveryDraft';
 
 interface PageEditorProps {
   pageId: string;
@@ -128,10 +131,24 @@ export function PageEditor({
   const { activeEditLocale, roomLocale } = localeSession;
   const ogRegenerationLocale = normalizeOgRegenerationLocale(activeEditLocale.activeLocale);
   const { shouldUseLocaleDocument } = localeSession.mode;
-  const { provider, doc, bootstrap, protocol, isConnected, isSynced, reloadCanonical, acceptEpochAck } =
-    usePageEditorCollaboration(pageId, roomLocale);
+  const {
+    provider,
+    doc,
+    bootstrap,
+    protocol,
+    isConnected,
+    isSynced,
+    reloadCanonical,
+    acceptEpochAck,
+    recoverySnapshot,
+  } = usePageEditorCollaboration(pageId, roomLocale);
   const [residentTitle, setResidentTitle] = useState(initialTitle);
   const [residentSummary, setResidentSummary] = useState(initialSummary ?? '');
+  const recoveryDraft = usePageRecoveryDraft(recoverySnapshot, {
+    title: residentTitle,
+    summary: residentSummary,
+    layout,
+  });
   useEffect(() => {
     const resident = resolvePageResidentMetadata({
       roomLocale,
@@ -239,6 +256,7 @@ export function PageEditor({
       if (!acceptEpochAck(ack)) {
         setLayout(request.previous);
         router.refresh();
+        throw new Error(tCommon('notifications.saveFailed'));
       }
     },
     onError: (error, request) => {
@@ -292,9 +310,13 @@ export function PageEditor({
   const slugErrorReason = slugMgmt.errorReason ?? slugMutationErrorReason;
   const slugError = slugErrorReason ? t(`slugValidation.${slugErrorReason}`) : undefined;
 
-  const debouncedLayoutUpdate = useDebouncedCallback((value: DocumentLayout, previous: DocumentLayout) => {
-    updateLayout.mutate({ value, previous });
-  }, 500);
+  const debouncedLayoutUpdate = useDebouncedPatch({
+    document: `page:${pageId}`,
+    scope: protocol,
+    delay: 500,
+    write: (request: { value: DocumentLayout; previous: DocumentLayout }) =>
+      updateLayout.mutateAsync(request).then(() => undefined),
+  });
 
   const handleStatusChange = useCallback(
     (nextStatus: 'draft' | 'published') => {
@@ -355,7 +377,7 @@ export function PageEditor({
       }
       const previous = layout;
       setLayout(value);
-      debouncedLayoutUpdate(value, previous);
+      debouncedLayoutUpdate({ value, previous });
     },
     [canEditNeutral, debouncedLayoutUpdate, layout],
   );
@@ -408,6 +430,9 @@ export function PageEditor({
       blockRoomProtocol={protocol}
     >
       <Stack h="100%" gap="md">
+        {recoverySnapshot && !revision.reloadRequired ? (
+          <PageRecoveryNotice snapshot={recoverySnapshot} draft={recoveryDraft} />
+        ) : null}
         <EditorHeader
           title={displayedTitle}
           onTitleChange={canEditLocaleDocument ? handleLocaleTitleChange : undefined}
@@ -615,6 +640,9 @@ export function PageEditor({
         />
 
         <PageEditorInterruptionDialogs
+          recoveryAction={
+            recoverySnapshot ? <PageRecoveryNotice snapshot={recoverySnapshot} draft={recoveryDraft} /> : undefined
+          }
           interruption={permissionRevocation.interruption}
           reloadRequired={revision.reloadRequired}
           permissionRevokedDestination={status === 'published' ? `/${slug || pageId}` : '/'}

@@ -36,7 +36,10 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function renderDialogs(props: Partial<React.ComponentProps<typeof PageEditorInterruptionDialogs>> = {}) {
+function renderDialogs(
+  props: Partial<React.ComponentProps<typeof PageEditorInterruptionDialogs>> = {},
+  clickAction = true,
+) {
   const navigate = vi.fn();
   const reload = vi.fn();
   act(() => {
@@ -57,7 +60,9 @@ function renderDialogs(props: Partial<React.ComponentProps<typeof PageEditorInte
     );
   });
   act(() => {
-    document.body.querySelector<HTMLButtonElement>('[role="alertdialog"] button')?.click();
+    if (clickAction) {
+      document.body.querySelector<HTMLButtonElement>('[role="alertdialog"] button')?.click();
+    }
   });
   return { navigate, reload };
 }
@@ -80,5 +85,26 @@ describe('PageEditorInterruptionDialogs', () => {
     });
     expect(reload).toHaveBeenCalledOnce();
     expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('offers recovery download before the user reloads', () => {
+    const download = vi.fn();
+    const { reload } = renderDialogs(
+      {
+        reloadRequired: true,
+        recoveryAction: (
+          <button type="button" onClick={download}>
+            Download recovery copy
+          </button>
+        ),
+      },
+      false,
+    );
+    const buttons = [...document.body.querySelectorAll<HTMLButtonElement>('[role="alertdialog"] button')];
+    act(() => buttons.find((button) => button.textContent === 'Download recovery copy')?.click());
+    expect(download).toHaveBeenCalledOnce();
+    expect(reload).not.toHaveBeenCalled();
+    act(() => buttons.find((button) => button.textContent === 'Reload')?.click());
+    expect(reload).toHaveBeenCalledOnce();
   });
 });

@@ -3062,6 +3062,10 @@
     "pinned": "Fisso"
   },
   "pageEditor": {
+    "localRecovery": {
+      "message": "La copia locale delle modifiche è stata conservata prima della riconnessione. Scaricala prima di ricaricare o uscire.",
+      "action": "Scarica copia di recupero"
+    },
     "shareLinksDescription": "Link di anteprima per pagine non pubblicate",
     "showTitleOnPage": "Mostra titolo nella pagina",
     "slugValidation": {

@@ -3504,6 +3504,10 @@
     "pinned": "Fixiert"
   },
   "pageEditor": {
+    "localRecovery": {
+      "message": "Ihre lokale Bearbeitungskopie wurde vor dem erneuten Verbinden gesichert. Laden Sie sie vor dem Neuladen oder Verlassen herunter.",
+      "action": "Wiederherstellungskopie herunterladen"
+    },
     "shareLinksDescription": "Vorschaulinks für unveröffentlichte Seiten",
     "showTitleOnPage": "Titel auf der Seite anzeigen",
     "slugValidation": {

@@ -3062,6 +3062,10 @@
     "pinned": "固定"
   },
   "pageEditor": {
+    "localRecovery": {
+      "message": "已保留重新連線前的本機編輯內容。請在重新整理或離開前下載復原副本。",
+      "action": "下載復原副本"
+    },
     "shareLinksDescription": "未發布頁面的預覽鏈接",
     "showTitleOnPage": "在頁面上顯示標題",
     "slugValidation": {
