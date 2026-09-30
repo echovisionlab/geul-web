@@ -630,6 +630,8 @@ describe('form admin actions', () => {
 describe('form submission actions', () => {
   it('maps submission listings and decodes stored payloads', async () => {
     const createdAt = new Date('2026-04-04T11:00:00.000Z');
+    const dateFrom = '2026-03-08T08:00:00.000Z';
+    const dateTo = '2026-03-09T07:00:00.000Z';
     listSubmissionsMock.mockResolvedValue({
       submissions: [
         {
@@ -651,42 +653,52 @@ describe('form submission actions', () => {
         formId: 'form-1',
         page: 2,
         limit: 10,
+        search: 'hello@example.com',
         sortBy: 'createdAt',
         sortOrder: 'asc',
+        countryCode: ' kr ',
+        dateFrom,
+        dateTo,
       }),
     ).resolves.toEqual({
-      submissions: [
-        {
-          id: 'submission-1',
-          formId: 'form-1',
-          memberId: 'user-1',
-          data: { email: 'hello@example.com' },
-          ipAddress: '127.0.0.1',
-          countryCode: 'KR',
-          userAgent: 'Mozilla/5.0',
-          createdAt,
-        },
-      ],
-      total: 1,
-      page: 2,
-      limit: 10,
-      totalPages: 1,
+      ok: true,
+      data: {
+        submissions: [
+          {
+            id: 'submission-1',
+            formId: 'form-1',
+            memberId: 'user-1',
+            data: { email: 'hello@example.com' },
+            ipAddress: '127.0.0.1',
+            countryCode: 'KR',
+            userAgent: 'Mozilla/5.0',
+            createdAt,
+          },
+        ],
+        total: 1,
+        page: 2,
+        limit: 10,
+        totalPages: 1,
+      },
     });
 
     expect(listSubmissionsMock).toHaveBeenCalledWith({
       formId: 'form-1',
       pagination: { limit: 10, offset: 10 },
       sorts: [{ field: 'createdAt', order: SortOrder.ASC }],
+      search: 'hello@example.com',
+      countryCode: 'KR',
+      createdAtFrom: timestampFromDate(new Date(dateFrom)),
+      createdAtBefore: timestampFromDate(new Date(dateTo)),
     });
   });
 
-  it('returns an empty submission listing on RPC failure', async () => {
+  it('returns a serializable error result on RPC failure', async () => {
     listSubmissionsMock.mockRejectedValue(new ConnectError('boom', Code.Internal));
 
     await expect(listFormSubmissionsAction({ formId: 'form-1' })).resolves.toEqual({
-      submissions: [],
-      total: 0,
-      totalPages: 0,
+      ok: false,
+      code: 'LIST_SUBMISSIONS_FAILED',
     });
   });
 

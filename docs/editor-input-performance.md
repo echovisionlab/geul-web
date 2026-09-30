@@ -92,3 +92,57 @@ locale authority, collaboration projection, pending remote edits, plugin-appende
 transactions, undo/redo, Page context/body integration, observer fanout, and
 unsubscribe/reconnect. TypeScript, changed-path ESLint, Prettier, and diff whitespace checks passed
 before commit. Full build and suite execution remain CI release gates.
+
+## Concurrent inline edit integrity (2026-10-01)
+
+Inline text and marks reconcile on existing Y.Text handles. Whole and partial
+format changes no longer delete and recreate the concurrently edited text.
+Physical payload indexes remain raw indexes; materialization projects formatted
+runs into the existing protobuf JSON shape. Table cell text and existing link
+children use this same rule. A true text/link structural conversion still replaces
+a minimal structural window.
+
+Link addresses are written only when they change, so typing cannot overwrite a
+concurrent address edit. Both inline and source-text edit boundaries preserve
+complete Unicode surrogate pairs.
+
+Remote updates are projected synchronously before another local editor transaction.
+For structural deletion, ancestors of surviving children stay resident until those
+children move out; complete discarded subtrees are removed first, avoiding extra
+reorder mutations after Backspace. Undo continues to use the existing room origin.
+
+Web and Collab use Block-room protocol version 2. A version mismatch requests
+reload before bootstrap application or write admission. Deploy the Collab reader
+before the Web writer; the canonical protobuf and storage schema stay unchanged.
+
+The first inline integrity implementation added projection overhead. The final
+projection decodes inline content, table rows, and cell content once, preserving
+all existing malformed-payload validation. Preliminary local measurements are
+kept as diagnostics; the final published-dependency comparison follows below.
+
+### Final published-package comparison
+
+Three alternating before/after runs use the identical fixture, dependencies,
+sample counts, and warm-up above. Baseline is Web v0.2.2's controller/bridge/diff
+with published Common v0.2.1; after uses this change with published Common v0.2.3.
+Proto/event v0.2.1, Node, and Yjs remain fixed. No other local tests or builds ran.
+The table reports the median of each run's median and p95, not a pooled percentile.
+Raw audit artifacts are `editor-integrity-final-{before,after}-{1,2,3}-20261001.json`.
+
+| Fixture                           | Before median (ms) | After median (ms) | Median change | Before / after p95 (ms) |
+| --------------------------------- | -----------------: | ----------------: | ------------: | ----------------------: |
+| Post 100 paragraphs               |               3.73 |              3.59 |         -3.8% |             4.36 / 4.75 |
+| Post 500 paragraphs               |              14.68 |             14.69 |         +0.1% |           16.47 / 16.50 |
+| Post 1000 paragraphs              |              30.61 |             29.38 |         -4.0% |           35.45 / 30.15 |
+| Page 500 paragraphs / 1 section   |              16.75 |             14.93 |        -10.9% |           17.92 / 26.49 |
+| Page 500 paragraphs / 5 sections  |              15.72 |             15.13 |         -3.8% |           17.41 / 16.68 |
+| Page 500 paragraphs / 20 sections |              15.48 |             15.35 |         -0.8% |           16.71 / 17.38 |
+
+Notifications remain exactly one per edit in all Page fixtures. This establishes
+that the integrity fixes and projection fast path retain the previous performance
+work; the small differences and noisy tails do not establish a production browser
+latency improvement. Post 500 is effectively unchanged, and Page one-section p95
+is higher. There are no browser INP, paint, network, or persistence measurements.
+The first Common v0.2.2 projection cost is retained in separate diagnostic runs;
+removing duplicate decoding, unchanged-style normalization, and unused payload
+allocation removes that extra work in v0.2.3.

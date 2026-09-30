@@ -71,7 +71,7 @@ function bootstrapMessage(challenge = 'challenge-1') {
     update,
     payload: JSON.stringify({
       kind: 'block_room.bootstrap',
-      protocolVersion: 1,
+      protocolVersion: 2,
       bootstrapChallenge: challenge,
       documentName: `page:${entityId}:ko`,
       documentType: 'page',
@@ -133,7 +133,7 @@ function sendReady(instance: (typeof providerState.instances)[number], challenge
     instance.configuration.onStateless?.({
       payload: JSON.stringify({
         kind: 'block_room.ready',
-        protocolVersion: 1,
+        protocolVersion: 2,
         bootstrapChallenge: challenge,
       }),
     }),
@@ -184,7 +184,7 @@ describe('useBlockRoomConnection', () => {
     const ack = JSON.parse(resident.sendStateless.mock.calls[0]![0]);
     expect(ack).toEqual({
       kind: 'block_room.bootstrap_ack',
-      protocolVersion: 1,
+      protocolVersion: 2,
       challenge: 'challenge-1',
       stateVector: expect.any(String),
     });

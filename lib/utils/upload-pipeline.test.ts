@@ -313,14 +313,41 @@ describe('upload-pipeline', () => {
   });
 
   describe('prepareUploadFile', () => {
-    it('returns canonical MIME for non-converted upload type', async () => {
-      const file = makeFile('logo.svg', '', 1024);
+    it('returns a File with canonical MIME and filename without changing the bytes', async () => {
+      const file = new File(['<svg/>'], 'logo.svg', { type: '', lastModified: 1234 });
       const result = await prepareUploadFile(file, UploadType.SITE_LOGO);
 
       expect(mockConvertToWebP).not.toHaveBeenCalled();
-      expect(result.file).toBe(file);
+      expect(result.file).not.toBe(file);
+      expect(result.file.name).toBe('logo.svg');
+      expect(result.file.type).toBe('image/svg+xml');
+      expect(result.file.lastModified).toBe(1234);
+      expect(new TextDecoder().decode(await result.file.arrayBuffer())).toBe('<svg/>');
       expect(result.mimeType).toBe('image/svg+xml');
     });
+
+    it.each([
+      ['track.aif', 'audio/x-aiff', 'track.aiff', 'audio/aiff', UploadType.TRACK_AUDIO],
+      ['cover.jpeg', 'image/jpeg', 'cover.jpg', 'image/jpeg', UploadType.GENERAL_FILE],
+    ] as const)(
+      'normalizes %s to the canonical MIME filename while preserving bytes',
+      async (sourceName, sourceMime, canonicalName, canonicalMime, uploadType) => {
+        const payload = 'original-file-payload';
+        const file = new File([payload], sourceName, { type: sourceMime, lastModified: 5678 });
+        if (sourceMime === 'image/jpeg') {
+          mockConvertToWebP.mockResolvedValueOnce(
+            new File(['larger-webp-output'.repeat(4)], 'cover.webp', { type: 'image/webp' }),
+          );
+        }
+        const result = await prepareUploadFile(file, uploadType);
+
+        expect(result.file.name).toBe(canonicalName);
+        expect(result.file.type).toBe(canonicalMime);
+        expect(result.mimeType).toBe(canonicalMime);
+        expect(result.file.lastModified).toBe(5678);
+        expect(new TextDecoder().decode(await result.file.arrayBuffer())).toBe(payload);
+      },
+    );
 
     it('throws when file remains disallowed after preprocessing policy', async () => {
       const file = makeFile('logo.jpg', 'image/jpeg', 1024);
@@ -329,6 +356,7 @@ describe('upload-pipeline', () => {
 
     it('returns converted file and MIME for editor image upload', async () => {
       const file = makeFile('photo.jpg', 'image/jpeg', 1024);
+      mockConvertToWebP.mockResolvedValueOnce(new File(['webp-payload'], 'photo.webp', { type: 'image/webp' }));
       const result = await prepareUploadFile(file, UploadType.EDITOR_IMAGE);
 
       expect(mockConvertToWebP).toHaveBeenCalledTimes(1);

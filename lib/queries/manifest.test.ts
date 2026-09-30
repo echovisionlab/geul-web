@@ -266,4 +266,19 @@ describe('getManifest', () => {
       footer: 'flow',
     });
   });
+
+  it('returns null only when the public Page API reports not found', async () => {
+    getPublicPageRpcMock.mockRejectedValueOnce(new ConnectError('page not found', Code.NotFound));
+    const { getPublicPage } = await import('./manifest');
+
+    await expect(getPublicPage('/', { requestedLocale: 'en' })).resolves.toBeNull();
+  });
+
+  it('propagates other public Page API failures instead of treating them as unconfigured', async () => {
+    const error = new ConnectError('temporarily unavailable', Code.Unavailable);
+    getPublicPageRpcMock.mockRejectedValueOnce(error);
+    const { getPublicPage } = await import('./manifest');
+
+    await expect(getPublicPage('/', { requestedLocale: 'en' })).rejects.toBe(error);
+  });
 });

@@ -4,6 +4,7 @@ import { Code } from '@connectrpc/connect';
 import { createPublicArtistClientWithAuth } from '@/lib/api/server-client';
 import { materializeLocalizedRichTextTree } from '@/features/editor/contract/localized-rich-text';
 import { mapPublicLocalizationInfo, maybeFetchSourceLocale } from '@/lib/queries/localized-public';
+import { publicWorkTypeToString } from '@/lib/types/work/proto';
 import { createLogger } from '@/lib/utils/logger';
 import { isValidUuid } from '@/lib/utils/validation';
 
@@ -76,7 +77,8 @@ export async function getArtistView(
         id: work.id,
         title: work.title,
         slug: work.slug ?? null,
-        type: 'music_project',
+        // The shared mapper keeps unspecified or future enum values on the established music_project fallback.
+        type: publicWorkTypeToString(work.type),
         featuredImageUrl: work.imageAsset?.url ?? null,
       })),
       releases: (releasesResponse.releases ?? []).map((release) => ({

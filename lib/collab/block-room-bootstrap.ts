@@ -92,7 +92,7 @@ function localeMetadataEquals(left: LocaleMetadata, right: LocaleMetadata): bool
 const bootstrapEnvelopeSchema = z
   .object({
     kind: z.literal('block_room.bootstrap'),
-    protocolVersion: z.literal(1),
+    protocolVersion: z.literal(2),
     bootstrapChallenge: nonEmptyStringSchema,
     documentName: nonEmptyStringSchema,
     documentType: documentTypeSchema,

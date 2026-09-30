@@ -4,7 +4,8 @@ import { useCallback } from 'react';
 import type { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { getUploadSelectionMimeTypes, UPLOAD_CONFIGS } from '@/lib/constants/upload-config';
-import { getExtensionFromMimeType, toAcceptString } from '@/lib/utils/upload';
+import { resolveUploadMimeType, toAcceptString } from '@/lib/utils/upload';
+import { canonicalUploadFileName, normalizeUploadFile } from '@/lib/utils/upload-pipeline';
 import type { UploadLifecycleStage } from '@/lib/utils/upload-runtime';
 import { useFileUpload } from './useFileUpload';
 
@@ -27,23 +28,6 @@ interface UploadOptions {
 interface UploadResult {
   url: string;
   fileId: string;
-}
-
-function canonicalBlobFileName(fileName: string | undefined, extension: string): string {
-  const fallbackName = `upload.${extension}`;
-  const trimmedName = fileName?.trim();
-  if (!trimmedName) {
-    return fallbackName;
-  }
-
-  const expectedSuffix = `.${extension}`;
-  if (trimmedName.toLowerCase().endsWith(expectedSuffix.toLowerCase())) {
-    return trimmedName;
-  }
-
-  const extensionIndex = trimmedName.lastIndexOf('.');
-  const baseName = extensionIndex > 0 ? trimmedName.slice(0, extensionIndex) : trimmedName;
-  return `${baseName}.${extension}`;
 }
 
 /**
@@ -91,9 +75,10 @@ export function useUpload(uploadType: UploadType) {
    */
   const upload = useCallback(
     async (blob: Blob, options: UploadOptions): Promise<UploadResult> => {
-      const ext = getExtensionFromMimeType(blob.type);
-      const fileName = canonicalBlobFileName(options.fileName, ext);
-      const file = new File([blob], fileName, { type: blob.type });
+      const input = { name: options.fileName ?? '', type: blob.type };
+      const mimeType = resolveUploadMimeType(input, uploadType);
+      const fileName = canonicalUploadFileName(options.fileName, mimeType);
+      const file = new File([blob], fileName, { type: mimeType });
 
       return multipartUpload(file, {
         uploadType,
@@ -112,7 +97,8 @@ export function useUpload(uploadType: UploadType) {
    */
   const uploadFile = useCallback(
     async (file: File, options: Omit<UploadOptions, 'fileName'>): Promise<UploadResult> => {
-      return multipartUpload(file, {
+      const mimeType = resolveUploadMimeType(file, uploadType);
+      return multipartUpload(normalizeUploadFile(file, mimeType), {
         uploadType,
         entityId: options.entityId,
         entityType: options.entityType,

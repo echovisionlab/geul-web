@@ -2,11 +2,12 @@ import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { getUploadSelectionMimeTypes, UPLOAD_CONFIGS } from '@/lib/constants/upload-config';
 import { isHeicInputMime } from '@/lib/types/upload/model';
 import { convertToWebP } from '@/lib/utils/image-convert';
-import { createCanonicalMimeSet, isMimeAllowedInSet } from '@/lib/utils/mime';
+import { canonicalizeMimeType, createCanonicalMimeSet, isMimeAllowedInSet } from '@/lib/utils/mime';
 import {
   buildUnsupportedEditorMediaMessage,
   buildUnsupportedUploadTypeMessage,
   formatFileSize,
+  getExtensionFromMimeType,
   getUploadTypeForMime,
   resolveUploadMimeType,
 } from '@/lib/utils/upload';
@@ -126,6 +127,45 @@ function uploadTypeAllowsWebP(uploadType: UploadType): boolean {
   return UPLOAD_CONFIGS[uploadType].permittedMimeTypes.includes('image/webp');
 }
 
+/** Return a filename whose extension agrees with the upload's canonical MIME. */
+export function canonicalUploadFileName(fileName: string | undefined, mimeType: string): string {
+  const extension = getExtensionFromMimeType(mimeType);
+  const trimmedName = fileName?.trim();
+  if (!trimmedName) {
+    return `upload.${extension}`;
+  }
+  if (extension === 'bin') {
+    return trimmedName;
+  }
+
+  const expectedSuffix = `.${extension}`;
+  if (trimmedName.toLowerCase().endsWith(expectedSuffix.toLowerCase())) {
+    return trimmedName;
+  }
+
+  const extensionIndex = trimmedName.lastIndexOf('.');
+  const baseName = extensionIndex > 0 ? trimmedName.slice(0, extensionIndex) : trimmedName;
+  return `${baseName}.${extension}`;
+}
+
+/**
+ * Preserve the input bytes while making the filename and File.type agree with
+ * the canonical MIME used to initiate the multipart upload.
+ */
+export function normalizeUploadFile(file: File, mimeType: string): File {
+  const canonicalMimeType = canonicalizeMimeType(mimeType);
+  const fileName = canonicalUploadFileName(file.name, canonicalMimeType);
+  const fileType = canonicalMimeType || file.type;
+  if (file.name === fileName && file.type === fileType) {
+    return file;
+  }
+
+  return new File([file], fileName, {
+    type: fileType,
+    lastModified: file.lastModified,
+  });
+}
+
 /**
  * Apply client-side preprocessing aligned with upload policy.
  * WebP conversion is only applied when the target upload type permits WebP.
@@ -199,5 +239,5 @@ export async function prepareUploadFile(file: File, uploadType: UploadType): Pro
   if (!validation.valid) {
     throw new Error(validation.error);
   }
-  return { file: processedFile, mimeType: validation.mimeType };
+  return { file: normalizeUploadFile(processedFile, validation.mimeType), mimeType: validation.mimeType };
 }

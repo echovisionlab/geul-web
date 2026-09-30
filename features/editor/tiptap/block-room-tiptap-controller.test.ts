@@ -908,7 +908,7 @@ describe('incremental Block-room input boundaries', () => {
     async (nested) => {
       const fixture = performanceBoundaryFixture(nested);
       const serialize = vi.spyOn(ProseMirrorNode.prototype, 'toJSON');
-      const replaceText = vi.spyOn(fixture.bridge, 'replaceCollaborativeText');
+      const reconcileText = vi.spyOn(fixture.bridge, 'reconcileInlineContent');
       try {
         const changedId = fixture.ids[1]!;
         const from = fixture.position(changedId);
@@ -919,7 +919,7 @@ describe('incremental Block-room input boundaries', () => {
         expect(
           serialize.mock.contexts.filter((node) => node instanceof ProseMirrorNode && node.type.name === 'doc'),
         ).toHaveLength(0);
-        expect(replaceText.mock.calls.map(([target]) => target.blockId)).toEqual([changedId]);
+        expect(reconcileText.mock.calls.map(([target]) => target.blockId)).toEqual([changedId]);
         expect(undoBlockRoom(fixture.room)).toBe(true);
         await Promise.resolve();
         expect(fixture.text(changedId)).toBe('text1');

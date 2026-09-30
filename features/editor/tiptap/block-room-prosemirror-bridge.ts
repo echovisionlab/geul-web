@@ -25,6 +25,7 @@ import {
   moveBlockRoomPayloadArrayItem,
   replaceBlockRoomCollaborativeText,
   replaceBlockRoomPayloadArray,
+  reconcileBlockRoomInlineContent,
   moveRichTextBlockNode,
   replaceRichTextBlockData,
   roomLocale,
@@ -443,6 +444,17 @@ export class BlockRoomProseMirrorBridge {
   replaceCollection(target: BlockRoomPayloadTarget, values: readonly JsonValue[]): void {
     this.#assertPayloadMutationAuthority(target);
     replaceBlockRoomPayloadArray(this.#document, this.#payloadRef(target), values, {
+      origin: this.#origin,
+    });
+  }
+
+  reconcileInlineContent(
+    target: BlockRoomPayloadTarget,
+    previous: readonly JsonValue[],
+    next: readonly JsonValue[],
+  ): void {
+    this.#assertPayloadMutationAuthority(target);
+    reconcileBlockRoomInlineContent(this.#document, this.#payloadRef(target), previous, next, {
       origin: this.#origin,
     });
   }
