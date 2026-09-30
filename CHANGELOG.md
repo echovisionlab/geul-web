@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/echovisionlab/geul-web/compare/v0.2.3...v0.2.4) (2026-09-30)
+
+
+### Bug Fixes
+
+* **page:** share section insertion menus and labels ([#31](https://github.com/echovisionlab/geul-web/issues/31)) ([bc222f1](https://github.com/echovisionlab/geul-web/commit/bc222f16c47687cda853f5d4082504116946a98f))
+
 ## [0.2.3](https://github.com/echovisionlab/geul-web/compare/v0.2.2...v0.2.3) (2026-09-30)
 
 
