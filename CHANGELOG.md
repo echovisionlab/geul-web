@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/echovisionlab/geul-web/compare/v0.2.1...v0.2.2) (2026-09-30)
+
+
+### Performance Improvements
+
+* **editor:** reduce Post and Page input overhead ([#27](https://github.com/echovisionlab/geul-web/issues/27)) ([e9ad0cd](https://github.com/echovisionlab/geul-web/commit/e9ad0cdcf79c117ab22cd83295df9be74b16eb41))
+
 ## [0.2.1](https://github.com/echovisionlab/geul-web/compare/v0.2.0...v0.2.1) (2026-09-30)
 
 
