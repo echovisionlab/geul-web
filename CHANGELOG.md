@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.5](https://github.com/echovisionlab/geul-web/compare/v0.2.4...v0.2.5) (2026-09-30)
+
+
+### Bug Fixes
+
+* **web:** clarify editor planning and action outcomes ([#33](https://github.com/echovisionlab/geul-web/issues/33)) ([d84dc5a](https://github.com/echovisionlab/geul-web/commit/d84dc5a1aaaa1f0e1ab2eac0663bccf3aa0e81d4))
+
 ## [0.2.4](https://github.com/echovisionlab/geul-web/compare/v0.2.3...v0.2.4) (2026-09-30)
 
 
