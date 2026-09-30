@@ -34,7 +34,7 @@ interface SectionItemProps {
 
 export function SectionItem({ section, onDelete, editable = true }: SectionItemProps) {
   const t = useTranslations('pageEditor');
-  const { mergeSection, updateLocalizedSectionProps, updateSection, allowStructuralEdits } = usePageEditor();
+  const { updateLocalizedSectionProps, updateSection, allowStructuralEdits } = usePageEditor();
   const [settingsOpened, setSettingsOpened] = useState(false);
   const sectionTypeLabels = usePageSectionTypeLabels();
   const maxWidthOptions = useMemo(
@@ -91,8 +91,7 @@ export function SectionItem({ section, onDelete, editable = true }: SectionItemP
   // Use default settings if not provided
   const settings = section.settings ?? DEFAULT_SECTION_SETTINGS;
   const sectionLabel = sectionTypeLabels[section.type] ?? section.type;
-  const mergedSection = mergeSection(section);
-  const blockProps = mergedSection.props ?? {};
+  const blockProps = section.props ?? {};
   const sectionSettingsPanel = <SectionSettingsForm settings={settings} onChange={updateSettings} />;
 
   return (

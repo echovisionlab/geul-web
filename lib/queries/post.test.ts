@@ -260,6 +260,19 @@ describe('post server queries', () => {
     });
   });
 
+  it('uses the same public Post projection for public and share-token fetches', async () => {
+    const publicView = await queries.getPostView('post');
+    const tokenView = await queries.getPostViewWithToken('post', 'share-token');
+
+    expect(tokenView).toEqual(publicView);
+    expect(publicPostClient.get).toHaveBeenNthCalledWith(1, { slug: 'post' });
+    expect(publicPostClient.get).toHaveBeenNthCalledWith(2, {
+      slug: 'post',
+      shareToken: 'share-token',
+      sharePassword: undefined,
+    });
+  });
+
   it('resolves an authorized edit slug to the manage Post ID', async () => {
     const postId = '00000000-0000-4000-8000-000000000001';
     publicPostClient.get.mockResolvedValueOnce({ post: publicPost({ id: postId, slug: 'post-slug' }) });

@@ -29,6 +29,9 @@ import { createLogger } from '@/lib/utils/logger';
 import { isValidUuid } from '@/lib/utils/validation';
 
 const logger = createLogger('post-queries');
+type PublicPostClient = Awaited<ReturnType<typeof createPublicPostClientWithAuth>>;
+type PublicPostResponse = Awaited<ReturnType<PublicPostClient['get']>>;
+type PublicPost = NonNullable<PublicPostResponse['post']>;
 
 function toLocationPlace(
   place?: { name: string; lat: number; lng: number; googlePlaceId?: string } | null,
@@ -42,6 +45,42 @@ function toLocationPlace(
     lat: place.lat,
     lng: place.lng,
     googlePlaceId: place.googlePlaceId ?? null,
+  };
+}
+
+function mapPublicPostResponse(post: PublicPost, blockMedia: PublicPostResponse['blockMedia']) {
+  const content = post.document ? materializeLocalizedRichTextTree(post.document) : null;
+
+  return {
+    id: post.id,
+    title: post.title,
+    slug: post.slug,
+    summary: post.summary,
+    content,
+    blockMedia,
+    documentLayout: mapProtoDocumentLayout(post.documentLayout),
+    status: publicStatusToString(post.status),
+    statusCode: post.status,
+    commentsEnabled: post.commentsEnabled,
+    featuredImageUrl: resolvePostFeaturedImageUrl(post.featuredImageDelivery),
+    localizationInfo: mapPublicLocalizationInfo(post.localizationInfo),
+    publishedAt: post.publishedAt ? timestampDate(post.publishedAt) : undefined,
+    createdAt: post.createdAt ? timestampDate(post.createdAt) : undefined,
+    updatedAt: post.updatedAt ? timestampDate(post.updatedAt) : undefined,
+    authors: (post.authorMembers ?? []).map((author) => ({
+      id: author.id,
+      name: author.nickname,
+      avatarUrl: author.avatarAsset?.url,
+    })),
+    categories: (post.categories ?? []).map((category) => ({
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+    })),
+    tags: (post.tags ?? []).map((tag) => ({ id: tag.id, name: tag.name, slug: tag.slug })),
+    series: post.series ? { id: post.series.id, title: post.series.title, slug: post.series.slug } : undefined,
+    mapPlaceId: post.mapPlaceId ?? null,
+    locationPlace: toLocationPlace(post.locationPlace ?? null),
   };
 }
 
@@ -320,39 +359,7 @@ export async function getPostView(
       return null;
     }
 
-    const content = post.document ? materializeLocalizedRichTextTree(post.document) : null;
-
-    return {
-      id: post.id,
-      title: post.title,
-      slug: post.slug,
-      summary: post.summary,
-      content,
-      blockMedia: response.blockMedia,
-      documentLayout: mapProtoDocumentLayout(post.documentLayout),
-      status: publicStatusToString(post.status),
-      statusCode: post.status,
-      commentsEnabled: post.commentsEnabled,
-      featuredImageUrl: resolvePostFeaturedImageUrl(post.featuredImageDelivery),
-      localizationInfo: mapPublicLocalizationInfo(post.localizationInfo),
-      publishedAt: post.publishedAt ? timestampDate(post.publishedAt) : undefined,
-      createdAt: post.createdAt ? timestampDate(post.createdAt) : undefined,
-      updatedAt: post.updatedAt ? timestampDate(post.updatedAt) : undefined,
-      authors: (post.authorMembers ?? []).map((a) => ({
-        id: a.id,
-        name: a.nickname,
-        avatarUrl: a.avatarAsset?.url,
-      })),
-      categories: (post.categories ?? []).map((c) => ({
-        id: c.id,
-        name: c.name,
-        slug: c.slug,
-      })),
-      tags: (post.tags ?? []).map((t) => ({ id: t.id, name: t.name, slug: t.slug })),
-      series: post.series ? { id: post.series.id, title: post.series.title, slug: post.series.slug } : undefined,
-      mapPlaceId: post.mapPlaceId ?? null,
-      locationPlace: toLocationPlace(post.locationPlace ?? null),
-    };
+    return mapPublicPostResponse(post, response.blockMedia);
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
@@ -381,39 +388,7 @@ export async function getPostViewWithToken(
       return null;
     }
 
-    const content = post.document ? materializeLocalizedRichTextTree(post.document) : null;
-
-    return {
-      id: post.id,
-      title: post.title,
-      slug: post.slug,
-      summary: post.summary,
-      content,
-      blockMedia: response.blockMedia,
-      documentLayout: mapProtoDocumentLayout(post.documentLayout),
-      status: publicStatusToString(post.status),
-      statusCode: post.status,
-      commentsEnabled: post.commentsEnabled,
-      featuredImageUrl: resolvePostFeaturedImageUrl(post.featuredImageDelivery),
-      localizationInfo: mapPublicLocalizationInfo(post.localizationInfo),
-      publishedAt: post.publishedAt ? timestampDate(post.publishedAt) : undefined,
-      createdAt: post.createdAt ? timestampDate(post.createdAt) : undefined,
-      updatedAt: post.updatedAt ? timestampDate(post.updatedAt) : undefined,
-      authors: (post.authorMembers ?? []).map((a) => ({
-        id: a.id,
-        name: a.nickname,
-        avatarUrl: a.avatarAsset?.url,
-      })),
-      categories: (post.categories ?? []).map((c) => ({
-        id: c.id,
-        name: c.name,
-        slug: c.slug,
-      })),
-      tags: (post.tags ?? []).map((t) => ({ id: t.id, name: t.name, slug: t.slug })),
-      series: post.series ? { id: post.series.id, title: post.series.title, slug: post.series.slug } : undefined,
-      mapPlaceId: post.mapPlaceId ?? null,
-      locationPlace: toLocationPlace(post.locationPlace ?? null),
-    };
+    return mapPublicPostResponse(post, response.blockMedia);
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;

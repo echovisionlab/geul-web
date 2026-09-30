@@ -8,7 +8,7 @@ import type { SectionMeta } from './types';
 
 const state = vi.hoisted(() => ({ editable: true, mountedEditor: vi.fn(), getBlockDefinition: vi.fn() }));
 vi.mock('./PageEditorContext', () => ({
-  usePageEditor: () => ({ editable: state.editable, mergeSection: (section: SectionMeta) => section }),
+  usePageEditor: () => ({ editable: state.editable }),
 }));
 vi.mock('@/features/page/blocks/registry', () => ({
   getBlockDefinition: state.getBlockDefinition,

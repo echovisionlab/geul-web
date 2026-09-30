@@ -4,6 +4,14 @@ export function connectErrorCode(error: unknown): Code | undefined {
   return error instanceof ConnectError ? error.code : undefined;
 }
 
+export function connectActionErrorCode<TFallbackCode extends string>(
+  error: unknown,
+  fallbackCode: TFallbackCode,
+): Code | TFallbackCode {
+  const code = connectErrorCode(error);
+  return code ?? fallbackCode;
+}
+
 export function isConnectError(error: unknown): error is ConnectError {
   return error instanceof ConnectError;
 }

@@ -242,13 +242,16 @@ describe('series and share-link actions', () => {
         password: 'preview-secret',
       }),
     ).resolves.toEqual({
+      ok: true,
       shareLink: { id: 'share-1', url: 'https://studio.example.com/share/one' },
     });
-    await expect(shareLink.deleteShareLinkAction('share-1')).resolves.toEqual({ success: true });
+    await expect(shareLink.deleteShareLinkAction('share-1')).resolves.toEqual({ ok: true, success: true });
 
     shareLinkClient.createShareLink.mockRejectedValueOnce(new ConnectError('missing', Code.NotFound));
     await expect(shareLink.createShareLinkAction(ShareLinkEntityType.POST, 'missing')).resolves.toEqual({
+      ok: false,
       error: 'Entity not found',
+      errorCode: Code.NotFound,
     });
   });
 });

@@ -100,6 +100,7 @@ beforeEach(() => {
   regenerateOgImageMock.mockReset();
   vi.mocked(createFormClient).mockReset();
   regenerateOgImageMock.mockResolvedValue({
+    ok: true,
     runId: 'form-run',
     generationIds: ['form-generation'],
   });
@@ -306,6 +307,7 @@ describe('checkFormAccessAction', () => {
     createFormRpcMock.mockResolvedValue({ id: 'form-1' });
 
     await expect(createFormAction('Fresh Form')).resolves.toEqual({
+      ok: true,
       data: { id: 'form-1' },
     });
 
@@ -397,6 +399,7 @@ describe('checkFormAccessAction', () => {
     submitMock.mockResolvedValue({});
 
     await expect(submitFormAction('form-1', { email: 'hello@example.com' }, '   ', 'ko')).resolves.toEqual({
+      ok: true,
       success: true,
     });
 
@@ -415,7 +418,9 @@ describe('checkFormAccessAction', () => {
     submitMock.mockRejectedValue(new ConnectError('submit failed', Code.InvalidArgument));
 
     await expect(submitFormAction('form-1', { email: 'hello@example.com' })).resolves.toEqual({
+      ok: false,
       error: '[invalid_argument] submit failed',
+      errorCode: Code.InvalidArgument,
     });
     expect(createPublicFormClientWithAuth).toHaveBeenCalledWith(undefined);
   });
@@ -514,7 +519,10 @@ describe('form admin actions', () => {
   it('revalidates the scoped form paths when updating forms', async () => {
     updateFormRpcMock.mockResolvedValue({});
 
-    await expect(updateFormAction('form-1', { title: 'Updated', status: 'draft' })).resolves.toEqual({ success: true });
+    await expect(updateFormAction('form-1', { title: 'Updated', status: 'draft' })).resolves.toEqual({
+      ok: true,
+      success: true,
+    });
 
     expect(updateFormRpcMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -538,6 +546,7 @@ describe('form admin actions', () => {
       });
 
     await expect(updateFormAction('form-1', { title: 'Committed' })).resolves.toEqual({
+      ok: true,
       success: true,
     });
   });
@@ -546,7 +555,9 @@ describe('form admin actions', () => {
     deleteFormRpcMock.mockRejectedValue(new ConnectError('cannot delete', Code.FailedPrecondition));
 
     await expect(deleteFormAction('form-1')).resolves.toEqual({
+      ok: false,
       error: '[failed_precondition] cannot delete',
+      errorCode: Code.FailedPrecondition,
     });
     expect(revalidatePath).not.toHaveBeenCalled();
   });
@@ -557,7 +568,7 @@ describe('form admin actions', () => {
       throw new Error('cache unavailable');
     });
 
-    await expect(deleteFormAction('form-1')).resolves.toEqual({ success: true });
+    await expect(deleteFormAction('form-1')).resolves.toEqual({ ok: true, success: true });
     expect(deleteFormRpcMock).toHaveBeenCalledWith({ id: 'form-1' });
   });
 
@@ -569,10 +580,12 @@ describe('form admin actions', () => {
     deleteFeaturedImageMock.mockResolvedValue({ ogGenerationRunId: 'form-delete-featured-run' });
 
     await expect(setFormFeaturedImageAction('form-1', 'file-1', 'my')).resolves.toEqual({
+      ok: true,
       imageUrl: 'https://cdn.example.com/form.webp',
       ogGenerationRunId: 'form-featured-run',
     });
     await expect(removeFormFeaturedImageAction('form-1', 'my')).resolves.toEqual({
+      ok: true,
       success: true,
       ogGenerationRunId: 'form-delete-featured-run',
     });
@@ -597,10 +610,12 @@ describe('form admin actions', () => {
       });
 
     await expect(setFormFeaturedImageAction('form-1', 'file-1', 'my')).resolves.toEqual({
+      ok: true,
       imageUrl: 'https://cdn.example.com/form.webp',
       ogGenerationRunId: 'form-featured-run',
     });
     await expect(removeFormFeaturedImageAction('form-1', 'my')).resolves.toEqual({
+      ok: true,
       success: true,
       ogGenerationRunId: 'form-delete-featured-run',
     });
@@ -608,6 +623,7 @@ describe('form admin actions', () => {
 
   it('regenerates the exact Form locale and returns its durable generation identity', async () => {
     await expect(regenerateFormOgImageAction('form-1', ' ko ')).resolves.toEqual({
+      ok: true,
       success: true,
       runId: 'form-run',
       generationId: 'form-generation',
@@ -621,7 +637,9 @@ describe('form admin actions', () => {
 
   it('rejects a Form regeneration without a concrete locale', async () => {
     await expect(regenerateFormOgImageAction('form-1', '   ')).resolves.toEqual({
+      ok: false,
       error: 'Locale is required to regenerate this OG image',
+      errorCode: 'ACTION_INVALID_LOCALE',
     });
     expect(regenerateOgImageMock).not.toHaveBeenCalled();
   });
@@ -698,17 +716,21 @@ describe('form submission actions', () => {
 
     await expect(listFormSubmissionsAction({ formId: 'form-1' })).resolves.toEqual({
       ok: false,
+      error: 'Failed to list form submissions',
+      errorCode: Code.Internal,
       code: 'LIST_SUBMISSIONS_FAILED',
     });
   });
 
   it('deletes individual submissions and reports RPC errors', async () => {
     deleteSubmissionMock.mockResolvedValueOnce({});
-    await expect(deleteFormSubmissionAction('submission-1')).resolves.toEqual({ success: true });
+    await expect(deleteFormSubmissionAction('submission-1')).resolves.toEqual({ ok: true, success: true });
 
     deleteSubmissionMock.mockRejectedValueOnce(new ConnectError('cannot delete', Code.Internal));
     await expect(deleteFormSubmissionAction('submission-2')).resolves.toEqual({
+      ok: false,
       error: '[internal] cannot delete',
+      errorCode: Code.Internal,
     });
   });
 

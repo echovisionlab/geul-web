@@ -1,6 +1,12 @@
 'use server';
 
-import { isConnectError } from '@/lib/api/connect-error';
+import { connectActionErrorCode, isConnectError } from '@/lib/api/connect-error';
+import {
+  actionFailure,
+  actionSuccess,
+  type ActionResult,
+  type LocalActionErrorCode,
+} from '@/lib/actions/action-result';
 import { revalidatePath } from 'next/cache';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
@@ -17,6 +23,21 @@ import { toSlugInputValue } from '@/lib/utils/slug';
 
 const revalidatePostAfterCommit = createCommittedMutationRevalidator('post-actions', 'post');
 
+function postActionFailure(
+  err: unknown,
+  fallback: string,
+  fallbackCode: LocalActionErrorCode,
+  unauthorizedCodes: readonly Code[] = [Code.Unauthenticated],
+) {
+  const message =
+    isConnectError(err) && unauthorizedCodes.includes(err.code)
+      ? 'Unauthorized'
+      : err instanceof Error
+        ? err.message
+        : fallback;
+  return actionFailure(message.trim() ? message : fallback, connectActionErrorCode(err, fallbackCode));
+}
+
 function toProtoDocumentLayout(layout: DocumentLayout) {
   return {
     contentHeight: layout.contentHeight === 'viewport' ? DocumentContentHeight.VIEWPORT : DocumentContentHeight.CONTENT,
@@ -25,7 +46,7 @@ function toProtoDocumentLayout(layout: DocumentLayout) {
   };
 }
 
-export async function createPostAction(): Promise<{ data?: { id: string }; error?: string }> {
+export async function createPostAction(): Promise<ActionResult<{ data: { id: string } }>> {
   try {
     const client = await createPostClient();
     const response = await client.createPost({
@@ -33,32 +54,23 @@ export async function createPostAction(): Promise<{ data?: { id: string }; error
       commentsEnabled: true,
     });
     revalidatePath('/admin/posts');
-    return { data: { id: response.id } };
+    return actionSuccess({ data: { id: response.id } });
   } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create post' };
+    return postActionFailure(err, 'Failed to create post', 'POST_CREATE_FAILED');
   }
 }
 
-export async function deletePostAdminAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function deletePostAdminAction(id: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createPostClient();
     await client.deletePost({ id });
     revalidatePostAfterCommit('/admin/posts');
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated || err.code === Code.PermissionDenied) {
-        return { error: 'Unauthorized' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete post' };
+    return postActionFailure(err, 'Failed to delete post', 'POST_DELETE_FAILED', [
+      Code.Unauthenticated,
+      Code.PermissionDenied,
+    ]);
   }
 }
 
@@ -70,7 +82,7 @@ export async function updatePostAction(
     mapPlaceId?: string;
     documentLayout?: DocumentLayout;
   },
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createPostClient();
     const request: {
@@ -95,93 +107,63 @@ export async function updatePostAction(
     }
 
     await client.updatePost(request);
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update post' };
+    return postActionFailure(err, 'Failed to update post', 'POST_UPDATE_FAILED');
   }
 }
 
 export async function updatePostSlugAction(
   postId: string,
   slug: string | null,
-): Promise<{ success?: boolean; slug?: string | null; error?: string }> {
+): Promise<ActionResult<{ success: true; slug: string | null }>> {
   const result = await updatePostAction(postId, { slug: toSlugInputValue(slug) });
 
-  if (result.error) {
-    return { error: result.error };
+  if (!result.ok) {
+    return actionFailure(result.error, result.errorCode);
   }
 
-  return { success: true, slug };
+  return actionSuccess({ success: true, slug });
 }
 
-export async function deletePostAction(postId: string): Promise<{ success?: boolean; error?: string }> {
+export async function deletePostAction(postId: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createPostClient();
     await client.deletePost({ id: postId });
     revalidatePostAfterCommit('/admin/posts');
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete post' };
+    return postActionFailure(err, 'Failed to delete post', 'POST_DELETE_FAILED');
   }
 }
 
-export async function publishPostAction(postId: string): Promise<{ success?: boolean; error?: string }> {
+export async function publishPostAction(postId: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createPostClient();
     await client.publishPost({ id: postId });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to publish post' };
+    return postActionFailure(err, 'Failed to publish post', 'POST_PUBLISH_FAILED');
   }
 }
 
-export async function unpublishPostAction(postId: string): Promise<{ success?: boolean; error?: string }> {
+export async function unpublishPostAction(postId: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createPostClient();
     await client.unpublishPost({ id: postId });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to unpublish post' };
+    return postActionFailure(err, 'Failed to unpublish post', 'POST_UNPUBLISH_FAILED');
   }
 }
 
-export async function archivePostAction(postId: string): Promise<{ success?: boolean; error?: string }> {
+export async function archivePostAction(postId: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createPostClient();
     await client.archivePost({ id: postId });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to archive post' };
+    return postActionFailure(err, 'Failed to archive post', 'POST_ARCHIVE_FAILED');
   }
 }
 
@@ -189,7 +171,7 @@ export async function schedulePostAction(
   postId: string,
   scheduledAt: Date,
   scheduledTimeZone: string,
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createPostClient();
     await client.schedulePost({
@@ -197,165 +179,110 @@ export async function schedulePostAction(
       scheduledAt: timestampFromDate(scheduledAt),
       scheduledTimeZone,
     });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to schedule post' };
+    return postActionFailure(err, 'Failed to schedule post', 'POST_SCHEDULE_FAILED');
   }
 }
 
-export async function cancelPostScheduleAction(postId: string): Promise<{ success?: boolean; error?: string }> {
+export async function cancelPostScheduleAction(postId: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createPostClient();
     await client.cancelPostSchedule({ id: postId });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to cancel post schedule' };
+    return postActionFailure(err, 'Failed to cancel post schedule', 'POST_CANCEL_SCHEDULE_FAILED');
   }
 }
 
-export async function republishPostAction(postId: string): Promise<{ success?: boolean; error?: string }> {
+export async function republishPostAction(postId: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createPostClient();
     await client.republishPost({ id: postId });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to republish post' };
+    return postActionFailure(err, 'Failed to republish post', 'POST_REPUBLISH_FAILED');
   }
 }
 
 export async function setPostFeaturedImageAction(
   postId: string,
   fileId: string,
-): Promise<{ imageUrl?: string; ogGenerationRunId?: string; error?: string }> {
+): Promise<ActionResult<{ imageUrl: string | undefined; ogGenerationRunId?: string }>> {
   try {
     const client = await createPostClient();
     const result = await client.setPostFeaturedImage({ postId, fileId });
     const response = { imageUrl: resolvePostFeaturedImageUrl(result.imageDelivery) ?? undefined };
-    return result.ogGenerationRunId ? { ...response, ogGenerationRunId: result.ogGenerationRunId } : response;
+    return actionSuccess(
+      result.ogGenerationRunId ? { ...response, ogGenerationRunId: result.ogGenerationRunId } : response,
+    );
   } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to set featured image' };
+    return postActionFailure(err, 'Failed to set featured image', 'POST_SET_FEATURED_IMAGE_FAILED');
   }
 }
 
 export async function removePostFeaturedImageAction(
   postId: string,
-): Promise<{ success?: boolean; ogGenerationRunId?: string; error?: string }> {
+): Promise<ActionResult<{ success: true; ogGenerationRunId?: string }>> {
   try {
     const client = await createPostClient();
     const result = await client.deletePostFeaturedImage({ postId });
-    return result.ogGenerationRunId
-      ? { success: true, ogGenerationRunId: result.ogGenerationRunId }
-      : { success: true };
+    return actionSuccess(
+      result.ogGenerationRunId ? { success: true, ogGenerationRunId: result.ogGenerationRunId } : { success: true },
+    );
   } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to remove featured image' };
+    return postActionFailure(err, 'Failed to remove featured image', 'POST_REMOVE_FEATURED_IMAGE_FAILED');
   }
 }
 
 // === Authors and collaborators ===
 
-export async function addPostAuthorAction(
-  postId: string,
-  memberId: string,
-): Promise<{ success?: boolean; error?: string }> {
+export async function addPostAuthorAction(postId: string, memberId: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createPostClient();
     await client.addPostAuthor({ postId, memberId });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to add author' };
+    return postActionFailure(err, 'Failed to add author', 'POST_ADD_AUTHOR_FAILED');
   }
 }
 
 export async function removePostAuthorAction(
   postId: string,
   memberId: string,
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createPostClient();
     await client.removePostAuthor({ postId, memberId });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to remove author' };
+    return postActionFailure(err, 'Failed to remove author', 'POST_REMOVE_AUTHOR_FAILED');
   }
 }
 
 export async function addPostCollaboratorAction(
   postId: string,
   memberId: string,
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createPostClient();
     await client.addPostCollaborator({ postId, memberId });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to add collaborator' };
+    return postActionFailure(err, 'Failed to add collaborator', 'POST_ADD_COLLABORATOR_FAILED');
   }
 }
 
 export async function removePostCollaboratorAction(
   postId: string,
   memberId: string,
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createPostClient();
     await client.removePostCollaborator({ postId, memberId });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to remove collaborator' };
+    return postActionFailure(err, 'Failed to remove collaborator', 'POST_REMOVE_COLLABORATOR_FAILED');
   }
 }
 
@@ -369,7 +296,7 @@ export async function createPostShareLinkAction(data: {
   label?: string;
   expiresAt?: Date;
   password?: string;
-}): Promise<{ shareLink?: ShareLinkItem; error?: string }> {
+}): Promise<ActionResult<{ shareLink: ShareLinkItem }>> {
   return createShareLinkAction(ShareLinkEntityType.POST, data.postId, {
     label: data.label,
     expiresAt: data.expiresAt,
@@ -377,17 +304,17 @@ export async function createPostShareLinkAction(data: {
   });
 }
 
-export async function deletePostShareLinkAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function deletePostShareLinkAction(id: string): Promise<ActionResult<{ success: true }>> {
   return deleteShareLinkAction(id);
 }
 
 export async function regeneratePostOgImageAction(
   postId: string,
   locale: string,
-): Promise<{ success?: boolean; runId?: string; generationId?: string; error?: string }> {
+): Promise<ActionResult<{ success: true; runId?: string; generationId?: string }>> {
   const scopedLocale = normalizeOgRegenerationLocale(locale);
   if (!scopedLocale) {
-    return { error: 'Locale is required to regenerate this OG image' };
+    return actionFailure('Locale is required to regenerate this OG image', 'ACTION_INVALID_LOCALE');
   }
 
   const result = await requestOgImageRegeneration({
@@ -395,10 +322,10 @@ export async function regeneratePostOgImageAction(
     entityId: postId,
     selection: { type: 'locale', locale: scopedLocale },
   });
-  if (result.error) {
-    return { error: result.error };
+  if (!result.ok) {
+    return actionFailure(result.error, result.errorCode);
   }
-  return { success: true, runId: result.runId, generationId: result.generationIds?.[0] };
+  return actionSuccess({ success: true, runId: result.runId, generationId: result.generationIds?.[0] });
 }
 
 async function getGeneratedPostMarkdown(postId: string): Promise<{ title: string; markdown: string }> {
@@ -418,25 +345,19 @@ async function getGeneratedPostMarkdown(postId: string): Promise<{ title: string
 // Markdown export stays server-side because it reads the canonical Block document.
 export async function getPostMarkdownAction(
   postId: string,
-): Promise<{ title?: string | null; markdown?: string; error?: string }> {
+): Promise<ActionResult<{ title: string; markdown: string }>> {
   try {
-    return await getGeneratedPostMarkdown(postId);
+    return actionSuccess(await getGeneratedPostMarkdown(postId));
   } catch (err) {
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to get markdown' };
+    return postActionFailure(err, 'Failed to get markdown', 'POST_GET_MARKDOWN_FAILED', []);
   }
 }
 
-export async function exportPostMarkdownAction(postId: string): Promise<{ markdown?: string; error?: string }> {
+export async function exportPostMarkdownAction(postId: string): Promise<ActionResult<{ markdown: string }>> {
   try {
     const result = await getGeneratedPostMarkdown(postId);
-    return { markdown: result.markdown };
+    return actionSuccess({ markdown: result.markdown });
   } catch (err) {
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to export markdown' };
+    return postActionFailure(err, 'Failed to export markdown', 'POST_EXPORT_MARKDOWN_FAILED', []);
   }
 }

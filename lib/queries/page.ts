@@ -13,6 +13,9 @@ import { createLogger } from '@/lib/utils/logger';
 import { isValidUuid } from '@/lib/utils/validation';
 
 const logger = createLogger('page-queries');
+type PublicPageClient = Awaited<ReturnType<typeof createPublicPageClientWithAuth>>;
+type PublicPageResponse = Awaited<ReturnType<PublicPageClient['get']>>;
+type PublicPage = NonNullable<PublicPageResponse['page']>;
 
 // Helper to convert public PageStatus enum to string
 function publicPageStatusToString(status: PublicPageStatus): 'draft' | 'published' {
@@ -33,6 +36,25 @@ function pageStatusToString(status: PageStatus): 'draft' | 'published' {
     default:
       return 'draft';
   }
+}
+
+function mapPublicPageResponse(page: PublicPage, blockMedia: PublicPageResponse['blockMedia']) {
+  const content = page.document ? materializeLocalizedPageSections(page.document) : null;
+  return {
+    id: page.id,
+    slug: page.slug ?? null,
+    title: page.title,
+    summary: page.summary ?? null,
+    featuredImageUrl: resolveFeaturedImageDeliveryUrl(page.featuredImageDelivery),
+    showTitle: page.showTitle,
+    content,
+    blockMedia,
+    documentLayout: mapProtoDocumentLayout(page.documentLayout),
+    localizationInfo: mapPublicLocalizationInfo(page.localizationInfo),
+    createdAt: page.createdAt ? timestampDate(page.createdAt) : null,
+    updatedAt: page.updatedAt ? timestampDate(page.updatedAt) : null,
+    publishedAt: page.publishedAt ? timestampDate(page.publishedAt) : null,
+  };
 }
 
 interface PageListInput {
@@ -168,23 +190,7 @@ export async function getPageView(
       return null;
     }
 
-    const content = page.document ? materializeLocalizedPageSections(page.document) : null;
-
-    return {
-      id: page.id,
-      slug: page.slug ?? null,
-      title: page.title,
-      summary: page.summary ?? null,
-      featuredImageUrl: resolveFeaturedImageDeliveryUrl(page.featuredImageDelivery),
-      showTitle: page.showTitle,
-      content,
-      blockMedia: response.blockMedia,
-      documentLayout: mapProtoDocumentLayout(page.documentLayout),
-      localizationInfo: mapPublicLocalizationInfo(page.localizationInfo),
-      createdAt: page.createdAt ? timestampDate(page.createdAt) : null,
-      updatedAt: page.updatedAt ? timestampDate(page.updatedAt) : null,
-      publishedAt: page.publishedAt ? timestampDate(page.publishedAt) : null,
-    };
+    return mapPublicPageResponse(page, response.blockMedia);
   } catch (err) {
     if (isConnectError(err)) {
       if (err.code === Code.NotFound) {
@@ -215,23 +221,9 @@ export async function getPageViewWithToken(
       return null;
     }
 
-    const content = page.document ? materializeLocalizedPageSections(page.document) : null;
-
     return {
-      id: page.id,
-      slug: page.slug ?? null,
-      title: page.title,
-      summary: page.summary ?? null,
-      featuredImageUrl: resolveFeaturedImageDeliveryUrl(page.featuredImageDelivery),
+      ...mapPublicPageResponse(page, response.blockMedia),
       status: publicPageStatusToString(page.status),
-      showTitle: page.showTitle,
-      content,
-      blockMedia: response.blockMedia,
-      documentLayout: mapProtoDocumentLayout(page.documentLayout),
-      localizationInfo: mapPublicLocalizationInfo(page.localizationInfo),
-      createdAt: page.createdAt ? timestampDate(page.createdAt) : null,
-      updatedAt: page.updatedAt ? timestampDate(page.updatedAt) : null,
-      publishedAt: page.publishedAt ? timestampDate(page.publishedAt) : null,
     };
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {

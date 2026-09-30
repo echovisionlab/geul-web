@@ -1,6 +1,12 @@
 'use server';
 
-import { isConnectError } from '@/lib/api/connect-error';
+import { connectActionErrorCode, isConnectError } from '@/lib/api/connect-error';
+import {
+  actionFailure,
+  actionSuccess,
+  type ActionResult,
+  type LocalActionErrorCode,
+} from '@/lib/actions/action-result';
 import { revalidatePath } from 'next/cache';
 import { timestampDate, timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
@@ -45,6 +51,11 @@ function getFormsBasePath(scope: FormScope): string {
 
 const revalidateFormAfterCommit = createCommittedMutationRevalidator('form-actions', 'form');
 
+function formActionFailure(err: unknown, fallback: string, fallbackCode: LocalActionErrorCode) {
+  const message = err instanceof Error ? err.message : fallback;
+  return actionFailure(message.trim() ? message : fallback, connectActionErrorCode(err, fallbackCode));
+}
+
 export async function listFormsAdminAction(input: FormListInput) {
   try {
     const client = await createFormClient();
@@ -84,7 +95,7 @@ export async function listFormsAdminAction(input: FormListInput) {
   }
 }
 
-export async function createFormAction(title: string): Promise<{ data?: { id: string }; error?: string }> {
+export async function createFormAction(title: string): Promise<ActionResult<{ data: { id: string } }>> {
   try {
     const client = await createFormClient();
     const schema = {
@@ -97,26 +108,20 @@ export async function createFormAction(title: string): Promise<{ data?: { id: st
       isPublic: false,
     });
     revalidatePath('/admin/forms');
-    return { data: { id: form.id } };
+    return actionSuccess({ data: { id: form.id } });
   } catch (err) {
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create form' };
+    return formActionFailure(err, 'Failed to create form', 'FORM_CREATE_FAILED');
   }
 }
 
-export async function deleteFormAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function deleteFormAction(id: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createFormClient();
     await client.deleteForm({ id });
     revalidateFormAfterCommit('/admin/forms');
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete form' };
+    return formActionFailure(err, 'Failed to delete form', 'FORM_DELETE_FAILED');
   }
 }
 
@@ -134,10 +139,7 @@ export interface UpdateFormInput {
   allowDuplicateSubmission?: boolean;
 }
 
-export async function updateFormAction(
-  id: string,
-  data: UpdateFormInput,
-): Promise<{ success?: boolean; error?: string }> {
+export async function updateFormAction(id: string, data: UpdateFormInput): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createFormClient();
     await client.updateForm({
@@ -163,12 +165,9 @@ export async function updateFormAction(
     const basePath = getFormsBasePath('admin');
     revalidateFormAfterCommit(basePath);
     revalidateFormAfterCommit(`${basePath}/${id}`);
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update form' };
+    return formActionFailure(err, 'Failed to update form', 'FORM_UPDATE_FAILED');
   }
 }
 
@@ -176,57 +175,53 @@ export async function setFormFeaturedImageAction(
   formId: string,
   fileId: string,
   scope: FormScope = 'admin',
-): Promise<{ imageUrl?: string; ogGenerationRunId?: string; error?: string }> {
+): Promise<ActionResult<{ imageUrl?: string; ogGenerationRunId?: string }>> {
   try {
     const client = await createFormClient();
     const result = await client.setFormFeaturedImage({ formId, fileId });
     revalidateFormAfterCommit(`${getFormsBasePath(scope)}/${formId}`);
     const response = { imageUrl: result.imageAsset?.url };
-    return result.ogGenerationRunId ? { ...response, ogGenerationRunId: result.ogGenerationRunId } : response;
+    return actionSuccess(
+      result.ogGenerationRunId ? { ...response, ogGenerationRunId: result.ogGenerationRunId } : response,
+    );
   } catch (err) {
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to set featured image' };
+    return formActionFailure(err, 'Failed to set featured image', 'FORM_SET_FEATURED_IMAGE_FAILED');
   }
 }
 
 export async function removeFormFeaturedImageAction(
   formId: string,
   scope: FormScope = 'admin',
-): Promise<{ success?: boolean; ogGenerationRunId?: string; error?: string }> {
+): Promise<ActionResult<{ success: true; ogGenerationRunId?: string }>> {
   try {
     const client = await createFormClient();
     const result = await client.deleteFormFeaturedImage({ formId });
     revalidateFormAfterCommit(`${getFormsBasePath(scope)}/${formId}`);
-    return result.ogGenerationRunId
-      ? { success: true, ogGenerationRunId: result.ogGenerationRunId }
-      : { success: true };
+    return actionSuccess(
+      result.ogGenerationRunId ? { success: true, ogGenerationRunId: result.ogGenerationRunId } : { success: true },
+    );
   } catch (err) {
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to remove featured image' };
+    return formActionFailure(err, 'Failed to remove featured image', 'FORM_REMOVE_FEATURED_IMAGE_FAILED');
   }
 }
 
 export async function regenerateFormOgImageAction(
   formId: string,
   locale: string,
-): Promise<{ success?: boolean; runId?: string; generationId?: string; error?: string }> {
+): Promise<ActionResult<{ success: true; runId?: string; generationId?: string }>> {
   const scopedLocale = locale.trim();
   if (!scopedLocale) {
-    return { error: 'Locale is required to regenerate this OG image' };
+    return actionFailure('Locale is required to regenerate this OG image', 'ACTION_INVALID_LOCALE');
   }
   const result = await requestOgImageRegeneration({
     entityType: 'form',
     entityId: formId,
     selection: { type: 'locale', locale: scopedLocale },
   });
-  if (result.error) {
-    return { error: result.error };
+  if (!result.ok) {
+    return actionFailure(result.error, result.errorCode);
   }
-  return { success: true, runId: result.runId, generationId: result.generationIds?.[0] };
+  return actionSuccess({ success: true, runId: result.runId, generationId: result.generationIds?.[0] });
 }
 
 interface ListSubmissionsInput {
@@ -241,7 +236,26 @@ interface ListSubmissionsInput {
   dateTo?: string;
 }
 
-export async function listFormSubmissionsAction(input: ListSubmissionsInput) {
+interface FormSubmissionsListData {
+  submissions: Array<{
+    id: string;
+    formId: string;
+    memberId: string | undefined;
+    data: unknown;
+    ipAddress: string | undefined;
+    countryCode: string | undefined;
+    userAgent: string | undefined;
+    createdAt: Date | undefined;
+  }>;
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export async function listFormSubmissionsAction(
+  input: ListSubmissionsInput,
+): Promise<ActionResult<{ data: FormSubmissionsListData }, { code: 'LIST_SUBMISSIONS_FAILED' }>> {
   try {
     const client = await createFormClient();
     const page = input.page ?? 1;
@@ -266,8 +280,7 @@ export async function listFormSubmissionsAction(input: ListSubmissionsInput) {
     });
 
     const total = response.pagination?.total ?? 0;
-    return {
-      ok: true as const,
+    return actionSuccess({
       data: {
         submissions: (response.submissions ?? []).map((s) => ({
           id: s.id,
@@ -284,25 +297,24 @@ export async function listFormSubmissionsAction(input: ListSubmissionsInput) {
         limit,
         totalPages: Math.ceil(total / limit),
       },
-    };
+    });
   } catch (err) {
     if (isConnectError(err)) {
       logger.error('ListFormSubmissions RPC error', { error: err.message });
     }
-    return { ok: false as const, code: 'LIST_SUBMISSIONS_FAILED' as const };
+    return actionFailure('Failed to list form submissions', connectActionErrorCode(err, 'LIST_SUBMISSIONS_FAILED'), {
+      code: 'LIST_SUBMISSIONS_FAILED' as const,
+    });
   }
 }
 
-export async function deleteFormSubmissionAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function deleteFormSubmissionAction(id: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createFormClient();
     await client.deleteFormSubmission({ id });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete submission' };
+    return formActionFailure(err, 'Failed to delete submission', 'FORM_DELETE_SUBMISSION_FAILED');
   }
 }
 
@@ -312,7 +324,7 @@ export async function submitFormAction(
   data: Record<string, unknown>,
   password?: string,
   requestedLocale?: string,
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<ActionResult<{ success: true }>> {
   try {
     const publicClient = await createPublicFormClientWithAuth(requestedLocale);
     const normalizedPassword = password?.trim() ? password : undefined;
@@ -323,12 +335,9 @@ export async function submitFormAction(
       password: normalizedPassword,
     });
 
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to submit form' };
+    return formActionFailure(err, 'Failed to submit form', 'FORM_SUBMIT_FAILED');
   }
 }
 
@@ -367,7 +376,7 @@ export async function createFormShareLinkAction(data: {
   label?: string;
   expiresAt?: Date;
   password?: string;
-}): Promise<{ shareLink?: ShareLinkItem; error?: string }> {
+}): Promise<ActionResult<{ shareLink: ShareLinkItem }>> {
   return createShareLinkAction(data.type, data.formId, {
     label: data.label,
     expiresAt: data.expiresAt,
@@ -375,7 +384,7 @@ export async function createFormShareLinkAction(data: {
   });
 }
 
-export async function deleteFormShareLinkAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function deleteFormShareLinkAction(id: string): Promise<ActionResult<{ success: true }>> {
   return deleteShareLinkAction(id);
 }
 

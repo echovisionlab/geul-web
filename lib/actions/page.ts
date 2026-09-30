@@ -1,6 +1,12 @@
 'use server';
 
-import { isConnectError } from '@/lib/api/connect-error';
+import { connectActionErrorCode, isConnectError } from '@/lib/api/connect-error';
+import {
+  actionFailure,
+  actionSuccess,
+  type ActionResult,
+  type LocalActionErrorCode,
+} from '@/lib/actions/action-result';
 import { revalidatePath } from 'next/cache';
 import { Code } from '@connectrpc/connect';
 import { ShareLinkEntityType, type ShareLinkItem } from '@echovisionlab/geul-proto/secure/share_link_pb.ts';
@@ -15,96 +21,86 @@ import { toSlugInputValue } from '@/lib/utils/slug';
 
 const revalidatePageAfterCommit = createCommittedMutationRevalidator('page-actions', 'page');
 
-export async function createPageAction(): Promise<{ data?: { id: string; slug: string | null }; error?: string }> {
+function pageActionFailure(err: unknown, fallback: string, fallbackCode: LocalActionErrorCode) {
+  const message = err instanceof Error ? err.message : fallback;
+  return actionFailure(message.trim() ? message : fallback, connectActionErrorCode(err, fallbackCode));
+}
+
+export async function createPageAction(): Promise<ActionResult<{ data: { id: string; slug: string | null } }>> {
   try {
     const client = await createPageClient();
     const page = await client.createPage({
       title: 'Untitled Page',
     });
     revalidatePath('/admin/pages');
-    return { data: { id: page.id, slug: page.slug ?? null } };
+    return actionSuccess({ data: { id: page.id, slug: page.slug ?? null } });
   } catch (err) {
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create page' };
+    return pageActionFailure(err, 'Failed to create page', 'PAGE_CREATE_FAILED');
   }
 }
 
-export async function deletePageAdminAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function deletePageAdminAction(id: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createPageClient();
     await client.deletePage({ id });
     revalidatePageAfterCommit('/admin/pages');
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete page' };
+    return pageActionFailure(err, 'Failed to delete page', 'PAGE_DELETE_FAILED');
   }
 }
 
 // === Editor Mutations ===
 
-export async function publishPageAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function publishPageAction(id: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createPageClient();
     await client.publishPage({ id });
     revalidatePath('/admin/pages');
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to publish page' };
+    return pageActionFailure(err, 'Failed to publish page', 'PAGE_PUBLISH_FAILED');
   }
 }
 
-export async function unpublishPageAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function unpublishPageAction(id: string): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createPageClient();
     await client.unpublishPage({ id });
     revalidatePath('/admin/pages');
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to unpublish page' };
+    return pageActionFailure(err, 'Failed to unpublish page', 'PAGE_UNPUBLISH_FAILED');
   }
 }
 
 export async function updatePageShowTitleAction(
   id: string,
   showTitle: boolean,
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<ActionResult<{ success: true }>> {
   try {
     const client = await createPageClient();
     await client.updatePage({ id, showTitle });
-    return { success: true };
+    return actionSuccess({ success: true });
   } catch (err) {
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update page show title' };
+    return pageActionFailure(err, 'Failed to update page show title', 'PAGE_UPDATE_SHOW_TITLE_FAILED');
   }
 }
 
 export async function updatePageSlugAction(
   id: string,
   slug: string | null,
-): Promise<{
-  success?: boolean;
-  slug?: string | null;
-  error?: string;
-  reason?: PageSlugValidationReason | 'alreadyExists' | 'checkFailed';
-}> {
+): Promise<
+  ActionResult<
+    { success: true; slug: string | null },
+    { reason: PageSlugValidationReason | 'alreadyExists' | 'checkFailed' }
+  >
+> {
   try {
     const client = await createPageClient();
     await client.updatePage({ id, slug: toSlugInputValue(slug) });
     revalidatePath('/admin/pages');
-    return { success: true, slug };
+    return actionSuccess({ success: true, slug });
   } catch (err) {
     if (isConnectError(err)) {
       const reason =
@@ -115,9 +111,13 @@ export async function updatePageSlugAction(
               ? (getPageSlugValidationReason(slug) ?? 'invalidPath')
               : 'invalidPath'
             : 'checkFailed';
-      return { error: err.message, reason };
+      return actionFailure(err.message, connectActionErrorCode(err, 'PAGE_UPDATE_SLUG_FAILED'), { reason });
     }
-    return { error: err instanceof Error ? err.message : 'Failed to update page slug', reason: 'checkFailed' };
+    return actionFailure(
+      err instanceof Error ? err.message : 'Failed to update page slug',
+      connectActionErrorCode(err, 'PAGE_UPDATE_SLUG_FAILED'),
+      { reason: 'checkFailed' },
+    );
   }
 }
 
@@ -131,7 +131,7 @@ export async function createPageShareLinkAction(data: {
   label?: string;
   expiresAt?: Date;
   password?: string;
-}): Promise<{ shareLink?: ShareLinkItem; error?: string }> {
+}): Promise<ActionResult<{ shareLink: ShareLinkItem }>> {
   return createShareLinkAction(ShareLinkEntityType.PAGE, data.pageId, {
     label: data.label,
     expiresAt: data.expiresAt,
@@ -139,17 +139,17 @@ export async function createPageShareLinkAction(data: {
   });
 }
 
-export async function deletePageShareLinkAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function deletePageShareLinkAction(id: string): Promise<ActionResult<{ success: true }>> {
   return deleteShareLinkAction(id);
 }
 
 export async function regeneratePageOgImageAction(
   pageId: string,
   locale: string,
-): Promise<{ success?: boolean; runId?: string; generationId?: string; error?: string }> {
+): Promise<ActionResult<{ success: true; runId?: string; generationId?: string }>> {
   const scopedLocale = normalizeOgRegenerationLocale(locale);
   if (!scopedLocale) {
-    return { error: 'Locale is required to regenerate this OG image' };
+    return actionFailure('Locale is required to regenerate this OG image', 'ACTION_INVALID_LOCALE');
   }
 
   const result = await requestOgImageRegeneration({
@@ -157,43 +157,39 @@ export async function regeneratePageOgImageAction(
     entityId: pageId,
     selection: { type: 'locale', locale: scopedLocale },
   });
-  if (result.error) {
-    return { error: result.error };
+  if (!result.ok) {
+    return actionFailure(result.error, result.errorCode);
   }
-  return { success: true, runId: result.runId, generationId: result.generationIds?.[0] };
+  return actionSuccess({ success: true, runId: result.runId, generationId: result.generationIds?.[0] });
 }
 
 export async function setPageFeaturedImageAction(
   pageId: string,
   fileId: string,
-): Promise<{ imageUrl?: string; ogGenerationRunId?: string; error?: string }> {
+): Promise<ActionResult<{ imageUrl?: string; ogGenerationRunId?: string }>> {
   try {
     const client = await createPageClient();
     const result = await client.setPageFeaturedImage({ pageId, fileId });
     const imageUrl = resolveFeaturedImageDeliveryUrl(result.imageDelivery);
     const response = imageUrl ? { imageUrl } : {};
-    return result.ogGenerationRunId ? { ...response, ogGenerationRunId: result.ogGenerationRunId } : response;
+    return actionSuccess(
+      result.ogGenerationRunId ? { ...response, ogGenerationRunId: result.ogGenerationRunId } : response,
+    );
   } catch (err) {
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to set featured image' };
+    return pageActionFailure(err, 'Failed to set featured image', 'PAGE_SET_FEATURED_IMAGE_FAILED');
   }
 }
 
 export async function removePageFeaturedImageAction(
   pageId: string,
-): Promise<{ success?: boolean; ogGenerationRunId?: string; error?: string }> {
+): Promise<ActionResult<{ success: true; ogGenerationRunId?: string }>> {
   try {
     const client = await createPageClient();
     const result = await client.deletePageFeaturedImage({ pageId });
-    return result.ogGenerationRunId
-      ? { success: true, ogGenerationRunId: result.ogGenerationRunId }
-      : { success: true };
+    return actionSuccess(
+      result.ogGenerationRunId ? { success: true, ogGenerationRunId: result.ogGenerationRunId } : { success: true },
+    );
   } catch (err) {
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to remove featured image' };
+    return pageActionFailure(err, 'Failed to remove featured image', 'PAGE_REMOVE_FEATURED_IMAGE_FAILED');
   }
 }

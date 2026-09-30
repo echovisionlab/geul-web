@@ -9,6 +9,7 @@ import type { ReleaseTrackItem } from '@/lib/collab/schemas/release-fields.schem
 import { DEFAULT_MEDIA_STATUS_LABELS } from '@/lib/media/status';
 import { TestProviders } from '@/test/TestProviders';
 import { ReleaseTracksSection } from './ReleaseTracksSection';
+import { RELEASE_TRACK_PROCESSING_STATUS } from './track-processing-status';
 import { resolveTrackProgressIndicator } from './track-runtime';
 
 const deleteTrackActionMock = vi.fn();
@@ -225,6 +226,7 @@ vi.mock('../TrackAudioUploader', () => ({
   TrackAudioUploader: (props: {
     trackId: string;
     mode?: string;
+    processingStatus?: string | null;
     processingActive?: boolean;
     processingProgress?: number | null;
     onPendingUploadCancelled?: (identity: { attemptId?: string; fileId?: string }) => void;
@@ -232,7 +234,10 @@ vi.mock('../TrackAudioUploader', () => ({
     latestTrackAudioUploaderProps[`${props.trackId}:${props.mode ?? 'default'}`] = props;
 
     return (
-      <div data-testid={`audio-uploader-${props.trackId}-${props.mode ?? 'default'}`}>
+      <div
+        data-testid={`audio-uploader-${props.trackId}-${props.mode ?? 'default'}`}
+        data-processing-status={props.processingStatus ?? ''}
+      >
         {props.processingActive ? 'processing' : 'none'}:{props.processingProgress ?? 'null'}
       </div>
     );
@@ -243,8 +248,12 @@ vi.mock('../TrackAudioUploader', () => ({
 
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches: false,
+  value: vi.fn(),
+});
+
+function setMobileViewport(matches: boolean) {
+  window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+    matches,
     media: query,
     onchange: null,
     addListener: vi.fn(),
@@ -252,8 +261,8 @@ Object.defineProperty(window, 'matchMedia', {
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
-  })),
-});
+  }));
+}
 
 class ResizeObserverMock {
   observe() {}
@@ -307,10 +316,11 @@ afterEach(() => {
 });
 
 beforeEach(() => {
+  setMobileViewport(false);
   deleteTrackActionMock.mockReset();
-  deleteTrackActionMock.mockResolvedValue({ success: true });
+  deleteTrackActionMock.mockResolvedValue({ ok: true, success: true });
   reorderTracksActionMock.mockReset();
-  reorderTracksActionMock.mockResolvedValue({ success: true });
+  reorderTracksActionMock.mockResolvedValue({ ok: true, success: true });
   useUploadResumeStateMock.mockReset();
   useUploadResumeStateMock.mockReturnValue({
     code: 'idle',
@@ -328,6 +338,128 @@ beforeEach(() => {
 });
 
 describe('ReleaseTracksSection', () => {
+  it('passes failed processing state to the mobile uploader status view', () => {
+    setMobileViewport(true);
+    const trackId = randomTestUuid();
+    const fileId = randomTestUuid();
+    const tracks: ReleaseTrackItem[] = [
+      {
+        id: trackId,
+        track_number: 1,
+        title: 'Failed processing',
+        duration_seconds: null,
+        audio_attached: false,
+        audio_original_file_id: fileId,
+        processing_status: null,
+        credits: [],
+      },
+    ];
+
+    useMediaProcessingRuntimeStateMock.mockReturnValue({
+      value: {
+        processing_status: RELEASE_TRACK_PROCESSING_STATUS.failed,
+        processing_progress: 0,
+        duration_seconds: null,
+      },
+      isLoading: false,
+    });
+
+    render(<ReleaseTracksSection releaseId={randomTestUuid()} tracks={tracks} onTracksChange={vi.fn()} />);
+
+    expect(document.querySelector('table')).toBeNull();
+    expect(document.querySelector(`[data-testid="audio-uploader-${trackId}-status-only"]`)).toHaveAttribute(
+      'data-processing-status',
+      RELEASE_TRACK_PROCESSING_STATUS.failed,
+    );
+  });
+
+  it('renders upload progress in the mobile track layout', () => {
+    setMobileViewport(true);
+    const trackId = randomTestUuid();
+    const tracks: ReleaseTrackItem[] = [
+      {
+        id: trackId,
+        track_number: 1,
+        title: 'Uploading',
+        duration_seconds: null,
+        audio_attached: false,
+        processing_status: null,
+        credits: [],
+      },
+    ];
+
+    render(<ReleaseTracksSection releaseId={randomTestUuid()} tracks={tracks} onTracksChange={vi.fn()} />);
+
+    act(() => {
+      latestTrackAudioUploaderProps[`${trackId}:button-only`]?.onUploadProgressChange?.(trackId, {
+        active: true,
+        progress: 37,
+        stage: 'uploading',
+      });
+    });
+
+    expect(document.querySelector('table')).toBeNull();
+    expect(document.body.textContent).toContain('Uploading 37%');
+  });
+
+  it('renders resumable-upload notice in the mobile track layout', () => {
+    setMobileViewport(true);
+    const trackId = randomTestUuid();
+    useUploadResumeStateMock.mockReturnValue({
+      code: 'available',
+      resumeNotice: {
+        uploadId: randomTestUuid(),
+        fileId: randomTestUuid(),
+        key: 'release/test/audio.wav',
+        fileName: 'audio.wav',
+        status: 2,
+      },
+      hasActiveSession: true,
+    } as any);
+    const tracks: ReleaseTrackItem[] = [
+      {
+        id: trackId,
+        track_number: 1,
+        title: 'Resumable upload',
+        duration_seconds: null,
+        audio_attached: false,
+        processing_status: null,
+        credits: [],
+      },
+    ];
+
+    render(<ReleaseTracksSection releaseId={randomTestUuid()} tracks={tracks} onTracksChange={vi.fn()} />);
+
+    expect(document.querySelector('table')).toBeNull();
+    expect(document.querySelector(`#release-track-resume-row-${trackId}`)).toBeNull();
+    expect(document.body.textContent).toContain('Interrupted upload found');
+  });
+
+  it('opens the inline track editor from the mobile track layout', async () => {
+    setMobileViewport(true);
+    const tracks: ReleaseTrackItem[] = [
+      {
+        id: 'mobile-track',
+        track_number: 1,
+        title: 'Intro',
+        duration_seconds: 90,
+        audio_attached: false,
+        processing_status: null,
+        credits: [],
+      },
+    ];
+
+    render(<ReleaseTracksSection releaseId={randomTestUuid()} tracks={tracks} onTracksChange={vi.fn()} />);
+
+    const editButton = Array.from(document.querySelectorAll('button')).find(
+      (button) => button.getAttribute('aria-label') === 'Edit',
+    );
+    await clickElement(editButton);
+
+    expect(document.querySelector('table')).toBeNull();
+    expect(document.body.textContent).toContain('Track credits');
+  });
+
   it('uses a visible upload tone for direct upload progress rows', () => {
     expect(
       resolveTrackProgressIndicator(DEFAULT_MEDIA_STATUS_LABELS, { progress: 64, stage: 'uploading' }, null),
@@ -503,7 +635,11 @@ describe('ReleaseTracksSection', () => {
   });
 
   it('restores saved track order and reports a rejected reorder', async () => {
-    reorderTracksActionMock.mockResolvedValueOnce({ error: 'permission denied' });
+    reorderTracksActionMock.mockResolvedValueOnce({
+      ok: false,
+      error: 'permission denied',
+      errorCode: 'PERMISSION_DENIED',
+    });
     const onTracksChange = vi.fn();
     const tracks: ReleaseTrackItem[] = [
       {
