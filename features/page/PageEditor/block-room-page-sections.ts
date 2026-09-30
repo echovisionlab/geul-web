@@ -20,7 +20,6 @@ import {
   insertPageSectionNode,
   materializeCanonicalBlockRoom,
   movePageSectionNode,
-  observeCanonicalBlockRoom,
   replaceBlockRoomCollaborativeText,
   replaceBlockRoomPayloadArray,
   roomLocaleRole,
@@ -28,6 +27,7 @@ import {
 } from '@echovisionlab/geul-common/collaboration/block-room-codec';
 import type * as Y from 'yjs';
 import { materializeLocalizedPageSections } from '@/features/editor/contract/localized-page';
+import { observeSharedBlockRoomChanges } from '@/lib/collab/block-room-observation';
 import type { SectionMeta, SectionSettings, SectionUpdates } from './types';
 import { parseSectionMeta } from '@/features/page/blocks/section-schema';
 import { createBlockId } from '@/lib/editor/block-id';
@@ -311,10 +311,26 @@ function pageDocument(document: Y.Doc): LocalizedPageDocument {
 
 function readSections(document: Y.Doc, locale: string): SectionMeta[] {
   const localized = pageDocument(document);
+  return readSectionsFromDocument(localized, locale);
+}
+
+function readSectionsFromDocument(localized: LocalizedPageDocument, locale: string): SectionMeta[] {
   if (localized.locale !== locale) {
     throw new Error(`Page room locale mismatch: expected ${locale}, received ${localized.locale}.`);
   }
   return materializeLocalizedPageSections(localized).map(toSectionMeta);
+}
+
+function collectSectionIds(sections: readonly SectionMeta[], output = new Set<string>()): Set<string> {
+  for (const section of sections) {
+    output.add(section.id);
+    if (section.type === 'columns') {
+      for (const column of section.columns) {
+        collectSectionIds(column.sections, output);
+      }
+    }
+  }
+  return output;
 }
 
 function findSection(sections: readonly SectionMeta[], id: string): SectionMeta | null {
@@ -353,7 +369,59 @@ export class BlockRoomPageSectionsController {
   }
 
   observe(listener: (sections: readonly SectionMeta[]) => void): () => void {
-    return observeCanonicalBlockRoom(this.document, 'page', () => listener(this.read()));
+    let knownSectionIds = collectSectionIds(this.read());
+    return observeSharedBlockRoomChanges(this.document, (change) => {
+      const { changeSet } = change;
+      if (changeSet.requiresFullDecode || changeSet.documentMetadataChanged || changeSet.documentLayoutChanged) {
+        const snapshot = change.snapshot();
+        if (snapshot.document.$typeName !== 'api.content.v1.LocalizedPageDocument') {
+          throw new Error('Expected a typed localized Page document.');
+        }
+        const sections = readSectionsFromDocument(snapshot.document, this.locale);
+        knownSectionIds = collectSectionIds(sections);
+        listener(sections);
+        return;
+      }
+
+      const hasAffectedNodes =
+        changeSet.affectedBaseBlockIds.length > 0 ||
+        changeSet.affectedLocaleBlockIds.length > 0 ||
+        changeSet.affectedLocaleValueTargets.length > 0 ||
+        changeSet.changedContainerOrderKeys.length > 0;
+      if (!hasAffectedNodes) {
+        return;
+      }
+
+      const changesKnownSection = [...changeSet.affectedBaseBlockIds, ...changeSet.affectedLocaleBlockIds].some(
+        (blockId) => knownSectionIds.has(blockId),
+      );
+      let snapshot: ReturnType<typeof change.snapshot> | undefined;
+      let changesPageSection = changesKnownSection;
+      if (!changesPageSection) {
+        snapshot = change.snapshot();
+        const changedIds = new Set([
+          ...changeSet.affectedBaseBlockIds,
+          ...changeSet.affectedLocaleBlockIds,
+          ...changeSet.affectedLocaleValueTargets.flatMap((target) =>
+            target.owner.case === 'blockHandle' ? [target.owner.value] : [],
+          ),
+        ]);
+        changesPageSection = snapshot.baseNodes.some(
+          (node) => node.family === 'page_section' && changedIds.has(node.id),
+        );
+      }
+      if (!changesPageSection) {
+        return;
+      }
+
+      snapshot ??= change.snapshot();
+      if (snapshot.document.$typeName !== 'api.content.v1.LocalizedPageDocument') {
+        throw new Error('Expected a typed localized Page document.');
+      }
+      const sections = readSectionsFromDocument(snapshot.document, this.locale);
+      knownSectionIds = collectSectionIds(sections);
+      listener(sections);
+    });
   }
 
   insert(section: SectionMeta, placement: { parentSectionId?: string; columnId?: string; index: number }): void {

@@ -1,7 +1,14 @@
 import { fromJson, type JsonValue } from '@bufbuild/protobuf';
 import { contentBlockCatalogFingerprint, pageSectionKinds } from '@echovisionlab/geul-proto/content/block_catalog.ts';
-import { LocalizedPageDocumentSchema } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import {
+  LocalizedPageDocumentSchema,
+  RichTextBlockDataSchema,
+  RichTextBlockLocaleDataSchema,
+  type RichTextBlockData,
+  type RichTextBlockLocaleData,
+} from '@echovisionlab/geul-proto/content/block_content_pb.ts';
+import {
+  getBlockRoomCollaborativeText,
   hydrateCanonicalBlockRoom,
   materializeCanonicalBlockRoom,
 } from '@echovisionlab/geul-common/collaboration/block-room-codec';
@@ -9,12 +16,23 @@ import { describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import { createDefaultSection } from './types';
 import { parseSectionMeta } from '@/features/page/blocks/section-schema';
+import { createBlockRoomProseMirrorBridge } from '@/features/editor/tiptap/block-room-prosemirror-bridge';
 import { createBlockRoomPageSectionsController } from './block-room-page-sections';
 
 const FORM_ID = '019cce25-dbc0-7d12-9f1f-735b1a6c6b13';
 const SECTION_ID = '019cce25-dbc0-7d12-9f1f-735b1a6c6b14';
 const AUTHOR_ID_1 = '019cce25-dbc0-7d12-9f1f-735b1a6c6b15';
 const AUTHOR_ID_2 = '019cce25-dbc0-7d12-9f1f-735b1a6c6b16';
+
+function paragraphData(): RichTextBlockData {
+  return fromJson(RichTextBlockDataSchema, { paragraph: { props: {} } }) as RichTextBlockData;
+}
+
+function paragraphLocale(text: string): RichTextBlockLocaleData {
+  return fromJson(RichTextBlockLocaleDataSchema, {
+    paragraph: { props: {}, content: [{ text: { text } }] },
+  }) as RichTextBlockLocaleData;
+}
 
 function room(locale = 'ko', sourceLocale = 'ko'): Y.Doc {
   const document = new Y.Doc();
@@ -69,6 +87,100 @@ function targetRoom(): Y.Doc {
 }
 
 describe('typed Page Block-room section controller', () => {
+  it('does not notify the Page section projection for rich-text body edits', () => {
+    const document = room();
+    const controller = createBlockRoomPageSectionsController(document, 'ko');
+    const section = createDefaultSection('rich-text');
+    controller.insert(section, { index: 0 });
+    const pageChanges = vi.fn();
+    const stopPage = controller.observe(pageChanges);
+    const bridge = createBlockRoomProseMirrorBridge({
+      document,
+      documentType: 'page',
+      locale: 'ko',
+      pageSectionId: section.id,
+    });
+    const editorChanges = vi.fn();
+    const stopEditor = bridge.observe(editorChanges);
+    const blockId = bridge.insertBlock({
+      data: paragraphData(),
+      localeData: { ko: paragraphLocale('처음') },
+      index: 1,
+    });
+    pageChanges.mockClear();
+    editorChanges.mockClear();
+
+    const text = getBlockRoomCollaborativeText(document, {
+      id: blockId,
+      family: 'rich_text',
+      locale: true,
+      path: 'content[0].text.text',
+    });
+    text.insert(text.length, '됨');
+
+    expect(pageChanges).not.toHaveBeenCalled();
+    expect(editorChanges).toHaveBeenCalledOnce();
+    expect(bridge.readBlocks().find((block) => block.id === blockId)?.localePayload).toMatchObject({
+      content: [{ text: { text: '처음됨' } }],
+    });
+    stopEditor();
+    stopPage();
+    document.destroy();
+  });
+
+  it('routes block and section deletions to every bridge observer, including fresh subscriptions', () => {
+    const document = room();
+    const controller = createBlockRoomPageSectionsController(document, 'ko');
+    const section = createDefaultSection('rich-text');
+    controller.insert(section, { index: 0 });
+    const bridge = createBlockRoomProseMirrorBridge({
+      document,
+      documentType: 'page',
+      locale: 'ko',
+      pageSectionId: section.id,
+    });
+    const firstChanges = vi.fn();
+    const secondChanges = vi.fn();
+    const stopFirst = bridge.observe(firstChanges);
+    const stopSecond = bridge.observe(secondChanges);
+    const insertBlock = (): string =>
+      bridge.insertBlock({
+        data: paragraphData(),
+        localeData: { ko: paragraphLocale('텍스트') },
+        index: bridge.readBlocks().length,
+      });
+
+    const firstBlockId = insertBlock();
+    expect(firstChanges).toHaveBeenCalledOnce();
+    expect(secondChanges).toHaveBeenCalledOnce();
+    firstChanges.mockClear();
+    secondChanges.mockClear();
+    bridge.deleteBlock(firstBlockId);
+    expect(firstChanges).toHaveBeenCalledOnce();
+    expect(secondChanges).toHaveBeenCalledOnce();
+
+    stopFirst();
+    stopSecond();
+    const unobservedBlockId = insertBlock();
+    const freshChanges = vi.fn();
+    const stopFresh = bridge.observe(freshChanges);
+    bridge.deleteBlock(unobservedBlockId);
+    expect(freshChanges).toHaveBeenCalledOnce();
+    stopFresh();
+
+    const laterFirst = vi.fn();
+    const laterSecond = vi.fn();
+    const stopLaterFirst = bridge.observe(laterFirst);
+    const stopLaterSecond = bridge.observe(laterSecond);
+    controller.delete(section.id);
+    expect(laterFirst).toHaveBeenCalledOnce();
+    expect(laterSecond).toHaveBeenCalledOnce();
+
+    stopLaterFirst();
+    stopLaterSecond();
+    document.destroy();
+  });
+
   it.each(pageSectionKinds)('inserts and reads generated %s sections', (kind) => {
     const document = room();
     const controller = createBlockRoomPageSectionsController(document, 'ko');

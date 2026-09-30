@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 
-import { Editor, Node, type JSONContent } from '@tiptap/core';
+import { Editor, Extension, Node, type JSONContent } from '@tiptap/core';
+import { Node as ProseMirrorNode } from '@tiptap/pm/model';
+import { Plugin } from '@tiptap/pm/state';
 import { fromJson, type JsonValue } from '@bufbuild/protobuf';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import {
@@ -21,7 +23,7 @@ import {
   createPostBlockRoomTiptapController,
   createRichTextBlockRoomTiptapController,
 } from './block-room-tiptap-controller';
-import { blockRoomUndoDepth } from '@/lib/collab/interactive-mutation-undo';
+import { blockRoomUndoDepth, redoBlockRoom, undoBlockRoom } from '@/lib/collab/interactive-mutation-undo';
 import { createTiptapWireExtensions } from './wire-schema';
 import { SHADER_STAGE_DEFINITIONS } from './shader/shader-program';
 
@@ -831,5 +833,178 @@ describe('PostBlockRoomTiptapController', () => {
 
     disconnect();
     editor.destroy();
+  });
+});
+
+function performanceBoundaryFixture(nested = false) {
+  const ids = [BLOCK_ID, FOLLOWING_PARAGRAPH_ID, EMPTY_DOCUMENT_BLOCK_ID];
+  const source = fromJson(LocalizedRichTextDocumentSchema, {
+    blockCatalogFingerprint: contentBlockCatalogFingerprint,
+    profile: RichTextProfile.POST,
+    locale: 'ko',
+    base: {
+      nodes: ids.map((id, index) => ({
+        block: { id, paragraph: { props: {} } },
+        placement:
+          nested && index === 1 ? { parentBlockId: ids[0], index: 0 } : { index: nested && index === 2 ? 1 : index },
+      })),
+    },
+    localeOverlay: {
+      locale: 'ko',
+      blocks: ids.map((blockId, index) => ({
+        blockId,
+        paragraph: { props: {}, content: [{ text: { text: `text${index}` } }] },
+      })),
+    },
+  } as JsonValue);
+  const room = new Y.Doc();
+  hydrateCanonicalBlockRoom(room, 'post', 'ko', source, []);
+  const bridge = createBlockRoomProseMirrorBridge({ document: room, documentType: 'post', locale: 'ko' });
+  const controller = createPostBlockRoomTiptapController(bridge);
+  const editor = new Editor({
+    element: document.createElement('div'),
+    extensions: [...createTiptapWireExtensions(), controller.extension],
+    content: controller.initialContent,
+  });
+  const disconnect = controller.connect(editor);
+  const position = (id: string) => {
+    let result = -1;
+    editor.state.doc.descendants((node, at) => {
+      if (node.type.name === 'blockContainer' && node.attrs.id === id) {
+        result = at + 2;
+      }
+    });
+    if (result < 0) {
+      throw new Error('Missing fixture Block.');
+    }
+    return result;
+  };
+  const text = (id: string) =>
+    getBlockRoomCollaborativeText(room, {
+      id,
+      family: 'rich_text',
+      locale: true,
+      path: 'content[0].text.text',
+    }).toString();
+  return {
+    ids,
+    room,
+    bridge,
+    controller,
+    editor,
+    position,
+    text,
+    cleanup: () => {
+      disconnect();
+      editor.destroy();
+      room.destroy();
+    },
+  };
+}
+
+describe('incremental Block-room input boundaries', () => {
+  it.each([false, true])(
+    'writes only the changed payload with nested topology=%s and retains undo/redo',
+    async (nested) => {
+      const fixture = performanceBoundaryFixture(nested);
+      const serialize = vi.spyOn(ProseMirrorNode.prototype, 'toJSON');
+      const replaceText = vi.spyOn(fixture.bridge, 'replaceCollaborativeText');
+      try {
+        const changedId = fixture.ids[1]!;
+        const from = fixture.position(changedId);
+        fixture.editor.view.dispatch(fixture.editor.state.tr.insertText('!', from));
+        expect(fixture.text(changedId)).toBe('!text1');
+        expect(fixture.text(fixture.ids[0]!)).toBe('text0');
+        expect(fixture.text(fixture.ids[2]!)).toBe('text2');
+        expect(
+          serialize.mock.contexts.filter((node) => node instanceof ProseMirrorNode && node.type.name === 'doc'),
+        ).toHaveLength(0);
+        expect(replaceText.mock.calls.map(([target]) => target.blockId)).toEqual([changedId]);
+        expect(undoBlockRoom(fixture.room)).toBe(true);
+        await Promise.resolve();
+        expect(fixture.text(changedId)).toBe('text1');
+        expect(redoBlockRoom(fixture.room)).toBe(true);
+        await Promise.resolve();
+        expect(fixture.text(changedId)).toBe('!text1');
+        expect(fixture.editor.getText()).toContain('!text1');
+      } finally {
+        serialize.mockRestore();
+        fixture.cleanup();
+      }
+    },
+  );
+
+  it('retains a pending remote change in another Block during immediate local typing', async () => {
+    const fixture = performanceBoundaryFixture();
+    try {
+      const remoteId = fixture.ids[2]!;
+      const text = getBlockRoomCollaborativeText(fixture.room, {
+        id: remoteId,
+        family: 'rich_text',
+        locale: true,
+        path: 'content[0].text.text',
+      });
+      fixture.room.transact(() => text.insert(0, 'remote-'), 'remote-peer');
+      fixture.editor.view.dispatch(fixture.editor.state.tr.insertText('local-', fixture.position(fixture.ids[0]!)));
+      await Promise.resolve();
+      expect(fixture.text(remoteId)).toBe('remote-text2');
+      expect(fixture.text(fixture.ids[0]!)).toBe('local-text0');
+      expect(fixture.editor.getText()).toContain('remote-text2');
+    } finally {
+      fixture.cleanup();
+    }
+  });
+
+  it('keeps reordered/deleted Blocks and subsequent payload edits synchronized', async () => {
+    const fixture = performanceBoundaryFixture();
+    try {
+      const value = fixture.editor.getJSON();
+      const containers = value.content![0]!.content!;
+      value.content![0]!.content = [containers[2]!, containers[0]!];
+      fixture.editor.commands.setContent(value);
+      const materialized = fixture.controller.getLocalizedDocumentSnapshot();
+      expect(fixture.bridge.readBlocks().map((block) => block.id)).toEqual([fixture.ids[2], fixture.ids[0]]);
+      expect(materialized.localeOverlay?.blocks.map((block) => block.blockId).sort()).toEqual(
+        [fixture.ids[0], fixture.ids[2]].sort(),
+      );
+      fixture.editor.view.dispatch(fixture.editor.state.tr.insertText('!', fixture.position(fixture.ids[2]!)));
+      expect(fixture.text(fixture.ids[2]!)).toBe('!text2');
+      expect(undoBlockRoom(fixture.room)).toBe(true);
+      await Promise.resolve();
+      expect(fixture.bridge.readBlocks().map((block) => block.id)).toEqual(fixture.ids);
+    } finally {
+      fixture.cleanup();
+    }
+  });
+
+  it('persists plugin-appended document changes after a selection-only transaction', () => {
+    const room = new Y.Doc();
+    hydrateCanonicalBlockRoom(room, 'post', 'ko', postDocument(), []);
+    const bridge = createBlockRoomProseMirrorBridge({ document: room, documentType: 'post', locale: 'ko' });
+    const controller = createPostBlockRoomTiptapController(bridge);
+    const append = Extension.create({
+      name: 'testAppendedBody',
+      addProseMirrorPlugins: () => [
+        new Plugin({
+          appendTransaction: (transactions, _old, state) =>
+            transactions.some((transaction) => transaction.getMeta('appendBody')) ? state.tr.insertText('!', 3) : null,
+        }),
+      ],
+    });
+    const editor = new Editor({
+      element: document.createElement('div'),
+      extensions: [...createTiptapWireExtensions(), append, controller.extension],
+      content: controller.initialContent,
+    });
+    const disconnect = controller.connect(editor);
+    try {
+      editor.view.dispatch(editor.state.tr.setMeta('appendBody', true));
+      expect(editor.getText().trim()).toBe('!안녕');
+      expect(textFromRoom(room)).toBe('!안녕');
+    } finally {
+      disconnect();
+      editor.destroy();
+      room.destroy();
+    }
   });
 });
