@@ -3062,6 +3062,10 @@
     "pinned": "Sabitlendi"
   },
   "pageEditor": {
+    "localRecovery": {
+      "message": "Yeniden bağlanmadan önce yerel düzenleme kopyanız korundu. Yenilemeden veya ayrılmadan önce indirin.",
+      "action": "Kurtarma kopyasını indir"
+    },
     "shareLinksDescription": "Yayınlanmamış sayfalar için bağlantıları önizleme",
     "showTitleOnPage": "Başlığı sayfada göster",
     "slugValidation": {

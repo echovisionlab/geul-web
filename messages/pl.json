@@ -3062,6 +3062,10 @@
     "pinned": "Przypięty"
   },
   "pageEditor": {
+    "localRecovery": {
+      "message": "Lokalna kopia zmian została zachowana przed ponownym połączeniem. Pobierz ją przed odświeżeniem lub opuszczeniem strony.",
+      "action": "Pobierz kopię odzyskiwania"
+    },
     "shareLinksDescription": "Podgląd linków do niepublikowanych stron",
     "showTitleOnPage": "Pokaż tytuł na stronie",
     "slugValidation": {

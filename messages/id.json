@@ -3062,6 +3062,10 @@
     "pinned": "Disematkan"
   },
   "pageEditor": {
+    "localRecovery": {
+      "message": "Salinan perubahan lokal disimpan sebelum menyambungkan kembali. Unduh sebelum memuat ulang atau keluar.",
+      "action": "Unduh salinan pemulihan"
+    },
     "shareLinksDescription": "Pratinjau tautan untuk halaman yang tidak dipublikasikan",
     "showTitleOnPage": "Tampilkan judul di halaman",
     "slugValidation": {

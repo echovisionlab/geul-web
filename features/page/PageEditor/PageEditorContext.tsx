@@ -1,6 +1,15 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import type * as Y from 'yjs';
 import { notifications } from '@mantine/notifications';
@@ -16,9 +25,77 @@ import {
   type BlockRoomPageSectionsController,
 } from './block-room-page-sections';
 import { persistCollaborativeDocumentNow } from '@/lib/collab/persist-now';
+import { registerEditorSave } from '@/lib/editor/editor-save-registry';
 import { createClientLogger } from '@/lib/utils/client-logger';
 
 const logger = createClientLogger('PageEditorContext');
+const MAX_DURABILITY_FLUSH_ROUNDS = 4;
+
+function createPageRoomDurability(doc: Y.Doc, provider: HocuspocusProvider, pageId: string) {
+  let localRevision = 0;
+  let durableRevision = 0;
+  let activeFlush: Promise<boolean> | null = null;
+
+  const observeTransaction = (transaction: Y.Transaction) => {
+    if (transaction.local && transaction.changed.size > 0) {
+      localRevision += 1;
+    }
+  };
+
+  const hasPending = () => localRevision > durableRevision || activeFlush !== null;
+
+  const flush = (action: string): Promise<boolean> => {
+    if (activeFlush) {
+      return activeFlush;
+    }
+
+    const drain = async (): Promise<boolean> => {
+      for (let round = 0; round < MAX_DURABILITY_FLUSH_ROUNDS; round += 1) {
+        if (localRevision <= durableRevision) {
+          return true;
+        }
+
+        const revisionBeingPersisted = localRevision;
+        try {
+          await persistCollaborativeDocumentNow(provider);
+          durableRevision = Math.max(durableRevision, revisionBeingPersisted);
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Failed to persist page changes';
+          logger.error('Failed to persist page changes', { pageId, action, error: message });
+          notifications.show({ message, color: 'red' });
+          return false;
+        }
+      }
+
+      return localRevision <= durableRevision;
+    };
+
+    const operation = drain().finally(() => {
+      if (activeFlush === operation) {
+        activeFlush = null;
+      }
+    });
+    activeFlush = operation;
+    return operation;
+  };
+
+  return {
+    flush,
+    hasPending,
+    register: () => {
+      doc.on('afterTransaction', observeTransaction);
+      const unregisterEditorSave = registerEditorSave(`page:${pageId}`, {
+        flush: () => flush('locale-switch'),
+        hasPending,
+      });
+
+      return () => {
+        doc.off('afterTransaction', observeTransaction);
+        unregisterEditorSave();
+      };
+    },
+  };
+}
 
 interface PageEditorContextValue {
   doc: Y.Doc;
@@ -62,6 +139,7 @@ export function PageEditorProvider({
   children,
 }: PageEditorProviderProps) {
   const controller = useMemo(() => createBlockRoomPageSectionsController(doc, locale), [doc, locale]);
+  const durability = useMemo(() => createPageRoomDurability(doc, provider, pageId), [doc, pageId, provider]);
   const [sections, setSections] = useState<readonly SectionMeta[]>(() => controller.read());
 
   useEffect(() => {
@@ -69,17 +147,13 @@ export function PageEditorProvider({
     return controller.observe(setSections);
   }, [controller]);
 
+  useLayoutEffect(() => durability.register(), [durability]);
+
   const persistStructureChange = useCallback(
-    async (action: string) => {
-      try {
-        await persistCollaborativeDocumentNow(provider);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to persist page structure change';
-        logger.error('Failed to persist page structure change', { pageId, action, error: message });
-        notifications.show({ message, color: 'red' });
-      }
+    (action: string) => {
+      void durability.flush(action);
     },
-    [pageId, provider],
+    [durability],
   );
 
   const updateSection = useCallback(

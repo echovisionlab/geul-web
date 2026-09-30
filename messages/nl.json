@@ -3062,6 +3062,10 @@
     "pinned": "Vastgezet"
   },
   "pageEditor": {
+    "localRecovery": {
+      "message": "Je lokale bewerkingskopie is bewaard vóór het opnieuw verbinden. Download deze voordat je herlaadt of vertrekt.",
+      "action": "Herstelkopie downloaden"
+    },
     "shareLinksDescription": "Voorbeeldlinks voor ongepubliceerde pagina's",
     "showTitleOnPage": "Titel op pagina tonen",
     "slugValidation": {

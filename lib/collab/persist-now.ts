@@ -10,8 +10,6 @@ function waitForProviderSync(provider: HocuspocusProvider, timeoutMs: number): P
     return Promise.resolve();
   }
 
-  provider.forceSync();
-
   return new Promise((resolve, reject) => {
     let settled = false;
     let timer: ReturnType<typeof setTimeout> | null = setTimeout(() => {
@@ -47,6 +45,14 @@ function waitForProviderSync(provider: HocuspocusProvider, timeoutMs: number): P
 
     provider.on('synced', handleSynced);
     provider.on('unsyncedChanges', handleUnsyncedChanges);
+    try {
+      provider.forceSync();
+      maybeResolve();
+    } catch (error) {
+      settled = true;
+      cleanup();
+      reject(error);
+    }
   });
 }
 
@@ -102,11 +108,11 @@ export async function persistCollaborativeDocumentNow(provider: HocuspocusProvid
     };
 
     provider.on('stateless', handleStateless);
-    provider.sendStateless(
-      JSON.stringify({
-        kind: 'persist.now.request',
-        requestId,
-      }),
-    );
+    try {
+      provider.sendStateless(JSON.stringify({ kind: 'persist.now.request', requestId }));
+    } catch (error) {
+      cleanup();
+      reject(error);
+    }
   });
 }

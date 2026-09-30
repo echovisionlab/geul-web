@@ -22,7 +22,8 @@ interface ColumnsEditorProps {
 export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) {
   const t = useTranslations('pageEditor');
   const tCommonEntities = useTranslations('common.entities');
-  const { updateSection } = usePageEditor();
+  const { updateSection, editable, allowStructuralEdits } = usePageEditor();
+  const canEditStructure = editable && allowStructuralEdits;
   const sectionTypeLabels = usePageSectionTypeLabels();
   const sectionTypeOptions = useMemo<Array<{ value: SectionType; label: string }>>(
     () => [
@@ -81,6 +82,9 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
 
   const updateProp = useCallback(
     (key: string, value: string) => {
+      if (!canEditStructure) {
+        return;
+      }
       const newProps = { ...props, [key]: value };
 
       // When column count changes, update columns array and ratios
@@ -112,27 +116,33 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
         updateSection(section.id, { props: newProps });
       }
     },
-    [updateSection, section.id, props, columnsData],
+    [canEditStructure, updateSection, section.id, props, columnsData, ratioOptions],
   );
 
   const addSectionToColumn = useCallback(
     (columnIndex: number, type: SectionType) => {
+      if (!canEditStructure) {
+        return;
+      }
       const newColumns = columnsData.map((col, i) =>
         i === columnIndex ? { ...col, sections: [...col.sections, createDefaultSection(type)] } : col,
       );
       updateSection(section.id, { columns: newColumns });
     },
-    [updateSection, section.id, columnsData],
+    [canEditStructure, updateSection, section.id, columnsData],
   );
 
   const removeSectionFromColumn = useCallback(
     (columnIndex: number, sectionIndex: number) => {
+      if (!canEditStructure) {
+        return;
+      }
       const newColumns = columnsData.map((col, i) =>
         i === columnIndex ? { ...col, sections: col.sections.filter((_, si) => si !== sectionIndex) } : col,
       );
       updateSection(section.id, { columns: newColumns });
     },
-    [updateSection, section.id, columnsData],
+    [canEditStructure, updateSection, section.id, columnsData],
   );
 
   const ratios = columnRatios.split(':').map(Number);
@@ -155,6 +165,7 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
       {/* Settings */}
       <Group gap="sm">
         <SegmentedControl
+          disabled={!canEditStructure}
           data={columnCountOptions}
           value={columnCount}
           onChange={(value) => updateProp('columns', value)}
@@ -162,6 +173,7 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
         />
 
         <Select
+          disabled={!canEditStructure}
           data={ratioOptions[columnCount] || ratioOptions['2']}
           value={columnRatios}
           onChange={(value) => updateProp('columnRatios', value || '1:1')}
@@ -170,6 +182,7 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
         />
 
         <NumberInput
+          disabled={!canEditStructure}
           value={parseInt(gap, 10)}
           onChange={(value) => updateProp('gap', String(value || 24))}
           min={0}
@@ -180,6 +193,7 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
         />
 
         <Switch
+          disabled={!canEditStructure}
           label={t('columnsEditor.stackOnMobile')}
           checked={mobileStack === 'true'}
           onChange={(e) => updateProp('mobileStack', e.currentTarget.checked ? 'true' : 'false')}
@@ -204,6 +218,7 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
               <DropdownMenu size="compact">
                 <DropdownMenu.Target>
                   <IconButton
+                    disabled={!canEditStructure}
                     emphasis="medium"
                     size="xs"
                     aria-label={t('columnsEditor.actions.addSectionToColumn', {
@@ -216,7 +231,11 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
                 <DropdownMenu.Dropdown>
                   <DropdownMenu.Label>{t('columnsEditor.menuLabel')}</DropdownMenu.Label>
                   {sectionTypeOptions.map((opt) => (
-                    <DropdownMenu.Item key={opt.value} onClick={() => addSectionToColumn(columnIndex, opt.value)}>
+                    <DropdownMenu.Item
+                      key={opt.value}
+                      disabled={!canEditStructure}
+                      onClick={() => addSectionToColumn(columnIndex, opt.value)}
+                    >
                       {opt.label}
                     </DropdownMenu.Item>
                   ))}
@@ -235,6 +254,7 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
                     <Group justify="space-between" mb="xs">
                       <LabelBadge size="xs">{sectionTypeLabels[childSection.type]}</LabelBadge>
                       <IconButton
+                        disabled={!canEditStructure}
                         tone="danger"
                         emphasis="low"
                         size="xs"

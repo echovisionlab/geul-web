@@ -3062,6 +3062,10 @@
     "pinned": "Pinned"
   },
   "pageEditor": {
+    "localRecovery": {
+      "message": "Your local editing copy was preserved before reconnecting. Download it before reloading or leaving.",
+      "action": "Download recovery copy"
+    },
     "shareLinksDescription": "Preview links for unpublished pages",
     "showTitleOnPage": "Show title on page",
     "slugValidation": {
