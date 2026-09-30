@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocale, useTranslations } from 'next-intl';
 import type { FilterFieldConfig } from '@/features/data-table/DataTableMultiFilter';
@@ -155,6 +155,11 @@ export function EventSeriesEventsTable({
   const [result, setResult] = useState<PaginatedQueryResult<EventSeriesEventsTableItem>>(initialResult);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const queryRef = useRef(query);
+  const activeContextRef = useRef({ seriesId, requestedLocale });
+  const loadMoreRequestIdRef = useRef(0);
+  queryRef.current = query;
+  activeContextRef.current = { seriesId, requestedLocale };
   const locationLabels: Record<BrowserProgramEventLocationMode, string> = {
     map_place: tProgramEventAdmin('locationModes.mapPlace'),
     online: tProgramEventAdmin('locationModes.online'),
@@ -210,14 +215,18 @@ export function EventSeriesEventsTable({
 
   const handleQueryChange = (nextQuery: PaginatedQuery) => {
     const normalized = normalizeQuery(nextQuery);
-    setError(null);
-    setQuery({
+    const next = {
       page: 1,
       pageSize,
       search: normalized.search,
       filters: normalized.filters,
       filterBy: normalized.filterBy,
-    });
+    };
+    loadMoreRequestIdRef.current += 1;
+    queryRef.current = next;
+    setIsLoadingMore(false);
+    setError(null);
+    setQuery(next);
   };
 
   const handleLoadMore = async () => {
@@ -225,17 +234,33 @@ export function EventSeriesEventsTable({
       return;
     }
 
+    const requestId = ++loadMoreRequestIdRef.current;
+    const requestQuery = query;
+    const requestSeriesId = seriesId;
+    const requestLocale = requestedLocale;
+    const isCurrentRequest = () =>
+      requestId === loadMoreRequestIdRef.current &&
+      requestQuery === queryRef.current &&
+      requestSeriesId === activeContextRef.current.seriesId &&
+      requestLocale === activeContextRef.current.requestedLocale;
+
     setIsLoadingMore(true);
     setError(null);
     try {
       const nextResult = await fetchEventSeriesEvents({
-        seriesId,
-        query,
+        seriesId: requestSeriesId,
+        query: requestQuery,
         offset: result.data.length,
         pageSize,
-        requestedLocale,
+        requestedLocale: requestLocale,
       });
+      if (!isCurrentRequest()) {
+        return;
+      }
       setResult((current) => {
+        if (!isCurrentRequest()) {
+          return current;
+        }
         const seen = new Set(current.data.map((event) => event.id));
         const next = nextResult.data.filter((event) => !seen.has(event.id));
         const data = [...current.data, ...next];
@@ -248,9 +273,13 @@ export function EventSeriesEventsTable({
         };
       });
     } catch {
-      setError(tCommonErrors('generic'));
+      if (isCurrentRequest()) {
+        setError(tCommonErrors('generic'));
+      }
     } finally {
-      setIsLoadingMore(false);
+      if (requestId === loadMoreRequestIdRef.current) {
+        setIsLoadingMore(false);
+      }
     }
   };
 

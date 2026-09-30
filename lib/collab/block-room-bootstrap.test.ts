@@ -42,7 +42,7 @@ function bootstrapMessage(
   };
   return {
     kind: 'block_room.bootstrap',
-    protocolVersion: 1,
+    protocolVersion: 2,
     bootstrapChallenge: 'challenge-1',
     documentName: `post:${entityId}:${roomLocale}`,
     documentType: 'post',

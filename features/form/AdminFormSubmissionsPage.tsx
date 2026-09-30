@@ -17,6 +17,7 @@ import { TextButton } from '@/components/core/TextButton';
 import { Tooltip } from '@/components/core/Tooltip';
 import { PageLoader } from '@/features/site/PageLoader';
 import { deleteFormSubmissionAction, listFormSubmissionsAction } from '@/lib/actions/form';
+import { getSubmissionDateRangeBounds } from './submission-date-range';
 
 // Local type for submissions returned from the action (createdAt is optional)
 interface SubmissionListItem {
@@ -34,6 +35,7 @@ export default function AdminFormSubmissionsPage({ formId, editBaseHref }: { for
   const t = useTranslations('formAdmin.submissions');
   const tCommonActions = useTranslations('common.actions');
   const tCommonEntities = useTranslations('common.entities');
+  const tCommonErrors = useTranslations('common.errors');
   const tCommonLabels = useTranslations('common.labels');
   const tCommonPlaceholders = useTranslations('common.placeholders');
   const tCommonStates = useTranslations('common.states');
@@ -53,15 +55,22 @@ export default function AdminFormSubmissionsPage({ formId, editBaseHref }: { for
   }, [debouncedSearch, sortOrder, countryFilter, dateRange]);
 
   const queryClient = useQueryClient();
-  const { data: submissionsData, isLoading: submissionsLoading } = useQuery({
+  const {
+    data: submissionsData,
+    isLoading: submissionsLoading,
+    isError: submissionsFailed,
+    isFetching: submissionsFetching,
+    refetch: refetchSubmissions,
+  } = useQuery({
     queryKey: [
       'forms',
       formId,
       'submissions',
       { page, limit, search: debouncedSearch, sortOrder, countryFilter, dateRange },
     ],
-    queryFn: () =>
-      listFormSubmissionsAction({
+    queryFn: async () => {
+      const dateBounds = getSubmissionDateRangeBounds(dateRange);
+      const result = await listFormSubmissionsAction({
         formId,
         page,
         limit,
@@ -69,9 +78,13 @@ export default function AdminFormSubmissionsPage({ formId, editBaseHref }: { for
         sortBy: 'createdAt',
         sortOrder,
         countryCode: countryFilter || undefined,
-        dateFrom: dateRange[0] ? (dateRange[0] instanceof Date ? dateRange[0].toISOString() : dateRange[0]) : undefined,
-        dateTo: dateRange[1] ? (dateRange[1] instanceof Date ? dateRange[1].toISOString() : dateRange[1]) : undefined,
-      }),
+        ...dateBounds,
+      });
+      if (!result.ok) {
+        throw new Error(result.code);
+      }
+      return result.data;
+    },
   });
 
   const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
@@ -109,6 +122,22 @@ export default function AdminFormSubmissionsPage({ formId, editBaseHref }: { for
 
   if (submissionsLoading) {
     return <PageLoader />;
+  }
+
+  if (submissionsFailed) {
+    return (
+      <Stack role="alert" align="center" gap="sm">
+        <Text c="red">{tCommonErrors('generic')}</Text>
+        <Button
+          emphasis="low"
+          loading={submissionsFetching}
+          disabled={submissionsFetching}
+          onClick={() => void refetchSubmissions()}
+        >
+          {tCommonActions('tryAgain')}
+        </Button>
+      </Stack>
+    );
   }
 
   const submissions = (submissionsData?.submissions ?? []) as SubmissionListItem[];

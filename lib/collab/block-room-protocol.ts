@@ -22,7 +22,7 @@ const metadataAckSchema = z
 const readySchema = z
   .object({
     kind: z.literal('block_room.ready'),
-    protocolVersion: z.literal(1),
+    protocolVersion: z.literal(2),
     bootstrapChallenge: z.string().trim().min(1),
   })
   .strict();
@@ -30,7 +30,7 @@ const readySchema = z
 const metadataResultSchema = z
   .object({
     kind: z.literal('block_room.metadata_result'),
-    protocolVersion: z.literal(1),
+    protocolVersion: z.literal(2),
     requestId: z.string().uuid(),
     ok: z.boolean(),
     ack: z.unknown().optional(),
@@ -51,7 +51,7 @@ const snapshotSchema = z
 const snapshotResultSchema = z
   .object({
     kind: z.literal('block_room.snapshot_result'),
-    protocolVersion: z.literal(1),
+    protocolVersion: z.literal(2),
     requestId: z.string().uuid(),
     ok: z.boolean(),
     snapshot: z.unknown().optional(),
@@ -306,7 +306,7 @@ export class BlockRoomProtocolClient implements BlockRoomProtocolTransport {
       this.options.sendStateless(
         JSON.stringify({
           kind: 'block_room.metadata',
-          protocolVersion: 1,
+          protocolVersion: 2,
           requestId,
           operation,
           payload,
@@ -342,7 +342,7 @@ export class BlockRoomProtocolClient implements BlockRoomProtocolTransport {
       this.options.sendStateless(
         JSON.stringify({
           kind: 'block_room.snapshot',
-          protocolVersion: 1,
+          protocolVersion: 2,
           requestId,
         }),
       );
@@ -383,7 +383,7 @@ export class BlockRoomProtocolClient implements BlockRoomProtocolTransport {
     this.options.sendStateless(
       JSON.stringify({
         kind: 'block_room.bootstrap_ack',
-        protocolVersion: 1,
+        protocolVersion: 2,
         challenge: this.bootstrap.bootstrapChallenge,
         stateVector: this.encodeBase64(Y.encodeStateVector(this.options.document)),
       }),

@@ -105,52 +105,39 @@ export class PostBlockRoomTiptapController {
       () => editorGeneration.current()?.isEditable === true,
     );
     let active = true;
-    let scheduled = false;
-    let pending: readonly ProseMirrorBlockDescriptor[] | null = null;
     const unsubscribe = this.#bridge.observe((blocks) => {
       if (blocks.length === 0 && this.#previousDescriptors.length > 0) {
         this.#emptyParagraphId = null;
       }
       this.#previousDescriptors = blocks;
-      pending = blocks;
-      if (this.#applyingRoom || scheduled) {
+      if (!active || this.#applyingRoom || this.#editorGeneration !== editorGeneration) {
         return;
       }
-      scheduled = true;
-      queueMicrotask(() => {
-        scheduled = false;
-        const next = pending;
-        pending = null;
-        if (!active || !next) {
-          return;
-        }
-        if (this.#editorGeneration !== editorGeneration) {
-          return;
-        }
-        const currentEditor = editorGeneration.current();
-        if (!currentEditor) {
-          return;
-        }
-        this.#applyingRoom = true;
-        try {
-          const document = currentEditor.schema.nodeFromJSON(this.#projectDocument(next));
-          if (!currentEditor.state.doc.eq(document)) {
-            const from = currentEditor.state.doc.content.findDiffStart(document.content);
-            const ends = currentEditor.state.doc.content.findDiffEnd(document.content);
-            if (from === null || ends === null) {
-              throw new Error('Failed to locate the changed Block-room projection range.');
-            }
-            currentEditor.view.dispatch(
-              currentEditor.state.tr
-                .replace(from, ends.a, document.slice(from, ends.b))
-                .setMeta('addToHistory', false)
-                .setMeta('blockRoomProjection', true),
-            );
+      const currentEditor = editorGeneration.current();
+      if (!currentEditor) {
+        return;
+      }
+      // Project remote edits before another local transaction can read stale
+      // ProseMirror content and turn unseen text into a deletion.
+      this.#applyingRoom = true;
+      try {
+        const document = currentEditor.schema.nodeFromJSON(this.#projectDocument(blocks));
+        if (!currentEditor.state.doc.eq(document)) {
+          const from = currentEditor.state.doc.content.findDiffStart(document.content);
+          const ends = currentEditor.state.doc.content.findDiffEnd(document.content);
+          if (from === null || ends === null) {
+            throw new Error('Failed to locate the changed Block-room projection range.');
           }
-        } finally {
-          this.#applyingRoom = false;
+          currentEditor.view.dispatch(
+            currentEditor.state.tr
+              .replace(from, ends.a, document.slice(from, ends.b))
+              .setMeta('addToHistory', false)
+              .setMeta('blockRoomProjection', true),
+          );
         }
-      });
+      } finally {
+        this.#applyingRoom = false;
+      }
     });
     return () => {
       active = false;
@@ -222,11 +209,22 @@ export class PostBlockRoomTiptapController {
     const previous = new Map(flattenDescriptor(previousDescriptors).map((block) => [block.id, block]));
     const nextById = new Map(next.map((block) => [block.id, block]));
     const workingOrders = new BlockOrderIndex(previousDescriptors);
+    const retainedAncestors = new Set<string>();
+    for (const block of next) {
+      let parentId = previous.get(block.id)?.parentId;
+      while (parentId && !retainedAncestors.has(parentId)) {
+        retainedAncestors.add(parentId);
+        parentId = previous.get(parentId)?.parentId;
+      }
+    }
     this.#applyingRoom = true;
     try {
       this.#bridge.transact(() => {
+        // Remove complete discarded subtrees first so survivors need no moves
+        // just to account for a deleted sibling. Ancestors of surviving blocks
+        // stay resident until those blocks have moved out below.
         for (const block of [...previous.values()].reverse()) {
-          if (!nextById.has(block.id)) {
+          if (!nextById.has(block.id) && !retainedAncestors.has(block.id)) {
             this.#bridge.deleteBlock(block.id);
             workingOrders.remove(block.id);
           }
@@ -288,6 +286,14 @@ export class PostBlockRoomTiptapController {
             continue;
           }
           applyTiptapBlockPayload(this.#bridge, block, before, payload);
+        }
+        // Surviving children must leave a removed parent before its cascading
+        // deletion. Moves above also establish the final sibling order.
+        for (const block of [...previous.values()].reverse()) {
+          if (!nextById.has(block.id) && retainedAncestors.has(block.id)) {
+            this.#bridge.deleteBlock(block.id);
+            workingOrders.remove(block.id);
+          }
         }
       });
       if (!this.#connected) {

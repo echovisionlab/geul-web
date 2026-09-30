@@ -16,6 +16,7 @@ import {
 import { describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import { createBlockRoomProseMirrorBridge, type ProseMirrorBlockDescriptor } from './block-room-prosemirror-bridge';
+import { textDiff } from './block-room-tiptap-diff';
 import { applyTiptapBlockPayload } from './block-room-tiptap-mutation-writer';
 import type { JsonObject, TiptapBlockSnapshot } from './block-room-tiptap-codec';
 import { SHADER_STAGE_DEFINITIONS } from './shader/shader-program';
@@ -164,6 +165,60 @@ function applyPayload(
 }
 
 describe('Block-room Tiptap mutation writer', () => {
+  it('replaces supplementary source characters through the typed bridge', () => {
+    const room = new Y.Doc();
+    hydrateCanonicalBlockRoom(room, 'post', 'ko', emptyCollaborativeLeavesDocument(), []);
+    const bridge = createBlockRoomProseMirrorBridge({ document: room, documentType: 'post', locale: 'ko' });
+    const before = String.fromCodePoint(0x1f600);
+    const sharedHighAfter = String.fromCodePoint(0x1f601);
+    const sharedLowAfter = String.fromCodePoint(0x1fa00);
+    const setSource = (source: string) =>
+      applyPayload(bridge, 'p5-sketch', {
+        base: { props: { source } },
+        locale: { props: {} },
+      });
+    const readSource = () =>
+      getBlockRoomCollaborativeText(room, {
+        id: IDS.p5Sketch,
+        family: 'rich_text',
+        path: 'props.source',
+      }).toString();
+
+    setSource(before);
+    setSource(sharedHighAfter);
+    expect(readSource()).toBe(sharedHighAfter);
+
+    setSource(before);
+    setSource(sharedLowAfter);
+    expect(readSource()).toBe(sharedLowAfter);
+
+    setSource(`a${before}b`);
+    setSource('ab');
+    expect(readSource()).toBe('ab');
+  });
+
+  it('keeps pure text diff ranges on complete surrogate-pair boundaries', () => {
+    const sharedHighBefore = String.fromCodePoint(0x1f600);
+    const sharedHighAfter = String.fromCodePoint(0x1f601);
+    const sharedLowAfter = String.fromCodePoint(0x1fa00);
+
+    expect(textDiff(sharedHighBefore, sharedHighAfter)).toEqual({
+      from: 0,
+      to: 2,
+      insert: sharedHighAfter,
+    });
+    expect(textDiff(sharedHighBefore, sharedLowAfter)).toEqual({
+      from: 0,
+      to: 2,
+      insert: sharedLowAfter,
+    });
+    expect(textDiff(`a${sharedHighBefore}b`, 'ab')).toEqual({
+      from: 1,
+      to: 3,
+      insert: '',
+    });
+  });
+
   it('creates absent generated collaborative text leaves before applying their first edit', () => {
     const room = new Y.Doc();
     hydrateCanonicalBlockRoom(room, 'post', 'ko', emptyCollaborativeLeavesDocument(), []);
@@ -354,12 +409,13 @@ describe('Block-room Tiptap mutation writer', () => {
     expect(secondReplace).not.toHaveBeenCalled();
   });
 
-  it('replaces only the changed link-child window when a link child topology changes', () => {
+  it('retains link text identities when inserting a differently styled run', () => {
     const room = new Y.Doc();
     hydrateCanonicalBlockRoom(room, 'post', 'ko', inlineDocument(), []);
     const bridge = createBlockRoomProseMirrorBridge({ document: room, documentType: 'post', locale: 'ko' });
-    const deleteCollectionItem = vi.spyOn(bridge, 'deleteCollectionItem');
-    const insertCollectionItem = vi.spyOn(bridge, 'insertCollectionItem');
+    const ref = { id: IDS.paragraph, family: 'rich_text' as const, locale: true as const };
+    const firstText = getBlockRoomCollaborativeText(room, { ...ref, path: 'content[1].link.content[0].text' });
+    const secondText = getBlockRoomCollaborativeText(room, { ...ref, path: 'content[1].link.content[1].text' });
 
     applyPayload(bridge, 'paragraph', {
       base: { props: {} },
@@ -384,17 +440,21 @@ describe('Block-room Tiptap mutation writer', () => {
       },
     });
 
-    expect(deleteCollectionItem.mock.calls.filter(([target]) => target.path === 'content')).toEqual([]);
-    expect(insertCollectionItem.mock.calls).toEqual([
-      [
+    expect(getBlockRoomCollaborativeText(room, { ...ref, path: 'content[1].link.content[0].text' })).toBe(firstText);
+    expect(getBlockRoomCollaborativeText(room, { ...ref, path: 'content[1].link.content[1].text' })).toBe(secondText);
+    expect(bridge.readBlocks()[0]!.localePayload!.content).toEqual(
+      expect.arrayContaining([
         {
-          blockId: IDS.paragraph,
-          scope: 'locale',
-          path: 'content[1].link.content',
+          link: {
+            href: 'https://example.com',
+            content: [
+              { text: 'left' },
+              { text: 'middle', styles: { italic: true } },
+              { text: 'right', styles: { bold: true } },
+            ],
+          },
         },
-        1,
-        { text: 'middle', styles: { italic: true } },
-      ],
-    ]);
+      ]),
+    );
   });
 });

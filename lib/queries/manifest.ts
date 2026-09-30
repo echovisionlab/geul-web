@@ -341,10 +341,13 @@ const getPublicPageCached = cache(
         publishedAt: page.publishedAt ? timestampDate(page.publishedAt) : null,
       };
     } catch (err) {
+      if (isConnectError(err) && err.code === Code.NotFound) {
+        return null;
+      }
       if (isConnectError(err)) {
         logger.error('GetPublicPage RPC error', { error: err.message });
       }
-      return null;
+      throw err;
     }
   },
 );

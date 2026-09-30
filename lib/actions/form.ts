@@ -259,30 +259,37 @@ export async function listFormSubmissionsAction(input: ListSubmissionsInput) {
             },
           ]
         : [],
+      ...(input.search ? { search: input.search } : {}),
+      ...(input.countryCode?.trim() ? { countryCode: input.countryCode.trim().toUpperCase() } : {}),
+      ...(input.dateFrom ? { createdAtFrom: timestampFromDate(new Date(input.dateFrom)) } : {}),
+      ...(input.dateTo ? { createdAtBefore: timestampFromDate(new Date(input.dateTo)) } : {}),
     });
 
     const total = response.pagination?.total ?? 0;
     return {
-      submissions: (response.submissions ?? []).map((s) => ({
-        id: s.id,
-        formId: s.formId,
-        memberId: s.memberId,
-        data: JSON.parse(fromBytes(s.data)),
-        ipAddress: s.ipAddress,
-        countryCode: s.countryCode,
-        userAgent: s.userAgent,
-        createdAt: s.createdAt ? timestampDate(s.createdAt) : undefined,
-      })),
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
+      ok: true as const,
+      data: {
+        submissions: (response.submissions ?? []).map((s) => ({
+          id: s.id,
+          formId: s.formId,
+          memberId: s.memberId,
+          data: JSON.parse(fromBytes(s.data)),
+          ipAddress: s.ipAddress,
+          countryCode: s.countryCode,
+          userAgent: s.userAgent,
+          createdAt: s.createdAt ? timestampDate(s.createdAt) : undefined,
+        })),
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     };
   } catch (err) {
     if (isConnectError(err)) {
       logger.error('ListFormSubmissions RPC error', { error: err.message });
     }
-    return { submissions: [], total: 0, totalPages: 0 };
+    return { ok: false as const, code: 'LIST_SUBMISSIONS_FAILED' as const };
   }
 }
 
