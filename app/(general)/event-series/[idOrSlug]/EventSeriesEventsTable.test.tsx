@@ -144,13 +144,17 @@ describe('EventSeriesEventsTable pagination', () => {
     expect(mocks.listEvents).toHaveBeenCalledWith(expect.objectContaining({ search: 'new', offset: 0 }));
     await act(async () => {
       newSearch.resolve(response(['new-1']));
-      await new Promise((resolve) => setTimeout(resolve, 0));
     });
-    expect(container.querySelector('[data-testid="event-ids"]')?.textContent).toBe('new-1');
+    await vi.waitFor(async () => {
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(container.querySelector('[data-testid="event-ids"]')?.textContent).toBe('new-1');
+    });
 
     await act(async () => {
       oldLoadMore.resolve(response(['old-2']));
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await oldLoadMore.promise;
     });
     expect(container.querySelector('[data-testid="event-ids"]')?.textContent).toBe('new-1');
   });
