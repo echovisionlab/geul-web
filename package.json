@@ -131,6 +131,7 @@
     "@typescript/tooling": "npm:@typescript/typescript6@6.0.2",
     "@vitest/coverage-v8": "^4.1.10",
     "dotenv-cli": "^11.0.0",
+    "esbuild": "0.28.2",
     "eslint": "^9.39.5",
     "eslint-config-mantine": "^4.0.3",
     "eslint-plugin-jsx-a11y": "^6.10.2",
