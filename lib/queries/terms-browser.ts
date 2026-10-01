@@ -3,6 +3,7 @@ import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
 import { createPublicTermsClient, createPublicTermsClientWithLocale } from '@/lib/api/browser-client';
 import { mapPublicLocalizationInfo } from '@/lib/queries/localized-public';
+import { mapPublicLegalPage } from '@/lib/queries/legal-public-page';
 import { materializeLocalizedRichTextTree } from '@/features/editor/contract/localized-rich-text';
 import { createClientLogger, serializeClientLogError } from '@/lib/utils/client-logger';
 
@@ -12,56 +13,25 @@ const logger = createClientLogger('terms-browser');
 // Client Component queries for Terms domain
 // ============================================
 
-export async function getActiveTerms(requestedLocale?: string | null) {
+export async function getTermsPageData(requestedLocale?: string | null) {
   try {
     const client = requestedLocale ? createPublicTermsClientWithLocale(requestedLocale) : createPublicTermsClient();
     const response = await client.get({});
-
-    if (!response.terms) {
-      return null;
-    }
-
-    return {
-      id: response.terms.id,
-      version: response.terms.version,
-      title: response.terms.title,
-      content: response.terms.document ? materializeLocalizedRichTextTree(response.terms.document) : null,
-      localizationInfo: mapPublicLocalizationInfo(response.terms.localizationInfo),
-      status: 'active' as const,
-      effectiveFrom: response.terms.effectiveFrom ? timestampDate(response.terms.effectiveFrom) : null,
-      createdAt: null,
-    };
+    return mapPublicLegalPage(response.terms, response.scheduled);
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
-      return null;
+      return { active: null, scheduled: null };
     }
     throw err;
   }
 }
 
+export async function getActiveTerms(requestedLocale?: string | null) {
+  return (await getTermsPageData(requestedLocale)).active;
+}
+
 export async function getScheduledTerms(requestedLocale?: string | null) {
-  try {
-    const client = requestedLocale ? createPublicTermsClientWithLocale(requestedLocale) : createPublicTermsClient();
-    const response = await client.get({});
-
-    if (!response.scheduled) {
-      return null;
-    }
-
-    return {
-      id: response.scheduled.id,
-      version: response.scheduled.version,
-      title: response.scheduled.title,
-      localizationInfo: mapPublicLocalizationInfo(response.scheduled.localizationInfo),
-      status: 'scheduled' as const,
-      effectiveFrom: response.scheduled.effectiveFrom ? timestampDate(response.scheduled.effectiveFrom) : null,
-    };
-  } catch (err) {
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return null;
-    }
-    throw err;
-  }
+  return (await getTermsPageData(requestedLocale)).scheduled;
 }
 
 export async function getScheduledTermsPreview(

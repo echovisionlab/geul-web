@@ -163,3 +163,50 @@ ESLint enforces that `components/**` contains only `core`, protects Core and Fea
 boundaries, and rejects direct Mantine interactive controls outside Core. Relative imports may
 compose siblings inside the same Core or feature `ui` subtree but may not escape that boundary;
 Feature UI also cannot import locale/message modules or any `@echovisionlab/*` domain contract directly.
+
+## Public legal document loading
+
+`/privacy` and `/terms` use `lib/queries/legal-public.server.ts` to read the current
+and scheduled versions once per requested locale and render request. React request
+memoization does not persist a policy version across requests.
+
+`features/policy/public-legal-page.server.ts` derives the title and summary from that
+snapshot so metadata, JSON-LD, and the initial document use the same version.
+`lib/queries/legal-public-page.ts` owns the shared wire-to-view projection; browser
+and server reads use the same content, localization and date mapping.
+
+The client consumes matching-locale initial data in one combined query. It uses the
+Query provider's existing 60-second freshness window and the server read timestamp,
+so mounting fresh data requires no browser RPC. A newer server snapshot also takes
+precedence over older browser data on a return visit. Missing server data remains eligible
+for a browser retry; an authoritative empty response renders the empty state, while
+a query failure renders an error. ShareLink previews retain their exact version ID,
+token and locale query, and never consume a public initial snapshot. History queries
+retain their existing interfaces.
+
+### Measured loading verification (2026-10-01)
+
+Compared the two page client modules at `f1e21bf2456ebbf62e19122cfaabe2e0c049f679`
+with this change using the same React/Vitest/JSDOM fixtures, English locale, one
+published paragraph, empty query cache and the existing 60-second freshness window.
+Only the baseline page modules were swapped; query mocks and rendering fixtures
+were identical. Both pages changed as follows:
+
+| Measurement | Before | After |
+| --- | ---: | ---: |
+| Initial client query function calls | 2 | 0 |
+| Published paragraphs in initial HTML | 0 | 1 |
+
+The initial client query calls dropped by 100%. When the server snapshot is unavailable,
+the client now invokes one combined query; the query boundary test verifies exactly
+one `get({})` RPC for both current and scheduled values.
+
+These are deterministic query/HTML measurements, not real network timings. Production
+LCP and CLS have not been measured for the changed version because it has not been
+deployed; the local-contract build uses local service endpoints, not the audited live
+site's content. Actual layout and timing improvement needs the same browser/cache
+conditions as the public-page audit after deployment. The alternatives verified here
+are real paragraph SSR, hydration preserving the server DOM, query counts, locale and
+ShareLink isolation, return visits with older or pending browser data, and authoritative
+empty versus service failure behavior. Server request-cache tests model React's cache
+semantics and do not constitute production RPC tracing.
