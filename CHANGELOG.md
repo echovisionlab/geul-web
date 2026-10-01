@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.4](https://github.com/echovisionlab/geul-web/compare/v0.3.3...v0.3.4) (2026-10-01)
+
+
+### Bug Fixes
+
+* **editor:** preserve translated metadata drafts on refresh ([#52](https://github.com/echovisionlab/geul-web/issues/52)) ([4acc222](https://github.com/echovisionlab/geul-web/commit/4acc222ff3c9d4dc0aca418a1a0fd566b2fda3c7))
+
 ## [0.3.3](https://github.com/echovisionlab/geul-web/compare/v0.3.2...v0.3.3) (2026-10-01)
 
 
