@@ -17,7 +17,33 @@ let root: Root;
 let latest: ReturnType<typeof usePostMeta> | null = null;
 const acceptEpochAck = vi.fn();
 const reloadCanonical = vi.fn();
-const protocol = vi.hoisted(() => ({ updateMetadata: vi.fn(), getSnapshot: vi.fn() }));
+const metadataRoom = vi.hoisted(() => ({
+  listener: null as
+    | null
+    | ((update: {
+        operation: 'locale' | 'document' | 'page_layout';
+        values: Record<string, unknown>;
+        sequence: number;
+      }) => void),
+}));
+const protocol = vi.hoisted(() => ({
+  updateMetadata: vi.fn(),
+  getSnapshot: vi.fn(),
+  subscribeMetadata: vi.fn(
+    (
+      listener: (update: {
+        operation: 'locale' | 'document' | 'page_layout';
+        values: Record<string, unknown>;
+        sequence: number;
+      }) => void,
+    ) => {
+      metadataRoom.listener = listener;
+      return () => {
+        metadataRoom.listener = null;
+      };
+    },
+  ),
+}));
 const recoveryRoom = vi.hoisted(() => ({ snapshots: {} as Record<string, unknown> }));
 const localeRoom = vi.hoisted(() => ({
   active: {
@@ -117,6 +143,7 @@ beforeEach(() => {
   root = createRoot(container);
   latest = null;
   recoveryRoom.snapshots = {};
+  metadataRoom.listener = null;
   localeRoom.active = {
     activeLocale: 'ko',
     sourceLocale: 'ko',
@@ -188,6 +215,7 @@ describe('PostMetaProvider', () => {
     expect(latest?.tagIds).toEqual(['tag-1']);
 
     act(() => {
+      latest?.setCategoryIds(['category-intermediate']);
       latest?.setCategoryIds(['category-2']);
       latest?.setTagIds(['tag-2']);
       vi.advanceTimersByTime(250);
@@ -198,9 +226,25 @@ describe('PostMetaProvider', () => {
     expect(updatePostBlockRoomDocumentMetadata).toHaveBeenCalledWith(protocol, {
       categoryIds: ['category-2'],
       tagIds: ['tag-2'],
+      observed: { categoryIds: ['category-1'], tagIds: ['tag-1'] },
     });
     expect(acceptEpochAck).toHaveBeenCalledOnce();
     expect(mockDoc.getMap('post-meta').size).toBe(0);
+  });
+
+  it('adopts peer taxonomy arrays while protecting fields with local pending edits', async () => {
+    await renderProvider();
+    act(() => {
+      latest?.setCategoryIds(['local-category']);
+      metadataRoom.listener?.({
+        operation: 'document',
+        values: { categoryIds: ['remote-category'], tagIds: ['remote-tag'] },
+        sequence: 2,
+      });
+    });
+
+    expect(latest?.categoryIds).toEqual(['local-category']);
+    expect(latest?.tagIds).toEqual(['remote-tag']);
   });
 
   it('keeps non-Block presentation state local and survives StrictMode replay', async () => {
@@ -241,6 +285,7 @@ it('reports taxonomy failure and retries the retained fields together with the n
   expect(updatePostBlockRoomDocumentMetadata).toHaveBeenLastCalledWith(protocol, {
     categoryIds: ['category-2'],
     tagIds: ['tag-2'],
+    observed: { categoryIds: ['category-1'], tagIds: ['tag-1'] },
   });
   expect(acceptEpochAck).toHaveBeenCalledOnce();
 });

@@ -41,6 +41,7 @@ import {
   useTranslationGenerationAvailability,
 } from '@/features/translation/useTranslationGenerationAvailability';
 import { useOptionalEditorRuntimeContext } from '@/lib/contexts/EditorRuntimeContext';
+import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 import { mutateAIDocumentTargetTranslation, type AIDocumentTargetType } from '@/lib/ai/document-client';
 import { DEFAULT_LOCALE } from '@/lib/i18n/locale';
 import { CONTENT_LANGUAGE_QUERY_PARAM } from '@/lib/translation/content-language';
@@ -224,8 +225,25 @@ export function EntityTranslationsPanel({
     refreshEntries,
     refreshJobs,
     beforeRegenerate: async () => {
-      if (runtimeContext && runtimeContext.entityType === entityType && runtimeContext.entityId === entityId) {
+      if (!(await flushEditorSaves(`${entityType}:${entityId}`))) {
+        throw new Error('Pending editor saves did not complete.');
+      }
+      const runtimeEntityTypeMatches =
+        runtimeContext?.entityType === entityType ||
+        (runtimeContext?.entityType === 'series' && entityType === 'post_series');
+      if (runtimeContext && runtimeEntityTypeMatches && runtimeContext.entityId === entityId) {
         await runtimeContext.persistNow();
+      }
+    },
+    beforeSourceChange: async () => {
+      const runtimeEntityTypeMatches =
+        runtimeContext?.entityType === entityType ||
+        (runtimeContext?.entityType === 'series' && entityType === 'post_series');
+      if (runtimeContext && runtimeEntityTypeMatches && runtimeContext.entityId === entityId) {
+        await runtimeContext.persistNow();
+      }
+      if (!(await flushEditorSaves(`${entityType}:${entityId}`))) {
+        throw new Error('Pending editor saves did not complete.');
       }
     },
     getBlockRoomSnapshot: runtimeContext?.getBlockRoomSnapshot,

@@ -7,6 +7,7 @@ export interface EditorSaveRecoveryEntry {
   document: string;
   updatedAt: number;
   patch: unknown;
+  recoveryKey?: string;
 }
 
 export interface EditorSaveRecovery {
@@ -14,41 +15,44 @@ export interface EditorSaveRecovery {
   entries: EditorSaveRecoveryEntry[];
 }
 
+export interface EditorSaveRecoveryIdentity {
+  scope: string | null;
+  key?: string;
+}
+
 interface StoredEntry extends Omit<EditorSaveRecoveryEntry, 'id'> {
   queueId: string;
+  recoveredQueueIds?: string[];
 }
 
 interface StoredRecovery {
   version: 1;
   scope: string;
   entries: StoredEntry[];
+  /** Unrecognized entry shapes are carried through unrelated writes without being replayed. */
+  opaqueEntries?: unknown[];
 }
 
 const activeQueueIds = new Set<string>();
-const recoveryListeners = new Set<() => void>();
+const claimedQueueIds = new Map<string, string>();
 const memoryRecoveries = new Map<string, Map<string, StoredEntry>>();
-
-function notifyRecoveryChanged() {
-  for (const listener of recoveryListeners) {
-    listener();
-  }
-}
-
-export function subscribeToEditorSaveRecovery(listener: () => void) {
-  recoveryListeners.add(listener);
-  return () => {
-    recoveryListeners.delete(listener);
-  };
-}
+const latestPersistedAtByScope = new Map<string, number>();
 
 export function activateEditorSaveRecoveryQueue(queueId: string) {
   activeQueueIds.add(queueId);
-  notifyRecoveryChanged();
 }
 
 export function deactivateEditorSaveRecoveryQueue(queueId: string) {
   activeQueueIds.delete(queueId);
-  notifyRecoveryChanged();
+  releaseEditorSaveRecoveryClaims(queueId);
+}
+
+function releaseEditorSaveRecoveryClaims(ownerQueueId: string) {
+  for (const [queueId, owner] of claimedQueueIds) {
+    if (owner === ownerQueueId) {
+      claimedQueueIds.delete(queueId);
+    }
+  }
 }
 
 function getStorage(): Storage | null {
@@ -86,19 +90,42 @@ function parseSessionRecovery(scope: string): StoredRecovery | null {
     ) {
       return null;
     }
-    const entries = value.entries.filter(
-      (entry): entry is StoredEntry =>
-        Boolean(entry) &&
-        typeof entry === 'object' &&
-        'queueId' in entry &&
-        typeof entry.queueId === 'string' &&
-        'document' in entry &&
-        typeof entry.document === 'string' &&
-        'updatedAt' in entry &&
-        typeof entry.updatedAt === 'number' &&
-        'patch' in entry,
-    );
-    return { version: 1, scope, entries };
+    const entries: StoredEntry[] = [];
+    const opaqueEntries: unknown[] = [];
+    for (const entry of value.entries) {
+      if (
+        !entry ||
+        typeof entry !== 'object' ||
+        !('queueId' in entry) ||
+        typeof entry.queueId !== 'string' ||
+        !('document' in entry) ||
+        typeof entry.document !== 'string' ||
+        !('updatedAt' in entry) ||
+        typeof entry.updatedAt !== 'number' ||
+        !Number.isFinite(entry.updatedAt) ||
+        !('patch' in entry)
+      ) {
+        opaqueEntries.push(entry);
+        continue;
+      }
+      const recoveryKey =
+        'recoveryKey' in entry && typeof entry.recoveryKey === 'string' ? entry.recoveryKey : undefined;
+      const recoveredQueueIds =
+        'recoveredQueueIds' in entry &&
+        Array.isArray(entry.recoveredQueueIds) &&
+        entry.recoveredQueueIds.every((queueId: unknown) => typeof queueId === 'string')
+          ? [...entry.recoveredQueueIds]
+          : undefined;
+      entries.push({
+        queueId: entry.queueId,
+        document: entry.document,
+        updatedAt: entry.updatedAt,
+        patch: entry.patch,
+        ...(recoveryKey === undefined ? {} : { recoveryKey }),
+        ...(recoveredQueueIds === undefined ? {} : { recoveredQueueIds }),
+      });
+    }
+    return { version: 1, scope, entries, opaqueEntries };
   } catch {
     return null;
   }
@@ -117,37 +144,17 @@ function parseStoredRecovery(scope: string): StoredRecovery | null {
   for (const entry of memory) {
     entries.set(entry.queueId, entry);
   }
-  return { version: 1, scope, entries: [...entries.values()] };
+  return { version: 1, scope, entries: [...entries.values()], opaqueEntries: session?.opaqueEntries ?? [] };
 }
 
-function storedScopes(): string[] {
-  const scopes = new Set(memoryRecoveries.keys());
-  const storage = getStorage();
-  if (!storage) {
-    return [...scopes];
-  }
-  try {
-    for (let index = 0; index < storage.length; index += 1) {
-      const key = storage.key(index);
-      if (!key?.startsWith(STORAGE_PREFIX)) {
-        continue;
-      }
-      try {
-        scopes.add(decodeURIComponent(key.slice(STORAGE_PREFIX.length)));
-      } catch {
-        // Ignore malformed keys and preserve records under valid scopes.
-      }
-    }
-  } catch {
-    // Keep the in-memory scopes available if session storage cannot be enumerated.
-  }
-  return [...scopes];
+function serializedRecovery(scope: string, entries: StoredEntry[], opaqueEntries: unknown[] = []) {
+  return JSON.stringify({ version: 1, scope, entries: [...opaqueEntries, ...entries] });
 }
 
 export function persistEditorSaveRecoveryEntry(
   scope: string | null,
   queueId: string,
-  entry: Omit<EditorSaveRecoveryEntry, 'id'>,
+  entry: Omit<EditorSaveRecoveryEntry, 'id'> & { recoveredQueueIds?: readonly string[] },
 ): boolean {
   if (!scope) {
     return false;
@@ -158,11 +165,20 @@ export function persistEditorSaveRecoveryEntry(
     if (serializedPatch === undefined) {
       return false;
     }
+    const existing = parseStoredRecovery(scope)?.entries ?? [];
+    const latestPersistedAt = Math.max(
+      latestPersistedAtByScope.get(scope) ?? Number.NEGATIVE_INFINITY,
+      ...existing.map((storedEntry) => storedEntry.updatedAt),
+    );
+    const updatedAt = Math.max(entry.updatedAt, latestPersistedAt + 1);
+    latestPersistedAtByScope.set(scope, updatedAt);
     const safeEntry: StoredEntry = {
       queueId,
       document: entry.document,
-      updatedAt: entry.updatedAt,
+      updatedAt,
       patch: JSON.parse(serializedPatch) as unknown,
+      ...(typeof entry.recoveryKey === 'string' ? { recoveryKey: entry.recoveryKey } : {}),
+      ...(entry.recoveredQueueIds?.length ? { recoveredQueueIds: [...new Set(entry.recoveredQueueIds)] } : {}),
     };
     const memory = memoryRecoveries.get(scope) ?? new Map<string, StoredEntry>();
     memory.set(queueId, safeEntry);
@@ -170,14 +186,16 @@ export function persistEditorSaveRecoveryEntry(
     const stored = parseStoredRecovery(scope) ?? { version: 1 as const, scope, entries: [] };
     const entries = stored.entries.filter((item) => item.queueId !== queueId);
     entries.push(safeEntry);
-    storage?.setItem(storageKey(scope), JSON.stringify({ version: 1, scope, entries } satisfies StoredRecovery));
-    notifyRecoveryChanged();
-    return storage !== null;
-  } catch {
-    const memory = memoryRecoveries.get(scope);
-    if (memory) {
-      notifyRecoveryChanged();
+    if (storage) {
+      const sessionStored = parseSessionRecovery(scope);
+      // Keep malformed/unknown envelopes intact. The in-memory copy remains usable for this session.
+      const rawSession = storage.getItem(storageKey(scope));
+      if (!rawSession || sessionStored) {
+        storage.setItem(storageKey(scope), serializedRecovery(scope, entries, sessionStored?.opaqueEntries));
+      }
     }
+    return true;
+  } catch {
     return false;
   }
 }
@@ -186,80 +204,164 @@ export function removeEditorSaveRecoveryEntry(scope: string | null, queueId: str
   if (!scope) {
     return;
   }
+  const queueIdsToRemove = new Set([queueId]);
+  for (const [claimedId, owner] of claimedQueueIds) {
+    if (owner === queueId && !activeQueueIds.has(claimedId)) {
+      queueIdsToRemove.add(claimedId);
+    }
+  }
+  for (const claimedId of queueIdsToRemove) {
+    claimedQueueIds.delete(claimedId);
+  }
   const storage = getStorage();
   const memory = memoryRecoveries.get(scope);
-  memory?.delete(queueId);
+  for (const id of queueIdsToRemove) {
+    memory?.delete(id);
+  }
   if (memory?.size === 0) {
     memoryRecoveries.delete(scope);
   }
   const stored = parseSessionRecovery(scope);
   if (!storage || !stored) {
-    notifyRecoveryChanged();
     return;
   }
   try {
-    const entries = stored.entries.filter((entry) => entry.queueId !== queueId);
-    if (entries.length === 0) {
+    const entries = stored.entries.filter((entry) => !queueIdsToRemove.has(entry.queueId));
+    if (entries.length === 0 && stored.opaqueEntries?.length === 0) {
       storage.removeItem(storageKey(scope));
     } else {
-      storage.setItem(storageKey(scope), JSON.stringify({ ...stored, entries }));
+      storage.setItem(storageKey(scope), serializedRecovery(scope, entries, stored.opaqueEntries));
     }
-    notifyRecoveryChanged();
   } catch {
-    // A recovery cleanup failure leaves a downloadable copy in session storage.
+    // Keep the recovery entry when storage cleanup fails.
   }
 }
 
 export function readEditorSaveRecovery(scope: string): EditorSaveRecovery | null {
   const stored = parseStoredRecovery(scope);
-  const entries = stored?.entries.filter((entry) => !activeQueueIds.has(entry.queueId)) ?? [];
+  const absorbedQueueIds = new Map<string, Set<string>>();
+  for (const entry of stored?.entries ?? []) {
+    if (!entry.recoveryKey) {
+      continue;
+    }
+    const identity = JSON.stringify([entry.document, entry.recoveryKey]);
+    const queueIds = absorbedQueueIds.get(identity) ?? new Set<string>();
+    for (const recoveredQueueId of entry.recoveredQueueIds ?? []) {
+      queueIds.add(recoveredQueueId);
+    }
+    absorbedQueueIds.set(identity, queueIds);
+  }
+  const entries =
+    stored?.entries.filter(
+      (entry) =>
+        !activeQueueIds.has(entry.queueId) &&
+        !claimedQueueIds.has(entry.queueId) &&
+        !absorbedQueueIds.get(JSON.stringify([entry.document, entry.recoveryKey]))?.has(entry.queueId),
+    ) ?? [];
   if (entries.length === 0) {
     return null;
   }
   return {
     scope,
-    entries: entries.map(({ queueId, document, updatedAt, patch }) => ({ id: queueId, document, updatedAt, patch })),
+    entries: entries.map(({ queueId, document, updatedAt, patch, recoveryKey }) => ({
+      id: queueId,
+      document,
+      updatedAt,
+      patch,
+      ...(recoveryKey === undefined ? {} : { recoveryKey }),
+    })),
   };
 }
 
-export function listEditorSaveRecoveries(document: string): EditorSaveRecovery[] {
-  const recoveries: EditorSaveRecovery[] = [];
-  try {
-    for (const scope of storedScopes()) {
-      const recovery = readEditorSaveRecovery(scope);
-      const entries = recovery?.entries.filter((entry) => entry.document === document) ?? [];
-      if (recovery && entries.length > 0) {
-        recoveries.push({ scope, entries });
-      }
-    }
-  } catch {
-    return recoveries;
-  }
-  return recoveries;
+export interface ClaimedEditorSaveRecoveryEntry extends EditorSaveRecoveryEntry {
+  recoveredQueueIds: string[];
 }
 
-export function hasEditorSaveRecovery(document?: string): boolean {
-  try {
-    for (const scope of storedScopes()) {
-      const recovery = readEditorSaveRecovery(scope);
-      if (recovery?.entries.some((entry) => document === undefined || entry.document === document)) {
-        return true;
-      }
+/** Claims only inactive entries written by the same stable writer for this exact room and document. */
+export function claimEditorSaveRecoveryEntries(
+  scope: string | null,
+  ownerQueueId: string,
+  document: string,
+  recoveryKey: string | undefined,
+): ClaimedEditorSaveRecoveryEntry[] {
+  if (!scope || !recoveryKey) {
+    return [];
+  }
+  const stored = parseStoredRecovery(scope);
+  if (!stored) {
+    return [];
+  }
+
+  const matchingEntries = stored.entries.filter(
+    (entry) =>
+      entry.document === document &&
+      entry.recoveryKey === recoveryKey &&
+      entry.patch !== null &&
+      typeof entry.patch === 'object' &&
+      !Array.isArray(entry.patch),
+  );
+  const absorbedQueueIds = new Set(matchingEntries.flatMap((entry) => entry.recoveredQueueIds ?? []));
+  const candidates = matchingEntries.filter((entry) => {
+    if (absorbedQueueIds.has(entry.queueId)) {
+      return false;
     }
-  } catch {
-    return false;
+    if (entry.queueId !== ownerQueueId && activeQueueIds.has(entry.queueId)) {
+      return false;
+    }
+    const currentClaimOwner = claimedQueueIds.get(entry.queueId);
+    return currentClaimOwner === undefined || currentClaimOwner === ownerQueueId;
+  });
+  candidates.sort((a, b) => a.updatedAt - b.updatedAt);
+
+  const inheritedQueueIds = new Set<string>();
+  for (const entry of candidates) {
+    for (const inheritedId of entry.recoveredQueueIds ?? []) {
+      inheritedQueueIds.add(inheritedId);
+    }
+    if (entry.queueId !== ownerQueueId) {
+      inheritedQueueIds.add(entry.queueId);
+    }
+  }
+
+  // Reserve available ancestors too, so a second mounting queue cannot replay them in parallel.
+  for (const claimedId of inheritedQueueIds) {
+    if (
+      !activeQueueIds.has(claimedId) &&
+      (claimedQueueIds.get(claimedId) === undefined || claimedQueueIds.get(claimedId) === ownerQueueId)
+    ) {
+      claimedQueueIds.set(claimedId, ownerQueueId);
+    }
+  }
+  for (const entry of candidates) {
+    if (entry.queueId !== ownerQueueId) {
+      claimedQueueIds.set(entry.queueId, ownerQueueId);
+    }
+  }
+
+  return candidates.map((entry) => ({
+    id: entry.queueId,
+    document: entry.document,
+    updatedAt: entry.updatedAt,
+    patch: entry.patch,
+    ...(entry.recoveryKey === undefined ? {} : { recoveryKey: entry.recoveryKey }),
+    recoveredQueueIds: [...(entry.recoveredQueueIds ?? [])],
+  }));
+}
+
+/** Only an exact registered writer can keep an orphaned keyed batch navigation-blocking. */
+export function hasRecoverableEditorSaveRecovery(
+  identities: readonly (EditorSaveRecoveryIdentity & { document: string })[],
+): boolean {
+  for (const identity of identities) {
+    if (!identity.scope || !identity.key) {
+      continue;
+    }
+    const recovery = readEditorSaveRecovery(identity.scope);
+    if (recovery?.entries.some((entry) => entry.document === identity.document && entry.recoveryKey === identity.key)) {
+      return true;
+    }
   }
   return false;
-}
-
-export function exportEditorSaveRecovery(scope: string): string | null {
-  const recovery = readEditorSaveRecovery(scope);
-  return recovery ? JSON.stringify(recovery, null, 2) : null;
-}
-
-export function exportEditorSaveRecoveries(document: string): string | null {
-  const recoveries = listEditorSaveRecoveries(document);
-  return recoveries.length > 0 ? JSON.stringify({ document, recoveries }, null, 2) : null;
 }
 
 /** Removes a recovery copy only after an explicit user action. */
@@ -271,8 +373,20 @@ export function clearEditorSaveRecovery(scope: string, queueIds?: readonly strin
   }
   try {
     const queueIdSet = queueIds ? new Set(queueIds) : null;
+    if (queueIdSet) {
+      for (const entry of stored.entries) {
+        if (queueIdSet.has(entry.queueId)) {
+          for (const recoveredQueueId of entry.recoveredQueueIds ?? []) {
+            queueIdSet.add(recoveredQueueId);
+          }
+        }
+      }
+    }
     const keptEntries = stored.entries.filter(
-      (entry) => activeQueueIds.has(entry.queueId) || (queueIdSet ? !queueIdSet.has(entry.queueId) : false),
+      (entry) =>
+        activeQueueIds.has(entry.queueId) ||
+        claimedQueueIds.has(entry.queueId) ||
+        (queueIdSet ? !queueIdSet.has(entry.queueId) : false),
     );
     const memory = memoryRecoveries.get(scope);
     if (memory) {
@@ -286,16 +400,16 @@ export function clearEditorSaveRecovery(scope: string, queueIds?: readonly strin
         memoryRecoveries.delete(scope);
       }
     }
-    if (storage) {
-      const sessionEntries = parseSessionRecovery(scope)?.entries ?? [];
+    const sessionRecovery = parseSessionRecovery(scope);
+    if (storage && sessionRecovery) {
+      const sessionEntries = sessionRecovery.entries;
       const sessionKept = sessionEntries.filter((entry) => keptEntries.some((kept) => kept.queueId === entry.queueId));
-      if (sessionKept.length === 0) {
+      if (sessionKept.length === 0 && sessionRecovery?.opaqueEntries?.length === 0) {
         storage.removeItem(storageKey(scope));
       } else {
-        storage.setItem(storageKey(scope), JSON.stringify({ ...stored, entries: sessionKept }));
+        storage.setItem(storageKey(scope), serializedRecovery(scope, sessionKept, sessionRecovery?.opaqueEntries));
       }
     }
-    notifyRecoveryChanged();
   } catch {
     // Keep the record if storage refuses the explicit cleanup.
   }

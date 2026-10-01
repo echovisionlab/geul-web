@@ -25,6 +25,7 @@ import type { PaginatedQuery } from '@/lib/types/common/query';
 export interface LegalPolicyListItem {
   id: string;
   version: number;
+  revision: string;
   title: string;
   status: string;
   effectiveFrom: Date | null;
@@ -56,7 +57,7 @@ interface LegalPolicyListClientProps {
   initialVersions: LegalPolicyListItem[];
   status: LegalPolicyStatusStrategy;
   createVersion: () => Promise<CreateActionResult>;
-  deleteVersion: (id: string) => Promise<ActionResult>;
+  deleteVersion: (id: string, expectedRevision: string) => Promise<ActionResult>;
   searchPlaceholder: string;
 }
 
@@ -136,7 +137,8 @@ export function LegalPolicyListClient({
   });
 
   const deleteMutation = useMutation({
-    mutationFn: deleteVersion,
+    mutationFn: ({ id, expectedRevision }: { id: string; expectedRevision: string }) =>
+      deleteVersion(id, expectedRevision),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
@@ -327,7 +329,12 @@ export function LegalPolicyListClient({
           sortFields={sortFields}
           bulkDelete={{
             entityLabel,
-            deleteAction: deleteVersion,
+            deleteAction: (id) => {
+              const selected = versions.find((version) => version.id === id);
+              return selected
+                ? deleteVersion(selected.id, selected.revision)
+                : Promise.resolve({ error: tCommon('messages.noVersionsFound') });
+            },
             getRowLabel: (row) => row.title || row.id,
             successMessage: tCommon('messages.itemDeleted', { item: tCommon('labels.version') }),
             onSuccess: (successfulIds) => {
@@ -346,7 +353,10 @@ export function LegalPolicyListClient({
             </Button>
             <Button
               tone="danger"
-              onClick={() => selectedVersion && deleteMutation.mutate(selectedVersion.id)}
+              onClick={() =>
+                selectedVersion &&
+                deleteMutation.mutate({ id: selectedVersion.id, expectedRevision: selectedVersion.revision })
+              }
               loading={deleteMutation.isPending}
             >
               {tCommon('actions.delete')}

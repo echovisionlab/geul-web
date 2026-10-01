@@ -54,6 +54,8 @@ function bootstrapMessage(
     presentLocaleValues: [],
     targetRevision: options.targetRevision,
     sourceMetadata,
+    documentMetadata: {},
+    metadataSequence: 0,
     localeMetadata: localeExists ? (roomLocale === sourceLocale ? sourceMetadata : { locale: roomLocale }) : undefined,
     blockCatalogFingerprint: fingerprint,
     serverInstanceId: 'collab-1',
@@ -102,6 +104,12 @@ describe('block-room WebSocket bootstrap', () => {
     const sourceMessage = bootstrapMessage();
     expect(() =>
       parseBlockRoomBootstrap({ ...sourceMessage, sourceMetadata: undefined }, 'post', entityId, 'en'),
+    ).toThrow(/failed validation/u);
+    expect(() =>
+      parseBlockRoomBootstrap({ ...sourceMessage, documentMetadata: undefined }, 'post', entityId, 'en'),
+    ).toThrow(/failed validation/u);
+    expect(() =>
+      parseBlockRoomBootstrap({ ...sourceMessage, metadataSequence: undefined }, 'post', entityId, 'en'),
     ).toThrow(/failed validation/u);
     expect(() =>
       parseBlockRoomBootstrap({ ...sourceMessage, localeMetadata: undefined }, 'post', entityId, 'en'),

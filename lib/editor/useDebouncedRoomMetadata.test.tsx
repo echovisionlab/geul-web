@@ -81,3 +81,29 @@ it.each(['ack', 'error'] as const)('ignores a disposed room %s after a new room 
   expect(newRoom.reloadCanonical).not.toHaveBeenCalled();
   expect(notifications.show).not.toHaveBeenCalled();
 });
+
+it('retains pending intent across reconnect and uses the fresh room writer and ACK handler', async () => {
+  const old = connection();
+  const documentName = 'work:one:ko';
+  old.protocol = { documentName } as Connection['protocol'];
+  old.bootstrap = { documentName } as Connection['bootstrap'];
+  const failed = vi.fn().mockRejectedValue(new BlockRoomMetadataError('reload', true));
+  act(() => root.render(<Editor room={old} write={failed} />));
+  act(() => edit({ title: 'pending' }));
+  await act(async () => {
+    expect(await edit.flush()).toBe(false);
+  });
+  act(() => root.render(<Editor room={{ ...old, protocol: null, bootstrap: null }} write={failed} />));
+  expect(edit.hasPending()).toBe(true);
+  const fresh = connection();
+  fresh.protocol = { documentName } as Connection['protocol'];
+  fresh.bootstrap = { documentName } as Connection['bootstrap'];
+  const saved = vi.fn().mockResolvedValue(ack);
+  await act(async () => {
+    root.render(<Editor room={fresh} write={saved} />);
+  });
+  expect(saved).toHaveBeenCalledWith(fresh.protocol, { title: 'pending' });
+  expect(fresh.acceptEpochAck).toHaveBeenCalledExactlyOnceWith(ack);
+  expect(old.acceptEpochAck).not.toHaveBeenCalled();
+  expect(edit.hasPending()).toBe(false);
+});

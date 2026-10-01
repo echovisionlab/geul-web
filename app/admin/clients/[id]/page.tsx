@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -26,6 +26,13 @@ export default function AdminClientDetailPage() {
   const [website, setWebsite] = useState('');
   const [logoLightUrl, setLogoLightUrl] = useState<string | null>(null);
   const [logoDarkUrl, setLogoDarkUrl] = useState<string | null>(null);
+  const baselineRef = useRef<{
+    id: string;
+    name: string;
+    website: string;
+    logoLightUrl: string | null;
+    logoDarkUrl: string | null;
+  } | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -36,7 +43,7 @@ export default function AdminClientDetailPage() {
   });
 
   const createClient = useMutation({
-    mutationFn: (data: { name: string; website?: string | null }) => createClientAction(data.name),
+    mutationFn: (data: { name: string; website?: string | null }) => createClientAction(data.name, data.website),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
@@ -48,12 +55,20 @@ export default function AdminClientDetailPage() {
   });
 
   const updateClient = useMutation({
-    mutationFn: (data: { id: string; name: string; website?: string | null }) =>
+    mutationFn: (data: { id: string; name?: string; website?: string | null }) =>
       updateClientAction(data.id, { name: data.name, website: data.website }),
-    onSuccess: (result) => {
+    onSuccess: (result, variables) => {
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
         return;
+      }
+      const baseline = baselineRef.current;
+      if (baseline?.id === variables.id) {
+        baselineRef.current = {
+          ...baseline,
+          ...(variables.name !== undefined ? { name: variables.name } : {}),
+          ...(variables.website !== undefined ? { website: variables.website ?? '' } : {}),
+        };
       }
       notifications.show({ message: tPage('updated'), color: 'green' });
       queryClient.invalidateQueries({ queryKey: ['clients'] });
@@ -61,13 +76,40 @@ export default function AdminClientDetailPage() {
   });
 
   useEffect(() => {
-    if (client) {
-      setName(client.name);
-      setWebsite(client.website || '');
-      setLogoLightUrl(client.logoLightUrl ?? client.logoUrl);
-      setLogoDarkUrl(client.logoDarkUrl);
+    if (!client || isNew || client.id !== id) {
+      if (isNew) {
+        baselineRef.current = null;
+      }
+      return;
     }
-  }, [client]);
+
+    const nextBaseline = {
+      id: client.id,
+      name: client.name,
+      website: client.website || '',
+      logoLightUrl: client.logoLightUrl ?? client.logoUrl,
+      logoDarkUrl: client.logoDarkUrl,
+    };
+    const baseline = baselineRef.current;
+    const identityChanged = baseline?.id !== nextBaseline.id;
+    const dirty =
+      !identityChanged &&
+      baseline !== null &&
+      (name !== baseline.name ||
+        website !== baseline.website ||
+        logoLightUrl !== baseline.logoLightUrl ||
+        logoDarkUrl !== baseline.logoDarkUrl);
+
+    if (!identityChanged && (dirty || updateClient.isPending)) {
+      return;
+    }
+
+    baselineRef.current = nextBaseline;
+    setName(nextBaseline.name);
+    setWebsite(nextBaseline.website);
+    setLogoLightUrl(nextBaseline.logoLightUrl);
+    setLogoDarkUrl(nextBaseline.logoDarkUrl);
+  }, [client, id, isNew, logoDarkUrl, logoLightUrl, name, updateClient.isPending, website]);
 
   const handleSubmit = () => {
     if (isNew) {
@@ -76,10 +118,24 @@ export default function AdminClientDetailPage() {
         website: website || null,
       });
     } else {
+      const baseline = baselineRef.current;
+      if (!baseline || baseline.id !== id) {
+        return;
+      }
+
+      const changes: { id: string; name?: string; website?: string | null } = { id };
+      if (name !== baseline.name) {
+        changes.name = name;
+      }
+      if (website !== baseline.website) {
+        changes.website = website || null;
+      }
+      if (Object.keys(changes).length === 1) {
+        return;
+      }
+
       updateClient.mutate({
-        id,
-        name,
-        website: website || null,
+        ...changes,
       });
     }
   };
@@ -109,7 +165,12 @@ export default function AdminClientDetailPage() {
             name={name}
             size={120}
             label={tCommon('labels.logoLight')}
-            onImageChange={(url) => setLogoLightUrl(url)}
+            onImageChange={(url) => {
+              setLogoLightUrl(url);
+              if (baselineRef.current?.id === id) {
+                baselineRef.current.logoLightUrl = url;
+              }
+            }}
           />
         )}
 
@@ -121,7 +182,12 @@ export default function AdminClientDetailPage() {
             name={name}
             size={120}
             label={tCommon('labels.logoDark')}
-            onImageChange={(url) => setLogoDarkUrl(url)}
+            onImageChange={(url) => {
+              setLogoDarkUrl(url);
+              if (baselineRef.current?.id === id) {
+                baselineRef.current.logoDarkUrl = url;
+              }
+            }}
           />
         )}
 

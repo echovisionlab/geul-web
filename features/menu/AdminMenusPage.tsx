@@ -214,7 +214,7 @@ export function AdminMenusPage() {
       if (editingMenuId !== selectedMenuId || !roomState || !canEditStructure) {
         return;
       }
-      menuRoom.replaceSource(menuName, roomState.items);
+      menuRoom.replaceSource(roomState, menuName, roomState.items);
       closeMenuModal();
     } else {
       createMenu.mutate(menuName);
@@ -229,11 +229,11 @@ export function AdminMenusPage() {
 
   // Helper to save items
   const saveItems = (items: MenuItem[]) => {
-    if (!selectedMenuId || selectedMenuAuthoringLocked) {
+    if (!selectedMenuId || !roomState || selectedMenuAuthoringLocked) {
       return;
     }
     setMenuItems(items);
-    menuRoom.replaceSource(roomState?.name ?? selectedMenu?.name ?? '', items);
+    menuRoom.replaceSource({ name: roomState.name, items: menuItems }, roomState.name, items);
   };
 
   // Item handlers

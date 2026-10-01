@@ -92,10 +92,13 @@ export async function getClientsForBlockByIdsAction(input: { ids: string[]; requ
   }
 }
 
-export async function createClientAction(name: string): Promise<{ data?: { id: string }; error?: string }> {
+export async function createClientAction(
+  name: string,
+  website?: string | null,
+): Promise<{ data?: { id: string }; error?: string }> {
   try {
     const client = await createClientClient();
-    const created = await client.createClient({ name });
+    const created = await client.createClient({ name, website: website || undefined });
     revalidatePath('/admin/clients');
     return { data: { id: created.id } };
   } catch (err) {
@@ -131,8 +134,8 @@ export async function updateClientAction(
     const client = await createClientClient();
     await client.updateClient({
       id,
-      name: data.name,
-      website: data.website ?? undefined,
+      ...(data.name !== undefined ? { name: data.name } : {}),
+      ...(data.website !== undefined ? { website: data.website ?? '' } : {}),
     });
     revalidatePath('/admin/clients');
     return { success: true };

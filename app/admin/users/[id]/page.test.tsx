@@ -8,6 +8,23 @@ const mocks = vi.hoisted(() => ({
   invalidateQueries: vi.fn(),
   updateUserAction: vi.fn(),
   updateMutate: vi.fn(),
+  updateSuccess: null as
+    | null
+    | ((
+        result: { error?: string },
+        variables: {
+          id: string;
+          nickname?: string;
+          bio?: string | null;
+          website?: string | null;
+          socialLinks?: Record<string, string> | null;
+          role?: string;
+          tagIds?: string[];
+        },
+      ) => void),
+  updatePending: false,
+  dirtyFields: {} as Record<string, boolean>,
+  setFormValues: vi.fn(),
   formValues: { nickname: 'Member', bio: 'Bio', role: 'author', tagIds: ['tag-1'] },
   user: {
     id: 'member-1',
@@ -48,16 +65,26 @@ vi.mock('@tanstack/react-query', () => ({
     }
     return { data: null, isLoading: false };
   },
-  useMutation: ({ mutationFn }: { mutationFn: unknown }) => ({
-    mutate: String(mutationFn).includes('updateUserAction') ? mocks.updateMutate : vi.fn(),
-    mutateAsync: vi.fn(),
-    isPending: false,
-  }),
+  useMutation: ({ mutationFn, onSuccess }: { mutationFn: unknown; onSuccess?: unknown }) => {
+    const isUpdate = String(mutationFn).includes('updateUserAction');
+    if (isUpdate) {
+      mocks.updateSuccess = onSuccess as typeof mocks.updateSuccess;
+    }
+    return {
+      mutate: isUpdate ? mocks.updateMutate : vi.fn(),
+      mutateAsync: vi.fn(),
+      isPending: mocks.updatePending,
+    };
+  },
 }));
 vi.mock('@mantine/form', () => ({
   useForm: () => ({
     values: mocks.formValues,
-    setValues: vi.fn(),
+    setValues: mocks.setFormValues,
+    setInitialValues: vi.fn(),
+    resetDirty: vi.fn(),
+    isDirty: (path?: string) =>
+      path ? Boolean(mocks.dirtyFields[path]) : Object.values(mocks.dirtyFields).some(Boolean),
     onSubmit: (callback: (values: { nickname: string; bio: string; role: string; tagIds: string[] }) => void) => () =>
       callback(mocks.formValues),
     getInputProps: () => ({}),
@@ -122,9 +149,27 @@ beforeEach(() => {
   mocks.invalidateQueries.mockReset();
   mocks.updateUserAction.mockReset();
   mocks.updateMutate.mockReset();
+  mocks.updateSuccess = null;
+  mocks.updatePending = false;
+  mocks.dirtyFields = {};
+  mocks.setFormValues.mockReset();
   mocks.profileProps = null;
-  mocks.user.role = 'author';
-  mocks.user.onboarded = false;
+  mocks.user = {
+    id: 'member-1',
+    tag_ids: ['tag-1'],
+    nickname: 'Member',
+    email: 'member@example.com',
+    image: null,
+    bio: 'Bio',
+    website: 'https://member.example',
+    social_links: { github: 'member' },
+    role: 'author',
+    banned: false,
+    onboarded: false,
+    created_at: null,
+    auth_details: null,
+    ban_details: null,
+  };
   mocks.formValues = { nickname: 'Member', bio: 'Bio', role: 'author', tagIds: ['tag-1'] };
 
   act(() => {
@@ -142,6 +187,7 @@ describe('Admin Member profile controller', () => {
     mocks.user.role = 'user';
     mocks.user.onboarded = false;
     mocks.formValues = { nickname: 'Member', bio: 'Temporary bio', role: 'user', tagIds: ['tag-1'] };
+    mocks.dirtyFields = { bio: true };
     act(() => {
       root.render(<AdminUserEditPage params={Promise.resolve({ id: 'member-1' })} />);
     });
@@ -154,13 +200,36 @@ describe('Admin Member profile controller', () => {
 
     expect(mocks.updateMutate).toHaveBeenCalledWith({
       id: 'member-1',
-      nickname: 'Member',
-      role: 'user',
-      tagIds: ['tag-1'],
       bio: 'Temporary bio',
-      website: 'https://member.example',
-      socialLinks: { github: 'member' },
     });
+  });
+
+  it('preserves dirty drafts when refreshed user data arrives, including during a save', () => {
+    mocks.dirtyFields = { nickname: true };
+    mocks.setFormValues.mockClear();
+    mocks.user = { ...mocks.user, nickname: 'Changed elsewhere' };
+    act(() => root.render(<AdminUserEditPage params={Promise.resolve({ id: 'member-1' })} />));
+    expect(mocks.setFormValues).not.toHaveBeenCalled();
+
+    mocks.updatePending = true;
+    mocks.user = { ...mocks.user, bio: 'Also changed elsewhere' };
+    act(() => root.render(<AdminUserEditPage params={Promise.resolve({ id: 'member-1' })} />));
+    expect(mocks.setFormValues).not.toHaveBeenCalled();
+  });
+
+  it('keeps the submitted baseline when the old query snapshot remains after mutation success', () => {
+    mocks.setFormValues.mockClear();
+    expect(mocks.updateSuccess).not.toBeNull();
+    mocks.updatePending = true;
+    act(() => root.render(<AdminUserEditPage params={Promise.resolve({ id: 'member-1' })} />));
+
+    act(() => {
+      mocks.updateSuccess!({}, { id: 'member-1', bio: 'Saved bio' });
+    });
+    mocks.updatePending = false;
+    act(() => root.render(<AdminUserEditPage params={Promise.resolve({ id: 'member-1' })} />));
+
+    expect(mocks.setFormValues).not.toHaveBeenCalled();
   });
 
   it('refreshes the exact Member after an avatar mutation without issuing a generic profile update', async () => {

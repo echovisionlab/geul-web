@@ -48,14 +48,6 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
     },
   });
 
-  const mutateEditableEvent = useCallback(
-    (data: ProgramEventUpdate) => {
-      if (canEdit) {
-        update.mutate(data);
-      }
-    },
-    [canEdit, update],
-  );
   const saveEditableEvent = useCallback(
     (data: ProgramEventUpdate) => {
       if (!canEdit) {
@@ -191,7 +183,6 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
     canDelete,
     statusOptions,
     isEditable,
-    mutateEditableEvent,
     saveEditableEvent,
     changeStatus,
     deleteEvent: { ...deleteEvent, mutate: requestDelete },

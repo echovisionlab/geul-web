@@ -19,6 +19,7 @@ import { OgImagePreview } from '@/features/metadata/OgImagePreview';
 import { EditorActiveLocaleControl } from '@/features/translation/EditorActiveLocaleControl';
 import { EntityTranslationsPanel } from '@/features/translation/EntityTranslationsPanel';
 import { useLocaleDocumentSession } from '@/features/translation/useLocaleDocumentSession';
+import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 import { SectionCard } from '@/components/core/Section';
 import { ImageUploadCropController } from '@/features/upload/ImageUploadCropController';
 import {
@@ -367,12 +368,29 @@ export function SeriesDetail({ initialData, scope }: SeriesDetailProps) {
     });
   };
 
-  const handleStatusChange = (nextStatus: SeriesStatus) => {
-    if (nextStatus === status) {
-      return;
+  const flushPendingSaves = useCallback(async () => {
+    const saved = await flushEditorSaves(`post_series:${seriesId}`);
+    if (!saved) {
+      notifications.show({ message: tCommonNotifications('saveFailed'), color: 'red' });
     }
-    changeStatus.mutate(nextStatus);
-  };
+    return saved;
+  }, [seriesId, tCommonNotifications]);
+
+  const handleBack = useCallback(async () => {
+    if (await flushPendingSaves()) {
+      router.push(backHref);
+    }
+  }, [backHref, flushPendingSaves, router]);
+
+  const handleStatusChange = useCallback(
+    async (nextStatus: SeriesStatus) => {
+      if (nextStatus === status || !(await flushPendingSaves())) {
+        return;
+      }
+      changeStatus.mutate(nextStatus);
+    },
+    [changeStatus, flushPendingSaves, status],
+  );
 
   const handleTitleChange = useCallback(
     (value: string) => {
@@ -431,7 +449,7 @@ export function SeriesDetail({ initialData, scope }: SeriesDetailProps) {
           statusOptions={seriesStatusOptions}
           isConnected={collaboration.isConnected}
           isSynced={collaboration.isSynced}
-          onBack={() => router.push(backHref)}
+          onBack={handleBack}
           onStatusChange={handleStatusChange}
           isStatusChanging={changeStatus.isPending}
           backTooltip={tCommon('actions.back')}

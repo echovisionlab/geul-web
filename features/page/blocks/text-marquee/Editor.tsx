@@ -139,9 +139,9 @@ function TextMarqueeSettingsForm({ props, updateProps }: TextMarqueeSettingsForm
 
   const updateProp = useCallback(
     (key: string, value: string) => {
-      updateProps({ ...props, [key]: value });
+      updateProps({ [key]: value });
     },
-    [props, updateProps],
+    [updateProps],
   );
 
   const updateItems = useCallback(

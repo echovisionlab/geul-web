@@ -301,23 +301,48 @@ export async function updateCampaignNameAction(
   }
 }
 
+export type CampaignConfigurationPatch =
+  | {
+      targetMode: CampaignTargetMode.ALL | CampaignTargetMode.SEGMENT;
+      segmentId: string | null;
+      layoutId?: never;
+      recipientScope?: never;
+    }
+  | {
+      layoutId: string | null;
+      targetMode?: never;
+      segmentId?: never;
+      recipientScope?: never;
+    }
+  | {
+      recipientScope: CampaignRecipientScopeValue;
+      targetMode?: never;
+      segmentId?: never;
+      layoutId?: never;
+    };
+
 export async function updateCampaignConfigurationAction(
   id: string,
-  configuration: {
-    targetMode: CampaignTargetMode.ALL | CampaignTargetMode.SEGMENT;
-    segmentId: string | null;
-    layoutId: string | null;
-    recipientScope: CampaignRecipientScopeValue;
-  },
+  configuration: CampaignConfigurationPatch,
 ): Promise<{ changed?: boolean; error?: string }> {
   try {
     const client = await createCampaignClient();
+    const patch = {
+      ...(configuration.targetMode !== undefined
+        ? {
+            targetMode: configuration.targetMode,
+            // An empty optional string is the explicit null/clear for the pair.
+            segmentId: configuration.segmentId ?? '',
+          }
+        : {}),
+      ...(configuration.layoutId !== undefined ? { layoutId: configuration.layoutId ?? '' } : {}),
+      ...(configuration.recipientScope !== undefined
+        ? { recipientScope: campaignRecipientScopeToProto(configuration.recipientScope) }
+        : {}),
+    };
     const response = await client.updateCampaignConfiguration({
       id,
-      targetMode: configuration.targetMode,
-      segmentId: configuration.segmentId ?? undefined,
-      layoutId: configuration.layoutId ?? undefined,
-      recipientScope: campaignRecipientScopeToProto(configuration.recipientScope),
+      ...patch,
     });
     revalidatePath('/admin/campaigns');
     revalidatePath(`/campaigns/${id}`);

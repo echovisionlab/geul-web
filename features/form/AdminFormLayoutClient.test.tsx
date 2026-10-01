@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MantineProvider } from '@mantine/core';
+import { useOptionalEditorRuntimeContext } from '@/lib/contexts/EditorRuntimeContext';
 import { AdminFormLayoutClient } from './AdminFormLayoutClient';
 
 const pushMock = vi.fn();
@@ -18,6 +19,7 @@ let mockPathname = '/admin/forms/form-1';
 let mockSearchParams = new URLSearchParams('lang=ko');
 let mockFormEditorContext: any;
 let mockFormTranslationContext: any;
+let runtimeContext: ReturnType<typeof useOptionalEditorRuntimeContext>;
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -155,6 +157,11 @@ function render(node: React.ReactNode) {
   });
 }
 
+function RuntimeContextProbe() {
+  runtimeContext = useOptionalEditorRuntimeContext();
+  return null;
+}
+
 async function flush() {
   await act(async () => {
     await Promise.resolve();
@@ -176,7 +183,7 @@ beforeEach(() => {
   mockFormEditorContext = {
     isConnected: true,
     isSynced: true,
-    provider: {},
+    provider: null,
     fields: {
       title: 'Old title',
       slug: '',
@@ -216,6 +223,17 @@ afterEach(() => {
 });
 
 describe('AdminFormLayoutClient', () => {
+  it('exposes the active form collaboration runtime to nested translation panels', () => {
+    render(
+      <AdminFormLayoutClient formId="form-1">
+        <RuntimeContextProbe />
+      </AdminFormLayoutClient>,
+    );
+
+    expect(runtimeContext).toMatchObject({ entityType: 'form', entityId: 'form-1', provider: null });
+    expect(runtimeContext?.getBlockRoomSnapshot).toEqual(expect.any(Function));
+  });
+
   it('preserves the current query string when switching tabs', () => {
     mockSearchParams = new URLSearchParams('lang=ko&foo=bar');
 

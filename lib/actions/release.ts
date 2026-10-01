@@ -13,6 +13,15 @@ import { Code } from '@connectrpc/connect';
 import { createReleaseClient } from '@/lib/api/server-client';
 import { releaseTypeToString, stringToReleaseType } from '@/lib/types/release/proto';
 import { parseReleaseStatus } from '@/lib/types/release/schema';
+import type {
+  ReleaseArtistItem,
+  ReleaseCategoryItem,
+  ReleaseCreditItem,
+  ReleaseFormatItem,
+  ReleaseGenreItem,
+  ReleaseLabelItem,
+  ReleaseStyleItem,
+} from '@/lib/types/release/model';
 import { toSlugInputValue } from '@/lib/utils/slug';
 
 function releaseActionFailure(
@@ -84,6 +93,62 @@ export async function getReleaseAdminAction(id: string) {
       publishedAt: release.publishedAt ? timestampDate(release.publishedAt) : null,
       createdAt: release.createdAt ? timestampDate(release.createdAt) : null,
       updatedAt: release.updatedAt ? timestampDate(release.updatedAt) : null,
+    };
+  } catch (err) {
+    if (isConnectErrorCode(err, Code.NotFound, Code.PermissionDenied)) {
+      return null;
+    }
+    throw err;
+  }
+}
+
+export async function getReleaseEditorRelationsAction(releaseId: string): Promise<{
+  artists: ReleaseArtistItem[];
+  labels: ReleaseLabelItem[];
+  categories: ReleaseCategoryItem[];
+  genres: ReleaseGenreItem[];
+  styles: ReleaseStyleItem[];
+  formats: ReleaseFormatItem[];
+  credits: ReleaseCreditItem[];
+} | null> {
+  try {
+    const client = await createReleaseClient();
+    const response = await client.getReleaseRelations({ releaseId });
+    return {
+      artists: (response.artists ?? []).map((artist) => ({
+        artist_id: artist.artistId,
+        artist_name: artist.artistName,
+        artist_slug: artist.artistSlug ?? null,
+        sort_order: artist.sortOrder,
+      })),
+      labels: (response.labels ?? []).map((label) => ({
+        label_id: label.labelId,
+        label_name: label.labelName,
+        label_slug: label.labelSlug ?? null,
+        catalog_number: label.catalogNumber ?? null,
+        sort_order: label.sortOrder,
+      })),
+      categories: (response.categories ?? []).map(({ id, name, slug }) => ({ id, name, slug })),
+      genres: (response.genres ?? []).map(({ id, name, slug }) => ({ id, name, slug })),
+      styles: (response.styles ?? []).map(({ id, name, slug }) => ({ id, name, slug })),
+      formats: (response.formats ?? []).map((format) => ({
+        id: format.id,
+        name: format.name,
+        slug: format.slug,
+        format_description: format.formatDescription ?? null,
+      })),
+      credits: (response.credits ?? []).map((credit) => ({
+        id: credit.id,
+        credit_type: credit.artistId ? 'artist' : credit.memberId ? 'member' : 'text',
+        artist_id: credit.artistId ?? null,
+        artist_name: credit.artistName ?? null,
+        artist_slug: credit.artistSlug ?? null,
+        member_id: credit.memberId ?? null,
+        member_name: credit.memberName ?? null,
+        credited_name: credit.creditedName ?? null,
+        credit_role: credit.creditRole ?? null,
+        sort_order: credit.sortOrder,
+      })),
     };
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound, Code.PermissionDenied)) {
@@ -199,7 +264,12 @@ export async function deleteReleaseArtworkAction(releaseId: string): Promise<Act
 export async function setReleaseLabelsAction(
   releaseId: string,
   labels: { labelId: string; catalogNumber?: string; sortOrder: number }[],
+  observedLabels: { labelId: string; catalogNumber?: string; sortOrder: number }[],
+  orderIntent?: { itemId: string; previousItemId?: string; nextItemId?: string },
 ): Promise<ActionResult<{ success: true }>> {
+  if (!Array.isArray(observedLabels)) {
+    return actionFailure('An observed label snapshot is required', Code.InvalidArgument);
+  }
   try {
     const client = await createReleaseClient();
     await client.setReleaseLabels({
@@ -209,6 +279,14 @@ export async function setReleaseLabelsAction(
         catalogNumber: l.catalogNumber,
         sortOrder: l.sortOrder,
       })),
+      observed: {
+        labels: observedLabels.map((l) => ({
+          labelId: l.labelId,
+          catalogNumber: l.catalogNumber,
+          sortOrder: l.sortOrder,
+        })),
+      },
+      ...(orderIntent ? { orderIntent } : {}),
     });
     return actionSuccess({ success: true });
   } catch (err) {
@@ -219,12 +297,17 @@ export async function setReleaseLabelsAction(
 export async function setReleaseGenresAction(
   releaseId: string,
   genreIds: string[],
+  observedIds: string[],
 ): Promise<ActionResult<{ success: true }>> {
+  if (!Array.isArray(observedIds)) {
+    return actionFailure('An observed genre snapshot is required', Code.InvalidArgument);
+  }
   try {
     const client = await createReleaseClient();
     await client.setReleaseGenres({
       releaseId,
       genreIds,
+      observed: { ids: observedIds },
     });
     return actionSuccess({ success: true });
   } catch (err) {
@@ -235,7 +318,12 @@ export async function setReleaseGenresAction(
 export async function setReleaseArtistsAction(
   releaseId: string,
   artists: { artistId: string; sortOrder: number }[],
+  observedArtists: { artistId: string; sortOrder: number }[],
+  orderIntent?: { itemId: string; previousItemId?: string; nextItemId?: string },
 ): Promise<ActionResult<{ success: true }>> {
+  if (!Array.isArray(observedArtists)) {
+    return actionFailure('An observed artist snapshot is required', Code.InvalidArgument);
+  }
   try {
     const client = await createReleaseClient();
     await client.setReleaseArtists({
@@ -244,6 +332,13 @@ export async function setReleaseArtistsAction(
         artistId: artist.artistId,
         sortOrder: artist.sortOrder,
       })),
+      observed: {
+        artists: observedArtists.map((artist) => ({
+          artistId: artist.artistId,
+          sortOrder: artist.sortOrder,
+        })),
+      },
+      ...(orderIntent ? { orderIntent } : {}),
     });
     return actionSuccess({ success: true });
   } catch (err) {
@@ -254,12 +349,17 @@ export async function setReleaseArtistsAction(
 export async function setReleaseCategoriesAction(
   releaseId: string,
   categoryIds: string[],
+  observedIds: string[],
 ): Promise<ActionResult<{ success: true }>> {
+  if (!Array.isArray(observedIds)) {
+    return actionFailure('An observed category snapshot is required', Code.InvalidArgument);
+  }
   try {
     const client = await createReleaseClient();
     await client.setReleaseCategories({
       releaseId,
       categoryIds,
+      observed: { ids: observedIds },
     });
     return actionSuccess({ success: true });
   } catch (err) {
@@ -270,12 +370,17 @@ export async function setReleaseCategoriesAction(
 export async function setReleaseStylesAction(
   releaseId: string,
   styleIds: string[],
+  observedIds: string[],
 ): Promise<ActionResult<{ success: true }>> {
+  if (!Array.isArray(observedIds)) {
+    return actionFailure('An observed style snapshot is required', Code.InvalidArgument);
+  }
   try {
     const client = await createReleaseClient();
     await client.setReleaseStyles({
       releaseId,
       styleIds,
+      observed: { ids: observedIds },
     });
     return actionSuccess({ success: true });
   } catch (err) {
@@ -286,7 +391,11 @@ export async function setReleaseStylesAction(
 export async function setReleaseFormatsAction(
   releaseId: string,
   formats: { formatId: string; formatDescription?: string }[],
+  observedFormats: { formatId: string; formatDescription?: string }[],
 ): Promise<ActionResult<{ success: true }>> {
+  if (!Array.isArray(observedFormats)) {
+    return actionFailure('An observed format snapshot is required', Code.InvalidArgument);
+  }
   try {
     const client = await createReleaseClient();
     await client.setReleaseFormats({
@@ -295,6 +404,12 @@ export async function setReleaseFormatsAction(
         formatId: f.formatId,
         formatDescription: f.formatDescription,
       })),
+      observed: {
+        formats: observedFormats.map((f) => ({
+          formatId: f.formatId,
+          formatDescription: f.formatDescription,
+        })),
+      },
     });
     return actionSuccess({ success: true });
   } catch (err) {
@@ -312,7 +427,19 @@ export async function setReleaseCreditsAction(
     creditRole?: string | null;
     sortOrder: number;
   }[],
+  observedCredits: {
+    id?: string;
+    artistId?: string | null;
+    memberId?: string | null;
+    creditedName?: string | null;
+    creditRole?: string | null;
+    sortOrder: number;
+  }[],
+  orderIntent?: { itemId: string; previousItemId?: string; nextItemId?: string },
 ): Promise<ActionResult<{ success: true }>> {
+  if (!Array.isArray(observedCredits)) {
+    return actionFailure('An observed credit snapshot is required', Code.InvalidArgument);
+  }
   try {
     const client = await createReleaseClient();
     await client.setReleaseCredits({
@@ -325,6 +452,17 @@ export async function setReleaseCreditsAction(
         creditRole: c.creditRole ?? undefined,
         sortOrder: c.sortOrder,
       })),
+      observed: {
+        credits: observedCredits.map((c) => ({
+          id: c.id,
+          artistId: c.artistId ?? undefined,
+          memberId: c.memberId ?? undefined,
+          creditedName: c.creditedName ?? undefined,
+          creditRole: c.creditRole ?? undefined,
+          sortOrder: c.sortOrder,
+        })),
+      },
+      ...(orderIntent ? { orderIntent } : {}),
     });
     return actionSuccess({ success: true });
   } catch (err) {

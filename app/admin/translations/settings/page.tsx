@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from '@/components/core/Navigation';
 import { TranslationProviderType, type TranslationProvider } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
 import { IconChecklist, IconDeviceFloppy, IconEdit, IconPlus, IconSettings2, IconTrash } from '@tabler/icons-react';
@@ -36,6 +36,14 @@ interface FormState {
   protectedTerms: string[];
 }
 
+type SettingsUpdatePath = 'default_locale' | 'protected_terms';
+
+interface SettingsUpdateMutation {
+  form: FormState;
+  baseline: FormState;
+  paths: SettingsUpdatePath[];
+}
+
 function canonicalizeSettingsForm(form: FormState): FormState {
   return {
     defaultLocale: form.defaultLocale,
@@ -44,11 +52,43 @@ function canonicalizeSettingsForm(form: FormState): FormState {
 }
 
 function settingsFormsEqual(left: FormState, right: FormState): boolean {
-  return (
-    left.defaultLocale === right.defaultLocale &&
-    left.protectedTerms.length === right.protectedTerms.length &&
-    left.protectedTerms.every((term, index) => term === right.protectedTerms[index])
-  );
+  return left.defaultLocale === right.defaultLocale && protectedTermsEqual(left.protectedTerms, right.protectedTerms);
+}
+
+function protectedTermsEqual(left: string[], right: string[]): boolean {
+  return left.length === right.length && left.every((term, index) => term === right[index]);
+}
+
+function mergeRefreshedSettingsForm(local: FormState, baseline: FormState | null, incoming: FormState): FormState {
+  if (!baseline) {
+    return incoming;
+  }
+  return {
+    defaultLocale: incoming.defaultLocale !== baseline.defaultLocale ? incoming.defaultLocale : local.defaultLocale,
+    protectedTerms: protectedTermsEqual(incoming.protectedTerms, baseline.protectedTerms)
+      ? local.protectedTerms
+      : incoming.protectedTerms,
+  };
+}
+
+function preserveSettingsEditsMadeDuringSave(current: FormState, submitted: FormState, saved: FormState): FormState {
+  return {
+    defaultLocale: current.defaultLocale === submitted.defaultLocale ? saved.defaultLocale : current.defaultLocale,
+    protectedTerms: protectedTermsEqual(current.protectedTerms, submitted.protectedTerms)
+      ? saved.protectedTerms
+      : current.protectedTerms,
+  };
+}
+
+export function buildSettingsUpdateMutation(baseline: FormState, form: FormState): SettingsUpdateMutation | null {
+  const paths: SettingsUpdatePath[] = [];
+  if (baseline.defaultLocale !== form.defaultLocale) {
+    paths.push('default_locale');
+  }
+  if (!protectedTermsEqual(baseline.protectedTerms, form.protectedTerms)) {
+    paths.push('protected_terms');
+  }
+  return paths.length > 0 ? { form, baseline, paths } : null;
 }
 
 export default function TranslationSettingsPage() {
@@ -78,6 +118,8 @@ export default function TranslationSettingsPage() {
     protectedTerms: [],
   });
   const [persistedForm, setPersistedForm] = useState<FormState | null>(null);
+  const formRef = useRef(form);
+  const persistedFormRef = useRef<FormState | null>(null);
   const [providerForm, setProviderForm] = useState<ProviderFormState>(DEFAULT_PROVIDER_FORM);
   const [providerModalOpen, setProviderModalOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState<TranslationProvider | null>(null);
@@ -92,9 +134,18 @@ export default function TranslationSettingsPage() {
       defaultLocale: settings.defaultLocale,
       protectedTerms: normalizeProtectedTerms(settings.protectedTerms),
     });
-    setForm(nextForm);
+    const mergedForm = mergeRefreshedSettingsForm(formRef.current, persistedFormRef.current, nextForm);
+    formRef.current = mergedForm;
+    setForm(mergedForm);
+    persistedFormRef.current = nextForm;
     setPersistedForm(nextForm);
   }, [settingsQuery.data]);
+
+  const updateSettingsForm = (update: (current: FormState) => FormState) => {
+    const nextForm = canonicalizeSettingsForm(update(formRef.current));
+    formRef.current = nextForm;
+    setForm(nextForm);
+  };
 
   const canonicalForm = useMemo(() => canonicalizeSettingsForm(form), [form]);
   const hasSettingsChanges = persistedForm !== null && !settingsFormsEqual(canonicalForm, persistedForm);
@@ -108,19 +159,27 @@ export default function TranslationSettingsPage() {
   };
 
   const saveMutation = useMutation({
-    mutationFn: async () =>
+    mutationFn: async (mutation: SettingsUpdateMutation) =>
       translationClient.updateTranslationSettings({
         settings: {
-          defaultLocale: canonicalForm.defaultLocale,
-          protectedTerms: canonicalForm.protectedTerms,
+          defaultLocale: mutation.paths.includes('default_locale') ? mutation.form.defaultLocale : '',
+          protectedTerms: mutation.paths.includes('protected_terms') ? mutation.form.protectedTerms : [],
+        },
+        updateMask: { paths: mutation.paths },
+        baseSettings: {
+          defaultLocale: mutation.baseline.defaultLocale,
+          protectedTerms: mutation.baseline.protectedTerms,
         },
       }),
-    onSuccess: async (result) => {
+    onSuccess: async (result, mutation) => {
       const savedForm = canonicalizeSettingsForm({
-        defaultLocale: result.settings?.defaultLocale ?? canonicalForm.defaultLocale,
-        protectedTerms: result.settings?.protectedTerms ?? canonicalForm.protectedTerms,
+        defaultLocale: result.settings?.defaultLocale ?? mutation.form.defaultLocale,
+        protectedTerms: result.settings?.protectedTerms ?? mutation.form.protectedTerms,
       });
-      setForm(savedForm);
+      const nextForm = preserveSettingsEditsMadeDuringSave(formRef.current, mutation.form, savedForm);
+      formRef.current = nextForm;
+      setForm(nextForm);
+      persistedFormRef.current = savedForm;
       setPersistedForm(savedForm);
       notifications.show({
         color: 'green',
@@ -289,7 +348,16 @@ export default function TranslationSettingsPage() {
           </Button>
           <Button
             leftSection={<IconDeviceFloppy size={16} />}
-            onClick={() => saveMutation.mutate()}
+            onClick={() => {
+              const baseline = persistedFormRef.current;
+              if (!baseline) {
+                return;
+              }
+              const mutation = buildSettingsUpdateMutation(baseline, canonicalForm);
+              if (mutation) {
+                saveMutation.mutate(mutation);
+              }
+            }}
             loading={saveMutation.isPending}
             disabled={!hasSettingsChanges}
           >
@@ -400,7 +468,9 @@ export default function TranslationSettingsPage() {
             description={t('fields.defaultLocale.description')}
             data={localeOptions}
             value={form.defaultLocale}
-            onChange={(value) => setForm((current) => ({ ...current, defaultLocale: value ?? current.defaultLocale }))}
+            onChange={(value) =>
+              updateSettingsForm((current) => ({ ...current, defaultLocale: value ?? current.defaultLocale }))
+            }
             allowDeselect={false}
           />
           <TagsInput
@@ -409,7 +479,9 @@ export default function TranslationSettingsPage() {
             placeholder={t('fields.protectedTerms.placeholder')}
             value={form.protectedTerms}
             splitChars={[',', '\n']}
-            onChange={(value) => setForm((current) => ({ ...current, protectedTerms: normalizeProtectedTerms(value) }))}
+            onChange={(value) =>
+              updateSettingsForm((current) => ({ ...current, protectedTerms: normalizeProtectedTerms(value) }))
+            }
           />
           <Text size="xs" c="dimmed">
             {t('fields.protectedTerms.examples')}

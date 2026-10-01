@@ -34,16 +34,15 @@ function toProtoDocumentLayout(layout: DocumentLayout) {
 export async function updatePageDocumentMetadata(
   protocol: BlockRoomProtocolTransport,
   documentLayout: DocumentLayout,
+  observedLayout: DocumentLayout,
   signal?: AbortSignal,
 ): Promise<PageDocumentMetadataAck> {
   try {
-    return await protocol.updateMetadata(
-      'page_layout',
-      {
-        documentLayout: toJson(DocumentLayoutSchema, toProtoDocumentLayout(documentLayout)),
-      },
-      signal,
-    );
+    const payload = {
+      documentLayout: toJson(DocumentLayoutSchema, toProtoDocumentLayout(documentLayout)),
+      observedLayout: toJson(DocumentLayoutSchema, toProtoDocumentLayout(observedLayout)),
+    };
+    return await protocol.updateMetadata('page_layout', payload, signal);
   } catch (error) {
     if (error instanceof BlockRoomProtocolError) {
       throw new PageDocumentMetadataError(error.message, error.reloadRequired);

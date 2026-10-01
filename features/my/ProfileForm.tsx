@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { useClipboard } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import {
   ProfileFormView,
+  type ProfileFormChangedFields,
   type ProfileFormViewErrors,
   type ProfileFormValues,
   type ProfileSocialPlatformOption,
@@ -51,6 +52,7 @@ export function ProfileForm({ initialUser, disabled = false }: ProfileFormProps)
   const { updateMemberSummary } = useSession();
   const { copied, copy } = useClipboard({ timeout: 2000 });
   const [errors, setErrors] = useState<ProfileFormViewErrors>({});
+  const [savedRevision, setSavedRevision] = useState(0);
   const [nickname, setNickname] = useState(initialUser.nickname);
   const nicknameValidation = useNicknameValidation(nickname);
 
@@ -87,6 +89,7 @@ export function ProfileForm({ initialUser, disabled = false }: ProfileFormProps)
       if (result.member) {
         updateMemberSummary(result.member);
       }
+      setSavedRevision((revision) => revision + 1);
     },
     onError: (error) => {
       showUpdateError(error instanceof Error ? error.message : String(error));
@@ -94,43 +97,52 @@ export function ProfileForm({ initialUser, disabled = false }: ProfileFormProps)
   });
 
   const isAuthorOrAdmin = initialUser.role === 'admin' || initialUser.role === 'author';
-  const initialSocialLinks = toEditableOrderedArray(initialUser.socialLinks ?? {}).map(
-    ({ key, platform, value }, index) => ({
-      key: key || `stored-${index}`,
-      platform,
-      value,
+  const initialValues = useMemo(
+    () => ({
+      uid: initialUser.id,
+      nickname: initialUser.nickname,
+      bio: initialUser.bio ?? '',
+      website: initialUser.website ?? '',
+      socialLinks: toEditableOrderedArray(initialUser.socialLinks ?? {}).map(({ key, platform, value }, index) => ({
+        key: key || `stored-${index}`,
+        platform,
+        value,
+      })),
     }),
+    [initialUser],
   );
 
-  const handleUpdateProfile = (values: ProfileFormValues) => {
+  const handleUpdateProfile = (values: ProfileFormValues, changedFields: ProfileFormChangedFields) => {
     setErrors({});
-    if (!nicknameValidation.valid || nicknameValidation.status === 'unavailable') {
+    if (changedFields.nickname && (!nicknameValidation.valid || nicknameValidation.status === 'unavailable')) {
       showUpdateError(
         nicknameValidation.status === 'unavailable' ? tNickname('unavailable') : tNickname('invalid'),
         'nickname',
       );
       return;
     }
-    updateProfileMutation.mutate({
-      nickname: nicknameValidation.normalized,
-      ...(isAuthorOrAdmin && {
-        bio: values.bio || null,
-        website: values.website || null,
-        social_links: formatOrderedLinksForSave(values.socialLinks),
-      }),
-    });
+    const changes: Parameters<typeof updateProfileAction>[0] = {};
+    if (changedFields.nickname) {
+      changes.nickname = nicknameValidation.normalized;
+    }
+    if (isAuthorOrAdmin && changedFields.bio) {
+      changes.bio = values.bio || null;
+    }
+    if (isAuthorOrAdmin && changedFields.website) {
+      changes.website = values.website || null;
+    }
+    if (isAuthorOrAdmin && changedFields.socialLinks) {
+      changes.social_links = formatOrderedLinksForSave(values.socialLinks);
+    }
+    if (Object.keys(changes).length > 0) {
+      updateProfileMutation.mutate(changes);
+    }
   };
 
   return (
     <ProfileFormView
       key={initialUser.id}
-      initialValues={{
-        uid: initialUser.id,
-        nickname: initialUser.nickname,
-        bio: initialUser.bio ?? '',
-        website: initialUser.website ?? '',
-        socialLinks: initialSocialLinks,
-      }}
+      initialValues={initialValues}
       labels={{
         uid: t('fields.uid'),
         copyUid: tCommon('copy'),
@@ -152,6 +164,7 @@ export function ProfileForm({ initialUser, disabled = false }: ProfileFormProps)
       platformOptions={SOCIAL_PLATFORM_OPTIONS}
       showExtendedFields={isAuthorOrAdmin}
       pending={updateProfileMutation.isPending}
+      savedRevision={savedRevision}
       disabled={disabled}
       copied={copied}
       errors={errors}

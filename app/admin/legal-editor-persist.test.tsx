@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PrivacyEditor } from '@/features/policy/PrivacyEditor';
 import { TermsEditor } from '@/features/policy/TermsEditor';
 import { PRIVACY_STATUS, TERMS_STATUS } from '@/lib/policy-status';
+import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 
 const mocks = vi.hoisted(() => ({
   persistNow: vi.fn(),
@@ -21,6 +22,10 @@ const mocks = vi.hoisted(() => ({
   activeLocaleOverride: null as Record<string, unknown> | null,
   richTextController: vi.fn(),
   policyEditor: vi.fn(),
+  roomProtocol: {
+    updateMetadata: vi.fn(),
+    getSnapshot: vi.fn(),
+  },
 }));
 
 vi.mock('next/navigation', () => ({
@@ -85,8 +90,21 @@ vi.mock('@/components/core/Input', () => ({
 }));
 
 vi.mock('@/features/editor/EditorHeader', () => ({
-  EditorHeader: ({ actionItems }: { actionItems: Array<{ key: string; label: string; onClick: () => void }> }) => (
+  EditorHeader: ({
+    actionItems,
+    onTitleChange,
+  }: {
+    actionItems: Array<{ key: string; label: string; onClick: () => void }>;
+    onTitleChange?: (title: string) => void;
+  }) => (
     <header>
+      {onTitleChange ? (
+        <input
+          aria-label="legal title"
+          data-testid="legal-title"
+          onChange={(event) => onTitleChange(event.currentTarget.value)}
+        />
+      ) : null}
       {actionItems.map((item) => (
         <button key={item.key} type="button" data-testid={`action-${item.key}`} onClick={item.onClick}>
           {item.label}
@@ -154,6 +172,7 @@ vi.mock('@/lib/collab/useBlockRoomConnection', () => ({
         documentRevision: '11111111-1111-4111-8111-111111111111',
         targetRevision: locale === sourceLocale ? undefined : '22222222-2222-4222-8222-222222222222',
       },
+      protocol: mocks.roomProtocol,
       isConnected: true,
       isSynced: true,
       isLoading: false,
@@ -210,6 +229,7 @@ const variants = [
     ),
     schedule: mocks.schedulePrivacy,
     activate: mocks.activatePrivacy,
+    documentKey: 'privacy:privacy-1',
   },
   {
     name: 'TermsEditor',
@@ -232,12 +252,14 @@ const variants = [
     ),
     schedule: mocks.scheduleTerms,
     activate: mocks.activateTerms,
+    documentKey: 'terms:terms-1',
   },
 ] satisfies Array<{
   name: string;
   render: () => ReactElement;
   schedule: ReturnType<typeof vi.fn>;
   activate: ReturnType<typeof vi.fn>;
+  documentKey: string;
 }>;
 
 describe.each(variants)('$name persist-before-lifecycle boundary', (variant) => {
@@ -249,6 +271,22 @@ describe.each(variants)('$name persist-before-lifecycle boundary', (variant) => 
     mocks.activeLocaleOverride = null;
     mocks.richTextController.mockReturnValue(null);
     mocks.persistNow.mockRejectedValue(new Error('persist failed'));
+    mocks.roomProtocol.updateMetadata.mockResolvedValue({
+      documentRevision: '33333333-3333-4333-8333-333333333333',
+      changed: true,
+      sourceChanged: true,
+      changedLocales: ['en'],
+      locale: 'en',
+    });
+    mocks.roomProtocol.getSnapshot.mockImplementation(async () => {
+      const locale = String(mocks.activeLocaleOverride?.activeLocale ?? 'en');
+      return {
+        documentRevision: '33333333-3333-4333-8333-333333333333',
+        sourceLocale: 'en',
+        locale,
+        localeExists: true,
+      };
+    });
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
@@ -298,6 +336,27 @@ describe.each(variants)('$name persist-before-lifecycle boundary', (variant) => 
 
     expect(mocks.persistNow).toHaveBeenCalledWith(mocks.provider);
     expect(variant.activate).not.toHaveBeenCalled();
+  });
+
+  it('registers the debounced title with the locale/navigation save queue', async () => {
+    mocks.persistNow.mockResolvedValue(undefined);
+    const title = container.querySelector('[data-testid="legal-title"]') as HTMLInputElement;
+
+    await act(async () => {
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+      setter?.call(title, 'Updated policy title');
+      title.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    await act(async () => {
+      expect(await flushEditorSaves(variant.documentKey)).toBe(true);
+    });
+
+    expect(mocks.roomProtocol.updateMetadata).toHaveBeenCalledWith(
+      'locale',
+      { title: 'Updated policy title' },
+      undefined,
+    );
   });
 });
 

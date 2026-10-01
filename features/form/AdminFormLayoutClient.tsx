@@ -13,6 +13,7 @@ import { PageLoader } from '@/features/site/PageLoader';
 import { EditorActiveLocaleControl } from '@/features/translation/EditorActiveLocaleControl';
 import { deleteFormAction, updateFormAction } from '@/lib/actions/form';
 import { useFormEditorContext } from '@/lib/contexts/FormEditorContext';
+import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import { useFormTranslationContext } from '@/features/form/FormTranslationContext';
 
 type FormStatus = 'draft' | 'published';
@@ -33,7 +34,7 @@ function FormLayoutContent({ children, formId, initialStatus }: FormLayoutConten
   const [status, setStatus] = useState<FormStatus>(initialStatus ?? 'draft');
   const formsListPath = '/admin/forms';
 
-  const { isConnected, isSynced, fields, setField } = useFormEditorContext();
+  const { provider, isConnected, isSynced, fields, setField } = useFormEditorContext();
   const { activeEditLocale } = useFormTranslationContext();
   const shouldUseLocaleDocument =
     Boolean(activeEditLocale.activeLocale) && (activeEditLocale.isSourceLocale || activeEditLocale.hasLiveRow);
@@ -127,52 +128,54 @@ function FormLayoutContent({ children, formId, initialStatus }: FormLayoutConten
   }
 
   return (
-    <Stack gap="md">
-      <EditorHeader
-        title={displayedTitle}
-        onTitleChange={titleChangeHandler}
-        titlePlaceholder={tCommon('states.untitledEntity', { entity: tCommon('entities.form') })}
-        titleDisabled={titleDisabled}
-        status={status}
-        statusOptions={statusOptions}
-        isConnected={currentIsConnected}
-        isSynced={currentIsSynced}
-        onBack={() => router.push(formsListPath)}
-        backTooltip={t('navigation.backToForms')}
-        onStatusChange={(nextStatus) => updateStatus.mutate(nextStatus)}
-        isStatusChanging={updateStatus.isPending}
-        onDelete={() => deleteForm.mutate()}
-        deleteConfirmation={{
-          title: tCommon('actions.delete'),
-          message: (
-            <Stack gap="xs">
-              <Text>
-                {tCommon.rich('messages.confirmDeleteNamedRich', {
-                  name: displayedTitle || tCommon('entities.form'),
-                  strong: (chunks) => <strong>{chunks}</strong>,
-                })}
-              </Text>
-              <Text size="sm" c="orange">
-                {t('deleteModal.warning')}
-              </Text>
-            </Stack>
-          ),
-        }}
-        isDeleting={deleteForm.isPending}
-        groupStatusWithCollab
-        controls={<EditorActiveLocaleControl state={activeEditLocale} />}
-      />
-      <Tabs value={currentTab} onChange={handleTabChange}>
-        <Tabs.List>
-          {navItems.map(({ value, label, Icon }) => (
-            <Tabs.Tab key={value} value={value} leftSection={<Icon size={16} />}>
-              {label}
-            </Tabs.Tab>
-          ))}
-        </Tabs.List>
-      </Tabs>
-      {children}
-    </Stack>
+    <EditorRuntimeProvider provider={provider ?? null} entityType="form" entityId={formId}>
+      <Stack gap="md">
+        <EditorHeader
+          title={displayedTitle}
+          onTitleChange={titleChangeHandler}
+          titlePlaceholder={tCommon('states.untitledEntity', { entity: tCommon('entities.form') })}
+          titleDisabled={titleDisabled}
+          status={status}
+          statusOptions={statusOptions}
+          isConnected={currentIsConnected}
+          isSynced={currentIsSynced}
+          onBack={() => router.push(formsListPath)}
+          backTooltip={t('navigation.backToForms')}
+          onStatusChange={(nextStatus) => updateStatus.mutate(nextStatus)}
+          isStatusChanging={updateStatus.isPending}
+          onDelete={() => deleteForm.mutate()}
+          deleteConfirmation={{
+            title: tCommon('actions.delete'),
+            message: (
+              <Stack gap="xs">
+                <Text>
+                  {tCommon.rich('messages.confirmDeleteNamedRich', {
+                    name: displayedTitle || tCommon('entities.form'),
+                    strong: (chunks) => <strong>{chunks}</strong>,
+                  })}
+                </Text>
+                <Text size="sm" c="orange">
+                  {t('deleteModal.warning')}
+                </Text>
+              </Stack>
+            ),
+          }}
+          isDeleting={deleteForm.isPending}
+          groupStatusWithCollab
+          controls={<EditorActiveLocaleControl state={activeEditLocale} />}
+        />
+        <Tabs value={currentTab} onChange={handleTabChange}>
+          <Tabs.List>
+            {navItems.map(({ value, label, Icon }) => (
+              <Tabs.Tab key={value} value={value} leftSection={<Icon size={16} />}>
+                {label}
+              </Tabs.Tab>
+            ))}
+          </Tabs.List>
+        </Tabs>
+        {children}
+      </Stack>
+    </EditorRuntimeProvider>
   );
 }
 

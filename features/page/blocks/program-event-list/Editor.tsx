@@ -67,9 +67,9 @@ function ProgramEventListSettingsForm({ props, updateProps }: ProgramEventListSe
 
   const updateProp = useCallback(
     (key: keyof ProgramEventListProps, value: string) => {
-      updateProps({ ...props, [key]: value });
+      updateProps({ [key]: value });
     },
-    [props, updateProps],
+    [updateProps],
   );
 
   return (

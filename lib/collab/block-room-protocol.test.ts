@@ -51,6 +51,8 @@ function bootstrapFixture(challenge = 'challenge-1', options: BootstrapFixtureOp
       presentLocaleValues: [],
       targetRevision: options.targetRevision,
       sourceMetadata: { locale: sourceLocale },
+      documentMetadata: {},
+      metadataSequence: 0,
       localeMetadata: localeExists ? { locale } : undefined,
       blockCatalogFingerprint: contentBlockCatalogFingerprint,
       serverInstanceId: 'server-1',
@@ -153,6 +155,7 @@ describe('BlockRoomProtocolClient', () => {
     );
     expect(runtime.setResumeToken).toHaveBeenCalledWith('challenge-1');
     expect(runtime.onReady).toHaveBeenCalledOnce();
+    expect(runtime.sendStateless).toHaveBeenCalledOnce();
 
     runtime.protocol.destroy();
     runtime.document.destroy();
@@ -243,6 +246,7 @@ describe('BlockRoomProtocolClient', () => {
           sourceChanged: true,
           changedLocales: ['ko'],
           locale: 'ko',
+          metadataUpdate: { operation: 'locale', values: { title: '제목' }, sequence: 1 },
         },
       }),
     );
@@ -366,6 +370,7 @@ describe('BlockRoomProtocolClient', () => {
           sourceChanged: false,
           changedLocales: ['ko'],
           locale: 'ko',
+          metadataUpdate: { operation: 'locale', values: { title: '제목' }, sequence: 1 },
         },
       }),
     );
@@ -386,6 +391,7 @@ describe('BlockRoomProtocolClient', () => {
           sourceChanged: false,
           changedLocales: ['ko'],
           locale: 'ko',
+          metadataUpdate: { operation: 'locale', values: { title: '제목' }, sequence: 2 },
         },
       }),
     );
@@ -508,4 +514,102 @@ describe('BlockRoomProtocolClient', () => {
     runtime.protocol.destroy();
     runtime.document.destroy();
   });
+});
+
+it('projects initial metadata to early and late subscribers and ignores reordered peer ACKs', () => {
+  const runtime = setup();
+  const early = vi.fn();
+  runtime.protocol.subscribeMetadata(early);
+  const bootstrap = JSON.parse(bootstrapFixture().payload);
+  bootstrap.sourceMetadata = { locale: 'ko', title: 'initial' };
+  bootstrap.localeMetadata = { locale: 'ko', title: 'initial' };
+  bootstrap.documentMetadata = { categoryIds: ['initial'] };
+  runtime.protocol.handleStateless(JSON.stringify(bootstrap));
+  expect(early).toHaveBeenCalledWith({ operation: 'locale', values: { title: 'initial' }, sequence: 0 });
+  const send = (sequence: number, title: string, documentName = `post:${entityId}:ko`) =>
+    runtime.protocol.handleStateless(
+      JSON.stringify({
+        kind: 'block_room.metadata_changed',
+        protocolVersion: 2,
+        documentName,
+        ack: {
+          documentRevision: '44444444-4444-4444-8444-444444444444',
+          changed: true,
+          sourceChanged: true,
+          changedLocales: ['ko'],
+          locale: 'ko',
+          metadataUpdate: { operation: 'locale', values: { title }, sequence },
+        },
+      }),
+    );
+  send(2, 'latest');
+  send(1, 'old');
+  send(3, 'wrong room', `post:${entityId}:en`);
+  expect(early).toHaveBeenLastCalledWith({ operation: 'locale', values: { title: 'latest' }, sequence: 2 });
+  const late = vi.fn();
+  runtime.protocol.subscribeMetadata(late);
+  expect(late).toHaveBeenCalledWith({ operation: 'locale', values: { title: 'latest' }, sequence: 2 });
+  expect(runtime.onReloadRequired).not.toHaveBeenCalled();
+  runtime.protocol.destroy();
+  runtime.document.destroy();
+});
+
+it('requires metadata update details in successful metadata ACKs', async () => {
+  const runtime = setup();
+  admit(runtime);
+  runtime.sendStateless.mockClear();
+  const pending = runtime.protocol.updateMetadata('locale', {
+    locale: 'ko',
+    title: 'updated',
+  });
+  const request = JSON.parse(runtime.sendStateless.mock.calls[0]![0]);
+  runtime.protocol.handleStateless(
+    JSON.stringify({
+      kind: 'block_room.metadata_result',
+      protocolVersion: 2,
+      requestId: request.requestId,
+      ok: true,
+      ack: {
+        documentRevision: '44444444-4444-4444-8444-444444444444',
+        changed: true,
+        sourceChanged: true,
+        changedLocales: ['ko'],
+        locale: 'ko',
+      },
+    }),
+  );
+  await expect(pending).rejects.toMatchObject({ reloadRequired: true });
+  expect(runtime.onReloadRequired).toHaveBeenCalledOnce();
+  runtime.protocol.destroy();
+  runtime.document.destroy();
+});
+
+it('accepts durability hints only for the admitted exact room and valid clocks', () => {
+  const runtime = setup();
+  const listener = vi.fn();
+  const unsubscribe = runtime.protocol.subscribePersisted(listener);
+  const vector = Y.encodeStateVector(runtime.document);
+  const send = (documentName = `post:${entityId}:ko`, stateVector = Buffer.from(vector).toString('base64')) =>
+    runtime.protocol.handleStateless(
+      JSON.stringify({
+        kind: 'block_room.persisted',
+        protocolVersion: 2,
+        documentName,
+        stateVector,
+        deleted: { '7': [{ clock: 2, len: 3 }] },
+      }),
+    );
+  send();
+  expect(listener).not.toHaveBeenCalled();
+  admit(runtime);
+  send(`post:${entityId}:en`);
+  send(undefined, 'bad vector');
+  expect(listener).not.toHaveBeenCalled();
+  send();
+  expect(listener).toHaveBeenCalledExactlyOnceWith({ stateVector: vector, deleted: { '7': [{ clock: 2, len: 3 }] } });
+  unsubscribe();
+  send();
+  expect(listener).toHaveBeenCalledOnce();
+  runtime.protocol.destroy();
+  runtime.document.destroy();
 });

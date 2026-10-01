@@ -150,7 +150,7 @@ describe('independent block selection boundaries', () => {
         type: 'paragraph',
         content: [
           { type: 'text', text: 'value ' },
-          { type: 'mathInline', attrs: { latex: 'x' } },
+          { type: 'mathInline', content: [{ type: 'text', text: 'x' }] },
         ],
       }),
       block('text', { type: 'paragraph', content: [{ type: 'text', text: 'plain' }] }),

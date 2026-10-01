@@ -56,6 +56,7 @@ import {
 } from './track-runtime';
 import { ReleaseTrackCreateView, secondsToTimePickerValue, timePickerValueToSeconds } from './ReleaseTrackCreateView';
 import { TrackCreditsEditorSection } from './TrackCreditsEditorSection';
+import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
 import { useTrackOrderSave } from './useTrackOrderSave';
 
 interface ReleaseTracksSectionProps {
@@ -63,6 +64,8 @@ interface ReleaseTracksSectionProps {
   idPrefix?: string;
   tracks: ReleaseTrackItem[];
   onTracksChange: (tracks: ReleaseTrackItem[]) => void;
+  onMutationStart?: () => void;
+  onMutationSettled?: (succeeded: boolean) => void;
 }
 
 type MediaStatusMessageKey =
@@ -94,7 +97,14 @@ function createLocalizedMediaStatusLabels(tMedia: (key: MediaStatusMessageKey) =
   };
 }
 
-export function ReleaseTracksSection({ releaseId, idPrefix, tracks, onTracksChange }: ReleaseTracksSectionProps) {
+export function ReleaseTracksSection({
+  releaseId,
+  idPrefix,
+  tracks,
+  onTracksChange,
+  onMutationStart,
+  onMutationSettled,
+}: ReleaseTracksSectionProps) {
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.tracks');
   const isMobile = useMediaQuery('(max-width: 48em)');
@@ -114,18 +124,24 @@ export function ReleaseTracksSection({ releaseId, idPrefix, tracks, onTracksChan
   const createTrack = useMutation({
     mutationFn: (data: { release_id: string; track_number: number; title: string; duration_seconds?: number }) =>
       createTrackAction(data),
+    onMutate: () => onMutationStart?.(),
+    onSettled: (result, error) => onMutationSettled?.(!error && Boolean(result?.data) && !result?.error),
   });
 
   const updateTrack = useMutation({
     mutationFn: (data: { id: string; track_number?: number; title?: string; duration_seconds?: number | null }) =>
       updateTrackAction(data.id, data),
+    onMutate: () => onMutationStart?.(),
+    onSettled: (result, error) => onMutationSettled?.(!error && Boolean(result?.success) && !result?.error),
   });
 
   const deleteTrack = useMutation({
     mutationFn: (id: string) => deleteTrackAction(id),
+    onMutate: () => onMutationStart?.(),
+    onSettled: (result, error) => onMutationSettled?.(!error && Boolean(result?.success) && !result?.error),
   });
 
-  const saveTrackOrder = useTrackOrderSave({ releaseId, tracks, onTracksChange });
+  const saveTrackOrder = useTrackOrderSave({ releaseId, tracks, onTracksChange, onMutationStart, onMutationSettled });
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -172,6 +188,7 @@ export function ReleaseTracksSection({ releaseId, idPrefix, tracks, onTracksChan
             return;
           }
           const newTrack = result.data;
+          publishEditorEntityChange(`release:${releaseId}`);
           notifications.show({
             message: tCommon('messages.itemCreated', { item: tCommon('entities.track') }),
             color: 'green',
@@ -219,7 +236,12 @@ export function ReleaseTracksSection({ releaseId, idPrefix, tracks, onTracksChan
         duration_seconds: durationSeconds,
       },
       {
-        onSuccess: () => {
+        onSuccess: (result) => {
+          if (result.error) {
+            notifications.show({ message: result.error, color: 'red' });
+            return;
+          }
+          publishEditorEntityChange(`release:${releaseId}`);
           notifications.show({
             message: tCommon('messages.itemUpdated', { item: tCommon('entities.track') }),
             color: 'green',
@@ -251,7 +273,12 @@ export function ReleaseTracksSection({ releaseId, idPrefix, tracks, onTracksChan
     }
 
     deleteTrack.mutate(deletingTrackId, {
-      onSuccess: () => {
+      onSuccess: (result) => {
+        if (result.error) {
+          notifications.show({ message: result.error, color: 'red' });
+          return;
+        }
+        publishEditorEntityChange(`release:${releaseId}`);
         notifications.show({
           message: tCommon('messages.itemDeleted', { item: tCommon('entities.track') }),
           color: 'red',
@@ -328,6 +355,7 @@ export function ReleaseTracksSection({ releaseId, idPrefix, tracks, onTracksChan
 
     return (
       <TrackRowEditorPanel
+        releaseId={releaseId}
         idPrefix={idPrefix}
         track={track}
         title={editTrackTitle}
@@ -340,6 +368,8 @@ export function ReleaseTracksSection({ releaseId, idPrefix, tracks, onTracksChan
         onCreditsChange={(newCredits) => {
           onTracksChange(tracks.map((item) => (item.id === track.id ? { ...item, credits: newCredits } : item)));
         }}
+        onMutationStart={onMutationStart}
+        onMutationSettled={onMutationSettled}
       />
     );
   };
@@ -1070,6 +1100,7 @@ function SortableTrackListItem({
 }
 
 interface TrackRowEditorPanelProps {
+  releaseId: string;
   idPrefix?: string;
   track: ReleaseTrackItem;
   title: string;
@@ -1080,9 +1111,12 @@ interface TrackRowEditorPanelProps {
   onClose: () => void;
   isSaving: boolean;
   onCreditsChange: (credits: ReleaseTrackItem['credits']) => void;
+  onMutationStart?: () => void;
+  onMutationSettled?: (succeeded: boolean) => void;
 }
 
 function TrackRowEditorPanel({
+  releaseId,
   idPrefix,
   track,
   title,
@@ -1093,6 +1127,8 @@ function TrackRowEditorPanel({
   onClose,
   isSaving,
   onCreditsChange,
+  onMutationStart,
+  onMutationSettled,
 }: TrackRowEditorPanelProps) {
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.tracks');
@@ -1128,10 +1164,13 @@ function TrackRowEditorPanel({
       ) : null}
 
       <TrackCreditsEditorSection
+        releaseId={releaseId}
         idPrefix={idPrefix}
         trackId={track.id}
         credits={track.credits}
         onCreditsChange={onCreditsChange}
+        onMutationStart={onMutationStart}
+        onMutationSettled={onMutationSettled}
       />
 
       <Group justify="flex-end">

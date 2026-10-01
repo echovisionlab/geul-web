@@ -33,6 +33,7 @@ const mocks = vi.hoisted(() => ({
   notificationShow: vi.fn(),
   persistNow: vi.fn(),
   getBlockRoomSnapshot: vi.fn(),
+  flushEditorSaves: vi.fn(),
   mutateTargetTranslation: vi.fn(),
 }));
 
@@ -85,6 +86,10 @@ vi.mock('@/lib/contexts/EditorRuntimeContext', () => ({
     getContributorMemberIds: () => ['33333333-3333-4333-8333-333333333333'],
     subscribeToRuntimeEvents: () => () => undefined,
   }),
+}));
+
+vi.mock('@/lib/editor/editor-save-registry', () => ({
+  flushEditorSaves: mocks.flushEditorSaves,
 }));
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -149,6 +154,7 @@ beforeEach(() => {
   mocks.cancelTranslationJob.mockResolvedValue({});
   mocks.persistNow.mockResolvedValue(undefined);
   mocks.getBlockRoomSnapshot.mockResolvedValue({ documentRevision: '22222222-2222-4222-8222-222222222222' });
+  mocks.flushEditorSaves.mockResolvedValue(true);
   mocks.mutateTargetTranslation.mockResolvedValue(undefined);
 
   container = document.createElement('div');
@@ -211,6 +217,13 @@ describe('EntityTranslationsPanel API commands', () => {
 
     await click('entity-translations-panel-regenerate-fr');
     expect(mocks.persistNow).toHaveBeenCalledTimes(1);
+    expect(mocks.flushEditorSaves).toHaveBeenCalledWith('post:post-1');
+    expect(mocks.flushEditorSaves.mock.invocationCallOrder.at(-1)).toBeLessThan(
+      mocks.persistNow.mock.invocationCallOrder.at(-1) ?? Number.POSITIVE_INFINITY,
+    );
+    expect(mocks.persistNow.mock.invocationCallOrder.at(-1)).toBeLessThan(
+      mocks.regenerateEntityTranslations.mock.invocationCallOrder.at(-1) ?? Number.POSITIVE_INFINITY,
+    );
     expect(mocks.regenerateEntityTranslations).toHaveBeenNthCalledWith(1, {
       target: TARGET,
       locales: ['fr'],
@@ -224,6 +237,29 @@ describe('EntityTranslationsPanel API commands', () => {
       locales: ['fr', 'ja'],
     });
     expect(mocks.notificationShow).toHaveBeenCalledWith(expect.objectContaining({ color: 'blue' }));
+  });
+
+  it('flushes the Form save-registry key before regenerating translations', async () => {
+    await renderReady({ entityType: 'form', entityId: 'form-1' });
+
+    await click('entity-translations-panel-regenerate-fr');
+
+    expect(mocks.flushEditorSaves).toHaveBeenCalledWith('form:form-1');
+    expect(mocks.regenerateEntityTranslations).toHaveBeenCalledOnce();
+  });
+
+  it('does not persist or regenerate when pending editor saves fail to flush', async () => {
+    mocks.flushEditorSaves.mockResolvedValue(false);
+    await renderReady();
+
+    await click('entity-translations-panel-regenerate-fr');
+
+    expect(mocks.persistNow).not.toHaveBeenCalled();
+    expect(mocks.regenerateEntityTranslations).not.toHaveBeenCalled();
+    expect(mocks.notificationShow).toHaveBeenCalledWith({
+      color: 'red',
+      message: koMessages.translationPanel.notifications.regenerateFailed,
+    });
   });
 
   it('keeps explicit regenerate available for an existing target and labels a missing target as generate', async () => {
@@ -364,8 +400,41 @@ describe('EntityTranslationsPanel API commands', () => {
       sourceLocale: 'fr',
       expectedDocumentRevision: '22222222-2222-4222-8222-222222222222',
     });
+    expect(mocks.flushEditorSaves).toHaveBeenCalledWith('post:post-1');
+    expect(mocks.persistNow.mock.invocationCallOrder.at(-1)).toBeLessThan(
+      mocks.flushEditorSaves.mock.invocationCallOrder.at(-1) ?? Number.POSITIVE_INFINITY,
+    );
+    expect(mocks.flushEditorSaves.mock.invocationCallOrder.at(-1)).toBeLessThan(
+      mocks.getBlockRoomSnapshot.mock.invocationCallOrder.at(-1) ?? Number.POSITIVE_INFINITY,
+    );
+    expect(mocks.getBlockRoomSnapshot.mock.invocationCallOrder.at(-1)).toBeLessThan(
+      mocks.setEntitySourceLocale.mock.invocationCallOrder.at(-1) ?? Number.POSITIVE_INFINITY,
+    );
     expect(mocks.routerReplace).toHaveBeenCalledWith('/posts/post-1?edit=true&tab=translations&lang=fr');
     expect(mocks.listEntityTranslations.mock.calls.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('blocks a source-locale switch when pending editor saves fail to flush', async () => {
+    mocks.flushEditorSaves.mockResolvedValue(false);
+    await renderReady();
+    const select = document.querySelector('select') as HTMLSelectElement;
+
+    await act(async () => {
+      select.value = 'fr';
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    const confirmation = mocks.openConfirmModal.mock.calls[0]?.[0];
+    await act(async () => confirmation.onConfirm());
+    await settle();
+
+    expect(mocks.flushEditorSaves).toHaveBeenCalledWith('post:post-1');
+    expect(mocks.getBlockRoomSnapshot).not.toHaveBeenCalled();
+    expect(mocks.setEntitySourceLocale).not.toHaveBeenCalled();
+    expect(mocks.routerReplace).not.toHaveBeenCalled();
+    expect(mocks.notificationShow).toHaveBeenCalledWith({
+      color: 'red',
+      message: koMessages.translationPanel.notifications.sourceLocaleUpdateFailed,
+    });
   });
 
   it('renders stable authorization and fallback errors without exposing raw RPC details', async () => {

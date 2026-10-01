@@ -1,8 +1,18 @@
-import { hasEditorSaveRecovery } from './editor-save-recovery';
+import { hasRecoverableEditorSaveRecovery, type EditorSaveRecoveryIdentity } from './editor-save-recovery';
 
-type PendingSave = { flush: () => Promise<boolean>; hasPending: () => boolean };
+type PendingSave = {
+  flush: () => Promise<boolean>;
+  hasPending: () => boolean;
+  getPendingPatch?: () => object | null;
+  getRecoveryIdentity?: () => EditorSaveRecoveryIdentity;
+};
 const pendingSaves = new Map<string, Set<PendingSave>>();
 const pendingSaveListeners = new Map<string | undefined, Set<() => void>>();
+
+/** Fields with local intent still waiting for acknowledgment must survive peer updates. */
+export function getPendingEditorPatch(document: string): Record<string, unknown> {
+  return Object.assign({}, ...[...(pendingSaves.get(document) ?? [])].map((save) => save.getPendingPatch?.() ?? {}));
+}
 
 export function notifyEditorSaveStateChanged(document: string) {
   for (const listener of pendingSaveListeners.get(document) ?? []) {
@@ -75,7 +85,13 @@ export async function flushAllEditorSaves(document?: string): Promise<boolean> {
       notifyEditorSaveStateChanged(registeredDocument);
     }
   }
-  return ![...documentsFlushed].some((flushedDocument) => hasEditorSaveRecovery(flushedDocument));
+  const recoveryIdentities = [...documentsFlushed].flatMap((registeredDocument) =>
+    [...(pendingSaves.get(registeredDocument) ?? [])].flatMap((save) => {
+      const identity = save.getRecoveryIdentity?.();
+      return identity ? [{ ...identity, document: registeredDocument }] : [];
+    }),
+  );
+  return !hasRecoverableEditorSaveRecovery(recoveryIdentities);
 }
 
 /** Backwards-compatible scoped flush used by locale transitions. */

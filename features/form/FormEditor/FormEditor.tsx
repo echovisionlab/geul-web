@@ -7,18 +7,18 @@ import type { FormSchema } from '@/lib/types/form/schema';
 import { FormBuilder } from '../FormBuilder/FormBuilder';
 
 export function FormEditor() {
-  const { fields, setField } = useFormEditorContext();
+  const { fields, isSynced, setField } = useFormEditorContext();
   const { activeEditLocale, isEditingScopedLocale } = useFormTranslationContext();
   const isViewingTargetLocale = Boolean(activeEditLocale.activeLocale) && !activeEditLocale.isSourceLocale;
   const isExistingTargetLocale = isViewingTargetLocale && activeEditLocale.hasLiveRow;
 
   const handleSchemaChange = useCallback(
     (newSchema: FormSchema) => {
-      if (!isViewingTargetLocale || isExistingTargetLocale) {
+      if (isSynced && (!isViewingTargetLocale || isExistingTargetLocale)) {
         setField('schema', newSchema);
       }
     },
-    [isExistingTargetLocale, isViewingTargetLocale, setField],
+    [isExistingTargetLocale, isSynced, isViewingTargetLocale, setField],
   );
 
   return (
@@ -26,7 +26,9 @@ export function FormEditor() {
       schema={fields.schema}
       onChange={handleSchemaChange}
       title={fields.title}
-      mode={isExistingTargetLocale ? 'translation' : isEditingScopedLocale ? 'readOnly' : 'full'}
+      mode={
+        !isSynced ? 'readOnly' : isExistingTargetLocale ? 'translation' : isEditingScopedLocale ? 'readOnly' : 'full'
+      }
     />
   );
 }

@@ -18,6 +18,7 @@ import {
   type FileDownloadPage,
   type FileDownloadPageInput,
   type FileDownloadPolicyModel,
+  type FileDownloadPolicyObservedState,
   type FileDownloadPolicyTarget,
 } from '@/lib/types/file-download-access';
 
@@ -98,6 +99,22 @@ function audienceToProto(audience: FileDownloadAudience): ProtoFileDownloadAudie
   }
 }
 
+function isFileDownloadAudience(value: unknown): value is FileDownloadAudience {
+  return value === 'disabled' || value === 'public' || value === 'authenticated' || value === 'restricted';
+}
+
+function isObservedPolicy(value: unknown): value is FileDownloadPolicyObservedState {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const candidate = value as Partial<FileDownloadPolicyObservedState>;
+  return (
+    isFileDownloadAudience(candidate.audience) &&
+    Array.isArray(candidate.audienceSegmentIds) &&
+    candidate.audienceSegmentIds.every((id) => typeof id === 'string')
+  );
+}
+
 function mapPolicy(policy: FileDownloadPolicy): FileDownloadPolicyModel {
   return {
     ...(policy.entityType !== TranscodeEntityType.UNSPECIFIED ? { entityType: policy.entityType } : {}),
@@ -147,13 +164,20 @@ export async function updateFileDownloadPolicyAction(
   target: FileDownloadPolicyTarget,
   audience: FileDownloadAudience,
   audienceSegmentIds: string[],
+  observedPolicy: FileDownloadPolicyObservedState,
 ): Promise<FileDownloadActionResult<FileDownloadPolicyModel>> {
   if (!isValidTarget(target)) {
     return { errorCode: 'invalidTarget' };
   }
+  if (!isObservedPolicy(observedPolicy)) {
+    return { errorCode: 'invalidPolicyBaseline' };
+  }
 
   const segmentIds =
     audience === 'restricted' ? Array.from(new Set(audienceSegmentIds.map((id) => id.trim()).filter(Boolean))) : [];
+  const observedSegmentIds = Array.from(
+    new Set(observedPolicy.audienceSegmentIds.map((id) => id.trim()).filter(Boolean)),
+  ).sort();
 
   try {
     const client = await createFileClient();
@@ -162,6 +186,10 @@ export async function updateFileDownloadPolicyAction(
       expectedFileId: target.expectedFileId,
       audience: audienceToProto(audience),
       audienceSegmentIds: segmentIds,
+      observedPolicy: {
+        audience: audienceToProto(observedPolicy.audience),
+        audienceSegmentIds: observedSegmentIds,
+      },
     });
     if (!response.policy) {
       return { errorCode: 'missingResponse' };

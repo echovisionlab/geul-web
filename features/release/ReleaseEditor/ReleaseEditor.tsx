@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -20,11 +20,13 @@ import { isLocaleDocumentEditable } from '@/features/translation/locale-document
 import { useLocaleDocumentSession } from '@/features/translation/useLocaleDocumentSession';
 import {
   deleteReleaseAction,
+  getReleaseEditorRelationsAction,
   publishReleaseAction,
   unpublishReleaseAction,
   updateReleaseFieldsAction,
   updateReleaseSlugAction,
 } from '@/lib/actions/release';
+import { getReleaseTrackSnapshotAction } from '@/lib/actions/track';
 import type { ReleaseFields, ReleaseTrackItem } from '@/lib/collab/schemas/release-fields.schema';
 import { updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
@@ -32,6 +34,7 @@ import { useRichTextBlockRoomController } from '@/features/editor/hooks/useBlock
 import { useBlockRoomConnection } from '@/lib/collab/useBlockRoomConnection';
 import { useSlugManagement } from '@/lib/hooks/useSlugManagement';
 import type {
+  ReleaseArtistItem,
   ReleaseCategoryItem,
   ReleaseCreditItem,
   ReleaseFormatItem,
@@ -52,6 +55,10 @@ import { ReleaseTracksSection } from './ReleaseTracksSection';
 import { requireActionSuccess } from '@/lib/editor/require-action-success';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
+import { flushAllEditorSaves, getPendingEditorPatch } from '@/lib/editor/editor-save-registry';
+import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
+import { useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
+import { persistCollaborativeDocumentNow } from '@/lib/collab/persist-now';
 
 interface ReleaseEditorProps {
   releaseId: string;
@@ -65,6 +72,7 @@ interface ReleaseEditorProps {
   initialAppleMusicUrl: string | null;
   initialBandcampUrl: string | null;
   initialYoutubeMusicUrl: string | null;
+  initialArtists: ReleaseArtistItem[];
   initialCredits: ReleaseCreditItem[];
   initialLabels: ReleaseLabelItem[];
   initialCategories: ReleaseCategoryItem[];
@@ -73,6 +81,22 @@ interface ReleaseEditorProps {
   initialFormats: ReleaseFormatItem[];
   initialTracks: ReleaseTrackItem[];
   baseUrl: string;
+}
+
+type ReleaseRelationField =
+  'artists' | 'labels' | 'categories' | 'genres' | 'styles' | 'formats' | 'credits' | 'tracks';
+
+function isReleaseRelationField(key: keyof ReleaseFields): key is ReleaseRelationField {
+  return (
+    key === 'artists' ||
+    key === 'labels' ||
+    key === 'categories' ||
+    key === 'genres' ||
+    key === 'styles' ||
+    key === 'formats' ||
+    key === 'credits' ||
+    key === 'tracks'
+  );
 }
 
 export function ReleaseEditor({
@@ -87,6 +111,7 @@ export function ReleaseEditor({
   initialAppleMusicUrl,
   initialBandcampUrl,
   initialYoutubeMusicUrl,
+  initialArtists,
   initialCredits,
   initialLabels,
   initialCategories,
@@ -128,8 +153,80 @@ export function ReleaseEditor({
     styles: initialStyles,
     formats: initialFormats,
     tracks: initialTracks,
-    artists: [],
+    artists: initialArtists,
   });
+  const relationDirty = useRef(new Set<ReleaseRelationField>());
+  const relationMutationCount = useRef(new Map<string, number>());
+  const relationMutationFailed = useRef(new Set<string>());
+  const relationRefreshSequence = useRef(0);
+  const refreshReleaseRelations = useCallback(async () => {
+    const sequence = ++relationRefreshSequence.current;
+    const [relations, tracks] = await Promise.all([
+      getReleaseEditorRelationsAction(releaseId).catch(() => null),
+      getReleaseTrackSnapshotAction(releaseId).catch(() => null),
+    ]);
+    if (sequence !== relationRefreshSequence.current) {
+      return;
+    }
+    setFields((current) => {
+      const next = { ...current };
+      const dirty = relationDirty.current;
+      if (relations) {
+        if (!dirty.has('artists')) {
+          next.artists = relations.artists;
+        }
+        if (!dirty.has('labels')) {
+          next.labels = relations.labels;
+        }
+        if (!dirty.has('categories')) {
+          next.categories = relations.categories;
+        }
+        if (!dirty.has('genres')) {
+          next.genres = relations.genres;
+        }
+        if (!dirty.has('styles')) {
+          next.styles = relations.styles;
+        }
+        if (!dirty.has('formats')) {
+          next.formats = relations.formats;
+        }
+        if (!dirty.has('credits')) {
+          next.credits = relations.credits;
+        }
+      }
+      if (tracks && !dirty.has('tracks')) {
+        next.tracks = tracks;
+      }
+      return next;
+    });
+  }, [releaseId]);
+  const beginRelationSave = useCallback((field: ReleaseRelationField) => {
+    relationDirty.current.add(field);
+    const count = relationMutationCount.current.get(field) ?? 0;
+    if (count === 0) {
+      relationMutationFailed.current.delete(field);
+    }
+    relationMutationCount.current.set(field, count + 1);
+  }, []);
+  const settleRelationSave = useCallback(
+    (field: ReleaseRelationField, succeeded: boolean) => {
+      if (!succeeded) {
+        relationMutationFailed.current.add(field);
+      }
+      const count = Math.max(0, (relationMutationCount.current.get(field) ?? 1) - 1);
+      if (count > 0) {
+        relationMutationCount.current.set(field, count);
+        return;
+      }
+      relationMutationCount.current.delete(field);
+      if (relationMutationFailed.current.has(field)) {
+        return;
+      }
+      relationDirty.current.delete(field);
+      void refreshReleaseRelations();
+    },
+    [refreshReleaseRelations],
+  );
   const localeSession = useLocaleDocumentSession({
     entityType: 'release',
     entityId: releaseId,
@@ -145,20 +242,58 @@ export function ReleaseEditor({
   const currentProvider = provider;
   const currentIsConnected = isConnected;
   const currentIsSynced = isSynced;
+  useEditorEntityChanges(
+    `release:${releaseId}`,
+    () => {
+      void refreshReleaseRelations();
+    },
+    currentProvider,
+  );
   const [creditNotes, setCreditNotes] = useState<Record<string, string>>({});
+  const localeMetadataDocument = `release:${releaseId}`;
   useEffect(() => {
     if (!roomLocale) {
       setCreditNotes({});
+      return;
+    }
+    if (Object.hasOwn(getPendingEditorPatch(localeMetadataDocument), 'creditNotes')) {
       return;
     }
     const projection =
       bootstrap?.localeMetadata ??
       (bootstrap?.sourceMetadata?.locale === roomLocale ? bootstrap.sourceMetadata : undefined);
     setCreditNotes(Object.fromEntries((projection?.creditNotes ?? []).map(({ creditId, note }) => [creditId, note])));
-  }, [bootstrap?.localeMetadata, bootstrap?.sourceMetadata, roomLocale]);
+  }, [bootstrap?.localeMetadata, bootstrap?.sourceMetadata, localeMetadataDocument, roomLocale]);
   const descriptionEditorKey = `release-${roomLocale ?? 'source'}`;
   const [residentTitle, setResidentTitle] = useState(initialTitle);
-  useEffect(() => setResidentTitle(activeEditLocale.displayTitle), [activeEditLocale.displayTitle, roomLocale]);
+  useEffect(() => {
+    if (Object.hasOwn(getPendingEditorPatch(localeMetadataDocument), 'title')) {
+      return;
+    }
+    setResidentTitle(activeEditLocale.displayTitle);
+  }, [activeEditLocale.displayTitle, localeMetadataDocument, roomLocale]);
+  useBlockRoomMetadataUpdates(blockRoom, localeMetadataDocument, ({ operation, values }) => {
+    if (operation !== 'locale') {
+      return;
+    }
+    if (typeof values.title === 'string') {
+      setResidentTitle(values.title);
+    }
+    if (
+      Array.isArray(values.creditNotes) &&
+      values.creditNotes.every(
+        (entry) =>
+          entry != null &&
+          typeof entry === 'object' &&
+          'creditId' in entry &&
+          typeof entry.creditId === 'string' &&
+          'note' in entry &&
+          typeof entry.note === 'string',
+      )
+    ) {
+      setCreditNotes(Object.fromEntries(values.creditNotes.map(({ creditId, note }) => [creditId, note])));
+    }
+  });
   const displayedTitle = roomLocale ? residentTitle : activeEditLocale.displayTitle;
   const hasLocaleRoomMutationAuthority = localeSession.hasRoomMutationAuthority({
     sourceLocale: bootstrap?.sourceLocale ?? null,
@@ -197,11 +332,16 @@ export function ReleaseEditor({
   });
   const debouncedLocaleMetadataUpdate = useDebouncedRoomMetadata({
     connection: blockRoom,
-    document: `release:${releaseId}`,
+    document: localeMetadataDocument,
     delay: 500,
     write: (
       protocol,
-      input: { locale: string; title?: string; creditNotes?: readonly { creditId: string; note: string }[] },
+      input: {
+        locale: string;
+        title?: string;
+        creditNotes?: readonly { creditId: string; note: string }[];
+        observed?: { creditNotes?: readonly { creditId: string; note: string }[] };
+      },
     ) => updateBlockRoomLocaleMetadata(protocol, { type: 'release', ...input }),
   });
   const debouncedReleaseFieldsUpdate = useDebouncedPatch({
@@ -209,12 +349,15 @@ export function ReleaseEditor({
       requireActionSuccess(updateReleaseFields.mutateAsync(input)),
     delay: 500,
     scope: releaseId,
-    document: `release:${releaseId}`,
+    document: localeMetadataDocument,
   });
   const setField = useCallback(
     <K extends keyof ReleaseFields>(key: K, value: ReleaseFields[K]) => {
       if (!canEditNeutral) {
         return;
+      }
+      if (isReleaseRelationField(key)) {
+        relationDirty.current.add(key);
       }
       setFields((current) => ({ ...current, [key]: value }));
       switch (key) {
@@ -291,6 +434,25 @@ export function ReleaseEditor({
       }
     },
   });
+  const runReleaseTransition = useCallback(
+    async (transition: () => void | Promise<void>) => {
+      try {
+        if (!(await flushAllEditorSaves(`release:${releaseId}`))) {
+          notifications.show({ message: tCommon('notifications.saveFailed'), color: 'red' });
+          return false;
+        }
+        if (currentProvider) {
+          await persistCollaborativeDocumentNow(currentProvider);
+        }
+        await transition();
+        return true;
+      } catch {
+        notifications.show({ message: tCommon('notifications.saveFailed'), color: 'red' });
+        return false;
+      }
+    },
+    [currentProvider, releaseId, tCommon],
+  );
   const handleStatusChange = (status: ReleaseStatus) => {
     if (!canEditNeutral) {
       return;
@@ -374,6 +536,9 @@ export function ReleaseEditor({
         debouncedLocaleMetadataUpdate({
           locale: roomLocale,
           creditNotes: Object.entries(next).map(([id, value]) => ({ creditId: id, note: value })),
+          observed: {
+            creditNotes: Object.entries(current).map(([id, value]) => ({ creditId: id, note: value })),
+          },
         });
         return next;
       });
@@ -399,9 +564,13 @@ export function ReleaseEditor({
           statusOptions={releaseStatusOptions}
           isConnected={currentIsConnected}
           isSynced={currentIsSynced}
-          onBack={() => router.back()}
-          onStatusChange={canEditNeutral ? handleStatusChange : undefined}
-          onDelete={canEditNeutral ? () => deleteRelease.mutate() : undefined}
+          onBack={() => {
+            void runReleaseTransition(() => router.back());
+          }}
+          onStatusChange={
+            canEditNeutral ? (nextStatus) => void runReleaseTransition(() => handleStatusChange(nextStatus)) : undefined
+          }
+          onDelete={canEditNeutral ? () => void runReleaseTransition(() => deleteRelease.mutate()) : undefined}
           deleteConfirmation={{
             title: tActions('delete'),
             message: (
@@ -591,6 +760,8 @@ export function ReleaseEditor({
             idPrefix={`release-${releaseId}-artists`}
             artists={fields.artists}
             onArtistsChange={(artists) => setField('artists', artists)}
+            onMutationStart={() => beginRelationSave('artists')}
+            onMutationSettled={(succeeded) => settleRelationSave('artists', succeeded)}
           />
         ) : null}
 
@@ -601,6 +772,8 @@ export function ReleaseEditor({
             idPrefix={`release-${releaseId}-labels`}
             labels={fields.labels}
             onLabelsChange={(labels) => setField('labels', labels)}
+            onMutationStart={() => beginRelationSave('labels')}
+            onMutationSettled={(succeeded) => settleRelationSave('labels', succeeded)}
           />
         ) : null}
 
@@ -617,6 +790,14 @@ export function ReleaseEditor({
             onGenresChange={(genres) => setField('genres', genres)}
             onStylesChange={(styles) => setField('styles', styles)}
             onFormatsChange={(formats) => setField('formats', formats)}
+            onCategoriesMutationStart={() => beginRelationSave('categories')}
+            onCategoriesMutationSettled={(succeeded) => settleRelationSave('categories', succeeded)}
+            onGenresMutationStart={() => beginRelationSave('genres')}
+            onGenresMutationSettled={(succeeded) => settleRelationSave('genres', succeeded)}
+            onStylesMutationStart={() => beginRelationSave('styles')}
+            onStylesMutationSettled={(succeeded) => settleRelationSave('styles', succeeded)}
+            onFormatsMutationStart={() => beginRelationSave('formats')}
+            onFormatsMutationSettled={(succeeded) => settleRelationSave('formats', succeeded)}
           />
         ) : null}
 
@@ -632,6 +813,8 @@ export function ReleaseEditor({
           )}
           onCreditsChange={(credits) => setField('credits', credits)}
           onCreditNoteChange={handleCreditNoteChange}
+          onMutationStart={() => beginRelationSave('credits')}
+          onMutationSettled={(succeeded) => settleRelationSave('credits', succeeded)}
         />
 
         {/* Tracks */}
@@ -641,6 +824,8 @@ export function ReleaseEditor({
             idPrefix={`release-${releaseId}-tracks`}
             tracks={fields.tracks}
             onTracksChange={(tracks) => setField('tracks', tracks)}
+            onMutationStart={() => beginRelationSave('tracks')}
+            onMutationSettled={(succeeded) => settleRelationSave('tracks', succeeded)}
           />
         ) : null}
 

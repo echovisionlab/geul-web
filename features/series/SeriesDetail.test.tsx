@@ -5,6 +5,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MantineProvider } from '@mantine/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { registerEditorSave } from '@/lib/editor/editor-save-registry';
 import { SeriesDetail } from './SeriesDetail';
 
 const mocks = vi.hoisted(() => ({
@@ -16,9 +17,11 @@ const mocks = vi.hoisted(() => ({
   usePostSeriesCollaboration: vi.fn(),
   setCollaborationField: vi.fn(),
   editorHeader: vi.fn(),
+  routerPush: vi.fn(),
+  updateSeries: vi.fn(),
 }));
 
-vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push: mocks.routerPush }) }));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
 vi.mock('@mantine/notifications', () => ({ notifications: { show: mocks.notification } }));
 vi.mock('@/components/core/Button', () => ({
@@ -52,7 +55,13 @@ vi.mock('@/components/core/Section', () => ({
 vi.mock('@/components/core/Tooltip', () => ({ Tooltip: ({ children }: { children: ReactNode }) => children }));
 vi.mock('@/features/editor/EditorHeader', () => ({
   createDraftPublishedStatusOptions: () => [],
-  EditorHeader: (props: { controls?: ReactNode; isConnected: boolean; isSynced: boolean }) => {
+  EditorHeader: (props: {
+    controls?: ReactNode;
+    isConnected: boolean;
+    isSynced: boolean;
+    onBack?: () => void | Promise<void>;
+    onStatusChange?: (status: 'draft' | 'published') => void | Promise<void>;
+  }) => {
     mocks.editorHeader(props);
     return <>{props.controls}</>;
   },
@@ -87,7 +96,7 @@ vi.mock('@/lib/actions/series', () => ({
   reorderSeriesPostsAction: mocks.reorder,
   setSeriesFeaturedImageAction: vi.fn(),
   unassignPostFromSeriesAction: mocks.unassign,
-  updateSeriesAction: vi.fn(),
+  updateSeriesAction: mocks.updateSeries,
 }));
 vi.mock('@/lib/hooks/useSlugManagement', () => ({
   useSlugManagement: () => ({
@@ -124,6 +133,7 @@ const posts = [
 
 let container: HTMLDivElement;
 let root: Root;
+let unregisterSaves: Array<() => void>;
 
 function renderedPostTitles() {
   return Array.from(container.querySelectorAll('tbody tr')).map(
@@ -134,6 +144,7 @@ function renderedPostTitles() {
 describe('SeriesDetail post ordering', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    unregisterSaves = [];
     mocks.useLocaleDocumentSession.mockReturnValue({
       activeEditLocale: {
         activeLocale: 'en',
@@ -164,6 +175,7 @@ describe('SeriesDetail post ordering', () => {
     mocks.listPosts.mockResolvedValue(posts);
     mocks.reorder.mockResolvedValue({ success: true });
     mocks.unassign.mockResolvedValue({ success: true });
+    mocks.updateSeries.mockResolvedValue({ success: true });
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
@@ -171,7 +183,103 @@ describe('SeriesDetail post ordering', () => {
 
   afterEach(() => {
     act(() => root.unmount());
+    for (const unregister of unregisterSaves) {
+      unregister();
+    }
     container.remove();
+  });
+
+  async function renderSeries() {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
+    await act(async () => {
+      root.render(
+        <QueryClientProvider client={queryClient}>
+          <MantineProvider env="test">
+            <SeriesDetail
+              scope="admin"
+              initialData={{
+                series: {
+                  id: 'series-1',
+                  title: 'Series',
+                  slug: 'series',
+                  sourceLocale: 'en',
+                  status: 'draft',
+                },
+                managers: [],
+              }}
+            />
+          </MantineProvider>
+        </QueryClientProvider>,
+      );
+    });
+    return mocks.editorHeader.mock.calls.at(-1)?.[0] as {
+      onBack: () => void | Promise<void>;
+      onStatusChange: (status: 'draft' | 'published') => void | Promise<void>;
+    };
+  }
+
+  function registerPendingSave(document: string, finish: Promise<void>) {
+    let pending = true;
+    unregisterSaves.push(
+      registerEditorSave(document, {
+        flush: async () => {
+          await finish;
+          pending = false;
+          return true;
+        },
+        hasPending: () => pending,
+      }),
+    );
+  }
+
+  it('waits for registered room and slug saves before navigating back', async () => {
+    let finishRoom!: () => void;
+    let finishSlug!: () => void;
+    registerPendingSave(
+      'post_series:series-1',
+      new Promise<void>((resolve) => {
+        finishRoom = resolve;
+      }),
+    );
+    registerPendingSave(
+      'post_series:series-1',
+      new Promise<void>((resolve) => {
+        finishSlug = resolve;
+      }),
+    );
+    const header = await renderSeries();
+
+    let back: Promise<void> | undefined;
+    await act(async () => {
+      back = Promise.resolve(header.onBack());
+      await Promise.resolve();
+    });
+    expect(mocks.routerPush).not.toHaveBeenCalled();
+
+    await act(async () => finishRoom());
+    expect(mocks.routerPush).not.toHaveBeenCalled();
+    await act(async () => finishSlug());
+    await act(async () => back);
+    expect(mocks.routerPush).toHaveBeenCalledWith('/admin/series');
+  });
+
+  it('aborts a status transition and reports save failure when a pending save cannot flush', async () => {
+    unregisterSaves.push(
+      registerEditorSave('post_series:series-1', {
+        flush: async () => false,
+        hasPending: () => true,
+      }),
+    );
+    const header = await renderSeries();
+
+    await act(async () => {
+      await header.onStatusChange('published');
+    });
+
+    expect(mocks.updateSeries).not.toHaveBeenCalled();
+    expect(mocks.notification).toHaveBeenCalledWith({ message: 'saveFailed', color: 'red' });
   });
 
   it('optimistically reorders and restores the authoritative order when persistence fails', async () => {

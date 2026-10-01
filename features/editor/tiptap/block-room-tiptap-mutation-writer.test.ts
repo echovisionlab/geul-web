@@ -29,6 +29,8 @@ const IDS = {
   shader: '10000000-0000-4000-8000-000000000005',
   table: '10000000-0000-4000-8000-000000000006',
 } as const;
+const TABLE_ROW_ID = '10000000-0000-4000-8000-000000000007';
+const TABLE_CELL_ID = '10000000-0000-4000-8000-000000000008';
 
 function emptyCollaborativeLeavesDocument(): LocalizedRichTextDocument {
   const shaderStages = SHADER_STAGE_DEFINITIONS.map((_, index) => ({ kind: index + 1, source: '' }));
@@ -46,7 +48,12 @@ function emptyCollaborativeLeavesDocument(): LocalizedRichTextDocument {
         {
           block: {
             id: IDS.table,
-            table: { props: {}, content: { rows: [{ cells: [{ header: false, props: {} }] }] } },
+            table: {
+              props: {},
+              content: {
+                rows: [{ id: TABLE_ROW_ID, cells: [{ id: TABLE_CELL_ID, header: false, props: {} }] }],
+              },
+            },
           },
           placement: { index: 5 },
         },
@@ -62,7 +69,10 @@ function emptyCollaborativeLeavesDocument(): LocalizedRichTextDocument {
         { blockId: IDS.shader, shader: { props: {} } },
         {
           blockId: IDS.table,
-          table: { props: {}, content: { rows: [{ cells: [{}] }] } },
+          table: {
+            props: {},
+            content: { rows: [{ rowId: TABLE_ROW_ID, cells: [{ cellId: TABLE_CELL_ID }] }] },
+          },
         },
       ],
     },
@@ -80,7 +90,12 @@ function inlineDocument(): LocalizedRichTextDocument {
         {
           block: {
             id: IDS.table,
-            table: { props: {}, content: { rows: [{ cells: [{ header: false, props: {} }] }] } },
+            table: {
+              props: {},
+              content: {
+                rows: [{ id: TABLE_ROW_ID, cells: [{ id: TABLE_CELL_ID, header: false, props: {} }] }],
+              },
+            },
           },
           placement: { index: 1 },
         },
@@ -114,8 +129,10 @@ function inlineDocument(): LocalizedRichTextDocument {
             content: {
               rows: [
                 {
+                  rowId: TABLE_ROW_ID,
                   cells: [
                     {
+                      cellId: TABLE_CELL_ID,
                       content: [
                         {
                           link: {
@@ -246,8 +263,18 @@ describe('Block-room Tiptap mutation writer', () => {
       locale: { props: {} },
     });
     applyPayload(bridge, 'table', {
-      base: { props: {}, content: { rows: [{ cells: [{ header: false, props: {} }] }] } },
-      locale: { props: {}, content: { rows: [{ cells: [{ content: [{ text: { text: 'table' } }] }] }] } },
+      base: {
+        props: {},
+        content: {
+          rows: [{ id: TABLE_ROW_ID, cells: [{ id: TABLE_CELL_ID, header: false, props: {} }] }],
+        },
+      },
+      locale: {
+        props: {},
+        content: {
+          rows: [{ rowId: TABLE_ROW_ID, cells: [{ cellId: TABLE_CELL_ID, content: [{ text: { text: 'table' } }] }] }],
+        },
+      },
     });
 
     const text = (id: string, scope: 'base' | 'locale', path: string) =>
@@ -309,14 +336,21 @@ describe('Block-room Tiptap mutation writer', () => {
       },
     });
     applyPayload(bridge, 'table', {
-      base: { props: {}, content: { rows: [{ cells: [{ header: false, props: {} }] }] } },
+      base: {
+        props: {},
+        content: {
+          rows: [{ id: TABLE_ROW_ID, cells: [{ id: TABLE_CELL_ID, header: false, props: {} }] }],
+        },
+      },
       locale: {
         props: {},
         content: {
           rows: [
             {
+              rowId: TABLE_ROW_ID,
               cells: [
                 {
+                  cellId: TABLE_CELL_ID,
                   content: [
                     {
                       link: {

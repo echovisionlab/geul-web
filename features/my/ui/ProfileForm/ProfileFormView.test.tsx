@@ -148,12 +148,20 @@ describe('ProfileFormView', () => {
       form?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     });
 
-    expect(onSubmit).toHaveBeenCalledWith({
-      nickname: 'June Park',
-      bio: 'Sound artist and curator.',
-      website: 'https://june.example.com',
-      socialLinks: [{ key: '0', platform: 'instagram', value: 'https://instagram.com/june' }],
-    });
+    expect(onSubmit).toHaveBeenCalledWith(
+      {
+        nickname: 'June Park',
+        bio: 'Sound artist and curator.',
+        website: 'https://june.example.com',
+        socialLinks: [{ key: '0', platform: 'instagram', value: 'https://instagram.com/june' }],
+      },
+      {
+        nickname: true,
+        bio: false,
+        website: false,
+        socialLinks: false,
+      },
+    );
   });
 
   it('normalizes social values on blur and submits reordered links in display order', () => {
@@ -186,15 +194,72 @@ describe('ProfileFormView', () => {
     act(() => {
       container.querySelector('form')?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     });
-    expect(onSubmit).toHaveBeenLastCalledWith({
-      nickname: 'June Han',
-      bio: 'Sound artist and curator.',
-      website: 'https://june.example.com',
-      socialLinks: [
-        { key: 'github', platform: 'github', value: 'https://github.com/june' },
-        { key: 'instagram', platform: 'instagram', value: 'https://instagram.com/june' },
-      ],
+    expect(onSubmit).toHaveBeenLastCalledWith(
+      {
+        nickname: 'June Han',
+        bio: 'Sound artist and curator.',
+        website: 'https://june.example.com',
+        socialLinks: [
+          { key: 'github', platform: 'github', value: 'https://github.com/june' },
+          { key: 'instagram', platform: 'instagram', value: 'https://instagram.com/june' },
+        ],
+      },
+      {
+        nickname: false,
+        bio: false,
+        website: false,
+        socialLinks: true,
+      },
+    );
+  });
+
+  it('accepts refreshed profile values only while the draft is clean', () => {
+    renderView();
+    renderView({
+      initialValues: {
+        ...defaultProps.initialValues,
+        nickname: 'Updated while clean',
+        bio: 'Fresh server bio',
+      },
     });
+    expect(container.querySelector<HTMLInputElement>('#profile-nickname')?.value).toBe('Updated while clean');
+    expect(container.querySelector<HTMLTextAreaElement>('#profile-bio')?.value).toBe('Fresh server bio');
+    expect(onNicknameChange).toHaveBeenLastCalledWith('Updated while clean');
+
+    const nickname = container.querySelector<HTMLInputElement>('#profile-nickname')!;
+    act(() => setInputValue(nickname, 'Local draft'));
+
+    renderView({
+      initialValues: {
+        ...defaultProps.initialValues,
+        nickname: 'Changed elsewhere',
+        bio: 'Newer server bio',
+      },
+    });
+
+    expect(container.querySelector<HTMLInputElement>('#profile-nickname')?.value).toBe('Local draft');
+    expect(container.querySelector<HTMLTextAreaElement>('#profile-bio')?.value).toBe('Fresh server bio');
+  });
+
+  it('keeps the saved form baseline until the profile query supplies a new snapshot', () => {
+    renderView({ pending: true });
+    const nickname = container.querySelector<HTMLInputElement>('#profile-nickname')!;
+    act(() => setInputValue(nickname, 'Saved nickname'));
+
+    renderView({ pending: true, savedRevision: 1 });
+    renderView({ pending: false, savedRevision: 1 });
+    expect(container.querySelector<HTMLInputElement>('#profile-nickname')?.value).toBe('Saved nickname');
+
+    renderView({
+      pending: false,
+      savedRevision: 1,
+      initialValues: {
+        ...defaultProps.initialValues,
+        nickname: 'Saved nickname',
+        bio: 'Freshly saved bio',
+      },
+    });
+    expect(container.querySelector<HTMLTextAreaElement>('#profile-bio')?.value).toBe('Freshly saved bio');
   });
 
   it('renders external errors and disables every command in the disabled state', () => {
@@ -218,5 +283,13 @@ describe('ProfileFormView', () => {
     }
     expect(container.querySelector<HTMLInputElement>('#profile-nickname')?.disabled).toBe(true);
     expect(container.querySelector<HTMLTextAreaElement>('#profile-bio')?.disabled).toBe(true);
+  });
+
+  it('disables profile controls while a save is pending', () => {
+    renderView({ pending: true });
+
+    expect(container.querySelector<HTMLInputElement>('#profile-nickname')?.disabled).toBe(true);
+    expect(container.querySelector<HTMLTextAreaElement>('#profile-bio')?.disabled).toBe(true);
+    expect(container.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(true);
   });
 });

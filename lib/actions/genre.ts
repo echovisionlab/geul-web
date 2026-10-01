@@ -107,8 +107,8 @@ export async function updateGenreAction(
     const client = await createGenreClient();
     await client.updateGenre({
       id,
-      name: data.name,
-      description: data.description ?? undefined,
+      ...(data.name !== undefined ? { name: data.name } : {}),
+      ...(data.description !== undefined ? { description: data.description ?? '' } : {}),
     });
     revalidatePath('/admin/genres');
     return { success: true };

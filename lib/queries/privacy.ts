@@ -35,6 +35,7 @@ export async function listPrivacyVersions() {
     return (response.versions ?? []).map((v) => ({
       id: v.id,
       version: v.version,
+      revision: v.revision,
       title: v.title,
       status: privacyStatus(v.status),
       effectiveFrom: v.effectiveFrom ? timestampDate(v.effectiveFrom) : null,

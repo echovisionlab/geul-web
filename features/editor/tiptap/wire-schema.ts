@@ -388,11 +388,6 @@ export const WireMathInline = TiptapNode.create({
   content: 'text*',
   marks: '',
   selectable: false,
-  addAttributes() {
-    // Read-only compatibility for atom-shaped Tiptap documents written before
-    // inline math source became ordinary ProseMirror text content.
-    return propSchemaToAttributes({ latex: { default: '' } });
-  },
   parseHTML: () => [{ tag: '[data-inline-content-type="mathInline"]' }],
   renderHTML: ({ HTMLAttributes }) => [
     'span',

@@ -37,26 +37,14 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function renderDialogs({
-  interruption,
-  reloadRequired = false,
-}: {
-  interruption: 'permission_revoked' | 'session_expired' | null;
-  reloadRequired?: boolean;
-}) {
+function renderDialogs({ interruption }: { interruption: 'permission_revoked' | 'session_expired' | null }) {
   const navigate = vi.fn();
-  const reload = vi.fn();
 
   act(() => {
     root.render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
         <MantineProvider env="test">
-          <MapThemeEditorInterruptionDialogs
-            interruption={interruption}
-            reloadRequired={reloadRequired}
-            navigate={navigate}
-            reload={reload}
-          />
+          <MapThemeEditorInterruptionDialogs interruption={interruption} navigate={navigate} />
         </MantineProvider>
       </NextIntlClientProvider>,
     );
@@ -66,7 +54,7 @@ function renderDialogs({
     document.body.querySelector<HTMLButtonElement>('[role="alertdialog"] button')?.click();
   });
 
-  return { navigate, reload };
+  return { navigate };
 }
 
 describe('MapThemeEditorInterruptionDialogs', () => {
@@ -80,8 +68,8 @@ describe('MapThemeEditorInterruptionDialogs', () => {
     expect(navigate).toHaveBeenCalledWith('/login?redirect=%2Fadmin%2Fmap%2Fthemes%2Ftheme-1%3Flocale%3Dko%23palette');
   });
 
-  it('reloads the current page for a revision conflict', () => {
-    const { reload } = renderDialogs({ interruption: null, reloadRequired: true });
-    expect(reload).toHaveBeenCalledOnce();
+  it('shows no blocking dialog without an access interruption', () => {
+    renderDialogs({ interruption: null });
+    expect(document.body.querySelector('[role="alertdialog"]')).toBeNull();
   });
 });

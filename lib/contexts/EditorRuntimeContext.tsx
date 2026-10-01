@@ -4,7 +4,9 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, typ
 import type { EditorRuntimeEvent, RuntimeEntityType } from '@echovisionlab/geul-common/collaboration/runtime-events';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { persistCollaborativeDocumentNow } from '@/lib/collab/persist-now';
+import { getDocumentRoomSnapshot } from '@/lib/collab/document-room-snapshot';
 import type { BlockRoomProtocolTransport, BlockRoomSnapshot } from '@/lib/collab/block-room-protocol';
+import { registerCollaborativeDocumentSave } from '@/lib/editor/collaborative-document-save';
 import {
   subscribeToProviderRuntimeEvents,
   type EditorRuntimeEventListener,
@@ -67,6 +69,12 @@ export function EditorRuntimeProvider({
 }: EditorRuntimeProviderProps) {
   const runtimeEventSubscribersRef = useRef<Set<RuntimeEventSubscriber>>(new Set());
   const persistNow = useCallback(() => persistCollaborativeDocumentNow(provider), [provider]);
+  useEffect(() => {
+    if (!provider || ['page', 'menu', 'series', 'email_layout'].includes(entityType)) {
+      return;
+    }
+    return registerCollaborativeDocumentSave(provider, `${entityType}:${entityId}`);
+  }, [entityId, entityType, provider]);
   const getContributorMemberIds = useCallback(() => {
     const ids = new Set<string>();
     for (const state of provider?.awareness?.getStates().values() ?? []) {
@@ -78,11 +86,21 @@ export function EditorRuntimeProvider({
     return [...ids].sort();
   }, [provider]);
   const getBlockRoomSnapshot = useCallback(() => {
-    if (!blockRoomProtocol) {
-      return Promise.reject(new Error('Block-room WebSocket is not available.'));
+    if (blockRoomProtocol) {
+      return blockRoomProtocol.getSnapshot();
     }
-    return blockRoomProtocol.getSnapshot();
-  }, [blockRoomProtocol]);
+    const registryEntityType = entityType === 'series' ? 'post_series' : entityType;
+    const snapshot = getDocumentRoomSnapshot(provider?.document, {
+      entityType: registryEntityType,
+      entityId,
+      documentName: provider?.configuration.name,
+    });
+    if (!snapshot) {
+      return Promise.reject(new Error('A validated collaboration snapshot is not available.'));
+    }
+    const { documentName: _documentName, ...blockRoomSnapshot } = snapshot;
+    return Promise.resolve(blockRoomSnapshot);
+  }, [blockRoomProtocol, entityId, entityType, provider]);
 
   useEffect(
     () =>

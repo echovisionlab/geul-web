@@ -112,7 +112,7 @@ interface Props {
   meshOptimizationControls?: ImmersiveSceneMeshOptimizationControls;
   addUnit: () => void;
   selectUnit: (unitId: string) => void;
-  reorderUnit: (index: number, direction: -1 | 1) => void;
+  reorderUnit: (unitId: string, direction: -1 | 1) => void;
   removeUnit: (unitId: string) => void;
   replaceVisualUnit: (unitId: string, patch: Partial<ImmersiveSceneUnit>) => void;
   replaceCopyUnit: (unitId: string, patch: Partial<ImmersiveSceneUnit>) => void;
@@ -212,7 +212,7 @@ export function ImmersiveSceneUnitSettingsPanel({
                   emphasis="low"
                   disabled={index === 0}
                   aria-label={tb('blockEditor.actions.moveUnitUp', 'Move unit up')}
-                  onClick={() => reorderUnit(index, -1)}
+                  onClick={() => reorderUnit(unit.id, -1)}
                 >
                   <IconArrowUp size={14} />
                 </IconButton>
@@ -221,7 +221,7 @@ export function ImmersiveSceneUnitSettingsPanel({
                   emphasis="low"
                   disabled={index === config.units.length - 1}
                   aria-label={tb('blockEditor.actions.moveUnitDown', 'Move unit down')}
-                  onClick={() => reorderUnit(index, 1)}
+                  onClick={() => reorderUnit(unit.id, 1)}
                 >
                   <IconArrowDown size={14} />
                 </IconButton>

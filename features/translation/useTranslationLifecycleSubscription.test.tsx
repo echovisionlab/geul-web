@@ -4,6 +4,7 @@ import { act, type ReactNode } from 'react';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
+import * as Y from 'yjs';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import type { TranslationLifecycleRefetchHint } from '@/lib/translation/lifecycle';
 import { useTranslationLifecycleSubscription } from './useTranslationLifecycleSubscription';
@@ -19,7 +20,13 @@ class FakeEventSource {
 }
 
 class FakeProvider {
+  static instances: FakeProvider[] = [];
+  readonly document = new Y.Doc();
   private handlers = new Map<string, Set<(message?: { payload: string }) => void>>();
+
+  constructor() {
+    FakeProvider.instances.push(this);
+  }
 
   on(event: string, handler: (message?: { payload: string }) => void) {
     const handlers = this.handlers.get(event) ?? new Set();
@@ -113,6 +120,7 @@ afterEach(() => {
   container?.remove();
   container = null;
   root = null;
+  FakeProvider.instances.splice(0).forEach((provider) => provider.document.destroy());
   FakeEventSource.instances = [];
   globalThis.EventSource = originalEventSource;
 });

@@ -104,6 +104,8 @@ const bootstrapEnvelopeSchema = z
     targetRevision: targetRevisionSchema.optional(),
     presentLocaleValues: z.array(z.unknown()),
     sourceMetadata: localeMetadataSchema,
+    documentMetadata: z.record(z.string(), z.unknown()),
+    metadataSequence: z.number().int().nonnegative(),
     localeMetadata: localeMetadataSchema.optional(),
     blockCatalogFingerprint: nonEmptyStringSchema,
     serverInstanceId: nonEmptyStringSchema,
@@ -134,6 +136,8 @@ interface BlockRoomBootstrapBase {
     subject?: string;
     creditNotes?: readonly { creditId: string; note: string }[];
   };
+  documentMetadata: Record<string, unknown>;
+  metadataSequence: number;
   blockCatalogFingerprint: string;
   serverInstanceId: string;
   roomEpoch: string;

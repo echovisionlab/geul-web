@@ -4,7 +4,6 @@ import { useMutation } from '@tanstack/react-query';
 import { Stack, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { notifications } from '@mantine/notifications';
-import { blockRoomTypeForTranslationEntity } from './block-document-translation';
 import type { createTranslationClient } from '@/lib/api/browser-client';
 import { getTranslationActionErrorMessage } from '@/lib/translation/action-error';
 
@@ -32,6 +31,7 @@ interface TranslationLocaleCommandOptions {
   refreshEntries: () => Promise<unknown>;
   refreshJobs?: () => Promise<unknown>;
   beforeRegenerate?: () => Promise<unknown>;
+  beforeSourceChange?: () => Promise<unknown>;
   getBlockRoomSnapshot?: () => Promise<{ documentRevision: string }>;
   afterSourceChange?: (sourceLocale: string) => Promise<unknown> | unknown;
 }
@@ -45,6 +45,7 @@ export function useTranslationLocaleCommands({
   refreshEntries,
   refreshJobs,
   beforeRegenerate,
+  beforeSourceChange,
   getBlockRoomSnapshot,
   afterSourceChange,
 }: TranslationLocaleCommandOptions) {
@@ -54,10 +55,10 @@ export function useTranslationLocaleCommands({
       if (!entityType || !entityId) {
         throw new Error('Translation target is incomplete.');
       }
-      const roomType = blockRoomTypeForTranslationEntity(entityType);
-      const expectedDocumentRevision = roomType ? (await getBlockRoomSnapshot?.())?.documentRevision : undefined;
-      if (roomType && !expectedDocumentRevision) {
-        throw new Error('Block-room WebSocket is not available.');
+      await beforeSourceChange?.();
+      const expectedDocumentRevision = (await getBlockRoomSnapshot?.())?.documentRevision;
+      if (!expectedDocumentRevision) {
+        throw new Error('Collaborative document revision is not available.');
       }
       return client.setEntitySourceLocale({
         target,

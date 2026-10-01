@@ -23,16 +23,20 @@ const mocks = vi.hoisted(() => ({
     copied: boolean;
     errors: { form?: string };
     showExtendedFields: boolean;
+    savedRevision: number;
     events: {
       onCopyUid: () => void;
       onNicknameChange: (value: string) => void;
       onNormalizeSocialLink: (platform: string, value: string) => string;
-      onSubmit: (values: {
-        nickname: string;
-        bio: string;
-        website: string;
-        socialLinks: { key: string; platform: string; value: string }[];
-      }) => void;
+      onSubmit: (
+        values: {
+          nickname: string;
+          bio: string;
+          website: string;
+          socialLinks: { key: string; platform: string; value: string }[];
+        },
+        changedFields: { nickname: boolean; bio: boolean; website: boolean; socialLinks: boolean },
+      ) => void;
     };
   },
 }));
@@ -136,15 +140,18 @@ describe('ProfileForm controller', () => {
 
     act(() => view.events.onNicknameChange('June Park'));
     act(() =>
-      getViewProps().events.onSubmit({
-        nickname: 'June Park',
-        bio: 'Updated bio',
-        website: 'https://june.example.com/new',
-        socialLinks: [
-          { key: 'github', platform: 'github', value: 'june' },
-          { key: 'instagram', platform: 'instagram', value: 'https://instagram.com/june' },
-        ],
-      }),
+      getViewProps().events.onSubmit(
+        {
+          nickname: 'June Park',
+          bio: 'Updated bio',
+          website: 'https://june.example.com/new',
+          socialLinks: [
+            { key: 'github', platform: 'github', value: 'june' },
+            { key: 'instagram', platform: 'instagram', value: 'https://instagram.com/june' },
+          ],
+        },
+        { nickname: true, bio: true, website: true, socialLinks: true },
+      ),
     );
 
     expect(mocks.mutate).toHaveBeenCalledWith({
@@ -168,15 +175,38 @@ describe('ProfileForm controller', () => {
 
     act(() => view.events.onNicknameChange('June Member'));
     act(() =>
-      getViewProps().events.onSubmit({
-        nickname: 'June Member',
-        bio: 'Ignored bio',
-        website: 'https://ignored.example.com',
-        socialLinks: [{ key: 'github', platform: 'github', value: 'ignored' }],
-      }),
+      getViewProps().events.onSubmit(
+        {
+          nickname: 'June Member',
+          bio: 'Ignored bio',
+          website: 'https://ignored.example.com',
+          socialLinks: [{ key: 'github', platform: 'github', value: 'ignored' }],
+        },
+        { nickname: true, bio: false, website: false, socialLinks: false },
+      ),
     );
 
     expect(mocks.mutate).toHaveBeenLastCalledWith({ nickname: 'June Member' });
+  });
+
+  it('sends only the changed extended profile field', () => {
+    const view = getViewProps();
+    act(() =>
+      view.events.onSubmit(
+        {
+          nickname: 'June Han',
+          bio: 'Updated bio only',
+          website: 'https://june.example.com',
+          socialLinks: [
+            { key: '0', platform: 'instagram', value: 'https://instagram.com/june' },
+            { key: '1', platform: 'github', value: 'https://github.com/june' },
+          ],
+        },
+        { nickname: false, bio: true, website: false, socialLinks: false },
+      ),
+    );
+
+    expect(mocks.mutate).toHaveBeenCalledWith({ bio: 'Updated bio only' });
   });
 
   it('notifies and applies the returned bounded Member summary after a successful mutation', async () => {
@@ -197,6 +227,7 @@ describe('ProfileForm controller', () => {
     });
     expect(mocks.updateMemberSummary).toHaveBeenCalledWith(member);
     expect(getViewProps().errors).toEqual({});
+    expect(getViewProps().savedRevision).toBe(1);
   });
 
   it('exposes returned and thrown mutation errors without changing the viewer cache', async () => {
@@ -210,6 +241,7 @@ describe('ProfileForm controller', () => {
       color: 'red',
     });
     expect(getViewProps().errors).toEqual({ form: 'Returned failure' });
+    expect(getViewProps().savedRevision).toBe(0);
     expect(mocks.updateMemberSummary).not.toHaveBeenCalled();
 
     act(() => getMutationOptions().onError(new Error('Thrown failure')));

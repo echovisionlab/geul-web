@@ -29,6 +29,7 @@ import { IconButton } from '@/components/core/IconButton';
 import { Select, TextInput } from '@/components/core/Input';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
 import { setReleaseLabelsAction } from '@/lib/actions/release';
+import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
 import { listLabelsForSelector } from '@/lib/queries/label-browser';
 import type { ReleaseLabelItem } from '@/lib/types/release/model';
 
@@ -37,9 +38,18 @@ interface ReleaseLabelsSectionProps {
   idPrefix?: string;
   labels: ReleaseLabelItem[];
   onLabelsChange: (labels: ReleaseLabelItem[]) => void;
+  onMutationStart?: () => void;
+  onMutationSettled?: (succeeded: boolean) => void;
 }
 
-export function ReleaseLabelsSection({ releaseId, idPrefix, labels, onLabelsChange }: ReleaseLabelsSectionProps) {
+export function ReleaseLabelsSection({
+  releaseId,
+  idPrefix,
+  labels,
+  onLabelsChange,
+  onMutationStart,
+  onMutationSettled,
+}: ReleaseLabelsSectionProps) {
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.labels');
   const [addModalOpened, { open: openAddModal, close: closeAddModal }] = useDisclosure(false);
@@ -52,13 +62,31 @@ export function ReleaseLabelsSection({ releaseId, idPrefix, labels, onLabelsChan
   });
 
   const setLabels = useMutation({
-    mutationFn: (labels: { labelId: string; catalogNumber?: string; sortOrder: number }[]) =>
-      setReleaseLabelsAction(releaseId, labels),
+    mutationFn: ({
+      nextLabels,
+      orderIntent,
+    }: {
+      nextLabels: { labelId: string; catalogNumber?: string; sortOrder: number }[];
+      orderIntent?: { itemId: string; previousItemId?: string; nextItemId?: string };
+    }) =>
+      setReleaseLabelsAction(
+        releaseId,
+        nextLabels,
+        labels.map((label, sortOrder) => ({
+          labelId: label.label_id,
+          catalogNumber: label.catalog_number || undefined,
+          sortOrder,
+        })),
+        orderIntent,
+      ),
+    onMutate: () => onMutationStart?.(),
+    onSettled: (result, error) => onMutationSettled?.(!error && !result?.error),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
         return;
       }
+      publishEditorEntityChange(`release:${releaseId}`);
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: tCommon('entities.labels') }),
         color: 'green',
@@ -71,6 +99,21 @@ export function ReleaseLabelsSection({ releaseId, idPrefix, labels, onLabelsChan
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
+  const persistLabels = (
+    nextLabels: ReleaseLabelItem[],
+    orderIntent?: { itemId: string; previousItemId?: string; nextItemId?: string },
+  ) => {
+    onLabelsChange(nextLabels);
+    setLabels.mutate({
+      nextLabels: nextLabels.map((label, sortOrder) => ({
+        labelId: label.label_id,
+        catalogNumber: label.catalog_number || undefined,
+        sortOrder,
+      })),
+      orderIntent,
+    });
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) {
@@ -82,14 +125,12 @@ export function ReleaseLabelsSection({ releaseId, idPrefix, labels, onLabelsChan
 
     if (oldIndex !== -1 && newIndex !== -1) {
       const newLabels = arrayMove(labels, oldIndex, newIndex);
-      onLabelsChange(newLabels);
-      setLabels.mutate(
-        newLabels.map((l, idx) => ({
-          labelId: l.label_id,
-          catalogNumber: l.catalog_number || undefined,
-          sortOrder: idx,
-        })),
-      );
+      const movedIndex = newLabels.findIndex((label) => label.label_id === active.id);
+      persistLabels(newLabels, {
+        itemId: String(active.id),
+        previousItemId: movedIndex > 0 ? newLabels[movedIndex - 1].label_id : undefined,
+        nextItemId: movedIndex + 1 < newLabels.length ? newLabels[movedIndex + 1].label_id : undefined,
+      });
     }
   };
 
@@ -116,14 +157,7 @@ export function ReleaseLabelsSection({ releaseId, idPrefix, labels, onLabelsChan
       },
     ];
 
-    onLabelsChange(newLabels);
-    setLabels.mutate(
-      newLabels.map((l, idx) => ({
-        labelId: l.label_id,
-        catalogNumber: l.catalog_number || undefined,
-        sortOrder: idx,
-      })),
-    );
+    persistLabels(newLabels);
 
     closeAddModal();
     setSelectedLabelId(null);
@@ -132,14 +166,7 @@ export function ReleaseLabelsSection({ releaseId, idPrefix, labels, onLabelsChan
 
   const handleRemove = (labelId: string) => {
     const newLabels = labels.filter((l) => l.label_id !== labelId);
-    onLabelsChange(newLabels);
-    setLabels.mutate(
-      newLabels.map((l, idx) => ({
-        labelId: l.label_id,
-        catalogNumber: l.catalog_number || undefined,
-        sortOrder: idx,
-      })),
-    );
+    persistLabels(newLabels);
   };
 
   return (
@@ -187,14 +214,7 @@ export function ReleaseLabelsSection({ releaseId, idPrefix, labels, onLabelsChan
                         const newLabels = labels.map((l) =>
                           l.label_id === label.label_id ? { ...l, catalog_number: catalogNumber || null } : l,
                         );
-                        onLabelsChange(newLabels);
-                        setLabels.mutate(
-                          newLabels.map((l, idx) => ({
-                            labelId: l.label_id,
-                            catalogNumber: l.catalog_number || undefined,
-                            sortOrder: idx,
-                          })),
-                        );
+                        persistLabels(newLabels);
                       }}
                     />
                   ))}

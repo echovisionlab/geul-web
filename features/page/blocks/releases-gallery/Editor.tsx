@@ -54,9 +54,9 @@ function ReleaseListSettingsForm({ props, updateProps }: ReleaseListSettingsForm
 
   const updateProp = useCallback(
     (key: string, value: string) => {
-      updateProps({ ...props, [key]: value });
+      updateProps({ [key]: value });
     },
-    [updateProps, props],
+    [updateProps],
   );
 
   const typeOptions = [

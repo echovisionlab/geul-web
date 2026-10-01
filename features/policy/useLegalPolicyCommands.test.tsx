@@ -76,6 +76,7 @@ describe('useLegalPolicyCommands', () => {
         flushActiveDocuments: async () => {
           order.push('flush');
         },
+        getExpectedRevision: async () => 'observed-revision',
         closeScheduleModal: vi.fn(),
         closeCancelModal: vi.fn(),
         closeActivateModal: vi.fn(),
@@ -93,6 +94,58 @@ describe('useLegalPolicyCommands', () => {
     await mocks.mutationFns[4]?.();
     expect(order).toEqual(['flush', 'regenerate']);
     expect(regenerateHtml).toHaveBeenCalledWith('privacy-1');
+    act(() => root.unmount());
+  });
+
+  it('passes the same-room revision observed after flushing the draft before scheduling', async () => {
+    const order: string[] = [];
+    const expectedRevision = 'observed-revision';
+    const schedule = vi.fn(async () => {
+      order.push('schedule');
+      return { success: true };
+    });
+    const strategy = {
+      entityType: 'terms',
+      listPath: '/admin/terms',
+      status: { isDraft: () => true },
+      actions: {
+        schedule,
+        cancelSchedule: vi.fn(),
+        activateNow: vi.fn(),
+        deleteVersion: vi.fn(),
+        regenerateHtml: vi.fn(),
+      },
+    } as unknown as LegalPolicyEditorStrategy;
+
+    function Harness() {
+      useLegalPolicyCommands({
+        policyId: 'terms-1',
+        policyStatus: 'draft',
+        strategy,
+        flushActiveDocuments: async () => {
+          order.push('flush');
+        },
+        getExpectedRevision: async () => {
+          order.push('snapshot');
+          return expectedRevision;
+        },
+        closeScheduleModal: vi.fn(),
+        closeCancelModal: vi.fn(),
+        closeActivateModal: vi.fn(),
+        clearEffectiveFrom: vi.fn(),
+        messages,
+      });
+      return null;
+    }
+
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    act(() => root.render(<Harness />));
+
+    await mocks.mutationFns[0]?.(new Date('2026-09-01T00:00:00.000Z'));
+
+    expect(order).toEqual(['flush', 'snapshot', 'schedule']);
+    expect(schedule).toHaveBeenCalledWith('terms-1', new Date('2026-09-01T00:00:00.000Z'), expectedRevision);
     act(() => root.unmount());
   });
 });

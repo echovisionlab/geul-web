@@ -71,6 +71,11 @@ export async function createTrackAction(data: {
 }
 
 export async function listTracksByReleaseAction(releaseId: string): Promise<ReleaseTrackItem[]> {
+  return (await getReleaseTrackSnapshotAction(releaseId)) ?? [];
+}
+
+/** Returns null on transport/authorization failure, preserving callers' current editor state. */
+export async function getReleaseTrackSnapshotAction(releaseId: string): Promise<ReleaseTrackItem[] | null> {
   try {
     const client = await createTrackClient();
     const response = await client.listTracksByRelease({ releaseId });
@@ -96,7 +101,7 @@ export async function listTracksByReleaseAction(releaseId: string): Promise<Rele
       })),
     }));
   } catch {
-    return [];
+    return null;
   }
 }
 
@@ -153,12 +158,17 @@ export async function deleteTrackAction(id: string): Promise<{ success?: boolean
 export async function setTrackCreditsAction(
   trackId: string,
   credits: TrackCreditInput[],
+  observedCredits: TrackCreditInput[],
 ): Promise<{ success?: boolean; error?: string }> {
+  if (!Array.isArray(observedCredits)) {
+    return { error: 'An observed credit snapshot is required' };
+  }
   try {
     const client = await createTrackClient();
     await client.setTrackCredits({
       trackId,
       credits: credits.map(mapTrackCreditInput),
+      observed: { credits: observedCredits.map(mapTrackCreditInput) },
     });
     return { success: true };
   } catch (err) {

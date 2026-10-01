@@ -62,7 +62,13 @@ describe('post actions', () => {
     mocks.regenerateOgImage.mockResolvedValue({ ok: true, runId: 'run-1', generationIds: ['generation-1'] });
     mocks.createAdminClient.mockResolvedValue({ regenerateOgImage: mocks.regenerateOgImage });
     postClient.createPost.mockResolvedValue({ id: 'post-1' });
-    postClient.updatePost.mockResolvedValue({ configurationRevision: acknowledgedConfigurationRevision });
+    postClient.updatePost.mockResolvedValue({
+      id: 'post-1',
+      slug: 'new-title',
+      commentsEnabled: false,
+      mapPlaceId: undefined,
+      configurationRevision: acknowledgedConfigurationRevision,
+    });
     postClient.setPostFeaturedImage.mockResolvedValue({
       imageDelivery: { thumbnail: assetRefFixture('https://cdn.example/post.webp') },
       ogGenerationRunId: 'featured-run',
@@ -74,6 +80,11 @@ describe('post actions', () => {
     postClient.getPost.mockResolvedValue({
       id: 'post-1',
       title: 'Post',
+      slug: 'post-slug',
+      summary: 'summary',
+      commentsEnabled: true,
+      mapPlaceId: 'place-1',
+      configurationRevision: initialConfigurationRevision,
       document: create(RichTextDocumentSchema, {
         blockCatalogFingerprint: contentBlockCatalogFingerprint,
         profile: RichTextProfile.POST,
@@ -104,7 +115,18 @@ describe('post actions', () => {
         },
         initialConfigurationRevision,
       ),
-    ).resolves.toEqual({ ok: true, success: true, configurationRevision: acknowledgedConfigurationRevision });
+    ).resolves.toEqual({
+      ok: true,
+      success: true,
+      configurationRevision: acknowledgedConfigurationRevision,
+      configuration: {
+        configurationRevision: acknowledgedConfigurationRevision,
+        slug: 'new-title',
+        commentsEnabled: false,
+        mapPlaceId: null,
+        documentLayout: { contentHeight: 'content', pageChrome: 'flow', footer: 'flow' },
+      },
+    });
     await expect(actions.publishPostAction('post-1')).resolves.toEqual({ ok: true, success: true });
     await expect(actions.unpublishPostAction('post-1')).resolves.toEqual({ ok: true, success: true });
     await expect(actions.archivePostAction('post-1')).resolves.toEqual({ ok: true, success: true });
@@ -145,6 +167,20 @@ describe('post actions', () => {
     expect(postClient.deletePost).toHaveBeenCalledWith({ id: 'post-1' });
     expect(postClient.deletePost).toHaveBeenCalledWith({ id: 'post-2' });
     expect(mocks.revalidatePath).toHaveBeenCalledWith('/admin/posts');
+  });
+
+  it('loads the current Post configuration for a stale settings save retry', async () => {
+    await expect(actions.getPostConfigurationAction('post-1')).resolves.toEqual({
+      ok: true,
+      configuration: {
+        configurationRevision: initialConfigurationRevision,
+        slug: 'post-slug',
+        commentsEnabled: true,
+        mapPlaceId: 'place-1',
+        documentLayout: { contentHeight: 'content', pageChrome: 'flow', footer: 'flow' },
+      },
+    });
+    expect(postClient.getPost).toHaveBeenCalledWith({ id: 'post-1' });
   });
 
   it('maps media, taxonomy, member, share-link, OG, and markdown actions', async () => {

@@ -6,7 +6,6 @@ import { MissingAttachmentMediaKind } from '@echovisionlab/geul-proto/content/bl
 import { describe, expect, it } from 'vitest';
 import type { ProseMirrorBlockDescriptor } from './block-room-prosemirror-bridge';
 import {
-  array,
   documentToTiptap,
   inlineContentProjectionEqual,
   object,
@@ -323,7 +322,7 @@ describe('Block-room Tiptap codec', () => {
     editor.destroy();
   });
 
-  it('deterministically upgrades legacy positional tables to durable identities', () => {
+  it('rejects tables that do not have durable row and cell identities', () => {
     const legacy = descriptor(
       'table',
       '10000000-0000-4000-8000-000000000224',
@@ -356,55 +355,35 @@ describe('Block-room Tiptap codec', () => {
         },
       },
     );
-    const first = documentToTiptap([legacy]);
-    const second = documentToTiptap([legacy]);
-    expect(first).toEqual(second);
-
-    const editor = new Editor({
-      element: document.createElement('div'),
-      extensions: createTiptapWireExtensions(),
-      content: first,
-    });
-    const parsed = parseDocument(editor.getJSON() as JSONContent);
-    const payload = splitPayload(parsed[0]!);
-    const baseRows = array(object(payload.base.content).rows).map(object);
-    const localeRows = array(object(payload.locale.content).rows).map(object);
-
-    expect(baseRows).toHaveLength(2);
-    expect(localeRows).toHaveLength(2);
-    expect(localeRows.map((row) => row.rowId)).toEqual(baseRows.map((row) => row.id));
-    expect(localeRows.map((row) => array(row.cells).map((cell) => object(cell).cellId))).toEqual(
-      baseRows.map((row) => array(row.cells).map((cell) => object(cell).id)),
-    );
-    expect(parsed[0]?.content.map((row) => row.content?.map((cell) => cell.content?.[0]?.content?.[0]?.text))).toEqual([
-      ['A', 'B'],
-      ['C', 'D'],
-    ]);
-    editor.destroy();
+    expect(() => documentToTiptap([legacy])).toThrow('must have durable UUID identities');
   });
 
-  it('pairs a legacy locale positionally with already migrated base identities', () => {
+  it('rejects missing locale identities even when base table identities are durable', () => {
     const rowId = '10000000-0000-4000-8000-000000000225';
     const cellId = '10000000-0000-4000-8000-000000000226';
-    const input = documentToTiptap([
-      descriptor(
-        'table',
-        '10000000-0000-4000-8000-000000000227',
-        { props: {}, content: { rows: [{ id: rowId, cells: [{ id: cellId, header: false, props: {} }] }] } },
-        { props: {}, content: { rows: [{ cells: [{ content: [{ text: { text: 'legacy locale' } }] }] }] } },
-      ),
-    ]);
-    const editor = new Editor({
-      element: document.createElement('div'),
-      extensions: createTiptapWireExtensions(),
-      content: input,
-    });
-    const payload = splitPayload(parseDocument(editor.getJSON() as JSONContent)[0]!);
+    expect(() =>
+      documentToTiptap([
+        descriptor(
+          'table',
+          '10000000-0000-4000-8000-000000000227',
+          { props: {}, content: { rows: [{ id: rowId, cells: [{ id: cellId, header: false, props: {} }] }] } },
+          { props: {}, content: { rows: [{ cells: [{ content: [{ text: { text: 'legacy locale' } }] }] }] } },
+        ),
+      ]),
+    ).toThrow('must have durable UUID identities');
+  });
 
-    expect(payload.locale).toMatchObject({
-      content: { rows: [{ rowId, cells: [{ cellId, content: [{ text: { text: 'legacy locale' } }] }] }] },
-    });
-    editor.destroy();
+  it('rejects malformed table UUIDs', () => {
+    expect(() =>
+      documentToTiptap([
+        descriptor(
+          'table',
+          '10000000-0000-4000-8000-000000000234',
+          { props: {}, content: { rows: [{ id: 'not-a-uuid', cells: [] }] } },
+          { props: {}, content: { rows: [{ rowId: 'not-a-uuid', cells: [] }] } },
+        ),
+      ]),
+    ).toThrow('must have durable UUID identities');
   });
 
   it('rejects partially migrated table identity sets', () => {
@@ -425,7 +404,65 @@ describe('Block-room Tiptap codec', () => {
           { props: {}, content: { rows: [{ cells: [{ content: [] }] }, { cells: [{ content: [] }] }] } },
         ),
       ]),
-    ).toThrow('partially migrated durable identities');
+    ).toThrow('must have durable UUID identities');
+  });
+
+  it('rejects duplicate table identities instead of pairing duplicate positions', () => {
+    const rowId = '10000000-0000-4000-8000-000000000231';
+    const cellId = '10000000-0000-4000-8000-000000000232';
+    expect(() =>
+      documentToTiptap([
+        descriptor(
+          'table',
+          '10000000-0000-4000-8000-000000000230',
+          {
+            props: {},
+            content: {
+              rows: [
+                { id: rowId, cells: [] },
+                { id: rowId, cells: [] },
+              ],
+            },
+          },
+          {
+            props: {},
+            content: {
+              rows: [
+                { rowId, cells: [] },
+                { rowId, cells: [] },
+              ],
+            },
+          },
+        ),
+      ]),
+    ).toThrow('missing or duplicate durable row ID');
+
+    expect(() =>
+      documentToTiptap([
+        descriptor(
+          'table',
+          '10000000-0000-4000-8000-000000000233',
+          {
+            props: {},
+            content: { rows: [{ id: rowId, cells: [{ id: cellId }, { id: cellId }] }] },
+          },
+          {
+            props: {},
+            content: {
+              rows: [
+                {
+                  rowId,
+                  cells: [
+                    { cellId, content: [] },
+                    { cellId, content: [] },
+                  ],
+                },
+              ],
+            },
+          },
+        ),
+      ]),
+    ).toThrow('missing or duplicate durable cell ID');
   });
 
   it('stores the official Tiptap Emoji node as locale Unicode text', () => {

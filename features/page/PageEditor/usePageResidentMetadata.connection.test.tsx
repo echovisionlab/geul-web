@@ -1,8 +1,14 @@
 // @vitest-environment jsdom
 
-import { act } from 'react';
+import { act, useState } from 'react';
 import { usePageResidentMetadata } from './usePageResidentMetadata';
+import { applyPageLayoutMetadataUpdate } from './page-layout-metadata';
 import { create, toJson } from '@bufbuild/protobuf';
+import {
+  DocumentContentHeight,
+  DocumentLayoutSchema,
+  DocumentRegionPlacement,
+} from '@echovisionlab/geul-proto/common/common_pb.ts';
 import {
   LocalizedPageDocumentSchema,
   type LocalizedPageDocument,
@@ -13,6 +19,9 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import { useBlockRoomConnection } from '@/lib/collab/useBlockRoomConnection';
+import { DEFAULT_DOCUMENT_LAYOUT, type DocumentLayout } from '@/features/document-layout';
+import { registerEditorSave } from '@/lib/editor/editor-save-registry';
+import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
 
 const providerState = vi.hoisted(() => ({
   instances: [] as Array<{
@@ -55,6 +64,9 @@ let latestHook: ReturnType<typeof useBlockRoomConnection> | null = null;
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
 let residentMetadata: ReturnType<typeof usePageResidentMetadata> | null = null;
+let layoutState: DocumentLayout | null = null;
+let setLayoutState: ((layout: DocumentLayout) => void) | null = null;
+let unregisterPendingSave: (() => void) | null = null;
 
 function bootstrapMessage(challenge = 'challenge-1') {
   const typed: LocalizedPageDocument = create(LocalizedPageDocumentSchema, {
@@ -67,6 +79,15 @@ function bootstrapMessage(challenge = 'challenge-1') {
   hydrateCanonicalBlockRoom(source, 'page', 'ko', typed, []);
   const update = Y.encodeStateAsUpdate(source);
   source.destroy();
+  const documentLayout = toJson(
+    DocumentLayoutSchema,
+    create(DocumentLayoutSchema, {
+      contentHeight: DocumentContentHeight.CONTENT,
+      pageChrome: DocumentRegionPlacement.FLOW,
+      footer: DocumentRegionPlacement.FLOW,
+    }),
+    { alwaysEmitImplicit: true },
+  );
   return {
     update,
     payload: JSON.stringify({
@@ -83,6 +104,8 @@ function bootstrapMessage(challenge = 'challenge-1') {
       presentLocaleValues: [],
       sourceMetadata: { locale: 'ko', title: 'original', summary: 'original summary' },
       localeMetadata: { locale: 'ko', title: 'original', summary: 'original summary' },
+      documentMetadata: { documentLayout },
+      metadataSequence: 0,
       blockCatalogFingerprint: contentBlockCatalogFingerprint,
       serverInstanceId: 'collab-1',
       roomEpoch: 'bdac72af-8a24-4214-999d-83727445cbd7',
@@ -93,13 +116,24 @@ function bootstrapMessage(challenge = 'challenge-1') {
 
 function TestHarness({ id = entityId, locale = 'ko' }: { id?: string; locale?: string | null }) {
   latestHook = useBlockRoomConnection('page', id, locale);
-  residentMetadata = usePageResidentMetadata({
+  const currentResidentMetadata = usePageResidentMetadata({
     roomIdentity: latestHook.provider,
     sessionLocale: locale,
     roomLocale: locale,
     bootstrap: latestHook.bootstrap,
     fallbackTitle: 'original',
     fallbackSummary: 'original summary',
+  });
+  residentMetadata = currentResidentMetadata;
+  const [layout, setLayout] = useState(DEFAULT_DOCUMENT_LAYOUT);
+  layoutState = layout;
+  setLayoutState = setLayout;
+  useBlockRoomMetadataUpdates({ protocol: latestHook.protocol }, `page:${id}`, ({ operation, values }) => {
+    if (operation === 'locale') {
+      currentResidentMetadata.adoptPeerUpdate({ operation, values });
+    } else if (operation === 'page_layout') {
+      setLayout((current) => applyPageLayoutMetadataUpdate(current, values));
+    }
   });
   return null;
 }
@@ -154,6 +188,32 @@ function admit(instance = providerState.instances.at(-1)!, challenge = 'challeng
   sendReady(instance, challenge);
 }
 
+function sendMetadataUpdate(
+  instance: (typeof providerState.instances)[number],
+  operation: 'locale' | 'page_layout',
+  values: Record<string, unknown>,
+  sequence: number,
+  documentRevision: string,
+) {
+  act(() =>
+    instance.configuration.onStateless?.({
+      payload: JSON.stringify({
+        kind: 'block_room.metadata_changed',
+        protocolVersion: 2,
+        documentName: `page:${entityId}:ko`,
+        ack: {
+          documentRevision,
+          changed: true,
+          sourceChanged: true,
+          changedLocales: ['ko'],
+          locale: 'ko',
+          metadataUpdate: { operation, values, sequence },
+        },
+      }),
+    }),
+  );
+}
+
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 beforeEach(() => {
@@ -162,10 +222,14 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  act(() => unregisterPendingSave?.());
+  unregisterPendingSave = null;
   act(() => root?.unmount());
   container?.remove();
   root = null;
   container = null;
+  layoutState = null;
+  setLayoutState = null;
 });
 
 function metadata() {
@@ -217,5 +281,82 @@ describe('Page metadata through the resident room ACK boundary', () => {
       title: 'newer pending title',
       summary: 'newer pending summary',
     });
+  });
+
+  it('adopts peer locale fields while keeping fields with local pending edits', async () => {
+    await render();
+    const instance = providerState.instances.at(-1)!;
+    admit(instance);
+    const pendingSummary = { summary: 'Local summary draft' };
+    act(() => metadata().setSummary(pendingSummary.summary));
+    act(() => {
+      unregisterPendingSave = registerEditorSave(`page:${entityId}`, {
+        flush: async () => false,
+        hasPending: () => true,
+        getPendingPatch: () => pendingSummary,
+      });
+    });
+
+    sendMetadataUpdate(
+      instance,
+      'locale',
+      { title: 'Peer title', summary: 'Peer summary' },
+      1,
+      'e5309d1c-58bb-4d67-a5ba-6d6ed0973060',
+    );
+    expect(metadata()).toMatchObject({ title: 'Peer title', summary: 'Local summary draft' });
+
+    act(() => unregisterPendingSave?.());
+    const pendingTitle = { title: 'Local title draft' };
+    act(() => {
+      metadata().setTitle(pendingTitle.title);
+      unregisterPendingSave = registerEditorSave(`page:${entityId}`, {
+        flush: async () => false,
+        hasPending: () => true,
+        getPendingPatch: () => pendingTitle,
+      });
+    });
+    sendMetadataUpdate(
+      instance,
+      'locale',
+      { summary: 'Second peer summary' },
+      2,
+      'a30e359f-e0f3-467c-b5eb-cd5ef1a1bfbc',
+    );
+
+    expect(metadata()).toMatchObject({ title: 'Local title draft', summary: 'Second peer summary' });
+  });
+
+  it('adopts a partial peer layout update without replacing its other fields', async () => {
+    await render();
+    const instance = providerState.instances.at(-1)!;
+    admit(instance);
+    const pendingLayout = {
+      value: { ...DEFAULT_DOCUMENT_LAYOUT, pageChrome: 'pinned' as const },
+      previous: DEFAULT_DOCUMENT_LAYOUT,
+    };
+    act(() => {
+      setLayoutState?.(pendingLayout.value);
+      unregisterPendingSave = registerEditorSave(`page:${entityId}`, {
+        flush: async () => false,
+        hasPending: () => true,
+        getPendingPatch: () => pendingLayout,
+      });
+    });
+
+    sendMetadataUpdate(
+      instance,
+      'page_layout',
+      {
+        documentLayout: {
+          contentHeight: 'DOCUMENT_CONTENT_HEIGHT_VIEWPORT',
+          pageChrome: 'DOCUMENT_REGION_PLACEMENT_FLOW',
+        },
+      },
+      1,
+      'e5309d1c-58bb-4d67-a5ba-6d6ed0973060',
+    );
+
+    expect(layoutState).toEqual({ ...DEFAULT_DOCUMENT_LAYOUT, contentHeight: 'viewport', pageChrome: 'pinned' });
   });
 });

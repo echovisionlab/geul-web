@@ -1,6 +1,5 @@
 import type { JSONContent } from '@tiptap/core';
 import { fromJson, type JsonValue } from '@bufbuild/protobuf';
-import { v5 as uuidV5 } from 'uuid';
 import {
   richTextBlockFieldOwnership,
   richTextBlockKindByProtoCase,
@@ -328,57 +327,25 @@ function standaloneExternalVideoSource(
   };
 }
 
-function tableIdentityMode(values: readonly unknown[], description: string): 'durable' | 'legacy' {
-  const durableCount = values.filter(isBlockId).length;
-  if (durableCount === values.length) {
-    return 'durable';
+function requireTableIdentity(value: unknown, description: string): string {
+  if (!isBlockId(value)) {
+    throw new Error(`Generated table ${description} must have durable UUID identities.`);
   }
-  if (durableCount === 0 && values.every((value) => value === undefined || value === null || value === '')) {
-    return 'legacy';
-  }
-  throw new Error(`Generated table ${description} contain partially migrated durable identities.`);
+  return value;
 }
 
-function legacyTableIdentity(blockId: string, path: string): string {
-  return uuidV5(path, blockId);
-}
-
-function tableToTiptap(blockId: string, base: JsonObject, locale: JsonObject): readonly JSONContent[] {
+function tableToTiptap(base: JsonObject, locale: JsonObject): readonly JSONContent[] {
   const baseRows = array(object(base.content).rows);
   const localeRows = array(object(locale.content).rows);
-  const baseRowMode = tableIdentityMode(
-    baseRows.map((value) => object(value).id),
-    'base rows',
-  );
-  const baseCellMode = tableIdentityMode(
-    baseRows.flatMap((value) => array(object(value).cells).map((cell) => object(cell).id)),
-    'base cells',
-  );
-  const localeRowMode = tableIdentityMode(
-    localeRows.map((value) => object(value).rowId),
-    'locale rows',
-  );
-  const localeCellMode = tableIdentityMode(
-    localeRows.flatMap((value) => array(object(value).cells).map((cell) => object(cell).cellId)),
-    'locale cells',
-  );
-  if ((baseRowMode === 'legacy' || localeRowMode === 'legacy') && baseRows.length !== localeRows.length) {
-    throw new Error('Generated legacy table base and locale row counts do not match.');
-  }
-
-  const resolvedBaseRows = baseRows.map((baseRow, rowIndex) => {
+  const resolvedBaseRows = baseRows.map((baseRow) => {
     const row = object(baseRow);
     return {
-      row,
-      rowId: baseRowMode === 'durable' ? String(row.id) : legacyTableIdentity(blockId, `row:${rowIndex}`),
-      cells: array(row.cells).map((baseCell, cellIndex) => {
+      rowId: requireTableIdentity(row.id, 'base row'),
+      cells: array(row.cells).map((baseCell) => {
         const cell = object(baseCell);
         return {
           cell,
-          cellId:
-            baseCellMode === 'durable'
-              ? String(cell.id)
-              : legacyTableIdentity(blockId, `cell:${rowIndex}:${cellIndex}`),
+          cellId: requireTableIdentity(cell.id, 'base cell'),
         };
       }),
     };
@@ -399,48 +366,41 @@ function tableToTiptap(blockId: string, base: JsonObject, locale: JsonObject): r
   }
 
   const localeByRowId = new Map<string, JsonObject>();
-  if (localeRowMode === 'durable') {
-    for (const value of localeRows) {
-      const row = object(value);
-      const rowId = String(row.rowId);
-      if (localeByRowId.has(rowId)) {
-        throw new Error('Generated table locale contains a missing or duplicate durable row ID.');
-      }
-      localeByRowId.set(rowId, row);
+  for (const value of localeRows) {
+    const row = object(value);
+    const rowId = requireTableIdentity(row.rowId, 'locale row');
+    if (localeByRowId.has(rowId)) {
+      throw new Error('Generated table locale contains a missing or duplicate durable row ID.');
     }
-    if (localeByRowId.size !== resolvedBaseRows.length) {
-      throw new Error('Generated table base and locale durable row sets do not match.');
-    }
+    localeByRowId.set(rowId, row);
+  }
+  if (localeByRowId.size !== resolvedBaseRows.length) {
+    throw new Error('Generated table base and locale durable row sets do not match.');
   }
 
-  return resolvedBaseRows.map(({ rowId, cells }, rowIndex) => {
-    const localeRow = localeRowMode === 'durable' ? localeByRowId.get(rowId) : object(localeRows[rowIndex]);
+  return resolvedBaseRows.map(({ rowId, cells }) => {
+    const localeRow = localeByRowId.get(rowId);
     if (!localeRow) {
       throw new Error(`Generated table locale is missing durable row ${rowId}.`);
     }
     const localeByCellId = new Map<string, JsonObject>();
     const localeCells = array(localeRow.cells);
-    if (localeCellMode === 'legacy' && localeCells.length !== cells.length) {
-      throw new Error(`Generated legacy table locale row ${rowId} cell count does not match its base row.`);
+    for (const value of localeCells) {
+      const cell = object(value);
+      const cellId = requireTableIdentity(cell.cellId, `locale cell in row ${rowId}`);
+      if (localeByCellId.has(cellId)) {
+        throw new Error(`Generated table locale row ${rowId} contains a missing or duplicate durable cell ID.`);
+      }
+      localeByCellId.set(cellId, cell);
     }
-    if (localeCellMode === 'durable') {
-      for (const value of localeCells) {
-        const cell = object(value);
-        const cellId = String(cell.cellId);
-        if (localeByCellId.has(cellId)) {
-          throw new Error(`Generated table locale row ${rowId} contains a missing or duplicate durable cell ID.`);
-        }
-        localeByCellId.set(cellId, cell);
-      }
-      if (localeByCellId.size !== cells.length) {
-        throw new Error(`Generated table base and locale durable cell sets do not match for row ${rowId}.`);
-      }
+    if (localeByCellId.size !== cells.length) {
+      throw new Error(`Generated table base and locale durable cell sets do not match for row ${rowId}.`);
     }
     return {
       type: 'tableRow',
       attrs: { id: rowId },
-      content: cells.map(({ cell, cellId }, cellIndex) => {
-        const localeCell = localeCellMode === 'durable' ? localeByCellId.get(cellId) : object(localeCells[cellIndex]);
+      content: cells.map(({ cell, cellId }) => {
+        const localeCell = localeByCellId.get(cellId);
         if (!localeCell) {
           throw new Error(`Generated table locale row ${rowId} is missing durable cell ${cellId}.`);
         }
@@ -479,7 +439,7 @@ function descriptorToTiptap(
         return typeof value === 'string' && value ? [{ type: 'text', text: value }] : [];
       }
       case 'table':
-        return [...tableToTiptap(block.id, block.basePayload, block.localePayload ?? {})];
+        return [...tableToTiptap(block.basePayload, block.localePayload ?? {})];
       case 'source-text': {
         const source = object(block.basePayload.props).source;
         return typeof source === 'string' && source ? [{ type: 'text', text: source }] : [];

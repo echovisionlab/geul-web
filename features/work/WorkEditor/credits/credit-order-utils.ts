@@ -3,6 +3,8 @@ import type {
   FlatDisplayItem,
   WorkCreditGroupWithCredits,
   WorkCreditWithDetails,
+  WorkCreditMoveAnchor,
+  WorkCreditMoveIntent,
 } from '@/lib/types/work/credit';
 
 export function getItemId(item: FlatDisplayItem): string {
@@ -152,6 +154,91 @@ export type CreditDropData =
 export interface CreditDropPlan {
   order?: CreditOrderItem[];
   groupChange?: { creditId: string; groupId: string | null };
+}
+
+export function creditMoveIntentFromDropPlan(
+  plan: CreditDropPlan,
+  activeData: CreditDragData,
+  flatList: FlatDisplayItem[],
+): WorkCreditMoveIntent | null {
+  if (activeData.type === 'group') {
+    if (!plan.order) {
+      return null;
+    }
+    const start = plan.order.findIndex((item) => item.type === 'group' && item.id === activeData.groupId);
+    if (start < 0) {
+      return null;
+    }
+    const parentByCredit = creditParents(flatList, activeData);
+    let end = start + 1;
+    while (end < plan.order.length) {
+      const item = plan.order[end];
+      if (item.type !== 'credit' || parentByCredit.get(item.id) !== activeData.groupId) {
+        break;
+      }
+      end++;
+    }
+    return {
+      kind: 'group',
+      itemId: activeData.groupId,
+      after: anchorFromOrderItem(plan.order[start - 1]),
+      before: anchorFromOrderItem(plan.order[end]),
+    };
+  }
+
+  const order = plan.order ?? flatListToOrder(flatList);
+  const movedIndex = order.findIndex((item) => item.type === 'credit' && item.id === activeData.creditId);
+  if (movedIndex < 0) {
+    return null;
+  }
+  const targetGroupId = plan.groupChange ? plan.groupChange.groupId : activeData.groupId;
+  const parentByCredit = creditParents(flatList, activeData);
+  parentByCredit.set(activeData.creditId, targetGroupId);
+
+  let after: WorkCreditMoveAnchor | undefined;
+  for (let index = movedIndex - 1; index >= 0; index--) {
+    const item = order[index];
+    if (item.type === 'credit' && parentByCredit.get(item.id) === targetGroupId) {
+      after = { kind: 'credit', id: item.id };
+      break;
+    }
+  }
+  let before: WorkCreditMoveAnchor | undefined;
+  for (let index = movedIndex + 1; index < order.length; index++) {
+    const item = order[index];
+    if (item.type === 'credit' && parentByCredit.get(item.id) === targetGroupId) {
+      before = { kind: 'credit', id: item.id };
+      break;
+    }
+  }
+
+  return {
+    kind: 'credit',
+    itemId: activeData.creditId,
+    targetGroupId,
+    after,
+    before,
+  };
+}
+
+function creditParents(flatList: FlatDisplayItem[], activeData: CreditDragData): Map<string, string | null> {
+  const result = new Map<string, string | null>();
+  for (const item of flatList) {
+    if (item.type === 'credit') {
+      result.set(item.credit.id, item.groupId);
+    }
+  }
+  if (activeData.type === 'credit') {
+    result.set(activeData.creditId, activeData.groupId);
+  }
+  return result;
+}
+
+function anchorFromOrderItem(item: CreditOrderItem | undefined): WorkCreditMoveAnchor | undefined {
+  if (!item) {
+    return undefined;
+  }
+  return { kind: item.type, id: item.id };
 }
 
 export function planCreditDrop({

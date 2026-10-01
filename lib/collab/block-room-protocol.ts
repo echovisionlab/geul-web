@@ -8,6 +8,14 @@ import {
   type BlockRoomDocumentType,
 } from '@/lib/collab/block-room-bootstrap';
 
+const metadataUpdateSchema = z
+  .object({
+    operation: z.enum(['locale', 'document', 'page_layout']),
+    values: z.record(z.string(), z.unknown()),
+    sequence: z.number().int().positive(),
+  })
+  .strict();
+
 const metadataAckSchema = z
   .object({
     documentRevision: z.string().uuid(),
@@ -16,8 +24,27 @@ const metadataAckSchema = z
     sourceChanged: z.boolean(),
     changedLocales: z.array(z.string()),
     locale: z.string().trim().min(1),
+    metadataUpdate: metadataUpdateSchema,
   })
   .strict();
+
+const persistedSchema = z
+  .object({
+    kind: z.literal('block_room.persisted'),
+    protocolVersion: z.literal(2),
+    documentName: z.string().min(1),
+    stateVector: z.string().min(1),
+    deleted: z.record(
+      z.string().regex(/^\d+$/u),
+      z.array(z.object({ clock: z.number().int().nonnegative(), len: z.number().int().positive() }).strict()),
+    ),
+  })
+  .strict();
+
+export interface BlockRoomPersistedState {
+  stateVector: Uint8Array;
+  deleted: Record<string, Array<{ clock: number; len: number }>>;
+}
 
 const readySchema = z
   .object({
@@ -35,6 +62,15 @@ const metadataResultSchema = z
     ok: z.boolean(),
     ack: z.unknown().optional(),
     error: z.string().optional(),
+  })
+  .strict();
+
+const metadataChangedSchema = z
+  .object({
+    kind: z.literal('block_room.metadata_changed'),
+    protocolVersion: z.literal(2),
+    documentName: z.string().min(1),
+    ack: metadataAckSchema,
   })
   .strict();
 
@@ -66,6 +102,7 @@ const reloadSchema = z
   })
   .strict();
 
+export type BlockRoomMetadataUpdate = z.infer<typeof metadataUpdateSchema>;
 export type BlockRoomMetadataAck = z.infer<typeof metadataAckSchema>;
 export interface BlockRoomSnapshot {
   documentRevision: string;
@@ -87,6 +124,10 @@ export class BlockRoomProtocolError extends Error {
 }
 
 export interface BlockRoomProtocolTransport {
+  readonly documentName?: string;
+  subscribeReady?: (listener: () => void) => () => void;
+  subscribePersisted?: (listener: (state: BlockRoomPersistedState) => void) => () => void;
+  subscribeMetadata?: (listener: (update: BlockRoomMetadataUpdate) => void) => () => void;
   updateMetadata: (
     operation: BlockRoomMetadataOperation,
     payload: unknown,
@@ -146,6 +187,9 @@ export class BlockRoomProtocolClient implements BlockRoomProtocolTransport {
   private ackSent = false;
   private ready = false;
   private destroyed = false;
+  private readonly readyListeners = new Set<() => void>();
+  private readonly persistedListeners = new Set<(state: BlockRoomPersistedState) => void>();
+  private readonly metadataListeners = new Set<(update: BlockRoomMetadataUpdate) => void>();
   private readonly pending = new Map<string, PendingRequest>();
   private readonly pendingSnapshots = new Map<string, PendingSnapshotRequest>();
 
@@ -155,6 +199,9 @@ export class BlockRoomProtocolClient implements BlockRoomProtocolTransport {
     this.providerSynced = true;
     if (this.ready) {
       this.options.onReady();
+      for (const listener of this.readyListeners) {
+        listener();
+      }
     }
     this.ackBootstrapWhenReady();
   }
@@ -177,6 +224,9 @@ export class BlockRoomProtocolClient implements BlockRoomProtocolTransport {
         validationDocument.destroy();
         this.bootstrap = bootstrap;
         this.options.onBootstrap(bootstrap);
+        for (const listener of this.metadataListeners) {
+          this.emitBootstrapMetadata(listener);
+        }
         this.ackBootstrapWhenReady();
       } catch {
         this.options.onReloadRequired();
@@ -192,6 +242,31 @@ export class BlockRoomProtocolClient implements BlockRoomProtocolTransport {
       this.ready = true;
       this.options.setResumeToken(this.bootstrap.bootstrapChallenge);
       this.options.onReady();
+      for (const listener of this.readyListeners) {
+        listener();
+      }
+      return true;
+    }
+    const persisted = persistedSchema.safeParse(raw);
+    if (persisted.success) {
+      if (this.ready && persisted.data.documentName === this.bootstrap?.documentName) {
+        try {
+          const bytes = Uint8Array.from(atob(persisted.data.stateVector), (character) => character.charCodeAt(0));
+          Y.decodeStateVector(bytes);
+          for (const listener of this.persistedListeners) {
+            listener({ stateVector: bytes, deleted: persisted.data.deleted });
+          }
+        } catch {
+          /* Ignore malformed durability hints; they must never acknowledge local edits. */
+        }
+      }
+      return true;
+    }
+    const metadataChanged = metadataChangedSchema.safeParse(raw);
+    if (metadataChanged.success) {
+      if (metadataChanged.data.documentName === this.bootstrap?.documentName) {
+        this.applyMetadataAck(metadataChanged.data.ack);
+      }
       return true;
     }
     const result = metadataResultSchema.safeParse(raw);
@@ -265,8 +340,99 @@ export class BlockRoomProtocolClient implements BlockRoomProtocolTransport {
       this.options.onReloadRequired();
       return true;
     }
+    this.applyMetadataAck(ack.data);
     pending.resolve(ack.data);
     return true;
+  }
+
+  subscribeReady = (listener: () => void): (() => void) => {
+    this.readyListeners.add(listener);
+    if (this.ready) {
+      listener();
+    }
+    return () => {
+      this.readyListeners.delete(listener);
+    };
+  };
+
+  subscribePersisted = (listener: (state: BlockRoomPersistedState) => void): (() => void) => {
+    this.persistedListeners.add(listener);
+    return () => {
+      this.persistedListeners.delete(listener);
+    };
+  };
+
+  get documentName(): string {
+    return `${this.options.documentType}:${this.options.entityId}:${this.options.locale}`;
+  }
+
+  subscribeMetadata = (listener: (update: BlockRoomMetadataUpdate) => void): (() => void) => {
+    this.metadataListeners.add(listener);
+    this.emitBootstrapMetadata(listener);
+    return () => {
+      this.metadataListeners.delete(listener);
+    };
+  };
+
+  private emitBootstrapMetadata(listener: (update: BlockRoomMetadataUpdate) => void): void {
+    const bootstrap = this.bootstrap;
+    if (!bootstrap) {
+      return;
+    }
+    const { locale: _locale, ...values } = bootstrap.localeMetadata ?? bootstrap.sourceMetadata;
+    listener({
+      operation: 'locale',
+      values: this.options.documentType === 'work' ? { ...values, sourceTitle: values.title } : values,
+      sequence: bootstrap.metadataSequence,
+    });
+    const { documentLayout, ...documentValues } = bootstrap.documentMetadata;
+    if (Object.keys(documentValues).length) {
+      listener({ operation: 'document', values: documentValues, sequence: bootstrap.metadataSequence });
+    }
+    if (documentLayout) {
+      listener({ operation: 'page_layout', values: { documentLayout }, sequence: bootstrap.metadataSequence });
+    }
+  }
+
+  private applyMetadataAck(ack: BlockRoomMetadataAck): void {
+    const bootstrap = this.bootstrap;
+    const update = ack.metadataUpdate;
+    if (!bootstrap || update.sequence <= bootstrap.metadataSequence) {
+      return;
+    }
+    if (
+      ack.locale !== bootstrap.locale ||
+      (bootstrap.locale === bootstrap.sourceLocale) === Boolean(ack.targetRevision)
+    ) {
+      return;
+    }
+    const next = {
+      ...bootstrap,
+      documentRevision: ack.documentRevision,
+      targetRevision: ack.targetRevision,
+      metadataSequence: update.sequence,
+    };
+    if (update.operation === 'document' || update.operation === 'page_layout') {
+      next.documentMetadata = { ...bootstrap.documentMetadata, ...update.values };
+    }
+    if (update.operation === 'locale') {
+      const values = { ...bootstrap.localeMetadata };
+      for (const [key, value] of Object.entries(update.values)) {
+        const field = key === 'sourceTitle' ? 'title' : key;
+        if (['title', 'summary', 'subject', 'creditNotes'].includes(field)) {
+          (values as Record<string, unknown>)[field] = value ?? '';
+        }
+      }
+      next.localeMetadata = { ...values, locale: bootstrap.locale };
+      if (bootstrap.sourceLocale === bootstrap.locale) {
+        next.sourceMetadata = next.localeMetadata;
+      }
+    }
+    this.bootstrap = next;
+    this.options.onBootstrap(next);
+    for (const listener of this.metadataListeners) {
+      listener(update);
+    }
   }
 
   updateMetadata(
@@ -351,6 +517,9 @@ export class BlockRoomProtocolClient implements BlockRoomProtocolTransport {
 
   destroy(): void {
     this.destroyed = true;
+    this.metadataListeners.clear();
+    this.persistedListeners.clear();
+    this.readyListeners.clear();
     for (const request of this.pending.values()) {
       clearTimeout(request.timeout);
       request.cleanupAbort?.();

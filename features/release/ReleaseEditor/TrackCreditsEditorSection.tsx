@@ -12,23 +12,30 @@ import { IconButton } from '@/components/core/IconButton';
 import { SegmentedControl, Select, TextInput } from '@/components/core/Input';
 import { listArtistsAction } from '@/lib/actions/artist';
 import { setTrackCreditsAction } from '@/lib/actions/track';
+import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
 import { listUsersAdminAction } from '@/lib/actions/user';
 import type { ReleaseTrackItem } from '@/lib/collab/schemas/release-fields.schema';
 import type { CreditTargetType } from '@/lib/types/track/model';
 import { toTrackCreditMutationInput } from './track-credit-mutation';
 
 interface TrackCreditsEditorSectionProps {
+  releaseId: string;
   idPrefix?: string;
   trackId: string;
   credits: ReleaseTrackItem['credits'];
   onCreditsChange: (credits: ReleaseTrackItem['credits']) => void;
+  onMutationStart?: () => void;
+  onMutationSettled?: (succeeded: boolean) => void;
 }
 
 export function TrackCreditsEditorSection({
+  releaseId,
   idPrefix,
   trackId,
   credits,
   onCreditsChange,
+  onMutationStart,
+  onMutationSettled,
 }: TrackCreditsEditorSectionProps) {
   const tCommon = useTranslations('common');
   const tTracks = useTranslations('releaseEditor.tracks');
@@ -45,7 +52,9 @@ export function TrackCreditsEditorSection({
 
   const setCredits = useMutation({
     mutationFn: (nextCredits: ReleaseTrackItem['credits']) =>
-      setTrackCreditsAction(trackId, toTrackCreditMutationInput(nextCredits)),
+      setTrackCreditsAction(trackId, toTrackCreditMutationInput(nextCredits), toTrackCreditMutationInput(credits)),
+    onMutate: () => onMutationStart?.(),
+    onSettled: (result, error) => onMutationSettled?.(!error && Boolean(result?.success) && !result?.error),
   });
 
   const resetForm = () => {
@@ -63,6 +72,7 @@ export function TrackCreditsEditorSection({
           notifications.show({ message: result.error, color: 'red' });
           return;
         }
+        publishEditorEntityChange(`release:${releaseId}`);
         notifications.show({ message: successMessage, color: 'green' });
         onCreditsChange(nextCredits);
         onSuccess?.();

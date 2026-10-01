@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconHistory } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
@@ -11,7 +11,6 @@ import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { EditorHeader } from '@/features/editor/EditorHeader';
 import { useEditorPermissionRevocation } from '@/features/editor/useEditorPermissionRevocation';
-import { useEditorReloadRequired } from '@/features/editor/useEditorReloadRequired';
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
 import { OgImagePreview } from '@/features/metadata/OgImagePreview';
 import { SectionCard } from '@/components/core/Section';
@@ -32,7 +31,6 @@ import {
   publishPageAction,
   regeneratePageOgImageAction,
   unpublishPageAction,
-  updatePageShowTitleAction,
   updatePageSlugAction,
 } from '@/lib/actions/page';
 import { updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
@@ -52,12 +50,13 @@ import { PageFeaturedImageUploader } from './PageFeaturedImageUploader';
 import { PageEditorInterruptionDialogs } from './PageEditorInterruptionDialogs';
 import { SectionList } from './SectionList';
 import { usePageResidentMetadata } from './usePageResidentMetadata';
+import { usePageNeutralConfiguration } from './usePageNeutralConfiguration';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
+import { createBlockRoomDocumentName } from '@/lib/collab/block-room-bootstrap';
 import { useEditorNavigation } from '@/features/editor/useEditorNavigation';
-import { EditorSaveRecoveryNotice } from '@/features/editor/EditorSaveRecoveryNotice';
-import { PageRecoveryNotice } from './PageRecoveryNotice';
-import { usePageRecoveryDraft } from './usePageRecoveryDraft';
+import { applyPageLayoutMetadataUpdate } from './page-layout-metadata';
+import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
 
 interface PageEditorProps {
   pageId: string;
@@ -80,6 +79,15 @@ interface PageEditorProps {
   baseUrl: string;
   canonicalOrigin: string;
   siteName: string;
+}
+
+interface PageLayoutPatch {
+  value: DocumentLayout;
+  previous: DocumentLayout;
+}
+
+function mergePageLayoutPatches(pending: PageLayoutPatch, next: PageLayoutPatch): PageLayoutPatch {
+  return { value: next.value, previous: pending.previous };
 }
 
 export function PageEditor({
@@ -112,12 +120,9 @@ export function PageEditor({
   const navigateWithSave = useEditorNavigation(`page:${pageId}`);
   const [versionHistoryOpened, { open: openVersionHistory, close: closeVersionHistory }] = useDisclosure(false);
   const [featuredImageUrl, setFeaturedImageUrl] = useState(initialFeaturedImageUrl);
-  const [slug, setSlug] = useState(initialSlug);
   const [slugMutationErrorReason, setSlugMutationErrorReason] = useState<
     'alreadyExists' | 'invalidPath' | 'emptySegment' | 'dotSegment' | 'reservedRoute' | 'checkFailed' | undefined
   >();
-  const [status, setStatus] = useState<'draft' | 'published'>(initialStatus === 'published' ? 'published' : 'draft');
-  const [showTitle, setShowTitle] = useState(initialShowTitle);
   const [layout, setLayout] = useState(initialDocumentLayout);
 
   const localeSession = useLocaleDocumentSession({
@@ -132,24 +137,42 @@ export function PageEditor({
     initialRequestedLocaleSummary,
   });
   const { activeEditLocale, roomLocale } = localeSession;
+  const layoutDocumentName = useMemo(() => {
+    if (!roomLocale) {
+      return null;
+    }
+    try {
+      return createBlockRoomDocumentName('page', pageId, roomLocale);
+    } catch {
+      return null;
+    }
+  }, [pageId, roomLocale]);
   const ogRegenerationLocale = normalizeOgRegenerationLocale(activeEditLocale.activeLocale);
   const { shouldUseLocaleDocument } = localeSession.mode;
-  const {
+  const { provider, doc, bootstrap, protocol, isConnected, isSynced, reloadCanonical, acceptEpochAck } =
+    usePageEditorCollaboration(pageId, roomLocale);
+  const initialNeutralConfiguration = useMemo(
+    () => ({
+      slug: initialSlug,
+      showTitle: initialShowTitle,
+      status: initialStatus === 'published' ? ('published' as const) : ('draft' as const),
+    }),
+    [initialShowTitle, initialSlug, initialStatus],
+  );
+  const pageNeutral = usePageNeutralConfiguration({
+    pageId,
+    initialConfiguration: initialNeutralConfiguration,
     provider,
-    doc,
-    bootstrap,
-    protocol,
-    isConnected,
-    isSynced,
-    reloadCanonical,
-    acceptEpochAck,
-    recoverySnapshot,
-  } = usePageEditorCollaboration(pageId, roomLocale);
+    onShowTitleSaveError: (message) => notifications.show({ message, color: 'red' }),
+  });
+  const { configuration: neutralConfiguration, setDraft, isDraft, beginFieldWrite, queueShowTitle } = pageNeutral;
+  const { slug, showTitle, status } = neutralConfiguration;
   const {
     title: residentTitle,
     summary: residentSummary,
     setTitle: setResidentTitle,
     setSummary: setResidentSummary,
+    adoptPeerUpdate,
   } = usePageResidentMetadata({
     roomIdentity: provider,
     sessionLocale: activeEditLocale.activeLocale,
@@ -158,14 +181,17 @@ export function PageEditor({
     fallbackTitle: activeEditLocale.displayTitle,
     fallbackSummary: activeEditLocale.displaySummary,
   });
-  const recoveryDraft = usePageRecoveryDraft(recoverySnapshot, {
-    title: residentTitle,
-    summary: residentSummary,
-    layout,
+  useBlockRoomMetadataUpdates({ protocol }, `page:${pageId}`, ({ operation, values }) => {
+    if (operation === 'locale') {
+      adoptPeerUpdate({ operation, values });
+      return;
+    }
+    if (operation === 'page_layout') {
+      setLayout((current) => applyPageLayoutMetadataUpdate(current, values));
+    }
   });
   const permissionRevocation = useEditorPermissionRevocation(provider, 'page', pageId);
-  const revision = useEditorReloadRequired(provider);
-  const canMutate = !permissionRevocation.blocked && !revision.reloadRequired;
+  const canMutate = !permissionRevocation.blocked;
   const hasLocaleRoomMutationAuthority = localeSession.hasRoomMutationAuthority({
     sourceLocale: bootstrap?.sourceLocale ?? null,
     locale: bootstrap?.locale ?? null,
@@ -184,25 +210,51 @@ export function PageEditor({
   const canEditNeutral = canEditLocaleDocument && activeEditLocale.isSourceLocale;
 
   const publish = useMutation({
-    mutationFn: () => publishPageAction(pageId),
+    mutationFn: async () => {
+      const write = beginFieldWrite('status');
+      try {
+        const result = await publishPageAction(pageId);
+        if (result.ok) {
+          write.acknowledge(result.status);
+        } else {
+          write.fail();
+        }
+        return result;
+      } catch (error) {
+        write.fail();
+        throw error;
+      }
+    },
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
         return;
       }
-      setStatus('published');
       notifications.show({ message: t('notifications.published'), color: 'green' });
     },
   });
 
   const unpublish = useMutation({
-    mutationFn: () => unpublishPageAction(pageId),
+    mutationFn: async () => {
+      const write = beginFieldWrite('status');
+      try {
+        const result = await unpublishPageAction(pageId);
+        if (result.ok) {
+          write.acknowledge(result.status);
+        } else {
+          write.fail();
+        }
+        return result;
+      } catch (error) {
+        write.fail();
+        throw error;
+      }
+    },
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
         return;
       }
-      setStatus('draft');
       notifications.show({ message: t('notifications.unpublished'), color: 'yellow' });
     },
   });
@@ -237,36 +289,21 @@ export function PageEditor({
     },
   });
 
-  const updateShowTitle = useMutation({
-    mutationFn: (request: { value: boolean; previous: boolean }) => updatePageShowTitleAction(pageId, request.value),
-    onSuccess: (result, request) => {
-      if (result.error) {
-        setShowTitle(request.previous);
-        notifications.show({ message: result.error, color: 'red' });
-      }
-    },
-  });
-
   const updateLayout = useMutation({
     scope: { id: `page-document-layout:${pageId}` },
-    mutationFn: (request: { value: DocumentLayout; previous: DocumentLayout }) => {
+    mutationFn: async (request: PageLayoutPatch) => {
       if (!canEditNeutral || !bootstrap || !protocol) {
         throw new Error('Page collaboration is not ready.');
       }
-      return updatePageDocumentMetadata(protocol, request.value);
-    },
-    onSuccess: (ack, request) => {
+      const ack = await updatePageDocumentMetadata(protocol, request.value, request.previous);
       if (!acceptEpochAck(ack)) {
-        setLayout(request.previous);
-        router.refresh();
-        throw new Error(tCommon('notifications.saveFailed'));
+        throw new PageDocumentMetadataError(tCommon('notifications.saveFailed'), true);
       }
+      return ack;
     },
-    onError: (error, request) => {
-      setLayout(request.previous);
+    onError: (error) => {
       if (error instanceof PageDocumentMetadataError && error.reloadRequired) {
         reloadCanonical();
-        router.refresh();
       }
       notifications.show({
         message: error instanceof Error ? error.message : tCommon('notifications.updateFailed'),
@@ -276,7 +313,21 @@ export function PageEditor({
   });
 
   const updateSlug = useMutation({
-    mutationFn: (slug: string | null) => updatePageSlugAction(pageId, slug),
+    mutationFn: async (nextSlug: string | null) => {
+      const write = beginFieldWrite('slug');
+      try {
+        const result = await updatePageSlugAction(pageId, nextSlug);
+        if (result.ok) {
+          write.acknowledge(result.slug);
+        } else {
+          write.fail(false);
+        }
+        return result;
+      } catch (error) {
+        write.fail(false);
+        throw error;
+      }
+    },
     onSuccess: (result) => {
       if (result.error) {
         const reason = result.reason ?? 'checkFailed';
@@ -301,11 +352,11 @@ export function PageEditor({
     slug: toSlugInputValue(slug),
     onSlugChange: (val) => {
       if (canEditNeutral) {
-        setSlug(toNullableSlug(val));
+        setDraft('slug', toNullableSlug(val));
       }
     },
     onSave: (newSlug) => {
-      if (canEditNeutral) {
+      if (canEditNeutral && isDraft('slug')) {
         return updateSlug.mutateAsync(toNullableSlug(newSlug));
       }
     },
@@ -315,11 +366,13 @@ export function PageEditor({
 
   const debouncedLayoutUpdate = useDebouncedPatch({
     document: `page:${pageId}`,
-    scope: protocol,
-    recoveryScope: bootstrap?.documentName ?? null,
+    scope: layoutDocumentName ?? pageId,
+    recoveryScope: layoutDocumentName,
+    recoveryKey: 'page-layout',
     delay: 500,
-    write: (request: { value: DocumentLayout; previous: DocumentLayout }) =>
-      updateLayout.mutateAsync(request).then(() => undefined),
+    merge: mergePageLayoutPatches,
+    retry: true,
+    write: (request: PageLayoutPatch) => updateLayout.mutateAsync(request).then(() => undefined),
   });
 
   const handleStatusChange = useCallback(
@@ -343,14 +396,6 @@ export function PageEditor({
     write: (protocol, metadata: { title?: string; summary?: string | null }) =>
       updateBlockRoomLocaleMetadata(protocol, { type: 'page', locale: roomLocale!, ...metadata }),
   });
-  useEffect(
-    () => () => {
-      debouncedLayoutUpdate.cancel();
-      debouncedMetadataUpdate.cancel();
-    },
-    [debouncedLayoutUpdate, debouncedMetadataUpdate, roomLocale],
-  );
-
   const handleLocaleTitleChange = useCallback(
     (value: string) => {
       if (!canEditLocaleDocument) {
@@ -367,11 +412,10 @@ export function PageEditor({
       if (!canEditNeutral) {
         return;
       }
-      const previous = showTitle;
-      setShowTitle(checked);
-      updateShowTitle.mutate({ value: checked, previous });
+      setDraft('showTitle', checked);
+      queueShowTitle(checked);
     },
-    [canEditNeutral, showTitle, updateShowTitle],
+    [canEditNeutral, queueShowTitle, setDraft],
   );
 
   const handleLayoutChange = useCallback(
@@ -434,10 +478,6 @@ export function PageEditor({
       blockRoomProtocol={protocol}
     >
       <Stack h="100%" gap="md">
-        <EditorSaveRecoveryNotice document={`page:${pageId}`} />
-        {recoverySnapshot && !revision.reloadRequired ? (
-          <PageRecoveryNotice snapshot={recoverySnapshot} draft={recoveryDraft} />
-        ) : null}
         <EditorHeader
           title={displayedTitle}
           onTitleChange={canEditLocaleDocument ? handleLocaleTitleChange : undefined}
@@ -647,11 +687,7 @@ export function PageEditor({
         />
 
         <PageEditorInterruptionDialogs
-          recoveryAction={
-            recoverySnapshot ? <PageRecoveryNotice snapshot={recoverySnapshot} draft={recoveryDraft} /> : undefined
-          }
           interruption={permissionRevocation.interruption}
-          reloadRequired={revision.reloadRequired}
           permissionRevokedDestination={status === 'published' ? `/${slug || pageId}` : '/'}
           navigate={(destination) => router.replace(destination)}
         />

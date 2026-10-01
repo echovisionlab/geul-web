@@ -69,7 +69,7 @@ export function ThemeEditorPage({ themeId, initialTheme }: ThemeEditorPageProps)
     updateLightVariant,
     updateDarkVariant,
   } = useMapThemeEditorCollaboration(themeId, initialState);
-  const { blocked, interruption, reloadRequired } = useMapThemeEditorInterruption(provider, themeId);
+  const { blocked, interruption } = useMapThemeEditorInterruption(provider, themeId);
 
   const [activeTab, setActiveTab] = useState<MapThemeVariantTab>('light');
   const isDefault = themeList?.defaultMapThemeId === themeId;
@@ -220,7 +220,7 @@ export function ThemeEditorPage({ themeId, initialTheme }: ThemeEditorPageProps)
           onSettingsChange={handleSettingsChange}
         />
       </Box>
-      <MapThemeEditorInterruptionDialogs interruption={interruption} reloadRequired={reloadRequired} />
+      <MapThemeEditorInterruptionDialogs interruption={interruption} />
     </Box>
   );
 }

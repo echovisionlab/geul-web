@@ -114,6 +114,43 @@ describe('map place actions', () => {
     expect(revalidatePath).toHaveBeenCalledWith('/admin/map/places');
   });
 
+  it('preserves sparse updates, zero coordinates, explicit clears, and image-clear presence', async () => {
+    updateMapPlaceMock.mockResolvedValue({});
+
+    await expect(
+      updateMapPlaceAction('place-1', {
+        lat: 0,
+        lng: 0,
+        google_place_id: null,
+        address_components: null,
+        image_file_id: null,
+      }),
+    ).resolves.toEqual({ success: true });
+
+    const request = updateMapPlaceMock.mock.calls[0][0];
+    expect(request).toMatchObject({
+      id: 'place-1',
+      lat: 0,
+      lng: 0,
+      googlePlaceId: '',
+      addressComponents: {},
+      clearImage: true,
+    });
+    expect(request.name).toBeUndefined();
+    expect(request.address).toBeUndefined();
+    expect(request.imageFileId).toBeUndefined();
+  });
+
+  it('omits address components when the sparse update leaves them unchanged', async () => {
+    updateMapPlaceMock.mockResolvedValue({});
+
+    await updateMapPlaceAction('place-1', { name: 'Updated name' });
+
+    const request = updateMapPlaceMock.mock.calls[0][0];
+    expect(request.name).toBe('Updated name');
+    expect(request.addressComponents).toBeUndefined();
+  });
+
   it('maps Google place IDs for selected admin map places', async () => {
     getMapPlacesByIdsMock.mockResolvedValue({ places: [mapPlaceResponse()] });
 

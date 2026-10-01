@@ -10,12 +10,18 @@ export function useDebouncedPatch<T extends object>({
   scope,
   document,
   recoveryScope,
+  recoveryKey,
+  merge,
+  retry = false,
 }: {
   write: PatchWriter<T>;
   delay: number;
   scope: unknown;
   document: string;
   recoveryScope?: string | null;
+  recoveryKey?: string;
+  merge?: (pending: T, next: T) => T;
+  retry?: boolean;
 }) {
   const inferredRecoveryScope = typeof scope === 'string' || typeof scope === 'number' ? document : null;
   const activeRecoveryScope = recoveryScope === undefined ? inferredRecoveryScope : recoveryScope;
@@ -24,18 +30,18 @@ export function useDebouncedPatch<T extends object>({
     return {
       scope,
       document,
-      queue: createDebouncedPatch<T>(delay, document, inferredRecoveryScope),
+      queue: createDebouncedPatch<T>(delay, document, inferredRecoveryScope, merge, retry, recoveryKey),
       write: undefined as PatchWriter<T> | undefined,
       active: false,
     };
-  }, [delay, scope, document]);
+  }, [delay, scope, document, merge, retry, recoveryKey]);
   useLayoutEffect(() => {
     state.write = write;
     state.queue.setRecoveryScope(activeRecoveryScope);
   });
   useEffect(() => {
     state.active = true;
-    state.queue.activateRecovery();
+    state.queue.activateRecovery(state.write);
     const unregister = registerEditorSave(state.document, state.queue);
     return () => {
       state.active = false;

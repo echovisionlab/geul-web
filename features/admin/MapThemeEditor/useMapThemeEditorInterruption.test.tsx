@@ -38,21 +38,14 @@ describe('useMapThemeEditorInterruption', () => {
     {
       payload: { kind: 'permission_revoked', reason: 'permission_revoked' },
       expectedInterruption: 'permission_revoked',
-      reloadRequired: false,
     },
     {
       payload: { kind: 'session_expired', reason: 'session_expired' },
       expectedInterruption: 'session_expired',
-      reloadRequired: false,
-    },
-    {
-      payload: { kind: 'reload_required' },
-      expectedInterruption: null,
-      reloadRequired: true,
     },
   ] as const)(
-    'disconnects and blocks mutation for $payload.kind',
-    ({ payload, expectedInterruption, reloadRequired }) => {
+    'disconnects and blocks mutation for access interruption $payload.kind',
+    ({ payload, expectedInterruption }) => {
       const provider = createProvider();
       const container = document.createElement('div');
       const root = createRoot(container);
@@ -71,7 +64,6 @@ describe('useMapThemeEditorInterruption', () => {
 
       expect(result.current?.blocked).toBe(true);
       expect(result.current?.interruption).toBe(expectedInterruption);
-      expect(result.current?.reloadRequired).toBe(reloadRequired);
       expect(provider.disconnect).toHaveBeenCalledOnce();
       act(() => root.unmount());
     },

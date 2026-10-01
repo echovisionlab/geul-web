@@ -39,6 +39,11 @@ export interface FileDownloadPolicyModel {
   audienceSegments: AudienceSegmentSummary[];
 }
 
+export interface FileDownloadPolicyObservedState {
+  audience: FileDownloadAudience;
+  audienceSegmentIds: string[];
+}
+
 export interface FileDownloadPolicyTarget {
   entityType: TranscodeEntityType;
   entityId: string;
@@ -64,7 +69,7 @@ export interface FileDownloadPage<T> {
 }
 
 export type FileDownloadActionErrorCode =
-  'invalidTarget' | 'missingResponse' | 'loadFailed' | 'saveFailed' | 'staleTarget';
+  'invalidTarget' | 'invalidPolicyBaseline' | 'missingResponse' | 'loadFailed' | 'saveFailed' | 'staleTarget';
 
 export interface FileDownloadActionResult<T> {
   data?: T;

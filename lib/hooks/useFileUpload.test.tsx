@@ -6,8 +6,10 @@ import type { EditorRuntimeEvent } from '@echovisionlab/geul-common/collaboratio
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { UploadSessionStatus } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import * as Y from 'yjs';
 import {
   completeUploadAction,
   downloadFromUrlAction,
@@ -111,6 +113,7 @@ class MockXMLHttpRequest {
 
 let root: Root | null = null;
 let container: HTMLDivElement | null = null;
+let runtimeDocument: Y.Doc | null = null;
 
 function render(node: React.ReactNode) {
   const queryClient = new QueryClient({
@@ -123,11 +126,13 @@ function render(node: React.ReactNode) {
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
+  runtimeDocument = new Y.Doc();
+  const provider = { document: runtimeDocument } as HocuspocusProvider;
 
   act(() => {
     root?.render(
       <QueryClientProvider client={queryClient}>
-        <EditorRuntimeProvider provider={{} as never} entityType="release" entityId="release-1">
+        <EditorRuntimeProvider provider={provider} entityType="release" entityId="release-1">
           {node}
         </EditorRuntimeProvider>
       </QueryClientProvider>,
@@ -247,6 +252,8 @@ describe('useFileUpload', () => {
     container?.remove();
     root = null;
     container = null;
+    runtimeDocument?.destroy();
+    runtimeDocument = null;
     runtimeSubscription.listener = null;
     globalThis.XMLHttpRequest = originalXMLHttpRequest;
     globalThis.fetch = originalFetch;

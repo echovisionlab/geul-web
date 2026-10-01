@@ -1,14 +1,12 @@
 'use client';
 
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import type { Editor, JSONContent } from '@tiptap/core';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { IconVariable } from '@tabler/icons-react';
 import type { Awareness } from 'y-protocols/awareness';
-import * as Y from 'yjs';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
 import { normalizeRichTextHtmlLinks } from '@echovisionlab/geul-common/editor/link-normalization';
-import { createCollaborationExtension } from '../collaboration';
 import { createBlockRoomPresenceExtension } from '../block-room-presence';
 import type { RichTextBlockRoomTiptapController } from '../block-room-tiptap-controller';
 import { TiptapAuthoringControls } from '../TiptapAuthoringControls';
@@ -26,62 +24,6 @@ export interface EmailCampaignTiptapEditorHandle {
   getText: () => string;
   insertVariable: (variable: string) => void;
   focus: () => void;
-}
-
-export class UnsupportedEmailCampaignTiptapNodeError extends Error {
-  constructor(nodeName: string) {
-    super(`Unsupported email/campaign Tiptap node: ${nodeName}`);
-    this.name = 'UnsupportedEmailCampaignTiptapNodeError';
-  }
-}
-
-const SUPPORTED_XML_NODE_NAMES = new Set([
-  'blockgroup',
-  'blockcontainer',
-  'paragraph',
-  'heading',
-  'bulletlistitem',
-  'numberedlistitem',
-  'checklistitem',
-  'quote',
-  'callout',
-  'codeblock',
-  'divider',
-  'math',
-  'map',
-  'table',
-  'tableparagraph',
-  'tableheader',
-  'tablecell',
-  'tablerow',
-  'hardbreak',
-  'mathinline',
-]);
-
-function assertSupportedXmlNodes(node: Y.XmlFragment | Y.XmlElement): void {
-  for (const child of node.toArray()) {
-    if (!(child instanceof Y.XmlElement)) {
-      continue;
-    }
-    const nodeName = child.nodeName.toLocaleLowerCase();
-    if (!SUPPORTED_XML_NODE_NAMES.has(nodeName)) {
-      throw new UnsupportedEmailCampaignTiptapNodeError(child.nodeName);
-    }
-    assertSupportedXmlNodes(child);
-  }
-}
-
-/** Validates both initial content and remote collaborative updates before rendering them. */
-export function findUnsupportedEmailCampaignTiptapNode(fragment: Y.XmlFragment): string | null {
-  try {
-    assertSupportedXmlNodes(fragment);
-    return null;
-  } catch (error) {
-    if (error instanceof UnsupportedEmailCampaignTiptapNodeError) {
-      return error.message;
-    }
-    throw error;
-  }
 }
 
 export function normalizeEmailCampaignVariable(variable: string): string {
@@ -149,23 +91,12 @@ interface EmailTiptapEditorSharedProps {
   onContentChange?: (editor: EmailCampaignTiptapEditorHandle) => void;
 }
 
-export type EmailTiptapEditorProps = EmailTiptapEditorSharedProps &
-  (
-    | {
-        blockRoomController: RichTextBlockRoomTiptapController;
-        awareness: Awareness;
-        userName: string;
-        userColor: string;
-        fragment?: never;
-      }
-    | {
-        blockRoomController?: never;
-        fragment: Y.XmlFragment;
-        awareness?: Awareness;
-        userName?: string;
-        userColor?: string;
-      }
-  );
+export interface EmailTiptapEditorProps extends EmailTiptapEditorSharedProps {
+  blockRoomController: RichTextBlockRoomTiptapController;
+  awareness: Awareness;
+  userName: string;
+  userColor: string;
+}
 
 const IsolatedEditorContent = memo(({ editor }: { editor: Editor }) => {
   return <EditorContent editor={editor} className={classes.surface} />;
@@ -173,7 +104,6 @@ const IsolatedEditorContent = memo(({ editor }: { editor: Editor }) => {
 IsolatedEditorContent.displayName = 'IsolatedEditorContent';
 
 function EmailTiptapEditorRuntime({
-  fragment,
   blockRoomController,
   awareness,
   userName,
@@ -193,19 +123,15 @@ function EmailTiptapEditorRuntime({
     () => [
       ...createTiptapWireExtensions(),
       ...(structureLocked ? [TranslationStructureLockExtension] : []),
-      ...(blockRoomController
-        ? [
-            blockRoomController.extension,
-            createBlockRoomPresenceExtension(awareness!, { name: userName!, color: userColor! }),
-          ]
-        : [createCollaborationExtension({ fragment: fragment!, awareness })]),
+      blockRoomController.extension,
+      createBlockRoomPresenceExtension(awareness, { name: userName, color: userColor }),
     ],
-    [awareness, blockRoomController, fragment, structureLocked, userColor, userName],
+    [awareness, blockRoomController, structureLocked, userColor, userName],
   );
   const editor = useEditor(
     {
       extensions,
-      content: blockRoomController?.initialContent,
+      content: blockRoomController.initialContent,
       editable,
       immediatelyRender: false,
       shouldRerenderOnTransaction: false,
@@ -221,7 +147,7 @@ function EmailTiptapEditorRuntime({
     [extensions],
   );
   useEffect(() => {
-    if (!editor || !blockRoomController) {
+    if (!editor) {
       return;
     }
     return blockRoomController.connect(editor);
@@ -246,28 +172,5 @@ function EmailTiptapEditorRuntime({
 }
 
 export function EmailTiptapEditor(props: EmailTiptapEditorProps) {
-  const legacyFragment = props.fragment;
-  const [supportError, setSupportError] = useState(() =>
-    legacyFragment ? findUnsupportedEmailCampaignTiptapNode(legacyFragment) : null,
-  );
-
-  useEffect(() => {
-    if (!legacyFragment) {
-      return;
-    }
-    const validate = () => setSupportError(findUnsupportedEmailCampaignTiptapNode(legacyFragment));
-    validate();
-    legacyFragment.observeDeep(validate);
-    return () => legacyFragment.unobserveDeep(validate);
-  }, [legacyFragment]);
-
-  if (supportError) {
-    return (
-      <div role="alert" data-testid="email-campaign-tiptap-unsupported-node" data-editor-engine="tiptap">
-        {supportError}
-      </div>
-    );
-  }
-
   return <EmailTiptapEditorRuntime {...props} />;
 }

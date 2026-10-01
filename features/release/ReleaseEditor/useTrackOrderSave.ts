@@ -7,6 +7,7 @@ import { notifications } from '@mantine/notifications';
 import { reorderTracksAction } from '@/lib/actions/track';
 import type { ReleaseTrackItem } from '@/lib/collab/schemas/release-fields.schema';
 import { requireActionSuccess } from '@/lib/editor/require-action-success';
+import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
 
 export function restoreTrackOrder(tracks: ReleaseTrackItem[], savedOrder: string[]): ReleaseTrackItem[] {
   const positions = new Map(savedOrder.map((id, index) => [id, index]));
@@ -21,10 +22,14 @@ export function useTrackOrderSave({
   releaseId,
   tracks,
   onTracksChange,
+  onMutationStart,
+  onMutationSettled,
 }: {
   releaseId: string;
   tracks: ReleaseTrackItem[];
   onTracksChange: (tracks: ReleaseTrackItem[]) => void;
+  onMutationStart?: () => void;
+  onMutationSettled?: (succeeded: boolean) => void;
 }) {
   const t = useTranslations('common.notifications');
   const confirmedOrder = useRef(tracks.map((track) => track.id));
@@ -33,8 +38,11 @@ export function useTrackOrderSave({
     scope: { id: `release-track-order:${releaseId}` },
     mutationFn: (request: { trackIds: string[]; version: number }) =>
       requireActionSuccess(reorderTracksAction(request.trackIds)),
+    onMutate: () => onMutationStart?.(),
+    onSettled: (_result, error) => onMutationSettled?.(!error),
     onSuccess: (_result, request) => {
       confirmedOrder.current = request.trackIds;
+      publishEditorEntityChange(`release:${releaseId}`);
     },
     onError: (error, request) => {
       if (request.version === latestRequest.current) {

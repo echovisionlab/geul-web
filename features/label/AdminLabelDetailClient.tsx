@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconUsers } from '@tabler/icons-react';
 import { LabelAction } from '@echovisionlab/geul-proto/secure/label_pb.ts';
@@ -38,6 +38,8 @@ import {
 import { useRichTextBlockRoomController } from '@/features/editor/hooks/useBlockRoomTiptapController';
 import { useBlockRoomConnection } from '@/lib/collab/useBlockRoomConnection';
 import { useSlugManagement } from '@/lib/hooks/useSlugManagement';
+import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
+import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 import { normalizeEnumToken } from '@/lib/i18n/admin-labels';
 import type { getLabelAdmin } from '@/lib/queries/label';
 import { listLabelsForSelector } from '@/lib/queries/label-browser';
@@ -115,7 +117,7 @@ export function AdminLabelDetailClient({
   const currentIsSynced = isSynced;
   const descriptionEditorKey = `label-${roomLocale ?? 'source'}`;
   const [residentName, setResidentName] = useState(label.name);
-  useEffect(() => setResidentName(activeEditLocale.displayTitle), [activeEditLocale.displayTitle, roomLocale]);
+  useLayoutEffect(() => setResidentName(activeEditLocale.displayTitle), [activeEditLocale.displayTitle, roomLocale]);
 
   const debouncedLocaleMetadataUpdate = useDebouncedRoomMetadata({
     connection: blockRoom,
@@ -128,6 +130,7 @@ export function AdminLabelDetailClient({
     connection: blockRoom,
     document: `label:${id}`,
     delay: 500,
+    operation: 'document',
     write: (protocol, input: BlockRoomDocumentMetadataPatch<'label'>) =>
       updateBlockRoomDocumentMetadata(protocol, { type: 'label', ...input }),
   });
@@ -148,14 +151,62 @@ export function AdminLabelDetailClient({
           debouncedDocumentMetadataUpdate({ website: String(value) || null });
           return;
         case 'socialLinks':
-          debouncedDocumentMetadataUpdate({ socialLinks: value as Record<string, string> });
+          debouncedDocumentMetadataUpdate({
+            socialLinks: value as Record<string, string>,
+            observed: { socialLinks: fields.socialLinks },
+          });
           return;
         case 'parentLabelId':
           debouncedDocumentMetadataUpdate({ parentLabelId: value ? String(value) : null });
       }
     },
-    [canEditNeutral, debouncedDocumentMetadataUpdate],
+    [canEditNeutral, debouncedDocumentMetadataUpdate, fields],
   );
+
+  useBlockRoomMetadataUpdates(blockRoom, `label:${id}`, (update) => {
+    if (update.operation === 'locale') {
+      if (roomLocale && typeof update.values.title === 'string') {
+        setResidentName(update.values.title);
+      }
+      return;
+    }
+    if (update.operation !== 'document') {
+      return;
+    }
+
+    const values = update.values;
+    const socialLinks = values.socialLinks;
+    const nextSocialLinks =
+      socialLinks &&
+      typeof socialLinks === 'object' &&
+      !Array.isArray(socialLinks) &&
+      Object.values(socialLinks).every((value) => typeof value === 'string')
+        ? (socialLinks as Record<string, string>)
+        : null;
+    setFields((current) => {
+      let next = current;
+      const assign = <K extends keyof typeof current>(key: K, value: (typeof current)[K]) => {
+        if (next === current) {
+          next = { ...current };
+        }
+        next[key] = value;
+      };
+      for (const key of ['slug', 'countryCode', 'website'] as const) {
+        const value = values[key];
+        if (typeof value === 'string' || value === null) {
+          assign(key, value ?? '');
+        }
+      }
+      const parentLabelId = values.parentLabelId;
+      if (typeof parentLabelId === 'string' || parentLabelId === null) {
+        assign('parentLabelId', parentLabelId);
+      }
+      if (nextSocialLinks) {
+        assign('socialLinks', nextSocialLinks);
+      }
+      return next;
+    });
+  });
 
   const slugMgmt = useSlugManagement({
     entityType: 'label',
@@ -215,17 +266,32 @@ export function AdminLabelDetailClient({
     },
   });
 
-  const handleStatusChange = (status: LabelStatus) => {
-    if (!canEditNeutral) {
-      return;
+  const flushPendingSaves = useCallback(async () => {
+    const saved = await flushEditorSaves(`label:${id}`);
+    if (!saved) {
+      notifications.show({ message: tCommon('notifications.saveFailed'), color: 'red' });
     }
-    if (status === 'published') {
-      publishLabel.mutate(id);
-      return;
+    return saved;
+  }, [id, tCommon]);
+  const handleBack = useCallback(async () => {
+    if (await flushPendingSaves()) {
+      router.push(backHref);
     }
+  }, [backHref, flushPendingSaves, router]);
+  const handleStatusChange = useCallback(
+    async (status: LabelStatus) => {
+      if (!canEditNeutral || !(await flushPendingSaves())) {
+        return;
+      }
+      if (status === 'published') {
+        publishLabel.mutate(id);
+        return;
+      }
 
-    unpublishLabel.mutate(id);
-  };
+      unpublishLabel.mutate(id);
+    },
+    [canEditNeutral, flushPendingSaves, id, publishLabel.mutate, unpublishLabel.mutate],
+  );
 
   const labelStatusOptions: StatusOption<LabelStatus>[] = [
     {
@@ -286,7 +352,7 @@ export function AdminLabelDetailClient({
           statusOptions={labelStatusOptions}
           isConnected={currentIsConnected}
           isSynced={currentIsSynced}
-          onBack={() => router.push(backHref)}
+          onBack={handleBack}
           onStatusChange={canEditNeutral && (canPublish || canUnpublish) ? handleStatusChange : undefined}
           isStatusChanging={publishLabel.isPending || unpublishLabel.isPending}
           backTooltip={t('actions.backToLabels')}
@@ -465,7 +531,7 @@ export function AdminLabelDetailClient({
             <ShareLinkSection entityType="label" entityId={id} disabled={!canEditNeutral} />
           ) : null}
           <Group justify="flex-end" mt="md">
-            <Button tone="neutral" emphasis="low" onClick={() => router.push(backHref)}>
+            <Button tone="neutral" emphasis="low" onClick={handleBack}>
               {tCommon('actions.cancel')}
             </Button>
           </Group>

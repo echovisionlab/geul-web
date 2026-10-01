@@ -4,6 +4,7 @@ import { act, useState, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { flushEditorSaves, getPendingEditorPatch, hasPendingEditorSaves } from '@/lib/editor/editor-save-registry';
 import type { PageSlugAvailabilityResult } from '@/lib/queries/page-browser';
 import { useSlugManagement } from './useSlugManagement';
 
@@ -49,9 +50,11 @@ let container: HTMLDivElement | null = null;
 let root: Root | null = null;
 let latestHook: ReturnType<typeof useSlugManagement> | null = null;
 let latestRenderedSlug = '';
+let setHarnessEntityId: ((entityId: string) => void) | null = null;
 
 beforeEach(() => {
   vi.clearAllMocks();
+  checkPageSlugAvailable.mockReset().mockResolvedValue({ available: true });
 });
 
 afterEach(() => {
@@ -63,22 +66,29 @@ afterEach(() => {
   container = null;
   latestHook = null;
   latestRenderedSlug = '';
+  setHarnessEntityId = null;
   vi.useRealTimers();
 });
 
 function TestHarness({
   initialSlug,
+  entityType = 'page',
+  initialEntityId = 'page-1',
   onSave,
   debounceMs,
 }: {
   initialSlug: string;
+  entityType?: Parameters<typeof useSlugManagement>[0]['entityType'];
+  initialEntityId?: string;
   onSave: (slug: string) => void | Promise<unknown>;
   debounceMs: number;
 }) {
   const [slug, setSlug] = useState(initialSlug);
+  const [entityId, setEntityId] = useState(initialEntityId);
+  setHarnessEntityId = setEntityId;
   const slugMgmt = useSlugManagement({
-    entityType: 'page',
-    entityId: 'page-1',
+    entityType,
+    entityId,
     slug,
     onSlugChange: setSlug,
     onSave,
@@ -138,6 +148,13 @@ function changeInput(value: string) {
 function blurInput() {
   act(() => {
     getHook().handleBlur();
+  });
+}
+
+function changeEntityId(entityId: string) {
+  expect(setHarnessEntityId).not.toBeNull();
+  act(() => {
+    (setHarnessEntityId as (value: string) => void)(entityId);
   });
 }
 
@@ -252,6 +269,7 @@ describe('useSlugManagement', () => {
       vi.advanceTimersByTime(250);
       await Promise.resolve();
     });
+    await flushFakeTimerUpdates();
 
     expect(onSave).toHaveBeenCalledWith('');
     expect(checkPageSlugAvailable).not.toHaveBeenCalled();
@@ -286,6 +304,147 @@ describe('useSlugManagement', () => {
 
     expect(getHook().errorReason).toBe('reservedRoute');
     expect(getHook().error).toBeUndefined();
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it('lets the shared document flush wait for an in-flight slug save', async () => {
+    vi.useFakeTimers();
+    let resolveSave: (() => void) | undefined;
+    const blockedSave = new Promise<void>((resolve) => {
+      resolveSave = resolve;
+    });
+    const onSave = vi.fn(() => blockedSave);
+
+    renderHarness(<TestHarness initialSlug="old-slug" onSave={onSave} debounceMs={250} />);
+    await flushUpdates();
+    changeInput('new-slug');
+
+    await act(async () => {
+      vi.advanceTimersByTime(250);
+      await Promise.resolve();
+    });
+    await flushFakeTimerUpdates();
+    expect(onSave).toHaveBeenCalledExactlyOnceWith('new-slug');
+
+    let flushFinished = false;
+    const flush = flushEditorSaves('page:page-1').then((result) => {
+      flushFinished = true;
+      return result;
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(onSave).toHaveBeenCalledExactlyOnceWith('new-slug');
+    expect(flushFinished).toBe(false);
+
+    await act(async () => {
+      resolveSave?.();
+      await Promise.resolve();
+    });
+    await expect(flush).resolves.toBe(true);
+    expect(flushFinished).toBe(true);
+  });
+
+  it('registers Series slug saves under the post_series document key', async () => {
+    vi.useFakeTimers();
+    let resolveSave: (() => void) | undefined;
+    const blockedSave = new Promise<void>((resolve) => {
+      resolveSave = resolve;
+    });
+    const onSave = vi.fn(() => blockedSave);
+
+    renderHarness(
+      <TestHarness
+        entityType="series"
+        initialEntityId="series-1"
+        initialSlug="old-slug"
+        onSave={onSave}
+        debounceMs={250}
+      />,
+    );
+    await flushUpdates();
+    changeInput('new-slug');
+
+    await act(async () => {
+      vi.advanceTimersByTime(250);
+      await Promise.resolve();
+    });
+    await flushFakeTimerUpdates();
+    expect(onSave).toHaveBeenCalledExactlyOnceWith('new-slug');
+    expect(hasPendingEditorSaves('post_series:series-1')).toBe(true);
+    expect(hasPendingEditorSaves('series:series-1')).toBe(false);
+
+    let flushFinished = false;
+    const flush = flushEditorSaves('post_series:series-1').then((result) => {
+      flushFinished = true;
+      return result;
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(flushFinished).toBe(false);
+
+    await act(async () => {
+      resolveSave?.();
+      await Promise.resolve();
+    });
+    await expect(flush).resolves.toBe(true);
+    expect(flushFinished).toBe(true);
+  });
+
+  it('retains a rejected slug save for the next shared flush attempt', async () => {
+    vi.useFakeTimers();
+    let shouldSucceed = false;
+    const onSave = vi.fn(async () => {
+      if (!shouldSucceed) {
+        throw new Error('temporary failure');
+      }
+    });
+
+    renderHarness(<TestHarness initialSlug="old-slug" onSave={onSave} debounceMs={250} />);
+    await flushUpdates();
+    changeInput('new-slug');
+
+    await act(async () => {
+      vi.advanceTimersByTime(250);
+      await Promise.resolve();
+    });
+    await flushFakeTimerUpdates();
+    expect(onSave).toHaveBeenCalledExactlyOnceWith('new-slug');
+
+    await expect(flushEditorSaves('page:page-1')).resolves.toBe(false);
+    expect(getPendingEditorPatch('page:page-1')).toEqual({ slug: 'new-slug' });
+    expect(onSave).toHaveBeenCalledTimes(2);
+
+    shouldSucceed = true;
+    await expect(flushEditorSaves('page:page-1')).resolves.toBe(true);
+    expect(onSave).toHaveBeenCalledTimes(3);
+    expect(onSave).toHaveBeenLastCalledWith('new-slug');
+    expect(getPendingEditorPatch('page:page-1')).toEqual({});
+  });
+
+  it('ignores a blur availability result after the hook switches entities', async () => {
+    let resolveAvailability: ((result: PageSlugAvailabilityResult) => void) | undefined;
+    const pendingAvailability = new Promise<PageSlugAvailabilityResult>((resolve) => {
+      resolveAvailability = resolve;
+    });
+    checkPageSlugAvailable.mockImplementation((slug) =>
+      slug === 'new-slug' ? pendingAvailability : Promise.resolve({ available: true }),
+    );
+    const onSave = vi.fn();
+
+    renderHarness(<TestHarness initialSlug="old-slug" onSave={onSave} debounceMs={1_000} />);
+    await flushUpdates();
+    changeInput('new-slug');
+    blurInput();
+    changeEntityId('page-2');
+
+    await act(async () => {
+      resolveAvailability?.({ available: true });
+      await Promise.resolve();
+    });
+    await flushUpdates();
+
     expect(onSave).not.toHaveBeenCalled();
   });
 });

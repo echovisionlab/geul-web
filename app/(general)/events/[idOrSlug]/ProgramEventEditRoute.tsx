@@ -80,9 +80,17 @@ export async function renderProgramEventEditRoute(idOrSlug: string, query: Searc
       initialTicketUrl={event.ticketUrl}
       initialStreamUrl={event.streamUrl}
       initialExternalUrl={event.externalUrl}
-      initialArtists={event.artists.map((artist) => artist.artistId)}
-      initialLabels={event.labels.map((label) => label.labelId)}
-      initialClients={event.clients.map((client) => client.clientId)}
+      initialArtists={event.artists.map((artist) => ({
+        id: artist.artistId,
+        role: artist.role,
+        sortOrder: artist.sortOrder,
+      }))}
+      initialLabels={event.labels.map((label) => ({ id: label.labelId, role: label.role, sortOrder: label.sortOrder }))}
+      initialClients={event.clients.map((client) => ({
+        id: client.clientId,
+        role: client.role,
+        sortOrder: client.sortOrder,
+      }))}
       initialCredits={event.credits}
       allowedActions={resolveProgramEventEditorActions(canEdit, event.status)}
       typeOptions={types.map((type) => ({ id: type.id, name: type.name }))}

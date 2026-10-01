@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({
   getReleasePublic: vi.fn(),
   resolveReleaseIdForEdit: vi.fn(),
   getReleaseAdminAction: vi.fn(),
+  getReleaseEditorRelationsAction: vi.fn(),
+  getReleaseTrackSnapshotAction: vi.fn(),
   listTracksByReleaseAction: vi.fn(),
   validateShareLink: vi.fn(),
   redirect: vi.fn((href: string) => {
@@ -24,8 +26,14 @@ vi.mock('@/lib/queries/release', () => ({
   getReleasePublic: mocks.getReleasePublic,
   resolveReleaseIdForEdit: mocks.resolveReleaseIdForEdit,
 }));
-vi.mock('@/lib/actions/release', () => ({ getReleaseAdminAction: mocks.getReleaseAdminAction }));
-vi.mock('@/lib/actions/track', () => ({ listTracksByReleaseAction: mocks.listTracksByReleaseAction }));
+vi.mock('@/lib/actions/release', () => ({
+  getReleaseAdminAction: mocks.getReleaseAdminAction,
+  getReleaseEditorRelationsAction: mocks.getReleaseEditorRelationsAction,
+}));
+vi.mock('@/lib/actions/track', () => ({
+  getReleaseTrackSnapshotAction: mocks.getReleaseTrackSnapshotAction,
+  listTracksByReleaseAction: mocks.listTracksByReleaseAction,
+}));
 vi.mock('@/lib/api/server-client', () => ({
   createPublicShareLinkClient: vi.fn(() => ({ validate: mocks.validateShareLink })),
 }));
@@ -70,6 +78,16 @@ describe('Release canonical editor route', () => {
       youtubeMusicUrl: null,
     });
     mocks.listTracksByReleaseAction.mockResolvedValue([]);
+    mocks.getReleaseTrackSnapshotAction.mockResolvedValue([]);
+    mocks.getReleaseEditorRelationsAction.mockResolvedValue({
+      artists: [],
+      labels: [],
+      categories: [],
+      genres: [],
+      styles: [],
+      formats: [],
+      credits: [],
+    });
     mocks.validateShareLink.mockResolvedValue({
       valid: true,
       passwordRequired: false,

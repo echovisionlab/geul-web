@@ -292,7 +292,12 @@ describe('ReleaseArtistsSection', () => {
         sort_order: 0,
       },
     ] satisfies ReleaseArtistItem[]);
-    expect(setReleaseArtistsActionMock).toHaveBeenCalledWith('release-1', [{ artistId: 'artist-1', sortOrder: 0 }]);
+    expect(setReleaseArtistsActionMock).toHaveBeenCalledWith(
+      'release-1',
+      [{ artistId: 'artist-1', sortOrder: 0 }],
+      [],
+      undefined,
+    );
     expect(notifications.show).toHaveBeenCalled();
   });
 
@@ -337,9 +342,21 @@ describe('ReleaseArtistsSection', () => {
         sort_order: 1,
       },
     ] satisfies ReleaseArtistItem[]);
-    expect(setReleaseArtistsActionMock).toHaveBeenCalledWith('release-1', [
-      { artistId: 'artist-2', sortOrder: 0 },
-      { artistId: 'artist-1', sortOrder: 1 },
-    ]);
+    expect(setReleaseArtistsActionMock).toHaveBeenCalledWith(
+      'release-1',
+      [
+        { artistId: 'artist-2', sortOrder: 0 },
+        { artistId: 'artist-1', sortOrder: 1 },
+      ],
+      [
+        { artistId: 'artist-1', sortOrder: 0 },
+        { artistId: 'artist-2', sortOrder: 1 },
+      ],
+      {
+        itemId: 'artist-2',
+        previousItemId: undefined,
+        nextItemId: 'artist-1',
+      },
+    );
   });
 });

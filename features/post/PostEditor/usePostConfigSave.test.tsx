@@ -8,11 +8,27 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { notifications } from '@mantine/notifications';
 import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 import { clearEditorSaveRecovery, readEditorSaveRecovery } from '@/lib/editor/editor-save-recovery';
-import type { PostConfigPatch } from './post-config-save';
+import type { DocumentLayout } from '@/features/document-layout';
+import type { PostConfigurationSnapshot } from '@/lib/types/post/model';
+import { diffPostLayout, type PostConfigPatch } from './post-config-save';
 import { usePostConfigSave } from './usePostConfigSave';
 
-const mocks = vi.hoisted(() => ({ updatePostAction: vi.fn() }));
-vi.mock('@/lib/actions/post', () => ({ updatePostAction: mocks.updatePostAction }));
+const mocks = vi.hoisted(() => ({
+  updatePostAction: vi.fn(),
+  getPostConfigurationAction: vi.fn(),
+  publishEditorEntityChange: vi.fn(),
+  entityChange: null as null | (() => void | Promise<void>),
+}));
+vi.mock('@/lib/actions/post', () => ({
+  updatePostAction: mocks.updatePostAction,
+  getPostConfigurationAction: mocks.getPostConfigurationAction,
+}));
+vi.mock('@/lib/editor/editor-entity-changes', () => ({
+  publishEditorEntityChange: mocks.publishEditorEntityChange,
+  useEditorEntityChanges: (_document: string, onChange: () => void | Promise<void>) => {
+    mocks.entityChange = onChange;
+  },
+}));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
 vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
 
@@ -21,7 +37,15 @@ const secondPostId = '22222222-2222-4222-8222-222222222222';
 const initialRevision = '10000000-0000-4000-8000-000000000001';
 const nextRevision = '10000000-0000-4000-8000-000000000002';
 const finalRevision = '10000000-0000-4000-8000-000000000003';
-type UpdateResponse = { ok: boolean; configurationRevision?: string; error?: string; errorCode?: Code | string };
+const latestRevision = '10000000-0000-4000-8000-000000000004';
+type UpdateResponse = {
+  ok: boolean;
+  success?: true;
+  configurationRevision?: string;
+  configuration?: PostConfigurationSnapshot;
+  error?: string;
+  errorCode?: Code | string;
+};
 type SaveHook = ReturnType<typeof usePostConfigSave>;
 
 let root: Root;
@@ -33,14 +57,47 @@ let activePostId: string;
 let activeRevision: string;
 let activeRoomLocale: string;
 
+const initialLayout: DocumentLayout = { contentHeight: 'content', pageChrome: 'flow', footer: 'flow' };
+
+function configuration(
+  revision: string,
+  overrides: Partial<PostConfigurationSnapshot> = {},
+): PostConfigurationSnapshot {
+  return {
+    configurationRevision: revision,
+    slug: null,
+    commentsEnabled: true,
+    mapPlaceId: null,
+    documentLayout: initialLayout,
+    ...overrides,
+  };
+}
+
+function updateSuccess(revision: string, overrides: Partial<PostConfigurationSnapshot> = {}): UpdateResponse {
+  return {
+    ok: true,
+    success: true,
+    configurationRevision: revision,
+    configuration: configuration(revision, overrides),
+  };
+}
+
+function actionFailure(error: string, errorCode: Code | string): UpdateResponse {
+  return { ok: false, error, errorCode };
+}
+
+function actionConfiguration(revision: string, overrides: Partial<PostConfigurationSnapshot> = {}) {
+  return { ok: true, configuration: configuration(revision, overrides) };
+}
+
 function Harness() {
-  update = usePostConfigSave(activePostId, activeRevision);
+  update = usePostConfigSave(activePostId, configuration(activeRevision));
   return <span>{activeRoomLocale}</span>;
 }
 
 function TwoHookHarness() {
-  update = usePostConfigSave(activePostId, activeRevision);
-  updateSecond = usePostConfigSave(activePostId, activeRevision);
+  update = usePostConfigSave(activePostId, configuration(activeRevision));
+  updateSecond = usePostConfigSave(activePostId, configuration(activeRevision));
   return null;
 }
 
@@ -58,6 +115,17 @@ async function settlePromises() {
   }
 }
 
+async function signalEntityChange() {
+  const callback = mocks.entityChange;
+  if (!callback) {
+    throw new Error('Post configuration change listener is not registered');
+  }
+  await act(async () => {
+    await callback();
+    await settlePromises();
+  });
+}
+
 function render(harness: typeof Harness | typeof TwoHookHarness = Harness) {
   act(() => {
     root.render(
@@ -71,10 +139,15 @@ function render(harness: typeof Harness | typeof TwoHookHarness = Harness) {
 beforeEach(() => {
   vi.useFakeTimers();
   vi.clearAllMocks();
+  mocks.entityChange = null;
   activePostId = postId;
   activeRevision = initialRevision;
   activeRoomLocale = 'ko';
   queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+  mocks.updatePostAction.mockImplementation((_postId: string, _patch: PostConfigPatch, revision: string) =>
+    Promise.resolve(updateSuccess(nextRevision, { configurationRevision: revision })),
+  );
+  mocks.getPostConfigurationAction.mockResolvedValue(actionConfiguration(nextRevision));
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
@@ -92,6 +165,15 @@ afterEach(() => {
 });
 
 describe('Post config saves', () => {
+  it('captures only the nested layout fields changed by the local editor', () => {
+    expect(
+      diffPostLayout(
+        { contentHeight: 'content', pageChrome: 'flow', footer: 'flow' },
+        { contentHeight: 'content', pageChrome: 'pinned', footer: 'flow' },
+      ),
+    ).toEqual({ layoutPageChrome: 'pinned' });
+  });
+
   it('waits for A acknowledgement and uses its revision for the next latest-field write', async () => {
     const requests: Array<{
       patch: PostConfigPatch;
@@ -121,7 +203,7 @@ describe('Post config saves', () => {
     expect(requests).toHaveLength(1);
 
     await act(async () => {
-      requests[0].response.resolve({ ok: true, configurationRevision: nextRevision });
+      requests[0].response.resolve(updateSuccess(nextRevision, { commentsEnabled: false }));
       await settlePromises();
     });
     expect(
@@ -132,16 +214,20 @@ describe('Post config saves', () => {
     ]);
 
     await act(async () => {
-      requests[1].response.resolve({ ok: true, configurationRevision: finalRevision });
+      requests[1].response.resolve(updateSuccess(finalRevision, { commentsEnabled: true }));
       await settlePromises();
     });
   });
 
   it('retries transient failures with the same resident revision', async () => {
     mocks.updatePostAction
-      .mockResolvedValueOnce({ ok: false, error: 'permission denied', errorCode: 'POST_UPDATE_FAILED' })
-      .mockResolvedValueOnce({ ok: true, success: true, configurationRevision: nextRevision });
-    act(() => update({ documentLayout: { contentHeight: 'viewport', pageChrome: 'pinned', footer: 'flow' } }));
+      .mockResolvedValueOnce(actionFailure('permission denied', 'POST_UPDATE_FAILED'))
+      .mockResolvedValueOnce(
+        updateSuccess(nextRevision, {
+          documentLayout: { contentHeight: 'viewport', pageChrome: 'pinned', footer: 'flow' },
+        }),
+      );
+    act(() => update({ layoutContentHeight: 'viewport', layoutPageChrome: 'pinned' }));
 
     let firstFlush = true;
     await act(async () => {
@@ -173,7 +259,7 @@ describe('Post config saves', () => {
   });
 
   it('sends slug and other settings through one queue', async () => {
-    mocks.updatePostAction.mockResolvedValue({ ok: true, configurationRevision: nextRevision });
+    mocks.updatePostAction.mockResolvedValue(updateSuccess(nextRevision));
     act(() => update({ commentsEnabled: false }));
     act(() => update({ slug: 'new-post-slug' }));
     act(() => update({ mapPlaceId: 'place-1' }));
@@ -193,8 +279,8 @@ describe('Post config saves', () => {
 
   it('keeps the server revision after a no-op acknowledgement', async () => {
     mocks.updatePostAction
-      .mockResolvedValueOnce({ ok: true, configurationRevision: initialRevision })
-      .mockResolvedValueOnce({ ok: true, configurationRevision: nextRevision });
+      .mockResolvedValueOnce(updateSuccess(initialRevision))
+      .mockResolvedValueOnce(updateSuccess(nextRevision));
 
     act(() => update({ commentsEnabled: true }));
     await act(async () => {
@@ -224,7 +310,7 @@ describe('Post config saves', () => {
   });
 
   it('does not rebase its resident revision when the same Post receives refreshed props', async () => {
-    mocks.updatePostAction.mockResolvedValueOnce({ ok: true, configurationRevision: nextRevision });
+    mocks.updatePostAction.mockResolvedValueOnce(updateSuccess(nextRevision));
     act(() => update({ commentsEnabled: false }));
     activeRevision = finalRevision;
     render();
@@ -237,7 +323,7 @@ describe('Post config saves', () => {
   });
 
   it('keeps entity-wide settings in the Post queue when the active room locale changes', async () => {
-    mocks.updatePostAction.mockResolvedValueOnce({ ok: true, configurationRevision: nextRevision });
+    mocks.updatePostAction.mockResolvedValueOnce(updateSuccess(nextRevision));
     act(() => update({ commentsEnabled: false }));
     activeRoomLocale = 'ja';
     render();
@@ -250,11 +336,15 @@ describe('Post config saves', () => {
     expect(container.textContent).toContain('ja');
   });
 
-  it('retains and blocks a stale second client without rebasing after a conflict', async () => {
+  it('merges a disjoint stale scalar setting and retries once against the latest revision', async () => {
     render(TwoHookHarness);
     mocks.updatePostAction
-      .mockResolvedValueOnce({ ok: true, configurationRevision: nextRevision })
-      .mockResolvedValueOnce({ ok: false, error: 'A newer version was saved', errorCode: Code.Aborted });
+      .mockResolvedValueOnce(updateSuccess(nextRevision, { commentsEnabled: false }))
+      .mockResolvedValueOnce(actionFailure('A newer version was saved', Code.Aborted))
+      .mockResolvedValueOnce(updateSuccess(finalRevision, { commentsEnabled: false, mapPlaceId: 'stale-place' }));
+    mocks.getPostConfigurationAction.mockResolvedValueOnce(
+      actionConfiguration(nextRevision, { commentsEnabled: false }),
+    );
 
     act(() => update({ commentsEnabled: false }));
     await act(async () => {
@@ -262,47 +352,140 @@ describe('Post config saves', () => {
     });
 
     act(() => updateSecond({ mapPlaceId: 'stale-place' }));
-    let staleFlush = true;
+    let staleFlush = false;
     await act(async () => {
       staleFlush = await updateSecond.flush();
     });
-    expect(staleFlush).toBe(false);
-    expect(updateSecond.conflict).toBe(true);
-    expect(updateSecond.configurationRevision).toBe(initialRevision);
-    expect(updateSecond.getPendingPatch()).toEqual({ mapPlaceId: 'stale-place' });
-
-    act(() => updateSecond({ slug: 'latest-local-slug' }));
-    let blockedFlush = true;
-    await act(async () => {
-      blockedFlush = await updateSecond.flush();
-    });
-    expect(blockedFlush).toBe(false);
-    expect(updateSecond.getPendingPatch()).toEqual({ mapPlaceId: 'stale-place', slug: 'latest-local-slug' });
-    let navigationFlush = true;
-    await act(async () => {
-      navigationFlush = await flushEditorSaves(`post:${postId}`);
-    });
-    expect(navigationFlush).toBe(false);
-    expect(mocks.updatePostAction).toHaveBeenCalledTimes(2);
+    expect(staleFlush).toBe(true);
+    expect(updateSecond.conflict).toBe(false);
+    expect(updateSecond.configurationRevision).toBe(finalRevision);
+    expect(updateSecond.getPendingPatch()).toBeNull();
+    expect(mocks.getPostConfigurationAction).toHaveBeenCalledExactlyOnceWith(postId);
     expect(mocks.updatePostAction).toHaveBeenNthCalledWith(2, postId, { mapPlaceId: 'stale-place' }, initialRevision);
+    expect(mocks.updatePostAction).toHaveBeenNthCalledWith(3, postId, { mapPlaceId: 'stale-place' }, nextRevision);
   });
 
-  it('shows reload recovery when the server requires a resident revision', async () => {
-    mocks.updatePostAction.mockResolvedValueOnce({
-      ok: false,
-      error: 'Reload this Post before saving',
-      errorCode: Code.FailedPrecondition,
+  it('uses same-field last save wins after a stale revision', async () => {
+    render(TwoHookHarness);
+    mocks.updatePostAction
+      .mockResolvedValueOnce(updateSuccess(nextRevision, { commentsEnabled: false }))
+      .mockResolvedValueOnce(actionFailure('A newer version was saved', Code.Aborted))
+      .mockResolvedValueOnce(updateSuccess(finalRevision, { commentsEnabled: true }));
+    mocks.getPostConfigurationAction.mockResolvedValueOnce(
+      actionConfiguration(nextRevision, { commentsEnabled: false }),
+    );
+
+    act(() => update({ commentsEnabled: false }));
+    await act(async () => {
+      expect(await update.flush()).toBe(true);
     });
-    act(() => update({ slug: 'draft-slug' }));
+    act(() => updateSecond({ commentsEnabled: true }));
+    await act(async () => {
+      expect(await updateSecond.flush()).toBe(true);
+    });
+
+    expect(mocks.updatePostAction).toHaveBeenNthCalledWith(3, postId, { commentsEnabled: true }, nextRevision);
+    expect(updateSecond.configurationRevision).toBe(finalRevision);
+  });
+
+  it('refetches peer configuration changes and preserves local pending fields', async () => {
+    render();
+    const remoteLayout: DocumentLayout = { contentHeight: 'viewport', pageChrome: 'pinned', footer: 'pinned' };
+    mocks.getPostConfigurationAction.mockResolvedValueOnce(
+      actionConfiguration(nextRevision, { commentsEnabled: true, documentLayout: remoteLayout }),
+    );
+    mocks.updatePostAction.mockResolvedValueOnce(
+      updateSuccess(finalRevision, { commentsEnabled: false, documentLayout: remoteLayout }),
+    );
+    act(() => update({ commentsEnabled: false }));
+
+    await signalEntityChange();
+    expect(update.configuration).toEqual(
+      configuration(nextRevision, { commentsEnabled: false, documentLayout: remoteLayout }),
+    );
+
+    await act(async () => {
+      expect(await update.flush()).toBe(true);
+    });
+    expect(mocks.updatePostAction).toHaveBeenCalledExactlyOnceWith(postId, { commentsEnabled: false }, nextRevision);
+    expect(mocks.publishEditorEntityChange).toHaveBeenCalledExactlyOnceWith(`post:${postId}`);
+    expect(update.configuration).toEqual(
+      configuration(finalRevision, { commentsEnabled: false, documentLayout: remoteLayout }),
+    );
+  });
+
+  it('does not replace a newer peer snapshot with an older in-flight acknowledgement', async () => {
+    const response = deferred<UpdateResponse>();
+    mocks.updatePostAction.mockReturnValueOnce(response.promise);
+    mocks.getPostConfigurationAction
+      .mockResolvedValueOnce(actionConfiguration(finalRevision, { commentsEnabled: true, mapPlaceId: 'peer-place' }))
+      .mockResolvedValueOnce(actionConfiguration(latestRevision, { commentsEnabled: true, mapPlaceId: 'peer-place' }));
+    render();
+    act(() => update({ commentsEnabled: false }));
+    let flushPromise!: Promise<boolean>;
+    act(() => {
+      flushPromise = update.flush();
+    });
+    await settlePromises();
+
+    await signalEntityChange();
+    response.resolve(updateSuccess(nextRevision, { commentsEnabled: false }));
+    await act(async () => {
+      expect(await flushPromise).toBe(true);
+      await settlePromises();
+    });
+
+    expect(update.configurationRevision).toBe(latestRevision);
+    expect(update.configuration.commentsEnabled).toBe(true);
+    expect(update.configuration.mapPlaceId).toBe('peer-place');
+  });
+
+  it('merges only changed layout keys over the latest server layout', async () => {
+    const currentLayout: DocumentLayout = { contentHeight: 'viewport', pageChrome: 'flow', footer: 'pinned' };
+    const expectedMergedLayout: DocumentLayout = { contentHeight: 'viewport', pageChrome: 'pinned', footer: 'pinned' };
+    mocks.updatePostAction
+      .mockResolvedValueOnce(actionFailure('A newer version was saved', Code.Aborted))
+      .mockResolvedValueOnce(updateSuccess(nextRevision, { documentLayout: expectedMergedLayout }));
+    mocks.getPostConfigurationAction.mockResolvedValueOnce(
+      actionConfiguration(finalRevision, { documentLayout: currentLayout }),
+    );
+    act(() => update({ layoutPageChrome: 'pinned' }));
+    await act(async () => {
+      expect(await update.flush()).toBe(true);
+    });
+
+    expect(mocks.updatePostAction).toHaveBeenNthCalledWith(
+      1,
+      postId,
+      { documentLayout: { contentHeight: 'content', pageChrome: 'pinned', footer: 'flow' } },
+      initialRevision,
+    );
+    expect(mocks.updatePostAction).toHaveBeenNthCalledWith(
+      2,
+      postId,
+      { documentLayout: expectedMergedLayout },
+      finalRevision,
+    );
+    expect(update.configurationRevision).toBe(nextRevision);
+  });
+
+  it('retains a sparse patch when the single automatic retry also conflicts', async () => {
+    mocks.updatePostAction
+      .mockResolvedValueOnce(actionFailure('A newer version was saved', Code.Aborted))
+      .mockResolvedValueOnce(actionFailure('A newer version was saved', Code.Aborted));
+    mocks.getPostConfigurationAction.mockResolvedValueOnce(actionConfiguration(nextRevision));
+    act(() => update({ layoutFooter: 'pinned' }));
     let flushed = true;
     await act(async () => {
       flushed = await update.flush();
     });
 
     expect(flushed).toBe(false);
-    expect(update.conflict).toBe(true);
-    expect(update.configurationRevision).toBe(initialRevision);
-    expect(update.getPendingPatch()).toEqual({ slug: 'draft-slug' });
+    expect(update.conflict).toBe(false);
+    expect(update.configurationRevision).toBe(nextRevision);
+    expect(update.getPendingPatch()).toEqual({ layoutFooter: 'pinned' });
+    expect(mocks.updatePostAction).toHaveBeenCalledTimes(2);
+    expect(mocks.getPostConfigurationAction).toHaveBeenCalledExactlyOnceWith(postId);
   });
 
   it('keeps a pending patch in its Post when the editor changes IDs', async () => {
@@ -321,7 +504,7 @@ describe('Post config saves', () => {
     });
     expect(mocks.updatePostAction).not.toHaveBeenCalled();
 
-    mocks.updatePostAction.mockResolvedValueOnce({ ok: true, configurationRevision: initialRevision });
+    mocks.updatePostAction.mockResolvedValueOnce(updateSuccess(initialRevision));
     act(() => update({ mapPlaceId: 'new-post-place' }));
     await act(async () => {
       expect(await update.flush()).toBe(true);
@@ -334,8 +517,8 @@ describe('Post config saves', () => {
   });
 
   it.each([
-    ['acknowledgement', { ok: true, configurationRevision: nextRevision }],
-    ['conflict', { ok: false, error: 'A newer version was saved', errorCode: Code.Aborted }],
+    ['acknowledgement', updateSuccess(nextRevision)],
+    ['conflict', actionFailure('A newer version was saved', Code.Aborted)],
   ] as const)('ignores an old A %s after switching A to B and back to A', async (_kind, delayedResult) => {
     const response = deferred<UpdateResponse>();
     mocks.updatePostAction.mockReturnValueOnce(response.promise);
@@ -365,12 +548,19 @@ describe('Post config saves', () => {
     expect(update.configurationRevision).toBe(initialRevision);
     expect(update.conflict).toBe(false);
 
-    mocks.updatePostAction.mockResolvedValueOnce({ ok: true, configurationRevision: finalRevision });
+    mocks.updatePostAction.mockResolvedValueOnce(updateSuccess(finalRevision));
     act(() => update({ slug: 'fresh-a-slug' }));
     await act(async () => {
       expect(await update.flush()).toBe(true);
     });
-    expect(mocks.updatePostAction).toHaveBeenNthCalledWith(2, postId, { slug: 'fresh-a-slug' }, initialRevision);
+    // Returning to A resumes its unacknowledged local intent. The old A
+    // response still cannot move this new resident's configuration revision.
+    expect(mocks.updatePostAction).toHaveBeenNthCalledWith(
+      2,
+      postId,
+      { commentsEnabled: false, slug: 'fresh-a-slug' },
+      initialRevision,
+    );
   });
 
   it('retains pending values under the Post configuration recovery scope after unmount', () => {

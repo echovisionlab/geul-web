@@ -79,9 +79,9 @@ function FormSettingsForm({ props, updateProps }: FormSettingsFormProps) {
 
   const updateProp = useCallback(
     (key: keyof FormProps, value: string) => {
-      updateProps({ ...props, [key]: value });
+      updateProps({ [key]: value });
     },
-    [updateProps, props],
+    [updateProps],
   );
 
   return (

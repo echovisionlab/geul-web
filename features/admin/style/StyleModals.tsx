@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Text } from '@mantine/core';
@@ -25,17 +25,38 @@ export function StyleModals() {
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [editLoading, setEditLoading] = useState(false);
+  const editBaselineRef = useRef<{ id: string; name: string; description: string } | null>(null);
 
   // Delete state
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Sync edit form with editing style
   useEffect(() => {
-    if (editingStyle) {
-      setEditName(editingStyle.name);
-      setEditDescription(editingStyle.description || '');
+    if (!editingStyle) {
+      editBaselineRef.current = null;
+      return;
     }
-  }, [editingStyle]);
+
+    const nextBaseline = {
+      id: editingStyle.id,
+      name: editingStyle.name,
+      description: editingStyle.description || '',
+    };
+    const baseline = editBaselineRef.current;
+    if (!baseline || baseline.id !== nextBaseline.id) {
+      editBaselineRef.current = nextBaseline;
+      setEditName(nextBaseline.name);
+      setEditDescription(nextBaseline.description);
+      return;
+    }
+    if (editLoading || editName !== baseline.name || editDescription !== baseline.description) {
+      return;
+    }
+
+    editBaselineRef.current = nextBaseline;
+    setEditName(nextBaseline.name);
+    setEditDescription(nextBaseline.description);
+  }, [editingStyle, editDescription, editLoading, editName]);
 
   // Reset create form when closed
   useEffect(() => {
@@ -65,12 +86,25 @@ export function StyleModals() {
     if (!editingStyle) {
       return;
     }
+    const baseline = editBaselineRef.current;
+    if (!baseline || baseline.id !== editingStyle.id) {
+      return;
+    }
+    const changes: { name?: string; description?: string | null } = {};
+    if (editName !== baseline.name) {
+      changes.name = editName;
+    }
+    if (editDescription !== baseline.description) {
+      changes.description = editDescription || null;
+    }
+    if (Object.keys(changes).length === 0) {
+      closeEdit();
+      return;
+    }
+
     setEditLoading(true);
     try {
-      const result = await updateStyleAction(editingStyle.id, {
-        name: editName,
-        description: editDescription || null,
-      });
+      const result = await updateStyleAction(editingStyle.id, changes);
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
         return;

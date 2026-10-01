@@ -35,6 +35,27 @@ export interface WorkCreditGroupWithCredits extends WorkCreditGroup {
 export type CreditOrderItem =
   { type: 'group'; id: string } | { type: 'credit'; id: string; creditType: 'artist' | 'member' | 'name' };
 
+export type WorkCreditOrderKind = 'group' | 'credit';
+
+export interface WorkCreditOrderEntry {
+  kind: WorkCreditOrderKind;
+  id: string;
+  groupId?: string | null;
+}
+
+export interface WorkCreditMoveAnchor {
+  kind: WorkCreditOrderKind;
+  id: string;
+}
+
+export interface WorkCreditMoveIntent {
+  kind: WorkCreditOrderKind;
+  itemId: string;
+  targetGroupId?: string | null;
+  after?: WorkCreditMoveAnchor;
+  before?: WorkCreditMoveAnchor;
+}
+
 export type FlatDisplayItem =
   { type: 'group'; group: WorkCreditGroup } | { type: 'credit'; credit: WorkCreditWithDetails; groupId: string | null };
 

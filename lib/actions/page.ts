@@ -10,6 +10,7 @@ import {
 import { revalidatePath } from 'next/cache';
 import { Code } from '@connectrpc/connect';
 import { ShareLinkEntityType, type ShareLinkItem } from '@echovisionlab/geul-proto/secure/share_link_pb.ts';
+import { PageStatus } from '@echovisionlab/geul-proto/secure/page_pb.ts';
 import { createShareLinkAction, deleteShareLinkAction, listShareLinksAction } from '@/lib/actions/share-link';
 import { regenerateOgImageAction as requestOgImageRegeneration } from '@/lib/actions/og-generation';
 import { createCommittedMutationRevalidator } from '@/lib/actions/revalidate-after-commit';
@@ -20,6 +21,19 @@ import { getPageSlugValidationReason, type PageSlugValidationReason } from '@/li
 import { toSlugInputValue } from '@/lib/utils/slug';
 
 const revalidatePageAfterCommit = createCommittedMutationRevalidator('page-actions', 'page');
+
+type PageLifecycleStatus = 'draft' | 'published';
+
+function pageLifecycleStatus(status: PageStatus): PageLifecycleStatus {
+  switch (status) {
+    case PageStatus.DRAFT:
+      return 'draft';
+    case PageStatus.PUBLISHED:
+      return 'published';
+    default:
+      throw new Error('Page service returned an unsupported lifecycle status');
+  }
+}
 
 function pageActionFailure(err: unknown, fallback: string, fallbackCode: LocalActionErrorCode) {
   const message = err instanceof Error ? err.message : fallback;
@@ -52,23 +66,46 @@ export async function deletePageAdminAction(id: string): Promise<ActionResult<{ 
 
 // === Editor Mutations ===
 
-export async function publishPageAction(id: string): Promise<ActionResult<{ success: true }>> {
+export async function getPageNeutralConfigurationAction(
+  id: string,
+): Promise<ActionResult<{ slug: string | null; showTitle: boolean; status: PageLifecycleStatus }>> {
   try {
     const client = await createPageClient();
-    await client.publishPage({ id });
+    const page = await client.getPage({ id });
+    return actionSuccess({
+      slug: page.slug || null,
+      showTitle: page.showTitle,
+      status: pageLifecycleStatus(page.status),
+    });
+  } catch (err) {
+    return actionFailure(
+      err instanceof Error ? err.message : 'Failed to load page editor configuration',
+      isConnectError(err) ? err.code : Code.Internal,
+    );
+  }
+}
+
+export async function publishPageAction(
+  id: string,
+): Promise<ActionResult<{ success: true; status: PageLifecycleStatus }>> {
+  try {
+    const client = await createPageClient();
+    const response = await client.publishPage({ id });
     revalidatePath('/admin/pages');
-    return actionSuccess({ success: true });
+    return actionSuccess({ success: true, status: pageLifecycleStatus(response.status) });
   } catch (err) {
     return pageActionFailure(err, 'Failed to publish page', 'PAGE_PUBLISH_FAILED');
   }
 }
 
-export async function unpublishPageAction(id: string): Promise<ActionResult<{ success: true }>> {
+export async function unpublishPageAction(
+  id: string,
+): Promise<ActionResult<{ success: true; status: PageLifecycleStatus }>> {
   try {
     const client = await createPageClient();
-    await client.unpublishPage({ id });
+    const response = await client.unpublishPage({ id });
     revalidatePath('/admin/pages');
-    return actionSuccess({ success: true });
+    return actionSuccess({ success: true, status: pageLifecycleStatus(response.status) });
   } catch (err) {
     return pageActionFailure(err, 'Failed to unpublish page', 'PAGE_UNPUBLISH_FAILED');
   }
@@ -77,11 +114,11 @@ export async function unpublishPageAction(id: string): Promise<ActionResult<{ su
 export async function updatePageShowTitleAction(
   id: string,
   showTitle: boolean,
-): Promise<ActionResult<{ success: true }>> {
+): Promise<ActionResult<{ success: true; showTitle: boolean }>> {
   try {
     const client = await createPageClient();
-    await client.updatePage({ id, showTitle });
-    return actionSuccess({ success: true });
+    const response = await client.updatePage({ id, showTitle });
+    return actionSuccess({ success: true, showTitle: response.showTitle });
   } catch (err) {
     return pageActionFailure(err, 'Failed to update page show title', 'PAGE_UPDATE_SHOW_TITLE_FAILED');
   }
@@ -98,9 +135,11 @@ export async function updatePageSlugAction(
 > {
   try {
     const client = await createPageClient();
-    await client.updatePage({ id, slug: toSlugInputValue(slug) });
+    const requestedSlug = toSlugInputValue(slug);
+    const response = await client.updatePage({ id, slug: requestedSlug });
     revalidatePath('/admin/pages');
-    return actionSuccess({ success: true, slug });
+    const canonicalSlug = response.slug ?? requestedSlug;
+    return actionSuccess({ success: true, slug: canonicalSlug || null });
   } catch (err) {
     if (isConnectError(err)) {
       const reason =

@@ -1,10 +1,15 @@
 import { Code, ConnectError } from '@connectrpc/connect';
 import { OgEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
+import { PageStatus } from '@echovisionlab/geul-proto/secure/page_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   deletePageAdminAction,
+  getPageNeutralConfigurationAction,
+  publishPageAction,
   regeneratePageOgImageAction,
   setPageFeaturedImageAction,
+  unpublishPageAction,
+  updatePageShowTitleAction,
   updatePageSlugAction,
 } from './page';
 
@@ -17,7 +22,10 @@ const mocks = vi.hoisted(() => ({
 
 const pageClient = vi.hoisted(() => ({
   deletePage: vi.fn(),
+  getPage: vi.fn(),
+  publishPage: vi.fn(),
   setPageFeaturedImage: vi.fn(),
+  unpublishPage: vi.fn(),
   updatePage: vi.fn(),
 }));
 
@@ -79,6 +87,31 @@ describe('page actions', () => {
     expect(pageClient.deletePage).toHaveBeenCalledWith({ id: 'page-1' });
   });
 
+  it('loads the canonical neutral editor configuration through the authorized Page client', async () => {
+    pageClient.getPage.mockResolvedValueOnce({
+      slug: 'canonical-path',
+      showTitle: false,
+      status: PageStatus.PUBLISHED,
+    });
+
+    await expect(getPageNeutralConfigurationAction('page-1')).resolves.toEqual({
+      ok: true,
+      slug: 'canonical-path',
+      showTitle: false,
+      status: 'published',
+    });
+    expect(pageClient.getPage).toHaveBeenCalledWith({ id: 'page-1' });
+  });
+
+  it('returns a typed failure when the Page client returns an unsupported lifecycle status', async () => {
+    pageClient.getPage.mockResolvedValueOnce({ slug: '', showTitle: true, status: PageStatus.UNSPECIFIED });
+
+    await expect(getPageNeutralConfigurationAction('page-1')).resolves.toMatchObject({
+      ok: false,
+      errorCode: Code.Internal,
+    });
+  });
+
   it('uses signed MediaDelivery for the editor featured-image preview', async () => {
     pageClient.setPageFeaturedImage.mockResolvedValue({
       imageDelivery: {
@@ -113,5 +146,32 @@ describe('page actions', () => {
       errorCode: Code.InvalidArgument,
       reason: 'emptySegment',
     });
+  });
+
+  it('returns the server-canonical slug after a successful update', async () => {
+    pageClient.updatePage.mockResolvedValueOnce({ slug: 'canonical-path' });
+
+    await expect(updatePageSlugAction('page-1', 'requested-path')).resolves.toMatchObject({
+      ok: true,
+      slug: 'canonical-path',
+    });
+  });
+
+  it('returns the canonical show-title value after a successful update', async () => {
+    pageClient.updatePage.mockResolvedValueOnce({ showTitle: false });
+
+    await expect(updatePageShowTitleAction('page-1', true)).resolves.toEqual({
+      ok: true,
+      success: true,
+      showTitle: false,
+    });
+  });
+
+  it('returns canonical lifecycle statuses after publish and unpublish', async () => {
+    pageClient.publishPage.mockResolvedValueOnce({ status: PageStatus.PUBLISHED });
+    pageClient.unpublishPage.mockResolvedValueOnce({ status: PageStatus.DRAFT });
+
+    await expect(publishPageAction('page-1')).resolves.toEqual({ ok: true, success: true, status: 'published' });
+    await expect(unpublishPageAction('page-1')).resolves.toEqual({ ok: true, success: true, status: 'draft' });
   });
 });

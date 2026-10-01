@@ -126,3 +126,23 @@ it('retains a full debounce after input made while another save is running', asy
   await vi.advanceTimersByTimeAsync(1);
   expect(write).toHaveBeenCalledExactlyOnceWith({ title: 'latest' });
 });
+
+it('automatically retries failed intent and cancels retries on disposal', async () => {
+  const queue = createDebouncedPatch<{ title: string }>(100, 'retry-test', null, undefined, true);
+  const write = vi.fn().mockRejectedValueOnce(new Error('disconnected')).mockResolvedValue(undefined);
+  queue.enqueue({ title: 'retained' }, write);
+  await vi.advanceTimersByTimeAsync(100);
+  expect(queue.hasPending()).toBe(true);
+  await vi.advanceTimersByTimeAsync(999);
+  expect(write).toHaveBeenCalledOnce();
+  await vi.advanceTimersByTimeAsync(1);
+  expect(write).toHaveBeenCalledTimes(2);
+  expect(queue.hasPending()).toBe(false);
+  const failed = vi.fn().mockRejectedValue(new Error('disconnected'));
+  queue.enqueue({ title: 'unmounted' }, failed);
+  await vi.advanceTimersByTimeAsync(100);
+  queue.cancel();
+  queue.deactivateRecovery();
+  await vi.advanceTimersByTimeAsync(30_000);
+  expect(failed).toHaveBeenCalledOnce();
+});

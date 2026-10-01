@@ -2,6 +2,7 @@
 
 import { useCallback, useLayoutEffect, useState } from 'react';
 import type { BlockRoomBootstrap } from '@/lib/collab/block-room-bootstrap';
+import type { BlockRoomMetadataUpdate } from '@/lib/collab/block-room-protocol';
 import { resolvePageResidentMetadata } from './collaboration-mode';
 
 type PageMetadataBootstrap = Pick<
@@ -113,5 +114,23 @@ export function usePageResidentMetadata(input: UsePageResidentMetadataInput) {
     setState((current) => ({ ...current, summary }));
   }, []);
 
-  return { title: state.title, summary: state.summary, setTitle, setSummary };
+  const adoptPeerUpdate = useCallback((update: Pick<BlockRoomMetadataUpdate, 'operation' | 'values'>) => {
+    if (update.operation !== 'locale') {
+      return;
+    }
+
+    setState((current) => {
+      const title = typeof update.values.title === 'string' ? update.values.title : current.title;
+      const summary =
+        update.values.summary === null || typeof update.values.summary === 'string'
+          ? (update.values.summary ?? '')
+          : current.summary;
+      if (title === current.title && summary === current.summary) {
+        return current;
+      }
+      return { ...current, title, summary };
+    });
+  }, []);
+
+  return { title: state.title, summary: state.summary, setTitle, setSummary, adoptPeerUpdate };
 }

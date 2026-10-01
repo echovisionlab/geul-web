@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
 import { useTranslations } from 'next-intl';
@@ -19,6 +19,82 @@ import {
 import { buildSegmentConfig, createEmptyConfig, type SegmentConfigState } from './SegmentConfig';
 import { SegmentConfigFields } from './SegmentConfigFields';
 import { useSegmentModal } from './SegmentModalContext';
+
+type SegmentEditConfig = SegmentConfigState;
+
+interface SegmentEditBaseline {
+  name: string;
+  description: string;
+  segmentType: SegmentType;
+  config: SegmentEditConfig;
+}
+
+interface SegmentEditDraft {
+  name: string;
+  description: string;
+  segmentType: string;
+  config: SegmentEditConfig;
+}
+
+function segmentConfigState(config: {
+  memberTagIds: string[];
+  accountRoles: string[];
+  createdAfter?: string;
+  createdBefore?: string;
+}): SegmentEditConfig {
+  return {
+    memberTagIds: config.memberTagIds,
+    accountRoles: config.accountRoles,
+    createdAfter: config.createdAfter ?? '',
+    createdBefore: config.createdBefore ?? '',
+  };
+}
+
+function sameStringSet(left: string[], right: string[]): boolean {
+  return left.length === right.length && left.every((value) => right.includes(value));
+}
+
+function mergePendingStringSet(canonical: string[], submitted: string[], latest: string[]): string[] {
+  const merged = new Set(canonical);
+  const submittedSet = new Set(submitted);
+  const latestSet = new Set(latest);
+  for (const value of latest) {
+    if (!submittedSet.has(value)) {
+      merged.add(value);
+    }
+  }
+  for (const value of submitted) {
+    if (!latestSet.has(value)) {
+      merged.delete(value);
+    }
+  }
+  return Array.from(merged);
+}
+
+function rebasePendingConfig(
+  canonical: SegmentEditConfig,
+  submitted: SegmentEditConfig,
+  latest: SegmentEditConfig,
+): SegmentEditConfig {
+  return {
+    memberTagIds: mergePendingStringSet(canonical.memberTagIds, submitted.memberTagIds, latest.memberTagIds),
+    accountRoles: mergePendingStringSet(canonical.accountRoles, submitted.accountRoles, latest.accountRoles),
+    createdAfter: latest.createdAfter === submitted.createdAfter ? canonical.createdAfter : latest.createdAfter,
+    createdBefore: latest.createdBefore === submitted.createdBefore ? canonical.createdBefore : latest.createdBefore,
+  };
+}
+
+function sameSegmentEditDraft(left: SegmentEditDraft, right: SegmentEditDraft): boolean {
+  return (
+    left.name === right.name &&
+    left.description === right.description &&
+    left.segmentType === right.segmentType &&
+    sameStringSet(left.config.memberTagIds, right.config.memberTagIds) &&
+    sameStringSet(left.config.accountRoles, right.config.accountRoles) &&
+    left.config.createdAfter === right.config.createdAfter &&
+    left.config.createdBefore === right.config.createdBefore
+  );
+}
 
 export function SegmentModals() {
   const tCommon = useTranslations('common');
@@ -46,8 +122,23 @@ export function SegmentModals() {
   const [editFetchLoading, setEditFetchLoading] = useState(false);
   const [editEstimatedCount, setEditEstimatedCount] = useState<number | null>(null);
   const [editEstimateLoading, setEditEstimateLoading] = useState(false);
+  const [editBaseline, setEditBaseline] = useState<SegmentEditBaseline | null>(null);
 
   const [lifecycleLoading, setLifecycleLoading] = useState(false);
+  const editingSegmentIdRef = useRef(editingSegmentId);
+  editingSegmentIdRef.current = editingSegmentId;
+  const editDraftRef = useRef<SegmentEditDraft>({
+    name: editName,
+    description: editDescription,
+    segmentType: editType ?? '',
+    config: editConfig,
+  });
+  editDraftRef.current = {
+    name: editName,
+    description: editDescription,
+    segmentType: editType ?? '',
+    config: editConfig,
+  };
   const segmentTypeOptions = [
     { value: String(SegmentType.ALL_MEMBERS), label: tPage('types.allUsers') },
     { value: String(SegmentType.MEMBER_TAGS), label: tCommonEntities('userTags') },
@@ -74,34 +165,52 @@ export function SegmentModals() {
 
   // Load segment data for edit
   useEffect(() => {
+    let isCurrentRequest = true;
     if (!editingSegmentId) {
       setEditName('');
       setEditDescription('');
       setEditType(null);
       setEditConfig(createEmptyConfig());
       setEditEstimatedCount(null);
+      setEditBaseline(null);
+      setEditLoading(false);
+      setEditFetchLoading(false);
       return;
     }
+    setEditLoading(false);
     setEditFetchLoading(true);
     getSegmentAction(editingSegmentId)
       .then((result) => {
+        if (!isCurrentRequest) {
+          return;
+        }
         if (result.data) {
+          const config = segmentConfigState(result.data.config);
           setEditName(result.data.name);
           setEditDescription(result.data.description);
           setEditType(String(result.data.segmentType));
-          setEditConfig({
-            memberTagIds: result.data.config.memberTagIds,
-            accountRoles: result.data.config.accountRoles,
-            createdAfter: result.data.config.createdAfter ?? '',
-            createdBefore: result.data.config.createdBefore ?? '',
+          setEditConfig(config);
+          setEditBaseline({
+            name: result.data.name,
+            description: result.data.description,
+            segmentType: result.data.segmentType,
+            config,
           });
           setEditEstimatedCount(result.data.estimatedCount);
         } else {
+          setEditBaseline(null);
           notifications.show({ message: result.error ?? tPage('loading'), color: 'red' });
           closeEdit();
         }
       })
-      .finally(() => setEditFetchLoading(false));
+      .finally(() => {
+        if (isCurrentRequest) {
+          setEditFetchLoading(false);
+        }
+      });
+    return () => {
+      isCurrentRequest = false;
+    };
   }, [editingSegmentId, closeEdit]);
 
   // Reset config when edit type changes
@@ -172,28 +281,91 @@ export function SegmentModals() {
   };
 
   const handleUpdate = async () => {
-    if (!editingSegmentId || !editType) {
+    if (!editingSegmentId || !editType || !editBaseline) {
       return;
     }
+    const segmentId = editingSegmentId;
+    const baseline = editBaseline;
+    const submittedDraft: SegmentEditDraft = {
+      name: editName,
+      description: editDescription,
+      segmentType: editType,
+      config: {
+        ...editConfig,
+        memberTagIds: [...editConfig.memberTagIds],
+        accountRoles: [...editConfig.accountRoles],
+      },
+    };
+    const segmentType = Number(editType) as SegmentType;
     setEditLoading(true);
     try {
-      const segmentType = Number(editType) as SegmentType;
-      const result = await updateSegmentAction({
-        id: editingSegmentId,
-        name: editName,
-        description: editDescription || undefined,
-        segmentType,
-        config: buildSegmentConfig(segmentType, editConfig),
-      });
-      if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+      const input: Parameters<typeof updateSegmentAction>[0] = {
+        id: segmentId,
+        config: buildSegmentConfig(segmentType, submittedDraft.config),
+        observed: {
+          segmentType: baseline.segmentType,
+          config: buildSegmentConfig(baseline.segmentType, baseline.config),
+        },
+      };
+      if (submittedDraft.name !== baseline.name) {
+        input.name = submittedDraft.name;
+      }
+      if (submittedDraft.description !== baseline.description) {
+        input.description = submittedDraft.description;
+      }
+      if (segmentType !== baseline.segmentType) {
+        input.segmentType = segmentType;
+      }
+
+      const result = await updateSegmentAction(input);
+      if (editingSegmentIdRef.current !== segmentId) {
+        if (result.data) {
+          router.refresh();
+        }
         return;
       }
+      if (result.error || !result.data) {
+        notifications.show({ message: result.error ?? tPage('loading'), color: 'red' });
+        return;
+      }
+
+      const canonicalConfig = segmentConfigState(result.data.config);
+      const canonicalDraft: SegmentEditDraft = {
+        name: result.data.name,
+        description: result.data.description,
+        segmentType: String(result.data.segmentType),
+        config: canonicalConfig,
+      };
+      const latestDraft = editDraftRef.current;
+      const hasPendingTyping = !sameSegmentEditDraft(latestDraft, submittedDraft);
+      const typeChangedWhileSaving = latestDraft.segmentType !== submittedDraft.segmentType;
+      setEditBaseline({
+        name: result.data.name,
+        description: result.data.description,
+        segmentType: result.data.segmentType,
+        config: canonicalConfig,
+      });
+      setEditName(latestDraft.name === submittedDraft.name ? canonicalDraft.name : latestDraft.name);
+      setEditDescription(
+        latestDraft.description === submittedDraft.description ? canonicalDraft.description : latestDraft.description,
+      );
+      setEditType(
+        latestDraft.segmentType === submittedDraft.segmentType ? canonicalDraft.segmentType : latestDraft.segmentType,
+      );
+      setEditConfig(
+        typeChangedWhileSaving
+          ? latestDraft.config
+          : rebasePendingConfig(canonicalConfig, submittedDraft.config, latestDraft.config),
+      );
       notifications.show({ message: tPage('updated'), color: 'green' });
-      closeEdit();
       router.refresh();
+      if (!hasPendingTyping) {
+        closeEdit();
+      }
     } finally {
-      setEditLoading(false);
+      if (editingSegmentIdRef.current === segmentId) {
+        setEditLoading(false);
+      }
     }
   };
 

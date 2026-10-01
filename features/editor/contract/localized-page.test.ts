@@ -10,7 +10,7 @@ const sourceFileId = '1620bf08-8b57-41f3-a071-abe628f7ff6a';
 const optimizedFileId = '60d8271d-c047-46e2-a85f-e7f54bc2e03c';
 
 describe('materializeLocalizedPageSections', () => {
-  it('flattens typed immersive unit props and active File identities for the legacy renderer', () => {
+  it('flattens typed immersive unit props and active File identities for the renderer projection', () => {
     const document = fromJson(LocalizedPageDocumentSchema, {
       blockCatalogFingerprint: contentBlockCatalogFingerprint,
       locale: 'en',

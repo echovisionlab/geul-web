@@ -1,16 +1,27 @@
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createPublicClientClientWithAuth } from '@/lib/api/server-client';
+import { createClientClient, createPublicClientClientWithAuth } from '@/lib/api/server-client';
 import { assetRefFixture } from '@/tests/helpers/asset-ref';
-import { getClientsForBlockByIdsAction, listClientsForBlockAction } from './client';
+import {
+  createClientAction,
+  getClientsForBlockByIdsAction,
+  listClientsForBlockAction,
+  updateClientAction,
+} from './client';
 
 const listMock = vi.fn();
 const getMock = vi.fn();
+const createClientMock = vi.fn();
+const updateClientMock = vi.fn();
+const revalidatePathMock = vi.hoisted(() => vi.fn());
 
 vi.mock('@/lib/api/server-client', () => ({
+  createClientClient: vi.fn(),
   createPublicClientClientWithAuth: vi.fn(),
 }));
+
+vi.mock('next/cache', () => ({ revalidatePath: revalidatePathMock }));
 
 vi.mock('@/lib/utils/logger', () => ({
   createLogger: () => ({
@@ -21,11 +32,46 @@ vi.mock('@/lib/utils/logger', () => ({
 beforeEach(() => {
   listMock.mockReset();
   getMock.mockReset();
+  createClientMock.mockReset();
+  updateClientMock.mockReset();
+  vi.mocked(createClientClient).mockReset();
   vi.mocked(createPublicClientClientWithAuth).mockReset();
+  vi.mocked(createClientClient).mockResolvedValue({
+    createClient: createClientMock,
+    updateClient: updateClientMock,
+  } as unknown as Awaited<ReturnType<typeof createClientClient>>);
   vi.mocked(createPublicClientClientWithAuth).mockResolvedValue({
     get: getMock,
     list: listMock,
   } as unknown as Awaited<ReturnType<typeof createPublicClientClientWithAuth>>);
+});
+
+describe('client mutation actions', () => {
+  it('creates clients with the submitted website', async () => {
+    createClientMock.mockResolvedValue({ id: 'client-1' });
+
+    await expect(createClientAction('Client One', 'https://client.example')).resolves.toEqual({
+      data: { id: 'client-1' },
+    });
+
+    expect(createClientMock).toHaveBeenCalledWith({ name: 'Client One', website: 'https://client.example' });
+  });
+
+  it('sends an explicit empty website when clearing the existing value', async () => {
+    updateClientMock.mockResolvedValue({});
+
+    await expect(updateClientAction('client-1', { website: null })).resolves.toEqual({ success: true });
+
+    expect(updateClientMock).toHaveBeenCalledWith({ id: 'client-1', website: '' });
+  });
+
+  it('omits untouched client fields from partial updates', async () => {
+    updateClientMock.mockResolvedValue({});
+
+    await expect(updateClientAction('client-1', { name: 'New name' })).resolves.toEqual({ success: true });
+
+    expect(updateClientMock).toHaveBeenCalledWith({ id: 'client-1', name: 'New name' });
+  });
 });
 
 describe('listClientsForBlockAction', () => {

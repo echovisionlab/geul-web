@@ -23,6 +23,7 @@ interface Options {
   policyStatus: string;
   strategy: LegalPolicyEditorStrategy;
   flushActiveDocuments: () => Promise<void>;
+  getExpectedRevision: () => Promise<string>;
   closeScheduleModal: () => void;
   closeCancelModal: () => void;
   closeActivateModal: () => void;
@@ -35,6 +36,7 @@ export function useLegalPolicyCommands({
   policyStatus,
   strategy,
   flushActiveDocuments,
+  getExpectedRevision,
   closeScheduleModal,
   closeCancelModal,
   closeActivateModal,
@@ -52,7 +54,8 @@ export function useLegalPolicyCommands({
   const scheduleMutation = useMutation({
     mutationFn: async (effectiveFrom: Date) => {
       await flushActiveDocuments();
-      return strategy.actions.schedule(policyId, effectiveFrom);
+      const expectedRevision = await getExpectedRevision();
+      return strategy.actions.schedule(policyId, effectiveFrom, expectedRevision);
     },
     onSuccess: (result) => {
       if (!result.success) {
@@ -88,7 +91,8 @@ export function useLegalPolicyCommands({
       if (strategy.status.isDraft(policyStatus)) {
         await flushActiveDocuments();
       }
-      return strategy.actions.activateNow(policyId);
+      const expectedRevision = await getExpectedRevision();
+      return strategy.actions.activateNow(policyId, expectedRevision);
     },
     onSuccess: (result) => {
       if (!result.success) {
@@ -104,7 +108,11 @@ export function useLegalPolicyCommands({
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => strategy.actions.deleteVersion(policyId),
+    mutationFn: async () => {
+      await flushActiveDocuments();
+      const expectedRevision = await getExpectedRevision();
+      return strategy.actions.deleteVersion(policyId, expectedRevision);
+    },
     onSuccess: (result) => {
       if (!result.success) {
         notifications.show({ message: result.error || messages.deleteFailed, color: 'red' });

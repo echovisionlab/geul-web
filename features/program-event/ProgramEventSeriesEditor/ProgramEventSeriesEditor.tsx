@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { useMutation } from '@tanstack/react-query';
@@ -23,6 +23,7 @@ import {
 } from '@/lib/actions/program-event';
 import { getUploadSelectionMimeTypes, UPLOAD_CONFIGS } from '@/lib/constants/upload-config';
 import { sanitizeSlugInput, toSlugInputValue } from '@/lib/utils/slug';
+import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 import { requireActionSuccess } from '@/lib/editor/require-action-success';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
 
@@ -148,6 +149,36 @@ export function ProgramEventSeriesEditor({
     scope: seriesId,
     document: `program_event_series:${seriesId}`,
   });
+  const flushPendingSaves = useCallback(async () => {
+    const saved = await flushEditorSaves(`program_event_series:${seriesId}`);
+    if (!saved) {
+      notifications.show({ message: tCommonNotifications('saveFailed'), color: 'red' });
+    }
+    return saved;
+  }, [seriesId, tCommonNotifications]);
+  const handleBack = useCallback(async () => {
+    if (await flushPendingSaves()) {
+      router.push('/admin/event-series');
+    }
+  }, [flushPendingSaves, router]);
+  const handleStatusChange = useCallback(
+    async (nextStatus: SeriesStatus) => {
+      if (nextStatus === status || !(await flushPendingSaves())) {
+        return;
+      }
+      const previousStatus = status;
+      const requestId = statusRequestIdRef.current + 1;
+      statusRequestIdRef.current = requestId;
+      setStatus(nextStatus);
+      updateSeriesStatus.mutate({ nextStatus, previousStatus, requestId });
+    },
+    [flushPendingSaves, status, updateSeriesStatus.mutate],
+  );
+  const handleDelete = useCallback(async () => {
+    if (await flushPendingSaves()) {
+      deleteSeries.mutate();
+    }
+  }, [deleteSeries.mutate, flushPendingSaves]);
 
   const statusOptions: StatusOption<SeriesStatus>[] = [
     {
@@ -187,15 +218,9 @@ export function ProgramEventSeriesEditor({
         statusOptions={statusOptions}
         isConnected
         isSynced
-        onBack={() => router.push('/admin/event-series')}
-        onStatusChange={(nextStatus) => {
-          const previousStatus = status;
-          const requestId = statusRequestIdRef.current + 1;
-          statusRequestIdRef.current = requestId;
-          setStatus(nextStatus);
-          updateSeriesStatus.mutate({ nextStatus, previousStatus, requestId });
-        }}
-        onDelete={() => deleteSeries.mutate()}
+        onBack={handleBack}
+        onStatusChange={handleStatusChange}
+        onDelete={handleDelete}
         deleteConfirmation={{
           title: tCommon('actions.delete'),
           message: (
