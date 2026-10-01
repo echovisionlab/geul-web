@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.6](https://github.com/echovisionlab/geul-web/compare/v0.2.5...v0.2.6) (2026-10-01)
+
+
+### Performance Improvements
+
+* **web:** reduce public page loading and preserve document SSR ([#35](https://github.com/echovisionlab/geul-web/issues/35)) ([3ef1a86](https://github.com/echovisionlab/geul-web/commit/3ef1a867aa9fcfcb6bc4552c0449d2113734e1f9))
+
 ## [0.2.5](https://github.com/echovisionlab/geul-web/compare/v0.2.4...v0.2.5) (2026-09-30)
 
 
