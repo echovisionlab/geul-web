@@ -15,6 +15,8 @@ import { notifyEditorSaveStateChanged, registerEditorSave } from './editor-save-
 
 const MAX_FLUSH_ROUNDS = 4;
 const AUTOMATIC_PERSIST_DEBOUNCE_MS = 2_000;
+const AUTOMATIC_PERSIST_RETRY_INITIAL_MS = 1_000;
+const AUTOMATIC_PERSIST_RETRY_MAX_MS = 30_000;
 
 interface ActiveFlush {
   operation: Promise<boolean>;
@@ -54,6 +56,7 @@ export function createCollaborativeDocumentSaveTracker(
   let pendingDurabilityState: BlockRoomDurabilityState | null = null;
   let activeFlush: ActiveFlush | null = null;
   let documentKey: string | null = null;
+  let observeRegisteredFlush: ((state: ActiveFlush) => void) | null = null;
 
   const handleAfterTransaction = (transaction: Transaction) => {
     // Remote updates, including canonical revision metadata, are not local authoring.
@@ -156,6 +159,7 @@ export function createCollaborativeDocumentSaveTracker(
         }
       }
     });
+    observeRegisteredFlush?.(state);
     if (documentKey) {
       notifyEditorSaveStateChanged(documentKey);
     }
@@ -172,14 +176,22 @@ export function createCollaborativeDocumentSaveTracker(
       documentKey = key;
       let registered = true;
       let automaticFlushTimer: ReturnType<typeof setTimeout> | null = null;
+      let automaticFlushTimerIsRetry = false;
       let autoFlushRequestedWhileActive = false;
       let observedActiveFlush: ActiveFlush | null = null;
+      let automaticRetryAttempt = 0;
+      let automaticRetryPending = false;
       const isAutomaticFlushEligible = () =>
         registered &&
         persistence.kind === 'persist-now' &&
         hasPending() &&
         provider.isSynced &&
         !provider.hasUnsyncedChanges;
+      const retryDelay = () =>
+        Math.min(
+          AUTOMATIC_PERSIST_RETRY_INITIAL_MS * 2 ** Math.min(Math.max(automaticRetryAttempt - 1, 0), 30),
+          AUTOMATIC_PERSIST_RETRY_MAX_MS,
+        );
       const observeActiveFlush = (state: ActiveFlush) => {
         if (observedActiveFlush === state) {
           return;
@@ -189,16 +201,29 @@ export function createCollaborativeDocumentSaveTracker(
           if (observedActiveFlush === state) {
             observedActiveFlush = null;
           }
+          const shouldRetry = registered && state.hadError && hasPending();
           const shouldFollowUp = registered && !state.hadError && autoFlushRequestedWhileActive && hasPending();
           autoFlushRequestedWhileActive = false;
-          if (shouldFollowUp) {
+          if (shouldRetry) {
+            automaticRetryPending = true;
+            automaticRetryAttempt += 1;
+            scheduleAutomaticFlush(retryDelay());
+          } else if (shouldFollowUp) {
+            automaticRetryAttempt = 0;
+            automaticRetryPending = false;
             scheduleAutomaticFlush();
+          } else if (!state.hadError) {
+            automaticRetryAttempt = 0;
+            automaticRetryPending = false;
           }
         };
         void state.operation.then(finish, finish);
       };
-      const scheduleAutomaticFlush = () => {
+      const scheduleAutomaticFlush = (delay = automaticRetryPending ? retryDelay() : AUTOMATIC_PERSIST_DEBOUNCE_MS) => {
         if (!isAutomaticFlushEligible()) {
+          return;
+        }
+        if (automaticRetryPending && automaticFlushTimerIsRetry && automaticFlushTimer !== null) {
           return;
         }
         if (activeFlush) {
@@ -210,16 +235,19 @@ export function createCollaborativeDocumentSaveTracker(
         if (automaticFlushTimer !== null) {
           clearTimeout(automaticFlushTimer);
         }
+        const isRetry = automaticRetryPending;
+        automaticFlushTimerIsRetry = isRetry;
         automaticFlushTimer = setTimeout(() => {
           automaticFlushTimer = null;
+          automaticFlushTimerIsRetry = false;
           if (!isAutomaticFlushEligible()) {
             return;
           }
-          const operation = flush(onFlushError, () => registered);
-          if (activeFlush?.operation === operation) {
-            observeActiveFlush(activeFlush);
+          if (isRetry) {
+            automaticRetryPending = false;
           }
-        }, AUTOMATIC_PERSIST_DEBOUNCE_MS);
+          flush(onFlushError, () => registered);
+        }, delay);
       };
       const handleUnsyncedChanges = ({ number }: { number: number }) => {
         if (number === 0) {
@@ -247,15 +275,24 @@ export function createCollaborativeDocumentSaveTracker(
             })
           : () => undefined;
       const unregisterSave = registerEditorSave(key, { flush: () => flush(onFlushError), hasPending });
+      observeRegisteredFlush = observeActiveFlush;
+      if (activeFlush) {
+        observeActiveFlush(activeFlush);
+      }
       scheduleAutomaticFlush();
 
       return () => {
         registered = false;
         autoFlushRequestedWhileActive = false;
+        automaticRetryPending = false;
         observedActiveFlush = null;
+        if (observeRegisteredFlush === observeActiveFlush) {
+          observeRegisteredFlush = null;
+        }
         if (automaticFlushTimer !== null) {
           clearTimeout(automaticFlushTimer);
           automaticFlushTimer = null;
+          automaticFlushTimerIsRetry = false;
         }
         if (persistence.kind === 'persist-now') {
           provider.off('unsyncedChanges', handleUnsyncedChanges);

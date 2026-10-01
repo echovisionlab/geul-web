@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import type { DocumentRoomIntentChange, PostSeriesDocumentRoomIntentSnapshot } from './document-room-intent';
+import type {
+  DocumentRoomIntentChange,
+  FormDocumentRoomIntentSnapshot,
+  PostSeriesDocumentRoomIntentSnapshot,
+} from './document-room-intent';
 import {
   acknowledgeDocumentRoomIntents,
   getDocumentRoomIntentBatch,
@@ -37,13 +41,72 @@ function snapshot(
 }
 
 function change(
-  before: PostSeriesDocumentRoomIntentSnapshot,
-  after: PostSeriesDocumentRoomIntentSnapshot,
+  before: DocumentRoomIntentChange['before'],
+  after: DocumentRoomIntentChange['after'],
 ): DocumentRoomIntentChange {
   return { before, after };
 }
 
+function formSnapshot(
+  locale: string,
+  sourceLocale: string,
+  title: string,
+  overrides: Partial<FormDocumentRoomIntentSnapshot> = {},
+): FormDocumentRoomIntentSnapshot {
+  return {
+    documentName: `form:${ENTITY_ID}:${locale}`,
+    documentRevision: DOCUMENT_REVISION,
+    sourceLocale,
+    locale,
+    localeExists: true,
+    ...(locale === sourceLocale ? {} : { targetRevision: TARGET_REVISION }),
+    documentType: 'form',
+    role: locale === sourceLocale ? 'source' : 'target',
+    title,
+    hasTitlePresence: true,
+    ...overrides,
+  };
+}
+
 describe('document room intent journal', () => {
+  it.each([
+    { locale: 'en', sourceLocale: 'en' },
+    { locale: 'ko', sourceLocale: 'en' },
+  ])(
+    'retains a Form title across $locale canonical identity teardown until acknowledged',
+    ({ locale, sourceLocale }) => {
+      const documentName = `form:${ENTITY_ID}:${locale}`;
+      const before = formSnapshot(locale, sourceLocale, 'canonical title');
+      const after = formSnapshot(locale, sourceLocale, 'local title');
+      const intent = change(before, after);
+
+      expect(recordDocumentRoomIntent(documentName, change(before, before), FIRST_DOCUMENT)).toBe(false);
+      expect(recordDocumentRoomIntent(documentName, intent, FIRST_DOCUMENT)).toBe(true);
+
+      const newerCanonical = formSnapshot(locale, sourceLocale, 'peer title', {
+        documentRevision: '44444444-4444-4444-8444-444444444444',
+        ...(locale === sourceLocale ? {} : { targetRevision: '55555555-5555-4555-8555-555555555555' }),
+      });
+      expect(getDocumentRoomIntentBatch(documentName, newerCanonical, SECOND_DOCUMENT)).toMatchObject({
+        changes: [intent],
+        requiresReplay: true,
+      });
+
+      const otherLocale = formSnapshot(locale === 'ko' ? 'ja' : 'ko', sourceLocale, 'other locale');
+      const otherSource = formSnapshot(locale, 'fr', 'other source');
+      const otherEntity = {
+        ...newerCanonical,
+        documentName: `form:99999999-9999-4999-8999-999999999999:${locale}`,
+      };
+      expect(getDocumentRoomIntents(documentName, otherLocale)).toEqual([]);
+      expect(getDocumentRoomIntents(documentName, otherSource)).toEqual([]);
+      expect(getDocumentRoomIntents(documentName, otherEntity)).toEqual([]);
+      expect(hasDocumentRoomIntents(documentName, newerCanonical)).toBe(true);
+      expect(acknowledgeDocumentRoomIntents(documentName, [intent])).toBe(true);
+      expect(hasDocumentRoomIntents(documentName, newerCanonical)).toBe(false);
+    },
+  );
+
   it('acknowledges only the captured prefix and preserves changes made during persistence', () => {
     const initial = snapshot({ title: 'initial' });
     const firstAfter = snapshot({ title: 'first local edit' });

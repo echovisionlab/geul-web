@@ -1,5 +1,10 @@
 import { CollaborativeDocumentType, parseDocumentName } from '@echovisionlab/geul-common/collaboration/document';
 import {
+  FORM_CANONICAL_CONTEXT_MAP_NAME,
+  FORM_FIELDS_MAP_NAME,
+  FORM_LOCALE_PRESENCE_MAP_NAME,
+} from '@echovisionlab/geul-common/collaboration/form';
+import {
   EMAIL_LAYOUT_CONTEXT_MAP_NAME,
   EMAIL_LAYOUT_HTML_TEXT_NAME,
   EMAIL_LAYOUT_UNITS_ARRAY_NAME,
@@ -28,9 +33,10 @@ import {
   type PostSeriesStoredLocaleFields,
 } from '@echovisionlab/geul-common/collaboration/post-series';
 import * as Y from 'yjs';
+import { formRootTitleTarget } from '@echovisionlab/geul-proto/intra/form_locale_catalog.ts';
 import { getDocumentRoomSnapshot, type DocumentRoomSnapshot } from './document-room-snapshot';
 
-type DocumentRoomIntentDocumentType = 'menu' | 'post_series' | 'email_layout';
+type DocumentRoomIntentDocumentType = 'form' | 'menu' | 'post_series' | 'email_layout';
 type DocumentRoomIntentRole = 'source' | 'target';
 
 interface DocumentRoomIntentSnapshotBase extends DocumentRoomSnapshot {
@@ -43,6 +49,12 @@ export interface MenuDocumentRoomIntentSnapshot extends DocumentRoomIntentSnapsh
   name: string;
   items: MenuCollaborationItem[];
   requestedLabels: Record<string, string>;
+}
+
+export interface FormDocumentRoomIntentSnapshot extends DocumentRoomIntentSnapshotBase {
+  documentType: 'form';
+  title: string | null;
+  hasTitlePresence: boolean;
 }
 
 export interface PostSeriesDocumentRoomIntentSnapshot extends DocumentRoomIntentSnapshotBase {
@@ -64,6 +76,7 @@ export interface EmailLayoutTargetDocumentRoomIntentSnapshot extends DocumentRoo
 }
 
 export type DocumentRoomIntentSnapshot =
+  | FormDocumentRoomIntentSnapshot
   | MenuDocumentRoomIntentSnapshot
   | PostSeriesDocumentRoomIntentSnapshot
   | EmailLayoutSourceDocumentRoomIntentSnapshot
@@ -90,12 +103,14 @@ export class DocumentRoomIntentError extends Error {
 }
 
 const entityTypeByDocumentType: Partial<Record<CollaborativeDocumentType, DocumentRoomIntentDocumentType>> = {
+  [CollaborativeDocumentType.FORM]: 'form',
   [CollaborativeDocumentType.MENU]: 'menu',
   [CollaborativeDocumentType.POST_SERIES]: 'post_series',
   [CollaborativeDocumentType.EMAIL_LAYOUT]: 'email_layout',
 };
 
 const contextMapByDocumentType: Record<DocumentRoomIntentDocumentType, string> = {
+  form: FORM_CANONICAL_CONTEXT_MAP_NAME,
   menu: MENU_CONTEXT_MAP_NAME,
   post_series: POST_SERIES_CONTEXT_MAP_NAME,
   email_layout: EMAIL_LAYOUT_CONTEXT_MAP_NAME,
@@ -137,7 +152,7 @@ export function captureDocumentRoomSnapshot(
   if (
     sourceLocale !== serverSnapshot.sourceLocale ||
     locale !== serverSnapshot.locale ||
-    localeExists !== serverSnapshot.localeExists
+    (documentType !== 'form' && localeExists !== serverSnapshot.localeExists)
   ) {
     return null;
   }
@@ -150,6 +165,22 @@ export function captureDocumentRoomSnapshot(
 
   try {
     switch (documentType) {
+      case 'form': {
+        const rawTitle = document.getMap<unknown>(FORM_FIELDS_MAP_NAME).get('title');
+        if (rawTitle !== undefined && typeof rawTitle !== 'string') {
+          return null;
+        }
+        const titlePresence = document.getMap<boolean>(FORM_LOCALE_PRESENCE_MAP_NAME).get(formRootTitlePresenceKey());
+        if (titlePresence !== undefined && titlePresence !== true) {
+          return null;
+        }
+        return {
+          ...base,
+          documentType,
+          title: rawTitle ?? null,
+          hasTitlePresence: titlePresence === true,
+        };
+      }
       case 'menu': {
         const menu = extractMenuCanonicalSnapshot(document);
         return {
@@ -271,6 +302,24 @@ function applyChange(document: Y.Doc, before: DocumentRoomIntentSnapshot, after:
   }
 
   switch (before.documentType) {
+    case 'form': {
+      if (after.documentType !== 'form') {
+        throw new DocumentRoomIntentError('document_type_mismatch');
+      }
+      const fields = document.getMap<unknown>(FORM_FIELDS_MAP_NAME);
+      if (after.title === null) {
+        fields.delete('title');
+      } else {
+        fields.set('title', after.title);
+      }
+      const presence = document.getMap<boolean>(FORM_LOCALE_PRESENCE_MAP_NAME);
+      if (after.hasTitlePresence) {
+        presence.set(formRootTitlePresenceKey(), true);
+      } else {
+        presence.delete(formRootTitlePresenceKey());
+      }
+      return;
+    }
     case 'menu': {
       if (after.documentType !== 'menu') {
         throw new DocumentRoomIntentError('document_type_mismatch');
@@ -310,6 +359,14 @@ function applyChange(document: Y.Doc, before: DocumentRoomIntentSnapshot, after:
         throw new DocumentRoomIntentError('role_mismatch');
       }
   }
+}
+
+function formRootTitlePresenceKey(): string {
+  const target = formRootTitleTarget();
+  if (target.owner.case !== 'blockHandle' || target.path.length > 0) {
+    throw new DocumentRoomIntentError('invalid_current_room');
+  }
+  return `${target.owner.value}\u0000${target.fieldHandle}`;
 }
 
 function applyMenuTargetLabels(

@@ -1,5 +1,11 @@
 import { CollaborativeDocumentType, createDocumentName } from '@echovisionlab/geul-common/collaboration/document';
 import {
+  FORM_FIELDS_MAP_NAME,
+  FORM_LOCALE_PRESENCE_MAP_NAME,
+  hydrateFormCanonicalRoom,
+  recordFormLocaleFieldChange,
+} from '@echovisionlab/geul-common/collaboration/form';
+import {
   hydrateEmailLayoutCanonicalRoom,
   EMAIL_LAYOUT_HTML_TEXT_NAME,
   EMAIL_LAYOUT_LOCALE_VALUES_MAP_NAME,
@@ -20,6 +26,7 @@ import {
   setPostSeriesLocaleField,
   unsetPostSeriesLocaleField,
 } from '@echovisionlab/geul-common/collaboration/post-series';
+import { formRootTitleTarget, formStepDescriptionTarget } from '@echovisionlab/geul-proto/intra/form_locale_catalog.ts';
 import * as Y from 'yjs';
 import { describe, expect, it } from 'vitest';
 import {
@@ -32,6 +39,7 @@ import { DOCUMENT_ROOM_SNAPSHOT_KEYS, DOCUMENT_ROOM_SNAPSHOT_MAP_NAME } from './
 const ENTITY_ID = '11111111-1111-4111-8111-111111111111';
 const DOCUMENT_REVISION = '22222222-2222-4222-8222-222222222222';
 const TARGET_REVISION = '33333333-3333-4333-8333-333333333333';
+const NEXT_DOCUMENT_REVISION = '44444444-4444-4444-8444-444444444444';
 const ORIGIN = Symbol('test-replay-origin');
 
 function projectObservedSnapshot(document: Y.Doc, documentName: string, sourceLocale: string, locale: string) {
@@ -102,6 +110,39 @@ function emailRoom(
   return { document: projectObservedSnapshot(document, documentName, 'en', locale), documentName };
 }
 
+function formRoom(
+  locale: string,
+  sourceTitle: string,
+  title: string | null,
+  schema: { id: string; steps: Array<{ id: string; fields: unknown[]; description?: string }> },
+  documentRevision = DOCUMENT_REVISION,
+  extraPresenceTargets: ReturnType<typeof formStepDescriptionTarget>[] = [],
+): { document: Y.Doc; documentName: string } {
+  const documentName = createDocumentName(CollaborativeDocumentType.FORM, ENTITY_ID, locale);
+  const presentLocaleValues = [
+    ...(locale === 'en' || title !== null ? [formRootTitleTarget()] : []),
+    ...extraPresenceTargets,
+  ];
+  const document = hydrateFormCanonicalRoom({
+    sourceLocale: 'en',
+    locale,
+    source: { title: sourceTitle, schema },
+    requested: { ...(title === null ? {} : { title }), schema },
+    requestedExists: true,
+    presentLocaleValues,
+  });
+  const marker = document.getMap<string | boolean>(DOCUMENT_ROOM_SNAPSHOT_MAP_NAME);
+  marker.set(DOCUMENT_ROOM_SNAPSHOT_KEYS.documentName, documentName);
+  marker.set(DOCUMENT_ROOM_SNAPSHOT_KEYS.documentRevision, documentRevision);
+  marker.set(DOCUMENT_ROOM_SNAPSHOT_KEYS.sourceLocale, 'en');
+  marker.set(DOCUMENT_ROOM_SNAPSHOT_KEYS.locale, locale);
+  marker.set(DOCUMENT_ROOM_SNAPSHOT_KEYS.localeExists, true);
+  if (locale !== 'en') {
+    marker.set(DOCUMENT_ROOM_SNAPSHOT_KEYS.targetRevision, TARGET_REVISION);
+  }
+  return { document, documentName };
+}
+
 const menuItems = (...ids: string[]): MenuCollaborationItem[] =>
   ids.map((id) => ({ id, label: `${id} source`, linkType: 'external', url: `https://${id}.example` }));
 
@@ -116,6 +157,48 @@ const emailUnits = (...handles: string[]): EmailLayoutUnit[] =>
   }));
 
 describe('document room semantic intent replay', () => {
+  it.each(['en', 'ko'])('replays only a Form title in the %s room and preserves the canonical schema', (locale) => {
+    const oldSchema = { id: 'schema-1', steps: [{ id: 'step-1', fields: [] }] };
+    const baselineTitle = locale === 'en' ? 'Baseline title' : null;
+    const baseline = formRoom(locale, 'Source title', baselineTitle, oldSchema);
+    const before = captureDocumentRoomSnapshot(baseline.documentName, baseline.document);
+    if (!before || before.documentType !== 'form') {
+      throw new Error('expected Form snapshot');
+    }
+
+    if (locale !== 'en') {
+      recordFormLocaleFieldChange(baseline.document, { title: 'Source title' }, { title: 'Local title' });
+    }
+    baseline.document.getMap(FORM_FIELDS_MAP_NAME).set('title', 'Local title');
+    const after = captureDocumentRoomSnapshot(baseline.documentName, baseline.document);
+    if (!after || after.documentType !== 'form') {
+      throw new Error('expected Form snapshot');
+    }
+
+    const peerSchema = {
+      id: 'schema-1',
+      steps: [{ id: 'step-1', fields: [], description: 'Peer schema change' }],
+    };
+    const current = formRoom(
+      locale,
+      'Source title',
+      locale === 'en' ? 'Peer title' : null,
+      peerSchema,
+      NEXT_DOCUMENT_REVISION,
+      [formStepDescriptionTarget('step-1')],
+    );
+    replayDocumentRoomChanges(baseline.documentName, current.document, [{ before, after }], ORIGIN);
+
+    const result = captureDocumentRoomSnapshot(current.documentName, current.document);
+    expect(result).toMatchObject({ documentType: 'form', title: 'Local title' });
+    expect(JSON.parse(current.document.getMap<string>(FORM_FIELDS_MAP_NAME).get('schema') ?? '')).toEqual(peerSchema);
+    if (locale !== 'en') {
+      expect(current.document.getMap<boolean>(FORM_LOCALE_PRESENCE_MAP_NAME).get('document\u0000title')).toBe(true);
+    }
+    baseline.document.destroy();
+    current.document.destroy();
+  });
+
   it('replays only edited Post Series leaves over newer peer values', () => {
     const baseline = postSeriesRoom('ko', { title: 'old title', summary: 'old summary' });
     const before = captureDocumentRoomSnapshot(baseline.documentName, baseline.document);

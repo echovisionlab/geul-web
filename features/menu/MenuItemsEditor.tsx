@@ -34,6 +34,25 @@ import {
 } from './menu-editor-model';
 import { getVisibilityLabel, VisibilityEditor } from './VisibilityEditor';
 
+interface MenuItemLinkDraft {
+  linkType: MenuLinkType;
+  url: string;
+  targetId: string | null;
+}
+
+interface MenuItemLocalizationDraft {
+  mode: MenuItemLocalizationMode;
+  fixedLocale: string | null;
+}
+
+interface MenuItemFormDraft {
+  label?: string;
+  link?: MenuItemLinkDraft;
+  openInNewTab?: boolean;
+  localization?: MenuItemLocalizationDraft;
+  visibility?: MenuVisibility;
+}
+
 function MenuItemForm({
   item,
   onSave,
@@ -50,60 +69,82 @@ function MenuItemForm({
   const tCommon = useTranslations('common');
   const tPage = useTranslations('adminList.menus');
   const supportedLocaleOptions = getSupportedLocaleOptions();
-  const [label, setLabel] = useState(item.label);
-  const [linkType, setLinkType] = useState<MenuLinkType>(item.linkType as MenuLinkType);
-  const [url, setUrl] = useState(item.url || '');
-  const [targetId, setTargetId] = useState<string | null>(item.targetId || null);
-  const [openInNewTab, setOpenInNewTab] = useState(item.openInNewTab || false);
-  const [localizationMode, setLocalizationMode] = useState<MenuItemLocalizationMode>(
-    item.localizationMode ?? (item.fixedLocale ? 'fixed_locale' : 'translated'),
-  );
-  const [fixedLocale, setFixedLocale] = useState<string | null>(item.fixedLocale || null);
-  const [visibility, setVisibility] = useState<MenuVisibility>(item.visibility || { mode: 'all' });
+  const [draft, setDraft] = useState<MenuItemFormDraft>({});
+  const label = draft.label ?? item.label;
+  const link =
+    draft.link ??
+    ({
+      linkType: item.linkType as MenuLinkType,
+      url: item.url || '',
+      targetId: item.targetId || null,
+    } satisfies MenuItemLinkDraft);
+  const openInNewTab = draft.openInNewTab ?? item.openInNewTab ?? false;
+  const localization =
+    draft.localization ??
+    ({
+      mode: item.localizationMode ?? (item.fixedLocale ? 'fixed_locale' : 'translated'),
+      fixedLocale: item.fixedLocale || null,
+    } satisfies MenuItemLocalizationDraft);
+  const visibility = draft.visibility ?? item.visibility ?? { mode: 'all' };
   const labelOwnedBySource = isMenuItemLabelApplicableToLocale(
     {
       ...item,
       label,
-      localizationMode,
-      fixedLocale: fixedLocale ?? undefined,
+      localizationMode: localization.mode,
+      fixedLocale: localization.fixedLocale ?? undefined,
     },
     sourceLocale,
   );
 
   const { data: targets } = useQuery({
-    queryKey: ['menu', 'targets', linkType],
-    queryFn: async (): Promise<MenuTarget[]> => getMenuAvailableTargetsAction(linkType),
-    enabled: linkType !== 'custom',
+    queryKey: ['menu', 'targets', link.linkType],
+    queryFn: async (): Promise<MenuTarget[]> => getMenuAvailableTargetsAction(link.linkType),
+    enabled: link.linkType !== 'custom',
   });
   const preservedTargetSlug =
-    linkType === item.linkType && item.targetSlug?.trim() ? item.targetSlug.trim() : undefined;
+    link.linkType === item.linkType && link.targetId === (item.targetId || null) && item.targetSlug?.trim()
+      ? item.targetSlug.trim()
+      : undefined;
   const targetSelectData = useMemo(
-    () => buildTargetSelectData(targets, targetId, preservedTargetSlug),
-    [preservedTargetSlug, targetId, targets],
+    () => buildTargetSelectData(targets, link.targetId, preservedTargetSlug),
+    [link.targetId, preservedTargetSlug, targets],
   );
   const canSave =
     editable &&
     (!labelOwnedBySource || label.trim().length > 0) &&
-    (linkType === 'custom' ? url.trim().length > 0 : Boolean(targetId || preservedTargetSlug)) &&
-    (localizationMode !== 'fixed_locale' || Boolean(fixedLocale));
+    (link.linkType === 'custom' ? link.url.trim().length > 0 : Boolean(link.targetId || preservedTargetSlug)) &&
+    (localization.mode !== 'fixed_locale' || Boolean(localization.fixedLocale));
 
   const handleSave = () => {
     if (!editable) {
       return;
     }
-    const selectedTarget = targets?.find((t) => t.id === targetId);
-    onSave({
-      ...item,
-      label: labelOwnedBySource ? label.trim() : '',
-      linkType,
-      url: linkType === 'custom' ? url.trim() : undefined,
-      targetId: linkType !== 'custom' ? targetId || undefined : undefined,
-      targetSlug: linkType !== 'custom' ? (selectedTarget?.slug ?? preservedTargetSlug) : undefined,
-      openInNewTab: openInNewTab || undefined,
-      localizationMode: localizationMode === 'fixed_locale' ? 'fixed_locale' : undefined,
-      fixedLocale: localizationMode === 'fixed_locale' ? fixedLocale || undefined : undefined,
-      visibility: visibility.mode === 'all' ? undefined : visibility,
-    });
+    const selectedTarget = targets?.find((target) => target.id === link.targetId);
+    const updated: MenuItem | MenuItemBase = { ...item };
+
+    if (draft.label !== undefined && labelOwnedBySource) {
+      updated.label = label.trim();
+    }
+    if (draft.link) {
+      Object.assign(updated, {
+        linkType: link.linkType,
+        url: link.linkType === 'custom' ? link.url.trim() : undefined,
+        targetId: link.linkType !== 'custom' ? link.targetId || undefined : undefined,
+        targetSlug: link.linkType !== 'custom' ? (selectedTarget?.slug ?? preservedTargetSlug) : undefined,
+      });
+    }
+    if (draft.openInNewTab !== undefined) {
+      updated.openInNewTab = openInNewTab || undefined;
+    }
+    if (draft.localization) {
+      updated.localizationMode = localization.mode === 'fixed_locale' ? 'fixed_locale' : undefined;
+      updated.fixedLocale = localization.mode === 'fixed_locale' ? localization.fixedLocale || undefined : undefined;
+    }
+    if (draft.visibility) {
+      updated.visibility = visibility.mode === 'all' ? undefined : visibility;
+    }
+
+    onSave(updated);
   };
 
   return (
@@ -114,16 +155,35 @@ function MenuItemForm({
         placeholder={tPage('labelPlaceholder')}
         description={tPage('sourceLabelDescription')}
         value={label}
-        onChange={(e) => setLabel(e.currentTarget.value)}
+        onChange={(e) => {
+          const nextLabel = e.currentTarget.value;
+          setDraft((current) => ({ ...current, label: nextLabel }));
+        }}
         disabled={!editable || !labelOwnedBySource}
       />
       <Group grow gap="xs">
         <Select
           size="xs"
-          value={linkType}
+          value={link.linkType}
           onChange={(v) => {
-            setLinkType(v as MenuLinkType);
-            setTargetId(null);
+            const nextLinkType = v as MenuLinkType;
+            setDraft((current) => {
+              const currentLink =
+                current.link ??
+                ({
+                  linkType: item.linkType as MenuLinkType,
+                  url: item.url || '',
+                  targetId: item.targetId || null,
+                } satisfies MenuItemLinkDraft);
+              return {
+                ...current,
+                link: {
+                  ...currentLink,
+                  linkType: nextLinkType,
+                  targetId: nextLinkType === currentLink.linkType ? currentLink.targetId : null,
+                },
+              };
+            });
           }}
           data={[
             { value: 'custom', label: tPage('customUrl') },
@@ -134,20 +194,43 @@ function MenuItemForm({
           ]}
           disabled={!editable}
         />
-        {linkType === 'custom' ? (
+        {link.linkType === 'custom' ? (
           <TextInput
             size="xs"
             placeholder={tPage('urlPlaceholder')}
-            value={url}
-            onChange={(e) => setUrl(e.currentTarget.value)}
+            value={link.url}
+            onChange={(e) => {
+              const url = e.currentTarget.value;
+              setDraft((current) => {
+                const currentLink =
+                  current.link ??
+                  ({
+                    linkType: item.linkType as MenuLinkType,
+                    url: item.url || '',
+                    targetId: item.targetId || null,
+                  } satisfies MenuItemLinkDraft);
+                return { ...current, link: { ...currentLink, url } };
+              });
+            }}
             disabled={!editable}
           />
         ) : (
           <Select
             size="xs"
             placeholder={tPage('targetPlaceholder')}
-            value={targetId}
-            onChange={setTargetId}
+            value={link.targetId}
+            onChange={(targetId) =>
+              setDraft((current) => {
+                const currentLink =
+                  current.link ??
+                  ({
+                    linkType: item.linkType as MenuLinkType,
+                    url: item.url || '',
+                    targetId: item.targetId || null,
+                  } satisfies MenuItemLinkDraft);
+                return { ...current, link: { ...currentLink, targetId } };
+              })
+            }
             data={targetSelectData}
             searchable
             nothingFoundMessage={tPage('noTargets')}
@@ -159,13 +242,20 @@ function MenuItemForm({
         <Select
           size="xs"
           label={tPage('labelLanguageMode')}
-          value={localizationMode}
+          value={localization.mode}
           onChange={(value) => {
             const nextMode = (value as MenuItemLocalizationMode | null) ?? 'translated';
-            setLocalizationMode(nextMode);
-            if (nextMode !== 'fixed_locale') {
-              setFixedLocale(null);
-            }
+            setDraft((current) => ({
+              ...current,
+              localization: {
+                ...(current.localization ?? {
+                  mode: item.localizationMode ?? (item.fixedLocale ? 'fixed_locale' : 'translated'),
+                  fixedLocale: item.fixedLocale || null,
+                }),
+                mode: nextMode,
+                fixedLocale: nextMode === 'fixed_locale' ? localization.fixedLocale : null,
+              },
+            }));
           }}
           data={[
             { value: 'translated', label: tPage('labelLanguageTranslated') },
@@ -173,13 +263,24 @@ function MenuItemForm({
           ]}
           disabled={!editable}
         />
-        {localizationMode === 'fixed_locale' ? (
+        {localization.mode === 'fixed_locale' ? (
           <Select
             size="xs"
             label={tCommon('labels.language')}
             placeholder={tPage('fixedLocalePlaceholder')}
-            value={fixedLocale}
-            onChange={setFixedLocale}
+            value={localization.fixedLocale}
+            onChange={(fixedLocale) =>
+              setDraft((current) => ({
+                ...current,
+                localization: {
+                  ...(current.localization ?? {
+                    mode: item.localizationMode ?? (item.fixedLocale ? 'fixed_locale' : 'translated'),
+                    fixedLocale: item.fixedLocale || null,
+                  }),
+                  fixedLocale,
+                },
+              }))
+            }
             data={supportedLocaleOptions}
             searchable
             disabled={!editable}
@@ -187,7 +288,7 @@ function MenuItemForm({
         ) : null}
       </Group>
       <Text size="xs" c="dimmed">
-        {localizationMode === 'fixed_locale'
+        {localization.mode === 'fixed_locale'
           ? tPage('labelLanguageFixedLocaleDescription')
           : tPage('labelLanguageTranslatedDescription')}
       </Text>
@@ -195,11 +296,18 @@ function MenuItemForm({
         size="xs"
         label={tCommon('actions.openInNewTab')}
         checked={openInNewTab}
-        onChange={(e) => setOpenInNewTab(e.currentTarget.checked)}
+        onChange={(e) => {
+          const checked = e.currentTarget.checked;
+          setDraft((current) => ({ ...current, openInNewTab: checked }));
+        }}
         disabled={!editable}
       />
       <Divider my="xs" />
-      <VisibilityEditor value={visibility} onChange={setVisibility} disabled={!editable} />
+      <VisibilityEditor
+        value={visibility}
+        onChange={(nextVisibility) => setDraft((current) => ({ ...current, visibility: nextVisibility }))}
+        disabled={!editable}
+      />
       <Group justify="flex-end" gap="xs">
         <Button size="xs" tone="neutral" emphasis="medium" onClick={onCancel}>
           {tCommon('actions.cancel')}

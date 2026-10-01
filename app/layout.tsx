@@ -7,7 +7,7 @@ import '@/lib/styles/document-content.css';
 import '@/lib/styles/print.css';
 
 import React from 'react';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { ClientMessagesProvider } from '@/lib/providers/ClientMessagesProvider';
@@ -49,6 +49,13 @@ import { getRequestLocaleContext } from '@/lib/utils/language.server';
 import { getRequestPathnameFromHeaders, getRequestPathWithSearchFromHeaders } from '@/lib/utils/request-path';
 import { getSession } from '@/lib/utils/session.server';
 import { buildSiteApplicationMetadata, normalizeSiteApplicationTitle } from '@/lib/utils/site-application-metadata';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  minimumScale: 1,
+  viewportFit: 'cover',
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const [localeContext, headersList] = await Promise.all([getRequestLocaleContext(), getRequestHeaders()]);
@@ -167,10 +174,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           href={buildFontStylesheetHref(publicRuntimeConfig.cdnUrl, localeContext.definition.fontProfile)}
         />
         {site.logoUrl ? <meta property="og:logo" content={site.logoUrl} /> : null}
-        <meta
-          name="viewport"
-          content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no, viewport-fit=cover"
-        />
         <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#1a1b1e" media="(prefers-color-scheme: dark)" />
         <meta name="format-detection" content="telephone=no" />

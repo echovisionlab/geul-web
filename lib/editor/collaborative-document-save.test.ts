@@ -177,7 +177,7 @@ describe('registerCollaborativeDocumentSave', () => {
     expect(persistNow).toHaveBeenCalledOnce();
   });
 
-  it('retains pending intent when an automatic persist.now request rejects without busy retrying', async () => {
+  it('retries a failed automatic persist.now request after a quiet backoff and recovers', async () => {
     vi.useFakeTimers();
     const { document, provider } = attachDocumentSave();
     persistNow.mockRejectedValueOnce(new Error('write failed'));
@@ -185,13 +185,63 @@ describe('registerCollaborativeDocumentSave', () => {
     document.getMap('content').set('title', 'Automatic failure');
     provider.decrementUnsyncedChanges();
     await vi.advanceTimersByTimeAsync(2_000);
-    await vi.waitFor(() => expect(persistNow).toHaveBeenCalledOnce());
-    await vi.advanceTimersByTimeAsync(10_000);
-    await Promise.resolve();
-    await Promise.resolve();
-
-    expect(hasPendingEditorSaves('post:post-1')).toBe(true);
+    await settlePromises();
     expect(persistNow).toHaveBeenCalledOnce();
+    expect(hasPendingEditorSaves('post:post-1')).toBe(true);
+
+    await vi.advanceTimersByTimeAsync(999);
+    await settlePromises();
+    expect(persistNow).toHaveBeenCalledOnce();
+    await vi.advanceTimersByTimeAsync(1);
+    await settlePromises();
+    expect(persistNow).toHaveBeenCalledTimes(2);
+    expect(hasPendingEditorSaves('post:post-1')).toBe(false);
+  });
+
+  it('clears a scheduled automatic retry when the tracker is unregistered', async () => {
+    vi.useFakeTimers();
+    const { document, provider } = attachDocumentSave();
+    persistNow.mockRejectedValueOnce(new Error('write failed'));
+
+    document.getMap('content').set('title', 'Unregister before retry');
+    provider.decrementUnsyncedChanges();
+    await vi.advanceTimersByTimeAsync(2_000);
+    await settlePromises();
+    expect(persistNow).toHaveBeenCalledOnce();
+
+    unregisterCallbacks.pop()?.();
+    await vi.advanceTimersByTimeAsync(60_000);
+
+    expect(persistNow).toHaveBeenCalledOnce();
+  });
+
+  it('doubles failed automatic retry delays up to the cap without overlapping requests', async () => {
+    vi.useFakeTimers();
+    const { document, provider } = attachDocumentSave();
+    for (let failure = 0; failure < 7; failure += 1) {
+      persistNow.mockRejectedValueOnce(new Error('temporary write failure'));
+    }
+    persistNow.mockResolvedValueOnce();
+
+    document.getMap('content').set('title', 'Retry with bounded backoff');
+    provider.decrementUnsyncedChanges();
+    await vi.advanceTimersByTimeAsync(2_000);
+    await settlePromises();
+    expect(persistNow).toHaveBeenCalledTimes(1);
+
+    let calls = 1;
+    for (const delay of [1_000, 2_000, 4_000, 8_000, 16_000, 30_000, 30_000]) {
+      await vi.advanceTimersByTimeAsync(delay - 1);
+      await settlePromises();
+      expect(persistNow).toHaveBeenCalledTimes(calls);
+      await vi.advanceTimersByTimeAsync(1);
+      calls += 1;
+      await settlePromises();
+      expect(persistNow).toHaveBeenCalledTimes(calls);
+    }
+
+    expect(hasPendingEditorSaves('post:post-1')).toBe(false);
+    expect(persistNow).toHaveBeenCalledTimes(8);
   });
 
   it('drains a newer edit only after its own persist.now ACK', async () => {
@@ -392,4 +442,10 @@ function deferred<T>() {
     resolve = resolvePromise;
   });
   return { promise, resolve };
+}
+
+async function settlePromises() {
+  for (let index = 0; index < 8; index += 1) {
+    await Promise.resolve();
+  }
 }

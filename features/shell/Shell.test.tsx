@@ -8,6 +8,7 @@ import type { ShellViewProps } from './ui/Shell';
 const mocks = vi.hoisted(() => ({
   invalidateQueries: vi.fn(),
   pathname: '/work',
+  search: '',
   push: vi.fn(),
   signOut: vi.fn(),
   toggleColorScheme: vi.fn(),
@@ -17,12 +18,14 @@ const mocks = vi.hoisted(() => ({
 vi.mock('next/link', () => ({ default: () => null }));
 
 vi.mock('next-intl', () => {
-  const translate = (key: string) => key;
+  const translate = (key: string, values?: Record<string, string>) =>
+    key === 'actions.searchTooltip' ? `${key}:${values?.shortcut ?? ''}` : key;
   return { useTranslations: () => translate };
 });
 
 vi.mock('next/navigation', () => ({
   usePathname: () => mocks.pathname,
+  useSearchParams: () => new URLSearchParams(mocks.search),
   useRouter: () => ({ push: mocks.push }),
 }));
 
@@ -71,7 +74,7 @@ vi.mock('@/lib/auth/client', () => ({
 }));
 
 vi.mock('@/lib/auth/login-page', () => ({
-  buildLoginRedirectHref: (pathname: string) => `/login?redirect=${pathname}`,
+  buildLoginRedirectHref: (path: string) => `/login?redirect=${encodeURIComponent(path)}`,
 }));
 
 vi.mock('@/lib/contexts/ManifestContext', () => ({
@@ -123,6 +126,7 @@ beforeEach(() => {
   document.body.appendChild(container);
   root = createRoot(container);
   mocks.pathname = '/work';
+  mocks.search = '';
   mocks.viewProps = null;
   mocks.invalidateQueries.mockReset();
   mocks.invalidateQueries.mockResolvedValue(undefined);
@@ -149,6 +153,14 @@ function viewProps() {
 }
 
 describe('Shell controller disclosure state', () => {
+  it('keeps public page query context in the login return path and advertises the K shortcut', () => {
+    mocks.search = 'share=share-token&lang=ko&table_page=3';
+    renderController();
+
+    expect(viewProps().loginHref).toBe('/login?redirect=%2Fwork%3Fshare%3Dshare-token%26lang%3Dko%26table_page%3D3');
+    expect(viewProps().labels.searchTooltip).toBe('actions.searchTooltip:Cmd+K');
+  });
+
   it('owns navigation and account state and closes both when navigation completes', () => {
     renderController();
     expect(viewProps()).toMatchObject({ navigationOpened: false, userMenuOpened: false });

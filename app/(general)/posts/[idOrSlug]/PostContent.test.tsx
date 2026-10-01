@@ -109,4 +109,26 @@ describe('typed post content', () => {
 
     expect(html).toContain('can-edit:false');
   });
+
+  it('keeps the validated public body visible when the manage actions RPC is unavailable', async () => {
+    mocks.getPostAllowedActions.mockRejectedValueOnce(new Error('manage service unavailable'));
+    const post = {
+      id: 'post-1',
+      slug: 'post-slug',
+      status: 'published',
+      title: 'Public body remains available',
+    } as PublicPost;
+
+    const html = renderToStaticMarkup(
+      await PostContent({
+        idOrSlug: 'post-slug',
+        initialPost: post,
+        requestedLocale: 'ko',
+      }),
+    );
+
+    expect(html).toContain('title:Public body remains available');
+    expect(html).toContain('actions:');
+    expect(html).toContain('can-edit:false');
+  });
 });

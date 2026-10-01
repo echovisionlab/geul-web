@@ -1,4 +1,5 @@
 import { fromJson } from '@bufbuild/protobuf';
+import { Code, ConnectError } from '@connectrpc/connect';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocumentContentHeight, DocumentRegionPlacement } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
@@ -116,6 +117,22 @@ describe('public page queries', () => {
       pageChrome: 'pinned',
       footer: 'flow',
     });
+  });
+
+  it('keeps genuine public Page not-found results concealed and propagates upstream failures', async () => {
+    const notFound = new ConnectError('not found', Code.NotFound);
+    getPublicPageRpcMock.mockRejectedValueOnce(notFound);
+    await expect(getPageView('missing')).resolves.toBeNull();
+
+    for (const code of [Code.Internal, Code.Unavailable]) {
+      const upstreamError = new ConnectError('upstream unavailable', code);
+      getPublicPageRpcMock.mockRejectedValueOnce(upstreamError);
+      await expect(getPageView('about')).rejects.toBe(upstreamError);
+    }
+
+    const transportError = new Error('connection closed');
+    getPublicPageRpcMock.mockRejectedValueOnce(transportError);
+    await expect(getPageView('about')).rejects.toBe(transportError);
   });
 
   it('threads the share token through the generated document request', async () => {
