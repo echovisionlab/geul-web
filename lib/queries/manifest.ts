@@ -7,12 +7,7 @@ import {
   type Menus as ProtoMenus,
   type SiteSettings as ProtoSiteSettings,
 } from '@echovisionlab/geul-proto/public/manifest_pb.ts';
-import {
-  createManifestClient,
-  createPublicManifestClient,
-  createPublicPageClient,
-  createPublicPageClientWithAuth,
-} from '@/lib/api/server-client';
+import { createManifestClient, createPublicManifestClient } from '@/lib/api/server-client';
 import { resolveFeaturedImageDeliveryUrl } from '@/lib/media/post-featured-image';
 import { mapProtoDocumentLayout } from '@/lib/queries/document-layout';
 import { mapPublicLocalizationInfo, type PublicLocalizationInfoLike } from '@/lib/queries/localized-public';
@@ -21,6 +16,7 @@ import type { ContentBlockMediaItem } from '@echovisionlab/geul-proto/content/bl
 import { materializeLocalizedPageSections, type LocalizedPageSection } from '@/features/editor/contract/localized-page';
 import { createLogger } from '@/lib/utils/logger';
 import { assetRefUrl, themedAssetRefUrl } from '@/lib/utils/asset-ref';
+import { getPublicPageResponse } from '@/lib/queries/page-public.server';
 
 const logger = createLogger('manifest-queries');
 
@@ -314,10 +310,9 @@ export interface PublicPageData {
  * - slug="about" returns the page with that slug
  */
 const getPublicPageCached = cache(
-  async (slug: string, requestedLocale: string | null): Promise<PublicPageData | null> => {
+  async (decodedSlug: string, requestedLocale: string | null): Promise<PublicPageData | null> => {
     try {
-      const client = requestedLocale ? await createPublicPageClientWithAuth(requestedLocale) : createPublicPageClient();
-      const response = await client.get({ slug });
+      const response = await getPublicPageResponse(decodedSlug, requestedLocale);
 
       const page = response.page;
       if (!page) {
@@ -356,5 +351,5 @@ export function getPublicPage(
   slug: string,
   options?: { requestedLocale?: string | null },
 ): Promise<PublicPageData | null> {
-  return getPublicPageCached(slug, normalizeRequestedLocale(options?.requestedLocale));
+  return getPublicPageCached(decodeURIComponent(slug), normalizeRequestedLocale(options?.requestedLocale));
 }

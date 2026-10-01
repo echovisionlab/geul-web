@@ -34,7 +34,7 @@ vi.mock('@/lib/queries/metadata', () => ({
 }));
 vi.mock('@/lib/utils/language.server', () => ({ getUserLocale: vi.fn(async () => 'en') }));
 vi.mock('@/lib/utils/url.server', () => ({ getBaseUrl: vi.fn(async () => 'https://example.test') }));
-vi.mock('@/features/page/PageEditor/PageEditor', () => ({ PageEditor: vi.fn(() => null) }));
+vi.mock('@/features/page/PageEditor/LazyPageEditor', () => ({ LazyPageEditor: vi.fn(() => null) }));
 vi.mock('./PageContent', () => ({ PageContent: vi.fn(() => null) }));
 vi.mock('./PageContentWithToken', () => ({ PageContentWithToken: vi.fn(() => null) }));
 

@@ -1,9 +1,6 @@
 'use client';
 
-import { MermaidDiagram } from '@/features/mermaid/MermaidDiagram';
-
-import { useCallback } from 'react';
-import katex from 'katex';
+import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { normalizeRichTextHref } from '@echovisionlab/geul-common/editor/link-normalization';
@@ -13,7 +10,10 @@ import {
   ContentBlockDownloadAvailability,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { FileDownloadAction, FileDownloadAvailability } from '@echovisionlab/geul-proto/public/file_pb.ts';
-import { richTextBlockKindByProtoCase } from '@echovisionlab/geul-proto/content/block_catalog.ts';
+import {
+  richTextBlockKindByProtoCase,
+  type RichTextBlockKind,
+} from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import { AudioMediaView } from '@/features/media/AudioMediaView';
 import { VideoMediaView } from '@/features/media/VideoMediaView';
 import { AttachmentMediaView } from '@/features/media/ui/AttachmentMediaView';
@@ -22,32 +22,37 @@ import { MissingMediaView, type MissingMediaKind } from '@/features/media/ui/Mis
 import { AuthorizedDownloadAction } from '@/features/media-download/AuthorizedDownloadAction';
 import { useContentMediaDelivery } from '@/features/media/ContentMediaDeliveryContext';
 import { useOptionalContentBlockMediaRuntime } from '@/features/media/ContentBlockMediaRuntimeContext';
-import {
-  SHADER_STAGE_DEFINITIONS,
-  validateShaderPassGraph,
-  type ShaderChannel,
-  type ShaderProgramDocument,
-  type ShaderSamplerOptions,
-} from '@/features/editor/tiptap/shader/shader-program';
-import type { ShaderAssetResolver } from '@/features/editor/tiptap/shader/shader-preview-runtime';
-import { MapView } from '@/features/page/blocks/map/View';
-import { PublicExecutableBlockView } from './PublicExecutableBlockView';
 import { resolveAudioViewModelFromBlock } from '@/lib/media/audio-view-model';
-import {
-  formatMediaSize,
-  getBlockPropString,
-  mediaContainerStyleToReact,
-  resolveMediaContainerStyle,
-} from '@/lib/media/shared';
+import { formatMediaSize, getBlockPropString } from '@/lib/media/shared';
 import { resolveVideoViewModelFromBlock } from '@/lib/media/video-view-model';
 import type { Block, InlineContent } from '@/lib/types/page-content';
 import { getFileTypeName } from '@/lib/utils/file-icon';
 import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
-import { getCodeBlockLanguageName, resolveCodeBlockLanguage } from '@/lib/editor/code-block-options';
-import { CodeBlockSurface } from '@/features/editor/tiptap/code/CodeBlockSurface';
-import { normalizeP5Capabilities } from '@/features/editor/tiptap/p5/p5-capabilities';
-import { assertNever, requireRichTextBlockKind } from '@/features/editor/contract/block-registry';
 import { isBlockId } from '@/lib/editor/block-id';
+import { getContainerStyle } from './DefaultBlockView.utils';
+
+const DefaultInlineMathView = dynamic<{ latex: string }>(() =>
+  import('./DefaultInlineMathView').then((module) => module.DefaultInlineMathView),
+);
+const DefaultMathBlockView = dynamic<{ block: Block }>(() =>
+  import('./DefaultMathBlockView').then((module) => module.DefaultMathBlockView),
+);
+const DefaultMapBlockView = dynamic<{ block: Block; requestedLocale?: string }>(() =>
+  import('./DefaultMapBlockView').then((module) => module.DefaultMapBlockView),
+);
+const DefaultCodeBlockView = dynamic<{ block: Block }>(() =>
+  import('./DefaultCodeBlockView').then((module) => module.DefaultCodeBlockView),
+);
+const DefaultMermaidBlockView = dynamic<{ source: string; title: string }>(() =>
+  import('./DefaultMermaidBlockView').then((module) => module.DefaultMermaidBlockView),
+);
+const DefaultExecutableBlockView = dynamic<{ block: Block; source: string }>(() =>
+  import('./DefaultExecutableBlockView').then((module) => module.DefaultExecutableBlockView),
+);
+
+export { resolveShaderMediaAsset } from './DefaultBlockView.utils';
+
+const richTextBlockKinds = new Set<string>(Object.values(richTextBlockKindByProtoCase));
 
 interface DefaultBlockViewProps {
   block: Block;
@@ -56,6 +61,17 @@ interface DefaultBlockViewProps {
 
 function hasOwn<TObject extends object>(value: TObject, key: PropertyKey): key is keyof TObject {
   return Object.hasOwn(value, key);
+}
+
+function requireRichTextBlockKind(value: string): RichTextBlockKind {
+  if (!richTextBlockKinds.has(value)) {
+    throw new Error(`Unsupported rich-text Block kind: ${value}`);
+  }
+  return value as RichTextBlockKind;
+}
+
+function assertNever(value: never, message: string): never {
+  throw new Error(`${message}: ${String(value)}`);
 }
 
 function publicRichTextKind(value: string) {
@@ -104,17 +120,19 @@ export function DefaultBlockView({ block, requestedLocale }: DefaultBlockViewPro
     case 'divider':
       return <DividerBlock />;
     case 'map':
-      return <MapBlockView block={block} requestedLocale={requestedLocale} />;
+      return <DefaultMapBlockView block={block} requestedLocale={requestedLocale} />;
     case 'math':
-      return <MathBlockView block={block} />;
+      return <DefaultMathBlockView block={block} />;
     case 'code-block':
-      return <CodeBlock block={block} />;
+      return <DefaultCodeBlockView block={block} />;
     case 'mermaid':
-      return <MermaidDiagram source={executableSource(block)} title={getBlockPropString(block.props, 'title')} />;
+      return (
+        <DefaultMermaidBlockView source={executableSource(block)} title={getBlockPropString(block.props, 'title')} />
+      );
     case 'p5-sketch':
     case 'three-scene':
     case 'shader':
-      return <ExecutableCodeBlock block={block} />;
+      return <DefaultExecutableBlockView block={block} source={executableSource(block)} />;
     case 'table':
       return <TableBlock block={block} />;
     case 'file': {
@@ -180,17 +198,6 @@ function MissingMediaBlock({ block, kind }: { block: Block; kind: MissingMediaKi
       caption={getBlockPropString(block.props, 'caption')}
       style={getContainerStyle(block)}
     />
-  );
-}
-
-function getContainerStyle(block: Block): React.CSSProperties {
-  return (
-    mediaContainerStyleToReact(
-      resolveMediaContainerStyle(
-        getBlockPropString(block.props, 'previewWidth', '100'),
-        getBlockPropString(block.props, 'textAlignment', 'left'),
-      ),
-    ) || {}
   );
 }
 
@@ -264,16 +271,7 @@ function renderInlineContent(content: InlineContent[] | undefined): React.ReactN
     }
 
     if (item.type === 'mathInline') {
-      let html = item.props?.latex as string;
-      try {
-        html = katex.renderToString(item.props?.latex as string, {
-          displayMode: false,
-          throwOnError: false,
-        });
-      } catch {
-        // fallback to raw latex
-      }
-      return <span key={index} className="math-inline" dangerouslySetInnerHTML={{ __html: html }} />;
+      return <DefaultInlineMathView key={index} latex={item.props?.latex as string} />;
     }
 
     return null;
@@ -395,29 +393,6 @@ function ImageBlock({ block }: { block: Block }) {
   );
 }
 
-function MathBlockView({ block }: { block: Block }) {
-  const latex = getBlockPropString(block.props, 'latex');
-  if (!latex) {
-    return null;
-  }
-
-  let html = latex;
-  try {
-    html = katex.renderToString(latex, {
-      displayMode: true,
-      throwOnError: false,
-    });
-  } catch {
-    // fallback to raw latex
-  }
-
-  return <div className="math-block" data-latex={latex} dangerouslySetInnerHTML={{ __html: html }} />;
-}
-
-function MapBlockView({ block, requestedLocale }: { block: Block; requestedLocale?: string }) {
-  return <MapView props={block.props} requestedLocale={requestedLocale} />;
-}
-
 function VideoBlock({ block }: { block: Block }) {
   const model = resolveVideoViewModelFromBlock(block);
   if (!model.hlsUrl && !model.playbackUrl && !getBlockPropString(block.props, 'fileId')) {
@@ -446,48 +421,6 @@ function AudioBlock({ block }: { block: Block }) {
   );
 }
 
-function CodeBlock({ block }: { block: Block }) {
-  const editorMessages = useTranslations('editorCommon.editor');
-  const commonActions = useTranslations('common.actions');
-  const commonLabels = useTranslations('common.labels');
-  const language = (block.props.language as string) || 'text';
-  const resolvedLanguage = resolveCodeBlockLanguage(language);
-  const title = getBlockPropString(block.props, 'title');
-  const code = block.content?.map((c) => c.text || '').join('') || '';
-
-  return (
-    <figure data-content-type="codeBlock" style={getContainerStyle(block)}>
-      <div
-        data-language={language}
-        data-preview-width={getBlockPropString(block.props, 'previewWidth', '100')}
-        data-text-alignment={String(block.props.textAlignment || 'left')}
-      >
-        <CodeBlockSurface
-          title={title}
-          fallbackTitle={editorMessages('slashMenu.items.codeBlock.title')}
-          titleLabel={commonLabels('title')}
-          languageName={getCodeBlockLanguageName(language)}
-          source={code}
-          sourceLabel={commonLabels('source')}
-          copyLabel={commonActions('copy')}
-          monacoLanguage={resolvedLanguage.monacoLanguage}
-          modelPath={`public/code/${encodeURIComponent(block.id)}.${resolvedLanguage.fileExtension}`}
-        />
-      </div>
-    </figure>
-  );
-}
-
-function executableLanguage(block: Block): 'glsl' | 'javascript' | 'typescript' {
-  if (block.type === 'shader') {
-    return 'glsl';
-  }
-  if (block.type === 'threeScene') {
-    return block.props.language === 'javascript' ? 'javascript' : 'typescript';
-  }
-  return 'javascript';
-}
-
 function executableSource(block: Block): string {
   const source = block.content?.map((node) => (node.type === 'text' ? (node.text ?? '') : '')).join('') ?? '';
   if (source) {
@@ -496,190 +429,6 @@ function executableSource(block: Block): string {
   return block.type === 'p5Sketch' || block.type === 'threeScene' || block.type === 'mermaid'
     ? getBlockPropString(block.props, 'source')
     : '';
-}
-
-function exactKeys(value: Record<string, unknown>, keys: readonly string[]): boolean {
-  const actual = Object.keys(value).sort();
-  return actual.length === keys.length && actual.every((key, index) => key === [...keys].sort()[index]);
-}
-
-function shaderSampler(value: unknown): ShaderSamplerOptions | null {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return null;
-  }
-  const candidate = value as Record<string, unknown>;
-  return exactKeys(candidate, ['filter', 'vflip', 'wrap']) &&
-    (candidate.filter === 'nearest' || candidate.filter === 'linear') &&
-    (candidate.wrap === 'clamp' || candidate.wrap === 'repeat') &&
-    typeof candidate.vflip === 'boolean'
-    ? (candidate as unknown as ShaderSamplerOptions)
-    : null;
-}
-
-function shaderChannel(value: unknown): ShaderChannel | null {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return null;
-  }
-  const candidate = value as Record<string, unknown>;
-  if (candidate.kind === 'none' && exactKeys(candidate, ['kind'])) {
-    return { kind: 'none' };
-  }
-  if (
-    candidate.kind === 'buffer' &&
-    exactKeys(candidate, ['buffer', 'kind']) &&
-    ['A', 'B', 'C', 'D'].includes(String(candidate.buffer))
-  ) {
-    return { kind: 'buffer', buffer: candidate.buffer as 'A' | 'B' | 'C' | 'D' };
-  }
-  const sampler = shaderSampler(candidate.sampler);
-  if (!sampler) {
-    return null;
-  }
-  if (
-    (candidate.kind === 'textureFile' || candidate.kind === 'videoFile') &&
-    exactKeys(candidate, ['fileId', 'kind', 'sampler']) &&
-    typeof candidate.fileId === 'string' &&
-    candidate.fileId
-  ) {
-    return { kind: candidate.kind, fileId: candidate.fileId, sampler };
-  }
-  if (
-    candidate.kind === 'cubemapFiles' &&
-    exactKeys(candidate, ['fileIds', 'kind', 'sampler']) &&
-    Array.isArray(candidate.fileIds) &&
-    candidate.fileIds.length === 6 &&
-    candidate.fileIds.every((fileId) => typeof fileId === 'string' && fileId)
-  ) {
-    return {
-      kind: 'cubemapFiles',
-      fileIds: candidate.fileIds as [string, string, string, string, string, string],
-      sampler,
-    };
-  }
-  if (candidate.kind === 'cubemapPass' && exactKeys(candidate, ['kind', 'sampler'])) {
-    return { kind: 'cubemapPass', sampler };
-  }
-  return null;
-}
-
-function shaderProgramFromBlock(block: Block): ShaderProgramDocument | null {
-  const stages = block.content ?? [];
-  if (stages.length !== SHADER_STAGE_DEFINITIONS.length) {
-    return null;
-  }
-  const sources = {} as ShaderProgramDocument['sources'];
-  const channels: ShaderProgramDocument['channels'] = {};
-  for (const [index, [stage, nodeName]] of SHADER_STAGE_DEFINITIONS.entries()) {
-    const rawStage = stages[index] as unknown;
-    if (!rawStage || typeof rawStage !== 'object' || Array.isArray(rawStage)) {
-      return null;
-    }
-    const candidate = rawStage as Record<string, unknown>;
-    if (candidate.type !== nodeName || !Array.isArray(candidate.content)) {
-      return null;
-    }
-    const sourceParts: string[] = [];
-    for (const rawText of candidate.content) {
-      if (!rawText || typeof rawText !== 'object' || Array.isArray(rawText)) {
-        return null;
-      }
-      const text = rawText as Record<string, unknown>;
-      const styles = text.styles;
-      if (
-        text.type !== 'text' ||
-        typeof text.text !== 'string' ||
-        (styles !== undefined && (!styles || typeof styles !== 'object' || Object.keys(styles).length > 0))
-      ) {
-        return null;
-      }
-      sourceParts.push(text.text);
-    }
-    sources[stage] = sourceParts.join('');
-    if (index >= 2) {
-      const props = candidate.props;
-      if (
-        !props ||
-        typeof props !== 'object' ||
-        Array.isArray(props) ||
-        !exactKeys(props as Record<string, unknown>, ['channels'])
-      ) {
-        return null;
-      }
-      const rawChannels = (props as Record<string, unknown>).channels;
-      if (!Array.isArray(rawChannels) || rawChannels.length !== 4) {
-        return null;
-      }
-      const parsed = rawChannels.map(shaderChannel);
-      if (parsed.some((channel) => channel === null)) {
-        return null;
-      }
-      channels[stage as keyof typeof channels] = parsed as ShaderChannel[];
-    } else if (
-      candidate.props !== undefined &&
-      (!candidate.props || typeof candidate.props !== 'object' || Object.keys(candidate.props).length > 0)
-    ) {
-      return null;
-    }
-  }
-  const program = { sources, channels };
-  return validateShaderPassGraph(program) ? null : program;
-}
-
-function ExecutableCodeBlock({ block }: { block: Block }) {
-  const mediaDelivery = useContentMediaDelivery();
-  const resolveShaderAsset = useCallback<ShaderAssetResolver>(
-    (fileId, kind) => resolveShaderMediaAsset(mediaDelivery, fileId, kind),
-    [mediaDelivery],
-  );
-  const language = executableLanguage(block);
-  const commonProps = {
-    blockId: block.id,
-    title: getBlockPropString(block.props, 'title'),
-    previewHeight: Number(getBlockPropString(block.props, 'previewHeight', '360')),
-    style: getContainerStyle(block),
-  };
-  if (block.type === 'shader') {
-    const program = shaderProgramFromBlock(block);
-    return program ? (
-      <PublicExecutableBlockView
-        {...commonProps}
-        type="shader"
-        language="glsl"
-        program={program}
-        resolveAsset={resolveShaderAsset}
-      />
-    ) : (
-      <div data-invalid-executable-block="shader" />
-    );
-  }
-  return (
-    <PublicExecutableBlockView
-      {...commonProps}
-      type={block.type as 'p5Sketch' | 'threeScene'}
-      source={executableSource(block)}
-      language={language}
-      {...(block.type === 'p5Sketch'
-        ? {
-            capabilities: normalizeP5Capabilities(block.props.capabilities),
-          }
-        : {})}
-    />
-  );
-}
-
-export async function resolveShaderMediaAsset(
-  mediaDelivery: ReturnType<typeof useContentMediaDelivery>,
-  fileId: string,
-  kind: 'image' | 'video',
-) {
-  if (!mediaDelivery) {
-    throw new Error('Shader media delivery is unavailable.');
-  }
-  const url = await mediaDelivery.resolveAsset(fileId, kind);
-  if (!url?.trim()) {
-    throw new Error(`Shader ${kind} file is unavailable.`);
-  }
-  return { fileId, kind, url } as const;
 }
 
 function TableBlock({ block }: { block: Block }) {

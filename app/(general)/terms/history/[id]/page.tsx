@@ -4,7 +4,7 @@ import { connection } from 'next/server';
 import { notFound } from 'next/navigation';
 import { Code } from '@connectrpc/connect';
 import { getTranslations } from 'next-intl/server';
-import { TermsEditor } from '@/features/policy/TermsEditor';
+import { LazyTermsEditor } from '@/features/policy/LazyTermsEditor';
 import { JsonLdScript } from '@/features/metadata/ui/JsonLdScript';
 import { getSiteMetadataDocument } from '@/lib/queries/metadata';
 import { getAllSiteSettings } from '@/lib/queries/site-setting';
@@ -54,7 +54,9 @@ export default async function TermsHistoryDetailPage({ params, searchParams }: P
         notFound();
       }
       const siteSettings = session?.user?.role === 'admin' ? await getAllSiteSettings() : null;
-      return <TermsEditor initialTerms={terms} siteSettings={siteSettings} canEdit={session?.user?.role === 'admin'} />;
+      return (
+        <LazyTermsEditor initialTerms={terms} siteSettings={siteSettings} canEdit={session?.user?.role === 'admin'} />
+      );
     } catch (error) {
       if (
         isConnectError(error) &&

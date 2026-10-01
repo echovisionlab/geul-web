@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { ProgramEventSeriesEditor } from '@/features/program-event/ProgramEventSeriesEditor/ProgramEventSeriesEditor';
+import { LazyProgramEventSeriesEditor } from '@/features/program-event/ProgramEventSeriesEditor/LazyProgramEventSeriesEditor';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { getManageSiteContext } from '@/lib/queries/manifest';
 import { getProgramEventSeriesAdmin } from '@/lib/queries/program-event';
@@ -41,7 +41,7 @@ export async function renderProgramEventSeriesEditRoute(idOrSlug: string, query:
 
   const [baseUrl, site] = await Promise.all([getBaseUrl(), getManageSiteContext()]);
   return (
-    <ProgramEventSeriesEditor
+    <LazyProgramEventSeriesEditor
       seriesId={series.id}
       initialTitle={series.title}
       initialSlug={series.slug}

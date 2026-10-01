@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { SimpleGrid, Stack, Text } from '@mantine/core';
 import { MonthPickerInput, type DateValue } from '@mantine/dates';
+import '@mantine/dates/styles.css';
 import { TextInput, NativeSelect, Switch, TagsInput } from '@/components/core/Input';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
 import { WORK_TYPE_LABELS, WORK_TYPES, WorkType } from '@/lib/types/work/model';

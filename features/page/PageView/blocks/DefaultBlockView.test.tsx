@@ -1,8 +1,9 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { create } from '@bufbuild/protobuf';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { MantineProvider } from '@mantine/core';
+import Loadable from 'next/dist/shared/lib/loadable.shared-runtime';
 import {
   ContentBlockDownloadAction,
   ContentBlockDownloadAvailability,
@@ -15,6 +16,10 @@ import type { Block, InlineContent } from '@/lib/types/page-content';
 import { DefaultBlockView, resolveShaderMediaAsset, resolveUnifiedFileViewKind } from './DefaultBlockView';
 
 describe('DefaultBlockView', () => {
+  beforeAll(async () => {
+    await Loadable.preloadAll();
+  });
+
   const noneChannels = () => Array.from({ length: 4 }, () => ({ kind: 'none' }));
   const shaderContent = () =>
     [
@@ -96,10 +101,58 @@ describe('DefaultBlockView', () => {
     expect(html).toContain('TypeScript');
     expect(html).toContain('aria-label="Copy"');
     expect(html).toContain('data-code-block-surface');
+    expect(html).toContain('data-code-block-print-source');
+    expect(html).toContain('const answer: number = 42;');
     expect(html).toContain('width:58%');
     expect(html).toContain('margin-left:auto');
     expect(html).toContain('margin-right:auto');
     expect(html).not.toContain('data-runtime-surface');
+  });
+
+  it('renders inline and display math through the public renderer', () => {
+    const inlineHtml = renderToStaticMarkup(
+      <DefaultBlockView
+        block={{
+          id: 'inline-math',
+          type: 'paragraph',
+          props: {},
+          content: [{ type: 'mathInline', props: { latex: 'x^2' } }],
+          children: [],
+        }}
+      />,
+    );
+    const displayHtml = renderToStaticMarkup(
+      <DefaultBlockView
+        block={{ id: 'display-math', type: 'math', props: { latex: 'y^2' }, content: [], children: [] }}
+      />,
+    );
+
+    expect(inlineHtml).toContain('class="math-inline"');
+    expect(inlineHtml).toContain('class="katex"');
+    expect(displayHtml).toContain('class="math-block" data-latex="y^2"');
+    expect(displayHtml).toContain('class="katex"');
+  });
+
+  it('renders Mermaid title and loading surface through the lazy public view', () => {
+    const html = renderToStaticMarkup(
+      <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
+        <MantineProvider>
+          <DefaultBlockView
+            block={{
+              id: 'mermaid',
+              type: 'mermaid',
+              props: { source: 'graph TD\nA --> B', title: 'Recording flow' },
+              content: [],
+              children: [],
+            }}
+          />
+        </MantineProvider>
+      </NextIntlClientProvider>,
+    );
+
+    expect(html).toContain('aria-label="Recording flow"');
+    expect(html).toContain('Recording flow');
+    expect(html).toContain('role="status"');
   });
 
   it('projects durable p5 device capabilities into the public runtime controls', () => {

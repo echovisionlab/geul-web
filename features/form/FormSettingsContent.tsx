@@ -5,6 +5,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Divider, Group, Stack, Text, Title } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
+import '@mantine/dates/styles.css';
 import { notifications } from '@mantine/notifications';
 import { MultiSelect, NumberInput, PasswordInput, Switch } from '@/components/core/Input';
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';

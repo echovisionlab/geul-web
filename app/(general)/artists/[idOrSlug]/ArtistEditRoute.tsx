@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { ArtistDetailEditor } from '@/features/artist/ArtistEditor/ArtistDetailEditor';
+import { LazyArtistDetailEditor } from '@/features/artist/ArtistEditor/LazyArtistDetailEditor';
 import { getArtistAdminAction } from '@/lib/actions/artist';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { getSettings } from '@/lib/queries/manifest';
@@ -48,5 +48,5 @@ export async function renderArtistEditRoute(idOrSlug: string, query: SearchParam
   }
 
   const baseUrl = await getBaseUrl();
-  return <ArtistDetailEditor id={artist.id} artist={artist} baseUrl={baseUrl} />;
+  return <LazyArtistDetailEditor id={artist.id} artist={artist} baseUrl={baseUrl} />;
 }

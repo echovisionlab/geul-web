@@ -4,7 +4,7 @@ import { connection } from 'next/server';
 import { notFound } from 'next/navigation';
 import { Code } from '@connectrpc/connect';
 import { getTranslations } from 'next-intl/server';
-import { PrivacyEditor } from '@/features/policy/PrivacyEditor';
+import { LazyPrivacyEditor } from '@/features/policy/LazyPrivacyEditor';
 import { JsonLdScript } from '@/features/metadata/ui/JsonLdScript';
 import { getSiteMetadataDocument } from '@/lib/queries/metadata';
 import { getPrivacyVersion } from '@/lib/queries/privacy';
@@ -55,7 +55,11 @@ export default async function PrivacyHistoryDetailPage({ params, searchParams }:
       }
       const siteSettings = session?.user?.role === 'admin' ? await getAllSiteSettings() : null;
       return (
-        <PrivacyEditor initialPrivacy={privacy} siteSettings={siteSettings} canEdit={session?.user?.role === 'admin'} />
+        <LazyPrivacyEditor
+          initialPrivacy={privacy}
+          siteSettings={siteSettings}
+          canEdit={session?.user?.role === 'admin'}
+        />
       );
     } catch (error) {
       if (

@@ -19,26 +19,30 @@ import { PrintButton } from '@/features/print/PrintButton';
 import { LegalRichTextContent } from '@/features/policy/LegalRichTextContent';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
 import { normalizeLocale } from '@/lib/i18n/locale';
-import { getActivePrivacy, getScheduledPrivacy, getScheduledPrivacyPreview } from '@/lib/queries/privacy-browser';
+import { getPrivacyPageData, getScheduledPrivacyPreview } from '@/lib/queries/privacy-browser';
+import type { PublicLegalPageInitialData } from '@/lib/queries/legal-public-page';
 import { CONTENT_LANGUAGE_QUERY_PARAM } from '@/lib/translation/content-language';
 import classes from '@/features/policy/LegalDocumentView.module.css';
 
-export function PrivacyPageClient() {
+interface Props {
+  initialData?: PublicLegalPageInitialData;
+}
+
+export function PrivacyPageClient({ initialData }: Props) {
   return (
     <Suspense fallback={<PageLoader />}>
-      <PrivacyContent />
+      <PrivacyContent initialData={initialData} />
     </Suspense>
   );
 }
 
-function PrivacyContent() {
+function PrivacyContent({ initialData }: Props) {
   const searchParams = useSearchParams();
   const previewId = searchParams.get('preview');
   const previewToken = searchParams.get('token');
   const locale = useLocale();
   const requestedLocale = normalizeLocale(searchParams.get(CONTENT_LANGUAGE_QUERY_PARAM)) ?? locale;
 
-  // If preview mode
   if (previewId && previewToken) {
     return (
       <PrivacyPreview
@@ -50,26 +54,45 @@ function PrivacyContent() {
     );
   }
 
-  return <PrivacyActive requestedLocale={requestedLocale} query={Object.fromEntries(searchParams.entries())} />;
+  return (
+    <PrivacyActive
+      requestedLocale={requestedLocale}
+      query={Object.fromEntries(searchParams.entries())}
+      initialData={initialData}
+    />
+  );
 }
 
-function PrivacyActive({ requestedLocale, query }: { requestedLocale: string; query: Record<string, string> }) {
+function PrivacyActive({
+  requestedLocale,
+  query,
+  initialData,
+}: Props & { requestedLocale: string; query: Record<string, string> }) {
   const t = useTranslations('privacyPage.active');
   const tLegalPage = useTranslations('legalPageCommon');
   const tCommonEntities = useTranslations('common.entities');
   const tCommonLabels = useTranslations('common.labels');
   const dateTime = useDateTimeFormatter();
-  const { data: activePrivacy, isLoading } = useQuery({
-    queryKey: ['privacy', 'active', requestedLocale],
-    queryFn: () => getActivePrivacy(requestedLocale),
+  const tCommonMessages = useTranslations('common.messages');
+  const matchingInitialData = initialData?.requestedLocale === requestedLocale ? initialData : undefined;
+  const { data, dataUpdatedAt, isLoading, error } = useQuery({
+    queryKey: ['privacy', 'page', requestedLocale],
+    queryFn: () => getPrivacyPageData(requestedLocale),
+    initialData: matchingInitialData?.data,
+    initialDataUpdatedAt: matchingInitialData?.updatedAt,
   });
-  const { data: scheduledPrivacy } = useQuery({
-    queryKey: ['privacy', 'scheduled', requestedLocale],
-    queryFn: () => getScheduledPrivacy(requestedLocale),
-  });
+  // A return visit can already have older data in the browser query cache.
+  const pageData =
+    matchingInitialData && matchingInitialData.updatedAt > dataUpdatedAt ? matchingInitialData.data : data;
+  const activePrivacy = pageData?.active;
+  const scheduledPrivacy = pageData?.scheduled;
 
-  if (isLoading) {
+  if (isLoading && !pageData) {
     return <PageLoader />;
+  }
+
+  if (error && !pageData) {
+    return <Alert tone="danger">{tCommonMessages('failedToLoad')}</Alert>;
   }
 
   return (
@@ -111,10 +134,10 @@ function PrivacyActive({ requestedLocale, query }: { requestedLocale: string; qu
         </Group>
       </Group>
 
-      {scheduledPrivacy && (
+      {scheduledPrivacy?.effectiveFrom && (
         <Alert icon={<IconCalendar size={16} />} tone="accent" className={classes.notice}>
           {tLegalPage('active.upcomingAlert', {
-            date: dateTime.date(scheduledPrivacy.effectiveFrom!, {
+            date: dateTime.date(scheduledPrivacy.effectiveFrom, {
               year: 'numeric',
               month: 'long',
               day: 'numeric',

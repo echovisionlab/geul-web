@@ -3,6 +3,7 @@
 import { IconCopy, IconExternalLink, IconLink, IconPlus, IconTrash } from '@tabler/icons-react';
 import { Group, Loader, Stack, Text } from '@mantine/core';
 import { DateTimePicker } from '@mantine/dates';
+import '@mantine/dates/styles.css';
 import { LabelBadge } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';

@@ -10,7 +10,6 @@ import {
   createPublicArtistClientWithAuth,
   createPublicFormClientWithAuth,
   createPublicLabelClientWithAuth,
-  createPublicPageClientWithAuth,
   createPublicPostClientWithAuth,
   createPublicReleaseClientWithAuth,
   createPublicMemberClient,
@@ -25,6 +24,7 @@ import { getPublicCategoryBySlug, getPublicTagBySlug } from '@/lib/queries/taxon
 import { createLogger } from '@/lib/utils/logger';
 import { themedAssetRefUrl } from '@/lib/utils/asset-ref';
 import { isValidUuid } from '@/lib/utils/validation';
+import { getPublicPageResponse } from '@/lib/queries/page-public.server';
 
 const logger = createLogger('metadata-queries');
 
@@ -316,10 +316,9 @@ export function getSiteMetadataDocument(options?: { requestedLocale?: string | n
 }
 
 const getHomeMetadataDocumentCached = cache(async (requestedLocale: string | null): Promise<HomeMetadataDocument> => {
-  const client = await createPublicPageClientWithAuth(requestedLocale);
   const [site, response] = await Promise.all([
     getSiteMetadataDocument({ requestedLocale }),
-    client.get({ slug: '/' }).catch((err) => {
+    getPublicPageResponse('/', requestedLocale).catch((err) => {
       if (isConnectErrorCode(err, Code.NotFound)) {
         return null;
       }
@@ -464,18 +463,16 @@ const getPageMetadataDocumentCached = cache(
   ): Promise<PageMetadataDocument | null> => {
     try {
       const requestedSlug = decodeURIComponent(idOrSlug);
-      const client = await createPublicPageClientWithAuth(requestedLocale);
       const [site, response] = await Promise.all([
         getSiteMetadataDocument({ requestedLocale }),
-        client.get({ slug: requestedSlug }),
+        getPublicPageResponse(requestedSlug, requestedLocale),
       ]);
       const localizedResponse = await maybeFetchSourceLocale({
         preferSourceLocale,
         initialResponse: response,
         entity: response.page ?? null,
         fetchWithLocale: async (locale) => {
-          const sourceClient = await createPublicPageClientWithAuth(locale);
-          return sourceClient.get({ slug: requestedSlug });
+          return getPublicPageResponse(requestedSlug, locale);
         },
       });
 

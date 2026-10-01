@@ -19,26 +19,30 @@ import { PrintButton } from '@/features/print/PrintButton';
 import { LegalRichTextContent } from '@/features/policy/LegalRichTextContent';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
 import { normalizeLocale } from '@/lib/i18n/locale';
-import { getActiveTerms, getScheduledTerms, getScheduledTermsPreview } from '@/lib/queries/terms-browser';
+import { getTermsPageData, getScheduledTermsPreview } from '@/lib/queries/terms-browser';
+import type { PublicLegalPageInitialData } from '@/lib/queries/legal-public-page';
 import { CONTENT_LANGUAGE_QUERY_PARAM } from '@/lib/translation/content-language';
 import classes from '@/features/policy/LegalDocumentView.module.css';
 
-export function TermsPageClient() {
+interface Props {
+  initialData?: PublicLegalPageInitialData;
+}
+
+export function TermsPageClient({ initialData }: Props) {
   return (
     <Suspense fallback={<PageLoader />}>
-      <TermsContent />
+      <TermsContent initialData={initialData} />
     </Suspense>
   );
 }
 
-function TermsContent() {
+function TermsContent({ initialData }: Props) {
   const searchParams = useSearchParams();
   const previewId = searchParams.get('preview');
   const previewToken = searchParams.get('token');
   const locale = useLocale();
   const requestedLocale = normalizeLocale(searchParams.get(CONTENT_LANGUAGE_QUERY_PARAM)) ?? locale;
 
-  // If preview mode
   if (previewId && previewToken) {
     return (
       <TermsPreview
@@ -50,26 +54,45 @@ function TermsContent() {
     );
   }
 
-  return <TermsActive requestedLocale={requestedLocale} query={Object.fromEntries(searchParams.entries())} />;
+  return (
+    <TermsActive
+      requestedLocale={requestedLocale}
+      query={Object.fromEntries(searchParams.entries())}
+      initialData={initialData}
+    />
+  );
 }
 
-function TermsActive({ requestedLocale, query }: { requestedLocale: string; query: Record<string, string> }) {
+function TermsActive({
+  requestedLocale,
+  query,
+  initialData,
+}: Props & { requestedLocale: string; query: Record<string, string> }) {
   const t = useTranslations('termsPage.active');
   const tLegalPage = useTranslations('legalPageCommon');
   const tCommonEntities = useTranslations('common.entities');
   const tCommonLabels = useTranslations('common.labels');
   const dateTime = useDateTimeFormatter();
-  const { data: activeTerms, isLoading } = useQuery({
-    queryKey: ['terms', 'active', requestedLocale],
-    queryFn: () => getActiveTerms(requestedLocale),
+  const tCommonMessages = useTranslations('common.messages');
+  const matchingInitialData = initialData?.requestedLocale === requestedLocale ? initialData : undefined;
+  const { data, dataUpdatedAt, isLoading, error } = useQuery({
+    queryKey: ['terms', 'page', requestedLocale],
+    queryFn: () => getTermsPageData(requestedLocale),
+    initialData: matchingInitialData?.data,
+    initialDataUpdatedAt: matchingInitialData?.updatedAt,
   });
-  const { data: scheduledTerms } = useQuery({
-    queryKey: ['terms', 'scheduled', requestedLocale],
-    queryFn: () => getScheduledTerms(requestedLocale),
-  });
+  // A return visit can already have older data in the browser query cache.
+  const pageData =
+    matchingInitialData && matchingInitialData.updatedAt > dataUpdatedAt ? matchingInitialData.data : data;
+  const activeTerms = pageData?.active;
+  const scheduledTerms = pageData?.scheduled;
 
-  if (isLoading) {
+  if (isLoading && !pageData) {
     return <PageLoader />;
+  }
+
+  if (error && !pageData) {
+    return <Alert tone="danger">{tCommonMessages('failedToLoad')}</Alert>;
   }
 
   return (
@@ -111,10 +134,10 @@ function TermsActive({ requestedLocale, query }: { requestedLocale: string; quer
         </Group>
       </Group>
 
-      {scheduledTerms && (
+      {scheduledTerms?.effectiveFrom && (
         <Alert icon={<IconCalendar size={16} />} tone="accent" className={classes.notice}>
           {tLegalPage('active.upcomingAlert', {
-            date: dateTime.date(scheduledTerms.effectiveFrom!, {
+            date: dateTime.date(scheduledTerms.effectiveFrom, {
               year: 'numeric',
               month: 'long',
               day: 'numeric',

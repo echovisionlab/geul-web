@@ -15,8 +15,8 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('next/navigation', () => ({ redirect: mocks.redirect, notFound: mocks.notFound }));
 vi.mock('next-intl/server', () => ({ getTranslations: vi.fn() }));
-vi.mock('@/features/post/PostEditor/PostEditor', () => ({
-  PostEditor: ({ postId, initialAllowedActions }: { postId: string; initialAllowedActions: PostAction[] }) => (
+vi.mock('@/features/post/PostEditor/LazyPostEditor', () => ({
+  LazyPostEditor: ({ postId, initialAllowedActions }: { postId: string; initialAllowedActions: PostAction[] }) => (
     <div>
       editor:{postId}:{initialAllowedActions.includes(PostAction.EDIT) ? 'edit' : 'view'}
     </div>

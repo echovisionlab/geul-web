@@ -1,6 +1,7 @@
 'use client';
 
 import { Carousel } from '@mantine/carousel';
+import '@mantine/carousel/styles.css';
 import { SimpleGrid, Skeleton, Stack } from '@mantine/core';
 import { ContentCard, ContentCardSection } from '@/components/core/Section';
 import { getSlideSize } from '../constants';

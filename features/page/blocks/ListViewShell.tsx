@@ -5,6 +5,7 @@ import NextImage from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Carousel } from '@mantine/carousel';
+import '@mantine/carousel/styles.css';
 import { Box, Group, SimpleGrid, Stack, Text } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { Button } from '@/components/core/Button';

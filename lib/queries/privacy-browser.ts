@@ -3,6 +3,7 @@ import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
 import { createPublicPrivacyClient, createPublicPrivacyClientWithLocale } from '@/lib/api/browser-client';
 import { mapPublicLocalizationInfo } from '@/lib/queries/localized-public';
+import { mapPublicLegalPage } from '@/lib/queries/legal-public-page';
 import { materializeLocalizedRichTextTree } from '@/features/editor/contract/localized-rich-text';
 import { createClientLogger, serializeClientLogError } from '@/lib/utils/client-logger';
 
@@ -12,56 +13,25 @@ const logger = createClientLogger('privacy-browser');
 // Client Component queries for Privacy domain
 // ============================================
 
-export async function getActivePrivacy(requestedLocale?: string | null) {
+export async function getPrivacyPageData(requestedLocale?: string | null) {
   try {
     const client = requestedLocale ? createPublicPrivacyClientWithLocale(requestedLocale) : createPublicPrivacyClient();
     const response = await client.get({});
-
-    if (!response.privacy) {
-      return null;
-    }
-
-    return {
-      id: response.privacy.id,
-      version: response.privacy.version,
-      title: response.privacy.title,
-      content: response.privacy.document ? materializeLocalizedRichTextTree(response.privacy.document) : null,
-      localizationInfo: mapPublicLocalizationInfo(response.privacy.localizationInfo),
-      status: 'active' as const,
-      effectiveFrom: response.privacy.effectiveFrom ? timestampDate(response.privacy.effectiveFrom) : null,
-      createdAt: null,
-    };
+    return mapPublicLegalPage(response.privacy, response.scheduled);
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
-      return null;
+      return { active: null, scheduled: null };
     }
     throw err;
   }
 }
 
+export async function getActivePrivacy(requestedLocale?: string | null) {
+  return (await getPrivacyPageData(requestedLocale)).active;
+}
+
 export async function getScheduledPrivacy(requestedLocale?: string | null) {
-  try {
-    const client = requestedLocale ? createPublicPrivacyClientWithLocale(requestedLocale) : createPublicPrivacyClient();
-    const response = await client.get({});
-
-    if (!response.scheduled) {
-      return null;
-    }
-
-    return {
-      id: response.scheduled.id,
-      version: response.scheduled.version,
-      title: response.scheduled.title,
-      localizationInfo: mapPublicLocalizationInfo(response.scheduled.localizationInfo),
-      status: 'scheduled' as const,
-      effectiveFrom: response.scheduled.effectiveFrom ? timestampDate(response.scheduled.effectiveFrom) : null,
-    };
-  } catch (err) {
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return null;
-    }
-    throw err;
-  }
+  return (await getPrivacyPageData(requestedLocale)).scheduled;
 }
 
 export async function getScheduledPrivacyPreview(

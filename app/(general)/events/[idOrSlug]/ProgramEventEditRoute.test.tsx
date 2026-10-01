@@ -20,8 +20,8 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('next/navigation', () => ({ redirect: mocks.redirect, notFound: mocks.notFound }));
 vi.mock('next-intl/server', () => ({ getTranslations: vi.fn() }));
-vi.mock('@/features/program-event/ProgramEventEditor/ProgramEventEditor', () => ({
-  ProgramEventEditor: ({
+vi.mock('@/features/program-event/ProgramEventEditor/LazyProgramEventEditor', () => ({
+  LazyProgramEventEditor: ({
     eventId,
     initialStatus,
     allowedActions,

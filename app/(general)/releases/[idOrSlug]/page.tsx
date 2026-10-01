@@ -3,7 +3,7 @@ import { connection } from 'next/server';
 import { notFound, redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { ShareLinkEntityType } from '@echovisionlab/geul-proto/secure/share_link_pb.ts';
-import { ReleaseEditor } from '@/features/release/ReleaseEditor/ReleaseEditor';
+import { LazyReleaseEditor } from '@/features/release/ReleaseEditor/LazyReleaseEditor';
 import { getReleaseMetadataDocument } from '@/lib/queries/metadata';
 import { getReleaseAdminAction } from '@/lib/actions/release';
 import { listTracksByReleaseAction } from '@/lib/actions/track';
@@ -146,7 +146,7 @@ export default async function ReleaseViewPage({ params, searchParams }: Props) {
     }
 
     return (
-      <ReleaseEditor
+      <LazyReleaseEditor
         releaseId={release.id}
         initialTitle={release.title}
         initialSlug={release.slug}

@@ -14,8 +14,8 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('next/navigation', () => ({ redirect: mocks.redirect, notFound: mocks.notFound }));
 vi.mock('next-intl/server', () => ({ getTranslations: vi.fn() }));
-vi.mock('@/features/artist/ArtistEditor/ArtistDetailEditor', () => ({
-  ArtistDetailEditor: ({ id }: { id: string }) => <div>editor:{id}</div>,
+vi.mock('@/features/artist/ArtistEditor/LazyArtistDetailEditor', () => ({
+  LazyArtistDetailEditor: ({ id }: { id: string }) => <div>editor:{id}</div>,
 }));
 vi.mock('@/lib/actions/artist', () => ({ getArtistAdminAction: mocks.getArtistAdminAction }));
 vi.mock('@/lib/queries/manifest', () => ({ getSettings: vi.fn() }));

@@ -4,6 +4,7 @@ import { IconPlus } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { Group, Modal, Stack } from '@mantine/core';
 import { TimePicker } from '@mantine/dates';
+import '@mantine/dates/styles.css';
 import { Button } from '@/components/core/Button';
 import { TextInput } from '@/components/core/Input';
 

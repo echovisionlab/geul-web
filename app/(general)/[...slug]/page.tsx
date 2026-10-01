@@ -4,7 +4,7 @@ import { connection } from 'next/server';
 import { notFound, redirect } from 'next/navigation';
 import { TranslationEntityType } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
 import { getTranslations } from 'next-intl/server';
-import { PageEditor } from '@/features/page/PageEditor/PageEditor';
+import { LazyPageEditor } from '@/features/page/PageEditor/LazyPageEditor';
 import { JsonLdScript } from '@/features/metadata/ui/JsonLdScript';
 import { createTranslationClient } from '@/lib/api/server-client';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
@@ -169,7 +169,7 @@ export default async function PublicPageView({ params, searchParams }: Props) {
     ]);
 
     return (
-      <PageEditor
+      <LazyPageEditor
         pageId={page.id}
         currentMemberId={session.user.id}
         canManageTranslations={session.user.role === 'admin'}

@@ -1,4 +1,5 @@
 import katex from 'katex';
+import 'katex/dist/katex.min.css';
 import { createHighlighter, type Highlighter } from 'shiki';
 import type { LooseBlock } from '@/lib/types/editor/schema';
 
