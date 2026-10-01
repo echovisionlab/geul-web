@@ -36,7 +36,7 @@ import { applyMapInsertWorkflow } from '@/features/editor/tiptap/integration/map
 import type { TiptapSlashActionContext } from '@/features/editor/tiptap/slash/types';
 import { UPLOAD_FAILED_MESSAGE, UPLOAD_INTERRUPTED_MESSAGE } from '@/lib/hooks/useFileUpload';
 import { createMediaStatusLabels, resolveMediaLifecycleDisplay } from '@/lib/media/status';
-import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
+import { useOptionalEditorRuntimeContext } from '@/lib/contexts/EditorRuntimeContext';
 import { getMapPlacesByIdsAction } from '@/lib/actions/map-place';
 import { listMapThemesAction, resolveMapThemeAction } from '@/lib/actions/map-theme';
 
@@ -376,14 +376,16 @@ function LocalizedCollaborativeRichTextEditorSurface({
   );
 }
 
+/** Inherits the entity editor's runtime so body durability has one owner. */
 export function LocalizedCollaborativeRichTextEditor(props: LocalizedCollaborativeRichTextEditorProps) {
-  return (
-    <EditorRuntimeProvider
-      provider={props.provider}
-      entityType={resolveEntityKind(props.entityType)}
-      entityId={props.entityId ?? ''}
-    >
-      <LocalizedCollaborativeRichTextEditorSurface {...props} />
-    </EditorRuntimeProvider>
-  );
+  const runtime = useOptionalEditorRuntimeContext();
+  if (
+    !runtime ||
+    runtime.provider !== props.provider ||
+    runtime.entityType !== resolveEntityKind(props.entityType) ||
+    runtime.entityId !== (props.entityId ?? '')
+  ) {
+    throw new Error('The rich-text surface requires its owning entity editor runtime.');
+  }
+  return <LocalizedCollaborativeRichTextEditorSurface {...props} />;
 }

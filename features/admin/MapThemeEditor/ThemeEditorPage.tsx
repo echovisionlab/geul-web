@@ -8,6 +8,7 @@ import { Box, Divider, useComputedColorScheme } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { Alert } from '@/components/core/Alert';
 import { EditorHeader, type StatusOption } from '@/features/editor/EditorHeader';
+import { useEditorNavigation } from '@/features/editor/useEditorNavigation';
 import { PageLoader } from '@/features/site/PageLoader';
 import { listMapThemesAction, setDefaultMapThemeAction } from '@/lib/actions/map-theme';
 import { useMapThemeEditorCollaboration } from '@/lib/hooks/useMapThemeEditorCollaboration';
@@ -30,6 +31,7 @@ export function ThemeEditorPage({ themeId, initialTheme }: ThemeEditorPageProps)
   const tCommonActions = useTranslations('common.actions');
   const tCommonStatuses = useTranslations('common.statuses');
   const router = useRouter();
+  const performNavigation = useEditorNavigation(`map_theme:${themeId}`);
   const queryClient = useQueryClient();
   const colorScheme = useComputedColorScheme('light');
 
@@ -99,8 +101,8 @@ export function ThemeEditorPage({ themeId, initialTheme }: ThemeEditorPageProps)
   });
 
   const handleBack = useCallback(() => {
-    router.push('/admin/map/themes');
-  }, [router]);
+    void performNavigation(() => router.push('/admin/map/themes'));
+  }, [performNavigation, router]);
 
   const handleStatusChange = useCallback(
     (nextStatus: MapThemeHeaderStatus) => {

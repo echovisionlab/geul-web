@@ -14,6 +14,12 @@ import {
 import { notifyEditorSaveStateChanged, registerEditorSave } from './editor-save-registry';
 
 const MAX_FLUSH_ROUNDS = 4;
+const AUTOMATIC_PERSIST_DEBOUNCE_MS = 2_000;
+
+interface ActiveFlush {
+  operation: Promise<boolean>;
+  hadError: boolean;
+}
 
 const replayOrigins = new WeakSet<object>();
 
@@ -46,7 +52,7 @@ export function createCollaborativeDocumentSaveTracker(
   let localRevision = 0;
   let durableRevision = 0;
   let pendingDurabilityState: BlockRoomDurabilityState | null = null;
-  let activeFlush: Promise<boolean> | null = null;
+  let activeFlush: ActiveFlush | null = null;
   let documentKey: string | null = null;
 
   const handleAfterTransaction = (transaction: Transaction) => {
@@ -74,13 +80,17 @@ export function createCollaborativeDocumentSaveTracker(
   const hasPending = () =>
     persistence.kind === 'block-room' ? pendingDurabilityState !== null : localRevision > durableRevision;
 
-  const flush = (onError?: (error: unknown) => void): Promise<boolean> => {
+  const flush = (onError?: (error: unknown) => void, continueFlushing?: () => boolean): Promise<boolean> => {
     if (activeFlush) {
-      return activeFlush;
+      return activeFlush.operation;
     }
 
+    const state: ActiveFlush = { operation: Promise.resolve(false), hadError: false };
     const operation = (async () => {
       for (let round = 0; round < MAX_FLUSH_ROUNDS; round += 1) {
+        if (continueFlushing && !continueFlushing()) {
+          return false;
+        }
         if (!hasPending()) {
           return true;
         }
@@ -99,6 +109,7 @@ export function createCollaborativeDocumentSaveTracker(
           // This asks the resident to persist. Only block_room.persisted proves block-room durability.
           await persistCollaborativeDocumentNow(provider);
         } catch (error) {
+          state.hadError = true;
           acknowledgementAbort.abort();
           if (!hasPending()) {
             return true;
@@ -120,6 +131,7 @@ export function createCollaborativeDocumentSaveTracker(
         // A persist.now response may precede the broadcast. Keep waiting for the exact durable stamp.
         const acknowledgedState = acknowledgement ? await acknowledgement : null;
         if (!acknowledgedState) {
+          state.hadError = true;
           onError?.(new Error('Block room durability acknowledgement timed out.'));
           return false;
         }
@@ -134,9 +146,10 @@ export function createCollaborativeDocumentSaveTracker(
       return !hasPending();
     })();
 
-    activeFlush = operation;
+    state.operation = operation;
+    activeFlush = state;
     void operation.finally(() => {
-      if (activeFlush === operation) {
+      if (activeFlush === state) {
         activeFlush = null;
         if (documentKey) {
           notifyEditorSaveStateChanged(documentKey);
@@ -157,7 +170,73 @@ export function createCollaborativeDocumentSaveTracker(
         throw new Error('A collaborative save tracker can only be registered once.');
       }
       documentKey = key;
+      let registered = true;
+      let automaticFlushTimer: ReturnType<typeof setTimeout> | null = null;
+      let autoFlushRequestedWhileActive = false;
+      let observedActiveFlush: ActiveFlush | null = null;
+      const isAutomaticFlushEligible = () =>
+        registered &&
+        persistence.kind === 'persist-now' &&
+        hasPending() &&
+        provider.isSynced &&
+        !provider.hasUnsyncedChanges;
+      const observeActiveFlush = (state: ActiveFlush) => {
+        if (observedActiveFlush === state) {
+          return;
+        }
+        observedActiveFlush = state;
+        const finish = () => {
+          if (observedActiveFlush === state) {
+            observedActiveFlush = null;
+          }
+          const shouldFollowUp = registered && !state.hadError && autoFlushRequestedWhileActive && hasPending();
+          autoFlushRequestedWhileActive = false;
+          if (shouldFollowUp) {
+            scheduleAutomaticFlush();
+          }
+        };
+        void state.operation.then(finish, finish);
+      };
+      const scheduleAutomaticFlush = () => {
+        if (!isAutomaticFlushEligible()) {
+          return;
+        }
+        if (activeFlush) {
+          autoFlushRequestedWhileActive = true;
+          observeActiveFlush(activeFlush);
+          return;
+        }
+
+        if (automaticFlushTimer !== null) {
+          clearTimeout(automaticFlushTimer);
+        }
+        automaticFlushTimer = setTimeout(() => {
+          automaticFlushTimer = null;
+          if (!isAutomaticFlushEligible()) {
+            return;
+          }
+          const operation = flush(onFlushError, () => registered);
+          if (activeFlush?.operation === operation) {
+            observeActiveFlush(activeFlush);
+          }
+        }, AUTOMATIC_PERSIST_DEBOUNCE_MS);
+      };
+      const handleUnsyncedChanges = ({ number }: { number: number }) => {
+        if (number === 0) {
+          scheduleAutomaticFlush();
+        }
+      };
+      const handleSynced = ({ state }: { state: boolean }) => {
+        if (state) {
+          scheduleAutomaticFlush();
+        }
+      };
+
       document.on('afterTransaction', handleAfterTransaction);
+      if (persistence.kind === 'persist-now') {
+        provider.on('unsyncedChanges', handleUnsyncedChanges);
+        provider.on('synced', handleSynced);
+      }
       const unsubscribePersisted =
         persistence.kind === 'block-room'
           ? persistence.protocol.subscribePersisted((acknowledgement) => {
@@ -168,8 +247,20 @@ export function createCollaborativeDocumentSaveTracker(
             })
           : () => undefined;
       const unregisterSave = registerEditorSave(key, { flush: () => flush(onFlushError), hasPending });
+      scheduleAutomaticFlush();
 
       return () => {
+        registered = false;
+        autoFlushRequestedWhileActive = false;
+        observedActiveFlush = null;
+        if (automaticFlushTimer !== null) {
+          clearTimeout(automaticFlushTimer);
+          automaticFlushTimer = null;
+        }
+        if (persistence.kind === 'persist-now') {
+          provider.off('unsyncedChanges', handleUnsyncedChanges);
+          provider.off('synced', handleSynced);
+        }
         document.off('afterTransaction', handleAfterTransaction);
         unsubscribePersisted();
         unregisterSave();

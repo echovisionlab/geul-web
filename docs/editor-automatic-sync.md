@@ -25,6 +25,33 @@ An older acknowledgment cannot clear newer input or a deletion it does not
 cover. A persist-now response alone cannot acknowledge Block-room changes; a
 bounded wait for the persisted acknowledgment keeps failed saves pending.
 
+The entity editor owns the runtime and its body save tracker. Nested rich-text
+surfaces consume that same provider, entity identity and persistence contract;
+they do not register another runtime. Post, Work and ProgramEvent previously
+mounted a second runtime without the Block-room protocol. Its persist-now-only
+tracker stayed pending after the authoritative tracker had accepted an autosave
+ACK. Production Chrome debugging identified both trackers on the same Post
+document: the Block-room tracker was clear while the nested tracker reported
+33 local revisions and zero explicit flush revisions. Page's outer context
+already owns its body tracker and shares the same surface contract.
+
+MapTheme and Form document-room saves request persistence automatically after
+their local updates synchronize. A transport ACK triggers that request; it
+does not clear pending edits. Only a successful persistence response advances
+the captured local revision, and later edits are drained by subsequent writes.
+Provider listeners and timers are removed with the owning tracker. MapTheme
+field intent is cleared only after this save barrier is clean, and its Back
+action waits for the same barrier. A delayed-ACK canonical-reload regression
+fails against the former hook (peer value replaces the unsaved local value)
+and passes with this durability gate.
+
+The document-room debounce test uses the same 20 local edits and 20 transport
+ACKs within two seconds. The former tracker issued zero automatic persistence
+requests and remained pending; the new tracker coalesces the burst into one
+request after two seconds, remains pending while its response is unresolved,
+and clears only after success. This measures request coalescing and save-state
+correctness; it is not a production save-latency benchmark.
+
 Old metadata negotiation, baseline-free replacements, manual recovery/download
 dialogs and unused fragment-backed editor APIs are removed. Form schemas use
 the server-serialized patch protocol; direct whole-schema Yjs updates are

@@ -1,44 +1,38 @@
 # Editor save and navigation lifecycle
 
-Delayed field updates belong to one canonical document and one mounted room or
-configuration queue. A queue merges pending fields and serializes writes until
-each acknowledgement arrives. New edits during a write are drained by explicit
-flush; failed writes retain their fields for retry. An in-flight batch counts as
-pending from the instant autosave starts, including before its Promise is stored.
+Each debounced save queue owns one pending patch for a document and serializes
+its writes. A batch counts as pending once autosave starts. A flush sends
+pending work, including edits made while an earlier write was in flight, and
+succeeds only after registered queues acknowledge their work. The save barrier
+also checks keyed recovery entries matching those registered queues. A failed
+write remains pending. Timed retries are enabled per queue; where enabled, the
+queue schedules up to eight retries with exponential backoff starting at one
+second and capped at 30 seconds. A later edit resets that retry count.
 
-App links use the Core NavigationLink adapter. It preserves Next Link props,
-anchor refs, and the caller's onNavigate cancellation before sending a generic
-navigation intent. EditorNavigationProvider owns the application policy: if any
-registered editor save is pending, prevent navigation, drain all current and
-newer queued edits, then push or replace with the original scroll option. A
-failed save keeps the current screen and shows the existing save-failure message.
-Normal links without pending saves retain Next's navigation behavior. Next owns
-modified clicks, new tabs, downloads, and external navigation.
+Queues configured with both a stable recovery scope and recovery key copy
+serializable pending and in-flight patches to `sessionStorage`, with an
+in-memory fallback. A matching queue can claim an inactive recovery entry only
+for the same document and recovery key, then submits the patch through its
+current writer. A successful acknowledgement removes the recovered copy when
+no newer patch remains. Failed work stays queued and recoverable. If
+`sessionStorage` is unavailable, the in-memory copy can support recovery only
+while that app session remains alive. This is automatic patch recovery; there
+is no manual recovery download or dismissal flow.
 
-Explicit Page/Post Back actions use the same scoped save boundary. A single
-global beforeunload hook warns while any registered editor save is pending and
-removes the listener after acknowledgement or unmount. Native browser history
-and abrupt process termination cannot await an asynchronous server write.
+App-link navigation uses the Core `NavigationLink` and
+`EditorNavigationProvider`. When no editor save is pending, Next handles the
+navigation normally. Otherwise, the provider prevents that navigation and
+flushes registered editor queues; it proceeds only after acknowledgement. A
+failed flush keeps the current screen open and shows the existing save-failure
+notification. Explicit editor actions such as Post Back use the same barrier
+scoped to that document.
 
-Every serializable pending patch has an independent queue ID and recovery copy.
-Room metadata uses the bootstrap document name, including locale; Post entity
-configuration has its own stable scope. Opaque room identities without a known
-canonical scope do not persist a copy. Teardown archives pending and in-flight
-fields before canceling the original writer; it never writes through a new room.
+The global `beforeunload` listener warns while any registered editor save is
+pending and is removed when the pending set clears. Browser unload warnings
+cannot wait for an asynchronous server acknowledgement, and native history or
+process termination may end the page before a write is acknowledged.
 
-Recovery copies use sessionStorage plus an in-memory fallback. If storage is
-denied or full, the copy remains available during the current app session; that
-fallback cannot survive a browser reload. Page/Post show all archived scopes
-for their current document and allow explicit download or dismissal. Mounted
-queues are excluded so dismissal cannot discard a live pending save. Copies
-are never automatically applied to a replacement room.
-
-Page title and summary initialize from canonical metadata once per provider and
-locale. Revision-only ACKs preserve both accepted fields and newer local drafts.
-A replacement provider or locale starts a new canonical scope. Regression tests
-exercise the actual room connection ACK, deferred writes, newer edits during
-flush, stale-room teardown, failed writes, storage denial, and the autosave
-in-flight unload window.
-
-See the [Post configuration and room recovery contract](post-editor-save-recovery.md)
-for entity-wide ordering and the separate cross-client concurrency limitation.
+Block-room body durability and semantic replay have separate persisted
+acknowledgement rules; see [Editor automatic synchronization](editor-automatic-sync.md).
+Post entity-configuration revision handling is described in [Post editor
+configuration saves](post-editor-save-recovery.md).
