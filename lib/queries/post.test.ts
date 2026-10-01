@@ -51,6 +51,7 @@ const protoDocumentLayout = {
 function adminPost(overrides: Record<string, unknown> = {}) {
   return {
     id: 'post-1',
+    configurationRevision: '10000000-0000-4000-8000-000000000001',
     title: 'Post',
     slug: 'post',
     summary: 'Summary',
@@ -252,6 +253,7 @@ describe('post server queries', () => {
     });
     await expect(queries.getPostForEdit('00000000-0000-4000-8000-000000000001')).resolves.toMatchObject({
       id: 'post-1',
+      configurationRevision: '10000000-0000-4000-8000-000000000001',
       allowedActions: [PostAction.EDIT, PostAction.PUBLISH_NOW],
       authors: [{ id: 'author-1', nickname: 'Author' }],
       categories: [{ id: 'cat-1' }],

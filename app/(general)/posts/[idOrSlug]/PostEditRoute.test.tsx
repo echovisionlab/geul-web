@@ -16,9 +16,17 @@ const mocks = vi.hoisted(() => ({
 vi.mock('next/navigation', () => ({ redirect: mocks.redirect, notFound: mocks.notFound }));
 vi.mock('next-intl/server', () => ({ getTranslations: vi.fn() }));
 vi.mock('@/features/post/PostEditor/LazyPostEditor', () => ({
-  LazyPostEditor: ({ postId, initialAllowedActions }: { postId: string; initialAllowedActions: PostAction[] }) => (
+  LazyPostEditor: ({
+    postId,
+    initialAllowedActions,
+    initialConfigurationRevision,
+  }: {
+    postId: string;
+    initialAllowedActions: PostAction[];
+    initialConfigurationRevision: string;
+  }) => (
     <div>
-      editor:{postId}:{initialAllowedActions.includes(PostAction.EDIT) ? 'edit' : 'view'}
+      editor:{postId}:{initialAllowedActions.includes(PostAction.EDIT) ? 'edit' : 'view'}:{initialConfigurationRevision}
     </div>
   ),
 }));
@@ -44,6 +52,7 @@ import { renderPostEditRoute } from './PostEditRoute';
 const POST_ID = '00000000-0000-4000-8000-000000000001';
 const post = {
   id: POST_ID,
+  configurationRevision: '10000000-0000-4000-8000-000000000001',
   title: 'Post',
   slug: 'post-slug',
   summary: null,
@@ -118,6 +127,7 @@ describe('Post edit query route', () => {
     const html = renderToStaticMarkup(await renderPostEditRoute(POST_ID, { edit: 'true' }));
 
     expect(html).toContain(`editor:${POST_ID}`);
+    expect(html).toContain(post.configurationRevision);
     expect(mocks.getPostForEdit).toHaveBeenCalledWith(POST_ID);
   });
 });

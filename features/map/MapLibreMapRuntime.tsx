@@ -24,6 +24,7 @@ import {
 import { buildCalloutViewModel } from './callout-model';
 import { buildClusterLayerModel } from './cluster-layer-model';
 import { configureMapLibreWorker } from './maplibre-worker';
+import { createMapStyleController, type MapStyleController } from './utils/map-style-controller';
 import type { MapLibreMapProps } from './MapLibreMap.types';
 import type { MapRendererPlace, MapServerFeatureSource } from './types';
 import { MapCalloutView, MapLibreMapView, type MapCalloutColors, type MapCalloutLayout } from './ui';
@@ -154,6 +155,7 @@ export function MapLibreMapRuntime({
 }: MapLibreMapRuntimeProps) {
   const colorScheme = useComputedColorScheme('light');
   const mapRef = useRef<MapLibreMapInstance | null>(null);
+  const mapStyleControllerRef = useRef<MapStyleController | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const calloutHoveringRef = useRef(false);
   const clusterIdBase = useId().replace(/:/g, '');
@@ -390,6 +392,19 @@ export function MapLibreMapRuntime({
     }
     return buildMapLibreStyle(baseMapStyleConfig);
   }, [baseMapStyleConfig, mapStyleOverride]);
+  const initialMapStyleRef = useRef(mapStyle);
+
+  useEffect(() => {
+    mapStyleControllerRef.current?.setStyle(mapStyle);
+  }, [mapStyle]);
+
+  useEffect(
+    () => () => {
+      mapStyleControllerRef.current?.destroy();
+      mapStyleControllerRef.current = null;
+    },
+    [],
+  );
 
   const calloutColors = useMemo<MapCalloutColors>(() => {
     return {
@@ -578,10 +593,31 @@ export function MapLibreMapRuntime({
             opacity: isReady ? 1 : 0,
             transition: 'opacity 0.3s ease',
           }}
-          mapStyle={mapStyle}
+          mapStyle={initialMapStyleRef.current}
           onLoad={(event) => {
             const map = event.target;
             mapRef.current = map;
+            if (mapStyleControllerRef.current) {
+              mapStyleControllerRef.current.setStyle(mapStyle);
+            } else {
+              const controller = createMapStyleController(
+                {
+                  isStyleLoaded: () => map.isStyleLoaded(),
+                  setStyle: (style) => map.setStyle(style),
+                  subscribeStyleReady: (listener) => {
+                    map.on('style.load', listener);
+                    map.on('idle', listener);
+                    return () => {
+                      map.off('style.load', listener);
+                      map.off('idle', listener);
+                    };
+                  },
+                },
+                initialMapStyleRef.current,
+              );
+              mapStyleControllerRef.current = controller;
+              controller.setStyle(mapStyle);
+            }
             onLoadingStageChange('rendering');
             syncTouchZoomRotateRotation(map.touchZoomRotate, { rotatable, zoomable });
             setCanvasCursor(null);

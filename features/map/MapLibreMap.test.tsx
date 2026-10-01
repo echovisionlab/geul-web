@@ -9,6 +9,10 @@ import { MapLibreMap } from './MapLibreMap';
 
 const mocks = vi.hoisted(() => ({
   container: undefined as unknown as HTMLElement,
+  mapStyleProps: [] as unknown[],
+  styleLoaded: false,
+  styleListeners: new Set<() => void>(),
+  appliedStyles: [] as unknown[],
   mapRef: {
     getBounds: vi.fn(() => ({
       getWest: () => 120,
@@ -22,7 +26,13 @@ const mocks = vi.hoisted(() => ({
     getZoom: vi.fn(() => 12),
     loaded: vi.fn(() => true),
     areTilesLoaded: vi.fn(() => true),
-    off: vi.fn(),
+    isStyleLoaded: vi.fn(() => mocks.styleLoaded),
+    on: vi.fn((_event: string, handler: () => void) => mocks.styleListeners.add(handler)),
+    off: vi.fn((_event: string, handler: () => void) => mocks.styleListeners.delete(handler)),
+    setStyle: vi.fn((style: unknown) => {
+      mocks.appliedStyles.push(style);
+      mocks.styleLoaded = false;
+    }),
     once: vi.fn((_event: string, handler: () => void) => handler()),
     touchZoomRotate: {
       disableRotation: vi.fn(),
@@ -51,6 +61,7 @@ vi.mock('next-intl', () => ({
 vi.mock('react-map-gl/maplibre', () => ({
   default: ({ children, ref, onLoad, onMoveStart, onMoveEnd, onZoomStart, onZoomEnd, ...props }: any) => {
     ref?.({ getMap: () => mocks.mapRef });
+    mocks.mapStyleProps.push(props.mapStyle);
     return (
       <div
         data-map-view
@@ -66,7 +77,14 @@ vi.mock('react-map-gl/maplibre', () => ({
         })}
       >
         <canvas className="maplibregl-canvas" data-map-canvas />
-        <button type="button" data-load-map onClick={() => onLoad?.({ target: mocks.mapRef })}>
+        <button
+          type="button"
+          data-load-map
+          onClick={() => {
+            mocks.styleLoaded = true;
+            onLoad?.({ target: mocks.mapRef });
+          }}
+        >
           load
         </button>
         <button
@@ -185,6 +203,10 @@ let root: Root | null = null;
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.mapStyleProps = [];
+  mocks.styleLoaded = false;
+  mocks.styleListeners.clear();
+  mocks.appliedStyles = [];
   mocks.container = document.createElement('div');
   Object.defineProperties(mocks.container, {
     clientWidth: { configurable: true, value: 640 },
@@ -332,6 +354,56 @@ describe('MapLibreMap', () => {
 
     const props = JSON.parse(document.querySelector<HTMLElement>('[data-map-view]')?.dataset.props ?? '{}');
     expect(props.mapStyleName).toBe('Offline fixture');
+  });
+
+  it('keeps the initial MapView style stable until load, applies the latest theme, and cleans up its listener', async () => {
+    const initialTheme = INITIAL_MAP_THEME_LIGHT_CONFIG;
+    const firstTheme = { ...initialTheme, backgroundColor: '#123456' };
+    const latestTheme = { ...initialTheme, backgroundColor: '#abcdef' };
+    const render = async (themeConfig: typeof initialTheme) => {
+      await act(async () => {
+        root?.render(
+          <MantineProvider>
+            <MapLibreMap places={[]} center={{ lat: 37.5, lng: 127.1 }} zoom={12} themeConfig={themeConfig} />
+          </MantineProvider>,
+        );
+      });
+    };
+
+    await render(initialTheme);
+    const initialMapStyle = mocks.mapStyleProps.at(-1);
+    await render(firstTheme);
+    await render(latestTheme);
+
+    expect(mocks.mapStyleProps.every((style) => style === initialMapStyle)).toBe(true);
+    expect(mocks.mapRef.setStyle).not.toHaveBeenCalled();
+
+    act(() => {
+      document.querySelector<HTMLButtonElement>('[data-load-map]')?.click();
+    });
+
+    expect(mocks.mapRef.setStyle).toHaveBeenCalledOnce();
+    expect((mocks.appliedStyles[0] as { layers: Array<{ paint?: Record<string, unknown> }> }).layers[0].paint).toEqual(
+      expect.objectContaining({ 'background-color': '#abcdef' }),
+    );
+
+    mocks.styleLoaded = true;
+    for (const listener of [...mocks.styleListeners]) {
+      listener();
+    }
+    await render({ ...latestTheme, backgroundColor: '#fedcba' });
+    expect(mocks.mapRef.setStyle).toHaveBeenCalledTimes(2);
+    expect((mocks.appliedStyles[1] as { layers: Array<{ paint?: Record<string, unknown> }> }).layers[0].paint).toEqual(
+      expect.objectContaining({ 'background-color': '#fedcba' }),
+    );
+
+    act(() => {
+      root?.unmount();
+    });
+    root = null;
+    expect(mocks.mapRef.off).toHaveBeenCalledWith('style.load', expect.any(Function));
+    expect(mocks.mapRef.off).toHaveBeenCalledWith('idle', expect.any(Function));
+    expect(mocks.styleListeners.size).toBe(0);
   });
 
   it('renders callouts, map controls, attribution, and the directions chooser', async () => {

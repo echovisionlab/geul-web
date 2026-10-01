@@ -107,6 +107,7 @@ export async function renderPostEditRoute(idOrSlug: string, query: SearchParamRe
       initialTags={tags}
       initialFeaturedImageUrl={post.featuredImageUrl ?? null}
       initialCommentsEnabled={post.commentsEnabled}
+      initialConfigurationRevision={post.configurationRevision}
       initialDocumentLayout={post.documentLayout}
       initialSeriesId={post.seriesId ?? null}
       initialSeriesOrder={post.seriesOrder ?? null}

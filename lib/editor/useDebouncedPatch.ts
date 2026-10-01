@@ -53,7 +53,12 @@ export function useDebouncedPatch<T extends object>({
             state.queue.enqueue(patch, state.write);
           }
         },
-        { flush: state.queue.flush, cancel: state.queue.cancel, hasPending: state.queue.hasPending },
+        {
+          flush: state.queue.flush,
+          cancel: state.queue.cancel,
+          hasPending: state.queue.hasPending,
+          getPendingPatch: state.queue.getPendingPatch,
+        },
       ),
     [state],
   );

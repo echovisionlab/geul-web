@@ -78,6 +78,19 @@ class DebouncedPatchQueue<T extends object> {
 
   hasPending = () => Boolean(this.pending || this.inFlight || this.activeSave);
 
+  /** A portable copy of unsaved fields; reading it does not acknowledge or discard them. */
+  getPendingPatch = (): T | null => {
+    const patch = { ...this.inFlight?.patch, ...this.pending?.patch };
+    if (Object.keys(patch).length === 0) {
+      return null;
+    }
+    try {
+      return JSON.parse(JSON.stringify(patch)) as T;
+    } catch {
+      return null;
+    }
+  };
+
   // Explicit flush drains all edits, including ones made while waiting for an acknowledgement.
   flush = async (): Promise<boolean> => {
     while (this.hasPending()) {

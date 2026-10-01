@@ -6,6 +6,36 @@ beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 
 describe('delayed editor patches', () => {
+  it('exports a detached latest-field copy through in-flight saves and failure without changing the queue', async () => {
+    type Patch = { title?: string; summary?: string | null; layout?: { footer: string } };
+    let reject!: (error: Error) => void;
+    const first = vi.fn(
+      () =>
+        new Promise<void>((_, fail) => {
+          reject = fail;
+        }),
+    );
+    const queue = createDebouncedPatch<Patch>(500);
+    expect(queue.getPendingPatch()).toBeNull();
+    queue.enqueue({ title: 'first', summary: 'old', layout: { footer: 'flow' } }, first);
+    const flushed = queue.flush();
+    const retry = vi.fn();
+    queue.enqueue({ title: 'latest', summary: null }, retry);
+    const copy = queue.getPendingPatch();
+    expect(copy).toEqual({ title: 'latest', summary: null, layout: { footer: 'flow' } });
+    copy!.layout!.footer = 'pinned';
+    expect(queue.getPendingPatch()?.layout).toEqual({ footer: 'flow' });
+    expect(queue.hasPending()).toBe(true);
+    expect(first).toHaveBeenCalledOnce();
+    expect(retry).not.toHaveBeenCalled();
+    reject(new Error('stale settings'));
+    expect(await flushed).toBe(false);
+    expect(queue.getPendingPatch()).toEqual({ title: 'latest', summary: null, layout: { footer: 'flow' } });
+    expect(await queue.flush()).toBe(true);
+    expect(retry).toHaveBeenCalledExactlyOnceWith({ title: 'latest', summary: null, layout: { footer: 'flow' } });
+    expect(queue.getPendingPatch()).toBeNull();
+  });
+
   it('keeps the delay, combines different fields, and preserves explicit clearing values', async () => {
     const write = vi.fn();
     const queue = createDebouncedPatch<Record<string, unknown>>(500);
