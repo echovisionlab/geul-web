@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconBan, IconCheck } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -34,6 +34,34 @@ import { useCopyToClipboard } from '@/lib/hooks/useCopyToClipboard';
 import type { SocialLinks } from '@/lib/types/common/social-links';
 import { guardNotFound } from '@/lib/utils/not-found-guard';
 
+interface AdminUserProfileSnapshot {
+  nickname: string;
+  bio: string;
+  role: string;
+  tagIds: string[];
+  website: string;
+  socialLinks: SocialLinks;
+}
+
+function sameStringRecord(left: Record<string, string>, right: Record<string, string>): boolean {
+  const leftKeys = Object.keys(left).sort();
+  const rightKeys = Object.keys(right).sort();
+  return (
+    leftKeys.length === rightKeys.length &&
+    leftKeys.every((key, index) => {
+      return key === rightKeys[index] && left[key] === right[key];
+    })
+  );
+}
+
+function sameTagIds(left: string[], right: string[]): boolean {
+  if (left.length !== right.length) {
+    return false;
+  }
+  const rightIds = new Set(right);
+  return left.every((id) => rightIds.has(id));
+}
+
 export default function AdminUserEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
@@ -48,6 +76,9 @@ export default function AdminUserEditPage({ params }: { params: Promise<{ id: st
     queryKey: ['users', 'admin', id],
     queryFn: () => getUserAdminAction(id),
   });
+  const userRef = useRef(user);
+  userRef.current = user;
+  const savedUserSnapshotRef = useRef<typeof user | null>(null);
   const { data: memberTags = [] } = useQuery({
     queryKey: ['memberTags', 'admin', 'all'],
     queryFn: listAllUserTagsAction,
@@ -67,6 +98,17 @@ export default function AdminUserEditPage({ params }: { params: Promise<{ id: st
   const [banDuration, setBanDuration] = useState<string | null>('permanent');
   const [website, setWebsite] = useState('');
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({});
+  const profileBaselineRef = useRef<AdminUserProfileSnapshot | null>(null);
+  const form = useForm<AdminUserProfileFormValues>({
+    initialValues: {
+      nickname: '',
+      bio: '',
+      role: 'user',
+      tagIds: [],
+    },
+  });
+  const formRef = useRef(form);
+  formRef.current = form;
   const invalidateUserQueries = () => {
     queryClient.invalidateQueries({ queryKey: ['users', 'admin', id] });
     queryClient.invalidateQueries({ queryKey: ['users', 'admin', 'list'] });
@@ -87,11 +129,43 @@ export default function AdminUserEditPage({ params }: { params: Promise<{ id: st
         social_links: data.socialLinks,
         tag_ids: data.tagIds,
       }),
-    onSuccess: (result) => {
+    onSuccess: (result, variables) => {
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
         return;
       }
+      const currentBaseline = profileBaselineRef.current;
+      if (currentBaseline) {
+        const nextBaseline = { ...currentBaseline };
+        if (variables.nickname !== undefined) {
+          nextBaseline.nickname = variables.nickname;
+        }
+        if (variables.bio !== undefined) {
+          nextBaseline.bio = variables.bio ?? '';
+        }
+        if (variables.role !== undefined) {
+          nextBaseline.role = variables.role;
+        }
+        if (variables.tagIds !== undefined) {
+          nextBaseline.tagIds = variables.tagIds;
+        }
+        if (variables.website !== undefined) {
+          nextBaseline.website = variables.website ?? '';
+        }
+        if (variables.socialLinks !== undefined) {
+          nextBaseline.socialLinks = variables.socialLinks ?? {};
+        }
+        profileBaselineRef.current = nextBaseline;
+        const nextFormValues = {
+          nickname: nextBaseline.nickname,
+          bio: nextBaseline.bio,
+          role: nextBaseline.role,
+          tagIds: nextBaseline.tagIds,
+        };
+        formRef.current.setInitialValues(nextFormValues);
+        formRef.current.resetDirty(nextFormValues);
+      }
+      savedUserSnapshotRef.current = userRef.current;
       notifications.show({ message: tPage('notifications.updated'), color: 'green' });
       invalidateUserQueries();
     },
@@ -184,27 +258,45 @@ export default function AdminUserEditPage({ params }: { params: Promise<{ id: st
     },
   });
 
-  const form = useForm<AdminUserProfileFormValues>({
-    initialValues: {
-      nickname: '',
-      bio: '',
-      role: 'user',
-      tagIds: [],
-    },
-  });
-
   useEffect(() => {
-    if (user) {
-      form.setValues({
-        nickname: user.nickname,
-        bio: user.bio ?? '',
-        role: user.role ?? 'user',
-        tagIds: user.tag_ids,
-      });
-      setWebsite(user.website ?? '');
-      setSocialLinks(user.social_links || {});
+    if (!user || updateUser.isPending) {
+      return;
     }
-  }, [user]);
+    if (savedUserSnapshotRef.current === user) {
+      return;
+    }
+    const baseline = profileBaselineRef.current;
+    if (
+      baseline &&
+      (formRef.current.isDirty() ||
+        website !== baseline.website ||
+        !sameStringRecord(socialLinks, baseline.socialLinks))
+    ) {
+      return;
+    }
+    savedUserSnapshotRef.current = null;
+
+    const nextBaseline: AdminUserProfileSnapshot = {
+      nickname: user.nickname,
+      bio: user.bio ?? '',
+      role: user.role ?? 'user',
+      tagIds: user.tag_ids,
+      website: user.website ?? '',
+      socialLinks: user.social_links ?? {},
+    };
+    const nextFormValues = {
+      nickname: nextBaseline.nickname,
+      bio: nextBaseline.bio,
+      role: nextBaseline.role,
+      tagIds: nextBaseline.tagIds,
+    };
+    profileBaselineRef.current = nextBaseline;
+    formRef.current.setInitialValues(nextFormValues);
+    formRef.current.setValues(nextFormValues);
+    formRef.current.resetDirty(nextFormValues);
+    setWebsite(nextBaseline.website);
+    setSocialLinks(nextBaseline.socialLinks);
+  }, [user, updateUser.isPending, website, socialLinks]);
 
   if (isLoading) {
     return <PageLoader />;
@@ -213,15 +305,34 @@ export default function AdminUserEditPage({ params }: { params: Promise<{ id: st
   guardNotFound(user);
 
   const handleSubmit = form.onSubmit((values) => {
-    updateUser.mutate({
-      id,
-      nickname: values.nickname,
-      role: values.role,
-      tagIds: values.tagIds,
-      bio: values.bio || null,
-      website: website || null,
-      socialLinks,
-    });
+    const baseline = profileBaselineRef.current;
+    if (!baseline) {
+      return;
+    }
+
+    const changes: Parameters<typeof updateUser.mutate>[0] = { id };
+    if (form.isDirty('nickname')) {
+      changes.nickname = values.nickname;
+    }
+    if (form.isDirty('bio')) {
+      changes.bio = values.bio || null;
+    }
+    if (form.isDirty('role')) {
+      changes.role = values.role;
+    }
+    if (form.isDirty('tagIds') && !sameTagIds(values.tagIds, baseline.tagIds)) {
+      changes.tagIds = values.tagIds;
+    }
+    if (website !== baseline.website) {
+      changes.website = website || null;
+    }
+    if (!sameStringRecord(socialLinks, baseline.socialLinks)) {
+      changes.socialLinks = socialLinks;
+    }
+
+    if (Object.keys(changes).length > 1) {
+      updateUser.mutate(changes);
+    }
   });
 
   const handleImageChange = async () => {

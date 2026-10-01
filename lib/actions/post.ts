@@ -18,6 +18,8 @@ import { regenerateOgImageAction as requestOgImageRegeneration } from '@/lib/act
 import { createCommittedMutationRevalidator } from '@/lib/actions/revalidate-after-commit';
 import { createPostClient } from '@/lib/api/server-client';
 import { resolvePostFeaturedImageUrl } from '@/lib/media/post-featured-image';
+import { mapProtoDocumentLayout } from '@/lib/queries/document-layout';
+import type { PostConfigurationSnapshot } from '@/lib/types/post/model';
 import { normalizeOgRegenerationLocale } from '@/lib/utils/og-regeneration';
 
 const revalidatePostAfterCommit = createCommittedMutationRevalidator('post-actions', 'post');
@@ -82,7 +84,7 @@ export async function updatePostAction(
     documentLayout?: DocumentLayout;
   },
   expectedConfigurationRevision: string,
-): Promise<ActionResult<{ success: true; configurationRevision: string }>> {
+): Promise<ActionResult<{ success: true; configurationRevision: string; configuration: PostConfigurationSnapshot }>> {
   try {
     const client = await createPostClient();
     const request: {
@@ -108,10 +110,39 @@ export async function updatePostAction(
     }
 
     const response = await client.updatePost(request);
-    return actionSuccess({ success: true, configurationRevision: response.configurationRevision });
+    const configuration = postConfigurationSnapshot(response);
+    return actionSuccess({ success: true, configurationRevision: configuration.configurationRevision, configuration });
   } catch (err) {
     return postActionFailure(err, 'Failed to update post', 'POST_UPDATE_FAILED');
   }
+}
+
+export async function getPostConfigurationAction(
+  postId: string,
+): Promise<ActionResult<{ configuration: PostConfigurationSnapshot }>> {
+  try {
+    const client = await createPostClient();
+    const response = await client.getPost({ id: postId });
+    return actionSuccess({ configuration: postConfigurationSnapshot(response) });
+  } catch (err) {
+    return postActionFailure(err, 'Failed to load Post settings', 'POST_UPDATE_FAILED');
+  }
+}
+
+function postConfigurationSnapshot(post: {
+  configurationRevision: string;
+  slug?: string;
+  commentsEnabled: boolean;
+  mapPlaceId?: string;
+  documentLayout?: Parameters<typeof mapProtoDocumentLayout>[0];
+}): PostConfigurationSnapshot {
+  return {
+    configurationRevision: post.configurationRevision,
+    slug: post.slug ?? null,
+    commentsEnabled: post.commentsEnabled,
+    mapPlaceId: post.mapPlaceId ?? null,
+    documentLayout: mapProtoDocumentLayout(post.documentLayout),
+  };
 }
 
 export async function deletePostAction(postId: string): Promise<ActionResult<{ success: true }>> {

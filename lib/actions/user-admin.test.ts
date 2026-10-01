@@ -304,6 +304,33 @@ describe('admin Member and profile actions', () => {
     });
   });
 
+  it('sends only the changed admin profile, tag, or role request', async () => {
+    await expect(actions.updateUserAction('member-1', { bio: 'Updated bio' })).resolves.toEqual({ success: true });
+    expect(memberClient.updateMemberProfile).toHaveBeenCalledWith({
+      memberId: 'member-1',
+      nickname: undefined,
+      bio: 'Updated bio',
+    });
+    expect(memberClient.setMemberTags).not.toHaveBeenCalled();
+    expect(accountClient.setAccountRole).not.toHaveBeenCalled();
+
+    vi.clearAllMocks();
+    mocks.createMemberClient.mockResolvedValue(memberClient);
+    mocks.createAccountClient.mockResolvedValue(accountClient);
+    await expect(actions.updateUserAction('member-1', { tag_ids: [] })).resolves.toEqual({ success: true });
+    expect(memberClient.updateMemberProfile).not.toHaveBeenCalled();
+    expect(memberClient.setMemberTags).toHaveBeenCalledWith({ memberId: 'member-1', tagIds: [] });
+    expect(accountClient.setAccountRole).not.toHaveBeenCalled();
+
+    vi.clearAllMocks();
+    mocks.createMemberClient.mockResolvedValue(memberClient);
+    mocks.createAccountClient.mockResolvedValue(accountClient);
+    await expect(actions.updateUserAction('member-1', { role: 'admin' })).resolves.toEqual({ success: true });
+    expect(memberClient.updateMemberProfile).not.toHaveBeenCalled();
+    expect(memberClient.setMemberTags).not.toHaveBeenCalled();
+    expect(accountClient.setAccountRole).toHaveBeenCalledWith({ memberId: 'member-1', role: AuthorizationRole.ADMIN });
+  });
+
   it('keeps omitted profile fields out of partial Member updates and preserves explicit clearing', async () => {
     await expect(actions.updateUserAction('member-1', { nickname: 'Name only' })).resolves.toEqual({ success: true });
     expect(memberClient.updateMemberProfile).toHaveBeenLastCalledWith({

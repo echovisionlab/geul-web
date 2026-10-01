@@ -2,15 +2,23 @@
 
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Editor, getSchema } from '@tiptap/core';
+import { Editor } from '@tiptap/core';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { Fragment, Schema, Slice } from '@tiptap/pm/model';
 import { NodeSelection, TextSelection } from '@tiptap/pm/state';
 import { MantineProvider } from '@mantine/core';
+import { fromJson, type JsonValue } from '@bufbuild/protobuf';
+import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
+import {
+  LocalizedRichTextDocumentSchema,
+  RichTextProfile,
+  type LocalizedRichTextDocument,
+} from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
-import { prosemirrorJSONToYXmlFragment } from 'y-prosemirror';
-import { createCollaborationExtension } from '../collaboration';
+import { hydrateCanonicalBlockRoom } from '@echovisionlab/geul-common/collaboration/block-room-codec';
+import { createBlockRoomProseMirrorBridge } from '../block-room-prosemirror-bridge';
+import { createPostBlockRoomTiptapController } from '../block-room-tiptap-controller';
 import { createTiptapWireExtensions } from '../wire-schema';
 import { TiptapMathInput, normalizeMathFragment, withTiptapMathExtensions } from './index';
 
@@ -69,7 +77,7 @@ describe('Tiptap math runtime', () => {
               content: [
                 {
                   type: 'paragraph',
-                  content: [{ type: 'mathInline', attrs: { latex: '' }, content: [{ type: 'text', text: 'x' }] }],
+                  content: [{ type: 'mathInline', content: [{ type: 'text', text: 'x' }] }],
                 },
               ],
             },
@@ -301,60 +309,6 @@ describe('Tiptap math runtime', () => {
     mounted.destroy();
   });
 
-  it('normalizes a legacy attribute-only node that arrives from a collaborator after the editor mounted', async () => {
-    const initialDocument = {
-      type: 'doc',
-      content: [
-        {
-          type: 'blockGroup',
-          content: [block('target', { type: 'paragraph', content: [{ type: 'text', text: 'x' }] })],
-        },
-      ],
-    };
-    const yDoc = new Y.Doc();
-    const fragment = yDoc.getXmlFragment('document-store');
-    const schema = getSchema(withTiptapMathExtensions(createTiptapWireExtensions()));
-    prosemirrorJSONToYXmlFragment(schema, schema.nodeFromJSON(initialDocument).toJSON(), fragment);
-    const observerElement = document.createElement('div');
-    const collaboratorElement = document.createElement('div');
-    document.body.append(observerElement, collaboratorElement);
-    const observer = new Editor({
-      element: observerElement,
-      extensions: [
-        ...withTiptapMathExtensions(createTiptapWireExtensions()),
-        createCollaborationExtension({ fragment }),
-      ],
-    });
-    const collaborator = new Editor({
-      element: collaboratorElement,
-      extensions: [...createTiptapWireExtensions(), createCollaborationExtension({ fragment })],
-    });
-    const paragraphPosition = findNodePosition(collaborator, 'paragraph');
-    const mathInline = collaborator.state.schema.nodes.mathInline;
-    if (!mathInline) {
-      throw new Error('Inline math schema is unavailable');
-    }
-    collaborator.view.dispatch(
-      collaborator.state.tr.replaceWith(
-        paragraphPosition + 1,
-        paragraphPosition + 2,
-        mathInline.create({ latex: 'legacy' }),
-      ),
-    );
-    await Promise.resolve();
-
-    const migrated = observer.state.doc.nodeAt(findNodePosition(observer, 'mathInline'));
-    expect(migrated?.attrs.latex).toBe('');
-    expect(migrated?.textContent).toBe('legacy');
-    expect(collaborator.state.doc.nodeAt(findNodePosition(collaborator, 'mathInline'))?.textContent).toBe('legacy');
-
-    observer.destroy();
-    collaborator.destroy();
-    observerElement.remove();
-    collaboratorElement.remove();
-    yDoc.destroy();
-  });
-
   it('edits inline math as character-addressable paragraph content without a Tab stop or node selection', async () => {
     const editorRef: { current: Editor | null } = { current: null };
     function Harness() {
@@ -458,37 +412,38 @@ describe('Tiptap math runtime', () => {
   });
 
   it('undoes and redoes an inline source character through collaborative history without losing its source or preview', async () => {
-    const initialDocument = {
-      type: 'doc',
-      content: [
-        {
-          type: 'blockGroup',
-          content: [
-            block('target', {
-              type: 'paragraph',
-              content: [
-                { type: 'text', text: 'Hello ' },
-                { type: 'mathInline', content: [{ type: 'text', text: 'E^MC' }] },
-                { type: 'text', text: ' world' },
-              ],
-            }),
-          ],
-        },
-      ],
-    };
-    const yDoc = new Y.Doc();
-    const fragment = yDoc.getXmlFragment('document-store');
-    const schema = getSchema(withTiptapMathExtensions(createTiptapWireExtensions()));
-    prosemirrorJSONToYXmlFragment(schema, schema.nodeFromJSON(initialDocument).toJSON(), fragment);
+    const blockId = '019cce25-dbc0-7d12-9f1f-735b1a6c6b13';
+    const room = new Y.Doc();
+    const source = fromJson(LocalizedRichTextDocumentSchema, {
+      blockCatalogFingerprint: contentBlockCatalogFingerprint,
+      profile: RichTextProfile.POST,
+      locale: 'ko',
+      base: {
+        nodes: [{ block: { id: blockId, paragraph: { props: {} } }, placement: { index: 0 } }],
+      },
+      localeOverlay: {
+        locale: 'ko',
+        blocks: [
+          {
+            blockId,
+            paragraph: {
+              props: {},
+              content: [{ text: { text: 'Hello ' } }, { mathInline: { source: 'E^MC' } }, { text: { text: ' world' } }],
+            },
+          },
+        ],
+      },
+    } as unknown as JsonValue) as LocalizedRichTextDocument;
+    hydrateCanonicalBlockRoom(room, 'post', 'ko', source, []);
+    const bridge = createBlockRoomProseMirrorBridge({ document: room, documentType: 'post', locale: 'ko' });
+    const controller = createPostBlockRoomTiptapController(bridge);
 
     const editorRef: { current: Editor | null } = { current: null };
     function Harness() {
       const instance = useEditor({
         immediatelyRender: false,
-        extensions: [
-          ...withTiptapMathExtensions(createTiptapWireExtensions()),
-          createCollaborationExtension({ fragment }),
-        ],
+        extensions: [...withTiptapMathExtensions(createTiptapWireExtensions()), controller.extension],
+        content: controller.initialContent,
       });
       editorRef.current = instance;
       return (
@@ -504,6 +459,7 @@ describe('Tiptap math runtime', () => {
     await act(async () => root.render(<Harness />));
     const editor = editorRef.current;
     expect(editor).not.toBeNull();
+    const disconnect = controller.connect(editor!);
 
     const pressModShortcut = async (shiftKey = false) => {
       const event = new KeyboardEvent('keydown', {
@@ -563,11 +519,12 @@ describe('Tiptap math runtime', () => {
     );
 
     await act(async () => root.unmount());
+    disconnect();
     container.remove();
-    yDoc.destroy();
+    room.destroy();
   });
 
-  it('keeps invalid inline source visible and migrates legacy latex attributes into editable text', async () => {
+  it('keeps invalid inline source text visible and editable', async () => {
     const editorRef: { current: Editor | null } = { current: null };
     function Harness() {
       const instance = useEditor({
@@ -581,7 +538,7 @@ describe('Tiptap math runtime', () => {
               content: [
                 block('target', {
                   type: 'paragraph',
-                  content: [{ type: 'mathInline', attrs: { latex: '\\frac{' } }],
+                  content: [{ type: 'mathInline', content: [{ type: 'text', text: '\\frac{' }] }],
                 }),
               ],
             },
@@ -605,7 +562,6 @@ describe('Tiptap math runtime', () => {
     const mathNode = editor?.state.doc.nodeAt(findNodePosition(editor!, 'mathInline'));
     const inlineView = container.querySelector<HTMLElement>('[data-math-inline]');
     expect(mathNode?.textContent).toBe('\\frac{');
-    expect(mathNode?.attrs.latex).toBe('');
     expect(inlineView?.dataset.renderable).toBeUndefined();
     expect(inlineView?.textContent).toContain('\\frac{');
     expect(inlineView?.querySelector('.katex')).toBeNull();

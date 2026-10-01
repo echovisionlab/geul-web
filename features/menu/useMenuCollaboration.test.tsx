@@ -89,7 +89,11 @@ describe('useMenuCollaboration', () => {
     await renderHook('en');
 
     act(() =>
-      hook().replaceSource('Primary', [{ id: 'archive', label: 'Archive', linkType: 'custom', url: '/archive' }]),
+      hook().replaceSource(
+        { name: 'Main', items: [{ id: 'posts', label: 'Posts', linkType: 'custom', url: '/posts' }] },
+        'Primary',
+        [{ id: 'archive', label: 'Archive', linkType: 'custom', url: '/archive' }],
+      ),
     );
     expect(hook().roomState).toMatchObject({
       name: 'Primary',

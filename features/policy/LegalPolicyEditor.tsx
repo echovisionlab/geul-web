@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation } from '@tanstack/react-query';
 import { IconAlertCircle, IconCalendar, IconDownload, IconPlayerPlay, IconRefresh, IconX } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { Box, Divider, Group, Modal, Stack, Text, Title } from '@mantine/core';
@@ -29,9 +28,10 @@ import { EditorActiveLocaleMenu } from '@/features/translation/EditorActiveLocal
 import { EntityTranslationsPanel } from '@/features/translation/EntityTranslationsPanel';
 import { useLocaleDocumentSession } from '@/features/translation/useLocaleDocumentSession';
 import { persistCollaborativeDocumentNow } from '@/lib/collab/persist-now';
-import { BlockRoomMetadataError, updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
+import { updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import { useRichTextBlockRoomController } from '@/features/editor/hooks/useBlockRoomTiptapController';
+import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 import { useBlockRoomConnection } from '@/lib/collab/useBlockRoomConnection';
 import type { OgGenerationLookupSignal } from '@/lib/types/og-generation';
 import type { SiteSettingsView } from '@/lib/types/site-setting/config';
@@ -135,33 +135,35 @@ export function LegalPolicyEditor({
     }
   }, [isEditable]);
 
-  const flushActiveDocuments = useCallback(async () => {
-    await persistCollaborativeDocumentNow(blockRoom.provider);
-  }, [blockRoom.provider]);
-
-  const updateTitleMetadata = useMutation({
-    mutationFn: (value: string) => {
-      if (!blockRoom.bootstrap || !blockRoom.protocol || !roomLocale) {
-        throw new Error('Policy Block room is not ready.');
-      }
-      return updateBlockRoomLocaleMetadata(blockRoom.protocol, {
-        type: documentType,
-        locale: roomLocale,
-        title: value,
-      });
-    },
-    onSuccess: blockRoom.acceptEpochAck,
-    onError: (error) => {
-      if (error instanceof BlockRoomMetadataError && error.reloadRequired) {
-        blockRoom.reloadCanonical();
-      }
-      notifications.show({
-        message: error instanceof Error ? error.message : tCommonNotifications('updateFailed'),
-        color: 'red',
-      });
-    },
+  const debouncedTitleUpdate = useDebouncedRoomMetadata({
+    connection: blockRoom,
+    document: `${strategy.entityType}:${policyId}`,
+    delay: 500,
+    write: (protocol, update: { locale: string; title: string }) =>
+      updateBlockRoomLocaleMetadata(protocol, { type: documentType, ...update }),
   });
-  const debouncedTitleUpdate = useDebouncedCallback((value: string) => updateTitleMetadata.mutate(value), 500);
+
+  const flushActiveDocuments = useCallback(async () => {
+    if (!(await debouncedTitleUpdate.flush())) {
+      throw new Error(tCommonNotifications('saveFailed'));
+    }
+    await persistCollaborativeDocumentNow(blockRoom.provider);
+  }, [blockRoom.provider, debouncedTitleUpdate, tCommonNotifications]);
+
+  const getExpectedRevision = useCallback(async () => {
+    if (!blockRoom.protocol || !activeEditLocale.sourceLocale || !roomLocale) {
+      throw new Error('Policy Block room is not ready.');
+    }
+    const snapshot = await blockRoom.protocol.getSnapshot();
+    if (
+      snapshot.locale !== roomLocale ||
+      snapshot.sourceLocale !== activeEditLocale.sourceLocale ||
+      !snapshot.localeExists
+    ) {
+      throw new Error('Policy Block room snapshot is no longer current.');
+    }
+    return snapshot.documentRevision;
+  }, [activeEditLocale.sourceLocale, blockRoom.protocol, roomLocale]);
 
   const { scheduleMutation, cancelScheduleMutation, activateNowMutation, deleteMutation, regenerateHtmlMutation } =
     useLegalPolicyCommands({
@@ -169,6 +171,7 @@ export function LegalPolicyEditor({
       policyStatus: policyData.status,
       strategy,
       flushActiveDocuments,
+      getExpectedRevision,
       closeScheduleModal,
       closeCancelModal,
       closeActivateModal,
@@ -203,7 +206,7 @@ export function LegalPolicyEditor({
         return;
       }
       setResidentTitle(value);
-      debouncedTitleUpdate(value);
+      debouncedTitleUpdate({ locale: roomLocale, title: value });
       if (activeEditLocale.isSourceLocale) {
         setTitle(value);
         announceSourceTitleGeneration(activeEditLocale.sourceLocale);

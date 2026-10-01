@@ -28,8 +28,13 @@ import {
   sendTestEmailTemplateAction,
   updateEmailTemplateLayoutAction,
 } from '@/lib/actions/email-template';
-import { BlockRoomMetadataError, updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
+import { updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
+import { persistCollaborativeDocumentNow } from '@/lib/collab/persist-now';
+import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
+import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
+import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
+import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 import { buildEmailPreviewSrcDoc } from '@/lib/email/preview-document';
 import { resolveSystemEmailEventKey } from '@/lib/i18n/email-template';
 import { getSupportedLocaleOptions, normalizeLocale } from '@/lib/i18n/locale';
@@ -60,6 +65,8 @@ export default function EmailTemplateEditPage() {
 
   const [viewMode, setViewMode] = useState<ViewMode>('split');
   const [layoutId, setLayoutId] = useState<string | null>(null);
+  const pendingLayoutRequestCountRef = useRef(0);
+  const layoutRequestSequenceRef = useRef(0);
   const [testEmail, setTestEmail] = useState('');
   const [testLocale, setTestLocale] = useState<string>(() => normalizeLocale(currentLocale) ?? 'en');
   const [variablesExpanded, setVariablesExpanded] = useState(false);
@@ -146,12 +153,16 @@ export default function EmailTemplateEditPage() {
     ],
     [tCommonLabels, tEmailLayoutViewModes, tEmailTemplates],
   );
-  const { data: template, isLoading } = useQuery({
+  const {
+    data: template,
+    isLoading,
+    refetch: refetchTemplate,
+  } = useQuery({
     queryKey: ['emailTemplates', templateId],
     queryFn: () => getEmailTemplateAction(templateId),
   });
   useEffect(() => {
-    if (template) {
+    if (template && pendingLayoutRequestCountRef.current === 0) {
       setLayoutId(template.layoutId ?? null);
     }
   }, [template]);
@@ -171,9 +182,16 @@ export default function EmailTemplateEditPage() {
   const { activeEditLocale, roomLocale } = localeSession;
   const localeMode = localeSession.mode;
   const blockRoom = useBlockRoomConnection('email-template', templateId, roomLocale);
-  const { provider, doc, bootstrap, protocol, isConnected, isSynced, acceptEpochAck, reloadCanonical } = blockRoom;
+  const { provider, doc, bootstrap, protocol, isConnected, isSynced } = blockRoom;
   const blockRoomController = useRichTextBlockRoomController('email-template', doc, roomLocale);
   const currentProvider = provider;
+  useEditorEntityChanges(
+    `email_template:${templateId}`,
+    () => {
+      void refetchTemplate();
+    },
+    currentProvider,
+  );
   const editorSession =
     currentProvider && blockRoomController && isSynced
       ? { provider: currentProvider, controller: blockRoomController }
@@ -195,6 +213,11 @@ export default function EmailTemplateEditPage() {
       }),
     );
   }, [activeEditLocale.displayTitle, activeEditLocale.hasLiveRow, activeEditLocale.isSourceLocale, template?.subject]);
+  useBlockRoomMetadataUpdates(blockRoom, `email_template:${templateId}`, ({ operation, values }) => {
+    if (operation === 'locale' && typeof values.subject === 'string') {
+      setResidentSubject(values.subject);
+    }
+  });
   const currentSubject = roomLocale ? residentSubject : (template?.subject ?? '');
   const canEditTranslationSource = true;
   const hasLocaleRoomMutationAuthority = localeSession.hasRoomMutationAuthority({
@@ -303,31 +326,12 @@ export default function EmailTemplateEditPage() {
     },
     { delay: PREVIEW_DEBOUNCE_MS, flushOnUnmount: true },
   );
-  const updateSubjectMetadata = useMutation({
-    mutationFn: (input: { locale: string; subject: string }) => {
-      if (!bootstrap || !protocol) {
-        throw new Error('Email Template Block room is not ready.');
-      }
-      return updateBlockRoomLocaleMetadata(protocol, {
-        type: 'email-template',
-        ...input,
-      });
-    },
-    onSuccess: acceptEpochAck,
-    onError: (error) => {
-      if (error instanceof BlockRoomMetadataError && error.reloadRequired) {
-        reloadCanonical();
-      }
-      notifications.show({
-        message: error instanceof Error ? error.message : tCommonNotifications('saveFailed'),
-        color: 'red',
-      });
-    },
+  const debouncedSubjectUpdate = useDebouncedRoomMetadata({
+    connection: blockRoom,
+    document: `email_template:${templateId}`,
+    write: (protocol, input: { locale: string; subject: string }) =>
+      updateBlockRoomLocaleMetadata(protocol, { type: 'email-template', ...input }),
   });
-  const debouncedSubjectUpdate = useDebouncedCallback(
-    (input: { locale: string; subject: string }) => updateSubjectMetadata.mutate(input),
-    500,
-  );
 
   const handleSubjectChange = useCallback(
     (value: string) => {
@@ -367,11 +371,30 @@ export default function EmailTemplateEditPage() {
     if (!testEmail) {
       return;
     }
-    sendTest.mutate({
-      id: templateId,
-      email: testEmail,
-      locale: normalizeLocale(testLocale) ?? 'en',
-    });
+    void (async () => {
+      if (!(await flushEditorSaves(`email_template:${templateId}`))) {
+        notifications.show({ message: tCommonNotifications('saveFailed'), color: 'red' });
+        return;
+      }
+      if (localeMode.shouldUseLocaleDocument && !isSynced) {
+        notifications.show({ message: tCommonStates('syncing'), color: 'yellow' });
+        return;
+      }
+      try {
+        await persistCollaborativeDocumentNow(currentProvider);
+      } catch (error) {
+        notifications.show({
+          message: error instanceof Error ? error.message : tCommonNotifications('saveFailed'),
+          color: 'red',
+        });
+        return;
+      }
+      sendTest.mutate({
+        id: templateId,
+        email: testEmail,
+        locale: normalizeLocale(testLocale) ?? 'en',
+      });
+    })();
   };
 
   useEffect(() => {
@@ -410,22 +433,39 @@ export default function EmailTemplateEditPage() {
         return;
       }
       const previousLayoutId = layoutId;
+      const requestId = ++layoutRequestSequenceRef.current;
+      pendingLayoutRequestCountRef.current += 1;
       setLayoutId(value);
       updateLayout.mutate(
         { id: templateId, layoutId: value },
         {
           onSuccess: (result) => {
             if (!result.success) {
-              setLayoutId(previousLayoutId);
+              if (requestId === layoutRequestSequenceRef.current) {
+                setLayoutId(previousLayoutId);
+              }
               notifications.show({
                 message: result.error || tEmailTemplates('detail.notifications.updateLayoutFailed'),
                 color: 'red',
               });
+            } else {
+              publishEditorEntityChange(`email_template:${templateId}`);
             }
           },
           onError: (error) => {
-            setLayoutId(previousLayoutId);
+            if (requestId === layoutRequestSequenceRef.current) {
+              setLayoutId(previousLayoutId);
+            }
             notifications.show({ message: error.message, color: 'red' });
+          },
+          onSettled: async () => {
+            pendingLayoutRequestCountRef.current = Math.max(0, pendingLayoutRequestCountRef.current - 1);
+            if (pendingLayoutRequestCountRef.current === 0) {
+              const result = await refetchTemplate();
+              if (pendingLayoutRequestCountRef.current === 0 && result.data) {
+                setLayoutId(result.data.layoutId ?? null);
+              }
+            }
           },
         },
       );
@@ -434,7 +474,7 @@ export default function EmailTemplateEditPage() {
         void schedulePreviewRefresh();
       }
     },
-    [layoutId, schedulePreviewRefresh, showPreview, tEmailTemplates, templateId, updateLayout],
+    [layoutId, refetchTemplate, schedulePreviewRefresh, showPreview, tEmailTemplates, templateId, updateLayout],
   );
 
   useEffect(() => {
@@ -494,7 +534,15 @@ export default function EmailTemplateEditPage() {
           title={displayTitle}
           isConnected={isConnected}
           isSynced={isSynced}
-          onBack={() => router.push('/admin/email-templates')}
+          onBack={() => {
+            void (async () => {
+              if (!(await flushEditorSaves(`email_template:${templateId}`))) {
+                notifications.show({ message: tCommonNotifications('saveFailed'), color: 'red' });
+                return;
+              }
+              router.push('/admin/email-templates');
+            })();
+          }}
           backTooltip={tEmailTemplates('detail.backTooltip')}
           actionItems={[
             {

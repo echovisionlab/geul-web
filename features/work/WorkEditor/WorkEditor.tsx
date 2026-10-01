@@ -43,6 +43,9 @@ import { useOgGenerationLookupSignal } from '@/lib/hooks/useOgGenerationLookupSi
 import { updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
 import { useSlugManagement } from '@/lib/hooks/useSlugManagement';
 import { toNullableSlug, toSlugInputValue } from '@/lib/utils/slug';
+import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
+import { flushEditorSaves, getPendingEditorPatch } from '@/lib/editor/editor-save-registry';
+import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
 import { WorkClientsSection } from './WorkClientsSection';
 import { WorkCreditsSection } from './WorkCreditsSection';
 import { WorkFeaturedImageUploader } from './WorkFeaturedImageUploader';
@@ -90,6 +93,21 @@ interface WorkEditorProps {
   onBack?: () => void;
 }
 
+type WorkFieldsUpdate = Parameters<typeof updateWorkFieldsAction>[1];
+const EMPTY_WORK_METADATA: Record<string, unknown> = {};
+const EMPTY_WORK_CLIENTS: string[] = [];
+
+function mergeWorkFieldsUpdate(pending: WorkFieldsUpdate, next: WorkFieldsUpdate): WorkFieldsUpdate {
+  const merged = { ...pending, ...next };
+  if (pending.observedMetadata !== undefined) {
+    merged.observedMetadata = pending.observedMetadata;
+  }
+  if (pending.observedClients !== undefined) {
+    merged.observedClients = pending.observedClients;
+  }
+  return merged;
+}
+
 export function WorkEditor(props: WorkEditorProps) {
   const initialMeta: WorkMeta = {
     title: props.initialTitle,
@@ -101,11 +119,11 @@ export function WorkEditor(props: WorkEditorProps) {
     untilMonth: props.initialUntilMonth,
     isPresent: props.initialIsPresent,
     summary: props.initialSummary || '',
-    metadata: props.initialMetadata,
+    metadata: props.initialMetadata ?? EMPTY_WORK_METADATA,
     featured: props.initialFeatured,
     creditsVersion: 0,
     creditOrder: [],
-    clients: props.initialClients ?? [],
+    clients: props.initialClients ?? EMPTY_WORK_CLIENTS,
   };
 
   return (
@@ -127,6 +145,7 @@ function WorkEditorContent({
   currentMemberId,
   initialTitle,
   initialSummary: _initialSummary,
+  initialMetadata,
   initialStatus,
   initialMapPlaceId,
   initialOgImageUrl,
@@ -143,8 +162,26 @@ function WorkEditorContent({
   const tCommon = useTranslations('common');
   const tCommonLabels = useTranslations('common.labels');
   const router = useRouter();
-  const handleBack = onBack ?? (() => router.back());
-  const lifecycle = useWorkLifecycle({ workId, initialStatus, canEdit, isAdmin, onDeleted: handleBack });
+  const navigateBack = useCallback(() => {
+    if (onBack) {
+      onBack();
+    } else {
+      router.back();
+    }
+  }, [onBack, router]);
+  const flushPendingSaves = useCallback(async () => {
+    const saved = await flushEditorSaves(`work:${workId}`);
+    if (!saved) {
+      notifications.show({ message: tCommon('notifications.saveFailed'), color: 'red' });
+    }
+    return saved;
+  }, [tCommon, workId]);
+  const handleBack = useCallback(async () => {
+    if (await flushPendingSaves()) {
+      navigateBack();
+    }
+  }, [flushPendingSaves, navigateBack]);
+  const lifecycle = useWorkLifecycle({ workId, initialStatus, canEdit, isAdmin, onDeleted: navigateBack });
   const { status } = lifecycle;
   const canEditWork = lifecycle.canEdit;
   const [mapPlaceId, setMapPlaceId] = useState<string | null>(initialMapPlaceId);
@@ -181,6 +218,27 @@ function WorkEditorContent({
     roomLocale,
     localeSession,
   } = useWorkMeta();
+  const currentProvider = provider;
+  useEditorEntityChanges(`work:${workId}`, () => router.refresh(), currentProvider);
+  const handleStatusChange = useCallback(
+    async (nextStatus: Parameters<typeof lifecycle.changeStatus>[0]) => {
+      if (await flushPendingSaves()) {
+        lifecycle.changeStatus(nextStatus);
+      }
+    },
+    [flushPendingSaves, lifecycle.changeStatus],
+  );
+  const handleDelete = useCallback(async () => {
+    if (await flushPendingSaves()) {
+      lifecycle.deleteWork.mutate();
+    }
+  }, [flushPendingSaves, lifecycle.deleteWork.mutate]);
+  const observedMetadataRef = useRef(metadata);
+  useEffect(() => {
+    if (!Object.hasOwn(getPendingEditorPatch(`work:${workId}`), 'metadata')) {
+      observedMetadataRef.current = structuredClone(initialMetadata);
+    }
+  }, [initialMetadata, workId]);
   const { activeEditLocale } = localeSession;
   const canEditTranslationSource = canEditWork;
   const hasLocaleRoomMutationAuthority = localeSession.hasRoomMutationAuthority({
@@ -192,7 +250,6 @@ function WorkEditorContent({
   });
   const currentLocaleCanEdit = canEditWork && activeEditLocale.canEditActiveLocale && hasLocaleRoomMutationAuthority;
   const canEditNeutral = currentLocaleCanEdit && activeEditLocale.isSourceLocale;
-  const currentProvider = provider;
   const currentDoc = doc;
   const currentIsConnected = isConnected;
   const currentIsSynced = isSynced;
@@ -329,9 +386,14 @@ function WorkEditorContent({
   const [residentTitle, setResidentTitle] = useState(initialTitle);
   const [residentSummary, setResidentSummary] = useState(_initialSummary ?? '');
   useEffect(() => {
-    setResidentTitle(activeEditLocale.displayTitle);
-    setResidentSummary(activeEditLocale.displaySummary);
-  }, [activeEditLocale.displaySummary, activeEditLocale.displayTitle, roomLocale]);
+    const pending = getPendingEditorPatch(`work:${workId}`);
+    if (!Object.hasOwn(pending, 'sourceTitle')) {
+      setResidentTitle(activeEditLocale.displayTitle);
+    }
+    if (!Object.hasOwn(pending, 'summary')) {
+      setResidentSummary(activeEditLocale.displaySummary);
+    }
+  }, [activeEditLocale.displaySummary, activeEditLocale.displayTitle, roomLocale, workId]);
 
   const debouncedResidentMetadataUpdate = useDebouncedRoomMetadata({
     connection: { protocol, bootstrap, acceptEpochAck, reloadCanonical },
@@ -340,12 +402,39 @@ function WorkEditorContent({
     write: (protocol, update: { locale: string; sourceTitle?: string; summary?: string | null }) =>
       updateBlockRoomLocaleMetadata(protocol, { type: 'work', ...update }),
   });
+  useBlockRoomMetadataUpdates({ protocol }, `work:${workId}`, ({ operation, values }) => {
+    if (operation !== 'locale') {
+      return;
+    }
+    if (typeof values.sourceTitle === 'string') {
+      setResidentTitle(values.sourceTitle);
+      if (activeEditLocale.isSourceLocale) {
+        setTitle(values.sourceTitle);
+      }
+    }
+    if (values.summary === null || typeof values.summary === 'string') {
+      const nextSummary = values.summary ?? '';
+      setResidentSummary(nextSummary);
+      if (activeEditLocale.isSourceLocale) {
+        setSummary(nextSummary);
+      }
+    }
+  });
   const debouncedWorkFieldsUpdate = useDebouncedPatch({
-    write: (update: Parameters<typeof updateWorkFieldsAction>[1]) =>
-      requireActionSuccess(updateWorkFields.mutateAsync(update)),
+    write: async (update: WorkFieldsUpdate) => {
+      const result = await updateWorkFields.mutateAsync(update);
+      await requireActionSuccess(Promise.resolve(result));
+      if (update.metadata !== undefined) {
+        observedMetadataRef.current = structuredClone(result.metadata ?? update.metadata);
+      }
+      publishEditorEntityChange(`work:${workId}`);
+    },
     delay: 500,
     scope: workId,
     document: `work:${workId}`,
+    merge: mergeWorkFieldsUpdate,
+    recoveryKey: 'work-fields',
+    retry: true,
   });
   const handleScopedLocaleTitleChange = useCallback(
     (value: string) => {
@@ -405,6 +494,7 @@ function WorkEditorContent({
       if (updates.metadata !== undefined) {
         setMetadata(updates.metadata);
         durableUpdate.metadata = updates.metadata;
+        durableUpdate.observedMetadata = structuredClone(observedMetadataRef.current);
       }
       if (updates.featured !== undefined) {
         setFeatured(updates.featured);
@@ -474,8 +564,8 @@ function WorkEditorContent({
           isConnected={currentIsConnected}
           isSynced={currentIsSynced}
           onBack={handleBack}
-          onStatusChange={canEditNeutral ? lifecycle.changeStatus : undefined}
-          onDelete={canEditNeutral && lifecycle.controls.canDelete ? () => lifecycle.deleteWork.mutate() : undefined}
+          onStatusChange={canEditNeutral ? handleStatusChange : undefined}
+          onDelete={canEditNeutral && lifecycle.controls.canDelete ? handleDelete : undefined}
           deleteConfirmation={
             canEditNeutral && lifecycle.controls.canDelete
               ? {

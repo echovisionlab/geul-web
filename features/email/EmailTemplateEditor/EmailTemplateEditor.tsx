@@ -4,7 +4,7 @@ import {
   EmailTiptapEditor,
   type EmailCampaignTiptapEditorHandle,
 } from '@/features/editor/tiptap/profiles/EmailTiptapEditor';
-import type { CollaborationAwarenessProvider } from '@/lib/collab/createCollaborationConfig';
+import type { CollaborationAwarenessProvider } from '@/lib/collab/collaboration-awareness-provider';
 import type { RichTextBlockRoomTiptapController } from '@/features/editor/tiptap/block-room-tiptap-controller';
 
 interface EmailTemplateEditorProps {

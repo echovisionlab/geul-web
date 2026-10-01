@@ -14,6 +14,7 @@ import {
   previewCampaignAction,
   scheduleCampaignAction,
   sendCampaignNowAction,
+  updateCampaignConfigurationAction,
 } from './campaign';
 
 const createCampaignRpcMock = vi.fn();
@@ -23,6 +24,7 @@ const getCampaignRecipientsRpcMock = vi.fn();
 const previewCampaignRpcMock = vi.fn();
 const sendCampaignNowRpcMock = vi.fn();
 const scheduleCampaignRpcMock = vi.fn();
+const updateCampaignConfigurationRpcMock = vi.fn();
 
 type CampaignClient = Awaited<ReturnType<typeof createCampaignClient>>;
 
@@ -409,6 +411,50 @@ describe('campaign recipient scope delivery commands', () => {
     expect(scheduleCampaignRpcMock).toHaveBeenCalledWith({
       id: 'campaign-1',
       scheduledAt: timestampFromDate(scheduledAt),
+      recipientScope: CampaignRecipientScope.ALL_MATCHING_USERS,
+    });
+  });
+});
+
+describe('updateCampaignConfigurationAction field patches', () => {
+  beforeEach(() => {
+    updateCampaignConfigurationRpcMock.mockReset();
+    vi.mocked(createCampaignClient).mockReset();
+    vi.mocked(createCampaignClient).mockResolvedValue(
+      createCampaignClientStub({ updateCampaignConfiguration: updateCampaignConfigurationRpcMock }),
+    );
+    updateCampaignConfigurationRpcMock.mockResolvedValue({ changed: true });
+  });
+
+  it('sends target mode and segment as a pair and preserves an explicit null clear', async () => {
+    await expect(
+      updateCampaignConfigurationAction('campaign-1', {
+        targetMode: CampaignTargetMode.ALL,
+        segmentId: null,
+      }),
+    ).resolves.toEqual({ changed: true });
+
+    expect(updateCampaignConfigurationRpcMock).toHaveBeenCalledWith({
+      id: 'campaign-1',
+      targetMode: CampaignTargetMode.ALL,
+      segmentId: '',
+    });
+  });
+
+  it('sends a layout-only patch and preserves an explicit null clear', async () => {
+    await updateCampaignConfigurationAction('campaign-1', { layoutId: null });
+
+    expect(updateCampaignConfigurationRpcMock).toHaveBeenCalledWith({
+      id: 'campaign-1',
+      layoutId: '',
+    });
+  });
+
+  it('sends a recipient-scope-only patch', async () => {
+    await updateCampaignConfigurationAction('campaign-1', { recipientScope: 'ALL_MATCHING_USERS' });
+
+    expect(updateCampaignConfigurationRpcMock).toHaveBeenCalledWith({
+      id: 'campaign-1',
       recipientScope: CampaignRecipientScope.ALL_MATCHING_USERS,
     });
   });

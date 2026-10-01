@@ -5,8 +5,8 @@ import { getTranslations } from 'next-intl/server';
 import { ShareLinkEntityType } from '@echovisionlab/geul-proto/secure/share_link_pb.ts';
 import { LazyReleaseEditor } from '@/features/release/ReleaseEditor/LazyReleaseEditor';
 import { getReleaseMetadataDocument } from '@/lib/queries/metadata';
-import { getReleaseAdminAction } from '@/lib/actions/release';
-import { listTracksByReleaseAction } from '@/lib/actions/track';
+import { getReleaseAdminAction, getReleaseEditorRelationsAction } from '@/lib/actions/release';
+import { getReleaseTrackSnapshotAction } from '@/lib/actions/track';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { getReleasePublic, resolveReleaseIdForEdit } from '@/lib/queries/release';
 import { createPublicShareLinkClient } from '@/lib/api/server-client';
@@ -136,12 +136,13 @@ export default async function ReleaseViewPage({ params, searchParams }: Props) {
     if (idOrSlug !== releaseId) {
       redirect(`/releases/${encodeURIComponent(releaseId)}${buildSearchSuffix(query)}`);
     }
-    const [release, baseUrl, initialTracks] = await Promise.all([
+    const [release, baseUrl, initialTracks, initialRelations] = await Promise.all([
       getReleaseAdminAction(releaseId),
       getBaseUrl(),
-      listTracksByReleaseAction(releaseId),
+      getReleaseTrackSnapshotAction(releaseId),
+      getReleaseEditorRelationsAction(releaseId),
     ]);
-    if (!release) {
+    if (!release || !initialRelations) {
       notFound();
     }
 
@@ -158,13 +159,14 @@ export default async function ReleaseViewPage({ params, searchParams }: Props) {
         initialAppleMusicUrl={release.appleMusicUrl}
         initialBandcampUrl={release.bandcampUrl}
         initialYoutubeMusicUrl={release.youtubeMusicUrl}
-        initialCredits={[]}
-        initialLabels={[]}
-        initialCategories={[]}
-        initialGenres={[]}
-        initialStyles={[]}
-        initialFormats={[]}
-        initialTracks={initialTracks}
+        initialArtists={initialRelations.artists}
+        initialCredits={initialRelations.credits}
+        initialLabels={initialRelations.labels}
+        initialCategories={initialRelations.categories}
+        initialGenres={initialRelations.genres}
+        initialStyles={initialRelations.styles}
+        initialFormats={initialRelations.formats}
+        initialTracks={initialTracks ?? []}
         baseUrl={baseUrl}
       />
     );

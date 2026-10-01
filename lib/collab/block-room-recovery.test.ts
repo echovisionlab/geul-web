@@ -31,6 +31,8 @@ function bootstrap(
     presentLocaleValues: [],
     sourceMetadata: { locale: sourceLocale },
     localeMetadata: { locale },
+    documentMetadata: {},
+    metadataSequence: 0,
     blockCatalogFingerprint: 'catalog-v1',
     serverInstanceId: 'collab-1',
     roomEpoch: 'bdac72af-8a24-4214-999d-83727445cbd7',

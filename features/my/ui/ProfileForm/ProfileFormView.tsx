@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, type DragEvent, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type DragEvent, type KeyboardEvent } from 'react';
 import { IconCheck, IconCopy, IconGripVertical, IconPlus, IconTrash } from '@tabler/icons-react';
 import { Group, Stack, Text } from '@mantine/core';
 import { useForm } from '@mantine/form';
@@ -25,6 +25,13 @@ export interface ProfileFormValues {
   bio: string;
   website: string;
   socialLinks: ProfileSocialLinkValue[];
+}
+
+export interface ProfileFormChangedFields {
+  nickname: boolean;
+  bio: boolean;
+  website: boolean;
+  socialLinks: boolean;
 }
 
 export interface ProfileFormInitialValues extends ProfileFormValues {
@@ -68,7 +75,7 @@ export interface ProfileFormViewEvents {
   onCopyUid: () => void;
   onNicknameChange: (value: string) => void;
   onNormalizeSocialLink: (platform: string, value: string) => string;
-  onSubmit: (values: ProfileFormValues) => void;
+  onSubmit: (values: ProfileFormValues, changedFields: ProfileFormChangedFields) => void;
 }
 
 export interface ProfileFormViewProps {
@@ -77,6 +84,7 @@ export interface ProfileFormViewProps {
   platformOptions: ProfileSocialPlatformOption[];
   showExtendedFields: boolean;
   pending?: boolean;
+  savedRevision?: number;
   disabled?: boolean;
   copied?: boolean;
   errors?: ProfileFormViewErrors;
@@ -92,6 +100,7 @@ export function ProfileFormView({
   platformOptions,
   showExtendedFields,
   pending = false,
+  savedRevision = 0,
   disabled = false,
   copied = false,
   errors = {},
@@ -101,6 +110,8 @@ export function ProfileFormView({
 }: ProfileFormViewProps) {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const newLinkIdRef = useRef(0);
+  const savedRevisionRef = useRef(savedRevision);
+  const savedInitialValuesRef = useRef<ProfileFormInitialValues | null>(null);
   const formDisabled = disabled || pending;
   const form = useForm<ProfileFormValues>({
     initialValues: {
@@ -110,6 +121,42 @@ export function ProfileFormView({
       socialLinks: initialValues.socialLinks,
     },
   });
+  const formRef = useRef(form);
+  formRef.current = form;
+  const onNicknameChangeRef = useRef(events.onNicknameChange);
+  onNicknameChangeRef.current = events.onNicknameChange;
+
+  useEffect(() => {
+    const currentForm = formRef.current;
+    if (savedRevisionRef.current !== savedRevision) {
+      savedRevisionRef.current = savedRevision;
+      savedInitialValuesRef.current = initialValues;
+      const savedValues = currentForm.getValues();
+      currentForm.setInitialValues(savedValues);
+      currentForm.resetDirty(savedValues);
+      return;
+    }
+
+    if (savedInitialValuesRef.current === initialValues) {
+      return;
+    }
+
+    if (disabled || pending || currentForm.isDirty()) {
+      return;
+    }
+    savedInitialValuesRef.current = null;
+
+    const nextValues = {
+      nickname: initialValues.nickname,
+      bio: initialValues.bio,
+      website: initialValues.website,
+      socialLinks: initialValues.socialLinks,
+    };
+    currentForm.setInitialValues(nextValues);
+    currentForm.setValues(nextValues);
+    currentForm.resetDirty(nextValues);
+    onNicknameChangeRef.current(nextValues.nickname);
+  }, [disabled, initialValues, pending, savedRevision]);
 
   const setSocialLinks = (socialLinks: ProfileSocialLinkValue[]) => {
     form.setFieldValue('socialLinks', socialLinks);
@@ -199,7 +246,16 @@ export function ProfileFormView({
         }
       />
 
-      <form onSubmit={form.onSubmit((values) => events.onSubmit(values))}>
+      <form
+        onSubmit={form.onSubmit((values) =>
+          events.onSubmit(values, {
+            nickname: form.isDirty('nickname'),
+            bio: showExtendedFields && form.isDirty('bio'),
+            website: showExtendedFields && form.isDirty('website'),
+            socialLinks: showExtendedFields && form.isDirty('socialLinks'),
+          }),
+        )}
+      >
         <Stack>
           <ValidatingTextInput
             id="profile-nickname"
@@ -367,7 +423,7 @@ export function ProfileFormView({
             </Text>
           ) : null}
 
-          <Button type="submit" tone="accent" emphasis="strong" loading={pending} disabled={disabled}>
+          <Button type="submit" tone="accent" emphasis="strong" loading={pending} disabled={formDisabled}>
             {labels.submit}
           </Button>
         </Stack>

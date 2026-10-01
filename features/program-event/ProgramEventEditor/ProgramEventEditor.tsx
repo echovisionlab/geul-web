@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { useMutation } from '@tanstack/react-query';
@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import { Box, Combobox, Group, InputBase, Loader, SimpleGrid, Stack, Text, useCombobox } from '@mantine/core';
 import { DateTimePicker } from '@mantine/dates';
 import '@mantine/dates/styles.css';
-import { useDebouncedCallback, useDisclosure } from '@mantine/hooks';
+import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { EditorHeader } from '@/features/editor/EditorHeader';
 import { MultiSelect, Select, TextInput, Checkbox, NumberInput } from '@/components/core/Input';
@@ -25,7 +25,12 @@ import { EditorActiveLocaleControl } from '@/features/translation/EditorActiveLo
 import { EntityTranslationsPanel } from '@/features/translation/EntityTranslationsPanel';
 import { LocalizedRichTextFragmentEditor } from '@/features/translation/LocalizedRichTextFragmentEditor';
 import { useLocaleDocumentSession } from '@/features/translation/useLocaleDocumentSession';
-import { createProgramEventTypeAction, type ProgramEventCreditItem } from '@/lib/actions/program-event';
+import {
+  createProgramEventTypeAction,
+  type ProgramEventCreditItem,
+  type ProgramEventNeutralConfiguration,
+  type ProgramEventRelationInput,
+} from '@/lib/actions/program-event';
 import {
   createMapPlaceForBlockWithBrowserClient,
   createMapPlaceWithBrowserClient,
@@ -48,8 +53,16 @@ import {
 import type { ProgramEventEditorAction } from './program-event-actions';
 import type { ProgramEventLocationModeValue } from '@/lib/types/program-event/location-mode';
 import { requireActionSuccess } from '@/lib/editor/require-action-success';
+import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
+import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
+import { mergeMetadataPatches } from '@/lib/editor/merge-metadata-patches';
+import {
+  mergeProgramEventTypeOption,
+  resolveProgramEventObservedRelations,
+  useProgramEventNeutralConfiguration,
+} from './useProgramEventNeutralConfiguration';
 
 interface Option {
   id: string;
@@ -84,9 +97,9 @@ interface ProgramEventEditorProps {
   initialTicketUrl: string | null;
   initialStreamUrl: string | null;
   initialExternalUrl: string | null;
-  initialArtists: string[];
-  initialLabels: string[];
-  initialClients: string[];
+  initialArtists: ProgramEventRelationInput[];
+  initialLabels: ProgramEventRelationInput[];
+  initialClients: ProgramEventRelationInput[];
   initialCredits: ProgramEventCreditItem[];
   allowedActions: readonly ProgramEventEditorAction[];
   typeOptions: Option[];
@@ -160,9 +173,51 @@ export function ProgramEventEditor({
   const [ticketUrl, setTicketUrl] = useState(initialTicketUrl ?? '');
   const [streamUrl, setStreamUrl] = useState(initialStreamUrl ?? '');
   const [externalUrl, setExternalUrl] = useState(initialExternalUrl ?? '');
-  const [artistIds, setArtistIds] = useState(initialArtists);
-  const [labelIds, setLabelIds] = useState(initialLabels);
-  const [clientIds, setClientIds] = useState(initialClients);
+  const [artistIds, setArtistIds] = useState(initialArtists.map(({ id }) => id));
+  const [labelIds, setLabelIds] = useState(initialLabels.map(({ id }) => id));
+  const [clientIds, setClientIds] = useState(initialClients.map(({ id }) => id));
+  const relationBaselineRef = useRef({ artists: initialArtists, labels: initialLabels, clients: initialClients });
+  const initialNeutralConfiguration = useMemo<ProgramEventNeutralConfiguration>(
+    () => ({
+      slug: initialSlug,
+      typeId: initialTypeId,
+      typeName: typeOptions.find((option) => option.id === initialTypeId)?.name ?? null,
+      seriesId: initialSeriesId,
+      seriesOrder: initialSeriesOrder,
+      startsAt: initialStartsAt,
+      endsAt: initialEndsAt,
+      timezone: initialTimezone,
+      allDay: initialAllDay,
+      locationMode: initialLocationMode,
+      mapPlaceId: initialMapPlaceId,
+      ticketUrl: initialTicketUrl,
+      streamUrl: initialStreamUrl,
+      externalUrl: initialExternalUrl,
+      artists: initialArtists,
+      labels: initialLabels,
+      clients: initialClients,
+    }),
+    [
+      initialAllDay,
+      initialArtists,
+      initialClients,
+      initialEndsAt,
+      initialExternalUrl,
+      initialLabels,
+      initialLocationMode,
+      initialMapPlaceId,
+      initialSeriesId,
+      initialSeriesOrder,
+      initialSlug,
+      initialStartsAt,
+      initialStreamUrl,
+      initialTicketUrl,
+      initialTimezone,
+      initialTypeId,
+      typeOptions,
+    ],
+  );
+  const pendingAuxiliaryWritesRef = useRef(new Set<Promise<void>>());
   const [posterMedia, setPosterMedia] = useState(initialPosterMedia);
   const [createPlaceInitialName, setCreatePlaceInitialName] = useState('');
   const [createPlaceOpened, { open: openCreatePlace, close: closeCreatePlace }] = useDisclosure(false);
@@ -197,7 +252,70 @@ export function ProgramEventEditor({
     initialStatus,
     allowedActions: neutralAllowedActions,
   });
-  const { status, mutateEditableEvent, saveEditableEvent } = lifecycle;
+  const { status, saveEditableEvent } = lifecycle;
+  const adoptNeutralConfiguration = useCallback((configuration: Partial<ProgramEventNeutralConfiguration>) => {
+    if (configuration.slug !== undefined) {
+      setSlug(configuration.slug ?? '');
+    }
+    if (configuration.typeId !== undefined) {
+      setTypeId(configuration.typeId);
+    }
+    if (configuration.typeId !== undefined && configuration.typeName) {
+      const { typeId, typeName } = configuration;
+      setAvailableTypes((current) => mergeProgramEventTypeOption(current, typeId, typeName));
+    }
+    if (configuration.seriesId !== undefined) {
+      setSeriesId(configuration.seriesId);
+    }
+    if (configuration.seriesOrder !== undefined) {
+      setSeriesOrder(configuration.seriesOrder);
+    }
+    if (configuration.startsAt !== undefined) {
+      setStartsAt(configuration.startsAt);
+    }
+    if (configuration.endsAt !== undefined) {
+      setEndsAt(configuration.endsAt);
+    }
+    if (configuration.timezone !== undefined) {
+      setTimezone(configuration.timezone);
+    }
+    if (configuration.allDay !== undefined) {
+      setAllDay(configuration.allDay);
+    }
+    if (configuration.locationMode !== undefined) {
+      setLocationMode(configuration.locationMode);
+    }
+    if (configuration.mapPlaceId !== undefined) {
+      setMapPlaceId(configuration.mapPlaceId);
+    }
+    if (configuration.ticketUrl !== undefined) {
+      setTicketUrl(configuration.ticketUrl ?? '');
+    }
+    if (configuration.streamUrl !== undefined) {
+      setStreamUrl(configuration.streamUrl ?? '');
+    }
+    if (configuration.externalUrl !== undefined) {
+      setExternalUrl(configuration.externalUrl ?? '');
+    }
+    if (configuration.artists !== undefined) {
+      relationBaselineRef.current = { ...relationBaselineRef.current, artists: configuration.artists };
+      setArtistIds(configuration.artists.map(({ id }) => id));
+    }
+    if (configuration.labels !== undefined) {
+      relationBaselineRef.current = { ...relationBaselineRef.current, labels: configuration.labels };
+      setLabelIds(configuration.labels.map(({ id }) => id));
+    }
+    if (configuration.clients !== undefined) {
+      relationBaselineRef.current = { ...relationBaselineRef.current, clients: configuration.clients };
+      setClientIds(configuration.clients.map(({ id }) => id));
+    }
+  }, []);
+  const neutralConfiguration = useProgramEventNeutralConfiguration({
+    eventId,
+    initialConfiguration: initialNeutralConfiguration,
+    provider: blockRoom.provider,
+    onAdopt: adoptNeutralConfiguration,
+  });
   const timezoneSelectData = useMemo(() => {
     const options = COMMON_TIMEZONES.map((option) => ({
       value: option.value,
@@ -252,7 +370,7 @@ export function ProgramEventEditor({
         return;
       }
       setTypeId(nextType.id);
-      mutateEditableEvent({ typeId: nextType.id });
+      queueNeutralPatch({ typeId: nextType.id });
       setTypeSearch('');
       typeCombobox.closeDropdown();
       notifications.show({ message: tCommon('notifications.saveSuccess'), color: 'green' });
@@ -277,27 +395,157 @@ export function ProgramEventEditor({
         return;
       }
       setMapPlaceId(result.data.id);
-      mutateEditableEvent({ mapPlaceId: result.data.id });
+      queueNeutralPatch({ mapPlaceId: result.data.id });
       closeCreatePlace();
     },
   });
 
   const debouncedMetaUpdate = useDebouncedPatch({
-    write: (data: ProgramEventUpdate) => requireActionSuccess(saveEditableEvent(data)),
+    write: async (data: ProgramEventUpdate) => {
+      const currentBaseline = relationBaselineRef.current;
+      const observed = resolveProgramEventObservedRelations(data, currentBaseline);
+      const write = neutralConfiguration.beginWrite(data);
+      try {
+        await requireActionSuccess(
+          saveEditableEvent({ ...data, ...(Object.keys(observed).length ? { observed } : {}) }),
+        );
+      } catch (error) {
+        write.fail();
+        throw error;
+      }
+
+      const nextBaseline = { ...currentBaseline };
+      for (const collection of ['artists', 'labels', 'clients'] as const) {
+        const desired = data[collection];
+        if (desired === undefined) {
+          continue;
+        }
+        const collectionBaseline = data.observed?.[collection] ?? currentBaseline[collection];
+        const previousById = new Map(collectionBaseline.map((relation) => [relation.id, relation]));
+        let nextSortOrder = Math.max(-1, ...collectionBaseline.map(({ sortOrder }) => sortOrder ?? -1)) + 1;
+        nextBaseline[collection] = desired
+          .map((relation) => {
+            const previous = previousById.get(relation.id);
+            return {
+              id: relation.id,
+              ...(relation.role === undefined
+                ? previous?.role === undefined
+                  ? {}
+                  : { role: previous.role }
+                : { role: relation.role }),
+              sortOrder: relation.sortOrder ?? nextSortOrder++,
+            };
+          })
+          .sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0));
+      }
+      relationBaselineRef.current = nextBaseline;
+      write.acknowledge(data);
+    },
     delay: 500,
     scope: eventId,
     document: `program_event:${eventId}`,
+    merge: mergeMetadataPatches,
+    recoveryKey: 'event-relations',
+    retry: true,
   });
-  const debouncedRelationsUpdate = useDebouncedCallback(
-    (next: { artists: string[]; labels: string[]; clients: string[] }) => {
-      mutateEditableEvent({
-        artists: next.artists.map((id, index) => ({ id, sortOrder: index })),
-        labels: next.labels.map((id, index) => ({ id, sortOrder: index })),
-        clients: next.clients.map((id, index) => ({ id, sortOrder: index })),
-      });
+  const queueNeutralPatch = useCallback(
+    (patch: ProgramEventUpdate) => {
+      if (patch.slug !== undefined) {
+        neutralConfiguration.setDraft('slug', patch.slug || null);
+      }
+      if (patch.typeId !== undefined) {
+        neutralConfiguration.setDraft('typeId', patch.typeId);
+      }
+      if (patch.seriesId !== undefined) {
+        neutralConfiguration.setDraft('seriesId', patch.seriesId);
+      }
+      if (patch.seriesOrder !== undefined) {
+        neutralConfiguration.setDraft('seriesOrder', patch.seriesOrder);
+      }
+      if (patch.startsAt !== undefined) {
+        neutralConfiguration.setDraft('startsAt', patch.startsAt);
+      }
+      if (patch.endsAt !== undefined) {
+        neutralConfiguration.setDraft('endsAt', patch.endsAt);
+      }
+      if (patch.timezone !== undefined) {
+        neutralConfiguration.setDraft('timezone', patch.timezone);
+      }
+      if (patch.allDay !== undefined) {
+        neutralConfiguration.setDraft('allDay', patch.allDay);
+      }
+      if (patch.locationMode !== undefined) {
+        neutralConfiguration.setDraft('locationMode', patch.locationMode);
+      }
+      if (patch.mapPlaceId !== undefined) {
+        neutralConfiguration.setDraft('mapPlaceId', patch.mapPlaceId);
+      }
+      if (patch.ticketUrl !== undefined) {
+        neutralConfiguration.setDraft('ticketUrl', patch.ticketUrl || null);
+      }
+      if (patch.streamUrl !== undefined) {
+        neutralConfiguration.setDraft('streamUrl', patch.streamUrl || null);
+      }
+      if (patch.externalUrl !== undefined) {
+        neutralConfiguration.setDraft('externalUrl', patch.externalUrl || null);
+      }
+      if (patch.artists !== undefined) {
+        neutralConfiguration.setDraft('artists', patch.artists);
+      }
+      if (patch.labels !== undefined) {
+        neutralConfiguration.setDraft('labels', patch.labels);
+      }
+      if (patch.clients !== undefined) {
+        neutralConfiguration.setDraft('clients', patch.clients);
+      }
+      debouncedMetaUpdate(patch);
     },
-    500,
+    [debouncedMetaUpdate, neutralConfiguration.setDraft],
   );
+
+  const trackAuxiliaryWrite = useCallback(
+    (promise: Promise<unknown>) => {
+      const tracked = promise
+        .then(() => undefined)
+        .catch((error: unknown) => {
+          notifications.show({
+            message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
+            color: 'red',
+          });
+        })
+        .finally(() => pendingAuxiliaryWritesRef.current.delete(tracked));
+      pendingAuxiliaryWritesRef.current.add(tracked);
+    },
+    [tCommon],
+  );
+  const flushPendingSaves = useCallback(async () => {
+    while (pendingAuxiliaryWritesRef.current.size > 0) {
+      await Promise.all([...pendingAuxiliaryWritesRef.current]);
+    }
+    const saved = await flushEditorSaves(`program_event:${eventId}`);
+    if (!saved) {
+      notifications.show({ message: tCommon('notifications.saveFailed'), color: 'red' });
+    }
+    return saved;
+  }, [eventId, tCommon]);
+  const handleBack = useCallback(async () => {
+    if (await flushPendingSaves()) {
+      router.back();
+    }
+  }, [flushPendingSaves, router]);
+  const handleStatusChange = useCallback(
+    async (nextStatus: ProgramEventStatusValue) => {
+      if (await flushPendingSaves()) {
+        lifecycle.changeStatus(nextStatus);
+      }
+    },
+    [flushPendingSaves, lifecycle.changeStatus],
+  );
+  const handleDelete = useCallback(async () => {
+    if (await flushPendingSaves()) {
+      lifecycle.deleteEvent.mutate();
+    }
+  }, [flushPendingSaves, lifecycle.deleteEvent.mutate]);
 
   const debouncedResidentMetadataUpdate = useDebouncedRoomMetadata({
     connection: blockRoom,
@@ -341,6 +589,25 @@ export function ProgramEventEditor({
     ],
   );
 
+  useBlockRoomMetadataUpdates(blockRoom, `program_event:${eventId}`, ({ operation, values }) => {
+    if (operation !== 'locale') {
+      return;
+    }
+    if (typeof values.title === 'string') {
+      setResidentTitle(values.title);
+      if (activeEditLocale.isSourceLocale) {
+        setSourceTitle(values.title);
+      }
+    }
+    if (values.summary === null || typeof values.summary === 'string') {
+      const nextSummary = values.summary ?? '';
+      setResidentSummary(nextSummary);
+      if (activeEditLocale.isSourceLocale) {
+        setSourceSummary(nextSummary);
+      }
+    }
+  });
+
   const seriesSelectData = seriesOptions.map((option) => ({
     value: option.id,
     label: option.title,
@@ -374,11 +641,11 @@ export function ProgramEventEditor({
       return;
     }
     if (value === '$create') {
-      createType.mutate(typeSearch.trim());
+      trackAuxiliaryWrite(createType.mutateAsync(typeSearch.trim()));
       return;
     }
     setTypeId(value);
-    debouncedMetaUpdate({ typeId: value });
+    queueNeutralPatch({ typeId: value });
     setTypeSearch('');
     typeCombobox.closeDropdown();
   };
@@ -396,9 +663,9 @@ export function ProgramEventEditor({
           statusOptions={lifecycle.statusOptions}
           isConnected={blockRoom.isConnected}
           isSynced={blockRoom.isSynced}
-          onBack={() => router.back()}
-          onStatusChange={lifecycle.statusOptions.length > 1 ? lifecycle.changeStatus : undefined}
-          onDelete={lifecycle.canDelete ? () => lifecycle.deleteEvent.mutate() : undefined}
+          onBack={handleBack}
+          onStatusChange={lifecycle.statusOptions.length > 1 ? handleStatusChange : undefined}
+          onDelete={lifecycle.canDelete ? handleDelete : undefined}
           deleteConfirmation={{
             title: tCommon('actions.delete'),
             message: (
@@ -445,10 +712,11 @@ export function ProgramEventEditor({
           disabled={!canEditNeutral}
           onChange={(value) => {
             if (canEditNeutral) {
-              setSlug(sanitizeSlugInput(value));
+              const nextSlug = sanitizeSlugInput(value);
+              setSlug(nextSlug);
+              queueNeutralPatch({ slug: nextSlug });
             }
           }}
-          onBlur={() => mutateEditableEvent({ slug })}
         />
 
         <SummaryFieldCard
@@ -531,7 +799,7 @@ export function ProgramEventEditor({
                 value={seriesId}
                 onChange={(value) => {
                   setSeriesId(value);
-                  debouncedMetaUpdate({ seriesId: value ?? null });
+                  queueNeutralPatch({ seriesId: value ?? null });
                 }}
                 searchable
                 clearable
@@ -544,7 +812,7 @@ export function ProgramEventEditor({
                 onChange={(value) => {
                   const next = typeof value === 'number' ? value : null;
                   setSeriesOrder(next);
-                  debouncedMetaUpdate({ seriesOrder: next });
+                  queueNeutralPatch({ seriesOrder: next });
                 }}
                 disabled={!canEditNeutral}
               />
@@ -557,7 +825,7 @@ export function ProgramEventEditor({
                     return;
                   }
                   setTimezone(value);
-                  debouncedMetaUpdate({ timezone: value });
+                  queueNeutralPatch({ timezone: value });
                 }}
                 searchable
                 allowDeselect={false}
@@ -573,7 +841,7 @@ export function ProgramEventEditor({
                   try {
                     const next = zonedDateTimeInputToInstant(value, timezone);
                     setStartsAt(next);
-                    debouncedMetaUpdate({ startsAt: next });
+                    queueNeutralPatch({ startsAt: next });
                   } catch {
                     notifications.show({
                       message: tCommon('notifications.saveFailed'),
@@ -591,7 +859,7 @@ export function ProgramEventEditor({
                   try {
                     const next = value ? zonedDateTimeInputToInstant(value, timezone) : null;
                     setEndsAt(next);
-                    debouncedMetaUpdate({ endsAt: next });
+                    queueNeutralPatch({ endsAt: next });
                   } catch {
                     notifications.show({
                       message: tCommon('notifications.saveFailed'),
@@ -608,7 +876,7 @@ export function ProgramEventEditor({
                 checked={allDay}
                 onChange={(event) => {
                   setAllDay(event.currentTarget.checked);
-                  debouncedMetaUpdate({ allDay: event.currentTarget.checked });
+                  queueNeutralPatch({ allDay: event.currentTarget.checked });
                 }}
                 disabled={!canEditNeutral}
               />
@@ -626,7 +894,7 @@ export function ProgramEventEditor({
                 onChange={(value) => {
                   const next = (value ?? 'tba') as ProgramEventLocationModeValue;
                   setLocationMode(next);
-                  debouncedMetaUpdate({ locationMode: next });
+                  queueNeutralPatch({ locationMode: next });
                 }}
                 disabled={!canEditNeutral}
               />
@@ -638,7 +906,7 @@ export function ProgramEventEditor({
                 canEdit={canEditNeutral}
                 onChange={(value) => {
                   setMapPlaceId(value);
-                  debouncedMetaUpdate({ mapPlaceId: value });
+                  queueNeutralPatch({ mapPlaceId: value });
                 }}
                 onCreateNew={(searchTerm) => {
                   if (!canEditNeutral) {
@@ -654,8 +922,9 @@ export function ProgramEventEditor({
                 label={tProgramEventAdmin('editor.ticketUrl')}
                 value={ticketUrl}
                 onChange={(event) => {
-                  setTicketUrl(event.currentTarget.value);
-                  debouncedMetaUpdate({ ticketUrl: event.currentTarget.value });
+                  const next = event.currentTarget.value;
+                  setTicketUrl(next);
+                  queueNeutralPatch({ ticketUrl: next || null });
                 }}
                 disabled={!canEditNeutral}
               />
@@ -663,8 +932,9 @@ export function ProgramEventEditor({
                 label={tProgramEventAdmin('editor.streamUrl')}
                 value={streamUrl}
                 onChange={(event) => {
-                  setStreamUrl(event.currentTarget.value);
-                  debouncedMetaUpdate({ streamUrl: event.currentTarget.value });
+                  const next = event.currentTarget.value;
+                  setStreamUrl(next);
+                  queueNeutralPatch({ streamUrl: next || null });
                 }}
                 disabled={!canEditNeutral}
               />
@@ -672,8 +942,9 @@ export function ProgramEventEditor({
                 label={tProgramEventAdmin('editor.externalUrl')}
                 value={externalUrl}
                 onChange={(event) => {
-                  setExternalUrl(event.currentTarget.value);
-                  debouncedMetaUpdate({ externalUrl: event.currentTarget.value });
+                  const next = event.currentTarget.value;
+                  setExternalUrl(next);
+                  queueNeutralPatch({ externalUrl: next || null });
                 }}
                 disabled={!canEditNeutral}
               />
@@ -690,10 +961,15 @@ export function ProgramEventEditor({
                 value={artistIds}
                 onChange={(values) => {
                   setArtistIds(values);
-                  debouncedRelationsUpdate({
-                    artists: values,
-                    labels: labelIds,
-                    clients: clientIds,
+                  const observed = relationBaselineRef.current.artists;
+                  const baselineById = new Map(observed.map((relation) => [relation.id, relation]));
+                  queueNeutralPatch({
+                    artists: values.map((id, sortOrder) => ({
+                      id,
+                      ...(baselineById.has(id) ? { role: baselineById.get(id)?.role } : {}),
+                      sortOrder,
+                    })),
+                    observed: { artists: observed },
                   });
                 }}
                 searchable
@@ -705,10 +981,15 @@ export function ProgramEventEditor({
                 value={labelIds}
                 onChange={(values) => {
                   setLabelIds(values);
-                  debouncedRelationsUpdate({
-                    artists: artistIds,
-                    labels: values,
-                    clients: clientIds,
+                  const observed = relationBaselineRef.current.labels;
+                  const baselineById = new Map(observed.map((relation) => [relation.id, relation]));
+                  queueNeutralPatch({
+                    labels: values.map((id, sortOrder) => ({
+                      id,
+                      ...(baselineById.has(id) ? { role: baselineById.get(id)?.role } : {}),
+                      sortOrder,
+                    })),
+                    observed: { labels: observed },
                   });
                 }}
                 searchable
@@ -720,10 +1001,15 @@ export function ProgramEventEditor({
                 value={clientIds}
                 onChange={(values) => {
                   setClientIds(values);
-                  debouncedRelationsUpdate({
-                    artists: artistIds,
-                    labels: labelIds,
-                    clients: values,
+                  const observed = relationBaselineRef.current.clients;
+                  const baselineById = new Map(observed.map((relation) => [relation.id, relation]));
+                  queueNeutralPatch({
+                    clients: values.map((id, sortOrder) => ({
+                      id,
+                      ...(baselineById.has(id) ? { role: baselineById.get(id)?.role } : {}),
+                      sortOrder,
+                    })),
+                    observed: { clients: observed },
                   });
                 }}
                 searchable
@@ -772,7 +1058,7 @@ export function ProgramEventEditor({
           onClose={closeCreatePlace}
           onSubmit={(data) => {
             if (canEditNeutral) {
-              createPlace.mutate(data);
+              trackAuxiliaryWrite(createPlace.mutateAsync(data));
             }
           }}
           isPending={createPlace.isPending}

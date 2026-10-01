@@ -39,6 +39,8 @@ vi.mock('@/lib/api/server-client', () => ({
 }));
 
 describe('privacy and terms actions', () => {
+  const observedRevision = 'ae30cf46-ed3d-48c3-a64c-686ab3a6d60e';
+
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.createPrivacyClient.mockResolvedValue(privacyClient);
@@ -55,22 +57,23 @@ describe('privacy and terms actions', () => {
     await expect(privacy.createPrivacyVersionAction()).resolves.toEqual({
       data: { id: 'privacy-1' },
     });
-    await expect(privacy.schedulePrivacyAction('privacy-1', effectiveFrom)).resolves.toEqual({
+    await expect(privacy.schedulePrivacyAction('privacy-1', effectiveFrom, observedRevision)).resolves.toEqual({
       success: true,
     });
     await expect(privacy.cancelPrivacyScheduleAction('privacy-1')).resolves.toEqual({
       success: true,
     });
-    await expect(privacy.activatePrivacyNowAction('privacy-1')).resolves.toEqual({
+    await expect(privacy.activatePrivacyNowAction('privacy-1', observedRevision)).resolves.toEqual({
       success: true,
     });
     await expect(privacy.regeneratePrivacyHtmlAction('privacy-1')).resolves.toEqual({
       success: true,
     });
-    await expect(privacy.deletePrivacyVersionAction('privacy-1')).resolves.toEqual({
+    await expect(privacy.deletePrivacyVersionAction('privacy-1', observedRevision)).resolves.toEqual({
       success: true,
     });
 
+    expect(privacyClient.createPrivacyVersion).toHaveBeenCalledWith({});
     expect(privacyClient.getPrivacyVersion).toHaveBeenCalledWith({ id: 'privacy-1' });
     expect(privacyClient.regeneratePrivacyDerivedContent).toHaveBeenCalledWith({
       id: 'privacy-1',
@@ -79,6 +82,15 @@ describe('privacy and terms actions', () => {
     expect(privacyClient.schedulePrivacy).toHaveBeenCalledWith({
       id: 'privacy-1',
       effectiveFrom: expect.objectContaining({ seconds: BigInt(1770091506) }),
+      expectedRevision: observedRevision,
+    });
+    expect(privacyClient.activatePrivacyNow).toHaveBeenCalledWith({
+      id: 'privacy-1',
+      expectedRevision: observedRevision,
+    });
+    expect(privacyClient.deletePrivacy).toHaveBeenCalledWith({
+      id: 'privacy-1',
+      expectedRevision: observedRevision,
     });
     expect(mocks.revalidatePath).toHaveBeenCalledWith('/admin/privacy');
   });
@@ -89,22 +101,23 @@ describe('privacy and terms actions', () => {
     await expect(terms.createTermsVersionAction()).resolves.toEqual({
       data: { id: 'terms-1' },
     });
-    await expect(terms.scheduleTermsAction('terms-1', effectiveFrom)).resolves.toEqual({
+    await expect(terms.scheduleTermsAction('terms-1', effectiveFrom, observedRevision)).resolves.toEqual({
       success: true,
     });
     await expect(terms.cancelTermsScheduleAction('terms-1')).resolves.toEqual({
       success: true,
     });
-    await expect(terms.activateTermsNowAction('terms-1')).resolves.toEqual({
+    await expect(terms.activateTermsNowAction('terms-1', observedRevision)).resolves.toEqual({
       success: true,
     });
     await expect(terms.regenerateTermsHtmlAction('terms-1')).resolves.toEqual({
       success: true,
     });
-    await expect(terms.deleteTermsVersionAction('terms-1')).resolves.toEqual({
+    await expect(terms.deleteTermsVersionAction('terms-1', observedRevision)).resolves.toEqual({
       success: true,
     });
 
+    expect(termsClient.createTermsVersion).toHaveBeenCalledWith({});
     expect(termsClient.getTermsVersion).toHaveBeenCalledWith({ id: 'terms-1' });
     expect(termsClient.regenerateTermsDerivedContent).toHaveBeenCalledWith({
       id: 'terms-1',
@@ -113,6 +126,15 @@ describe('privacy and terms actions', () => {
     expect(termsClient.scheduleTerms).toHaveBeenCalledWith({
       id: 'terms-1',
       effectiveFrom: expect.objectContaining({ seconds: BigInt(1772600767) }),
+      expectedRevision: observedRevision,
+    });
+    expect(termsClient.activateTermsNow).toHaveBeenCalledWith({
+      id: 'terms-1',
+      expectedRevision: observedRevision,
+    });
+    expect(termsClient.deleteTerms).toHaveBeenCalledWith({
+      id: 'terms-1',
+      expectedRevision: observedRevision,
     });
     expect(mocks.revalidatePath).toHaveBeenCalledWith('/admin/terms');
   });
@@ -124,7 +146,9 @@ describe('privacy and terms actions', () => {
     await expect(privacy.createPrivacyVersionAction()).resolves.toEqual({
       error: 'Unauthorized',
     });
-    await expect(terms.scheduleTermsAction('terms-1', new Date('2026-01-01T00:00:00Z'))).resolves.toEqual({
+    await expect(
+      terms.scheduleTermsAction('terms-1', new Date('2026-01-01T00:00:00Z'), observedRevision),
+    ).resolves.toEqual({
       error: '[invalid_argument] date is required',
     });
   });
@@ -152,13 +176,13 @@ describe('privacy and terms actions', () => {
         throw new Error('cache unavailable');
       });
 
-    await expect(privacy.deletePrivacyVersionAction('privacy-1')).resolves.toEqual({
+    await expect(privacy.deletePrivacyVersionAction('privacy-1', observedRevision)).resolves.toEqual({
       success: true,
     });
-    await expect(terms.deleteTermsVersionAction('terms-1')).resolves.toEqual({
+    await expect(terms.deleteTermsVersionAction('terms-1', observedRevision)).resolves.toEqual({
       success: true,
     });
-    expect(privacyClient.deletePrivacy).toHaveBeenCalledWith({ id: 'privacy-1' });
-    expect(termsClient.deleteTerms).toHaveBeenCalledWith({ id: 'terms-1' });
+    expect(privacyClient.deletePrivacy).toHaveBeenCalledWith({ id: 'privacy-1', expectedRevision: observedRevision });
+    expect(termsClient.deleteTerms).toHaveBeenCalledWith({ id: 'terms-1', expectedRevision: observedRevision });
   });
 });

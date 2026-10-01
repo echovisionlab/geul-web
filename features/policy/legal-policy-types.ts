@@ -34,10 +34,10 @@ export interface LegalPolicyEditorStrategy {
     isEditable: (status: string) => boolean;
   };
   actions: {
-    schedule: (id: string, effectiveFrom: Date) => Promise<LegalPolicyActionResult>;
+    schedule: (id: string, effectiveFrom: Date, expectedRevision: string) => Promise<LegalPolicyActionResult>;
     cancelSchedule: (id: string) => Promise<LegalPolicyActionResult>;
-    activateNow: (id: string) => Promise<LegalPolicyActionResult>;
-    deleteVersion: (id: string) => Promise<LegalPolicyActionResult>;
+    activateNow: (id: string, expectedRevision: string) => Promise<LegalPolicyActionResult>;
+    deleteVersion: (id: string, expectedRevision: string) => Promise<LegalPolicyActionResult>;
     regenerateHtml: (id: string) => Promise<LegalPolicyActionResult>;
   };
 }

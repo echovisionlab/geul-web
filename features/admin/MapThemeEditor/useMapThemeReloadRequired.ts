@@ -1,37 +1,18 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import type { HocuspocusProvider } from '@hocuspocus/provider';
+import { useCallback } from 'react';
 
-export function useMapThemeReloadRequired(provider: HocuspocusProvider | null) {
-  const [reloadRequired, setReloadRequired] = useState(false);
-
-  const requireReload = useCallback(() => {
-    setReloadRequired(true);
-    provider?.disconnect();
-  }, [provider]);
-
-  useEffect(() => {
-    if (!provider) {
-      return;
-    }
-
-    const handleStateless = ({ payload }: { payload: string }) => {
-      try {
-        const signal = JSON.parse(payload) as { kind?: string };
-        if (signal.kind === 'reload_required') {
-          requireReload();
-        }
-      } catch {
-        // Stateless messages for other collaboration features are ignored here.
-      }
-    };
-
-    provider.on('stateless', handleStateless);
-    return () => {
-      provider.off('stateless', handleStateless);
-    };
-  }, [provider, requireReload]);
-
-  return { reloadRequired, requireReload };
+/**
+ * Builds the Map Theme reload handler for the guarded collaboration callback.
+ * The connection validates that the signal belongs to a canonical map-theme room
+ * before invoking this handler.
+ */
+export function useMapThemeReloadRequired(stagePendingIntents: () => void) {
+  return useCallback(
+    (reloadCanonical: () => boolean) => {
+      stagePendingIntents();
+      return reloadCanonical();
+    },
+    [stagePendingIntents],
+  );
 }

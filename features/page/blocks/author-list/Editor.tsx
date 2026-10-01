@@ -59,9 +59,9 @@ function AuthorListSettingsForm({ props, updateProps }: AuthorListSettingsFormPr
 
   const updateProp = useCallback(
     (key: keyof AuthorListProps, value: string) => {
-      updateProps({ ...props, [key]: value });
+      updateProps({ [key]: value });
     },
-    [updateProps, props],
+    [updateProps],
   );
 
   const updateSelectedIds = useCallback((ids: string[]) => updateProp('authorIds', ids.join(',')), [updateProp]);

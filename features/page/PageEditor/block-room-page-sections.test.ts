@@ -18,6 +18,8 @@ import { createDefaultSection } from './types';
 import { parseSectionMeta } from '@/features/page/blocks/section-schema';
 import { createBlockRoomProseMirrorBridge } from '@/features/editor/tiptap/block-room-prosemirror-bridge';
 import { createBlockRoomPageSectionsController } from './block-room-page-sections';
+import { parseImmersiveSceneConfig } from '@/features/page/blocks/immersive-scene/schema';
+import { immersiveSceneUnitMutationProps } from '@/features/page/blocks/immersive-scene/settings-model';
 
 const FORM_ID = '019cce25-dbc0-7d12-9f1f-735b1a6c6b13';
 const SECTION_ID = '019cce25-dbc0-7d12-9f1f-735b1a6c6b14';
@@ -325,6 +327,165 @@ describe('typed Page Block-room section controller', () => {
       throw new Error('Expected Author List section.');
     }
     expect(stored.value.value.props?.authorIds).toEqual([AUTHOR_ID_2, AUTHOR_ID_1]);
+  });
+
+  it('applies stale-render edits as changed-key patches without reverting another field', () => {
+    const document = room();
+    const controller = createBlockRoomPageSectionsController(document, 'ko');
+    const section = parseSectionMeta({
+      ...createDefaultSection('external-video'),
+      props: { url: 'https://example.com/old', aspectRatio: 'auto' },
+    });
+    controller.insert(section, { index: 0 });
+    const staleProps = { url: 'https://example.com/old', aspectRatio: 'auto' };
+
+    controller.update(section.id, { props: { aspectRatio: '16:9' } });
+    controller.update(section.id, { props: { url: 'https://example.com/new' } });
+
+    expect(controller.read()[0]?.props).toMatchObject({
+      url: 'https://example.com/new',
+      aspectRatio: '16:9',
+    });
+    expect(staleProps).toEqual({ url: 'https://example.com/old', aspectRatio: 'auto' });
+    document.destroy();
+  });
+
+  it('merges independent Immersive Scene unit patches by stable unit ID', () => {
+    const initial = room();
+    const initialController = createBlockRoomPageSectionsController(initial, 'ko');
+    const unitIdA = '019cce25-dbc0-7d12-9f1f-735b1a6c6b21';
+    const unitIdB = '019cce25-dbc0-7d12-9f1f-735b1a6c6b22';
+    const section = parseSectionMeta({
+      ...createDefaultSection('immersive-scene'),
+      props: {
+        unitsJson: JSON.stringify([
+          { id: unitIdA, name: 'Opening', mesh: 'sphere', color: '#ffffff' },
+          { id: unitIdB, name: 'Ending', mesh: 'cone', color: '#777777' },
+        ]),
+        copyJson: JSON.stringify([
+          { id: unitIdA, title: 'Opening', text: 'Opening copy' },
+          { id: unitIdB, title: 'Ending', text: 'Ending copy' },
+        ]),
+      },
+    });
+    initialController.insert(section, { index: 0 });
+    const baseUpdate = Y.encodeStateAsUpdate(initial);
+    const documentA = new Y.Doc();
+    const documentB = new Y.Doc();
+    Y.applyUpdate(documentA, baseUpdate);
+    Y.applyUpdate(documentB, baseUpdate);
+    const controllerA = createBlockRoomPageSectionsController(documentA, 'ko');
+    const controllerB = createBlockRoomPageSectionsController(documentB, 'ko');
+    const vectorA = Y.encodeStateVector(documentA);
+    const vectorB = Y.encodeStateVector(documentB);
+
+    controllerA.update(section.id, {
+      props: immersiveSceneUnitMutationProps({
+        kind: 'patch',
+        unitId: unitIdA,
+        patch: { name: 'Introduction' },
+      }),
+    });
+    controllerB.update(section.id, {
+      props: immersiveSceneUnitMutationProps({
+        kind: 'patch',
+        unitId: unitIdB,
+        patch: {
+          color: '#ff0000',
+          meshFileId: '019cce25-dbc0-7d12-9f1f-735b1a6c6b23',
+        },
+      }),
+    });
+    controllerA.updateLocaleProps(
+      section.id,
+      immersiveSceneUnitMutationProps({ kind: 'patch', unitId: unitIdA, patch: { title: 'Translated opening' } }),
+    );
+    controllerB.updateLocaleProps(
+      section.id,
+      immersiveSceneUnitMutationProps({ kind: 'patch', unitId: unitIdB, patch: { text: 'Translated ending' } }),
+    );
+    const deltaA = Y.encodeStateAsUpdate(documentA, vectorA);
+    const deltaB = Y.encodeStateAsUpdate(documentB, vectorB);
+    Y.applyUpdate(documentA, deltaB);
+    Y.applyUpdate(documentB, deltaA);
+
+    for (const controller of [controllerA, controllerB]) {
+      const scene = controller.read().find((item) => item.id === section.id);
+      expect(parseImmersiveSceneConfig(scene?.props).units).toEqual([
+        expect.objectContaining({
+          id: unitIdA,
+          name: 'Introduction',
+          color: '#ffffff',
+          title: 'Translated opening',
+          text: 'Opening copy',
+        }),
+        expect.objectContaining({
+          id: unitIdB,
+          name: 'Ending',
+          color: '#ff0000',
+          meshFileId: '019cce25-dbc0-7d12-9f1f-735b1a6c6b23',
+          title: 'Ending',
+          text: 'Translated ending',
+        }),
+      ]);
+    }
+
+    documentA.destroy();
+    documentB.destroy();
+    initial.destroy();
+  });
+
+  it('keeps Immersive Scene insert, move, locale edit, and delete as distinct ID-addressed operations', () => {
+    const document = room();
+    const controller = createBlockRoomPageSectionsController(document, 'ko');
+    const unitIdA = '019cce25-dbc0-7d12-9f1f-735b1a6c6b31';
+    const unitIdB = '019cce25-dbc0-7d12-9f1f-735b1a6c6b32';
+    const unitIdC = '019cce25-dbc0-7d12-9f1f-735b1a6c6b33';
+    const section = parseSectionMeta({
+      ...createDefaultSection('immersive-scene'),
+      props: {
+        unitsJson: JSON.stringify([
+          { id: unitIdA, name: 'First', mesh: 'sphere', color: '#ffffff' },
+          { id: unitIdB, name: 'Second', mesh: 'cone', color: '#777777' },
+        ]),
+        copyJson: JSON.stringify([
+          { id: unitIdA, title: 'First title', text: 'First text' },
+          { id: unitIdB, title: 'Second title', text: 'Second text' },
+        ]),
+      },
+    });
+    controller.insert(section, { index: 0 });
+    const insertedUnit = {
+      id: unitIdC,
+      name: 'Third',
+      mesh: 'sphere' as const,
+      color: '#000000',
+      title: 'Third title',
+      text: 'Third text',
+    };
+
+    controller.update(section.id, {
+      props: immersiveSceneUnitMutationProps({ kind: 'insert', unit: insertedUnit }),
+    });
+    controller.update(section.id, {
+      props: immersiveSceneUnitMutationProps({ kind: 'move', unitId: unitIdC, direction: -1 }),
+    });
+    controller.updateLocaleProps(
+      section.id,
+      immersiveSceneUnitMutationProps({ kind: 'patch', unitId: unitIdC, patch: { title: 'Updated third title' } }),
+    );
+
+    let units = parseImmersiveSceneConfig(controller.read()[0]?.props).units;
+    expect(units.map((unit) => unit.id)).toEqual([unitIdA, unitIdC, unitIdB]);
+    expect(units[1]?.title).toBe('Updated third title');
+
+    controller.update(section.id, {
+      props: immersiveSceneUnitMutationProps({ kind: 'remove', unitId: unitIdC }),
+    });
+    units = parseImmersiveSceneConfig(controller.read()[0]?.props).units;
+    expect(units.map((unit) => unit.id)).toEqual([unitIdA, unitIdB]);
+    expect(units.map((unit) => unit.title)).toEqual(['First title', 'Second title']);
+    document.destroy();
   });
 
   it('lets a target edit locale leaves while rejecting every shared graph mutation', () => {

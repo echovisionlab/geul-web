@@ -85,14 +85,14 @@ export async function createCategoryAction(data: {
 
 export async function updateCategoryAction(
   id: string,
-  data: { name?: string; description?: string },
+  data: { name?: string; description?: string | null },
 ): Promise<{ success?: boolean; error?: string }> {
   try {
     const client = await createCategoryClient();
     await client.updateCategory({
       id,
-      name: data.name,
-      description: data.description,
+      ...(data.name !== undefined ? { name: data.name } : {}),
+      ...(data.description !== undefined ? { description: data.description ?? '' } : {}),
     });
     revalidatePath('/admin/categories');
     return { success: true };

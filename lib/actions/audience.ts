@@ -10,7 +10,13 @@ import {
   SortOrder,
   SortSpecSchema,
 } from '@echovisionlab/geul-proto/common/common_pb.ts';
-import { SegmentConfigSchema, SegmentType, type SegmentConfig } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
+import {
+  SegmentConfigSchema,
+  SegmentConfigSnapshotSchema,
+  SegmentType,
+  type Segment,
+  type SegmentConfig,
+} from '@echovisionlab/geul-proto/secure/audience_pb.ts';
 import { AuthorizationRole } from '@echovisionlab/geul-proto/policy/access_pb.ts';
 import { createCommittedMutationRevalidator } from '@/lib/actions/revalidate-after-commit';
 import { createAudienceClient } from '@/lib/api/server-client';
@@ -263,7 +269,25 @@ export async function updateSegmentAction(input: {
   description?: string;
   segmentType?: SegmentType;
   config?: SegmentConfig;
-}): Promise<{ data?: { id: string }; error?: string }> {
+  observed?: { segmentType: SegmentType; config: SegmentConfig };
+}): Promise<{
+  data?: {
+    id: string;
+    name: string;
+    description: string;
+    segmentType: SegmentType;
+    config: {
+      memberTagIds: string[];
+      accountRoles: string[];
+      createdAfter?: string;
+      createdBefore?: string;
+      excludeMemberIds: string[];
+    };
+    estimatedCount: number | null;
+    archivedAt: Date | null;
+  };
+  error?: string;
+}> {
   try {
     const client = await createAudienceClient();
     const segment = await client.updateSegment({
@@ -272,16 +296,46 @@ export async function updateSegmentAction(input: {
       description: input.description,
       segmentType: input.segmentType,
       config: input.config,
+      observed: input.observed
+        ? create(SegmentConfigSnapshotSchema, {
+            segmentType: input.observed.segmentType,
+            config: input.observed.config,
+          })
+        : undefined,
     });
     revalidateAudienceAfterCommit('/admin/audience-segments');
     revalidateAudienceAfterCommit('/admin/campaigns');
-    return { data: { id: segment.id } };
+    return { data: mapUpdatedSegment(segment) };
   } catch (err) {
     if (isConnectError(err)) {
       return { error: err.message };
     }
     return { error: err instanceof Error ? err.message : 'Failed to update segment' };
   }
+}
+
+function mapUpdatedSegment(segment: Segment) {
+  return {
+    id: segment.id,
+    name: segment.name,
+    description: segment.description ?? '',
+    segmentType: segment.segmentType,
+    config: {
+      memberTagIds: segment.config?.memberTagIds ?? [],
+      accountRoles:
+        segment.config?.accountRoles.flatMap((role) => {
+          const mapped = accountRoleToValue(role);
+          return mapped === null ? [] : [mapped];
+        }) ?? [],
+      createdAfter: segment.config?.createdAfter ? timestampDate(segment.config.createdAfter).toISOString() : undefined,
+      createdBefore: segment.config?.createdBefore
+        ? timestampDate(segment.config.createdBefore).toISOString()
+        : undefined,
+      excludeMemberIds: segment.config?.excludeMemberIds ?? [],
+    },
+    estimatedCount: segment.estimatedCount ?? null,
+    archivedAt: segment.archivedAt ? timestampDate(segment.archivedAt) : null,
+  };
 }
 
 export async function estimateSegmentCountAction(input: {

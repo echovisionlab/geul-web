@@ -4,11 +4,8 @@ import { Editor, getSchema, type JSONContent } from '@tiptap/core';
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import { TextSelection } from '@tiptap/pm/state';
 import { describe, expect, it } from 'vitest';
-import * as Y from 'yjs';
-import { prosemirrorJSONToYXmlFragment, yXmlFragmentToProseMirrorRootNode } from 'y-prosemirror';
 import { editorSchema } from '@/features/editor/schema';
 import { normalizeMapBlockPropsInput } from '@/lib/types/map-block/schema';
-import { createCollaborationExtension } from './collaboration';
 import { createP5SketchExtension } from './p5';
 import { KOREAN_P5_SKETCH_LABELS } from './p5/p5-labels.fixtures';
 import { createMermaidExtension } from './mermaid/mermaid-extension';
@@ -43,18 +40,6 @@ function documentWithBlocks(blocks: JSONContent[]): JSONContent {
   };
 }
 
-function createDocumentStoreFixture(document: JSONContent) {
-  // Make an unsupported or malformed fixture fail before it can be written to
-  // the authoritative document-store fragment.
-  const validatedDocument = wireSchema.nodeFromJSON(document);
-  validatedDocument.check();
-
-  const yDoc = new Y.Doc();
-  const fragment = yDoc.getXmlFragment('document-store');
-  prosemirrorJSONToYXmlFragment(wireSchema, validatedDocument.toJSON(), fragment);
-  return { yDoc, fragment };
-}
-
 function findNodePosition(editor: Editor, nodeName: string): number {
   let position = -1;
   editor.state.doc.descendants((node, pos) => {
@@ -68,12 +53,13 @@ function findNodePosition(editor: Editor, nodeName: string): number {
   return position;
 }
 
-function createMountedEditor(fragment: Y.XmlFragment) {
+function createMountedEditor(content: JSONContent) {
   const element = document.createElement('div');
   document.body.append(element);
   const editor = new Editor({
     element,
-    extensions: [...createTiptapWireExtensions(), createCollaborationExtension({ fragment })],
+    extensions: createTiptapWireExtensions(),
+    content,
   });
   return {
     editor,
@@ -313,7 +299,7 @@ describe('Tiptap wire schema', () => {
       tableRow: { group: '', content: '(tableCell | tableHeader)+', attrs: { id: null } },
       text: { group: 'inline', content: '', attrs: {} },
       hardBreak: { group: 'inline', content: '', attrs: {} },
-      mathInline: { group: 'inline', content: 'text*', attrs: { latex: '' } },
+      mathInline: { group: 'inline', content: 'text*', attrs: {} },
       emoji: { group: 'inline', content: '', attrs: { name: null } },
       externalVideo: {
         group: 'blockContent',
@@ -410,26 +396,23 @@ describe('Tiptap wire schema', () => {
     element.remove();
   });
 
-  it('keeps converter-only document-store fixtures on the verified File ID contract', () => {
-    const { yDoc, fragment } = createDocumentStoreFixture(
-      documentWithBlocks([
-        block(
-          'paragraph-one',
-          {
-            type: 'paragraph',
-            attrs: {
-              backgroundColor: 'default',
-              textColor: 'default',
-              textAlignment: 'left',
-            },
-            content: [{ type: 'text', text: 'Before Tiptap', marks: [{ type: 'bold' }] }],
+  it('keeps media identity in the standalone Tiptap projection while editing its caption', () => {
+    const content = documentWithBlocks([
+      block(
+        'paragraph-one',
+        {
+          type: 'paragraph',
+          attrs: {
+            backgroundColor: 'default',
+            textColor: 'default',
+            textAlignment: 'left',
           },
-          [block('file-block-one', fileNode)],
-        ),
-      ]),
-    );
-
-    const mounted = createMountedEditor(fragment);
+          content: [{ type: 'text', text: 'Before Tiptap', marks: [{ type: 'bold' }] }],
+        },
+        [block('file-block-one', fileNode)],
+      ),
+    ]);
+    const mounted = createMountedEditor(content);
     const tiptap = mounted.editor;
 
     expect(tiptap.getJSON()).toMatchObject({
@@ -468,160 +451,47 @@ describe('Tiptap wire schema', () => {
       }),
     );
 
-    expect(yXmlFragmentToProseMirrorRootNode(fragment, wireSchema).toJSON()).toMatchObject({
-      type: 'doc',
-      content: [
-        {
-          type: 'blockGroup',
-          content: [
-            {
-              type: 'blockContainer',
-              attrs: { id: 'paragraph-one' },
-              content: [
-                {
-                  type: 'paragraph',
-                  content: [{ type: 'text', text: 'Before Tiptap', marks: [{ type: 'bold' }] }],
-                },
-                {
-                  type: 'blockGroup',
-                  content: [
-                    {
-                      type: 'blockContainer',
-                      attrs: { id: 'file-block-one' },
-                      content: [
-                        {
-                          type: 'file',
-                          attrs: {
-                            fileId: 'file-123',
-                            caption: 'Updated by Tiptap',
-                          },
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
+    expect(tiptap.state.doc.nodeAt(filePosition)?.attrs).toMatchObject({
+      fileId: 'file-123',
+      caption: 'Updated by Tiptap',
     });
 
     mounted.destroy();
-    yDoc.destroy();
   });
 
-  it('reads a legacy map from an existing document-store fragment through the canonical conversion boundary', () => {
-    const { yDoc, fragment } = createDocumentStoreFixture(
-      documentWithBlocks([
-        block('legacy-map', {
-          type: 'map',
-          attrs: {
-            mapPlaceId: 'legacy-place',
-            location: JSON.stringify({ name: 'Seoul', lat: 37.5665, lng: 126.978 }),
-          },
-        }),
-      ]),
-    );
+  it('normalizes legacy map input attributes at the current authoring boundary', () => {
+    const attributes = normalizeMapBlockPropsInput({
+      mapPlaceId: 'legacy-place',
+      location: JSON.stringify({ name: 'Seoul', lat: 37.5665, lng: 126.978 }),
+    });
 
-    const mounted = createMountedEditor(fragment);
-    const mapPosition = findNodePosition(mounted.editor, 'map');
-    const mapAttributes = mounted.editor.state.doc.nodeAt(mapPosition)?.attrs;
-
-    expect(mapAttributes).toMatchObject({ mapPlaceId: 'legacy-place' });
-    expect(normalizeMapBlockPropsInput(mapAttributes)).toMatchObject({
+    expect(attributes).toMatchObject({
       mapPlaceIds: 'legacy-place',
       centerLat: '37.5665',
       centerLng: '126.978',
     });
-    expect(normalizeMapBlockPropsInput(mapAttributes)).not.toHaveProperty('mapPlaceId');
-    expect(normalizeMapBlockPropsInput(mapAttributes)).not.toHaveProperty('location');
-
-    mounted.destroy();
-    yDoc.destroy();
+    expect(attributes).not.toHaveProperty('mapPlaceId');
+    expect(attributes).not.toHaveProperty('location');
   });
 
-  it('syncs edits between two independently hydrated Yjs clients', () => {
-    const { yDoc: sourceDoc, fragment: sourceFragment } = createDocumentStoreFixture(
-      documentWithBlocks([
-        block(
-          'paragraph-one',
-          {
-            type: 'paragraph',
-            attrs: {
-              backgroundColor: 'default',
-              textColor: 'default',
-              textAlignment: 'left',
-            },
-            content: [{ type: 'text', text: 'Client A' }],
-          },
-          [block('file-block-one', fileNode)],
-        ),
-      ]),
-    );
-    const peerDoc = new Y.Doc();
-    Y.applyUpdate(peerDoc, Y.encodeStateAsUpdate(sourceDoc));
-    const peerFragment = peerDoc.getXmlFragment('document-store');
-    const source = createMountedEditor(sourceFragment);
-    const peer = createMountedEditor(peerFragment);
-
-    let sourceUpdate: Uint8Array | null = null;
-    sourceDoc.on('update', (update) => {
-      sourceUpdate = update;
-    });
-    const paragraphPosition = findNodePosition(source.editor, 'paragraph');
-    const paragraph = source.editor.state.doc.nodeAt(paragraphPosition);
-    source.editor.view.dispatch(
-      source.editor.state.tr.insertText(' synced', paragraphPosition + 1 + (paragraph?.content.size ?? 0)),
-    );
-    expect(sourceUpdate).not.toBeNull();
-    Y.applyUpdate(peerDoc, sourceUpdate!);
-    expect(peer.editor.getText()).toContain('Client A synced');
-
-    let peerUpdate: Uint8Array | null = null;
-    peerDoc.on('update', (update) => {
-      peerUpdate = update;
-    });
-    const peerFilePosition = findNodePosition(peer.editor, 'file');
-    peer.editor.view.dispatch(
-      peer.editor.state.tr.setNodeMarkup(peerFilePosition, undefined, {
-        ...peer.editor.state.doc.nodeAt(peerFilePosition)?.attrs,
-        caption: 'Updated by client B',
+  it('does not mutate supplied editor content while mounting', () => {
+    const content = documentWithBlocks([
+      block('stable-paragraph', {
+        type: 'paragraph',
+        attrs: { backgroundColor: 'default', textColor: 'default', textAlignment: 'left' },
+        content: [{ type: 'text', text: 'Stable document' }],
       }),
-    );
-    expect(peerUpdate).not.toBeNull();
-    Y.applyUpdate(sourceDoc, peerUpdate!);
-    expect(source.editor.state.doc.nodeAt(findNodePosition(source.editor, 'file'))?.attrs.caption).toBe(
-      'Updated by client B',
-    );
+    ]);
+    const before = structuredClone(content);
+    const mounted = createMountedEditor(content);
 
-    source.destroy();
-    peer.destroy();
-    sourceDoc.destroy();
-    peerDoc.destroy();
-  });
-
-  it('does not rewrite an existing fragment merely by mounting Tiptap', () => {
-    const { yDoc, fragment } = createDocumentStoreFixture(
-      documentWithBlocks([
-        block('stable-paragraph', {
-          type: 'paragraph',
-          attrs: { backgroundColor: 'default', textColor: 'default', textAlignment: 'left' },
-          content: [{ type: 'text', text: 'Stable document' }],
-        }),
-      ]),
-    );
-    const before = fragment.toJSON();
-    const mounted = createMountedEditor(fragment);
-
-    expect(fragment.toJSON()).toBe(before);
+    expect(content).toEqual(before);
 
     mounted.destroy();
-    yDoc.destroy();
   });
 
   it('provides the common formatting shortcuts from the wire extension', () => {
-    const { yDoc, fragment } = createDocumentStoreFixture(
+    const mounted = createMountedEditor(
       documentWithBlocks([
         block('shortcut-paragraph', {
           type: 'paragraph',
@@ -630,7 +500,6 @@ describe('Tiptap wire schema', () => {
         }),
       ]),
     );
-    const mounted = createMountedEditor(fragment);
     const paragraphPosition = findNodePosition(mounted.editor, 'paragraph');
     mounted.editor.commands.setTextSelection({
       from: paragraphPosition + 1,
@@ -651,11 +520,10 @@ describe('Tiptap wire schema', () => {
     }
 
     mounted.destroy();
-    yDoc.destroy();
   });
 
   it('consumes formatting shortcuts without applying or storing marks in inline math source', () => {
-    const { yDoc, fragment } = createDocumentStoreFixture(
+    const mounted = createMountedEditor(
       documentWithBlocks([
         block('math-shortcuts', {
           type: 'paragraph',
@@ -667,7 +535,6 @@ describe('Tiptap wire schema', () => {
         }),
       ]),
     );
-    const mounted = createMountedEditor(fragment);
     const mathPosition = findNodePosition(mounted.editor, 'mathInline');
     mounted.editor.commands.setTextSelection({ from: mathPosition + 1, to: mathPosition + 4 });
 
@@ -685,35 +552,5 @@ describe('Tiptap wire schema', () => {
     }
 
     mounted.destroy();
-    yDoc.destroy();
-  });
-
-  it('routes Mod-Z and Mod-Shift-Z through the collaborative Yjs undo authority', () => {
-    const { yDoc, fragment } = createDocumentStoreFixture(
-      documentWithBlocks([
-        block('undo-paragraph', {
-          type: 'paragraph',
-          attrs: { backgroundColor: 'default', textColor: 'default', textAlignment: 'left' },
-          content: [{ type: 'text', text: 'Before' }],
-        }),
-      ]),
-    );
-    const mounted = createMountedEditor(fragment);
-    const paragraphPosition = findNodePosition(mounted.editor, 'paragraph');
-    const paragraph = mounted.editor.state.doc.nodeAt(paragraphPosition);
-    mounted.editor.view.dispatch(
-      mounted.editor.state.tr.insertText(' after', paragraphPosition + 1 + (paragraph?.content.size ?? 0)),
-    );
-    expect(mounted.editor.getText()).toContain('Before after');
-
-    expect(pressModShortcut(mounted.editor, 'z').defaultPrevented).toBe(true);
-    expect(mounted.editor.getText()).toContain('Before');
-    expect(mounted.editor.getText()).not.toContain('after');
-
-    expect(pressModShortcut(mounted.editor, 'z', true).defaultPrevented).toBe(true);
-    expect(mounted.editor.getText()).toContain('Before after');
-
-    mounted.destroy();
-    yDoc.destroy();
   });
 });

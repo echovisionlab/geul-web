@@ -63,11 +63,16 @@ export function useMenuCollaboration(menuId: string, locale: string | null) {
   }, [connection.doc, connection.isSynced, documentName]);
 
   const replaceSource = useCallback(
-    (name: string, items: readonly MenuItem[]) => {
+    (previous: { name: string; items: readonly MenuItem[] }, name: string, items: readonly MenuItem[]) => {
       if (!connection.doc || !connection.isSynced) {
         return;
       }
-      connection.doc.transact(() => replaceMenuCanonicalSource(connection.doc!, name, items.map(toCollaborationItem)));
+      connection.doc.transact(() =>
+        replaceMenuCanonicalSource(connection.doc!, name, items.map(toCollaborationItem), {
+          name: previous.name,
+          items: previous.items.map(toCollaborationItem),
+        }),
+      );
     },
     [connection.doc, connection.isSynced],
   );

@@ -3,14 +3,17 @@
 import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { create } from '@bufbuild/protobuf';
-import { timestampFromDate } from '@bufbuild/protobuf/wkt';
+import { timestampDate, timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
 import { FilterOp, FilterSpecSchema, SortOrder } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import {
   ProgramEventArtistSchema,
+  ProgramEventArtistsSnapshotSchema,
   ProgramEventClientSchema,
+  ProgramEventClientsSnapshotSchema,
   ProgramEventCreditSchema,
   ProgramEventLabelSchema,
+  ProgramEventLabelsSnapshotSchema,
   ProgramEventLocationMode,
   ProgramEventSeriesStatus,
   ProgramEventTypeStatus,
@@ -181,6 +184,20 @@ function locationModeToProto(mode: ProgramEventLocationModeValue): ProgramEventL
   }
 }
 
+function locationModeFromProto(mode: ProgramEventLocationMode): ProgramEventLocationModeValue {
+  switch (mode) {
+    case ProgramEventLocationMode.ONLINE:
+      return 'online';
+    case ProgramEventLocationMode.HYBRID:
+      return 'hybrid';
+    case ProgramEventLocationMode.TBA:
+      return 'tba';
+    case ProgramEventLocationMode.MAP_PLACE:
+    default:
+      return 'map_place';
+  }
+}
+
 function programEventSeriesStatusToProto(status: ProgramEventSeriesStatusValue): ProgramEventSeriesStatus {
   return status === 'published' ? ProgramEventSeriesStatus.PUBLISHED : ProgramEventSeriesStatus.DRAFT;
 }
@@ -298,6 +315,11 @@ export async function updateProgramEventAction(
     labels?: ProgramEventRelationInput[];
     clients?: ProgramEventRelationInput[];
     credits?: ProgramEventCreditInput[];
+    observed?: {
+      artists?: ProgramEventRelationInput[];
+      labels?: ProgramEventRelationInput[];
+      clients?: ProgramEventRelationInput[];
+    };
   },
 ): Promise<{ success?: boolean; error?: string }> {
   try {
@@ -328,12 +350,110 @@ export async function updateProgramEventAction(
       replaceLabels: data.labels !== undefined,
       replaceClients: data.clients !== undefined,
       replaceCredits: data.credits !== undefined,
+      observedArtists:
+        data.observed?.artists === undefined
+          ? undefined
+          : create(ProgramEventArtistsSnapshotSchema, { artists: relationsToArtists(data.observed.artists) }),
+      observedLabels:
+        data.observed?.labels === undefined
+          ? undefined
+          : create(ProgramEventLabelsSnapshotSchema, { labels: relationsToLabels(data.observed.labels) }),
+      observedClients:
+        data.observed?.clients === undefined
+          ? undefined
+          : create(ProgramEventClientsSnapshotSchema, { clients: relationsToClients(data.observed.clients) }),
     });
     revalidatePath('/admin/events');
     revalidatePath(`/events/${id}`);
     return { success: true };
   } catch (err) {
     return actionError(err, 'Failed to update program event');
+  }
+}
+
+export interface ProgramEventNeutralConfiguration {
+  slug: string | null;
+  typeId: string;
+  typeName: string | null;
+  seriesId: string | null;
+  seriesOrder: number | null;
+  startsAt: Date | null;
+  endsAt: Date | null;
+  timezone: string;
+  allDay: boolean;
+  locationMode: ProgramEventLocationModeValue;
+  mapPlaceId: string | null;
+  ticketUrl: string | null;
+  streamUrl: string | null;
+  externalUrl: string | null;
+  artists: ProgramEventRelationInput[];
+  labels: ProgramEventRelationInput[];
+  clients: ProgramEventRelationInput[];
+}
+
+/** Authorized neutral Event settings used to refresh another editor tab. */
+export async function getProgramEventNeutralConfigurationAction(
+  id: string,
+): Promise<{ ok: true; configuration: ProgramEventNeutralConfiguration } | { ok: false; error: string }> {
+  try {
+    const eventClient = await createProgramEventClient();
+    const event = await eventClient.getProgramEvent({ id });
+    const uiLocale = await getUserLocale();
+    let typeName: string | null = null;
+    try {
+      const typeClient = await createProgramEventTypeClient();
+      const typeResponse = await typeClient.listProgramEventTypesAdmin({
+        pagination: { limit: 1, offset: 0 },
+        filters: [create(FilterSpecSchema, { field: 'id', op: FilterOp.EQ, value: event.typeId })],
+      });
+      const selectedType = typeResponse.types.find((type) => type.id === event.typeId);
+      typeName =
+        selectedType?.locales.find((locale) => locale.locale === uiLocale)?.name ??
+        selectedType?.locales.find((locale) => locale.locale === event.sourceLocale)?.name ??
+        selectedType?.locales[0]?.name ??
+        selectedType?.slug ??
+        null;
+    } catch (error) {
+      if (!isConnectError(error) || error.code !== Code.PermissionDenied) {
+        throw error;
+      }
+    }
+    return {
+      ok: true,
+      configuration: {
+        slug: event.slug || null,
+        typeId: event.typeId,
+        typeName,
+        seriesId: event.seriesId ?? null,
+        seriesOrder: event.seriesOrder ?? null,
+        startsAt: event.startsAt ? timestampDate(event.startsAt) : null,
+        endsAt: event.endsAt ? timestampDate(event.endsAt) : null,
+        timezone: event.timezone,
+        allDay: event.allDay,
+        locationMode: locationModeFromProto(event.locationMode),
+        mapPlaceId: event.mapPlaceId ?? null,
+        ticketUrl: event.ticketUrl || null,
+        streamUrl: event.streamUrl || null,
+        externalUrl: event.externalUrl || null,
+        artists: event.artists.map((item) => ({
+          id: item.artistId,
+          role: item.role || null,
+          sortOrder: item.sortOrder,
+        })),
+        labels: event.labels.map((item) => ({
+          id: item.labelId,
+          role: item.role || null,
+          sortOrder: item.sortOrder,
+        })),
+        clients: event.clients.map((item) => ({
+          id: item.clientId,
+          role: item.role || null,
+          sortOrder: item.sortOrder,
+        })),
+      },
+    };
+  } catch (error) {
+    return { ok: false, error: actionError(error, 'Failed to load program event settings').error };
   }
 }
 

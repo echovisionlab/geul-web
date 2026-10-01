@@ -6,11 +6,16 @@ import type * as Y from 'yjs';
 import type { DocumentLayout } from '@echovisionlab/geul-common/collaboration/document-layout';
 import type { PostMeta } from '@/lib/collab/post-meta';
 import { useLocaleDocumentSession, type LocaleDocumentSession } from '@/features/translation/useLocaleDocumentSession';
-import { updatePostBlockRoomDocumentMetadata } from '@/lib/collab/block-room-metadata';
+import { updatePostBlockRoomDocumentMetadata, type PostTaxonomyMetadataPatch } from '@/lib/collab/block-room-metadata';
 import { useBlockRoomConnection, type BlockRoomConnection } from '@/lib/collab/useBlockRoomConnection';
+import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 
 interface PostMetaContextValue {
+  sourceTitle: string;
+  sourceSummary: string;
+  setSourceTitle: (title: string) => void;
+  setSourceSummary: (summary: string) => void;
   slug: string | null;
   categoryIds: string[];
   tagIds: string[];
@@ -54,9 +59,13 @@ export function PostMetaProvider({
   children,
 }: PostMetaProviderProps) {
   const [slug, setSlug] = useState(initialSlug);
+  const [sourceTitle, setSourceTitle] = useState(initialMeta.title);
+  const [sourceSummary, setSourceSummary] = useState(initialMeta.summary);
   const [commentsEnabled, setCommentsEnabled] = useState(initialMeta.commentsEnabled);
   const [categoryIds, setCategoryIdsState] = useState(initialMeta.categories.map((category) => category.id));
   const [tagIds, setTagIdsState] = useState(initialMeta.tags.map((tag) => tag.id));
+  const categoryIdsRef = useRef(categoryIds);
+  const tagIdsRef = useRef(tagIds);
   const [layout, setLayout] = useState<DocumentLayout>({
     contentHeight: initialMeta.contentHeight,
     pageChrome: initialMeta.pageChrome,
@@ -74,8 +83,8 @@ export function PostMetaProvider({
   const localeSession = useLocaleDocumentSession({
     entityType: 'post',
     entityId: postId,
-    sourceTitle: initialMeta.title,
-    sourceSummary: initialMeta.summary,
+    sourceTitle,
+    sourceSummary,
   });
   const { roomLocale } = localeSession;
   const blockRoom = useBlockRoomConnection('post', postId, roomLocale);
@@ -91,26 +100,45 @@ export function PostMetaProvider({
     recoverySnapshot,
   } = blockRoom;
   const persistDocumentMetadata = useDebouncedRoomMetadata({
+    operation: 'document',
     connection: blockRoom,
     document: `post:${postId}`,
     delay: 250,
-    write: (protocol, update: { categoryIds?: readonly string[]; tagIds?: readonly string[] }) =>
-      updatePostBlockRoomDocumentMetadata(protocol, update),
+    write: (protocol, update: PostTaxonomyMetadataPatch) => updatePostBlockRoomDocumentMetadata(protocol, update),
   });
   const setCategoryIds = useCallback(
     (next: string[]) => {
+      const observed = categoryIdsRef.current;
+      categoryIdsRef.current = next;
       setCategoryIdsState(next);
-      persistDocumentMetadata({ categoryIds: next });
+      persistDocumentMetadata({ categoryIds: next, observed: { categoryIds: observed } });
     },
     [persistDocumentMetadata],
   );
   const setTagIds = useCallback(
     (next: string[]) => {
+      const observed = tagIdsRef.current;
+      tagIdsRef.current = next;
       setTagIdsState(next);
-      persistDocumentMetadata({ tagIds: next });
+      persistDocumentMetadata({ tagIds: next, observed: { tagIds: observed } });
     },
     [persistDocumentMetadata],
   );
+  useBlockRoomMetadataUpdates(blockRoom, `post:${postId}`, ({ operation, values }) => {
+    if (operation !== 'document') {
+      return;
+    }
+    if (Array.isArray(values.categoryIds) && values.categoryIds.every((id): id is string => typeof id === 'string')) {
+      const categoryIds = [...values.categoryIds];
+      categoryIdsRef.current = categoryIds;
+      setCategoryIdsState(categoryIds);
+    }
+    if (Array.isArray(values.tagIds) && values.tagIds.every((id): id is string => typeof id === 'string')) {
+      const tagIds = [...values.tagIds];
+      tagIdsRef.current = tagIds;
+      setTagIdsState(tagIds);
+    }
+  });
   const setFeaturedImage = useCallback((_fileId: string | null, url: string | null) => {
     if (!aliveRef.current) {
       return false;
@@ -121,6 +149,10 @@ export function PostMetaProvider({
 
   const contextValue = useMemo<PostMetaContextValue>(
     () => ({
+      sourceTitle,
+      sourceSummary,
+      setSourceTitle,
+      setSourceSummary,
       slug,
       categoryIds,
       tagIds,
@@ -146,6 +178,8 @@ export function PostMetaProvider({
       localeSession,
     }),
     [
+      sourceTitle,
+      sourceSummary,
       slug,
       categoryIds,
       tagIds,

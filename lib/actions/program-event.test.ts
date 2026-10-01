@@ -1,4 +1,7 @@
 import { Code, ConnectError } from '@connectrpc/connect';
+import { create } from '@bufbuild/protobuf';
+import { timestampFromDate } from '@bufbuild/protobuf/wkt';
+import { FilterOp, FilterSpecSchema } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import {
   ProgramEventLocationMode,
   ProgramEventSeriesStatus,
@@ -179,6 +182,107 @@ describe('program event actions', () => {
     vi.restoreAllMocks();
   });
 
+  it('loads the canonical neutral Event configuration without media hydration', async () => {
+    const startsAt = new Date('2026-08-01T10:30:00.000Z');
+    const endsAt = new Date('2026-08-01T12:00:00.000Z');
+    eventClient.getProgramEvent.mockResolvedValueOnce({
+      slug: 'summer-show',
+      typeId: 'type-new',
+      sourceLocale: 'en',
+      seriesId: 'series-1',
+      seriesOrder: 2,
+      startsAt: timestampFromDate(startsAt),
+      endsAt: timestampFromDate(endsAt),
+      timezone: 'Asia/Seoul',
+      allDay: false,
+      locationMode: ProgramEventLocationMode.HYBRID,
+      mapPlaceId: 'place-1',
+      ticketUrl: 'https://tickets.example/show',
+      streamUrl: 'https://stream.example/show',
+      externalUrl: 'https://example/show',
+      artists: [{ artistId: 'artist-1', role: 'performer', sortOrder: 4 }],
+      labels: [{ labelId: 'label-1', role: '', sortOrder: 7 }],
+      clients: [{ clientId: 'client-1', role: 'host', sortOrder: 9 }],
+    });
+    typeClient.listProgramEventTypesAdmin.mockResolvedValueOnce({
+      types: [
+        {
+          id: 'type-new',
+          slug: 'summer-event',
+          locales: [
+            { locale: 'en', name: 'Summer Event' },
+            { locale: 'ko', name: '새로 만든 이벤트 종류' },
+          ],
+        },
+      ],
+    });
+
+    await expect(actions.getProgramEventNeutralConfigurationAction('event-1')).resolves.toEqual({
+      ok: true,
+      configuration: {
+        slug: 'summer-show',
+        typeId: 'type-new',
+        typeName: '새로 만든 이벤트 종류',
+        seriesId: 'series-1',
+        seriesOrder: 2,
+        startsAt,
+        endsAt,
+        timezone: 'Asia/Seoul',
+        allDay: false,
+        locationMode: 'hybrid',
+        mapPlaceId: 'place-1',
+        ticketUrl: 'https://tickets.example/show',
+        streamUrl: 'https://stream.example/show',
+        externalUrl: 'https://example/show',
+        artists: [{ id: 'artist-1', role: 'performer', sortOrder: 4 }],
+        labels: [{ id: 'label-1', role: null, sortOrder: 7 }],
+        clients: [{ id: 'client-1', role: 'host', sortOrder: 9 }],
+      },
+    });
+    expect(eventClient.getProgramEvent).toHaveBeenCalledWith({ id: 'event-1' });
+    expect(typeClient.listProgramEventTypesAdmin).toHaveBeenCalledWith({
+      pagination: { limit: 1, offset: 0 },
+      filters: [create(FilterSpecSchema, { field: 'id', op: FilterOp.EQ, value: 'type-new' })],
+    });
+    expect(mocks.createFileClient).not.toHaveBeenCalled();
+  });
+
+  it('keeps canonical Event settings when the optional type label lookup is denied', async () => {
+    eventClient.getProgramEvent.mockResolvedValueOnce({
+      slug: 'summer-show',
+      typeId: 'type-new',
+      seriesId: 'series-1',
+      seriesOrder: 2,
+      timezone: 'Asia/Seoul',
+      allDay: false,
+      locationMode: ProgramEventLocationMode.HYBRID,
+      artists: [],
+      labels: [],
+      clients: [],
+    });
+    typeClient.listProgramEventTypesAdmin.mockRejectedValueOnce(new ConnectError('denied', Code.PermissionDenied));
+
+    await expect(actions.getProgramEventNeutralConfigurationAction('event-1')).resolves.toMatchObject({
+      ok: true,
+      configuration: {
+        slug: 'summer-show',
+        typeId: 'type-new',
+        typeName: null,
+        timezone: 'Asia/Seoul',
+        seriesId: 'series-1',
+      },
+    });
+  });
+
+  it('reports authorized getter failures without claiming canonical data', async () => {
+    eventClient.getProgramEvent.mockRejectedValueOnce(new ConnectError('denied', Code.PermissionDenied));
+
+    await expect(actions.getProgramEventNeutralConfigurationAction('event-1')).resolves.toEqual({
+      ok: false,
+      error: 'Unauthorized',
+    });
+  });
+
   it('creates, updates, publishes, archives, and deletes program events', async () => {
     await expect(actions.createProgramEventAction('Asia/Seoul')).resolves.toEqual({
       data: { id: 'event-1' },
@@ -234,6 +338,62 @@ describe('program event actions', () => {
       }),
     );
     expect(mocks.revalidatePath).toHaveBeenCalledWith('/admin/events');
+  });
+
+  it('serializes a single Program Event relation replacement without replacing sibling collections', async () => {
+    await expect(
+      actions.updateProgramEventAction('event-1', {
+        artists: [{ id: 'artist-1', role: 'performer' }],
+        observed: { artists: [{ id: 'artist-1', role: 'performer', sortOrder: 4 }] },
+      }),
+    ).resolves.toEqual({ success: true });
+
+    expect(eventClient.updateProgramEvent).toHaveBeenCalledOnce();
+    const update = eventClient.updateProgramEvent.mock.lastCall?.[0];
+    expect(update?.artists).toHaveLength(1);
+    expect(update?.artists[0]).toMatchObject({ artistId: 'artist-1', role: 'performer', sortOrder: 0 });
+    expect(update?.labels).toHaveLength(0);
+    expect(update?.clients).toHaveLength(0);
+    expect(update?.replaceArtists).toBe(true);
+    expect(update?.replaceLabels).toBe(false);
+    expect(update?.replaceClients).toBe(false);
+    expect(update?.observedArtists?.artists).toMatchObject([{ artistId: 'artist-1', role: 'performer', sortOrder: 4 }]);
+    expect(update?.observedLabels).toBeUndefined();
+    expect(update?.observedClients).toBeUndefined();
+  });
+
+  it('preserves an explicitly empty observed Program Event collection snapshot', async () => {
+    await expect(
+      actions.updateProgramEventAction('event-1', {
+        artists: [{ id: 'artist-1', sortOrder: 0 }],
+        observed: { artists: [] },
+      }),
+    ).resolves.toEqual({ success: true });
+
+    const update = eventClient.updateProgramEvent.mock.lastCall?.[0];
+    expect(update?.observedArtists).toMatchObject({ artists: [] });
+  });
+
+  it('serializes presence-bearing observed snapshots for all Program Event relation collections', async () => {
+    await expect(
+      actions.updateProgramEventAction('event-1', {
+        artists: [{ id: 'artist-next' }],
+        labels: [{ id: 'label-next' }],
+        clients: [{ id: 'client-next' }],
+        observed: {
+          artists: [{ id: 'artist-before', role: 'performer', sortOrder: 2 }],
+          labels: [],
+          clients: [{ id: 'client-before', role: 'host', sortOrder: 7 }],
+        },
+      }),
+    ).resolves.toEqual({ success: true });
+
+    const update = eventClient.updateProgramEvent.mock.lastCall?.[0];
+    expect(update?.observedArtists?.artists).toMatchObject([
+      { artistId: 'artist-before', role: 'performer', sortOrder: 2 },
+    ]);
+    expect(update?.observedLabels).toMatchObject({ labels: [] });
+    expect(update?.observedClients?.clients).toMatchObject([{ clientId: 'client-before', role: 'host', sortOrder: 7 }]);
   });
 
   it('hydrates poster media and maps credit operations', async () => {

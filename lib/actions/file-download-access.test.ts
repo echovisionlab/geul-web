@@ -82,8 +82,28 @@ describe('file download access actions', () => {
         },
         'public',
         [],
+        { audience: 'disabled', audienceSegmentIds: [] },
       ),
     ).resolves.toEqual({ errorCode: 'staleTarget' });
+  });
+
+  it('rejects a missing policy baseline before creating the file client', async () => {
+    await expect(
+      updateFileDownloadPolicyAction(
+        {
+          entityType: TranscodeEntityType.POST,
+          entityId: 'post-1',
+          blockId: 'block-1',
+          referencePath: 'file',
+          expectedFileId: 'file-1',
+        },
+        'public',
+        [],
+        undefined as never,
+      ),
+    ).resolves.toEqual({ errorCode: 'invalidPolicyBaseline' });
+
+    expect(createFileClient).not.toHaveBeenCalled();
   });
 
   it('maps the canonical Audience summaries returned with a file policy', async () => {
@@ -193,6 +213,7 @@ describe('file download access actions', () => {
       },
       'restricted',
       [' audience-1 ', 'audience-1', 'audience-2'],
+      { audience: 'public', audienceSegmentIds: ['audience-0', ' audience-0 '] },
     );
 
     expect(updateFileDownloadPolicy).toHaveBeenCalledWith({
@@ -203,6 +224,10 @@ describe('file download access actions', () => {
       expectedFileId: 'file-1',
       audience: FileDownloadAudience.RESTRICTED,
       audienceSegmentIds: ['audience-1', 'audience-2'],
+      observedPolicy: {
+        audience: FileDownloadAudience.PUBLIC,
+        audienceSegmentIds: ['audience-0'],
+      },
     });
   });
 
@@ -231,6 +256,7 @@ describe('file download access actions', () => {
         },
         'restricted',
         [],
+        { audience: 'disabled', audienceSegmentIds: [] },
       ),
     ).resolves.toEqual({
       data: {
@@ -251,6 +277,10 @@ describe('file download access actions', () => {
       expectedFileId: 'file-1',
       audience: FileDownloadAudience.RESTRICTED,
       audienceSegmentIds: [],
+      observedPolicy: {
+        audience: FileDownloadAudience.DISABLED,
+        audienceSegmentIds: [],
+      },
     });
   });
 

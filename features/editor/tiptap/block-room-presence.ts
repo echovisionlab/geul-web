@@ -3,7 +3,7 @@ import type { Node as ProseMirrorNode, ResolvedPos } from '@tiptap/pm/model';
 import { NodeSelection, Plugin, PluginKey, Selection } from '@tiptap/pm/state';
 import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import type { Awareness } from 'y-protocols/awareness';
-import type { CollaborationUser } from './collaboration';
+import type { CollaborationUser } from './block-room-presence-types';
 
 const presencePluginKey = new PluginKey<DecorationSet>('blockRoomPresence');
 const PRESENCE_META = 'blockRoomPresenceUpdate';

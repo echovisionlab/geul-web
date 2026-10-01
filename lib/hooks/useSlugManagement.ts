@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useDebouncedValue } from '@mantine/hooks';
+import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
 import { checkArtistSlugAvailable } from '@/lib/queries/artist-browser';
 import { checkFormSlugAvailable } from '@/lib/queries/form-browser';
 import { checkLabelSlugAvailable } from '@/lib/queries/label-browser';
@@ -75,14 +76,38 @@ export function useSlugManagement({
   debounceMs = 300,
   onSave,
 }: UseSlugManagementOptions): UseSlugManagementReturn {
-  const previousEntityId = useRef(entityId);
+  const registryEntityType = entityType === 'series' ? 'post_series' : entityType;
+  const document = `${registryEntityType}:${entityId}`;
+  const previousDocument = useRef(document);
+  const activeDocumentRef = useRef(document);
+  activeDocumentRef.current = document;
+  const saveGenerationRef = useRef(0);
   const [debouncedSlug] = useDebouncedValue(slug, debounceMs);
   const currentSlugRef = useRef(slug);
   const lastHandledSlug = useRef(debouncedSlug);
   const onSaveRef = useRef(onSave);
-  const queuedSaveSlugRef = useRef<string | undefined>(undefined);
-  const saveInFlightRef = useRef(false);
-  const saveGenerationRef = useRef(0);
+
+  const slugSave = useDebouncedPatch<{ slug: string }>({
+    write: async ({ slug: nextSlug }) => {
+      if (activeDocumentRef.current !== document) {
+        throw new Error('Slug save belongs to a different entity.');
+      }
+      const save = onSaveRef.current;
+      if (!save) {
+        throw new Error('Slug save handler is unavailable.');
+      }
+      const result = await save(nextSlug);
+      if (result && typeof result === 'object' && 'error' in result && result.error) {
+        throw new Error(typeof result.error === 'string' ? result.error : 'Slug save failed.');
+      }
+    },
+    delay: 0,
+    scope: document,
+    document,
+    recoveryScope: document,
+    recoveryKey: 'slug',
+    retry: true,
+  });
 
   useEffect(() => {
     currentSlugRef.current = slug;
@@ -92,55 +117,26 @@ export function useSlugManagement({
     onSaveRef.current = onSave;
   }, [onSave]);
 
-  // Reset save tracking when the same hook instance starts editing another entity.
+  // Reset slug validation state when the same hook instance starts another room.
   useEffect(() => {
-    if (previousEntityId.current === entityId) {
+    if (previousDocument.current === document) {
       return;
     }
-    previousEntityId.current = entityId;
+    previousDocument.current = document;
+    saveGenerationRef.current += 1;
     currentSlugRef.current = slug;
     lastHandledSlug.current = slug;
-    queuedSaveSlugRef.current = undefined;
-    saveInFlightRef.current = false;
-    saveGenerationRef.current += 1;
-  }, [entityId, slug]);
+  }, [document, slug]);
 
-  const queueSave = useCallback((nextSlug: string) => {
-    if (!onSaveRef.current) {
-      return;
-    }
-
-    // Keep only the newest requested value while a previous save is in flight.
-    // Serializing writes prevents a slower, older request from becoming the
-    // final server value after the user has continued typing.
-    queuedSaveSlugRef.current = nextSlug;
-    if (saveInFlightRef.current) {
-      return;
-    }
-
-    saveInFlightRef.current = true;
-    const generation = saveGenerationRef.current;
-
-    void (async () => {
-      try {
-        while (generation === saveGenerationRef.current && queuedSaveSlugRef.current !== undefined) {
-          const slugToSave = queuedSaveSlugRef.current;
-          queuedSaveSlugRef.current = undefined;
-
-          try {
-            await onSaveRef.current?.(slugToSave);
-          } catch {
-            // Mutation callbacks own user-facing error reporting. Continue with
-            // a newer queued value so a failed stale write cannot block it.
-          }
-        }
-      } finally {
-        if (generation === saveGenerationRef.current) {
-          saveInFlightRef.current = false;
-        }
+  const queueSave = useCallback(
+    (nextSlug: string) => {
+      if (!onSaveRef.current) {
+        return;
       }
-    })();
-  }, []);
+      slugSave({ slug: nextSlug });
+    },
+    [slugSave],
+  );
 
   const checkAction = checkSlugActions[entityType];
   const isSlugEmpty = debouncedSlug.length === 0;
@@ -201,6 +197,8 @@ export function useSlugManagement({
 
   const handleBlur = useCallback(() => {
     const currentSlug = currentSlugRef.current;
+    const documentAtBlur = document;
+    const generationAtBlur = saveGenerationRef.current;
 
     if (lastHandledSlug.current === currentSlug) {
       return;
@@ -215,17 +213,22 @@ export function useSlugManagement({
             : (await checkAction(currentSlug, entityId)).available;
 
       // Ignore stale async results if the input changed again while validating.
-      if (currentSlugRef.current !== currentSlug) {
+      if (
+        activeDocumentRef.current !== documentAtBlur ||
+        saveGenerationRef.current !== generationAtBlur ||
+        currentSlugRef.current !== currentSlug
+      ) {
         return;
       }
 
-      if (available && onSave) {
+      if (available && onSaveRef.current) {
         queueSave(currentSlug);
+        void slugSave.flush();
       }
 
       lastHandledSlug.current = currentSlug;
     })();
-  }, [checkAction, debouncedSlug, entityId, isAvailable, onSave, queueSave]);
+  }, [checkAction, debouncedSlug, document, entityId, isAvailable, queueSave, slugSave]);
 
   return {
     debouncedSlug,

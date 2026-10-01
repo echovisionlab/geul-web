@@ -18,8 +18,6 @@ import {
   IMMERSIVE_SCENE_TEXTURE_SIZE_VALUES,
   diffRemovedImmersiveSceneAssetFileIds,
   parseImmersiveSceneConfig,
-  serializeImmersiveSceneCopyUnits,
-  serializeImmersiveSceneVisualUnits,
   type ImmersiveSceneMesh,
   type ImmersiveSceneProps,
   type ImmersiveSceneUnit,
@@ -28,7 +26,7 @@ import {
   createImmersiveSceneUnit,
   diffRemovedMeshOptimizationSources,
   getRotationAxisValues,
-  hasImmersiveSceneUnitCopy,
+  immersiveSceneUnitMutationProps,
   moveImmersiveSceneUnit,
   replaceImmersiveSceneUnit,
   type RemovedMeshOptimizationSource,
@@ -121,16 +119,6 @@ export function ImmersiveSceneSettingsForm({
     setAssetFileInputReset,
     resetAssetFileInput,
   } = useImmersiveAssetUploadController({ abortMeshUpload, abortTextureUpload });
-
-  const updateSharedUnitList = useCallback(
-    (units: ImmersiveSceneUnit[]) => {
-      unitsRef.current = units;
-      updateSharedProps({
-        unitsJson: serializeImmersiveSceneVisualUnits(units),
-      });
-    },
-    [updateSharedProps],
-  );
 
   const deleteRemovedAssetFile = useCallback(
     (fileId: string) => {
@@ -235,42 +223,23 @@ export function ImmersiveSceneSettingsForm({
     [deleteRemovedAssetFile],
   );
 
-  const updateLocalizedUnitList = useCallback(
-    (units: ImmersiveSceneUnit[]) => {
-      unitsRef.current = units;
-      updateLocalizedProps({
-        copyJson: serializeImmersiveSceneCopyUnits(units),
-      });
-    },
-    [updateLocalizedProps],
-  );
-
-  const preserveLocalizedUnitCopy = useCallback(
-    (units: ImmersiveSceneUnit[]) => {
-      if (typeof props.copyJson !== 'string' && !hasImmersiveSceneUnitCopy(units)) {
-        return;
-      }
-      updateLocalizedUnitList(units);
-    },
-    [props.copyJson, updateLocalizedUnitList],
-  );
-
   const replaceVisualUnit = useCallback(
     (id: string, patch: Partial<ImmersiveSceneUnit>) => {
       const previousUnits = unitsRef.current;
       const nextUnits = replaceImmersiveSceneUnit(previousUnits, id, patch);
-      updateSharedUnitList(nextUnits);
-      preserveLocalizedUnitCopy(nextUnits);
+      unitsRef.current = nextUnits;
+      updateSharedProps(immersiveSceneUnitMutationProps({ kind: 'patch', unitId: id, patch }));
       cleanupRemovedAssets(previousUnits, nextUnits);
     },
-    [cleanupRemovedAssets, preserveLocalizedUnitCopy, updateSharedUnitList],
+    [cleanupRemovedAssets, updateSharedProps],
   );
 
   const replaceCopyUnit = useCallback(
     (id: string, patch: Partial<ImmersiveSceneUnit>) => {
-      updateLocalizedUnitList(replaceImmersiveSceneUnit(unitsRef.current, id, patch));
+      unitsRef.current = replaceImmersiveSceneUnit(unitsRef.current, id, patch);
+      updateLocalizedProps(immersiveSceneUnitMutationProps({ kind: 'patch', unitId: id, patch }));
     },
-    [updateLocalizedUnitList],
+    [updateLocalizedProps],
   );
 
   const { uploadUnitMesh, uploadUnitTexture } = useImmersiveUnitAssetUploads({
@@ -292,11 +261,10 @@ export function ImmersiveSceneSettingsForm({
     const unit = createImmersiveSceneUnit(
       `${tb('blockEditor.labels.sceneUnit', 'Unit')} ${unitsRef.current.length + 1}`,
     );
-    const units = [...unitsRef.current, unit];
-    updateSharedUnitList(units);
-    updateLocalizedUnitList(units);
+    unitsRef.current = [...unitsRef.current, unit];
+    updateSharedProps(immersiveSceneUnitMutationProps({ kind: 'insert', unit }));
     selectUnit(unit.id);
-  }, [selectUnit, tb, updateLocalizedUnitList, updateSharedUnitList]);
+  }, [selectUnit, tb, updateSharedProps]);
 
   const removeUnit = useCallback(
     (id: string) => {
@@ -307,30 +275,31 @@ export function ImmersiveSceneSettingsForm({
 
       cancelUnitUploads(id);
       const units = currentUnits.filter((unit) => unit.id !== id);
-      updateSharedUnitList(units);
-      updateLocalizedUnitList(units);
+      unitsRef.current = units;
+      updateSharedProps(immersiveSceneUnitMutationProps({ kind: 'remove', unitId: id }));
       cleanupRemovedAssets(currentUnits, units);
       if (activeSelectedUnitId === id) {
         selectUnit('');
       }
     },
-    [
-      cancelUnitUploads,
-      cleanupRemovedAssets,
-      activeSelectedUnitId,
-      selectUnit,
-      updateLocalizedUnitList,
-      updateSharedUnitList,
-    ],
+    [cancelUnitUploads, cleanupRemovedAssets, activeSelectedUnitId, selectUnit, updateSharedProps],
   );
 
   const reorderUnit = useCallback(
-    (index: number, direction: -1 | 1) => {
-      const units = moveImmersiveSceneUnit(unitsRef.current, index, direction);
-      updateSharedUnitList(units);
-      updateLocalizedUnitList(units);
+    (unitId: string, direction: -1 | 1) => {
+      const currentUnits = unitsRef.current;
+      const index = currentUnits.findIndex((unit) => unit.id === unitId);
+      if (index < 0) {
+        return;
+      }
+      const units = moveImmersiveSceneUnit(currentUnits, index, direction);
+      if (units === currentUnits) {
+        return;
+      }
+      unitsRef.current = units;
+      updateSharedProps(immersiveSceneUnitMutationProps({ kind: 'move', unitId, direction }));
     },
-    [updateLocalizedUnitList, updateSharedUnitList],
+    [updateSharedProps],
   );
 
   const meshOptions = IMMERSIVE_SCENE_MESH_VALUES.map((mesh) => ({

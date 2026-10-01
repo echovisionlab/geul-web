@@ -123,9 +123,9 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
 
   const updateProp = useCallback(
     (key: keyof PostMapProps, value: string) => {
-      updateProps({ ...props, [key]: value });
+      updateProps({ [key]: value });
     },
-    [props, updateProps],
+    [updateProps],
   );
 
   const updateZoomBounds = useCallback(
@@ -136,7 +136,6 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
       });
 
       updateProps({
-        ...props,
         minZoom: String(bounds.minZoom),
         maxZoom: String(bounds.maxZoom),
       });

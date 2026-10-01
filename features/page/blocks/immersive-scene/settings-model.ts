@@ -3,6 +3,18 @@ import type { MeshOptimizationSelection } from './MeshOptimizationPanel';
 import type { RotationAxis, RotationAxisValues } from './RotationAxisInputs';
 import type { ImmersiveSceneProps, ImmersiveSceneUnit } from './schema';
 
+export const IMMERSIVE_SCENE_UNIT_MUTATION_PROP = '__immersiveSceneUnitMutation';
+
+export type ImmersiveSceneUnitMutation =
+  | { kind: 'patch'; unitId: string; patch: Partial<ImmersiveSceneUnit> }
+  | { kind: 'insert'; unit: ImmersiveSceneUnit }
+  | { kind: 'remove'; unitId: string }
+  | { kind: 'move'; unitId: string; direction: -1 | 1 };
+
+export function immersiveSceneUnitMutationProps(mutation: ImmersiveSceneUnitMutation): Record<string, unknown> {
+  return { [IMMERSIVE_SCENE_UNIT_MUTATION_PROP]: mutation };
+}
+
 export function createImmersiveSceneUnit(name: string): ImmersiveSceneUnit {
   return {
     id: crypto.randomUUID(),

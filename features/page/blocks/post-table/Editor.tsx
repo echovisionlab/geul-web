@@ -77,9 +77,9 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
 
   const updateProp = useCallback(
     (key: keyof PostTableProps, value: string) => {
-      updateProps({ ...props, [key]: value });
+      updateProps({ [key]: value });
     },
-    [props, updateProps],
+    [updateProps],
   );
 
   return (

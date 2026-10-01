@@ -172,15 +172,20 @@ export async function updateMapPlaceAction(
       lat: data.lat,
       lng: data.lng,
       googlePlaceId: data.google_place_id === null ? '' : data.google_place_id,
-      addressComponents: data.address_components
-        ? {
-            street: data.address_components.street,
-            city: data.address_components.city,
-            region: data.address_components.region,
-            country: data.address_components.country,
-            postalCode: data.address_components.postalCode,
-          }
-        : undefined,
+      addressComponents:
+        data.address_components === undefined
+          ? undefined
+          : data.address_components === null
+            ? // The API patch uses optional-message presence: an empty message clears the
+              // component values; omitting this field leaves the stored value untouched.
+              {}
+            : {
+                street: data.address_components.street,
+                city: data.address_components.city,
+                region: data.address_components.region,
+                country: data.address_components.country,
+                postalCode: data.address_components.postalCode,
+              },
       imageFileId: data.image_file_id ?? undefined,
       clearImage: data.image_file_id === null,
     });

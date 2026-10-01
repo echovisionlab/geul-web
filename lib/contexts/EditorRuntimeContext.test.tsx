@@ -3,14 +3,16 @@
 import { act, type ReactNode } from 'react';
 import type { EditorRuntimeEvent } from '@echovisionlab/geul-common/collaboration/runtime-events';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
+import * as Y from 'yjs';
 import { MediaProcessingStatus } from '@echovisionlab/geul-proto/common/media_pb.ts';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getFileStatusesAction } from '@/lib/actions/file';
+import { hasPendingEditorSaves } from '@/lib/editor/editor-save-registry';
 import { useEditorRuntimeEvents } from '@/lib/hooks/useEditorRuntimeEvents';
 import { useEditorFileStatusBootstrap } from '@/lib/media/use-editor-file-status-bootstrap';
 import type { EditorFileStatusSnapshot } from '@/lib/media/editor-file-status-runtime';
-import { EditorRuntimeProvider } from './EditorRuntimeContext';
+import { EditorRuntimeProvider, useOptionalEditorRuntimeContext } from './EditorRuntimeContext';
 
 vi.mock('@/lib/actions/file', () => ({
   getFileStatusesAction: vi.fn(),
@@ -20,6 +22,7 @@ const mockedGetFileStatusesAction = vi.mocked(getFileStatusesAction);
 
 let host: HTMLDivElement | null = null;
 let root: Root | null = null;
+const documents: Y.Doc[] = [];
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -40,9 +43,15 @@ function status(fileId: string): EditorFileStatusSnapshot {
   };
 }
 
-function createProvider() {
+const documentEntityId = '11111111-1111-4111-8111-111111111111';
+
+function createProvider(documentName = `post:${documentEntityId}:en`) {
+  const document = new Y.Doc();
+  documents.push(document);
   let statelessHandler: ((input: { payload: string }) => void) | null = null;
   const provider = {
+    document,
+    configuration: { name: documentName },
     on: vi.fn((event: string, handler: (input: { payload: string }) => void) => {
       if (event === 'stateless') {
         statelessHandler = handler;
@@ -72,14 +81,29 @@ function RuntimeEventProbe({ entityId, onEvent }: { entityId: string; onEvent: (
   return null;
 }
 
-async function render(children: ReactNode, provider: HocuspocusProvider) {
+function RuntimeContextProbe({
+  onReady,
+}: {
+  onReady: (runtime: ReturnType<typeof useOptionalEditorRuntimeContext>) => void;
+}) {
+  const runtime = useOptionalEditorRuntimeContext();
+  onReady(runtime);
+  return null;
+}
+
+async function render(
+  children: ReactNode,
+  provider: HocuspocusProvider,
+  entityType: 'post' | 'page' | 'menu' | 'series' | 'email_layout' = 'post',
+  entityId = 'post-1',
+) {
   host = document.createElement('div');
   document.body.appendChild(host);
   root = createRoot(host);
 
   await act(async () => {
     root?.render(
-      <EditorRuntimeProvider provider={provider} entityType="post" entityId="post-1">
+      <EditorRuntimeProvider provider={provider} entityType={entityType} entityId={entityId}>
         {children}
       </EditorRuntimeProvider>,
     );
@@ -96,6 +120,7 @@ afterEach(() => {
   host?.remove();
   root = null;
   host = null;
+  documents.splice(0).forEach((document) => document.destroy());
   mockedGetFileStatusesAction.mockReset();
 });
 
@@ -164,5 +189,60 @@ describe('EditorRuntimeProvider', () => {
     });
     root = null;
     expect(runtimeProvider.off).toHaveBeenCalledTimes(1);
+  });
+
+  it('registers local provider document edits as a save for the owning entity', async () => {
+    const runtimeProvider = createProvider();
+    await render(null, runtimeProvider.provider);
+
+    runtimeProvider.provider.document.getMap('content').set('title', 'Local edit');
+
+    expect(hasPendingEditorSaves('post:post-1')).toBe(true);
+  });
+
+  it.each(['page', 'menu', 'series', 'email_layout'] as const)(
+    'leaves %s document durability to its connection save registration',
+    async (entityType) => {
+      const runtimeProvider = createProvider();
+      await render(null, runtimeProvider.provider, entityType, 'entity-1');
+      runtimeProvider.provider.document.getMap('content').set('title', 'Local edit');
+
+      expect(hasPendingEditorSaves(`${entityType}:entity-1`)).toBe(false);
+    },
+  );
+
+  it('uses the validated document snapshot for runtime series documents', async () => {
+    const documentName = `post-series:${documentEntityId}:ko`;
+    const runtimeProvider = createProvider(documentName);
+    const revision = '22222222-2222-4222-8222-222222222222';
+    const targetRevision = '33333333-3333-4333-8333-333333333333';
+    const metadata = runtimeProvider.provider.document.getMap<string | boolean>('collaboration-revision');
+    metadata.set('documentName', documentName);
+    metadata.set('documentRevision', revision);
+    metadata.set('sourceLocale', 'en');
+    metadata.set('locale', 'ko');
+    metadata.set('localeExists', true);
+    metadata.set('targetRevision', targetRevision);
+
+    const runtime: { current: ReturnType<typeof useOptionalEditorRuntimeContext> } = { current: null };
+    await render(
+      <RuntimeContextProbe onReady={(value) => (runtime.current = value)} />,
+      runtimeProvider.provider,
+      'series',
+      documentEntityId,
+    );
+
+    expect(runtime.current).not.toBeNull();
+    await expect(runtime.current!.getBlockRoomSnapshot()).resolves.toEqual({
+      documentRevision: revision,
+      sourceLocale: 'en',
+      locale: 'ko',
+      localeExists: true,
+      targetRevision,
+    });
+
+    runtimeProvider.provider.document.getMap('content').set('title', 'Series edit');
+    expect(hasPendingEditorSaves(`post_series:${documentEntityId}`)).toBe(false);
+    expect(hasPendingEditorSaves(`series:${documentEntityId}`)).toBe(false);
   });
 });

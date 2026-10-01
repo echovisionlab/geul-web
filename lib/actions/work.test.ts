@@ -316,6 +316,52 @@ describe('work actions', () => {
     });
   });
 
+  it('sends metadata and client baselines with mergeable Work field changes', async () => {
+    workClient.updateWork.mockResolvedValue({});
+
+    await expect(
+      actions.updateWorkFieldsAction('work-1', {
+        metadata: { nested: { label: '' }, tags: [] },
+        observedMetadata: { nested: { label: 'old' }, tags: ['old'] },
+        clients: ['client-b'],
+        observedClients: ['client-a'],
+      }),
+    ).resolves.toEqual({ success: true });
+
+    expect(workClient.updateWork).toHaveBeenCalledWith({
+      id: 'work-1',
+      type: undefined,
+      metadata: { nested: { label: '' }, tags: [] },
+      observedMetadata: { nested: { label: 'old' }, tags: ['old'] },
+      featured: undefined,
+      clients: { $typeName: 'api.manage.v1.WorkClientsUpdate', clientIds: ['client-b'] },
+      observedClients: { $typeName: 'api.manage.v1.WorkClientsUpdate', clientIds: ['client-a'] },
+      year: undefined,
+      month: undefined,
+      untilYear: undefined,
+      untilMonth: undefined,
+      isPresent: undefined,
+    });
+  });
+
+  it('returns the canonical merged metadata and client IDs from the field update', async () => {
+    workClient.updateWork.mockResolvedValue({
+      metadata: { peerKey: 'peer value', localKey: 'local value' },
+      clients: [{ id: 'peer-client' }, { id: 'local-client' }],
+    });
+
+    await expect(
+      actions.updateWorkFieldsAction('work-1', {
+        metadata: { localKey: 'local value' },
+        clients: ['local-client'],
+      }),
+    ).resolves.toEqual({
+      success: true,
+      metadata: { peerKey: 'peer value', localKey: 'local value' },
+      clients: ['peer-client', 'local-client'],
+    });
+  });
+
   it('returns stable empty results and action errors on backend failures', async () => {
     publicWorkClient.list.mockRejectedValueOnce(new Error('offline'));
     await expect(actions.listWorksPublishedAction({ limit: 2, offset: 3 })).resolves.toEqual({

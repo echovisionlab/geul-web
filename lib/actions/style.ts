@@ -104,8 +104,8 @@ export async function updateStyleAction(
     const client = await createStyleClient();
     await client.updateStyle({
       id,
-      name: data.name,
-      description: data.description ?? undefined,
+      ...(data.name !== undefined ? { name: data.name } : {}),
+      ...(data.description !== undefined ? { description: data.description ?? '' } : {}),
     });
     revalidatePath('/admin/styles');
     return { success: true };

@@ -14,7 +14,7 @@ import {
   useEditorState,
   type NodeViewProps,
 } from '@tiptap/react';
-import { TextSelection, Plugin, PluginKey, type EditorState, type Selection, type Transaction } from '@tiptap/pm/state';
+import { TextSelection, Plugin, PluginKey, type Selection } from '@tiptap/pm/state';
 import type { EditorView } from '@tiptap/pm/view';
 import { WireMath, WireMathInline } from '../wire-schema';
 import { useExactTiptapNodeSelection } from '../useExactTiptapNodeSelection';
@@ -39,7 +39,7 @@ function MathPreview({ latex, displayMode }: { latex: string; displayMode: boole
 }
 
 function inlineMathSource(node: NodeViewProps['node']): string {
-  return node.textContent || String(node.attrs.latex ?? '');
+  return node.textContent;
 }
 
 function selectionTouchesInlineMath(selection: Selection, position: number, contentSize: number): boolean {
@@ -52,33 +52,6 @@ function selectionTouchesInlineMath(selection: Selection, position: number, cont
     (selection.from < contentTo && selection.to > contentFrom) ||
     (selection.empty && selection.from >= contentFrom && selection.from <= contentTo)
   );
-}
-
-function legacyInlineMathMigration(state: EditorState): Transaction | null {
-  const legacy: Array<{ position: number; source: string }> = [];
-  state.doc.descendants((node, position) => {
-    const source = String(node.attrs.latex ?? '');
-    if (node.type.name === 'mathInline' && source) {
-      legacy.push({ position, source });
-    }
-  });
-  if (!legacy.length) {
-    return null;
-  }
-  let transaction = state.tr;
-  for (const entry of legacy.reverse()) {
-    const node = transaction.doc.nodeAt(entry.position);
-    if (!node || node.type.name !== 'mathInline' || !node.attrs.latex) {
-      continue;
-    }
-    const content = node.content.size > 0 ? node.content : state.schema.text(entry.source);
-    transaction = transaction.replaceWith(
-      entry.position,
-      entry.position + node.nodeSize,
-      node.type.create({ ...node.attrs, latex: '' }, content, node.marks),
-    );
-  }
-  return transaction.docChanged ? transaction.setMeta('addToHistory', false) : null;
 }
 
 function enterInlineMathSource(view: EditorView, event: KeyboardEvent): boolean {
@@ -115,32 +88,6 @@ function createInlineMathEditingPlugin(): Plugin {
     props: {
       handleKeyDown: enterInlineMathSource,
     },
-    view(view) {
-      let migrationScheduled = false;
-      const scheduleMigration = () => {
-        if (migrationScheduled) {
-          return;
-        }
-        migrationScheduled = true;
-        queueMicrotask(() => {
-          migrationScheduled = false;
-          if (!view.isDestroyed) {
-            const transaction = legacyInlineMathMigration(view.state);
-            if (transaction) {
-              view.dispatch(transaction);
-            }
-          }
-        });
-      };
-      scheduleMigration();
-      return {
-        update(_view, previousState) {
-          if (!previousState.doc.eq(view.state.doc)) {
-            scheduleMigration();
-          }
-        },
-      };
-    },
   });
 }
 
@@ -176,16 +123,7 @@ function TiptapMathInlineNodeView(props: NodeViewProps) {
       const ratio = bounds.width > 0 ? Math.min(1, Math.max(0, (event.clientX - bounds.left) / bounds.width)) : 1;
       const offset = Math.round(source.length * ratio);
       let transaction = props.editor.state.tr;
-      let contentSize = currentNode.content.size;
-      if (!contentSize && source) {
-        const replacement = currentNode.type.create(
-          { ...currentNode.attrs, latex: '' },
-          props.editor.state.schema.text(source),
-        );
-        transaction = transaction.replaceWith(currentPosition, currentPosition + currentNode.nodeSize, replacement);
-        contentSize = source.length;
-      }
-      const target = currentPosition + 1 + Math.min(contentSize, offset);
+      const target = currentPosition + 1 + Math.min(currentNode.content.size, offset);
       const anchor = event.shiftKey ? props.editor.state.selection.anchor : target;
       transaction = transaction.setSelection(TextSelection.create(transaction.doc, anchor, target));
       props.editor.view.dispatch(transaction.scrollIntoView());

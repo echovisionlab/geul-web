@@ -172,18 +172,24 @@ export async function updateUserAction(
   },
 ): Promise<{ success?: boolean; error?: string }> {
   try {
-    const memberClient = await createMemberClient();
-    const accountClient = await createAccountClient();
+    const hasProfileChanges =
+      data.nickname !== undefined ||
+      data.bio !== undefined ||
+      data.website !== undefined ||
+      data.social_links !== undefined;
+    if (hasProfileChanges) {
+      const memberClient = await createMemberClient();
+      await memberClient.updateMemberProfile({
+        memberId: id,
+        nickname: data.nickname,
+        ...(data.bio !== undefined && { bio: data.bio ?? '' }),
+        ...(data.website !== undefined && { website: data.website ?? '' }),
+        ...(data.social_links !== undefined && { socialLinks: data.social_links ?? {} }),
+      });
+    }
 
-    await memberClient.updateMemberProfile({
-      memberId: id,
-      nickname: data.nickname,
-      ...(data.bio !== undefined && { bio: data.bio ?? '' }),
-      ...(data.website !== undefined && { website: data.website ?? '' }),
-      ...(data.social_links !== undefined && { socialLinks: data.social_links ?? {} }),
-    });
-
-    if (data.tag_ids) {
+    if (data.tag_ids !== undefined) {
+      const memberClient = await createMemberClient();
       await memberClient.setMemberTags({
         memberId: id,
         tagIds: data.tag_ids,
@@ -191,7 +197,8 @@ export async function updateUserAction(
     }
 
     // Update role if changed
-    if (data.role) {
+    if (data.role !== undefined) {
+      const accountClient = await createAccountClient();
       await accountClient.setAccountRole({
         memberId: id,
         role: stringToAuthorizationRole(data.role),

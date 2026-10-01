@@ -14,6 +14,7 @@ import {
 import { ShareLinkEntityType, type ShareLinkItem } from '@echovisionlab/geul-proto/secure/share_link_pb.ts';
 import {
   MyCreditedWorkCreditType,
+  WorkCreditItemKind,
   WorkClientsUpdateSchema,
   WorkStatus,
   WorkType,
@@ -31,7 +32,13 @@ import {
   workStatusToString,
   workTypeToString,
 } from '@/lib/types/work/proto';
-import { mapWorkCredits } from '@/lib/types/work/credit';
+import {
+  type CreditOrderItem,
+  mapWorkCredits,
+  type WorkCreditMoveAnchor,
+  type WorkCreditMoveIntent,
+  type WorkCreditOrderEntry,
+} from '@/lib/types/work/credit';
 import { createLogger } from '@/lib/utils/logger';
 import { toSlugInputValue } from '@/lib/utils/slug';
 
@@ -366,24 +373,31 @@ export async function updateWorkFieldsAction(
   data: {
     type?: string;
     metadata?: Record<string, unknown>;
+    observedMetadata?: Record<string, unknown>;
     featured?: boolean;
     clients?: readonly string[];
+    observedClients?: readonly string[];
     year?: number;
     month?: number;
     untilYear?: number | null;
     untilMonth?: number | null;
     isPresent?: boolean;
   },
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<{ success?: boolean; metadata?: Record<string, unknown>; clients?: string[]; error?: string }> {
   try {
     const client = await createWorkClient();
-    await client.updateWork({
+    const response = await client.updateWork({
       id,
       type: data.type === undefined ? undefined : stringToWorkType(data.type),
       metadata: data.metadata as JsonObject | undefined,
+      observedMetadata: data.observedMetadata as JsonObject | undefined,
       featured: data.featured,
       clients:
         data.clients === undefined ? undefined : create(WorkClientsUpdateSchema, { clientIds: [...data.clients] }),
+      observedClients:
+        data.observedClients === undefined
+          ? undefined
+          : create(WorkClientsUpdateSchema, { clientIds: [...data.observedClients] }),
       year: data.year,
       month: data.month,
       untilYear: data.untilYear ?? undefined,
@@ -391,7 +405,11 @@ export async function updateWorkFieldsAction(
       isPresent: data.isPresent,
     });
     revalidateWorkAfterCommit(`/works/${id}`);
-    return { success: true };
+    return {
+      success: true,
+      ...(response.metadata ? { metadata: response.metadata } : {}),
+      ...(response.clients ? { clients: response.clients.map((client) => client.id) } : {}),
+    };
   } catch (error) {
     return { error: error instanceof Error ? error.message : 'Failed to update work fields' };
   }
@@ -448,6 +466,24 @@ export async function getWorkGroupsWithCreditsAction(workId: string) {
   try {
     const client = await createWorkClient();
     const response = await client.getWorkCredits({ workId });
+    const credits = mapWorkCredits(response.credits ?? []);
+    const creditsById = new Map(credits.map((credit) => [credit.id, credit]));
+    const order: CreditOrderItem[] = (response.order ?? []).flatMap<CreditOrderItem>((item) => {
+      if (item.kind === WorkCreditItemKind.GROUP) {
+        return [{ type: 'group', id: item.id }];
+      }
+      if (item.kind === WorkCreditItemKind.CREDIT) {
+        const credit = creditsById.get(item.id);
+        return [
+          {
+            type: 'credit',
+            id: item.id,
+            creditType: credit?.artist ? 'artist' : credit?.member ? 'member' : 'name',
+          },
+        ];
+      }
+      return [];
+    });
 
     return {
       groups: (response.groups ?? []).map((g, sortOrder) => ({
@@ -456,11 +492,54 @@ export async function getWorkGroupsWithCreditsAction(workId: string) {
         name: g.name,
         sortOrder,
       })),
-      credits: mapWorkCredits(response.credits ?? []),
+      credits,
+      order,
     };
   } catch (err) {
     logger.error('Failed to get work credits', { error: err });
-    return { groups: [], credits: [] };
+    return { groups: [], credits: [], order: [], error: true };
+  }
+}
+
+export async function moveWorkCreditItemAction(
+  workId: string,
+  intent: WorkCreditMoveIntent,
+): Promise<{ success?: boolean; changed?: boolean; order?: WorkCreditOrderEntry[]; error?: string }> {
+  const protoKind = (kind: WorkCreditMoveAnchor['kind']) =>
+    kind === 'group' ? WorkCreditItemKind.GROUP : WorkCreditItemKind.CREDIT;
+  const toProtoAnchor = (anchor?: WorkCreditMoveAnchor) =>
+    anchor ? { kind: protoKind(anchor.kind), id: anchor.id } : undefined;
+
+  try {
+    const client = await createWorkClient();
+    const response = await client.moveWorkCreditItem({
+      workId,
+      kind: protoKind(intent.kind),
+      itemId: intent.itemId,
+      ...(intent.kind === 'credit' ? { targetGroupId: intent.targetGroupId ?? '' } : {}),
+      after: toProtoAnchor(intent.after),
+      before: toProtoAnchor(intent.before),
+    });
+    return {
+      success: true,
+      changed: response.changed,
+      order: (response.items ?? []).map((item) => ({
+        kind: item.kind === WorkCreditItemKind.GROUP ? 'group' : 'credit',
+        id: item.id,
+        ...(item.kind === WorkCreditItemKind.CREDIT ? { groupId: item.groupId ?? null } : {}),
+      })),
+    };
+  } catch (err) {
+    if (isConnectErrorCode(err, Code.Unauthenticated)) {
+      return { error: 'Unauthorized' };
+    }
+    if (isConnectErrorCode(err, Code.PermissionDenied)) {
+      return { error: 'No permission to edit this work' };
+    }
+    if (isConnectErrorCode(err, Code.NotFound)) {
+      return { error: 'The credit order changed and has been refreshed.' };
+    }
+    return { error: err instanceof Error ? err.message : 'Failed to move credit item' };
   }
 }
 

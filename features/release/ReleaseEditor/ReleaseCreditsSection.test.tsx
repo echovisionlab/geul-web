@@ -413,16 +413,21 @@ describe('ReleaseCreditsSection', () => {
         sort_order: 0,
       },
     ] satisfies ReleaseCreditItem[]);
-    expect(setReleaseCreditsActionMock).toHaveBeenCalledWith('release-1', [
-      {
-        id: 'credit-new',
-        artistId: null,
-        memberId: null,
-        creditedName: 'Sleeve notes',
-        creditRole: 'Writer',
-        sortOrder: 0,
-      },
-    ]);
+    expect(setReleaseCreditsActionMock).toHaveBeenCalledWith(
+      'release-1',
+      [
+        {
+          id: 'credit-new',
+          artistId: null,
+          memberId: null,
+          creditedName: 'Sleeve notes',
+          creditRole: 'Writer',
+          sortOrder: 0,
+        },
+      ],
+      [],
+      undefined,
+    );
     expect(onCreditNoteChange).toHaveBeenCalledWith('credit-new', 'Refers to Blue Circuit and Midnight Radio');
     expect(notifications.show).toHaveBeenCalled();
   });
@@ -504,7 +509,21 @@ describe('ReleaseCreditsSection', () => {
     await clickElement(removeButton);
 
     expect(onCreditsChange).toHaveBeenCalledWith([]);
-    expect(setReleaseCreditsActionMock).toHaveBeenCalledWith('release-1', []);
+    expect(setReleaseCreditsActionMock).toHaveBeenCalledWith(
+      'release-1',
+      [],
+      [
+        {
+          id: 'credit-1',
+          artistId: 'artist-1',
+          memberId: null,
+          creditedName: null,
+          creditRole: 'Producer',
+          sortOrder: 0,
+        },
+      ],
+      undefined,
+    );
     expect(onCreditNoteChange).toHaveBeenCalledWith('credit-1', '');
   });
 

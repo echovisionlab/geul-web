@@ -164,6 +164,9 @@ describe('taxonomy CRUD actions', () => {
     await expect(category.updateCategoryAction('cat-1', { name: 'New' })).resolves.toEqual({
       success: true,
     });
+    expect(categoryClient.updateCategory).toHaveBeenLastCalledWith({ id: 'cat-1', name: 'New' });
+    await category.updateCategoryAction('cat-1', { description: null });
+    expect(categoryClient.updateCategory).toHaveBeenLastCalledWith({ id: 'cat-1', description: '' });
     await expect(category.deleteCategoryAction('cat-1')).resolves.toEqual({ success: true });
 
     await expect(tag.listTagsAdminAction({ search: 'tag' })).resolves.toMatchObject({
@@ -191,6 +194,7 @@ describe('taxonomy CRUD actions', () => {
     await expect(genre.updateGenreAction('genre-1', { description: null })).resolves.toEqual({
       success: true,
     });
+    expect(genreClient.updateGenre).toHaveBeenLastCalledWith({ id: 'genre-1', description: '' });
     await expect(genre.deleteGenreAction('genre-1')).resolves.toEqual({ success: true });
 
     await expect(format.listFormatsAdminAction({ search: 'format' })).resolves.toMatchObject({
@@ -216,6 +220,7 @@ describe('taxonomy CRUD actions', () => {
     await expect(style.updateStyleAction('style-1', { description: null })).resolves.toEqual({
       success: true,
     });
+    expect(styleClient.updateStyle).toHaveBeenLastCalledWith({ id: 'style-1', description: '' });
     await expect(style.deleteStyleAction('style-1')).resolves.toEqual({ success: true });
   });
 

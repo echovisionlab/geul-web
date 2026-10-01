@@ -8,13 +8,16 @@ import { useProgramEventLifecycle } from './useProgramEventLifecycle';
 
 const mutationState = vi.hoisted(() => ({
   mutates: [] as Array<ReturnType<typeof vi.fn>>,
+  mutateAsynces: [] as Array<ReturnType<typeof vi.fn>>,
 }));
 
 vi.mock('@tanstack/react-query', () => ({
   useMutation: () => {
     const mutate = vi.fn();
+    const mutateAsync = vi.fn().mockResolvedValue({ success: true });
     mutationState.mutates.push(mutate);
-    return { mutate, isPending: false };
+    mutationState.mutateAsynces.push(mutateAsync);
+    return { mutate, mutateAsync, isPending: false };
   },
 }));
 
@@ -40,6 +43,7 @@ function Harness({ allowedActions }: { allowedActions: readonly ProgramEventEdit
 beforeEach(() => {
   latest = null;
   mutationState.mutates.length = 0;
+  mutationState.mutateAsynces.length = 0;
   container = document.createElement('div');
   document.body.append(container);
   root = createRoot(container);
@@ -53,11 +57,10 @@ afterEach(() => {
 });
 
 describe('useProgramEventLifecycle action authority', () => {
-  it('fails closed for every archived Author mutation command', () => {
+  it('fails closed for every archived Author mutation command', async () => {
     act(() => root?.render(<Harness allowedActions={[]} />));
 
     act(() => {
-      latest?.mutateEditableEvent({ title: 'blocked' });
       latest?.changeStatus('published');
       latest?.changeStatus('archived');
       latest?.deleteEvent.mutate();
@@ -67,23 +70,28 @@ describe('useProgramEventLifecycle action authority', () => {
     for (const mutate of mutationState.mutates) {
       expect(mutate).not.toHaveBeenCalled();
     }
+    await expect(latest?.saveEditableEvent({ title: 'blocked' })).resolves.toMatchObject({
+      error: 'notifications.saveFailed',
+    });
+    expect(mutationState.mutateAsynces[0]).not.toHaveBeenCalled();
     expect(latest?.canEdit).toBe(false);
     expect(latest?.canDelete).toBe(false);
     expect(latest?.statusOptions.map((option) => option.value)).toEqual(['archived']);
   });
 
-  it('routes only the exact actions granted to an archived Admin', () => {
+  it('routes queued Event saves and only exact lifecycle actions granted to an archived Admin', async () => {
     act(() => root?.render(<Harness allowedActions={['edit', 'publish', 'delete']} />));
 
-    act(() => {
-      latest?.mutateEditableEvent({ title: 'allowed' });
+    await act(async () => {
+      await latest?.saveEditableEvent({ title: 'allowed' });
       latest?.changeStatus('published');
       latest?.changeStatus('archived');
       latest?.deleteEvent.mutate();
     });
 
     const [update, publish, archive, remove] = mutationState.mutates;
-    expect(update).toHaveBeenCalledWith({ title: 'allowed' });
+    expect(update).not.toHaveBeenCalled();
+    expect(mutationState.mutateAsynces[0]).toHaveBeenCalledWith({ title: 'allowed' });
     expect(publish).toHaveBeenCalledOnce();
     expect(archive).not.toHaveBeenCalled();
     expect(remove).toHaveBeenCalledOnce();

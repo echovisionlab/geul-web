@@ -30,10 +30,13 @@ export async function createPrivacyVersionAction(): Promise<{
   }
 }
 
-export async function deletePrivacyVersionAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function deletePrivacyVersionAction(
+  id: string,
+  expectedRevision: string,
+): Promise<{ success?: boolean; error?: string }> {
   try {
     const client = await createPrivacyClient();
-    await client.deletePrivacy({ id });
+    await client.deletePrivacy({ id, expectedRevision });
     revalidatePrivacyAfterCommit('/admin/privacy');
     return { success: true };
   } catch (err) {
@@ -50,12 +53,14 @@ export async function deletePrivacyVersionAction(id: string): Promise<{ success?
 export async function schedulePrivacyAction(
   id: string,
   effectiveFrom: Date,
+  expectedRevision: string,
 ): Promise<{ success?: boolean; error?: string }> {
   try {
     const client = await createPrivacyClient();
     await client.schedulePrivacy({
       id,
       effectiveFrom: timestampFromDate(effectiveFrom),
+      expectedRevision,
     });
     revalidatePath('/admin/privacy');
     return { success: true };
@@ -90,10 +95,13 @@ export async function cancelPrivacyScheduleAction(id: string): Promise<{ success
   }
 }
 
-export async function activatePrivacyNowAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function activatePrivacyNowAction(
+  id: string,
+  expectedRevision: string,
+): Promise<{ success?: boolean; error?: string }> {
   try {
     const client = await createPrivacyClient();
-    await client.activatePrivacyNow({ id });
+    await client.activatePrivacyNow({ id, expectedRevision });
     revalidatePath('/admin/privacy');
     return { success: true };
   } catch (err) {

@@ -14,13 +14,12 @@ import type { Editor } from '@tiptap/core';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import type { Awareness } from 'y-protocols/awareness';
-import type * as Y from 'yjs';
 import {
   useOptionalEditorAuthoringMode,
   useRegisterEditorAuthoringMode,
   type EditorAuthoringMode,
 } from '@/features/editor/EditorAuthoringMode';
-import { createCollaborationExtension, type CollaborationUser } from './collaboration';
+import type { CollaborationUser } from './block-room-presence-types';
 import { CodeBlockSelectionMenu, createTiptapCodeBlock, type CodeBlockSelectionMenuLabels } from './code';
 import { TiptapAIAssistantSurface, useTiptapAIController } from './ai/TiptapAIController';
 import type { TiptapAINodeTypes } from './ai';
@@ -123,27 +122,17 @@ interface TiptapEditorSharedProps {
   structureLocked?: boolean;
   /** Internal extension port for entity-owned editor integrations. */
   additionalExtensions?: readonly TiptapAnyExtension[];
-  /** Internal integration port for fragment ownership and projection. */
+  /** Internal integration port for editor lifecycle and projection. */
   onEditorReady?: (editor: Editor | null) => void;
   /** Narrows the shared command surface to the active durable profile. */
   authoringCapabilities?: TiptapAuthoringCapabilities;
 }
 
-type TiptapEditorCollaborationBinding =
-  | {
-      /** Typed one-entity Block-room authority. */
-      blockRoomController: RichTextBlockRoomTiptapController;
-      fragment?: never;
-      awareness: Awareness;
-      localUser: CollaborationUser;
-    }
-  | {
-      /** Legacy fragment authority for domains that have not cut over yet. */
-      blockRoomController?: never;
-      fragment: Y.XmlFragment;
-      awareness?: Awareness;
-      localUser?: CollaborationUser;
-    };
+interface TiptapEditorCollaborationBinding {
+  blockRoomController: RichTextBlockRoomTiptapController;
+  awareness: Awareness;
+  localUser: CollaborationUser;
+}
 
 export type TiptapEditorProps = TiptapEditorSharedProps & TiptapEditorCollaborationBinding;
 
@@ -417,7 +406,6 @@ function EditorChrome({
 }
 
 export function TiptapEditor({
-  fragment,
   blockRoomController,
   awareness,
   localUser,
@@ -650,9 +638,8 @@ export function TiptapEditor({
       ...(structureLocked ? [TranslationStructureLockExtension] : []),
       ...additionalExtensions,
       createTiptapPaginationExtension(),
-      ...(blockRoomController
-        ? [blockRoomController.extension, createBlockRoomPresenceExtension(awareness, localUser)]
-        : [createCollaborationExtension({ fragment, awareness, localUser })]),
+      blockRoomController.extension,
+      createBlockRoomPresenceExtension(awareness, localUser),
     ];
   }, [
     authoringMode,
@@ -664,7 +651,6 @@ export function TiptapEditor({
     executableSelectionLabels,
     executableSelectionRegistry,
     codeBlockLabels,
-    fragment,
     localUser,
     map,
     mediaRuntimeStore,
@@ -679,7 +665,7 @@ export function TiptapEditor({
   const editor = useEditor(
     {
       extensions,
-      content: blockRoomController?.initialContent,
+      content: blockRoomController.initialContent,
       editable,
       immediatelyRender: false,
       shouldRerenderOnTransaction: false,
@@ -695,7 +681,7 @@ export function TiptapEditor({
   useRegisterEditorAuthoringMode(editor, authoringMode ?? DENIED_AUTHORING_MODE);
 
   useEffect(() => {
-    if (!editor || !blockRoomController) {
+    if (!editor) {
       return undefined;
     }
     return blockRoomController.connect(editor);

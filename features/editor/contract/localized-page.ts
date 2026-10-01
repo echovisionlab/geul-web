@@ -56,7 +56,7 @@ function enumToken(value: string): string {
     .toUpperCase();
 }
 
-function legacyEnum(value: unknown, values: readonly unknown[] | undefined): unknown {
+function rendererEnumProjection(value: unknown, values: readonly unknown[] | undefined): unknown {
   if (typeof value !== 'string' || !values) {
     return value;
   }
@@ -74,24 +74,24 @@ interface FieldSpec {
   fields?: Readonly<Record<string, FieldSpec>>;
 }
 
-function legacyScalar(value: unknown, spec: FieldSpec | undefined): unknown {
+function rendererScalarProjection(value: unknown, spec: FieldSpec | undefined): unknown {
   if (value === undefined || value === null) {
     return undefined;
   }
   if (spec?.type === 'enum' || spec?.type === 'enum_int') {
-    return String(legacyEnum(value, spec.values));
+    return String(rendererEnumProjection(value, spec.values));
   }
   if (spec?.type === 'array') {
     if (!Array.isArray(value)) {
       return String(value);
     }
     if (spec.items?.type === 'object') {
-      return JSON.stringify(value.map((item) => legacyObject(record(item), spec.items?.fields)));
+      return JSON.stringify(value.map((item) => rendererObjectProjection(record(item), spec.items?.fields)));
     }
-    return value.map((item) => legacyScalar(item, spec.items)).join(',');
+    return value.map((item) => rendererScalarProjection(item, spec.items)).join(',');
   }
   if (spec?.type === 'object') {
-    return legacyObject(record(value), spec.fields);
+    return rendererObjectProjection(record(value), spec.fields);
   }
   if (typeof value === 'number' || typeof value === 'boolean') {
     return String(value);
@@ -99,11 +99,14 @@ function legacyScalar(value: unknown, spec: FieldSpec | undefined): unknown {
   return value;
 }
 
-function legacyObject(value: JsonRecord, fields: Readonly<Record<string, FieldSpec>> | undefined): JsonRecord {
+function rendererObjectProjection(
+  value: JsonRecord,
+  fields: Readonly<Record<string, FieldSpec>> | undefined,
+): JsonRecord {
   return Object.fromEntries(
     Object.entries(value)
       .filter(([key, item]) => key !== '$typeName' && item !== undefined && item !== null)
-      .map(([key, item]) => [key, legacyScalar(item, fields?.[key])]),
+      .map(([key, item]) => [key, rendererScalarProjection(item, fields?.[key])]),
   );
 }
 
@@ -116,11 +119,18 @@ function payloadJson(section: PageSection | PageSectionLocale): JsonRecord {
   return record(json[section.value.case ?? '']);
 }
 
-function legacyProps(kind: PageSectionKind, base: PageSection, localized: PageSectionLocale | undefined): JsonRecord {
+function materializeRendererProps(
+  kind: PageSectionKind,
+  base: PageSection,
+  localized: PageSectionLocale | undefined,
+): JsonRecord {
   const catalog = pageSectionCatalog[kind] as { fields: Readonly<Record<string, FieldSpec>> };
   const basePayload = payloadJson(base);
   const localePayload = localized ? payloadJson(localized) : {};
-  const props = legacyObject({ ...record(basePayload.props), ...record(localePayload.props) }, catalog.fields);
+  const props = rendererObjectProjection(
+    { ...record(basePayload.props), ...record(localePayload.props) },
+    catalog.fields,
+  );
 
   if (kind === 'external-video') {
     props.url = props.uri;
@@ -145,7 +155,7 @@ function legacyProps(kind: PageSectionKind, base: PageSection, localized: PageSe
       ]),
     );
     const visualUnits = baseUnits.map((unit) => {
-      const visual = legacyObject({ id: unit.id, ...record(unit.props) }, pageImmersiveUnitCatalog);
+      const visual = rendererObjectProjection({ id: unit.id, ...record(unit.props) }, pageImmersiveUnitCatalog);
       for (const key of [
         'meshFile',
         'meshOptimizationSourceFile',
@@ -259,7 +269,7 @@ export function materializeLocalizedPageSections(document: LocalizedPageDocument
       id,
       kind,
       settings: sectionSettings(section.settings),
-      props: legacyProps(kind, section, localized),
+      props: materializeRendererProps(kind, section, localized),
       richText,
       columns,
     };

@@ -9,6 +9,12 @@ import { updateWorkFieldsAction } from '@/lib/actions/work';
 import { type CreditOrderItem, type WorkMeta, type WorkType } from '@/lib/collab/work-meta';
 import { useBlockRoomConnection, type BlockRoomConnection } from '@/lib/collab/useBlockRoomConnection';
 import { useLocaleDocumentSession, type LocaleDocumentSession } from '@/features/translation/useLocaleDocumentSession';
+import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
+import {
+  getPendingEditorPatch,
+  notifyEditorSaveStateChanged,
+  registerEditorSave,
+} from '@/lib/editor/editor-save-registry';
 
 function sanitizeWorkMetadata(metadata: Record<string, unknown>): Record<string, unknown> {
   const { year, month, untilYear, untilMonth, isPresent, periodYear, periodMonth, ...rest } = metadata;
@@ -20,6 +26,50 @@ function sanitizeWorkMetadata(metadata: Record<string, unknown>): Record<string,
   void periodYear;
   void periodMonth;
   return rest;
+}
+
+function mergeClientIntent(current: string[], observed: string[], desired: string[]): string[] {
+  const observedSet = new Set(observed);
+  const desiredSet = new Set(desired);
+  const merged = current.filter((clientId) => !(observedSet.has(clientId) && !desiredSet.has(clientId)));
+  const mergedSet = new Set(merged);
+  for (const clientId of desired) {
+    if (!observedSet.has(clientId) && !mergedSet.has(clientId)) {
+      merged.push(clientId);
+      mergedSet.add(clientId);
+    }
+  }
+
+  const desiredCommon = desired.filter((clientId) => observedSet.has(clientId));
+  const observedCommon = observed.filter((clientId) => desiredSet.has(clientId));
+  if (
+    desiredCommon.length === observedCommon.length &&
+    desiredCommon.every((clientId, index) => clientId === observedCommon[index])
+  ) {
+    return merged;
+  }
+
+  const reordered: string[] = [];
+  const seen = new Set<string>();
+  for (const clientId of desired) {
+    if (mergedSet.has(clientId) && !seen.has(clientId)) {
+      reordered.push(clientId);
+      seen.add(clientId);
+    }
+  }
+  for (const clientId of merged) {
+    if (!seen.has(clientId)) {
+      reordered.push(clientId);
+      seen.add(clientId);
+    }
+  }
+  return reordered;
+}
+
+interface PendingClientSave {
+  request: number;
+  observedAtSelection: string[];
+  desiredClients: string[];
 }
 
 interface WorkMetaContextValue extends WorkMeta {
@@ -84,6 +134,9 @@ export function WorkMetaProvider({
   const { roomLocale } = localeSession;
   const connection = useBlockRoomConnection('work', workId, roomLocale);
   const { provider, doc, isConnected, isSynced, bootstrap, protocol, acceptEpochAck, reloadCanonical } = connection;
+  const clientsWritesPending = useRef(0);
+  const pendingClientSaves = useRef<PendingClientSave[]>([]);
+  const activeClientSave = useRef<Promise<boolean> | null>(null);
   const setField = useCallback(<K extends keyof WorkMeta>(key: K, value: WorkMeta[K]) => {
     setState((current) => ({ ...current, [key]: value }));
   }, []);
@@ -94,36 +147,132 @@ export function WorkMetaProvider({
     [],
   );
   const tCommon = useTranslations('common');
-  const confirmedClients = useRef(initialMeta.clients);
+  const confirmedClients = useRef([...initialMeta.clients]);
+  const visibleClients = useRef([...initialMeta.clients]);
   const clientsRequest = useRef(0);
-  const clientsSave = useRef(Promise.resolve());
+  const drainClientSaves = useCallback((): Promise<boolean> => {
+    if (activeClientSave.current) {
+      return activeClientSave.current;
+    }
+    if (pendingClientSaves.current.length === 0) {
+      return Promise.resolve(true);
+    }
+
+    const operation = Promise.resolve().then(async () => {
+      try {
+        while (pendingClientSaves.current.length > 0) {
+          const pending = pendingClientSaves.current[0];
+          const observedClients = [...confirmedClients.current];
+          const clientsToSave = mergeClientIntent(observedClients, pending.observedAtSelection, pending.desiredClients);
+          try {
+            const result = await updateWorkFieldsAction(workId, { clients: clientsToSave, observedClients });
+            if (result.error) {
+              throw new Error(result.error);
+            }
+            confirmedClients.current = [...(result.clients ?? clientsToSave)];
+            pendingClientSaves.current.shift();
+            clientsWritesPending.current = Math.max(0, clientsWritesPending.current - 1);
+            notifyEditorSaveStateChanged(`work:${workId}`);
+            if (
+              pending.request === clientsRequest.current &&
+              pendingClientSaves.current.length === 0 &&
+              aliveRef.current
+            ) {
+              visibleClients.current = [...confirmedClients.current];
+              setField('clients', visibleClients.current);
+            }
+            publishEditorEntityChange(`work:${workId}`);
+          } catch (error) {
+            if (aliveRef.current) {
+              notifications.show({
+                message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
+                color: 'red',
+              });
+            }
+            notifyEditorSaveStateChanged(`work:${workId}`);
+            // Retain this request and later selections. Navigation/lifecycle flushes
+            // remain blocked and can retry the same intent.
+            return false;
+          }
+        }
+        return true;
+      } finally {
+        if (activeClientSave.current === operation) {
+          activeClientSave.current = null;
+        }
+        notifyEditorSaveStateChanged(`work:${workId}`);
+      }
+    });
+    activeClientSave.current = operation;
+    notifyEditorSaveStateChanged(`work:${workId}`);
+    return operation;
+  }, [setField, tCommon, workId]);
+  const clientsEditorSave = useMemo(
+    () => ({
+      flush: drainClientSaves,
+      hasPending: () => pendingClientSaves.current.length > 0 || activeClientSave.current !== null,
+      getPendingPatch: () => (pendingClientSaves.current.length > 0 ? { clients: [...visibleClients.current] } : null),
+    }),
+    [drainClientSaves],
+  );
+  useEffect(() => registerEditorSave(`work:${workId}`, clientsEditorSave), [clientsEditorSave, workId]);
+  useEffect(() => {
+    const pending = getPendingEditorPatch(`work:${workId}`);
+    const hasPending = (field: string) => Object.hasOwn(pending, field);
+    const protectsClients = clientsWritesPending.current > 0;
+    setState((current) => ({
+      ...current,
+      title: hasPending('sourceTitle') ? current.title : initialMeta.title,
+      slug: hasPending('slug') ? current.slug : initialMeta.slug,
+      type: hasPending('type') ? current.type : initialMeta.type,
+      year: hasPending('year') ? current.year : initialMeta.year,
+      month: hasPending('month') ? current.month : initialMeta.month,
+      untilYear: hasPending('untilYear') ? current.untilYear : initialMeta.untilYear,
+      untilMonth: hasPending('untilMonth') ? current.untilMonth : initialMeta.untilMonth,
+      isPresent: hasPending('isPresent') ? current.isPresent : initialMeta.isPresent,
+      summary: hasPending('summary') ? current.summary : initialMeta.summary,
+      metadata: hasPending('metadata') ? current.metadata : sanitizeWorkMetadata(initialMeta.metadata),
+      featured: hasPending('featured') ? current.featured : initialMeta.featured,
+      clients: protectsClients ? current.clients : [...initialMeta.clients],
+      // The edit route does not provide current credit order/version; keep the owning
+      // credits query's state across route refreshes.
+      creditOrder: current.creditOrder,
+      creditsVersion: current.creditsVersion,
+    }));
+    if (!protectsClients) {
+      confirmedClients.current = [...initialMeta.clients];
+      visibleClients.current = [...initialMeta.clients];
+    }
+    setFeaturedImageUrl(initialFeaturedImageUrl);
+  }, [
+    initialFeaturedImageUrl,
+    initialMeta.clients,
+    initialMeta.featured,
+    initialMeta.isPresent,
+    initialMeta.metadata,
+    initialMeta.month,
+    initialMeta.slug,
+    initialMeta.summary,
+    initialMeta.title,
+    initialMeta.type,
+    initialMeta.untilMonth,
+    initialMeta.untilYear,
+    initialMeta.year,
+    workId,
+  ]);
   const setClients = useCallback(
     (clients: string[]) => {
-      setField('clients', clients);
+      const observedAtSelection = [...visibleClients.current];
+      const desiredClients = [...clients];
+      visibleClients.current = desiredClients;
+      setField('clients', desiredClients);
+      clientsWritesPending.current += 1;
       const request = ++clientsRequest.current;
-      // Serialize replacements so a slower older request cannot overwrite a newer one.
-      clientsSave.current = clientsSave.current.then(async () => {
-        try {
-          const result = await updateWorkFieldsAction(workId, { clients });
-          if (result.error) {
-            throw new Error(result.error);
-          }
-          confirmedClients.current = clients;
-        } catch (error) {
-          if (!aliveRef.current) {
-            return;
-          }
-          if (request === clientsRequest.current) {
-            setField('clients', confirmedClients.current);
-          }
-          notifications.show({
-            message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
-            color: 'red',
-          });
-        }
-      });
+      pendingClientSaves.current.push({ request, observedAtSelection, desiredClients });
+      notifyEditorSaveStateChanged(`work:${workId}`);
+      void drainClientSaves();
     },
-    [setField, tCommon, workId],
+    [drainClientSaves, setField, workId],
   );
   const setFeaturedImage = useCallback(
     (_fileId: string | null, url: string | null) => {

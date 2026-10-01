@@ -33,9 +33,9 @@ function LabelListSettingsForm({ props, updateProps }: LabelListSettingsFormProp
 
   const updateProp = useCallback(
     (key: string, value: string) => {
-      updateProps({ ...props, [key]: value });
+      updateProps({ [key]: value });
     },
-    [updateProps, props],
+    [updateProps],
   );
 
   const sortByOptions = [

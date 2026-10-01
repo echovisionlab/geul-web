@@ -38,7 +38,10 @@ interface ReleaseArtistsSectionViewProps {
   idPrefix?: string;
   artists: ReleaseArtistItem[];
   options: ReleaseArtistOption[];
-  onChange: (artists: ReleaseArtistItem[]) => void;
+  onChange: (
+    artists: ReleaseArtistItem[],
+    orderIntent?: { itemId: string; previousItemId?: string; nextItemId?: string },
+  ) => void;
 }
 
 export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange }: ReleaseArtistsSectionViewProps) {
@@ -57,8 +60,14 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
     close();
   };
 
-  const normalizeAndChange = (nextArtists: ReleaseArtistItem[]) => {
-    onChange(nextArtists.map((artist, index) => ({ ...artist, sort_order: index })));
+  const normalizeAndChange = (
+    nextArtists: ReleaseArtistItem[],
+    orderIntent?: { itemId: string; previousItemId?: string; nextItemId?: string },
+  ) => {
+    onChange(
+      nextArtists.map((artist, index) => ({ ...artist, sort_order: index })),
+      orderIntent,
+    );
   };
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
@@ -68,7 +77,13 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
     const oldIndex = artists.findIndex((artist) => artist.artist_id === active.id);
     const newIndex = artists.findIndex((artist) => artist.artist_id === over.id);
     if (oldIndex !== -1 && newIndex !== -1) {
-      normalizeAndChange(arrayMove(artists, oldIndex, newIndex));
+      const reordered = arrayMove(artists, oldIndex, newIndex);
+      const movedIndex = reordered.findIndex((artist) => artist.artist_id === active.id);
+      normalizeAndChange(reordered, {
+        itemId: String(active.id),
+        previousItemId: movedIndex > 0 ? reordered[movedIndex - 1].artist_id : undefined,
+        nextItemId: movedIndex + 1 < reordered.length ? reordered[movedIndex + 1].artist_id : undefined,
+      });
     }
   };
 

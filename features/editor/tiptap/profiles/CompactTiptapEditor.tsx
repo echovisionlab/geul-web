@@ -6,12 +6,10 @@ import { Plugin } from '@tiptap/pm/state';
 import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import { EditorContent, useEditor } from '@tiptap/react';
 import type { Awareness } from 'y-protocols/awareness';
-import type * as Y from 'yjs';
 import { useRegisterEditorAuthoringMode, type EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { TranslationStructureLockExtension } from '@/lib/editor/extensions/TranslationStructureLockExtension';
 import type { RichTextBlockRoomTiptapController } from '../block-room-tiptap-controller';
 import { createBlockRoomPresenceExtension } from '../block-room-presence';
-import { createCollaborationExtension } from '../collaboration';
 import { createAuthoringShortcutGuard } from '../integration/authoring-shortcuts';
 import {
   WireBackgroundColor,
@@ -112,22 +110,12 @@ interface CompactTiptapEditorSharedProps {
   structureLocked?: boolean;
 }
 
-export type CompactTiptapEditorProps = CompactTiptapEditorSharedProps &
-  (
-    | {
-        blockRoomController: RichTextBlockRoomTiptapController;
-        awareness: Awareness;
-        fragment?: never;
-      }
-    | {
-        blockRoomController?: never;
-        fragment: Y.XmlFragment;
-        awareness?: Awareness;
-      }
-  );
+export interface CompactTiptapEditorProps extends CompactTiptapEditorSharedProps {
+  blockRoomController: RichTextBlockRoomTiptapController;
+  awareness: Awareness;
+}
 
 export function CompactTiptapEditor({
-  fragment,
   blockRoomController,
   awareness,
   editable = true,
@@ -150,21 +138,17 @@ export function CompactTiptapEditor({
     () => [
       ...createCompactTiptapExtensions(placeholder, structureLocked),
       createAuthoringShortcutGuard(authoringMode),
-      ...(blockRoomController
-        ? [
-            blockRoomController.extension,
-            ...(awareness && userName && userColor
-              ? [createBlockRoomPresenceExtension(awareness, { name: userName, color: userColor })]
-              : []),
-          ]
-        : [createCollaborationExtension({ fragment: fragment!, awareness })]),
+      blockRoomController.extension,
+      ...(userName && userColor
+        ? [createBlockRoomPresenceExtension(awareness, { name: userName, color: userColor })]
+        : []),
     ],
-    [authoringMode, awareness, blockRoomController, fragment, placeholder, structureLocked, userColor, userName],
+    [authoringMode, awareness, blockRoomController, placeholder, structureLocked, userColor, userName],
   );
   const editor = useEditor(
     {
       extensions,
-      content: blockRoomController?.initialContent,
+      content: blockRoomController.initialContent,
       editable: isEditable,
       immediatelyRender: false,
       shouldRerenderOnTransaction: false,
@@ -181,7 +165,7 @@ export function CompactTiptapEditor({
   useRegisterEditorAuthoringMode(editor, authoringMode);
 
   useEffect(() => {
-    if (!editor || !blockRoomController) {
+    if (!editor) {
       return;
     }
     return blockRoomController.connect(editor);
@@ -192,7 +176,7 @@ export function CompactTiptapEditor({
   }, [editor, isEditable]);
 
   useEffect(() => {
-    if (!awareness || !userName || !userColor) {
+    if (!userName || !userColor) {
       return;
     }
     awareness.setLocalStateField('user', { name: userName, color: userColor });

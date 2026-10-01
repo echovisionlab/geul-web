@@ -13,9 +13,30 @@ import {
   type MapThemeDocumentVariant,
 } from '@/lib/collab/map-theme-fields';
 import { TypedMetaMap } from '@/lib/collab/TypedMetaMap';
+import type * as Y from 'yjs';
 import type { ThemeSettings, ThemeVariant } from '@/lib/types/map-theme/model';
 import { DEFAULT_DARK_VARIANT, DEFAULT_LIGHT_VARIANT, DEFAULT_THEME_SETTINGS } from '@/lib/types/map-theme/schema';
+import { useMapThemeReloadRequired } from '@/features/admin/MapThemeEditor/useMapThemeReloadRequired';
+import { registerCollaborativeDocumentSave } from '@/lib/editor/collaborative-document-save';
 import { useHocuspocusConnection } from './useHocuspocusConnection';
+
+interface MapThemeCanonicalSnapshot {
+  name: string;
+  settings: MapThemeDocumentSettings;
+  lightVariant: MapThemeDocumentVariant;
+  darkVariant: MapThemeDocumentVariant;
+}
+
+interface MapThemeFieldIntents {
+  name?: string;
+  settings: Partial<MapThemeDocumentSettings>;
+  lightVariant: Partial<MapThemeDocumentVariant>;
+  darkVariant: Partial<MapThemeDocumentVariant>;
+}
+
+interface PendingMapThemeReplay {
+  intents: MapThemeFieldIntents;
+}
 
 export interface MapThemeEditorInitialState {
   name: string;
@@ -54,14 +75,21 @@ export function useMapThemeEditorCollaboration(
   const [isDocumentReady, setIsDocumentReady] = useState(false);
 
   const cleanedUpRef = useRef(false);
+  const hasCanonicalSyncRef = useRef(false);
+  const lastSyncedDocRef = useRef<Y.Doc | null>(null);
+  const canonicalSnapshotRef = useRef<MapThemeCanonicalSnapshot | null>(null);
+  const fieldIntentsRef = useRef<MapThemeFieldIntents>(createEmptyFieldIntents());
+  const pendingReplayRef = useRef<PendingMapThemeReplay | null>(null);
   const metaMapRef = useRef<TypedMetaMap<typeof MapThemeDocumentMetaSchema> | null>(null);
   const settingsMapRef = useRef<TypedMetaMap<typeof MapThemeDocumentSettingsSchema> | null>(null);
   const lightVariantMapRef = useRef<TypedMetaMap<typeof MapThemeDocumentVariantSchema> | null>(null);
   const darkVariantMapRef = useRef<TypedMetaMap<typeof MapThemeDocumentVariantSchema> | null>(null);
+  const latestInitialStateRef = useRef(initialState);
+  latestInitialStateRef.current = initialState;
 
-  const syncFromMaps = useCallback(() => {
+  const readSnapshotFromMaps = useCallback((): MapThemeCanonicalSnapshot | null => {
     if (!metaMapRef.current || !settingsMapRef.current || !lightVariantMapRef.current || !darkVariantMapRef.current) {
-      return;
+      return null;
     }
 
     const metaResult = MapThemeDocumentMetaSchema.safeParse(metaMapRef.current.getAll());
@@ -70,20 +98,41 @@ export function useMapThemeEditorCollaboration(
     const darkResult = MapThemeDocumentVariantSchema.safeParse(darkVariantMapRef.current.getAll());
     if (!metaResult.success || !settingsResult.success || !lightResult.success || !darkResult.success) {
       setIsDocumentReady(false);
+      return null;
+    }
+
+    return {
+      name: metaResult.data.name,
+      settings: settingsResult.data,
+      lightVariant: lightResult.data,
+      darkVariant: darkResult.data,
+    };
+  }, []);
+
+  const syncFromMaps = useCallback(() => {
+    const snapshot = readSnapshotFromMaps();
+    if (!snapshot) {
       return;
     }
 
-    const meta = metaResult.data;
-    const nextSettings = settingsResult.data;
-    const nextLightVariant = fromDocumentVariant('light', lightResult.data);
-    const nextDarkVariant = fromDocumentVariant('dark', darkResult.data);
-
-    setNameState(meta.name);
-    setSettingsState(nextSettings);
-    setLightVariantState(nextLightVariant);
-    setDarkVariantState(nextDarkVariant);
+    setNameState(snapshot.name);
+    setSettingsState(snapshot.settings);
+    setLightVariantState(fromDocumentVariant('light', snapshot.lightVariant));
+    setDarkVariantState(fromDocumentVariant('dark', snapshot.darkVariant));
     setIsDocumentReady(true);
+  }, [readSnapshotFromMaps]);
+
+  const stagePendingIntents = useCallback(() => {
+    const baseline = canonicalSnapshotRef.current;
+    if (!baseline) {
+      pendingReplayRef.current = null;
+      return;
+    }
+    pendingReplayRef.current = {
+      intents: cloneFieldIntents(fieldIntentsRef.current),
+    };
   }, []);
+  const onReloadRequired = useMapThemeReloadRequired(stagePendingIntents);
 
   const {
     provider,
@@ -97,7 +146,38 @@ export function useMapThemeEditorCollaboration(
         syncFromMaps();
       }
     },
+    onReloadRequired,
   });
+
+  // MapTheme is a standalone legacy collaboration editor rather than an
+  // EditorRuntimeProvider child, so register its document with the same save barrier.
+  useEffect(() => {
+    if (!provider) {
+      return;
+    }
+    return registerCollaborativeDocumentSave(provider, `map_theme:${themeId}`);
+  }, [provider, themeId]);
+
+  useEffect(() => {
+    if (!provider) {
+      return;
+    }
+    const handleUnsyncedChanges = ({ number }: { number: number }) => {
+      if (number !== 0 || !hasCanonicalSyncRef.current || pendingReplayRef.current) {
+        return;
+      }
+      const snapshot = readSnapshotFromMaps();
+      if (!snapshot) {
+        return;
+      }
+      canonicalSnapshotRef.current = cloneCanonicalSnapshot(snapshot);
+      fieldIntentsRef.current = createEmptyFieldIntents();
+    };
+    provider.on('unsyncedChanges', handleUnsyncedChanges);
+    return () => {
+      provider.off('unsyncedChanges', handleUnsyncedChanges);
+    };
+  }, [provider, readSnapshotFromMaps]);
 
   const metaMap = useMemo(() => (doc ? createMapThemeMetaMap(doc) : null), [doc]);
   const settingsMap = useMemo(() => (doc ? createMapThemeSettingsMap(doc) : null), [doc]);
@@ -112,20 +192,61 @@ export function useMapThemeEditorCollaboration(
   }, [metaMap, settingsMap, lightVariantMap, darkVariantMap]);
 
   useEffect(() => {
-    if (providerSynced) {
-      syncFromMaps();
+    if (!providerSynced || !doc || lastSyncedDocRef.current === doc) {
+      return;
     }
-  }, [darkVariantMap, lightVariantMap, metaMap, providerSynced, settingsMap, syncFromMaps]);
+
+    const canonicalSnapshot = readSnapshotFromMaps();
+    if (!canonicalSnapshot) {
+      return;
+    }
+
+    lastSyncedDocRef.current = doc;
+    hasCanonicalSyncRef.current = true;
+    canonicalSnapshotRef.current = cloneCanonicalSnapshot(canonicalSnapshot);
+
+    const pendingReplay = pendingReplayRef.current;
+    if (pendingReplay) {
+      // Staged values are local commits. Apply them after the fresh server sync
+      // so this editor's pending writes remain the later same-key commit.
+      const replayableIntents = onlyChangedFields(pendingReplay.intents, canonicalSnapshot);
+      fieldIntentsRef.current = cloneFieldIntents(replayableIntents);
+      if (
+        applyFieldIntents(
+          doc,
+          replayableIntents,
+          metaMapRef.current,
+          settingsMapRef.current,
+          lightVariantMapRef.current,
+          darkVariantMapRef.current,
+        )
+      ) {
+        pendingReplayRef.current = null;
+      }
+    }
+    syncFromMaps();
+  }, [darkVariantMap, doc, lightVariantMap, metaMap, providerSynced, readSnapshotFromMaps, settingsMap, syncFromMaps]);
 
   useEffect(() => {
     cleanedUpRef.current = false;
+    hasCanonicalSyncRef.current = false;
+    lastSyncedDocRef.current = null;
+    canonicalSnapshotRef.current = null;
+    fieldIntentsRef.current = createEmptyFieldIntents();
+    pendingReplayRef.current = null;
+    setIsDocumentReady(false);
+    const nextInitialState = latestInitialStateRef.current;
+    setNameState(nextInitialState?.name ?? '');
+    setSettingsState(nextInitialState?.settings ?? DEFAULT_THEME_SETTINGS);
+    setLightVariantState(nextInitialState?.lightVariant ?? DEFAULT_LIGHT_VARIANT);
+    setDarkVariantState(nextInitialState?.darkVariant ?? DEFAULT_DARK_VARIANT);
     return () => {
       cleanedUpRef.current = true;
     };
   }, [themeId]);
 
   useEffect(() => {
-    if (!initialState || providerSynced) {
+    if (!initialState || providerSynced || hasCanonicalSyncRef.current) {
       return;
     }
 
@@ -173,6 +294,7 @@ export function useMapThemeEditorCollaboration(
     (value: string) => {
       const parsedName = MapThemeDocumentMetaSchema.shape.name.safeParse(value);
       if (providerSynced && isDocumentReady && parsedName.success) {
+        updateIntentField(fieldIntentsRef.current, parsedName.data, canonicalSnapshotRef.current?.name);
         metaMapRef.current?.set('name', parsedName.data);
       }
     },
@@ -182,6 +304,7 @@ export function useMapThemeEditorCollaboration(
   const updateSettings = useCallback(
     (values: Partial<MapThemeDocumentSettings>) => {
       if (providerSynced && isDocumentReady && Object.keys(values).length > 0) {
+        updateIntentFields(fieldIntentsRef.current.settings, canonicalSnapshotRef.current?.settings, values);
         settingsMapRef.current?.setMany(values);
       }
     },
@@ -191,6 +314,7 @@ export function useMapThemeEditorCollaboration(
   const updateLightVariant = useCallback(
     (values: Partial<MapThemeDocumentVariant>) => {
       if (providerSynced && isDocumentReady && Object.keys(values).length > 0) {
+        updateIntentFields(fieldIntentsRef.current.lightVariant, canonicalSnapshotRef.current?.lightVariant, values);
         lightVariantMapRef.current?.setMany(values);
       }
     },
@@ -200,6 +324,7 @@ export function useMapThemeEditorCollaboration(
   const updateDarkVariant = useCallback(
     (values: Partial<MapThemeDocumentVariant>) => {
       if (providerSynced && isDocumentReady && Object.keys(values).length > 0) {
+        updateIntentFields(fieldIntentsRef.current.darkVariant, canonicalSnapshotRef.current?.darkVariant, values);
         darkVariantMapRef.current?.setMany(values);
       }
     },
@@ -210,7 +335,7 @@ export function useMapThemeEditorCollaboration(
     provider,
     doc,
     isConnected,
-    isSynced: providerSynced && isDocumentReady,
+    isSynced: providerSynced && isDocumentReady && lastSyncedDocRef.current === doc,
     name,
     settings,
     lightVariant,
@@ -227,4 +352,115 @@ function fromDocumentVariant(scheme: 'light' | 'dark', variant: MapThemeDocument
     scheme,
     ...variant,
   };
+}
+
+function createEmptyFieldIntents(): MapThemeFieldIntents {
+  return { settings: {}, lightVariant: {}, darkVariant: {} };
+}
+
+function cloneFieldIntents(intents: MapThemeFieldIntents): MapThemeFieldIntents {
+  return {
+    ...(intents.name === undefined ? {} : { name: intents.name }),
+    settings: clonePartial(intents.settings),
+    lightVariant: clonePartial(intents.lightVariant),
+    darkVariant: clonePartial(intents.darkVariant),
+  };
+}
+
+function cloneCanonicalSnapshot(snapshot: MapThemeCanonicalSnapshot): MapThemeCanonicalSnapshot {
+  return {
+    name: snapshot.name,
+    settings: cloneValue(snapshot.settings),
+    lightVariant: cloneValue(snapshot.lightVariant),
+    darkVariant: cloneValue(snapshot.darkVariant),
+  };
+}
+
+function clonePartial<T extends object>(value: Partial<T>): Partial<T> {
+  return cloneValue(value);
+}
+
+function cloneValue<T>(value: T): T {
+  if (value === undefined || value === null || typeof value !== 'object') {
+    return value;
+  }
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
+function sameFieldValue(left: unknown, right: unknown): boolean {
+  if (left === right) {
+    return true;
+  }
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return JSON.stringify(left) === JSON.stringify(right);
+  }
+  return false;
+}
+
+function updateIntentField(intents: MapThemeFieldIntents, value: string, baseline: string | undefined): void {
+  if (baseline !== undefined && sameFieldValue(value, baseline)) {
+    delete intents.name;
+  } else {
+    intents.name = value;
+  }
+}
+
+function updateIntentFields<T extends object>(target: Partial<T>, baseline: T | undefined, values: Partial<T>): void {
+  for (const key of Object.keys(values) as Array<keyof T>) {
+    const value = values[key];
+    if (baseline && sameFieldValue(value, baseline[key])) {
+      delete target[key];
+    } else if (value !== undefined) {
+      target[key] = cloneValue(value);
+    }
+  }
+}
+
+function onlyChangedFields(intents: MapThemeFieldIntents, canonical: MapThemeCanonicalSnapshot): MapThemeFieldIntents {
+  const remaining = cloneFieldIntents(intents);
+  if (remaining.name !== undefined && sameFieldValue(remaining.name, canonical.name)) {
+    delete remaining.name;
+  }
+  removeSatisfiedFields(remaining.settings, canonical.settings);
+  removeSatisfiedFields(remaining.lightVariant, canonical.lightVariant);
+  removeSatisfiedFields(remaining.darkVariant, canonical.darkVariant);
+  return remaining;
+}
+
+function removeSatisfiedFields<T extends object>(intents: Partial<T>, canonical: T): void {
+  for (const key of Object.keys(intents) as Array<keyof T>) {
+    if (sameFieldValue(intents[key], canonical[key])) {
+      delete intents[key];
+    }
+  }
+}
+
+function applyFieldIntents(
+  doc: Y.Doc,
+  intents: MapThemeFieldIntents,
+  metaMap: TypedMetaMap<typeof MapThemeDocumentMetaSchema> | null,
+  settingsMap: TypedMetaMap<typeof MapThemeDocumentSettingsSchema> | null,
+  lightVariantMap: TypedMetaMap<typeof MapThemeDocumentVariantSchema> | null,
+  darkVariantMap: TypedMetaMap<typeof MapThemeDocumentVariantSchema> | null,
+): boolean {
+  if (!metaMap || !settingsMap || !lightVariantMap || !darkVariantMap) {
+    return false;
+  }
+
+  let succeeded = true;
+  doc.transact(() => {
+    if (intents.name !== undefined) {
+      succeeded = metaMap.set('name', intents.name) && succeeded;
+    }
+    if (Object.keys(intents.settings).length > 0) {
+      succeeded = settingsMap.setMany(intents.settings) && succeeded;
+    }
+    if (Object.keys(intents.lightVariant).length > 0) {
+      succeeded = lightVariantMap.setMany(intents.lightVariant) && succeeded;
+    }
+    if (Object.keys(intents.darkVariant).length > 0) {
+      succeeded = darkVariantMap.setMany(intents.darkVariant) && succeeded;
+    }
+  });
+  return succeeded;
 }

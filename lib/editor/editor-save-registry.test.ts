@@ -2,7 +2,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDebouncedPatch } from './debounced-patch';
 import { flushAllEditorSaves, flushEditorSaves, registerEditorSave } from './editor-save-registry';
-import { clearEditorSaveRecovery, persistEditorSaveRecoveryEntry } from './editor-save-recovery';
+import {
+  clearEditorSaveRecovery,
+  persistEditorSaveRecoveryEntry,
+  readEditorSaveRecovery,
+} from './editor-save-recovery';
 
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => {
@@ -67,7 +71,7 @@ describe('locale transition saves', () => {
     }
   });
 
-  it('keeps an unrelated archived document out of a provider-wide flush result', async () => {
+  it('preserves an unkeyed legacy archive without blocking healthy navigation', async () => {
     window.sessionStorage.clear();
     persistEditorSaveRecoveryEntry('work:archived', 'old-queue', {
       document: 'work:archived',
@@ -80,11 +84,123 @@ describe('locale transition saves', () => {
     try {
       expect(await flushEditorSaves('page:current')).toBe(true);
       expect(await flushAllEditorSaves()).toBe(true);
-      expect(await flushEditorSaves('work:archived')).toBe(false);
+      expect(await flushEditorSaves('work:archived')).toBe(true);
+      expect(readEditorSaveRecovery('work:archived')?.entries).toMatchObject([
+        { id: 'old-queue', document: 'work:archived', patch: { title: 'old draft' } },
+      ]);
     } finally {
       unregister();
       current.cancel();
       clearEditorSaveRecovery('work:archived', ['old-queue']);
+    }
+  });
+
+  it('blocks on a keyed orphan only when a registered writer matches its exact scope, document, and key', async () => {
+    const document = 'work:one:en';
+    const recoveryScope = 'work-room:one:en';
+    persistEditorSaveRecoveryEntry(recoveryScope, 'matching-orphan', {
+      document,
+      updatedAt: Date.now(),
+      recoveryKey: 'work-metadata',
+      patch: { title: 'recoverable title' },
+    });
+    const queue = createDebouncedPatch<{ title: string }>(
+      500,
+      document,
+      recoveryScope,
+      undefined,
+      false,
+      'work-metadata',
+    );
+    const unregister = registerEditorSave(document, queue);
+    try {
+      expect(await flushEditorSaves(document)).toBe(false);
+      expect(readEditorSaveRecovery(recoveryScope)?.entries).toMatchObject([
+        { id: 'matching-orphan', recoveryKey: 'work-metadata', patch: { title: 'recoverable title' } },
+      ]);
+    } finally {
+      unregister();
+      queue.cancel();
+      clearEditorSaveRecovery(recoveryScope);
+    }
+  });
+
+  it('does not block on a wrong key, locale, scope, or an unkeyed legacy archive', async () => {
+    const document = 'work:one:en';
+    const recoveryScope = 'work-room:one:en';
+    const otherScope = 'work-room:one:ko';
+    const persist = (scope: string, id: string, entryDocument: string, recoveryKey?: string) =>
+      persistEditorSaveRecoveryEntry(scope, id, {
+        document: entryDocument,
+        updatedAt: Date.now(),
+        patch: { title: id },
+        ...(recoveryKey === undefined ? {} : { recoveryKey }),
+      });
+    persist(recoveryScope, 'wrong-key', document, 'work-layout');
+    persist(recoveryScope, 'wrong-locale', 'work:one:ko', 'work-metadata');
+    persist(recoveryScope, 'unkeyed-legacy', document);
+    persist(otherScope, 'wrong-scope', document, 'work-metadata');
+
+    const queue = createDebouncedPatch<{ title: string }>(
+      500,
+      document,
+      recoveryScope,
+      undefined,
+      false,
+      'work-metadata',
+    );
+    const unregister = registerEditorSave(document, queue);
+    try {
+      expect(await flushEditorSaves(document)).toBe(true);
+      expect(
+        readEditorSaveRecovery(recoveryScope)
+          ?.entries.map(({ id }) => id)
+          .sort(),
+      ).toEqual(['unkeyed-legacy', 'wrong-key', 'wrong-locale'].sort());
+      expect(readEditorSaveRecovery(otherScope)?.entries.map(({ id }) => id)).toEqual(['wrong-scope']);
+    } finally {
+      unregister();
+      queue.cancel();
+      clearEditorSaveRecovery(recoveryScope);
+      clearEditorSaveRecovery(otherScope);
+    }
+  });
+
+  it('keeps a matching recovered save blocking until its automatic retry is durably acknowledged', async () => {
+    const document = 'post:one:en';
+    const recoveryScope = 'post-room:one:en';
+    persistEditorSaveRecoveryEntry(recoveryScope, 'failed-prior-queue', {
+      document,
+      updatedAt: Date.now(),
+      recoveryKey: 'post-metadata',
+      patch: { title: 'pending canonical title' },
+    });
+    const write = vi.fn().mockRejectedValueOnce(new Error('offline')).mockResolvedValue(undefined);
+    const queue = createDebouncedPatch<{ title: string }>(
+      500,
+      document,
+      recoveryScope,
+      undefined,
+      false,
+      'post-metadata',
+    );
+    queue.activateRecovery(write);
+    const unregister = registerEditorSave(document, queue);
+    try {
+      expect(queue.getPendingPatch()).toEqual({ title: 'pending canonical title' });
+      expect(await flushEditorSaves(document)).toBe(false);
+      expect(write).toHaveBeenCalledExactlyOnceWith({ title: 'pending canonical title' });
+
+      await vi.advanceTimersByTimeAsync(1_000);
+
+      expect(write).toHaveBeenCalledTimes(2);
+      expect(await flushEditorSaves(document)).toBe(true);
+      expect(readEditorSaveRecovery(recoveryScope)).toBeNull();
+    } finally {
+      unregister();
+      queue.cancel();
+      queue.deactivateRecovery();
+      clearEditorSaveRecovery(recoveryScope);
     }
   });
 });

@@ -1,9 +1,11 @@
 import { notifyEditorSaveStateChanged } from './editor-save-registry';
 import {
   activateEditorSaveRecoveryQueue,
+  claimEditorSaveRecoveryEntries,
   deactivateEditorSaveRecoveryQueue,
   persistEditorSaveRecoveryEntry,
   removeEditorSaveRecoveryEntry,
+  type EditorSaveRecoveryIdentity,
 } from './editor-save-recovery';
 
 export type PatchWriter<T> = (patch: T) => void | Promise<void>;
@@ -31,15 +33,25 @@ class DebouncedPatchQueue<T extends object> {
   private timer?: ReturnType<typeof setTimeout>;
   private activeSave?: Promise<boolean>;
   private generation = 0;
+  private retries = 0;
+  private activated = true;
   private recoveryScope: string | null;
+  private readonly recoveryKey?: string;
+  private readonly recoveredQueueIds = new Set<string>();
+  private recoveredIntent = false;
+  private lastRecoveryTimestamp = 0;
   private readonly recoveryQueueId = createQueueId();
 
   constructor(
     private readonly delay: number,
     private readonly document: string,
     recoveryScope: string | null,
+    private readonly merge: (pending: T, next: T) => T = (pending, next) => ({ ...pending, ...next }),
+    private readonly automaticRetry = false,
+    recoveryKey?: string,
   ) {
     this.recoveryScope = recoveryScope;
+    this.recoveryKey = recoveryKey;
   }
 
   setRecoveryScope = (recoveryScope: string | null) => {
@@ -57,16 +69,22 @@ class DebouncedPatchQueue<T extends object> {
     this.recoveryScope = recoveryScope;
   };
 
-  activateRecovery = () => {
+  activateRecovery = (write?: PatchWriter<T>) => {
+    this.activated = true;
     activateEditorSaveRecoveryQueue(this.recoveryQueueId);
+    if (!this.pending && !this.inFlight && write && this.recoveryKey) {
+      this.restoreRecovery(write);
+    }
   };
 
   deactivateRecovery = () => {
+    this.activated = false;
     deactivateEditorSaveRecoveryQueue(this.recoveryQueueId);
   };
 
   enqueue(patch: T, write: PatchWriter<T>) {
-    this.pending = { patch: { ...this.pending?.patch, ...patch }, write };
+    this.pending = { patch: this.pending ? this.merge(this.pending.patch, patch) : patch, write };
+    this.retries = 0;
     this.clearTimer();
     this.persistRecovery();
     notifyEditorSaveStateChanged(this.document);
@@ -77,6 +95,11 @@ class DebouncedPatchQueue<T extends object> {
   }
 
   hasPending = () => Boolean(this.pending || this.inFlight || this.activeSave);
+
+  getRecoveryIdentity = (): EditorSaveRecoveryIdentity => ({
+    scope: this.recoveryScope,
+    ...(this.recoveryKey === undefined ? {} : { key: this.recoveryKey }),
+  });
 
   /** A portable copy of unsaved fields; reading it does not acknowledge or discard them. */
   getPendingPatch = (): T | null => {
@@ -147,16 +170,33 @@ class DebouncedPatchQueue<T extends object> {
     if (generation === this.generation) {
       this.inFlight = undefined;
       if (saved) {
+        this.retries = 0;
         if (this.pending) {
           this.persistRecovery();
         } else {
           removeEditorSaveRecoveryEntry(this.recoveryScope, this.recoveryQueueId);
+          this.recoveredQueueIds.clear();
+          this.recoveredIntent = false;
         }
       } else {
         this.persistRecovery();
       }
     } else {
       this.inFlight = undefined;
+    }
+    if (
+      !saved &&
+      (this.automaticRetry || this.recoveredIntent) &&
+      this.activated &&
+      this.pending &&
+      this.retries < 8 &&
+      this.timer === undefined
+    ) {
+      const retryDelay = Math.min(30_000, 1_000 * 2 ** this.retries++);
+      this.timer = setTimeout(() => {
+        this.timer = undefined;
+        void this.savePending();
+      }, retryDelay);
     }
     notifyEditorSaveStateChanged(this.document);
     return saved;
@@ -170,7 +210,7 @@ class DebouncedPatchQueue<T extends object> {
       if (generation === this.generation) {
         // A newer value for the same field wins over the failed attempt.
         this.pending = {
-          patch: { ...batch.patch, ...this.pending?.patch },
+          patch: this.pending ? this.merge(batch.patch, this.pending.patch) : batch.patch,
           write: this.pending?.write ?? batch.write,
         };
         this.inFlight = undefined;
@@ -185,11 +225,56 @@ class DebouncedPatchQueue<T extends object> {
     if (Object.keys(patch).length === 0) {
       return;
     }
-    persistEditorSaveRecoveryEntry(this.recoveryScope, this.recoveryQueueId, {
+    const updatedAt = Math.max(Date.now(), this.lastRecoveryTimestamp + 1);
+    this.lastRecoveryTimestamp = updatedAt;
+    return persistEditorSaveRecoveryEntry(this.recoveryScope, this.recoveryQueueId, {
       document: this.document,
-      updatedAt: Date.now(),
+      updatedAt,
       patch,
+      ...(this.recoveryKey === undefined ? {} : { recoveryKey: this.recoveryKey }),
+      ...(this.recoveredQueueIds.size ? { recoveredQueueIds: [...this.recoveredQueueIds] } : {}),
     });
+  }
+
+  private restoreRecovery(write: PatchWriter<T>) {
+    const recovered = claimEditorSaveRecoveryEntries(
+      this.recoveryScope,
+      this.recoveryQueueId,
+      this.document,
+      this.recoveryKey,
+    );
+    if (recovered.length === 0) {
+      return;
+    }
+
+    let patch: T | undefined;
+    for (const entry of recovered) {
+      this.lastRecoveryTimestamp = Math.max(this.lastRecoveryTimestamp, entry.updatedAt);
+      for (const recoveredQueueId of entry.recoveredQueueIds) {
+        this.recoveredQueueIds.add(recoveredQueueId);
+      }
+      if (entry.id !== this.recoveryQueueId) {
+        this.recoveredQueueIds.add(entry.id);
+      }
+      const next = entry.patch as T;
+      patch = patch === undefined ? next : this.merge(patch, next);
+    }
+
+    if (patch === undefined) {
+      return;
+    }
+    this.pending = {
+      patch: this.pending ? this.merge(patch, this.pending.patch) : patch,
+      write,
+    };
+    this.recoveredIntent = true;
+    this.persistRecovery();
+    notifyEditorSaveStateChanged(this.document);
+    this.clearTimer();
+    this.timer = setTimeout(() => {
+      this.timer = undefined;
+      void this.savePending();
+    }, this.delay);
   }
 }
 
@@ -197,6 +282,9 @@ export function createDebouncedPatch<T extends object>(
   delay: number,
   document = '',
   recoveryScope: string | null = document,
+  merge?: (pending: T, next: T) => T,
+  automaticRetry = false,
+  recoveryKey?: string,
 ) {
-  return new DebouncedPatchQueue<T>(delay, document, recoveryScope);
+  return new DebouncedPatchQueue<T>(delay, document, recoveryScope, merge, automaticRetry, recoveryKey);
 }

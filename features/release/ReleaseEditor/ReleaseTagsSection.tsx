@@ -17,6 +17,7 @@ import {
   setReleaseStylesAction,
 } from '@/lib/actions/release';
 import { listStylesAction } from '@/lib/actions/style';
+import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
 import type {
   ReleaseCategoryItem,
   ReleaseFormatItem,
@@ -35,6 +36,14 @@ interface ReleaseTagsSectionProps {
   onGenresChange: (genres: ReleaseGenreItem[]) => void;
   onStylesChange: (styles: ReleaseStyleItem[]) => void;
   onFormatsChange: (formats: ReleaseFormatItem[]) => void;
+  onCategoriesMutationStart?: () => void;
+  onCategoriesMutationSettled?: (succeeded: boolean) => void;
+  onGenresMutationStart?: () => void;
+  onGenresMutationSettled?: (succeeded: boolean) => void;
+  onStylesMutationStart?: () => void;
+  onStylesMutationSettled?: (succeeded: boolean) => void;
+  onFormatsMutationStart?: () => void;
+  onFormatsMutationSettled?: (succeeded: boolean) => void;
 }
 
 export function ReleaseTagsSection({
@@ -48,6 +57,14 @@ export function ReleaseTagsSection({
   onGenresChange,
   onStylesChange,
   onFormatsChange,
+  onCategoriesMutationStart,
+  onCategoriesMutationSettled,
+  onGenresMutationStart,
+  onGenresMutationSettled,
+  onStylesMutationStart,
+  onStylesMutationSettled,
+  onFormatsMutationStart,
+  onFormatsMutationSettled,
 }: ReleaseTagsSectionProps) {
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.tags');
@@ -70,12 +87,16 @@ export function ReleaseTagsSection({
   });
 
   const setCategories = useMutation({
-    mutationFn: (categoryIds: string[]) => setReleaseCategoriesAction(releaseId, categoryIds),
+    mutationFn: ({ ids, observed }: { ids: string[]; observed: string[] }) =>
+      setReleaseCategoriesAction(releaseId, ids, observed),
+    onMutate: () => onCategoriesMutationStart?.(),
+    onSettled: (result, error) => onCategoriesMutationSettled?.(!error && !result?.error),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
         return;
       }
+      publishEditorEntityChange(`release:${releaseId}`);
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: tCommon('entities.categories') }),
         color: 'green',
@@ -84,12 +105,16 @@ export function ReleaseTagsSection({
   });
 
   const setGenres = useMutation({
-    mutationFn: (genreIds: string[]) => setReleaseGenresAction(releaseId, genreIds),
+    mutationFn: ({ ids, observed }: { ids: string[]; observed: string[] }) =>
+      setReleaseGenresAction(releaseId, ids, observed),
+    onMutate: () => onGenresMutationStart?.(),
+    onSettled: (result, error) => onGenresMutationSettled?.(!error && !result?.error),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
         return;
       }
+      publishEditorEntityChange(`release:${releaseId}`);
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: tCommon('entities.genres') }),
         color: 'green',
@@ -98,12 +123,16 @@ export function ReleaseTagsSection({
   });
 
   const setStyles = useMutation({
-    mutationFn: (styleIds: string[]) => setReleaseStylesAction(releaseId, styleIds),
+    mutationFn: ({ ids, observed }: { ids: string[]; observed: string[] }) =>
+      setReleaseStylesAction(releaseId, ids, observed),
+    onMutate: () => onStylesMutationStart?.(),
+    onSettled: (result, error) => onStylesMutationSettled?.(!error && !result?.error),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
         return;
       }
+      publishEditorEntityChange(`release:${releaseId}`);
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: tCommon('entities.styles') }),
         color: 'green',
@@ -112,16 +141,32 @@ export function ReleaseTagsSection({
   });
 
   const setFormats = useMutation({
-    mutationFn: (formatIds: string[]) =>
+    mutationFn: ({
+      nextFormats,
+      observedFormats,
+    }: {
+      nextFormats: ReleaseFormatItem[];
+      observedFormats: ReleaseFormatItem[];
+    }) =>
       setReleaseFormatsAction(
         releaseId,
-        formatIds.map((id) => ({ formatId: id })),
+        nextFormats.map((format) => ({
+          formatId: format.id,
+          formatDescription: format.format_description ?? undefined,
+        })),
+        observedFormats.map((format) => ({
+          formatId: format.id,
+          formatDescription: format.format_description ?? undefined,
+        })),
       ),
+    onMutate: () => onFormatsMutationStart?.(),
+    onSettled: (result, error) => onFormatsMutationSettled?.(!error && !result?.error),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
         return;
       }
+      publishEditorEntityChange(`release:${releaseId}`);
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: tCommon('entities.formats') }),
         color: 'green',
@@ -136,7 +181,7 @@ export function ReleaseTagsSection({
     });
 
     onCategoriesChange(newCategories);
-    setCategories.mutate(categoryIds);
+    setCategories.mutate({ ids: categoryIds, observed: categories.map((item) => item.id) });
   };
 
   const handleGenresChange = (genreIds: string[]) => {
@@ -146,7 +191,7 @@ export function ReleaseTagsSection({
     });
 
     onGenresChange(newGenres);
-    setGenres.mutate(genreIds);
+    setGenres.mutate({ ids: genreIds, observed: genres.map((item) => item.id) });
   };
 
   const handleStylesChange = (styleIds: string[]) => {
@@ -156,17 +201,27 @@ export function ReleaseTagsSection({
     });
 
     onStylesChange(newStyles);
-    setStyles.mutate(styleIds);
+    setStyles.mutate({ ids: styleIds, observed: styles.map((item) => item.id) });
   };
 
   const handleFormatsChange = (formatIds: string[]) => {
     const newFormats: ReleaseFormatItem[] = formatIds.flatMap((id) => {
       const format = allFormats?.find((f) => f.id === id);
-      return format ? [{ id: format.id, name: format.name, slug: format.slug, format_description: null }] : [];
+      const previous = formats.find((item) => item.id === id);
+      return format
+        ? [
+            {
+              id: format.id,
+              name: format.name,
+              slug: format.slug,
+              format_description: previous?.format_description ?? null,
+            },
+          ]
+        : [];
     });
 
     onFormatsChange(newFormats);
-    setFormats.mutate(formatIds);
+    setFormats.mutate({ nextFormats: newFormats, observedFormats: formats });
   };
 
   const categoryOptions = useMemo(

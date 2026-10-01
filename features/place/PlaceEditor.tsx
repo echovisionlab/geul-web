@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useRef, useState, type ReactNode } from 'react';
 import { IconChevronDown, IconChevronUp, IconTrash } from '@tabler/icons-react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { useTranslations } from 'next-intl';
@@ -25,7 +25,7 @@ interface PlaceEditorProps {
   /** Initial data for editing existing place */
   initialData?: PlaceEditorFormState;
   /** Submit handler */
-  onSubmit: (data: PlaceEditorFormState) => void;
+  onSubmit: (updates: Partial<PlaceEditorFormState>) => Promise<boolean>;
   /** Delete handler (only for edit mode) */
   onDelete?: () => void;
   /** Back button handler */
@@ -71,16 +71,10 @@ function PlaceEditorContent({
       addressComponents: null,
     },
   );
+  const baselineRef = useRef(clonePlaceEditorFormState(formState));
   const [geocodingLoading, setGeocodingLoading] = useState(false);
   const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
   const [drawerOpened, { toggle: toggleDrawer }] = useDisclosure(true);
-
-  // Sync with initialData when it changes (for edit mode)
-  useEffect(() => {
-    if (initialData) {
-      setFormState(initialData);
-    }
-  }, [initialData]);
 
   const handleMapClick = useCallback(
     async (lat: number, lng: number) => {
@@ -167,9 +161,23 @@ function PlaceEditorContent({
     }));
   }, []);
 
-  const handleSubmit = useCallback(() => {
-    onSubmit(formState);
-  }, [formState, onSubmit]);
+  const handleSubmit = useCallback(async () => {
+    if (isSubmitting) {
+      return;
+    }
+
+    const submittedState = clonePlaceEditorFormState(formState);
+    const updates = diffPlaceEditorFormState(baselineRef.current, submittedState);
+    if (Object.keys(updates).length === 0) {
+      return;
+    }
+
+    if (await onSubmit(updates)) {
+      // Advance the baseline to the submitted values without replacing the draft.
+      // Inputs changed while the request was pending remain dirty for the next save.
+      baselineRef.current = submittedState;
+    }
+  }, [formState, isSubmitting, onSubmit]);
 
   const handleDelete = useCallback(() => {
     onDelete?.();
@@ -209,7 +217,7 @@ function PlaceEditorContent({
               {
                 key: 'save',
                 label: resolvedSubmitLabel,
-                disabled: !isFormValid,
+                disabled: !isFormValid || isSubmitting,
                 loading: isSubmitting,
                 onClick: handleSubmit,
               },
@@ -351,5 +359,60 @@ export function PlaceEditor(props: PlaceEditorProps) {
     <MapProvider>
       <PlaceEditorContent {...props} />
     </MapProvider>
+  );
+}
+
+function clonePlaceEditorFormState(state: PlaceEditorFormState): PlaceEditorFormState {
+  return {
+    ...state,
+    addressComponents: state.addressComponents ? { ...state.addressComponents } : null,
+  };
+}
+
+function diffPlaceEditorFormState(
+  baseline: PlaceEditorFormState,
+  next: PlaceEditorFormState,
+): Partial<PlaceEditorFormState> {
+  const updates: Partial<PlaceEditorFormState> = {};
+
+  if (baseline.name !== next.name) {
+    updates.name = next.name;
+  }
+  if (baseline.address !== next.address) {
+    updates.address = next.address;
+  }
+  if (baseline.lat !== next.lat) {
+    updates.lat = next.lat;
+  }
+  if (baseline.lng !== next.lng) {
+    updates.lng = next.lng;
+  }
+  if (baseline.googlePlaceId !== next.googlePlaceId) {
+    updates.googlePlaceId = next.googlePlaceId;
+  }
+  if (!sameAddressComponents(baseline.addressComponents, next.addressComponents)) {
+    updates.addressComponents = next.addressComponents ? { ...next.addressComponents } : null;
+  }
+
+  return updates;
+}
+
+function sameAddressComponents(
+  left: PlaceEditorFormState['addressComponents'],
+  right: PlaceEditorFormState['addressComponents'],
+): boolean {
+  if (left === right) {
+    return true;
+  }
+  if (!left || !right) {
+    return false;
+  }
+
+  return (
+    left.street === right.street &&
+    left.city === right.city &&
+    left.region === right.region &&
+    left.country === right.country &&
+    left.postalCode === right.postalCode
   );
 }

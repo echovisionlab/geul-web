@@ -32,7 +32,26 @@ describe('ProgramEventEditor collaboration runtime', () => {
     expect(source).toContain('allowedActions: neutralAllowedActions');
     expect(source).toContain('canEdit={canEditNeutral}');
     expect(source).toContain('editable={canEditCurrentLocale}');
-    expect(source).not.toContain('debouncedMetaUpdate({ slug: nextSlug })');
+    expect(source).toContain('queueNeutralPatch({ slug: nextSlug });');
+    expect(source).not.toContain('mutateEditableEvent');
     expect(source).toContain("titlePlaceholder={tCommon('states.untitledEntity'");
+  });
+
+  it('queues neutral and relation edits and flushes before direct transitions', () => {
+    expect(source).toContain('observed: { artists: observed }');
+    expect(source).toContain('observed: { labels: observed }');
+    expect(source).toContain('observed: { clients: observed }');
+    expect(source).toContain('merge: mergeMetadataPatches');
+    expect(source).toContain('artists: values.map((id, sortOrder) => ({');
+    expect(source).toContain('labels: values.map((id, sortOrder) => ({');
+    expect(source).toContain('clients: values.map((id, sortOrder) => ({');
+    expect(source).not.toContain('debouncedRelationsUpdate');
+    expect(source).toContain('neutralConfiguration.beginWrite(data)');
+    expect(source).toContain('data.observed?.[collection] ?? currentBaseline[collection]');
+    expect(source).toContain('pendingAuxiliaryWritesRef.current.size > 0');
+    expect(source).toMatch(/flushEditorSaves\(`program_event:\$\{eventId\}`\)/);
+    expect(source).toContain('if (await flushPendingSaves()) {\n      router.back();');
+    expect(source).toContain('if (await flushPendingSaves()) {\n        lifecycle.changeStatus(nextStatus);');
+    expect(source).toContain('if (await flushPendingSaves()) {\n      lifecycle.deleteEvent.mutate();');
   });
 });

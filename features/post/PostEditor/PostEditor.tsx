@@ -1,8 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import * as Y from 'yjs';
 import { PostAction } from '@echovisionlab/geul-proto/secure/post_pb.ts';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -10,9 +9,7 @@ import { SimpleGrid, Stack, Text } from '@mantine/core';
 import { Checkbox } from '@/components/core/Input';
 import { useDisclosure, useWindowEvent } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
-import { EditorReloadRequiredDialog } from '@/features/editor/EditorReloadRequiredDialog';
 import { useEditorPermissionRevocation } from '@/features/editor/useEditorPermissionRevocation';
-import { useEditorReloadRequired } from '@/features/editor/useEditorReloadRequired';
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
 import { OgImagePreview } from '@/features/metadata/OgImagePreview';
 import { ShareLinkSection } from '@/features/share/ShareLinkSection';
@@ -26,7 +23,6 @@ import { EditorActiveLocaleControl } from '@/features/translation/EditorActiveLo
 import { EntityTranslationsPanel } from '@/features/translation/EntityTranslationsPanel';
 import { isLocaleDocumentEditable } from '@/features/translation/locale-document-mode';
 import { usePostBlockRoomController } from '@/features/editor/hooks/useBlockRoomTiptapController';
-import { EditorSaveRecoveryNotice } from '@/features/editor/EditorSaveRecoveryNotice';
 import { exportPostMarkdownAction, regeneratePostOgImageAction } from '@/lib/actions/post';
 import {
   createMapPlaceForBlockWithBrowserClient,
@@ -34,7 +30,6 @@ import {
 } from '@/lib/api/map-place-browser-client';
 import type { PostMeta } from '@/lib/collab/post-meta';
 import { updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
-import { createBlockRoomRecoverySnapshot, matchesBlockRoomRecoveryScope } from '@/lib/collab/block-room-recovery';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import { MapPlaceActionProvider } from '@/lib/contexts/MapPlaceActionContext';
 import { PostMetaProvider, usePostMeta } from '@/lib/contexts/PostMetaContext';
@@ -50,8 +45,6 @@ import type { TagSelect } from '@/lib/types/tag/model';
 import { downloadMarkdown } from '@/lib/utils/export';
 import { normalizeOgRegenerationLocale } from '@/lib/utils/og-regeneration';
 import { toNullableSlug, toSlugInputValue } from '@/lib/utils/slug';
-import { PostConfigConflictRecoveryNotice, type PostConfigDocumentRecovery } from './PostConfigConflictRecoveryNotice';
-import { PostRecoveryNotice } from './PostRecoveryNotice';
 import { resolvePostEditorBodyMode } from './body-mode';
 import { CategorySelector } from './CategorySelector';
 import { resolvePostEditorAiTarget } from './collaboration-mode';
@@ -66,9 +59,10 @@ import { PostSessionExpiredDialog } from './PostSessionExpiredDialog';
 import { SeriesSelector } from './SeriesSelector';
 import { TagSelector } from './TagSelector';
 import { usePostConfigSave } from './usePostConfigSave';
+import { diffPostLayout } from './post-config-save';
 import { usePostLifecycle } from './usePostLifecycle';
-import { usePostRecoveryDraft } from './usePostRecoveryDraft';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
+import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
 
 interface PostEditorProps {
   postId: string;
@@ -160,6 +154,8 @@ function PostEditorContent({
   const navigateWithSave = useEditorNavigation(`post:${postId}`);
   const [isZenMode, setIsZenMode] = useState(false);
   const [mapPlaceId, setMapPlaceId] = useState<string | null>(initialMapPlaceId);
+  const adoptedSlugRef = useRef<string | null | undefined>(undefined);
+  const localSlugEditRef = useRef(false);
   const [createPlaceInitialName, setCreatePlaceInitialName] = useState('');
 
   const [participantsOpened, { open: openParticipants, close: closeParticipants }] = useDisclosure(false);
@@ -190,6 +186,8 @@ function PostEditorContent({
   } = lifecycle.permissions;
 
   const {
+    setSourceTitle,
+    setSourceSummary,
     slug,
     setSlug,
     commentsEnabled,
@@ -205,7 +203,6 @@ function PostEditorContent({
     protocol,
     acceptEpochAck,
     reloadCanonical,
-    recoverySnapshot,
     roomLocale,
     localeSession,
   } = usePostMeta();
@@ -226,17 +223,37 @@ function PostEditorContent({
   const handleBack = useCallback(async () => {
     await navigateWithSave(() => router.back());
   }, [navigateWithSave, router]);
-  const postConfigUpdate = usePostConfigSave(postId, initialConfigurationRevision);
-  const pendingPostConfigPatch = postConfigUpdate.getPendingPatch();
+  const postConfigUpdate = usePostConfigSave(
+    postId,
+    {
+      configurationRevision: initialConfigurationRevision,
+      slug,
+      commentsEnabled,
+      mapPlaceId,
+      documentLayout: layout,
+    },
+    provider,
+  );
+  useEffect(() => {
+    const configuration = postConfigUpdate.configuration;
+    if (configuration.slug === slug) {
+      localSlugEditRef.current = false;
+    } else if (!localSlugEditRef.current) {
+      adoptedSlugRef.current = configuration.slug;
+      setSlug(configuration.slug);
+    }
+    setCommentsEnabled(configuration.commentsEnabled);
+    setMapPlaceId(configuration.mapPlaceId);
+    setLayout(configuration.documentLayout);
+  }, [postConfigUpdate.configuration, setCommentsEnabled, setLayout, setSlug, slug]);
   const permissionRevocation = useEditorPermissionRevocation(provider, 'post', postId);
-  const revision = useEditorReloadRequired(provider);
   const blockRoomController = usePostBlockRoomController(currentDoc, roomLocale);
   const editorSession =
     currentProvider && blockRoomController && currentIsSynced
       ? { provider: currentProvider, controller: blockRoomController }
       : null;
   const isEditorReady = editorSession !== null;
-  const canMutateContent = canEdit && !permissionRevocation.blocked && !revision.reloadRequired;
+  const canMutateContent = canEdit && !permissionRevocation.blocked;
 
   // Track the durable server-side OG generation for the active target.
   const ogImage = useOgImage({
@@ -253,9 +270,18 @@ function PostEditorContent({
     entityType: 'post',
     entityId: postId,
     slug: toSlugInputValue(slug),
-    onSlugChange: (val) => setSlug(toNullableSlug(val)),
+    onSlugChange: (val) => {
+      adoptedSlugRef.current = undefined;
+      localSlugEditRef.current = true;
+      setSlug(toNullableSlug(val));
+    },
     onSave: (newSlug) => {
-      postConfigUpdate({ slug: toSlugInputValue(toNullableSlug(newSlug)) });
+      const nextSlug = toNullableSlug(newSlug);
+      if (adoptedSlugRef.current === nextSlug) {
+        adoptedSlugRef.current = undefined;
+        return;
+      }
+      postConfigUpdate({ slug: toSlugInputValue(nextSlug) });
     },
   });
 
@@ -324,58 +350,6 @@ function PostEditorContent({
     setResidentTitle(activeEditLocale.displayTitle);
     setResidentSummary(activeEditLocale.displaySummary);
   }, [activeEditLocale.displaySummary, activeEditLocale.displayTitle, roomLocale]);
-  const recoveryDraft = usePostRecoveryDraft(recoverySnapshot, {
-    title: residentTitle,
-    summary: residentSummary,
-    commentsEnabled,
-    mapPlaceId,
-    layout,
-  });
-  const getPostConfigDocumentRecovery = useCallback((): PostConfigDocumentRecovery | null => {
-    const scope = { documentType: 'post' as const, entityId: postId, locale: roomLocale };
-    if (matchesBlockRoomRecoveryScope(recoverySnapshot, scope)) {
-      return { snapshot: recoverySnapshot, ...(recoveryDraft ? { draft: recoveryDraft } : {}) };
-    }
-
-    if (!roomLocale || !currentDoc || !bootstrap || !currentIsSynced) {
-      return null;
-    }
-
-    const snapshot = createBlockRoomRecoverySnapshot({
-      ...scope,
-      admitted: currentIsSynced,
-      bootstrap,
-      yjsUpdate: Y.encodeStateAsUpdate(currentDoc),
-    });
-    if (!snapshot) {
-      return null;
-    }
-
-    return {
-      snapshot,
-      draft: {
-        title: residentTitle,
-        summary: residentSummary,
-        commentsEnabled,
-        mapPlaceId,
-        layout,
-      },
-    };
-  }, [
-    bootstrap,
-    commentsEnabled,
-    currentDoc,
-    currentIsSynced,
-    layout,
-    mapPlaceId,
-    postId,
-    recoveryDraft,
-    recoverySnapshot,
-    residentSummary,
-    residentTitle,
-    roomLocale,
-  ]);
-
   const debouncedResidentMetadataUpdate = useDebouncedRoomMetadata({
     connection: { protocol, bootstrap, acceptEpochAck, reloadCanonical },
     document: `post:${postId}`,
@@ -383,9 +357,26 @@ function PostEditorContent({
     write: (protocol, update: { locale: string; title?: string | null; summary?: string | null }) =>
       updateBlockRoomLocaleMetadata(protocol, { type: 'post', ...update }),
   });
-  useEffect(() => {
-    debouncedResidentMetadataUpdate.cancel();
-  }, [debouncedResidentMetadataUpdate, roomLocale]);
+
+  useBlockRoomMetadataUpdates({ protocol }, `post:${postId}`, ({ operation, values }) => {
+    if (operation !== 'locale') {
+      return;
+    }
+    if (values.title === null || typeof values.title === 'string') {
+      const title = values.title ?? '';
+      setResidentTitle(title);
+      if (activeEditLocale.isSourceLocale) {
+        setSourceTitle(title);
+      }
+    }
+    if (values.summary === null || typeof values.summary === 'string') {
+      const summary = values.summary ?? '';
+      setResidentSummary(summary);
+      if (activeEditLocale.isSourceLocale) {
+        setSourceSummary(summary);
+      }
+    }
+  });
 
   const handleCommentsEnabledChange = useCallback(
     (enabled: boolean) => {
@@ -401,9 +392,12 @@ function PostEditorContent({
         return;
       }
       setResidentTitle(value);
+      if (activeEditLocale.isSourceLocale) {
+        setSourceTitle(value);
+      }
       debouncedResidentMetadataUpdate({ locale: roomLocale, title: value });
     },
-    [debouncedResidentMetadataUpdate, roomLocale],
+    [activeEditLocale.isSourceLocale, debouncedResidentMetadataUpdate, roomLocale, setSourceTitle],
   );
 
   const handleScopedLocaleSummaryChange = useCallback(
@@ -412,17 +406,23 @@ function PostEditorContent({
         return;
       }
       setResidentSummary(value);
+      if (activeEditLocale.isSourceLocale) {
+        setSourceSummary(value);
+      }
       debouncedResidentMetadataUpdate({ locale: roomLocale, summary: value || null });
     },
-    [debouncedResidentMetadataUpdate, roomLocale],
+    [activeEditLocale.isSourceLocale, debouncedResidentMetadataUpdate, roomLocale, setSourceSummary],
   );
 
   const handleLayoutChange = useCallback(
     (nextLayout: DocumentLayout) => {
+      const layoutIntent = diffPostLayout(layout, nextLayout);
       setLayout(nextLayout);
-      postConfigUpdate({ documentLayout: nextLayout });
+      if (Object.keys(layoutIntent).length > 0) {
+        postConfigUpdate(layoutIntent);
+      }
     },
-    [postConfigUpdate, setLayout],
+    [layout, postConfigUpdate, setLayout],
   );
 
   const handleMapPlaceChange = useCallback(
@@ -478,11 +478,7 @@ function PostEditorContent({
     ? canEditTranslationSource
     : activeEditLocale.canEditActiveLocale;
   const currentLocaleCanEdit =
-    canEdit &&
-    currentLocalePermission &&
-    hasLocaleRoomMutationAuthority &&
-    !permissionRevocation.blocked &&
-    !revision.reloadRequired;
+    canEdit && currentLocalePermission && hasLocaleRoomMutationAuthority && !permissionRevocation.blocked;
   const hasLocaleEditPermission = activeEditLocale.isSourceLocaleReady ? currentLocaleCanEdit : false;
   const canEditLocaleDocument = isLocaleDocumentEditable({
     activeLocale: roomLocale,
@@ -493,7 +489,7 @@ function PostEditorContent({
   const canMutateSourceDocument = canEditLocaleDocument && activeEditLocale.isSourceLocale;
   const canEditSharedTaxonomy = canMutateSourceDocument && isSynced;
   const editorAiTarget = resolvePostEditorAiTarget({ postId, roomLocale, canEditLocaleDocument });
-  const canRestoreCurrentVersion = canRestoreVersion && !permissionRevocation.blocked && !revision.reloadRequired;
+  const canRestoreCurrentVersion = canRestoreVersion && !permissionRevocation.blocked;
   const bodyPreviewLoading = activeEditLocale.contentPreviewLoading;
   const showEditorChrome = !isZenMode;
   const hasParticipantActions = canAddAuthor || canRemoveAuthor || canManageCollaborators;
@@ -525,10 +521,6 @@ function PostEditorContent({
             : undefined
         }
       >
-        {recoverySnapshot && !revision.reloadRequired ? (
-          <PostRecoveryNotice snapshot={recoverySnapshot} draft={recoveryDraft} />
-        ) : null}
-        <EditorSaveRecoveryNotice document={`post:${postId}`} />
         <PostEditorHeaderSection
           postId={postId}
           title={displayedTitle}
@@ -757,40 +749,9 @@ function PostEditorContent({
           loading={lifecycle.schedule.isPending}
         />
 
-        <EditorReloadRequiredDialog
-          opened={revision.reloadRequired || postConfigUpdate.conflict}
-          onReload={() => window.location.reload()}
-          recoveryAction={
-            revision.reloadRequired || postConfigUpdate.conflict ? (
-              <Stack gap="sm">
-                {revision.reloadRequired && recoverySnapshot ? (
-                  <PostRecoveryNotice snapshot={recoverySnapshot} draft={recoveryDraft} />
-                ) : null}
-                {postConfigUpdate.conflict ? (
-                  <PostConfigConflictRecoveryNotice
-                    getDocumentRecovery={getPostConfigDocumentRecovery}
-                    copy={
-                      pendingPostConfigPatch
-                        ? {
-                            postId,
-                            expectedConfigurationRevision: postConfigUpdate.configurationRevision,
-                            patch: pendingPostConfigPatch,
-                          }
-                        : null
-                    }
-                  />
-                ) : null}
-              </Stack>
-            ) : undefined
-          }
-        />
+        <PostPermissionRevokedDialog opened={permissionRevocation.revoked} postId={postId} />
 
-        <PostPermissionRevokedDialog
-          opened={permissionRevocation.revoked && !revision.reloadRequired}
-          postId={postId}
-        />
-
-        <PostSessionExpiredDialog opened={permissionRevocation.sessionExpired && !revision.reloadRequired} />
+        <PostSessionExpiredDialog opened={permissionRevocation.sessionExpired} />
 
         <CreatePlaceModal
           opened={createPlaceOpened}

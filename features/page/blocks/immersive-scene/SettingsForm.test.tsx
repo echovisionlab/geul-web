@@ -7,7 +7,19 @@ import { MantineProvider } from '@mantine/core';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { MESH_OPTIMIZATION_METHOD_DRACO } from '@/lib/types/mesh-optimization';
 import { ImmersiveSceneSettingsForm, type ImmersiveSceneUploadControls } from './SettingsForm';
-import type { ImmersiveSceneProps } from './schema';
+import {
+  parseImmersiveSceneConfig,
+  serializeImmersiveSceneCopyUnits,
+  serializeImmersiveSceneVisualUnits,
+  type ImmersiveSceneProps,
+  type ImmersiveSceneUnit,
+} from './schema';
+import {
+  IMMERSIVE_SCENE_UNIT_MUTATION_PROP,
+  type ImmersiveSceneUnitMutation,
+  moveImmersiveSceneUnit,
+  replaceImmersiveSceneUnit,
+} from './settings-model';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -40,6 +52,37 @@ vi.mock('./DescriptionEditor', () => ({
 
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
+
+function applyUnitMutation(
+  current: Partial<ImmersiveSceneProps>,
+  mutation: ImmersiveSceneUnitMutation,
+  ownership: 'shared' | 'locale',
+): Partial<ImmersiveSceneProps> {
+  const currentUnits = parseImmersiveSceneConfig(current).units;
+  let units: ImmersiveSceneUnit[];
+  switch (mutation.kind) {
+    case 'patch':
+      units = replaceImmersiveSceneUnit(currentUnits, mutation.unitId, mutation.patch);
+      break;
+    case 'insert':
+      units = [...currentUnits, mutation.unit];
+      break;
+    case 'remove':
+      units = currentUnits.filter((unit) => unit.id !== mutation.unitId);
+      break;
+    case 'move': {
+      const index = currentUnits.findIndex((unit) => unit.id === mutation.unitId);
+      units = index < 0 ? currentUnits : moveImmersiveSceneUnit(currentUnits, index, mutation.direction);
+      break;
+    }
+  }
+  return {
+    ...current,
+    ...(ownership === 'shared'
+      ? { unitsJson: serializeImmersiveSceneVisualUnits(units) }
+      : { copyJson: serializeImmersiveSceneCopyUnits(units) }),
+  };
+}
 
 function installDomMocks() {
   Object.defineProperty(window, 'matchMedia', {
@@ -94,9 +137,15 @@ function ControlledSettingsForm({
   const applyPatch = (
     patch: Record<string, unknown>,
     notify: ((nextPatch: Record<string, unknown>) => void) | undefined,
+    ownership: 'shared' | 'locale',
   ) => {
     notify?.(patch);
-    setCurrentProps((current) => ({ ...current, ...patch }) as Partial<ImmersiveSceneProps>);
+    setCurrentProps((current) => {
+      const mutation = patch[IMMERSIVE_SCENE_UNIT_MUTATION_PROP] as ImmersiveSceneUnitMutation | undefined;
+      return mutation
+        ? applyUnitMutation(current, mutation, ownership)
+        : ({ ...current, ...patch } as Partial<ImmersiveSceneProps>);
+    });
   };
 
   return (
@@ -105,8 +154,8 @@ function ControlledSettingsForm({
         sectionId="section-1"
         pageId="page-1"
         props={currentProps}
-        updateSharedProps={(patch) => applyPatch(patch, onSharedUpdate)}
-        updateLocalizedProps={(patch) => applyPatch(patch, onLocalizedUpdate)}
+        updateSharedProps={(patch) => applyPatch(patch, onSharedUpdate, 'shared')}
+        updateLocalizedProps={(patch) => applyPatch(patch, onLocalizedUpdate, 'locale')}
         uploadControls={uploadControls}
         panel={panel}
       />
@@ -348,14 +397,10 @@ describe('ImmersiveSceneSettingsForm', () => {
     if (meshScaleInput) {
       await changeInputValue(meshScaleInput, '1.8');
     }
-    const meshScaleUpdate = [...updateSharedProps.mock.calls]
-      .reverse()
-      .map(([value]) => value as { unitsJson?: string })
-      .find((value) => JSON.parse(value.unitsJson ?? '[]')[0]?.scale === '1.8');
-    expect(JSON.parse(meshScaleUpdate?.unitsJson ?? '[]')[0]).toMatchObject({
-      id: 'unit-1',
-      scale: '1.8',
-    });
+    const meshScaleMutation = updateSharedProps.mock.calls
+      .map(([value]) => value[IMMERSIVE_SCENE_UNIT_MUTATION_PROP] as ImmersiveSceneUnitMutation | undefined)
+      .find((mutation) => mutation?.kind === 'patch' && mutation.patch.scale === '1.8');
+    expect(meshScaleMutation).toEqual({ kind: 'patch', unitId: 'unit-1', patch: { scale: '1.8' } });
 
     const particleSizeControl = document.querySelector<HTMLElement>(
       '[data-testid="immersive-scene-particle-size-unit-1"]',
@@ -370,26 +415,18 @@ describe('ImmersiveSceneSettingsForm', () => {
     if (particleSizeInput) {
       await changeInputValue(particleSizeInput, '0.6');
     }
-    const serializedUpdate = [...updateSharedProps.mock.calls]
-      .reverse()
-      .map(([value]) => value as { unitsJson?: string })
-      .find((value) => value.unitsJson);
-    expect(JSON.parse(serializedUpdate?.unitsJson ?? '[]')[0]).toMatchObject({
-      id: 'unit-1',
-      particleSize: '0.6',
-    });
+    const particleSizeMutation = updateSharedProps.mock.calls.at(-1)?.[0][
+      IMMERSIVE_SCENE_UNIT_MUTATION_PROP
+    ] as ImmersiveSceneUnitMutation;
+    expect(particleSizeMutation).toEqual({ kind: 'patch', unitId: 'unit-1', patch: { particleSize: '0.6' } });
 
     if (particleSizeInput) {
       await changeInputValue(particleSizeInput, '4.0');
     }
-    const decimalUpdate = [...updateSharedProps.mock.calls]
-      .reverse()
-      .map(([value]) => value as { unitsJson?: string })
-      .find((value) => value.unitsJson);
-    expect(JSON.parse(decimalUpdate?.unitsJson ?? '[]')[0]).toMatchObject({
-      id: 'unit-1',
-      particleSize: '4.0',
-    });
+    const decimalMutation = updateSharedProps.mock.calls.at(-1)?.[0][
+      IMMERSIVE_SCENE_UNIT_MUTATION_PROP
+    ] as ImmersiveSceneUnitMutation;
+    expect(decimalMutation).toEqual({ kind: 'patch', unitId: 'unit-1', patch: { particleSize: '4.0' } });
 
     await act(async () => {
       openingButton?.click();
@@ -445,17 +482,12 @@ describe('ImmersiveSceneSettingsForm', () => {
       await Promise.resolve();
     });
 
-    const sharedUnits = JSON.parse(updateSharedProps.mock.calls.at(-1)?.[0].unitsJson) as Array<
-      Record<string, unknown>
-    >;
-    expect(sharedUnits).toEqual([
-      expect.objectContaining({ id: 'unit-1', meshOffsetY: '1.4' }),
-      expect.objectContaining({ id: 'unit-2', meshOffsetY: '0.1' }),
-    ]);
-    expect(JSON.parse(updateLocalizedProps.mock.calls.at(-1)?.[0].copyJson)).toEqual([
-      { id: 'unit-1', title: 'Opening', text: 'Localized opening' },
-      { id: 'unit-2', title: 'Middle', text: 'Localized middle' },
-    ]);
+    expect(updateSharedProps.mock.calls.at(-1)?.[0][IMMERSIVE_SCENE_UNIT_MUTATION_PROP]).toEqual({
+      kind: 'patch',
+      unitId: 'unit-2',
+      patch: { meshOffsetY: '0.1' },
+    });
+    expect(updateLocalizedProps).not.toHaveBeenCalled();
   });
 
   it('omits the optional mesh height offset after resetting it to zero', async () => {
@@ -493,7 +525,11 @@ describe('ImmersiveSceneSettingsForm', () => {
       await Promise.resolve();
     });
 
-    expect(JSON.parse(updateSharedProps.mock.calls.at(-1)?.[0].unitsJson)[0]).not.toHaveProperty('meshOffsetY');
+    expect(updateSharedProps.mock.calls.at(-1)?.[0][IMMERSIVE_SCENE_UNIT_MUTATION_PROP]).toEqual({
+      kind: 'patch',
+      unitId: 'unit-1',
+      patch: { meshOffsetY: undefined },
+    });
   });
 
   it('labels unit copy as a description and preserves multiline input', async () => {
@@ -526,13 +562,11 @@ describe('ImmersiveSceneSettingsForm', () => {
 
     await changeTextareaValue(descriptionInput!, 'First line\nSecond line\n\nSeparate paragraph');
 
-    expect(JSON.parse(updateLocalizedProps.mock.calls.at(-1)?.[0].copyJson)).toEqual([
-      {
-        id: 'unit-1',
-        title: 'Opening',
-        text: 'First line\nSecond line\n\nSeparate paragraph',
-      },
-    ]);
+    expect(updateLocalizedProps.mock.calls.at(-1)?.[0][IMMERSIVE_SCENE_UNIT_MUTATION_PROP]).toEqual({
+      kind: 'patch',
+      unitId: 'unit-1',
+      patch: { text: 'First line\nSecond line\n\nSeparate paragraph' },
+    });
   });
 
   it('persists rich unit attribution only in shared visual state', async () => {
@@ -586,33 +620,19 @@ describe('ImmersiveSceneSettingsForm', () => {
 
     await changeTextareaValue(attributionInput!, 'Created by [Artist B](https://example.com/artists/b)');
 
-    const sharedUpdate = [...updateSharedProps.mock.calls]
-      .reverse()
-      .map(([value]) => value as { unitsJson?: string })
-      .find((value) => value.unitsJson);
-    const sharedUnits = JSON.parse(sharedUpdate?.unitsJson ?? '[]') as Array<Record<string, unknown>>;
-    expect(sharedUnits.map((unit) => unit.attribution)).toEqual([
-      'Created by [Artist B](https://example.com/artists/b)',
-      undefined,
-      'Created by [Artist C](https://example.com/artists/c)',
-    ]);
-
-    for (const [localizedUpdate] of updateLocalizedProps.mock.calls) {
-      const localizedUnits = JSON.parse(String(localizedUpdate.copyJson)) as Array<Record<string, unknown>>;
-      expect(localizedUnits).toEqual([
-        { id: 'unit-1', title: 'Opening', text: 'Localized opening' },
-        { id: 'unit-2', title: 'Middle', text: 'Localized middle' },
-        { id: 'unit-3', title: 'Ending', text: 'Localized ending' },
-      ]);
-      expect(localizedUnits.every((unit) => !Object.hasOwn(unit, 'attribution'))).toBe(true);
-    }
+    expect(updateSharedProps.mock.calls.at(-1)?.[0][IMMERSIVE_SCENE_UNIT_MUTATION_PROP]).toEqual({
+      kind: 'patch',
+      unitId: 'unit-1',
+      patch: { attribution: 'Created by [Artist B](https://example.com/artists/b)' },
+    });
+    expect(updateLocalizedProps).not.toHaveBeenCalled();
 
     await changeTextareaValue(attributionInput!, '');
-    const clearedUpdate = [...updateSharedProps.mock.calls]
-      .reverse()
-      .map(([value]) => value as { unitsJson?: string })
-      .find((value) => value.unitsJson);
-    expect(JSON.parse(clearedUpdate?.unitsJson ?? '[]')[0]).not.toHaveProperty('attribution');
+    expect(updateSharedProps.mock.calls.at(-1)?.[0][IMMERSIVE_SCENE_UNIT_MUTATION_PROP]).toEqual({
+      kind: 'patch',
+      unitId: 'unit-1',
+      patch: { attribution: '' },
+    });
   });
 
   it('persists unit names and ordering only in shared visual state', async () => {
@@ -657,24 +677,24 @@ describe('ImmersiveSceneSettingsForm', () => {
     expect(nameInput).toBeTruthy();
     await changeInputValue(nameInput!, 'Introduction');
 
-    let visualUnits = JSON.parse(updateSharedProps.mock.calls.at(-1)?.[0].unitsJson);
-    expect(visualUnits[0]).toEqual(expect.objectContaining({ id: 'unit-1', name: 'Introduction' }));
-    expect(JSON.parse(updateLocalizedProps.mock.calls.at(-1)?.[0].copyJson)).toEqual([
-      { id: 'unit-1', title: 'Hello', text: 'Opening copy' },
-      { id: 'unit-2', title: 'Bye', text: 'Final copy' },
-    ]);
+    expect(updateSharedProps.mock.calls.at(-1)?.[0][IMMERSIVE_SCENE_UNIT_MUTATION_PROP]).toEqual({
+      kind: 'patch',
+      unitId: 'unit-1',
+      patch: { name: 'Introduction' },
+    });
+    expect(updateLocalizedProps).not.toHaveBeenCalled();
 
     await act(async () => {
       findButtonByAriaLabel('blockEditor.actions.moveUnitDown')?.click();
       await Promise.resolve();
     });
 
-    visualUnits = JSON.parse(updateSharedProps.mock.calls.at(-1)?.[0].unitsJson);
-    expect(visualUnits.map((unit: { id: string }) => unit.id)).toEqual(['unit-2', 'unit-1']);
-    expect(JSON.parse(updateLocalizedProps.mock.calls.at(-1)?.[0].copyJson)).toEqual([
-      expect.objectContaining({ id: 'unit-2', title: 'Bye' }),
-      expect.objectContaining({ id: 'unit-1', title: 'Hello' }),
-    ]);
+    expect(updateSharedProps.mock.calls.at(-1)?.[0][IMMERSIVE_SCENE_UNIT_MUTATION_PROP]).toEqual({
+      kind: 'move',
+      unitId: 'unit-1',
+      direction: 1,
+    });
+    expect(updateLocalizedProps).not.toHaveBeenCalled();
   });
 
   it('reports upload progress, cancels each uploader, and accepts the same mesh file again', async () => {
@@ -1219,31 +1239,16 @@ describe('ImmersiveSceneSettingsForm', () => {
       unitId: 'unit-1',
       candidateId: 'candidate-1',
     });
-    expect(updateSharedProps).toHaveBeenCalledWith({
-      unitsJson: expect.any(String),
-    });
-    expect(JSON.parse(updateSharedProps.mock.calls.at(-1)?.[0].unitsJson)).toEqual([
-      expect.objectContaining({
-        id: 'unit-1',
+    expect(updateSharedProps.mock.calls.at(-1)?.[0][IMMERSIVE_SCENE_UNIT_MUTATION_PROP]).toEqual({
+      kind: 'patch',
+      unitId: 'unit-1',
+      patch: expect.objectContaining({
         meshOptimizationCandidateId: 'candidate-1',
         meshOptimizationSourceFileId: 'source-file',
         meshOptimizationFileId: 'optimized-file',
       }),
-    ]);
-    expect(updateSharedProps.mock.calls.at(-1)?.[0].unitsJson).not.toContain('/media/');
-    expect(updateSharedProps.mock.calls.at(-1)?.[0].unitsJson).not.toContain('FileSize');
-    expect(updateSharedProps.mock.calls.at(-1)?.[0].unitsJson).not.toContain('TriangleCount');
-    expect(updateSharedProps.mock.calls.at(-1)?.[0].unitsJson).not.toContain('meshOptimizationMethod');
-    expect(updateSharedProps.mock.calls.at(-1)?.[0].unitsJson).not.toContain('meshOptimizationTargetRatioPercent');
-    expect(updateLocalizedProps).toHaveBeenCalledWith({
-      copyJson: JSON.stringify([
-        {
-          id: 'unit-1',
-          title: 'Written title',
-          text: 'Written text',
-        },
-      ]),
     });
+    expect(updateLocalizedProps).not.toHaveBeenCalled();
   });
 
   it('restores a selected optimized GLB from durable unit fields', async () => {

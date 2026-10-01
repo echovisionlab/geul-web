@@ -47,6 +47,7 @@ beforeEach(() => {
   setFieldMock.mockReset();
 
   useFormEditorContextMock.mockReturnValue({
+    isSynced: true,
     fields: {
       title: 'Source form',
       schema: {
@@ -90,6 +91,25 @@ afterEach(() => {
 });
 
 describe('FormEditor', () => {
+  it('keeps the builder read-only until the canonical room has synced', () => {
+    const context = useFormEditorContextMock();
+    useFormEditorContextMock.mockReturnValue({ ...context, isSynced: false });
+
+    render();
+
+    const props = formBuilderMock.mock.lastCall?.[0] as {
+      mode: string;
+      onChange: (schema: { id: string; steps: [] }) => void;
+    };
+    expect(props.mode).toBe('readOnly');
+
+    act(() => {
+      props.onChange({ id: 'form-1', steps: [] });
+    });
+
+    expect(setFieldMock).not.toHaveBeenCalled();
+  });
+
   it('opens an existing target in translation mode with the resident locale schema', () => {
     render();
 

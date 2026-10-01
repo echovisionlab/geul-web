@@ -12,33 +12,72 @@ export type BlockRoomLocaleMetadataUpdate =
   | { type: 'work'; locale: string; sourceTitle?: string; summary?: string | null }
   | { type: 'program-event'; locale: string; title?: string; summary?: string | null }
   | { type: 'artist' | 'label' | 'terms-history' | 'privacy-history'; locale: string; title?: string }
-  | { type: 'release'; locale: string; title?: string; creditNotes?: readonly { creditId: string; note: string }[] }
+  | {
+      type: 'release';
+      locale: string;
+      title?: string;
+      creditNotes?: readonly { creditId: string; note: string }[];
+      observed?: { creditNotes?: readonly { creditId: string; note: string }[] };
+    }
   | { type: 'campaign' | 'email-template'; locale: string; subject?: string };
 
-export type BlockRoomDocumentMetadataUpdate =
+type ArtistDocumentMetadataScalars = {
+  type: 'artist';
+  realName?: string | null;
+  countryCode?: string | null;
+  website?: string | null;
+  slug?: string | null;
+  parentArtistId?: string | null;
+};
+
+type ArtistDocumentMetadataCollections =
+  | { socialLinks?: undefined; labelIds?: undefined; observed?: undefined }
   | {
-      type: 'artist';
-      realName?: string | null;
-      countryCode?: string | null;
-      website?: string | null;
-      socialLinks?: Readonly<Record<string, string>>;
-      slug?: string | null;
-      labelIds?: readonly string[];
-      parentArtistId?: string | null;
+      socialLinks: Readonly<Record<string, string>>;
+      labelIds?: undefined;
+      observed: { socialLinks: Readonly<Record<string, string>> };
     }
   | {
-      type: 'label';
-      slug?: string | null;
-      countryCode?: string | null;
-      website?: string | null;
-      socialLinks?: Readonly<Record<string, string>>;
-      parentLabelId?: string | null;
+      socialLinks?: undefined;
+      labelIds: readonly string[];
+      observed: { labelIds: readonly string[] };
+    }
+  | {
+      socialLinks: Readonly<Record<string, string>>;
+      labelIds: readonly string[];
+      observed: { socialLinks: Readonly<Record<string, string>>; labelIds: readonly string[] };
     };
 
-export type BlockRoomDocumentMetadataPatch<T extends BlockRoomDocumentMetadataUpdate['type']> = Omit<
-  Extract<BlockRoomDocumentMetadataUpdate, { type: T }>,
-  'type'
+type LabelDocumentMetadataScalars = {
+  type: 'label';
+  slug?: string | null;
+  countryCode?: string | null;
+  website?: string | null;
+  parentLabelId?: string | null;
+};
+
+type LabelDocumentMetadataCollections =
+  | { socialLinks?: undefined; observed?: undefined }
+  | { socialLinks: Readonly<Record<string, string>>; observed: { socialLinks: Readonly<Record<string, string>> } };
+
+export type BlockRoomDocumentMetadataUpdate =
+  | (ArtistDocumentMetadataScalars & ArtistDocumentMetadataCollections)
+  | (LabelDocumentMetadataScalars & LabelDocumentMetadataCollections);
+
+type RemoveMetadataType<T> = T extends { type: string } ? Omit<T, 'type'> : never;
+
+export type BlockRoomDocumentMetadataPatch<T extends BlockRoomDocumentMetadataUpdate['type']> = RemoveMetadataType<
+  Extract<BlockRoomDocumentMetadataUpdate, { type: T }>
 >;
+
+export type PostTaxonomyMetadataPatch =
+  | { categoryIds: readonly string[]; tagIds?: never; observed: { categoryIds: readonly string[] } }
+  | { categoryIds?: never; tagIds: readonly string[]; observed: { tagIds: readonly string[] } }
+  | {
+      categoryIds: readonly string[];
+      tagIds: readonly string[];
+      observed: { categoryIds: readonly string[]; tagIds: readonly string[] };
+    };
 
 export class BlockRoomMetadataError extends Error {
   constructor(
@@ -77,7 +116,7 @@ export function updateBlockRoomLocaleMetadata(
 
 export function updatePostBlockRoomDocumentMetadata(
   protocol: BlockRoomProtocolTransport,
-  update: { categoryIds?: readonly string[]; tagIds?: readonly string[] },
+  update: PostTaxonomyMetadataPatch,
   signal?: AbortSignal,
 ): Promise<BlockRoomMetadataAck> {
   return updateMetadata(protocol, 'document', update, signal);

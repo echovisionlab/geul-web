@@ -10,7 +10,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import TranslationSettingsPage from './page';
+import TranslationSettingsPage, { buildSettingsUpdateMutation } from './page';
 
 const api = vi.hoisted(() => ({
   getTranslationSettings: vi.fn(),
@@ -388,6 +388,7 @@ async function changeSelect(label: string, value: string) {
 }
 
 beforeEach(() => {
+  api.updateTranslationSettings.mockReset();
   api.getTranslationSettings.mockResolvedValue({
     settings,
     generationEnabled: false,
@@ -397,6 +398,7 @@ beforeEach(() => {
     locales: [
       { code: 'en', displayName: 'English' },
       { code: 'ko', displayName: 'Korean' },
+      { code: 'ja', displayName: 'Japanese' },
     ],
   });
   api.listTranslationProviders.mockResolvedValue({
@@ -434,6 +436,17 @@ afterEach(() => {
 
 describe('TranslationSettingsPage', () => {
   it('renders provider state and preserves the source default and exact protected terms', async () => {
+    api.getTranslationSettings.mockResolvedValueOnce({
+      settings,
+      generationEnabled: false,
+      generationDisabledReason: 'translation generation requires an active translation provider',
+    });
+    api.getTranslationSettings.mockResolvedValue({
+      settings: { ...settings, defaultLocale: 'ko' },
+      generationEnabled: false,
+      generationDisabledReason: 'translation generation requires an active translation provider',
+    });
+    api.updateTranslationSettings.mockResolvedValueOnce({ settings: { ...settings, defaultLocale: 'ko' } });
     renderPage();
     await settle();
 
@@ -452,7 +465,9 @@ describe('TranslationSettingsPage', () => {
     await settle();
 
     expect(api.updateTranslationSettings).toHaveBeenCalledWith({
-      settings: { ...settings, defaultLocale: 'ko' },
+      settings: { defaultLocale: 'ko', protectedTerms: [] },
+      updateMask: { paths: ['default_locale'] },
+      baseSettings: settings,
     });
     expect(api.getTranslationSettings.mock.calls.length).toBeGreaterThan(initialSettingsQueries);
   });
@@ -467,7 +482,71 @@ describe('TranslationSettingsPage', () => {
     expect(api.updateTranslationSettings).not.toHaveBeenCalled();
   });
 
+  it('keeps a dirty field on refresh while adopting a remote change to an untouched field', async () => {
+    renderPage();
+    await settle();
+    await changeSelect('translationSettingsPage.fields.defaultLocale.label', 'ko');
+
+    act(() => {
+      queryClient!.setQueryData(['translation-settings'], {
+        settings: { defaultLocale: 'en', protectedTerms: ['Remote term'] },
+        generationEnabled: false,
+      });
+    });
+    await settle();
+
+    expect(selectByLabel('translationSettingsPage.fields.defaultLocale.label').value).toBe('ko');
+    expect(inputByLabel('translationSettingsPage.fields.protectedTerms.label').value).toBe('Remote term');
+    expect(buttonByText('translationSettingsPage.actions.save').disabled).toBe(false);
+  });
+
+  it('adopts the latest server value when the same field changed remotely', async () => {
+    renderPage();
+    await settle();
+    await changeSelect('translationSettingsPage.fields.defaultLocale.label', 'ko');
+
+    act(() => {
+      queryClient!.setQueryData(['translation-settings'], {
+        settings: { defaultLocale: 'ja', protectedTerms: settings.protectedTerms },
+        generationEnabled: false,
+      });
+    });
+    await settle();
+
+    expect(selectByLabel('translationSettingsPage.fields.defaultLocale.label').value).toBe('ja');
+    expect(buttonByText('translationSettingsPage.actions.save').disabled).toBe(true);
+  });
+
+  it('preserves input changed while the settings save is pending', async () => {
+    let resolveSave: ((value: { settings: typeof settings }) => void) | undefined;
+    api.updateTranslationSettings.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveSave = resolve;
+      }),
+    );
+    const submittedSettings = { ...settings, defaultLocale: 'ko' };
+    api.getTranslationSettings.mockResolvedValue({ settings: submittedSettings, generationEnabled: false });
+
+    renderPage();
+    await settle();
+    await changeSelect('translationSettingsPage.fields.defaultLocale.label', 'ko');
+    await act(async () => buttonByText('translationSettingsPage.actions.save').click());
+    await changeInput('translationSettingsPage.fields.protectedTerms.label', 'Photoshop, draft term');
+
+    await act(async () => {
+      resolveSave?.({ settings: submittedSettings });
+      await Promise.resolve();
+    });
+    await settle();
+
+    expect(inputByLabel('translationSettingsPage.fields.protectedTerms.label').value).toBe('Photoshop, draft term');
+    expect(buttonByText('translationSettingsPage.actions.save').disabled).toBe(false);
+  });
+
   it('trims and exact-deduplicates protected terms while preserving case in the update payload', async () => {
+    api.updateTranslationSettings.mockResolvedValueOnce({
+      settings: { defaultLocale: 'en', protectedTerms: ['Photoshop', 'photoshop', 'React Native'] },
+    });
     renderPage();
     await settle();
 
@@ -482,10 +561,31 @@ describe('TranslationSettingsPage', () => {
 
     expect(api.updateTranslationSettings).toHaveBeenCalledWith({
       settings: {
-        defaultLocale: 'en',
+        defaultLocale: '',
         protectedTerms: ['Photoshop', 'photoshop', 'React Native'],
       },
+      updateMask: { paths: ['protected_terms'] },
+      baseSettings: settings,
     });
+  });
+
+  it('builds independent touched-field patches from two stale settings forms', () => {
+    const baseline = { defaultLocale: 'en', protectedTerms: ['Observed term', 'Remove me'] };
+    const localeEdit = buildSettingsUpdateMutation(baseline, {
+      defaultLocale: 'ko',
+      protectedTerms: baseline.protectedTerms,
+    });
+    const termsEdit = buildSettingsUpdateMutation(baseline, {
+      defaultLocale: 'en',
+      protectedTerms: ['Observed term', 'Local addition'],
+    });
+
+    expect(localeEdit?.paths).toEqual(['default_locale']);
+    expect(termsEdit?.paths).toEqual(['protected_terms']);
+    expect(termsEdit?.baseline).toEqual(baseline);
+    expect(buildSettingsUpdateMutation(baseline, { defaultLocale: 'en', protectedTerms: [] })?.paths).toEqual([
+      'protected_terms',
+    ]);
   });
 
   it('shows bounded authorization and internal errors without exposing raw RPC details', async () => {

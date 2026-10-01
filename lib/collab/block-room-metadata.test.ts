@@ -27,16 +27,44 @@ describe('block-room metadata updates', () => {
     expect(protocol.updateMetadata).toHaveBeenCalledWith('locale', { title: '이벤트 제목', summary: null }, undefined);
   });
 
+  it('sends a Release credit-note observed baseline with the desired note values', async () => {
+    const protocol = protocolTransport();
+
+    await updateBlockRoomLocaleMetadata(protocol, {
+      type: 'release',
+      locale: 'ko',
+      creditNotes: [{ creditId: 'credit-1', note: 'Updated note' }],
+      observed: { creditNotes: [{ creditId: 'credit-1', note: 'Original note' }] },
+    });
+
+    expect(protocol.updateMetadata).toHaveBeenCalledWith(
+      'locale',
+      {
+        creditNotes: [{ creditId: 'credit-1', note: 'Updated note' }],
+        observed: { creditNotes: [{ creditId: 'credit-1', note: 'Original note' }] },
+      },
+      undefined,
+    );
+  });
+
   it('keeps document metadata adapters unchanged', async () => {
     const protocol = protocolTransport();
 
-    await updatePostBlockRoomDocumentMetadata(protocol, { categoryIds: ['category-id'] });
+    await updatePostBlockRoomDocumentMetadata(protocol, {
+      categoryIds: ['category-id'],
+      observed: { categoryIds: [] },
+    });
     await updateBlockRoomDocumentMetadata(protocol, {
       type: 'artist',
       realName: 'Artist Name',
     });
 
-    expect(protocol.updateMetadata).toHaveBeenNthCalledWith(1, 'document', { categoryIds: ['category-id'] }, undefined);
+    expect(protocol.updateMetadata).toHaveBeenNthCalledWith(
+      1,
+      'document',
+      { categoryIds: ['category-id'], observed: { categoryIds: [] } },
+      undefined,
+    );
     expect(protocol.updateMetadata).toHaveBeenNthCalledWith(2, 'document', { realName: 'Artist Name' }, undefined);
   });
 });

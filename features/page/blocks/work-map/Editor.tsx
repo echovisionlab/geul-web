@@ -96,9 +96,9 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
 
   const updateProp = useCallback(
     (key: keyof WorkMapProps, value: string) => {
-      updateProps({ ...props, [key]: value });
+      updateProps({ [key]: value });
     },
-    [props, updateProps],
+    [updateProps],
   );
 
   const updateZoomBounds = useCallback(
@@ -109,7 +109,6 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
       });
 
       updateProps({
-        ...props,
         minZoom: String(bounds.minZoom),
         maxZoom: String(bounds.maxZoom),
       });

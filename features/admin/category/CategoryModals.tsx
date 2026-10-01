@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Text } from '@mantine/core';
@@ -25,17 +25,38 @@ export function CategoryModals() {
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [editLoading, setEditLoading] = useState(false);
+  const editBaselineRef = useRef<{ id: string; name: string; description: string } | null>(null);
 
   // Delete state
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Sync edit form with editing category
   useEffect(() => {
-    if (editingCategory) {
-      setEditName(editingCategory.name);
-      setEditDescription(editingCategory.description || '');
+    if (!editingCategory) {
+      editBaselineRef.current = null;
+      return;
     }
-  }, [editingCategory]);
+
+    const nextBaseline = {
+      id: editingCategory.id,
+      name: editingCategory.name,
+      description: editingCategory.description || '',
+    };
+    const baseline = editBaselineRef.current;
+    if (!baseline || baseline.id !== nextBaseline.id) {
+      editBaselineRef.current = nextBaseline;
+      setEditName(nextBaseline.name);
+      setEditDescription(nextBaseline.description);
+      return;
+    }
+    if (editLoading || editName !== baseline.name || editDescription !== baseline.description) {
+      return;
+    }
+
+    editBaselineRef.current = nextBaseline;
+    setEditName(nextBaseline.name);
+    setEditDescription(nextBaseline.description);
+  }, [editingCategory, editDescription, editLoading, editName]);
 
   // Reset create form when closed
   useEffect(() => {
@@ -68,12 +89,25 @@ export function CategoryModals() {
     if (!editingCategory) {
       return;
     }
+    const baseline = editBaselineRef.current;
+    if (!baseline || baseline.id !== editingCategory.id) {
+      return;
+    }
+    const changes: { name?: string; description?: string | null } = {};
+    if (editName !== baseline.name) {
+      changes.name = editName;
+    }
+    if (editDescription !== baseline.description) {
+      changes.description = editDescription || null;
+    }
+    if (Object.keys(changes).length === 0) {
+      closeEdit();
+      return;
+    }
+
     setEditLoading(true);
     try {
-      const result = await updateCategoryAction(editingCategory.id, {
-        name: editName,
-        description: editDescription || undefined,
-      });
+      const result = await updateCategoryAction(editingCategory.id, changes);
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
         return;

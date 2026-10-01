@@ -28,19 +28,22 @@ import {
   createWorkCreditGroupAction,
   deleteWorkCreditGroupAction,
   getWorkGroupsWithCreditsAction,
+  moveWorkCreditItemAction,
   removeWorkCreditAction,
   searchArtistsForCreditAction,
   updateWorkCreditAction,
   updateWorkCreditGroupAction,
 } from '@/lib/actions/work';
 import { useWorkMeta } from '@/lib/contexts/WorkMetaContext';
+import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
 import { useSearchCombobox } from '@/lib/hooks/useSearchCombobox';
 import { useSortableSensors } from '@/lib/hooks/useSortableSensors';
 import { searchMembers } from '@/lib/queries/user-browser';
 import type { CreditOrderItem, FlatDisplayItem } from '@/lib/types/work/credit';
+import { WorkCreditSaveCoordinator } from './credits/work-credit-save-coordinator';
 import {
   buildFlatList,
-  flatListToOrder,
+  creditMoveIntentFromDropPlan,
   getItemId,
   planCreditDrop,
   type CreditDragData,
@@ -120,18 +123,84 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
 
   const { creditsVersion, incrementCreditsVersion, creditOrder, setCreditOrder } = useWorkMeta();
   const prevVersionRef = useRef(creditsVersion);
+  const creditOrderRef = useRef(creditOrder);
+  const moveSequenceRef = useRef(0);
+  const pendingMoveCountRef = useRef(0);
+  const moveQueueRef = useRef(Promise.resolve());
+  const creditSaveCoordinatorRef = useRef<WorkCreditSaveCoordinator | null>(null);
+  const [pendingMoveCount, setPendingMoveCount] = useState(0);
+  const [creditGroupOverrides, setCreditGroupOverrides] = useState<Record<string, string | null>>({});
+  const creditGroupOverridesRef = useRef<Record<string, string | null>>({});
 
   const queryClient = useQueryClient();
+  const creditsQueryKey = useMemo(() => ['work', 'groupsWithCredits', workId] as const, [workId]);
+  useEffect(() => {
+    const coordinator = new WorkCreditSaveCoordinator(`work:${workId}`);
+    creditSaveCoordinatorRef.current = coordinator;
+    return () => {
+      if (creditSaveCoordinatorRef.current === coordinator) {
+        creditSaveCoordinatorRef.current = null;
+      }
+      coordinator.dispose();
+    };
+  }, [workId]);
+  const trackCreditOperation = useCallback(<T,>(operation: () => Promise<T>, isSuccessful: (value: T) => boolean) => {
+    const coordinator = creditSaveCoordinatorRef.current;
+    if (coordinator) {
+      return coordinator.track(operation, isSuccessful);
+    }
+    try {
+      return Promise.resolve(operation()).then(
+        (value) => {
+          try {
+            return isSuccessful(value);
+          } catch {
+            return false;
+          }
+        },
+        () => false,
+      );
+    } catch {
+      return Promise.resolve(false);
+    }
+  }, []);
+  const trackCreditMutation = useCallback(
+    <T extends { error?: string }>(operation: () => Promise<T>) =>
+      trackCreditOperation(operation, (result) => !result.error),
+    [trackCreditOperation],
+  );
+  const setLocalCreditOrder = useCallback(
+    (order: CreditOrderItem[]) => {
+      creditOrderRef.current = order;
+      setCreditOrder(order);
+    },
+    [setCreditOrder],
+  );
+  const setLocalCreditGroupOverrides = useCallback((overrides: Record<string, string | null>) => {
+    creditGroupOverridesRef.current = overrides;
+    setCreditGroupOverrides(overrides);
+  }, []);
+  const announceCreditsChange = useCallback(() => {
+    publishEditorEntityChange(`work:${workId}`);
+  }, [workId]);
+
+  useEffect(() => {
+    creditOrderRef.current = creditOrder;
+  }, [creditOrder]);
 
   useEffect(() => {
     if (prevVersionRef.current !== creditsVersion) {
       prevVersionRef.current = creditsVersion;
-      queryClient.invalidateQueries({ queryKey: ['work', 'groupsWithCredits', workId] });
+      queryClient.invalidateQueries({ queryKey: creditsQueryKey });
     }
-  }, [creditsVersion, workId, queryClient]);
+  }, [creditsVersion, creditsQueryKey, queryClient]);
+
+  useEditorEntityChanges(`work:${workId}`, () => {
+    void queryClient.invalidateQueries({ queryKey: creditsQueryKey });
+  });
 
   const { data, isLoading } = useQuery({
-    queryKey: ['work', 'groupsWithCredits', workId],
+    queryKey: creditsQueryKey,
     queryFn: () => getWorkGroupsWithCreditsAction(workId),
   });
 
@@ -146,10 +215,10 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
       name: g.name,
       sortOrder: g.sortOrder,
       credits: data.credits
-        .filter((c) => c.groupId === g.id)
+        .filter((c) => (Object.hasOwn(creditGroupOverrides, c.id) ? creditGroupOverrides[c.id] : c.groupId) === g.id)
         .map((c) => ({
           id: c.id,
-          groupId: c.groupId,
+          groupId: Object.hasOwn(creditGroupOverrides, c.id) ? creditGroupOverrides[c.id] : c.groupId,
           name: c.name,
           creditRole: c.creditRole,
           sortOrder: c.sortOrder,
@@ -157,35 +226,33 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
           member: c.member,
         })),
     }));
-  }, [data]);
+  }, [data, creditGroupOverrides]);
 
   const ungrouped = useMemo(() => {
     if (!data?.credits) {
       return [];
     }
     return data.credits
-      .filter((c) => !c.groupId)
+      .filter((c) => !(Object.hasOwn(creditGroupOverrides, c.id) ? creditGroupOverrides[c.id] : c.groupId))
       .map((c) => ({
         id: c.id,
-        groupId: c.groupId,
+        groupId: Object.hasOwn(creditGroupOverrides, c.id) ? creditGroupOverrides[c.id] : c.groupId,
         name: c.name,
         creditRole: c.creditRole,
         sortOrder: c.sortOrder,
         artist: c.artist,
         member: c.member,
       }));
-  }, [data]);
+  }, [data, creditGroupOverrides]);
 
   const flatList = useMemo(() => buildFlatList(creditOrder, groups, ungrouped), [creditOrder, groups, ungrouped]);
 
   useEffect(() => {
-    if (!isLoading && data) {
-      const currentOrder = flatListToOrder(flatList);
-      if (creditOrder.length === 0 && currentOrder.length > 0) {
-        setCreditOrder(currentOrder);
-      }
+    if (!isLoading && data && !data.error && pendingMoveCount === 0 && pendingMoveCountRef.current === 0) {
+      setLocalCreditOrder(data.order);
+      setLocalCreditGroupOverrides({});
     }
-  }, [isLoading, data, flatList, creditOrder.length, setCreditOrder]);
+  }, [isLoading, data, pendingMoveCount, setLocalCreditOrder, setLocalCreditGroupOverrides]);
 
   const { data: artistResults = [], isFetching: artistSearchFetching } = useQuery({
     queryKey: ['work', 'searchArtistsForCredit', workId, debouncedSearch],
@@ -216,10 +283,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
       }
       notifications.show({ message: t('notifications.groupCreated'), color: 'green' });
       queryClient.invalidateQueries({ queryKey: ['work', 'groupsWithCredits', workId] });
-      if (result.group) {
-        const newOrder: CreditOrderItem[] = [...creditOrder, { type: 'group', id: result.group.id }];
-        setCreditOrder(newOrder);
-      }
+      announceCreditsChange();
       incrementCreditsVersion();
       setNewGroupName('');
     },
@@ -234,6 +298,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['work', 'groupsWithCredits', workId] });
+      announceCreditsChange();
       incrementCreditsVersion();
     },
   });
@@ -243,15 +308,14 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
     onMutate: (groupId) => {
       setDeletingGroupId(groupId);
     },
-    onSuccess: (result, groupId) => {
+    onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
         return;
       }
       notifications.show({ message: t('notifications.groupDeleted'), color: 'yellow' });
       queryClient.invalidateQueries({ queryKey: ['work', 'groupsWithCredits', workId] });
-      const newOrder = creditOrder.filter((item) => !(item.type === 'group' && item.id === groupId));
-      setCreditOrder(newOrder);
+      announceCreditsChange();
       incrementCreditsVersion();
     },
     onSettled: () => {
@@ -274,39 +338,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
       }
       notifications.show({ message: t('notifications.creditAdded'), color: 'green' });
       queryClient.invalidateQueries({ queryKey: ['work', 'groupsWithCredits', workId] });
-
-      if (result.creditId) {
-        const newItem: CreditOrderItem = {
-          type: 'credit',
-          id: result.creditId,
-          creditType: searchType,
-        };
-
-        let newOrder: CreditOrderItem[];
-        if (selectedGroupId) {
-          const groupIndex = creditOrder.findIndex((item) => item.type === 'group' && item.id === selectedGroupId);
-          if (groupIndex !== -1) {
-            let insertIndex = groupIndex + 1;
-            while (insertIndex < creditOrder.length && creditOrder[insertIndex].type === 'credit') {
-              const creditId = creditOrder[insertIndex].id;
-              const belongsToGroup = groups
-                .find((g) => g.id === selectedGroupId)
-                ?.credits.some((c) => c.id === creditId);
-              if (!belongsToGroup) {
-                break;
-              }
-              insertIndex++;
-            }
-            newOrder = [...creditOrder.slice(0, insertIndex), newItem, ...creditOrder.slice(insertIndex)];
-          } else {
-            newOrder = [...creditOrder, newItem];
-          }
-        } else {
-          newOrder = [...creditOrder, newItem];
-        }
-
-        setCreditOrder(newOrder);
-      }
+      announceCreditsChange();
       incrementCreditsVersion();
       reset();
       setCreditRole('');
@@ -318,15 +350,14 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
     onMutate: (creditId) => {
       setRemovingId(creditId);
     },
-    onSuccess: (result, creditId) => {
+    onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
         return;
       }
       notifications.show({ message: t('notifications.creditRemoved'), color: 'yellow' });
       queryClient.invalidateQueries({ queryKey: ['work', 'groupsWithCredits', workId] });
-      const newOrder = creditOrder.filter((item) => !(item.type === 'credit' && item.id === creditId));
-      setCreditOrder(newOrder);
+      announceCreditsChange();
       incrementCreditsVersion();
     },
     onSettled: () => {
@@ -335,14 +366,15 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
   });
 
   const updateCredit = useMutation({
-    mutationFn: (data: { creditId: string; groupId?: string | null; creditRole?: string | null }) =>
-      updateWorkCreditAction(data.creditId, { groupId: data.groupId, creditRole: data.creditRole }),
+    mutationFn: (data: { creditId: string; creditRole?: string | null }) =>
+      updateWorkCreditAction(data.creditId, { creditRole: data.creditRole }),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['work', 'groupsWithCredits', workId] });
+      announceCreditsChange();
       incrementCreditsVersion();
     },
     onSettled: () => {
@@ -352,8 +384,96 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
 
   const handleEditRole = (creditId: string, creditRole: string | null) => {
     setUpdatingRoleId(creditId);
-    updateCredit.mutate({ creditId, creditRole });
+    void trackCreditMutation(() => updateCredit.mutateAsync({ creditId, creditRole }));
   };
+
+  const adoptMoveOrder = useCallback(
+    (entries: NonNullable<Awaited<ReturnType<typeof moveWorkCreditItemAction>>['order']>) => {
+      const currentCreditTypes = new Map(
+        creditOrderRef.current.flatMap((item) => (item.type === 'credit' ? [[item.id, item.creditType] as const] : [])),
+      );
+      const nextOrder: CreditOrderItem[] = entries.map((entry) =>
+        entry.kind === 'group'
+          ? { type: 'group', id: entry.id }
+          : { type: 'credit', id: entry.id, creditType: currentCreditTypes.get(entry.id) ?? 'name' },
+      );
+      const nextGroups: Record<string, string | null> = {};
+      for (const entry of entries) {
+        if (entry.kind === 'credit') {
+          nextGroups[entry.id] = entry.groupId ?? null;
+        }
+      }
+      setLocalCreditOrder(nextOrder);
+      setLocalCreditGroupOverrides(nextGroups);
+    },
+    [setLocalCreditGroupOverrides, setLocalCreditOrder],
+  );
+
+  const enqueueMoveIntent = useCallback(
+    (
+      intent: NonNullable<ReturnType<typeof creditMoveIntentFromDropPlan>>,
+      optimisticOrder: CreditOrderItem[] | undefined,
+      groupChange: { creditId: string; groupId: string | null } | undefined,
+    ) => {
+      const sequence = ++moveSequenceRef.current;
+      pendingMoveCountRef.current++;
+      setPendingMoveCount(pendingMoveCountRef.current);
+      if (optimisticOrder) {
+        setLocalCreditOrder(optimisticOrder);
+      }
+      if (groupChange) {
+        setLocalCreditGroupOverrides({
+          ...creditGroupOverridesRef.current,
+          [groupChange.creditId]: groupChange.groupId,
+        });
+      }
+
+      const run = moveQueueRef.current.then(async () => {
+        const result = await moveWorkCreditItemAction(workId, intent);
+        if (result.error || !result.order) {
+          notifications.show({ message: result.error ?? tCommon('notifications.saveFailed'), color: 'red' });
+          void queryClient.invalidateQueries({ queryKey: creditsQueryKey });
+          return false;
+        }
+        announceCreditsChange();
+        incrementCreditsVersion();
+        if (sequence === moveSequenceRef.current) {
+          adoptMoveOrder(result.order);
+        }
+        return true;
+      });
+      const queuedRun = run
+        .catch((error: unknown) => {
+          notifications.show({
+            message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
+            color: 'red',
+          });
+          void queryClient.invalidateQueries({ queryKey: creditsQueryKey });
+          return false;
+        })
+        .finally(() => {
+          pendingMoveCountRef.current = Math.max(0, pendingMoveCountRef.current - 1);
+          setPendingMoveCount(pendingMoveCountRef.current);
+        });
+      moveQueueRef.current = queuedRun.then(() => undefined);
+      void trackCreditOperation(
+        () => queuedRun,
+        (succeeded) => succeeded,
+      );
+    },
+    [
+      adoptMoveOrder,
+      announceCreditsChange,
+      creditsQueryKey,
+      incrementCreditsVersion,
+      queryClient,
+      setLocalCreditGroupOverrides,
+      setLocalCreditOrder,
+      trackCreditOperation,
+      tCommon,
+      workId,
+    ],
+  );
 
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
@@ -368,56 +488,62 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
     (event: DragEndEvent) => {
       setActiveItem(null);
       const { active, over } = event;
-      if (!over) {
+      if (!over || !active.data.current) {
         return;
       }
 
+      const activeData = active.data.current as CreditDragData;
       const plan = planCreditDrop({
         flatList,
         activeId: active.id,
         overId: over.id,
-        activeData: active.data.current as CreditDragData | undefined,
+        activeData,
         overData: over.data.current as CreditDropData | undefined,
       });
-      if (!plan) {
+      if (!plan || (!plan.order && !plan.groupChange)) {
         return;
       }
-      if (plan.groupChange) {
-        updateCredit.mutate(plan.groupChange);
+      const intent = creditMoveIntentFromDropPlan(plan, activeData, flatList);
+      if (!intent) {
+        return;
       }
-      if (plan.order) {
-        setCreditOrder(plan.order);
-      }
-      incrementCreditsVersion();
+      enqueueMoveIntent(intent, plan.order, plan.groupChange);
     },
-    [flatList, setCreditOrder, incrementCreditsVersion, updateCredit],
+    [enqueueMoveIntent, flatList],
   );
 
   const handleAddCredit = (id: string) => {
-    addCredit.mutate({
-      groupId: selectedGroupId,
-      ...(searchType === 'artist' ? { artistId: id } : { memberId: id }),
-      creditRole: creditRole.trim() || null,
-    });
+    void trackCreditMutation(() =>
+      addCredit.mutateAsync({
+        groupId: selectedGroupId,
+        ...(searchType === 'artist' ? { artistId: id } : { memberId: id }),
+        creditRole: creditRole.trim() || null,
+      }),
+    );
   };
 
   const handleAddByName = () => {
     if (!creditName.trim()) {
       return;
     }
-    addCredit.mutate({
-      groupId: selectedGroupId,
-      name: creditName.trim(),
-      creditRole: creditRole.trim() || null,
+    void trackCreditMutation(() =>
+      addCredit.mutateAsync({
+        groupId: selectedGroupId,
+        name: creditName.trim(),
+        creditRole: creditRole.trim() || null,
+      }),
+    ).then((saved) => {
+      if (saved) {
+        setCreditName('');
+      }
     });
-    setCreditName('');
   };
 
   const handleCreateGroup = () => {
     if (!newGroupName.trim()) {
       return;
     }
-    createGroup.mutate(newGroupName.trim());
+    void trackCreditMutation(() => createGroup.mutateAsync(newGroupName.trim()));
   };
 
   const groupSelectData = [
@@ -595,8 +721,12 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
                     key={`group-${item.group.id}`}
                     group={item.group}
                     canEdit={canEdit}
-                    onEdit={(groupId, name) => updateGroup.mutate({ groupId, name })}
-                    onDelete={(groupId) => deleteGroup.mutate(groupId)}
+                    onEdit={(groupId, name) => {
+                      void trackCreditMutation(() => updateGroup.mutateAsync({ groupId, name }));
+                    }}
+                    onDelete={(groupId) => {
+                      void trackCreditMutation(() => deleteGroup.mutateAsync(groupId));
+                    }}
                     isDeleting={deletingGroupId === item.group.id}
                   />
                 ) : (
@@ -605,7 +735,9 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
                     credit={item.credit}
                     groupId={item.groupId}
                     canEdit={canEdit}
-                    onRemove={(id) => removeCredit.mutate(id)}
+                    onRemove={(id) => {
+                      void trackCreditMutation(() => removeCredit.mutateAsync(id));
+                    }}
                     onEditRole={handleEditRole}
                     isRemoving={removingId === item.credit.id}
                     isUpdating={updatingRoleId === item.credit.id}

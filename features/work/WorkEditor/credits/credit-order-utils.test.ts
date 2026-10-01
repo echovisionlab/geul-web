@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { FlatDisplayItem, WorkCreditGroup, WorkCreditWithDetails } from '@/lib/types/work/credit';
-import { planCreditDrop } from './credit-order-utils';
+import { creditMoveIntentFromDropPlan, planCreditDrop } from './credit-order-utils';
 
 const group = (id: string): WorkCreditGroup => ({ id, workId: 'work', name: id, sortOrder: 0 });
 const credit = (id: string, groupId: string | null): WorkCreditWithDetails => ({
@@ -62,5 +62,70 @@ describe('planCreditDrop', () => {
 
     expect(plan?.order?.map((item) => item.id)).toEqual(['a', 'u1', 'a1']);
     expect(plan?.groupChange).toEqual({ creditId: 'a1', groupId: null });
+  });
+
+  it('turns a group drag into stable anchors outside its child section', () => {
+    const flatList = [
+      groupItem('a'),
+      creditItem('a1', 'a'),
+      groupItem('b'),
+      creditItem('b1', 'b'),
+      creditItem('u1', null),
+    ];
+    const activeData = { type: 'group' as const, groupId: 'a' };
+    const plan = planCreditDrop({
+      flatList,
+      activeId: 'group-a',
+      overId: 'credit-b1',
+      activeData,
+      overData: { type: 'credit', groupId: 'b' },
+    });
+
+    expect(creditMoveIntentFromDropPlan(plan!, activeData, flatList)).toEqual({
+      kind: 'group',
+      itemId: 'a',
+      after: { kind: 'credit', id: 'b1' },
+      before: { kind: 'credit', id: 'u1' },
+    });
+  });
+
+  it('turns a credit group change into one move with the target peer anchor', () => {
+    const flatList = [groupItem('a'), creditItem('a1', 'a'), creditItem('u1', null)];
+    const activeData = { type: 'credit' as const, creditId: 'u1', groupId: null };
+    const plan = planCreditDrop({
+      flatList,
+      activeId: 'credit-u1',
+      overId: 'group-a',
+      activeData,
+      overData: { type: 'group', groupId: 'a' },
+    });
+
+    expect(creditMoveIntentFromDropPlan(plan!, activeData, flatList)).toEqual({
+      kind: 'credit',
+      itemId: 'u1',
+      targetGroupId: 'a',
+      after: { kind: 'credit', id: 'a1' },
+      before: undefined,
+    });
+  });
+
+  it('keeps stable neighbor anchors for a credit move within its group', () => {
+    const flatList = [groupItem('a'), creditItem('a1', 'a'), creditItem('a2', 'a'), creditItem('a3', 'a')];
+    const activeData = { type: 'credit' as const, creditId: 'a1', groupId: 'a' };
+    const plan = planCreditDrop({
+      flatList,
+      activeId: 'credit-a1',
+      overId: 'credit-a3',
+      activeData,
+      overData: { type: 'credit', groupId: 'a' },
+    });
+
+    expect(creditMoveIntentFromDropPlan(plan!, activeData, flatList)).toEqual({
+      kind: 'credit',
+      itemId: 'a1',
+      targetGroupId: 'a',
+      after: { kind: 'credit', id: 'a3' },
+      before: undefined,
+    });
   });
 });

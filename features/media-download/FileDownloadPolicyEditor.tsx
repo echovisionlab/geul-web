@@ -15,8 +15,10 @@ import type {
   FileDownloadPage,
   FileDownloadPageInput,
   FileDownloadPolicyModel,
+  FileDownloadPolicyObservedState,
   FileDownloadPolicyTarget,
 } from '@/lib/types/file-download-access';
+import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
 import {
   enqueueFileDownloadPolicyWrite,
   runAfterFileDownloadPolicyWrites,
@@ -31,6 +33,7 @@ export interface FileDownloadPolicyEditorAdapter {
     target: FileDownloadPolicyTarget,
     audience: FileDownloadAudience,
     audienceSegmentIds: string[],
+    observedPolicy: FileDownloadPolicyObservedState,
   ) => Promise<FileDownloadActionResult<FileDownloadPolicyModel>>;
 }
 
@@ -61,8 +64,10 @@ interface PendingPolicySave {
   sequence: number;
   targetKey: string;
   target: FileDownloadPolicyTarget;
+  observedPolicy: FileDownloadPolicyObservedState;
   audience: FileDownloadAudience;
   audienceSegmentIds: string[];
+  retryCount: number;
 }
 
 interface ActivePolicySave {
@@ -97,6 +102,76 @@ function policyMatchesTarget(policy: FileDownloadPolicyModel, target: FileDownlo
     policy.referencePath === target.referencePath &&
     policy.fileId === target.expectedFileId
   );
+}
+
+function policyChangeDocument(target: FileDownloadPolicyTarget): string {
+  return `file-policy:${target.expectedFileId}:${target.entityType}:${target.entityId}:${target.blockId ?? ''}:${target.referencePath ?? ''}`;
+}
+
+function sortedPolicySegmentIds(policy: FileDownloadPolicyModel): string[] {
+  return policy.audienceSegments.map((segment) => segment.id).sort();
+}
+
+function applySegmentSelectionDelta(current: string[], observed: string[], desired: string[]): string[] {
+  const next = new Set(current);
+  const observedSet = new Set(observed);
+  const desiredSet = new Set(desired);
+  for (const id of observedSet) {
+    if (!desiredSet.has(id)) {
+      next.delete(id);
+    }
+  }
+  for (const id of desiredSet) {
+    if (!observedSet.has(id)) {
+      next.add(id);
+    }
+  }
+  return [...next].sort();
+}
+
+function rebasePendingSave(
+  pending: PendingPolicySave,
+  active: PendingPolicySave,
+  acknowledged: FileDownloadPolicyObservedState,
+): PendingPolicySave {
+  const audience = pending.audience === active.audience ? acknowledged.audience : pending.audience;
+  const audienceSegmentIds = applySegmentSelectionDelta(
+    acknowledged.audienceSegmentIds,
+    active.audience === 'restricted' ? active.audienceSegmentIds : [],
+    pending.audience === 'restricted' ? pending.audienceSegmentIds : [],
+  );
+  return {
+    ...pending,
+    observedPolicy: {
+      audience: acknowledged.audience,
+      audienceSegmentIds: acknowledged.audienceSegmentIds,
+    },
+    audience,
+    audienceSegmentIds: audience === 'restricted' ? audienceSegmentIds : [],
+  };
+}
+
+function rebasePendingSaveOntoCurrent(pending: PendingPolicySave, current: FileDownloadPolicyModel): PendingPolicySave {
+  const currentState = {
+    audience: current.audience,
+    audienceSegmentIds: sortedPolicySegmentIds(current),
+  } satisfies FileDownloadPolicyObservedState;
+  const audience = pending.audience === pending.observedPolicy.audience ? currentState.audience : pending.audience;
+  const audienceSegmentIds =
+    audience === 'restricted'
+      ? applySegmentSelectionDelta(
+          currentState.audienceSegmentIds,
+          pending.observedPolicy.audienceSegmentIds,
+          pending.audienceSegmentIds,
+        )
+      : [];
+  return {
+    ...pending,
+    observedPolicy: currentState,
+    audience,
+    audienceSegmentIds,
+    retryCount: pending.retryCount + 1,
+  };
 }
 
 export function FileDownloadPolicyEditor({
@@ -137,6 +212,7 @@ export function FileDownloadPolicyEditor({
   const [loadedTargetKey, setLoadedTargetKey] = useState('');
   const [policyLoaded, setPolicyLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [targetStale, setTargetStale] = useState(false);
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
   const activeTargetKeyRef = useRef(targetKey);
@@ -149,11 +225,98 @@ export function FileDownloadPolicyEditor({
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingSaveRef = useRef<PendingPolicySave | null>(null);
   const activeSaveRef = useRef<ActivePolicySave | null>(null);
+  const peerRefreshRequestedRef = useRef(false);
+  const peerRefreshInFlightRef = useRef(false);
+  const ignoreOwnPeerHintSequenceRef = useRef<number | null>(null);
+  const targetStaleRef = useRef(false);
+  const blockedSaveSequenceRef = useRef<number | null>(null);
+  const hydratingRef = useRef(false);
+  const initialPolicyReadStartedRef = useRef(false);
   const persistedPolicyRef = useRef<{
     audience: FileDownloadAudience;
     audienceSegments: AudienceSegmentSummary[];
   } | null>(null);
   activeTargetKeyRef.current = targetKey;
+
+  const refreshPolicyFromPeer = useCallback(async () => {
+    if (!enabled || targetStaleRef.current || activeSaveRef.current || pendingSaveRef.current) {
+      peerRefreshRequestedRef.current = true;
+      return;
+    }
+    if (peerRefreshInFlightRef.current) {
+      peerRefreshRequestedRef.current = true;
+      return;
+    }
+
+    peerRefreshRequestedRef.current = false;
+    peerRefreshInFlightRef.current = true;
+    const requestSequence = saveSequenceRef.current;
+    const requestTargetKey = targetKey;
+    try {
+      const result = await adapter.loadPolicy(target);
+      if (activeTargetKeyRef.current !== requestTargetKey) {
+        return;
+      }
+      if (requestSequence !== saveSequenceRef.current || activeSaveRef.current || pendingSaveRef.current) {
+        peerRefreshRequestedRef.current = true;
+        return;
+      }
+      if (!result.data) {
+        setError(t('loadError'));
+        return;
+      }
+      if (!policyMatchesTarget(result.data, target)) {
+        targetStaleRef.current = true;
+        setTargetStale(true);
+        setError(tReloadRequired('message'));
+        return;
+      }
+
+      const snapshot = {
+        audience: result.data.audience,
+        audienceSegmentIds: sortedPolicySegmentIds(result.data),
+      };
+      persistedPolicyRef.current = {
+        audience: snapshot.audience,
+        audienceSegments: result.data.audienceSegments,
+      };
+      setAudience(snapshot.audience);
+      setSelectedAudienceSegmentIds(snapshot.audienceSegmentIds);
+      setSegments((current) => mergeSegments(current, result.data!.audienceSegments));
+      setAvailableSegmentIds((current) =>
+        Array.from(new Set([...current, ...result.data!.audienceSegments.map((segment) => segment.id)])),
+      );
+      setError('');
+      setSaved(false);
+    } catch {
+      if (activeTargetKeyRef.current === requestTargetKey) {
+        setError(t('loadError'));
+      }
+    } finally {
+      peerRefreshInFlightRef.current = false;
+      if (peerRefreshRequestedRef.current && !activeSaveRef.current && !pendingSaveRef.current) {
+        void refreshPolicyFromPeer();
+      }
+    }
+  }, [adapter, enabled, t, target, targetKey, tReloadRequired]);
+
+  useEditorEntityChanges(policyChangeDocument(target), () => {
+    const ownPublishSequence = ignoreOwnPeerHintSequenceRef.current;
+    ignoreOwnPeerHintSequenceRef.current = null;
+    if (ownPublishSequence === saveSequenceRef.current) {
+      return;
+    }
+    if (hydratingRef.current) {
+      if (initialPolicyReadStartedRef.current) {
+        peerRefreshRequestedRef.current = true;
+      }
+      return;
+    }
+    peerRefreshRequestedRef.current = true;
+    if (!activeSaveRef.current && !pendingSaveRef.current) {
+      void refreshPolicyFromPeer();
+    }
+  });
 
   const showDetachedSaveFailure = useCallback(
     (staleTarget: boolean) => {
@@ -174,6 +337,13 @@ export function FileDownloadPolicyEditor({
   });
 
   useEffect(() => {
+    targetStaleRef.current = false;
+    blockedSaveSequenceRef.current = null;
+    peerRefreshRequestedRef.current = false;
+    setTargetStale(false);
+    persistedPolicyRef.current = null;
+    hydratingRef.current = enabled;
+    initialPolicyReadStartedRef.current = false;
     segmentPaginationGenerationRef.current += 1;
     activeSegmentPaginationRef.current = null;
     loadedSegmentSearchesRef.current.clear();
@@ -202,6 +372,7 @@ export function FileDownloadPolicyEditor({
       setLoadedTargetKey(targetKey);
       setPolicyLoaded(false);
       setLoading(false);
+      hydratingRef.current = false;
       persistedPolicyRef.current = null;
       return;
     }
@@ -217,7 +388,10 @@ export function FileDownloadPolicyEditor({
     setSaved(false);
     setPolicyLoaded(false);
     Promise.all([
-      runAfterFileDownloadPolicyWrites(targetKey, () => adapter.loadPolicy(target)),
+      runAfterFileDownloadPolicyWrites(targetKey, () => {
+        initialPolicyReadStartedRef.current = true;
+        return adapter.loadPolicy(target);
+      }),
       adapter.loadSegments({ page: 1, pageSize: SEGMENTS_PAGE_SIZE }),
     ])
       .then(([policyResult, segmentResult]) => {
@@ -229,6 +403,8 @@ export function FileDownloadPolicyEditor({
           return;
         }
         if (!policyMatchesTarget(policyResult.data, target)) {
+          targetStaleRef.current = true;
+          setTargetStale(true);
           setError(tReloadRequired('message'));
           return;
         }
@@ -262,11 +438,16 @@ export function FileDownloadPolicyEditor({
         if (!cancelled) {
           setLoadedTargetKey(targetKey);
           setLoading(false);
+          hydratingRef.current = false;
+          if (peerRefreshRequestedRef.current && !activeSaveRef.current && !pendingSaveRef.current) {
+            void refreshPolicyFromPeer();
+          }
         }
       });
 
     return () => {
       cancelled = true;
+      hydratingRef.current = false;
       segmentPaginationGenerationRef.current += 1;
       activeSegmentPaginationRef.current = null;
       if (segmentSearchTimerRef.current) {
@@ -287,7 +468,12 @@ export function FileDownloadPolicyEditor({
       }
 
       const detachedSave = enqueueFileDownloadPolicyWrite(pendingSave.targetKey, () =>
-        adapter.savePolicy(pendingSave.target, pendingSave.audience, pendingSave.audienceSegmentIds),
+        adapter.savePolicy(
+          pendingSave.target,
+          pendingSave.audience,
+          pendingSave.audienceSegmentIds,
+          pendingSave.observedPolicy,
+        ),
       );
       pendingSaveRef.current = null;
       void detachedSave
@@ -296,11 +482,13 @@ export function FileDownloadPolicyEditor({
             showDetachedSaveFailure(result.errorCode === 'staleTarget');
           } else if (!policyMatchesTarget(result.data, pendingSave.target)) {
             showDetachedSaveFailure(true);
+          } else {
+            publishEditorEntityChange(policyChangeDocument(pendingSave.target));
           }
         })
         .catch(() => showDetachedSaveFailure(false));
     };
-  }, [adapter, enabled, showDetachedSaveFailure, t, target, targetKey, tReloadRequired]);
+  }, [adapter, enabled, refreshPolicyFromPeer, showDetachedSaveFailure, t, target, targetKey, tReloadRequired]);
 
   const loadSegmentsForSearch = (rawSearch: string) => {
     const search = rawSearch.trim();
@@ -425,6 +613,9 @@ export function FileDownloadPolicyEditor({
     ) {
       return;
     }
+    if (request.sequence === blockedSaveSequenceRef.current) {
+      return;
+    }
 
     pendingSaveRef.current = null;
     const saveToken = Symbol('file-download-policy-save');
@@ -436,7 +627,12 @@ export function FileDownloadPolicyEditor({
     activeSaveRef.current = activeSave;
     activeSave.promise = enqueueFileDownloadPolicyWrite(request.targetKey, async () => {
       try {
-        const result = await adapter.savePolicy(request.target, request.audience, request.audienceSegmentIds);
+        const result = await adapter.savePolicy(
+          request.target,
+          request.audience,
+          request.audienceSegmentIds,
+          request.observedPolicy,
+        );
         const detached =
           activeSaveRef.current?.token !== saveToken ||
           request.generation !== saveGenerationRef.current ||
@@ -450,6 +646,57 @@ export function FileDownloadPolicyEditor({
           return;
         }
         if (!result.data) {
+          if (result.errorCode === 'staleTarget') {
+            const retryRequest = pendingSaveRef.current ?? request;
+            try {
+              const currentResult = await adapter.loadPolicy(request.target);
+              const refreshDetached =
+                activeSaveRef.current?.token !== saveToken ||
+                request.generation !== saveGenerationRef.current ||
+                request.targetKey !== activeTargetKeyRef.current;
+              if (refreshDetached) {
+                return;
+              }
+              if (!currentResult.data || !policyMatchesTarget(currentResult.data, request.target)) {
+                pendingSaveRef.current = null;
+                targetStaleRef.current = true;
+                setTargetStale(true);
+                setError(tReloadRequired('message'));
+                return;
+              }
+              const currentPolicy = currentResult.data;
+              const rebased = rebasePendingSaveOntoCurrent(retryRequest, currentPolicy);
+              persistedPolicyRef.current = {
+                audience: currentPolicy.audience,
+                audienceSegments: currentPolicy.audienceSegments,
+              };
+              setSegments((current) => mergeSegments(current, currentPolicy.audienceSegments));
+              setAvailableSegmentIds((current) =>
+                Array.from(new Set([...current, ...currentPolicy.audienceSegments.map((segment) => segment.id)])),
+              );
+              if (retryRequest.retryCount >= 1) {
+                pendingSaveRef.current = rebased;
+                blockedSaveSequenceRef.current = rebased.sequence;
+                setAudience(rebased.audience);
+                setSelectedAudienceSegmentIds(rebased.audienceSegmentIds);
+                setError(t('saveError'));
+                return;
+              }
+              pendingSaveRef.current = rebased;
+              blockedSaveSequenceRef.current = null;
+              setAudience(rebased.audience);
+              setSelectedAudienceSegmentIds(rebased.audienceSegmentIds);
+              setError('');
+              return;
+            } catch {
+              pendingSaveRef.current = retryRequest;
+              blockedSaveSequenceRef.current = retryRequest.sequence;
+              targetStaleRef.current = true;
+              setTargetStale(true);
+              setError(tReloadRequired('message'));
+              return;
+            }
+          }
           if (request.sequence !== saveSequenceRef.current) {
             return;
           }
@@ -459,13 +706,20 @@ export function FileDownloadPolicyEditor({
             setSelectedAudienceSegmentIds(persistedPolicy.audienceSegments.map((segment) => segment.id));
             setSegments((current) => mergeSegments(current, persistedPolicy.audienceSegments));
           }
-          setError(result.errorCode === 'staleTarget' ? tReloadRequired('message') : t('saveError'));
+          setError(t('saveError'));
           return;
         }
         if (!policyMatchesTarget(result.data, request.target)) {
+          targetStaleRef.current = true;
+          setTargetStale(true);
+          pendingSaveRef.current = null;
           setError(tReloadRequired('message'));
           return;
         }
+        const acknowledgedPolicy = {
+          audience: result.data.audience,
+          audienceSegmentIds: sortedPolicySegmentIds(result.data),
+        } satisfies FileDownloadPolicyObservedState;
         persistedPolicyRef.current = {
           audience: result.data.audience,
           audienceSegments: result.data.audienceSegments,
@@ -474,7 +728,24 @@ export function FileDownloadPolicyEditor({
         setAvailableSegmentIds((current) =>
           Array.from(new Set([...current, ...result.data!.audienceSegments.map((segment) => segment.id)])),
         );
+        ignoreOwnPeerHintSequenceRef.current = saveSequenceRef.current;
+        publishEditorEntityChange(policyChangeDocument(request.target));
+        const pending = pendingSaveRef.current;
+        if (
+          pending &&
+          pending.generation === request.generation &&
+          pending.targetKey === request.targetKey &&
+          pending.sequence !== request.sequence
+        ) {
+          const rebasedPending = rebasePendingSave(pending, request, acknowledgedPolicy);
+          pendingSaveRef.current = rebasedPending;
+          setAudience(rebasedPending.audience);
+          setSelectedAudienceSegmentIds(rebasedPending.audienceSegmentIds);
+          setSaved(false);
+          return;
+        }
         if (request.sequence !== saveSequenceRef.current) {
+          peerRefreshRequestedRef.current = true;
           return;
         }
         setAudience(result.data.audience);
@@ -521,6 +792,9 @@ export function FileDownloadPolicyEditor({
             request.targetKey === activeTargetKeyRef.current
           ) {
             setSaving(false);
+            if (peerRefreshRequestedRef.current && !targetStaleRef.current) {
+              void refreshPolicyFromPeer();
+            }
           }
         }
       }
@@ -528,7 +802,12 @@ export function FileDownloadPolicyEditor({
   }
 
   const queueSave = (nextAudience: FileDownloadAudience, nextAudienceSegmentIds: string[]) => {
-    if (!enabled) {
+    if (!enabled || targetStaleRef.current) {
+      return;
+    }
+
+    const persistedPolicy = persistedPolicyRef.current;
+    if (!persistedPolicy) {
       return;
     }
 
@@ -538,8 +817,13 @@ export function FileDownloadPolicyEditor({
       sequence: requestSequence,
       targetKey,
       target,
+      observedPolicy: {
+        audience: persistedPolicy.audience,
+        audienceSegmentIds: persistedPolicy.audienceSegments.map((segment) => segment.id).sort(),
+      },
       audience: nextAudience,
       audienceSegmentIds: nextAudience === 'restricted' ? nextAudienceSegmentIds : [],
+      retryCount: 0,
     };
     setError('');
     setSaved(false);
@@ -586,7 +870,7 @@ export function FileDownloadPolicyEditor({
       getCollapsedSummaryLabel={(count) => t('additionalSelected', { count })}
       size="xs"
       w="100%"
-      disabled={!enabled || loading}
+      disabled={!enabled || loading || targetStale}
       rightSection={saving || segmentsLoadingMore ? <Loader size={10} /> : undefined}
       onChange={(values) => {
         const addedValue = values.find((value) => !selectedAccessValues.includes(value));

@@ -26,10 +26,13 @@ export async function createTermsVersionAction(): Promise<{
   }
 }
 
-export async function deleteTermsVersionAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function deleteTermsVersionAction(
+  id: string,
+  expectedRevision: string,
+): Promise<{ success?: boolean; error?: string }> {
   try {
     const client = await createTermsClient();
-    await client.deleteTerms({ id });
+    await client.deleteTerms({ id, expectedRevision });
     revalidateTermsAfterCommit('/admin/terms');
     return { success: true };
   } catch (err) {
@@ -46,12 +49,14 @@ export async function deleteTermsVersionAction(id: string): Promise<{ success?: 
 export async function scheduleTermsAction(
   id: string,
   effectiveFrom: Date,
+  expectedRevision: string,
 ): Promise<{ success?: boolean; error?: string }> {
   try {
     const client = await createTermsClient();
     await client.scheduleTerms({
       id,
       effectiveFrom: timestampFromDate(effectiveFrom),
+      expectedRevision,
     });
     revalidatePath('/admin/terms');
     return { success: true };
@@ -86,10 +91,13 @@ export async function cancelTermsScheduleAction(id: string): Promise<{ success?:
   }
 }
 
-export async function activateTermsNowAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function activateTermsNowAction(
+  id: string,
+  expectedRevision: string,
+): Promise<{ success?: boolean; error?: string }> {
   try {
     const client = await createTermsClient();
-    await client.activateTermsNow({ id });
+    await client.activateTermsNow({ id, expectedRevision });
     revalidatePath('/admin/terms');
     return { success: true };
   } catch (err) {

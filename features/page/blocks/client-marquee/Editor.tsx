@@ -29,9 +29,9 @@ function ClientMarqueeSettingsForm({ props, updateProps }: ClientMarqueeSettings
 
   const updateProp = useCallback(
     (key: string, value: string) => {
-      updateProps({ ...props, [key]: value });
+      updateProps({ [key]: value });
     },
-    [props, updateProps],
+    [updateProps],
   );
 
   return (

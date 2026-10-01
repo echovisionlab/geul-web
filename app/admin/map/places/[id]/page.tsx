@@ -13,7 +13,6 @@ import { PlaceEditor } from '@/features/place/PlaceEditor';
 import { deleteMapPlaceAction, getMapPlaceAction, updateMapPlaceAction } from '@/lib/actions/map-place';
 import {
   displayMapPlaceMemberNickname,
-  type AddressComponents,
   type MapPlaceMemberSummary,
   type PlaceEditorFormState,
 } from '@/lib/types/map-place/model';
@@ -74,31 +73,15 @@ export default function EditPlacePage({ params }: PageProps) {
   });
 
   const updatePlace = useMutation({
-    mutationFn: (data: {
-      id: string;
-      name: string;
-      address: string;
-      lat: number;
-      lng: number;
-      googlePlaceId: string | null;
-      addressComponents: AddressComponents | null;
-    }) =>
+    mutationFn: (data: { id: string; updates: Partial<PlaceEditorFormState> }) =>
       updateMapPlaceAction(data.id, {
-        name: data.name,
-        address: data.address,
-        lat: data.lat,
-        lng: data.lng,
-        google_place_id: data.googlePlaceId,
-        address_components: data.addressComponents,
+        name: data.updates.name,
+        address: data.updates.address,
+        lat: data.updates.lat,
+        lng: data.updates.lng,
+        google_place_id: data.updates.googlePlaceId,
+        address_components: data.updates.addressComponents,
       }),
-    onSuccess: (result) => {
-      if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
-        return;
-      }
-      notifications.show({ message: tPlace('notifications.saved'), color: 'green' });
-      queryClient.invalidateQueries({ queryKey: ['mapPlaces'] });
-    },
   });
 
   const deletePlace = useMutation({
@@ -114,18 +97,25 @@ export default function EditPlacePage({ params }: PageProps) {
   });
 
   const handleSubmit = useCallback(
-    (data: PlaceEditorFormState) => {
-      updatePlace.mutate({
-        id,
-        name: data.name,
-        address: data.address,
-        lat: data.lat,
-        lng: data.lng,
-        googlePlaceId: data.googlePlaceId,
-        addressComponents: data.addressComponents,
-      });
+    async (updates: Partial<PlaceEditorFormState>) => {
+      try {
+        const result = await updatePlace.mutateAsync({ id, updates });
+        if (result.error) {
+          notifications.show({ message: result.error, color: 'red' });
+          return false;
+        }
+        notifications.show({ message: tPlace('notifications.saved'), color: 'green' });
+        void queryClient.invalidateQueries({ queryKey: ['mapPlaces'] });
+        return true;
+      } catch (error) {
+        notifications.show({
+          message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
+          color: 'red',
+        });
+        return false;
+      }
     },
-    [id, updatePlace],
+    [id, queryClient, tCommon, tPlace, updatePlace],
   );
 
   const handleDelete = useCallback(() => {
@@ -176,6 +166,7 @@ export default function EditPlacePage({ params }: PageProps) {
 
   return (
     <PlaceEditor
+      key={id}
       initialData={initialData}
       metadata={metadata}
       onSubmit={handleSubmit}

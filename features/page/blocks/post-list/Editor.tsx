@@ -76,9 +76,9 @@ function PostListSettingsForm({ props, updateProps }: PostListSettingsFormProps)
 
   const updateProp = useCallback(
     (key: keyof PostListProps, value: string) => {
-      updateProps({ ...props, [key]: value });
+      updateProps({ [key]: value });
     },
-    [props, updateProps],
+    [updateProps],
   );
 
   const updateBaseProp = useCallback(

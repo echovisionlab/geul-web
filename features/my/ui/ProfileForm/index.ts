@@ -1,5 +1,6 @@
 export { ProfileFormView } from './ProfileFormView';
 export type {
+  ProfileFormChangedFields,
   ProfileFormInitialValues,
   ProfileFormValues,
   ProfileFormViewErrors,

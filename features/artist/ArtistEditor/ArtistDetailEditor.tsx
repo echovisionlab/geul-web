@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconUsers } from '@tabler/icons-react';
 import { ArtistAction } from '@echovisionlab/geul-proto/secure/artist_pb.ts';
@@ -47,6 +47,8 @@ import { useBlockRoomConnection } from '@/lib/collab/useBlockRoomConnection';
 import { useSlugManagement } from '@/lib/hooks/useSlugManagement';
 import { useOgGenerationLookupSignal } from '@/lib/hooks/useOgGenerationLookupSignal';
 import { useOgImage } from '@/lib/hooks/useOgImage';
+import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
+import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { listLabelsForSelector } from '@/lib/queries/label-browser';
 import type { SocialLinks } from '@/lib/types/common/social-links';
@@ -158,7 +160,7 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
   });
   const bioEditorKey = `artist-${roomLocale ?? 'source'}`;
   const [residentName, setResidentName] = useState(artist.name);
-  useEffect(() => {
+  useLayoutEffect(() => {
     setResidentName(activeEditLocale.displayTitle);
   }, [activeEditLocale.displayTitle, roomLocale]);
 
@@ -173,6 +175,7 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
     connection: blockRoom,
     document: `artist:${id}`,
     delay: 500,
+    operation: 'document',
     write: (protocol, input: BlockRoomDocumentMetadataPatch<'artist'>) =>
       updateBlockRoomDocumentMetadata(protocol, { type: 'artist', ...input }),
   });
@@ -195,20 +198,78 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
           debouncedDocumentMetadataUpdate({ website: String(value) || null });
           return;
         case 'socialLinks':
-          debouncedDocumentMetadataUpdate({ socialLinks: value as Record<string, string> });
+          debouncedDocumentMetadataUpdate({
+            socialLinks: value as Record<string, string>,
+            observed: { socialLinks: fields.socialLinks },
+          });
           return;
         case 'slug':
           debouncedDocumentMetadataUpdate({ slug: String(value) || null });
           return;
         case 'labelIds':
-          debouncedDocumentMetadataUpdate({ labelIds: value as string[] });
+          debouncedDocumentMetadataUpdate({
+            labelIds: value as string[],
+            observed: { labelIds: fields.labelIds },
+          });
           return;
         case 'parentArtistId':
           debouncedDocumentMetadataUpdate({ parentArtistId: value ? String(value) : null });
       }
     },
-    [canEditNeutral, debouncedDocumentMetadataUpdate],
+    [canEditNeutral, debouncedDocumentMetadataUpdate, fields],
   );
+
+  useBlockRoomMetadataUpdates(blockRoom, `artist:${id}`, (update) => {
+    if (update.operation === 'locale') {
+      if (roomLocale && typeof update.values.title === 'string') {
+        setResidentName(update.values.title);
+      }
+      return;
+    }
+    if (update.operation !== 'document') {
+      return;
+    }
+
+    const values = update.values;
+    const socialLinks = values.socialLinks;
+    const nextSocialLinks =
+      socialLinks &&
+      typeof socialLinks === 'object' &&
+      !Array.isArray(socialLinks) &&
+      Object.values(socialLinks).every((value) => typeof value === 'string')
+        ? (socialLinks as Record<string, string>)
+        : null;
+    if (nextSocialLinks) {
+      setLocalSocialLinks(nextSocialLinks);
+    }
+    setFields((current) => {
+      let next = current;
+      const assign = <K extends keyof typeof current>(key: K, value: (typeof current)[K]) => {
+        if (next === current) {
+          next = { ...current };
+        }
+        next[key] = value;
+      };
+      for (const key of ['realName', 'countryCode', 'website', 'slug'] as const) {
+        const value = values[key];
+        if (typeof value === 'string' || value === null) {
+          assign(key, value ?? '');
+        }
+      }
+      const parentArtistId = values.parentArtistId;
+      if (typeof parentArtistId === 'string' || parentArtistId === null) {
+        assign('parentArtistId', parentArtistId);
+      }
+      if (nextSocialLinks) {
+        assign('socialLinks', nextSocialLinks);
+      }
+      const labelIds = values.labelIds;
+      if (Array.isArray(labelIds) && labelIds.every((value) => typeof value === 'string')) {
+        assign('labelIds', labelIds as string[]);
+      }
+      return next;
+    });
+  });
 
   const unpublishArtist = useMutation({
     mutationFn: () => unpublishArtistAction(id),
@@ -224,6 +285,24 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
       });
     },
   });
+
+  const flushPendingSaves = useCallback(async () => {
+    const saved = await flushEditorSaves(`artist:${id}`);
+    if (!saved) {
+      notifications.show({ message: tCommon('notifications.saveFailed'), color: 'red' });
+    }
+    return saved;
+  }, [id, tCommon]);
+  const handleBack = useCallback(async () => {
+    if (await flushPendingSaves()) {
+      router.back();
+    }
+  }, [flushPendingSaves, router]);
+  const handleDelete = useCallback(async () => {
+    if (await flushPendingSaves()) {
+      setDeleteDialogOpened(true);
+    }
+  }, [flushPendingSaves]);
 
   const slugMgmt = useSlugManagement({
     entityType: 'artist',
@@ -275,8 +354,11 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
   };
 
   const handleStatusChange = useCallback(
-    (nextStatus: ArtistEditorStatus) => {
+    async (nextStatus: ArtistEditorStatus) => {
       if (!canEditNeutral) {
+        return;
+      }
+      if (!(await flushPendingSaves())) {
         return;
       }
       if (nextStatus === 'published' && canPublish) {
@@ -288,7 +370,7 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
         unpublishArtist.mutate();
       }
     },
-    [canEditNeutral, canPublish, canUnpublish, publishArtist, unpublishArtist],
+    [canEditNeutral, canPublish, canUnpublish, flushPendingSaves, publishArtist, unpublishArtist],
   );
 
   const slugError = slugMgmt.error;
@@ -344,10 +426,10 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
           isSynced={currentIsSynced}
           status={normalizedStatus}
           statusOptions={artistStatusOptions}
-          onBack={() => router.back()}
+          onBack={handleBack}
           backTooltip={tCommon('actions.back')}
           onStatusChange={canEditNeutral && (canPublish || canUnpublish) ? handleStatusChange : undefined}
-          onDelete={canEditNeutral && canDelete ? () => setDeleteDialogOpened(true) : undefined}
+          onDelete={canEditNeutral && canDelete ? handleDelete : undefined}
           isStatusChanging={publishArtist.isPending || unpublishArtist.isPending}
           groupStatusWithCollab
           controls={<EditorActiveLocaleControl state={activeEditLocale} />}

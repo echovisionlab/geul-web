@@ -30,6 +30,7 @@ import { Select, Textarea, TextInput, SegmentedControl } from '@/components/core
 import { SectionCard, SectionHeader } from '@/components/core/Section';
 import { listArtistsAction } from '@/lib/actions/artist';
 import { setReleaseCreditsAction } from '@/lib/actions/release';
+import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
 import { listUsersAdminAction } from '@/lib/actions/user';
 import type { CreditTargetType, ReleaseCreditItem } from '@/lib/types/release/model';
 
@@ -42,6 +43,8 @@ interface ReleaseCreditsSectionProps {
   canEditNotes: boolean;
   onCreditsChange: (credits: ReleaseCreditItem[]) => void;
   onCreditNoteChange: (creditId: string, note: string) => void;
+  onMutationStart?: () => void;
+  onMutationSettled?: (succeeded: boolean) => void;
 }
 
 export function ReleaseCreditsSection({
@@ -53,6 +56,8 @@ export function ReleaseCreditsSection({
   canEditNotes,
   onCreditsChange,
   onCreditNoteChange,
+  onMutationStart,
+  onMutationSettled,
 }: ReleaseCreditsSectionProps) {
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.credits');
@@ -74,7 +79,7 @@ export function ReleaseCreditsSection({
   });
 
   const setCredits = useMutation({
-    mutationFn: (
+    mutationFn: (mutation: {
       credits: {
         id?: string;
         artistId?: string | null;
@@ -82,13 +87,30 @@ export function ReleaseCreditsSection({
         creditedName?: string | null;
         creditRole?: string | null;
         sortOrder: number;
-      }[],
-    ) => setReleaseCreditsAction(releaseId, credits),
+      }[];
+      orderIntent?: { itemId: string; previousItemId?: string; nextItemId?: string };
+    }) =>
+      setReleaseCreditsAction(
+        releaseId,
+        mutation.credits,
+        credits.map((credit, sortOrder) => ({
+          id: credit.id,
+          artistId: credit.artist_id,
+          memberId: credit.member_id,
+          creditedName: credit.credited_name,
+          creditRole: credit.credit_role,
+          sortOrder,
+        })),
+        mutation.orderIntent,
+      ),
+    onMutate: () => onMutationStart?.(),
+    onSettled: (result, error) => onMutationSettled?.(!error && !result?.error),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, color: 'red' });
         return;
       }
+      publishEditorEntityChange(`release:${releaseId}`);
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: tCommon('entities.credits') }),
         color: 'green',
@@ -101,7 +123,10 @@ export function ReleaseCreditsSection({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
-  const persistCredits = (nextCredits: ReleaseCreditItem[]) => {
+  const persistCredits = (
+    nextCredits: ReleaseCreditItem[],
+    orderIntent?: { itemId: string; previousItemId?: string; nextItemId?: string },
+  ) => {
     if (!canEdit) {
       return;
     }
@@ -110,8 +135,8 @@ export function ReleaseCreditsSection({
       sort_order: index,
     }));
     onCreditsChange(normalizedCredits);
-    setCredits.mutate(
-      normalizedCredits.map((credit, index) => ({
+    setCredits.mutate({
+      credits: normalizedCredits.map((credit, index) => ({
         id: credit.id,
         artistId: credit.artist_id,
         memberId: credit.member_id,
@@ -119,7 +144,8 @@ export function ReleaseCreditsSection({
         creditRole: credit.credit_role,
         sortOrder: index,
       })),
-    );
+      orderIntent,
+    });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -135,7 +161,13 @@ export function ReleaseCreditsSection({
     const newIndex = credits.findIndex((c) => c.id === over.id);
 
     if (oldIndex !== -1 && newIndex !== -1) {
-      persistCredits(arrayMove(credits, oldIndex, newIndex));
+      const reordered = arrayMove(credits, oldIndex, newIndex);
+      const movedIndex = reordered.findIndex((credit) => credit.id === active.id);
+      persistCredits(reordered, {
+        itemId: String(active.id),
+        previousItemId: movedIndex > 0 ? reordered[movedIndex - 1].id : undefined,
+        nextItemId: movedIndex + 1 < reordered.length ? reordered[movedIndex + 1].id : undefined,
+      });
     }
   };
 

@@ -1,18 +1,26 @@
 // @vitest-environment jsdom
 
 import { act } from 'react';
-import { create, toJson } from '@bufbuild/protobuf';
+import { fromJson, toJson, type JsonValue } from '@bufbuild/protobuf';
 import {
   LocalizedPageDocumentSchema,
   type LocalizedPageDocument,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
-import { hydrateCanonicalBlockRoom } from '@echovisionlab/geul-common/collaboration/block-room-codec';
+import {
+  decodeCanonicalBlockRoom,
+  hydrateCanonicalBlockRoom,
+} from '@echovisionlab/geul-common/collaboration/block-room-codec';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
+import { createBlockRoomPageSectionsController } from '@/features/page/PageEditor/block-room-page-sections';
+import { clearBlockRoomIntentChanges, getBlockRoomIntentChanges } from './block-room-intent-journal';
 import { attachBlockRoomLocalUndoOrigin, blockRoomUndoDepth, undoBlockRoom } from './interactive-mutation-undo';
 import { useBlockRoomConnection } from './useBlockRoomConnection';
+
+const persistNowMock = vi.hoisted(() => vi.fn(async () => undefined));
+vi.mock('@/lib/collab/persist-now', () => ({ persistCollaborativeDocumentNow: persistNowMock }));
 
 const providerState = vi.hoisted(() => ({
   instances: [] as Array<{
@@ -51,18 +59,28 @@ vi.mock('@hocuspocus/provider', () => ({
 }));
 
 const entityId = '01b3db42-75f1-4bf1-8cb9-9b3baf57e795';
+const sectionAId = '01b3db42-75f1-4bf1-8cb9-9b3baf57e796';
+const sectionBId = '01b3db42-75f1-4bf1-8cb9-9b3baf57e797';
 let latestHook: ReturnType<typeof useBlockRoomConnection> | null = null;
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
 const renderSnapshots: Array<{ locale: string | null; connection: ReturnType<typeof useBlockRoomConnection> }> = [];
 
-function bootstrapMessage(challenge = 'challenge-1') {
-  const typed: LocalizedPageDocument = create(LocalizedPageDocumentSchema, {
+function bootstrapMessage(challenge = 'challenge-1', sections: Array<{ id: string; uri: string }> = []) {
+  const typed = fromJson(LocalizedPageDocumentSchema, {
     blockCatalogFingerprint: contentBlockCatalogFingerprint,
     locale: 'ko',
-    base: { nodes: [] },
-    localeOverlay: { locale: 'ko', sections: [] },
-  });
+    base: {
+      nodes: sections.map(({ id, uri }, index) => ({
+        section: { id, externalVideo: { props: { uri } } },
+        placement: { index },
+      })),
+    },
+    localeOverlay: {
+      locale: 'ko',
+      sections: sections.map(({ id }) => ({ sectionId: id, externalVideo: { props: {} } })),
+    },
+  } as JsonValue) as LocalizedPageDocument;
   const source = new Y.Doc();
   hydrateCanonicalBlockRoom(source, 'page', 'ko', typed, []);
   const update = Y.encodeStateAsUpdate(source);
@@ -83,6 +101,8 @@ function bootstrapMessage(challenge = 'challenge-1') {
       presentLocaleValues: [],
       sourceMetadata: { locale: 'ko' },
       localeMetadata: { locale: 'ko' },
+      documentMetadata: {},
+      metadataSequence: 0,
       blockCatalogFingerprint: contentBlockCatalogFingerprint,
       serverInstanceId: 'collab-1',
       roomEpoch: 'bdac72af-8a24-4214-999d-83727445cbd7',
@@ -112,8 +132,12 @@ function connection() {
   return latestHook as ReturnType<typeof useBlockRoomConnection>;
 }
 
-function sendBootstrap(instance = providerState.instances.at(-1)!, challenge = 'challenge-1') {
-  const bootstrap = bootstrapMessage(challenge);
+function sendBootstrap(
+  instance = providerState.instances.at(-1)!,
+  challenge = 'challenge-1',
+  sections: Array<{ id: string; uri: string }> = [],
+) {
+  const bootstrap = bootstrapMessage(challenge, sections);
   act(() => {
     instance.configuration.onStateless?.({ payload: bootstrap.payload });
   });
@@ -140,11 +164,59 @@ function sendReady(instance: (typeof providerState.instances)[number], challenge
   );
 }
 
-function admit(instance = providerState.instances.at(-1)!, challenge = 'challenge-1') {
-  const bootstrap = sendBootstrap(instance, challenge);
+function admit(
+  instance = providerState.instances.at(-1)!,
+  challenge = 'challenge-1',
+  sections: Array<{ id: string; uri: string }> = [],
+) {
+  const bootstrap = sendBootstrap(instance, challenge, sections);
   syncBootstrap(instance, bootstrap);
   expect(instance.sendStateless).toHaveBeenCalledWith(expect.stringContaining('block_room.bootstrap_ack'));
   sendReady(instance, challenge);
+}
+
+function sendPersisted(
+  instance: (typeof providerState.instances)[number],
+  stateVector: Uint8Array,
+  deleted: Record<string, Array<{ clock: number; len: number }>> = {},
+) {
+  act(() =>
+    instance.configuration.onStateless?.({
+      payload: JSON.stringify({
+        kind: 'block_room.persisted',
+        protocolVersion: 2,
+        documentName: instance.configuration.name,
+        stateVector: Buffer.from(stateVector).toString('base64'),
+        deleted,
+      }),
+    }),
+  );
+}
+
+function deleteSetRanges(transaction: Y.Transaction): Record<string, Array<{ clock: number; len: number }>> {
+  const deleteSet = transaction.deleteSet as {
+    clients: Map<number, Array<{ clock: number; len: number }>>;
+  };
+  return Object.fromEntries(
+    [...deleteSet.clients.entries()].map(([client, ranges]) => [
+      String(client),
+      ranges.map(({ clock, len }) => ({ clock, len })),
+    ]),
+  );
+}
+
+function observeLocalDeleteSets(document: Y.Doc, provider: object) {
+  let deleted: Record<string, Array<{ clock: number; len: number }>> = {};
+  const listener = (transaction: Y.Transaction) => {
+    if (transaction.origin !== provider) {
+      deleted = deleteSetRanges(transaction);
+    }
+  };
+  document.on('afterTransaction', listener);
+  return {
+    current: () => deleted,
+    stop: () => document.off('afterTransaction', listener),
+  };
 }
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -153,6 +225,8 @@ beforeEach(() => {
   latestHook = null;
   providerState.instances.length = 0;
   renderSnapshots.length = 0;
+  persistNowMock.mockClear();
+  clearBlockRoomIntentChanges({ documentType: 'page', entityId, locale: 'ko', sourceLocale: 'ko' });
 });
 
 afterEach(() => {
@@ -160,6 +234,7 @@ afterEach(() => {
   container?.remove();
   root = null;
   container = null;
+  vi.useRealTimers();
 });
 
 describe('useBlockRoomConnection', () => {
@@ -338,6 +413,212 @@ describe('useBlockRoomConnection', () => {
     replayedNewer.destroy();
   });
 
+  it('replays a pending Page leaf edit over fresh canonical data and waits for durable coverage', async () => {
+    await render();
+    const first = providerState.instances[0]!;
+    admit(first, 'challenge-1', [
+      { id: sectionAId, uri: 'https://example.com/original-a' },
+      { id: sectionBId, uri: 'https://example.com/peer-b' },
+    ]);
+    const controller = createBlockRoomPageSectionsController(first.configuration.document, 'ko');
+    controller.update(sectionAId, { props: { url: 'https://example.com/local-a' } });
+    const capturedIntents = getBlockRoomIntentChanges({
+      documentType: 'page',
+      entityId,
+      locale: 'ko',
+      sourceLocale: 'ko',
+    });
+    expect(capturedIntents).toHaveLength(1);
+    expect(capturedIntents[0]?.before.baseNodes.find(({ id }) => id === sectionAId)?.payload).toMatchObject({
+      props: { uri: 'https://example.com/original-a' },
+    });
+    expect(capturedIntents[0]?.after.baseNodes.find(({ id }) => id === sectionAId)?.payload).toMatchObject({
+      props: { uri: 'https://example.com/local-a' },
+    });
+    act(() => first.configuration.onSynced?.());
+    expect(
+      getBlockRoomIntentChanges({ documentType: 'page', entityId, locale: 'ko', sourceLocale: 'ko' }),
+    ).toHaveLength(1);
+    expect(persistNowMock).not.toHaveBeenCalled();
+    expect(
+      decodeCanonicalBlockRoom(first.configuration.document, 'page').baseNodes.find(({ id }) => id === sectionAId)
+        ?.payload,
+    ).toMatchObject({ props: { uri: 'https://example.com/local-a' } });
+
+    act(() => connection().reloadCanonical());
+    await act(async () => Promise.resolve());
+    const second = providerState.instances[1]!;
+    const persistedTransaction = observeLocalDeleteSets(second.configuration.document, second);
+    admit(second, 'challenge-2', [{ id: sectionAId, uri: 'https://example.com/original-a' }]);
+
+    expect(persistNowMock).toHaveBeenCalledWith(second);
+    const freshPage = decodeCanonicalBlockRoom(second.configuration.document, 'page');
+    expect(freshPage.baseNodes.find(({ id }) => id === sectionAId)?.payload).toMatchObject({
+      props: { uri: 'https://example.com/local-a' },
+    });
+    expect(freshPage.baseNodes.some(({ id }) => id === sectionBId)).toBe(false);
+    expect(connection().recoverySnapshot).not.toBeNull();
+
+    sendPersisted(second, Y.encodeStateVector(second.configuration.document), persistedTransaction.current());
+    expect(connection().recoverySnapshot).toBeNull();
+    persistedTransaction.stop();
+  });
+
+  it('retries failed replay persistence with backoff and waits for the durable coverage ACK', async () => {
+    vi.useFakeTimers();
+    await render();
+    const first = providerState.instances[0]!;
+    admit(first, 'challenge-1', [{ id: sectionAId, uri: 'https://example.com/original-a' }]);
+    createBlockRoomPageSectionsController(first.configuration.document, 'ko').update(sectionAId, {
+      props: { url: 'https://example.com/local-a' },
+    });
+
+    act(() => connection().reloadCanonical());
+    await act(async () => Promise.resolve());
+    const second = providerState.instances[1]!;
+    const persistedTransaction = observeLocalDeleteSets(second.configuration.document, second);
+    persistNowMock
+      .mockRejectedValueOnce(new Error('temporary persistence failure'))
+      .mockRejectedValueOnce(new Error('still unavailable'))
+      .mockResolvedValueOnce(undefined);
+
+    admit(second, 'challenge-2', [{ id: sectionAId, uri: 'https://example.com/original-a' }]);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(persistNowMock).toHaveBeenCalledTimes(1);
+    expect(persistNowMock).toHaveBeenNthCalledWith(1, second);
+    expect(
+      getBlockRoomIntentChanges({ documentType: 'page', entityId, locale: 'ko', sourceLocale: 'ko' }),
+    ).toHaveLength(1);
+    expect(connection().recoverySnapshot).not.toBeNull();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1_999);
+    });
+    expect(persistNowMock).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(persistNowMock).toHaveBeenCalledTimes(2);
+    expect(persistNowMock).toHaveBeenNthCalledWith(2, second);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3_999);
+    });
+    expect(persistNowMock).toHaveBeenCalledTimes(2);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(persistNowMock).toHaveBeenCalledTimes(3);
+    expect(persistNowMock).toHaveBeenNthCalledWith(3, second);
+    expect(
+      getBlockRoomIntentChanges({ documentType: 'page', entityId, locale: 'ko', sourceLocale: 'ko' }),
+    ).toHaveLength(1);
+    expect(connection().recoverySnapshot).not.toBeNull();
+
+    sendPersisted(second, Y.encodeStateVector(second.configuration.document), persistedTransaction.current());
+    expect(
+      getBlockRoomIntentChanges({ documentType: 'page', entityId, locale: 'ko', sourceLocale: 'ko' }),
+    ).toHaveLength(0);
+    expect(connection().recoverySnapshot).toBeNull();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(60_000);
+    });
+    expect(persistNowMock).toHaveBeenCalledTimes(3);
+    persistedTransaction.stop();
+  });
+
+  it('cancels a replay persistence retry when its resident identity is replaced', async () => {
+    vi.useFakeTimers();
+    await render();
+    const first = providerState.instances[0]!;
+    admit(first, 'challenge-1', [{ id: sectionAId, uri: 'https://example.com/original-a' }]);
+    createBlockRoomPageSectionsController(first.configuration.document, 'ko').update(sectionAId, {
+      props: { url: 'https://example.com/local-a' },
+    });
+
+    act(() => connection().reloadCanonical());
+    await act(async () => Promise.resolve());
+    const second = providerState.instances[1]!;
+    persistNowMock.mockRejectedValueOnce(new Error('temporary persistence failure'));
+    admit(second, 'challenge-2', [{ id: sectionAId, uri: 'https://example.com/original-a' }]);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(persistNowMock).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      root?.render(<TestHarness locale="ja" />);
+      await Promise.resolve();
+    });
+    const japaneseProvider = providerState.instances[2]!;
+    expect(japaneseProvider.configuration.name).toBe(`page:${entityId}:ja`);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(60_000);
+    });
+    expect(persistNowMock).toHaveBeenCalledTimes(1);
+    expect(persistNowMock).toHaveBeenCalledWith(second);
+  });
+
+  it('stops replay persistence retries after terminal authentication failure', async () => {
+    vi.useFakeTimers();
+    await render();
+    const first = providerState.instances[0]!;
+    admit(first, 'challenge-1', [{ id: sectionAId, uri: 'https://example.com/original-a' }]);
+    createBlockRoomPageSectionsController(first.configuration.document, 'ko').update(sectionAId, {
+      props: { url: 'https://example.com/local-a' },
+    });
+
+    act(() => connection().reloadCanonical());
+    await act(async () => Promise.resolve());
+    const second = providerState.instances[1]!;
+    persistNowMock.mockRejectedValueOnce(new Error('temporary persistence failure'));
+    admit(second, 'challenge-2', [{ id: sectionAId, uri: 'https://example.com/original-a' }]);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(persistNowMock).toHaveBeenCalledTimes(1);
+
+    act(() => second.configuration.onAuthenticationFailed?.({ reason: 'session_expired' }));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(60_000);
+    });
+    expect(persistNowMock).toHaveBeenCalledTimes(1);
+    expect(persistNowMock).toHaveBeenCalledWith(second);
+  });
+
+  it('skips replay when the local body intent was acknowledged before canonical reload', async () => {
+    await render();
+    const first = providerState.instances[0]!;
+    admit(first, 'challenge-1', [{ id: sectionAId, uri: 'https://example.com/original-a' }]);
+    const persistedTransaction = observeLocalDeleteSets(first.configuration.document, first);
+    const controller = createBlockRoomPageSectionsController(first.configuration.document, 'ko');
+    controller.update(sectionAId, { props: { url: 'https://example.com/durable-a' } });
+    sendPersisted(first, Y.encodeStateVector(first.configuration.document), persistedTransaction.current());
+    expect(connection().recoverySnapshot).toBeNull();
+
+    act(() => connection().reloadCanonical());
+    await act(async () => Promise.resolve());
+    const second = providerState.instances[1]!;
+    admit(second, 'challenge-2', [{ id: sectionAId, uri: 'https://example.com/durable-a' }]);
+
+    expect(decodeCanonicalBlockRoom(second.configuration.document, 'page').baseNodes[0]?.payload).toMatchObject({
+      props: { uri: 'https://example.com/durable-a' },
+    });
+    expect(connection().recoverySnapshot).toBeNull();
+    expect(persistNowMock).not.toHaveBeenCalled();
+    persistedTransaction.stop();
+  });
+
   it('opens a fresh tokenless resident when authentication rejects a stale resume token', async () => {
     await render();
     const first = providerState.instances[0]!;
@@ -469,6 +750,7 @@ describe('useBlockRoomConnection', () => {
         sourceChanged: true,
         changedLocales: ['ko'],
         locale: 'ko',
+        metadataUpdate: { sequence: 1 },
       });
     });
     expect(accepted).toBe(true);
@@ -483,6 +765,7 @@ describe('useBlockRoomConnection', () => {
         sourceChanged: false,
         changedLocales: ['ja'],
         locale: 'ja',
+        metadataUpdate: { sequence: 1 },
       });
     });
     expect(accepted).toBe(false);
@@ -503,6 +786,7 @@ describe('useBlockRoomConnection', () => {
         sourceChanged: false,
         changedLocales: ['ko'],
         locale: 'ko',
+        metadataUpdate: { sequence: 1 },
       });
     });
 

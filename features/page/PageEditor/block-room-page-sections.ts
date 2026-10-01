@@ -16,21 +16,33 @@ import {
 import {
   deleteBlockRoomAtomicValue,
   deleteBlockRoomBaseNode,
+  deleteBlockRoomPayloadArrayItem,
+  insertBlockRoomPayloadArrayItem,
   insertPageSectionLocale,
   insertPageSectionNode,
   materializeCanonicalBlockRoom,
+  moveBlockRoomPayloadArrayItem,
   movePageSectionNode,
   replaceBlockRoomCollaborativeText,
   replaceBlockRoomPayloadArray,
   roomLocaleRole,
   setBlockRoomAtomicValue,
 } from '@echovisionlab/geul-common/collaboration/block-room-codec';
-import type * as Y from 'yjs';
+import * as Y from 'yjs';
 import { materializeLocalizedPageSections } from '@/features/editor/contract/localized-page';
 import { observeSharedBlockRoomChanges } from '@/lib/collab/block-room-observation';
 import type { SectionMeta, SectionSettings, SectionUpdates } from './types';
 import { parseSectionMeta } from '@/features/page/blocks/section-schema';
 import { createBlockId } from '@/lib/editor/block-id';
+import {
+  IMMERSIVE_SCENE_UNIT_MUTATION_PROP,
+  type ImmersiveSceneUnitMutation,
+} from '@/features/page/blocks/immersive-scene/settings-model';
+import {
+  serializeImmersiveSceneCopyUnits,
+  serializeImmersiveSceneVisualUnits,
+  type ImmersiveSceneUnit,
+} from '@/features/page/blocks/immersive-scene/schema';
 
 type JsonObject = Record<string, JsonValue>;
 type FieldOwnership = 'shared' | 'source' | 'locale';
@@ -222,6 +234,67 @@ function immersiveLocaleUnits(props: Record<string, unknown> | undefined): JsonV
       props: { title: String(unit.title ?? ''), text: String(unit.text ?? '') },
     };
   });
+}
+
+const immersiveSceneAttachmentFields: Readonly<Record<string, string>> = {
+  meshFileId: 'meshFile',
+  meshOptimizationSourceFileId: 'meshOptimizationSourceFile',
+  meshOptimizationFileId: 'meshOptimizationFile',
+  textureFileId: 'textureFile',
+  darkTextureFileId: 'darkTextureFile',
+};
+
+function immersiveSceneUnitsArray(
+  document: Y.Doc,
+  sectionId: string,
+  ownership: 'shared' | 'locale',
+): Y.Array<unknown> {
+  const room = document.getMap<unknown>('block-document');
+  const nodes = room.get(ownership === 'locale' ? 'localeOverlay' : 'baseNodes');
+  if (!(nodes instanceof Y.Map)) {
+    throw new Error('Immersive Scene Page section map is missing.');
+  }
+  const node = nodes.get(sectionId);
+  if (!(node instanceof Y.Map)) {
+    throw new Error(`Unknown Immersive Scene Page section: ${sectionId}`);
+  }
+  const payload = node.get('payload');
+  if (!(payload instanceof Y.Map)) {
+    throw new Error(`Immersive Scene Page section payload is missing: ${sectionId}`);
+  }
+  const units = payload.get('units');
+  if (!(units instanceof Y.Array)) {
+    throw new Error(`Immersive Scene Page section units are missing: ${sectionId}`);
+  }
+  return units;
+}
+
+function immersiveSceneUnitIndex(units: Y.Array<unknown>, unitId: string, ownership: 'shared' | 'locale'): number {
+  const identityField = ownership === 'locale' ? 'unitId' : 'id';
+  return units.toArray().findIndex((value) => value instanceof Y.Map && value.get(identityField) === unitId);
+}
+
+function immersiveSceneUnitValue(unit: unknown, reason: string): Y.Map<unknown> {
+  if (!(unit instanceof Y.Map)) {
+    throw new Error(`Invalid Immersive Scene Page unit: ${reason}`);
+  }
+  return unit;
+}
+
+function serializeSceneVisualUnit(unit: ImmersiveSceneUnit): string {
+  return serializeImmersiveSceneVisualUnits([unit]);
+}
+
+function serializeSceneCopyUnit(unit: ImmersiveSceneUnit): string {
+  return serializeImmersiveSceneCopyUnits([unit]);
+}
+
+function serializeSceneVisualPatch(unitId: string, patch: Partial<ImmersiveSceneUnit>): string {
+  return serializeSceneVisualUnit({ id: unitId, mesh: 'sphere', color: '#000000', title: '', text: '', ...patch });
+}
+
+function serializeSceneCopyPatch(unitId: string, patch: Partial<ImmersiveSceneUnit>): string {
+  return serializeSceneCopyUnit({ id: unitId, mesh: 'sphere', color: '#000000', title: '', text: '', ...patch });
 }
 
 function columnPayload(section: SectionMeta): JsonObject {
@@ -545,6 +618,12 @@ export class BlockRoomPageSectionsController {
     props: Record<string, unknown>,
     ownership: FieldOwnership,
   ): void {
+    if (kind === 'immersive-scene' && IMMERSIVE_SCENE_UNIT_MUTATION_PROP in props) {
+      if (ownership === 'shared' || ownership === 'locale') {
+        this.#updateImmersiveSceneUnit(sectionId, props[IMMERSIVE_SCENE_UNIT_MUTATION_PROP], ownership);
+      }
+      return;
+    }
     if (kind === 'immersive-scene' && ownership === 'shared' && props.unitsJson !== undefined) {
       this.#replaceBaseArray(sectionId, 'units', immersiveUnits(props));
     }
@@ -597,6 +676,138 @@ export class BlockRoomPageSectionsController {
           origin: 'page-section-adapter',
         });
       }
+    }
+  }
+
+  #updateImmersiveSceneUnit(sectionId: string, rawMutation: unknown, ownership: 'shared' | 'locale'): void {
+    this.document.transact(
+      () => this.#applyImmersiveSceneUnitMutation(sectionId, rawMutation, ownership),
+      'page-section-adapter',
+    );
+  }
+
+  #applyImmersiveSceneUnitMutation(sectionId: string, rawMutation: unknown, ownership: 'shared' | 'locale'): void {
+    if (rawMutation === null || typeof rawMutation !== 'object' || Array.isArray(rawMutation)) {
+      throw new Error('Invalid Immersive Scene unit mutation.');
+    }
+    const mutation = rawMutation as ImmersiveSceneUnitMutation;
+    const units = immersiveSceneUnitsArray(this.document, sectionId, ownership);
+    const unitId = mutation.kind === 'insert' ? mutation.unit.id : mutation.unitId;
+    const index = immersiveSceneUnitIndex(units, unitId, ownership);
+    const ref = {
+      family: 'page_section' as const,
+      id: sectionId,
+      ...(ownership === 'locale' ? { locale: true as const } : {}),
+      path: 'units',
+    };
+
+    switch (mutation.kind) {
+      case 'insert': {
+        if (index >= 0) {
+          return;
+        }
+        const value =
+          ownership === 'locale'
+            ? immersiveLocaleUnits({ copyJson: serializeSceneCopyUnit(mutation.unit) })[0]
+            : immersiveUnits({ unitsJson: serializeSceneVisualUnit(mutation.unit) })[0];
+        if (!value) {
+          throw new Error('Immersive Scene unit could not be serialized.');
+        }
+        insertBlockRoomPayloadArrayItem(this.document, ref, units.length, value, {
+          origin: 'page-section-adapter',
+        });
+        if (ownership === 'shared') {
+          this.#applyImmersiveSceneUnitMutation(sectionId, rawMutation, 'locale');
+        }
+        return;
+      }
+      case 'remove':
+        if (index >= 0) {
+          deleteBlockRoomPayloadArrayItem(this.document, ref, index, { origin: 'page-section-adapter' });
+        }
+        if (ownership === 'shared') {
+          this.#applyImmersiveSceneUnitMutation(sectionId, rawMutation, 'locale');
+        }
+        return;
+      case 'move': {
+        const nextIndex = index + mutation.direction;
+        if (index >= 0 && nextIndex >= 0 && nextIndex < units.length) {
+          moveBlockRoomPayloadArrayItem(this.document, ref, index, nextIndex, { origin: 'page-section-adapter' });
+        }
+        if (ownership === 'shared') {
+          this.#applyImmersiveSceneUnitMutation(sectionId, rawMutation, 'locale');
+        }
+        return;
+      }
+      case 'patch': {
+        if (index < 0) {
+          return;
+        }
+        const unit = immersiveSceneUnitValue(units.get(index), unitId);
+        const unitProps = unit.get('props');
+        if (!(unitProps instanceof Y.Map)) {
+          throw new Error(`Immersive Scene unit properties are missing: ${unitId}`);
+        }
+        const encoded =
+          ownership === 'locale'
+            ? immersiveLocaleUnits({ copyJson: serializeSceneCopyPatch(unitId, mutation.patch) })[0]
+            : immersiveUnits({ unitsJson: serializeSceneVisualPatch(unitId, mutation.patch) })[0];
+        const encodedProps = record(record(encoded).props) as JsonObject;
+        const collaborativeTextFields =
+          ownership === 'locale' ? new Set(['title', 'text']) : new Set(['name', 'attribution', 'meshObjectName']);
+
+        for (const [field, requestedValue] of Object.entries(mutation.patch)) {
+          if (field === 'id') {
+            continue;
+          }
+          if (ownership === 'locale' && field !== 'title' && field !== 'text') {
+            continue;
+          }
+          if (
+            ownership === 'shared' &&
+            (field === 'title' ||
+              field === 'text' ||
+              (!Object.hasOwn(immersiveSceneAttachmentFields, field) &&
+                !Object.hasOwn(encodedProps, field) &&
+                requestedValue !== undefined))
+          ) {
+            continue;
+          }
+
+          const attachmentField = immersiveSceneAttachmentFields[field];
+          if (attachmentField) {
+            const attachment = record(encodedProps[attachmentField]);
+            const activeFileId = attachment.activeFileId;
+            if (typeof activeFileId !== 'string' || activeFileId === '') {
+              unitProps.delete(attachmentField);
+              continue;
+            }
+            let attachmentMap = unitProps.get(attachmentField);
+            if (!(attachmentMap instanceof Y.Map)) {
+              attachmentMap = new Y.Map<unknown>();
+              unitProps.set(attachmentField, attachmentMap);
+            }
+            (attachmentMap as Y.Map<unknown>).set('activeFileId', activeFileId);
+            continue;
+          }
+
+          const value = encodedProps[field];
+          if (collaborativeTextFields.has(field)) {
+            if (ownership === 'locale' || (typeof requestedValue === 'string' && requestedValue.trim() !== '')) {
+              replaceText(this.document, { ...ref, path: `units[${index}].props.${field}` }, String(value ?? ''));
+            } else {
+              unitProps.delete(field);
+            }
+          } else if (value === undefined) {
+            unitProps.delete(field);
+          } else {
+            unitProps.set(field, value);
+          }
+        }
+        return;
+      }
+      default:
+        throw new Error('Unknown Immersive Scene unit mutation.');
     }
   }
 
