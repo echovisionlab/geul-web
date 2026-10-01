@@ -337,10 +337,33 @@ export function ProgramEventEditor({
   const canEditTitle = canEditCurrentLocale && blockRoom.isSynced;
   const [residentTitle, setResidentTitle] = useState(initialTitle);
   const [residentSummary, setResidentSummary] = useState(initialSummary ?? '');
+  const debouncedResidentMetadataUpdate = useDebouncedRoomMetadata({
+    connection: blockRoom,
+    document: `program_event:${eventId}`,
+    delay: 500,
+    write: (protocol, update: { locale: string; title?: string; summary?: string | null }) =>
+      updateBlockRoomLocaleMetadata(protocol, { type: 'program-event', ...update }),
+  });
   useEffect(() => {
-    setResidentTitle(activeEditLocale.displayTitle);
-    setResidentSummary(activeEditLocale.displaySummary);
-  }, [activeEditLocale.displaySummary, activeEditLocale.displayTitle, roomLocale]);
+    const pending = debouncedResidentMetadataUpdate.getPendingPatch();
+    const pendingForRoom = pending?.locale === roomLocale ? pending : null;
+    setResidentTitle(
+      pendingForRoom && Object.hasOwn(pendingForRoom, 'title')
+        ? (pendingForRoom.title ?? '')
+        : activeEditLocale.displayTitle,
+    );
+    setResidentSummary(
+      pendingForRoom && Object.hasOwn(pendingForRoom, 'summary')
+        ? (pendingForRoom.summary ?? '')
+        : activeEditLocale.displaySummary,
+    );
+  }, [
+    activeEditLocale.displaySummary,
+    activeEditLocale.displayTitle,
+    debouncedResidentMetadataUpdate,
+    eventId,
+    roomLocale,
+  ]);
   const displayedTitle = roomLocale ? residentTitle : activeEditLocale.displayTitle;
   const displayedSummary = roomLocale ? residentSummary : activeEditLocale.displaySummary;
 
@@ -546,14 +569,6 @@ export function ProgramEventEditor({
       lifecycle.deleteEvent.mutate();
     }
   }, [flushPendingSaves, lifecycle.deleteEvent.mutate]);
-
-  const debouncedResidentMetadataUpdate = useDebouncedRoomMetadata({
-    connection: blockRoom,
-    document: `program_event:${eventId}`,
-    delay: 500,
-    write: (protocol, update: { locale: string; title?: string; summary?: string | null }) =>
-      updateBlockRoomLocaleMetadata(protocol, { type: 'program-event', ...update }),
-  });
 
   const handleTitleChange = useCallback(
     (value: string) => {
