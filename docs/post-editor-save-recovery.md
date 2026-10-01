@@ -1,9 +1,39 @@
-# Post editor settings and recovery
+# Post editor configuration saves
 
-Slug, comments, content layout, and map location are entity-wide Post settings. The management `GetPost` projection gives the editor its starting `configurationRevision`. All four settings share one debounced queue. Every update, including slug-only and no-op updates, sends the queue's current `expectedConfigurationRevision` and waits for the server acknowledgement before sending the next patch. The queue adopts only the revision returned by its own successful acknowledgement.
+The Post configuration queue owns the entity-wide slug, comments setting, map
+place, and document-layout fields (content height, page chrome, and footer).
+Localized title, summary, and body data use the separate locale and block-room
+save paths.
 
-When two editor sessions start from the same revision, the first accepted settings change advances the Post revision. A later stale update is rejected. The editor keeps the latest pending settings, blocks save-dependent navigation, and shows the reload dialog with a recovery download. The JSON copy contains the Post ID, resident revision, and latest local patch. If the active Post locale room has been admitted, export also captures its Yjs document and local title, summary, and layout metadata at download time. Existing collaboration recovery data and its frozen metadata take precedence; an unadmitted or different-locale room is omitted. Reload is manual; the editor does not fetch a newer revision and retry those settings automatically.
+Configuration edits are sparse patches in one debounced queue per Post. The
+queue sends each update against its resident `configurationRevision` and waits
+for the response before sending the next patch. It adopts the returned
+canonical snapshot while retaining later local intent. Layout updates merge
+only the changed layout fields over the current snapshot. A hint from another
+editor triggers an authorized configuration read; pending local fields remain
+overlaid on that result. If a peer snapshot arrives during a write, the hook
+reads again before adopting the acknowledgement so an older response cannot
+regress the resident revision.
 
-Transient failures keep the current resident revision and leave the patch available for another save attempt. Slug edits share the settings queue, so they cannot bypass its acknowledgement ordering. A different Post gets a new queue and initial revision; pending fields from the previous Post stay in that Post's recovery scope. Locale title and summary remain room-scoped metadata and do not join the entity-wide settings patch.
+When the server rejects an update with `Aborted` or `FailedPrecondition`, the
+hook reads the latest configuration. If the patch already matches that
+snapshot, it does not send a redundant update. Otherwise, it retries the sparse
+patch once against the fetched revision. This preserves disjoint peer changes;
+when both editors change the same scalar, the last accepted server update
+wins. A second conflict or another save failure leaves the patch in the queue
+and reports the error. This queue has automatic retry enabled, so it retries
+with exponential backoff (up to eight scheduled retries, capped at 30 seconds)
+and retains the patch for recovery if the retry budget is exhausted.
 
-The recovery JSON is a portable copy for manual use. It does not apply local data after reload or overwrite the saved Post.
+The queue uses document `post:<id>` and the exact recovery scope
+`post:<id>:configuration` with recovery key `post-configuration`. A matching
+Post editor automatically claims an inactive recovery patch and submits it
+through the current writer. It does not show a recovery download, reload
+dialog, or manual apply/dismiss action for configuration conflicts. App-link
+navigation and the Post Back action flush registered saves first; a failed
+flush keeps the editor open. Browser unload shows the shared pending-save
+warning but cannot await the server.
+
+This contract covers entity-wide Post configuration only. It does not describe
+locale metadata, collaborative body durability, lifecycle actions, or other
+Post mutations.

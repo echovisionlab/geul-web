@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, type ReactNode } from 'react';
+import { act, isValidElement, type ReactNode } from 'react';
 import type { Editor } from '@tiptap/core';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
@@ -11,7 +11,10 @@ import type { EditorMediaCommandPort } from '@/features/editor/lib/media-block-u
 import type { TiptapSlashActionContext } from '@/features/editor/tiptap/slash/types';
 import { LocalizedCollaborativeRichTextEditor } from './LocalizedCollaborativeRichTextEditor';
 
-const { createMediaPortSpy } = vi.hoisted(() => ({ createMediaPortSpy: vi.fn() }));
+const { createMediaPortSpy, runtimeContext } = vi.hoisted(() => ({
+  createMediaPortSpy: vi.fn(),
+  runtimeContext: { current: null as unknown },
+}));
 
 const editorSpy = vi.fn<(props: Record<string, unknown>) => ReactNode>(() => <div data-typed-editor />);
 const mediaSurfaceSpy = vi.fn((_options?: unknown) => ({
@@ -46,6 +49,7 @@ vi.mock('@/features/editor/contexts/EditorMediaIngestContext', () => ({
 }));
 vi.mock('@/lib/contexts/EditorRuntimeContext', () => ({
   EditorRuntimeProvider: ({ children }: { children: ReactNode }) => children,
+  useOptionalEditorRuntimeContext: () => runtimeContext.current,
 }));
 vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
@@ -66,7 +70,38 @@ function provider(withAwareness = true): HocuspocusProvider {
   } as unknown as HocuspocusProvider;
 }
 
-function render(element: ReactNode): void {
+function runtimeEntityType(entityType: TranscodeEntityType | null | undefined): string {
+  switch (entityType) {
+    case TranscodeEntityType.PAGE:
+      return 'page';
+    case TranscodeEntityType.WORK:
+      return 'work';
+    case TranscodeEntityType.PROGRAM_EVENT:
+      return 'program_event';
+    case TranscodeEntityType.POST:
+    default:
+      return 'post';
+  }
+}
+
+function render(element: ReactNode, runtimeOverride?: unknown): void {
+  const props = isValidElement(element)
+    ? (element.props as {
+        provider?: HocuspocusProvider;
+        entityId?: string | null;
+        entityType?: TranscodeEntityType | null;
+      })
+    : null;
+  runtimeContext.current =
+    runtimeOverride === undefined
+      ? props
+        ? {
+            provider: props.provider,
+            entityType: runtimeEntityType(props.entityType),
+            entityId: props.entityId ?? '',
+          }
+        : null
+      : runtimeOverride;
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
@@ -81,6 +116,7 @@ afterEach(() => {
   editorSpy.mockClear();
   mediaSurfaceSpy.mockClear();
   createMediaPortSpy.mockReset();
+  runtimeContext.current = null;
 });
 
 describe('typed Block-room collaborative rich-text editor', () => {
@@ -238,4 +274,31 @@ describe('typed Block-room collaborative rich-text editor', () => {
       ),
     ).toThrow('requires provider awareness');
   });
+
+  it.each(['absent', 'provider', 'entityType', 'entityId'] as const)(
+    'requires a matching owning runtime context when %s differs',
+    (mismatch) => {
+      const residentProvider = provider();
+      const editor = (
+        <LocalizedCollaborativeRichTextEditor
+          provider={residentProvider}
+          blockRoomController={controller()}
+          userName="editor"
+          editable
+          entityId="post-1"
+          entityType={TranscodeEntityType.POST}
+        />
+      );
+      const mismatchedRuntime =
+        mismatch === 'absent'
+          ? null
+          : {
+              provider: mismatch === 'provider' ? provider() : residentProvider,
+              entityType: mismatch === 'entityType' ? 'page' : 'post',
+              entityId: mismatch === 'entityId' ? 'post-2' : 'post-1',
+            };
+
+      expect(() => render(editor, mismatchedRuntime)).toThrow('requires its owning entity editor runtime');
+    },
+  );
 });
