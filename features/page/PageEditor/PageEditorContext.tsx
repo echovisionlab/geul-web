@@ -24,81 +24,11 @@ import {
   createBlockRoomPageSectionsController,
   type BlockRoomPageSectionsController,
 } from './block-room-page-sections';
-import { persistCollaborativeDocumentNow } from '@/lib/collab/persist-now';
-import { notifyEditorSaveStateChanged, registerEditorSave } from '@/lib/editor/editor-save-registry';
+import type { BlockRoomDurabilityProtocol } from '@/lib/collab/block-room-durability';
+import { createCollaborativeDocumentSaveTracker } from '@/lib/editor/collaborative-document-save';
 import { createClientLogger } from '@/lib/utils/client-logger';
 
 const logger = createClientLogger('PageEditorContext');
-const MAX_DURABILITY_FLUSH_ROUNDS = 4;
-
-function createPageRoomDurability(doc: Y.Doc, provider: HocuspocusProvider, pageId: string) {
-  let localRevision = 0;
-  let durableRevision = 0;
-  let activeFlush: Promise<boolean> | null = null;
-
-  const observeTransaction = (transaction: Y.Transaction) => {
-    if (transaction.local && transaction.changed.size > 0) {
-      localRevision += 1;
-      notifyEditorSaveStateChanged(`page:${pageId}`);
-    }
-  };
-
-  const hasPending = () => localRevision > durableRevision || activeFlush !== null;
-
-  const flush = (action: string): Promise<boolean> => {
-    if (activeFlush) {
-      return activeFlush;
-    }
-
-    const drain = async (): Promise<boolean> => {
-      for (let round = 0; round < MAX_DURABILITY_FLUSH_ROUNDS; round += 1) {
-        if (localRevision <= durableRevision) {
-          return true;
-        }
-
-        const revisionBeingPersisted = localRevision;
-        try {
-          await persistCollaborativeDocumentNow(provider);
-          durableRevision = Math.max(durableRevision, revisionBeingPersisted);
-        } catch (error) {
-          const message = error instanceof Error ? error.message : 'Failed to persist page changes';
-          logger.error('Failed to persist page changes', { pageId, action, error: message });
-          notifications.show({ message, color: 'red' });
-          return false;
-        }
-      }
-
-      return localRevision <= durableRevision;
-    };
-
-    const operation = drain().finally(() => {
-      if (activeFlush === operation) {
-        activeFlush = null;
-        notifyEditorSaveStateChanged(`page:${pageId}`);
-      }
-    });
-    activeFlush = operation;
-    notifyEditorSaveStateChanged(`page:${pageId}`);
-    return operation;
-  };
-
-  return {
-    flush,
-    hasPending,
-    register: () => {
-      doc.on('afterTransaction', observeTransaction);
-      const unregisterEditorSave = registerEditorSave(`page:${pageId}`, {
-        flush: () => flush('locale-switch'),
-        hasPending,
-      });
-
-      return () => {
-        doc.off('afterTransaction', observeTransaction);
-        unregisterEditorSave();
-      };
-    },
-  };
-}
 
 interface PageEditorContextValue {
   doc: Y.Doc;
@@ -122,6 +52,7 @@ const PageEditorContext = createContext<PageEditorContextValue | null>(null);
 interface PageEditorProviderProps {
   doc: Y.Doc;
   provider: HocuspocusProvider;
+  protocol: BlockRoomDurabilityProtocol;
   locale: string;
   userName: string;
   pageId: string;
@@ -133,6 +64,7 @@ interface PageEditorProviderProps {
 export function PageEditorProvider({
   doc,
   provider,
+  protocol,
   locale,
   userName,
   pageId,
@@ -141,7 +73,10 @@ export function PageEditorProvider({
   children,
 }: PageEditorProviderProps) {
   const controller = useMemo(() => createBlockRoomPageSectionsController(doc, locale), [doc, locale]);
-  const durability = useMemo(() => createPageRoomDurability(doc, provider, pageId), [doc, pageId, provider]);
+  const durability = useMemo(
+    () => createCollaborativeDocumentSaveTracker(provider, { kind: 'block-room', protocol }),
+    [doc, pageId, protocol, provider],
+  );
   const [sections, setSections] = useState<readonly SectionMeta[]>(() => controller.read());
 
   useEffect(() => {
@@ -149,13 +84,25 @@ export function PageEditorProvider({
     return controller.observe(setSections);
   }, [controller]);
 
-  useLayoutEffect(() => durability.register(), [durability]);
+  const reportFlushError = useCallback(
+    (action: string, error: unknown) => {
+      const message = error instanceof Error ? error.message : 'Failed to persist page changes';
+      logger.error('Failed to persist page changes', { pageId, action, error: message });
+      notifications.show({ message, color: 'red' });
+    },
+    [pageId],
+  );
+
+  useLayoutEffect(
+    () => durability.register(`page:${pageId}`, (error) => reportFlushError('navigation', error)),
+    [durability, pageId, reportFlushError],
+  );
 
   const persistStructureChange = useCallback(
     (action: string) => {
-      void durability.flush(action);
+      void durability.flush((error) => reportFlushError(action, error));
     },
-    [durability],
+    [durability, reportFlushError],
   );
 
   const updateSection = useCallback(

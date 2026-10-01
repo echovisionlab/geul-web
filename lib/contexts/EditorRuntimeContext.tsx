@@ -6,6 +6,7 @@ import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { persistCollaborativeDocumentNow } from '@/lib/collab/persist-now';
 import { getDocumentRoomSnapshot } from '@/lib/collab/document-room-snapshot';
 import type { BlockRoomProtocolTransport, BlockRoomSnapshot } from '@/lib/collab/block-room-protocol';
+import { requireBlockRoomDurabilityProtocol } from '@/lib/collab/block-room-durability';
 import { registerCollaborativeDocumentSave } from '@/lib/editor/collaborative-document-save';
 import {
   subscribeToProviderRuntimeEvents,
@@ -73,8 +74,11 @@ export function EditorRuntimeProvider({
     if (!provider || ['page', 'menu', 'series', 'email_layout'].includes(entityType)) {
       return;
     }
-    return registerCollaborativeDocumentSave(provider, `${entityType}:${entityId}`);
-  }, [entityId, entityType, provider]);
+    const persistence = blockRoomProtocol
+      ? { kind: 'block-room' as const, protocol: requireBlockRoomDurabilityProtocol(blockRoomProtocol) }
+      : { kind: 'persist-now' as const };
+    return registerCollaborativeDocumentSave(provider, `${entityType}:${entityId}`, persistence);
+  }, [blockRoomProtocol, entityId, entityType, provider]);
   const getContributorMemberIds = useCallback(() => {
     const ids = new Set<string>();
     for (const state of provider?.awareness?.getStates().values() ?? []) {

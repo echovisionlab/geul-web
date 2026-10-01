@@ -10,6 +10,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
+import type { BlockRoomDurabilityProtocol, BlockRoomDurabilityState } from '@/lib/collab/block-room-durability';
 import { usePendingEditorUnload } from '@/lib/editor/usePendingEditorUnload';
 import { createBlockRoomProseMirrorBridge } from '@/features/editor/tiptap/block-room-prosemirror-bridge';
 import { PageEditorProvider, usePageEditor } from './PageEditorContext';
@@ -28,15 +29,27 @@ let roomDocument: Y.Doc;
 let container: HTMLDivElement;
 let root: Root;
 let current: ReturnType<typeof usePageEditor> | null;
-const provider = { name: 'one-page-room' } as unknown as HocuspocusProvider;
+const persistedListeners = new Set<(state: BlockRoomDurabilityState) => void>();
+const protocol: BlockRoomDurabilityProtocol = {
+  subscribePersisted: (listener) => {
+    persistedListeners.add(listener);
+    return () => persistedListeners.delete(listener);
+  },
+};
+const provider = {
+  name: 'one-page-room',
+  get document() {
+    return roomDocument;
+  },
+} as unknown as HocuspocusProvider;
 const SECTION_ID = '019cce25-dbc0-7d12-9f1f-735b1a6c6b14';
 const RICH_TEXT_BLOCK_ID = '019cce25-dbc0-7d12-9f1f-735b1a6c6b15';
 
 function deferred<T>() {
-  let resolve!: (value: T) => void;
+  let resolve!: (value?: T) => void;
   let reject!: (error: unknown) => void;
   const promise = new Promise<T>((resolvePromise, rejectPromise) => {
-    resolve = resolvePromise;
+    resolve = (value) => resolvePromise(value as T);
     reject = rejectPromise;
   });
   return { promise, resolve, reject };
@@ -137,6 +150,23 @@ function createRichTextRoom(): Y.Doc {
   return value;
 }
 
+function currentDurabilityState(document: Y.Doc): BlockRoomDurabilityState {
+  const update = Y.decodeUpdate(Y.encodeStateAsUpdate(document));
+  return {
+    stateVector: Y.encodeStateVector(document),
+    deleted: Object.fromEntries(
+      [...update.ds.clients.entries()].map(([client, ranges]) => [
+        String(client),
+        ranges.map(({ clock, len }) => ({ clock, len })),
+      ]),
+    ),
+  };
+}
+
+function emitPersisted(state = currentDurabilityState(roomDocument)): void {
+  persistedListeners.forEach((listener) => listener(state));
+}
+
 function Harness() {
   current = usePageEditor();
   usePendingEditorUnload('page:page-1');
@@ -155,6 +185,7 @@ function render(editable = true, locale = 'ko', allowStructuralEdits = editable)
       <PageEditorProvider
         doc={roomDocument}
         provider={provider}
+        protocol={protocol}
         locale={locale}
         userName="tester"
         pageId="page-1"
@@ -185,7 +216,8 @@ beforeEach(() => {
   root = createRoot(container);
   current = null;
   persistCollaborativeDocumentNow.mockReset();
-  persistCollaborativeDocumentNow.mockResolvedValue(undefined);
+  persistedListeners.clear();
+  persistCollaborativeDocumentNow.mockImplementation(async () => emitPersisted());
 });
 
 afterEach(() => {
@@ -230,6 +262,7 @@ describe('typed resident Page editor context', () => {
     expect(persistCollaborativeDocumentNow).toHaveBeenCalledOnce();
     expect(settled).toBe(false);
     persist.resolve();
+    emitPersisted();
     await expect(flushed).resolves.toBe(true);
   });
 
@@ -249,6 +282,7 @@ describe('typed resident Page editor context', () => {
     expect(propsFlushSettled).toBe(false);
     expect(persistCollaborativeDocumentNow).toHaveBeenCalledOnce();
     propsPersist.resolve();
+    emitPersisted();
     await expect(flushProps).resolves.toBe(true);
 
     roomDocument.destroy();
@@ -282,6 +316,7 @@ describe('typed resident Page editor context', () => {
     expect(richTextFlushSettled).toBe(false);
     expect(persistCollaborativeDocumentNow).toHaveBeenCalledTimes(2);
     richTextPersist.resolve();
+    emitPersisted();
     await expect(flushRichText).resolves.toBe(true);
   });
 
@@ -301,6 +336,7 @@ describe('typed resident Page editor context', () => {
     expect(fireBeforeUnload().defaultPrevented).toBe(true);
 
     persist.resolve();
+    emitPersisted();
     await expect(flushing).resolves.toBe(true);
     await act(async () => Promise.resolve());
     expect(fireBeforeUnload().defaultPrevented).toBe(false);
@@ -337,9 +373,38 @@ describe('typed resident Page editor context', () => {
     expect(fireBeforeUnload().defaultPrevented).toBe(true);
 
     persist.resolve();
+    emitPersisted();
     await expect(flushing).resolves.toBe(true);
     await act(async () => Promise.resolve());
     expect(fireBeforeUnload().defaultPrevented).toBe(false);
+  });
+
+  it('clears the Page body unload guard on a covering resident durability ACK', () => {
+    roomDocument.destroy();
+    roomDocument = createRichTextRoom();
+    render();
+    const bridge = createBlockRoomProseMirrorBridge({
+      document: roomDocument,
+      documentType: 'page',
+      locale: 'ko',
+      pageSectionId: SECTION_ID,
+    });
+
+    act(() => {
+      bridge.replaceCollaborativeText({
+        blockId: RICH_TEXT_BLOCK_ID,
+        scope: 'locale',
+        path: 'content[0].text.text',
+        from: 0,
+        to: 9,
+        insert: 'Durable body',
+      });
+    });
+    expect(fireBeforeUnload().defaultPrevented).toBe(true);
+
+    act(() => emitPersisted());
+    expect(fireBeforeUnload().defaultPrevented).toBe(false);
+    expect(persistCollaborativeDocumentNow).not.toHaveBeenCalled();
   });
 
   it('does not warn or persist for a remote Yjs transaction', () => {
@@ -364,10 +429,13 @@ describe('typed resident Page editor context', () => {
     persistCollaborativeDocumentNow.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
 
     act(() => context().updateLocalizedSectionProps(SECTION_ID, { caption: 'First edit' }));
+    const firstAcknowledgement = currentDurabilityState(roomDocument);
     const flushing = flushEditorSaves('page:page-1');
     await act(async () => Promise.resolve());
     act(() => context().updateLocalizedSectionProps(SECTION_ID, { caption: 'Second edit' }));
-    first.resolve();
+    const secondAcknowledgement = currentDurabilityState(roomDocument);
+    first.resolve(undefined);
+    emitPersisted(firstAcknowledgement);
     await act(async () => Promise.resolve());
 
     expect(persistCollaborativeDocumentNow).toHaveBeenCalledTimes(2);
@@ -377,14 +445,18 @@ describe('typed resident Page editor context', () => {
     });
     await act(async () => Promise.resolve());
     expect(settled).toBe(false);
-    second.resolve();
+    second.resolve(undefined);
+    emitPersisted(secondAcknowledgement);
     await expect(flushing).resolves.toBe(true);
 
     act(() => context().updateLocalizedSectionProps(SECTION_ID, { caption: 'Retry edit' }));
     persistCollaborativeDocumentNow.mockRejectedValueOnce(new Error('persistence rejected'));
     await expect(flushEditorSaves('page:page-1')).resolves.toBe(false);
     persistCollaborativeDocumentNow.mockResolvedValueOnce(undefined);
-    await expect(flushEditorSaves('page:page-1')).resolves.toBe(true);
+    const retried = flushEditorSaves('page:page-1');
+    await act(async () => Promise.resolve());
+    emitPersisted();
+    await expect(retried).resolves.toBe(true);
   });
 
   it('rechecks the current Page document after a pending save belongs to a stale document', async () => {
@@ -398,6 +470,7 @@ describe('typed resident Page editor context', () => {
       .mockReturnValueOnce(currentDocumentPersist.promise);
 
     act(() => context().updateLocalizedSectionProps(SECTION_ID, { caption: 'Old document edit' }));
+    const oldAcknowledgement = currentDurabilityState(roomDocument);
     const flushing = flushEditorSaves('page:page-1');
     await act(async () => Promise.resolve());
     expect(persistCollaborativeDocumentNow).toHaveBeenCalledOnce();
@@ -406,7 +479,9 @@ describe('typed resident Page editor context', () => {
     roomDocument = createRoom('ko', 'ko', true);
     render();
     act(() => context().updateLocalizedSectionProps(SECTION_ID, { caption: 'Current document edit' }));
-    oldDocumentPersist.resolve();
+    const currentAcknowledgement = currentDurabilityState(roomDocument);
+    oldDocumentPersist.resolve(undefined);
+    emitPersisted(oldAcknowledgement);
     await act(async () => Promise.resolve());
 
     expect(persistCollaborativeDocumentNow).toHaveBeenCalledTimes(2);
@@ -416,7 +491,8 @@ describe('typed resident Page editor context', () => {
     });
     await act(async () => Promise.resolve());
     expect(settled).toBe(false);
-    currentDocumentPersist.resolve();
+    currentDocumentPersist.resolve(undefined);
+    emitPersisted(currentAcknowledgement);
     await expect(flushing).resolves.toBe(true);
   });
 
