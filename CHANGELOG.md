@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.7](https://github.com/echovisionlab/geul-web/compare/v0.2.6...v0.2.7) (2026-10-01)
+
+
+### Performance Improvements
+
+* **map:** bundle worker dependencies into one module ([#37](https://github.com/echovisionlab/geul-web/issues/37)) ([3ac3ce7](https://github.com/echovisionlab/geul-web/commit/3ac3ce7232bdd3a3cb25d3d3ae9f0644348ba210))
+
 ## [0.2.6](https://github.com/echovisionlab/geul-web/compare/v0.2.5...v0.2.6) (2026-10-01)
 
 
