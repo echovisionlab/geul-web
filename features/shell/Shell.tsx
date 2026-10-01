@@ -1,7 +1,7 @@
 'use client';
 
 import { type ReactNode, useEffect } from 'react';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { usePathname } from 'next/navigation';
 import type { MenuItem } from '@echovisionlab/geul-proto/public/manifest_pb.ts';
 import { useTranslations } from 'next-intl';

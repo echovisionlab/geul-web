@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { IconFilter, IconSearch } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { Box, Divider, Group, Stack, Text } from '@mantine/core';

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { IconChevronLeft, IconChevronRight, IconChevronsLeft, IconChevronsRight } from '@tabler/icons-react';
 import { Box, Group, Text } from '@mantine/core';
 import { IconButton, type ControlEmphasis } from '@/components/core/IconButton';

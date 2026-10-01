@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import type { PostStatus as PublicPostStatus } from '@echovisionlab/geul-proto/public/post_pb.ts';
 import type { ContentBlockMediaItem } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { PostAction } from '@echovisionlab/geul-proto/secure/post_pb.ts';

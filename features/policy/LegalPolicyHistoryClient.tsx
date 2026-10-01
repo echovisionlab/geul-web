@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { IconArrowLeft, IconFileText } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { Group, Paper, Stack, Table, Text, Title } from '@mantine/core';

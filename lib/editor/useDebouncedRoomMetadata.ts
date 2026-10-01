@@ -33,6 +33,7 @@ export function useDebouncedRoomMetadata<T extends object>({
   return useDebouncedPatch({
     document,
     scope: connection.protocol,
+    recoveryScope: connection.bootstrap?.documentName ?? null,
     delay,
     write: async (patch: T) => {
       try {

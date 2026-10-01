@@ -7,7 +7,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { SimpleGrid, Stack, Text } from '@mantine/core';
 import { Checkbox } from '@/components/core/Input';
-import { useDebouncedCallback, useDisclosure, useWindowEvent } from '@mantine/hooks';
+import { useDisclosure, useWindowEvent } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { EditorReloadRequiredDialog } from '@/features/editor/EditorReloadRequiredDialog';
 import { useEditorPermissionRevocation } from '@/features/editor/useEditorPermissionRevocation';
@@ -25,12 +25,8 @@ import { EditorActiveLocaleControl } from '@/features/translation/EditorActiveLo
 import { EntityTranslationsPanel } from '@/features/translation/EntityTranslationsPanel';
 import { isLocaleDocumentEditable } from '@/features/translation/locale-document-mode';
 import { usePostBlockRoomController } from '@/features/editor/hooks/useBlockRoomTiptapController';
-import {
-  exportPostMarkdownAction,
-  regeneratePostOgImageAction,
-  updatePostAction,
-  updatePostSlugAction,
-} from '@/lib/actions/post';
+import { EditorSaveRecoveryNotice } from '@/features/editor/EditorSaveRecoveryNotice';
+import { exportPostMarkdownAction, regeneratePostOgImageAction, updatePostSlugAction } from '@/lib/actions/post';
 import {
   createMapPlaceForBlockWithBrowserClient,
   createMapPlaceWithBrowserClient,
@@ -40,6 +36,7 @@ import { updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata'
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import { MapPlaceActionProvider } from '@/lib/contexts/MapPlaceActionContext';
 import { PostMetaProvider, usePostMeta } from '@/lib/contexts/PostMetaContext';
+import { useEditorNavigation } from '@/features/editor/useEditorNavigation';
 import { useOgImage } from '@/lib/hooks/useOgImage';
 import { useOgGenerationLookupSignal } from '@/lib/hooks/useOgGenerationLookupSignal';
 import { useSlugManagement } from '@/lib/hooks/useSlugManagement';
@@ -51,6 +48,7 @@ import type { TagSelect } from '@/lib/types/tag/model';
 import { downloadMarkdown } from '@/lib/utils/export';
 import { normalizeOgRegenerationLocale } from '@/lib/utils/og-regeneration';
 import { toNullableSlug, toSlugInputValue } from '@/lib/utils/slug';
+import { PostRecoveryNotice } from './PostRecoveryNotice';
 import { resolvePostEditorBodyMode } from './body-mode';
 import { CategorySelector } from './CategorySelector';
 import { resolvePostEditorAiTarget } from './collaboration-mode';
@@ -64,7 +62,9 @@ import { PostScheduleDialog } from './PostScheduleDialog';
 import { PostSessionExpiredDialog } from './PostSessionExpiredDialog';
 import { SeriesSelector } from './SeriesSelector';
 import { TagSelector } from './TagSelector';
+import { usePostConfigSave } from './usePostConfigSave';
 import { usePostLifecycle } from './usePostLifecycle';
+import { usePostRecoveryDraft } from './usePostRecoveryDraft';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 
 interface PostEditorProps {
@@ -152,6 +152,7 @@ function PostEditorContent({
   const t = useTranslations('postEditor');
   const tLayout = useTranslations('contentLayout');
   const router = useRouter();
+  const navigateWithSave = useEditorNavigation(`post:${postId}`);
   const [isZenMode, setIsZenMode] = useState(false);
   const [mapPlaceId, setMapPlaceId] = useState<string | null>(initialMapPlaceId);
   const [createPlaceInitialName, setCreatePlaceInitialName] = useState('');
@@ -199,6 +200,7 @@ function PostEditorContent({
     protocol,
     acceptEpochAck,
     reloadCanonical,
+    recoverySnapshot,
     roomLocale,
     localeSession,
   } = usePostMeta();
@@ -216,6 +218,10 @@ function PostEditorContent({
   const currentDoc = doc;
   const currentIsConnected = isConnected;
   const currentIsSynced = isSynced;
+  const handleBack = useCallback(async () => {
+    await navigateWithSave(() => router.back());
+  }, [navigateWithSave, router]);
+  const postConfigUpdate = usePostConfigSave(postId);
   const permissionRevocation = useEditorPermissionRevocation(provider, 'post', postId);
   const revision = useEditorReloadRequired(provider);
   const blockRoomController = usePostBlockRoomController(currentDoc, roomLocale);
@@ -235,22 +241,6 @@ function PostEditorContent({
     provider: currentProvider,
   });
   useOgGenerationLookupSignal(activeEditLocale.ogGenerationRun, activeEditLocale.activeLocale, ogImage.trackLatest);
-
-  const updatePost = useMutation({
-    mutationFn: (data: { commentsEnabled?: boolean; mapPlaceId?: string; documentLayout?: DocumentLayout }) =>
-      updatePostAction(postId, data),
-    onSuccess: (result) => {
-      if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
-      }
-    },
-    onError: (error) => {
-      notifications.show({
-        message: error instanceof Error ? error.message : tCommonNotifications('updateFailed'),
-        color: 'red',
-      });
-    },
-  });
 
   const updateSlug = useMutation({
     mutationFn: (nextSlug: string | null) => updatePostSlugAction(postId, nextSlug),
@@ -321,7 +311,8 @@ function PostEditorContent({
 
       const nextMapPlaceId = result.data.id;
       setMapPlaceId(nextMapPlaceId);
-      updatePost.mutate({ mapPlaceId: nextMapPlaceId });
+      postConfigUpdate({ mapPlaceId: nextMapPlaceId });
+      void postConfigUpdate.flush();
       closeCreatePlace();
       notifications.show({
         message: tCommon('notifications.placeCreatedAndLinked'),
@@ -336,20 +327,19 @@ function PostEditorContent({
     },
   });
 
-  const debouncedCommentsEnabledUpdate = useDebouncedCallback((enabled: boolean) => {
-    updatePost.mutate({ commentsEnabled: enabled });
-  }, 500);
-
-  const debouncedLayoutUpdate = useDebouncedCallback((documentLayout: DocumentLayout) => {
-    updatePost.mutate({ documentLayout });
-  }, 500);
-
   const [residentTitle, setResidentTitle] = useState(initialTitle);
   const [residentSummary, setResidentSummary] = useState(initialSummary ?? '');
   useEffect(() => {
     setResidentTitle(activeEditLocale.displayTitle);
     setResidentSummary(activeEditLocale.displaySummary);
   }, [activeEditLocale.displaySummary, activeEditLocale.displayTitle, roomLocale]);
+  const recoveryDraft = usePostRecoveryDraft(recoverySnapshot, {
+    title: residentTitle,
+    summary: residentSummary,
+    commentsEnabled,
+    mapPlaceId,
+    layout,
+  });
 
   const debouncedResidentMetadataUpdate = useDebouncedRoomMetadata({
     connection: { protocol, bootstrap, acceptEpochAck, reloadCanonical },
@@ -365,9 +355,9 @@ function PostEditorContent({
   const handleCommentsEnabledChange = useCallback(
     (enabled: boolean) => {
       setCommentsEnabled(enabled);
-      debouncedCommentsEnabledUpdate(enabled);
+      postConfigUpdate({ commentsEnabled: enabled });
     },
-    [setCommentsEnabled, debouncedCommentsEnabledUpdate],
+    [setCommentsEnabled, postConfigUpdate],
   );
 
   const handleScopedLocaleTitleChange = useCallback(
@@ -395,17 +385,18 @@ function PostEditorContent({
   const handleLayoutChange = useCallback(
     (nextLayout: DocumentLayout) => {
       setLayout(nextLayout);
-      debouncedLayoutUpdate(nextLayout);
+      postConfigUpdate({ documentLayout: nextLayout });
     },
-    [debouncedLayoutUpdate, setLayout],
+    [postConfigUpdate, setLayout],
   );
 
   const handleMapPlaceChange = useCallback(
     (nextMapPlaceId: string | null) => {
       setMapPlaceId(nextMapPlaceId);
-      updatePost.mutate({ mapPlaceId: nextMapPlaceId ?? '' });
+      postConfigUpdate({ mapPlaceId: nextMapPlaceId ?? '' });
+      void postConfigUpdate.flush();
     },
-    [updatePost],
+    [postConfigUpdate],
   );
 
   const handleCreatePlaceStart = useCallback(
@@ -499,6 +490,10 @@ function PostEditorContent({
             : undefined
         }
       >
+        {recoverySnapshot && !revision.reloadRequired ? (
+          <PostRecoveryNotice snapshot={recoverySnapshot} draft={recoveryDraft} />
+        ) : null}
+        <EditorSaveRecoveryNotice document={`post:${postId}`} />
         <PostEditorHeaderSection
           postId={postId}
           title={displayedTitle}
@@ -514,7 +509,7 @@ function PostEditorContent({
           controls={<EditorActiveLocaleControl state={activeEditLocale} hidden={isZenMode} />}
           scheduledAt={scheduledAt}
           scheduledTimeZone={scheduledTimeZone}
-          onBack={router.back}
+          onBack={handleBack}
           onStatusChange={lifecycle.statusOptions.length > 1 ? lifecycle.changeStatus : undefined}
           onDelete={canDelete ? () => lifecycle.deletePost.mutate() : undefined}
           onOpenVersionHistory={canViewVersions ? openVersionHistory : undefined}
@@ -727,7 +722,13 @@ function PostEditorContent({
           loading={lifecycle.schedule.isPending}
         />
 
-        <EditorReloadRequiredDialog opened={revision.reloadRequired} onReload={() => window.location.reload()} />
+        <EditorReloadRequiredDialog
+          opened={revision.reloadRequired}
+          onReload={() => window.location.reload()}
+          recoveryAction={
+            recoverySnapshot ? <PostRecoveryNotice snapshot={recoverySnapshot} draft={recoveryDraft} /> : undefined
+          }
+        />
 
         <PostPermissionRevokedDialog
           opened={permissionRevocation.revoked && !revision.reloadRequired}

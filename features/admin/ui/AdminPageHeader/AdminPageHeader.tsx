@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { Group, Stack, Text, Title } from '@mantine/core';
 import { Button, type ControlEmphasis, type ControlTone } from '@/components/core/Button';
 import styles from './AdminPageHeader.module.css';

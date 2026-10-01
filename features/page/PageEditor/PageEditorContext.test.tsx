@@ -10,6 +10,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
+import { usePendingEditorUnload } from '@/lib/editor/usePendingEditorUnload';
 import { createBlockRoomProseMirrorBridge } from '@/features/editor/tiptap/block-room-prosemirror-bridge';
 import { PageEditorProvider, usePageEditor } from './PageEditorContext';
 
@@ -138,7 +139,14 @@ function createRichTextRoom(): Y.Doc {
 
 function Harness() {
   current = usePageEditor();
+  usePendingEditorUnload('page:page-1');
   return null;
+}
+
+function fireBeforeUnload(): Event {
+  const event = new Event('beforeunload', { cancelable: true });
+  window.dispatchEvent(event);
+  return event;
 }
 
 function render(editable = true, locale = 'ko', allowStructuralEdits = editable): void {
@@ -275,6 +283,76 @@ describe('typed resident Page editor context', () => {
     expect(persistCollaborativeDocumentNow).toHaveBeenCalledTimes(2);
     richTextPersist.resolve();
     await expect(flushRichText).resolves.toBe(true);
+  });
+
+  it('warns for localized section edits until their durability flush is acknowledged', async () => {
+    roomDocument.destroy();
+    roomDocument = createRoom('ko', 'ko', true);
+    render();
+    const persist = deferred<void>();
+    persistCollaborativeDocumentNow.mockReturnValueOnce(persist.promise);
+
+    act(() => context().updateLocalizedSectionProps(SECTION_ID, { caption: 'Pending caption' }));
+    expect(fireBeforeUnload().defaultPrevented).toBe(true);
+
+    const flushing = flushEditorSaves('page:page-1');
+    await act(async () => Promise.resolve());
+    expect(persistCollaborativeDocumentNow).toHaveBeenCalledOnce();
+    expect(fireBeforeUnload().defaultPrevented).toBe(true);
+
+    persist.resolve();
+    await expect(flushing).resolves.toBe(true);
+    await act(async () => Promise.resolve());
+    expect(fireBeforeUnload().defaultPrevented).toBe(false);
+  });
+
+  it('warns for localized rich-text edits until their durability flush is acknowledged', async () => {
+    roomDocument.destroy();
+    roomDocument = createRichTextRoom();
+    render();
+    const persist = deferred<void>();
+    persistCollaborativeDocumentNow.mockReturnValueOnce(persist.promise);
+    const bridge = createBlockRoomProseMirrorBridge({
+      document: roomDocument,
+      documentType: 'page',
+      locale: 'ko',
+      pageSectionId: SECTION_ID,
+    });
+
+    act(() => {
+      bridge.replaceCollaborativeText({
+        blockId: RICH_TEXT_BLOCK_ID,
+        scope: 'locale',
+        path: 'content[0].text.text',
+        from: 0,
+        to: 9,
+        insert: 'Fresh body',
+      });
+    });
+    expect(fireBeforeUnload().defaultPrevented).toBe(true);
+
+    const flushing = flushEditorSaves('page:page-1');
+    await act(async () => Promise.resolve());
+    expect(persistCollaborativeDocumentNow).toHaveBeenCalledOnce();
+    expect(fireBeforeUnload().defaultPrevented).toBe(true);
+
+    persist.resolve();
+    await expect(flushing).resolves.toBe(true);
+    await act(async () => Promise.resolve());
+    expect(fireBeforeUnload().defaultPrevented).toBe(false);
+  });
+
+  it('does not warn or persist for a remote Yjs transaction', () => {
+    render();
+    const remoteDocument = new Y.Doc();
+    Y.applyUpdate(remoteDocument, Y.encodeStateAsUpdate(roomDocument));
+    remoteDocument.getMap('remote-state').set('value', 'remote edit');
+
+    act(() => Y.applyUpdate(roomDocument, Y.encodeStateAsUpdate(remoteDocument)));
+
+    expect(fireBeforeUnload().defaultPrevented).toBe(false);
+    expect(persistCollaborativeDocumentNow).not.toHaveBeenCalled();
+    remoteDocument.destroy();
   });
 
   it('keeps edits made during a save pending, vetoes on failure, and allows a retry', async () => {

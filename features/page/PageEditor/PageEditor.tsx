@@ -51,9 +51,11 @@ import { toNullableSlug, toSlugInputValue } from '@/lib/utils/slug';
 import { PageFeaturedImageUploader } from './PageFeaturedImageUploader';
 import { PageEditorInterruptionDialogs } from './PageEditorInterruptionDialogs';
 import { SectionList } from './SectionList';
-import { resolvePageResidentMetadata } from './collaboration-mode';
+import { usePageResidentMetadata } from './usePageResidentMetadata';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
+import { useEditorNavigation } from '@/features/editor/useEditorNavigation';
+import { EditorSaveRecoveryNotice } from '@/features/editor/EditorSaveRecoveryNotice';
 import { PageRecoveryNotice } from './PageRecoveryNotice';
 import { usePageRecoveryDraft } from './usePageRecoveryDraft';
 
@@ -107,6 +109,7 @@ export function PageEditor({
   const tCommon = useTranslations('common');
   const tCommonLabels = useTranslations('common.labels');
   const router = useRouter();
+  const navigateWithSave = useEditorNavigation(`page:${pageId}`);
   const [versionHistoryOpened, { open: openVersionHistory, close: closeVersionHistory }] = useDisclosure(false);
   const [featuredImageUrl, setFeaturedImageUrl] = useState(initialFeaturedImageUrl);
   const [slug, setSlug] = useState(initialSlug);
@@ -142,24 +145,24 @@ export function PageEditor({
     acceptEpochAck,
     recoverySnapshot,
   } = usePageEditorCollaboration(pageId, roomLocale);
-  const [residentTitle, setResidentTitle] = useState(initialTitle);
-  const [residentSummary, setResidentSummary] = useState(initialSummary ?? '');
+  const {
+    title: residentTitle,
+    summary: residentSummary,
+    setTitle: setResidentTitle,
+    setSummary: setResidentSummary,
+  } = usePageResidentMetadata({
+    roomIdentity: provider,
+    sessionLocale: activeEditLocale.activeLocale,
+    roomLocale,
+    bootstrap,
+    fallbackTitle: activeEditLocale.displayTitle,
+    fallbackSummary: activeEditLocale.displaySummary,
+  });
   const recoveryDraft = usePageRecoveryDraft(recoverySnapshot, {
     title: residentTitle,
     summary: residentSummary,
     layout,
   });
-  useEffect(() => {
-    const resident = resolvePageResidentMetadata({
-      roomLocale,
-      bootstrapLocale: bootstrap?.locale ?? null,
-      localeMetadata: bootstrap?.localeMetadata,
-      fallbackTitle: activeEditLocale.displayTitle,
-      fallbackSummary: activeEditLocale.displaySummary,
-    });
-    setResidentTitle(resident.title);
-    setResidentSummary(resident.summary);
-  }, [activeEditLocale.displaySummary, activeEditLocale.displayTitle, bootstrap, roomLocale]);
   const permissionRevocation = useEditorPermissionRevocation(provider, 'page', pageId);
   const revision = useEditorReloadRequired(provider);
   const canMutate = !permissionRevocation.blocked && !revision.reloadRequired;
@@ -313,6 +316,7 @@ export function PageEditor({
   const debouncedLayoutUpdate = useDebouncedPatch({
     document: `page:${pageId}`,
     scope: protocol,
+    recoveryScope: bootstrap?.documentName ?? null,
     delay: 500,
     write: (request: { value: DocumentLayout; previous: DocumentLayout }) =>
       updateLayout.mutateAsync(request).then(() => undefined),
@@ -430,6 +434,7 @@ export function PageEditor({
       blockRoomProtocol={protocol}
     >
       <Stack h="100%" gap="md">
+        <EditorSaveRecoveryNotice document={`page:${pageId}`} />
         {recoverySnapshot && !revision.reloadRequired ? (
           <PageRecoveryNotice snapshot={recoverySnapshot} draft={recoveryDraft} />
         ) : null}
@@ -443,7 +448,9 @@ export function PageEditor({
           statusOptions={pageStatusOptions}
           isConnected={currentIsConnected}
           isSynced={currentIsSynced}
-          onBack={() => router.back()}
+          onBack={() => {
+            void navigateWithSave(() => router.back());
+          }}
           onStatusChange={canEditNeutral ? handleStatusChange : undefined}
           onDelete={canEditNeutral ? () => deletePage.mutate() : undefined}
           deleteConfirmation={{

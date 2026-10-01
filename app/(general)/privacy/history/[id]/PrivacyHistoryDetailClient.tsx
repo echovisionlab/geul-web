@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { useSearchParams } from 'next/navigation';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';

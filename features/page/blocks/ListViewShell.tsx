@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import NextImage from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { useTranslations } from 'next-intl';
 import { Carousel } from '@mantine/carousel';
 import '@mantine/carousel/styles.css';

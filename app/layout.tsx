@@ -28,6 +28,7 @@ import { LocaleProvider } from '@/lib/providers/LocaleProvider';
 import { ReactQueryProvider } from '@/lib/providers/ReactQueryProvider';
 import { RequestTimeZoneProvider } from '@/lib/providers/RequestTimeZoneProvider';
 import { RouteProgressRuntime } from '@/lib/providers/RouteProgressRuntime';
+import { EditorNavigationProvider } from '@/lib/providers/EditorNavigationProvider';
 import { SessionProvider } from '@/lib/providers/SessionProvider';
 import { getServerPublicRuntimeConfig } from '@/lib/public-runtime-config';
 import { getManifest } from '@/lib/queries/manifest';
@@ -191,12 +192,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <LocalePreferenceSync />
                   <ManifestProvider manifest={manifest}>
                     <AppMantineProvider defaultColorScheme={initialColorScheme}>
-                      <RouteProgressRuntime />
-                      <ModalsProvider>
-                        <Notifications pauseResetOnHover="notification" />
-                        {children}
-                        <CookieConsentBanner />
-                      </ModalsProvider>
+                      <EditorNavigationProvider>
+                        <RouteProgressRuntime />
+                        <ModalsProvider>
+                          <Notifications pauseResetOnHover="notification" />
+                          {children}
+                          <CookieConsentBanner />
+                        </ModalsProvider>
+                      </EditorNavigationProvider>
                     </AppMantineProvider>
                   </ManifestProvider>
                 </LocaleProvider>

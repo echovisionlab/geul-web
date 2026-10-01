@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import Link from 'next/link';
+import Link from '../Navigation';
 import { Group, Stack, Text, type TextProps } from '@mantine/core';
 import classes from './PublicMetadata.module.css';
 

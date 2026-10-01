@@ -74,6 +74,9 @@ export function SessionProvider({
       }
 
       const json = (await response.json()) as SessionData | null;
+      if (requestSequence !== requestSequenceRef.current || abortController.signal.aborted) {
+        return;
+      }
       setData(json?.user ? json : null);
     } catch (caught) {
       if (caught instanceof DOMException && caught.name === 'AbortError') {

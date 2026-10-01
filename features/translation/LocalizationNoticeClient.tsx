@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { IconLanguage, IconX } from '@tabler/icons-react';
 import { Group, Stack, Text } from '@mantine/core';
 import { Alert, type AlertTone } from '@/components/core/Alert';

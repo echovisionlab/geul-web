@@ -32,6 +32,7 @@ interface PostMetaContextValue {
   protocol: BlockRoomConnection['protocol'];
   acceptEpochAck: BlockRoomConnection['acceptEpochAck'];
   reloadCanonical: BlockRoomConnection['reloadCanonical'];
+  recoverySnapshot: BlockRoomConnection['recoverySnapshot'];
   roomLocale: string | null;
   localeSession: LocaleDocumentSession;
 }
@@ -78,7 +79,17 @@ export function PostMetaProvider({
   });
   const { roomLocale } = localeSession;
   const blockRoom = useBlockRoomConnection('post', postId, roomLocale);
-  const { provider, doc, isConnected, isSynced, bootstrap, protocol, acceptEpochAck, reloadCanonical } = blockRoom;
+  const {
+    provider,
+    doc,
+    isConnected,
+    isSynced,
+    bootstrap,
+    protocol,
+    acceptEpochAck,
+    reloadCanonical,
+    recoverySnapshot,
+  } = blockRoom;
   const persistDocumentMetadata = useDebouncedRoomMetadata({
     connection: blockRoom,
     document: `post:${postId}`,
@@ -130,6 +141,7 @@ export function PostMetaProvider({
       protocol,
       acceptEpochAck,
       reloadCanonical,
+      recoverySnapshot,
       roomLocale,
       localeSession,
     }),
@@ -151,6 +163,7 @@ export function PostMetaProvider({
       protocol,
       acceptEpochAck,
       reloadCanonical,
+      recoverySnapshot,
       roomLocale,
       localeSession,
     ],

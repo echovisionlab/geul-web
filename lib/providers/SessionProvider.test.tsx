@@ -176,4 +176,48 @@ describe('SessionProvider', () => {
     expect(container.textContent).toContain('Session User:settled');
     expect(container.textContent).toContain('Session refresh failed with status 503');
   });
+
+  it('does not restore an invalidated session when an accepted response body finishes late', async () => {
+    let finishBody!: (data: SessionData) => void;
+    const json = vi.fn(
+      () =>
+        new Promise<SessionData>((resolve) => {
+          finishBody = resolve;
+        }),
+    );
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json }));
+    await renderProvider();
+    await act(async () => window.dispatchEvent(new Event('focus')));
+    expect(json).toHaveBeenCalledOnce();
+
+    act(() => window.dispatchEvent(new Event(SESSION_INVALIDATED_EVENT)));
+    await act(async () => finishBody(sessionFixture));
+
+    expect(container.textContent).toContain('signed-out:settled');
+  });
+
+  it('keeps the newest refresh when an older response body finishes last', async () => {
+    let finishBody!: (data: SessionData) => void;
+    const newer = { ...sessionFixture, user: { ...sessionFixture.user, nickname: 'New session' } };
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: () =>
+            new Promise<SessionData>((resolve) => {
+              finishBody = resolve;
+            }),
+        })
+        .mockResolvedValueOnce({ ok: true, status: 200, json: async () => newer }),
+    );
+    await renderProvider();
+    await act(async () => window.dispatchEvent(new Event('focus')));
+    await act(async () => window.dispatchEvent(new Event('focus')));
+    await act(async () => finishBody(sessionFixture));
+
+    expect(container.textContent).toContain('New session:settled');
+  });
 });

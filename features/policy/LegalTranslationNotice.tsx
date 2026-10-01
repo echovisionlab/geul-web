@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { IconLanguage } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { Group, Text } from '@mantine/core';

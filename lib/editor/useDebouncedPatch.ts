@@ -9,32 +9,40 @@ export function useDebouncedPatch<T extends object>({
   delay,
   scope,
   document,
+  recoveryScope,
 }: {
   write: PatchWriter<T>;
   delay: number;
   scope: unknown;
   document: string;
+  recoveryScope?: string | null;
 }) {
+  const inferredRecoveryScope = typeof scope === 'string' || typeof scope === 'number' ? document : null;
+  const activeRecoveryScope = recoveryScope === undefined ? inferredRecoveryScope : recoveryScope;
   const state = useMemo(() => {
     // Each room/document owns its writer as well as its queue, including stale handlers.
     return {
       scope,
       document,
-      queue: createDebouncedPatch<T>(delay),
+      queue: createDebouncedPatch<T>(delay, document, inferredRecoveryScope),
       write: undefined as PatchWriter<T> | undefined,
       active: false,
     };
   }, [delay, scope, document]);
   useLayoutEffect(() => {
     state.write = write;
+    state.queue.setRecoveryScope(activeRecoveryScope);
   });
   useEffect(() => {
     state.active = true;
+    state.queue.activateRecovery();
     const unregister = registerEditorSave(state.document, state.queue);
     return () => {
       state.active = false;
+      state.queue.preservePendingForRecovery();
       unregister();
       state.queue.cancel();
+      state.queue.deactivateRecovery();
     };
   }, [state]);
   return useMemo(
@@ -45,7 +53,7 @@ export function useDebouncedPatch<T extends object>({
             state.queue.enqueue(patch, state.write);
           }
         },
-        { flush: state.queue.flush, cancel: state.queue.cancel },
+        { flush: state.queue.flush, cancel: state.queue.cancel, hasPending: state.queue.hasPending },
       ),
     [state],
   );

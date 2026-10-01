@@ -1,7 +1,7 @@
 'use client';
 
 import type { MouseEvent, ReactNode } from 'react';
-import Link from 'next/link';
+import Link from '../Navigation';
 import { IconDots } from '@tabler/icons-react';
 import { DropdownMenu } from '../DropdownMenu';
 import { IconButton } from '../IconButton';

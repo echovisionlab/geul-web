@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { getTranslations } from 'next-intl/server';
 import { Group, Stack, Text, Title } from '@mantine/core';
 import { statusToneFromColor, StatusBadge } from '@/components/core/Badge';
