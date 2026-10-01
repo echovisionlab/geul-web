@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { IconKey, IconMail } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { Anchor, Divider, Stack, Text, Title } from '@mantine/core';

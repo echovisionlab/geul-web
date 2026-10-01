@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { IconCopy, IconDots, IconEdit, IconStar, IconTrash } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { Group, SimpleGrid, Text } from '@mantine/core';

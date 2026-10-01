@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { TranslationEntityType } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
 import { IconPlayerPause, IconRefresh, IconSettings2 } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';

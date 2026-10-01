@@ -9,7 +9,7 @@ import {
   type ReactNode,
   type RefAttributes,
 } from 'react';
-import Link, { type LinkProps as NextLinkProps } from 'next/link';
+import Link, { type LinkProps as NextLinkProps } from '../Navigation';
 import classes from './TextButton.module.css';
 
 export type TextButtonAppearance = 'default' | 'muted' | 'accent';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { TranslationProviderType, type TranslationProvider } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
 import { IconChecklist, IconDeviceFloppy, IconEdit, IconPlus, IconSettings2, IconTrash } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';

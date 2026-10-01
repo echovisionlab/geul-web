@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { IconCheck, IconMail, IconRefresh } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { Center, Paper, Stack, Text, Title } from '@mantine/core';

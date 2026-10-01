@@ -49,7 +49,7 @@
     "@echovisionlab/geul-proto": "0.2.1",
     "@echovisionlab/geul-telemetry": "0.1.3",
     "@echovisionlab/ionian": "0.1.3",
-    "@echovisionlab/youtube-audio": "0.1.5",
+    "@echovisionlab/youtube-audio": "0.1.6",
     "@hocuspocus/provider": "^4.6.0",
     "@mantine/carousel": "9.5.1",
     "@mantine/charts": "9.5.1",

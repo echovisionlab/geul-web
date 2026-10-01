@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { useTranslations } from 'next-intl';
 import { Avatar, Group, Stack, Text } from '@mantine/core';
 import { statusToneFromColor, StatusBadge } from '@/components/core/Badge';

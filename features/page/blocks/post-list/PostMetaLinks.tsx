@@ -1,5 +1,5 @@
 import { Fragment, type CSSProperties } from 'react';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { Anchor, Group, Text } from '@mantine/core';
 import classes from './PostAuthorLinks.module.css';
 

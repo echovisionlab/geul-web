@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { redirect } from 'next/navigation';
 import { Box, Group, Stack, Text, Title } from '@mantine/core';
 import { TableOfContents, type TocItem } from '@/features/navigation/TableOfContents';

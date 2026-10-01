@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
+import { UploadSessionStatus } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { IconCheck, IconPlayerStop, IconTriangle, IconUpload, IconX } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -29,6 +30,7 @@ import {
   RELEASE_TRACK_PROCESSING_STATUS,
   type ReleaseTrackProcessingStatus,
 } from './ReleaseEditor/track-processing-status';
+import { isTrackAudioUploadFinalizing } from './track-audio-upload-policy';
 
 const logger = createClientLogger('TrackAudioUploader');
 const ACCEPT_TRACK_AUDIO = ['.mp3', '.wav', '.flac', '.aac', '.ogg', '.oga', '.m4a', '.aif', '.aiff'].join(',');
@@ -119,6 +121,7 @@ export function TrackAudioUploader({
   const [uploadStage, setUploadStage] = useState<string | null>(null);
   const [isResumingCurrentUpload, setIsResumingCurrentUpload] = useState(false);
   const [isFinalizingUpload, setIsFinalizingUpload] = useState(false);
+  const [isCompletionRetryPending, setIsCompletionRetryPending] = useState(false);
   const [localPendingUploadIdentity, setLocalPendingUploadIdentity] = useState<{
     fileId: string;
     attemptId: string;
@@ -129,6 +132,8 @@ export function TrackAudioUploader({
   const activePendingAttemptRef = useRef(String(pendingUploadAttemptId || ''));
   const activePendingFileRef = useRef(String(pendingUploadFileId || ''));
   const activeUploadRunRef = useRef<symbol | null>(null);
+  const isFinalizingOperationRef = useRef(false);
+  const isCompletionRetryPendingRef = useRef(false);
   const suppressedResumeRef = useRef<{ attemptId?: string; fileId?: string } | null>(null);
   const pendingMultipartSessionRef = useRef<{ fileId: string; resumable: boolean } | null>(null);
 
@@ -200,6 +205,12 @@ export function TrackAudioUploader({
   const effectiveUploadProgress = externalUploadActive ? (activeUploadState?.progress ?? 0) : uploadProgress;
   const effectiveUploadStage = externalUploadActive ? (activeUploadState?.stage ?? null) : uploadStage;
   const isAnyUploadActive = isUploading || isFinalizingUpload || externalUploadActive;
+  const isFinalizingOperation = isTrackAudioUploadFinalizing({
+    lifecycleStage: effectiveUploadStage,
+    sessionStatus: resumeNotice?.status,
+    completionRetryPending: isCompletionRetryPending,
+  });
+  isFinalizingOperationRef.current = isFinalizingOperation;
   const isResumeNoticeSuppressed =
     isUploadResumeSuppressed(resumeNotice, suppressedResumeRef.current) ||
     isUploadResumeSuppressed(resumeNotice, suppressedResumeIdentity);
@@ -265,8 +276,17 @@ export function TrackAudioUploader({
     return display.label || t('processing');
   }, [audioAttached, mediaStatusLabels, processingActive, processingProgress, t]);
 
+  const setCompletionRetryPending = (pending: boolean) => {
+    isCompletionRetryPendingRef.current = pending;
+    setIsCompletionRetryPending(pending);
+  };
+
   const cancelPendingUpload = useMutation({
     mutationFn: async () => {
+      if (isFinalizingOperationRef.current) {
+        return null;
+      }
+
       const cancelAttemptId = activePendingAttemptRef.current;
       const cancelIdentity: UploadResumeSuppressionIdentity = {
         attemptId: cancelAttemptId || trackedPendingAttemptId || resumeNotice?.attemptId || undefined,
@@ -316,6 +336,9 @@ export function TrackAudioUploader({
       return suppressedIdentity;
     },
     onSuccess: (identity) => {
+      if (!identity) {
+        return;
+      }
       onPendingUploadCancelled?.(identity);
       if (!isUploading) {
         notifications.show({
@@ -343,6 +366,10 @@ export function TrackAudioUploader({
         ? { fileId: persistedResumeSession.fileId, uploadId: persistedResumeSession.uploadId }
         : undefined;
     const resumeRequested = Boolean(resumeSession);
+    const retryingFinalization =
+      isCompletionRetryPendingRef.current ||
+      resumeNotice?.status === UploadSessionStatus.FINALIZING ||
+      effectiveUploadStage === 'finalizing';
     let activeUploadAttemptId = resumeAttemptId;
     const isCurrentUploadRun = () => activeUploadRunRef.current === activeUploadRun;
     if (!resumeRequested) {
@@ -351,6 +378,8 @@ export function TrackAudioUploader({
     setUploadStage(null);
     setIsResumingCurrentUpload(false);
     setIsFinalizingUpload(false);
+    setCompletionRetryPending(retryingFinalization);
+    isFinalizingOperationRef.current = retryingFinalization;
     cancelRequestedRef.current = false;
     suppressedResumeRef.current = null;
     pendingMultipartSessionRef.current = null;
@@ -394,9 +423,31 @@ export function TrackAudioUploader({
           if (!isCurrentUploadRun()) {
             return;
           }
-          setIsFinalizingUpload(false);
+          if (progress.stage !== 'finalizing') {
+            setIsFinalizingUpload(false);
+          }
           setUploadProgress(progress.percentage);
           setUploadStage(progress.stage ?? 'uploading');
+        },
+        onLifecycle: (lifecycle) => {
+          if (!isCurrentUploadRun()) {
+            return;
+          }
+
+          if (lifecycle.stage === 'finalizing') {
+            isFinalizingOperationRef.current = true;
+            setIsFinalizingUpload(true);
+            setUploadStage('finalizing');
+            setUploadProgress((current) => Math.max(current, lifecycle.percentage ?? 100));
+            if (lifecycle.error) {
+              setCompletionRetryPending(true);
+            }
+            return;
+          }
+
+          if (lifecycle.stage === 'completed' || lifecycle.stage === 'failed') {
+            setCompletionRetryPending(false);
+          }
         },
       });
 
@@ -407,9 +458,18 @@ export function TrackAudioUploader({
       setUploadStage('finalizing');
       setUploadProgress((current) => Math.max(current, 100));
       notifications.show({ message: t('uploaded'), color: 'green' });
+      setCompletionRetryPending(false);
       clearPendingUpload(activeUploadAttemptId);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
+
+      if (message === UPLOAD_FINALIZATION_FAILED_MESSAGE) {
+        setCompletionRetryPending(true);
+        isFinalizingOperationRef.current = true;
+      } else if (!resumeNotice || resumeNotice.status !== UploadSessionStatus.FINALIZING) {
+        setCompletionRetryPending(false);
+        isFinalizingOperationRef.current = false;
+      }
 
       if (cancelRequestedRef.current || message === UPLOAD_ABORTED_MESSAGE) {
         cancelRequestedRef.current = false;
@@ -485,6 +545,14 @@ export function TrackAudioUploader({
     kind: 'idle' | 'warning' | 'processing' | 'ready' | 'failed';
   } => {
     const hasActiveProcessingLifecycle = Boolean(audioAttached && processingActive);
+
+    if (isFinalizingOperation) {
+      return {
+        label: mediaStatusLabels.stage.finalizing,
+        tone: 'cyan',
+        kind: 'processing',
+      };
+    }
 
     if (isAnyUploadActive && isResumingCurrentUpload) {
       return {
@@ -638,13 +706,15 @@ export function TrackAudioUploader({
 
   const cancelButton = showCancelButton ? (
     <div id={cancelButtonWrapperId}>
-      <Tooltip label={tCommon('actions.cancel')}>
+      <Tooltip label={isFinalizingOperation ? mediaStatusLabels.stage.finalizing : tCommon('actions.cancel')}>
         <IconButton
           id={cancelButtonId}
           size={compact ? 'sm' : 'md'}
           tone={isPendingExpired ? 'danger' : 'neutral'}
           emphasis="low"
           loading={cancelPendingUpload.isPending}
+          disabled={isFinalizingOperation}
+          title={isFinalizingOperation ? mediaStatusLabels.stage.finalizing : undefined}
           onClick={() => {
             void cancelPendingUpload.mutateAsync();
           }}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, type ReactNode } from 'react';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { IconExternalLink, IconPencil } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { Box, Divider, Group, Stack, Text, Title } from '@mantine/core';

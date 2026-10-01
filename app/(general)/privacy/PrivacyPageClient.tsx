@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense } from 'react';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { useSearchParams } from 'next/navigation';
 import { IconCalendar, IconHistory } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';

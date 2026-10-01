@@ -1,9 +1,14 @@
+// @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDebouncedPatch } from './debounced-patch';
-import { flushEditorSaves, registerEditorSave } from './editor-save-registry';
+import { flushAllEditorSaves, flushEditorSaves, registerEditorSave } from './editor-save-registry';
+import { clearEditorSaveRecovery, persistEditorSaveRecoveryEntry } from './editor-save-recovery';
 
 beforeEach(() => vi.useFakeTimers());
-afterEach(() => vi.useRealTimers());
+afterEach(() => {
+  window.sessionStorage.clear();
+  vi.useRealTimers();
+});
 
 describe('locale transition saves', () => {
   it('waits for the old locale acknowledgement and blocks transition on failure', async () => {
@@ -59,6 +64,27 @@ describe('locale transition saves', () => {
       cleanups.forEach((cleanup) => cleanup());
       a.cancel();
       b.cancel();
+    }
+  });
+
+  it('keeps an unrelated archived document out of a provider-wide flush result', async () => {
+    window.sessionStorage.clear();
+    persistEditorSaveRecoveryEntry('work:archived', 'old-queue', {
+      document: 'work:archived',
+      updatedAt: Date.now(),
+      patch: { title: 'old draft' },
+    });
+    const current = createDebouncedPatch<{ summary: string }>(500);
+    current.enqueue({ summary: 'current' }, async () => undefined);
+    const unregister = registerEditorSave('page:current', current);
+    try {
+      expect(await flushEditorSaves('page:current')).toBe(true);
+      expect(await flushAllEditorSaves()).toBe(true);
+      expect(await flushEditorSaves('work:archived')).toBe(false);
+    } finally {
+      unregister();
+      current.cancel();
+      clearEditorSaveRecovery('work:archived', ['old-queue']);
     }
   });
 });

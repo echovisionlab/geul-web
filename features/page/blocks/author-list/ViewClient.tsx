@@ -1,7 +1,7 @@
 'use client';
 
 import NextImage from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { Anchor, Box, Group, SimpleGrid, Stack, Text } from '@mantine/core';
 import { isManagedCdnAssetUrl } from '@/lib/utils/file-url';
 import type { AuthorListProps } from './schema';

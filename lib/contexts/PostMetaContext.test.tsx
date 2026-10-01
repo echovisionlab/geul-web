@@ -6,6 +6,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import type { PostMeta } from '@/lib/collab/post-meta';
+import type { BlockRoomRecoverySnapshot } from '@/lib/collab/block-room-recovery';
 import { updatePostBlockRoomDocumentMetadata } from '@/lib/collab/block-room-metadata';
 import { PostMetaProvider, usePostMeta } from './PostMetaContext';
 
@@ -17,6 +18,7 @@ let latest: ReturnType<typeof usePostMeta> | null = null;
 const acceptEpochAck = vi.fn();
 const reloadCanonical = vi.fn();
 const protocol = vi.hoisted(() => ({ updateMetadata: vi.fn(), getSnapshot: vi.fn() }));
+const recoveryRoom = vi.hoisted(() => ({ snapshots: {} as Record<string, unknown> }));
 const localeRoom = vi.hoisted(() => ({
   active: {
     activeLocale: 'ko',
@@ -52,6 +54,7 @@ vi.mock('@/lib/collab/useBlockRoomConnection', () => ({
       error: null,
       acceptEpochAck,
       reloadCanonical,
+      recoverySnapshot: recoveryRoom.snapshots[`${args[0]}:${args[1]}:${args[2]}`] ?? null,
     };
   },
 }));
@@ -88,10 +91,10 @@ const initialMeta: PostMeta = {
   footer: 'pinned',
 };
 
-async function renderProvider(strict = false) {
+async function renderProvider(strict = false, targetPostId = postId) {
   const provider = (
     <PostMetaProvider
-      postId={postId}
+      postId={targetPostId}
       initialMeta={initialMeta}
       initialSlug="post"
       initialFeaturedImageUrl="https://example.com/hydrated-cover.jpg"
@@ -113,6 +116,7 @@ beforeEach(() => {
   document.body.appendChild(container);
   root = createRoot(container);
   latest = null;
+  recoveryRoom.snapshots = {};
   localeRoom.active = {
     activeLocale: 'ko',
     sourceLocale: 'ko',
@@ -149,6 +153,32 @@ describe('PostMetaProvider', () => {
     await renderProvider();
     expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'ko');
     expect(latest?.roomLocale).toBe('ko');
+  });
+
+  it('exposes only the recovery snapshot matching the current Post and locale room', async () => {
+    const koSnapshot = { documentType: 'post', entityId: postId, locale: 'ko' } as BlockRoomRecoverySnapshot;
+    const enSnapshot = { documentType: 'post', entityId: postId, locale: 'en' } as BlockRoomRecoverySnapshot;
+    recoveryRoom.snapshots[`post:${postId}:ko`] = koSnapshot;
+    recoveryRoom.snapshots[`post:${postId}:en`] = enSnapshot;
+
+    await renderProvider();
+    expect(latest?.recoverySnapshot).toBe(koSnapshot);
+    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'ko');
+
+    localeRoom.active = {
+      activeLocale: 'en',
+      sourceLocale: 'ko',
+      isSourceLocale: false,
+      isSourceLocaleReady: true,
+      hasLiveRow: true,
+    };
+    await renderProvider();
+    expect(latest?.recoverySnapshot).toBe(enSnapshot);
+    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'en');
+
+    await renderProvider(false, '22222222-2222-4222-8222-222222222222');
+    expect(latest?.recoverySnapshot).toBeNull();
+    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', '22222222-2222-4222-8222-222222222222', 'en');
   });
 
   it('uses one resident Block Y.Doc and batches taxonomy metadata through CAS', async () => {

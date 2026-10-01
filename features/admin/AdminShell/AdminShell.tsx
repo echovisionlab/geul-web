@@ -1,7 +1,7 @@
 'use client';
 
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { usePathname } from 'next/navigation';
 import {
   IconArticle,

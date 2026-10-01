@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { IconArticle, IconHome } from '@tabler/icons-react';
 import { getTranslations } from 'next-intl/server';
 import { Group, Paper, SimpleGrid, Stack, Text, Title } from '@mantine/core';

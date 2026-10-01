@@ -25,7 +25,7 @@ import {
   type BlockRoomPageSectionsController,
 } from './block-room-page-sections';
 import { persistCollaborativeDocumentNow } from '@/lib/collab/persist-now';
-import { registerEditorSave } from '@/lib/editor/editor-save-registry';
+import { notifyEditorSaveStateChanged, registerEditorSave } from '@/lib/editor/editor-save-registry';
 import { createClientLogger } from '@/lib/utils/client-logger';
 
 const logger = createClientLogger('PageEditorContext');
@@ -39,6 +39,7 @@ function createPageRoomDurability(doc: Y.Doc, provider: HocuspocusProvider, page
   const observeTransaction = (transaction: Y.Transaction) => {
     if (transaction.local && transaction.changed.size > 0) {
       localRevision += 1;
+      notifyEditorSaveStateChanged(`page:${pageId}`);
     }
   };
 
@@ -73,9 +74,11 @@ function createPageRoomDurability(doc: Y.Doc, provider: HocuspocusProvider, page
     const operation = drain().finally(() => {
       if (activeFlush === operation) {
         activeFlush = null;
+        notifyEditorSaveStateChanged(`page:${pageId}`);
       }
     });
     activeFlush = operation;
+    notifyEditorSaveStateChanged(`page:${pageId}`);
     return operation;
   };
 

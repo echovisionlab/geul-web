@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import Link from 'next/link';
+import Link from '@/components/core/Navigation';
 import { IconMarkdown, IconPencil, IconPrinter, IconShare } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { Box, Group, Image, Stack, Text, Title } from '@mantine/core';
