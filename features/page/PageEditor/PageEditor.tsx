@@ -57,6 +57,7 @@ import { createBlockRoomDocumentName } from '@/lib/collab/block-room-bootstrap';
 import { useEditorNavigation } from '@/features/editor/useEditorNavigation';
 import { applyPageLayoutMetadataUpdate } from './page-layout-metadata';
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
+import { requireBlockRoomDurabilityProtocol } from '@/lib/collab/block-room-durability';
 
 interface PageEditorProps {
   pageId: string;
@@ -151,6 +152,10 @@ export function PageEditor({
   const { shouldUseLocaleDocument } = localeSession.mode;
   const { provider, doc, bootstrap, protocol, isConnected, isSynced, reloadCanonical, acceptEpochAck } =
     usePageEditorCollaboration(pageId, roomLocale);
+  const durabilityProtocol = useMemo(
+    () => (protocol ? requireBlockRoomDurabilityProtocol(protocol) : null),
+    [protocol],
+  );
   const initialNeutralConfiguration = useMemo(
     () => ({
       slug: initialSlug,
@@ -639,11 +644,12 @@ export function PageEditor({
             <Text size="sm" fw={500}>
               {tCommon('labels.body')}
             </Text>
-            {provider && doc && isSynced && roomLocale ? (
+            {provider && doc && durabilityProtocol && isSynced && roomLocale ? (
               <MapPlaceActionProvider createMapPlaceForBlock={createMapPlaceForBlockWithBrowserClient}>
                 <PageEditorProvider
                   doc={doc}
                   provider={provider}
+                  protocol={durabilityProtocol}
                   locale={roomLocale}
                   userName={userName}
                   pageId={pageId}

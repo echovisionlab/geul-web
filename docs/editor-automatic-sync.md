@@ -17,6 +17,14 @@ is cleared only when the server's persisted state vector and deletion ranges
 cover it. Checkpointing an already accepted version cannot acknowledge dirty
 body changes. Navigation barriers drain registered body and metadata writes.
 
+The navigation and unload barrier uses the same persisted acknowledgment as the
+body recovery journal. It retains one cumulative state vector and pending
+deletion ranges, captured from local transactions without serializing the full
+document again. A covering acknowledgment clears the barrier after autosave.
+An older acknowledgment cannot clear newer input or a deletion it does not
+cover. A persist-now response alone cannot acknowledge Block-room changes; a
+bounded wait for the persisted acknowledgment keeps failed saves pending.
+
 Old metadata negotiation, baseline-free replacements, manual recovery/download
 dialogs and unused fragment-backed editor APIs are removed. Form schemas use
 the server-serialized patch protocol; direct whole-schema Yjs updates are
@@ -47,6 +55,23 @@ On 2026-10-01, read-only production queries found three current table blocks:
 Every row/cell had an ID. Base IDs were valid UUIDs; localized row/cell IDs and
 cell counts matched the corresponding base positions. No content was changed.
 This check covers current canonical records, not historical version snapshots.
+
+## Connected browser check
+
+On 2026-10-02 (Asia/Seoul), Google Chrome checked the production Page and Post
+regression documents with two connected tabs each, after API v1.0.0 and
+Web/Collab v0.3.0 rolled out. Summary and option changes reached the other tab
+automatically. Temporary body sections and paragraphs appeared in the peer tab,
+then disappeared after deletion and remained deleted after a server reload.
+The original body content survived. Summary edits made immediately before
+navigation were present after returning and receiving canonical state.
+
+Those checks also exposed a stale unload guard: a local body edit remained
+marked pending even after autosave and a peer deletion had completed. The
+shared persisted-acknowledgment tracker addresses that bookkeeping error for
+both Page and Post. Focused regressions distinguish transport synchronization,
+request acknowledgment and actual body durability, including delete-only
+changes and input arriving while a save is in flight.
 
 ## Validation boundary
 

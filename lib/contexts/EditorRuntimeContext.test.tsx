@@ -3,6 +3,8 @@
 import { act, type ReactNode } from 'react';
 import type { EditorRuntimeEvent } from '@echovisionlab/geul-common/collaboration/runtime-events';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
+import type { BlockRoomDurabilityState } from '@/lib/collab/block-room-durability';
+import type { BlockRoomProtocolTransport } from '@/lib/collab/block-room-protocol';
 import * as Y from 'yjs';
 import { MediaProcessingStatus } from '@echovisionlab/geul-proto/common/media_pb.ts';
 import { createRoot, type Root } from 'react-dom/client';
@@ -96,6 +98,7 @@ async function render(
   provider: HocuspocusProvider,
   entityType: 'post' | 'page' | 'menu' | 'series' | 'email_layout' = 'post',
   entityId = 'post-1',
+  blockRoomProtocol?: BlockRoomProtocolTransport | null,
 ) {
   host = document.createElement('div');
   document.body.appendChild(host);
@@ -103,7 +106,12 @@ async function render(
 
   await act(async () => {
     root?.render(
-      <EditorRuntimeProvider provider={provider} entityType={entityType} entityId={entityId}>
+      <EditorRuntimeProvider
+        provider={provider}
+        entityType={entityType}
+        entityId={entityId}
+        blockRoomProtocol={blockRoomProtocol}
+      >
         {children}
       </EditorRuntimeProvider>,
     );
@@ -198,6 +206,27 @@ describe('EditorRuntimeProvider', () => {
     runtimeProvider.provider.document.getMap('content').set('title', 'Local edit');
 
     expect(hasPendingEditorSaves('post:post-1')).toBe(true);
+  });
+
+  it('clears block-room body intent only after a canonical persisted acknowledgement', async () => {
+    const runtimeProvider = createProvider();
+    const listeners = new Set<(state: BlockRoomDurabilityState) => void>();
+    const protocol: BlockRoomProtocolTransport = {
+      updateMetadata: vi.fn(),
+      getSnapshot: vi.fn(),
+      subscribePersisted: (listener: (state: BlockRoomDurabilityState) => void) => {
+        listeners.add(listener);
+        return () => listeners.delete(listener);
+      },
+    };
+    await render(null, runtimeProvider.provider, 'post', 'post-1', protocol);
+
+    const document = runtimeProvider.provider.document;
+    document.getMap('content').set('body', 'Local body');
+    expect(hasPendingEditorSaves('post:post-1')).toBe(true);
+
+    listeners.forEach((listener) => listener({ stateVector: Y.encodeStateVector(document), deleted: {} }));
+    expect(hasPendingEditorSaves('post:post-1')).toBe(false);
   });
 
   it.each(['page', 'menu', 'series', 'email_layout'] as const)(

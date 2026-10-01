@@ -9,6 +9,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
+import type { BlockRoomDurabilityProtocol, BlockRoomDurabilityState } from '@/lib/collab/block-room-durability';
 import { TestProviders } from '@/test/TestProviders';
 import { createDefaultSection } from './types';
 import { createBlockRoomPageSectionsController } from './block-room-page-sections';
@@ -30,7 +31,15 @@ vi.mock('@/lib/collab/persist-now', () => ({ persistCollaborativeDocumentNow: vi
 let roomDocument: Y.Doc;
 let container: HTMLDivElement;
 let root: Root;
-const provider = { name: 'resident-page-room' } as unknown as HocuspocusProvider;
+const provider = {
+  name: 'resident-page-room',
+  get document() {
+    return roomDocument;
+  },
+} as unknown as HocuspocusProvider;
+const protocol: BlockRoomDurabilityProtocol = {
+  subscribePersisted: (_listener: (state: BlockRoomDurabilityState) => void) => () => undefined,
+};
 const RICH_SECTION_ID = '019cce25-dbc0-7d12-9f1f-735b1a6c6b14';
 const BLOCK_ID = '019cce25-dbc0-7d12-9f1f-735b1a6c6b15';
 
@@ -114,6 +123,7 @@ function render(locale: string, editable = true): void {
         <PageEditorProvider
           doc={roomDocument}
           provider={provider}
+          protocol={protocol}
           locale={locale}
           userName="tester"
           pageId="page-1"

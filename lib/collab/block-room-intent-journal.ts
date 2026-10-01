@@ -1,9 +1,15 @@
-import * as Y from 'yjs';
 import {
   canonicalBlockRoomDocumentBytes,
   type CanonicalBlockRoomSnapshot,
   type BlockRoomDocumentType,
 } from '@echovisionlab/geul-common/collaboration/block-room-codec';
+import {
+  blockRoomDurabilityStateCovers,
+  mergeBlockRoomDurabilityDeleteSets,
+  type BlockRoomDurabilityState,
+  type BlockRoomDurabilityDeleteRange,
+  type BlockRoomDurabilityDeleteSet,
+} from './block-room-durability';
 
 export interface BlockRoomIntentScope {
   documentType: BlockRoomDocumentType;
@@ -12,12 +18,9 @@ export interface BlockRoomIntentScope {
   sourceLocale: string;
 }
 
-export interface BlockRoomDeleteRange {
-  clock: number;
-  len: number;
-}
+export type BlockRoomDeleteRange = BlockRoomDurabilityDeleteRange;
 
-export type BlockRoomDeleteSet = Record<string, BlockRoomDeleteRange[]>;
+export type BlockRoomDeleteSet = BlockRoomDurabilityDeleteSet;
 
 export interface BlockRoomIntentChange {
   before: CanonicalBlockRoomSnapshot;
@@ -26,10 +29,7 @@ export interface BlockRoomIntentChange {
   deleted: BlockRoomDeleteSet;
 }
 
-export interface BlockRoomIntentAcknowledgement {
-  stateVector: Uint8Array;
-  deleted: BlockRoomDeleteSet;
-}
+export interface BlockRoomIntentAcknowledgement extends BlockRoomDurabilityState {}
 
 const intentJournals = new Map<string, BlockRoomIntentChange[]>();
 
@@ -47,36 +47,8 @@ function cloneDeleteSet(deleted: BlockRoomDeleteSet): BlockRoomDeleteSet {
   );
 }
 
-function mergeDeleteRanges(ranges: readonly BlockRoomDeleteRange[]): BlockRoomDeleteRange[] {
-  const ordered = ranges.map(({ clock, len }) => ({ clock, len })).sort((left, right) => left.clock - right.clock);
-  const merged: BlockRoomDeleteRange[] = [];
-  for (const range of ordered) {
-    const previous = merged.at(-1);
-    if (
-      previous &&
-      Number.isSafeInteger(previous.clock) &&
-      previous.clock >= 0 &&
-      Number.isSafeInteger(previous.len) &&
-      previous.len > 0 &&
-      Number.isSafeInteger(range.clock) &&
-      range.clock >= 0 &&
-      Number.isSafeInteger(range.len) &&
-      range.len > 0 &&
-      range.clock <= previous.clock + previous.len
-    ) {
-      previous.len = Math.max(previous.clock + previous.len, range.clock + range.len) - previous.clock;
-    } else {
-      merged.push(range);
-    }
-  }
-  return merged;
-}
-
 function mergeDeleteSets(left: BlockRoomDeleteSet, right: BlockRoomDeleteSet): BlockRoomDeleteSet {
-  const clients = new Set([...Object.keys(left), ...Object.keys(right)]);
-  return Object.fromEntries(
-    [...clients].map((client) => [client, mergeDeleteRanges([...(left[client] ?? []), ...(right[client] ?? [])])]),
-  );
+  return mergeBlockRoomDurabilityDeleteSets(left, right);
 }
 
 function cloneChange(change: BlockRoomIntentChange): BlockRoomIntentChange {
@@ -118,50 +90,11 @@ export function blockRoomIntentChangesCanonicalBody(
   return snapshotChanged(scope.documentType, change.before, change.after);
 }
 
-function stateVectorCovers(actualBytes: Uint8Array, expectedBytes: Uint8Array): boolean {
-  const actual = Y.decodeStateVector(actualBytes);
-  const expected = Y.decodeStateVector(expectedBytes);
-  for (const [client, clock] of expected) {
-    if ((actual.get(client) ?? 0) < clock) {
-      return false;
-    }
-  }
-  return true;
-}
-
-function deleteRangesCover(actual: readonly BlockRoomDeleteRange[], expected: BlockRoomDeleteRange): boolean {
-  const expectedEnd = expected.clock + expected.len;
-  const ranges = [...actual]
-    .filter(({ clock, len }) => Number.isSafeInteger(clock) && clock >= 0 && Number.isSafeInteger(len) && len > 0)
-    .sort((left, right) => left.clock - right.clock);
-  let coveredUntil = expected.clock;
-  for (const range of ranges) {
-    const rangeEnd = range.clock + range.len;
-    if (rangeEnd <= coveredUntil) {
-      continue;
-    }
-    if (range.clock > coveredUntil) {
-      return false;
-    }
-    coveredUntil = rangeEnd;
-    if (coveredUntil >= expectedEnd) {
-      return true;
-    }
-  }
-  return coveredUntil >= expectedEnd;
-}
-
 function acknowledgementCoversChange(
   acknowledgement: BlockRoomIntentAcknowledgement,
   change: BlockRoomIntentChange,
 ): boolean {
-  if (!stateVectorCovers(acknowledgement.stateVector, change.stateVector)) {
-    return false;
-  }
-  return Object.entries(change.deleted).every(([client, expectedRanges]) => {
-    const actualRanges = acknowledgement.deleted[client] ?? [];
-    return expectedRanges.every((range) => deleteRangesCover(actualRanges, range));
-  });
+  return blockRoomDurabilityStateCovers(acknowledgement, change);
 }
 
 /** Appends one local canonical body intent; no-op projections are deliberately ignored. */

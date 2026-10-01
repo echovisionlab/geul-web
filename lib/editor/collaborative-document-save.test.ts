@@ -1,6 +1,7 @@
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import * as Y from 'yjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { BlockRoomDurabilityProtocol, BlockRoomDurabilityState } from '@/lib/collab/block-room-durability';
 import { persistCollaborativeDocumentNow } from '@/lib/collab/persist-now';
 import { flushEditorSaves, hasPendingEditorSaves } from './editor-save-registry';
 import {
@@ -16,6 +17,33 @@ const persistNow = vi.mocked(persistCollaborativeDocumentNow);
 const unregisterCallbacks: Array<() => void> = [];
 const documents: Y.Doc[] = [];
 
+function createDurabilityProtocol() {
+  const listeners = new Set<(state: BlockRoomDurabilityState) => void>();
+  const protocol: BlockRoomDurabilityProtocol = {
+    subscribePersisted: (listener) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+  };
+  return {
+    protocol,
+    emit: (state: BlockRoomDurabilityState) => listeners.forEach((listener) => listener(state)),
+  };
+}
+
+function currentDurabilityState(document: Y.Doc): BlockRoomDurabilityState {
+  const update = Y.decodeUpdate(Y.encodeStateAsUpdate(document));
+  return {
+    stateVector: Y.encodeStateVector(document),
+    deleted: Object.fromEntries(
+      [...update.ds.clients.entries()].map(([client, ranges]) => [
+        String(client),
+        ranges.map(({ clock, len }) => ({ clock, len })),
+      ]),
+    ),
+  };
+}
+
 function attachDocumentSave(documentKey = 'post:post-1') {
   const document = new Y.Doc();
   documents.push(document);
@@ -24,7 +52,19 @@ function attachDocumentSave(documentKey = 'post:post-1') {
   return { document, provider };
 }
 
+function attachBlockRoomDocumentSave(documentKey = 'post:post-1') {
+  const document = new Y.Doc();
+  documents.push(document);
+  const provider = { document } as unknown as HocuspocusProvider;
+  const durability = createDurabilityProtocol();
+  unregisterCallbacks.push(
+    registerCollaborativeDocumentSave(provider, documentKey, { kind: 'block-room', protocol: durability.protocol }),
+  );
+  return { document, provider, durability };
+}
+
 afterEach(() => {
+  vi.useRealTimers();
   unregisterCallbacks.splice(0).forEach((unregister) => unregister());
   documents.splice(0).forEach((document) => document.destroy());
   persistNow.mockReset();
@@ -105,4 +145,68 @@ describe('registerCollaborativeDocumentSave', () => {
     expect(persistNow).toHaveBeenCalledTimes(2);
     expect(hasPendingEditorSaves('post:post-1')).toBe(false);
   });
+
+  it('waits for a covering durable ACK when persist.now responds first', async () => {
+    const { document, durability } = attachBlockRoomDocumentSave();
+    persistNow.mockResolvedValue();
+    document.getMap('content').set('title', 'Local edit');
+
+    let settled = false;
+    const flush = flushEditorSaves('post:post-1').then((result) => {
+      settled = true;
+      return result;
+    });
+    await Promise.resolve();
+    expect(persistNow).toHaveBeenCalledOnce();
+    expect(settled).toBe(false);
+    expect(hasPendingEditorSaves('post:post-1')).toBe(true);
+
+    durability.emit(currentDurabilityState(document));
+    await expect(flush).resolves.toBe(true);
+    expect(hasPendingEditorSaves('post:post-1')).toBe(false);
+  });
+
+  it('keeps a newer local edit pending when an older durable ACK arrives', async () => {
+    const { document, durability } = attachBlockRoomDocumentSave();
+    const firstRequest = deferred<void>();
+    persistNow.mockReturnValueOnce(firstRequest.promise).mockResolvedValueOnce();
+
+    document.getMap('content').set('first', 'first edit');
+    const firstAcknowledgement = currentDurabilityState(document);
+    const flushing = flushEditorSaves('post:post-1');
+    await Promise.resolve();
+    document.getMap('content').set('second', 'newer edit');
+    firstRequest.resolve(undefined);
+    await Promise.resolve();
+
+    durability.emit(firstAcknowledgement);
+    await Promise.resolve();
+    expect(persistNow).toHaveBeenCalledTimes(2);
+    expect(hasPendingEditorSaves('post:post-1')).toBe(true);
+
+    durability.emit(currentDurabilityState(document));
+    await expect(flushing).resolves.toBe(true);
+    expect(hasPendingEditorSaves('post:post-1')).toBe(false);
+  });
+
+  it('retains pending intent when the durable ACK does not arrive within its bounded wait', async () => {
+    vi.useFakeTimers();
+    const { document } = attachBlockRoomDocumentSave();
+    persistNow.mockResolvedValue();
+    document.getMap('content').set('title', 'Still not durable');
+
+    const flushing = flushEditorSaves('post:post-1');
+    await Promise.resolve();
+    await vi.advanceTimersByTimeAsync(8_001);
+    await expect(flushing).resolves.toBe(false);
+    expect(hasPendingEditorSaves('post:post-1')).toBe(true);
+  });
 });
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+  return { promise, resolve };
+}
