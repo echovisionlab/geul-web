@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3](https://github.com/echovisionlab/geul-web/compare/v0.3.2...v0.3.3) (2026-10-01)
+
+
+### Bug Fixes
+
+* **editor:** preserve recovery intent and durable lifecycle saves ([#50](https://github.com/echovisionlab/geul-web/issues/50)) ([83b82a3](https://github.com/echovisionlab/geul-web/commit/83b82a3bd695cdafc406e2a0e0df13f5cb840557))
+
 ## [0.3.2](https://github.com/echovisionlab/geul-web/compare/v0.3.1...v0.3.2) (2026-10-01)
 
 
