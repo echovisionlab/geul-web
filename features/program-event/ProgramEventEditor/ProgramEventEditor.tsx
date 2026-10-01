@@ -7,6 +7,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Box, Combobox, Group, InputBase, Loader, SimpleGrid, Stack, Text, useCombobox } from '@mantine/core';
 import { DateTimePicker } from '@mantine/dates';
+import '@mantine/dates/styles.css';
 import { useDebouncedCallback, useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { EditorHeader } from '@/features/editor/EditorHeader';

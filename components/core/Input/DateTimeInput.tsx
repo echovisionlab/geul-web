@@ -7,6 +7,7 @@ import {
   DatesProvider,
   TimePicker as MantineTimePicker,
 } from '@mantine/dates';
+import '@mantine/dates/styles.css';
 import { useMediaQuery, useUncontrolled } from '@mantine/hooks';
 import 'dayjs/locale/ar';
 import 'dayjs/locale/de';

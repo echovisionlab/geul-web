@@ -24,6 +24,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Box, Collapse, Divider, Group, Progress, Stack, Table, Text } from '@mantine/core';
 import { TimePicker } from '@mantine/dates';
+import '@mantine/dates/styles.css';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { Button } from '@/components/core/Button';

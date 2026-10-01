@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { AreaChart, BarChart, DonutChart, LineChart, PieChart, RadarChart } from '@mantine/charts';
+import '@mantine/charts/styles.css';
 import { Group, Stack, Table, Text } from '@mantine/core';
 import { Select } from '@/components/core/Input';
 import type { FieldStats, FieldStatsDate, FieldStatsDistribution, FieldStatsNumber } from '@/lib/types/form/model';

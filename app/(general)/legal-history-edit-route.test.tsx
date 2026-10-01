@@ -17,8 +17,8 @@ const mocks = vi.hoisted(() => ({
 vi.mock('next/server', () => ({ connection: mocks.connection }));
 vi.mock('next/navigation', () => ({ notFound: mocks.notFound }));
 vi.mock('next-intl/server', () => ({ getTranslations: vi.fn() }));
-vi.mock('@/features/policy/PrivacyEditor', () => ({ PrivacyEditor: () => null }));
-vi.mock('@/features/policy/TermsEditor', () => ({ TermsEditor: () => null }));
+vi.mock('@/features/policy/LazyPrivacyEditor', () => ({ LazyPrivacyEditor: () => null }));
+vi.mock('@/features/policy/LazyTermsEditor', () => ({ LazyTermsEditor: () => null }));
 vi.mock('@/features/metadata/ui/JsonLdScript', () => ({ JsonLdScript: () => null }));
 vi.mock('@/lib/queries/metadata', () => ({ getSiteMetadataDocument: vi.fn() }));
 vi.mock('@/lib/queries/privacy', () => ({ getPrivacyVersion: mocks.getPrivacyVersion }));

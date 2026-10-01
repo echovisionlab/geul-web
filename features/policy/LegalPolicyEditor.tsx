@@ -10,6 +10,7 @@ import { Alert } from '@/components/core/Alert';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
 import { SegmentedControl } from '@/components/core/Input';
 import { DateTimePicker } from '@mantine/dates';
+import '@mantine/dates/styles.css';
 import { useDebouncedCallback, useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { materializeLocalizedRichTextDocument } from '@echovisionlab/geul-proto/content/block_catalog.ts';

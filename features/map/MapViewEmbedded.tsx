@@ -15,6 +15,7 @@ import type { ResolvedThemeConfig } from '@/lib/types/map-theme/model';
 import type { MapViewConfig } from '@/lib/types/map/model';
 import { resolveMapLabelVisibility } from '@/lib/utils/map-theme';
 import { resolveMapEmbeddedContainerStyle } from './embedded-layout';
+import { loadPublicMapRuntime, preloadPublicMapRuntime } from './public-map-runtime-loader';
 
 function MapEmbeddedLoader() {
   const t = useTranslations('mapView');
@@ -23,10 +24,13 @@ function MapEmbeddedLoader() {
 }
 
 // Dynamic import for MapLibreMap (requires window)
-const MapLibreMap = dynamic(() => import('@/features/map/MapLibreMap').then((mod) => mod.MapLibreMap), {
-  ssr: false,
-  loading: () => <MapEmbeddedLoader />,
-});
+const MapLibreMap = dynamic(
+  () => loadPublicMapRuntime(() => import('@/features/map/MapLibreMap').then((mod) => mod.MapLibreMap)),
+  {
+    ssr: false,
+    loading: () => <MapEmbeddedLoader />,
+  },
+);
 
 interface MapViewEmbeddedProps {
   config: MapViewConfig;
@@ -93,6 +97,18 @@ export function MapViewEmbedded({
   });
   const themeConfig = themeResolution.config;
   const resolvedLabelLocale = normalizeLocale(labelLocale) ?? currentLocale;
+  const shouldRenderMap =
+    allowEmpty ||
+    config.places.length > 0 ||
+    (featureSourceData !== undefined && featureSourceData.features.length > 0);
+
+  useEffect(() => {
+    if (!shouldRenderMap) {
+      return;
+    }
+
+    void preloadPublicMapRuntime(() => import('@/features/map/MapLibreMap').then((mod) => mod.MapLibreMap));
+  }, [shouldRenderMap]);
 
   // Convert MapViewPlace[] to MapRendererPlace[] format
   const rendererPlaces = useMemo<MapRendererProps['places']>(
@@ -120,7 +136,7 @@ export function MapViewEmbedded({
     isMobileViewport,
   });
 
-  if (!allowEmpty && config.places.length === 0 && (!featureSourceData || featureSourceData.features.length === 0)) {
+  if (!shouldRenderMap) {
     return null;
   }
 

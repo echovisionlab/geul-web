@@ -6,6 +6,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Group, SimpleGrid, Stack, Text } from '@mantine/core';
 import { DateInput, type DateValue } from '@mantine/dates';
+import '@mantine/dates/styles.css';
 import { notifications } from '@mantine/notifications';
 import { EditorHeader, type StatusOption } from '@/features/editor/EditorHeader';
 import { Select, TextInput } from '@/components/core/Input';

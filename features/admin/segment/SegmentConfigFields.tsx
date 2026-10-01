@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { z } from 'zod';
 import { Group, Stack, Text } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
+import '@mantine/dates/styles.css';
 import { LabelBadge } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
 import { MultiSelect } from '@/components/core/Input';

@@ -242,6 +242,11 @@ describe('GeneratedRichTextBlockView File Block downloads', () => {
       );
     });
 
+    await act(async () => {
+      await vi.waitFor(() => {
+        expect(host.querySelector<HTMLButtonElement>('[data-authorized-download-action="icon"]')).not.toBeNull();
+      });
+    });
     const button = host.querySelector<HTMLButtonElement>('[data-authorized-download-action="icon"]');
     expect(button).not.toBeNull();
     await act(async () => {

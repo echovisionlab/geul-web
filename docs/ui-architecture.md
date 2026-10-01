@@ -192,10 +192,10 @@ published paragraph, empty query cache and the existing 60-second freshness wind
 Only the baseline page modules were swapped; query mocks and rendering fixtures
 were identical. Both pages changed as follows:
 
-| Measurement | Before | After |
-| --- | ---: | ---: |
-| Initial client query function calls | 2 | 0 |
-| Published paragraphs in initial HTML | 0 | 1 |
+| Measurement                          | Before | After |
+| ------------------------------------ | -----: | ----: |
+| Initial client query function calls  |      2 |     0 |
+| Published paragraphs in initial HTML |      0 |     1 |
 
 The initial client query calls dropped by 100%. When the server snapshot is unavailable,
 the client now invokes one combined query; the query boundary test verifies exactly
@@ -210,3 +210,43 @@ are real paragraph SSR, hydration preserving the server DOM, query counts, local
 ShareLink isolation, return visits with older or pending browser data, and authoritative
 empty versus service failure behavior. Server request-cache tests model React's cache
 semantics and do not constitute production RPC tracing.
+
+## Public runtime loading boundaries
+
+Public route compositions import a domain-owned `Lazy*Editor` client entrypoint. That
+entrypoint owns the editor's `next/dynamic` import; permissions, redirects and edit
+props stay in the server route. Editor SSR remains enabled. Importing an editor
+dynamically from a server component alone does not establish this client boundary.
+
+Generated and legacy rich-text dispatchers keep text, headings, lists and tables
+synchronous. Math, maps, diagrams, code and executable blocks own separate dynamic
+modules with SSR enabled, preserving document HTML and printable source. Generated
+file blocks own their media implementation separately. Download authority, durable
+attachment state and missing-media presentation are preserved by those modules.
+
+The root layout owns Mantine Core, notifications, spotlight and document styles.
+Dates, charts, carousel, KaTeX and Video.js vendor styles belong to actual feature
+consumers. Math modules import KaTeX; both the video player and legacy media hydrator
+import Video.js. Storybook retains its independent preview styling.
+
+`MapViewEmbedded` starts the shared runtime import when a map is needed, overlapping
+its theme query. The dynamic renderer reuses the same promise. Empty unused maps do
+not start it, and failed imports can be retried. Map workers retain their existing
+runtime lifecycle; bounds-dependent data requests are not deduplicated across
+unequal bounds.
+
+`page-public.server.ts` owns the raw Page response within one React request, keyed
+by decoded slug and requested locale. Homepage and Page metadata/body mapping share
+that response. Source-locale fallbacks use a different locale key, and each caller
+retains its existing empty/not-found/error policy.
+
+Anonymous visits to the six measured public routes receive a smaller translation
+catalogue. Authenticated and other initial routes receive the full catalogue.
+Public media/executable messages in `editorCommon` remain available. Because root
+layouts persist across navigation, `ClientMessagesProvider` restores the current
+locale's full catalogue before rendering another route. It retains a loaded full
+catalogue for later navigation and never reuses it for another locale.
+
+Same-condition measurement and limits are recorded in
+`docs/public-loading-performance.md`. Source dependency boundaries are not a
+substitute for initial network-transfer measurements.

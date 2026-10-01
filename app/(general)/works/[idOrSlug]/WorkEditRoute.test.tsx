@@ -14,8 +14,8 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('next/navigation', () => ({ redirect: mocks.redirect, notFound: mocks.notFound }));
 vi.mock('next-intl/server', () => ({ getTranslations: vi.fn() }));
-vi.mock('@/features/work/WorkEditor/WorkEditor', () => ({
-  WorkEditor: ({ workId, canEdit }: { workId: string; canEdit: boolean }) => (
+vi.mock('@/features/work/WorkEditor/LazyWorkEditor', () => ({
+  LazyWorkEditor: ({ workId, canEdit }: { workId: string; canEdit: boolean }) => (
     <div>
       editor:{workId}:{String(canEdit)}
     </div>

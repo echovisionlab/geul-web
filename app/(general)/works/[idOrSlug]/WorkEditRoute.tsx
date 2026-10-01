@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { WorkEditor } from '@/features/work/WorkEditor/WorkEditor';
+import { LazyWorkEditor } from '@/features/work/WorkEditor/LazyWorkEditor';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import type { WorkType } from '@/lib/contexts/WorkMetaContext';
 import { getManageSiteContext, getSettings } from '@/lib/queries/manifest';
@@ -48,7 +48,7 @@ export async function renderWorkEditRoute(idOrSlug: string, query: SearchParamRe
 
   const [baseUrl, site] = await Promise.all([getBaseUrl(), getManageSiteContext()]);
   return (
-    <WorkEditor
+    <LazyWorkEditor
       workId={work.id}
       currentMemberId={session.user.id}
       initialTitle={work.title}

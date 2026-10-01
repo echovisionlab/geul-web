@@ -14,8 +14,8 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('next/navigation', () => ({ redirect: mocks.redirect, notFound: mocks.notFound }));
 vi.mock('next-intl/server', () => ({ getTranslations: vi.fn() }));
-vi.mock('@/features/program-event/ProgramEventSeriesEditor/ProgramEventSeriesEditor', () => ({
-  ProgramEventSeriesEditor: ({ seriesId, initialStatus }: { seriesId: string; initialStatus: string }) => (
+vi.mock('@/features/program-event/ProgramEventSeriesEditor/LazyProgramEventSeriesEditor', () => ({
+  LazyProgramEventSeriesEditor: ({ seriesId, initialStatus }: { seriesId: string; initialStatus: string }) => (
     <div>
       editor:{seriesId}:{initialStatus}
     </div>

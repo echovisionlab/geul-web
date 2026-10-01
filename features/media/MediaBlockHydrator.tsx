@@ -1,5 +1,6 @@
 'use client';
 
+import 'video.js/dist/video-js.css';
 import { RefObject, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { resolveHydratedAudioSources, resolveHydratedVideoSources } from '@/features/media/runtime/media-hydration';

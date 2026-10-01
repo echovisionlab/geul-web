@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Carousel } from '@mantine/carousel';
+import '@mantine/carousel/styles.css';
 import { Group, Pagination, SimpleGrid, Skeleton, Stack, Text } from '@mantine/core';
 import { ContentCard, ContentCardSection } from '@/components/core/Section';
 import { listPublishedPosts } from '@/lib/queries/post-browser';

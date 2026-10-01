@@ -1,11 +1,6 @@
 import '@mantine/core/styles.css';
-import '@mantine/carousel/styles.css';
-import '@mantine/charts/styles.css';
-import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
 import '@mantine/spotlight/styles.css';
-import 'katex/dist/katex.min.css';
-import 'video.js/dist/video-js.css';
 import '@/lib/styles/variables.css';
 import '@/lib/styles/font-assignment.css';
 import '@/lib/styles/document-content.css';
@@ -15,7 +10,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { NextIntlClientProvider } from 'next-intl';
+import { ClientMessagesProvider } from '@/lib/providers/ClientMessagesProvider';
 import { mantineHtmlProps } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
@@ -25,6 +20,7 @@ import { GoogleAnalyticsLoader } from '@/features/analytics/GoogleAnalyticsLoade
 import { loadAfterOnboardingGate } from '@/lib/auth/onboarding-redirect';
 import { ManifestProvider } from '@/lib/contexts/ManifestContext';
 import { getMessagesForLocale } from '@/lib/i18n/messages';
+import { selectClientMessages } from '@/lib/i18n/client-messages';
 import { resolveRequestTimeZone } from '@/lib/i18n/request-time-zone';
 import { AppMantineProvider } from '@/lib/providers/AppMantineProvider';
 import { LocalePreferenceSync } from '@/lib/providers/LocalePreferenceSync';
@@ -128,7 +124,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
   const session = gated.session;
   const [manifest, site, cookieStore] = gated.bootstrap;
-  const messages = await getMessagesForLocale(localeContext.locale);
+  const fullMessages = await getMessagesForLocale(localeContext.locale);
+  const messages = selectClientMessages(fullMessages, {
+    pathWithSearch: getRequestPathWithSearchFromHeaders(headersList, pathname),
+    hasSession: Boolean(session),
+  });
   const publicRuntimeConfig = getServerPublicRuntimeConfig();
   const google_analytics_id = manifest.settings.google_analytics_id;
   const siteJsonLd = [buildSiteOrganizationJsonLd(site), buildSiteWebSiteJsonLd(site)];
@@ -179,10 +179,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <GoogleAnalyticsLoader googleAnalyticsId={google_analytics_id} />
         <ReactQueryProvider>
           <SessionProvider initialData={initialSession}>
-            <NextIntlClientProvider
+            <ClientMessagesProvider
               key={localeContext.locale}
               locale={localeContext.locale}
               messages={messages}
+              reducedCatalogue={messages !== fullMessages}
               timeZone={requestTimeZone}
             >
               <RequestTimeZoneProvider timeZone={requestTimeZone}>
@@ -200,7 +201,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   </ManifestProvider>
                 </LocaleProvider>
               </RequestTimeZoneProvider>
-            </NextIntlClientProvider>
+            </ClientMessagesProvider>
           </SessionProvider>
         </ReactQueryProvider>
       </body>

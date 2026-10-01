@@ -4,6 +4,7 @@ import { IconPlus, IconTrash } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { Group, Stack, Text } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
+import '@mantine/dates/styles.css';
 import { useMediaQuery } from '@mantine/hooks';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';

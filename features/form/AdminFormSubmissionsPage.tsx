@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Group, Modal, Pagination, Stack, Table, Text } from '@mantine/core';
 import { DatePickerInput, type DatesRangeValue } from '@mantine/dates';
+import '@mantine/dates/styles.css';
 import { useDebouncedValue, useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { LabelBadge } from '@/components/core/Badge';

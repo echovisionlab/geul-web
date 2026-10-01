@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { ProgramEventEditor } from '@/features/program-event/ProgramEventEditor/ProgramEventEditor';
+import { LazyProgramEventEditor } from '@/features/program-event/ProgramEventEditor/LazyProgramEventEditor';
 import { resolveProgramEventEditorActions } from '@/features/program-event/ProgramEventEditor/program-event-actions';
 import { listArtistsAction } from '@/lib/actions/artist';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
@@ -57,7 +57,7 @@ export async function renderProgramEventEditRoute(idOrSlug: string, query: Searc
     : [[], [], [], { data: [] }, { data: [] }];
 
   return (
-    <ProgramEventEditor
+    <LazyProgramEventEditor
       eventId={event.id}
       currentMemberId={session.user.id}
       userName={session.user.nickname}

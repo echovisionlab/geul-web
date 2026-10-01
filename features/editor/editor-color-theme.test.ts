@@ -110,13 +110,15 @@ describe('editor semantic color theme', () => {
     expect(blockMenu).toContain('<EditorColorSwatch kind={kind} color={color} />');
   });
 
-  it('loads the Mantine document bridge and KaTeX vendor styles at both global entrypoints', () => {
+  it('loads the document bridge globally and KaTeX styles with math renderers', () => {
     const appLayout = read('../../app/layout.tsx');
     const storybookPreview = read('../../.storybook/preview.tsx');
 
     expect(appLayout).toContain("import '@/lib/styles/document-content.css';");
     expect(storybookPreview).toContain("import '../lib/styles/document-content.css';");
-    expect(appLayout).toContain("import 'katex/dist/katex.min.css';");
+    expect(appLayout).not.toContain("import 'katex/dist/katex.min.css';");
+    expect(read('./tiptap/math/math-render.ts')).toContain("import 'katex/dist/katex.min.css';");
+    expect(read('../page/PageView/blocks/GeneratedMathBlockView.tsx')).toContain("import 'katex/dist/katex.min.css';");
     expect(storybookPreview).toContain("import 'katex/dist/katex.min.css';");
     expect(appLayout).not.toContain("import '@/lib/styles/prose.css';");
   });

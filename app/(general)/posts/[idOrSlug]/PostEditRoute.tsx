@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { PostAction } from '@echovisionlab/geul-proto/secure/post_pb.ts';
 import { getTranslations } from 'next-intl/server';
-import { PostEditor } from '@/features/post/PostEditor/PostEditor';
+import { LazyPostEditor } from '@/features/post/PostEditor/LazyPostEditor';
 import { listCategoriesAction } from '@/lib/actions/category';
 import { listPostShareLinksAction } from '@/lib/actions/post';
 import { listTagsAction } from '@/lib/actions/tag';
@@ -93,7 +93,7 @@ export async function renderPostEditRoute(idOrSlug: string, query: SearchParamRe
   }));
 
   return (
-    <PostEditor
+    <LazyPostEditor
       postId={post.id}
       currentMemberId={session.user.id}
       initialTitle={post.title}
