@@ -13,6 +13,14 @@ import { DEFAULT_DARK_VARIANT, DEFAULT_LIGHT_VARIANT, DEFAULT_THEME_SETTINGS } f
 import { hasPendingEditorSaves } from '@/lib/editor/editor-save-registry';
 import { useMapThemeEditorCollaboration } from './useMapThemeEditorCollaboration';
 
+const { persistCollaborativeDocumentNow } = vi.hoisted(() => ({
+  persistCollaborativeDocumentNow: vi.fn<() => Promise<void>>(),
+}));
+
+vi.mock('@/lib/collab/persist-now', () => ({ persistCollaborativeDocumentNow }));
+
+const AUTOMATIC_PERSIST_DEBOUNCE_MS = 2_000;
+
 const connection = vi.hoisted(() => ({
   doc: null as Y.Doc | null,
   provider: null as MockProvider | null,
@@ -25,9 +33,11 @@ const connection = vi.hoisted(() => ({
 interface MockProvider {
   document: Y.Doc;
   hasUnsyncedChanges: boolean;
-  on: (event: string, listener: (event: { number: number }) => void) => void;
-  off: (event: string, listener: (event: { number: number }) => void) => void;
+  readonly isSynced: boolean;
+  on: (event: string, listener: (event: { number: number } | { state: boolean }) => void) => void;
+  off: (event: string, listener: (event: { number: number } | { state: boolean }) => void) => void;
   emitUnsyncedChanges: (number: number) => void;
+  emitSynced: (state: boolean) => void;
 }
 
 vi.mock('./useHocuspocusConnection', () => ({
@@ -77,27 +87,31 @@ function createThemeDocument(snapshot?: {
 
 function setConnectionDocument(doc: Y.Doc) {
   connection.doc = doc;
-  const listeners = new Set<(event: { number: number }) => void>();
-  connection.provider = {
+  const listeners = new Map<string, Set<(event: { number: number } | { state: boolean }) => void>>();
+  const provider: MockProvider = {
     document: doc,
     hasUnsyncedChanges: false,
+    get isSynced() {
+      return connection.synced;
+    },
     on: (event, listener) => {
-      if (event === 'unsyncedChanges') {
-        listeners.add(listener);
-      }
+      const eventListeners = listeners.get(event) ?? new Set();
+      eventListeners.add(listener);
+      listeners.set(event, eventListeners);
     },
     off: (event, listener) => {
-      if (event === 'unsyncedChanges') {
-        listeners.delete(listener);
-      }
+      listeners.get(event)?.delete(listener);
     },
     emitUnsyncedChanges: (number) => {
-      if (connection.provider) {
-        connection.provider.hasUnsyncedChanges = number > 0;
-      }
-      listeners.forEach((listener) => listener({ number }));
+      provider.hasUnsyncedChanges = number > 0;
+      listeners.get('unsyncedChanges')?.forEach((listener) => listener({ number }));
+    },
+    emitSynced: (state) => {
+      connection.synced = state;
+      listeners.get('synced')?.forEach((listener) => listener({ state }));
     },
   };
+  connection.provider = provider;
 }
 
 function withoutScheme<T extends { scheme: string }>({ scheme: _scheme, ...variant }: T) {
@@ -128,7 +142,33 @@ function syncCurrentDocument() {
   act(() => connection.onSynced?.(connection.doc!));
 }
 
+function createDeferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise;
+    reject = rejectPromise;
+  });
+  return { promise, resolve, reject };
+}
+
+async function settlePromiseCallbacks() {
+  await act(async () => {
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+}
+
+async function advanceAutomaticPersistDebounce() {
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(AUTOMATIC_PERSIST_DEBOUNCE_MS);
+  });
+}
+
 beforeEach(() => {
+  vi.useFakeTimers();
+  persistCollaborativeDocumentNow.mockReset().mockResolvedValue(undefined);
   setConnectionDocument(createThemeDocument());
   connection.synced = false;
   connection.onSynced = null;
@@ -145,6 +185,8 @@ afterEach(() => {
   act(() => root.unmount());
   container.remove();
   documents.splice(0).forEach((doc) => doc.destroy());
+  vi.clearAllTimers();
+  vi.useRealTimers();
 });
 
 describe('useMapThemeEditorCollaboration', () => {
@@ -240,7 +282,7 @@ describe('useMapThemeEditorCollaboration', () => {
     expect(hasPendingEditorSaves('map_theme:11111111-1111-4111-8111-111111111111')).toBe(true);
   });
 
-  it('does not replay an edit already acknowledged by the server over a later peer value', () => {
+  it('does not replay an edit already acknowledged by the server over a later peer value', async () => {
     const initialDocument = createThemeDocument({ name: 'Baseline theme' });
     setConnectionDocument(initialDocument);
     renderProbe();
@@ -251,6 +293,9 @@ describe('useMapThemeEditorCollaboration', () => {
       connection.provider?.emitUnsyncedChanges(1);
       connection.provider?.emitUnsyncedChanges(0);
     });
+    await advanceAutomaticPersistDebounce();
+    await settlePromiseCallbacks();
+    expect(hasPendingEditorSaves('map_theme:11111111-1111-4111-8111-111111111111')).toBe(false);
     act(() => connection.onReloadRequired?.(() => true));
 
     const freshDocument = createThemeDocument({ name: 'Later peer theme' });
@@ -260,6 +305,81 @@ describe('useMapThemeEditorCollaboration', () => {
     syncCurrentDocument();
 
     expect(createMapThemeMetaMap(freshDocument).get('name')).toBe('Later peer theme');
+  });
+
+  it('keeps field intent through transport sync until persist.now acknowledges the write', async () => {
+    setConnectionDocument(createThemeDocument({ name: 'Initial name' }));
+    renderProbe();
+    syncCurrentDocument();
+
+    const firstPersist = createDeferred<void>();
+    persistCollaborativeDocumentNow.mockReturnValueOnce(firstPersist.promise);
+    act(() => result.current?.setName('Local name'));
+    act(() => {
+      connection.provider?.emitUnsyncedChanges(1);
+      connection.provider?.emitUnsyncedChanges(0);
+    });
+    expect(persistCollaborativeDocumentNow).not.toHaveBeenCalled();
+    await advanceAutomaticPersistDebounce();
+    expect(persistCollaborativeDocumentNow).toHaveBeenCalledOnce();
+    expect(hasPendingEditorSaves('map_theme:11111111-1111-4111-8111-111111111111')).toBe(true);
+
+    act(() => connection.onReloadRequired?.(() => true));
+    const freshDocument = createThemeDocument({ name: 'Peer name' });
+    setConnectionDocument(freshDocument);
+    connection.synced = false;
+    renderProbe();
+    syncCurrentDocument();
+
+    expect(createMapThemeMetaMap(freshDocument).get('name')).toBe('Local name');
+    expect(hasPendingEditorSaves('map_theme:11111111-1111-4111-8111-111111111111')).toBe(true);
+    firstPersist.resolve(undefined);
+    await settlePromiseCallbacks();
+  });
+
+  it('advances the field baseline after persist.now ACK and keeps later edits pending through their own ACK', async () => {
+    setConnectionDocument(createThemeDocument({ name: 'Initial name' }));
+    renderProbe();
+    syncCurrentDocument();
+
+    const firstPersist = createDeferred<void>();
+    persistCollaborativeDocumentNow.mockReturnValueOnce(firstPersist.promise);
+    act(() => result.current?.setName('Saved local name'));
+    act(() => {
+      connection.provider?.emitUnsyncedChanges(1);
+      connection.provider?.emitUnsyncedChanges(0);
+    });
+    await advanceAutomaticPersistDebounce();
+    expect(persistCollaborativeDocumentNow).toHaveBeenCalledOnce();
+    expect(hasPendingEditorSaves('map_theme:11111111-1111-4111-8111-111111111111')).toBe(true);
+
+    firstPersist.resolve(undefined);
+    await settlePromiseCallbacks();
+    expect(hasPendingEditorSaves('map_theme:11111111-1111-4111-8111-111111111111')).toBe(false);
+
+    const secondPersist = createDeferred<void>();
+    persistCollaborativeDocumentNow.mockReturnValueOnce(secondPersist.promise);
+    act(() => result.current?.setName('Newer local name'));
+    act(() => {
+      connection.provider?.emitUnsyncedChanges(1);
+      connection.provider?.emitUnsyncedChanges(0);
+    });
+    await advanceAutomaticPersistDebounce();
+    expect(persistCollaborativeDocumentNow).toHaveBeenCalledTimes(2);
+    expect(hasPendingEditorSaves('map_theme:11111111-1111-4111-8111-111111111111')).toBe(true);
+
+    secondPersist.resolve(undefined);
+    await settlePromiseCallbacks();
+    expect(hasPendingEditorSaves('map_theme:11111111-1111-4111-8111-111111111111')).toBe(false);
+
+    act(() => connection.onReloadRequired?.(() => true));
+    const freshDocument = createThemeDocument({ name: 'Later peer name' });
+    setConnectionDocument(freshDocument);
+    connection.synced = false;
+    renderProbe();
+    syncCurrentDocument();
+
+    expect(createMapThemeMetaMap(freshDocument).get('name')).toBe('Later peer name');
   });
 
   it('resets the collaboration baseline and staged intents when the theme identity changes', () => {

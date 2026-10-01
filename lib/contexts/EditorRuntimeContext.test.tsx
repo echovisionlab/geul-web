@@ -53,6 +53,8 @@ function createProvider(documentName = `post:${documentEntityId}:en`) {
   let statelessHandler: ((input: { payload: string }) => void) | null = null;
   const provider = {
     document,
+    isSynced: true,
+    hasUnsyncedChanges: false,
     configuration: { name: documentName },
     on: vi.fn((event: string, handler: (input: { payload: string }) => void) => {
       if (event === 'stateless') {
@@ -157,7 +159,7 @@ describe('EditorRuntimeProvider', () => {
     expect(host?.querySelectorAll('[data-url="https://cdn.example.com/file-b.m3u8"]')).toHaveLength(1);
   });
 
-  it('uses one provider listener and dispatches one parsed event through subscriber filters', async () => {
+  it('uses one runtime event listener and dispatches one parsed event through subscriber filters', async () => {
     const runtimeProvider = createProvider();
     const firstListener = vi.fn();
     const secondListener = vi.fn();
@@ -170,7 +172,7 @@ describe('EditorRuntimeProvider', () => {
       runtimeProvider.provider,
     );
 
-    expect(runtimeProvider.on).toHaveBeenCalledTimes(1);
+    expect(runtimeProvider.on.mock.calls.filter(([event]) => event === 'stateless')).toHaveLength(1);
 
     act(() => {
       runtimeProvider.emit({
@@ -196,7 +198,7 @@ describe('EditorRuntimeProvider', () => {
       root?.unmount();
     });
     root = null;
-    expect(runtimeProvider.off).toHaveBeenCalledTimes(1);
+    expect(runtimeProvider.off.mock.calls.filter(([event]) => event === 'stateless')).toHaveLength(1);
   });
 
   it('registers local provider document edits as a save for the owning entity', async () => {

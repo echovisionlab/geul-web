@@ -18,6 +18,7 @@ import type { ThemeSettings, ThemeVariant } from '@/lib/types/map-theme/model';
 import { DEFAULT_DARK_VARIANT, DEFAULT_LIGHT_VARIANT, DEFAULT_THEME_SETTINGS } from '@/lib/types/map-theme/schema';
 import { useMapThemeReloadRequired } from '@/features/admin/MapThemeEditor/useMapThemeReloadRequired';
 import { registerCollaborativeDocumentSave } from '@/lib/editor/collaborative-document-save';
+import { hasPendingEditorSaves, subscribeToEditorSaveState } from '@/lib/editor/editor-save-registry';
 import { useHocuspocusConnection } from './useHocuspocusConnection';
 
 interface MapThemeCanonicalSnapshot {
@@ -148,36 +149,61 @@ export function useMapThemeEditorCollaboration(
     },
     onReloadRequired,
   });
+  const saveKey = `map_theme:${themeId}`;
 
-  // MapTheme is a standalone legacy collaboration editor rather than an
-  // EditorRuntimeProvider child, so register its document with the same save barrier.
+  // This standalone document-room editor owns its save barrier here.
   useEffect(() => {
     if (!provider) {
       return;
     }
-    return registerCollaborativeDocumentSave(provider, `map_theme:${themeId}`);
-  }, [provider, themeId]);
+    return registerCollaborativeDocumentSave(provider, saveKey);
+  }, [provider, saveKey]);
+
+  const advanceCanonicalSnapshotIfDurable = useCallback(() => {
+    if (
+      !provider ||
+      !provider.isSynced ||
+      provider.hasUnsyncedChanges ||
+      !hasCanonicalSyncRef.current ||
+      pendingReplayRef.current ||
+      hasPendingEditorSaves(saveKey)
+    ) {
+      return;
+    }
+
+    const snapshot = readSnapshotFromMaps();
+    if (!snapshot) {
+      return;
+    }
+
+    canonicalSnapshotRef.current = cloneCanonicalSnapshot(snapshot);
+    fieldIntentsRef.current = createEmptyFieldIntents();
+  }, [provider, readSnapshotFromMaps, saveKey]);
 
   useEffect(() => {
     if (!provider) {
       return;
     }
     const handleUnsyncedChanges = ({ number }: { number: number }) => {
-      if (number !== 0 || !hasCanonicalSyncRef.current || pendingReplayRef.current) {
-        return;
+      if (number === 0) {
+        advanceCanonicalSnapshotIfDurable();
       }
-      const snapshot = readSnapshotFromMaps();
-      if (!snapshot) {
-        return;
-      }
-      canonicalSnapshotRef.current = cloneCanonicalSnapshot(snapshot);
-      fieldIntentsRef.current = createEmptyFieldIntents();
     };
+    const handleSynced = ({ state }: { state: boolean }) => {
+      if (state) {
+        advanceCanonicalSnapshotIfDurable();
+      }
+    };
+    const unsubscribeSaveState = subscribeToEditorSaveState(saveKey, advanceCanonicalSnapshotIfDurable);
     provider.on('unsyncedChanges', handleUnsyncedChanges);
+    provider.on('synced', handleSynced);
+    advanceCanonicalSnapshotIfDurable();
     return () => {
       provider.off('unsyncedChanges', handleUnsyncedChanges);
+      provider.off('synced', handleSynced);
+      unsubscribeSaveState();
     };
-  }, [provider, readSnapshotFromMaps]);
+  }, [advanceCanonicalSnapshotIfDurable, provider, saveKey]);
 
   const metaMap = useMemo(() => (doc ? createMapThemeMetaMap(doc) : null), [doc]);
   const settingsMap = useMemo(() => (doc ? createMapThemeSettingsMap(doc) : null), [doc]);

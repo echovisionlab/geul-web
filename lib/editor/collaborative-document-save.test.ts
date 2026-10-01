@@ -1,10 +1,11 @@
-import type { HocuspocusProvider } from '@hocuspocus/provider';
 import * as Y from 'yjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { BlockRoomDurabilityProtocol, BlockRoomDurabilityState } from '@/lib/collab/block-room-durability';
 import { persistCollaborativeDocumentNow } from '@/lib/collab/persist-now';
 import { flushEditorSaves, hasPendingEditorSaves } from './editor-save-registry';
+import { createHocuspocusProviderFixture } from '@/features/editor/hocuspocusProvider.test-fixture';
 import {
+  createCollaborativeDocumentSaveTracker,
   createCollaborativeDocumentReplayOrigin,
   registerCollaborativeDocumentSave,
 } from './collaborative-document-save';
@@ -16,6 +17,7 @@ vi.mock('@/lib/collab/persist-now', () => ({
 const persistNow = vi.mocked(persistCollaborativeDocumentNow);
 const unregisterCallbacks: Array<() => void> = [];
 const documents: Y.Doc[] = [];
+const providerFixtures: Array<ReturnType<typeof createHocuspocusProviderFixture>> = [];
 
 function createDurabilityProtocol() {
   const listeners = new Set<(state: BlockRoomDurabilityState) => void>();
@@ -45,17 +47,21 @@ function currentDurabilityState(document: Y.Doc): BlockRoomDurabilityState {
 }
 
 function attachDocumentSave(documentKey = 'post:post-1') {
-  const document = new Y.Doc();
+  const fixture = createHocuspocusProviderFixture(documentKey);
+  providerFixtures.push(fixture);
+  const provider = fixture.provider;
+  const document = provider.document;
   documents.push(document);
-  const provider = { document } as unknown as HocuspocusProvider;
   unregisterCallbacks.push(registerCollaborativeDocumentSave(provider, documentKey));
   return { document, provider };
 }
 
 function attachBlockRoomDocumentSave(documentKey = 'post:post-1') {
-  const document = new Y.Doc();
+  const fixture = createHocuspocusProviderFixture(documentKey);
+  providerFixtures.push(fixture);
+  const provider = fixture.provider;
+  const document = provider.document;
   documents.push(document);
-  const provider = { document } as unknown as HocuspocusProvider;
   const durability = createDurabilityProtocol();
   unregisterCallbacks.push(
     registerCollaborativeDocumentSave(provider, documentKey, { kind: 'block-room', protocol: durability.protocol }),
@@ -66,6 +72,7 @@ function attachBlockRoomDocumentSave(documentKey = 'post:post-1') {
 afterEach(() => {
   vi.useRealTimers();
   unregisterCallbacks.splice(0).forEach((unregister) => unregister());
+  providerFixtures.splice(0).forEach((fixture) => fixture.destroy());
   documents.splice(0).forEach((document) => document.destroy());
   persistNow.mockReset();
 });
@@ -144,6 +151,182 @@ describe('registerCollaborativeDocumentSave', () => {
     await expect(flushEditorSaves('post:post-1')).resolves.toBe(true);
     expect(persistNow).toHaveBeenCalledTimes(2);
     expect(hasPendingEditorSaves('post:post-1')).toBe(false);
+  });
+
+  it('keeps a local revision pending after transport sync until its automatic persist.now ACK', async () => {
+    vi.useFakeTimers();
+    const { document, provider } = attachDocumentSave();
+    const persistAcknowledgement = deferred<void>();
+    persistNow.mockReturnValueOnce(persistAcknowledgement.promise);
+
+    document.getMap('content').set('title', 'Automatic persistence');
+    expect(provider.unsyncedChanges).toBe(1);
+    expect(hasPendingEditorSaves('post:post-1')).toBe(true);
+    expect(persistNow).not.toHaveBeenCalled();
+
+    provider.decrementUnsyncedChanges();
+    expect(provider.unsyncedChanges).toBe(0);
+    expect(provider.isSynced).toBe(true);
+    await vi.advanceTimersByTimeAsync(2_000);
+    await vi.waitFor(() => expect(persistNow).toHaveBeenCalledOnce());
+    expect(persistNow).toHaveBeenCalledWith(provider);
+    expect(hasPendingEditorSaves('post:post-1')).toBe(true);
+
+    persistAcknowledgement.resolve(undefined);
+    await vi.waitFor(() => expect(hasPendingEditorSaves('post:post-1')).toBe(false));
+    expect(persistNow).toHaveBeenCalledOnce();
+  });
+
+  it('retains pending intent when an automatic persist.now request rejects without busy retrying', async () => {
+    vi.useFakeTimers();
+    const { document, provider } = attachDocumentSave();
+    persistNow.mockRejectedValueOnce(new Error('write failed'));
+
+    document.getMap('content').set('title', 'Automatic failure');
+    provider.decrementUnsyncedChanges();
+    await vi.advanceTimersByTimeAsync(2_000);
+    await vi.waitFor(() => expect(persistNow).toHaveBeenCalledOnce());
+    await vi.advanceTimersByTimeAsync(10_000);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(hasPendingEditorSaves('post:post-1')).toBe(true);
+    expect(persistNow).toHaveBeenCalledOnce();
+  });
+
+  it('drains a newer edit only after its own persist.now ACK', async () => {
+    vi.useFakeTimers();
+    const { document, provider } = attachDocumentSave();
+    const firstAcknowledgement = deferred<void>();
+    const secondAcknowledgement = deferred<void>();
+    persistNow.mockReturnValueOnce(firstAcknowledgement.promise).mockReturnValueOnce(secondAcknowledgement.promise);
+
+    document.getMap('content').set('title', 'First edit');
+    provider.decrementUnsyncedChanges();
+    await vi.advanceTimersByTimeAsync(2_000);
+    await vi.waitFor(() => expect(persistNow).toHaveBeenCalledTimes(1));
+
+    document.getMap('content').set('summary', 'Edit while saving');
+    expect(provider.unsyncedChanges).toBe(1);
+    expect(hasPendingEditorSaves('post:post-1')).toBe(true);
+    let navigationSettled = false;
+    const navigationFlush = flushEditorSaves('post:post-1').then((saved) => {
+      navigationSettled = true;
+      return saved;
+    });
+    provider.decrementUnsyncedChanges();
+    firstAcknowledgement.resolve(undefined);
+
+    await vi.waitFor(() => expect(persistNow).toHaveBeenCalledTimes(2));
+    expect(hasPendingEditorSaves('post:post-1')).toBe(true);
+    expect(navigationSettled).toBe(false);
+    secondAcknowledgement.resolve(undefined);
+    await expect(navigationFlush).resolves.toBe(true);
+    expect(hasPendingEditorSaves('post:post-1')).toBe(false);
+    expect(persistNow).toHaveBeenCalledTimes(2);
+  });
+
+  it('coalesces a burst of synced edits into one automatic persist.now request', async () => {
+    vi.useFakeTimers();
+    const { document, provider } = attachDocumentSave();
+    const persistAcknowledgement = deferred<void>();
+    persistNow.mockReturnValueOnce(persistAcknowledgement.promise);
+
+    for (let edit = 0; edit < 20; edit += 1) {
+      document.getMap('content').set(`title-${edit}`, `Edit ${edit}`);
+      provider.decrementUnsyncedChanges();
+    }
+
+    expect(hasPendingEditorSaves('post:post-1')).toBe(true);
+    expect(persistNow).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1_999);
+    expect(persistNow).not.toHaveBeenCalled();
+
+    await vi.advanceTimersByTimeAsync(1);
+    await vi.waitFor(() => expect(persistNow).toHaveBeenCalledOnce());
+    expect(hasPendingEditorSaves('post:post-1')).toBe(true);
+    persistAcknowledgement.resolve(undefined);
+    await vi.waitFor(() => expect(hasPendingEditorSaves('post:post-1')).toBe(false));
+    expect(persistNow).toHaveBeenCalledOnce();
+  });
+
+  it('debounces one follow-up after a bounded automatic flush leaves newer work pending', async () => {
+    vi.useFakeTimers();
+    const { document, provider } = attachDocumentSave();
+    const acknowledgements: Array<ReturnType<typeof deferred<void>>> = [];
+    persistNow.mockImplementation(() => {
+      const acknowledgement = deferred<void>();
+      acknowledgements.push(acknowledgement);
+      return acknowledgement.promise;
+    });
+
+    document.getMap('content').set('title', 'Edit 0');
+    provider.decrementUnsyncedChanges();
+    await vi.advanceTimersByTimeAsync(2_000);
+    await vi.waitFor(() => expect(persistNow).toHaveBeenCalledTimes(1));
+
+    for (let round = 0; round < 4; round += 1) {
+      document.getMap('content').set('title', `Edit ${round + 1}`);
+      provider.decrementUnsyncedChanges();
+      acknowledgements[round].resolve(undefined);
+      if (round < 3) {
+        await vi.waitFor(() => expect(persistNow).toHaveBeenCalledTimes(round + 2));
+      }
+    }
+
+    await vi.waitFor(() => expect(hasPendingEditorSaves('post:post-1')).toBe(true));
+    expect(persistNow).toHaveBeenCalledTimes(4);
+    await vi.advanceTimersByTimeAsync(1_999);
+    expect(persistNow).toHaveBeenCalledTimes(4);
+
+    await vi.advanceTimersByTimeAsync(1);
+    await vi.waitFor(() => expect(persistNow).toHaveBeenCalledTimes(5));
+    acknowledgements[4].resolve(undefined);
+    await vi.waitFor(() => expect(hasPendingEditorSaves('post:post-1')).toBe(false));
+    expect(persistNow).toHaveBeenCalledTimes(5);
+  });
+
+  it('does not auto-persist when transport sync arrives after the tracker is unregistered', async () => {
+    vi.useFakeTimers();
+    const { document, provider } = attachDocumentSave();
+
+    document.getMap('content').set('title', 'Old room edit');
+    expect(provider.unsyncedChanges).toBe(1);
+    unregisterCallbacks.pop()?.();
+    provider.decrementUnsyncedChanges();
+    await vi.advanceTimersByTimeAsync(2_000);
+
+    expect(persistNow).not.toHaveBeenCalled();
+  });
+
+  it('does not start another automatic persist.now round after unregistering during a request', async () => {
+    vi.useFakeTimers();
+    const fixture = createHocuspocusProviderFixture('post:post-1');
+    providerFixtures.push(fixture);
+    const { provider } = fixture;
+    const document = provider.document;
+    documents.push(document);
+    const tracker = createCollaborativeDocumentSaveTracker(provider);
+    const unregister = tracker.register('post:post-1');
+    unregisterCallbacks.push(unregister);
+    const firstAcknowledgement = deferred<void>();
+    persistNow.mockReturnValueOnce(firstAcknowledgement.promise);
+
+    document.getMap('content').set('title', 'First edit');
+    provider.decrementUnsyncedChanges();
+    await vi.advanceTimersByTimeAsync(2_000);
+    await vi.waitFor(() => expect(persistNow).toHaveBeenCalledOnce());
+
+    document.getMap('content').set('summary', 'Pending when unregistering');
+    provider.decrementUnsyncedChanges();
+    const inFlight = tracker.flush();
+    unregister();
+    unregisterCallbacks.pop();
+    firstAcknowledgement.resolve(undefined);
+
+    await expect(inFlight).resolves.toBe(false);
+    expect(tracker.hasPending()).toBe(true);
+    expect(persistNow).toHaveBeenCalledOnce();
   });
 
   it('waits for a covering durable ACK when persist.now responds first', async () => {
