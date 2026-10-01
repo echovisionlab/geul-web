@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0](https://github.com/echovisionlab/geul-web/compare/v0.2.9...v0.3.0) (2026-10-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* synchronize editor changes without manual recovery ([#43](https://github.com/echovisionlab/geul-web/issues/43))
+
+### Bug Fixes
+
+* synchronize editor changes without manual recovery ([#43](https://github.com/echovisionlab/geul-web/issues/43)) ([1d14e69](https://github.com/echovisionlab/geul-web/commit/1d14e69ae8ec28bf17493ebe898bc6a8c5942018))
+
 ## [0.2.9](https://github.com/echovisionlab/geul-web/compare/v0.2.8...v0.2.9) (2026-10-01)
 
 
