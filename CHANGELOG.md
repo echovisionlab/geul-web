@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/echovisionlab/geul-web/compare/v0.3.1...v0.3.2) (2026-10-01)
+
+
+### Bug Fixes
+
+* acknowledge automatic editor saves ([#48](https://github.com/echovisionlab/geul-web/issues/48)) ([2d66502](https://github.com/echovisionlab/geul-web/commit/2d66502e0027d6b5a913d23d41b53cbacf6005c5))
+
 ## [0.3.1](https://github.com/echovisionlab/geul-web/compare/v0.3.0...v0.3.1) (2026-10-01)
 
 
