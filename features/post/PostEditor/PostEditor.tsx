@@ -346,10 +346,6 @@ function PostEditorContent({
 
   const [residentTitle, setResidentTitle] = useState(initialTitle);
   const [residentSummary, setResidentSummary] = useState(initialSummary ?? '');
-  useEffect(() => {
-    setResidentTitle(activeEditLocale.displayTitle);
-    setResidentSummary(activeEditLocale.displaySummary);
-  }, [activeEditLocale.displaySummary, activeEditLocale.displayTitle, roomLocale]);
   const debouncedResidentMetadataUpdate = useDebouncedRoomMetadata({
     connection: { protocol, bootstrap, acceptEpochAck, reloadCanonical },
     document: `post:${postId}`,
@@ -357,6 +353,26 @@ function PostEditorContent({
     write: (protocol, update: { locale: string; title?: string | null; summary?: string | null }) =>
       updateBlockRoomLocaleMetadata(protocol, { type: 'post', ...update }),
   });
+  useEffect(() => {
+    const pending = debouncedResidentMetadataUpdate.getPendingPatch();
+    const pendingForRoom = pending?.locale === roomLocale ? pending : null;
+    setResidentTitle(
+      pendingForRoom && Object.hasOwn(pendingForRoom, 'title')
+        ? (pendingForRoom.title ?? '')
+        : activeEditLocale.displayTitle,
+    );
+    setResidentSummary(
+      pendingForRoom && Object.hasOwn(pendingForRoom, 'summary')
+        ? (pendingForRoom.summary ?? '')
+        : activeEditLocale.displaySummary,
+    );
+  }, [
+    activeEditLocale.displaySummary,
+    activeEditLocale.displayTitle,
+    debouncedResidentMetadataUpdate,
+    postId,
+    roomLocale,
+  ]);
 
   useBlockRoomMetadataUpdates({ protocol }, `post:${postId}`, ({ operation, values }) => {
     if (operation !== 'locale') {

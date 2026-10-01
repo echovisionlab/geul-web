@@ -13,9 +13,13 @@ const mocks = vi.hoisted(() => {
     back: vi.fn(),
     deleteEvent: vi.fn(),
     getNeutralConfiguration: vi.fn(),
+    activeLocale: 'en',
+    displayTitle: 'Event',
+    displaySummary: '',
+    sourceLocale: 'en',
     notification: vi.fn(),
     publishEvent: vi.fn(),
-    protocol: { subscribeMetadata },
+    protocol: { documentName: 'program_event:11111111-1111-4111-8111-111111111111:en', subscribeMetadata },
     subscribeMetadata,
     updateEvent: vi.fn(),
     metadataListener: null as
@@ -42,17 +46,24 @@ vi.mock('@mantine/notifications', () => ({ notifications: { show: mocks.notifica
 vi.mock('@/features/editor/EditorHeader', () => ({
   EditorHeader: ({
     onBack,
+    onTitleChange,
     onStatusChange,
     onDelete,
     title,
   }: {
     onBack?: () => void;
+    onTitleChange?: (value: string) => void;
     onStatusChange?: (status: 'published' | 'archived') => void;
     onDelete?: () => void;
     title: string;
   }) => (
     <div>
       <div data-testid="event-title">{title}</div>
+      <input
+        data-testid="event-title-input"
+        value={title}
+        onChange={(event) => onTitleChange?.(event.currentTarget.value)}
+      />
       <button type="button" data-testid="back" onClick={() => onBack?.()}>
         back
       </button>
@@ -105,7 +116,16 @@ vi.mock('@/features/metadata/UrlSection', () => ({
 vi.mock('@/features/site/PageLoader', () => ({ PageLoader: () => null }));
 vi.mock('@/features/metadata/MetadataPanel/MetadataPanel', () => ({ MetadataPanel: () => null }));
 vi.mock('@/features/metadata/SummaryFieldCard/SummaryFieldCard', () => ({
-  SummaryFieldCard: ({ summary }: { summary: string }) => <div data-testid="event-summary">{summary}</div>,
+  SummaryFieldCard: ({ summary, onSummaryChange }: { summary: string; onSummaryChange?: (value: string) => void }) => (
+    <>
+      <div data-testid="event-summary">{summary}</div>
+      <textarea
+        data-testid="event-summary-input"
+        value={summary}
+        onChange={(event) => onSummaryChange?.(event.currentTarget.value)}
+      />
+    </>
+  ),
 }));
 vi.mock('@/features/place/CreatePlaceModal', () => ({ CreatePlaceModal: () => null }));
 vi.mock('@/features/post/PostEditor/LocationSelector', () => ({ LocationSelector: () => null }));
@@ -117,24 +137,30 @@ vi.mock('@/features/translation/LocalizedRichTextFragmentEditor', () => ({
 vi.mock('@/features/translation/useLocaleDocumentSession', () => ({
   useLocaleDocumentSession: () => ({
     activeEditLocale: {
-      activeLocale: 'en',
+      activeLocale: mocks.activeLocale,
       canEditActiveLocale: true,
-      displaySummary: '',
-      displayTitle: 'Event',
+      displaySummary: mocks.displaySummary,
+      displayTitle: mocks.displayTitle,
       hasLiveRow: true,
       isLoading: false,
-      isSourceLocale: true,
-      sourceLocale: 'en',
+      isSourceLocale: mocks.activeLocale === mocks.sourceLocale,
+      sourceLocale: mocks.sourceLocale,
     },
     hasRoomMutationAuthority: () => true,
     mode: { shouldUseLocaleDocument: true },
-    roomLocale: 'en',
+    roomLocale: mocks.activeLocale,
   }),
 }));
 vi.mock('@/features/editor/hooks/useRichTextBlockRoomEditor', () => ({
   useRichTextBlockRoomEditor: () => ({
     acceptEpochAck: () => true,
-    bootstrap: { documentRevision: 'revision-1', locale: 'en', localeExists: true, sourceLocale: 'en' },
+    bootstrap: {
+      documentName: mocks.protocol.documentName,
+      documentRevision: 'revision-1',
+      locale: mocks.activeLocale,
+      localeExists: true,
+      sourceLocale: mocks.sourceLocale,
+    },
     controller: {},
     doc: {},
     isConnected: true,
@@ -167,15 +193,16 @@ vi.mock('./ProgramEventCreditsSection', () => ({ ProgramEventCreditsSection: () 
 vi.mock('./ProgramEventPosterUploader', () => ({ ProgramEventPosterUploader: () => null }));
 
 import { ProgramEventEditor } from './ProgramEventEditor';
-import { clearEditorSaveRecovery } from '@/lib/editor/editor-save-recovery';
+import { clearEditorSaveRecovery, persistEditorSaveRecoveryEntry } from '@/lib/editor/editor-save-recovery';
+import { getPendingEditorPatch } from '@/lib/editor/editor-save-registry';
 
 const eventId = '11111111-1111-4111-8111-111111111111';
 
 let container: HTMLDivElement;
 let root: Root;
+let queryClient: QueryClient;
 
 function renderEditor() {
-  const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
   root.render(
     <QueryClientProvider client={queryClient}>
       <MantineProvider env="test">
@@ -222,8 +249,21 @@ function renderEditor() {
   );
 }
 
+function setInputValue(element: HTMLInputElement | HTMLTextAreaElement, value: string) {
+  const prototype = element instanceof HTMLInputElement ? HTMLInputElement.prototype : HTMLTextAreaElement.prototype;
+  Object.getOwnPropertyDescriptor(prototype, 'value')?.set?.call(element, value);
+  element.dispatchEvent(new Event('input', { bubbles: true }));
+  element.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
+  queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+  mocks.activeLocale = 'en';
+  mocks.sourceLocale = 'en';
+  mocks.displayTitle = 'Event';
+  mocks.displaySummary = '';
+  mocks.protocol.documentName = `program_event:${eventId}:en`;
   mocks.updateEvent.mockResolvedValue({ success: true });
   mocks.getNeutralConfiguration.mockResolvedValue({
     ok: true,
@@ -258,9 +298,13 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   act(() => root.unmount());
+  queryClient.clear();
   container.remove();
   clearEditorSaveRecovery(`program_event:${eventId}`);
+  clearEditorSaveRecovery(`program_event:${eventId}:en`);
+  clearEditorSaveRecovery(`program_event:${eventId}:fr`);
   window.sessionStorage.clear();
 });
 
@@ -279,6 +323,111 @@ describe('ProgramEventEditor relation saves and navigation', () => {
 
     expect(container.querySelector('[data-testid="event-title"]')?.textContent).toBe('Peer event title');
     expect(container.querySelector('[data-testid="event-summary"]')?.textContent).toBe('Peer event summary');
+  });
+
+  it('preserves a pending title while adopting a fresh summary from the active locale preview', async () => {
+    mocks.activeLocale = 'fr';
+    mocks.protocol.documentName = `program_event:${eventId}:fr`;
+    await act(async () => renderEditor());
+
+    const input = container.querySelector<HTMLInputElement>('[data-testid="event-title-input"]');
+    if (!input) {
+      throw new Error('The Program Event title input is unavailable');
+    }
+    act(() => {
+      setInputValue(input, 'Pending local title');
+    });
+    expect(getPendingEditorPatch(`program_event:${eventId}`)).toMatchObject({
+      locale: 'fr',
+      title: 'Pending local title',
+    });
+
+    mocks.displayTitle = 'Fresh query title';
+    mocks.displaySummary = 'Fresh query summary';
+    await act(async () => renderEditor());
+
+    expect(container.querySelector('[data-testid="event-title"]')?.textContent).toBe('Pending local title');
+    expect(container.querySelector('[data-testid="event-summary"]')?.textContent).toBe('Fresh query summary');
+  });
+
+  it('preserves a pending summary while adopting a fresh title from the active locale preview', async () => {
+    mocks.activeLocale = 'fr';
+    mocks.protocol.documentName = `program_event:${eventId}:fr`;
+    await act(async () => renderEditor());
+
+    const input = container.querySelector<HTMLTextAreaElement>('[data-testid="event-summary-input"]');
+    if (!input) {
+      throw new Error('The Program Event summary input is unavailable');
+    }
+    act(() => {
+      setInputValue(input, 'Pending local summary');
+    });
+    expect(getPendingEditorPatch(`program_event:${eventId}`)).toMatchObject({
+      locale: 'fr',
+      summary: 'Pending local summary',
+    });
+
+    mocks.displayTitle = 'Fresh query title';
+    mocks.displaySummary = 'Fresh query summary';
+    await act(async () => renderEditor());
+
+    expect(container.querySelector('[data-testid="event-title"]')?.textContent).toBe('Fresh query title');
+    expect(container.querySelector('[data-testid="event-summary"]')?.textContent).toBe('Pending local summary');
+  });
+
+  it('renders recovered metadata from the active non-source room', async () => {
+    const roomScope = `program_event:${eventId}:fr`;
+    mocks.activeLocale = 'fr';
+    mocks.protocol.documentName = roomScope;
+    mocks.displayTitle = 'Fresh French title';
+    mocks.displaySummary = 'Fresh French summary';
+    persistEditorSaveRecoveryEntry(roomScope, 'test-recovery', {
+      document: `program_event:${eventId}`,
+      recoveryKey: 'room-locale',
+      patch: {
+        locale: 'fr',
+        title: 'Recovered French title',
+        summary: 'Recovered French summary',
+      },
+      updatedAt: Date.now(),
+    });
+
+    await act(async () => renderEditor());
+
+    expect(container.querySelector('[data-testid="event-title"]')?.textContent).toBe('Recovered French title');
+    expect(container.querySelector('[data-testid="event-summary"]')?.textContent).toBe('Recovered French summary');
+  });
+
+  it('initializes the new locale room preview without mixing pending drafts from the prior room', async () => {
+    mocks.activeLocale = 'fr';
+    mocks.protocol.documentName = `program_event:${eventId}:fr`;
+    mocks.displayTitle = 'Titre français';
+    mocks.displaySummary = 'Résumé français';
+    await act(async () => renderEditor());
+
+    const title = container.querySelector<HTMLInputElement>('[data-testid="event-title-input"]');
+    const summary = container.querySelector<HTMLTextAreaElement>('[data-testid="event-summary-input"]');
+    if (!title || !summary) {
+      throw new Error('The Program Event metadata inputs are unavailable');
+    }
+    act(() => {
+      setInputValue(title, 'French draft title');
+      setInputValue(summary, 'French draft summary');
+    });
+    expect(getPendingEditorPatch(`program_event:${eventId}`)).toMatchObject({
+      locale: 'fr',
+      title: 'French draft title',
+      summary: 'French draft summary',
+    });
+
+    mocks.activeLocale = 'en';
+    mocks.displayTitle = 'English title';
+    mocks.displaySummary = 'English summary';
+    mocks.protocol.documentName = `program_event:${eventId}:en`;
+    await act(async () => renderEditor());
+
+    expect(container.querySelector('[data-testid="event-title"]')?.textContent).toBe('English title');
+    expect(container.querySelector('[data-testid="event-summary"]')?.textContent).toBe('English summary');
   });
 
   it('flushes only the edited relation collection before Back', async () => {
