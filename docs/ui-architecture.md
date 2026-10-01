@@ -231,9 +231,11 @@ import Video.js. Storybook retains its independent preview styling.
 
 `MapViewEmbedded` starts the shared runtime import when a map is needed, overlapping
 its theme query. The dynamic renderer reuses the same promise. Empty unused maps do
-not start it, and failed imports can be retried. Map workers retain their existing
-runtime lifecycle; bounds-dependent data requests are not deduplicated across
-unequal bounds.
+not start it, and failed imports can be retried. The build bundles MapLibre’s module
+worker and shared static dependency into one same-origin ESM asset at the existing
+worker URL. Runtime plugin imports and the license are preserved. Map workers retain
+their existing runtime lifecycle; bounds-dependent data requests are not deduplicated
+across unequal bounds.
 
 `page-public.server.ts` owns the raw Page response within one React request, keyed
 by decoded slug and requested locale. Homepage and Page metadata/body mapping share

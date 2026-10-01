@@ -31,6 +31,33 @@ measurement. CLS uses the maximum session window, excluding recent-input shifts.
 
 ## Deployment comparison
 
-Production after-results will be added following deployment of the validated
-release. Initial-response legal body, layout stability, actual initial JS/CSS
-transfer, map ready time and navigation/locale errors are checked at that boundary.
+Web 0.2.6 was deployed with the validated image digest
+`sha256:36da088e46e28d99f4099e5136ed141e03610a9de0b2fc6401eac42ea8c06f11`.
+The same-session three-trial medians are:
+
+| Route              |  Initial script transfer bytes |      LCP ms |                 CLS |
+| ------------------ | -----------------------------: | ----------: | ------------------: |
+| `/`                |   1,154,997 → 824,637 (-28.6%) |   620 → 576 | 0.000358 → 0.000000 |
+| `/works`           | 2,107,515 → 1,109,847 (-47.3%) |  1140 → 876 | 0.002264 → 0.002264 |
+| `/tools`           |   1,822,820 → 825,117 (-54.7%) |   556 → 664 | 0.000000 → 0.000000 |
+| `/tools/transcode` |      667,476 → 671,856 (+0.7%) |   604 → 556 | 0.000000 → 0.000000 |
+| `/privacy`         |     987,793 → 659,394 (-33.2%) | 1652 → 1004 | 0.237936 → 0.000000 |
+| `/terms`           |     987,783 → 659,386 (-33.2%) | 1464 → 1032 | 0.237936 → 0.000000 |
+
+The homepage currently contains no published content blocks; its LCP is therefore
+not a measure of content-rich homepage rendering. Transcode adds about 4.4KB of
+initial scripts for the navigation catalogue boundary. Tools LCP increased in this
+small sample despite a large script reduction. Timing observations include live
+server/network and font variation; they do not establish statistical significance.
+Browser console warnings/errors were absent across these measured reloads.
+
+Map-ready median was 2,157 → 2,591ms, so 0.2.6 did not demonstrate faster map
+readiness. The worker still loaded its shared module in a serial request. The
+follow-up bundles that static dependency into the existing same-origin ESM worker
+asset, preserving variable plugin imports, license and runtime lifecycle. In the
+same installed MapLibre 6.4.0 source graph, assets decrease 2 → 1, decoded bytes
+500,628 → 471,020 (−5.9%) and gzip level-9 bytes 139,486 → 131,741 (−5.6%).
+This controlled byte/request result is separate from deployed map-ready timing.
+The generation test verifies the complete input graph, no output static imports,
+runtime plugin imports and identical license bytes. Final deployed runtime
+measurements are recorded in the operator comparison artifact.
