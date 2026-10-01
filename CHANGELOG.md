@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/echovisionlab/geul-web/compare/v0.3.0...v0.3.1) (2026-10-01)
+
+
+### Bug Fixes
+
+* clear editor unload guards after durable autosave ([#45](https://github.com/echovisionlab/geul-web/issues/45)) ([6c34072](https://github.com/echovisionlab/geul-web/commit/6c34072f3dd958df01623da1751e91d00e9404f5))
+
 ## [0.3.0](https://github.com/echovisionlab/geul-web/compare/v0.2.9...v0.3.0) (2026-10-01)
 
 
