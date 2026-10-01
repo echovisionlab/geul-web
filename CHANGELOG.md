@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.8](https://github.com/echovisionlab/geul-web/compare/v0.2.7...v0.2.8) (2026-10-01)
+
+
+### Bug Fixes
+
+* preserve editor saves and guard navigation through acknowledgements ([#39](https://github.com/echovisionlab/geul-web/issues/39)) ([bf25bd6](https://github.com/echovisionlab/geul-web/commit/bf25bd67855576730a96ae603882a06330016b75))
+
 ## [0.2.7](https://github.com/echovisionlab/geul-web/compare/v0.2.6...v0.2.7) (2026-10-01)
 
 
