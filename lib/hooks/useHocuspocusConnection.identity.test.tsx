@@ -5,6 +5,12 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import { CollaborativeDocumentType, createDocumentName } from '@echovisionlab/geul-common/collaboration/document';
+import { formRootTitleTarget, formStepDescriptionTarget } from '@echovisionlab/geul-proto/intra/form_locale_catalog.ts';
+import {
+  FORM_FIELDS_MAP_NAME,
+  FORM_LOCALE_PRESENCE_MAP_NAME,
+  hydrateFormCanonicalRoom,
+} from '@echovisionlab/geul-common/collaboration/form';
 import {
   hydrateMenuCanonicalRoom,
   MENU_ITEMS_MAP_NAME,
@@ -13,6 +19,7 @@ import {
 } from '@echovisionlab/geul-common/collaboration/menu';
 import { DOCUMENT_ROOM_SNAPSHOT_KEYS, DOCUMENT_ROOM_SNAPSHOT_MAP_NAME } from '@/lib/collab/document-room-snapshot';
 import { flushEditorSaves, hasPendingEditorSaves } from '@/lib/editor/editor-save-registry';
+import { useFormEditorCollaboration } from './useFormEditorCollaboration';
 import { useHocuspocusConnection } from './useHocuspocusConnection';
 
 const persistNowMock = vi.hoisted(() => vi.fn(async (_provider: unknown): Promise<void> => undefined));
@@ -67,9 +74,11 @@ vi.mock('@hocuspocus/provider', () => ({
 const entityId = '11111111-1111-4111-8111-111111111111';
 const documentRevision = '22222222-2222-4222-8222-222222222222';
 const targetRevision = '33333333-3333-4333-8333-333333333333';
+const nextDocumentRevision = '44444444-4444-4444-8444-444444444444';
 const snapshots: Array<{ name: string; connection: ReturnType<typeof useHocuspocusConnection> }> = [];
 let root: Root | null = null;
 let container: HTMLDivElement | null = null;
+let latestFormEditor: ReturnType<typeof useFormEditorCollaboration> | null = null;
 
 function Harness({ locale }: { locale: string }) {
   const name = `email-layout:${entityId}:${locale}`;
@@ -90,9 +99,15 @@ function ReloadHarness({
   return null;
 }
 
+function FormEditorHarness({ locale }: { locale: string }) {
+  latestFormEditor = useFormEditorCollaboration(entityId, locale);
+  return null;
+}
+
 beforeEach(() => {
   providerState.instances.length = 0;
   snapshots.length = 0;
+  latestFormEditor = null;
   persistNowMock.mockReset();
   persistNowMock.mockResolvedValue(undefined);
   container = document.createElement('div');
@@ -120,6 +135,36 @@ function seedMenuRoom(document: Y.Doc, locale: string, items: MenuCollaborationI
   marker.set(DOCUMENT_ROOM_SNAPSHOT_KEYS.targetRevision, targetRevision);
   const update = Y.encodeStateAsUpdate(canonical);
   Y.applyUpdate(document, update, 'server-seed');
+  canonical.destroy();
+}
+
+function seedFormRoom(
+  document: Y.Doc,
+  locale: string,
+  title: string | null,
+  schema: { id: string; steps: unknown[] },
+  revision = documentRevision,
+  presentLocaleValues = title === null ? [] : [formRootTitleTarget()],
+) {
+  const documentName = createDocumentName(CollaborativeDocumentType.FORM, entityId, locale);
+  const canonical = hydrateFormCanonicalRoom({
+    sourceLocale: 'en',
+    locale,
+    source: { title: 'Server form', schema },
+    requested: { ...(title === null ? {} : { title }), schema },
+    requestedExists: true,
+    presentLocaleValues,
+  });
+  const marker = canonical.getMap<string | boolean>(DOCUMENT_ROOM_SNAPSHOT_MAP_NAME);
+  marker.set(DOCUMENT_ROOM_SNAPSHOT_KEYS.documentName, documentName);
+  marker.set(DOCUMENT_ROOM_SNAPSHOT_KEYS.documentRevision, revision);
+  marker.set(DOCUMENT_ROOM_SNAPSHOT_KEYS.sourceLocale, 'en');
+  marker.set(DOCUMENT_ROOM_SNAPSHOT_KEYS.locale, locale);
+  marker.set(DOCUMENT_ROOM_SNAPSHOT_KEYS.localeExists, true);
+  if (locale !== 'en') {
+    marker.set(DOCUMENT_ROOM_SNAPSHOT_KEYS.targetRevision, targetRevision);
+  }
+  Y.applyUpdate(document, Y.encodeStateAsUpdate(canonical), 'server-seed');
   canonical.destroy();
 }
 
@@ -217,6 +262,107 @@ describe('useHocuspocusConnection request identity', () => {
       isSynced: false,
     });
     expect(snapshots.at(-1)?.connection.reloadCanonical()).toBe(true);
+  });
+
+  it('replays a pending Form title over a canonical schema change and clears it after durable persistence', async () => {
+    await act(async () => {
+      root?.render(<FormEditorHarness locale="en" />);
+      await Promise.resolve();
+    });
+
+    const first = providerState.instances[0]!;
+    const originalSchema = { id: 'schema-1', steps: [{ id: 'step-1', fields: [] }] };
+    seedFormRoom(first.configuration.document, 'en', 'Server form', originalSchema);
+    act(() => first.configuration.onSynced?.());
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => latestFormEditor?.setField('title', 'Local title'));
+    expect(hasPendingEditorSaves(`form:${entityId}`)).toBe(true);
+
+    act(() => first.emit('stateless', { payload: JSON.stringify({ kind: 'reload_required' }) }));
+    const second = providerState.instances[1]!;
+    const peerSchema = {
+      id: 'schema-1',
+      steps: [{ id: 'step-1', description: 'Peer schema edit', fields: [] }],
+    };
+    let acknowledgePersistence!: () => void;
+    persistNowMock.mockImplementationOnce(() => new Promise<void>((resolve) => (acknowledgePersistence = resolve)));
+    seedFormRoom(second.configuration.document, 'en', 'Server form', peerSchema, nextDocumentRevision, [
+      formRootTitleTarget(),
+      formStepDescriptionTarget('step-1'),
+    ]);
+    act(() => second.configuration.onSynced?.());
+
+    let flushing!: Promise<boolean>;
+    act(() => {
+      flushing = flushEditorSaves(`form:${entityId}`);
+    });
+    await vi.waitFor(() => expect(persistNowMock).toHaveBeenCalledOnce());
+    expect(second.configuration.document.getMap<string>(FORM_FIELDS_MAP_NAME).get('title')).toBe('Local title');
+    expect(hasPendingEditorSaves(`form:${entityId}`)).toBe(true);
+
+    acknowledgePersistence();
+    await act(async () => {
+      expect(await flushing).toBe(true);
+    });
+
+    const fields = second.configuration.document.getMap<string>(FORM_FIELDS_MAP_NAME);
+    expect(fields.get('title')).toBe('Local title');
+    expect(JSON.parse(fields.get('schema') ?? '')).toEqual(peerSchema);
+    expect(hasPendingEditorSaves(`form:${entityId}`)).toBe(false);
+    expect(persistNowMock).toHaveBeenCalledOnce();
+  });
+
+  it('replays a pending target Form title without dropping its locale presence', async () => {
+    await act(async () => {
+      root?.render(<FormEditorHarness locale="ko" />);
+      await Promise.resolve();
+    });
+
+    const first = providerState.instances[0]!;
+    const schema = { id: 'schema-1', steps: [{ id: 'step-1', fields: [] }] };
+    seedFormRoom(first.configuration.document, 'ko', null, schema);
+    act(() => first.configuration.onSynced?.());
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => latestFormEditor?.setField('title', 'Local target title'));
+    expect(hasPendingEditorSaves(`form:${entityId}`)).toBe(true);
+
+    act(() => first.emit('stateless', { payload: JSON.stringify({ kind: 'reload_required' }) }));
+    const second = providerState.instances[1]!;
+    seedFormRoom(second.configuration.document, 'ko', null, schema, nextDocumentRevision);
+    act(() => second.configuration.onSynced?.());
+
+    await act(async () => {
+      expect(await flushEditorSaves(`form:${entityId}`)).toBe(true);
+    });
+
+    expect(second.configuration.document.getMap<string>(FORM_FIELDS_MAP_NAME).get('title')).toBe('Local target title');
+    expect(
+      second.configuration.document.getMap<boolean>(FORM_LOCALE_PRESENCE_MAP_NAME).get('document\u0000title'),
+    ).toBe(true);
+    expect(hasPendingEditorSaves(`form:${entityId}`)).toBe(false);
+    expect(persistNowMock).toHaveBeenCalledOnce();
+  });
+
+  it('does not register a Form title save when a local write leaves the title unchanged', async () => {
+    await act(async () => {
+      root?.render(<FormEditorHarness locale="en" />);
+      await Promise.resolve();
+    });
+
+    const provider = providerState.instances[0]!;
+    seedFormRoom(provider.configuration.document, 'en', 'Server form', { id: 'schema-1', steps: [] });
+    act(() => provider.configuration.onSynced?.());
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => latestFormEditor?.setField('title', 'Server form'));
+
+    expect(hasPendingEditorSaves(`form:${entityId}`)).toBe(false);
+    expect(persistNowMock).not.toHaveBeenCalled();
   });
 
   it.each([

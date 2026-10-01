@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PostAction } from '@echovisionlab/geul-proto/secure/post_pb.ts';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { notifications } from '@mantine/notifications';
+import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 import type { StatusOption } from '@/features/editor/EditorHeader';
 import {
   archivePostAction,
@@ -28,6 +29,33 @@ interface Options {
   allowedActions: readonly PostAction[];
   openSchedule: () => void;
   closeSchedule: () => void;
+}
+
+export async function runPostLifecycleActionAfterSave<T>(
+  postId: string,
+  lock: { current: boolean },
+  action: () => Promise<T>,
+  onSaveFailure: () => void,
+): Promise<T | null> {
+  if (lock.current) {
+    return null;
+  }
+  lock.current = true;
+  try {
+    let saved = false;
+    try {
+      saved = await flushEditorSaves(`post:${postId}`);
+    } catch {
+      saved = false;
+    }
+    if (!saved) {
+      onSaveFailure();
+      return null;
+    }
+    return await action();
+  } finally {
+    lock.current = false;
+  }
 }
 
 function postStatusTone(status: PostStatus): StatusOption<PostStatus>['tone'] {
@@ -53,10 +81,12 @@ export function usePostLifecycle({
 }: Options) {
   const t = useTranslations('postEditor');
   const tCommon = useTranslations('common');
+  const tCommonNotifications = useTranslations('common.notifications');
   const router = useRouter();
   const [status, setStatus] = useState<PostStatus>(initialStatus);
   const [scheduledAt, setScheduledAt] = useState<string | null>(initialScheduledAt);
   const [scheduledTimeZone, setScheduledTimeZone] = useState<string | null>(initialScheduledTimeZone);
+  const lifecycleCommandInFlight = useRef(false);
   const allowed = useMemo(() => new Set(allowedActions), [allowedActions]);
 
   const permissions = useMemo(
@@ -87,9 +117,20 @@ export function usePostLifecycle({
     return true;
   }, []);
 
+  const runAfterEditorSave = useCallback(
+    <T>(action: () => Promise<T>) =>
+      runPostLifecycleActionAfterSave(postId, lifecycleCommandInFlight, action, () =>
+        notifications.show({ message: tCommonNotifications('saveFailed'), color: 'red' }),
+      ),
+    [postId, tCommonNotifications],
+  );
+
   const publish = useMutation({
-    mutationFn: () => publishPostAction(postId),
+    mutationFn: () => runAfterEditorSave(() => publishPostAction(postId)),
     onSuccess: (result) => {
+      if (!result) {
+        return;
+      }
       if (!result.ok) {
         reportActionError(result.error);
         return;
@@ -102,8 +143,11 @@ export function usePostLifecycle({
     },
   });
   const unpublish = useMutation({
-    mutationFn: () => unpublishPostAction(postId),
+    mutationFn: () => runAfterEditorSave(() => unpublishPostAction(postId)),
     onSuccess: (result) => {
+      if (!result) {
+        return;
+      }
       if (!result.ok) {
         reportActionError(result.error);
         return;
@@ -114,8 +158,11 @@ export function usePostLifecycle({
     },
   });
   const archive = useMutation({
-    mutationFn: () => archivePostAction(postId),
+    mutationFn: () => runAfterEditorSave(() => archivePostAction(postId)),
     onSuccess: (result) => {
+      if (!result) {
+        return;
+      }
       if (!result.ok) {
         reportActionError(result.error);
         return;
@@ -127,8 +174,11 @@ export function usePostLifecycle({
   });
   const schedule = useMutation({
     mutationFn: (resolution: PostScheduleResolution) =>
-      schedulePostAction(postId, resolution.instant, resolution.timeZone),
+      runAfterEditorSave(() => schedulePostAction(postId, resolution.instant, resolution.timeZone)),
     onSuccess: (result, resolution) => {
+      if (!result) {
+        return;
+      }
       if (!result.ok) {
         reportActionError(result.error);
         return;
@@ -142,8 +192,11 @@ export function usePostLifecycle({
     },
   });
   const cancelSchedule = useMutation({
-    mutationFn: () => cancelPostScheduleAction(postId),
+    mutationFn: () => runAfterEditorSave(() => cancelPostScheduleAction(postId)),
     onSuccess: (result) => {
+      if (!result) {
+        return;
+      }
       if (!result.ok) {
         reportActionError(result.error);
         return;
@@ -156,8 +209,11 @@ export function usePostLifecycle({
     },
   });
   const republish = useMutation({
-    mutationFn: () => republishPostAction(postId),
+    mutationFn: () => runAfterEditorSave(() => republishPostAction(postId)),
     onSuccess: (result) => {
+      if (!result) {
+        return;
+      }
       if (!result.ok) {
         reportActionError(result.error);
         return;

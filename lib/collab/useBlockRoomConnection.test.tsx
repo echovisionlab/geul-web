@@ -8,6 +8,7 @@ import {
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import {
   decodeCanonicalBlockRoom,
+  getBlockRoomCollaborativeText,
   hydrateCanonicalBlockRoom,
 } from '@echovisionlab/geul-common/collaboration/block-room-codec';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
@@ -61,24 +62,74 @@ vi.mock('@hocuspocus/provider', () => ({
 const entityId = '01b3db42-75f1-4bf1-8cb9-9b3baf57e795';
 const sectionAId = '01b3db42-75f1-4bf1-8cb9-9b3baf57e796';
 const sectionBId = '01b3db42-75f1-4bf1-8cb9-9b3baf57e797';
+const richTextSectionId = '01b3db42-75f1-4bf1-8cb9-9b3baf57e798';
+const richTextBlockId = '01b3db42-75f1-4bf1-8cb9-9b3baf57e799';
 let latestHook: ReturnType<typeof useBlockRoomConnection> | null = null;
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
 const renderSnapshots: Array<{ locale: string | null; connection: ReturnType<typeof useBlockRoomConnection> }> = [];
 
-function bootstrapMessage(challenge = 'challenge-1', sections: Array<{ id: string; uri: string }> = []) {
+function bootstrapMessage(
+  challenge = 'challenge-1',
+  sections: Array<{ id: string; uri: string }> = [],
+  paragraphText?: string,
+) {
   const typed = fromJson(LocalizedPageDocumentSchema, {
     blockCatalogFingerprint: contentBlockCatalogFingerprint,
     locale: 'ko',
     base: {
-      nodes: sections.map(({ id, uri }, index) => ({
-        section: { id, externalVideo: { props: { uri } } },
-        placement: { index },
-      })),
+      nodes: [
+        ...sections.map(({ id, uri }, index) => ({
+          section: { id, externalVideo: { props: { uri } } },
+          placement: { index },
+        })),
+        ...(paragraphText === undefined
+          ? []
+          : [
+              {
+                section: {
+                  id: richTextSectionId,
+                  richText: {
+                    props: {},
+                    blocks: {
+                      nodes: [
+                        {
+                          block: { id: richTextBlockId, paragraph: { props: {} } },
+                          placement: { index: 0 },
+                        },
+                      ],
+                    },
+                  },
+                },
+                placement: { index: sections.length },
+              },
+            ]),
+      ],
     },
     localeOverlay: {
       locale: 'ko',
-      sections: sections.map(({ id }) => ({ sectionId: id, externalVideo: { props: {} } })),
+      sections: [
+        ...sections.map(({ id }) => ({ sectionId: id, externalVideo: { props: {} } })),
+        ...(paragraphText === undefined
+          ? []
+          : [
+              {
+                sectionId: richTextSectionId,
+                richText: {
+                  props: {},
+                  blocks: {
+                    locale: 'ko',
+                    blocks: [
+                      {
+                        blockId: richTextBlockId,
+                        paragraph: { props: {}, content: [{ text: { text: paragraphText } }] },
+                      },
+                    ],
+                  },
+                },
+              },
+            ]),
+      ],
     },
   } as JsonValue) as LocalizedPageDocument;
   const source = new Y.Doc();
@@ -136,8 +187,9 @@ function sendBootstrap(
   instance = providerState.instances.at(-1)!,
   challenge = 'challenge-1',
   sections: Array<{ id: string; uri: string }> = [],
+  paragraphText?: string,
 ) {
-  const bootstrap = bootstrapMessage(challenge, sections);
+  const bootstrap = bootstrapMessage(challenge, sections, paragraphText);
   act(() => {
     instance.configuration.onStateless?.({ payload: bootstrap.payload });
   });
@@ -168,8 +220,9 @@ function admit(
   instance = providerState.instances.at(-1)!,
   challenge = 'challenge-1',
   sections: Array<{ id: string; uri: string }> = [],
+  paragraphText?: string,
 ) {
-  const bootstrap = sendBootstrap(instance, challenge, sections);
+  const bootstrap = sendBootstrap(instance, challenge, sections, paragraphText);
   syncBootstrap(instance, bootstrap);
   expect(instance.sendStateless).toHaveBeenCalledWith(expect.stringContaining('block_room.bootstrap_ack'));
   sendReady(instance, challenge);
@@ -203,6 +256,29 @@ function deleteSetRanges(transaction: Y.Transaction): Record<string, Array<{ clo
       ranges.map(({ clock, len }) => ({ clock, len })),
     ]),
   );
+}
+
+function canonicalParagraphText(document: LocalizedPageDocument): string {
+  const json = toJson(LocalizedPageDocumentSchema, document) as unknown as {
+    localeOverlay?: {
+      sections?: Array<{
+        sectionId: string;
+        richText?: {
+          blocks?: {
+            blocks?: Array<{ paragraph?: { content?: Array<{ text?: { text?: string } }> } }>;
+          };
+        };
+      }>;
+    };
+  };
+  return (
+    json.localeOverlay?.sections?.find(({ sectionId }) => sectionId === richTextSectionId)?.richText?.blocks
+      ?.blocks?.[0]?.paragraph?.content?.[0]?.text?.text ?? ''
+  );
+}
+
+function canonicalPageParagraphText(document: Y.Doc): string {
+  return canonicalParagraphText(decodeCanonicalBlockRoom(document, 'page').document as LocalizedPageDocument);
 }
 
 function observeLocalDeleteSets(document: Y.Doc, provider: object) {
@@ -462,6 +538,60 @@ describe('useBlockRoomConnection', () => {
     sendPersisted(second, Y.encodeStateVector(second.configuration.document), persistedTransaction.current());
     expect(connection().recoverySnapshot).toBeNull();
     persistedTransaction.stop();
+  });
+
+  it('rebases a local rich-text deletion before a second canonical reload without deleting twice', async () => {
+    await render();
+    const first = providerState.instances[0]!;
+    admit(first, 'challenge-1', [], 'a');
+
+    const scope = { documentType: 'page', entityId, locale: 'ko', sourceLocale: 'ko' } as const;
+    const localText = getBlockRoomCollaborativeText(first.configuration.document, {
+      id: richTextBlockId,
+      family: 'rich_text',
+      locale: true,
+      path: 'content[0].text.text',
+    });
+    first.configuration.document.transact(() => localText.delete(0, localText.length));
+
+    const originalIntents = getBlockRoomIntentChanges(scope);
+    expect(originalIntents).toHaveLength(1);
+    expect(canonicalParagraphText(originalIntents[0]!.before.document as LocalizedPageDocument)).toBe('a');
+    expect(canonicalParagraphText(originalIntents[0]!.after.document as LocalizedPageDocument)).toBe('');
+    expect(canonicalPageParagraphText(first.configuration.document)).toBe('');
+
+    act(() => connection().reloadCanonical());
+    await act(async () => Promise.resolve());
+    const second = providerState.instances[1]!;
+    const secondBootstrap = sendBootstrap(second, 'challenge-2', [], 'aa');
+    syncBootstrap(second, secondBootstrap);
+    expect(canonicalPageParagraphText(second.configuration.document)).toBe('aa');
+    sendReady(second, 'challenge-2');
+
+    // The materialized canonical paragraph is authoritative; replay may reshape
+    // Yjs inline arrays, so this avoids treating an old raw text node as content.
+    expect(canonicalPageParagraphText(second.configuration.document)).toBe('a');
+    expect(persistNowMock).toHaveBeenCalledOnce();
+
+    // persist.now only accepts the request; the block-room durable ACK has not arrived.
+    const rebasedIntents = getBlockRoomIntentChanges(scope);
+    expect(rebasedIntents).toHaveLength(1);
+    expect(canonicalParagraphText(rebasedIntents[0]!.before.document as LocalizedPageDocument)).toBe('aa');
+    expect(canonicalParagraphText(rebasedIntents[0]!.after.document as LocalizedPageDocument)).toBe('a');
+    expect(connection().recoverySnapshot).not.toBeNull();
+
+    act(() => connection().reloadCanonical());
+    await act(async () => Promise.resolve());
+    const third = providerState.instances[2]!;
+    const thirdBootstrap = sendBootstrap(third, 'challenge-3', [], 'a');
+    syncBootstrap(third, thirdBootstrap);
+    expect(canonicalPageParagraphText(third.configuration.document)).toBe('a');
+    sendReady(third, 'challenge-3');
+
+    expect(canonicalPageParagraphText(third.configuration.document)).toBe('a');
+    expect(getBlockRoomIntentChanges(scope)).toHaveLength(0);
+    expect(connection().recoverySnapshot).toBeNull();
+    expect(persistNowMock).toHaveBeenCalledOnce();
   });
 
   it('retries failed replay persistence with backoff and waits for the durable coverage ACK', async () => {

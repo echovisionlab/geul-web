@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconHistory } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
@@ -58,6 +58,7 @@ import { useEditorNavigation } from '@/features/editor/useEditorNavigation';
 import { applyPageLayoutMetadataUpdate } from './page-layout-metadata';
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
 import { requireBlockRoomDurabilityProtocol } from '@/lib/collab/block-room-durability';
+import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 
 interface PageEditorProps {
   pageId: string;
@@ -85,6 +86,38 @@ interface PageEditorProps {
 interface PageLayoutPatch {
   value: DocumentLayout;
   previous: DocumentLayout;
+}
+
+export async function runPageLifecycleActionAfterSave(
+  pageId: string,
+  action: () => Promise<unknown>,
+  onSaveFailure: () => void,
+): Promise<boolean> {
+  let saved = false;
+  try {
+    saved = await flushEditorSaves(`page:${pageId}`);
+  } catch {
+    saved = false;
+  }
+  if (!saved) {
+    onSaveFailure();
+    return false;
+  }
+  await action();
+  return true;
+}
+
+export function runPageStatusChangeAfterSave(
+  pageId: string,
+  nextStatus: 'draft' | 'published',
+  actions: { publish: () => Promise<unknown>; unpublish: () => Promise<unknown> },
+  onSaveFailure: () => void,
+): Promise<boolean> {
+  return runPageLifecycleActionAfterSave(
+    pageId,
+    nextStatus === 'published' ? actions.publish : actions.unpublish,
+    onSaveFailure,
+  );
 }
 
 function mergePageLayoutPatches(pending: PageLayoutPatch, next: PageLayoutPatch): PageLayoutPatch {
@@ -172,6 +205,7 @@ export function PageEditor({
   });
   const { configuration: neutralConfiguration, setDraft, isDraft, beginFieldWrite, queueShowTitle } = pageNeutral;
   const { slug, showTitle, status } = neutralConfiguration;
+  const lifecycleCommandInFlight = useRef(false);
   const {
     title: residentTitle,
     summary: residentSummary,
@@ -381,17 +415,25 @@ export function PageEditor({
   });
 
   const handleStatusChange = useCallback(
-    (nextStatus: 'draft' | 'published') => {
-      if (!canEditNeutral) {
+    async (nextStatus: 'draft' | 'published') => {
+      if (!canEditNeutral || lifecycleCommandInFlight.current) {
         return;
       }
-      if (nextStatus === 'published') {
-        publish.mutate();
-      } else {
-        unpublish.mutate();
+      lifecycleCommandInFlight.current = true;
+      try {
+        await runPageStatusChangeAfterSave(
+          pageId,
+          nextStatus,
+          { publish: () => publish.mutateAsync(), unpublish: () => unpublish.mutateAsync() },
+          () => notifications.show({ message: tCommon('notifications.saveFailed'), color: 'red' }),
+        );
+      } catch {
+        // The mutation owns action errors; the save barrier reports its own failures above.
+      } finally {
+        lifecycleCommandInFlight.current = false;
       }
     },
-    [canEditNeutral, publish, unpublish],
+    [canEditNeutral, pageId, publish, tCommon, unpublish],
   );
 
   const debouncedMetadataUpdate = useDebouncedRoomMetadata({

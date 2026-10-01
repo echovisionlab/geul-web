@@ -2,7 +2,7 @@
 
 import { type ReactNode, useEffect } from 'react';
 import Link from '@/components/core/Navigation';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import type { MenuItem } from '@echovisionlab/geul-proto/public/manifest_pb.ts';
 import { useTranslations } from 'next-intl';
 import { useComputedColorScheme, useMantineColorScheme } from '@mantine/core';
@@ -91,6 +91,7 @@ export function Shell({ children, initialMenus, initialUserSnapshot }: ShellProp
   const tCommon = useTranslations('common');
   const tCommonActions = useTranslations('common.actions');
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [navigationOpened, { toggle: toggleNavigation, close: closeNavigation }] = useDisclosure();
   const [userMenuOpened, { open: openUserMenu, close: closeUserMenu }] = useDisclosure();
   const { toggleColorScheme } = useMantineColorScheme();
@@ -119,6 +120,8 @@ export function Shell({ children, initialMenus, initialUserSnapshot }: ShellProp
   const accountItems = (menus.avatarDropdown as MenuItem[]).map((item) => toNavigationItem(item, pathname));
   const canViewChangelog = session?.user.role === 'admin' || session?.user.role === 'author';
   const companyName = settings.company_name || settings.site_title;
+  const queryString = searchParams?.toString();
+  const currentPath = queryString ? `${pathname}?${queryString}` : pathname;
 
   useEffect(() => {
     closeNavigation();
@@ -148,7 +151,7 @@ export function Shell({ children, initialMenus, initialUserSnapshot }: ShellProp
 
   return (
     <ShellView
-      loginHref={buildLoginRedirectHref(pathname)}
+      loginHref={buildLoginRedirectHref(currentPath)}
       navigationOpened={navigationOpened}
       userMenuOpened={userMenuOpened}
       themeMode={themeMode}

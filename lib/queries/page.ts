@@ -192,13 +192,11 @@ export async function getPageView(
 
     return mapPublicPageResponse(page, response.blockMedia);
   } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.NotFound) {
-        return null;
-      }
-      logger.error('GetPageView RPC error', { error: err.message });
+    if (isConnectErrorCode(err, Code.NotFound)) {
+      return null;
     }
-    return null;
+    logger.error('GetPageView failed', { error: err });
+    throw err;
   }
 }
 

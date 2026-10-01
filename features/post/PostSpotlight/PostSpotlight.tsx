@@ -83,7 +83,7 @@ export function PostSpotlight() {
       actions={actions}
       query={query}
       onQueryChange={setQuery}
-      shortcut="mod + /"
+      shortcut="mod + K"
       nothingFound={getNothingFoundMessage()}
       highlightQuery
       searchProps={{

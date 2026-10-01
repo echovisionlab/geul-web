@@ -17,7 +17,12 @@ export async function PostContent({ initialPost, requestedLocale, query }: Props
   const post = initialPost;
 
   const transformedPost = toPostViewModel(post);
-  const allowedActions = await getPostAllowedActions(post.id);
+  let allowedActions: PostAction[];
+  try {
+    allowedActions = await getPostAllowedActions(post.id);
+  } catch {
+    allowedActions = [];
+  }
   transformedPost.canEdit = allowedActions.includes(PostAction.EDIT);
   const pathname = `/posts/${post.slug || post.id}`;
   return (

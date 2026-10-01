@@ -119,11 +119,13 @@ export default function CampaignEditPage() {
     currentProvider && blockRoomController ? { provider: currentProvider, controller: blockRoomController } : null;
 
   const [fields, setCampaignFields] = useState<CampaignFields>(DEFAULT_CAMPAIGN_FIELDS);
+  const [pendingConfigRequestCount, setPendingConfigRequestCount] = useState(0);
   const pendingConfigRequestsRef = useRef(new Map<keyof CampaignFields, Set<number>>());
   const latestConfigRequestRef = useRef(new Map<keyof CampaignFields, number>());
   const nextConfigRequestRef = useRef(0);
   const beginConfigRequest = useCallback((keys: (keyof CampaignFields)[]) => {
     const requestId = ++nextConfigRequestRef.current;
+    setPendingConfigRequestCount((count) => count + 1);
     for (const key of keys) {
       const requests = pendingConfigRequestsRef.current.get(key) ?? new Set<number>();
       requests.add(requestId);
@@ -133,6 +135,7 @@ export default function CampaignEditPage() {
     return {
       isLatest: () => keys.every((key) => latestConfigRequestRef.current.get(key) === requestId),
       finish: () => {
+        setPendingConfigRequestCount((count) => Math.max(0, count - 1));
         for (const key of keys) {
           const requests = pendingConfigRequestsRef.current.get(key);
           requests?.delete(requestId);
@@ -143,6 +146,7 @@ export default function CampaignEditPage() {
       },
     };
   }, []);
+  const hasPendingCampaignConfiguration = pendingConfigRequestCount > 0;
   const setField = useCallback(<K extends keyof CampaignFields>(key: K, value: CampaignFields[K]) => {
     setCampaignFields((current) => ({ ...current, [key]: value }));
   }, []);
@@ -460,6 +464,9 @@ export default function CampaignEditPage() {
   }, [persistEditableCampaignBeforeDelivery, sendTest, testEmail, testLocale]);
 
   const handleSendAll = useCallback(() => {
+    if (pendingConfigRequestsRef.current.size > 0) {
+      return;
+    }
     if (!deliveryTargetComplete) {
       notifications.show({ message: t('target.audienceRequired'), color: 'red' });
       return;
@@ -468,11 +475,17 @@ export default function CampaignEditPage() {
       if (!(await persistEditableCampaignBeforeDelivery())) {
         return;
       }
+      if (pendingConfigRequestsRef.current.size > 0) {
+        return;
+      }
       sendCampaign.mutate(fields.recipientScope);
     })();
   }, [deliveryTargetComplete, fields.recipientScope, persistEditableCampaignBeforeDelivery, sendCampaign, t]);
 
   const handleSchedule = useCallback(() => {
+    if (pendingConfigRequestsRef.current.size > 0) {
+      return;
+    }
     const scheduledAt = dateTimeValueToDate(scheduleDate);
     if (!scheduledAt || !deliveryTargetComplete) {
       if (!deliveryTargetComplete) {
@@ -482,6 +495,9 @@ export default function CampaignEditPage() {
     }
     void (async () => {
       if (!(await persistEditableCampaignBeforeDelivery())) {
+        return;
+      }
+      if (pendingConfigRequestsRef.current.size > 0) {
         return;
       }
       scheduleCampaign.mutate({
@@ -585,7 +601,7 @@ export default function CampaignEditPage() {
                     label: tActions('schedule'),
                     icon: <IconCalendar size={16} />,
                     emphasis: 'medium' as const,
-                    disabled: !currentSubject.trim() || !deliveryTargetComplete,
+                    disabled: hasPendingCampaignConfiguration || !currentSubject.trim() || !deliveryTargetComplete,
                     onClick: openScheduleModal,
                   },
                 ]
@@ -596,7 +612,7 @@ export default function CampaignEditPage() {
                     key: 'send-now',
                     label: t('actions.sendNow'),
                     icon: <IconSend size={16} />,
-                    disabled: !currentSubject.trim() || !deliveryTargetComplete,
+                    disabled: hasPendingCampaignConfiguration || !currentSubject.trim() || !deliveryTargetComplete,
                     onClick: openSendModal,
                   },
                 ]
@@ -772,7 +788,7 @@ export default function CampaignEditPage() {
           sendDialog={{
             opened: sendModalOpened,
             includesUnsubscribedUsers: fields.recipientScope === 'ALL_MATCHING_USERS',
-            pending: sendCampaign.isPending,
+            pending: sendCampaign.isPending || hasPendingCampaignConfiguration,
             labels: {
               title: t('actions.sendCampaign'),
               warning: t('sendModal.warning', { audience: selectedSegmentName }),
@@ -790,7 +806,7 @@ export default function CampaignEditPage() {
             minDate: dateToDateTimeValue(new Date()),
             audience: selectedSegmentName,
             includesUnsubscribedUsers: fields.recipientScope === 'ALL_MATCHING_USERS',
-            pending: scheduleCampaign.isPending,
+            pending: scheduleCampaign.isPending || hasPendingCampaignConfiguration,
             labels: {
               title: t('actions.scheduleCampaign'),
               description: t('scheduleModal.description'),

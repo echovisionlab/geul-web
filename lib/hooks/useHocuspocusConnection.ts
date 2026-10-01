@@ -65,6 +65,8 @@ function getDocumentRoomSaveKey(documentName: string | null): string | null {
   try {
     const parsed = parseDocumentName(documentName);
     switch (parsed.type) {
+      case CollaborativeDocumentType.FORM:
+        return `form:${parsed.entityId}`;
       case CollaborativeDocumentType.MENU:
         return `menu:${parsed.entityId}`;
       case CollaborativeDocumentType.POST_SERIES:
