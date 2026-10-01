@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.9](https://github.com/echovisionlab/geul-web/compare/v0.2.8...v0.2.9) (2026-10-01)
+
+
+### Bug Fixes
+
+* **editor:** preserve versioned Post settings and defer map styles ([#41](https://github.com/echovisionlab/geul-web/issues/41)) ([fd728a0](https://github.com/echovisionlab/geul-web/commit/fd728a04a579dbe0bb20daa050bee2931f931042))
+
 ## [0.2.8](https://github.com/echovisionlab/geul-web/compare/v0.2.7...v0.2.8) (2026-10-01)
 
 
