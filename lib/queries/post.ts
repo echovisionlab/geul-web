@@ -422,6 +422,7 @@ export async function getPostForEdit(idOrSlug: string) {
       summary: post.summary,
       status: protoStatusToString(post.status),
       commentsEnabled: post.commentsEnabled,
+      configurationRevision: post.configurationRevision,
       documentLayout: mapProtoDocumentLayout(post.documentLayout),
       featuredImageUrl: resolvePostFeaturedImageUrl(post.featuredImageDelivery),
       seriesId: post.series?.id,

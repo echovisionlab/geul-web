@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import * as Y from 'yjs';
 import { PostAction } from '@echovisionlab/geul-proto/secure/post_pb.ts';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -26,13 +27,14 @@ import { EntityTranslationsPanel } from '@/features/translation/EntityTranslatio
 import { isLocaleDocumentEditable } from '@/features/translation/locale-document-mode';
 import { usePostBlockRoomController } from '@/features/editor/hooks/useBlockRoomTiptapController';
 import { EditorSaveRecoveryNotice } from '@/features/editor/EditorSaveRecoveryNotice';
-import { exportPostMarkdownAction, regeneratePostOgImageAction, updatePostSlugAction } from '@/lib/actions/post';
+import { exportPostMarkdownAction, regeneratePostOgImageAction } from '@/lib/actions/post';
 import {
   createMapPlaceForBlockWithBrowserClient,
   createMapPlaceWithBrowserClient,
 } from '@/lib/api/map-place-browser-client';
 import type { PostMeta } from '@/lib/collab/post-meta';
 import { updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
+import { createBlockRoomRecoverySnapshot, matchesBlockRoomRecoveryScope } from '@/lib/collab/block-room-recovery';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import { MapPlaceActionProvider } from '@/lib/contexts/MapPlaceActionContext';
 import { PostMetaProvider, usePostMeta } from '@/lib/contexts/PostMetaContext';
@@ -48,6 +50,7 @@ import type { TagSelect } from '@/lib/types/tag/model';
 import { downloadMarkdown } from '@/lib/utils/export';
 import { normalizeOgRegenerationLocale } from '@/lib/utils/og-regeneration';
 import { toNullableSlug, toSlugInputValue } from '@/lib/utils/slug';
+import { PostConfigConflictRecoveryNotice, type PostConfigDocumentRecovery } from './PostConfigConflictRecoveryNotice';
 import { PostRecoveryNotice } from './PostRecoveryNotice';
 import { resolvePostEditorBodyMode } from './body-mode';
 import { CategorySelector } from './CategorySelector';
@@ -81,6 +84,7 @@ interface PostEditorProps {
   initialTags: PostMeta['tags'];
   initialFeaturedImageUrl: string | null;
   initialCommentsEnabled: boolean;
+  initialConfigurationRevision: string;
   initialDocumentLayout: DocumentLayout;
   initialSeriesId: string | null;
   initialSeriesOrder: number | null;
@@ -131,6 +135,7 @@ function PostEditorContent({
   initialStatus,
   initialScheduledAt,
   initialScheduledTimeZone,
+  initialConfigurationRevision,
   initialAllowedActions,
   initialSeriesId,
   initialSeriesOrder,
@@ -221,7 +226,8 @@ function PostEditorContent({
   const handleBack = useCallback(async () => {
     await navigateWithSave(() => router.back());
   }, [navigateWithSave, router]);
-  const postConfigUpdate = usePostConfigSave(postId);
+  const postConfigUpdate = usePostConfigSave(postId, initialConfigurationRevision);
+  const pendingPostConfigPatch = postConfigUpdate.getPendingPatch();
   const permissionRevocation = useEditorPermissionRevocation(provider, 'post', postId);
   const revision = useEditorReloadRequired(provider);
   const blockRoomController = usePostBlockRoomController(currentDoc, roomLocale);
@@ -242,21 +248,6 @@ function PostEditorContent({
   });
   useOgGenerationLookupSignal(activeEditLocale.ogGenerationRun, activeEditLocale.activeLocale, ogImage.trackLatest);
 
-  const updateSlug = useMutation({
-    mutationFn: (nextSlug: string | null) => updatePostSlugAction(postId, nextSlug),
-    onSuccess: (result) => {
-      if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
-      }
-    },
-    onError: (error) => {
-      notifications.show({
-        message: error instanceof Error ? error.message : t('notifications.slugUpdateFailed'),
-        color: 'red',
-      });
-    },
-  });
-
   // Slug management with auto-save
   const slugMgmt = useSlugManagement({
     entityType: 'post',
@@ -264,7 +255,7 @@ function PostEditorContent({
     slug: toSlugInputValue(slug),
     onSlugChange: (val) => setSlug(toNullableSlug(val)),
     onSave: (newSlug) => {
-      return updateSlug.mutateAsync(toNullableSlug(newSlug));
+      postConfigUpdate({ slug: toSlugInputValue(toNullableSlug(newSlug)) });
     },
   });
 
@@ -340,6 +331,50 @@ function PostEditorContent({
     mapPlaceId,
     layout,
   });
+  const getPostConfigDocumentRecovery = useCallback((): PostConfigDocumentRecovery | null => {
+    const scope = { documentType: 'post' as const, entityId: postId, locale: roomLocale };
+    if (matchesBlockRoomRecoveryScope(recoverySnapshot, scope)) {
+      return { snapshot: recoverySnapshot, ...(recoveryDraft ? { draft: recoveryDraft } : {}) };
+    }
+
+    if (!roomLocale || !currentDoc || !bootstrap || !currentIsSynced) {
+      return null;
+    }
+
+    const snapshot = createBlockRoomRecoverySnapshot({
+      ...scope,
+      admitted: currentIsSynced,
+      bootstrap,
+      yjsUpdate: Y.encodeStateAsUpdate(currentDoc),
+    });
+    if (!snapshot) {
+      return null;
+    }
+
+    return {
+      snapshot,
+      draft: {
+        title: residentTitle,
+        summary: residentSummary,
+        commentsEnabled,
+        mapPlaceId,
+        layout,
+      },
+    };
+  }, [
+    bootstrap,
+    commentsEnabled,
+    currentDoc,
+    currentIsSynced,
+    layout,
+    mapPlaceId,
+    postId,
+    recoveryDraft,
+    recoverySnapshot,
+    residentSummary,
+    residentTitle,
+    roomLocale,
+  ]);
 
   const debouncedResidentMetadataUpdate = useDebouncedRoomMetadata({
     connection: { protocol, bootstrap, acceptEpochAck, reloadCanonical },
@@ -528,7 +563,7 @@ function PostEditorContent({
             slug={toSlugInputValue(slug)}
             idPrefix={`post-${postId}`}
             error={slugMgmt.error}
-            saving={slugMgmt.isChecking || updateSlug.isPending}
+            saving={slugMgmt.isChecking || postConfigUpdate.isPending}
             disabled={!canMutateSourceDocument}
             onChange={slugMgmt.handleChange}
             onBlur={slugMgmt.handleBlur}
@@ -723,10 +758,30 @@ function PostEditorContent({
         />
 
         <EditorReloadRequiredDialog
-          opened={revision.reloadRequired}
+          opened={revision.reloadRequired || postConfigUpdate.conflict}
           onReload={() => window.location.reload()}
           recoveryAction={
-            recoverySnapshot ? <PostRecoveryNotice snapshot={recoverySnapshot} draft={recoveryDraft} /> : undefined
+            revision.reloadRequired || postConfigUpdate.conflict ? (
+              <Stack gap="sm">
+                {revision.reloadRequired && recoverySnapshot ? (
+                  <PostRecoveryNotice snapshot={recoverySnapshot} draft={recoveryDraft} />
+                ) : null}
+                {postConfigUpdate.conflict ? (
+                  <PostConfigConflictRecoveryNotice
+                    getDocumentRecovery={getPostConfigDocumentRecovery}
+                    copy={
+                      pendingPostConfigPatch
+                        ? {
+                            postId,
+                            expectedConfigurationRevision: postConfigUpdate.configurationRevision,
+                            patch: pendingPostConfigPatch,
+                          }
+                        : null
+                    }
+                  />
+                ) : null}
+              </Stack>
+            ) : undefined
           }
         />
 

@@ -19,7 +19,6 @@ import { createCommittedMutationRevalidator } from '@/lib/actions/revalidate-aft
 import { createPostClient } from '@/lib/api/server-client';
 import { resolvePostFeaturedImageUrl } from '@/lib/media/post-featured-image';
 import { normalizeOgRegenerationLocale } from '@/lib/utils/og-regeneration';
-import { toSlugInputValue } from '@/lib/utils/slug';
 
 const revalidatePostAfterCommit = createCommittedMutationRevalidator('post-actions', 'post');
 
@@ -82,16 +81,18 @@ export async function updatePostAction(
     mapPlaceId?: string;
     documentLayout?: DocumentLayout;
   },
-): Promise<ActionResult<{ success: true }>> {
+  expectedConfigurationRevision: string,
+): Promise<ActionResult<{ success: true; configurationRevision: string }>> {
   try {
     const client = await createPostClient();
     const request: {
       id: string;
+      expectedConfigurationRevision: string;
       slug?: string;
       commentsEnabled?: boolean;
       mapPlaceId?: string;
       documentLayout?: ReturnType<typeof toProtoDocumentLayout>;
-    } = { id: postId };
+    } = { id: postId, expectedConfigurationRevision };
 
     if ('slug' in data) {
       request.slug = data.slug;
@@ -106,24 +107,11 @@ export async function updatePostAction(
       request.documentLayout = toProtoDocumentLayout(data.documentLayout);
     }
 
-    await client.updatePost(request);
-    return actionSuccess({ success: true });
+    const response = await client.updatePost(request);
+    return actionSuccess({ success: true, configurationRevision: response.configurationRevision });
   } catch (err) {
     return postActionFailure(err, 'Failed to update post', 'POST_UPDATE_FAILED');
   }
-}
-
-export async function updatePostSlugAction(
-  postId: string,
-  slug: string | null,
-): Promise<ActionResult<{ success: true; slug: string | null }>> {
-  const result = await updatePostAction(postId, { slug: toSlugInputValue(slug) });
-
-  if (!result.ok) {
-    return actionFailure(result.error, result.errorCode);
-  }
-
-  return actionSuccess({ success: true, slug });
 }
 
 export async function deletePostAction(postId: string): Promise<ActionResult<{ success: true }>> {

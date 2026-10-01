@@ -37,6 +37,9 @@ const postClient = vi.hoisted(() => ({
   updatePost: vi.fn(),
 }));
 
+const initialConfigurationRevision = '10000000-0000-4000-8000-000000000001';
+const acknowledgedConfigurationRevision = '10000000-0000-4000-8000-000000000002';
+
 vi.mock('next/cache', () => ({
   revalidatePath: mocks.revalidatePath,
 }));
@@ -59,6 +62,7 @@ describe('post actions', () => {
     mocks.regenerateOgImage.mockResolvedValue({ ok: true, runId: 'run-1', generationIds: ['generation-1'] });
     mocks.createAdminClient.mockResolvedValue({ regenerateOgImage: mocks.regenerateOgImage });
     postClient.createPost.mockResolvedValue({ id: 'post-1' });
+    postClient.updatePost.mockResolvedValue({ configurationRevision: acknowledgedConfigurationRevision });
     postClient.setPostFeaturedImage.mockResolvedValue({
       imageDelivery: { thumbnail: assetRefFixture('https://cdn.example/post.webp') },
       ogGenerationRunId: 'featured-run',
@@ -86,22 +90,21 @@ describe('post actions', () => {
   it('maps CRUD and status server actions to the post service', async () => {
     await expect(actions.createPostAction()).resolves.toEqual({ ok: true, data: { id: 'post-1' } });
     await expect(
-      actions.updatePostAction('post-1', {
-        slug: 'new-title',
-        commentsEnabled: false,
-        mapPlaceId: '',
-        documentLayout: {
-          contentHeight: 'viewport',
-          pageChrome: 'pinned',
-          footer: 'flow',
+      actions.updatePostAction(
+        'post-1',
+        {
+          slug: 'new-title',
+          commentsEnabled: false,
+          mapPlaceId: '',
+          documentLayout: {
+            contentHeight: 'viewport',
+            pageChrome: 'pinned',
+            footer: 'flow',
+          },
         },
-      }),
-    ).resolves.toEqual({ ok: true, success: true });
-    await expect(actions.updatePostSlugAction('post-1', ' New Slug ')).resolves.toEqual({
-      ok: true,
-      success: true,
-      slug: ' New Slug ',
-    });
+        initialConfigurationRevision,
+      ),
+    ).resolves.toEqual({ ok: true, success: true, configurationRevision: acknowledgedConfigurationRevision });
     await expect(actions.publishPostAction('post-1')).resolves.toEqual({ ok: true, success: true });
     await expect(actions.unpublishPostAction('post-1')).resolves.toEqual({ ok: true, success: true });
     await expect(actions.archivePostAction('post-1')).resolves.toEqual({ ok: true, success: true });
@@ -119,6 +122,7 @@ describe('post actions', () => {
     });
     expect(postClient.updatePost).toHaveBeenCalledWith({
       id: 'post-1',
+      expectedConfigurationRevision: initialConfigurationRevision,
       slug: 'new-title',
       commentsEnabled: false,
       mapPlaceId: '',
@@ -128,7 +132,6 @@ describe('post actions', () => {
         footer: DocumentRegionPlacement.FLOW,
       },
     });
-    expect(postClient.updatePost).toHaveBeenCalledWith({ id: 'post-1', slug: ' New Slug ' });
     expect(postClient.publishPost).toHaveBeenCalledWith({ id: 'post-1' });
     expect(postClient.unpublishPost).toHaveBeenCalledWith({ id: 'post-1' });
     expect(postClient.archivePost).toHaveBeenCalledWith({ id: 'post-1' });
