@@ -109,9 +109,10 @@ jobs:
         env:
           HARBOR_REGISTRY_USERNAME: ${{ secrets.HARBOR_REGISTRY_USERNAME }}
           HARBOR_REGISTRY_PASSWORD: ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
+          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
         run: |
           set -euo pipefail
-          for var in HARBOR_REGISTRY_USERNAME HARBOR_REGISTRY_PASSWORD; do
+          for var in HARBOR_REGISTRY_USERNAME HARBOR_REGISTRY_PASSWORD NEXT_SERVER_ACTIONS_ENCRYPTION_KEY; do
             if [ -z "${!var:-}" ]; then
               echo "Missing secret: ${var}" >&2
               exit 1
@@ -128,12 +129,16 @@ jobs:
       - name: Build and push release image
         id: published-image
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        env:
+          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
         with:
           context: .
           platforms: ${{ env.PLATFORMS }}
           push: true
           build-args: |
             RELEASE_IMAGE_BUILD=true
+          secret-envs: |
+            NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
           labels: |
             org.opencontainers.image.created=${{ steps.release-context.outputs.created_at }}
             org.opencontainers.image.revision=${{ env.RELEASE_SHA }}
@@ -151,6 +156,7 @@ jobs:
           PUBLISHED_DIGEST: ${{ steps.published-image.outputs.digest }}
           SHA_IMAGE: ${{ steps.release-context.outputs.sha_image }}
           TAG_IMAGE: ${{ steps.release-context.outputs.tag_image }}
+          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
         run: |
           set -euo pipefail
           docker pull "${SHA_IMAGE}"
@@ -182,3 +188,9 @@ jobs:
           fi
 
           docker run --rm --entrypoint /bin/sh "${deploy_image}" -c 'test -s server.js && test -d .next/static && node --version >/dev/null'
+          docker run --rm --entrypoint node --env NEXT_SERVER_ACTIONS_ENCRYPTION_KEY "${deploy_image}" -e '
+            const manifest = require("./.next/server/server-reference-manifest.json");
+            if (!process.env.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY || manifest.encryptionKey !== process.env.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY) {
+              throw new Error("Release Server Action key does not match configured build key.");
+            }
+          '
