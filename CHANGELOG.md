@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.5](https://github.com/echovisionlab/geul-web/compare/v0.3.4...v0.3.5) (2026-10-02)
+
+
+### Bug Fixes
+
+* **web:** preserve Server Action identity across releases ([#54](https://github.com/echovisionlab/geul-web/issues/54)) ([8e95c17](https://github.com/echovisionlab/geul-web/commit/8e95c17127d410c4898599c7333bacf1c6d8ebf6))
+
 ## [0.3.4](https://github.com/echovisionlab/geul-web/compare/v0.3.3...v0.3.4) (2026-10-01)
 
 
