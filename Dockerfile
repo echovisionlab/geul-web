@@ -39,7 +39,12 @@ ENV OATHKEEPER_URL=http://localhost:8000 \
     RELEASE_IMAGE_BUILD=${RELEASE_IMAGE_BUILD}
 RUN pnpm prepare:maplibre-worker
 RUN pnpm prepare:p5-runtime
-RUN pnpm exec next build
+# Release builds reuse the deployed action key so open clients keep valid action IDs.
+RUN --mount=type=secret,id=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,env=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY \
+    if [ "${RELEASE_IMAGE_BUILD}" = "true" ] && [ -z "${NEXT_SERVER_ACTIONS_ENCRYPTION_KEY:-}" ]; then \
+      echo "Release builds require NEXT_SERVER_ACTIONS_ENCRYPTION_KEY." >&2; exit 1; \
+    fi; \
+    pnpm exec next build
 
 FROM node:24.19.0-alpine@sha256:d32cdf619f63fe0471182d08996dd516c6275bb5fd31ae06e55a570bd9e1ad43 AS runner
 WORKDIR /app
