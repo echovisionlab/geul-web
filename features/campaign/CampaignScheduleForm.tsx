@@ -4,7 +4,7 @@ import { IconAlertCircle, IconCalendar } from '@tabler/icons-react';
 import { Divider, Group, Stack, Text } from '@mantine/core';
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
-import { DateTimeInput, type DateTimeValue } from '@/components/core/Input';
+import { DateTimeInput, type DateTimeValue } from '@/components/core/Input/DateTimeInput';
 
 export interface CampaignScheduleFormLabels {
   description: string;

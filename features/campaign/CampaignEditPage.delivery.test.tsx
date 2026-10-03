@@ -119,6 +119,8 @@ vi.mock('@/features/editor/useEditorPermissionRevocation', () => ({
 vi.mock('@/components/core/Input', () => ({
   Select: () => null,
   TextInput: () => null,
+}));
+vi.mock('@/components/core/Input/DateTimeInput', () => ({
   dateTimeValueToDate: ({ date, time }: { date: Date | null; time: string }) => {
     if (!date || !time) {
       return null;

@@ -18,7 +18,7 @@ export function PrintCodeSource({ language, source }: PrintCodeSourceProps) {
     let active = true;
     setHighlighted(null);
     setStatus('loading');
-    void import('shiki/bundle/full')
+    void import('./print-code-highlighter')
       .then(({ codeToHtml }) =>
         codeToHtml(source, {
           lang: language || 'text',

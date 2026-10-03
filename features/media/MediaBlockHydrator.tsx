@@ -5,11 +5,8 @@ import { RefObject, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { resolveHydratedAudioSources, resolveHydratedVideoSources } from '@/features/media/runtime/media-hydration';
 import { buildVideoJsMessages } from '@/features/media/runtime/videojs-messages';
-import {
-  disposeVideoJsPlayer,
-  mountVideoJsPlayer,
-  type VideoJsMessages,
-} from '@/features/media/runtime/videojs-player';
+import { loadVideoJsRuntime } from '@/features/media/runtime/videojs-loader';
+import { resolveVideoPlaybackSource, type VideoJsMessages } from '@/features/media/runtime/videojs-source';
 import {
   clampMediaTime,
   normalizeHydrationUrl,
@@ -81,24 +78,39 @@ function hydrateVideo(video: HTMLVideoElement, messages: VideoJsMessages) {
     video.poster = posterUrl;
   }
 
-  const player = mountVideoJsPlayer(video, {
-    hlsSrc,
-    src: originalUrl,
-    poster: posterUrl,
-    messages,
-  });
-
-  if (!player && (hlsSrc || originalUrl)) {
-    return null;
-  }
-
-  if (!player && !hlsSrc && !originalUrl) {
+  if (!resolveVideoPlaybackSource({ hlsSrc, src: originalUrl })) {
     video.removeAttribute('src');
     video.load();
+    return () => {};
   }
 
+  let cancelled = false;
+  let dispose: (() => void) | null = null;
+  const signature = buildVideoSignature(video, block);
+  void loadVideoJsRuntime()
+    .then((runtime) => {
+      if (cancelled || !video.isConnected || buildVideoSignature(video, block) !== signature) {
+        return;
+      }
+      const player = runtime.mountVideoJsPlayer(video, {
+        hlsSrc,
+        src: originalUrl,
+        poster: posterUrl,
+        messages,
+      });
+      dispose = () => runtime.disposeVideoJsPlayer(player || undefined);
+    })
+    .catch(() => {
+      // Preserve the static video fallback if the runtime chunk fails to load.
+      if (!cancelled && video.isConnected && buildVideoSignature(video, block) === signature) {
+        video.controls = true;
+        video.src = resolveVideoPlaybackSource({ src: originalUrl })?.src || hlsSrc;
+      }
+    });
+
   return () => {
-    disposeVideoJsPlayer(player || undefined);
+    cancelled = true;
+    dispose?.();
   };
 }
 
@@ -505,7 +517,12 @@ export function MediaBlockHydrator({ containerRef, contentKey }: MediaBlockHydra
     const observer = new MutationObserver(() => {
       scheduleSync();
     });
-    observer.observe(container, { childList: true, subtree: true });
+    observer.observe(container, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['data-hls-src', 'data-hls-url', 'data-original-url', 'data-poster-url', 'data-file-id'],
+    });
 
     return () => {
       observer.disconnect();
