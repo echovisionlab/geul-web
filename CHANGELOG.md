@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.3](https://github.com/echovisionlab/geul-web/compare/v0.4.2...v0.4.3) (2026-10-03)
+
+
+### Performance Improvements
+
+* **web:** separate public shell helpers from validation runtimes ([#64](https://github.com/echovisionlab/geul-web/issues/64)) ([af919c0](https://github.com/echovisionlab/geul-web/commit/af919c048a56c2a95076df6126c7d270cc7ed668))
+
 ## [0.4.2](https://github.com/echovisionlab/geul-web/compare/v0.4.1...v0.4.2) (2026-10-03)
 
 
