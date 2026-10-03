@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.5](https://github.com/echovisionlab/geul-web/compare/v0.4.4...v0.4.5) (2026-10-03)
+
+
+### Performance Improvements
+
+* keep page media descriptors off empty routes ([#68](https://github.com/echovisionlab/geul-web/issues/68)) ([04af72b](https://github.com/echovisionlab/geul-web/commit/04af72b0659d46ed80d958380da283b4f96117fc))
+
 ## [0.4.4](https://github.com/echovisionlab/geul-web/compare/v0.4.3...v0.4.4) (2026-10-03)
 
 
