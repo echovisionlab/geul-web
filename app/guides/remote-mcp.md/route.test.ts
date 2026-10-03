@@ -40,7 +40,7 @@ describe('Remote MCP installation guide', () => {
     const examples = markdown.split('## Try it\n')[1]?.split('## Remove or reconnect')[0];
 
     expect(examples).toBeDefined();
-    expect(examples?.match(/^  > /gm)).toHaveLength(4);
+    expect(examples?.match(/^ {2}> /gm)).toHaveLength(4);
     expect(markdown.indexOf('## Try it')).toBeGreaterThan(markdown.indexOf('## ChatGPT on the web'));
   });
 
