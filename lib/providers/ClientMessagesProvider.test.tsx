@@ -176,6 +176,37 @@ describe('ClientMessagesProvider', () => {
     expect(container.querySelector('[data-testid="auth-title"]')?.textContent).toBe('로그인');
   });
 
+  it('keeps public detail navigation reduced and restores the selected locale before editing', async () => {
+    const koPublicMessages = selectClientMessages(koMessages, {
+      pathWithSearch: '/posts/example?lang=ko',
+      hasSession: false,
+    });
+    const koLoad = deferred<ClientMessages>();
+    mocks.loadMessages.mockReturnValue(koLoad.promise);
+    mocks.pathname = '/posts/example';
+    mocks.search = 'lang=ko';
+
+    await act(async () => renderProvider({ locale: 'ko', messages: koPublicMessages, children: <PrivacyTitle /> }));
+    for (const pathname of ['/works/example', '/releases/example', '/artists/example']) {
+      mocks.pathname = pathname;
+      await act(async () => renderProvider({ locale: 'ko', messages: koPublicMessages, children: <PrivacyTitle /> }));
+      expect(container.querySelector('[role="status"]')).toBeNull();
+    }
+    expect(mocks.loadMessages).not.toHaveBeenCalled();
+
+    mocks.search = 'lang=ko&edit=true';
+    await act(async () => renderProvider({ locale: 'ko', messages: koPublicMessages }));
+    expect(mocks.loadMessages).toHaveBeenCalledExactlyOnceWith('ko');
+    expect(container.querySelector('[role="status"]')).not.toBeNull();
+    expect(container.querySelector('[data-testid="auth-title"]')).toBeNull();
+
+    await act(async () => {
+      koLoad.resolve(koMessages);
+      await koLoad.promise;
+    });
+    expect(container.querySelector('[data-testid="auth-title"]')?.textContent).toBe('로그인');
+  });
+
   it('keeps failed-route children hidden and offers a working catalogue retry', async () => {
     mocks.pathname = '/login';
     mocks.loadMessages.mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce(enMessages);

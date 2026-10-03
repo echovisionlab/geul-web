@@ -29,6 +29,16 @@ vi.mock('@/features/media/runtime/videojs-player', async () => {
   };
 });
 
+const mockLoadVideoJsRuntime = vi.hoisted(() => vi.fn());
+vi.mock('@/features/media/runtime/videojs-loader', () => ({
+  loadVideoJsRuntime: mockLoadVideoJsRuntime,
+}));
+
+mockLoadVideoJsRuntime.mockImplementation(async () => ({
+  mountVideoJsPlayer: mockMountVideoJsPlayer,
+  disposeVideoJsPlayer: mockDisposeVideoJsPlayer,
+}));
+
 let host: HTMLDivElement | null = null;
 let root: Root | null = null;
 
@@ -76,6 +86,11 @@ afterEach(() => {
     el: () => null,
   });
   mockDisposeVideoJsPlayer.mockReset();
+  mockLoadVideoJsRuntime.mockReset();
+  mockLoadVideoJsRuntime.mockImplementation(async () => ({
+    mountVideoJsPlayer: mockMountVideoJsPlayer,
+    disposeVideoJsPlayer: mockDisposeVideoJsPlayer,
+  }));
 });
 
 describe('VideoPlayer', () => {
@@ -309,5 +324,77 @@ describe('VideoPlayer', () => {
     const actionSlot = host.querySelector('[data-video-player-action-slot]');
     expect(actionSlot?.querySelector('[data-player-action]')).not.toBeNull();
     expect(actionSlot?.nextElementSibling?.classList.contains('vjs-fullscreen-control')).toBe(true);
+  });
+  async function renderPlayer(props: Parameters<typeof VideoPlayer>[0] = {}) {
+    if (!host) {
+      host = document.createElement('div');
+      document.body.appendChild(host);
+      root = createRoot(host);
+    }
+    await act(async () => {
+      root!.render(
+        <MantineProvider>
+          <NextIntlClientProvider locale="en" messages={messages}>
+            <VideoPlayer {...props} />
+          </NextIntlClientProvider>
+        </MantineProvider>,
+      );
+    });
+  }
+
+  it('does not request the runtime without a ready playable source', async () => {
+    await renderPlayer();
+    await renderPlayer({ src: 'https://cdn.example.com/original.mp4', isReady: false });
+    await renderPlayer({ src: 'undefined' });
+    expect(mockLoadVideoJsRuntime).not.toHaveBeenCalled();
+  });
+
+  it('does not mount after unmount while the runtime is loading', async () => {
+    let resolveRuntime!: (runtime: unknown) => void;
+    mockLoadVideoJsRuntime.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveRuntime = resolve;
+      }),
+    );
+    await renderPlayer({ src: '/original.mp4' });
+    expect(mockMountVideoJsPlayer).not.toHaveBeenCalled();
+    act(() => {
+      root!.unmount();
+      root = null;
+    });
+    await act(async () => {
+      resolveRuntime({ mountVideoJsPlayer: mockMountVideoJsPlayer, disposeVideoJsPlayer: mockDisposeVideoJsPlayer });
+      await Promise.resolve();
+    });
+    expect(mockMountVideoJsPlayer).not.toHaveBeenCalled();
+  });
+
+  it('mounts only the latest source when props change during a shared load', async () => {
+    let resolveRuntime!: (runtime: unknown) => void;
+    mockLoadVideoJsRuntime.mockReturnValue(
+      new Promise((resolve) => {
+        resolveRuntime = resolve;
+      }),
+    );
+    await renderPlayer({ src: '/first.mp4' });
+    await renderPlayer({ src: '/second.mp4' });
+    await act(async () => {
+      resolveRuntime({ mountVideoJsPlayer: mockMountVideoJsPlayer, disposeVideoJsPlayer: mockDisposeVideoJsPlayer });
+      await Promise.resolve();
+    });
+    expect(mockMountVideoJsPlayer).toHaveBeenCalledTimes(1);
+    expect(mockMountVideoJsPlayer).toHaveBeenCalledWith(
+      expect.any(HTMLVideoElement),
+      expect.objectContaining({ src: '/second.mp4' }),
+    );
+  });
+
+  it('keeps native playback on import failure and retries on a later source', async () => {
+    mockLoadVideoJsRuntime.mockRejectedValueOnce(new Error('chunk unavailable'));
+    await renderPlayer({ hlsSrc: '/master.m3u8', src: '/original.mp4' });
+    expect(host?.querySelector('video')?.getAttribute('src')).toBe('/original.mp4');
+    expect(host?.querySelector('video')?.controls).toBe(true);
+    await renderPlayer({ src: '/next.mp4' });
+    expect(mockMountVideoJsPlayer).toHaveBeenCalledTimes(1);
   });
 });

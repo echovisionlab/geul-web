@@ -54,6 +54,16 @@ window.requestAnimationFrame = (callback: FrameRequestCallback) =>
 
 window.cancelAnimationFrame = (handle: number) => window.clearTimeout(handle);
 
+const mockLoadVideoJsRuntime = vi.hoisted(() => vi.fn());
+vi.mock('@/features/media/runtime/videojs-loader', () => ({
+  loadVideoJsRuntime: mockLoadVideoJsRuntime,
+}));
+
+mockLoadVideoJsRuntime.mockImplementation(async () => ({
+  mountVideoJsPlayer: mockMountVideoJsPlayer,
+  disposeVideoJsPlayer: mockDisposeVideoJsPlayer,
+}));
+
 let host: HTMLDivElement | null = null;
 let content: HTMLDivElement | null = null;
 let root: Root | null = null;
@@ -72,6 +82,11 @@ afterEach(() => {
   mockMountVideoJsPlayer.mockReset();
   mockMountVideoJsPlayer.mockReturnValue({ dispose: vi.fn() });
   mockDisposeVideoJsPlayer.mockReset();
+  mockLoadVideoJsRuntime.mockReset();
+  mockLoadVideoJsRuntime.mockImplementation(async () => ({
+    mountVideoJsPlayer: mockMountVideoJsPlayer,
+    disposeVideoJsPlayer: mockDisposeVideoJsPlayer,
+  }));
   lastMountOptions = null;
   mockFetchWaveformData.mockReset();
   mockFetchWaveformData.mockResolvedValue([0.1, 0.4, 0.8]);
@@ -258,5 +273,81 @@ describe('MediaBlockHydrator', () => {
     });
 
     expect(mockDisposeVideoJsPlayer).toHaveBeenCalledTimes(1);
+  });
+  async function renderVideoHarness() {
+    host = document.createElement('div');
+    document.body.appendChild(host);
+    root = createRoot(host);
+    await act(async () => {
+      root!.render(
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <VideoHydrationHarness />
+        </NextIntlClientProvider>,
+      );
+    });
+    await vi.waitFor(() => expect(mockLoadVideoJsRuntime).toHaveBeenCalled());
+  }
+
+  it('cancels video hydration when unmounted during the runtime load', async () => {
+    let resolveRuntime!: (runtime: unknown) => void;
+    mockLoadVideoJsRuntime.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveRuntime = resolve;
+      }),
+    );
+    await renderVideoHarness();
+    act(() => {
+      root!.unmount();
+      root = null;
+    });
+    await act(async () => {
+      resolveRuntime({ mountVideoJsPlayer: mockMountVideoJsPlayer, disposeVideoJsPlayer: mockDisposeVideoJsPlayer });
+      await Promise.resolve();
+    });
+    expect(mockMountVideoJsPlayer).not.toHaveBeenCalled();
+  });
+
+  it('cancels pending hydration when a video block is removed', async () => {
+    let resolveRuntime!: (runtime: unknown) => void;
+    mockLoadVideoJsRuntime.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveRuntime = resolve;
+      }),
+    );
+    await renderVideoHarness();
+    await act(async () => {
+      content?.replaceChildren();
+      await new Promise((resolve) => window.setTimeout(resolve, 20));
+      resolveRuntime({ mountVideoJsPlayer: mockMountVideoJsPlayer, disposeVideoJsPlayer: mockDisposeVideoJsPlayer });
+    });
+    expect(mockMountVideoJsPlayer).not.toHaveBeenCalled();
+  });
+
+  it('hydrates only the latest source when block attributes change during loading', async () => {
+    let resolveRuntime!: (runtime: unknown) => void;
+    mockLoadVideoJsRuntime.mockReturnValue(
+      new Promise((resolve) => {
+        resolveRuntime = resolve;
+      }),
+    );
+    await renderVideoHarness();
+    await act(async () => {
+      content?.querySelector('.video-block')?.setAttribute('data-hls-src', '/next.m3u8');
+      await new Promise((resolve) => window.setTimeout(resolve, 20));
+      resolveRuntime({ mountVideoJsPlayer: mockMountVideoJsPlayer, disposeVideoJsPlayer: mockDisposeVideoJsPlayer });
+    });
+    expect(mockMountVideoJsPlayer).toHaveBeenCalledTimes(1);
+    expect(mockMountVideoJsPlayer).toHaveBeenCalledWith(
+      expect.any(HTMLVideoElement),
+      expect.objectContaining({ hlsSrc: '/next.m3u8' }),
+    );
+  });
+
+  it('keeps static native controls if the runtime import fails', async () => {
+    mockLoadVideoJsRuntime.mockRejectedValueOnce(new Error('chunk unavailable'));
+    await renderVideoHarness();
+    await vi.waitFor(() => expect(content?.querySelector('video')?.controls).toBe(true));
+    expect(content?.querySelector('video')?.getAttribute('src')).toBe('https://cdn.example.com/original.mp4');
+    expect(mockMountVideoJsPlayer).not.toHaveBeenCalled();
   });
 });

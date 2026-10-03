@@ -151,10 +151,6 @@ export type {
 export {
   Checkbox,
   ColorInput,
-  DateTimeInput,
-  dateTimeValueToDate,
-  dateToDateTimeValue,
-  FileDropzone,
   FileInput,
   MultiSelect,
   NativeSelect,
@@ -171,6 +167,8 @@ export {
   Textarea,
   TextInput,
 } from './Input';
+export { DateTimeInput, dateTimeValueToDate, dateToDateTimeValue } from './Input/DateTimeInput';
+export { FileDropzone } from './Input/FileDropzone';
 export type {
   DateTimeInputProps,
   DateTimeValue,

@@ -6,6 +6,9 @@ export type ClientMessages = Messages;
 // Restrict the smaller catalogue to audited anonymous routes. Other routes and
 // authenticated sessions retain the full catalogue, including editor dialogs.
 const PUBLIC_ROUTES = new Set(['/', '/privacy', '/terms', '/works', '/tools', '/tools/transcode']);
+// These entity details also fall back to the read-only Page renderer. Arbitrary
+// Page slugs cannot be distinguished from other routes here, so stay full.
+const PUBLIC_DETAIL_ROUTE = /^\/(posts|works|releases|artists)\/[^/]+$/;
 const PRIVATE_NAMESPACES = [
   'adminShell',
   'adminList',
@@ -48,24 +51,25 @@ const PRIVATE_NAMESPACES = [
   'mapInsertModal',
   'createPlaceModal',
   'placeEditor',
-  'programEventAdmin',
 ] as const satisfies readonly (keyof Messages)[];
 
 export function isReducedCatalogueRoute(pathWithSearch: string): boolean {
-  if (!pathWithSearch) {
+  if (!pathWithSearch.startsWith('/') || pathWithSearch.startsWith('//')) {
     return false;
   }
 
   const url = new URL(pathWithSearch, 'http://internal');
-  return PUBLIC_ROUTES.has(url.pathname) && url.searchParams.get('edit') !== 'true';
+  return (
+    (PUBLIC_ROUTES.has(url.pathname) || PUBLIC_DETAIL_ROUTE.test(url.pathname)) &&
+    !url.searchParams.getAll('edit').includes('true')
+  );
 }
 
 export function selectClientMessages(
   messages: Messages,
   context: { pathWithSearch: string; hasSession: boolean },
 ): Partial<Messages> {
-  const url = new URL(context.pathWithSearch, 'http://internal');
-  if (context.hasSession || !PUBLIC_ROUTES.has(url.pathname) || url.searchParams.get('edit') === 'true') {
+  if (context.hasSession || !isReducedCatalogueRoute(context.pathWithSearch)) {
     return messages;
   }
 
@@ -74,5 +78,6 @@ export function selectClientMessages(
     delete selected[namespace];
   }
   // editorCommon also owns public media/executable messages, so retain it.
+  // programEventAdmin also owns public Page event-list labels, so retain it.
   return selected;
 }

@@ -152,7 +152,7 @@ vi.mock('@/features/metadata/OgImagePreview', () => ({ OgImagePreview: () => nul
 vi.mock('@/features/share/ShareLinkSection', () => ({ ShareLinkSection: () => null }));
 vi.mock('@/features/metadata/UrlSection', () => ({ UrlSection: () => null }));
 vi.mock('@/features/version-history', () => ({ VersionHistoryDrawer: () => null }));
-vi.mock('@/features/document-layout', () => ({ ContentLayoutField: () => null }));
+vi.mock('@/features/document-layout/ContentLayoutField', () => ({ ContentLayoutField: () => null }));
 vi.mock('@/features/place/CreatePlaceModal', () => ({ CreatePlaceModal: () => null }));
 vi.mock('@/features/translation/EditorActiveLocaleControl', () => ({ EditorActiveLocaleControl: () => null }));
 vi.mock('@/features/translation/EntityTranslationsPanel', () => ({ EntityTranslationsPanel: () => null }));

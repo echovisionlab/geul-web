@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { BlockingAlertDialog } from '@/components/core';
+import { BlockingAlertDialog } from '@/components/core/Modal';
 
 export interface EditorPermissionRevokedDialogProps {
   opened: boolean;
