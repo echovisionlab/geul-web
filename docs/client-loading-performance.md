@@ -21,22 +21,25 @@ node scripts/performance/next-client-build.mjs /Volumes/dev/dsub/.perf-geul-web-
 node scripts/performance/next-client-build.mjs /Volumes/dev/dsub/.perf-geul-web-after analyze
 ```
 
-These paths are disposable worktrees, not a requirement of the harness. To
-reproduce elsewhere, create two detached worktrees from the baseline commit:
+These paths are disposable worktrees, not a requirement of the harness. From
+the committed implementation checkout, reproduce elsewhere with the baseline
+and current implementation in separate detached worktrees:
 
 ```sh
 git worktree add --detach /tmp/geul-before 1dcdc92e1a6705364cd97e566e7f237e4b70cd63
-git worktree add --detach /tmp/geul-after 1dcdc92e1a6705364cd97e566e7f237e4b70cd63
-git diff --binary HEAD | git -C /tmp/geul-after apply
+git worktree add --detach /tmp/geul-after HEAD
 ```
 
-Copy requested new source files reported by `git ls-files --others
---exclude-standard` into the final worktree with their relative paths. Exclude
-local instruction files and all dotenv files. Install each tree with
+For an optional uncommitted comparison, create the final worktree at the source
+checkout's HEAD, apply that checkout's dirty tracked diff, and copy requested
+new source files reported by `git ls-files --others --exclude-standard` with
+their relative paths. Exclude local instruction files and all dotenv files.
+Record the source HEAD and patch/new-file fingerprints for that comparison.
+
+Install each tree with
 `pnpm install --frozen-lockfile --offline`; if the store is unavailable, fetch the
 same frozen lockfile first and disclose that setup difference. Pass those tree
-paths to the scripts above. Once the change is committed, using its exact commit
-for the final worktree avoids the patch/new-file overlay entirely.
+paths to the scripts above. Committed comparisons need no patch/new-file overlay.
 
 Read the production emitted JS/CSS asset graph with:
 
