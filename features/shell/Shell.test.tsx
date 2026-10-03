@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   signOut: vi.fn(),
   toggleColorScheme: vi.fn(),
   openSearch: vi.fn(),
+  socialLinks: null as ReactNode,
   viewProps: null as ShellViewProps | null,
 }));
 
@@ -79,6 +80,7 @@ vi.mock('@/lib/auth/login-page', () => ({
 }));
 
 vi.mock('@/lib/contexts/ManifestContext', () => ({
+  useSiteSocialLinks: () => mocks.socialLinks,
   useMenus: () => ({ avatarDropdown: [], footer: [], header: [], secondary: [] }),
   useSiteSettings: () => ({
     settings: {
@@ -129,6 +131,7 @@ beforeEach(() => {
   mocks.pathname = '/work';
   mocks.search = '';
   mocks.viewProps = null;
+  mocks.socialLinks = null;
   mocks.invalidateQueries.mockReset();
   mocks.invalidateQueries.mockResolvedValue(undefined);
   mocks.push.mockReset();
@@ -154,6 +157,16 @@ function viewProps() {
 }
 
 describe('Shell controller disclosure state', () => {
+  it('uses the server-prepared footer slot and accepts its replacement', () => {
+    const prepared = <a href="https://example.com">Prepared social link</a>;
+    mocks.socialLinks = prepared;
+    renderController();
+    expect(viewProps().slots.socialLinks).toBe(prepared);
+    mocks.socialLinks = null;
+    renderController();
+    expect(viewProps().slots.socialLinks).toBeNull();
+  });
+
   it('keeps public page query context in the login return path and advertises the K shortcut', () => {
     mocks.search = 'share=share-token&lang=ko&table_page=3';
     renderController();

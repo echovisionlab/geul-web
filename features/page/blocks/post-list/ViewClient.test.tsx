@@ -6,7 +6,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MantineProvider } from '@mantine/core';
 import { parsePostListProps } from './schema';
-import { PostListViewClient } from './ViewClient';
+import { PostListViewClient } from './ViewClientRuntime';
 
 vi.mock('next/link', () => ({
   default: ({ href, children, onClick, ...props }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
@@ -32,6 +32,13 @@ vi.mock('next/image', () => ({
     <img src={typeof src === 'string' ? src : src.src} alt={alt} {...props} />
   ),
 }));
+
+// These synchronous layout tests exercise the runtime's unchanged slide markup.
+// The actual dynamic import/SSR boundary is covered separately.
+vi.mock('next/dynamic', async () => {
+  const { ListCarouselRuntime } = await import('../ListCarouselRuntime');
+  return { default: () => ListCarouselRuntime };
+});
 
 vi.mock('@mantine/carousel', () => {
   const Carousel = ({

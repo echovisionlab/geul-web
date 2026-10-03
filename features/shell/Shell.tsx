@@ -10,11 +10,10 @@ import { useDisclosure, useMounted, useOs } from '@mantine/hooks';
 import { openPostSpotlight } from '@/features/post/PostSpotlight/post-spotlight-trigger';
 import { PrintHeader } from '@/features/shell/PrintHeader';
 import { SiteLogo } from '@/features/site/SiteLogo';
-import { SocialLinksDisplay } from '@/features/social-links/SocialLinksDisplay';
 import { signOut, useSession } from '@/lib/auth/client';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import type { UserDisplaySnapshot } from '@/lib/auth/user-display-cookie';
-import { useMenus, useSiteSettings } from '@/lib/contexts/ManifestContext';
+import { useMenus, useSiteSettings, useSiteSocialLinks } from '@/lib/contexts/ManifestContext';
 import { COOKIE_CONSENT_OPEN_EVENT } from '@/lib/cookie-consent';
 import { APP_VERSION_LABEL } from '@/lib/site-version';
 import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
@@ -102,6 +101,7 @@ export function Shell({ children, initialMenus, initialUserSnapshot }: ShellProp
   const modKey = os === 'macos' ? 'Cmd' : 'Ctrl';
   const { settings } = useSiteSettings();
   const menus = useMenus();
+  const socialLinks = useSiteSocialLinks();
 
   const user = buildShellUser(
     session?.onboarded ? session.user : null,
@@ -205,10 +205,7 @@ export function Shell({ children, initialMenus, initialUserSnapshot }: ShellProp
         languageMobile: <LanguageMenu />,
         languageFooterDesktop: <LanguageMenu variant="text" textSize="xs" />,
         languageFooterMobile: <LanguageMenu variant="text" textSize="xs" />,
-        socialLinks:
-          settings.social_links && Object.keys(settings.social_links).length > 0 ? (
-            <SocialLinksDisplay links={settings.social_links} gap="sm" />
-          ) : null,
+        socialLinks,
       }}
       linkComponent={Link}
     >

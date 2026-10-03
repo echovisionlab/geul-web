@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
 import type { ContentBlockMediaItem } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
-import { ContentBlockMediaRuntimeIndex } from './content-block-media-runtime';
+import { ContentBlockMediaRuntimeIndex } from './content-block-media-runtime-index';
 
 const ContentBlockMediaRuntimeContext = createContext<ContentBlockMediaRuntimeIndex | null>(null);
 

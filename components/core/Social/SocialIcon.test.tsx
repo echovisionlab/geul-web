@@ -4,6 +4,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { getSocialIconBrandColors, SocialIcon } from './SocialIcon';
+import { SocialIconGlyph } from './SocialIconGlyph';
 
 let container: HTMLDivElement;
 let root: Root;
@@ -79,4 +80,30 @@ describe('SocialIcon', () => {
       expect(getSocialIconBrandColors(platform).dark).toBe('#ffffff');
     },
   );
+});
+
+describe('SocialIconGlyph', () => {
+  it('renders prepared path/colors with the same accessibility and caller style overrides', () => {
+    const icon = renderIcon(
+      <SocialIconGlyph
+        platform="github"
+        path="M0 0h24v24H0z"
+        light="#181717"
+        dark="#f0f6fc"
+        size={32}
+        colorMode="hoverBrand"
+        label="Prepared GitHub"
+        style={{ opacity: 0.5 }}
+        className="prepared-icon"
+      />,
+    );
+    expect(icon.querySelector('path')?.getAttribute('d')).toBe('M0 0h24v24H0z');
+    expect(icon.style.getPropertyValue('--social-icon-brand-light')).toBe('#181717');
+    expect(icon.style.getPropertyValue('--social-icon-brand-dark')).toBe('#f0f6fc');
+    expect(icon.style.opacity).toBe('0.5');
+    expect(icon.classList.contains('prepared-icon')).toBe(true);
+    expect(icon.getAttribute('width')).toBe('32');
+    expect(icon.getAttribute('aria-label')).toBe('Prepared GitHub');
+    expect(icon.getAttribute('role')).toBe('img');
+  });
 });

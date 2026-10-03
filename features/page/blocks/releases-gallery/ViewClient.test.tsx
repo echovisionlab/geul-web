@@ -6,7 +6,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MantineProvider } from '@mantine/core';
 import { parseReleaseListProps } from './schema';
-import { ReleaseListViewClient } from './ViewClient';
+import { ReleaseListViewClient } from './ViewClientRuntime';
 
 vi.mock('next/link', () => ({
   default: ({ href, children, onClick, ...props }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
