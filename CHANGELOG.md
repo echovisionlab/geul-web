@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.6](https://github.com/echovisionlab/geul-web/compare/v0.3.5...v0.3.6) (2026-10-03)
+
+
+### Bug Fixes
+
+* **mcp:** render configured guide URLs and recover grant revocation ([#56](https://github.com/echovisionlab/geul-web/issues/56)) ([cc9f289](https://github.com/echovisionlab/geul-web/commit/cc9f2897341b15ad6784fa3aa77d51080cf3ad8a))
+
 ## [0.3.5](https://github.com/echovisionlab/geul-web/compare/v0.3.4...v0.3.5) (2026-10-02)
 
 
