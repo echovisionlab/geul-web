@@ -4,7 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { Stack, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { notifications } from '@mantine/notifications';
-import type { createTranslationClient } from '@/lib/api/browser-client';
+import type { createTranslationClient } from '@/lib/api/browser/secure-translation';
 import { getTranslationActionErrorMessage } from '@/lib/translation/action-error';
 
 type TranslationClient = ReturnType<typeof createTranslationClient>;

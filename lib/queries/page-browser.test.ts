@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => ({
   checkPageSlugAvailable: vi.fn(),
 }));
 
-vi.mock('@/lib/api/browser-client', () => ({
+vi.mock('@/lib/api/browser/secure-page', () => ({
   createPageClient: vi.fn(() => ({
     checkPageSlugAvailable: mocks.checkPageSlugAvailable,
   })),

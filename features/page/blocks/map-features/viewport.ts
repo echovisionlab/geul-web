@@ -7,7 +7,8 @@ export type MapViewportBounds = MapFeatureBounds;
 export type MapViewportRequest = MapFeatureViewportRequest;
 
 const WORLD_VIEW_CENTER: Coordinate = { lat: 0, lng: 0 };
-const WORLD_TILE_SIZE = 256;
+// MapLibre vector maps use a 512px world at zoom 0, independently of physical tile pixels.
+const WORLD_TILE_SIZE = 512;
 const DEFAULT_VIEWPORT_WIDTH = 1280;
 const WORLD_MERCATOR_LIMIT = 85;
 const WORLD_LONGITUDE_EPSILON = 0.00001;
@@ -38,7 +39,7 @@ function normalizeViewportBoundsForDimensions(
   widthPx: number,
   heightPx: number,
 ): MapViewportBounds {
-  const worldScale = 256 * 2 ** zoom;
+  const worldScale = WORLD_TILE_SIZE * 2 ** zoom;
   const coversFullLongitude = widthPx >= worldScale - 1;
   const coversFullLatitude = heightPx >= worldScale - 1;
 
@@ -74,7 +75,7 @@ export function getFullWorldZoomForDimensions(widthPx: number, heightPx: number)
 }
 
 function lngLatToWorldPixel(lng: number, lat: number, zoom: number): { x: number; y: number } {
-  const scale = 256 * 2 ** zoom;
+  const scale = WORLD_TILE_SIZE * 2 ** zoom;
   const safeLat = clamp(lat, -85.05112878, 85.05112878);
   const x = ((lng + 180) / 360) * scale;
   const sinLat = Math.sin((safeLat * Math.PI) / 180);
@@ -83,7 +84,7 @@ function lngLatToWorldPixel(lng: number, lat: number, zoom: number): { x: number
 }
 
 function worldPixelToLngLat(x: number, y: number, zoom: number): Coordinate {
-  const scale = 256 * 2 ** zoom;
+  const scale = WORLD_TILE_SIZE * 2 ** zoom;
   const lng = (x / scale) * 360 - 180;
   const n = Math.PI - (2 * Math.PI * y) / scale;
   const lat = (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
@@ -188,8 +189,17 @@ export function clampMapViewportToZoomBounds(
     return viewport;
   }
 
+  const center = getCenterFromBounds(viewport.bounds);
+  const bounds = normalizeViewportBoundsForDimensions(
+    buildBoundsFromViewport(center, zoom, viewport.widthPx, viewport.heightPx),
+    zoom,
+    viewport.widthPx,
+    viewport.heightPx,
+  );
+
   return {
     ...viewport,
+    bounds,
     zoom,
     clusterRadiusPx: getClusterRadiusPxForZoom(zoom, viewport.widthPx),
   };

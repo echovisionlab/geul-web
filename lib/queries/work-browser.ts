@@ -2,7 +2,8 @@ import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { FilterOp } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { WorkType as PublicWorkType } from '@echovisionlab/geul-proto/public/work_pb.ts';
 import { WORK_TABLE_FILTER_FIELD_DEFINITIONS, WORK_TABLE_SORT_FIELD_DEFINITIONS } from '@/lib/types/work/table-spec';
-import { createPublicWorkClient, createPublicWorkClientWithLocale, createWorkClient } from '@/lib/api/browser-client';
+import { createPublicWorkClient, createPublicWorkClientWithLocale } from '@/lib/api/browser/public-work';
+import { createWorkClient } from '@/lib/api/browser/secure-work';
 import {
   buildPublicTableRequest,
   type PublicTableFilterFieldSpec,

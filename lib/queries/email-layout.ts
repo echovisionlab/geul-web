@@ -2,7 +2,7 @@ import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { timestampDate, type Timestamp } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
 import { FilterOp, type SortOrder } from '@echovisionlab/geul-proto/common/common_pb.ts';
-import { createEmailLayoutClient } from '@/lib/api/browser-client';
+import { createEmailLayoutClient } from '@/lib/api/browser/secure-email-layout';
 import { createClientLogger, serializeClientLogError } from '@/lib/utils/client-logger';
 
 const logger = createClientLogger('email-layout-queries');

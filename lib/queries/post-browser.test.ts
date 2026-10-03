@@ -24,8 +24,10 @@ const publicPostClient = vi.hoisted(() => ({
   search: vi.fn(),
 }));
 
-vi.mock('@/lib/api/browser-client', () => ({
+vi.mock('@/lib/api/browser/secure-post', () => ({
   createPostClient: mocks.createPostClient,
+}));
+vi.mock('@/lib/api/browser/public-post', () => ({
   createPublicPostClient: mocks.createPublicPostClient,
   createPublicPostClientWithLocale: mocks.createPublicPostClientWithLocale,
 }));

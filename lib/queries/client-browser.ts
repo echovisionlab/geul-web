@@ -1,7 +1,7 @@
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
-import { createClientClient } from '@/lib/api/browser-client';
+import { createClientClient } from '@/lib/api/browser/secure-client';
 import { createClientLogger, serializeClientLogError } from '@/lib/utils/client-logger';
 import { themedAssetRefUrl } from '@/lib/utils/asset-ref';
 

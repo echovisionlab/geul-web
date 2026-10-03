@@ -4,7 +4,7 @@ import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
-import { MapView } from './View';
+import { MapView } from './ViewRuntime';
 
 const mapViewEmbeddedSpy = vi.fn();
 

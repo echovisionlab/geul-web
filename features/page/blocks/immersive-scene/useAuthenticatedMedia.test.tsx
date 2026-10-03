@@ -3,14 +3,14 @@
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createFileClient } from '@/lib/api/browser-client';
+import { createFileClient } from '@/lib/api/browser/secure-file';
 import { mediaDeliveryFixture } from '@/tests/helpers/media-delivery';
 import { parseImmersiveSceneConfig, type ImmersiveSceneProps } from './schema';
 import { fetchAuthenticatedImmersiveSceneMedia, useAuthenticatedImmersiveSceneProps } from './useAuthenticatedMedia';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
-vi.mock('@/lib/api/browser-client', () => ({
+vi.mock('@/lib/api/browser/secure-file', () => ({
   createFileClient: vi.fn(),
 }));
 

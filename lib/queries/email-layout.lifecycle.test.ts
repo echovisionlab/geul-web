@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createEmailLayoutClient } from '@/lib/api/browser-client';
+import { createEmailLayoutClient } from '@/lib/api/browser/secure-email-layout';
 import { listEmailLayouts, listEmailLayoutsSimple } from './email-layout';
 
 const listEmailLayoutsAdmin = vi.fn();
 
-vi.mock('@/lib/api/browser-client', () => ({
+vi.mock('@/lib/api/browser/secure-email-layout', () => ({
   createEmailLayoutClient: vi.fn(),
 }));
 

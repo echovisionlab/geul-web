@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { MediaDelivery } from '@echovisionlab/geul-proto/common/media_pb.ts';
-import { createFileClient } from '@/lib/api/browser-client';
+import { createFileClient } from '@/lib/api/browser/secure-file';
 import {
   collectImmersiveSceneMediaRequests,
   hydrateImmersiveSceneAssetProps,

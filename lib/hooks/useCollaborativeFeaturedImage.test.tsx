@@ -10,7 +10,7 @@ const { getMediaDeliveryMock, loggerWarnMock } = vi.hoisted(() => ({
   loggerWarnMock: vi.fn(),
 }));
 
-vi.mock('@/lib/api/browser-client', () => ({
+vi.mock('@/lib/api/browser/secure-file', () => ({
   createFileClient: () => ({ getMediaDelivery: getMediaDeliveryMock }),
 }));
 

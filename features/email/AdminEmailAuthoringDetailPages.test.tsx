@@ -143,7 +143,7 @@ vi.mock('@/lib/queries/email-layout', () => ({
   listEmailLayoutsSimple: api.listEmailLayoutsSimple,
 }));
 
-vi.mock('@/lib/api/browser-client', () => ({
+vi.mock('@/lib/api/browser/secure-translation', () => ({
   createTranslationClient: () => ({ listEntityTranslations: api.listEntityTranslations }),
 }));
 

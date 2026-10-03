@@ -1,4 +1,4 @@
-import { createPageClient } from '@/lib/api/browser-client';
+import { createPageClient } from '@/lib/api/browser/secure-page';
 import { getPageSlugValidationReason, type PageSlugValidationReason } from '@/lib/utils/page-route';
 
 export type PageSlugAvailabilityReason = PageSlugValidationReason | 'alreadyExists' | 'checkFailed';

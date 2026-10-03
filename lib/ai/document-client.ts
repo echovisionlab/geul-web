@@ -12,7 +12,7 @@ import {
   type AIDocumentOperation,
   type AIDocumentValidation,
 } from '@echovisionlab/geul-proto/secure/ai_pb.ts';
-import { createAIDocumentClient as createGeneratedAIDocumentClient } from '@/lib/api/browser-client';
+import { createAIDocumentClient as createGeneratedAIDocumentClient } from '@/lib/api/browser/secure-ai';
 
 export const DCDP_PROTOCOL_VERSION = 'dcdp/1' as const;
 

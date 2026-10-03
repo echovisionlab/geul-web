@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   push: vi.fn(),
   signOut: vi.fn(),
   toggleColorScheme: vi.fn(),
+  openSearch: vi.fn(),
   viewProps: null as ShellViewProps | null,
 }));
 
@@ -59,8 +60,8 @@ vi.mock('@mantine/hooks', async () => {
   };
 });
 
-vi.mock('@mantine/spotlight', () => ({
-  spotlight: { open: vi.fn() },
+vi.mock('@/features/post/PostSpotlight/post-spotlight-trigger', () => ({
+  openPostSpotlight: mocks.openSearch,
 }));
 
 vi.mock('@/features/shell/PrintHeader', () => ({ PrintHeader: () => null }));
@@ -159,6 +160,8 @@ describe('Shell controller disclosure state', () => {
 
     expect(viewProps().loginHref).toBe('/login?redirect=%2Fwork%3Fshare%3Dshare-token%26lang%3Dko%26table_page%3D3');
     expect(viewProps().labels.searchTooltip).toBe('actions.searchTooltip:Cmd+K');
+    viewProps().events.onSearch();
+    expect(mocks.openSearch).toHaveBeenCalledTimes(1);
   });
 
   it('owns navigation and account state and closes both when navigation completes', () => {
