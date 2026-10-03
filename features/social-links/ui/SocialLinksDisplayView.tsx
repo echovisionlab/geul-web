@@ -2,7 +2,12 @@
 
 import { Anchor, Group, Stack, Text, type MantineSpacing } from '@mantine/core';
 import { IconButton, type IconButtonProps } from '@/components/core/IconButton';
-import { SocialIcon, type SocialIconColorMode, type SocialPlatform } from '@/components/core/Social';
+import {
+  SocialIconGlyph,
+  type SocialIconColorMode,
+  type SocialIconGlyphProps,
+} from '@/components/core/Social/SocialIconGlyph';
+import type { SocialPlatform } from '@/components/core/Social/platforms';
 import { Tooltip } from '@/components/core/Tooltip';
 import classes from './SocialLinksDisplay.module.css';
 
@@ -11,6 +16,7 @@ export interface SocialLinkDisplayViewModel {
   platform: SocialPlatform;
   url: string;
   label: string;
+  glyph: Pick<SocialIconGlyphProps, 'path' | 'light' | 'dark'>;
 }
 
 export interface SocialLinksDisplayViewProps {
@@ -41,7 +47,7 @@ export function SocialLinksDisplayView({
   if (variant === 'list') {
     return (
       <Stack gap={gap}>
-        {entries.map(({ key, platform, url, label }) => (
+        {entries.map(({ key, platform, url, label, glyph }) => (
           <Anchor
             key={key}
             href={url}
@@ -52,7 +58,7 @@ export function SocialLinksDisplayView({
             aria-label={label}
           >
             <Group gap="xs" wrap="nowrap">
-              <SocialIcon platform={platform} size={iconSize} colorMode={iconColor} />
+              <SocialIconGlyph {...glyph} platform={platform} size={iconSize} colorMode={iconColor} />
               {showLabels ? <Text size="sm">{label}</Text> : null}
             </Group>
           </Anchor>
@@ -64,7 +70,7 @@ export function SocialLinksDisplayView({
   if (variant === 'button') {
     return (
       <Group gap={gap}>
-        {entries.map(({ key, platform, url, label }) => (
+        {entries.map(({ key, platform, url, label, glyph }) => (
           <Tooltip key={key} label={label}>
             <IconButton
               component="a"
@@ -76,7 +82,7 @@ export function SocialLinksDisplayView({
               aria-label={label}
               className={classes.socialButton}
             >
-              <SocialIcon platform={platform} size={iconSize} colorMode={iconColor} />
+              <SocialIconGlyph {...glyph} platform={platform} size={iconSize} colorMode={iconColor} />
             </IconButton>
           </Tooltip>
         ))}
@@ -86,7 +92,7 @@ export function SocialLinksDisplayView({
 
   return (
     <Group gap={gap}>
-      {entries.map(({ key, platform, url, label }) => (
+      {entries.map(({ key, platform, url, label, glyph }) => (
         <Tooltip key={key} label={label}>
           <Anchor
             href={url}
@@ -95,7 +101,7 @@ export function SocialLinksDisplayView({
             className={classes.socialLink}
             aria-label={label}
           >
-            <SocialIcon platform={platform} size={iconSize} colorMode={iconColor} />
+            <SocialIconGlyph {...glyph} platform={platform} size={iconSize} colorMode={iconColor} />
           </Anchor>
         </Tooltip>
       ))}

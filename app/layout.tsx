@@ -14,6 +14,7 @@ import { ClientMessagesProvider } from '@/lib/providers/ClientMessagesProvider';
 import { mantineHtmlProps } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
+import { ServerSocialLinksDisplay } from '@/features/social-links/ServerSocialLinksDisplay';
 import { CookieConsentBanner } from '@/features/cookie-consent/CookieConsentBanner';
 import { JsonLdScript } from '@/features/metadata/ui/JsonLdScript';
 import { GoogleAnalyticsLoader } from '@/features/analytics/GoogleAnalyticsLoader';
@@ -193,7 +194,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <RequestTimeZoneProvider timeZone={requestTimeZone}>
                 <LocaleProvider locale={localeContext.locale}>
                   <LocalePreferenceSync />
-                  <ManifestProvider manifest={manifest}>
+                  <ManifestProvider
+                    manifest={manifest}
+                    socialLinks={<ServerSocialLinksDisplay links={manifest.settings.social_links} gap="sm" />}
+                  >
                     <AppMantineProvider defaultColorScheme={initialColorScheme}>
                       <EditorNavigationProvider>
                         <RouteProgressRuntime />

@@ -7,10 +7,11 @@ import {
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { describe, expect, it } from 'vitest';
 import {
-  ContentBlockMediaRuntimeIndex,
+  ContentBlockMediaRuntimeIndex as CodecFacadeIndex,
   parseContentBlockMediaItems,
   serializeContentBlockMediaItems,
 } from './content-block-media-runtime';
+import { ContentBlockMediaRuntimeIndex } from './content-block-media-runtime-index';
 
 const blockId = '01b3db42-75f1-4bf1-8cb9-9b3baf57e795';
 const fileId = 'b67328c4-668c-5bf2-8f1e-41465149ded6';
@@ -32,6 +33,10 @@ function activeItem() {
 }
 
 describe('ContentBlockMediaRuntimeIndex', () => {
+  it('keeps the codec facade and schema-free runtime constructor identical', () => {
+    expect(CodecFacadeIndex).toBe(ContentBlockMediaRuntimeIndex);
+  });
+
   it('indexes exact Block usage separately from File metadata', () => {
     const item = activeItem();
     const index = new ContentBlockMediaRuntimeIndex([item]);
@@ -44,6 +49,7 @@ describe('ContentBlockMediaRuntimeIndex', () => {
   it('round-trips through protobuf JSON for client hydration without merging Block props', () => {
     const restored = parseContentBlockMediaItems(serializeContentBlockMediaItems([activeItem()]));
 
+    expect(restored).toBeInstanceOf(ContentBlockMediaRuntimeIndex);
     expect(restored.get(blockId)?.delivery?.fileSize).toBe(2048n);
     expect(restored.get(blockId)?.attachment?.state).toEqual({ case: 'activeFileId', value: fileId });
   });
@@ -88,4 +94,71 @@ describe('ContentBlockMediaRuntimeIndex', () => {
         ]),
     ).toThrow(/does not match/u);
   });
+
+  it.each([
+    {
+      name: 'missing selector',
+      invalidate: (item: ReturnType<typeof activeItem>) => {
+        item.selector = undefined;
+      },
+      error: 'Content Block media selector is required.',
+    },
+    {
+      name: 'blank reference path',
+      invalidate: (item: ReturnType<typeof activeItem>) => {
+        item.selector!.referencePath = '  ';
+      },
+      error: 'Content Block media reference path is required.',
+    },
+    {
+      name: 'missing attachment',
+      invalidate: (item: ReturnType<typeof activeItem>) => {
+        item.attachment = undefined;
+      },
+      error: 'Content Block media attachment state is required.',
+    },
+    {
+      name: 'unset attachment state',
+      invalidate: (item: ReturnType<typeof activeItem>) => {
+        item.attachment!.state = { case: undefined };
+      },
+      error: 'Content Block media attachment state is required.',
+    },
+    {
+      name: 'invalid active file identity',
+      invalidate: (item: ReturnType<typeof activeItem>) => {
+        item.attachment!.state = { case: 'activeFileId', value: 'legacy-file' };
+      },
+      error: 'Content Block media active File identity must be a UUID.',
+    },
+    {
+      name: 'invalid missing file identity',
+      invalidate: (item: ReturnType<typeof activeItem>) => {
+        item.attachment!.state = { case: 'missingAttachment', value: createMissingAttachment('legacy-file') };
+      },
+      error: 'Content Block media missing File identity must be a UUID.',
+    },
+    {
+      name: 'missing attachment with delivery',
+      invalidate: (item: ReturnType<typeof activeItem>) => {
+        item.attachment!.state = { case: 'missingAttachment', value: createMissingAttachment(fileId) };
+      },
+      error: 'Content Block missing attachment must not include a delivery.',
+    },
+  ])('retains the exact validation error for $name', ({ invalidate, error }) => {
+    const item = activeItem();
+    invalidate(item);
+    expect(() => new ContentBlockMediaRuntimeIndex([item])).toThrow(error);
+    expect(() => serializeContentBlockMediaItems([item])).toThrow(error);
+  });
 });
+
+function createMissingAttachment(formerFileId: string) {
+  const state = create(ContentBlockMediaItemSchema, {
+    attachment: { state: { case: 'missingAttachment', value: { formerFileId } } },
+  }).attachment!.state;
+  if (state.case !== 'missingAttachment') {
+    throw new Error('Missing attachment fixture could not be created.');
+  }
+  return state.value;
+}
