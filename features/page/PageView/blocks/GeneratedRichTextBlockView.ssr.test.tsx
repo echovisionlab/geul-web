@@ -1,8 +1,7 @@
 // @vitest-environment node
 
-import { beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { renderToReadableStream } from 'react-dom/server';
-import Loadable from 'next/dist/shared/lib/loadable.shared-runtime';
 import { MantineProvider } from '@mantine/core';
 import { NextIntlClientProvider } from 'next-intl';
 import {
@@ -14,8 +13,12 @@ import { ContentBlockMediaRuntimeProvider } from '@/features/media/ContentBlockM
 import enMessages from '@/messages/en.json';
 import { GeneratedRichTextBlockView } from './GeneratedRichTextBlockView';
 
-beforeAll(async () => {
-  await Loadable.preloadAll();
+// App Router's real lazy SSR implementation preserves nested heavy-block loading.
+vi.mock('next/dynamic', async () => {
+  const { default: dynamic } = await vi.importActual<{ default: typeof import('next/dynamic').default }>(
+    'next/dist/shared/lib/app-dynamic.js',
+  );
+  return { default: dynamic };
 });
 
 async function renderGeneratedStream(block: LocalizedRichTextBlock): Promise<string> {
