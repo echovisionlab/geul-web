@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/echovisionlab/geul-web/compare/v0.4.0...v0.4.1) (2026-10-03)
+
+
+### Performance Improvements
+
+* **web:** narrow client loading and public catalogues ([#60](https://github.com/echovisionlab/geul-web/issues/60)) ([42049eb](https://github.com/echovisionlab/geul-web/commit/42049eb22e774b92a911ce53118923bcce8ae611))
+
 ## [0.4.0](https://github.com/echovisionlab/geul-web/compare/v0.3.6...v0.4.0) (2026-10-03)
 
 
