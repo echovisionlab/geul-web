@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.6](https://github.com/echovisionlab/geul-web/compare/v0.4.5...v0.4.6) (2026-10-03)
+
+
+### Performance Improvements
+
+* defer unused carousel skeleton dependencies ([#70](https://github.com/echovisionlab/geul-web/issues/70)) ([12cd58b](https://github.com/echovisionlab/geul-web/commit/12cd58bd2ef53b6c5322873c52594ce1a22b0153))
+
 ## [0.4.5](https://github.com/echovisionlab/geul-web/compare/v0.4.4...v0.4.5) (2026-10-03)
 
 
