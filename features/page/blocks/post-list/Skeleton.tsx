@@ -1,10 +1,11 @@
 'use client';
 
-import { Carousel } from '@mantine/carousel';
-import '@mantine/carousel/styles.css';
+import dynamic from 'next/dynamic';
 import { SimpleGrid, Skeleton, Stack } from '@mantine/core';
 import { ContentCard, ContentCardSection } from '@/components/core/Section';
 import { getSlideSize } from '../constants';
+
+const ListCarousel = dynamic(() => import('../ListCarouselRuntime').then((module) => module.ListCarouselRuntime));
 
 interface PostListSkeletonProps {
   columns?: number;
@@ -36,17 +37,15 @@ export function PostListSkeleton({
   if (layout === 'carousel') {
     const slideSize = getSlideSize(columns);
     return (
-      <Carousel
+      <ListCarousel
         slideSize={{ base: '100%', sm: columns === 1 ? '100%' : '50%', md: slideSize }}
         slideGap="md"
         emblaOptions={{ loop: carouselLoop }}
         withIndicators={carouselIndicators}
         className="post-list-block"
       >
-        {skeletonCards.map((card, i) => (
-          <Carousel.Slide key={i}>{card}</Carousel.Slide>
-        ))}
-      </Carousel>
+        {skeletonCards}
+      </ListCarousel>
     );
   }
 

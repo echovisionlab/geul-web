@@ -1,10 +1,11 @@
 'use client';
 
-import { Carousel } from '@mantine/carousel';
-import '@mantine/carousel/styles.css';
+import dynamic from 'next/dynamic';
 import { Box, SimpleGrid, Skeleton, Stack } from '@mantine/core';
 import { ContentCard } from '@/components/core/Section';
 import { getSlideSize } from './constants';
+
+const ListCarousel = dynamic(() => import('./ListCarouselRuntime').then((module) => module.ListCarouselRuntime));
 
 interface ListBlockSkeletonProps {
   className: string;
@@ -106,17 +107,15 @@ export function ListBlockSkeleton({
   if (layout === 'carousel') {
     const slideSize = getSlideSize(columns);
     return (
-      <Carousel
+      <ListCarousel
         slideSize={{ base: '100%', sm: columns === 1 ? '100%' : '50%', md: slideSize }}
         slideGap="lg"
         emblaOptions={{ loop: carouselLoop }}
         withIndicators={carouselIndicators}
         className={className}
       >
-        {cards.map((card, index) => (
-          <Carousel.Slide key={index}>{card}</Carousel.Slide>
-        ))}
-      </Carousel>
+        {cards}
+      </ListCarousel>
     );
   }
 
