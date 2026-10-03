@@ -10,7 +10,7 @@ import {
   type Ref,
 } from 'react';
 import { Box, Group, Stack, Table, Text } from '@mantine/core';
-import { Checkbox } from '../Input';
+import { Checkbox } from '../Input/Checkbox';
 import { TextButton } from '../TextButton';
 import {
   DEFAULT_DESKTOP_TABLE_MIN_WIDTH_PX,
