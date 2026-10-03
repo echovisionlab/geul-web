@@ -89,6 +89,19 @@ describe('social-links utilities', () => {
     ]);
   });
 
+  it('keeps non-web script and data URLs out of inferred ordered display links', () => {
+    const scriptUrl = ['javascript', 'alert(1)'].join(':');
+    expect(inferSocialPlatformFromUrl(scriptUrl)).toBeNull();
+    expect(inferSocialPlatformFromUrl('data:text/html,<script>alert(1)</script>')).toBeNull();
+    expect(
+      getDisplaySocialLinkEntries({
+        '0': scriptUrl,
+        '1': 'data:text/html,<script>alert(1)</script>',
+        '2': 'https://github.com/example',
+      }),
+    ).toEqual([{ key: '2', platform: 'github', url: 'https://github.com/example' }]);
+  });
+
   it('compacts optional streaming URL fields into the shared social-links shape', () => {
     expect(
       compactSocialLinks({

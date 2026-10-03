@@ -11,7 +11,7 @@ import { useMediaQuery } from '@mantine/hooks';
 import { Button } from '@/components/core/Button';
 import { ContentCard, ContentCardSection } from '@/components/core/Section';
 import { getResponsiveSlideSize } from './constants';
-import { toAspectRatio } from './list-shared';
+import { toAspectRatio } from './list-view-utils';
 import classes from './post-list/PostListCard.module.css';
 
 export type ListViewLayout = 'grid' | 'list' | 'cards' | 'minimal' | 'carousel';
