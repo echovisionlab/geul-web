@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/echovisionlab/geul-web/compare/v0.3.6...v0.4.0) (2026-10-03)
+
+
+### Features
+
+* **mcp:** add task examples and clarify connection consent ([#58](https://github.com/echovisionlab/geul-web/issues/58)) ([7fee034](https://github.com/echovisionlab/geul-web/commit/7fee034a63438533c19b5215922c1856b0a8d988))
+
 ## [0.3.6](https://github.com/echovisionlab/geul-web/compare/v0.3.5...v0.3.6) (2026-10-03)
 
 
