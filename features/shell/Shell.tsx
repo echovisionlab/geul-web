@@ -7,7 +7,7 @@ import type { MenuItem } from '@echovisionlab/geul-proto/public/manifest_pb.ts';
 import { useTranslations } from 'next-intl';
 import { useComputedColorScheme, useMantineColorScheme } from '@mantine/core';
 import { useDisclosure, useMounted, useOs } from '@mantine/hooks';
-import { spotlight } from '@mantine/spotlight';
+import { openPostSpotlight } from '@/features/post/PostSpotlight/post-spotlight-trigger';
 import { PrintHeader } from '@/features/shell/PrintHeader';
 import { SiteLogo } from '@/features/site/SiteLogo';
 import { SocialLinksDisplay } from '@/features/social-links/SocialLinksDisplay';
@@ -191,7 +191,7 @@ export function Shell({ children, initialMenus, initialUserSnapshot }: ShellProp
         onToggleNavigation: toggleNavigation,
         onOpenUserMenu: openUserMenu,
         onCloseUserMenu: closeUserMenu,
-        onSearch: () => spotlight.open(),
+        onSearch: openPostSpotlight,
         onToggleColorScheme: toggleColorScheme,
         onSignOut: handleSignOut,
         onOpenCookieSettings: openCookieSettings,

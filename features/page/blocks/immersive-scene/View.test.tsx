@@ -21,7 +21,7 @@ import {
 } from './scene-renderer-model';
 import { resolveScrollProgress, resolveUnitMeshAsset } from './SceneRenderer';
 import type { ImmersiveSceneUnit } from './schema';
-import { ImmersiveSceneView } from './View';
+import { ImmersiveSceneView } from './ViewRuntime';
 
 const testUnits: ImmersiveSceneUnit[] = [
   {

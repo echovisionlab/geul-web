@@ -1,12 +1,8 @@
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  createPublicPrivacyClient,
-  createPublicPrivacyClientWithLocale,
-  createPublicTermsClient,
-  createPublicTermsClientWithLocale,
-} from '@/lib/api/browser-client';
+import { createPublicPrivacyClient, createPublicPrivacyClientWithLocale } from '@/lib/api/browser/public-privacy';
+import { createPublicTermsClient, createPublicTermsClientWithLocale } from '@/lib/api/browser/public-terms';
 import { getActivePrivacy, getPrivacyPageData, getScheduledPrivacy } from './privacy-browser';
 import { getActiveTerms, getScheduledTerms, getTermsPageData } from './terms-browser';
 
@@ -14,9 +10,11 @@ const { localizedBlocks } = vi.hoisted(() => ({
   localizedBlocks: [{ id: 'localized-block', kind: 'paragraph' }] as const,
 }));
 
-vi.mock('@/lib/api/browser-client', () => ({
+vi.mock('@/lib/api/browser/public-privacy', () => ({
   createPublicPrivacyClient: vi.fn(),
   createPublicPrivacyClientWithLocale: vi.fn(),
+}));
+vi.mock('@/lib/api/browser/public-terms', () => ({
   createPublicTermsClient: vi.fn(),
   createPublicTermsClientWithLocale: vi.fn(),
 }));

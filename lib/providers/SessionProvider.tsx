@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { SESSION_INVALIDATED_EVENT } from '@/lib/auth/session-events';
 import { clearUserDisplaySnapshotCookie, writeUserDisplaySnapshotCookie } from '@/lib/auth/user-display-cookie';
 import type { SessionData } from '@/lib/session-data';
@@ -25,6 +25,30 @@ export interface MemberSummarySnapshot {
 const SessionContext = createContext<SessionContextValue | null>(null);
 const SESSION_REVALIDATE_INTERVAL_MS = 60_000;
 
+// Compare the complete JSON response, including fields added by the server, so
+// unchanged refreshes preserve identity without hiding authentication changes.
+function equalSessionValue(left: unknown, right: unknown): boolean {
+  if (Object.is(left, right)) {
+    return true;
+  }
+  if (!left || !right || typeof left !== 'object' || typeof right !== 'object') {
+    return false;
+  }
+  if (Array.isArray(left) !== Array.isArray(right)) {
+    return false;
+  }
+  const leftFields = Object.keys(left);
+  const rightFields = Object.keys(right);
+  return (
+    leftFields.length === rightFields.length &&
+    leftFields.every(
+      (key) =>
+        Object.hasOwn(right, key) &&
+        equalSessionValue((left as Record<string, unknown>)[key], (right as Record<string, unknown>)[key]),
+    )
+  );
+}
+
 export function SessionProvider({
   children,
   initialData,
@@ -37,61 +61,89 @@ export function SessionProvider({
   const [error, setError] = useState<Error | null>(null);
   const requestSequenceRef = useRef(0);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const inFlightRef = useRef<Promise<void> | null>(null);
+  const hasResolvedSessionRef = useRef(initialData !== undefined);
 
   const invalidateSession = useCallback(() => {
     requestSequenceRef.current += 1;
     abortControllerRef.current?.abort();
     abortControllerRef.current = null;
+    inFlightRef.current = null;
+    hasResolvedSessionRef.current = true;
     setData(null);
     setError(null);
     setIsPending(false);
     clearUserDisplaySnapshotCookie();
   }, []);
 
-  const fetchSession = useCallback(async () => {
+  const fetchSession = useCallback((background = false): Promise<void> => {
+    if (background && inFlightRef.current) {
+      return inFlightRef.current;
+    }
     abortControllerRef.current?.abort();
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
     const requestSequence = requestSequenceRef.current + 1;
     requestSequenceRef.current = requestSequence;
-    setIsPending(true);
+    if (!background || !hasResolvedSessionRef.current) {
+      setIsPending(true);
+    }
     setError(null);
 
-    try {
-      const response = await fetch('/api/auth/session', {
-        cache: 'no-store',
-        signal: abortController.signal,
-      });
-      if (requestSequence !== requestSequenceRef.current) {
-        return;
-      }
-      if (response.status === 401) {
-        setData(null);
-        return;
-      }
-      if (!response.ok) {
-        throw new Error(`Session refresh failed with status ${response.status}`);
-      }
+    const request = Promise.resolve().then(async () => {
+      try {
+        if (requestSequence !== requestSequenceRef.current || abortController.signal.aborted) {
+          return;
+        }
+        const response = await fetch('/api/auth/session', {
+          cache: 'no-store',
+          signal: abortController.signal,
+        });
+        if (requestSequence !== requestSequenceRef.current) {
+          return;
+        }
+        if (response.status === 401) {
+          hasResolvedSessionRef.current = true;
+          setData(null);
+          return;
+        }
+        if (!response.ok) {
+          throw new Error(`Session refresh failed with status ${response.status}`);
+        }
 
-      const json = (await response.json()) as SessionData | null;
-      if (requestSequence !== requestSequenceRef.current || abortController.signal.aborted) {
-        return;
+        const json = (await response.json()) as SessionData | null;
+        if (requestSequence !== requestSequenceRef.current || abortController.signal.aborted) {
+          return;
+        }
+        hasResolvedSessionRef.current = true;
+        const next = json?.user ? json : null;
+        setData((current) => (equalSessionValue(current, next) ? current : next));
+      } catch (caught) {
+        if (caught instanceof DOMException && caught.name === 'AbortError') {
+          return;
+        }
+        if (requestSequence === requestSequenceRef.current) {
+          setError(caught instanceof Error ? caught : new Error('Session refresh failed'));
+        }
+      } finally {
+        if (requestSequence === requestSequenceRef.current) {
+          abortControllerRef.current = null;
+          inFlightRef.current = null;
+          setIsPending(false);
+        }
       }
-      setData(json?.user ? json : null);
-    } catch (caught) {
-      if (caught instanceof DOMException && caught.name === 'AbortError') {
-        return;
-      }
-      if (requestSequence === requestSequenceRef.current) {
-        setError(caught instanceof Error ? caught : new Error('Session refresh failed'));
-      }
-    } finally {
-      if (requestSequence === requestSequenceRef.current) {
-        abortControllerRef.current = null;
-        setIsPending(false);
-      }
-    }
+    });
+    inFlightRef.current = request;
+    return request;
   }, []);
+
+  const refetch = useCallback(() => {
+    return fetchSession();
+  }, [fetchSession]);
+
+  const revalidateSession = useCallback(() => {
+    return fetchSession(true);
+  }, [fetchSession]);
 
   const updateMemberSummary = useCallback((member: MemberSummarySnapshot) => {
     setData((current) => {
@@ -129,9 +181,9 @@ export function SessionProvider({
 
   useEffect(() => {
     if (initialData === undefined) {
-      void fetchSession();
+      void refetch();
     }
-  }, [fetchSession, initialData]);
+  }, [refetch, initialData]);
 
   useEffect(() => {
     const handleInvalidated = () => invalidateSession();
@@ -140,7 +192,7 @@ export function SessionProvider({
   }, [invalidateSession]);
 
   useEffect(() => {
-    const revalidate = () => void fetchSession();
+    const revalidate = () => void revalidateSession();
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         revalidate();
@@ -158,12 +210,13 @@ export function SessionProvider({
         window.clearInterval(intervalId);
       }
     };
-  }, [data?.user.id, fetchSession]);
+  }, [data?.user.id, revalidateSession]);
 
   useEffect(
     () => () => {
       requestSequenceRef.current += 1;
       abortControllerRef.current?.abort();
+      inFlightRef.current = null;
     },
     [],
   );
@@ -192,13 +245,12 @@ export function SessionProvider({
     window.location.replace(buildNicknameOnboardingHref(currentPath));
   }, [data]);
 
-  return (
-    <SessionContext.Provider
-      value={{ data, isPending, error, refetch: fetchSession, updateMemberSummary, completeOnboarding }}
-    >
-      {children}
-    </SessionContext.Provider>
+  const value = useMemo(
+    () => ({ data, isPending, error, refetch, updateMemberSummary, completeOnboarding }),
+    [data, isPending, error, refetch, updateMemberSummary, completeOnboarding],
   );
+
+  return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 
 export function useSessionContext(): SessionContextValue | null {

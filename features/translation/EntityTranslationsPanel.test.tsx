@@ -43,7 +43,7 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams('edit=true&tab=translations'),
 }));
 
-vi.mock('@/lib/api/browser-client', () => ({
+vi.mock('@/lib/api/browser/secure-translation', () => ({
   createTranslationClient: () => ({
     listTranslationLocales: mocks.listTranslationLocales,
     listEntityTranslations: mocks.listEntityTranslations,

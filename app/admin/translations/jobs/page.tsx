@@ -18,7 +18,7 @@ import {
   translationJobsRefetchInterval,
 } from '@/features/translation/translation-job-polling';
 import { useTranslationLifecycleSubscription } from '@/features/translation/useTranslationLifecycleSubscription';
-import { createTranslationClient } from '@/lib/api/browser-client';
+import { createTranslationClient } from '@/lib/api/browser/secure-translation';
 import { getTranslationActionErrorMessage } from '@/lib/translation/action-error';
 import { getCommonTranslationEntityLabelKey } from '@/lib/translation/entity-type';
 import { getTranslationJobDisplayStatusKey, getTranslationJobDisplayStatusTone } from '@/lib/translation/job-status';

@@ -1,14 +1,12 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import type { BlockViewProps } from '../types';
-import { useOptionalContentBlockMediaRuntime } from '@/features/media/ContentBlockMediaRuntimeContext';
-import { ImmersiveSceneRenderer } from './SceneRenderer';
-import { hydrateImmersiveSceneRuntimeProps } from './runtime-media';
-import { parseImmersiveSceneConfig } from './schema';
 
-export function ImmersiveSceneView({ sectionId, props }: BlockViewProps) {
-  const runtime = useOptionalContentBlockMediaRuntime();
-  const runtimeProps = hydrateImmersiveSceneRuntimeProps(props, sectionId, runtime);
-  const config = parseImmersiveSceneConfig(runtimeProps);
-  return <ImmersiveSceneRenderer config={config} />;
+// Keep unused block implementations out of the public page's initial client graph.
+// SSR stays enabled so rendered sections retain their HTML and chunk preloads.
+const RuntimeView = dynamic(() => import('./ViewRuntime').then((module) => module.ImmersiveSceneView));
+
+export function ImmersiveSceneView(props: BlockViewProps) {
+  return <RuntimeView {...props} />;
 }

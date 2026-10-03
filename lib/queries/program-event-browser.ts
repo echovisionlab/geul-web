@@ -5,7 +5,7 @@ import {
   createPublicProgramEventClientWithLocale,
   createPublicProgramEventSeriesClientWithLocale,
   createPublicProgramEventTypeClientWithLocale,
-} from '@/lib/api/browser-client';
+} from '@/lib/api/browser/public-program-event';
 import {
   programEventLocationModeFilterValue,
   publicProgramEventLocationModeToString,

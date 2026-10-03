@@ -1,7 +1,7 @@
 import { create } from '@bufbuild/protobuf';
 import { FilterOp, FilterSpecSchema } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { FormStatus } from '@echovisionlab/geul-proto/secure/form_pb.ts';
-import { createFormClient } from '@/lib/api/browser-client';
+import { createFormClient } from '@/lib/api/browser/secure-form';
 import { createClientLogger, serializeClientLogError } from '@/lib/utils/client-logger';
 
 const logger = createClientLogger('form-browser');

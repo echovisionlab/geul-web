@@ -1,5 +1,5 @@
 import { isConnectError } from '@/lib/api/connect-error';
-import { createMemberClient } from '@/lib/api/browser-client';
+import { createMemberClient } from '@/lib/api/browser/secure-member';
 import { createClientLogger } from '@/lib/utils/client-logger';
 
 const logger = createClientLogger('user-browser');

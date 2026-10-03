@@ -9,6 +9,7 @@ import { materializeLocalizedPageSections } from '@/features/editor/contract/loc
 import { resolveFeaturedImageDeliveryUrl } from '@/lib/media/post-featured-image';
 import { mapProtoDocumentLayout } from '@/lib/queries/document-layout';
 import { mapPublicLocalizationInfo, maybeFetchSourceLocale } from '@/lib/queries/localized-public';
+import { getPublicPageResponse } from '@/lib/queries/page-public.server';
 import { createLogger } from '@/lib/utils/logger';
 import { isValidUuid } from '@/lib/utils/validation';
 
@@ -173,15 +174,13 @@ export async function getPageView(
 ) {
   try {
     const slug = decodeURIComponent(idOrSlug);
-    const client = await createPublicPageClientWithAuth(options?.requestedLocale);
-    let response = await client.get({ slug });
+    let response = await getPublicPageResponse(slug, options?.requestedLocale, 'authenticated');
     response = await maybeFetchSourceLocale({
       preferSourceLocale: options?.preferSourceLocale,
       initialResponse: response,
       entity: response.page ?? null,
       fetchWithLocale: async (locale) => {
-        const sourceClient = await createPublicPageClientWithAuth(locale);
-        return sourceClient.get({ slug });
+        return getPublicPageResponse(slug, locale, 'authenticated');
       },
     });
 

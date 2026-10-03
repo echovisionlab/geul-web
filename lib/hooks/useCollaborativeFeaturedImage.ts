@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { createFileClient } from '@/lib/api/browser-client';
+import { createFileClient } from '@/lib/api/browser/secure-file';
 import { createClientLogger } from '@/lib/utils/client-logger';
 
 const logger = createClientLogger('useCollaborativeFeaturedImage');

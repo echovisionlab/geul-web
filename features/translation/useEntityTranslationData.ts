@@ -5,7 +5,7 @@ import { FilterOp } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import type { TranslationJob } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getProtoTranslationEntityType } from '@/features/translation/translation-entity-type';
-import { createTranslationClient } from '@/lib/api/browser-client';
+import { createTranslationClient } from '@/lib/api/browser/secure-translation';
 import { translationJobEntityTypeFilterValue, type TranslationEntityTypeKey } from '@/lib/translation/lifecycle';
 import {
   filterActiveTranslationJobs,

@@ -1,7 +1,7 @@
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
-import { createPublicPrivacyClient, createPublicPrivacyClientWithLocale } from '@/lib/api/browser-client';
+import { createPublicPrivacyClient, createPublicPrivacyClientWithLocale } from '@/lib/api/browser/public-privacy';
 import { mapPublicLocalizationInfo } from '@/lib/queries/localized-public';
 import { mapPublicLegalPage } from '@/lib/queries/legal-public-page';
 import { materializeLocalizedRichTextTree } from '@/features/editor/contract/localized-rich-text';

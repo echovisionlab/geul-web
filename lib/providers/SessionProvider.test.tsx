@@ -35,9 +35,25 @@ const sessionFixture: SessionData = {
 
 let container: HTMLDivElement;
 let root: Root;
+let observedSession: ReturnType<typeof useSessionContext>;
+let sessionRenders: number;
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((finish) => {
+    resolve = finish;
+  });
+  return { promise, resolve };
+}
+
+function successfulResponse(data: SessionData | null) {
+  return { ok: true, status: 200, json: async () => data };
+}
 
 function SessionState() {
   const session = useSessionContext();
+  observedSession = session;
+  sessionRenders += 1;
   return (
     <output data-email={session?.data?.user.email ?? ''} data-image={session?.data?.user.image ?? ''}>
       {session?.data?.user.nickname ?? 'signed-out'}:{session?.isPending ? 'pending' : 'settled'}:
@@ -65,10 +81,10 @@ function SessionMemberMutation() {
   );
 }
 
-async function renderProvider(initialData: SessionData | null = sessionFixture) {
+async function renderProvider(initialData: SessionData | null | undefined = sessionFixture, omitInitialData = false) {
   await act(async () => {
     root.render(
-      <SessionProvider initialData={initialData}>
+      <SessionProvider initialData={omitInitialData ? undefined : initialData}>
         <SessionState />
         <SessionMemberMutation />
       </SessionProvider>,
@@ -82,15 +98,172 @@ beforeEach(() => {
   root = createRoot(container);
   cookieMocks.clear.mockReset();
   cookieMocks.write.mockReset();
+  sessionRenders = 0;
+  observedSession = null;
+  window.history.replaceState({}, '', '/onboarding/nickname');
 });
 
 afterEach(() => {
   act(() => root.unmount());
   container.remove();
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
 describe('SessionProvider', () => {
+  it.each([sessionFixture, null])(
+    'joins automatic focus and visibility refreshes without pending hydrated UI (%j)',
+    async (initial) => {
+      const response = deferred<ReturnType<typeof successfulResponse>>();
+      const fetchMock = vi.fn().mockReturnValue(response.promise);
+      vi.stubGlobal('fetch', fetchMock);
+      await renderProvider(initial);
+      const originalContext = observedSession;
+      const originalRenders = sessionRenders;
+      vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible');
+
+      await act(async () => {
+        window.dispatchEvent(new Event('focus'));
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(observedSession?.isPending).toBe(false);
+      expect(observedSession).toBe(originalContext);
+
+      await act(async () => response.resolve(successfulResponse(initial ? structuredClone(initial) : null)));
+      expect(observedSession).toBe(originalContext);
+      expect(sessionRenders).toBe(originalRenders);
+
+      await act(async () => window.dispatchEvent(new Event('focus')));
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    },
+  );
+
+  it('joins interval refreshes in flight and rechecks again at the next interval', async () => {
+    vi.useFakeTimers();
+    const response = deferred<ReturnType<typeof successfulResponse>>();
+    const fetchMock = vi
+      .fn()
+      .mockReturnValueOnce(response.promise)
+      .mockResolvedValue(successfulResponse(sessionFixture));
+    vi.stubGlobal('fetch', fetchMock);
+    await renderProvider();
+    await act(async () => {
+      window.dispatchEvent(new Event('focus'));
+      vi.advanceTimersByTime(60_000);
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(observedSession?.isPending).toBe(false);
+    await act(async () => response.resolve(successfulResponse(sessionFixture)));
+    await act(async () => vi.advanceTimersByTime(60_000));
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps initial unknown sessions pending and joins automatic revalidation into the initial fetch', async () => {
+    const response = deferred<ReturnType<typeof successfulResponse>>();
+    const fetchMock = vi.fn().mockReturnValue(response.promise);
+    vi.stubGlobal('fetch', fetchMock);
+    await renderProvider(undefined, true);
+    await act(async () => window.dispatchEvent(new Event('focus')));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(observedSession?.isPending).toBe(true);
+    await act(async () => response.resolve(successfulResponse(sessionFixture)));
+    expect(observedSession?.isPending).toBe(false);
+    expect(observedSession?.data).toEqual(sessionFixture);
+  });
+
+  it('makes explicit refresh pending, aborts automatic work and keeps its newer result', async () => {
+    const oldBody = deferred<SessionData>();
+    const newResponse = deferred<ReturnType<typeof successfulResponse>>();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: true, status: 200, json: () => oldBody.promise })
+      .mockReturnValueOnce(newResponse.promise);
+    vi.stubGlobal('fetch', fetchMock);
+    await renderProvider();
+    await act(async () => window.dispatchEvent(new Event('focus')));
+    await act(async () => void observedSession?.refetch());
+    expect(fetchMock.mock.calls[0][1].signal.aborted).toBe(true);
+    expect(observedSession?.isPending).toBe(true);
+    const newer = { ...sessionFixture, user: { ...sessionFixture.user, role: 'admin' as const } };
+    await act(async () => newResponse.resolve(successfulResponse(newer)));
+    await act(async () => oldBody.resolve(sessionFixture));
+    expect(observedSession?.data).toEqual(newer);
+    expect(observedSession?.isPending).toBe(false);
+  });
+
+  it.each([
+    { ...sessionFixture, onboarded: false },
+    { ...sessionFixture, nickname_suggestion: 'Suggested' },
+    ...Object.entries({
+      id: 'other',
+      nickname: 'Other',
+      email: null,
+      image: '/avatar',
+      preferred_locale: 'en',
+      role: 'admin',
+      status: 'banned',
+    }).map(([field, value]) => ({ ...sessionFixture, user: { ...sessionFixture.user, [field]: value } })),
+    { ...sessionFixture, additionalAuthState: { scopes: ['changed'] } },
+  ])('publishes every changed server session field immediately (%j)', async (updated) => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(successfulResponse(updated as SessionData)));
+    await renderProvider();
+    await act(async () => window.dispatchEvent(new Event('focus')));
+    expect(observedSession?.data).toEqual(updated);
+    expect(observedSession?.isPending).toBe(false);
+  });
+
+  it('aborts on unmount and ignores a late accepted response body', async () => {
+    const body = deferred<SessionData>();
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, json: () => body.promise });
+    vi.stubGlobal('fetch', fetchMock);
+    await renderProvider();
+    await act(async () => window.dispatchEvent(new Event('focus')));
+    act(() => root.unmount());
+    const cookieWrites = cookieMocks.write.mock.calls.length;
+    await act(async () => body.resolve({ ...sessionFixture, user: { ...sessionFixture.user, nickname: 'Late' } }));
+    expect(fetchMock.mock.calls[0][1].signal.aborted).toBe(true);
+    expect(cookieMocks.write).toHaveBeenCalledTimes(cookieWrites);
+  });
+
+  it('releases in-flight work after a synchronous fetch failure so focus retries', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockImplementationOnce(() => {
+        throw new Error('offline');
+      })
+      .mockResolvedValueOnce(successfulResponse(sessionFixture));
+    vi.stubGlobal('fetch', fetchMock);
+    await renderProvider();
+    await act(async () => window.dispatchEvent(new Event('focus')));
+    expect(observedSession?.error?.message).toBe('offline');
+    await act(async () => window.dispatchEvent(new Event('focus')));
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(observedSession?.error).toBeNull();
+  });
+
+  it('preserves explicit onboarding completion and display cookie updates', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    await renderProvider({ ...sessionFixture, onboarded: false, nickname_suggestion: 'Suggested' });
+    act(() =>
+      observedSession?.completeOnboarding({
+        id: sessionFixture.user.id,
+        nickname: 'Complete',
+        avatarUrl: '/avatar',
+        deleted: false,
+      }),
+    );
+    expect(observedSession?.data).toEqual({
+      ...sessionFixture,
+      onboarded: true,
+      nickname_suggestion: null,
+      user: { ...sessionFixture.user, nickname: 'Complete', image: '/avatar' },
+    });
+    expect(cookieMocks.write).toHaveBeenLastCalledWith({ name: 'Complete', image: '/avatar' });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('uses hydrated viewer data without an initial duplicate session request', async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
@@ -214,8 +387,8 @@ describe('SessionProvider', () => {
         .mockResolvedValueOnce({ ok: true, status: 200, json: async () => newer }),
     );
     await renderProvider();
-    await act(async () => window.dispatchEvent(new Event('focus')));
-    await act(async () => window.dispatchEvent(new Event('focus')));
+    await act(async () => void observedSession?.refetch());
+    await act(async () => void observedSession?.refetch());
     await act(async () => finishBody(sessionFixture));
 
     expect(container.textContent).toContain('New session:settled');

@@ -1,9 +1,11 @@
 import { PublicMediaEntityType } from '@echovisionlab/geul-proto/public/file_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createPublicFileClient } from '@/lib/api/browser-client';
+import { createPublicFileClient } from '@/lib/api/browser/public-file';
 import { authorizeFileDownload } from './file-download-browser';
 
-vi.mock('@/lib/api/browser-client', () => ({ createPublicFileClient: vi.fn() }));
+vi.mock('@/lib/api/browser/public-file', () => ({
+  createPublicFileClient: vi.fn(),
+}));
 
 describe('authorizeFileDownload', () => {
   const authorizeDownload = vi.fn();

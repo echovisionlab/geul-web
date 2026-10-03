@@ -2,7 +2,7 @@ import { isConnectError } from '@/lib/api/connect-error';
 import { toJson } from '@bufbuild/protobuf';
 import { ValueSchema } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
-import { createSiteSettingClient } from '@/lib/api/browser-client';
+import { createSiteSettingClient } from '@/lib/api/browser/secure-site-setting';
 import type { OgImageConfigs, SiteSettingsView } from '@/lib/types/site-setting/config';
 import { fromProtoAllSettings } from '@/lib/queries/site-setting-mapper';
 import { createClientLogger } from '@/lib/utils/client-logger';

@@ -22,7 +22,7 @@ import { EmailEntityTranslationsPanel } from '@/features/translation/EmailEntity
 import { TranslationLocaleControl } from '@/features/translation/TranslationLocaleControl';
 import { useActiveEditLocale } from '@/features/translation/useActiveEditLocale';
 import { updateEmailLayoutAction, type EmailLayoutActionErrorCode } from '@/lib/actions/email-layout';
-import { createTranslationClient } from '@/lib/api/browser-client';
+import { createTranslationClient } from '@/lib/api/browser/secure-translation';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import { normalizeLocale } from '@/lib/i18n/locale';
 import { getEmailLayout } from '@/lib/queries/email-layout';

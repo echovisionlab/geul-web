@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { createTranslationClient } from '@/lib/api/browser-client';
+import { createTranslationClient } from '@/lib/api/browser/secure-translation';
 
 const translationSettingsQueryKey = ['translation-settings'] as const;
 

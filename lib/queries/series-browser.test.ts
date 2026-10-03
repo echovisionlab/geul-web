@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createSeriesClient } from '@/lib/api/browser-client';
+import { createSeriesClient } from '@/lib/api/browser/secure-series';
 import { listMySeries, listSeriesManagers } from './series-browser';
 
 const listMySeriesMock = vi.fn();
 const listSeriesManagersMock = vi.fn();
 
-vi.mock('@/lib/api/browser-client', () => ({ createSeriesClient: vi.fn() }));
+vi.mock('@/lib/api/browser/secure-series', () => ({
+  createSeriesClient: vi.fn(),
+}));
 vi.mock('@/lib/queries/user-browser', () => ({ searchMembers: vi.fn() }));
 vi.mock('@/lib/utils/client-logger', () => ({
   createClientLogger: () => ({ error: vi.fn() }),
