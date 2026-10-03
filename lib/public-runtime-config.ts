@@ -1,28 +1,35 @@
-import { z } from 'zod';
+import * as z from 'zod/mini';
+import en from 'zod/v4/locales/en.js';
 
-const urlWithoutTrailingSlash = z.url().transform((url) => url.replace(/\/+$/, ''));
-const optionalUrlWithoutTrailingSlash = z
-  .url()
-  .optional()
-  .transform((url) => url?.replace(/\/+$/, ''));
-const optionalString = z
-  .string()
-  .optional()
-  .transform((value) => {
+// Match Classic Zod's default locale so validation messages remain unchanged.
+z.config(en());
+
+const urlWithoutTrailingSlash = z.pipe(
+  z.url(),
+  z.transform((url) => url.replace(/\/+$/, '')),
+);
+const optionalUrlWithoutTrailingSlash = z.pipe(
+  z.optional(z.url()),
+  z.transform((url) => url?.replace(/\/+$/, '')),
+);
+const optionalString = z.pipe(
+  z.optional(z.string()),
+  z.transform((value) => {
     const trimmed = value?.trim();
     return trimmed ? trimmed : undefined;
-  });
-const positiveInteger = z.coerce.number().int().positive();
-const optionalPositiveInteger = z
-  .union([z.string(), z.number()])
-  .optional()
-  .transform((value) => {
+  }),
+);
+const positiveInteger = z.coerce.number().check(z.int(), z.gt(0));
+const optionalPositiveInteger = z.pipe(
+  z.optional(z.union([z.string(), z.number()])),
+  z.transform((value) => {
     if (value == null) {
       return undefined;
     }
     const parsed = positiveInteger.safeParse(value);
     return parsed.success ? parsed.data : undefined;
-  });
+  }),
+);
 
 const DEFAULT_EDITOR_IMAGE_MAX_SIZE_BYTES = 30 * 1024 * 1024;
 const DEFAULT_AUTH_CODE_LIFESPAN_SECONDS = 15 * 60;

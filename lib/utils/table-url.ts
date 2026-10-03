@@ -16,13 +16,8 @@
  * });
  */
 
-import {
-  DEFAULT_PAGE,
-  DEFAULT_PAGE_SIZE,
-  type TableFilterSpec,
-  type TableQuery,
-  type TableSortSpec,
-} from './table-query';
+import type { TableFilterSpec, TableQuery, TableSortSpec } from './table-query';
+import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from './table-query-defaults';
 
 // Type for URLSearchParams-like objects (includes ReadonlyURLSearchParams from next/navigation)
 type SearchParamsLike = {

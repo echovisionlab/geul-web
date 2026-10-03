@@ -40,5 +40,4 @@ export type TableQuery = z.infer<typeof tableQuerySchema>;
 // Constants
 // ============================================================================
 
-export const DEFAULT_PAGE = 1;
-export const DEFAULT_PAGE_SIZE = 20;
+export { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from './table-query-defaults';

@@ -1,6 +1,6 @@
 'use client';
 
-import { PLATFORM_CONFIGS, type SocialLinks } from '@/lib/types/common/social-links';
+import { PLATFORM_CONFIGS, type SocialLinks } from '@/lib/types/common/social-links-model';
 import { getDisplaySocialLinkEntries } from '@/lib/utils/social-links';
 import { SocialLinksDisplayView, type SocialLinksDisplayViewProps } from './ui/SocialLinksDisplayView';
 

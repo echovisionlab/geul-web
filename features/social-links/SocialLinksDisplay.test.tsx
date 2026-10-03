@@ -51,6 +51,14 @@ describe('SocialLinksDisplay', () => {
 
     const links = Array.from(container.querySelectorAll('a'));
     expect(links.map((link) => link.getAttribute('aria-label'))).toEqual(['Instagram', 'Bandcamp']);
+    expect(links.map((link) => link.getAttribute('href'))).toEqual([
+      'https://instagram.com/example-studio',
+      'https://signal-unit.bandcamp.com',
+    ]);
+    for (const link of links) {
+      expect(link.getAttribute('target')).toBe('_blank');
+      expect(link.getAttribute('rel')).toBe('noopener noreferrer');
+    }
     expect(links.map((link) => link.querySelector('svg')?.getAttribute('data-social-platform'))).toEqual([
       'instagram',
       'bandcamp',

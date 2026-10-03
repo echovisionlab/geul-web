@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Group, Pagination } from '@mantine/core';
 import { listLabelsForBlockAction } from '@/lib/actions/label';
-import { parseBooleanProp, parseIntegerProp } from '../list-shared';
+import { parseBooleanProp, parseIntegerProp } from '../list-view-utils';
 import { ListBlockSkeleton } from '../ListBlockSkeleton';
 import type { BlockViewProps } from '../types';
 import { parseLabelListProps } from './schema';

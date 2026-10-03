@@ -3,7 +3,7 @@ import {
   SOCIAL_PLATFORMS,
   type SocialLinks,
   type SocialPlatform,
-} from '@/lib/types/common/social-links';
+} from '@/lib/types/common/social-links-model';
 
 export interface SocialLinkDisplayEntry {
   key: string;

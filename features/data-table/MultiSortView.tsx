@@ -15,7 +15,7 @@ import { useMediaQuery } from '@mantine/hooks';
 import { Button } from '@/components/core/Button';
 import { Drawer } from '@/components/core/Drawer';
 import { IconButton } from '@/components/core/IconButton';
-import { Checkbox } from '@/components/core/Input';
+import { Checkbox } from '@/components/core/Input/Checkbox';
 import { Popover } from '@/components/core/Popover';
 import { Tooltip } from '@/components/core/Tooltip';
 import type { TableSortSpec } from '@/lib/utils/table-query';

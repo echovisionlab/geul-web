@@ -5,7 +5,7 @@ import { IconSearch } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { Box } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
-import { TextInput } from '@/components/core/Input';
+import { TextInput } from '@/components/core/Input/TextInput';
 import { useDataTableContext } from './DataTableContext';
 
 export interface DataTableSearchProps {

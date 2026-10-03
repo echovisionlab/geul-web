@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useLocale } from 'next-intl';
 import { Group, Pagination } from '@mantine/core';
 import { listProgramEventsForBlockBrowser } from '@/lib/queries/program-event-browser';
-import { parseBooleanProp, parseIntegerProp, splitCsv } from '../list-shared';
+import { parseBooleanProp, parseIntegerProp, splitCsv } from '../list-view-utils';
 import { ListBlockSkeleton } from '../ListBlockSkeleton';
 import type { BlockViewProps } from '../types';
 import { parseProgramEventListProps } from './schema';
