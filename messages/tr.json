@@ -1711,6 +1711,9 @@
     },
     "mcpIntegration": {
       "description": "Uyumlu bir yapay zekâ istemcisini bu uç noktaya bağlayın. Oturum açma ve onay için tarayıcınız açılır.",
+      "consentDescription": "Bu istemci, hesabınızın mevcut izinleri kapsamında içerikleri okuyup düzenleyebilir ve dosyaları yönetebilir. İçerik oluşturabilir, güncelleyebilir veya silebilir ve mevcut dosya eklerini değiştirebilir. Bağlantı, hesaba ek izinler vermez.",
+      "consentOfflineAccess": "Bu bağlantı, mevcut tarayıcı oturumunuz sona erdikten sonra siz iptal edene kadar devam edebilir.",
+      "consentRevoke": "Bu bağlantıyı {settings} → Remote MCP bölümünden iptal edebilirsiniz.",
       "connectionsTitle": "Connected MCP clients",
       "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
       "connectionsEmpty": "No MCP clients are connected.",

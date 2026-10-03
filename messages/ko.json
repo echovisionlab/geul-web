@@ -1711,6 +1711,9 @@
     },
     "mcpIntegration": {
       "description": "호환되는 AI 클라이언트에 이 엔드포인트를 연결하세요. 로그인과 동의를 위해 브라우저가 열립니다.",
+      "consentDescription": "이 클라이언트는 현재 계정 권한 범위에서 콘텐츠를 읽고 수정하며 파일을 관리할 수 있습니다. 콘텐츠를 생성·수정·삭제하거나 기존 첨부 파일을 변경할 수 있습니다. 연결해도 계정에 추가 권한이 부여되지는 않습니다.",
+      "consentOfflineAccess": "이 연결은 현재 브라우저 세션이 끝난 뒤에도 취소할 때까지 유지될 수 있습니다.",
+      "consentRevoke": "{settings} → Remote MCP에서 이 연결을 취소할 수 있습니다.",
       "connectionsTitle": "연결된 MCP 클라이언트",
       "connectionsDescription": "OAuth 권한은 브라우저 세션과 별개입니다. 권한을 해제하면 로그아웃하지 않고 해당 MCP 클라이언트만 연결이 끊어집니다.",
       "connectionsEmpty": "연결된 MCP 클라이언트가 없습니다.",

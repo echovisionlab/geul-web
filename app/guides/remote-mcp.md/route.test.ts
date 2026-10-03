@@ -28,9 +28,21 @@ describe('Remote MCP installation guide', () => {
       expect(markdown).toContain(`codex mcp add geul --url ${origin}/mcp`);
       expect(markdown).toContain('codex mcp login geul');
       expect(markdown).toContain('Author and Admin');
+      expect(markdown).not.toContain('dsub.io');
       expect(markdown).not.toMatch(/example\.invalid|SITE_ORIGIN|\$\{/);
     },
   );
+
+  it('serves four copyable task examples between setup and removal', async () => {
+    vi.stubEnv('SITE_ORIGIN', 'https://studio.example.com');
+    const { GET } = await import('./route');
+    const markdown = await GET().text();
+    const examples = markdown.split('## Try it\n')[1]?.split('## Remove or reconnect')[0];
+
+    expect(examples).toBeDefined();
+    expect(examples?.match(/^ {2}> /gm)).toHaveLength(4);
+    expect(markdown.indexOf('## Try it')).toBeGreaterThan(markdown.indexOf('## ChatGPT on the web'));
+  });
 
   it('ignores untrusted request hosts when rendering the endpoint', async () => {
     vi.stubEnv('SITE_ORIGIN', 'https://studio.example.com');

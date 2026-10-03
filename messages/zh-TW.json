@@ -1772,6 +1772,9 @@
     },
     "mcpIntegration": {
       "description": "將相容的 AI 用戶端連線至此端點。瀏覽器將開啟以完成登入與授權。",
+      "consentDescription": "此用戶端可以在您現有的帳戶權限範圍內讀取和編輯內容以及管理檔案。它可以建立、更新或刪除內容，並變更現有附件。連線不會授予任何額外的帳戶權限。",
+      "consentOfflineAccess": "目前的瀏覽器工作階段結束後，此連線仍可繼續，直到您撤銷它。",
+      "consentRevoke": "您可以在{settings} → Remote MCP中撤銷此連線。",
       "connectionsTitle": "Connected MCP clients",
       "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
       "connectionsEmpty": "No MCP clients are connected.",

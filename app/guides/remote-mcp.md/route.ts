@@ -48,6 +48,19 @@ If your account has developer mode, enable it under **Settings → Security and 
 
 ChatGPT web setup is separate from local Codex MCP configuration. Availability and workspace permissions depend on your ChatGPT account.
 
+## Try it
+
+After connecting, copy a request below and replace the quoted names and text with your own. Reading these examples does not change any content; send an edit request only when you want that change. If a title, name, paragraph, or file matches more than one item, ask the agent to clarify before proceeding.
+
+- **Summarize a Post:**
+  > Find the Post titled "Studio notes", read its current body, and summarize it in Korean. If multiple Posts match, ask me which one. Do not edit it.
+- **Edit one paragraph:**
+  > Find the Post titled "Studio notes" and replace only the paragraph beginning "Opening hours" with "We open at 10 a.m. on weekdays." Keep all other content unchanged. If the Post or paragraph is ambiguous, ask me to choose before editing.
+- **Read a Release or Artist:**
+  > Find the Release titled "First light" or the Artist named "Echo", ask me which item if there are multiple matches, and read its current document. Summarize what it says without editing it.
+- **Replace a file in a Post:**
+  > In the Post titled "Studio notes", replace the existing file block for "old-cover.jpg" with the existing file named "new-cover.jpg". Keep all other content unchanged. If the Post, block, or file is ambiguous, ask me to choose before editing. Use an existing file; do not upload a new one.
+
 ## Remove or reconnect
 
 In Codex CLI, run \`codex mcp remove geul\` to remove the configuration, or \`codex mcp login geul\` to sign in again.

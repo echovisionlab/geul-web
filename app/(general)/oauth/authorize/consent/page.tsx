@@ -52,8 +52,9 @@ export default async function McpConsentPage({ searchParams }: PageProps) {
   const delegationName = mcpDelegationDisplayName(request, session);
   const approve = approveMcpConsent.bind(null, challenge);
   const reject = rejectMcpConsentAction.bind(null, challenge);
-  const [actions, mcp] = await Promise.all([
+  const [actions, labels, mcp] = await Promise.all([
     getTranslations('common.actions'),
+    getTranslations('common.labels'),
     getTranslations('security.mcpIntegration'),
   ]);
 
@@ -66,7 +67,15 @@ export default async function McpConsentPage({ searchParams }: PageProps) {
             <Stack gap="xs">
               <Title order={1}>Remote MCP</Title>
               <Text fw={600}>{clientName}</Text>
-              <Text c="dimmed">{mcp('description')}</Text>
+              <Text c="dimmed">{mcp('consentDescription')}</Text>
+              {request.requested_scope.includes('offline_access') && (
+                <Text size="sm" c="dimmed">
+                  {mcp('consentOfflineAccess')}
+                </Text>
+              )}
+              <Text size="sm" c="dimmed">
+                {mcp('consentRevoke', { settings: labels('settings') })}
+              </Text>
               <Text size="sm" c="dimmed">
                 {delegationName}
               </Text>

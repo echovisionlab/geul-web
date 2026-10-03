@@ -1772,6 +1772,9 @@
     },
     "mcpIntegration": {
       "description": "Collega un client AI compatibile a questo endpoint. Il browser si aprirà per l’accesso e il consenso.",
+      "consentDescription": "Questo client può leggere e modificare contenuti e gestire file entro i permessi attuali del tuo account. Può creare, aggiornare o eliminare contenuti e modificare gli allegati esistenti. La connessione non concede permessi aggiuntivi all’account.",
+      "consentOfflineAccess": "Questa connessione può continuare dopo la fine della sessione attuale del browser, finché non la revochi.",
+      "consentRevoke": "Puoi revocare questa connessione in {settings} → Remote MCP.",
       "connectionsTitle": "Connected MCP clients",
       "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
       "connectionsEmpty": "No MCP clients are connected.",
