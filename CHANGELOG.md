@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.2](https://github.com/echovisionlab/geul-web/compare/v0.4.1...v0.4.2) (2026-10-03)
+
+
+### Performance Improvements
+
+* **web:** load page features and RPC clients at their usage boundaries ([#62](https://github.com/echovisionlab/geul-web/issues/62)) ([c3c6871](https://github.com/echovisionlab/geul-web/commit/c3c68718083b5aa45743d5631b8dd72de4f1fee8))
+
 ## [0.4.1](https://github.com/echovisionlab/geul-web/compare/v0.4.0...v0.4.1) (2026-10-03)
 
 
