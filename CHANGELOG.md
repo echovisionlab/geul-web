@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.4](https://github.com/echovisionlab/geul-web/compare/v0.4.3...v0.4.4) (2026-10-03)
+
+
+### Performance Improvements
+
+* load public section runtimes only when rendered ([#66](https://github.com/echovisionlab/geul-web/issues/66)) ([ec1961e](https://github.com/echovisionlab/geul-web/commit/ec1961e850d9fdcea16d022159ff5f9d4a77dfad))
+
 ## [0.4.3](https://github.com/echovisionlab/geul-web/compare/v0.4.2...v0.4.3) (2026-10-03)
 
 
