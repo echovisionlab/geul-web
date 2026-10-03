@@ -29,7 +29,7 @@ import { ContentBlockMediaRuntimeProvider } from '@/features/media/ContentBlockM
 import { authorizeFileDownload } from '@/lib/queries/file-download-browser';
 import enMessages from '@/messages/en.json';
 import { TestProviders } from '@/test/TestProviders';
-import { GeneratedRichTextBlockView } from './GeneratedRichTextBlockView';
+import { GeneratedRichTextBlockView } from './GeneratedRichTextBlockViewRuntime';
 
 vi.mock('@/lib/queries/file-download-browser', () => ({ authorizeFileDownload: vi.fn() }));
 

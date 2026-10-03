@@ -1,4 +1,4 @@
-'use client';
+import 'server-only';
 
 import type { ReactNode } from 'react';
 import { PublicMediaEntityType } from '@echovisionlab/geul-proto/public/file_pb.ts';
