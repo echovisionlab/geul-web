@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
-import { act } from 'react';
+import { act, type ReactNode } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
-import { renderToStaticMarkup, renderToString } from 'react-dom/server';
+import { renderToReadableStream } from 'react-dom/server.browser';
 import { MantineProvider } from '@mantine/core';
 import { create } from '@bufbuild/protobuf';
 import {
@@ -22,6 +22,15 @@ const mocks = vi.hoisted(() => ({
   getScheduled: vi.fn(),
   getPreview: vi.fn(),
 }));
+
+// App Router uses lazy SSR, which must finish through a streaming server renderer.
+// Exercise the actual Next implementation rather than replacing the rich-text body.
+vi.mock('next/dynamic', async () => {
+  const { default: dynamic } = await vi.importActual<{ default: typeof import('next/dynamic').default }>(
+    'next/dist/shared/lib/app-dynamic.js',
+  );
+  return { default: dynamic };
+});
 
 vi.mock('next/navigation', () => ({ useSearchParams: () => mocks.query }));
 vi.mock('next-intl', () => ({
@@ -90,6 +99,18 @@ function screen(kind: 'privacy' | 'terms', initialData?: PublicLegalPageInitialD
   );
 }
 
+async function renderServerScreen(content: ReactNode): Promise<string> {
+  const stream = await renderToReadableStream(content);
+  await stream.allReady;
+  return new Response(stream).text();
+}
+
+async function waitForPublishedBody(container: HTMLElement) {
+  await act(async () => {
+    await vi.waitFor(() => expect(container.textContent).toContain('Published legal document'));
+  });
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.query = new URLSearchParams();
@@ -100,25 +121,25 @@ beforeEach(() => {
 });
 
 describe.each(['privacy', 'terms'] as const)('%s initial public document', (kind) => {
-  it('includes the published body in the first server render', () => {
-    const html = renderToStaticMarkup(screen(kind, snapshot()));
+  it('includes the published body in the first server render', async () => {
+    const html = await renderServerScreen(screen(kind, snapshot()));
     expect(html).toContain('Published legal document');
     expect(html).not.toContain('data-testid="loader"');
   });
 
-  it('renders an authoritative empty response without a loader', () => {
+  it('renders an authoritative empty response without a loader', async () => {
     const initialData = snapshot();
     initialData.data.active = null;
-    const html = renderToStaticMarkup(screen(kind, initialData));
+    const html = await renderServerScreen(screen(kind, initialData));
     expect(html).toContain('emptyTitle');
     expect(html).not.toContain('data-testid="loader"');
   });
 
-  it('does not reuse another locale or a public snapshot for a ShareLink preview', () => {
+  it('does not reuse another locale or a public snapshot for a ShareLink preview', async () => {
     mocks.query = new URLSearchParams('lang=ko');
-    expect(renderToStaticMarkup(screen(kind, snapshot()))).toContain('data-testid="loader"');
+    expect(await renderServerScreen(screen(kind, snapshot()))).toContain('data-testid="loader"');
     mocks.query = new URLSearchParams('preview=scheduled-id&token=share-token');
-    expect(renderToStaticMarkup(screen(kind, snapshot()))).toContain('data-testid="loader"');
+    expect(await renderServerScreen(screen(kind, snapshot()))).toContain('data-testid="loader"');
   });
 
   it('mounts fresh server data without issuing another browser query', async () => {
@@ -129,6 +150,7 @@ describe.each(['privacy', 'terms'] as const)('%s initial public document', (kind
       await act(async () => {
         root.render(screen(kind, snapshot(), client));
       });
+      await waitForPublishedBody(container);
       expect(
         mocks.getPage.mock.calls.length + mocks.getActive.mock.calls.length + mocks.getScheduled.mock.calls.length,
       ).toBe(0);
@@ -144,16 +166,20 @@ describe.each(['privacy', 'terms'] as const)('%s initial public document', (kind
     const serverClient = new QueryClient();
     const browserClient = new QueryClient({ defaultOptions: { queries: { staleTime: 60_000, retry: false } } });
     const container = document.createElement('div');
-    container.innerHTML = renderToString(screen(kind, initialData, serverClient));
+    container.innerHTML = await renderServerScreen(screen(kind, initialData, serverClient));
     const serverBody = container.querySelector(`.${kind}-content`);
+    const serverParagraph = serverBody?.querySelector('p');
+    expect(serverParagraph?.textContent).toBe('Published legal document');
     const onRecoverableError = vi.fn();
     let root: ReturnType<typeof hydrateRoot> | undefined;
     try {
       await act(async () => {
         root = hydrateRoot(container, screen(kind, initialData, browserClient), { onRecoverableError });
       });
+      await waitForPublishedBody(container);
       expect(serverBody).not.toBeNull();
       expect(container.querySelector(`.${kind}-content`)).toBe(serverBody);
+      expect(container.querySelector(`.${kind}-content p`)).toBe(serverParagraph);
       expect(onRecoverableError).not.toHaveBeenCalled();
       expect(mocks.getPage).not.toHaveBeenCalled();
     } finally {
@@ -173,6 +199,7 @@ describe.each(['privacy', 'terms'] as const)('%s initial public document', (kind
     const root = createRoot(container);
     try {
       await act(async () => root.render(screen(kind, initialData, client)));
+      await waitForPublishedBody(container);
       expect(container.textContent).toContain('version 1');
       expect(container.textContent).not.toContain('version 0');
       expect(mocks.getPage).not.toHaveBeenCalled();
@@ -191,6 +218,7 @@ describe.each(['privacy', 'terms'] as const)('%s initial public document', (kind
     const root = createRoot(container);
     try {
       await act(async () => root.render(screen(kind, initialData, client)));
+      await waitForPublishedBody(container);
       expect(container.textContent).toContain('Published legal document');
       expect(container.querySelector('[data-testid="loader"]')).toBeNull();
     } finally {
@@ -222,7 +250,7 @@ describe.each(['privacy', 'terms'] as const)('%s initial public document', (kind
     }
   });
 
-  it('renders the scheduled notice on the first server render', () => {
+  it('renders the scheduled notice on the first server render', async () => {
     const initialData = snapshot();
     initialData.data.scheduled = {
       id: 'next-version',
@@ -232,7 +260,7 @@ describe.each(['privacy', 'terms'] as const)('%s initial public document', (kind
       status: 'scheduled',
       effectiveFrom: new Date('2026-11-01T00:00:00Z'),
     };
-    expect(renderToStaticMarkup(screen(kind, initialData))).toContain('active.upcomingAlert');
+    expect(await renderServerScreen(screen(kind, initialData))).toContain('active.upcomingAlert');
   });
 
   it('fetches one combined snapshot when server data is unavailable', async () => {
