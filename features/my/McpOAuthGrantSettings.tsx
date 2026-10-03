@@ -28,19 +28,24 @@ export function McpOAuthGrantSettings({ initialGrants, initialLoadFailed = false
   const [revokingId, setRevokingId] = useState<string | null>(null);
 
   const revoke = async () => {
-    if (!selected) {
+    if (!selected || revokingId !== null) {
       return;
     }
     setRevokingId(selected.id);
-    const result = await revokeMyMcpOAuthGrant(selected.id);
-    setRevokingId(null);
-    if (!result.success) {
+    try {
+      const result = await revokeMyMcpOAuthGrant(selected.id);
+      if (!result.success) {
+        notifications.show({ color: 'red', message: t('revokeFailed') });
+        return;
+      }
+      setGrants((current) => current.filter((grant) => grant.id !== selected.id));
+      setSelected(null);
+      notifications.show({ color: 'green', message: t('revokeSuccess') });
+    } catch {
       notifications.show({ color: 'red', message: t('revokeFailed') });
-      return;
+    } finally {
+      setRevokingId(null);
     }
-    setGrants((current) => current.filter((grant) => grant.id !== selected.id));
-    setSelected(null);
-    notifications.show({ color: 'green', message: t('revokeSuccess') });
   };
 
   return (
