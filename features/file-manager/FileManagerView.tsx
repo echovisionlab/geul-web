@@ -26,6 +26,7 @@ import { ContentModal } from '@/components/core/Modal';
 import { Progress } from '@/components/core/Progress';
 import { TextButton } from '@/components/core/TextButton';
 import { FilePreview, FileTypeIcon } from '@/features/media/FilePreview';
+import { PageLoader } from '@/features/site/PageLoader';
 import classes from './FileManagerView.module.css';
 import type { FileManagerFileView, FileManagerItemView, FileManagerUsageItemView } from './model';
 import { FileBrowserGridView } from './ui/FileBrowserGridView';
@@ -514,9 +515,9 @@ export function FileManagerView(props: FileManagerViewProps) {
       ) : null}
 
       {props.loading ? (
-        <Center mih={320}>
-          <Loader aria-label={labels.title} />
-        </Center>
+        <Box pos="relative" mih={320}>
+          <PageLoader height={320} minHeight={320} />
+        </Box>
       ) : props.folderNotFound ? (
         <Paper withBorder radius={0} mih={260} p="xl" data-file-folder-not-found>
           <Center h="100%" mih={210}>

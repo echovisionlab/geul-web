@@ -1,31 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { MantineColor } from '@mantine/core';
 import { PageLoaderView, type PageLoaderViewSize } from '@/components/core/LoadingSurface';
 import { useSiteSettings } from '@/lib/contexts/ManifestContext';
-import { toCdnUrl } from '@/lib/utils/file-url';
-
-function shouldBypassNextImageOptimization(src: string): boolean {
-  try {
-    const pathname = new URL(src).pathname.toLowerCase();
-    return pathname.endsWith('.gif') || pathname.endsWith('.svg');
-  } catch {
-    return src.toLowerCase().endsWith('.gif') || src.toLowerCase().endsWith('.svg');
-  }
-}
-
-function pickRandomLoaderUrl(urls: string[]): string | null {
-  if (urls.length === 0) {
-    return null;
-  }
-  return urls[Math.floor(Math.random() * urls.length)] ?? urls[0] ?? null;
-}
-
-function pickInitialLoaderUrl(urls: string[]): string | null {
-  return urls[0] ?? null;
-}
+import { resolvePageLoaderImage } from './loader-image';
 
 export interface PageLoaderProps {
   /** Height of the loader container. Defaults to '100%' for full parent height. */
@@ -34,7 +13,7 @@ export interface PageLoaderProps {
   minHeight?: string | number;
   /** Loader size. Defaults to 'md'. */
   size?: PageLoaderViewSize;
-  /** Loader color. Applies only to the fallback Mantine Loader. */
+  /** Retained for caller compatibility. Configured loading images keep their colors. */
   color?: MantineColor;
   /** Optional message to display below the loader. */
   message?: string;
@@ -43,16 +22,8 @@ export interface PageLoaderProps {
 export function PageLoader({ height = '100%', minHeight = 200, size = 'md', color, message }: PageLoaderProps) {
   const t = useTranslations('common.states');
   const { settings } = useSiteSettings();
-  const configuredLoaderUrls = settings.loader_urls ?? [];
-  const loaderUrlsKey = configuredLoaderUrls.join('\u0000');
-  const [selectedLoader, setSelectedLoader] = useState(() => pickInitialLoaderUrl(configuredLoaderUrls));
-
-  useEffect(() => {
-    const urls = loaderUrlsKey ? loaderUrlsKey.split('\u0000') : [];
-    setSelectedLoader(pickRandomLoaderUrl(urls));
-  }, [loaderUrlsKey]);
-
-  const imageSrc = selectedLoader ? toCdnUrl(selectedLoader) : null;
+  const image = resolvePageLoaderImage(settings.loader_urls ?? []);
+  const loadingLabel = t('loading');
 
   return (
     <PageLoaderView
@@ -60,10 +31,10 @@ export function PageLoader({ height = '100%', minHeight = 200, size = 'md', colo
       minHeight={minHeight}
       size={size}
       color={color}
-      message={message}
-      imageSrc={imageSrc}
-      imageAlt={t('loading')}
-      imageUnoptimized={imageSrc ? shouldBypassNextImageOptimization(imageSrc) : false}
+      message={message?.trim() === loadingLabel.trim() ? undefined : message}
+      imageSrc={image.src}
+      imageAlt={loadingLabel}
+      imageUnoptimized={image.unoptimized}
     />
   );
 }

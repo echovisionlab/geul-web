@@ -3,7 +3,9 @@
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { MantineProvider } from '@mantine/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PostSpotlightRuntimeProps } from './PostSpotlightRuntime';
 
 const mocks = vi.hoisted(() => ({ load: vi.fn(), render: vi.fn() }));
 vi.mock('./post-spotlight-runtime-loader', () => ({ loadPostSpotlightRuntime: mocks.load }));
@@ -25,22 +27,24 @@ vi.mock('@/components/core/Button', () => ({
     </button>
   ),
 }));
-
 import { PostSpotlight } from './PostSpotlight';
 import { consumePostSpotlightOpen, openPostSpotlight } from './post-spotlight-trigger';
 
 let root: Root;
 let host: HTMLDivElement;
-
-function Runtime({ openRequest }: { openRequest: number }) {
-  mocks.render(openRequest);
-  return <div role="dialog">Search</div>;
+function Runtime(props: PostSpotlightRuntimeProps) {
+  mocks.render(props);
+  return <div data-search-results="">Search results</div>;
 }
-
 async function mount() {
-  await act(async () => root.render(<PostSpotlight />));
+  await act(async () =>
+    root.render(
+      <MantineProvider env="test">
+        <PostSpotlight />
+      </MantineProvider>,
+    ),
+  );
 }
-
 beforeEach(() => {
   vi.clearAllMocks();
   consumePostSpotlightOpen();
@@ -49,21 +53,25 @@ beforeEach(() => {
   root = createRoot(host);
   mocks.load.mockResolvedValue(Runtime);
 });
-
 afterEach(async () => {
   await act(async () => root.unmount());
   host.remove();
 });
 
-describe('PostSpotlight demand loading', () => {
-  it('renders no search UI or runtime on SSR and idle hydration', async () => {
-    expect(renderToStaticMarkup(<PostSpotlight />)).toBe('');
+describe('PostSpotlight demand-loaded results', () => {
+  it('renders no dialog or results runtime on SSR and idle hydration', async () => {
+    const html = renderToStaticMarkup(
+      <MantineProvider env="test">
+        <PostSpotlight />
+      </MantineProvider>,
+    );
+    expect(html).not.toContain('role="dialog"');
     await mount();
     expect(mocks.load).not.toHaveBeenCalled();
-    expect(host.innerHTML).toBe('');
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
   });
 
-  it('loads and opens on the first shell gesture, coalescing concurrent requests', async () => {
+  it('opens its real input immediately and coalesces concurrent results imports', async () => {
     let resolve!: (runtime: typeof Runtime) => void;
     mocks.load.mockReturnValue(
       new Promise<typeof Runtime>((done) => {
@@ -76,20 +84,23 @@ describe('PostSpotlight demand loading', () => {
       openPostSpotlight();
     });
     expect(mocks.load).toHaveBeenCalledTimes(1);
-    expect(host.innerHTML).toBe('');
+    expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+    const input = document.querySelector('input[placeholder="searchPosts"]');
+    expect(input).not.toBeNull();
+    expect(mocks.render).not.toHaveBeenCalled();
     await act(async () => resolve(Runtime));
-    expect(host.querySelector('[role="dialog"]')).not.toBeNull();
-    expect(mocks.render).toHaveBeenLastCalledWith(2);
+    expect(document.querySelector('[data-search-results]')).not.toBeNull();
+    expect(document.querySelector('input[placeholder="searchPosts"]')).toBe(input);
     await act(async () => openPostSpotlight());
     expect(mocks.load).toHaveBeenCalledTimes(1);
-    expect(mocks.render).toHaveBeenLastCalledWith(3);
+    expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
   });
 
-  it('preserves a gesture before the listener is mounted', async () => {
+  it('preserves a gesture before the listener mounts', async () => {
     openPostSpotlight();
     await mount();
     expect(mocks.load).toHaveBeenCalledTimes(1);
-    expect(host.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
   });
 
   it.each(['ctrlKey', 'metaKey'] as const)('opens with %s+K and ignores editing controls', async (modifier) => {
@@ -106,6 +117,7 @@ describe('PostSpotlight demand loading', () => {
       ),
     );
     expect(mocks.load).toHaveBeenCalledTimes(1);
+    expect(document.querySelector('input[placeholder="searchPosts"]')).not.toBeNull();
   });
 
   it('ignores pending completion after unmount', async () => {
@@ -120,35 +132,48 @@ describe('PostSpotlight demand loading', () => {
     await act(async () => root.unmount());
     await act(async () => resolve(Runtime));
     expect(mocks.render).not.toHaveBeenCalled();
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
     root = createRoot(host);
   });
 
-  it('shows an import failure and allows retry', async () => {
+  it('shows import failures inside the same dialog and allows retry', async () => {
     mocks.load.mockRejectedValueOnce(new Error('chunk unavailable')).mockResolvedValue(Runtime);
     await mount();
     await act(async () => openPostSpotlight());
-    expect(host.querySelector('[role="alert"]')?.textContent).toContain('errors.generic');
-    await act(async () => (host.querySelector('button') as HTMLButtonElement).click());
+    expect(document.querySelector('[role="alert"]')?.textContent).toContain('errors.generic');
+    const retry = Array.from(document.querySelectorAll('button')).find(
+      (button) => button.textContent === 'actions.tryAgain',
+    )!;
+    await act(async () => retry.click());
     expect(mocks.load).toHaveBeenCalledTimes(2);
-    expect(host.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+    expect(document.querySelector('[data-search-results]')).not.toBeNull();
   });
 
-  it('recovers a renderer failure on retry without loading forever', async () => {
+  it('recovers renderer errors on retry without replacing the input', async () => {
     const errorLog = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     let fail = true;
-    mocks.load.mockResolvedValue(() => {
+    mocks.load.mockResolvedValue((props: PostSpotlightRuntimeProps) => {
       if (fail) {
         throw new Error('render failed');
       }
-      return <Runtime openRequest={1} />;
+      return <Runtime {...props} />;
     });
-    await mount();
-    await act(async () => openPostSpotlight());
-    expect(host.querySelector('[role="alert"]')).not.toBeNull();
-    fail = false;
-    await act(async () => (host.querySelector('button') as HTMLButtonElement).click());
-    expect(host.querySelector('[role="dialog"]')).not.toBeNull();
-    expect(mocks.load).toHaveBeenCalledTimes(1);
-    errorLog.mockRestore();
+    try {
+      await mount();
+      await act(async () => openPostSpotlight());
+      const input = document.querySelector('input[placeholder="searchPosts"]');
+      expect(document.querySelector('[role="alert"]')).not.toBeNull();
+      fail = false;
+      const retry = Array.from(document.querySelectorAll('button')).find(
+        (button) => button.textContent === 'actions.tryAgain',
+      )!;
+      await act(async () => retry.click());
+      expect(document.querySelector('[data-search-results]')).not.toBeNull();
+      expect(document.querySelector('input[placeholder="searchPosts"]')).toBe(input);
+      expect(mocks.load).toHaveBeenCalledTimes(1);
+    } finally {
+      errorLog.mockRestore();
+    }
   });
 });

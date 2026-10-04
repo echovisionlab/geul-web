@@ -11,6 +11,7 @@ import { WORK_TABLE_FILTER_FIELD_DEFINITIONS, WORK_TABLE_SORT_FIELD_DEFINITIONS 
 import { createPublicWorkClient, createPublicWorkClientWithAuth, createWorkClient } from '@/lib/api/server-client';
 import { materializeLocalizedRichTextTree } from '@/features/editor/contract/localized-rich-text';
 import { mapPublicLocalizationInfo, maybeFetchSourceLocale } from '@/lib/queries/localized-public';
+import { getPublicWorkResponse } from '@/lib/queries/work-public.server';
 import {
   buildWorkMapFeatureRequest,
   mapWorkMapFeatureResponse,
@@ -73,15 +74,13 @@ export async function getWorkView(
 ) {
   try {
     const slug = decodeURIComponent(idOrSlug);
-    const client = await createPublicWorkClientWithAuth(options?.requestedLocale);
-    let response = await client.get({ slug });
+    let response = await getPublicWorkResponse(slug, options?.requestedLocale);
     response = await maybeFetchSourceLocale({
       preferSourceLocale: options?.preferSourceLocale,
       initialResponse: response,
       entity: response.work ?? null,
       fetchWithLocale: async (locale) => {
-        const sourceClient = await createPublicWorkClientWithAuth(locale);
-        return sourceClient.get({ slug });
+        return getPublicWorkResponse(slug, locale);
       },
     });
 

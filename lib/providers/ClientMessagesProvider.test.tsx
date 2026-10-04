@@ -21,6 +21,22 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(mocks.search),
 }));
 
+vi.mock('next/image', () => ({
+  default: ({
+    src,
+    alt,
+    unoptimized,
+    preload,
+  }: {
+    src: string;
+    alt: string;
+    unoptimized?: boolean;
+    preload?: boolean;
+  }) => (
+    <img src={src} alt={alt} loading="lazy" data-unoptimized={String(unoptimized)} data-preload={String(preload)} />
+  ),
+}));
+
 vi.mock('@/lib/i18n/client-message-loaders', () => ({
   loadClientMessagesForLocale: mocks.loadMessages,
 }));
@@ -51,14 +67,24 @@ function renderProvider({
   messages = publicMessages,
   reducedCatalogue = true,
   children = <AuthTitle />,
+  loaderImageSrc,
+  loaderImageUnoptimized,
 }: {
   locale?: string;
   messages?: Partial<ClientMessages>;
   reducedCatalogue?: boolean;
   children?: ReactNode;
+  loaderImageSrc?: string | null;
+  loaderImageUnoptimized?: boolean;
 } = {}) {
   root.render(
-    <ClientMessagesProvider locale={locale} messages={messages} reducedCatalogue={reducedCatalogue}>
+    <ClientMessagesProvider
+      locale={locale}
+      messages={messages}
+      reducedCatalogue={reducedCatalogue}
+      loaderImageSrc={loaderImageSrc}
+      loaderImageUnoptimized={loaderImageUnoptimized}
+    >
       {children}
     </ClientMessagesProvider>,
   );
@@ -92,6 +118,58 @@ afterEach(() => {
 });
 
 describe('ClientMessagesProvider', () => {
+  it('server-renders the configured GIF on the first pending catalogue paint without generic visible text', async () => {
+    mocks.pathname = '/login';
+    const pending = deferred<ClientMessages>();
+    mocks.loadMessages.mockReturnValue(pending.promise);
+    const loaderImageSrc = 'https://cdn.example.com/loader.gif?version=2';
+    const koPublicMessages = selectClientMessages(koMessages, { pathWithSearch: '/', hasSession: false });
+    const markup = renderToStaticMarkup(
+      <ClientMessagesProvider
+        locale="ko"
+        messages={koPublicMessages}
+        reducedCatalogue
+        loaderImageSrc={loaderImageSrc}
+        loaderImageUnoptimized
+      >
+        <AuthTitle />
+      </ClientMessagesProvider>,
+    );
+    expect(markup).toContain(loaderImageSrc);
+    expect(markup).not.toContain('rel="preload" as="image"');
+    expect(markup).toContain(`aria-label="${koMessages.common.states.loading}"`);
+    await act(async () =>
+      renderProvider({ locale: 'ko', messages: koPublicMessages, loaderImageSrc, loaderImageUnoptimized: true }),
+    );
+    const status = container.querySelector('[role="status"]');
+    expect(status?.textContent).toBe('');
+    expect(status?.querySelector('img')?.getAttribute('src')).toBe(loaderImageSrc);
+    expect(status?.querySelector('img')?.getAttribute('data-unoptimized')).toBe('true');
+    expect(status?.querySelector('img')?.getAttribute('data-preload')).toBe('undefined');
+    await act(async () => {
+      pending.resolve(koMessages);
+      await pending.promise;
+    });
+    expect(container.querySelector('[data-testid="auth-title"]')?.textContent).toBe('로그인');
+  });
+
+  it('uses a quiet accessible pending surface for empty configuration and ignores a cancelled catalogue load', async () => {
+    const pending = deferred<ClientMessages>();
+    mocks.pathname = '/login';
+    mocks.loadMessages.mockReturnValue(pending.promise);
+    await act(async () => renderProvider());
+    expect(container.querySelector('[role="status"]')?.textContent).toBe('');
+    expect(container.querySelector('img')).toBeNull();
+    expect(container.querySelector('.mantine-Loader-root')).toBeNull();
+    mocks.pathname = '/';
+    await act(async () => renderProvider({ children: <RouteTitle /> }));
+    await act(async () => {
+      pending.resolve(enMessages);
+      await pending.promise;
+    });
+    expect(container.querySelector('[data-testid="public-page"]')).not.toBeNull();
+    expect(container.querySelector('[role="status"]')).toBeNull();
+  });
   it('loads the full catalogue before showing private messages after public-to-login navigation', async () => {
     const enLoad = deferred<ClientMessages>();
     mocks.loadMessages.mockReturnValue(enLoad.promise);
