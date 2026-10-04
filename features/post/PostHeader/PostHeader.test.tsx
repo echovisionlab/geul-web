@@ -97,7 +97,7 @@ describe('PostHeader author identities', () => {
   it('uses the compact Core low-emphasis contract for every header action', () => {
     renderHeader({ ...BASE_POST, canEdit: true });
 
-    for (const label of ['Edit post', 'Share post', 'Print post', 'Export post as Markdown']) {
+    for (const label of ['Edit post', 'Share post', 'Export post as Markdown']) {
       const button = document.querySelector<HTMLElement>(`[aria-label="${label}"]`);
       expect(button).not.toBeNull();
       expect(button).toHaveAttribute('data-size', 'sm');

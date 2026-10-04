@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import Link from '@/components/core/Navigation';
-import { IconMarkdown, IconPencil, IconPrinter, IconShare } from '@tabler/icons-react';
+import { IconMarkdown, IconPencil, IconShare } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { Box, Group, Image, Stack, Text, Title } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
@@ -145,17 +145,6 @@ export function PostHeader({ post, onShare, onExport, languageMenu }: PostHeader
       <Tooltip label={tCommon('actions.share')}>
         <IconButton size="sm" tone="neutral" emphasis="low" aria-label={t('actions.sharePost')} onClick={onShare}>
           <IconShare size={16} />
-        </IconButton>
-      </Tooltip>
-      <Tooltip label={tCommon('actions.print')}>
-        <IconButton
-          size="sm"
-          tone="neutral"
-          emphasis="low"
-          aria-label={t('actions.printPost')}
-          onClick={() => window.print()}
-        >
-          <IconPrinter size={16} />
         </IconButton>
       </Tooltip>
       <Tooltip label={tCommon('actions.markdown')}>
