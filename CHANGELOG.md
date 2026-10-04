@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.9](https://github.com/echovisionlab/geul-web/compare/v0.4.8...v0.4.9) (2026-10-04)
+
+
+### Bug Fixes
+
+* **ui:** remove print buttons from page and post views ([#76](https://github.com/echovisionlab/geul-web/issues/76)) ([dc25f2d](https://github.com/echovisionlab/geul-web/commit/dc25f2d2fbf8df73123d4c162628d1768c95d862))
+
 ## [0.4.8](https://github.com/echovisionlab/geul-web/compare/v0.4.7...v0.4.8) (2026-10-04)
 
 
