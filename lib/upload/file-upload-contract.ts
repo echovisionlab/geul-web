@@ -68,4 +68,14 @@ export interface InFlightServerLifecycle {
   uploadSurfaceKey?: string;
   activityId: string;
   progress: UploadAttemptProgress;
+  /** Browser preparation owns aggregate progress and completion until commit acknowledgement. */
+  clientMediaPrepared?: boolean;
+}
+
+export class UploadPausedError extends Error {
+  readonly code = 'UPLOAD_PAUSED';
+  constructor() {
+    super('Upload paused');
+    this.name = 'UploadPausedError';
+  }
 }

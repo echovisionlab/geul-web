@@ -6,17 +6,28 @@ import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.
 import type { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { useMutation } from '@tanstack/react-query';
+import { Code } from '@connectrpc/connect';
+import type { ActionResult } from '@/lib/actions/action-result';
+import { CLIENT_MEDIA_ARTIFACTS_MISSING } from '@/lib/upload/upload-errors';
 import {
   abortUploadAction,
   completeUploadAction,
+  completeClientMediaUploadAction,
+  recoverCompletedClientMediaUploadAction,
   downloadFromUrlAction,
   findMultipartUploadCandidateAction,
   initiateUploadAction,
+  prepareClientMediaUploadAction,
   recoverCompletedUploadAction,
 } from '../actions/file.ts';
 import { useOptionalEditorRuntimeContext } from '@/lib/contexts/EditorRuntimeContext';
-import { runDirectFileUpload } from '@/lib/upload/direct-upload-runner';
-import type { DownloadFromUrlOptions, UploadOptions, UploadResult } from '@/lib/upload/file-upload-contract';
+import {
+  UploadPausedError,
+  type DownloadFromUrlOptions,
+  type UploadOptions,
+  type UploadResult,
+} from '@/lib/upload/file-upload-contract';
+import { UPLOAD_ABORTED_MESSAGE } from '@/lib/upload/failure';
 import { runRemoteFileImport } from '@/lib/upload/remote-import-runner';
 import { useUploadLifecycleTracker } from './useUploadLifecycleTracker';
 
@@ -27,6 +38,8 @@ export type {
   UploadProgress,
   UploadResult,
 } from '@/lib/upload/file-upload-contract';
+
+export { UploadPausedError } from '@/lib/upload/file-upload-contract';
 
 export {
   UPLOAD_ABORTED_MESSAGE,
@@ -62,8 +75,33 @@ function normalizeRuntimeEntityType(
   }
 }
 
+function unwrapClientMediaCompletion(result: ActionResult<{ url: string; fileId: string }>): {
+  url: string;
+  fileId: string;
+} {
+  if (result.ok) {
+    return { url: result.url, fileId: result.fileId };
+  }
+  if (result.error === CLIENT_MEDIA_ARTIFACTS_MISSING) {
+    throw new Error(CLIENT_MEDIA_ARTIFACTS_MISSING);
+  }
+  if (result.errorCode === Code.Unauthenticated) {
+    throw new Error('Unauthorized');
+  }
+  if (result.errorCode === Code.PermissionDenied) {
+    throw new Error('Forbidden');
+  }
+  if (
+    [Code.InvalidArgument, Code.NotFound, Code.FailedPrecondition, Code.DataLoss].includes(result.errorCode as Code)
+  ) {
+    throw new Error('Upload failed');
+  }
+  throw new Error(result.error);
+}
+
 export function useFileUpload(options?: UseFileUploadOptions) {
   const abortedRef = useRef(false);
+  const pausedRef = useRef(false);
   const partAbortersRef = useRef<Set<() => void>>(new Set());
   const [isDirectUploading, setIsDirectUploading] = useState(false);
   const runtimeContext = useOptionalEditorRuntimeContext();
@@ -88,6 +126,13 @@ export function useFileUpload(options?: UseFileUploadOptions) {
   }, []);
 
   const abortActiveUpload = useCallback(() => {
+    pausedRef.current = false;
+    abortedRef.current = true;
+    partAbortersRef.current.forEach((abortPart) => abortPart());
+  }, []);
+
+  const pauseUpload = useCallback(() => {
+    pausedRef.current = true;
     abortedRef.current = true;
     partAbortersRef.current.forEach((abortPart) => abortPart());
   }, []);
@@ -98,24 +143,54 @@ export function useFileUpload(options?: UseFileUploadOptions) {
   const downloadMutation = useMutation({ mutationFn: downloadFromUrlAction });
 
   const upload = useCallback(
-    (file: File, uploadOptions: UploadOptions): Promise<UploadResult> =>
-      runDirectFileUpload(file, uploadOptions, {
+    async (file: File, uploadOptions: UploadOptions): Promise<UploadResult> => {
+      abortedRef.current = false;
+      pausedRef.current = false;
+      setIsDirectUploading(true);
+      let runDirectFileUpload: typeof import('@/lib/upload/direct-upload-runner').runDirectFileUpload;
+      try {
+        ({ runDirectFileUpload } = await import('@/lib/upload/direct-upload-runner'));
+        if (abortedRef.current) {
+          throw pausedRef.current ? new UploadPausedError() : new Error(UPLOAD_ABORTED_MESSAGE);
+        }
+      } catch (error) {
+        setIsDirectUploading(false);
+        throw error;
+      }
+      return runDirectFileUpload(file, uploadOptions, {
         canTrackServerLifecycle: lifecycle.canTrack,
         lifecycleTrackers: lifecycle.trackers,
         isAborted: () => abortedRef.current,
+        isPaused: () => pausedRef.current,
         resetAborted: () => {
           abortedRef.current = false;
+          pausedRef.current = false;
         },
         abortActiveUpload,
         registerPartAborter,
         clearPartAborters: () => partAbortersRef.current.clear(),
         setUploading: setIsDirectUploading,
         initiate: initiateMutation.mutateAsync,
-        complete: completeMutation.mutateAsync,
+        complete: async (input) =>
+          input.clientMediaBundleId
+            ? unwrapClientMediaCompletion(
+                await completeClientMediaUploadAction({ ...input, clientMediaBundleId: input.clientMediaBundleId }),
+              )
+            : completeMutation.mutateAsync(input),
+        prepareBundle: prepareClientMediaUploadAction,
         abort: abortMutation.mutateAsync,
         findCandidate: findMultipartUploadCandidateAction,
-        recoverCompleted: recoverCompletedUploadAction,
-      }),
+        recoverCompleted: async (input) =>
+          input.clientMediaBundleId
+            ? unwrapClientMediaCompletion(
+                await recoverCompletedClientMediaUploadAction({
+                  ...input,
+                  clientMediaBundleId: input.clientMediaBundleId,
+                }),
+              )
+            : recoverCompletedUploadAction(input),
+      });
+    },
     [
       abortActiveUpload,
       abortMutation.mutateAsync,
@@ -146,6 +221,7 @@ export function useFileUpload(options?: UseFileUploadOptions) {
   return {
     upload,
     abort: abortActiveUpload,
+    pauseUpload,
     downloadFromUrl,
     isUploading: initiateMutation.isPending || isDirectUploading || completeMutation.isPending,
     isDownloading: downloadMutation.isPending,

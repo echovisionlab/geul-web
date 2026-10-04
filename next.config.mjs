@@ -1,6 +1,9 @@
 import bundleAnalyzer from '@next/bundle-analyzer';
 import createNextIntlPlugin from 'next-intl/plugin';
 import { fileURLToPath } from 'node:url';
+import { prepareClientMediaCodecs } from './scripts/prepare-client-media-codecs.mjs';
+
+await prepareClientMediaCodecs();
 
 const useLocalContracts = process.env.LOCAL_CONTRACTS === '1';
 const releaseImageBuild = process.env.RELEASE_IMAGE_BUILD === 'true';
@@ -28,6 +31,7 @@ export default withNextIntl(
       '@echovisionlab/geul-event',
       '@echovisionlab/geul-proto',
       '@echovisionlab/geul-telemetry',
+      '@echovisionlab/audio-transcoder',
     ],
     turbopack: useLocalContracts
       ? {

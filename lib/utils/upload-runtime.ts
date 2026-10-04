@@ -2,7 +2,7 @@ import type { FileIngestRuntimeStage } from '@echovisionlab/geul-common/collabor
 
 const DEFAULT_UPLOAD_CHUNK_SIZE = 10 * 1024 * 1024;
 
-export type UploadLifecycleStage = FileIngestRuntimeStage | 'validating' | 'finalizing';
+export type UploadLifecycleStage = FileIngestRuntimeStage | 'validating' | 'finalizing' | 'processing';
 
 interface ResumableMultipartUploadOptions {
   fileSize: number;
