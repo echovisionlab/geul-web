@@ -1,12 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createHash, webcrypto } from 'node:crypto';
 import { ClientMediaUnavailableError } from './contracts';
-import {
-  MAX_ARTIFACT_BYTES,
-  createArtifactStore,
-  disposeNamespace,
-  saveManifest,
-} from './artifact-storage';
+import { MAX_ARTIFACT_BYTES, createArtifactStore, disposeNamespace, saveManifest } from './artifact-storage';
 
 const namespace = 'geul-client-media-12345678-1234-1234-1234-123456789abc';
 function storageFixture() {
