@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.7](https://github.com/echovisionlab/geul-web/compare/v0.4.6...v0.4.7) (2026-10-04)
+
+
+### Performance Improvements
+
+* open search immediately and unify GIF page loading ([#72](https://github.com/echovisionlab/geul-web/issues/72)) ([4712f86](https://github.com/echovisionlab/geul-web/commit/4712f86abdaaff4b14083853b723ef16ce11ab4c))
+
 ## [0.4.6](https://github.com/echovisionlab/geul-web/compare/v0.4.5...v0.4.6) (2026-10-03)
 
 
