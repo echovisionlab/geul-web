@@ -17,6 +17,7 @@ COPY --link pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 COPY --link patches ./patches
 COPY --link tooling/typescript-eslint ./tooling/typescript-eslint
 COPY --link tooling/typescript6 ./tooling/typescript6
+COPY --link scripts/prepare-client-media-codecs.mjs ./scripts/prepare-client-media-codecs.mjs
 RUN pnpm fetch --frozen-lockfile
 RUN pnpm install --frozen-lockfile --offline
 

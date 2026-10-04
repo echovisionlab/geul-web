@@ -69,6 +69,10 @@ export function useUploadLifecycleTracker({ provider, entityType, entityId, enab
         return;
       }
 
+      if (tracker.clientMediaPrepared) {
+        // Raw original-file events cannot represent the prepared bundle or acknowledge its commit.
+        return;
+      }
       applyServerLifecycleEvent(event, tracker, event.correlationId);
       if (isTerminalLifecycleEvent(event)) {
         trackersRef.current.delete(event.correlationId);

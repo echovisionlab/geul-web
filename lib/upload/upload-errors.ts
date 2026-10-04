@@ -74,3 +74,15 @@ export function isRetryableUploadPartError(error: unknown): boolean {
   }
   return message === UPLOAD_INTERRUPTED_MESSAGE || message === UPLOAD_FAILED_MESSAGE;
 }
+
+export const CLIENT_MEDIA_ARTIFACTS_MISSING = 'CLIENT_MEDIA_ARTIFACTS_MISSING';
+
+export function isClientMediaArtifactsMissingError(error: unknown): boolean {
+  return error instanceof Error && error.message === CLIENT_MEDIA_ARTIFACTS_MISSING;
+}
+
+export function isClientMediaRestoreMismatchError(
+  error: unknown,
+): error is Error & { code: 'CLIENT_MEDIA_RESTORE_MISMATCH' } {
+  return error instanceof Error && 'code' in error && error.code === 'CLIENT_MEDIA_RESTORE_MISMATCH';
+}

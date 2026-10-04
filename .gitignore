@@ -26,6 +26,7 @@ tmp/
 .artifacts/
 public/providers/maplibre/
 public/vendors/p5/
+public/client-media/codecs/
 *.log
 .DS_Store
 *.tmp
