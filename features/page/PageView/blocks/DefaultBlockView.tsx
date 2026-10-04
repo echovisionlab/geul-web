@@ -14,8 +14,6 @@ import {
   richTextBlockKindByProtoCase,
   type RichTextBlockKind,
 } from '@echovisionlab/geul-proto/content/block_catalog.ts';
-import { AudioMediaView } from '@/features/media/AudioMediaView';
-import { VideoMediaView } from '@/features/media/VideoMediaView';
 import { AttachmentMediaView } from '@/features/media/ui/AttachmentMediaView';
 import { ImageMediaView } from '@/features/media/ui/ImageMediaView';
 import { MissingMediaView, type MissingMediaKind } from '@/features/media/ui/MissingMediaView';
@@ -30,6 +28,9 @@ import { getFileTypeName } from '@/lib/utils/file-icon';
 import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
 import { isBlockId } from '@/lib/editor/block-id';
 import { getContainerStyle } from './DefaultBlockView.utils';
+
+const AudioMediaView = dynamic(() => import('@/features/media/AudioMediaView').then((module) => module.AudioMediaView));
+const VideoMediaView = dynamic(() => import('@/features/media/VideoMediaView').then((module) => module.VideoMediaView));
 
 const DefaultInlineMathView = dynamic<{ latex: string }>(() =>
   import('./DefaultInlineMathView').then((module) => module.DefaultInlineMathView),

@@ -221,6 +221,48 @@ describe('ClientMessagesProvider', () => {
     expect(mocks.loadMessages).toHaveBeenCalledExactlyOnceWith('en');
   });
 
+  it.each([
+    '/posts',
+    '/artists',
+    '/labels',
+    '/releases',
+    '/events',
+    '/labels/example',
+    '/events/example',
+    '/series/example',
+    '/event-series/example',
+    '/privacy/history',
+    '/privacy/history/example',
+    '/terms/history',
+    '/terms/history/example',
+  ])('keeps public navigation to %s visible without importing the full catalogue', async (pathname) => {
+    await act(async () => renderProvider({ children: <PrivacyTitle /> }));
+    mocks.pathname = pathname;
+    mocks.search = 'lang=ko';
+    await act(async () => renderProvider({ children: <PrivacyTitle /> }));
+    expect(mocks.loadMessages).not.toHaveBeenCalled();
+    expect(container.querySelector('[role="status"]')).toBeNull();
+    expect(container.querySelector('[data-testid="privacy-title"]')?.textContent).toBe('Loading...');
+  });
+
+  it.each([
+    'view=edit',
+    'view=public&view=edit',
+    'edit=false&edit=true',
+    'share=token',
+    'preview=example&token=secret',
+  ])('loads the full catalogue before a new legal detail protected mode %s', async (search) => {
+    const pending = deferred<ClientMessages>();
+    mocks.loadMessages.mockReturnValue(pending.promise);
+    await act(async () => renderProvider({ children: <PrivacyTitle /> }));
+    mocks.pathname = '/privacy/history/example';
+    mocks.search = search;
+    await act(async () => renderProvider({ children: <PrivacyTitle /> }));
+    expect(mocks.loadMessages).toHaveBeenCalledExactlyOnceWith('en');
+    expect(container.querySelector('[role="status"]')).not.toBeNull();
+    expect(container.querySelector('[data-testid="privacy-title"]')).toBeNull();
+  });
+
   it('never renders the previous locale full catalogue while the current locale is loading', async () => {
     const enLoad = deferred<ClientMessages>();
     const koLoad = deferred<ClientMessages>();

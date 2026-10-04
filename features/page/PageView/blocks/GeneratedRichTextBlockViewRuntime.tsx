@@ -6,11 +6,14 @@ import { useTranslations } from 'next-intl';
 import { normalizeRichTextHref } from '@echovisionlab/geul-common/editor/link-normalization';
 import type { RichTextInline, RichTextStyledText } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import type { LocalizedRichTextBlock } from '@/features/editor/contract/localized-rich-text';
-import { ExternalVideoView } from '@/features/media/ExternalVideoView';
 import { resolveGeneratedStandaloneExternalVideoLink } from '@/features/media/standalone-external-video';
 import { mediaContainerStyleToReact, resolveMediaContainerStyle } from '@/lib/media/shared';
 import { alignment, assertNever, containerStyle, requireHeadingLevel } from './GeneratedRichTextViewUtils';
 import type { GeneratedRichTextBlock, GeneratedRichTextBlockViewProps } from './GeneratedRichTextBlockView.types';
+
+const ExternalVideoView = dynamic(() =>
+  import('@/features/media/ExternalVideoView').then((module) => module.ExternalVideoView),
+);
 
 const GeneratedInlineMathView = dynamic<{ source: string }>(() =>
   import('./GeneratedInlineMathView').then((module) => module.GeneratedInlineMathView),
