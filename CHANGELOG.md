@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/echovisionlab/geul-web/compare/v0.4.9...v0.5.0) (2026-10-04)
+
+
+### Features
+
+* prepare audio and video uploads in the browser ([ce4e09d](https://github.com/echovisionlab/geul-web/commit/ce4e09d8f503f489cab80420f999320fbd6ee993))
+
 ## [0.4.9](https://github.com/echovisionlab/geul-web/compare/v0.4.8...v0.4.9) (2026-10-04)
 
 
