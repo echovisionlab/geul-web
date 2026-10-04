@@ -1,7 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { Center, Loader, Stack, Text, type MantineColor } from '@mantine/core';
+import { useState } from 'react';
+import { Center, Stack, Text, type MantineColor } from '@mantine/core';
 
 const IMAGE_SIZE_MAP: Record<PageLoaderViewSize, number> = {
   xs: 48,
@@ -19,6 +20,7 @@ export interface PageLoaderViewProps {
   /** Minimum height safeguard for page-sized loaders. Defaults to 200. */
   minHeight?: string | number;
   size?: PageLoaderViewSize;
+  /** Retained for caller compatibility. Configured images keep their colors. */
   color?: MantineColor;
   message?: string;
   imageSrc?: string | null;
@@ -30,14 +32,17 @@ export function PageLoaderView({
   height = '100%',
   minHeight = 200,
   size = 'md',
-  color,
   message,
   imageSrc,
   imageAlt,
   imageUnoptimized = false,
 }: PageLoaderViewProps) {
+  const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
   return (
     <Center
+      role="status"
+      aria-label={imageAlt}
+      aria-busy="true"
       style={{
         height,
         minHeight,
@@ -46,22 +51,16 @@ export function PageLoaderView({
       }}
     >
       <Stack align="center" gap="sm">
-        {imageSrc ? (
+        {imageSrc && imageSrc !== failedImageSrc ? (
           <Image
             src={imageSrc}
             alt={imageAlt}
             width={IMAGE_SIZE_MAP[size]}
             height={IMAGE_SIZE_MAP[size]}
-            preload
             unoptimized={imageUnoptimized}
+            onError={() => setFailedImageSrc(imageSrc)}
           />
-        ) : (
-          <Loader
-            size={size}
-            color={color}
-            vars={!color ? () => ({ root: { '--loader-color': 'var(--mantine-color-text)' } }) : undefined}
-          />
-        )}
+        ) : null}
         {message ? (
           <Text size="sm" c="dimmed">
             {message}

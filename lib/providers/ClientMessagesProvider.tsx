@@ -16,6 +16,8 @@ export interface ClientMessagesProviderProps extends ProviderOptions {
   locale: string;
   messages?: Partial<ClientMessages>;
   reducedCatalogue: boolean;
+  loaderImageSrc?: string | null;
+  loaderImageUnoptimized?: boolean;
   children: ReactNode;
 }
 
@@ -39,16 +41,23 @@ function IntlBoundary({ locale, messages, options, children }: IntlBoundaryProps
   );
 }
 
-function CatalogueLoadingFallback() {
+function CatalogueLoadingFallback({
+  loaderImageSrc,
+  loaderImageUnoptimized,
+}: Pick<ClientMessagesProviderProps, 'loaderImageSrc' | 'loaderImageUnoptimized'>) {
   const t = useTranslations('common.states');
   const loadingMessage = t('loading');
 
   return (
-    <div role="status" aria-label="Loading">
-      <MantineProvider>
-        <PageLoaderView height="100dvh" minHeight={0} message={loadingMessage} imageAlt={loadingMessage} />
-      </MantineProvider>
-    </div>
+    <MantineProvider>
+      <PageLoaderView
+        height="100dvh"
+        minHeight={0}
+        imageSrc={loaderImageSrc}
+        imageUnoptimized={loaderImageUnoptimized}
+        imageAlt={loadingMessage}
+      />
+    </MantineProvider>
   );
 }
 
@@ -70,6 +79,8 @@ function ClientMessagesProviderContent({
   locale: requestedLocale,
   messages,
   reducedCatalogue,
+  loaderImageSrc,
+  loaderImageUnoptimized,
   children,
   ...options
 }: ClientMessagesProviderProps) {
@@ -123,7 +134,11 @@ function ClientMessagesProviderContent({
   const selectedMessages = !reducedCatalogue && messages ? messages : (fullMessages ?? messages);
   let content = children;
   if (requiresFullCatalogue && !fullMessages) {
-    content = failed ? <CatalogueLoadError onRetry={retry} /> : <CatalogueLoadingFallback />;
+    content = failed ? (
+      <CatalogueLoadError onRetry={retry} />
+    ) : (
+      <CatalogueLoadingFallback loaderImageSrc={loaderImageSrc} loaderImageUnoptimized={loaderImageUnoptimized} />
+    );
   }
 
   return (
@@ -134,13 +149,13 @@ function ClientMessagesProviderContent({
 }
 
 export function ClientMessagesProvider(props: ClientMessagesProviderProps) {
-  const { locale, messages, reducedCatalogue, children, ...options } = props;
+  const { locale, messages, reducedCatalogue, loaderImageSrc, loaderImageUnoptimized, children, ...options } = props;
 
   return (
     <Suspense
       fallback={
         <IntlBoundary locale={locale} messages={messages} options={options}>
-          <CatalogueLoadingFallback />
+          <CatalogueLoadingFallback loaderImageSrc={loaderImageSrc} loaderImageUnoptimized={loaderImageUnoptimized} />
         </IntlBoundary>
       }
     >
@@ -148,6 +163,8 @@ export function ClientMessagesProvider(props: ClientMessagesProviderProps) {
         locale={locale}
         messages={messages}
         reducedCatalogue={reducedCatalogue}
+        loaderImageSrc={loaderImageSrc}
+        loaderImageUnoptimized={loaderImageUnoptimized}
         {...options}
       >
         {children}

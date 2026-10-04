@@ -10,10 +10,8 @@ import {
   createPublicArtistClientWithAuth,
   createPublicFormClientWithAuth,
   createPublicLabelClientWithAuth,
-  createPublicPostClientWithAuth,
   createPublicReleaseClientWithAuth,
   createPublicMemberClient,
-  createPublicWorkClientWithAuth,
 } from '@/lib/api/server-client';
 import { getManifestSnapshot } from '@/lib/queries/manifest';
 import { materializeLocalizedRichTextTree } from '@/features/editor/contract/localized-rich-text';
@@ -25,6 +23,8 @@ import { createLogger } from '@/lib/utils/logger';
 import { themedAssetRefUrl } from '@/lib/utils/asset-ref';
 import { isValidUuid } from '@/lib/utils/validation';
 import { getPublicPageResponse } from '@/lib/queries/page-public.server';
+import { getPublicWorkResponse } from '@/lib/queries/work-public.server';
+import { getPublicPostResponse } from '@/lib/queries/post-public.server';
 
 const logger = createLogger('metadata-queries');
 
@@ -375,18 +375,16 @@ const getPostMetadataDocumentCached = cache(
   ): Promise<PostMetadataDocument | null> => {
     try {
       const requestedSlug = decodeURIComponent(idOrSlug);
-      const client = await createPublicPostClientWithAuth(requestedLocale);
       const [site, response] = await Promise.all([
         getSiteMetadataDocument({ requestedLocale }),
-        client.get({ slug: requestedSlug }),
+        getPublicPostResponse(requestedSlug, requestedLocale),
       ]);
       const localizedResponse = await maybeFetchSourceLocale({
         preferSourceLocale,
         initialResponse: response,
         entity: response.post ?? null,
         fetchWithLocale: async (locale) => {
-          const sourceClient = await createPublicPostClientWithAuth(locale);
-          return sourceClient.get({ slug: requestedSlug });
+          return getPublicPostResponse(requestedSlug, locale);
         },
       });
 
@@ -528,18 +526,16 @@ const getWorkMetadataDocumentCached = cache(
   ): Promise<WorkMetadataDocument | null> => {
     try {
       const requestedSlug = decodeURIComponent(idOrSlug);
-      const client = await createPublicWorkClientWithAuth(requestedLocale);
       const [site, response] = await Promise.all([
         getSiteMetadataDocument({ requestedLocale }),
-        client.get({ slug: requestedSlug }),
+        getPublicWorkResponse(requestedSlug, requestedLocale),
       ]);
       const localizedResponse = await maybeFetchSourceLocale({
         preferSourceLocale,
         initialResponse: response,
         entity: response.work ?? null,
         fetchWithLocale: async (locale) => {
-          const sourceClient = await createPublicWorkClientWithAuth(locale);
-          return sourceClient.get({ slug: requestedSlug });
+          return getPublicWorkResponse(requestedSlug, locale);
         },
       });
 

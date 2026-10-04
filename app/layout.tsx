@@ -11,6 +11,7 @@ import type { Metadata, Viewport } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { ClientMessagesProvider } from '@/lib/providers/ClientMessagesProvider';
+import { resolvePageLoaderImage } from '@/features/site/PageLoader/loader-image';
 import { mantineHtmlProps } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
@@ -139,6 +140,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     hasSession: Boolean(session),
   });
   const publicRuntimeConfig = getServerPublicRuntimeConfig();
+  const loaderImage = resolvePageLoaderImage(manifest.settings.loader_urls ?? []);
   const google_analytics_id = manifest.settings.google_analytics_id;
   const siteJsonLd = [buildSiteOrganizationJsonLd(site), buildSiteWebSiteJsonLd(site)];
   const cookieColorScheme = normalizeColorScheme(cookieStore.get(COLOR_SCHEME_STORAGE_KEY)?.value);
@@ -185,6 +187,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ReactQueryProvider>
           <SessionProvider initialData={initialSession}>
             <ClientMessagesProvider
+              loaderImageSrc={loaderImage.src}
+              loaderImageUnoptimized={loaderImage.unoptimized}
               key={localeContext.locale}
               locale={localeContext.locale}
               messages={messages}

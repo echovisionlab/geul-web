@@ -3,7 +3,8 @@
 import { useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
-import { Loader, Stack, Text } from '@mantine/core';
+import { Box } from '@mantine/core';
+import { PageLoader } from '@/features/site/PageLoader';
 import { notifications } from '@mantine/notifications';
 import { createTermsVersionAction } from '@/lib/actions/terms';
 
@@ -35,9 +36,12 @@ export default function NewTermsPage() {
   }, []);
 
   return (
-    <Stack align="center" justify="center" h="100%">
-      <Loader size="sm" />
-      <Text c="dimmed">{createMutation.isPending || isNavigating ? 'Creating new version...' : 'Redirecting...'}</Text>
-    </Stack>
+    <Box pos="relative" h="100%" mih={200}>
+      <PageLoader
+        height="100%"
+        minHeight={200}
+        message={createMutation.isPending || isNavigating ? 'Creating new version...' : 'Redirecting...'}
+      />
+    </Box>
   );
 }
