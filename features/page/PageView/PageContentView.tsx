@@ -5,7 +5,6 @@ import type { LocalizedPageSection } from '@/features/editor/contract/localized-
 import { ContentBlockMediaRuntimeProvider } from '@/features/media/ContentBlockMediaRuntimeContext';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
 import { LocalizationNotice } from '@/features/translation/LocalizationNotice';
-import { PrintButton } from '@/features/print/PrintButton';
 import { GeneratedPageRenderer } from './GeneratedPageRenderer';
 import classes from './PageContentView.module.css';
 
@@ -33,19 +32,16 @@ interface PageContentViewProps {
 }
 
 export function PageContentView({ page, pathname, query, requestedLocale }: PageContentViewProps) {
-  const controls = (
+  const controls = page.localizationInfo ? (
     <div className={classes.controls}>
-      {page.localizationInfo ? (
-        <ContentLanguageMenu
-          pathname={pathname}
-          query={query}
-          requestedLocale={requestedLocale}
-          localizationInfo={page.localizationInfo}
-        />
-      ) : null}
-      <PrintButton />
+      <ContentLanguageMenu
+        pathname={pathname}
+        query={query}
+        requestedLocale={requestedLocale}
+        localizationInfo={page.localizationInfo}
+      />
     </div>
-  );
+  ) : null;
   const showTitle = page.showTitle && !!page.title;
   const chrome = <ContentChrome title={showTitle ? page.title : undefined} controls={controls} />;
 
