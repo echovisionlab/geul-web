@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.8](https://github.com/echovisionlab/geul-web/compare/v0.4.7...v0.4.8) (2026-10-04)
+
+
+### Performance Improvements
+
+* remove avoidable public document waits ([#74](https://github.com/echovisionlab/geul-web/issues/74)) ([19c9835](https://github.com/echovisionlab/geul-web/commit/19c98356d1abef7f998bd8aa186c3b88a19ea46a))
+
 ## [0.4.7](https://github.com/echovisionlab/geul-web/compare/v0.4.6...v0.4.7) (2026-10-04)
 
 
