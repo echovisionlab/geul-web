@@ -1,5 +1,8 @@
 import { isConnectError } from '@/lib/api/connect-error';
 import type { Metadata } from 'next';
+import { getPublicLegalHistoryDetail } from '@/lib/queries/legal-history.server';
+import { getUserLocale } from '@/lib/utils/language.server';
+import { resolveContentRequestedLocale } from '@/lib/translation/content-language';
 import { connection } from 'next/server';
 import { notFound } from 'next/navigation';
 import { Code } from '@connectrpc/connect';
@@ -71,6 +74,8 @@ export default async function PrivacyHistoryDetailPage({ params, searchParams }:
       throw error;
     }
   }
+  const requestedLocale = resolveContentRequestedLocale(await getUserLocale(), query);
+  const history = getPublicLegalHistoryDetail('privacy', id, requestedLocale).catch(() => undefined);
   const t = await getTranslations('privacyHistoryDetail.metadata');
   const site = await getSiteMetadataDocument();
   const title = t('title');
@@ -86,7 +91,7 @@ export default async function PrivacyHistoryDetailPage({ params, searchParams }:
           description,
         })}
       />
-      <PrivacyHistoryDetailClient id={id} />
+      <PrivacyHistoryDetailClient id={id} initialData={await history} />
     </>
   );
 }

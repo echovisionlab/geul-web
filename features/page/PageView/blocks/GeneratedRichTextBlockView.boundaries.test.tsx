@@ -5,7 +5,16 @@ import { describe, expect, it, vi } from 'vitest';
 import type { LocalizedRichTextBlock } from '@/features/editor/contract/localized-rich-text';
 import { GeneratedRichTextBlockView } from './GeneratedRichTextBlockView';
 
-const imports = vi.hoisted(() => ({ contentSchema: 0, code: 0, math: 0, map: 0, file: 0, executable: 0, mermaid: 0 }));
+const imports = vi.hoisted(() => ({
+  contentSchema: 0,
+  code: 0,
+  math: 0,
+  map: 0,
+  file: 0,
+  executable: 0,
+  mermaid: 0,
+  externalVideo: 0,
+}));
 
 vi.mock('next/dynamic', async () => {
   const { default: dynamic } = await vi.importActual<{ default: typeof import('next/dynamic').default }>(
@@ -17,6 +26,10 @@ vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
 vi.mock('@echovisionlab/geul-proto/content/block_content_pb.ts', async () => {
   imports.contentSchema += 1;
   return vi.importActual('@echovisionlab/geul-proto/content/block_content_pb.ts');
+});
+vi.mock('@/features/media/ExternalVideoView', async () => {
+  imports.externalVideo += 1;
+  return vi.importActual('@/features/media/ExternalVideoView');
 });
 vi.mock('./GeneratedCodeBlockView', () => {
   imports.code += 1;
@@ -71,38 +84,50 @@ describe('GeneratedRichTextBlockView runtime boundary', () => {
     } as unknown as LocalizedRichTextBlock);
     expect(html).toContain('<p style="text-align:left"><span>Readable server text</span></p>');
     expect(imports.contentSchema).toBe(1);
+    expect(imports.externalVideo).toBe(0);
 
     const { ParagraphProps_TextAlignment, ParagraphProps_AspectRatio } =
       await import('@echovisionlab/geul-proto/content/block_content_pb.ts');
-    const externalVideoHtml = await render(
-      {
-        id: 'standalone-recording',
-        kind: 'paragraph',
-        base: {
-          props: {
-            previewWidth: 42,
-            textAlignment: ParagraphProps_TextAlignment.CENTER,
-            aspectRatio: ParagraphProps_AspectRatio.X_4_3,
-          },
+    const externalVideoBlock = {
+      id: 'standalone-recording',
+      kind: 'paragraph',
+      base: {
+        props: {
+          previewWidth: 42,
+          textAlignment: ParagraphProps_TextAlignment.CENTER,
+          aspectRatio: ParagraphProps_AspectRatio.X_4_3,
         },
-        locale: {
-          content: [
-            {
-              value: {
-                case: 'link',
-                value: { href: 'https://youtu.be/dQw4w9WgXcQ', content: [{ text: 'Recording' }] },
-              },
+      },
+      locale: {
+        content: [
+          {
+            value: {
+              case: 'link',
+              value: { href: 'https://youtu.be/dQw4w9WgXcQ', content: [{ text: 'Recording' }] },
             },
-          ],
-        },
-        children: [],
-      } as unknown as LocalizedRichTextBlock,
-      true,
-    );
+          },
+        ],
+      },
+      children: [],
+    } as unknown as LocalizedRichTextBlock;
+    const ordinaryLinkHtml = await render(externalVideoBlock);
+    expect(ordinaryLinkHtml).toContain('href="https://youtu.be/dQw4w9WgXcQ"');
+    expect(ordinaryLinkHtml).not.toContain('<iframe');
+    expect(imports.externalVideo).toBe(0);
+    const externalVideoHtml = await render(externalVideoBlock, true);
     expect(externalVideoHtml).toContain('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=0');
     expect(externalVideoHtml).toContain('style="width:42%;margin-left:auto;margin-right:auto"');
     expect(externalVideoHtml).toContain('aspect-ratio:4 / 3');
     expect(externalVideoHtml).toContain('>Recording<');
-    expect(imports).toEqual({ contentSchema: 1, code: 0, math: 0, map: 0, file: 0, executable: 0, mermaid: 0 });
+    expect(imports).toEqual({
+      contentSchema: 1,
+      code: 0,
+      math: 0,
+      map: 0,
+      file: 0,
+      executable: 0,
+      mermaid: 0,
+      externalVideo: 1,
+    });
   });
 });

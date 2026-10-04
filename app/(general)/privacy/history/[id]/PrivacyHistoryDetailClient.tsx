@@ -1,6 +1,7 @@
 'use client';
 
 import Link from '@/components/core/Navigation';
+import type { PublicLegalHistoryDetailInitialData } from '@/lib/queries/legal-history';
 import { useSearchParams } from 'next/navigation';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
@@ -21,7 +22,13 @@ import { getArchivedPrivacy } from '@/lib/queries/privacy-browser';
 import { CONTENT_LANGUAGE_QUERY_PARAM } from '@/lib/translation/content-language';
 import classes from '@/features/policy/LegalDocumentView.module.css';
 
-export function PrivacyHistoryDetailClient({ id }: { id: string }) {
+export function PrivacyHistoryDetailClient({
+  id,
+  initialData,
+}: {
+  id: string;
+  initialData?: PublicLegalHistoryDetailInitialData;
+}) {
   const locale = useLocale();
   const searchParams = useSearchParams();
   const requestedLocale = normalizeLocale(searchParams?.get(CONTENT_LANGUAGE_QUERY_PARAM)) ?? locale;
@@ -29,12 +36,19 @@ export function PrivacyHistoryDetailClient({ id }: { id: string }) {
   const tCommonEntities = useTranslations('common.entities');
   const tCommonStatuses = useTranslations('common.statuses');
   const tLegalHistory = useTranslations('legalHistoryDetailCommon');
-  const { data: archived, isLoading } = useQuery({
+  const matchingInitialData =
+    initialData?.id === id && initialData.requestedLocale === requestedLocale ? initialData : undefined;
+  const { data, dataUpdatedAt, isLoading } = useQuery({
     queryKey: ['privacy', 'archived', id, requestedLocale],
     queryFn: () => getArchivedPrivacy(id, requestedLocale),
+    initialData: matchingInitialData?.data,
+    initialDataUpdatedAt: matchingInitialData?.updatedAt,
   });
 
-  if (isLoading) {
+  const archived =
+    matchingInitialData && matchingInitialData.updatedAt > dataUpdatedAt ? matchingInitialData.data : data;
+
+  if (isLoading && !matchingInitialData) {
     return <PageLoader />;
   }
 
@@ -118,6 +132,7 @@ export function PrivacyHistoryDetailClient({ id }: { id: string }) {
           <LegalRichTextContent
             blocks={archived.content}
             className={`prose privacy-history-content ${classes.content}`}
+            requestedLocale={requestedLocale}
           />
         ) : (
           <Paper p="xl" withBorder ta="center">

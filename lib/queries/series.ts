@@ -1,3 +1,4 @@
+import { getPublicSeriesResponse } from '@/lib/queries/detail-public.server';
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { create } from '@bufbuild/protobuf';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
@@ -156,8 +157,7 @@ export async function listPublicSeriesOptions() {
 
 export async function getPublicSeries(idOrSlug: string, options?: { requestedLocale?: string | null }) {
   try {
-    const client = await createPublicSeriesClientWithAuth(options?.requestedLocale);
-    const response = await client.get({ slug: decodeURIComponent(idOrSlug) });
+    const response = await getPublicSeriesResponse(decodeURIComponent(idOrSlug), options?.requestedLocale);
     const series = response.series;
     if (!series) {
       return null;

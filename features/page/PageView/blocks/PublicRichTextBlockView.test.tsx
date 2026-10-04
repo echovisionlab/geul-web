@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it } from 'vitest';
+import Loadable from 'next/dist/shared/lib/loadable.shared-runtime';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { resolveStandaloneExternalVideoLink } from '@/features/media/standalone-external-video';
 import type { Block, InlineContent } from '@/lib/types/page-content';
 import enMessages from '@/messages/en.json';
@@ -66,6 +67,9 @@ describe('resolveStandaloneExternalVideoLink', () => {
 });
 
 describe('PublicRichTextBlockView', () => {
+  beforeAll(async () => {
+    await Loadable.preloadAll();
+  });
   it('renders a canonical, non-autoplay player for an exact standalone link', () => {
     const html = renderPublicRichText(paragraph([youtubeLink]));
     const iframe = html.match(/<iframe[^>]+>/)?.[0] ?? '';

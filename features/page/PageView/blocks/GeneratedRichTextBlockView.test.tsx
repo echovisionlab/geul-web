@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { createRoot } from 'react-dom/client';
 import { create } from '@bufbuild/protobuf';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   BulletListItemBlockLocaleSchema,
   BulletListItemBlockSchema,
@@ -30,6 +30,25 @@ import { authorizeFileDownload } from '@/lib/queries/file-download-browser';
 import enMessages from '@/messages/en.json';
 import { TestProviders } from '@/test/TestProviders';
 import { GeneratedRichTextBlockView } from './GeneratedRichTextBlockViewRuntime';
+
+const preload = vi.hoisted(() => ({ pending: [] as Promise<unknown>[] }));
+
+vi.mock('next/dynamic', async () => {
+  const { default: dynamic } = await vi.importActual<{ default: typeof import('next/dynamic').default }>(
+    'next/dynamic',
+  );
+  return {
+    default: (...args: Parameters<typeof dynamic>) => {
+      const View = dynamic(...args) as ReturnType<typeof dynamic> & { render: { preload: () => Promise<unknown> } };
+      preload.pending.push(View.render.preload());
+      return View;
+    },
+  };
+});
+
+beforeAll(async () => {
+  await Promise.all(preload.pending);
+});
 
 vi.mock('@/lib/queries/file-download-browser', () => ({ authorizeFileDownload: vi.fn() }));
 

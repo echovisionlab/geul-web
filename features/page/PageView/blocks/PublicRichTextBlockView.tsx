@@ -1,12 +1,17 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import type { ComponentType } from 'react';
 import { useTranslations } from 'next-intl';
-import { ExternalVideoView, type ExternalVideoViewProps } from '@/features/media/ExternalVideoView';
+import type { ExternalVideoViewProps } from '@/features/media/ExternalVideoView';
 import { resolveStandaloneExternalVideoLink } from '@/features/media/standalone-external-video';
 import { mediaContainerStyleToReact, resolveMediaContainerStyle } from '@/lib/media/shared';
 import type { Block } from '@/lib/types/page-content';
 import { DefaultBlockView } from './DefaultBlockView';
+
+const ExternalVideoView = dynamic(() =>
+  import('@/features/media/ExternalVideoView').then((module) => module.ExternalVideoView),
+);
 
 interface PublicRichTextBlockViewProps {
   block: Block;
