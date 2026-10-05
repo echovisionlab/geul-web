@@ -26,6 +26,7 @@ import {
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import { UploadType } from '@/lib/types/upload/model';
 import { useFileUpload } from './useFileUpload';
+import { downloadRemoteSource } from '@/lib/upload/remote-source';
 import { prepareMedia, type PreparedMedia } from '@/lib/media/client-processing/processor';
 import { uploadClientMediaArtifact } from '@/lib/upload/client-media-transport';
 import { buildUploadSurfaceKey, cancelUploadSurface } from '@/lib/hooks/uploadSurfaceActivity';
@@ -57,6 +58,8 @@ vi.mock('@/lib/collab/subscribe-runtime-events', () => ({
     };
   },
 }));
+
+vi.mock('@/lib/upload/remote-source', () => ({ downloadRemoteSource: vi.fn() }));
 
 vi.mock('@/lib/actions/file', () => ({
   abortUploadAction: vi.fn(),
@@ -122,6 +125,9 @@ class MockXMLHttpRequest {
     MockXMLHttpRequest.instances.push(this);
   }
   setRequestHeader() {}
+  getResponseHeader() {
+    return null;
+  }
   abort() {
     this.readyState = MockXMLHttpRequest.DONE;
     this.onabort?.();
@@ -337,6 +343,7 @@ describe('useFileUpload', () => {
     globalThis.fetch = originalFetch;
     MockXMLHttpRequest.instances = [];
     MockXMLHttpRequest.sendHandler = null;
+    vi.useRealTimers();
     vi.clearAllMocks();
   });
 
@@ -351,13 +358,26 @@ describe('useFileUpload', () => {
       entityType: TranscodeEntityType.POST,
       expectedCurrentFileId: '046a1c17-f9ae-4ca6-a3aa-d7027dfd00b3',
     },
-  ])('forwards $name projection identity to the server action', async (testCase) => {
-    vi.mocked(downloadFromUrlAction).mockResolvedValue({
-      url: 'https://cdn.example.com/image.png',
-      fileId: 'file-1',
-      slotId: 'slot-1',
-      attemptId: 'attempt-1',
+  ])('imports $name through the direct-upload pipeline with untargeted editor attachment', async (testCase) => {
+    globalThis.XMLHttpRequest = MockXMLHttpRequest as unknown as typeof XMLHttpRequest;
+    const dispose = vi.fn(async () => undefined);
+    vi.mocked(downloadRemoteSource).mockResolvedValue({
+      file: new File(['image'], 'image.png', { type: 'image/png', lastModified: 0 }),
+      storageId: 'geul-client-media-source',
+      dispose,
     });
+    vi.mocked(initiateUploadAction).mockResolvedValue({
+      uploadId: 'upload-1',
+      fileId: 'file-1',
+      totalParts: 1,
+      chunkSize: 5,
+      uploadedParts: [],
+      status: 1,
+      resumed: false,
+      slotId: '',
+      attemptId: 'attempt-1',
+    } as never);
+    vi.mocked(completeUploadAction).mockResolvedValue({ url: '/media/file-1', fileId: 'file-1' } as never);
 
     render(<DownloadHarness entityType={testCase.entityType} expectedCurrentFileId={testCase.expectedCurrentFileId} />);
 
@@ -365,17 +385,27 @@ describe('useFileUpload', () => {
       document.querySelector<HTMLButtonElement>('#start-download')?.click();
     });
 
-    await expect.poll(() => vi.mocked(downloadFromUrlAction).mock.calls.length).toBe(1);
+    await expect.poll(() => vi.mocked(completeUploadAction).mock.calls.length).toBe(1);
     expect(persistCollaborativeDocumentNowMock).not.toHaveBeenCalled();
-    expect(vi.mocked(downloadFromUrlAction).mock.calls[0]?.[0]).toEqual({
-      uploadType: UploadType.EDITOR_IMAGE,
-      entityId: 'entity-1',
-      entityType: testCase.entityType,
-      url: 'https://source.example.com/image.png',
-      correlationId: 'correlation-1',
+    expect(downloadFromUrlAction).not.toHaveBeenCalled();
+    expect(vi.mocked(downloadRemoteSource).mock.calls[0]?.slice(0, 2)).toEqual([
+      'https://source.example.com/image.png',
+      expect.objectContaining({
+        uploadType: UploadType.EDITOR_IMAGE,
+        entityId: 'entity-1',
+        entityType: testCase.entityType,
+        correlationId: 'correlation-1',
+        surfaceSlotId: 'client-attempt-slot',
+        expectedCurrentFileId: testCase.expectedCurrentFileId,
+      }),
+    ]);
+    expect(vi.mocked(initiateUploadAction).mock.calls[0]?.[0]).toMatchObject({
+      entityId: '',
+      entityType: undefined,
       slotId: undefined,
-      expectedCurrentFileId: testCase.expectedCurrentFileId,
+      expectedCurrentFileId: undefined,
     });
+    await expect.poll(() => dispose.mock.calls.length).toBe(1);
   });
 
   it.each([
@@ -569,8 +599,8 @@ describe('useFileUpload', () => {
     expect((rejected as Error).message).toBe('Upload finalization failed');
     expect(findMultipartUploadCandidateAction).toHaveBeenCalledWith({
       uploadType: UploadType.GENERAL_FILE,
-      entityId: 'track-1',
-      entityType: TranscodeEntityType.TRACK,
+      entityId: '',
+      entityType: undefined,
       slotId: undefined,
       expectedCurrentFileId: undefined,
       fileId: 'file-finalizing-1',
@@ -939,6 +969,7 @@ describe('useFileUpload', () => {
   });
 
   it('automatically retries an interrupted part in a ten-part upload and completes', async () => {
+    vi.useFakeTimers();
     globalThis.XMLHttpRequest = MockXMLHttpRequest as unknown as typeof XMLHttpRequest;
     const file = new File([new Uint8Array(50)], 'file.bin', { type: 'application/octet-stream' });
     const partAttempts = new Map<number, number>();
@@ -995,13 +1026,22 @@ describe('useFileUpload', () => {
       />,
     );
 
-    await expect.poll(() => runtimeSubscription.listener != null).toBe(true);
+    expect(runtimeSubscription.listener).not.toBeNull();
     await act(async () => {
       document.querySelector<HTMLButtonElement>('#start-upload')?.click();
     });
 
-    await expect.poll(() => vi.mocked(completeUploadAction).mock.calls.length).toBe(1);
-    await expect.poll(() => resolved).toBe(true);
+    expect(partAttempts.get(7)).toBe(1);
+    expect(completeUploadAction).not.toHaveBeenCalled();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(999);
+    });
+    expect(partAttempts.get(7)).toBe(1);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
+    expect(completeUploadAction).toHaveBeenCalledOnce();
+    expect(resolved).toBe(true);
     expect(partAttempts.get(7)).toBe(2);
     expect(progressPercentages.every((value, index) => index === 0 || value >= progressPercentages[index - 1]!)).toBe(
       true,
@@ -1014,6 +1054,7 @@ describe('useFileUpload', () => {
   });
 
   it('stops after automatic part retries are exhausted and succeeds when the user resumes the same file', async () => {
+    vi.useFakeTimers();
     globalThis.XMLHttpRequest = MockXMLHttpRequest as unknown as typeof XMLHttpRequest;
     const file = new File([new Uint8Array(50)], 'file.bin', { type: 'application/octet-stream' });
     const partAttemptsByPhase = new Map<string, number>();
@@ -1098,16 +1139,31 @@ describe('useFileUpload', () => {
       />,
     );
 
-    await expect.poll(() => runtimeSubscription.listener != null).toBe(true);
+    expect(runtimeSubscription.listener).not.toBeNull();
     await act(async () => {
       document.querySelector<HTMLButtonElement>('#start-upload')?.click();
     });
 
-    await expect.poll(() => rejected != null).toBe(true);
+    expect(partAttemptsByPhase.get('initial:6')).toBe(1);
+    expect(rejected).toBeUndefined();
+    for (const [index, delay] of [1000, 2000, 4000, 8000].entries()) {
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(delay - 1);
+      });
+      expect(partAttemptsByPhase.get('initial:6')).toBe(index + 1);
+      expect(rejected).toBeUndefined();
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1);
+      });
+      expect(partAttemptsByPhase.get('initial:6')).toBe(index + 2);
+    }
     expect(rejected).toBeInstanceOf(Error);
     expect((rejected as Error).message).toBe('Upload interrupted');
-    expect(partAttemptsByPhase.get('initial:6')).toBe(3);
+    expect(partAttemptsByPhase.get('initial:6')).toBe(5);
     expect(vi.mocked(completeUploadAction)).not.toHaveBeenCalled();
+    for (const partNumber of [1, 2, 3, 4, 5, 7]) {
+      expect(partAttemptsByPhase.get(`initial:${partNumber}`)).toBe(1);
+    }
 
     Object.assign(uploadOptions, {
       resumeSession: { fileId: 'file-1', uploadId: 'upload-1' },
@@ -1115,11 +1171,15 @@ describe('useFileUpload', () => {
 
     await act(async () => {
       document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+      await vi.advanceTimersByTimeAsync(0);
     });
 
-    await expect.poll(() => vi.mocked(completeUploadAction).mock.calls.length).toBe(1);
-    await expect.poll(() => resolved).toBe(true);
+    expect(completeUploadAction).toHaveBeenCalledOnce();
+    expect(resolved).toBe(true);
     expect(partAttemptsByPhase.get('resume:6')).toBe(1);
+    for (const partNumber of [1, 2, 3, 4, 5, 7]) {
+      expect(partAttemptsByPhase.has(`resume:${partNumber}`)).toBe(false);
+    }
     expect(progressByPhase.resume[0]).toBe(60);
     expect(
       progressByPhase.resume.every((value, index) => index === 0 || value >= progressByPhase.resume[index - 1]!),

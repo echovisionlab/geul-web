@@ -25,8 +25,11 @@ vi.mock('@/lib/media/client-processing/processor', async () => {
   );
   return { ...contracts, prepareMedia: durableMocks.prepare, restoreMedia: durableMocks.restore };
 });
-vi.mock('@/lib/media/client-processing/artifact-storage', () => {
-  return { disposeNamespace: durableMocks.disposeNamespace };
+vi.mock('@/lib/media/client-processing/artifact-storage', async () => {
+  const storage = await vi.importActual<typeof import('@/lib/media/client-processing/artifact-storage')>(
+    '@/lib/media/client-processing/artifact-storage',
+  );
+  return { ...storage, disposeNamespace: durableMocks.disposeNamespace };
 });
 vi.mock('./client-media-transport', () => ({ uploadClientMediaArtifact: durableMocks.uploadArtifact }));
 
@@ -34,10 +37,12 @@ beforeEach(() => {
   durableMocks.prepare.mockReset();
   durableMocks.restore.mockReset();
   durableMocks.uploadArtifact.mockReset();
-  durableMocks.disposeNamespace.mockClear();
+  durableMocks.disposeNamespace.mockReset();
+  durableMocks.disposeNamespace.mockResolvedValue(undefined);
 });
 
 const fileId = '01b3db42-75f1-4bf1-8cb9-9b3baf57e795';
+const sourceStorageId = 'geul-client-media-22222222-2222-2222-2222-222222222222';
 
 afterEach(async () => {
   await disposePreparedSession(fileId);
@@ -105,7 +110,7 @@ describe('upload-session-store', () => {
   });
 });
 
-function preparedResumeFixture(): { source: File; prepared: PreparedMedia } {
+function preparedResumeFixture(ownedSourceStorageId?: string): { source: File; prepared: PreparedMedia } {
   const source = new File(['source'], 'source.ogg', { type: 'audio/ogg', lastModified: 123 });
   const artifact = new File(['wave'], 'waveform.json', { type: 'application/json' });
   const prepared: PreparedMedia = {
@@ -120,6 +125,7 @@ function preparedResumeFixture(): { source: File; prepared: PreparedMedia } {
   rememberUploadSession({ fileId, uploadId: 'multipart-1', attemptId: 'attempt-1', clientMediaBundleId: 'bundle-1' });
   rememberPreparedSession(fileId, {
     source,
+    sourceStorageId: ownedSourceStorageId,
     uploadId: 'multipart-1',
     bundleId: 'bundle-1',
     uploadType: UploadType.TRACK_AUDIO,
@@ -167,9 +173,64 @@ async function readBlobText(blob: Blob): Promise<string> {
   });
 }
 
+describe('prepared URL source ownership', () => {
+  it('disposes resident prepared media and its owned source directory', async () => {
+    const { prepared } = preparedResumeFixture(sourceStorageId);
+    expect(localStorage.getItem(`geul-prepared-upload:${fileId}`)).toContain(sourceStorageId);
+
+    await disposePreparedSession(fileId);
+    await disposePreparedSession(fileId);
+
+    expect(prepared.dispose).toHaveBeenCalledOnce();
+    expect(durableMocks.disposeNamespace).toHaveBeenCalledExactlyOnceWith(sourceStorageId);
+    expect(localStorage.getItem(`geul-prepared-upload:${fileId}`)).toBeNull();
+  });
+
+  it('disposes both durable directories after reload without restoring media', async () => {
+    const { prepared } = preparedResumeFixture(sourceStorageId);
+    vi.resetModules();
+    const store = await import('./upload-session-store');
+
+    await store.disposePreparedSession(fileId);
+
+    expect(durableMocks.disposeNamespace).toHaveBeenCalledTimes(2);
+    expect(durableMocks.disposeNamespace).toHaveBeenCalledWith(prepared.storageId);
+    expect(durableMocks.disposeNamespace).toHaveBeenCalledWith(sourceStorageId);
+    expect(durableMocks.restore).not.toHaveBeenCalled();
+    expect(localStorage.getItem(`geul-prepared-upload:${fileId}`)).toBeNull();
+  });
+
+  it('keeps legacy durable records valid without an owned source directory', async () => {
+    const { prepared } = preparedResumeFixture();
+    vi.resetModules();
+    const store = await import('./upload-session-store');
+    expect(store.readDurablePreparedSession(fileId)?.sourceStorageId).toBeUndefined();
+    expect(store.readDurablePreparedSession(fileId)?.bundleId).toBe('bundle-1');
+
+    await store.disposePreparedSession(fileId);
+
+    expect(durableMocks.disposeNamespace).toHaveBeenCalledExactlyOnceWith(prepared.storageId);
+  });
+
+  it('attempts both cleanups and preserves each failure', async () => {
+    const { prepared } = preparedResumeFixture(sourceStorageId);
+    const artifactError = new Error('Artifact removal failed');
+    const sourceError = new Error('Source removal failed');
+    vi.mocked(prepared.dispose).mockRejectedValueOnce(artifactError);
+    durableMocks.disposeNamespace.mockRejectedValueOnce(sourceError);
+
+    await expect(disposePreparedSession(fileId)).rejects.toMatchObject({
+      name: 'AggregateError',
+      errors: [artifactError, sourceError],
+    });
+    expect(prepared.dispose).toHaveBeenCalledOnce();
+    expect(durableMocks.disposeNamespace).toHaveBeenCalledExactlyOnceWith(sourceStorageId);
+  });
+});
+
 describe('durable prepared upload integration', () => {
   it('restores after module reset without re-encoding or re-sending acknowledged artifacts', async () => {
-    const { source, prepared } = preparedResumeFixture();
+    const { source, prepared } = preparedResumeFixture(sourceStorageId);
     expect(localStorage.getItem(`geul-prepared-upload:${fileId}`)).toContain('waveform.json');
     vi.resetModules();
     const restored = { ...prepared, dispose: vi.fn(async () => undefined) };
@@ -198,6 +259,7 @@ describe('durable prepared upload integration', () => {
     expect(durableMocks.uploadArtifact).not.toHaveBeenCalled();
     expect(runtime.complete).toHaveBeenCalledWith(expect.objectContaining({ clientMediaBundleId: 'bundle-1' }));
     expect(restored.dispose).toHaveBeenCalledOnce();
+    expect(durableMocks.disposeNamespace).toHaveBeenCalledExactlyOnceWith(sourceStorageId);
     expect(localStorage.getItem(`geul-prepared-upload:${fileId}`)).toBeNull();
     expect(progress.at(-1)).toBe(100);
     expect(progress.every((percentage, index) => index === 0 || percentage >= progress[index - 1]!)).toBe(true);

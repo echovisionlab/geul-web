@@ -116,6 +116,10 @@ export async function runMultipartUploadSession({
 
   const remainingParts = missingParts.filter((partNumber) => partNumber !== 1);
   for (let index = 0; index < remainingParts.length; index += concurrency) {
-    await Promise.all(remainingParts.slice(index, index + concurrency).map(uploadPart));
+    const results = await Promise.allSettled(remainingParts.slice(index, index + concurrency).map(uploadPart));
+    const failed = results.find((result) => result.status === 'rejected');
+    if (failed) {
+      throw failed.reason;
+    }
   }
 }

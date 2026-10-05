@@ -24,6 +24,8 @@ export interface FileIngestLifecycleUpdate {
 }
 
 export interface UploadOptions {
+  surfaceSlotId?: string;
+  attemptId?: string;
   uploadType: UploadType;
   entityId?: string;
   entityType?: TranscodeEntityType;
@@ -48,6 +50,8 @@ export interface UploadOptions {
 }
 
 export interface DownloadFromUrlOptions {
+  resumeSession?: UploadOptions['resumeSession'];
+  onMultipartSession?: UploadOptions['onMultipartSession'];
   correlationId?: string;
   slotId?: string;
   surfaceSlotId?: string;
