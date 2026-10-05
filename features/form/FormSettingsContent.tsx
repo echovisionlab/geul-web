@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Divider, Group, Stack, Text, Title } from '@mantine/core';
@@ -69,7 +69,7 @@ export function FormSettingsContent({
   const tFeaturedImage = useTranslations('featuredImage');
   const tCommonPlaceholders = useTranslations('common.placeholders');
   const tCommonNotifications = useTranslations('common.notifications');
-  const { provider, ogGenerationLookup } = useFormEditorContext();
+  const { fields, isSynced, provider, ogGenerationLookup } = useFormEditorContext();
   const { activeEditLocale } = useFormTranslationContext();
   const [slug, setSlug] = useState(initialSlug);
   const [isPublic, setIsPublic] = useState(initialIsPublic);
@@ -116,6 +116,13 @@ export function FormSettingsContent({
     onSlugChange: setSlug,
     onSave: (nextSlug) => saveSettings.mutateAsync({ slug: nextSlug || null, isPublic: nextSlug ? isPublic : false }),
   });
+  const { updateFromTitle } = slugMgmt;
+  useEffect(() => {
+    if (isSynced && activeEditLocale.isSourceLocale && activeEditLocale.canEditActiveLocale) {
+      updateFromTitle(fields.title);
+    }
+  }, [activeEditLocale.canEditActiveLocale, activeEditLocale.isSourceLocale, fields.title, isSynced, updateFromTitle]);
+
   const {
     error: slugError,
     handleBlur: handleSlugBlur,
@@ -211,6 +218,7 @@ export function FormSettingsContent({
             entityType="form"
             entityId={formId}
             slug={slug}
+            isAvailable={slugMgmt.isAvailable}
             error={slugError}
             saving={isSlugChecking || saveSettings.isPending}
             onChange={handleSlugChange}

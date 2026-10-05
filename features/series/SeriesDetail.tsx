@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { IconChevronDown, IconChevronUp, IconUsers, IconX } from '@tabler/icons-react';
+import { IconCheck, IconChevronDown, IconChevronUp, IconUsers, IconX } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Group, Loader, Pagination, Stack, Table, Text } from '@mantine/core';
@@ -398,8 +398,11 @@ export function SeriesDetail({ initialData, scope }: SeriesDetailProps) {
         return;
       }
       collaboration.setField('title', value);
+      if (activeEditLocale.isSourceLocale) {
+        slugMgmt.updateFromTitle(value);
+      }
     },
-    [canEditCurrentCopy, collaboration],
+    [activeEditLocale.isSourceLocale, slugMgmt.updateFromTitle, canEditCurrentCopy, collaboration],
   );
 
   const movePost = (postId: string, direction: 'up' | 'down') => {
@@ -507,7 +510,13 @@ export function SeriesDetail({ initialData, scope }: SeriesDetailProps) {
               onChange={(e) => slugMgmt.handleChange(e.currentTarget.value)}
               disabled={!activeEditLocale.isSourceLocale}
               error={slugMgmt.error}
-              rightSection={slugMgmt.isChecking ? <Loader size={14} /> : undefined}
+              rightSection={
+                slugMgmt.isChecking ? (
+                  <Loader size={14} />
+                ) : slug && slugMgmt.isAvailable === true ? (
+                  <IconCheck size={16} color="var(--mantine-color-green-6)" />
+                ) : undefined
+              }
               description={t('slug.manualDescription')}
             />
             <Textarea

@@ -97,7 +97,13 @@ vi.mock('@/lib/hooks/useOgImage', () => ({
 }));
 vi.mock('@/lib/hooks/useOgGenerationLookupSignal', () => ({ useOgGenerationLookupSignal: vi.fn() }));
 vi.mock('@/lib/hooks/useSlugManagement', () => ({
-  useSlugManagement: () => ({ error: null, isChecking: false, handleChange: vi.fn(), handleBlur: vi.fn() }),
+  useSlugManagement: () => ({
+    error: null,
+    isChecking: false,
+    handleChange: vi.fn(),
+    handleBlur: vi.fn(),
+    updateFromTitle: vi.fn(),
+  }),
 }));
 vi.mock('./usePostConfigSave', () => ({ usePostConfigSave: () => mocks.configUpdate }));
 vi.mock('./usePostLifecycle', () => ({ usePostLifecycle: () => mocks.lifecycle }));

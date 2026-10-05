@@ -224,9 +224,19 @@ export function AdminLabelDetailClient({
         return;
       }
       setResidentName(value);
+      if (canEditNeutral) {
+        slugMgmt.updateFromTitle(value);
+      }
       debouncedLocaleMetadataUpdate({ locale: roomLocale, title: value });
     },
-    [activeEditLocale.canEditActiveLocale, canMutate, debouncedLocaleMetadataUpdate, roomLocale],
+    [
+      canEditNeutral,
+      slugMgmt.updateFromTitle,
+      activeEditLocale.canEditActiveLocale,
+      canMutate,
+      debouncedLocaleMetadataUpdate,
+      roomLocale,
+    ],
   );
 
   const { data: labelsForParent } = useQuery({
@@ -425,6 +435,7 @@ export function AdminLabelDetailClient({
             entityType="label"
             entityId={id}
             slug={fields.slug || ''}
+            isAvailable={slugMgmt.isAvailable}
             idPrefix={`label-${id}`}
             error={slugMgmt.error}
             saving={slugMgmt.isChecking}

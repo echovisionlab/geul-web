@@ -5,7 +5,7 @@ function source(path: string): string {
   return readFileSync(new URL(path, import.meta.url), 'utf8');
 }
 
-describe('existing entity title and slug contract', () => {
+describe('entity title and slug contract', () => {
   it.each([
     ['Page', '../page/PageEditor/PageEditor.tsx'],
     ['Post', '../post/PostEditor/PostEditor.tsx'],
@@ -17,10 +17,14 @@ describe('existing entity title and slug contract', () => {
     ['Form', '../form/FormSettingsContent.tsx'],
     ['Event', '../program-event/ProgramEventEditor/ProgramEventEditor.tsx'],
     ['Event Series', '../program-event/ProgramEventSeriesEditor/ProgramEventSeriesEditor.tsx'],
-  ])('does not derive the %s slug from an edited title', (_domain, path) => {
+  ])('routes %s slug generation through the shared hook', (_domain, path) => {
     const editor = source(path);
 
-    expect(editor).not.toContain('slugMgmt.updateFromTitle');
+    if (!['Event', 'Event Series'].includes(_domain)) {
+      expect(editor).toContain(
+        _domain === 'Form' ? 'updateFromTitle(fields.title)' : 'slugMgmt.updateFromTitle(value)',
+      );
+    }
     expect(editor).not.toContain('updateSlugFromTitle');
     expect(editor).not.toContain('next.slug = generateSlug(value)');
     expect(editor).not.toContain('debouncedMetaUpdate({ slug: nextSlug })');

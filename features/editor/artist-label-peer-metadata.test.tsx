@@ -162,7 +162,13 @@ vi.mock('@/lib/contexts/EditorRuntimeContext', () => ({
 }));
 vi.mock('@/lib/contexts/LocaleProvider', () => ({ useLocale: () => 'en' }));
 vi.mock('@/lib/hooks/useSlugManagement', () => ({
-  useSlugManagement: () => ({ error: null, isChecking: false, handleChange: vi.fn(), handleBlur: vi.fn() }),
+  useSlugManagement: () => ({
+    error: null,
+    isChecking: false,
+    handleChange: vi.fn(),
+    handleBlur: vi.fn(),
+    updateFromTitle: vi.fn(),
+  }),
 }));
 vi.mock('@/lib/hooks/useOgImage', () => ({
   useOgImage: () => ({

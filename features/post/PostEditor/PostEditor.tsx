@@ -403,20 +403,6 @@ function PostEditorContent({
     [setCommentsEnabled, postConfigUpdate],
   );
 
-  const handleScopedLocaleTitleChange = useCallback(
-    (value: string) => {
-      if (!roomLocale) {
-        return;
-      }
-      setResidentTitle(value);
-      if (activeEditLocale.isSourceLocale) {
-        setSourceTitle(value);
-      }
-      debouncedResidentMetadataUpdate({ locale: roomLocale, title: value });
-    },
-    [activeEditLocale.isSourceLocale, debouncedResidentMetadataUpdate, roomLocale, setSourceTitle],
-  );
-
   const handleScopedLocaleSummaryChange = useCallback(
     (value: string) => {
       if (!roomLocale) {
@@ -504,6 +490,29 @@ function PostEditorContent({
     isSynced: currentIsSynced,
   });
   const canMutateSourceDocument = canEditLocaleDocument && activeEditLocale.isSourceLocale;
+  const handleScopedLocaleTitleChange = useCallback(
+    (value: string) => {
+      if (!roomLocale) {
+        return;
+      }
+      setResidentTitle(value);
+      if (canMutateSourceDocument) {
+        slugMgmt.updateFromTitle(value);
+      }
+      if (activeEditLocale.isSourceLocale) {
+        setSourceTitle(value);
+      }
+      debouncedResidentMetadataUpdate({ locale: roomLocale, title: value });
+    },
+    [
+      canMutateSourceDocument,
+      slugMgmt.updateFromTitle,
+      activeEditLocale.isSourceLocale,
+      debouncedResidentMetadataUpdate,
+      roomLocale,
+      setSourceTitle,
+    ],
+  );
   const canEditSharedTaxonomy = canMutateSourceDocument && isSynced;
   const editorAiTarget = resolvePostEditorAiTarget({ postId, roomLocale, canEditLocaleDocument });
   const canRestoreCurrentVersion = canRestoreVersion && !permissionRevocation.blocked;
@@ -570,6 +579,7 @@ function PostEditorContent({
             entityType="post"
             entityId={postId}
             slug={toSlugInputValue(slug)}
+            isAvailable={slugMgmt.isAvailable}
             idPrefix={`post-${postId}`}
             error={slugMgmt.error}
             saving={slugMgmt.isChecking || postConfigUpdate.isPending}
