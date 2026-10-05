@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.7.1](https://github.com/echovisionlab/geul-web/compare/v0.7.0...v0.7.1) (2026-10-05)
+
+
+### Bug Fixes
+
+* **deps:** upgrade Three and Ionian together ([623d78f](https://github.com/echovisionlab/geul-web/commit/623d78fdfde59b4d20d5e4e6683f7c2cacbdd841))
+* **deps:** upgrade Three and Ionian together ([ccfbb09](https://github.com/echovisionlab/geul-web/commit/ccfbb09b32140f1a63820512f63eccb72d662d55))
+* restrict Three diagnostics to development ([e3ba603](https://github.com/echovisionlab/geul-web/commit/e3ba603e42f32397709d061a5800d2e9a461c9d7))
+* restrict Three diagnostics to development ([2dd8b99](https://github.com/echovisionlab/geul-web/commit/2dd8b99999858a2f32f5e120708084c47d95881b))
+
 ## [0.7.0](https://github.com/echovisionlab/geul-web/compare/v0.6.0...v0.7.0) (2026-10-05)
 
 
