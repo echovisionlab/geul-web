@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/echovisionlab/geul-web/compare/v0.6.0...v0.7.0) (2026-10-05)
+
+
+### Features
+
+* process URL imports in the browser and retry slow uploads ([#84](https://github.com/echovisionlab/geul-web/issues/84)) ([ccf03b7](https://github.com/echovisionlab/geul-web/commit/ccf03b7c625959e4420b5389711ca49ae7703230))
+
 ## [0.6.0](https://github.com/echovisionlab/geul-web/compare/v0.5.1...v0.6.0) (2026-10-05)
 
 
