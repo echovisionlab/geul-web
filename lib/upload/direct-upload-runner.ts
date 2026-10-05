@@ -97,7 +97,8 @@ interface UploadOperation {
   progress: UploadAttemptProgress;
 }
 
-const UNTARGETED_EDITOR_UPLOAD_TYPES = new Set<UploadType>([
+const UNTARGETED_UPLOAD_TYPES = new Set<UploadType>([
+  UploadType.GENERAL_FILE,
   UploadType.EDITOR_IMAGE,
   UploadType.EDITOR_VIDEO,
   UploadType.EDITOR_AUDIO,
@@ -106,7 +107,7 @@ const UNTARGETED_EDITOR_UPLOAD_TYPES = new Set<UploadType>([
 ]);
 
 function createServerUploadTarget(options: UploadOptions): UploadOperation['serverTarget'] {
-  if (UNTARGETED_EDITOR_UPLOAD_TYPES.has(options.uploadType)) {
+  if (UNTARGETED_UPLOAD_TYPES.has(options.uploadType)) {
     return {
       entityId: '',
       entityType: undefined,
@@ -126,7 +127,8 @@ function createUploadOperation(options: UploadOptions): UploadOperation {
   const correlationId = options.correlationId ?? createUploadCorrelationId();
   const resumeSession = options.resumeSession;
   const storedSession = resumeSession ? readUploadSession(resumeSession.fileId) : null;
-  const surfaceSlotId = options.slotId;
+  const surfaceSlotId = options.surfaceSlotId ?? options.slotId;
+  const attemptId = storedSession?.attemptId ?? options.attemptId;
   const resumeRequested = Boolean(resumeSession);
 
   return {
@@ -140,11 +142,11 @@ function createUploadOperation(options: UploadOptions): UploadOperation {
       uploadType: options.uploadType,
       entityId: options.entityId ?? '',
       slotId: surfaceSlotId,
-      attemptId: storedSession?.attemptId,
+      attemptId,
     }),
     progress: {
-      identity: storedSession?.attemptId || resumeSession?.fileId || correlationId,
-      attemptId: storedSession?.attemptId,
+      identity: attemptId || resumeSession?.fileId || correlationId,
+      attemptId,
       fileId: resumeSession?.fileId,
       loadedBytes: 0,
       percentage: 0,

@@ -1,8 +1,7 @@
-import { UPLOAD_ABORTED_MESSAGE, UPLOAD_FAILED_MESSAGE } from '@/lib/upload/failure';
-import { createUploadError, createUploadPartError, isRetryableUploadPartError } from '@/lib/upload/upload-errors';
-
-const MAX_ATTEMPTS = 3;
-const RETRY_BASE_DELAY_MS = 250;
+import { UPLOAD_ABORTED_MESSAGE, UPLOAD_FAILED_MESSAGE, UPLOAD_INTERRUPTED_MESSAGE } from '@/lib/upload/failure';
+import { createUploadError, createUploadPartError } from '@/lib/upload/upload-errors';
+import { retryUpload } from './upload-retry';
+import { watchUploadInactivity } from './upload-inactivity';
 
 interface MultipartControlIdentity {
   fileId: string;
@@ -59,7 +58,12 @@ async function postControl<T>(
       signal: controller.signal,
     });
     if (!response.ok) {
-      throw createUploadPartError(response.status, (await response.text()) || response.statusText);
+      throw createUploadPartError(
+        response.status,
+        (await response.text()) || response.statusText,
+        false,
+        response.headers.get('Retry-After'),
+      );
     }
     if (response.status === 204) {
       return undefined as T;
@@ -75,13 +79,6 @@ async function postControl<T>(
   }
 }
 
-function waitForRetry(attempt: number): Promise<void> {
-  const delayMs = RETRY_BASE_DELAY_MS * 2 ** Math.max(attempt - 1, 0);
-  return new Promise((resolve) => {
-    setTimeout(resolve, delayMs);
-  });
-}
-
 function putPresignedPart(
   uploadUrl: string,
   chunk: Blob,
@@ -93,33 +90,70 @@ function putPresignedPart(
     xhr.open('PUT', uploadUrl);
     xhr.responseType = 'text';
 
-    const unregisterAborter = registerAborter(() => {
-      if (xhr.readyState !== XMLHttpRequest.DONE) {
-        xhr.abort();
-      }
+    let settled = false;
+    let unregisterAborter = () => {};
+    const inactivity = watchUploadInactivity(() => {
+      finish(createUploadError(UPLOAD_INTERRUPTED_MESSAGE));
+      xhr.abort();
     });
-    const rejectAfterCleanup = (error: Error) => {
+    const finish = (error?: Error) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      inactivity.stop();
       unregisterAborter();
-      reject(error);
+      xhr.upload.onprogress = null;
+      xhr.onprogress = null;
+      xhr.onerror = null;
+      xhr.ontimeout = null;
+      xhr.onabort = null;
+      xhr.onload = null;
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
     };
 
+    xhr.onprogress = inactivity.reset;
     xhr.upload.onprogress = (event) => {
+      inactivity.reset();
       if (event.lengthComputable) {
         onProgress(event.loaded);
       }
     };
-    xhr.onerror = () => rejectAfterCleanup(createUploadError(UPLOAD_FAILED_MESSAGE));
-    xhr.onabort = () => rejectAfterCleanup(createUploadError(UPLOAD_ABORTED_MESSAGE));
+    xhr.onerror = () => finish(createUploadError(UPLOAD_FAILED_MESSAGE));
+    xhr.ontimeout = () => finish(createUploadError(UPLOAD_INTERRUPTED_MESSAGE));
+    xhr.onabort = () => finish(createUploadError(UPLOAD_ABORTED_MESSAGE));
     xhr.onload = () => {
-      unregisterAborter();
       if (xhr.status < 200 || xhr.status >= 300) {
-        reject(createUploadPartError(xhr.status, xhr.responseText || xhr.statusText, xhr.status === 403));
+        finish(
+          createUploadPartError(
+            xhr.status,
+            xhr.responseText || xhr.statusText,
+            xhr.status === 403,
+            xhr.getResponseHeader('Retry-After'),
+          ),
+        );
         return;
       }
       onProgress(chunk.size);
-      resolve();
+      finish();
     };
-    xhr.send(chunk);
+    unregisterAborter = registerAborter(() => {
+      finish(createUploadError(UPLOAD_ABORTED_MESSAGE));
+      xhr.abort();
+    });
+    if (settled) {
+      unregisterAborter();
+      return;
+    }
+    try {
+      xhr.send(chunk);
+    } catch (error) {
+      finish(createUploadError(error));
+    }
   });
 }
 
@@ -131,94 +165,113 @@ function putRelayedPart(request: UploadPartRequest): Promise<string> {
     xhr.responseType = 'text';
     xhr.setRequestHeader('Content-Type', 'application/octet-stream');
 
-    const unregisterAborter = request.registerAborter(() => {
-      if (xhr.readyState !== XMLHttpRequest.DONE) {
-        xhr.abort();
-      }
+    let settled = false;
+    let unregisterAborter = () => {};
+    const inactivity = watchUploadInactivity(() => {
+      finish(createUploadError(UPLOAD_INTERRUPTED_MESSAGE));
+      xhr.abort();
     });
-    const rejectAfterCleanup = (error: Error) => {
+    const finish = (result: string | Error) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      inactivity.stop();
       unregisterAborter();
-      reject(error);
+      xhr.upload.onprogress = null;
+      xhr.onprogress = null;
+      xhr.onerror = null;
+      xhr.ontimeout = null;
+      xhr.onabort = null;
+      xhr.onload = null;
+      if (result instanceof Error) {
+        reject(result);
+      } else {
+        resolve(result);
+      }
     };
 
+    xhr.onprogress = inactivity.reset;
     xhr.upload.onprogress = (event) => {
+      inactivity.reset();
       if (event.lengthComputable) {
         request.onProgress(event.loaded);
       }
     };
-    xhr.onerror = () => rejectAfterCleanup(createUploadError(UPLOAD_FAILED_MESSAGE));
-    xhr.onabort = () => rejectAfterCleanup(createUploadError(UPLOAD_ABORTED_MESSAGE));
+    xhr.onerror = () => finish(createUploadError(UPLOAD_FAILED_MESSAGE));
+    xhr.ontimeout = () => finish(createUploadError(UPLOAD_INTERRUPTED_MESSAGE));
+    xhr.onabort = () => finish(createUploadError(UPLOAD_ABORTED_MESSAGE));
     xhr.onload = () => {
-      unregisterAborter();
       if (xhr.status < 200 || xhr.status >= 300) {
-        reject(createUploadPartError(xhr.status, xhr.responseText || xhr.statusText));
+        finish(
+          createUploadPartError(
+            xhr.status,
+            xhr.responseText || xhr.statusText,
+            false,
+            xhr.getResponseHeader('Retry-After'),
+          ),
+        );
         return;
       }
       try {
         const response = JSON.parse(xhr.responseText || '{}') as ConfirmResponse;
         if (!response.etag) {
-          reject(createUploadError('Missing ETag for uploaded part'));
+          finish(createUploadError('Missing ETag for uploaded part'));
           return;
         }
         request.onProgress(request.chunk.size);
-        resolve(response.etag);
+        finish(response.etag);
       } catch (error) {
-        reject(createUploadError(error));
+        finish(createUploadError(error));
       }
     };
-    xhr.send(request.chunk);
+    unregisterAborter = request.registerAborter(() => {
+      finish(createUploadError(UPLOAD_ABORTED_MESSAGE));
+      xhr.abort();
+    });
+    if (settled) {
+      unregisterAborter();
+      return;
+    }
+    try {
+      xhr.send(request.chunk);
+    } catch (error) {
+      finish(createUploadError(error));
+    }
   });
 }
 
 export async function verifyUploadPrefix(request: VerifyUploadPrefixRequest): Promise<void> {
-  await postControl<void>(controlUrl('prefix', request), request.registerAborter, request.prefix);
+  await retryUpload(
+    () => postControl<void>(controlUrl('prefix', request), request.registerAborter, request.prefix),
+    request,
+  );
 }
 
 export async function uploadDirectPartWithRetry(request: UploadPartRequest): Promise<string> {
-  for (let attempt = 1; ; attempt += 1) {
-    if (request.isAborted()) {
-      throw createUploadError(UPLOAD_ABORTED_MESSAGE);
+  await retryUpload(async () => {
+    const presigned = await postControl<PresignResponse>(
+      controlUrl('part/presign', request, request.partNumber),
+      request.registerAborter,
+    );
+    if (!presigned.url) {
+      throw createUploadError('Missing presigned URL for uploaded part');
     }
-    try {
-      const presigned = await postControl<PresignResponse>(
-        controlUrl('part/presign', request, request.partNumber),
-        request.registerAborter,
-      );
-      if (!presigned.url) {
-        throw createUploadError('Missing presigned URL for uploaded part');
-      }
-      await putPresignedPart(presigned.url, request.chunk, request.onProgress, request.registerAborter);
-      const confirmed = await postControl<ConfirmResponse>(
-        controlUrl('part/confirm', request, request.partNumber),
-        request.registerAborter,
-      );
-      if (!confirmed.etag) {
-        throw createUploadError('Missing ETag for uploaded part');
-      }
-      return confirmed.etag;
-    } catch (error) {
-      const retryable = !request.isAborted() && attempt < MAX_ATTEMPTS && isRetryableUploadPartError(error);
-      if (!retryable) {
-        throw error;
-      }
-      await waitForRetry(attempt);
+    await putPresignedPart(presigned.url, request.chunk, request.onProgress, request.registerAborter);
+  }, request);
+  // Once storage accepted the bytes, only retry acknowledgement; never send the part again.
+  return retryUpload(async () => {
+    const confirmed = await postControl<ConfirmResponse>(
+      controlUrl('part/confirm', request, request.partNumber),
+      request.registerAborter,
+    );
+    if (!confirmed.etag) {
+      throw createUploadError('Missing ETag for uploaded part');
     }
-  }
+    return confirmed.etag;
+  }, request);
 }
 
 export async function uploadRelayedPartWithRetry(request: UploadPartRequest): Promise<string> {
-  for (let attempt = 1; ; attempt += 1) {
-    if (request.isAborted()) {
-      throw createUploadError(UPLOAD_ABORTED_MESSAGE);
-    }
-    try {
-      return await putRelayedPart(request);
-    } catch (error) {
-      const retryable = !request.isAborted() && attempt < MAX_ATTEMPTS && isRetryableUploadPartError(error);
-      if (!retryable) {
-        throw error;
-      }
-      await waitForRetry(attempt);
-    }
-  }
+  return retryUpload(() => putRelayedPart(request), request);
 }

@@ -5,6 +5,7 @@ import {
   checkAbort,
 } from '@/lib/media/client-processing/contracts';
 import type { UploadType } from '@/lib/types/upload/model';
+import { validateNamespace } from '@/lib/media/client-processing/artifact-storage';
 import { prepareUploadFile } from '@/lib/utils/upload-pipeline';
 
 const storedUploadSessionSchema = z
@@ -69,6 +70,7 @@ export function forgetUploadSession(fileId: string): void {
 
 export interface PreparedUploadSession {
   source: File;
+  sourceStorageId?: string;
   uploadType: UploadType;
   uploadId: string;
   bundleId: string;
@@ -124,11 +126,27 @@ export async function disposePreparedSession(fileId: string): Promise<void> {
   const durable = readDurablePreparedSession(fileId);
   preparedSessions.delete(fileId);
   durableStorage()?.removeItem(`${PREPARED_STORAGE_PREFIX}${fileId}`);
+  const cleanup: Promise<void>[] = [];
   if (session) {
-    await session.prepared.dispose();
-  } else if (durable) {
+    cleanup.push(Promise.resolve().then(() => session.prepared.dispose()));
+  }
+  const sourceStorageId = session?.sourceStorageId ?? durable?.sourceStorageId;
+  if ((!session && durable) || sourceStorageId) {
     const { disposeNamespace } = await import('@/lib/media/client-processing/artifact-storage');
-    await disposeNamespace(durable.storageId);
+    if (!session && durable) {
+      cleanup.push(disposeNamespace(durable.storageId));
+    }
+    if (sourceStorageId) {
+      cleanup.push(disposeNamespace(sourceStorageId));
+    }
+  }
+  const results = await Promise.allSettled(cleanup);
+  const failures = results.filter((result) => result.status === 'rejected').map((result) => result.reason);
+  if (failures.length === 1) {
+    throw failures[0];
+  }
+  if (failures.length > 1) {
+    throw new AggregateError(failures, 'Prepared upload storage cleanup failed.');
   }
 }
 
@@ -136,6 +154,17 @@ const PREPARED_STORAGE_PREFIX = 'geul-prepared-upload:';
 const durablePreparedUploadSchema = z
   .object({
     storageId: z.string().min(1),
+    sourceStorageId: z
+      .string()
+      .refine((namespace) => {
+        try {
+          validateNamespace(namespace);
+          return true;
+        } catch {
+          return false;
+        }
+      })
+      .optional(),
     sourceFingerprint: z.string().min(1),
     uploadId: z.string().min(1),
     bundleId: z.string().min(1),
@@ -176,6 +205,7 @@ function persistPreparedSession(fileId: string, session: PreparedUploadSession):
   }
   const index = durablePreparedUploadSchema.parse({
     storageId,
+    sourceStorageId: session.sourceStorageId,
     sourceFingerprint,
     uploadId: session.uploadId,
     bundleId: session.bundleId,
@@ -255,6 +285,7 @@ export async function restorePreparedSession(
   }
   const session: PreparedUploadSession = {
     source,
+    sourceStorageId: durable.sourceStorageId,
     uploadType,
     uploadId,
     bundleId: durable.bundleId,

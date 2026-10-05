@@ -14,7 +14,6 @@ import {
   completeUploadAction,
   completeClientMediaUploadAction,
   recoverCompletedClientMediaUploadAction,
-  downloadFromUrlAction,
   findMultipartUploadCandidateAction,
   initiateUploadAction,
   prepareClientMediaUploadAction,
@@ -28,7 +27,6 @@ import {
   type UploadResult,
 } from '@/lib/upload/file-upload-contract';
 import { UPLOAD_ABORTED_MESSAGE } from '@/lib/upload/failure';
-import { runRemoteFileImport } from '@/lib/upload/remote-import-runner';
 import { useUploadLifecycleTracker } from './useUploadLifecycleTracker';
 
 export type {
@@ -104,6 +102,7 @@ export function useFileUpload(options?: UseFileUploadOptions) {
   const pausedRef = useRef(false);
   const partAbortersRef = useRef<Set<() => void>>(new Set());
   const [isDirectUploading, setIsDirectUploading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const runtimeContext = useOptionalEditorRuntimeContext();
   const provider = options?.provider ?? null;
   const runtimeEntityType = normalizeRuntimeEntityType(options?.entityType ?? runtimeContext?.entityType);
@@ -140,7 +139,6 @@ export function useFileUpload(options?: UseFileUploadOptions) {
   const initiateMutation = useMutation({ mutationFn: initiateUploadAction });
   const completeMutation = useMutation({ mutationFn: completeUploadAction });
   const abortMutation = useMutation({ mutationFn: abortUploadAction });
-  const downloadMutation = useMutation({ mutationFn: downloadFromUrlAction });
 
   const upload = useCallback(
     async (file: File, uploadOptions: UploadOptions): Promise<UploadResult> => {
@@ -203,19 +201,33 @@ export function useFileUpload(options?: UseFileUploadOptions) {
   );
 
   const downloadFromUrl = useCallback(
-    (
+    async (
       uploadType: UploadType,
       entityId: string,
       url: string,
       entityType?: TranscodeEntityType,
       downloadOptions?: DownloadFromUrlOptions,
-    ): Promise<UploadResult> =>
-      runRemoteFileImport(uploadType, entityId, url, entityType, downloadOptions, {
-        canTrackServerLifecycle: lifecycle.canTrack,
-        lifecycleTrackers: lifecycle.trackers,
-        download: downloadMutation.mutateAsync,
-      }),
-    [downloadMutation.mutateAsync, lifecycle.canTrack, lifecycle.trackers],
+    ): Promise<UploadResult> => {
+      abortedRef.current = false;
+      pausedRef.current = false;
+      setIsDownloading(true);
+      try {
+        const { runRemoteFileImport } = await import('@/lib/upload/remote-import-runner');
+        if (abortedRef.current) {
+          throw pausedRef.current ? new UploadPausedError() : new Error(UPLOAD_ABORTED_MESSAGE);
+        }
+        return await runRemoteFileImport(uploadType, entityId, url, entityType, downloadOptions, {
+          upload,
+          isAborted: () => abortedRef.current,
+          isPaused: () => pausedRef.current,
+          abortActiveUpload,
+          registerPartAborter,
+        });
+      } finally {
+        setIsDownloading(false);
+      }
+    },
+    [upload, abortActiveUpload, registerPartAborter],
   );
 
   return {
@@ -223,7 +235,7 @@ export function useFileUpload(options?: UseFileUploadOptions) {
     abort: abortActiveUpload,
     pauseUpload,
     downloadFromUrl,
-    isUploading: initiateMutation.isPending || isDirectUploading || completeMutation.isPending,
-    isDownloading: downloadMutation.isPending,
+    isUploading: initiateMutation.isPending || isDirectUploading || isDownloading || completeMutation.isPending,
+    isDownloading,
   };
 }

@@ -7,6 +7,7 @@ import { getUploadSelectionMimeTypes, UPLOAD_CONFIGS } from '@/lib/constants/upl
 import { resolveUploadMimeType, toAcceptString } from '@/lib/utils/upload';
 import { canonicalUploadFileName, normalizeUploadFile } from '@/lib/utils/upload-pipeline';
 import type { UploadLifecycleStage } from '@/lib/utils/upload-runtime';
+import type { DownloadFromUrlOptions } from '@/lib/upload/file-upload-contract';
 import { useFileUpload } from './useFileUpload';
 
 interface UploadProgress {
@@ -111,11 +112,16 @@ export function useUpload(uploadType: UploadType) {
   );
 
   /**
-   * Download a file from URL and save it (server-side download).
+   * Download a URL source in the browser and upload it through the shared pipeline.
    */
   const downloadFromUrl = useCallback(
-    async (entityId: string, url: string): Promise<UploadResult> => {
-      return downloadFromUrlInternal(uploadType, entityId, url);
+    async (
+      entityId: string,
+      url: string,
+      entityType?: TranscodeEntityType,
+      options?: DownloadFromUrlOptions,
+    ): Promise<UploadResult> => {
+      return downloadFromUrlInternal(uploadType, entityId, url, entityType, options);
     },
     [downloadFromUrlInternal, uploadType],
   );
@@ -125,7 +131,7 @@ export function useUpload(uploadType: UploadType) {
     upload,
     /** Upload a File directly with validation */
     uploadFile,
-    /** Download from URL (server-side) */
+    /** Download from URL and upload in the browser */
     downloadFromUrl,
     /** Abort current upload */
     abort,
