@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { createEditor } from '@rhwp/editor';
+import { createEditor } from 'rust-hwp-intl/editor';
 import { PageLoader } from '@/features/site/PageLoader';
 import { HwpEditorView, type HwpEditorLabels, type HwpEditorViewProps } from './ui/HwpEditorView';
 
@@ -28,7 +28,7 @@ export function HwpEditor({ labels }: HwpEditorProps) {
     let disposed = false;
     let editor: Awaited<ReturnType<typeof createEditor>> | null = null;
     const startup = createEditor(mount, {
-      studioUrl: new URL('/vendors/rhwp/0.8.6-dsub.2/index.html?scroll=page', window.location.origin).href,
+      studioUrl: new URL('/vendors/rust-hwp-intl/0.1.0/index.html?scroll=page', window.location.origin).href,
     });
     const iframe = mount.querySelector('iframe');
     const onContentHeight = (event: MessageEvent) => {

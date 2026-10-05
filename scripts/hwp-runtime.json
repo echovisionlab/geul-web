@@ -1,8 +1,10 @@
 {
-  "buildId": "0.8.6-dsub.2",
-  "basePath": "/vendors/rhwp/0.8.6-dsub.2/",
-  "source": "https://github.com/echovisionlab/rhwp",
-  "upstreamCommit": "e8800c8def63449808a4092798442652ed460552",
-  "archiveUrl": "https://github.com/echovisionlab/rhwp/releases/download/dsub-runtime-0.8.6-2/rhwp-studio-0.8.6-dsub.2.tar.gz",
-  "sha256": "dbb7ebe842ca7a5190672a26e47c321e25b231d8b6d9d0fa7b42e47380928206"
+  "buildId": "0.1.0",
+  "basePath": "/vendors/rust-hwp-intl/0.1.0/",
+  "source": "https://github.com/echovisionlab/rust-hwp-intl",
+  "archivePackage": "rust-hwp-intl",
+  "archivePath": "studio.tar.gz",
+  "sha256": "9a3de159b9968c52efc4c1d045fb128300d9e5941ddfa2cea8cfb9c3103e654d",
+  "sourceCommit": "ef80a0ff15f9fa90786a7258f6b2cfcd127e9c59",
+  "upstreamCommit": "e8800c8def63449808a4092798442652ed460552"
 }

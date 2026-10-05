@@ -27,6 +27,7 @@ tmp/
 public/providers/maplibre/
 public/vendors/p5/
 public/vendors/rhwp/
+public/vendors/rust-hwp-intl/
 public/client-media/codecs/
 *.log
 .DS_Store
