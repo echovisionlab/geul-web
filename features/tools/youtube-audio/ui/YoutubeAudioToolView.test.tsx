@@ -12,6 +12,7 @@ const handlers = { onClear: vi.fn(), onResolve: vi.fn(), onUrlChange: vi.fn() };
 const baseProps: YoutubeAudioToolViewProps = {
   labels: {
     title: 'YouTube Audio',
+    description: 'Convert audio from an authenticated YouTube source in your browser.',
     urlLabel: 'Video link',
     urlPlaceholder: 'https://…',
     resolve: 'Load audio',
@@ -54,6 +55,8 @@ function render(props: Partial<YoutubeAudioToolViewProps> = {}) {
 describe('YoutubeAudioToolView', () => {
   it('uses the Core URL field and submits only a non-empty source', () => {
     render();
+    expect(container.querySelector('h1')?.textContent).toBe(baseProps.labels.title);
+    expect(container.textContent).toContain(baseProps.labels.description);
     const input = container.querySelector<HTMLInputElement>('input[type="url"]');
     const form = container.querySelector('form');
     const submit = container.querySelector<HTMLButtonElement>('button[type="submit"]');

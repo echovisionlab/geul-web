@@ -17,7 +17,8 @@ import { SectionCard } from '@/components/core/Section';
 import { ShareLinkSection } from '@/features/share/ShareLinkSection';
 import { UrlSection } from '@/features/metadata/UrlSection';
 import { VersionHistoryDrawer } from '@/features/version-history';
-import { ContentLayoutField, type DocumentLayout } from '@/features/document-layout';
+import type { DocumentLayout } from '@/features/document-layout';
+import { ContentLayoutField } from '@/features/document-layout/ContentLayoutField';
 import { getEditorBodyLoadingId, getEditorBodyReadyId } from '@/features/editor/lib/media-test-ids';
 import { MetadataPanel } from '@/features/metadata/MetadataPanel/MetadataPanel';
 import { SummaryFieldCard } from '@/features/metadata/SummaryFieldCard/SummaryFieldCard';
@@ -449,9 +450,12 @@ export function PageEditor({
         return;
       }
       setResidentTitle(value);
+      if (canEditNeutral) {
+        slugMgmt.updateFromTitle(value);
+      }
       debouncedMetadataUpdate({ title: value });
     },
-    [canEditLocaleDocument, debouncedMetadataUpdate],
+    [canEditNeutral, slugMgmt.updateFromTitle, canEditLocaleDocument, debouncedMetadataUpdate],
   );
 
   const handleShowTitleChange = useCallback(
@@ -572,6 +576,7 @@ export function PageEditor({
           entityType="page"
           entityId={pageId}
           slug={toSlugInputValue(slug)}
+          isAvailable={slugMgmt.isAvailable}
           idPrefix={`page-${pageId}`}
           error={slugError}
           saving={slugMgmt.isChecking || updateSlug.isPending}

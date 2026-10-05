@@ -1772,6 +1772,9 @@
     },
     "mcpIntegration": {
       "description": "Verbind een compatibele AI-client met dit eindpunt. Je browser wordt geopend om in te loggen en toestemming te geven.",
+      "consentDescription": "Deze client kan binnen uw bestaande accountrechten inhoud lezen en bewerken en bestanden beheren. Hij kan inhoud maken, bijwerken of verwijderen en bestaande bestandsbijlagen wijzigen. De verbinding verleent geen extra accountrechten.",
+      "consentOfflineAccess": "Deze verbinding kan na het einde van uw huidige browsersessie doorgaan, totdat u haar intrekt.",
+      "consentRevoke": "U kunt deze verbinding intrekken via {settings} → Remote MCP.",
       "connectionsTitle": "Connected MCP clients",
       "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
       "connectionsEmpty": "No MCP clients are connected.",
@@ -5258,6 +5261,15 @@
       "automaticRateUnavailable": "Automatisch kan geen geldige frequentie kiezen voor deze bron van {sourceRate}. Toegestane uitvoerfrequenties: {allowed}.",
       "presetRateUnsupported": "Deze uitvoer ondersteunt {targetRate} niet. Toegestane frequenties: {allowed}.",
       "notices": "Open-sourcelicenties"
+    },
+    "hwp": {
+      "title": "HWP-editor",
+      "metadataDescription": "Open, bewerk en bewaar HWP- en HWPX-documenten in je browser.",
+      "description": "Gebruik het menu Bestand van de editor om HWP- of HWPX-bestanden te openen en op te slaan. Documenten worden op dit apparaat verwerkt zonder upload.",
+      "loading": "Editor laden…",
+      "error": "De editor kon niet worden geladen. Probeer het opnieuw.",
+      "retry": "Opnieuw proberen",
+      "metadataTitle": "HWP-editor"
     }
   },
   "myMetadata": {

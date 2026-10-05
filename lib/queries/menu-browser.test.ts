@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createMenuClient } from '@/lib/api/browser-client';
+import { createMenuClient } from '@/lib/api/browser/secure-menu';
 import { listMenus } from './menu-browser';
 
 const listMenusMock = vi.fn();
 
-vi.mock('@/lib/api/browser-client', () => ({ createMenuClient: vi.fn() }));
+vi.mock('@/lib/api/browser/secure-menu', () => ({
+  createMenuClient: vi.fn(),
+}));
 
 function menu(id: string) {
   return { id, name: id, items: [] };

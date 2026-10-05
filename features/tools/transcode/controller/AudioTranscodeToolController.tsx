@@ -543,6 +543,7 @@ export function AudioTranscodeToolController({
   const labels = useMemo<AudioTranscodeToolLabels>(
     () => ({
       title: t('title'),
+      description: t('metadataDescription'),
       notices: t('notices'),
       targetIdle: t('targetIdle'),
       targetChecking: t('targetChecking'),

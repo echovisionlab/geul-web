@@ -1,3 +1,4 @@
+import { getPublicReleaseResponse } from '@/lib/queries/detail-public.server';
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { create } from '@bufbuild/protobuf';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
@@ -377,24 +378,21 @@ export async function getReleasePublic(
   },
 ): Promise<PublicRelease | null> {
   try {
-    const client = await createPublicReleaseClientWithAuth(options?.requestedLocale);
-    const initialResponse = await client.get({
-      slug: decodeURIComponent(idOrSlug),
-      shareToken,
-      sharePassword: options?.sharePassword,
-    });
+    const guarded = shareToken !== undefined || options?.sharePassword !== undefined;
+    const slug = decodeURIComponent(idOrSlug);
+    const read = async (locale?: string | null) => {
+      if (!guarded) {
+        return getPublicReleaseResponse(slug, locale);
+      }
+      const client = await createPublicReleaseClientWithAuth(locale);
+      return client.get({ slug, shareToken, sharePassword: options?.sharePassword });
+    };
+    const initialResponse = await read(options?.requestedLocale);
     const response = await maybeFetchSourceLocale({
       preferSourceLocale: options?.preferSourceLocale,
       initialResponse,
       entity: initialResponse.release ?? null,
-      fetchWithLocale: async (locale) => {
-        const sourceClient = await createPublicReleaseClientWithAuth(locale);
-        return sourceClient.get({
-          slug: decodeURIComponent(idOrSlug),
-          shareToken,
-          sharePassword: options?.sharePassword,
-        });
-      },
+      fetchWithLocale: read,
     });
     if (!response.release) {
       return null;

@@ -1,23 +1,22 @@
 // Server Component - no 'use client'
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { connection } from 'next/server';
 import { notFound, redirect } from 'next/navigation';
 import { TranslationEntityType } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
 import { getTranslations } from 'next-intl/server';
 import { LazyPageEditor } from '@/features/page/PageEditor/LazyPageEditor';
-import { JsonLdScript } from '@/features/metadata/ui/JsonLdScript';
 import { createTranslationClient } from '@/lib/api/server-client';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { getManageSiteContext } from '@/lib/queries/manifest';
 import { getPageMetadataDocument, getSiteMetadataDocument } from '@/lib/queries/metadata';
-import { getPage } from '@/lib/queries/page';
+import { getPage, getPageView } from '@/lib/queries/page';
 import { readContentLocaleOverride, resolveContentRequestedLocale } from '@/lib/translation/content-language';
 import {
   applyContentMetadataSeo,
   buildContentMetadataSeo,
   resolveLocalizedOgFallbacks,
 } from '@/lib/translation/metadata';
-import { buildPageJsonLd } from '@/lib/utils/json-ld';
 import { getUserLocale } from '@/lib/utils/language.server';
 import { buildPageOgMetadata } from '@/lib/utils/og';
 import { buildPagePath } from '@/lib/utils/page-route';
@@ -27,6 +26,7 @@ import { getSession } from '@/lib/utils/session.server';
 import { joinUrl } from '@/lib/utils/url';
 import { getBaseUrl } from '@/lib/utils/url.server';
 import { PageContent } from './PageContent';
+import { PageJsonLd } from './PageJsonLd';
 import { PageContentWithToken } from './PageContentWithToken';
 
 import './page-view.css';
@@ -208,12 +208,17 @@ export default async function PublicPageView({ params, searchParams }: Props) {
     return <PageContentWithToken slug={slug} token={shareTokenValue} query={query} requestedLocale={requestedLocale} />;
   }
 
-  const pageMetadata = await getPageMetadataDocument(slug, { requestedLocale });
+  const page = await getPageView(slug, { requestedLocale });
+  if (!page) {
+    notFound();
+  }
 
   return (
     <>
-      {pageMetadata && <JsonLdScript data={buildPageJsonLd(pageMetadata)} />}
-      <PageContent slug={slug} query={query} requestedLocale={requestedLocale} />
+      <Suspense fallback={null}>
+        <PageJsonLd slug={slug} requestedLocale={requestedLocale} />
+      </Suspense>
+      <PageContent slug={slug} query={query} requestedLocale={requestedLocale} initialPage={page} />
     </>
   );
 }

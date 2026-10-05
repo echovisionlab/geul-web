@@ -275,7 +275,7 @@ vi.mock('@/features/site/PageLoader', () => ({
   PageLoader: () => <div>loading</div>,
 }));
 
-vi.mock('@/lib/api/browser-client', () => ({
+vi.mock('@/lib/api/browser/secure-translation', () => ({
   createTranslationClient: () => api,
 }));
 

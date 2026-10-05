@@ -9,6 +9,11 @@ import { MantineProvider } from '@mantine/core';
 import { FileManagerView, type FileManagerViewLabels, type FileManagerViewProps } from './FileManagerView';
 import type { FileManagerFileView, FileManagerItemView, FileManagerUsageItemView } from './model';
 
+vi.mock('next-intl', () => ({ useTranslations: () => () => 'Loading files' }));
+vi.mock('@/lib/contexts/ManifestContext', () => ({
+  useSiteSettings: () => ({ settings: { loader_urls: ['https://assets.example/site-loader.gif'] } }),
+}));
+
 type FileManagerRow = FileManagerItemView;
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -213,6 +218,20 @@ function renderView(
 }
 
 describe('FileManagerView', () => {
+  it('contains the configured GIF in the 320px file-list loading surface without a visible generic message', () => {
+    renderView('author', vi.fn(), vi.fn(), 'grid', [], undefined, undefined, { loading: true });
+    const status = host?.querySelector<HTMLElement>('[role="status"]');
+    const image = status?.querySelector<HTMLImageElement>('img');
+    expect(status?.getAttribute('aria-label')).toBe('Loading files');
+    expect(image?.getAttribute('alt')).toBe('Loading files');
+    expect(image?.getAttribute('src')).toBe('https://assets.example/site-loader.gif');
+    expect(status?.style.minHeight).toBe('320px');
+    expect(status?.style.height).toBe('320px');
+    expect(status?.parentElement?.style.position).toBe('relative');
+    expect(status?.parentElement?.style.minHeight).toBe('calc(20rem * var(--mantine-scale))');
+    expect(status?.textContent).toBe('');
+  });
+
   it('renders site-wide paths and keeps the search total independent of selection', () => {
     renderView('author', vi.fn(), vi.fn(), 'list', ['file-1'], undefined, undefined, {
       searching: true,

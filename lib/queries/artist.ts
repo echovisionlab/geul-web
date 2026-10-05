@@ -1,3 +1,4 @@
+import { getPublicArtistResponse } from '@/lib/queries/detail-public.server';
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
@@ -26,16 +27,20 @@ export async function getArtistView(
 ) {
   try {
     const slug = isValidUuid(idOrSlug) ? idOrSlug : decodeURIComponent(idOrSlug);
-    const client = await createPublicArtistClientWithAuth(options?.requestedLocale);
-    let response = await client.get({ slug, shareToken: options?.shareToken, sharePassword: options?.sharePassword });
+    const guarded = options?.shareToken !== undefined || options?.sharePassword !== undefined;
+    const read = async (locale?: string | null) => {
+      if (!guarded) {
+        return getPublicArtistResponse(slug, locale);
+      }
+      const client = await createPublicArtistClientWithAuth(locale);
+      return client.get({ slug, shareToken: options?.shareToken, sharePassword: options?.sharePassword });
+    };
+    let response = await read(options?.requestedLocale);
     response = await maybeFetchSourceLocale({
       preferSourceLocale: options?.preferSourceLocale,
       initialResponse: response,
       entity: response.artist ?? null,
-      fetchWithLocale: async (locale) => {
-        const sourceClient = await createPublicArtistClientWithAuth(locale);
-        return sourceClient.get({ slug, shareToken: options?.shareToken, sharePassword: options?.sharePassword });
-      },
+      fetchWithLocale: read,
     });
     const artist = response.artist;
     if (!artist) {

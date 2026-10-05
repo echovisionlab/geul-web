@@ -26,6 +26,8 @@ tmp/
 .artifacts/
 public/providers/maplibre/
 public/vendors/p5/
+public/vendors/rhwp/
+public/client-media/codecs/
 *.log
 .DS_Store
 *.tmp
@@ -37,3 +39,8 @@ public/vendors/p5/
 .stylelintcache
 .cache/
 .parcel-cache/
+
+# Local agent instructions
+AGENTS.md
+AGENTS.override.md
+CLAUDE.md

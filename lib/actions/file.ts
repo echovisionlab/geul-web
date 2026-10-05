@@ -8,6 +8,7 @@ import { MediaProcessingStatus, type MediaDelivery } from '@echovisionlab/geul-p
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import {
   FileManagerSortField,
+  ClientMediaKind,
   FileDerivativeType,
   FileUsageDomain,
   UploadType,
@@ -20,9 +21,11 @@ import {
   uniqueMediaIdsInOrder,
 } from '@/lib/media/media-delivery-batches';
 import type { EditorFileStatusSnapshot } from '@/lib/media/editor-file-status-runtime';
-import { UPLOAD_FAILED_MESSAGE } from '@/lib/upload/failure';
+import { UPLOAD_FAILED_MESSAGE, UPLOAD_FINALIZATION_FAILED_MESSAGE } from '@/lib/upload/failure';
+import { CLIENT_MEDIA_ARTIFACTS_MISSING } from '@/lib/upload/upload-errors';
+import { actionFailure, actionSuccess, type ActionResult } from './action-result';
 
-function normalizeDefinitiveUploadCompletionError(err: unknown, options: { candidateLookup: boolean }): Error | null {
+function completionError(err: unknown, mode: 'candidate' | 'completion'): Error | null {
   if (!isConnectError(err)) {
     return null;
   }
@@ -33,9 +36,10 @@ function normalizeDefinitiveUploadCompletionError(err: unknown, options: { candi
     return new Error('Forbidden');
   }
 
-  const definitiveCodes = options.candidateLookup
-    ? [Code.InvalidArgument, Code.NotFound, Code.FailedPrecondition]
-    : [Code.InvalidArgument, Code.NotFound];
+  const definitiveCodes =
+    mode === 'candidate'
+      ? [Code.InvalidArgument, Code.NotFound, Code.FailedPrecondition]
+      : [Code.InvalidArgument, Code.NotFound];
   return definitiveCodes.includes(err.code) ? new Error(UPLOAD_FAILED_MESSAGE) : null;
 }
 
@@ -199,9 +203,10 @@ export async function findMultipartUploadCandidateAction(input: {
       lastActivityAt: timestampToDate(response.lastActivityAt),
       slotId: response.slotId || '',
       attemptId: response.ingestAttemptId || '',
+      clientMediaBundleId: response.clientMediaBundleId,
     };
   } catch (err) {
-    const definitiveError = normalizeDefinitiveUploadCompletionError(err, { candidateLookup: true });
+    const definitiveError = completionError(err, 'candidate');
     if (definitiveError) {
       throw definitiveError;
     }
@@ -209,23 +214,101 @@ export async function findMultipartUploadCandidateAction(input: {
   }
 }
 
-export async function completeUploadAction(input: {
+export async function prepareClientMediaUploadAction(input: {
+  fileId: string;
+  uploadId: string;
+  kind: 'audio' | 'video';
+  durationSeconds: number;
+  artifacts: Array<{
+    path: string;
+    mimeType: string;
+    size: number;
+    sha256: string;
+    derivativeType: FileDerivativeType;
+  }>;
+}): Promise<ActionResult<{ bundleId: string }>> {
+  try {
+    if (
+      !Number.isFinite(input.durationSeconds) ||
+      input.durationSeconds <= 0 ||
+      !input.artifacts.length ||
+      input.artifacts.some((artifact) => !Number.isSafeInteger(artifact.size) || artifact.size <= 0)
+    ) {
+      return actionFailure('Invalid client media upload plan', Code.InvalidArgument);
+    }
+    const client = await createFileClient();
+    const response = await client.prepareClientMediaUpload({
+      fileId: input.fileId,
+      uploadId: input.uploadId,
+      kind: input.kind === 'audio' ? ClientMediaKind.AUDIO : ClientMediaKind.VIDEO,
+      durationSeconds: input.durationSeconds,
+      artifacts: input.artifacts.map((artifact) => ({ ...artifact, size: BigInt(artifact.size) })),
+    });
+    if (!response.bundleId) {
+      return actionFailure('Missing client media bundle identity', Code.Internal);
+    }
+    return actionSuccess({ bundleId: response.bundleId });
+  } catch (err) {
+    return actionFailure(
+      isConnectErrorCode(err, Code.Unauthenticated) ? 'Unauthorized' : UPLOAD_FAILED_MESSAGE,
+      isConnectError(err) ? err.code : Code.Unknown,
+    );
+  }
+}
+
+type CompletionInput = {
   fileId: string;
   uploadId: string;
   uploadType: UploadType;
   correlationId?: string;
-}) {
+  clientMediaBundleId?: string;
+};
+type BundleCompletionInput = CompletionInput & { clientMediaBundleId: string };
+type CompletionResult = { url: string; fileId: string };
+
+function bundleReady(
+  input: CompletionInput,
+  bundleId: string | undefined,
+  delivery: MediaDelivery | undefined,
+): boolean {
+  if (
+    bundleId !== input.clientMediaBundleId ||
+    !delivery ||
+    delivery.fileId !== input.fileId ||
+    delivery.processingStatus !== MediaProcessingStatus.READY ||
+    !delivery.playback?.url ||
+    !delivery.download?.url
+  ) {
+    return false;
+  }
+  if (delivery.mimeType.startsWith('audio/')) {
+    return Boolean(delivery.waveform?.url && delivery.spectrogram?.url);
+  }
+  return delivery.mimeType.startsWith('video/') && Boolean(delivery.thumbnail?.url);
+}
+
+export async function completeUploadAction(input: CompletionInput): Promise<CompletionResult> {
   try {
     const client = await createFileClient();
     const response = await client.completeMultipartUpload({
       fileId: input.fileId,
       uploadId: input.uploadId,
       correlationId: input.correlationId,
+      clientMediaBundleId: input.clientMediaBundleId,
     });
 
     return { url: uploadDeliveryUrl(response.delivery, input.uploadType), fileId: response.fileId };
   } catch (err) {
-    const definitiveError = normalizeDefinitiveUploadCompletionError(err, { candidateLookup: false });
+    if (
+      input.clientMediaBundleId &&
+      isConnectErrorCode(err, Code.Unavailable) &&
+      err.rawMessage.includes(CLIENT_MEDIA_ARTIFACTS_MISSING)
+    ) {
+      // Keep the retry reason in the serialized action message, rather than
+      // relying on custom Error properties surviving the action boundary.
+      throw new Error(CLIENT_MEDIA_ARTIFACTS_MISSING);
+    }
+    const definitiveError = completionError(err, 'completion');
     if (definitiveError) {
       throw definitiveError;
     }
@@ -233,16 +316,69 @@ export async function completeUploadAction(input: {
   }
 }
 
-export async function recoverCompletedUploadAction(input: Parameters<typeof completeUploadAction>[0]) {
+export async function recoverCompletedUploadAction(input: CompletionInput): Promise<CompletionResult> {
   try {
     return await completeUploadAction(input);
   } catch (err) {
-    const definitiveError = normalizeDefinitiveUploadCompletionError(err, { candidateLookup: true });
+    if (
+      err instanceof Error &&
+      ['Unauthorized', 'Forbidden', UPLOAD_FAILED_MESSAGE, CLIENT_MEDIA_ARTIFACTS_MISSING].includes(err.message)
+    ) {
+      throw err;
+    }
+    const definitiveError = completionError(err, 'candidate');
     if (definitiveError) {
       throw definitiveError;
     }
+    if (input.clientMediaBundleId) {
+      try {
+        const client = await createFileClient();
+        const { delivery, clientMediaBundleId } = await client.getMediaDelivery({ fileId: input.fileId });
+        if (bundleReady(input, clientMediaBundleId, delivery)) {
+          return { url: uploadDeliveryUrl(delivery, input.uploadType), fileId: input.fileId };
+        }
+      } catch {
+        // Preserve the ambiguous completion error when readiness cannot be verified.
+      }
+    }
     throw err;
   }
+}
+
+async function completeBundle(
+  input: BundleCompletionInput,
+  action: typeof completeUploadAction,
+): Promise<ActionResult<CompletionResult>> {
+  if (!input.clientMediaBundleId.trim()) {
+    return actionFailure(UPLOAD_FAILED_MESSAGE, Code.InvalidArgument);
+  }
+  try {
+    return actionSuccess(await action(input));
+  } catch (err) {
+    const message = err instanceof Error ? err.message : '';
+    if (message === CLIENT_MEDIA_ARTIFACTS_MISSING) {
+      return actionFailure(CLIENT_MEDIA_ARTIFACTS_MISSING, Code.Unavailable);
+    }
+    if (message === 'Unauthorized') {
+      return actionFailure(message, Code.Unauthenticated);
+    }
+    if (message === 'Forbidden') {
+      return actionFailure(message, Code.PermissionDenied);
+    }
+    if (message === UPLOAD_FAILED_MESSAGE || isConnectErrorCode(err, Code.FailedPrecondition)) {
+      return actionFailure(UPLOAD_FAILED_MESSAGE, isConnectError(err) ? err.code : Code.FailedPrecondition);
+    }
+    return actionFailure(UPLOAD_FINALIZATION_FAILED_MESSAGE, isConnectError(err) ? err.code : Code.Unknown);
+  }
+}
+
+/** Structured failures survive Next's production server action serialization. */
+export async function completeClientMediaUploadAction(input: BundleCompletionInput) {
+  return completeBundle(input, completeUploadAction);
+}
+
+export async function recoverCompletedClientMediaUploadAction(input: BundleCompletionInput) {
+  return completeBundle(input, recoverCompletedUploadAction);
 }
 
 export async function abortUploadAction(input: { fileId: string; uploadId: string; correlationId?: string }) {

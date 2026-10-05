@@ -1,5 +1,7 @@
 import { UploadSessionStatus } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import {
+  CLIENT_MEDIA_ARTIFACTS_MISSING,
+  isClientMediaArtifactsMissingError,
   createTerminalUploadCompletionError,
   createUploadError,
   isDefinitiveUploadCompletionError,
@@ -19,9 +21,20 @@ export class UploadCompletionPolicyError extends Error {
   constructor(
     message: string,
     readonly retryable: boolean,
+    readonly code?: typeof CLIENT_MEDIA_ARTIFACTS_MISSING,
   ) {
     super(message);
     this.name = 'UploadCompletionPolicyError';
+  }
+}
+
+/** Known integrity/authority failures and missing staging bypass delivery probing. */
+function throwKnownFailure(error: unknown): void {
+  if (isClientMediaArtifactsMissingError(error)) {
+    throw new UploadCompletionPolicyError(CLIENT_MEDIA_ARTIFACTS_MISSING, true, CLIENT_MEDIA_ARTIFACTS_MISSING);
+  }
+  if (isDefinitiveUploadCompletionError(error)) {
+    throw new UploadCompletionPolicyError(createTerminalUploadCompletionError(error).message, false);
   }
 }
 
@@ -55,9 +68,7 @@ export async function completeUploadWithRecovery<TResult>({
   try {
     return await complete();
   } catch (completionError) {
-    if (isDefinitiveUploadCompletionError(completionError)) {
-      throw new UploadCompletionPolicyError(createTerminalUploadCompletionError(completionError).message, false);
-    }
+    throwKnownFailure(completionError);
 
     let candidate: CompletionCandidate | null | undefined;
     try {
@@ -72,9 +83,7 @@ export async function completeUploadWithRecovery<TResult>({
       try {
         return await recoverCompleted();
       } catch (recoveryError) {
-        if (isDefinitiveUploadCompletionError(recoveryError)) {
-          throw new UploadCompletionPolicyError(createTerminalUploadCompletionError(recoveryError).message, false);
-        }
+        throwKnownFailure(recoveryError);
       }
     } else if (candidate !== undefined && !isExactRecoverableCandidate(candidate, identity)) {
       throw new UploadCompletionPolicyError(createTerminalUploadCompletionError(completionError).message, false);

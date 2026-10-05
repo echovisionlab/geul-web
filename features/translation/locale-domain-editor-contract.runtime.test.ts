@@ -23,14 +23,14 @@ describe('locale domain editor wiring', () => {
     expect(artist).toContain('titleDisabled={!canEditLocalizedName}');
     expect(artist).toContain('disabled={!canEditNeutral}');
     expect(artist).toContain('structureLocked');
-    expect(artist).not.toContain('slugMgmt.updateFromTitle');
+    expect(artist).toContain('if (canEditNeutral) {\n        slugMgmt.updateFromTitle(value);\n      }');
 
     expect(label).toContain('const canEditNeutral = currentLocaleCanEdit && activeEditLocale.isSourceLocale;');
     expect(label).toContain('const hasLocaleRoomMutationAuthority = localeSession.hasRoomMutationAuthority({');
     expect(label).toContain('titleDisabled={!canEditLocalizedName}');
     expect(label).toContain('disabled={!canEditNeutral}');
     expect(label).toContain('structureLocked');
-    expect(label).not.toContain('slugMgmt.updateFromTitle');
+    expect(label).toContain('if (canEditNeutral) {\n        slugMgmt.updateFromTitle(value);\n      }');
   });
 
   it('keeps Release and Work title text locale-owned without opening neutral metadata', () => {
@@ -42,14 +42,14 @@ describe('locale domain editor wiring', () => {
     expect(release).toContain('titleDisabled={!canEditLocalizedTitle}');
     expect(release).toContain('canEdit={canEditNeutral}');
     expect(release).toContain('structureLocked');
-    expect(release).not.toContain('slugMgmt.updateFromTitle');
+    expect(release).toContain('if (canEditNeutral) {\n        slugMgmt.updateFromTitle(value);\n      }');
 
     expect(work).toContain('const canEditNeutral = currentLocaleCanEdit && activeEditLocale.isSourceLocale;');
     expect(work).toContain('const hasLocaleRoomMutationAuthority = localeSession.hasRoomMutationAuthority({');
     expect(work).toContain('titleDisabled={!roomLocale || !currentLocaleCanEdit || !currentIsSynced}');
     expect(work).toContain('canEdit={canEditNeutral}');
     expect(work).toContain('allowNeutralBlockEdits={activeEditLocale.isSourceLocale}');
-    expect(work).not.toContain('slugMgmt.updateFromTitle');
+    expect(work).toContain('if (canEditNeutral) {\n        slugMgmt.updateFromTitle(value);\n      }');
   });
 
   it('binds Page and Work summary AI to the exact active locale room without replacing editor AI', () => {

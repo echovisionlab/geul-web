@@ -20,10 +20,6 @@ vi.mock('@/features/translation/LocalizationNotice', () => ({
   LocalizationNotice: () => <div data-testid="localization-notice" />,
 }));
 
-vi.mock('@/features/print/PrintButton', () => ({
-  PrintButton: () => <button type="button">Print</button>,
-}));
-
 vi.mock('./GeneratedPageRenderer', () => ({
   GeneratedPageRenderer: (props: Record<string, unknown>) => {
     pageRendererSpy(props);
@@ -104,7 +100,7 @@ describe('PageContentView', () => {
     expect(document.querySelector('[data-content-scroll-root]')).toBeNull();
     expect(document.querySelector('[data-content-body]')).not.toBeNull();
     expect(document.querySelector('[data-content-chrome] h1')?.textContent).toBe('About');
-    expect(document.querySelector('[data-content-chrome] button')?.textContent).toBe('Print');
+    expect(document.querySelector('[data-content-chrome] [data-testid="content-language-menu"]')).not.toBeNull();
     expect(contentLanguageMenuSpy).toHaveBeenCalledWith(
       expect.objectContaining({ pathname: '/about', requestedLocale: 'en' }),
     );

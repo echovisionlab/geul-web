@@ -8,7 +8,7 @@ import {
 
 export const runtime = 'nodejs';
 
-function buildUpstreamUrl(request: Request, path: string[], baseUrl: string): string {
+function uploadUrl(request: Request, path: string[], baseUrl: string): string {
   const normalizedBaseUrl = baseUrl.replace(/\/+$/, '');
   const sourceUrl = new URL(request.url);
   const upstreamPath = path.join('/');
@@ -17,15 +17,15 @@ function buildUpstreamUrl(request: Request, path: string[], baseUrl: string): st
   return upstreamUrl.toString();
 }
 
-async function forwardUploadRequest(request: Request, { params }: { params: Promise<{ path: string[] }> }) {
+async function proxyUpload(request: Request, { params }: { params: Promise<{ path: string[] }> }) {
   const cookieStore = await cookies();
   const cookieHeader = cookieStore
     .getAll()
-    .map((c) => `${c.name}=${c.value}`)
+    .map((cookie) => `${cookie.name}=${cookie.value}`)
     .join('; ');
 
   const { path } = await params;
-  const upstreamUrl = buildUpstreamUrl(
+  const upstreamUrl = uploadUrl(
     request,
     path,
     resolveUploadProxyBaseUrl({
@@ -43,6 +43,7 @@ async function forwardUploadRequest(request: Request, { params }: { params: Prom
     headers: forwardHeaders,
     cache: 'no-store',
     body: requestBody,
+    signal: request.signal,
   };
   if (requestBody) {
     init.duplex = 'half';
@@ -66,18 +67,4 @@ async function forwardUploadRequest(request: Request, { params }: { params: Prom
   });
 }
 
-export async function PUT(request: Request, context: { params: Promise<{ path: string[] }> }) {
-  return forwardUploadRequest(request, context);
-}
-
-export async function POST(request: Request, context: { params: Promise<{ path: string[] }> }) {
-  return forwardUploadRequest(request, context);
-}
-
-export async function OPTIONS(request: Request, context: { params: Promise<{ path: string[] }> }) {
-  return forwardUploadRequest(request, context);
-}
-
-export async function GET(request: Request, context: { params: Promise<{ path: string[] }> }) {
-  return forwardUploadRequest(request, context);
-}
+export { proxyUpload as PUT, proxyUpload as POST, proxyUpload as OPTIONS, proxyUpload as GET };

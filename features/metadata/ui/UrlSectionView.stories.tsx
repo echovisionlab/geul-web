@@ -8,6 +8,7 @@ const meta = {
   args: {
     entityId: 'entity-id',
     slug: 'example',
+    isAvailable: true,
     publicUrlById: 'https://studio.example.com/works/entity-id',
     publicUrlBySlug: 'https://studio.example.com/works/example',
     labels: {

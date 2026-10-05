@@ -13,6 +13,7 @@ import {
   type PostMapFeatureRequestInput,
 } from '@/lib/queries/map-features';
 import { mapPublicLocalizationInfo, maybeFetchSourceLocale } from '@/lib/queries/localized-public';
+import { getPublicPostResponse } from '@/lib/queries/post-public.server';
 import { resolvePostFeaturedImageUrl } from '@/lib/media/post-featured-image';
 import {
   buildPublishedPostsTableRequest,
@@ -342,15 +343,13 @@ export async function getPostView(
 ) {
   try {
     const slug = decodeURIComponent(idOrSlug);
-    const client = await createPublicPostClientWithAuth(options?.requestedLocale);
-    let response = await client.get({ slug });
+    let response = await getPublicPostResponse(slug, options?.requestedLocale);
     response = await maybeFetchSourceLocale({
       preferSourceLocale: options?.preferSourceLocale,
       initialResponse: response,
       entity: response.post ?? null,
       fetchWithLocale: async (locale) => {
-        const sourceClient = await createPublicPostClientWithAuth(locale);
-        return sourceClient.get({ slug });
+        return getPublicPostResponse(slug, locale);
       },
     });
 

@@ -327,9 +327,19 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
         return;
       }
       setResidentName(value);
+      if (canEditNeutral) {
+        slugMgmt.updateFromTitle(value);
+      }
       debouncedLocaleMetadataUpdate({ locale: roomLocale, title: value });
     },
-    [activeEditLocale.canEditActiveLocale, canMutate, debouncedLocaleMetadataUpdate, roomLocale],
+    [
+      canEditNeutral,
+      slugMgmt.updateFromTitle,
+      activeEditLocale.canEditActiveLocale,
+      canMutate,
+      debouncedLocaleMetadataUpdate,
+      roomLocale,
+    ],
   );
 
   const handleSlugChange = useCallback(
@@ -491,6 +501,7 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
             entityType="artist"
             entityId={id}
             slug={fields.slug}
+            isAvailable={slugMgmt.isAvailable}
             idPrefix={`artist-${id}`}
             error={slugError}
             saving={slugMgmt.isChecking}

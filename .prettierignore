@@ -9,6 +9,7 @@ out/
 coverage/
 .coverage/
 storybook-static/
+public/vendors/rhwp/
 
 # Test output
 test-results/

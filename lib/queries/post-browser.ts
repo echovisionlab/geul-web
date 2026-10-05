@@ -5,7 +5,8 @@ import { Code } from '@connectrpc/connect';
 import { FilterOp, FilterSpecSchema, SortOrder, SortSpecSchema } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { PostParticipantRole, Post as ProtoPost } from '@echovisionlab/geul-proto/secure/post_pb.ts';
 import { PostStatus as PublicPostStatus } from '@echovisionlab/geul-proto/public/post_pb.ts';
-import { createPostClient, createPublicPostClient, createPublicPostClientWithLocale } from '@/lib/api/browser-client';
+import { createPostClient } from '@/lib/api/browser/secure-post';
+import { createPublicPostClient, createPublicPostClientWithLocale } from '@/lib/api/browser/public-post';
 import {
   buildPublishedPostsTableRequest,
   buildPublicPostTableResult,

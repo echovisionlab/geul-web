@@ -1,5 +1,8 @@
 import { isConnectError } from '@/lib/api/connect-error';
 import type { Metadata } from 'next';
+import { getPublicLegalHistoryDetail } from '@/lib/queries/legal-history.server';
+import { getUserLocale } from '@/lib/utils/language.server';
+import { resolveContentRequestedLocale } from '@/lib/translation/content-language';
 import { connection } from 'next/server';
 import { notFound } from 'next/navigation';
 import { Code } from '@connectrpc/connect';
@@ -67,6 +70,8 @@ export default async function TermsHistoryDetailPage({ params, searchParams }: P
       throw error;
     }
   }
+  const requestedLocale = resolveContentRequestedLocale(await getUserLocale(), query);
+  const history = getPublicLegalHistoryDetail('terms', id, requestedLocale).catch(() => undefined);
   const t = await getTranslations('termsHistoryDetail.metadata');
   const site = await getSiteMetadataDocument();
   const title = t('title');
@@ -82,7 +87,7 @@ export default async function TermsHistoryDetailPage({ params, searchParams }: P
           description,
         })}
       />
-      <TermsHistoryDetailClient id={id} />
+      <TermsHistoryDetailClient id={id} initialData={await history} />
     </>
   );
 }

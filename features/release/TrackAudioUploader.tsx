@@ -10,6 +10,8 @@ import { Box, Group, Loader, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconButton } from '@/components/core/IconButton';
 import { Tooltip } from '@/components/core/Tooltip';
+import { isClientMediaRestoreMismatchError } from '@/lib/upload/upload-errors';
+import { UploadPausedError } from '@/lib/upload/file-upload-contract';
 import { abortUploadAction, findMultipartUploadCandidateAction } from '@/lib/actions/file';
 import {
   UPLOAD_ABORTED_MESSAGE,
@@ -24,7 +26,7 @@ import { resolveMediaLifecycleDisplay, resolveMediaStatusDisplay, type MediaStat
 import { UploadType } from '@/lib/types/upload/model';
 import { isRecoverableUploadFailure, resolveUploadFailureCode } from '@/lib/upload/failure';
 import { isUploadResumeSuppressed, type UploadResumeSuppressionIdentity } from '@/lib/upload/resume-suppression';
-import { readUploadSession } from '@/lib/upload/upload-session-store';
+import { readUploadSession, disposePreparedSession, forgetUploadSession } from '@/lib/upload/upload-session-store';
 import { createClientLogger } from '@/lib/utils/client-logger';
 import {
   RELEASE_TRACK_PROCESSING_STATUS,
@@ -327,6 +329,10 @@ export function TrackAudioUploader({
         }
       }
 
+      if (resumableFileId) {
+        await disposePreparedSession(resumableFileId);
+        forgetUploadSession(resumableFileId);
+      }
       const suppressedIdentity = {
         attemptId: cancelIdentity.attemptId || undefined,
         fileId: resumableFileId || cancelIdentity.fileId || undefined,
@@ -407,9 +413,6 @@ export function TrackAudioUploader({
             return;
           }
           activeUploadAttemptId = sessionAttemptId;
-          if (!session.resumed) {
-            setUploadProgress(0);
-          }
           pendingMultipartSessionRef.current = {
             fileId: session.fileId,
             resumable: session.resumable,
@@ -438,7 +441,7 @@ export function TrackAudioUploader({
             isFinalizingOperationRef.current = true;
             setIsFinalizingUpload(true);
             setUploadStage('finalizing');
-            setUploadProgress((current) => Math.max(current, lifecycle.percentage ?? 100));
+            setUploadProgress((current) => Math.max(current, lifecycle.percentage ?? current));
             if (lifecycle.error) {
               setCompletionRetryPending(true);
             }
@@ -462,6 +465,16 @@ export function TrackAudioUploader({
       clearPendingUpload(activeUploadAttemptId);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
+      if (error instanceof UploadPausedError || isClientMediaRestoreMismatchError(error)) {
+        const session = pendingMultipartSessionRef.current as { fileId: string; resumable: boolean } | null;
+        if (session?.fileId) {
+          markPendingUpload(session.fileId, activeUploadAttemptId);
+        }
+        if (isClientMediaRestoreMismatchError(error)) {
+          notifications.show({ message: error.message, color: 'red' });
+        }
+        return;
+      }
 
       if (message === UPLOAD_FINALIZATION_FAILED_MESSAGE) {
         setCompletionRetryPending(true);

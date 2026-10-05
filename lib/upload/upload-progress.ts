@@ -62,3 +62,13 @@ export function runtimeEventMatchesUpload(
     (Boolean(payloadFileId) && payloadFileId === current.fileId)
   );
 }
+
+/** Work fractions for a prepared bundle, reserving the last point for commit acknowledgement. */
+export function clientMediaProcessingPercentage(progress: number): number {
+  return Math.floor(Math.max(0, Math.min(1, Number.isFinite(progress) ? progress : 0)) * 40);
+}
+
+export function clientMediaUploadPercentage(loadedBytes: number, totalBytes: number): number {
+  const fraction = totalBytes > 0 ? Math.max(0, Math.min(1, loadedBytes / totalBytes)) : 0;
+  return Math.min(99, 40 + Math.floor(fraction * 59));
+}

@@ -1,6 +1,8 @@
 'use client';
 
 import Link from '@/components/core/Navigation';
+import type { PublicLegalHistoryInitialData } from '@/lib/queries/legal-history';
+import { buildContentLanguageHref } from '@/lib/translation/content-language';
 import { IconArrowLeft, IconFileText } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { Group, Paper, Stack, Table, Text, Title } from '@mantine/core';
@@ -33,22 +35,52 @@ interface LegalPolicyHistoryLabels {
 
 interface LegalPolicyHistoryClientProps {
   policy: 'privacy' | 'terms';
+  requestedLocale?: string;
+  initialData?: PublicLegalHistoryInitialData;
   labels: LegalPolicyHistoryLabels;
-  getActive: () => Promise<LegalPolicyHistoryItem | null>;
+  getActive: (requestedLocale?: string) => Promise<LegalPolicyHistoryItem | null>;
   listArchived: () => Promise<LegalPolicyHistoryItem[]>;
 }
 
-export function LegalPolicyHistoryClient({ policy, labels, getActive, listArchived }: LegalPolicyHistoryClientProps) {
+export function LegalPolicyHistoryClient({
+  policy,
+  labels,
+  getActive,
+  listArchived,
+  requestedLocale,
+  initialData,
+}: LegalPolicyHistoryClientProps) {
   const dateTime = useDateTimeFormatter();
   const basePath = `/${policy}`;
-  const { data: activePolicy, isLoading: isLoadingActive } = useQuery({
-    queryKey: [policy, 'active'],
-    queryFn: getActive,
+  const matchingInitialData = initialData?.requestedLocale === requestedLocale ? initialData : undefined;
+  const href = (path: string) => buildContentLanguageHref(path, undefined, { requestedLocale });
+  const {
+    data: queriedActive,
+    dataUpdatedAt: activeUpdatedAt,
+    isLoading: isLoadingActive,
+  } = useQuery({
+    queryKey: [policy, 'active', requestedLocale],
+    queryFn: () => getActive(requestedLocale),
+    initialData: matchingInitialData?.active,
+    initialDataUpdatedAt: matchingInitialData?.updatedAt,
   });
-  const { data: archivedPolicies, isLoading: isLoadingArchived } = useQuery({
+  const {
+    data: queriedArchived,
+    dataUpdatedAt: archivedUpdatedAt,
+    isLoading: isLoadingArchived,
+  } = useQuery({
     queryKey: [policy, 'archived', 'list'],
     queryFn: listArchived,
+    initialData: matchingInitialData?.archived,
+    initialDataUpdatedAt: matchingInitialData?.updatedAt,
   });
+
+  const activePolicy =
+    matchingInitialData && matchingInitialData.updatedAt > activeUpdatedAt ? matchingInitialData.active : queriedActive;
+  const archivedPolicies =
+    matchingInitialData && matchingInitialData.updatedAt > archivedUpdatedAt
+      ? matchingInitialData.archived
+      : queriedArchived;
 
   const formatDateRange = (effectiveFrom: Date | null, effectiveUntil: Date | null) => {
     if (!effectiveFrom) {
@@ -72,14 +104,14 @@ export function LegalPolicyHistoryClient({ policy, labels, getActive, listArchiv
     return labels.closedDateRange(from, until);
   };
 
-  const isLoading = isLoadingActive || isLoadingArchived;
+  const isLoading = !matchingInitialData && (isLoadingActive || isLoadingArchived);
   const hasVersions = Boolean(activePolicy || archivedPolicies?.length);
 
   return (
     <Stack gap="md">
       <Group>
         <Tooltip label={labels.back}>
-          <IconButton component={Link} href={basePath} emphasis="low" aria-label={labels.back}>
+          <IconButton component={Link} href={href(basePath)} emphasis="low" aria-label={labels.back}>
             <IconArrowLeft size={20} />
           </IconButton>
         </Tooltip>
@@ -108,7 +140,7 @@ export function LegalPolicyHistoryClient({ policy, labels, getActive, listArchiv
             {activePolicy ? (
               <PolicyHistoryRow
                 item={activePolicy}
-                href={basePath}
+                href={href(basePath)}
                 status={labels.current}
                 tone="positive"
                 dateRange={formatDateRange(activePolicy.effectiveFrom, null)}
@@ -118,7 +150,7 @@ export function LegalPolicyHistoryClient({ policy, labels, getActive, listArchiv
               <PolicyHistoryRow
                 key={item.id}
                 item={item}
-                href={`${basePath}/history/${item.id}`}
+                href={href(`${basePath}/history/${item.id}`)}
                 status={labels.archived}
                 tone="neutral"
                 dateRange={formatDateRange(item.effectiveFrom, item.effectiveUntil ?? null)}
@@ -145,9 +177,9 @@ function PolicyHistoryRow({
   dateRange: string;
 }) {
   return (
-    <Table.Tr onClick={() => (window.location.href = href)} style={{ cursor: 'pointer' }}>
+    <Table.Tr>
       <Table.Td>
-        <Text size="sm" fw={500}>
+        <Text component={Link} href={href} size="sm" fw={500}>
           v{item.version}
         </Text>
       </Table.Td>

@@ -1,5 +1,4 @@
-import type { CSSProperties, SVGProps } from 'react';
-import classes from './SocialIcon.module.css';
+import { SocialIconGlyph, type SocialIconGlyphProps } from './SocialIconGlyph';
 import { SOCIAL_ICON_DEFINITIONS, type SocialPlatform } from './platforms';
 
 export type { SocialPlatform };
@@ -33,59 +32,18 @@ export function getSocialIconBrandColors(platform: SocialPlatform): SocialIconBr
   return dark ? { light, dark } : { light };
 }
 
-export type SocialIconColorMode = 'currentColor' | 'brand' | 'hoverBrand';
+export type { SocialIconColorMode } from './SocialIconGlyph';
 
-export interface SocialIconProps extends Omit<
-  SVGProps<SVGSVGElement>,
-  'aria-hidden' | 'aria-label' | 'aria-labelledby' | 'children' | 'color' | 'focusable' | 'height' | 'role' | 'width'
-> {
-  platform: SocialPlatform;
-  size?: number | string;
-  colorMode?: SocialIconColorMode;
-  label?: string;
-}
+export interface SocialIconProps extends Omit<SocialIconGlyphProps, 'path' | 'light' | 'dark'> {}
 
-type SocialIconStyle = CSSProperties & {
-  '--social-icon-brand-light': string;
-  '--social-icon-brand-dark': string;
-};
-
-/** Pure platform icon primitive. URL parsing and link behavior belong to feature code. */
-export function SocialIcon({
-  platform,
-  size = 24,
-  colorMode = 'currentColor',
-  label,
-  className,
-  style,
-  ...props
-}: SocialIconProps) {
-  const icon = SOCIAL_ICON_DEFINITIONS[platform].icon;
-  const brandColors = getSocialIconBrandColors(platform);
-  const iconStyle: SocialIconStyle = {
-    '--social-icon-brand-light': brandColors.light,
-    '--social-icon-brand-dark': brandColors.dark ?? brandColors.light,
-    ...style,
-  };
-
+/** Compatibility wrapper for consumers that select icons by platform on the client. */
+export function SocialIcon({ platform, ...props }: SocialIconProps) {
   return (
-    <svg
+    <SocialIconGlyph
       {...props}
-      role={label ? 'img' : undefined}
-      aria-label={label}
-      aria-hidden={label ? undefined : true}
-      focusable="false"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      fill="currentColor"
-      className={[classes.icon, className].filter(Boolean).join(' ')}
-      style={iconStyle}
-      data-social-platform={platform}
-      data-color-mode={colorMode}
-    >
-      <path d={icon.path} />
-    </svg>
+      platform={platform}
+      path={SOCIAL_ICON_DEFINITIONS[platform].icon.path}
+      {...getSocialIconBrandColors(platform)}
+    />
   );
 }

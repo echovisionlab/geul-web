@@ -23,7 +23,7 @@ import {
   type ProviderFormState,
   validateProviderForm,
 } from '@/features/translation/settings/provider-form';
-import { createTranslationClient } from '@/lib/api/browser-client';
+import { createTranslationClient } from '@/lib/api/browser/secure-translation';
 import { getTranslationActionErrorMessage } from '@/lib/translation/action-error';
 import { normalizeProtectedTerms } from '@/lib/translation/protected-terms';
 

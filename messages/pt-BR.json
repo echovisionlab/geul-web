@@ -1772,6 +1772,9 @@
     },
     "mcpIntegration": {
       "description": "Conecte um cliente de IA compatível a este endpoint. O navegador será aberto para login e consentimento.",
+      "consentDescription": "Este cliente pode ler e editar conteúdo e gerenciar arquivos dentro das permissões atuais da sua conta. Ele pode criar, atualizar ou excluir conteúdo e alterar anexos existentes. A conexão não concede permissões adicionais à conta.",
+      "consentOfflineAccess": "Esta conexão pode continuar após o término da sessão atual do navegador, até que você a revogue.",
+      "consentRevoke": "Você pode revogar esta conexão em {settings} → Remote MCP.",
       "connectionsTitle": "Connected MCP clients",
       "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
       "connectionsEmpty": "No MCP clients are connected.",
@@ -5258,6 +5261,15 @@
       "automaticRateUnavailable": "Automático não consegue escolher uma taxa válida para esta origem de {sourceRate}. Taxas de saída permitidas: {allowed}.",
       "presetRateUnsupported": "Esta saída não aceita {targetRate}. Taxas permitidas: {allowed}.",
       "notices": "Licenças de código aberto"
+    },
+    "hwp": {
+      "title": "Editor HWP",
+      "metadataDescription": "Abra, edite e salve documentos HWP e HWPX no navegador.",
+      "description": "Use o menu Arquivo do editor para abrir e salvar arquivos HWP ou HWPX. Os documentos são processados neste dispositivo sem serem enviados.",
+      "loading": "Carregando editor…",
+      "error": "Não foi possível carregar o editor. Tente novamente.",
+      "retry": "Tentar novamente",
+      "metadataTitle": "Editor HWP"
     }
   },
   "myMetadata": {

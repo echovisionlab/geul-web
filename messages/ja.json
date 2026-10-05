@@ -1772,6 +1772,9 @@
     },
     "mcpIntegration": {
       "description": "対応する AI クライアントをこのエンドポイントに接続します。ログインと同意のためにブラウザが開きます。",
+      "consentDescription": "このクライアントは、現在のアカウント権限の範囲でコンテンツの閲覧・編集とファイルの管理ができます。コンテンツの作成・更新・削除や既存の添付ファイルの変更ができます。接続によってアカウントに追加の権限が付与されることはありません。",
+      "consentOfflineAccess": "この接続は、現在のブラウザーセッションが終了した後も、取り消すまで継続できます。",
+      "consentRevoke": "{settings} → Remote MCPでこの接続を取り消せます。",
       "connectionsTitle": "Connected MCP clients",
       "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
       "connectionsEmpty": "No MCP clients are connected.",
@@ -5258,6 +5261,15 @@
       "automaticRateUnavailable": "自動では {sourceRate} のソースに有効なレートを選択できません。許可される出力レート: {allowed}。",
       "presetRateUnsupported": "この出力は {targetRate} に対応していません。許可されるレート: {allowed}。",
       "notices": "オープンソースライセンス"
+    },
+    "hwp": {
+      "title": "HWPエディター",
+      "metadataDescription": "ブラウザーでHWP・HWPX文書を開き、編集して保存できます。",
+      "description": "エディターのファイルメニューからHWP・HWPXファイルを開いて保存できます。文書はアップロードせず、この端末で処理します。",
+      "loading": "エディターを読み込み中…",
+      "error": "エディターを読み込めませんでした。再試行してください。",
+      "retry": "再試行",
+      "metadataTitle": "HWPエディター"
     }
   },
   "myMetadata": {

@@ -6,7 +6,8 @@ import {
   SortSpecSchema,
   type SortOrder,
 } from '@echovisionlab/geul-proto/common/common_pb.ts';
-import { createPublicReleaseClient, createReleaseClient } from '@/lib/api/browser-client';
+import { createPublicReleaseClient } from '@/lib/api/browser/public-release';
+import { createReleaseClient } from '@/lib/api/browser/secure-release';
 import { publicReleaseTypeToString, stringToPublicReleaseType } from '@/lib/types/release/proto';
 import { createClientLogger, serializeClientLogError } from '@/lib/utils/client-logger';
 

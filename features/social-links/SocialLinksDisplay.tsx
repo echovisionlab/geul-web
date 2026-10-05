@@ -1,7 +1,7 @@
 'use client';
 
-import { PLATFORM_CONFIGS, type SocialLinks } from '@/lib/types/common/social-links';
-import { getDisplaySocialLinkEntries } from '@/lib/utils/social-links';
+import type { SocialLinks } from '@/lib/types/common/social-links-model';
+import { prepareSocialLinksDisplay } from './prepare-social-links-display';
 import { SocialLinksDisplayView, type SocialLinksDisplayViewProps } from './ui/SocialLinksDisplayView';
 
 export interface SocialLinksDisplayProps extends Omit<SocialLinksDisplayViewProps, 'entries'> {
@@ -9,10 +9,7 @@ export interface SocialLinksDisplayProps extends Omit<SocialLinksDisplayViewProp
 }
 
 export function SocialLinksDisplay({ links, ...viewProps }: SocialLinksDisplayProps) {
-  const entries = getDisplaySocialLinkEntries(links).map((entry) => ({
-    ...entry,
-    label: PLATFORM_CONFIGS[entry.platform].label,
-  }));
+  const entries = prepareSocialLinksDisplay(links);
 
   return <SocialLinksDisplayView {...viewProps} entries={entries} />;
 }

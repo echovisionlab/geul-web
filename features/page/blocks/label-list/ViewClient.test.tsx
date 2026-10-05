@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import koMessages from '@/messages/ko.json';
 import { TestProviders } from '@/test/TestProviders';
 import { parseLabelListProps } from './schema';
-import { LabelListViewClient } from './ViewClient';
+import { LabelListViewClient } from './ViewClientRuntime';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 

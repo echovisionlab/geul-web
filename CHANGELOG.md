@@ -1,5 +1,117 @@
 # Changelog
 
+## [0.7.0](https://github.com/echovisionlab/geul-web/compare/v0.6.0...v0.7.0) (2026-10-05)
+
+
+### Features
+
+* process URL imports in the browser and retry slow uploads ([#84](https://github.com/echovisionlab/geul-web/issues/84)) ([ccf03b7](https://github.com/echovisionlab/geul-web/commit/ccf03b7c625959e4420b5389711ca49ae7703230))
+
+## [0.6.0](https://github.com/echovisionlab/geul-web/compare/v0.5.1...v0.6.0) (2026-10-05)
+
+
+### Features
+
+* **tools:** add local HWP editor with shared UI and page scrolling ([#82](https://github.com/echovisionlab/geul-web/issues/82)) ([64cbd14](https://github.com/echovisionlab/geul-web/commit/64cbd14998c5f97eec537ae60a589778290d134b))
+
+## [0.5.1](https://github.com/echovisionlab/geul-web/compare/v0.5.0...v0.5.1) (2026-10-05)
+
+
+### Bug Fixes
+
+* **slug:** restore title autofill and debounce availability checks ([#80](https://github.com/echovisionlab/geul-web/issues/80)) ([2308df9](https://github.com/echovisionlab/geul-web/commit/2308df9ed4b538e049f29dc10b42b25f97dd3377))
+
+## [0.5.0](https://github.com/echovisionlab/geul-web/compare/v0.4.9...v0.5.0) (2026-10-04)
+
+
+### Features
+
+* prepare audio and video uploads in the browser ([ce4e09d](https://github.com/echovisionlab/geul-web/commit/ce4e09d8f503f489cab80420f999320fbd6ee993))
+
+## [0.4.9](https://github.com/echovisionlab/geul-web/compare/v0.4.8...v0.4.9) (2026-10-04)
+
+
+### Bug Fixes
+
+* **ui:** remove print buttons from page and post views ([#76](https://github.com/echovisionlab/geul-web/issues/76)) ([dc25f2d](https://github.com/echovisionlab/geul-web/commit/dc25f2d2fbf8df73123d4c162628d1768c95d862))
+
+## [0.4.8](https://github.com/echovisionlab/geul-web/compare/v0.4.7...v0.4.8) (2026-10-04)
+
+
+### Performance Improvements
+
+* remove avoidable public document waits ([#74](https://github.com/echovisionlab/geul-web/issues/74)) ([19c9835](https://github.com/echovisionlab/geul-web/commit/19c98356d1abef7f998bd8aa186c3b88a19ea46a))
+
+## [0.4.7](https://github.com/echovisionlab/geul-web/compare/v0.4.6...v0.4.7) (2026-10-04)
+
+
+### Performance Improvements
+
+* open search immediately and unify GIF page loading ([#72](https://github.com/echovisionlab/geul-web/issues/72)) ([4712f86](https://github.com/echovisionlab/geul-web/commit/4712f86abdaaff4b14083853b723ef16ce11ab4c))
+
+## [0.4.6](https://github.com/echovisionlab/geul-web/compare/v0.4.5...v0.4.6) (2026-10-03)
+
+
+### Performance Improvements
+
+* defer unused carousel skeleton dependencies ([#70](https://github.com/echovisionlab/geul-web/issues/70)) ([12cd58b](https://github.com/echovisionlab/geul-web/commit/12cd58bd2ef53b6c5322873c52594ce1a22b0153))
+
+## [0.4.5](https://github.com/echovisionlab/geul-web/compare/v0.4.4...v0.4.5) (2026-10-03)
+
+
+### Performance Improvements
+
+* keep page media descriptors off empty routes ([#68](https://github.com/echovisionlab/geul-web/issues/68)) ([04af72b](https://github.com/echovisionlab/geul-web/commit/04af72b0659d46ed80d958380da283b4f96117fc))
+
+## [0.4.4](https://github.com/echovisionlab/geul-web/compare/v0.4.3...v0.4.4) (2026-10-03)
+
+
+### Performance Improvements
+
+* load public section runtimes only when rendered ([#66](https://github.com/echovisionlab/geul-web/issues/66)) ([ec1961e](https://github.com/echovisionlab/geul-web/commit/ec1961e850d9fdcea16d022159ff5f9d4a77dfad))
+
+## [0.4.3](https://github.com/echovisionlab/geul-web/compare/v0.4.2...v0.4.3) (2026-10-03)
+
+
+### Performance Improvements
+
+* **web:** separate public shell helpers from validation runtimes ([#64](https://github.com/echovisionlab/geul-web/issues/64)) ([af919c0](https://github.com/echovisionlab/geul-web/commit/af919c048a56c2a95076df6126c7d270cc7ed668))
+
+## [0.4.2](https://github.com/echovisionlab/geul-web/compare/v0.4.1...v0.4.2) (2026-10-03)
+
+
+### Performance Improvements
+
+* **web:** load page features and RPC clients at their usage boundaries ([#62](https://github.com/echovisionlab/geul-web/issues/62)) ([c3c6871](https://github.com/echovisionlab/geul-web/commit/c3c68718083b5aa45743d5631b8dd72de4f1fee8))
+
+## [0.4.1](https://github.com/echovisionlab/geul-web/compare/v0.4.0...v0.4.1) (2026-10-03)
+
+
+### Performance Improvements
+
+* **web:** narrow client loading and public catalogues ([#60](https://github.com/echovisionlab/geul-web/issues/60)) ([42049eb](https://github.com/echovisionlab/geul-web/commit/42049eb22e774b92a911ce53118923bcce8ae611))
+
+## [0.4.0](https://github.com/echovisionlab/geul-web/compare/v0.3.6...v0.4.0) (2026-10-03)
+
+
+### Features
+
+* **mcp:** add task examples and clarify connection consent ([#58](https://github.com/echovisionlab/geul-web/issues/58)) ([7fee034](https://github.com/echovisionlab/geul-web/commit/7fee034a63438533c19b5215922c1856b0a8d988))
+
+## [0.3.6](https://github.com/echovisionlab/geul-web/compare/v0.3.5...v0.3.6) (2026-10-03)
+
+
+### Bug Fixes
+
+* **mcp:** render configured guide URLs and recover grant revocation ([#56](https://github.com/echovisionlab/geul-web/issues/56)) ([cc9f289](https://github.com/echovisionlab/geul-web/commit/cc9f2897341b15ad6784fa3aa77d51080cf3ad8a))
+
+## [0.3.5](https://github.com/echovisionlab/geul-web/compare/v0.3.4...v0.3.5) (2026-10-02)
+
+
+### Bug Fixes
+
+* **web:** preserve Server Action identity across releases ([#54](https://github.com/echovisionlab/geul-web/issues/54)) ([8e95c17](https://github.com/echovisionlab/geul-web/commit/8e95c17127d410c4898599c7333bacf1c6d8ebf6))
+
 ## [0.3.4](https://github.com/echovisionlab/geul-web/compare/v0.3.3...v0.3.4) (2026-10-01)
 
 

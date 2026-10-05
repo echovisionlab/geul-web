@@ -12,6 +12,8 @@ const mocks = vi.hoisted(() => ({
   push: vi.fn(),
   signOut: vi.fn(),
   toggleColorScheme: vi.fn(),
+  openSearch: vi.fn(),
+  socialLinks: null as ReactNode,
   viewProps: null as ShellViewProps | null,
 }));
 
@@ -59,8 +61,8 @@ vi.mock('@mantine/hooks', async () => {
   };
 });
 
-vi.mock('@mantine/spotlight', () => ({
-  spotlight: { open: vi.fn() },
+vi.mock('@/features/post/PostSpotlight/post-spotlight-trigger', () => ({
+  openPostSpotlight: mocks.openSearch,
 }));
 
 vi.mock('@/features/shell/PrintHeader', () => ({ PrintHeader: () => null }));
@@ -78,6 +80,7 @@ vi.mock('@/lib/auth/login-page', () => ({
 }));
 
 vi.mock('@/lib/contexts/ManifestContext', () => ({
+  useSiteSocialLinks: () => mocks.socialLinks,
   useMenus: () => ({ avatarDropdown: [], footer: [], header: [], secondary: [] }),
   useSiteSettings: () => ({
     settings: {
@@ -128,6 +131,7 @@ beforeEach(() => {
   mocks.pathname = '/work';
   mocks.search = '';
   mocks.viewProps = null;
+  mocks.socialLinks = null;
   mocks.invalidateQueries.mockReset();
   mocks.invalidateQueries.mockResolvedValue(undefined);
   mocks.push.mockReset();
@@ -153,12 +157,24 @@ function viewProps() {
 }
 
 describe('Shell controller disclosure state', () => {
+  it('uses the server-prepared footer slot and accepts its replacement', () => {
+    const prepared = <a href="https://example.com">Prepared social link</a>;
+    mocks.socialLinks = prepared;
+    renderController();
+    expect(viewProps().slots.socialLinks).toBe(prepared);
+    mocks.socialLinks = null;
+    renderController();
+    expect(viewProps().slots.socialLinks).toBeNull();
+  });
+
   it('keeps public page query context in the login return path and advertises the K shortcut', () => {
     mocks.search = 'share=share-token&lang=ko&table_page=3';
     renderController();
 
     expect(viewProps().loginHref).toBe('/login?redirect=%2Fwork%3Fshare%3Dshare-token%26lang%3Dko%26table_page%3D3');
     expect(viewProps().labels.searchTooltip).toBe('actions.searchTooltip:Cmd+K');
+    viewProps().events.onSearch();
+    expect(mocks.openSearch).toHaveBeenCalledTimes(1);
   });
 
   it('owns navigation and account state and closes both when navigation completes', () => {

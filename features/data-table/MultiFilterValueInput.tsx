@@ -1,11 +1,18 @@
 'use client';
 
 import { Group, Stack } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
-import '@mantine/dates/styles.css';
-import { MultiSelect, NumberInput, Radio, TextInput } from '@/components/core/Input';
+import type { DateInputProps } from '@mantine/dates';
+import dynamic from 'next/dynamic';
+import { MultiSelect } from '@/components/core/Input/MultiSelect';
+import { NumberInput } from '@/components/core/Input/NumberInput';
+import { Radio } from '@/components/core/Input/Radio';
+import { TextInput } from '@/components/core/Input/TextInput';
 import { isNoValueOperator } from '@/lib/types/common/filter';
 import type { FilterEditState, FilterFieldConfig } from './multi-filter-model';
+
+const DateInput = dynamic<DateInputProps>(() =>
+  import('./DateFilterInputRuntime').then((module) => module.DateFilterInputRuntime),
+);
 
 interface Labels {
   value: string;

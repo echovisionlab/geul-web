@@ -7,7 +7,7 @@ import {
   MenuVisibilityMode,
   type MenuItem as ProtoMenuItem,
 } from '@echovisionlab/geul-proto/secure/menu_pb.ts';
-import { createMenuClient } from '@/lib/api/browser-client';
+import { createMenuClient } from '@/lib/api/browser/secure-menu';
 import { normalizeMenuVisibilityRole } from '@/lib/types/menu/visibility';
 import { createClientLogger } from '@/lib/utils/client-logger';
 

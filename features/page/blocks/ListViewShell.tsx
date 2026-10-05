@@ -1,18 +1,19 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
+import dynamic from 'next/dynamic';
 import NextImage from 'next/image';
 import Link from '@/components/core/Navigation';
 import { useTranslations } from 'next-intl';
-import { Carousel } from '@mantine/carousel';
-import '@mantine/carousel/styles.css';
 import { Box, Group, SimpleGrid, Stack, Text } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { Button } from '@/components/core/Button';
 import { ContentCard, ContentCardSection } from '@/components/core/Section';
 import { getResponsiveSlideSize } from './constants';
-import { toAspectRatio } from './list-shared';
+import { toAspectRatio } from './list-view-utils';
 import classes from './post-list/PostListCard.module.css';
+
+const ListCarousel = dynamic(() => import('./ListCarouselRuntime').then((module) => module.ListCarouselRuntime));
 
 export type ListViewLayout = 'grid' | 'list' | 'cards' | 'minimal' | 'carousel';
 
@@ -303,7 +304,7 @@ export function ListViewShell<T extends ListViewShellItem>({
 
     if (isHeroStyle) {
       return (
-        <Carousel
+        <ListCarousel
           slideSize="100%"
           slideGap="md"
           emblaOptions={{ loop: carouselLoop }}
@@ -320,7 +321,7 @@ export function ListViewShell<T extends ListViewShellItem>({
             const heroMeta = renderHeroMeta?.(item, { mobile: Boolean(isMobile) });
 
             return (
-              <Carousel.Slide key={item.id}>
+              <Fragment key={item.id}>
                 <Box
                   className={classes.heroCarouselSlide}
                   data-hero-carousel-slide
@@ -399,15 +400,15 @@ export function ListViewShell<T extends ListViewShellItem>({
                     )}
                   </Box>
                 </Box>
-              </Carousel.Slide>
+              </Fragment>
             );
           })}
-        </Carousel>
+        </ListCarousel>
       );
     }
 
     return (
-      <Carousel
+      <ListCarousel
         slideSize={getResponsiveSlideSize(columns)}
         slideGap="md"
         emblaOptions={{ loop: carouselLoop }}
@@ -419,7 +420,7 @@ export function ListViewShell<T extends ListViewShellItem>({
           const meta = renderCarouselCardMeta?.(item);
 
           return (
-            <Carousel.Slide key={item.id}>
+            <Fragment key={item.id}>
               <ContentCard
                 padding="lg"
                 radius={0}
@@ -464,10 +465,10 @@ export function ListViewShell<T extends ListViewShellItem>({
                   </Stack>
                 </Box>
               </ContentCard>
-            </Carousel.Slide>
+            </Fragment>
           );
         })}
-      </Carousel>
+      </ListCarousel>
     );
   }
 

@@ -24,6 +24,8 @@ export interface FileIngestLifecycleUpdate {
 }
 
 export interface UploadOptions {
+  surfaceSlotId?: string;
+  attemptId?: string;
   uploadType: UploadType;
   entityId?: string;
   entityType?: TranscodeEntityType;
@@ -48,6 +50,8 @@ export interface UploadOptions {
 }
 
 export interface DownloadFromUrlOptions {
+  resumeSession?: UploadOptions['resumeSession'];
+  onMultipartSession?: UploadOptions['onMultipartSession'];
   correlationId?: string;
   slotId?: string;
   surfaceSlotId?: string;
@@ -68,4 +72,14 @@ export interface InFlightServerLifecycle {
   uploadSurfaceKey?: string;
   activityId: string;
   progress: UploadAttemptProgress;
+  /** Browser preparation owns aggregate progress and completion until commit acknowledgement. */
+  clientMediaPrepared?: boolean;
+}
+
+export class UploadPausedError extends Error {
+  readonly code = 'UPLOAD_PAUSED';
+  constructor() {
+    super('Upload paused');
+    this.name = 'UploadPausedError';
+  }
 }

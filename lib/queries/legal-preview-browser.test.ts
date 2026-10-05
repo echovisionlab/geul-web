@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  createPublicPrivacyClient,
-  createPublicPrivacyClientWithLocale,
-  createPublicTermsClient,
-  createPublicTermsClientWithLocale,
-} from '@/lib/api/browser-client';
+import { createPublicPrivacyClient, createPublicPrivacyClientWithLocale } from '@/lib/api/browser/public-privacy';
+import { createPublicTermsClient, createPublicTermsClientWithLocale } from '@/lib/api/browser/public-terms';
 import { getArchivedPrivacy, getScheduledPrivacyPreview } from './privacy-browser';
 import { getArchivedTerms, getScheduledTermsPreview } from './terms-browser';
 
@@ -12,9 +8,11 @@ const { localizedBlocks } = vi.hoisted(() => ({
   localizedBlocks: [{ id: 'block-1', kind: 'paragraph' }] as const,
 }));
 
-vi.mock('@/lib/api/browser-client', () => ({
+vi.mock('@/lib/api/browser/public-privacy', () => ({
   createPublicPrivacyClient: vi.fn(),
   createPublicPrivacyClientWithLocale: vi.fn(),
+}));
+vi.mock('@/lib/api/browser/public-terms', () => ({
   createPublicTermsClient: vi.fn(),
   createPublicTermsClientWithLocale: vi.fn(),
 }));

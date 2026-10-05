@@ -13,7 +13,11 @@ import {
   type HocuspocusProviderFixture,
 } from '@/features/editor/hocuspocusProvider.test-fixture';
 import {
+  abortUploadAction,
   completeUploadAction,
+  completeClientMediaUploadAction,
+  recoverCompletedClientMediaUploadAction,
+  prepareClientMediaUploadAction,
   downloadFromUrlAction,
   findMultipartUploadCandidateAction,
   initiateUploadAction,
@@ -22,6 +26,18 @@ import {
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import { UploadType } from '@/lib/types/upload/model';
 import { useFileUpload } from './useFileUpload';
+import { downloadRemoteSource } from '@/lib/upload/remote-source';
+import { prepareMedia, type PreparedMedia } from '@/lib/media/client-processing/processor';
+import { uploadClientMediaArtifact } from '@/lib/upload/client-media-transport';
+import { buildUploadSurfaceKey, cancelUploadSurface } from '@/lib/hooks/uploadSurfaceActivity';
+import { createUploadPartError } from '@/lib/upload/upload-errors';
+import {
+  disposePreparedSession,
+  forgetUploadSession,
+  readUploadSession,
+  rememberPreparedSession,
+  rememberUploadSession,
+} from '@/lib/upload/upload-session-store';
 
 const runtimeSubscription = vi.hoisted(() => ({
   listener: null as ((event: EditorRuntimeEvent) => void) | null,
@@ -43,9 +59,14 @@ vi.mock('@/lib/collab/subscribe-runtime-events', () => ({
   },
 }));
 
+vi.mock('@/lib/upload/remote-source', () => ({ downloadRemoteSource: vi.fn() }));
+
 vi.mock('@/lib/actions/file', () => ({
   abortUploadAction: vi.fn(),
+  prepareClientMediaUploadAction: vi.fn(),
   completeUploadAction: vi.fn(),
+  completeClientMediaUploadAction: vi.fn(),
+  recoverCompletedClientMediaUploadAction: vi.fn(),
   downloadFromUrlAction: vi.fn(),
   findMultipartUploadCandidateAction: vi.fn(),
   initiateUploadAction: vi.fn(),
@@ -67,6 +88,18 @@ vi.mock('@/lib/utils/upload-pipeline', () => ({
     mimeType: file.type || 'audio/ogg',
   }),
 }));
+
+vi.mock('@/lib/media/client-processing/processor', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/media/client-processing/contracts')>(
+    '@/lib/media/client-processing/contracts',
+  );
+  return {
+    prepareMedia: vi.fn(async () => null),
+    restoreMedia: vi.fn(async () => null),
+    ClientMediaRestoreMismatchError: actual.ClientMediaRestoreMismatchError,
+  };
+});
+vi.mock('@/lib/upload/client-media-transport', () => ({ uploadClientMediaArtifact: vi.fn(async () => undefined) }));
 
 class MockXMLHttpRequest {
   static DONE = 4;
@@ -92,6 +125,9 @@ class MockXMLHttpRequest {
     MockXMLHttpRequest.instances.push(this);
   }
   setRequestHeader() {}
+  getResponseHeader() {
+    return null;
+  }
   abort() {
     this.readyState = MockXMLHttpRequest.DONE;
     this.onabort?.();
@@ -156,9 +192,11 @@ interface UploadHarnessProps {
     resumable: boolean;
   }) => void;
   uploadType?: UploadType;
+  clientMedia?: boolean;
   entityId?: string;
   entityType?: TranscodeEntityType;
   file?: File;
+  selectFile?: () => File;
   uploadOptions?: Record<string, unknown>;
 }
 
@@ -168,33 +206,50 @@ function UploadHarness({
   onProgress,
   onLifecycle,
   onMultipartSession,
-  uploadType = UploadType.TRACK_AUDIO,
+  uploadType,
+  clientMedia = false,
   entityId = 'track-1',
   entityType = TranscodeEntityType.TRACK,
-  file = new File(['audio'], 'audio.ogg', { type: 'audio/ogg' }),
+  file,
+  selectFile,
   uploadOptions = {},
 }: UploadHarnessProps) {
-  const { upload } = useFileUpload();
+  const { upload, abort, pauseUpload } = useFileUpload();
 
   return (
-    <button
-      id="start-upload"
-      type="button"
-      onClick={() => {
-        void upload(file, {
-          uploadType,
-          entityId,
-          entityType,
-          correlationId: 'correlation-1',
-          ...uploadOptions,
-          onProgress,
-          onLifecycle,
-          onMultipartSession,
-        }).then(onResolved, onRejected);
-      }}
-    >
-      start
-    </button>
+    <>
+      <button id="pause-upload" type="button" onClick={pauseUpload}>
+        pause
+      </button>
+      <button id="cancel-upload" type="button" onClick={abort}>
+        cancel
+      </button>
+      <button
+        id="start-upload"
+        type="button"
+        onClick={() => {
+          void upload(
+            selectFile?.() ??
+              file ??
+              (clientMedia
+                ? new File(['audio'], 'audio.ogg', { type: 'audio/ogg' })
+                : new File(['bytes'], 'file.bin', { type: 'application/octet-stream' })),
+            {
+              uploadType: uploadType ?? (clientMedia ? UploadType.TRACK_AUDIO : UploadType.GENERAL_FILE),
+              entityId,
+              entityType,
+              correlationId: 'correlation-1',
+              ...uploadOptions,
+              onProgress,
+              onLifecycle,
+              onMultipartSession,
+            },
+          ).then(onResolved, onRejected);
+        }}
+      >
+        start
+      </button>
+    </>
   );
 }
 
@@ -229,6 +284,30 @@ describe('useFileUpload', () => {
   const originalFetch = globalThis.fetch;
 
   beforeEach(() => {
+    vi.mocked(completeClientMediaUploadAction).mockImplementation(async (input) => {
+      try {
+        return { ok: true, ...(await completeUploadAction(input)) };
+      } catch (error) {
+        return {
+          ok: false,
+          error: error instanceof Error ? error.message : String(error),
+          errorCode: Code.Unavailable,
+        };
+      }
+    });
+    vi.mocked(recoverCompletedClientMediaUploadAction).mockImplementation(async (input) => {
+      try {
+        return { ok: true, ...(await recoverCompletedUploadAction(input)) };
+      } catch (error) {
+        return {
+          ok: false,
+          error: error instanceof Error ? error.message : String(error),
+          errorCode: Code.Unavailable,
+        };
+      }
+    });
+    vi.mocked(prepareMedia).mockReset().mockResolvedValue(null);
+    vi.mocked(uploadClientMediaArtifact).mockReset().mockResolvedValue(undefined);
     globalThis.fetch = vi.fn(async (input) => {
       const url = new URL(String(input), 'https://studio.example.com');
       if (url.pathname === '/api/upload/prefix') {
@@ -247,7 +326,10 @@ describe('useFileUpload', () => {
     });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    await disposePreparedSession('file-1');
+    forgetUploadSession('file-1');
+    localStorage.clear();
     act(() => {
       root?.unmount();
     });
@@ -261,6 +343,7 @@ describe('useFileUpload', () => {
     globalThis.fetch = originalFetch;
     MockXMLHttpRequest.instances = [];
     MockXMLHttpRequest.sendHandler = null;
+    vi.useRealTimers();
     vi.clearAllMocks();
   });
 
@@ -275,13 +358,26 @@ describe('useFileUpload', () => {
       entityType: TranscodeEntityType.POST,
       expectedCurrentFileId: '046a1c17-f9ae-4ca6-a3aa-d7027dfd00b3',
     },
-  ])('forwards $name projection identity to the server action', async (testCase) => {
-    vi.mocked(downloadFromUrlAction).mockResolvedValue({
-      url: 'https://cdn.example.com/image.png',
-      fileId: 'file-1',
-      slotId: 'slot-1',
-      attemptId: 'attempt-1',
+  ])('imports $name through the direct-upload pipeline with untargeted editor attachment', async (testCase) => {
+    globalThis.XMLHttpRequest = MockXMLHttpRequest as unknown as typeof XMLHttpRequest;
+    const dispose = vi.fn(async () => undefined);
+    vi.mocked(downloadRemoteSource).mockResolvedValue({
+      file: new File(['image'], 'image.png', { type: 'image/png', lastModified: 0 }),
+      storageId: 'geul-client-media-source',
+      dispose,
     });
+    vi.mocked(initiateUploadAction).mockResolvedValue({
+      uploadId: 'upload-1',
+      fileId: 'file-1',
+      totalParts: 1,
+      chunkSize: 5,
+      uploadedParts: [],
+      status: 1,
+      resumed: false,
+      slotId: '',
+      attemptId: 'attempt-1',
+    } as never);
+    vi.mocked(completeUploadAction).mockResolvedValue({ url: '/media/file-1', fileId: 'file-1' } as never);
 
     render(<DownloadHarness entityType={testCase.entityType} expectedCurrentFileId={testCase.expectedCurrentFileId} />);
 
@@ -289,17 +385,27 @@ describe('useFileUpload', () => {
       document.querySelector<HTMLButtonElement>('#start-download')?.click();
     });
 
-    await expect.poll(() => vi.mocked(downloadFromUrlAction).mock.calls.length).toBe(1);
+    await expect.poll(() => vi.mocked(completeUploadAction).mock.calls.length).toBe(1);
     expect(persistCollaborativeDocumentNowMock).not.toHaveBeenCalled();
-    expect(vi.mocked(downloadFromUrlAction).mock.calls[0]?.[0]).toEqual({
-      uploadType: UploadType.EDITOR_IMAGE,
-      entityId: 'entity-1',
-      entityType: testCase.entityType,
-      url: 'https://source.example.com/image.png',
-      correlationId: 'correlation-1',
+    expect(downloadFromUrlAction).not.toHaveBeenCalled();
+    expect(vi.mocked(downloadRemoteSource).mock.calls[0]?.slice(0, 2)).toEqual([
+      'https://source.example.com/image.png',
+      expect.objectContaining({
+        uploadType: UploadType.EDITOR_IMAGE,
+        entityId: 'entity-1',
+        entityType: testCase.entityType,
+        correlationId: 'correlation-1',
+        surfaceSlotId: 'client-attempt-slot',
+        expectedCurrentFileId: testCase.expectedCurrentFileId,
+      }),
+    ]);
+    expect(vi.mocked(initiateUploadAction).mock.calls[0]?.[0]).toMatchObject({
+      entityId: '',
+      entityType: undefined,
       slotId: undefined,
-      expectedCurrentFileId: testCase.expectedCurrentFileId,
+      expectedCurrentFileId: undefined,
     });
+    await expect.poll(() => dispose.mock.calls.length).toBe(1);
   });
 
   it.each([
@@ -395,7 +501,7 @@ describe('useFileUpload', () => {
 
   it('reports the backend upload session attempt returned by initiate', async () => {
     globalThis.XMLHttpRequest = MockXMLHttpRequest as unknown as typeof XMLHttpRequest;
-    const file = new File(['audio-data'], 'audio.ogg', { type: 'audio/ogg' });
+    const file = new File(['audio-data'], 'file.bin', { type: 'application/octet-stream' });
     const onMultipartSession = vi.fn();
     vi.mocked(initiateUploadAction).mockResolvedValue({
       uploadId: 'upload-1',
@@ -492,9 +598,9 @@ describe('useFileUpload', () => {
     expect(rejected).toBeInstanceOf(Error);
     expect((rejected as Error).message).toBe('Upload finalization failed');
     expect(findMultipartUploadCandidateAction).toHaveBeenCalledWith({
-      uploadType: UploadType.TRACK_AUDIO,
-      entityId: 'track-1',
-      entityType: TranscodeEntityType.TRACK,
+      uploadType: UploadType.GENERAL_FILE,
+      entityId: '',
+      entityType: undefined,
       slotId: undefined,
       expectedCurrentFileId: undefined,
       fileId: 'file-finalizing-1',
@@ -548,7 +654,7 @@ describe('useFileUpload', () => {
     expect(recoverCompletedUploadAction).toHaveBeenCalledWith({
       fileId: 'file-response-loss-1',
       uploadId: 'upload-response-loss-1',
-      uploadType: UploadType.TRACK_AUDIO,
+      uploadType: UploadType.GENERAL_FILE,
       correlationId: 'correlation-1',
     });
     expect(onLifecycle).toHaveBeenLastCalledWith(
@@ -638,7 +744,7 @@ describe('useFileUpload', () => {
     expect(recoverCompletedUploadAction).toHaveBeenCalledWith({
       fileId: 'file-recovery-transient-1',
       uploadId: 'upload-recovery-transient-1',
-      uploadType: UploadType.TRACK_AUDIO,
+      uploadType: UploadType.GENERAL_FILE,
       correlationId: 'correlation-1',
     });
     expect((rejected as Error).message).toBe('Upload finalization failed');
@@ -863,8 +969,9 @@ describe('useFileUpload', () => {
   });
 
   it('automatically retries an interrupted part in a ten-part upload and completes', async () => {
+    vi.useFakeTimers();
     globalThis.XMLHttpRequest = MockXMLHttpRequest as unknown as typeof XMLHttpRequest;
-    const file = new File([new Uint8Array(50)], 'audio.ogg', { type: 'audio/ogg' });
+    const file = new File([new Uint8Array(50)], 'file.bin', { type: 'application/octet-stream' });
     const partAttempts = new Map<number, number>();
 
     MockXMLHttpRequest.sendHandler = (xhr, chunk) => {
@@ -919,13 +1026,22 @@ describe('useFileUpload', () => {
       />,
     );
 
-    await expect.poll(() => runtimeSubscription.listener != null).toBe(true);
+    expect(runtimeSubscription.listener).not.toBeNull();
     await act(async () => {
       document.querySelector<HTMLButtonElement>('#start-upload')?.click();
     });
 
-    await expect.poll(() => vi.mocked(completeUploadAction).mock.calls.length).toBe(1);
-    await expect.poll(() => resolved).toBe(true);
+    expect(partAttempts.get(7)).toBe(1);
+    expect(completeUploadAction).not.toHaveBeenCalled();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(999);
+    });
+    expect(partAttempts.get(7)).toBe(1);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
+    expect(completeUploadAction).toHaveBeenCalledOnce();
+    expect(resolved).toBe(true);
     expect(partAttempts.get(7)).toBe(2);
     expect(progressPercentages.every((value, index) => index === 0 || value >= progressPercentages[index - 1]!)).toBe(
       true,
@@ -933,13 +1049,14 @@ describe('useFileUpload', () => {
     expect(vi.mocked(completeUploadAction).mock.calls[0]?.[0]).toMatchObject({
       uploadId: 'upload-1',
       fileId: 'file-1',
-      uploadType: UploadType.TRACK_AUDIO,
+      uploadType: UploadType.GENERAL_FILE,
     });
   });
 
   it('stops after automatic part retries are exhausted and succeeds when the user resumes the same file', async () => {
+    vi.useFakeTimers();
     globalThis.XMLHttpRequest = MockXMLHttpRequest as unknown as typeof XMLHttpRequest;
-    const file = new File([new Uint8Array(50)], 'audio.ogg', { type: 'audio/ogg' });
+    const file = new File([new Uint8Array(50)], 'file.bin', { type: 'application/octet-stream' });
     const partAttemptsByPhase = new Map<string, number>();
     let phase: 'initial' | 'resume' = 'initial';
 
@@ -1022,16 +1139,31 @@ describe('useFileUpload', () => {
       />,
     );
 
-    await expect.poll(() => runtimeSubscription.listener != null).toBe(true);
+    expect(runtimeSubscription.listener).not.toBeNull();
     await act(async () => {
       document.querySelector<HTMLButtonElement>('#start-upload')?.click();
     });
 
-    await expect.poll(() => rejected != null).toBe(true);
+    expect(partAttemptsByPhase.get('initial:6')).toBe(1);
+    expect(rejected).toBeUndefined();
+    for (const [index, delay] of [1000, 2000, 4000, 8000].entries()) {
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(delay - 1);
+      });
+      expect(partAttemptsByPhase.get('initial:6')).toBe(index + 1);
+      expect(rejected).toBeUndefined();
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1);
+      });
+      expect(partAttemptsByPhase.get('initial:6')).toBe(index + 2);
+    }
     expect(rejected).toBeInstanceOf(Error);
     expect((rejected as Error).message).toBe('Upload interrupted');
-    expect(partAttemptsByPhase.get('initial:6')).toBe(3);
+    expect(partAttemptsByPhase.get('initial:6')).toBe(5);
     expect(vi.mocked(completeUploadAction)).not.toHaveBeenCalled();
+    for (const partNumber of [1, 2, 3, 4, 5, 7]) {
+      expect(partAttemptsByPhase.get(`initial:${partNumber}`)).toBe(1);
+    }
 
     Object.assign(uploadOptions, {
       resumeSession: { fileId: 'file-1', uploadId: 'upload-1' },
@@ -1039,11 +1171,15 @@ describe('useFileUpload', () => {
 
     await act(async () => {
       document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+      await vi.advanceTimersByTimeAsync(0);
     });
 
-    await expect.poll(() => vi.mocked(completeUploadAction).mock.calls.length).toBe(1);
-    await expect.poll(() => resolved).toBe(true);
+    expect(completeUploadAction).toHaveBeenCalledOnce();
+    expect(resolved).toBe(true);
     expect(partAttemptsByPhase.get('resume:6')).toBe(1);
+    for (const partNumber of [1, 2, 3, 4, 5, 7]) {
+      expect(partAttemptsByPhase.has(`resume:${partNumber}`)).toBe(false);
+    }
     expect(progressByPhase.resume[0]).toBe(60);
     expect(
       progressByPhase.resume.every((value, index) => index === 0 || value >= progressByPhase.resume[index - 1]!),
@@ -1052,5 +1188,658 @@ describe('useFileUpload', () => {
       uploadId: 'upload-1',
       fileId: 'file-1',
     });
+  });
+  function preparedFixture(): PreparedMedia {
+    const artifact = new File(['wave'], 'waveform.json', { type: 'application/json' });
+    return {
+      storageId: 'geul-client-media-11111111-1111-1111-1111-111111111111',
+      sourceFingerprint: 'a'.repeat(64),
+      metadata: { kind: 'audio', durationSeconds: 1 },
+      artifacts: [
+        { path: artifact.name, mimeType: artifact.type, size: artifact.size, sha256: 'a'.repeat(64), file: artifact },
+      ],
+      dispose: vi.fn(async () => undefined),
+    };
+  }
+
+  function initiateFixture() {
+    vi.mocked(initiateUploadAction).mockResolvedValue({
+      fileId: 'file-1',
+      uploadId: 'upload-1',
+      totalParts: 1,
+      chunkSize: 5,
+      uploadedParts: [],
+      slotId: '',
+      attemptId: 'attempt-1',
+      resumed: false,
+    } as never);
+    vi.mocked(prepareClientMediaUploadAction).mockResolvedValue({ ok: true, bundleId: 'bundle-1' });
+    vi.mocked(completeUploadAction).mockResolvedValue({ fileId: 'file-1', url: '/media/file-1' } as never);
+    globalThis.XMLHttpRequest = MockXMLHttpRequest as unknown as typeof XMLHttpRequest;
+  }
+
+  it('prepares before initiating, aggregates artifact bytes, and reserves 100 until commit acknowledgement', async () => {
+    initiateFixture();
+    const prepared = preparedFixture();
+    const steps: string[] = [];
+    vi.mocked(prepareMedia).mockImplementation(async (_file, { onProgress }) => {
+      expect(initiateUploadAction).not.toHaveBeenCalled();
+      steps.push('prepare');
+      onProgress(0.5);
+      onProgress(1);
+      return prepared;
+    });
+    vi.mocked(uploadClientMediaArtifact).mockImplementation(async ({ onProgress, file }) => {
+      expect(prepareClientMediaUploadAction).toHaveBeenCalledOnce();
+      steps.push('artifact');
+      onProgress?.({ loaded: file.size / 2, total: file.size });
+    });
+    let acknowledge: ((value: never) => void) | undefined;
+    vi.mocked(completeUploadAction).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          acknowledge = resolve;
+        }) as never,
+    );
+    const percentages: number[] = [];
+    let resolved = false;
+    render(
+      <UploadHarness
+        clientMedia
+        onProgress={({ percentage }) => percentages.push(percentage)}
+        onResolved={() => {
+          resolved = true;
+        }}
+      />,
+    );
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => acknowledge != null).toBe(true);
+    expect(steps).toEqual(['prepare', 'artifact']);
+    expect(percentages).toContain(20);
+    expect(percentages).toContain(40);
+    expect(percentages.at(-1)).toBe(99);
+    expect(Math.max(...percentages)).toBe(99);
+    expect(vi.mocked(completeClientMediaUploadAction).mock.calls.at(-1)?.[0]).toMatchObject({
+      clientMediaBundleId: 'bundle-1',
+    });
+    expect(resolved).toBe(false);
+    expect(prepared.dispose).not.toHaveBeenCalled();
+    await act(async () => {
+      acknowledge?.({ fileId: 'file-1', url: '/media/file-1' } as never);
+    });
+    await expect.poll(() => resolved).toBe(true);
+    expect(percentages.at(-1)).toBe(100);
+    expect(percentages.every((value, index) => index === 0 || value >= percentages[index - 1]!)).toBe(true);
+    expect(prepared.dispose).toHaveBeenCalledOnce();
+  });
+
+  it('cancels preparation without initiating or falling back to server encoding', async () => {
+    initiateFixture();
+    let preparationStarted = false;
+    vi.mocked(prepareMedia).mockImplementation(
+      (_file, { signal }) =>
+        new Promise((_resolve, reject) => {
+          preparationStarted = true;
+          signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true });
+        }),
+    );
+    const rejected = vi.fn();
+    render(<UploadHarness clientMedia onResolved={vi.fn()} onRejected={rejected} />);
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => preparationStarted).toBe(true);
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#cancel-upload')?.click();
+    });
+    await expect.poll(() => rejected.mock.calls.length).toBe(1);
+    expect(rejected.mock.calls[0]?.[0].message).toBe('Upload aborted');
+    expect(initiateUploadAction).not.toHaveBeenCalled();
+    expect(uploadClientMediaArtifact).not.toHaveBeenCalled();
+  });
+
+  it('uses exact cached artifacts on completion retry without encoding again', async () => {
+    initiateFixture();
+    const prepared = preparedFixture();
+    vi.mocked(prepareMedia).mockResolvedValue(prepared);
+    vi.mocked(completeUploadAction).mockRejectedValueOnce(new Error('Lost response'));
+    vi.mocked(findMultipartUploadCandidateAction).mockResolvedValue({
+      fileId: 'file-1',
+      uploadId: 'upload-1',
+      clientMediaBundleId: 'bundle-1',
+      totalParts: 1,
+      chunkSize: 5,
+      uploadedParts: [],
+      status: UploadSessionStatus.FINALIZING,
+      attemptId: 'attempt-1',
+      slotId: '',
+    } as never);
+    const file = new File(['audio'], 'audio.ogg', { type: 'audio/ogg', lastModified: 123 });
+    let selectedFile = file;
+    const uploadOptions: Record<string, unknown> = {};
+    const rejected = vi.fn();
+    const resolved = vi.fn();
+    render(
+      <UploadHarness
+        clientMedia
+        selectFile={() => selectedFile}
+        uploadOptions={uploadOptions}
+        onResolved={resolved}
+        onRejected={rejected}
+      />,
+    );
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => rejected.mock.calls.length).toBe(1);
+    expect(prepared.dispose).not.toHaveBeenCalled();
+    selectedFile = new File(['other'], 'audio.ogg', { type: 'audio/ogg', lastModified: 123 });
+    let retryOriginal: Blob | undefined;
+    MockXMLHttpRequest.sendHandler = (xhr, body) => {
+      retryOriginal = body;
+      xhr.readyState = MockXMLHttpRequest.DONE;
+      xhr.status = 200;
+      xhr.responseText = JSON.stringify({ etag: 'cached-source-etag' });
+      xhr.onload?.();
+    };
+    Object.assign(uploadOptions, { resumeSession: { fileId: 'file-1', uploadId: 'upload-1' } });
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => resolved.mock.calls.length).toBe(1);
+    expect(prepareMedia).toHaveBeenCalledOnce();
+    expect(prepareClientMediaUploadAction).toHaveBeenCalledOnce();
+    expect(uploadClientMediaArtifact).toHaveBeenCalledOnce();
+    expect(prepared.dispose).toHaveBeenCalledOnce();
+    const retryBytes = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsText(retryOriginal!);
+    });
+    expect(retryBytes).toBe('audio');
+  });
+  it('cleans up the exact owned session when cancellation arrives during initiation', async () => {
+    initiateFixture();
+    const prepared = preparedFixture();
+    vi.mocked(prepareMedia).mockResolvedValue(prepared);
+    let finishInitiation: ((value: never) => void) | undefined;
+    vi.mocked(initiateUploadAction).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finishInitiation = resolve;
+        }) as never,
+    );
+    const rejected = vi.fn();
+    render(<UploadHarness clientMedia onResolved={vi.fn()} onRejected={rejected} />);
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => finishInitiation != null).toBe(true);
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#cancel-upload')?.click();
+    });
+    await act(async () => {
+      finishInitiation?.({
+        fileId: 'file-1',
+        uploadId: 'upload-1',
+        totalParts: 1,
+        chunkSize: 5,
+        uploadedParts: [],
+      } as never);
+    });
+    await expect.poll(() => rejected.mock.calls.length).toBe(1);
+    expect(vi.mocked(abortUploadAction).mock.calls[0]?.[0]).toEqual({
+      fileId: 'file-1',
+      uploadId: 'upload-1',
+      correlationId: 'correlation-1',
+    });
+    expect(prepareClientMediaUploadAction).not.toHaveBeenCalled();
+    expect(MockXMLHttpRequest.instances).toHaveLength(0);
+    expect(prepared.dispose).toHaveBeenCalledOnce();
+  });
+
+  it('ignores raw server completion until every prepared artifact and commit are acknowledged', async () => {
+    initiateFixture();
+    vi.mocked(prepareMedia).mockResolvedValue(preparedFixture());
+    let finishArtifact: (() => void) | undefined;
+    vi.mocked(uploadClientMediaArtifact).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finishArtifact = resolve;
+        }),
+    );
+    const lifecycle = vi.fn();
+    const resolved = vi.fn();
+    render(<UploadHarness clientMedia onResolved={resolved} onLifecycle={lifecycle} />);
+    await expect.poll(() => runtimeSubscription.listener != null).toBe(true);
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => finishArtifact != null).toBe(true);
+    act(() => {
+      runtimeSubscription.listener?.({
+        version: 1,
+        kind: 'file.ingest.lifecycle',
+        entityType: 'release',
+        entityId: 'release-1',
+        correlationId: 'correlation-1',
+        timestampMs: 1,
+        payload: { fileId: 'file-1', attemptId: 'attempt-1', source: 'upload', stage: 'completed', progress: 100 },
+      });
+    });
+    expect(lifecycle.mock.calls.filter(([update]) => update.source === 'server')).toHaveLength(0);
+    expect(lifecycle.mock.calls.some(([update]) => update.percentage === 100)).toBe(false);
+    expect(completeUploadAction).not.toHaveBeenCalled();
+    await act(async () => {
+      finishArtifact?.();
+    });
+    await expect.poll(() => resolved.mock.calls.length).toBe(1);
+  });
+
+  it('rejects a persisted browser bundle without its original cached artifact bytes', async () => {
+    initiateFixture();
+    vi.mocked(findMultipartUploadCandidateAction).mockResolvedValue({
+      fileId: 'file-1',
+      uploadId: 'upload-1',
+      clientMediaBundleId: 'bundle-lost',
+      totalParts: 1,
+      chunkSize: 5,
+      uploadedParts: [],
+      attemptId: 'attempt-1',
+      slotId: '',
+    } as never);
+    const rejected = vi.fn();
+    render(
+      <UploadHarness
+        clientMedia
+        uploadOptions={{ resumeSession: { fileId: 'file-1', uploadId: 'upload-1' } }}
+        onResolved={vi.fn()}
+        onRejected={rejected}
+      />,
+    );
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => rejected.mock.calls.length).toBe(1);
+    expect(rejected.mock.calls[0]?.[0].message).toContain('Start a new upload');
+    expect(prepareMedia).not.toHaveBeenCalled();
+    expect(completeUploadAction).not.toHaveBeenCalled();
+    expect(MockXMLHttpRequest.instances).toHaveLength(0);
+  });
+  it('cancels an artifact transfer through the handed-off Track attempt surface', async () => {
+    initiateFixture();
+    const prepared = preparedFixture();
+    vi.mocked(prepareMedia).mockResolvedValue(prepared);
+    let artifactSignal: AbortSignal | undefined;
+    vi.mocked(uploadClientMediaArtifact).mockImplementation(
+      ({ signal }) =>
+        new Promise((_resolve, reject) => {
+          artifactSignal = signal;
+          signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true });
+        }),
+    );
+    const rejected = vi.fn();
+    render(<UploadHarness clientMedia onResolved={vi.fn()} onRejected={rejected} />);
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => artifactSignal != null).toBe(true);
+    act(() => {
+      expect(
+        cancelUploadSurface(
+          buildUploadSurfaceKey({ uploadType: UploadType.TRACK_AUDIO, entityId: 'track-1', attemptId: 'attempt-1' }),
+        ),
+      ).toBe(true);
+    });
+    await expect.poll(() => rejected.mock.calls.length).toBe(1);
+    expect(artifactSignal?.aborted).toBe(true);
+    expect(vi.mocked(abortUploadAction).mock.calls[0]?.[0]).toMatchObject({ fileId: 'file-1', uploadId: 'upload-1' });
+    expect(completeUploadAction).not.toHaveBeenCalled();
+    expect(prepared.dispose).toHaveBeenCalledOnce();
+    expect(readUploadSession('file-1')).toBeNull();
+  });
+
+  it('disposes artifacts and revokes its session after definitive artifact validation failure', async () => {
+    initiateFixture();
+    const prepared = preparedFixture();
+    vi.mocked(prepareMedia).mockResolvedValue(prepared);
+    vi.mocked(uploadClientMediaArtifact).mockRejectedValue(createUploadPartError(400, 'hash mismatch'));
+    const rejected = vi.fn();
+    render(<UploadHarness clientMedia onResolved={vi.fn()} onRejected={rejected} />);
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => rejected.mock.calls.length).toBe(1);
+    expect(prepared.dispose).toHaveBeenCalledOnce();
+    expect(vi.mocked(abortUploadAction).mock.calls[0]?.[0]).toMatchObject({ fileId: 'file-1', uploadId: 'upload-1' });
+    expect(completeUploadAction).not.toHaveBeenCalled();
+    expect(readUploadSession('file-1')).toBeNull();
+  });
+  it('rejects a different source identity and cleans up the previous bundle before a new upload', async () => {
+    initiateFixture();
+    const source = new File(['audio'], 'audio.ogg', { type: 'audio/ogg', lastModified: 123 });
+    const prepared = preparedFixture();
+    rememberUploadSession({ fileId: 'file-1', uploadId: 'upload-1', clientMediaBundleId: 'bundle-1' });
+    rememberPreparedSession('file-1', {
+      source,
+      uploadId: 'upload-1',
+      uploadType: UploadType.TRACK_AUDIO,
+      bundleId: 'bundle-1',
+      prepared,
+      progress: { loadedBytes: 5, percentage: 99 },
+    });
+    const rejected = vi.fn();
+    render(
+      <UploadHarness
+        clientMedia
+        file={new File(['audio'], 'different.ogg', { type: 'audio/ogg', lastModified: 123 })}
+        uploadOptions={{ resumeSession: { fileId: 'file-1', uploadId: 'upload-1' } }}
+        onResolved={vi.fn()}
+        onRejected={rejected}
+      />,
+    );
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => rejected.mock.calls.length).toBe(1);
+    expect(rejected.mock.calls[0]?.[0].message).toContain('Start a new upload');
+    expect(prepared.dispose).toHaveBeenCalledOnce();
+    expect(vi.mocked(abortUploadAction).mock.calls[0]?.[0]).toMatchObject({ fileId: 'file-1', uploadId: 'upload-1' });
+    expect(readUploadSession('file-1')).toBeNull();
+    expect(initiateUploadAction).not.toHaveBeenCalled();
+    expect(completeUploadAction).not.toHaveBeenCalled();
+  });
+  it('pauses an artifact transfer without deleting its server session or prepared bytes, then resumes', async () => {
+    initiateFixture();
+    const prepared = preparedFixture();
+    vi.mocked(prepareMedia).mockResolvedValue(prepared);
+    let pausedSignal: AbortSignal | undefined;
+    vi.mocked(uploadClientMediaArtifact).mockImplementationOnce(
+      ({ signal }) =>
+        new Promise((_resolve, reject) => {
+          pausedSignal = signal;
+          signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true });
+        }),
+    );
+    vi.mocked(findMultipartUploadCandidateAction).mockResolvedValue({
+      fileId: 'file-1',
+      uploadId: 'upload-1',
+      clientMediaBundleId: 'bundle-1',
+      totalParts: 1,
+      chunkSize: 5,
+      uploadedParts: [{ partNumber: 1, etag: 'etag-1' }],
+      status: UploadSessionStatus.UPLOADING,
+      attemptId: 'attempt-1',
+      slotId: '',
+    } as never);
+    const rejected = vi.fn();
+    const resolved = vi.fn();
+    const uploadOptions: Record<string, unknown> = {};
+    const file = new File(['audio'], 'audio.ogg', { type: 'audio/ogg', lastModified: 123 });
+    render(
+      <UploadHarness
+        clientMedia
+        file={file}
+        uploadOptions={uploadOptions}
+        onResolved={resolved}
+        onRejected={rejected}
+      />,
+    );
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => pausedSignal != null).toBe(true);
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#pause-upload')?.click();
+    });
+    await expect.poll(() => rejected.mock.calls.length).toBe(1);
+    expect(rejected.mock.calls[0]?.[0]).toMatchObject({ code: 'UPLOAD_PAUSED' });
+    expect(abortUploadAction).not.toHaveBeenCalled();
+    expect(prepared.dispose).not.toHaveBeenCalled();
+    expect(readUploadSession('file-1')?.clientMediaBundleId).toBe('bundle-1');
+    expect(localStorage.getItem('geul-prepared-upload:file-1')).not.toBeNull();
+    Object.assign(uploadOptions, { resumeSession: { fileId: 'file-1', uploadId: 'upload-1' } });
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => resolved.mock.calls.length).toBe(1);
+    expect(prepareMedia).toHaveBeenCalledOnce();
+    expect(prepared.dispose).toHaveBeenCalledOnce();
+    expect(localStorage.getItem('geul-prepared-upload:file-1')).toBeNull();
+  });
+  it('clears artifact receipts only for the structured missing-staging error and re-sends on resume', async () => {
+    initiateFixture();
+    const prepared = preparedFixture();
+    vi.mocked(prepareMedia).mockResolvedValue(prepared);
+    vi.mocked(completeClientMediaUploadAction).mockResolvedValueOnce({
+      ok: false,
+      error: 'CLIENT_MEDIA_ARTIFACTS_MISSING',
+      errorCode: Code.Unavailable,
+    });
+    vi.mocked(findMultipartUploadCandidateAction).mockResolvedValue({
+      fileId: 'file-1',
+      uploadId: 'upload-1',
+      clientMediaBundleId: 'bundle-1',
+      totalParts: 1,
+      chunkSize: 5,
+      uploadedParts: [{ partNumber: 1, etag: 'etag-1' }],
+      status: UploadSessionStatus.FINALIZING,
+      attemptId: 'attempt-1',
+      slotId: '',
+    } as never);
+    const rejected = vi.fn();
+    const resolved = vi.fn();
+    const uploadOptions: Record<string, unknown> = {};
+    const file = new File(['audio'], 'audio.ogg', { type: 'audio/ogg', lastModified: 123 });
+    render(
+      <UploadHarness
+        clientMedia
+        file={file}
+        uploadOptions={uploadOptions}
+        onResolved={resolved}
+        onRejected={rejected}
+      />,
+    );
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => rejected.mock.calls.length).toBe(1);
+    expect(rejected.mock.calls[0]?.[0]).toMatchObject({ code: 'CLIENT_MEDIA_ARTIFACTS_MISSING', retryable: true });
+    expect(prepared.dispose).not.toHaveBeenCalled();
+    expect(JSON.parse(localStorage.getItem('geul-prepared-upload:file-1')!).receipts).toEqual([]);
+    Object.assign(uploadOptions, { resumeSession: { fileId: 'file-1', uploadId: 'upload-1' } });
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => resolved.mock.calls.length).toBe(1);
+    expect(uploadClientMediaArtifact).toHaveBeenCalledTimes(2);
+    expect(prepareMedia).toHaveBeenCalledOnce();
+    expect(abortUploadAction).not.toHaveBeenCalled();
+  });
+  it('fails unsupported direct media preparation before any original or artifact upload', async () => {
+    initiateFixture();
+    vi.mocked(prepareMedia).mockResolvedValue(null);
+    const rejected = vi.fn();
+    render(<UploadHarness clientMedia onResolved={vi.fn()} onRejected={rejected} />);
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => rejected.mock.calls.length).toBe(1);
+    expect(rejected.mock.calls[0]?.[0]).toMatchObject({ code: 'CLIENT_MEDIA_UNAVAILABLE', reason: 'capability' });
+    expect(initiateUploadAction).not.toHaveBeenCalled();
+    expect(prepareClientMediaUploadAction).not.toHaveBeenCalled();
+    expect(MockXMLHttpRequest.instances).toHaveLength(0);
+    expect(uploadClientMediaArtifact).not.toHaveBeenCalled();
+    expect(completeClientMediaUploadAction).not.toHaveBeenCalled();
+  });
+  it('pauses preparation without creating a server session, so retry can start preparation again', async () => {
+    initiateFixture();
+    let activeSignal: AbortSignal | undefined;
+    vi.mocked(prepareMedia).mockImplementationOnce(
+      (_file, { signal }) =>
+        new Promise((_resolve, reject) => {
+          activeSignal = signal;
+          signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true });
+        }),
+    );
+    const rejected = vi.fn();
+    render(<UploadHarness clientMedia onResolved={vi.fn()} onRejected={rejected} />);
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => activeSignal != null).toBe(true);
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#pause-upload')?.click();
+    });
+    await expect.poll(() => rejected.mock.calls.length).toBe(1);
+    expect(activeSignal?.aborted).toBe(true);
+    expect(rejected.mock.calls[0]?.[0]).toMatchObject({ code: 'UPLOAD_PAUSED' });
+    expect(initiateUploadAction).not.toHaveBeenCalled();
+    expect(abortUploadAction).not.toHaveBeenCalled();
+    expect(localStorage.getItem('geul-prepared-upload:file-1')).toBeNull();
+  });
+
+  it('pauses initiation after binding the completed preparation to its immutable bundle, without sending bytes', async () => {
+    initiateFixture();
+    const prepared = preparedFixture();
+    vi.mocked(prepareMedia).mockResolvedValue(prepared);
+    let finishInitiation: ((result: never) => void) | undefined;
+    vi.mocked(initiateUploadAction).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finishInitiation = resolve;
+        }) as never,
+    );
+    const rejected = vi.fn();
+    render(<UploadHarness clientMedia onResolved={vi.fn()} onRejected={rejected} />);
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => finishInitiation != null).toBe(true);
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#pause-upload')?.click();
+    });
+    await act(async () => {
+      finishInitiation?.({
+        fileId: 'file-1',
+        uploadId: 'upload-1',
+        totalParts: 1,
+        chunkSize: 5,
+        uploadedParts: [],
+        attemptId: 'attempt-1',
+        slotId: '',
+      } as never);
+    });
+    await expect.poll(() => rejected.mock.calls.length).toBe(1);
+    expect(rejected.mock.calls[0]?.[0]).toMatchObject({ code: 'UPLOAD_PAUSED' });
+    expect(abortUploadAction).not.toHaveBeenCalled();
+    expect(prepared.dispose).not.toHaveBeenCalled();
+    expect(prepareClientMediaUploadAction).toHaveBeenCalledOnce();
+    expect(MockXMLHttpRequest.instances).toHaveLength(0);
+    expect(uploadClientMediaArtifact).not.toHaveBeenCalled();
+    expect(readUploadSession('file-1')?.clientMediaBundleId).toBe('bundle-1');
+  });
+  it.each([
+    { mime: 'audio/ogg', name: 'audio.ogg', kind: 'audio' },
+    { mime: 'video/mp4', name: 'video.mp4', kind: 'video' },
+  ] as const)(
+    'prepares $mime editor attachments before initiation and commits with the bundle identity',
+    async ({ mime, name, kind }) => {
+      initiateFixture();
+      const prepared = preparedFixture();
+      prepared.metadata.kind = kind;
+      let finishPreparation: ((result: PreparedMedia) => void) | undefined;
+      vi.mocked(prepareMedia).mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            finishPreparation = resolve;
+          }),
+      );
+      const resolved = vi.fn();
+      render(
+        <UploadHarness
+          uploadType={UploadType.EDITOR_ATTACHMENT}
+          file={new File(['media'], name, { type: mime })}
+          onResolved={resolved}
+        />,
+      );
+      await act(async () => {
+        document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+      });
+      await expect.poll(() => finishPreparation != null).toBe(true);
+      expect(initiateUploadAction).not.toHaveBeenCalled();
+      expect(MockXMLHttpRequest.instances).toHaveLength(0);
+      await act(async () => {
+        finishPreparation?.(prepared);
+      });
+      await expect.poll(() => resolved.mock.calls.length).toBe(1);
+      expect(vi.mocked(prepareClientMediaUploadAction).mock.calls[0]?.[0]).toMatchObject({
+        kind,
+        fileId: 'file-1',
+        uploadId: 'upload-1',
+      });
+      expect(vi.mocked(completeClientMediaUploadAction).mock.calls[0]?.[0]).toMatchObject({
+        uploadType: UploadType.EDITOR_ATTACHMENT,
+        clientMediaBundleId: 'bundle-1',
+      });
+      expect(vi.mocked(initiateUploadAction).mock.calls[0]?.[0]).toMatchObject({
+        uploadType: UploadType.EDITOR_ATTACHMENT,
+        entityId: '',
+      });
+      expect(prepared.dispose).toHaveBeenCalledOnce();
+    },
+  );
+
+  it.each(['audio/ogg', 'video/mp4'])(
+    'blocks unsupported %s editor attachments before every remote upload',
+    async (mime) => {
+      initiateFixture();
+      vi.mocked(prepareMedia).mockResolvedValue(null);
+      const rejected = vi.fn();
+      render(
+        <UploadHarness
+          uploadType={UploadType.EDITOR_ATTACHMENT}
+          file={new File(['media'], 'media', { type: mime })}
+          onResolved={vi.fn()}
+          onRejected={rejected}
+        />,
+      );
+      await act(async () => {
+        document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+      });
+      await expect.poll(() => rejected.mock.calls.length).toBe(1);
+      expect(rejected.mock.calls[0]?.[0]).toMatchObject({ code: 'CLIENT_MEDIA_UNAVAILABLE' });
+      expect(initiateUploadAction).not.toHaveBeenCalled();
+      expect(prepareClientMediaUploadAction).not.toHaveBeenCalled();
+      expect(MockXMLHttpRequest.instances).toHaveLength(0);
+      expect(uploadClientMediaArtifact).not.toHaveBeenCalled();
+      expect(completeClientMediaUploadAction).not.toHaveBeenCalled();
+    },
+  );
+
+  it('keeps nonmedia editor attachments on their existing multipart completion path', async () => {
+    initiateFixture();
+    const resolved = vi.fn();
+    render(
+      <UploadHarness
+        uploadType={UploadType.EDITOR_ATTACHMENT}
+        file={new File(['%PDF-'], 'document.pdf', { type: 'application/pdf' })}
+        onResolved={resolved}
+      />,
+    );
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+    await expect.poll(() => resolved.mock.calls.length).toBe(1);
+    expect(prepareMedia).not.toHaveBeenCalled();
+    expect(prepareClientMediaUploadAction).not.toHaveBeenCalled();
+    expect(completeClientMediaUploadAction).not.toHaveBeenCalled();
+    expect(vi.mocked(completeUploadAction).mock.calls[0]?.[0]).toMatchObject({
+      uploadType: UploadType.EDITOR_ATTACHMENT,
+    });
+    expect(vi.mocked(completeUploadAction).mock.calls[0]?.[0]).not.toHaveProperty('clientMediaBundleId');
   });
 });

@@ -4,6 +4,11 @@ on:
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - '.github/**'
+      - '.release-please-manifest.json'
+      - 'CHANGELOG.md'
+      - 'release-please-config.json'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -67,7 +72,7 @@ jobs:
             done <<< "${changed_files}"
 
             if [ "${metadata_only}" = "true" ]; then
-              python3 - "${BASE_SHA}" "${HEAD_SHA}" <<'PY'
+              if ! python3 - "${BASE_SHA}" "${HEAD_SHA}" <<'PY'
           import json
           import subprocess
           import sys
@@ -105,6 +110,9 @@ jobs:
           if base_package != head_package or not (version_bumped or initial_version_recorded):
               raise SystemExit(1)
           PY
+              then
+                metadata_only=false
+              fi
             fi
 
             if [ "${metadata_only}" = "true" ]; then

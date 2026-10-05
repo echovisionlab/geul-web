@@ -1711,6 +1711,9 @@
     },
     "mcpIntegration": {
       "description": "Kết nối ứng dụng AI tương thích với điểm cuối này. Trình duyệt sẽ mở để đăng nhập và cấp quyền.",
+      "consentDescription": "Ứng dụng khách này có thể đọc và chỉnh sửa nội dung, cũng như quản lý tệp trong phạm vi quyền hiện có của tài khoản bạn. Ứng dụng có thể tạo, cập nhật hoặc xóa nội dung và thay đổi tệp đính kèm hiện có. Việc kết nối không cấp thêm quyền cho tài khoản.",
+      "consentOfflineAccess": "Kết nối này có thể tiếp tục sau khi phiên trình duyệt hiện tại kết thúc, cho đến khi bạn thu hồi.",
+      "consentRevoke": "Bạn có thể thu hồi kết nối này tại {settings} → Remote MCP.",
       "connectionsTitle": "Connected MCP clients",
       "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
       "connectionsEmpty": "No MCP clients are connected.",
@@ -5258,6 +5261,15 @@
       "metadataTitle": "Bộ chuyển mã âm thanh",
       "metadataDescription": "Chuyển đổi âm thanh trong trình duyệt của bạn. Các tập tin không bao giờ rời khỏi thiết bị của bạn.",
       "notices": "Giấy phép nguồn mở"
+    },
+    "hwp": {
+      "title": "Trình soạn thảo HWP",
+      "metadataDescription": "Mở, chỉnh sửa và lưu tài liệu HWP và HWPX trong trình duyệt.",
+      "description": "Dùng menu Tệp của trình soạn thảo để mở và lưu tệp HWP hoặc HWPX. Tài liệu được xử lý trên thiết bị này mà không tải lên máy chủ.",
+      "loading": "Đang tải trình soạn thảo…",
+      "error": "Không thể tải trình soạn thảo. Vui lòng thử lại.",
+      "retry": "Thử lại",
+      "metadataTitle": "Trình soạn thảo HWP"
     }
   },
   "myMetadata": {

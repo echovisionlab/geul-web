@@ -4,7 +4,7 @@ import {
   type ContentBlockMediaSelector,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import type { PublicMediaEntityType } from '@echovisionlab/geul-proto/public/file_pb.ts';
-import { createPublicFileClient } from '@/lib/api/browser-client';
+import { createPublicFileClient } from '@/lib/api/browser/public-file';
 
 export interface AuthorizeFileDownloadInput {
   entityType: PublicMediaEntityType;

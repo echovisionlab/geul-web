@@ -15,7 +15,8 @@ import { OgImagePreview } from '@/features/metadata/OgImagePreview';
 import { ShareLinkSection } from '@/features/share/ShareLinkSection';
 import { UrlSection } from '@/features/metadata/UrlSection';
 import { VersionHistoryDrawer } from '@/features/version-history';
-import { ContentLayoutField, type DocumentLayout } from '@/features/document-layout';
+import type { DocumentLayout } from '@/features/document-layout';
+import { ContentLayoutField } from '@/features/document-layout/ContentLayoutField';
 import { MetadataPanel } from '@/features/metadata/MetadataPanel/MetadataPanel';
 import { SummaryFieldCard } from '@/features/metadata/SummaryFieldCard/SummaryFieldCard';
 import { CreatePlaceModal, type CreatePlaceFormState } from '@/features/place/CreatePlaceModal';
@@ -402,20 +403,6 @@ function PostEditorContent({
     [setCommentsEnabled, postConfigUpdate],
   );
 
-  const handleScopedLocaleTitleChange = useCallback(
-    (value: string) => {
-      if (!roomLocale) {
-        return;
-      }
-      setResidentTitle(value);
-      if (activeEditLocale.isSourceLocale) {
-        setSourceTitle(value);
-      }
-      debouncedResidentMetadataUpdate({ locale: roomLocale, title: value });
-    },
-    [activeEditLocale.isSourceLocale, debouncedResidentMetadataUpdate, roomLocale, setSourceTitle],
-  );
-
   const handleScopedLocaleSummaryChange = useCallback(
     (value: string) => {
       if (!roomLocale) {
@@ -503,6 +490,29 @@ function PostEditorContent({
     isSynced: currentIsSynced,
   });
   const canMutateSourceDocument = canEditLocaleDocument && activeEditLocale.isSourceLocale;
+  const handleScopedLocaleTitleChange = useCallback(
+    (value: string) => {
+      if (!roomLocale) {
+        return;
+      }
+      setResidentTitle(value);
+      if (canMutateSourceDocument) {
+        slugMgmt.updateFromTitle(value);
+      }
+      if (activeEditLocale.isSourceLocale) {
+        setSourceTitle(value);
+      }
+      debouncedResidentMetadataUpdate({ locale: roomLocale, title: value });
+    },
+    [
+      canMutateSourceDocument,
+      slugMgmt.updateFromTitle,
+      activeEditLocale.isSourceLocale,
+      debouncedResidentMetadataUpdate,
+      roomLocale,
+      setSourceTitle,
+    ],
+  );
   const canEditSharedTaxonomy = canMutateSourceDocument && isSynced;
   const editorAiTarget = resolvePostEditorAiTarget({ postId, roomLocale, canEditLocaleDocument });
   const canRestoreCurrentVersion = canRestoreVersion && !permissionRevocation.blocked;
@@ -569,6 +579,7 @@ function PostEditorContent({
             entityType="post"
             entityId={postId}
             slug={toSlugInputValue(slug)}
+            isAvailable={slugMgmt.isAvailable}
             idPrefix={`post-${postId}`}
             error={slugMgmt.error}
             saving={slugMgmt.isChecking || postConfigUpdate.isPending}

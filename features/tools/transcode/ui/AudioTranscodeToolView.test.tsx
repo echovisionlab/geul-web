@@ -40,6 +40,7 @@ Object.defineProperty(window, 'ResizeObserver', {
 
 const labels: AudioTranscodeToolLabels = {
   title: 'Audio transcoder',
+  description: 'Convert audio files in your browser without uploading them.',
   notices: 'Open-source licenses',
   targetIdle: 'Waiting',
   targetChecking: 'Checking support',
@@ -206,6 +207,28 @@ afterEach(() => {
 });
 
 describe('AudioTranscodeToolView', () => {
+  it('uses accessible indeterminate Core progress while inspecting a file without a percentage', () => {
+    renderView({ files: [fileModel('inspect', 'inspecting', { statusLabel: 'Inspecting audio' })] });
+    const row = container.querySelector('[data-file-status="inspecting"]');
+    const progress = row?.querySelector('[role="progressbar"]');
+    expect(row?.getAttribute('aria-busy')).toBe('true');
+    expect(progress?.getAttribute('aria-label')).toBe('Inspecting audio');
+    expect(progress?.hasAttribute('aria-valuenow')).toBe(false);
+    expect(progress?.hasAttribute('aria-valuetext')).toBe(false);
+    expect(row?.textContent).not.toContain('%');
+  });
+
+  it('shows the shared page title and description and hides both when embedded', () => {
+    renderView();
+    expect(container.querySelector('h1')?.textContent).toBe(labels.title);
+    expect(container.textContent).toContain(labels.description);
+
+    renderView({ title: null });
+    expect(container.querySelector('h1')).toBeNull();
+    expect(container.textContent).not.toContain(labels.description);
+    expect(container.textContent).toContain(labels.outputSettings);
+  });
+
   it('forwards picker and drag/drop file intent without accepting folders', async () => {
     renderView();
 

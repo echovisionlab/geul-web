@@ -5,7 +5,7 @@ import {
   UPLOAD_INTERRUPTED_MESSAGE,
 } from '@/lib/upload/failure';
 
-type UploadPartError = Error & { status?: number; retryable?: boolean };
+type UploadPartError = Error & { status?: number; retryable?: boolean; retryAfterMs?: number };
 
 export function normalizeUploadErrorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error || '');
@@ -20,6 +20,9 @@ export function normalizeUploadErrorMessage(error: unknown): string {
     normalized.includes('unexpected eof') ||
     normalized.includes('networkerror') ||
     normalized.includes('network error') ||
+    normalized.includes('failed to fetch') ||
+    normalized.includes('fetch failed') ||
+    normalized === 'load failed' ||
     normalized.includes('body stream') ||
     normalized.includes('context canceled') ||
     normalized.includes('upload interrupted')
@@ -51,10 +54,22 @@ export function isDefinitiveUploadCompletionError(error: unknown): boolean {
   return message === UPLOAD_FAILED_MESSAGE || message === 'Unauthorized' || message === 'Forbidden';
 }
 
-export function createUploadPartError(status: number, detail: string, retryable = false): UploadPartError {
+export function createUploadPartError(
+  status: number,
+  detail: string,
+  retryable = false,
+  retryAfter?: string | null,
+): UploadPartError {
   const error = createUploadError(`Failed to upload part: ${detail}`) as UploadPartError;
   error.status = status;
   error.retryable = retryable;
+  if ((status === 429 || status === 503) && retryAfter) {
+    const seconds = Number(retryAfter);
+    const delay = Number.isFinite(seconds) ? seconds * 1000 : Date.parse(retryAfter) - Date.now();
+    if (Number.isFinite(delay)) {
+      error.retryAfterMs = Math.max(0, Math.min(delay, 60_000));
+    }
+  }
   return error;
 }
 
@@ -73,4 +88,16 @@ export function isRetryableUploadPartError(error: unknown): boolean {
     );
   }
   return message === UPLOAD_INTERRUPTED_MESSAGE || message === UPLOAD_FAILED_MESSAGE;
+}
+
+export const CLIENT_MEDIA_ARTIFACTS_MISSING = 'CLIENT_MEDIA_ARTIFACTS_MISSING';
+
+export function isClientMediaArtifactsMissingError(error: unknown): boolean {
+  return error instanceof Error && error.message === CLIENT_MEDIA_ARTIFACTS_MISSING;
+}
+
+export function isClientMediaRestoreMismatchError(
+  error: unknown,
+): error is Error & { code: 'CLIENT_MEDIA_RESTORE_MISMATCH' } {
+  return error instanceof Error && 'code' in error && error.code === 'CLIENT_MEDIA_RESTORE_MISMATCH';
 }

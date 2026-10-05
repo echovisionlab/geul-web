@@ -1,7 +1,7 @@
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createClientClient } from '@/lib/api/browser-client';
+import { createClientClient } from '@/lib/api/browser/secure-client';
 import { assetRefFixture } from '@/tests/helpers/asset-ref';
 import { getClient, listClientsForSelector, searchClients } from './client-browser';
 
@@ -9,7 +9,7 @@ const getClientMock = vi.fn();
 const listClientsMock = vi.fn();
 const searchClientsMock = vi.fn();
 
-vi.mock('@/lib/api/browser-client', () => ({
+vi.mock('@/lib/api/browser/secure-client', () => ({
   createClientClient: vi.fn(),
 }));
 

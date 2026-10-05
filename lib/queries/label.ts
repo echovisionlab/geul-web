@@ -1,3 +1,4 @@
+import { getPublicLabelResponse } from '@/lib/queries/detail-public.server';
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { create } from '@bufbuild/protobuf';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
@@ -210,16 +211,31 @@ export async function getLabelPublic(
   options?: { preferSourceLocale?: boolean; requestedLocale?: string | null; sharePassword?: string },
 ): Promise<PublicLabel | null> {
   try {
-    const client = await createPublicLabelClientWithAuth(options?.requestedLocale);
-    let response = await client.get({ slug: idOrSlug, shareToken, sharePassword: options?.sharePassword });
+    const guarded = shareToken !== undefined || options?.sharePassword !== undefined;
+    let decodedSlug = idOrSlug;
+    if (!guarded) {
+      try {
+        decodedSlug = decodeURIComponent(idOrSlug);
+      } catch (error) {
+        if (!(error instanceof URIError)) {
+          throw error;
+        }
+        // Retain the previous body-reader behavior for malformed escape sequences.
+      }
+    }
+    const read = async (locale?: string | null) => {
+      if (!guarded) {
+        return getPublicLabelResponse(decodedSlug, locale);
+      }
+      const client = await createPublicLabelClientWithAuth(locale);
+      return client.get({ slug: idOrSlug, shareToken, sharePassword: options?.sharePassword });
+    };
+    let response = await read(options?.requestedLocale);
     response = await maybeFetchSourceLocale({
       preferSourceLocale: options?.preferSourceLocale,
       initialResponse: response,
       entity: response.label ?? null,
-      fetchWithLocale: async (locale) => {
-        const sourceClient = await createPublicLabelClientWithAuth(locale);
-        return sourceClient.get({ slug: idOrSlug, shareToken, sharePassword: options?.sharePassword });
-      },
+      fetchWithLocale: read,
     });
 
     if (!response.label) {

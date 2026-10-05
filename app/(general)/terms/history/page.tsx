@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { getPublicLegalHistory } from '@/lib/queries/legal-history.server';
+import { getUserLocale } from '@/lib/utils/language.server';
+import { resolveContentRequestedLocale } from '@/lib/translation/content-language';
 import { getTranslations } from 'next-intl/server';
 import { JsonLdScript } from '@/features/metadata/ui/JsonLdScript';
 import { getSiteMetadataDocument } from '@/lib/queries/metadata';
@@ -24,7 +27,13 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default async function TermsHistoryPage() {
+export default async function TermsHistoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const requestedLocale = resolveContentRequestedLocale(await getUserLocale(), await searchParams);
+  const history = getPublicLegalHistory('terms', requestedLocale).catch(() => undefined);
   const [t, tMetadata] = await Promise.all([getTranslations('termsHistory'), getTranslations('termsHistory.metadata')]);
   const site = await getSiteMetadataDocument();
   const title = t('title');
@@ -40,7 +49,7 @@ export default async function TermsHistoryPage() {
           description,
         })}
       />
-      <TermsHistoryClient />
+      <TermsHistoryClient initialData={await history} />
     </>
   );
 }

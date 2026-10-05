@@ -1,0 +1,8 @@
+{
+  "buildId": "0.8.6-dsub.2",
+  "basePath": "/vendors/rhwp/0.8.6-dsub.2/",
+  "source": "https://github.com/echovisionlab/rhwp",
+  "upstreamCommit": "e8800c8def63449808a4092798442652ed460552",
+  "archiveUrl": "https://github.com/echovisionlab/rhwp/releases/download/dsub-runtime-0.8.6-2/rhwp-studio-0.8.6-dsub.2.tar.gz",
+  "sha256": "dbb7ebe842ca7a5190672a26e47c321e25b231d8b6d9d0fa7b42e47380928206"
+}

@@ -13,7 +13,7 @@ const generated = vi.hoisted(() => ({
   applyAIDocumentOperations: vi.fn(),
 }));
 
-vi.mock('@/lib/api/browser-client', () => ({
+vi.mock('@/lib/api/browser/secure-ai', () => ({
   createAIDocumentClient: () => generated,
 }));
 

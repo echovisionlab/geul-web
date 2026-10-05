@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { getPublicLegalHistory } from '@/lib/queries/legal-history.server';
+import { getUserLocale } from '@/lib/utils/language.server';
+import { resolveContentRequestedLocale } from '@/lib/translation/content-language';
 import { getTranslations } from 'next-intl/server';
 import { JsonLdScript } from '@/features/metadata/ui/JsonLdScript';
 import { getSiteMetadataDocument } from '@/lib/queries/metadata';
@@ -27,7 +30,13 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default async function PrivacyHistoryPage() {
+export default async function PrivacyHistoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const requestedLocale = resolveContentRequestedLocale(await getUserLocale(), await searchParams);
+  const history = getPublicLegalHistory('privacy', requestedLocale).catch(() => undefined);
   const [t, tMetadata] = await Promise.all([
     getTranslations('privacyHistory'),
     getTranslations('privacyHistory.metadata'),
@@ -46,7 +55,7 @@ export default async function PrivacyHistoryPage() {
           description,
         })}
       />
-      <PrivacyHistoryClient />
+      <PrivacyHistoryClient initialData={await history} />
     </>
   );
 }

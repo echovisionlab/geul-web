@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  AUDIO_TRANSCODER_CODEC_ASSET_MANIFEST,
   AUDIO_TRANSCODER_STREAM_CAPABILITIES,
   AudioTranscoderError,
   type AudioStreamInputSupportResult,
@@ -103,7 +104,7 @@ describe('createAudioTranscoderRuntime', () => {
           basePath: 'codec-assets',
           kind: 'jsdelivr-github',
           repository: 'echovisionlab/audio-transcoder',
-          tag: 'v0.1.2',
+          tag: `v${AUDIO_TRANSCODER_CODEC_ASSET_MANIFEST.version}`,
         },
       },
       concurrency: 1,

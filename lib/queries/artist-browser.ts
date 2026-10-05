@@ -1,4 +1,4 @@
-import { createArtistClient } from '@/lib/api/browser-client';
+import { createArtistClient } from '@/lib/api/browser/secure-artist';
 import { createClientLogger, serializeClientLogError } from '@/lib/utils/client-logger';
 
 const logger = createClientLogger('artist-browser');

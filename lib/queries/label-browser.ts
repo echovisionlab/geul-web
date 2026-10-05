@@ -1,4 +1,4 @@
-import { createLabelClient } from '@/lib/api/browser-client';
+import { createLabelClient } from '@/lib/api/browser/secure-label';
 import { createClientLogger, serializeClientLogError } from '@/lib/utils/client-logger';
 import { themedAssetRefUrl } from '@/lib/utils/asset-ref';
 

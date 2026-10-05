@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
-import domtoimage from 'dom-to-image-more';
 import type * as maplibregl from 'maplibre-gl';
 import { useWindowEvent } from '@mantine/hooks';
 
@@ -16,10 +15,19 @@ export function useMapPrintCapture({ mapRef, containerRef, isReady }: Options) {
   const capturedRef = useRef(false);
   const captureInProgressRef = useRef(false);
   const captureMethodRef = useRef<'none' | 'canvas' | 'dom'>('none');
+  const cancelledRef = useRef(false);
+
+  useEffect(() => {
+    cancelledRef.current = false;
+    return () => {
+      cancelledRef.current = true;
+    };
+  }, []);
 
   const capture = useCallback(
     async (mode: 'background' | 'beforeprint') => {
       if (
+        cancelledRef.current ||
         captureInProgressRef.current ||
         (mode === 'background' && capturedRef.current) ||
         (mode === 'beforeprint' && captureMethodRef.current === 'dom')
@@ -36,7 +44,14 @@ export function useMapPrintCapture({ mapRef, containerRef, isReady }: Options) {
       try {
         if (mode === 'beforeprint') {
           try {
+            const { default: domtoimage } = await import('dom-to-image-more');
+            if (cancelledRef.current || containerRef.current !== container || mapRef.current !== map) {
+              return;
+            }
             const domCapture = await domtoimage.toJpeg(container, { quality: 1 });
+            if (cancelledRef.current || containerRef.current !== container || mapRef.current !== map) {
+              return;
+            }
             if (domCapture) {
               setImageUrl(domCapture);
               capturedRef.current = true;
@@ -48,6 +63,9 @@ export function useMapPrintCapture({ mapRef, containerRef, isReady }: Options) {
           }
         }
 
+        if (cancelledRef.current || containerRef.current !== container || mapRef.current !== map) {
+          return;
+        }
         try {
           const canvasCapture = map.getCanvas().toDataURL('image/jpeg', 0.95);
           if (canvasCapture && canvasCapture !== 'data:,') {

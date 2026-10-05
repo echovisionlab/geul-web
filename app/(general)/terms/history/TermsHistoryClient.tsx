@@ -1,10 +1,14 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
+import { resolveContentRequestedLocale } from '@/lib/translation/content-language';
+import type { PublicLegalHistoryInitialData } from '@/lib/queries/legal-history';
+import { useLocale, useTranslations } from 'next-intl';
 import { LegalPolicyHistoryClient } from '@/features/policy/LegalPolicyHistoryClient';
 import { getActiveTerms, listArchivedTerms } from '@/lib/queries/terms-browser';
 
-export function TermsHistoryClient() {
+export function TermsHistoryClient({ initialData }: { initialData?: PublicLegalHistoryInitialData }) {
+  const requestedLocale = resolveContentRequestedLocale(useLocale(), Object.fromEntries(useSearchParams().entries()));
   const t = useTranslations('termsHistory');
   const common = useTranslations('legalHistoryCommon');
   const actions = useTranslations('common.actions');
@@ -16,6 +20,8 @@ export function TermsHistoryClient() {
   return (
     <LegalPolicyHistoryClient
       policy="terms"
+      requestedLocale={requestedLocale}
+      initialData={initialData}
       getActive={getActiveTerms}
       listArchived={listArchivedTerms}
       labels={{

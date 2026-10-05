@@ -1711,6 +1711,9 @@
     },
     "mcpIntegration": {
       "description": "Ligue um cliente de IA compatível a este endpoint. O navegador será aberto para iniciar sessão e dar consentimento.",
+      "consentDescription": "Este cliente pode ler e editar conteúdo e gerir ficheiros dentro das permissões atuais da sua conta. Pode criar, atualizar ou eliminar conteúdo e alterar anexos existentes. A ligação não concede permissões adicionais à conta.",
+      "consentOfflineAccess": "Esta ligação pode continuar após o fim da sessão atual do navegador, até que a revogue.",
+      "consentRevoke": "Pode revogar esta ligação em {settings} → Remote MCP.",
       "connectionsTitle": "Connected MCP clients",
       "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
       "connectionsEmpty": "No MCP clients are connected.",
@@ -5258,6 +5261,15 @@
       "metadataTitle": "Transcodificador de áudio",
       "metadataDescription": "Converta áudio no seu navegador. Os ficheiros nunca saem do seu dispositivo.",
       "notices": "Licenças de código aberto"
+    },
+    "hwp": {
+      "title": "Editor HWP",
+      "metadataDescription": "Abra, edite e guarde documentos HWP e HWPX no navegador.",
+      "description": "Use o menu Ficheiro do editor para abrir e guardar ficheiros HWP ou HWPX. Os documentos são processados neste dispositivo sem serem enviados.",
+      "loading": "A carregar o editor…",
+      "error": "Não foi possível carregar o editor. Tente novamente.",
+      "retry": "Tentar novamente",
+      "metadataTitle": "Editor HWP"
     }
   },
   "myMetadata": {

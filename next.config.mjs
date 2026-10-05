@@ -1,6 +1,9 @@
 import bundleAnalyzer from '@next/bundle-analyzer';
 import createNextIntlPlugin from 'next-intl/plugin';
 import { fileURLToPath } from 'node:url';
+import { prepareClientMediaCodecs } from './scripts/prepare-client-media-codecs.mjs';
+
+await prepareClientMediaCodecs();
 
 const useLocalContracts = process.env.LOCAL_CONTRACTS === '1';
 const releaseImageBuild = process.env.RELEASE_IMAGE_BUILD === 'true';
@@ -17,6 +20,7 @@ const allowedDevOrigins = process.env.ALLOWED_DEV_ORIGINS
 
 export default withNextIntl(
   withBundleAnalyzer({
+    agentRules: false,
     distDir: process.env.DIST_DIR || '.next',
     output: 'standalone',
     outputFileTracingIncludes: {
@@ -28,6 +32,7 @@ export default withNextIntl(
       '@echovisionlab/geul-event',
       '@echovisionlab/geul-proto',
       '@echovisionlab/geul-telemetry',
+      '@echovisionlab/audio-transcoder',
     ],
     turbopack: useLocalContracts
       ? {

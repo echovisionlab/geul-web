@@ -8,6 +8,7 @@ import { DEFAULT_SITE_SETTINGS_VIEW, type SiteSettingsView } from '@/lib/types/s
 interface ManifestContextValue {
   settings: SiteSettingsView;
   menus: Menus;
+  socialLinks: ReactNode;
 }
 
 const DEFAULT_MENUS: Menus = {
@@ -21,14 +22,16 @@ const DEFAULT_MENUS: Menus = {
 const ManifestContext = createContext<ManifestContextValue>({
   settings: DEFAULT_SITE_SETTINGS_VIEW,
   menus: DEFAULT_MENUS,
+  socialLinks: null,
 });
 
 interface ManifestProviderProps {
   children: ReactNode;
   manifest?: Manifest;
+  socialLinks?: ReactNode;
 }
 
-export function ManifestProvider({ children, manifest }: ManifestProviderProps) {
+export function ManifestProvider({ children, manifest, socialLinks = null }: ManifestProviderProps) {
   const settings: SiteSettingsView = {
     ...DEFAULT_SITE_SETTINGS_VIEW,
     ...manifest?.settings,
@@ -36,7 +39,7 @@ export function ManifestProvider({ children, manifest }: ManifestProviderProps) 
 
   const menus: Menus = manifest?.menus ?? DEFAULT_MENUS;
 
-  return <ManifestContext.Provider value={{ settings, menus }}>{children}</ManifestContext.Provider>;
+  return <ManifestContext.Provider value={{ settings, menus, socialLinks }}>{children}</ManifestContext.Provider>;
 }
 
 export function useSiteSettings() {
@@ -47,4 +50,9 @@ export function useSiteSettings() {
 export function useMenus() {
   const { menus } = useContext(ManifestContext);
   return menus;
+}
+
+/** Server-prepared footer content; no client icon catalog is required. */
+export function useSiteSocialLinks() {
+  return useContext(ManifestContext).socialLinks;
 }

@@ -8,9 +8,9 @@ import {
   DateTimeInput,
   dateTimeValueToDate,
   dateToDateTimeValue,
-  Select,
   type DateTimeValue,
-} from '@/components/core/Input';
+} from '@/components/core/Input/DateTimeInput';
+import { Select } from '@/components/core/Input';
 import {
   getIanaTimeZoneOptions,
   instantToScheduleInput,

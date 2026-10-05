@@ -3,7 +3,7 @@
 import Link from '@/components/core/Navigation';
 import { Anchor, Collapse, Group, Paper, Stack, Text } from '@mantine/core';
 import { Button } from '@/components/core/Button';
-import { Switch } from '@/components/core/Input';
+import { Switch } from '@/components/core/Input/Switch';
 
 export interface CookieConsentLearnMoreSegment {
   text: string;

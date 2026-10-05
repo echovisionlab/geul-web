@@ -1,130 +1,141 @@
 'use client';
 
-import { useState } from 'react';
-import NextImage from 'next/image';
-import { useRouter } from 'next/navigation';
-import { IconArticle, IconSearch } from '@tabler/icons-react';
-import { useQuery } from '@tanstack/react-query';
+import { Component, type ComponentType, type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Box, Group, Text } from '@mantine/core';
-import { useDebouncedValue } from '@mantine/hooks';
-import { Spotlight } from '@mantine/spotlight';
-import { searchPublishedPosts } from '@/lib/queries/post-browser';
+import { useDebouncedValue, useHotkeys } from '@mantine/hooks';
+import { createSpotlight, SpotlightEmpty, SpotlightRoot, SpotlightSearch, useSpotlight } from '@mantine/spotlight';
+import { IconSearch } from '@tabler/icons-react';
+import { Alert } from '@/components/core/Alert';
+import { Button } from '@/components/core/Button';
+import { loadPostSpotlightRuntime } from './post-spotlight-runtime-loader';
+import { consumePostSpotlightOpen, POST_SPOTLIGHT_OPEN_EVENT } from './post-spotlight-trigger';
+import type { PostSpotlightRuntimeProps } from './PostSpotlightRuntime';
 
-interface SearchedPost {
-  id: string;
-  title: string;
-  slug: string;
-  featuredImageUrl: string;
+class SearchBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode; resetKey: number },
+  { failed: boolean; resetKey: number }
+> {
+  state = { failed: false, resetKey: 0 };
+
+  static getDerivedStateFromProps(props: { resetKey: number }, state: { resetKey: number }) {
+    return props.resetKey !== state.resetKey ? { failed: false, resetKey: props.resetKey } : null;
+  }
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
 }
 
+/** Open the input immediately; mount search data/results only after invocation. */
 export function PostSpotlight() {
-  const router = useRouter();
-  const tCommonMessages = useTranslations('common.messages');
-  const tCommonPlaceholders = useTranslations('common.placeholders');
-  const tCommonStates = useTranslations('common.states');
+  const t = useTranslations('common');
+  const [[store, controls]] = useState(createSpotlight);
+  const { opened } = useSpotlight(store);
   const [query, setQuery] = useState('');
   const [debouncedQuery] = useDebouncedValue(query, 300);
+  const tPlaceholders = useTranslations('common.placeholders');
+  const tMessages = useTranslations('common.messages');
+  const tStates = useTranslations('common.states');
+  const [Runtime, setRuntime] = useState<ComponentType<PostSpotlightRuntimeProps> | null>(null);
+  const [openRequest, setOpenRequest] = useState(0);
+  const [failed, setFailed] = useState(false);
+  const mounted = useRef(false);
+  const pending = useRef(false);
+  const loaded = useRef(false);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['post', 'searchPublished', debouncedQuery],
-    queryFn: () => searchPublishedPosts(debouncedQuery, 10),
-    enabled: debouncedQuery.length >= 2,
-  });
-
-  // searchPublishedPostsAction returns an array of posts directly
-  const posts = (data ?? []) as SearchedPost[];
-
-  const actions = posts.map((post) => ({
-    id: post.id,
-    label: post.title || tCommonStates('untitledPlain'),
-    leftSection: post.featuredImageUrl ? (
-      <Box
-        style={{
-          width: 38,
-          height: 38,
-          borderRadius: 'var(--mantine-radius-sm)',
-          overflow: 'hidden',
-          position: 'relative',
-          flexShrink: 0,
-        }}
-      >
-        <NextImage
-          src={post.featuredImageUrl}
-          alt={post.title || ''}
-          fill
-          sizes="38px"
-          style={{ objectFit: 'cover' }}
-        />
-      </Box>
-    ) : (
-      <IconArticle size={24} />
-    ),
-    onClick: () => {
-      router.push(`/posts/${post.slug || post.id}`);
-    },
-  }));
-
-  const getNothingFoundMessage = () => {
-    if (query.length === 0) {
-      return tCommonPlaceholders('searchPosts');
+  const open = useCallback(() => {
+    setOpenRequest((request) => request + 1);
+    setFailed(false);
+    controls.open();
+    if (loaded.current || pending.current) {
+      return;
     }
-    if (query.length < 2) {
-      return tCommonMessages('typeAtLeast2Characters', { count: 2 });
-    }
-    if (isLoading) {
-      return tCommonStates('loading');
-    }
-    return tCommonMessages('noPostsFound');
-  };
+    pending.current = true;
+    loadPostSpotlightRuntime()
+      .then((runtime) => {
+        if (mounted.current) {
+          loaded.current = true;
+          setRuntime(() => runtime);
+        }
+      })
+      .catch(() => {
+        if (mounted.current) {
+          setFailed(true);
+        }
+      })
+      .finally(() => {
+        pending.current = false;
+      });
+  }, [controls]);
+
+  useEffect(() => {
+    mounted.current = true;
+    const handleOpen = () => {
+      if (consumePostSpotlightOpen()) {
+        open();
+      }
+    };
+    window.addEventListener(POST_SPOTLIGHT_OPEN_EVENT, handleOpen);
+    handleOpen();
+    return () => {
+      mounted.current = false;
+      controls.close();
+      window.removeEventListener(POST_SPOTLIGHT_OPEN_EVENT, handleOpen);
+    };
+  }, [open, controls]);
+
+  useHotkeys([['mod + K', open]]);
+
+  const fallback = (
+    <Alert tone="danger" role="alert" title={t('labels.error')} withCloseButton onClose={controls.close}>
+      {t('errors.generic')}
+      <Button onClick={open} mt="sm">
+        {t('actions.tryAgain')}
+      </Button>
+    </Alert>
+  );
+
+  const pendingMessage =
+    query.length === 0
+      ? tPlaceholders('searchPosts')
+      : query.length < 2
+        ? tMessages('typeAtLeast2Characters', { count: 2 })
+        : tStates('loading');
 
   return (
-    <Spotlight
-      actions={actions}
+    <SpotlightRoot
+      store={store}
       query={query}
       onQueryChange={setQuery}
-      shortcut="mod + K"
-      nothingFound={getNothingFoundMessage()}
-      highlightQuery
-      searchProps={{
-        placeholder: tCommonPlaceholders('searchPosts'),
-        leftSection: <IconSearch size={20} />,
-      }}
+      shortcut={null}
       styles={{
-        content: {
-          padding: 'var(--mantine-spacing-sm)',
-        },
+        content: { padding: 'var(--mantine-spacing-sm)' },
         search: {
           border: 'none',
           borderBottom: '1px solid var(--mantine-color-default-border)',
           borderRadius: 0,
           background: 'transparent',
         },
-        action: {
-          padding: 'var(--mantine-spacing-sm)',
-          borderRadius: 'var(--mantine-radius-md)',
-        },
-        actionBody: {
-          flex: 1,
-        },
-        actionsGroup: {
-          padding: 'var(--mantine-spacing-xs) 0',
-        },
+        action: { padding: 'var(--mantine-spacing-sm)', borderRadius: 'var(--mantine-radius-md)' },
+        actionBody: { flex: 1 },
+        actionsGroup: { padding: 'var(--mantine-spacing-xs) 0' },
       }}
-      filter={() => actions}
     >
-      {actions.map((action) => (
-        <Spotlight.Action key={action.id} onClick={action.onClick}>
-          <Group wrap="nowrap" w="100%" gap="md">
-            {action.leftSection}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <Text size="sm" fw={500} truncate>
-                {action.label}
-              </Text>
-            </div>
-          </Group>
-        </Spotlight.Action>
-      ))}
-    </Spotlight>
+      <SpotlightSearch placeholder={tPlaceholders('searchPosts')} leftSection={<IconSearch size={20} />} />
+      {opened &&
+        (failed ? (
+          fallback
+        ) : Runtime ? (
+          <SearchBoundary resetKey={openRequest} fallback={fallback}>
+            <Runtime query={query} debouncedQuery={debouncedQuery} opened={opened} />
+          </SearchBoundary>
+        ) : (
+          <SpotlightEmpty>{pendingMessage}</SpotlightEmpty>
+        ))}
+    </SpotlightRoot>
   );
 }

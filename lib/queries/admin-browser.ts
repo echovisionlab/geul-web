@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/api/browser-client';
+import { createAdminClient } from '@/lib/api/browser/secure-admin';
 
 // Browser: get admin dashboard stats (for Client Component useQuery)
 export async function getAdminStats() {

@@ -97,7 +97,13 @@ vi.mock('@/lib/hooks/useOgImage', () => ({
 }));
 vi.mock('@/lib/hooks/useOgGenerationLookupSignal', () => ({ useOgGenerationLookupSignal: vi.fn() }));
 vi.mock('@/lib/hooks/useSlugManagement', () => ({
-  useSlugManagement: () => ({ error: null, isChecking: false, handleChange: vi.fn(), handleBlur: vi.fn() }),
+  useSlugManagement: () => ({
+    error: null,
+    isChecking: false,
+    handleChange: vi.fn(),
+    handleBlur: vi.fn(),
+    updateFromTitle: vi.fn(),
+  }),
 }));
 vi.mock('./usePostConfigSave', () => ({ usePostConfigSave: () => mocks.configUpdate }));
 vi.mock('./usePostLifecycle', () => ({ usePostLifecycle: () => mocks.lifecycle }));
@@ -152,7 +158,7 @@ vi.mock('@/features/metadata/OgImagePreview', () => ({ OgImagePreview: () => nul
 vi.mock('@/features/share/ShareLinkSection', () => ({ ShareLinkSection: () => null }));
 vi.mock('@/features/metadata/UrlSection', () => ({ UrlSection: () => null }));
 vi.mock('@/features/version-history', () => ({ VersionHistoryDrawer: () => null }));
-vi.mock('@/features/document-layout', () => ({ ContentLayoutField: () => null }));
+vi.mock('@/features/document-layout/ContentLayoutField', () => ({ ContentLayoutField: () => null }));
 vi.mock('@/features/place/CreatePlaceModal', () => ({ CreatePlaceModal: () => null }));
 vi.mock('@/features/translation/EditorActiveLocaleControl', () => ({ EditorActiveLocaleControl: () => null }));
 vi.mock('@/features/translation/EntityTranslationsPanel', () => ({ EntityTranslationsPanel: () => null }));

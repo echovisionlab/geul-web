@@ -916,6 +916,9 @@
     },
     "mcpIntegration": {
       "description": "صِل عميل ذكاء اصطناعي متوافقًا بنقطة النهاية هذه. سيفتح المتصفح لتسجيل الدخول والموافقة.",
+      "consentDescription": "يمكن لهذا العميل قراءة المحتوى وتعديله وإدارة الملفات ضمن صلاحيات حسابك الحالية. ويمكنه إنشاء المحتوى أو تحديثه أو حذفه وتغيير المرفقات الموجودة. لا يمنح الاتصال أي صلاحيات إضافية للحساب.",
+      "consentOfflineAccess": "يمكن أن يستمر هذا الاتصال بعد انتهاء جلسة المتصفح الحالية إلى أن تلغيه.",
+      "consentRevoke": "يمكنك إلغاء هذا الاتصال من {settings} → Remote MCP.",
       "connectionsTitle": "Connected MCP clients",
       "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
       "connectionsEmpty": "No MCP clients are connected.",
@@ -5258,6 +5261,15 @@
       "automaticRateUnavailable": "لا يستطيع الوضع التلقائي اختيار معدل صالح للمصدر ذي المعدل {sourceRate}. معدلات الخرج المسموح بها: {allowed}.",
       "presetRateUnsupported": "هذا الخرج لا يدعم {targetRate}. المعدلات المسموح بها: {allowed}.",
       "notices": "تراخيص المصادر المفتوحة"
+    },
+    "hwp": {
+      "title": "محرر HWP",
+      "metadataDescription": "افتح مستندات HWP وHWPX وحررها واحفظها في متصفحك.",
+      "description": "استخدم قائمة الملف في المحرر لفتح ملفات HWP أو HWPX وحفظها. تُعالج المستندات على هذا الجهاز دون رفعها.",
+      "loading": "جارٍ تحميل المحرر…",
+      "error": "تعذر تحميل المحرر. حاول مرة أخرى.",
+      "retry": "إعادة المحاولة",
+      "metadataTitle": "محرر HWP"
     }
   },
   "myMetadata": {

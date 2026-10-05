@@ -9,7 +9,7 @@ import {
   type TranslationLocale,
 } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
 import { useQuery } from '@tanstack/react-query';
-import { createTranslationClient } from '@/lib/api/browser-client';
+import { createTranslationClient } from '@/lib/api/browser/secure-translation';
 import { getSupportedLocaleOptions, normalizeLocale } from '@/lib/i18n/locale';
 import { CONTENT_LANGUAGE_QUERY_PARAM } from '@/lib/translation/content-language';
 import { extractTranslationContentPreview } from '@/lib/translation/contentPreview';

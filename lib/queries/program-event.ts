@@ -1,3 +1,4 @@
+import { getPublicProgramEventResponse, getPublicProgramEventSeriesResponse } from '@/lib/queries/detail-public.server';
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { create } from '@bufbuild/protobuf';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
@@ -16,7 +17,6 @@ import {
   createProgramEventTypeClient,
   createPublicProgramEventClient,
   createPublicProgramEventClientWithAuth,
-  createPublicProgramEventSeriesClientWithAuth,
 } from '@/lib/api/server-client';
 import { mapPublicLocalizationInfo, maybeFetchSourceLocale } from '@/lib/queries/localized-public';
 import { materializeLocalizedRichTextTree } from '@/features/editor/contract/localized-rich-text';
@@ -632,16 +632,12 @@ export async function getProgramEventView(
   const slug = decodeURIComponent(idOrSlug);
   let response;
   try {
-    const client = await createPublicProgramEventClientWithAuth(options?.requestedLocale);
-    response = await client.get({ slug });
+    response = await getPublicProgramEventResponse(slug, options?.requestedLocale);
     response = await maybeFetchSourceLocale({
       preferSourceLocale: options?.preferSourceLocale,
       initialResponse: response,
       entity: response.event ?? null,
-      fetchWithLocale: async (locale) => {
-        const sourceClient = await createPublicProgramEventClientWithAuth(locale);
-        return sourceClient.get({ slug });
-      },
+      fetchWithLocale: (locale) => getPublicProgramEventResponse(slug, locale),
     });
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
@@ -750,8 +746,7 @@ export async function getProgramEventView(
 export async function getProgramEventSeriesView(idOrSlug: string): Promise<PublicProgramEventSeriesDetail | null> {
   const slug = decodeURIComponent(idOrSlug);
   try {
-    const client = await createPublicProgramEventSeriesClientWithAuth();
-    const response = await client.get({ slug });
+    const response = await getPublicProgramEventSeriesResponse(slug);
 
     const series = response.series;
     if (!series) {

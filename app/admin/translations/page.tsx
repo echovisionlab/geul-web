@@ -23,7 +23,7 @@ import { useDateTimeFormatter } from '@/features/date-time/DateTime';
 import { PageLoader } from '@/features/site/PageLoader';
 import { translationOverviewRefetchInterval } from '@/features/translation/translation-job-polling';
 import { useTranslationLifecycleSubscription } from '@/features/translation/useTranslationLifecycleSubscription';
-import { createTranslationClient } from '@/lib/api/browser-client';
+import { createTranslationClient } from '@/lib/api/browser/secure-translation';
 import { getCommonTranslationEntityLabelKey } from '@/lib/translation/entity-type';
 import { toDate } from '@/lib/utils/proto';
 

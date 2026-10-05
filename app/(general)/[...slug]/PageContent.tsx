@@ -7,10 +7,11 @@ interface Props {
   slug: string;
   query?: Record<string, string | string[] | undefined>;
   requestedLocale: string;
+  initialPage?: NonNullable<Awaited<ReturnType<typeof getPageView>>>;
 }
 
-export async function PageContent({ slug, query, requestedLocale }: Props) {
-  const page = await getPageView(slug, { requestedLocale });
+export async function PageContent({ slug, query, requestedLocale, initialPage }: Props) {
+  const page = initialPage ?? (await getPageView(slug, { requestedLocale }));
 
   if (!page) {
     notFound();

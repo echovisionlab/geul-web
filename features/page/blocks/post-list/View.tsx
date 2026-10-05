@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Carousel } from '@mantine/carousel';
-import '@mantine/carousel/styles.css';
+import dynamic from 'next/dynamic';
 import { Group, Pagination, SimpleGrid, Skeleton, Stack, Text } from '@mantine/core';
 import { ContentCard, ContentCardSection } from '@/components/core/Section';
 import { listPublishedPosts } from '@/lib/queries/post-browser';
@@ -11,6 +10,8 @@ import { getSlideSize } from '../constants';
 import type { BlockViewProps } from '../types';
 import { parsePostListProps } from './schema';
 import { PostListViewClient } from './ViewClient';
+
+const ListCarousel = dynamic(() => import('../ListCarouselRuntime').then((module) => module.ListCarouselRuntime));
 
 export function PostListView({ props }: BlockViewProps) {
   const p = parsePostListProps(props);
@@ -65,17 +66,15 @@ export function PostListView({ props }: BlockViewProps) {
     if (layout === 'carousel') {
       const slideSize = getSlideSize(columns);
       return (
-        <Carousel
+        <ListCarousel
           slideSize={{ base: '100%', sm: columns === 1 ? '100%' : '50%', md: slideSize }}
           slideGap="md"
           emblaOptions={{ loop: carouselLoop }}
           withIndicators={carouselIndicators}
           className="post-list-block"
         >
-          {skeletonCards.map((card, i) => (
-            <Carousel.Slide key={i}>{card}</Carousel.Slide>
-          ))}
-        </Carousel>
+          {skeletonCards}
+        </ListCarousel>
       );
     }
 

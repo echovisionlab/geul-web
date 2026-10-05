@@ -23,13 +23,8 @@ import { EditorHeader, type StatusOption } from '@/features/editor/EditorHeader'
 import { EditorPermissionRevokedDialog } from '@/features/editor/EditorPermissionRevokedDialog';
 import { EditorSessionExpiredDialog } from '@/features/editor/EditorSessionExpiredDialog';
 import { useEditorPermissionRevocation } from '@/features/editor/useEditorPermissionRevocation';
-import {
-  dateTimeValueToDate,
-  dateToDateTimeValue,
-  Select,
-  TextInput,
-  type DateTimeValue,
-} from '@/components/core/Input';
+import { dateTimeValueToDate, dateToDateTimeValue, type DateTimeValue } from '@/components/core/Input/DateTimeInput';
+import { Select, TextInput } from '@/components/core/Input';
 import { PageLoader } from '@/features/site/PageLoader';
 import { IconViewModeControl } from '@/features/admin/IconViewModeControl';
 import { CampaignEditor } from '@/features/campaign/CampaignEditor/CampaignEditor';

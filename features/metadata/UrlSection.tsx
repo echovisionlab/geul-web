@@ -16,6 +16,7 @@ export interface UrlSectionProps {
   idPrefix?: string;
   error?: string;
   saving?: boolean;
+  isAvailable?: boolean;
   disabled?: boolean;
   onChange: (value: string) => void;
   onBlur?: () => void;

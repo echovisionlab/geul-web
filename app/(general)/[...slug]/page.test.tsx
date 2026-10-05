@@ -4,6 +4,7 @@ import PublicPageView from './page';
 const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
   getPage: vi.fn(),
+  getPageView: vi.fn(),
   getPageMetadataDocument: vi.fn(),
   redirect: vi.fn((href: string) => {
     throw new Error(`redirect:${href}`);
@@ -19,7 +20,7 @@ vi.mock('next/navigation', () => ({
   notFound: mocks.notFound,
 }));
 vi.mock('@/lib/utils/session.server', () => ({ getSession: mocks.getSession }));
-vi.mock('@/lib/queries/page', () => ({ getPage: mocks.getPage }));
+vi.mock('@/lib/queries/page', () => ({ getPage: mocks.getPage, getPageView: mocks.getPageView }));
 vi.mock('@/lib/api/server-client', () => ({
   createTranslationClient: vi.fn(async () => ({
     listEntityTranslations: mocks.listEntityTranslations,
@@ -66,6 +67,7 @@ describe('Page view and editor route', () => {
       user: { id: 'member-1', nickname: 'Admin', role: 'admin' },
     });
     mocks.getPage.mockResolvedValue(page);
+    mocks.getPageView.mockResolvedValue(page);
     mocks.getPageMetadataDocument.mockResolvedValue(null);
     mocks.listEntityTranslations.mockResolvedValue({ sourceLocale: 'en', entries: [] });
   });

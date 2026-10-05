@@ -1,6 +1,6 @@
 import { isConnectError } from '@/lib/api/connect-error';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
-import { createSeriesClient } from '@/lib/api/browser-client';
+import { createSeriesClient } from '@/lib/api/browser/secure-series';
 import { searchMembers } from '@/lib/queries/user-browser';
 import { fromApiSeriesStatus } from '@/lib/types/series/status';
 import { createClientLogger } from '@/lib/utils/client-logger';
