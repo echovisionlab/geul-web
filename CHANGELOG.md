@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/echovisionlab/geul-web/compare/v0.5.1...v0.6.0) (2026-10-05)
+
+
+### Features
+
+* **tools:** add local HWP editor with shared UI and page scrolling ([#82](https://github.com/echovisionlab/geul-web/issues/82)) ([64cbd14](https://github.com/echovisionlab/geul-web/commit/64cbd14998c5f97eec537ae60a589778290d134b))
+
 ## [0.5.1](https://github.com/echovisionlab/geul-web/compare/v0.5.0...v0.5.1) (2026-10-05)
 
 
