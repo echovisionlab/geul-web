@@ -182,6 +182,8 @@ jobs:
         run: pnpm prepare:maplibre-worker
       - name: Prepare p5 runtime
         run: pnpm prepare:p5-runtime
+      - name: Prepare HWP runtime
+        run: pnpm prepare:hwp-runtime
       - name: Build with TypeScript 7
         run: pnpm build
       - name: Build Storybook catalog

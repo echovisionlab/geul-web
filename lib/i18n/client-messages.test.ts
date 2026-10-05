@@ -4,6 +4,7 @@ import { getMessagesForLocale } from './messages';
 import { SUPPORTED_LOCALES } from './locale';
 
 const NEW_PUBLIC_ROUTES = [
+  '/tools/hwp',
   '/posts',
   '/artists',
   '/labels',

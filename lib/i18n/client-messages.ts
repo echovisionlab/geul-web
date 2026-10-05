@@ -19,6 +19,7 @@ const PUBLIC_ROUTES = new Set([
   '/events',
   '/tools',
   '/tools/transcode',
+  '/tools/hwp',
 ]);
 // Each audited entity has exactly one identifier. Unknown Page slugs, extra
 // segments and protected modes retain the full catalogue.

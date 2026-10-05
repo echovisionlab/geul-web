@@ -5261,6 +5261,15 @@
       "metadataTitle": "Audio Transcoder",
       "metadataDescription": "Convert audio in your browser. Files never leave your device.",
       "notices": "Open-source licenses"
+    },
+    "hwp": {
+      "title": "HWP editor",
+      "metadataDescription": "Open, edit, and save HWP and HWPX documents in your browser.",
+      "description": "Use the editor’s File menu to open and save HWP or HWPX files. Documents are processed on this device without being uploaded.",
+      "loading": "Loading editor…",
+      "error": "The editor could not be loaded. Try again.",
+      "retry": "Try again",
+      "metadataTitle": "HWP editor"
     }
   },
   "myMetadata": {

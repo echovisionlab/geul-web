@@ -10,6 +10,7 @@ import { PageHeader } from '@/components/core/PageHeader';
 
 export interface YoutubeAudioToolLabels {
   title: string;
+  description: string;
   urlLabel: string;
   urlPlaceholder: string;
   resolve: string;
@@ -49,7 +50,7 @@ export function YoutubeAudioToolView({
 
   return (
     <Stack gap="xl" data-youtube-audio-tool>
-      <PageHeader title={labels.title} />
+      <PageHeader title={labels.title} description={labels.description} />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="md">

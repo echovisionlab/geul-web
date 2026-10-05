@@ -5261,6 +5261,15 @@
       "metadataTitle": "Transkoder dźwięku",
       "metadataDescription": "Konwertuj dźwięk w przeglądarce. Pliki nigdy nie opuszczają Twojego urządzenia.",
       "notices": "Licencje typu open source"
+    },
+    "hwp": {
+      "title": "Edytor HWP",
+      "metadataDescription": "Otwieraj, edytuj i zapisuj dokumenty HWP i HWPX w przeglądarce.",
+      "description": "Użyj menu Plik edytora, aby otwierać i zapisywać pliki HWP lub HWPX. Dokumenty są przetwarzane na tym urządzeniu bez przesyłania na serwer.",
+      "loading": "Ładowanie edytora…",
+      "error": "Nie udało się załadować edytora. Spróbuj ponownie.",
+      "retry": "Spróbuj ponownie",
+      "metadataTitle": "Edytor HWP"
     }
   },
   "myMetadata": {

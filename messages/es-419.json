@@ -5261,6 +5261,15 @@
       "metadataTitle": "Transcodificador de audio",
       "metadataDescription": "Convierte audio en tu navegador. Los archivos nunca salen de su dispositivo.",
       "notices": "Licencias de código abierto"
+    },
+    "hwp": {
+      "title": "Editor HWP",
+      "metadataDescription": "Abre, edita y guarda documentos HWP y HWPX en tu navegador.",
+      "description": "Usa el menú Archivo del editor para abrir y guardar archivos HWP o HWPX. Los documentos se procesan en este dispositivo sin subirlos.",
+      "loading": "Cargando editor…",
+      "error": "No se pudo cargar el editor. Inténtalo de nuevo.",
+      "retry": "Reintentar",
+      "metadataTitle": "Editor HWP"
     }
   },
   "myMetadata": {

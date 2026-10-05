@@ -36,7 +36,10 @@
     "storybook:build:local-contracts": "LOCAL_CONTRACTS=1 storybook build",
     "i18n:sync-weblate": "python3 scripts/i18n/sync-weblate-messages.py",
     "prepare:client-media-codecs": "node scripts/prepare-client-media-codecs.mjs",
-    "postinstall": "pnpm prepare:client-media-codecs"
+    "postinstall": "pnpm prepare:client-media-codecs",
+    "prepare:hwp-runtime": "node scripts/prepare-hwp-runtime.mjs",
+    "predev": "pnpm prepare:hwp-runtime",
+    "prebuild": "pnpm prepare:hwp-runtime"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.14.0",
@@ -71,6 +74,7 @@
     "@opentelemetry/api-logs": "0.221.0",
     "@opentelemetry/exporter-logs-otlp-http": "0.221.0",
     "@opentelemetry/sdk-logs": "0.221.0",
+    "@rhwp/editor": "0.8.6",
     "@t3-oss/env-nextjs": "^0.13.11",
     "@tabler/icons-react": "^3.46.0",
     "@tanstack/react-query": "^5.101.4",

@@ -5261,6 +5261,15 @@
       "metadataTitle": "Bộ chuyển mã âm thanh",
       "metadataDescription": "Chuyển đổi âm thanh trong trình duyệt của bạn. Các tập tin không bao giờ rời khỏi thiết bị của bạn.",
       "notices": "Giấy phép nguồn mở"
+    },
+    "hwp": {
+      "title": "Trình soạn thảo HWP",
+      "metadataDescription": "Mở, chỉnh sửa và lưu tài liệu HWP và HWPX trong trình duyệt.",
+      "description": "Dùng menu Tệp của trình soạn thảo để mở và lưu tệp HWP hoặc HWPX. Tài liệu được xử lý trên thiết bị này mà không tải lên máy chủ.",
+      "loading": "Đang tải trình soạn thảo…",
+      "error": "Không thể tải trình soạn thảo. Vui lòng thử lại.",
+      "retry": "Thử lại",
+      "metadataTitle": "Trình soạn thảo HWP"
     }
   },
   "myMetadata": {

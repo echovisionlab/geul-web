@@ -5261,6 +5261,15 @@
       "automaticRateUnavailable": "自動では {sourceRate} のソースに有効なレートを選択できません。許可される出力レート: {allowed}。",
       "presetRateUnsupported": "この出力は {targetRate} に対応していません。許可されるレート: {allowed}。",
       "notices": "オープンソースライセンス"
+    },
+    "hwp": {
+      "title": "HWPエディター",
+      "metadataDescription": "ブラウザーでHWP・HWPX文書を開き、編集して保存できます。",
+      "description": "エディターのファイルメニューからHWP・HWPXファイルを開いて保存できます。文書はアップロードせず、この端末で処理します。",
+      "loading": "エディターを読み込み中…",
+      "error": "エディターを読み込めませんでした。再試行してください。",
+      "retry": "再試行",
+      "metadataTitle": "HWPエディター"
     }
   },
   "myMetadata": {

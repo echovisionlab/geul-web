@@ -5261,6 +5261,15 @@
       "metadataTitle": "Ses Dönüştürücü",
       "metadataDescription": "Tarayıcınızda sesi dönüştürün. Dosyalar asla cihazınızdan ayrılmaz.",
       "notices": "Açık kaynak lisansları"
+    },
+    "hwp": {
+      "title": "HWP düzenleyici",
+      "metadataDescription": "HWP ve HWPX belgelerini tarayıcınızda açın, düzenleyin ve kaydedin.",
+      "description": "HWP veya HWPX dosyalarını açmak ve kaydetmek için düzenleyicinin Dosya menüsünü kullanın. Belgeler yüklenmeden bu cihazda işlenir.",
+      "loading": "Düzenleyici yükleniyor…",
+      "error": "Düzenleyici yüklenemedi. Tekrar deneyin.",
+      "retry": "Tekrar dene",
+      "metadataTitle": "HWP düzenleyici"
     }
   },
   "myMetadata": {

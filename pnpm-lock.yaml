@@ -165,6 +165,9 @@ importers:
       '@opentelemetry/sdk-logs':
         specifier: 0.221.0
         version: 0.221.0(@opentelemetry/api@1.9.1)
+      '@rhwp/editor':
+        specifier: 0.8.6
+        version: 0.8.6
       '@t3-oss/env-nextjs':
         specifier: ^0.13.11
         version: 0.13.11(typescript@7.0.2)(zod@4.4.3)
@@ -2556,6 +2559,10 @@ packages:
         optional: true
       react-redux:
         optional: true
+
+  '@rhwp/editor@0.8.6':
+    resolution: {integrity: sha512-Hc/rHrQrgZqJ2OSWNsPd/8tKyfnLer8M9r+U81yphJ7O8LaXLuv5A2yUub2fhFnfaYyfl76LfOIMsfcD0/dXgA==}
+    engines: {node: '>=18.0.0'}
 
   '@rolldown/binding-android-arm64@1.0.3':
     resolution: {integrity: sha512-454rs7jHngixp/NMxd5srYD57OnzSlZ/eFTETjORQHLwJG1lRtmNOJcBerZlfu4GjKqeq8aCCIQrMdHyhI51Hw==}
@@ -9948,6 +9955,8 @@ snapshots:
     optionalDependencies:
       react: 19.2.8
       react-redux: 9.3.0(@types/react@19.2.18)(react@19.2.8)(redux@5.0.1)
+
+  '@rhwp/editor@0.8.6': {}
 
   '@rolldown/binding-android-arm64@1.0.3':
     optional: true

@@ -5261,6 +5261,15 @@
       "automaticRateUnavailable": "Automático não consegue escolher uma taxa válida para esta origem de {sourceRate}. Taxas de saída permitidas: {allowed}.",
       "presetRateUnsupported": "Esta saída não aceita {targetRate}. Taxas permitidas: {allowed}.",
       "notices": "Licenças de código aberto"
+    },
+    "hwp": {
+      "title": "Editor HWP",
+      "metadataDescription": "Abra, edite e salve documentos HWP e HWPX no navegador.",
+      "description": "Use o menu Arquivo do editor para abrir e salvar arquivos HWP ou HWPX. Os documentos são processados neste dispositivo sem serem enviados.",
+      "loading": "Carregando editor…",
+      "error": "Não foi possível carregar o editor. Tente novamente.",
+      "retry": "Tentar novamente",
+      "metadataTitle": "Editor HWP"
     }
   },
   "myMetadata": {

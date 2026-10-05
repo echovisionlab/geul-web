@@ -5261,6 +5261,15 @@
       "automaticRateUnavailable": "Automatico non può scegliere una frequenza valida per questa sorgente a {sourceRate}. Frequenze consentite: {allowed}.",
       "presetRateUnsupported": "Questa uscita non supporta {targetRate}. Frequenze consentite: {allowed}.",
       "notices": "Licenze open source"
+    },
+    "hwp": {
+      "title": "Editor HWP",
+      "metadataDescription": "Apri, modifica e salva documenti HWP e HWPX nel browser.",
+      "description": "Usa il menu File dell’editor per aprire e salvare file HWP o HWPX. I documenti vengono elaborati su questo dispositivo senza essere caricati.",
+      "loading": "Caricamento dell’editor…",
+      "error": "Impossibile caricare l’editor. Riprova.",
+      "retry": "Riprova",
+      "metadataTitle": "Editor HWP"
     }
   },
   "myMetadata": {

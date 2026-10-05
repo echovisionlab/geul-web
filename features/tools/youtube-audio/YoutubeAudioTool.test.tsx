@@ -96,6 +96,7 @@ describe('YoutubeAudioTool', () => {
         method: 'POST',
       }),
     );
+    expect(props().labels.description).toBe(enMessages.tools.youtubeAudio.metadataDescription);
     expect(transcodeProps).toMatchObject({
       externalSource: {
         id: resolved.sourceId,

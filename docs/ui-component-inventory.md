@@ -178,10 +178,23 @@ pathname or search parameters commit, and never patches browser history or reser
 Page-, map-, editor-, media-, and upload-specific loading surfaces remain independently owned by their
 existing Feature controllers.
 
+Public tool headings use the same Core `PageHeader` title and description scale and outer `Stack`
+spacing (`xl`). The Audio Transcoder and YouTube Audio descriptions reuse their localized metadata
+descriptions. Embedding the Audio Transcoder with `title={null}` hides the complete header.
+
 `features/tools/youtube-audio` owns YouTube URL resolution and its pure Storybook states. It composes
 Core `PageHeader`, `SectionCard`, `SectionHeader`, `Field`, `TextInput`, `Button`, `StatusBadge`, and
 `Alert`, then passes the authenticated HTTP range source into the existing Audio Transcoder Feature;
 it introduces no parallel conversion controls or new Core primitive.
+
+`features/hwp-editor` owns the reusable self-hosted RHWP Studio integration. Its
+`HwpEditorView` composes Core `Alert` and `Button` with a resolved loading slot;
+the controller supplies the site `PageLoader`, including configured loader images.
+`features/tools/hwp` composes Core `PageHeader` around that Feature.
+Studio owns file selection, editing, and HWP/HWPX download. Documents stay on the device.
+Focused controller tests cover readiness, retry, navigation cleanup, and same-origin
+document-height messages; fixed view states appear in Storybook. The live editor
+runtime is verified in the application.
 
 ESLint restrictions are added only after a migrated symbol reaches zero direct imports. This keeps
 the gate strict without suppressing unfinished work.
