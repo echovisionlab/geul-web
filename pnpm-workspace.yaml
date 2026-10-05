@@ -6,6 +6,7 @@ blockExoticSubdeps: false
 injectWorkspacePackages: true
 minimumReleaseAgeExclude:
   - '@echovisionlab/*'
+  - rust-hwp-intl@0.1.0
 
 overrides:
   '@babel/core': 8.0.1

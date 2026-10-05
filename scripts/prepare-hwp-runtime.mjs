@@ -2,14 +2,14 @@ import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { mkdir, mkdtemp, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
-import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 
 const run = promisify(execFile);
-const basePath = '/vendors/rhwp/0.8.6-dsub.2/';
+const basePath = '/vendors/rust-hwp-intl/0.1.0/';
 const markerName = '.prepared.json';
 
 async function checkReady(directory, runtime) {
@@ -29,6 +29,9 @@ async function checkReady(directory, runtime) {
   if (manifest.buildId !== runtime.buildId || manifest.basePath !== runtime.basePath) {
     throw new Error('RHWP runtime manifest does not match the pinned build ID and base path.');
   }
+  if (manifest.downstreamCommit !== runtime.sourceCommit) {
+    throw new Error('HWP runtime manifest does not match the pinned source commit.');
+  }
   for (const name of ['assets', 'fonts']) {
     if ((await readdir(resolve(directory, name))).length === 0) {
       throw new Error(`RHWP runtime has an empty ${name} directory`);
@@ -36,7 +39,13 @@ async function checkReady(directory, runtime) {
   }
 }
 
-export async function prepareHwpRuntime({ projectDirectory = process.cwd(), descriptor, fetchArchive = fetch } = {}) {
+/**
+ * @param {{ projectDirectory?: string, descriptor?: {
+ *   buildId: string, basePath: string, sourceCommit: string, sha256: string,
+ *   archivePackage: string, archivePath: string
+ * } }} [options]
+ */
+export async function prepareHwpRuntime({ projectDirectory = process.cwd(), descriptor } = {}) {
   const runtime = descriptor ?? JSON.parse(await readFile(new URL('./hwp-runtime.json', import.meta.url), 'utf8'));
   if (!/^[a-f0-9]{64}$/.test(runtime.sha256 ?? '')) {
     throw new Error('RHWP runtime descriptor requires the published archive SHA256.');
@@ -44,8 +53,17 @@ export async function prepareHwpRuntime({ projectDirectory = process.cwd(), desc
   if (runtime.basePath !== basePath) {
     throw new Error(`RHWP runtime must use ${basePath}`);
   }
+  if (!/^[a-f0-9]{40}$/.test(runtime.sourceCommit ?? '')) {
+    throw new Error('HWP runtime descriptor requires the published source commit.');
+  }
   const outputDirectory = resolve(projectDirectory, `public${basePath}`);
-  const marker = { sha256: runtime.sha256, buildId: runtime.buildId, archiveUrl: runtime.archiveUrl };
+  const marker = {
+    sha256: runtime.sha256,
+    buildId: runtime.buildId,
+    sourceCommit: runtime.sourceCommit,
+    archivePackage: runtime.archivePackage,
+    archivePath: runtime.archivePath,
+  };
   try {
     const prepared = JSON.parse(await readFile(resolve(outputDirectory, markerName), 'utf8'));
     if (JSON.stringify(prepared) === JSON.stringify(marker)) {
@@ -53,7 +71,7 @@ export async function prepareHwpRuntime({ projectDirectory = process.cwd(), desc
       return { outputDirectory, reused: true };
     }
   } catch {
-    // Missing or incomplete local assets are prepared again from the pinned archive.
+    // Missing or incomplete local assets are prepared again from the installed package.
   }
 
   const artifactsDirectory = resolve(projectDirectory, '.artifacts');
@@ -61,11 +79,9 @@ export async function prepareHwpRuntime({ projectDirectory = process.cwd(), desc
   const temporaryDirectory = await mkdtemp(resolve(artifactsDirectory, 'hwp-runtime-'));
   try {
     const archive = resolve(temporaryDirectory, 'runtime.tar.gz');
-    const response = await fetchArchive(runtime.archiveUrl);
-    if (!response.ok || !response.body) {
-      throw new Error(`RHWP runtime download failed: ${response.status}`);
-    }
-    await pipeline(Readable.fromWeb(response.body), createWriteStream(archive));
+    const require = createRequire(resolve(projectDirectory, 'package.json'));
+    const installedArchive = require.resolve(`${runtime.archivePackage}/${runtime.archivePath}`);
+    await pipeline(createReadStream(installedArchive), createWriteStream(archive));
     const digest = createHash('sha256');
     for await (const chunk of createReadStream(archive)) {
       digest.update(chunk);
@@ -74,7 +90,7 @@ export async function prepareHwpRuntime({ projectDirectory = process.cwd(), desc
       throw new Error('RHWP runtime archive SHA256 mismatch.');
     }
 
-    // The verified release is trusted; also reject unsafe archive member paths before tar extraction.
+    // The verified package is trusted; also reject unsafe archive member paths before tar extraction.
     const { stdout } = await run('tar', ['-tzf', archive]);
     const members = stdout.trim().split('\n');
     if (members.some((name) => name.startsWith('/') || name.split('/').includes('..'))) {

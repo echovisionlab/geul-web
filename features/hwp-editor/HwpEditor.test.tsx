@@ -3,7 +3,7 @@
 import { act, StrictMode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { MantineProvider } from '@mantine/core';
-import { createEditor } from '@rhwp/editor';
+import { createEditor } from 'rust-hwp-intl/editor';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import enMessages from '@/messages/en.json';
@@ -14,7 +14,7 @@ vi.mock('@/lib/contexts/ManifestContext', () => ({
 }));
 vi.mock('@/lib/public-runtime-config', () => ({ getPublicCdnUrl: () => 'https://fixture.test' }));
 
-vi.mock('@rhwp/editor', () => ({ createEditor: vi.fn() }));
+vi.mock('rust-hwp-intl/editor', () => ({ createEditor: vi.fn() }));
 
 type Editor = Awaited<ReturnType<typeof createEditor>>;
 
@@ -80,7 +80,9 @@ describe('HwpEditor lifecycle', () => {
     const { iframe, editor, destroy } = installStartup(pending);
     render();
     expect(container.querySelector('[role="status"]')?.textContent).toContain(enMessages.tools.hwp.loading);
-    expect(iframe.src).toBe(new URL('/vendors/rhwp/0.8.6-dsub.2/index.html?scroll=page', window.location.origin).href);
+    expect(iframe.src).toBe(
+      new URL('/vendors/rust-hwp-intl/0.1.0/index.html?scroll=page', window.location.origin).href,
+    );
     expect(iframe.title).toBe('HWP / HWPX editor');
     expect(container.querySelector('img')?.getAttribute('src')).toContain('loader.gif');
 
