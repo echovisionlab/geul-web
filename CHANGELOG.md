@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.2](https://github.com/echovisionlab/geul-web/compare/v0.7.1...v0.7.2) (2026-10-05)
+
+
+### Bug Fixes
+
+* **hwp:** use rust-hwp-intl release with stable toolbox scrolling ([#90](https://github.com/echovisionlab/geul-web/issues/90)) ([10110d2](https://github.com/echovisionlab/geul-web/commit/10110d227fcf834b5171468c1764806d368f4bc6))
+
 ## [0.7.1](https://github.com/echovisionlab/geul-web/compare/v0.7.0...v0.7.1) (2026-10-05)
 
 
