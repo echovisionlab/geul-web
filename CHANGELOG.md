@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/echovisionlab/geul-web/compare/v0.5.0...v0.5.1) (2026-10-05)
+
+
+### Bug Fixes
+
+* **slug:** restore title autofill and debounce availability checks ([#80](https://github.com/echovisionlab/geul-web/issues/80)) ([2308df9](https://github.com/echovisionlab/geul-web/commit/2308df9ed4b538e049f29dc10b42b25f97dd3377))
+
 ## [0.5.0](https://github.com/echovisionlab/geul-web/compare/v0.4.9...v0.5.0) (2026-10-04)
 
 
