@@ -442,12 +442,23 @@ function WorkEditorContent({
         return;
       }
       setResidentTitle(value);
+      if (canEditNeutral) {
+        slugMgmt.updateFromTitle(value);
+      }
       debouncedResidentMetadataUpdate({ locale: roomLocale, sourceTitle: value });
       if (activeEditLocale.isSourceLocale) {
         setTitle(value);
       }
     },
-    [activeEditLocale.isSourceLocale, currentLocaleCanEdit, debouncedResidentMetadataUpdate, roomLocale, setTitle],
+    [
+      canEditNeutral,
+      slugMgmt.updateFromTitle,
+      activeEditLocale.isSourceLocale,
+      currentLocaleCanEdit,
+      debouncedResidentMetadataUpdate,
+      roomLocale,
+      setTitle,
+    ],
   );
 
   const handleMetaChange = useCallback(
@@ -626,6 +637,7 @@ function WorkEditorContent({
           entityType="work"
           entityId={workId}
           slug={toSlugInputValue(slug)}
+          isAvailable={slugMgmt.isAvailable}
           idPrefix={`work-${workId}`}
           error={slugMgmt.error}
           saving={slugMgmt.isChecking || updateSlug.isPending}

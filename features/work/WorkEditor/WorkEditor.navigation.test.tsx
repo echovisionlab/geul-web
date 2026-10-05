@@ -87,7 +87,13 @@ vi.mock('@/lib/hooks/useOgImage', () => ({
 }));
 vi.mock('@/lib/hooks/useOgGenerationLookupSignal', () => ({ useOgGenerationLookupSignal: vi.fn() }));
 vi.mock('@/lib/hooks/useSlugManagement', () => ({
-  useSlugManagement: () => ({ error: null, isChecking: false, handleChange: vi.fn(), handleBlur: vi.fn() }),
+  useSlugManagement: () => ({
+    error: null,
+    isChecking: false,
+    handleChange: vi.fn(),
+    handleBlur: vi.fn(),
+    updateFromTitle: vi.fn(),
+  }),
 }));
 vi.mock('@/lib/collab/block-room-metadata', () => ({ updateBlockRoomLocaleMetadata: vi.fn() }));
 vi.mock('@/lib/editor/editor-entity-changes', () => ({

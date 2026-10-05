@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useDebouncedValue } from '@mantine/hooks';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
@@ -17,7 +17,7 @@ import { checkReleaseSlugAvailable } from '@/lib/queries/release-browser';
 import { checkSeriesSlugAvailable } from '@/lib/queries/series-browser';
 import { checkWorkSlugAvailable } from '@/lib/queries/work-browser';
 import { getPageSlugValidationReason } from '@/lib/utils/page-route';
-import { sanitizePageSlugInput, sanitizeSlugInput } from '@/lib/utils/slug';
+import { generateSlug, sanitizePageSlugInput, sanitizeSlugInput } from '@/lib/utils/slug';
 
 type EntityType = 'post' | 'page' | 'form' | 'work' | 'label' | 'artist' | 'series' | 'release';
 
@@ -30,7 +30,7 @@ interface UseSlugManagementOptions {
   slug: string;
   /** Callback when slug should change */
   onSlugChange: (slug: string) => void;
-  /** Debounce delay in ms (default: 300) */
+  /** Debounce delay in ms (default: 1000) */
   debounceMs?: number;
   /** Callback when slug is available and should be saved (for auto-save scenarios) */
   onSave?: (slug: string) => void | Promise<unknown>;
@@ -49,6 +49,8 @@ interface UseSlugManagementReturn {
   errorReason: PageSlugAvailabilityReason | undefined;
   /** Handle slug input change (sanitizes and updates) */
   handleChange: (value: string) => void;
+  /** Follow title edits until the slug has been explicitly set */
+  updateFromTitle: (title: string) => void;
   /** Persist the current slug immediately */
   handleBlur: () => void;
 }
@@ -65,7 +67,7 @@ const checkSlugActions = {
 };
 
 /**
- * Hook for managing explicit slug edits and validation.
+ * Hook for managing title-generated and explicit slug edits and validation.
  * Works with both regular state and collaboration state (Yjs).
  */
 export function useSlugManagement({
@@ -73,7 +75,7 @@ export function useSlugManagement({
   entityId,
   slug,
   onSlugChange,
-  debounceMs = 300,
+  debounceMs = 1000,
   onSave,
 }: UseSlugManagementOptions): UseSlugManagementReturn {
   const registryEntityType = entityType === 'series' ? 'post_series' : entityType;
@@ -82,10 +84,24 @@ export function useSlugManagement({
   const activeDocumentRef = useRef(document);
   activeDocumentRef.current = document;
   const saveGenerationRef = useRef(0);
-  const [debouncedSlug] = useDebouncedValue(slug, debounceMs);
+  const debounceInput = useMemo(() => ({ document, slug }), [document, slug]);
+  const [debouncedInput] = useDebouncedValue(debounceInput, debounceMs);
+  const debouncedSlug = debouncedInput.slug;
+  const isCurrentDebouncedSlug = debouncedInput === debounceInput;
+  const autoSlugRef = useRef({ enabled: slug.length === 0, lastSlug: slug });
   const currentSlugRef = useRef(slug);
   const lastHandledSlug = useRef(debouncedSlug);
   const onSaveRef = useRef(onSave);
+
+  if (previousDocument.current !== document) {
+    previousDocument.current = document;
+    saveGenerationRef.current += 1;
+    currentSlugRef.current = slug;
+    lastHandledSlug.current = slug;
+    autoSlugRef.current = { enabled: slug.length === 0, lastSlug: slug };
+  } else if (autoSlugRef.current.enabled && slug !== autoSlugRef.current.lastSlug) {
+    autoSlugRef.current.enabled = false;
+  }
 
   const slugSave = useDebouncedPatch<{ slug: string }>({
     write: async ({ slug: nextSlug }) => {
@@ -117,17 +133,6 @@ export function useSlugManagement({
     onSaveRef.current = onSave;
   }, [onSave]);
 
-  // Reset slug validation state when the same hook instance starts another room.
-  useEffect(() => {
-    if (previousDocument.current === document) {
-      return;
-    }
-    previousDocument.current = document;
-    saveGenerationRef.current += 1;
-    currentSlugRef.current = slug;
-    lastHandledSlug.current = slug;
-  }, [document, slug]);
-
   const queueSave = useCallback(
     (nextSlug: string) => {
       if (!onSaveRef.current) {
@@ -139,15 +144,16 @@ export function useSlugManagement({
   );
 
   const checkAction = checkSlugActions[entityType];
-  const isSlugEmpty = debouncedSlug.length === 0;
+  const isSlugEmpty = slug.length === 0;
 
-  const { data, isFetching: isChecking } = useQuery({
+  const { data, isFetching } = useQuery({
     queryKey: ['slug-check', entityType, debouncedSlug, entityId],
     queryFn: () => checkAction(debouncedSlug, entityId),
-    enabled: !isSlugEmpty,
+    enabled: !isSlugEmpty && isCurrentDebouncedSlug,
   });
 
-  const isAvailable = isSlugEmpty ? true : data?.available;
+  const isChecking = !isSlugEmpty && (!isCurrentDebouncedSlug || isFetching);
+  const isAvailable = isSlugEmpty ? true : isChecking ? undefined : data?.available;
 
   const error = entityType !== 'page' && !isSlugEmpty && isAvailable === false ? 'Slug already exists' : undefined;
   const localPageSlugReason = entityType === 'page' ? getPageSlugValidationReason(slug) : undefined;
@@ -163,7 +169,7 @@ export function useSlugManagement({
   useEffect(() => {
     // Availability belongs to the debounced value. If the user has already
     // typed beyond it, never persist that stale prefix.
-    if (currentSlugRef.current !== debouncedSlug) {
+    if (!isCurrentDebouncedSlug || currentSlugRef.current !== debouncedSlug) {
       return;
     }
 
@@ -184,15 +190,29 @@ export function useSlugManagement({
 
     // Update ref only after we've processed this slug
     lastHandledSlug.current = debouncedSlug;
-  }, [debouncedSlug, isAvailable, isSlugEmpty, onSave, queueSave]);
+  }, [debouncedSlug, isAvailable, isCurrentDebouncedSlug, isSlugEmpty, onSave, queueSave]);
 
   const handleChange = useCallback(
     (value: string) => {
+      autoSlugRef.current.enabled = false;
       const sanitized = entityType === 'page' ? sanitizePageSlugInput(value) : sanitizeSlugInput(value);
       currentSlugRef.current = sanitized;
       onSlugChange(sanitized);
     },
     [entityType, onSlugChange],
+  );
+
+  const updateFromTitle = useCallback(
+    (title: string) => {
+      if (!autoSlugRef.current.enabled) {
+        return;
+      }
+      const generated = generateSlug(title);
+      autoSlugRef.current.lastSlug = generated;
+      currentSlugRef.current = generated;
+      onSlugChange(generated);
+    },
+    [onSlugChange],
   );
 
   const handleBlur = useCallback(() => {
@@ -237,6 +257,7 @@ export function useSlugManagement({
     error,
     errorReason,
     handleChange,
+    updateFromTitle,
     handleBlur,
   };
 }

@@ -29,6 +29,7 @@ export interface UrlSectionViewProps {
   idPrefix?: string;
   error?: string;
   saving?: boolean;
+  isAvailable?: boolean;
   disabled?: boolean;
   onChange: (value: string) => void;
   onBlur?: () => void;
@@ -46,6 +47,7 @@ export function UrlSectionView({
   idPrefix,
   error,
   saving,
+  isAvailable,
   disabled,
   onChange,
   onBlur,
@@ -91,7 +93,7 @@ export function UrlSectionView({
               rightSection={
                 saving ? (
                   <Loader size={14} />
-                ) : slug && !error ? (
+                ) : slug && !error && isAvailable === true ? (
                   <IconCheck size={16} color="var(--mantine-color-green-6)" />
                 ) : null
               }

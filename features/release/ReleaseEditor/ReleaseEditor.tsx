@@ -516,9 +516,18 @@ export function ReleaseEditor({
         return;
       }
       setResidentTitle(value);
+      if (canEditNeutral) {
+        slugMgmt.updateFromTitle(value);
+      }
       debouncedLocaleMetadataUpdate({ locale: roomLocale, title: value });
     },
-    [activeEditLocale.canEditActiveLocale, debouncedLocaleMetadataUpdate, roomLocale],
+    [
+      canEditNeutral,
+      slugMgmt.updateFromTitle,
+      activeEditLocale.canEditActiveLocale,
+      debouncedLocaleMetadataUpdate,
+      roomLocale,
+    ],
   );
 
   const handleCreditNoteChange = useCallback(
@@ -593,6 +602,7 @@ export function ReleaseEditor({
           entityType="release"
           entityId={releaseId}
           slug={toSlugInputValue(slug)}
+          isAvailable={slugMgmt.isAvailable}
           idPrefix={`release-${releaseId}`}
           error={slugMgmt.error}
           saving={slugMgmt.isChecking || updateSlug.isPending}

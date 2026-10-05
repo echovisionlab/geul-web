@@ -450,9 +450,12 @@ export function PageEditor({
         return;
       }
       setResidentTitle(value);
+      if (canEditNeutral) {
+        slugMgmt.updateFromTitle(value);
+      }
       debouncedMetadataUpdate({ title: value });
     },
-    [canEditLocaleDocument, debouncedMetadataUpdate],
+    [canEditNeutral, slugMgmt.updateFromTitle, canEditLocaleDocument, debouncedMetadataUpdate],
   );
 
   const handleShowTitleChange = useCallback(
@@ -573,6 +576,7 @@ export function PageEditor({
           entityType="page"
           entityId={pageId}
           slug={toSlugInputValue(slug)}
+          isAvailable={slugMgmt.isAvailable}
           idPrefix={`page-${pageId}`}
           error={slugError}
           saving={slugMgmt.isChecking || updateSlug.isPending}
