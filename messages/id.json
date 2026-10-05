@@ -5261,6 +5261,15 @@
       "metadataTitle": "Transkoder Audio",
       "metadataDescription": "Konversi audio di browser Anda. File tidak pernah meninggalkan perangkat Anda.",
       "notices": "Lisensi sumber terbuka"
+    },
+    "hwp": {
+      "title": "Editor HWP",
+      "metadataDescription": "Buka, edit, dan simpan dokumen HWP dan HWPX di browser.",
+      "description": "Gunakan menu File editor untuk membuka dan menyimpan file HWP atau HWPX. Dokumen diproses di perangkat ini tanpa diunggah.",
+      "loading": "Memuat editor…",
+      "error": "Editor tidak dapat dimuat. Coba lagi.",
+      "retry": "Coba lagi",
+      "metadataTitle": "Editor HWP"
     }
   },
   "myMetadata": {

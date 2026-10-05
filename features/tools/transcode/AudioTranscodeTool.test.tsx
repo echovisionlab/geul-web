@@ -85,7 +85,12 @@ describe('AudioTranscodeTool controller', () => {
       externalSource,
       expect.objectContaining({ signal: expect.any(AbortSignal) }),
     );
-    expect(viewProps()).toMatchObject({ format: 'mp3', showFilePicker: false, title: null });
+    expect(viewProps()).toMatchObject({
+      format: 'mp3',
+      showFilePicker: false,
+      title: null,
+      labels: { description: enMessages.tools.transcode.metadataDescription },
+    });
     expect(viewProps().encodingControls[0]).toMatchObject({ id: 'bitrate-bps', value: '320000' });
     expect(viewProps().files[0]).toMatchObject({ name: 'Reference.m4a', sizeLabel: '121 KB' });
     expect(viewProps().files[0]?.canDownloadSource).toBe(true);

@@ -20,6 +20,7 @@ const allowedDevOrigins = process.env.ALLOWED_DEV_ORIGINS
 
 export default withNextIntl(
   withBundleAnalyzer({
+    agentRules: false,
     distDir: process.env.DIST_DIR || '.next',
     output: 'standalone',
     outputFileTracingIncludes: {

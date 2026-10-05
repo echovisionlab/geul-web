@@ -5261,6 +5261,15 @@
       "automaticRateUnavailable": "لا يستطيع الوضع التلقائي اختيار معدل صالح للمصدر ذي المعدل {sourceRate}. معدلات الخرج المسموح بها: {allowed}.",
       "presetRateUnsupported": "هذا الخرج لا يدعم {targetRate}. المعدلات المسموح بها: {allowed}.",
       "notices": "تراخيص المصادر المفتوحة"
+    },
+    "hwp": {
+      "title": "محرر HWP",
+      "metadataDescription": "افتح مستندات HWP وHWPX وحررها واحفظها في متصفحك.",
+      "description": "استخدم قائمة الملف في المحرر لفتح ملفات HWP أو HWPX وحفظها. تُعالج المستندات على هذا الجهاز دون رفعها.",
+      "loading": "جارٍ تحميل المحرر…",
+      "error": "تعذر تحميل المحرر. حاول مرة أخرى.",
+      "retry": "إعادة المحاولة",
+      "metadataTitle": "محرر HWP"
     }
   },
   "myMetadata": {

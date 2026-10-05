@@ -11,6 +11,7 @@ import {
 
 const labels: AudioTranscodeToolLabels = {
   title: 'Audio transcoder',
+  description: 'Convert audio files in your browser without uploading them.',
   notices: 'Open-source licenses',
   targetIdle: 'Waiting',
   targetChecking: 'Checking support',

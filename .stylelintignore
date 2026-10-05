@@ -1,3 +1,5 @@
 .next
 out
 coverage
+public/vendors/rhwp/
+.artifacts/

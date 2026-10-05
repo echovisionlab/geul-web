@@ -12,7 +12,7 @@ import {
   IconTrash,
   IconX,
 } from '@tabler/icons-react';
-import { Divider, Flex, Group, Loader, SimpleGrid, Stack, Text, Title, VisuallyHidden } from '@mantine/core';
+import { Divider, Flex, Group, SimpleGrid, Stack, Text, VisuallyHidden } from '@mantine/core';
 import { Alert } from '@/components/core/Alert';
 import { StatusBadge, type StatusBadgeTone } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
@@ -21,6 +21,7 @@ import { IconButton } from '@/components/core/IconButton';
 import { NativeSelect } from '@/components/core/Input';
 import { FileDropzone } from '@/components/core/Input/FileDropzone';
 import { Progress } from '@/components/core/Progress';
+import { PageHeader } from '@/components/core/PageHeader';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
 import { TextButton } from '@/components/core/TextButton';
 
@@ -65,6 +66,7 @@ export interface AudioTranscodeFileViewModel {
 
 export interface AudioTranscodeToolLabels {
   title: string;
+  description: string;
   notices: string;
   targetIdle: string;
   targetChecking: string;
@@ -95,7 +97,7 @@ export interface AudioTranscodeToolLabels {
 
 export interface AudioTranscodeToolViewProps {
   labels: AudioTranscodeToolLabels;
-  /** Null embeds the converter without a second page heading. */
+  /** Null embeds the converter without a second page heading or description. */
   title?: string | null;
   files: readonly AudioTranscodeFileViewModel[];
   accept: string;
@@ -173,7 +175,6 @@ function targetStatusLabel(status: AudioTranscodeTargetStatus, labels: AudioTran
 function FileStatusIcon({ status }: { status: AudioTranscodeFileStatus }) {
   switch (status) {
     case 'inspecting':
-      return <Loader aria-hidden size="xs" />;
     case 'converting':
     case 'ready':
       return null;
@@ -199,7 +200,8 @@ interface FileRowProps {
 
 function FileRow({ divided, file, labels, onRetry, onCancel, onRemove, onDownloadSource }: FileRowProps) {
   const progress = clampProgress(file.progress);
-  const isProgressVisible = file.status === 'converting' && file.progress !== null;
+  const isInspecting = file.status === 'inspecting';
+  const isProgressVisible = isInspecting || (file.status === 'converting' && file.progress !== null);
   const metadata = [file.sourceSummary, file.sizeLabel, file.outputSummary ? `→ ${file.outputSummary}` : null]
     .filter(Boolean)
     .join(' · ');
@@ -233,15 +235,17 @@ function FileRow({ divided, file, labels, onRetry, onCancel, onRemove, onDownloa
               <Group gap="xs" wrap="nowrap">
                 <Progress
                   data-audio-transcode-progress
-                  value={progress}
+                  value={isInspecting ? null : progress}
                   size="md"
                   flex={1}
-                  aria-label={file.progressLabel ?? file.statusLabel}
-                  aria-valuetext={file.progressLabel ?? `${Math.round(progress)}%`}
+                  aria-label={isInspecting ? file.statusLabel : (file.progressLabel ?? file.statusLabel)}
+                  aria-valuetext={isInspecting ? undefined : (file.progressLabel ?? `${Math.round(progress)}%`)}
                 />
-                <Text size="xs" c="blue" fw={600} ff="monospace">
-                  {Math.round(progress)}%
-                </Text>
+                {isInspecting ? null : (
+                  <Text size="xs" c="blue" fw={600} ff="monospace">
+                    {Math.round(progress)}%
+                  </Text>
+                )}
               </Group>
             ) : null}
 
@@ -358,21 +362,12 @@ export function AudioTranscodeToolView({
 
   return (
     <Stack gap="xl" data-audio-transcode-tool>
-      {title === null ? null : (
-        <Title order={1} id={titleId}>
-          {title}
-        </Title>
-      )}
+      {title === null ? null : <PageHeader title={title} description={labels.description} />}
 
       <SectionCard component="section" aria-labelledby={`${titleId}-settings-title`}>
         <Stack gap="md">
           <SectionHeader
-            title={
-              <Group gap="xs" wrap="nowrap">
-                {targetStatus === 'checking' ? <Loader aria-hidden size="xs" /> : null}
-                <span id={`${titleId}-settings-title`}>{labels.outputSettings}</span>
-              </Group>
-            }
+            title={<span id={`${titleId}-settings-title`}>{labels.outputSettings}</span>}
             description={
               targetMessage ? (
                 <span role={targetStatus === 'error' ? 'alert' : undefined}>{targetMessage}</span>

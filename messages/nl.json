@@ -5261,6 +5261,15 @@
       "automaticRateUnavailable": "Automatisch kan geen geldige frequentie kiezen voor deze bron van {sourceRate}. Toegestane uitvoerfrequenties: {allowed}.",
       "presetRateUnsupported": "Deze uitvoer ondersteunt {targetRate} niet. Toegestane frequenties: {allowed}.",
       "notices": "Open-sourcelicenties"
+    },
+    "hwp": {
+      "title": "HWP-editor",
+      "metadataDescription": "Open, bewerk en bewaar HWP- en HWPX-documenten in je browser.",
+      "description": "Gebruik het menu Bestand van de editor om HWP- of HWPX-bestanden te openen en op te slaan. Documenten worden op dit apparaat verwerkt zonder upload.",
+      "loading": "Editor laden…",
+      "error": "De editor kon niet worden geladen. Probeer het opnieuw.",
+      "retry": "Opnieuw proberen",
+      "metadataTitle": "HWP-editor"
     }
   },
   "myMetadata": {

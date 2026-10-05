@@ -65,7 +65,7 @@ const restrictedCoreImportPaths = [
 export default defineConfig(
   ...mantine,
   {
-    ignores: ['**/*.{mjs,cjs,js,d.ts,d.mts}', '.next', '.next-integration-*', 'gen', 'scripts', 'tests'],
+    ignores: ['**/*.{mjs,cjs,js,d.ts,d.mts}', '.next', '.next-integration-*', '.artifacts', 'gen', 'scripts', 'tests'],
   },
   {
     rules: { 'no-alert': 'off' },

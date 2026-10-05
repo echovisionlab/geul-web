@@ -5261,6 +5261,15 @@
       "automaticRateUnavailable": "Automatique ne peut pas choisir de taux valide pour cette source à {sourceRate}. Taux autorisés : {allowed}.",
       "presetRateUnsupported": "Cette sortie ne prend pas en charge {targetRate}. Taux autorisés : {allowed}.",
       "notices": "Licences open source"
+    },
+    "hwp": {
+      "title": "Éditeur HWP",
+      "metadataDescription": "Ouvrez, modifiez et enregistrez des documents HWP et HWPX dans votre navigateur.",
+      "description": "Utilisez le menu Fichier de l’éditeur pour ouvrir et enregistrer des fichiers HWP ou HWPX. Les documents sont traités sur cet appareil sans être téléversés.",
+      "loading": "Chargement de l’éditeur…",
+      "error": "Impossible de charger l’éditeur. Réessayez.",
+      "retry": "Réessayer",
+      "metadataTitle": "Éditeur HWP"
     }
   },
   "myMetadata": {

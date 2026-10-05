@@ -5261,6 +5261,15 @@
       "automaticRateUnavailable": "Automatisch kann für diese {sourceRate}-Quelle keine gültige Rate wählen. Zulässige Ausgaberaten: {allowed}.",
       "presetRateUnsupported": "Diese Ausgabe unterstützt {targetRate} nicht. Zulässige Raten: {allowed}.",
       "notices": "Open-Source-Lizenzen"
+    },
+    "hwp": {
+      "title": "HWP-Editor",
+      "metadataDescription": "HWP- und HWPX-Dokumente im Browser öffnen, bearbeiten und speichern.",
+      "description": "Öffnen und speichern Sie HWP- oder HWPX-Dateien über das Dateimenü des Editors. Dokumente werden auf diesem Gerät verarbeitet, ohne hochgeladen zu werden.",
+      "loading": "Editor wird geladen…",
+      "error": "Der Editor konnte nicht geladen werden. Versuchen Sie es erneut.",
+      "retry": "Erneut versuchen",
+      "metadataTitle": "HWP-Editor"
     }
   },
   "myMetadata": {

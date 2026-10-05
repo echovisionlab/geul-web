@@ -17,7 +17,7 @@ function LocalizedSourceView(props: YoutubeAudioToolViewProps) {
   const t = useTranslations('tools.youtubeAudio');
   const translated = { ...props.labels };
   for (const key of Object.keys(translated) as (keyof YoutubeAudioToolLabels)[]) {
-    translated[key] = t(key);
+    translated[key] = t(key === 'description' ? 'metadataDescription' : key);
   }
   return (
     <YoutubeAudioToolView
@@ -32,7 +32,7 @@ function LocalizedConverter(props: AudioTranscodeToolViewProps) {
   const t = useTranslations('tools.transcode');
   const translated = { ...props.labels };
   for (const key of Object.keys(translated) as (keyof AudioTranscodeToolLabels)[]) {
-    translated[key] = t(key);
+    translated[key] = t(key === 'description' ? 'metadataDescription' : key);
   }
   const statusKeys = {
     inspecting: 'statusInspecting',
@@ -74,11 +74,11 @@ function LocalizedConverter(props: AudioTranscodeToolViewProps) {
 
 const labels: YoutubeAudioToolLabels = {
   title: 'YouTube Audio',
+  description: 'Convert audio from an authenticated YouTube source in your browser.',
   urlLabel: 'Video link',
   urlPlaceholder: 'https://…',
   resolve: 'Load audio',
   resolving: 'Loading audio',
-  ready: 'Source ready',
   clear: 'Clear source',
 };
 
@@ -86,6 +86,7 @@ const converterArgs = {
   title: null,
   labels: {
     title: 'Audio transcoder',
+    description: 'Convert audio files in your browser without uploading them.',
     notices: 'Open-source licenses',
     targetIdle: 'Waiting',
     targetChecking: 'Checking support',
