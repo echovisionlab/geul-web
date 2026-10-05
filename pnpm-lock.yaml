@@ -103,8 +103,8 @@ importers:
         specifier: 0.1.3
         version: 0.1.3
       '@echovisionlab/ionian':
-        specifier: 0.1.4
-        version: 0.1.4(mitt@3.0.1)(three-stdlib@2.36.1(three@0.186.1))(three@0.186.1)
+        specifier: 0.1.5
+        version: 0.1.5(mitt@3.0.1)(three-stdlib@2.36.1(three@0.186.1))(three@0.186.1)
       '@echovisionlab/youtube-audio':
         specifier: 0.1.6
         version: 0.1.6
@@ -1207,8 +1207,8 @@ packages:
     resolution: {integrity: sha512-nK2ZSM7T+3pthM/PiW7tD6dwDZCeRZDJ8E4V3COBrRqgUuYTJmlh2UkGzKKVCr5e0FcW7fM5Lq14pgAwbc5oKg==}
     engines: {node: 24.19.0}
 
-  '@echovisionlab/ionian@0.1.4':
-    resolution: {integrity: sha512-Ivh7p+wjaMaq1770C6aS7pBSlTpsAZcNagm8GOZsornyvHDgTslZdLk5GQQshXPAp02Vj5EFYUSNxvAXguzeOw==}
+  '@echovisionlab/ionian@0.1.5':
+    resolution: {integrity: sha512-415QIX3GUvqQ7mqhDVupl4NZQ92kc82hwXoHxplMNFXlL507BjVFL7BrLbZndo42FJMkwTQA/010sYhTy+LlxQ==}
     engines: {node: 24.19.0}
     peerDependencies:
       mitt: ^3.0.1
@@ -8869,7 +8869,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.1
 
-  '@echovisionlab/ionian@0.1.4(mitt@3.0.1)(three-stdlib@2.36.1(three@0.186.1))(three@0.186.1)':
+  '@echovisionlab/ionian@0.1.5(mitt@3.0.1)(three-stdlib@2.36.1(three@0.186.1))(three@0.186.1)':
     dependencies:
       mitt: 3.0.1
       three: 0.186.1

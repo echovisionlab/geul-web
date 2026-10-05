@@ -326,6 +326,28 @@ function AuthoringScene({
 }
 
 describe('authoring Three.js scene resize', () => {
+  it('keeps runtime failures visible in the scene error UI', async () => {
+    const runtimeFactory: ThreePreviewRuntimeFactory = (_canvas, events) => ({
+      run: () => events.onError({ kind: 'runtime', message: 'frame failed' }),
+      stop: events.onStopped,
+      dispose: () => undefined,
+    });
+    const element = document.createElement('div');
+    document.body.append(element);
+    const root = createRoot(element);
+    await act(async () => {
+      root.render(
+        <MantineProvider>
+          <AuthoringScene runtimeFactory={runtimeFactory} onEditor={() => undefined} />
+        </MantineProvider>,
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect(element.querySelector('[data-testid="three-error"]')?.textContent).toContain('frame failed');
+    await act(async () => root.unmount());
+    element.remove();
+  });
+
   it('keeps Monaco edits draft-only until Apply updates source and preview', async () => {
     const run = vi.fn();
     const runtimeFactory: ThreePreviewRuntimeFactory = (_canvas, events) => ({
