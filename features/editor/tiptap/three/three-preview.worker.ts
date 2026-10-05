@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createClientLogger } from '@/lib/utils/client-logger';
 import type { ThreeSceneError, ThreeSceneErrorKind } from './three-source';
 
 type WorkerStartMessage = { type: 'start'; source: string; canvas: OffscreenCanvas };
@@ -14,6 +15,19 @@ const runtime = globalThis as typeof globalThis & {
   onmessage: ((event: MessageEvent<WorkerStartMessage | WorkerStopMessage>) => void) | null;
 };
 const SourceFunction = Function;
+const logger = createClientLogger('three-preview');
+THREE.setConsoleFunction((level, message, ...params) => {
+  logger[level === 'log' ? 'debug' : level](message, { params });
+});
+const sourceConsole =
+  process.env.NODE_ENV === 'development'
+    ? console
+    : new Proxy(console, {
+        get(target, key) {
+          const value = Reflect.get(target, key);
+          return typeof value === 'function' ? () => {} : value;
+        },
+      });
 
 let renderer: THREE.WebGLRenderer | null = null;
 let scene: THREE.Scene | null = null;
@@ -28,6 +42,10 @@ function disableCapability(name: string, value: unknown): void {
   } catch {
     // A missing/non-configurable browser API is already unavailable.
   }
+}
+
+if (process.env.NODE_ENV !== 'development') {
+  disableCapability('console', sourceConsole);
 }
 
 const blockedNetwork = () => Promise.reject(new Error('Network access is disabled in Three.js previews.'));
@@ -166,6 +184,7 @@ function start({ source, canvas }: WorkerStartMessage): void {
     );
     camera = nextCamera;
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.debug.checkShaderErrors = process.env.NODE_ENV === 'development';
     renderer.setPixelRatio(1);
     renderer.setSize(Math.max(1, canvas.width), Math.max(1, canvas.height), false);
     const compile = new SourceFunction(

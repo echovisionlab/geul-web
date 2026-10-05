@@ -6,6 +6,7 @@ import type * as Three from 'three';
 import { Box, Title, useComputedColorScheme } from '@mantine/core';
 import { useReducedMotion } from '@mantine/hooks';
 import { toCdnUrl } from '@/lib/utils/file-url';
+import { createClientLogger } from '@/lib/utils/client-logger';
 import { ImmersiveSceneDescriptionView } from './DescriptionView';
 import classes from './SceneRenderer.module.css';
 import {
@@ -66,6 +67,7 @@ interface ImmersiveSceneRendererProps {
 type RendererStatus = 'idle' | 'ready' | 'fallback';
 type AssetLoadStatus = 'idle' | 'primitive' | 'color' | 'loaded' | 'fallback';
 const DRACO_DECODER_PATH = '/draco/gltf/';
+const logger = createClientLogger('immersive-scene-three');
 
 interface RendererAssetStatus {
   mesh: AssetLoadStatus;
@@ -530,12 +532,16 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
           return;
         }
 
+        THREE.setConsoleFunction((level, message, ...params) => {
+          logger[level === 'log' ? 'debug' : level](message, { params });
+        });
         const renderer = new THREE.WebGLRenderer({
           canvas,
           antialias: true,
           alpha: !backgroundEnabled,
           powerPreference: preview ? 'low-power' : 'high-performance',
         });
+        renderer.debug.checkShaderErrors = process.env.NODE_ENV === 'development';
         renderer.setClearColor(backgroundColor, backgroundEnabled ? 1 : 0);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, preview ? 1.5 : 2));
 
@@ -552,6 +558,7 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
           camera,
           useIntersection: hoverControlsRef.current.enabled,
           dracoDecoderPath: DRACO_DECODER_PATH,
+          debug: process.env.NODE_ENV === 'development',
         });
         engineRef.current = engine;
         cleanup = () => {
