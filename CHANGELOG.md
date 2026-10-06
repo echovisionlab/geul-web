@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.9.2](https://github.com/echovisionlab/geul-web/compare/v0.9.1...v0.9.2) (2026-10-06)
+
+
+### Bug Fixes
+
+* **embed:** fit document height and simplify block UI ([54bfc7c](https://github.com/echovisionlab/geul-web/commit/54bfc7c7a96bc725968a4ddd788d32502a2d914a))
+* **embed:** preserve long document content height ([b39c656](https://github.com/echovisionlab/geul-web/commit/b39c6565a832a7cb3de6539b0b1ef76ed616edbb))
+* **embed:** remove extra frame toolbar ([b1ee121](https://github.com/echovisionlab/geul-web/commit/b1ee121839a00a0cab6d08b58c12e5bd32ef8e54))
+* **embed:** remove unused Turkish toolbar strings ([f53bb2b](https://github.com/echovisionlab/geul-web/commit/f53bb2bb271254990b104ed45b10cd7373b52866))
+* **embed:** simplify URL field label ([14688c9](https://github.com/echovisionlab/geul-web/commit/14688c907f6e5871dedbde887aa24298cfa839b6))
+
 ## [0.9.1](https://github.com/echovisionlab/geul-web/compare/v0.9.0...v0.9.1) (2026-10-06)
 
 
