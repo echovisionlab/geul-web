@@ -4,6 +4,8 @@ import type { Meta, StoryObj } from '@storybook/nextjs';
 import { EmbedFrame } from './EmbedFrame';
 import { EmbedSettingsForm } from './SettingsForm';
 import { parseEmbedProps } from './schema';
+import { DEFAULT_DOCUMENT_LAYOUT } from '@/features/document-layout';
+import { PageContentView } from '@/features/page/PageView/PageContentView';
 
 const meta: Meta<typeof EmbedFrame> = {
   title: 'Feature/Page/Embed',
@@ -80,6 +82,50 @@ export const CombinedModuleMobile: Story = {
       <CombinedEditor module />
     </div>
   ),
+};
+
+export const DirectToolContentControls: Story = {
+  parameters: { layout: 'fullscreen' },
+  args: { props: parseEmbedProps({ uri: '', title: 'Direct module tool' }) },
+  argTypes: { props: { control: 'object' } },
+  render: function ContentControls({ props }) {
+    const [uri, setUri] = useState(props.uri);
+    useEffect(() => setUri(props.uri || `${window.location.origin}/fixtures/embed-tool.js`), [props.uri]);
+    return (
+      <div style={{ padding: 16 }}>
+        <PageContentView
+          pathname="/page/tool"
+          requestedLocale="en"
+          page={{
+            title: '',
+            showTitle: false,
+            blockMedia: [],
+            documentLayout: DEFAULT_DOCUMENT_LAYOUT,
+            content: [
+              {
+                id: 'tool',
+                kind: 'embed',
+                settings: {},
+                richText: null,
+                columns: [],
+                props: parseEmbedProps({ ...props, uri }),
+              },
+            ],
+            localizationInfo: {
+              requestedLocale: 'en',
+              displayedLocale: 'en',
+              sourceLocale: 'en',
+              availableLocales: ['en', 'ko'],
+              isFallback: false,
+              isOriginal: true,
+              machineGenerated: false,
+              fallbackReason: 0,
+            },
+          }}
+        />
+      </div>
+    );
+  },
 };
 
 export const SettingsCompact: Story = {
