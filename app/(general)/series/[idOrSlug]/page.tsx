@@ -95,7 +95,6 @@ export default async function SeriesPage({ params, searchParams }: Props) {
       />
       <SeriesPublicView
         title={series.title}
-        description={series.description}
         featuredImageUrl={series.featuredImageUrl}
         postsLabel={tCommon('entities.posts')}
         controls={

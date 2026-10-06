@@ -119,11 +119,6 @@ export async function LabelPublicContent({
             <Group className={classes.titleRow} justify="space-between" align="flex-start">
               <Box className={classes.titleBlock}>
                 <Title order={1}>{label.name}</Title>
-                {label.descriptionText ? (
-                  <Text c="dimmed" mt="xs">
-                    {label.descriptionText}
-                  </Text>
-                ) : null}
               </Box>
               <Group className={classes.headerActions} gap="xs" align="center" wrap="nowrap">
                 <ContentLanguageMenu

@@ -117,12 +117,6 @@ export function ProgramEventViewClient({ event, shareUrl, locale, pathname, quer
   const tCommonLabels = useTranslations('common.labels');
   const tCommonStates = useTranslations('common.states');
   const tProgramEventAdmin = useTranslations('programEventAdmin');
-  const locationLabels: Record<ProgramEventViewData['locationMode'], string> = {
-    map_place: tProgramEventAdmin('locationModes.mapPlace'),
-    online: tProgramEventAdmin('locationModes.online'),
-    hybrid: tProgramEventAdmin('locationModes.hybrid'),
-    tba: tProgramEventAdmin('locationModes.tba'),
-  };
   const tocItems = useMemo(() => buildGeneratedBlockTocItems(event.content), [event.content]);
   const eventDate = formatEventDate(event, locale);
   const languageMenu = event.localizationInfo ? (
@@ -163,11 +157,6 @@ export function ProgramEventViewClient({ event, shareUrl, locale, pathname, quer
                 </Text>
               </PublicMetadataRow>
             ) : null}
-            <PublicMetadataRow label={tCommonLabels('location')}>
-              <Text size="sm" component="span">
-                {locationLabels[event.locationMode]}
-              </Text>
-            </PublicMetadataRow>
             {event.locationPlace ? (
               <LocationPlaceMetadataRows place={event.locationPlace} textSize="sm" coordinateVisibility="desktop" />
             ) : null}
@@ -295,13 +284,6 @@ export function ProgramEventViewClient({ event, shareUrl, locale, pathname, quer
         ) : (
           <MetadataSection />
         )}
-
-        {event.summary ? (
-          <>
-            <Divider />
-            <Text size="md">{event.summary}</Text>
-          </>
-        ) : null}
 
         {event.content && event.content.length > 0 ? (
           <>

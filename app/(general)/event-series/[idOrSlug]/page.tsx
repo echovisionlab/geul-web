@@ -107,7 +107,6 @@ export default async function ProgramEventSeriesPage({ params, searchParams }: P
       />
       <ProgramEventSeriesPublicView
         title={series.title}
-        summary={series.summary}
         description={series.description}
         posterUrl={series.posterUrl}
         controls={<ShareButton url={shareUrl} title={series.title} size="md" />}

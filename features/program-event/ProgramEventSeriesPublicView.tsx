@@ -4,7 +4,6 @@ import { PageHeader } from '@/components/core/PageHeader';
 
 interface ProgramEventSeriesPublicViewProps {
   title: string;
-  summary?: string | null;
   description?: string | null;
   posterUrl?: string | null;
   controls?: ReactNode;
@@ -14,7 +13,6 @@ interface ProgramEventSeriesPublicViewProps {
 
 export function ProgramEventSeriesPublicView({
   title,
-  summary,
   description,
   posterUrl,
   controls,
@@ -24,7 +22,6 @@ export function ProgramEventSeriesPublicView({
   const details = (
     <Stack gap="md">
       <PageHeader title={title} actions={controls} />
-      {summary ? <Text size="md">{summary}</Text> : null}
       {description ? (
         <Text size="sm" c="dimmed" style={{ whiteSpace: 'pre-wrap' }}>
           {description}

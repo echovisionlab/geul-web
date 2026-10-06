@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { getSiteMetadataDocument } from '@/lib/queries/metadata';
 import { listPublishedPosts } from '@/lib/queries/post';
 import { getPublicSeries } from '@/lib/queries/series';
-import SeriesPage from './page';
+import SeriesPage, { generateMetadata } from './page';
 
 const mocks = vi.hoisted(() => ({
   notFound: vi.fn(() => {
@@ -51,7 +52,28 @@ describe('public Post Series route', () => {
       posts: [],
       pagination: { total: 12, limit: 10, offset: 10, hasMore: false },
     });
+    vi.mocked(getSiteMetadataDocument).mockResolvedValue({
+      siteTitle: 'Studio',
+      siteDescription: null,
+      canonicalOrigin: 'https://studio.example.test',
+      siteOgImageUrl: null,
+      companyName: null,
+      logoUrl: null,
+      socialLinks: [],
+    });
     mocks.renderPageRouteFallback.mockReturnValue(<div>page-fallback</div>);
+  });
+
+  it('keeps the stored summary description in search and share metadata', async () => {
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ idOrSlug: 'field-notes' }),
+      searchParams: Promise.resolve({ lang: 'ko' }),
+    });
+
+    expect(metadata.description).toBe('시리즈 설명');
+    expect(metadata.openGraph?.description).toBe('시리즈 설명');
+    expect(metadata.twitter?.description).toBe('시리즈 설명');
+    expect(getPublicSeries).toHaveBeenCalledWith('field-notes', { requestedLocale: 'ko' });
   });
 
   it('uses localized SeriesService/Get and paginates public Posts in Series order', async () => {

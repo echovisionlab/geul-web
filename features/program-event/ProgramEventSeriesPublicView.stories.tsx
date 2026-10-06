@@ -76,7 +76,6 @@ function StoryView({ withPoster, empty, sparse, longTitle }: StoryViewProps) {
     >
       <ProgramEventSeriesPublicView
         title={title}
-        summary={sparse ? null : 'A global event-series summary shared by every locale.'}
         description={
           sparse
             ? null
@@ -169,7 +168,7 @@ const meta = {
     },
     sparse: {
       control: 'boolean',
-      description: 'Omit optional global summary and description.',
+      description: 'Omit the optional global description.',
     },
     longTitle: {
       control: 'boolean',

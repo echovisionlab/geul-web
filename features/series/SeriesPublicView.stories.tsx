@@ -30,7 +30,6 @@ function StoryView({ withImage = false, empty = false }: { withImage?: boolean; 
     <div style={{ width: 'min(1040px, 94vw)' }}>
       <SeriesPublicView
         title="Night Walks"
-        description="A series of essays and field notes about listening, movement, and public space after dark."
         featuredImageUrl={featuredImageUrl}
         postsLabel="Posts"
         controls={<Button size="xs">Share</Button>}
