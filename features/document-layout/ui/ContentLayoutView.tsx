@@ -23,7 +23,11 @@ export function ContentLayoutView({ layout, chrome, controls, children, classNam
       data-footer-layout={layout.footer}
       data-has-chrome={chrome ? 'true' : 'false'}
     >
-      {controls ? <div className={`${classes.controls} print-hide`}>{controls}</div> : null}
+      {controls ? (
+        <div className={`${classes.controls} print-hide`} data-content-controls>
+          {controls}
+        </div>
+      ) : null}
       {chrome && chromeIsPinned ? <div className={classes.pinnedChrome}>{chrome}</div> : null}
       <div className={classes.body} data-content-body>
         {chrome && !chromeIsPinned ? <div className={classes.flowChrome}>{chrome}</div> : null}
