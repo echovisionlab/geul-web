@@ -5135,6 +5135,10 @@
     }
   },
   "tools": {
+    "portadj": {
+      "metadataTitle": "PortaDJ",
+      "metadataDescription": "Play and mix local audio files in your browser with two DJ decks."
+    },
     "youtubeAudio": {
       "title": "YouTube Audio",
       "urlLabel": "Video link",

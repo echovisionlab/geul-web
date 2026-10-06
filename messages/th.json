@@ -5135,6 +5135,10 @@
     }
   },
   "tools": {
+    "portadj": {
+      "metadataTitle": "PortaDJ",
+      "metadataDescription": "เล่นและมิกซ์ไฟล์เสียงในเครื่องผ่านเบราว์เซอร์ด้วยเด็ค DJ สองตัว"
+    },
     "youtubeAudio": {
       "title": "เสียงจาก YouTube",
       "urlLabel": "ลิงก์วิดีโอ",

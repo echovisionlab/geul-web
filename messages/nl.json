@@ -5135,6 +5135,10 @@
     }
   },
   "tools": {
+    "portadj": {
+      "metadataTitle": "PortaDJ",
+      "metadataDescription": "Speel en mix lokale audiobestanden in je browser met twee DJ-decks."
+    },
     "youtubeAudio": {
       "title": "YouTube-audio",
       "urlLabel": "Videolink",

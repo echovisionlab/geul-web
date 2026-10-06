@@ -5135,6 +5135,10 @@
     }
   },
   "tools": {
+    "portadj": {
+      "metadataTitle": "PortaDJ",
+      "metadataDescription": "Воспроизводите и микшируйте локальные аудиофайлы в браузере на двух DJ-деках."
+    },
     "youtubeAudio": {
       "title": "Аудио с YouTube",
       "urlLabel": "Ссылка на видео",

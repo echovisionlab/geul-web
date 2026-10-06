@@ -5135,6 +5135,10 @@
     }
   },
   "tools": {
+    "portadj": {
+      "metadataTitle": "PortaDJ",
+      "metadataDescription": "在瀏覽器中使用兩個 DJ 播放器播放及混音本機音訊檔案。"
+    },
     "youtubeAudio": {
       "title": "YouTube 音訊",
       "urlLabel": "影片連結",

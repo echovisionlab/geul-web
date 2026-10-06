@@ -5135,6 +5135,10 @@
     }
   },
   "tools": {
+    "portadj": {
+      "metadataTitle": "PortaDJ",
+      "metadataDescription": "شغّل ملفات الصوت المحلية وامزجها في متصفحك باستخدام مشغّلي DJ."
+    },
     "youtubeAudio": {
       "title": "صوت YouTube",
       "urlLabel": "رابط الفيديو",

@@ -5135,6 +5135,10 @@
     }
   },
   "tools": {
+    "portadj": {
+      "metadataTitle": "PortaDJ",
+      "metadataDescription": "Reproduza e mixe arquivos de áudio locais no navegador com dois decks de DJ."
+    },
     "youtubeAudio": {
       "title": "Áudio do YouTube",
       "urlLabel": "Link do vídeo",

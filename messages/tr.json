@@ -5135,6 +5135,10 @@
     }
   },
   "tools": {
+    "portadj": {
+      "metadataTitle": "PortaDJ",
+      "metadataDescription": "İki DJ deck’i ile yerel ses dosyalarını tarayıcınızda çalın ve miksleyin."
+    },
     "youtubeAudio": {
       "title": "YouTube Sesi",
       "urlLabel": "Video bağlantısı",

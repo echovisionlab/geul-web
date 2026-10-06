@@ -5135,6 +5135,10 @@
     }
   },
   "tools": {
+    "portadj": {
+      "metadataTitle": "PortaDJ",
+      "metadataDescription": "Phát và trộn các tệp âm thanh trên thiết bị trong trình duyệt bằng hai bàn DJ."
+    },
     "youtubeAudio": {
       "title": "Âm thanh YouTube",
       "urlLabel": "Liên kết video",

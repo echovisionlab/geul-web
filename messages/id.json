@@ -5135,6 +5135,10 @@
     }
   },
   "tools": {
+    "portadj": {
+      "metadataTitle": "PortaDJ",
+      "metadataDescription": "Putar dan campur file audio lokal di browser dengan dua deck DJ."
+    },
     "youtubeAudio": {
       "title": "Audio YouTube",
       "urlLabel": "Tautan video",
