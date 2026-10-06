@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/echovisionlab/geul-web/compare/v0.8.0...v0.8.1) (2026-10-06)
+
+
+### Bug Fixes
+
+* **content:** keep summaries in previews and align event metadata ([#94](https://github.com/echovisionlab/geul-web/issues/94)) ([4e725a8](https://github.com/echovisionlab/geul-web/commit/4e725a84b85dfe6c7cfa468240a244b6c2e5a2c0))
+
 ## [0.8.0](https://github.com/echovisionlab/geul-web/compare/v0.7.2...v0.8.0) (2026-10-06)
 
 
