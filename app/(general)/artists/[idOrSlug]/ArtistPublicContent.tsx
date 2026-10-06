@@ -12,11 +12,9 @@ import { SectionCard } from '@/components/core/Section';
 import { JsonLdScript } from '@/features/metadata/ui/JsonLdScript';
 import { parseReleaseListProps } from '@/features/page/blocks/releases-gallery/schema';
 import { ReleaseListViewClient } from '@/features/page/blocks/releases-gallery/ViewClient';
-import { ShareButton } from '@/features/share/ShareButton';
 import { GeneratedRichTextBlockView } from '@/features/page/PageView/blocks/GeneratedRichTextBlockView';
 import { SocialLinksDisplay } from '@/features/social-links/SocialLinksDisplay';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
-import { LocalizationNotice } from '@/features/translation/LocalizationNotice';
 import { formatCountryDisplayName } from '@/lib/countries';
 import type { getArtistView } from '@/lib/queries/artist';
 import type { getArtistMetadataDocument } from '@/lib/queries/metadata';
@@ -54,14 +52,12 @@ function getArtistReleaseArtists(artist: ArtistView) {
 export async function ArtistPublicContent({
   artist,
   artistMetadata,
-  baseUrl,
   query,
   requestedLocale,
   uiLocale,
 }: {
   artist: ArtistView;
   artistMetadata: ArtistMetadata | null;
-  baseUrl: string;
   query: SearchParamRecord;
   requestedLocale: string | null;
   uiLocale: string;
@@ -71,7 +67,6 @@ export async function ArtistPublicContent({
     getTranslations('common.entities'),
     getTranslations('common.labels'),
   ]);
-  const url = `${baseUrl}/artists/${artist.slug || artist.id}`;
   const pathname = `/artists/${artist.slug || artist.id}`;
   const contentLocale = requestedLocale ?? uiLocale;
   const hasSocialLinks = artist.socialLinks && Object.keys(artist.socialLinks).length > 0;
@@ -81,13 +76,6 @@ export async function ArtistPublicContent({
     <>
       {artistMetadata && <JsonLdScript data={buildArtistJsonLd(artistMetadata)} />}
       <Stack gap="xl">
-        <LocalizationNotice
-          pathname={pathname}
-          query={query}
-          requestedLocale={contentLocale}
-          localizationInfo={artist.localizationInfo}
-          variant="subtle"
-        />
         <Group align="flex-start" gap="xl" wrap="wrap" className={classes.header}>
           {artist.imageUrl && (
             <Box className={classes.imageContainer}>
@@ -108,7 +96,6 @@ export async function ArtistPublicContent({
                   requestedLocale={contentLocale}
                   localizationInfo={artist.localizationInfo}
                 />
-                <ShareButton url={url} title={artist.name} />
               </Group>
             </Group>
             <Divider />

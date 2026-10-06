@@ -17,7 +17,6 @@ import { getUserLocale } from '@/lib/utils/language.server';
 import { buildArtistOgMetadata } from '@/lib/utils/og';
 import { isEntityEditView } from '@/lib/utils/entity-edit-route';
 import { withNoIndex } from '@/lib/utils/route-metadata';
-import { getBaseUrl } from '@/lib/utils/url.server';
 import { generatePageRouteFallbackMetadata, renderPageRouteFallback } from '@/app/_shared/page-route-fallback';
 import { ArtistPublicContent } from './ArtistPublicContent';
 import { ArtistShareViewClient } from './ArtistShareViewClient';
@@ -103,10 +102,9 @@ export default async function ArtistViewPage({ params, searchParams }: Props) {
     }
   }
 
-  const [artist, artistMetadata, baseUrl] = await Promise.all([
+  const [artist, artistMetadata] = await Promise.all([
     getArtistView(idOrSlug, { requestedLocale, shareToken }),
     shareToken ? Promise.resolve(null) : getArtistMetadataDocument(idOrSlug, { requestedLocale }),
-    getBaseUrl(),
   ]);
   if (!artist) {
     return renderPageRouteFallback(['artists', idOrSlug], query);
@@ -115,7 +113,6 @@ export default async function ArtistViewPage({ params, searchParams }: Props) {
     <ArtistPublicContent
       artist={artist}
       artistMetadata={artistMetadata}
-      baseUrl={baseUrl}
       query={query}
       requestedLocale={requestedLocale}
       uiLocale={uiLocale}

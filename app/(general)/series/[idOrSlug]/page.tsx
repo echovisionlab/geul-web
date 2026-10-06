@@ -2,9 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
 import { ServerDataTablePagination } from '@/features/data-table/ServerDataTable/ServerDataTablePagination';
-import { LocalizationNotice } from '@/features/translation/LocalizationNotice';
 import { SeriesPublicPostsView, SeriesPublicView } from '@/features/series/SeriesPublicView';
-import { ShareButton } from '@/features/share/ShareButton';
 import { getSiteMetadataDocument } from '@/lib/queries/metadata';
 import { listPublishedPosts } from '@/lib/queries/post';
 import { getPublicSeries } from '@/lib/queries/series';
@@ -17,7 +15,6 @@ import {
 import { getUserLocale } from '@/lib/utils/language.server';
 import { buildSeriesOgMetadata } from '@/lib/utils/og';
 import { withNoIndex } from '@/lib/utils/route-metadata';
-import { getBaseUrl } from '@/lib/utils/url.server';
 import { parseBlockTableQuery, queryRecordToSearchParams } from '@/features/page/blocks/table-utils';
 import { generatePageRouteFallbackMetadata, renderPageRouteFallback } from '@/app/_shared/page-route-fallback';
 
@@ -70,7 +67,7 @@ export default async function SeriesPage({ params, searchParams }: Props) {
   const postsQuery = parseBlockTableQuery(seriesPostsSearchParams, 'seriesPosts', 10);
   const postsPage = Math.max(1, postsQuery.page ?? 1);
   const postsPageSize = Math.max(1, Math.min(100, postsQuery.pageSize ?? 10));
-  const [postResult, baseUrl, tCommon] = await Promise.all([
+  const [postResult, tCommon] = await Promise.all([
     listPublishedPosts({
       seriesId: series.id,
       sortBy: 'series_order',
@@ -79,69 +76,56 @@ export default async function SeriesPage({ params, searchParams }: Props) {
       offset: (postsPage - 1) * postsPageSize,
       requestedLocale,
     }),
-    getBaseUrl(),
     getTranslations('common'),
   ]);
   const pathname = `/series/${series.slug || series.id}`;
 
   return (
-    <>
-      <LocalizationNotice
-        pathname={pathname}
-        query={query}
-        requestedLocale={requestedLocale}
-        localizationInfo={series.localizationInfo}
-        variant="subtle"
+    <SeriesPublicView
+      title={series.title}
+      featuredImageUrl={series.featuredImageUrl}
+      postsLabel={tCommon('entities.posts')}
+      controls={
+        <ContentLanguageMenu
+          pathname={pathname}
+          query={query}
+          requestedLocale={requestedLocale}
+          localizationInfo={series.localizationInfo}
+        />
+      }
+    >
+      <SeriesPublicPostsView
+        posts={postResult.posts.map((post) => ({
+          id: post.id,
+          title: post.title,
+          slug: post.slug,
+          publishedAt: post.published_at?.toISOString() ?? null,
+          authors: post.authors.map((author: { id: string; name?: string | null }) => ({
+            id: author.id,
+            name: author.name,
+          })),
+        }))}
+        labels={{
+          title: tCommon('labels.title'),
+          authors: tCommon('labels.authors'),
+          published: tCommon('labels.published'),
+          empty: tCommon('messages.noPostsFound'),
+          untitled: tCommon('states.untitled'),
+          unknown: tCommon('states.unknown'),
+        }}
       />
-      <SeriesPublicView
-        title={series.title}
-        featuredImageUrl={series.featuredImageUrl}
-        postsLabel={tCommon('entities.posts')}
-        controls={
-          <>
-            <ContentLanguageMenu
-              pathname={pathname}
-              query={query}
-              requestedLocale={requestedLocale}
-              localizationInfo={series.localizationInfo}
-            />
-            <ShareButton url={`${baseUrl}${pathname}`} title={series.title} />
-          </>
-        }
-      >
-        <SeriesPublicPostsView
-          posts={postResult.posts.map((post) => ({
-            id: post.id,
-            title: post.title,
-            slug: post.slug,
-            publishedAt: post.published_at?.toISOString() ?? null,
-            authors: post.authors.map((author: { id: string; name?: string | null }) => ({
-              id: author.id,
-              name: author.name,
-            })),
-          }))}
-          labels={{
-            title: tCommon('labels.title'),
-            authors: tCommon('labels.authors'),
-            published: tCommon('labels.published'),
-            empty: tCommon('messages.noPostsFound'),
-            untitled: tCommon('states.untitled'),
-            unknown: tCommon('states.unknown'),
-          }}
-        />
-        <ServerDataTablePagination
-          namespace="seriesPosts"
-          result={{
-            data: postResult.posts,
-            total: postResult.pagination.total,
-            page: postsPage,
-            pageSize: postsPageSize,
-            totalPages: Math.ceil(postResult.pagination.total / postsPageSize),
-          }}
-          searchParams={seriesPostsSearchParams}
-          reserveSpaceWhenHidden
-        />
-      </SeriesPublicView>
-    </>
+      <ServerDataTablePagination
+        namespace="seriesPosts"
+        result={{
+          data: postResult.posts,
+          total: postResult.pagination.total,
+          page: postsPage,
+          pageSize: postsPageSize,
+          totalPages: Math.ceil(postResult.pagination.total / postsPageSize),
+        }}
+        searchParams={seriesPostsSearchParams}
+        reserveSpaceWhenHidden
+      />
+    </SeriesPublicView>
   );
 }

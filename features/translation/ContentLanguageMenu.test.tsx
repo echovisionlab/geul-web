@@ -45,17 +45,19 @@ vi.mock('@/components/core/DropdownMenu', async () => {
     children,
     href,
     onClick,
+    selected,
   }: {
     children: ReactNode;
     href?: string;
     onClick?: () => void;
+    selected?: boolean;
   }) {
     return href ? (
-      <a href={href} role="menuitem">
+      <a href={href} role="menuitem" data-selected={selected || undefined}>
         {children}
       </a>
     ) : (
-      <button type="button" role="menuitem" onClick={onClick}>
+      <button type="button" role="menuitem" onClick={onClick} data-selected={selected || undefined}>
         {children}
       </button>
     );
@@ -139,17 +141,15 @@ async function clickElement(element: Element | null | undefined) {
 }
 
 describe('ContentLanguageMenu', () => {
-  it('renders only available locales plus the source option when locale inventory is present', async () => {
+  it('selects the displayed translation when only some fields fall back to the source', async () => {
+    const localizationInfo = {
+      displayedLocale: 'en',
+      sourceLocale: 'ko',
+      availableLocales: ['ko', 'en'],
+      isFallback: true,
+    };
     renderDropdownMenu(
-      <ContentLanguageMenu
-        pathname="/test"
-        requestedLocale="en"
-        localizationInfo={{
-          displayedLocale: 'en',
-          sourceLocale: 'ko',
-          availableLocales: ['ko', 'en'],
-        }}
-      />,
+      <ContentLanguageMenu pathname="/test" requestedLocale="en" localizationInfo={localizationInfo} />,
     );
 
     await clickElement(document.querySelector('button'));
@@ -160,22 +160,63 @@ describe('ContentLanguageMenu', () => {
     expect(document.body.textContent).toContain('English');
     expect(document.body.textContent).not.toContain('日本語');
     expect(document.body.textContent).not.toContain('Français');
+    expect(document.querySelector('button')?.textContent).toBe('EN');
+    expect(document.querySelector('[role="menuitem"][data-selected]')?.textContent).toBe('English');
   });
 
-  it('uses the displayed locale for the trigger when the requested locale is unavailable', () => {
-    renderDropdownMenu(
-      <ContentLanguageMenu
-        pathname="/test"
-        requestedLocale="ja"
-        localizationInfo={{
-          displayedLocale: 'ko',
-          sourceLocale: 'ko',
-          availableLocales: ['ko', 'en'],
-        }}
-      />,
-    );
+  it.each([
+    { name: 'with inventory', displayedLocale: 'ko', availableLocales: ['ko', 'en'], code: 'KO', label: '한국어' },
+    {
+      name: 'with a listed target',
+      displayedLocale: 'ko',
+      availableLocales: ['ko', 'en', 'ja'],
+      code: 'KO',
+      label: '한국어',
+    },
+    { name: 'without inventory', displayedLocale: 'ko', availableLocales: undefined, code: 'KO', label: '한국어' },
+    {
+      name: 'regional source',
+      displayedLocale: 'pt-BR',
+      availableLocales: undefined,
+      code: 'PT-BR',
+      label: 'Português (Brasil)',
+    },
+  ])(
+    'shows and selects the displayed source fallback $name',
+    async ({ displayedLocale, availableLocales, code, label }) => {
+      renderDropdownMenu(
+        <ContentLanguageMenu
+          pathname="/test"
+          query={{ lang: 'ja', page: '2', share: 'share-token' }}
+          requestedLocale="ja"
+          localizationInfo={{
+            displayedLocale,
+            sourceLocale: displayedLocale,
+            availableLocales,
+          }}
+        />,
+      );
 
-    expect(document.querySelector('button')?.textContent).toContain('한국어');
+      expect(document.querySelector('button')?.textContent).toBe(code);
+      expect(document.querySelector('button')?.getAttribute('aria-label')).toContain(label);
+      await clickElement(document.querySelector('button'));
+
+      const selectedItems = document.querySelectorAll('[role="menuitem"][data-selected]');
+      expect(selectedItems).toHaveLength(1);
+      expect(selectedItems[0]?.textContent).toBe(`Original (${label})`);
+      expect(selectedItems[0]?.getAttribute('href')).toBe(`/test?page=2&share=share-token&lang=${displayedLocale}`);
+    },
+  );
+
+  it('keeps the requested locale when display metadata is absent', async () => {
+    renderDropdownMenu(<ContentLanguageMenu pathname="/test" requestedLocale="pt-PT" />);
+
+    expect(document.querySelector('button')?.textContent).toBe('PT-PT');
+    expect(document.querySelector('button')?.getAttribute('aria-label')).toContain('Português (Portugal)');
+    await clickElement(document.querySelector('button'));
+    expect(document.querySelector('[role="menuitem"][data-selected]')?.textContent).toBe(
+      'Original (Português (Portugal))',
+    );
   });
 
   it('keeps the source option visible even when it is missing from available locales', async () => {

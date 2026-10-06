@@ -4,7 +4,6 @@ import type { ContentBlockMediaItem } from '@echovisionlab/geul-proto/content/bl
 import type { LocalizedPageSection } from '@/features/editor/contract/localized-page';
 import { ContentBlockMediaRuntimeProvider } from '@/features/media/ContentBlockMediaRuntimeContext';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
-import { LocalizationNotice } from '@/features/translation/LocalizationNotice';
 import { GeneratedPageRenderer } from './GeneratedPageRenderer';
 import classes from './PageContentView.module.css';
 
@@ -33,29 +32,28 @@ interface PageContentViewProps {
 
 export function PageContentView({ page, pathname, query, requestedLocale }: PageContentViewProps) {
   const controls = page.localizationInfo ? (
-    <div className={classes.controls}>
-      <ContentLanguageMenu
-        pathname={pathname}
-        query={query}
-        requestedLocale={requestedLocale}
-        localizationInfo={page.localizationInfo}
-      />
-    </div>
+    <ContentLanguageMenu
+      pathname={pathname}
+      query={query}
+      requestedLocale={requestedLocale}
+      localizationInfo={page.localizationInfo}
+    />
   ) : null;
   const showTitle = page.showTitle && !!page.title;
-  const chrome = <ContentChrome title={showTitle ? page.title : undefined} controls={controls} />;
+  const chrome = showTitle ? (
+    <ContentChrome title={page.title} className={controls ? classes.chromeWithControls : undefined} />
+  ) : null;
 
   return (
     <ContentBlockMediaRuntimeProvider items={page.blockMedia}>
-      <ContentLayoutView layout={page.documentLayout} chrome={chrome} className="page-content">
-        {page.localizationInfo ? (
-          <LocalizationNotice
-            pathname={pathname}
-            query={query}
-            requestedLocale={requestedLocale}
-            localizationInfo={page.localizationInfo}
-          />
-        ) : null}
+      <ContentLayoutView
+        layout={page.documentLayout}
+        chrome={chrome}
+        controls={controls}
+        className={['page-content', !showTitle && controls ? classes.withoutTitle : undefined]
+          .filter(Boolean)
+          .join(' ')}
+      >
         <GeneratedPageRenderer sections={page.content ?? []} query={query} requestedLocale={requestedLocale} />
       </ContentLayoutView>
     </ContentBlockMediaRuntimeProvider>

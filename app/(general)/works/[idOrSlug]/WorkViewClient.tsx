@@ -16,7 +16,6 @@ import {
   PublicMetadataRows,
   PublicMetadataValueGroup,
 } from '@/components/core/PublicMetadata';
-import { ShareButton } from '@/features/share/ShareButton';
 import { PrintButton } from '@/features/print/PrintButton';
 import { SocialLinksDisplay } from '@/features/social-links/SocialLinksDisplay';
 import { TableOfContents } from '@/features/navigation/TableOfContents';
@@ -100,7 +99,6 @@ interface WorkData {
 
 interface Props {
   work: WorkData;
-  shareUrl: string;
   pathname: string;
   query?: Record<string, string | string[] | undefined>;
   requestedLocale: string;
@@ -108,7 +106,7 @@ interface Props {
   sharePassword?: string;
 }
 
-export function WorkViewClient({ work, shareUrl, pathname, query, requestedLocale, shareToken, sharePassword }: Props) {
+export function WorkViewClient({ work, pathname, query, requestedLocale, shareToken, sharePassword }: Props) {
   const dateTime = useDateTimeFormatter();
   const t = useTranslations('workView');
   const tCommonActions = useTranslations('common.actions');
@@ -201,7 +199,6 @@ export function WorkViewClient({ work, shareUrl, pathname, query, requestedLocal
             </Tooltip>
           )}
           <PrintButton />
-          <ShareButton url={shareUrl} title={work.title || tCommonStates('untitledPlain')} size="md" />
         </Group>
       </Group>
 

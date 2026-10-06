@@ -5,11 +5,12 @@ import classes from './ContentLayoutView.module.css';
 export interface ContentLayoutViewProps {
   layout: DocumentLayoutViewModel;
   chrome?: ReactNode;
+  controls?: ReactNode;
   children: ReactNode;
   className?: string;
 }
 
-export function ContentLayoutView({ layout, chrome, children, className }: ContentLayoutViewProps) {
+export function ContentLayoutView({ layout, chrome, controls, children, className }: ContentLayoutViewProps) {
   const chromeIsPinned = layout.pageChrome === 'pinned';
   const rootClassName = [classes.root, className].filter(Boolean).join(' ');
 
@@ -22,6 +23,7 @@ export function ContentLayoutView({ layout, chrome, children, className }: Conte
       data-footer-layout={layout.footer}
       data-has-chrome={chrome ? 'true' : 'false'}
     >
+      {controls ? <div className={`${classes.controls} print-hide`}>{controls}</div> : null}
       {chrome && chromeIsPinned ? <div className={classes.pinnedChrome}>{chrome}</div> : null}
       <div className={classes.body} data-content-body>
         {chrome && !chromeIsPinned ? <div className={classes.flowChrome}>{chrome}</div> : null}

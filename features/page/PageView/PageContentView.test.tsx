@@ -16,10 +16,6 @@ vi.mock('@/features/translation/ContentLanguageMenu', () => ({
   },
 }));
 
-vi.mock('@/features/translation/LocalizationNotice', () => ({
-  LocalizationNotice: () => <div data-testid="localization-notice" />,
-}));
-
 vi.mock('./GeneratedPageRenderer', () => ({
   GeneratedPageRenderer: (props: Record<string, unknown>) => {
     pageRendererSpy(props);
@@ -100,7 +96,8 @@ describe('PageContentView', () => {
     expect(document.querySelector('[data-content-scroll-root]')).toBeNull();
     expect(document.querySelector('[data-content-body]')).not.toBeNull();
     expect(document.querySelector('[data-content-chrome] h1')?.textContent).toBe('About');
-    expect(document.querySelector('[data-content-chrome] [data-testid="content-language-menu"]')).not.toBeNull();
+    expect(document.querySelector('[data-content-chrome] [data-testid="content-language-menu"]')).toBeNull();
+    expect(layout?.querySelector('[data-testid="content-language-menu"]')).not.toBeNull();
     expect(contentLanguageMenuSpy).toHaveBeenCalledWith(
       expect.objectContaining({ pathname: '/about', requestedLocale: 'en' }),
     );
@@ -124,6 +121,15 @@ describe('PageContentView', () => {
             },
           ] as never,
           blockMedia: [],
+          localizationInfo: {
+            requestedLocale: 'en',
+            displayedLocale: 'en',
+            sourceLocale: 'en',
+            isFallback: false,
+            isOriginal: true,
+            machineGenerated: false,
+            fallbackReason: 0,
+          },
         }}
       />,
     );
@@ -132,6 +138,9 @@ describe('PageContentView', () => {
     expect(layout?.getAttribute('data-content-height')).toBe('content');
     expect(layout?.getAttribute('data-page-chrome')).toBe('flow');
     expect(layout?.getAttribute('data-footer-layout')).toBe('flow');
+    expect(layout?.getAttribute('data-has-chrome')).toBe('false');
+    expect(layout?.querySelector('[data-testid="content-language-menu"]')).not.toBeNull();
+    expect(document.querySelector('[data-content-chrome]')).toBeNull();
     expect(document.querySelector('[data-content-scroll-root]')).toBeNull();
   });
 

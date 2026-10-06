@@ -1,10 +1,8 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { DraftModeAlert } from '@/features/draft-mode/DraftModeAlert';
-import { LocalizationNotice } from '@/features/translation/LocalizationNotice';
 import { toWorkViewModel } from '@/features/work/work-view-model';
 import { getWorkViewWithShareToken } from '@/lib/queries/work';
-import { getBaseUrl } from '@/lib/utils/url.server';
 import { WorkViewClient } from './WorkViewClient';
 
 interface Props {
@@ -26,23 +24,14 @@ export async function WorkContentWithToken({ idOrSlug, token, password, requeste
     notFound();
   }
 
-  const baseUrl = await getBaseUrl();
-  const shareUrl = `${baseUrl}/works/${work.slug || work.id}`;
   const pathname = `/works/${work.slug || work.id}`;
   const transformedWork = toWorkViewModel(work, (index) => tCreditList('groupName', { index }));
 
   return (
     <>
       <DraftModeAlert id={work.id} status={work.status} />
-      <LocalizationNotice
-        pathname={pathname}
-        query={query}
-        requestedLocale={requestedLocale}
-        localizationInfo={transformedWork.localizationInfo}
-      />
       <WorkViewClient
         work={transformedWork}
-        shareUrl={shareUrl}
         pathname={pathname}
         query={query}
         requestedLocale={requestedLocale}

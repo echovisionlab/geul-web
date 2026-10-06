@@ -1,9 +1,7 @@
 import { JsonLdScript } from '@/features/metadata/ui/JsonLdScript';
-import { LocalizationNotice } from '@/features/translation/LocalizationNotice';
 import { getSiteMetadataDocument } from '@/lib/queries/metadata';
 import { getProgramEventView } from '@/lib/queries/program-event';
 import { buildProgramEventJsonLd } from '@/lib/utils/json-ld';
-import { getBaseUrl } from '@/lib/utils/url.server';
 import { ProgramEventViewClient } from './ProgramEventViewClient';
 
 interface Props {
@@ -47,9 +45,8 @@ function transformProgramEventForView(event: NonNullable<Awaited<ReturnType<type
 export async function ProgramEventContent({ initialEvent, locale, requestedLocale, query }: Props) {
   const event = initialEvent;
 
-  const [baseUrl, site] = await Promise.all([getBaseUrl(), getSiteMetadataDocument()]);
+  const site = await getSiteMetadataDocument();
   const pathname = `/events/${event.slug || event.id}`;
-  const shareUrl = `${baseUrl}${pathname}`;
   const transformedEvent = transformProgramEventForView(event);
   const jsonLd = buildProgramEventJsonLd({
     site,
@@ -74,16 +71,8 @@ export async function ProgramEventContent({ initialEvent, locale, requestedLocal
   return (
     <>
       <JsonLdScript data={jsonLd} />
-      <LocalizationNotice
-        pathname={pathname}
-        query={query}
-        requestedLocale={requestedLocale}
-        localizationInfo={transformedEvent.localizationInfo}
-        variant="subtle"
-      />
       <ProgramEventViewClient
         event={transformedEvent}
-        shareUrl={shareUrl}
         locale={locale}
         pathname={pathname}
         query={query}

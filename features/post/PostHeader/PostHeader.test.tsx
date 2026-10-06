@@ -65,7 +65,7 @@ function render(node: ReactNode) {
 }
 
 function renderHeader(post: Post) {
-  render(<PostHeader post={post} onShare={vi.fn()} onExport={vi.fn()} />);
+  render(<PostHeader post={post} onExport={vi.fn()} />);
 }
 
 function getUserLink(label: string): HTMLAnchorElement {
@@ -97,7 +97,8 @@ describe('PostHeader author identities', () => {
   it('uses the compact Core low-emphasis contract for every header action', () => {
     renderHeader({ ...BASE_POST, canEdit: true });
 
-    for (const label of ['Edit post', 'Share post', 'Export post as Markdown']) {
+    expect(document.querySelector('[aria-label="Share post"]')).toBeNull();
+    for (const label of ['Edit post', 'Export post as Markdown']) {
       const button = document.querySelector<HTMLElement>(`[aria-label="${label}"]`);
       expect(button).not.toBeNull();
       expect(button).toHaveAttribute('data-size', 'sm');

@@ -2,7 +2,6 @@
 
 import type { ReactNode } from 'react';
 import { getLabelPublic } from '@/lib/queries/label';
-import { getBaseUrl } from '@/lib/utils/url.server';
 import { LabelPublicContent } from './LabelPublicContent';
 
 export interface LabelShareAccessState {
@@ -31,7 +30,6 @@ export async function accessLabelShareAction(
     content: await LabelPublicContent({
       label,
       labelMetadata: null,
-      baseUrl: await getBaseUrl(),
       query: { share: token },
       requestedLocale,
       uiLocale,
