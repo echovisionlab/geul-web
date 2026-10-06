@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.4](https://github.com/echovisionlab/geul-web/compare/v0.10.3...v0.10.4) (2026-10-06)
+
+
+### Bug Fixes
+
+* **fonts:** bypass cached font responses with missing CORS headers ([#110](https://github.com/echovisionlab/geul-web/issues/110)) ([d664363](https://github.com/echovisionlab/geul-web/commit/d664363943a2137f99d20463961f5616659663ee))
+
 ## [0.10.3](https://github.com/echovisionlab/geul-web/compare/v0.10.2...v0.10.3) (2026-10-06)
 
 
