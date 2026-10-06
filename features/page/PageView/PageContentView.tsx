@@ -40,7 +40,6 @@ export function PageContentView({ page, pathname, query, requestedLocale }: Page
     />
   ) : null;
   const showTitle = page.showTitle && !!page.title;
-  const controlsBeforeEmbed = !showTitle && controls && page.content?.[0]?.kind === 'embed';
   const chrome = showTitle ? (
     <ContentChrome title={page.title} className={controls ? classes.chromeWithControls : undefined} />
   ) : null;
@@ -51,11 +50,7 @@ export function PageContentView({ page, pathname, query, requestedLocale }: Page
         layout={page.documentLayout}
         chrome={chrome}
         controls={controls}
-        className={[
-          'page-content',
-          !showTitle && controls ? classes.withoutTitle : undefined,
-          controlsBeforeEmbed ? classes.controlsBeforeEmbed : undefined,
-        ]
+        className={['page-content', !showTitle && controls ? classes.withoutTitle : undefined]
           .filter(Boolean)
           .join(' ')}
       >

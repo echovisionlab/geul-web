@@ -5,9 +5,3 @@
 .withoutTitle :global(.page-section:first-child[data-section-type='rich-text'] > :first-child) {
   padding-inline-end: var(--content-controls-space);
 }
-
-.controlsBeforeEmbed > :global([data-content-controls]) {
-  position: static;
-  display: flex;
-  justify-content: flex-end;
-}
