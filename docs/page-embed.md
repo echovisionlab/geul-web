@@ -129,10 +129,16 @@ window.addEventListener('message', (event) => {
     // Apply the supplied locale and colorScheme in the tool's own UI.
   }
 });
+// Announce readiness after registering the initialization listener.
+parent.postMessage({ type: 'geul:embed:ready' }, siteOrigin);
 ```
 
-Web sends `{ type: 'geul:embed:init', locale, colorScheme }` after load and when
-locale or theme changes. A tool may ignore these messages. It must validate both
+Web sends `{ type: 'geul:embed:init', locale, colorScheme }` after load, when
+locale or theme changes, and when the current frame sends `geul:embed:ready`
+from its exact URL origin. Tools send readiness once after registering their
+initialization listener, to each exact allowed parent origin, without `*`.
+Readiness works in every height mode; resize messages affect only automatic height.
+A tool may ignore these messages. It must validate both
 the sender window and origin before handling them. See
 [postMessage security guidance](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage).
 

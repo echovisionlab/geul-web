@@ -63,3 +63,16 @@ export function readEmbedHeightMessage(
   }
   return Math.max(EMBED_MIN_HEIGHT, Math.ceil(data.height));
 }
+
+export function isEmbedReadyMessage(event: MessageEvent, frameWindow: Window | null, expectedOrigin: string): boolean {
+  const data: unknown = event.data;
+  return Boolean(
+    frameWindow &&
+    event.source === frameWindow &&
+    event.origin === expectedOrigin &&
+    data !== null &&
+    typeof data === 'object' &&
+    'type' in data &&
+    data.type === 'geul:embed:ready',
+  );
+}

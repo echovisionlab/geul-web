@@ -8,6 +8,7 @@ import {
   buildEmbedAllow,
   buildEmbedSandbox,
   hasUnsafeEmbedOrigin,
+  isEmbedReadyMessage,
   readEmbedHeightMessage,
   resolveEmbedUrl,
 } from './policy';
@@ -89,24 +90,27 @@ function EmbedDocument({
   const frame = useRef<HTMLIFrameElement>(null);
   const [autoHeight, setAutoHeight] = useState<number | null>(null);
   const [active, setActive] = useState(!preview);
-  useEffect(() => {
-    if (props.heightMode !== 'auto') {
-      return;
-    }
-    const onMessage = (event: MessageEvent) => {
-      const height = readEmbedHeightMessage(event, frame.current?.contentWindow ?? null, url.origin);
-      if (height !== null) {
-        setAutoHeight(height);
-      }
-    };
-    window.addEventListener('message', onMessage);
-    return () => window.removeEventListener('message', onMessage);
-  }, [props.heightMode, url.origin]);
   const initialize = useCallback(() => {
     if (props.allowSameOrigin === 'true') {
       frame.current?.contentWindow?.postMessage({ type: 'geul:embed:init', locale, colorScheme }, url.origin);
     }
   }, [props.allowSameOrigin, locale, colorScheme, url.origin]);
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      const frameWindow = frame.current?.contentWindow ?? null;
+      if (isEmbedReadyMessage(event, frameWindow, url.origin)) {
+        initialize();
+      }
+      if (props.heightMode === 'auto') {
+        const height = readEmbedHeightMessage(event, frameWindow, url.origin);
+        if (height !== null) {
+          setAutoHeight(height);
+        }
+      }
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [props.heightMode, url.origin, initialize]);
   useEffect(initialize, [initialize]);
   const height =
     props.heightMode === 'viewport'
