@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/echovisionlab/geul-web/compare/v0.7.2...v0.8.0) (2026-10-06)
+
+
+### Features
+
+* **tools:** add PortaDJ with site theme and localized metadata ([#92](https://github.com/echovisionlab/geul-web/issues/92)) ([daa6ca2](https://github.com/echovisionlab/geul-web/commit/daa6ca25a9ef21fec7792a9f617acc45f3571c08))
+
 ## [0.7.2](https://github.com/echovisionlab/geul-web/compare/v0.7.1...v0.7.2) (2026-10-05)
 
 
