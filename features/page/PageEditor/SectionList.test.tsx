@@ -3,7 +3,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { PageSectionPreinsertDialog } from './SectionList';
+import { PageSectionPreinsertDialog } from './PageSectionPreinsertDialog';
 
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
@@ -78,9 +78,9 @@ afterEach(() => {
 });
 
 function renderDialog(
-  type: 'external-video' | 'form',
+  type: 'external-video' | 'embed' | 'form',
   onCancel: () => void,
-  onInsert: (type: 'external-video' | 'form', props: Record<string, unknown>) => void,
+  onInsert: (type: 'external-video' | 'embed' | 'form', props: Record<string, unknown>) => void,
 ) {
   act(() => {
     root.render(
@@ -136,6 +136,32 @@ describe('Page section pre-insert configuration', () => {
 
     expect(onInsert).toHaveBeenCalledOnce();
     expect(onInsert).toHaveBeenCalledWith('external-video', { url: 'https://video.example/watch/1' });
+  });
+
+  it('cancels Embed configuration without creating a durable section', () => {
+    const onCancel = vi.fn();
+    const onInsert = vi.fn();
+    renderDialog('embed', onCancel, onInsert);
+    act(() => container.querySelector<HTMLButtonElement>('[data-page-section-preinsert-cancel]')?.click());
+    expect(onCancel).toHaveBeenCalledOnce();
+    expect(onInsert).not.toHaveBeenCalled();
+  });
+
+  it('requires a noncredential HTTPS URI before inserting an Embed', () => {
+    const onInsert = vi.fn();
+    renderDialog('embed', vi.fn(), onInsert);
+    const input = container.querySelector<HTMLInputElement>('[data-page-section-preinsert-url]')!;
+    const confirm = container.querySelector<HTMLButtonElement>('[data-page-section-preinsert-confirm]')!;
+    for (const value of ['', 'invalid', 'http://embed.example', 'https://user:password@embed.example']) {
+      act(() => changeInput(input, value));
+      expect(confirm.disabled).toBe(true);
+      act(() => confirm.click());
+      expect(onInsert).not.toHaveBeenCalled();
+    }
+    act(() => changeInput(input, ' https://embed.example/app '));
+    expect(confirm.disabled).toBe(false);
+    act(() => confirm.click());
+    expect(onInsert).toHaveBeenCalledExactlyOnceWith('embed', { uri: 'https://embed.example/app' });
   });
 
   it('inserts a Form exactly once only after a published Form is selected', () => {

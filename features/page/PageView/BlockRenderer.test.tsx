@@ -49,6 +49,7 @@ vi.mock('@/features/page/blocks/label-list/ViewServer', () =>
 vi.mock('@/features/page/blocks/author-list/ViewServer', () =>
   createMockBlockView('author-list', 'AuthorListViewStreaming'),
 );
+vi.mock('@/features/page/blocks/embed/View', () => createMockBlockView('embed', 'PageEmbedView'));
 vi.mock('@/features/page/blocks/form/View', () => createMockBlockView('form', 'FormView'));
 vi.mock('@/features/page/blocks/immersive-scene/View', () =>
   createMockBlockView('immersive-scene', 'ImmersiveSceneView'),
@@ -85,10 +86,12 @@ vi.mock('@/features/page/blocks/works-gallery/ViewServer', () =>
 );
 
 let PageRenderer: typeof import('./BlockRenderer').PageRenderer;
+let GeneratedPageRenderer: typeof import('./GeneratedPageRenderer').GeneratedPageRenderer;
 
 describe('PageRenderer', () => {
   beforeAll(async () => {
     ({ PageRenderer } = await import('./BlockRenderer'));
+    ({ GeneratedPageRenderer } = await import('./GeneratedPageRenderer'));
   });
 
   beforeEach(() => {
@@ -124,6 +127,8 @@ describe('PageRenderer', () => {
     expect(html).toContain('data-section-type="client-marquee"');
     expect(html).toContain('data-section-type="label-marquee"');
     expect(html).toContain('data-section-type="external-video"');
+    expect(html).toContain('data-section-type="embed"');
+    expect(html).toContain('data-block-view="embed"');
     expect(html).toContain('data-section-type="columns"');
     expect(html).toContain('data-block-view="rich-text"');
     expect(html).toContain('data-block-view="post-list"');
@@ -332,6 +337,55 @@ describe('PageRenderer', () => {
         content: undefined,
         columns: undefined,
       },
+    ]);
+  });
+
+  it('passes Embed source settings and localized title into public rendering inside Columns', () => {
+    const props = {
+      uri: 'https://embed.example/app',
+      title: 'Translated app',
+      heightMode: 'fixed',
+      height: '640',
+      allowMicrophone: 'true',
+    };
+    const content: PageContent = {
+      sections: [
+        {
+          id: 'embed-columns',
+          type: 'columns',
+          settings: {},
+          props: {},
+          columns: [{ id: 'embed-column', sections: [{ id: 'nested-embed', type: 'embed', settings: {}, props }] }],
+        },
+      ],
+    };
+    renderToStaticMarkup(<PageRenderer content={content} requestedLocale="en" />);
+    expect(blockViewCalls.get('embed')).toEqual([
+      { sectionId: 'nested-embed', props, content: undefined, columns: undefined },
+    ]);
+  });
+
+  it('renders generated canonical Embed sections at root and inside Columns', () => {
+    const props = {
+      uri: 'https://embed.example/app',
+      title: 'Translated title',
+      height: '640',
+      allowMicrophone: 'true',
+    };
+    const embed = { id: 'generated-embed', kind: 'embed' as const, settings: {}, props, richText: null, columns: [] };
+    const columns = {
+      id: 'generated-columns',
+      kind: 'columns' as const,
+      settings: {},
+      props: {},
+      richText: null,
+      columns: [{ id: 'generated-column', ratio: 1, sections: [{ ...embed, id: 'generated-nested-embed' }] }],
+    };
+    const html = renderToStaticMarkup(<GeneratedPageRenderer sections={[embed, columns]} requestedLocale="en" />);
+    expect(html).toContain('data-section-type="embed"');
+    expect(blockViewCalls.get('embed')).toEqual([
+      { sectionId: 'generated-embed', props, content: undefined, columns: undefined },
+      { sectionId: 'generated-nested-embed', props, content: undefined, columns: undefined },
     ]);
   });
 

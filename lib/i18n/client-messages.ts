@@ -18,8 +18,6 @@ const PUBLIC_ROUTES = new Set([
   '/releases',
   '/events',
   '/tools',
-  '/tools/transcode',
-  '/tools/hwp',
 ]);
 // Each audited entity has exactly one identifier. Unknown Page slugs, extra
 // segments and protected modes retain the full catalogue.
@@ -33,7 +31,7 @@ const PUBLIC_DETAIL_ENTITIES = new Set([
   'series',
   'event-series',
 ]);
-const EXISTING_PUBLIC_ROUTES = new Set(['/', '/privacy', '/terms', '/works', '/tools', '/tools/transcode']);
+const EXISTING_PUBLIC_ROUTES = new Set(['/', '/privacy', '/terms', '/works', '/tools']);
 const EXISTING_PUBLIC_DETAIL_ENTITIES = new Set(['posts', 'works', 'releases', 'artists']);
 const PROTECTED_QUERY_PARAMS = ['share', 'password', 'preview', 'token'] as const;
 

@@ -727,6 +727,7 @@ export async function getProgramEventView(
             id: credit.artist.id,
             name: credit.artist.name,
             slug: credit.artist.slug ?? null,
+            imageUrl: credit.artist.imageAsset?.url ?? null,
           }
         : null,
       member: credit.member

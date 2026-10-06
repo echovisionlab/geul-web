@@ -397,6 +397,79 @@ describe('program event queries', () => {
     });
   });
 
+  it('preserves public credit order, profile images, and contributor metadata', async () => {
+    publicEventClient.get.mockResolvedValueOnce({
+      event: publicEvent({
+        credits: [
+          {
+            id: 'member-credit',
+            displayName: 'Display name',
+            creditRole: 'Sound',
+            description: 'Recorded on location',
+            member: {
+              id: 'member-1',
+              nickname: 'Member name',
+              avatarAsset: { url: 'https://cdn.example/member.webp' },
+            },
+          },
+          {
+            id: 'artist-credit',
+            creditRole: 'Performer',
+            description: 'Live set',
+            artist: {
+              id: 'artist-1',
+              name: 'Artist name',
+              slug: 'artist-slug',
+              imageAsset: { url: 'https://cdn.example/artist.webp' },
+            },
+          },
+          { id: 'text-credit', displayName: 'Guest' },
+          {
+            id: 'no-avatar',
+            member: { id: 'member-2', nickname: 'Member 2' },
+            artist: { id: 'artist-2', name: 'Artist 2' },
+          },
+        ],
+      }),
+      blockMedia: [],
+    });
+
+    const event = await queries.getProgramEventView('event-1');
+
+    expect(event?.credits).toEqual([
+      {
+        id: 'member-credit',
+        name: 'Display name',
+        creditRole: 'Sound',
+        description: 'Recorded on location',
+        artist: null,
+        member: { id: 'member-1', name: 'Member name', image: 'https://cdn.example/member.webp' },
+      },
+      {
+        id: 'artist-credit',
+        name: 'Artist name',
+        creditRole: 'Performer',
+        description: 'Live set',
+        artist: {
+          id: 'artist-1',
+          name: 'Artist name',
+          slug: 'artist-slug',
+          imageUrl: 'https://cdn.example/artist.webp',
+        },
+        member: null,
+      },
+      { id: 'text-credit', name: 'Guest', creditRole: null, description: null, artist: null, member: null },
+      {
+        id: 'no-avatar',
+        name: 'Artist 2',
+        creditRole: null,
+        description: null,
+        artist: { id: 'artist-2', name: 'Artist 2', slug: null, imageUrl: null },
+        member: { id: 'member-2', name: 'Member 2', image: null },
+      },
+    ]);
+  });
+
   it('maps status filter values and handled public failures', async () => {
     expect(queries.toManageProgramEventStatusFilterValue('draft')).toBe('PROGRAM_EVENT_STATUS_DRAFT');
     expect(queries.toManageProgramEventStatusFilterValue('published')).toBe('PROGRAM_EVENT_STATUS_PUBLISHED');

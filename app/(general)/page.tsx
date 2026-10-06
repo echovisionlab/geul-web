@@ -5,7 +5,9 @@ import { Center, Stack, Text, Title } from '@mantine/core';
 import { JsonLdScript } from '@/features/metadata/ui/JsonLdScript';
 import { PageContentView } from '@/features/page/PageView/PageContentView';
 import { PageMediaDeliveryProvider } from '@/features/page/PageMediaDeliveryContext';
-import { getPublicPage } from '@/lib/queries/manifest';
+import { getPageAccessView } from '@/lib/queries/page';
+import { PageRestrictedAccess } from '@/features/page/PageRestrictedAccess';
+import { withNoIndex } from '@/lib/utils/route-metadata';
 import { getHomeMetadataDocument } from '@/lib/queries/metadata';
 import { resolveContentRequestedLocale } from '@/lib/translation/content-language';
 import { resolveLocalizedMetadataSummary, resolveLocalizedOgFallbacks } from '@/lib/translation/metadata';
@@ -24,6 +26,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const [query, uiLocale] = await Promise.all([searchParams, getUserLocale()]);
   const requestedLocale = resolveContentRequestedLocale(uiLocale, query);
+  const access = await getPageAccessView('/', { requestedLocale });
+  if (access && access.reason !== 'allowed') {
+    const tAccess = await getTranslations('pageEditor.access');
+    return withNoIndex({
+      title: tAccess(access.reason === 'authentication-required' ? 'loginRequiredTitle' : 'restrictedTitle'),
+    });
+  }
   const home = await getHomeMetadataDocument({ requestedLocale });
   const ogFallbacks = resolveLocalizedOgFallbacks(home.localizationInfo, {
     featuredImageUrl: home.featuredImageUrl,
@@ -55,10 +64,12 @@ export default async function HomePage({
   const t = await getTranslations('home.emptyState');
   const [query, uiLocale] = await Promise.all([searchParams, getUserLocale()]);
   const requestedLocale = resolveContentRequestedLocale(uiLocale, query);
-  const [page, home] = await Promise.all([
-    getPublicPage('/', { requestedLocale }),
-    getHomeMetadataDocument({ requestedLocale }),
-  ]);
+  const access = await getPageAccessView('/', { requestedLocale });
+  if (access && access.reason !== 'allowed') {
+    return <PageRestrictedAccess reason={access.reason} returnTo="/" />;
+  }
+  const page = access?.page ?? null;
+  const home = await getHomeMetadataDocument({ requestedLocale });
   const homeJsonLd = buildHomeJsonLd(home);
 
   if (!page) {

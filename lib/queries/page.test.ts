@@ -1,3 +1,4 @@
+import { PageAccessReason } from '@echovisionlab/geul-proto/common/page_access_pb.ts';
 import { fromJson } from '@bufbuild/protobuf';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -6,7 +7,7 @@ import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/conten
 import { LocalizedPageDocumentSchema } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { PageStatus as PublicPageStatus } from '@echovisionlab/geul-proto/public/page_pb.ts';
 import { createPageClient, createPublicPageClientWithAuth } from '@/lib/api/server-client';
-import { getPage, getPageView, getPageViewWithToken } from './page';
+import { getPage, getPageAccessView, getPageAccessViewWithToken, getPageView, getPageViewWithToken } from './page';
 
 const getPublicPageRpcMock = vi.fn();
 const getAdminPageRpcMock = vi.fn();
@@ -134,6 +135,31 @@ describe('public page queries', () => {
     getPublicPageRpcMock.mockRejectedValueOnce(transportError);
     await expect(getPageView('about')).rejects.toBe(transportError);
   });
+
+  it.each([
+    [PageAccessReason.AUTHENTICATION_REQUIRED, 'authentication-required'],
+    [PageAccessReason.CONDITIONS_NOT_MET, 'conditions-not-met'],
+  ] as const)(
+    'returns denial %s without materializing content or requesting source locale',
+    async (accessReason, reason) => {
+      getPublicPageRpcMock.mockResolvedValue({
+        accessReason,
+        page: {
+          title: 'Private title',
+          document: { invalid: true },
+          localizationInfo: { sourceLocale: 'ko', displayedLocale: 'en' },
+        },
+        blockMedia: [{ privateMedia: true }],
+      });
+      await expect(getPageAccessView('members', { requestedLocale: 'en', preferSourceLocale: true })).resolves.toEqual({
+        reason,
+      });
+      expect(getPublicPageRpcMock).toHaveBeenCalledTimes(1);
+      await expect(getPageView('members')).resolves.toBeNull();
+      await expect(getPageAccessViewWithToken('members', 'share-token', 'en', 'secret')).resolves.toEqual({ reason });
+      await expect(getPageViewWithToken('members', 'share-token', 'en', 'secret')).resolves.toBeNull();
+    },
+  );
 
   it('threads the share token through the generated document request', async () => {
     getPublicPageRpcMock.mockResolvedValue({

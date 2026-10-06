@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import PublicPageView from './page';
+import { DEFAULT_PAGE_ACCESS_POLICY } from '@/lib/types/page-access';
 
 const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
   getPage: vi.fn(),
   getPageView: vi.fn(),
+  getPageAccessView: vi.fn(),
   getPageMetadataDocument: vi.fn(),
   redirect: vi.fn((href: string) => {
     throw new Error(`redirect:${href}`);
@@ -20,7 +22,11 @@ vi.mock('next/navigation', () => ({
   notFound: mocks.notFound,
 }));
 vi.mock('@/lib/utils/session.server', () => ({ getSession: mocks.getSession }));
-vi.mock('@/lib/queries/page', () => ({ getPage: mocks.getPage, getPageView: mocks.getPageView }));
+vi.mock('@/lib/queries/page', () => ({
+  getPage: mocks.getPage,
+  getPageView: mocks.getPageView,
+  getPageAccessView: mocks.getPageAccessView,
+}));
 vi.mock('@/lib/api/server-client', () => ({
   createTranslationClient: vi.fn(async () => ({
     listEntityTranslations: mocks.listEntityTranslations,
@@ -46,6 +52,7 @@ const page = {
   slug: 'edit',
   status: 'draft',
   showTitle: true,
+  accessPolicy: { ...DEFAULT_PAGE_ACCESS_POLICY, mode: 'authenticated' as const },
   documentLayout: { contentHeight: 'content', pageChrome: 'flow', footer: 'flow' },
   featuredImageUrl: null,
   ogImageUrl: null,
@@ -63,6 +70,10 @@ function props(slug: string, searchParams: Record<string, string | string[] | un
 describe('Page view and editor route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.getPageAccessView.mockImplementation(async (...args: unknown[]) => {
+      const page = await mocks.getPageView(...args);
+      return page ? { reason: 'allowed', page } : null;
+    });
     mocks.getSession.mockResolvedValue({
       user: { id: 'member-1', nickname: 'Admin', role: 'admin' },
     });
@@ -71,6 +82,17 @@ describe('Page view and editor route', () => {
     mocks.getPageMetadataDocument.mockResolvedValue(null);
     mocks.listEntityTranslations.mockResolvedValue({ sourceLocale: 'en', entries: [] });
   });
+
+  it.each(['authentication-required', 'conditions-not-met'] as const)(
+    'returns a restricted %s view without rendering Page content',
+    async (reason) => {
+      mocks.getPageAccessView.mockResolvedValueOnce({ reason });
+      const result = await PublicPageView(props('members', { lang: 'ko' }));
+      expect(result.props).toEqual({ reason, returnTo: '/members?lang=ko' });
+      expect(mocks.getPageMetadataDocument).not.toHaveBeenCalled();
+      expect(mocks.getPageView).not.toHaveBeenCalled();
+    },
+  );
 
   it('redirects no Session to login with the exact edit=true return path before entity lookup', async () => {
     mocks.getSession.mockResolvedValue(null);
@@ -109,6 +131,7 @@ describe('Page view and editor route', () => {
     expect(result.props).toMatchObject({
       pageId: 'page-uuid',
       initialSlug: 'edit',
+      initialAccessPolicy: page.accessPolicy,
       canManageTranslations: true,
     });
   });

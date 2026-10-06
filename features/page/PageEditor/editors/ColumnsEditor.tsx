@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, type ComponentType } from 'react';
+import { useCallback, useMemo, useState, type ComponentType } from 'react';
 import { IconColumns, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { Group, Paper, Stack, Text } from '@mantine/core';
@@ -9,10 +9,12 @@ import { IconButton } from '@/components/core/IconButton';
 import { Select, NumberInput, SegmentedControl, Switch } from '@/components/core/Input';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
 import { usePageEditor } from '@/features/page/PageEditor/PageEditorContext';
+import { resolveEmbedUrl } from '@/features/page/blocks/embed/policy';
 import { createBlockId } from '@/lib/editor/block-id';
 import type { SectionRendererProps } from '../SectionRendererContext';
 import { createDefaultSection, type ColumnData, type ColumnsSection, type SectionType } from '../types';
 import { usePageSectionTypeLabels } from '../usePageSectionTypeLabels';
+import { PageSectionPreinsertDialog } from '../PageSectionPreinsertDialog';
 import { COLUMN_SECTION_MENU } from '../section-menu';
 
 interface ColumnsEditorProps {
@@ -24,6 +26,7 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
   const t = useTranslations('pageEditor');
   const { updateSection, editable, allowStructuralEdits } = usePageEditor();
   const canEditStructure = editable && allowStructuralEdits;
+  const [pendingEmbedColumn, setPendingEmbedColumn] = useState<string | null>(null);
   const sectionTypeLabels = usePageSectionTypeLabels();
   const columnCountOptions = useMemo(
     () => [
@@ -100,12 +103,21 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
   );
 
   const addSectionToColumn = useCallback(
-    (columnIndex: number, type: SectionType) => {
-      if (!canEditStructure) {
+    (columnId: string, type: SectionType, initialProps?: Record<string, unknown>) => {
+      if (!canEditStructure || !columnsData.some((column) => column.id === columnId)) {
         return;
       }
-      const newColumns = columnsData.map((col, i) =>
-        i === columnIndex ? { ...col, sections: [...col.sections, createDefaultSection(type)] } : col,
+      if (type === 'embed' && !initialProps) {
+        setPendingEmbedColumn(columnId);
+        return;
+      }
+      if (type === 'embed' && !resolveEmbedUrl(String(initialProps?.uri ?? ''))) {
+        return;
+      }
+      const created = createDefaultSection(type);
+      const child = initialProps ? { ...created, props: { ...created.props, ...initialProps } } : created;
+      const newColumns = columnsData.map((col) =>
+        col.id === columnId ? { ...col, sections: [...col.sections, child] } : col,
       );
       updateSection(section.id, { columns: newColumns });
     },
@@ -130,6 +142,19 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
 
   return (
     <Stack gap="sm" data-page-block-editor="columns">
+      {pendingEmbedColumn !== null ? (
+        <PageSectionPreinsertDialog
+          type="embed"
+          title={sectionTypeLabels.embed}
+          formOptions={[]}
+          formsLoading={false}
+          onCancel={() => setPendingEmbedColumn(null)}
+          onInsert={(_type, initialProps) => {
+            addSectionToColumn(pendingEmbedColumn, 'embed', initialProps);
+            setPendingEmbedColumn(null);
+          }}
+        />
+      ) : null}
       {/* Header */}
       <Group gap="xs">
         <IconColumns size={18} />
@@ -199,6 +224,7 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
                 <DropdownMenu.Target>
                   <IconButton
                     disabled={!canEditStructure}
+                    data-column-section-add={columnIndex}
                     emphasis="medium"
                     size="xs"
                     aria-label={t('columnsEditor.actions.addSectionToColumn', {
@@ -213,8 +239,9 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
                   {COLUMN_SECTION_MENU.map((type) => (
                     <DropdownMenu.Item
                       key={type}
+                      data-column-section-add-item={type}
                       disabled={!canEditStructure}
-                      onClick={() => addSectionToColumn(columnIndex, type)}
+                      onClick={() => addSectionToColumn(column.id, type)}
                     >
                       {sectionTypeLabels[type]}
                     </DropdownMenu.Item>

@@ -23,15 +23,11 @@ const FIXED_PAGE_ROUTE_NAMESPACES = new Set([
   'subscribe',
   'tag',
   'terms',
-  'tools',
   'unsubscribe',
   'user',
   'verification',
   'verify',
 ]);
-
-// These exact roots are CMS Pages while their child paths remain app-owned.
-const CMS_PAGE_ROOT_EXCEPTIONS = new Set(['tools']);
 
 export function getPageSlugValidationReason(slug: string): PageSlugValidationReason | undefined {
   if (slug === '') {
@@ -50,8 +46,8 @@ export function getPageSlugValidationReason(slug: string): PageSlugValidationRea
   }
 
   const root = segments[0]?.toLowerCase() ?? '';
-  const isCmsPageRoot = segments.length === 1 && CMS_PAGE_ROOT_EXCEPTIONS.has(root);
-  if (FIXED_PAGE_ROUTE_NAMESPACES.has(root) && !isCmsPageRoot) {
+  const isP5Runner = root === 'tools' && segments[1]?.toLowerCase() === 'p5-runner';
+  if (FIXED_PAGE_ROUTE_NAMESPACES.has(root) || isP5Runner) {
     return 'reservedRoute';
   }
   return undefined;

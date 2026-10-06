@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import type { ComponentProps } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { create } from '@bufbuild/protobuf';
@@ -18,6 +20,16 @@ import { ProgramEventViewClient } from './ProgramEventViewClient';
 const mocks = vi.hoisted(() => ({ renderBlock: vi.fn(), renderPlace: vi.fn() }));
 
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
+vi.mock('next/image', () => ({
+  default: ({ src, alt }: { src: string; alt: string }) => <img src={src} alt={alt} />,
+}));
+vi.mock('@/components/core/Navigation', () => ({
+  default: ({ href, children, ...props }: ComponentProps<'a'>) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
 vi.mock('@/features/share/ShareButton', () => ({ ShareButton: () => null }));
 vi.mock('@/features/navigation/TableOfContents', () => ({ TableOfContents: () => null }));
 vi.mock('@/features/location/LocationPlaceMetadataRows', () => ({
@@ -147,5 +159,93 @@ describe('ProgramEventViewClient', () => {
     expect(html).toContain('Gangdong University');
     expect(html).not.toContain('locationModes.');
     expect(mocks.renderPlace).toHaveBeenCalledWith({ place, textSize: 'sm', coordinateVisibility: 'desktop' });
+  });
+});
+
+type Credit = Event['credits'][number];
+
+function renderCredits(credits: Credit[], posterUrl: string | null = null) {
+  const container = document.createElement('div');
+  container.innerHTML = renderEvent(null, { credits, posterUrl });
+  return container;
+}
+
+function credit(overrides: Partial<Credit>): Credit {
+  return { id: 'credit', name: null, creditRole: null, description: null, artist: null, member: null, ...overrides };
+}
+
+describe('ProgramEventViewClient credits', () => {
+  it.each([null, 'https://example.com/poster.jpg'])(
+    'renders ordered Work credit items with profile avatars, roles, and notes (poster %s)',
+    (posterUrl) => {
+      const container = renderCredits(
+        [
+          credit({
+            id: 'member',
+            name: 'Display name',
+            creditRole: 'Sound',
+            description: 'Recorded on location',
+            member: { id: 'member-1', name: 'Member name', image: 'https://example.com/member.jpg' },
+          }),
+          credit({
+            id: 'artist',
+            creditRole: 'Performer',
+            description: 'Live set',
+            artist: {
+              id: 'artist-1',
+              name: 'Artist name',
+              slug: 'artist-slug',
+              imageUrl: 'https://example.com/artist.jpg',
+            },
+            member: { id: 'other-member', name: 'Other member', image: 'https://example.com/other.jpg' },
+          }),
+          credit({ id: 'plain', name: 'Guest', description: 'Guest contribution' }),
+        ],
+        posterUrl,
+      );
+      const list = container.querySelector('[role="list"][aria-label="public.credits"]')!;
+      const items = Array.from(list.querySelectorAll('[role="listitem"]'));
+      expect(items).toHaveLength(3);
+      expect(items[0]).toHaveTextContent('Display name — Sound');
+      expect(items[0]).toHaveTextContent('Recorded on location');
+      expect(items[0].querySelector('a')).toHaveAttribute('href', '/user/member-1');
+      expect(items[0].querySelector('img')).toHaveAttribute('src', 'https://example.com/member.jpg');
+      expect(items[0].querySelector('img')).toHaveAttribute('alt', 'Display name');
+      expect(items[1]).toHaveTextContent('Artist name — Performer');
+      expect(items[1]).toHaveTextContent('Live set');
+      expect(items[1].querySelector('a')).toHaveAttribute('href', '/artists/artist-slug');
+      expect(items[1].querySelector('img')).toHaveAttribute('src', 'https://example.com/artist.jpg');
+      expect(items[2]).toHaveTextContent('Guest');
+      expect(items[2]).toHaveTextContent('Guest contribution');
+      expect(items[2].querySelector('a')).toBeNull();
+      expect(items[2].querySelector('img')).toBeNull();
+      // Work's initial avatar is used for entries without an image.
+      expect(items[2].firstElementChild).toHaveTextContent('G');
+      expect(container.textContent?.match(/public\.credits/g)).toHaveLength(1);
+    },
+  );
+
+  it('falls back to member or unknown names and artist ids without changing link precedence', () => {
+    const container = renderCredits([
+      credit({ id: 'member', name: '', member: { id: 'member-1', name: 'Member name', image: null } }),
+      credit({ id: 'unknown' }),
+      credit({
+        id: 'artist',
+        artist: { id: 'artist-1', name: 'Artist name', slug: null, imageUrl: null },
+        member: { id: 'member-2', name: 'Member 2', image: 'https://example.com/member.jpg' },
+      }),
+    ]);
+    const items = container.querySelectorAll('[role="listitem"]');
+    expect(items[0]).toHaveTextContent('Member name');
+    expect(items[1]).toHaveTextContent('unknown');
+    expect(items[1].querySelector('a')).toBeNull();
+    expect(items[2].querySelector('a')).toHaveAttribute('href', '/artists/artist-1');
+    expect(items[2].querySelector('img')).toHaveAttribute('src', 'https://example.com/member.jpg');
+  });
+
+  it('hides the Credits label and list when no credits exist', () => {
+    const container = renderCredits([]);
+    expect(container.textContent).not.toContain('public.credits');
+    expect(container.querySelector('[role="list"]')).toBeNull();
   });
 });

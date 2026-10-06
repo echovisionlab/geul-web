@@ -1,3 +1,4 @@
+import { resolveEmbedUrl } from '@/features/page/blocks/embed/policy';
 import { fromJson, type JsonValue } from '@bufbuild/protobuf';
 import {
   contentBlockCatalogFingerprint,
@@ -499,6 +500,9 @@ export class BlockRoomPageSectionsController {
 
   insert(section: SectionMeta, placement: { parentSectionId?: string; columnId?: string; index: number }): void {
     this.#assertStructuralAuthority();
+    if (section.type === 'embed' && !resolveEmbedUrl(String(section.props?.uri ?? ''))) {
+      throw new Error('A valid HTTPS Embed URI is required before insertion.');
+    }
     const protoCase = protoCaseByKind[section.type];
     const generated = payloads(section);
     const node = fromJson(PageSectionNodeSchema, {

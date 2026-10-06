@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation';
+import { PageRestrictedAccess } from '@/features/page/PageRestrictedAccess';
 import { DraftModeAlert } from '@/features/draft-mode/DraftModeAlert';
 import { PageContentView } from '@/features/page/PageView/PageContentView';
 import { PageMediaDeliveryProvider } from '@/features/page/PageMediaDeliveryContext';
-import { getPageViewWithToken } from '@/lib/queries/page';
+import { getPageAccessViewWithToken } from '@/lib/queries/page';
 
 interface Props {
   slug: string;
@@ -13,12 +14,16 @@ interface Props {
 }
 
 export async function PageContentWithToken({ slug, token, query, requestedLocale, password }: Props) {
-  const page = await getPageViewWithToken(slug, token, requestedLocale, password);
+  const access = await getPageAccessViewWithToken(slug, token, requestedLocale, password);
 
-  if (!page) {
+  if (!access) {
     notFound();
   }
 
+  if (access.reason !== 'allowed') {
+    return <PageRestrictedAccess reason={access.reason} returnTo={`/${slug}?share=${encodeURIComponent(token)}`} />;
+  }
+  const page = access.page;
   return (
     <>
       <DraftModeAlert id={page.id} status={page.status ?? 'draft'} />

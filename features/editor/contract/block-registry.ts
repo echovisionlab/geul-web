@@ -95,6 +95,7 @@ export const pageSectionRegistry = {
   'immersive-scene': pageRegistration('immersive-scene'),
   columns: pageRegistration('columns', 'columns'),
   mermaid: pageRegistration('mermaid'),
+  embed: pageRegistration('embed'),
 } as const satisfies Record<PageSectionKind, PageSectionAdapterRegistration>;
 
 function pageRegistration<TKind extends PageSectionKind>(

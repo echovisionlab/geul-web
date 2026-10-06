@@ -4,8 +4,9 @@ import { notFound, redirect } from 'next/navigation';
 import { ShareLinkEntityType } from '@echovisionlab/geul-proto/secure/share_link_pb.ts';
 import { createPublicShareLinkClient } from '@/lib/api/server-client';
 import { getPostAllowedActions, getPostViewWithToken } from '@/lib/queries/post';
-import { getPageViewWithToken } from '@/lib/queries/page';
+import { getPageAccessViewWithToken } from '@/lib/queries/page';
 import { getUserLocale } from '@/lib/utils/language.server';
+import { PageRestrictedAccess } from '@/features/page/PageRestrictedAccess';
 import { PageShareContent } from './PageShareContent';
 import { PageShareViewClient } from './PageShareViewClient';
 import { PostShareViewClient } from './PostShareViewClient';
@@ -54,10 +55,14 @@ export default async function ShareLinkPage({ params }: { params: Promise<{ toke
   const locale = await getUserLocale();
   if (response.entityType === ShareLinkEntityType.PAGE) {
     const idOrSlug = response.slug || response.entityId;
-    const page = response.passwordRequired ? null : await getPageViewWithToken(idOrSlug, token, locale);
-    if (!response.passwordRequired && !page) {
+    const access = response.passwordRequired ? null : await getPageAccessViewWithToken(idOrSlug, token, locale);
+    if (!response.passwordRequired && !access) {
       notFound();
     }
+    if (access && access.reason !== 'allowed') {
+      return <PageRestrictedAccess reason={access.reason} returnTo={`/s/${encodeURIComponent(token)}`} />;
+    }
+    const page = access?.reason === 'allowed' ? access.page : null;
     return (
       <PageShareViewClient
         token={token}

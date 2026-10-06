@@ -5,6 +5,7 @@ import ShareLinkPage from './page';
 const mocks = vi.hoisted(() => ({
   validate: vi.fn(),
   getPageViewWithToken: vi.fn(),
+  getPageAccessViewWithToken: vi.fn(),
   getLegalShareDocument: vi.fn(),
   isPublicLegalHistoryVersion: vi.fn(),
   notFound: vi.fn(() => {
@@ -22,7 +23,10 @@ vi.mock('next/navigation', () => ({
 vi.mock('@/lib/api/server-client', () => ({
   createPublicShareLinkClient: vi.fn(() => ({ validate: mocks.validate })),
 }));
-vi.mock('@/lib/queries/page', () => ({ getPageViewWithToken: mocks.getPageViewWithToken }));
+vi.mock('@/lib/queries/page', () => ({
+  getPageViewWithToken: mocks.getPageViewWithToken,
+  getPageAccessViewWithToken: mocks.getPageAccessViewWithToken,
+}));
 vi.mock('@/lib/queries/post', () => ({
   getPostViewWithToken: vi.fn(),
   getPostAllowedActions: vi.fn(),
@@ -40,6 +44,10 @@ vi.mock('./LegalShareViewClient', () => ({ LegalShareViewClient: vi.fn(() => nul
 describe('/s/[token] Page share route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.getPageAccessViewWithToken.mockImplementation(async (...args: unknown[]) => {
+      const page = await mocks.getPageViewWithToken(...args);
+      return page ? { reason: 'allowed', page } : null;
+    });
     mocks.isPublicLegalHistoryVersion.mockResolvedValue(false);
   });
 

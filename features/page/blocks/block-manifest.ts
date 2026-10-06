@@ -2,6 +2,7 @@ import { artistListSchema } from './artist-grid/schema';
 import { authorListSchema } from './author-list/schema';
 import { clientMarqueeSchema } from './client-marquee/schema';
 import { columnsSchema } from './columns/schema';
+import { embedSchema } from './embed/schema';
 import { externalVideoSchema } from './external-video/schema';
 import { formSchema } from './form/schema';
 import { immersiveSceneSchema } from './immersive-scene/schema';
@@ -37,6 +38,7 @@ function definePageBlock<TType extends string, TSchema extends z.ZodObject, TAll
 export const pageBlockDefinitions = [
   definePageBlock('mermaid', mermaidSchema, true),
   definePageBlock('rich-text', richTextSchema, true),
+  definePageBlock('embed', embedSchema, true),
   definePageBlock('external-video', externalVideoSchema, true),
   definePageBlock('post-list', postListSchema, true),
   definePageBlock('post-table', postTableSchema, true),

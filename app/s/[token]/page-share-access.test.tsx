@@ -3,10 +3,12 @@ import { accessPageShareAction } from './page-share-access';
 
 const mocks = vi.hoisted(() => ({
   getPageViewWithToken: vi.fn(),
+  getPageAccessViewWithToken: vi.fn(),
 }));
 
 vi.mock('@/lib/queries/page', () => ({
   getPageViewWithToken: mocks.getPageViewWithToken,
+  getPageAccessViewWithToken: mocks.getPageAccessViewWithToken,
 }));
 vi.mock('./PageShareContent', () => ({ PageShareContent: vi.fn(() => null) }));
 
@@ -21,6 +23,10 @@ function form(values: Record<string, string>) {
 describe('accessPageShareAction', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.getPageAccessViewWithToken.mockImplementation(async (...args: unknown[]) => {
+      const page = await mocks.getPageViewWithToken(...args);
+      return page ? { reason: 'allowed', page } : null;
+    });
   });
 
   it('keeps the password in the current submission and opens the Page once', async () => {
@@ -60,5 +66,16 @@ describe('accessPageShareAction', () => {
     await expect(
       accessPageShareAction({}, form({ token: 'share-token', idOrSlug: 'shared-page', password: 'wrong' })),
     ).resolves.toEqual({ error: 'incorrect_password' });
+  });
+  it('returns conditions-denied content after valid share credentials without converting it to a password error', async () => {
+    mocks.getPageAccessViewWithToken.mockResolvedValueOnce({ reason: 'conditions-not-met' });
+    const formData = new FormData();
+    formData.set('token', 'share-token');
+    formData.set('idOrSlug', 'shared-page');
+    formData.set('password', 'secret');
+    const result = await accessPageShareAction({}, formData);
+    expect(result.error).toBeUndefined();
+    expect(result.content).toBeDefined();
+    expect(mocks.getPageViewWithToken).not.toHaveBeenCalled();
   });
 });

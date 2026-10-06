@@ -188,16 +188,153 @@ describe('typed Page Block-room section controller', () => {
     const controller = createBlockRoomPageSectionsController(document, 'ko');
     const initial = createDefaultSection(kind);
     const section =
-      kind === 'external-video'
-        ? parseSectionMeta({ ...initial, props: { ...initial.props, url: 'https://example.com/video' } })
-        : kind === 'form'
-          ? parseSectionMeta({ ...initial, props: { ...initial.props, formId: FORM_ID } })
-          : initial;
+      kind === 'embed'
+        ? parseSectionMeta({ ...initial, props: { ...initial.props, uri: 'https://embed.example/app' } })
+        : kind === 'external-video'
+          ? parseSectionMeta({ ...initial, props: { ...initial.props, url: 'https://example.com/video' } })
+          : kind === 'form'
+            ? parseSectionMeta({ ...initial, props: { ...initial.props, formId: FORM_ID } })
+            : initial;
 
     controller.insert(section, { index: 0 });
 
     expect(controller.read()).toEqual([expect.objectContaining({ id: section.id, type: kind })]);
     expect(() => materializeCanonicalBlockRoom(document, 'page')).not.toThrow();
+  });
+
+  it('rejects invalid Embed insertion before any canonical graph mutation', () => {
+    const document = room();
+    const controller = createBlockRoomPageSectionsController(document, 'ko');
+    for (const uri of ['', 'invalid', 'http://embed.example', 'https://user@embed.example']) {
+      const section = parseSectionMeta({ ...createDefaultSection('embed'), props: { uri } });
+      expect(() => controller.insert(section, { index: 0 })).toThrow('valid HTTPS Embed URI');
+      expect(controller.read()).toEqual([]);
+    }
+    document.destroy();
+  });
+
+  it('preserves Embed permissions through two-peer edits, canonical reload, nesting, and deletion', () => {
+    const documentA = room();
+    const controllerA = createBlockRoomPageSectionsController(documentA, 'ko');
+    const embed = parseSectionMeta({
+      ...createDefaultSection('embed'),
+      props: {
+        uri: 'https://embed.example/app',
+        title: '원문',
+        heightMode: 'auto',
+        height: '720',
+        allowScripts: 'true',
+        allowSameOrigin: 'true',
+        allowForms: 'true',
+        allowDownloads: 'true',
+        allowPopups: 'true',
+        allowMicrophone: 'true',
+        allowSpeakerSelection: 'true',
+        allowFullscreen: 'true',
+      },
+    });
+    const columns = createDefaultSection('columns');
+    if (columns.type !== 'columns') {
+      throw new Error('Expected Columns section.');
+    }
+    controllerA.insert(
+      { ...columns, columns: [{ ...columns.columns[0]!, sections: [embed] }, columns.columns[1]!] },
+      { index: 0 },
+    );
+    const documentB = new Y.Doc();
+    Y.applyUpdate(documentB, Y.encodeStateAsUpdate(documentA));
+    const controllerB = createBlockRoomPageSectionsController(documentB, 'ko');
+    const vectorA = Y.encodeStateVector(documentA);
+    const vectorB = Y.encodeStateVector(documentB);
+    controllerA.update(embed.id, { props: { allowMicrophone: 'false', heightMode: 'viewport' } });
+    controllerB.update(embed.id, { props: { allowDownloads: 'false', allowPopups: 'false' } });
+    const deltaA = Y.encodeStateAsUpdate(documentA, vectorA);
+    const deltaB = Y.encodeStateAsUpdate(documentB, vectorB);
+    Y.applyUpdate(documentA, deltaB);
+    Y.applyUpdate(documentB, deltaA);
+    const expected = {
+      ...embed.props,
+      allowMicrophone: 'false',
+      allowDownloads: 'false',
+      allowPopups: 'false',
+      heightMode: 'viewport',
+    };
+    for (const controller of [controllerA, controllerB]) {
+      const section = controller.read()[0];
+      if (section?.type !== 'columns') {
+        throw new Error('Expected Columns section.');
+      }
+      expect(section.columns[0]?.sections[0]?.props).toMatchObject(expected);
+    }
+    const canonical = materializeCanonicalBlockRoom(documentA, 'page');
+    const reloaded = new Y.Doc();
+    hydrateCanonicalBlockRoom(reloaded, 'page', 'ko', canonical, []);
+    const reloadedController = createBlockRoomPageSectionsController(reloaded, 'ko');
+    const section = reloadedController.read()[0];
+    if (section?.type !== 'columns') {
+      throw new Error('Expected Columns section.');
+    }
+    expect(section.columns[0]?.sections[0]?.props).toMatchObject(expected);
+    reloadedController.delete(embed.id);
+    expect(reloadedController.read()[0]).toMatchObject({ columns: [{ sections: [] }, { sections: [] }] });
+    documentA.destroy();
+    documentB.destroy();
+    reloaded.destroy();
+  });
+
+  it('translates Embed title while retaining source URI, height, and permissions', () => {
+    const source = room();
+    const controller = createBlockRoomPageSectionsController(source, 'ko');
+    const embed = parseSectionMeta({
+      ...createDefaultSection('embed'),
+      props: { uri: 'https://embed.example/app', title: '원문', allowMicrophone: 'true' },
+    });
+    controller.insert(embed, { index: 0 });
+    const canonical = materializeCanonicalBlockRoom(source, 'page');
+    if (canonical.$typeName !== 'api.content.v1.LocalizedPageDocument') {
+      throw new Error('Expected localized Page document.');
+    }
+    const targetCanonical = fromJson(LocalizedPageDocumentSchema, {
+      blockCatalogFingerprint: contentBlockCatalogFingerprint,
+      locale: 'en',
+      base: {},
+      localeOverlay: {
+        locale: 'en',
+        sections: [{ sectionId: embed.id, embed: { props: { title: 'English title' } } }],
+      },
+    } as JsonValue);
+    targetCanonical.base = canonical.base;
+    const target = new Y.Doc();
+    hydrateCanonicalBlockRoom(target, 'page', 'ko', targetCanonical, []);
+    const targetController = createBlockRoomPageSectionsController(target, 'en');
+    const baseBefore = materializeCanonicalBlockRoom(target, 'page');
+    targetController.updateLocaleProps(embed.id, {
+      title: 'Translated title',
+      uri: 'https://attacker.example',
+      height: '999',
+      allowMicrophone: 'false',
+    });
+    expect(targetController.read()[0]?.props).toMatchObject({ ...embed.props, title: 'Translated title' });
+    const after = materializeCanonicalBlockRoom(target, 'page');
+    if (
+      baseBefore.$typeName !== 'api.content.v1.LocalizedPageDocument' ||
+      after.$typeName !== 'api.content.v1.LocalizedPageDocument'
+    ) {
+      throw new Error('Expected localized Page document.');
+    }
+    expect(after.base).toEqual(baseBefore.base);
+    const reloaded = new Y.Doc();
+    hydrateCanonicalBlockRoom(reloaded, 'page', 'ko', after, []);
+    expect(createBlockRoomPageSectionsController(reloaded, 'en').read()[0]?.props).toMatchObject({
+      ...embed.props,
+      title: 'Translated title',
+    });
+    reloaded.destroy();
+    expect(() => targetController.update(embed.id, { props: { uri: 'https://attacker.example' } })).toThrow(
+      'cannot mutate shared section structure',
+    );
+    source.destroy();
+    target.destroy();
   });
 
   it('updates shared, locale, settings, order, and deletion through narrow codec operations', () => {

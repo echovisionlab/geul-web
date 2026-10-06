@@ -2,14 +2,20 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
-import { getPageNeutralConfigurationAction, updatePageShowTitleAction } from '@/lib/actions/page';
+import {
+  getPageNeutralConfigurationAction,
+  updatePageAccessPolicyAction,
+  updatePageShowTitleAction,
+} from '@/lib/actions/page';
 import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
+import type { PageAccessPolicyValue } from '@/lib/types/page-access';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
 
 export interface PageNeutralConfiguration {
   slug: string | null;
   showTitle: boolean;
   status: 'draft' | 'published';
+  accessPolicy: PageAccessPolicyValue;
 }
 
 export type PageNeutralConfigurationField = keyof PageNeutralConfiguration;
@@ -40,11 +46,16 @@ export interface UsePageNeutralConfigurationOptions {
   provider?: HocuspocusProvider | null;
   loadConfiguration?: typeof getPageNeutralConfigurationAction;
   saveShowTitle?: typeof updatePageShowTitleAction;
+  saveAccessPolicy?: typeof updatePageAccessPolicyAction;
   onShowTitleSaveError?: (message: string) => void;
   delay?: number;
 }
 
-const FIELDS: readonly PageNeutralConfigurationField[] = ['slug', 'showTitle', 'status'];
+const FIELDS: readonly PageNeutralConfigurationField[] = ['slug', 'showTitle', 'status', 'accessPolicy'];
+
+function sameFieldValue(field: PageNeutralConfigurationField, left: unknown, right: unknown): boolean {
+  return field === 'accessPolicy' ? JSON.stringify(left) === JSON.stringify(right) : Object.is(left, right);
+}
 
 function createPageNeutralScope(pageId: string, initialConfiguration: PageNeutralConfiguration): PageNeutralScope {
   return {
@@ -64,6 +75,7 @@ export function usePageNeutralConfiguration({
   provider,
   loadConfiguration = getPageNeutralConfigurationAction,
   saveShowTitle = updatePageShowTitleAction,
+  saveAccessPolicy = updatePageAccessPolicyAction,
   onShowTitleSaveError,
   delay = 500,
 }: UsePageNeutralConfigurationOptions) {
@@ -90,6 +102,7 @@ export function usePageNeutralConfiguration({
         slug: result.slug,
         showTitle: result.showTitle,
         status: result.status,
+        accessPolicy: result.accessPolicy,
       };
       requestedScope.canonical = canonical;
       setState((current) => {
@@ -103,7 +116,10 @@ export function usePageNeutralConfiguration({
           if (pending?.size) {
             continue;
           }
-          if (!requestedScope.drafts.has(field) || Object.is(requestedScope.drafts.get(field), canonical[field])) {
+          if (
+            !requestedScope.drafts.has(field) ||
+            sameFieldValue(field, requestedScope.drafts.get(field), canonical[field])
+          ) {
             requestedScope.drafts.delete(field);
             next = { ...next, [field]: canonical[field] };
           }
@@ -137,7 +153,7 @@ export function usePageNeutralConfiguration({
         return;
       }
       const canonical = scope.canonical;
-      if (Object.is(value, canonical[field])) {
+      if (sameFieldValue(field, value, canonical[field])) {
         scope.drafts.delete(field);
       } else {
         scope.drafts.set(field, value);
@@ -232,6 +248,25 @@ export function usePageNeutralConfiguration({
     [refresh, scope],
   );
 
+  const saveAccess = useCallback(
+    async (value: PageAccessPolicyValue) => {
+      const write = beginFieldWrite('accessPolicy');
+      try {
+        const result = await saveAccessPolicy(scope.pageId, value);
+        if (result.ok) {
+          write.acknowledge(result.accessPolicy);
+        } else {
+          write.fail(false);
+        }
+        return result;
+      } catch (error) {
+        write.fail(false);
+        throw error;
+      }
+    },
+    [beginFieldWrite, saveAccessPolicy, scope],
+  );
+
   const writeShowTitle = useCallback(
     async ({ value }: { value: boolean }) => {
       const write = beginFieldWrite('showTitle');
@@ -270,8 +305,9 @@ export function usePageNeutralConfiguration({
       setDraft,
       isDraft,
       beginFieldWrite,
+      saveAccess,
       queueShowTitle: (value: boolean) => showTitlePatch({ value }),
     }),
-    [beginFieldWrite, configuration, isDraft, setDraft, showTitlePatch],
+    [beginFieldWrite, configuration, isDraft, saveAccess, setDraft, showTitlePatch],
   );
 }

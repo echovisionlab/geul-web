@@ -6,6 +6,8 @@ import {
   assertRichTextProfileAllows,
   contentBlockProfileForRichTextProfile,
   pageSectionRegistry,
+  pageFieldOwnership,
+  pageSectionDefaults,
   profileSupportsParagraphExternalVideo,
   requireHeadingLevel,
   requirePageSectionKind,
@@ -35,6 +37,28 @@ describe('generated Block adapter registry', () => {
     expect(richTextBlockDefaults('heading').get('level')).toBe(1);
   });
 
+  it('keeps Embed title localized and frame settings shared with explicit permission defaults', () => {
+    expect(pageFieldOwnership('embed', 'title')).toBe('locale');
+    for (const field of [
+      'uri',
+      'height',
+      'heightMode',
+      'allowScripts',
+      'allowSameOrigin',
+      'allowForms',
+      'allowDownloads',
+      'allowPopups',
+      'allowMicrophone',
+      'allowSpeakerSelection',
+      'allowFullscreen',
+    ]) {
+      expect(pageFieldOwnership('embed', field)).toBe('shared');
+    }
+    expect(pageSectionDefaults('embed').get('allowScripts')).toBe(true);
+    expect(pageSectionDefaults('embed').get('allowSameOrigin')).toBe(true);
+    expect(pageSectionDefaults('embed').get('allowMicrophone')).toBe(false);
+  });
+
   it('reads paragraph external-video availability from generated profile data', () => {
     expect(contentBlockProfileForRichTextProfile(RichTextProfile.POST)).toBe('post');
     expect(contentBlockProfileForRichTextProfile(RichTextProfile.PAGE)).toBe('page');
@@ -46,6 +70,7 @@ describe('generated Block adapter registry', () => {
 
   it('maps Page columns as the only nested section container', () => {
     expect(() => assertPageContainerPlacement('columns', 'rich-text')).not.toThrow();
+    expect(() => assertPageContainerPlacement('columns', 'embed')).not.toThrow();
     expect(() => assertPageContainerPlacement('columns', 'columns')).toThrow('cannot be placed');
     expect(() => assertPageContainerPlacement('rich-text', 'map')).toThrow('cannot be placed');
   });

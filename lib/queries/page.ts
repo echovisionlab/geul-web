@@ -2,6 +2,8 @@ import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
 import { FilterOp, SortOrder } from '@echovisionlab/geul-proto/common/common_pb.ts';
+import { PageAccessReason } from '@echovisionlab/geul-proto/common/page_access_pb.ts';
+import { fromProtoPageAccessPolicy } from '@/lib/types/page-access';
 import { PageStatus as PublicPageStatus } from '@echovisionlab/geul-proto/public/page_pb.ts';
 import { PageStatus } from '@echovisionlab/geul-proto/secure/page_pb.ts';
 import { createPageClient, createPublicPageClientWithAuth } from '@/lib/api/server-client';
@@ -154,6 +156,7 @@ export async function getPage(idOrSlug: string) {
       documentLayout: mapProtoDocumentLayout(page.documentLayout),
       status: pageStatusToString(page.status),
       showTitle: page.showTitle,
+      accessPolicy: fromProtoPageAccessPolicy(page.accessPolicy),
       featuredImageUrl: resolveFeaturedImageDeliveryUrl(page.featuredImageDelivery),
       createdAt: page.createdAt ? timestampDate(page.createdAt) : null,
       updatedAt: page.updatedAt ? timestampDate(page.updatedAt) : null,
@@ -168,13 +171,17 @@ export async function getPage(idOrSlug: string) {
   }
 }
 
-export async function getPageView(
+export async function getPageAccessView(
   idOrSlug: string,
   options?: { preferSourceLocale?: boolean; requestedLocale?: string | null },
 ) {
   try {
     const slug = decodeURIComponent(idOrSlug);
     let response = await getPublicPageResponse(slug, options?.requestedLocale, 'authenticated');
+    const initialDenial = deniedPageAccessReason(response.accessReason);
+    if (initialDenial) {
+      return { reason: initialDenial };
+    }
     response = await maybeFetchSourceLocale({
       preferSourceLocale: options?.preferSourceLocale,
       initialResponse: response,
@@ -184,12 +191,16 @@ export async function getPageView(
       },
     });
 
+    const denial = deniedPageAccessReason(response.accessReason);
+    if (denial) {
+      return { reason: denial };
+    }
     const page = response.page;
     if (!page) {
       return null;
     }
 
-    return mapPublicPageResponse(page, response.blockMedia);
+    return { reason: 'allowed' as const, page: mapPublicPageResponse(page, response.blockMedia) };
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
@@ -199,7 +210,7 @@ export async function getPageView(
   }
 }
 
-export async function getPageViewWithToken(
+export async function getPageAccessViewWithToken(
   idOrSlug: string,
   token: string,
   requestedLocale?: string | null,
@@ -213,14 +224,21 @@ export async function getPageViewWithToken(
       sharePassword: sharePassword?.trim() || undefined,
     });
 
+    const denial = deniedPageAccessReason(response.accessReason);
+    if (denial) {
+      return { reason: denial };
+    }
     const page = response.page;
     if (!page) {
       return null;
     }
 
     return {
-      ...mapPublicPageResponse(page, response.blockMedia),
-      status: publicPageStatusToString(page.status),
+      reason: 'allowed' as const,
+      page: {
+        ...mapPublicPageResponse(page, response.blockMedia),
+        status: publicPageStatusToString(page.status),
+      },
     };
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
@@ -229,4 +247,39 @@ export async function getPageViewWithToken(
     logger.error('GetPageViewWithToken RPC error', { error: err });
     throw err;
   }
+}
+
+export type PageDeniedReason = 'authentication-required' | 'conditions-not-met';
+
+function deniedPageAccessReason(reason: PageAccessReason): PageDeniedReason | null {
+  switch (reason) {
+    case PageAccessReason.AUTHENTICATION_REQUIRED:
+      return 'authentication-required';
+    case PageAccessReason.CONDITIONS_NOT_MET:
+      return 'conditions-not-met';
+    case PageAccessReason.ALLOWED:
+    case PageAccessReason.UNSPECIFIED:
+    case undefined:
+      return null;
+    default:
+      throw new Error('Page service returned an unsupported access decision');
+  }
+}
+
+export async function getPageView(
+  idOrSlug: string,
+  options?: { preferSourceLocale?: boolean; requestedLocale?: string | null },
+) {
+  const access = await getPageAccessView(idOrSlug, options);
+  return access?.reason === 'allowed' ? access.page : null;
+}
+
+export async function getPageViewWithToken(
+  idOrSlug: string,
+  token: string,
+  requestedLocale?: string | null,
+  sharePassword?: string,
+) {
+  const access = await getPageAccessViewWithToken(idOrSlug, token, requestedLocale, sharePassword);
+  return access?.reason === 'allowed' ? access.page : null;
 }

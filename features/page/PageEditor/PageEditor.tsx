@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconHistory } from '@tabler/icons-react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { ScrollArea, Stack, Text } from '@mantine/core';
 import { Checkbox } from '@/components/core/Input';
@@ -13,7 +13,8 @@ import { EditorHeader } from '@/features/editor/EditorHeader';
 import { useEditorPermissionRevocation } from '@/features/editor/useEditorPermissionRevocation';
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
 import { OgImagePreview } from '@/features/metadata/OgImagePreview';
-import { SectionCard } from '@/components/core/Section';
+import { Button } from '@/components/core/Button';
+import { SectionCard, SectionHeader } from '@/components/core/Section';
 import { ShareLinkSection } from '@/features/share/ShareLinkSection';
 import { UrlSection } from '@/features/metadata/UrlSection';
 import { VersionHistoryDrawer } from '@/features/version-history';
@@ -29,6 +30,7 @@ import { useLocaleDocumentSession } from '@/features/translation/useLocaleDocume
 import { LocalizedCollaborativePageBodyEditor } from '@/features/page/PageEditor/LocalizedCollaborativePageBodyEditor';
 import {
   deletePageAdminAction,
+  getPageAccessTagOptionsAction,
   publishPageAction,
   regeneratePageOgImageAction,
   unpublishPageAction,
@@ -51,6 +53,8 @@ import { PageFeaturedImageUploader } from './PageFeaturedImageUploader';
 import { PageEditorInterruptionDialogs } from './PageEditorInterruptionDialogs';
 import { SectionList } from './SectionList';
 import { usePageResidentMetadata } from './usePageResidentMetadata';
+import type { PageAccessPolicyValue } from '@/lib/types/page-access';
+import { PageAccessSettings } from './PageAccessSettings';
 import { usePageNeutralConfiguration } from './usePageNeutralConfiguration';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
@@ -75,6 +79,7 @@ interface PageEditorProps {
   initialSlug: string | null;
   initialStatus: string;
   initialShowTitle: boolean;
+  initialAccessPolicy: PageAccessPolicyValue;
   initialDocumentLayout: DocumentLayout;
   initialFeaturedImageUrl: string | null;
   initialOgImageUrl: string | null;
@@ -139,6 +144,7 @@ export function PageEditor({
   initialSlug,
   initialStatus,
   initialShowTitle,
+  initialAccessPolicy,
   initialDocumentLayout,
   initialFeaturedImageUrl,
   initialOgImageUrl,
@@ -194,9 +200,10 @@ export function PageEditor({
     () => ({
       slug: initialSlug,
       showTitle: initialShowTitle,
+      accessPolicy: initialAccessPolicy,
       status: initialStatus === 'published' ? ('published' as const) : ('draft' as const),
     }),
-    [initialShowTitle, initialSlug, initialStatus],
+    [initialAccessPolicy, initialShowTitle, initialSlug, initialStatus],
   );
   const pageNeutral = usePageNeutralConfiguration({
     pageId,
@@ -205,7 +212,7 @@ export function PageEditor({
     onShowTitleSaveError: (message) => notifications.show({ message, color: 'red' }),
   });
   const { configuration: neutralConfiguration, setDraft, isDraft, beginFieldWrite, queueShowTitle } = pageNeutral;
-  const { slug, showTitle, status } = neutralConfiguration;
+  const { slug, showTitle, status, accessPolicy } = neutralConfiguration;
   const lifecycleCommandInFlight = useRef(false);
   const {
     title: residentTitle,
@@ -248,6 +255,27 @@ export function PageEditor({
     isSynced,
   });
   const canEditNeutral = canEditLocaleDocument && activeEditLocale.isSourceLocale;
+  const accessTags = useQuery({
+    queryKey: ['page-access-tags'],
+    enabled: canEditNeutral,
+    queryFn: async () => {
+      const result = await getPageAccessTagOptionsAction();
+      if (!result.ok) {
+        throw new Error(result.error);
+      }
+      return result.tagOptions;
+    },
+    retry: false,
+  });
+  const handleAccessSave = useCallback(
+    async (value: PageAccessPolicyValue) => {
+      if (!canEditNeutral) {
+        return { ok: false as const, error: tCommon('notifications.saveFailed') };
+      }
+      return pageNeutral.saveAccess(value);
+    },
+    [canEditNeutral, pageNeutral.saveAccess, tCommon],
+  );
 
   const publish = useMutation({
     mutationFn: async () => {
@@ -647,6 +675,35 @@ export function PageEditor({
           currentMemberDisplayName={userName}
           onSummaryChange={canEditLocaleDocument ? handleLocaleSummaryChange : undefined}
         />
+
+        <SectionCard>
+          <Stack gap="md">
+            <SectionHeader title={t('access.title')} />
+            {accessTags.isError ? (
+              <Stack gap="xs">
+                <Text size="sm" c="red" role="alert">
+                  {t('access.tagsLoadError')}
+                </Text>
+                <Button
+                  tone="neutral"
+                  emphasis="low"
+                  onClick={() => void accessTags.refetch()}
+                  disabled={!canEditNeutral}
+                >
+                  {t('access.tagsRetry')}
+                </Button>
+              </Stack>
+            ) : null}
+            <PageAccessSettings
+              key={pageId}
+              value={accessPolicy}
+              tagOptions={accessTags.data ?? []}
+              loadingTags={accessTags.isLoading || accessTags.isError}
+              disabled={!canEditNeutral}
+              onSave={handleAccessSave}
+            />
+          </Stack>
+        </SectionCard>
 
         <MetadataPanel
           title={displayedTitle}

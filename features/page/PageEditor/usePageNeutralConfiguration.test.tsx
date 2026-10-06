@@ -1,9 +1,15 @@
 // @vitest-environment jsdom
 import { act } from 'react';
+import { MantineProvider } from '@mantine/core';
+import { PageAccessSettings } from './PageAccessSettings';
 import { createRoot, type Root } from 'react-dom/client';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { DEFAULT_PAGE_ACCESS_POLICY } from '@/lib/types/page-access';
 import { type PageNeutralConfiguration, usePageNeutralConfiguration } from './usePageNeutralConfiguration';
+
+vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
+Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', { configurable: true, value: () => {} });
 
 vi.mock('@/lib/contexts/EditorRuntimeContext', () => ({
   useOptionalEditorRuntimeContext: () => null,
@@ -46,7 +52,7 @@ function deferred<T>() {
 }
 
 function config(overrides: Partial<PageNeutralConfiguration> = {}): PageNeutralConfiguration {
-  return { slug: 'initial', showTitle: false, status: 'draft', ...overrides };
+  return { slug: 'initial', showTitle: false, status: 'draft', accessPolicy: DEFAULT_PAGE_ACCESS_POLICY, ...overrides };
 }
 
 let root: Root;
@@ -58,6 +64,15 @@ function HookHarness(props: Parameters<typeof usePageNeutralConfiguration>[0]) {
   return null;
 }
 
+function AccessHarness(props: Parameters<typeof usePageNeutralConfiguration>[0]) {
+  const neutral = usePageNeutralConfiguration(props);
+  return (
+    <MantineProvider env="test">
+      <PageAccessSettings value={neutral.configuration.accessPolicy} tagOptions={[]} onSave={neutral.saveAccess} />
+    </MantineProvider>
+  );
+}
+
 function emitHint(provider: TestProvider, document: string) {
   provider.emit('stateless', {
     payload: JSON.stringify({ kind: 'editor.entity_changed', version: 1, document }),
@@ -65,13 +80,23 @@ function emitHint(provider: TestProvider, document: string) {
 }
 
 beforeEach(() => {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
   host = document.createElement('div');
+  document.body.appendChild(host);
   root = createRoot(host);
   (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 });
 
 afterEach(() => {
   act(() => root.unmount());
+  host.remove();
   vi.unstubAllGlobals();
   vi.useRealTimers();
 });
@@ -105,16 +130,16 @@ describe('usePageNeutralConfiguration', () => {
     expect(loadConfiguration).toHaveBeenCalledTimes(2);
 
     await act(async () => {
-      peerRead.resolve({ ok: true, slug: 'peer-slug', showTitle: false, status: 'published' });
+      peerRead.resolve({ ok: true, ...config({ slug: 'peer-slug', status: 'published' }) });
       await peerRead.promise;
     });
-    expect(current.configuration).toEqual({ slug: 'local-slug', showTitle: true, status: 'published' });
+    expect(current.configuration).toEqual(config({ slug: 'local-slug', showTitle: true, status: 'published' }));
 
     await act(async () => {
-      staleRead.resolve({ ok: true, slug: 'stale-slug', showTitle: false, status: 'draft' });
+      staleRead.resolve({ ok: true, ...config({ slug: 'stale-slug' }) });
       await staleRead.promise;
     });
-    expect(current.configuration).toEqual({ slug: 'local-slug', showTitle: true, status: 'published' });
+    expect(current.configuration).toEqual(config({ slug: 'local-slug', showTitle: true, status: 'published' }));
   });
 
   it('keeps a write pending across peer refresh and adopts its canonical acknowledgment', async () => {
@@ -217,7 +242,7 @@ describe('usePageNeutralConfiguration', () => {
     expect(loadConfiguration).toHaveBeenCalledTimes(loadCountBeforeStaleCompletion);
     act(() => staleAcknowledgment.acknowledge('published'));
     expect(loadConfiguration).toHaveBeenCalledTimes(loadCountBeforeStaleCompletion);
-    expect(current.configuration).toEqual({ slug: 'a-new-draft', showTitle: true, status: 'draft' });
+    expect(current.configuration).toEqual(config({ slug: 'a-new-draft', showTitle: true, status: 'draft' }));
     expect(current.isDraft('slug')).toBe(true);
     expect(current.isDraft('showTitle')).toBe(true);
 
@@ -227,9 +252,125 @@ describe('usePageNeutralConfiguration', () => {
       currentStatusWrite.acknowledge('published');
     });
     await act(async () => Promise.resolve());
-    expect(current.configuration).toEqual({ slug: 'a-committed', showTitle: true, status: 'published' });
+    expect(current.configuration).toEqual(config({ slug: 'a-committed', showTitle: true, status: 'published' }));
     expect(current.isDraft('slug')).toBe(false);
     expect(current.isDraft('showTitle')).toBe(false);
+  });
+
+  it('preserves access writes through peer refresh, adopts canonical policy, and keeps retryable failures local', async () => {
+    const provider = createProvider();
+    const policy = { ...DEFAULT_PAGE_ACCESS_POLICY, mode: 'conditions' as const, roles: ['author' as const] };
+    const canonicalPolicy = { ...policy, roles: ['author' as const, 'admin' as const] };
+    const write = deferred<{ ok: true; accessPolicy: typeof canonicalPolicy }>();
+    const saveAccessPolicy = vi
+      .fn()
+      .mockReturnValueOnce(write.promise)
+      .mockResolvedValueOnce({ ok: false, error: 'Permission changed', errorCode: 7 });
+    let remote = config();
+    const loadConfiguration = vi.fn(async () => ({ ok: true as const, ...remote }));
+    act(() =>
+      root.render(
+        <HookHarness
+          pageId="page-1"
+          initialConfiguration={config()}
+          provider={provider}
+          loadConfiguration={loadConfiguration}
+          saveAccessPolicy={saveAccessPolicy}
+        />,
+      ),
+    );
+    await act(async () => Promise.resolve());
+    let saving!: ReturnType<typeof current.saveAccess>;
+    act(() => {
+      saving = current.saveAccess(policy);
+    });
+    remote = config({ accessPolicy: { ...DEFAULT_PAGE_ACCESS_POLICY, mode: 'authenticated' } });
+    act(() => emitHint(provider, 'page:page-1'));
+    await act(async () => Promise.resolve());
+    expect(current.configuration.accessPolicy).toEqual(DEFAULT_PAGE_ACCESS_POLICY);
+    remote = config({ accessPolicy: canonicalPolicy });
+    await act(async () => {
+      write.resolve({ ok: true, accessPolicy: canonicalPolicy });
+      await saving;
+    });
+    expect(saveAccessPolicy).toHaveBeenCalledWith('page-1', policy);
+    expect(current.configuration.accessPolicy).toEqual(canonicalPolicy);
+    await act(async () => {
+      await expect(current.saveAccess(DEFAULT_PAGE_ACCESS_POLICY)).resolves.toMatchObject({
+        ok: false,
+        error: 'Permission changed',
+      });
+    });
+    expect(current.configuration.accessPolicy).toEqual(canonicalPolicy);
+  });
+
+  it('saves through the actual access controls and shows canonical controls after the neutral acknowledgment', async () => {
+    const canonical = {
+      ...DEFAULT_PAGE_ACCESS_POLICY,
+      mode: 'conditions' as const,
+      match: 'all' as const,
+      roles: ['author' as const, 'admin' as const],
+    };
+    const initial = config();
+    const saveAccessPolicy = vi.fn(async () => ({ ok: true as const, accessPolicy: canonical }));
+    let remote = initial;
+    const loadConfiguration = vi.fn(async () => ({ ok: true as const, ...remote }));
+    act(() =>
+      root.render(
+        <AccessHarness
+          pageId="page-1"
+          initialConfiguration={initial}
+          loadConfiguration={loadConfiguration}
+          saveAccessPolicy={saveAccessPolicy}
+        />,
+      ),
+    );
+    await act(async () => Promise.resolve());
+    const authorLabel = [...host.querySelectorAll<HTMLLabelElement>('label')].find(
+      (label) => label.textContent === 'roleAuthor',
+    )!;
+    act(() => document.getElementById(authorLabel.htmlFor)!.click());
+    remote = config({ accessPolicy: canonical });
+    const save = [...host.querySelectorAll<HTMLButtonElement>('button')].find(
+      (button) => button.textContent === 'save',
+    )!;
+    await act(async () => save.click());
+    expect(saveAccessPolicy).toHaveBeenCalledWith('page-1', {
+      ...DEFAULT_PAGE_ACCESS_POLICY,
+      mode: 'conditions',
+      roles: ['author'],
+    });
+    const userLabel = [...host.querySelectorAll<HTMLLabelElement>('label')].find(
+      (label) => label.textContent === 'roleAdmin',
+    )!;
+    expect(document.getElementById(userLabel.htmlFor)).toBeChecked();
+    expect(host.querySelector('[role="status"]')).toHaveTextContent('saved');
+    expect(
+      [...host.querySelectorAll<HTMLButtonElement>('button')].find((button) => button.textContent === 'save'),
+    ).toBeDisabled();
+  });
+
+  it('recognizes equal access-policy drafts by value during canonical refresh', async () => {
+    const provider = createProvider();
+    const policy = { ...DEFAULT_PAGE_ACCESS_POLICY, mode: 'conditions' as const, userTagIds: ['tag-1'] };
+    const loadConfiguration = vi.fn().mockResolvedValue({ ok: true, ...config({ accessPolicy: policy }) });
+    act(() =>
+      root.render(
+        <HookHarness
+          pageId="page-1"
+          initialConfiguration={config()}
+          provider={provider}
+          loadConfiguration={loadConfiguration}
+        />,
+      ),
+    );
+    await act(async () => Promise.resolve());
+    act(() => current.setDraft('accessPolicy', { ...policy, userTagIds: ['tag-1'] }));
+    expect(current.isDraft('accessPolicy')).toBe(false);
+    act(() => current.setDraft('accessPolicy', { ...policy, userTagIds: ['local-tag'] }));
+    act(() => emitHint(provider, 'page:page-1'));
+    await act(async () => Promise.resolve());
+    expect(current.configuration.accessPolicy.userTagIds).toEqual(['local-tag']);
   });
 
   it('retries failed show-title writes automatically and adopts the acknowledged value', async () => {

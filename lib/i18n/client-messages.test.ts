@@ -4,7 +4,6 @@ import { getMessagesForLocale } from './messages';
 import { SUPPORTED_LOCALES } from './locale';
 
 const NEW_PUBLIC_ROUTES = [
-  '/tools/hwp',
   '/posts',
   '/artists',
   '/labels',
@@ -145,6 +144,16 @@ describe('anonymous public message catalogue', () => {
     expect(isReducedCatalogueRoute(pathWithSearch)).toBe(false);
     expect(selectClientMessages(messages, { pathWithSearch, hasSession: false })).toBe(messages);
   });
+
+  it.each(['/tools/transcode', '/tools/youtube-audio', '/tools/hwp', '/tools/portadj'])(
+    'keeps the complete catalogue for the generic Page fallback at former tool route %s',
+    async (pathWithSearch) => {
+      const messages = await getMessagesForLocale('en');
+      expect(isReducedCatalogueRoute(pathWithSearch)).toBe(false);
+      expect(selectClientMessages(messages, { pathWithSearch, hasSession: false })).toBe(messages);
+      expect(selectClientMessages(messages, { pathWithSearch, hasSession: true })).toBe(messages);
+    },
+  );
 
   it.each(['/admin', '/login', '/my', '/custom-page', '/works?edit=true'])(
     'keeps the full catalogue on %s',

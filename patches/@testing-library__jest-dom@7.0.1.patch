@@ -1,0 +1,10 @@
+diff --git a/types/vitest.d.ts b/types/vitest.d.ts
+--- a/types/vitest.d.ts
++++ b/types/vitest.d.ts
+@@ -4,5 +4,5 @@
+ declare module 'vitest' {
+-  interface Assertion<T = any>
++  interface Assertion<R extends void | Promise<void> = void, T = unknown>
+     extends TestingLibraryMatchers<
+       any,
+       T
