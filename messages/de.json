@@ -3938,6 +3938,10 @@
       }
     },
     "embed": {
+      "toolDescription": "Dieses Werkzeug läuft direkt auf der Seite. Seine Höhe passt sich dem Inhalt an.",
+      "toolOriginError": "Verwende eine Werkzeug-URL von dieser Website oder ihren Werkzeugservern.",
+      "toolLoadError": "Das Werkzeug konnte nicht geladen werden.",
+      "toolLoading": "Werkzeug wird geladen…",
       "urlLabel": "URL",
       "urlDescription": "Gib die HTTPS-Adresse der einzubettenden Seite ein.",
       "invalidUrl": "Gib eine gültige HTTPS-URL ohne Benutzernamen oder Passwort ein.",

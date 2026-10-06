@@ -39,6 +39,7 @@ const config: StorybookConfig = {
     { from: '../tests/fixtures/media', to: '/storybook/media' },
     { from: '../lib/assets/fonts', to: '/storybook/fonts' },
     { from: '../public/providers', to: '/providers' },
+    { from: '../public/fixtures', to: '/fixtures' },
   ],
   addons: ['@storybook/addon-themes', 'storybook-addon-pseudo-states'],
   // Stories define their controls explicitly; automatic prop extraction only

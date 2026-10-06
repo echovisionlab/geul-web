@@ -3496,6 +3496,10 @@
       }
     },
     "embed": {
+      "toolDescription": "This tool runs directly within the page. Its height follows its content.",
+      "toolOriginError": "Use a tool URL from this site or its tool servers.",
+      "toolLoadError": "The tool could not be loaded.",
+      "toolLoading": "Loading tool…",
       "urlLabel": "URL",
       "urlDescription": "Enter the HTTPS address of the page to embed.",
       "invalidUrl": "Enter a valid HTTPS URL without a username or password.",

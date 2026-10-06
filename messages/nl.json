@@ -3496,6 +3496,10 @@
       }
     },
     "embed": {
+      "toolDescription": "Deze tool draait rechtstreeks op de pagina. De hoogte past zich aan de inhoud aan.",
+      "toolOriginError": "Gebruik een tool-URL van deze site of de bijbehorende toolservers.",
+      "toolLoadError": "De tool kon niet worden geladen.",
+      "toolLoading": "Tool laden…",
       "urlLabel": "URL",
       "urlDescription": "Voer het HTTPS-adres in van de pagina die je wilt insluiten.",
       "invalidUrl": "Voer een geldige HTTPS-URL in zonder gebruikersnaam of wachtwoord.",

@@ -3496,6 +3496,10 @@
       }
     },
     "embed": {
+      "toolDescription": "Bu araç doğrudan sayfa içinde çalışır. Yüksekliği içeriğe göre ayarlanır.",
+      "toolOriginError": "Bu siteden veya sitenin araç sunucularından bir araç URL’si kullanın.",
+      "toolLoadError": "Araç yüklenemedi.",
+      "toolLoading": "Araç yükleniyor…",
       "urlLabel": "URL",
       "urlDescription": "Gömülecek sayfanın HTTPS adresini girin.",
       "invalidUrl": "Kullanıcı adı veya parola içermeyen geçerli bir HTTPS URL’si girin.",

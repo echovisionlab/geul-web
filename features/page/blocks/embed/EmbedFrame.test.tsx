@@ -9,6 +9,9 @@ import { MantineProvider } from '@mantine/core';
 import { useLocale } from 'next-intl';
 import { EmbedFrame } from './EmbedFrame';
 import { parseEmbedProps, type EmbedProps } from './schema';
+import { loadToolModule } from './loadToolModule';
+
+vi.mock('./loadToolModule', () => ({ loadToolModule: vi.fn() }));
 
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key, useLocale: vi.fn(() => 'en') }));
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -36,6 +39,7 @@ function resize(
 }
 
 beforeEach(() => {
+  vi.mocked(loadToolModule).mockReset();
   vi.mocked(useLocale).mockReturnValue('en');
   container = document.createElement('div');
   document.body.append(container);
@@ -47,6 +51,38 @@ afterEach(() => {
 });
 
 describe('EmbedFrame security and lifecycle', () => {
+  it('mounts a newly named trusted tool directly without iframe permissions or height styling', async () => {
+    const destroy = vi.fn();
+    const mount = vi.fn(async (host: HTMLElement) => {
+      host.attachShadow({ mode: 'open' }).textContent = 'Native content';
+      return { update: vi.fn(), destroy };
+    });
+    vi.mocked(loadToolModule).mockResolvedValue({ mount });
+    const uri = 'https://tools-just-added.parent.example/embed/index.js';
+    render({ uri, heightMode: 'viewport', allowScripts: 'false' });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(loadToolModule).toHaveBeenCalledWith(uri);
+    expect(mount).toHaveBeenCalledTimes(1);
+    expect(container.querySelector('iframe')).toBeNull();
+    expect(container.querySelector('[style*="height"]')).toBeNull();
+    render({ uri: 'https://parent.example/embed/index.mjs', allowSameOrigin: 'true', allowScripts: 'true' });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(destroy).toHaveBeenCalledTimes(1);
+    expect(container.textContent).not.toContain('unsafeOrigin');
+  });
+  it('rejects untrusted executable URLs before import and keeps external pages on the iframe path', () => {
+    render({ uri: 'https://attacker.example/embed/index.js' });
+    expect(container.textContent).toContain('toolOriginError');
+    expect(loadToolModule).not.toHaveBeenCalled();
+    expect(container.querySelector('iframe')).toBeNull();
+    render({ uri: 'https://attacker.example/page' });
+    expect(container.querySelector('iframe')?.src).toBe('https://attacker.example/page');
+    expect(loadToolModule).not.toHaveBeenCalled();
+  });
   it('never emits an iframe during SSR without the actual parent origin', () => {
     const html = renderToStaticMarkup(
       <MantineProvider>

@@ -1,16 +1,47 @@
 import { EMBED_MIN_HEIGHT, type EmbedProps } from './schema';
 
-export function resolveEmbedUrl(value: string): URL | null {
+const isLoopback = (hostname: string) => hostname === 'localhost' || hostname === '127.0.0.1';
+
+export function resolveEmbedUrl(value: string, parentOrigin?: string | null): URL | null {
   try {
     const url = new URL(value.trim());
-    return url.protocol === 'https:' && !url.username && !url.password ? url : null;
+    const local =
+      parentOrigin && isLoopback(new URL(parentOrigin).hostname) && isLoopback(url.hostname) && isToolModuleUrl(url);
+    return (url.protocol === 'https:' || (local && url.protocol === 'http:')) && !url.username && !url.password
+      ? url
+      : null;
   } catch {
     return null;
   }
 }
 
+export function isToolModuleUrl(url: URL): boolean {
+  return /\.(?:m?js)$/.test(url.pathname);
+}
+
+export function isTrustedToolModuleUrl(url: URL, parentOrigin: string): boolean {
+  const parent = new URL(parentOrigin);
+  if (url.username || url.password) {
+    return false;
+  }
+  if (url.origin === parent.origin) {
+    return url.protocol === 'https:' || url.protocol === 'http:';
+  }
+  if (isLoopback(parent.hostname) && isLoopback(url.hostname)) {
+    return url.protocol === 'https:' || url.protocol === 'http:';
+  }
+  const baseHostname = parent.hostname.replace(/^www\./, '');
+  const prefix = url.hostname.slice(0, -(baseHostname.length + 1));
+  return (
+    url.protocol === 'https:' &&
+    !url.port &&
+    url.hostname.endsWith(`.${baseHostname}`) &&
+    /^tools-[a-z0-9-]+$/.test(prefix)
+  );
+}
+
 export function hasUnsafeEmbedOrigin(props: EmbedProps, parentOrigin: string): boolean {
-  const url = resolveEmbedUrl(props.uri);
+  const url = resolveEmbedUrl(props.uri, parentOrigin);
   return Boolean(
     url && url.origin === parentOrigin && props.allowScripts === 'true' && props.allowSameOrigin === 'true',
   );

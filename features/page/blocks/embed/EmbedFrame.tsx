@@ -9,11 +9,14 @@ import {
   buildEmbedSandbox,
   hasUnsafeEmbedOrigin,
   isEmbedReadyMessage,
+  isToolModuleUrl,
+  isTrustedToolModuleUrl,
   readEmbedHeightMessage,
   resolveEmbedUrl,
 } from './policy';
 import { type EmbedProps } from './schema';
 import classes from './EmbedFrame.module.css';
+import { ToolModule } from './ToolModule';
 
 export interface EmbedFrameProps {
   props: EmbedProps;
@@ -29,13 +32,33 @@ export function EmbedFrame({ props, preview = false }: EmbedFrameProps) {
   const allow = buildEmbedAllow(props);
   const identity = `${props.uri}:${props.heightMode}:${sandbox}:${allow}`;
   useEffect(() => setParentOrigin(window.location.origin), []);
-  const url = resolveEmbedUrl(props.uri);
-  const unsafe = parentOrigin !== null && hasUnsafeEmbedOrigin(props, parentOrigin);
+  const url = resolveEmbedUrl(props.uri, parentOrigin);
+  const module = url && isToolModuleUrl(url);
+  const untrustedModule = module && parentOrigin !== null && !isTrustedToolModuleUrl(url, parentOrigin);
+  const unsafe = !module && parentOrigin !== null && hasUnsafeEmbedOrigin(props, parentOrigin);
   const canRender = url && parentOrigin !== null && !unsafe;
 
   return (
     <Stack gap="xs">
-      {canRender ? (
+      {canRender && module ? (
+        untrustedModule ? (
+          <Text role="alert" c="dimmed" size="sm">
+            {t('toolOriginError')}
+          </Text>
+        ) : (
+          <ToolModule
+            key={url.href}
+            uri={url.href}
+            title={props.title.trim()}
+            preview={preview}
+            locale={locale}
+            colorScheme={colorScheme}
+            activateLabel={t('activatePreview')}
+            loadingLabel={t('toolLoading')}
+            errorLabel={t('toolLoadError')}
+          />
+        )
+      ) : canRender ? (
         <EmbedDocument
           key={identity}
           props={props}

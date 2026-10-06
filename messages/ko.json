@@ -3496,6 +3496,10 @@
       }
     },
     "embed": {
+      "toolDescription": "도구가 페이지 안에서 직접 실행되며, 내용에 맞춰 높이가 정해집니다.",
+      "toolOriginError": "이 사이트 또는 도구 서버에서 제공하는 URL을 입력하세요.",
+      "toolLoadError": "도구를 불러오지 못했습니다.",
+      "toolLoading": "도구를 불러오는 중…",
       "urlLabel": "URL",
       "urlDescription": "임베드할 페이지의 HTTPS 주소를 입력하세요.",
       "invalidUrl": "사용자 이름이나 비밀번호가 없는 올바른 HTTPS 주소를 입력하세요.",
