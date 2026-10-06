@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { Group, Stack, Text, useComputedColorScheme } from '@mantine/core';
+import { Stack, Text, useComputedColorScheme } from '@mantine/core';
 import { Button } from '@/components/core/Button';
 import {
   buildEmbedAllow,
@@ -24,10 +24,9 @@ export function EmbedFrame({ props, preview = false }: EmbedFrameProps) {
   const locale = useLocale();
   const colorScheme = useComputedColorScheme('light');
   const [parentOrigin, setParentOrigin] = useState<string | null>(null);
-  const [reload, setReload] = useState(0);
   const sandbox = buildEmbedSandbox(props);
   const allow = buildEmbedAllow(props);
-  const identity = `${props.uri}:${props.heightMode}:${sandbox}:${allow}:${reload}`;
+  const identity = `${props.uri}:${props.heightMode}:${sandbox}:${allow}`;
   useEffect(() => setParentOrigin(window.location.origin), []);
   const url = resolveEmbedUrl(props.uri);
   const unsafe = parentOrigin !== null && hasUnsafeEmbedOrigin(props, parentOrigin);
@@ -65,30 +64,6 @@ export function EmbedFrame({ props, preview = false }: EmbedFrameProps) {
                   : t('emptyPreview')}
           </Text>
         </div>
-      )}
-      {url && (
-        <Group gap="xs" wrap="wrap">
-          <Button
-            component="a"
-            href={url.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            size="xs"
-            tone="neutral"
-            emphasis="low"
-          >
-            {t('openExternal')}
-          </Button>
-          <Button
-            size="xs"
-            tone="neutral"
-            emphasis="low"
-            disabled={!canRender}
-            onClick={() => setReload((value) => value + 1)}
-          >
-            {t('reload')}
-          </Button>
-        </Group>
       )}
     </Stack>
   );

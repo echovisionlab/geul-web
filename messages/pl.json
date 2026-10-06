@@ -3496,7 +3496,7 @@
       }
     },
     "embed": {
-      "urlLabel": "Adres URL do osadzenia",
+      "urlLabel": "URL",
       "urlDescription": "Wpisz adres HTTPS strony, którą chcesz osadzić.",
       "invalidUrl": "Wpisz prawidłowy adres URL HTTPS bez nazwy użytkownika ani hasła.",
       "titleLabel": "Tytuł",
@@ -3527,8 +3527,6 @@
       "emptyPreview": "Dodaj adres URL, aby wyświetlić podgląd osadzonej strony.",
       "invalidPreview": "Ten adres URL do osadzenia jest nieprawidłowy.",
       "unsafeOrigin": "Użyj odrębnego pochodzenia, gdy skrypty i przechowywanie danych w przeglądarce są włączone.",
-      "openExternal": "Otwórz w nowej karcie",
-      "reload": "Odśwież",
       "playerTitle": "Osadzone narzędzie",
       "activatePreview": "Korzystaj z podglądu"
     },

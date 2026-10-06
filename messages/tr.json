@@ -3496,7 +3496,7 @@
       }
     },
     "embed": {
-      "urlLabel": "Gömülecek URL",
+      "urlLabel": "URL",
       "urlDescription": "Gömülecek sayfanın HTTPS adresini girin.",
       "invalidUrl": "Kullanıcı adı veya parola içermeyen geçerli bir HTTPS URL’si girin.",
       "titleLabel": "Başlık",
@@ -3527,8 +3527,6 @@
       "emptyPreview": "Gömülü sayfayı önizlemek için bir URL ekleyin.",
       "invalidPreview": "Bu gömme URL’si geçersiz.",
       "unsafeOrigin": "Betikler ve tarayıcı depolaması etkinleştirildiğinde ayrı bir köken kullanın.",
-      "openExternal": "Yeni sekmede aç",
-      "reload": "Yeniden yükle",
       "playerTitle": "Gömülü araç",
       "activatePreview": "Önizlemeyle etkileşime geç"
     },

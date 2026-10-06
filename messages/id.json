@@ -3496,7 +3496,7 @@
       }
     },
     "embed": {
-      "urlLabel": "URL sematan",
+      "urlLabel": "URL",
       "urlDescription": "Masukkan alamat HTTPS halaman yang ingin disematkan.",
       "invalidUrl": "Masukkan URL HTTPS yang valid tanpa nama pengguna atau kata sandi.",
       "titleLabel": "Judul",
@@ -3527,8 +3527,6 @@
       "emptyPreview": "Tambahkan URL untuk melihat pratinjau halaman yang disematkan.",
       "invalidPreview": "URL sematan ini tidak valid.",
       "unsafeOrigin": "Gunakan origin terpisah saat skrip dan penyimpanan browser diaktifkan.",
-      "openExternal": "Buka di tab baru",
-      "reload": "Muat ulang",
       "playerTitle": "Alat yang disematkan",
       "activatePreview": "Berinteraksi dengan pratinjau"
     },

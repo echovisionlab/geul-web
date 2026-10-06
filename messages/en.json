@@ -3496,7 +3496,7 @@
       }
     },
     "embed": {
-      "urlLabel": "Embed URL",
+      "urlLabel": "URL",
       "urlDescription": "Enter the HTTPS address of the page to embed.",
       "invalidUrl": "Enter a valid HTTPS URL without a username or password.",
       "titleLabel": "Title",
@@ -3527,8 +3527,6 @@
       "emptyPreview": "Add a URL to preview the embedded page.",
       "invalidPreview": "This embed URL is invalid.",
       "unsafeOrigin": "Use a separate origin when scripts and browser storage are enabled.",
-      "openExternal": "Open in new tab",
-      "reload": "Reload",
       "playerTitle": "Embedded tool",
       "activatePreview": "Interact with preview"
     },

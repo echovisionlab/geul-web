@@ -3496,7 +3496,7 @@
       }
     },
     "embed": {
-      "urlLabel": "Insluitings-URL",
+      "urlLabel": "URL",
       "urlDescription": "Voer het HTTPS-adres in van de pagina die je wilt insluiten.",
       "invalidUrl": "Voer een geldige HTTPS-URL in zonder gebruikersnaam of wachtwoord.",
       "titleLabel": "Titel",
@@ -3527,8 +3527,6 @@
       "emptyPreview": "Voeg een URL toe om een voorbeeld van de ingesloten pagina te bekijken.",
       "invalidPreview": "Deze insluitings-URL is ongeldig.",
       "unsafeOrigin": "Gebruik een afzonderlijke oorsprong wanneer scripts en browseropslag zijn ingeschakeld.",
-      "openExternal": "In nieuw tabblad openen",
-      "reload": "Opnieuw laden",
       "playerTitle": "Ingesloten tool",
       "activatePreview": "Voorbeeld bedienen"
     },

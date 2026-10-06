@@ -3496,7 +3496,7 @@
       }
     },
     "embed": {
-      "urlLabel": "URL d’intégration",
+      "urlLabel": "URL",
       "urlDescription": "Saisissez l’adresse HTTPS de la page à intégrer.",
       "invalidUrl": "Saisissez une URL HTTPS valide sans nom d’utilisateur ni mot de passe.",
       "titleLabel": "Titre",
@@ -3527,8 +3527,6 @@
       "emptyPreview": "Ajoutez une URL pour afficher un aperçu de la page intégrée.",
       "invalidPreview": "Cette URL d’intégration n’est pas valide.",
       "unsafeOrigin": "Utilisez une origine distincte lorsque les scripts et le stockage dans le navigateur sont activés.",
-      "openExternal": "Ouvrir dans un nouvel onglet",
-      "reload": "Recharger",
       "playerTitle": "Outil intégré",
       "activatePreview": "Interagir avec l’aperçu"
     },

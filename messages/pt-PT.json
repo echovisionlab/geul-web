@@ -3496,7 +3496,7 @@
       }
     },
     "embed": {
-      "urlLabel": "URL de incorporação",
+      "urlLabel": "URL",
       "urlDescription": "Introduza o endereço HTTPS da página a incorporar.",
       "invalidUrl": "Introduza um URL HTTPS válido sem nome de utilizador ou palavra-passe.",
       "titleLabel": "Título",
@@ -3527,8 +3527,6 @@
       "emptyPreview": "Adicione um URL para pré-visualizar a página incorporada.",
       "invalidPreview": "Este URL de incorporação é inválido.",
       "unsafeOrigin": "Use uma origem separada quando os scripts e o armazenamento no navegador estiverem ativados.",
-      "openExternal": "Abrir num novo separador",
-      "reload": "Recarregar",
       "playerTitle": "Ferramenta incorporada",
       "activatePreview": "Interagir com a pré-visualização"
     },
