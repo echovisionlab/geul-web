@@ -181,6 +181,7 @@ async function searchOptions(label: string, search: string) {
   const input = inputForLabel(label);
   const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
   await act(async () => {
+    input.focus();
     valueSetter?.call(input, search);
     input.dispatchEvent(new Event('input', { bubbles: true }));
     await Promise.resolve();

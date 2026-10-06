@@ -185,7 +185,10 @@ describe('FileDropzone', () => {
       throw new Error('Expected FileDropzone to render Mantine Dropzone');
     }
 
-    const file = new File(['content'], 'file.bin', { type: 'application/octet-stream' });
+    const file = Object.assign(new File(['content'], 'file.bin', { type: 'application/octet-stream' }), {
+      path: 'file.bin',
+      relativePath: 'file.bin',
+    });
     act(() => dropzoneProps.onReject([{ file, errors: [{ code, message: code }] }]));
 
     expect(onFilesRejected).toHaveBeenCalledWith([{ file, reason: reason satisfies FileDropzoneRejectionReason }]);

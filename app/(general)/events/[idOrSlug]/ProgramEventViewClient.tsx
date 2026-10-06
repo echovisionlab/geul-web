@@ -11,6 +11,7 @@ import {
   PublicMetadataRows,
   PublicMetadataValueGroup,
 } from '@/components/core/PublicMetadata';
+import { CreditList } from '@/features/work/CreditList';
 import { ShareButton } from '@/features/share/ShareButton';
 import { TableOfContents } from '@/features/navigation/TableOfContents';
 import { GeneratedRichTextBlockView } from '@/features/page/PageView/blocks/GeneratedRichTextBlockView';
@@ -50,7 +51,7 @@ interface ProgramEventViewData {
     name: string | null;
     creditRole: string | null;
     description: string | null;
-    artist: { id: string; name: string; slug: string | null } | null;
+    artist: { id: string; name: string; slug: string | null; imageUrl: string | null } | null;
     member: { id: string; name: string; image: string | null } | null;
   }[];
   publishedAt: Date | null;
@@ -98,8 +99,7 @@ function formatNameWithRole(name: string, role: string | null): string {
 }
 
 function formatCreditName(credit: ProgramEventViewData['credits'][number], unknownLabel: string): string {
-  const name = credit.name || credit.artist?.name || credit.member?.name || unknownLabel;
-  return formatNameWithRole(name, credit.creditRole);
+  return credit.name || credit.artist?.name || credit.member?.name || unknownLabel;
 }
 
 function creditHref(credit: ProgramEventViewData['credits'][number]): string | null {
@@ -225,21 +225,18 @@ export function ProgramEventViewClient({ event, shareUrl, locale, pathname, quer
             ) : null}
             {event.credits.length > 0 ? (
               <PublicMetadataRow label={tProgramEventAdmin('public.credits')}>
-                <PublicMetadataValueGroup>
-                  {event.credits.map((credit) => {
-                    const label = formatCreditName(credit, tCommonStates('unknown'));
-                    const href = creditHref(credit);
-                    return href ? (
-                      <PublicMetadataLink key={credit.id} href={href}>
-                        {label}
-                      </PublicMetadataLink>
-                    ) : (
-                      <Text key={credit.id} size="sm" component="span">
-                        {label}
-                      </Text>
-                    );
-                  })}
-                </PublicMetadataValueGroup>
+                <Stack gap="sm" role="list" aria-label={tProgramEventAdmin('public.credits')}>
+                  {event.credits.map((credit) => (
+                    <CreditList.Item
+                      key={credit.id}
+                      name={formatCreditName(credit, tCommonStates('unknown'))}
+                      role={credit.creditRole}
+                      note={credit.description}
+                      href={creditHref(credit)}
+                      imageUrl={credit.artist?.imageUrl ?? credit.member?.image}
+                    />
+                  ))}
+                </Stack>
               </PublicMetadataRow>
             ) : null}
           </PublicMetadataRows>

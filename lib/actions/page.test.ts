@@ -1,3 +1,4 @@
+import { toProtoPageAccessPolicy, DEFAULT_PAGE_ACCESS_POLICY } from '@/lib/types/page-access';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { OgEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { PageStatus } from '@echovisionlab/geul-proto/secure/page_pb.ts';
@@ -5,6 +6,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   deletePageAdminAction,
   getPageNeutralConfigurationAction,
+  getPageAccessTagOptionsAction,
+  updatePageAccessPolicyAction,
   publishPageAction,
   regeneratePageOgImageAction,
   setPageFeaturedImageAction,
@@ -16,6 +19,8 @@ import {
 const mocks = vi.hoisted(() => ({
   createAdminClient: vi.fn(),
   createPageClient: vi.fn(),
+  createMemberClient: vi.fn(),
+  listMemberTagsAdmin: vi.fn(),
   regenerateOgImage: vi.fn(),
   revalidatePath: vi.fn(),
 }));
@@ -36,6 +41,7 @@ vi.mock('next/cache', () => ({
 vi.mock('@/lib/api/server-client', () => ({
   createAdminClient: mocks.createAdminClient,
   createPageClient: mocks.createPageClient,
+  createMemberClient: mocks.createMemberClient,
 }));
 
 vi.mock('@/lib/actions/share-link', () => ({
@@ -50,6 +56,7 @@ describe('page actions', () => {
     mocks.regenerateOgImage.mockResolvedValue({ ok: true, runId: 'run-1', generationIds: ['generation-1'] });
     mocks.createAdminClient.mockResolvedValue({ regenerateOgImage: mocks.regenerateOgImage });
     mocks.createPageClient.mockResolvedValue(pageClient);
+    mocks.createMemberClient.mockResolvedValue({ listMemberTagsAdmin: mocks.listMemberTagsAdmin });
   });
 
   it('regenerates the OG image for the active locale only', async () => {
@@ -99,8 +106,68 @@ describe('page actions', () => {
       slug: 'canonical-path',
       showTitle: false,
       status: 'published',
+      accessPolicy: DEFAULT_PAGE_ACCESS_POLICY,
     });
     expect(pageClient.getPage).toHaveBeenCalledWith({ id: 'page-1' });
+  });
+
+  it('saves access through UpdatePage, returns the canonical projection, and survives revalidation failure', async () => {
+    const requested = {
+      ...DEFAULT_PAGE_ACCESS_POLICY,
+      mode: 'conditions' as const,
+      userTagIds: ['tag-1'],
+      newsletterSubscriber: true,
+    };
+    const canonical = { ...requested, match: 'all' as const };
+    pageClient.updatePage.mockResolvedValueOnce({ slug: 'members', accessPolicy: toProtoPageAccessPolicy(canonical) });
+    mocks.revalidatePath.mockImplementationOnce(() => {
+      throw new Error('cache unavailable');
+    });
+    await expect(updatePageAccessPolicyAction('page-1', requested)).resolves.toEqual({
+      ok: true,
+      accessPolicy: canonical,
+    });
+    expect(pageClient.updatePage).toHaveBeenCalledWith({
+      id: 'page-1',
+      accessPolicy: toProtoPageAccessPolicy(requested),
+    });
+    expect(mocks.revalidatePath).toHaveBeenCalledWith('/members');
+    pageClient.getPage.mockResolvedValueOnce({
+      slug: 'members',
+      showTitle: false,
+      status: PageStatus.PUBLISHED,
+      accessPolicy: toProtoPageAccessPolicy(canonical),
+    });
+    await expect(getPageNeutralConfigurationAction('page-1')).resolves.toMatchObject({
+      ok: true,
+      accessPolicy: canonical,
+    });
+    pageClient.updatePage.mockRejectedValueOnce(new ConnectError('permission revoked', Code.PermissionDenied));
+    await expect(updatePageAccessPolicyAction('page-1', requested)).resolves.toMatchObject({
+      ok: false,
+      errorCode: Code.PermissionDenied,
+    });
+  });
+
+  it('returns exact member tag ids across pages and reports load failures distinctly from empty data', async () => {
+    mocks.listMemberTagsAdmin
+      .mockResolvedValueOnce({ tags: [{ id: 'tag-1', name: 'Supporter' }], pagination: { hasMore: true } })
+      .mockResolvedValueOnce({ tags: [{ id: 'tag-2', name: 'Workshop' }], pagination: { hasMore: false } });
+    await expect(getPageAccessTagOptionsAction()).resolves.toEqual({
+      ok: true,
+      tagOptions: [
+        { value: 'tag-1', label: 'Supporter' },
+        { value: 'tag-2', label: 'Workshop' },
+      ],
+    });
+    expect(mocks.listMemberTagsAdmin).toHaveBeenNthCalledWith(2, { pagination: { limit: 500, offset: 1 } });
+    mocks.listMemberTagsAdmin.mockRejectedValueOnce(new ConnectError('denied', Code.PermissionDenied));
+    await expect(getPageAccessTagOptionsAction()).resolves.toMatchObject({
+      ok: false,
+      errorCode: Code.PermissionDenied,
+    });
+    mocks.listMemberTagsAdmin.mockResolvedValueOnce({ tags: [], pagination: { hasMore: false } });
+    await expect(getPageAccessTagOptionsAction()).resolves.toEqual({ ok: true, tagOptions: [] });
   });
 
   it('returns a typed failure when the Page client returns an unsupported lifecycle status', async () => {

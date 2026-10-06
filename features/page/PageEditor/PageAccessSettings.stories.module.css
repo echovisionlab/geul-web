@@ -1,0 +1,19 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: var(--mantine-spacing-lg);
+  align-items: start;
+  max-width: 1320px;
+  margin-inline: auto;
+}
+
+.body,
+.sidebar {
+  min-width: 0;
+}
+
+@media (max-width: 62em) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

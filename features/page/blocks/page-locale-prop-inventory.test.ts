@@ -5,6 +5,7 @@ import { authorListSchema } from '@/features/page/blocks/author-list/schema';
 import { clientMarqueeSchema } from '@/features/page/blocks/client-marquee/schema';
 import { columnsSchema } from '@/features/page/blocks/columns/schema';
 import { externalVideoSchema } from '@/features/page/blocks/external-video/schema';
+import { embedSchema } from '@/features/page/blocks/embed/schema';
 import { formSchema } from '@/features/page/blocks/form/schema';
 import { immersiveSceneSchema } from '@/features/page/blocks/immersive-scene/schema';
 import { labelListSchema } from '@/features/page/blocks/label-list/schema';
@@ -29,6 +30,7 @@ const SCHEMAS = {
   'label-marquee': labelMarqueeSchema,
   columns: columnsSchema,
   'external-video': externalVideoSchema,
+  embed: embedSchema,
   form: formSchema,
   'immersive-scene': immersiveSceneSchema,
   map: mapSchema,
@@ -60,6 +62,7 @@ describe('page shipped block locale prop inventory', () => {
 
     expect(inventory).toEqual([
       { blockType: 'external-video', key: 'caption' },
+      { blockType: 'embed', key: 'title' },
       { blockType: 'immersive-scene', key: 'copyJson' },
       { blockType: 'map', key: 'caption' },
     ]);

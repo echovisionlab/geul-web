@@ -5,6 +5,7 @@ export const SECTION_MENU = [
   'rich-text',
   'columns',
   'external-video',
+  'embed',
   'post-list',
   'post-table',
   'post-map',
@@ -28,6 +29,7 @@ export const SECTION_MENU = [
 const columnTypes: ReadonlySet<SectionType> = new Set([
   'rich-text',
   'external-video',
+  'embed',
   'post-list',
   'post-table',
   'work-list',

@@ -6,6 +6,7 @@
  */
 
 import {
+  IconCode,
   IconArticle,
   IconSchema,
   IconBriefcase,
@@ -34,6 +35,9 @@ import { ClientMarqueeViewServer } from './client-marquee/ViewServer';
 import { ColumnsEditor } from './columns/Editor';
 import { parseColumnsProps, type ColumnsProps } from './columns/schema';
 import { ColumnsView } from './columns/View';
+import { EmbedEditor, EmbedSettingsEditor, EmbedCanvasPreview } from './embed/Editor';
+import { parseEmbedProps, type EmbedProps } from './embed/schema';
+import { PageEmbedView } from './embed/View';
 import { FormCanvasPreview, FormEditor, FormSettingsEditor } from './form/Editor';
 import { parseFormProps, type FormProps } from './form/schema';
 import { FormView } from './form/View';
@@ -334,6 +338,20 @@ const externalVideoBlock: BlockDefinition<ExternalVideoProps> = {
   allowNested: isPageBlockNestable('external-video'),
 };
 
+const embedBlock: BlockDefinition<EmbedProps> = {
+  type: 'embed',
+  label: 'Embed',
+  icon: IconCode,
+  category: 'content',
+  schema: pageBlockManifest.embed.schema,
+  parse: parseEmbedProps,
+  Editor: EmbedEditor,
+  CanvasPreview: EmbedCanvasPreview,
+  SettingsEditor: EmbedSettingsEditor,
+  View: PageEmbedView,
+  allowNested: isPageBlockNestable('embed'),
+};
+
 const columnsBlock: BlockDefinition<ColumnsProps> = {
   type: 'columns',
   label: 'Columns',
@@ -394,6 +412,7 @@ const mermaidBlock: BlockDefinition<MermaidProps> = {
 };
 
 export const pageBlockRegistry: BlockRegistry = {
+  embed: embedBlock,
   mermaid: mermaidBlock,
   'post-list': postListBlock,
   'post-table': postTableBlock,

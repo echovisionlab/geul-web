@@ -8,7 +8,14 @@ import { PageContent } from './PageContent';
 import { PageJsonLd } from './PageJsonLd';
 
 const mocks = vi.hoisted(() => ({ getPageView: vi.fn(), getPageMetadataDocument: vi.fn() }));
-vi.mock('@/lib/queries/page', () => ({ getPage: vi.fn(), getPageView: mocks.getPageView }));
+vi.mock('@/lib/queries/page', () => ({
+  getPage: vi.fn(),
+  getPageView: mocks.getPageView,
+  getPageAccessView: async (...args: unknown[]) => {
+    const page = await mocks.getPageView(...args);
+    return page ? { reason: 'allowed', page } : null;
+  },
+}));
 vi.mock('@/lib/queries/metadata', () => ({
   getPageMetadataDocument: mocks.getPageMetadataDocument,
   getSiteMetadataDocument: vi.fn(),

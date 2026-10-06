@@ -1,7 +1,8 @@
 'use server';
 
 import type { ReactNode } from 'react';
-import { getPageViewWithToken } from '@/lib/queries/page';
+import { getPageAccessViewWithToken } from '@/lib/queries/page';
+import { PageRestrictedAccess } from '@/features/page/PageRestrictedAccess';
 import { PageShareContent } from './PageShareContent';
 
 export interface PageShareAccessState {
@@ -22,10 +23,14 @@ export async function accessPageShareAction(
   }
 
   try {
-    const page = await getPageViewWithToken(idOrSlug, token, requestedLocale, password);
-    if (!page) {
+    const access = await getPageAccessViewWithToken(idOrSlug, token, requestedLocale, password);
+    if (!access) {
       return { error: 'not_found' };
     }
+    if (access.reason !== 'allowed') {
+      return { content: <PageRestrictedAccess reason={access.reason} returnTo={`/s/${encodeURIComponent(token)}`} /> };
+    }
+    const page = access.page;
     return {
       content: <PageShareContent page={page} token={token} password={password} requestedLocale={requestedLocale} />,
     };

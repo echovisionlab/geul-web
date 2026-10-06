@@ -3,15 +3,23 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { disposeVideoJsPlayer, mountVideoJsPlayer, resolveVideoPlaybackSource } from './videojs-player';
 
-const { mockVideoJs, mockGetPlayer } = vi.hoisted(() => ({
+type BeforeErrorHook = (player: { el: () => HTMLDivElement }, error: { code: number }) => { code: number } | null;
+
+const { mockVideoJs, mockGetPlayer, registeredHooks } = vi.hoisted(() => ({
   mockVideoJs: vi.fn(),
   mockGetPlayer: vi.fn(),
+  // Video.js retains hooks across mounts even when Vitest clears mock call history.
+  registeredHooks: new Map<string, BeforeErrorHook[]>(),
 }));
 
 vi.mock('video.js', () => {
   const videojs = Object.assign((...args: unknown[]) => mockVideoJs(...args), {
     getPlayer: mockGetPlayer,
-    hook: vi.fn(),
+    hook: vi.fn((type: string, callback: BeforeErrorHook) => {
+      const hooks = registeredHooks.get(type) ?? [];
+      hooks.push(callback);
+      registeredHooks.set(type, hooks);
+    }),
   });
   return { default: videojs };
 });
@@ -74,6 +82,7 @@ describe('videojs-player', () => {
         ],
       }),
     );
+    expect(registeredHooks.get('beforeerror')).toHaveLength(1);
     expect(player.width).toHaveBeenCalledWith('100%');
     expect(player.addClass).toHaveBeenCalledWith('geul-video-js');
     expect(video.classList.contains('video-js')).toBe(true);
@@ -113,9 +122,7 @@ describe('videojs-player', () => {
     expect(player.error).toHaveBeenCalledWith(null);
   });
 
-  it('registers a beforeerror hook that suppresses handled errors before video.js logs them', async () => {
-    const { default: videojs } = await import('video.js');
-    const hook = vi.mocked(videojs.hook);
+  it('registers a beforeerror hook that suppresses handled errors before video.js logs them', () => {
     const video = document.createElement('video');
     const player = {
       addClass: vi.fn(),
@@ -139,17 +146,14 @@ describe('videojs-player', () => {
       onBeforeError: () => true,
     });
 
-    const beforeErrorRegistration = hook.mock.calls.find(([type]) => type === 'beforeerror');
-    expect(beforeErrorRegistration).toBeTruthy();
-    const beforeError = beforeErrorRegistration?.[1] as
-      ((player: { el: () => HTMLDivElement }, err: { code: number }) => { code: number } | null) | undefined;
+    const hooks = registeredHooks.get('beforeerror');
+    expect(hooks).toHaveLength(1);
+    const [beforeError] = hooks!;
 
-    expect(beforeError?.(player, { code: 4 })).toBeNull();
+    expect(beforeError(player, { code: 4 })).toBeNull();
   });
 
-  it('does not re-run playback recovery for a recently suppressed beforeerror', async () => {
-    const { default: videojs } = await import('video.js');
-    const hook = vi.mocked(videojs.hook);
+  it('does not re-run playback recovery for a recently suppressed beforeerror', () => {
     let onError: (() => void) | undefined;
     const video = document.createElement('video');
     const player = {
@@ -178,21 +182,18 @@ describe('videojs-player', () => {
       onError: recover,
     });
 
-    const beforeErrorRegistration = hook.mock.calls.find(([type]) => type === 'beforeerror');
-    expect(beforeErrorRegistration).toBeTruthy();
-    const beforeError = beforeErrorRegistration?.[1] as
-      ((player: { el: () => HTMLDivElement }, err: { code: number }) => { code: number } | null) | undefined;
+    const hooks = registeredHooks.get('beforeerror');
+    expect(hooks).toHaveLength(1);
+    const [beforeError] = hooks!;
 
-    expect(beforeError?.(player, { code: 4 })).toBeNull();
+    expect(beforeError(player, { code: 4 })).toBeNull();
     onError?.();
 
     expect(recover).not.toHaveBeenCalled();
     expect(player.error).toHaveBeenCalledWith(null);
   });
 
-  it('suppresses media source errors caused by disposing a player without running recovery', async () => {
-    const { default: videojs } = await import('video.js');
-    const hook = vi.mocked(videojs.hook);
+  it('suppresses media source errors caused by disposing a player without running recovery', () => {
     const video = document.createElement('video');
     const recover = vi.fn(() => true);
     const player = {
@@ -215,14 +216,13 @@ describe('videojs-player', () => {
       onBeforeError: recover,
     });
 
-    const beforeErrorRegistration = hook.mock.calls.find(([type]) => type === 'beforeerror');
-    expect(beforeErrorRegistration).toBeTruthy();
-    const beforeError = beforeErrorRegistration?.[1] as
-      ((player: { el: () => HTMLDivElement }, err: { code: number }) => { code: number } | null) | undefined;
+    const hooks = registeredHooks.get('beforeerror');
+    expect(hooks).toHaveLength(1);
+    const [beforeError] = hooks!;
 
     disposeVideoJsPlayer(mounted as never);
 
-    expect(beforeError?.(player, { code: 4 })).toBeNull();
+    expect(beforeError(player, { code: 4 })).toBeNull();
     expect(recover).not.toHaveBeenCalled();
   });
 

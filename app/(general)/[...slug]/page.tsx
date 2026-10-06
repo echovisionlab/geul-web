@@ -10,7 +10,8 @@ import { createTranslationClient } from '@/lib/api/server-client';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { getManageSiteContext } from '@/lib/queries/manifest';
 import { getPageMetadataDocument, getSiteMetadataDocument } from '@/lib/queries/metadata';
-import { getPage, getPageView } from '@/lib/queries/page';
+import { PageRestrictedAccess } from '@/features/page/PageRestrictedAccess';
+import { getPage, getPageAccessView } from '@/lib/queries/page';
 import { readContentLocaleOverride, resolveContentRequestedLocale } from '@/lib/translation/content-language';
 import {
   applyContentMetadataSeo,
@@ -91,6 +92,18 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   }
   const uiLocale = await getUserLocale();
   const requestedLocale = resolveContentRequestedLocale(uiLocale, query);
+  if (!shareTokenValue) {
+    const access = await getPageAccessView(slug, { requestedLocale });
+    if (access && access.reason !== 'allowed') {
+      const tAccess = await getTranslations('pageEditor.access');
+      return withNoIndex({
+        title: tAccess(access.reason === 'authentication-required' ? 'loginRequiredTitle' : 'restrictedTitle'),
+      });
+    }
+    if (!access) {
+      return {};
+    }
+  }
   const page = await getPageMetadataDocument(slug, { requestedLocale });
 
   if (!page) {
@@ -183,6 +196,7 @@ export default async function PublicPageView({ params, searchParams }: Props) {
         initialSlug={page.slug ?? null}
         initialStatus={page.status}
         initialShowTitle={page.showTitle}
+        initialAccessPolicy={page.accessPolicy}
         initialDocumentLayout={page.documentLayout}
         initialFeaturedImageUrl={page.featuredImageUrl ?? null}
         initialOgImageUrl={page.ogImageUrl ?? null}
@@ -208,11 +222,17 @@ export default async function PublicPageView({ params, searchParams }: Props) {
     return <PageContentWithToken slug={slug} token={shareTokenValue} query={query} requestedLocale={requestedLocale} />;
   }
 
-  const page = await getPageView(slug, { requestedLocale });
-  if (!page) {
+  const access = await getPageAccessView(slug, { requestedLocale });
+  if (!access) {
     notFound();
   }
 
+  if (access.reason !== 'allowed') {
+    return (
+      <PageRestrictedAccess reason={access.reason} returnTo={`${buildPagePath(slug)}${buildSearchSuffix(query)}`} />
+    );
+  }
+  const page = access.page;
   return (
     <>
       <Suspense fallback={null}>

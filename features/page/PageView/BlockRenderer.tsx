@@ -3,6 +3,7 @@
 import { ArtistListViewStreaming } from '@/features/page/blocks/artist-grid/ViewServer';
 import { AuthorListViewStreaming } from '@/features/page/blocks/author-list/ViewServer';
 import { ClientMarqueeViewServer } from '@/features/page/blocks/client-marquee/ViewServer';
+import { PageEmbedView } from '@/features/page/blocks/embed/View';
 import { FormView } from '@/features/page/blocks/form/View';
 import { PageExternalVideoView } from '@/features/page/blocks/external-video/View';
 import { ImmersiveSceneView } from '@/features/page/blocks/immersive-scene/View';
@@ -149,6 +150,8 @@ function SectionContent({ section, query, requestedLocale }: SectionViewProps) {
       return (
         <ImmersiveSceneView sectionId={section.id} props={props} query={query} requestedLocale={requestedLocale} />
       );
+    case 'embed':
+      return <PageEmbedView sectionId={section.id} props={props} query={query} requestedLocale={requestedLocale} />;
     case 'external-video':
       return (
         <PageExternalVideoView sectionId={section.id} props={props} query={query} requestedLocale={requestedLocale} />

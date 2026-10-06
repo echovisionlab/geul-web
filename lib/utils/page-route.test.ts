@@ -18,10 +18,28 @@ describe('Page route builders', () => {
     expect(getPageSlugValidationReason('about/../team')).toBe('dotSegment');
     expect(getPageSlugValidationReason('admin/team')).toBe('reservedRoute');
     expect(getPageSlugValidationReason('tools')).toBeUndefined();
-    expect(getPageSlugValidationReason('tools/transcode')).toBe('reservedRoute');
+    expect(getPageSlugValidationReason('tools/transcode')).toBeUndefined();
     expect(getPageSlugValidationReason('events/example')).toBeUndefined();
     expect(getPageSlugValidationReason('some/where')).toBeUndefined();
     expect(getPageSlugValidationReason('events')).toBeUndefined();
+  });
+
+  it('allows CMS tool pages while preserving the p5 runner route', () => {
+    for (const slug of [
+      'tools',
+      'TOOLS',
+      'tools/transcode',
+      'tools/youtube-audio',
+      'tools/hwp',
+      'tools/portadj',
+      'tools/future-tool/details',
+      'tools/p5-runner-extra',
+    ]) {
+      expect(getPageSlugValidationReason(slug), slug).toBeUndefined();
+    }
+    for (const slug of ['tools/p5-runner', 'TOOLS/P5-RUNNER', 'tools/p5-runner/child']) {
+      expect(getPageSlugValidationReason(slug), slug).toBe('reservedRoute');
+    }
   });
 
   it('matches the complete fixed and resource-child route inventory', () => {
@@ -48,7 +66,6 @@ describe('Page route builders', () => {
       'subscribe',
       'tag',
       'terms',
-      'tools',
       'unsubscribe',
       'user',
       'verification',
@@ -68,7 +85,7 @@ describe('Page route builders', () => {
     ];
 
     for (const route of fixedRoutes) {
-      expect(getPageSlugValidationReason(route), route).toBe(route === 'tools' ? undefined : 'reservedRoute');
+      expect(getPageSlugValidationReason(route), route).toBe('reservedRoute');
       expect(getPageSlugValidationReason(`${route}/child`), route).toBe('reservedRoute');
     }
     for (const route of resourceChildRoutes) {

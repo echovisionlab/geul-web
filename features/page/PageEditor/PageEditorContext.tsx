@@ -1,5 +1,7 @@
 'use client';
 
+import { resolveEmbedUrl } from '@/features/page/blocks/embed/policy';
+
 import {
   createContext,
   useCallback,
@@ -148,6 +150,9 @@ export function PageEditorProvider({
       const section = initialProps
         ? parseSectionMeta({ ...created, props: { ...created.props, ...initialProps } })
         : created;
+      if (type === 'embed' && !resolveEmbedUrl(String(section.props?.uri ?? ''))) {
+        throw new Error('A valid HTTPS Embed URI is required before insertion.');
+      }
       if (type === 'external-video' && !section.props?.url) {
         throw new Error('External video URL is required before insertion.');
       }

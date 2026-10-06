@@ -14,11 +14,16 @@ import { PageStatus } from '@echovisionlab/geul-proto/secure/page_pb.ts';
 import { createShareLinkAction, deleteShareLinkAction, listShareLinksAction } from '@/lib/actions/share-link';
 import { regenerateOgImageAction as requestOgImageRegeneration } from '@/lib/actions/og-generation';
 import { createCommittedMutationRevalidator } from '@/lib/actions/revalidate-after-commit';
-import { createPageClient } from '@/lib/api/server-client';
+import { createMemberClient, createPageClient } from '@/lib/api/server-client';
 import { resolveFeaturedImageDeliveryUrl } from '@/lib/media/post-featured-image';
 import { normalizeOgRegenerationLocale } from '@/lib/utils/og-regeneration';
 import { getPageSlugValidationReason, type PageSlugValidationReason } from '@/lib/utils/page-route';
 import { toSlugInputValue } from '@/lib/utils/slug';
+import {
+  fromProtoPageAccessPolicy,
+  toProtoPageAccessPolicy,
+  type PageAccessPolicyValue,
+} from '@/lib/types/page-access';
 
 const revalidatePageAfterCommit = createCommittedMutationRevalidator('page-actions', 'page');
 
@@ -66,9 +71,14 @@ export async function deletePageAdminAction(id: string): Promise<ActionResult<{ 
 
 // === Editor Mutations ===
 
-export async function getPageNeutralConfigurationAction(
-  id: string,
-): Promise<ActionResult<{ slug: string | null; showTitle: boolean; status: PageLifecycleStatus }>> {
+export async function getPageNeutralConfigurationAction(id: string): Promise<
+  ActionResult<{
+    slug: string | null;
+    showTitle: boolean;
+    status: PageLifecycleStatus;
+    accessPolicy: PageAccessPolicyValue;
+  }>
+> {
   try {
     const client = await createPageClient();
     const page = await client.getPage({ id });
@@ -76,10 +86,54 @@ export async function getPageNeutralConfigurationAction(
       slug: page.slug || null,
       showTitle: page.showTitle,
       status: pageLifecycleStatus(page.status),
+      accessPolicy: fromProtoPageAccessPolicy(page.accessPolicy),
     });
   } catch (err) {
     return actionFailure(
       err instanceof Error ? err.message : 'Failed to load page editor configuration',
+      isConnectError(err) ? err.code : Code.Internal,
+    );
+  }
+}
+
+export async function updatePageAccessPolicyAction(
+  id: string,
+  accessPolicy: PageAccessPolicyValue,
+): Promise<ActionResult<{ accessPolicy: PageAccessPolicyValue }>> {
+  try {
+    const client = await createPageClient();
+    const page = await client.updatePage({ id, accessPolicy: toProtoPageAccessPolicy(accessPolicy) });
+    const canonical = fromProtoPageAccessPolicy(page.accessPolicy);
+    revalidatePageAfterCommit('/admin/pages');
+    revalidatePageAfterCommit('/');
+    revalidatePageAfterCommit(`/${page.slug || id}`);
+    return actionSuccess({ accessPolicy: canonical });
+  } catch (err) {
+    return actionFailure(
+      err instanceof Error ? err.message : 'Failed to update page access settings',
+      isConnectError(err) ? err.code : Code.Internal,
+    );
+  }
+}
+
+export async function getPageAccessTagOptionsAction(): Promise<
+  ActionResult<{ tagOptions: { value: string; label: string }[] }>
+> {
+  try {
+    const client = await createMemberClient();
+    const tagOptions: { value: string; label: string }[] = [];
+    let offset = 0;
+    let hasMore = false;
+    do {
+      const response = await client.listMemberTagsAdmin({ pagination: { limit: 500, offset } });
+      tagOptions.push(...response.tags.map((tag) => ({ value: tag.id, label: tag.name })));
+      offset += response.tags.length;
+      hasMore = response.pagination?.hasMore ?? false;
+    } while (hasMore);
+    return actionSuccess({ tagOptions });
+  } catch (err) {
+    return actionFailure(
+      err instanceof Error ? err.message : 'Failed to load member tags',
       isConnectError(err) ? err.code : Code.Internal,
     );
   }

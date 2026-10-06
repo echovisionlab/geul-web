@@ -78,7 +78,10 @@ describe('ImageUploadField rejection boundary', () => {
       throw new Error('Expected ImageUploadField to render a dropzone');
     }
 
-    const file = new File(['image'], 'image.png', { type: 'image/png' });
+    const file = Object.assign(new File(['image'], 'image.png', { type: 'image/png' }), {
+      path: 'image.png',
+      relativePath: 'image.png',
+    });
     const rejections: FileRejection[] = [
       {
         file,
@@ -121,7 +124,10 @@ describe('ImageUploadField rejection boundary', () => {
       throw new Error('Expected ImageUploadField to render a dropzone');
     }
 
-    const file = new File(['image'], 'image.png', { type: 'image/png' });
+    const file = Object.assign(new File(['image'], 'image.png', { type: 'image/png' }), {
+      path: 'image.png',
+      relativePath: 'image.png',
+    });
     act(() => {
       dropzoneProps.onReject([{ file, errors: [{ code, message: code }] }]);
     });
