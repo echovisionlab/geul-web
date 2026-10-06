@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.9.0](https://github.com/echovisionlab/geul-web/compare/v0.8.1...v0.9.0) (2026-10-06)
+
+
+### Features
+
+* **page:** add runtime embeds and audience controls ([7a53499](https://github.com/echovisionlab/geul-web/commit/7a5349995bec56f799bde8ab1552f69e7a458ba1))
+* **page:** add runtime embeds, audience controls and event credits ([af85791](https://github.com/echovisionlab/geul-web/commit/af85791e05c53d248022b148a7b59d2c05e0ccd6))
+
+
+### Bug Fixes
+
+* **test:** model current input and mock lifecycle semantics ([90057b4](https://github.com/echovisionlab/geul-web/commit/90057b4fd92658d3b45eb79731b13b909553e301))
+
 ## [0.8.1](https://github.com/echovisionlab/geul-web/compare/v0.8.0...v0.8.1) (2026-10-06)
 
 
