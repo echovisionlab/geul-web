@@ -23,7 +23,7 @@ describe('buildFontStylesheetHref', () => {
       expect(href).toContain('family=Noto+Sans:wght@100..900');
       expect(href).toContain('family=Noto+Sans+Mono:wght@100..900');
       expect(href).toContain('family=Noto+Color+Emoji');
-      expect(href.endsWith('&display=swap')).toBe(true);
+      expect(href.endsWith('&display=swap&v=3')).toBe(true);
 
       for (const localeFamily of LOCALE_FAMILIES) {
         if (localeFamily === expectedLocaleFamily) {

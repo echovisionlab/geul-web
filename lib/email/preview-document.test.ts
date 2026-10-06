@@ -13,6 +13,7 @@ describe('buildEmailPreviewSrcDoc', () => {
     expect(result).toContain('<html lang="ko" dir="ltr">');
     expect(result).toContain("font-family: 'Noto Sans KR', 'Noto Sans', 'Noto Color Emoji', sans-serif !important;");
     expect(result).toContain('https://cdn.example.test/fonts/css2?');
+    expect(result).toContain('&display=swap&v=3" data-geul-email-preview-fonts="true"');
     expect(result).toContain('<body><p>Hello</p></body>');
   });
 
@@ -25,6 +26,7 @@ describe('buildEmailPreviewSrcDoc', () => {
     expect(result).toContain('<!DOCTYPE html>');
     expect(result).toContain('<html lang="ja" dir="ltr">');
     expect(result).toContain('<head><meta name="viewport" content="width=device-width, initial-scale=1" />');
+    expect(result).toContain('&display=swap&v=3" data-geul-email-preview-fonts="true"');
     expect(result).toContain("font-family: 'Noto Sans JP', 'Noto Sans', 'Noto Color Emoji', sans-serif !important;");
     expect(result).toContain('<body><p>Hello</p></body>');
   });
