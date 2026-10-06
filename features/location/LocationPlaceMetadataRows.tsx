@@ -62,7 +62,11 @@ export function LocationPlaceMetadataRows({
     );
 
     if (coordinateVisibility === 'desktop') {
-      return <Box visibleFrom="sm">{row}</Box>;
+      return (
+        <Box visibleFrom="sm" style={{ display: 'contents' }}>
+          {row}
+        </Box>
+      );
     }
 
     return row;

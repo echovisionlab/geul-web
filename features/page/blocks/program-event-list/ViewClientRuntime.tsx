@@ -53,12 +53,6 @@ export function ProgramEventListViewClient({
   const locale = localeProp || contextLocale;
   const requestTimeZone = useRequestTimeZone();
   const tProgramEventAdmin = useTranslations('programEventAdmin');
-  const locationLabels: Record<ProgramEventListItem['locationMode'], string> = {
-    map_place: tProgramEventAdmin('locationModes.mapPlace'),
-    online: tProgramEventAdmin('locationModes.online'),
-    hybrid: tProgramEventAdmin('locationModes.hybrid'),
-    tba: tProgramEventAdmin('locationModes.tba'),
-  };
   const layout = p.layout || 'grid';
   const columns = parseInt(p.columns || '3', 10);
   const showImage = p.showImage !== 'false';
@@ -94,9 +88,6 @@ export function ProgramEventListViewClient({
                       {date}
                     </Text>
                   ) : null}
-                  <Text size="xs" c="dimmed">
-                    {locationLabels[event.locationMode]}
-                  </Text>
                 </Stack>
               );
             }

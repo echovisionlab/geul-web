@@ -172,7 +172,7 @@ describe('optional list runtime boundaries', () => {
           />
         ),
         href: item.href,
-        copy: [item.title, 'Concert', enMessages.programEventAdmin.locationModes.online],
+        copy: [item.title, 'Concert'],
       },
     ];
     for (const [index, entry] of cases.entries()) {

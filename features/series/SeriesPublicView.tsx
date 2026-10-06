@@ -74,28 +74,14 @@ export function SeriesPublicPostsView({ posts, labels }: SeriesPublicPostsViewPr
 
 interface SeriesPublicViewProps {
   title: string;
-  description?: string | null;
   featuredImageUrl?: string | null;
   controls?: ReactNode;
   postsLabel: string;
   children: ReactNode;
 }
 
-export function SeriesPublicView({
-  title,
-  description,
-  featuredImageUrl,
-  controls,
-  postsLabel,
-  children,
-}: SeriesPublicViewProps) {
-  const details = (
-    <PageHeader
-      title={title}
-      description={description ? <span style={{ whiteSpace: 'pre-wrap' }}>{description}</span> : undefined}
-      actions={controls}
-    />
-  );
+export function SeriesPublicView({ title, featuredImageUrl, controls, postsLabel, children }: SeriesPublicViewProps) {
+  const details = <PageHeader title={title} actions={controls} />;
 
   return (
     <Stack gap="xl">

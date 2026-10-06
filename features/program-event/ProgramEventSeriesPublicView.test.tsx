@@ -28,12 +28,15 @@ describe('ProgramEventSeriesPublicView', () => {
     container.remove();
   });
 
-  it('renders the global copy, poster, controls, and events under one semantic page heading', () => {
+  it('renders the description, poster, controls, and events without the stored summary', () => {
+    const series = {
+      title: 'Night Signals',
+      summary: 'Global summary',
+      description: 'First line\nSecond line',
+    };
     render(
       <ProgramEventSeriesPublicView
-        title="Night Signals"
-        summary="Global summary"
-        description={'First line\nSecond line'}
+        {...series}
         posterUrl="https://cdn.example.test/poster.jpg"
         controls={<button type="button">Share</button>}
         eventsLabel="Events"
@@ -45,16 +48,17 @@ describe('ProgramEventSeriesPublicView', () => {
     expect(container.querySelector('h1')).toHaveTextContent('Night Signals');
     expect(container.querySelectorAll('h1')).toHaveLength(1);
     expect(container.querySelector('h2')).toHaveTextContent('Events');
-    expect(container).toHaveTextContent('Global summary');
+    expect(container).not.toHaveTextContent(series.summary);
     expect(container).toHaveTextContent('First line Second line');
     expect(container.querySelector('img')).toHaveAttribute('alt', 'Night Signals');
     expect(container.querySelector('button')).toHaveTextContent('Share');
     expect(container).toHaveTextContent('Event list');
   });
 
-  it('omits absent optional copy and poster without removing the event section', () => {
+  it('does not use the stored summary when the description is absent', () => {
+    const series = { title: 'Sparse series', summary: 'Stored summary', description: null };
     render(
-      <ProgramEventSeriesPublicView title="Sparse series" eventsLabel="Events">
+      <ProgramEventSeriesPublicView {...series} eventsLabel="Events">
         <div>No events found</div>
       </ProgramEventSeriesPublicView>,
     );
@@ -63,5 +67,6 @@ describe('ProgramEventSeriesPublicView', () => {
     expect(container.querySelector('img')).toBeNull();
     expect(container.querySelector('h2')).toHaveTextContent('Events');
     expect(container).toHaveTextContent('No events found');
+    expect(container).not.toHaveTextContent(series.summary);
   });
 });
