@@ -54,7 +54,7 @@ describe('EmbedFrame security and lifecycle', () => {
       </MantineProvider>,
     );
     expect(html).not.toContain('<iframe');
-    expect(html).toContain('https://embed.example/');
+    expect(html).toContain('min-height:640px');
   });
 
   it('remounts on permission changes and revokes sandbox and device access', () => {

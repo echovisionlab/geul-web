@@ -3527,8 +3527,6 @@
       "emptyPreview": "URL을 추가하면 임베드 페이지를 미리 볼 수 있습니다.",
       "invalidPreview": "올바르지 않은 임베드 주소입니다.",
       "unsafeOrigin": "스크립트와 브라우저 저장소를 허용하려면 별도의 출처를 사용하세요.",
-      "openExternal": "새 탭에서 열기",
-      "reload": "새로고침",
       "playerTitle": "임베드 도구",
       "activatePreview": "미리보기 조작"
     },

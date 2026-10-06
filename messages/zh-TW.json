@@ -3527,8 +3527,6 @@
       "emptyPreview": "新增 URL 以預覽嵌入頁面。",
       "invalidPreview": "此嵌入 URL 無效。",
       "unsafeOrigin": "啟用指令碼和瀏覽器儲存空間時，請使用獨立的來源。",
-      "openExternal": "在新分頁中開啟",
-      "reload": "重新載入",
       "playerTitle": "嵌入工具",
       "activatePreview": "操作預覽"
     },

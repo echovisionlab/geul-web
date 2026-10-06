@@ -3527,8 +3527,6 @@
       "emptyPreview": "添加 URL 以预览嵌入页面。",
       "invalidPreview": "此嵌入 URL 无效。",
       "unsafeOrigin": "启用脚本和浏览器存储时，请使用独立的源。",
-      "openExternal": "在新标签页中打开",
-      "reload": "重新加载",
       "playerTitle": "嵌入工具",
       "activatePreview": "操作预览"
     },

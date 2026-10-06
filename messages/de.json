@@ -3969,8 +3969,6 @@
       "emptyPreview": "Füge eine URL hinzu, um die eingebettete Seite in der Vorschau zu sehen.",
       "invalidPreview": "Diese Einbettungs-URL ist ungültig.",
       "unsafeOrigin": "Verwende einen separaten Ursprung, wenn Skripte und Browserspeicher aktiviert sind.",
-      "openExternal": "In neuem Tab öffnen",
-      "reload": "Neu laden",
       "playerTitle": "Eingebettetes Werkzeug",
       "activatePreview": "Mit Vorschau interagieren"
     },

@@ -3527,8 +3527,6 @@
       "emptyPreview": "Aggiungi un URL per visualizzare l’anteprima della pagina incorporata.",
       "invalidPreview": "Questo URL da incorporare non è valido.",
       "unsafeOrigin": "Usa un’origine separata quando gli script e l’archiviazione nel browser sono abilitati.",
-      "openExternal": "Apri in una nuova scheda",
-      "reload": "Ricarica",
       "playerTitle": "Strumento incorporato",
       "activatePreview": "Interagisci con l’anteprima"
     },

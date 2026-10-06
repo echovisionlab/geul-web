@@ -3527,8 +3527,6 @@
       "emptyPreview": "URL を追加すると、埋め込みページをプレビューできます。",
       "invalidPreview": "この埋め込み URL は無効です。",
       "unsafeOrigin": "スクリプトとブラウザストレージを有効にする場合は、別のオリジンを使用してください。",
-      "openExternal": "新しいタブで開く",
-      "reload": "再読み込み",
       "playerTitle": "埋め込みツール",
       "activatePreview": "プレビューを操作"
     },

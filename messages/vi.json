@@ -3527,8 +3527,6 @@
       "emptyPreview": "Thêm URL để xem trước trang được nhúng.",
       "invalidPreview": "URL nhúng này không hợp lệ.",
       "unsafeOrigin": "Sử dụng nguồn gốc riêng khi bật tập lệnh và bộ nhớ trình duyệt.",
-      "openExternal": "Mở trong thẻ mới",
-      "reload": "Tải lại",
       "playerTitle": "Công cụ được nhúng",
       "activatePreview": "Tương tác với bản xem trước"
     },

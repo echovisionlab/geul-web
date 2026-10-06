@@ -3527,8 +3527,6 @@
       "emptyPreview": "Adicione uma URL para visualizar a página incorporada.",
       "invalidPreview": "Esta URL de incorporação é inválida.",
       "unsafeOrigin": "Use uma origem separada quando os scripts e o armazenamento no navegador estiverem ativados.",
-      "openExternal": "Abrir em nova aba",
-      "reload": "Recarregar",
       "playerTitle": "Ferramenta incorporada",
       "activatePreview": "Interagir com a prévia"
     },

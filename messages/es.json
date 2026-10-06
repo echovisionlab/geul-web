@@ -3527,8 +3527,6 @@
       "emptyPreview": "Añade una URL para previsualizar la página insertada.",
       "invalidPreview": "Esta URL de inserción no es válida.",
       "unsafeOrigin": "Usa un origen separado cuando los scripts y el almacenamiento en el navegador estén habilitados.",
-      "openExternal": "Abrir en una pestaña nueva",
-      "reload": "Recargar",
       "playerTitle": "Herramienta insertada",
       "activatePreview": "Interactuar con la vista previa"
     },
