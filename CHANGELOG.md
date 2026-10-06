@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.1](https://github.com/echovisionlab/geul-web/compare/v0.10.0...v0.10.1) (2026-10-06)
+
+
+### Bug Fixes
+
+* **page:** keep content controls clear of embedded tools ([a144e64](https://github.com/echovisionlab/geul-web/commit/a144e642819ef5b7a91c5e76edcf879157d777ca))
+* **page:** keep content controls clear of embedded tools ([e0fe310](https://github.com/echovisionlab/geul-web/commit/e0fe310ff8f84e38ffd6a1ca418038a76512c048))
+
 ## [0.10.0](https://github.com/echovisionlab/geul-web/compare/v0.9.2...v0.10.0) (2026-10-06)
 
 
