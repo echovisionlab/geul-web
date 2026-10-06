@@ -18,7 +18,7 @@ COPY --link patches ./patches
 COPY --link tooling/typescript-eslint ./tooling/typescript-eslint
 COPY --link tooling/typescript6 ./tooling/typescript6
 COPY --link scripts/prepare-client-media-codecs.mjs ./scripts/prepare-client-media-codecs.mjs
-RUN pnpm fetch --frozen-lockfile
+RUN pnpm fetch
 RUN pnpm install --frozen-lockfile --offline
 
 FROM base AS builder
@@ -40,7 +40,6 @@ ENV OATHKEEPER_URL=http://localhost:8000 \
     RELEASE_IMAGE_BUILD=${RELEASE_IMAGE_BUILD}
 RUN pnpm prepare:maplibre-worker
 RUN pnpm prepare:p5-runtime
-RUN pnpm prepare:hwp-runtime
 # Release builds reuse the deployed action key so open clients keep valid action IDs.
 RUN --mount=type=secret,id=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,env=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY \
     if [ "${RELEASE_IMAGE_BUILD}" = "true" ] && [ -z "${NEXT_SERVER_ACTIONS_ENCRYPTION_KEY:-}" ]; then \
