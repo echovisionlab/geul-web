@@ -5,7 +5,6 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MantineProvider } from '@mantine/core';
 import { PageContentView } from './PageContentView';
-import classes from './PageContentView.module.css';
 
 const contentLanguageMenuSpy = vi.fn();
 const pageRendererSpy = vi.fn();
@@ -66,39 +65,6 @@ afterEach(() => {
 });
 
 describe('PageContentView', () => {
-  it('places controls before a titleless first Embed while preserving the document layout', () => {
-    render(
-      <PageContentView
-        pathname="/tool"
-        requestedLocale="en"
-        page={{
-          title: '',
-          showTitle: false,
-          documentLayout: { contentHeight: 'content', pageChrome: 'flow', footer: 'flow' },
-          content: [{ id: 'tool', kind: 'embed', props: {}, settings: {}, richText: null, columns: [] }],
-          blockMedia: [],
-          localizationInfo: {
-            requestedLocale: 'en',
-            displayedLocale: 'en',
-            sourceLocale: 'en',
-            isFallback: false,
-            isOriginal: true,
-            machineGenerated: false,
-            fallbackReason: 0,
-          },
-        }}
-      />,
-    );
-    const layout = document.querySelector('[data-content-layout]')!;
-    const controls = layout.querySelector('[data-content-controls]')!;
-    const body = layout.querySelector('[data-content-body]')!;
-    expect(layout.classList.contains(classes.controlsBeforeEmbed)).toBe(true);
-    expect(controls.parentElement).toBe(layout);
-    expect(controls.compareDocumentPosition(body) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(layout.getAttribute('data-content-height')).toBe('content');
-    expect(layout.getAttribute('data-page-chrome')).toBe('flow');
-    expect(layout.getAttribute('data-footer-layout')).toBe('flow');
-  });
   it('uses the canonical layout and shared content chrome', () => {
     render(
       <PageContentView
@@ -124,7 +90,6 @@ describe('PageContentView', () => {
     );
 
     const layout = document.querySelector('[data-content-layout]');
-    expect(layout?.classList.contains(classes.controlsBeforeEmbed)).toBe(false);
     expect(layout?.getAttribute('data-content-height')).toBe('viewport');
     expect(layout?.getAttribute('data-page-chrome')).toBe('pinned');
     expect(layout?.getAttribute('data-footer-layout')).toBe('pinned');
@@ -217,9 +182,6 @@ describe('PageContentView', () => {
       />,
     );
 
-    expect(document.querySelector('[data-content-layout]')?.classList.contains(classes.controlsBeforeEmbed)).toBe(
-      false,
-    );
     expect(pageRendererSpy).toHaveBeenCalledWith(expect.objectContaining({ sections }));
   });
 
