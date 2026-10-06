@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.3](https://github.com/echovisionlab/geul-web/compare/v0.10.2...v0.10.3) (2026-10-06)
+
+
+### Bug Fixes
+
+* **images:** align crop, gallery and metadata aspect ratios ([#108](https://github.com/echovisionlab/geul-web/issues/108)) ([3e3c9a8](https://github.com/echovisionlab/geul-web/commit/3e3c9a8de0ada78971fb12300437d1cb74a21ea3))
+
 ## [0.10.2](https://github.com/echovisionlab/geul-web/compare/v0.10.1...v0.10.2) (2026-10-06)
 
 
