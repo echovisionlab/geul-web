@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.10.0](https://github.com/echovisionlab/geul-web/compare/v0.9.2...v0.10.0) (2026-10-06)
+
+
+### Features
+
+* **embed:** run trusted tool modules directly in page blocks ([9620ac1](https://github.com/echovisionlab/geul-web/commit/9620ac16844155654ef812db69e4350a48dff703))
+* **page:** embed independent tool modules and simplify content controls ([563c313](https://github.com/echovisionlab/geul-web/commit/563c3136692bf6769b1adeaca01977425ba1a9d8))
+
+
+### Bug Fixes
+
+* **content:** include language controls and banner cleanup ([b55d87e](https://github.com/echovisionlab/geul-web/commit/b55d87e3a76e7c014b55687ac277392296200f1f))
+* **content:** simplify language controls and remove banners and share buttons ([141f532](https://github.com/echovisionlab/geul-web/commit/141f532b6f4b6bebe3649a268562196d3f621978))
+* **embed:** initialize tools after their message listener is ready ([84ec2cd](https://github.com/echovisionlab/geul-web/commit/84ec2cdc3959e0c2e4f24c71fa82304ca6a96128))
+
 ## [0.9.2](https://github.com/echovisionlab/geul-web/compare/v0.9.1...v0.9.2) (2026-10-06)
 
 
