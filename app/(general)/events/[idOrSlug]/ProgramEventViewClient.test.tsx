@@ -30,7 +30,6 @@ vi.mock('@/components/core/Navigation', () => ({
     </a>
   ),
 }));
-vi.mock('@/features/share/ShareButton', () => ({ ShareButton: () => null }));
 vi.mock('@/features/navigation/TableOfContents', () => ({ TableOfContents: () => null }));
 vi.mock('@/features/location/LocationPlaceMetadataRows', () => ({
   LocationPlaceMetadataRows: (props: { place: LocationPlaceSummary }) => {
@@ -78,13 +77,7 @@ function renderEvent(content: Event['content'], overrides: Partial<Event> = {}) 
 
   return renderToStaticMarkup(
     <MantineProvider>
-      <ProgramEventViewClient
-        event={event}
-        shareUrl="https://www.dsub.io/events/event-slug"
-        locale="en"
-        pathname="/events/event-slug"
-        requestedLocale="en"
-      />
+      <ProgramEventViewClient event={event} locale="en" pathname="/events/event-slug" requestedLocale="en" />
     </MantineProvider>,
   );
 }

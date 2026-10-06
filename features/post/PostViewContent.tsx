@@ -21,9 +21,7 @@ import { CommentSection } from '@/features/post/Comment/CommentSection';
 import { PostHeader } from '@/features/post/PostHeader/PostHeader';
 import { PostMediaDownloadProvider } from '@/features/post/PostMediaDownloadContext';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
-import { LocalizationNotice } from '@/features/translation/LocalizationNotice';
 import { getPostMarkdownAction } from '@/lib/actions/post';
-import { useCopyToClipboard } from '@/lib/hooks/useCopyToClipboard';
 import { buildGeneratedBlockTocItems } from '@/lib/toc-items';
 import type { LocalizedRichTextBlock } from '@/features/editor/contract/localized-rich-text';
 import { downloadMarkdown } from '@/lib/utils/export';
@@ -91,31 +89,12 @@ export function PostViewContent({
   const t = useTranslations('postView');
   const tCommon = useTranslations('common');
   const tCommonNotifications = useTranslations('common.notifications');
-  const { copy } = useCopyToClipboard();
   const markdown = useMutation({
     mutationFn: (id: string) => getPostMarkdownAction(id),
   });
   const tocItems = useMemo(() => buildGeneratedBlockTocItems(post.content), [post.content]);
   const shareValue = query?.share;
   const shareToken = Array.isArray(shareValue) ? shareValue[0] : shareValue;
-
-  const handleShare = async () => {
-    const shareData = {
-      title: post.title || tCommon('states.untitled'),
-      url: window.location.href,
-    };
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        copy(shareData.url, { successMessage: tCommon('messages.urlCopiedToClipboard') });
-      }
-    } catch (err) {
-      if ((err as Error).name !== 'AbortError') {
-        copy(shareData.url, { successMessage: tCommon('messages.urlCopiedToClipboard') });
-      }
-    }
-  };
 
   const handleExport = async (format: 'markdown' | 'pdf') => {
     try {
@@ -144,39 +123,26 @@ export function PostViewContent({
       >
         <ContentLayoutView
           layout={post.documentLayout}
+          controls={
+            post.localizationInfo ? (
+              <div className={post.featuredImageUrl ? classes.heroLanguageMenu : undefined}>
+                <ContentLanguageMenu
+                  pathname={pathname}
+                  query={query}
+                  requestedLocale={requestedLocale}
+                  localizationInfo={post.localizationInfo}
+                  onRequestedLocaleChange={onRequestedLocaleChange}
+                />
+              </div>
+            ) : null
+          }
           chrome={
             <ContentChrome>
-              <PostHeader
-                post={post}
-                onShare={handleShare}
-                onExport={handleExport}
-                languageMenu={
-                  post.localizationInfo ? (
-                    <ContentLanguageMenu
-                      pathname={pathname}
-                      query={query}
-                      requestedLocale={requestedLocale}
-                      localizationInfo={post.localizationInfo}
-                      onRequestedLocaleChange={onRequestedLocaleChange}
-                    />
-                  ) : null
-                }
-              />
+              <PostHeader post={post} onExport={handleExport} reserveLanguageMenuSpace={!!post.localizationInfo} />
             </ContentChrome>
           }
         >
           <div className={classes.contentFlow}>
-            {post.localizationInfo ? (
-              <LocalizationNotice
-                pathname={pathname}
-                query={query}
-                requestedLocale={requestedLocale}
-                localizationInfo={post.localizationInfo}
-                variant="subtle"
-                onRequestedLocaleChange={onRequestedLocaleChange}
-              />
-            ) : null}
-
             {/* Series Navigation */}
             {post.series && (
               <SectionCard>

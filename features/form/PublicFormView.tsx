@@ -14,7 +14,6 @@ import { FormAccessBoundary } from '@/features/form/FormAccessBoundary';
 import { FormRenderer } from '@/features/form/FormRenderer';
 import { FormSubmissionPendingState } from '@/features/form/FormSubmissionState';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
-import { LocalizationNotice } from '@/features/translation/LocalizationNotice';
 import { resolvePhoneDefaultCountryCode } from '@/features/form/phone-default-country';
 import { useFormValidationMessages } from '@/features/form/useFormValidationMessages';
 import {
@@ -163,23 +162,15 @@ export function PublicFormView({
   const form = initialForm ?? (protectedAccess?.accessible && protectedAccess.form ? protectedAccess.form : null);
   const contentPathname = isShareMode ? `/s/${shareToken}` : `/forms/${slug}`;
   const contentQuery = Object.fromEntries(searchParams.entries());
-  const localizationControls = form?.localizationInfo ? (
-    <Stack gap="sm">
-      <LocalizationNotice
+  const languageControl = form?.localizationInfo ? (
+    <Box className="print-hide" style={{ alignSelf: 'flex-end' }}>
+      <ContentLanguageMenu
         pathname={contentPathname}
         query={contentQuery}
         requestedLocale={requestedLocale}
         localizationInfo={form.localizationInfo}
       />
-      <Box className="print-hide" style={{ alignSelf: 'flex-end' }}>
-        <ContentLanguageMenu
-          pathname={contentPathname}
-          query={contentQuery}
-          requestedLocale={requestedLocale}
-          localizationInfo={form.localizationInfo}
-        />
-      </Box>
-    </Stack>
+    </Box>
   ) : null;
 
   const builtForm = useMemo(() => {
@@ -244,7 +235,7 @@ export function PublicFormView({
   if (isShareMode) {
     return renderWithHeader(
       <Stack gap="md">
-        {localizationControls}
+        {languageControl}
         <Alert tone="warning" icon={<IconEyeOff size={16} />} title={t('previewMode.title')}>
           {t('previewMode.description')}
         </Alert>
@@ -261,7 +252,7 @@ export function PublicFormView({
 
   return renderWithHeader(
     <Stack gap="md">
-      {localizationControls}
+      {languageControl}
       <Paper p="xl">
         <Box pos="relative" aria-busy={submitForm.isPending || redirectingToSuccess}>
           <Stack gap="lg">

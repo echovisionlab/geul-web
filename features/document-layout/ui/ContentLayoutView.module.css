@@ -1,7 +1,16 @@
 .root {
+  --content-controls-space: 4.5rem;
+
   position: relative;
   width: 100%;
   min-width: 0;
+}
+
+.controls {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  z-index: 6;
 }
 
 .root[data-content-height='viewport'],
@@ -35,6 +44,10 @@
 }
 
 @media print {
+  .root {
+    --content-controls-space: 0px;
+  }
+
   .root,
   .root[data-content-height='viewport'] {
     display: block !important;

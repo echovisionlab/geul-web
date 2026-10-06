@@ -10,17 +10,14 @@ import {
 import { JsonLdScript } from '@/features/metadata/ui/JsonLdScript';
 import { GeneratedRichTextBlockView } from '@/features/page/PageView/blocks/GeneratedRichTextBlockView';
 import { ReleaseCreditsList } from '@/features/release/ReleaseCreditsList';
-import { ShareButton } from '@/features/share/ShareButton';
 import { SocialLinksDisplay } from '@/features/social-links/SocialLinksDisplay';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
-import { LocalizationNotice } from '@/features/translation/LocalizationNotice';
 import type { getReleaseMetadataDocument } from '@/lib/queries/metadata';
 import type { PublicRelease } from '@/lib/queries/release';
 import { formatDateTimeInZone } from '@/components/core/DateTime';
 import { buildReleaseJsonLd } from '@/lib/utils/json-ld';
 import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
 import { compactSocialLinks } from '@/lib/utils/social-links';
-import { getBaseUrl } from '@/lib/utils/url.server';
 import { ReleaseTrackAudioPlayer } from './ReleaseTrackAudioPlayer';
 import classes from './page.module.css';
 
@@ -126,12 +123,11 @@ export async function ReleasePublicContent({
   shareToken?: string;
   sharePassword?: string;
 }) {
-  const [t, tCommonEntities, tCommonLabels, tCommonStates, baseUrl] = await Promise.all([
+  const [t, tCommonEntities, tCommonLabels, tCommonStates] = await Promise.all([
     getTranslations('releasePage'),
     getTranslations('common.entities'),
     getTranslations('common.labels'),
     getTranslations('common.states'),
-    getBaseUrl(),
   ]);
   const releaseDate = formatReleaseDate(release.releaseDate, uiLocale);
   const streamingLinks = compactSocialLinks({
@@ -142,7 +138,6 @@ export async function ReleasePublicContent({
   });
   const hasLinks = Object.keys(streamingLinks).length > 0;
   const pathname = `/releases/${release.slug || release.id}`;
-  const url = `${baseUrl}${pathname}`;
   const releaseArtists = dedupeReleaseArtists(release.artists);
   const creditGroups = release.credits.reduce<CreditGroup[]>((groups, credit) => {
     const groupName = credit.creditRole?.trim() || tCommonEntities('credit');
@@ -170,13 +165,6 @@ export async function ReleasePublicContent({
     <>
       {releaseMetadata && <JsonLdScript data={buildReleaseJsonLd(releaseMetadata)} />}
       <Stack gap="xl">
-        <LocalizationNotice
-          pathname={pathname}
-          query={query}
-          requestedLocale={requestedLocale}
-          localizationInfo={release.localizationInfo}
-          variant="subtle"
-        />
         <div className={classes.hero}>
           <div className={classes.artworkCard}>
             <Box className={classes.artworkMedia}>
@@ -326,7 +314,6 @@ export async function ReleasePublicContent({
                   requestedLocale={requestedLocale}
                   localizationInfo={release.localizationInfo}
                 />
-                <ShareButton url={url} title={release.title} />
               </Group>
             </div>
           </Stack>

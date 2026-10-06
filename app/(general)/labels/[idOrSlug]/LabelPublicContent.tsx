@@ -7,12 +7,10 @@ import { parseArtistListProps } from '@/features/page/blocks/artist-grid/schema'
 import { ArtistListViewClient } from '@/features/page/blocks/artist-grid/ViewClient';
 import { parseReleaseListProps } from '@/features/page/blocks/releases-gallery/schema';
 import { ReleaseListViewClient } from '@/features/page/blocks/releases-gallery/ViewClient';
-import { ShareButton } from '@/features/share/ShareButton';
 import { GeneratedRichTextBlockView } from '@/features/page/PageView/blocks/GeneratedRichTextBlockView';
 import { SocialLinksDisplay } from '@/features/social-links/SocialLinksDisplay';
 import { ThemedAssetImage } from '@/features/media/ThemedAssetImage';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
-import { LocalizationNotice } from '@/features/translation/LocalizationNotice';
 import { formatCountryDisplayName } from '@/lib/countries';
 import type { getLabelPublic } from '@/lib/queries/label';
 import type { getLabelMetadataDocument } from '@/lib/queries/metadata';
@@ -66,22 +64,17 @@ function getUniqueLabelArtists(artists: LabelView['artists']) {
 export async function LabelPublicContent({
   label,
   labelMetadata,
-  baseUrl,
   query,
   requestedLocale,
   uiLocale,
 }: {
   label: LabelView;
   labelMetadata: LabelMetadata | null;
-  baseUrl: string;
   query: SearchParamRecord;
   requestedLocale: string | null;
   uiLocale: string;
 }) {
   const [t, tCommonLabels] = await Promise.all([getTranslations('labelPage'), getTranslations('common.labels')]);
-  const url = `${baseUrl}/labels/${label.slug || label.id}`;
-  const shareToken = Array.isArray(query.share) ? query.share[0] : query.share;
-  const shareUrl = shareToken ? `${baseUrl}/s/${encodeURIComponent(shareToken)}` : url;
   const pathname = `/labels/${label.slug || label.id}`;
   const contentLocale = requestedLocale ?? uiLocale;
   const hasSocialLinks = label.socialLinks && Object.keys(label.socialLinks).length > 0;
@@ -96,13 +89,6 @@ export async function LabelPublicContent({
     <>
       {labelMetadata ? <JsonLdScript data={buildLabelJsonLd(labelMetadata)} /> : null}
       <Stack gap="xl">
-        <LocalizationNotice
-          pathname={pathname}
-          query={query}
-          requestedLocale={contentLocale}
-          localizationInfo={label.localizationInfo}
-          variant="subtle"
-        />
         <Group align="flex-start" gap="xl" wrap="wrap" className={classes.header}>
           {label.imageUrl || label.imageLightUrl || label.imageDarkUrl ? (
             <Box className={classes.imageContainer}>
@@ -127,7 +113,6 @@ export async function LabelPublicContent({
                   requestedLocale={contentLocale}
                   localizationInfo={label.localizationInfo}
                 />
-                <ShareButton url={shareUrl} title={label.name} />
               </Group>
             </Group>
             <Divider />
