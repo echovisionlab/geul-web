@@ -50,7 +50,7 @@ describe('embed security boundaries', () => {
     expect(allow).not.toContain('*');
   });
 
-  it('accepts resize messages only from this frame and its configured origin, with a bounded numeric height', () => {
+  it('accepts resize messages only from this frame and its configured origin, with a finite positive height', () => {
     const frame = {} as Window;
     const otherFrame = {} as Window;
     const message = (data: unknown, origin = 'https://tool.example', source = frame) =>
@@ -69,6 +69,7 @@ describe('embed security boundaries', () => {
       {},
       { type: 'other', height: 500 },
       { type: 'geul:embed:resize', height: '500' },
+      { type: 'geul:embed:resize', height: 0 },
       { type: 'geul:embed:resize', height: -1 },
       { type: 'geul:embed:resize', height: Infinity },
       { type: 'geul:embed:resize', height: NaN },
@@ -76,6 +77,6 @@ describe('embed security boundaries', () => {
       expect(readEmbedHeightMessage(message(data), frame, 'https://tool.example')).toBeNull();
     }
     expect(readEmbedHeightMessage(message({ ...valid, height: 1 }), frame, 'https://tool.example')).toBe(180);
-    expect(readEmbedHeightMessage(message({ ...valid, height: 999999 }), frame, 'https://tool.example')).toBe(10000);
+    expect(readEmbedHeightMessage(message({ ...valid, height: 12765.5 }), frame, 'https://tool.example')).toBe(12766);
   });
 });

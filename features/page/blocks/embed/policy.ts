@@ -61,5 +61,5 @@ export function readEmbedHeightMessage(
   ) {
     return null;
   }
-  return Math.max(EMBED_MIN_HEIGHT, Math.min(10000, Math.ceil(data.height)));
+  return Math.max(EMBED_MIN_HEIGHT, Math.ceil(data.height));
 }

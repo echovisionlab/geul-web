@@ -108,9 +108,9 @@ tool list in Next's `headers()` configuration is unnecessary here. See
 
 For automatic height, the tool reports its content height to the exact parent
 origin. Web accepts only messages from this frame's window and exact URL origin,
-then clamps the height to 180–10000 px. With origin preservation disabled, the
-sandbox uses an opaque origin, so automatic height and initialization are
-unavailable; use a fixed or viewport height.
+then rounds a finite positive height up with a 180 px minimum and no maximum.
+With origin preservation disabled, the sandbox uses an opaque origin, so automatic
+height and initialization are unavailable; use a fixed or viewport height.
 
 ```js
 const siteOrigin = 'https://www.dsub.io';
