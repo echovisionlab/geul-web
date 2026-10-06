@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.2](https://github.com/echovisionlab/geul-web/compare/v0.10.1...v0.10.2) (2026-10-06)
+
+
+### Bug Fixes
+
+* **page:** restore language controls without a separate row ([cbcb89e](https://github.com/echovisionlab/geul-web/commit/cbcb89ec00ece69f54095bb748bb680c6693428d))
+* **page:** restore language controls without a separate row ([61a3f08](https://github.com/echovisionlab/geul-web/commit/61a3f08349097281be47f738399a7ab2ac7edb0a))
+
 ## [0.10.1](https://github.com/echovisionlab/geul-web/compare/v0.10.0...v0.10.1) (2026-10-06)
 
 
