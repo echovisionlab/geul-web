@@ -11,6 +11,7 @@ import { Button } from '@/components/core/Button';
 import { ContentCard, ContentCardSection } from '@/components/core/Section';
 import { getResponsiveSlideSize } from './constants';
 import { toAspectRatio } from './list-view-utils';
+import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
 import classes from './post-list/PostListCard.module.css';
 
 const ListCarousel = dynamic(() => import('./ListCarouselRuntime').then((module) => module.ListCarouselRuntime));
@@ -80,9 +81,23 @@ function TitleLink<T extends ListViewShellItem>({
   );
 }
 
-function MediaLink<T extends ListViewShellItem>({ item, children }: { item: T; children: ReactNode }) {
+function MediaLink<T extends ListViewShellItem>({
+  item,
+  children,
+  naturalSize = false,
+}: {
+  item: T;
+  children: ReactNode;
+  naturalSize?: boolean;
+}) {
   return (
-    <Link href={item.href} className={classes.mediaLink} aria-label={item.title ?? undefined} tabIndex={-1}>
+    <Link
+      href={item.href}
+      className={classes.mediaLink}
+      style={naturalSize ? { position: 'relative' } : undefined}
+      aria-label={item.title ?? undefined}
+      tabIndex={-1}
+    >
       {children}
     </Link>
   );
@@ -108,9 +123,31 @@ function mediaImageFitStyle<T extends ListViewShellItem>(item: T) {
   } as const;
 }
 
-function MediaImage<T extends ListViewShellItem>({ item, className }: { item: T; className?: string }) {
+function MediaImage<T extends ListViewShellItem>({
+  item,
+  className,
+  naturalSize = false,
+  sizes = '(max-width: 48em) 50vw, (max-width: 75em) 33vw, 25vw',
+}: {
+  item: T;
+  className?: string;
+  naturalSize?: boolean;
+  sizes?: string;
+}) {
   if (!item.imageUrl) {
     return null;
+  }
+
+  if (naturalSize) {
+    return (
+      <img
+        src={buildManagedImageUrl(item.imageUrl, MANAGED_IMAGE_PRESET.CONTENT_IMAGE) ?? item.imageUrl}
+        alt={item.imageAlt ?? item.title ?? ''}
+        loading="lazy"
+        className={className}
+        style={{ display: 'block', width: '100%', height: 'auto', ...mediaImageFitStyle(item) }}
+      />
+    );
   }
 
   return (
@@ -118,7 +155,7 @@ function MediaImage<T extends ListViewShellItem>({ item, className }: { item: T;
       src={item.imageUrl}
       alt={item.imageAlt ?? item.title ?? ''}
       fill
-      sizes="(max-width: 48em) 50vw, (max-width: 75em) 33vw, 25vw"
+      sizes={sizes}
       unoptimized={hasSvgImage(item)}
       className={className}
       style={mediaImageFitStyle(item)}
@@ -148,6 +185,7 @@ export function ListViewShell<T extends ListViewShellItem>({
   const tActions = useTranslations('common.actions');
   const isMobile = useMediaQuery('(max-width: 48em)');
   const aspectRatio = toAspectRatio(imageAspectRatio, '16:9');
+  const naturalSize = aspectRatio === 'auto';
 
   if (!items.length) {
     return (
@@ -177,11 +215,15 @@ export function ListViewShell<T extends ListViewShellItem>({
                 {showImage ? (
                   <Box
                     className={`${classes.listMedia} ${classes.hoverMedia}`}
-                    style={{ backgroundColor: mediaFrameBackgroundColor(item) }}
+                    style={{
+                      backgroundColor: mediaFrameBackgroundColor(item),
+                      aspectRatio: naturalSize && !item.imageUrl ? '16 / 9' : aspectRatio,
+                      alignSelf: 'start',
+                    }}
                     {...dataProps(dataScope, 'data-post-list-list-media')}
                   >
-                    <MediaLink item={item}>
-                      <MediaImage item={item} className={classes.mediaImage} />
+                    <MediaLink item={item} naturalSize={naturalSize && Boolean(item.imageUrl)}>
+                      <MediaImage item={item} className={classes.mediaImage} naturalSize={naturalSize} />
                     </MediaLink>
                   </Box>
                 ) : null}
@@ -262,14 +304,15 @@ export function ListViewShell<T extends ListViewShellItem>({
                       position: 'relative',
                       width: 112,
                       minWidth: 112,
-                      aspectRatio: '4 / 3',
+                      aspectRatio: naturalSize && !item.imageUrl ? '16 / 9' : aspectRatio,
+                      alignSelf: 'start',
                       backgroundColor: mediaFrameBackgroundColor(item),
                     }}
                     className={classes.hoverMedia}
                     {...dataProps(dataScope, 'data-post-list-card-media')}
                   >
-                    <MediaLink item={item}>
-                      <MediaImage item={item} className={classes.mediaImage} />
+                    <MediaLink item={item} naturalSize={naturalSize && Boolean(item.imageUrl)}>
+                      <MediaImage item={item} className={classes.mediaImage} naturalSize={naturalSize} />
                     </MediaLink>
                   </Box>
                 ) : null}
@@ -439,19 +482,14 @@ export function ListViewShell<T extends ListViewShellItem>({
                   {showImage ? (
                     <Box
                       className={classes.carouselCardMedia}
-                      style={{ backgroundColor: mediaFrameBackgroundColor(item) }}
+                      style={{
+                        backgroundColor: mediaFrameBackgroundColor(item),
+                        aspectRatio: naturalSize && !item.imageUrl ? '16 / 9' : aspectRatio,
+                        alignSelf: 'start',
+                      }}
                       {...dataProps(dataScope, 'data-post-list-carousel-card-media')}
                     >
-                      {item.imageUrl ? (
-                        <NextImage
-                          src={item.imageUrl}
-                          alt={item.imageAlt ?? item.title ?? ''}
-                          fill
-                          sizes="(max-width: 48em) 100vw, 320px"
-                          unoptimized={hasSvgImage(item)}
-                          style={mediaImageFitStyle(item)}
-                        />
-                      ) : null}
+                      <MediaImage item={item} naturalSize={naturalSize} sizes="(max-width: 48em) 100vw, 320px" />
                     </Box>
                   ) : null}
 
@@ -488,10 +526,13 @@ export function ListViewShell<T extends ListViewShellItem>({
             {...dataProps(dataScope, 'data-post-list-item-layout', 'grid')}
           >
             {showImage ? (
-              <ContentCardSection style={{ position: 'relative', aspectRatio }} className={classes.hoverMedia}>
-                <MediaLink item={item}>
+              <ContentCardSection
+                style={{ position: 'relative', aspectRatio: naturalSize && !item.imageUrl ? '16 / 9' : aspectRatio }}
+                className={classes.hoverMedia}
+              >
+                <MediaLink item={item} naturalSize={naturalSize && Boolean(item.imageUrl)}>
                   {item.imageUrl ? (
-                    <MediaImage item={item} className={classes.mediaImage} />
+                    <MediaImage item={item} className={classes.mediaImage} naturalSize={naturalSize} />
                   ) : (
                     <div
                       className={classes.mediaPlaceholder}

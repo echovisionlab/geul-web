@@ -107,7 +107,9 @@ function buildEntityOgMetadata(params: EntityOgMetadataInput) {
       url: canonical,
       ...(ogImage && {
         images: [
-          params.includeOgImageDimensions === false ? { url: ogImage } : { url: ogImage, width: 1200, height: 630 },
+          params.ogImageUrl?.trim() && params.includeOgImageDimensions !== false
+            ? { url: ogImage, width: 1200, height: 630 }
+            : { url: ogImage },
         ],
       }),
       ...(params.siteName && { siteName: params.siteName }),
@@ -304,7 +306,7 @@ export function buildStaticOgMetadata(params: {
       description,
       type: 'website' as const,
       url,
-      ...(ogImage && { images: [{ url: ogImage, width: 1200, height: 630 }] }),
+      ...(ogImage && { images: [{ url: ogImage }] }),
       ...(siteName && { siteName }),
     },
     twitter: {

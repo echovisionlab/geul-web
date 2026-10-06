@@ -42,7 +42,7 @@ const meta: Meta<typeof ImageUploadCropField> = {
     maxSize: 20 * 1024 * 1024,
     previewWidth: 420,
     previewMinHeight: 220,
-    aspectRatio: 1200 / 630,
+    aspectRatio: 16 / 9,
     onFileSelect: () => {},
     onReject: () => {},
     onRemove: () => {},

@@ -123,6 +123,77 @@ describe('EntityListView', () => {
     installMatchMedia();
   });
 
+  it.each(['grid', 'list', 'cards', 'carousel'] as const)(
+    'honors the selected square ratio in %s media frames',
+    (layout) => {
+      act(() => {
+        root?.render(
+          <MantineProvider>
+            <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
+              <EntityListView
+                items={[{ id: 'one', href: '/one', title: 'One', imageUrl: 'https://example.com/landscape.jpg' }]}
+                className="ratio-test"
+                emptyLabel="Empty"
+                layout={layout}
+                columns={3}
+                showImage
+                imageAspectRatio="1:1"
+                carouselLoop={false}
+                carouselIndicators={false}
+              />
+            </NextIntlClientProvider>
+          </MantineProvider>,
+        );
+      });
+      const image = container?.querySelector<HTMLImageElement>('img[src="https://example.com/landscape.jpg"]');
+      const frame = image?.parentElement?.tagName === 'A' ? image.parentElement.parentElement : image?.parentElement;
+      expect(frame?.style.aspectRatio).toBe('1 / 1');
+      expect(image?.style.objectFit).toBe('cover');
+    },
+  );
+
+  it.each(['grid', 'list', 'cards', 'carousel'] as const)(
+    'keeps original portrait and landscape dimensions in %s auto media',
+    (layout) => {
+      const items = ['portrait', 'landscape'].map((name) => ({
+        id: name,
+        href: `/${name}`,
+        title: name,
+        imageUrl: `https://example.com/${name}.jpg`,
+      }));
+      act(() => {
+        root?.render(
+          <MantineProvider>
+            <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
+              <EntityListView
+                items={items}
+                className="ratio-test"
+                emptyLabel="Empty"
+                layout={layout}
+                columns={3}
+                showImage
+                imageAspectRatio="auto"
+                carouselLoop={false}
+                carouselIndicators={false}
+              />
+            </NextIntlClientProvider>
+          </MantineProvider>,
+        );
+      });
+      for (const item of items) {
+        const image = container?.querySelector<HTMLImageElement>(`img[src="${item.imageUrl}"]`);
+        const frame = image?.parentElement?.tagName === 'A' ? image.parentElement.parentElement : image?.parentElement;
+        expect(frame?.style.aspectRatio).toBe('auto');
+        expect(image?.style.width).toBe('100%');
+        expect(image?.style.height).toBe('auto');
+        expect(image?.style.position).not.toBe('absolute');
+        if (image?.parentElement?.tagName === 'A') {
+          expect(image.parentElement.style.position).toBe('relative');
+          expect(image.parentElement.getAttribute('href')).toBe(item.href);
+        }
+      }
+    },
+  );
   it('keeps the shared hero carousel slide wrapper for single-item hero layouts', () => {
     const items = [
       {

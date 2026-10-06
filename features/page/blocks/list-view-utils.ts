@@ -25,6 +25,6 @@ export function parseBooleanProp(value: string | undefined, fallback: boolean): 
 }
 
 export function toAspectRatio(value: string | undefined, fallback: '16:9' | '4:3' | '1:1'): string {
-  const resolved = value && value !== 'auto' ? value : fallback;
+  const resolved = value || fallback;
   return resolved.replace(':', ' / ');
 }

@@ -4,7 +4,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ImageUploadCropFieldProps, ImageUploadRejectionReason } from '@/components/core/ImageUpload';
-import { ImageUploadCropController } from './ImageUploadCropController';
+import { ImageUploadCropController, type ImageUploadCropControllerProps } from './ImageUploadCropController';
 
 const {
   notificationShowMock,
@@ -50,7 +50,8 @@ vi.mock('@mantine/notifications', () => ({
 }));
 
 vi.mock('next-intl', () => ({
-  useTranslations: (namespace: string) => (key: string) => `${namespace}.${key}`,
+  useTranslations: (namespace: string) => (key: string, values?: { ratio?: string }) =>
+    values?.ratio ? `${namespace}.${key}: ${values.ratio}` : `${namespace}.${key}`,
 }));
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -58,7 +59,7 @@ vi.mock('next-intl', () => ({
 let container: HTMLDivElement;
 let root: Root;
 
-function renderController() {
+function renderController(overrides: Partial<ImageUploadCropControllerProps> = {}) {
   act(() => {
     root.render(
       <ImageUploadCropController
@@ -69,6 +70,7 @@ function renderController() {
         isRemoving={false}
         onUpload={vi.fn()}
         onRemove={vi.fn()}
+        {...overrides}
       />,
     );
   });
@@ -115,4 +117,35 @@ describe('ImageUploadCropController rejection policy', () => {
       });
     },
   );
+});
+
+describe('ImageUploadCropController aspect ratio', () => {
+  it('defaults to a 16:9 crop and matching upload instruction', () => {
+    renderController();
+    const props = getRenderedCropFieldProps();
+    expect(props.aspectRatio).toBe(16 / 9);
+    expect(props.labels.emptyDescription).toContain('featuredImage.empty.editable: 16:9');
+  });
+
+  it.each([
+    [16 / 9, '16:9'],
+    [1, '1:1'],
+    [4 / 3, '4:3'],
+    [9 / 16, '9:16'],
+    [1200 / 630, '40:21'],
+    [1.234, '1.234:1'],
+  ])('describes the actual numeric crop %s as %s', (aspectRatio, expected) => {
+    renderController({ aspectRatio });
+    expect(getRenderedCropFieldProps().labels.emptyDescription).toContain(`featuredImage.empty.editable: ${expected}`);
+  });
+
+  it('describes both range bounds without rounding them', () => {
+    renderController({ aspectRatio: { min: 9 / 16, max: 1.234 } });
+    expect(getRenderedCropFieldProps().labels.emptyDescription).toContain('featuredImage.empty.editable: 9:16-1.234:1');
+  });
+
+  it('omits a fixed-ratio instruction for a free crop', () => {
+    renderController({ aspectRatio: 'free' });
+    expect(getRenderedCropFieldProps().labels.emptyDescription).not.toContain('featuredImage.empty.editable');
+  });
 });
