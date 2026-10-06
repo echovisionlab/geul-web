@@ -75,6 +75,12 @@ afterEach(() => {
 });
 
 describe('ImageUploadCropField', () => {
+  it('defaults the image preview to the same 16:9 ratio as featured-image cropping', () => {
+    renderField({ imageUrl: '/featured.webp' });
+    const preview = container.querySelector<HTMLImageElement>('img');
+    expect(preview?.parentElement?.style.aspectRatio).toBe(`${16 / 9} / 1`);
+  });
+
   it('renders injected copy and forwards file-selection intent', () => {
     const onFileSelect = vi.fn();
     renderField({ idPrefix: 'cover', onFileSelect });

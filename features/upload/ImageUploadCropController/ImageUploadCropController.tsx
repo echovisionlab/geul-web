@@ -42,7 +42,7 @@ export function ImageUploadCropController({
   isRemoving,
   onUpload,
   onRemove,
-  aspectRatio = 1200 / 630,
+  aspectRatio = 16 / 9,
   previewWidth = '100%',
   previewMaxWidth,
   previewMinHeight = 120,
@@ -136,10 +136,22 @@ function formatAspectRatio(aspectRatio: AspectRatioConfig): string | null {
   }
 
   if (typeof aspectRatio === 'number') {
-    return `${Math.round(aspectRatio * 9)}:9`;
+    return formatNumericAspectRatio(aspectRatio);
   }
 
-  return `${Math.round(aspectRatio.min * 9)}:9-${Math.round(aspectRatio.max * 9)}:9`;
+  return `${formatNumericAspectRatio(aspectRatio.min)}-${formatNumericAspectRatio(aspectRatio.max)}`;
+}
+
+function formatNumericAspectRatio(aspectRatio: number): string {
+  const commonRatios = [
+    [1, 1],
+    [16, 9],
+    [4, 3],
+    [9, 16],
+    [40, 21],
+  ];
+  const ratio = commonRatios.find(([width, height]) => width / height === aspectRatio);
+  return ratio ? `${ratio[0]}:${ratio[1]}` : `${aspectRatio}:1`;
 }
 
 function formatBytes(bytes: number): string {

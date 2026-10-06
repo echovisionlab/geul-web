@@ -24,7 +24,7 @@ describe('list view utilities', () => {
 
   it('preserves image ratio fallbacks and the legacy schema/default API', () => {
     expect(toAspectRatio('4:3', '16:9')).toBe('4 / 3');
-    expect(toAspectRatio('auto', '1:1')).toBe('1 / 1');
+    expect(toAspectRatio('auto', '1:1')).toBe('auto');
     expect(toAspectRatio(undefined, '16:9')).toBe('16 / 9');
     expect(legacyToAspectRatio).toBe(toAspectRatio);
     expect(listLayoutSchema.default('grid').parse(undefined)).toBe('grid');

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  buildArtistOgMetadata,
   buildFormOgMetadata,
   buildLabelOgMetadata,
   buildPostOgMetadata,
@@ -7,6 +8,8 @@ import {
   buildProgramEventSeriesOgMetadata,
   buildReleaseOgMetadata,
   buildSeriesOgMetadata,
+  buildStaticOgMetadata,
+  buildUserOgMetadata,
   truncateForDescription,
 } from './og';
 
@@ -91,7 +94,7 @@ describe('buildPostOgMetadata', () => {
       title: 'Featured',
       featuredImageUrl: 'https://images.example.test/featured.webp',
     });
-    expect(featuredImage.openGraph.images?.[0]?.url).toBe('https://images.example.test/featured.webp');
+    expect(featuredImage.openGraph.images?.[0]).toEqual({ url: 'https://images.example.test/featured.webp' });
 
     const siteDefault = buildPostOgMetadata({
       canonicalOrigin: 'https://studio.example.com',
@@ -99,7 +102,7 @@ describe('buildPostOgMetadata', () => {
       title: 'Default',
       siteOgImageUrl: 'https://cdn.example.test/asset/site-default/og.webp',
     });
-    expect(siteDefault.openGraph.images?.[0]?.url).toBe('https://cdn.example.test/asset/site-default/og.webp');
+    expect(siteDefault.openGraph.images?.[0]).toEqual({ url: 'https://cdn.example.test/asset/site-default/og.webp' });
   });
 });
 
@@ -257,5 +260,50 @@ describe('buildLabelOgMetadata', () => {
       siteOgImageUrl: 'https://cdn.example.test/asset/site-default/og.webp',
     });
     expect(fallback.openGraph.images?.[0]?.url).toBe('https://cdn.example.test/asset/site-default/og.webp');
+  });
+});
+
+describe('OG image dimensions', () => {
+  const base = {
+    canonicalOrigin: 'https://studio.example.com',
+    routePath: '/artists/signal',
+    name: 'Signal',
+    siteOgImageUrl: 'https://cdn.example.test/asset/site-default/og.webp',
+  };
+
+  it('does not invent landscape dimensions for a user avatar', () => {
+    const metadata = buildUserOgMetadata({ ...base, avatarUrl: 'https://cdn.example.test/asset/avatar/square.webp' });
+    expect(metadata.openGraph.images).toEqual([{ url: 'https://cdn.example.test/asset/avatar/square.webp' }]);
+  });
+
+  it('omits dimensions for an artist image when the generated OG is blank', () => {
+    const metadata = buildArtistOgMetadata({
+      ...base,
+      ogImageUrl: '  ',
+      imageUrl: 'https://cdn.example.test/asset/artist/portrait.webp',
+    });
+    expect(metadata.openGraph.images).toEqual([{ url: 'https://cdn.example.test/asset/artist/portrait.webp' }]);
+  });
+
+  it('keeps generated image dimensions and precedence over raw fallback images', () => {
+    const metadata = buildArtistOgMetadata({
+      ...base,
+      ogImageUrl: ' https://cdn.example.test/asset/generated/og.webp ',
+      imageUrl: 'https://cdn.example.test/asset/artist/portrait.webp',
+    });
+    expect(metadata.openGraph.images).toEqual([
+      { url: 'https://cdn.example.test/asset/generated/og.webp', width: 1200, height: 630 },
+    ]);
+  });
+
+  it('does not assert dimensions for a static page image with unknown size', () => {
+    const metadata = buildStaticOgMetadata({
+      baseUrl: base.canonicalOrigin,
+      path: '/privacy',
+      title: 'Privacy',
+      description: 'Privacy policy',
+      imageUrl: 'https://cdn.example.test/asset/static/image.webp',
+    });
+    expect(metadata.openGraph.images).toEqual([{ url: 'https://cdn.example.test/asset/static/image.webp' }]);
   });
 });

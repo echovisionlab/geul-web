@@ -72,3 +72,21 @@ export const BoundedAspectRatio: Story = {
     circularCrop: false,
   },
 };
+
+export const RangeAtImageEdges: Story = {
+  args: {
+    title: 'Crop artist image',
+    imageSrc: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+        <rect width="1000" height="1000" fill="#dbe4ff" />
+        <path d="M0 900 H1000 M900 0 V1000" stroke="#e03131" stroke-width="4" />
+        <circle cx="500" cy="500" r="300" fill="#228be6" />
+        <text x="20" y="960" font-size="32">Bottom 10%</text>
+      </svg>
+    `)}`,
+    aspectRatio: { min: 9 / 16, max: 16 / 9 },
+    circularCrop: false,
+    helpText:
+      'Draw a wide selection below the red line, then resize or use arrow keys. The ratio stays within 9:16–16:9.',
+  },
+};

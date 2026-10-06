@@ -32,6 +32,35 @@ describe('managed-image-url', () => {
       );
     });
 
+    it('preserves the poster thumbnail ratio instead of bucketing its height', () => {
+      expect(buildManagedImageUrl('/asset/poster/image.webp', MANAGED_IMAGE_PRESET.POSTER_THUMB)).toBe(
+        'https://cdn.example.test/asset/poster/image.webp?w=160&h=240&fit=fill&q=80',
+      );
+    });
+
+    it.each([
+      { width: 161, height: 322, expectedWidth: 192, expectedHeight: 384 },
+      { width: 360, height: 240, expectedWidth: 480, expectedHeight: 320 },
+      { width: 360, height: 203, expectedWidth: 480, expectedHeight: 271 },
+    ])(
+      'scales the height with bucketed width for $width x $height',
+      ({ width, height, expectedWidth, expectedHeight }) => {
+        const url = new URL(buildManagedImageUrl('/asset/image/photo.webp', { width, height, fit: 'fill' })!);
+        expect(url.searchParams.get('w')).toBe(String(expectedWidth));
+        expect(url.searchParams.get('h')).toBe(String(expectedHeight));
+        expect(url.searchParams.get('fit')).toBe('fill');
+      },
+    );
+
+    it('removes a stale height for presets that preserve the source ratio', () => {
+      const url = new URL(
+        buildManagedImageUrl('/asset/image/photo.webp?h=256&fit=fill', MANAGED_IMAGE_PRESET.HERO_IMAGE)!,
+      );
+      expect(url.searchParams.get('w')).toBe('1600');
+      expect(url.searchParams.has('h')).toBe(false);
+      expect(url.searchParams.has('fit')).toBe(false);
+    });
+
     it('passes external URLs through unchanged', () => {
       expect(buildManagedImageUrl('https://images.example.test/photo.jpg', MANAGED_IMAGE_PRESET.HEADER_IMAGE)).toBe(
         'https://images.example.test/photo.jpg',

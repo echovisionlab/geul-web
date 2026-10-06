@@ -1,10 +1,11 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
-import ReactCrop, { centerCrop, makeAspectCrop, type Crop, type PercentCrop, type PixelCrop } from 'react-image-crop';
+import ReactCrop, { centerCrop, makeAspectCrop, type PercentCrop, type PixelCrop } from 'react-image-crop';
 import { Box, Group, Loader, Modal, Stack, Text } from '@mantine/core';
 import { Button } from '../Button';
 import { cropImage } from './image-crop';
+import { clampToAspectRange } from './aspect-range';
 
 import 'react-image-crop/dist/ReactCrop.css';
 
@@ -50,7 +51,7 @@ export interface ImageCropperProps {
 /**
  * Get initial crop based on aspect ratio config.
  */
-function getInitialCrop(imageWidth: number, imageHeight: number, aspectRatio: AspectRatioConfig): Crop {
+function getInitialCrop(imageWidth: number, imageHeight: number, aspectRatio: AspectRatioConfig): PercentCrop {
   if (aspectRatio === 'free') {
     // Full image selected
     return { unit: '%', x: 0, y: 0, width: 100, height: 100 };
@@ -85,48 +86,6 @@ function getInitialCrop(imageWidth: number, imageHeight: number, aspectRatio: As
   const cropWidth = 100;
   const cropHeight = (imageAspect / min) * 100;
   return { unit: '%', x: 0, y: (100 - cropHeight) / 2, width: cropWidth, height: cropHeight };
-}
-
-/**
- * Clamp crop to aspect ratio range.
- */
-function clampToAspectRange(
-  crop: Crop,
-  imageWidth: number,
-  imageHeight: number,
-  aspectRange: { min: number; max: number },
-): Crop {
-  if (!crop.width || !crop.height) {
-    return crop;
-  }
-
-  const cropWidthPx = crop.unit === '%' ? (crop.width / 100) * imageWidth : crop.width;
-  const cropHeightPx = crop.unit === '%' ? (crop.height / 100) * imageHeight : crop.height;
-  const currentAspect = cropWidthPx / cropHeightPx;
-
-  if (currentAspect >= aspectRange.min && currentAspect <= aspectRange.max) {
-    return crop;
-  }
-
-  const targetAspect = currentAspect < aspectRange.min ? aspectRange.min : aspectRange.max;
-  const newHeightPx = cropWidthPx / targetAspect;
-  const newHeight = crop.unit === '%' ? (newHeightPx / imageHeight) * 100 : newHeightPx;
-  const maxHeight = crop.unit === '%' ? 100 - (crop.y ?? 0) : imageHeight - (crop.y ?? 0);
-
-  return { ...crop, height: Math.min(newHeight, maxHeight) };
-}
-
-/**
- * Convert PercentCrop to PixelCrop.
- */
-function toPixelCrop(crop: PercentCrop, width: number, height: number): PixelCrop {
-  return {
-    unit: 'px',
-    x: (crop.x / 100) * width,
-    y: (crop.y / 100) * height,
-    width: (crop.width / 100) * width,
-    height: (crop.height / 100) * height,
-  };
 }
 
 /**
@@ -176,8 +135,8 @@ export function ImageCropper({
   maxOutputHeight,
   outputQuality,
 }: ImageCropperProps) {
-  const [crop, setCrop] = useState<Crop>();
-  const [completedCrop, setCompletedCrop] = useState<PercentCrop | PixelCrop>();
+  const [crop, setCrop] = useState<PercentCrop>();
+  const [completedCrop, setCompletedCrop] = useState<PercentCrop>();
   const [isProcessing, setIsProcessing] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
@@ -187,35 +146,32 @@ export function ImageCropper({
       const initialCrop = getInitialCrop(width, height, aspectRatio);
       setCrop(initialCrop);
 
-      // Set initial completedCrop
-      if (initialCrop.unit === '%') {
-        const pixelCrop = toPixelCrop(initialCrop as PercentCrop, width, height);
-        setCompletedCrop(pixelCrop);
-      } else {
-        setCompletedCrop(initialCrop as PixelCrop);
-      }
+      setCompletedCrop(initialCrop);
     },
     [aspectRatio],
   );
 
-  const handleCropChange = useCallback(
-    (c: Crop) => {
+  const correctCrop = useCallback(
+    (percentCrop: PercentCrop) => {
       const image = imgRef.current;
-      if (!image) {
-        setCrop(c);
-        return;
+      if (image && typeof aspectRatio === 'object') {
+        return clampToAspectRange(percentCrop, image.naturalWidth, image.naturalHeight, aspectRatio);
       }
-
-      // Apply aspect range clamping if needed
-      if (typeof aspectRatio === 'object' && 'min' in aspectRatio) {
-        const clamped = clampToAspectRange(c, image.naturalWidth, image.naturalHeight, aspectRatio);
-        setCrop(clamped);
-      } else {
-        setCrop(c);
-      }
+      return percentCrop;
     },
     [aspectRatio],
   );
+
+  const handleCropChange = (_pixelCrop: PixelCrop, percentCrop: PercentCrop) => {
+    setCrop(correctCrop(percentCrop));
+  };
+
+  const handleCropComplete = (_pixelCrop: PixelCrop, percentCrop: PercentCrop) => {
+    // Keyboard completion can contain the raw selection emitted before our correction.
+    const correctedCrop = correctCrop(percentCrop);
+    setCrop(correctedCrop);
+    setCompletedCrop(correctedCrop);
+  };
 
   const handleConfirm = async () => {
     const image = imgRef.current;
@@ -255,7 +211,7 @@ export function ImageCropper({
           <ReactCrop
             crop={crop}
             onChange={handleCropChange}
-            onComplete={(c, percentCrop) => setCompletedCrop(percentCrop || c)}
+            onComplete={handleCropComplete}
             aspect={reactCropAspect}
             circularCrop={circularCrop}
           >

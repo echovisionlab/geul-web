@@ -143,10 +143,12 @@ export function buildManagedImageUrl(
   }
 
   const resolvedPreset = getManagedImagePreset(preset);
-  url.searchParams.set('w', String(resolveManagedImageBucketWidth(resolvedPreset.width)));
+  const width = resolveManagedImageBucketWidth(resolvedPreset.width);
+  url.searchParams.set('w', String(width));
 
   if (resolvedPreset.height && resolvedPreset.height > 0) {
-    url.searchParams.set('h', String(resolveManagedImageBucketWidth(resolvedPreset.height)));
+    const height = Math.round((width * resolvedPreset.height) / resolvedPreset.width);
+    url.searchParams.set('h', String(height));
   } else {
     url.searchParams.delete('h');
   }

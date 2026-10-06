@@ -60,7 +60,7 @@ export function ImageUploadCropField({
   labels,
   accept,
   maxSize,
-  aspectRatio = 1200 / 630,
+  aspectRatio = 16 / 9,
   previewWidth = '100%',
   previewMaxWidth,
   previewMinHeight = 120,
