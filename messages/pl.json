@@ -3496,7 +3496,7 @@
       }
     },
     "embed": {
-      "urlLabel": "Adres URL do osadzenia",
+      "urlLabel": "URL",
       "urlDescription": "Wpisz adres HTTPS strony, którą chcesz osadzić.",
       "invalidUrl": "Wpisz prawidłowy adres URL HTTPS bez nazwy użytkownika ani hasła.",
       "titleLabel": "Tytuł",

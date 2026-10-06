@@ -3496,7 +3496,7 @@
       }
     },
     "embed": {
-      "urlLabel": "嵌入 URL",
+      "urlLabel": "URL",
       "urlDescription": "輸入要嵌入頁面的 HTTPS 位址。",
       "invalidUrl": "輸入不含使用者名稱或密碼的有效 HTTPS URL。",
       "titleLabel": "標題",

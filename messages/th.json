@@ -3496,7 +3496,7 @@
       }
     },
     "embed": {
-      "urlLabel": "URL สำหรับฝัง",
+      "urlLabel": "URL",
       "urlDescription": "ป้อนที่อยู่ HTTPS ของหน้าที่ต้องการฝัง",
       "invalidUrl": "ป้อน URL แบบ HTTPS ที่ถูกต้องโดยไม่มีชื่อผู้ใช้หรือรหัสผ่าน",
       "titleLabel": "ชื่อ",

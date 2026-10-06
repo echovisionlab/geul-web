@@ -3496,7 +3496,7 @@
       }
     },
     "embed": {
-      "urlLabel": "Insluitings-URL",
+      "urlLabel": "URL",
       "urlDescription": "Voer het HTTPS-adres in van de pagina die je wilt insluiten.",
       "invalidUrl": "Voer een geldige HTTPS-URL in zonder gebruikersnaam of wachtwoord.",
       "titleLabel": "Titel",

@@ -3938,7 +3938,7 @@
       }
     },
     "embed": {
-      "urlLabel": "Einbettungs-URL",
+      "urlLabel": "URL",
       "urlDescription": "Gib die HTTPS-Adresse der einzubettenden Seite ein.",
       "invalidUrl": "Gib eine gültige HTTPS-URL ohne Benutzernamen oder Passwort ein.",
       "titleLabel": "Titel",

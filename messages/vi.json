@@ -3496,7 +3496,7 @@
       }
     },
     "embed": {
-      "urlLabel": "URL nhúng",
+      "urlLabel": "URL",
       "urlDescription": "Nhập địa chỉ HTTPS của trang cần nhúng.",
       "invalidUrl": "Nhập URL HTTPS hợp lệ không chứa tên người dùng hoặc mật khẩu.",
       "titleLabel": "Tiêu đề",

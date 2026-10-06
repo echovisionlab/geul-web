@@ -3496,7 +3496,7 @@
       }
     },
     "embed": {
-      "urlLabel": "Embed URL",
+      "urlLabel": "URL",
       "urlDescription": "Enter the HTTPS address of the page to embed.",
       "invalidUrl": "Enter a valid HTTPS URL without a username or password.",
       "titleLabel": "Title",

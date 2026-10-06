@@ -3496,7 +3496,7 @@
       }
     },
     "embed": {
-      "urlLabel": "Gömülecek URL",
+      "urlLabel": "URL",
       "urlDescription": "Gömülecek sayfanın HTTPS adresini girin.",
       "invalidUrl": "Kullanıcı adı veya parola içermeyen geçerli bir HTTPS URL’si girin.",
       "titleLabel": "Başlık",

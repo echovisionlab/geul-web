@@ -3496,7 +3496,7 @@
       }
     },
     "embed": {
-      "urlLabel": "URL de inserción",
+      "urlLabel": "URL",
       "urlDescription": "Introduce la dirección HTTPS de la página que quieres insertar.",
       "invalidUrl": "Introduce una URL HTTPS válida sin nombre de usuario ni contraseña.",
       "titleLabel": "Título",
