@@ -5135,6 +5135,10 @@
     }
   },
   "tools": {
+    "portadj": {
+      "metadataTitle": "PortaDJ",
+      "metadataDescription": "Écoutez et mixez des fichiers audio locaux dans votre navigateur avec deux platines DJ."
+    },
     "youtubeAudio": {
       "title": "Audio YouTube",
       "urlLabel": "Lien de la vidéo",

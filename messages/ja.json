@@ -5135,6 +5135,10 @@
     }
   },
   "tools": {
+    "portadj": {
+      "metadataTitle": "PortaDJ",
+      "metadataDescription": "ブラウザ上の2つのDJデッキで、ローカルの音声ファイルを再生・ミックスできます。"
+    },
     "youtubeAudio": {
       "title": "YouTube オーディオ",
       "urlLabel": "動画リンク",

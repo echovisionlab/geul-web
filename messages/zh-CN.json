@@ -5135,6 +5135,10 @@
     }
   },
   "tools": {
+    "portadj": {
+      "metadataTitle": "PortaDJ",
+      "metadataDescription": "在浏览器中使用两个 DJ 播放器播放和混音本地音频文件。"
+    },
     "youtubeAudio": {
       "title": "YouTube 音频",
       "urlLabel": "视频链接",

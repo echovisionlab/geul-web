@@ -5135,6 +5135,10 @@
     }
   },
   "tools": {
+    "portadj": {
+      "metadataTitle": "PortaDJ",
+      "metadataDescription": "Riproduci e mixa file audio locali nel browser con due deck DJ."
+    },
     "youtubeAudio": {
       "title": "Audio YouTube",
       "urlLabel": "Link del video",

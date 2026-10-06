@@ -5135,6 +5135,10 @@
     }
   },
   "tools": {
+    "portadj": {
+      "metadataTitle": "PortaDJ",
+      "metadataDescription": "Odtwarzaj i miksuj lokalne pliki audio w przeglądarce na dwóch deckach DJ."
+    },
     "youtubeAudio": {
       "title": "Dźwięk z YouTube",
       "urlLabel": "Link do filmu",
