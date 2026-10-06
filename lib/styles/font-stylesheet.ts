@@ -18,5 +18,5 @@ export function buildFontStylesheetHref(cdnUrl: string, fontProfile: LocaleFontP
   const baseUrl = cdnUrl.replace(/\/+$/, '');
   const familyQuery = families.map((family) => `family=${family}`).join('&');
 
-  return `${baseUrl}/fonts/css2?${familyQuery}&display=swap`;
+  return `${baseUrl}/fonts/css2?${familyQuery}&display=swap&v=3`;
 }
