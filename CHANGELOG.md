@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.1](https://github.com/echovisionlab/geul-web/compare/v0.9.0...v0.9.1) (2026-10-06)
+
+
+### Bug Fixes
+
+* **build:** support pnpm 12 release containers ([6115c3d](https://github.com/echovisionlab/geul-web/commit/6115c3de6acb6da20610f3f76d53429cbba0547a))
+* **build:** support pnpm 12 release containers ([680725a](https://github.com/echovisionlab/geul-web/commit/680725adb5162c7395743c8ca03bf8cf9d3a67a9))
+
 ## [0.9.0](https://github.com/echovisionlab/geul-web/compare/v0.8.1...v0.9.0) (2026-10-06)
 
 
