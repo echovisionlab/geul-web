@@ -3496,6 +3496,10 @@
       }
     },
     "embed": {
+      "toolDescription": "Công cụ này chạy trực tiếp trong trang. Chiều cao tự điều chỉnh theo nội dung.",
+      "toolOriginError": "Sử dụng URL công cụ từ trang web này hoặc các máy chủ công cụ của trang web.",
+      "toolLoadError": "Không thể tải công cụ.",
+      "toolLoading": "Đang tải công cụ…",
       "urlLabel": "URL",
       "urlDescription": "Nhập địa chỉ HTTPS của trang cần nhúng.",
       "invalidUrl": "Nhập URL HTTPS hợp lệ không chứa tên người dùng hoặc mật khẩu.",

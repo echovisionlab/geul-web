@@ -3496,6 +3496,10 @@
       }
     },
     "embed": {
+      "toolDescription": "Questo strumento viene eseguito direttamente nella pagina. La sua altezza si adatta al contenuto.",
+      "toolOriginError": "Usa un URL di uno strumento di questo sito o dei suoi server di strumenti.",
+      "toolLoadError": "Impossibile caricare lo strumento.",
+      "toolLoading": "Caricamento dello strumento…",
       "urlLabel": "URL",
       "urlDescription": "Inserisci l’indirizzo HTTPS della pagina da incorporare.",
       "invalidUrl": "Inserisci un URL HTTPS valido senza nome utente o password.",

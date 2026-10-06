@@ -3,12 +3,47 @@ import {
   buildEmbedAllow,
   buildEmbedSandbox,
   hasUnsafeEmbedOrigin,
+  isToolModuleUrl,
+  isTrustedToolModuleUrl,
   readEmbedHeightMessage,
   resolveEmbedUrl,
 } from './policy';
 import { parseEmbedProps } from './schema';
 
 describe('embed security boundaries', () => {
+  it('trusts arbitrary tool names only in the controlled namespace or exact parent origin', () => {
+    const parent = 'https://www.dsub.io';
+    for (const uri of ['https://tools-new-app.dsub.io/embed/index.js', 'https://www.dsub.io/tool.mjs']) {
+      expect(isTrustedToolModuleUrl(new URL(uri), parent)).toBe(true);
+      expect(isToolModuleUrl(new URL(uri))).toBe(true);
+    }
+    for (const uri of [
+      'https://tools-new-app.dsub.io.attacker.example/tool.js',
+      'https://tools-new-app.evil.dsub.io/tool.js',
+      'https://other.dsub.io/tool.js',
+      'https://tools-new-app.dsub.io:8443/tool.js',
+      'http://tools-new-app.dsub.io/tool.js',
+      'https://user:password@tools-new-app.dsub.io/tool.js',
+    ]) {
+      expect(isTrustedToolModuleUrl(new URL(uri), parent)).toBe(false);
+    }
+    expect(isToolModuleUrl(new URL('https://tools-new-app.dsub.io/page?name=index.js'))).toBe(false);
+    expect(isTrustedToolModuleUrl(new URL('https://site.example:8443/tool.js'), 'https://site.example:8443')).toBe(
+      true,
+    );
+    expect(isTrustedToolModuleUrl(new URL('https://site.example/tool.js'), 'https://site.example:8443')).toBe(false);
+  });
+
+  it('permits local HTTP development only with a loopback parent and preserves exact same-origin scheme/port', () => {
+    const local = 'http://localhost:3000';
+    expect(resolveEmbedUrl('http://127.0.0.1:4300/embed/index.js', local)?.href).toBe(
+      'http://127.0.0.1:4300/embed/index.js',
+    );
+    expect(resolveEmbedUrl('http://localhost:4300/embed/index.js', 'https://www.dsub.io')).toBeNull();
+    expect(resolveEmbedUrl('http://insecure.example', local)).toBeNull();
+    expect(isTrustedToolModuleUrl(new URL('http://127.0.0.1:4300/embed/index.js'), local)).toBe(true);
+    expect(isTrustedToolModuleUrl(new URL('http://localhost:4300/embed/index.js'), 'https://www.dsub.io')).toBe(false);
+  });
   it('accepts an HTTPS tool address and rejects executable, relative, insecure and credential URLs', () => {
     expect(resolveEmbedUrl(' https://tool.example/embed?locale=ko ')?.href).toBe(
       'https://tool.example/embed?locale=ko',

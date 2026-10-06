@@ -3496,6 +3496,10 @@
       }
     },
     "embed": {
+      "toolDescription": "このツールはページ内で直接実行され、高さはコンテンツに合わせて調整されます。",
+      "toolOriginError": "このサイトまたはそのツールサーバーが提供するツールの URL を入力してください。",
+      "toolLoadError": "ツールを読み込めませんでした。",
+      "toolLoading": "ツールを読み込み中…",
       "urlLabel": "URL",
       "urlDescription": "埋め込むページの HTTPS アドレスを入力してください。",
       "invalidUrl": "ユーザー名やパスワードを含まない有効な HTTPS URL を入力してください。",

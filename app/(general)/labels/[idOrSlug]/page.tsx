@@ -128,10 +128,9 @@ export default async function LabelViewPage({ params, searchParams }: Props) {
     }
   }
 
-  const [label, labelMetadata, baseUrl] = await Promise.all([
+  const [label, labelMetadata] = await Promise.all([
     getLabelPublic(idOrSlug, shareToken, { requestedLocale }),
     shareToken ? Promise.resolve(null) : getLabelMetadataDocument(idOrSlug, { requestedLocale }),
-    getBaseUrl(),
   ]);
   if (!label) {
     return renderPageRouteFallback(['labels', idOrSlug], query);
@@ -140,7 +139,6 @@ export default async function LabelViewPage({ params, searchParams }: Props) {
     <LabelPublicContent
       label={label}
       labelMetadata={labelMetadata}
-      baseUrl={baseUrl}
       query={query}
       requestedLocale={requestedLocale}
       uiLocale={uiLocale}

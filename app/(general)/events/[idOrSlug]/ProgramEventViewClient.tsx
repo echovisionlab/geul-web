@@ -12,7 +12,6 @@ import {
   PublicMetadataValueGroup,
 } from '@/components/core/PublicMetadata';
 import { CreditList } from '@/features/work/CreditList';
-import { ShareButton } from '@/features/share/ShareButton';
 import { TableOfContents } from '@/features/navigation/TableOfContents';
 import { GeneratedRichTextBlockView } from '@/features/page/PageView/blocks/GeneratedRichTextBlockView';
 import { ContentBlockMediaRuntimeProvider } from '@/features/media/ContentBlockMediaRuntimeContext';
@@ -70,7 +69,6 @@ interface ProgramEventViewData {
 
 interface Props {
   event: ProgramEventViewData;
-  shareUrl: string;
   locale: string;
   pathname: string;
   query?: Record<string, string | string[] | undefined>;
@@ -112,7 +110,7 @@ function creditHref(credit: ProgramEventViewData['credits'][number]): string | n
   return null;
 }
 
-export function ProgramEventViewClient({ event, shareUrl, locale, pathname, query, requestedLocale }: Props) {
+export function ProgramEventViewClient({ event, locale, pathname, query, requestedLocale }: Props) {
   const tCommonEntities = useTranslations('common.entities');
   const tCommonLabels = useTranslations('common.labels');
   const tCommonStates = useTranslations('common.states');
@@ -241,10 +239,7 @@ export function ProgramEventViewClient({ event, shareUrl, locale, pathname, quer
             ) : null}
           </PublicMetadataRows>
         </Stack>
-        <Group gap="xs">
-          {languageMenu}
-          <ShareButton url={shareUrl} title={event.title || tCommonStates('untitledPlain')} size="md" />
-        </Group>
+        <Group gap="xs">{languageMenu}</Group>
       </Group>
     </Stack>
   );

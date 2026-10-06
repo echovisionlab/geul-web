@@ -3496,6 +3496,10 @@
       }
     },
     "embed": {
+      "toolDescription": "Alat ini berjalan langsung di dalam halaman. Tingginya menyesuaikan dengan konten.",
+      "toolOriginError": "Gunakan URL alat dari situs ini atau server alatnya.",
+      "toolLoadError": "Alat tidak dapat dimuat.",
+      "toolLoading": "Memuat alat…",
       "urlLabel": "URL",
       "urlDescription": "Masukkan alamat HTTPS halaman yang ingin disematkan.",
       "invalidUrl": "Masukkan URL HTTPS yang valid tanpa nama pengguna atau kata sandi.",

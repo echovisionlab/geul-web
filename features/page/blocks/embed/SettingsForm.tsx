@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Stack, Text } from '@mantine/core';
 import { Checkbox, Select, TextInput } from '@/components/core/Input';
-import { resolveEmbedUrl } from './policy';
+import { isToolModuleUrl, resolveEmbedUrl } from './policy';
 import { EMBED_MAX_HEIGHT, EMBED_MIN_HEIGHT, parseEmbedProps, type EmbedProps } from './schema';
 
 interface EmbedSettingsFormProps {
@@ -22,7 +22,11 @@ export function EmbedSettingsForm({
 }: EmbedSettingsFormProps) {
   const t = useTranslations('pageEditor.embed');
   const parsed = parseEmbedProps(props);
+  const [parentOrigin, setParentOrigin] = useState<string | null>(null);
+  useEffect(() => setParentOrigin(window.location.origin), []);
   const [uri, setUri] = useState(parsed.uri);
+  const url = resolveEmbedUrl(uri, parentOrigin);
+  const module = url && isToolModuleUrl(url);
   const [height, setHeight] = useState(parsed.height);
   const [persisted, setPersisted] = useState({ uri: parsed.uri, height: parsed.height });
   if (persisted.uri !== parsed.uri || persisted.height !== parsed.height) {
@@ -35,7 +39,7 @@ export function EmbedSettingsForm({
     setPersisted({ uri: parsed.uri, height: parsed.height });
   }
   const commitUri = () => {
-    const url = resolveEmbedUrl(uri);
+    const url = resolveEmbedUrl(uri, parentOrigin);
     if (allowSharedEdits && url) {
       updateSharedProps({ uri: url.href });
     }
@@ -63,10 +67,10 @@ export function EmbedSettingsForm({
     <Stack gap="sm" data-page-block-editor="embed">
       <TextInput
         label={t('urlLabel')}
-        description={t('urlDescription')}
+        description={t(module ? 'toolDescription' : 'urlDescription')}
         value={uri}
         disabled={!allowSharedEdits}
-        error={uri.trim() && !resolveEmbedUrl(uri) ? t('invalidUrl') : undefined}
+        error={uri.trim() && !url ? t('invalidUrl') : undefined}
         onChange={(event) => setUri(event.currentTarget.value)}
         onBlur={commitUri}
         onKeyDown={(event) => {
@@ -81,55 +85,59 @@ export function EmbedSettingsForm({
         value={parsed.title}
         onChange={(event) => updateLocalizedProps({ title: event.currentTarget.value })}
       />
-      <Select
-        label={t('heightModeLabel')}
-        value={parsed.heightMode}
-        disabled={!allowSharedEdits}
-        data={[
-          { value: 'fixed', label: t('heightFixed') },
-          { value: 'auto', label: t('heightAuto') },
-          { value: 'viewport', label: t('heightViewport') },
-        ]}
-        onChange={(value) => {
-          if (allowSharedEdits && value) {
-            updateSharedProps({ heightMode: value });
-          }
-        }}
-      />
-      {parsed.heightMode !== 'viewport' && (
-        <TextInput
-          label={t('heightLabel')}
-          value={height}
-          inputMode="numeric"
-          disabled={!allowSharedEdits}
-          description={parsed.heightMode === 'auto' ? t('heightAutoDescription') : undefined}
-          onChange={(event) => setHeight(event.currentTarget.value)}
-          onBlur={commitHeight}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              commitHeight();
-            }
-          }}
-        />
+      {!module && (
+        <>
+          <Select
+            label={t('heightModeLabel')}
+            value={parsed.heightMode}
+            disabled={!allowSharedEdits}
+            data={[
+              { value: 'fixed', label: t('heightFixed') },
+              { value: 'auto', label: t('heightAuto') },
+              { value: 'viewport', label: t('heightViewport') },
+            ]}
+            onChange={(value) => {
+              if (allowSharedEdits && value) {
+                updateSharedProps({ heightMode: value });
+              }
+            }}
+          />
+          {parsed.heightMode !== 'viewport' && (
+            <TextInput
+              label={t('heightLabel')}
+              value={height}
+              inputMode="numeric"
+              disabled={!allowSharedEdits}
+              description={parsed.heightMode === 'auto' ? t('heightAutoDescription') : undefined}
+              onChange={(event) => setHeight(event.currentTarget.value)}
+              onBlur={commitHeight}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  commitHeight();
+                }
+              }}
+            />
+          )}
+          <Text size="sm" fw={500}>
+            {t('permissionsLabel')}
+          </Text>
+          {permissions.map(([key, label, description]) => (
+            <Checkbox
+              key={key}
+              label={t(label)}
+              description={t(description)}
+              styles={{ labelWrapper: { minWidth: 0 }, description: { overflowWrap: 'anywhere' } }}
+              checked={parsed[key] === 'true'}
+              disabled={!allowSharedEdits}
+              onChange={(event) => {
+                if (allowSharedEdits) {
+                  updateSharedProps({ [key]: event.currentTarget.checked ? 'true' : 'false' });
+                }
+              }}
+            />
+          ))}
+        </>
       )}
-      <Text size="sm" fw={500}>
-        {t('permissionsLabel')}
-      </Text>
-      {permissions.map(([key, label, description]) => (
-        <Checkbox
-          key={key}
-          label={t(label)}
-          description={t(description)}
-          styles={{ labelWrapper: { minWidth: 0 }, description: { overflowWrap: 'anywhere' } }}
-          checked={parsed[key] === 'true'}
-          disabled={!allowSharedEdits}
-          onChange={(event) => {
-            if (allowSharedEdits) {
-              updateSharedProps({ [key]: event.currentTarget.checked ? 'true' : 'false' });
-            }
-          }}
-        />
-      ))}
     </Stack>
   );
 }

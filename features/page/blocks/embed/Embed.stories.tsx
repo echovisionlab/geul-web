@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, SimpleGrid } from '@mantine/core';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { EmbedFrame } from './EmbedFrame';
@@ -52,10 +52,15 @@ export const SettingsMobile: Story = {
 export const SettingsDark: Story = { render: () => <Settings />, globals: { theme: 'dark' } };
 export const Readonly: Story = { render: () => <Settings readonly /> };
 
-function CombinedEditor() {
+function CombinedEditor({ module = false }: { module?: boolean }) {
   const [props, setProps] = useState(
     parseEmbedProps({ uri: 'https://example.com', title: 'Embedded source', heightMode: 'auto', height: '480' }),
   );
+  useEffect(() => {
+    if (module) {
+      setProps((current) => ({ ...current, uri: `${window.location.origin}/fixtures/embed-tool.js` }));
+    }
+  }, [module]);
   const update = (next: Record<string, unknown>) => setProps((current) => parseEmbedProps({ ...current, ...next }));
   return (
     <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
@@ -67,6 +72,15 @@ function CombinedEditor() {
   );
 }
 export const Combined: Story = { render: () => <CombinedEditor /> };
+export const CombinedModule: Story = { render: () => <CombinedEditor module /> };
+export const CombinedModuleDark: Story = { render: () => <CombinedEditor module />, globals: { theme: 'dark' } };
+export const CombinedModuleMobile: Story = {
+  render: () => (
+    <div style={{ width: 320, maxWidth: '100%' }}>
+      <CombinedEditor module />
+    </div>
+  ),
+};
 
 export const SettingsCompact: Story = {
   render: () => (

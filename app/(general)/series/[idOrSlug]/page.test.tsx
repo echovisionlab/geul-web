@@ -20,7 +20,6 @@ vi.mock('@/lib/queries/series', () => ({ getPublicSeries: vi.fn() }));
 vi.mock('@/lib/queries/metadata', () => ({ getSiteMetadataDocument: vi.fn() }));
 vi.mock('@/lib/utils/header.server', () => ({ getRequestHeaders: vi.fn() }));
 vi.mock('@/lib/utils/language.server', () => ({ getUserLocale: vi.fn(async () => 'ko') }));
-vi.mock('@/lib/utils/url.server', () => ({ getBaseUrl: vi.fn(async () => 'https://studio.example.test') }));
 vi.mock('@/app/_shared/page-route-fallback', () => ({
   generatePageRouteFallbackMetadata: vi.fn(),
   renderPageRouteFallback: mocks.renderPageRouteFallback,

@@ -6,14 +6,20 @@ import { ContentLayoutView as DocumentLayoutSurface } from './ui/ContentLayoutVi
 export interface ContentLayoutViewProps {
   layout: DocumentLayout;
   chrome?: ReactNode;
+  controls?: ReactNode;
   children: ReactNode;
   className?: string;
 }
 
 /** Adapts the collaboration contract to the domain-free document-layout surface. */
-export function ContentLayoutView({ layout, chrome, children, className }: ContentLayoutViewProps) {
+export function ContentLayoutView({ layout, chrome, controls, children, className }: ContentLayoutViewProps) {
   return (
-    <DocumentLayoutSurface layout={toDocumentLayoutViewModel(layout)} chrome={chrome} className={className}>
+    <DocumentLayoutSurface
+      layout={toDocumentLayoutViewModel(layout)}
+      chrome={chrome}
+      controls={controls}
+      className={className}
+    >
       {children}
     </DocumentLayoutSurface>
   );

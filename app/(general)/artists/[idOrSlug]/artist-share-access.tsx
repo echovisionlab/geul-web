@@ -2,7 +2,6 @@
 
 import type { ReactNode } from 'react';
 import { getArtistView } from '@/lib/queries/artist';
-import { getBaseUrl } from '@/lib/utils/url.server';
 import { ArtistPublicContent } from './ArtistPublicContent';
 
 export interface ArtistShareAccessState {
@@ -31,7 +30,6 @@ export async function accessArtistShareAction(
     content: await ArtistPublicContent({
       artist,
       artistMetadata: null,
-      baseUrl: await getBaseUrl(),
       query: { share: token },
       requestedLocale,
       uiLocale,

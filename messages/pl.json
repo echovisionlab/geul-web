@@ -3496,6 +3496,10 @@
       }
     },
     "embed": {
+      "toolDescription": "To narzędzie działa bezpośrednio na stronie. Jego wysokość dopasowuje się do treści.",
+      "toolOriginError": "Użyj adresu URL narzędzia z tej witryny lub jej serwerów narzędzi.",
+      "toolLoadError": "Nie udało się wczytać narzędzia.",
+      "toolLoading": "Wczytywanie narzędzia…",
       "urlLabel": "URL",
       "urlDescription": "Wpisz adres HTTPS strony, którą chcesz osadzić.",
       "invalidUrl": "Wpisz prawidłowy adres URL HTTPS bez nazwy użytkownika ani hasła.",

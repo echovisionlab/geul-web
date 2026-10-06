@@ -3496,6 +3496,10 @@
       }
     },
     "embed": {
+      "toolDescription": "此工具直接在頁面內執行，高度會隨內容自動調整。",
+      "toolOriginError": "請使用此網站或其工具伺服器提供的工具 URL。",
+      "toolLoadError": "無法載入工具。",
+      "toolLoading": "正在載入工具…",
       "urlLabel": "URL",
       "urlDescription": "輸入要嵌入頁面的 HTTPS 位址。",
       "invalidUrl": "輸入不含使用者名稱或密碼的有效 HTTPS URL。",

@@ -61,6 +61,19 @@ afterEach(() => {
 });
 
 describe('Embed settings persistence boundaries', () => {
+  it('shows module execution information instead of iframe height and permissions, preserving translator title edits', () => {
+    render({ uri: 'https://tools-new.dsub.io/embed/index.js' }, false);
+    expect(container.textContent).toContain('toolDescription');
+    expect(container.textContent).not.toContain('heightModeLabel');
+    expect(container.querySelectorAll('input[type="checkbox"]')).toHaveLength(0);
+    expect(input('urlLabel').disabled).toBe(true);
+    type(input('titleLabel'), 'Localized tool');
+    expect(localized).toHaveBeenCalledWith({ title: 'Localized tool' });
+    expect(shared).not.toHaveBeenCalled();
+    render({ uri: 'https://external.example/page' });
+    expect(container.textContent).toContain('heightModeLabel');
+    expect(container.querySelectorAll('input[type="checkbox"]')).toHaveLength(8);
+  });
   it('gives every permission a named checkbox and complete accessible description, with clickable labels', () => {
     render({});
     const permissions = [

@@ -46,6 +46,7 @@ describe('ContentLayoutView', () => {
       <ContentLayoutView
         layout={{ contentHeight: 'viewport', pageChrome: 'pinned', footer: 'pinned' }}
         chrome={<ContentChrome title="Page" />}
+        controls={<button type="button">EN</button>}
       >
         <div>Body</div>
       </ContentLayoutView>,
@@ -58,6 +59,7 @@ describe('ContentLayoutView', () => {
     expect(layout?.getAttribute('data-has-chrome')).toBe('true');
     expect(container.querySelector('[data-content-scroll-root]')).toBeNull();
     expect(container.querySelector('[data-content-body]')?.getAttribute('tabindex')).toBeNull();
+    expect(layout?.querySelector('button')?.parentElement?.parentElement).toBe(layout);
   });
 
   it('does not reserve an empty pinned chrome row when chrome is absent', () => {

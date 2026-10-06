@@ -1,0 +1,6 @@
+@media (max-width: 48em) {
+  .dropdown {
+    max-height: calc(50dvh - var(--mantine-spacing-xl));
+    overflow-y: auto;
+  }
+}

@@ -1,6 +1,6 @@
 .root {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: var(--mantine-spacing-md);
   width: 100%;
@@ -21,12 +21,6 @@
 .title {
   color: inherit;
   overflow-wrap: anywhere;
-}
-
-.controls {
-  display: flex;
-  align-items: center;
-  min-height: 2rem;
 }
 
 @media (max-width: 48em) {

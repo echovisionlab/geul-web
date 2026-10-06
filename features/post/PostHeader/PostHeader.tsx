@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import Link from '@/components/core/Navigation';
-import { IconMarkdown, IconPencil, IconShare } from '@tabler/icons-react';
+import { IconMarkdown, IconPencil } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { Box, Group, Image, Stack, Text, Title } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
@@ -64,12 +64,11 @@ interface PostHeaderPost {
 
 interface PostHeaderProps {
   post: PostHeaderPost;
-  onShare: () => void;
   onExport: (format: 'markdown' | 'pdf') => void;
-  languageMenu?: ReactNode;
+  reserveLanguageMenuSpace?: boolean;
 }
 
-export function PostHeader({ post, onShare, onExport, languageMenu }: PostHeaderProps) {
+export function PostHeader({ post, onExport, reserveLanguageMenuSpace = false }: PostHeaderProps) {
   const dateTime = useDateTimeFormatter();
   const t = useTranslations('postHeader');
   const tCommon = useTranslations('common');
@@ -126,8 +125,10 @@ export function PostHeader({ post, onShare, onExport, languageMenu }: PostHeader
     });
 
   const actionButtons = (
-    <Group gap="xs" className="print-hide">
-      {languageMenu}
+    <Group
+      gap="xs"
+      className={`print-hide ${reserveLanguageMenuSpace && post.featuredImageUrl ? classes.actionsWithLanguage : ''}`}
+    >
       {post.canEdit && (
         <Tooltip label={tCommon('actions.edit')}>
           <IconButton
@@ -142,11 +143,6 @@ export function PostHeader({ post, onShare, onExport, languageMenu }: PostHeader
           </IconButton>
         </Tooltip>
       )}
-      <Tooltip label={tCommon('actions.share')}>
-        <IconButton size="sm" tone="neutral" emphasis="low" aria-label={t('actions.sharePost')} onClick={onShare}>
-          <IconShare size={16} />
-        </IconButton>
-      </Tooltip>
       <Tooltip label={tCommon('actions.markdown')}>
         <IconButton
           size="sm"
@@ -313,7 +309,11 @@ export function PostHeader({ post, onShare, onExport, languageMenu }: PostHeader
   // Standard Header without Featured Image
   return (
     <>
-      <Group justify="space-between" align="flex-start">
+      <Group
+        justify="space-between"
+        align="flex-start"
+        className={reserveLanguageMenuSpace ? classes.headerWithLanguage : undefined}
+      >
         <Stack gap="xs" style={{ flex: 1 }}>
           <Title order={1} style={{ fontWeight: 700, fontSize: '1.5rem' }}>
             {post.title || tCommon('states.untitled')}

@@ -8,11 +8,15 @@ import {
   buildEmbedAllow,
   buildEmbedSandbox,
   hasUnsafeEmbedOrigin,
+  isEmbedReadyMessage,
+  isToolModuleUrl,
+  isTrustedToolModuleUrl,
   readEmbedHeightMessage,
   resolveEmbedUrl,
 } from './policy';
 import { type EmbedProps } from './schema';
 import classes from './EmbedFrame.module.css';
+import { ToolModule } from './ToolModule';
 
 export interface EmbedFrameProps {
   props: EmbedProps;
@@ -28,13 +32,33 @@ export function EmbedFrame({ props, preview = false }: EmbedFrameProps) {
   const allow = buildEmbedAllow(props);
   const identity = `${props.uri}:${props.heightMode}:${sandbox}:${allow}`;
   useEffect(() => setParentOrigin(window.location.origin), []);
-  const url = resolveEmbedUrl(props.uri);
-  const unsafe = parentOrigin !== null && hasUnsafeEmbedOrigin(props, parentOrigin);
+  const url = resolveEmbedUrl(props.uri, parentOrigin);
+  const module = url && isToolModuleUrl(url);
+  const untrustedModule = module && parentOrigin !== null && !isTrustedToolModuleUrl(url, parentOrigin);
+  const unsafe = !module && parentOrigin !== null && hasUnsafeEmbedOrigin(props, parentOrigin);
   const canRender = url && parentOrigin !== null && !unsafe;
 
   return (
     <Stack gap="xs">
-      {canRender ? (
+      {canRender && module ? (
+        untrustedModule ? (
+          <Text role="alert" c="dimmed" size="sm">
+            {t('toolOriginError')}
+          </Text>
+        ) : (
+          <ToolModule
+            key={url.href}
+            uri={url.href}
+            title={props.title.trim()}
+            preview={preview}
+            locale={locale}
+            colorScheme={colorScheme}
+            activateLabel={t('activatePreview')}
+            loadingLabel={t('toolLoading')}
+            errorLabel={t('toolLoadError')}
+          />
+        )
+      ) : canRender ? (
         <EmbedDocument
           key={identity}
           props={props}
@@ -89,24 +113,27 @@ function EmbedDocument({
   const frame = useRef<HTMLIFrameElement>(null);
   const [autoHeight, setAutoHeight] = useState<number | null>(null);
   const [active, setActive] = useState(!preview);
-  useEffect(() => {
-    if (props.heightMode !== 'auto') {
-      return;
-    }
-    const onMessage = (event: MessageEvent) => {
-      const height = readEmbedHeightMessage(event, frame.current?.contentWindow ?? null, url.origin);
-      if (height !== null) {
-        setAutoHeight(height);
-      }
-    };
-    window.addEventListener('message', onMessage);
-    return () => window.removeEventListener('message', onMessage);
-  }, [props.heightMode, url.origin]);
   const initialize = useCallback(() => {
     if (props.allowSameOrigin === 'true') {
       frame.current?.contentWindow?.postMessage({ type: 'geul:embed:init', locale, colorScheme }, url.origin);
     }
   }, [props.allowSameOrigin, locale, colorScheme, url.origin]);
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      const frameWindow = frame.current?.contentWindow ?? null;
+      if (isEmbedReadyMessage(event, frameWindow, url.origin)) {
+        initialize();
+      }
+      if (props.heightMode === 'auto') {
+        const height = readEmbedHeightMessage(event, frameWindow, url.origin);
+        if (height !== null) {
+          setAutoHeight(height);
+        }
+      }
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [props.heightMode, url.origin, initialize]);
   useEffect(initialize, [initialize]);
   const height =
     props.heightMode === 'viewport'

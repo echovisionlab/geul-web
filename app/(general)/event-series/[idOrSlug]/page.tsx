@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { JsonLdScript } from '@/features/metadata/ui/JsonLdScript';
 import { ProgramEventSeriesPublicView } from '@/features/program-event/ProgramEventSeriesPublicView';
-import { ShareButton } from '@/features/share/ShareButton';
 import { getSiteMetadataDocument } from '@/lib/queries/metadata';
 import {
   getProgramEventSeriesView,
@@ -14,7 +13,6 @@ import { isEntityEditView } from '@/lib/utils/entity-edit-route';
 import { buildProgramEventSeriesJsonLd } from '@/lib/utils/json-ld';
 import { buildProgramEventSeriesOgMetadata } from '@/lib/utils/og';
 import { getUserLocale } from '@/lib/utils/language.server';
-import { getBaseUrl } from '@/lib/utils/url.server';
 import { EventSeriesEventsTable, type EventSeriesEventsTableItem } from './EventSeriesEventsTable';
 import { generatePageRouteFallbackMetadata, renderPageRouteFallback } from '@/app/_shared/page-route-fallback';
 import {
@@ -81,8 +79,7 @@ export default async function ProgramEventSeriesPage({ params, searchParams }: P
     return renderPageRouteFallback(['event-series', idOrSlug], query);
   }
 
-  const [baseUrl, site, tCommonEntities, eventResult] = await Promise.all([
-    getBaseUrl(),
+  const [site, tCommonEntities, eventResult] = await Promise.all([
     getSiteMetadataDocument(),
     getTranslations('common.entities'),
     listProgramEventsForSeries({
@@ -93,7 +90,6 @@ export default async function ProgramEventSeriesPage({ params, searchParams }: P
   ]);
 
   const pathname = `/event-series/${series.slug || series.id}`;
-  const shareUrl = `${baseUrl}${pathname}`;
   return (
     <>
       <JsonLdScript
@@ -109,7 +105,6 @@ export default async function ProgramEventSeriesPage({ params, searchParams }: P
         title={series.title}
         description={series.description}
         posterUrl={series.posterUrl}
-        controls={<ShareButton url={shareUrl} title={series.title} size="md" />}
         eventsLabel={tCommonEntities('programEvents')}
       >
         <EventSeriesEventsTable
