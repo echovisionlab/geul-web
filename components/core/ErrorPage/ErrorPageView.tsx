@@ -2,31 +2,32 @@ import type { ReactNode } from 'react';
 import { Center, Container, Group, Stack, Text, Title } from '@mantine/core';
 import { Button } from '../Button';
 
+export type ErrorPageAction = { label: string } & (
+  { href: string; onClick?: never } | { onClick: () => void; href?: never }
+);
+
 export interface ErrorPageViewProps {
   code?: string;
+  codeVisual?: ReactNode;
   title: string;
-  description: ReactNode;
-  homeLabel: string;
-  homeHref?: string;
-  retryLabel?: string;
-  onRetry?: () => void;
+  description?: string;
+  actions: readonly ErrorPageAction[];
   fullScreen?: boolean;
 }
 
 export function ErrorPageView({
   code,
+  codeVisual,
   title,
   description,
-  homeLabel,
-  homeHref = '/',
-  retryLabel,
-  onRetry,
+  actions,
   fullScreen = false,
 }: ErrorPageViewProps) {
   return (
     <Center
       component="section"
       aria-label={title}
+      data-error-page
       mih={fullScreen ? '100svh' : '50vh'}
       py="xl"
       px="md"
@@ -34,22 +35,32 @@ export function ErrorPageView({
     >
       <Container size="sm">
         <Stack align="center" gap="lg">
-          {code ? (
-            <Text aria-hidden="true" fz="6rem" fw={700} c="dimmed" lh={1}>
-              {code}
-            </Text>
-          ) : null}
+          {codeVisual ??
+            (code ? (
+              <Text aria-hidden="true" fz="6rem" fw={700} ta="center" c="dimmed">
+                {code}
+              </Text>
+            ) : null)}
           <Title order={1} ta="center">
             {title}
           </Title>
-          <Text c="dimmed" ta="center">
-            {description}
-          </Text>
+          {description ? (
+            <Text c="dimmed" ta="center" size="sm">
+              {description}
+            </Text>
+          ) : null}
           <Group justify="center" gap="sm">
-            {onRetry && retryLabel ? <Button onClick={onRetry}>{retryLabel}</Button> : null}
-            <Button emphasis="low" component="a" href={homeHref}>
-              {homeLabel}
-            </Button>
+            {actions.map((action, index) =>
+              action.href !== undefined ? (
+                <Button key={index} emphasis="low" component="a" href={action.href}>
+                  {action.label}
+                </Button>
+              ) : (
+                <Button key={index} emphasis="low" onClick={action.onClick}>
+                  {action.label}
+                </Button>
+              ),
+            )}
           </Group>
         </Stack>
       </Container>

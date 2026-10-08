@@ -3,7 +3,7 @@ import { createContext, runInContext } from 'node:vm';
 import { resolve } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 
-function workerFixture(mode: 'development' | 'production') {
+function workerFixture(mode: 'development' | 'production', initialization: Promise<void> = Promise.resolve()) {
   const diagnostics = Object.fromEntries(
     ['log', 'debug', 'info', 'warn', 'error', 'table', 'group', 'groupEnd'].map((name) => [name, vi.fn()]),
   );
@@ -34,7 +34,7 @@ function workerFixture(mode: 'development' | 'production') {
     write: false,
     platform: 'browser',
     format: 'cjs',
-    external: ['three'],
+    external: ['@/lib/three/cdn-runtime'],
     define: { 'process.env.NODE_ENV': JSON.stringify(mode) },
   }).outputFiles[0].text;
   const context = createContext({
@@ -44,14 +44,19 @@ function workerFixture(mode: 'development' | 'production') {
     setTimeout: vi.fn(() => 1),
     clearTimeout: vi.fn(),
     require: () => ({
-      setConsoleFunction: (callback: typeof threeConsole) => {
-        threeConsole = callback;
+      loadThreeRuntime: async () => {
+        await initialization;
+        return {
+          setConsoleFunction: (callback: typeof threeConsole) => {
+            threeConsole = callback;
+          },
+          WebGLRenderer: Renderer,
+          Scene: class {
+            traverse() {}
+          },
+          PerspectiveCamera: class {},
+        };
       },
-      WebGLRenderer: Renderer,
-      Scene: class {
-        traverse() {}
-      },
-      PerspectiveCamera: class {},
     }),
   });
   runInContext('globalThis.self = globalThis;', context);
@@ -62,15 +67,45 @@ function workerFixture(mode: 'development' | 'production') {
     renderers,
     onShaderError,
     start(source: string) {
-      context.onmessage({ data: { type: 'start', source, canvas: { width: 640, height: 360 } } });
+      return context.onmessage({ data: { type: 'start', source, canvas: { width: 640, height: 360 } } });
+    },
+    stop() {
+      return context.onmessage({ data: { type: 'stop' } });
     },
   };
 }
 
 describe('Three preview diagnostics', () => {
-  it.each(['development', 'production'] as const)('gates Three and author diagnostics in %s', (mode) => {
+  it('reports CDN initialization failures as resource errors without running author code', async () => {
+    const fixture = workerFixture('production', Promise.reject(new Error('CDN unavailable')));
+    await fixture.start('throw new Error("author code ran");');
+    expect(fixture.renderers).toHaveLength(0);
+    expect(fixture.postMessage).toHaveBeenCalledWith({
+      type: 'error',
+      error: expect.objectContaining({ kind: 'resource' }),
+    });
+  });
+
+  it('does not start a stopped preview when the CDN subsequently finishes loading', async () => {
+    let resolve!: () => void;
+    const fixture = workerFixture(
+      'production',
+      new Promise<void>((done) => {
+        resolve = done;
+      }),
+    );
+    const start = fixture.start('throw new Error("author code ran");');
+    await fixture.stop();
+    resolve();
+    await start;
+    expect(fixture.renderers).toHaveLength(0);
+    expect(fixture.postMessage).toHaveBeenCalledWith({ type: 'stopped' });
+    expect(fixture.postMessage).not.toHaveBeenCalledWith({ type: 'ready' });
+  });
+
+  it.each(['development', 'production'] as const)('gates Three and author diagnostics in %s', async (mode) => {
     const fixture = workerFixture(mode);
-    fixture.start(`
+    await fixture.start(`
       console.log('author log'); console.debug('author debug'); console.info('author info');
       console.warn('author warning'); console.error('author error');
       console.table({ value: 1 }); console.group('author group'); console.groupEnd();
@@ -88,9 +123,9 @@ describe('Three preview diagnostics', () => {
     }
   });
 
-  it.each(['development', 'production'] as const)('still reports thrown frame errors in %s', (mode) => {
+  it.each(['development', 'production'] as const)('still reports thrown frame errors in %s', async (mode) => {
     const fixture = workerFixture(mode);
-    fixture.start("function frame() { throw new Error('frame failed'); }");
+    await fixture.start("function frame() { throw new Error('frame failed'); }");
     expect(fixture.postMessage).toHaveBeenCalledWith({
       type: 'error',
       error: expect.objectContaining({ kind: 'runtime', message: 'frame failed' }),
@@ -98,9 +133,9 @@ describe('Three preview diagnostics', () => {
     expect(fixture.renderers[0].dispose).toHaveBeenCalledOnce();
   });
 
-  it('still reports compile errors outside development', () => {
+  it('still reports compile errors outside development', async () => {
     const fixture = workerFixture('production');
-    fixture.start('const = invalid;');
+    await fixture.start('const = invalid;');
     expect(fixture.postMessage).toHaveBeenCalledWith({
       type: 'error',
       error: expect.objectContaining({ kind: 'compile' }),

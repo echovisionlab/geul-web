@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
-import { IconAlertCircle, IconBan, IconLock, IconUserX } from '@tabler/icons-react';
 import { getTranslations } from 'next-intl/server';
-import { Center, Paper, Stack, Text, Title } from '@mantine/core';
-import { Button } from '@/components/core/Button';
+import type { ErrorPageAction } from '@/components/core/ErrorPage/ErrorPageView';
+import { ErrorPageView } from '@/features/application-error/ErrorPageView';
 import { buildAuthPageMetadata } from '@/lib/i18n/auth-metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -35,18 +34,16 @@ function getErrorContent(
   t: Translator,
   tGeneralError: Translator,
 ): {
-  icon: React.ReactNode;
+  status: number;
   title: string;
   message: string;
-  color: string;
   showRecovery?: boolean;
 } {
   if (!error) {
     return {
-      icon: <IconAlertCircle size={48} />,
+      status: 500,
       title: tGeneralError('title'),
       message: t('states.generic.message'),
-      color: 'red',
     };
   }
 
@@ -58,10 +55,9 @@ function getErrorContent(
   // Account pending deletion - show recovery option (exact match preferred, fallback to includes)
   if (errorId === 'account_pending_deletion' || message.includes('pending deletion')) {
     return {
-      icon: <IconUserX size={48} />,
+      status: 403,
       title: t('states.accountPendingDeletion.title'),
       message: t('states.accountPendingDeletion.message'),
-      color: 'orange',
       showRecovery: true,
     };
   }
@@ -75,10 +71,9 @@ function getErrorContent(
     message.includes('account has been suspended')
   ) {
     return {
-      icon: <IconBan size={48} />,
+      status: 403,
       title: t('states.accountSuspended.title'),
       message: t('states.accountSuspended.message'),
-      color: 'red',
     };
   }
 
@@ -89,29 +84,26 @@ function getErrorContent(
     errorId === 'session_already_available'
   ) {
     return {
-      icon: <IconLock size={48} />,
+      status: 401,
       title: t('states.sessionError.title'),
       message: t('states.sessionError.message'),
-      color: 'orange',
     };
   }
 
   // CSRF violation
   if (errorId === 'security_csrf_violation') {
     return {
-      icon: <IconAlertCircle size={48} />,
+      status: 403,
       title: t('states.securityError.title'),
       message: t('states.securityError.message'),
-      color: 'red',
     };
   }
 
   // Generic error with message
   return {
-    icon: <IconAlertCircle size={48} />,
+    status: error.code && error.code >= 400 && error.code <= 599 ? error.code : 401,
     title: t('states.loginFailed.title'),
     message: t('states.loginFailed.message'),
-    color: 'red',
   };
 }
 
@@ -125,38 +117,11 @@ export default async function LoginFailedPage({ searchParams }: Props) {
 
   const errorData: AuthErrorResponse | null = errorId ? { id: errorId, error: { id: errorId } } : null;
 
-  const { icon, title, message, color, showRecovery } = getErrorContent(errorData?.error || null, t, tGeneralError);
-
-  return (
-    <Center style={{ flex: 1 }} p="md">
-      <Paper radius="md" p="xl" withBorder maw={450} w="100%">
-        <Stack align="center" gap="lg">
-          <Text c={color}>{icon}</Text>
-
-          <Title order={2} ta="center">
-            {title}
-          </Title>
-
-          <Text c="dimmed" ta="center" size="sm">
-            {message}
-          </Text>
-
-          <Stack gap="sm" w="100%">
-            {showRecovery && (
-              <Button component="a" href="/account/recover" fullWidth>
-                {tCommonActions('recoverAccount')}
-              </Button>
-            )}
-            <Button component="a" href="/login" fullWidth emphasis={showRecovery ? 'medium' : 'strong'}>
-              {tCommonActions('backToLogin')}
-            </Button>
-
-            <Button component="a" href="/" emphasis="low" fullWidth>
-              {t('actions.goHome')}
-            </Button>
-          </Stack>
-        </Stack>
-      </Paper>
-    </Center>
-  );
+  const { status, title, message, showRecovery } = getErrorContent(errorData?.error || null, t, tGeneralError);
+  const actions: ErrorPageAction[] = [];
+  if (showRecovery) {
+    actions.push({ label: tCommonActions('recoverAccount'), href: '/account/recover' });
+  }
+  actions.push({ label: tCommonActions('backToLogin'), href: '/login' }, { label: t('actions.goHome'), href: '/' });
+  return <ErrorPageView code={String(status)} title={title} description={message} actions={actions} />;
 }

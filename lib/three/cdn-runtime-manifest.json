@@ -1,0 +1,9 @@
+{
+  "versions": {
+    "three": "0.186.1",
+    "three-stdlib": "2.36.1",
+    "@echovisionlab/ionian": "0.2.0",
+    "mitt": "3.0.1"
+  },
+  "threeUrl": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.min.js"
+}

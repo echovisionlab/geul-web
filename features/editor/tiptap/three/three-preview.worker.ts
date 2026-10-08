@@ -1,4 +1,5 @@
-import * as THREE from 'three';
+import type * as Three from 'three';
+import { loadThreeRuntime } from '@/lib/three/cdn-runtime';
 import { createClientLogger } from '@/lib/utils/client-logger';
 import type { ThreeSceneError, ThreeSceneErrorKind } from './three-source';
 
@@ -16,9 +17,15 @@ const runtime = globalThis as typeof globalThis & {
 };
 const SourceFunction = Function;
 const logger = createClientLogger('three-preview');
-THREE.setConsoleFunction((level, message, ...params) => {
-  logger[level === 'log' ? 'debug' : level](message, { params });
+let THREE: typeof Three;
+const threeRuntime = loadThreeRuntime().then((module) => {
+  THREE = module;
+  THREE.setConsoleFunction((level, message, ...params) => {
+    logger[level === 'log' ? 'debug' : level](message, { params });
+  });
 });
+// Report a loading failure when the queued start message is handled.
+void threeRuntime.catch(() => {});
 const sourceConsole =
   process.env.NODE_ENV === 'development'
     ? console
@@ -29,12 +36,13 @@ const sourceConsole =
         },
       });
 
-let renderer: THREE.WebGLRenderer | null = null;
-let scene: THREE.Scene | null = null;
-let camera: THREE.Camera | null = null;
+let renderer: Three.WebGLRenderer | null = null;
+let scene: Three.Scene | null = null;
+let camera: Three.Camera | null = null;
 let frameTimer: ReturnType<typeof setTimeout> | null = null;
 let program: SceneProgram | null = null;
 let lastHeartbeat = 0;
+let startGeneration = 0;
 
 function disableCapability(name: string, value: unknown): void {
   try {
@@ -115,16 +123,17 @@ function reportError(error: unknown, kind: ThreeSceneErrorKind): void {
   });
 }
 
-function disposeMaterial(material: THREE.Material): void {
+function disposeMaterial(material: Three.Material): void {
   for (const value of Object.values(material)) {
     if (value && typeof value === 'object' && 'isTexture' in value && 'dispose' in value) {
-      (value as THREE.Texture).dispose();
+      (value as Three.Texture).dispose();
     }
   }
   material.dispose();
 }
 
 function cleanup(): void {
+  startGeneration += 1;
   if (frameTimer) {
     clearTimeout(frameTimer);
   }
@@ -135,9 +144,9 @@ function cleanup(): void {
     // Cleanup remains best-effort; the worker is discarded immediately after.
   }
   scene?.traverse((object) => {
-    const candidate = object as THREE.Object3D & {
-      geometry?: THREE.BufferGeometry;
-      material?: THREE.Material | THREE.Material[];
+    const candidate = object as Three.Object3D & {
+      geometry?: Three.BufferGeometry;
+      material?: Three.Material | Three.Material[];
     };
     candidate.geometry?.dispose();
     if (Array.isArray(candidate.material)) {
@@ -172,8 +181,20 @@ function runFrame(time: number): void {
   }
 }
 
-function start({ source, canvas }: WorkerStartMessage): void {
+async function start({ source, canvas }: WorkerStartMessage): Promise<void> {
   cleanup();
+  const generation = startGeneration;
+  try {
+    await threeRuntime;
+  } catch (error) {
+    if (generation === startGeneration) {
+      reportError(error, 'resource');
+    }
+    return;
+  }
+  if (generation !== startGeneration) {
+    return;
+  }
   try {
     scene = new THREE.Scene();
     const nextCamera = new THREE.PerspectiveCamera(
@@ -196,9 +217,9 @@ function start({ source, canvas }: WorkerStartMessage): void {
       `"use strict";\n${source}\n//# sourceURL=three-scene.js\nreturn { frame: typeof frame === "function" ? frame : undefined, dispose: typeof dispose === "function" ? dispose : undefined };`,
     ) as (
       three: typeof THREE,
-      scene: THREE.Scene,
-      camera: THREE.Camera,
-      renderer: THREE.WebGLRenderer,
+      scene: Three.Scene,
+      camera: Three.Camera,
+      renderer: Three.WebGLRenderer,
       canvas: OffscreenCanvas,
     ) => SceneProgram;
     program = compile(THREE, scene, nextCamera, renderer, canvas);
@@ -211,9 +232,9 @@ function start({ source, canvas }: WorkerStartMessage): void {
   }
 }
 
-runtime.onmessage = (event) => {
+runtime.onmessage = async (event) => {
   if (event.data.type === 'start') {
-    start(event.data);
+    await start(event.data);
   } else {
     cleanup();
     runtime.postMessage({ type: 'stopped' });

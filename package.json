@@ -50,7 +50,7 @@
     "@echovisionlab/geul-event": "0.5.0",
     "@echovisionlab/geul-proto": "0.5.0",
     "@echovisionlab/geul-telemetry": "0.2.0",
-    "@echovisionlab/ionian": "0.1.5",
+    "@echovisionlab/ionian": "0.2.0",
     "@hocuspocus/provider": "^4.6.0",
     "@jsquash/webp": "1.5.0",
     "@mantine/carousel": "9.7.0",

@@ -286,8 +286,8 @@ importers:
         specifier: 0.2.0
         version: 0.2.0
       '@echovisionlab/ionian':
-        specifier: 0.1.5
-        version: 0.1.5(mitt@3.0.1)(three-stdlib@2.36.1(three@0.186.1))(three@0.186.1)
+        specifier: 0.2.0
+        version: 0.2.0(mitt@3.0.1)(three-stdlib@2.36.1(three@0.186.1))(three@0.186.1)
       '@hocuspocus/provider':
         specifier: ^4.6.0
         version: 4.6.0(y-protocols@1.0.7(yjs@13.6.33))(yjs@13.6.33)
@@ -1381,9 +1381,9 @@ packages:
     resolution: {integrity: sha512-V0jBpcqCNwfThM2L3VdZWat1TEkf8H5fg1tZXbQ/lFnNWcYrUrg6/OMte54mzfUT+zKmZj8M0TrmZncrbyPaoQ==}
     engines: {node: 24.21.0}
 
-  '@echovisionlab/ionian@0.1.5':
-    resolution: {integrity: sha512-415QIX3GUvqQ7mqhDVupl4NZQ92kc82hwXoHxplMNFXlL507BjVFL7BrLbZndo42FJMkwTQA/010sYhTy+LlxQ==}
-    engines: {node: 24.19.0}
+  '@echovisionlab/ionian@0.2.0':
+    resolution: {integrity: sha512-6m4lvKbmvzEqdFivlAd5elDPujS9CTkkojJ1Hj6d63RGeIDpQrVHlvk0fxBXzHNKXsoEN1JgwqkP6pCYK1hHYQ==}
+    engines: {node: 24.21.0}
     peerDependencies:
       mitt: ^3.0.1
       three: '>=0.175.0 <0.187.0'
@@ -9183,7 +9183,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.1
 
-  '@echovisionlab/ionian@0.1.5(mitt@3.0.1)(three-stdlib@2.36.1(three@0.186.1))(three@0.186.1)':
+  '@echovisionlab/ionian@0.2.0(mitt@3.0.1)(three-stdlib@2.36.1(three@0.186.1))(three@0.186.1)':
     dependencies:
       mitt: 3.0.1
       three: 0.186.1
