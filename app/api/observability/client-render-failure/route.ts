@@ -72,7 +72,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return emptyResponse(413);
   }
 
-  const body = await request.text();
+  let body: string;
+  try {
+    body = await request.text();
+  } catch {
+    return emptyResponse(400);
+  }
   if (new TextEncoder().encode(body).byteLength > CLIENT_RENDER_FAILURE_MAX_BODY_BYTES) {
     return emptyResponse(413);
   }

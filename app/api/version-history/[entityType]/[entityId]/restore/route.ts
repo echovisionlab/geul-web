@@ -19,7 +19,7 @@ export async function POST(request: Request, { params }: Params) {
   }
 
   const body = (await request.json().catch(() => null)) as { versionId?: string } | null;
-  if (!body?.versionId) {
+  if (typeof body?.versionId !== 'string' || !body.versionId.trim()) {
     return NextResponse.json({ error: 'Missing version id' }, { status: 400 });
   }
 

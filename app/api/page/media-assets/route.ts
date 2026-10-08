@@ -1,6 +1,10 @@
+import { toHttpErrorResult } from '@/lib/api/http-error';
+import { createLogger } from '@/lib/utils/logger';
 import { connection, NextResponse } from 'next/server';
 import { getPageView, getPageViewWithToken } from '@/lib/queries/page';
 import { activeContentBlockFileId, contentBlockMediaAssetRecord } from '@/lib/media/content-block-media-server';
+
+const logger = createLogger('page-media-assets-api');
 
 export async function POST(request: Request) {
   await connection();
@@ -18,19 +22,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'invalid_request' }, { status: 400 });
   }
 
-  const page = shareToken
-    ? await getPageViewWithToken(idOrSlug, shareToken, requestedLocale, sharePassword).catch(() => null)
-    : await getPageView(idOrSlug, { requestedLocale });
-  if (!page) {
-    return NextResponse.json({ error: 'not_found' }, { status: 404 });
-  }
-
-  const media: Record<string, Record<string, string>> = {};
-  for (const item of page.blockMedia) {
-    const fileId = activeContentBlockFileId(item);
-    if (fileId) {
-      media[fileId] = contentBlockMediaAssetRecord(item);
+  try {
+    const page = shareToken
+      ? await getPageViewWithToken(idOrSlug, shareToken, requestedLocale, sharePassword)
+      : await getPageView(idOrSlug, { requestedLocale });
+    if (!page) {
+      return NextResponse.json({ error: 'not_found' }, { status: 404 });
     }
+
+    const media: Record<string, Record<string, string>> = {};
+    for (const item of page.blockMedia) {
+      const fileId = activeContentBlockFileId(item);
+      if (fileId) {
+        media[fileId] = contentBlockMediaAssetRecord(item);
+      }
+    }
+    return NextResponse.json({ media }, { headers: { 'Cache-Control': 'private, no-store, max-age=0' } });
+  } catch (error) {
+    logger.error('Failed to fetch media', { error });
+    const result = toHttpErrorResult(error, 'Failed to fetch media');
+    return NextResponse.json({ error: result.error }, { status: result.status });
   }
-  return NextResponse.json({ media }, { headers: { 'Cache-Control': 'private, no-store, max-age=0' } });
 }

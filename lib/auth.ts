@@ -12,7 +12,7 @@ export type { GeoInfo, SessionUser, SessionWithUser } from './auth/types';
 
 const logger = createLogger('auth');
 
-export async function getSessionFromCookie(): Promise<SessionWithUser | null> {
+export async function getSessionFromCookie(options?: { throwOnError?: boolean }): Promise<SessionWithUser | null> {
   const cookieStore = await cookies();
   if (!cookieStore.has(getSessionCookieName())) {
     return null;
@@ -22,6 +22,9 @@ export async function getSessionFromCookie(): Promise<SessionWithUser | null> {
     const memberClient = await createMemberClient();
     const session = parseCurrentSession(await memberClient.getCurrentSession({}));
     if (!session) {
+      if (options?.throwOnError) {
+        throw new Error('GetCurrentSession returned an invalid session projection');
+      }
       logger.error('GetCurrentSession returned an invalid session projection');
     }
     return session;
@@ -35,6 +38,9 @@ export async function getSessionFromCookie(): Promise<SessionWithUser | null> {
       error,
       data: rpcCode === undefined ? undefined : { rpc_code: rpcCode },
     });
+    if (options?.throwOnError) {
+      throw error;
+    }
     return null;
   }
 }

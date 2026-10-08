@@ -509,7 +509,10 @@ export async function getReleasePublic(
     if (isConnectError(err)) {
       logger.error('GetReleasePublic RPC error', { error: err.message });
     }
-    return null;
+    if (isConnectErrorCode(err, Code.NotFound, Code.PermissionDenied)) {
+      return null;
+    }
+    throw err;
   }
 }
 

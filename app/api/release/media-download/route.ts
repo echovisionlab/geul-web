@@ -1,6 +1,10 @@
+import { toHttpErrorResult } from '@/lib/api/http-error';
+import { createLogger } from '@/lib/utils/logger';
 import { connection, NextResponse } from 'next/server';
 import { FileDownloadAction, FileDownloadAvailability } from '@echovisionlab/geul-proto/public/file_pb.ts';
 import { getReleasePublic } from '@/lib/queries/release';
+
+const logger = createLogger('release-media-download-api');
 
 export async function POST(request: Request) {
   await connection();
@@ -20,28 +24,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'invalid_request' }, { status: 400 });
   }
 
-  const release = await getReleasePublic(idOrSlug, shareToken || undefined, {
-    requestedLocale,
-    sharePassword,
-    hydrateWaveformData: false,
-  });
-  const track = release?.tracks.find((candidate) => candidate.id === trackId);
-  if (!track) {
-    return NextResponse.json({ error: 'not_found' }, { status: 404 });
-  }
+  try {
+    const release = await getReleasePublic(idOrSlug, shareToken || undefined, {
+      requestedLocale,
+      sharePassword,
+      hydrateWaveformData: false,
+    });
+    const track = release?.tracks.find((candidate) => candidate.id === trackId);
+    if (!track) {
+      return NextResponse.json({ error: 'not_found' }, { status: 404 });
+    }
 
-  return NextResponse.json(
-    {
-      access: {
-        availability: track.downloadAvailability,
-        action: track.downloadAction,
+    return NextResponse.json(
+      {
+        access: {
+          availability: track.downloadAvailability,
+          action: track.downloadAction,
+        },
+        ...(track.downloadAvailability === FileDownloadAvailability.AVAILABLE &&
+        track.downloadAction === FileDownloadAction.DOWNLOAD &&
+        track.downloadUrl
+          ? { download: { url: track.downloadUrl } }
+          : {}),
       },
-      ...(track.downloadAvailability === FileDownloadAvailability.AVAILABLE &&
-      track.downloadAction === FileDownloadAction.DOWNLOAD &&
-      track.downloadUrl
-        ? { download: { url: track.downloadUrl } }
-        : {}),
-    },
-    { headers: { 'Cache-Control': 'private, no-store, max-age=0' } },
-  );
+      { headers: { 'Cache-Control': 'private, no-store, max-age=0' } },
+    );
+  } catch (error) {
+    logger.error('Failed to fetch media', { error });
+    const result = toHttpErrorResult(error, 'Failed to fetch media');
+    return NextResponse.json({ error: result.error }, { status: result.status });
+  }
 }

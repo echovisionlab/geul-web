@@ -172,4 +172,22 @@ describe('getSessionFromCookie', () => {
       data: { rpc_code: Code.Unavailable },
     });
   });
+
+  it('propagates dependency failures in strict mode without clearing the session', async () => {
+    const error = new ConnectError('upstream unavailable', Code.Unavailable);
+    mocks.getCurrentSession.mockRejectedValue(error);
+    await expect(getSessionFromCookie({ throwOnError: true })).rejects.toBe(error);
+    expect(mocks.cookieDelete).not.toHaveBeenCalled();
+  });
+
+  it('still returns null for an expired session in strict mode', async () => {
+    mocks.getCurrentSession.mockRejectedValue(new ConnectError('expired', Code.Unauthenticated));
+    await expect(getSessionFromCookie({ throwOnError: true })).resolves.toBeNull();
+  });
+
+  it('propagates invalid session projections in strict mode', async () => {
+    mocks.getCurrentSession.mockResolvedValue({});
+    await expect(getSessionFromCookie({ throwOnError: true })).rejects.toThrow('invalid session projection');
+    expect(mocks.cookieDelete).not.toHaveBeenCalled();
+  });
 });

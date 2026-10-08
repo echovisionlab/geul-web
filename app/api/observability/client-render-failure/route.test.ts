@@ -34,6 +34,13 @@ describe('client render failure intake', () => {
     clientRenderFailureRateLimit.resetForTesting();
   });
 
+  it('rejects an unreadable request body before logging', async () => {
+    const req = request({});
+    vi.spyOn(req, 'text').mockRejectedValueOnce(new Error('private stream failure'));
+    expect((await POST(req)).status).toBe(400);
+    expect(mocks.emitSystemRecord).not.toHaveBeenCalled();
+  });
+
   it('emits a bounded supplemental classification for a minified React code', async () => {
     const response = await POST(
       request({
