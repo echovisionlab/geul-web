@@ -2403,7 +2403,7 @@
   },
   "generalError": {
     "title": "Une erreur est survenue",
-    "description": "Une erreur s'est produite lors du chargement de la page.<br></br>Vous n'avez peut-être pas les autorisations requises ou votre session a peut-être expiré.",
+    "description": "Une erreur s'est produite lors du chargement de la page.",
     "actions": {
       "goHome": "Retour à l'accueil"
     }

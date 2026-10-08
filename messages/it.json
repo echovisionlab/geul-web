@@ -2403,7 +2403,7 @@
   },
   "generalError": {
     "title": "Qualcosa è andato storto",
-    "description": "Si è verificato un errore durante il caricamento della pagina.<br></br>Potresti non avere l'autorizzazione oppure la tua sessione potrebbe essere scaduta.",
+    "description": "Si è verificato un errore durante il caricamento della pagina.",
     "actions": {
       "goHome": "Vai a casa"
     }

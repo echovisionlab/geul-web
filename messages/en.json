@@ -2403,7 +2403,7 @@
   },
   "generalError": {
     "title": "Something went wrong",
-    "description": "An error occurred while loading the page.<br></br>You may not have permission or your session may have expired.",
+    "description": "An error occurred while loading the page.",
     "actions": {
       "goHome": "Go to home"
     }

@@ -2403,7 +2403,7 @@
   },
   "generalError": {
     "title": "Ada yang tidak beres",
-    "description": "Terjadi kesalahan saat memuat laman.<br></br>Anda mungkin tidak memiliki izin atau sesi Anda mungkin telah kedaluwarsa.",
+    "description": "Terjadi kesalahan saat memuat laman.",
     "actions": {
       "goHome": "Pergi ke rumah"
     }

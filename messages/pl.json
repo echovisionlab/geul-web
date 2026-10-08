@@ -2403,7 +2403,7 @@
   },
   "generalError": {
     "title": "Coś poszło nie tak",
-    "description": "Wystąpił błąd podczas ładowania strony.<br></br>Możesz nie mieć uprawnień lub Twoja sesja mogła wygasnąć.",
+    "description": "Wystąpił błąd podczas ładowania strony.",
     "actions": {
       "goHome": "Idź do domu"
     }

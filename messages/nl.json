@@ -2403,7 +2403,7 @@
   },
   "generalError": {
     "title": "Er is iets misgegaan",
-    "description": "Er is een fout opgetreden tijdens het laden van de pagina.<br></br>Je hebt mogelijk geen rechten of je sessie is mogelijk verlopen.",
+    "description": "Er is een fout opgetreden tijdens het laden van de pagina.",
     "actions": {
       "goHome": "Ga naar startpagina"
     }

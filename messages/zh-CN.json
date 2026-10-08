@@ -2403,7 +2403,7 @@
   },
   "generalError": {
     "title": "出了点问题",
-    "description": "加载页面时出错。<br></br>您可能没有权限，或者您的会话已过期",
+    "description": "加载页面时出错。",
     "actions": {
       "goHome": "返回首页"
     }
