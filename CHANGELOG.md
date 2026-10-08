@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/echovisionlab/geul-web/compare/v0.10.5...v0.11.0) (2026-10-08)
+
+
+### Features
+
+* **ui:** unify error pages with Ionian particles and shared Three CDN runtime ([#114](https://github.com/echovisionlab/geul-web/issues/114)) ([69863e6](https://github.com/echovisionlab/geul-web/commit/69863e6c6c09cbda5f47f82da4d5e5f55fbe82a5))
+
 ## [0.10.5](https://github.com/echovisionlab/geul-web/compare/v0.10.4...v0.10.5) (2026-10-08)
 
 
