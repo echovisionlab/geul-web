@@ -6,7 +6,7 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import messages from '@/lib/i18n/error-messages.json';
+import messages from '@/lib/i18n/error-page-messages.json';
 import { SUPPORTED_LOCALES } from '@/lib/i18n/locale';
 import { RootErrorPageView } from './RootErrorPageView';
 
@@ -31,18 +31,25 @@ describe('root error fallback', () => {
         </MantineProvider>,
       ),
     );
-    expect(container.querySelector('h1')?.textContent).toBe(messages.ko.title);
+    expect(container.querySelector('h1')?.textContent).toBe(messages.ko.titles['500']);
     expect(container.querySelector('a')?.getAttribute('href')).toBe('/');
     await act(async () => container.querySelector('button')!.click());
     expect(retry).toHaveBeenCalledOnce();
-    expect(container.querySelector('button')?.getAttribute('data-emphasis')).toBe('strong');
+    expect(container.querySelector('button')?.getAttribute('data-emphasis')).toBe('low');
   });
 
   it('keeps the provider-free fallback synchronized with every supported language', () => {
     expect(Object.keys(messages).sort()).toEqual([...SUPPORTED_LOCALES].sort());
     for (const locale of SUPPORTED_LOCALES) {
       const catalogue = JSON.parse(readFileSync(`${process.cwd()}/messages/${locale}.json`, 'utf8'));
-      expect(messages[locale]).toEqual({ ...catalogue.generalError, tryAgain: catalogue.common.actions.tryAgain });
+      expect(messages[locale].titles['404']).toBe(catalogue.notFoundPage.title);
+      expect(messages[locale].titles['500']).toBe(catalogue.generalError.title);
+      expect(messages[locale].actions).toEqual({
+        goHome: catalogue.notFoundPage.goHome,
+        tryAgain: catalogue.common.actions.tryAgain,
+        login: catalogue.common.actions.backToLogin,
+      });
+      expect(Object.values(messages[locale].titles).every((title) => title.length > 0)).toBe(true);
     }
   });
 });

@@ -5,6 +5,7 @@ import '@/lib/styles/variables.css';
 import '@/lib/styles/font-assignment.css';
 
 import { useEffect, useSyncExternalStore } from 'react';
+import { resolveErrorStatus } from '@/features/application-error/error-status';
 import { RootErrorPageView } from '@/features/application-error/RootErrorPageView';
 import { DEFAULT_LOCALE, getLocaleDirection, getLocaleFontProfile, normalizeLocale } from '@/lib/i18n/locale';
 import { AppMantineProvider } from '@/lib/providers/AppMantineProvider';
@@ -45,7 +46,7 @@ export default function GlobalError({ error, reset }: Props) {
     <html lang={locale} dir={getLocaleDirection(locale)} data-font-profile={getLocaleFontProfile(locale)}>
       <body>
         <AppMantineProvider defaultColorScheme="auto">
-          <RootErrorPageView locale={locale} onRetry={reset} />
+          <RootErrorPageView status={resolveErrorStatus(error)} locale={locale} onRetry={reset} />
         </AppMantineProvider>
       </body>
     </html>

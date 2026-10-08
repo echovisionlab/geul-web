@@ -1,7 +1,8 @@
-import { getTranslations } from 'next-intl/server';
-import { ErrorPageView } from '@/components/core/ErrorPage/ErrorPageView';
+import { getLocale } from 'next-intl/server';
+import { ApplicationErrorPage } from '@/features/application-error/ApplicationErrorPage';
+import { DEFAULT_LOCALE, normalizeLocale } from '@/lib/i18n/locale';
 
 export default async function NotFound() {
-  const t = await getTranslations('notFoundPage');
-  return <ErrorPageView code="404" title={t('title')} description={t('description')} homeLabel={t('goHome')} />;
+  const locale = normalizeLocale(await getLocale()) ?? DEFAULT_LOCALE;
+  return <ApplicationErrorPage status={404} locale={locale} />;
 }

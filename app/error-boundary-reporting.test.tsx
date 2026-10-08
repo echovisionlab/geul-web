@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import GeneralError from './(general)/error';
 import AdminError from './admin/error';
 import GlobalError from './global-error';
+import RootError from './error';
 
 const mocks = vi.hoisted(() => ({ report: vi.fn() }));
 
@@ -15,6 +16,7 @@ vi.mock('@/lib/observability/client-render-failure', () => ({
 }));
 
 vi.mock('next-intl', () => ({
+  useLocale: () => 'ko',
   useTranslations: () =>
     Object.assign((key: string) => key, {
       rich: (key: string) => key,
@@ -58,6 +60,17 @@ describe('application error boundary reporting', () => {
 
     expect(mocks.report).toHaveBeenCalledWith('general', generalError);
     expect(mocks.report).toHaveBeenCalledWith('admin', adminError);
+  });
+
+  it('covers routes outside the general/admin groups with the common boundary', async () => {
+    const error = Object.assign(new Error('upstream'), { status: 503 });
+    await renderBoundary(
+      <MantineProvider env="test">
+        <RootError error={error} reset={vi.fn()} />
+      </MantineProvider>,
+    );
+    expect(document.querySelector('[data-error-code]')?.getAttribute('data-error-code')).toBe('503');
+    expect(mocks.report).toHaveBeenCalledWith('general', error);
   });
 
   it('classifies the root error surface', async () => {

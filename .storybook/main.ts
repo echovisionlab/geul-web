@@ -1,6 +1,7 @@
 import type { StorybookConfig } from '@storybook/nextjs';
 import { existsSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { prepareThreeRuntime } from '../scripts/prepare-three-runtime.mjs';
 
 const typeScriptLoader = fileURLToPath(new URL('./loaders/transpile-typescript.cjs', import.meta.url));
 const useLocalContracts = process.env.LOCAL_CONTRACTS === '1';
@@ -52,11 +53,13 @@ const config: StorybookConfig = {
     options: {},
   },
   webpackFinal: async (webpackConfig) => {
+    await prepareThreeRuntime();
     webpackConfig.module ??= { rules: [] };
     webpackConfig.module.rules ??= [];
     webpackConfig.resolve ??= {};
     webpackConfig.resolve.alias = {
       ...webpackConfig.resolve.alias,
+      three$: fileURLToPath(new URL('../lib/three/three-cdn-module.generated.mjs', import.meta.url)),
       ...(localContractRoots
         ? {
             // Keep local Common sources on the application's Yjs constructor.

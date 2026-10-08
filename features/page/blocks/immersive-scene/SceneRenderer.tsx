@@ -7,6 +7,7 @@ import { Box, Title, useComputedColorScheme } from '@mantine/core';
 import { useReducedMotion } from '@mantine/hooks';
 import { toCdnUrl } from '@/lib/utils/file-url';
 import { createClientLogger } from '@/lib/utils/client-logger';
+import { loadIonianRuntime, loadThreeRuntime } from '@/lib/three/cdn-runtime';
 import { ImmersiveSceneDescriptionView } from './DescriptionView';
 import classes from './SceneRenderer.module.css';
 import {
@@ -526,7 +527,7 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
 
     async function initializeRenderer() {
       try {
-        const [{ ParticlesEngine }, THREE] = await Promise.all([import('@echovisionlab/ionian'), import('three')]);
+        const [{ ParticlesEngine }, THREE] = await Promise.all([loadIonianRuntime(), loadThreeRuntime()]);
 
         if (disposed || !canvas) {
           return;

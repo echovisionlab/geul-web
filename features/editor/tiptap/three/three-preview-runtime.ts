@@ -22,7 +22,8 @@ type RuntimeWorkerMessage = { type: 'ready' | 'heartbeat' | 'stopped' } | { type
 type TranspileWorkerMessage = { type: 'compiled'; source: string } | { type: 'error'; error: ThreeSceneError };
 
 const COMPILE_TIMEOUT_MS = 8_000;
-const START_TIMEOUT_MS = 5_000;
+// CDN initialization gets a separate startup budget; frame watchdogs stay short.
+const START_TIMEOUT_MS = 20_000;
 const HEARTBEAT_TIMEOUT_MS = 1_500;
 const STOP_GRACE_MS = 100;
 

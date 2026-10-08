@@ -1,0 +1,482 @@
+{
+  "ar": {
+    "titles": {
+      "400": "طلب غير صالح",
+      "401": "يلزم تسجيل الدخول",
+      "403": "تم رفض الوصول",
+      "404": "الصفحة غير موجودة",
+      "408": "انتهت مهلة الطلب",
+      "409": "يتعارض الطلب مع الحالة الحالية",
+      "410": "لم تعد هذه الصفحة متاحة",
+      "413": "حجم الطلب كبير جدًا",
+      "422": "تعذرت معالجة الطلب",
+      "429": "طلبات كثيرة جدًا",
+      "500": "حدث خطأ ما",
+      "501": "هذا الطلب غير مدعوم",
+      "502": "حدث خطأ في خدمة متصلة",
+      "503": "الخدمة غير متاحة مؤقتًا",
+      "504": "انتهت مهلة استجابة الخدمة"
+    },
+    "actions": {
+      "goHome": "العودة إلى الصفحة الرئيسية",
+      "tryAgain": "حاول مرة أخرى",
+      "login": "العودة إلى تسجيل الدخول"
+    }
+  },
+  "de": {
+    "titles": {
+      "400": "Ungültige Anfrage",
+      "401": "Anmeldung erforderlich",
+      "403": "Zugriff verweigert",
+      "404": "Seite nicht gefunden",
+      "408": "Zeitüberschreitung der Anfrage",
+      "409": "Die Anfrage steht im Konflikt mit dem aktuellen Zustand",
+      "410": "Diese Seite ist nicht mehr verfügbar",
+      "413": "Die Anfrage ist zu groß",
+      "422": "Die Anfrage kann nicht verarbeitet werden",
+      "429": "Zu viele Anfragen",
+      "500": "Etwas ist schiefgelaufen",
+      "501": "Diese Anfrage wird nicht unterstützt",
+      "502": "Ein vorgelagerter Dienst ist fehlgeschlagen",
+      "503": "Dienst vorübergehend nicht verfügbar",
+      "504": "Zeitüberschreitung der Dienstantwort"
+    },
+    "actions": {
+      "goHome": "Zur Startseite",
+      "tryAgain": "Erneut versuchen",
+      "login": "Zur Anmeldung"
+    }
+  },
+  "en": {
+    "titles": {
+      "400": "Invalid request",
+      "401": "Sign in required",
+      "403": "Access denied",
+      "404": "Page not found",
+      "408": "Request timed out",
+      "409": "Request conflicts with the current state",
+      "410": "This page is no longer available",
+      "413": "Request is too large",
+      "422": "Unable to process the request",
+      "429": "Too many requests",
+      "500": "Something went wrong",
+      "501": "This request is not supported",
+      "502": "An upstream service failed",
+      "503": "Service temporarily unavailable",
+      "504": "Service response timed out"
+    },
+    "actions": {
+      "goHome": "Go home",
+      "tryAgain": "Try again",
+      "login": "Back to Login"
+    }
+  },
+  "es": {
+    "titles": {
+      "400": "Solicitud no válida",
+      "401": "Debes iniciar sesión",
+      "403": "Acceso denegado",
+      "404": "Página no encontrada",
+      "408": "La solicitud agotó el tiempo de espera",
+      "409": "La solicitud entra en conflicto con el estado actual",
+      "410": "Esta página ya no está disponible",
+      "413": "La solicitud es demasiado grande",
+      "422": "No se puede procesar la solicitud",
+      "429": "Demasiadas solicitudes",
+      "500": "Algo salió mal",
+      "501": "Esta solicitud no es compatible",
+      "502": "Falló un servicio externo",
+      "503": "Servicio temporalmente no disponible",
+      "504": "La respuesta del servicio agotó el tiempo de espera"
+    },
+    "actions": {
+      "goHome": "Ir a casa",
+      "tryAgain": "Intentar otra vez",
+      "login": "Volver a iniciar sesión"
+    }
+  },
+  "es-419": {
+    "titles": {
+      "400": "Solicitud no válida",
+      "401": "Debes iniciar sesión",
+      "403": "Acceso denegado",
+      "404": "Página no encontrada",
+      "408": "La solicitud agotó el tiempo de espera",
+      "409": "La solicitud entra en conflicto con el estado actual",
+      "410": "Esta página ya no está disponible",
+      "413": "La solicitud es demasiado grande",
+      "422": "No se puede procesar la solicitud",
+      "429": "Demasiadas solicitudes",
+      "500": "algo salió mal",
+      "501": "Esta solicitud no es compatible",
+      "502": "Falló un servicio externo",
+      "503": "Servicio temporalmente no disponible",
+      "504": "La respuesta del servicio agotó el tiempo de espera"
+    },
+    "actions": {
+      "goHome": "Ir a casa",
+      "tryAgain": "Inténtalo de nuevo",
+      "login": "Volver a iniciar sesión"
+    }
+  },
+  "fr": {
+    "titles": {
+      "400": "Requête invalide",
+      "401": "Connexion requise",
+      "403": "Accès refusé",
+      "404": "Page introuvable",
+      "408": "La requête a expiré",
+      "409": "La requête est en conflit avec l’état actuel",
+      "410": "Cette page n’est plus disponible",
+      "413": "La requête est trop volumineuse",
+      "422": "Impossible de traiter la requête",
+      "429": "Trop de requêtes",
+      "500": "Une erreur est survenue",
+      "501": "Cette requête n’est pas prise en charge",
+      "502": "Un service en amont a échoué",
+      "503": "Service temporairement indisponible",
+      "504": "Le délai de réponse du service est dépassé"
+    },
+    "actions": {
+      "goHome": "Retour à l'accueil",
+      "tryAgain": "Réessayer",
+      "login": "Retour à la connexion"
+    }
+  },
+  "id": {
+    "titles": {
+      "400": "Permintaan tidak valid",
+      "401": "Perlu masuk",
+      "403": "Akses ditolak",
+      "404": "Halaman tidak ditemukan",
+      "408": "Waktu permintaan habis",
+      "409": "Permintaan bertentangan dengan keadaan saat ini",
+      "410": "Halaman ini tidak lagi tersedia",
+      "413": "Permintaan terlalu besar",
+      "422": "Permintaan tidak dapat diproses",
+      "429": "Terlalu banyak permintaan",
+      "500": "Ada yang tidak beres",
+      "501": "Permintaan ini tidak didukung",
+      "502": "Layanan terkait mengalami kesalahan",
+      "503": "Layanan sementara tidak tersedia",
+      "504": "Waktu respons layanan habis"
+    },
+    "actions": {
+      "goHome": "Pulang",
+      "tryAgain": "Coba lagi",
+      "login": "Kembali ke Masuk"
+    }
+  },
+  "it": {
+    "titles": {
+      "400": "Richiesta non valida",
+      "401": "Accesso richiesto",
+      "403": "Accesso negato",
+      "404": "Pagina non trovata",
+      "408": "La richiesta è scaduta",
+      "409": "La richiesta è in conflitto con lo stato attuale",
+      "410": "Questa pagina non è più disponibile",
+      "413": "La richiesta è troppo grande",
+      "422": "Impossibile elaborare la richiesta",
+      "429": "Troppe richieste",
+      "500": "Qualcosa è andato storto",
+      "501": "Questa richiesta non è supportata",
+      "502": "Un servizio a monte ha avuto un errore",
+      "503": "Servizio temporaneamente non disponibile",
+      "504": "La risposta del servizio è scaduta"
+    },
+    "actions": {
+      "goHome": "Vai alla home",
+      "tryAgain": "Riprova",
+      "login": "Torna al login"
+    }
+  },
+  "ja": {
+    "titles": {
+      "400": "無効なリクエストです",
+      "401": "ログインが必要です",
+      "403": "アクセス権限がありません",
+      "404": "ページが見つかりません",
+      "408": "リクエストがタイムアウトしました",
+      "409": "リクエストが現在の状態と競合しています",
+      "410": "このページは利用できなくなりました",
+      "413": "リクエストのサイズが大きすぎます",
+      "422": "リクエストを処理できません",
+      "429": "リクエストが多すぎます",
+      "500": "問題が発生しました",
+      "501": "対応していないリクエストです",
+      "502": "接続先のサービスでエラーが発生しました",
+      "503": "サービスを一時的に利用できません",
+      "504": "サービスの応答がタイムアウトしました"
+    },
+    "actions": {
+      "goHome": "ホームへ移動",
+      "tryAgain": "再試行",
+      "login": "ログインに戻る"
+    }
+  },
+  "ko": {
+    "titles": {
+      "400": "잘못된 요청입니다",
+      "401": "로그인이 필요합니다",
+      "403": "접근 권한이 없습니다",
+      "404": "페이지를 찾을 수 없습니다",
+      "408": "요청 시간이 초과되었습니다",
+      "409": "요청이 현재 상태와 충돌합니다",
+      "410": "더 이상 사용할 수 없는 페이지입니다",
+      "413": "요청 크기가 너무 큽니다",
+      "422": "요청을 처리할 수 없습니다",
+      "429": "요청이 너무 많습니다",
+      "500": "문제가 발생했습니다",
+      "501": "지원하지 않는 요청입니다",
+      "502": "연결된 서비스에 오류가 발생했습니다",
+      "503": "서비스를 잠시 사용할 수 없습니다",
+      "504": "서비스 응답 시간이 초과되었습니다"
+    },
+    "actions": {
+      "goHome": "홈으로 가기",
+      "tryAgain": "다시 시도",
+      "login": "로그인으로 돌아가기"
+    }
+  },
+  "nl": {
+    "titles": {
+      "400": "Ongeldig verzoek",
+      "401": "Inloggen vereist",
+      "403": "Toegang geweigerd",
+      "404": "Pagina niet gevonden",
+      "408": "Het verzoek is verlopen",
+      "409": "Het verzoek conflicteert met de huidige status",
+      "410": "Deze pagina is niet meer beschikbaar",
+      "413": "Het verzoek is te groot",
+      "422": "Het verzoek kan niet worden verwerkt",
+      "429": "Te veel verzoeken",
+      "500": "Er is iets misgegaan",
+      "501": "Dit verzoek wordt niet ondersteund",
+      "502": "Een achterliggende dienst is uitgevallen",
+      "503": "Dienst tijdelijk niet beschikbaar",
+      "504": "De dienst reageerde niet op tijd"
+    },
+    "actions": {
+      "goHome": "Naar startpagina",
+      "tryAgain": "Opnieuw proberen",
+      "login": "Terug naar inloggen"
+    }
+  },
+  "pl": {
+    "titles": {
+      "400": "Nieprawidłowe żądanie",
+      "401": "Wymagane logowanie",
+      "403": "Brak dostępu",
+      "404": "Nie znaleziono strony",
+      "408": "Upłynął limit czasu żądania",
+      "409": "Żądanie jest sprzeczne z bieżącym stanem",
+      "410": "Ta strona nie jest już dostępna",
+      "413": "Żądanie jest zbyt duże",
+      "422": "Nie można przetworzyć żądania",
+      "429": "Zbyt wiele żądań",
+      "500": "Coś poszło nie tak",
+      "501": "To żądanie nie jest obsługiwane",
+      "502": "Wystąpił błąd usługi zewnętrznej",
+      "503": "Usługa jest tymczasowo niedostępna",
+      "504": "Upłynął limit czasu odpowiedzi usługi"
+    },
+    "actions": {
+      "goHome": "Idź do domu",
+      "tryAgain": "Spróbuj ponownie",
+      "login": "Powrót do logowania"
+    }
+  },
+  "pt-BR": {
+    "titles": {
+      "400": "Solicitação inválida",
+      "401": "É necessário entrar",
+      "403": "Acesso negado",
+      "404": "Página não encontrada",
+      "408": "O tempo da solicitação expirou",
+      "409": "A solicitação conflita com o estado atual",
+      "410": "Esta página não está mais disponível",
+      "413": "A solicitação é muito grande",
+      "422": "Não foi possível processar a solicitação",
+      "429": "Muitas solicitações",
+      "500": "Algo deu errado",
+      "501": "Esta solicitação não é compatível",
+      "502": "Um serviço externo falhou",
+      "503": "Serviço temporariamente indisponível",
+      "504": "O tempo de resposta do serviço expirou"
+    },
+    "actions": {
+      "goHome": "Ir para a página inicial",
+      "tryAgain": "Tentar novamente",
+      "login": "Voltar para o login"
+    }
+  },
+  "pt-PT": {
+    "titles": {
+      "400": "Pedido inválido",
+      "401": "É necessário iniciar sessão",
+      "403": "Acesso negado",
+      "404": "Página não encontrada",
+      "408": "O tempo do pedido expirou",
+      "409": "O pedido entra em conflito com o estado atual",
+      "410": "Esta página já não está disponível",
+      "413": "O pedido é demasiado grande",
+      "422": "Não é possível processar o pedido",
+      "429": "Demasiados pedidos",
+      "500": "Algo correu mal",
+      "501": "Este pedido não é suportado",
+      "502": "Um serviço externo falhou",
+      "503": "Serviço temporariamente indisponível",
+      "504": "O tempo de resposta do serviço expirou"
+    },
+    "actions": {
+      "goHome": "Ir para casa",
+      "tryAgain": "Tente novamente",
+      "login": "Voltar ao login"
+    }
+  },
+  "ru": {
+    "titles": {
+      "400": "Некорректный запрос",
+      "401": "Необходимо войти",
+      "403": "Доступ запрещён",
+      "404": "Страница не найдена",
+      "408": "Время ожидания запроса истекло",
+      "409": "Запрос конфликтует с текущим состоянием",
+      "410": "Эта страница больше недоступна",
+      "413": "Запрос слишком большой",
+      "422": "Не удалось обработать запрос",
+      "429": "Слишком много запросов",
+      "500": "Что-то пошло не так",
+      "501": "Этот запрос не поддерживается",
+      "502": "Ошибка связанного сервиса",
+      "503": "Сервис временно недоступен",
+      "504": "Время ожидания ответа сервиса истекло"
+    },
+    "actions": {
+      "goHome": "Иди домой",
+      "tryAgain": "Попробуйте еще раз",
+      "login": "Вернуться к входу"
+    }
+  },
+  "th": {
+    "titles": {
+      "400": "คำขอไม่ถูกต้อง",
+      "401": "ต้องเข้าสู่ระบบ",
+      "403": "ไม่มีสิทธิ์เข้าถึง",
+      "404": "ไม่พบหน้า",
+      "408": "คำขอหมดเวลา",
+      "409": "คำขอขัดแย้งกับสถานะปัจจุบัน",
+      "410": "หน้านี้ไม่พร้อมใช้งานอีกต่อไป",
+      "413": "คำขอมีขนาดใหญ่เกินไป",
+      "422": "ไม่สามารถประมวลผลคำขอได้",
+      "429": "ส่งคำขอมากเกินไป",
+      "500": "มีบางอย่างผิดพลาด",
+      "501": "ไม่รองรับคำขอนี้",
+      "502": "บริการที่เชื่อมต่อเกิดข้อผิดพลาด",
+      "503": "บริการไม่พร้อมใช้งานชั่วคราว",
+      "504": "การตอบกลับของบริการหมดเวลา"
+    },
+    "actions": {
+      "goHome": "กลับบ้าน",
+      "tryAgain": "ลองอีกครั้ง",
+      "login": "กลับไปที่เข้าสู่ระบบ"
+    }
+  },
+  "tr": {
+    "titles": {
+      "400": "Geçersiz istek",
+      "401": "Oturum açmanız gerekiyor",
+      "403": "Erişim reddedildi",
+      "404": "Sayfa bulunamadı",
+      "408": "İstek zaman aşımına uğradı",
+      "409": "İstek mevcut durumla çakışıyor",
+      "410": "Bu sayfa artık kullanılamıyor",
+      "413": "İstek çok büyük",
+      "422": "İstek işlenemiyor",
+      "429": "Çok fazla istek",
+      "500": "Bir şeyler ters gitti",
+      "501": "Bu istek desteklenmiyor",
+      "502": "Bağlı bir hizmette hata oluştu",
+      "503": "Hizmet geçici olarak kullanılamıyor",
+      "504": "Hizmet yanıtı zaman aşımına uğradı"
+    },
+    "actions": {
+      "goHome": "Eve git",
+      "tryAgain": "Tekrar dene",
+      "login": "Girişe Geri Dön"
+    }
+  },
+  "vi": {
+    "titles": {
+      "400": "Yêu cầu không hợp lệ",
+      "401": "Cần đăng nhập",
+      "403": "Không có quyền truy cập",
+      "404": "Không tìm thấy trang",
+      "408": "Yêu cầu đã hết thời gian chờ",
+      "409": "Yêu cầu xung đột với trạng thái hiện tại",
+      "410": "Trang này không còn khả dụng",
+      "413": "Yêu cầu quá lớn",
+      "422": "Không thể xử lý yêu cầu",
+      "429": "Quá nhiều yêu cầu",
+      "500": "Đã xảy ra lỗi",
+      "501": "Yêu cầu này không được hỗ trợ",
+      "502": "Dịch vụ liên quan gặp lỗi",
+      "503": "Dịch vụ tạm thời không khả dụng",
+      "504": "Phản hồi dịch vụ đã hết thời gian chờ"
+    },
+    "actions": {
+      "goHome": "Về nhà",
+      "tryAgain": "Thử lại",
+      "login": "Quay lại đăng nhập"
+    }
+  },
+  "zh-CN": {
+    "titles": {
+      "400": "无效请求",
+      "401": "需要登录",
+      "403": "没有访问权限",
+      "404": "页面未找到",
+      "408": "请求超时",
+      "409": "请求与当前状态冲突",
+      "410": "此页面已不可用",
+      "413": "请求过大",
+      "422": "无法处理请求",
+      "429": "请求过于频繁",
+      "500": "出了点问题",
+      "501": "不支持此请求",
+      "502": "上游服务出错",
+      "503": "服务暂时不可用",
+      "504": "服务响应超时"
+    },
+    "actions": {
+      "goHome": "返回首页",
+      "tryAgain": "重试",
+      "login": "返回登录"
+    }
+  },
+  "zh-TW": {
+    "titles": {
+      "400": "無效的請求",
+      "401": "需要登入",
+      "403": "沒有存取權限",
+      "404": "找不到頁面",
+      "408": "請求逾時",
+      "409": "請求與目前狀態衝突",
+      "410": "此頁面已無法使用",
+      "413": "請求過大",
+      "422": "無法處理請求",
+      "429": "請求過於頻繁",
+      "500": "出了點問題",
+      "501": "不支援此請求",
+      "502": "上游服務發生錯誤",
+      "503": "服務暫時無法使用",
+      "504": "服務回應逾時"
+    },
+    "actions": {
+      "goHome": "返回首頁",
+      "tryAgain": "再試一次",
+      "login": "返回登入"
+    }
+  }
+}

@@ -2,8 +2,10 @@ import bundleAnalyzer from '@next/bundle-analyzer';
 import createNextIntlPlugin from 'next-intl/plugin';
 import { fileURLToPath } from 'node:url';
 import { prepareClientMediaCodecs } from './scripts/prepare-client-media-codecs.mjs';
+import { prepareThreeRuntime } from './scripts/prepare-three-runtime.mjs';
 
 await prepareClientMediaCodecs();
+await prepareThreeRuntime();
 
 const useLocalContracts = process.env.LOCAL_CONTRACTS === '1';
 const releaseImageBuild = process.env.RELEASE_IMAGE_BUILD === 'true';
@@ -34,11 +36,12 @@ export default withNextIntl(
       '@echovisionlab/geul-telemetry',
       '@echovisionlab/audio-transcoder',
     ],
-    turbopack: useLocalContracts
-      ? {
-          root: workspaceRoot,
-        }
-      : undefined,
+    turbopack: {
+      ...(useLocalContracts ? { root: workspaceRoot } : {}),
+      resolveAlias: {
+        three: { browser: './lib/three/three-cdn-module.generated.mjs' },
+      },
+    },
     allowedDevOrigins,
     images: {
       loader: 'custom',
