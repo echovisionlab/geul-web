@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 
+import { MantineProvider } from '@mantine/core';
+import { theme } from '@/theme';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { readFileSync } from 'node:fs';
@@ -17,17 +19,23 @@ describe('root error fallback', () => {
     document.body.replaceChildren();
   });
 
-  it('offers a working retry and home link without application providers', async () => {
+  it('offers a working retry and home link with only its local site theme', async () => {
     const container = document.createElement('div');
     document.body.append(container);
     root = createRoot(container);
     const retry = vi.fn();
-    await act(async () => root!.render(<RootErrorPageView locale="ko" onRetry={retry} />));
+    await act(async () =>
+      root!.render(
+        <MantineProvider theme={theme} env="test">
+          <RootErrorPageView locale="ko" onRetry={retry} />
+        </MantineProvider>,
+      ),
+    );
     expect(container.querySelector('h1')?.textContent).toBe(messages.ko.title);
     expect(container.querySelector('a')?.getAttribute('href')).toBe('/');
     await act(async () => container.querySelector('button')!.click());
     expect(retry).toHaveBeenCalledOnce();
-    expect(container.querySelector('section')?.style.minHeight).toBe('100svh');
+    expect(container.querySelector('button')?.getAttribute('data-emphasis')).toBe('strong');
   });
 
   it('keeps the provider-free fallback synchronized with every supported language', () => {
