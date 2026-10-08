@@ -2403,7 +2403,7 @@
   },
   "generalError": {
     "title": "Bir şeyler ters gitti",
-    "description": "Sayfa yüklenirken bir hata oluştu.<br></br>İzniniz olmayabilir veya oturumunuzun süresi dolmuş olabilir.",
+    "description": "Sayfa yüklenirken bir hata oluştu.",
     "actions": {
       "goHome": "Eve git"
     }

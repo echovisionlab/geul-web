@@ -1,0 +1,162 @@
+{
+  "ar": {
+    "title": "حدث خطأ ما",
+    "description": "حدث خطأ أثناء تحميل الصفحة.",
+    "actions": {
+      "goHome": "الانتقال إلى الصفحة الرئيسية"
+    },
+    "tryAgain": "حاول مرة أخرى"
+  },
+  "de": {
+    "title": "Etwas ist schiefgelaufen",
+    "description": "Beim Laden der Seite ist ein Fehler aufgetreten.",
+    "actions": {
+      "goHome": "Zur Startseite"
+    },
+    "tryAgain": "Erneut versuchen"
+  },
+  "en": {
+    "title": "Something went wrong",
+    "description": "An error occurred while loading the page.",
+    "actions": {
+      "goHome": "Go to home"
+    },
+    "tryAgain": "Try again"
+  },
+  "es-419": {
+    "title": "algo salió mal",
+    "description": "Se produjo un error al cargar la página.",
+    "actions": {
+      "goHome": "ir a casa"
+    },
+    "tryAgain": "Inténtalo de nuevo"
+  },
+  "es": {
+    "title": "Algo salió mal",
+    "description": "Se produjo un error al cargar la página.",
+    "actions": {
+      "goHome": "Ir al inicio"
+    },
+    "tryAgain": "Intentar otra vez"
+  },
+  "fr": {
+    "title": "Une erreur est survenue",
+    "description": "Une erreur s'est produite lors du chargement de la page.",
+    "actions": {
+      "goHome": "Retour à l'accueil"
+    },
+    "tryAgain": "Réessayer"
+  },
+  "id": {
+    "title": "Ada yang tidak beres",
+    "description": "Terjadi kesalahan saat memuat laman.",
+    "actions": {
+      "goHome": "Pergi ke rumah"
+    },
+    "tryAgain": "Coba lagi"
+  },
+  "it": {
+    "title": "Qualcosa è andato storto",
+    "description": "Si è verificato un errore durante il caricamento della pagina.",
+    "actions": {
+      "goHome": "Vai a casa"
+    },
+    "tryAgain": "Riprova"
+  },
+  "ja": {
+    "title": "問題が発生しました",
+    "description": "ページの読み込み中にエラーが発生しました",
+    "actions": {
+      "goHome": "ホームへ移動"
+    },
+    "tryAgain": "再試行"
+  },
+  "ko": {
+    "title": "문제가 발생했습니다",
+    "description": "페이지를 불러오는 중 오류가 발생했습니다.",
+    "actions": {
+      "goHome": "홈으로 이동"
+    },
+    "tryAgain": "다시 시도"
+  },
+  "nl": {
+    "title": "Er is iets misgegaan",
+    "description": "Er is een fout opgetreden tijdens het laden van de pagina.",
+    "actions": {
+      "goHome": "Ga naar startpagina"
+    },
+    "tryAgain": "Opnieuw proberen"
+  },
+  "pl": {
+    "title": "Coś poszło nie tak",
+    "description": "Wystąpił błąd podczas ładowania strony.",
+    "actions": {
+      "goHome": "Idź do domu"
+    },
+    "tryAgain": "Spróbuj ponownie"
+  },
+  "pt-BR": {
+    "title": "Algo deu errado",
+    "description": "Ocorreu um erro ao carregar a página.",
+    "actions": {
+      "goHome": "Ir para a página inicial"
+    },
+    "tryAgain": "Tentar novamente"
+  },
+  "pt-PT": {
+    "title": "Algo correu mal",
+    "description": "Ocorreu um erro ao carregar a página.",
+    "actions": {
+      "goHome": "Vá para casa"
+    },
+    "tryAgain": "Tente novamente"
+  },
+  "ru": {
+    "title": "Что-то пошло не так",
+    "description": "При загрузке страницы произошла ошибка.",
+    "actions": {
+      "goHome": "Иди домой"
+    },
+    "tryAgain": "Попробуйте еще раз"
+  },
+  "th": {
+    "title": "มีบางอย่างผิดพลาด",
+    "description": "เกิดข้อผิดพลาดขณะโหลดเพจ",
+    "actions": {
+      "goHome": "ไปที่บ้าน"
+    },
+    "tryAgain": "ลองอีกครั้ง"
+  },
+  "tr": {
+    "title": "Bir şeyler ters gitti",
+    "description": "Sayfa yüklenirken bir hata oluştu.",
+    "actions": {
+      "goHome": "Eve git"
+    },
+    "tryAgain": "Tekrar dene"
+  },
+  "vi": {
+    "title": "Đã xảy ra lỗi",
+    "description": "Đã xảy ra lỗi khi tải trang.",
+    "actions": {
+      "goHome": "Về nhà"
+    },
+    "tryAgain": "Thử lại"
+  },
+  "zh-CN": {
+    "title": "出了点问题",
+    "description": "加载页面时出错。",
+    "actions": {
+      "goHome": "返回首页"
+    },
+    "tryAgain": "重试"
+  },
+  "zh-TW": {
+    "title": "出了點問題",
+    "description": "載入頁面面時發生錯誤。",
+    "actions": {
+      "goHome": "返回首頁"
+    },
+    "tryAgain": "再試一次"
+  }
+}

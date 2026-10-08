@@ -2403,7 +2403,7 @@
   },
   "generalError": {
     "title": "algo salió mal",
-    "description": "Se produjo un error al cargar la página.<br></br>Es posible que no tenga permiso o que su sesión haya caducado.",
+    "description": "Se produjo un error al cargar la página.",
     "actions": {
       "goHome": "ir a casa"
     }

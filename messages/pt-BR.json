@@ -2403,7 +2403,7 @@
   },
   "generalError": {
     "title": "Algo deu errado",
-    "description": "Ocorreu um erro ao carregar a página.<br></br>Você pode não ter permissão ou sua sessão pode ter expirado.",
+    "description": "Ocorreu um erro ao carregar a página.",
     "actions": {
       "goHome": "Ir para a página inicial"
     }

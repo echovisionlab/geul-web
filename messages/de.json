@@ -967,7 +967,7 @@
   },
   "generalError": {
     "title": "Etwas ist schiefgelaufen",
-    "description": "Beim Laden der Seite ist ein Fehler aufgetreten.<br></br>Vielleicht fehlen Ihnen Berechtigungen oder Ihre Sitzung ist abgelaufen.",
+    "description": "Beim Laden der Seite ist ein Fehler aufgetreten.",
     "actions": {
       "goHome": "Zur Startseite"
     }

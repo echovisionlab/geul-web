@@ -2403,7 +2403,7 @@
   },
   "generalError": {
     "title": "出了點問題",
-    "description": "載入頁面面時發生錯誤。 <br></br>您可能沒有權限，或者您的會話可能已過期",
+    "description": "載入頁面面時發生錯誤。",
     "actions": {
       "goHome": "返回首頁"
     }

@@ -2403,7 +2403,7 @@
   },
   "generalError": {
     "title": "Đã xảy ra lỗi",
-    "description": "Đã xảy ra lỗi khi tải trang.<br></br>Bạn có thể không có quyền hoặc phiên của bạn có thể đã hết hạn.",
+    "description": "Đã xảy ra lỗi khi tải trang.",
     "actions": {
       "goHome": "Về nhà"
     }
