@@ -1,6 +1,5 @@
-import { isConnectError } from '@/lib/api/connect-error';
+import { toHttpErrorResult } from '@/lib/api/http-error';
 import { timestampDate, type Timestamp } from '@bufbuild/protobuf/wkt';
-import { Code } from '@connectrpc/connect';
 import type { DocumentLayout as ProtoDocumentLayout } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { createPageClient, createPostClient, createWorkClient } from '@/lib/api/server-client';
 import { mapProtoDocumentLayout } from '@/lib/queries/document-layout';
@@ -82,20 +81,7 @@ export function toVersionErrorResult(
   status: number;
   error: string;
 } {
-  if (isConnectError(err)) {
-    if (err.code === Code.Unauthenticated) {
-      return { status: 401, error: 'Unauthorized' };
-    }
-    if (err.code === Code.PermissionDenied) {
-      return { status: 403, error: 'Forbidden' };
-    }
-    return { status: 500, error: fallback };
-  }
-
-  return {
-    status: 500,
-    error: fallback,
-  };
+  return toHttpErrorResult(err, fallback);
 }
 
 function mapVersion(

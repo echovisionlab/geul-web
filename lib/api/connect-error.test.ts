@@ -35,6 +35,6 @@ describe('Connect error helpers', () => {
 
   it('does not classify unrelated permission failures as authentication failures', () => {
     expect(isAuthenticationConnectError(new ConnectError('edit is forbidden', Code.PermissionDenied))).toBe(false);
-    expect(isAuthenticationConnectError(new ConnectError('login is required', Code.PermissionDenied))).toBe(true);
+    expect(isAuthenticationConnectError(new ConnectError('login is required', Code.PermissionDenied))).toBe(false);
   });
 });

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionFromCookie } from '@/lib/auth';
 import { getSettings } from '@/lib/queries/manifest';
-import type { ContentOgImageConfig, HomeOgImageConfig } from '@/lib/types/site-setting/config';
+import { toHttpErrorResult } from '@/lib/api/http-error';
+import { ogPreviewInput } from '@/lib/server/og-preview-input';
 import { createLogger } from '@/lib/utils/logger';
 import {
   DEFAULT_CONTENT_OG_CONFIG,
@@ -13,19 +14,6 @@ import {
 const logger = createLogger('og-preview-api');
 
 export const dynamic = 'force-dynamic';
-
-interface HomePreviewRequestBody {
-  type: 'home';
-  config: HomeOgImageConfig;
-}
-
-interface ContentPreviewRequestBody {
-  type: 'content';
-  title: string;
-  config: ContentOgImageConfig;
-}
-
-type PreviewRequestBody = HomePreviewRequestBody | ContentPreviewRequestBody;
 
 /**
  * Fetch an image URL and return it as a data URL (base64)
@@ -47,14 +35,34 @@ async function fetchImageAsDataUrl(url: string): Promise<string | undefined> {
 
 export async function POST(request: NextRequest) {
   // Check admin permission
-  const session = await getSessionFromCookie();
-  if (!session?.user || session.user.role !== 'admin') {
+  let session;
+  try {
+    session = await getSessionFromCookie({ throwOnError: true });
+  } catch (error) {
+    logger.error('Failed to check preview permission', { error });
+    const result = toHttpErrorResult(error, 'Failed to check preview permission');
+    return NextResponse.json({ error: result.error }, { status: result.status });
+  }
+  if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  try {
-    const body = (await request.json()) as PreviewRequestBody;
+  if (session.user.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
+  let decoded: unknown;
+  try {
+    decoded = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+  const parsed = ogPreviewInput.safeParse(decoded);
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid preview request' }, { status: 400 });
+  }
+  const body = parsed.data;
+  try {
     // Get site settings for the preview
     const settings = await getSettings();
 
@@ -92,6 +100,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error generating preview', { error });
-    return NextResponse.json({ error: 'Failed to generate preview' }, { status: 500 });
+    const { status, error: message } = toHttpErrorResult(error, 'Failed to generate preview');
+    return NextResponse.json({ error: message }, { status });
   }
 }

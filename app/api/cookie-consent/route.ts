@@ -2,7 +2,11 @@ import { NextResponse } from 'next/server';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { createMemberClient } from '@/lib/api/server-client';
 import { isAuthenticationConnectError } from '@/lib/api/connect-error';
+import { toHttpErrorResult } from '@/lib/api/http-error';
+import { createLogger } from '@/lib/utils/logger';
 import { COOKIE_CONSENT_VERSION } from '@/lib/cookie-consent';
+
+const logger = createLogger('cookie-consent-api');
 
 interface CookieConsentPayload {
   analytics?: unknown;
@@ -74,35 +78,37 @@ export async function GET() {
       return NextResponse.json({ success: true, persisted: false, consent: null });
     }
 
-    return NextResponse.json(
-      {
-        success: false,
-        error: err instanceof Error ? err.message : 'Failed to fetch cookie consent',
-      },
-      { status: 500 },
-    );
+    logger.error('Failed to fetch cookie consent', { error: err });
+    const { status, error } = toHttpErrorResult(err, 'Failed to fetch cookie consent');
+    return NextResponse.json({ success: false, error }, { status });
   }
 }
 
 export async function POST(request: Request) {
-  let payload: CookieConsentPayload;
+  let payload: unknown;
   try {
-    payload = (await request.json()) as CookieConsentPayload;
+    payload = await request.json();
   } catch {
     return NextResponse.json({ success: false, error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  if (typeof payload.analytics !== 'boolean') {
+  if (
+    !payload ||
+    typeof payload !== 'object' ||
+    Array.isArray(payload) ||
+    typeof (payload as CookieConsentPayload).analytics !== 'boolean'
+  ) {
     return NextResponse.json({ success: false, error: '"analytics" must be a boolean' }, { status: 400 });
   }
 
+  const consentPayload = payload as CookieConsentPayload & { analytics: boolean };
   try {
     const memberClient = await createMemberClient();
     const response = await memberClient.updateMyPreferences({
       cookieConsent: {
-        analytics: payload.analytics,
-        version: asVersion(payload.version),
-        source: asOptionalString(payload.source),
+        analytics: consentPayload.analytics,
+        version: asVersion(consentPayload.version),
+        source: asOptionalString(consentPayload.source),
       },
     });
     const consent = serializeConsent(response.settings?.cookieConsent ?? null);
@@ -118,12 +124,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, persisted: false });
     }
 
-    return NextResponse.json(
-      {
-        success: false,
-        error: err instanceof Error ? err.message : 'Failed to persist cookie consent',
-      },
-      { status: 500 },
-    );
+    logger.error('Failed to persist cookie consent', { error: err });
+    const { status, error } = toHttpErrorResult(err, 'Failed to persist cookie consent');
+    return NextResponse.json({ success: false, error }, { status });
   }
 }

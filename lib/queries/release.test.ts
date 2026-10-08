@@ -1,5 +1,5 @@
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
-import { ConnectError } from '@connectrpc/connect';
+import { Code, ConnectError } from '@connectrpc/connect';
 import { FileDownloadAction, FileDownloadAvailability } from '@echovisionlab/geul-proto/public/file_pb.ts';
 import {
   ReleaseStatus as PublicReleaseStatus,
@@ -244,7 +244,7 @@ describe('release queries', () => {
     });
   });
 
-  it('preserves list failures and handles unavailable public documents', async () => {
+  it('preserves list failures and distinguishes missing public documents from outages', async () => {
     releaseClient.listReleasesAdmin.mockRejectedValueOnce(new Error('offline'));
     await expect(queries.listReleasesAdmin({})).resolves.toEqual({
       error: 'offline',
@@ -255,8 +255,11 @@ describe('release queries', () => {
       totalPages: 0,
     });
 
-    publicReleaseClient.get.mockRejectedValueOnce(new ConnectError('unavailable'));
+    publicReleaseClient.get.mockRejectedValueOnce(new ConnectError('missing', Code.NotFound));
     await expect(queries.getReleasePublic('missing')).resolves.toBeNull();
+    const error = new ConnectError('unavailable', Code.Unavailable);
+    publicReleaseClient.get.mockRejectedValueOnce(error);
+    await expect(queries.getReleasePublic('release-1')).rejects.toBe(error);
   });
 });
 

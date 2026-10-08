@@ -1,7 +1,11 @@
+import { toHttpErrorResult } from '@/lib/api/http-error';
+import { createLogger } from '@/lib/utils/logger';
 import { connection, NextResponse } from 'next/server';
 import { FileDownloadAction, FileDownloadAvailability } from '@echovisionlab/geul-proto/public/file_pb.ts';
 import { getPostView, getPostViewWithToken } from '@/lib/queries/post';
 import { findContentBlockMediaBySelector } from '@/lib/media/content-block-media-server';
+
+const logger = createLogger('post-media-download-api');
 
 export async function POST(request: Request) {
   await connection();
@@ -22,24 +26,30 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'invalid_request' }, { status: 400 });
   }
 
-  const post = shareToken
-    ? await getPostViewWithToken(idOrSlug, shareToken, requestedLocale, sharePassword)
-    : await getPostView(idOrSlug, { requestedLocale });
-  const item = post ? findContentBlockMediaBySelector(post.blockMedia, { blockId, referencePath }) : null;
-  if (!item) {
-    return NextResponse.json({ error: 'not_found' }, { status: 404 });
-  }
+  try {
+    const post = shareToken
+      ? await getPostViewWithToken(idOrSlug, shareToken, requestedLocale, sharePassword)
+      : await getPostView(idOrSlug, { requestedLocale });
+    const item = post ? findContentBlockMediaBySelector(post.blockMedia, { blockId, referencePath }) : null;
+    if (!item) {
+      return NextResponse.json({ error: 'not_found' }, { status: 404 });
+    }
 
-  const availability = Number(item.downloadAvailability) as FileDownloadAvailability;
-  const action = Number(item.downloadAction) as FileDownloadAction;
-  const downloadUrl = item.delivery?.download?.url ?? '';
-  return NextResponse.json(
-    {
-      access: { availability, action },
-      ...(availability === FileDownloadAvailability.AVAILABLE && action === FileDownloadAction.DOWNLOAD && downloadUrl
-        ? { download: { url: downloadUrl } }
-        : {}),
-    },
-    { headers: { 'Cache-Control': 'private, no-store, max-age=0' } },
-  );
+    const availability = Number(item.downloadAvailability) as FileDownloadAvailability;
+    const action = Number(item.downloadAction) as FileDownloadAction;
+    const downloadUrl = item.delivery?.download?.url ?? '';
+    return NextResponse.json(
+      {
+        access: { availability, action },
+        ...(availability === FileDownloadAvailability.AVAILABLE && action === FileDownloadAction.DOWNLOAD && downloadUrl
+          ? { download: { url: downloadUrl } }
+          : {}),
+      },
+      { headers: { 'Cache-Control': 'private, no-store, max-age=0' } },
+    );
+  } catch (error) {
+    logger.error('Failed to fetch media', { error });
+    const result = toHttpErrorResult(error, 'Failed to fetch media');
+    return NextResponse.json({ error: result.error }, { status: result.status });
+  }
 }

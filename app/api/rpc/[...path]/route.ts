@@ -45,7 +45,12 @@ async function forwardRpcRequest(request: Request, { params }: { params: Promise
 
   const { path } = await params;
   const pathString = path.join('/');
-  const body = request.method === 'GET' || request.method === 'HEAD' ? undefined : await request.arrayBuffer();
+  let body: ArrayBuffer | undefined;
+  try {
+    body = request.method === 'GET' || request.method === 'HEAD' ? undefined : await request.arrayBuffer();
+  } catch {
+    return new Response('Bad Request', { status: 400 });
+  }
   const forwardHeaders = buildRpcForwardHeaders(request.headers, cookieHeader);
   const anonymousForwardHeaders = buildRpcForwardHeaders(request.headers, '');
   const apiTargets = buildApiTargets();
@@ -111,10 +116,16 @@ async function forwardRpcRequest(request: Request, { params }: { params: Promise
       requestUrl: request.url,
       sessionCookieNames,
     });
-    const connectBody =
-      request.method === 'HEAD' || response.status === 204 || response.status === 304
-        ? null
-        : await response.arrayBuffer();
+    let connectBody: ArrayBuffer | null;
+    try {
+      connectBody =
+        request.method === 'HEAD' || response.status === 204 || response.status === 304
+          ? null
+          : await response.arrayBuffer();
+    } catch (error) {
+      logger.error('RPC upstream response body failed', { error });
+      return new Response('Bad Gateway', { status: 502 });
+    }
     return new Response(connectBody, {
       status: response.status,
       headers: connectHeaders,
@@ -136,10 +147,16 @@ async function forwardRpcRequest(request: Request, { params }: { params: Promise
     });
   }
 
-  const responseBody =
-    request.method === 'HEAD' || response.status === 204 || response.status === 304
-      ? null
-      : await response.arrayBuffer();
+  let responseBody: ArrayBuffer | null;
+  try {
+    responseBody =
+      request.method === 'HEAD' || response.status === 204 || response.status === 304
+        ? null
+        : await response.arrayBuffer();
+  } catch (error) {
+    logger.error('RPC upstream response body failed', { error });
+    return new Response('Bad Gateway', { status: 502 });
+  }
 
   return new Response(responseBody, {
     status: response.status,

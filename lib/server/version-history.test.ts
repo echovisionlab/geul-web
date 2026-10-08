@@ -137,3 +137,17 @@ describe('version history document layout', () => {
     ]);
   });
 });
+
+it.each([
+  [Code.InvalidArgument, 400],
+  [Code.NotFound, 404],
+  [Code.Aborted, 409],
+  [Code.FailedPrecondition, 422],
+  [Code.ResourceExhausted, 429],
+  [Code.Unavailable, 503],
+  [Code.DeadlineExceeded, 504],
+])('preserves version-history error category %s at HTTP %s', (code, status) => {
+  expect(
+    toVersionErrorResult(new ConnectError('private upstream error', code), 'Version operation failed').status,
+  ).toBe(status);
+});

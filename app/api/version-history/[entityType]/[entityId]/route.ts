@@ -22,6 +22,18 @@ export async function GET(request: Request, { params }: Params) {
   const page = Number(searchParams.get('page') ?? '1');
   const pageSize = Number(searchParams.get('pageSize') ?? '20');
 
+  if (
+    !Number.isSafeInteger(page) ||
+    page < 1 ||
+    !Number.isSafeInteger(pageSize) ||
+    pageSize < 1 ||
+    pageSize > 100 ||
+    !Number.isSafeInteger((page - 1) * pageSize) ||
+    (page - 1) * pageSize > 2_147_483_647
+  ) {
+    return NextResponse.json({ error: 'Invalid pagination' }, { status: 400 });
+  }
+
   try {
     const result = await listVersions(parsedEntityType, entityId, page, pageSize);
     return NextResponse.json(result);

@@ -22,19 +22,7 @@ export function isConnectErrorCode(error: unknown, ...codes: readonly Code[]): e
 }
 
 export function isAuthenticationConnectError(error: unknown): error is ConnectError {
-  if (!isConnectError(error)) {
-    return false;
-  }
-  if (error.code === Code.Unauthenticated) {
-    return true;
-  }
-  const message = error.message.toLowerCase();
-  return (
-    message.includes('unauthenticated') ||
-    message.includes('authentication') ||
-    message.includes('login') ||
-    message.includes('access credentials are invalid')
-  );
+  return isConnectErrorCode(error, Code.Unauthenticated);
 }
 
 type ConnectErrorMessage = string | ((error: ConnectError) => string);
