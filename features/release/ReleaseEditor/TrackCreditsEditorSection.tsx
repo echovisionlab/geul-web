@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useState } from 'react';
 import { IconX } from '@tabler/icons-react';
@@ -46,8 +48,16 @@ export function TrackCreditsEditorSection({
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [creditedName, setCreditedName] = useState('');
   const [creditRole, setCreditRole] = useState('');
-  const { data: allArtists = [] } = useQuery({ queryKey: ['artist', 'list'], queryFn: listArtistsAction });
-  const { data: members } = useQuery({ queryKey: ['member', 'listAdmin'], queryFn: () => listUsersAdminAction({}) });
+  const allArtistsQuery = useQuery({
+    queryKey: ['artist', 'list'],
+    queryFn: () => listArtistsAction().then(unwrapQueryResult),
+  });
+  const { data: allArtists = [] } = allArtistsQuery;
+  const membersQuery = useQuery({
+    queryKey: ['member', 'listAdmin'],
+    queryFn: () => listUsersAdminAction({}).then(unwrapQueryResult),
+  });
+  const { data: members } = membersQuery;
   const allMembers = (members?.data ?? []).map((member) => ({ id: member.id, name: member.nickname }));
 
   const setCredits = useMutation({
@@ -182,6 +192,7 @@ export function TrackCreditsEditorSection({
 
   return (
     <Stack gap="sm">
+      <QueryErrorAlert queries={[allArtistsQuery, membersQuery]} />
       <Text size="sm" fw={500}>
         {tTracks('creditsModal.title')}
       </Text>

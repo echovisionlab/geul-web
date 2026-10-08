@@ -1,4 +1,5 @@
 'use server';
+import { queryResult, unwrapQueryResult } from '@/lib/api/query-result';
 
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
@@ -110,128 +111,125 @@ export async function listWorksPublishedAction(options?: {
   sortBy?: 'title' | 'published_at' | 'updated_at';
   sortOrder?: 'asc' | 'desc';
 }) {
-  try {
-    const client = createPublicWorkClient();
-    const filters = [];
-    if (options?.types && options.types.length > 0) {
-      filters.push(
-        create(FilterSpecSchema, {
-          field: 'type',
-          op: FilterOp.IN,
-          values: options.types.map((type) => WORK_TYPE_FILTER_VALUES[type]),
-        }),
-      );
-    }
-    if (options?.featured !== undefined) {
-      filters.push(
-        create(FilterSpecSchema, {
-          field: 'featured',
-          op: FilterOp.EQ,
-          value: String(options.featured),
-        }),
-      );
-    }
-    const limit = options?.limit ?? 20;
-    const offset = options?.offset ?? 0;
-    const response = await client.list({
-      pagination: { limit, offset },
-      filters,
-      sorts: options?.sortBy
-        ? [
-            create(SortSpecSchema, {
-              field: options.sortBy,
-              order: (options.sortOrder === 'asc' ? 1 : 2) as SortOrder,
-            }),
-          ]
-        : undefined,
-    });
+  return queryResult(async () => {
+    try {
+      const client = createPublicWorkClient();
+      const filters = [];
+      if (options?.types && options.types.length > 0) {
+        filters.push(
+          create(FilterSpecSchema, {
+            field: 'type',
+            op: FilterOp.IN,
+            values: options.types.map((type) => WORK_TYPE_FILTER_VALUES[type]),
+          }),
+        );
+      }
+      if (options?.featured !== undefined) {
+        filters.push(
+          create(FilterSpecSchema, {
+            field: 'featured',
+            op: FilterOp.EQ,
+            value: String(options.featured),
+          }),
+        );
+      }
+      const limit = options?.limit ?? 20;
+      const offset = options?.offset ?? 0;
+      const response = await client.list({
+        pagination: { limit, offset },
+        filters,
+        sorts: options?.sortBy
+          ? [
+              create(SortSpecSchema, {
+                field: options.sortBy,
+                order: (options.sortOrder === 'asc' ? 1 : 2) as SortOrder,
+              }),
+            ]
+          : undefined,
+      });
 
-    return {
-      works: (response.works ?? []).map((w) => ({
-        id: w.id,
-        title: w.title,
-        slug: w.slug ?? null,
-        type: publicWorkTypeToString(w.type),
-        summary: w.summary ?? null,
-        featuredImageUrl: w.featuredImageAsset?.url ?? null,
-        featured: w.featured,
-        mapPlaceId: w.mapPlaceId ?? null,
-        publishedAt: w.publishedAt ? timestampDate(w.publishedAt) : null,
-      })),
-      pagination: {
-        total: response.pagination?.total ?? 0,
-        limit,
-        offset,
-      },
-    };
-  } catch (err) {
-    logger.error('Failed to list published works', { error: err });
-    return {
-      works: [],
-      pagination: {
-        total: 0,
-        limit: options?.limit ?? 20,
-        offset: options?.offset ?? 0,
-      },
-    };
-  }
+      return {
+        works: (response.works ?? []).map((w) => ({
+          id: w.id,
+          title: w.title,
+          slug: w.slug ?? null,
+          type: publicWorkTypeToString(w.type),
+          summary: w.summary ?? null,
+          featuredImageUrl: w.featuredImageAsset?.url ?? null,
+          featured: w.featured,
+          mapPlaceId: w.mapPlaceId ?? null,
+          publishedAt: w.publishedAt ? timestampDate(w.publishedAt) : null,
+        })),
+        pagination: {
+          total: response.pagination?.total ?? 0,
+          limit,
+          offset,
+        },
+      };
+    } catch (err) {
+      logger.error('Failed to list published works', { error: err });
+      throw err;
+    }
+  });
 }
 
 export async function listWorksAdminAction(input: WorkListInput) {
-  try {
-    const client = await createWorkClient();
-    const limit = input.pageSize ?? 20;
-    const page = input.page ?? 1;
-    const offset = (page - 1) * limit;
+  return queryResult(async () => {
+    try {
+      const client = await createWorkClient();
+      const limit = input.pageSize ?? 20;
+      const page = input.page ?? 1;
+      const offset = (page - 1) * limit;
 
-    const sorts = input.sort?.map((s) => ({
-      field: s.field,
-      order: (s.order === 'desc' ? 2 : 1) as SortOrder,
-    }));
+      const sorts = input.sort?.map((s) => ({
+        field: s.field,
+        order: (s.order === 'desc' ? 2 : 1) as SortOrder,
+      }));
 
-    const filters = [];
-    const workType = stringToWorkType(input.type);
-    if (workType !== WorkType.UNSPECIFIED) {
-      filters.push(create(FilterSpecSchema, { field: 'type', op: FilterOp.EQ, value: String(workType) }));
+      const filters = [];
+      const workType = stringToWorkType(input.type);
+      if (workType !== WorkType.UNSPECIFIED) {
+        filters.push(create(FilterSpecSchema, { field: 'type', op: FilterOp.EQ, value: String(workType) }));
+      }
+      const workStatus = stringToWorkStatus(input.status);
+      if (workStatus !== WorkStatus.UNSPECIFIED) {
+        filters.push(create(FilterSpecSchema, { field: 'status', op: FilterOp.EQ, value: String(workStatus) }));
+      }
+      if (input.search) {
+        filters.push(create(FilterSpecSchema, { field: 'search', op: FilterOp.ILIKE, value: input.search }));
+      }
+      const response = await client.listWorksAdmin({
+        pagination: { limit, offset },
+        filters,
+        sorts,
+      });
+
+      const total = response.pagination?.total ?? 0;
+
+      return {
+        data: (response.works ?? []).map((wws) => ({
+          id: wws.work?.id ?? '',
+          title: wws.work?.title ?? '',
+          slug: wws.work?.slug ?? null,
+          type: workTypeToString(wws.work?.type ?? WorkType.MUSIC_PROJECT),
+          featuredImageUrl: wws.work?.featuredImageAsset?.url ?? null,
+          featured: wws.work?.featured ?? false,
+          status: workStatusToString(wws.work?.status ?? WorkStatus.DRAFT),
+          creditCount: wws.creditCount,
+          clientCount: wws.clientCount,
+          createdAt: wws.work?.createdAt ? timestampDate(wws.work.createdAt) : null,
+          updatedAt: wws.work?.updatedAt ? timestampDate(wws.work.updatedAt) : null,
+        })),
+        total,
+        page,
+        pageSize: limit,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (err) {
+      logger.error('Failed to list works admin', { error: err });
+      throw err;
     }
-    const workStatus = stringToWorkStatus(input.status);
-    if (workStatus !== WorkStatus.UNSPECIFIED) {
-      filters.push(create(FilterSpecSchema, { field: 'status', op: FilterOp.EQ, value: String(workStatus) }));
-    }
-    if (input.search) {
-      filters.push(create(FilterSpecSchema, { field: 'search', op: FilterOp.ILIKE, value: input.search }));
-    }
-    const response = await client.listWorksAdmin({
-      pagination: { limit, offset },
-      filters,
-      sorts,
-    });
-
-    const total = response.pagination?.total ?? 0;
-
-    return {
-      data: (response.works ?? []).map((wws) => ({
-        id: wws.work?.id ?? '',
-        title: wws.work?.title ?? '',
-        slug: wws.work?.slug ?? null,
-        type: workTypeToString(wws.work?.type ?? WorkType.MUSIC_PROJECT),
-        featuredImageUrl: wws.work?.featuredImageAsset?.url ?? null,
-        featured: wws.work?.featured ?? false,
-        status: workStatusToString(wws.work?.status ?? WorkStatus.DRAFT),
-        creditCount: wws.creditCount,
-        clientCount: wws.clientCount,
-        createdAt: wws.work?.createdAt ? timestampDate(wws.work.createdAt) : null,
-        updatedAt: wws.work?.updatedAt ? timestampDate(wws.work.updatedAt) : null,
-      })),
-      total,
-      page,
-      pageSize: limit,
-      totalPages: Math.ceil(total / limit),
-    };
-  } catch (err) {
-    logger.error('Failed to list works admin', { error: err });
-    return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
-  }
+  });
 }
 
 // === CRUD Actions ===
@@ -703,33 +701,35 @@ export async function deleteWorkCreditGroupAction(groupId: string): Promise<{ su
 }
 
 export async function searchArtistsForCreditAction(_workId: string, _query: string) {
-  const query = _query.trim();
-  if (!query) {
-    return [];
-  }
+  return queryResult(async () => {
+    const query = _query.trim();
+    if (!query) {
+      return [];
+    }
 
-  try {
-    const client = await createArtistClient();
-    const response = await client.listArtists({
-      pagination: { limit: 10, offset: 0 },
-      filters: [create(FilterSpecSchema, { field: 'search', op: FilterOp.ILIKE, value: query })],
-      sorts: [{ field: 'name', order: 1 as SortOrder }],
-    });
+    try {
+      const client = await createArtistClient();
+      const response = await client.listArtists({
+        pagination: { limit: 10, offset: 0 },
+        filters: [create(FilterSpecSchema, { field: 'search', op: FilterOp.ILIKE, value: query })],
+        sorts: [{ field: 'name', order: 1 as SortOrder }],
+      });
 
-    return (response.artists ?? []).map((artist) => ({
-      id: artist.id,
-      name: artist.name,
-      imageUrl: artist.imageAsset?.url ?? null,
-    }));
-  } catch (err) {
-    logger.error('Failed to search artists for work credit', { error: err });
-    return [];
-  }
+      return (response.artists ?? []).map((artist) => ({
+        id: artist.id,
+        name: artist.name,
+        imageUrl: artist.imageAsset?.url ?? null,
+      }));
+    } catch (err) {
+      logger.error('Failed to search artists for work credit', { error: err });
+      throw err;
+    }
+  });
 }
 
 // Share link operations - uses generic ShareLinkService
 export async function listWorkShareLinksAction(workId: string): Promise<ShareLinkItem[]> {
-  return listShareLinksAction(ShareLinkEntityType.WORK, workId);
+  return listShareLinksAction(ShareLinkEntityType.WORK, workId).then(unwrapQueryResult);
 }
 
 export async function createWorkShareLinkAction(data: {
@@ -750,122 +750,124 @@ export async function deleteWorkShareLinkAction(id: string): Promise<{ success?:
 }
 
 export async function listMyCreditedWorksAction(input: WorkListInput) {
-  const limit = input.pageSize ?? 20;
-  const page = input.page ?? 1;
-  const offset = (page - 1) * limit;
+  return queryResult(async () => {
+    const limit = input.pageSize ?? 20;
+    const page = input.page ?? 1;
+    const offset = (page - 1) * limit;
 
-  try {
-    const client = await createWorkClient();
+    try {
+      const client = await createWorkClient();
 
-    const sorts = input.sort?.map((s) => ({
-      field: s.field,
-      order: (s.order === 'desc' ? 2 : 1) as SortOrder,
-    }));
+      const sorts = input.sort?.map((s) => ({
+        field: s.field,
+        order: (s.order === 'desc' ? 2 : 1) as SortOrder,
+      }));
 
-    const filters: Array<{
-      field: string;
-      op: FilterOp;
-      value?: string;
-      values?: string[];
-    }> = [];
+      const filters: Array<{
+        field: string;
+        op: FilterOp;
+        value?: string;
+        values?: string[];
+      }> = [];
 
-    if (input.search?.trim()) {
-      filters.push({
-        field: 'search',
-        op: FilterOp.ILIKE,
-        value: input.search.trim(),
-      });
-    }
-
-    if (input.type) {
-      filters.push({
-        field: 'type',
-        op: FilterOp.EQ,
-        value: String(stringToWorkType(input.type)),
-      });
-    }
-
-    if (input.status) {
-      filters.push({
-        field: 'status',
-        op: FilterOp.EQ,
-        value: String(stringToWorkStatus(input.status)),
-      });
-    }
-
-    const uiFilters = toLocalFilterSpecs(input.filter);
-    for (const filter of uiFilters) {
-      if (filter.field !== 'title' && filter.field !== 'type' && filter.field !== 'status') {
-        continue;
+      if (input.search?.trim()) {
+        filters.push({
+          field: 'search',
+          op: FilterOp.ILIKE,
+          value: input.search.trim(),
+        });
       }
 
-      const mappedOp = filterOpFromString(filter.op, filter.value);
-      if (!mappedOp) {
-        continue;
+      if (input.type) {
+        filters.push({
+          field: 'type',
+          op: FilterOp.EQ,
+          value: String(stringToWorkType(input.type)),
+        });
       }
 
-      if (mappedOp === FilterOp.IS_NULL || mappedOp === FilterOp.IS_NOT_NULL) {
-        filters.push({ field: filter.field, op: mappedOp });
-        continue;
+      if (input.status) {
+        filters.push({
+          field: 'status',
+          op: FilterOp.EQ,
+          value: String(stringToWorkStatus(input.status)),
+        });
       }
 
-      if (mappedOp === FilterOp.IN) {
-        if (!Array.isArray(filter.value)) {
+      const uiFilters = toLocalFilterSpecs(input.filter);
+      for (const filter of uiFilters) {
+        if (filter.field !== 'title' && filter.field !== 'type' && filter.field !== 'status') {
           continue;
         }
-        const values = filter.value
-          .map((value) => toStringValue(value))
-          .filter((value): value is string => value !== null);
-        if (values.length === 0) {
+
+        const mappedOp = filterOpFromString(filter.op, filter.value);
+        if (!mappedOp) {
+          continue;
+        }
+
+        if (mappedOp === FilterOp.IS_NULL || mappedOp === FilterOp.IS_NOT_NULL) {
+          filters.push({ field: filter.field, op: mappedOp });
+          continue;
+        }
+
+        if (mappedOp === FilterOp.IN) {
+          if (!Array.isArray(filter.value)) {
+            continue;
+          }
+          const values = filter.value
+            .map((value) => toStringValue(value))
+            .filter((value): value is string => value !== null);
+          if (values.length === 0) {
+            continue;
+          }
+          filters.push({
+            field: filter.field,
+            op: mappedOp,
+            values,
+          });
+          continue;
+        }
+
+        const value = toStringValue(filter.value);
+        if (value === null) {
           continue;
         }
         filters.push({
           field: filter.field,
           op: mappedOp,
-          values,
+          value,
         });
-        continue;
       }
 
-      const value = toStringValue(filter.value);
-      if (value === null) {
-        continue;
-      }
-      filters.push({
-        field: filter.field,
-        op: mappedOp,
-        value,
+      const response = await client.listMyCreditedWorks({
+        pagination: { limit, offset },
+        filters: filters.length > 0 ? filters : undefined,
+        sorts,
       });
+
+      const total = response.pagination?.total ?? 0;
+
+      return {
+        data: (response.works ?? []).map((work) => ({
+          id: work.workId,
+          title: work.title,
+          slug: work.slug ?? null,
+          type: workTypeToString(work.type),
+          status: workStatusToString(work.status),
+          creditId: work.creditId,
+          creditRole: work.creditRole ?? null,
+          creditType: creditedWorkCreditTypeToString(work.creditType),
+          creditedAs: work.creditedAs,
+          creditedAsImage: work.creditedAsImageAsset?.url ?? null,
+        })),
+        total,
+        page,
+        pageSize: limit,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (err) {
+      logger.error('Failed to list my credited works', { error: err });
+      throw err;
     }
-
-    const response = await client.listMyCreditedWorks({
-      pagination: { limit, offset },
-      filters: filters.length > 0 ? filters : undefined,
-      sorts,
-    });
-
-    const total = response.pagination?.total ?? 0;
-
-    return {
-      data: (response.works ?? []).map((work) => ({
-        id: work.workId,
-        title: work.title,
-        slug: work.slug ?? null,
-        type: workTypeToString(work.type),
-        status: workStatusToString(work.status),
-        creditId: work.creditId,
-        creditRole: work.creditRole ?? null,
-        creditType: creditedWorkCreditTypeToString(work.creditType),
-        creditedAs: work.creditedAs,
-        creditedAsImage: work.creditedAsImageAsset?.url ?? null,
-      })),
-      total,
-      page,
-      pageSize: limit,
-      totalPages: Math.ceil(total / limit),
-    };
-  } catch (err) {
-    logger.error('Failed to list my credited works', { error: err });
-    return { data: [], total: 0, page, pageSize: limit, totalPages: 0 };
-  }
+  });
 }

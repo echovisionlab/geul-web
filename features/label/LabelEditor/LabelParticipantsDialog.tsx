@@ -1,4 +1,5 @@
 'use client';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
@@ -45,11 +46,12 @@ export function LabelParticipantsDialog({
   const queryClient = useQueryClient();
   const queryKey = ['label', 'participants', labelId] as const;
 
-  const { data: participants = [], isLoading } = useQuery({
+  const participantsQuery = useQuery({
     queryKey,
-    queryFn: () => listLabelParticipantsAction(labelId),
+    queryFn: () => listLabelParticipantsAction(labelId).then(unwrapQueryResult),
     enabled: opened,
   });
+  const { data: participants = [], isLoading } = participantsQuery;
   const participantIds = participants.map((participant) => participant.memberId);
   const candidatesQuery = useQuery({
     queryKey: ['members', 'label-participant-search', debouncedSearch, participantIds],
@@ -86,7 +88,7 @@ export function LabelParticipantsDialog({
 
   return (
     <LabelParticipantsDialogView
-      queryFailure={<QueryErrorAlert queries={[candidatesQuery]} />}
+      queryFailure={<QueryErrorAlert queries={[candidatesQuery, participantsQuery]} />}
       opened={opened}
       onClose={onClose}
       participants={participants.map((participant) => ({

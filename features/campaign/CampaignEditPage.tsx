@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -89,14 +91,11 @@ export default function CampaignEditPage() {
   const [scheduleModalOpened, { open: openScheduleModal, close: closeScheduleModal }] = useDisclosure(false);
   const supportedLocaleOptions = useMemo(() => getSupportedLocaleOptions(), []);
 
-  const {
-    data: campaign,
-    isLoading,
-    refetch: refetchCampaign,
-  } = useQuery({
+  const campaignQuery = useQuery({
     queryKey: ['campaigns', campaignId],
-    queryFn: () => getCampaignAction(campaignId),
+    queryFn: () => getCampaignAction(campaignId).then(unwrapQueryResult),
   });
+  const { data: campaign, isLoading, refetch: refetchCampaign } = campaignQuery;
   const localeSession = useLocaleDocumentSession({
     entityType: 'campaign',
     entityId: campaignId,
@@ -517,6 +516,10 @@ export default function CampaignEditPage() {
     return <PageLoader />;
   }
 
+  if (campaignQuery.isError && !campaign) {
+    return <QueryErrorAlert queries={[campaignQuery]} />;
+  }
+
   guardNotFound(campaign);
 
   const isScheduled = canCancelScheduledCampaignStatus(campaign.status);
@@ -563,6 +566,7 @@ export default function CampaignEditPage() {
       entityId={campaignId}
       blockRoomProtocol={protocol}
     >
+      <QueryErrorAlert queries={[campaignQuery]} />
       <Stack h="100%" gap="md">
         <EditorHeader
           title={campaignName.name}
@@ -723,6 +727,7 @@ export default function CampaignEditPage() {
 
           {preview.showPreview && (
             <Box flex={1}>
+              <QueryErrorAlert queries={[preview.query]} />
               {preview.previewSrcDoc ? (
                 <iframe
                   srcDoc={preview.previewSrcDoc}

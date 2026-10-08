@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -127,7 +129,7 @@ export default function MyWorksPage() {
     { field: 'created_at', label: tCommon('labels.created') },
   ];
   const [query, setQuery] = useState<PaginatedQuery>({ page: 1, pageSize: 20 });
-  const { data, isLoading } = useQuery({
+  const loadedDataQuery = useQuery({
     queryKey: ['works', 'my', 'credited', query],
     queryFn: () =>
       listMyCreditedWorksAction({
@@ -137,11 +139,16 @@ export default function MyWorksPage() {
         page: query.page ?? 1,
         pageSize: query.pageSize ?? 20,
         search: query.search,
-      }),
+      }).then(unwrapQueryResult),
   });
+  const { data, isLoading } = loadedDataQuery;
 
+  if (loadedDataQuery.isError && loadedDataQuery.data === undefined) {
+    return <QueryErrorAlert queries={[loadedDataQuery]} />;
+  }
   return (
     <Stack>
+      <QueryErrorAlert queries={[loadedDataQuery]} />
       <Title order={2}>{tCommon('entities.works')}</Title>
       <DataTable
         columns={columns}

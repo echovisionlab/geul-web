@@ -1,4 +1,5 @@
 'use client';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
@@ -256,11 +257,12 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
     }
   }, [isLoading, data, pendingMoveCount, setLocalCreditOrder, setLocalCreditGroupOverrides]);
 
-  const { data: artistResults = [], isFetching: artistSearchFetching } = useQuery({
+  const artistResultsQuery = useQuery({
     queryKey: ['work', 'searchArtistsForCredit', workId, debouncedSearch],
-    queryFn: () => searchArtistsForCreditAction(workId, debouncedSearch),
+    queryFn: () => searchArtistsForCreditAction(workId, debouncedSearch).then(unwrapQueryResult),
     enabled: isEnabled && searchType === 'artist' && canEdit,
   });
+  const { data: artistResults = [], isFetching: artistSearchFetching } = artistResultsQuery;
 
   const userResultsQuery = useQuery({
     queryKey: ['users', 'search', debouncedSearch],
@@ -560,7 +562,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
 
   return (
     <SectionCard withBorder p="md">
-      <QueryErrorAlert queries={[userResultsQuery]} />
+      <QueryErrorAlert queries={[userResultsQuery, artistResultsQuery]} />
       <Group justify="space-between" mb="sm">
         <Text size="sm" fw={500}>
           {tCommon('entities.credits')}

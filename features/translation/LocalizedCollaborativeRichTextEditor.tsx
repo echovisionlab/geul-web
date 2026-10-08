@@ -1,4 +1,5 @@
 'use client';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import type { Editor } from '@tiptap/core';
@@ -71,7 +72,7 @@ function resolveEntityKind(
 }
 
 function loadMapPlacesByIds(ids: readonly string[]) {
-  return getMapPlacesByIdsAction([...ids]);
+  return getMapPlacesByIdsAction([...ids]).then(unwrapQueryResult);
 }
 
 function LocalizedCollaborativeRichTextEditorSurface({

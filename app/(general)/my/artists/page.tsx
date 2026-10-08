@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { redirect } from 'next/navigation';
 import { MyArtistsTable } from '@/features/my/MyArtistsTable';
 import { listMyArtistsAction } from '@/lib/actions/artist';
@@ -12,7 +13,7 @@ export default async function MyArtistsPage() {
   const initialData = await listMyArtistsAction({
     page: 1,
     pageSize: 20,
-  });
+  }).then(unwrapQueryResult);
 
   return <MyArtistsTable initialData={initialData} />;
 }

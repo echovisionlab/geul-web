@@ -1,4 +1,5 @@
 'use client';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
@@ -73,11 +74,12 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
 
   const sortableCredits = useMemo(() => credits.map(toSortableCredit), [credits]);
 
-  const { data: artistResults = [], isFetching: artistSearchFetching } = useQuery({
+  const artistResultsQuery = useQuery({
     queryKey: ['program-event', 'searchArtistsForCredit', eventId, debouncedSearch],
-    queryFn: () => searchArtistsForProgramEventCreditAction(eventId, debouncedSearch),
+    queryFn: () => searchArtistsForProgramEventCreditAction(eventId, debouncedSearch).then(unwrapQueryResult),
     enabled: isEnabled && searchType === 'artist' && canEdit,
   });
+  const { data: artistResults = [], isFetching: artistSearchFetching } = artistResultsQuery;
 
   const memberResultsQuery = useQuery({
     queryKey: ['users', 'search', debouncedSearch],
@@ -213,7 +215,7 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
 
   return (
     <SectionCard withBorder p="md">
-      <QueryErrorAlert queries={[memberResultsQuery]} />
+      <QueryErrorAlert queries={[memberResultsQuery, artistResultsQuery]} />
       <Group justify="space-between" mb="sm">
         <Text size="sm" fw={500}>
           {tCommon('entities.credits')}

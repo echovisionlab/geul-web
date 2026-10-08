@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -18,7 +20,7 @@ export function WorkListView({ props }: BlockViewProps) {
   const workTypes = splitCsv(p.workTypes) as Array<'music_project' | 'portfolio' | 'article' | 'contribution'>;
   const showPagination = parseBooleanProp(p.showPagination, false);
 
-  const { data, isLoading } = useQuery({
+  const recipientsQuery = useQuery({
     queryKey: ['works', 'published', { workTypes, featuredOnly: p.featuredOnly, limit, page, p }],
     queryFn: () =>
       listWorksPublishedAction({
@@ -28,9 +30,13 @@ export function WorkListView({ props }: BlockViewProps) {
         offset: showPagination ? (page - 1) * limit : 0,
         sortBy: p.sortBy,
         sortOrder: p.sortOrder,
-      }),
+      }).then(unwrapQueryResult),
   });
+  const { data, isLoading } = recipientsQuery;
 
+  if (recipientsQuery.isError && recipientsQuery.data === undefined) {
+    return <QueryErrorAlert queries={[recipientsQuery]} />;
+  }
   if (isLoading || !data) {
     return (
       <ListBlockSkeleton
@@ -46,6 +52,7 @@ export function WorkListView({ props }: BlockViewProps) {
 
   return (
     <>
+      <QueryErrorAlert queries={[recipientsQuery]} />
       <WorkListViewClient
         works={data.works.map((work) => ({
           id: work.id,
@@ -58,6 +65,7 @@ export function WorkListView({ props }: BlockViewProps) {
         }))}
         parsedProps={p}
       />
+
       {showPagination && data.pagination.total > limit ? (
         <Group justify="center" mt="md">
           <Pagination total={Math.ceil(data.pagination.total / limit)} value={page} onChange={setPage} />

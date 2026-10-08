@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { revalidatePath } from 'next/cache';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
@@ -78,7 +79,7 @@ describe('map place actions', () => {
       pagination: { total: 1 },
     });
 
-    await expect(listMapPlacesAdminAction({ page: 1, pageSize: 10 })).resolves.toMatchObject({
+    await expect(listMapPlacesAdminAction({ page: 1, pageSize: 10 }).then(unwrapQueryResult)).resolves.toMatchObject({
       data: [{ id: 'place-1', google_place_id: 'google-place-1' }],
       total: 1,
     });
@@ -154,7 +155,7 @@ describe('map place actions', () => {
   it('maps Google place IDs for selected admin map places', async () => {
     getMapPlacesByIdsMock.mockResolvedValue({ places: [mapPlaceResponse()] });
 
-    await expect(getMapPlacesByIdsAction(['place-1'])).resolves.toEqual([
+    await expect(getMapPlacesByIdsAction(['place-1']).then(unwrapQueryResult)).resolves.toEqual([
       expect.objectContaining({ id: 'place-1', googlePlaceId: 'google-place-1' }),
     ]);
   });
@@ -162,7 +163,7 @@ describe('map place actions', () => {
   it('maps Google place IDs for public selected map places', async () => {
     publicGetByIdsMock.mockResolvedValue({ places: [mapPlaceResponse()] });
 
-    await expect(getPublicMapPlacesByIdsAction(['place-1'], 'ko')).resolves.toEqual([
+    await expect(getPublicMapPlacesByIdsAction(['place-1'], 'ko').then(unwrapQueryResult)).resolves.toEqual([
       expect.objectContaining({ id: 'place-1', googlePlaceId: 'google-place-1' }),
     ]);
     expect(createPublicMapPlaceClientWithAuth).toHaveBeenCalledWith('ko');

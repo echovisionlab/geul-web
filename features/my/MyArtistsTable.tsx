@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -90,7 +92,7 @@ export function MyArtistsTable({ initialData }: MyArtistsTableProps) {
     pageSize: 20,
   });
 
-  const { data, isLoading } = useQuery({
+  const loadedDataQuery = useQuery({
     queryKey: ['artists', 'my', query],
     queryFn: () =>
       listMyArtistsAction({
@@ -100,9 +102,10 @@ export function MyArtistsTable({ initialData }: MyArtistsTableProps) {
         page: query.page ?? 1,
         pageSize: query.pageSize ?? 20,
         search: query.search,
-      }),
+      }).then(unwrapQueryResult),
     initialData,
   });
+  const { data, isLoading } = loadedDataQuery;
 
   const statusLabels: ArtistStatusLabels = {
     draft: tCommon('statuses.draft'),
@@ -113,20 +116,26 @@ export function MyArtistsTable({ initialData }: MyArtistsTableProps) {
     data: data.data.map((artist) => toRowViewModel(artist, dateTime.date, statusLabels)),
   };
 
+  if (loadedDataQuery.isError && loadedDataQuery.data === undefined) {
+    return <QueryErrorAlert queries={[loadedDataQuery]} />;
+  }
   return (
-    <MyArtistsDataTable
-      result={result}
-      labels={{
-        title: tCommon('entities.artists'),
-        name: tCommon('labels.name'),
-        status: tCommon('labels.status'),
-        created: tCommon('labels.created'),
-        empty: t('empty'),
-        searchPlaceholder: t('searchPlaceholder'),
-      }}
-      query={query}
-      loading={isLoading}
-      onQueryChange={setQuery}
-    />
+    <>
+      <QueryErrorAlert queries={[loadedDataQuery]} />
+      <MyArtistsDataTable
+        result={result}
+        labels={{
+          title: tCommon('entities.artists'),
+          name: tCommon('labels.name'),
+          status: tCommon('labels.status'),
+          created: tCommon('labels.created'),
+          empty: t('empty'),
+          searchPlaceholder: t('searchPlaceholder'),
+        }}
+        query={query}
+        loading={isLoading}
+        onQueryChange={setQuery}
+      />
+    </>
   );
 }

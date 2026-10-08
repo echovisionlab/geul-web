@@ -95,7 +95,7 @@ describe('post actions', () => {
     });
     mocks.createShareLinkAction.mockResolvedValue({ ok: true, shareLink: { id: 'share-1' } });
     mocks.deleteShareLinkAction.mockResolvedValue({ ok: true, success: true });
-    mocks.listShareLinksAction.mockResolvedValue([{ id: 'share-1' }]);
+    mocks.listShareLinksAction.mockResolvedValue({ ok: true, value: [{ id: 'share-1' }] });
   });
 
   it('maps CRUD and status server actions to the post service', async () => {

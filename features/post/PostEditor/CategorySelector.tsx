@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -32,10 +34,10 @@ export function CategorySelector({ postId, canEdit, isAdmin, categories: initial
   }));
 
   // Use initialData to avoid loading state, staleTime: Infinity to prevent refetch
-  const { data: categories = normalizedInitialCategories, isLoading } = useQuery({
+  const categoriesQuery = useQuery({
     queryKey: ['category', 'list'],
     queryFn: async () => {
-      const result = await listCategoriesAction();
+      const result = await listCategoriesAction().then(unwrapQueryResult);
       // Ensure slug is always string
       return result.map((c) => ({
         id: c.id,
@@ -46,6 +48,7 @@ export function CategorySelector({ postId, canEdit, isAdmin, categories: initial
     initialData: normalizedInitialCategories,
     staleTime: Infinity,
   });
+  const { data: categories = normalizedInitialCategories, isLoading } = categoriesQuery;
 
   const selectedCategories = useMemo(
     () => categoryIds.map((id) => categories.find((category) => category.id === id) ?? { id, name: id, slug: '' }),
@@ -103,21 +106,24 @@ export function CategorySelector({ postId, canEdit, isAdmin, categories: initial
   );
 
   return (
-    <MultiSelectCombobox
-      label={tCommonEntities('categories')}
-      idPrefix={`post-${postId}-categories`}
-      placeholder={t('placeholder')}
-      emptyMessage={t('emptyMessage')}
-      notFoundMessage={t('notFoundMessage')}
-      selectedItems={selectedCategories}
-      options={categories}
-      isLoading={isLoading}
-      isCreating={createCategory.isPending}
-      onSelect={handleSelect}
-      onDeselect={handleDeselect}
-      onCreate={handleCreate}
-      canEdit={canEdit}
-      canCreateNew={canEdit && isAdmin}
-    />
+    <>
+      <QueryErrorAlert queries={[categoriesQuery]} />
+      <MultiSelectCombobox
+        label={tCommonEntities('categories')}
+        idPrefix={`post-${postId}-categories`}
+        placeholder={t('placeholder')}
+        emptyMessage={t('emptyMessage')}
+        notFoundMessage={t('notFoundMessage')}
+        selectedItems={selectedCategories}
+        options={categories}
+        isLoading={isLoading}
+        isCreating={createCategory.isPending}
+        onSelect={handleSelect}
+        onDeselect={handleDeselect}
+        onCreate={handleCreate}
+        canEdit={canEdit}
+        canCreateNew={canEdit && isAdmin}
+      />
+    </>
   );
 }

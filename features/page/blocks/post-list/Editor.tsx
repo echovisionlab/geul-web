@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -43,18 +45,21 @@ function PostListSettingsForm({ props, updateProps }: PostListSettingsFormProps)
   const authorIds = props.authorIds || '';
   const tagIds = props.tagIds || '';
 
-  const { data: categories } = useQuery({
+  const categoriesQuery = useQuery({
     queryKey: ['categories'],
-    queryFn: () => listCategoriesAction(),
+    queryFn: () => listCategoriesAction().then(unwrapQueryResult),
   });
-  const { data: seriesList } = useQuery({
+  const { data: categories } = categoriesQuery;
+  const seriesListQuery = useQuery({
     queryKey: ['series', 'simple'],
     queryFn: () => listSeriesSimple(),
   });
-  const { data: tags } = useQuery({
+  const { data: seriesList } = seriesListQuery;
+  const tagsQuery = useQuery({
     queryKey: ['tags'],
-    queryFn: () => listTagsAction(),
+    queryFn: () => listTagsAction().then(unwrapQueryResult),
   });
+  const { data: tags } = tagsQuery;
   const { data: authorsData } = useQuery({
     queryKey: ['authors', 50],
     queryFn: () => listAuthorOptionsAction(50),
@@ -94,77 +99,80 @@ function PostListSettingsForm({ props, updateProps }: PostListSettingsFormProps)
   );
 
   return (
-    <ListBlockEditorBase
-      editorType="post-list"
-      limitLabel={tPageEditor('blockEditor.labels.numberOfPosts')}
-      layout={layout}
-      columns={columns}
-      limit={limit}
-      maxLimit={MAX_LIMIT_POSTS}
-      defaultColumns="3"
-      defaultLimit="6"
-      sortBy={sortBy}
-      sortByOptions={sortByOptions}
-      sortOrder={sortOrder}
-      showPagination={showPagination}
-      showImage={showFeaturedImage}
-      imageAspectRatio={imageAspectRatio}
-      carouselLoop={carouselLoop}
-      carouselIndicators={carouselIndicators}
-      filters={
-        <>
-          <MultiSelect
-            label={tCommonEntities('categories')}
-            placeholder={tPageEditor('mapEditor.allCategoriesPlaceholder')}
-            data={categoryOptions}
-            value={categoryIds ? categoryIds.split(',').filter(Boolean) : []}
-            onChange={(values) => updateProp('categoryIds', values.join(','))}
-            size="xs"
-            clearable
-            searchable
+    <>
+      <QueryErrorAlert queries={[categoriesQuery, seriesListQuery, tagsQuery]} />
+      <ListBlockEditorBase
+        editorType="post-list"
+        limitLabel={tPageEditor('blockEditor.labels.numberOfPosts')}
+        layout={layout}
+        columns={columns}
+        limit={limit}
+        maxLimit={MAX_LIMIT_POSTS}
+        defaultColumns="3"
+        defaultLimit="6"
+        sortBy={sortBy}
+        sortByOptions={sortByOptions}
+        sortOrder={sortOrder}
+        showPagination={showPagination}
+        showImage={showFeaturedImage}
+        imageAspectRatio={imageAspectRatio}
+        carouselLoop={carouselLoop}
+        carouselIndicators={carouselIndicators}
+        filters={
+          <>
+            <MultiSelect
+              label={tCommonEntities('categories')}
+              placeholder={tPageEditor('mapEditor.allCategoriesPlaceholder')}
+              data={categoryOptions}
+              value={categoryIds ? categoryIds.split(',').filter(Boolean) : []}
+              onChange={(values) => updateProp('categoryIds', values.join(','))}
+              size="xs"
+              clearable
+              searchable
+            />
+            <Select
+              label={tCommonEntities('series')}
+              placeholder={tPageEditor('mapEditor.allSeriesPlaceholder')}
+              data={seriesOptions}
+              value={seriesId || null}
+              onChange={(value) => updateProp('seriesId', value || '')}
+              size="xs"
+              clearable
+              searchable
+            />
+            <MultiSelect
+              label={tCommonLabels('authors')}
+              placeholder={tPageEditor('mapEditor.allAuthorsPlaceholder')}
+              data={authorOptions}
+              value={authorIds ? authorIds.split(',').filter(Boolean) : []}
+              onChange={(values) => updateProp('authorIds', values.join(','))}
+              size="xs"
+              clearable
+              searchable
+            />
+            <MultiSelect
+              label={tCommonEntities('tags')}
+              placeholder={tPageEditor('mapEditor.allTagsPlaceholder')}
+              data={tagOptions}
+              value={tagIds ? tagIds.split(',').filter(Boolean) : []}
+              onChange={(values) => updateProp('tagIds', values.join(','))}
+              size="xs"
+              clearable
+              searchable
+            />
+          </>
+        }
+        extraDisplayOptions={
+          <Switch
+            label={tPageEditor('blockEditor.labels.showMeta')}
+            checked={showMeta === 'true'}
+            onChange={(event) => updateProp('showMeta', event.currentTarget.checked ? 'true' : 'false')}
+            size="sm"
           />
-          <Select
-            label={tCommonEntities('series')}
-            placeholder={tPageEditor('mapEditor.allSeriesPlaceholder')}
-            data={seriesOptions}
-            value={seriesId || null}
-            onChange={(value) => updateProp('seriesId', value || '')}
-            size="xs"
-            clearable
-            searchable
-          />
-          <MultiSelect
-            label={tCommonLabels('authors')}
-            placeholder={tPageEditor('mapEditor.allAuthorsPlaceholder')}
-            data={authorOptions}
-            value={authorIds ? authorIds.split(',').filter(Boolean) : []}
-            onChange={(values) => updateProp('authorIds', values.join(','))}
-            size="xs"
-            clearable
-            searchable
-          />
-          <MultiSelect
-            label={tCommonEntities('tags')}
-            placeholder={tPageEditor('mapEditor.allTagsPlaceholder')}
-            data={tagOptions}
-            value={tagIds ? tagIds.split(',').filter(Boolean) : []}
-            onChange={(values) => updateProp('tagIds', values.join(','))}
-            size="xs"
-            clearable
-            searchable
-          />
-        </>
-      }
-      extraDisplayOptions={
-        <Switch
-          label={tPageEditor('blockEditor.labels.showMeta')}
-          checked={showMeta === 'true'}
-          onChange={(event) => updateProp('showMeta', event.currentTarget.checked ? 'true' : 'false')}
-          size="sm"
-        />
-      }
-      onUpdate={updateBaseProp}
-    />
+        }
+        onUpdate={updateBaseProp}
+      />
+    </>
   );
 }
 

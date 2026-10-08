@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { notFound } from 'next/navigation';
 import CampaignEditPage from '@/features/campaign/CampaignEditPage';
 import { getCampaignAction } from '@/lib/actions/campaign';
@@ -11,7 +12,7 @@ export default async function CanonicalCampaignEditPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
-  const campaign = await getCampaignAction(id);
+  const campaign = await getCampaignAction(id).then(unwrapQueryResult);
   if (!campaign) {
     return renderPageRouteFallback(['campaigns', id], query);
   }

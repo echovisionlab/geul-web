@@ -1,4 +1,5 @@
 'use client';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { listSessionsAction, revokeOtherSessionsAction, revokeSessionAction } from '@/lib/actions/session';
 import { useSessionContext } from '@/lib/providers/SessionProvider';
@@ -36,7 +37,7 @@ export const authClient = {
   signOut: () => signOut(),
   useSession,
   listSessions: async () => {
-    const sessions = await listSessionsAction();
+    const sessions = await listSessionsAction().then(unwrapQueryResult);
     return { data: sessions };
   },
   revokeSession: async ({ token }: { token: string }) => {

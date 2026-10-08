@@ -181,7 +181,7 @@ describe('MyArtistsTable controller', () => {
   });
 
   it('owns query state and maps table query changes to the list action input', async () => {
-    mocks.listMyArtistsAction.mockResolvedValue(initialData);
+    mocks.listMyArtistsAction.mockResolvedValue({ ok: true, value: initialData });
     renderController();
 
     const nextQuery: MyArtistsDataTableQuery = {

@@ -1,4 +1,5 @@
 'use client';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
@@ -25,14 +26,16 @@ function ReleaseListSettingsForm({ props, updateProps }: ReleaseListSettingsForm
   const tPageEditor = useTranslations('pageEditor');
   const tReleaseTypes = useTranslations('releasePage.types');
   const tCommonEntities = useTranslations('common.entities');
-  const { data: artists } = useQuery({
+  const artistsQuery = useQuery({
     queryKey: ['artists', 'selector'],
-    queryFn: () => listArtistsAction(),
+    queryFn: () => listArtistsAction().then(unwrapQueryResult),
   });
-  const { data: categories } = useQuery({
+  const { data: artists } = artistsQuery;
+  const categoriesQuery = useQuery({
     queryKey: ['categories'],
-    queryFn: () => listCategoriesAction(),
+    queryFn: () => listCategoriesAction().then(unwrapQueryResult),
   });
+  const { data: categories } = categoriesQuery;
   const labelsQuery = useQuery({
     queryKey: ['labels', 'selector'],
     queryFn: () => listLabelsForSelector(),
@@ -80,7 +83,7 @@ function ReleaseListSettingsForm({ props, updateProps }: ReleaseListSettingsForm
 
   return (
     <>
-      <QueryErrorAlert queries={[labelsQuery]} />
+      <QueryErrorAlert queries={[labelsQuery, artistsQuery, categoriesQuery]} />
       <ListBlockEditorBase
         editorType="release-list"
         limitLabel={tPageEditor('blockEditor.labels.numberOfReleases')}

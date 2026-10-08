@@ -1,7 +1,8 @@
 'use server';
+import { queryResult, type QueryResult } from '@/lib/api/query-result';
 
 import { isConnectErrorCode } from '@/lib/api/connect-error';
-import { Code } from '@connectrpc/connect';
+import { Code, ConnectError } from '@connectrpc/connect';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { createAccountClient } from '@/lib/api/server-client';
 import type { SessionInfo } from '@/lib/types/user/model';
@@ -25,25 +26,27 @@ function mapError(err: unknown, fallback: string): SessionActionResult {
   return { error: fallback, errorCode: 'UNKNOWN' };
 }
 
-export async function listSessionsAction(): Promise<SessionInfo[]> {
-  const session = await getSession();
-  if (!session?.user?.id) {
-    return [];
-  }
+export async function listSessionsAction(): Promise<QueryResult<SessionInfo[]>> {
+  return queryResult(async () => {
+    const session = await getSession({ throwOnError: true });
+    if (!session?.user?.id) {
+      throw new ConnectError('Authentication required', Code.Unauthenticated);
+    }
 
-  try {
-    const client = await createAccountClient();
-    const response = await client.getMySecurity({});
-    return (response.security?.sessions ?? []).map((item) => ({
-      id: item.id,
-      active: item.active,
-      current: item.current,
-      authenticated_at: item.authenticatedAt ? timestampDate(item.authenticatedAt).toISOString() : '',
-    }));
-  } catch (err) {
-    logger.error('Failed to list sessions', { error: err });
-    return [];
-  }
+    try {
+      const client = await createAccountClient();
+      const response = await client.getMySecurity({});
+      return (response.security?.sessions ?? []).map((item) => ({
+        id: item.id,
+        active: item.active,
+        current: item.current,
+        authenticated_at: item.authenticatedAt ? timestampDate(item.authenticatedAt).toISOString() : '',
+      }));
+    } catch (err) {
+      logger.error('Failed to list sessions', { error: err });
+      throw err;
+    }
+  });
 }
 
 export async function revokeSessionAction(sessionId: string): Promise<SessionActionResult> {

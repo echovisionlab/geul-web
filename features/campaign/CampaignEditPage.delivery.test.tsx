@@ -61,9 +61,11 @@ vi.mock('@tanstack/react-query', async () => {
   };
 });
 
-vi.mock('@mantine/core', async () => {
+vi.mock('@mantine/core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@mantine/core')>();
   const React = await import('react');
   return {
+    ...actual,
     Box: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     Group: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     SimpleGrid: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,

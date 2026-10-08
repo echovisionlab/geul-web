@@ -316,7 +316,7 @@ export function AdminMenusPage() {
   return (
     <EditorRuntimeProvider provider={menuRoom.provider} entityType="menu" entityId={selectedMenuId ?? ''}>
       <Stack>
-        <QueryErrorAlert queries={[menusQuery, selectedMenuFailure, targetsQuery]} />
+        <QueryErrorAlert queries={[menusQuery, selectedMenuFailure, targetsQuery, selectedMenuQuery]} />
         <Group justify="space-between">
           <Title order={2}>{tPage('title')}</Title>
           <Button tone="neutral" emphasis="medium" onClick={handleCreateMenu} leftSection={<IconPlus size={16} />}>

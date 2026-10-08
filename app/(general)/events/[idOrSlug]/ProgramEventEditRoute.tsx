@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
@@ -50,7 +51,7 @@ export async function renderProgramEventEditRoute(idOrSlug: string, query: Searc
     ? await Promise.all([
         listProgramEventTypesAdmin(),
         listProgramEventSeriesAdmin(),
-        listArtistsAction(),
+        listArtistsAction().then(unwrapQueryResult),
         listLabelsAdmin({ pageSize: 100 }),
         listClientsAdmin({ pageSize: 100 }),
       ])

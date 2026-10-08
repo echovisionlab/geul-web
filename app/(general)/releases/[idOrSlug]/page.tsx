@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import type { Metadata } from 'next';
 import { connection } from 'next/server';
 import { notFound, redirect } from 'next/navigation';
@@ -139,7 +140,7 @@ export default async function ReleaseViewPage({ params, searchParams }: Props) {
     const [release, baseUrl, initialTracks, initialRelations] = await Promise.all([
       getReleaseAdminAction(releaseId),
       getBaseUrl(),
-      getReleaseTrackSnapshotAction(releaseId),
+      getReleaseTrackSnapshotAction(releaseId).then(unwrapQueryResult),
       getReleaseEditorRelationsAction(releaseId),
     ]);
     if (!release || !initialRelations) {

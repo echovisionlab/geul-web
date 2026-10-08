@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -32,10 +34,10 @@ export function TagSelector({ postId, canEdit, isAdmin, tags: initialTags }: Tag
   }));
 
   // Use initialData to avoid loading state, staleTime: Infinity to prevent refetch
-  const { data: tags = normalizedInitialTags, isLoading } = useQuery({
+  const tagsQuery = useQuery({
     queryKey: ['tag', 'list'],
     queryFn: async () => {
-      const result = await listTagsAction();
+      const result = await listTagsAction().then(unwrapQueryResult);
       // Ensure slug is always string
       return result.map((t) => ({
         id: t.id,
@@ -46,6 +48,7 @@ export function TagSelector({ postId, canEdit, isAdmin, tags: initialTags }: Tag
     initialData: normalizedInitialTags,
     staleTime: Infinity,
   });
+  const { data: tags = normalizedInitialTags, isLoading } = tagsQuery;
 
   const selectedTags = useMemo(
     () => tagIds.map((id) => tags.find((tag) => tag.id === id) ?? { id, name: id, slug: '' }),
@@ -103,22 +106,25 @@ export function TagSelector({ postId, canEdit, isAdmin, tags: initialTags }: Tag
   );
 
   return (
-    <MultiSelectCombobox
-      label={tCommonEntities('tags')}
-      idPrefix={`post-${postId}-tags`}
-      placeholder={t('placeholder')}
-      emptyMessage={t('emptyMessage')}
-      notFoundMessage={t('notFoundMessage')}
-      selectedItems={selectedTags}
-      options={tags}
-      isLoading={isLoading}
-      isCreating={createTag.isPending}
-      onSelect={handleSelect}
-      onDeselect={handleDeselect}
-      onCreate={handleCreate}
-      canEdit={canEdit}
-      canCreateNew={canEdit && isAdmin}
-      combineWithSelected
-    />
+    <>
+      <QueryErrorAlert queries={[tagsQuery]} />
+      <MultiSelectCombobox
+        label={tCommonEntities('tags')}
+        idPrefix={`post-${postId}-tags`}
+        placeholder={t('placeholder')}
+        emptyMessage={t('emptyMessage')}
+        notFoundMessage={t('notFoundMessage')}
+        selectedItems={selectedTags}
+        options={tags}
+        isLoading={isLoading}
+        isCreating={createTag.isPending}
+        onSelect={handleSelect}
+        onDeselect={handleDeselect}
+        onCreate={handleCreate}
+        canEdit={canEdit}
+        canCreateNew={canEdit && isAdmin}
+        combineWithSelected
+      />
+    </>
   );
 }

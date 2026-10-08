@@ -1,4 +1,5 @@
 'use client';
+import { unwrapQueryResult, type QueryValue } from '@/lib/api/query-result';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -26,12 +27,14 @@ export function LabelRowMenu({ label }: LabelRowMenuProps) {
   const router = useRouter();
   const [deleteOpened, setDeleteOpened] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [deletePreview, setDeletePreview] = useState<Awaited<ReturnType<typeof previewDeleteLabelAction>>>(null);
+  const [deletePreview, setDeletePreview] = useState<QueryValue<
+    Awaited<ReturnType<typeof previewDeleteLabelAction>>
+  > | null>(null);
 
   const openDelete = async () => {
     setDeleteLoading(true);
     try {
-      const preview = await previewDeleteLabelAction(label.id);
+      const preview = await previewDeleteLabelAction(label.id).then(unwrapQueryResult);
       if (!preview) {
         notifications.show({ message: tCommon('messages.failedToLoad'), color: 'red' });
         return;

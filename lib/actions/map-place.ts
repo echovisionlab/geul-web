@@ -1,4 +1,6 @@
 'use server';
+import { throwQueryError } from '@/lib/api/query-error';
+import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
@@ -55,54 +57,53 @@ function toMapPlaceMemberSummary(
 }
 
 export async function listMapPlacesAdminAction(input: { page?: number; pageSize?: number; search?: string }) {
-  try {
-    const client = await createMapPlaceClient();
-    const limit = input.pageSize ?? 20;
-    const offset = ((input.page ?? 1) - 1) * limit;
+  return queryResult(async () => {
+    try {
+      const client = await createMapPlaceClient();
+      const limit = input.pageSize ?? 20;
+      const offset = ((input.page ?? 1) - 1) * limit;
 
-    const response = await client.listMapPlacesAdmin({
-      pagination: { limit, offset },
-      filters: input.search ? [{ field: 'search', op: FilterOp.ILIKE, value: input.search }] : undefined,
-    });
+      const response = await client.listMapPlacesAdmin({
+        pagination: { limit, offset },
+        filters: input.search ? [{ field: 'search', op: FilterOp.ILIKE, value: input.search }] : undefined,
+      });
 
-    const total = response.pagination?.total ?? 0;
-    return {
-      data: (response.places ?? []).map((p) => ({
-        id: p.id,
-        name: p.name,
-        address: p.address,
-        lat: p.lat,
-        lng: p.lng,
-        google_place_id: p.googlePlaceId ?? null,
-        address_components: p.addressComponents
-          ? {
-              street: p.addressComponents.street ?? undefined,
-              city: p.addressComponents.city ?? undefined,
-              region: p.addressComponents.region ?? undefined,
-              country: p.addressComponents.country ?? undefined,
-              postalCode: p.addressComponents.postalCode ?? undefined,
-            }
-          : null,
-        image_file_id: p.imageFileId ?? null,
-        created_by_member_id: p.createdByMemberId ?? null,
-        updated_by_member_id: p.updatedByMemberId ?? null,
-        created_by_member: toMapPlaceMemberSummary(p.createdByMember),
-        updated_by_member: toMapPlaceMemberSummary(p.updatedByMember),
-        created_at: p.createdAt ? timestampDate(p.createdAt) : new Date(),
-        updated_at: p.updatedAt ? timestampDate(p.updatedAt) : new Date(),
-      })),
-      total,
-      page: input.page ?? 1,
-      pageSize: limit,
-      totalPages: Math.ceil(total / limit),
-    };
-  } catch (err) {
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
+      const total = response.pagination?.total ?? 0;
+      return {
+        data: (response.places ?? []).map((p) => ({
+          id: p.id,
+          name: p.name,
+          address: p.address,
+          lat: p.lat,
+          lng: p.lng,
+          google_place_id: p.googlePlaceId ?? null,
+          address_components: p.addressComponents
+            ? {
+                street: p.addressComponents.street ?? undefined,
+                city: p.addressComponents.city ?? undefined,
+                region: p.addressComponents.region ?? undefined,
+                country: p.addressComponents.country ?? undefined,
+                postalCode: p.addressComponents.postalCode ?? undefined,
+              }
+            : null,
+          image_file_id: p.imageFileId ?? null,
+          created_by_member_id: p.createdByMemberId ?? null,
+          updated_by_member_id: p.updatedByMemberId ?? null,
+          created_by_member: toMapPlaceMemberSummary(p.createdByMember),
+          updated_by_member: toMapPlaceMemberSummary(p.updatedByMember),
+          created_at: p.createdAt ? timestampDate(p.createdAt) : new Date(),
+          updated_at: p.updatedAt ? timestampDate(p.updatedAt) : new Date(),
+        })),
+        total,
+        page: input.page ?? 1,
+        pageSize: limit,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (err) {
+      logger.error('Failed to list map places', { error: err });
+      throw err;
     }
-    logger.error('Failed to list map places', { error: err });
-    return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
-  }
+  });
 }
 
 export async function deleteMapPlaceAction(id: string): Promise<{ success?: boolean; error?: string }> {
@@ -155,7 +156,7 @@ export async function getMapPlaceAction(id: string) {
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
     }
-    throw err;
+    throwQueryError(err);
   }
 }
 
@@ -204,54 +205,58 @@ export async function updateMapPlaceAction(
 
 // Public: get multiple places by IDs (for Map block editor)
 export async function getMapPlacesByIdsAction(ids: string[]) {
-  try {
-    const client = await createMapPlaceClient();
-    const response = await client.getMapPlacesByIds({ ids });
-    return (response.places ?? []).map((p) => ({
-      id: p.id,
-      name: p.name,
-      address: p.address,
-      lat: p.lat,
-      lng: p.lng,
-      googlePlaceId: p.googlePlaceId ?? null,
-      imageUrl: p.imageAsset?.url ?? null,
-    }));
-  } catch (err) {
-    logger.error('Failed to get map places by IDs', { error: err });
-    return [];
-  }
+  return queryResult(async () => {
+    try {
+      const client = await createMapPlaceClient();
+      const response = await client.getMapPlacesByIds({ ids });
+      return (response.places ?? []).map((p) => ({
+        id: p.id,
+        name: p.name,
+        address: p.address,
+        lat: p.lat,
+        lng: p.lng,
+        googlePlaceId: p.googlePlaceId ?? null,
+        imageUrl: p.imageAsset?.url ?? null,
+      }));
+    } catch (err) {
+      logger.error('Failed to get map places by IDs', { error: err });
+      throw err;
+    }
+  });
 }
 
 export async function getPublicMapPlacesByIdsAction(ids: string[], requestedLocale?: string | null) {
-  if (ids.length === 0) {
-    return [];
-  }
+  return queryResult(async () => {
+    if (ids.length === 0) {
+      return [];
+    }
 
-  try {
-    const client = requestedLocale
-      ? await createPublicMapPlaceClientWithAuth(requestedLocale)
-      : createPublicMapPlaceClient();
-    const response = await client.getByIds({ ids });
-    return (response.places ?? []).map((p) => ({
-      id: p.id,
-      name: p.name,
-      address: p.address,
-      lat: p.lat,
-      lng: p.lng,
-      googlePlaceId: p.googlePlaceId ?? null,
-      addressComponents: p.addressComponents
-        ? {
-            street: p.addressComponents.street ?? undefined,
-            city: p.addressComponents.city ?? undefined,
-            region: p.addressComponents.region ?? undefined,
-            country: p.addressComponents.country ?? undefined,
-            postalCode: p.addressComponents.postalCode ?? undefined,
-          }
-        : null,
-      imageUrl: p.imageAsset?.url ?? null,
-    }));
-  } catch (err) {
-    logger.error('Failed to get public map places by IDs', { error: err });
-    return [];
-  }
+    try {
+      const client = requestedLocale
+        ? await createPublicMapPlaceClientWithAuth(requestedLocale)
+        : createPublicMapPlaceClient();
+      const response = await client.getByIds({ ids });
+      return (response.places ?? []).map((p) => ({
+        id: p.id,
+        name: p.name,
+        address: p.address,
+        lat: p.lat,
+        lng: p.lng,
+        googlePlaceId: p.googlePlaceId ?? null,
+        addressComponents: p.addressComponents
+          ? {
+              street: p.addressComponents.street ?? undefined,
+              city: p.addressComponents.city ?? undefined,
+              region: p.addressComponents.region ?? undefined,
+              country: p.addressComponents.country ?? undefined,
+              postalCode: p.addressComponents.postalCode ?? undefined,
+            }
+          : null,
+        imageUrl: p.imageAsset?.url ?? null,
+      }));
+    } catch (err) {
+      logger.error('Failed to get public map places by IDs', { error: err });
+      throw err;
+    }
+  });
 }

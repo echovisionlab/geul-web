@@ -1,4 +1,5 @@
 'use client';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useCallback, useState } from 'react';
 import { PostStatus } from '@echovisionlab/geul-proto/public/post_pb.ts';
@@ -29,7 +30,7 @@ export function CommentSection({ postId, commentsEnabled, status, canModerate = 
 
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ['comment', 'list', postId],
-    queryFn: ({ pageParam }) => listCommentsAction(postId, { cursor: pageParam }),
+    queryFn: ({ pageParam }) => listCommentsAction(postId, { cursor: pageParam }).then(unwrapQueryResult),
     getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.nextCursor : undefined),
     initialPageParam: undefined as string | undefined,
   });

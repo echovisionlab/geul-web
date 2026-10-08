@@ -1,4 +1,6 @@
 'use server';
+import { throwQueryError } from '@/lib/api/query-error';
+import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
@@ -23,7 +25,7 @@ import { isValidUuid } from '@/lib/utils/validation';
 
 // Simple list for selectors (published only)
 export async function listArtistsAction() {
-  try {
+  return queryResult(async () => {
     const client = await createArtistClient();
     const response = await client.listArtists({
       pagination: { limit: 100, offset: 0 },
@@ -34,13 +36,11 @@ export async function listArtistsAction() {
       slug: a.slug ?? null,
       imageUrl: a.imageAsset?.url ?? null,
     }));
-  } catch (err) {
-    return [];
-  }
+  });
 }
 
 export async function listArtistParentOptionsAction(artistId: string) {
-  try {
+  return queryResult(async () => {
     const client = await createArtistClient();
     const [published, manageable] = await Promise.all([
       client.listArtists({ pagination: { limit: 200, offset: 0 } }),
@@ -53,9 +53,7 @@ export async function listArtistParentOptionsAction(artistId: string) {
     return [...candidates.values()]
       .map((artist) => ({ id: artist.id, name: artist.name }))
       .sort((left, right) => left.name.localeCompare(right.name));
-  } catch {
-    return [];
-  }
+  });
 }
 
 export async function createArtistDraftAction(): Promise<{
@@ -265,7 +263,7 @@ export async function getArtistAdminAction(idOrSlug: string) {
     if (isConnectErrorCode(err, Code.PermissionDenied)) {
       return null;
     }
-    throw err;
+    throwQueryError(err);
   }
 }
 
@@ -351,7 +349,7 @@ export async function setArtistImagesAction(
 
 // User-scoped list (for /my/artists page) - artists where user is editor
 export async function listMyArtistsAction(input: ArtistListInput) {
-  try {
+  return queryResult(async () => {
     const client = await createArtistClient();
     const limit = input.pageSize ?? 20;
     const page = input.page ?? 1;
@@ -384,9 +382,7 @@ export async function listMyArtistsAction(input: ArtistListInput) {
       pageSize: limit,
       totalPages: Math.ceil(total / limit),
     };
-  } catch (err) {
-    return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
-  }
+  });
 }
 
 // Public: list artists for page blocks (published only)
@@ -398,7 +394,7 @@ export async function listArtistsForBlockAction(input: {
   offset?: number;
   requestedLocale?: string | null;
 }) {
-  try {
+  return queryResult(async () => {
     const client = input.requestedLocale
       ? await createPublicArtistClientWithAuth(input.requestedLocale)
       : createPublicArtistClient();
@@ -424,7 +420,6 @@ export async function listArtistsForBlockAction(input: {
         }),
       ],
     });
-
     return {
       artists: (response.artists ?? []).map((a) => ({
         id: a.id,
@@ -440,22 +435,13 @@ export async function listArtistsForBlockAction(input: {
         offset,
       },
     };
-  } catch (err) {
-    return {
-      artists: [],
-      pagination: {
-        total: 0,
-        limit: input.limit ?? 12,
-        offset: input.offset ?? 0,
-      },
-    };
-  }
+  });
 }
 
 // === Durable Owner and Manager participants ===
 
 export async function listArtistParticipantsAction(artistId: string) {
-  try {
+  return queryResult(async () => {
     const client = await createArtistClient();
     const response = await client.listArtistParticipants({ artistId });
     return (response.participants ?? []).map((participant) => ({
@@ -465,9 +451,7 @@ export async function listArtistParticipantsAction(artistId: string) {
       role: participant.role,
       hasEffectiveAuthority: participant.hasEffectiveAuthority,
     }));
-  } catch (err) {
-    return [];
-  }
+  });
 }
 
 export async function setArtistParticipantAction(

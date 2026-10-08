@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
@@ -107,7 +109,7 @@ export default function AdminWorksPage() {
     { field: 'published_at', label: tCommon('labels.published') },
   ];
 
-  const { data, isLoading } = useQuery({
+  const loadedDataQuery = useQuery({
     queryKey: ['works', 'admin', query],
     queryFn: () =>
       listWorksAdminAction({
@@ -117,8 +119,9 @@ export default function AdminWorksPage() {
         page: query.page ?? 1,
         pageSize: query.pageSize ?? 20,
         search: query.search,
-      }),
+      }).then(unwrapQueryResult),
   });
+  const { data, isLoading } = loadedDataQuery;
 
   const invalidateWorks = () => queryClient.invalidateQueries({ queryKey: ['works'] });
 
@@ -296,8 +299,13 @@ export default function AdminWorksPage() {
     },
   ];
 
+  if (loadedDataQuery.isError && loadedDataQuery.data === undefined) {
+    return <QueryErrorAlert queries={[loadedDataQuery]} />;
+  }
   return (
     <>
+      <QueryErrorAlert queries={[loadedDataQuery]} />
+
       <AdminPageHeader
         title={tCommon('entities.works')}
         items={[

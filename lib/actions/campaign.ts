@@ -1,4 +1,5 @@
 'use server';
+import { queryResult, type QueryResult } from '@/lib/api/query-result';
 
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
@@ -159,101 +160,97 @@ export async function listCampaignsAction(options?: {
   pageSize?: number;
   search?: string;
   sort?: { field: string; order?: 'asc' | 'desc' }[];
-}): Promise<PaginatedQueryResult<CampaignListItem>> {
-  const page = options?.page ?? 1;
-  const pageSize = options?.pageSize ?? 20;
+}): Promise<QueryResult<PaginatedQueryResult<CampaignListItem>>> {
+  return queryResult(async () => {
+    const page = options?.page ?? 1;
+    const pageSize = options?.pageSize ?? 20;
 
-  try {
-    const client = await createCampaignClient();
-    const response = await client.listCampaignsAdmin({
-      pagination: {
-        limit: pageSize,
-        offset: (page - 1) * pageSize,
-      },
-      filters: options?.search ? [{ field: 'search', op: FilterOp.ILIKE, value: options.search }] : undefined,
-      sorts: options?.sort?.map((s) => ({
-        field: s.field,
-        order: s.order === 'desc' ? SortOrder.DESC : SortOrder.ASC,
-      })),
-    });
+    try {
+      const client = await createCampaignClient();
+      const response = await client.listCampaignsAdmin({
+        pagination: {
+          limit: pageSize,
+          offset: (page - 1) * pageSize,
+        },
+        filters: options?.search ? [{ field: 'search', op: FilterOp.ILIKE, value: options.search }] : undefined,
+        sorts: options?.sort?.map((s) => ({
+          field: s.field,
+          order: s.order === 'desc' ? SortOrder.DESC : SortOrder.ASC,
+        })),
+      });
 
-    const total = response.pagination?.total ?? 0;
+      const total = response.pagination?.total ?? 0;
 
-    return {
-      data: (response.campaigns ?? []).map(mapCampaignListItem),
-      total,
-      page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize),
-    };
-  } catch (err) {
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
+      return {
+        data: (response.campaigns ?? []).map(mapCampaignListItem),
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      };
+    } catch (err) {
+      logger.error('Failed to list campaigns', { error: err });
+      throw err;
     }
-    logger.error('Failed to list campaigns', { error: err });
-    return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
-  }
+  });
 }
 
-export async function getCampaignAction(id: string): Promise<Campaign | null> {
-  try {
-    const client = await createCampaignClient();
-    const response = await client.getCampaign({ id });
-    if (!response.campaign) {
-      return null;
+export async function getCampaignAction(id: string): Promise<QueryResult<Campaign | null>> {
+  return queryResult(async () => {
+    try {
+      const client = await createCampaignClient();
+      const response = await client.getCampaign({ id });
+      if (!response.campaign) {
+        return null;
+      }
+      return mapCampaign(response.campaign);
+    } catch (err) {
+      logger.error('Failed to get campaign', { error: err });
+      throw err;
     }
-    return mapCampaign(response.campaign);
-  } catch (err) {
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return null;
-    }
-    logger.error('Failed to get campaign', { error: err });
-    return null;
-  }
+  });
 }
 
-export async function getCampaignStatsAction(id: string): Promise<CampaignDeliveryStats | null> {
-  try {
-    const client = await createCampaignClient();
-    const response = await client.getCampaignStats({ id });
-    if (!response.stats) {
-      return null;
+export async function getCampaignStatsAction(id: string): Promise<QueryResult<CampaignDeliveryStats | null>> {
+  return queryResult(async () => {
+    try {
+      const client = await createCampaignClient();
+      const response = await client.getCampaignStats({ id });
+      if (!response.stats) {
+        return null;
+      }
+      return {
+        totalSent: response.stats.totalSent,
+        totalSkipped: response.stats.totalSkipped,
+        totalFailed: response.stats.totalFailed,
+        totalBlocked: response.stats.totalBlocked,
+        totalSuppressed: response.stats.totalSuppressed,
+      };
+    } catch (err) {
+      logger.error('Failed to get campaign stats', { error: err });
+      throw err;
     }
-    return {
-      totalSent: response.stats.totalSent,
-      totalSkipped: response.stats.totalSkipped,
-      totalFailed: response.stats.totalFailed,
-      totalBlocked: response.stats.totalBlocked,
-      totalSuppressed: response.stats.totalSuppressed,
-    };
-  } catch (err) {
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return null;
-    }
-    logger.error('Failed to get campaign stats', { error: err });
-    return null;
-  }
+  });
 }
 
 export async function getCampaignRecipientsAction(
   id: string,
   limit: number = 100,
   offset: number = 0,
-): Promise<{ recipients: CampaignDeliveryRecipient[]; total: number }> {
-  try {
-    const client = await createCampaignClient();
-    const response = await client.getCampaignRecipients({ id, limit, offset });
-    return {
-      recipients: (response.recipients ?? []).map(mapCampaignRecipient),
-      total: response.total,
-    };
-  } catch (err) {
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { recipients: [], total: 0 };
+): Promise<QueryResult<{ recipients: CampaignDeliveryRecipient[]; total: number }>> {
+  return queryResult(async () => {
+    try {
+      const client = await createCampaignClient();
+      const response = await client.getCampaignRecipients({ id, limit, offset });
+      return {
+        recipients: (response.recipients ?? []).map(mapCampaignRecipient),
+        total: response.total,
+      };
+    } catch (err) {
+      logger.error('Failed to get campaign recipients', { error: err });
+      throw err;
     }
-    logger.error('Failed to get campaign recipients', { error: err });
-    return { recipients: [], total: 0 };
-  }
+  });
 }
 
 export async function createCampaignAction(
@@ -409,28 +406,30 @@ export async function previewCampaignAction(
     subject?: string | null;
     document?: LocalizedRichTextDocument | null;
   },
-): Promise<CampaignPreview | null> {
-  try {
-    const client = await createCampaignClient();
-    const response = await client.previewCampaign({
-      id,
-      locale: options?.locale ?? undefined,
-      layoutId: options?.layoutId === undefined ? undefined : (options.layoutId ?? ''),
-      subject: options?.subject ?? undefined,
-      document: options?.document ?? undefined,
-    });
-    if (!response.preview) {
-      return null;
+): Promise<QueryResult<CampaignPreview | null>> {
+  return queryResult(async () => {
+    try {
+      const client = await createCampaignClient();
+      const response = await client.previewCampaign({
+        id,
+        locale: options?.locale ?? undefined,
+        layoutId: options?.layoutId === undefined ? undefined : (options.layoutId ?? ''),
+        subject: options?.subject ?? undefined,
+        document: options?.document ?? undefined,
+      });
+      if (!response.preview) {
+        return null;
+      }
+      return {
+        subject: response.preview.subject,
+        htmlContent: response.preview.htmlContent,
+        textContent: response.preview.textContent,
+      };
+    } catch (err) {
+      logger.error('Failed to preview campaign', { error: err });
+      throw err;
     }
-    return {
-      subject: response.preview.subject,
-      htmlContent: response.preview.htmlContent,
-      textContent: response.preview.textContent,
-    };
-  } catch (err) {
-    logger.error('Failed to preview campaign', { error: err });
-    return null;
-  }
+  });
 }
 
 export async function sendTestCampaignAction(

@@ -1,4 +1,5 @@
 'use server';
+import { throwQueryError } from '@/lib/api/query-error';
 
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { timestampDate, type Timestamp } from '@bufbuild/protobuf/wkt';
@@ -187,7 +188,7 @@ export async function getEmailTemplateAction(id: string): Promise<EmailTemplate 
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return null;
     }
-    throw err;
+    throwQueryError(err);
   }
 }
 
@@ -343,6 +344,6 @@ export async function previewEmailTemplateAction(data: {
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return null;
     }
-    throw err;
+    throwQueryError(err);
   }
 }

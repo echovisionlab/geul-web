@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -57,7 +58,7 @@ describe('Account session actions', () => {
   });
 
   it('loads the Account-owned session projection including the current marker', async () => {
-    await expect(listSessionsAction()).resolves.toEqual([
+    await expect(listSessionsAction().then(unwrapQueryResult)).resolves.toEqual([
       {
         id: 'session-current',
         active: true,
@@ -90,7 +91,7 @@ describe('Account session actions', () => {
   it('does not create an Account client without an authenticated Member viewer', async () => {
     mocks.getSession.mockResolvedValue(null);
 
-    await expect(listSessionsAction()).resolves.toEqual([]);
+    await expect(listSessionsAction().then(unwrapQueryResult)).rejects.toMatchObject({ status: 401 });
     await expect(revokeSessionAction('session-other')).resolves.toEqual({
       error: 'Unauthorized',
       errorCode: 'UNAUTHORIZED',

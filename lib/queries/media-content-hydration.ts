@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import type { MediaDelivery } from '@echovisionlab/geul-proto/common/media_pb.ts';
 import { getPublicMapPlacesByIdsAction } from '@/lib/actions/map-place';
 import { resolvePublicMapThemesByIdsAction } from '@/lib/actions/map-theme';
@@ -121,7 +122,7 @@ async function fetchFreshMapData(
   }
 
   const [places, themes] = await Promise.all([
-    getPublicMapPlacesByIdsAction(Array.from(placeIds), requestedLocale),
+    getPublicMapPlacesByIdsAction(Array.from(placeIds), requestedLocale).then(unwrapQueryResult),
     resolvePublicMapThemesByIdsAction(Array.from(themeIds)),
   ]);
 

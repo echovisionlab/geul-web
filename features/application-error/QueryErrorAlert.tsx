@@ -37,7 +37,7 @@ function QueryErrorAlertContent({ failed }: { failed: readonly QueryFailure[] })
             emphasis="medium"
             size="sm"
             loading={failed.some((query) => query.isFetching)}
-            onClick={() => void Promise.all(failed.map((query) => query.refetch()))}
+            onClick={() => void Promise.allSettled(failed.map((query) => query.refetch()))}
           >
             {content.tryAgain}
           </Button>

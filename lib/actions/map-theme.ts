@@ -1,4 +1,5 @@
 'use server';
+import { throwQueryError } from '@/lib/api/query-error';
 
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
@@ -182,7 +183,7 @@ export async function getMapThemeByIdAction(id: string): Promise<MapTheme | null
     if (isConnectErrorCode(error, Code.NotFound, Code.Unauthenticated)) {
       return null;
     }
-    throw error;
+    throwQueryError(error);
   }
 }
 

@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -90,7 +91,7 @@ describe('Artist edit target lookup', () => {
       ],
     });
 
-    await expect(listArtistParentOptionsAction('artist-current')).resolves.toEqual([
+    await expect(listArtistParentOptionsAction('artist-current').then(unwrapQueryResult)).resolves.toEqual([
       { id: 'artist-draft', name: 'Draft' },
       { id: 'artist-public', name: 'Public' },
     ]);

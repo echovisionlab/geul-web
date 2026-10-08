@@ -8,8 +8,8 @@ import { toUserRole } from './validation';
 /**
  * Get session (memoized per request)
  */
-export const getSession = cache(async () => {
-  return getSessionFromCookie();
+export const getSession = cache(async (options?: { throwOnError?: boolean }) => {
+  return getSessionFromCookie(options);
 });
 
 /**

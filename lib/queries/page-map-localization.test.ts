@@ -15,18 +15,21 @@ describe('localizePageMapContent', () => {
   });
 
   it('replaces top-level map section places with localized data', async () => {
-    mockedGetPublicMapPlacesByIdsAction.mockResolvedValue([
-      {
-        id: 'place-1',
-        name: '리마 아르마스 광장',
-        address: '리마, 페루',
-        lat: 1,
-        lng: 2,
-        googlePlaceId: null,
-        addressComponents: null,
-        imageUrl: null,
-      },
-    ]);
+    mockedGetPublicMapPlacesByIdsAction.mockResolvedValue({
+      ok: true,
+      value: [
+        {
+          id: 'place-1',
+          name: '리마 아르마스 광장',
+          address: '리마, 페루',
+          lat: 1,
+          lng: 2,
+          googlePlaceId: null,
+          addressComponents: null,
+          imageUrl: null,
+        },
+      ],
+    });
 
     const content: PageContent = {
       sections: [
@@ -63,18 +66,21 @@ describe('localizePageMapContent', () => {
   });
 
   it('replaces nested columns map section places with localized data', async () => {
-    mockedGetPublicMapPlacesByIdsAction.mockResolvedValue([
-      {
-        id: 'place-2',
-        name: '현지화된 장소',
-        address: '현지화된 주소',
-        lat: 3,
-        lng: 4,
-        googlePlaceId: null,
-        addressComponents: null,
-        imageUrl: null,
-      },
-    ]);
+    mockedGetPublicMapPlacesByIdsAction.mockResolvedValue({
+      ok: true,
+      value: [
+        {
+          id: 'place-2',
+          name: '현지화된 장소',
+          address: '현지화된 주소',
+          lat: 3,
+          lng: 4,
+          googlePlaceId: null,
+          addressComponents: null,
+          imageUrl: null,
+        },
+      ],
+    });
 
     const content: PageContent = {
       sections: [

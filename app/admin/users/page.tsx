@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getTranslations } from 'next-intl/server';
 import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
 import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
@@ -81,7 +82,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
     search: query.search,
     sort: query.sorts?.map((s) => ({ field: s.field, order: s.direction })),
     filter: query.filters,
-  });
+  }).then(unwrapQueryResult);
 
   return (
     <UserModalProvider>

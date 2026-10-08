@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -27,10 +29,11 @@ export function ReleaseArtistsSection({
   onMutationSettled,
 }: ReleaseArtistsSectionProps) {
   const tCommon = useTranslations('common');
-  const { data: options = [] } = useQuery({
+  const optionsQuery = useQuery({
     queryKey: ['artist', 'list'],
-    queryFn: () => listArtistsAction(),
+    queryFn: () => listArtistsAction().then(unwrapQueryResult),
   });
+  const { data: options = [] } = optionsQuery;
   const setArtists = useMutation({
     mutationFn: ({
       nextArtists,
@@ -68,5 +71,10 @@ export function ReleaseArtistsSection({
     setArtists.mutate({ nextArtists, orderIntent });
   };
 
-  return <ReleaseArtistsSectionView idPrefix={idPrefix} artists={artists} options={options} onChange={handleChange} />;
+  return (
+    <>
+      <QueryErrorAlert queries={[optionsQuery]} />
+      <ReleaseArtistsSectionView idPrefix={idPrefix} artists={artists} options={options} onChange={handleChange} />
+    </>
+  );
 }

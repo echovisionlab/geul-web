@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useParams } from 'next/navigation';
 import { IconCalendar, IconCalendarMonth, IconCalendarWeek, IconChartBar } from '@tabler/icons-react';
@@ -15,17 +17,22 @@ export default function AdminFormOverviewPage() {
   const params = useParams();
   const formId = params.id as string;
 
-  const { data: stats, isLoading } = useQuery({
+  const statsQuery = useQuery({
     queryKey: ['forms', 'stats', formId],
-    queryFn: () => getFormSubmissionStatsAction(formId),
+    queryFn: () => getFormSubmissionStatsAction(formId).then(unwrapQueryResult),
   });
+  const { data: stats, isLoading } = statsQuery;
 
+  if (statsQuery.isError && statsQuery.data === undefined) {
+    return <QueryErrorAlert queries={[statsQuery]} />;
+  }
   if (isLoading) {
     return <PageLoader />;
   }
 
   return (
     <Stack>
+      <QueryErrorAlert queries={[statsQuery]} />
       <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
         <StatCard
           label={t('totalSubmissions')}

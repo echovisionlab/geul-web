@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { revalidatePath } from 'next/cache';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
@@ -50,7 +51,7 @@ describe('Audience lifecycle actions', () => {
       pagination: { total: 1 },
     });
 
-    const result = await listSegmentsAdminAction({ includeArchived: true });
+    const result = await listSegmentsAdminAction({ includeArchived: true }).then(unwrapQueryResult);
 
     expect(listSegmentsAdmin).toHaveBeenCalledWith(expect.objectContaining({ includeArchived: true }));
     expect(result.data[0]).toEqual(

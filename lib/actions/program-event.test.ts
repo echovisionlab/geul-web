@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { create } from '@bufbuild/protobuf';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
@@ -510,10 +511,12 @@ describe('program event actions', () => {
     await expect(actions.deleteProgramEventSeriesAction('series-1')).resolves.toEqual({
       success: true,
     });
-    await expect(actions.searchArtistsForProgramEventCreditAction('event-1', ' Artist ')).resolves.toEqual([
-      { id: 'artist-1', name: 'Artist', imageUrl: null },
-    ]);
-    await expect(actions.searchArtistsForProgramEventCreditAction('event-1', '   ')).resolves.toEqual([]);
+    await expect(
+      actions.searchArtistsForProgramEventCreditAction('event-1', ' Artist ').then(unwrapQueryResult),
+    ).resolves.toEqual([{ id: 'artist-1', name: 'Artist', imageUrl: null }]);
+    await expect(
+      actions.searchArtistsForProgramEventCreditAction('event-1', '   ').then(unwrapQueryResult),
+    ).resolves.toEqual([]);
   });
 
   it('maps auth and permission failures to Unauthorized', async () => {

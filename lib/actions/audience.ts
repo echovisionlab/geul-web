@@ -1,4 +1,5 @@
 'use server';
+import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectError } from '@/lib/api/connect-error';
 import { create } from '@bufbuild/protobuf';
@@ -64,7 +65,7 @@ function accountRoleToValue(role: AuthorizationRole): string | null {
 }
 
 export async function listSegmentsAdminAction(input: SegmentListInput) {
-  try {
+  return queryResult(async () => {
     const client = await createAudienceClient();
     const { page = 1, pageSize = 20, search, sort, includeArchived = false } = input;
 
@@ -104,12 +105,7 @@ export async function listSegmentsAdminAction(input: SegmentListInput) {
       pageSize,
       totalPages: Math.ceil(total / pageSize),
     };
-  } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('ListSegments RPC error', { error: err.message });
-    }
-    return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
-  }
+  });
 }
 
 export async function createSegmentAction(input: {

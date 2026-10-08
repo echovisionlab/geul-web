@@ -1,4 +1,6 @@
 'use client';
+import { unwrapQueryResult } from '@/lib/api/query-result';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -77,6 +79,8 @@ export function PublicFormView({
 
   const [passwordVerified, setPasswordVerified] = useState(false);
   const [checkingPassword, setCheckingPassword] = useState(accessReason === 'password_required');
+  const [passwordCheckError, setPasswordCheckError] = useState<unknown>(null);
+  const [passwordCheckAttempt, setPasswordCheckAttempt] = useState(0);
   const [redirectingToSuccess, setRedirectingToSuccess] = useState(false);
   const passwordPath = useMemo(() => {
     const params = new URLSearchParams();
@@ -113,20 +117,25 @@ export function PublicFormView({
     }
 
     let cancelled = false;
+    setCheckingPassword(true);
 
     const run = async () => {
       try {
-        const result = await verifyFormPasswordAction(slug, storedPassword, isShareMode ? shareToken : undefined);
+        const result = await verifyFormPasswordAction(slug, storedPassword, isShareMode ? shareToken : undefined).then(
+          unwrapQueryResult,
+        );
         if (cancelled) {
           return;
         }
         setPasswordVerified(result.valid);
+        setPasswordCheckError(null);
         if (!result.valid) {
           sessionStorage.removeItem(`form-password-${slug}`);
         }
-      } catch {
+      } catch (error) {
         if (!cancelled) {
           setPasswordVerified(false);
+          setPasswordCheckError(error);
         }
       } finally {
         if (!cancelled) {
@@ -140,10 +149,10 @@ export function PublicFormView({
     return () => {
       cancelled = true;
     };
-  }, [accessReason, isShareMode, shareToken, slug]);
+  }, [accessReason, isShareMode, shareToken, slug, passwordCheckAttempt]);
 
   const needsProtectedFetch = accessReason === 'password_required' && passwordVerified;
-  const { data: protectedAccess, isLoading: protectedAccessLoading } = useQuery({
+  const protectedAccessQuery = useQuery({
     queryKey: ['form-access', slug, shareToken, passwordVerified, requestedLocale],
     queryFn: async () => {
       const storedPassword = sessionStorage.getItem(`form-password-${slug}`) ?? undefined;
@@ -158,6 +167,7 @@ export function PublicFormView({
     },
     enabled: needsProtectedFetch,
   });
+  const { data: protectedAccess, isLoading: protectedAccessLoading } = protectedAccessQuery;
 
   const form = initialForm ?? (protectedAccess?.accessible && protectedAccess.form ? protectedAccess.form : null);
   const contentPathname = isShareMode ? `/s/${shareToken}` : `/forms/${slug}`;
@@ -206,6 +216,23 @@ export function PublicFormView({
   });
 
   const isLoading = checkingPassword || (needsProtectedFetch && protectedAccessLoading);
+  if (passwordCheckError !== null || protectedAccessQuery.isError) {
+    return renderWithHeader(
+      <QueryErrorAlert
+        queries={[
+          protectedAccessQuery,
+          {
+            isError: passwordCheckError !== null,
+            error: passwordCheckError,
+            isFetching: checkingPassword,
+            refetch: async () => {
+              setPasswordCheckAttempt((attempt) => attempt + 1);
+            },
+          },
+        ]}
+      />,
+    );
+  }
   if (isLoading) {
     return (
       <Box mih="100dvh" bg="var(--mantine-color-body)">

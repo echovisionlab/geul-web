@@ -1,4 +1,5 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -20,7 +21,7 @@ export function ReleaseListView({ props }: BlockViewProps) {
   const labelId = p.labelId || undefined;
   const showPagination = parseBooleanProp(p.showPagination, false);
   const types = splitCsv(p.types) as Array<'album' | 'ep' | 'single' | 'compilation'>;
-  const { data, isLoading } = useQuery({
+  const loadedDataQuery = useQuery({
     queryKey: ['releases', 'published', { categoryIds, artistId, labelId, types, limit, page, p }],
     queryFn: () =>
       listPublishedReleases({
@@ -34,7 +35,11 @@ export function ReleaseListView({ props }: BlockViewProps) {
         sortOrder: p.sortOrder,
       }),
   });
+  const { data, isLoading } = loadedDataQuery;
 
+  if (loadedDataQuery.isError && loadedDataQuery.data === undefined) {
+    return <QueryErrorAlert queries={[loadedDataQuery]} />;
+  }
   if (isLoading || !data) {
     return (
       <ListBlockSkeleton
@@ -51,6 +56,8 @@ export function ReleaseListView({ props }: BlockViewProps) {
 
   return (
     <>
+      <QueryErrorAlert queries={[loadedDataQuery]} />
+
       <ReleaseListViewClient
         releases={data.releases.map((release) => {
           const primaryArtists = release.artists.filter((artist) => artist.role.toLowerCase() === 'primary');
@@ -84,6 +91,7 @@ export function ReleaseListView({ props }: BlockViewProps) {
         })}
         parsedProps={p}
       />
+
       {showPagination && data.pagination.total > limit ? (
         <Group justify="center" mt="md">
           <Pagination total={Math.ceil(data.pagination.total / limit)} value={page} onChange={setPage} />

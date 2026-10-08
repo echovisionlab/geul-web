@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { revalidatePath } from 'next/cache';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code, ConnectError } from '@connectrpc/connect';
@@ -347,7 +348,7 @@ describe('checkFormAccessAction', () => {
         slug: 'contact',
         shareToken: ' share-token ',
         requestedLocale: 'ko',
-      }),
+      }).then(unwrapQueryResult),
     ).resolves.toEqual({
       formId: 'form-1',
       formTitle: '문의 폼',
@@ -376,14 +377,14 @@ describe('checkFormAccessAction', () => {
     });
   });
 
-  it('returns null when dashboard data is missing or the RPC fails', async () => {
+  it('distinguishes a missing dashboard payload from an RPC failure', async () => {
     getDashboardMock.mockResolvedValueOnce({ dashboard: undefined });
     await expect(
       getFormDashboardByShareAction({
         slug: 'contact',
         shareToken: 'share-token',
         requestedLocale: 'ko',
-      }),
+      }).then(unwrapQueryResult),
     ).resolves.toBeNull();
 
     getDashboardMock.mockRejectedValueOnce(new ConnectError('boom', Code.Internal));
@@ -391,8 +392,8 @@ describe('checkFormAccessAction', () => {
       getFormDashboardByShareAction({
         slug: 'contact',
         shareToken: 'share-token',
-      }),
-    ).resolves.toBeNull();
+      }).then(unwrapQueryResult),
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it('submits public forms while trimming blank passwords', async () => {
@@ -428,7 +429,9 @@ describe('checkFormAccessAction', () => {
   it('verifies passwords with trimmed share tokens and passwords', async () => {
     verifyPasswordMock.mockResolvedValue({ valid: true });
 
-    await expect(verifyFormPasswordAction('contact', '  secret  ', ' share-token ')).resolves.toEqual({ valid: true });
+    await expect(
+      verifyFormPasswordAction('contact', '  secret  ', ' share-token ').then(unwrapQueryResult),
+    ).resolves.toEqual({ valid: true });
 
     expect(verifyPasswordMock).toHaveBeenCalledWith({
       slug: 'contact',
@@ -438,11 +441,18 @@ describe('checkFormAccessAction', () => {
     });
   });
 
-  it('returns false when password verification throws', async () => {
+  it('preserves a successful incorrect-password result', async () => {
+    verifyPasswordMock.mockResolvedValue({ valid: false });
+    await expect(verifyFormPasswordAction('contact', 'wrong').then(unwrapQueryResult)).resolves.toEqual({
+      valid: false,
+    });
+  });
+
+  it('distinguishes denied verification from an incorrect password', async () => {
     verifyPasswordMock.mockRejectedValue(new ConnectError('bad password', Code.PermissionDenied));
 
-    await expect(verifyFormPasswordAction('contact', 'secret', 'token')).resolves.toEqual({
-      valid: false,
+    await expect(verifyFormPasswordAction('contact', 'secret', 'token').then(unwrapQueryResult)).rejects.toMatchObject({
+      status: 403,
     });
   });
 });
@@ -472,7 +482,7 @@ describe('form admin actions', () => {
         pageSize: 10,
         search: 'contact',
         sort: [{ field: 'updatedAt', order: 'desc' }],
-      }),
+      }).then(unwrapQueryResult),
     ).resolves.toEqual({
       data: [
         {
@@ -498,7 +508,7 @@ describe('form admin actions', () => {
     });
   });
 
-  it('returns a stable empty admin listing when the RPC fails', async () => {
+  it('propagates an unavailable admin listing', async () => {
     listFormsAdminMock.mockRejectedValue(new ConnectError('unavailable', Code.Unavailable));
 
     await expect(
@@ -506,14 +516,8 @@ describe('form admin actions', () => {
         page: 3,
         pageSize: 50,
         search: 'contact',
-      }),
-    ).resolves.toEqual({
-      data: [],
-      total: 0,
-      page: 1,
-      pageSize: 20,
-      totalPages: 0,
-    });
+      }).then(unwrapQueryResult),
+    ).rejects.toMatchObject({ status: 503 });
   });
 
   it('revalidates the scoped form paths when updating forms', async () => {
@@ -737,7 +741,7 @@ describe('form submission actions', () => {
   it('returns zeroed stats when no aggregated stats exist', async () => {
     getSubmissionStatsMock.mockResolvedValue({ stats: undefined });
 
-    await expect(getFormSubmissionStatsAction('form-1')).resolves.toEqual({
+    await expect(getFormSubmissionStatsAction('form-1').then(unwrapQueryResult)).resolves.toEqual({
       totalSubmissions: 0,
       submissionsToday: 0,
       submissionsThisWeek: 0,
@@ -766,7 +770,7 @@ describe('form submission actions', () => {
       },
     });
 
-    await expect(getFormSubmissionStatsAction('form-1')).resolves.toEqual({
+    await expect(getFormSubmissionStatsAction('form-1').then(unwrapQueryResult)).resolves.toEqual({
       totalSubmissions: 8,
       submissionsToday: 3,
       submissionsThisWeek: 5,
@@ -784,9 +788,9 @@ describe('form submission actions', () => {
     });
   });
 
-  it('returns null when submission stats loading fails', async () => {
+  it('propagates submission stats failures', async () => {
     getSubmissionStatsMock.mockRejectedValue(new ConnectError('boom', Code.Internal));
 
-    await expect(getFormSubmissionStatsAction('form-1')).resolves.toBeNull();
+    await expect(getFormSubmissionStatsAction('form-1').then(unwrapQueryResult)).rejects.toMatchObject({ status: 500 });
   });
 });

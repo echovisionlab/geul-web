@@ -1,4 +1,5 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { useCallback, useEffect, useState } from 'react';
 import { IconChevronDown, IconChevronUp, IconX } from '@tabler/icons-react';
@@ -57,13 +58,7 @@ export function SeriesSelector({
 
   const queryClient = useQueryClient();
 
-  const {
-    data: allSeriesList = initialSeries,
-    isError: allError,
-    isFetching: allFetching,
-    isLoading: allLoading,
-    refetch: refetchAllSeries,
-  } = useQuery({
+  const allSeriesListQuery = useQuery({
     queryKey: ['series', 'listAllSimple'],
     queryFn: () => listSeriesSimple(),
     enabled: isAdmin,
@@ -73,6 +68,13 @@ export function SeriesSelector({
     refetchOnWindowFocus: 'always',
     refetchOnReconnect: 'always',
   });
+  const {
+    data: allSeriesList = initialSeries,
+    isError: allError,
+    isFetching: allFetching,
+    isLoading: allLoading,
+    refetch: refetchAllSeries,
+  } = allSeriesListQuery;
 
   const {
     data: mySeriesList = initialSeries,
@@ -329,6 +331,7 @@ export function SeriesSelector({
 
   return (
     <Stack gap={4}>
+      <QueryErrorAlert queries={[allSeriesListQuery]} />
       <Text size="xs" c="dimmed">
         {tCommonEntities('series')}
       </Text>

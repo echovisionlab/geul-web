@@ -1,4 +1,5 @@
 'use server';
+import { queryResult, type QueryResult, unwrapQueryResult } from '@/lib/api/query-result';
 
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
@@ -71,12 +72,14 @@ export async function createTrackAction(data: {
 }
 
 export async function listTracksByReleaseAction(releaseId: string): Promise<ReleaseTrackItem[]> {
-  return (await getReleaseTrackSnapshotAction(releaseId)) ?? [];
+  return (await getReleaseTrackSnapshotAction(releaseId).then(unwrapQueryResult)) ?? [];
 }
 
-/** Returns null on transport/authorization failure, preserving callers' current editor state. */
-export async function getReleaseTrackSnapshotAction(releaseId: string): Promise<ReleaseTrackItem[] | null> {
-  try {
+/** Returns an explicit, safe failure result on transport or authorization errors. */
+export async function getReleaseTrackSnapshotAction(
+  releaseId: string,
+): Promise<QueryResult<ReleaseTrackItem[] | null>> {
+  return queryResult(async () => {
     const client = await createTrackClient();
     const response = await client.listTracksByRelease({ releaseId });
     return (response.tracks ?? []).map((entry) => ({
@@ -100,9 +103,7 @@ export async function getReleaseTrackSnapshotAction(releaseId: string): Promise<
         sort_order: credit.sortOrder,
       })),
     }));
-  } catch {
-    return null;
-  }
+  });
 }
 
 export async function updateTrackAction(

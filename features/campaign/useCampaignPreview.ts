@@ -1,4 +1,5 @@
 'use client';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDebouncedCallback } from '@mantine/hooks';
@@ -33,6 +34,8 @@ export function useCampaignPreview({
 }: Options) {
   const [viewMode, setViewMode] = useState<CampaignViewMode>('split');
   const [previewHtml, setPreviewHtml] = useState('');
+  const [previewError, setPreviewError] = useState<unknown>(null);
+  const [previewPending, setPreviewPending] = useState(false);
   const editorRef = useRef<EmailCampaignTiptapEditorHandle | null>(null);
   const requestIdRef = useRef(0);
   const showEditor = viewMode === 'split' || viewMode === 'edit';
@@ -51,20 +54,26 @@ export function useCampaignPreview({
       if (!campaignLoaded) {
         return;
       }
-
+      setPreviewPending(true);
       try {
         const preview = await previewCampaignAction(campaignId, {
           locale,
           layoutId,
           subject,
           document,
-        });
+        }).then(unwrapQueryResult);
         if (requestId === requestIdRef.current) {
           setPreviewHtml(preview?.htmlContent ?? '');
+          setPreviewError(null);
         }
-      } catch {
-        // Collaboration can advance while a preview is generated; the next
-        // debounced request owns the visible result.
+      } catch (error) {
+        if (requestId === requestIdRef.current) {
+          setPreviewError(error);
+        }
+      } finally {
+        if (requestId === requestIdRef.current) {
+          setPreviewPending(false);
+        }
       }
     },
     [campaignId, campaignLoaded, layoutId, locale, subject],
@@ -103,6 +112,12 @@ export function useCampaignPreview({
     showEditor,
     showPreview,
     previewSrcDoc,
+    query: {
+      isError: previewError !== null,
+      error: previewError,
+      isFetching: previewPending,
+      refetch: () => refresh(getDocumentSnapshot()),
+    },
     scheduleRefresh,
     refresh,
     changeViewMode,

@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { WorkType as PublicWorkType } from '@echovisionlab/geul-proto/public/work_pb.ts';
@@ -79,7 +80,7 @@ describe('work actions', () => {
     mocks.createAdminClient.mockResolvedValue({ regenerateOgImage: mocks.regenerateOgImage });
     mocks.createShareLinkAction.mockResolvedValue({ shareLink: { id: 'share-1' } });
     mocks.deleteShareLinkAction.mockResolvedValue({ success: true });
-    mocks.listShareLinksAction.mockResolvedValue([{ id: 'share-1' }]);
+    mocks.listShareLinksAction.mockResolvedValue({ ok: true, value: [{ id: 'share-1' }] });
 
     publicWorkClient.list.mockResolvedValue({
       works: [
@@ -188,43 +189,49 @@ describe('work actions', () => {
 
   it('maps public, admin, and credited work list responses', async () => {
     await expect(
-      actions.listWorksPublishedAction({
-        types: ['article'],
-        featured: true,
-        limit: 4,
-        offset: 8,
-        sortBy: 'published_at',
-        sortOrder: 'asc',
-      }),
+      actions
+        .listWorksPublishedAction({
+          types: ['article'],
+          featured: true,
+          limit: 4,
+          offset: 8,
+          sortBy: 'published_at',
+          sortOrder: 'asc',
+        })
+        .then(unwrapQueryResult),
     ).resolves.toMatchObject({
       works: [{ id: 'public-work-1', type: 'article', featured: true }],
       pagination: { total: 1, limit: 4, offset: 8 },
     });
     await expect(
-      actions.listWorksAdminAction({
-        page: 2,
-        pageSize: 5,
-        search: 'work',
-        type: 'portfolio',
-        status: 'published',
-        sort: [{ field: 'title', order: 'desc' }],
-      }),
+      actions
+        .listWorksAdminAction({
+          page: 2,
+          pageSize: 5,
+          search: 'work',
+          type: 'portfolio',
+          status: 'published',
+          sort: [{ field: 'title', order: 'desc' }],
+        })
+        .then(unwrapQueryResult),
     ).resolves.toMatchObject({
       data: [{ id: 'work-1', type: 'portfolio', status: 'published' }],
       page: 2,
       pageSize: 5,
     });
     await expect(
-      actions.listMyCreditedWorksAction({
-        search: ' credited ',
-        type: 'music_project',
-        status: 'published',
-        filter: [
-          { field: 'title', op: 'ilike', value: 'Credited' },
-          { field: 'type', op: 'in', value: ['music_project', 123] },
-          { field: 'status', op: 'isNull', value: false },
-        ],
-      }),
+      actions
+        .listMyCreditedWorksAction({
+          search: ' credited ',
+          type: 'music_project',
+          status: 'published',
+          filter: [
+            { field: 'title', op: 'ilike', value: 'Credited' },
+            { field: 'type', op: 'in', value: ['music_project', 123] },
+            { field: 'status', op: 'isNull', value: false },
+          ],
+        })
+        .then(unwrapQueryResult),
     ).resolves.toMatchObject({
       data: [{ id: 'work-1', status: 'archived', creditType: 'artist' }],
       total: 1,
@@ -292,10 +299,10 @@ describe('work actions', () => {
     await expect(actions.deleteWorkCreditGroupAction('group-1')).resolves.toEqual({
       success: true,
     });
-    await expect(actions.searchArtistsForCreditAction('work-1', ' Artist ')).resolves.toEqual([
+    await expect(actions.searchArtistsForCreditAction('work-1', ' Artist ').then(unwrapQueryResult)).resolves.toEqual([
       { id: 'artist-1', name: 'Artist', imageUrl: null },
     ]);
-    await expect(actions.searchArtistsForCreditAction('work-1', '   ')).resolves.toEqual([]);
+    await expect(actions.searchArtistsForCreditAction('work-1', '   ').then(unwrapQueryResult)).resolves.toEqual([]);
     await expect(actions.listWorkShareLinksAction('work-1')).resolves.toEqual([{ id: 'share-1' }]);
     await expect(actions.createWorkShareLinkAction({ workId: 'work-1', label: 'Preview' })).resolves.toEqual({
       shareLink: { id: 'share-1' },
@@ -362,12 +369,11 @@ describe('work actions', () => {
     });
   });
 
-  it('returns stable empty results and action errors on backend failures', async () => {
+  it('preserves backend failures and stable mutation errors', async () => {
     publicWorkClient.list.mockRejectedValueOnce(new Error('offline'));
-    await expect(actions.listWorksPublishedAction({ limit: 2, offset: 3 })).resolves.toEqual({
-      works: [],
-      pagination: { total: 0, limit: 2, offset: 3 },
-    });
+    await expect(
+      actions.listWorksPublishedAction({ limit: 2, offset: 3 }).then(unwrapQueryResult),
+    ).rejects.toMatchObject({ status: 500 });
 
     workClient.publishWork.mockRejectedValueOnce(new ConnectError('missing', Code.NotFound));
     await expect(actions.publishWorkAction('missing')).resolves.toEqual({

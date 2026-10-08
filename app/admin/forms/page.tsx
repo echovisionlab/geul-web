@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getTranslations } from 'next-intl/server';
 import { Stack } from '@mantine/core';
 import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
@@ -54,7 +55,7 @@ export default async function AdminFormsPage({ searchParams }: PageProps) {
     search: query.search,
     sort: query.sorts?.map((s) => ({ field: s.field, order: s.direction })),
     filterBy: query.filterBy,
-  });
+  }).then(unwrapQueryResult);
 
   return (
     <FormModalProvider>

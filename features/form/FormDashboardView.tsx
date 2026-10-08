@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -50,7 +52,7 @@ export function FormDashboardView({ slug, shareToken = '', sharePassword, reques
         shareToken,
         sharePassword,
         requestedLocale,
-      }),
+      }).then(unwrapQueryResult),
     enabled: !!shareToken && accessQuery.data?.accessible === true,
   });
 
@@ -102,6 +104,9 @@ export function FormDashboardView({ slug, shareToken = '', sharePassword, reques
     );
   }
 
+  if (dashboardQuery.isError) {
+    return <QueryErrorAlert queries={[dashboardQuery]} />;
+  }
   const dashboard = dashboardQuery.data;
   if (!dashboard) {
     return <FormAccessBoundary reason="server_error" slug={slug} shareToken={shareToken} />;
@@ -109,6 +114,7 @@ export function FormDashboardView({ slug, shareToken = '', sharePassword, reques
 
   return (
     <Box style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
+      <QueryErrorAlert queries={[dashboardQuery]} />
       <Box component="header" px="xl" py="md">
         <a href={logoHref} aria-label={tPublicForm('logoLinkAria')} style={{ display: 'inline-flex' }}>
           <SiteLogo height={24} />

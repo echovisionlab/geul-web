@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -19,7 +21,7 @@ export function LabelListView({ props }: BlockViewProps) {
   const columns = parseIntegerProp(p.columns, 3);
   const showPagination = parseBooleanProp(p.showPagination, false);
 
-  const { data, isLoading } = useQuery({
+  const recipientsQuery = useQuery({
     queryKey: ['labels', 'forBlock', { sortBy, sortOrder, limit, page }],
     queryFn: () =>
       listLabelsForBlockAction({
@@ -27,9 +29,13 @@ export function LabelListView({ props }: BlockViewProps) {
         sortOrder,
         limit,
         offset: showPagination ? (page - 1) * limit : 0,
-      }),
+      }).then(unwrapQueryResult),
   });
+  const { data, isLoading } = recipientsQuery;
 
+  if (recipientsQuery.isError && recipientsQuery.data === undefined) {
+    return <QueryErrorAlert queries={[recipientsQuery]} />;
+  }
   if (isLoading || !data) {
     return (
       <ListBlockSkeleton
@@ -45,6 +51,7 @@ export function LabelListView({ props }: BlockViewProps) {
 
   return (
     <>
+      <QueryErrorAlert queries={[recipientsQuery]} />
       <LabelListViewClient
         labels={data.labels.map((label) => ({
           id: label.id,
@@ -56,6 +63,7 @@ export function LabelListView({ props }: BlockViewProps) {
         }))}
         parsedProps={p}
       />
+
       {showPagination && data.pagination.total > limit ? (
         <Group justify="center" mt="md">
           <Pagination total={Math.ceil(data.pagination.total / limit)} value={page} onChange={setPage} />

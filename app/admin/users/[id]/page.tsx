@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { use, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -72,22 +74,25 @@ export default function AdminUserEditPage({ params }: { params: Promise<{ id: st
   const tPage = useTranslations('adminUserDetail');
   const tSecurityEmail = useTranslations('security.email');
   const { copy } = useCopyToClipboard();
-  const { data: user, isLoading } = useQuery({
+  const userQuery = useQuery({
     queryKey: ['users', 'admin', id],
-    queryFn: () => getUserAdminAction(id),
+    queryFn: () => getUserAdminAction(id).then(unwrapQueryResult),
   });
+  const { data: user, isLoading } = userQuery;
   const userRef = useRef(user);
   userRef.current = user;
   const savedUserSnapshotRef = useRef<typeof user | null>(null);
-  const { data: memberTags = [] } = useQuery({
+  const memberTagsQuery = useQuery({
     queryKey: ['memberTags', 'admin', 'all'],
-    queryFn: listAllUserTagsAction,
+    queryFn: () => listAllUserTagsAction().then(unwrapQueryResult),
   });
-  const { data: emailSuppression, isLoading: isSuppressionLoading } = useQuery({
+  const { data: memberTags = [] } = memberTagsQuery;
+  const emailSuppressionQuery = useQuery({
     queryKey: ['emailSuppression', user?.email],
-    queryFn: () => getEmailSuppressionAction(user?.email ?? ''),
+    queryFn: () => getEmailSuppressionAction(user?.email ?? '').then(unwrapQueryResult),
     enabled: Boolean(user?.email),
   });
+  const { data: emailSuppression, isLoading: isSuppressionLoading } = emailSuppressionQuery;
   const { data: personalAccessTokens, isLoading: arePersonalAccessTokensLoading } = useQuery({
     queryKey: ['personalAccessToken', 'admin', id],
     queryFn: () => listAccountPersonalAccessTokensAction(id),
@@ -302,6 +307,10 @@ export default function AdminUserEditPage({ params }: { params: Promise<{ id: st
     return <PageLoader />;
   }
 
+  if (userQuery.isError && !user) {
+    return <QueryErrorAlert queries={[userQuery]} />;
+  }
+
   guardNotFound(user);
 
   const handleSubmit = form.onSubmit((values) => {
@@ -366,6 +375,7 @@ export default function AdminUserEditPage({ params }: { params: Promise<{ id: st
 
   return (
     <Stack>
+      <QueryErrorAlert queries={[userQuery, memberTagsQuery, emailSuppressionQuery]} />
       <EditorHeader
         title={user?.nickname ?? tCommon('entities.member')}
         isConnected

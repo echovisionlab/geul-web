@@ -3,6 +3,8 @@ import { toHttpErrorResult } from './http-error';
 
 export type QueryResult<T> = { ok: true; value: T } | { ok: false; status: number; error: string };
 
+export type QueryValue<T> = T extends { ok: true; value: infer V } ? V : never;
+
 class QueryFailureError extends Error {
   constructor(
     message: string,

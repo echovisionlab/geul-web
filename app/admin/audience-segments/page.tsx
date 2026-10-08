@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getTranslations } from 'next-intl/server';
 import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
 import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
@@ -46,7 +47,7 @@ export default async function AdminSegmentsPage({ searchParams }: PageProps) {
     filter: query.filters,
     filterBy: query.filterBy,
     includeArchived: params.get('includeArchived') === 'true',
-  });
+  }).then(unwrapQueryResult);
 
   return (
     <SegmentModalProvider>

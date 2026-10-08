@@ -1,13 +1,11 @@
 'use server';
+import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { FilterOp, SortOrder } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { createStyleClient } from '@/lib/api/server-client';
-import { createLogger } from '@/lib/utils/logger';
-
-const logger = createLogger('style-actions');
 
 interface StyleListInput {
   search?: string;
@@ -17,7 +15,7 @@ interface StyleListInput {
 }
 
 export async function listStylesAction() {
-  try {
+  return queryResult(async () => {
     const client = await createStyleClient();
     const response = await client.listStyles({
       pagination: { limit: 1000, offset: 0 },
@@ -27,16 +25,11 @@ export async function listStylesAction() {
       name: s.name,
       slug: s.slug,
     }));
-  } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('ListStyles RPC error', { error: err.message });
-    }
-    return [];
-  }
+  });
 }
 
 export async function listStylesAdminAction(input?: StyleListInput) {
-  try {
+  return queryResult(async () => {
     const client = await createStyleClient();
     const limit = input?.pageSize ?? 20;
     const offset = ((input?.page ?? 1) - 1) * limit;
@@ -62,12 +55,7 @@ export async function listStylesAdminAction(input?: StyleListInput) {
       })),
       total,
     };
-  } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('ListStylesAdmin RPC error', { error: err.message });
-    }
-    return { data: [], total: 0 };
-  }
+  });
 }
 
 export async function createStyleAction(

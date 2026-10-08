@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useCallback } from 'react';
 import { IconFilter, IconMapPin } from '@tabler/icons-react';
@@ -86,18 +88,21 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
     hide: tPageEditor('blockEditor.options.labelMode.hide'),
   });
 
-  const { data: categories } = useQuery({
+  const categoriesQuery = useQuery({
     queryKey: ['categories'],
-    queryFn: () => listCategoriesAction(),
+    queryFn: () => listCategoriesAction().then(unwrapQueryResult),
   });
-  const { data: seriesList } = useQuery({
+  const { data: categories } = categoriesQuery;
+  const seriesListQuery = useQuery({
     queryKey: ['series', 'simple'],
     queryFn: () => listSeriesSimple(),
   });
-  const { data: tags } = useQuery({
+  const { data: seriesList } = seriesListQuery;
+  const tagsQuery = useQuery({
     queryKey: ['tags'],
-    queryFn: () => listTagsAction(),
+    queryFn: () => listTagsAction().then(unwrapQueryResult),
   });
+  const { data: tags } = tagsQuery;
   const { data: authorsData } = useQuery({
     queryKey: ['authors', 50],
     queryFn: () => listAuthorOptionsAction(50),
@@ -145,6 +150,7 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
 
   return (
     <Box data-page-block-editor="post-map">
+      <QueryErrorAlert queries={[categoriesQuery, seriesListQuery, tagsQuery]} />
       <Group gap="xs" mb="md">
         <IconMapPin size={18} />
         <Text size="sm" fw={500}>

@@ -1,4 +1,5 @@
 'use server';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { connectActionErrorCode, isConnectError } from '@/lib/api/connect-error';
 import {
@@ -307,7 +308,7 @@ export async function removePostCollaboratorAction(
 
 // Share links - delegate to ShareLink service
 export async function listPostShareLinksAction(postId: string): Promise<ShareLinkItem[]> {
-  return listShareLinksAction(ShareLinkEntityType.POST, postId);
+  return listShareLinksAction(ShareLinkEntityType.POST, postId).then(unwrapQueryResult);
 }
 
 export async function createPostShareLinkAction(data: {

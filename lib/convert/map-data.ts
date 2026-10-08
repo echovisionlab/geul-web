@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 /**
  * Map data utilities for embedding place/theme data
  *
@@ -24,7 +25,7 @@ async function fetchMapViewPlaces(
     return new Map();
   }
 
-  const placesData = await getPublicMapPlacesByIdsAction(placeIds, requestedLocale);
+  const placesData = await getPublicMapPlacesByIdsAction(placeIds, requestedLocale).then(unwrapQueryResult);
   const placesMap = new Map<string, MapViewPlace>();
 
   for (const place of placesData) {

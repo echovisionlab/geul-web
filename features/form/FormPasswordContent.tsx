@@ -1,4 +1,6 @@
 'use client';
+import { unwrapQueryResult } from '@/lib/api/query-result';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -80,7 +82,7 @@ export function FormPasswordContent({ slug, shareToken, next = 'form', requested
 
   const verifyPassword = useMutation({
     mutationFn: (data: { slug: string; password: string }) =>
-      verifyFormPasswordAction(data.slug, data.password, shareToken),
+      verifyFormPasswordAction(data.slug, data.password, shareToken).then(unwrapQueryResult),
     onSuccess: (data) => {
       if (data.valid) {
         // Store password in session storage for this form
@@ -100,6 +102,10 @@ export function FormPasswordContent({ slug, shareToken, next = 'form', requested
     }
     verifyPassword.mutate({ slug, password });
   };
+
+  if (accessQuery.isError) {
+    return <QueryErrorAlert queries={[accessQuery]} />;
+  }
 
   if (!passwordLoaded || accessQuery.isLoading || accessQuery.data?.reason !== 'password_required') {
     return (
@@ -121,6 +127,16 @@ export function FormPasswordContent({ slug, shareToken, next = 'form', requested
             <Paper p="xl" withBorder w="100%">
               <form onSubmit={handleSubmit}>
                 <Stack gap="lg" align="center">
+                  <QueryErrorAlert
+                    queries={[
+                      {
+                        isError: verifyPassword.isError,
+                        error: verifyPassword.error,
+                        isFetching: verifyPassword.isPending,
+                        refetch: () => verifyPassword.mutateAsync({ slug, password }),
+                      },
+                    ]}
+                  />
                   <IconLock size={48} color="var(--mantine-color-dimmed)" />
                   <div style={{ textAlign: 'center' }}>
                     <Title order={3}>{t('title')}</Title>

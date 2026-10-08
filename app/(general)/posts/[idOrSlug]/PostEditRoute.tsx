@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { PostAction } from '@echovisionlab/geul-proto/secure/post_pb.ts';
@@ -54,8 +55,8 @@ export async function renderPostEditRoute(idOrSlug: string, query: SearchParamRe
 
   const isAdmin = session.user.role === 'admin';
   const [allCategories, allTags, seriesList, shareLinkData, baseUrl, site] = await Promise.all([
-    listCategoriesAction(),
-    listTagsAction(),
+    listCategoriesAction().then(unwrapQueryResult),
+    listTagsAction().then(unwrapQueryResult),
     isAdmin ? listSeriesSimple() : listMySeries(),
     post.allowedActions.includes(PostAction.MANAGE_SHARE_LINKS)
       ? listPostShareLinksAction(post.id)

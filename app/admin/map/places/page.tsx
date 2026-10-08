@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useCallback, useEffect, useState, useTransition } from 'react';
 import Link from '@/components/core/Navigation';
@@ -39,15 +41,16 @@ export default function AdminMapPlacesPage() {
   });
 
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({
+  const loadedDataQuery = useQuery({
     queryKey: ['mapPlaces', 'admin', query],
     queryFn: () =>
       listMapPlacesAdminAction({
         page: query.page ?? 1,
         pageSize: query.pageSize ?? 20,
         search: query.search,
-      }),
+      }).then(unwrapQueryResult),
   });
+  const { data, isLoading } = loadedDataQuery;
 
   // Create modal
   const [createModalOpened, { open: openCreateModal, close: closeCreateModal }] = useDisclosure(false);
@@ -282,8 +285,13 @@ export default function AdminMapPlacesPage() {
     },
   ];
 
+  if (loadedDataQuery.isError && loadedDataQuery.data === undefined) {
+    return <QueryErrorAlert queries={[loadedDataQuery]} />;
+  }
   return (
     <>
+      <QueryErrorAlert queries={[loadedDataQuery]} />
+
       <AdminPageHeader
         title={tCommon('entities.mapPlaces')}
         items={[
@@ -327,6 +335,7 @@ export default function AdminMapPlacesPage() {
       />
 
       {/* Create Modal */}
+
       <CreatePlaceModal
         opened={createModalOpened}
         onClose={closeCreateModal}
@@ -335,6 +344,7 @@ export default function AdminMapPlacesPage() {
       />
 
       {/* Delete Modal */}
+
       <ConfirmModal
         opened={deleteModalOpened}
         onClose={closeDeleteModal}

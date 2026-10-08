@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { Suspense } from 'react';
 import { ServerDataTablePagination } from '@/features/data-table/ServerDataTable/ServerDataTablePagination';
 import { listLabelsForBlockAction } from '@/lib/actions/label';
@@ -24,7 +25,7 @@ async function LabelListViewServer({ sectionId, props, query, requestedLocale }:
     limit: tableQuery.pageSize,
     offset: ((tableQuery.page ?? 1) - 1) * (tableQuery.pageSize ?? limit),
     requestedLocale,
-  });
+  }).then(unwrapQueryResult);
 
   const transformedLabels = labels.map((label) => ({
     id: label.id,
