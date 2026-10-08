@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.5](https://github.com/echovisionlab/geul-web/compare/v0.10.4...v0.10.5) (2026-10-08)
+
+
+### Bug Fixes
+
+* **ui:** center error pages and preview recovery states in Storybook ([#112](https://github.com/echovisionlab/geul-web/issues/112)) ([2cb7c1e](https://github.com/echovisionlab/geul-web/commit/2cb7c1ef9d84baac91d06704a3f1ba1cb2032b58))
+
 ## [0.10.4](https://github.com/echovisionlab/geul-web/compare/v0.10.3...v0.10.4) (2026-10-06)
 
 
