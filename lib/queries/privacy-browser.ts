@@ -82,7 +82,7 @@ export async function listArchivedPrivacy() {
     }));
   } catch (err) {
     logger.error('Failed to list archived privacy', { error: serializeClientLogError(err) });
-    return [];
+    throw err;
   }
 }
 

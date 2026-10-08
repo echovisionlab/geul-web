@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -52,11 +54,12 @@ export function PostParticipantsDialog({
     enabled: opened,
   });
   const participantIds = participants.map((participant) => participant.memberId);
-  const { data: candidates = [], isFetching } = useQuery({
+  const candidatesQuery = useQuery({
     queryKey: ['members', 'post-participant-search', debouncedSearch, participantIds],
     queryFn: () => searchMembers(debouncedSearch, participantIds),
     enabled: opened && debouncedSearch.length >= 2 && (canAddAuthor || canManageCollaborators),
   });
+  const { data: candidates = [], isFetching } = candidatesQuery;
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['post', 'participants', postId] });
   const addParticipant = useMutation({
@@ -99,6 +102,7 @@ export function PostParticipantsDialog({
 
   return (
     <PostParticipantsDialogView
+      queryFailure={<QueryErrorAlert queries={[candidatesQuery]} />}
       opened={opened}
       onClose={onClose}
       participants={participants

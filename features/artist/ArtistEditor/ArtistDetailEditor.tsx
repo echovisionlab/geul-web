@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconUsers } from '@tabler/icons-react';
@@ -90,10 +92,11 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
     labelIds: artist.labelIds,
     parentArtistId: artist.parentArtistId,
   });
-  const { data: labels } = useQuery({
+  const labelsQuery = useQuery({
     queryKey: ['labels', 'list'],
     queryFn: listLabelsForSelector,
   });
+  const { data: labels } = labelsQuery;
   const { data: parentArtistOptions = [] } = useQuery({
     queryKey: ['artists', id, 'parent-options'],
     queryFn: () => listArtistParentOptionsAction(id),
@@ -426,6 +429,7 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
   return (
     <EditorRuntimeProvider provider={currentProvider} entityType="artist" entityId={id} blockRoomProtocol={protocol}>
       <Stack>
+        <QueryErrorAlert queries={[labelsQuery]} />
         <EditorHeader
           title={displayedName}
           onTitleChange={canEditLocalizedName ? handleScopedLocaleNameChange : undefined}

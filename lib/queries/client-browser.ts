@@ -44,7 +44,7 @@ export async function searchClients(query: string) {
     }));
   } catch (err) {
     logger.error('Failed to search clients', { error: serializeClientLogError(err) });
-    return [];
+    throw err;
   }
 }
 
@@ -62,6 +62,6 @@ export async function listClientsForSelector() {
     }));
   } catch (err) {
     logger.error('Failed to list clients', { error: serializeClientLogError(err) });
-    return [];
+    throw err;
   }
 }

@@ -1,3 +1,4 @@
+import { throwQueryError } from '@/lib/api/query-error';
 import { getPublicReleaseResponse } from '@/lib/queries/detail-public.server';
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { create } from '@bufbuild/protobuf';
@@ -230,14 +231,7 @@ export async function listPublishedReleases(input: {
     };
   } catch (err) {
     logger.error('Failed to list published releases', { error: err });
-    return {
-      releases: [],
-      pagination: {
-        total: 0,
-        limit: input.limit ?? 20,
-        offset: input.offset ?? 0,
-      },
-    };
+    throwQueryError(err);
   }
 }
 

@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { ReactNode, useState } from 'react';
 import { IconArrowsExchange, IconUserOff, IconUserPlus, IconX } from '@tabler/icons-react';
 import { ArtistParticipantRole } from '@echovisionlab/geul-proto/secure/artist_pb.ts';
@@ -59,11 +61,12 @@ export function ArtistParticipantsDialog({
   });
 
   const participantIds = participants.map((participant) => participant.memberId);
-  const { data: searchResults = [], isFetching } = useQuery({
+  const searchResultsQuery = useQuery({
     queryKey: ['members', 'artist-participant-search', debouncedSearch, participantIds],
     queryFn: () => searchMembers(debouncedSearch, participantIds),
     enabled: opened && isEnabled && canManageParticipants,
   });
+  const { data: searchResults = [], isFetching } = searchResultsQuery;
 
   const setParticipant = useMutation({
     mutationFn: ({ memberId, role }: { memberId: string; role: ArtistParticipantRole }) =>
@@ -134,6 +137,7 @@ export function ArtistParticipantsDialog({
 
   return (
     <Modal opened={opened} onClose={onClose} title={t('title')} size="lg">
+      <QueryErrorAlert queries={[searchResultsQuery]} />
       {canManageParticipants && (
         <Group gap="sm" mb="md" align="flex-end" wrap="nowrap">
           <SearchCombobox

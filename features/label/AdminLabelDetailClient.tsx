@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { useCallback, useLayoutEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconUsers } from '@tabler/icons-react';
@@ -239,10 +241,11 @@ export function AdminLabelDetailClient({
     ],
   );
 
-  const { data: labelsForParent } = useQuery({
+  const labelsForParentQuery = useQuery({
     queryKey: ['labels', 'list'],
     queryFn: listLabelsForSelector,
   });
+  const { data: labelsForParent } = labelsForParentQuery;
 
   const publishLabel = useMutation({
     mutationFn: (labelId: string) => publishLabelAction(labelId),
@@ -352,6 +355,7 @@ export function AdminLabelDetailClient({
   return (
     <EditorRuntimeProvider provider={currentProvider} entityType="label" entityId={id} blockRoomProtocol={protocol}>
       <Stack>
+        <QueryErrorAlert queries={[labelsForParentQuery]} />
         <EditorHeader
           title={displayedName}
           onTitleChange={canEditLocalizedName ? handleScopedLocaleNameChange : undefined}

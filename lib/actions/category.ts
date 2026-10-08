@@ -1,5 +1,6 @@
 'use server';
 
+import { queryResult } from '@/lib/api/query-result';
 import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
@@ -19,7 +20,7 @@ interface CategoryListInput {
 }
 
 export async function listCategoriesAdminAction(input: CategoryListInput) {
-  try {
+  return queryResult(async () => {
     const client = await createCategoryClient();
     const limit = input.pageSize ?? 20;
     const offset = ((input.page ?? 1) - 1) * limit;
@@ -49,12 +50,7 @@ export async function listCategoriesAdminAction(input: CategoryListInput) {
       pageSize: limit,
       totalPages: Math.ceil(total / limit),
     };
-  } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('ListCategoriesAdmin RPC error', { error: err.message });
-    }
-    return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
-  }
+  });
 }
 
 export async function createCategoryAction(data: {

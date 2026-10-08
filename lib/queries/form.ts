@@ -1,8 +1,12 @@
-import { isConnectError } from '@/lib/api/connect-error';
+import { throwQueryError } from '@/lib/api/query-error';
+import { Code } from '@connectrpc/connect';
+import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { FormStatus } from '@echovisionlab/geul-proto/secure/form_pb.ts';
 import { createFormClient } from '@/lib/api/server-client';
 import type { FormFields } from '@/lib/collab/form-fields';
+import { formSchemaZod } from '@/lib/types/form/schema';
+import { z } from 'zod';
 import type { UserRole } from '@/lib/types/user/model';
 import { createLogger } from '@/lib/utils/logger';
 
@@ -59,10 +63,13 @@ export async function getFormSettingsMeta(formId: string): Promise<FormSettingsM
       featuredImageUrl: form.featuredImageAsset?.url ?? null,
     };
   } catch (err) {
+    if (isConnectErrorCode(err, Code.NotFound)) {
+      return null;
+    }
     if (isConnectError(err)) {
       logger.error('GetFormSettingsMeta RPC error', { error: err.message });
     }
-    return null;
+    throwQueryError(err);
   }
 }
 
@@ -77,13 +84,16 @@ export async function getFormEditorInitialFields(formId: string): Promise<Partia
 
     return {
       title: form.title,
-      schema: JSON.parse(fromBytes(form.schema)),
+      schema: formSchemaZod.parse(JSON.parse(fromBytes(form.schema))),
     };
   } catch (err) {
+    if (isConnectErrorCode(err, Code.NotFound)) {
+      return null;
+    }
     if (isConnectError(err)) {
       logger.error('GetFormEditorInitialFields RPC error', { error: err.message });
     }
-    return null;
+    throwQueryError(err);
   }
 }
 
@@ -106,19 +116,22 @@ export async function getFormSubmissionWithSchema(submissionId: string) {
         id: submission.id,
         formId: submission.formId,
         memberId: submission.memberId,
-        data: JSON.parse(fromBytes(submission.data)),
+        data: z.record(z.string(), z.unknown()).parse(JSON.parse(fromBytes(submission.data))),
         ipAddress: submission.ipAddress,
         countryCode: submission.countryCode,
         userAgent: submission.userAgent,
         createdAt: submission.createdAt ? timestampDate(submission.createdAt) : undefined,
       },
-      formSchema: JSON.parse(fromBytes(response.formSchema)),
+      formSchema: formSchemaZod.parse(JSON.parse(fromBytes(response.formSchema))),
       formTitle: response.formTitle,
     };
   } catch (err) {
+    if (isConnectErrorCode(err, Code.NotFound)) {
+      return null;
+    }
     if (isConnectError(err)) {
       logger.error('GetFormSubmissionWithSchema RPC error', { error: err.message });
     }
-    return null;
+    throwQueryError(err);
   }
 }

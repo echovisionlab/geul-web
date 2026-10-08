@@ -1,3 +1,4 @@
+import { throwQueryError } from '@/lib/api/query-error';
 import { getPublicArtistResponse } from '@/lib/queries/detail-public.server';
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
@@ -106,6 +107,6 @@ export async function getArtistView(
       return null;
     }
     logger.error('Failed to get artist view', { error: err });
-    return null;
+    throwQueryError(err);
   }
 }

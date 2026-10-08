@@ -6,7 +6,7 @@ import { Group, Stack, Text } from '@mantine/core';
 import { LabelBadge } from '@/components/core/Badge';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
 import { getFieldKey, getFieldLabel } from '@/features/form/FormField/utils';
-import type { FormFieldSchema } from '@/lib/types/form/schema';
+import type { FormFieldSchema, FormSchema as StoredFormSchema } from '@/lib/types/form/schema';
 
 interface Submission {
   id: string;
@@ -71,15 +71,7 @@ export function SubmissionDetail({ submission, deleteButton }: SubmissionDetailP
   );
 }
 
-interface FormSchema {
-  id: string;
-  name: string;
-  steps: Array<{
-    id: string;
-    title: string;
-    fields?: FormFieldSchema[];
-  }>;
-}
+type FormSchema = StoredFormSchema & { name?: string };
 
 interface ResponsesProps {
   data: Record<string, unknown>;

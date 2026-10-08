@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -31,10 +33,11 @@ function ReleaseListSettingsForm({ props, updateProps }: ReleaseListSettingsForm
     queryKey: ['categories'],
     queryFn: () => listCategoriesAction(),
   });
-  const { data: labels } = useQuery({
+  const labelsQuery = useQuery({
     queryKey: ['labels', 'selector'],
     queryFn: () => listLabelsForSelector(),
   });
+  const { data: labels } = labelsQuery;
 
   const layout = props.layout || 'grid';
   const columns = props.columns || '4';
@@ -76,92 +79,95 @@ function ReleaseListSettingsForm({ props, updateProps }: ReleaseListSettingsForm
   ] as const;
 
   return (
-    <ListBlockEditorBase
-      editorType="release-list"
-      limitLabel={tPageEditor('blockEditor.labels.numberOfReleases')}
-      layout={layout}
-      columns={columns}
-      limit={limit}
-      maxLimit={24}
-      defaultColumns="4"
-      defaultLimit="8"
-      sortBy={sortBy}
-      sortByOptions={sortByOptions}
-      sortOrder={sortOrder}
-      showPagination={showPagination}
-      showImage={showImage}
-      imageAspectRatio={imageAspectRatio}
-      carouselLoop={carouselLoop}
-      carouselIndicators={carouselIndicators}
-      filters={
-        <>
-          <MultiSelect
-            label={tPageEditor('blockEditor.labels.releaseTypes')}
-            placeholder="All release types"
-            data={typeOptions}
-            value={types ? types.split(',').filter(Boolean) : []}
-            onChange={(values) => updateProp('types', values.join(','))}
-            size="xs"
-            searchable
-            clearable
+    <>
+      <QueryErrorAlert queries={[labelsQuery]} />
+      <ListBlockEditorBase
+        editorType="release-list"
+        limitLabel={tPageEditor('blockEditor.labels.numberOfReleases')}
+        layout={layout}
+        columns={columns}
+        limit={limit}
+        maxLimit={24}
+        defaultColumns="4"
+        defaultLimit="8"
+        sortBy={sortBy}
+        sortByOptions={sortByOptions}
+        sortOrder={sortOrder}
+        showPagination={showPagination}
+        showImage={showImage}
+        imageAspectRatio={imageAspectRatio}
+        carouselLoop={carouselLoop}
+        carouselIndicators={carouselIndicators}
+        filters={
+          <>
+            <MultiSelect
+              label={tPageEditor('blockEditor.labels.releaseTypes')}
+              placeholder="All release types"
+              data={typeOptions}
+              value={types ? types.split(',').filter(Boolean) : []}
+              onChange={(values) => updateProp('types', values.join(','))}
+              size="xs"
+              searchable
+              clearable
+            />
+            <MultiSelect
+              label={tCommonEntities('categories')}
+              placeholder="All categories"
+              data={
+                categories?.map((category) => ({
+                  value: category.id,
+                  label: category.name,
+                })) ?? []
+              }
+              value={categoryIds ? categoryIds.split(',').filter(Boolean) : []}
+              onChange={(values) => updateProp('categoryIds', values.join(','))}
+              size="xs"
+              searchable
+              clearable
+            />
+            <Select
+              label={tCommonEntities('artists')}
+              placeholder="All artists"
+              data={
+                artists?.map((artist) => ({
+                  value: artist.id,
+                  label: artist.name,
+                })) ?? []
+              }
+              value={artistId || null}
+              onChange={(value) => updateProp('artistId', value || '')}
+              size="xs"
+              searchable
+              clearable
+            />
+            <Select
+              label={tCommonEntities('labels')}
+              placeholder={tPageEditor('blockEditor.placeholders.allLabels')}
+              data={
+                labels?.map((label) => ({
+                  value: label.id,
+                  label: label.name,
+                })) ?? []
+              }
+              value={labelId || null}
+              onChange={(value) => updateProp('labelId', value || '')}
+              size="xs"
+              searchable
+              clearable
+            />
+          </>
+        }
+        extraDisplayOptions={
+          <Switch
+            label={tPageEditor('blockEditor.labels.showMeta')}
+            checked={showMeta === 'true'}
+            onChange={(event) => updateProp('showMeta', event.currentTarget.checked ? 'true' : 'false')}
+            size="sm"
           />
-          <MultiSelect
-            label={tCommonEntities('categories')}
-            placeholder="All categories"
-            data={
-              categories?.map((category) => ({
-                value: category.id,
-                label: category.name,
-              })) ?? []
-            }
-            value={categoryIds ? categoryIds.split(',').filter(Boolean) : []}
-            onChange={(values) => updateProp('categoryIds', values.join(','))}
-            size="xs"
-            searchable
-            clearable
-          />
-          <Select
-            label={tCommonEntities('artists')}
-            placeholder="All artists"
-            data={
-              artists?.map((artist) => ({
-                value: artist.id,
-                label: artist.name,
-              })) ?? []
-            }
-            value={artistId || null}
-            onChange={(value) => updateProp('artistId', value || '')}
-            size="xs"
-            searchable
-            clearable
-          />
-          <Select
-            label={tCommonEntities('labels')}
-            placeholder={tPageEditor('blockEditor.placeholders.allLabels')}
-            data={
-              labels?.map((label) => ({
-                value: label.id,
-                label: label.name,
-              })) ?? []
-            }
-            value={labelId || null}
-            onChange={(value) => updateProp('labelId', value || '')}
-            size="xs"
-            searchable
-            clearable
-          />
-        </>
-      }
-      extraDisplayOptions={
-        <Switch
-          label={tPageEditor('blockEditor.labels.showMeta')}
-          checked={showMeta === 'true'}
-          onChange={(event) => updateProp('showMeta', event.currentTarget.checked ? 'true' : 'false')}
-          size="sm"
-        />
-      }
-      onUpdate={updateProp}
-    />
+        }
+        onUpdate={updateProp}
+      />
+    </>
   );
 }
 

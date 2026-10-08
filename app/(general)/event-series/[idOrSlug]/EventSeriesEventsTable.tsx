@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocale, useTranslations } from 'next-intl';
@@ -166,10 +168,11 @@ export function EventSeriesEventsTable({
     hybrid: tProgramEventAdmin('locationModes.hybrid'),
     tba: tProgramEventAdmin('locationModes.tba'),
   };
-  const { data: typeOptions = [] } = useQuery({
+  const typeOptionsQuery = useQuery({
     queryKey: ['program-event-types', requestedLocale],
     queryFn: () => listProgramEventTypeOptionsBrowser(requestedLocale),
   });
+  const { data: typeOptions = [] } = typeOptionsQuery;
   const filterFields: FilterFieldConfig[] = useMemo(
     () => [
       {
@@ -284,28 +287,31 @@ export function EventSeriesEventsTable({
   };
 
   return (
-    <EventSeriesEventsTableView
-      result={result}
-      loading={isFetching && !data}
-      query={query}
-      pageSize={pageSize}
-      locale={locale}
-      labels={{
-        date: tProgramEventAdmin('public.date'),
-        event: tCommonLabels('event'),
-        type: tCommonLabels('type'),
-        location: tCommonLabels('location'),
-        tba: tProgramEventAdmin('locationModes.tba'),
-        empty: tProgramEventAdmin('public.empty'),
-        searchPlaceholder: tCommonPlaceholders('search'),
-        showMore: (count) => tShareLinks('showMore', { count }),
-      }}
-      locationLabels={locationLabels}
-      filterFields={filterFields}
-      isLoadingMore={isLoadingMore}
-      error={error}
-      onQueryChange={handleQueryChange}
-      onLoadMore={handleLoadMore}
-    />
+    <>
+      <QueryErrorAlert queries={[typeOptionsQuery]} />
+      <EventSeriesEventsTableView
+        result={result}
+        loading={isFetching && !data}
+        query={query}
+        pageSize={pageSize}
+        locale={locale}
+        labels={{
+          date: tProgramEventAdmin('public.date'),
+          event: tCommonLabels('event'),
+          type: tCommonLabels('type'),
+          location: tCommonLabels('location'),
+          tba: tProgramEventAdmin('locationModes.tba'),
+          empty: tProgramEventAdmin('public.empty'),
+          searchPlaceholder: tCommonPlaceholders('search'),
+          showMore: (count) => tShareLinks('showMore', { count }),
+        }}
+        locationLabels={locationLabels}
+        filterFields={filterFields}
+        isLoadingMore={isLoadingMore}
+        error={error}
+        onQueryChange={handleQueryChange}
+        onLoadMore={handleLoadMore}
+      />
+    </>
   );
 }

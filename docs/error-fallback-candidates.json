@@ -4,84 +4,96 @@
     "line": 15,
     "function": "getAdminStats",
     "returns": ["return { totalUsers: 0, totalPosts: 0, totalPages: 0, totalComments: 0 };"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/artist-browser.ts",
     "line": 17,
     "function": "checkArtistSlugAvailable",
     "returns": ["return { available: false };"],
-    "classification": "검증 실패 시 허용하지 않는 처리; 실패 안내 확인"
+    "classification": "검증 실패 시 허용하지 않는 처리; 실패 안내 확인",
+    "resolution": "수정: 확인 실패를 throw하고 공통 hook에서 checkFailed 안내 및 자동 저장 차단."
   },
   {
     "file": "lib/queries/artist.ts",
     "line": 104,
     "function": "getArtistView",
     "returns": ["return null;", "return null;"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/client-browser.ts",
     "line": 45,
     "function": "searchClients",
     "returns": ["return [];"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/client-browser.ts",
     "line": 63,
     "function": "listClientsForSelector",
     "returns": ["return [];"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/client.ts",
     "line": 55,
     "function": "listClientsAdmin",
     "returns": ["return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/form-browser.ts",
     "line": 95,
     "function": "checkFormSlugAvailable",
     "returns": ["return { available: false };"],
-    "classification": "검증 실패 시 허용하지 않는 처리; 실패 안내 확인"
+    "classification": "검증 실패 시 허용하지 않는 처리; 실패 안내 확인",
+    "resolution": "수정: 확인 실패를 throw하고 공통 hook에서 checkFailed 안내 및 자동 저장 차단."
   },
   {
     "file": "lib/queries/form.ts",
     "line": 61,
     "function": "getFormSettingsMeta",
     "returns": ["return null;"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/form.ts",
     "line": 82,
     "function": "getFormEditorInitialFields",
     "returns": ["return null;"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/form.ts",
     "line": 118,
     "function": "getFormSubmissionWithSchema",
     "returns": ["return null;"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/label-browser.ts",
     "line": 26,
     "function": "listLabelsForSelector",
     "returns": ["return [];"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/label-browser.ts",
     "line": 40,
     "function": "checkLabelSlugAvailable",
     "returns": ["return { available: false };"],
-    "classification": "검증 실패 시 허용하지 않는 처리; 실패 안내 확인"
+    "classification": "검증 실패 시 허용하지 않는 처리; 실패 안내 확인",
+    "resolution": "수정: 확인 실패를 throw하고 공통 hook에서 checkFailed 안내 및 자동 저장 차단."
   },
   {
     "file": "lib/queries/label.ts",
@@ -90,21 +102,24 @@
     "returns": [
       "return { data: [], total: 0, page: input.page ?? 1, pageSize: input.pageSize ?? 20, totalPages: 0, error: err instanceof Error ? err.message : 'Failed to load l"
     ],
-    "classification": "반환값에 실패 상태가 명시됨"
+    "classification": "반환값에 실패 상태가 명시됨",
+    "resolution": "검토 후 유지: 보조 정보 기본값, 명시적 오류 상태 또는 안전한 이동 계약."
   },
   {
     "file": "lib/queries/label.ts",
     "line": 299,
     "function": "getLabelPublic",
     "returns": ["return null;"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/manifest.ts",
     "line": 220,
     "function": "getPublicSettings",
     "returns": ["return DEFAULT_MANIFEST.settings;"],
-    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토"
+    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토",
+    "resolution": "검토 후 유지: 보조 정보 기본값, 명시적 오류 상태 또는 안전한 이동 계약."
   },
   {
     "file": "lib/queries/manifest.ts",
@@ -115,175 +130,200 @@
       "return { manifest: DEFAULT_MANIFEST, hasSettings: false };",
       "return { manifest: DEFAULT_MANIFEST, hasSettings: false };"
     ],
-    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토"
+    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토",
+    "resolution": "검토 후 유지: 보조 정보 기본값, 명시적 오류 상태 또는 안전한 이동 계약."
   },
   {
     "file": "lib/queries/manifest.ts",
     "line": 269,
     "function": "getManifestSnapshotCached",
     "returns": ["return { manifest: DEFAULT_MANIFEST, hasSettings: false };"],
-    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토"
+    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토",
+    "resolution": "검토 후 유지: 보조 정보 기본값, 명시적 오류 상태 또는 안전한 이동 계약."
   },
   {
     "file": "lib/queries/menu-browser.ts",
     "line": 126,
     "function": "listMenus",
     "returns": ["return [];"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/menu-browser.ts",
     "line": 146,
     "function": "getMenuById",
     "returns": ["return null;", "return null;"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/metadata.ts",
     "line": 434,
     "function": "getPostMetadataDocumentCached",
     "returns": ["return null;", "return null;"],
-    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토"
+    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토",
+    "resolution": "검토 후 유지: 보조 정보 기본값, 명시적 오류 상태 또는 안전한 이동 계약."
   },
   {
     "file": "lib/queries/metadata.ts",
     "line": 499,
     "function": "getPageMetadataDocumentCached",
     "returns": ["return null;", "return null;"],
-    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토"
+    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토",
+    "resolution": "검토 후 유지: 보조 정보 기본값, 명시적 오류 상태 또는 안전한 이동 계약."
   },
   {
     "file": "lib/queries/metadata.ts",
     "line": 595,
     "function": "getWorkMetadataDocumentCached",
     "returns": ["return null;", "return null;"],
-    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토"
+    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토",
+    "resolution": "검토 후 유지: 보조 정보 기본값, 명시적 오류 상태 또는 안전한 이동 계약."
   },
   {
     "file": "lib/queries/metadata.ts",
     "line": 663,
     "function": "getArtistMetadataDocumentCached",
     "returns": ["return null;", "return null;"],
-    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토"
+    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토",
+    "resolution": "검토 후 유지: 보조 정보 기본값, 명시적 오류 상태 또는 안전한 이동 계약."
   },
   {
     "file": "lib/queries/metadata.ts",
     "line": 783,
     "function": "getLabelMetadataDocumentCached",
     "returns": ["return null;", "return null;"],
-    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토"
+    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토",
+    "resolution": "검토 후 유지: 보조 정보 기본값, 명시적 오류 상태 또는 안전한 이동 계약."
   },
   {
     "file": "lib/queries/metadata.ts",
     "line": 850,
     "function": "getReleaseMetadataDocumentCached",
     "returns": ["return null;", "return null;"],
-    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토"
+    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토",
+    "resolution": "검토 후 유지: 보조 정보 기본값, 명시적 오류 상태 또는 안전한 이동 계약."
   },
   {
     "file": "lib/queries/metadata.ts",
     "line": 942,
     "function": "getFormMetadata",
     "returns": ["return null;", "return null;"],
-    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토"
+    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토",
+    "resolution": "수정: 공개 폼 본문에서도 사용되므로 장애를 null/404로 숨기지 않고 전달."
   },
   {
     "file": "lib/queries/metadata.ts",
     "line": 969,
     "function": "getMemberMetadata",
     "returns": ["return null;", "return null;"],
-    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토"
+    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토",
+    "resolution": "검토 후 유지: 보조 정보 기본값, 명시적 오류 상태 또는 안전한 이동 계약."
   },
   {
     "file": "lib/queries/page-browser.ts",
     "line": 29,
     "function": "checkPageSlugAvailable",
     "returns": ["return { available: false, reason: validationReason ?? 'checkFailed' };"],
-    "classification": "검증 실패 시 허용하지 않는 처리; 실패 안내 확인"
+    "classification": "검증 실패 시 허용하지 않는 처리; 실패 안내 확인",
+    "resolution": "유지: Page는 checkFailed 사유를 반환."
   },
   {
     "file": "lib/queries/page.ts",
     "line": 135,
     "function": "listPagesAdmin",
     "returns": ["return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/page.ts",
     "line": 166,
     "function": "getPage",
     "returns": ["return null;"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/post-browser.ts",
     "line": 187,
     "function": "getPostPermissionRevokedDestination",
     "returns": ["return '/';"],
-    "classification": "권한 회수 뒤 안전한 이동 경로"
+    "classification": "권한 회수 뒤 안전한 이동 경로",
+    "resolution": "검토 후 유지: 보조 정보 기본값, 명시적 오류 상태 또는 안전한 이동 계약."
   },
   {
     "file": "lib/queries/post-browser.ts",
     "line": 493,
     "function": "checkPostSlugAvailable",
     "returns": ["return { available: false };"],
-    "classification": "검증 실패 시 허용하지 않는 처리; 실패 안내 확인"
+    "classification": "검증 실패 시 허용하지 않는 처리; 실패 안내 확인",
+    "resolution": "수정: 확인 실패를 throw하고 공통 hook에서 checkFailed 안내 및 자동 저장 차단."
   },
   {
     "file": "lib/queries/privacy-browser.ts",
     "line": 83,
     "function": "listArchivedPrivacy",
     "returns": ["return [];"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/privacy.ts",
     "line": 46,
     "function": "listPrivacyVersions",
     "returns": ["return [];"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/program-event-browser.ts",
     "line": 31,
     "function": "listProgramEventTypeOptionsBrowser",
     "returns": ["return [];"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/program-event-browser.ts",
     "line": 47,
     "function": "listProgramEventSeriesOptionsBrowser",
     "returns": ["return [];"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/program-event.ts",
     "line": 235,
     "function": "resolveFileUrl",
     "returns": ["return null;"],
-    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토"
+    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토",
+    "resolution": "검토 후 유지: 보조 정보 기본값, 명시적 오류 상태 또는 안전한 이동 계약."
   },
   {
     "file": "lib/queries/program-event.ts",
     "line": 257,
     "function": "resolveBulkFileUrls",
     "returns": ["return Object.fromEntries(uniqueFileIds.map((fileId) => [fileId, null]));"],
-    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토"
+    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토",
+    "resolution": "검토 후 유지: 보조 정보 기본값, 명시적 오류 상태 또는 안전한 이동 계약."
   },
   {
     "file": "lib/queries/program-event.ts",
     "line": 765,
     "function": "getProgramEventSeriesView",
     "returns": ["return null;"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/release-browser.ts",
     "line": 104,
     "function": "checkReleaseSlugAvailable",
     "returns": ["return { available: false };"],
-    "classification": "검증 실패 시 허용하지 않는 처리; 실패 안내 확인"
+    "classification": "검증 실패 시 허용하지 않는 처리; 실패 안내 확인",
+    "resolution": "수정: 확인 실패를 throw하고 공통 hook에서 checkFailed 안내 및 자동 저장 차단."
   },
   {
     "file": "lib/queries/release.ts",
@@ -292,7 +332,8 @@
     "returns": [
       "return { data: [], total: 0, page: input.page ?? 1, pageSize: input.pageSize ?? 20, totalPages: 0, error: err instanceof Error ? err.message : 'Failed to load r"
     ],
-    "classification": "반환값에 실패 상태가 명시됨"
+    "classification": "반환값에 실패 상태가 명시됨",
+    "resolution": "검토 후 유지: 보조 정보 기본값, 명시적 오류 상태 또는 안전한 이동 계약."
   },
   {
     "file": "lib/queries/release.ts",
@@ -301,49 +342,56 @@
     "returns": [
       "return { releases: [], pagination: { total: 0, limit: input.limit ?? 20, offset: input.offset ?? 0, }, };"
     ],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/release.ts",
     "line": 364,
     "function": "fetchWaveformData",
     "returns": ["return undefined;"],
-    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토"
+    "classification": "메타데이터·보조 자료 기본값; 본문 오류와 분리해 검토",
+    "resolution": "검토 후 유지: 보조 정보 기본값, 명시적 오류 상태 또는 안전한 이동 계약."
   },
   {
     "file": "lib/queries/series-browser.ts",
     "line": 166,
     "function": "checkSeriesSlugAvailable",
     "returns": ["return { available: false };"],
-    "classification": "검증 실패 시 허용하지 않는 처리; 실패 안내 확인"
+    "classification": "검증 실패 시 허용하지 않는 처리; 실패 안내 확인",
+    "resolution": "수정: 확인 실패를 throw하고 공통 hook에서 checkFailed 안내 및 자동 저장 차단."
   },
   {
     "file": "lib/queries/series.ts",
     "line": 94,
     "function": "listSeriesSimple",
     "returns": ["return [];"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/site-setting-browser.ts",
     "line": 21,
     "function": "getAllSiteSettings",
     "returns": ["return null;", "return null;"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/site-setting-browser.ts",
     "line": 42,
     "function": "getOgConfig",
     "returns": ["return null;", "return null;"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/site-setting.ts",
     "line": 25,
     "function": "getAllSiteSettings",
     "returns": ["return null;", "return null;"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/sitemap.ts",
@@ -352,70 +400,80 @@
     "returns": [
       "return { status: SitemapDocumentStatus.UNAVAILABLE, content: 'Sitemap unavailable.\\n', contentType: 'text/plain; charset=utf-8', retryAfterSeconds: 300, };"
     ],
-    "classification": "반환값에 실패 상태가 명시됨"
+    "classification": "반환값에 실패 상태가 명시됨",
+    "resolution": "검토 후 유지: 보조 정보 기본값, 명시적 오류 상태 또는 안전한 이동 계약."
   },
   {
     "file": "lib/queries/taxonomy.ts",
     "line": 94,
     "function": "getPublicCategoryBySlug",
     "returns": ["return null;", "return null;"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/taxonomy.ts",
     "line": 106,
     "function": "getPublicTagBySlug",
     "returns": ["return null;", "return null;"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/terms-browser.ts",
     "line": 83,
     "function": "listArchivedTerms",
     "returns": ["return [];"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/terms.ts",
     "line": 46,
     "function": "listTermsVersions",
     "returns": ["return [];"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/user-browser.ts",
     "line": 30,
     "function": "searchMembers",
     "returns": ["return [];"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/user.ts",
     "line": 80,
     "function": "getUserProfileView",
     "returns": ["return null;"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/user.ts",
     "line": 107,
     "function": "getUserPublishedPosts",
     "returns": ["return [];"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/user.ts",
     "line": 157,
     "function": "listAuthors",
     "returns": ["return [];"],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   },
   {
     "file": "lib/queries/work-browser.ts",
     "line": 46,
     "function": "checkWorkSlugAvailable",
     "returns": ["return { available: false };"],
-    "classification": "검증 실패 시 허용하지 않는 처리; 실패 안내 확인"
+    "classification": "검증 실패 시 허용하지 않는 처리; 실패 안내 확인",
+    "resolution": "수정: 확인 실패를 throw하고 공통 hook에서 checkFailed 안내 및 자동 저장 차단."
   },
   {
     "file": "lib/queries/work.ts",
@@ -424,6 +482,7 @@
     "returns": [
       "return { works: [], pagination: { total: 0, limit: options?.limit ?? 20, offset: options?.offset ?? 0, }, };"
     ],
-    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상"
+    "classification": "오류가 정상 빈 값으로 바뀌는 추가 점검 대상",
+    "resolution": "수정: 분류된 조회 오류를 보존하고 호출 화면에 오류 표시. 실제 NotFound와 공개 비공개 자료의 기존 null 계약은 유지."
   }
 ]

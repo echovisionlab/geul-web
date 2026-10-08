@@ -1,3 +1,4 @@
+import { preservedQueryErrorStatus } from '@/lib/api/query-error';
 import { Code } from '@connectrpc/connect';
 import { connectErrorCode } from '@/lib/api/connect-error';
 import messages from '@/lib/i18n/error-page-messages.json';
@@ -31,7 +32,7 @@ export function resolveErrorStatus(error: unknown): number {
       }
     }
   }
-  return 500;
+  return preservedQueryErrorStatus(error) ?? 500;
 }
 
 export function getErrorPageContent(status: number, locale: SupportedLocale = DEFAULT_LOCALE) {

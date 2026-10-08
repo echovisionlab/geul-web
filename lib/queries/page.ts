@@ -1,3 +1,4 @@
+import { throwQueryError } from '@/lib/api/query-error';
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
@@ -136,7 +137,7 @@ export async function listPagesAdmin(input: PageListInput): Promise<PageListResu
     if (isConnectError(err)) {
       logger.error('ListPages RPC error', { error: err.message });
     }
-    return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
+    throwQueryError(err);
   }
 }
 
@@ -164,10 +165,13 @@ export async function getPage(idOrSlug: string) {
       ogImageUrl: page.ogAsset?.url ?? null,
     };
   } catch (err) {
+    if (isConnectErrorCode(err, Code.NotFound)) {
+      return null;
+    }
     if (isConnectError(err)) {
       logger.error('GetPage RPC error', { error: err.message });
     }
-    return null;
+    throwQueryError(err);
   }
 }
 

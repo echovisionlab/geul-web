@@ -31,6 +31,6 @@ export async function searchMembers(
     if (isConnectError(err)) {
       logger.error('SearchMembers RPC error', { error: err.message });
     }
-    return [];
+    throw err;
   }
 }

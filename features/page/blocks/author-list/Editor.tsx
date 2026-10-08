@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -51,11 +53,12 @@ function AuthorListSettingsForm({ props, updateProps }: AuthorListSettingsFormPr
     () => new Map(selectedAuthors.map((author) => [author.id, author])),
     [selectedAuthors],
   );
-  const { data: candidates = [], isFetching: candidatesFetching } = useQuery({
+  const candidatesQuery = useQuery({
     queryKey: ['members', 'author-candidates', debouncedSearch, selectedIds],
     queryFn: () => searchMembers(debouncedSearch, selectedIds, 10, true),
     enabled: source === 'selected' && isEnabled && selectedIds.length < MAX_SELECTED_AUTHORS,
   });
+  const { data: candidates = [], isFetching: candidatesFetching } = candidatesQuery;
 
   const updateProp = useCallback(
     (key: keyof AuthorListProps, value: string) => {
@@ -81,6 +84,7 @@ function AuthorListSettingsForm({ props, updateProps }: AuthorListSettingsFormPr
 
   return (
     <Box data-page-block-editor="author-list">
+      <QueryErrorAlert queries={[candidatesQuery]} />
       <Stack gap="sm">
         <Select
           label={tPageEditor('blockEditor.labels.source')}

@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { useMemo, useState } from 'react';
 import { closestCenter, DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -77,11 +79,12 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
     enabled: isEnabled && searchType === 'artist' && canEdit,
   });
 
-  const { data: memberResults = [], isFetching: memberSearchFetching } = useQuery({
+  const memberResultsQuery = useQuery({
     queryKey: ['users', 'search', debouncedSearch],
     queryFn: () => searchMembers(debouncedSearch),
     enabled: isEnabled && searchType === 'member' && canEdit,
   });
+  const { data: memberResults = [], isFetching: memberSearchFetching } = memberResultsQuery;
 
   const normalizedMemberResults = useMemo<CreditSearchResult[]>(
     () =>
@@ -210,6 +213,7 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
 
   return (
     <SectionCard withBorder p="md">
+      <QueryErrorAlert queries={[memberResultsQuery]} />
       <Group justify="space-between" mb="sm">
         <Text size="sm" fw={500}>
           {tCommon('entities.credits')}

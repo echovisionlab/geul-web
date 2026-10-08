@@ -1,3 +1,4 @@
+import { throwQueryError } from '@/lib/api/query-error';
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { Code } from '@connectrpc/connect';
 import { SortOrder } from '@echovisionlab/geul-proto/common/common_pb.ts';
@@ -95,7 +96,7 @@ export async function getPublicCategoryBySlug(slug: string): Promise<PublicCateg
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
     }
-    return null;
+    throwQueryError(err);
   }
 }
 
@@ -107,6 +108,6 @@ export async function getPublicTagBySlug(slug: string): Promise<PublicTagTaxonom
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
     }
-    return null;
+    throwQueryError(err);
   }
 }

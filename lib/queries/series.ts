@@ -1,3 +1,4 @@
+import { throwQueryError } from '@/lib/api/query-error';
 import { getPublicSeriesResponse } from '@/lib/queries/detail-public.server';
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { create } from '@bufbuild/protobuf';
@@ -95,7 +96,7 @@ export async function listSeriesSimple() {
     if (isConnectError(err)) {
       logger.error('ListSeriesSimple RPC error', { error: err.message });
     }
-    return [];
+    throwQueryError(err);
   }
 }
 

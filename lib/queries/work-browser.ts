@@ -45,7 +45,7 @@ export async function checkWorkSlugAvailable(slug: string, excludeWorkId?: strin
     return { available: response.available };
   } catch (err) {
     logger.error('Failed to check slug', { error: serializeClientLogError(err) });
-    return { available: false };
+    throw err;
   }
 }
 

@@ -1,3 +1,4 @@
+import { throwQueryError } from '@/lib/api/query-error';
 import { getPublicLabelResponse } from '@/lib/queries/detail-public.server';
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { create } from '@bufbuild/protobuf';
@@ -297,9 +298,12 @@ export async function getLabelPublic(
       localizationInfo: mapPublicLocalizationInfo(label.localizationInfo),
     };
   } catch (err) {
+    if (isConnectErrorCode(err, Code.NotFound, Code.PermissionDenied)) {
+      return null;
+    }
     if (isConnectError(err)) {
       logger.error('GetLabelPublic RPC error', { error: err.message });
     }
-    return null;
+    throwQueryError(err);
   }
 }

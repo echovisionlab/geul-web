@@ -1,3 +1,4 @@
+import { throwQueryError } from '@/lib/api/query-error';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { FilterOp, type SortOrder } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { createClientClient } from '@/lib/api/server-client';
@@ -54,6 +55,6 @@ export async function listClientsAdmin(input: ClientListInput) {
     };
   } catch (err) {
     logger.error('Failed to list clients admin', { error: err });
-    return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
+    throwQueryError(err);
   }
 }

@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import Link from '@/components/core/Navigation';
 import type { PublicLegalHistoryInitialData } from '@/lib/queries/legal-history';
 import { buildContentLanguageHref } from '@/lib/translation/content-language';
@@ -54,26 +56,24 @@ export function LegalPolicyHistoryClient({
   const basePath = `/${policy}`;
   const matchingInitialData = initialData?.requestedLocale === requestedLocale ? initialData : undefined;
   const href = (path: string) => buildContentLanguageHref(path, undefined, { requestedLocale });
-  const {
-    data: queriedActive,
-    dataUpdatedAt: activeUpdatedAt,
-    isLoading: isLoadingActive,
-  } = useQuery({
+  const queriedActiveQuery = useQuery({
     queryKey: [policy, 'active', requestedLocale],
     queryFn: () => getActive(requestedLocale),
     initialData: matchingInitialData?.active,
+    initialDataUpdatedAt: matchingInitialData?.updatedAt,
+  });
+  const { data: queriedActive, dataUpdatedAt: activeUpdatedAt, isLoading: isLoadingActive } = queriedActiveQuery;
+  const queriedArchivedQuery = useQuery({
+    queryKey: [policy, 'archived', 'list'],
+    queryFn: listArchived,
+    initialData: matchingInitialData?.archived,
     initialDataUpdatedAt: matchingInitialData?.updatedAt,
   });
   const {
     data: queriedArchived,
     dataUpdatedAt: archivedUpdatedAt,
     isLoading: isLoadingArchived,
-  } = useQuery({
-    queryKey: [policy, 'archived', 'list'],
-    queryFn: listArchived,
-    initialData: matchingInitialData?.archived,
-    initialDataUpdatedAt: matchingInitialData?.updatedAt,
-  });
+  } = queriedArchivedQuery;
 
   const activePolicy =
     matchingInitialData && matchingInitialData.updatedAt > activeUpdatedAt ? matchingInitialData.active : queriedActive;
@@ -109,6 +109,7 @@ export function LegalPolicyHistoryClient({
 
   return (
     <Stack gap="md">
+      <QueryErrorAlert queries={[queriedActiveQuery, queriedArchivedQuery]} />
       <Group>
         <Tooltip label={labels.back}>
           <IconButton component={Link} href={href(basePath)} emphasis="low" aria-label={labels.back}>
@@ -118,7 +119,7 @@ export function LegalPolicyHistoryClient({
         <Title order={2}>{labels.title}</Title>
       </Group>
 
-      {isLoading ? (
+      {queriedActiveQuery.isError || queriedArchivedQuery.isError ? null : isLoading ? (
         <PageLoader />
       ) : !hasVersions ? (
         <Paper p="xl" withBorder ta="center">

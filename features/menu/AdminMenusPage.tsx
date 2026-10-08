@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { useEffect, useMemo, useState } from 'react';
 import {
   closestCenter,
@@ -27,6 +29,7 @@ import { SectionCard, SectionHeader } from '@/components/core/Section';
 import { EntityTranslationsPanel } from '@/features/translation/EntityTranslationsPanel';
 import { TranslationLocaleControl } from '@/features/translation/TranslationLocaleControl';
 import { useLocaleDocumentSession } from '@/features/translation/useLocaleDocumentSession';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { createMenuAction, deleteMenuAction, getMenuAvailableTargetsAction } from '@/lib/actions/menu';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import { getSupportedLocaleOptions } from '@/lib/i18n/locale';
@@ -87,15 +90,21 @@ export function AdminMenusPage() {
   const [formVisibility, setFormVisibility] = useState<MenuVisibility>({ mode: 'all' });
 
   // Queries
-  const { data: menus, isLoading: menusLoading } = useQuery({
+  const menusQuery = useQuery({
     queryKey: ['menus', 'list'],
     queryFn: listMenus,
   });
-  const { data: selectedMenu, isLoading: selectedMenuLoading } = useQuery({
+  const { data: menus, isLoading: menusLoading } = menusQuery;
+  const selectedMenuQuery = useQuery({
     queryKey: ['menus', 'detail', selectedMenuId],
     queryFn: () => getMenuById(selectedMenuId!),
     enabled: !!selectedMenuId,
   });
+  const { data: selectedMenu, isLoading: selectedMenuLoading } = selectedMenuQuery;
+  const selectedMenuFailure =
+    selectedMenuId && selectedMenu === null
+      ? { ...selectedMenuQuery, isError: true, error: { status: 404 } }
+      : selectedMenuQuery;
   const localeSession = useLocaleDocumentSession({
     entityType: 'menu',
     entityId: selectedMenuId ?? '',
@@ -115,11 +124,12 @@ export function AdminMenusPage() {
   const canEditStructure = canEditCurrentCopy && activeEditLocale.isSourceLocale;
   const selectedMenuAuthoringLocked = !canEditStructure;
   const effectiveSourceLocale = roomState?.sourceLocale ?? activeEditLocale.sourceLocale ?? '';
-  const { data: targets } = useQuery({
+  const targetsQuery = useQuery({
     queryKey: ['menu', 'targets', formLinkType],
-    queryFn: async (): Promise<MenuTarget[]> => getMenuAvailableTargetsAction(formLinkType),
+    queryFn: async (): Promise<MenuTarget[]> => unwrapQueryResult(await getMenuAvailableTargetsAction(formLinkType)),
     enabled: formLinkType !== 'custom' && itemModalOpened,
   });
+  const { data: targets } = targetsQuery;
   const formTargetSelectData = useMemo(() => buildTargetSelectData(targets, formTargetId), [formTargetId, targets]);
   const formLabelOwnedBySource = isMenuItemLabelApplicableToLocale(
     {
@@ -306,6 +316,7 @@ export function AdminMenusPage() {
   return (
     <EditorRuntimeProvider provider={menuRoom.provider} entityType="menu" entityId={selectedMenuId ?? ''}>
       <Stack>
+        <QueryErrorAlert queries={[menusQuery, selectedMenuFailure, targetsQuery]} />
         <Group justify="space-between">
           <Title order={2}>{tPage('title')}</Title>
           <Button tone="neutral" emphasis="medium" onClick={handleCreateMenu} leftSection={<IconPlus size={16} />}>
@@ -317,7 +328,7 @@ export function AdminMenusPage() {
           {/* Menu List */}
           <SectionCard>
             <SectionHeader title={tCommon('entities.menus')} />
-            {menusLoading ? (
+            {menusQuery.isError ? null : menusLoading ? (
               <PageLoader />
             ) : !menus || menus.length === 0 ? (
               <Text size="sm" c="dimmed">
@@ -379,7 +390,7 @@ export function AdminMenusPage() {
 
           {/* Menu Items Editor */}
           <SectionCard>
-            {!selectedMenuId ? (
+            {selectedMenuFailure.isError ? null : !selectedMenuId ? (
               <Stack align="center" justify="center" h={300}>
                 <IconMenu2 size={48} color="gray" />
                 <Text c="dimmed">{tPage('selectPrompt')}</Text>

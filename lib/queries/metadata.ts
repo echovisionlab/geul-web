@@ -1,3 +1,4 @@
+import { throwQueryError } from '@/lib/api/query-error';
 import {
   getPublicArtistResponse,
   getPublicLabelResponse,
@@ -946,7 +947,7 @@ async function getFormMetadata(
       }
     }
     logger.error('GetFormMetadata error', { error: err });
-    return null;
+    throwQueryError(err);
   }
 }
 
