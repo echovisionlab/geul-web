@@ -94,6 +94,6 @@ export async function checkFormSlugAvailable(slug: string, excludeId?: string): 
     return { available: response.available };
   } catch (err) {
     logger.error('Failed to check form slug', { error: serializeClientLogError(err) });
-    return { available: false };
+    throw err;
   }
 }

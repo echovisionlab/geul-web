@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocale, useTranslations } from 'next-intl';
@@ -37,14 +39,16 @@ function ProgramEventListSettingsForm({ props, updateProps }: ProgramEventListSe
   const seriesId = props.seriesId || '';
   const timeWindow = props.timeWindow || 'all';
 
-  const { data: eventTypes } = useQuery({
+  const eventTypesQuery = useQuery({
     queryKey: ['program-events', 'types', locale],
     queryFn: () => listProgramEventTypeOptionsBrowser(locale),
   });
-  const { data: eventSeries } = useQuery({
+  const { data: eventTypes } = eventTypesQuery;
+  const eventSeriesQuery = useQuery({
     queryKey: ['program-events', 'series', locale],
     queryFn: () => listProgramEventSeriesOptionsBrowser(locale),
   });
+  const { data: eventSeries } = eventSeriesQuery;
 
   const typeOptions = eventTypes?.map((type) => ({ value: type.id, label: type.name })) ?? [];
   const seriesOptions = eventSeries?.map((series) => ({ value: series.id, label: series.title })) ?? [];
@@ -73,58 +77,61 @@ function ProgramEventListSettingsForm({ props, updateProps }: ProgramEventListSe
   );
 
   return (
-    <ListBlockEditorBase
-      editorType="program-event-list"
-      limitLabel={tPageEditor('blockEditor.labels.numberOfProgramEvents')}
-      layout={layout}
-      columns={columns}
-      limit={limit}
-      maxLimit={24}
-      defaultColumns="3"
-      defaultLimit="6"
-      sortBy={sortBy}
-      sortByOptions={sortByOptions}
-      sortOrder={sortOrder}
-      showPagination={showPagination}
-      showImage={showImage}
-      imageAspectRatio={imageAspectRatio}
-      carouselLoop={carouselLoop}
-      carouselIndicators={carouselIndicators}
-      filters={
-        <>
-          <MultiSelect
-            label={tPageEditor('blockEditor.labels.programEventTypes')}
-            placeholder={tPageEditor('blockEditor.placeholders.allTypes')}
-            data={typeOptions}
-            value={typeIds ? typeIds.split(',').filter(Boolean) : []}
-            onChange={(values) => updateProp('typeIds', values.join(','))}
-            size="xs"
-            clearable
-            searchable
-          />
-          <Select
-            label={tPageEditor('blockEditor.labels.programEventSeries')}
-            placeholder={tPageEditor('blockEditor.placeholders.allSeries')}
-            data={seriesOptions}
-            value={seriesId || null}
-            onChange={(value) => updateProp('seriesId', value || '')}
-            size="xs"
-            clearable
-            searchable
-          />
-          <Select
-            label={tPageEditor('blockEditor.labels.timeWindow')}
-            data={timeWindowOptions}
-            value={timeWindow}
-            onChange={(value) =>
-              updateProp('timeWindow', (value as ProgramEventListProps['timeWindow'] | null) || 'all')
-            }
-            size="xs"
-          />
-        </>
-      }
-      onUpdate={(key, value) => updateProp(key as keyof ProgramEventListProps, value)}
-    />
+    <>
+      <QueryErrorAlert queries={[eventTypesQuery, eventSeriesQuery]} />
+      <ListBlockEditorBase
+        editorType="program-event-list"
+        limitLabel={tPageEditor('blockEditor.labels.numberOfProgramEvents')}
+        layout={layout}
+        columns={columns}
+        limit={limit}
+        maxLimit={24}
+        defaultColumns="3"
+        defaultLimit="6"
+        sortBy={sortBy}
+        sortByOptions={sortByOptions}
+        sortOrder={sortOrder}
+        showPagination={showPagination}
+        showImage={showImage}
+        imageAspectRatio={imageAspectRatio}
+        carouselLoop={carouselLoop}
+        carouselIndicators={carouselIndicators}
+        filters={
+          <>
+            <MultiSelect
+              label={tPageEditor('blockEditor.labels.programEventTypes')}
+              placeholder={tPageEditor('blockEditor.placeholders.allTypes')}
+              data={typeOptions}
+              value={typeIds ? typeIds.split(',').filter(Boolean) : []}
+              onChange={(values) => updateProp('typeIds', values.join(','))}
+              size="xs"
+              clearable
+              searchable
+            />
+            <Select
+              label={tPageEditor('blockEditor.labels.programEventSeries')}
+              placeholder={tPageEditor('blockEditor.placeholders.allSeries')}
+              data={seriesOptions}
+              value={seriesId || null}
+              onChange={(value) => updateProp('seriesId', value || '')}
+              size="xs"
+              clearable
+              searchable
+            />
+            <Select
+              label={tPageEditor('blockEditor.labels.timeWindow')}
+              data={timeWindowOptions}
+              value={timeWindow}
+              onChange={(value) =>
+                updateProp('timeWindow', (value as ProgramEventListProps['timeWindow'] | null) || 'all')
+              }
+              size="xs"
+            />
+          </>
+        }
+        onUpdate={(key, value) => updateProp(key as keyof ProgramEventListProps, value)}
+      />
+    </>
   );
 }
 

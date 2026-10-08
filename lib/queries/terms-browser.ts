@@ -82,7 +82,7 @@ export async function listArchivedTerms() {
     }));
   } catch (err) {
     logger.error('Failed to list archived terms', { error: serializeClientLogError(err) });
-    return [];
+    throw err;
   }
 }
 

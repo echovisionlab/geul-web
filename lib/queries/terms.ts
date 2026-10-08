@@ -1,3 +1,4 @@
+import { throwQueryError } from '@/lib/api/query-error';
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
@@ -45,7 +46,7 @@ export async function listTermsVersions() {
     }));
   } catch (err) {
     logger.error('Failed to list terms versions', { error: err });
-    return [];
+    throwQueryError(err);
   }
 }
 

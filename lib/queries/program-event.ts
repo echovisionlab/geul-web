@@ -1,3 +1,4 @@
+import { throwQueryError } from '@/lib/api/query-error';
 import { getPublicProgramEventResponse, getPublicProgramEventSeriesResponse } from '@/lib/queries/detail-public.server';
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { create } from '@bufbuild/protobuf';
@@ -762,7 +763,10 @@ export async function getProgramEventSeriesView(idOrSlug: string): Promise<Publi
       description: series.description ?? null,
       posterUrl: series.posterAsset?.url ?? null,
     };
-  } catch {
-    return null;
+  } catch (err) {
+    if (isConnectErrorCode(err, Code.NotFound, Code.PermissionDenied)) {
+      return null;
+    }
+    throwQueryError(err);
   }
 }

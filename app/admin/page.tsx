@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import Link from '@/components/core/Navigation';
 import { IconArticle, IconFileText, IconMessage, IconUsers } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
@@ -48,16 +50,18 @@ function StatCard({ title, value, icon: Icon, color, href, prefetch }: StatCardP
 export default function AdminDashboardPage() {
   const t = useTranslations('adminList.dashboard');
   const tCommonLabels = useTranslations('common.labels');
-  const { data: stats, isLoading } = useQuery({
+  const statsQuery = useQuery({
     queryKey: ['admin', 'stats'],
     queryFn: getAdminStats,
   });
+  const { data: stats, isLoading } = statsQuery;
 
   return (
     <Stack>
+      <QueryErrorAlert queries={[statsQuery]} />
       <Title order={2}>{tCommonLabels('dashboard')}</Title>
 
-      {isLoading ? (
+      {statsQuery.isError ? null : isLoading ? (
         <PageLoader />
       ) : (
         <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }}>

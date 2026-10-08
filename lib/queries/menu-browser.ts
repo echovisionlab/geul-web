@@ -127,7 +127,7 @@ export async function listMenus() {
     if (isConnectError(err)) {
       logger.error('ListMenus RPC error', { error: err.message });
     }
-    return [];
+    throw err;
   }
 }
 
@@ -150,6 +150,6 @@ export async function getMenuById(id: string) {
       }
       logger.error('GetMenuById RPC error', { error: err.message });
     }
-    return null;
+    throw err;
   }
 }

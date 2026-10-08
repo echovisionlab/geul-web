@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { useState } from 'react';
 import { LabelParticipantRole } from '@echovisionlab/geul-proto/secure/label_pb.ts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -49,11 +51,12 @@ export function LabelParticipantsDialog({
     enabled: opened,
   });
   const participantIds = participants.map((participant) => participant.memberId);
-  const { data: candidates = [], isFetching } = useQuery({
+  const candidatesQuery = useQuery({
     queryKey: ['members', 'label-participant-search', debouncedSearch, participantIds],
     queryFn: () => searchMembers(debouncedSearch, participantIds),
     enabled: opened && canManageParticipants && debouncedSearch.length >= 2,
   });
+  const { data: candidates = [], isFetching } = candidatesQuery;
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey });
   const setParticipant = useMutation({
@@ -83,6 +86,7 @@ export function LabelParticipantsDialog({
 
   return (
     <LabelParticipantsDialogView
+      queryFailure={<QueryErrorAlert queries={[candidatesQuery]} />}
       opened={opened}
       onClose={onClose}
       participants={participants.map((participant) => ({

@@ -25,7 +25,7 @@ export async function listLabelsForSelector() {
     }));
   } catch (err) {
     logger.error('Failed to list labels', { error: serializeClientLogError(err) });
-    return [];
+    throw err;
   }
 }
 
@@ -39,6 +39,6 @@ export async function checkLabelSlugAvailable(slug: string, excludeLabelId?: str
     return { available: response.available };
   } catch (err) {
     logger.error('Failed to check slug', { error: serializeClientLogError(err) });
-    return { available: false };
+    throw err;
   }
 }

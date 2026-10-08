@@ -258,14 +258,11 @@ describe('work queries', () => {
     expect(workClient.getWork).toHaveBeenCalledWith({ id: workId });
   });
 
-  it('returns null or empty fallbacks for handled failures', async () => {
+  it('preserves absent resources and propagates gallery failures', async () => {
     workClient.getWork.mockRejectedValueOnce(new ConnectError('missing', Code.NotFound));
     await expect(queries.getWorkForEdit('missing')).resolves.toBeNull();
 
     publicWorkClient.list.mockRejectedValueOnce(new Error('offline'));
-    await expect(queries.listWorksForGallery({ limit: 2, offset: 3 })).resolves.toEqual({
-      works: [],
-      pagination: { total: 0, limit: 2, offset: 3 },
-    });
+    await expect(queries.listWorksForGallery({ limit: 2, offset: 3 })).rejects.toThrow('offline');
   });
 });

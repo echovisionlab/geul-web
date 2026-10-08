@@ -1,5 +1,6 @@
+import { throwQueryError } from '@/lib/api/query-error';
+import { Code, ConnectError } from '@connectrpc/connect';
 import { isConnectError } from '@/lib/api/connect-error';
-import { Code } from '@connectrpc/connect';
 import { createSiteSettingClient } from '@/lib/api/server-client';
 import { fromProtoAllSettings } from '@/lib/queries/site-setting-mapper';
 import type { SiteSettingsView } from '@/lib/types/site-setting/config';
@@ -19,16 +20,13 @@ export async function getAllSiteSettings(): Promise<SiteSettingsView | null> {
     const client = await createSiteSettingClient();
     const response = await client.getSettings({});
     if (!response.settings) {
-      return null;
+      throw new ConnectError('Site settings response is missing', Code.Internal);
     }
     return fromProtoAllSettings(response.settings);
   } catch (err) {
     if (isConnectError(err)) {
-      if (err.code === Code.PermissionDenied || err.code === Code.Unauthenticated) {
-        return null;
-      }
       logger.error('GetSettings RPC error', { error: err.message });
     }
-    return null;
+    throwQueryError(err);
   }
 }

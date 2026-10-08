@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -22,10 +24,11 @@ type ClientMarqueeSelectorItem = Awaited<ReturnType<typeof listClientsForSelecto
 
 function ClientMarqueeSettingsForm({ props, updateProps }: ClientMarqueeSettingsFormProps) {
   const tCommonEntities = useTranslations('common.entities');
-  const { data: clients } = useQuery({
+  const clientsQuery = useQuery({
     queryKey: ['clients', 'selector'],
     queryFn: () => listClientsForSelector(),
   });
+  const { data: clients } = clientsQuery;
 
   const updateProp = useCallback(
     (key: string, value: string) => {
@@ -36,6 +39,7 @@ function ClientMarqueeSettingsForm({ props, updateProps }: ClientMarqueeSettings
 
   return (
     <Stack gap="sm" data-page-block-editor="client-marquee">
+      <QueryErrorAlert queries={[clientsQuery]} />
       <MarqueeEntityFields
         entityLabel={tCommonEntities('clients')}
         source={props.source || 'all'}
@@ -99,28 +103,32 @@ export function ClientMarqueeEditor({ sectionId, props }: BlockEditorProps<Clien
 export function ClientMarqueeCanvasPreview({ props }: BlockCanvasPreviewProps<ClientMarqueeProps>) {
   const tPageEditor = useTranslations('pageEditor');
   const parsed = parseClientMarqueeProps(props);
-  const { data: clients } = useQuery({
+  const clientsQuery = useQuery({
     queryKey: ['clients', 'selector'],
     queryFn: () => listClientsForSelector(),
   });
+  const { data: clients } = clientsQuery;
   const items = buildClientMarqueePreviewItems(parsed, clients ?? []);
 
   return (
-    <MarqueeView
-      items={items}
-      options={{
-        direction: parsed.direction,
-        speed: parsed.speed,
-        speedPxPerSecond: parsed.speedPxPerSecond ? Number(parsed.speedPxPerSecond) : undefined,
-        itemHeight: parsed.itemHeight,
-        itemHeightPx: parsed.itemHeightPx ? Number(parsed.itemHeightPx) : undefined,
-        gap: parsed.gap,
-        pauseOnHover: parsed.pauseOnHover !== 'false',
-        linkTarget: parsed.linkTarget,
-        logoScale: parsed.logoScale,
-        fallbackMode: parsed.fallbackMode,
-      }}
-      emptyLabel={tPageEditor('blockEditor.empty.marqueeItems')}
-    />
+    <>
+      <QueryErrorAlert queries={[clientsQuery]} />
+      <MarqueeView
+        items={items}
+        options={{
+          direction: parsed.direction,
+          speed: parsed.speed,
+          speedPxPerSecond: parsed.speedPxPerSecond ? Number(parsed.speedPxPerSecond) : undefined,
+          itemHeight: parsed.itemHeight,
+          itemHeightPx: parsed.itemHeightPx ? Number(parsed.itemHeightPx) : undefined,
+          gap: parsed.gap,
+          pauseOnHover: parsed.pauseOnHover !== 'false',
+          linkTarget: parsed.linkTarget,
+          logoScale: parsed.logoScale,
+          fallbackMode: parsed.fallbackMode,
+        }}
+        emptyLabel={tPageEditor('blockEditor.empty.marqueeItems')}
+      />
+    </>
   );
 }

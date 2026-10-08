@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getTranslations } from 'next-intl/server';
 import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
 import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
@@ -34,14 +35,16 @@ export default async function AdminTagsPage({ searchParams }: PageProps) {
     { field: 'created_at', label: tCommon('labels.created') },
   ];
 
-  const result = await listTagsAdminAction({
-    filter: query.filters as never,
-    filterBy: (query.filterBy || 'AND') as 'AND' | 'OR',
-    sort: query.sorts?.map((s) => ({ field: s.field, order: s.direction })),
-    page: query.page,
-    pageSize: query.pageSize,
-    search: query.search,
-  });
+  const result = unwrapQueryResult(
+    await listTagsAdminAction({
+      filter: query.filters as never,
+      filterBy: (query.filterBy || 'AND') as 'AND' | 'OR',
+      sort: query.sorts?.map((s) => ({ field: s.field, order: s.direction })),
+      page: query.page,
+      pageSize: query.pageSize,
+      search: query.search,
+    }),
+  );
 
   return (
     <TagModalProvider>

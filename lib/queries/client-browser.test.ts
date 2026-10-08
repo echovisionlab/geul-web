@@ -151,10 +151,10 @@ describe('searchClients', () => {
     await expect(searchClients('cli')).resolves.toEqual([]);
   });
 
-  it('returns an empty search result when client search fails', async () => {
+  it('preserves client search failure', async () => {
     searchClientsMock.mockRejectedValue(new Error('backend unavailable'));
 
-    await expect(searchClients('cli')).resolves.toEqual([]);
+    await expect(searchClients('cli')).rejects.toThrow('backend unavailable');
   });
 });
 
@@ -218,9 +218,9 @@ describe('listClientsForSelector', () => {
     await expect(listClientsForSelector()).resolves.toEqual([]);
   });
 
-  it('returns an empty selector result when listing clients fails', async () => {
+  it('preserves client selector failure', async () => {
     listClientsMock.mockRejectedValue(new Error('backend unavailable'));
 
-    await expect(listClientsForSelector()).resolves.toEqual([]);
+    await expect(listClientsForSelector()).rejects.toThrow('backend unavailable');
   });
 });

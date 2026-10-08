@@ -1,5 +1,6 @@
 'use server';
 
+import { queryResult, unwrapQueryResult, type QueryResult } from '@/lib/api/query-result';
 import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import {
@@ -191,8 +192,8 @@ export async function deleteMenuAction(id: string): Promise<{ success?: boolean;
   }
 }
 
-export async function getMenuAvailableTargetsAction(type: string): Promise<MenuTarget[]> {
-  try {
+export async function getMenuAvailableTargetsAction(type: string): Promise<QueryResult<MenuTarget[]>> {
+  return queryResult(async () => {
     switch (type) {
       case 'page': {
         const pages = await listPagesAdmin({
@@ -207,11 +208,13 @@ export async function getMenuAvailableTargetsAction(type: string): Promise<MenuT
         }));
       }
       case 'category': {
-        const categories = await listCategoriesAdminAction({
-          page: 1,
-          pageSize: 1000,
-          sort: [{ field: 'name', order: 'asc' }],
-        });
+        const categories = unwrapQueryResult(
+          await listCategoriesAdminAction({
+            page: 1,
+            pageSize: 1000,
+            sort: [{ field: 'name', order: 'asc' }],
+          }),
+        );
         return categories.data.map((c) => ({
           id: c.id,
           name: formatTargetName(c.name, c.slug, 'Untitled category'),
@@ -219,11 +222,13 @@ export async function getMenuAvailableTargetsAction(type: string): Promise<MenuT
         }));
       }
       case 'tag': {
-        const tags = await listTagsAdminAction({
-          page: 1,
-          pageSize: 1000,
-          sort: [{ field: 'name', order: 'asc' }],
-        });
+        const tags = unwrapQueryResult(
+          await listTagsAdminAction({
+            page: 1,
+            pageSize: 1000,
+            sort: [{ field: 'name', order: 'asc' }],
+          }),
+        );
         return tags.data.map((t) => ({
           id: t.id,
           name: formatTargetName(t.name, t.slug, 'Untitled tag'),
@@ -245,8 +250,5 @@ export async function getMenuAvailableTargetsAction(type: string): Promise<MenuT
       default:
         return [];
     }
-  } catch (err) {
-    void err;
-    return [];
-  }
+  });
 }

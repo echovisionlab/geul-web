@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   closestCenter,
@@ -260,11 +262,12 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
     enabled: isEnabled && searchType === 'artist' && canEdit,
   });
 
-  const { data: userResults = [], isFetching: userSearchFetching } = useQuery({
+  const userResultsQuery = useQuery({
     queryKey: ['users', 'search', debouncedSearch],
     queryFn: () => searchMembers(debouncedSearch),
     enabled: isEnabled && searchType === 'member' && canEdit,
   });
+  const { data: userResults = [], isFetching: userSearchFetching } = userResultsQuery;
 
   const searchResults = (searchType === 'artist' ? artistResults : userResults) as Array<{
     id: string;
@@ -557,6 +560,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
 
   return (
     <SectionCard withBorder p="md">
+      <QueryErrorAlert queries={[userResultsQuery]} />
       <Group justify="space-between" mb="sm">
         <Text size="sm" fw={500}>
           {tCommon('entities.credits')}

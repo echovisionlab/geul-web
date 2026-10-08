@@ -17,36 +17,28 @@ export type BrowserProgramEventLocationMode = ProgramEventLocationModeValue;
 export type BrowserProgramEventSortBy = 'starts_at' | 'ends_at' | 'published_at' | 'updated_at' | 'title';
 
 export async function listProgramEventTypeOptionsBrowser(requestedLocale?: string | null) {
-  try {
-    const client = createPublicProgramEventTypeClientWithLocale(requestedLocale);
-    const response = await client.list({
-      pagination: { limit: 100, offset: 0 },
-      sorts: [create(SortSpecSchema, { field: 'sort_order', order: SortOrder.ASC })],
-    });
-    return (response.types ?? []).map((type) => ({
-      id: type.id,
-      slug: type.slug,
-      name: type.name,
-    }));
-  } catch {
-    return [];
-  }
+  const client = createPublicProgramEventTypeClientWithLocale(requestedLocale);
+  const response = await client.list({
+    pagination: { limit: 100, offset: 0 },
+    sorts: [create(SortSpecSchema, { field: 'sort_order', order: SortOrder.ASC })],
+  });
+  return (response.types ?? []).map((type) => ({
+    id: type.id,
+    slug: type.slug,
+    name: type.name,
+  }));
 }
 
 export async function listProgramEventSeriesOptionsBrowser(requestedLocale?: string | null) {
-  try {
-    const client = createPublicProgramEventSeriesClientWithLocale(requestedLocale);
-    const response = await client.list({
-      pagination: { limit: 100, offset: 0 },
-    });
-    return (response.series ?? []).map((series) => ({
-      id: series.id,
-      slug: series.slug,
-      title: series.title,
-    }));
-  } catch {
-    return [];
-  }
+  const client = createPublicProgramEventSeriesClientWithLocale(requestedLocale);
+  const response = await client.list({
+    pagination: { limit: 100, offset: 0 },
+  });
+  return (response.series ?? []).map((series) => ({
+    id: series.id,
+    slug: series.slug,
+    title: series.title,
+  }));
 }
 
 export async function listProgramEventsForBlockBrowser(input: {

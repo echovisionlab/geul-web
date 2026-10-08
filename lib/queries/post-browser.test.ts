@@ -279,6 +279,6 @@ describe('post browser queries', () => {
     ).resolves.toEqual({ data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 });
 
     postClient.checkSlugAvailable.mockRejectedValueOnce(new Error('offline'));
-    await expect(queries.checkPostSlugAvailable('taken')).resolves.toEqual({ available: false });
+    await expect(queries.checkPostSlugAvailable('taken')).rejects.toThrow('offline');
   });
 });

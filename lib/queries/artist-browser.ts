@@ -16,6 +16,6 @@ export async function checkArtistSlugAvailable(
     return { available: response.available };
   } catch (err) {
     logger.error('Failed to check artist slug', { error: serializeClientLogError(err) });
-    return { available: false };
+    throw err;
   }
 }

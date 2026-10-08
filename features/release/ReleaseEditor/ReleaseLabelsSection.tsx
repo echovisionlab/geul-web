@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { useState } from 'react';
 import {
   closestCenter,
@@ -56,10 +58,11 @@ export function ReleaseLabelsSection({
   const [selectedLabelId, setSelectedLabelId] = useState<string | null>(null);
   const [catalogNumber, setCatalogNumber] = useState('');
 
-  const { data: allLabels } = useQuery({
+  const allLabelsQuery = useQuery({
     queryKey: ['label', 'list'],
     queryFn: () => listLabelsForSelector(),
   });
+  const { data: allLabels } = allLabelsQuery;
 
   const setLabels = useMutation({
     mutationFn: ({
@@ -171,6 +174,7 @@ export function ReleaseLabelsSection({
 
   return (
     <SectionCard>
+      <QueryErrorAlert queries={[allLabelsQuery]} />
       <Stack>
         <SectionHeader
           title={tCommon('entities.labels')}

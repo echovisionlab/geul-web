@@ -156,14 +156,7 @@ export async function checkSeriesSlugAvailable(
   slug: string,
   excludeSeriesId?: string,
 ): Promise<{ available: boolean }> {
-  try {
-    const client = createSeriesClient();
-    const response = await client.checkSeriesSlugAvailable({
-      slug,
-      excludeId: excludeSeriesId,
-    });
-    return { available: response.available };
-  } catch {
-    return { available: false };
-  }
+  const client = createSeriesClient();
+  const response = await client.checkSeriesSlugAvailable({ slug, excludeId: excludeSeriesId });
+  return { available: response.available };
 }

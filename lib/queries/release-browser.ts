@@ -103,6 +103,6 @@ export async function checkReleaseSlugAvailable(
     return { available: response.available };
   } catch (err) {
     logger.error('Failed to check release slug', { error: serializeClientLogError(err) });
-    return { available: false };
+    throw err;
   }
 }

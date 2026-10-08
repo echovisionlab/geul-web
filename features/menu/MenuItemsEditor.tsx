@@ -19,6 +19,8 @@ import { LabelBadge } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { Checkbox, Select, TextInput } from '@/components/core/Input';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getMenuAvailableTargetsAction } from '@/lib/actions/menu';
 import { getSupportedLocaleOptions, normalizeLocale } from '@/lib/i18n/locale';
 import { isMenuItemLabelApplicableToLocale } from '@/features/translation/menu-translation-model';
@@ -96,11 +98,12 @@ function MenuItemForm({
     sourceLocale,
   );
 
-  const { data: targets } = useQuery({
+  const targetsQuery = useQuery({
     queryKey: ['menu', 'targets', link.linkType],
-    queryFn: async (): Promise<MenuTarget[]> => getMenuAvailableTargetsAction(link.linkType),
+    queryFn: async (): Promise<MenuTarget[]> => unwrapQueryResult(await getMenuAvailableTargetsAction(link.linkType)),
     enabled: link.linkType !== 'custom',
   });
+  const { data: targets } = targetsQuery;
   const preservedTargetSlug =
     link.linkType === item.linkType && link.targetId === (item.targetId || null) && item.targetSlug?.trim()
       ? item.targetSlug.trim()
@@ -149,6 +152,7 @@ function MenuItemForm({
 
   return (
     <Stack gap="xs" mt="sm">
+      <QueryErrorAlert queries={[targetsQuery]} />
       <TextInput
         size="xs"
         label={tPage('sourceLabel')}

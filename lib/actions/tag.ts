@@ -1,5 +1,6 @@
 'use server';
 
+import { queryResult } from '@/lib/api/query-result';
 import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
@@ -19,7 +20,7 @@ interface TagListInput {
 }
 
 export async function listTagsAdminAction(input: TagListInput) {
-  try {
+  return queryResult(async () => {
     const client = await createTagClient();
     const limit = input.pageSize ?? 20;
     const offset = ((input.page ?? 1) - 1) * limit;
@@ -47,12 +48,7 @@ export async function listTagsAdminAction(input: TagListInput) {
       pageSize: limit,
       totalPages: Math.ceil(total / limit),
     };
-  } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('ListTagsAdmin RPC error', { error: err.message });
-    }
-    return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
-  }
+  });
 }
 
 export async function createTagAction(

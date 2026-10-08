@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -220,11 +222,12 @@ export function WorkClientsSection({ workId: _workId, canEdit, initialClientDeta
   }, [clients, clientDetailsCache, loadingClientIds, fetchClientDetails]);
 
   // Search clients
-  const { data: searchResults = [], isFetching: searchFetching } = useQuery({
+  const searchResultsQuery = useQuery({
     queryKey: ['client', 'search', debouncedSearch],
     queryFn: () => searchClients(debouncedSearch),
     enabled: isEnabled && canEdit,
   });
+  const { data: searchResults = [], isFetching: searchFetching } = searchResultsQuery;
 
   // Filter out already added clients
   const existingClientIds = useMemo(() => new Set(clients), [clients]);
@@ -306,6 +309,7 @@ export function WorkClientsSection({ workId: _workId, canEdit, initialClientDeta
 
   return (
     <SectionCard>
+      <QueryErrorAlert queries={[searchResultsQuery]} />
       <SectionHeader
         title={tCommonEntities('clients')}
         actions={

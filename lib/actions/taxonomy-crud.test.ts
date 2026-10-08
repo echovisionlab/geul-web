@@ -154,7 +154,7 @@ describe('taxonomy CRUD actions', () => {
         search: 'cat',
         sort: [{ field: 'name', order: 'desc' }],
       }),
-    ).resolves.toMatchObject({ data: [{ id: 'cat-1', postCount: 2 }], total: 1, page: 2 });
+    ).resolves.toMatchObject({ ok: true, value: { data: [{ id: 'cat-1', postCount: 2 }], total: 1, page: 2 } });
     await expect(category.listCategoriesAction()).resolves.toEqual([
       { id: 'cat-1', name: 'Category', slug: 'category' },
     ]);
@@ -170,7 +170,8 @@ describe('taxonomy CRUD actions', () => {
     await expect(category.deleteCategoryAction('cat-1')).resolves.toEqual({ success: true });
 
     await expect(tag.listTagsAdminAction({ search: 'tag' })).resolves.toMatchObject({
-      data: [{ id: 'tag-1', postCount: 3 }],
+      ok: true,
+      value: { data: [{ id: 'tag-1', postCount: 3 }] },
     });
     await expect(tag.listTagsAction()).resolves.toEqual([{ id: 'tag-1', name: 'Tag', slug: 'tag' }]);
     await expect(tag.createTagAction('Tag')).resolves.toEqual({

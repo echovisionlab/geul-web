@@ -37,8 +37,12 @@ describe('listAllPublishedPagesAdminAction', () => {
 
     const result = await listAllPublishedPagesAdminAction();
 
-    expect(result).toHaveLength(101);
-    expect(result.at(-1)?.id).toBe('page-101');
+    expect(result).toEqual(expect.objectContaining({ ok: true }));
+    if (!result.ok) {
+      throw new Error(result.error);
+    }
+    expect(result.value).toHaveLength(101);
+    expect(result.value.at(-1)?.id).toBe('page-101');
     expect(listPagesAdminMock).toHaveBeenNthCalledWith(1, {
       page: 1,
       pageSize: 100,
@@ -56,7 +60,7 @@ describe('listAllPublishedPagesAdminAction', () => {
   it('does not list targets for a non-admin Member', async () => {
     createContextMock.mockResolvedValue({ member: { role: 'author' } });
 
-    await expect(listAllPublishedPagesAdminAction()).resolves.toEqual([]);
+    await expect(listAllPublishedPagesAdminAction()).resolves.toEqual({ ok: false, status: 403, error: 'Forbidden' });
     expect(listPagesAdminMock).not.toHaveBeenCalled();
   });
 });

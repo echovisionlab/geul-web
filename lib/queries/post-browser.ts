@@ -486,11 +486,7 @@ export async function listPostParticipants(postId: string) {
 }
 
 export async function checkPostSlugAvailable(slug: string, excludePostId?: string): Promise<{ available: boolean }> {
-  try {
-    const client = createPostClient();
-    const response = await client.checkSlugAvailable({ slug, excludePostId });
-    return { available: response.available };
-  } catch {
-    return { available: false };
-  }
+  const client = createPostClient();
+  const response = await client.checkSlugAvailable({ slug, excludePostId });
+  return { available: response.available };
 }

@@ -483,6 +483,6 @@ describe('program event queries', () => {
     await expect(queries.getProgramEventView('missing')).resolves.toBeNull();
 
     publicSeriesClient.get.mockRejectedValueOnce(new Error('offline'));
-    await expect(queries.getProgramEventSeriesView('missing')).resolves.toBeNull();
+    await expect(queries.getProgramEventSeriesView('missing')).rejects.toThrow('offline');
   });
 });

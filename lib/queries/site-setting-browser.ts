@@ -1,7 +1,7 @@
+import { Code, ConnectError } from '@connectrpc/connect';
 import { isConnectError } from '@/lib/api/connect-error';
 import { toJson } from '@bufbuild/protobuf';
 import { ValueSchema } from '@bufbuild/protobuf/wkt';
-import { Code } from '@connectrpc/connect';
 import { createSiteSettingClient } from '@/lib/api/browser/secure-site-setting';
 import type { OgImageConfigs, SiteSettingsView } from '@/lib/types/site-setting/config';
 import { fromProtoAllSettings } from '@/lib/queries/site-setting-mapper';
@@ -15,17 +15,14 @@ export async function getAllSiteSettings(): Promise<SiteSettingsView | null> {
     const client = createSiteSettingClient();
     const response = await client.getSettings({});
     if (!response.settings) {
-      return null;
+      throw new ConnectError('Site settings response is missing', Code.Internal);
     }
     return fromProtoAllSettings(response.settings);
   } catch (err) {
     if (isConnectError(err)) {
-      if (err.code === Code.PermissionDenied || err.code === Code.Unauthenticated) {
-        return null;
-      }
       logger.error('GetSettings RPC error', { error: err.message });
     }
-    return null;
+    throw err;
   }
 }
 
@@ -41,11 +38,8 @@ export async function getOgConfig(): Promise<OgImageConfigs | null> {
     return value as OgImageConfigs | null;
   } catch (err) {
     if (isConnectError(err)) {
-      if (err.code === Code.PermissionDenied || err.code === Code.Unauthenticated) {
-        return null;
-      }
       logger.error('GetSetting RPC error', { error: err.message });
     }
-    return null;
+    throw err;
   }
 }

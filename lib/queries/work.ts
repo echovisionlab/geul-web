@@ -1,3 +1,4 @@
+import { throwQueryError } from '@/lib/api/query-error';
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { create } from '@bufbuild/protobuf';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
@@ -355,14 +356,7 @@ export async function listWorksForGallery(options?: {
     };
   } catch (err) {
     logger.error('Failed to list works for gallery', { error: err });
-    return {
-      works: [],
-      pagination: {
-        total: 0,
-        limit: options?.limit ?? 20,
-        offset: options?.offset ?? 0,
-      },
-    };
+    throwQueryError(err);
   }
 }
 

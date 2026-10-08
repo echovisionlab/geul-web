@@ -146,23 +146,30 @@ export function useSlugManagement({
   const checkAction = checkSlugActions[entityType];
   const isSlugEmpty = slug.length === 0;
 
-  const { data, isFetching } = useQuery({
+  const { data, isFetching, isError } = useQuery({
     queryKey: ['slug-check', entityType, debouncedSlug, entityId],
     queryFn: () => checkAction(debouncedSlug, entityId),
     enabled: !isSlugEmpty && isCurrentDebouncedSlug,
   });
 
   const isChecking = !isSlugEmpty && (!isCurrentDebouncedSlug || isFetching);
-  const isAvailable = isSlugEmpty ? true : isChecking ? undefined : data?.available;
+  const isAvailable = isSlugEmpty ? true : isChecking || isError ? undefined : data?.available;
 
-  const error = entityType !== 'page' && !isSlugEmpty && isAvailable === false ? 'Slug already exists' : undefined;
+  const error =
+    !isSlugEmpty && isError
+      ? 'Could not check slug availability'
+      : entityType !== 'page' && !isSlugEmpty && isAvailable === false
+        ? 'Slug already exists'
+        : undefined;
   const localPageSlugReason = entityType === 'page' ? getPageSlugValidationReason(slug) : undefined;
   const errorReason =
     entityType === 'page' && slug.length > 0
       ? (localPageSlugReason ??
-        (!isSlugEmpty && isAvailable === false
-          ? ((data as PageSlugAvailabilityResult | undefined)?.reason ?? 'alreadyExists')
-          : undefined))
+        (isError
+          ? 'checkFailed'
+          : !isSlugEmpty && isAvailable === false
+            ? ((data as PageSlugAvailabilityResult | undefined)?.reason ?? 'alreadyExists')
+            : undefined))
       : undefined;
 
   // Call onSave when debounced slug changes and is available

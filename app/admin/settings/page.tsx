@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -10,6 +12,7 @@ import { SiteAssetUploader } from '@/features/site/SiteAssetUploader/SiteAssetUp
 import { SiteLoaderAssetsUploader } from '@/features/site/SiteLoaderAssetsUploader/SiteLoaderAssetsUploader';
 import { SiteOgImagePanel } from '@/features/site/SiteOgImagePanel/SiteOgImagePanel';
 import { SiteSettingsForm } from '@/features/site/SiteSettingsForm/SiteSettingsForm';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { listAllPublishedPagesAdminAction } from '@/lib/actions/admin';
 import { updateSiteSettingsAction } from '@/lib/actions/site-setting';
 import { listMenus } from '@/lib/queries/menu-browser';
@@ -21,18 +24,21 @@ export default function AdminSettingsPage() {
   const tPage = useTranslations('adminSettings.site');
   const queryClient = useQueryClient();
   const [ogGenerationRunId, setOgGenerationRunId] = useState<string>();
-  const { data: settings, isLoading } = useQuery({
+  const settingsQuery = useQuery({
     queryKey: ['siteSettings', 'all'],
     queryFn: getAllSiteSettings,
   });
-  const { data: pages = [] } = useQuery({
+  const { data: settings, isLoading } = settingsQuery;
+  const pagesQuery = useQuery({
     queryKey: ['pages', 'admin', 'published'],
-    queryFn: listAllPublishedPagesAdminAction,
+    queryFn: async () => unwrapQueryResult(await listAllPublishedPagesAdminAction()),
   });
-  const { data: menus = [] } = useQuery({
+  const { data: pages = [] } = pagesQuery;
+  const menusQuery = useQuery({
     queryKey: ['menus', 'list'],
     queryFn: listMenus,
   });
+  const { data: menus = [] } = menusQuery;
 
   const updateSettings = useMutation({
     mutationFn: updateSiteSettingsAction,
@@ -49,7 +55,11 @@ export default function AdminSettingsPage() {
     },
   });
 
-  if (isLoading || !settings) {
+  if (settingsQuery.isError || menusQuery.isError || pagesQuery.isError) {
+    return <QueryErrorAlert queries={[settingsQuery, menusQuery, pagesQuery]} />;
+  }
+
+  if (isLoading || pagesQuery.isLoading || menusQuery.isLoading || !settings) {
     return <PageLoader />;
   }
 

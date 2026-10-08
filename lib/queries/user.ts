@@ -1,4 +1,6 @@
-import { isConnectError } from '@/lib/api/connect-error';
+import { throwQueryError } from '@/lib/api/query-error';
+import { Code } from '@connectrpc/connect';
+import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { create } from '@bufbuild/protobuf';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { FilterOp, FilterSpecSchema } from '@echovisionlab/geul-proto/common/common_pb.ts';
@@ -78,10 +80,13 @@ export async function getUserProfileView(
       isSelf,
     };
   } catch (err) {
+    if (isConnectErrorCode(err, Code.NotFound)) {
+      return null;
+    }
     if (isConnectError(err)) {
       logger.error('Public user profile RPC error', { error: err.message });
     }
-    return null;
+    throwQueryError(err);
   }
 }
 
@@ -108,7 +113,7 @@ export async function getUserPublishedPosts(memberId: string, requestedLocale?: 
     if (isConnectError(err)) {
       logger.error('GetUserPublishedPosts RPC error', { error: err.message });
     }
-    return [];
+    throwQueryError(err);
   }
 }
 
@@ -158,6 +163,6 @@ export async function listAuthors(limit: number = 12, memberIds: string[] = []) 
     if (isConnectError(err)) {
       logger.error('ListAuthors RPC error', { error: err.message });
     }
-    return [];
+    throwQueryError(err);
   }
 }

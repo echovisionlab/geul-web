@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -28,10 +30,11 @@ type TabValue = 'home' | 'content';
 export default function OgImageSettingsPage() {
   const t = useTranslations('ogImageSettings');
   const queryClient = useQueryClient();
-  const { data: savedConfig, isLoading } = useQuery({
+  const savedConfigQuery = useQuery({
     queryKey: ['siteSettings', 'ogConfig'],
     queryFn: getOgConfig,
   });
+  const { data: savedConfig, isLoading } = savedConfigQuery;
 
   const [activeTab, setActiveTab] = useState<TabValue>('home');
   const generationRun = useOgGenerationRun();
@@ -142,12 +145,17 @@ export default function OgImageSettingsPage() {
     notifications.show({ message: t('notifications.resetToDefaults'), color: 'yellow' });
   };
 
+  if (savedConfigQuery.isError) {
+    return <QueryErrorAlert queries={[savedConfigQuery]} />;
+  }
+
   if (isLoading) {
     return <PageLoader />;
   }
 
   return (
     <Stack gap="lg">
+      <QueryErrorAlert queries={[savedConfigQuery]} />
       <Group justify="space-between" align="flex-start">
         <div>
           <Title order={2}>{t('title')}</Title>

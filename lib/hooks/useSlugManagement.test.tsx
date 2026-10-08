@@ -303,6 +303,22 @@ describe('useSlugManagement', () => {
     expect(latestRenderedSlug).toBe('collaborator-slug');
   });
 
+  it('blocks autosave and reports a failed check instead of a duplicate slug', async () => {
+    vi.useFakeTimers();
+    checkPageSlugAvailable.mockRejectedValue(new Error('backend unavailable'));
+    const onSave = vi.fn();
+    renderHarness(<TestHarness initialSlug="" onSave={onSave} debounceMs={300} />);
+    changeInput('new-slug');
+    await act(async () => {
+      vi.advanceTimersByTime(300);
+    });
+    await flushFakeTimerUpdates();
+    expect(getHook().isAvailable).toBeUndefined();
+    expect(getHook().errorReason).toBe('checkFailed');
+    expect(getHook().error).toBe('Could not check slug availability');
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
   it('hides the previous server rejection while new input is debouncing', async () => {
     vi.useFakeTimers();
     checkPageSlugAvailable.mockResolvedValue({ available: false, reason: 'alreadyExists' });

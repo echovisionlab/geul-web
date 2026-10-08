@@ -1,5 +1,7 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+
 import { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -21,10 +23,11 @@ function ArtistListSettingsForm({ props, updateProps }: ArtistListSettingsFormPr
   const tPageEditor = useTranslations('pageEditor');
   const tCommonEntities = useTranslations('common.entities');
   const tCommonLabels = useTranslations('common.labels');
-  const { data: labels } = useQuery({
+  const labelsQuery = useQuery({
     queryKey: ['labels'],
     queryFn: () => listLabelsForSelector(),
   });
+  const { data: labels } = labelsQuery;
 
   const layout = props.layout || 'grid';
   const labelIds = props.labelIds || '';
@@ -60,45 +63,48 @@ function ArtistListSettingsForm({ props, updateProps }: ArtistListSettingsFormPr
   ] as const;
 
   return (
-    <ListBlockEditorBase
-      editorType="artist-list"
-      limitLabel={tPageEditor('blockEditor.labels.maxArtists')}
-      layout={layout}
-      columns={columns}
-      limit={limit}
-      maxLimit={24}
-      defaultColumns="3"
-      defaultLimit="12"
-      sortBy={sortBy}
-      sortByOptions={sortByOptions}
-      sortOrder={sortOrder}
-      showPagination={showPagination}
-      showImage={showImage}
-      imageAspectRatio={imageAspectRatio}
-      carouselLoop={carouselLoop}
-      carouselIndicators={carouselIndicators}
-      filters={
-        <MultiSelect
-          label={tCommonEntities('labels')}
-          placeholder={tPageEditor('blockEditor.placeholders.allLabels')}
-          data={labelOptions}
-          value={labelIds ? labelIds.split(',').filter(Boolean) : []}
-          onChange={(values) => updateProp('labelIds', values.join(','))}
-          size="xs"
-          clearable
-          searchable
-        />
-      }
-      extraDisplayOptions={
-        <Switch
-          label={tPageEditor('blockEditor.labels.showSocialLinks')}
-          checked={showMeta === 'true'}
-          onChange={(event) => updateProp('showMeta', event.currentTarget.checked ? 'true' : 'false')}
-          size="sm"
-        />
-      }
-      onUpdate={updateProp}
-    />
+    <>
+      <QueryErrorAlert queries={[labelsQuery]} />
+      <ListBlockEditorBase
+        editorType="artist-list"
+        limitLabel={tPageEditor('blockEditor.labels.maxArtists')}
+        layout={layout}
+        columns={columns}
+        limit={limit}
+        maxLimit={24}
+        defaultColumns="3"
+        defaultLimit="12"
+        sortBy={sortBy}
+        sortByOptions={sortByOptions}
+        sortOrder={sortOrder}
+        showPagination={showPagination}
+        showImage={showImage}
+        imageAspectRatio={imageAspectRatio}
+        carouselLoop={carouselLoop}
+        carouselIndicators={carouselIndicators}
+        filters={
+          <MultiSelect
+            label={tCommonEntities('labels')}
+            placeholder={tPageEditor('blockEditor.placeholders.allLabels')}
+            data={labelOptions}
+            value={labelIds ? labelIds.split(',').filter(Boolean) : []}
+            onChange={(values) => updateProp('labelIds', values.join(','))}
+            size="xs"
+            clearable
+            searchable
+          />
+        }
+        extraDisplayOptions={
+          <Switch
+            label={tPageEditor('blockEditor.labels.showSocialLinks')}
+            checked={showMeta === 'true'}
+            onChange={(event) => updateProp('showMeta', event.currentTarget.checked ? 'true' : 'false')}
+            size="sm"
+          />
+        }
+        onUpdate={updateProp}
+      />
+    </>
   );
 }
 

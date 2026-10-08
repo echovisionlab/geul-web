@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { IconArrowsExchange, IconUserOff, IconUserPlus, IconX } from '@tabler/icons-react';
 import { Avatar, Group, Loader, ScrollArea, Stack, Text, useCombobox } from '@mantine/core';
 import { LabelBadge } from '@/components/core/Badge';
@@ -35,6 +35,7 @@ export interface LabelParticipantsDialogViewProps {
   selectedRole: LabelParticipantRoleName;
   canManageParticipants: boolean;
   canRemoveOwner: boolean;
+  queryFailure?: ReactNode;
   loading?: boolean;
   searching?: boolean;
   mutating?: boolean;
@@ -72,6 +73,7 @@ export function LabelParticipantsDialogView({
   selectedRole,
   canManageParticipants,
   canRemoveOwner,
+  queryFailure,
   loading = false,
   searching = false,
   mutating = false,
@@ -95,6 +97,7 @@ export function LabelParticipantsDialogView({
   return (
     <ContentModal opened={opened} onClose={onClose} title={labels.title} closeLabel={labels.close} size="standard">
       <Stack gap="md">
+        {queryFailure}
         {canManageParticipants ? (
           <Stack gap="xs">
             <Text size="sm" fw={500}>
