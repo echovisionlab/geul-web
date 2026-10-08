@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { Suspense } from 'react';
 import { ServerDataTablePagination } from '@/features/data-table/ServerDataTable/ServerDataTablePagination';
 import { listArtistsForBlockAction } from '@/lib/actions/artist';
@@ -26,7 +27,7 @@ async function ArtistListViewServer({ sectionId, props, query, requestedLocale }
     limit: tableQuery.pageSize,
     offset: ((tableQuery.page ?? 1) - 1) * (tableQuery.pageSize ?? limit),
     requestedLocale,
-  });
+  }).then(unwrapQueryResult);
 
   const transformedArtists = artists.map((a) => ({
     id: a.id,

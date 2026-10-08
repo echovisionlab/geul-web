@@ -6,9 +6,6 @@ import { revalidatePath } from 'next/cache';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { FilterOp, SortOrder } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { createCategoryClient } from '@/lib/api/server-client';
-import { createLogger } from '@/lib/utils/logger';
-
-const logger = createLogger('category-actions');
 
 interface CategoryListInput {
   filter?: unknown;
@@ -116,7 +113,7 @@ export async function deleteCategoryAction(id: string): Promise<{ success?: bool
 
 // Simple list for selectors (returns all categories)
 export async function listCategoriesAction() {
-  try {
+  return queryResult(async () => {
     const client = await createCategoryClient();
     const response = await client.listCategories({
       pagination: { limit: 1000, offset: 0 },
@@ -126,10 +123,5 @@ export async function listCategoriesAction() {
       name: c.name,
       slug: c.slug,
     }));
-  } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('ListCategories RPC error', { error: err.message });
-    }
-    return [];
-  }
+  });
 }

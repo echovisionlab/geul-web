@@ -1,4 +1,5 @@
 'use client';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useEffect, useState } from 'react';
 import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
@@ -57,6 +58,7 @@ export function SegmentConfigFields({
     if (segmentType === SegmentType.MEMBER_TAGS && userTags.length === 0) {
       setTagsLoading(true);
       listAllUserTagsAction()
+        .then(unwrapQueryResult)
         .then((tags) => setUserTags(tags.map((t) => ({ value: t.id, label: t.name }))))
         .finally(() => setTagsLoading(false));
     }

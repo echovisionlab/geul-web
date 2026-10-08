@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useCallback, useMemo } from 'react';
 import { IconArrowsMaximize, IconFocus2, IconMap, IconSettings, IconTrash, IconX } from '@tabler/icons-react';
@@ -106,11 +108,12 @@ function MapSettingsForm({ props, isExpanded = true, updateSharedProps, updateLo
   const config = useMemo(() => toMapConfig(props), [props]);
 
   // Fetch all selected places
-  const { data: selectedPlacesData } = useQuery({
+  const selectedPlacesDataQuery = useQuery({
     queryKey: ['mapPlace', 'byIds', mapPlaceIds],
-    queryFn: () => getMapPlacesByIdsAction(mapPlaceIds),
+    queryFn: () => getMapPlacesByIdsAction(mapPlaceIds).then(unwrapQueryResult),
     enabled: mapPlaceIds.length > 0,
   });
+  const { data: selectedPlacesData } = selectedPlacesDataQuery;
 
   // Fetch themes for Leva dropdown
   const { data: themesData } = useQuery({
@@ -265,6 +268,7 @@ function MapSettingsForm({ props, isExpanded = true, updateSharedProps, updateLo
 
   return (
     <Box>
+      <QueryErrorAlert queries={[selectedPlacesDataQuery]} />
       {/* Header */}
       <Group gap="xs" mb="md" justify="space-between">
         <Group gap="xs">
@@ -472,11 +476,12 @@ export function MapCanvasPreview({ props }: BlockCanvasPreviewProps<MapProps>) {
   const mapPlaceIds = useMemo(() => parseMapPlaceIds(props), [props]);
   const config = useMemo(() => toMapConfig(props), [props]);
 
-  const { data: selectedPlacesData } = useQuery({
+  const selectedPlacesDataQueryLoad = useQuery({
     queryKey: ['mapPlace', 'byIds', mapPlaceIds],
-    queryFn: () => getMapPlacesByIdsAction(mapPlaceIds),
+    queryFn: () => getMapPlacesByIdsAction(mapPlaceIds).then(unwrapQueryResult),
     enabled: mapPlaceIds.length > 0,
   });
+  const { data: selectedPlacesData } = selectedPlacesDataQueryLoad;
   const { data: themesData } = useQuery({
     queryKey: ['mapThemes', 'list'],
     queryFn: () => listMapThemesAction(),
@@ -522,6 +527,7 @@ export function MapCanvasPreview({ props }: BlockCanvasPreviewProps<MapProps>) {
 
   return (
     <Box>
+      <QueryErrorAlert queries={[selectedPlacesDataQueryLoad]} />
       <MapViewEmbedded config={mapViewConfig} blockAlignment={blockAlignment} />
       {caption ? (
         <Text size="sm" c="dimmed" mt="xs" ta={blockAlignment}>

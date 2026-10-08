@@ -30,9 +30,9 @@ vi.mock('@/features/post/PostEditor/LazyPostEditor', () => ({
     </div>
   ),
 }));
-vi.mock('@/lib/actions/category', () => ({ listCategoriesAction: vi.fn(async () => []) }));
+vi.mock('@/lib/actions/category', () => ({ listCategoriesAction: vi.fn(async () => ({ ok: true, value: [] })) }));
 vi.mock('@/lib/actions/post', () => ({ listPostShareLinksAction: vi.fn(async () => []) }));
-vi.mock('@/lib/actions/tag', () => ({ listTagsAction: vi.fn(async () => []) }));
+vi.mock('@/lib/actions/tag', () => ({ listTagsAction: vi.fn(async () => ({ ok: true, value: [] })) }));
 vi.mock('@/lib/queries/manifest', () => ({
   getManageSiteContext: vi.fn(async () => ({ canonicalOrigin: 'https://example.test', siteName: 'Geul' })),
   getSettings: vi.fn(),

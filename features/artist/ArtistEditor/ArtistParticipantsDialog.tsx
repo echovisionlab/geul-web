@@ -1,4 +1,5 @@
 'use client';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
@@ -54,11 +55,12 @@ export function ArtistParticipantsDialog({
   const queryClient = useQueryClient();
   const queryKey = ['artist', 'participants', artistId] as const;
 
-  const { data: participants = [], isLoading } = useQuery({
+  const participantsQuery = useQuery({
     queryKey,
-    queryFn: () => listArtistParticipantsAction(artistId),
+    queryFn: () => listArtistParticipantsAction(artistId).then(unwrapQueryResult),
     enabled: opened,
   });
+  const { data: participants = [], isLoading } = participantsQuery;
 
   const participantIds = participants.map((participant) => participant.memberId);
   const searchResultsQuery = useQuery({
@@ -137,7 +139,7 @@ export function ArtistParticipantsDialog({
 
   return (
     <Modal opened={opened} onClose={onClose} title={t('title')} size="lg">
-      <QueryErrorAlert queries={[searchResultsQuery]} />
+      <QueryErrorAlert queries={[searchResultsQuery, participantsQuery]} />
       {canManageParticipants && (
         <Group gap="sm" mb="md" align="flex-end" wrap="nowrap">
           <SearchCombobox

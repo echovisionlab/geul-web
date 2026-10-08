@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useMemo } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -69,22 +71,26 @@ export function ReleaseTagsSection({
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.tags');
   const tCategorySelector = useTranslations('postEditor.categorySelector');
-  const { data: allCategories } = useQuery({
+  const allCategoriesQuery = useQuery({
     queryKey: ['category', 'list'],
-    queryFn: () => listCategoriesAction(),
+    queryFn: () => listCategoriesAction().then(unwrapQueryResult),
   });
-  const { data: allGenres } = useQuery({
+  const { data: allCategories } = allCategoriesQuery;
+  const allGenresQuery = useQuery({
     queryKey: ['genre', 'list'],
-    queryFn: () => listGenresAction(),
+    queryFn: () => listGenresAction().then(unwrapQueryResult),
   });
-  const { data: allStyles } = useQuery({
+  const { data: allGenres } = allGenresQuery;
+  const allStylesQuery = useQuery({
     queryKey: ['style', 'list'],
-    queryFn: () => listStylesAction(),
+    queryFn: () => listStylesAction().then(unwrapQueryResult),
   });
-  const { data: allFormats } = useQuery({
+  const { data: allStyles } = allStylesQuery;
+  const allFormatsQuery = useQuery({
     queryKey: ['format', 'list'],
-    queryFn: () => listFormatsAction(),
+    queryFn: () => listFormatsAction().then(unwrapQueryResult),
   });
+  const { data: allFormats } = allFormatsQuery;
 
   const setCategories = useMutation({
     mutationFn: ({ ids, observed }: { ids: string[]; observed: string[] }) =>
@@ -237,6 +243,7 @@ export function ReleaseTagsSection({
 
   return (
     <SectionCard>
+      <QueryErrorAlert queries={[allCategoriesQuery, allGenresQuery, allStylesQuery, allFormatsQuery]} />
       <Stack>
         <SectionHeader title={t('title')} />
 

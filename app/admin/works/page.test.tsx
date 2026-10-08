@@ -19,6 +19,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 vi.mock('next-intl', () => ({
+  useLocale: () => 'ko',
   useTranslations: (namespace: string) => {
     const translate = (key: string, values?: Record<string, unknown>) => {
       if (key === 'actions.newItem') {
@@ -153,11 +154,14 @@ beforeEach(() => {
   deleteWorkActionMock.mockReset();
   listWorksAdminActionMock.mockReset();
   listWorksAdminActionMock.mockResolvedValue({
-    items: [],
-    page: 1,
-    pageSize: 20,
-    totalItems: 0,
-    totalPages: 0,
+    ok: true,
+    value: {
+      items: [],
+      page: 1,
+      pageSize: 20,
+      totalItems: 0,
+      totalPages: 0,
+    },
   });
   createWorkActionMock.mockResolvedValue({
     data: { id: 'new-work-id' },

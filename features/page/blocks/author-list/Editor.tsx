@@ -44,11 +44,12 @@ function AuthorListSettingsForm({ props, updateProps }: AuthorListSettingsFormPr
   });
   const { search, setSearch, debouncedSearch, combobox, isEnabled, reset } = useSearchCombobox();
 
-  const { data: selectedAuthors = [], isFetched: selectedAuthorsFetched } = useQuery({
+  const selectedAuthorsQuery = useQuery({
     queryKey: ['users', 'authors', 'selected', selectedIds],
     queryFn: () => listAuthorsAction(MAX_SELECTED_AUTHORS, selectedIds),
     enabled: source === 'selected' && selectedIds.length > 0,
   });
+  const { data: selectedAuthors = [], isFetched: selectedAuthorsFetched } = selectedAuthorsQuery;
   const selectedAuthorsById = useMemo(
     () => new Map(selectedAuthors.map((author) => [author.id, author])),
     [selectedAuthors],
@@ -84,7 +85,7 @@ function AuthorListSettingsForm({ props, updateProps }: AuthorListSettingsFormPr
 
   return (
     <Box data-page-block-editor="author-list">
-      <QueryErrorAlert queries={[candidatesQuery]} />
+      <QueryErrorAlert queries={[candidatesQuery, selectedAuthorsQuery]} />
       <Stack gap="sm">
         <Select
           label={tPageEditor('blockEditor.labels.source')}

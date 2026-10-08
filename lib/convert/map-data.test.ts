@@ -15,15 +15,18 @@ vi.mock('@/lib/actions/map-theme', () => ({
 }));
 
 beforeEach(() => {
-  getPlacesByIdsMock.mockResolvedValue([
-    {
-      id: 'place-1',
-      name: 'Polarfront Lab',
-      address: 'Seoul',
-      lat: 37.5,
-      lng: 127,
-    },
-  ]);
+  getPlacesByIdsMock.mockResolvedValue({
+    ok: true,
+    value: [
+      {
+        id: 'place-1',
+        name: 'Polarfront Lab',
+        address: 'Seoul',
+        lat: 37.5,
+        lng: 127,
+      },
+    ],
+  });
   resolveThemesByIdsMock.mockResolvedValue([
     {
       requestedThemeId: 'theme-deleted',

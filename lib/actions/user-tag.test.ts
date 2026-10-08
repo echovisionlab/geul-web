@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { FilterOp, SortOrder } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -37,7 +38,7 @@ describe('admin Member tag actions', () => {
         search: 'editor',
         filter: [{ field: 'created_at', op: 'gte', value: '2026-01-01' }],
         sort: [{ field: 'user_count', order: 'desc' }],
-      }),
+      }).then(unwrapQueryResult),
     ).resolves.toMatchObject({ data: [{ id: 'tag-1', user_count: 2 }], total: 1, page: 2, pageSize: 10 });
 
     expect(mocks.listMemberTagsAdmin).toHaveBeenCalledWith(

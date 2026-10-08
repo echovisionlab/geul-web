@@ -6,9 +6,6 @@ import { revalidatePath } from 'next/cache';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { FilterOp, SortOrder } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { createTagClient } from '@/lib/api/server-client';
-import { createLogger } from '@/lib/utils/logger';
-
-const logger = createLogger('tag-actions');
 
 interface TagListInput {
   filter?: unknown;
@@ -103,7 +100,7 @@ export async function deleteTagAction(id: string): Promise<{ success?: boolean; 
 
 // Simple list for selectors (returns all tags)
 export async function listTagsAction() {
-  try {
+  return queryResult(async () => {
     const client = await createTagClient();
     const response = await client.listTags({
       pagination: { limit: 1000, offset: 0 },
@@ -113,10 +110,5 @@ export async function listTagsAction() {
       name: t.name,
       slug: t.slug,
     }));
-  } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('ListTags RPC error', { error: err.message });
-    }
-    return [];
-  }
+  });
 }

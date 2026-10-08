@@ -1,4 +1,5 @@
 'use server';
+import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
@@ -22,74 +23,71 @@ export async function listClientsForBlockAction(input: {
   offset?: number;
   requestedLocale?: string | null;
 }) {
-  try {
-    const client = await createPublicClientClientWithAuth(input.requestedLocale);
-    const limit = input.limit ?? 24;
-    const offset = input.offset ?? 0;
-    const response = await client.list({ pagination: { limit, offset } });
+  return queryResult(async () => {
+    try {
+      const client = await createPublicClientClientWithAuth(input.requestedLocale);
+      const limit = input.limit ?? 24;
+      const offset = input.offset ?? 0;
+      const response = await client.list({ pagination: { limit, offset } });
 
-    return {
-      clients: (response.clients ?? []).map((item) => ({
-        id: item.id,
-        name: item.name,
-        website: item.website ?? null,
-        logoUrl: themedAssetRefUrl(item.logoLightAsset, item.logoDarkAsset),
-        logoLightUrl: item.logoLightAsset?.url ?? null,
-        logoDarkUrl: item.logoDarkAsset?.url ?? null,
-        createdAt: item.createdAt ? timestampDate(item.createdAt) : null,
-      })),
-      pagination: {
-        total: response.pagination?.total ?? 0,
-        limit,
-        offset,
-      },
-    };
-  } catch (err) {
-    logger.error('Failed to list clients for page block', { error: err });
-    return {
-      clients: [],
-      pagination: {
-        total: 0,
-        limit: input.limit ?? 24,
-        offset: input.offset ?? 0,
-      },
-    };
-  }
+      return {
+        clients: (response.clients ?? []).map((item) => ({
+          id: item.id,
+          name: item.name,
+          website: item.website ?? null,
+          logoUrl: themedAssetRefUrl(item.logoLightAsset, item.logoDarkAsset),
+          logoLightUrl: item.logoLightAsset?.url ?? null,
+          logoDarkUrl: item.logoDarkAsset?.url ?? null,
+          createdAt: item.createdAt ? timestampDate(item.createdAt) : null,
+        })),
+        pagination: {
+          total: response.pagination?.total ?? 0,
+          limit,
+          offset,
+        },
+      };
+    } catch (err) {
+      logger.error('Failed to list clients for page block', { error: err });
+      throw err;
+    }
+  });
 }
 
 export async function getClientsForBlockByIdsAction(input: { ids: string[]; requestedLocale?: string | null }) {
-  try {
-    const client = await createPublicClientClientWithAuth(input.requestedLocale);
-    const clients = await Promise.all(
-      input.ids.map(async (id) => {
-        try {
-          const response = await client.get({ id });
-          const item = response.client;
-          if (!item) {
-            return null;
+  return queryResult(async () => {
+    try {
+      const client = await createPublicClientClientWithAuth(input.requestedLocale);
+      const clients = await Promise.all(
+        input.ids.map(async (id) => {
+          try {
+            const response = await client.get({ id });
+            const item = response.client;
+            if (!item) {
+              return null;
+            }
+            return {
+              id: item.id,
+              name: item.name,
+              website: item.website ?? null,
+              logoUrl: themedAssetRefUrl(item.logoLightAsset, item.logoDarkAsset),
+              logoLightUrl: item.logoLightAsset?.url ?? null,
+              logoDarkUrl: item.logoDarkAsset?.url ?? null,
+            };
+          } catch (err) {
+            if (isConnectErrorCode(err, Code.NotFound)) {
+              return null;
+            }
+            throw err;
           }
-          return {
-            id: item.id,
-            name: item.name,
-            website: item.website ?? null,
-            logoUrl: themedAssetRefUrl(item.logoLightAsset, item.logoDarkAsset),
-            logoLightUrl: item.logoLightAsset?.url ?? null,
-            logoDarkUrl: item.logoDarkAsset?.url ?? null,
-          };
-        } catch (err) {
-          if (isConnectErrorCode(err, Code.NotFound)) {
-            return null;
-          }
-          throw err;
-        }
-      }),
-    );
+        }),
+      );
 
-    return clients.filter((item): item is NonNullable<(typeof clients)[number]> => item !== null);
-  } catch (err) {
-    logger.error('Failed to get clients for page block', { error: err });
-    return [];
-  }
+      return clients.filter((item): item is NonNullable<(typeof clients)[number]> => item !== null);
+    } catch (err) {
+      logger.error('Failed to get clients for page block', { error: err });
+      throw err;
+    }
+  });
 }
 
 export async function createClientAction(

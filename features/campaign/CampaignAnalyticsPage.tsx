@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -86,26 +88,39 @@ export default function CampaignAnalyticsPage() {
     return date ? dateTime.dateTime(date) : '-';
   }
 
-  const { data: campaign, isLoading: isLoadingCampaign } = useQuery({
+  const campaignQuery = useQuery({
     queryKey: ['campaigns', campaignId],
-    queryFn: () => getCampaignAction(campaignId),
+    queryFn: () => getCampaignAction(campaignId).then(unwrapQueryResult),
   });
+  const { data: campaign, isLoading: isLoadingCampaign } = campaignQuery;
 
-  const { data: stats, isLoading: isLoadingStats } = useQuery({
+  const statsQuery = useQuery({
     queryKey: ['campaigns', 'stats', campaignId],
-    queryFn: () => getCampaignStatsAction(campaignId),
+    queryFn: () => getCampaignStatsAction(campaignId).then(unwrapQueryResult),
   });
+  const { data: stats, isLoading: isLoadingStats } = statsQuery;
 
-  const { data: recipientResult, isLoading: isLoadingRecipients } = useQuery({
+  const recipientsQuery = useQuery({
     queryKey: ['campaigns', 'recipients', campaignId, recipientPage],
     queryFn: () =>
-      getCampaignRecipientsAction(campaignId, RECIPIENTS_PAGE_SIZE, (recipientPage - 1) * RECIPIENTS_PAGE_SIZE),
+      getCampaignRecipientsAction(campaignId, RECIPIENTS_PAGE_SIZE, (recipientPage - 1) * RECIPIENTS_PAGE_SIZE).then(
+        unwrapQueryResult,
+      ),
   });
+  const { data: recipientResult, isLoading: isLoadingRecipients } = recipientsQuery;
 
   const isLoading = isLoadingCampaign || isLoadingStats || isLoadingRecipients;
 
   if (isLoading) {
     return <PageLoader />;
+  }
+
+  if (
+    (campaignQuery.isError && !campaign) ||
+    (statsQuery.isError && !stats) ||
+    (recipientsQuery.isError && !recipientResult)
+  ) {
+    return <QueryErrorAlert queries={[campaignQuery, statsQuery, recipientsQuery]} />;
   }
 
   guardNotFound(campaign);
@@ -122,6 +137,7 @@ export default function CampaignAnalyticsPage() {
 
   return (
     <Stack>
+      <QueryErrorAlert queries={[campaignQuery, statsQuery, recipientsQuery]} />
       <Group>
         <Tooltip label={t('actions.backToCampaign')}>
           <IconButton

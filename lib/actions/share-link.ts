@@ -1,4 +1,5 @@
 'use server';
+import { queryResult, type QueryResult } from '@/lib/api/query-result';
 
 import { connectActionErrorCode, isConnectErrorCode } from '@/lib/api/connect-error';
 import {
@@ -56,18 +57,17 @@ function prependHost(link: ShareLinkItem): ShareLinkItem {
 export async function listShareLinksAction(
   entityType: ShareLinkEntityType,
   entityId: string,
-): Promise<ShareLinkItem[]> {
-  try {
-    const client = await createShareLinkClient();
-    const response = await client.listShareLinks({ entityType, entityId });
-    return response.shareLinks.map(prependHost);
-  } catch (err) {
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return [];
+): Promise<QueryResult<ShareLinkItem[]>> {
+  return queryResult(async () => {
+    try {
+      const client = await createShareLinkClient();
+      const response = await client.listShareLinks({ entityType, entityId });
+      return response.shareLinks.map(prependHost);
+    } catch (err) {
+      logger.error('Failed to list share links', { error: err });
+      throw err;
     }
-    logger.error('Failed to list share links', { error: err });
-    return [];
-  }
+  });
 }
 
 export async function createShareLinkAction(

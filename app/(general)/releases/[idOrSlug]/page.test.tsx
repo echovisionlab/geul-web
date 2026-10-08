@@ -78,7 +78,7 @@ describe('Release canonical editor route', () => {
       youtubeMusicUrl: null,
     });
     mocks.listTracksByReleaseAction.mockResolvedValue([]);
-    mocks.getReleaseTrackSnapshotAction.mockResolvedValue([]);
+    mocks.getReleaseTrackSnapshotAction.mockResolvedValue({ ok: true, value: [] });
     mocks.getReleaseEditorRelationsAction.mockResolvedValue({
       artists: [],
       labels: [],

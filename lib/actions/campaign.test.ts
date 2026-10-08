@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import {
   CampaignRecipientScope,
@@ -151,7 +152,7 @@ describe('getCampaignAction', () => {
 
   it('maps explicit all and segment targets without null inference', async () => {
     getCampaignRpcMock.mockResolvedValueOnce({ campaign });
-    await expect(getCampaignAction('campaign-1')).resolves.toMatchObject({
+    await expect(getCampaignAction('campaign-1').then(unwrapQueryResult)).resolves.toMatchObject({
       targetMode: CampaignTargetMode.ALL,
       segmentId: undefined,
     });
@@ -163,7 +164,7 @@ describe('getCampaignAction', () => {
         segmentId: 'audience-1',
       },
     });
-    await expect(getCampaignAction('campaign-1')).resolves.toMatchObject({
+    await expect(getCampaignAction('campaign-1').then(unwrapQueryResult)).resolves.toMatchObject({
       targetMode: CampaignTargetMode.SEGMENT,
       segmentId: 'audience-1',
     });
@@ -173,7 +174,7 @@ describe('getCampaignAction', () => {
     getCampaignRpcMock.mockResolvedValueOnce({
       campaign: { ...campaign, targetMode: CampaignTargetMode.UNSPECIFIED },
     });
-    await expect(getCampaignAction('campaign-1')).resolves.toBeNull();
+    await expect(getCampaignAction('campaign-1').then(unwrapQueryResult)).rejects.toMatchObject({ status: 500 });
 
     getCampaignRpcMock.mockResolvedValueOnce({
       campaign: {
@@ -182,7 +183,7 @@ describe('getCampaignAction', () => {
         segmentId: 'audience-1',
       },
     });
-    await expect(getCampaignAction('campaign-1')).resolves.toBeNull();
+    await expect(getCampaignAction('campaign-1').then(unwrapQueryResult)).rejects.toMatchObject({ status: 500 });
   });
 
   it('fails closed for an unspecified lifecycle status', async () => {
@@ -190,7 +191,7 @@ describe('getCampaignAction', () => {
       campaign: { ...campaign, status: CampaignStatus.UNSPECIFIED },
     });
 
-    await expect(getCampaignAction('campaign-1')).resolves.toBeNull();
+    await expect(getCampaignAction('campaign-1').then(unwrapQueryResult)).rejects.toMatchObject({ status: 500 });
   });
 });
 
@@ -216,7 +217,7 @@ describe('getCampaignStatsAction', () => {
       },
     });
 
-    await expect(getCampaignStatsAction('campaign-1')).resolves.toEqual({
+    await expect(getCampaignStatsAction('campaign-1').then(unwrapQueryResult)).resolves.toEqual({
       totalSent: 7,
       totalSkipped: 2,
       totalFailed: 1,
@@ -256,7 +257,7 @@ describe('getCampaignRecipientsAction', () => {
       total: 1,
     });
 
-    await expect(getCampaignRecipientsAction('campaign-1', 25, 50)).resolves.toEqual({
+    await expect(getCampaignRecipientsAction('campaign-1', 25, 50).then(unwrapQueryResult)).resolves.toEqual({
       recipients: [
         {
           email: 'recipient@example.com',
@@ -302,7 +303,7 @@ describe('previewCampaignAction', () => {
       previewCampaignAction('campaign-1', {
         locale: 'ko',
         layoutId: 'layout-1',
-      }),
+      }).then(unwrapQueryResult),
     ).resolves.toEqual({
       subject: 'Subject',
       htmlContent: '<p>HTML</p>',
@@ -333,7 +334,7 @@ describe('previewCampaignAction', () => {
       layoutId: 'layout-1',
       subject: 'Draft subject',
       document,
-    });
+    }).then(unwrapQueryResult);
 
     expect(previewCampaignRpcMock).toHaveBeenCalledWith({
       id: 'campaign-1',
@@ -356,7 +357,7 @@ describe('previewCampaignAction', () => {
     await previewCampaignAction('campaign-1', {
       locale: 'en',
       layoutId: null,
-    });
+    }).then(unwrapQueryResult);
 
     expect(previewCampaignRpcMock).toHaveBeenCalledWith({
       id: 'campaign-1',

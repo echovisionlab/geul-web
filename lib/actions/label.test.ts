@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { create } from '@bufbuild/protobuf';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { FilterOp, FilterSpecSchema, SortSpecSchema } from '@echovisionlab/geul-proto/common/common_pb.ts';
@@ -75,7 +76,7 @@ describe('listLabelsForBlockAction', () => {
         limit: 3,
         offset: 6,
         requestedLocale: 'ko',
-      }),
+      }).then(unwrapQueryResult),
     ).resolves.toEqual({
       labels: [
         {
@@ -127,7 +128,7 @@ describe('listLabelsForBlockAction', () => {
   it('uses default list controls and empty results when the public API omits optional fields', async () => {
     listMock.mockResolvedValue({});
 
-    await expect(listLabelsForBlockAction({ requestedLocale: undefined })).resolves.toEqual({
+    await expect(listLabelsForBlockAction({ requestedLocale: undefined }).then(unwrapQueryResult)).resolves.toEqual({
       labels: [],
       pagination: { total: 0, limit: 12, offset: 0 },
     });
@@ -143,12 +144,11 @@ describe('listLabelsForBlockAction', () => {
     });
   });
 
-  it('returns an empty block result when listing labels fails', async () => {
+  it('propagates lookup failures instead of returning an empty result', async () => {
     listMock.mockRejectedValue(new Error('backend unavailable'));
 
-    await expect(listLabelsForBlockAction({ requestedLocale: null })).resolves.toEqual({
-      labels: [],
-      pagination: { total: 0, limit: 12, offset: 0 },
+    await expect(listLabelsForBlockAction({ requestedLocale: null }).then(unwrapQueryResult)).rejects.toMatchObject({
+      status: 500,
     });
   });
 });
@@ -196,7 +196,7 @@ describe('getLabelsForBlockByIdsAction', () => {
       getLabelsForBlockByIdsAction({
         ids: [labelOneID, labelTwoID, labelThreeID, missingID],
         requestedLocale: 'ja',
-      }),
+      }).then(unwrapQueryResult),
     ).resolves.toEqual([
       {
         id: labelOneID,
@@ -247,9 +247,11 @@ describe('getLabelsForBlockByIdsAction', () => {
     });
   });
 
-  it('returns an empty selected label list when a non-not-found lookup fails', async () => {
+  it('propagates lookup failures instead of returning an empty result', async () => {
     listMock.mockRejectedValue(new Error('unavailable'));
 
-    await expect(getLabelsForBlockByIdsAction({ ids: ['label-one'], requestedLocale: undefined })).resolves.toEqual([]);
+    await expect(
+      getLabelsForBlockByIdsAction({ ids: ['label-one'], requestedLocale: undefined }).then(unwrapQueryResult),
+    ).rejects.toMatchObject({ status: 500 });
   });
 });

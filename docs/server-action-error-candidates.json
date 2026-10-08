@@ -1,0 +1,456 @@
+[
+  {
+    "file": "lib/actions/artist.ts",
+    "line": 37,
+    "function": "listArtistsAction",
+    "returns": ["return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/artist.ts",
+    "line": 56,
+    "function": "listArtistParentOptionsAction",
+    "returns": ["return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/artist.ts",
+    "line": 261,
+    "function": "getArtistAdminAction",
+    "returns": ["return null;", "return null;"],
+    "classification": "조건부 NotFound/권한 fallback 이후 다른 오류는 throw하는 기존 계약",
+    "resolution": "기존 없음·접근 제한 계약 유지. 그 외 오류는 안전한 digest로 운영 화면의 상태를 보존"
+  },
+  {
+    "file": "lib/actions/artist.ts",
+    "line": 387,
+    "function": "listMyArtistsAction",
+    "returns": ["return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/artist.ts",
+    "line": 468,
+    "function": "listArtistParticipantsAction",
+    "returns": ["return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/audience.ts",
+    "line": 107,
+    "function": "listSegmentsAdminAction",
+    "returns": ["return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/campaign.ts",
+    "line": 189,
+    "function": "listCampaignsAction",
+    "returns": [
+      "return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };",
+      "return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };"
+    ],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/campaign.ts",
+    "line": 206,
+    "function": "getCampaignAction",
+    "returns": ["return null;", "return null;"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/campaign.ts",
+    "line": 229,
+    "function": "getCampaignStatsAction",
+    "returns": ["return null;", "return null;"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/campaign.ts",
+    "line": 430,
+    "function": "previewCampaignAction",
+    "returns": ["return null;"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/category.ts",
+    "line": 129,
+    "function": "listCategoriesAction",
+    "returns": ["return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/client.ts",
+    "line": 79,
+    "function": "getClientsForBlockByIdsAction",
+    "returns": ["return null;"],
+    "classification": "조건부 NotFound/권한 fallback 이후 다른 오류는 throw하는 기존 계약",
+    "resolution": "기존 없음·접근 제한 계약 유지. 그 외 오류는 안전한 digest로 운영 화면의 상태를 보존"
+  },
+  {
+    "file": "lib/actions/client.ts",
+    "line": 89,
+    "function": "getClientsForBlockByIdsAction",
+    "returns": ["return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/email-suppression.ts",
+    "line": 56,
+    "function": "getEmailSuppressionAction",
+    "returns": ["return null;", "return null;"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/email-template.ts",
+    "line": 183,
+    "function": "getEmailTemplateAction",
+    "returns": ["return null;", "return null;"],
+    "classification": "조건부 NotFound/권한 fallback 이후 다른 오류는 throw하는 기존 계약",
+    "resolution": "기존 없음·접근 제한 계약 유지. 그 외 오류는 안전한 digest로 운영 화면의 상태를 보존"
+  },
+  {
+    "file": "lib/actions/email-template.ts",
+    "line": 339,
+    "function": "previewEmailTemplateAction",
+    "returns": ["return null;", "return null;"],
+    "classification": "조건부 NotFound/권한 fallback 이후 다른 오류는 throw하는 기존 계약",
+    "resolution": "기존 없음·접근 제한 계약 유지. 그 외 오류는 안전한 digest로 운영 화면의 상태를 보존"
+  },
+  {
+    "file": "lib/actions/form.ts",
+    "line": 90,
+    "function": "listFormsAdminAction",
+    "returns": ["return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/form.ts",
+    "line": 599,
+    "function": "getFormDashboardByShareAction",
+    "returns": ["return null;"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/form.ts",
+    "line": 654,
+    "function": "getFormSubmissionStatsAction",
+    "returns": ["return null;"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/format.ts",
+    "line": 29,
+    "function": "listFormatsAction",
+    "returns": ["return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/format.ts",
+    "line": 65,
+    "function": "listFormatsAdminAction",
+    "returns": ["return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/genre.ts",
+    "line": 30,
+    "function": "listGenresAction",
+    "returns": ["return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/genre.ts",
+    "line": 68,
+    "function": "listGenresAdminAction",
+    "returns": ["return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/label.ts",
+    "line": 82,
+    "function": "previewDeleteLabelAction",
+    "returns": ["return null;"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/label.ts",
+    "line": 98,
+    "function": "listLabelParticipantsAction",
+    "returns": ["return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/label.ts",
+    "line": 291,
+    "function": "getLabelsForBlockByIdsAction",
+    "returns": ["return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/map-place.ts",
+    "line": 99,
+    "function": "listMapPlacesAdminAction",
+    "returns": [
+      "return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };",
+      "return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };"
+    ],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/map-place.ts",
+    "line": 154,
+    "function": "getMapPlaceAction",
+    "returns": ["return null;"],
+    "classification": "조건부 NotFound/권한 fallback 이후 다른 오류는 throw하는 기존 계약",
+    "resolution": "기존 없음·접근 제한 계약 유지. 그 외 오류는 안전한 digest로 운영 화면의 상태를 보존"
+  },
+  {
+    "file": "lib/actions/map-place.ts",
+    "line": 219,
+    "function": "getMapPlacesByIdsAction",
+    "returns": ["return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/map-place.ts",
+    "line": 253,
+    "function": "getPublicMapPlacesByIdsAction",
+    "returns": ["return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/map-theme.ts",
+    "line": 181,
+    "function": "getMapThemeByIdAction",
+    "returns": ["return null;"],
+    "classification": "조건부 NotFound/권한 fallback 이후 다른 오류는 throw하는 기존 계약",
+    "resolution": "기존 없음·접근 제한 계약 유지. 그 외 오류는 안전한 digest로 운영 화면의 상태를 보존"
+  },
+  {
+    "file": "lib/actions/program-event.ts",
+    "line": 657,
+    "function": "searchArtistsForProgramEventCreditAction",
+    "returns": ["return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/release.ts",
+    "line": 97,
+    "function": "getReleaseAdminAction",
+    "returns": ["return null;"],
+    "classification": "조건부 NotFound/권한 fallback 이후 다른 오류는 throw하는 기존 계약",
+    "resolution": "기존 없음·접근 제한 계약 유지. 그 외 오류는 안전한 digest로 운영 화면의 상태를 보존"
+  },
+  {
+    "file": "lib/actions/release.ts",
+    "line": 153,
+    "function": "getReleaseEditorRelationsAction",
+    "returns": ["return null;"],
+    "classification": "조건부 NotFound/권한 fallback 이후 다른 오류는 throw하는 기존 계약",
+    "resolution": "기존 없음·접근 제한 계약 유지. 그 외 오류는 안전한 digest로 운영 화면의 상태를 보존"
+  },
+  {
+    "file": "lib/actions/session.ts",
+    "line": 43,
+    "function": "listSessionsAction",
+    "returns": ["return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/share-link.ts",
+    "line": 64,
+    "function": "listShareLinksAction",
+    "returns": ["return [];", "return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/style.ts",
+    "line": 30,
+    "function": "listStylesAction",
+    "returns": ["return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/style.ts",
+    "line": 65,
+    "function": "listStylesAdminAction",
+    "returns": ["return { data: [], total: 0 };"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/tag.ts",
+    "line": 116,
+    "function": "listTagsAction",
+    "returns": ["return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/track.ts",
+    "line": 103,
+    "function": "getReleaseTrackSnapshotAction",
+    "returns": ["return null;"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/user-tag.ts",
+    "line": 109,
+    "function": "listUserTagsAdminAction",
+    "returns": ["return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/user-tag.ts",
+    "line": 138,
+    "function": "listAllUserTagsAction",
+    "returns": ["return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/user.ts",
+    "line": 155,
+    "function": "listUsersAdminAction",
+    "returns": ["return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/user.ts",
+    "line": 336,
+    "function": "getUserAdminAction",
+    "returns": ["return null;"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/work.ts",
+    "line": 231,
+    "function": "listWorksAdminAction",
+    "returns": ["return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/work.ts",
+    "line": 724,
+    "function": "searchArtistsForCreditAction",
+    "returns": ["return [];"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/work.ts",
+    "line": 867,
+    "function": "listMyCreditedWorksAction",
+    "returns": ["return { data: [], total: 0, page, pageSize: limit, totalPages: 0 };"],
+    "classification": "조회/미리보기 장애를 null·빈 값으로 바꾸는 별도 Server Action 수정 대상",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 호출부에서 unwrap·화면 오류를 표시"
+  },
+  {
+    "file": "lib/actions/artist.ts",
+    "function": "listArtistsForBlockAction",
+    "line": 438,
+    "returns": [
+      "return {\n      artists: [],\n      pagination: {\n        total: 0,\n        limit: input.limit ?? 12,\n        offset: input.offset ?? 0,\n      },\n    };"
+    ],
+    "classification": "추가 객체형 목록·비밀번호 검증 실패 기본값",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 빈 성공·틀린 비밀번호와 구분"
+  },
+  {
+    "file": "lib/actions/campaign.ts",
+    "function": "getCampaignRecipientsAction",
+    "line": 248,
+    "returns": ["return { recipients: [], total: 0 };"],
+    "classification": "추가 객체형 목록·비밀번호 검증 실패 기본값",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 빈 성공·틀린 비밀번호와 구분"
+  },
+  {
+    "file": "lib/actions/client.ts",
+    "function": "listClientsForBlockAction",
+    "line": 48,
+    "returns": [
+      "return {\n      clients: [],\n      pagination: {\n        total: 0,\n        limit: input.limit ?? 24,\n        offset: input.offset ?? 0,\n      },\n    };"
+    ],
+    "classification": "추가 객체형 목록·비밀번호 검증 실패 기본값",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 빈 성공·틀린 비밀번호와 구분"
+  },
+  {
+    "file": "lib/actions/comment.ts",
+    "function": "listCommentsAction",
+    "line": 130,
+    "returns": ["return { comments: [], hasMore: false, totalCount: 0 };"],
+    "classification": "추가 객체형 목록·비밀번호 검증 실패 기본값",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 빈 성공·틀린 비밀번호와 구분"
+  },
+  {
+    "file": "lib/actions/comment.ts",
+    "function": "loadMoreRepliesAction",
+    "line": 156,
+    "returns": ["return { replies: [], hasMore: false, totalCount: 0 };"],
+    "classification": "추가 객체형 목록·비밀번호 검증 실패 기본값",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 빈 성공·틀린 비밀번호와 구분"
+  },
+  {
+    "file": "lib/actions/form.ts",
+    "function": "verifyFormPasswordAction",
+    "line": 356,
+    "returns": ["return { valid: false };"],
+    "classification": "추가 객체형 목록·비밀번호 검증 실패 기본값",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 빈 성공·틀린 비밀번호와 구분"
+  },
+  {
+    "file": "lib/actions/label.ts",
+    "function": "listLabelsForBlockAction",
+    "line": 242,
+    "returns": [
+      "return {\n      labels: [],\n      pagination: {\n        total: 0,\n        limit: input.limit ?? 12,\n        offset: input.offset ?? 0,\n      },\n    };"
+    ],
+    "classification": "추가 객체형 목록·비밀번호 검증 실패 기본값",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 빈 성공·틀린 비밀번호와 구분"
+  },
+  {
+    "file": "lib/actions/work.ts",
+    "function": "listWorksPublishedAction",
+    "line": 168,
+    "returns": [
+      "return {\n      works: [],\n      pagination: {\n        total: 0,\n        limit: options?.limit ?? 20,\n        offset: options?.offset ?? 0,\n      },\n    };"
+    ],
+    "classification": "추가 객체형 목록·비밀번호 검증 실패 기본값",
+    "resolution": "QueryResult 실패 상태를 직렬화하고 빈 성공·틀린 비밀번호와 구분"
+  }
+]

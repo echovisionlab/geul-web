@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -104,7 +105,9 @@ describe('listClientsForBlockAction', () => {
       pagination: { total: 12 },
     });
 
-    await expect(listClientsForBlockAction({ limit: 2, offset: 4, requestedLocale: 'ko' })).resolves.toEqual({
+    await expect(
+      listClientsForBlockAction({ limit: 2, offset: 4, requestedLocale: 'ko' }).then(unwrapQueryResult),
+    ).resolves.toEqual({
       clients: [
         {
           id: 'client-1',
@@ -144,7 +147,7 @@ describe('listClientsForBlockAction', () => {
   it('uses default pagination and empty results when the public API omits optional fields', async () => {
     listMock.mockResolvedValue({});
 
-    await expect(listClientsForBlockAction({ requestedLocale: undefined })).resolves.toEqual({
+    await expect(listClientsForBlockAction({ requestedLocale: undefined }).then(unwrapQueryResult)).resolves.toEqual({
       clients: [],
       pagination: { total: 0, limit: 24, offset: 0 },
     });
@@ -152,12 +155,11 @@ describe('listClientsForBlockAction', () => {
     expect(listMock).toHaveBeenCalledWith({ pagination: { limit: 24, offset: 0 } });
   });
 
-  it('returns an empty block result when listing clients fails', async () => {
+  it('propagates lookup failures instead of returning an empty result', async () => {
     listMock.mockRejectedValue(new Error('backend unavailable'));
 
-    await expect(listClientsForBlockAction({ requestedLocale: null })).resolves.toEqual({
-      clients: [],
-      pagination: { total: 0, limit: 24, offset: 0 },
+    await expect(listClientsForBlockAction({ requestedLocale: null }).then(unwrapQueryResult)).rejects.toMatchObject({
+      status: 500,
     });
   });
 });
@@ -196,7 +198,7 @@ describe('getClientsForBlockByIdsAction', () => {
       getClientsForBlockByIdsAction({
         ids: ['client-1', 'client-2', 'client-3', 'missing', 'empty'],
         requestedLocale: 'ja',
-      }),
+      }).then(unwrapQueryResult),
     ).resolves.toEqual([
       {
         id: 'client-1',
@@ -232,9 +234,11 @@ describe('getClientsForBlockByIdsAction', () => {
     expect(getMock).toHaveBeenNthCalledWith(5, { id: 'empty' });
   });
 
-  it('returns an empty selected client list when a non-not-found lookup fails', async () => {
+  it('propagates lookup failures instead of returning an empty result', async () => {
     getMock.mockRejectedValue(new ConnectError('unavailable', Code.Unavailable));
 
-    await expect(getClientsForBlockByIdsAction({ ids: ['client-1'], requestedLocale: undefined })).resolves.toEqual([]);
+    await expect(
+      getClientsForBlockByIdsAction({ ids: ['client-1'], requestedLocale: undefined }).then(unwrapQueryResult),
+    ).rejects.toMatchObject({ status: 503 });
   });
 });

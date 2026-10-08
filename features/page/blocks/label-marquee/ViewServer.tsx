@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getLabelsForBlockByIdsAction, listLabelsForBlockAction } from '@/lib/actions/label';
 import { parseIntegerProp } from '../list-shared';
 import { MarqueeView } from '../marquee/MarqueeView';
@@ -11,14 +12,14 @@ export async function LabelMarqueeViewServer({ props, requestedLocale }: BlockVi
   const selectedIds = parseMarqueeIds(p.ids);
   const labels =
     p.source === 'selected'
-      ? await getLabelsForBlockByIdsAction({ ids: selectedIds, requestedLocale })
+      ? await getLabelsForBlockByIdsAction({ ids: selectedIds, requestedLocale }).then(unwrapQueryResult)
       : (
           await listLabelsForBlockAction({
             sortBy: 'name',
             sortOrder: 'asc',
             limit: parseIntegerProp(p.limit, 24),
             requestedLocale,
-          })
+          }).then(unwrapQueryResult)
         ).labels;
   const orderedLabels = p.source === 'selected' ? reorderByIds(labels, selectedIds) : labels;
   const items = orderedLabels.map((label) =>

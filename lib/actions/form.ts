@@ -1,4 +1,5 @@
 'use server';
+import { queryResult, type QueryResult, unwrapQueryResult } from '@/lib/api/query-result';
 
 import { connectActionErrorCode, isConnectError } from '@/lib/api/connect-error';
 import {
@@ -57,7 +58,7 @@ function formActionFailure(err: unknown, fallback: string, fallbackCode: LocalAc
 }
 
 export async function listFormsAdminAction(input: FormListInput) {
-  try {
+  return queryResult(async () => {
     const client = await createFormClient();
     const limit = input.pageSize ?? 20;
     const offset = ((input.page ?? 1) - 1) * limit;
@@ -87,12 +88,7 @@ export async function listFormsAdminAction(input: FormListInput) {
       pageSize: limit,
       totalPages: Math.ceil(total / limit),
     };
-  } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('ListForms RPC error', { error: err.message });
-    }
-    return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
-  }
+  });
 }
 
 export async function createFormAction(title: string): Promise<ActionResult<{ data: { id: string } }>> {
@@ -347,8 +343,8 @@ export async function verifyFormPasswordAction(
   password: string,
   shareToken?: string,
   sharePassword?: string,
-): Promise<{ valid: boolean }> {
-  try {
+): Promise<QueryResult<{ valid: boolean }>> {
+  return queryResult(async () => {
     const client = await createPublicFormClientWithAuth();
     const response = await client.verifyPassword({
       slug,
@@ -357,9 +353,7 @@ export async function verifyFormPasswordAction(
       sharePassword: sharePassword?.trim() ? sharePassword : undefined,
     });
     return { valid: response.valid };
-  } catch {
-    return { valid: false };
-  }
+  });
 }
 
 // Share links - uses generic ShareLinkService
@@ -367,7 +361,7 @@ export async function listFormShareLinksAction(
   formId: string,
   type: ShareLinkEntityType.FORM | ShareLinkEntityType.FORM_DASHBOARD,
 ): Promise<ShareLinkItem[]> {
-  return listShareLinksAction(type, formId);
+  return listShareLinksAction(type, formId).then(unwrapQueryResult);
 }
 
 export async function createFormShareLinkAction(data: {
@@ -564,8 +558,8 @@ export async function getFormDashboardByShareAction(input: {
   shareToken: string;
   sharePassword?: string;
   requestedLocale?: string;
-}): Promise<PublicFormDashboardData | null> {
-  try {
+}): Promise<QueryResult<PublicFormDashboardData | null>> {
+  return queryResult(async () => {
     const client = await createPublicFormClientWithAuth(input.requestedLocale);
     const response = await client.getDashboard({
       slug: input.slug,
@@ -596,12 +590,7 @@ export async function getFormDashboardByShareAction(input: {
       submissionsThisMonth: dashboard.submissionsThisMonth,
       fieldStats,
     };
-  } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('GetFormDashboardByShare RPC error', { error: err.message });
-    }
-    return null;
-  }
+  });
 }
 
 // Public: Get form submission stats for dashboard
@@ -620,8 +609,8 @@ export interface FormSubmissionStats {
   >;
 }
 
-export async function getFormSubmissionStatsAction(formId: string): Promise<FormSubmissionStats | null> {
-  try {
+export async function getFormSubmissionStatsAction(formId: string): Promise<QueryResult<FormSubmissionStats | null>> {
+  return queryResult(async () => {
     const client = await createFormClient();
     const response = await client.getFormSubmissionStats({ formId });
     const stats = response.stats;
@@ -651,10 +640,5 @@ export async function getFormSubmissionStatsAction(formId: string): Promise<Form
       submissionsThisMonth: stats.submissionsThisMonth,
       fieldStats,
     };
-  } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('GetFormSubmissionStats RPC error', { error: err.message });
-    }
-    return null;
-  }
+  });
 }

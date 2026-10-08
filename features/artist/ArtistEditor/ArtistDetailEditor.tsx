@@ -1,4 +1,5 @@
 'use client';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
@@ -97,10 +98,11 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
     queryFn: listLabelsForSelector,
   });
   const { data: labels } = labelsQuery;
-  const { data: parentArtistOptions = [] } = useQuery({
+  const parentArtistOptionsQuery = useQuery({
     queryKey: ['artists', id, 'parent-options'],
-    queryFn: () => listArtistParentOptionsAction(id),
+    queryFn: () => listArtistParentOptionsAction(id).then(unwrapQueryResult),
   });
+  const { data: parentArtistOptions = [] } = parentArtistOptionsQuery;
 
   const publishArtist = useMutation({
     mutationFn: () => publishArtistAction(id),
@@ -429,7 +431,7 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
   return (
     <EditorRuntimeProvider provider={currentProvider} entityType="artist" entityId={id} blockRoomProtocol={protocol}>
       <Stack>
-        <QueryErrorAlert queries={[labelsQuery]} />
+        <QueryErrorAlert queries={[labelsQuery, parentArtistOptionsQuery]} />
         <EditorHeader
           title={displayedName}
           onTitleChange={canEditLocalizedName ? handleScopedLocaleNameChange : undefined}

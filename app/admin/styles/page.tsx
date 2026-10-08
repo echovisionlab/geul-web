@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getTranslations } from 'next-intl/server';
 import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
 import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
@@ -39,7 +40,7 @@ export default async function AdminStylesPage({ searchParams }: PageProps) {
     page: query.page,
     pageSize: query.pageSize,
     search: query.search,
-  });
+  }).then(unwrapQueryResult);
 
   // Transform the result to match ServerDataTable expected format
   const result = {

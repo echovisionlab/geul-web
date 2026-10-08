@@ -1,4 +1,5 @@
 'use server';
+import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
@@ -23,10 +24,7 @@ import { AuthorizationRole } from '@echovisionlab/geul-proto/policy/access_pb.ts
 import { createAccountClient, createMemberClient } from '@/lib/api/server-client';
 import { listAuthorOptions as queryListAuthorOptions, listAuthors as queryListAuthors } from '@/lib/queries/user';
 import type { AdminUserBanDetails } from '@/lib/types/user/model';
-import { createLogger } from '@/lib/utils/logger';
 import { accountRoleToString, accountStatusToString } from '@/lib/types/user/proto';
-
-const logger = createLogger('user-actions');
 
 interface UserListInput {
   filter?: unknown;
@@ -99,7 +97,7 @@ function adminMemberFilters(input: unknown): FilterSpec[] {
 }
 
 export async function listUsersAdminAction(input: UserListInput) {
-  try {
+  return queryResult(async () => {
     const memberClient = await createMemberClient();
     const { page = 1, pageSize = 20, search, sort } = input;
     const filters = search ? [create(FilterSpecSchema, { field: 'search', op: FilterOp.ILIKE, value: search })] : [];
@@ -152,12 +150,7 @@ export async function listUsersAdminAction(input: UserListInput) {
       pageSize,
       totalPages: Math.ceil(total / pageSize),
     };
-  } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('RPC error', { error: err.message });
-    }
-    return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
-  }
+  });
 }
 
 export async function updateUserAction(
@@ -297,7 +290,7 @@ export async function deleteUserAction(id: string): Promise<{ success?: boolean;
 }
 
 export async function getUserAdminAction(id: string) {
-  try {
+  return queryResult(async () => {
     const memberClient = await createMemberClient();
     const result = await memberClient.getMember({ memberId: id });
     const profile = result.member;
@@ -333,12 +326,7 @@ export async function getUserAdminAction(id: string) {
       created_at: profile.createdAt ? timestampDate(profile.createdAt) : new Date(),
       updated_at: profile.updatedAt ? timestampDate(profile.updatedAt) : null,
     };
-  } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('RPC error', { error: err.message });
-    }
-    return null;
-  }
+  });
 }
 
 function mapAccountAdminDetails(

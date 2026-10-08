@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { FilterOp, SortOrder } from '@echovisionlab/geul-proto/common/common_pb.ts';
@@ -155,12 +156,14 @@ describe('admin Member and profile actions', () => {
 
   it('maps admin list and detail projections without a secondary Account lookup', async () => {
     await expect(
-      actions.listUsersAdminAction({
-        page: 2,
-        pageSize: 5,
-        search: 'member',
-        sort: [{ field: 'email', order: 'asc' }],
-      }),
+      actions
+        .listUsersAdminAction({
+          page: 2,
+          pageSize: 5,
+          search: 'member',
+          sort: [{ field: 'email', order: 'asc' }],
+        })
+        .then(unwrapQueryResult),
     ).resolves.toMatchObject({
       data: [
         {
@@ -177,7 +180,7 @@ describe('admin Member and profile actions', () => {
       pageSize: 5,
     });
 
-    await expect(actions.getUserAdminAction('member-1')).resolves.toMatchObject({
+    await expect(actions.getUserAdminAction('member-1').then(unwrapQueryResult)).resolves.toMatchObject({
       id: 'member-1',
       tag_ids: ['tag-1'],
       role: 'author',
@@ -207,7 +210,7 @@ describe('admin Member and profile actions', () => {
   });
 
   it('treats omitted detail-only accountDetails as a valid list projection', async () => {
-    const result = await actions.listUsersAdminAction({});
+    const result = await actions.listUsersAdminAction({}).then(unwrapQueryResult);
 
     expect(result.data).toHaveLength(1);
     expect(result.data[0]).not.toHaveProperty('auth_details');
@@ -215,16 +218,18 @@ describe('admin Member and profile actions', () => {
   });
 
   it('forwards the supported admin Member filters and sort without dropping Identity-owned state', async () => {
-    await actions.listUsersAdminAction({
-      filter: [
-        { field: 'nickname', op: 'ilike', value: 'member' },
-        { field: 'role', op: 'in', value: ['admin', 'author'] },
-        { field: 'status', op: 'eq', value: 'active' },
-        { field: 'newsletter_subscribed', value: true },
-        { field: 'created_at', op: 'gte', value: '2026-01-01' },
-      ],
-      sort: [{ field: 'newsletter_subscribed', order: 'desc' }],
-    });
+    await actions
+      .listUsersAdminAction({
+        filter: [
+          { field: 'nickname', op: 'ilike', value: 'member' },
+          { field: 'role', op: 'in', value: ['admin', 'author'] },
+          { field: 'status', op: 'eq', value: 'active' },
+          { field: 'newsletter_subscribed', value: true },
+          { field: 'created_at', op: 'gte', value: '2026-01-01' },
+        ],
+        sort: [{ field: 'newsletter_subscribed', order: 'desc' }],
+      })
+      .then(unwrapQueryResult);
 
     expect(memberClient.listMembersAdmin).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -380,18 +385,12 @@ describe('admin Member and profile actions', () => {
     expect(mocks.listAuthors).toHaveBeenCalledWith(24, ['member-2', 'member-1']);
   });
 
-  it('returns empty/null results on RPC failures and stable mutation errors', async () => {
+  it('preserves RPC failure categories and stable mutation errors', async () => {
     memberClient.listMembersAdmin.mockRejectedValueOnce(new ConnectError('unavailable', Code.Unavailable));
-    await expect(actions.listUsersAdminAction({})).resolves.toEqual({
-      data: [],
-      total: 0,
-      page: 1,
-      pageSize: 20,
-      totalPages: 0,
-    });
+    await expect(actions.listUsersAdminAction({}).then(unwrapQueryResult)).rejects.toMatchObject({ status: 503 });
 
     memberClient.getMember.mockRejectedValueOnce(new ConnectError('missing', Code.NotFound));
-    await expect(actions.getUserAdminAction('missing')).resolves.toBeNull();
+    await expect(actions.getUserAdminAction('missing').then(unwrapQueryResult)).rejects.toMatchObject({ status: 404 });
 
     accountClient.deleteAccount.mockRejectedValueOnce(new ConnectError('denied', Code.PermissionDenied));
     await expect(actions.deleteUserAction('member-1')).resolves.toEqual({

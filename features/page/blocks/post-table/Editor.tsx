@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useCallback } from 'react';
 import { IconFilter, IconTable } from '@tabler/icons-react';
@@ -42,22 +44,25 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
   const sortFields = parsePostTableSortFields(props.sortFields);
   const pageSize = props.pageSize || '10';
 
-  const { data: categories } = useQuery({
+  const categoriesQuery = useQuery({
     queryKey: ['categories'],
-    queryFn: () => listCategoriesAction(),
+    queryFn: () => listCategoriesAction().then(unwrapQueryResult),
   });
-  const { data: tags } = useQuery({
+  const { data: categories } = categoriesQuery;
+  const tagsQuery = useQuery({
     queryKey: ['tags'],
-    queryFn: () => listTagsAction(),
+    queryFn: () => listTagsAction().then(unwrapQueryResult),
   });
+  const { data: tags } = tagsQuery;
   const { data: authors } = useQuery({
     queryKey: ['authors', 50],
     queryFn: () => listAuthorOptionsAction(50),
   });
-  const { data: series } = useQuery({
+  const seriesQuery = useQuery({
     queryKey: ['series', 'simple'],
     queryFn: () => listSeriesSimple(),
   });
+  const { data: series } = seriesQuery;
   const statusOptions = [
     { value: 'POST_STATUS_PUBLISHED', label: tCommonStatuses('published') },
     { value: 'POST_STATUS_ARCHIVED', label: tCommonStatuses('archived') },
@@ -84,6 +89,7 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
 
   return (
     <Box data-page-block-editor="post-table">
+      <QueryErrorAlert queries={[categoriesQuery, tagsQuery, seriesQuery]} />
       <Group gap="xs" mb="md">
         <IconTable size={18} />
         <Text size="sm" fw={500}>

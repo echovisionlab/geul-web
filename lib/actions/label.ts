@@ -1,4 +1,5 @@
 'use server';
+import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
@@ -64,7 +65,7 @@ export async function deleteLabelAction(
 }
 
 export async function previewDeleteLabelAction(id: string) {
-  try {
+  return queryResult(async () => {
     const client = await createLabelClient();
     const response = await client.previewDeleteLabel({ id });
     return {
@@ -79,13 +80,11 @@ export async function previewDeleteLabelAction(id: string) {
       programEventCount: response.programEventCount,
       releaseCount: response.releaseCount,
     };
-  } catch {
-    return null;
-  }
+  });
 }
 
 export async function listLabelParticipantsAction(labelId: string) {
-  try {
+  return queryResult(async () => {
     const client = await createLabelClient();
     const response = await client.listLabelParticipants({ labelId });
     return (response.participants ?? []).map((participant) => ({
@@ -95,9 +94,7 @@ export async function listLabelParticipantsAction(labelId: string) {
       role: participant.role,
       hasEffectiveAuthority: participant.hasEffectiveAuthority,
     }));
-  } catch {
-    return [];
-  }
+  });
 }
 
 export async function setLabelParticipantAction(
@@ -211,66 +208,23 @@ export async function listLabelsForBlockAction(input: {
   offset?: number;
   requestedLocale?: string | null;
 }) {
-  try {
-    const client = await createPublicLabelClientWithAuth(input.requestedLocale);
-    const limit = input.limit ?? 12;
-    const offset = input.offset ?? 0;
-    const response = await client.list({
-      pagination: { limit, offset },
-      sorts: [
-        create(SortSpecSchema, {
-          field: input.sortBy ?? 'name',
-          order: (input.sortOrder === 'desc' ? 2 : 1) as SortOrder,
-        }),
-      ],
-    });
+  return queryResult(async () => {
+    try {
+      const client = await createPublicLabelClientWithAuth(input.requestedLocale);
+      const limit = input.limit ?? 12;
+      const offset = input.offset ?? 0;
+      const response = await client.list({
+        pagination: { limit, offset },
+        sorts: [
+          create(SortSpecSchema, {
+            field: input.sortBy ?? 'name',
+            order: (input.sortOrder === 'desc' ? 2 : 1) as SortOrder,
+          }),
+        ],
+      });
 
-    return {
-      labels: (response.labels ?? []).map((label) => ({
-        id: label.id,
-        name: label.name,
-        slug: label.slug ?? null,
-        imageUrl: themedAssetRefUrl(label.imageLightAsset, label.imageDarkAsset),
-        imageLightUrl: label.imageLightAsset?.url ?? null,
-        imageDarkUrl: label.imageDarkAsset?.url ?? null,
-        countryCode: label.countryCode ?? null,
-        publishedAt: label.publishedAt ? timestampDate(label.publishedAt) : null,
-      })),
-      pagination: {
-        total: response.pagination?.total ?? 0,
-        limit,
-        offset,
-      },
-    };
-  } catch (err) {
-    logger.error('Failed to list labels for page block', { error: err });
-    return {
-      labels: [],
-      pagination: {
-        total: 0,
-        limit: input.limit ?? 12,
-        offset: input.offset ?? 0,
-      },
-    };
-  }
-}
-
-export async function getLabelsForBlockByIdsAction(input: { ids: string[]; requestedLocale?: string | null }) {
-  if (input.ids.length === 0) {
-    return [];
-  }
-
-  try {
-    const client = await createPublicLabelClientWithAuth(input.requestedLocale);
-    const ids = [...new Set(input.ids)];
-    const response = await client.list({
-      pagination: { limit: ids.length },
-      filters: [create(FilterSpecSchema, { field: 'id', op: FilterOp.IN, values: ids })],
-    });
-    const byId = new Map(
-      (response.labels ?? []).map((label) => [
-        label.id,
-        {
+      return {
+        labels: (response.labels ?? []).map((label) => ({
           id: label.id,
           name: label.name,
           slug: label.slug ?? null,
@@ -279,17 +233,57 @@ export async function getLabelsForBlockByIdsAction(input: { ids: string[]; reque
           imageDarkUrl: label.imageDarkAsset?.url ?? null,
           countryCode: label.countryCode ?? null,
           publishedAt: label.publishedAt ? timestampDate(label.publishedAt) : null,
-          website: label.website ?? null,
+        })),
+        pagination: {
+          total: response.pagination?.total ?? 0,
+          limit,
+          offset,
         },
-      ]),
-    );
+      };
+    } catch (err) {
+      logger.error('Failed to list labels for page block', { error: err });
+      throw err;
+    }
+  });
+}
 
-    return ids.flatMap((id) => {
-      const label = byId.get(id);
-      return label ? [label] : [];
-    });
-  } catch (err) {
-    logger.error('Failed to get labels for page block', { error: err });
-    return [];
-  }
+export async function getLabelsForBlockByIdsAction(input: { ids: string[]; requestedLocale?: string | null }) {
+  return queryResult(async () => {
+    if (input.ids.length === 0) {
+      return [];
+    }
+
+    try {
+      const client = await createPublicLabelClientWithAuth(input.requestedLocale);
+      const ids = [...new Set(input.ids)];
+      const response = await client.list({
+        pagination: { limit: ids.length },
+        filters: [create(FilterSpecSchema, { field: 'id', op: FilterOp.IN, values: ids })],
+      });
+      const byId = new Map(
+        (response.labels ?? []).map((label) => [
+          label.id,
+          {
+            id: label.id,
+            name: label.name,
+            slug: label.slug ?? null,
+            imageUrl: themedAssetRefUrl(label.imageLightAsset, label.imageDarkAsset),
+            imageLightUrl: label.imageLightAsset?.url ?? null,
+            imageDarkUrl: label.imageDarkAsset?.url ?? null,
+            countryCode: label.countryCode ?? null,
+            publishedAt: label.publishedAt ? timestampDate(label.publishedAt) : null,
+            website: label.website ?? null,
+          },
+        ]),
+      );
+
+      return ids.flatMap((id) => {
+        const label = byId.get(id);
+        return label ? [label] : [];
+      });
+    } catch (err) {
+      logger.error('Failed to get labels for page block', { error: err });
+      throw err;
+    }
+  });
 }

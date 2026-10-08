@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as category from './category';
@@ -155,7 +156,7 @@ describe('taxonomy CRUD actions', () => {
         sort: [{ field: 'name', order: 'desc' }],
       }),
     ).resolves.toMatchObject({ ok: true, value: { data: [{ id: 'cat-1', postCount: 2 }], total: 1, page: 2 } });
-    await expect(category.listCategoriesAction()).resolves.toEqual([
+    await expect(category.listCategoriesAction().then(unwrapQueryResult)).resolves.toEqual([
       { id: 'cat-1', name: 'Category', slug: 'category' },
     ]);
     await expect(category.createCategoryAction({ name: 'Category' })).resolves.toEqual({
@@ -173,7 +174,9 @@ describe('taxonomy CRUD actions', () => {
       ok: true,
       value: { data: [{ id: 'tag-1', postCount: 3 }] },
     });
-    await expect(tag.listTagsAction()).resolves.toEqual([{ id: 'tag-1', name: 'Tag', slug: 'tag' }]);
+    await expect(tag.listTagsAction().then(unwrapQueryResult)).resolves.toEqual([
+      { id: 'tag-1', name: 'Tag', slug: 'tag' },
+    ]);
     await expect(tag.createTagAction('Tag')).resolves.toEqual({
       data: { id: 'tag-1', name: 'Tag', slug: 'tag' },
     });
@@ -185,10 +188,12 @@ describe('taxonomy CRUD actions', () => {
   });
 
   it('maps genre, format, and style selector/admin lists and mutations', async () => {
-    await expect(genre.listGenresAdminAction({ search: 'genre' })).resolves.toMatchObject({
+    await expect(genre.listGenresAdminAction({ search: 'genre' }).then(unwrapQueryResult)).resolves.toMatchObject({
       data: [{ id: 'genre-1', releaseCount: 4 }],
     });
-    await expect(genre.listGenresAction()).resolves.toEqual([{ id: 'genre-1', name: 'Genre', slug: 'genre' }]);
+    await expect(genre.listGenresAction().then(unwrapQueryResult)).resolves.toEqual([
+      { id: 'genre-1', name: 'Genre', slug: 'genre' },
+    ]);
     await expect(genre.createGenreAction('Genre', 'Description')).resolves.toEqual({
       data: { id: 'genre-1', name: 'Genre', slug: 'genre' },
     });
@@ -198,10 +203,12 @@ describe('taxonomy CRUD actions', () => {
     expect(genreClient.updateGenre).toHaveBeenLastCalledWith({ id: 'genre-1', description: '' });
     await expect(genre.deleteGenreAction('genre-1')).resolves.toEqual({ success: true });
 
-    await expect(format.listFormatsAdminAction({ search: 'format' })).resolves.toMatchObject({
+    await expect(format.listFormatsAdminAction({ search: 'format' }).then(unwrapQueryResult)).resolves.toMatchObject({
       data: [{ id: 'format-1', releaseCount: 5 }],
     });
-    await expect(format.listFormatsAction()).resolves.toEqual([{ id: 'format-1', name: 'Format', slug: 'format' }]);
+    await expect(format.listFormatsAction().then(unwrapQueryResult)).resolves.toEqual([
+      { id: 'format-1', name: 'Format', slug: 'format' },
+    ]);
     await expect(format.createFormatAction('Format')).resolves.toEqual({
       data: { id: 'format-1', name: 'Format', slug: 'format' },
     });
@@ -210,11 +217,13 @@ describe('taxonomy CRUD actions', () => {
     });
     await expect(format.deleteFormatAction('format-1')).resolves.toEqual({ success: true });
 
-    await expect(style.listStylesAdminAction({ search: 'style' })).resolves.toMatchObject({
+    await expect(style.listStylesAdminAction({ search: 'style' }).then(unwrapQueryResult)).resolves.toMatchObject({
       data: [{ id: 'style-1', releaseCount: 6 }],
       total: 1,
     });
-    await expect(style.listStylesAction()).resolves.toEqual([{ id: 'style-1', name: 'Style', slug: 'style' }]);
+    await expect(style.listStylesAction().then(unwrapQueryResult)).resolves.toEqual([
+      { id: 'style-1', name: 'Style', slug: 'style' },
+    ]);
     await expect(style.createStyleAction('Style', 'Description')).resolves.toEqual({
       data: { id: 'style-1', name: 'Style', slug: 'style' },
     });
@@ -225,17 +234,17 @@ describe('taxonomy CRUD actions', () => {
     await expect(style.deleteStyleAction('style-1')).resolves.toEqual({ success: true });
   });
 
-  it('returns empty lists when selector backends fail', async () => {
+  it('propagates selector backend failures', async () => {
     categoryClient.listCategories.mockRejectedValueOnce(new Error('offline'));
     tagClient.listTags.mockRejectedValueOnce(new Error('offline'));
     genreClient.listGenres.mockRejectedValueOnce(new Error('offline'));
     formatClient.listFormats.mockRejectedValueOnce(new Error('offline'));
     styleClient.listStyles.mockRejectedValueOnce(new Error('offline'));
 
-    await expect(category.listCategoriesAction()).resolves.toEqual([]);
-    await expect(tag.listTagsAction()).resolves.toEqual([]);
-    await expect(genre.listGenresAction()).resolves.toEqual([]);
-    await expect(format.listFormatsAction()).resolves.toEqual([]);
-    await expect(style.listStylesAction()).resolves.toEqual([]);
+    await expect(category.listCategoriesAction().then(unwrapQueryResult)).rejects.toMatchObject({ status: 500 });
+    await expect(tag.listTagsAction().then(unwrapQueryResult)).rejects.toMatchObject({ status: 500 });
+    await expect(genre.listGenresAction().then(unwrapQueryResult)).rejects.toMatchObject({ status: 500 });
+    await expect(format.listFormatsAction().then(unwrapQueryResult)).rejects.toMatchObject({ status: 500 });
+    await expect(style.listStylesAction().then(unwrapQueryResult)).rejects.toMatchObject({ status: 500 });
   });
 });

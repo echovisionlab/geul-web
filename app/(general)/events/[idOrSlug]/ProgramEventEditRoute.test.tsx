@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
   getProgramEventAdmin: vi.fn(),
 
-  listArtistsAction: vi.fn(async () => []),
+  listArtistsAction: vi.fn(async () => ({ ok: true, value: [] })),
   listClientsAdmin: vi.fn(async () => ({ data: [] })),
   listLabelsAdmin: vi.fn(async () => ({ data: [] })),
   listProgramEventSeriesAdmin: vi.fn(async () => []),

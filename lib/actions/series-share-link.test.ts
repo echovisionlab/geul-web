@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { OgEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { ShareLinkEntityType } from '@echovisionlab/geul-proto/secure/share_link_pb.ts';
@@ -230,7 +231,9 @@ describe('series and share-link actions', () => {
   });
 
   it('normalizes share-link URLs and maps handled errors', async () => {
-    await expect(shareLink.listShareLinksAction(ShareLinkEntityType.POST, 'post-1')).resolves.toEqual([
+    await expect(
+      shareLink.listShareLinksAction(ShareLinkEntityType.POST, 'post-1').then(unwrapQueryResult),
+    ).resolves.toEqual([
       { id: 'share-1', url: 'https://studio.example.com/share/one' },
       { id: 'share-2', url: 'https://cdn.example/share/two' },
       { id: 'share-3', url: 'https://external.example/share/three' },

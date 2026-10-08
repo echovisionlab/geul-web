@@ -1,4 +1,5 @@
 'use client';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useState } from 'react';
 import {
@@ -120,7 +121,7 @@ export function CommentItem({ comment, postId, depth = 0, canReply = true, canMo
       const lastReply = displayedReplies[displayedReplies.length - 1];
       const cursor = replyCursor || (lastReply ? lastReply.id : undefined);
 
-      const result = await loadMoreRepliesAction(comment.id, { limit: 10, cursor });
+      const result = await loadMoreRepliesAction(comment.id, { limit: 10, cursor }).then(unwrapQueryResult);
       setLoadedReplies((prev) => [...prev, ...result.replies]);
       setReplyCursor(result.nextCursor);
       setHasMoreReplies(result.hasMore);

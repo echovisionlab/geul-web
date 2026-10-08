@@ -1,8 +1,7 @@
 'use server';
+import { queryResult, type QueryResult } from '@/lib/api/query-result';
 
-import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { timestampDate, type Timestamp } from '@bufbuild/protobuf/wkt';
-import { Code } from '@connectrpc/connect';
 import { createEmailSuppressionClient } from '@/lib/api/server-client';
 import { createLogger } from '@/lib/utils/logger';
 
@@ -44,22 +43,21 @@ function mapSuppression(s: {
   };
 }
 
-export async function getEmailSuppressionAction(email: string): Promise<EmailSuppressionStatus | null> {
-  if (!email.trim()) {
-    return null;
-  }
-
-  try {
-    const client = await createEmailSuppressionClient();
-    const response = await client.getEmailSuppression({ email });
-    return response.suppression ? mapSuppression(response.suppression) : null;
-  } catch (err) {
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
+export async function getEmailSuppressionAction(email: string): Promise<QueryResult<EmailSuppressionStatus | null>> {
+  return queryResult(async () => {
+    if (!email.trim()) {
       return null;
     }
-    logger.error('Failed to get email suppression', { error: err });
-    return null;
-  }
+
+    try {
+      const client = await createEmailSuppressionClient();
+      const response = await client.getEmailSuppression({ email });
+      return response.suppression ? mapSuppression(response.suppression) : null;
+    } catch (err) {
+      logger.error('Failed to get email suppression', { error: err });
+      throw err;
+    }
+  });
 }
 
 export async function releaseEmailSuppressionAction(email: string): Promise<{ success?: boolean; error?: string }> {

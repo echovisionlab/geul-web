@@ -1,4 +1,5 @@
 'use server';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { connectActionErrorCode, isConnectError } from '@/lib/api/connect-error';
 import {
@@ -216,7 +217,7 @@ export async function updatePageSlugAction(
 
 // Share links - uses generic ShareLinkService
 export async function listPageShareLinksAction(pageId: string): Promise<ShareLinkItem[]> {
-  return listShareLinksAction(ShareLinkEntityType.PAGE, pageId);
+  return listShareLinksAction(ShareLinkEntityType.PAGE, pageId).then(unwrapQueryResult);
 }
 
 export async function createPageShareLinkAction(data: {

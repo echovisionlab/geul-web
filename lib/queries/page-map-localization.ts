@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getPublicMapPlacesByIdsAction } from '@/lib/actions/map-place';
 import type { MapViewPlace } from '@/lib/types/map/model';
 import type { ColumnData, PageContent, Section } from '@/lib/types/page-content';
@@ -108,7 +109,7 @@ export async function localizePageMapContent(
     return content;
   }
 
-  const places = await getPublicMapPlacesByIdsAction(Array.from(allPlaceIds), requestedLocale);
+  const places = await getPublicMapPlacesByIdsAction(Array.from(allPlaceIds), requestedLocale).then(unwrapQueryResult);
   if (places.length === 0) {
     return content;
   }

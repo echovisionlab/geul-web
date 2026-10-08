@@ -1,13 +1,11 @@
 'use server';
+import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { FilterOp, SortOrder } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { createGenreClient } from '@/lib/api/server-client';
-import { createLogger } from '@/lib/utils/logger';
-
-const logger = createLogger('genre-actions');
 
 interface GenreListInput {
   search?: string;
@@ -17,7 +15,7 @@ interface GenreListInput {
 }
 
 export async function listGenresAction() {
-  try {
+  return queryResult(async () => {
     const client = await createGenreClient();
     const response = await client.listGenres({
       pagination: { limit: 1000, offset: 0 },
@@ -27,16 +25,11 @@ export async function listGenresAction() {
       name: g.name,
       slug: g.slug,
     }));
-  } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('ListGenres RPC error', { error: err.message });
-    }
-    return [];
-  }
+  });
 }
 
 export async function listGenresAdminAction(input: GenreListInput) {
-  try {
+  return queryResult(async () => {
     const client = await createGenreClient();
     const limit = input.pageSize ?? 20;
     const offset = ((input.page ?? 1) - 1) * limit;
@@ -65,12 +58,7 @@ export async function listGenresAdminAction(input: GenreListInput) {
       pageSize: limit,
       totalPages: Math.ceil(total / limit),
     };
-  } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('ListGenresAdmin RPC error', { error: err.message });
-    }
-    return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
-  }
+  });
 }
 
 export async function createGenreAction(

@@ -1,4 +1,5 @@
 'use server';
+import { queryResult, type QueryResult } from '@/lib/api/query-result';
 
 import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
@@ -13,9 +14,7 @@ import {
   SortSpecSchema,
 } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { createMemberClient } from '@/lib/api/server-client';
-import { createLogger } from '@/lib/utils/logger';
 
-const logger = createLogger('user-tag-actions');
 const userTagFilterFields = new Set(['name', 'created_at']);
 
 interface UserTagListInput {
@@ -71,7 +70,7 @@ function userTagFilters(input: unknown): FilterSpec[] {
 }
 
 export async function listUserTagsAdminAction(input: UserTagListInput) {
-  try {
+  return queryResult(async () => {
     const client = await createMemberClient();
     const { page = 1, pageSize = 20, search, sort } = input;
 
@@ -106,12 +105,7 @@ export async function listUserTagsAdminAction(input: UserTagListInput) {
       pageSize,
       totalPages: Math.ceil(total / pageSize),
     };
-  } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('ListUserTags RPC error', { error: err.message });
-    }
-    return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
-  }
+  });
 }
 
 export async function createUserTagAction(name: string): Promise<{ data?: { id: string }; error?: string }> {
@@ -128,16 +122,14 @@ export async function createUserTagAction(name: string): Promise<{ data?: { id: 
   }
 }
 
-export async function listAllUserTagsAction(): Promise<{ id: string; name: string }[]> {
-  try {
+export async function listAllUserTagsAction(): Promise<QueryResult<{ id: string; name: string }[]>> {
+  return queryResult(async () => {
     const client = await createMemberClient();
     const response = await client.listMemberTagsAdmin({
       pagination: create(PaginationRequestSchema, { limit: 500, offset: 0 }),
     });
     return (response.tags ?? []).map((t) => ({ id: t.id, name: t.name }));
-  } catch {
-    return [];
-  }
+  });
 }
 
 export async function deleteUserTagAction(id: string): Promise<{ success?: boolean; error?: string }> {

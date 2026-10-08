@@ -1,3 +1,4 @@
+import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getClientsForBlockByIdsAction, listClientsForBlockAction } from '@/lib/actions/client';
 import { parseIntegerProp } from '../list-shared';
 import { MarqueeView } from '../marquee/MarqueeView';
@@ -11,12 +12,12 @@ export async function ClientMarqueeViewServer({ props, requestedLocale }: BlockV
   const selectedIds = parseMarqueeIds(p.ids);
   const clients =
     p.source === 'selected'
-      ? await getClientsForBlockByIdsAction({ ids: selectedIds, requestedLocale })
+      ? await getClientsForBlockByIdsAction({ ids: selectedIds, requestedLocale }).then(unwrapQueryResult)
       : (
           await listClientsForBlockAction({
             limit: parseIntegerProp(p.limit, 24),
             requestedLocale,
-          })
+          }).then(unwrapQueryResult)
         ).clients;
   const orderedClients = p.source === 'selected' ? reorderByIds(clients, selectedIds) : clients;
   const items = orderedClients.map((client) =>

@@ -1,4 +1,5 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -556,6 +557,7 @@ export function PageEditor({
       entityId={pageId}
       blockRoomProtocol={protocol}
     >
+      <QueryErrorAlert queries={[accessTags]} />
       <Stack h="100%" gap="md">
         <EditorHeader
           title={displayedTitle}

@@ -1,4 +1,5 @@
 'use server';
+import { throwQueryError } from '@/lib/api/query-error';
 
 import { connectActionErrorCode, connectActionErrorMessage, isConnectErrorCode } from '@/lib/api/connect-error';
 import {
@@ -98,7 +99,7 @@ export async function getReleaseAdminAction(id: string) {
     if (isConnectErrorCode(err, Code.NotFound, Code.PermissionDenied)) {
       return null;
     }
-    throw err;
+    throwQueryError(err);
   }
 }
 
@@ -154,7 +155,7 @@ export async function getReleaseEditorRelationsAction(releaseId: string): Promis
     if (isConnectErrorCode(err, Code.NotFound, Code.PermissionDenied)) {
       return null;
     }
-    throw err;
+    throwQueryError(err);
   }
 }
 

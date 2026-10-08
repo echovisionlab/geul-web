@@ -1,4 +1,5 @@
 'use server';
+import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
@@ -638,11 +639,12 @@ export async function reorderProgramEventCreditsAction(
 }
 
 export async function searchArtistsForProgramEventCreditAction(_eventId: string, rawQuery: string) {
-  const query = rawQuery.trim();
-  if (!query) {
-    return [];
-  }
-  try {
+  return queryResult(async () => {
+    const query = rawQuery.trim();
+    if (!query) {
+      return [];
+    }
+
     const client = await createArtistClient();
     const response = await client.listArtists({
       pagination: { limit: 10, offset: 0 },
@@ -654,9 +656,7 @@ export async function searchArtistsForProgramEventCreditAction(_eventId: string,
       name: artist.name,
       imageUrl: artist.imageAsset?.url ?? null,
     }));
-  } catch {
-    return [];
-  }
+  });
 }
 
 export async function createProgramEventTypeAction(input?: {

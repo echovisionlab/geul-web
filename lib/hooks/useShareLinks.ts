@@ -1,4 +1,5 @@
 'use client';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useCallback, useMemo, useState } from 'react';
 import { ShareLinkEntityType, type ShareLinkItem } from '@echovisionlab/geul-proto/secure/share_link_pb.ts';
@@ -66,15 +67,15 @@ export function useShareLinks<T extends ShareEntityType>(options: UseShareLinksO
       case 'work':
         return listWorkShareLinksAction(entityId);
       case 'release':
-        return listShareLinksAction(ShareLinkEntityType.RELEASE, entityId);
+        return listShareLinksAction(ShareLinkEntityType.RELEASE, entityId).then(unwrapQueryResult);
       case 'artist':
-        return listShareLinksAction(ShareLinkEntityType.ARTIST, entityId);
+        return listShareLinksAction(ShareLinkEntityType.ARTIST, entityId).then(unwrapQueryResult);
       case 'label':
-        return listShareLinksAction(ShareLinkEntityType.LABEL, entityId);
+        return listShareLinksAction(ShareLinkEntityType.LABEL, entityId).then(unwrapQueryResult);
       case 'privacy':
-        return listShareLinksAction(ShareLinkEntityType.PRIVACY, entityId);
+        return listShareLinksAction(ShareLinkEntityType.PRIVACY, entityId).then(unwrapQueryResult);
       case 'terms':
-        return listShareLinksAction(ShareLinkEntityType.TERMS, entityId);
+        return listShareLinksAction(ShareLinkEntityType.TERMS, entityId).then(unwrapQueryResult);
       case 'form':
         return listFormShareLinksAction(entityId, ShareLinkEntityType.FORM);
       case 'form-dashboard':

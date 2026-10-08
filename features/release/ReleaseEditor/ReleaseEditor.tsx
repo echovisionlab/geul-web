@@ -1,4 +1,6 @@
 'use client';
+import { unwrapQueryResult } from '@/lib/api/query-result';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -159,15 +161,23 @@ export function ReleaseEditor({
   const relationMutationCount = useRef(new Map<string, number>());
   const relationMutationFailed = useRef(new Set<string>());
   const relationRefreshSequence = useRef(0);
+  const [relationRefreshError, setRelationRefreshError] = useState<unknown>(null);
+  const [relationRefreshPending, setRelationRefreshPending] = useState(false);
   const refreshReleaseRelations = useCallback(async () => {
     const sequence = ++relationRefreshSequence.current;
-    const [relations, tracks] = await Promise.all([
-      getReleaseEditorRelationsAction(releaseId).catch(() => null),
-      getReleaseTrackSnapshotAction(releaseId).catch(() => null),
+    setRelationRefreshPending(true);
+    const results = await Promise.allSettled([
+      getReleaseEditorRelationsAction(releaseId),
+      getReleaseTrackSnapshotAction(releaseId).then(unwrapQueryResult),
     ]);
     if (sequence !== relationRefreshSequence.current) {
       return;
     }
+    setRelationRefreshPending(false);
+    const failure = results.find((result) => result.status === 'rejected');
+    setRelationRefreshError(failure?.status === 'rejected' ? failure.reason : null);
+    const relations = results[0].status === 'fulfilled' ? results[0].value : null;
+    const tracks = results[1].status === 'fulfilled' ? results[1].value : null;
     setFields((current) => {
       const next = { ...current };
       const dirty = relationDirty.current;
@@ -563,6 +573,16 @@ export function ReleaseEditor({
       blockRoomProtocol={protocol}
     >
       <Stack>
+        <QueryErrorAlert
+          queries={[
+            {
+              isError: relationRefreshError !== null,
+              error: relationRefreshError,
+              isFetching: relationRefreshPending,
+              refetch: refreshReleaseRelations,
+            },
+          ]}
+        />
         <EditorHeader
           title={displayedTitle}
           onTitleChange={canEditLocalizedTitle ? handleScopedLocaleTitleChange : undefined}

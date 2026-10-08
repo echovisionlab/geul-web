@@ -24,7 +24,7 @@ describe('media-content-hydration', () => {
   beforeEach(() => {
     mockedGetPublicMapPlacesByIdsAction.mockReset();
     mockedResolvePublicMapThemesByIdsAction.mockReset();
-    mockedGetPublicMapPlacesByIdsAction.mockResolvedValue([]);
+    mockedGetPublicMapPlacesByIdsAction.mockResolvedValue({ ok: true, value: [] });
     mockedResolvePublicMapThemesByIdsAction.mockResolvedValue([]);
   });
 
@@ -493,18 +493,21 @@ describe('media-content-hydration', () => {
       lightVariant: { id: 'default-light', ...DEFAULT_LIGHT_VARIANT },
       darkVariant: { id: 'default-dark', ...DEFAULT_DARK_VARIANT },
     };
-    mockedGetPublicMapPlacesByIdsAction.mockResolvedValue([
-      {
-        id: 'place-1',
-        name: 'Place One',
-        address: '1 Example Street',
-        lat: 37.5665,
-        lng: 126.978,
-        googlePlaceId: null,
-        addressComponents: null,
-        imageUrl: null,
-      },
-    ]);
+    mockedGetPublicMapPlacesByIdsAction.mockResolvedValue({
+      ok: true,
+      value: [
+        {
+          id: 'place-1',
+          name: 'Place One',
+          address: '1 Example Street',
+          lat: 37.5665,
+          lng: 126.978,
+          googlePlaceId: null,
+          addressComponents: null,
+          imageUrl: null,
+        },
+      ],
+    });
     mockedResolvePublicMapThemesByIdsAction.mockResolvedValue([
       { requestedThemeId: 'missing-theme-a', theme: fallbackTheme },
       { requestedThemeId: 'missing-theme-b', theme: fallbackTheme },
@@ -549,18 +552,21 @@ describe('media-content-hydration', () => {
   });
 
   it('does not normalize whitespace Theme IDs collected from nested Map blocks', async () => {
-    mockedGetPublicMapPlacesByIdsAction.mockResolvedValue([
-      {
-        id: 'place-1',
-        name: 'Place One',
-        address: '1 Example Street',
-        lat: 37.5665,
-        lng: 126.978,
-        googlePlaceId: null,
-        addressComponents: null,
-        imageUrl: null,
-      },
-    ]);
+    mockedGetPublicMapPlacesByIdsAction.mockResolvedValue({
+      ok: true,
+      value: [
+        {
+          id: 'place-1',
+          name: 'Place One',
+          address: '1 Example Street',
+          lat: 37.5665,
+          lng: 126.978,
+          googlePlaceId: null,
+          addressComponents: null,
+          imageUrl: null,
+        },
+      ],
+    });
     mockedResolvePublicMapThemesByIdsAction.mockRejectedValueOnce(new Error('invalid Theme ID'));
 
     await expect(

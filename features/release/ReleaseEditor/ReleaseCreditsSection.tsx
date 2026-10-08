@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useEffect, useState } from 'react';
 import {
@@ -69,14 +71,16 @@ export function ReleaseCreditsSection({
   const [creditRole, setCreditRole] = useState('');
   const [creditNote, setCreditNote] = useState('');
 
-  const { data: allArtists } = useQuery({
+  const allArtistsQuery = useQuery({
     queryKey: ['artist', 'list'],
-    queryFn: () => listArtistsAction(),
+    queryFn: () => listArtistsAction().then(unwrapQueryResult),
   });
-  const { data: allMembers } = useQuery({
+  const { data: allArtists } = allArtistsQuery;
+  const allMembersQuery = useQuery({
     queryKey: ['member', 'listAdmin'],
-    queryFn: () => listUsersAdminAction({}),
+    queryFn: () => listUsersAdminAction({}).then(unwrapQueryResult),
   });
+  const { data: allMembers } = allMembersQuery;
 
   const setCredits = useMutation({
     mutationFn: (mutation: {
@@ -298,6 +302,7 @@ export function ReleaseCreditsSection({
 
   return (
     <SectionCard>
+      <QueryErrorAlert queries={[allArtistsQuery, allMembersQuery]} />
       <Stack>
         <SectionHeader
           title={tCommon('entities.credits')}
