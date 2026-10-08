@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.2](https://github.com/echovisionlab/geul-web/compare/v0.11.1...v0.11.2) (2026-10-08)
+
+
+### Bug Fixes
+
+* preserve query failures and editor state ([#118](https://github.com/echovisionlab/geul-web/issues/118)) ([fdf827a](https://github.com/echovisionlab/geul-web/commit/fdf827a5ef985f8f446fa6b5f1c61464e438e766))
+* preserve server action read failures ([#120](https://github.com/echovisionlab/geul-web/issues/120)) ([e620ae6](https://github.com/echovisionlab/geul-web/commit/e620ae656b3f1d3daad4d2a8749ea9e125c63f40))
+
 ## [0.11.1](https://github.com/echovisionlab/geul-web/compare/v0.11.0...v0.11.1) (2026-10-08)
 
 
