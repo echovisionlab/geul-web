@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/echovisionlab/geul-web/compare/v0.11.0...v0.11.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* preserve HTTP failure categories at web API boundaries ([#116](https://github.com/echovisionlab/geul-web/issues/116)) ([fd61817](https://github.com/echovisionlab/geul-web/commit/fd61817bd13be2a67d6805f910764b66bd190d4d))
+
 ## [0.11.0](https://github.com/echovisionlab/geul-web/compare/v0.10.5...v0.11.0) (2026-10-08)
 
 
