@@ -33,7 +33,6 @@ interface Options {
 
 export function useLegalPolicyCommands({
   policyId,
-  policyStatus,
   strategy,
   flushActiveDocuments,
   getExpectedRevision,
@@ -88,9 +87,7 @@ export function useLegalPolicyCommands({
 
   const activateNowMutation = useMutation({
     mutationFn: async () => {
-      if (strategy.status.isDraft(policyStatus)) {
-        await flushActiveDocuments();
-      }
+      await flushActiveDocuments();
       const expectedRevision = await getExpectedRevision();
       return strategy.actions.activateNow(policyId, expectedRevision);
     },

@@ -148,4 +148,59 @@ describe('useLegalPolicyCommands', () => {
     expect(schedule).toHaveBeenCalledWith('terms-1', new Date('2026-09-01T00:00:00.000Z'), expectedRevision);
     act(() => root.unmount());
   });
+  it.each([
+    ['scheduled', 'activateNow', 2],
+    ['draft', 'deleteVersion', 3],
+    ['scheduled', 'deleteVersion', 3],
+    ['active', 'deleteVersion', 3],
+    ['archived', 'deleteVersion', 3],
+  ] as const)('flushes edits and reads the resulting revision before %s %s', async (policyStatus, action, index) => {
+    const order: string[] = [];
+    const mutation = vi.fn(async () => {
+      order.push('mutation');
+      return { success: true };
+    });
+    const strategy = {
+      entityType: 'terms',
+      listPath: '/admin/terms',
+      status: { isDraft: () => policyStatus === 'draft' },
+      actions: {
+        schedule: vi.fn(),
+        cancelSchedule: vi.fn(),
+        activateNow: vi.fn(),
+        deleteVersion: vi.fn(),
+        regenerateHtml: vi.fn(),
+        [action]: mutation,
+      },
+    } as unknown as LegalPolicyEditorStrategy;
+
+    function Harness() {
+      useLegalPolicyCommands({
+        policyId: 'terms-1',
+        policyStatus,
+        strategy,
+        flushActiveDocuments: async () => {
+          order.push('flush');
+        },
+        getExpectedRevision: async () => {
+          order.push('snapshot');
+          return 'saved-revision';
+        },
+        closeScheduleModal: vi.fn(),
+        closeCancelModal: vi.fn(),
+        closeActivateModal: vi.fn(),
+        clearEffectiveFrom: vi.fn(),
+        messages,
+      });
+      return null;
+    }
+
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    act(() => root.render(<Harness />));
+    await mocks.mutationFns[index]?.();
+    expect(order).toEqual(['flush', 'snapshot', 'mutation']);
+    expect(mutation).toHaveBeenCalledWith('terms-1', 'saved-revision');
+    act(() => root.unmount());
+  });
 });
