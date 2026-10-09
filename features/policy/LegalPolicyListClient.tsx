@@ -255,21 +255,19 @@ export function LegalPolicyListClient({
             >
               {tCommon('actions.edit')}
             </DropdownMenu.Item>
-            {status.isDraft(row.status) && (
-              <>
-                <DropdownMenu.Divider />
-                <DropdownMenu.Item
-                  icon={<IconTrash size={16} />}
-                  tone="danger"
-                  onClick={() => {
-                    setSelectedVersion(row);
-                    openDeleteModal();
-                  }}
-                >
-                  {tCommon('actions.delete')}
-                </DropdownMenu.Item>
-              </>
-            )}
+            <>
+              <DropdownMenu.Divider />
+              <DropdownMenu.Item
+                icon={<IconTrash size={16} />}
+                tone="danger"
+                onClick={() => {
+                  setSelectedVersion(row);
+                  openDeleteModal();
+                }}
+              >
+                {tCommon('actions.delete')}
+              </DropdownMenu.Item>
+            </>
           </DropdownMenu.Dropdown>
         </DropdownMenu>
       ),
@@ -346,7 +344,7 @@ export function LegalPolicyListClient({
 
       <Modal opened={deleteModalOpened} onClose={closeDeleteModal} title={tCommon('actions.deleteVersion')}>
         <Stack>
-          <Text>{tCommon('messages.deleteDraftVersionConfirm')}</Text>
+          <Text>{tCommon('messages.deleteItemConfirm', { item: entityLabel })}</Text>
           <Group justify="flex-end">
             <Button emphasis="low" onClick={closeDeleteModal}>
               {tCommon('actions.cancel')}

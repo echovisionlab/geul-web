@@ -251,7 +251,7 @@ export function LegalPolicyEditor({
   const canCancelSchedule = isEditable && strategy.status.isScheduled(policyData.status);
   const canActivateNow =
     isEditable && (strategy.status.isDraft(policyData.status) || strategy.status.isScheduled(policyData.status));
-  const canDelete = isEditable && strategy.status.isDraft(policyData.status);
+  const canDelete = isEditable;
   const canEditCurrentLocale =
     isEditable &&
     activeEditLocale.canEditActiveLocale &&
@@ -627,7 +627,7 @@ export function LegalPolicyEditor({
 
         <Modal opened={deleteModalOpened} onClose={closeDeleteModal} title={tActions('deleteVersion')}>
           <Stack>
-            <Text>{tCommonMessages('deleteDraftVersionConfirm')}</Text>
+            <Text>{tCommonMessages('deleteItemConfirm', { item: tCommonEntities(strategy.entityType) })}</Text>
             <Group justify="flex-end">
               <Button emphasis="low" onClick={closeDeleteModal}>
                 {tActions('cancel')}
