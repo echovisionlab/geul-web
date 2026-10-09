@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/echovisionlab/geul-web/compare/v0.11.2...v0.12.0) (2026-10-09)
+
+
+### Features
+
+* **policy:** allow editing and deleting every policy lifecycle ([#121](https://github.com/echovisionlab/geul-web/issues/121)) ([1a8302e](https://github.com/echovisionlab/geul-web/commit/1a8302e10e205a866319120eb0f97841cfe8a964))
+
 ## [0.11.2](https://github.com/echovisionlab/geul-web/compare/v0.11.1...v0.11.2) (2026-10-08)
 
 
