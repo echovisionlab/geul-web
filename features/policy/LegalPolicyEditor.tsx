@@ -1,22 +1,37 @@
 'use client';
 
+import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
+import Link from '@/components/core/Navigation';
+import { SupportingText, Text as DsText, Heading as DsHeading } from '@/components/core/Typography';
+
+import { ConfirmationDialog } from '@/features/confirmation';
+
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutStack as DsLayoutStack,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconAlertCircle, IconCalendar, IconDownload, IconPlayerPlay, IconRefresh, IconX } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Box, Divider, Group, Modal, Stack, Text, Title } from '@mantine/core';
+import { Separator as Divider, ScrollArea } from '@/components/core/Display';
+import { SectionCard } from '@/components/core/Section';
+import { ContentModal, DialogActions } from '@/components/core/Modal';
 import { Alert } from '@/components/core/Alert';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
-import { SegmentedControl } from '@/components/core/Input';
-import { DateTimePicker } from '@mantine/dates';
-import '@mantine/dates/styles.css';
+import { SegmentedControl, DateTimePicker } from '@/components/core/Input';
+
 import { useDebouncedCallback, useDisclosure } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { materializeLocalizedRichTextDocument } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import { Button } from '@/components/core/Button';
 import { EditorHeader, type EditorHeaderActionItem } from '@/features/editor/EditorHeader';
 import { LegalOgImagePanel } from '@/features/policy/LegalOgImagePanel';
 import { LegalRichTextContent } from '@/features/policy/LegalRichTextContent';
+import { DOCUMENT_TITLE_HEADING_LEVEL } from '@/features/document-layout/ui/document-heading-level';
+import { DocumentHeadingScope } from '@/features/document-layout/ui/DocumentHeadingScope';
 import { LegalTranslationNotice } from '@/features/policy/LegalTranslationNotice';
 import { materializeLocalizedRichTextTree } from '@/features/editor/contract/localized-rich-text';
 import { PolicyEditor, type PolicyEditorInstance } from '@/features/policy/PolicyEditor/PolicyEditor';
@@ -58,7 +73,7 @@ interface Props {
   canEdit: boolean;
 }
 
-export function LegalPolicyEditor({
+function useLegalPolicyEditorViewModel({
   initialPolicy,
   siteSettings,
   ogBackgroundUrl,
@@ -66,6 +81,7 @@ export function LegalPolicyEditor({
   strategy,
   canEdit,
 }: Props) {
+  const tModalActions = useTranslations('common.actions');
   const router = useRouter();
   const dateTime = useDateTimeFormatter();
   const t = useTranslations(strategy.translationNamespace);
@@ -228,7 +244,10 @@ export function LegalPolicyEditor({
   const handleViewModeChange = (value: string) => {
     setViewMode(value);
     if (value === 'preview' && editorRef.current && !policyEditorError) {
-      setPreviewHtml(policyTiptapDocumentToHtml(editorRef.current.state.doc));
+      // The preview renders the body below its title heading (the preview's h1).
+      setPreviewHtml(
+        policyTiptapDocumentToHtml(editorRef.current.state.doc, { headingParentLevel: DOCUMENT_TITLE_HEADING_LEVEL }),
+      );
     }
   };
 
@@ -236,7 +255,7 @@ export function LegalPolicyEditor({
     if (!effectiveFrom) {
       notifications.show({
         message: tLegalEditorCommon('notifications.selectEffectiveDate'),
-        color: 'red',
+        tone: 'danger',
       });
       return;
     }
@@ -281,6 +300,171 @@ export function LegalPolicyEditor({
     );
   }, [blockRoomController, policyData.document, previewHtml, viewMode]);
 
+  return {
+    currentProvider,
+    strategy: {
+      entityType: strategy.entityType,
+      listPath: strategy.listPath,
+      backTooltipKey: strategy.backTooltipKey,
+      status: {
+        draft: strategy.status.draft,
+        scheduled: strategy.status.scheduled,
+        active: strategy.status.active,
+        archived: strategy.status.archived,
+        isScheduled: strategy.status.isScheduled,
+        isActive: strategy.status.isActive,
+        isArchived: strategy.status.isArchived,
+        isDraft: strategy.status.isDraft,
+      },
+    },
+    policyId,
+    blockRoom: { protocol: blockRoom.protocol },
+    displayedTitle,
+    canEditDisplayedTitle,
+    handleDisplayedTitleChange,
+    policyData: { status: policyData.status, version: policyData.version, effectiveFrom: policyData.effectiveFrom },
+    tStatuses,
+    currentIsConnected,
+    currentIsSynced,
+    router: { push: router.push },
+    tActions,
+    canDelete,
+    openDeleteModal,
+    activeEditLocale: {
+      isControlVisible: activeEditLocale.isControlVisible,
+      activeLocale: activeEditLocale.activeLocale,
+      activeLocaleLabel: activeEditLocale.activeLocaleLabel,
+      sourceLocale: activeEditLocale.sourceLocale,
+      localeOptions: activeEditLocale.localeOptions,
+      setActiveLocale: activeEditLocale.setActiveLocale,
+      isLoading: activeEditLocale.isLoading,
+      hasLiveRow: activeEditLocale.hasLiveRow,
+      ogGenerationRun: activeEditLocale.ogGenerationRun,
+      isSourceLocale: activeEditLocale.isSourceLocale,
+    },
+    canSchedule,
+    openScheduleModal,
+    canCancelSchedule,
+    openCancelModal,
+    canActivateNow,
+    openActivateModal,
+    isEditable,
+    regenerateHtmlMutation: { isPending: regenerateHtmlMutation.isPending, mutate: regenerateHtmlMutation.mutate },
+    handleExport,
+    tLegalEditorCommon,
+    dateTime: { dateTime: dateTime.dateTime, date: dateTime.date },
+    t,
+    policyEditorError,
+    ogBackgroundUrl,
+    sourceTitleGeneration,
+    isEditingTranslation,
+    viewMode,
+    handleViewModeChange,
+    tLabels,
+    editorSession,
+    canEditCurrentLocale,
+    handleEditorReady,
+    setPolicyEditorError,
+    tCommonStates,
+    tCommonEntities,
+    activePreviewHtml,
+    canonicalPreviewBlocks,
+    siteSettings,
+    contactEmail,
+    scheduleModalOpened,
+    closeScheduleModal,
+    tCommonMessages,
+    tModalActions,
+    tCommonPlaceholders,
+    effectiveFrom,
+    setEffectiveFrom,
+    handleSchedule,
+    scheduleMutation: { isPending: scheduleMutation.isPending },
+    cancelModalOpened,
+    closeCancelModal,
+    cancelScheduleMutation: { mutate: cancelScheduleMutation.mutate, isPending: cancelScheduleMutation.isPending },
+    activateModalOpened,
+    closeActivateModal,
+    activateNowMutation: { mutate: activateNowMutation.mutate, isPending: activateNowMutation.isPending },
+    deleteModalOpened,
+    closeDeleteModal,
+    deleteMutation: { mutate: deleteMutation.mutate, isPending: deleteMutation.isPending },
+  };
+}
+
+export function LegalPolicyEditor(props: Props) {
+  return <LegalPolicyEditorView model={useLegalPolicyEditorViewModel(props)} />;
+}
+
+export type LegalPolicyEditorViewModel = ReturnType<typeof useLegalPolicyEditorViewModel>;
+
+/** Complete production editor composition; controllers supply data and commands. */
+export function LegalPolicyEditorView({ model }: { model: LegalPolicyEditorViewModel }) {
+  const {
+    currentProvider,
+    strategy,
+    policyId,
+    blockRoom,
+    displayedTitle,
+    canEditDisplayedTitle,
+    handleDisplayedTitleChange,
+    policyData,
+    tStatuses,
+    currentIsConnected,
+    currentIsSynced,
+    router,
+    tActions,
+    canDelete,
+    openDeleteModal,
+    activeEditLocale,
+    canSchedule,
+    openScheduleModal,
+    canCancelSchedule,
+    openCancelModal,
+    canActivateNow,
+    openActivateModal,
+    isEditable,
+    regenerateHtmlMutation,
+    handleExport,
+    tLegalEditorCommon,
+    dateTime,
+    t,
+    policyEditorError,
+    ogBackgroundUrl,
+    sourceTitleGeneration,
+    isEditingTranslation,
+    viewMode,
+    handleViewModeChange,
+    tLabels,
+    editorSession,
+    canEditCurrentLocale,
+    handleEditorReady,
+    setPolicyEditorError,
+    tCommonStates,
+    tCommonEntities,
+    activePreviewHtml,
+    canonicalPreviewBlocks,
+    siteSettings,
+    contactEmail,
+    scheduleModalOpened,
+    closeScheduleModal,
+    tCommonMessages,
+    tModalActions,
+    tCommonPlaceholders,
+    effectiveFrom,
+    setEffectiveFrom,
+    handleSchedule,
+    scheduleMutation,
+    cancelModalOpened,
+    closeCancelModal,
+    cancelScheduleMutation,
+    activateModalOpened,
+    closeActivateModal,
+    activateNowMutation,
+    deleteModalOpened,
+    closeDeleteModal,
+    deleteMutation,
+  } = model;
   return (
     <EditorRuntimeProvider
       provider={currentProvider}
@@ -288,7 +472,7 @@ export function LegalPolicyEditor({
       entityId={policyId}
       blockRoomProtocol={blockRoom.protocol}
     >
-      <Stack h="100%" gap="md">
+      <DsLayoutStack fill="block" gap="md">
         <EditorHeader
           title={displayedTitle}
           onTitleChange={canEditDisplayedTitle ? handleDisplayedTitleChange : undefined}
@@ -327,10 +511,10 @@ export function LegalPolicyEditor({
           onDelete={canDelete ? openDeleteModal : undefined}
           groupStatusWithCollab
           controls={
-            <Group gap="xs" wrap="nowrap">
-              <Text size="sm" fw={500}>
+            <DsLayoutInline gap="xs" wrap="nowrap">
+              <DsText size="sm" weight="medium">
                 v{policyData.version}
-              </Text>
+              </DsText>
               {activeEditLocale.isControlVisible ? (
                 <EditorActiveLocaleMenu
                   activeLocale={activeEditLocale.activeLocale}
@@ -341,7 +525,7 @@ export function LegalPolicyEditor({
                   disabled={activeEditLocale.isLoading}
                 />
               ) : null}
-            </Group>
+            </DsLayoutInline>
           }
           actionItems={
             [
@@ -350,7 +534,7 @@ export function LegalPolicyEditor({
                     {
                       key: 'schedule',
                       label: tActions('schedule'),
-                      icon: <IconCalendar size={16} />,
+                      icon: <IconCalendar />,
                       emphasis: 'medium' as const,
                       onClick: openScheduleModal,
                     },
@@ -361,7 +545,7 @@ export function LegalPolicyEditor({
                     {
                       key: 'cancel-schedule',
                       label: tActions('cancelSchedule'),
-                      icon: <IconX size={16} />,
+                      icon: <IconX />,
                       tone: 'warning' as const,
                       emphasis: 'medium' as const,
                       onClick: openCancelModal,
@@ -373,7 +557,7 @@ export function LegalPolicyEditor({
                     {
                       key: 'activate-now',
                       label: tActions('activateNow'),
-                      icon: <IconPlayerPlay size={16} />,
+                      icon: <IconPlayerPlay />,
                       onClick: openActivateModal,
                     },
                   ]
@@ -383,7 +567,7 @@ export function LegalPolicyEditor({
                     {
                       key: 'regenerate-html',
                       label: tActions('regenerateHtml'),
-                      icon: <IconRefresh size={16} />,
+                      icon: <IconRefresh />,
                       emphasis: 'medium' as const,
                       loading: regenerateHtmlMutation.isPending,
                       onClick: () => regenerateHtmlMutation.mutate(),
@@ -393,7 +577,7 @@ export function LegalPolicyEditor({
               {
                 key: 'export-pdf',
                 label: tActions('exportPdf'),
-                icon: <IconDownload size={16} />,
+                icon: <IconDownload />,
                 emphasis: 'medium',
                 onClick: handleExport,
               },
@@ -427,12 +611,16 @@ export function LegalPolicyEditor({
           </Alert>
         )}
 
-        <EntityTranslationsPanel entityType={strategy.entityType} entityId={policyId} canManage={isEditable} />
+        <AuthoringExtension kind="translations">
+          <EntityTranslationsPanel entityType={strategy.entityType} entityId={policyId} canManage={isEditable} />
+        </AuthoringExtension>
 
-        {policyEditorError ? <Alert tone="warning">{policyEditorError}</Alert> : null}
+        {policyEditorError ? <Alert tone="danger">{policyEditorError}</Alert> : null}
 
         {strategy.status.isScheduled(policyData.status) ? (
-          <ShareLinkSection entityType={strategy.entityType} entityId={policyId} />
+          <AuthoringExtension kind="sharing">
+            <ShareLinkSection entityType={strategy.entityType} entityId={policyId} />
+          </AuthoringExtension>
         ) : null}
 
         {activeEditLocale.activeLocale && activeEditLocale.hasLiveRow ? (
@@ -455,15 +643,17 @@ export function LegalPolicyEditor({
           />
         ) : null}
 
-        <SegmentedControl
-          value={viewMode}
-          onChange={handleViewModeChange}
-          data={[
-            { value: 'edit', label: isEditable ? tLabels('edit') : tLabels('source') },
-            { value: 'preview', label: tLabels('preview') },
-          ]}
-          w={200}
-        />
+        <div style={{ width: 200 }}>
+          <SegmentedControl
+            aria-label={tLabels('content')}
+            value={viewMode}
+            onChange={handleViewModeChange}
+            data={[
+              { value: 'edit', label: isEditable ? tLabels('edit') : tLabels('source') },
+              { value: 'preview', label: tLabels('preview') },
+            ]}
+          />
+        </div>
 
         {viewMode === 'edit' ? (
           editorSession ? (
@@ -476,89 +666,105 @@ export function LegalPolicyEditor({
               onUnsupportedContent={setPolicyEditorError}
             />
           ) : (
-            <Box p="md">
-              <Text c="dimmed">{tCommonStates('connectingEditor')}</Text>
-            </Box>
+            <DsLayoutInset space="md">
+              <DsLayoutInset space="none">
+                <SupportingText tone="secondary" role="status">
+                  {tCommonStates('connectingEditor')}
+                </SupportingText>
+              </DsLayoutInset>
+            </DsLayoutInset>
           )
         ) : (
-          <Stack flex={1} gap="xs">
-            <Box
-              className="prose"
-              p="xl"
-              style={{
-                border: '1px solid var(--mantine-color-default-border)',
-                borderRadius: 'var(--mantine-radius-default)',
-                background: 'var(--mantine-color-body)',
-                flex: 1,
-                overflow: 'auto',
-              }}
-            >
-              <Title order={1} mb="xs">
-                {displayedTitle || tCommonEntities(strategy.entityType)}
-              </Title>
-              <Text size="sm" c="dimmed" mb="xs">
-                <strong>{tLabels('effectiveDate')}:</strong>{' '}
-                {getEffectiveDateDisplay(
-                  policyData.status,
-                  tLegalEditorCommon('preview.tbd'),
-                  strategy.status.isDraft,
-                  (date) =>
-                    dateTime.date(date, {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    }),
-                  policyData.effectiveFrom,
-                )}
-              </Text>
-              <Text size="sm" c="dimmed" mb="md">
-                <strong>{tLabels('version')}:</strong> {policyData.version}
-              </Text>
-              <Divider mb="md" />
-              {activePreviewHtml ? (
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: activePreviewHtml,
-                  }}
-                />
-              ) : canonicalPreviewBlocks?.length ? (
-                <LegalRichTextContent blocks={canonicalPreviewBlocks} className="prose" />
-              ) : (
-                <Text c="dimmed" ta="center" py="xl">
-                  {tLegalEditorCommon('preview.empty')}
-                </Text>
-              )}
-              <Divider mt="xl" mb="md" />
-              <Text size="sm" c="dimmed">
-                <strong>{siteSettings?.company_name || tLabels('companyName')}</strong>
-              </Text>
-              {siteSettings?.company_address && (
-                <Text size="sm" c="dimmed">
-                  {siteSettings.company_address}
-                </Text>
-              )}
-              <Text size="sm" c="dimmed">
-                {contactEmail && <a href={`mailto:${contactEmail}`}>{contactEmail}</a>}
-                {contactEmail && siteSettings?.site_origin && ' | '}
-                {siteSettings?.site_origin && (
-                  <a href={siteSettings.site_origin} target="_blank" rel="noopener noreferrer">
-                    {siteSettings.site_origin}
-                  </a>
-                )}
-              </Text>
-            </Box>
-          </Stack>
+          <DsLayoutStack flexible gap="xs">
+            <SectionCard padding="none" grow layout="stack" clip>
+              <ScrollArea grow inset="xl">
+                <div className="prose" role="region" aria-label={tLabels('bodyPreview')}>
+                  <DsLayoutInset blockEnd="xs">
+                    <DsHeading level={1} scale="title">
+                      {displayedTitle || tCommonEntities(strategy.entityType)}
+                    </DsHeading>
+                  </DsLayoutInset>
+                  <DsLayoutInset blockEnd="xs">
+                    <DsText size="sm" tone="secondary">
+                      <strong>{tLabels('effectiveDate')}:</strong>{' '}
+                      {getEffectiveDateDisplay(
+                        policyData.status,
+                        tLegalEditorCommon('preview.tbd'),
+                        strategy.status.isDraft,
+                        (date) =>
+                          dateTime.date(date, {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                          }),
+                        policyData.effectiveFrom,
+                      )}
+                    </DsText>
+                  </DsLayoutInset>
+                  <DsLayoutInset blockEnd="md">
+                    <DsText size="sm" tone="secondary">
+                      <strong>{tLabels('version')}:</strong> {policyData.version}
+                    </DsText>
+                  </DsLayoutInset>
+                  <Divider spaceAfter="md" />
+                  {activePreviewHtml ? (
+                    <div
+                      lang={activeEditLocale.activeLocale ?? undefined}
+                      dangerouslySetInnerHTML={{
+                        __html: activePreviewHtml,
+                      }}
+                    />
+                  ) : canonicalPreviewBlocks?.length ? (
+                    <DocumentHeadingScope parentLevel={DOCUMENT_TITLE_HEADING_LEVEL}>
+                      <LegalRichTextContent
+                        blocks={canonicalPreviewBlocks}
+                        className="prose"
+                        requestedLocale={activeEditLocale.activeLocale ?? undefined}
+                      />
+                    </DocumentHeadingScope>
+                  ) : (
+                    <DsLayoutInset block="xl">
+                      <SupportingText tone="secondary" align="center">
+                        {tLegalEditorCommon('preview.empty')}
+                      </SupportingText>
+                    </DsLayoutInset>
+                  )}
+                  <Divider spaceBefore="xl" spaceAfter="md" />
+                  <DsText size="sm" tone="secondary">
+                    <strong>{siteSettings?.company_name || tLabels('companyName')}</strong>
+                  </DsText>
+                  {siteSettings?.company_address && (
+                    <DsText size="sm" tone="secondary">
+                      {siteSettings.company_address}
+                    </DsText>
+                  )}
+                  <DsText size="sm" tone="secondary">
+                    {contactEmail && (
+                      <Link href={`mailto:${contactEmail}`} tone="inherit">
+                        {contactEmail}
+                      </Link>
+                    )}
+                    {contactEmail && siteSettings?.site_origin && ' | '}
+                    {siteSettings?.site_origin && (
+                      <Link href={siteSettings.site_origin} target="_blank" rel="noopener noreferrer" tone="inherit">
+                        {siteSettings.site_origin}
+                      </Link>
+                    )}
+                  </DsText>
+                </div>
+              </ScrollArea>
+            </SectionCard>
+          </DsLayoutStack>
         )}
 
-        <Modal
+        <ContentModal
           opened={scheduleModalOpened}
           onClose={closeScheduleModal}
           title={tCommonMessages('scheduleActivationTitle')}
+          closeLabel={tModalActions('close')}
         >
-          <Stack>
-            <Text size="sm" c="dimmed">
-              {tCommonMessages('scheduleActivationDescription')}
-            </Text>
+          <DsLayoutStack>
+            <SupportingText tone="secondary">{tCommonMessages('scheduleActivationDescription')}</SupportingText>
             <DateTimePicker
               label={tLabels('effectiveDate')}
               placeholder={tCommonPlaceholders('selectDateAndTime')}
@@ -569,76 +775,91 @@ export function LegalPolicyEditor({
             <Alert icon={<IconAlertCircle size={16} />} tone="warning">
               {tCommonMessages('scheduleActivationNotice')}
             </Alert>
-            <Group justify="flex-end">
+            <DialogActions>
               <Button emphasis="low" onClick={closeScheduleModal}>
                 {tActions('cancel')}
               </Button>
-              <Button onClick={handleSchedule} loading={scheduleMutation.isPending} disabled={!effectiveFrom}>
+              <Button
+                emphasis="strong"
+                onClick={handleSchedule}
+                loading={scheduleMutation.isPending}
+                disabled={!effectiveFrom}
+              >
                 {tActions('schedule')}
               </Button>
-            </Group>
-          </Stack>
-        </Modal>
+            </DialogActions>
+          </DsLayoutStack>
+        </ContentModal>
 
-        <Modal opened={cancelModalOpened} onClose={closeCancelModal} title={tActions('cancelSchedule')}>
-          <Stack>
-            <Text>{tLegalEditorCommon('cancelScheduleModal.confirmation')}</Text>
-            <Text size="sm" c="dimmed">
-              {tLegalEditorCommon('cancelScheduleModal.description')}
-            </Text>
-            <Group justify="flex-end">
+        <ContentModal
+          opened={cancelModalOpened}
+          onClose={closeCancelModal}
+          title={tActions('cancelSchedule')}
+          closeLabel={tModalActions('close')}
+        >
+          <DsLayoutStack>
+            <DsText>{tLegalEditorCommon('cancelScheduleModal.confirmation')}</DsText>
+            <SupportingText tone="secondary">{tLegalEditorCommon('cancelScheduleModal.description')}</SupportingText>
+            <DialogActions>
               <Button emphasis="low" onClick={closeCancelModal}>
                 {tLegalEditorCommon('cancelScheduleModal.keepSchedule')}
               </Button>
               <Button
+                emphasis="strong"
                 tone="warning"
                 onClick={() => cancelScheduleMutation.mutate()}
                 loading={cancelScheduleMutation.isPending}
               >
                 {tActions('cancelSchedule')}
               </Button>
-            </Group>
-          </Stack>
-        </Modal>
+            </DialogActions>
+          </DsLayoutStack>
+        </ContentModal>
 
-        <Modal opened={activateModalOpened} onClose={closeActivateModal} title={tActions('activateNow')}>
-          <Stack>
+        <ContentModal
+          opened={activateModalOpened}
+          onClose={closeActivateModal}
+          title={tActions('activateNow')}
+          closeLabel={tModalActions('close')}
+        >
+          <DsLayoutStack>
             <Alert icon={<IconAlertCircle size={16} />} tone="warning">
               {tLegalEditorCommon('activateModal.warning')}
             </Alert>
-            <Text size="sm" c="dimmed">
-              {tLegalEditorCommon('activateModal.description')}
-            </Text>
-            <Divider />
-            <Group justify="flex-end">
+            <DsText tone="secondary">{tLegalEditorCommon('activateModal.description')}</DsText>
+            <DialogActions>
               <Button emphasis="low" onClick={closeActivateModal}>
                 {tActions('cancel')}
               </Button>
               <Button
+                emphasis="strong"
                 tone="positive"
                 onClick={() => activateNowMutation.mutate()}
                 loading={activateNowMutation.isPending}
               >
                 {tActions('activateNow')}
               </Button>
-            </Group>
-          </Stack>
-        </Modal>
+            </DialogActions>
+          </DsLayoutStack>
+        </ContentModal>
 
-        <Modal opened={deleteModalOpened} onClose={closeDeleteModal} title={tActions('deleteVersion')}>
-          <Stack>
-            <Text>{tCommonMessages('deleteItemConfirm', { item: tCommonEntities(strategy.entityType) })}</Text>
-            <Group justify="flex-end">
-              <Button emphasis="low" onClick={closeDeleteModal}>
-                {tActions('cancel')}
-              </Button>
-              <Button tone="danger" onClick={() => deleteMutation.mutate()} loading={deleteMutation.isPending}>
-                {tActions('delete')}
-              </Button>
-            </Group>
-          </Stack>
-        </Modal>
-      </Stack>
+        <ConfirmationDialog
+          intent="delete"
+          opened={deleteModalOpened}
+          onClose={closeDeleteModal}
+          onConfirm={() => deleteMutation.mutate()}
+          title={tActions('deleteVersion')}
+          confirmLabel={tActions('delete')}
+          cancelLabel={tActions('cancel')}
+          closeLabel={tModalActions('close')}
+          loading={deleteMutation.isPending}
+          message={
+            <>
+              <DsText>{tCommonMessages('deleteItemConfirm', { item: tCommonEntities(strategy.entityType) })}</DsText>
+            </>
+          }
+        />
+      </DsLayoutStack>
     </EditorRuntimeProvider>
   );
 }

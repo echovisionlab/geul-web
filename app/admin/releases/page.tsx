@@ -1,13 +1,8 @@
+import { ReleasesPageView } from '@/features/admin/release/ReleasesPageView';
 import { getTranslations } from 'next-intl/server';
-import { Stack } from '@mantine/core';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import {
-  CreateReleaseButton,
-  ReleaseModalProvider,
-  ReleaseModals,
-  ReleasesTableContent,
-} from '@/features/admin/release';
+
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
+
 import { listReleasesAdmin } from '@/lib/queries/release';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
@@ -73,25 +68,13 @@ export default async function AdminReleasesPage({ searchParams }: PageProps) {
   });
 
   return (
-    <ReleaseModalProvider>
-      <Stack>
-        <AdminPageHeader
-          title={releasesLabel}
-          items={[{ key: 'create-release', type: 'custom', content: <CreateReleaseButton /> }]}
-        />
-
-        <ServerDataTable namespace="releases">
-          <ReleasesTableContent
-            result={result}
-            searchPlaceholder={searchPlaceholder}
-            filterFields={filterFields}
-            sortFields={sortFields}
-          />
-          <ServerDataTable.Pagination namespace="releases" result={result} searchParams={params} />
-        </ServerDataTable>
-      </Stack>
-
-      <ReleaseModals />
-    </ReleaseModalProvider>
+    <ReleasesPageView
+      title={releasesLabel}
+      searchParams={params.toString()}
+      result={result}
+      searchPlaceholder={searchPlaceholder}
+      filterFields={filterFields}
+      sortFields={sortFields}
+    />
   );
 }

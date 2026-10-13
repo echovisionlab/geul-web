@@ -5,8 +5,6 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  copied: false,
-  copy: vi.fn(),
   checkNicknameAvailabilityAction: vi.fn(),
   mutate: vi.fn(),
   notificationsShow: vi.fn(),
@@ -52,11 +50,7 @@ vi.mock('next-intl', () => ({
   useTranslations: (namespace: string) => (key: string) => `${namespace}.${key}`,
 }));
 
-vi.mock('@mantine/hooks', () => ({
-  useClipboard: () => ({ copied: mocks.copied, copy: mocks.copy }),
-}));
-
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: { show: mocks.notificationsShow },
 }));
 
@@ -99,10 +93,8 @@ beforeEach(() => {
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
-  mocks.copied = false;
   mocks.mutationOptions = null;
   mocks.viewProps = null;
-  mocks.copy.mockReset();
   mocks.checkNicknameAvailabilityAction.mockReset();
   mocks.checkNicknameAvailabilityAction.mockResolvedValue({ available: true });
   mocks.mutate.mockReset();
@@ -131,11 +123,9 @@ function getMutationOptions() {
 }
 
 describe('ProfileForm controller', () => {
-  it('maps copy, normalization, and ordered submit commands to controller services', () => {
+  it('maps normalization and ordered submit commands to controller services', () => {
     const view = getViewProps();
 
-    act(() => view.events.onCopyUid());
-    expect(mocks.copy).toHaveBeenCalledWith('usr_profile_1');
     expect(view.events.onNormalizeSocialLink('instagram', 'june')).toBe('https://instagram.com/june');
 
     act(() => view.events.onNicknameChange('June Park'));
@@ -223,7 +213,7 @@ describe('ProfileForm controller', () => {
     expect(mocks.notificationsShow).toHaveBeenCalledWith({
       title: 'profile.notifications.successTitle',
       message: 'profile.notifications.updated',
-      color: 'green',
+      tone: 'positive',
     });
     expect(mocks.updateMemberSummary).toHaveBeenCalledWith(member);
     expect(getViewProps().errors).toEqual({});
@@ -238,7 +228,7 @@ describe('ProfileForm controller', () => {
     expect(mocks.notificationsShow).toHaveBeenLastCalledWith({
       title: 'common.labels.error',
       message: 'Returned failure',
-      color: 'red',
+      tone: 'danger',
     });
     expect(getViewProps().errors).toEqual({ form: 'Returned failure' });
     expect(getViewProps().savedRevision).toBe(0);
@@ -248,7 +238,7 @@ describe('ProfileForm controller', () => {
     expect(mocks.notificationsShow).toHaveBeenLastCalledWith({
       title: 'common.labels.error',
       message: 'Thrown failure',
-      color: 'red',
+      tone: 'danger',
     });
     expect(getViewProps().errors).toEqual({ form: 'Thrown failure' });
     expect(mocks.updateMemberSummary).not.toHaveBeenCalled();

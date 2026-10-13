@@ -36,7 +36,7 @@ export function MermaidEditor({
   const id = useId();
   const t = useTranslations('mermaid');
   return (
-    <div className={classes.editor} data-mermaid-editor>
+    <div className={classes.editor} data-mermaid-editor role="group" aria-label={title || 'Mermaid'}>
       <div className={classes.split}>
         <MonacoSourceEditor
           value={source}
@@ -55,13 +55,13 @@ export function MermaidEditor({
           onRedo={onRedo}
           onEscape={onEscape}
           maxLength={MERMAID_SOURCE_LIMIT}
-          editorOptions={{ wordWrap: 'on', minimap: { enabled: false }, lineNumbersMinChars: 2, tabFocusMode: true }}
+          editorOptions={{ wordWrap: 'on', lineNumbersMinChars: 2, tabFocusMode: true }}
         />
         <MermaidDiagram source={source} title={title} />
       </div>
       {onTitleChange && (
         <TextInput
-          variant="unstyled"
+          appearance="bare"
           size="sm"
           value={title}
           onChange={(event) => onTitleChange(event.currentTarget.value)}

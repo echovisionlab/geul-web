@@ -1,9 +1,6 @@
+import { ProgramEventsPageView } from '@/features/admin/program-event/ProgramEventsPageView';
 import { getTranslations } from 'next-intl/server';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import { CreateProgramEventButton } from '@/features/admin/program-event/CreateProgramEventButton';
-import { ProgramEventTypeManagerButton } from '@/features/admin/program-event/ProgramEventTypeManager';
-import { ProgramEventsTableContent } from '@/features/admin/program-event/ProgramEventsTableContent';
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
 import {
   listProgramEventsAdmin,
   listProgramEventTypesAdmin,
@@ -68,29 +65,14 @@ export default async function AdminProgramEventsPage({ searchParams }: PageProps
   ]);
 
   return (
-    <>
-      <AdminPageHeader
-        title={programEventsLabel}
-        items={[
-          {
-            key: 'manage-program-event-types',
-            type: 'custom',
-            content: <ProgramEventTypeManagerButton initialTypes={eventTypes} />,
-          },
-          { key: 'create-program-event', type: 'custom', content: <CreateProgramEventButton /> },
-        ]}
-      />
-      <ServerDataTable namespace="events">
-        <ProgramEventsTableContent
-          result={result}
-          filterFields={filterFields}
-          sortFields={sortFields}
-          searchPlaceholder={tCommon('actions.searchItems', {
-            items: programEventsLabel.toLowerCase(),
-          })}
-        />
-        <ServerDataTable.Pagination namespace="events" result={result} searchParams={params} />
-      </ServerDataTable>
-    </>
+    <ProgramEventsPageView
+      result={result}
+      filterFields={filterFields}
+      sortFields={sortFields}
+      searchParams={params.toString()}
+      title={programEventsLabel}
+      searchPlaceholder={tCommon('actions.searchItems', { items: programEventsLabel.toLowerCase() })}
+      eventTypes={eventTypes}
+    />
   );
 }

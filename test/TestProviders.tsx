@@ -1,8 +1,12 @@
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import type { PropsWithChildren } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
-import { MantineProvider } from '@mantine/core';
+
+import { normalizeLocale, DEFAULT_LOCALE } from '@/lib/i18n/locale';
 import enMessages from '@/messages/en.json';
-import { theme } from '@/theme';
+
+/** UI tests share the native theme host without importing application orchestration into their owner. */
+export { DesignSystemProvider as DesignSystemTestProvider } from '@/lib/providers/DesignSystemProvider';
 
 if (typeof window !== 'undefined' && typeof window.matchMedia !== 'function') {
   Object.defineProperty(window, 'matchMedia', {
@@ -28,7 +32,9 @@ interface TestProvidersProps extends PropsWithChildren {
 export function TestProviders({ children, locale = 'en', messages = enMessages }: TestProvidersProps) {
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <MantineProvider theme={theme}>{children}</MantineProvider>
+      <DesignSystemProvider locale={normalizeLocale(locale) ?? DEFAULT_LOCALE} forceColorScheme="light">
+        {children}
+      </DesignSystemProvider>
     </NextIntlClientProvider>
   );
 }

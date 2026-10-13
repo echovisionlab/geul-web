@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { PublicMediaEntityType } from '@echovisionlab/geul-proto/public/file_pb.ts';
+import { PUBLIC_MEDIA_ENTITY_TYPE } from '@/features/media-download/download-wire-values';
 import { ContentMediaDeliveryProvider } from '@/features/media/ContentMediaDeliveryContext';
 
 export function WorkMediaDeliveryProvider({
@@ -24,7 +24,7 @@ export function WorkMediaDeliveryProvider({
       shareToken={shareToken}
       sharePassword={sharePassword}
       mediaDownloadEndpoint="/api/work/media-download"
-      entityType={PublicMediaEntityType.WORK}
+      entityType={PUBLIC_MEDIA_ENTITY_TYPE.WORK}
     >
       {children}
     </ContentMediaDeliveryProvider>

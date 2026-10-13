@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { RotationAxisInputs } from './RotationAxisInputs';
 
@@ -14,7 +15,7 @@ function render(onChange = vi.fn()) {
   const root = createRoot(container);
   act(() => {
     root.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <RotationAxisInputs
           label="Rotation speed"
           description="Blank inherits the scene value."
@@ -26,7 +27,7 @@ function render(onChange = vi.fn()) {
           testId="rotation-axes"
           onChange={onChange}
         />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
   return { container, root, onChange };
@@ -44,6 +45,9 @@ describe('RotationAxisInputs', () => {
     expect(container.querySelector<HTMLInputElement>('input[aria-label="Rotation speed X"]')?.value).toBe('0');
     expect(container.querySelector<HTMLInputElement>('input[aria-label="Rotation speed Y"]')?.placeholder).toBe('0.2');
     expect(container.textContent).toContain('Blank inherits the scene value.');
+    for (const input of container.querySelectorAll('input')) {
+      expect(input).toHaveAccessibleDescription('Blank inherits the scene value.');
+    }
 
     act(() => root.unmount());
   });
@@ -57,6 +61,7 @@ describe('RotationAxisInputs', () => {
       const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
       valueSetter?.call(input, '');
       input?.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'deleteContentBackward', data: null }));
+      input?.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
     });
 
     expect(onChange).toHaveBeenCalledWith('z', undefined);

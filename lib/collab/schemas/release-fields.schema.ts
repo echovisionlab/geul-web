@@ -16,7 +16,7 @@ import { trackBasicSchema } from '@/lib/types/track/schema';
 export const releaseTrackItemSchema = trackBasicSchema.extend({
   pending_upload_file_id: z.string().optional(),
   pending_upload_attempt_id: z.string().optional(),
-  pending_upload_status: releaseTrackPendingUploadStatusSchema.optional(),
+  pending_upload_status: z.optional(releaseTrackPendingUploadStatusSchema),
   pending_upload_started_at: z.iso.datetime().optional(),
   credits: z.array(baseCreditItemSchema),
 });

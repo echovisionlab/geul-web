@@ -7,7 +7,7 @@ build and redeploy their own server without changing or rebuilding the Web packa
 
 ## Conditions
 
-The root ran the successful before/after snapshots with:
+The paired build comparison used:
 
 - Exact Node `24.21.0` and Next.js `16.3.8` on the same host.
 - The same snapshot path: `.artifacts/page-embed-performance/snapshot`.
@@ -46,10 +46,8 @@ counting duplicate file copies separately. The metric excludes `public` assets a
 neither physical disk allocation nor complete Docker/registry/browser download size.
 Prepared public HWP and other runtime assets were held constant during this comparison.
 
-The initial failed snapshots involving absolute source aliases and tooling dependency
-resolution are excluded. Their failure times are not baseline samples. Successful
-logs, result JSON, snapshot metadata, and the measurement/runbook scripts remain in the
-ignored `.artifacts/page-embed-performance/` directory.
+Measurement/runbook scripts and successful results are in the ignored
+`.artifacts/page-embed-performance/` directory.
 
 ## Delivery consequence
 
@@ -69,7 +67,7 @@ API requests.
 This build comparison does not measure live redeploy duration, production resource use,
 registry transfer, or browser performance. Separate native Docker build/container
 observations and cache conditions are recorded in `geul-tools/docs/performance.md`.
-The root also ran selected mini app builds sequentially with Node `24.21.0`, Vite
+Selected mini app builds ran sequentially with Node `24.21.0`, Vite
 `8.3.3`, warm installed dependencies, and cold selected app `dist` output:
 
 | Tool          | Build wall time | Vite reported time | Logical dist bytes | Files |

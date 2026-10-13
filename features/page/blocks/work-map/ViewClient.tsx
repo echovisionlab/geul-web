@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { withQueryClient } from '@/lib/providers/with-query-client';
 import type { listWorkMapFeatures } from '@/lib/queries/work-browser';
 import type { MapViewConfig } from '@/lib/types/map/model';
 import type { WorkType } from '@/lib/types/work/model';
@@ -23,7 +24,9 @@ export interface WorkMapViewClientProps {
 }
 
 // SSR remains enabled so initial map data and theme keep their server-rendered content.
-const RuntimeView = dynamic(() => import('./ViewClientRuntime').then((module) => module.WorkMapViewClient));
+const RuntimeView = dynamic(() =>
+  withQueryClient(import('./ViewClientRuntime').then((module) => module.WorkMapViewClient)),
+);
 
 export function WorkMapViewClient(props: WorkMapViewClientProps) {
   return <RuntimeView {...props} />;

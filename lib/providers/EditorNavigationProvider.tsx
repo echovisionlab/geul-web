@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, type ReactNode } from 'react';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { NavigationIntentProvider, type NavigationIntent } from '@/components/core/Navigation';
@@ -34,7 +34,7 @@ export function EditorNavigationProvider({ children }: EditorNavigationProviderP
         }
 
         if (!saved) {
-          notifications.show({ message: t('saveFailed'), color: 'red' });
+          notifications.show({ message: t('saveFailed'), tone: 'danger' });
           return;
         }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { LayoutInline, LayoutStack } from '@/components/core/Layout';
 
 interface MediaBlockHeaderProps {
   headerClassName: string;
@@ -30,20 +31,16 @@ export function MediaBlockHeader({
       <div className={metaClassName} style={metaStyle}>
         {titleSlotClassName ? <div className={titleSlotClassName}>{title}</div> : title}
         {meta !== undefined || metaEnd !== undefined ? (
-          <div
-            data-media-block-meta-row
-            style={{
-              display: 'flex',
-              alignItems: 'baseline',
-              justifyContent: 'space-between',
-              gap: 12,
-              width: '100%',
-              minWidth: 0,
-            }}
-          >
-            <div style={{ minWidth: 0 }}>{meta}</div>
-            {metaEnd !== undefined ? <div style={{ flex: '0 0 auto' }}>{metaEnd}</div> : null}
-          </div>
+          <LayoutInline data-media-block-meta-row align="baseline" justify="between" gap="sm" wrap="nowrap">
+            <LayoutStack gap="none" flexible>
+              {meta}
+            </LayoutStack>
+            {metaEnd !== undefined ? (
+              <LayoutInline gap="none" shrink={false}>
+                {metaEnd}
+              </LayoutInline>
+            ) : null}
+          </LayoutInline>
         ) : null}
       </div>
       {end}

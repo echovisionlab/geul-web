@@ -1,4 +1,11 @@
 'use client';
+
+import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
+
+import { DocumentEditorPanels } from '@/features/authoring/DocumentEditorPanels';
+
+import { Text as DsText } from '@/components/core/Typography';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { useCallback, useMemo, useRef, useState } from 'react';
@@ -6,10 +13,11 @@ import { useRouter } from 'next/navigation';
 import { IconHistory } from '@tabler/icons-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { ScrollArea, Stack, Text } from '@mantine/core';
+
+import { ScrollArea } from '@/components/core/Display';
 import { Checkbox } from '@/components/core/Input';
 import { useDisclosure } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { EditorHeader } from '@/features/editor/EditorHeader';
 import { useEditorPermissionRevocation } from '@/features/editor/useEditorPermissionRevocation';
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
@@ -131,7 +139,7 @@ function mergePageLayoutPatches(pending: PageLayoutPatch, next: PageLayoutPatch)
   return { value: next.value, previous: pending.previous };
 }
 
-export function PageEditor({
+function usePageEditorViewModel({
   pageId,
   currentMemberId,
   canManageTranslations,
@@ -210,7 +218,7 @@ export function PageEditor({
     pageId,
     initialConfiguration: initialNeutralConfiguration,
     provider,
-    onShowTitleSaveError: (message) => notifications.show({ message, color: 'red' }),
+    onShowTitleSaveError: (message) => notifications.show({ message, tone: 'danger' }),
   });
   const { configuration: neutralConfiguration, setDraft, isDraft, beginFieldWrite, queueShowTitle } = pageNeutral;
   const { slug, showTitle, status, accessPolicy } = neutralConfiguration;
@@ -296,10 +304,10 @@ export function PageEditor({
     },
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: t('notifications.published'), color: 'green' });
+      notifications.show({ message: t('notifications.published'), tone: 'positive' });
     },
   });
 
@@ -321,10 +329,10 @@ export function PageEditor({
     },
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: t('notifications.unpublished'), color: 'yellow' });
+      notifications.show({ message: t('notifications.unpublished'), tone: 'positive' });
     },
   });
 
@@ -332,10 +340,10 @@ export function PageEditor({
     mutationFn: () => deletePageAdminAction(pageId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: t('notifications.deleted'), color: 'red' });
+      notifications.show({ message: t('notifications.deleted'), tone: 'positive' });
       router.push('/admin/pages');
     },
   });
@@ -344,16 +352,16 @@ export function PageEditor({
     mutationFn: (request: { locale: string; targetKey: string }) => regeneratePageOgImageAction(pageId, request.locale),
     onSuccess: (result, request) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       ogImage.trackRequestedGeneration(result.generationId, request.targetKey);
-      notifications.show({ message: tCommon('notifications.ogGenerationRequested'), color: 'blue' });
+      notifications.show({ message: tCommon('notifications.ogGenerationRequested'), tone: 'neutral' });
     },
     onError: (error) => {
       notifications.show({
         message: error instanceof Error ? error.message : tCommon('notifications.ogRegenerationFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
@@ -376,7 +384,7 @@ export function PageEditor({
       }
       notifications.show({
         message: error instanceof Error ? error.message : tCommon('notifications.updateFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
@@ -401,7 +409,7 @@ export function PageEditor({
       if (result.error) {
         const reason = result.reason ?? 'checkFailed';
         setSlugMutationErrorReason(reason);
-        notifications.show({ message: t(`slugValidation.${reason}`), color: 'red' });
+        notifications.show({ message: t(`slugValidation.${reason}`), tone: 'danger' });
         return;
       }
       setSlugMutationErrorReason(undefined);
@@ -410,7 +418,7 @@ export function PageEditor({
     onError: (error) => {
       notifications.show({
         message: error instanceof Error ? error.message : t('notifications.slugUpdateFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
@@ -455,7 +463,7 @@ export function PageEditor({
           pageId,
           nextStatus,
           { publish: () => publish.mutateAsync(), unpublish: () => unpublish.mutateAsync() },
-          () => notifications.show({ message: tCommon('notifications.saveFailed'), color: 'red' }),
+          () => notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' }),
         );
       } catch {
         // The mutation owns action errors; the save barrier reports its own failures above.
@@ -550,6 +558,157 @@ export function PageEditor({
   const displayedTitle = roomLocale && isSynced ? residentTitle : activeEditLocale.displayTitle;
   const displayedSummary = roomLocale && isSynced ? residentSummary : activeEditLocale.displaySummary;
 
+  return {
+    currentTextProvider,
+    pageId,
+    protocol,
+    accessTags: {
+      isError: accessTags.isError,
+      error: accessTags.error,
+      isFetching: accessTags.isFetching,
+      refetch: async () => {
+        await accessTags.refetch();
+      },
+      data: accessTags.data,
+      isLoading: accessTags.isLoading,
+    },
+    displayedTitle,
+    canEditLocaleDocument,
+    handleLocaleTitleChange,
+    tCommon,
+    status,
+    pageStatusOptions,
+    currentIsConnected,
+    currentIsSynced,
+    navigateWithSave,
+    router: { back: router.back, replace: router.replace },
+    canEditNeutral,
+    handleStatusChange,
+    deletePage: { mutate: deletePage.mutate, isPending: deletePage.isPending },
+    publish: { isPending: publish.isPending },
+    unpublish: { isPending: unpublish.isPending },
+    tCommonLabels,
+    openVersionHistory,
+    activeEditLocale,
+    baseUrl,
+    slug,
+    slugMgmt: {
+      isAvailable: slugMgmt.isAvailable,
+      isChecking: slugMgmt.isChecking,
+      handleChange: slugMgmt.handleChange,
+      handleBlur: slugMgmt.handleBlur,
+    },
+    slugError,
+    updateSlug: { isPending: updateSlug.isPending },
+    setSlugMutationErrorReason,
+    t,
+    canManageTranslations,
+    canMutate,
+    showTitle,
+    handleShowTitleChange,
+    layout,
+    handleLayoutChange,
+    tLayout,
+    displayedSummary,
+    roomLocale,
+    provider,
+    doc,
+    currentMemberId,
+    userName,
+    handleLocaleSummaryChange,
+    accessPolicy,
+    handleAccessSave,
+    canonicalOrigin,
+    siteName,
+    ogImage: {
+      src: ogImage.src,
+      isRegenerating: ogImage.isRegenerating,
+      status: ogImage.status,
+      error: ogImage.error,
+      targetKey: ogImage.targetKey,
+      trackLatest: ogImage.trackLatest,
+    },
+    featuredImageUrl,
+    ogRegenerationLocale,
+    regenerateOgImage: { isPending: regenerateOgImage.isPending, mutate: regenerateOgImage.mutate },
+    setFeaturedImageUrl,
+    durabilityProtocol,
+    isSynced,
+    versionHistoryOpened,
+    closeVersionHistory,
+    reloadCanonical,
+    permissionRevocation: { interruption: permissionRevocation.interruption },
+  };
+}
+
+export function PageEditor(props: PageEditorProps) {
+  return <PageEditorView model={usePageEditorViewModel(props)} />;
+}
+
+export type PageEditorViewModel = ReturnType<typeof usePageEditorViewModel>;
+
+/** Complete production editor composition; controllers supply data and commands. */
+export function PageEditorView({ model }: { model: PageEditorViewModel }) {
+  const {
+    currentTextProvider,
+    pageId,
+    protocol,
+    accessTags,
+    displayedTitle,
+    canEditLocaleDocument,
+    handleLocaleTitleChange,
+    tCommon,
+    status,
+    pageStatusOptions,
+    currentIsConnected,
+    currentIsSynced,
+    navigateWithSave,
+    router,
+    canEditNeutral,
+    handleStatusChange,
+    deletePage,
+    publish,
+    unpublish,
+    tCommonLabels,
+    openVersionHistory,
+    activeEditLocale,
+    baseUrl,
+    slug,
+    slugMgmt,
+    slugError,
+    updateSlug,
+    setSlugMutationErrorReason,
+    t,
+    canManageTranslations,
+    canMutate,
+    showTitle,
+    handleShowTitleChange,
+    layout,
+    handleLayoutChange,
+    tLayout,
+    displayedSummary,
+    roomLocale,
+    provider,
+    doc,
+    currentMemberId,
+    userName,
+    handleLocaleSummaryChange,
+    accessPolicy,
+    handleAccessSave,
+    canonicalOrigin,
+    siteName,
+    ogImage,
+    featuredImageUrl,
+    ogRegenerationLocale,
+    regenerateOgImage,
+    setFeaturedImageUrl,
+    durabilityProtocol,
+    isSynced,
+    versionHistoryOpened,
+    closeVersionHistory,
+    reloadCanonical,
+    permissionRevocation,
+  } = model;
   return (
     <EditorRuntimeProvider
       provider={currentTextProvider}
@@ -558,7 +717,7 @@ export function PageEditor({
       blockRoomProtocol={protocol}
     >
       <QueryErrorAlert queries={[accessTags]} />
-      <Stack h="100%" gap="md">
+      <DsLayoutStack fill="block" gap={{ base: 'xs', sm: 'md' }}>
         <EditorHeader
           title={displayedTitle}
           onTitleChange={canEditLocaleDocument ? handleLocaleTitleChange : undefined}
@@ -577,12 +736,12 @@ export function PageEditor({
           deleteConfirmation={{
             title: tCommon('actions.delete'),
             message: (
-              <Text>
+              <DsText>
                 {tCommon.rich('messages.confirmDeleteNamedRich', {
                   name: displayedTitle || tCommon('states.untitled'),
                   strong: (chunks) => <strong>{chunks}</strong>,
                 })}
-              </Text>
+              </DsText>
             ),
           }}
           isStatusChanging={publish.isPending || unpublish.isPending}
@@ -593,196 +752,215 @@ export function PageEditor({
             {
               label: tCommonLabels('versionHistory'),
               onClick: openVersionHistory,
-              icon: <IconHistory size={16} />,
+              icon: <IconHistory />,
               disabled: !canEditNeutral,
             },
           ]}
           controls={<EditorActiveLocaleControl state={activeEditLocale} />}
         />
 
-        {/* URL Section */}
-        <UrlSection
-          baseUrl={baseUrl}
-          entityType="page"
-          entityId={pageId}
-          slug={toSlugInputValue(slug)}
-          isAvailable={slugMgmt.isAvailable}
-          idPrefix={`page-${pageId}`}
-          error={slugError}
-          saving={slugMgmt.isChecking || updateSlug.isPending}
-          disabled={!canEditNeutral}
-          onChange={(value) => {
-            setSlugMutationErrorReason(undefined);
-            slugMgmt.handleChange(value);
-          }}
-          onBlur={slugMgmt.handleBlur}
-        />
+        <DocumentEditorPanels
+          settings={
+            <>
+              {/* URL Section */}
+              <UrlSection
+                baseUrl={baseUrl}
+                entityType="page"
+                entityId={pageId}
+                slug={toSlugInputValue(slug)}
+                isAvailable={slugMgmt.isAvailable}
+                idPrefix={`page-${pageId}`}
+                error={slugError}
+                saving={slugMgmt.isChecking || updateSlug.isPending}
+                disabled={!canEditNeutral}
+                onChange={(value) => {
+                  setSlugMutationErrorReason(undefined);
+                  slugMgmt.handleChange(value);
+                }}
+                onBlur={slugMgmt.handleBlur}
+              />
 
-        {/* Share Links */}
-        <ShareLinkSection
-          entityType="page"
-          entityId={pageId}
-          description={t('shareLinksDescription')}
-          disabled={!canEditNeutral}
-        />
-
-        <EntityTranslationsPanel
-          entityType="page"
-          entityId={pageId}
-          canManage={canManageTranslations && canMutate}
-          canAdministerTranslations={canManageTranslations && canMutate}
-          canMutateTargets={canManageTranslations && canMutate}
-        />
-
-        {/* Options */}
-        <Stack gap={4}>
-          <Text size="xs" c="dimmed">
-            {tCommonLabels('options')}
-          </Text>
-          <Checkbox
-            id={`page-${pageId}-show-title`}
-            label={t('showTitleOnPage')}
-            checked={showTitle}
-            onChange={(e) => handleShowTitleChange(e.currentTarget.checked)}
-            disabled={!canEditNeutral}
-            size="sm"
-          />
-          <ContentLayoutField
-            value={layout}
-            onChange={handleLayoutChange}
-            disabled={!canEditNeutral}
-            labels={{
-              contentHeight: tLayout('contentHeight'),
-              content: tLayout('content'),
-              viewport: tLayout('viewport'),
-              pageChrome: tLayout('chrome'),
-              footer: tLayout('footer'),
-              flow: tLayout('flow'),
-              pinned: tLayout('pinned'),
-            }}
-          />
-        </Stack>
-
-        <SummaryFieldCard
-          entityType="page"
-          entityId={pageId}
-          title={displayedTitle}
-          summary={displayedSummary}
-          summaryReadOnly={!canEditLocaleDocument}
-          hideAiActions={!canEditLocaleDocument}
-          aiTarget={canEditLocaleDocument && roomLocale ? { type: 'page', id: pageId, locale: roomLocale } : undefined}
-          provider={canEditLocaleDocument ? provider : null}
-          doc={canEditLocaleDocument ? doc : null}
-          currentMemberId={currentMemberId}
-          currentMemberDisplayName={userName}
-          onSummaryChange={canEditLocaleDocument ? handleLocaleSummaryChange : undefined}
-        />
-
-        <SectionCard>
-          <Stack gap="md">
-            <SectionHeader title={t('access.title')} />
-            {accessTags.isError ? (
-              <Stack gap="xs">
-                <Text size="sm" c="red" role="alert">
-                  {t('access.tagsLoadError')}
-                </Text>
-                <Button
-                  tone="neutral"
-                  emphasis="low"
-                  onClick={() => void accessTags.refetch()}
+              {/* Share Links */}
+              <AuthoringExtension kind="sharing">
+                <ShareLinkSection
+                  entityType="page"
+                  entityId={pageId}
+                  description={t('shareLinksDescription')}
                   disabled={!canEditNeutral}
-                >
-                  {t('access.tagsRetry')}
-                </Button>
-              </Stack>
-            ) : null}
-            <PageAccessSettings
-              key={pageId}
-              value={accessPolicy}
-              tagOptions={accessTags.data ?? []}
-              loadingTags={accessTags.isLoading || accessTags.isError}
-              disabled={!canEditNeutral}
-              onSave={handleAccessSave}
-            />
-          </Stack>
-        </SectionCard>
+                />
+              </AuthoringExtension>
 
-        <MetadataPanel
-          title={displayedTitle}
-          summary={displayedSummary}
-          routePath={`/${slug || pageId}`}
-          canonicalOrigin={canonicalOrigin}
-          siteName={siteName}
-          defaultImageUrl={ogImage.src ?? featuredImageUrl ?? undefined}
-          defaultSchemaType="WebPage"
-        />
+              <AuthoringExtension kind="translations">
+                <EntityTranslationsPanel
+                  entityType="page"
+                  entityId={pageId}
+                  canManage={canManageTranslations && canMutate}
+                  canAdministerTranslations={canManageTranslations && canMutate}
+                  canMutateTargets={canManageTranslations && canMutate}
+                />
+              </AuthoringExtension>
 
-        {/* OG Image & Featured Image */}
-        <MediaPreviewGrid>
-          <OgImagePreview
-            src={ogImage.src}
-            canRegenerate={canEditLocaleDocument && activeEditLocale.hasLiveRow && ogRegenerationLocale !== null}
-            isRegenerating={regenerateOgImage.isPending || ogImage.isRegenerating}
-            generationStatus={ogImage.status}
-            generationError={ogImage.error}
-            onRegenerate={() => {
-              if (ogRegenerationLocale) {
-                regenerateOgImage.mutate({
-                  locale: ogRegenerationLocale,
-                  targetKey: ogImage.targetKey,
-                });
-              }
-            }}
-          />
-          <PageFeaturedImageUploader
-            pageId={pageId}
-            imageUrl={featuredImageUrl}
-            onImageUrlChange={setFeaturedImageUrl}
-            idPrefix={`page-${pageId}-featured-image`}
-            canEdit={canEditNeutral}
-            onOgGenerationRequested={() => void ogImage.trackLatest()}
-          />
-        </MediaPreviewGrid>
+              {/* Options */}
+              <SectionCard padding={{ base: 'none', sm: 'md' }}>
+                <DsLayoutStack gap="md">
+                  <SectionHeader title={tCommonLabels('options')} />
+                  <Checkbox
+                    id={`page-${pageId}-show-title`}
+                    label={t('showTitleOnPage')}
+                    checked={showTitle}
+                    onChange={(e) => handleShowTitleChange(e.currentTarget.checked)}
+                    disabled={!canEditNeutral}
+                    size="sm"
+                  />
+                  <ContentLayoutField
+                    value={layout}
+                    onChange={handleLayoutChange}
+                    disabled={!canEditNeutral}
+                    labels={{
+                      contentHeight: tLayout('contentHeight'),
+                      content: tLayout('content'),
+                      viewport: tLayout('viewport'),
+                      pageChrome: tLayout('chrome'),
+                      footer: tLayout('footer'),
+                      flow: tLayout('flow'),
+                      pinned: tLayout('pinned'),
+                    }}
+                  />
+                </DsLayoutStack>
+              </SectionCard>
 
-        {/* Content */}
-        <SectionCard style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-          <Stack flex={1} style={{ minHeight: 0 }}>
-            <Text size="sm" fw={500}>
-              {tCommon('labels.body')}
-            </Text>
-            {provider && doc && durabilityProtocol && isSynced && roomLocale ? (
-              <MapPlaceActionProvider createMapPlaceForBlock={createMapPlaceForBlockWithBrowserClient}>
-                <PageEditorProvider
-                  doc={doc}
-                  provider={provider}
-                  protocol={durabilityProtocol}
-                  locale={roomLocale}
-                  userName={userName}
-                  pageId={pageId}
-                  editable={canEditLocaleDocument}
-                  allowStructuralEdits={canEditNeutral}
-                >
-                  <ScrollArea id={getEditorBodyReadyId('page', pageId)} flex={1} style={{ minHeight: 0 }}>
-                    {activeEditLocale.isSourceLocale ? (
-                      <SectionList />
-                    ) : (
-                      <LocalizedCollaborativePageBodyEditor
-                        fallbackText={tCommon('states.none')}
-                        editable={canEditLocaleDocument}
-                      />
-                    )}
-                  </ScrollArea>
-                </PageEditorProvider>
-              </MapPlaceActionProvider>
-            ) : (
-              <Stack id={getEditorBodyLoadingId('page', pageId)} justify="center" mih={200}>
-                <Text size="sm" c="dimmed">
-                  {tCommon('labels.body')}
-                </Text>
-              </Stack>
-            )}
-          </Stack>
-        </SectionCard>
+              <SummaryFieldCard
+                entityType="page"
+                entityId={pageId}
+                title={displayedTitle}
+                summary={displayedSummary}
+                summaryReadOnly={!canEditLocaleDocument}
+                hideAiActions={!canEditLocaleDocument}
+                aiTarget={
+                  canEditLocaleDocument && roomLocale ? { type: 'page', id: pageId, locale: roomLocale } : undefined
+                }
+                provider={canEditLocaleDocument ? provider : null}
+                doc={canEditLocaleDocument ? doc : null}
+                currentMemberId={currentMemberId}
+                currentMemberDisplayName={userName}
+                onSummaryChange={canEditLocaleDocument ? handleLocaleSummaryChange : undefined}
+              />
+
+              <SectionCard padding={{ base: 'none', sm: 'md' }}>
+                <DsLayoutStack gap="md">
+                  <SectionHeader title={t('access.title')} />
+                  {accessTags.isError ? (
+                    <DsLayoutStack gap="xs">
+                      <DsText size="sm" tone="danger" role="alert">
+                        {t('access.tagsLoadError')}
+                      </DsText>
+                      <Button
+                        tone="neutral"
+                        emphasis="low"
+                        onClick={() => void accessTags.refetch()}
+                        disabled={!canEditNeutral}
+                      >
+                        {t('access.tagsRetry')}
+                      </Button>
+                    </DsLayoutStack>
+                  ) : null}
+                  <PageAccessSettings
+                    key={pageId}
+                    value={accessPolicy}
+                    tagOptions={accessTags.data ?? []}
+                    loadingTags={accessTags.isLoading || accessTags.isError}
+                    disabled={!canEditNeutral}
+                    onSave={handleAccessSave}
+                  />
+                </DsLayoutStack>
+              </SectionCard>
+
+              <MetadataPanel
+                title={displayedTitle}
+                summary={displayedSummary}
+                routePath={`/${slug || pageId}`}
+                canonicalOrigin={canonicalOrigin}
+                siteName={siteName}
+                defaultImageUrl={ogImage.src ?? featuredImageUrl ?? undefined}
+                defaultSchemaType="WebPage"
+              />
+
+              {/* OG Image & Featured Image */}
+              <SectionCard padding={{ base: 'none', sm: 'md' }}>
+                <MediaPreviewGrid>
+                  <OgImagePreview
+                    src={ogImage.src}
+                    canRegenerate={
+                      canEditLocaleDocument && activeEditLocale.hasLiveRow && ogRegenerationLocale !== null
+                    }
+                    isRegenerating={regenerateOgImage.isPending || ogImage.isRegenerating}
+                    generationStatus={ogImage.status}
+                    generationError={ogImage.error}
+                    onRegenerate={() => {
+                      if (ogRegenerationLocale) {
+                        regenerateOgImage.mutate({
+                          locale: ogRegenerationLocale,
+                          targetKey: ogImage.targetKey,
+                        });
+                      }
+                    }}
+                  />
+                  <AuthoringExtension kind="uploads">
+                    <PageFeaturedImageUploader
+                      pageId={pageId}
+                      imageUrl={featuredImageUrl}
+                      onImageUrlChange={setFeaturedImageUrl}
+                      idPrefix={`page-${pageId}-featured-image`}
+                      canEdit={canEditNeutral}
+                      onOgGenerationRequested={() => void ogImage.trackLatest()}
+                    />
+                  </AuthoringExtension>
+                </MediaPreviewGrid>
+              </SectionCard>
+            </>
+          }
+        >
+          {/* Content */}
+          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+            <SectionCard layout="stack" grow padding={{ base: 'none', sm: 'md' }}>
+              <DsLayoutStack flexible>
+                {provider && doc && durabilityProtocol && isSynced && roomLocale ? (
+                  <MapPlaceActionProvider createMapPlaceForBlock={createMapPlaceForBlockWithBrowserClient}>
+                    <PageEditorProvider
+                      doc={doc}
+                      provider={provider}
+                      protocol={durabilityProtocol}
+                      locale={roomLocale}
+                      userName={userName}
+                      pageId={pageId}
+                      editable={canEditLocaleDocument}
+                      allowStructuralEdits={canEditNeutral}
+                    >
+                      <ScrollArea id={getEditorBodyReadyId('page', pageId)} grow>
+                        {activeEditLocale.isSourceLocale ? (
+                          <SectionList />
+                        ) : (
+                          <LocalizedCollaborativePageBodyEditor
+                            fallbackText={tCommon('states.none')}
+                            editable={canEditLocaleDocument}
+                          />
+                        )}
+                      </ScrollArea>
+                    </PageEditorProvider>
+                  </MapPlaceActionProvider>
+                ) : (
+                  <div style={{ minHeight: 200 }}>
+                    <DsLayoutStack id={getEditorBodyLoadingId('page', pageId)} justify="center">
+                      <DsText size="sm" tone="secondary">
+                        {tCommon('labels.body')}
+                      </DsText>
+                    </DsLayoutStack>
+                  </div>
+                )}
+              </DsLayoutStack>
+            </SectionCard>
+          </div>
+        </DocumentEditorPanels>
 
         {/* Version History */}
         <VersionHistoryDrawer
@@ -803,7 +981,7 @@ export function PageEditor({
           permissionRevokedDestination={status === 'published' ? `/${slug || pageId}` : '/'}
           navigate={(destination) => router.replace(destination)}
         />
-      </Stack>
+      </DsLayoutStack>
     </EditorRuntimeProvider>
   );
 }

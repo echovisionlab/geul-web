@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { NextIntlClientProvider } from 'next-intl';
-import { MantineProvider } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import koMessages from '@/messages/ko.json';
 import { McpOAuthGrantSettings } from './McpOAuthGrantSettings';
@@ -12,7 +13,7 @@ import { revokeMyMcpOAuthGrant } from './mcp-oauth-grant-actions';
 
 vi.mock('@/lib/providers/LocaleProvider', () => ({ useLocale: () => 'ko' }));
 vi.mock('@/features/my/mcp-oauth-grant-actions', () => ({ revokeMyMcpOAuthGrant: vi.fn() }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -35,9 +36,9 @@ function render(grants = [{ id: 'grant-1', clientName: 'Codex', connectedAt: '20
   act(() => {
     root.render(
       <NextIntlClientProvider locale="ko" messages={koMessages}>
-        <MantineProvider env="test">
+        <DesignSystemProvider locale="ko" forceColorScheme="light">
           <McpOAuthGrantSettings initialGrants={grants} />
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
   });
@@ -98,7 +99,7 @@ describe('McpOAuthGrantSettings', () => {
       expect(confirmationButton('권한 해제').disabled).toBe(false);
       expect(confirmationButton('취소').disabled).toBe(false);
       expect(notifications.show).toHaveBeenLastCalledWith({
-        color: 'red',
+        tone: 'danger',
         message: koMessages.security.mcpIntegration.revokeFailed,
       });
 
@@ -109,7 +110,7 @@ describe('McpOAuthGrantSettings', () => {
       expect(container.textContent).toContain('연결된 MCP 클라이언트가 없습니다.');
       expect(document.querySelector('[role="dialog"]')).toBeNull();
       expect(notifications.show).toHaveBeenLastCalledWith({
-        color: 'green',
+        tone: 'positive',
         message: koMessages.security.mcpIntegration.revokeSuccess,
       });
     },

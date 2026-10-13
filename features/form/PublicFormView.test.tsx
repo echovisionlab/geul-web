@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { PublicFormView } from './PublicFormView';
 
 const pushMock = vi.fn();
@@ -29,7 +30,7 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: {
     show: vi.fn(),
   },
@@ -140,7 +141,7 @@ function render(node: React.ReactNode) {
   act(() => {
     root?.render(
       <QueryClientProvider client={queryClient}>
-        <MantineProvider>{node}</MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>
       </QueryClientProvider>,
     );
   });
@@ -339,7 +340,7 @@ describe('PublicFormView', () => {
     await waitForAssertion(() => {
       expect(vi.mocked(notifications.show)).toHaveBeenCalledWith({
         message: 'Submission failed',
-        color: 'red',
+        tone: 'danger',
       });
     });
 

@@ -1,7 +1,7 @@
 .chromeWithControls {
-  padding-inline-end: var(--content-controls-space);
+  padding-inline-end: calc(var(--_document-layout-controls-space) + var(--_table-of-contents-inset-end, 0px));
 }
 
 .withoutTitle :global(.page-section:first-child[data-section-type='rich-text'] > :first-child) {
-  padding-inline-end: var(--content-controls-space);
+  padding-inline-end: var(--_document-layout-controls-space);
 }

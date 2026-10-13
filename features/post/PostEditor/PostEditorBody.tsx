@@ -1,21 +1,19 @@
 'use client';
-
+import { LayoutInset as DsLayoutInset, LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import type { ReactNode } from 'react';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
-import { Box, Stack, Text } from '@mantine/core';
 import { ActiveEditLocaleContentPreview } from '@/features/translation/ActiveEditLocaleContentPreview';
 import { LocalizedRichTextFragmentEditor } from '@/features/translation/LocalizedRichTextFragmentEditor';
 import type { PostBlockRoomTiptapController } from '@/features/editor/tiptap/block-room-tiptap-controller';
 import { getEditorBodyLoadingId, getEditorBodyReadyId } from '@/features/editor/lib/media-test-ids';
 import { PageLoader } from '@/features/site/PageLoader';
 import type { PostEditorBodyMode } from './body-mode';
-
 interface PostEditorSession {
   provider: HocuspocusProvider;
   controller: PostBlockRoomTiptapController;
 }
-
 interface PostEditorBodyProps {
   bodyMode: PostEditorBodyMode;
   session: PostEditorSession | null;
@@ -31,15 +29,13 @@ interface PostEditorBodyProps {
   previewLoading: boolean;
   isSourceLocale: boolean;
 }
-
 function EditorLoading({ postId }: { postId: string }) {
   return (
-    <Box id={getEditorBodyLoadingId('post', postId)} pos="relative" mih={200}>
+    <div style={{ position: 'relative', minHeight: 200 }} id={getEditorBodyLoadingId('post', postId)}>
       <PageLoader size="md" />
-    </Box>
+    </div>
   );
 }
-
 function ScopedLocaleBoundary({
   activeLocale,
   activeLocaleLabel,
@@ -50,7 +46,10 @@ function ScopedLocaleBoundary({
 }: Pick<
   PostEditorBodyProps,
   'activeLocale' | 'activeLocaleLabel' | 'hasLiveRow' | 'contentPreview' | 'previewLoading'
-> & { activeLocaleLabel: string; children?: ReactNode }) {
+> & {
+  activeLocaleLabel: string;
+  children?: ReactNode;
+}) {
   return (
     <ActiveEditLocaleContentPreview
       key={activeLocale ?? 'post-source'}
@@ -63,7 +62,6 @@ function ScopedLocaleBoundary({
     </ActiveEditLocaleContentPreview>
   );
 }
-
 export function PostEditorBody({
   bodyMode,
   session,
@@ -80,7 +78,6 @@ export function PostEditorBody({
   isSourceLocale,
 }: PostEditorBodyProps) {
   let content: ReactNode;
-
   switch (bodyMode) {
     case 'missing-target-fallback': {
       if (!activeLocaleLabel) {
@@ -96,8 +93,9 @@ export function PostEditorBody({
           previewLoading={previewLoading}
         >
           {session ? (
-            <Box id={getEditorBodyReadyId('post', postId)} flex={1}>
+            <DsLayoutInset space="none" id={getEditorBodyReadyId('post', postId)} flexible>
               <LocalizedRichTextFragmentEditor
+                accessibleLabel={bodyLabel}
                 key={`post-${postId}-${activeLocale ?? 'missing-target'}-source-fallback`}
                 provider={session.provider}
                 blockRoomController={session.controller}
@@ -108,7 +106,7 @@ export function PostEditorBody({
                 allowNeutralBlockEdits={false}
                 allowStructuralEdits={false}
               />
-            </Box>
+            </DsLayoutInset>
           ) : null}
         </ScopedLocaleBoundary>
       );
@@ -120,8 +118,9 @@ export function PostEditorBody({
         break;
       }
       content = (
-        <Box id={getEditorBodyReadyId('post', postId)} flex={1}>
+        <DsLayoutInset space="none" id={getEditorBodyReadyId('post', postId)} flexible>
           <LocalizedRichTextFragmentEditor
+            accessibleLabel={bodyLabel}
             key={`post-${postId}-${activeLocale ?? 'source'}`}
             provider={session.provider}
             blockRoomController={session.controller}
@@ -133,7 +132,7 @@ export function PostEditorBody({
             allowStructuralEdits={isSourceLocale}
             aiTarget={activeLocale && editable ? { type: 'post', id: postId, locale: activeLocale } : undefined}
           />
-        </Box>
+        </DsLayoutInset>
       );
       break;
     }
@@ -142,15 +141,14 @@ export function PostEditorBody({
       break;
     }
   }
-
   return (
-    <Stack gap={4} flex={1}>
+    <DsLayoutStack gap="xxs" flexible>
       {showLabel ? (
-        <Text size="xs" c="dimmed">
+        <DsText size="xs" tone="secondary">
           {bodyLabel}
-        </Text>
+        </DsText>
       ) : null}
       {content}
-    </Stack>
+    </DsLayoutStack>
   );
 }

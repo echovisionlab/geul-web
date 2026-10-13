@@ -1,10 +1,13 @@
 'use client';
+import { ConfirmationDialog } from '@/features/confirmation';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { Stack, Text } from '@mantine/core';
+
 import { TextInput } from '@/components/core/Input';
-import { ConfirmModal, FormModal } from '@/components/core/Modal';
+import { FormModal } from '@/components/core/Modal';
 import { PageHeader } from '@/components/core/PageHeader';
 import type { MapTheme } from '@/lib/types/map-theme/model';
 import { MapThemeListView } from './MapThemeListView';
@@ -75,7 +78,7 @@ export function MapThemeListPageView({
   };
 
   return (
-    <Stack gap="md">
+    <DsLayoutStack gap="md">
       <PageHeader title={tCommonEntities('mapThemes')} actions={createAction} />
 
       <MapThemeListView
@@ -98,7 +101,7 @@ export function MapThemeListPageView({
         loading={copyLoading}
         submitDisabled={!copyName.trim()}
       >
-        <Text>{tPage('copyModal.description', { name: copyingTheme?.name ?? '' })}</Text>
+        <DsText>{tPage('copyModal.description', { name: copyingTheme?.name ?? '' })}</DsText>
         <TextInput
           label={tPage('copyModal.nameLabel')}
           placeholder={tPage('copyModal.namePlaceholder')}
@@ -108,22 +111,23 @@ export function MapThemeListPageView({
         />
       </FormModal>
 
-      <ConfirmModal
+      <ConfirmationDialog
+        intent="delete"
         opened={Boolean(deletingTheme)}
         onClose={closeDelete}
         onConfirm={() => void confirmDelete()}
         title={tPage('deleteModal.title')}
         message={
           <>
-            <Text>
+            <DsText>
               {tCommon.rich('messages.confirmDeleteNamedRich', {
                 name: deletingTheme?.name ?? '',
                 strong: (chunks) => <strong>{chunks}</strong>,
               })}
-            </Text>
-            <Text size="sm" c="orange">
+            </DsText>
+            <DsText size="sm" tone="warning">
               {tPage('deleteModal.warning')}
-            </Text>
+            </DsText>
           </>
         }
         confirmLabel={tCommon('actions.delete')}
@@ -131,6 +135,6 @@ export function MapThemeListPageView({
         closeLabel={tCommon('actions.close')}
         loading={deleteLoading}
       />
-    </Stack>
+    </DsLayoutStack>
   );
 }

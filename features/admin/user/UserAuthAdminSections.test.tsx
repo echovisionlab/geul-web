@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { Divider, MantineProvider, Stack } from '@mantine/core';
+import { LayoutStack as Stack } from '@/components/core/Layout';
+import { Separator as Divider } from '@/components/core/Display';
 import type { UserFull } from '@/lib/types/user/model';
 import enMessages from '@/messages/en.json';
 import {
@@ -62,7 +64,9 @@ function render(node: ReactNode) {
   act(() => {
     root?.render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <MantineProvider>{node}</MantineProvider>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
+          {node}
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
   });
@@ -169,7 +173,7 @@ describe('admin user auth sections', () => {
   it('shows provider-backed delivery addresses without password or external-email controls', () => {
     renderAuthSections({ user: baseUser });
 
-    expect(document.body.textContent).toContain('johndoe@example.com');
+    expect(document.querySelector<HTMLInputElement>('input[role="combobox"]')?.value).toBe('johndoe@example.com');
     expect(document.body.textContent).toContain('Google');
     expect(document.body.textContent).toContain('GitHub');
     expect(document.body.textContent).not.toContain('Password login');

@@ -1,7 +1,9 @@
 'use client';
+import { getCollectionMetrics } from '@/components/core/Collection/collection-contract';
 
-import { useLocale } from 'next-intl';
-import { Text } from '@mantine/core';
+import { Text as DsText } from '@/components/core/Typography';
+import { useLocale, useTranslations } from 'next-intl';
+
 import { formatCountryDisplayName } from '@/lib/countries';
 import { EntityListView, type EntityListItem } from '../EntityListView';
 import type { LabelListProps } from './schema';
@@ -17,6 +19,8 @@ export interface LabelListViewClientProps {
 
 export function LabelListViewClient({ labels, parsedProps: p }: LabelListViewClientProps) {
   const locale = useLocale();
+  const t = useTranslations();
+  const metrics = getCollectionMetrics(p.itemSize);
   const layout = p.layout || 'grid';
   const columns = parseInt(p.columns || '3', 10);
   const showImage = p.showImage !== 'false';
@@ -29,8 +33,9 @@ export function LabelListViewClient({ labels, parsedProps: p }: LabelListViewCli
     <EntityListView
       items={labels}
       className="label-list-block"
-      emptyLabel="No labels found"
+      emptyLabel={t('common.messages.noLabelsFound')}
       layout={layout}
+      itemSize={p.itemSize}
       columns={columns}
       showImage={showImage}
       imageAspectRatio={imageAspectRatio}
@@ -40,9 +45,9 @@ export function LabelListViewClient({ labels, parsedProps: p }: LabelListViewCli
         showMeta
           ? (label) =>
               label.countryCode ? (
-                <Text size="xs" c="dimmed">
+                <DsText size={metrics.metaSize} tone="secondary">
                   {formatCountryDisplayName(label.countryCode, locale)}
-                </Text>
+                </DsText>
               ) : null
           : undefined
       }

@@ -1,18 +1,19 @@
 'use client';
 
-import type { CSSProperties } from 'react';
-import { IconChevronDown, IconExternalLink, IconMapPin } from '@tabler/icons-react';
+import { LayoutInline as DsLayoutInline, LayoutStack } from '@/components/core/Layout';
+
+import { IconExternalLink, IconMapPin } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Group, Text, type TextProps } from '@mantine/core';
-import { DropdownMenu } from '@/components/core/DropdownMenu';
+import { Text, type TextProps, type TextTone } from '@/components/core/Typography';
+// View pages load menu code on first interaction.
+import { OnDemandDropdownMenu as DropdownMenu } from '@/components/core/DropdownMenu/OnDemandDropdownMenu';
 import { TextButton } from '@/components/core/TextButton';
 import { MAP_LINK_PROVIDERS, openMapProviderLink } from '@/features/map/utils/provider-links';
 import { formatLocationPlace, type LocationPlaceSummary } from '@/lib/utils/location-place';
-import classes from './LocationPlaceMenu.module.css';
 
 interface LocationPlaceMenuProps {
   place: LocationPlaceSummary;
-  textColor?: string;
+  textColor?: TextTone;
   textSize?: TextProps['size'];
   iconSize?: number;
   variant?: 'details' | 'name';
@@ -41,83 +42,45 @@ export function LocationPlaceMenu({
     ? `${formattedPlace.name}. ${tCommon('labels.latitude')} ${formattedPlace.latitude}. ${tCommon('labels.longitude')} ${formattedPlace.longitude}.`
     : `${tCommon('labels.latitude')} ${formattedPlace.latitude}. ${tCommon('labels.longitude')} ${formattedPlace.longitude}.`;
 
-  const triggerStyle = textColor
-    ? ({
-        '--text-button-color': textColor,
-        '--text-button-hover-color': hoverAccent ? 'var(--mantine-primary-color-filled)' : textColor,
-      } as CSSProperties)
-    : undefined;
-
   return (
     <DropdownMenu size="wide" placement="bottom-start" portal>
       <DropdownMenu.Target>
         <TextButton
           type="button"
           appearance="default"
+          tone={textColor}
           size={textSize === 'xs' ? 'xs' : textSize === 'md' ? 'md' : 'sm'}
           display="block"
+          indicator={showChevron ? 'menu' : undefined}
           aria-label={`${tCommon('actions.openIn')} ${locationAriaLabel}`}
-          className={classes.trigger}
-          style={triggerStyle}
           data-hover-accent={hoverAccent ? 'true' : 'false'}
         >
-          <Group gap={6} wrap="nowrap" align={isDetailed ? 'flex-start' : 'center'}>
-            {showIcon && <IconMapPin size={iconSize} style={{ flexShrink: 0, marginTop: 2 }} />}
+          <DsLayoutInline gap="xxs" wrap="nowrap" align={isDetailed ? 'start' : 'center'}>
+            {showIcon && (
+              <DsLayoutInline gap="none" shrink={false}>
+                <IconMapPin size={iconSize} />
+              </DsLayoutInline>
+            )}
             {isDetailed ? (
-              <span
-                style={{
-                  display: 'block',
-                  flex: 1,
-                  minWidth: 0,
-                }}
-              >
+              <LayoutStack flexible gap="none">
                 {formattedPlace.name && (
-                  <Text
-                    size={textSize}
-                    c="inherit"
-                    span
-                    style={{
-                      display: 'block',
-                      overflowWrap: 'anywhere',
-                      fontWeight: 600,
-                      lineHeight: 1.35,
-                    }}
-                  >
+                  <Text size={textSize} tone="inherit" as="div" wrap="anywhere" weight="strong">
                     {formattedPlace.name}
                   </Text>
                 )}
-                <Text
-                  size={textSize}
-                  c="inherit"
-                  span
-                  style={{
-                    display: 'block',
-                    overflowWrap: 'anywhere',
-                    lineHeight: 1.35,
-                  }}
-                >
+                <Text size={textSize} tone="inherit" as="div" wrap="anywhere">
                   {`${tCommon('labels.latitude')} ${formattedPlace.latitude}`}
                 </Text>
-                <Text
-                  size={textSize}
-                  c="inherit"
-                  span
-                  style={{
-                    display: 'block',
-                    overflowWrap: 'anywhere',
-                    lineHeight: 1.35,
-                  }}
-                >
+                <Text size={textSize} tone="inherit" as="div" wrap="anywhere">
                   {`${tCommon('labels.longitude')} ${formattedPlace.longitude}`}
                 </Text>
-              </span>
+              </LayoutStack>
             ) : (
-              <Text size={textSize} c="inherit" span className={classes.compactLabel}>
+              <Text size={textSize} tone="inherit" wrap="anywhere">
                 {compactLabel}
               </Text>
             )}
-            {showChevron && <IconChevronDown size={12} style={{ flexShrink: 0 }} />}
-          </Group>
+          </DsLayoutInline>
         </TextButton>
       </DropdownMenu.Target>
 

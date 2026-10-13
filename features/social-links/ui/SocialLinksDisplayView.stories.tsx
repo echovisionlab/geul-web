@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
-import { SOCIAL_ICON_DEFINITIONS } from '@/components/core/Social';
+import { prepareSocialIcon } from '@/components/core/Social';
 import { SocialLinksDisplayView } from './SocialLinksDisplayView';
 
 const meta = {
-  title: 'Feature/SocialLinks/SocialLinksDisplayView',
+  title: 'Feature/Social Links/SocialLinksDisplayView',
   component: SocialLinksDisplayView,
   args: {
     entries: [
@@ -12,20 +12,14 @@ const meta = {
         platform: 'instagram',
         url: 'https://instagram.com/example-studio',
         label: 'Instagram',
-        glyph: {
-          path: SOCIAL_ICON_DEFINITIONS.instagram.icon.path,
-          light: `#${SOCIAL_ICON_DEFINITIONS.instagram.icon.hex}`,
-        },
+        glyph: prepareSocialIcon('instagram'),
       },
       {
         key: '1',
         platform: 'bandcamp',
         url: 'https://example-studio.bandcamp.com',
         label: 'Bandcamp',
-        glyph: {
-          path: SOCIAL_ICON_DEFINITIONS.bandcamp.icon.path,
-          light: `#${SOCIAL_ICON_DEFINITIONS.bandcamp.icon.hex}`,
-        },
+        glyph: prepareSocialIcon('bandcamp'),
       },
     ],
   },

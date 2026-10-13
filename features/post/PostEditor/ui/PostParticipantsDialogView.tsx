@@ -1,14 +1,23 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
-import { useMemo, type ReactNode } from 'react';
-import { IconArrowsExchange, IconUserOff, IconUserPlus, IconX } from '@tabler/icons-react';
-import { Avatar, Group, Loader, ScrollArea, Stack, Text, useCombobox } from '@mantine/core';
-import { LabelBadge } from '@/components/core/Badge';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+
+import { useInputCombobox, SearchComboboxView, Select } from '@/components/core/Input';
+
+import { useId, useMemo, type ReactNode } from 'react';
+import { IconArrowsExchange, IconUserPlus, IconX } from '@tabler/icons-react';
+
+import { Avatar, Spinner as Loader, ScrollArea } from '@/components/core/Display';
 import { IconButton } from '@/components/core/IconButton';
-import { SearchComboboxView, Select } from '@/components/core/Input';
+
 import { ContentModal } from '@/components/core/Modal';
 import { Tooltip } from '@/components/core/Tooltip';
-import styles from './PostParticipantsDialogView.module.css';
+import { ParticipantRow } from '@/features/participants/ParticipantRow';
 
 export interface PostParticipantViewModel {
   memberId: string;
@@ -101,7 +110,8 @@ export function PostParticipantsDialogView({
   onChangeRole,
   labels,
 }: PostParticipantsDialogViewProps) {
-  const combobox = useCombobox({ onDropdownClose: () => combobox.resetSelectedOption() });
+  const combobox = useInputCombobox();
+  const dialogId = useId();
   const authorCount = participants.filter((participant) => participant.role === 'author').length;
   const roleOptions = useMemo(
     () => [
@@ -114,15 +124,15 @@ export function PostParticipantsDialogView({
 
   return (
     <ContentModal opened={opened} onClose={onClose} title={labels.title} closeLabel={labels.close} size="standard">
-      <Stack gap="md">
+      <DsLayoutStack gap="md">
         {queryFailure}
         {roleOptions.length > 0 ? (
-          <Stack gap="xs">
-            <Text size="sm" fw={500}>
+          <DsLayoutStack gap="xs">
+            <DsText size="sm" weight="medium">
               {labels.addSectionLabel}
-            </Text>
-            <div className={styles.addControls}>
-              <div className={styles.searchControl} data-participant-search-control>
+            </DsText>
+            <DsLayoutInline gap="xs" align="end" wrap="nowrap" direction={{ base: 'column', xs: 'row' }}>
+              <DsLayoutStack gap="none" flexible fill="inline" data-participant-search-control>
                 <SearchComboboxView
                   combobox={combobox}
                   search={searchQuery}
@@ -140,54 +150,46 @@ export function PostParticipantsDialogView({
                     combobox.closeDropdown();
                   }}
                   renderItem={(candidate) => (
-                    <Group gap="sm" wrap="nowrap">
-                      <Avatar src={candidate.avatarUrl} size="sm" radius="xl">
-                        {candidate.nickname.charAt(0)}
-                      </Avatar>
-                      <Text size="sm" truncate>
+                    <DsLayoutInline gap="sm" wrap="nowrap">
+                      <Avatar src={candidate.avatarUrl} size="sm" shape="circle" name={candidate.nickname} />
+                      <DsText size="sm" truncate>
                         {candidate.nickname}
-                      </Text>
-                    </Group>
+                      </DsText>
+                    </DsLayoutInline>
                   )}
                   getItemId={(candidate) => candidate.id}
+                  getItemText={(candidate) => candidate.nickname}
                   minimumQueryMessage={labels.typeAtLeast2Characters}
                   noResultsMessage={labels.noUsersFound}
                   size="sm"
                 />
-              </div>
-              <div className={styles.roleControl} data-participant-role-select>
-                <span className={styles.roleWidthSizer} aria-hidden="true">
-                  <span>{labels.roleLabel}</span>
-                  {roleOptions.map((option) => (
-                    <span key={option.value}>{option.label}</span>
-                  ))}
-                </span>
-                <Select
-                  label={labels.roleLabel}
-                  value={normalizedSelectedRole}
-                  onChange={(value) => value && onSelectedRoleChange(value as 'author' | 'collaborator')}
-                  data={roleOptions}
-                  allowDeselect={false}
-                  disabled={roleOptions.length === 1}
-                  size="sm"
-                  classNames={{ root: styles.roleSelectRoot, input: styles.roleSelectInput }}
-                />
-              </div>
-            </div>
-          </Stack>
+              </DsLayoutStack>
+              <Select
+                width="content"
+                data-participant-role-select
+                label={labels.roleLabel}
+                value={normalizedSelectedRole}
+                onChange={(value) => value && onSelectedRoleChange(value as 'author' | 'collaborator')}
+                data={roleOptions}
+                allowDeselect={false}
+                disabled={roleOptions.length === 1}
+                size="sm"
+              />
+            </DsLayoutInline>
+          </DsLayoutStack>
         ) : null}
 
         {loading ? (
-          <Group justify="center" py="md">
-            <Loader size="sm" />
-          </Group>
+          <DsLayoutInset block="md">
+            <DsLayoutInline justify="center">
+              <Loader size="sm" />
+            </DsLayoutInline>
+          </DsLayoutInset>
         ) : participants.length === 0 ? (
-          <Text size="sm" c="dimmed">
-            {labels.empty}
-          </Text>
+          <SupportingText tone="secondary">{labels.empty}</SupportingText>
         ) : (
-          <ScrollArea.Autosize mah={360}>
-            <Stack gap="xs">
+          <ScrollArea.Autosize size="large">
+            <DsLayoutStack gap="xs">
               {participants.map((participant) => {
                 const lastAuthor = participant.role === 'author' && authorCount <= 1;
                 const canRemove =
@@ -219,80 +221,65 @@ export function PostParticipantsDialogView({
                       ? removeAction
                       : labels.cannotRemoveCollaborator;
                 return (
-                  <div
+                  <ParticipantRow
                     key={`${participant.role}:${participant.memberId}`}
-                    data-participant-id={participant.memberId}
-                    className={styles.participantRow}
-                  >
-                    <Group gap="sm" wrap="nowrap" className={styles.participantIdentity}>
-                      <Avatar src={participant.avatarUrl} size="sm" radius="xl">
-                        {participant.nickname.charAt(0)}
-                      </Avatar>
-                      <Group gap={4} wrap="nowrap" className={styles.participantText}>
-                        <Text size="sm" truncate>
-                          {participant.nickname}
-                        </Text>
-                        {!participant.hasEffectiveAuthority ? (
-                          <Tooltip label={labels.inactiveAuthority}>
-                            <span
-                              className={styles.inactiveStatus}
-                              role="img"
-                              aria-label={labels.inactiveAuthority}
-                              data-participant-inactive-status
-                            >
-                              <IconUserOff size={14} aria-hidden="true" />
-                            </span>
-                          </Tooltip>
+                    memberId={participant.memberId}
+                    identityId={`${dialogId}-${participant.memberId}-${participant.role}`}
+                    nickname={participant.nickname}
+                    avatarUrl={participant.avatarUrl}
+                    roleLabel={participant.role === 'author' ? labels.author : labels.collaborator}
+                    principal={participant.role === 'author'}
+                    inactiveLabel={participant.hasEffectiveAuthority ? undefined : labels.inactiveAuthority}
+                    actions={
+                      <>
+                        {!canChangeRole ? (
+                          <span hidden id={`${dialogId}-${participant.memberId}-${participant.role}-change-reason`}>
+                            {changeRoleReason}
+                          </span>
                         ) : null}
-                      </Group>
-                    </Group>
-                    <div className={styles.participantActions} data-participant-actions>
-                      <Tooltip label={participant.role === 'author' ? labels.author : labels.collaborator}>
-                        <span className={styles.roleBadgeContainer} data-participant-role-badge>
-                          <LabelBadge
-                            tone={participant.role === 'author' ? 'accent' : 'neutral'}
-                            size="sm"
-                            className={styles.roleBadge}
-                          >
-                            {participant.role === 'author' ? labels.author : labels.collaborator}
-                          </LabelBadge>
-                        </span>
-                      </Tooltip>
-                      <Tooltip label={changeRoleReason}>
-                        <span className={styles.actionButton}>
-                          <IconButton
-                            emphasis="low"
-                            size="sm"
-                            aria-label={changeRoleAction}
-                            disabled={!canChangeRole || mutating}
-                            onClick={() => onChangeRole(participant.memberId, targetRole)}
-                          >
-                            <IconArrowsExchange size={14} />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                      <Tooltip label={removeReason}>
-                        <span className={styles.actionButton}>
-                          <IconButton
-                            tone="danger"
-                            emphasis="low"
-                            size="sm"
-                            aria-label={removeAction}
-                            disabled={!canRemove || mutating}
-                            onClick={() => onRemove(participant.memberId, participant.role)}
-                          >
-                            <IconX size={14} />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                    </div>
-                  </div>
+                        {!canRemove ? (
+                          <span hidden id={`${dialogId}-${participant.memberId}-${participant.role}-remove-reason`}>
+                            {removeReason}
+                          </span>
+                        ) : null}
+                        <Tooltip label={changeRoleReason}>
+                          <span>
+                            <IconButton
+                              emphasis="low"
+                              size="sm"
+                              aria-label={changeRoleAction}
+                              aria-describedby={`${dialogId}-${participant.memberId}-${participant.role}${!canChangeRole ? ` ${dialogId}-${participant.memberId}-${participant.role}-change-reason` : ''}`}
+                              disabled={!canChangeRole || mutating}
+                              onClick={() => onChangeRole(participant.memberId, targetRole)}
+                            >
+                              <IconArrowsExchange size={14} />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                        <Tooltip label={removeReason}>
+                          <span>
+                            <IconButton
+                              tone="danger"
+                              emphasis="low"
+                              size="sm"
+                              aria-label={removeAction}
+                              aria-describedby={`${dialogId}-${participant.memberId}-${participant.role}${!canRemove ? ` ${dialogId}-${participant.memberId}-${participant.role}-remove-reason` : ''}`}
+                              disabled={!canRemove || mutating}
+                              onClick={() => onRemove(participant.memberId, participant.role)}
+                            >
+                              <IconX size={14} />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      </>
+                    }
+                  />
                 );
               })}
-            </Stack>
+            </DsLayoutStack>
           </ScrollArea.Autosize>
         )}
-      </Stack>
+      </DsLayoutStack>
     </ContentModal>
   );
 }

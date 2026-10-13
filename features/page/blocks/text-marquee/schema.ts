@@ -1,8 +1,8 @@
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 import { marqueeCommonSchema } from '../marquee/schema';
 
-export const textMarqueeSchema = marqueeCommonSchema.extend({
-  itemsJson: z.string().default('[]'),
+export const textMarqueeSchema = z.extend(marqueeCommonSchema, {
+  itemsJson: z._default(z.string(), '[]'),
 });
 
 export type TextMarqueeProps = z.infer<typeof textMarqueeSchema>;

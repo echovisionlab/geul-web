@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 // @vitest-environment-options {"url":"https://parent.example"}
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { useLocale } from 'next-intl';
 import { EmbedFrame } from './EmbedFrame';
 import { parseEmbedProps, type EmbedProps } from './schema';
@@ -21,9 +22,9 @@ let root: Root;
 function render(props: Partial<EmbedProps>, preview = false) {
   act(() =>
     root.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <EmbedFrame props={parseEmbedProps(props)} preview={preview} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     ),
   );
 }
@@ -85,9 +86,9 @@ describe('EmbedFrame security and lifecycle', () => {
   });
   it('never emits an iframe during SSR without the actual parent origin', () => {
     const html = renderToStaticMarkup(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <EmbedFrame props={parseEmbedProps({ uri: 'https://embed.example' })} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
     expect(html).not.toContain('<iframe');
     expect(html).toContain('min-height:640px');
@@ -136,11 +137,15 @@ describe('EmbedFrame security and lifecycle', () => {
     expect(frame.style.height).toBe('480px');
     expect(frame.style.pointerEvents).toBe('none');
     expect(frame.tabIndex).toBe(-1);
+    expect(frame).toHaveAttribute('aria-hidden', 'true');
+    expect(frame).toHaveAttribute('inert');
     const activate = Array.from(container.querySelectorAll('button')).find(
       (button) => button.textContent === 'activatePreview',
     )!;
     act(() => activate.click());
     expect(frame.style.pointerEvents).toBe('auto');
+    expect(frame).not.toHaveAttribute('aria-hidden');
+    expect(frame).not.toHaveAttribute('inert');
     render({ uri: 'https://embed.example', heightMode: 'viewport' });
     frame = container.querySelector('iframe')!;
     const height = frame.style.height;

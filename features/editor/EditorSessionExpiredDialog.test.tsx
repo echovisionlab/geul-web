@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import enMessages from '@/messages/en.json';
 import { EditorSessionExpiredDialog } from './EditorSessionExpiredDialog';
 
@@ -41,9 +42,9 @@ describe('EditorSessionExpiredDialog', () => {
     act(() => {
       root.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider env="test">
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <EditorSessionExpiredDialog opened={false} onConfirm={vi.fn()} />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -56,9 +57,9 @@ describe('EditorSessionExpiredDialog', () => {
     act(() => {
       root.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider env="test">
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <EditorSessionExpiredDialog opened onConfirm={onConfirm} />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });

@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 import { clearEditorSaveRecovery, readEditorSaveRecovery } from '@/lib/editor/editor-save-recovery';
 import type { DocumentLayout } from '@/features/document-layout';
@@ -30,7 +30,7 @@ vi.mock('@/lib/editor/editor-entity-changes', () => ({
   },
 }));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 
 const postId = '11111111-1111-4111-8111-111111111111';
 const secondPostId = '22222222-2222-4222-8222-222222222222';
@@ -235,7 +235,7 @@ describe('Post config saves', () => {
     });
     expect(firstFlush).toBe(false);
     expect(notifications.show).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'permission denied', color: 'red' }),
+      expect.objectContaining({ message: 'permission denied', tone: 'danger' }),
     );
 
     let retryFlush = false;
@@ -306,7 +306,9 @@ describe('Post config saves', () => {
     expect(flushed).toBe(false);
     expect(update.configurationRevision).toBe(initialRevision);
     expect(update.getPendingPatch()).toEqual({ mapPlaceId: 'unconfirmed-place' });
-    expect(notifications.show).toHaveBeenCalledWith(expect.objectContaining({ message: 'updateFailed', color: 'red' }));
+    expect(notifications.show).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'updateFailed', tone: 'danger' }),
+    );
   });
 
   it('does not rebase its resident revision when the same Post receives refreshed props', async () => {

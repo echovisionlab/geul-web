@@ -1,12 +1,14 @@
 'use client';
 
-import { useCallback, useState, type ReactNode } from 'react';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+import { type ReactElement, useCallback, useState, type ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { IconHammer, IconInbox, IconLanguage, IconSettings } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { Tabs } from '@/components/core/Tabs';
 import { EditorHeader, type StatusOption } from '@/features/editor/EditorHeader';
 import { PageLoader } from '@/features/site/PageLoader';
@@ -24,7 +26,7 @@ interface FormLayoutContentProps {
   initialStatus?: FormStatus;
 }
 
-function FormLayoutContent({ children, formId, initialStatus }: FormLayoutContentProps) {
+function useFormLayoutViewModel({ children, formId, initialStatus }: FormLayoutContentProps) {
   const t = useTranslations('formAdmin');
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
@@ -83,7 +85,7 @@ function FormLayoutContent({ children, formId, initialStatus }: FormLayoutConten
     mutationFn: (nextStatus: FormStatus) => updateFormAction(formId, { status: nextStatus }),
     onSuccess: (result, nextStatus) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       setStatus(nextStatus);
@@ -91,7 +93,7 @@ function FormLayoutContent({ children, formId, initialStatus }: FormLayoutConten
     onError: (error) => {
       notifications.show({
         message: error instanceof Error ? error.message : tCommonNotifications('updateFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
@@ -100,10 +102,10 @@ function FormLayoutContent({ children, formId, initialStatus }: FormLayoutConten
     mutationFn: () => deleteFormAction(formId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: t('notifications.deleted'), color: 'red' });
+      notifications.show({ message: t('notifications.deleted'), tone: 'positive' });
       router.push(formsListPath);
     },
   });
@@ -127,9 +129,64 @@ function FormLayoutContent({ children, formId, initialStatus }: FormLayoutConten
     return <PageLoader />;
   }
 
+  return {
+    provider,
+    formId,
+    displayedTitle,
+    titleChangeHandler,
+    tCommon,
+    titleDisabled,
+    status,
+    statusOptions,
+    currentIsConnected,
+    currentIsSynced,
+    router: { push: router.push },
+    formsListPath,
+    t,
+    updateStatus: { mutate: updateStatus.mutate, isPending: updateStatus.isPending },
+    deleteForm: { mutate: deleteForm.mutate, isPending: deleteForm.isPending },
+    activeEditLocale,
+    currentTab,
+    handleTabChange,
+    navItems,
+    children,
+  };
+}
+
+function FormLayoutContent(props: FormLayoutContentProps) {
+  const model = useFormLayoutViewModel(props);
+  return 'provider' in model ? <FormLayoutView model={model} /> : model;
+}
+
+export type FormLayoutViewModel = Exclude<ReturnType<typeof useFormLayoutViewModel>, ReactElement>;
+
+/** Complete production editor composition; controllers supply data and commands. */
+export function FormLayoutView({ model }: { model: FormLayoutViewModel }) {
+  const {
+    provider,
+    formId,
+    displayedTitle,
+    titleChangeHandler,
+    tCommon,
+    titleDisabled,
+    status,
+    statusOptions,
+    currentIsConnected,
+    currentIsSynced,
+    router,
+    formsListPath,
+    t,
+    updateStatus,
+    deleteForm,
+    activeEditLocale,
+    currentTab,
+    handleTabChange,
+    navItems,
+    children,
+  } = model;
   return (
     <EditorRuntimeProvider provider={provider ?? null} entityType="form" entityId={formId}>
-      <Stack gap="md">
+      <DsLayoutStack gap="md">
         <EditorHeader
           title={displayedTitle}
           onTitleChange={titleChangeHandler}
@@ -147,17 +204,17 @@ function FormLayoutContent({ children, formId, initialStatus }: FormLayoutConten
           deleteConfirmation={{
             title: tCommon('actions.delete'),
             message: (
-              <Stack gap="xs">
-                <Text>
+              <DsLayoutStack gap="xs">
+                <DsText>
                   {tCommon.rich('messages.confirmDeleteNamedRich', {
                     name: displayedTitle || tCommon('entities.form'),
                     strong: (chunks) => <strong>{chunks}</strong>,
                   })}
-                </Text>
-                <Text size="sm" c="orange">
+                </DsText>
+                <DsText size="sm" tone="warning">
                   {t('deleteModal.warning')}
-                </Text>
-              </Stack>
+                </DsText>
+              </DsLayoutStack>
             ),
           }}
           isDeleting={deleteForm.isPending}
@@ -165,16 +222,20 @@ function FormLayoutContent({ children, formId, initialStatus }: FormLayoutConten
           controls={<EditorActiveLocaleControl state={activeEditLocale} />}
         />
         <Tabs value={currentTab} onChange={handleTabChange}>
-          <Tabs.List>
+          <Tabs.List aria-label={tCommon('entities.form')}>
             {navItems.map(({ value, label, Icon }) => (
               <Tabs.Tab key={value} value={value} leftSection={<Icon size={16} />}>
                 {label}
               </Tabs.Tab>
             ))}
           </Tabs.List>
+          {navItems.map(({ value }) => (
+            <Tabs.Panel key={value} value={value} paddingTop="md">
+              {value === currentTab ? children : null}
+            </Tabs.Panel>
+          ))}
         </Tabs>
-        {children}
-      </Stack>
+      </DsLayoutStack>
     </EditorRuntimeProvider>
   );
 }

@@ -1,11 +1,21 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
+import { expect } from 'storybook/test';
 import { RouteProgressBar } from './RouteProgressBar';
-import classes from './RouteProgressBar.stories.module.css';
+import { LayoutInset } from '../Layout';
+import { Text } from '../Typography';
 
 const meta = {
   title: 'Core/Feedback/RouteProgressBar',
   component: RouteProgressBar,
-  parameters: { layout: 'fullscreen' },
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      description: {
+        component:
+          'Places the shared Progress primitive at the viewport top edge with zero block inset. Navigation owns the delayed waiting/loading/completing/idle lifecycle. Loading has unknown duration and no numeric percentage; completing projects 100 only after route commit. The wrapper adds placement, visibility and pointer pass-through. It does not own a second bar or estimate completion with a separate crawl animation.',
+      },
+    },
+  },
   args: {
     phase: 'loading',
     'aria-label': 'Loading page',
@@ -22,15 +32,33 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
-  parameters: { controls: { exclude: ['phase'] } },
   render: (args) => (
-    <div className={classes.sequence}>
-      <RouteProgressBar {...args} phase="loading" />
-      <p>The route transition sequence plays once when the canvas loads, then the bar disappears.</p>
-      <p>Reload the canvas to replay it.</p>
-    </div>
+    <LayoutInset space="lg">
+      <RouteProgressBar {...args} />
+      <Text size="xs" lang="en">
+        Use Phase in Controls to inspect the actual shared bar and its visibility. Production navigation owns the
+        lifecycle timers.
+      </Text>
+    </LayoutInset>
   ),
+  play: async ({ canvasElement, args }) => {
+    const route = canvasElement.querySelector<HTMLElement>('[data-route-progress]')!;
+    const bar = route.querySelector<HTMLElement>('[role="progressbar"]')!;
+    await expect(bar).toHaveAttribute('data-core-progress');
+    const hidden = args.phase === 'waiting' || args.phase === 'idle';
+    await expect(bar.hidden).toBe(hidden);
+    const style = getComputedStyle(route);
+    await expect(style.paddingBlockStart).toBe('0px');
+    await expect(style.paddingBlockEnd).toBe('0px');
+    await expect(style.top).toBe('0px');
+    if (!hidden) {
+      await expect(route.getBoundingClientRect().height).toBe(2);
+    }
+  },
 };
+
+export const Waiting: Story = { args: { phase: 'waiting' } };
+export const Idle: Story = { args: { phase: 'idle' } };
 
 export const Completing: Story = {
   args: { phase: 'completing' },

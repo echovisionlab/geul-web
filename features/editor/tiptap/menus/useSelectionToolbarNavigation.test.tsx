@@ -89,6 +89,16 @@ function Fixture({
           Last
         </button>
         <input aria-label="Native input" tabIndex={-1} />
+        <form>
+          <button type="button" data-link-popup-action>
+            Link popup action
+          </button>
+        </form>
+        <div role="menu">
+          <button type="button" role="menuitem" data-color-popup-action>
+            Color popup action
+          </button>
+        </div>
       </div>
     </>
   );
@@ -128,49 +138,25 @@ describe('useSelectionToolbarNavigation', () => {
     expect(space.defaultPrevented).toBe(false);
   });
 
-  it('wraps Tab and Shift+Tab within actions while leaving form Tab native', () => {
+  it('leaves Tab and Shift+Tab native on every toolbar action and input', () => {
     render(<Fixture />);
     const toolbar = container!.querySelector<HTMLElement>('[role="toolbar"]')!;
     const actions = [...toolbar.querySelectorAll<HTMLButtonElement>('[data-selection-toolbar-action]')].filter(
       (action) => action.textContent === 'First' || action.textContent === 'Last',
     );
     const input = toolbar.querySelector<HTMLInputElement>('input')!;
-
-    act(() => actions[0]!.focus());
-    const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
-    act(() => actions[0]!.dispatchEvent(tab));
-    expect(tab.defaultPrevented).toBe(true);
-    expect(document.activeElement).toBe(actions[1]);
-
-    const wrappedTab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
-    act(() => actions[1]!.dispatchEvent(wrappedTab));
-    expect(wrappedTab.defaultPrevented).toBe(true);
-    expect(document.activeElement).toBe(actions[0]);
-
-    act(() => actions[1]!.focus());
-    const reverseTab = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true });
-    act(() => actions[1]!.dispatchEvent(reverseTab));
-    expect(reverseTab.defaultPrevented).toBe(true);
-    expect(document.activeElement).toBe(actions[0]);
-
-    const reverseWrappedTab = new KeyboardEvent('keydown', {
-      key: 'Tab',
-      shiftKey: true,
-      bubbles: true,
-      cancelable: true,
-    });
-    act(() => actions[0]!.dispatchEvent(reverseWrappedTab));
-    expect(reverseWrappedTab.defaultPrevented).toBe(true);
-    expect(document.activeElement).toBe(actions[1]);
-
-    act(() => input.focus());
-    const inputTab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
-    act(() => input.dispatchEvent(inputTab));
-    expect(inputTab.defaultPrevented).toBe(false);
-    expect(document.activeElement).toBe(input);
+    for (const target of [...actions, input]) {
+      act(() => target.focus());
+      for (const shiftKey of [false, true]) {
+        const tab = new KeyboardEvent('keydown', { key: 'Tab', shiftKey, bubbles: true, cancelable: true });
+        act(() => target.dispatchEvent(tab));
+        expect(tab.defaultPrevented).toBe(false);
+        expect(document.activeElement).toBe(target);
+      }
+    }
   });
 
-  it('keeps and consumes Tab on the only visible action', () => {
+  it('leaves the only visible action with Tab instead of trapping focus', () => {
     render(<Fixture />);
     const actions = [...container!.querySelectorAll<HTMLButtonElement>('[data-selection-toolbar-action]')].filter(
       (action) => action.textContent === 'First' || action.textContent === 'Last',
@@ -179,22 +165,24 @@ describe('useSelectionToolbarNavigation', () => {
     act(() => actions[0]!.focus());
     const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
     act(() => actions[0]!.dispatchEvent(tab));
-    expect(tab.defaultPrevented).toBe(true);
+    expect(tab.defaultPrevented).toBe(false);
     expect(document.activeElement).toBe(actions[0]);
   });
 
-  it('does not consume toolbar Tab when no candidate accepts focus', () => {
-    render(<Fixture />);
-    const actions = [...container!.querySelectorAll<HTMLButtonElement>('[data-selection-toolbar-action]')].filter(
-      (action) => action.textContent === 'First' || action.textContent === 'Last',
-    );
-    act(() => actions[0]!.focus());
-    actions[0]!.focus = vi.fn();
-    actions[1]!.focus = vi.fn();
-    const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
-    act(() => actions[0]!.dispatchEvent(tab));
-    expect(tab.defaultPrevented).toBe(false);
-    expect(document.activeElement).toBe(actions[0]);
+  it('preserves IME and modified navigation rather than moving toolbar focus', () => {
+    const onEscape = vi.fn();
+    render(<Fixture onEscape={onEscape} />);
+    const first = container!.querySelector<HTMLButtonElement>('[data-selection-toolbar-action]')!;
+    act(() => first.focus());
+    for (const options of [{ isComposing: true }, { altKey: true }, { ctrlKey: true }, { metaKey: true }]) {
+      for (const key of ['Escape', 'ArrowRight', 'Home', 'End']) {
+        const event = new KeyboardEvent('keydown', { ...options, key, bubbles: true, cancelable: true });
+        act(() => first.dispatchEvent(event));
+        expect(event.defaultPrevented).toBe(false);
+        expect(document.activeElement).toBe(first);
+      }
+    }
+    expect(onEscape).not.toHaveBeenCalled();
   });
 
   it('uses vertical arrows only when explicitly enabled', () => {
@@ -205,6 +193,20 @@ describe('useSelectionToolbarNavigation', () => {
     act(() => actions[0]!.focus());
     act(() => actions[0]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true })));
     expect(document.activeElement).toBe(actions[1]);
+  });
+
+  it('lets nested link forms, menus and input controls own Escape before the toolbar dismisses', () => {
+    const onEscape = vi.fn();
+    render(<Fixture onEscape={onEscape} />);
+    for (const selector of ['[data-link-popup-action]', '[data-color-popup-action]', '[aria-label="Native input"]']) {
+      const target = container!.querySelector<HTMLElement>(selector)!;
+      act(() => target.focus());
+      const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+      act(() => target.dispatchEvent(event));
+      expect(event.defaultPrevented).toBe(false);
+      expect(document.activeElement).toBe(target);
+    }
+    expect(onEscape).not.toHaveBeenCalled();
   });
 
   it('calls Escape and bridges editor Tab directly to the first action', () => {
@@ -337,7 +339,41 @@ function DismissalBridge({ editor }: { editor: Editor }) {
   return null;
 }
 
+function NativeEditingBridge({ editor }: { editor: Editor }) {
+  const menu = useTiptapBubbleMenu(editor, 'native-editing-boundary-test');
+  return <output data-suppressed={menu.isSuppressed} data-dismissed={menu.isDismissed} />;
+}
+
 describe('Tiptap BubbleMenu keyboard bridge', () => {
+  it('suppresses block bubbles during nested input/source editing without losing editor selection', () => {
+    const element = document.createElement('div');
+    document.body.append(element);
+    const editor = new Editor({ element, extensions: createTiptapWireExtensions(), content: editorContent });
+    const controls = document.createElement('div');
+    controls.contentEditable = 'false';
+    const input = document.createElement('input');
+    const source = document.createElement('div');
+    source.dataset.sourceEditor = 'monaco';
+    const sourceTarget = document.createElement('button');
+    source.append(sourceTarget);
+    controls.append(input, source);
+    editor.view.dom.append(controls);
+    render(<NativeEditingBridge editor={editor} />);
+    const before = editor.state.selection.toJSON();
+    act(() => input.focus());
+    expect(container!.querySelector('output')?.dataset.suppressed).toBe('true');
+    expect(container!.querySelector('output')?.dataset.dismissed).toBe('false');
+    act(() => sourceTarget.focus());
+    expect(container!.querySelector('output')?.dataset.suppressed).toBe('true');
+    act(() => editor.view.dom.focus());
+    expect(container!.querySelector('output')?.dataset.suppressed).toBe('false');
+    expect(editor.state.selection.toJSON()).toEqual(before);
+    act(() => root?.unmount());
+    root = null;
+    editor.destroy();
+    element.remove();
+  });
+
   it('dismisses from editor-root Escape with the exact selection and one meta-only transaction', async () => {
     const element = document.createElement('div');
     document.body.appendChild(element);

@@ -1,24 +1,30 @@
 'use client';
 
-import { Group, Skeleton } from '@mantine/core';
+import { LayoutInline as DsLayoutInline, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
+
+import { Skeleton } from '@/components/core/Display';
 
 export function CreditGroupHeaderSkeleton() {
   return (
-    <Group gap="xs" py={6}>
-      <Skeleton width={14} height={14} radius="sm" />
-      <Skeleton width={100} height={14} radius="sm" />
-    </Group>
+    <DsLayoutInset block="xxs">
+      <DsLayoutInline gap="xs">
+        <Skeleton roleType="icon" />
+        <Skeleton roleType="text" />
+      </DsLayoutInline>
+    </DsLayoutInset>
   );
 }
 
 export function CreditSkeleton() {
   return (
-    <Group gap="xs" py={4}>
-      <Skeleton width={14} height={14} radius="sm" />
-      <Skeleton circle width={20} height={20} />
-      <Skeleton width={80} height={12} radius="sm" />
-      <Skeleton width={40} height={16} radius="sm" />
-      <Skeleton width={60} height={12} radius="sm" />
-    </Group>
+    <DsLayoutInset block="xxs">
+      <DsLayoutInline gap="xs">
+        <Skeleton roleType="icon" />
+        <Skeleton roleType="icon" shape="circle" />
+        <Skeleton roleType="text" />
+        <Skeleton roleType="text" />
+        <Skeleton roleType="text" />
+      </DsLayoutInline>
+    </DsLayoutInset>
   );
 }

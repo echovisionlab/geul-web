@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { useTranslations } from 'next-intl';
 import { flushAllEditorSaves, hasPendingEditorSaves } from '@/lib/editor/editor-save-registry';
 
@@ -22,7 +22,7 @@ export function useEditorNavigation(document: string) {
         return true;
       }
       if (!(await flushAllEditorSaves(document))) {
-        notifications.show({ message: t('saveFailed'), color: 'red' });
+        notifications.show({ message: t('saveFailed'), tone: 'danger' });
         return false;
       }
       await navigation();

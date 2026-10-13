@@ -1,5 +1,15 @@
 'use client';
+import { SectionCard } from '@/components/core/Section';
 
+import { LabelBadge } from '@/components/core/Badge';
+
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutStack as DsLayoutStack,
+  LayoutGrid as DsLayoutGrid,
+} from '@/components/core/Layout';
+
+import { Text as DsText } from '@/components/core/Typography';
 import { useMemo, type CSSProperties } from 'react';
 import {
   closestCenter,
@@ -10,22 +20,17 @@ import {
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core';
-import {
-  arrayMove,
-  rectSortingStrategy,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { SortableSurface, useSortableItem } from '@/components/core/Sortable';
 import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
-import { IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconGripVertical, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Group, SimpleGrid, Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { IconButton } from '@/components/core/IconButton';
 import { ImageCropper } from '@/components/core/ImageCropper';
+import { useImageCropAccessibility } from '@/lib/i18n/useImageCropAccessibility';
 import { ImageUploadField, type ImageUploadRejection } from '@/components/core/ImageUpload';
 import { Tooltip } from '@/components/core/Tooltip';
 import { useImageUploadCrop } from '@/features/upload/ImageUploadCropController';
@@ -80,11 +85,11 @@ export function ProgramEventPosterUploader({
     mutationFn: (fileId: string) => addProgramEventPosterAction(eventId, fileId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       onMediaChange(result.media ?? []);
-      notifications.show({ message: tCommonNotifications('featuredImageUpdated'), color: 'green' });
+      notifications.show({ message: tCommonNotifications('featuredImageUpdated'), tone: 'positive' });
     },
   });
 
@@ -96,7 +101,7 @@ export function ProgramEventPosterUploader({
       ),
     onSuccess: (result, variables) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         onMediaChange(variables.previousMedia);
         return;
       }
@@ -106,7 +111,7 @@ export function ProgramEventPosterUploader({
       onMediaChange(variables.previousMedia);
       notifications.show({
         message: error instanceof Error ? error.message : tProgramEventPoster('reorderFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
@@ -115,13 +120,13 @@ export function ProgramEventPosterUploader({
     mutationFn: (mediaId: string) => deleteProgramEventPosterAction(eventId, mediaId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       onMediaChange(result.media ?? []);
       notifications.show({
         message: tCommonNotifications('featuredImageRemoved'),
-        color: 'yellow',
+        tone: 'positive',
       });
     },
   });
@@ -156,11 +161,11 @@ export function ProgramEventPosterUploader({
   const isMutating = addPoster.isPending || reorderPosters.isPending || deletePoster.isPending;
 
   return (
-    <Stack gap="sm">
+    <DsLayoutStack gap="sm">
       {(sortedMedia.length > 0 || canEdit) && (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={sortedMedia.map((item) => item.id)} strategy={rectSortingStrategy}>
-            <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="xs">
+            <DsLayoutGrid columns={{ base: 2, sm: 3 }} gap="xs">
               {sortedMedia.map((item) => (
                 <SortablePosterCard
                   key={item.id}
@@ -186,11 +191,11 @@ export function ProgramEventPosterUploader({
                   label={tCommonActions('add')}
                 />
               ) : null}
-            </SimpleGrid>
+            </DsLayoutGrid>
           </SortableContext>
         </DndContext>
       )}
-    </Stack>
+    </DsLayoutStack>
   );
 }
 
@@ -207,116 +212,99 @@ interface SortablePosterCardProps {
   onRemove: () => void;
 }
 
-function SortablePosterCard({ item, canEdit, disabled, labels, onRemove }: SortablePosterCardProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+export function SortablePosterCard({ item, canEdit, disabled, labels, onRemove }: SortablePosterCardProps) {
+  const sortable = useSortableItem({
     id: item.id,
     disabled: !canEdit || disabled,
   });
   const style: CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
     position: 'relative',
-    border: '1px solid var(--mantine-color-default-border)',
-    borderRadius: 0,
+
     overflow: 'hidden',
-    background: 'var(--mantine-color-body)',
+
     aspectRatio: POSTER_TILE_ASPECT_RATIO,
   };
-  const handleProps =
-    canEdit && !disabled
-      ? {
-          ...attributes,
-          ...listeners,
-          role: 'button',
-          tabIndex: 0,
-          'aria-label': labels.drag,
-        }
-      : {};
 
   return (
-    <Box ref={setNodeRef} style={style}>
-      <Box
-        {...handleProps}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '100%',
-          height: '100%',
-          cursor: canEdit && !disabled ? (isDragging ? 'grabbing' : 'grab') : 'default',
-          outline: 'none',
-          overflow: 'hidden',
-        }}
-      >
-        {item.url ? (
-          <Box
-            component="img"
-            src={item.url}
-            alt={item.alt ?? ''}
-            draggable={false}
+    <SortableSurface ref={sortable.setNodeRef} motion={sortable.motion}>
+      <div style={style}>
+        <SectionCard padding="none" withBorder clip stretch state={sortable.isDragging ? 'dragging' : 'default'}>
+          <div
             style={{
-              display: 'block',
               width: '100%',
               height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'center',
-              pointerEvents: 'none',
-              userSelect: 'none',
+              overflow: 'hidden',
             }}
-          />
-        ) : (
-          <Group h="100%" justify="center">
-            <Text size="xs" c="dimmed">
-              {labels.noPreview}
-            </Text>
-          </Group>
-        )}
-      </Box>
-      {item.isPrimary && (
-        <Box
-          pos="absolute"
-          top={0}
-          left={0}
-          px="xs"
-          h={32}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            background: 'var(--mantine-color-teal-7)',
-            color: 'var(--mantine-color-white)',
-            fontSize: 12,
-            fontWeight: 700,
-            lineHeight: 1,
-            pointerEvents: 'none',
-          }}
-        >
-          <Text inherit component="span">
-            {labels.main}
-          </Text>
-        </Box>
-      )}
-      {canEdit && (
-        <Box pos="absolute" top={0} right={0}>
-          <Tooltip label={labels.remove}>
+          >
+            <DsLayoutInline align="center" justify="center" fill="both">
+              {item.url ? (
+                <img
+                  src={item.url}
+                  alt={item.alt ?? ''}
+                  draggable={false}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'center',
+                    pointerEvents: 'none',
+                    userSelect: 'none',
+                  }}
+                />
+              ) : (
+                <DsLayoutInline fill="block" justify="center">
+                  <DsText size="xs" tone="secondary">
+                    {labels.noPreview}
+                  </DsText>
+                </DsLayoutInline>
+              )}
+            </DsLayoutInline>
+          </div>
+          {item.isPrimary && (
+            <div style={{ position: 'absolute', bottom: 0, left: 0, pointerEvents: 'none' }}>
+              <LabelBadge tone="accent" appearance="solid">
+                {labels.main}
+              </LabelBadge>
+            </div>
+          )}
+          {canEdit && (
             <IconButton
-              size="sm"
-              tone="danger"
-              emphasis="strong"
-              aria-label={labels.remove}
+              placement="overlay-start-inside"
+              contrast="inverse"
+              emphasis="medium"
+              interaction="drag-handle"
+              draggable={false}
+              {...sortable.handle}
+              aria-label={labels.drag}
               disabled={disabled}
-              onPointerDown={(event) => event.stopPropagation()}
-              onClick={(event) => {
-                event.stopPropagation();
-                onRemove();
-              }}
             >
-              <IconTrash size={16} />
+              <IconGripVertical aria-hidden />
             </IconButton>
-          </Tooltip>
-        </Box>
-      )}
-    </Box>
+          )}
+          {canEdit && (
+            <Tooltip label={labels.remove}>
+              <IconButton
+                size="compact"
+                placement="overlay-end-inside"
+                contrast="inverse"
+                tone="danger"
+                emphasis="medium"
+                aria-label={labels.remove}
+                disabled={disabled}
+                onPointerDown={(event) => event.stopPropagation()}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onRemove();
+                }}
+              >
+                <IconTrash size={16} />
+              </IconButton>
+            </Tooltip>
+          )}
+        </SectionCard>
+      </div>
+    </SortableSurface>
   );
 }
 
@@ -331,6 +319,7 @@ interface PosterAddTileProps {
 
 function PosterAddTile({ idPrefix, disabled, isUploading, uploadProgress, onUpload, label }: PosterAddTileProps) {
   const tFeaturedImage = useTranslations('featuredImage');
+  const cropAccessibility = useImageCropAccessibility(tFeaturedImage('cropTitle'));
   const tCommon = useTranslations('common');
   const inputMaxSize = getUploadSelectionMaxSize(UploadType.PROGRAM_EVENT_POSTER, 'image/jpeg', posterConfig.maxSize);
   const { tempImageSrc, cropModalOpened, handleFileDrop, handleCropComplete, handleCropCancel } = useImageUploadCrop({
@@ -348,7 +337,7 @@ function PosterAddTile({ idPrefix, disabled, isUploading, uploadProgress, onUplo
       message = tFeaturedImage('errors.invalidFileType');
     }
 
-    notifications.show({ message, color: 'red' });
+    notifications.show({ message, tone: 'danger' });
   };
 
   const isPreparingImage = isUploading && uploadProgress <= 0;
@@ -357,9 +346,9 @@ function PosterAddTile({ idPrefix, disabled, isUploading, uploadProgress, onUplo
     : tCommon('uploadField.status.uploading');
 
   return (
-    <Box>
+    <div>
       <Tooltip label={label}>
-        <Box>
+        <div>
           <ImageUploadField
             imageUrl={null}
             alt={label}
@@ -379,23 +368,23 @@ function PosterAddTile({ idPrefix, disabled, isUploading, uploadProgress, onUplo
               width: '100%',
               aspectRatio: POSTER_TILE_ASPECT_RATIO,
               fit: 'cover',
-              radius: 0,
             }}
             placeholder={{
               width: '100%',
               aspectRatio: POSTER_TILE_ASPECT_RATIO,
               icon: <IconPlus size={30} stroke={1.7} />,
               compact: true,
-              iconSize: 30,
+              iconSize: 'md',
             }}
             onFileSelect={(file) => handleFileDrop([file])}
             onValidationReject={handleReject}
           />
-        </Box>
+        </div>
       </Tooltip>
 
       {tempImageSrc && (
         <ImageCropper
+          cropAccessibility={cropAccessibility}
           imageSrc={tempImageSrc}
           opened={cropModalOpened}
           onClose={handleCropCancel}
@@ -410,6 +399,6 @@ function PosterAddTile({ idPrefix, disabled, isUploading, uploadProgress, onUplo
           processingLabel={tCommon('uploadField.status.preparingImage')}
         />
       )}
-    </Box>
+    </div>
   );
 }

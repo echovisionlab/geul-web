@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 import {
   ClientMediaRestoreMismatchError,
   type PreparedMedia,
@@ -8,14 +8,13 @@ import type { UploadType } from '@/lib/types/upload/model';
 import { validateNamespace } from '@/lib/media/client-processing/artifact-storage';
 import { prepareUploadFile } from '@/lib/utils/upload-pipeline';
 
-const storedUploadSessionSchema = z
-  .object({
-    fileId: z.string().trim().min(1),
-    uploadId: z.string().trim().min(1),
-    attemptId: z.string().trim().min(1).optional(),
-    clientMediaBundleId: z.string().trim().min(1).optional(),
-  })
-  .strict();
+const trimmedNonEmptyString = () => z.string().check(z.trim(), z.minLength(1));
+const storedUploadSessionSchema = z.strictObject({
+  fileId: trimmedNonEmptyString(),
+  uploadId: trimmedNonEmptyString(),
+  attemptId: z.optional(trimmedNonEmptyString()),
+  clientMediaBundleId: z.optional(trimmedNonEmptyString()),
+});
 
 export type StoredUploadSession = z.infer<typeof storedUploadSessionSchema>;
 
@@ -151,31 +150,37 @@ export async function disposePreparedSession(fileId: string): Promise<void> {
 }
 
 const PREPARED_STORAGE_PREFIX = 'geul-prepared-upload:';
-const durablePreparedUploadSchema = z
-  .object({
-    storageId: z.string().min(1),
-    sourceStorageId: z
-      .string()
-      .refine((namespace) => {
+const nonEmptyString = () => z.string().check(z.minLength(1));
+const durablePreparedUploadSchema = z.strictObject({
+  storageId: nonEmptyString(),
+  sourceStorageId: z.optional(
+    z.string().check(
+      z.refine((namespace) => {
         try {
           validateNamespace(namespace);
           return true;
         } catch {
           return false;
         }
-      })
-      .optional(),
-    sourceFingerprint: z.string().min(1),
-    uploadId: z.string().min(1),
-    bundleId: z.string().min(1),
-    uploadType: z.number().int(),
-    source: z
-      .object({ name: z.string(), size: z.number().nonnegative(), lastModified: z.number(), type: z.string() })
-      .strict(),
-    progress: z.object({ loadedBytes: z.number().nonnegative(), percentage: z.number().min(0).max(99) }).strict(),
-    receipts: z.array(z.object({ path: z.string().min(1), sha256: z.string().regex(/^[a-f0-9]{64}$/) }).strict()),
-  })
-  .strict();
+      }),
+    ),
+  ),
+  sourceFingerprint: nonEmptyString(),
+  uploadId: nonEmptyString(),
+  bundleId: nonEmptyString(),
+  uploadType: z.number().check(z.int()),
+  source: z.strictObject({
+    name: z.string(),
+    size: z.number().check(z.nonnegative()),
+    lastModified: z.number(),
+    type: z.string(),
+  }),
+  progress: z.strictObject({
+    loadedBytes: z.number().check(z.nonnegative()),
+    percentage: z.number().check(z.gte(0), z.lte(99)),
+  }),
+  receipts: z.array(z.strictObject({ path: nonEmptyString(), sha256: z.string().check(z.regex(/^[a-f0-9]{64}$/)) })),
+});
 
 function durableStorage(): Storage | null {
   try {

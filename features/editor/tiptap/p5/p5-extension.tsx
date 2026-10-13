@@ -1,6 +1,6 @@
 import { mergeAttributes, Node, type CommandProps, type Extensions } from '@tiptap/core';
 import { ReactNodeViewRenderer } from '@tiptap/react';
-import { isMonacoSourceEditorEvent } from '../code-editor';
+import { withMonacoSourceEditorEvents } from '../code-editor';
 import { P5SketchNodeView } from './P5SketchNodeView';
 import { createP5AttributeDefinitions, createP5BlockId, normalizeP5NodeAttributes } from './p5-node-attributes';
 import { requireP5SketchLabels, type P5SketchOptions, type InsertP5SketchOptions } from './p5-node-options';
@@ -41,9 +41,9 @@ export function createP5SketchExtension(options: P5SketchOptions = {}): Extensio
       return ['div', mergeAttributes(HTMLAttributes, { 'data-content-type': 'p5Sketch' }), 0];
     },
     addNodeView() {
-      return ReactNodeViewRenderer((props) => <P5SketchNodeView {...props} {...this.options} />, {
-        stopEvent: ({ event }) => isMonacoSourceEditorEvent(event),
-      });
+      return withMonacoSourceEditorEvents(
+        ReactNodeViewRenderer((props) => <P5SketchNodeView {...props} {...this.options} />),
+      );
     },
     addCommands() {
       return {

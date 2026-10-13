@@ -1,16 +1,20 @@
 'use client';
+import { breakpointQuery } from '@/components/core/Layout/breakpoints';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
-import type { RefObject } from 'react';
+import { SectionCard as DsSectionCard } from '@/components/core/Section';
+import { SelectionRow } from '@/components/core/SelectionSurface';
+
 import {
-  IconArrowDown,
-  IconArrowUp,
-  IconGripVertical,
-  IconSortAscending,
-  IconSortDescending,
-  IconX,
-} from '@tabler/icons-react';
+  LayoutStack as DsLayoutStack,
+  LayoutInset as DsLayoutInset,
+  LayoutInline as DsLayoutInline,
+} from '@/components/core/Layout';
+import { useId, type RefObject } from 'react';
+import { IconArrowDown, IconArrowUp, IconSortAscending, IconSortDescending, IconX } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Box, Divider, Group, Indicator, ScrollArea, Stack, Text } from '@mantine/core';
+
+import { Separator as Divider, ScrollArea } from '@/components/core/Display';
 import { useMediaQuery } from '@mantine/hooks';
 import { Button } from '@/components/core/Button';
 import { Drawer } from '@/components/core/Drawer';
@@ -63,9 +67,20 @@ export function MultiSortView({
   onApply,
 }: MultiSortViewProps) {
   const t = useTranslations('dataTable.sort');
+  const directionDescriptionId = useId();
+  const directionDescriptions = (
+    <>
+      <span hidden id={`${directionDescriptionId}-asc`}>
+        {t('aria.directionAscending')}
+      </span>
+      <span hidden id={`${directionDescriptionId}-desc`}>
+        {t('aria.directionDescending')}
+      </span>
+    </>
+  );
   const tCommonActions = useTranslations('common.actions');
   const tCommonLabels = useTranslations('common.labels');
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useMediaQuery(breakpointQuery('sm'));
   const effectivePlaceholder = placeholder ?? t('button');
   const getFieldConfig = (field: string) => fields.find((config) => config.field === field);
   const getSortForField = (field: string) => sorts.find((sort) => sort.field === field);
@@ -82,79 +97,80 @@ export function MultiSortView({
   })();
 
   const fieldListPanel = (
-    <Box
-      w={isMobile ? '100%' : 180}
-      style={isMobile ? undefined : { borderRight: '1px solid var(--mantine-color-default-border)' }}
-    >
-      <Box p="xs" style={{ borderBottom: '1px solid var(--mantine-color-default-border)' }}>
-        <Text size="sm" fw={500}>
-          {tCommonLabels('fields')}
-        </Text>
-      </Box>
-      <ScrollArea h={isMobile ? 'auto' : 200} mah={isMobile ? 250 : undefined}>
-        <Stack gap={0} p="xs">
-          {fields.map((field) => {
-            const sort = getSortForField(field.field);
-            const canAdd = sorts.length < maxSorts || Boolean(sort);
+    <div style={{ width: isMobile ? '100%' : 180 }}>
+      <DsSectionCard padding="none" appearance="plain" border={isMobile ? 'none' : 'inline-end'}>
+        <DsSectionCard padding="none" appearance="plain" border="block-end">
+          <DsLayoutInset space="xs">
+            <DsLayoutInset space="none">
+              <DsText size="sm" weight="medium">
+                {tCommonLabels('fields')}
+              </DsText>
+            </DsLayoutInset>
+          </DsLayoutInset>
+        </DsSectionCard>
+        <ScrollArea size={isMobile ? 'content' : 'standard'} limit={isMobile ? 'standard' : undefined}>
+          <DsLayoutInset space="xs">
+            <DsLayoutStack gap="none">
+              {fields.map((field) => {
+                const sort = getSortForField(field.field);
+                const canAdd = sorts.length < maxSorts || Boolean(sort);
 
-            return (
-              <Group
-                key={field.field}
-                gap="xs"
-                p="xs"
-                wrap="nowrap"
-                justify="space-between"
-                style={{
-                  cursor: canAdd ? 'pointer' : 'not-allowed',
-                  borderRadius: 4,
-                  opacity: canAdd ? 1 : 0.5,
-                }}
-                onClick={() => canAdd && onToggleField(field.field)}
-              >
-                <Group gap="xs" wrap="nowrap">
-                  <Checkbox
-                    size="xs"
-                    checked={Boolean(sort)}
+                return (
+                  <SelectionRow
+                    key={field.field}
+                    aria-label={field.label}
+                    selected={Boolean(sort)}
                     disabled={!canAdd || disabled}
-                    onChange={() => onToggleField(field.field)}
-                    onClick={(event) => event.stopPropagation()}
-                  />
-                  <Text size="sm" lineClamp={1}>
-                    {field.label}
-                  </Text>
-                </Group>
-
-                {sort && (
-                  <IconButton
-                    aria-label={t('aria.toggleDirection', { label: field.label })}
-                    size="xs"
-                    emphasis="low"
-                    disabled={disabled}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onToggleDirection(field.field);
-                    }}
+                    onAction={() => onToggleField(field.field)}
+                    leading={
+                      <Checkbox
+                        aria-label={field.label}
+                        size="xs"
+                        checked={Boolean(sort)}
+                        disabled={!canAdd || disabled}
+                        onChange={() => onToggleField(field.field)}
+                      />
+                    }
+                    trailing={
+                      sort ? (
+                        <IconButton
+                          aria-label={t('aria.toggleDirection', { label: field.label })}
+                          aria-describedby={`${directionDescriptionId}-${sort.direction}`}
+                          size="xs"
+                          emphasis="low"
+                          disabled={disabled}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onToggleDirection(field.field);
+                          }}
+                        >
+                          {sort.direction === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />}
+                        </IconButton>
+                      ) : null
+                    }
                   >
-                    {sort.direction === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />}
-                  </IconButton>
-                )}
-              </Group>
-            );
-          })}
-        </Stack>
-      </ScrollArea>
-    </Box>
+                    <DsText size="sm" lines={1}>
+                      {field.label}
+                    </DsText>
+                  </SelectionRow>
+                );
+              })}
+            </DsLayoutStack>
+          </DsLayoutInset>
+        </ScrollArea>
+      </DsSectionCard>
+    </div>
   );
 
   const actions = onApply ? (
-    <Group grow>
+    <DsLayoutInline grow>
       <Button size="xs" tone="neutral" emphasis="low" onClick={onClear} disabled={disabled || sorts.length === 0}>
         {tCommonActions('clearAll')}
       </Button>
       <Button size="xs" onClick={onApply} disabled={disabled || !hasChanges}>
         {tCommonActions('apply')}
       </Button>
-    </Group>
+    </DsLayoutInline>
   ) : (
     <Button size="xs" tone="neutral" emphasis="low" fullWidth onClick={onClear}>
       {tCommonActions('clearAll')}
@@ -162,130 +178,132 @@ export function MultiSortView({
   );
 
   const sortOrderPanel = (
-    <Box flex={1}>
-      <Box p="xs" style={{ borderBottom: '1px solid var(--mantine-color-default-border)' }}>
-        <Text size="sm" fw={500}>
-          {tCommonLabels('sortOrder')}
-        </Text>
-      </Box>
+    <DsLayoutInset space="none" flexible>
+      <DsSectionCard padding="none" appearance="plain" border="block-end">
+        <DsLayoutInset space="xs">
+          <DsLayoutInset space="none">
+            <DsText size="sm" weight="medium">
+              {tCommonLabels('sortOrder')}
+            </DsText>
+          </DsLayoutInset>
+        </DsLayoutInset>
+      </DsSectionCard>
 
       {sorts.length > 0 ? (
-        <Stack gap={0}>
-          <ScrollArea h={isMobile ? 'auto' : 160} mah={isMobile ? 200 : undefined}>
-            <Stack gap="xs" p="xs">
-              {sorts.map((sort, index) => {
-                const label = getFieldConfig(sort.field)?.label ?? sort.field;
+        <DsLayoutStack gap="none">
+          <ScrollArea size={isMobile ? 'content' : 'compact'} limit={isMobile ? 'standard' : undefined}>
+            <DsLayoutInset space="xs">
+              <DsLayoutStack gap="xs">
+                {sorts.map((sort, index) => {
+                  const label = getFieldConfig(sort.field)?.label ?? sort.field;
 
-                return (
-                  <Group
-                    key={sort.field}
-                    gap="xs"
-                    wrap="nowrap"
-                    justify="space-between"
-                    p="xs"
-                    style={{
-                      backgroundColor: 'var(--mantine-color-default-hover)',
-                      borderRadius: 4,
-                    }}
-                  >
-                    <Group gap="xs" wrap="nowrap">
-                      <IconButton
-                        aria-label={t('aria.reorder', { label })}
-                        size="xs"
-                        emphasis="low"
-                        style={{ cursor: 'grab' }}
-                      >
-                        <IconGripVertical size={14} />
-                      </IconButton>
-                      <Text size="sm" fw={500}>
-                        {index + 1}.
-                      </Text>
-                      <Text size="sm" lineClamp={1}>
-                        {label}
-                      </Text>
-                    </Group>
-
-                    <Group gap={4} wrap="nowrap">
-                      <IconButton
-                        aria-label={t('aria.moveUp', { label })}
-                        size="xs"
-                        emphasis="low"
-                        disabled={index === 0 || disabled}
-                        onClick={() => onMoveSort(sort.field, 'up')}
-                      >
-                        <IconArrowUp size={12} />
-                      </IconButton>
-                      <IconButton
-                        aria-label={t('aria.moveDown', { label })}
-                        size="xs"
-                        emphasis="low"
-                        disabled={index === sorts.length - 1 || disabled}
-                        onClick={() => onMoveSort(sort.field, 'down')}
-                      >
-                        <IconArrowDown size={12} />
-                      </IconButton>
-                      <IconButton
-                        aria-label={t('aria.toggleDirection', { label })}
-                        size="xs"
-                        emphasis="medium"
-                        disabled={disabled}
-                        onClick={() => onToggleDirection(sort.field)}
-                      >
-                        {sort.direction === 'asc' ? <IconSortAscending size={14} /> : <IconSortDescending size={14} />}
-                      </IconButton>
-                      <IconButton
-                        aria-label={t('aria.removeSort', { label })}
-                        size="xs"
-                        tone="danger"
-                        emphasis="low"
-                        disabled={disabled}
-                        onClick={() => onRemoveSort(sort.field)}
-                      >
-                        <IconX size={12} />
-                      </IconButton>
-                    </Group>
-                  </Group>
-                );
-              })}
-            </Stack>
+                  return (
+                    <SelectionRow
+                      key={sort.field}
+                      appearance="muted"
+                      trailing={
+                        <DsLayoutInline gap="xxs" wrap="nowrap">
+                          <IconButton
+                            aria-label={t('aria.moveUp', { label })}
+                            size="xs"
+                            emphasis="low"
+                            disabled={index === 0 || disabled}
+                            onClick={() => onMoveSort(sort.field, 'up')}
+                          >
+                            <IconArrowUp size={12} />
+                          </IconButton>
+                          <IconButton
+                            aria-label={t('aria.moveDown', { label })}
+                            size="xs"
+                            emphasis="low"
+                            disabled={index === sorts.length - 1 || disabled}
+                            onClick={() => onMoveSort(sort.field, 'down')}
+                          >
+                            <IconArrowDown size={12} />
+                          </IconButton>
+                          <IconButton
+                            aria-label={t('aria.toggleDirection', { label })}
+                            aria-describedby={`${directionDescriptionId}-${sort.direction}`}
+                            size="xs"
+                            emphasis="medium"
+                            disabled={disabled}
+                            onClick={() => onToggleDirection(sort.field)}
+                          >
+                            {sort.direction === 'asc' ? (
+                              <IconSortAscending size={14} />
+                            ) : (
+                              <IconSortDescending size={14} />
+                            )}
+                          </IconButton>
+                          <IconButton
+                            aria-label={t('aria.removeSort', { label })}
+                            size="xs"
+                            tone="danger"
+                            emphasis="low"
+                            disabled={disabled}
+                            onClick={() => onRemoveSort(sort.field)}
+                          >
+                            <IconX size={12} />
+                          </IconButton>
+                        </DsLayoutInline>
+                      }
+                    >
+                      <DsLayoutInline gap="xs" wrap="nowrap">
+                        <DsText size="sm" weight="medium">
+                          {index + 1}.
+                        </DsText>
+                        <DsText size="sm" lines={1}>
+                          {label}
+                        </DsText>
+                      </DsLayoutInline>
+                    </SelectionRow>
+                  );
+                })}
+              </DsLayoutStack>
+            </DsLayoutInset>
           </ScrollArea>
           <Divider />
-          <Box p="xs">{actions}</Box>
-        </Stack>
+          <DsLayoutInset space="xs">
+            <DsLayoutInset space="none">{actions}</DsLayoutInset>
+          </DsLayoutInset>
+        </DsLayoutStack>
       ) : (
-        <Stack gap={0}>
-          <Stack align="center" justify="center" h={isMobile ? 100 : 160} c="dimmed">
-            <Text size="sm">{t('none')}</Text>
-            <Text size="xs">{isMobile ? t('selectAbove') : t('selectFromLeft')}</Text>
-          </Stack>
+        <DsLayoutStack gap="none">
+          <div style={{ height: isMobile ? 100 : 160 }}>
+            <DsLayoutStack align="center" justify="center">
+              <SupportingText>{t('none')}</SupportingText>
+              <DsText size="xs">{isMobile ? t('selectAbove') : t('selectFromLeft')}</DsText>
+            </DsLayoutStack>
+          </div>
           {onApply && (
             <>
               <Divider />
-              <Box p="xs">{actions}</Box>
+              <DsLayoutInset space="xs">
+                <DsLayoutInset space="none">{actions}</DsLayoutInset>
+              </DsLayoutInset>
             </>
           )}
-        </Stack>
+        </DsLayoutStack>
       )}
-    </Box>
+    </DsLayoutInset>
   );
 
   const trigger = (
     <Tooltip label={sortDisplay} disabled={isMobile}>
-      <Indicator label={appliedSorts.length} size={16} disabled={appliedSorts.length === 0}>
-        <IconButton
-          aria-label={effectivePlaceholder}
-          onClick={() => onOpenedChange(!opened)}
-          c={appliedSorts.length === 0 ? 'dimmed' : undefined}
-        >
-          {appliedSorts[0]?.direction === 'asc' ? <IconSortAscending size={18} /> : <IconSortDescending size={18} />}
-        </IconButton>
-      </Indicator>
+      <IconButton
+        count={appliedSorts.length}
+        aria-label={appliedSorts.length ? `${effectivePlaceholder} (${appliedSorts.length})` : effectivePlaceholder}
+        onClick={() => onOpenedChange(!opened)}
+      >
+        {appliedSorts[0]?.direction === 'asc' ? <IconSortAscending size={18} /> : <IconSortDescending size={18} />}
+      </IconButton>
     </Tooltip>
   );
 
   if (isMobile) {
     return (
       <>
+        {directionDescriptions}
         <span ref={markerRef} style={{ display: 'none' }} />
         {trigger}
         <Drawer
@@ -296,10 +314,10 @@ export function MultiSortView({
           title={t('button')}
           closeLabel={tCommonActions('close')}
         >
-          <Stack gap="md">
+          <DsLayoutStack gap="md">
             {fieldListPanel}
             {sorts.length > 0 && sortOrderPanel}
-          </Stack>
+          </DsLayoutStack>
         </Drawer>
       </>
     );
@@ -307,14 +325,17 @@ export function MultiSortView({
 
   return (
     <>
+      {directionDescriptions}
       <span ref={markerRef} style={{ display: 'none' }} />
       <Popover open={opened} onOpenChange={onOpenedChange} placement="bottom-start" size="wide">
         <Popover.Target>{trigger}</Popover.Target>
-        <Popover.Dropdown padding="none">
-          <Group align="stretch" gap={0} wrap="nowrap" style={{ minHeight: 250 }}>
-            {fieldListPanel}
-            {sortOrderPanel}
-          </Group>
+        <Popover.Dropdown padding="none" aria-label={t('button')}>
+          <div style={{ minHeight: 250 }}>
+            <DsLayoutInline align="stretch" gap="none" wrap="nowrap">
+              {fieldListPanel}
+              {sortOrderPanel}
+            </DsLayoutInline>
+          </div>
         </Popover.Dropdown>
       </Popover>
     </>

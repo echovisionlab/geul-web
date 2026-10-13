@@ -1,8 +1,9 @@
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { NextIntlClientProvider } from 'next-intl';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { create } from '@bufbuild/protobuf';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import Loadable from 'next/dist/shared/lib/loadable.shared-runtime';
 import {
   ContentBlockDownloadAction,
@@ -45,7 +46,7 @@ describe('DefaultBlockView', () => {
   ] as const)('renders %s as an explicit public runtime surface', (type, language) => {
     const html = renderToStaticMarkup(
       <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
-        <MantineProvider>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
           <DefaultBlockView
             block={{
               id: type,
@@ -58,7 +59,7 @@ describe('DefaultBlockView', () => {
               children: [],
             }}
           />
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
 
@@ -75,7 +76,7 @@ describe('DefaultBlockView', () => {
   it('renders ordinary code percentage width and alignment without executable runtime markup', () => {
     const html = renderToStaticMarkup(
       <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
-        <MantineProvider>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
           <DefaultBlockView
             block={{
               id: 'code',
@@ -90,7 +91,7 @@ describe('DefaultBlockView', () => {
               children: [],
             }}
           />
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
 
@@ -136,7 +137,7 @@ describe('DefaultBlockView', () => {
   it('renders Mermaid title and loading surface through the lazy public view', () => {
     const html = renderToStaticMarkup(
       <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
-        <MantineProvider>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
           <DefaultBlockView
             block={{
               id: 'mermaid',
@@ -146,11 +147,12 @@ describe('DefaultBlockView', () => {
               children: [],
             }}
           />
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
 
-    expect(html).toContain('aria-label="Recording flow"');
+    expect(html).toContain('role="figure"');
+    expect(html).toMatch(/aria-labelledby="[^"]+"/);
     expect(html).toContain('Recording flow');
     expect(html).toContain('role="status"');
   });
@@ -158,7 +160,7 @@ describe('DefaultBlockView', () => {
   it('projects durable p5 device capabilities into the public runtime controls', () => {
     const html = renderToStaticMarkup(
       <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
-        <MantineProvider>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
           <DefaultBlockView
             block={{
               id: 'p5-device',
@@ -168,7 +170,7 @@ describe('DefaultBlockView', () => {
               children: [],
             }}
           />
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
 
@@ -219,7 +221,9 @@ describe('DefaultBlockView', () => {
 
     expect(html).toContain('<aside data-callout="" data-bg-color="blue" data-text-color="default">');
     expect(html).toContain('<span data-callout-icon="" aria-hidden="true">💡</span>');
-    expect(html).toContain('<div data-callout-content=""><div data-callout-copy=""><span>Callout body</span></div><p');
+    expect(html).toContain(
+      '<div data-callout-content=""><div data-callout-copy=""><span>Callout body</span></div><div data-document-block="paragraph"',
+    );
     expect(html).toContain('Nested Callout copy');
   });
 
@@ -258,9 +262,9 @@ describe('DefaultBlockView', () => {
     expect(html).toContain('<col style="width:40%"/>');
     expect(html).toContain('<col style="width:60%"/>');
     expect(html).toContain('<table style="width:82%;margin-left:auto;margin-right:auto">');
-    expect(html).toContain('<thead><tr><th><span>장소</span></th>');
-    expect(html).toContain('<tbody><tr><td><span>예술의전당</span></td>');
-    expect(html).toContain('<td><span>저녁 리허설</span></td>');
+    expect(html).toContain('<thead><tr><th scope="col"><p><span>장소</span></p></th>');
+    expect(html).toContain('<tbody><tr><td><p><span>예술의전당</span></p></td>');
+    expect(html).toContain('<td><p><span>저녁 리허설</span></p></td>');
   });
 
   it('resolves Shader File channels through the owning content public asset lookup', async () => {
@@ -296,7 +300,7 @@ describe('DefaultBlockView', () => {
   it('fails closed when a public Shader stage tree is incomplete', () => {
     const html = renderToStaticMarkup(
       <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
-        <MantineProvider>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
           <DefaultBlockView
             block={{
               id: 'broken-shader',
@@ -306,7 +310,7 @@ describe('DefaultBlockView', () => {
               children: [],
             }}
           />
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
     expect(html).toContain('<div data-invalid-executable-block="shader"></div>');
@@ -443,7 +447,7 @@ describe('DefaultBlockView', () => {
 
     const html = renderToStaticMarkup(<DefaultBlockView block={block} />);
 
-    expect(html).toBe('<hr/>');
+    expect(html).toContain('<hr/>');
   });
 
   it('renders attachment captions below the title row', () => {
@@ -525,13 +529,13 @@ describe('DefaultBlockView', () => {
 
     const html = renderToStaticMarkup(
       <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
-        <MantineProvider>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
           <PageMediaDeliveryProvider idOrSlug="page-1" requestedLocale="en">
             <ContentBlockMediaRuntimeProvider items={[item]}>
               <DefaultBlockView block={block} />
             </ContentBlockMediaRuntimeProvider>
           </PageMediaDeliveryProvider>
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
 
@@ -593,11 +597,11 @@ describe('DefaultBlockView', () => {
           },
         }}
       >
-        <MantineProvider>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
           {blocks.map((block) => (
             <DefaultBlockView key={block.id} block={block} />
           ))}
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
 

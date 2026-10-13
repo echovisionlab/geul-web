@@ -22,12 +22,16 @@ export async function listVersionsRequest(
   entityId: string,
   page = 1,
   pageSize = 20,
+  signal?: AbortSignal,
 ): Promise<VersionListResult> {
   const query = new URLSearchParams({
     page: page.toString(),
     pageSize: pageSize.toString(),
   });
-  return requestJson<VersionListResult>(`/api/version-history/${entityType}/${entityId}?${query}`);
+  return requestJson<VersionListResult>(
+    `/api/version-history/${entityType}/${entityId}?${query}`,
+    signal ? { signal } : undefined,
+  );
 }
 
 export async function restoreVersionRequest(

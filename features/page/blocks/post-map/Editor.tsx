@@ -1,4 +1,10 @@
 'use client';
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
@@ -6,7 +12,7 @@ import { useCallback } from 'react';
 import { IconFilter, IconMapPin } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Divider, Group, Stack, Text } from '@mantine/core';
+
 import { LabelBadge } from '@/components/core/Badge';
 import { MultiSelect, Select, NumberInput, Switch } from '@/components/core/Input';
 import { listCategoriesAction } from '@/lib/actions/category';
@@ -149,26 +155,28 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
   );
 
   return (
-    <Box data-page-block-editor="post-map">
+    <DsLayoutStack gap="lg" data-page-block-editor="post-map">
       <QueryErrorAlert queries={[categoriesQuery, seriesListQuery, tagsQuery]} />
-      <Group gap="xs" mb="md">
-        <IconMapPin size={18} />
-        <Text size="sm" fw={500}>
-          {tPageEditor('sectionTypes.postMap')}
-        </Text>
-        <LabelBadge size="sm">{t('viewportQueryBadge')}</LabelBadge>
-        <LabelBadge size="sm" tone={requirePlace ? 'accent' : 'neutral'}>
-          {requirePlace ? t('withPlaceOnlyBadge') : t('allPostsBadge')}
-        </LabelBadge>
-      </Group>
+      <DsLayoutInset blockEnd="md">
+        <DsLayoutInline gap="xs">
+          <IconMapPin size={18} />
+          <DsText size="sm" weight="medium">
+            {tPageEditor('sectionTypes.postMap')}
+          </DsText>
+          <LabelBadge size="sm">{t('viewportQueryBadge')}</LabelBadge>
+          <LabelBadge size="sm" tone={requirePlace ? 'accent' : 'neutral'}>
+            {requirePlace ? t('withPlaceOnlyBadge') : t('allPostsBadge')}
+          </LabelBadge>
+        </DsLayoutInline>
+      </DsLayoutInset>
 
-      <Stack gap="sm">
-        <Group gap="xs">
+      <DsLayoutStack gap="md">
+        <DsLayoutInline gap="xs">
           <IconFilter size={14} />
-          <Text size="xs" c="dimmed" fw={500}>
+          <DsText size="xs" tone="secondary" weight="medium">
             {t('filtersSection')}
-          </Text>
-        </Group>
+          </DsText>
+        </DsLayoutInline>
 
         <MultiSelect
           label={tCommonEntities('categories')}
@@ -176,7 +184,6 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
           data={categoryOptions}
           value={categoryIds ? categoryIds.split(',') : []}
           onChange={(values) => updateProp('categoryIds', values.join(','))}
-          size="xs"
           clearable
           searchable
         />
@@ -187,7 +194,6 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
           data={seriesOptions}
           value={seriesId || null}
           onChange={(value) => updateProp('seriesId', value || '')}
-          size="xs"
           clearable
           searchable
         />
@@ -198,7 +204,6 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
           data={authorOptions}
           value={authorIds ? authorIds.split(',') : []}
           onChange={(values) => updateProp('authorIds', values.join(','))}
-          size="xs"
           clearable
           searchable
         />
@@ -209,7 +214,6 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
           data={tagOptions}
           value={tagIds ? tagIds.split(',') : []}
           onChange={(values) => updateProp('tagIds', values.join(','))}
-          size="xs"
           clearable
           searchable
         />
@@ -218,41 +222,34 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
           label={t('onlyIncludePostsWithLocation')}
           checked={requirePlace}
           onChange={(event) => updateProp('requirePlace', event.currentTarget.checked ? 'true' : 'false')}
-          size="sm"
         />
-      </Stack>
+      </DsLayoutStack>
 
-      <Divider my="sm" />
-
-      <Stack gap="sm">
-        <Text size="xs" c="dimmed" fw={500}>
+      <DsLayoutStack gap="md">
+        <DsText size="xs" tone="secondary" weight="medium">
           {t('querySection')}
-        </Text>
+        </DsText>
 
-        <Group grow>
+        <DsLayoutInline grow>
           <Select
             label={t('sortByLabel')}
             data={[...sortByOptions]}
             value={sortBy}
             onChange={(value) => updateProp('sortBy', value || 'published_at')}
-            size="xs"
           />
           <Select
             label={tCommonLabels('order')}
             data={[...sortOrderOptions]}
             value={sortOrder}
             onChange={(value) => updateProp('sortOrder', value || 'desc')}
-            size="xs"
           />
-        </Group>
-      </Stack>
+        </DsLayoutInline>
+      </DsLayoutStack>
 
-      <Divider my="sm" />
-
-      <Stack gap="sm">
-        <Text size="xs" c="dimmed" fw={500}>
+      <DsLayoutStack gap="md">
+        <DsText size="xs" tone="secondary" weight="medium">
           {t('mapSection')}
-        </Text>
+        </DsText>
 
         <Select
           label={t('primaryLabelLabel')}
@@ -260,38 +257,34 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
           data={[...primaryLabelOptions]}
           value={primaryLabel}
           onChange={(value) => updateProp('primaryLabel', value || 'content_title')}
-          size="xs"
         />
 
-        <Group grow>
+        <DsLayoutInline grow>
           <Select
             label={t('aspectRatioLabel')}
             data={[...aspectRatioOptions]}
             value={aspectRatio}
             onChange={(value) => updateProp('aspectRatio', value || '16:9')}
-            size="xs"
           />
-        </Group>
+        </DsLayoutInline>
 
-        <Group grow>
+        <DsLayoutInline grow>
           <NumberInput
             label={t('previewWidthLabel')}
             value={Number.parseInt(previewWidth, 10)}
             onChange={(value) => updateProp('previewWidth', String(value || 100))}
             min={10}
             max={100}
-            size="xs"
           />
           <Select
             label={tMapControls('fields.colorScheme')}
             data={[...colorSchemeOptions]}
             value={preferredScheme}
             onChange={(value) => updateProp('preferredScheme', value || 'auto')}
-            size="xs"
           />
-        </Group>
+        </DsLayoutInline>
 
-        <Group grow>
+        <DsLayoutInline grow>
           <NumberInput
             label={tMapControls('fields.minZoom')}
             value={minZoom}
@@ -305,7 +298,6 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
             max={MAP_MAX_ZOOM_LIMIT}
             step={0.1}
             decimalScale={1}
-            size="xs"
           />
           <NumberInput
             label={tMapControls('fields.maxZoom')}
@@ -320,26 +312,23 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
             max={MAP_MAX_ZOOM_LIMIT}
             step={0.1}
             decimalScale={1}
-            size="xs"
           />
-        </Group>
+        </DsLayoutInline>
 
-        <Group grow>
+        <DsLayoutInline grow>
           <Select
             label={tMapControls('fields.areaLabels')}
             data={[...labelModeOptions]}
             value={areaLabelsMode}
             onChange={(value) => updateProp('areaLabelsMode', value || 'inherit')}
-            size="xs"
           />
           <Select
             label={tMapControls('fields.poiLabels')}
             data={[...labelModeOptions]}
             value={poiLabelsMode}
             onChange={(value) => updateProp('poiLabelsMode', value || 'inherit')}
-            size="xs"
           />
-        </Group>
+        </DsLayoutInline>
 
         <Select
           label={tMapControls('fields.theme')}
@@ -347,12 +336,11 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
           data={themeOptions}
           value={themeId || null}
           onChange={(value) => updateProp('themeId', value || '')}
-          size="xs"
           clearable
           searchable
         />
-      </Stack>
-    </Box>
+      </DsLayoutStack>
+    </DsLayoutStack>
   );
 }
 

@@ -1,23 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { IconColorSwatch, IconGripVertical, IconTrash } from '@tabler/icons-react';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
 import { IconButton } from '@/components/core/IconButton';
-import { Tooltip } from '@/components/core/Tooltip';
-import { EditorColorSwatch } from '@/features/editor/toolbars/EditorColorStyleButton';
+import { DOCUMENT_COLOR_VALUES } from '@/components/core/DocumentColorPreview';
 
-export const TIPTAP_BLOCK_COLORS = [
-  'default',
-  'gray',
-  'brown',
-  'red',
-  'orange',
-  'yellow',
-  'green',
-  'blue',
-  'purple',
-  'pink',
-] as const;
+export const TIPTAP_BLOCK_COLORS = DOCUMENT_COLOR_VALUES;
 
 export type TiptapBlockColor = (typeof TIPTAP_BLOCK_COLORS)[number];
 
@@ -40,6 +29,7 @@ export interface TiptapBlockMenuProps {
   onDelete: () => void;
   onTextColorChange: (color: TiptapBlockColor) => void;
   onBackgroundColorChange: (color: TiptapBlockColor) => void;
+  onDraggingChange?: (dragging: boolean) => void;
 }
 
 function ColorMenuItems({
@@ -56,7 +46,7 @@ function ColorMenuItems({
   return TIPTAP_BLOCK_COLORS.map((color) => (
     <DropdownMenu.Item
       key={color}
-      icon={<EditorColorSwatch kind={kind} color={color} />}
+      colorPreview={{ kind, color }}
       selected={activeColor === color}
       onClick={() => onChange(color)}
     >
@@ -80,35 +70,51 @@ export function TiptapBlockMenu({
   onDelete,
   onTextColorChange,
   onBackgroundColorChange,
+  onDraggingChange,
 }: TiptapBlockMenuProps) {
   const hasColors = canSetTextColor || canSetBackgroundColor;
+  const [opened, setOpened] = useState(false);
 
   return (
-    <DropdownMenu size="standard" placement="right-start" portal={false}>
-      <Tooltip label={labels.open} withArrow>
-        <span>
-          <DropdownMenu.Target>
-            <IconButton
-              label={labels.open}
-              tone="neutral"
-              emphasis="low"
-              size="sm"
-              data-drag-handle
-              data-testid="tiptap-block-drag-handle"
-              draggable
-              tabIndex={-1}
-              onKeyDown={(event) => {
-                if (event.key === 'ArrowDown') {
-                  event.preventDefault();
-                  event.currentTarget.click();
-                }
-              }}
-            >
-              <IconGripVertical size={16} aria-hidden />
-            </IconButton>
-          </DropdownMenu.Target>
-        </span>
-      </Tooltip>
+    <DropdownMenu
+      size="standard"
+      placement="right-start"
+      portal={false}
+      opened={opened}
+      onChange={(next) => {
+        // MenuTrigger opens on pointerdown. A native drag handle must wait for
+        // a completed click, or the popup takes focus before dragging can begin.
+        if (!next) {
+          setOpened(false);
+        }
+      }}
+    >
+      <DropdownMenu.Target>
+        <IconButton
+          label={labels.open}
+          tone="neutral"
+          emphasis="low"
+          data-drag-handle
+          data-testid="tiptap-block-drag-handle"
+          interaction="drag-handle"
+          draggable
+          tabIndex={-1}
+          onClick={() => setOpened(true)}
+          onDragStart={() => {
+            setOpened(false);
+            onDraggingChange?.(true);
+          }}
+          onDragEnd={() => onDraggingChange?.(false)}
+          onKeyDown={(event) => {
+            if (['Enter', ' ', 'ArrowDown', 'ArrowUp'].includes(event.key)) {
+              event.preventDefault();
+              setOpened(true);
+            }
+          }}
+        >
+          <IconGripVertical aria-hidden />
+        </IconButton>
+      </DropdownMenu.Target>
       <DropdownMenu.Dropdown data-testid="tiptap-block-menu">
         <DropdownMenu.Item
           icon={<IconTrash size={16} aria-hidden />}

@@ -1,7 +1,9 @@
 'use client';
 
+import { PublicMetadataRows, PublicMetadataRow } from '@/components/core/PublicMetadata';
+
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { type ReactNode } from 'react';
-import { Box, Stack, Text } from '@mantine/core';
 import { SectionHeader } from '@/components/core/Section';
 import { StatusBadge } from '@/components/core/Badge';
 import type { UserFull } from '@/lib/types/user/model';
@@ -13,17 +15,19 @@ export type Tone = 'positive' | 'warning' | 'danger' | 'neutral';
 export function InfoSection({
   title,
   description,
+  actions,
   children,
 }: {
   title: ReactNode;
   description: ReactNode;
+  actions?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <Stack gap="sm">
-      <SectionHeader title={title} description={description} />
-      <Stack gap="xs">{children}</Stack>
-    </Stack>
+    <DsLayoutStack gap="md">
+      <SectionHeader title={title} description={description} actions={actions} />
+      <DsLayoutStack gap="xs">{children}</DsLayoutStack>
+    </DsLayoutStack>
   );
 }
 
@@ -37,19 +41,11 @@ export function InfoRow({
   compact?: boolean;
 }) {
   return (
-    <Box
-      style={{
-        display: 'grid',
-        gridTemplateColumns: compact ? '120px minmax(0, 1fr)' : '160px minmax(0, 1fr)',
-        columnGap: 'var(--mantine-spacing-md)',
-        alignItems: 'baseline',
-      }}
-    >
-      <Text size="sm" c="dimmed">
-        {label}
-      </Text>
-      <Box style={{ minWidth: 0 }}>{children}</Box>
-    </Box>
+    <PublicMetadataRows>
+      <PublicMetadataRow label={label} size={compact ? 'xs' : 'sm'}>
+        {children}
+      </PublicMetadataRow>
+    </PublicMetadataRows>
   );
 }
 

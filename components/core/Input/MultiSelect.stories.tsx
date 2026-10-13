@@ -12,7 +12,6 @@ const meta = {
     label: 'Tags',
     placeholder: 'Choose tags',
     data,
-    w: 420,
   },
 } satisfies Meta<typeof MultiSelect>;
 
@@ -32,14 +31,12 @@ export const Disabled: Story = {
 export const Narrow: Story = {
   args: {
     defaultValue: ['Ambient', 'Field recording', 'Installation'],
-    w: 240,
   },
 };
 export const CollapsedSelectedValues: Story = {
   args: {
     collapseSelectedValuesToOneLine: true,
     defaultValue: ['Ambient', 'Field recording', 'Installation', 'Performance', 'Sound art'],
-    w: 300,
   },
 };
 export const CollapsedSelectedValuesOpen: Story = {
@@ -47,6 +44,5 @@ export const CollapsedSelectedValuesOpen: Story = {
     collapseSelectedValuesToOneLine: true,
     defaultDropdownOpened: true,
     defaultValue: ['Ambient', 'Field recording', 'Installation', 'Performance', 'Sound art'],
-    w: 300,
   },
 };

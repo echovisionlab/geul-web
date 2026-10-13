@@ -1,0 +1,362 @@
+{
+  "schemaVersion": 1,
+  "reviewDate": "2026-10-12",
+  "timezone": "Asia/Seoul",
+  "status": "reviewed_snapshot",
+  "scope": "Scoped follow-up to user review: chart tooltip placement, contextual editor menus, cookie consent, file browser inset and reorder/date geometry. Production owners and their actual Storybook consumers were changed together.",
+  "entry": "http://localhost:6010/?path=/story/feature-editor-menus--table-selection&globals=locale:ko;theme:ocean-light",
+  "changes": [
+    "Core Chart disables only tooltip position animation; first painted hover labels retain measured coordinates, data and independent semantic tables.",
+    "Map/video/table/executable contexts consume compact shared Core ToolbarSurface. Table command groups align in one row; width readouts have aligned glyphs and a named status/resize description.",
+    "Executable floating menus retain alignment/deletion; source and runtime actions remain inline. Native title/Monaco focus suppresses unrelated selection menus.",
+    "Cookie banner/account settings expose one analytics draft and explicit rejection/save actions. Redundant disclosure and accept-all actions were removed; persistence, renewal, schema and provider gating remain.",
+    "File browser toolbar and grid/list share one Core inset. Grid/list selection is preserved and nested list landmarks have unique localized names.",
+    "Core grip hover/pickup feedback strengthens glyph ink on transparent stable leading targets. DateRange uses intrinsic groups and numeric date focus uses a text underline."
+  ],
+  "checks": {
+    "sourceTests": {
+      "files": 31,
+      "passed": 263,
+      "failed": 0,
+      "pending": 0,
+      "workers": 2
+    },
+    "storyTests": {
+      "groups": 12,
+      "passed": 55,
+      "failed": 0,
+      "pending": 0,
+      "workers": 2,
+      "scope": "Configured browser plays and axe for 12 affected groups, including actual Form Builder consumers. Not the complete story catalog or locale/theme/device Cartesian matrix.",
+      "groupsCovered": [
+        "Core/Data Display/Chart",
+        "Feature/Form/Field Statistics",
+        "Feature/Cookie Consent/Banner",
+        "Pages/Admin/File Manager",
+        "Feature/Editor/Menus",
+        "Feature/Editor/Executables",
+        "Feature/Editor/Public Block Comparison",
+        "Feature/Editor/Tiptap Playground",
+        "Core/Input/Input States",
+        "Core/Interaction/SortableGroups",
+        "Core/Input/DateTimeInput",
+        "Feature/Form/Builder"
+      ]
+    },
+    "storybookBuild": "pass",
+    "typescript": "pass",
+    "ownedLint": "pass",
+    "format": "pass",
+    "generatedDocumentsAndOwnership": "pass"
+  },
+  "earlierStoryRuns": [
+    {
+      "passed": 45,
+      "failed": 5,
+      "record": "review-results/interaction-before-fixes.json",
+      "resolved": [
+        "Story geometry incorrectly treated rem token values as pixels.",
+        "List nested scroll landmark duplicated the outer region name.",
+        "Chart play captured a wrapper before ResponsiveContainer mounted it."
+      ]
+    },
+    {
+      "passed": 48,
+      "failed": 2,
+      "record": "review-results/interaction-before-hover-fixes.json",
+      "resolved": [
+        "Radar hover coordinate was outside its polar plot on a wide canvas; play now uses actual rendered grid coordinates.",
+        "Dropdown hover simulation entered before establishing pointer modality; play now moves from the canvas into the actual trigger."
+      ]
+    }
+  ],
+  "browser": {
+    "engine": "Codex in-app browser",
+    "pointer": "fine",
+    "viewports": [
+      {
+        "width": 390,
+        "height": 844
+      },
+      {
+        "width": 834,
+        "height": 1112
+      },
+      {
+        "width": 1440,
+        "height": 900
+      }
+    ],
+    "locales": ["ko", "en"],
+    "themes": ["ocean-light", "ocean-dark"],
+    "observations": [
+      {
+        "scenario": "File Browser",
+        "results": "Header and grid/list edges match at 390/834/1440px. Grid→list preserves Performance notes selection. No document horizontal overflow. Korean nested region name is 파일 · 목록 보기."
+      },
+      {
+        "scenario": "Table Selection",
+        "results": "8 compact 28px command targets share one top edge. Actual header/data fixture replaces empty headers. Browser play Pass; axe 0 violations, 1 inconclusive result."
+      },
+      {
+        "scenario": "Map Controls",
+        "results": "6 compact 28px targets and width glyph share center Y=64.796875px. Width status is 너비: 64%. Configured hover verifies the actual places trigger tooltip."
+      },
+      {
+        "scenario": "Shader title and source editing",
+        "results": "Korean title 밤하늘 셰이더 accepts native input. Title input and Monaco frag.glsl focus each show zero unrelated selection toolbars; source/runtime actions remain inline."
+      },
+      {
+        "scenario": "Field Statistics",
+        "results": "Physical pointer input on donut sector and date area renders Monome: 7 and 2026-10-09: 7 at nonzero measured transforms. Tooltip transitionDuration=0s. Core Modes play additionally verifies first painted hover for all eight kinds."
+      },
+      {
+        "scenario": "Cookie Phone",
+        "results": "Analytics switch is immediately visible and initially off; rejection/save have the same 36.296875px height and content widths, and the 390px page has no horizontal overflow. Only local View fixtures were used."
+      },
+      {
+        "scenario": "Intrinsic Date Range",
+        "results": "Focused Korean start-month segment is 28×28px, transparent with no box outline and visible text underline. Values retain intrinsic spacing; play increments the month and narrow-range play checks non-overlap."
+      },
+      {
+        "scenario": "Grip and Form Builder",
+        "results": "Actual Core sortable keyboard reorder retains focus and changes item order. Leading 28px target has transparent feedback and a stable content track. Production Form Builder step grip consumes the same Core interaction with transparent 28px target."
+      }
+    ],
+    "note": "Final table screenshot and final 55-state execution use the recorded final build. Other screenshots precede the final story/test-only hover setup corrections; their production owners were unchanged. Temporary browser viewport overrides were reset."
+  },
+  "build": {
+    "storybook": "10.5.8",
+    "command": "UI_KIT_MINIFY=0 node node_modules/storybook/dist/bin/dispatcher.js build --quiet --disable-telemetry",
+    "indexSha256": "a3181ee2367dc93ad98a992986a9a89fa475441c3767f1365271e662e451ff24",
+    "sourceManifestHash": "ded3e2edd62fa12c4f1daf2663031731400e2e72ea61453c7ea6f5c00d7b51ba",
+    "assetCount": 1997,
+    "assetManifestHash": "f8b3e4e2104cd0433f9713cda6bd0585bc30677268c06d4ce31c6c2e40995078",
+    "assetManifestScope": "All static build files except copied review evidence; hashes sorted by relative path.",
+    "note": "Local review build is unminified. Default/CI minification is unchanged; bundle-size warnings remain."
+  },
+  "sourceIdentity": {
+    "manifestScope": "Generated TS/TSX census includes tests/stories; CSS/assets are outside that manifest. Explicit owner/document hashes below include current shared CSS.",
+    "files": [
+      {
+        "path": "components/core/Chart/Chart.tsx",
+        "sha256": "afe18da9555b5081cf25e27296cdbe2a2a29f6ac94c4b359f485a451810501a7"
+      },
+      {
+        "path": "components/core/Chart/Chart.stories.tsx",
+        "sha256": "78a3d2394ca46abfdf24427635296e6c781e295093f6c5ae58f6466f66751718"
+      },
+      {
+        "path": "components/core/Control.module.css",
+        "sha256": "0fd5e0a4157d637f1d682a3d0bc9aba0b54a35d6c0e0adf3cf22b001d1b6fd51"
+      },
+      {
+        "path": "components/core/Input/Input.module.css",
+        "sha256": "e833ec5d6e76c8d4c8f29147f2877101973421d92299d637664487c235f96a4b"
+      },
+      {
+        "path": "components/core/Input/InputStates.stories.tsx",
+        "sha256": "49345dac958dd0a4dca253daa4da329c04cdc118b734aa91323f2c9f5deaeb82"
+      },
+      {
+        "path": "components/core/Sortable/SortableGroups.stories.tsx",
+        "sha256": "fca3e2630e8a57340bb8a22ce3c29f80a13d40354eb2a738575ec0e64e709435"
+      },
+      {
+        "path": "features/editor/tiptap/menus/useSelectionToolbarNavigation.ts",
+        "sha256": "9b7eb534d55f357ae38ee5db4422a988e09762e795aab9150d677b25fa60aca1"
+      },
+      {
+        "path": "features/editor/tiptap/menus/SelectionBubbleMenu.tsx",
+        "sha256": "665b5c165ceb32e84cc3e4dbb5efaf34974fd6e66631a511babc8207ff280b7c"
+      },
+      {
+        "path": "features/editor/tiptap/menus/EditorMenus.stories.tsx",
+        "sha256": "0bd6f016e11f181b71b6df7d68a0890301df832c5dd295d001eb0f74907b30d4"
+      },
+      {
+        "path": "features/editor/tiptap/menus/map-external/SelectionMenuPrimitives.tsx",
+        "sha256": "0389409247a990d28a5a934309360bcd5408588889b71e1c704a40e85cec6324"
+      },
+      {
+        "path": "features/editor/tiptap/menus/map-external/MapSelectionMenu.tsx",
+        "sha256": "1f1338d491c56392b38af8cbc381cbd861bddc5f7540466e3c53a0416bb1fc8d"
+      },
+      {
+        "path": "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.tsx",
+        "sha256": "f098e77fe40a265c6ebbcf86a397c0f87a7939cec4f39949a457aa1590fb731c"
+      },
+      {
+        "path": "features/editor/tiptap/menus/map-external/TiptapMapSelectionBubbleMenu.tsx",
+        "sha256": "1420922d14313a56a75e564a71e771854eb5fc31be63731bd054ae7a78e09a06"
+      },
+      {
+        "path": "features/editor/tiptap/menus/map-external/TiptapExternalVideoSelectionBubbleMenu.tsx",
+        "sha256": "3e24cb892b84d1eee4a478aa3fa13a2a85786666b6755959b382d51b3170444d"
+      },
+      {
+        "path": "features/editor/tiptap/menus/executable/ExecutableSelectionMenu.tsx",
+        "sha256": "29516e64bff9658cfb4eabcf4472c545550dc146f090e85fe6ce42c74e7451f8"
+      },
+      {
+        "path": "features/editor/tiptap/menus/executable/TiptapExecutableSelectionBubbleMenu.tsx",
+        "sha256": "152e4ac8f6e571369fe21cd57c4691ef89ef67f9abf7f37c774db9d62499f169"
+      },
+      {
+        "path": "features/editor/tiptap/code/CodeBlockSelectionMenu.tsx",
+        "sha256": "56013a74fb95996665febed20374873dfe89bf8621828c6dc9cd34ed0f9e151d"
+      },
+      {
+        "path": "features/editor/tiptap/table/TiptapTableMenu.tsx",
+        "sha256": "627850c0d22257bcb7f6ee7b98e5852069a536d0b07a4edec54e7ad47f194566"
+      },
+      {
+        "path": "features/editor/tiptap/ExecutableRuntime.stories.tsx",
+        "sha256": "311a8e318855f3241a2ebf5ebf74439dad9156a147faed71ce52435747b4980b"
+      },
+      {
+        "path": "features/editor/toolbars/EditorToolbarTooltip.test.tsx",
+        "sha256": "2e3ddb50e71120d338a6a1017ae2aff7eda91c857f746cab657e6059893ec8fc"
+      },
+      {
+        "path": "stories/shared/EditorRuntimePreview.tsx",
+        "sha256": "b53c30073ec06aaf6ab18b21ead22f3656731d76d502a4a1edf5359ac995d41a"
+      },
+      {
+        "path": "features/file-manager/FileManagerView.tsx",
+        "sha256": "53c295c9077c0133d8f54f47edb7cac720c21db3ef029aeec53477435be68f2d"
+      },
+      {
+        "path": "features/file-manager/ui/FileBrowserHeader.tsx",
+        "sha256": "55981e4d896a24c260713338371765a681991d5333297e7f18ed0c493be66b94"
+      },
+      {
+        "path": "features/file-manager/ui/file-browser-layout.ts",
+        "sha256": "7f9159f9e34c9d9b5c09dad3c5b4f1d58cc8123d5915ccf11fd4e0456ecd39db"
+      },
+      {
+        "path": "stories/pages/FileManager.stories.tsx",
+        "sha256": "1e2cb043ae9fcb47d11bd19dc03e98d76bfd578188614b11c252867c8cc89a8c"
+      },
+      {
+        "path": "features/cookie-consent/ui/CookieConsentBannerView.tsx",
+        "sha256": "84f3a6b47b65ac81c7c4ccddadd5083cd8a7c945a14188c31d73b028984fb443"
+      },
+      {
+        "path": "features/cookie-consent/CookieConsentBanner.tsx",
+        "sha256": "d77c324db5e5871a9ba07906954ebaba2e094c935025fb708dff5d714b2b2aea"
+      },
+      {
+        "path": "features/my/CookieConsentSettings.tsx",
+        "sha256": "04c4b81cf36c94191184b936b388cd2c294e27f385187ae0b9ea3f68746406e1"
+      },
+      {
+        "path": "stories/features/CookieConsent.stories.tsx",
+        "sha256": "1935392006b778d302110bd8a1f47f406cb4731fc60a4f6c0f5b185e34bddb66"
+      },
+      {
+        "path": "docs/design-system.md",
+        "sha256": "8ca3f71290d594e73888b0f1174386f4773e8b3fb3b6433788e50423600defb0"
+      },
+      {
+        "path": "docs/design-system/changelog.md",
+        "sha256": "bc942076b3b18bd0d7d5226d9682459c54a9a2b76b0a9670c41a9c3499141edb"
+      },
+      {
+        "path": "docs/design-system/cookie-consent-contract.md",
+        "sha256": "f42611f606e112968bdaed3323843d982cb5d21e0b03f1a7f86b8b1bc7521f13"
+      },
+      {
+        "path": "docs/design-system/file-browser.md",
+        "sha256": "b6aabb1b44f4f7b5bd0bd031dd8b8d89d20a777363babc1728c0bfb82bd918a4"
+      },
+      {
+        "path": "docs/design-system/size-density-contract.md",
+        "sha256": "94d4d3bd96b45568cdcc25557a025af095f1d94d7e4c8a176d099ea26916b7ff"
+      },
+      {
+        "path": "docs/design-system/toolbar-api-review.md",
+        "sha256": "f78d0313cbbf5bf0ecd851c9138ff0cb1ded13e852f29666bdaa64b785855494"
+      },
+      {
+        "path": "docs/design-system/storybook-review.md",
+        "sha256": "8aab374e29e425dbd6ee349e828be44682a78f6d6dd1d7aed8d582cb2bc9fb82"
+      }
+    ]
+  },
+  "reports": [
+    {
+      "path": "design/storybook/review-results/interaction-before-fixes.json",
+      "sha256": "0b62e8407b036d538877a242ad2f9c070b974acb064fe6e3564b6e441d303a16"
+    },
+    {
+      "path": "design/storybook/review-results/interaction-before-hover-fixes.json",
+      "sha256": "c38710624865e501996a93d91aa9c446309e44f49134e939960fe77a9a7a15f5"
+    },
+    {
+      "path": "design/storybook/review-results/interaction-source-tests.json",
+      "sha256": "7c2be02588efbd0911a7a3a561703b1ff844a939b1167ddfd3d017567a1d07a7"
+    },
+    {
+      "path": "design/storybook/review-results/interaction-stories.json",
+      "sha256": "fc2868c7e2b349194c191e6acc7fcb8736710e7833e00748dbe5a8812bb38520"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "previews/interaction/chart-hover-ocean-dark-ko.png",
+      "sha256": "2ac24f5e4f992ac3fe60b1c2d741fb417184b86f6d8ecbf1a712bd95e5a320a5"
+    },
+    {
+      "path": "previews/interaction/cookie-phone-ocean-light-ko.png",
+      "sha256": "3637281831d64c90c87eab6f0341c121bf4ca2c32544fa95fa943c02340ec977"
+    },
+    {
+      "path": "previews/interaction/date-range-tablet-ocean-dark-ko.png",
+      "sha256": "8f38851afecde0c86d71ea90fcad91a71ac858de90fb2915e09775b0180d2657"
+    },
+    {
+      "path": "previews/interaction/file-browser-desktop-ocean-dark-en.png",
+      "sha256": "df692545d22de2507a03593bc23bde2f6919cc8e7aa94681a0122e20bc4337dc"
+    },
+    {
+      "path": "previews/interaction/file-browser-phone-ocean-light-ko.png",
+      "sha256": "49ad1c8bb0a2257312c1020a3d21e396becf51b628c862682f977e544b2c9a3f"
+    },
+    {
+      "path": "previews/interaction/file-browser-tablet-list-ocean-light-ko.png",
+      "sha256": "4c1843a823da8f2f0380095b434e0ebe7de076eb158441ff61c100ce7339dde5"
+    },
+    {
+      "path": "previews/interaction/form-builder-grip-ocean-light-ko.png",
+      "sha256": "730b5546153416b6857357ba6dcbb205eb188ca1fdda604f18ba2e580c1986eb"
+    },
+    {
+      "path": "previews/interaction/grip-reorder-tablet-ocean-light-ko.png",
+      "sha256": "077fc087f88de1db756eec956ee6b23fa34df429957f1c4034bcc321398f4766"
+    },
+    {
+      "path": "previews/interaction/map-compact-ocean-dark-ko.png",
+      "sha256": "178a636cbe7962b52febf2f30eea74f7e881933ba5cf09e882c0c20e34c21694"
+    },
+    {
+      "path": "previews/interaction/shader-title-no-bubble-ocean-light-ko.png",
+      "sha256": "93cfe54e5f4f47da5aed087e66acb2b6e65e12bc82db12ec8d080cdbbcf23699"
+    },
+    {
+      "path": "previews/interaction/table-compact-ocean-light-ko.png",
+      "sha256": "1b63037c2bba3a4e2dcee023e35e63dafdd36dbaa1b055911921953740ea522f"
+    }
+  ],
+  "boundaries": [
+    "Earlier full 1,313-state and title-only runs retain their own snapshot identities and do not establish coverage of later source.",
+    "Archive/page-section/Form Builder reorder consumers still lack an explicit non-drag click/tap alternative. Keyboard/drag support alone does not establish WCAG 2.5.7 acceptance.",
+    "Automated axe, DOM/keyboard checks and fine-pointer viewport emulation do not establish physical touch or native VoiceOver/Orca acceptance.",
+    "Page fixtures do not establish real backend persistence, account synchronization, external analytics/maps/media transport, design approval or deployment."
+  ],
+  "latestScopedRevision": {
+    "record": "design/storybook/compact-product-review.json",
+    "scope": "User review corrections to shared loading, dialog/bubble behavior, account controls, link forms, translation/identity, automatic file/history paging, image preparation, drag rendering, PostHero and cookie consent. Production owners and actual Storybook consumers change together.",
+    "note": "Earlier results retain their own snapshot identities and do not establish acceptance of later source."
+  }
+}

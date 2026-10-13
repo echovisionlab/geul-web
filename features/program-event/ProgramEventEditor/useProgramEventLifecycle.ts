@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import type { StatusOption } from '@/features/editor/EditorHeader';
 import {
   archiveProgramEventAction,
@@ -37,13 +37,13 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
     mutationFn: (data: ProgramEventUpdate) => updateProgramEventAction(eventId, data),
     onSuccess: (result) => {
       if ('error' in result && result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
       }
     },
     onError: (error) => {
       notifications.show({
         message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
@@ -63,7 +63,7 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
     mutationFn: () => publishProgramEventAction(eventId),
     onSuccess: (result) => {
       if ('error' in result && result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       setStatus('published');
@@ -71,7 +71,7 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
         message: tCommon('messages.itemPublished', {
           item: tCommonEntities('programEvent').toLowerCase(),
         }),
-        color: 'green',
+        tone: 'positive',
       });
     },
   });
@@ -80,11 +80,11 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
     mutationFn: () => archiveProgramEventAction(eventId),
     onSuccess: (result) => {
       if ('error' in result && result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       setStatus('archived');
-      notifications.show({ message: tCommon('statuses.archived'), color: 'orange' });
+      notifications.show({ message: tCommon('statuses.archived'), tone: 'positive' });
     },
   });
 
@@ -92,7 +92,7 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
     mutationFn: () => deleteProgramEventAction(eventId),
     onSuccess: (result) => {
       if ('error' in result && result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       router.push('/admin/events');
@@ -106,7 +106,7 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
           value: 'archived',
           label: tCommon('statuses.archived'),
           actionLabel: tCommon('statuses.archived'),
-          tone: 'warning',
+          tone: 'neutral',
         },
         ...(canPublish
           ? [
@@ -134,7 +134,7 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
                 value: 'archived',
                 label: tCommon('statuses.archived'),
                 actionLabel: tCommon('statuses.archived'),
-                tone: 'warning',
+                tone: 'neutral',
               } satisfies StatusOption<ProgramEventStatusValue>,
             ]
           : []),

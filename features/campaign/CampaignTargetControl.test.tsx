@@ -15,10 +15,6 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-vi.mock('@mantine/core', () => ({
-  Stack: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-}));
-
 vi.mock('@/components/core/Alert', () => ({
   Alert: ({ children }: { children: ReactNode }) => <div role="alert">{children}</div>,
 }));

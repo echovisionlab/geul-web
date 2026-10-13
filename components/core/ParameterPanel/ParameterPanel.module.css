@@ -1,0 +1,19 @@
+.panel {
+  width: min(100%, 18rem);
+  max-height: 80vh;
+  overflow: auto;
+}
+
+.panel[data-geul-parameter-placement='map-corner'] {
+  position: absolute;
+  top: var(--geul-spacing-xs);
+  right: var(--geul-spacing-xs);
+  z-index: 1;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--geul-spacing-xxs);
+}

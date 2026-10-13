@@ -22,8 +22,8 @@ vi.mock('next-intl', () => ({
 vi.mock('@tanstack/react-query', () => ({
   useMutation: () => ({ mutate: vi.fn(), mutateAsync: vi.fn().mockResolvedValue({}), isPending: false }),
 }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: mocks.notification } }));
-vi.mock('@mantine/core', () => ({ Box: 'div', Stack: 'div', Text: 'span' }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: mocks.notification } }));
+
 vi.mock('@tabler/icons-react', () => ({ IconHistory: () => null }));
 vi.mock('@/features/editor/EditorHeader', () => ({
   EditorHeader: ({

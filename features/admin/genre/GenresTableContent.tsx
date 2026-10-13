@@ -1,7 +1,8 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
+
 import { LabelBadge } from '@/components/core/Badge';
 import {
   ServerDataTableSelectableSection,
@@ -22,13 +23,20 @@ interface GenreRow {
 }
 
 interface GenresTableContentProps {
+  deleteAction?: typeof deleteGenreAction;
   result: ServerDataTableSelectableSectionProps<GenreRow>['result'];
   searchPlaceholder: string;
   filterFields: ServerDataTableSelectableSectionProps<GenreRow>['filterFields'];
   sortFields: ServerDataTableSelectableSectionProps<GenreRow>['sortFields'];
 }
 
-export function GenresTableContent({ result, searchPlaceholder, filterFields, sortFields }: GenresTableContentProps) {
+export function GenresTableContent({
+  result,
+  searchPlaceholder,
+  filterFields,
+  sortFields,
+  deleteAction = deleteGenreAction,
+}: GenresTableContentProps) {
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
   const tAdmin = useTranslations('adminList');
@@ -38,12 +46,12 @@ export function GenresTableContent({ result, searchPlaceholder, filterFields, so
       header: tCommon('entities.genre'),
       cell: (row: GenreRow) => (
         <div>
-          <Text size="sm" fw={500}>
+          <DsText size="sm" weight="medium">
             {row.name}
-          </Text>
-          <Text size="xs" c="dimmed">
+          </DsText>
+          <DsText size="xs" tone="secondary">
             /{row.slug}
-          </Text>
+          </DsText>
         </div>
       ),
     },
@@ -51,9 +59,9 @@ export function GenresTableContent({ result, searchPlaceholder, filterFields, so
       key: 'description',
       header: tCommon('labels.description'),
       cell: (row: GenreRow) => (
-        <Text size="sm" c="dimmed" lineClamp={1}>
+        <DsText size="sm" tone="secondary" lines={1}>
           {row.description || '-'}
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -65,9 +73,9 @@ export function GenresTableContent({ result, searchPlaceholder, filterFields, so
       key: 'createdAt',
       header: tCommon('labels.created'),
       cell: (row: GenreRow) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.createdAt} />
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -91,7 +99,7 @@ export function GenresTableContent({ result, searchPlaceholder, filterFields, so
       sortFields={sortFields}
       bulkDelete={{
         entityLabel: tCommonEntities('genres'),
-        deleteAction: deleteGenreAction,
+        deleteAction,
         getRowLabel: (row) => row.name || row.slug || row.id,
       }}
     />

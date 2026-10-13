@@ -272,6 +272,26 @@ export function toAcceptString(mimeTypes: readonly string[]): string {
   return mimeTypes.join(',');
 }
 
+/** Native picker hints include extensions for source files with an empty browser MIME. */
+export function imageSelectionAcceptTypes(mimeTypes: readonly string[]): Readonly<Record<string, readonly string[]>> {
+  return Object.fromEntries(
+    mimeTypes.map((mime) => {
+      const extension = getExtensionFromMimeType(mime);
+      const extensions = extension === 'bin' ? [] : [`.${extension}`];
+      if (mime === 'image/jpeg') {
+        extensions.push('.jpeg');
+      }
+      if (mime.startsWith('image/heic')) {
+        extensions.push('.heic');
+      }
+      if (mime.startsWith('image/heif')) {
+        extensions.push('.heif');
+      }
+      return [mime, [...new Set(extensions)]];
+    }),
+  );
+}
+
 /**
  * Format file size to human-readable string.
  */

@@ -1,11 +1,14 @@
 'use client';
 
-import Link from '@/components/core/Navigation';
+import { useEffect, useId, useRef } from 'react';
+
+import { LayoutContainer as DsLayoutContainer, LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
 import { IconKey, IconMail } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Anchor, Divider, Stack, Text, Title } from '@mantine/core';
+import { Separator as Divider } from '@/components/core/Display';
+import { NavigationLink as Anchor } from '@/components/core/Navigation';
 import { TextInput } from '@/components/core/Input';
-import { SectionCard } from '@/components/core/Section';
 import type { AuthProvider } from '@/features/auth/providers';
 import { AuthCodeChallengeView, type AuthCodeTimingViewModel } from './ui/AuthCodeChallengeView';
 import { AuthActionButton } from './ui/AuthActionButton';
@@ -87,55 +90,81 @@ export function LoginFlowView({
   const passkeySubmitting = pendingAction === 'passkey';
   const socialSubmittingProvider = providers.find((provider) => provider === pendingAction) ?? null;
   const authActionPending = pendingAction !== null;
+  const titleId = useId();
+  const errorId = useId();
+  const codeDescriptionId = useId();
+  const viewRef = useRef<HTMLElement>(null);
+  const previousChallenge = useRef(awaitingCode);
+  const previousError = useRef(visibleError);
+  useEffect(() => {
+    if (previousChallenge.current !== awaitingCode) {
+      previousChallenge.current = awaitingCode;
+      viewRef.current?.querySelector<HTMLInputElement>('input:not([type="hidden"]):not(:disabled)')?.focus();
+    }
+  }, [awaitingCode]);
+  useEffect(() => {
+    if (authActionPending) {
+      return;
+    }
+    const newError = visibleError && previousError.current !== visibleError;
+    previousError.current = visibleError;
+    if (newError && !viewRef.current?.contains(document.activeElement)) {
+      viewRef.current?.querySelector<HTMLInputElement>('input:not([type="hidden"]):not(:disabled)')?.focus();
+    }
+  }, [authActionPending, visibleError]);
 
   return (
-    <SectionCard p="xl" maw={420} w="100%">
-      <Stack gap="lg">
-        <Title order={2} ta="center">
+    <DsLayoutContainer ref={viewRef} size="form" inset="none" role="group" aria-labelledby={titleId}>
+      <DsLayoutStack gap="lg">
+        <DsHeading id={titleId} level={1} scale={2} align="center">
           {accountLinking ? t('accountLinking.title') : t('title')}
-        </Title>
+        </DsHeading>
 
         {securityReauthentication && !accountLinking ? (
-          <Text size="sm" c="dimmed" ta="center" data-testid="security-reauthentication-message">
+          <DsText size="sm" tone="secondary" align="center" data-testid="security-reauthentication-message">
             {t('securityReauthentication.description')}
-          </Text>
+          </DsText>
         ) : null}
 
         {newsletterIntent && !accountLinking ? (
-          <Text size="sm" c="dimmed" ta="center">
+          <DsText size="sm" tone="secondary" align="center">
             {t('newsletterIntent.description')}
-          </Text>
+          </DsText>
         ) : null}
 
         {accountLinking ? (
-          <Stack gap={4} ta="center">
-            <Text size="sm" c="dimmed">
+          <DsLayoutStack gap="xxs" align="center">
+            <DsText size="sm" tone="secondary">
               {t('accountLinking.description')}
-            </Text>
+            </DsText>
             {accountLinking.identifier ? (
-              <Text size="sm" fw={600}>
+              <DsText size="sm" weight="strong">
                 {accountLinking.identifier}
-              </Text>
+              </DsText>
             ) : null}
-          </Stack>
+          </DsLayoutStack>
         ) : null}
 
         {visibleError ? (
-          <Text size="sm" c="red" role="alert">
+          <DsText id={errorId} size="sm" tone="danger" role="alert">
             {visibleError}
-          </Text>
+          </DsText>
         ) : null}
 
         {awaitingCode ? (
-          <Stack gap="md">
-            <Stack gap={4}>
-              <Text fw={600}>{t('code.title')}</Text>
-              <Text size="sm" c="dimmed">
+          <DsLayoutStack gap="md">
+            <DsLayoutStack gap="xxs">
+              <DsText size="sm" weight="strong">
+                {t('code.title')}
+              </DsText>
+              <DsText id={codeDescriptionId} size="sm" tone="secondary">
                 {t('code.description')}
-              </Text>
-            </Stack>
+              </DsText>
+            </DsLayoutStack>
             <AuthCodeChallengeView
               code={code}
+              aria-invalid={Boolean(visibleError)}
+              aria-describedby={[codeDescriptionId, visibleError ? errorId : null].filter(Boolean).join(' ')}
               labels={{
                 codeAriaLabel: t('code.label'),
                 codeExpired: tAuthCommon('codeTiming.expired'),
@@ -153,26 +182,14 @@ export function LoginFlowView({
               submitting={emailSubmitting}
               timing={codeTiming}
             />
-          </Stack>
+          </DsLayoutStack>
         ) : (
-          <Stack gap="lg">
-            {providers.length > 0 ? (
-              <Stack gap="sm">
-                <SocialAuthButtons
-                  disabled={authActionPending}
-                  flow={flow}
-                  fallbackActionUrl={actionUrl}
-                  label={(provider) => t('continueWith', { provider: tCommonProviders(provider) })}
-                  onSubmit={onSocialSubmit}
-                  submittingProvider={socialSubmittingProvider}
-                />
-              </Stack>
-            ) : null}
-
+          <DsLayoutStack gap="lg">
             {supportsCode ? (
               <>
-                {providers.length > 0 ? <Divider label={t('divider')} labelPosition="center" /> : null}
                 <form
+                  aria-labelledby={titleId}
+                  aria-busy={emailSubmitting}
                   onSubmit={(event) => {
                     event.preventDefault();
                     if (!accountLinking && !email.trim()) {
@@ -181,7 +198,7 @@ export function LoginFlowView({
                     onRequestCode();
                   }}
                 >
-                  <Stack gap="sm">
+                  <DsLayoutStack gap="sm">
                     {!accountLinking ? (
                       <TextInput
                         id="login-email-input"
@@ -195,68 +212,85 @@ export function LoginFlowView({
                         value={email}
                         onChange={(event) => onEmailChange(event.currentTarget.value)}
                         required
+                        aria-invalid={Boolean(visibleError)}
+                        aria-describedby={visibleError ? errorId : undefined}
                       />
                     ) : null}
                     <AuthActionButton
                       id="login-email-code-submit"
                       type="submit"
+                      emphasis={accountLinking ? 'medium' : 'strong'}
                       loading={emailSubmitting}
                       disabled={authActionPending && !emailSubmitting}
-                      leftSection={<IconMail size={18} />}
+                      leftSection={<IconMail size="1em" aria-hidden />}
                     >
                       {accountLinking ? t('accountLinking.confirmWithEmail') : t('emailCode')}
                     </AuthActionButton>
-                  </Stack>
+                  </DsLayoutStack>
                 </form>
               </>
             ) : null}
 
-            {supportsPasskey ? (
-              <>
-                {supportsCode || providers.length > 0 ? <Divider label={t('divider')} labelPosition="center" /> : null}
-                <form action={actionUrl} method="POST">
-                  <input type="hidden" name="csrf_token" value={csrfToken} />
-                  <input type="hidden" name="identifier" value={identifierFromFlow || email} />
-                  <input
-                    type="hidden"
-                    name="passkey_challenge"
-                    value={getKratosNodeStringValue(flow, 'passkey_challenge')}
-                  />
-                  <input type="hidden" name="passkey_login" value="" />
-                  <AuthActionButton
-                    type="button"
-                    leftSection={<IconKey size={18} />}
-                    onClick={onPasskeyLogin}
-                    disabled={!passkeyReady || (authActionPending && !passkeySubmitting)}
-                    loading={passkeyLoading || passkeySubmitting}
-                    aria-busy={passkeyLoading || passkeySubmitting}
-                    data-testid="login-passkey"
-                  >
-                    {t('passkey')}
-                  </AuthActionButton>
-                </form>
-              </>
+            {supportsCode && (supportsPasskey || providers.length > 0) ? (
+              <Divider label={t('divider')} labelPosition="center" />
             ) : null}
-          </Stack>
+
+            {supportsPasskey || providers.length > 0 ? (
+              <DsLayoutStack gap="sm">
+                {supportsPasskey ? (
+                  <form action={actionUrl} method="POST">
+                    <input type="hidden" name="csrf_token" value={csrfToken} />
+                    <input type="hidden" name="identifier" value={identifierFromFlow || email} />
+                    <input
+                      type="hidden"
+                      name="passkey_challenge"
+                      value={getKratosNodeStringValue(flow, 'passkey_challenge')}
+                    />
+                    <input type="hidden" name="passkey_login" value="" />
+                    <AuthActionButton
+                      type="button"
+                      emphasis="medium"
+                      leftSection={<IconKey size="1em" aria-hidden />}
+                      onClick={onPasskeyLogin}
+                      disabled={!passkeyReady || (authActionPending && !passkeySubmitting)}
+                      loading={passkeyLoading || passkeySubmitting}
+                      aria-busy={passkeyLoading || passkeySubmitting}
+                      data-testid="login-passkey"
+                    >
+                      {t('passkey')}
+                    </AuthActionButton>
+                  </form>
+                ) : null}
+                {providers.length > 0 ? (
+                  <SocialAuthButtons
+                    disabled={authActionPending}
+                    flow={flow}
+                    fallbackActionUrl={actionUrl}
+                    label={(provider) => t('continueWith', { provider: tCommonProviders(provider) })}
+                    onSubmit={onSocialSubmit}
+                    submittingProvider={socialSubmittingProvider}
+                  />
+                ) : null}
+              </DsLayoutStack>
+            ) : null}
+          </DsLayoutStack>
         )}
 
-        <Divider />
-
-        <Text size="xs" c="dimmed" ta="center">
+        <DsText size="xs" tone="secondary" align="center">
           {t.rich('legalNotice', {
             terms: (chunks) => (
-              <Anchor component={Link} href="/terms" size="xs" underline="hover">
+              <Anchor href="/terms" size="xs" appearance="content">
                 {chunks}
               </Anchor>
             ),
             privacy: (chunks) => (
-              <Anchor component={Link} href="/privacy" size="xs" underline="hover">
+              <Anchor href="/privacy" size="xs" appearance="content">
                 {chunks}
               </Anchor>
             ),
           })}
-        </Text>
-      </Stack>
-    </SectionCard>
+        </DsText>
+      </DsLayoutStack>
+    </DsLayoutContainer>
   );
 }

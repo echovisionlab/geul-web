@@ -1,14 +1,19 @@
 'use client';
 
+import type { OverlayPresentationProps } from '../overlay-contract';
+
 import { forwardRef, type ReactNode } from 'react';
-import { Drawer as MantineDrawer, type DrawerProps as MantineDrawerProps } from '@mantine/core';
+import { OverlayDialog, type OverlayDialogDensity } from '../Modal/OverlayDialog';
+import { useDrawerDesktop } from './drawer-visibility';
 
 export type DrawerPlacement = 'left' | 'right' | 'bottom';
+export type DrawerDensity = OverlayDialogDensity;
 export type DrawerSize = 'compact' | 'standard' | 'large' | 'auto';
 export type DrawerClosePolicy = 'dismissible' | 'non-dismissible';
 export type DrawerVisibility = 'always' | 'mobile-only';
 
-export interface DrawerProps {
+export interface DrawerProps extends OverlayPresentationProps {
+  id?: string;
   opened: boolean;
   onClose: () => void;
   title: ReactNode;
@@ -16,34 +21,16 @@ export interface DrawerProps {
   closeLabel: string;
   placement?: DrawerPlacement;
   size?: DrawerSize;
+  density?: DrawerDensity;
   closePolicy?: DrawerClosePolicy;
   loading?: boolean;
   visibility?: DrawerVisibility;
 }
 
-type ResolvedDrawerSize = NonNullable<MantineDrawerProps['size']>;
-
-const SIDE_SIZES: Record<DrawerSize, ResolvedDrawerSize> = {
-  compact: 'sm',
-  standard: 'md',
-  large: 'lg',
-  auto: 'auto',
-};
-
-const BOTTOM_SIZES: Record<DrawerSize, ResolvedDrawerSize> = {
-  compact: '60%',
-  standard: '80%',
-  large: '85%',
-  auto: 'auto',
-};
-
-function resolveSize(placement: DrawerPlacement, size: DrawerSize) {
-  return placement === 'bottom' ? BOTTOM_SIZES[size] : SIDE_SIZES[size];
-}
-
 export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(
   (
     {
+      id,
       opened,
       onClose,
       title,
@@ -51,38 +38,32 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(
       closeLabel,
       placement = 'right',
       size = 'standard',
+      density = 'compact',
       closePolicy = 'dismissible',
       loading = false,
       visibility = 'always',
     },
     ref,
   ) => {
-    const dismissible = closePolicy === 'dismissible' && !loading;
-
+    const desktop = useDrawerDesktop();
     return (
-      <MantineDrawer
+      <OverlayDialog
         ref={ref}
-        opened={opened}
-        onClose={dismissible ? onClose : () => {}}
+        id={id}
+        opened={opened && (visibility !== 'mobile-only' || !desktop)}
+        onClose={onClose}
         title={title}
-        position={placement}
-        size={resolveSize(placement, size)}
-        radius={0}
-        hiddenFrom={visibility === 'mobile-only' ? 'sm' : undefined}
-        closeOnClickOutside={dismissible}
-        closeOnEscape={dismissible}
-        withCloseButton={dismissible}
-        closeButtonProps={{ 'aria-label': closeLabel }}
-        aria-busy={loading || undefined}
-        data-placement={placement}
-        data-size={size}
-        data-close-policy={dismissible ? 'dismissible' : 'non-dismissible'}
-        data-loading={loading || undefined}
+        closeLabel={closeLabel}
+        placement={placement}
+        size={size}
+        density={density}
+        dismissible={closePolicy === 'dismissible' && !loading}
+        busy={loading}
+        mobileOnly={visibility === 'mobile-only'}
       >
         {children}
-      </MantineDrawer>
+      </OverlayDialog>
     );
   },
 );
-
 Drawer.displayName = 'Drawer';

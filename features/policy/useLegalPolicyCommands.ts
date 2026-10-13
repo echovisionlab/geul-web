@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import type { LegalPolicyEditorStrategy } from './legal-policy-types';
 
 interface Messages {
@@ -58,31 +58,31 @@ export function useLegalPolicyCommands({
     },
     onSuccess: (result) => {
       if (!result.success) {
-        notifications.show({ message: result.error || messages.scheduleFailed, color: 'red' });
+        notifications.show({ message: result.error || messages.scheduleFailed, tone: 'danger' });
         return;
       }
-      notifications.show({ message: messages.scheduled, color: 'green' });
+      notifications.show({ message: messages.scheduled, tone: 'positive' });
       invalidatePolicy();
       closeScheduleModal();
       clearEffectiveFrom();
       router.refresh();
     },
-    onError: (error) => notifications.show({ message: error.message, color: 'red' }),
+    onError: (error) => notifications.show({ message: error.message, tone: 'danger' }),
   });
 
   const cancelScheduleMutation = useMutation({
     mutationFn: () => strategy.actions.cancelSchedule(policyId),
     onSuccess: (result) => {
       if (!result.success) {
-        notifications.show({ message: result.error || messages.cancelScheduleFailed, color: 'red' });
+        notifications.show({ message: result.error || messages.cancelScheduleFailed, tone: 'danger' });
         return;
       }
-      notifications.show({ message: messages.scheduleCancelled, color: 'yellow' });
+      notifications.show({ message: messages.scheduleCancelled, tone: 'positive' });
       invalidatePolicy();
       closeCancelModal();
       router.refresh();
     },
-    onError: (error) => notifications.show({ message: error.message, color: 'red' }),
+    onError: (error) => notifications.show({ message: error.message, tone: 'danger' }),
   });
 
   const activateNowMutation = useMutation({
@@ -93,15 +93,15 @@ export function useLegalPolicyCommands({
     },
     onSuccess: (result) => {
       if (!result.success) {
-        notifications.show({ message: result.error || messages.activateFailed, color: 'red' });
+        notifications.show({ message: result.error || messages.activateFailed, tone: 'danger' });
         return;
       }
-      notifications.show({ message: messages.activated, color: 'green' });
+      notifications.show({ message: messages.activated, tone: 'positive' });
       invalidatePolicy();
       closeActivateModal();
       router.refresh();
     },
-    onError: (error) => notifications.show({ message: error.message, color: 'red' }),
+    onError: (error) => notifications.show({ message: error.message, tone: 'danger' }),
   });
 
   const deleteMutation = useMutation({
@@ -112,13 +112,13 @@ export function useLegalPolicyCommands({
     },
     onSuccess: (result) => {
       if (!result.success) {
-        notifications.show({ message: result.error || messages.deleteFailed, color: 'red' });
+        notifications.show({ message: result.error || messages.deleteFailed, tone: 'danger' });
         return;
       }
-      notifications.show({ message: messages.deleted, color: 'red' });
+      notifications.show({ message: messages.deleted, tone: 'positive' });
       router.push(strategy.listPath);
     },
-    onError: (error) => notifications.show({ message: error.message, color: 'red' }),
+    onError: (error) => notifications.show({ message: error.message, tone: 'danger' }),
   });
 
   const regenerateHtmlMutation = useMutation({
@@ -128,14 +128,14 @@ export function useLegalPolicyCommands({
     },
     onSuccess: (result) => {
       if (!result.success) {
-        notifications.show({ message: result.error || messages.regenerateFailed, color: 'red' });
+        notifications.show({ message: result.error || messages.regenerateFailed, tone: 'danger' });
         return;
       }
-      notifications.show({ message: messages.regenerated, color: 'green' });
+      notifications.show({ message: messages.regenerated, tone: 'positive' });
       void queryClient.invalidateQueries({ queryKey: [strategy.entityType, policyId] });
       router.refresh();
     },
-    onError: (error) => notifications.show({ message: error.message, color: 'red' }),
+    onError: (error) => notifications.show({ message: error.message, tone: 'danger' }),
   });
 
   return {

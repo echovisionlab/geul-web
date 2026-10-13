@@ -1,13 +1,12 @@
 'use client';
 
-import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { createTranslationClient } from '@/lib/api/browser/secure-translation';
+import { useTranslationClient } from './TranslationServicesContext';
 
 const translationSettingsQueryKey = ['translation-settings'] as const;
 
 export function useTranslationGenerationAvailability(enabled = true) {
-  const translationClient = useMemo(() => createTranslationClient(), []);
+  const translationClient = useTranslationClient();
   return useQuery({
     queryKey: translationSettingsQueryKey,
     queryFn: async () => translationClient.getTranslationSettings({}),

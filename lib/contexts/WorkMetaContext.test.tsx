@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -23,7 +23,7 @@ let latest: ReturnType<typeof useWorkMeta> | null = null;
 const protocol = vi.hoisted(() => ({ updateMetadata: vi.fn(), getSnapshot: vi.fn() }));
 
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 
 vi.mock('@/lib/actions/work', () => ({
   updateWorkFieldsAction: vi.fn().mockResolvedValue({ success: true }),
@@ -220,7 +220,7 @@ describe('client save failures', () => {
     expect(hasPendingEditorSaves(`work:${workId}`)).toBe(true);
     expect(getPendingEditorPatch(`work:${workId}`)).toEqual({ clients: ['unsaved'] });
     expect(notifications.show).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'permission denied', color: 'red' }),
+      expect.objectContaining({ message: 'permission denied', tone: 'danger' }),
     );
     await expect(flushEditorSaves(`work:${workId}`)).resolves.toBe(true);
     expect(latest?.clients).toEqual(['unsaved']);

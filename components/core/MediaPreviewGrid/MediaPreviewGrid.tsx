@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react';
-import { Box } from '@mantine/core';
+
 import classes from './MediaPreviewGrid.module.css';
 
 export interface MediaPreviewGridProps {
   children: ReactNode;
 }
 
+/** Paired media previews stay side by side, including narrow editor screens. */
 export function MediaPreviewGrid({ children }: MediaPreviewGridProps) {
-  return <Box className={classes.grid}>{children}</Box>;
+  return <div className={classes.grid}>{children}</div>;
 }

@@ -1,7 +1,7 @@
+import { LabelsPageView } from '@/features/admin/label/LabelsPageView';
 import { getTranslations } from 'next-intl/server';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import { CreateLabelButton, LabelsTableContent } from '@/features/admin/label';
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
+
 import { listLabelsAdmin } from '@/lib/queries/label';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
@@ -53,21 +53,13 @@ export default async function AdminLabelsPage({ searchParams }: PageProps) {
   });
 
   return (
-    <>
-      <AdminPageHeader
-        title={labelsLabel}
-        items={[{ key: 'create-label', type: 'custom', content: <CreateLabelButton /> }]}
-      />
-
-      <ServerDataTable namespace="labels">
-        <LabelsTableContent
-          result={result}
-          searchPlaceholder={searchPlaceholder}
-          filterFields={filterFields}
-          sortFields={sortFields}
-        />
-        <ServerDataTable.Pagination namespace="labels" result={result} searchParams={params} />
-      </ServerDataTable>
-    </>
+    <LabelsPageView
+      title={labelsLabel}
+      searchParams={params.toString()}
+      result={result}
+      searchPlaceholder={searchPlaceholder}
+      filterFields={filterFields}
+      sortFields={sortFields}
+    />
   );
 }

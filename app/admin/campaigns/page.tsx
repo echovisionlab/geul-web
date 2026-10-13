@@ -1,13 +1,7 @@
+import { CampaignsPageView } from '@/features/admin/campaign/CampaignsPageView';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getTranslations } from 'next-intl/server';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import {
-  CampaignModalProvider,
-  CampaignModals,
-  CampaignsTableContent,
-  CreateCampaignButton,
-} from '@/features/admin/campaign';
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
 import { listCampaignsAction } from '@/lib/actions/campaign';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
@@ -63,23 +57,13 @@ export default async function AdminCampaignsPage({ searchParams }: PageProps) {
   }).then(unwrapQueryResult);
 
   return (
-    <CampaignModalProvider>
-      <AdminPageHeader
-        title={tCommonEntities('campaigns')}
-        items={[{ key: 'create-campaign', type: 'custom', content: <CreateCampaignButton /> }]}
-      />
-
-      <ServerDataTable namespace="campaigns">
-        <CampaignsTableContent
-          result={result}
-          searchPlaceholder={searchPlaceholder}
-          filterFields={filterFields}
-          sortFields={sortFields}
-        />
-        <ServerDataTable.Pagination namespace="campaigns" result={result} searchParams={params} />
-      </ServerDataTable>
-
-      <CampaignModals />
-    </CampaignModalProvider>
+    <CampaignsPageView
+      title={tCommonEntities('campaigns')}
+      result={result}
+      searchPlaceholder={searchPlaceholder}
+      filterFields={filterFields}
+      sortFields={sortFields}
+      searchParams={params.toString()}
+    />
   );
 }

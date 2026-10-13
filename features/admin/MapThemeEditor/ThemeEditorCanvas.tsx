@@ -1,24 +1,32 @@
 'use client';
 
+import {
+  parameterAction,
+  parameterGroup,
+  useParameterControls,
+  ParameterPanel,
+} from '@/components/core/ParameterPanel';
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+import { SectionCard as DsSectionCard } from '@/components/core/Section';
+import { Text as DsText } from '@/components/core/Typography';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { button, folder, LevaPanel, useControls, useCreateStore } from 'leva';
 import type { Map as MapLibreGLMap } from 'maplibre-gl';
 import { useTranslations } from 'next-intl';
-import { Box, Group, Stack, Text } from '@mantine/core';
 import { isMapThemeColor } from '@echovisionlab/geul-common/collaboration/map-theme';
 import { SegmentedControl, Switch } from '@/components/core/Input';
 import type { MapRendererPlace } from '@/features/map/types';
 import { PageLoader } from '@/features/site/PageLoader';
-import { useLevaSyncGuard } from '@/hooks/useLevaSync';
 import type { CalloutField, ThemeSettings, ThemeVariant } from '@/lib/types/map-theme/model';
 import { DEFAULT_DARK_VARIANT, DEFAULT_LIGHT_VARIANT, DEFAULT_THEME_SETTINGS } from '@/lib/types/map-theme/schema';
-
 const MapLibreMap = dynamic(() => import('@/features/map/MapLibreMap').then((mod) => mod.MapLibreMap), {
   ssr: false,
   loading: () => <PageLoader height="100%" />,
 });
-
 interface ThemeEditorCanvasProps {
   variant: Omit<ThemeVariant, 'id'>;
   settings: ThemeSettings;
@@ -26,22 +34,14 @@ interface ThemeEditorCanvasProps {
   onVariantChange: (variant: Omit<ThemeVariant, 'id'>) => void;
   onSettingsChange: (settings: ThemeSettings) => void;
 }
-
 type RgbaColor = {
   r: number;
   g: number;
   b: number;
   a: number;
 };
-
-interface ThemeEditorControlStores {
-  light: ReturnType<typeof useCreateStore>;
-  dark: ReturnType<typeof useCreateStore>;
-}
-
 const DEFAULT_CENTER = { lat: 37.5665, lng: 126.978 };
 const ORBIT_SPEED = 0.05; // degrees per frame
-
 // All available callout fields
 const ALL_CALLOUT_FIELDS: CalloutField[] = [
   'name',
@@ -53,9 +53,7 @@ const ALL_CALLOUT_FIELDS: CalloutField[] = [
   'country',
   'postalCode',
 ];
-
 type MapThemeEditorTranslation = ReturnType<typeof useTranslations>;
-
 function getCalloutFieldLabel(
   field: CalloutField,
   t: MapThemeEditorTranslation,
@@ -82,10 +80,8 @@ function getCalloutFieldLabel(
   if (field === 'coordinates') {
     return tCommonLabels('coordinates');
   }
-
   return t('callout.fields.street');
 }
-
 function getMockPlaces(t: MapThemeEditorTranslation): Record<string, MapRendererPlace[]> {
   return {
     '0': [],
@@ -151,21 +147,18 @@ function getMockPlaces(t: MapThemeEditorTranslation): Record<string, MapRenderer
     ],
   };
 }
-
 /**
- * Parse color string to RGBA object for Leva
+ * Parse color string to RGBA object for editable authored colors
  */
 export function parseColorToRgba(color: string): RgbaColor {
   const normalizedColor = color.trim();
   if (!isMapThemeColor(normalizedColor)) {
     throw new Error('Unsupported Map Theme color');
   }
-
   // Handle transparent
   if (normalizedColor === 'transparent') {
     return { r: 0, g: 0, b: 0, a: 0 };
   }
-
   // Match the Common Map Theme contract, including whitespace around channels.
   const rgbaMatch = normalizedColor.match(
     /^rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*((?:0(?:\.\d+)?)|(?:1(?:\.0+)?))\s*\)$/i,
@@ -178,7 +171,6 @@ export function parseColorToRgba(color: string): RgbaColor {
       a: parseFloat(rgbaMatch[4]),
     };
   }
-
   const rgbMatch = normalizedColor.match(/^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/i);
   if (rgbMatch) {
     return {
@@ -188,7 +180,6 @@ export function parseColorToRgba(color: string): RgbaColor {
       a: 1,
     };
   }
-
   // Expand #RGB and #RGBA before reading the canonical eight channels.
   let hex = normalizedColor.replace('#', '');
   if (hex.length === 3 || hex.length === 4) {
@@ -204,10 +195,8 @@ export function parseColorToRgba(color: string): RgbaColor {
   const g = parseInt(hex.slice(2, 4), 16);
   const b = parseInt(hex.slice(4, 6), 16);
   const a = parseInt(hex.slice(6, 8), 16) / 255;
-
   return { r, g, b, a };
 }
-
 /**
  * Convert RGBA object to CSS rgba() string
  */
@@ -221,7 +210,6 @@ function rgbaToString(rgba: RgbaColor): string {
   }
   return `rgba(${Math.round(rgba.r)},${Math.round(rgba.g)},${Math.round(rgba.b)},${rgba.a.toFixed(2)})`;
 }
-
 function ThemeEditorCanvasInner({
   variant,
   settings,
@@ -232,68 +220,55 @@ function ThemeEditorCanvasInner({
   const t = useTranslations('adminList.mapThemes.editor');
   const tMapControls = useTranslations('mapControls');
   const tCommonLabels = useTranslations('common.labels');
-  const lightControlsStore = useCreateStore();
-  const darkControlsStore = useCreateStore();
-  const controlStores: ThemeEditorControlStores = {
-    light: lightControlsStore,
-    dark: darkControlsStore,
-  };
-  const controlsStore = variant.scheme === 'dark' ? controlStores.dark : controlStores.light;
   const [placesCount, setPlacesCount] = useState<string>('1');
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
   const [autoRotate, setAutoRotate] = useState(false);
   const mockPlaces = useMemo(() => getMockPlaces(t), [t]);
-
   const places = useMemo(() => mockPlaces[placesCount] ?? [], [mockPlaces, placesCount]);
-
   // Camera state (source of truth)
   const [camera, setCamera] = useState({
     zoom: 15,
     pitch: 0,
     bearing: 0,
   });
-
   // Map instance ref for direct manipulation during auto rotate
   const mapInstanceRef = useRef<MapLibreGLMap | null>(null);
   const animationRef = useRef<number | null>(null);
   const orbitBearingRef = useRef(0);
-
   // Get default variant based on current scheme
   const getDefaultVariant = useCallback(() => {
     return variant.scheme === 'dark' ? DEFAULT_DARK_VARIANT : DEFAULT_LIGHT_VARIANT;
   }, [variant.scheme]);
-
-  // Guard to prevent onChange firing during scheme sync
-  const { guardedOnChange, sync } = useLevaSyncGuard();
-
-  // Leva controls - Map (base map colors)
-  const [, setMapControls] = useControls(
+  // Parameter controls - Map (base map colors)
+  const mapParameters = useParameterControls(
     () => ({
-      [tCommonLabels('map')]: folder(
+      [tCommonLabels('map')]: parameterGroup(
         {
           backgroundColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.backgroundColor),
             label: tCommonLabels('background'),
-            onChange: guardedOnChange((v: RgbaColor) =>
-              onVariantChange({ ...variant, backgroundColor: rgbaToString(v) }),
-            ),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, backgroundColor: rgbaToString(v) }),
           },
           waterColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.waterColor),
             label: t('controls.map.water'),
-            onChange: guardedOnChange((v: RgbaColor) => onVariantChange({ ...variant, waterColor: rgbaToString(v) })),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, waterColor: rgbaToString(v) }),
           },
           landColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.landColor),
             label: t('controls.map.land'),
-            onChange: guardedOnChange((v: RgbaColor) => onVariantChange({ ...variant, landColor: rgbaToString(v) })),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, landColor: rgbaToString(v) }),
           },
           roadColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.roadColor),
             label: t('controls.map.road'),
-            onChange: guardedOnChange((v: RgbaColor) => onVariantChange({ ...variant, roadColor: rgbaToString(v) })),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, roadColor: rgbaToString(v) }),
           },
-          [t('controls.map.reset')]: button(() => {
+          [t('controls.map.reset')]: parameterAction(() => {
             const defaults = getDefaultVariant();
             onVariantChange({
               ...variant,
@@ -307,35 +282,32 @@ function ThemeEditorCanvasInner({
         { collapsed: true },
       ),
     }),
-    { store: controlsStore },
-    [controlsStore, variant, onVariantChange, getDefaultVariant, guardedOnChange, t],
+    [variant, onVariantChange, getDefaultVariant, t],
   );
-
-  // Leva controls - Building
-  const [, setBuildingControls] = useControls(
+  // Parameter controls - Building
+  const buildingParameters = useParameterControls(
     () => ({
-      [t('controls.building.title')]: folder(
+      [t('controls.building.title')]: parameterGroup(
         {
           buildingFillColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.buildingFillColor),
             label: t('controls.building.fill'),
-            onChange: guardedOnChange((v: RgbaColor) =>
-              onVariantChange({ ...variant, buildingFillColor: rgbaToString(v) }),
-            ),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, buildingFillColor: rgbaToString(v) }),
           },
           buildingStrokeEnabled: {
+            kind: 'checkbox',
             value: variant.buildingStrokeEnabled,
             label: t('controls.building.strokeEnabled'),
-            onChange: guardedOnChange((v: boolean) => onVariantChange({ ...variant, buildingStrokeEnabled: v })),
+            onChange: (v: boolean) => onVariantChange({ ...variant, buildingStrokeEnabled: v }),
           },
           buildingStrokeColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.buildingStrokeColor),
             label: t('controls.building.stroke'),
-            onChange: guardedOnChange((v: RgbaColor) =>
-              onVariantChange({ ...variant, buildingStrokeColor: rgbaToString(v) }),
-            ),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, buildingStrokeColor: rgbaToString(v) }),
           },
-          [t('controls.building.reset')]: button(() => {
+          [t('controls.building.reset')]: parameterAction(() => {
             const defaults = getDefaultVariant();
             onVariantChange({
               ...variant,
@@ -348,103 +320,97 @@ function ThemeEditorCanvasInner({
         { collapsed: true },
       ),
     }),
-    { store: controlsStore },
-    [controlsStore, variant, onVariantChange, getDefaultVariant, guardedOnChange, t],
+    [variant, onVariantChange, getDefaultVariant, t],
   );
-
-  // Leva controls - Callout (colors + layout + fields)
-  const [, setCalloutControls] = useControls(
+  // Parameter controls - Callout (colors + layout + fields)
+  const calloutParameters = useParameterControls(
     () => ({
-      [t('callout.title')]: folder(
+      [t('callout.title')]: parameterGroup(
         {
           calloutLineColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.calloutLineColor),
             label: t('callout.line'),
-            onChange: guardedOnChange((v: RgbaColor) =>
-              onVariantChange({ ...variant, calloutLineColor: rgbaToString(v) }),
-            ),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, calloutLineColor: rgbaToString(v) }),
           },
           calloutHoverLineColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.calloutHoverLineColor),
             label: t('callout.hoverLine'),
-            onChange: guardedOnChange((v: RgbaColor) =>
-              onVariantChange({ ...variant, calloutHoverLineColor: rgbaToString(v) }),
-            ),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, calloutHoverLineColor: rgbaToString(v) }),
           },
           calloutTextColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.calloutTextColor),
             label: tCommonLabels('text'),
-            onChange: guardedOnChange((v: RgbaColor) =>
-              onVariantChange({ ...variant, calloutTextColor: rgbaToString(v) }),
-            ),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, calloutTextColor: rgbaToString(v) }),
           },
           calloutHoverTextColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.calloutHoverTextColor),
             label: t('callout.hoverText'),
-            onChange: guardedOnChange((v: RgbaColor) =>
-              onVariantChange({ ...variant, calloutHoverTextColor: rgbaToString(v) }),
-            ),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, calloutHoverTextColor: rgbaToString(v) }),
           },
           calloutDescriptionColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.calloutDescriptionColor),
             label: tCommonLabels('description'),
-            onChange: guardedOnChange((v: RgbaColor) =>
-              onVariantChange({ ...variant, calloutDescriptionColor: rgbaToString(v) }),
-            ),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, calloutDescriptionColor: rgbaToString(v) }),
           },
           calloutHoverDescriptionColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.calloutHoverDescriptionColor),
             label: t('callout.hoverDescription'),
-            onChange: guardedOnChange((v: RgbaColor) =>
-              onVariantChange({ ...variant, calloutHoverDescriptionColor: rgbaToString(v) }),
-            ),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, calloutHoverDescriptionColor: rgbaToString(v) }),
           },
           calloutBackgroundColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.calloutBackgroundColor),
             label: tCommonLabels('background'),
-            onChange: guardedOnChange((v: RgbaColor) =>
-              onVariantChange({ ...variant, calloutBackgroundColor: rgbaToString(v) }),
-            ),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, calloutBackgroundColor: rgbaToString(v) }),
           },
           calloutHoverBackgroundColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.calloutHoverBackgroundColor),
             label: t('callout.hoverBackground'),
-            onChange: guardedOnChange((v: RgbaColor) =>
-              onVariantChange({ ...variant, calloutHoverBackgroundColor: rgbaToString(v) }),
-            ),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, calloutHoverBackgroundColor: rgbaToString(v) }),
           },
           calloutScale: {
+            kind: 'number',
             value: settings.calloutScale,
             min: 0.5,
             max: 2,
             step: 0.1,
             label: t('callout.scale'),
-            onChange: guardedOnChange((v: number) => onSettingsChange({ ...settings, calloutScale: v })),
+            onChange: (v: number) => onSettingsChange({ ...settings, calloutScale: v }),
           },
           calloutOffsetX: {
+            kind: 'number',
             value: settings.calloutOffsetX,
             min: -50,
             max: 50,
             step: 1,
             label: t('callout.offsetX'),
-            onChange: guardedOnChange((v: number) => onSettingsChange({ ...settings, calloutOffsetX: v })),
+            onChange: (v: number) => onSettingsChange({ ...settings, calloutOffsetX: v }),
           },
           calloutOffsetY: {
+            kind: 'number',
             value: settings.calloutOffsetY,
             min: -50,
             max: 50,
             step: 1,
             label: t('callout.offsetY'),
-            onChange: guardedOnChange((v: number) => onSettingsChange({ ...settings, calloutOffsetY: v })),
+            onChange: (v: number) => onSettingsChange({ ...settings, calloutOffsetY: v }),
           },
           // Callout fields as individual toggles
           ...Object.fromEntries(
             ALL_CALLOUT_FIELDS.map((field) => [
               `field_${field}`,
               {
+                kind: 'checkbox',
                 value: settings.calloutFields.includes(field),
                 label: getCalloutFieldLabel(field, t, tCommonLabels),
-                onChange: guardedOnChange((enabled: boolean) => {
+                onChange: (enabled: boolean) => {
                   const isEnabled = settings.calloutFields.includes(field);
                   if (enabled === isEnabled) {
                     return;
@@ -455,11 +421,11 @@ function ThemeEditorCanvasInner({
                   if (newFields.length > 0) {
                     onSettingsChange({ ...settings, calloutFields: newFields });
                   }
-                }),
+                },
               },
             ]),
           ),
-          [t('callout.reset')]: button(() => {
+          [t('callout.reset')]: parameterAction(() => {
             const defaults = getDefaultVariant();
             onVariantChange({
               ...variant,
@@ -484,31 +450,34 @@ function ThemeEditorCanvasInner({
         { collapsed: true },
       ),
     }),
-    { store: controlsStore },
-    [controlsStore, variant, settings, onVariantChange, onSettingsChange, getDefaultVariant, guardedOnChange, t],
+    [variant, settings, onVariantChange, onSettingsChange, getDefaultVariant, t],
   );
-
-  // Leva controls - Attribution
-  const [, setAttributionControls] = useControls(
+  // Parameter controls - Attribution
+  const attributionParameters = useParameterControls(
     () => ({
-      [t('controls.attribution.title')]: folder(
+      [t('controls.attribution.title')]: parameterGroup(
         {
           attributionColor: {
-            value: parseColorToRgba(variant.attributionColor ?? 'rgba(128,128,128,0.55)'),
-            label: t('controls.attribution.color'),
-            onChange: guardedOnChange((v: RgbaColor) =>
-              onVariantChange({ ...variant, attributionColor: rgbaToString(v) }),
+            kind: 'color',
+            value: parseColorToRgba(
+              variant.attributionColor ??
+                (variant.scheme === 'dark'
+                  ? DEFAULT_DARK_VARIANT.attributionColor
+                  : DEFAULT_LIGHT_VARIANT.attributionColor),
             ),
+            label: t('controls.attribution.color'),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, attributionColor: rgbaToString(v) }),
           },
           attributionFontSize: {
+            kind: 'number',
             value: settings.attributionFontSize ?? 11,
             min: 9,
             max: 14,
             step: 1,
             label: tCommonLabels('fontSize'),
-            onChange: guardedOnChange((v: number) => onSettingsChange({ ...settings, attributionFontSize: v })),
+            onChange: (v: number) => onSettingsChange({ ...settings, attributionFontSize: v }),
           },
-          [t('controls.attribution.reset')]: button(() => {
+          [t('controls.attribution.reset')]: parameterAction(() => {
             const defaults = getDefaultVariant();
             onVariantChange({
               ...variant,
@@ -523,32 +492,31 @@ function ThemeEditorCanvasInner({
         { collapsed: true },
       ),
     }),
-    { store: controlsStore },
-    [controlsStore, variant, settings, onVariantChange, onSettingsChange, getDefaultVariant, guardedOnChange, t],
+    [variant, settings, onVariantChange, onSettingsChange, getDefaultVariant, t],
   );
-
-  const [, setLabelControls] = useControls(
+  const labelParameters = useParameterControls(
     () => ({
-      [t('controls.labels.title')]: folder(
+      [t('controls.labels.title')]: parameterGroup(
         {
           labelTextColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.labelTextColor),
             label: tCommonLabels('text'),
-            onChange: guardedOnChange((v: RgbaColor) =>
-              onVariantChange({ ...variant, labelTextColor: rgbaToString(v) }),
-            ),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, labelTextColor: rgbaToString(v) }),
           },
           showAreaLabels: {
+            kind: 'checkbox',
             value: settings.showAreaLabels,
             label: t('controls.labels.areaRoad'),
-            onChange: guardedOnChange((v: boolean) => onSettingsChange({ ...settings, showAreaLabels: v })),
+            onChange: (v: boolean) => onSettingsChange({ ...settings, showAreaLabels: v }),
           },
           showPoiLabels: {
+            kind: 'checkbox',
             value: settings.showPoiLabels,
             label: tMapControls('fields.poiLabels'),
-            onChange: guardedOnChange((v: boolean) => onSettingsChange({ ...settings, showPoiLabels: v })),
+            onChange: (v: boolean) => onSettingsChange({ ...settings, showPoiLabels: v }),
           },
-          [t('controls.labels.reset')]: button(() => {
+          [t('controls.labels.reset')]: parameterAction(() => {
             const defaults = getDefaultVariant();
             onVariantChange({
               ...variant,
@@ -564,41 +532,37 @@ function ThemeEditorCanvasInner({
         { collapsed: true },
       ),
     }),
-    { store: controlsStore },
-    [controlsStore, variant, settings, onVariantChange, onSettingsChange, getDefaultVariant, guardedOnChange, t],
+    [variant, settings, onVariantChange, onSettingsChange, getDefaultVariant, t],
   );
-
-  const [, setClusterControls] = useControls(
+  const clusterParameters = useParameterControls(
     () => ({
-      [t('controls.cluster.title')]: folder(
+      [t('controls.cluster.title')]: parameterGroup(
         {
           clusterColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.clusterColor),
             label: t('controls.cluster.bubble'),
-            onChange: guardedOnChange((v: RgbaColor) => onVariantChange({ ...variant, clusterColor: rgbaToString(v) })),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, clusterColor: rgbaToString(v) }),
           },
           clusterHoverColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.clusterHoverColor),
             label: t('controls.cluster.hoverBubble'),
-            onChange: guardedOnChange((v: RgbaColor) =>
-              onVariantChange({ ...variant, clusterHoverColor: rgbaToString(v) }),
-            ),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, clusterHoverColor: rgbaToString(v) }),
           },
           clusterTextColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.clusterTextColor),
             label: t('controls.cluster.count'),
-            onChange: guardedOnChange((v: RgbaColor) =>
-              onVariantChange({ ...variant, clusterTextColor: rgbaToString(v) }),
-            ),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, clusterTextColor: rgbaToString(v) }),
           },
           clusterTextHoverColor: {
+            kind: 'color',
             value: parseColorToRgba(variant.clusterTextHoverColor),
             label: t('controls.cluster.hoverCount'),
-            onChange: guardedOnChange((v: RgbaColor) =>
-              onVariantChange({ ...variant, clusterTextHoverColor: rgbaToString(v) }),
-            ),
+            onChange: (v: RgbaColor) => onVariantChange({ ...variant, clusterTextHoverColor: rgbaToString(v) }),
           },
-          [t('controls.cluster.reset')]: button(() => {
+          [t('controls.cluster.reset')]: parameterAction(() => {
             const defaults = getDefaultVariant();
             onVariantChange({
               ...variant,
@@ -612,136 +576,48 @@ function ThemeEditorCanvasInner({
         { collapsed: true },
       ),
     }),
-    { store: controlsStore },
-    [controlsStore, variant, settings, onVariantChange, onSettingsChange, getDefaultVariant, guardedOnChange, t],
+    [variant, settings, onVariantChange, onSettingsChange, getDefaultVariant, t],
   );
-
-  // Leva controls - Camera
-  // Note: deps array includes camera so Leva re-renders when camera state changes from map interaction
-  useControls(
-    () => ({
-      [tMapControls('folders.camera')]: folder(
-        {
-          zoom: {
-            value: camera.zoom,
-            min: 10,
-            max: 20,
-            step: 0.5,
-            label: tMapControls('fields.zoom'),
-            onChange: (v: number) => setCamera((prev) => ({ ...prev, zoom: v })),
+  const cameraParameters =
+    // Parameter controls - Camera
+    // Note: deps array includes camera so the controlled model updates when camera state changes from map interaction
+    useParameterControls(
+      () => ({
+        [tMapControls('folders.camera')]: parameterGroup(
+          {
+            zoom: {
+              kind: 'number',
+              value: camera.zoom,
+              min: 10,
+              max: 20,
+              step: 0.5,
+              label: tMapControls('fields.zoom'),
+              onChange: (v: number) => setCamera((prev) => ({ ...prev, zoom: v })),
+            },
+            pitch: {
+              kind: 'number',
+              value: camera.pitch,
+              min: 0,
+              max: 85,
+              step: 1,
+              label: tMapControls('fields.pitch'),
+              onChange: (v: number) => setCamera((prev) => ({ ...prev, pitch: v })),
+            },
+            bearing: {
+              kind: 'number',
+              value: camera.bearing,
+              min: -180,
+              max: 180,
+              step: 1,
+              label: tMapControls('fields.bearing'),
+              onChange: (v: number) => setCamera((prev) => ({ ...prev, bearing: v })),
+            },
           },
-          pitch: {
-            value: camera.pitch,
-            min: 0,
-            max: 85,
-            step: 1,
-            label: tMapControls('fields.pitch'),
-            onChange: (v: number) => setCamera((prev) => ({ ...prev, pitch: v })),
-          },
-          bearing: {
-            value: camera.bearing,
-            min: -180,
-            max: 180,
-            step: 1,
-            label: tMapControls('fields.bearing'),
-            onChange: (v: number) => setCamera((prev) => ({ ...prev, bearing: v })),
-          },
-        },
-        { collapsed: true },
-      ),
-    }),
-    { store: controlsStore },
-    [camera, controlsStore, tMapControls],
-  );
-
-  useEffect(() => {
-    sync(setMapControls as (values: Record<string, unknown>) => void, {
-      backgroundColor: parseColorToRgba(variant.backgroundColor),
-      waterColor: parseColorToRgba(variant.waterColor),
-      landColor: parseColorToRgba(variant.landColor),
-      roadColor: parseColorToRgba(variant.roadColor),
-    });
-  }, [variant.backgroundColor, variant.waterColor, variant.landColor, variant.roadColor, setMapControls, sync]);
-
-  useEffect(() => {
-    sync(setBuildingControls as (values: Record<string, unknown>) => void, {
-      buildingFillColor: parseColorToRgba(variant.buildingFillColor),
-      buildingStrokeEnabled: variant.buildingStrokeEnabled,
-      buildingStrokeColor: parseColorToRgba(variant.buildingStrokeColor),
-    });
-  }, [
-    variant.buildingFillColor,
-    variant.buildingStrokeEnabled,
-    variant.buildingStrokeColor,
-    setBuildingControls,
-    sync,
-  ]);
-
-  useEffect(() => {
-    sync(setCalloutControls as (values: Record<string, unknown>) => void, {
-      calloutLineColor: parseColorToRgba(variant.calloutLineColor),
-      calloutHoverLineColor: parseColorToRgba(variant.calloutHoverLineColor),
-      calloutTextColor: parseColorToRgba(variant.calloutTextColor),
-      calloutHoverTextColor: parseColorToRgba(variant.calloutHoverTextColor),
-      calloutDescriptionColor: parseColorToRgba(variant.calloutDescriptionColor),
-      calloutHoverDescriptionColor: parseColorToRgba(variant.calloutHoverDescriptionColor),
-      calloutBackgroundColor: parseColorToRgba(variant.calloutBackgroundColor),
-      calloutHoverBackgroundColor: parseColorToRgba(variant.calloutHoverBackgroundColor),
-      calloutScale: settings.calloutScale,
-      calloutOffsetX: settings.calloutOffsetX,
-      calloutOffsetY: settings.calloutOffsetY,
-      ...Object.fromEntries(
-        ALL_CALLOUT_FIELDS.map((field) => [`field_${field}`, settings.calloutFields.includes(field)]),
-      ),
-    });
-  }, [
-    variant.calloutLineColor,
-    variant.calloutHoverLineColor,
-    variant.calloutTextColor,
-    variant.calloutHoverTextColor,
-    variant.calloutDescriptionColor,
-    variant.calloutHoverDescriptionColor,
-    variant.calloutBackgroundColor,
-    variant.calloutHoverBackgroundColor,
-    settings.calloutScale,
-    settings.calloutOffsetX,
-    settings.calloutOffsetY,
-    settings.calloutFields,
-    setCalloutControls,
-    sync,
-  ]);
-
-  useEffect(() => {
-    sync(setAttributionControls as (values: Record<string, unknown>) => void, {
-      attributionColor: parseColorToRgba(variant.attributionColor),
-      attributionFontSize: settings.attributionFontSize,
-    });
-  }, [variant.attributionColor, settings.attributionFontSize, setAttributionControls, sync]);
-
-  useEffect(() => {
-    sync(setLabelControls as (values: Record<string, unknown>) => void, {
-      labelTextColor: parseColorToRgba(variant.labelTextColor),
-      showAreaLabels: settings.showAreaLabels,
-      showPoiLabels: settings.showPoiLabels,
-    });
-  }, [variant.labelTextColor, settings.showAreaLabels, settings.showPoiLabels, setLabelControls, sync]);
-
-  useEffect(() => {
-    sync(setClusterControls as (values: Record<string, unknown>) => void, {
-      clusterColor: parseColorToRgba(variant.clusterColor),
-      clusterHoverColor: parseColorToRgba(variant.clusterHoverColor),
-      clusterTextColor: parseColorToRgba(variant.clusterTextColor),
-      clusterTextHoverColor: parseColorToRgba(variant.clusterTextHoverColor),
-    });
-  }, [
-    variant.clusterColor,
-    variant.clusterHoverColor,
-    variant.clusterTextColor,
-    variant.clusterTextHoverColor,
-    setClusterControls,
-    sync,
-  ]);
-
+          { collapsed: true },
+        ),
+      }),
+      [camera, tMapControls],
+    );
   // Auto rotate animation - directly manipulates map instance, no React state
   useEffect(() => {
     if (!autoRotate || !mapInstanceRef.current) {
@@ -751,26 +627,20 @@ function ThemeEditorCanvasInner({
       }
       return;
     }
-
     const map = mapInstanceRef.current;
     orbitBearingRef.current = map.getBearing();
-
     const animate = () => {
       if (!mapInstanceRef.current) {
         return;
       }
-
       orbitBearingRef.current = (orbitBearingRef.current + ORBIT_SPEED) % 360;
       if (orbitBearingRef.current > 180) {
         orbitBearingRef.current -= 360;
       }
-
       mapInstanceRef.current.setBearing(orbitBearingRef.current);
       animationRef.current = requestAnimationFrame(animate);
     };
-
     animationRef.current = requestAnimationFrame(animate);
-
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
@@ -778,7 +648,6 @@ function ThemeEditorCanvasInner({
       }
     };
   }, [autoRotate]);
-
   // Handle view mode change
   const handleViewModeChange = useCallback((mode: string) => {
     const newMode = mode as '2d' | '3d';
@@ -792,51 +661,40 @@ function ThemeEditorCanvasInner({
       setCamera({ zoom: 15, pitch: 0, bearing: 0 });
     }
   }, []);
-
   const handleAutoRotateChange = useCallback((checked: boolean) => {
     setAutoRotate(checked);
   }, []);
-
   const show3DBuildings = viewMode === '3d';
-
   // Combined theme config for map (variant + settings without id/scheme)
   const themeConfig = useMemo(() => {
     const { scheme: _, ...variantConfig } = variant;
     return { ...variantConfig, ...settings };
   }, [variant, settings]);
-
   // Handle map ready
   const handleMapReady = useCallback((map: MapLibreGLMap) => {
     mapInstanceRef.current = map;
   }, []);
-
   return (
-    <Box pos="absolute" inset={0}>
+    <div style={{ position: 'absolute', inset: 0 }}>
       {showControls && (
-        <Box
-          style={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            zIndex: 10,
-            width: 280,
+        <ParameterPanel
+          placement="map-corner"
+          title={tMapControls('settingsTitle')}
+          model={{
+            ...mapParameters,
+            ...buildingParameters,
+            ...calloutParameters,
+            ...attributionParameters,
+            ...labelParameters,
+            ...clusterParameters,
+            ...cameraParameters,
           }}
-        >
-          <LevaPanel
-            key={variant.scheme}
-            fill
-            flat
-            store={controlsStore}
-            titleBar={false}
-            theme={{
-              sizes: { rootWidth: '280px' },
-            }}
-          />
-        </Box>
+          copyLabel={(label) => tMapControls('copyValueTitle', { label })}
+        />
       )}
 
       {/* View controls at bottom */}
-      <Box
+      <div
         style={{
           position: 'absolute',
           bottom: 16,
@@ -844,58 +702,57 @@ function ThemeEditorCanvasInner({
           zIndex: 10,
         }}
       >
-        <Group
-          gap="md"
-          p="xs"
-          style={{
-            background: 'var(--mantine-color-body)',
-            borderRadius: 'var(--mantine-radius-md)',
-            boxShadow: 'var(--mantine-shadow-sm)',
-          }}
-        >
-          <Stack gap={4}>
-            <Text size="xs" c="dimmed">
-              {t('viewMode.label')}
-            </Text>
-            <SegmentedControl
-              value={viewMode}
-              onChange={handleViewModeChange}
-              data={[
-                { label: t('viewMode.twoD'), value: '2d' },
-                { label: t('viewMode.threeD'), value: '3d' },
-              ]}
-              size="xs"
-            />
-          </Stack>
-          {viewMode === '3d' && (
-            <Stack gap={4}>
-              <Text size="xs" c="dimmed">
-                {tMapControls('fields.autoRotate')}
-              </Text>
-              <Switch
-                checked={autoRotate}
-                onChange={(e) => handleAutoRotateChange(e.currentTarget.checked)}
-                size="sm"
-              />
-            </Stack>
-          )}
-          <Stack gap={4}>
-            <Text size="xs" c="dimmed">
-              {t('viewMode.mockPlaces')}
-            </Text>
-            <SegmentedControl
-              value={placesCount}
-              onChange={setPlacesCount}
-              data={[
-                { label: '0', value: '0' },
-                { label: '1', value: '1' },
-                { label: '3', value: '3' },
-              ]}
-              size="xs"
-            />
-          </Stack>
-        </Group>
-      </Box>
+        <DsSectionCard padding="none" appearance="surface" border="none">
+          <DsLayoutInset space="xs">
+            <DsLayoutInline gap="md">
+              <DsLayoutStack gap="xxs">
+                <DsText size="xs" tone="secondary">
+                  {t('viewMode.label')}
+                </DsText>
+                <SegmentedControl
+                  aria-label={t('viewMode.label')}
+                  value={viewMode}
+                  onChange={handleViewModeChange}
+                  data={[
+                    { label: t('viewMode.twoD'), value: '2d' },
+                    { label: t('viewMode.threeD'), value: '3d' },
+                  ]}
+                  size="xs"
+                />
+              </DsLayoutStack>
+              {viewMode === '3d' && (
+                <DsLayoutStack gap="xxs">
+                  <DsText size="xs" tone="secondary">
+                    {tMapControls('fields.autoRotate')}
+                  </DsText>
+                  <Switch
+                    aria-label={tMapControls('fields.autoRotate')}
+                    checked={autoRotate}
+                    onChange={(e) => handleAutoRotateChange(e.currentTarget.checked)}
+                    size="sm"
+                  />
+                </DsLayoutStack>
+              )}
+              <DsLayoutStack gap="xxs">
+                <DsText size="xs" tone="secondary">
+                  {t('viewMode.mockPlaces')}
+                </DsText>
+                <SegmentedControl
+                  aria-label={t('viewMode.mockPlaces')}
+                  value={placesCount}
+                  onChange={setPlacesCount}
+                  data={[
+                    { label: '0', value: '0' },
+                    { label: '1', value: '1' },
+                    { label: '3', value: '3' },
+                  ]}
+                  size="xs"
+                />
+              </DsLayoutStack>
+            </DsLayoutInline>
+          </DsLayoutInset>
+        </DsSectionCard>
+      </div>
 
       {/* Map */}
       <MapLibreMap
@@ -913,6 +770,7 @@ function ThemeEditorCanvasInner({
         rotatable={!autoRotate}
         tiltable
         showNavigation
+        zoomPosition="bottom-right"
         show3DBuildings={show3DBuildings}
         onMapReady={handleMapReady}
         onZoomChange={(v) => {
@@ -928,10 +786,9 @@ function ThemeEditorCanvasInner({
           }
         }}
       />
-    </Box>
+    </div>
   );
 }
-
 export function ThemeEditorCanvas(props: ThemeEditorCanvasProps) {
   return <ThemeEditorCanvasInner key={props.variant.scheme} {...props} />;
 }

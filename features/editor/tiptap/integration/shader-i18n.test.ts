@@ -28,8 +28,6 @@ const RUNTIME_LABEL_KEYS = [
 interface ShaderMessageDocument {
   editorCommon: {
     editor: {
-      embeds: { shader: string };
-      resize: { shader: string };
       runtimeLabels: { shader: Record<string, string> };
       slashMenu: {
         groups: { embeds: string };
@@ -70,8 +68,6 @@ describe('Shader message parity', () => {
         aliases: expect.stringContaining('glsl'),
         group: value.editorCommon.editor.slashMenu.groups.embeds,
       });
-      expect(value.editorCommon.editor.resize.shader, file).toEqual(expect.any(String));
-      expect(value.editorCommon.editor.embeds.shader, file).toEqual(expect.any(String));
     }
   });
 });

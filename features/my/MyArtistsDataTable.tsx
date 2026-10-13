@@ -1,6 +1,8 @@
 'use client';
 
-import { Group, Stack, Title } from '@mantine/core';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Heading as DsHeading } from '@/components/core/Typography';
+
 import { DataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table';
 import { MyArtistsTableCellView, type MyArtistsTableRowViewModel } from '@/features/my/ui/MyArtistsTable';
 import type { ColumnDef } from '@/lib/types/common/data-table';
@@ -12,6 +14,7 @@ export type MyArtistsDataTableResult = PaginatedQueryResult<MyArtistsTableRowVie
 
 export interface MyArtistsDataTableLabels {
   title: string;
+  image: string;
   name: string;
   status: string;
   created: string;
@@ -32,6 +35,7 @@ function getColumns(labels: MyArtistsDataTableLabels): ColumnDef<MyArtistsTableR
     {
       key: 'avatar',
       header: '',
+      accessibleLabel: labels.image,
       width: 50,
       cell: (row) => <MyArtistsTableCellView cell="avatar" row={row} />,
     },
@@ -64,10 +68,13 @@ export function MyArtistsDataTable({ result, labels, query, loading = false, onQ
   ];
 
   return (
-    <Stack>
-      <Title order={2}>{labels.title}</Title>
+    <DsLayoutStack>
+      <DsHeading level={1} scale={2}>
+        {labels.title}
+      </DsHeading>
 
       <DataTable
+        accessibleLabel={labels.title}
         columns={getColumns(labels)}
         result={result}
         loading={loading}
@@ -78,14 +85,14 @@ export function MyArtistsDataTable({ result, labels, query, loading = false, onQ
       >
         <DataTable.Toolbar>
           <DataTable.Search placeholder={labels.searchPlaceholder} />
-          <Group gap={4}>
+          <DsLayoutInline gap="xxs">
             <DataTable.MultiFilter fields={filterFields} />
             <DataTable.MultiSort fields={sortFields} />
-          </Group>
+          </DsLayoutInline>
         </DataTable.Toolbar>
         <DataTable.Content />
         <DataTable.Pagination />
       </DataTable>
-    </Stack>
+    </DsLayoutStack>
   );
 }

@@ -1,16 +1,17 @@
 'use client';
 
-import { Stack } from '@mantine/core';
+import { LayoutStack as DsLayoutStack, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
+
 import { Radio } from '@/components/core/Input';
 import { toStringValue } from '@/lib/types/form/guards';
 import type { FormFieldSchemaSelect } from '@/lib/types/form/schema';
 import { parseMarkdown } from '@/lib/utils/parse-markdown';
-import { groupStyles } from '../styles';
 import { getFieldLabel } from '../utils';
 
 export interface SelectFieldProps {
   field: FormFieldSchemaSelect;
   value: unknown;
+  disabled?: boolean;
   onChange: (value: string) => void;
   onFocus: () => void;
   onBlur: () => void;
@@ -18,10 +19,21 @@ export interface SelectFieldProps {
   isRequired: boolean;
 }
 
-export function SelectField({ field, value, onChange, onFocus, onBlur, error, isRequired }: SelectFieldProps) {
+export function SelectField({
+  field,
+  disabled,
+  value,
+  onChange,
+  onFocus,
+  onBlur,
+  error,
+  isRequired,
+}: SelectFieldProps) {
   return (
     <Radio.Group
+      disabled={disabled}
       label={parseMarkdown(getFieldLabel(field))}
+      required={isRequired}
       description={field.description ? parseMarkdown(field.description) : undefined}
       value={toStringValue(value)}
       onChange={(val) => {
@@ -29,15 +41,16 @@ export function SelectField({ field, value, onChange, onFocus, onBlur, error, is
         requestAnimationFrame(() => onBlur());
       }}
       onFocus={onFocus}
+      onBlur={onBlur}
       error={error}
-      withAsterisk={isRequired}
-      styles={groupStyles}
     >
-      <Stack gap="xs" mt="xs">
-        {field.options.map((option, index) => (
-          <Radio key={`${option.value}-${index}`} value={option.value} label={option.label} />
-        ))}
-      </Stack>
+      <DsLayoutInset blockStart="xs">
+        <DsLayoutStack gap="xs">
+          {field.options.map((option, index) => (
+            <Radio key={`${option.value}-${index}`} value={option.value} label={option.label} />
+          ))}
+        </DsLayoutStack>
+      </DsLayoutInset>
     </Radio.Group>
   );
 }

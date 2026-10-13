@@ -4,8 +4,6 @@ import {
   buildHoveredClusterFilter,
   buildPriorityInteractionColorExpression,
   buildPriorityInteractionMatchExpression,
-  DIRECTIONS_BACKDROP_Z_INDEX,
-  DIRECTIONS_MODAL_Z_INDEX,
   getPlaceMarkerZIndex,
   resolvePriorityInteractionKey,
 } from './hover-order';
@@ -71,28 +69,6 @@ describe('hover-order', () => {
         selected: false,
       }),
     ).toBe(1800);
-  });
-
-  it('keeps the directions chooser above hovered and selected markers', () => {
-    expect(DIRECTIONS_BACKDROP_Z_INDEX).toBeGreaterThan(
-      getPlaceMarkerZIndex({
-        mode: 'hover',
-        index: 7,
-        hovered: true,
-        active: false,
-        selected: true,
-      }),
-    );
-    expect(DIRECTIONS_MODAL_Z_INDEX).toBeGreaterThan(DIRECTIONS_BACKDROP_Z_INDEX);
-    expect(DIRECTIONS_MODAL_Z_INDEX).toBeGreaterThan(
-      getPlaceMarkerZIndex({
-        mode: 'active',
-        index: 7,
-        hovered: false,
-        active: true,
-        selected: false,
-      }),
-    );
   });
 
   it('builds a hovered cluster overlay filter from the base cluster filter', () => {

@@ -1,10 +1,21 @@
+import { useArgs } from 'storybook/preview-api';
+import { Button } from '../Button';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { BlockingAlertDialog } from './BlockingAlertDialog';
 
 const meta: Meta<typeof BlockingAlertDialog> = {
-  title: 'Core/Modal/Blocking Alert Dialog',
+  title: 'Core/Overlays/BlockingAlertDialog',
   component: BlockingAlertDialog,
+  render: function OverlayPreview(args) {
+    const [, updateArgs] = useArgs();
+    return (
+      <>
+        {!args.opened && <Button onClick={() => updateArgs({ opened: true })}>{args.title}</Button>}
+        <BlockingAlertDialog {...args} onAction={() => updateArgs({ opened: false })} />
+      </>
+    );
+  },
   parameters: { layout: 'fullscreen' },
   args: {
     opened: true,

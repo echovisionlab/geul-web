@@ -1,6 +1,8 @@
 'use client';
 
-import { Stack, Text } from '@mantine/core';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+
 import { DateTime } from '@/features/date-time/DateTime';
 import { TextButton } from '@/components/core/TextButton';
 import type { PublicPostTableRow } from '@/lib/queries/post';
@@ -22,29 +24,29 @@ export function getPostTableColumns(labels: PostTableColumnLabels): ColumnDef<Pu
       header: labels.title,
       sortable: true,
       cell: (row) => (
-        <Stack gap={2}>
+        <DsLayoutStack gap="xxs">
           <TextButton href={`/posts/${row.slug || row.id}`} size="md" weight="medium" appearance="default">
             {row.title || labels.untitled}
           </TextButton>
-        </Stack>
+        </DsLayoutStack>
       ),
     },
     {
       key: 'authors',
       header: labels.authors,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           {row.authors.length > 0 ? row.authors.map((author) => author.name || labels.unknown).join(', ') : '-'}
-        </Text>
+        </DsText>
       ),
     },
     {
       key: 'categories',
       header: labels.categories,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           {row.categories.length > 0 ? row.categories.map((category) => category.name).join(', ') : '-'}
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -52,9 +54,9 @@ export function getPostTableColumns(labels: PostTableColumnLabels): ColumnDef<Pu
       header: labels.published,
       sortable: true,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.publishedAt} />
-        </Text>
+        </DsText>
       ),
     },
   ];

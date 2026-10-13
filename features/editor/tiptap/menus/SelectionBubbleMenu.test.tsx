@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { Editor } from '@tiptap/core';
 import { TextSelection } from '@tiptap/pm/state';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -12,10 +13,11 @@ import { createTiptapWireExtensions } from '../wire-schema';
 import {
   SELECTION_BUBBLE_MENU_PLUGIN_KEY,
   SelectionBubbleMenuView,
+  shouldShowSelectionBubbleMenu,
   updateSelectionBubbleMenuPosition,
   type SelectionBubbleMenuLabels,
 } from './SelectionBubbleMenu';
-import type { SelectionBubbleMenuCommands } from './selection-bubble-commands';
+import { createSelectionBubbleMenuCommands, type SelectionBubbleMenuCommands } from './selection-bubble-commands';
 
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
@@ -37,11 +39,12 @@ function render(node: ReactNode) {
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
-  act(() => root?.render(<MantineProvider env="test">{node}</MantineProvider>));
+  act(() => root?.render(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>));
 }
 
 const labels: SelectionBubbleMenuLabels = {
   menu: 'Formatting',
+  more: 'Options',
   blockType: 'Block type',
   blockTypes: {
     paragraph: 'Paragraph',
@@ -158,6 +161,29 @@ describe('SelectionBubbleMenuView keyboard navigation', () => {
     expect(document.activeElement).toBe(lastControl);
   });
 
+  it.each([
+    { linkHref: null, targetId: 'tiptap-selection-link-create' },
+    { linkHref: 'https://example.invalid', targetId: 'tiptap-selection-link-edit' },
+  ])('puts link disclosure and focus on the actual button: $targetId', async ({ linkHref, targetId }) => {
+    render(<SelectionBubbleMenuView commands={commands({ linkHref })} labels={labels} />);
+    const toolbar = container!.querySelector<HTMLElement>('[role="toolbar"]')!;
+    const target = toolbar.querySelector<HTMLButtonElement>(`[data-testid="${targetId}"]`)!;
+    expect(target.tagName).toBe('BUTTON');
+    expect(target.getAttribute('aria-expanded')).toBe('false');
+    expect(toolbar.querySelector('span[aria-expanded], span[tabindex="0"]')).toBeNull();
+    await act(async () => target.click());
+    expect(target.getAttribute('aria-expanded')).toBe('true');
+    const dialog = document.querySelector<HTMLElement>('[role="dialog"]')!;
+    expect(dialog).not.toBeNull();
+    const input = dialog.querySelector<HTMLInputElement>('input')!;
+    await act(async () => {
+      input.focus();
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    });
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(target.getAttribute('aria-expanded')).toBe('false');
+  });
+
   it('restores editor focus on Escape without hijacking arrow keys from form inputs', () => {
     const onEscapeFocus = vi.fn();
     render(
@@ -174,32 +200,126 @@ describe('SelectionBubbleMenuView keyboard navigation', () => {
     act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
     expect(document.activeElement).toBe(input);
     act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+    expect(onEscapeFocus).not.toHaveBeenCalled();
+    const action = toolbar.querySelector<HTMLButtonElement>('[data-selection-toolbar-action]')!;
+    act(() => action.focus());
+    act(() => action.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
     expect(onEscapeFocus).toHaveBeenCalledOnce();
   });
 
-  it('shows only the real AI shortcut while inline math keeps a name-only tooltip', () => {
+  it('keeps secondary formatting and AI commands in the actual compact menu', async () => {
+    const openAI = vi.fn(() => true);
+    const toggleTextStyle = vi.fn(() => true);
     render(
       <SelectionBubbleMenuView
-        commands={commands({ canConvertToInlineMath: true, canOpenAI: true })}
+        commands={commands({ canConvertToInlineMath: true, canOpenAI: true, openAI, toggleTextStyle })}
         labels={labels}
       />,
     );
-    const ai = container!.querySelector<HTMLButtonElement>('[data-testid="tiptap-selection-ai"]')!;
-    act(() => ai.focus());
-    expect(ai.getAttribute('aria-label')).toBe('AI');
-    expect(
-      [...document.querySelectorAll<HTMLElement>('[data-editor-toolbar-tooltip-content]')]
-        .find((content) => content.textContent?.startsWith('AI'))
-        ?.querySelector('kbd')?.textContent,
-    ).toBe('Ctrl J');
+    const toolbar = container!.querySelector<HTMLElement>('[role="toolbar"]')!;
+    expect(toolbar.getAttribute('data-geul-toolbar-density')).toBe('compact');
+    expect(toolbar.querySelectorAll('[data-selection-toolbar-action]')).toHaveLength(9);
+    expect(toolbar.querySelector('button[aria-label="Strike"]')).toBeNull();
+    await act(async () => toolbar.querySelector<HTMLButtonElement>('[data-testid="tiptap-selection-more"]')!.click());
+    const items = [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')];
+    const ai = items.find((item) => item.textContent?.startsWith('AI'))!;
+    expect(ai.querySelector('kbd')?.textContent).toBe('Ctrl J');
+    expect(items.some((item) => item.textContent === 'Inline math')).toBe(true);
+    await act(async () => ai.click());
+    expect(openAI).toHaveBeenCalledOnce();
+    await act(async () => toolbar.querySelector<HTMLButtonElement>('[data-testid="tiptap-selection-more"]')!.click());
+    await act(async () =>
+      [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')]
+        .find((item) => item.textContent === 'Code')!
+        .click(),
+    );
+    expect(toggleTextStyle).toHaveBeenCalledWith('code');
+  });
 
-    const inlineMath = container!.querySelector<HTMLButtonElement>('[data-testid="tiptap-selection-inline-math"]')!;
-    act(() => inlineMath.focus());
-    expect(
-      [...document.querySelectorAll<HTMLElement>('[data-editor-toolbar-tooltip-content]')]
-        .find((content) => content.textContent === 'Inline math')
-        ?.querySelector('kbd'),
-    ).toBeNull();
+  it('portals More outside the scrolling rail while preserving editor selection and owned popup focus', async () => {
+    const editorElement = document.createElement('div');
+    document.body.append(editorElement);
+    const editor = new Editor({
+      element: editorElement,
+      extensions: createTiptapWireExtensions(),
+      content: {
+        type: 'doc',
+        content: [
+          {
+            type: 'blockGroup',
+            content: [
+              {
+                type: 'blockContainer',
+                attrs: { id: 'portal-selection' },
+                content: [{ type: 'paragraph', content: [{ type: 'text', text: 'selected word' }] }],
+              },
+            ],
+          },
+        ],
+      },
+    });
+    try {
+      let position = 0;
+      editor.state.doc.descendants((node, offset) => {
+        if (node.type.name === 'paragraph') {
+          position = offset;
+        }
+      });
+      editor.view.dispatch(
+        editor.state.tr.setSelection(TextSelection.create(editor.state.doc, position + 1, position + 9)),
+      );
+      const selection = editor.state.selection;
+      const onEscapeFocus = vi.fn();
+      render(
+        <SelectionBubbleMenuView
+          commands={createSelectionBubbleMenuCommands(editor)}
+          labels={labels}
+          onEscapeFocus={onEscapeFocus}
+        />,
+      );
+      const toolbar = container!.querySelector<HTMLElement>('[role="toolbar"]')!;
+      const trigger = toolbar.querySelector<HTMLButtonElement>('[data-testid="tiptap-selection-more"]')!;
+      await act(async () => {
+        trigger.focus();
+        trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+      });
+      const menu = document.querySelector<HTMLElement>('[role="menu"]')!;
+      expect(menu).not.toBeNull();
+      expect(toolbar.contains(menu)).toBe(false);
+      expect(container!.contains(menu)).toBe(false);
+      expect(trigger.getAttribute('aria-controls')).toBe(menu.id);
+      expect(menu.contains(document.activeElement)).toBe(true);
+      expect(editor.state.selection.eq(selection)).toBe(true);
+      expect(
+        shouldShowSelectionBubbleMenu({ editor, element: toolbar.parentElement!, view: editor.view } as Parameters<
+          typeof shouldShowSelectionBubbleMenu
+        >[0]),
+      ).toBe(true);
+      await act(async () =>
+        menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })),
+      );
+      expect(document.querySelector('[role="menu"]')).toBeNull();
+      await vi.waitFor(() => expect(document.activeElement).toBe(trigger));
+      expect(onEscapeFocus).not.toHaveBeenCalled();
+      expect(editor.state.selection.eq(selection)).toBe(true);
+    } finally {
+      editor.destroy();
+      editorElement.remove();
+    }
+  });
+
+  it('offers one alignment trigger while its three actual menu commands remain available', async () => {
+    const setAlignment = vi.fn(() => true);
+    render(<SelectionBubbleMenuView commands={commands({ setAlignment })} labels={labels} />);
+    const toolbar = container!.querySelector<HTMLElement>('[role="toolbar"]')!;
+    expect(toolbar.querySelector('button[aria-label="Align center"]')).toBeNull();
+    const trigger = toolbar.querySelector<HTMLButtonElement>('button[aria-label="Alignment"]')!;
+    await act(async () => trigger.click());
+    const center = [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(
+      (item) => item.textContent === 'Align center',
+    )!;
+    await act(async () => center.click());
+    expect(setAlignment).toHaveBeenCalledWith('center');
   });
 });
 

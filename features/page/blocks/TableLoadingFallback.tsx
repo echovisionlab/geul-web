@@ -1,4 +1,5 @@
-import { Box } from '@mantine/core';
+import { LayoutInset as DsLayoutInset } from '@/components/core/Layout';
+
 import { getReservedTableContentMinHeight } from '@/components/core/DataTable';
 import { PageLoader } from '@/features/site/PageLoader';
 
@@ -11,8 +12,10 @@ export function TableLoadingFallback({ reservedRowCount, message }: TableLoading
   const minHeight = getReservedTableContentMinHeight(reservedRowCount) ?? 200;
 
   return (
-    <Box style={{ minHeight, position: 'relative' }}>
-      <PageLoader minHeight={minHeight} message={message} />
-    </Box>
+    <div style={{ minHeight, position: 'relative' }}>
+      <DsLayoutInset space="none">
+        <PageLoader minHeight={minHeight} message={message} />
+      </DsLayoutInset>
+    </div>
   );
 }

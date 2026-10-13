@@ -22,7 +22,7 @@ export function UserTagRowMenu({ tag }: UserTagRowMenuProps) {
           label: tCommon('actions.delete'),
           icon: <IconTrash size={16} />,
           onClick: () => openDelete(tag),
-          color: 'red',
+          tone: 'danger',
         },
       ]}
     />

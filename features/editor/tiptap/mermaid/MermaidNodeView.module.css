@@ -1,0 +1,4 @@
+/* Positioned parent for Core BlockSelectionTarget; the diagram keeps its own geometry. */
+.block {
+  position: relative;
+}

@@ -4,6 +4,7 @@ export type {
   PopoverPadding,
   PopoverPlacement,
   PopoverProps,
+  PopoverRole,
   PopoverSize,
   PopoverTargetProps,
 } from './Popover';

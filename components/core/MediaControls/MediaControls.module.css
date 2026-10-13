@@ -1,0 +1,165 @@
+.audio {
+  --_surface-inset: var(--geul-spacing-sm);
+  position: relative;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--geul-spacing-xs);
+}
+
+.visual,
+.waveFrame,
+.wave {
+  position: relative;
+  min-height: 64px;
+  height: 64px;
+}
+
+.wave {
+  isolation: isolate;
+}
+
+/* The native seek range covers the waveform for touch exploration; pointer input reaches the waveform. */
+:is(.waveFrame, .track) > .seek {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+:is(.waveFrame, .track):has(> .seek:focus-visible) {
+  outline: var(--geul-border-focus) solid var(--geul-focus);
+  outline-offset: var(--geul-border-focus);
+}
+
+.wave[data-audio-player-wave-ready='false'] {
+  opacity: var(--geul-opacity-drag-preview);
+}
+
+.wave[data-audio-player-wave-ready='true'] + .waveLoading {
+  display: none;
+}
+
+.waveLoading {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+}
+
+.wave::part(scroll) {
+  overflow: hidden;
+}
+
+.wave::part(wrapper) {
+  cursor: pointer;
+}
+
+.wave::part(cursor) {
+  background: var(--geul-wave-cursor);
+}
+
+/* Compatibility for persisted pre-waveform timeline DOM; new players render the waveform. */
+.track {
+  position: relative;
+  width: 100%;
+  padding: 0;
+}
+
+.track::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  inset-inline: 0;
+  height: var(--geul-border-focus);
+  background: var(--geul-border-strong);
+}
+
+.trackFill,
+.trackThumb {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.trackFill {
+  inset-inline-start: 0;
+  height: var(--geul-border-focus);
+  background: var(--geul-action-primary);
+}
+
+.trackThumb {
+  width: var(--geul-spacing-md);
+  height: var(--geul-spacing-md);
+  margin-inline-start: calc(-1 * var(--geul-spacing-md) / 2);
+  border: var(--geul-border-thin) solid var(--geul-border-strong);
+  background: var(--geul-surface);
+}
+
+.transport,
+.controls,
+.clock,
+.actions {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* Transport commands share the compact toolbar relationship; clock content is separate. */
+.controls,
+.actions {
+  gap: var(--geul-spacing-role-toolbar-item);
+}
+
+.clock {
+  gap: var(--geul-spacing-xxs);
+}
+
+.transport {
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--geul-spacing-role-action-group);
+}
+
+.volume {
+  width: clamp(4.5rem, 10vw, 6.75rem);
+}
+
+.clock {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  justify-content: flex-end;
+  margin-inline-start: auto;
+}
+
+/* Exported DOM players render both glyphs; the Core frame state chooses the visible one. */
+.icon {
+  display: inline-flex;
+}
+
+.icon svg {
+  width: var(--geul-chrome-icon-size);
+  height: var(--geul-chrome-icon-size);
+}
+
+.toggle .iconPause,
+.mute .iconMute,
+.audio[data-audio-player-playing='true'] .toggle .iconPlay,
+.mute[data-muted='true'] .iconVolume {
+  display: none;
+}
+
+.audio[data-audio-player-playing='true'] .toggle .iconPause,
+.mute[data-muted='true'] .iconMute {
+  display: inline-flex;
+}

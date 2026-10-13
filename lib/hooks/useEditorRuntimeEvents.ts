@@ -16,15 +16,19 @@ export function useEditorRuntimeEvents(
 ): void {
   const onEventRef = useRef(onEvent);
   onEventRef.current = onEvent;
+  const onResyncRef = useRef(options?.onResync);
+  onResyncRef.current = options?.onResync;
   const runtimeContext = useOptionalEditorRuntimeContext();
 
   useEffect(() => {
+    // `onResync` runs when events could not be delivered; the latest callback is used.
+    const subscription = { ...options, onResync: () => onResyncRef.current?.() };
     if (runtimeContext && (!provider || provider === runtimeContext.provider)) {
-      return runtimeContext.subscribeToRuntimeEvents((event) => onEventRef.current(event), options);
+      return runtimeContext.subscribeToRuntimeEvents((event) => onEventRef.current(event), subscription);
     }
 
     if (provider) {
-      return subscribeToProviderRuntimeEvents(provider, (event) => onEventRef.current(event), options);
+      return subscribeToProviderRuntimeEvents(provider, (event) => onEventRef.current(event), subscription);
     }
   }, [provider, runtimeContext, options?.entityId, options?.entityType, options?.locale]);
 }

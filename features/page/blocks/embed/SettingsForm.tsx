@@ -1,8 +1,10 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Stack, Text } from '@mantine/core';
+
 import { Checkbox, Select, TextInput } from '@/components/core/Input';
 import { isToolModuleUrl, resolveEmbedUrl } from './policy';
 import { EMBED_MAX_HEIGHT, EMBED_MIN_HEIGHT, parseEmbedProps, type EmbedProps } from './schema';
@@ -64,7 +66,7 @@ export function EmbedSettingsForm({
   ] as const;
 
   return (
-    <Stack gap="sm" data-page-block-editor="embed">
+    <DsLayoutStack gap="md" data-page-block-editor="embed">
       <TextInput
         label={t('urlLabel')}
         description={t(module ? 'toolDescription' : 'urlDescription')}
@@ -118,15 +120,14 @@ export function EmbedSettingsForm({
               }}
             />
           )}
-          <Text size="sm" fw={500}>
+          <DsText size="sm" weight="medium">
             {t('permissionsLabel')}
-          </Text>
+          </DsText>
           {permissions.map(([key, label, description]) => (
             <Checkbox
               key={key}
               label={t(label)}
               description={t(description)}
-              styles={{ labelWrapper: { minWidth: 0 }, description: { overflowWrap: 'anywhere' } }}
               checked={parsed[key] === 'true'}
               disabled={!allowSharedEdits}
               onChange={(event) => {
@@ -138,6 +139,6 @@ export function EmbedSettingsForm({
           ))}
         </>
       )}
-    </Stack>
+    </DsLayoutStack>
   );
 }

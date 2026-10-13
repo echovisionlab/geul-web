@@ -11,7 +11,6 @@ const meta = {
   args: {
     data,
     defaultValue: 'Draft',
-    w: 420,
     'aria-label': 'Publication status',
   },
 } satisfies Meta<typeof SegmentedControl>;
@@ -20,10 +19,12 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+export const Compact: Story = { args: { size: 'xs', density: 'compact' } };
 
 export const Selected: Story = { args: { defaultValue: 'Review' } };
-export const FullWidth: Story = { args: { fullWidth: true, w: 560 } };
-export const Vertical: Story = { args: { orientation: 'vertical', w: 240 } };
+export const FullWidth: Story = { args: { fullWidth: true } };
+export const Vertical: Story = { args: { orientation: 'vertical' } };
 export const Disabled: Story = {
   args: { defaultValue: 'Review', disabled: true },
 };
+export const ReadOnly: Story = { args: { defaultValue: 'Review', readOnly: true } };

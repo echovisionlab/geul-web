@@ -1,9 +1,11 @@
+import { primitiveTokens } from '@/components/core/design-tokens';
+import { DEFAULT_SITE_BRAND_COLOR } from '@/lib/theme/site-brand';
 import type { Metadata, MetadataRoute } from 'next';
 import type { FaviconAssetSetUrls } from '@/lib/queries/manifest';
 
 const DEFAULT_SITE_TITLE = 'Site';
-const DEFAULT_THEME_COLOR = '#b02d23';
-const DEFAULT_BACKGROUND_COLOR = '#ffffff';
+const DEFAULT_THEME_COLOR = DEFAULT_SITE_BRAND_COLOR;
+const DEFAULT_BACKGROUND_COLOR = primitiveTokens.colors.white;
 
 export interface SiteApplicationMetadataInput {
   faviconAssetSet: FaviconAssetSetUrls | null;

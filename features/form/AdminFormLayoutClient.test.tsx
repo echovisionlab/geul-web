@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { useOptionalEditorRuntimeContext } from '@/lib/contexts/EditorRuntimeContext';
 import { AdminFormLayoutClient } from './AdminFormLayoutClient';
 
@@ -66,7 +67,7 @@ vi.mock('next-intl', () => ({
   },
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: {
     show: vi.fn(),
   },
@@ -151,7 +152,7 @@ function render(node: React.ReactNode) {
   act(() => {
     root?.render(
       <QueryClientProvider client={queryClient}>
-        <MantineProvider>{node}</MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>
       </QueryClientProvider>,
     );
   });
@@ -239,16 +240,16 @@ describe('AdminFormLayoutClient', () => {
 
     render(<AdminFormLayoutClient formId="form-1">Body</AdminFormLayoutClient>);
 
-    const builderTab = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.textContent?.trim() === 'Builder',
+    const settingsTab = Array.from(document.querySelectorAll('[role="tab"]')).find(
+      (tab) => tab.textContent?.trim() === 'Settings',
     );
-    expect(builderTab).not.toBeNull();
+    expect(settingsTab).toBeDefined();
 
     act(() => {
-      builderTab?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      settingsTab?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
 
-    expect(pushMock).toHaveBeenCalledWith('/forms/form-1?lang=ko&foo=bar&edit=true&tab=builder');
+    expect(pushMock).toHaveBeenCalledWith('/forms/form-1?lang=ko&foo=bar&edit=true&tab=settings');
   });
 
   it('updates the source form title through collaboration without mixing DB settings into Yjs', async () => {

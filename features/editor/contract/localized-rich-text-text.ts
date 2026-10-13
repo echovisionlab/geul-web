@@ -5,7 +5,7 @@ function styled(values: readonly RichTextStyledText[]): string {
   return values.map((value) => value.text).join('');
 }
 
-function inline(values: readonly RichTextInline[]): string {
+export function localizedRichTextInlinePlainText(values: readonly RichTextInline[]): string {
   return values
     .map((value) => {
       switch (value.value.case) {
@@ -37,14 +37,16 @@ export function localizedRichTextPlainText(blocks: readonly LocalizedRichTextBlo
       case 'check-list-item':
       case 'quote':
       case 'callout':
-        own = inline(block.locale.content);
+        own = localizedRichTextInlinePlainText(block.locale.content);
         break;
       case 'code-block':
         own = block.locale.content;
         break;
       case 'table':
         own =
-          block.locale.content?.rows.flatMap((row) => row.cells.map((cell) => inline(cell.content))).join(' ') ?? '';
+          block.locale.content?.rows
+            .flatMap((row) => row.cells.map((cell) => localizedRichTextInlinePlainText(cell.content)))
+            .join(' ') ?? '';
         break;
       case 'mermaid':
         own = block.locale.props?.title ?? '';

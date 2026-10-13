@@ -3,7 +3,7 @@
 import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconEye, IconRefresh, IconTrash } from '@tabler/icons-react';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { useTranslations } from 'next-intl';
 import { TableRowMenu, type TableRowMenuItem } from '@/components/core/DataTable';
 import { republishPostAction } from '@/lib/actions/post';
@@ -19,6 +19,7 @@ export function PostRowMenu({ post }: PostRowMenuProps) {
   const [isPending, startTransition] = useTransition();
   const tCommon = useTranslations('common.actions');
   const tDataTable = useTranslations('dataTable.aria');
+  const tCommonStates = useTranslations('common.states');
   const tPostEditor = useTranslations('postEditor');
   const { openDelete } = usePostModal();
   const status = normalizeEnumToken(post.status);
@@ -42,10 +43,10 @@ export function PostRowMenu({ post }: PostRowMenuProps) {
         startTransition(async () => {
           const result = await republishPostAction(post.id);
           if (result.error) {
-            notifications.show({ message: result.error, color: 'red' });
+            notifications.show({ message: result.error, tone: 'danger' });
             return;
           }
-          notifications.show({ message: tPostEditor('notifications.republished'), color: 'green' });
+          notifications.show({ message: tPostEditor('notifications.republished'), tone: 'positive' });
           router.refresh();
         });
       },
@@ -56,14 +57,14 @@ export function PostRowMenu({ post }: PostRowMenuProps) {
     label: tCommon('delete'),
     icon: <IconTrash size={16} />,
     onClick: () => openDelete(post),
-    color: 'red',
+    tone: 'danger',
     disabled: isPending,
   });
 
   return (
     <TableRowMenu
       aria-label={tDataTable('rowActions', {
-        label: post.title || 'post',
+        label: post.title || `${tCommonStates('untitled')} (${post.slug || post.id})`,
       })}
       items={items}
     />

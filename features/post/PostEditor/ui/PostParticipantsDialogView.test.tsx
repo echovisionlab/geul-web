@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemTestProvider as DesignSystemProvider } from '@/test/TestProviders';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import {
   normalizeSelectedParticipantRole,
   PostParticipantsDialogView,
@@ -101,9 +102,9 @@ function renderView(overrides: Partial<PostParticipantsDialogViewProps> = {}) {
 
   act(() => {
     root?.render(
-      <MantineProvider env="test">
+      <DesignSystemProvider forceColorScheme="light">
         <PostParticipantsDialogView {...props} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
   return { onChangeRole, onRemove };

@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import type { ImmersiveSceneConfig } from './schema';
 import type { ImmersiveSceneUploadControls } from './SettingsForm';
 import { ImmersiveSceneWorkspaceContent } from './Workspace';
@@ -60,7 +61,7 @@ function render(node: ReactNode) {
   document.body.appendChild(container);
   root = createRoot(container);
   act(() => {
-    root?.render(<MantineProvider>{node}</MantineProvider>);
+    root?.render(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>);
   });
 }
 

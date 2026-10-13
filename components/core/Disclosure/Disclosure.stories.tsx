@@ -1,19 +1,22 @@
+import { LayoutStack as StoryLayoutStack, LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+
+import { localizedRender } from '@/.storybook/fixture-i18n';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
-import { Stack, Text } from '@mantine/core';
 import { Disclosure, type DisclosureProps } from './Disclosure';
 
 function DisclosureExample(props: Omit<DisclosureProps, 'opened' | 'onChange'>) {
-  return <Disclosure {...props} opened={false} onChange={() => {}} />;
+  return <Disclosure {...props} />;
 }
 
 const meta = {
-  title: 'Core/Disclosure/Disclosure',
+  title: 'Core/Interaction/Disclosure',
   component: Disclosure,
   parameters: { layout: 'centered' },
   args: {
-    label: 'Project details',
-    children: <Text size="sm">All visible copy and content are supplied by the consumer.</Text>,
+    label: 'Address details',
+    children: <DsText size="sm">All visible copy and content are supplied by the consumer.</DsText>,
   },
 } satisfies Meta<typeof Disclosure>;
 
@@ -21,27 +24,29 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: (args) => <DisclosureExample {...args} />,
+  render: localizedRender((args) => <DisclosureExample {...args} />),
 };
 
 export const CompactFilled: Story = {
-  render: (args) => (
-    <Stack w={280} gap={2}>
-      <DisclosureExample
-        {...args}
-        label="Explore"
-        appearance="filled"
-        density="compact"
-        shape="square"
-        contentIndent="small"
-      >
-        <Stack gap={0}>
-          <Text size="xs">Artists</Text>
-          <Text size="xs">Works</Text>
-        </Stack>
-      </DisclosureExample>
-    </Stack>
-  ),
+  render: localizedRender((args) => (
+    <div style={{ width: 280 }}>
+      <StoryLayoutStack gap="xxs">
+        <DisclosureExample
+          {...args}
+          label="Explore"
+          appearance="filled"
+          density="compact"
+          shape="square"
+          contentIndent="small"
+        >
+          <DsLayoutStack gap="none">
+            <DsText size="xs">Artists</DsText>
+            <DsText size="xs">Works</DsText>
+          </DsLayoutStack>
+        </DisclosureExample>
+      </StoryLayoutStack>
+    </div>
+  )),
 };
 
 export const Disabled: Story = {
@@ -49,4 +54,51 @@ export const Disabled: Story = {
     label: 'Unavailable details',
     disabled: true,
   },
+};
+
+export const Hovered: Story = {
+  parameters: { pseudo: { hover: true } },
+};
+
+export const LeadingChevron: Story = {
+  name: 'Hierarchy Leading Chevron',
+  args: { label: 'Parent group', chevronPosition: 'start' },
+};
+
+export const NestedDetails: Story = {
+  render: localizedRender((args) => (
+    <DisclosureExample {...args} defaultOpened>
+      <Disclosure label="Settings" withDivider={false}>
+        <DsText size="sm">Optional field settings</DsText>
+      </Disclosure>
+    </DisclosureExample>
+  )),
+};
+
+function NestedDetailsPreview({ children, ...props }: DisclosureProps) {
+  return (
+    <Disclosure {...props} defaultOpened density="compact" withDivider={false}>
+      {children}
+    </Disclosure>
+  );
+}
+
+export const LabelAlignedHierarchy: Story = {
+  render: localizedRender((args) => (
+    <div style={{ width: 320 }}>
+      <NestedDetailsPreview {...args} label="Parent group">
+        <DsLayoutStack gap="xxs">
+          <DsText size="sm">Project details</DsText>
+          <NestedDetailsPreview label="Address details">
+            <DsLayoutStack gap="xxs">
+              <DsText size="sm">Optional field settings</DsText>
+              <NestedDetailsPreview label="Settings">
+                <DsText size="sm">All visible copy and content are supplied by the consumer.</DsText>
+              </NestedDetailsPreview>
+            </DsLayoutStack>
+          </NestedDetailsPreview>
+        </DsLayoutStack>
+      </NestedDetailsPreview>
+    </div>
+  )),
 };

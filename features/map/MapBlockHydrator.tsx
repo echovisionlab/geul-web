@@ -1,4 +1,5 @@
 'use client';
+import { breakpointQuery } from '@/components/core/Layout/breakpoints';
 
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -168,7 +169,7 @@ function MapBlockPortal({ element, config, applyPreviewWidth, blockAlignment, la
   const isMobileViewport =
     typeof window !== 'undefined' &&
     typeof window.matchMedia === 'function' &&
-    window.matchMedia('(max-width: 768px)').matches;
+    window.matchMedia(breakpointQuery('sm')).matches;
 
   return createPortal(
     <MapViewEmbedded

@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SocialLinksDisplay } from './SocialLinksDisplay';
 
@@ -35,7 +36,7 @@ afterEach(() => {
 });
 
 function renderDisplay(node: React.ReactNode) {
-  act(() => root.render(<MantineProvider>{node}</MantineProvider>));
+  act(() => root.render(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>));
 }
 
 describe('SocialLinksDisplay', () => {

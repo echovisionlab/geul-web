@@ -1,11 +1,40 @@
+import { useArgs } from 'storybook/preview-api';
+import { withFeatureLabels } from '@/stories/feature-localization';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { ArtistDeleteDialogView } from './ArtistDeleteDialogView';
 
 const meta = {
-  title: 'Feature/Artist/Delete Dialog',
+  title: 'Feature/Admin/Delete Dialog',
   tags: ['artist-closure'],
   component: ArtistDeleteDialogView,
+  render: function InteractiveStory(args) {
+    const [, updateArgs] = useArgs();
+    return (
+      <ArtistDeleteDialogView
+        {...args}
+        onClose={() => updateArgs({ opened: false })}
+        onConfirm={() => updateArgs({ opened: false })}
+      />
+    );
+  },
+  decorators: [
+    withFeatureLabels({
+      labels: {
+        title: 'common.actions.delete',
+        confirm: 'common.actions.delete',
+        cancel: 'common.actions.cancel',
+        close: 'common.actions.close',
+        loading: 'common.states.loading',
+        failed: 'common.messages.failedToLoad',
+        confirmation: { key: 'common.messages.deleteNamedItemConfirm', values: { name: '{name}' } },
+        relationSummary: { key: 'common.messages.relatedItemsWillBeUnlinked', values: { count: '{count}' } },
+      },
+      project: (args, t) => ({
+        previewError: args.previewError ? t('common.messages.failedToLoad') : args.previewError,
+      }),
+    }),
+  ],
   parameters: { layout: 'fullscreen' },
   args: {
     opened: true,

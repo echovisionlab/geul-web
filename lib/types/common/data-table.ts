@@ -18,6 +18,8 @@ export interface ColumnDef<T> {
   key: string;
   /** Display header text */
   header: string;
+  /** Accessible header name, kept separate from displayed header text. */
+  accessibleLabel?: string;
   /** Property key or accessor function to get cell value */
   accessor?: keyof T | ((row: T) => unknown);
   /** Custom cell renderer */

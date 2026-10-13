@@ -1,11 +1,11 @@
 import type { ExternalVideoProps as SharedExternalVideoProps } from '@echovisionlab/geul-common/page';
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 
 export const externalVideoSchema = z.object({
-  url: z.string().default(''),
-  caption: z.string().default(''),
-  aspectRatio: z.enum(['auto', '16:9', '4:3', '1:1', '9:16']).default('auto'),
-}) satisfies z.ZodType<SharedExternalVideoProps>;
+  url: z._default(z.string(), ''),
+  caption: z._default(z.string(), ''),
+  aspectRatio: z._default(z.enum(['auto', '16:9', '4:3', '1:1', '9:16']), 'auto'),
+}) satisfies z.ZodMiniType<SharedExternalVideoProps>;
 
 export type ExternalVideoProps = z.infer<typeof externalVideoSchema>;
 

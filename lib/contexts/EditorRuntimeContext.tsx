@@ -1,11 +1,11 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
 import type { EditorRuntimeEvent, RuntimeEntityType } from '@echovisionlab/geul-common/collaboration/runtime-events';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { persistCollaborativeDocumentNow } from '@/lib/collab/persist-now';
 import { getDocumentRoomSnapshot } from '@/lib/collab/document-room-snapshot';
-import type { BlockRoomProtocolTransport, BlockRoomSnapshot } from '@/lib/collab/block-room-protocol';
+import type { BlockRoomProtocolTransport } from '@/lib/collab/block-room-protocol';
 import { requireBlockRoomDurabilityProtocol } from '@/lib/collab/block-room-durability';
 import { registerCollaborativeDocumentSave } from '@/lib/editor/collaborative-document-save';
 import {
@@ -13,23 +13,14 @@ import {
   type EditorRuntimeEventListener,
   type EditorRuntimeEventSubscriptionOptions,
 } from '@/lib/collab/subscribe-runtime-events';
+import { EditorRuntimeContext } from './editor-runtime-context-value';
+
+export { useOptionalEditorRuntimeContext } from './editor-runtime-context-value';
+export type { EditorRuntimeContextValue } from './editor-runtime-context-value';
 
 interface RuntimeEventSubscriber {
   listener: EditorRuntimeEventListener;
   options?: EditorRuntimeEventSubscriptionOptions;
-}
-
-interface EditorRuntimeContextValue {
-  provider: HocuspocusProvider | null;
-  entityType: RuntimeEntityType;
-  entityId: string;
-  persistNow: () => Promise<void>;
-  getContributorMemberIds: () => string[];
-  getBlockRoomSnapshot: () => Promise<BlockRoomSnapshot>;
-  subscribeToRuntimeEvents: (
-    onEvent: EditorRuntimeEventListener,
-    options?: EditorRuntimeEventSubscriptionOptions,
-  ) => () => void;
 }
 
 function runtimeEventMatchesSubscriber(
@@ -50,8 +41,6 @@ function runtimeEventMatchesSubscriber(
 
   return (options?.locale?.trim() || '') === (event.locale?.trim() || '');
 }
-
-const EditorRuntimeContext = createContext<EditorRuntimeContextValue | null>(null);
 
 interface EditorRuntimeProviderProps {
   provider: HocuspocusProvider | null;
@@ -108,13 +97,23 @@ export function EditorRuntimeProvider({
 
   useEffect(
     () =>
-      subscribeToProviderRuntimeEvents(provider, (event: EditorRuntimeEvent) => {
-        for (const subscriber of runtimeEventSubscribersRef.current) {
-          if (runtimeEventMatchesSubscriber(event, subscriber.options)) {
-            subscriber.listener(event);
+      subscribeToProviderRuntimeEvents(
+        provider,
+        (event: EditorRuntimeEvent) => {
+          for (const subscriber of runtimeEventSubscribersRef.current) {
+            if (runtimeEventMatchesSubscriber(event, subscriber.options)) {
+              subscriber.listener(event);
+            }
           }
-        }
-      }),
+        },
+        {
+          onResync: () => {
+            for (const subscriber of runtimeEventSubscribersRef.current) {
+              subscriber.options?.onResync?.();
+            }
+          },
+        },
+      ),
     [provider],
   );
 
@@ -151,8 +150,4 @@ export function EditorRuntimeProvider({
   );
 
   return <EditorRuntimeContext.Provider value={value}>{children}</EditorRuntimeContext.Provider>;
-}
-
-export function useOptionalEditorRuntimeContext(): EditorRuntimeContextValue | null {
-  return useContext(EditorRuntimeContext);
 }

@@ -1,16 +1,30 @@
 'use client';
+import { ConfirmationDialog } from '@/features/confirmation';
 
+import { Text as DsText } from '@/components/core/Typography';
+import { LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { Textarea, TextInput } from '@/components/core/Input';
-import { ConfirmModal, FormModal } from '@/components/core/Modal';
+import { FormModal } from '@/components/core/Modal';
 import { createCategoryAction, deleteCategoryAction, updateCategoryAction } from '@/lib/actions/category';
 import { useCategoryModal } from './CategoryModalContext';
 
-export function CategoryModals() {
+export interface CategoryModalsProps {
+  createAction?: typeof createCategoryAction;
+  deleteAction?: typeof deleteCategoryAction;
+  updateAction?: typeof updateCategoryAction;
+  refresh?: () => void;
+}
+export function CategoryModals({
+  createAction = createCategoryAction,
+  deleteAction = deleteCategoryAction,
+  updateAction = updateCategoryAction,
+  refresh,
+}: CategoryModalsProps = {}) {
   const tCommon = useTranslations('common');
   const tAdmin = useTranslations('adminList');
   const router = useRouter();
@@ -69,17 +83,17 @@ export function CategoryModals() {
   const handleCreate = async () => {
     setCreateLoading(true);
     try {
-      const result = await createCategoryAction({
+      const result = await createAction({
         name: createName,
         description: createDescription || undefined,
       });
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tCommon('notifications.categoryCreated'), color: 'green' });
+      notifications.show({ message: tCommon('notifications.categoryCreated'), tone: 'positive' });
       closeCreate();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setCreateLoading(false);
     }
@@ -107,14 +121,14 @@ export function CategoryModals() {
 
     setEditLoading(true);
     try {
-      const result = await updateCategoryAction(editingCategory.id, changes);
+      const result = await updateAction(editingCategory.id, changes);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tAdmin('categories.updated'), color: 'green' });
+      notifications.show({ message: tAdmin('categories.updated'), tone: 'positive' });
       closeEdit();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setEditLoading(false);
     }
@@ -126,14 +140,14 @@ export function CategoryModals() {
     }
     setDeleteLoading(true);
     try {
-      const result = await deleteCategoryAction(deletingCategory.id);
+      const result = await deleteAction(deletingCategory.id);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tAdmin('categories.deleted'), color: 'red' });
+      notifications.show({ message: tAdmin('categories.deleted'), tone: 'positive' });
       closeDelete();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setDeleteLoading(false);
     }
@@ -198,25 +212,28 @@ export function CategoryModals() {
       </FormModal>
 
       {/* Delete Modal */}
-      <ConfirmModal
+      <ConfirmationDialog
+        intent="delete"
         opened={!!deletingCategory}
         onClose={closeDelete}
         onConfirm={handleDelete}
         title={tAdmin('categories.deleteTitle')}
         message={
           <>
-            <Text>
+            <DsText>
               {tCommon.rich('messages.confirmDeleteNamedRich', {
                 name: deletingCategory?.name ?? '',
                 strong: (chunks) => <strong>{chunks}</strong>,
               })}
-            </Text>
+            </DsText>
             {deletingCategory && deletingCategory.postCount > 0 && (
-              <Text size="sm" c="orange" mt="xs">
-                {tAdmin('categories.deleteWarning', {
-                  count: String(deletingCategory.postCount),
-                })}
-              </Text>
+              <DsLayoutInset blockStart="xs">
+                <DsText size="sm" tone="warning">
+                  {tAdmin('categories.deleteWarning', {
+                    count: String(deletingCategory.postCount),
+                  })}
+                </DsText>
+              </DsLayoutInset>
             )}
           </>
         }

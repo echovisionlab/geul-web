@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-12",
+  "engine": "Codex in-app browser",
+  "pointer": "Actual mouse click/scroll actions through CUA; viewport changes do not emulate physical touch.",
+  "representativeViewports": [
+    [1440, 900],
+    [1440, 420],
+    [834, 1112],
+    [390, 844]
+  ],
+  "locales": ["ko", "en"],
+  "themePresets": ["ocean-light", "ocean-dark"],
+  "observations": [
+    {
+      "scenario": "Reference investigation: actual Notion desktop app",
+      "result": "Inspected a real 26-heading document with mouse entry/click, scrollbar-track click, later-heading selection, outside-area entry and reopening, viewing a screenshot after each operation. List scroll moved independently of the document. Pointer selection retained the list; leaving closed it; reopening began at the first entry. Pure hover timing, wheel boundary behavior, native keyboard and mobile Notion were not verified. Private workspace captures remain in ignored local artifacts. Only Notion and the supplied ChatGPT image informed this correction."
+    },
+    {
+      "scenario": "TOC-01/02: closed rail and pointer entry, LongDocument, 1440×900, ko/Ocean light",
+      "result": "Viewed the compact marks with the article at Section 1. Clicked the rail with the mouse, then moved into the adjacent list using mouse scroll. The list remained open across that transition; the article width did not change. No list-icon launcher, search field, collapse controls or counter remained.",
+      "screenshots": ["closed-ko.png", "open-ko.png"]
+    },
+    {
+      "scenario": "TOC-03: independent scrolling and end boundary, 60 and 120 headings",
+      "result": "Used actual mouse scroll inside both outlines, inspecting intermediate and final screens. Reached Section 60 and Section 120, with the last row fully inside the bounded list. Extra downward scroll at the 60-heading list end kept document scrollY at 0. The 60-heading list had clientHeight 446, scrollHeight 1714 and end offset 1268; the article remained at Section 1.",
+      "screenshots": ["scrolled-ko.png"]
+    },
+    {
+      "scenario": "TOC-04/05: pointer selection, leaving and reopening, final LongDocument build",
+      "result": "Clicked Section 60 with the mouse. Its actual heading received focus, the list remained visible and the current-location entry became Section 60. The final short section stopped at top139.8px at the document boundary and correctly remained current. Clicked outside: the list closed. Re-entered the rail: list scrollTop returned to 0 while the document stayed at Section 60. Final closed/open/scrolled/selected/reopened images were recaptured after the last build.",
+      "screenshots": ["selected-ko.png", "reopened-ko.png"]
+    },
+    {
+      "scenario": "TOC-06: native keyboard actions, Default, 1440×900, ko/Ocean light",
+      "result": "Tab focused the named rail and revealed the list with a visible focus outline. ArrowDown entered the first link. Tab and Enter selected Principles and moved focus to its actual heading while closing the list. Shift+Tab returned to the rail; Escape closed it with focus retained on the rail. This is a keyboard review in the browser, not native screen-reader acceptance."
+    },
+    {
+      "scenario": "TOC-07/08: long names and custom dark theme, LongLabels, en/Ocean dark",
+      "result": "Viewed the closed rail, opened the list with the mouse and selected its long second title. Its complete name wrapped inside the surface, with no horizontal list overflow. H2/H3/H4 levels had distinct indentation. The selected text, background, marks and focus used the existing theme roles. The example's former H3-to-H5 skip was corrected rather than disabling the heading-order accessibility rule.",
+      "screenshots": ["long-labels-dark-en.png"]
+    },
+    {
+      "scenario": "TOC-09: footer boundary and short viewport",
+      "result": "Clicked the last heading in FooterBoundary, inspected the footer, re-entered the rail and mouse-scrolled to the last row. Panel bottom631.9px and last-row bottom623.2px stayed above footer top743.8px. At1440×420, mouse-scrolled LongDocument to Section60: panel top96/bottom396, last-row bottom386.8, document scrollY0. A panel displaced above the footer can close when it moves away from the pointer; re-entry remains available.",
+      "screenshots": ["footer-boundary-ko.png"]
+    },
+    {
+      "scenario": "Actual production PostViewContent and ShellView fixture, ko/Ocean light",
+      "result": "Opened the shared outline, mouse-scrolled to later entries and clicked Listening section18. The real generated heading ID10000000-0000-4000-8000-000000000334 received focus at top63.94px below the64px fixed header. The outline remained open and retained its own scroll offset. Leaving and reopening reset only the outline to0; the article stayed at section18. Existing article geometry was preserved.",
+      "screenshots": ["post-consumer-ko.png"]
+    },
+    {
+      "scenario": "Actual production PageContentView and ShellView fixture, ko/Ocean light",
+      "result": "Visual inspection found that PageContentView had no TOC connection. The production View was connected to authored rich-text heading data, not a Storybook-only control. Rebuilt and inspected it: mouse scrolling kept the article fixed; selecting Listening section18 focused the actual ID at top64.04px, with current-location meaning and the list still visible. Section/column extraction and vertical geometry ordering are unit-tested; the manually inspected page is the single rich-text-section fixture.",
+      "screenshots": ["page-consumer-ko.png"]
+    },
+    {
+      "scenario": "TOC-10: actual PageContentView, 390×844 and 834×1112, ko/Ocean light",
+      "result": "Viewed both responsive screens. Existing below-md page-side TOC omission remained; no new floating button appeared. At390px, document scrollWidth375 matched clientWidth375; at834px, both were819. The existing body and shell remained readable without horizontal overflow.",
+      "screenshots": ["phone-ko.png", "tablet-ko.png"]
+    },
+    {
+      "scenario": "TOC-11: data and interaction regressions",
+      "result": "Source tests cover omission at three-or-fewer headings, replacement/cleanup, missing IDs, renderer-order page/column extraction, vertical geometry tracking, the last-heading document boundary, native modified links, reduced motion, Escape and touch-press mounting. Touch assertions are synthetic source tests and do not establish physical touch acceptance. Additional ESLint checks for the changed page consumer and TOC builders passed."
+    }
+  ],
+  "boundaries": [
+    "Production Views and the existing ShellView harness use local fixture data; live services, server Shell controller, persistence and permissions were not verified.",
+    "No native VoiceOver/Orca or physical touch acceptance was performed.",
+    "Only named screens and states were visually inspected; the full official catalog run is separate automated evidence.",
+    "Ready for human design review; this record does not assert design approval or deployment."
+  ]
+}

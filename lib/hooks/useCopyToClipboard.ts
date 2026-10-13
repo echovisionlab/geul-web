@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { useClipboard } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 
 interface CopyNotificationOptions {
   successMessage: string;
@@ -20,7 +20,7 @@ export function useCopyToClipboard(timeout = 2000) {
 
     notifications.show({
       message: pendingNotificationRef.current.successMessage,
-      color: 'blue',
+      tone: 'neutral',
     });
     pendingNotificationRef.current = null;
   }, [copied]);
@@ -32,7 +32,7 @@ export function useCopyToClipboard(timeout = 2000) {
 
     notifications.show({
       message: pendingNotificationRef.current.errorMessage,
-      color: 'red',
+      tone: 'danger',
     });
     pendingNotificationRef.current = null;
   }, [error]);

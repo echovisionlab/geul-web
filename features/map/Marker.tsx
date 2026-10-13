@@ -27,7 +27,11 @@ export function Marker({ position, children }: MarkerProps) {
         transformOrigin: AdvancedMarkerAnchorPoint.BOTTOM.join(' '),
       }}
     >
-      <Pin background="var(--mantine-color-red-6)" borderColor="var(--mantine-color-red-8)" glyphColor="white" />
+      <Pin
+        background="var(--geul-action-primary)"
+        borderColor="var(--geul-border-strong)"
+        glyphColor="var(--geul-text-on-action)"
+      />
     </AdvancedMarker>
   );
 }

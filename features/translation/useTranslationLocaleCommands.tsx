@@ -1,9 +1,11 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useMutation } from '@tanstack/react-query';
-import { Stack, Text } from '@mantine/core';
-import { modals } from '@mantine/modals';
-import { notifications } from '@mantine/notifications';
+
+import { confirmationDialogs } from '@/features/confirmation';
+import { notifications } from '@/components/core/Notification';
 import type { createTranslationClient } from '@/lib/api/browser/secure-translation';
 import { getTranslationActionErrorMessage } from '@/lib/translation/action-error';
 
@@ -67,13 +69,13 @@ export function useTranslationLocaleCommands({
       });
     },
     onSuccess: async (_response, nextSourceLocale) => {
-      notifications.show({ color: 'green', message: messages.sourceUpdated });
+      notifications.show({ tone: 'positive', message: messages.sourceUpdated });
       await refreshEntries();
       await afterSourceChange?.(nextSourceLocale);
     },
     onError: (error) => {
       notifications.show({
-        color: 'red',
+        tone: 'danger',
         message: getTranslationActionErrorMessage(error, messages.sourceUpdateFailed),
       });
     },
@@ -91,13 +93,13 @@ export function useTranslationLocaleCommands({
       });
     },
     onSuccess: async (_response, locales) => {
-      notifications.show({ color: 'blue', message: messages.regenerateSuccess(locales) });
+      notifications.show({ tone: 'neutral', message: messages.regenerateSuccess(locales) });
       await refreshEntries();
       await refreshJobs?.();
     },
     onError: async (error) => {
       notifications.show({
-        color: 'red',
+        tone: 'danger',
         message: getTranslationActionErrorMessage(error, messages.regenerateFailed),
       });
       await refreshEntries();
@@ -110,23 +112,22 @@ export function useTranslationLocaleCommands({
       return;
     }
 
-    modals.openConfirmModal({
+    confirmationDialogs.open({
       title: messages.sourceConfirmTitle,
-      labels: {
-        cancel: messages.sourceConfirmCancel,
-        confirm: messages.sourceConfirmAction,
-      },
-      confirmProps: { color: 'blue' },
-      children: (
-        <Stack gap="xs">
-          <Text size="sm">{messages.sourceConfirmDescription}</Text>
-          <Text size="sm" c="dimmed">
+      cancelLabel: messages.sourceConfirmCancel,
+      confirmLabel: messages.sourceConfirmAction,
+      closeLabel: messages.sourceConfirmCancel,
+      intent: 'confirm',
+      message: (
+        <DsLayoutStack gap="xs">
+          <DsText>{messages.sourceConfirmDescription}</DsText>
+          <DsText size="sm" tone="secondary">
             {messages.sourceConfirmDetail(getLocaleDisplayLabel(nextLocale))}
-          </Text>
-        </Stack>
+          </DsText>
+        </DsLayoutStack>
       ),
-      onConfirm: () => {
-        setSourceLocale.mutate(nextLocale);
+      onConfirm: async () => {
+        await setSourceLocale.mutateAsync(nextLocale);
       },
     });
   };

@@ -1,5 +1,6 @@
 import { Code, ConnectError } from '@connectrpc/connect';
 import { describe, expect, it } from 'vitest';
+import { getFallbackErrorPageMessages } from './error-page-fallback-messages';
 import { canRetryErrorStatus, getErrorPageContent, resolveErrorStatus } from './error-status';
 
 describe('application error classification', () => {
@@ -30,7 +31,10 @@ describe('application error classification', () => {
   });
 
   it('keeps an unfamiliar valid error code with a safe localized title', () => {
-    expect(getErrorPageContent(418, 'ko')).toMatchObject({ code: '418', title: '문제가 발생했습니다' });
+    expect(getErrorPageContent(418, getFallbackErrorPageMessages('ko'))).toMatchObject({
+      code: '418',
+      title: '문제가 발생했습니다',
+    });
   });
 
   it('offers retry only for transient failures', () => {

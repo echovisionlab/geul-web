@@ -1,12 +1,19 @@
 'use client';
 
+import { SectionCard as ExecutableSurface } from '@/components/core/Section';
+import {
+  LayoutInset as ExecutableInset,
+  LayoutStack as EditorDsLayoutStack,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { mergeAttributes, Node, type CommandProps, type Extensions } from '@tiptap/core';
 import type { Monaco } from '@monaco-editor/react';
 import type { editor as MonacoEditor } from 'monaco-editor';
 import { Selection } from '@tiptap/pm/state';
 import { NodeViewContent, NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from '@tiptap/react';
-import { Stack } from '@mantine/core';
+
 import { Alert } from '@/components/core/Alert';
 import type { EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import {
@@ -16,7 +23,7 @@ import {
 } from '@/features/executable/ExecutableRuntimeControls';
 import { useBlockResize } from '@/features/editor/hooks/useBlockResize';
 import { EditorMediaBlockFrame } from '@/features/editor/ui/EditorMediaBlockShell';
-import { isMonacoSourceEditorEvent, MonacoSourceEditor } from '../code-editor';
+import { withMonacoSourceEditorEvents, MonacoSourceEditor } from '../code-editor';
 import { executableBlockIdForPosition, replaceExecutableSource } from '../executable-source';
 import {
   type ExecutableSelectionMenuBinding,
@@ -273,9 +280,11 @@ function ThreePreviewSurface({
       </div>
       <ExecutableRuntimeStatus status={status} running={labels.running} stopped={labels.stopped} />
       {error ? (
-        <Alert className={classes.error} tone="danger" title={labels.error} data-testid="three-error">
-          {formatError(error)}
-        </Alert>
+        <div className={classes.error}>
+          <Alert tone="danger" title={labels.error} data-testid="three-error">
+            {formatError(error)}
+          </Alert>
+        </div>
       ) : null}
     </div>
   );
@@ -618,67 +627,78 @@ export function ThreeSceneNodeView({
         onResizeBlur={resize.onResizeBlur}
       >
         <div className={classes.root}>
-          <div className={classes.header}>
-            <ExecutableBlockTitle
-              title={title}
-              fallback={labels.title}
-              editable={canEditTitle}
-              onChange={(nextTitle) => updateAttributes({ title: nextTitle })}
-            />
-          </div>
+          <ExecutableSurface padding="none" withBorder clip>
+            <div className={classes.header}>
+              <ExecutableSurface padding="none" appearance="muted" border="block-end">
+                <ExecutableInset block="xxs" inline="xs">
+                  <ExecutableBlockTitle
+                    title={title}
+                    fallback={labels.title}
+                    editable={canEditTitle}
+                    onChange={(nextTitle) => updateAttributes({ title: nextTitle })}
+                  />
+                </ExecutableInset>
+              </ExecutableSurface>
+            </div>
 
-          <Stack className={classes.body} data-view-mode={mode} gap={0}>
-            {previewVisible ? (
-              <ThreePreviewSurface
-                key={revision}
-                source={source}
-                height={previewHeight}
-                revision={revision}
-                active={running}
-                runtimeFactory={runtimeFactory}
-                labels={labels}
-                onRuntime={setRuntime}
-              />
-            ) : null}
+            <div className={classes.body} data-view-mode={mode}>
+              <EditorDsLayoutStack gap="none">
+                {previewVisible ? (
+                  <ThreePreviewSurface
+                    key={revision}
+                    source={source}
+                    height={previewHeight}
+                    revision={revision}
+                    active={running}
+                    runtimeFactory={runtimeFactory}
+                    labels={labels}
+                    onRuntime={setRuntime}
+                  />
+                ) : null}
 
-            <ExecutableRuntimeControls
-              className={classes.controls}
-              type="threeScene"
-              labels={labels}
-              running={running}
-              onRun={restart}
-              onStop={stop}
-              onRestart={restart}
-              sourceControl={{ label: labels.source, expanded: codeVisible, onClick: toggleSource }}
-              onResetOriginal={codeVisible ? resetOriginal : undefined}
-              resetDisabled={!hasDraftChanges && temporarySource === originalSource}
-              copyControl={
-                codeVisible ? { label: copied ? labels.copied : labels.copy, onClick: copySource } : undefined
-              }
-              applyControl={
-                mode === 'edit' ? { label: labels.apply, disabled: !hasDraftChanges, onClick: applyDraft } : undefined
-              }
-            />
+                <ExecutableInset block="xxs" inline="xs">
+                  <ExecutableRuntimeControls
+                    type="threeScene"
+                    labels={labels}
+                    running={running}
+                    onRun={restart}
+                    onStop={stop}
+                    onRestart={restart}
+                    sourceControl={{ label: labels.source, expanded: codeVisible, onClick: toggleSource }}
+                    onResetOriginal={codeVisible ? resetOriginal : undefined}
+                    resetDisabled={!hasDraftChanges && temporarySource === originalSource}
+                    copyControl={
+                      codeVisible ? { label: copied ? labels.copied : labels.copy, onClick: copySource } : undefined
+                    }
+                    applyControl={
+                      mode === 'edit'
+                        ? { label: labels.apply, disabled: !hasDraftChanges, onClick: applyDraft }
+                        : undefined
+                    }
+                  />
+                </ExecutableInset>
 
-            {codeVisible ? (
-              <Stack gap={0}>
-                <MonacoSourceEditor
-                  className={classes.editor}
-                  value={mode === 'edit' ? draftSource : source}
-                  language="typescript"
-                  ariaLabel={labels.sourceInput}
-                  modelPath={`three/${blockId}.ts`}
-                  height={previewHeight}
-                  maxLength={THREE_SCENE_MAX_SOURCE_LENGTH}
-                  onMount={registerThreeSceneMonacoTypes}
-                  onChange={mode === 'edit' ? setDraftSource : undefined}
-                  onApply={mode === 'edit' ? applyDraft : undefined}
-                  onEscape={canEditNeutral ? selectBlock : undefined}
-                  readOnly={mode !== 'edit'}
-                />
-              </Stack>
-            ) : null}
-          </Stack>
+                {codeVisible ? (
+                  <DsLayoutStack gap="none">
+                    <MonacoSourceEditor
+                      className={classes.editor}
+                      value={mode === 'edit' ? draftSource : source}
+                      language="typescript"
+                      ariaLabel={labels.sourceInput}
+                      modelPath={`three/${blockId}.ts`}
+                      height={previewHeight}
+                      maxLength={THREE_SCENE_MAX_SOURCE_LENGTH}
+                      onMount={registerThreeSceneMonacoTypes}
+                      onChange={mode === 'edit' ? setDraftSource : undefined}
+                      onApply={mode === 'edit' ? applyDraft : undefined}
+                      onEscape={canEditNeutral ? selectBlock : undefined}
+                      readOnly={mode !== 'edit'}
+                    />
+                  </DsLayoutStack>
+                ) : null}
+              </EditorDsLayoutStack>
+            </div>
+          </ExecutableSurface>
         </div>
       </EditorMediaBlockFrame>
       <NodeViewContent className={classes.content} aria-hidden="true" />
@@ -740,9 +760,9 @@ export function createThreeSceneExtension(options: ThreeSceneOptions = {}): Exte
       return ['div', mergeAttributes(HTMLAttributes, { 'data-content-type': 'threeScene' }), 0];
     },
     addNodeView() {
-      return ReactNodeViewRenderer((props) => <ThreeSceneNodeView {...props} {...this.options} />, {
-        stopEvent: ({ event }) => isMonacoSourceEditorEvent(event),
-      });
+      return withMonacoSourceEditorEvents(
+        ReactNodeViewRenderer((props) => <ThreeSceneNodeView {...props} {...this.options} />),
+      );
     },
     addCommands() {
       return {

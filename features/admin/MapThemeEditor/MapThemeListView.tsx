@@ -1,13 +1,15 @@
 'use client';
+import { SupportingText } from '@/components/core/Typography';
 
 import Link from '@/components/core/Navigation';
 import { IconCopy, IconDots, IconEdit, IconStar, IconTrash } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Group, SimpleGrid, Text } from '@mantine/core';
+
 import { Alert } from '@/components/core/Alert';
 import { LabelBadge } from '@/components/core/Badge';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
 import { IconButton } from '@/components/core/IconButton';
+import { LayoutGrid, LayoutInline } from '@/components/core/Layout';
 import { SectionCard } from '@/components/core/Section';
 import { Tooltip } from '@/components/core/Tooltip';
 import type { MapTheme } from '@/lib/types/map-theme/model';
@@ -42,11 +44,11 @@ export function MapThemeListView({
   }
 
   if (themes.length === 0) {
-    return <Text c="dimmed">{tPage('empty')}</Text>;
+    return <SupportingText tone="secondary">{tPage('empty')}</SupportingText>;
   }
 
   return (
-    <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+    <LayoutGrid columns={{ base: 1, sm: 2, lg: 3 }} gap="md" align="stretch">
       {themes.map((theme) => {
         const isDefault = theme.id === defaultMapThemeId;
         const deleteDisabledReason = isDefault
@@ -57,23 +59,13 @@ export function MapThemeListView({
 
         return (
           <SectionCard key={theme.id} padding="md" data-map-theme-card={theme.id}>
-            <Group justify="space-between" wrap="nowrap">
-              <Group gap="xs" wrap="nowrap" style={{ minWidth: 0 }}>
-                <Text
-                  component={Link}
-                  href={`/admin/map/themes/${theme.id}`}
-                  fw={500}
-                  truncate
-                  style={{ color: 'inherit', textDecoration: 'none' }}
-                >
+            <LayoutInline justify="between" wrap="nowrap">
+              <LayoutInline gap="xs" wrap="nowrap">
+                <Link appearance="quiet" href={`/admin/map/themes/${theme.id}`}>
                   {theme.name}
-                </Text>
-                {isDefault ? (
-                  <LabelBadge size="xs" tone="accent">
-                    {tCommon('statuses.default')}
-                  </LabelBadge>
-                ) : null}
-              </Group>
+                </Link>
+                {isDefault ? <LabelBadge tone="accent">{tCommon('statuses.default')}</LabelBadge> : null}
+              </LayoutInline>
 
               <DropdownMenu size="compact">
                 <DropdownMenu.Target>
@@ -86,11 +78,7 @@ export function MapThemeListView({
                   </IconButton>
                 </DropdownMenu.Target>
                 <DropdownMenu.Dropdown>
-                  <DropdownMenu.Item
-                    component={Link}
-                    href={`/admin/map/themes/${theme.id}`}
-                    icon={<IconEdit size={16} />}
-                  >
+                  <DropdownMenu.Item href={`/admin/map/themes/${theme.id}`} icon={<IconEdit size={16} />}>
                     {tCommon('actions.edit')}
                   </DropdownMenu.Item>
                   <DropdownMenu.Item icon={<IconCopy size={16} />} onClick={() => onCopy(theme)}>
@@ -125,10 +113,10 @@ export function MapThemeListView({
                   </Tooltip>
                 </DropdownMenu.Dropdown>
               </DropdownMenu>
-            </Group>
+            </LayoutInline>
           </SectionCard>
         );
       })}
-    </SimpleGrid>
+    </LayoutGrid>
   );
 }

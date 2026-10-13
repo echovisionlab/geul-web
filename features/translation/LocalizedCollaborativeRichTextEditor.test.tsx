@@ -51,11 +51,8 @@ vi.mock('@/lib/contexts/EditorRuntimeContext', () => ({
   EditorRuntimeProvider: ({ children }: { children: ReactNode }) => children,
   useOptionalEditorRuntimeContext: () => runtimeContext.current,
 }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@mantine/core', () => ({
-  Box: ({ children, ...props }: { children?: ReactNode }) => <div {...props}>{children}</div>,
-}));
 
 let root: Root | null = null;
 let container: HTMLDivElement | null = null;

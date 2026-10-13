@@ -15,6 +15,8 @@ export interface FormEditorContextValue extends FormEditorCollaborationResult {
 
 const FormEditorContext = createContext<FormEditorContextValue | null>(null);
 
+export const FormEditorStateProvider = FormEditorContext.Provider;
+
 interface FormEditorProviderProps {
   formId: string;
   initialFields?: Partial<FormFields>;

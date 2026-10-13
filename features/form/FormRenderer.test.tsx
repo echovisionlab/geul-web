@@ -131,7 +131,7 @@ function renderSingleStepSubmitForm(onSubmit: () => Promise<void>) {
       {
         id: 'submit-step',
         title: 'Submit Step',
-        fields: [],
+        fields: [{ id: 'optional', name: 'optional', type: 'text', label: 'Optional text' }],
       },
     ],
   };
@@ -149,14 +149,14 @@ function renderSingleStepSubmitForm(onSubmit: () => Promise<void>) {
   });
 }
 
-function renderMultiStepForm() {
+function renderMultiStepForm(withInput = false) {
   const schema: FormSchema = {
     id: 'multi-step-form',
     steps: [
       {
         id: 'step-1',
         title: 'Step One',
-        fields: [],
+        fields: withInput ? [{ id: 'optional', name: 'optional', type: 'text', label: 'Optional text' }] : [],
       },
       {
         id: 'step-2',
@@ -177,6 +177,7 @@ function renderMultiStepForm() {
       </TestProviders>,
     );
   });
+  return schema;
 }
 
 async function flushUpdates() {
@@ -185,11 +186,22 @@ async function flushUpdates() {
   });
 }
 
+// PhoneField (with libphonenumber-js) is loaded on demand.
+async function waitForPhoneInput() {
+  await vi.waitFor(async () => {
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(container?.querySelector('input[type="tel"]')).not.toBeNull();
+  });
+}
+
 describe('FormRenderer', () => {
   it('renders the phone required error once after blur', async () => {
     const requiredMessage = 'Phone is required exactly once';
 
     renderPhoneRequiredForm(requiredMessage);
+    await waitForPhoneInput();
 
     const phoneInput = container?.querySelector('input[type="tel"]') as HTMLInputElement | null;
     expect(phoneInput).not.toBeNull();
@@ -206,10 +218,11 @@ describe('FormRenderer', () => {
     expect(occurrences).toBe(1);
   });
 
-  it('passes the resolved phone default country to phone fields', () => {
+  it('passes the resolved phone default country to phone fields', async () => {
     renderPhoneDefaultCountryForm('JP');
+    await waitForPhoneInput();
 
-    expect(container?.textContent).toContain('+81');
+    expect(container?.querySelector('input[role="combobox"]')?.getAttribute('value')).toContain('+81');
   });
 
   it('does not render an internal completion screen after submit resolves', async () => {
@@ -238,7 +251,7 @@ describe('FormRenderer', () => {
     renderSingleStepSubmitForm(onSubmit);
 
     await act(async () => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      container?.querySelector('input')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
       await Promise.resolve();
     });
 
@@ -281,10 +294,110 @@ describe('FormRenderer', () => {
     });
 
     expect(container?.textContent).toContain('Step Two');
+    expect(document.activeElement?.getAttribute('role')).toBe('group');
+    const titleId = document.activeElement?.getAttribute('aria-labelledby');
+    expect(document.getElementById(titleId ?? '')?.textContent).toBe('Step Two');
     expect(
       Array.from(container?.querySelectorAll('button') ?? []).some((button) =>
         button.textContent?.includes('Previous'),
       ),
     ).toBe(true);
+  });
+
+  it('preserves external editor focus when a passive schema reorder changes the displayed step', async () => {
+    const schema = renderMultiStepForm();
+    const grip = document.createElement('button');
+    grip.setAttribute('aria-label', 'Reorder builder step');
+    document.body.append(grip);
+    try {
+      act(() => grip.focus());
+      await act(async () => {
+        root!.render(
+          <TestProviders>
+            <FormRenderer form={buildForm({ ...schema, steps: [...schema.steps].reverse() })} />
+          </TestProviders>,
+        );
+      });
+      expect(container!.textContent).toContain('Step Two');
+      expect(document.activeElement).toBe(grip);
+    } finally {
+      grip.remove();
+    }
+  });
+
+  it('focuses the previous step after an explicit Previous action', async () => {
+    renderMultiStepForm();
+    await flushUpdates();
+    const next = [...container!.querySelectorAll('button')].find((button) => button.textContent?.includes('Next'))!;
+    await act(async () => next.click());
+    const previous = [...container!.querySelectorAll('button')].find((button) =>
+      button.textContent?.includes('Previous'),
+    )!;
+    await act(async () => previous.click());
+    const group = document.activeElement!;
+    expect(group.getAttribute('role')).toBe('group');
+    expect(document.getElementById(group.getAttribute('aria-labelledby') ?? '')?.textContent).toBe('Step One');
+  });
+
+  it('focuses the new step after Enter navigation removes the previous input', async () => {
+    renderMultiStepForm(true);
+    await flushUpdates();
+    const input = container!.querySelector<HTMLInputElement>('input')!;
+    await act(async () => {
+      input.focus();
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    });
+    expect(input.isConnected).toBe(false);
+    const group = document.activeElement!;
+    expect(group.getAttribute('role')).toBe('group');
+    expect(document.getElementById(group.getAttribute('aria-labelledby') ?? '')?.textContent).toBe('Step Two');
+  });
+  it('does not submit for Enter outside its own inputs, buttons or IME composition', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    renderSingleStepSubmitForm(onSubmit);
+    const outside = document.createElement('input');
+    document.body.appendChild(outside);
+    try {
+      await act(async () => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        outside.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        container
+          ?.querySelector('button')
+          ?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        container
+          ?.querySelector('input')
+          ?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, isComposing: true }));
+        await Promise.resolve();
+      });
+      expect(onSubmit).not.toHaveBeenCalled();
+    } finally {
+      outside.remove();
+    }
+  });
+
+  it('keeps submission locked while its transport is pending', async () => {
+    let resolve!: () => void;
+    const onSubmit = vi.fn(
+      () =>
+        new Promise<void>((done) => {
+          resolve = done;
+        }),
+    );
+    renderSingleStepSubmitForm(onSubmit);
+    await act(async () => {
+      container?.querySelector('input')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await Promise.resolve();
+    });
+    expect(container?.querySelector('input')?.disabled).toBe(true);
+    await act(async () => {
+      container?.querySelector('input')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await Promise.resolve();
+    });
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      resolve();
+      await Promise.resolve();
+    });
+    expect(container?.querySelector('input')?.disabled).toBe(false);
   });
 });

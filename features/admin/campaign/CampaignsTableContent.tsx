@@ -1,8 +1,9 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
-import { statusToneFromColor, StatusBadge } from '@/components/core/Badge';
+
+import { StatusBadge, type StatusTone } from '@/components/core/Badge';
 import { TextButton } from '@/components/core/TextButton';
 import {
   ServerDataTableSelectableSection,
@@ -12,12 +13,12 @@ import { DateTime } from '@/features/date-time/DateTime';
 import type { ColumnDef } from '@/lib/types/common/data-table';
 import { CampaignRowMenu } from './CampaignRowMenu';
 
-const STATUS_COLORS: Record<string, string> = {
-  draft: 'gray',
-  scheduled: 'blue',
-  sending: 'yellow',
-  sent: 'green',
-  failed: 'red',
+const STATUS_TONES: Record<string, StatusTone> = {
+  draft: 'neutral',
+  scheduled: 'accent',
+  sending: 'accent',
+  sent: 'positive',
+  failed: 'danger',
 };
 
 function translateCampaignStatus(
@@ -71,9 +72,9 @@ function getColumns(
             {row.name || labels.subjectFallback}
           </TextButton>
           {row.subject && row.subject !== row.name ? (
-            <Text size="xs" c="dimmed">
+            <DsText size="xs" tone="secondary">
               {row.subject}
-            </Text>
+            </DsText>
           ) : null}
         </div>
       ),
@@ -82,7 +83,7 @@ function getColumns(
       key: 'status',
       header: labels.status,
       cell: (row) => (
-        <StatusBadge tone={statusToneFromColor(STATUS_COLORS[row.status] || 'gray')} size="sm">
+        <StatusBadge tone={STATUS_TONES[row.status] ?? 'neutral'} size="sm">
           {translateCampaignStatus(row.status, labels.statuses)}
         </StatusBadge>
       ),
@@ -91,18 +92,18 @@ function getColumns(
       key: 'sentCount',
       header: labels.sentCount,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           {row.sentCount > 0 ? getRecipientsLabel(row.sentCount) : '-'}
-        </Text>
+        </DsText>
       ),
     },
     {
       key: 'createdAt',
       header: labels.created,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.createdAt} />
-        </Text>
+        </DsText>
       ),
     },
     {

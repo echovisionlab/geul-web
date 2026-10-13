@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { ArtistDeleteDialogView } from './ArtistDeleteDialogView';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -16,7 +17,7 @@ describe('ArtistDeleteDialogView', () => {
     const onConfirm = vi.fn();
     act(() =>
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <ArtistDeleteDialogView
             opened
             artistName="Example Artist"
@@ -44,7 +45,7 @@ describe('ArtistDeleteDialogView', () => {
             onClose={() => {}}
             onConfirm={onConfirm}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       ),
     );
     expect(document.body.textContent).toContain('Example Label (1)');

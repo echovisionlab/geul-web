@@ -5,20 +5,12 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({ query: vi.fn(), search: vi.fn(), push: vi.fn() }));
-vi.mock('next/navigation', () => ({ useRouter: () => ({ push: mocks.push }) }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push: mocks.push, replace: vi.fn(), prefetch: vi.fn() }) }));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
 vi.mock('next/image', () => ({ default: () => null }));
 vi.mock('@tanstack/react-query', () => ({ useQuery: mocks.query }));
 vi.mock('@/lib/queries/post-browser', () => ({ searchPublishedPosts: mocks.search }));
-vi.mock('@mantine/spotlight', () => ({
-  SpotlightEmpty: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SpotlightActionsList: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SpotlightAction: ({ label, onClick }: { label: string; onClick: () => void }) => (
-    <button type="button" onClick={onClick}>
-      {label}
-    </button>
-  ),
-}));
+import { AppDesignSystemRouter } from '@/lib/providers/DesignSystemProvider';
 import { PostSpotlightRuntime, type PostSpotlightRuntimeProps } from './PostSpotlightRuntime';
 let host: HTMLDivElement;
 let root: Root;
@@ -34,7 +26,14 @@ afterEach(async () => {
   host.remove();
 });
 async function render(props: PostSpotlightRuntimeProps) {
-  await act(async () => root.render(<PostSpotlightRuntime {...props} />));
+  // Results are Core navigation links; the application router owns client-side navigation.
+  await act(async () =>
+    root.render(
+      <AppDesignSystemRouter>
+        <PostSpotlightRuntime {...props} />
+      </AppDesignSystemRouter>,
+    ),
+  );
 }
 
 describe('PostSpotlight results runtime', () => {
@@ -68,7 +67,11 @@ describe('PostSpotlight results runtime', () => {
       isError: false,
     });
     await render({ query: 'ab', debouncedQuery: 'ab', opened: true });
-    await act(async () => host.querySelector('button')!.click());
-    expect(mocks.push).toHaveBeenCalledWith('/posts/post-slug');
+    const result = host.querySelector<HTMLAnchorElement>('[role="menuitem"]');
+    expect(result?.textContent).toBe('Post');
+    expect(result?.getAttribute('href')).toBe('/posts/post-slug');
+    await act(async () => result!.click());
+    expect(mocks.push).toHaveBeenCalledOnce();
+    expect(new URL(mocks.push.mock.lastCall?.[0], window.location.href).pathname).toBe('/posts/post-slug');
   });
 });

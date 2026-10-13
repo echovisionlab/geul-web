@@ -1,8 +1,9 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { CampaignTargetMode } from '@echovisionlab/geul-proto/secure/campaign_pb.ts';
 import { useTranslations } from 'next-intl';
-import { Stack } from '@mantine/core';
+
 import { Alert } from '@/components/core/Alert';
 import { Select } from '@/components/core/Input';
 
@@ -73,7 +74,7 @@ export function CampaignTargetControl({
   const value = targetMode === CampaignTargetMode.ALL ? allValue : segmentId ? segmentValue(segmentId) : null;
 
   return (
-    <Stack gap="xs">
+    <DsLayoutStack gap="xs">
       <Select
         label={t('audienceLabel')}
         placeholder={t('audiencePlaceholder')}
@@ -98,6 +99,6 @@ export function CampaignTargetControl({
       ) : targetMode === CampaignTargetMode.SEGMENT && (!segmentId || !selectedAudienceIsActive) ? (
         <Alert tone="warning">{t(segmentId ? 'unavailableAudienceDescription' : 'audienceRequired')}</Alert>
       ) : null}
-    </Stack>
+    </DsLayoutStack>
   );
 }

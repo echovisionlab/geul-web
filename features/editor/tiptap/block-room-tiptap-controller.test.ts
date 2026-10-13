@@ -2,7 +2,7 @@
 
 import { Editor, Extension, Node, type JSONContent } from '@tiptap/core';
 import { Node as ProseMirrorNode } from '@tiptap/pm/model';
-import { Plugin } from '@tiptap/pm/state';
+import { NodeSelection, Plugin } from '@tiptap/pm/state';
 import { fromJson, toJson, type JsonValue } from '@bufbuild/protobuf';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import {
@@ -32,6 +32,8 @@ import {
 import { blockRoomUndoDepth, redoBlockRoom, undoBlockRoom } from '@/lib/collab/interactive-mutation-undo';
 import { createTiptapWireExtensions } from './wire-schema';
 import { SHADER_STAGE_DEFINITIONS } from './shader/shader-program';
+import { createTiptapPlaygroundRoom } from './TiptapPlayground.story-fixtures';
+import { setShaderNodeMode } from './shader/ShaderNode';
 
 vi.mock('@/lib/collab/persist-now', () => ({
   persistCollaborativeDocumentNow: vi.fn().mockResolvedValue(undefined),
@@ -809,6 +811,71 @@ describe('PostBlockRoomTiptapController', () => {
     expect(blocks[11]?.content?.[0]?.content).toHaveLength(9);
     expect(blocks[14]?.content?.[0]?.attrs?.fileId).toBe('20000000-0000-4000-8000-000000000001');
     expect(blocks[15]?.content?.[0]?.attrs).toMatchObject({ icon: '⚠️', backgroundColor: 'yellow' });
+  });
+
+  it('keeps the selected Shader when switching to source mode beside a Mermaid block', async () => {
+    const room = createTiptapPlaygroundRoom();
+    const mermaid = Node.create({
+      name: 'mermaid',
+      group: 'blockContent',
+      content: 'text*',
+      atom: true,
+      addAttributes: () => ({ title: { default: '' } }),
+      renderHTML: () => ['div', 0],
+    });
+    const editor = new Editor({
+      element: document.createElement('div'),
+      extensions: [...createTiptapWireExtensions(), ...executableTestExtensions(), mermaid, room.controller.extension],
+      content: room.controller.initialContent,
+    });
+    const disconnect = room.controller.connect(editor);
+    try {
+      editor
+        .chain()
+        .focus('end')
+        .insertContent({
+          type: 'blockContainer',
+          attrs: { id: '10000000-0000-4000-8000-000000000302' },
+          content: [
+            {
+              type: 'shader',
+              attrs: { mode: 'preview' },
+              content: SHADER_STAGE_DEFINITIONS.map(([, type]) => ({ type })),
+            },
+          ],
+        })
+        .run();
+      await Promise.resolve();
+      editor.commands.setNodeSelection(nodePosition(editor, 'shader'));
+      expect((editor.state.selection as NodeSelection).node.type.name).toBe('shader');
+      const selectedPosition = editor.state.selection.from;
+      expect(setShaderNodeMode(editor, () => selectedPosition, 'source')).toBe(true);
+      await Promise.resolve();
+      expect(editor.state.selection).toBeInstanceOf(NodeSelection);
+      expect((editor.state.selection as NodeSelection).node.type.name).toBe('shader');
+      expect(editor.state.selection.$from.parent.attrs.id).toBe('10000000-0000-4000-8000-000000000302');
+      expect((editor.state.selection as NodeSelection).node.attrs.mode).toBe('source');
+
+      editor.commands.setNodeSelection(selectedPosition - 1);
+      expect(setShaderNodeMode(editor, () => selectedPosition, 'preview')).toBe(true);
+      expect(editor.state.selection).toBeInstanceOf(NodeSelection);
+      expect((editor.state.selection as NodeSelection).node.type.name).toBe('blockContainer');
+      expect((editor.state.selection as NodeSelection).node.attrs.id).toBe('10000000-0000-4000-8000-000000000302');
+
+      editor.commands.setNodeSelection(nodePosition(editor, 'mermaid'));
+      expect(setShaderNodeMode(editor, () => selectedPosition, 'edit')).toBe(true);
+      expect((editor.state.selection as NodeSelection).node.type.name).toBe('mermaid');
+
+      editor.commands.setTextSelection(nodePosition(editor, 'paragraph') + 1);
+      const textSelection = editor.state.selection.toJSON();
+      expect(setShaderNodeMode(editor, () => selectedPosition, 'source')).toBe(true);
+      expect(editor.state.selection.toJSON()).toEqual(textSelection);
+    } finally {
+      disconnect();
+      editor.destroy();
+      room.awareness.destroy();
+      room.document.destroy();
+    }
   });
 
   it('persists executable source leaves for the exhaustive Post document without whole-node replacement', () => {

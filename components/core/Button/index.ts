@@ -1,4 +1,3 @@
 export { Button } from './Button';
-export type { ButtonProps } from './Button';
-export { getControlToneColor } from '../control-style';
-export type { ControlEmphasis, ControlTone } from '../control-style';
+export type { ButtonProps, ButtonActionProps, ButtonLinkProps } from './Button';
+export type { ButtonSize, ControlSize, ControlEmphasis, ControlTone } from '../control-style';

@@ -1,3 +1,4 @@
+import { breakpointQuery } from '@/components/core/Layout/breakpoints';
 import type { ReactNode } from 'react';
 import Image from 'next/image';
 import classes from './WorkPublicHeaderLayout.module.css';
@@ -20,7 +21,7 @@ export function WorkPublicHeaderLayout({ featuredImageUrl, imageAlt, children }:
           src={featuredImageUrl}
           alt={imageAlt}
           fill
-          sizes="(max-width: 768px) 100vw, 60vw"
+          sizes={`${breakpointQuery('sm')} 100vw, 60vw`}
           style={{ objectFit: 'cover' }}
           quality={100}
           preload

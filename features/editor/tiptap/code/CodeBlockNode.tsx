@@ -6,7 +6,7 @@ import { NodeViewContent, NodeViewWrapper, ReactNodeViewRenderer, type NodeViewP
 import { redo, undo } from 'y-prosemirror';
 import type { EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { useBlockResize } from '@/features/editor/hooks/useBlockResize';
-import { EditorMediaBlockFrame } from '@/features/editor/ui/EditorMediaBlockShell';
+import { EditorMediaBlockFrame, EditorMediaBlockSelector } from '@/features/editor/ui/EditorMediaBlockShell';
 import { redoBlockRoomEditor, undoBlockRoomEditor } from '@/lib/collab/interactive-mutation-undo';
 import {
   CODE_BLOCK_AUTHORING_LANGUAGES,
@@ -212,15 +212,7 @@ function CodeBlockNodeView({
         onResizeRightKeyDown={resize.onResizeKeyDown}
         onResizeBlur={resize.onResizeBlur}
       >
-        <button
-          type="button"
-          className={classes.selector}
-          aria-label={labels.menu}
-          tabIndex={editorEditable ? 0 : -1}
-          contentEditable={false}
-          onFocus={select}
-          onClick={select}
-        />
+        <EditorMediaBlockSelector label={labels.menu} enabled={editorEditable} onSelect={select} />
         <div
           className={classes.editor}
           contentEditable={false}

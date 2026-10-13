@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => {
@@ -42,7 +43,7 @@ vi.mock('next-intl', () => ({
     return translate;
   },
 }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: mocks.notification } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: mocks.notification } }));
 vi.mock('@/features/editor/EditorHeader', () => ({
   EditorHeader: ({
     onBack,
@@ -81,6 +82,7 @@ vi.mock('@/features/editor/EditorHeader', () => ({
   ),
 }));
 vi.mock('@/components/core/Input', () => ({
+  useInputCombobox: () => ({ dropdownOpened: false, openDropdown: vi.fn(), closeDropdown: vi.fn() }),
   MultiSelect: ({ label, onChange }: { label: string; onChange: (values: string[]) => void }) => {
     const field = label.endsWith('artists') ? 'artists' : label.endsWith('labels') ? 'labels' : 'clients';
     return (
@@ -95,6 +97,7 @@ vi.mock('@/components/core/Input', () => ({
     );
   },
   NumberInput: () => null,
+  DateTimePicker: () => null,
   Select: () => null,
   TextInput: () => null,
   Checkbox: () => null,
@@ -205,7 +208,7 @@ let queryClient: QueryClient;
 function renderEditor() {
   root.render(
     <QueryClientProvider client={queryClient}>
-      <MantineProvider env="test">
+      <DesignSystemProvider forceColorScheme="light">
         <ProgramEventEditor
           eventId={eventId}
           currentMemberId="member-1"
@@ -244,7 +247,7 @@ function renderEditor() {
           canonicalOrigin="https://example.test"
           siteName="Geul"
         />
-      </MantineProvider>
+      </DesignSystemProvider>
     </QueryClientProvider>,
   );
 }
@@ -505,6 +508,6 @@ describe('ProgramEventEditor relation saves and navigation', () => {
       await vi.waitFor(() => expect(mocks.updateEvent).toHaveBeenCalled());
       await vi.waitFor(() => expect(mocks.back).not.toHaveBeenCalled());
     });
-    expect(mocks.notification).toHaveBeenCalledWith({ message: 'notifications.saveFailed', color: 'red' });
+    expect(mocks.notification).toHaveBeenCalledWith({ message: 'notifications.saveFailed', tone: 'danger' });
   });
 });

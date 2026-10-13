@@ -3,8 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { useClipboard } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import {
   ProfileFormView,
   type ProfileFormChangedFields,
@@ -12,7 +11,7 @@ import {
   type ProfileFormValues,
   type ProfileSocialPlatformOption,
 } from '@/features/my/ui/ProfileForm';
-import { useNicknameValidation } from '@/features/member/useNicknameValidation';
+import { useNicknameValidation, type NicknameAvailabilityCheck } from '@/features/member/useNicknameValidation';
 import { updateProfileAction } from '@/lib/actions/user';
 import { useSession } from '@/lib/auth/client';
 import { PLATFORM_CONFIGS, SOCIAL_PLATFORMS, type SocialLinks } from '@/lib/types/common/social-links';
@@ -39,10 +38,17 @@ interface ProfileFormProps {
     socialLinks: SocialLinks | null;
   };
   disabled?: boolean;
+  updateAction?: typeof updateProfileAction;
+  checkNickname?: NicknameAvailabilityCheck;
 }
 
 /** Connects profile translations and persistence to the pure profile form view. */
-export function ProfileForm({ initialUser, disabled = false }: ProfileFormProps) {
+export function ProfileForm({
+  initialUser,
+  disabled = false,
+  updateAction = updateProfileAction,
+  checkNickname,
+}: ProfileFormProps) {
   const t = useTranslations('profile');
   const tCommon = useTranslations('common.actions');
   const tCommonLabels = useTranslations('common.labels');
@@ -50,23 +56,22 @@ export function ProfileForm({ initialUser, disabled = false }: ProfileFormProps)
   const tSocialLinks = useTranslations('socialLinks');
   const tNickname = useTranslations('nicknameField');
   const { updateMemberSummary } = useSession();
-  const { copied, copy } = useClipboard({ timeout: 2000 });
   const [errors, setErrors] = useState<ProfileFormViewErrors>({});
   const [savedRevision, setSavedRevision] = useState(0);
   const [nickname, setNickname] = useState(initialUser.nickname);
-  const nicknameValidation = useNicknameValidation(nickname);
+  const nicknameValidation = useNicknameValidation(nickname, { check: checkNickname });
 
   const showUpdateError = (message: string, field: 'form' | 'nickname' = 'form') => {
     setErrors({ [field]: message });
     notifications.show({
       title: tCommonLabels('error'),
       message,
-      color: 'red',
+      tone: 'danger',
     });
   };
 
   const updateProfileMutation = useMutation({
-    mutationFn: updateProfileAction,
+    mutationFn: updateAction,
     onSuccess: async (result) => {
       if (result.error) {
         showUpdateError(
@@ -84,7 +89,7 @@ export function ProfileForm({ initialUser, disabled = false }: ProfileFormProps)
       notifications.show({
         title: t('notifications.successTitle'),
         message: t('notifications.updated'),
-        color: 'green',
+        tone: 'positive',
       });
       if (result.member) {
         updateMemberSummary(result.member);
@@ -159,6 +164,8 @@ export function ProfileForm({ initialUser, disabled = false }: ProfileFormProps)
         socialValue: tSocialLinks('valuePlaceholder'),
         removeSocialLink: (position) => `${tCommon('remove')} ${tSocialLinks('label')} ${position}`,
         reorderSocialLink: (position) => `${tCommon('change')} ${tSocialLinks('label')} ${position}`,
+        reorderInstructions: tSocialLinks('reorderInstructions'),
+        positionChanged: (position, count) => tSocialLinks('positionChanged', { position, count }),
         submit: t('actions.update'),
       }}
       platformOptions={SOCIAL_PLATFORM_OPTIONS}
@@ -166,7 +173,6 @@ export function ProfileForm({ initialUser, disabled = false }: ProfileFormProps)
       pending={updateProfileMutation.isPending}
       savedRevision={savedRevision}
       disabled={disabled}
-      copied={copied}
       errors={errors}
       nicknameValidation={{
         status:
@@ -189,7 +195,6 @@ export function ProfileForm({ initialUser, disabled = false }: ProfileFormProps)
                     : null,
       }}
       events={{
-        onCopyUid: () => copy(initialUser.id),
         onNicknameChange: (value) => {
           setNickname(value);
           setErrors((current) => ({ ...current, nickname: undefined }));

@@ -46,7 +46,7 @@ export function SocialLinksEditor({ value, onChange, maxLinks = 20, ...viewProps
       labels={{
         fieldLabel: t('label'),
         addLink: t('addLink'),
-        reorderLink: 'Reorder social link',
+        reorderLink: `${tCommonActions('move')}: ${t('label')}`,
         platformPlaceholder: t('platformPlaceholder'),
         valuePlaceholder: t('valuePlaceholder'),
         remove: tCommonActions('remove'),

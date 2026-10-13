@@ -18,7 +18,7 @@ export function PrintButton({ ariaLabel, size = 'md' }: PrintButtonProps) {
   return (
     <Tooltip label={label}>
       <IconButton
-        className="print-hide"
+        printVisibility="hidden"
         tone="neutral"
         emphasis="low"
         size={size}

@@ -51,7 +51,7 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: { show: vi.fn() },
 }));
 

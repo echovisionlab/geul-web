@@ -1,11 +1,11 @@
 import { CampaignTargetMode } from '@echovisionlab/geul-proto/secure/campaign_pb.ts';
 import { campaignRecipientScopeSchema } from '@echovisionlab/geul-common/collaboration/campaign';
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 
 export const CampaignFieldsSchema = z.object({
   targetMode: z.union([z.literal(CampaignTargetMode.ALL), z.literal(CampaignTargetMode.SEGMENT)]),
-  segmentId: z.string().nullable(),
-  layoutId: z.string().nullable(),
+  segmentId: z.nullable(z.string()),
+  layoutId: z.nullable(z.string()),
   recipientScope: campaignRecipientScopeSchema,
 });
 

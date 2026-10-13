@@ -1,67 +1,20 @@
 .root {
   width: 100%;
   min-width: 0;
-  margin: 0;
-  border: 1px solid var(--mantine-color-default-border);
-  background: var(--mantine-color-body);
-  text-align: left;
 }
 
 .header {
+  min-width: 0;
+}
+
+.title {
   display: flex;
-  min-width: 0;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--mantine-spacing-xs);
-  min-height: 34px;
-  padding: 4px 6px;
-  border-bottom: 1px solid var(--mantine-color-default-border);
-  background: var(--mantine-color-default-hover);
-}
-
-.title,
-.titleInput,
-.language,
-.languageButton {
+  min-height: calc(var(--geul-control-height-xs) + var(--geul-border-thin));
+  padding-inline: var(--geul-spacing-xs);
   min-width: 0;
-  overflow: hidden;
-  font-size: var(--mantine-font-size-xs);
-  line-height: 1.25;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.title,
-.titleInput {
   flex: 1 1 auto;
-  color: var(--mantine-color-text);
-  font-weight: 600;
-}
-
-.titleInput {
-  padding: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  font-family: inherit;
-}
-
-.titleInput::placeholder,
-.language,
-.languageButton {
-  color: var(--mantine-color-dimmed);
-}
-
-.languageButton {
-  border-radius: 0;
-  font-family: inherit;
-}
-
-.meta {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 2px;
+  overflow: hidden;
 }
 
 .editor {
@@ -76,18 +29,18 @@
 @media print {
   .root {
     overflow: visible;
-    color: #111;
-    border-color: #b5b5b5;
-    background: #fff;
+    color: var(--geul-paper-text);
+    border-color: var(--geul-paper-border);
+    background: var(--geul-paper-background);
     break-inside: auto;
   }
 
   .header {
     min-height: 0;
     padding: 6pt 8pt;
-    color: #111;
-    border-color: #b5b5b5;
-    background: #f3f3f3;
+    color: var(--geul-paper-text);
+    border-color: var(--geul-paper-border);
+    background: var(--geul-paper-control);
     break-after: avoid;
   }
 
@@ -102,16 +55,16 @@
     display: block;
     min-width: 0;
     flex: 1 1 auto;
-    color: #111;
-    font-size: 9pt;
-    font-weight: 600;
-    line-height: 1.3;
+    color: var(--geul-paper-text);
+    font-size: var(--geul-font-size-sm);
+    font-weight: var(--geul-font-weight-strong);
+    line-height: var(--geul-line-height-sm);
   }
 
   .language,
   .languageButton {
-    color: #444;
-    font-size: 8pt;
+    color: var(--geul-paper-caption);
+    font-size: var(--geul-font-size-xs);
   }
 
   .printSource {

@@ -1,3 +1,4 @@
+import { DEFAULT_SITE_BRAND_COLOR } from '@/lib/theme/site-brand';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionFromCookie } from '@/lib/auth';
 import { getSettings } from '@/lib/queries/manifest';
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
 
     const ogSettings = {
       siteTitle: settings.site_title || 'Site',
-      primaryColor: settings.primary_color || '#b02d23',
+      primaryColor: settings.primary_color || DEFAULT_SITE_BRAND_COLOR,
       logoSvg: logoDataUrl,
     };
 

@@ -1,36 +1,27 @@
-import { Box, Skeleton, Stack } from '@mantine/core';
-import { ContentCard } from '@/components/core/Section';
+import { LayoutGrid, LayoutInset as DsLayoutInset, LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+
+import { Skeleton } from '@/components/core/Display';
+import { SectionCard } from '@/components/core/Section';
 
 export function PostMapSkeleton() {
   return (
-    <Stack gap="md">
-      <Box
-        style={{
-          aspectRatio: '16 / 9',
-          borderRadius: 'var(--mantine-radius-md)',
-          overflow: 'hidden',
-        }}
-      >
-        <Skeleton height="100%" />
-      </Box>
+    <DsLayoutStack gap="md">
+      <div style={{ aspectRatio: '16 / 9', overflow: 'hidden' }}>
+        <DsLayoutInset space="none">
+          <Skeleton roleType="fill" />
+        </DsLayoutInset>
+      </div>
 
-      <ContentCard radius={0} withBorder padding="lg">
-        <Stack gap="sm">
-          <Skeleton height={18} width="35%" />
-          <Skeleton height={14} width="55%" />
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-              gap: 'var(--mantine-spacing-md)',
-              marginTop: 'var(--mantine-spacing-sm)',
-            }}
-          >
-            <Skeleton height={140} />
-            <Skeleton height={140} />
-          </div>
-        </Stack>
-      </ContentCard>
-    </Stack>
+      <SectionCard withBorder padding="lg">
+        <DsLayoutStack gap="sm">
+          <Skeleton roleType="heading" width="short" />
+          <Skeleton roleType="text" width="medium" />
+          <LayoutGrid columns={{ base: 1, sm: 2 }} gap="md">
+            <Skeleton roleType="media" />
+            <Skeleton roleType="media" />
+          </LayoutGrid>
+        </DsLayoutStack>
+      </SectionCard>
+    </DsLayoutStack>
   );
 }

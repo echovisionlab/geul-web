@@ -1,11 +1,11 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useEffect, useRef, useState } from 'react';
-import { IconSearch } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Box } from '@mantine/core';
+
 import { useDebouncedValue } from '@mantine/hooks';
-import { TextInput } from '@/components/core/Input/TextInput';
+import { SearchInput } from '@/components/core/Input/SearchInput';
 import { useDataTableContext } from './DataTableContext';
 
 export interface DataTableSearchProps {
@@ -18,29 +18,41 @@ export function DataTableSearch({ placeholder, debounceMs = 300 }: DataTableSear
   const { query, onQueryChange } = useDataTableContext();
   const [search, setSearch] = useState(query.search ?? '');
   const [debouncedSearch] = useDebouncedValue(search, debounceMs);
-  const lastSearchRef = useRef(query.search);
+  const lastSearchRef = useRef(query.search ?? '');
+  const queryRef = useRef(query);
+  queryRef.current = query;
+  const onQueryChangeRef = useRef(onQueryChange);
+  onQueryChangeRef.current = onQueryChange;
+
+  useEffect(() => {
+    const externalSearch = query.search ?? '';
+    if (externalSearch !== lastSearchRef.current) {
+      lastSearchRef.current = externalSearch;
+      setSearch(externalSearch);
+    }
+  }, [query.search]);
   const effectivePlaceholder = placeholder ?? tCommonPlaceholders('search');
 
   useEffect(() => {
     // Only update if the debounced value differs from the last search we sent
     if (debouncedSearch !== lastSearchRef.current) {
-      lastSearchRef.current = debouncedSearch || undefined;
-      onQueryChange({
-        ...query,
+      lastSearchRef.current = debouncedSearch;
+      onQueryChangeRef.current({
+        ...queryRef.current,
         search: debouncedSearch || undefined,
         page: 1,
       });
     }
-  }, [debouncedSearch]); // intentionally only depend on debouncedSearch
+  }, [debouncedSearch]);
 
   return (
-    <Box style={{ flex: 1, maxWidth: 400 }}>
-      <TextInput
+    <DsLayoutStack flexible gap="none">
+      <SearchInput
+        aria-label={effectivePlaceholder}
         placeholder={effectivePlaceholder}
-        leftSection={<IconSearch size={16} />}
         value={search}
         onChange={(e) => setSearch(e.currentTarget.value)}
       />
-    </Box>
+    </DsLayoutStack>
   );
 }

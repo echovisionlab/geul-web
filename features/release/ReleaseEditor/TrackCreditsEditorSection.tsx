@@ -1,14 +1,24 @@
 'use client';
+import { breakpointQuery } from '@/components/core/Layout/breakpoints';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { IconX } from '@tabler/icons-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Divider, Group, Stack, Table, Text } from '@mantine/core';
+
+import { Separator as Divider, Table } from '@/components/core/Display';
 import { useMediaQuery } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { SegmentedControl, Select, TextInput } from '@/components/core/Input';
@@ -42,12 +52,13 @@ export function TrackCreditsEditorSection({
   const tCommon = useTranslations('common');
   const tTracks = useTranslations('releaseEditor.tracks');
   const tCredits = useTranslations('releaseEditor.credits');
-  const isMobile = useMediaQuery('(max-width: 48em)');
+  const isMobile = useMediaQuery(breakpointQuery('sm'));
   const [creditType, setCreditType] = useState<CreditTargetType>('artist');
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [creditedName, setCreditedName] = useState('');
   const [creditRole, setCreditRole] = useState('');
+  const creditsId = useId();
   const allArtistsQuery = useQuery({
     queryKey: ['artist', 'list'],
     queryFn: () => listArtistsAction().then(unwrapQueryResult),
@@ -79,11 +90,11 @@ export function TrackCreditsEditorSection({
     setCredits.mutate(nextCredits, {
       onSuccess: (result) => {
         if (result.error) {
-          notifications.show({ message: result.error, color: 'red' });
+          notifications.show({ message: result.error, tone: 'danger' });
           return;
         }
         publishEditorEntityChange(`release:${releaseId}`);
-        notifications.show({ message: successMessage, color: 'green' });
+        notifications.show({ message: successMessage, tone: 'positive' });
         onCreditsChange(nextCredits);
         onSuccess?.();
       },
@@ -99,7 +110,7 @@ export function TrackCreditsEditorSection({
         return;
       }
       if (credits.some((credit) => credit.artist_id === selectedArtistId && credit.credit_role === creditRole)) {
-        notifications.show({ message: tCredits('duplicate'), color: 'yellow' });
+        notifications.show({ message: tCredits('duplicate'), tone: 'warning' });
         return;
       }
       newCredit = {
@@ -120,7 +131,7 @@ export function TrackCreditsEditorSection({
         return;
       }
       if (credits.some((credit) => credit.member_id === selectedMemberId && credit.credit_role === creditRole)) {
-        notifications.show({ message: tCredits('duplicate'), color: 'yellow' });
+        notifications.show({ message: tCredits('duplicate'), tone: 'warning' });
         return;
       }
       newCredit = {
@@ -184,6 +195,7 @@ export function TrackCreditsEditorSection({
       emphasis="low"
       size="sm"
       aria-label={tCommon('actions.remove')}
+      aria-describedby={`${creditsId}-${credit.id}`}
       onClick={() => handleRemoveCredit(credit.id)}
     >
       <IconX size={14} />
@@ -191,32 +203,34 @@ export function TrackCreditsEditorSection({
   );
 
   return (
-    <Stack gap="sm">
+    <DsLayoutStack gap="md">
       <QueryErrorAlert queries={[allArtistsQuery, membersQuery]} />
-      <Text size="sm" fw={500}>
+      <DsText size="sm" weight="medium">
         {tTracks('creditsModal.title')}
-      </Text>
+      </DsText>
       {credits.length === 0 ? (
-        <Text size="sm" c="dimmed">
-          {tTracks('creditsModal.empty')}
-        </Text>
+        <SupportingText tone="secondary">{tTracks('creditsModal.empty')}</SupportingText>
       ) : isMobile ? (
-        <Stack gap={0}>
+        <DsLayoutStack gap="none">
           {credits.map((credit, index) => (
-            <Box key={credit.id} py="sm">
-              <Group justify="space-between" align="flex-start" wrap="nowrap" gap="sm">
-                <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
-                  <Text size="sm">{getCreditDisplayName(credit)}</Text>
-                  <Text size="sm" c="dimmed">
-                    {credit.credit_role || '-'}
-                  </Text>
-                </Stack>
-                {removeButton(credit)}
-              </Group>
-              {index < credits.length - 1 ? <Divider mt="sm" /> : null}
-            </Box>
+            <DsLayoutInset key={credit.id} block="sm">
+              <DsLayoutInset space="none">
+                <DsLayoutInline justify="between" align="start" wrap="nowrap" gap="sm">
+                  <DsLayoutStack gap="xxs" flexible>
+                    <DsText id={`${creditsId}-${credit.id}`} size="sm">
+                      {getCreditDisplayName(credit)}
+                    </DsText>
+                    <DsText size="sm" tone="secondary">
+                      {credit.credit_role || '-'}
+                    </DsText>
+                  </DsLayoutStack>
+                  {removeButton(credit)}
+                </DsLayoutInline>
+                {index < credits.length - 1 ? <Divider spaceBefore="sm" /> : null}
+              </DsLayoutInset>
+            </DsLayoutInset>
           ))}
-        </Stack>
+        </DsLayoutStack>
       ) : (
         <Table>
           <Table.Thead>
@@ -230,12 +244,14 @@ export function TrackCreditsEditorSection({
             {credits.map((credit) => (
               <Table.Tr key={credit.id}>
                 <Table.Td>
-                  <Text size="sm">{getCreditDisplayName(credit)}</Text>
+                  <DsText id={`${creditsId}-${credit.id}`} size="sm">
+                    {getCreditDisplayName(credit)}
+                  </DsText>
                 </Table.Td>
                 <Table.Td>
-                  <Text size="sm" c="dimmed">
+                  <DsText size="sm" tone="secondary">
                     {credit.credit_role || '-'}
-                  </Text>
+                  </DsText>
                 </Table.Td>
                 <Table.Td>{removeButton(credit)}</Table.Td>
               </Table.Tr>
@@ -244,13 +260,12 @@ export function TrackCreditsEditorSection({
         </Table>
       )}
 
-      <Divider />
-
-      <Stack gap="xs">
-        <Text size="sm" fw={500}>
+      <DsLayoutStack gap="xs">
+        <DsText size="sm" weight="medium">
           {tCommon('actions.addItem', { item: tCommon('entities.credit') })}
-        </Text>
+        </DsText>
         <SegmentedControl
+          aria-label={tCommon('entities.credit')}
           id={idPrefix ? `${idPrefix}-track-credit-type-${trackId}` : undefined}
           value={creditType}
           onChange={(value) => setCreditType(value as CreditTargetType)}
@@ -262,9 +277,10 @@ export function TrackCreditsEditorSection({
           size="xs"
           fullWidth
         />
-        <Stack gap="sm">
+        <DsLayoutStack gap="sm">
           {creditType === 'artist' ? (
             <Select
+              aria-label={tCommon('entities.artist')}
               id={idPrefix ? `${idPrefix}-track-credit-artist-${trackId}` : undefined}
               placeholder={tCredits('placeholders.selectArtist')}
               data={allArtists.map((artist) => ({ value: artist.id, label: artist.name }))}
@@ -276,6 +292,7 @@ export function TrackCreditsEditorSection({
           ) : null}
           {creditType === 'member' ? (
             <Select
+              aria-label={tCommon('entities.member')}
               id={idPrefix ? `${idPrefix}-track-credit-member-${trackId}` : undefined}
               placeholder={tCredits('placeholders.selectUser')}
               data={allMembers.map((member) => ({ value: member.id, label: member.name }))}
@@ -287,6 +304,7 @@ export function TrackCreditsEditorSection({
           ) : null}
           {creditType === 'text' ? (
             <TextInput
+              aria-label={tCommon('labels.name')}
               id={idPrefix ? `${idPrefix}-track-credit-name-${trackId}` : undefined}
               placeholder={tCredits('placeholders.creditedName')}
               value={creditedName}
@@ -295,19 +313,26 @@ export function TrackCreditsEditorSection({
             />
           ) : null}
           <TextInput
+            aria-label={tCommon('labels.role')}
             id={idPrefix ? `${idPrefix}-track-credit-role-${trackId}` : undefined}
             placeholder={tCredits('placeholders.role')}
             value={creditRole}
             onChange={(event) => setCreditRole(event.currentTarget.value)}
             size="sm"
           />
-        </Stack>
-        <Group justify="flex-end">
-          <Button size="sm" onClick={handleAddCredit} disabled={isAddDisabled} loading={setCredits.isPending}>
+        </DsLayoutStack>
+        <DsLayoutInline justify="end">
+          <Button
+            emphasis="medium"
+            size="sm"
+            onClick={handleAddCredit}
+            disabled={isAddDisabled}
+            loading={setCredits.isPending}
+          >
             {tCommon('actions.add')}
           </Button>
-        </Group>
-      </Stack>
-    </Stack>
+        </DsLayoutInline>
+      </DsLayoutStack>
+    </DsLayoutStack>
   );
 }

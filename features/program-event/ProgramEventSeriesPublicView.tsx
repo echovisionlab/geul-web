@@ -1,5 +1,7 @@
+import { Text as DsText } from '@/components/core/Typography';
 import type { ReactNode } from 'react';
-import { Box, Divider, Grid, GridCol, Stack, Text } from '@mantine/core';
+
+import { LayoutGrid, LayoutGridItem, LayoutStack } from '@/components/core/Layout';
 import { PageHeader } from '@/components/core/PageHeader';
 
 interface ProgramEventSeriesPublicViewProps {
@@ -20,46 +22,43 @@ export function ProgramEventSeriesPublicView({
   children,
 }: ProgramEventSeriesPublicViewProps) {
   const details = (
-    <Stack gap="md">
+    <LayoutStack gap="md">
       <PageHeader title={title} actions={controls} />
       {description ? (
-        <Text size="sm" c="dimmed" style={{ whiteSpace: 'pre-wrap' }}>
+        <DsText size="sm" tone="secondary" wrap="preserve">
           {description}
-        </Text>
+        </DsText>
       ) : null}
-    </Stack>
+    </LayoutStack>
   );
 
   return (
-    <Stack gap="lg">
+    <LayoutStack gap="lg">
       {posterUrl ? (
-        <Grid gap="xl" align="start">
-          <GridCol span={{ base: 12, md: 7 }}>
-            <Box>
-              <img
-                src={posterUrl}
-                alt={title}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  height: 'auto',
-                  maxHeight: 'min(80dvh, 900px)',
-                  objectFit: 'contain',
-                }}
-              />
-            </Box>
-          </GridCol>
-          <GridCol span={{ base: 12, md: 5 }}>{details}</GridCol>
-        </Grid>
+        <LayoutGrid columns={12} gap="xl" align="start">
+          <LayoutGridItem span={{ base: 12, md: 7 }}>
+            <img
+              src={posterUrl}
+              alt={title}
+              style={{
+                display: 'block',
+                width: '100%',
+                height: 'auto',
+                maxHeight: 'min(80dvh, 900px)',
+                objectFit: 'contain',
+              }}
+            />
+          </LayoutGridItem>
+          <LayoutGridItem span={{ base: 12, md: 5 }}>{details}</LayoutGridItem>
+        </LayoutGrid>
       ) : (
         details
       )}
 
-      <Divider />
-      <Stack gap="sm">
+      <LayoutStack gap="sm">
         <PageHeader title={eventsLabel} level={2} />
         {children}
-      </Stack>
-    </Stack>
+      </LayoutStack>
+    </LayoutStack>
   );
 }

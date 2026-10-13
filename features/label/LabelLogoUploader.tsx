@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { LogoCropper } from '@/features/site/LogoCropper/LogoCropper';
 import { deleteLabelLogoAction, setLabelLogoAction, type ThemeAssetVariantName } from '@/lib/actions/label';
 import { useUpload } from '@/lib/hooks/useUpload';
@@ -93,7 +93,7 @@ export function LabelLogoUploader({
         // Link file to label
         const result = await setLogo.mutateAsync({ labelId, fileId });
         if (result.error) {
-          notifications.show({ message: result.error, color: 'red' });
+          notifications.show({ message: result.error, tone: 'danger' });
           throw new Error(result.error);
         }
 
@@ -108,7 +108,7 @@ export function LabelLogoUploader({
   const handleDelete = useCallback(async () => {
     const result = await deleteImage.mutateAsync({ labelId });
     if (result.error) {
-      notifications.show({ message: result.error, color: 'red' });
+      notifications.show({ message: result.error, tone: 'danger' });
       throw new Error(result.error);
     }
     return result;

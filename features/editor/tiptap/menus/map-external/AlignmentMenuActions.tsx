@@ -1,6 +1,7 @@
 'use client';
 
-import { Group } from '@mantine/core';
+import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+
 import { IconAlignCenter, IconAlignLeft, IconAlignRight } from '@tabler/icons-react';
 import { EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS } from '@/features/editor/toolbars/EditorToolbarTooltip';
 import { SelectionMenuAction } from './SelectionMenuPrimitives';
@@ -36,7 +37,7 @@ export function AlignmentMenuActions({
   testIdPrefix,
 }: AlignmentMenuActionsProps) {
   return (
-    <Group gap={2} wrap="nowrap" role="group" aria-label={labels.alignment}>
+    <DsLayoutInline gap="xxs" wrap="nowrap" role="group" aria-label={labels.alignment}>
       {alignments.map(({ value: alignment, Icon, labelKey }) => (
         <SelectionMenuAction
           key={alignment}
@@ -50,6 +51,6 @@ export function AlignmentMenuActions({
           <Icon size={16} aria-hidden />
         </SelectionMenuAction>
       ))}
-    </Group>
+    </DsLayoutInline>
   );
 }

@@ -4,7 +4,7 @@ import { Code } from '@connectrpc/connect';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { getPostConfigurationAction, updatePostAction } from '@/lib/actions/post';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
 import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
@@ -216,7 +216,7 @@ export function usePostConfigSave(
     onError: (error) => {
       notifications.show({
         message: error instanceof Error ? error.message : tCommonNotifications('updateFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
@@ -272,7 +272,7 @@ export function usePostConfigSave(
       void (async () => {
         const result = await getPostConfigurationAction(postId);
         if (!result.ok) {
-          notifications.show({ message: result.error, color: 'red' });
+          notifications.show({ message: result.error, tone: 'danger' });
           return;
         }
         if (isValidUuid(result.configuration.configurationRevision) && resident.current.postId === postId) {
@@ -281,7 +281,7 @@ export function usePostConfigSave(
       })().catch((error: unknown) => {
         notifications.show({
           message: error instanceof Error ? error.message : tCommonNotifications('updateFailed'),
-          color: 'red',
+          tone: 'danger',
         });
       });
     },

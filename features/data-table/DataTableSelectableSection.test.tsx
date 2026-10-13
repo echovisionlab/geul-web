@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import * as React from 'react';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { LocaleProvider } from '@/lib/providers/LocaleProvider';
 import type { ColumnDef } from '@/lib/types/common/data-table';
 import type { PaginatedQuery } from '@/lib/types/common/query';
@@ -30,7 +31,8 @@ vi.mock('next-intl', () => ({
   },
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/components/core/Notification')>()),
   notifications: {
     show: vi.fn(),
   },
@@ -221,9 +223,9 @@ function render(node: React.ReactNode) {
 
   act(() => {
     root?.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <LocaleProvider locale="ko">{node}</LocaleProvider>
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
 }
@@ -293,7 +295,6 @@ describe('DataTableSelectableSection', () => {
           getRowLabel: (row) => row.title,
           onSuccess,
           successMessage: 'Deleted rows',
-          successColor: 'green',
         }}
       />,
     );
@@ -339,11 +340,11 @@ describe('DataTableSelectableSection', () => {
     expect(onSuccess).toHaveBeenCalledWith(['row-1']);
     expect(vi.mocked(notifications.show)).toHaveBeenNthCalledWith(1, {
       message: 'Second row failed',
-      color: 'red',
+      tone: 'danger',
     });
     expect(vi.mocked(notifications.show)).toHaveBeenNthCalledWith(2, {
       message: 'Deleted rows',
-      color: 'green',
+      tone: 'positive',
     });
     expect(document.body.textContent).not.toContain('2개 선택');
     expect(document.querySelector('[data-testid="confirm-modal"]')).toBeNull();

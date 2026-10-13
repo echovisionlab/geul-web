@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import enMessages from '@/messages/en.json';
 import { MapThemeEditorInterruptionDialogs } from './MapThemeEditorInterruptionDialogs';
 
@@ -43,9 +44,9 @@ function renderDialogs({ interruption }: { interruption: 'permission_revoked' | 
   act(() => {
     root.render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <MantineProvider env="test">
+        <DesignSystemProvider locale="en" forceColorScheme="light">
           <MapThemeEditorInterruptionDialogs interruption={interruption} navigate={navigate} />
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
   });

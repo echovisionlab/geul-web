@@ -4,6 +4,8 @@ import type { ContentBlockMediaItem } from '@echovisionlab/geul-proto/content/bl
 import type { LocalizedPageSection } from '@/features/editor/contract/localized-page';
 import { ContentBlockMediaRuntimeProvider } from '@/features/media/ContentBlockMediaRuntimeContext';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
+import { TableOfContents } from '@/features/navigation/TableOfContents';
+import { buildGeneratedPageTocItems } from '@/lib/toc-items';
 import { GeneratedPageRenderer } from './GeneratedPageRenderer';
 import classes from './PageContentView.module.css';
 
@@ -48,13 +50,17 @@ export function PageContentView({ page, pathname, query, requestedLocale }: Page
     <ContentBlockMediaRuntimeProvider items={page.blockMedia}>
       <ContentLayoutView
         layout={page.documentLayout}
+        contentLanguage={page.localizationInfo?.displayedLocale || requestedLocale}
         chrome={chrome}
         controls={controls}
         className={['page-content', !showTitle && controls ? classes.withoutTitle : undefined]
           .filter(Boolean)
           .join(' ')}
       >
-        <GeneratedPageRenderer sections={page.content ?? []} query={query} requestedLocale={requestedLocale} />
+        {/* Sections keep their authored widths; Core reserves the outline at their inline end. */}
+        <TableOfContents items={buildGeneratedPageTocItems(page.content)}>
+          <GeneratedPageRenderer sections={page.content ?? []} query={query} requestedLocale={requestedLocale} />
+        </TableOfContents>
       </ContentLayoutView>
     </ContentBlockMediaRuntimeProvider>
   );

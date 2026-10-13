@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 import {
   isNestablePageBlockDefinition,
   pageBlockDefinitions,
@@ -29,14 +29,14 @@ const nestedSectionSchemas = pageBlockDefinitions
 
 const nestedSectionSchema = z.discriminatedUnion('type', requireNonEmpty(nestedSectionSchemas));
 
-const columnDataSchema: z.ZodType<ColumnData> = z.lazy(() =>
+const columnDataSchema: z.ZodMiniType<ColumnData> = z.lazy(() =>
   z.object({
     id: z.string(),
     sections: z.array(nestedSectionSchema),
   }),
 );
 
-const columnsSectionSchema = pageBlockManifest.columns.sectionSchema.extend({
+const columnsSectionSchema = z.extend(pageBlockManifest.columns.sectionSchema, {
   columns: z.array(columnDataSchema),
 });
 

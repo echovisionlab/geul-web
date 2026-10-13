@@ -5,7 +5,13 @@ import { resolveContentRequestedLocale } from '@/lib/translation/content-languag
 import type { PublicLegalHistoryInitialData } from '@/lib/queries/legal-history';
 import { useLocale, useTranslations } from 'next-intl';
 import { LegalPolicyHistoryClient } from '@/features/policy/LegalPolicyHistoryClient';
-import { getActivePrivacy, listArchivedPrivacy } from '@/lib/queries/privacy-browser';
+
+// The server renders the document; the browser RPC client loads only when a query has to run here
+// (token preview, missing or stale server data).
+const loadPrivacyQueries = () => import('@/lib/queries/privacy-browser');
+const getActivePrivacy = async (requestedLocale?: string) =>
+  (await loadPrivacyQueries()).getActivePrivacy(requestedLocale);
+const listArchivedPrivacy = async () => (await loadPrivacyQueries()).listArchivedPrivacy();
 
 export function PrivacyHistoryClient({ initialData }: { initialData?: PublicLegalHistoryInitialData }) {
   const requestedLocale = resolveContentRequestedLocale(useLocale(), Object.fromEntries(useSearchParams().entries()));

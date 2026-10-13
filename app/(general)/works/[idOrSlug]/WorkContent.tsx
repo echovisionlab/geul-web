@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { toWorkViewModel } from '@/features/work/work-view-model';
 import { getWorkView } from '@/lib/queries/work';
+import { prepareWorkMusicLinks } from './work-music-links';
 import { WorkViewClient } from './WorkViewClient';
 
 interface Props {
@@ -24,5 +25,13 @@ export async function WorkContent({ idOrSlug, requestedLocale, query }: Props) {
   const transformedWork = toWorkViewModel(work, (index) => tCreditList('groupName', { index }));
   const routePath = `/works/${work.slug || work.id}`;
 
-  return <WorkViewClient work={transformedWork} pathname={routePath} query={query} requestedLocale={requestedLocale} />;
+  return (
+    <WorkViewClient
+      work={transformedWork}
+      pathname={routePath}
+      query={query}
+      requestedLocale={requestedLocale}
+      musicLinkEntries={prepareWorkMusicLinks(transformedWork)}
+    />
+  );
 }

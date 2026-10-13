@@ -1,0 +1,21 @@
+/* The single Core loading glyph. Display Spinner and Button/IconButton pending states share it;
+   consumers own only placement, size and tone. */
+.spinner {
+  box-sizing: border-box;
+  border: var(--geul-border-focus) solid currentColor;
+  border-inline-end-color: transparent;
+  border-radius: var(--geul-radius-circle);
+  animation: core-spin var(--geul-motion-spin) linear infinite;
+}
+
+@keyframes core-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}

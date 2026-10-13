@@ -1,8 +1,10 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Group, Modal, Stack } from '@mantine/core';
+
+import { ContentModal, DialogActions } from '@/components/core/Modal';
 import { Button } from '@/components/core/Button';
 import { TextInput } from '@/components/core/Input';
 import { resolveExternalVideo } from '@/lib/media/external-video';
@@ -23,6 +25,7 @@ export function ExternalVideoInsertDialog({
   initialUrl = '',
   initialLabel = '',
 }: ExternalVideoInsertDialogProps) {
+  const tModalActions = useTranslations('common.actions');
   const t = useTranslations('editorCommon.externalVideoInsert');
   const [url, setUrl] = useState(initialUrl);
   const [label, setLabel] = useState(initialLabel);
@@ -56,9 +59,9 @@ export function ExternalVideoInsertDialog({
   };
 
   return (
-    <Modal opened={opened} onClose={onClose} title={t('title')} centered>
+    <ContentModal opened={opened} onClose={onClose} title={t('title')} centered closeLabel={tModalActions('close')}>
       <form onSubmit={handleSubmit}>
-        <Stack gap="sm">
+        <DsLayoutStack gap="sm">
           <TextInput
             autoFocus
             label={t('urlLabel')}
@@ -75,14 +78,16 @@ export function ExternalVideoInsertDialog({
             value={label}
             onChange={(event) => setLabel(event.currentTarget.value)}
           />
-          <Group justify="flex-end">
+          <DialogActions>
             <Button type="button" emphasis="low" onClick={onClose}>
               {t('cancel')}
             </Button>
-            <Button type="submit">{t('insert')}</Button>
-          </Group>
-        </Stack>
+            <Button emphasis="strong" type="submit">
+              {t('insert')}
+            </Button>
+          </DialogActions>
+        </DsLayoutStack>
       </form>
-    </Modal>
+    </ContentModal>
   );
 }

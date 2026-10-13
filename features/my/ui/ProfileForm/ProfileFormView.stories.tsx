@@ -1,5 +1,8 @@
+import { useArgs, useState } from 'storybook/preview-api';
+import { useTranslations } from 'next-intl';
+import { Text } from '@/components/core/Typography';
+import { withFeatureLabels } from '@/stories/feature-localization';
 import type { Meta, StoryObj } from '@storybook/nextjs';
-import { Box } from '@mantine/core';
 
 import {
   ProfileFormView,
@@ -24,6 +27,8 @@ const labels: ProfileFormViewLabels = {
   socialValue: 'URL or username',
   removeSocialLink: (position) => `Remove social link ${position}`,
   reorderSocialLink: (position) => `Reorder social link ${position}`,
+  reorderInstructions: 'Use the Up and Down arrow keys to change this link’s position.',
+  positionChanged: (position, count) => `Link moved to position ${position} of ${count}.`,
   submit: 'Update profile',
 };
 
@@ -67,15 +72,79 @@ const longBio =
     .trim()
     .slice(0, 500);
 
+function SavedStatus() {
+  const t = useTranslations('common.notifications');
+  return <Text role="status">{t('saveSuccess')}</Text>;
+}
+
 const meta: Meta<typeof ProfileFormView> = {
   title: 'Feature/My/ProfileForm',
   component: ProfileFormView,
+  render: function InteractiveStory(args) {
+    const [, updateArgs] = useArgs();
+    const [saved, setSaved] = useState(false);
+    return (
+      <>
+        <ProfileFormView
+          {...args}
+          events={{
+            ...args.events,
+            onNicknameChange: () => {
+              setSaved(false);
+            },
+            onSubmit: (values) => {
+              updateArgs({
+                initialValues: { uid: args.initialValues.uid, ...values },
+                errors: {},
+                savedRevision: (args.savedRevision ?? 0) + 1,
+              });
+              setSaved(true);
+            },
+          }}
+        />
+        {saved && <SavedStatus />}
+      </>
+    );
+  },
   parameters: { layout: 'centered' },
   decorators: [
+    withFeatureLabels({
+      labels: {
+        uid: 'profile.fields.uid',
+        copyUid: 'common.actions.copy',
+        copiedUid: 'common.actions.copied',
+        nickname: 'nicknameField.label',
+        nicknamePlaceholder: 'nicknameField.placeholder',
+        bio: 'profile.fields.bio',
+        bioPlaceholder: 'profile.placeholders.bio',
+        website: 'common.labels.website',
+        websitePlaceholder: 'common.placeholders.exampleUrl',
+        socialLinks: 'socialLinks.label',
+        addSocialLink: 'socialLinks.addLink',
+        socialPlatform: 'socialLinks.platformPlaceholder',
+        socialValue: 'socialLinks.valuePlaceholder',
+        removeSocialLink: (t) => (position: number) =>
+          `${t('common.actions.remove')} ${t('socialLinks.label')} ${position}`,
+        reorderSocialLink: (t) => (position: number) =>
+          `${t('common.actions.change')} ${t('socialLinks.label')} ${position}`,
+        reorderInstructions: 'socialLinks.reorderInstructions',
+        positionChanged: (t) => (position: number, count: number) =>
+          t('socialLinks.positionChanged', { position, count }),
+        submit: 'profile.actions.update',
+      },
+      project: (args, t) => ({
+        errors: Object.fromEntries(
+          Object.keys((args.errors as Record<string, string>) ?? {}).map((field) => [
+            field,
+            t(field === 'nickname' ? 'nicknameField.unavailable' : 'common.messages.failedToLoad'),
+          ]),
+        ),
+      }),
+    }),
     (Story) => (
-      <Box w={640} maw="calc(100vw - 2rem)" p="md">
+      <div style={{ width: 640, maxWidth: '100%', padding: 'var(--geul-spacing-md)' }}>
         <Story />
-      </Box>
+      </div>
     ),
   ],
   args: {
@@ -85,10 +154,8 @@ const meta: Meta<typeof ProfileFormView> = {
     showExtendedFields: true,
     pending: false,
     disabled: false,
-    copied: false,
     errors: {},
     events: {
-      onCopyUid: () => {},
       onNicknameChange: () => {},
       onNormalizeSocialLink: (_platform, value) => value,
       onSubmit: () => {},

@@ -1,7 +1,16 @@
 'use client';
 
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutInset,
+} from '@/components/core/Layout';
+
 import { useTranslations } from 'next-intl';
-import { Divider, Group, Modal, Stack } from '@mantine/core';
+
+import { SectionHeader } from '@/components/core/Section';
+import { ContentModal, DialogActions } from '@/components/core/Modal';
 import { Button } from '@/components/core/Button';
 import { NumberInput, PasswordInput, Select, Switch, TextInput } from '@/components/core/Input';
 import {
@@ -22,6 +31,7 @@ interface Props {
 }
 
 export function TranslationProviderModal({ opened, editing, form, saving, onChange, onClose, onSubmit }: Props) {
+  const tModalActions = useTranslations('common.actions');
   const t = useTranslations('translationSettingsPage');
   const tCommonActions = useTranslations('common.actions');
   const patch = (values: Partial<ProviderFormState>) => onChange({ ...form, ...values });
@@ -35,13 +45,14 @@ export function TranslationProviderModal({ opened, editing, form, saving, onChan
   ];
 
   return (
-    <Modal
+    <ContentModal
       opened={opened}
       onClose={onClose}
       title={editing ? t('modal.editProviderTitle') : t('modal.createProviderTitle')}
-      size="md"
+      size="standard"
+      closeLabel={tModalActions('close')}
     >
-      <Stack gap="md">
+      <DsLayoutStack gap="md">
         <TextInput
           label={t('fields.providerName.label')}
           value={form.name}
@@ -54,23 +65,24 @@ export function TranslationProviderModal({ opened, editing, form, saving, onChan
           onChange={(value) => value && patch({ type: value as ProviderFormType })}
           allowDeselect={false}
         />
-        <Group grow>
+        <DsLayoutInline grow>
           <NumberInput
             label={t('fields.providerPriority.label')}
             description={t('fields.providerPriority.description')}
             value={form.priority}
             onChange={(value) => patch({ priority: Number.isFinite(Number(value)) ? Number(value) : form.priority })}
           />
-          <Switch
-            label={t('fields.providerActive.label')}
-            description={t('fields.providerActive.description')}
-            checked={form.isActive}
-            mt={24}
-            onChange={(event) => patch({ isActive: event.currentTarget.checked })}
-          />
-        </Group>
+          <LayoutInset space="none" blockStart="lg">
+            <Switch
+              label={t('fields.providerActive.label')}
+              description={t('fields.providerActive.description')}
+              checked={form.isActive}
+              onChange={(event) => patch({ isActive: event.currentTarget.checked })}
+            />
+          </LayoutInset>
+        </DsLayoutInline>
 
-        <Divider label={t('modal.credentialsSection')} labelPosition="left" />
+        <SectionHeader title={t('modal.credentialsSection')} />
         {form.type === 'llm' ? (
           <>
             <Select
@@ -108,7 +120,7 @@ export function TranslationProviderModal({ opened, editing, form, saving, onChan
               value={form.llmApiBaseUrl}
               onChange={(event) => patch({ llmApiBaseUrl: event.currentTarget.value })}
             />
-            <Group grow>
+            <DsLayoutInline grow>
               <NumberInput
                 label={t('fields.llmInputPrice.label')}
                 description={t('fields.llmInputPrice.description')}
@@ -125,8 +137,8 @@ export function TranslationProviderModal({ opened, editing, form, saving, onChan
                 value={form.llmOutputTokenPriceUsdPerMillion}
                 onChange={(value) => patch({ llmOutputTokenPriceUsdPerMillion: value === '' ? '' : Number(value) })}
               />
-            </Group>
-            <Group grow>
+            </DsLayoutInline>
+            <DsLayoutInline grow>
               <NumberInput
                 label={t('fields.llmMaxContextTokens.label')}
                 description={t('fields.llmMaxContextTokens.description')}
@@ -141,8 +153,8 @@ export function TranslationProviderModal({ opened, editing, form, saving, onChan
                 value={form.llmMaxOutputTokens}
                 onChange={(value) => patch({ llmMaxOutputTokens: value === '' ? '' : Number(value) })}
               />
-            </Group>
-            <Group grow>
+            </DsLayoutInline>
+            <DsLayoutInline grow>
               <NumberInput
                 label={t('fields.llmTemperature.label')}
                 description={t('fields.llmTemperature.description')}
@@ -153,14 +165,15 @@ export function TranslationProviderModal({ opened, editing, form, saving, onChan
                 value={form.llmTemperature}
                 onChange={(value) => patch({ llmTemperature: value === '' ? '' : Number(value) })}
               />
-              <Switch
-                label={t('fields.llmSupportsJsonMode.label')}
-                description={t('fields.llmSupportsJsonMode.description')}
-                checked={form.llmSupportsJsonMode}
-                mt={24}
-                onChange={(event) => patch({ llmSupportsJsonMode: event.currentTarget.checked })}
-              />
-            </Group>
+              <LayoutInset space="none" blockStart="lg">
+                <Switch
+                  label={t('fields.llmSupportsJsonMode.label')}
+                  description={t('fields.llmSupportsJsonMode.description')}
+                  checked={form.llmSupportsJsonMode}
+                  onChange={(event) => patch({ llmSupportsJsonMode: event.currentTarget.checked })}
+                />
+              </LayoutInset>
+            </DsLayoutInline>
           </>
         ) : (
           <>
@@ -179,15 +192,17 @@ export function TranslationProviderModal({ opened, editing, form, saving, onChan
           </>
         )}
 
-        <Group justify="flex-end" mt="sm">
-          <Button type="button" emphasis="low" disabled={saving} onClick={onClose}>
-            {tCommonActions('cancel')}
-          </Button>
-          <Button onClick={onSubmit} loading={saving}>
-            {editing ? tCommonActions('save') : t('actions.createProvider')}
-          </Button>
-        </Group>
-      </Stack>
-    </Modal>
+        <DsLayoutInset blockStart="sm">
+          <DialogActions>
+            <Button type="button" emphasis="low" disabled={saving} onClick={onClose}>
+              {tCommonActions('cancel')}
+            </Button>
+            <Button emphasis="strong" onClick={onSubmit} loading={saving}>
+              {editing ? tCommonActions('save') : t('actions.createProvider')}
+            </Button>
+          </DialogActions>
+        </DsLayoutInset>
+      </DsLayoutStack>
+    </ContentModal>
   );
 }

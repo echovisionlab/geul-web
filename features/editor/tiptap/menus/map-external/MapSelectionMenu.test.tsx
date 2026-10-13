@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MapSelectionMenu, type MapSelectionMenuLabels } from './MapSelectionMenu';
 
@@ -53,7 +54,7 @@ describe('MapSelectionMenu', () => {
 
     act(() => {
       root.render(
-        <MantineProvider env="test">
+        <DesignSystemProvider forceColorScheme="light">
           <MapSelectionMenu
             labels={labels}
             places={[{ id: 'place-1', name: 'Studio', centered: true }]}
@@ -67,7 +68,7 @@ describe('MapSelectionMenu', () => {
             onFocusCaption={onFocusCaption}
             onDelete={onDelete}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
@@ -103,7 +104,7 @@ describe('MapSelectionMenu', () => {
     const onEscape = vi.fn();
     act(() => {
       root.render(
-        <MantineProvider env="test">
+        <DesignSystemProvider forceColorScheme="light">
           <MapSelectionMenu
             labels={labels}
             places={[]}
@@ -117,7 +118,7 @@ describe('MapSelectionMenu', () => {
             onDelete={() => undefined}
             onEscape={onEscape}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 

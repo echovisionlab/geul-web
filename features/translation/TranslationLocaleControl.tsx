@@ -1,14 +1,18 @@
 'use client';
 
+import { componentBindings } from '@/components/core/bindings';
 import { useMemo, type ComponentProps } from 'react';
 import { IconLanguage } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { type NativeSelectProps } from '@mantine/core';
+import { type NativeSelectProps } from '@/components/core';
 import { Button, type ButtonProps, type ControlEmphasis } from '@/components/core/Button';
 import { Select, NativeSelect } from '@/components/core/Input';
+import { useHeaderDensity } from '@/components/core/control-context';
+import { Tooltip } from '@/components/core/Tooltip';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
 import {
   partitionTranslationLocaleOptions,
+  getTranslationLocaleOptionName,
   useFormatTranslationLocaleOptionLabel,
   useTranslationLocaleSelectData,
   type TranslationLocaleSelectOption,
@@ -32,18 +36,19 @@ type MenuControlProps = BaseProps & {
 };
 
 type SelectControlProps = BaseProps &
-  Omit<ComponentProps<typeof Select>, 'data' | 'value' | 'onChange'> & {
+  Omit<ComponentProps<typeof Select>, 'data' | 'value' | 'onChange' | 'variant'> & {
     variant: 'select';
   };
 
 type NativeSelectControlProps = BaseProps &
-  Omit<NativeSelectProps, 'data' | 'value' | 'onChange'> & {
+  Omit<NativeSelectProps, 'data' | 'value' | 'onChange' | 'variant'> & {
     variant: 'native-select';
   };
 
 export type TranslationLocaleControlProps = MenuControlProps | SelectControlProps | NativeSelectControlProps;
 
 export function TranslationLocaleControl(props: TranslationLocaleControlProps) {
+  const compact = useHeaderDensity() === 'compact';
   const t = useTranslations('translationPanel.activeEditLocale');
   const tCommonEntities = useTranslations('common.entities');
   const tCommonLabels = useTranslations('common.labels');
@@ -109,6 +114,8 @@ export function TranslationLocaleControl(props: TranslationLocaleControlProps) {
         : null) ??
     props.fallbackLabel ??
     t('loading');
+  const buttonOption = activeOption ?? resolvedFallbackOption;
+  const buttonName = buttonOption ? getTranslationLocaleOptionName(buttonOption) : buttonLabel;
 
   switch (props.variant) {
     case 'menu': {
@@ -125,18 +132,21 @@ export function TranslationLocaleControl(props: TranslationLocaleControlProps) {
 
       return (
         <DropdownMenu size="wide" placement="bottom-end" portal={withinPortal}>
-          <DropdownMenu.Target>
-            <Button
-              size={buttonSize}
-              tone="neutral"
-              emphasis={buttonEmphasis}
-              leftSection={<IconLanguage size={14} />}
-              disabled={disabled}
-              aria-label={buttonAriaLabel ?? t('ariaLabel', { locale: buttonLabel })}
-            >
-              {buttonLabel}
-            </Button>
-          </DropdownMenu.Target>
+          <Tooltip label={buttonLabel}>
+            <DropdownMenu.Target>
+              <Button
+                size={buttonSize}
+                tone="neutral"
+                emphasis={buttonEmphasis}
+                leftSection={compact ? undefined : <IconLanguage size="1em" />}
+                indicator="menu"
+                disabled={disabled}
+                aria-label={buttonAriaLabel ?? t('ariaLabel', { locale: buttonLabel })}
+              >
+                {buttonName}
+              </Button>
+            </DropdownMenu.Target>
+          </Tooltip>
           <DropdownMenu.Dropdown>
             {sourceOption ? (
               <>
@@ -169,16 +179,39 @@ export function TranslationLocaleControl(props: TranslationLocaleControlProps) {
       );
     }
     case 'select': {
-      const { options: _options, sourceLocale: _sourceLocale, value, onChange, ...rest } = props;
+      const {
+        options: _options,
+        sourceLocale: _sourceLocale,
+        variant: _variant,
+        fallbackLabel: _fallbackLabel,
+        value,
+        onChange,
+        ...rest
+      } = props;
 
-      return <Select {...rest} data={groupedOptions} value={value} onChange={(locale) => onChange(locale)} />;
+      return (
+        <Select
+          {...componentBindings(rest)}
+          data={groupedOptions}
+          value={value}
+          onChange={(locale) => onChange(locale)}
+        />
+      );
     }
     case 'native-select': {
-      const { options: _options, sourceLocale: _sourceLocale, value, onChange, ...rest } = props;
+      const {
+        options: _options,
+        sourceLocale: _sourceLocale,
+        variant: _variant,
+        fallbackLabel: _fallbackLabel,
+        value,
+        onChange,
+        ...rest
+      } = props;
 
       return (
         <NativeSelect
-          {...rest}
+          {...componentBindings(rest)}
           data={groupedOptions}
           value={value ?? ''}
           onChange={(event) => onChange(event.currentTarget.value || null)}

@@ -5,13 +5,13 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--mantine-spacing-xs);
+  gap: var(--geul-spacing-xs);
   margin: 0;
-  padding: var(--mantine-spacing-md);
+  padding: var(--geul-spacing-md);
   overflow: auto;
-  color: var(--mantine-color-text);
-  font-family: var(--mantine-font-family);
-  font-size: var(--mantine-font-size-sm);
+  color: var(--geul-text-primary);
+  font-family: var(--font-family-sans);
+  font-size: var(--geul-font-size-sm);
 }
 
 .image {
@@ -20,23 +20,22 @@
   height: auto;
 }
 
-.message,
 .caption {
-  color: var(--mantine-color-dimmed);
-  font-size: var(--mantine-font-size-sm);
+  color: var(--geul-text-muted);
+  font-size: var(--geul-font-size-sm);
 }
 
 .error {
   width: 100%;
-  color: var(--mantine-color-error);
-  font-size: var(--mantine-font-size-sm);
+  color: var(--geul-status-danger);
+  font-size: var(--geul-font-size-sm);
 }
 
 .error pre {
   max-height: 200px;
   overflow: auto;
   overflow-wrap: anywhere;
-  font-size: var(--mantine-font-size-xs);
+  font-size: var(--geul-font-size-xs);
   white-space: pre-wrap;
 }
 
@@ -48,11 +47,18 @@
 .split {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--mantine-spacing-md);
+  gap: var(--geul-spacing-md);
 }
 
 @media (max-width: 680px) {
   .split {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+.message {
+  color: var(--geul-text-muted);
+  font-size: var(--geul-font-size-xs);
+  font-weight: var(--geul-font-weight-regular);
+  line-height: var(--geul-line-height-xs);
 }

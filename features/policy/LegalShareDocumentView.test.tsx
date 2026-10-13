@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { LegalShareDocumentView } from './LegalShareDocumentView';
 
 vi.mock('next-intl', () => ({
@@ -29,7 +30,8 @@ vi.mock('next-intl', () => ({
 }));
 
 vi.mock('@/features/navigation/TableOfContents', () => ({
-  TableOfContents: () => null,
+  // The navigation owner wraps the document so Core can reserve the outline beside it.
+  TableOfContents: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 describe('LegalShareDocumentView', () => {
@@ -50,7 +52,7 @@ describe('LegalShareDocumentView', () => {
   it('renders the exact localized document title instead of the generic domain label', () => {
     act(() => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <LegalShareDocumentView
             pathname="/s/share-token"
             document={{
@@ -62,7 +64,7 @@ describe('LegalShareDocumentView', () => {
               effectiveUntil: '2026-09-30T00:00:00.000Z',
             }}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
@@ -76,7 +78,7 @@ describe('LegalShareDocumentView', () => {
   it('keeps the translated legal disclaimer visible and links to the original', () => {
     act(() => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <LegalShareDocumentView
             pathname="/s/share-token"
             document={{
@@ -96,7 +98,7 @@ describe('LegalShareDocumentView', () => {
               },
             }}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
@@ -104,6 +106,8 @@ describe('LegalShareDocumentView', () => {
       (node) => node.textContent === '참고 번역이며 원문이 우선합니다',
     );
     expect(disclaimer).toBeTruthy();
+    expect(disclaimer).toHaveAttribute('lang', 'ko');
+    expect(container.querySelector('.terms-content')).toHaveAttribute('lang', 'en');
     expect(disclaimer?.closest('.print-hide')).toBeNull();
     expect(container.querySelector('a[href="/s/share-token?lang=ko"]')).toBeTruthy();
     expect(container.querySelector('button[aria-label*="dismiss" i]')).toBeNull();

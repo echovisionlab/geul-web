@@ -1,15 +1,17 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import {
   ExternalVideoFormattingToolbar,
   type ExternalVideoFormattingToolbarProps,
 } from './ExternalVideoFormattingToolbar';
 
 const labels = {
+  toolbar: 'Video layout',
   editLink: 'Edit link',
   aspectRatio: 'Aspect ratio',
   automaticAspectRatio: 'Auto',
@@ -44,7 +46,7 @@ function renderToolbar({
   root = createRoot(container);
   act(() => {
     root?.render(
-      <MantineProvider env="test">
+      <DesignSystemProvider forceColorScheme="light">
         <ExternalVideoFormattingToolbar
           labels={labels}
           selection={selection}
@@ -54,7 +56,7 @@ function renderToolbar({
         >
           <button type="button" aria-label="Bold" />
         </ExternalVideoFormattingToolbar>
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
   return { onUpdateLayout, onEditLink };
@@ -68,7 +70,9 @@ describe('ExternalVideoFormattingToolbar', () => {
 
     expect(container?.querySelector('button[aria-label="Bold"]')).toBeNull();
     expect(container?.querySelectorAll('button')).toHaveLength(5);
+    expect(container?.querySelector('[role="toolbar"]')?.getAttribute('aria-label')).toBe('Video layout');
     expect(container?.querySelector('button[aria-label="Align left"]')?.getAttribute('aria-pressed')).toBe('true');
+    expect(container?.querySelector('button[aria-label="Align right"]')?.getAttribute('aria-pressed')).toBe('false');
 
     act(() => {
       container?.querySelector<HTMLButtonElement>('button[aria-label="Align right"]')?.click();
@@ -89,7 +93,7 @@ describe('ExternalVideoFormattingToolbar', () => {
     root = createRoot(container!);
     act(() => {
       root?.render(
-        <MantineProvider env="test">
+        <DesignSystemProvider forceColorScheme="light">
           <ExternalVideoFormattingToolbar
             labels={labels}
             selection={{ aspectRatio: '16:9', textAlignment: 'center' }}
@@ -97,7 +101,7 @@ describe('ExternalVideoFormattingToolbar', () => {
           >
             <button type="button" aria-label="Bold" />
           </ExternalVideoFormattingToolbar>
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 

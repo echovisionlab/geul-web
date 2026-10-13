@@ -2,6 +2,7 @@ import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { describe, expect, it } from 'vitest';
 import { UPLOAD_CONFIGS } from '@/lib/constants/upload-config';
 import {
+  imageSelectionAcceptTypes,
   buildUnsupportedRemoteUploadTypeMessage,
   buildUnsupportedUploadTypeMessage,
   formatSupportedUploadFormats,
@@ -120,5 +121,17 @@ describe('unsupported upload messages', () => {
     expect(buildUnsupportedUploadTypeMessage(UploadType.EDITOR_MESH, 'application/octet-stream')).toContain(
       'Supported formats: GLB.',
     );
+  });
+});
+
+describe('imageSelectionAcceptTypes', () => {
+  it('includes only supported source MIME and equivalent extensions for native selection hints', () => {
+    const accept = imageSelectionAcceptTypes(['image/jpeg', 'image/png', 'image/heic', 'image/heif']);
+    expect(accept['image/jpeg']).toEqual(['.jpg', '.jpeg']);
+    expect(accept['image/png']).toEqual(['.png']);
+    expect(accept['image/heic']).toContain('.heic');
+    expect(accept['image/heif']).toContain('.heif');
+    expect(accept).not.toHaveProperty('image/gif');
+    expect(accept).not.toHaveProperty('image/svg+xml');
   });
 });

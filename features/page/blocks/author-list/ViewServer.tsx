@@ -35,7 +35,14 @@ export function AuthorListViewStreaming({ props }: BlockViewProps) {
 
   return (
     <Suspense
-      fallback={<AuthorListSkeleton columns={columns} limit={p.source === 'selected' ? selectedIds.length : limit} />}
+      fallback={
+        <AuthorListSkeleton
+          itemSize={p.itemSize}
+          layout={p.layout}
+          columns={columns}
+          limit={p.source === 'selected' ? selectedIds.length : limit}
+        />
+      }
     >
       <AuthorListViewServer props={props} />
     </Suspense>

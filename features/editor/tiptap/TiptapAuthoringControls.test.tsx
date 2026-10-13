@@ -1,11 +1,13 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Editor } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
-import { MantineProvider } from '@mantine/core';
-import { describe, expect, it, vi } from 'vitest';
+
+import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { loadMathRenderer } from './math/math-render-runtime';
 import enMessages from '@/messages/en.json';
 import koMessages from '@/messages/ko.json';
 import { createTiptapWireExtensions } from './wire-schema';
@@ -16,6 +18,11 @@ import {
   TiptapAuthoringControls,
   type TiptapSlashActionContext,
 } from './TiptapAuthoringControls';
+
+// KaTeX loads on demand; the math authoring tests assert the rendered state.
+beforeAll(async () => {
+  await loadMathRenderer();
+});
 
 vi.stubGlobal(
   'ResizeObserver',
@@ -114,14 +121,14 @@ async function renderControls(
   const root = createRoot(container);
   await act(async () => {
     root.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <TiptapAuthoringControls
           editor={editor}
           capabilities={{ file: Boolean(onFileActivate), map: Boolean(onMapActivate) }}
           onFileActivate={onFileActivate}
           onMapActivate={onMapActivate}
         />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
   return {
@@ -449,7 +456,7 @@ describe('Tiptap authoring controls', () => {
     scrollIntoView.mockClear();
 
     const selectableOptions = Array.from(
-      document.querySelectorAll<HTMLButtonElement>('[role="option"]:not(:disabled)'),
+      document.querySelectorAll<HTMLButtonElement>('[role="option"]:not([aria-disabled="true"])'),
     );
     const fileIndex = selectableOptions.findIndex((option) => option.dataset.testid === 'tiptap-slash-item-file');
     if (fileIndex < 0) {
@@ -486,8 +493,8 @@ describe('Tiptap authoring controls', () => {
     await act(async () => {
       mounted.editor.view.dom.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
     });
-    const headingOption = document.querySelector<HTMLElement>('[data-testid="tiptap-slash-item-heading"]');
-    expect(headingOption?.getAttribute('aria-selected')).toBe('true');
+    const firstOption = document.querySelector<HTMLElement>('[data-testid="tiptap-slash-item-paragraph"]');
+    expect(firstOption?.getAttribute('aria-selected')).toBe('true');
     await act(async () => {
       mounted.editor.view.dom.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
     });
@@ -568,7 +575,22 @@ describe('Tiptap authoring controls', () => {
 
     const menu = document.querySelector<HTMLElement>('[data-testid="tiptap-file-menu"]');
     expect(menu).not.toBeNull();
+    expect(menu?.querySelector('[data-testid="tiptap-toolbar-align-left"]')).toHaveAttribute('aria-pressed', 'true');
+    const center = menu?.querySelector<HTMLButtonElement>('[data-testid="tiptap-toolbar-align-center"]');
+    expect(center).toHaveAttribute('aria-pressed', 'false');
+    await act(async () => center?.click());
+    await flushMenuUpdate();
+    expect(document.querySelector('[data-testid="tiptap-toolbar-align-center"]')).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(document.querySelector('[data-testid="tiptap-toolbar-align-left"]')).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
+    expect(mounted.editor.state.selection).toBeInstanceOf(NodeSelection);
     const replace = document.querySelector<HTMLButtonElement>('[data-testid="tiptap-file-replace"]');
+    expect(replace).not.toHaveAttribute('aria-pressed');
     await act(async () => replace?.click());
     expect(onFileActivate).toHaveBeenCalledWith('target-block');
     expect(mounted.editor.state.selection).toBeInstanceOf(NodeSelection);
@@ -651,5 +673,46 @@ describe('Tiptap authoring controls', () => {
 
     await controls.destroy();
     mounted.destroy();
+  });
+
+  it('names math source by its target, relates syntax errors and cancels without mutating the formula', async () => {
+    const original = '\\invalidCommand{x}';
+    const mounted = createEditorWithBlock({ type: 'math', attrs: { latex: original } });
+    const controls = await renderControls(mounted.editor);
+    try {
+      await act(async () => {
+        mounted.editor.view.focus();
+        mounted.editor.commands.setNodeSelection(2);
+      });
+      await flushMenuUpdate();
+      const edit = document.querySelector<HTMLButtonElement>('[data-testid="tiptap-math-edit"]')!;
+      expect(edit).not.toBeNull();
+      await act(async () => edit.click());
+      const input = document.querySelector<HTMLInputElement>('[data-testid="tiptap-math-menu"] input')!;
+      expect(input).toHaveAttribute('aria-label', 'block');
+      expect(input.value).toBe(original);
+      expect(input).toHaveAttribute('aria-invalid', 'true');
+      expect(document.getElementById(input.getAttribute('aria-describedby')!)?.textContent).toContain(
+        'Undefined control sequence',
+      );
+      const composingEscape = new KeyboardEvent('keydown', {
+        key: 'Escape',
+        bubbles: true,
+        cancelable: true,
+        isComposing: true,
+      });
+      await act(async () => input.dispatchEvent(composingEscape));
+      expect(composingEscape.defaultPrevented).toBe(false);
+      expect(input).toHaveFocus();
+
+      const escape = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+      await act(async () => input.dispatchEvent(escape));
+      expect(escape.defaultPrevented).toBe(true);
+      expect(mounted.editor.state.doc.nodeAt(2)?.attrs.latex).toBe(original);
+      expect(mounted.editor.view.dom).toHaveFocus();
+    } finally {
+      await controls.destroy();
+      mounted.destroy();
+    }
   });
 });

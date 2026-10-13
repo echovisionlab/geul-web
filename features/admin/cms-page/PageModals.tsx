@@ -1,11 +1,13 @@
 'use client';
+import { ConfirmationDialog } from '@/features/confirmation';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
-import { ConfirmModal } from '@/components/core/Modal';
+
+import { notifications } from '@/components/core/Notification';
+
 import { deletePageAdminAction } from '@/lib/actions/page';
 import { usePageModal } from './PageModalContext';
 
@@ -30,12 +32,12 @@ export function PageModals({ deleteAction = deletePageAdminAction, refresh }: Pa
     try {
       const result = await deleteAction(deletingPage.id);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       notifications.show({
         message: tCommon('messages.itemDeleted', { item: tCommon('entities.page') }),
-        color: 'red',
+        tone: 'positive',
       });
       closeDelete();
       (refresh ?? router.refresh)();
@@ -45,18 +47,19 @@ export function PageModals({ deleteAction = deletePageAdminAction, refresh }: Pa
   };
 
   return (
-    <ConfirmModal
+    <ConfirmationDialog
+      intent="delete"
       opened={!!deletingPage}
       onClose={closeDelete}
       onConfirm={handleDelete}
       title={tCommon('actions.delete')}
       message={
-        <Text>
+        <DsText>
           {tCommon.rich('messages.confirmDeleteNamedRich', {
             name: deletingPage?.title || tCommon('states.untitled'),
             strong: (chunks) => <strong>{chunks}</strong>,
           })}
-        </Text>
+        </DsText>
       }
       confirmLabel={tCommon('actions.delete')}
       cancelLabel={tCommon('actions.cancel')}

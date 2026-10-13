@@ -1,13 +1,14 @@
 'use client';
+import { useTranslations } from 'next-intl';
+import { getCollectionMetrics } from '@/components/core/Collection/collection-contract';
 
-import { Stack, Text } from '@mantine/core';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+
 import { DateTime } from '@/features/date-time/DateTime';
 import { EntityListView, type EntityListItem } from '../EntityListView';
 import { PostMetaLinks, type PostMetaLinkItem } from '../post-list/PostMetaLinks';
 import type { ReleaseListProps } from './schema';
-
-const releaseDateFallbackLabel = 'TBA';
-const releaseArtistFallbackLabel = 'Unknown';
 
 interface ReleaseListItem extends EntityListItem {
   releaseDate: string | null;
@@ -20,6 +21,10 @@ export interface ReleaseListViewClientProps {
 }
 
 export function ReleaseListViewClient({ releases, parsedProps: p }: ReleaseListViewClientProps) {
+  const t = useTranslations();
+  const releaseDateFallbackLabel = t('common.states.toBeAnnounced');
+  const releaseArtistFallbackLabel = t('common.states.unknown');
+  const metrics = getCollectionMetrics(p.itemSize);
   const layout = p.layout || 'grid';
   const columns = parseInt(p.columns || '4', 10);
   const showImage = p.showImage !== 'false';
@@ -32,41 +37,41 @@ export function ReleaseListViewClient({ releases, parsedProps: p }: ReleaseListV
     <EntityListView
       items={releases}
       className="release-list-block"
-      emptyLabel="No releases found"
+      emptyLabel={t('common.messages.noReleasesFound')}
       layout={layout}
+      itemSize={p.itemSize}
       columns={columns}
       showImage={showImage}
       imageAspectRatio={imageAspectRatio}
       carouselLoop={carouselLoop}
       carouselIndicators={carouselIndicators}
-      emptyImageLabel="No artwork"
       gridCols={{ base: 2, sm: 3 }}
       renderMeta={
         showMeta
           ? (release) => (
-              <Stack gap={2}>
+              <DsLayoutStack gap="xxs">
                 {release.mainArtists.length > 0 ? (
                   <PostMetaLinks
                     items={release.mainArtists}
-                    textSize="xs"
-                    textColor="var(--mantine-color-dimmed)"
-                    separatorColor="var(--mantine-color-dimmed)"
+                    textSize={metrics.metaSize}
+                    tone="secondary"
+                    separatorTone="secondary"
                   />
                 ) : (
-                  <Text size="xs" c="dimmed">
+                  <DsText size={metrics.metaSize} tone="secondary">
                     {releaseArtistFallbackLabel}
-                  </Text>
+                  </DsText>
                 )}
                 {release.releaseDate ? (
-                  <Text size="xs" c="dimmed">
+                  <DsText size={metrics.metaSize} tone="secondary">
                     <DateTime value={release.releaseDate} timeZone="UTC" />
-                  </Text>
+                  </DsText>
                 ) : (
-                  <Text size="xs" c="dimmed">
+                  <DsText size={metrics.metaSize} tone="secondary">
                     {releaseDateFallbackLabel}
-                  </Text>
+                  </DsText>
                 )}
-              </Stack>
+              </DsLayoutStack>
             )
           : undefined
       }

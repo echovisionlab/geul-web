@@ -20,6 +20,7 @@ import {
 } from '@/features/editor/lib/block-insert';
 import type { TiptapAnyExtension } from '@/lib/editor/extensions/tiptap';
 import { useFileUpload } from '@/lib/hooks/useFileUpload';
+import { useOptionalEditorMediaServices } from '../contexts/EditorMediaServicesContext';
 
 interface UseEntityMediaSurfaceOptions {
   entityId: string;
@@ -50,8 +51,9 @@ export function useEntityMediaSurface({
     entityType,
     entityId,
   });
+  const services = useOptionalEditorMediaServices();
   const uploadRef = useRef(upload);
-  uploadRef.current = upload;
+  uploadRef.current = services?.upload ?? upload;
   const [uploadProgress, setUploadProgress] = useState<{
     name: string;
     percentage: number;

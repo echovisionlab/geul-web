@@ -1,5 +1,6 @@
 import { DEFAULT_LOCALE, type SupportedLocale } from '@/lib/i18n/locale';
-import { ApplicationErrorPage } from './ApplicationErrorPage';
+import { ApplicationErrorPageView } from './ApplicationErrorPage';
+import { getFallbackErrorPageMessages } from './error-page-fallback-messages';
 
 export function RootErrorPageView({
   status = 500,
@@ -10,5 +11,12 @@ export function RootErrorPageView({
   locale?: SupportedLocale;
   onRetry: () => void;
 }) {
-  return <ApplicationErrorPage status={status} locale={locale} onRetry={onRetry} fullScreen />;
+  return (
+    <ApplicationErrorPageView
+      status={status}
+      messages={getFallbackErrorPageMessages(locale)}
+      onRetry={onRetry}
+      fullScreen
+    />
+  );
 }

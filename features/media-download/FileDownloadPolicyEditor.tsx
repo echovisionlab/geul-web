@@ -1,10 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { VisuallyHidden } from '@/components/core/Typography';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Loader, Stack } from '@mantine/core';
+
+import { Spinner as Loader } from '@/components/core/Display';
 import { useWindowEvent } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { Alert } from '@/components/core/Alert';
 import { StatusBadge } from '@/components/core/Badge';
 import { MultiSelect } from '@/components/core/Input';
@@ -188,6 +191,8 @@ export function FileDownloadPolicyEditor({
   const tReloadRequired = useTranslations('editorCommon.reloadRequired');
   const tActions = useTranslations('common.actions');
   const tStates = useTranslations('common.states');
+  const errorId = useId();
+  const audienceDescriptionId = useId();
   const target = useMemo(
     () => ({
       entityType,
@@ -322,7 +327,7 @@ export function FileDownloadPolicyEditor({
     (staleTarget: boolean) => {
       notifications.show({
         autoClose: false,
-        color: 'red',
+        tone: 'danger',
         title: t('sectionTitle'),
         message: staleTarget ? tReloadRequired('message') : `${t('saveError')} ${tActions('tryAgain')}`,
       });
@@ -840,72 +845,82 @@ export function FileDownloadPolicyEditor({
         : [ACCESS_SCOPE_VALUES.restricted]
       : [ACCESS_SCOPE_VALUES[resolvedAudience as Exclude<FileDownloadAudience, 'restricted'>]];
   const accessControl = policyLoaded ? (
-    <MultiSelect
-      label={mediaHeader ? undefined : t('sectionTitle')}
-      aria-label={mediaHeader ? t('sectionTitle') : undefined}
-      description={mediaHeader ? undefined : t(`audiences.${resolvedAudience}.description`)}
-      value={selectedAccessValues}
-      data={[
-        { value: ACCESS_SCOPE_VALUES.disabled, label: t('audiences.disabled.label') },
-        { value: ACCESS_SCOPE_VALUES.public, label: t('audiences.public.label') },
-        { value: ACCESS_SCOPE_VALUES.authenticated, label: t('audiences.authenticated.label') },
-        ...(audience === 'restricted' && selectedAudienceSegmentIds.length === 0
-          ? [
-              {
-                value: ACCESS_SCOPE_VALUES.restricted,
-                label: t('audiences.restricted.label'),
-                disabled: true,
-              },
-            ]
-          : []),
-        ...segments.map((segment) => ({
-          value: segment.id,
-          label: segment.name,
-        })),
-      ]}
-      searchable
-      searchValue={segmentSearch}
-      onSearchChange={scheduleSegmentSearch}
-      collapseSelectedValuesToOneLine
-      getCollapsedSummaryLabel={(count) => t('additionalSelected', { count })}
-      size="xs"
-      w="100%"
-      disabled={!enabled || loading || targetStale}
-      rightSection={saving || segmentsLoadingMore ? <Loader size={10} /> : undefined}
-      onChange={(values) => {
-        const addedValue = values.find((value) => !selectedAccessValues.includes(value));
-        if (addedValue && isAccessScopeValue(addedValue)) {
-          if (addedValue === ACCESS_SCOPE_VALUES.restricted) {
+    <div style={{ width: '100%' }}>
+      {mediaHeader ? (
+        <VisuallyHidden id={audienceDescriptionId} data-file-download-access-description>
+          {t(`audiences.${resolvedAudience}.description`)}
+        </VisuallyHidden>
+      ) : null}
+      <MultiSelect
+        label={mediaHeader ? undefined : t('sectionTitle')}
+        aria-label={mediaHeader ? t('sectionTitle') : undefined}
+        aria-describedby={
+          [mediaHeader ? audienceDescriptionId : undefined, error ? errorId : undefined].filter(Boolean).join(' ') ||
+          undefined
+        }
+        description={mediaHeader ? undefined : t(`audiences.${resolvedAudience}.description`)}
+        value={selectedAccessValues}
+        data={[
+          { value: ACCESS_SCOPE_VALUES.disabled, label: t('audiences.disabled.label') },
+          { value: ACCESS_SCOPE_VALUES.public, label: t('audiences.public.label') },
+          { value: ACCESS_SCOPE_VALUES.authenticated, label: t('audiences.authenticated.label') },
+          ...(audience === 'restricted' && selectedAudienceSegmentIds.length === 0
+            ? [
+                {
+                  value: ACCESS_SCOPE_VALUES.restricted,
+                  label: t('audiences.restricted.label'),
+                  disabled: true,
+                },
+              ]
+            : []),
+          ...segments.map((segment) => ({
+            value: segment.id,
+            label: segment.name,
+          })),
+        ]}
+        searchable
+        searchValue={segmentSearch}
+        onSearchChange={scheduleSegmentSearch}
+        collapseSelectedValuesToOneLine
+        getCollapsedSummaryLabel={(count) => t('additionalSelected', { count })}
+        size="xs"
+        disabled={!enabled || loading || targetStale}
+        rightSection={saving || segmentsLoadingMore ? <Loader size="xs" /> : undefined}
+        onChange={(values) => {
+          const addedValue = values.find((value) => !selectedAccessValues.includes(value));
+          if (addedValue && isAccessScopeValue(addedValue)) {
+            if (addedValue === ACCESS_SCOPE_VALUES.restricted) {
+              return;
+            }
+            const nextAudience =
+              addedValue === ACCESS_SCOPE_VALUES.disabled
+                ? 'disabled'
+                : addedValue === ACCESS_SCOPE_VALUES.public
+                  ? 'public'
+                  : 'authenticated';
+            setAudience(nextAudience);
+            setSelectedAudienceSegmentIds([]);
+            setSaved(false);
+            queueSave(nextAudience, []);
             return;
           }
-          const nextAudience =
-            addedValue === ACCESS_SCOPE_VALUES.disabled
-              ? 'disabled'
-              : addedValue === ACCESS_SCOPE_VALUES.public
-                ? 'public'
-                : 'authenticated';
-          setAudience(nextAudience);
-          setSelectedAudienceSegmentIds([]);
-          setSaved(false);
-          queueSave(nextAudience, []);
-          return;
-        }
 
-        const nextAudienceSegmentIds = values.filter((value) => !isAccessScopeValue(value));
-        if (nextAudienceSegmentIds.length === 0) {
-          setAudience('disabled');
-          setSelectedAudienceSegmentIds([]);
-          setSaved(false);
-          queueSave('disabled', []);
-          return;
-        }
+          const nextAudienceSegmentIds = values.filter((value) => !isAccessScopeValue(value));
+          if (nextAudienceSegmentIds.length === 0) {
+            setAudience('disabled');
+            setSelectedAudienceSegmentIds([]);
+            setSaved(false);
+            queueSave('disabled', []);
+            return;
+          }
 
-        setAudience('restricted');
-        setSelectedAudienceSegmentIds(nextAudienceSegmentIds);
-        setSaved(false);
-        queueSave('restricted', nextAudienceSegmentIds);
-      }}
-    />
+          setAudience('restricted');
+          setSelectedAudienceSegmentIds(nextAudienceSegmentIds);
+          setSaved(false);
+          queueSave('restricted', nextAudienceSegmentIds);
+        }}
+      />
+    </div>
   ) : null;
   const segmentFeedback = policyLoaded ? (
     <>
@@ -913,10 +928,9 @@ export function FileDownloadPolicyEditor({
         <StatusBadge
           role="status"
           aria-live="polite"
-          size="xs"
           tone="neutral"
           appearance="soft"
-          leftSection={<Loader size={8} />}
+          leftSection={<Loader size="xs" />}
         >
           {t('loading')}
         </StatusBadge>
@@ -940,33 +954,41 @@ export function FileDownloadPolicyEditor({
   ) : null;
   const synchronizationFeedback =
     saving || saved ? (
-      <Stack align={mediaHeader ? 'flex-start' : 'flex-end'} gap={0} mih={18} aria-live="polite" aria-atomic="true">
-        {saving ? (
-          <StatusBadge size="xs" tone="neutral" appearance="soft" leftSection={<Loader size={8} />}>
-            {tStates('syncing')}
-          </StatusBadge>
-        ) : null}
-        {!saving && saved ? (
-          <StatusBadge size="xs" tone="positive" appearance="soft">
-            {tStates('synced')}
-          </StatusBadge>
-        ) : null}
-      </Stack>
+      <div style={{ minHeight: 18 }}>
+        <DsLayoutStack align={mediaHeader ? 'start' : 'end'} gap="none">
+          {saving ? (
+            <StatusBadge tone="neutral" appearance="soft" leftSection={<Loader size="xs" />}>
+              {tStates('syncing')}
+            </StatusBadge>
+          ) : null}
+          {!saving && saved ? (
+            <StatusBadge tone="positive" appearance="soft">
+              {tStates('synced')}
+            </StatusBadge>
+          ) : null}
+        </DsLayoutStack>
+      </div>
     ) : null;
   const content = loadPending ? (
-    <Alert tone="neutral">{t('loading')}</Alert>
+    <Alert role="status" tone="neutral">
+      {t('loading')}
+    </Alert>
   ) : !enabled ? (
-    <Alert tone="neutral">{t('fileRequired')}</Alert>
+    <Alert role="status" tone="neutral">
+      {t('fileRequired')}
+    </Alert>
   ) : !policyLoaded ? (
     error ? (
-      <Alert tone="danger">{error}</Alert>
+      <Alert id={errorId} role="alert" tone="danger">
+        {error}
+      </Alert>
     ) : null
   ) : (
     <>
       {accessControl}
       {segmentFeedback}
       {error ? (
-        <Alert role="alert" tone="danger">
+        <Alert id={errorId} role="alert" tone="danger">
           {error}
         </Alert>
       ) : null}
@@ -976,34 +998,49 @@ export function FileDownloadPolicyEditor({
 
   if (mediaHeader) {
     return (
-      <Stack
+      <DsLayoutStack
         gap="xs"
-        w="100%"
+        fill="inline"
+        role="group"
+        aria-label={t('sectionTitle')}
+        aria-busy={loadPending}
         data-file-download-policy-presentation="media-header"
         onMouseDown={(event) => event.stopPropagation()}
         onClick={(event) => event.stopPropagation()}
       >
-        {loadPending ? <Loader size={16} aria-label={t('loading')} /> : null}
+        <VisuallyHidden role="status" aria-live="polite" aria-atomic="true" data-file-download-policy-sync>
+          {saving ? tStates('syncing') : saved ? tStates('synced') : ''}
+        </VisuallyHidden>
+        {loadPending ? <Loader size="xs" aria-label={t('loading')} /> : null}
         {!loadPending && policyLoaded ? accessControl : null}
         {!loadPending && policyLoaded ? segmentFeedback : null}
         {!loadPending && policyLoaded && error ? (
-          <Alert role="alert" tone="danger">
+          <Alert id={errorId} role="alert" tone="danger">
             {error}
           </Alert>
         ) : null}
         {!loadPending && policyLoaded ? synchronizationFeedback : null}
         {!loadPending && !policyLoaded && error ? (
-          <Alert role="alert" tone="danger">
+          <Alert id={errorId} role="alert" tone="danger">
             {error}
           </Alert>
         ) : null}
-      </Stack>
+      </DsLayoutStack>
     );
   }
 
   return (
-    <Stack gap={compact ? 'xs' : 'sm'} data-file-download-policy-presentation="standalone">
+    <DsLayoutStack
+      gap={compact ? 'xs' : 'sm'}
+      data-file-download-policy-presentation="standalone"
+      role="group"
+      aria-label={t('sectionTitle')}
+      aria-busy={loadPending}
+    >
+      <VisuallyHidden role="status" aria-live="polite" aria-atomic="true" data-file-download-policy-sync>
+        {saving ? tStates('syncing') : saved ? tStates('synced') : ''}
+      </VisuallyHidden>
       {content}
-    </Stack>
+    </DsLayoutStack>
   );
 }

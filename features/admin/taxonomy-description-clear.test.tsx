@@ -22,8 +22,8 @@ vi.mock('next-intl', () => ({
     return translate;
   },
 }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
-vi.mock('@mantine/core', () => ({ Text: ({ children }: { children: ReactNode }) => <span>{children}</span> }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
+
 vi.mock('@/components/core/Input', () => ({
   TextInput: ({
     label,

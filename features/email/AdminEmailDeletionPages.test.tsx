@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import AdminEmailLayoutsPage from '@/app/admin/email-layouts/page';
 import AdminEmailTemplatesPage from '@/app/admin/email-templates/page';
 
@@ -40,7 +41,7 @@ vi.mock('next-intl', () => ({
   },
 }));
 
-vi.mock('@mantine/notifications', () => ({ notifications: notificationMocks }));
+vi.mock('@/components/core/Notification', () => ({ notifications: notificationMocks }));
 
 vi.mock('@/features/admin/ui/AdminPageHeader', () => ({
   AdminPageHeader: ({ title }: { title: string }) => <h1>{title}</h1>,
@@ -172,7 +173,7 @@ function renderPage(node: ReactNode) {
   act(() => {
     root?.render(
       <QueryClientProvider client={queryClient!}>
-        <MantineProvider>{node}</MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>
       </QueryClientProvider>,
     );
   });
@@ -307,7 +308,7 @@ describe('email authoring admin list deletion', () => {
     expect(api.deleteEmailTemplateAction).not.toHaveBeenCalled();
     expect(notificationMocks.show).toHaveBeenCalledWith({
       message: 'adminList.emailTemplates.deleteConflict',
-      color: 'red',
+      tone: 'danger',
     });
   });
 
@@ -325,7 +326,7 @@ describe('email authoring admin list deletion', () => {
 
     expect(notificationMocks.show).toHaveBeenCalledWith({
       message: 'adminList.emailTemplates.deleteConflict',
-      color: 'red',
+      tone: 'danger',
     });
   });
 
@@ -360,7 +361,7 @@ describe('email authoring admin list deletion', () => {
     expect(api.deleteEmailLayoutAction).not.toHaveBeenCalled();
     expect(notificationMocks.show).toHaveBeenCalledWith({
       message: 'adminList.emailLayouts.deleteConflict',
-      color: 'red',
+      tone: 'danger',
     });
   });
 
@@ -378,7 +379,7 @@ describe('email authoring admin list deletion', () => {
 
     expect(notificationMocks.show).toHaveBeenCalledWith({
       message: 'adminList.emailLayouts.deleteConflict',
-      color: 'red',
+      tone: 'danger',
     });
   });
 });

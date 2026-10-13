@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { MapThemeListPageView } from '@/features/admin/MapThemeEditor/MapThemeListPageView';
 import { CreateMapThemeButton } from '@/features/admin/MapThemeEditor/CreateMapThemeButton';
 import { PageLoader } from '@/features/site/PageLoader';
@@ -36,14 +36,14 @@ export default function AdminMapThemesPage() {
     try {
       const result = await copyTheme.mutateAsync({ id: theme.id, name });
       if (result.error) {
-        notifications.show({ message: tPage('notifications.copyFailed'), color: 'red' });
+        notifications.show({ message: tPage('notifications.copyFailed'), tone: 'danger' });
         return false;
       }
-      notifications.show({ message: tPage('notifications.copied'), color: 'green' });
+      notifications.show({ message: tPage('notifications.copied'), tone: 'positive' });
       await queryClient.invalidateQueries({ queryKey: ['mapThemes'] });
       return true;
     } catch {
-      notifications.show({ message: tPage('notifications.copyFailed'), color: 'red' });
+      notifications.show({ message: tPage('notifications.copyFailed'), tone: 'danger' });
       return false;
     }
   };
@@ -52,14 +52,14 @@ export default function AdminMapThemesPage() {
     try {
       const result = await deleteTheme.mutateAsync(theme.id);
       if (result.error) {
-        notifications.show({ message: tPage('notifications.deleteFailed'), color: 'red' });
+        notifications.show({ message: tPage('notifications.deleteFailed'), tone: 'danger' });
         return false;
       }
-      notifications.show({ message: tPage('notifications.deleted'), color: 'red' });
+      notifications.show({ message: tPage('notifications.deleted'), tone: 'positive' });
       await queryClient.invalidateQueries({ queryKey: ['mapThemes'] });
       return true;
     } catch {
-      notifications.show({ message: tPage('notifications.deleteFailed'), color: 'red' });
+      notifications.show({ message: tPage('notifications.deleteFailed'), tone: 'danger' });
       return false;
     }
   };
@@ -72,13 +72,13 @@ export default function AdminMapThemesPage() {
     try {
       const result = await setDefaultTheme.mutateAsync(theme.id);
       if (result.error) {
-        notifications.show({ message: tPage('notifications.defaultUpdateFailed'), color: 'red' });
+        notifications.show({ message: tPage('notifications.defaultUpdateFailed'), tone: 'danger' });
         return;
       }
-      notifications.show({ message: tPage('notifications.defaultUpdated'), color: 'green' });
+      notifications.show({ message: tPage('notifications.defaultUpdated'), tone: 'positive' });
       await queryClient.invalidateQueries({ queryKey: ['mapThemes'] });
     } catch {
-      notifications.show({ message: tPage('notifications.defaultUpdateFailed'), color: 'red' });
+      notifications.show({ message: tPage('notifications.defaultUpdateFailed'), tone: 'danger' });
     }
   };
 

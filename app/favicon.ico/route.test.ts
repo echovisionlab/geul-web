@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getPublicSettings } from '@/lib/queries/manifest';
-import { getPublicCdnUrl } from '@/lib/public-runtime-config';
+import { getServerPublicRuntimeConfig } from '@/lib/public-runtime-config.server';
 import { proxyFaviconRequest } from '@/lib/utils/favicon-proxy';
 import { GET } from './route';
 
@@ -8,8 +8,8 @@ vi.mock('@/lib/queries/manifest', () => ({
   getPublicSettings: vi.fn(),
 }));
 
-vi.mock('@/lib/public-runtime-config', () => ({
-  getPublicCdnUrl: vi.fn(() => 'https://cdn.example.com'),
+vi.mock('@/lib/public-runtime-config.server', () => ({
+  getServerPublicRuntimeConfig: vi.fn(() => ({ cdnUrl: 'https://cdn.example.com' })),
 }));
 
 vi.mock('@/lib/utils/favicon-proxy', () => ({
@@ -40,7 +40,7 @@ describe('favicon.ico route', () => {
       requestHeaders: request.headers,
       sourceUrl: icoUrl,
     });
-    expect(getPublicCdnUrl).toHaveBeenCalledTimes(1);
+    expect(getServerPublicRuntimeConfig).toHaveBeenCalledTimes(1);
   });
 
   it('never proxies a legacy favicon that may contain PNG bytes', async () => {

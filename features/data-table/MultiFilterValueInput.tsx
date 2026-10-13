@@ -1,7 +1,12 @@
 'use client';
 
-import { Group, Stack } from '@mantine/core';
-import type { DateInputProps } from '@mantine/dates';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+
+import type { DateInputProps } from '@/components/core/Input';
 import dynamic from 'next/dynamic';
 import { MultiSelect } from '@/components/core/Input/MultiSelect';
 import { NumberInput } from '@/components/core/Input/NumberInput';
@@ -40,7 +45,7 @@ export function MultiFilterValueInput({
   onChange,
   labels,
   disabled = false,
-  withinPortal = true,
+  withinPortal: _withinPortal,
 }: Props) {
   if (!field || isNoValueOperator(state.op)) {
     return null;
@@ -60,7 +65,6 @@ export function MultiFilterValueInput({
         placeholder={labels.selectValues}
         searchable
         clearable
-        comboboxProps={{ withinPortal }}
         disabled={disabled}
       />
     );
@@ -73,33 +77,29 @@ export function MultiFilterValueInput({
 
     if (field.type === 'date') {
       return (
-        <Stack gap="xs">
+        <DsLayoutStack gap="xs">
           <DateInput
             label={labels.from}
             size="xs"
-            valueFormat="YYYY-MM-DD"
             value={fromValue ? new Date(fromValue) : null}
             onChange={(next) => updateValue([next ?? '', toValue])}
             clearable
-            popoverProps={{ withinPortal }}
             disabled={disabled}
           />
           <DateInput
             label={labels.to}
             size="xs"
-            valueFormat="YYYY-MM-DD"
             value={toValue ? new Date(toValue) : null}
             onChange={(next) => updateValue([fromValue, next ?? ''])}
             clearable
-            popoverProps={{ withinPortal }}
             disabled={disabled}
           />
-        </Stack>
+        </DsLayoutStack>
       );
     }
 
     return (
-      <Stack gap="xs">
+      <DsLayoutStack gap="xs">
         <NumberInput
           label={labels.from}
           size="xs"
@@ -114,7 +114,7 @@ export function MultiFilterValueInput({
           onChange={(next) => updateValue([fromValue, next ?? ''])}
           disabled={disabled}
         />
-      </Stack>
+      </DsLayoutStack>
     );
   }
 
@@ -123,11 +123,9 @@ export function MultiFilterValueInput({
       <DateInput
         label={labels.value}
         size="xs"
-        valueFormat="YYYY-MM-DD"
         value={value ? new Date(value as string) : null}
         onChange={(next) => updateValue(next ?? '')}
         clearable
-        popoverProps={{ withinPortal }}
         disabled={disabled}
       />
     );
@@ -153,10 +151,12 @@ export function MultiFilterValueInput({
         value={String(value)}
         onChange={(next) => updateValue(next === 'true')}
       >
-        <Group mt="xs">
-          <Radio value="true" label={labels.trueValue} disabled={disabled} />
-          <Radio value="false" label={labels.falseValue} disabled={disabled} />
-        </Group>
+        <DsLayoutInset blockStart="xs">
+          <DsLayoutInline>
+            <Radio value="true" label={labels.trueValue} disabled={disabled} />
+            <Radio value="false" label={labels.falseValue} disabled={disabled} />
+          </DsLayoutInline>
+        </DsLayoutInset>
       </Radio.Group>
     );
   }

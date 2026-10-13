@@ -1,12 +1,7 @@
+import { SegmentsPageView } from '@/features/admin/segment/SegmentsPageView';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getTranslations } from 'next-intl/server';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import { CreateSegmentButton } from '@/features/admin/segment/CreateSegmentButton';
-import { AudienceArchiveFilter } from '@/features/admin/segment/AudienceArchiveFilter';
-import { SegmentModalProvider } from '@/features/admin/segment/SegmentModalContext';
-import { SegmentModals } from '@/features/admin/segment/SegmentModals';
-import { SegmentsTableContent } from '@/features/admin/segment/SegmentsTableContent';
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
 import { listSegmentsAdminAction } from '@/lib/actions/audience';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
@@ -50,31 +45,14 @@ export default async function AdminSegmentsPage({ searchParams }: PageProps) {
   }).then(unwrapQueryResult);
 
   return (
-    <SegmentModalProvider>
-      <AdminPageHeader
-        title={tCommonEntities('audienceSegments')}
-        description={tPage('description')}
-        items={[
-          {
-            key: 'include-archived',
-            type: 'custom',
-            content: <AudienceArchiveFilter />,
-          },
-          { key: 'create-segment', type: 'custom', content: <CreateSegmentButton /> },
-        ]}
-      />
-
-      <ServerDataTable namespace="segments">
-        <SegmentsTableContent
-          result={result}
-          searchPlaceholder={searchPlaceholder}
-          filterFields={filterFields}
-          sortFields={sortFields}
-        />
-        <ServerDataTable.Pagination namespace="segments" result={result} searchParams={params} />
-      </ServerDataTable>
-
-      <SegmentModals />
-    </SegmentModalProvider>
+    <SegmentsPageView
+      result={result}
+      filterFields={filterFields}
+      sortFields={sortFields}
+      searchParams={params.toString()}
+      title={tCommonEntities('audienceSegments')}
+      searchPlaceholder={searchPlaceholder}
+      description={tPage('description')}
+    />
   );
 }

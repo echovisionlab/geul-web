@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemTestProvider as DesignSystemProvider } from '@/test/TestProviders';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { MyArtistsTableCellView, type MyArtistsTableRowViewModel } from './MyArtistsTableCellView';
 
 const row: MyArtistsTableRowViewModel = {
@@ -11,9 +12,9 @@ const row: MyArtistsTableRowViewModel = {
   name: 'Mina Park',
   slugLabel: '/mina-park',
   imageUrl: 'https://cdn.example.com/mina.jpg?w=96',
-  avatarFallback: 'M',
   href: '/artists/artist-1?edit=true',
   statusLabel: 'Published',
+  statusTone: 'positive',
   createdLabel: '7/4/2026',
 };
 
@@ -33,7 +34,7 @@ afterEach(() => {
 
 function render(node: ReactNode) {
   act(() => {
-    root.render(<MantineProvider>{node}</MantineProvider>);
+    root.render(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>);
   });
 }
 

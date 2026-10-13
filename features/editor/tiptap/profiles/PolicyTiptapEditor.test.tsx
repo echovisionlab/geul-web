@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { Editor, getSchema } from '@tiptap/core';
-import { MantineProvider } from '@mantine/core';
+
 import { fromJson, type JsonValue } from '@bufbuild/protobuf';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import {
@@ -150,6 +151,17 @@ describe('PolicyTiptapEditor profile', () => {
     );
   });
 
+  it('renders headings below a document title one element lower with the authored level', () => {
+    const document = documentWith(
+      container('heading', { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'Scope' }] }),
+    );
+
+    expect(policyTiptapDocumentToHtml(document)).toBe('<h1>Scope</h1>');
+    expect(policyTiptapDocumentToHtml(document, { headingParentLevel: 1 })).toBe(
+      '<h2 data-heading-level="1">Scope</h2>',
+    );
+  });
+
   it('rejects policy-disallowed nodes instead of accepting or exporting them', () => {
     const document = documentWith(container('file', { type: 'file', attrs: { fileId: 'file-1' } }));
 
@@ -208,13 +220,13 @@ describe('PolicyTiptapEditor profile', () => {
 
     await act(async () => {
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <PolicyTiptapEditor
             blockRoomController={policyController(doc)}
             awareness={awareness}
             onEditorReady={onEditorReady}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
@@ -248,14 +260,14 @@ describe('PolicyTiptapEditor profile', () => {
 
     await act(async () => {
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <PolicyTiptapEditor
             blockRoomController={policyController(doc)}
             awareness={awareness}
             onEditorReady={onEditorReady}
             onUnsupportedContent={onUnsupportedContent}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 

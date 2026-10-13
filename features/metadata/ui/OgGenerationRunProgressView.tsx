@@ -1,4 +1,6 @@
-import { Paper, Stack, Text } from '@mantine/core';
+import { SectionCard as DsSectionCard } from '@/components/core/Section';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
 export interface OgGenerationRunProgressViewModel {
   countLabel?: string;
@@ -18,23 +20,23 @@ export function OgGenerationRunProgressView({ model }: OgGenerationRunProgressVi
   return (
     <>
       {model.countLabel ? (
-        <Paper withBorder p="sm" role="status" aria-live="polite" aria-atomic="true">
-          <Stack gap={4}>
-            <Text size="sm" data-testid="og-generation-run-counts">
+        <DsSectionCard withBorder role="status" aria-live="polite" aria-atomic="true" padding="sm">
+          <DsLayoutStack gap="xxs">
+            <SupportingText tone="primary" data-testid="og-generation-run-counts">
               {model.countLabel}
-            </Text>
+            </SupportingText>
             {model.failures.map((failure) => (
-              <Text key={failure.id} size="xs" c="red">
+              <DsText key={failure.id} size="xs" tone="danger">
                 {failure.label}
-              </Text>
+              </DsText>
             ))}
-          </Stack>
-        </Paper>
+          </DsLayoutStack>
+        </DsSectionCard>
       ) : null}
       {model.error ? (
-        <Text size="sm" c="red" role="alert">
+        <DsText size="sm" tone="danger" role="alert">
           {model.error}
-        </Text>
+        </DsText>
       ) : null}
     </>
   );

@@ -1,17 +1,51 @@
+import { useArgs } from 'storybook/preview-api';
+import { withFeatureLabels } from '@/stories/feature-localization';
 import type { Meta, StoryObj } from '@storybook/nextjs';
-import { Box } from '@mantine/core';
+
 import { AccountEmailProviderLogo } from '@/features/account-email/AccountEmailOption';
 import { ConnectedSocialAccountsView } from './ui/ConnectedSocialAccounts';
 
 const meta = {
   title: 'Feature/My/Connected Social Logins',
   component: ConnectedSocialAccountsView,
+  render: function InteractiveStory(args) {
+    const [, updateArgs] = useArgs();
+    return (
+      <ConnectedSocialAccountsView
+        {...args}
+        onLink={(provider) =>
+          updateArgs({
+            connectedProviders: [...args.connectedProviders, provider],
+            availableProviders: args.availableProviders.filter((value) => value !== provider),
+          })
+        }
+        onUnlink={(provider) =>
+          updateArgs({
+            connectedProviders: args.connectedProviders.filter((value) => value !== provider),
+            availableProviders: [...args.availableProviders, provider],
+          })
+        }
+      />
+    );
+  },
   parameters: { layout: 'centered' },
   decorators: [
+    withFeatureLabels({
+      labels: {
+        connect: 'common.actions.connect',
+        connected: 'common.states.connected',
+        description: 'security.connectedAccounts.description',
+        disconnect: 'common.actions.disconnect',
+        lastMethod: 'security.providerErrors.mustKeepMethod',
+        notConnected: 'common.states.notConnected',
+        primaryEmailRequired: 'security.providerErrors.primaryEmailRequired',
+        title: 'security.connectedAccounts.title',
+      },
+    }),
     (Story) => (
-      <Box w={560} maw="calc(100vw - 2rem)">
+      <div style={{ width: 560, maxWidth: '100%' }}>
         <Story />
-      </Box>
+      </div>
     ),
   ],
   args: {
@@ -31,7 +65,7 @@ const meta = {
     linkingProvider: null,
     onLink: () => {},
     onUnlink: () => {},
-    providerIcon: (provider) => <AccountEmailProviderLogo provider={provider} size={provider === 'google' ? 18 : 16} />,
+    providerIcon: (provider) => <AccountEmailProviderLogo provider={provider} />,
     unlinkBlockedReasons: {},
     unlinkingProvider: null,
   },

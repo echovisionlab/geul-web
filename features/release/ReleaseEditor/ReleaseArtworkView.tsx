@@ -38,6 +38,7 @@ export function ReleaseArtworkView({
       isRemoving={isRemoving}
       onUpload={onUpload}
       onRemove={onRemove}
+      uploadType={UploadType.RELEASE_ARTWORK}
       aspectRatio={1}
       previewWidth={180}
       previewMaxWidth="min(100%, 180px)"

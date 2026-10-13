@@ -1,3 +1,5 @@
+import { useArgs } from 'storybook/preview-api';
+import { withFeatureLabels } from '@/stories/feature-localization';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { CountrySelect } from './CountrySelect';
@@ -29,6 +31,24 @@ const options = [
 const meta: Meta<typeof CountrySelect> = {
   title: 'Feature/Location/CountrySelect',
   component: CountrySelect,
+  render: function InteractiveStory(args) {
+    const [, updateArgs] = useArgs();
+    return <CountrySelect {...args} onChange={(value) => updateArgs({ value })} />;
+  },
+  decorators: [
+    withFeatureLabels({
+      project: (args, t, locale) => ({
+        label: t('common.labels.country'),
+        placeholder: t('common.placeholders.selectValues'),
+        noResultsLabel: t('searchCombobox.noResults'),
+        options: (args.options as typeof options).map((option) => ({
+          ...option,
+          label: new Intl.DisplayNames([locale], { type: 'region' }).of(option.code) ?? option.name,
+          name: new Intl.DisplayNames([locale], { type: 'region' }).of(option.code) ?? option.name,
+        })),
+      }),
+    }),
+  ],
   parameters: { layout: 'centered' },
   args: {
     options,
@@ -37,7 +57,6 @@ const meta: Meta<typeof CountrySelect> = {
     placeholder: 'Choose a country',
     searchable: true,
     clearable: true,
-    w: 320,
     onChange: () => {},
   },
 };
@@ -48,5 +67,3 @@ type Story = StoryObj<typeof CountrySelect>;
 export const Empty: Story = {};
 export const Selected: Story = { args: { value: 'KR' } };
 export const Disabled: Story = { args: { value: 'KR', disabled: true } };
-
-export const Selection: Story = {};

@@ -1,8 +1,11 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Group, Stack, Text } from '@mantine/core';
+
 import { Button } from '@/components/core/Button';
 import { Checkbox, MultiSelect, Select } from '@/components/core/Input';
 import { DEFAULT_PAGE_ACCESS_POLICY, type PageAccessPolicyValue } from '@/lib/types/page-access';
@@ -98,14 +101,14 @@ export function PageAccessSettings({
   }
 
   return (
-    <Stack gap="md">
-      <Stack gap="xs" role="group" aria-label={t('audience')}>
-        <Text size="sm" fw={500}>
+    <DsLayoutStack gap="md">
+      <DsLayoutStack gap="xs" role="group" aria-label={t('audience')}>
+        <DsText size="sm" weight="medium">
           {t('audience')}
-        </Text>
-        <Text size="xs" c="dimmed">
+        </DsText>
+        <DsText size="xs" tone="secondary">
           {t('audienceDescription')}
-        </Text>
+        </DsText>
         <Checkbox
           label={t('roleUser')}
           description={t('memberDescription')}
@@ -148,7 +151,7 @@ export function PageAccessSettings({
           onChange={(event) => updateConditions({ newsletterSubscriber: event.currentTarget.checked })}
           disabled={disabled || pending}
         />
-      </Stack>
+      </DsLayoutStack>
       <MultiSelect
         label={t('userTags')}
         description={t('userTagsDescription')}
@@ -180,27 +183,27 @@ export function PageAccessSettings({
         />
       ) : null}
       {state.attemptedSave && emptyConditions ? (
-        <Text size="sm" c="red" role="alert">
+        <SupportingText tone="danger" role="alert">
           {t('emptyConditions')}
-        </Text>
+        </SupportingText>
       ) : null}
       {state.status === 'error' ? (
-        <Text size="sm" c="red" role="alert">
+        <SupportingText tone="danger" role="alert">
           {state.error}
-        </Text>
+        </SupportingText>
       ) : null}
       {state.status === 'saved' ? (
-        <Text size="sm" c="green" role="status">
+        <SupportingText tone="positive" role="status">
           {t('saved')}
-        </Text>
+        </SupportingText>
       ) : null}
       {dirty ? (
-        <Text size="xs" c="dimmed">
+        <DsText size="xs" tone="secondary">
           {t('unsaved')}
-        </Text>
+        </DsText>
       ) : null}
-      <Group gap="xs">
-        <Button onClick={() => void save()} disabled={disabled || !dirty} loading={pending}>
+      <DsLayoutInline gap="xs">
+        <Button emphasis="medium" onClick={() => void save()} disabled={disabled || !dirty} loading={pending}>
           {pending ? t('saving') : t('save')}
         </Button>
         <Button
@@ -220,7 +223,7 @@ export function PageAccessSettings({
         >
           {t('cancel')}
         </Button>
-      </Group>
-    </Stack>
+      </DsLayoutInline>
+    </DsLayoutStack>
   );
 }

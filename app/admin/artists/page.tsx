@@ -1,8 +1,8 @@
+import { ArtistsPageView } from '@/features/admin/artist/ArtistsPageView';
 import { getTranslations } from 'next-intl/server';
-import { Stack } from '@mantine/core';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import { ArtistModalProvider, ArtistModals, ArtistsTableContent, CreateArtistButton } from '@/features/admin/artist';
+
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
+
 import { listArtistsAdminAction } from '@/lib/actions/artist';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
@@ -54,25 +54,13 @@ export default async function AdminArtistsPage({ searchParams }: PageProps) {
   });
 
   return (
-    <ArtistModalProvider>
-      <Stack>
-        <AdminPageHeader
-          title={artistsLabel}
-          items={[{ key: 'create-artist', type: 'custom', content: <CreateArtistButton /> }]}
-        />
-
-        <ServerDataTable namespace="artists">
-          <ArtistsTableContent
-            result={result}
-            searchPlaceholder={searchPlaceholder}
-            filterFields={filterFields}
-            sortFields={sortFields}
-          />
-          <ServerDataTable.Pagination namespace="artists" result={result} searchParams={params} />
-        </ServerDataTable>
-      </Stack>
-
-      <ArtistModals />
-    </ArtistModalProvider>
+    <ArtistsPageView
+      title={artistsLabel}
+      searchParams={params.toString()}
+      result={result}
+      searchPlaceholder={searchPlaceholder}
+      filterFields={filterFields}
+      sortFields={sortFields}
+    />
   );
 }

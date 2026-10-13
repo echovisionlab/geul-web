@@ -1,8 +1,7 @@
 import { getTranslations } from 'next-intl/server';
-import { Stack } from '@mantine/core';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import { ClientModalProvider, ClientModals, ClientsTableContent, CreateClientButton } from '@/features/admin/client';
+
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
+import { ClientsPageView } from '@/features/admin/client/ClientsPageView';
 import { listClientsAdmin } from '@/lib/queries/client';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
@@ -45,25 +44,13 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
   });
 
   return (
-    <ClientModalProvider>
-      <Stack>
-        <AdminPageHeader
-          title={tCommonEntities('clients')}
-          items={[{ key: 'create-client', type: 'custom', content: <CreateClientButton /> }]}
-        />
-
-        <ServerDataTable namespace="clients">
-          <ClientsTableContent
-            result={result}
-            searchPlaceholder={searchPlaceholder}
-            filterFields={filterFields}
-            sortFields={sortFields}
-          />
-          <ServerDataTable.Pagination namespace="clients" result={result} searchParams={params} />
-        </ServerDataTable>
-      </Stack>
-
-      <ClientModals />
-    </ClientModalProvider>
+    <ClientsPageView
+      title={tCommonEntities('clients')}
+      result={result}
+      searchPlaceholder={searchPlaceholder}
+      filterFields={filterFields}
+      sortFields={sortFields}
+      searchParams={params.toString()}
+    />
   );
 }

@@ -1,8 +1,14 @@
 'use client';
 
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutGrid as DsLayoutGrid,
+  LayoutInline as DsLayoutInline,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { Divider, Group, SimpleGrid, Stack, Text } from '@mantine/core';
+
 import { MultiSelect, Select, Checkbox, Slider } from '@/components/core/Input';
 import {
   MARQUEE_ITEM_HEIGHT_MAX,
@@ -74,12 +80,11 @@ export function MarqueeCommonFields({
 
   return (
     <>
-      <Divider my="sm" />
-      <Stack gap="sm">
-        <Text size="xs" c="dimmed" fw={500}>
+      <DsLayoutStack gap="md">
+        <DsText size="xs" tone="secondary" weight="medium">
           {tb('blockEditor.sections.marqueeBehavior', 'Marquee behavior')}
-        </Text>
-        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+        </DsText>
+        <DsLayoutGrid columns={{ base: 1, sm: 2 }} gap="sm">
           <Select
             label={tb('blockEditor.labels.direction', 'Direction')}
             data={[
@@ -88,44 +93,41 @@ export function MarqueeCommonFields({
             ]}
             value={direction}
             onChange={(value) => onUpdate('direction', value || 'left')}
-            size="xs"
           />
-          <Stack gap={6}>
-            <Group justify="space-between" gap="xs">
-              <Text size="xs" fw={500}>
+          <DsLayoutStack gap="xxs">
+            <DsLayoutInline justify="between" gap="xs">
+              <DsText size="xs" weight="medium">
                 {tb('blockEditor.labels.speed', 'Speed')}
-              </Text>
-              <Text size="xs" c="dimmed">
+              </DsText>
+              <DsText size="xs" tone="secondary">
                 {speedValue}px/s
-              </Text>
-            </Group>
+              </DsText>
+            </DsLayoutInline>
             <Slider
               min={MARQUEE_SPEED_MIN}
               max={MARQUEE_SPEED_MAX}
               step={MARQUEE_SPEED_STEP}
               value={speedValue}
               onChange={(value) => onUpdate('speedPxPerSecond', String(value))}
-              size="xs"
             />
-          </Stack>
-          <Stack gap={6}>
-            <Group justify="space-between" gap="xs">
-              <Text size="xs" fw={500}>
+          </DsLayoutStack>
+          <DsLayoutStack gap="xxs">
+            <DsLayoutInline justify="between" gap="xs">
+              <DsText size="xs" weight="medium">
                 {tb('blockEditor.labels.itemHeight', 'Item height')}
-              </Text>
-              <Text size="xs" c="dimmed">
+              </DsText>
+              <DsText size="xs" tone="secondary">
                 {itemHeightValue}px
-              </Text>
-            </Group>
+              </DsText>
+            </DsLayoutInline>
             <Slider
               min={MARQUEE_ITEM_HEIGHT_MIN}
               max={MARQUEE_ITEM_HEIGHT_MAX}
               step={MARQUEE_ITEM_HEIGHT_STEP}
               value={itemHeightValue}
               onChange={(value) => onUpdate('itemHeightPx', String(value))}
-              size="xs"
             />
-          </Stack>
+          </DsLayoutStack>
           <Select
             label={tb('blockEditor.labels.gap', 'Gap')}
             data={[
@@ -136,24 +138,21 @@ export function MarqueeCommonFields({
             ]}
             value={gap}
             onChange={(value) => onUpdate('gap', value || 'lg')}
-            size="xs"
           />
-        </SimpleGrid>
-        <Group gap="lg" align="center">
+        </DsLayoutGrid>
+        <DsLayoutInline gap="lg" align="center">
           <Checkbox
             label={tb('blockEditor.labels.openInNewTab', 'Open links in a new tab')}
             checked={linkTarget === 'new-tab'}
             onChange={(event) => onUpdate('linkTarget', event.currentTarget.checked ? 'new-tab' : 'same-tab')}
-            size="xs"
           />
           <Checkbox
             label={tb('blockEditor.labels.pauseOnHover', 'Pause on hover')}
             checked={pauseOnHover !== 'false'}
             onChange={(event) => onUpdate('pauseOnHover', event.currentTarget.checked ? 'true' : 'false')}
-            size="xs"
           />
-        </Group>
-      </Stack>
+        </DsLayoutInline>
+      </DsLayoutStack>
     </>
   );
 }
@@ -186,10 +185,10 @@ export function MarqueeEntityFields({
   const selectedIds = ids ? ids.split(',').filter(Boolean) : [];
 
   return (
-    <Stack gap="sm">
-      <Text size="xs" c="dimmed" fw={500}>
+    <DsLayoutStack gap="md">
+      <DsText size="xs" tone="secondary" weight="medium">
         {tb('blockEditor.sections.content', 'Content')}
-      </Text>
+      </DsText>
       <Select
         label={tb('blockEditor.labels.source', 'Source')}
         data={[
@@ -198,7 +197,6 @@ export function MarqueeEntityFields({
         ]}
         value={source}
         onChange={(value) => onUpdate('source', value || 'all')}
-        size="xs"
       />
       {source === 'selected' ? (
         <MultiSelect
@@ -208,10 +206,9 @@ export function MarqueeEntityFields({
           onChange={(values) => onUpdate('ids', values.join(','))}
           searchable
           clearable
-          size="xs"
         />
       ) : null}
-      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+      <DsLayoutGrid columns={{ base: 1, sm: 2 }} gap="sm">
         <Select
           label={tb('blockEditor.labels.linkMode', 'Links')}
           data={[
@@ -220,7 +217,6 @@ export function MarqueeEntityFields({
           ]}
           value={linkMode}
           onChange={(value) => onUpdate('linkMode', value || 'entity')}
-          size="xs"
         />
         <Select
           label={tb('blockEditor.labels.logoScale', 'Logo scale')}
@@ -233,9 +229,8 @@ export function MarqueeEntityFields({
           ]}
           value={logoScale}
           onChange={(value) => onUpdate('logoScale', value || 'contain')}
-          size="xs"
         />
-      </SimpleGrid>
+      </DsLayoutGrid>
       <Select
         label={tb('blockEditor.labels.fallbackMode', 'Missing logo')}
         data={[
@@ -244,9 +239,8 @@ export function MarqueeEntityFields({
         ]}
         value={fallbackMode}
         onChange={(value) => onUpdate('fallbackMode', value || 'name')}
-        size="xs"
       />
       {extra}
-    </Stack>
+    </DsLayoutStack>
   );
 }

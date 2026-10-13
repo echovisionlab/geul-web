@@ -1,6 +1,7 @@
 'use client';
 
 import videojs from 'video.js';
+import { applyVideoMediaPresentation } from '@/components/core/MediaControls';
 import {
   resolveVideoPlaybackSource,
   normalizeMediaUrl,
@@ -208,6 +209,10 @@ export function mountVideoJsPlayer(
   }
 
   player.addClass('geul-video-js');
+  if (playerElement) {
+    const removePresentation = applyVideoMediaPresentation(playerElement, { kind: 'video-js' });
+    player.on('dispose', removePresentation);
+  }
   (player as BeforeErrorCapable)[BEFORE_ERROR_HANDLER_KEY] = input.onBeforeError;
   applyVideoJsMessages(player, input.messages);
   player.on('error', () => {

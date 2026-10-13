@@ -1,12 +1,14 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useCallback, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { EditorHeader, type StatusOption } from '@/features/editor/EditorHeader';
 import { Textarea } from '@/components/core/Input';
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
@@ -44,7 +46,7 @@ interface ProgramEventSeriesEditorProps {
   baseUrl: string;
 }
 
-export function ProgramEventSeriesEditor({
+function useProgramEventSeriesEditorViewModel({
   seriesId,
   initialTitle,
   initialSlug,
@@ -73,13 +75,13 @@ export function ProgramEventSeriesEditor({
       updateProgramEventSeriesAction(seriesId, data),
     onSuccess: (result) => {
       if ('error' in result && result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
       }
     },
     onError: (error) => {
       notifications.show({
         message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
@@ -93,7 +95,7 @@ export function ProgramEventSeriesEditor({
         if (statusRequestIdRef.current === input.requestId) {
           setStatus(input.previousStatus);
         }
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
       }
     },
     onError: (error, input) => {
@@ -102,7 +104,7 @@ export function ProgramEventSeriesEditor({
       }
       notifications.show({
         message: error instanceof Error ? error.message : tCommonNotifications('saveFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
@@ -110,7 +112,7 @@ export function ProgramEventSeriesEditor({
     mutationFn: () => deleteProgramEventSeriesAction(seriesId),
     onSuccess: (result) => {
       if ('error' in result && result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       router.push('/admin/event-series');
@@ -120,24 +122,24 @@ export function ProgramEventSeriesEditor({
     mutationFn: (fileId: string) => setProgramEventSeriesPosterAction(seriesId, fileId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       setPosterUrl(result.imageUrl ?? null);
-      notifications.show({ message: tCommonNotifications('featuredImageUpdated'), color: 'green' });
+      notifications.show({ message: tCommonNotifications('featuredImageUpdated'), tone: 'positive' });
     },
   });
   const removePoster = useMutation({
     mutationFn: () => removeProgramEventSeriesPosterAction(seriesId),
     onSuccess: (result) => {
       if ('error' in result && result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       setPosterUrl(null);
       notifications.show({
         message: tCommonNotifications('featuredImageRemoved'),
-        color: 'yellow',
+        tone: 'positive',
       });
     },
   });
@@ -152,7 +154,7 @@ export function ProgramEventSeriesEditor({
   const flushPendingSaves = useCallback(async () => {
     const saved = await flushEditorSaves(`program_event_series:${seriesId}`);
     if (!saved) {
-      notifications.show({ message: tCommonNotifications('saveFailed'), color: 'red' });
+      notifications.show({ message: tCommonNotifications('saveFailed'), tone: 'danger' });
     }
     return saved;
   }, [seriesId, tCommonNotifications]);
@@ -205,8 +207,80 @@ export function ProgramEventSeriesEditor({
 
   const routePath = `/event-series/${slug || seriesId}`;
 
+  return {
+    title,
+    setTitle,
+    debouncedUpdate: (patch: Parameters<typeof debouncedUpdate>[0]) => debouncedUpdate(patch),
+    tCommon,
+    status,
+    statusOptions,
+    handleBack,
+    handleStatusChange,
+    handleDelete,
+    updateSeriesStatus: { isPending: updateSeriesStatus.isPending },
+    deleteSeries: { isPending: deleteSeries.isPending },
+    posterUrl,
+    isUploading,
+    uploadProgress,
+    removePoster: { isPending: removePoster.isPending, mutate: removePoster.mutate },
+    handleUpload,
+    tCommonEntities,
+    summary,
+    routePath,
+    canonicalOrigin,
+    siteName,
+    baseUrl,
+    seriesId,
+    slug,
+    setSlug,
+    updateSeries: { mutate: updateSeries.mutate },
+    setSummary,
+    description,
+    setDescription,
+  };
+}
+
+export function ProgramEventSeriesEditor(props: ProgramEventSeriesEditorProps) {
+  return <ProgramEventSeriesEditorView model={useProgramEventSeriesEditorViewModel(props)} />;
+}
+
+export type ProgramEventSeriesEditorViewModel = ReturnType<typeof useProgramEventSeriesEditorViewModel>;
+
+/** Complete production editor composition; controllers supply data and commands. */
+export function ProgramEventSeriesEditorView({ model }: { model: ProgramEventSeriesEditorViewModel }) {
+  const {
+    title,
+    setTitle,
+    debouncedUpdate,
+    tCommon,
+    status,
+    statusOptions,
+    handleBack,
+    handleStatusChange,
+    handleDelete,
+    updateSeriesStatus,
+    deleteSeries,
+    posterUrl,
+    isUploading,
+    uploadProgress,
+    removePoster,
+    handleUpload,
+    tCommonEntities,
+    summary,
+    routePath,
+    canonicalOrigin,
+    siteName,
+    baseUrl,
+    seriesId,
+    slug,
+    setSlug,
+    updateSeries,
+    setSummary,
+    description,
+    setDescription,
+  } = model;
   return (
-    <Stack gap="md">
+    <DsLayoutStack gap="md">
       <EditorHeader
         title={title}
         onTitleChange={(value) => {
@@ -224,12 +298,12 @@ export function ProgramEventSeriesEditor({
         deleteConfirmation={{
           title: tCommon('actions.delete'),
           message: (
-            <Text>
+            <DsText>
               {tCommon.rich('messages.confirmDeleteNamedRich', {
                 name: title || tCommon('states.untitled'),
                 strong: (chunks) => <strong>{chunks}</strong>,
               })}
-            </Text>
+            </DsText>
           ),
         }}
         isStatusChanging={updateSeriesStatus.isPending}
@@ -272,7 +346,7 @@ export function ProgramEventSeriesEditor({
       />
 
       <SectionCard>
-        <Stack gap="md">
+        <DsLayoutStack gap="md">
           <Textarea
             label={tCommon('labels.summary')}
             value={summary}
@@ -295,8 +369,8 @@ export function ProgramEventSeriesEditor({
             autosize
             minRows={6}
           />
-        </Stack>
+        </DsLayoutStack>
       </SectionCard>
-    </Stack>
+    </DsLayoutStack>
   );
 }

@@ -1,0 +1,25 @@
+.root {
+  width: 100%;
+  color: var(--geul-text-inverse-primary);
+}
+
+.root[data-placement='cover'] {
+  position: absolute;
+  inset: 0;
+}
+
+.root[data-shade='card'] {
+  background: var(--geul-overlay-card-gradient);
+}
+
+.root[data-shade='header'] {
+  background: var(--geul-overlay-header-gradient);
+}
+
+.root :global([data-core-typography][data-tone='primary']) {
+  color: var(--geul-text-inverse-primary);
+}
+
+.root :global([data-core-typography]:is([data-tone='secondary'], [data-tone='muted'])) {
+  color: var(--geul-text-inverse-secondary);
+}

@@ -1,8 +1,11 @@
 'use client';
+import { Text } from '../Typography';
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { Center, Stack, Text, type MantineColor } from '@mantine/core';
+import { LayoutStack } from '../Layout';
+
+import classes from './PageLoaderView.module.css';
 
 const IMAGE_SIZE_MAP: Record<PageLoaderViewSize, number> = {
   xs: 48,
@@ -21,7 +24,7 @@ export interface PageLoaderViewProps {
   minHeight?: string | number;
   size?: PageLoaderViewSize;
   /** Retained for caller compatibility. Configured images keep their colors. */
-  color?: MantineColor;
+
   message?: string;
   imageSrc?: string | null;
   imageAlt: string;
@@ -39,18 +42,17 @@ export function PageLoaderView({
 }: PageLoaderViewProps) {
   const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
   return (
-    <Center
+    <div
+      className={classes.root}
+      data-core-page-loader
       role="status"
       aria-label={imageAlt}
-      aria-busy="true"
       style={{
         height,
         minHeight,
-        position: 'absolute',
-        inset: 0,
       }}
     >
-      <Stack align="center" gap="sm">
+      <LayoutStack align="center" gap="sm">
         {imageSrc && imageSrc !== failedImageSrc ? (
           <Image
             src={imageSrc}
@@ -62,11 +64,11 @@ export function PageLoaderView({
           />
         ) : null}
         {message ? (
-          <Text size="sm" c="dimmed">
+          <Text size="xs" tone="muted" align="center">
             {message}
           </Text>
         ) : null}
-      </Stack>
-    </Center>
+      </LayoutStack>
+    </div>
   );
 }

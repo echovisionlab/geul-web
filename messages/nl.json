@@ -1,6 +1,7 @@
 {
   "common": {
     "actions": {
+      "move": "Verplaatsen",
       "save": "Opslaan",
       "saveChanges": "Wijzigingen opslaan",
       "create": "Aanmaken",
@@ -59,7 +60,7 @@
       "reply": "Antwoorden",
       "insertVariable": "Variabele invoegen",
       "acceptAll": "Alles accepteren",
-      "rejectNonEssential": "Niet-essentiële weigeren",
+      "rejectNonEssential": "Weigeren",
       "savePreferences": "Voorkeuren opslaan",
       "import": "Importeren",
       "export": "Exporteren",
@@ -127,10 +128,7 @@
       "file": "Bestand",
       "bio": "Biografie",
       "realName": "Echte naam",
-      "countryCode": "Landcode",
       "slug": "Slug",
-      "slugAutoModeEnabled": "Automatisch synchroniseren met titel (klik om uit te schakelen)",
-      "slugAutoModeManual": "Handmatige modus (klik om automatisch synchroniseren in te schakelen)",
       "submissions": "Inzendingen",
       "public": "Openbaar",
       "location": "Locatie",
@@ -162,7 +160,6 @@
       "logoLight": "Licht logo",
       "logoDark": "Donker logo",
       "joined": "Lid sinds",
-      "subscribed": "Geabonneerd",
       "featured": "Uitgelicht",
       "order": "Volgorde",
       "sortOrder": "Sorteervolgorde",
@@ -177,7 +174,6 @@
       "minutes": "Minuten",
       "seconds": "Seconden",
       "time": "Tijd",
-      "generationInfo": "Generatie-informatie",
       "body": "Body",
       "content": "Inhoud",
       "bodyPreview": "Inhoudsvoorbeeld",
@@ -280,6 +276,7 @@
     },
     "messages": {
       "noUsersFound": "Geen gebruikers gevonden.",
+      "noAuthorsFound": "Geen auteurs gevonden.",
       "noVersionsFound": "Geen versies gevonden.",
       "typeAtLeast2Characters": "Typ minstens 2 tekens",
       "itemCreated": "{item} aangemaakt",
@@ -294,25 +291,23 @@
       "removeImageFailed": "Afbeelding verwijderen mislukt",
       "deleteItemConfirm": "Weet je zeker dat je deze {item} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
       "deleteNamedItemConfirm": "Weet je zeker dat je \"{name}\" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
-      "confirmDeleteSelectedCount": "Weet je zeker dat je {count} geselecteerde items wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
-      "deleteDraftVersionConfirm": "Weet je zeker dat je deze conceptversie wilt verwijderen?",
+      "confirmDeleteSelectedCount": "Weet je zeker dat je {count, plural, one {# geselecteerd item} other {# geselecteerde items}} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
       "confirmDeleteNamedRich": "Weet je zeker dat je <strong>{name}</strong> wilt verwijderen?",
-      "activeCount": "{count} actief",
       "effectiveFromDate": "Van kracht vanaf {date}",
       "noUpdateRecorded": "Geen update vastgelegd",
-      "exportedEmails": "Geëxporteerde {count, plural, one {# e-mail} other {# e-mails}}",
       "formSubmittedSuccessfully": "Je reactie is succesvol verzonden.",
       "userDate": "{user} · {date}",
       "scheduleActivationTitle": "Activering plannen",
       "scheduleActivationDescription": "Selecteer wanneer deze versie actief moet worden. Wanneer ingepland, worden meldingsmails naar alle actieve accounts verzonden.",
       "scheduleActivationNotice": "Plannen verstuurt meldingsmails naar alle actieve accounts met een voorbeeldlink.",
-      "translationDetailUnavailable": "Het laden van gedetailleerde vertaalgegevens is mislukt. Je kunt de huidige openbare vertaling nog steeds bewerken.",
       "invalidConfirmationLinkFromEmail": "Ongeldige bevestigingslink. Gebruik de link uit je bevestigingsmail.",
       "noPostsFound": "Geen berichten gevonden.",
       "noWorksFound": "Geen werken gevonden.",
-      "urlCopiedToClipboard": "URL naar klembord gekopieerd",
       "failedToLoad": "De gegevens konden niet worden geladen.",
-      "relatedItemsWillBeUnlinked": "{count} gekoppelde items worden ontkoppeld."
+      "relatedItemsWillBeUnlinked": "{count} gekoppelde items worden ontkoppeld.",
+      "noArtistsFound": "Geen artiesten gevonden.",
+      "noLabelsFound": "Geen labels gevonden.",
+      "noReleasesFound": "Geen releases gevonden."
     },
     "notifications": {
       "categoryCreated": "Categorie aangemaakt",
@@ -372,8 +367,6 @@
       "testEmail": "test@voorbeeld.com",
       "testEmailExample": "test@example.com",
       "noReplyEmail": "noreply@example.com",
-      "translationLiveRowMissing": "Er bestaat nog geen openbare vertaling voor deze taal. Door hier op te slaan, maak je er direct een aan.",
-      "translationBodyPreviewUnavailable": "Inhoudsvoorbeeld is niet beschikbaar.",
       "selectDateAndTime": "Selecteer datum en tijd",
       "streetAddress": "Straatadres",
       "regionSubdivision": "Provincie/deelstaat"
@@ -408,12 +401,11 @@
       "generating": "Genereren...",
       "true": "Waar",
       "false": "Onwaar",
-      "loading": "Laden..."
+      "loading": "Laden...",
+      "toBeAnnounced": "Wordt aangekondigd"
     },
     "roles": {
       "admin": "Beheerder",
-      "editor": "Redacteur",
-      "viewer": "Kijker",
       "author": "Auteur",
       "user": "Gebruiker"
     },
@@ -445,6 +437,11 @@
       "unsubscribed": "Uitgeschreven",
       "subscribed": "Geabonneerd",
       "onboardingPending": "Onboarding niet voltooid"
+    },
+    "motion": {
+      "pause": "Animatie pauzeren",
+      "resume": "Animatie hervatten",
+      "readAllInformation": "Alle scène-informatie lezen"
     }
   },
   "shell": {
@@ -931,7 +928,6 @@
     },
     "mapThemes": {
       "empty": "Geen kaartthema's gevonden.",
-      "notFound": "Kaartthema niet gevonden.",
       "loadFailed": "Kaartthema's konden niet worden geladen.",
       "defaultDisabled": "Dit is al het standaardthema.",
       "deleteDisabled": {
@@ -939,9 +935,7 @@
         "last": "Het laatste kaartthema kan niet worden verwijderd."
       },
       "reloadRequired": {
-        "title": "Opnieuw laden vereist",
-        "message": "Dit thema is vanuit een nieuwere revisie opgeslagen. Laad opnieuw voordat je verdergaat.",
-        "action": "Opnieuw laden"
+        "title": "Opnieuw laden vereist"
       },
       "variants": {
         "light": "Licht",
@@ -972,8 +966,7 @@
       },
       "editor": {
         "notifications": {
-          "defaultSet": "Thema als standaard ingesteld",
-          "variantRequired": "Er is minstens één variant (licht of donker) vereist"
+          "defaultSet": "Thema als standaard ingesteld"
         },
         "controls": {
           "map": {
@@ -1310,7 +1303,6 @@
     },
     "verification": {
       "loading": "Loading verification form...",
-      "redirecting": "Redirecting...",
       "startOver": "Start over",
       "errors": {
         "flowNotFound": "Verification flow not found or expired",
@@ -1373,21 +1365,14 @@
   "featuredImage": {
     "label": "Uitgelichte afbeelding",
     "alt": "Uitgelichte afbeelding",
-    "hint": "Klik op de afbeelding om te vervangen",
     "cropTitle": "Uitgelichte afbeelding bijsnijden",
-    "empty": {
-      "editable": "Sleep hierheen of klik om te uploaden ({ratio})",
-      "readOnly": "Geen afbeelding"
-    },
     "errors": {
       "fileRejected": "Bestand afgewezen",
       "fileTooLarge": "Bestand te groot. Maximale grootte: {maxSize}",
       "invalidFileType": "Ongeldig bestandstype"
     },
     "actions": {
-      "changeAria": "Uitgelichte afbeelding wijzigen",
-      "removeAria": "Uitgelichte afbeelding verwijderen",
-      "remove": "Afbeelding verwijderen"
+      "removeAria": "Uitgelichte afbeelding verwijderen"
     }
   },
   "artistPage": {
@@ -1495,7 +1480,6 @@
       "slug": "artiest-slug",
       "name": "Artiestennaam / naam van artiest",
       "realName": "Juridische naam (optioneel)",
-      "countryCode": "bijv. US, KR, JP",
       "labels": "Labels selecteren...",
       "parentArtist": "Bovenliggende artiest selecteren..."
     },
@@ -1518,15 +1502,7 @@
     },
     "placeholders": {
       "name": "Labelnaam",
-      "countryCode": "bijv. DE, US, KR",
       "parentLabel": "Bovenliggend label selecteren (optioneel)"
-    }
-  },
-  "workCollaborators": {
-    "empty": "Nog geen medewerkers",
-    "notifications": {
-      "added": "Medewerker toegevoegd",
-      "removed": "Medewerker verwijderd"
     }
   },
   "comments": {
@@ -1585,17 +1561,6 @@
     "credits": {
       "other": "Overig"
     },
-    "music": {
-      "released": "Uitgebracht: {value}",
-      "spotify": "Spotify",
-      "bandcamp": "Bandcamp",
-      "soundcloud": "SoundCloud",
-      "youtube": "YouTube",
-      "openSpotify": "Spotify openen",
-      "openBandcamp": "Bandcamp openen",
-      "openSoundcloud": "SoundCloud openen",
-      "openYoutube": "YouTube openen"
-    },
     "portfolio": {
       "tech": "Techniek:"
     },
@@ -1643,7 +1608,6 @@
     }
   },
   "cookieConsentCommon": {
-    "essentialLabel": "Essentiële cookies (altijd actief)",
     "analyticsLabel": "Analytische cookies (Google Analytics)"
   },
   "nicknameField": {
@@ -1690,7 +1654,6 @@
       "failedToRevokeSession": "Sessie intrekken mislukt",
       "failedToRevokeSessions": "Sessies intrekken mislukt",
       "failedToRequestDeletion": "Accountverwijdering aanvragen mislukt",
-      "cannotUnlinkMessage": "Je moet minstens één authenticatiemethode hebben",
       "connectedMessage": "{provider}-account succesvol gekoppeld.",
       "disconnectedMessage": "{provider} is ontkoppeld.",
       "failedToUpdateMainEmail": "Primair e-mailadres bijwerken mislukt",
@@ -1739,21 +1702,11 @@
     "email": {
       "title": "Primair e-mailadres",
       "description": "Kies uit de geverifieerde adressen het e-mailadres voor meldingen en accountberichten.",
-      "addEmail": "E-mailadres toevoegen",
       "canonical": "Primair e-mailadres",
-      "canonicalCannotRemove": "Kies een ander primair e-mailadres voordat je dit adres verwijdert.",
       "setCanonical": "Instellen als primair e-mailadres",
-      "noEmail": "Geen e-mailadres ingesteld",
-      "helper": "Er is slechts één geverifieerd adres beschikbaar als primair e-mailadres.",
-      "selectLabel": "Primair e-mailadres",
       "changeAction": "Primair e-mailadres wijzigen",
       "sources": {
-        "current": "Huidig primair e-mailadres",
-        "emailCode": "E-mail",
-        "pending": "Verificatie in behandeling"
-      },
-      "messages": {
-        "pendingVerification": "Voor dit e-mailadres staat verificatie al open. Je kunt de verificatiemail opnieuw versturen."
+        "emailCode": "E-mail"
       },
       "mainEmailUpdated": "Primair e-mailadres bijgewerkt.",
       "canonicalUpdated": "Primair e-mailadres bijgewerkt."
@@ -1812,8 +1765,6 @@
       "added": "Toegevoegd op {date}",
       "lastMethod": "Voeg een andere aanmeldmethode toe voordat je deze passkey verwijdert.",
       "removeNamed": "Passkey {name} verwijderen",
-      "reauth": "Meld je opnieuw aan voordat je passkeys wijzigt.",
-      "reauthAction": "Opnieuw aanmelden",
       "errors": {
         "load": "Passkeys konden niet worden geladen.",
         "remove": "Deze passkey kon niet worden verwijderd.",
@@ -1834,7 +1785,6 @@
   },
   "seriesDetail": {
     "slug": {
-      "autoDescription": "Automatische modus: titelwijzigingen werken de slug automatisch bij.",
       "manualDescription": "Handmatige modus: de slug blijft vast totdat je hem bewerkt of de automatische modus opnieuw inschakelt."
     },
     "notifications": {
@@ -1870,10 +1820,6 @@
     }
   },
   "works": {
-    "tabs": {
-      "editable": "Bewerkbaar"
-    },
-    "emptyEditable": "Er zijn geen bewerkbare werken aan je toegewezen.",
     "emptyCredits": "Geen werken met credits gevonden.",
     "columns": {
       "creditedAs": "Vermeld als",
@@ -1995,6 +1941,7 @@
         "patternPlaceholder": "bijv. ^[A-Z]{3}$",
         "customErrorMessage": "Aangepaste foutmelding",
         "optional": "Optioneel",
+        "dragValidator": "Validatieregel slepen",
         "removeValidator": "Validatieregel verwijderen"
       },
       "fieldTypes": {
@@ -2062,10 +2009,6 @@
       }
     },
     "settings": {
-      "notifications": {
-        "managerAdded": "Formulierbeheerder toegevoegd",
-        "managerRemoved": "Formulierbeheerder verwijderd"
-      },
       "urlPublic": {
         "title": "URL en openbare toegang",
         "allowPublic": "Openbare URL-toegang toestaan",
@@ -2085,13 +2028,7 @@
         "description": "Deel dashboardlinks om formulierstatistieken zonder beheerderstoegang te bekijken"
       },
       "managers": {
-        "adminControls": "Beheeropties",
-        "readOnly": "Alleen lezen",
-        "description": "Beheerders kunnen dit formulier bewerken, inzendingen bekijken en deellinks beheren.",
-        "searchPlaceholder": "Zoek gebruikers om beheerder toe te voegen...",
-        "adminOnly": "Alleen beheerders kunnen beheerders toevoegen of verwijderen.",
-        "empty": "Nog geen beheerders toegewezen.",
-        "removeManager": "Beheerder {name} verwijderen"
+        "description": "Beheerders kunnen dit formulier bewerken, inzendingen bekijken en deellinks beheren."
       },
       "access": {
         "title": "Toegangsbeheer",
@@ -2120,7 +2057,11 @@
   "dataTable": {
     "aria": {
       "sortBy": "Sorteer op {label}",
-      "rowActions": "Acties voor {label}"
+      "rowActions": "Acties voor {label}",
+      "selectAllRows": "Alle rijen selecteren",
+      "selectRow": "{label} selecteren",
+      "resultSummary": "{totalPages, plural, =0 {{count, plural, one {# resultaat} other {# resultaten}}} other {{count, plural, one {# resultaat} other {# resultaten}}, pagina {page} van {totalPages}}}",
+      "loadingMessage": "Laden"
     },
     "sort": {
       "button": "Sorteren",
@@ -2133,7 +2074,9 @@
         "moveUp": "{label} omhoog verplaatsen",
         "moveDown": "{label} omlaag verplaatsen",
         "toggleDirection": "Sorteerrichting voor {label} omkeren",
-        "removeSort": "Sortering voor {label} verwijderen"
+        "removeSort": "Sortering voor {label} verwijderen",
+        "directionAscending": "Momenteel oplopend",
+        "directionDescending": "Momenteel aflopend"
       }
     },
     "filter": {
@@ -2148,7 +2091,8 @@
       "drawerTitle": "Filter",
       "aria": {
         "backToFields": "Terug naar filtervelden",
-        "removeFilter": "Filter voor {label} verwijderen"
+        "removeFilter": "Filter voor {label} verwijderen",
+        "logic": "Combinatie van filters"
       },
       "operators": {
         "eq": "gelijk aan",
@@ -2181,7 +2125,8 @@
       "previousPage": "Vorige pagina",
       "nextPage": "Volgende pagina",
       "lastPage": "Laatste pagina",
-      "page": "Pagina {page}"
+      "page": "Pagina {page}",
+      "navigation": "Paginanavigatie"
     }
   },
   "versionHistory": {
@@ -2193,7 +2138,9 @@
     "restoreTitle": "Versie herstellen",
     "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
     "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document."
+    "restoreFailed": "Failed to restore the source document.",
+    "loadFailed": "De versiegeschiedenis kon niet worden geladen.",
+    "end": "Alle versies zijn geladen."
   },
   "shareLinks": {
     "title": "Deellinks",
@@ -2203,7 +2150,6 @@
     "createError": "Link aanmaken mislukt",
     "deleteSuccess": "Link verwijderd",
     "deleteError": "Link verwijderen mislukt",
-    "invalidUrl": "Ongeldige URL",
     "noLinks": "Nog geen links aangemaakt",
     "showLess": "Minder tonen",
     "showMore": "Toon {count} meer",
@@ -2218,21 +2164,9 @@
     "passwordPlaceholder": "Laat leeg om geen wachtwoord te gebruiken",
     "maximumExpiration": "De maximale vervaltijd is één jaar",
     "expirationInvalid": "Kies een geldige toekomstige vervaltijd",
-    "bypassFormPassword": "Formulierwachtwoord omzeilen",
-    "bypassFormPasswordDescription": "Als dit uit staat, moet de kijker het formulierwachtwoord invoeren",
-    "bypassAuthentication": "Authenticatie omzeilen",
-    "bypassAuthenticationDescription": "Als dit aan staat, slaat de deellink de loginvereiste over",
-    "bypassRoleChecks": "Rollencontrole omzeilen",
-    "bypassRoleChecksDescription": "Als dit aan staat, slaat de deellink de controle op toegestane rollen over",
     "policies": {
-      "passwordBypass": "Wachtwoord omzeilen",
-      "passwordRequired": "Wachtwoord vereist",
       "passwordProtected": "Met wachtwoord beveiligd",
-      "noPassword": "Geen wachtwoord",
-      "authBypass": "Authenticatie omzeilen",
-      "authEnforced": "Authenticatie vereist",
-      "roleBypass": "Rollen omzeilen",
-      "roleEnforced": "Rollen vereist"
+      "noPassword": "Geen wachtwoord"
     },
     "expirationBadge": {
       "expired": "Verlopen",
@@ -2264,7 +2198,9 @@
     "label": "Sociale links",
     "addLink": "Link toevoegen",
     "platformPlaceholder": "Platform",
-    "valuePlaceholder": "URL of gebruikersnaam"
+    "valuePlaceholder": "URL of gebruikersnaam",
+    "reorderInstructions": "Gebruik de pijltoetsen omhoog en omlaag om de positie van deze link te wijzigen.",
+    "positionChanged": "Link verplaatst naar positie {position} van {count}."
   },
   "termsPage": {
     "active": {
@@ -2424,7 +2360,6 @@
     }
   },
   "releasePage": {
-    "previewTitle": "Releasevoorvertoning",
     "streaming": "Streamen",
     "metadata": {
       "fallbackDescription": "{title}",
@@ -2494,8 +2429,7 @@
         "title": "Track toevoegen"
       },
       "placeholders": {
-        "title": "Tracktitel",
-        "durationSeconds": "bijv. 240"
+        "title": "Tracktitel"
       },
       "deleteConfirm": "Weet je zeker dat je deze track wilt verwijderen?",
       "creditsModal": {
@@ -2517,8 +2451,7 @@
   "contentMetadata": {
     "preview": {
       "page": "Paginavoorvertoning",
-      "post": "Berichtvoorvertoning",
-      "work": "Werkvoorvertoning"
+      "post": "Berichtvoorvertoning"
     }
   },
   "editorMetadata": {
@@ -2541,8 +2474,6 @@
   "postHeader": {
     "actions": {
       "editPost": "Bericht bewerken",
-      "sharePost": "Bericht delen",
-      "printPost": "Bericht afdrukken",
       "exportMarkdown": "Bericht exporteren als Markdown"
     }
   },
@@ -2551,7 +2482,6 @@
     "intro": "We gebruiken essentiële cookies voor authenticatie en sitewerking, en optionele analysecookies om het gebruik van de site te begrijpen",
     "learnMore": "Bekijk ons <privacy>Privacybeleid</privacy> en onze <terms>Servicevoorwaarden</terms>",
     "actions": {
-      "hidePreferences": "Voorkeuren verbergen",
       "customize": "Aanpassen"
     }
   },
@@ -2569,7 +2499,6 @@
   },
   "locationSelector": {
     "placeholder": "Locatie selecteren...",
-    "clearSelection": "Geselecteerde plaats wissen",
     "emptySearch": "Zoek naar een kaartlocatie",
     "emptyResults": "Geen plaatsen gevonden"
   },
@@ -2602,9 +2531,6 @@
     "actions": {
       "copyId": "ID kopiëren",
       "copyUrl": "URL kopiëren"
-    },
-    "notifications": {
-      "copied": "{label} gekopieerd"
     }
   },
   "formValidation": {
@@ -2644,7 +2570,7 @@
   },
   "ogImagePreview": {
     "alt": "Open Graph-voorbeeld",
-    "empty": "OG-afbeelding nog niet gegenereerd",
+    "empty": "Geen OG-afbeelding",
     "actions": {
       "regenerate": "OG-afbeelding opnieuw genereren"
     },
@@ -2768,7 +2694,6 @@
     "scheduleModal": {
       "description": "Kies een datum en tijd om deze campagne te verzenden.",
       "dateLabel": "Geplande datum en tijd",
-      "datePlaceholder": "Datum en tijd kiezen",
       "previousMonth": "Vorige maand",
       "nextMonth": "Volgende maand",
       "audience": "Doelgroep: {audience}",
@@ -2858,7 +2783,6 @@
       "notFoundMessage": "Geen categorieën gevonden"
     },
     "seriesSelector": {
-      "searchPlaceholder": "Zoeken of aanmaken...",
       "states": {
         "empty": "Geen series beschikbaar",
         "select": "Serie selecteren...",
@@ -2871,14 +2795,12 @@
       },
       "notifications": {
         "assigned": "Bericht aan serie toegewezen",
-        "reorderFailed": "Serie herschikken mislukt",
         "createFailed": "Serie kon niet worden aangemaakt",
         "seriesUnavailable": "Deze serie kan niet meer worden beheerd. De vorige toewijzing is behouden.",
         "updateFailed": "De serie van het bericht kon niet worden gewijzigd. De vorige toewijzing is behouden."
       }
     },
     "notifications": {
-      "slugUpdateFailed": "Slug bijwerken mislukt",
       "deleted": "Bericht verwijderd",
       "published": "Bericht gepubliceerd",
       "unpublished": "Bericht ongepubliceerd",
@@ -3065,10 +2987,6 @@
     "pinned": "Vastgezet"
   },
   "pageEditor": {
-    "localRecovery": {
-      "message": "Je lokale bewerkingskopie is bewaard vóór het opnieuw verbinden. Download deze voordat je herlaadt of vertrekt.",
-      "action": "Herstelkopie downloaden"
-    },
     "shareLinksDescription": "Voorbeeldlinks voor ongepubliceerde pagina's",
     "showTitleOnPage": "Titel op pagina tonen",
     "slugValidation": {
@@ -3139,6 +3057,9 @@
       }
     },
     "columnsEditor": {
+      "labels": {
+        "ratio": "Kolomverhouding"
+      },
       "badges": {
         "columnCount": "{count} kolommen"
       },
@@ -3163,16 +3084,14 @@
       "menuLabel": "Sectie toevoegen",
       "emptyColumn": "Lege kolom - klik op + om inhoud toe te voegen",
       "actions": {
-        "addSectionToColumn": "Sectie toevoegen aan kolom {index}",
-        "removeSectionFromColumn": "Sectie {section} verwijderen uit kolom {index}"
+        "addSectionToColumn": "Sectie toevoegen aan kolom {index}"
       }
     },
     "notifications": {
       "published": "Pagina gepubliceerd",
       "unpublished": "Pagina ongepubliceerd",
       "deleted": "Pagina verwijderd",
-      "slugUpdateFailed": "Slug van pagina bijwerken mislukt",
-      "confirmSummaryFailed": "Bevestigen van samenvattingsupdate mislukt"
+      "slugUpdateFailed": "Slug van pagina bijwerken mislukt"
     },
     "mapEditor": {
       "title": "Kaart",
@@ -3217,7 +3136,6 @@
         "content": "Inhoud",
         "marqueeBehavior": "Marquee-gedrag",
         "scenePlayback": "Playback",
-        "sceneRender": "Renderer",
         "sceneMotion": "Motion",
         "sceneUnits": "Units",
         "sceneSettings": "Scene",
@@ -3234,7 +3152,6 @@
         "columns": "Kolommen",
         "infiniteLoop": "Oneindige lus",
         "showIndicators": "Indicatoren tonen",
-        "showFeaturedImage": "Uitgelichte afbeelding tonen",
         "imageAspectRatio": "Beeldverhouding",
         "showMeta": "Metadata tonen (datum, auteur)",
         "sortBy": "Sorteren op",
@@ -3253,7 +3170,6 @@
         "showImage": "Afbeelding tonen",
         "selectForm": "Formulier selecteren",
         "showFormTitle": "Formuliertitel tonen",
-        "showTitle": "Titel tonen",
         "numberOfWorks": "Aantal werken",
         "numberOfReleases": "Aantal releases",
         "numberOfProgramEvents": "Aantal events",
@@ -3323,7 +3239,10 @@
         "textColorSource": "Text color",
         "lightTextColor": "Light text",
         "darkTextColorSource": "Dark text",
-        "darkTextColor": "Dark text color"
+        "darkTextColor": "Dark text color",
+        "itemSize": "Itemgrootte",
+        "showAvatar": "Avatar tonen",
+        "maxLabels": "Maximaal aantal labels"
       },
       "fieldLabels": {
         "year": "Jaar",
@@ -3334,11 +3253,7 @@
       },
       "badges": {
         "posts": "{count} berichten",
-        "rows": "{count} rijen",
-        "authors": "{count} auteurs",
-        "artists": "{count} artiesten",
-        "works": "{count} werken",
-        "releases": "{count} releases"
+        "rows": "{count} rijen"
       },
       "placeholders": {
         "publishedByDefault": "Standaard gepubliceerd",
@@ -3358,7 +3273,6 @@
           "auto": "Automatisch"
         },
         "sortBy": {
-          "dateAdded": "Datum toegevoegd",
           "startDate": "Startdatum",
           "endDate": "Einddatum",
           "publishedDate": "Publicatiedatum",
@@ -3367,9 +3281,7 @@
         },
         "sortOrder": {
           "newest": "Nieuwste",
-          "oldest": "Oudste",
-          "azOldest": "A-Z / oudste",
-          "zaNewest": "Z-A / nieuwste"
+          "oldest": "Oudste"
         },
         "mapPrimaryLabel": {
           "placeName": "Plaatsnaam"
@@ -3443,6 +3355,11 @@
           "theme": "Follow theme",
           "custom": "Custom",
           "inherit": "Follow light"
+        },
+        "itemSize": {
+          "s": "S · Compact",
+          "m": "M · Standaard",
+          "l": "L · Groot"
         }
       },
       "actions": {
@@ -3453,8 +3370,6 @@
         "moveUnitUp": "Move unit up",
         "moveUnitDown": "Move unit down",
         "removeSceneUnit": "Remove unit",
-        "expandSceneUnit": "Expand unit",
-        "collapseSceneUnit": "Collapse unit",
         "replaceMesh": "Replace GLB",
         "uploadMesh": "Upload GLB",
         "clearMeshAsset": "Clear mesh asset",
@@ -3493,6 +3408,12 @@
         "meshOptimizationCancelled": "Cancelled",
         "optimizedMeshCleanupFailed": "Optimized asset reference removed, but cleanup failed: {error}",
         "optimizedMeshCleanupFailedDefault": "Optimized asset reference removed, but cleanup failed"
+      },
+      "authorSelection": {
+        "maxSelected": "Er kunnen maximaal {count} auteurs worden geselecteerd.",
+        "empty": "Geen auteurs geselecteerd. Dit blok blijft leeg.",
+        "unavailable": "Deze auteur is niet meer beschikbaar.",
+        "unavailableWarning": "Niet-beschikbare auteurs worden niet op de openbare pagina getoond. Verwijder ze of kies een vervanger."
       }
     },
     "embed": {
@@ -3545,8 +3466,6 @@
       "matchDescription": "Combineer de geselecteerde groepen voor rollen, tags en nieuwsbrief.",
       "any": "Een van de geselecteerde groepen",
       "all": "Alle geselecteerde groepen",
-      "roles": "Rollen",
-      "rolesDescription": "Een van de geselecteerde rollen is voldoende.",
       "roleUser": "Leden",
       "memberDescription": "Alleen aangemelde leden kunnen deze pagina bekijken.",
       "authorDescription": "Leden met de auteursrol.",
@@ -3574,13 +3493,23 @@
       "restrictedTitle": "Je hebt geen toegang tot deze pagina",
       "restrictedDescription": "Je account voldoet niet aan de toegangsvoorwaarden voor deze pagina.",
       "signIn": "Aanmelden"
+    },
+    "a11y": {
+      "sectionPosition": "{section} · {index}/{count}",
+      "dragInstructions": "Druk op de spatiebalk om te verplaatsen en gebruik de pijltoetsen om de positie te wijzigen. Druk op de spatiebalk om te bevestigen of Escape om te annuleren.",
+      "dragStart": "{section} · Verplaatsen · Bezig · {index}/{count}",
+      "dragOver": "{section} · Verplaatsen · {index}/{count}",
+      "dragEnd": "{section} · Verplaatsen · Bevestigen · {index}/{count}",
+      "dragCancel": "{section} · Verplaatsen · Geannuleerd",
+      "sectionDeleted": "{section} verwijderd",
+      "sectionAdded": "{section} aangemaakt · {index}/{count}",
+      "columnsPosition": "{column} · {section} · {index}/{count}"
     }
   },
   "editorCommon": {
     "reloadRequired": {
       "title": "Opnieuw laden vereist",
-      "message": "Er is een nieuwere versie opgeslagen terwijl deze editor openstond. Laad opnieuw voordat je verdergaat.",
-      "action": "Opnieuw laden"
+      "message": "Er is een nieuwere versie opgeslagen terwijl deze editor openstond. Laad opnieuw voordat je verdergaat."
     },
     "permissionRevoked": {
       "title": "Bewerkingsrechten ingetrokken",
@@ -3640,7 +3569,6 @@
         "mute": "Audio dempen",
         "unmute": "Audio inschakelen",
         "volume": "Audiovolume",
-        "original": "Origineel",
         "waveform": "Golfvorm",
         "spectrogram": "Spectrogram",
         "spectrogramAlt": "Audio-spectrogram",
@@ -3657,10 +3585,8 @@
         "addItem": "{item} toevoegen",
         "replaceItem": "{item} vervangen",
         "browse": "Bestanden kiezen",
-        "or": "OR",
         "importFromUrl": "Importeren via URL",
         "directVideoUrlHelp": "Alleen rechtstreekse URL's naar videobestanden. Gebruik Externe video voor YouTube of Vimeo.",
-        "confirm": "Insluiten",
         "resumeAvailable": "Interrupted upload found",
         "resumeInstructionNamed": "Select {name} again to continue the upload from where it stopped.",
         "backToUpload": "Bestanden uploaden",
@@ -3756,11 +3682,8 @@
       }
     },
     "mapBlock": {
-      "clickToAddPlace": "Klik om een plaats toe te voegen",
       "captionPlaceholder": "Bijschrift toevoegen...",
-      "clickToAddCaption": "Klik om een bijschrift toe te voegen",
-      "externalPlaceholder": "Kaart: {count} {count, plural, one {plaats} other {plaatsen}}",
-      "viewOnGoogleMaps": "Bekijken in Google Maps ({lat}, {lng})"
+      "clickToAddCaption": "Klik om een bijschrift toe te voegen"
     },
     "mapPlacesModal": {
       "title": "Plaatsen beheren",
@@ -3770,22 +3693,9 @@
       "centeredTitle": "Gecentreerd",
       "setAsCenterTitle": "Instellen als middelpunt"
     },
-    "blockAlign": {
-      "left": "Links uitlijnen",
-      "center": "Centreren",
-      "right": "Rechts uitlijnen"
-    },
-    "mathInline": {
-      "clickToEdit": "Klik om te bewerken",
-      "convertToBlock": "Omzetten naar blok"
-    },
-    "mathInlineButton": {
-      "label": "Inline-wiskunde"
-    },
     "editor": {
       "slashMenu": {
         "placeholder": "Typ '/' voor opdrachten",
-        "empty": "Geen items",
         "unavailable": "Niet beschikbaar",
         "groups": {
           "headings": "Koppen",
@@ -3950,9 +3860,6 @@
         "alignLeft": "Links uitlijnen",
         "alignCenter": "Centreren",
         "alignRight": "Rechts uitlijnen",
-        "alignJustify": "Tekst uitvullen",
-        "textColor": "Tekst",
-        "backgroundColor": "Achtergrond",
         "nest": "Nest blok",
         "unnest": "Ontnest blok",
         "inlineMath": "Inline-wiskunde",
@@ -3967,36 +3874,19 @@
         "urlPlaceholder": "Bewerk URL"
       },
       "math": {
-        "inline": "Inline-wiskunde",
-        "block": "Wiskundeblok",
-        "clickToEdit": "Klik om te bewerken",
-        "convertToBlock": "Omzetten naar blok"
+        "selectBlock": "Wiskundeblok selecteren",
+        "block": "Wiskundeblok"
       },
       "file": {
-        "add": "{item} toevoegen",
         "replace": "{item} vervangen",
-        "delete": "Verwijderen",
-        "download": "Downloaden",
-        "caption": "Bijschrift toevoegen...",
-        "upload": "Bestanden uploaden",
-        "embed": "Insluiten",
-        "urlPlaceholder": "Bewerk URL"
+        "delete": "Verwijderen"
       },
       "resize": {
-        "image": "Formaat wijzigen — Afbeelding",
-        "audio": "Formaat wijzigen — Audio",
-        "video": "Formaat wijzigen — Video",
-        "file": "Formaat wijzigen — Bijlage",
         "map": "Formaat wijzigen — Kaart",
-        "externalVideo": "Formaat wijzigen — Externe video",
-        "p5Sketch": "Formaat wijzigen — p5.js",
-        "threeScene": "Formaat wijzigen — Three.js",
-        "dragHandle": "Sleep om het formaat te wijzigen",
-        "shader": "Formaat wijzigen — GLSL-shader"
+        "externalVideo": "Formaat wijzigen — Externe video"
       },
       "drag": {
         "openBlockMenu": "Open blok menu",
-        "addBlock": "Nieuw blok",
         "delete": "Verwijder",
         "colors": "Kleuren"
       },
@@ -4028,7 +3918,6 @@
         "toggleHeaderColumn": "Kopkolom",
         "selectRow": "Rij selecteren",
         "selectColumn": "Kolom selecteren",
-        "selectCells": "Geselecteerde cellen",
         "selectTable": "Tabel selecteren",
         "deleteTable": "Tabel verwijderen",
         "mergeCells": "Voeg cellen samen",
@@ -4042,17 +3931,11 @@
         "unavailable": "Niet beschikbaar"
       },
       "map": {
-        "insert": "Kaart",
-        "clickToAddPlace": "Klik om een plaats toe te voegen",
-        "captionPlaceholder": "Bijschrift toevoegen...",
         "managePlaces": "Plaatsen beheren"
       },
       "embeds": {
         "map": "Kaart",
-        "externalVideo": "Externe video",
-        "p5Sketch": "p5.js",
-        "threeScene": "Three.js",
-        "shader": "GLSL-shader"
+        "externalVideo": "Externe video"
       },
       "runtimeLabels": {
         "code": {
@@ -4139,12 +4022,7 @@
         }
       },
       "media": {
-        "browse": "Bestanden kiezen",
-        "importFromUrl": "Importeren via URL",
-        "embed": "Insluiten",
-        "openLibrary": "Bestandsbibliotheek",
-        "uploadFiles": "Bestanden uploaden",
-        "selectFile": "Selecteer een bestand"
+        "importFromUrl": "Importeren via URL"
       }
     }
   },
@@ -4170,7 +4048,6 @@
       "brainstorm": "Brainstormen"
     },
     "sections": {
-      "original": "Origineel",
       "result": "AI-resultaat"
     },
     "actions": {
@@ -4220,8 +4097,7 @@
       "pinClickable": "Pin klikbaar"
     },
     "themeOptions": {
-      "none": "Geen",
-      "systemSuffix": "(Systeem)"
+      "none": "Geen"
     },
     "scheme": {
       "auto": "Automatisch",
@@ -4237,13 +4113,7 @@
     "copyValueTitle": "Klik om de waarde van {label} te kopiëren"
   },
   "postMembers": {
-    "removeAria": "Verwijderen: {name}",
-    "roles": {
-      "owner": "Eigenaar"
-    },
-    "states": {
-      "memberFallback": "lid"
-    }
+    "removeAria": "Verwijderen: {name}"
   },
   "workCredits": {
     "divider": "of credit toevoegen",
@@ -4275,9 +4145,6 @@
     "emptyResults": {
       "artist": "Geen artiesten gevonden",
       "name": "Geen namen gevonden"
-    },
-    "states": {
-      "unknownInitial": "?"
     },
     "notifications": {
       "groupCreated": "Groep gemaakt",
@@ -4334,13 +4201,11 @@
       }
     },
     "statuses": {
-      "missing": "Ontbrekend",
       "existing": "Existing"
     },
     "states": {
       "loadFailed": "Vertalingen laden mislukt.",
       "missingTarget": "No target document yet.",
-      "sourceRow": "Deze locale wordt bewerkt in de hoofdbroneditor.",
       "sourceEditorHint": "Bewerk de originele tekst in de hoofdeditor.",
       "updatedAt": "Bijgewerkt {date}"
     },
@@ -4354,52 +4219,19 @@
   },
   "translationPanelMenu": {
     "description": "Review source menu labels and existing translation documents.",
-    "sourceLocaleDescription": "The menu editor above owns structure, ordering, links, visibility, and source labels. Target translations below are read-only previews.",
-    "states": {
-      "sourcePreview": "Bronlabels ({locale}): {labels}",
-      "sourceEditorHint": "Bewerk de menustructuur in de hoofdmenu-editor.",
-      "missingTarget": "No labels are saved for this locale yet.",
-      "noItems": "Nog geen gelokaliseerde labels.",
-      "translationPreview": "Existing {locale} labels: {labels}"
-    },
     "previewModal": {
       "title": "{locale} menu translation preview",
-      "descriptions": {
-        "missing": "No public menu translation exists for this locale. The source is shown until an Admin generates it.",
-        "existing": "Shows the current public translated labels for this menu as read-only."
-      },
       "fields": {
-        "linkType": "Link type",
-        "destination": "Destination",
-        "children": "Nested items",
-        "localizedLabelForLocale": "{locale} public label",
-        "sourceLabelForLocale": "{locale} source label",
-        "localizedLabelDescription": "The current translated label shown in public menus; it cannot be changed here.",
-        "sourceLabelDescription": "Comes from the source menu editor and cannot be changed here.",
-        "fixedLocaleLockedDescription": "This item is fixed to the {locale} label and is read-only."
-      },
-      "states": {
-        "detailUnavailable": "Detailed translated menu data could not be loaded.",
-        "noItems": "There are no menu items to preview."
+        "localizedLabelForLocale": "{locale} public label"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template.",
-      "sourceLocaleDescription": "Het bronsjabloon stuurt het onderwerp, de bodytekst en de namen van runtimevariabelen aan.",
-      "states": {
-        "sourceEditorHint": "Bewerk het bronsjabloon in de hoofdeditor.",
-        "noContent": "Er bestaat nog geen vertaald onderwerp of body."
-      }
+      "description": "Manage the source language and existing translation documents for this email template."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout.",
-      "sourceLocaleDescription": "De bronlay-out stuurt wrapper-HTML en structurele placeholdernamen voor e-mailweergave aan.",
-      "states": {
-        "sourceEditorHint": "Bewerk de bronlay-out in de hoofdeditor.",
-        "noContent": "Er bestaat nog geen vertaalde lay-out-HTML."
-      }
+      "description": "Manage the source language and existing translation documents for this email layout."
     }
   },
   "localizationNotice": {
@@ -4408,9 +4240,7 @@
       "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
     },
     "fallback": {
-      "title": "Fallback-taal",
-      "english": "De aangevraagde {requested}-vertaling is niet beschikbaar, dus deze pagina wordt in {displayed} weergegeven.",
-      "source": "De aangevraagde {requested}-vertaling is niet beschikbaar, dus deze pagina wordt in de originele {source} weergegeven."
+      "title": "Fallback-taal"
     },
     "actions": {
       "viewOriginal": "Origineel bekijken ({source})"
@@ -4440,7 +4270,6 @@
       "policy": "Beleid",
       "lastTargetUpdate": "Last target update",
       "entity": "Item",
-      "existing": "Existing translations",
       "sources": "Bronnen",
       "lastSourceUpdate": "Laatste bronupdate"
     },
@@ -4628,33 +4457,22 @@
       "summary": "Voeg een bondige samenvatting toe..."
     },
     "tooltips": {
-      "generatingNamed": "{name} is een samenvatting aan het genereren",
-      "applyingNamed": "{name} past de gegenereerde samenvatting toe",
-      "readyNamed": "{name} heeft een gegenereerde samenvatting klaarstaan"
+      "generatingNamed": "{name} is een samenvatting aan het genereren"
     },
     "feedback": {
       "failedDefault": "Het genereren van de samenvatting is mislukt.",
-      "invalidJson": "Het AI-antwoord kon niet worden geparseerd als samenvattings-JSON.",
       "alreadyRunning": "Samenvattingsgeneratie is al bezig.",
-      "applyingGenerated": "De gegenereerde samenvatting wordt toegepast.",
-      "resetOlderSession": "Een verouderde status van een gegenereerde samenvatting uit een eerdere sessie is gereset.",
-      "resetUnrestorable": "Een verouderde status van een gegenereerde samenvatting die niet kon worden hersteld is gereset.",
-      "missingJobPayload": "Samenvattingsgeneratie leverde geen job-payload op.",
       "missingSuggestionPayload": "Samenvattingsgeneratie is voltooid zonder suggestie-payload.",
       "staleSuggestion": "Deze suggestie is verouderd. Genereer opnieuw of sluit deze voordat je toepast.",
       "unableToApplyNow": "De gegenereerde samenvatting kan nu niet worden toegepast.",
       "applyFailed": "De gegenereerde samenvatting toepassen is mislukt.",
       "applied": "De gegenereerde samenvatting is toegepast.",
-      "appliedJobUnresolved": "Samenvatting toegepast, maar de AI-taak kon niet automatisch worden opgelost.",
-      "dismissedJobUnresolved": "De samenvattingssuggestie is lokaal afgewezen, maar de status van de AI-job kon niet automatisch worden afgehandeld.",
-      "readyBeforeApplying": "Pas de gegenereerde samenvatting eerst toe of wijs deze af.",
       "readyToApply": "De gegenereerde samenvatting is klaar om toe te passen."
     },
     "ready": {
       "title": "Gegenereerde samenvatting",
       "suggestedSummary": "Voorgestelde samenvatting",
       "anotherCollaborator": "Een andere medewerker",
-      "anotherCollaboratorFallback": "Een andere medewerker heeft een gegenereerde samenvatting klaarstaan.",
       "anotherCollaboratorNamed": "{name} heeft een gegenereerde samenvatting klaarstaan."
     }
   },
@@ -4702,8 +4520,7 @@
       "roleUpdated": "Rol bijgewerkt",
       "userBanned": "Gebruiker geblokkeerd",
       "userUnbanned": "Blokkering gebruiker opgeheven",
-      "userDeleted": "Gebruiker verwijderd",
-      "userCreated": "Gebruiker gemaakt"
+      "userDeleted": "Gebruiker verwijderd"
     }
   },
   "adminUserDetail": {
@@ -4740,16 +4557,13 @@
       "userIdCopied": "Gebruikers-ID gekopieerd",
       "userIdCopyFailed": "Gebruikers-ID kopiëren mislukt",
       "emailSuppressionReleased": "E-mailblokkering opgeheven",
-      "mainEmailUpdated": "Primair e-mailadres bijgewerkt",
       "ssoProviderRemoved": "SSO-provider verwijderd"
     },
     "auth": {
       "emptyEmail": "Geen e-mail",
       "delivery": {
         "title": "Ontvangst-e-mail",
-        "description": "Campagnes, meldingen en accountmails gebruiken de geselecteerde hoofd-e-mail.",
-        "changePlaceholder": "Selecteer een geverifieerde e-mail",
-        "changeHelp": "Als je deze selectie wijzigt, wordt dit direct opgeslagen."
+        "description": "Campagnes, meldingen en accountmails gebruiken de geselecteerde hoofd-e-mail."
       },
       "providers": {
         "title": "Verbonden SSO-providers",
@@ -4758,7 +4572,6 @@
         "remove": "SSO-provider verwijderen"
       },
       "sources": {
-        "current": "Huidige e-mail",
         "emailCode": "Inloggen met e-mail"
       },
       "ban": {
@@ -4793,7 +4606,6 @@
         "noChanges": "Geen wijzigingen om op te slaan"
       },
       "validation": {
-        "invalidUrl": "Ongeldig URL-formaat",
         "invalidEmail": "Ongeldig e-mailformaat",
         "invalidHexColor": "Ongeldig hexkleurformaat",
         "invalidGoogleAnalyticsId": "Ongeldig Google Analytics-ID-formaat"
@@ -5102,14 +4914,12 @@
   },
   "formSuccessPage": {
     "metadata": {
-      "fallbackTitle": "Formulier verzonden",
       "title": "{formTitle} - verzonden"
     },
     "title": "Bedankt"
   },
   "formPasswordPage": {
     "metadata": {
-      "fallbackTitle": "Formuliertoegang",
       "description": "Voer het wachtwoord in om toegang te krijgen tot dit formulier"
     },
     "title": "Beveiligd met wachtwoord",
@@ -5121,7 +4931,6 @@
   },
   "formDashboardPage": {
     "metadata": {
-      "fallbackTitle": "Formulierdashboard",
       "title": "{formTitle} - dashboard",
       "description": "Statistieken en analyses van formulierinzendingen"
     },
@@ -5131,7 +4940,28 @@
     "stats": {
       "total": "Totaal"
     },
-    "fieldStatistics": "Veldstatistieken"
+    "fieldStatistics": "Veldstatistieken",
+    "charts": {
+      "donut": "Ring",
+      "pie": "Taart",
+      "bar-horizontal": "Horizontale balken",
+      "bar-vertical": "Verticale balken",
+      "radar": "Radar",
+      "table": "Tabel",
+      "area": "Gebied",
+      "line": "Lijn",
+      "histogram": "Histogram",
+      "noResponses": "Nog geen antwoorden",
+      "emptyValue": "(leeg)",
+      "min": "Minimum",
+      "max": "Maximum",
+      "avg": "Gemiddelde",
+      "count": "Aantal",
+      "date": "Datum",
+      "value": "Waarde",
+      "range": "Bereik",
+      "chartType": "Grafiektype"
+    }
   },
   "embeddedForm": {
     "states": {
@@ -5182,10 +5012,7 @@
       "locationMode": "Locatiemodus",
       "ticketUrl": "Ticket-URL",
       "streamUrl": "Stream-URL",
-      "externalUrl": "Externe URL",
-      "participants": "Deelnemers",
-      "textCredits": "Tekstcredits",
-      "textCreditsDescription": "Een credit per regel. Gebruik Rol: Naam wanneer een rol nodig is."
+      "externalUrl": "Externe URL"
     },
     "locationModes": {
       "mapPlace": "Locatie",
@@ -5198,7 +5025,6 @@
       "tickets": "Tickets",
       "stream": "Stream",
       "link": "Link",
-      "participants": "Deelnemers",
       "empty": "Geen events gevonden.",
       "date": "Datum",
       "credits": "Credits"
@@ -5215,152 +5041,14 @@
       "deleteMessage": "Alleen een type dat door geen enkel event wordt gebruikt kan worden verwijderd."
     }
   },
-  "tools": {
-    "portadj": {
-      "metadataTitle": "PortaDJ",
-      "metadataDescription": "Speel en mix lokale audiobestanden in je browser met twee DJ-decks."
-    },
-    "youtubeAudio": {
-      "title": "YouTube-audio",
-      "urlLabel": "Videolink",
-      "urlPlaceholder": "https://…",
-      "resolve": "Audio laden",
-      "resolving": "Audio laden",
-      "clear": "Bron wissen",
-      "metadataTitle": "YouTube-audio",
-      "metadataDescription": "Converteer audio van een geverifieerde YouTube-bron in je browser.",
-      "errors": {
-        "INTERNAL_ERROR": "De audiobron kon niet worden geladen. Probeer het opnieuw.",
-        "INVALID_REQUEST": "Voer een geldige YouTube-video-URL in.",
-        "INVALID_UPSTREAM_RESPONSE": "YouTube heeft een onverwachte audiobron geretourneerd. Probeer een andere video.",
-        "REQUEST_ABORTED": "Het verzoek is geannuleerd.",
-        "SOURCE_EXPIRED": "Deze audiobron is verlopen. Laad de URL opnieuw.",
-        "SOURCE_NOT_FOUND": "Deze audiobron is niet meer beschikbaar. Laad de URL opnieuw.",
-        "UNAUTHORIZED": "Meld je opnieuw aan om dit hulpmiddel te gebruiken.",
-        "UNSUPPORTED_VIDEO": "Deze video biedt geen ondersteunde audiobron met een beperkte duur.",
-        "UPSTREAM_FAILURE": "YouTube-audio kan momenteel niet worden geladen. Probeer het opnieuw."
-      }
-    },
-    "transcode": {
-      "title": "Audiotranscoder",
-      "targetIdle": "Wachten",
-      "targetChecking": "Controleren",
-      "targetReady": "Gereed",
-      "targetError": "Niet beschikbaar",
-      "dropTitle": "Sleep of kies audiobestanden",
-      "dropDescription": "Maximaal 10 bestanden · Geen mappen · Verwerkt op dit apparaat",
-      "chooseFiles": "Audiobestanden kiezen",
-      "supportedFormatsLabel": "Ondersteunde formaten",
-      "supportedFormats": "Ondersteund: CAF, AIFF/AIFC, WAV, FLAC, MP3, AAC/M4A, Ogg/Opus en audio in MP4, MOV, MKV/WebM of TS. Per bestand gecontroleerd.",
-      "filesSelected": "Bestanden",
-      "outputSettings": "Uitvoerinstellingen",
-      "format": "Formaat",
-      "sampleRate": "Samplesnelheid",
-      "bitrate": "Bitrate",
-      "bitDepth": "Bitdiepte",
-      "codec": "Codec",
-      "sampleFormat": "Sampleformaat",
-      "float": "Zwevendekomma",
-      "integer": "Geheel-getal-PCM",
-      "sourcePcmFloat": "{bitDepth}-bits zwevendekomma",
-      "sourcePcmInteger": "{bitDepth}-bits geheel getal",
-      "sourcePcmSignedInteger": "{bitDepth}-bits geheel getal met teken",
-      "sourcePcmUnsignedInteger": "{bitDepth}-bits geheel getal zonder teken",
-      "automatic": "Automatisch",
-      "unknownAudio": "Audio",
-      "channelCount": "{count, plural, one {# kanaal} other {# kanalen}}",
-      "queue": "Conversiewachtrij",
-      "convert": "Converteren",
-      "cancelAll": "Alles annuleren",
-      "clear": "Wissen",
-      "download": "Conversie opslaan",
-      "downloadSource": "Origineel opslaan",
-      "sourceDownloadExpired": "De bron is verlopen of niet beschikbaar. Laad de YouTube-URL opnieuw.",
-      "sourceDownloadFailed": "Het origineel kon niet worden gedownload. Controleer je verbinding en laad de bron opnieuw.",
-      "retry": "Opnieuw proberen",
-      "cancel": "Annuleren",
-      "remove": "Verwijderen",
-      "sourceValue": "Bron ({value})",
-      "mono": "Mono",
-      "stereo": "Stereo",
-      "targetWaitingForFiles": "Voeg een ondersteund audiobestand toe om het gekozen uitvoerdoel te controleren.",
-      "targetCheckingMessage": "Controleren of deze browser het gekozen uitvoerdoel ondersteunt.",
-      "targetReadyMessage": "Het gekozen uitvoerdoel is beschikbaar in deze browser.",
-      "engineLoading": "De audio-engine {asset} wordt geladen.",
-      "engineVerifying": "De audio-engine {asset} wordt geverifieerd.",
-      "engineLoadFailed": "De audio-engine {asset} kon niet worden geladen.",
-      "capacityExceeded": "{count, number} bestanden zijn niet toegevoegd. De wachtrij kan maximaal {max, number} bestanden bevatten.",
-      "statusInspectionQueued": "Wacht op inspectie",
-      "statusInspecting": "Inspecteren",
-      "statusReady": "Gereed",
-      "statusQueued": "In wachtrij",
-      "statusConverting": "Converteren",
-      "statusComplete": "Voltooid",
-      "statusUnsupported": "Niet ondersteund",
-      "statusError": "Fout",
-      "statusCancelled": "Geannuleerd",
-      "unsupportedInput": "Dit audiobestand wordt niet ondersteund.",
-      "unsupportedCodec": "Deze browser kan de audiocodec in dit bestand niet decoderen.",
-      "inspectionFailed": "Het bestand kon niet worden geïnspecteerd. Probeer het opnieuw.",
-      "inspectionInconclusive": "De browser kon deze audio niet vaststellen binnen de veilige leeslimiet. Probeer een ander bestand of formaat.",
-      "outputUnsupported": "De gekozen uitvoerinstellingen worden niet ondersteund in deze browser.",
-      "outputProbeFailed": "De uitvoerondersteuning kon niet worden gecontroleerd. Probeer het opnieuw.",
-      "conversionFailed": "De audioconversie is mislukt.",
-      "conversionStorageLimitExceeded": "De lokale tijdelijke opslag van deze browser is niet groot genoeg voor de verwachte uitvoer. Kies een kleiner of gecomprimeerd formaat, of probeer het opnieuw in een browser die grote lokale uitvoer ondersteunt.",
-      "conversionTargetSizeLimitExceeded": "Het geselecteerde uitvoerformaat kan een bestand van deze grootte niet weergeven. Kies een andere indeling of verlaag de samplefrequentie, bitdiepte of het aantal kanalen.",
-      "cancelledMessage": "De conversie is geannuleerd.",
-      "sourceSummary": "{container} · {sampleRate} · {channels} · {bitDepth}",
-      "outputSummary": "{preset} · {size}",
-      "progressLabel": "{phase} · {progress, number}%",
-      "phasePrepare": "Voorbereiden",
-      "phaseDecode": "Decoderen",
-      "phaseEncode": "Coderen",
-      "phaseFinalize": "Afronden",
-      "bytes": "{count, number} bytes",
-      "storageOpfs": "Privéopslag in de browser",
-      "storageMemory": "Browsergeheugen",
-      "metadataTitle": "Audiotranscoder",
-      "metadataDescription": "Converteer audio in uw browser. Bestanden blijven op uw apparaat.",
-      "outputSettingsHelper": "Kanalen blijven ongewijzigd. Automatisch kiest per bestand een compatibele frequentie.",
-      "processingDetails": "Verwerkingsdetails",
-      "processingDetailsDescription": "Gebalanceerde resampling. Gehele uitvoer wordt geditherd. Grote WAV-bestanden gebruiken RF64.",
-      "bitDepthContainerEffective": "{containerBits}-bits container / {effectiveBits} bits effectief",
-      "constantBitrate": "CBR",
-      "variableBitrate": "VBR",
-      "preserveSource": "Bron behouden",
-      "unavailable": "Niet beschikbaar",
-      "sampleRateAvailableFor": "{supported, number} van {total, number} bestanden",
-      "sampleRateResetAutomatic": "De vorige samplefrequentie is ongeldig voor deze uitvoer en is gewijzigd naar Automatisch.",
-      "targetAvailability": "{available, number} bestanden kunnen worden geconverteerd; {unavailable, number} blijven met deze instellingen niet beschikbaar.",
-      "statusQueuedAvailability": "{converting, number} bestanden in de wachtrij; {unavailable, number} blijven niet beschikbaar.",
-      "statusConvertingAvailability": "{converting, number} bestanden worden geconverteerd; {unavailable, number} blijven niet beschikbaar.",
-      "statusCompleteAvailability": "{converted, number} bestanden geconverteerd; {unavailable, number} blijven niet beschikbaar.",
-      "statusBatchResult": "Uitvoering voltooid: {eligible, number} geschikt, {attempted, number} geprobeerd, {succeeded, number} geslaagd, {failed, number} mislukt, {unavailable, number} niet beschikbaar.",
-      "outputEngineUnavailable": "De runtime-engine voor {preset} kon niet starten. Controleer netwerk- of assetbeleid en probeer opnieuw.",
-      "outputChannelsUnsupported": "Deze uitvoer ondersteunt {minimum, number}–{maximum, number} bronkanalen, maar dit bestand heeft er {actual, number}. Kanalen blijven behouden en worden niet gedownmixt.",
-      "sourceInspectionMissing": "Het aantal bronkanalen of de samplefrequentie kon niet worden bepaald. Kies een bestand met leesbare audiometagegevens.",
-      "outputConfigurationUnavailable": "De gekozen indeling en codering vormen geen beschikbare uitvoerconfiguratie.",
-      "preserveSourceRateUnsupported": "{sourceRate} kan niet worden behouden voor deze uitvoer. Toegestane frequenties: {allowed}.",
-      "sourceResamplingRateUnsupported": "De bron van {sourceRate} valt buiten het resamplingbereik ({minimum}–{maximum}) en kan alleen naar compatibele uitvoer worden doorgegeven.",
-      "targetResamplingRateUnsupported": "Het doel van {targetRate} valt buiten het resamplingbereik ({minimum}–{maximum}).",
-      "automaticRateUnavailable": "Automatisch kan geen geldige frequentie kiezen voor deze bron van {sourceRate}. Toegestane uitvoerfrequenties: {allowed}.",
-      "presetRateUnsupported": "Deze uitvoer ondersteunt {targetRate} niet. Toegestane frequenties: {allowed}.",
-      "notices": "Open-sourcelicenties"
-    },
-    "hwp": {
-      "title": "HWP-editor",
-      "metadataDescription": "Open, bewerk en bewaar HWP- en HWPX-documenten in je browser.",
-      "description": "Gebruik het menu Bestand van de editor om HWP- of HWPX-bestanden te openen en op te slaan. Documenten worden op dit apparaat verwerkt zonder upload.",
-      "loading": "Editor laden…",
-      "error": "De editor kon niet worden geladen. Probeer het opnieuw.",
-      "retry": "Opnieuw proberen",
-      "metadataTitle": "HWP-editor"
-    }
-  },
   "myMetadata": {
     "description": "{title}-pagina voor je account op {siteName}."
   },
   "fileManager": {
+    "pagination": {
+      "end": "Einde van de resultaten"
+    },
+    "selectionUnavailableDescription": "Dit bestand kan niet worden toegevoegd. Druk op Enter voor een voorbeeld.",
     "title": "Bestanden",
     "description": "Upload, organiseer, controleer en hergebruik bestanden op de hele site.",
     "root": "Bestanden",
@@ -5396,8 +5084,8 @@
     "selectAll": "Alle items selecteren",
     "selectItem": "{name} selecteren",
     "sortBy": "Sorteren op {name}",
-    "selectedCount": "{count} items geselecteerd",
-    "itemCount": "{count} items",
+    "selectedCount": "{count, plural, one {# item geselecteerd} other {# items geselecteerd}}",
+    "itemCount": "{count, plural, one {# item} other {# items}}",
     "searchResultCount": "{count, plural, one {# resultaat gevonden} other {# resultaten gevonden}}",
     "uploadProgress": "Uploaden {percentage}%",
     "types": {
@@ -5484,9 +5172,7 @@
       "move-files": {
         "title": "Bestanden verplaatsen"
       },
-      "targetFolderId": "ID van doelmap",
       "extensionSeparate": "De extensie .{extension} wordt afzonderlijk behouden.",
-      "rootWhenEmpty": "Laat leeg om naar de hoofdmap te verplaatsen.",
       "delete": {
         "title": "Verwijderen",
         "folder": "Deze map en alle ongebruikte bestanden eronder verwijderen?",
@@ -5496,14 +5182,26 @@
         "byDomain": "Per domein: {summary}",
         "more": "en nog {count}. Bekijk de volledige lijst in de bestandsdetails."
       }
+    },
+    "viewSettings": {
+      "title": "Weergave-instellingen",
+      "iconSize": "Pictogramgrootte",
+      "spacing": "Afstand tussen items",
+      "columns": "Kolommen",
+      "auto": "Automatisch",
+      "small": "Klein",
+      "medium": "Gemiddeld",
+      "large": "Groot",
+      "compact": "Compact",
+      "standard": "Standaard",
+      "comfortable": "Ruim",
+      "reset": "Weergave herstellen"
     }
   },
   "fileDownloadAccess": {
     "editor": {
       "sectionTitle": "Downloadtoegang",
-      "sectionDescription": "Bepaal wie het originele bestand kan downloaden.",
       "loading": "Downloadtoegang laden…",
-      "audienceLabel": "Doelgroep voor downloads",
       "audiences": {
         "disabled": {
           "label": "Uitgeschakeld",
@@ -5522,15 +5220,10 @@
           "description": "Alleen gebruikers in de geselecteerde doelgroepen kunnen dit bestand downloaden."
         }
       },
-      "segmentsLabel": "Doelgroepen",
-      "segmentsDescription": "Selecteer een of meer bestaande doelgroepsegmenten.",
-      "segmentsPlaceholder": "Selecteer doelgroepen",
       "segmentsLoadError": "Het beleid is geladen, maar de doelgroepen konden niet worden geladen.",
       "segmentsEmpty": "Er zijn geen doelgroepsegmenten beschikbaar.",
       "restrictedWithoutAudience": "Dit beperkte beleid heeft geen doelgroep. Downloads worden voor iedereen geweigerd totdat je ten minste één doelgroep selecteert.",
-      "segmentRequiresSubscription": "{name} (nieuwsbriefabonnement vereist)",
       "additionalSelected": "Nog {count} geselecteerd",
-      "loadMoreSegments": "Meer doelgroepen laden",
       "loadError": "De downloadtoegang kon niet worden geladen.",
       "saveError": "De downloadtoegang kon niet worden opgeslagen.",
       "fileRequired": "Sla het bestand op voordat je downloadtoegang instelt."
@@ -5552,5 +5245,29 @@
     "empty": "Voer diagramcode in",
     "invalid": "Ongeldig diagram",
     "loading": "Bezig met tekenen…"
+  },
+  "errorPage": {
+    "titles": {
+      "400": "Ongeldig verzoek",
+      "401": "Inloggen vereist",
+      "403": "Toegang geweigerd",
+      "404": "Pagina niet gevonden",
+      "408": "Het verzoek is verlopen",
+      "409": "Het verzoek conflicteert met de huidige status",
+      "410": "Deze pagina is niet meer beschikbaar",
+      "413": "Het verzoek is te groot",
+      "422": "Het verzoek kan niet worden verwerkt",
+      "429": "Te veel verzoeken",
+      "500": "Er is iets misgegaan",
+      "501": "Dit verzoek wordt niet ondersteund",
+      "502": "Een achterliggende dienst is uitgevallen",
+      "503": "Dienst tijdelijk niet beschikbaar",
+      "504": "De dienst reageerde niet op tijd"
+    },
+    "actions": {
+      "goHome": "Naar startpagina",
+      "tryAgain": "Opnieuw proberen",
+      "login": "Terug naar inloggen"
+    }
   }
 }

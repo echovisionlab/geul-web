@@ -139,12 +139,15 @@ describe('EventSeriesEventsTable pagination', () => {
     act(() => {
       container.querySelectorAll('button')[1]?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
-    expect(mocks.listEvents).toHaveBeenCalledWith(expect.objectContaining({ offset: 1 }));
+    // The browser query module is imported on demand, so the request starts after a microtask.
+    await vi.waitFor(() => expect(mocks.listEvents).toHaveBeenCalledWith(expect.objectContaining({ offset: 1 })));
 
     act(() => {
       container.querySelectorAll('button')[0]?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
-    expect(mocks.listEvents).toHaveBeenCalledWith(expect.objectContaining({ search: 'new', offset: 0 }));
+    await vi.waitFor(() =>
+      expect(mocks.listEvents).toHaveBeenCalledWith(expect.objectContaining({ search: 'new', offset: 0 })),
+    );
     await act(async () => {
       newSearch.resolve(response(['new-1']));
     });

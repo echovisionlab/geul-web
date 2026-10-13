@@ -1,10 +1,11 @@
 import type * as Y from 'yjs';
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 import { createClientLogger } from '@/lib/utils/client-logger';
 
 const logger = createClientLogger('TypedMetaMap');
 
-type ZodObjectSchema = z.ZodObject<z.ZodRawShape>;
+/** An object schema from either zod entry point (Common's collaboration schemas use classic zod). */
+type ZodObjectSchema = z.core.$ZodObject;
 type InferSchema<TSchema extends ZodObjectSchema> = z.infer<TSchema>;
 type SchemaKey<TSchema extends ZodObjectSchema> = keyof InferSchema<TSchema> & string;
 
@@ -21,6 +22,14 @@ export class TypedMetaMap<TSchema extends ZodObjectSchema> {
     private readonly schema: TSchema,
     private readonly jsonKeys: ReadonlySet<SchemaKey<TSchema>>,
   ) {}
+
+  private get shape(): z.core.$ZodShape {
+    return this.schema._zod.def.shape;
+  }
+
+  private fieldSchema(key: SchemaKey<TSchema>): z.core.$ZodType {
+    return this.shape[key] as z.core.$ZodType;
+  }
 
   /**
    * Get a value from the map with Zod validation.
@@ -44,8 +53,7 @@ export class TypedMetaMap<TSchema extends ZodObjectSchema> {
     }
 
     // Validate with Zod
-    const fieldSchema = this.schema.shape[key] as z.ZodTypeAny;
-    const result = fieldSchema.safeParse(value);
+    const result = z.safeParse(this.fieldSchema(key), value);
 
     if (!result.success) {
       logger.warn(`Validation failed for key "${key}"`, {
@@ -62,8 +70,7 @@ export class TypedMetaMap<TSchema extends ZodObjectSchema> {
    * Returns false if validation fails.
    */
   set<K extends SchemaKey<TSchema>>(key: K, value: InferSchema<TSchema>[K]): boolean {
-    const fieldSchema = this.schema.shape[key] as z.ZodTypeAny;
-    const result = fieldSchema.safeParse(value);
+    const result = z.safeParse(this.fieldSchema(key), value);
 
     if (!result.success) {
       logger.error(`Invalid value for key "${key}"`, {
@@ -84,8 +91,7 @@ export class TypedMetaMap<TSchema extends ZodObjectSchema> {
   setMany(values: Partial<InferSchema<TSchema>>): boolean {
     const entries = Object.entries(values) as Array<[SchemaKey<TSchema>, InferSchema<TSchema>[SchemaKey<TSchema>]]>;
     for (const [key, value] of entries) {
-      const fieldSchema = this.schema.shape[key] as z.ZodTypeAny;
-      const result = fieldSchema.safeParse(value);
+      const result = z.safeParse(this.fieldSchema(key), value);
       if (!result.success) {
         logger.error(`Invalid value for key "${key}"`, {
           errors: z.flattenError(result.error),
@@ -118,7 +124,7 @@ export class TypedMetaMap<TSchema extends ZodObjectSchema> {
    * Initialize all fields with default values.
    */
   initAll(defaults: InferSchema<TSchema>): void {
-    const keys = Object.keys(this.schema.shape) as SchemaKey<TSchema>[];
+    const keys = Object.keys(this.shape) as SchemaKey<TSchema>[];
     for (const key of keys) {
       this.init(key, defaults[key]);
     }
@@ -129,7 +135,7 @@ export class TypedMetaMap<TSchema extends ZodObjectSchema> {
    */
   getAll(): Partial<InferSchema<TSchema>> {
     const result: Partial<InferSchema<TSchema>> = {};
-    const keys = Object.keys(this.schema.shape) as SchemaKey<TSchema>[];
+    const keys = Object.keys(this.shape) as SchemaKey<TSchema>[];
     for (const key of keys) {
       const value = this.get(key);
       if (value !== undefined) {
@@ -144,7 +150,7 @@ export class TypedMetaMap<TSchema extends ZodObjectSchema> {
    */
   getAllWithDefaults(defaults: InferSchema<TSchema>): InferSchema<TSchema> {
     const result = { ...defaults };
-    const keys = Object.keys(this.schema.shape) as SchemaKey<TSchema>[];
+    const keys = Object.keys(this.shape) as SchemaKey<TSchema>[];
     for (const key of keys) {
       const value = this.get(key);
       if (value !== undefined) {
@@ -161,7 +167,7 @@ export class TypedMetaMap<TSchema extends ZodObjectSchema> {
   observe(callback: (changedKeys: SchemaKey<TSchema>[]) => void): () => void {
     const observer = (event: Y.YMapEvent<unknown>) => {
       const changedKeys = Array.from(event.keysChanged).filter((key): key is SchemaKey<TSchema> =>
-        Object.hasOwn(this.schema.shape, key),
+        Object.hasOwn(this.shape, key),
       );
 
       if (changedKeys.length > 0) {

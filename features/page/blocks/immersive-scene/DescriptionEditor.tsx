@@ -1,8 +1,10 @@
 'use client';
 
 import { type JSONContent } from '@tiptap/core';
+import { useLocale } from 'next-intl';
 import { type ReactNode, useMemo } from 'react';
 import { Field } from '@/components/core/Field';
+import { InputFrame } from '@/components/core/Input';
 import { ControlledTiptapEditor } from '@/features/editor/tiptap/profiles/ControlledTiptapEditor';
 import {
   WireBlockContainer,
@@ -25,6 +27,7 @@ import classes from './DescriptionEditor.module.css';
 interface ImmersiveSceneDescriptionEditorProps {
   label: string;
   description?: ReactNode;
+  contentLanguage?: string;
   value: string;
   onChange: (value: string) => void;
   testId?: string;
@@ -194,21 +197,33 @@ export function immersiveSceneDocumentToMarkdown(document: JSONContent): string 
   );
 }
 
-export function ImmersiveSceneDescriptionEditor({
+interface ImmersiveSceneDescriptionSurfaceProps extends ImmersiveSceneDescriptionEditorProps {
+  id?: string;
+  'aria-describedby'?: string;
+}
+
+function ImmersiveSceneDescriptionSurface({
+  id,
+  'aria-describedby': describedBy,
   label,
-  description,
+  contentLanguage,
   value,
   onChange,
   testId,
   variant = 'description',
-}: ImmersiveSceneDescriptionEditorProps) {
+}: ImmersiveSceneDescriptionSurfaceProps) {
+  const locale = useLocale();
   const extensions = useMemo(() => createImmersiveSceneDescriptionExtensions(), []);
 
   return (
-    <Field label={label} description={description}>
-      <div className={classes.root} data-testid={testId} data-variant={variant} data-editor-engine="tiptap">
+    <div className={classes.root} data-testid={testId} data-variant={variant} data-editor-engine="tiptap">
+      <InputFrame>
         <ControlledTiptapEditor
           value={value}
+          contentId={id}
+          accessibleLabel={label}
+          accessibleDescriptionId={describedBy}
+          contentLanguage={contentLanguage ?? locale}
           extensions={extensions}
           parseValue={markdownToImmersiveSceneDocument}
           serializeValue={immersiveSceneDocumentToMarkdown}
@@ -218,7 +233,15 @@ export function ImmersiveSceneDescriptionEditor({
           contentTestId="immersive-scene-description-content"
           profile="immersive-scene-copy"
         />
-      </div>
+      </InputFrame>
+    </div>
+  );
+}
+
+export function ImmersiveSceneDescriptionEditor({ description, ...props }: ImmersiveSceneDescriptionEditorProps) {
+  return (
+    <Field label={props.label} description={description}>
+      <ImmersiveSceneDescriptionSurface {...props} />
     </Field>
   );
 }

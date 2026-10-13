@@ -1,9 +1,15 @@
 'use client';
 
-import Link from '@/components/core/Navigation';
-import { Anchor, Collapse, Group, Paper, Stack, Text } from '@mantine/core';
-import { Button } from '@/components/core/Button';
-import { Switch } from '@/components/core/Input/Switch';
+import { useId } from 'react';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutContainer,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+import { SectionCard } from '@/components/core/Section';
+import { NavigationLink as Anchor } from '@/components/core/Navigation';
+import { TextButton } from '@/components/core/TextButton';
 
 export interface CookieConsentLearnMoreSegment {
   text: string;
@@ -13,18 +19,12 @@ export interface CookieConsentLearnMoreSegment {
 export interface CookieConsentBannerViewModel {
   isOpen: boolean;
   requiresRenewal: boolean;
-  showPreferences: boolean;
-  analyticsEnabled: boolean;
   labels: {
     renewalNotice: string;
     intro: string;
     rejectNonEssential: string;
-    hidePreferences: string;
-    customize: string;
-    acceptAll: string;
-    essential: string;
     analytics: string;
-    savePreferences: string;
+    acceptAll: string;
   };
   learnMore: CookieConsentLearnMoreSegment[];
 }
@@ -32,96 +32,87 @@ export interface CookieConsentBannerViewModel {
 interface CookieConsentBannerViewProps {
   model: CookieConsentBannerViewModel;
   onRejectNonEssential: () => void;
-  onTogglePreferences: () => void;
   onAcceptAll: () => void;
-  onAnalyticsChange: (enabled: boolean) => void;
-  onSavePreferences: () => void;
 }
 
-export function CookieConsentBannerView({
-  model,
-  onRejectNonEssential,
-  onTogglePreferences,
-  onAcceptAll,
-  onAnalyticsChange,
-  onSavePreferences,
-}: CookieConsentBannerViewProps) {
+export function CookieConsentBannerView({ model, onRejectNonEssential, onAcceptAll }: CookieConsentBannerViewProps) {
+  const noticeId = useId();
   if (!model.isOpen) {
     return null;
   }
 
   return (
-    <Paper
+    <aside
+      aria-labelledby={noticeId}
       className="print-hide"
-      withBorder
-      shadow="md"
-      radius={0}
-      p="md"
       style={{
         position: 'fixed',
-        left: 16,
-        right: 16,
-        bottom: 'calc(16px + var(--safe-area-bottom))',
-        maxWidth: 780,
+        left: 'var(--geul-spacing-md)',
+        right: 'var(--geul-spacing-md)',
+        bottom: 'calc(var(--geul-spacing-md) + env(safe-area-inset-bottom, 0px))',
         margin: '0 auto',
-        zIndex: 999,
+        zIndex: 'var(--geul-layer-banner)',
       }}
     >
-      <Stack gap="sm">
-        {model.requiresRenewal ? (
-          <Text size="sm" fw={500} data-testid="cookie-consent-renewal-notice">
-            {model.labels.renewalNotice}
-          </Text>
-        ) : (
-          <Text size="sm">{model.labels.intro}</Text>
-        )}
-
-        <Text size="xs" c="dimmed">
-          {model.learnMore.map((segment, index) =>
-            segment.href ? (
-              <Anchor key={`${segment.href}-${index}`} component={Link} href={segment.href} size="xs">
-                {segment.text}
-              </Anchor>
+      <LayoutContainer size="compact" inset="none">
+        <SectionCard padding="sm" withBorder>
+          <DsLayoutStack gap="xs">
+            {model.requiresRenewal ? (
+              <DsText id={noticeId} size="xs" weight="medium" data-testid="cookie-consent-renewal-notice">
+                {model.labels.renewalNotice}
+              </DsText>
             ) : (
-              <span key={`text-${index}`}>{segment.text}</span>
-            ),
-          )}
-        </Text>
+              <DsText id={noticeId} size="xs">
+                {model.labels.intro}
+              </DsText>
+            )}
 
-        <Group gap="xs">
-          <Button
-            id="cookie-consent-reject-non-essential"
-            size="xs"
-            tone="neutral"
-            emphasis="medium"
-            onClick={onRejectNonEssential}
-          >
-            {model.labels.rejectNonEssential}
-          </Button>
-          <Button size="xs" emphasis="medium" onClick={onTogglePreferences}>
-            {model.showPreferences ? model.labels.hidePreferences : model.labels.customize}
-          </Button>
-          <Button size="xs" onClick={onAcceptAll}>
-            {model.labels.acceptAll}
-          </Button>
-        </Group>
+            {model.requiresRenewal && <DsText size="xs">{model.labels.intro}</DsText>}
 
-        <Collapse expanded={model.showPreferences}>
-          <Stack gap="xs" mt="xs">
-            <Switch checked disabled label={model.labels.essential} />
-            <Switch
-              checked={model.analyticsEnabled}
-              onChange={(event) => onAnalyticsChange(event.currentTarget.checked)}
-              label={model.labels.analytics}
-            />
-            <Group justify="flex-end" mt="xs">
-              <Button size="xs" onClick={onSavePreferences}>
-                {model.labels.savePreferences}
-              </Button>
-            </Group>
-          </Stack>
-        </Collapse>
-      </Stack>
-    </Paper>
+            <DsText size="xs" tone="secondary">
+              {model.labels.analytics}
+            </DsText>
+            <DsLayoutInline gap="action-group" justify="between">
+              <DsText size="xs" tone="secondary">
+                {model.learnMore.map((segment, index) =>
+                  segment.href ? (
+                    <Anchor key={`${segment.href}-${index}`} href={segment.href} size="xs">
+                      {segment.text}
+                    </Anchor>
+                  ) : (
+                    <span key={`text-${index}`}>{segment.text}</span>
+                  ),
+                )}
+              </DsText>
+
+              <DsLayoutInline gap="action-group" wrap="nowrap">
+                <TextButton
+                  id="cookie-consent-reject-non-essential"
+                  size="xs"
+                  controlSize="xs"
+                  density="chrome"
+                  weight="medium"
+                  aria-describedby={noticeId}
+                  onClick={onRejectNonEssential}
+                >
+                  {model.labels.rejectNonEssential}
+                </TextButton>
+                <TextButton
+                  size="xs"
+                  controlSize="xs"
+                  density="chrome"
+                  weight="medium"
+                  aria-describedby={noticeId}
+                  data-testid="cookie-consent-accept-all"
+                  onClick={onAcceptAll}
+                >
+                  {model.labels.acceptAll}
+                </TextButton>
+              </DsLayoutInline>
+            </DsLayoutInline>
+          </DsLayoutStack>
+        </SectionCard>
+      </LayoutContainer>
+    </aside>
   );
 }

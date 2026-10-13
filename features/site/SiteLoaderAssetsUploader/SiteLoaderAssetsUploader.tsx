@@ -1,11 +1,16 @@
 'use client';
-
+import { SectionCard as DsSectionCard } from '@/components/core/Section';
+import { Text as DsText } from '@/components/core/Typography';
+import {
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+} from '@/components/core/Layout';
+import { notifications } from '@/components/core/Notification';
 import { useMemo, useState } from 'react';
 import { IconTrash } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
-import { useTranslations } from 'next-intl';
-import { Box, Group, Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+import { useLocale, useTranslations } from 'next-intl';
 import { IconButton } from '@/components/core/IconButton';
 import { ImageUploadField } from '@/components/core/ImageUpload';
 import { addSiteLoaderAssetAction, removeSiteLoaderAssetAction } from '@/lib/actions/site-setting';
@@ -15,22 +20,28 @@ import { useUploadValidation } from '@/lib/hooks/useUploadValidation';
 import type { SiteLoaderAsset } from '@/lib/types/site-setting/config';
 import { UploadType } from '@/lib/types/upload/model';
 import { formatFileSize, formatMimeTypes } from '@/lib/utils/upload';
-
+export interface SiteLoaderBindings {
+  add: typeof addSiteLoaderAssetAction;
+  remove: typeof removeSiteLoaderAssetAction;
+  uploadFile: ReturnType<typeof useUpload>['uploadFile'];
+}
 interface SiteLoaderAssetsUploaderProps {
+  bindings?: SiteLoaderBindings;
   assets: SiteLoaderAsset[];
   onSuccess?: () => void;
 }
-
-export function SiteLoaderAssetsUploader({ assets, onSuccess }: SiteLoaderAssetsUploaderProps) {
+export function SiteLoaderAssetsUploader({ assets, onSuccess, bindings }: SiteLoaderAssetsUploaderProps) {
   const t = useTranslations('adminSettings.site');
+  const locale = useLocale();
   const tCommon = useTranslations('common');
   const tCommonNotifications = useTranslations('common.notifications');
   const uploadType = UploadType.SITE_LOADER;
   const config = UPLOAD_CONFIGS[uploadType];
   const { validateFile } = useUploadValidation();
-  const { uploadFile, isUploading } = useUpload(uploadType);
+  const transport = useUpload(uploadType);
+  const { isUploading } = transport;
+  const uploadFile = bindings?.uploadFile ?? transport.uploadFile;
   const [uploading, setUploading] = useState(false);
-
   const label = t('assets.loader.label');
   const description = t('assets.loader.description');
   const uploadPrompt = useMemo(
@@ -50,41 +61,37 @@ export function SiteLoaderAssetsUploader({ assets, onSuccess }: SiteLoaderAssets
       }),
     [config, label, t],
   );
-
   const addLoader = useMutation({
-    mutationFn: (fileId: string) => addSiteLoaderAssetAction(fileId),
+    mutationFn: (fileId: string) => (bindings?.add ?? addSiteLoaderAssetAction)(fileId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: t('assets.uploaded', { label }), color: 'green' });
+      notifications.show({ message: t('assets.uploaded', { label }), tone: 'positive' });
       onSuccess?.();
     },
   });
-
   const removeLoader = useMutation({
-    mutationFn: (fileId: string) => removeSiteLoaderAssetAction(fileId),
+    mutationFn: (fileId: string) => (bindings?.remove ?? removeSiteLoaderAssetAction)(fileId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       notifications.show({
         message: result.warning ?? t('assets.removed', { label }),
-        color: result.warning ? 'orange' : 'yellow',
+        tone: result.warning ? 'warning' : 'positive',
       });
       onSuccess?.();
     },
   });
-
   const handleFileSelect = async (file: File) => {
     const validation = validateFile(file, uploadType);
     if (!validation.valid) {
-      notifications.show({ message: validation.error, color: 'red' });
+      notifications.show({ message: validation.error, tone: 'danger' });
       return;
     }
-
     setUploading(true);
     try {
       const { fileId } = await uploadFile(file, { slotId: 'loader' });
@@ -92,59 +99,56 @@ export function SiteLoaderAssetsUploader({ assets, onSuccess }: SiteLoaderAssets
     } catch (error) {
       notifications.show({
         message: error instanceof Error ? error.message : tCommonNotifications('uploadFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     } finally {
       setUploading(false);
     }
   };
-
   return (
-    <Box>
-      <Text size="sm" fw={500} mb={4}>
-        {label}
-      </Text>
-      <Text size="xs" c="dimmed" mb="xs">
-        {description}
-      </Text>
+    <div>
+      <DsLayoutInset blockEnd="xxs">
+        <DsText size="sm" weight="medium">
+          {label}
+        </DsText>
+      </DsLayoutInset>
+      <DsLayoutInset blockEnd="xs">
+        <DsText size="xs" tone="secondary">
+          {description}
+        </DsText>
+      </DsLayoutInset>
 
-      <Stack gap="xs">
+      <DsLayoutStack gap="xs">
         {assets.length > 0 ? (
-          <Group gap="xs" align="center">
-            {assets.map((asset) => (
-              <Box key={asset.file_id} pos="relative">
-                <Box
-                  style={{
-                    width: 48,
-                    height: 48,
-                    border: '1px solid var(--mantine-color-default-border)',
-                    borderRadius: 'var(--mantine-radius-sm)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden',
-                    background: 'var(--mantine-color-body)',
-                  }}
-                >
-                  <img src={asset.url} alt={label} style={{ display: 'block', maxWidth: '100%', maxHeight: '100%' }} />
-                </Box>
+          <DsLayoutInline gap="xs" align="center">
+            {assets.map((asset, index) => (
+              <div style={{ position: 'relative' }} key={asset.file_id}>
+                <div style={{ width: 48, height: 48, overflow: 'hidden' }}>
+                  <DsSectionCard padding="none" appearance="surface" border="all">
+                    <DsLayoutInline align="center" justify="center">
+                      <img
+                        src={asset.url}
+                        alt={label}
+                        style={{ display: 'block', maxWidth: '100%', maxHeight: '100%' }}
+                      />
+                    </DsLayoutInline>
+                  </DsSectionCard>
+                </div>
                 <IconButton
                   size="xs"
                   shape="circle"
                   tone="danger"
-                  emphasis="strong"
-                  pos="absolute"
-                  top={-4}
-                  right={-4}
+                  emphasis="medium"
+                  placement="overlay-end"
                   loading={removeLoader.isPending}
-                  aria-label={tCommon('actions.remove')}
+                  aria-label={`${tCommon('actions.remove')} ${label} ${new Intl.NumberFormat(locale).format(index + 1)}`}
                   onClick={() => removeLoader.mutate(asset.file_id)}
                 >
                   <IconTrash size={12} />
                 </IconButton>
-              </Box>
+              </div>
             ))}
-          </Group>
+          </DsLayoutInline>
         ) : null}
 
         <ImageUploadField
@@ -157,11 +161,11 @@ export function SiteLoaderAssetsUploader({ assets, onSuccess }: SiteLoaderAssets
           emptyTitle={label}
           emptyDescription={uploadPrompt}
           preview={{ mode: 'fixed', width: '100%', height: 96, fit: 'contain' }}
-          placeholder={{ width: '100%', minHeight: 96, iconSize: 24 }}
+          placeholder={{ width: '100%', minHeight: 96, iconSize: 'md' }}
           onFileSelect={handleFileSelect}
-          onReject={() => notifications.show({ message: errorMessage, color: 'red' })}
+          onReject={() => notifications.show({ message: errorMessage, tone: 'danger' })}
         />
-      </Stack>
-    </Box>
+      </DsLayoutStack>
+    </div>
   );
 }

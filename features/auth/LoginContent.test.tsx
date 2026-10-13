@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import enMessages from '@/messages/en.json';
 import { LoginContent } from './LoginContent';
 import { LoginController } from './LoginController';
@@ -246,6 +247,31 @@ async function flush(): Promise<void> {
 }
 
 describe('LoginContent', () => {
+  it('keeps legal links distinguishable within their surrounding login prose', async () => {
+    const transport: UnifiedLoginTransport = {
+      actionUrl: vi.fn(() => '/api/auth/login?flow=flow-1'),
+      browserUrl: vi.fn(() => '/api/auth/login'),
+      load: vi.fn().mockResolvedValue({ kind: 'continued', flow: codeFlow, ok: true }),
+      submit: vi.fn(),
+    };
+    await act(async () => {
+      root?.render(
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <DesignSystemProvider locale="en" forceTheme="ocean-dark">
+            <LoginContent transport={transport} />
+          </DesignSystemProvider>
+        </NextIntlClientProvider>,
+      );
+    });
+    await flush();
+    const terms = container?.querySelector<HTMLAnchorElement>('a[href="/terms"]');
+    const privacy = container?.querySelector<HTMLAnchorElement>('a[href="/privacy"]');
+    expect(terms?.textContent).toBe('Terms of Service');
+    expect(privacy?.textContent).toBe('Privacy Policy');
+    expect(terms?.dataset.appearance).toBe('content');
+    expect(privacy?.dataset.appearance).toBe('content');
+  });
+
   it('explains that a privileged refresh will automatically continue the security request', async () => {
     const refreshFlow = {
       ...codeFlow,
@@ -267,7 +293,7 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginController
               flowId="flow-1"
               hasSession
@@ -275,7 +301,7 @@ describe('LoginContent', () => {
               navigation={navigation}
               transport={transport}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -302,7 +328,7 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginController
               hasSession={false}
               isSessionPending={false}
@@ -310,7 +336,7 @@ describe('LoginContent', () => {
               redirectUrl="/admin?tab=users"
               transport={transport}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -342,7 +368,7 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginController
               key="newsletter-start"
               applyNewsletterSubscription={applyNewsletterSubscription}
@@ -353,7 +379,7 @@ describe('LoginContent', () => {
               redirectUrl={finalRedirect}
               transport={transport}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -367,7 +393,7 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginController
               key="newsletter-callback"
               applyNewsletterSubscription={applyNewsletterSubscription}
@@ -377,7 +403,7 @@ describe('LoginContent', () => {
               navigation={navigation}
               transport={transport}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -439,7 +465,7 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginController
               applyNewsletterSubscription={applyNewsletterSubscription}
               flowId="flow-1"
@@ -449,7 +475,7 @@ describe('LoginContent', () => {
               navigation={navigation}
               transport={transport}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -499,7 +525,7 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginController
               key="expired-newsletter-flow"
               applyNewsletterSubscription={applyNewsletterSubscription}
@@ -510,7 +536,7 @@ describe('LoginContent', () => {
               redirectUrl="/query-must-not-win"
               transport={expiredTransport}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -545,7 +571,7 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginController
               key="replacement-newsletter-flow"
               applyNewsletterSubscription={applyNewsletterSubscription}
@@ -556,7 +582,7 @@ describe('LoginContent', () => {
               redirectUrl="/query-must-not-win"
               transport={replacementTransport}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -606,7 +632,7 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginController
               flowId="terminal-load-failure"
               hasSession={false}
@@ -614,7 +640,7 @@ describe('LoginContent', () => {
               navigation={{ assign: vi.fn(), origin, replace: vi.fn() }}
               transport={transport}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -648,7 +674,7 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginController
               key="initial-newsletter-entry"
               applyNewsletterSubscription={applyNewsletterSubscription}
@@ -659,7 +685,7 @@ describe('LoginContent', () => {
               redirectUrl={finalRedirect}
               transport={directTransport}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -678,7 +704,7 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginController
               key="initial-expired-flow"
               applyNewsletterSubscription={applyNewsletterSubscription}
@@ -689,7 +715,7 @@ describe('LoginContent', () => {
               redirectUrl="/callback-query-must-not-win"
               transport={expiredTransport}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -710,7 +736,7 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginController
               key="replacement-after-load-410"
               applyNewsletterSubscription={applyNewsletterSubscription}
@@ -721,7 +747,7 @@ describe('LoginContent', () => {
               redirectUrl="/callback-query-must-not-win"
               transport={replacementTransport}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -766,9 +792,9 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginContent />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -788,7 +814,7 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginController
               applyNewsletterSubscription={authMock.newsletterSubscription}
               hasSession
@@ -807,7 +833,7 @@ describe('LoginContent', () => {
                 submit: vi.fn(),
               }}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -845,7 +871,7 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginController
               applyNewsletterSubscription={authMock.newsletterSubscription}
               hasSession
@@ -860,7 +886,7 @@ describe('LoginContent', () => {
                 submit: vi.fn(),
               }}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -919,9 +945,9 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginContent />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -972,9 +998,9 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginContent />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -1026,9 +1052,9 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginContent />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -1063,9 +1089,9 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginContent />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -1106,9 +1132,9 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginContent />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -1147,9 +1173,9 @@ describe('LoginContent', () => {
     await act(async () => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <LoginContent />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -1157,7 +1183,7 @@ describe('LoginContent', () => {
 
     const emailButton = document.querySelector<HTMLButtonElement>('#login-email-code-submit');
     expect(emailButton?.disabled).toBe(false);
-    expect(emailButton?.getAttribute('data-variant')).toBe('filled');
+    expect(emailButton?.getAttribute('data-emphasis')).toBe('strong');
     emailButton?.click();
     await flush();
     expect(fetchMock).toHaveBeenCalledTimes(1);

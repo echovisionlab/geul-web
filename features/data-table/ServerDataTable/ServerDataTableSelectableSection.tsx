@@ -1,18 +1,21 @@
 'use client';
+import { ConfirmationDialog } from '@/features/confirmation';
+import { useBulkDeletion } from '@/features/confirmation/useBulkDeletion';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useServerTableRouter as useRouter } from './ServerDataTableNavigation';
 import { IconTrash } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import {
   DataTableSelectionToolbar,
   TableRowMenu,
   type TableRowMenuItem,
   useCurrentPageRowSelection,
 } from '@/components/core/DataTable';
-import { ConfirmModal } from '@/components/core/Modal';
+
 import { useLocale } from '@/lib/providers/LocaleProvider';
 import type { ColumnDef } from '@/lib/types/common/data-table';
 import type { PaginatedQueryResult } from '@/lib/types/repository/result';
@@ -55,9 +58,10 @@ export function ServerDataTableSelectableSection<T>({
   const router = useRouter();
   const locale = useLocale();
   const tCommon = useTranslations('common');
+  const tTableAria = useTranslations('dataTable.aria');
   const selection = useCurrentPageRowSelection(result.data, getRowKey, bulkDelete?.getRowLabel);
   const [bulkDeleteOpened, setBulkDeleteOpened] = useState(false);
-  const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false);
+  const { loading: bulkDeleteLoading, execute: executeBulkDelete } = useBulkDeletion();
   const singleSelectedRowLabel =
     bulkDelete && selection.selectedOnPageCount === 1
       ? (() => {
@@ -77,7 +81,7 @@ export function ServerDataTableSelectableSection<T>({
           label: tCommon('actions.delete'),
           icon: <IconTrash size={16} />,
           onClick: () => setBulkDeleteOpened(true),
-          color: 'red',
+          tone: 'danger',
           disabled: selection.selectedOnPageCount === 0 || bulkDeleteLoading,
         },
       ]
@@ -87,27 +91,21 @@ export function ServerDataTableSelectableSection<T>({
     if (!bulkDelete) {
       return;
     }
-
-    setBulkDeleteLoading(true);
-    try {
-      const results = await Promise.all(selection.selectedOnPageRowKeys.map((id) => bulkDelete.deleteAction(id)));
-      const errors = results.filter((result) => result.error);
-
-      if (errors.length > 0) {
-        notifications.show({
-          message: errors[0]?.error ?? tCommon('errors.generic'),
-          color: 'red',
-        });
-      }
-
-      if (results.length > errors.length) {
-        selection.clearSelection();
-        setBulkDeleteOpened(false);
-        router.refresh();
-      }
-    } finally {
-      setBulkDeleteLoading(false);
-    }
+    await executeBulkDelete(
+      selection.selectedOnPageRowKeys,
+      bulkDelete.deleteAction,
+      tCommon('errors.generic'),
+      async ({ successfulIds, errors }) => {
+        if (errors.length > 0) {
+          notifications.show({ message: errors[0], tone: 'danger' });
+        }
+        if (successfulIds.length > 0) {
+          router.refresh();
+          selection.clearSelection();
+          setBulkDeleteOpened(false);
+        }
+      },
+    );
   };
 
   return (
@@ -128,7 +126,14 @@ export function ServerDataTableSelectableSection<T>({
             />
           }
           sorts={<ServerDataTable.MultiSort namespace={namespace} fields={sortFields} />}
-          actions={bulkDelete ? <TableRowMenu aria-label={tCommon('labels.actions')} items={bulkActionItems} /> : null}
+          actions={
+            bulkDelete ? (
+              <TableRowMenu
+                aria-label={tTableAria('rowActions', { label: bulkDelete.entityLabel })}
+                items={bulkActionItems}
+              />
+            ) : null
+          }
         />
       </ServerDataTable.Toolbar>
       <ServerDataTable.Content
@@ -139,19 +144,20 @@ export function ServerDataTableSelectableSection<T>({
         selection={bulkDelete ? selection : undefined}
       />
       {bulkDelete ? (
-        <ConfirmModal
+        <ConfirmationDialog
+          intent="delete"
           opened={bulkDeleteOpened}
           onClose={() => setBulkDeleteOpened(false)}
           onConfirm={handleBulkDelete}
           title={tCommon('actions.delete')}
           message={
-            <Text>
+            <DsText>
               {singleSelectedRowLabel
                 ? tCommon('messages.deleteNamedItemConfirm', { name: singleSelectedRowLabel })
                 : tCommon('messages.confirmDeleteSelectedCount', {
                     count: selection.selectedOnPageCount,
                   })}
-            </Text>
+            </DsText>
           }
           confirmLabel={tCommon('actions.delete')}
           cancelLabel={tCommon('actions.cancel')}

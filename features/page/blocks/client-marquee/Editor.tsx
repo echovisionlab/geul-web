@@ -1,11 +1,12 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Stack } from '@mantine/core';
+
 import { usePageEditor } from '@/features/page/PageEditor/PageEditorContext';
 import { listClientsForSelector } from '@/lib/queries/client-browser';
 import { MarqueeCommonFields, MarqueeEntityFields } from '../marquee/MarqueeEditorFields';
@@ -38,7 +39,7 @@ function ClientMarqueeSettingsForm({ props, updateProps }: ClientMarqueeSettings
   );
 
   return (
-    <Stack gap="sm" data-page-block-editor="client-marquee">
+    <DsLayoutStack gap="lg" data-page-block-editor="client-marquee">
       <QueryErrorAlert queries={[clientsQuery]} />
       <MarqueeEntityFields
         entityLabel={tCommonEntities('clients')}
@@ -61,7 +62,7 @@ function ClientMarqueeSettingsForm({ props, updateProps }: ClientMarqueeSettings
         linkTarget={props.linkTarget || 'same-tab'}
         onUpdate={updateProp}
       />
-    </Stack>
+    </DsLayoutStack>
   );
 }
 

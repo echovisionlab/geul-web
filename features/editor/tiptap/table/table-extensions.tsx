@@ -138,7 +138,7 @@ class TableNodeView extends TableView {
     this.getPosition = getPos;
     this.dom.className = classes.root;
     this.dom.dataset.testid = 'tiptap-table-runtime';
-    this.dom.style.setProperty('--table-min-column-width', `${TABLE_MIN_COLUMN_WIDTH_PX}px`);
+    this.dom.style.setProperty('--_editor-table-min-column-width', `${TABLE_MIN_COLUMN_WIDTH_PX}px`);
     this.table.className = classes.table;
     this.table.dataset.textColor = String(node.attrs.textColor);
 

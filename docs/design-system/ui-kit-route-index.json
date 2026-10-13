@@ -1,0 +1,1493 @@
+{
+  "schemaVersion": 1,
+  "routes": [
+    {
+      "route": "/[...slug]",
+      "family": "Public",
+      "source": "app/(general)/[...slug]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Editors/Page",
+          "variant": "Ready",
+          "scope": "Complete production editor View with canonical document/controller and local state. Title, locale, metadata and body are rendered together. Server authorization, collaboration persistence, uploads, relation commands and generation are outside.",
+          "storyId": "pages-editors-page--ready",
+          "branch": "edit"
+        },
+        {
+          "storyTitle": "Pages/Public/Documents",
+          "variant": "Page",
+          "scope": "Actual PageContentView with generated rich-text section and actual pinned/empty/phone document layout. Service-backed section kinds, media, localization/access/share checks and edit branch remain outside.",
+          "storyId": "pages-public-documents--page"
+        }
+      ]
+    },
+    {
+      "route": "/account/deletion/cancel",
+      "family": "Identity",
+      "source": "app/(general)/account/deletion/cancel/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Account/Lifecycle",
+          "variant": "DeletionCancelled",
+          "scope": "Actual production account lifecycle controller/render PageView with local typed request/mutation transport. Request/submitted/error/pending and invalid/success/failure states; backend token validation, mail delivery, account/subscription persistence, metadata and redirects remain outside.",
+          "storyId": "pages-account-lifecycle--deletion-cancelled"
+        }
+      ]
+    },
+    {
+      "route": "/account/deletion/confirm",
+      "family": "Identity",
+      "source": "app/(general)/account/deletion/confirm/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Account/Lifecycle",
+          "variant": "DeletionConfirmed",
+          "scope": "Actual production account lifecycle controller/render PageView with local typed request/mutation transport. Request/submitted/error/pending and invalid/success/failure states; backend token validation, mail delivery, account/subscription persistence, metadata and redirects remain outside.",
+          "storyId": "pages-account-lifecycle--deletion-confirmed"
+        }
+      ]
+    },
+    {
+      "route": "/account/recover",
+      "family": "Identity",
+      "source": "app/(general)/account/recover/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Account/Lifecycle",
+          "variant": "RecoveryRequest",
+          "scope": "Actual production account lifecycle controller/render PageView with local typed request/mutation transport. Request/submitted/error/pending and invalid/success/failure states; backend token validation, mail delivery, account/subscription persistence, metadata and redirects remain outside.",
+          "storyId": "pages-account-lifecycle--recovery-request"
+        }
+      ]
+    },
+    {
+      "route": "/account/recovery/confirm",
+      "family": "Identity",
+      "source": "app/(general)/account/recovery/confirm/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Account/Lifecycle",
+          "variant": "RecoveryConfirmed",
+          "scope": "Actual production account lifecycle controller/render PageView with local typed request/mutation transport. Request/submitted/error/pending and invalid/success/failure states; backend token validation, mail delivery, account/subscription persistence, metadata and redirects remain outside.",
+          "storyId": "pages-account-lifecycle--recovery-confirmed"
+        }
+      ]
+    },
+    {
+      "route": "/artists/[idOrSlug]",
+      "family": "Public",
+      "source": "app/(general)/artists/[idOrSlug]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Editors/Artist",
+          "variant": "Ready",
+          "scope": "Complete production editor View with canonical document/controller and local state. Title, locale, metadata and body are rendered together. Server authorization, collaboration persistence, uploads, relation commands and generation are outside.",
+          "storyId": "pages-editors-artist--ready",
+          "branch": "edit"
+        },
+        {
+          "storyTitle": "Pages/Public/Catalog Entity Detail",
+          "variant": "Artist",
+          "scope": "Actual ArtistPublicView extracted unchanged from ArtistPublicContent, including actual ArtistWorks search/filter owner and populated/empty states. Server read/localization resolution, metadata JSON-LD and auth/services remain outside.",
+          "storyId": "pages-public-catalog-entity-detail--artist"
+        }
+      ]
+    },
+    {
+      "route": "/artists",
+      "family": "Public",
+      "source": "app/(general)/artists/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Public/Documents",
+          "variant": "ArtistsIndex",
+          "scope": "Exact shared PageContentView owner used by this CMS route alias; route-specific pathname with validated rich-text section fixture. Home demonstrates the resolved CMS-page branch only. Backend-configured entity-list/other section kinds, missing/restricted branches, server queries and metadata remain outside; this is not the live entity listing.",
+          "storyId": "pages-public-documents--artists-index"
+        }
+      ]
+    },
+    {
+      "route": "/campaigns/[id]/analytics",
+      "family": "Public",
+      "source": "app/(general)/campaigns/[id]/analytics/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Campaign/Analytics",
+          "variant": "Ready",
+          "scope": "Actual CampaignAnalyticsPage controller, metrics, recipient states and pagination with typed local readers. Canonical route server access/fallback and live delivery persistence remain outside.",
+          "storyId": "pages-campaign-analytics--ready"
+        }
+      ]
+    },
+    {
+      "route": "/campaigns/[id]",
+      "family": "Public",
+      "source": "app/(general)/campaigns/[id]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Editors/Campaign",
+          "variant": "Ready",
+          "scope": "Complete production editor View with canonical document/controller and local state. Title, locale, metadata and body are rendered together. Server authorization, collaboration persistence, uploads, relation commands and generation are outside.",
+          "storyId": "pages-editors-campaign--ready",
+          "branch": "edit"
+        },
+        {
+          "storyTitle": "Pages/Editors/Campaign",
+          "variant": "Ready",
+          "scope": "Complete shared production page composition with local data/callbacks. Live authorization, persistence, collaboration, external rendering and translation mutations remain outside; see the story description for fixture limits.",
+          "storyId": "pages-editors-campaign--ready"
+        }
+      ]
+    },
+    {
+      "route": "/category/[slug]",
+      "family": "Public",
+      "source": "app/(general)/category/[slug]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Public/Post Taxonomy",
+          "variant": "Category",
+          "scope": "Actual PostTaxonomyListPage complete query controller/render tree with local typed read transport. Search, scalar fixture filter/sort and pagination; taxonomy lookup/notFound, JSON-LD, root shell and backend semantics outside.",
+          "storyId": "pages-public-post-taxonomy--category"
+        }
+      ]
+    },
+    {
+      "route": "/changelog",
+      "family": "Public",
+      "source": "app/(general)/changelog/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Public/Utilities",
+          "variant": "Changelog",
+          "scope": "Actual ChangelogPageView production release/list rendering using authored release data. Server authorization and filesystem loading remain outside.",
+          "storyId": "pages-public-utilities--changelog"
+        }
+      ]
+    },
+    {
+      "route": "/event-series/[idOrSlug]",
+      "family": "Public",
+      "source": "app/(general)/event-series/[idOrSlug]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Editors/Program Events",
+          "variant": "Series",
+          "scope": "Complete production editor View with canonical document/controller and local state. Title, locale, metadata and body are rendered together. Server authorization, collaboration persistence, uploads, relation commands and generation are outside.",
+          "storyId": "pages-editors-program-events--series",
+          "branch": "edit"
+        },
+        {
+          "storyTitle": "Pages/Public/Event Series",
+          "variant": "Ready",
+          "scope": "Actual ProgramEventSeriesPublicView/EventSeriesEventsTableView with local search, load more and share callbacks; empty/loading/error states. Server filtering, edit branch, metadata and permissions remain outside.",
+          "storyId": "pages-public-event-series--ready"
+        }
+      ]
+    },
+    {
+      "route": "/events/[idOrSlug]",
+      "family": "Public",
+      "source": "app/(general)/events/[idOrSlug]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Editors/Program Events",
+          "variant": "Event",
+          "scope": "Complete production editor View with canonical document/controller and local state. Title, locale, metadata and body are rendered together. Server authorization, collaboration persistence, uploads, relation commands and generation are outside.",
+          "storyId": "pages-editors-program-events--event",
+          "branch": "edit"
+        },
+        {
+          "storyTitle": "Pages/Public/Entity Detail",
+          "variant": "Event",
+          "scope": "Actual ProgramEventViewClient public details/links and sparse/phone states. Rich content, media, edit branch, authorization and server localization remain outside.",
+          "storyId": "pages-public-entity-detail--event"
+        }
+      ]
+    },
+    {
+      "route": "/events",
+      "family": "Public",
+      "source": "app/(general)/events/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Public/Documents",
+          "variant": "EventsIndex",
+          "scope": "Exact shared PageContentView owner used by this CMS route alias; route-specific pathname with validated rich-text section fixture. Home demonstrates the resolved CMS-page branch only. Backend-configured entity-list/other section kinds, missing/restricted branches, server queries and metadata remain outside; this is not the live entity listing.",
+          "storyId": "pages-public-documents--events-index"
+        }
+      ]
+    },
+    {
+      "route": "/files",
+      "family": "Public",
+      "source": "app/(general)/files/page.tsx",
+      "previews": []
+    },
+    {
+      "route": "/labels/[idOrSlug]",
+      "family": "Public",
+      "source": "app/(general)/labels/[idOrSlug]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Editors/Label",
+          "variant": "Ready",
+          "scope": "Complete production editor View with canonical document/controller and local state. Title, locale, metadata and body are rendered together. Server authorization, collaboration persistence, uploads, relation commands and generation are outside.",
+          "storyId": "pages-editors-label--ready",
+          "branch": "edit"
+        },
+        {
+          "storyTitle": "Pages/Public/Catalog Entity Detail",
+          "variant": "Label",
+          "scope": "Actual LabelPublicView extracted unchanged from LabelPublicContent with populated/empty states. Server read/localization resolution, metadata JSON-LD and auth/services remain outside.",
+          "storyId": "pages-public-catalog-entity-detail--label"
+        }
+      ]
+    },
+    {
+      "route": "/labels",
+      "family": "Public",
+      "source": "app/(general)/labels/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Public/Documents",
+          "variant": "LabelsIndex",
+          "scope": "Exact shared PageContentView owner used by this CMS route alias; route-specific pathname with validated rich-text section fixture. Home demonstrates the resolved CMS-page branch only. Backend-configured entity-list/other section kinds, missing/restricted branches, server queries and metadata remain outside; this is not the live entity listing.",
+          "storyId": "pages-public-documents--labels-index"
+        }
+      ]
+    },
+    {
+      "route": "/login/error",
+      "family": "Identity",
+      "source": "app/(general)/login/error/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Auth/Login Error",
+          "variant": "Generic",
+          "scope": "Actual LoginErrorPageView production error/recovery branches using identity-error fixtures. No authentication, server account actions or telemetry.",
+          "storyId": "pages-auth-login-error--generic"
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "family": "Identity",
+      "source": "app/(general)/login/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Auth/Login",
+          "variant": "Email",
+          "scope": "Actual LoginFlowView with local email/code/resend/start-over callbacks, invalid/expired/pending states. Identity issuance, passkeys, social providers and server sessions remain outside.",
+          "storyId": "pages-auth-login--email"
+        }
+      ]
+    },
+    {
+      "route": "/my/artists",
+      "family": "My",
+      "source": "app/(general)/my/artists/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Account/Owned Lists",
+          "variant": "Artists",
+          "scope": "Actual production MyArtistsTable; local typed query/create transport, empty/loading/error branches where the production owner exposes them. Text search/pagination operate on fixtures; backend filter/sort semantics, auth and navigation destinations remain outside.",
+          "storyId": "pages-account-owned-lists--artists"
+        }
+      ]
+    },
+    {
+      "route": "/my",
+      "family": "My",
+      "source": "app/(general)/my/page.tsx",
+      "previews": []
+    },
+    {
+      "route": "/my/posts",
+      "family": "My",
+      "source": "app/(general)/my/posts/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Account/Owned Lists",
+          "variant": "Posts",
+          "scope": "Actual production MyPostsPageView; local typed query/create transport, empty/loading/error branches where the production owner exposes them. Text search/pagination operate on fixtures; backend filter/sort semantics, auth and navigation destinations remain outside.",
+          "storyId": "pages-account-owned-lists--posts"
+        }
+      ]
+    },
+    {
+      "route": "/my/profile",
+      "family": "My",
+      "source": "app/(general)/my/profile/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Account/Full Pages",
+          "variant": "Profile",
+          "scope": "Actual complete MyProfilePageView heading and original ProfileForm controller with local nickname/profile mutation callbacks. Session projection, live identity persistence and account shell are outside.",
+          "storyId": "pages-account-full-pages--profile"
+        }
+      ]
+    },
+    {
+      "route": "/my/security",
+      "family": "My",
+      "source": "app/(general)/my/security/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Account/Full Pages",
+          "variant": "Security",
+          "scope": "Actual complete MySecurityPageView and original SecurityForm sections, local session callbacks and local passkey flow read. Server freshness/access, OAuth and WebAuthn ceremonies and real deletion are outside.",
+          "storyId": "pages-account-full-pages--security"
+        }
+      ]
+    },
+    {
+      "route": "/my/series/[id]",
+      "family": "My",
+      "source": "app/(general)/my/series/[id]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Editors/Series",
+          "variant": "Mine",
+          "scope": "Complete shared production page composition with local data/callbacks. Live authorization, persistence, collaboration, external rendering and translation mutations remain outside; see the story description for fixture limits.",
+          "storyId": "pages-editors-series--mine"
+        }
+      ]
+    },
+    {
+      "route": "/my/series",
+      "family": "My",
+      "source": "app/(general)/my/series/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Account/Owned Lists",
+          "variant": "Series",
+          "scope": "Actual production MySeriesPageView; local typed query/create transport, empty/loading/error branches where the production owner exposes them. Text search/pagination operate on fixtures; backend filter/sort semantics, auth and navigation destinations remain outside.",
+          "storyId": "pages-account-owned-lists--series"
+        }
+      ]
+    },
+    {
+      "route": "/my/settings",
+      "family": "My",
+      "source": "app/(general)/my/settings/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Account/Full Pages",
+          "variant": "Settings",
+          "scope": "Actual complete MySettingsPageView with language/newsletter/cookie/token/MCP sections and local preference callbacks. Server role/session projection, credentials and identity persistence are outside.",
+          "storyId": "pages-account-full-pages--settings"
+        }
+      ]
+    },
+    {
+      "route": "/my/works",
+      "family": "My",
+      "source": "app/(general)/my/works/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Account/Owned Lists",
+          "variant": "Works",
+          "scope": "Actual production MyWorksPageView; local typed query/create transport, empty/loading/error branches where the production owner exposes them. Text search/pagination operate on fixtures; backend filter/sort semantics, auth and navigation destinations remain outside.",
+          "storyId": "pages-account-owned-lists--works"
+        }
+      ]
+    },
+    {
+      "route": "/oauth/authorize/consent",
+      "family": "Identity",
+      "source": "app/(general)/oauth/authorize/consent/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Auth/OAuth Consent",
+          "variant": "OfflineAccess",
+          "scope": "Actual McpConsentPageView extracted unchanged from server route, offline/session scopes and local approve/reject forms. Challenge/session/delegation/Hydra validation, persistence and redirects remain outside.",
+          "storyId": "pages-auth-oauth-consent--offline-access"
+        }
+      ]
+    },
+    {
+      "route": "/onboarding/nickname",
+      "family": "Identity",
+      "source": "app/(general)/onboarding/nickname/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Auth/Nickname Onboarding",
+          "variant": "Ready",
+          "scope": "Actual NicknameOnboarding controller including debounce, unavailable/check-error/submission-error/pending states and local complete/logout actions. Session, uniqueness/persistence and redirects remain outside.",
+          "storyId": "pages-auth-nickname-onboarding--ready"
+        }
+      ]
+    },
+    {
+      "route": "/",
+      "family": "Public",
+      "source": "app/(general)/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Public/Documents",
+          "variant": "Home",
+          "scope": "Exact shared PageContentView owner used by this CMS route alias; route-specific pathname with validated rich-text section fixture. Home demonstrates the resolved CMS-page branch only. Backend-configured entity-list/other section kinds, missing/restricted branches, server queries and metadata remain outside; this is not the live entity listing.",
+          "storyId": "pages-public-documents--home"
+        }
+      ]
+    },
+    {
+      "route": "/posts/[idOrSlug]",
+      "family": "Public",
+      "source": "app/(general)/posts/[idOrSlug]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Editors/Post",
+          "variant": "Ready",
+          "scope": "Complete production editor View with canonical document/controller and local state. Title, locale, metadata and body are rendered together. Server authorization, collaboration persistence, uploads, relation commands and generation are outside.",
+          "storyId": "pages-editors-post--ready",
+          "branch": "edit"
+        },
+        {
+          "storyTitle": "Pages/Public/Documents",
+          "variant": "Post",
+          "scope": "Actual PostViewContent with typed generated rich text, header, hero/pinned/empty document layout, TOC, series links, local markdown export and local empty comments/anonymous snapshot. Comment creation/moderation, media authorization, share/access/SSR/edit branches remain outside.",
+          "storyId": "pages-public-documents--post"
+        }
+      ]
+    },
+    {
+      "route": "/posts",
+      "family": "Public",
+      "source": "app/(general)/posts/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Public/Documents",
+          "variant": "PostsIndex",
+          "scope": "Exact shared PageContentView owner used by this CMS route alias; route-specific pathname with validated rich-text section fixture. Home demonstrates the resolved CMS-page branch only. Backend-configured entity-list/other section kinds, missing/restricted branches, server queries and metadata remain outside; this is not the live entity listing.",
+          "storyId": "pages-public-documents--posts-index"
+        }
+      ]
+    },
+    {
+      "route": "/privacy/history/[id]",
+      "family": "Public",
+      "source": "app/(general)/privacy/history/[id]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Editors/Legal",
+          "variant": "Privacy",
+          "scope": "Complete production editor View with canonical document/controller and local state. Title, locale, metadata and body are rendered together. Server authorization, collaboration persistence, uploads, relation commands and generation are outside.",
+          "storyId": "pages-editors-legal--privacy",
+          "branch": "edit"
+        },
+        {
+          "storyTitle": "Pages/Legal/History Detail",
+          "variant": "Privacy",
+          "scope": "Actual route history-detail client with matching per-locale initial data; archived/missing/unknown dates, metadata and navigation. Queries disabled. Rich text, translated fallback notice, edit branch, server access and query failure recovery remain outside.",
+          "storyId": "pages-legal-history-detail--privacy"
+        }
+      ]
+    },
+    {
+      "route": "/privacy/history",
+      "family": "Public",
+      "source": "app/(general)/privacy/history/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Legal/History",
+          "variant": "Privacy",
+          "scope": "Actual PrivacyHistoryClient production active/archived rows, period formatting and navigation with locale-specific seeded query data. Query transport/server fetch and failure recovery remain outside.",
+          "storyId": "pages-legal-history--privacy"
+        }
+      ]
+    },
+    {
+      "route": "/privacy",
+      "family": "Public",
+      "source": "app/(general)/privacy/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Legal/Public Document",
+          "variant": "Privacy",
+          "scope": "Actual PrivacyPageClient active version/date, upcoming notice, empty body and history/print controls. Seeded query transport disabled; rich document, token-preview and translation branches remain outside.",
+          "storyId": "pages-legal-public-document--privacy"
+        }
+      ]
+    },
+    {
+      "route": "/releases/[idOrSlug]",
+      "family": "Public",
+      "source": "app/(general)/releases/[idOrSlug]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Editors/Release",
+          "variant": "Ready",
+          "scope": "Complete production editor View with canonical document/controller and local state. Title, locale, metadata and body are rendered together. Server authorization, collaboration persistence, uploads, relation commands and generation are outside.",
+          "storyId": "pages-editors-release--ready",
+          "branch": "edit"
+        },
+        {
+          "storyTitle": "Pages/Public/Catalog Entity Detail",
+          "variant": "Release",
+          "scope": "Actual ReleasePublicView extracted unchanged from ReleasePublicContent with populated/empty states. Server read/localization resolution, metadata JSON-LD and auth/services remain outside.",
+          "storyId": "pages-public-catalog-entity-detail--release"
+        }
+      ]
+    },
+    {
+      "route": "/releases",
+      "family": "Public",
+      "source": "app/(general)/releases/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Public/Documents",
+          "variant": "ReleasesIndex",
+          "scope": "Exact shared PageContentView owner used by this CMS route alias; route-specific pathname with validated rich-text section fixture. Home demonstrates the resolved CMS-page branch only. Backend-configured entity-list/other section kinds, missing/restricted branches, server queries and metadata remain outside; this is not the live entity listing.",
+          "storyId": "pages-public-documents--releases-index"
+        }
+      ]
+    },
+    {
+      "route": "/series/[idOrSlug]",
+      "family": "Public",
+      "source": "app/(general)/series/[idOrSlug]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Public/Series",
+          "variant": "Populated",
+          "scope": "Production SeriesPublicView and SeriesPublicPostsView composition; sample rows/local share dialog. Navigation is contained inside the preview; route read, SSR and permission behavior are outside.",
+          "storyId": "pages-public-series--populated"
+        }
+      ]
+    },
+    {
+      "route": "/sitemap",
+      "family": "Public",
+      "source": "app/(general)/sitemap/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Public/Utilities",
+          "variant": "Sitemap",
+          "scope": "Actual SitemapPageView production navigation/list surface. Application shell and server authorization remain outside.",
+          "storyId": "pages-public-utilities--sitemap"
+        }
+      ]
+    },
+    {
+      "route": "/subscribe/confirm",
+      "family": "Public",
+      "source": "app/(general)/subscribe/confirm/page.tsx",
+      "previews": []
+    },
+    {
+      "route": "/subscribe",
+      "family": "Public",
+      "source": "app/(general)/subscribe/page.tsx",
+      "previews": []
+    },
+    {
+      "route": "/tag/[slug]",
+      "family": "Public",
+      "source": "app/(general)/tag/[slug]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Public/Post Taxonomy",
+          "variant": "Tag",
+          "scope": "Actual PostTaxonomyListPage complete query controller/render tree with local typed read transport. Search, scalar fixture filter/sort and pagination; taxonomy lookup/notFound, JSON-LD, root shell and backend semantics outside.",
+          "storyId": "pages-public-post-taxonomy--tag"
+        }
+      ]
+    },
+    {
+      "route": "/terms/history/[id]",
+      "family": "Public",
+      "source": "app/(general)/terms/history/[id]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Editors/Legal",
+          "variant": "Terms",
+          "scope": "Complete production editor View with canonical document/controller and local state. Title, locale, metadata and body are rendered together. Server authorization, collaboration persistence, uploads, relation commands and generation are outside.",
+          "storyId": "pages-editors-legal--terms",
+          "branch": "edit"
+        },
+        {
+          "storyTitle": "Pages/Legal/History Detail",
+          "variant": "Terms",
+          "scope": "Actual route history-detail client with matching per-locale initial data; archived/missing/unknown dates, metadata and navigation. Queries disabled. Rich text, translated fallback notice, edit branch, server access and query failure recovery remain outside.",
+          "storyId": "pages-legal-history-detail--terms"
+        }
+      ]
+    },
+    {
+      "route": "/terms/history",
+      "family": "Public",
+      "source": "app/(general)/terms/history/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Legal/History",
+          "variant": "Terms",
+          "scope": "Actual TermsHistoryClient production active/archived rows, period formatting and navigation with locale-specific seeded query data. Query transport/server fetch and failure recovery remain outside.",
+          "storyId": "pages-legal-history--terms"
+        }
+      ]
+    },
+    {
+      "route": "/terms",
+      "family": "Public",
+      "source": "app/(general)/terms/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Legal/Public Document",
+          "variant": "Terms",
+          "scope": "Actual TermsPageClient active version/date, upcoming notice, empty body and history/print controls. Seeded query transport disabled; rich document, token-preview and translation branches remain outside.",
+          "storyId": "pages-legal-public-document--terms"
+        }
+      ]
+    },
+    {
+      "route": "/unsubscribe",
+      "family": "Public",
+      "source": "app/(general)/unsubscribe/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Account/Lifecycle",
+          "variant": "Unsubscribed",
+          "scope": "Actual production account lifecycle controller/render PageView with local typed request/mutation transport. Request/submitted/error/pending and invalid/success/failure states; backend token validation, mail delivery, account/subscription persistence, metadata and redirects remain outside.",
+          "storyId": "pages-account-lifecycle--unsubscribed"
+        }
+      ]
+    },
+    {
+      "route": "/user/[id]",
+      "family": "Public",
+      "source": "app/(general)/user/[id]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/User/Profile Full Page",
+          "variant": "Public",
+          "scope": "Actual complete UserProfilePageView and production published-post table view with query controls, paging and local profile modal callbacks. Server profile/access projection, persistence and real deletion are outside.",
+          "storyId": "pages-user-profile-full-page--public"
+        }
+      ]
+    },
+    {
+      "route": "/verify",
+      "family": "Identity",
+      "source": "app/(general)/verify/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Auth/Verification",
+          "variant": "Flow",
+          "scope": "Production VerificationFlowView with a local choose-email/code/applying/passed adapter. No identity issuance, delivery, session continuation or server verification.",
+          "storyId": "pages-auth-verification--flow"
+        }
+      ]
+    },
+    {
+      "route": "/works/[idOrSlug]",
+      "family": "Public",
+      "source": "app/(general)/works/[idOrSlug]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Editors/Work",
+          "variant": "Ready",
+          "scope": "Complete production editor View with canonical document/controller and local state. Title, locale, metadata and body are rendered together. Server authorization, collaboration persistence, uploads, relation commands and generation are outside.",
+          "storyId": "pages-editors-work--ready",
+          "branch": "edit"
+        },
+        {
+          "storyTitle": "Pages/Public/Entity Detail",
+          "variant": "Work",
+          "scope": "Actual WorkViewClient public detail header, metadata and credits, sparse/phone states. Fixtures intentionally have no rich text/media tree; edit, SSR, localization and signed delivery remain outside.",
+          "storyId": "pages-public-entity-detail--work"
+        }
+      ]
+    },
+    {
+      "route": "/works",
+      "family": "Public",
+      "source": "app/(general)/works/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Public/Documents",
+          "variant": "WorksIndex",
+          "scope": "Exact shared PageContentView owner used by this CMS route alias; route-specific pathname with validated rich-text section fixture. Home demonstrates the resolved CMS-page branch only. Backend-configured entity-list/other section kinds, missing/restricted branches, server queries and metadata remain outside; this is not the live entity listing.",
+          "storyId": "pages-public-documents--works-index"
+        }
+      ]
+    },
+    {
+      "route": "/admin/artists",
+      "family": "Admin",
+      "source": "app/admin/artists/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Entity Lists",
+          "variant": "Artists",
+          "scope": "Actual production ArtistsPageView extracted from the server route. Domain columns, row menus, creation/deletion controllers, selection and URL query controls use local typed actions/navigation. Text search, scalar fixture filters/sort/pagination only; other operators, auth, draft editor navigation and persistence remain outside.",
+          "storyId": "pages-admin-entity-lists--artists"
+        }
+      ]
+    },
+    {
+      "route": "/admin/audience-segments",
+      "family": "Admin",
+      "source": "app/admin/audience-segments/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Audience and Users",
+          "variant": "Segments",
+          "scope": "Actual production segment PageView, query controls, estimate/create/edit/archive/restore dialogs with typed local transport. Server evaluation, relation constraints and persistence remain outside.",
+          "storyId": "pages-admin-audience-and-users--segments"
+        }
+      ]
+    },
+    {
+      "route": "/admin/campaigns/[id]/analytics",
+      "family": "Admin",
+      "source": "app/admin/campaigns/[id]/analytics/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Campaign/Analytics",
+          "variant": "Ready",
+          "scope": "Actual same CampaignAnalyticsPage owner used by admin alias, with typed local readers. Canonical/admin authorization and live delivery persistence remain outside.",
+          "storyId": "pages-campaign-analytics--ready"
+        }
+      ]
+    },
+    {
+      "route": "/admin/campaigns/[id]",
+      "family": "Admin",
+      "source": "app/admin/campaigns/[id]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Editors/Campaign",
+          "variant": "Ready",
+          "scope": "Complete shared production page composition with local data/callbacks. Live authorization, persistence, collaboration, external rendering and translation mutations remain outside; see the story description for fixture limits.",
+          "storyId": "pages-editors-campaign--ready"
+        }
+      ]
+    },
+    {
+      "route": "/admin/campaigns",
+      "family": "Admin",
+      "source": "app/admin/campaigns/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Communication Lists",
+          "variant": "Campaigns",
+          "scope": "Actual extracted production CampaignsPageView composition with original header/table/modal/pagination owners and local create/delete actions. Scalar fixture query transport; audience evaluation/sending/backend and destination edit pages remain outside.",
+          "storyId": "pages-admin-communication-lists--campaigns"
+        }
+      ]
+    },
+    {
+      "route": "/admin/categories",
+      "family": "Admin",
+      "source": "app/admin/categories/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Taxonomy",
+          "variant": "Categories",
+          "scope": "Actual production domain PageView, table/query columns, CRUD dialogs and selection using typed local callbacks. Scalar/date filters, sorting and paging use fixture transport; authorization, backend validation, relation impacts and persistence remain outside. User-tag domain exposes create/delete only, matching production.",
+          "storyId": "pages-admin-taxonomy--categories"
+        }
+      ]
+    },
+    {
+      "route": "/admin/clients/[id]",
+      "family": "Admin",
+      "source": "app/admin/clients/[id]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Client Editor",
+          "variant": "Edit",
+          "scope": "Actual ClientDetailPageView full production query/mutation/baseline form, light/dark logo upload/crop controls with local typed read/create/update/asset callbacks; captured navigation. New/edit/pending/save-failed states. Multipart transport, asset linking, authorization/validation/persistence outside.",
+          "storyId": "pages-admin-client-editor--edit"
+        }
+      ]
+    },
+    {
+      "route": "/admin/clients",
+      "family": "Admin",
+      "source": "app/admin/clients/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Collections",
+          "variant": "Clients",
+          "scope": "Actual ClientsPageView with domain columns/row menus/create/delete, selection and URL controls backed by local typed actions. Scalar fixture search/filter/sort/paging only; backend authorization/validation/persistence and editor navigation outside.",
+          "storyId": "pages-admin-collections--clients"
+        }
+      ]
+    },
+    {
+      "route": "/admin/email-layouts/[id]",
+      "family": "Admin",
+      "source": "app/admin/email-layouts/[id]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Email Editors",
+          "variant": "Layout",
+          "scope": "Complete shared production page composition with local data/callbacks. Live authorization, persistence, collaboration, external rendering and translation mutations remain outside; see the story description for fixture limits.",
+          "storyId": "pages-admin-email-editors--layout"
+        }
+      ]
+    },
+    {
+      "route": "/admin/email-layouts",
+      "family": "Admin",
+      "source": "app/admin/email-layouts/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Email Catalog",
+          "variant": "Layouts",
+          "scope": "Actual production layout catalog, query controls, previews and create/delete dialogs with local typed transport. HTML preview uses local document data; authorization, persistence and the edit destination remain outside.",
+          "storyId": "pages-admin-email-catalog--layouts"
+        }
+      ]
+    },
+    {
+      "route": "/admin/email-templates/[id]",
+      "family": "Admin",
+      "source": "app/admin/email-templates/[id]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Email Editors",
+          "variant": "Template",
+          "scope": "Complete shared production page composition with local data/callbacks. Live authorization, persistence, collaboration, external rendering and translation mutations remain outside; see the story description for fixture limits.",
+          "storyId": "pages-admin-email-editors--template"
+        }
+      ]
+    },
+    {
+      "route": "/admin/email-templates",
+      "family": "Admin",
+      "source": "app/admin/email-templates/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Email Catalog",
+          "variant": "Templates",
+          "scope": "Actual production template catalog and event mapping controls with local typed transport. Delivery, authorization, persistence and the edit destination remain outside.",
+          "storyId": "pages-admin-email-catalog--templates"
+        }
+      ]
+    },
+    {
+      "route": "/admin/emails",
+      "family": "Admin",
+      "source": "app/admin/emails/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Email Events",
+          "variant": "Notices",
+          "scope": "Actual production page containing removed-database-log and external-dashboard notices. There is no event table or mutation controller on this route.",
+          "storyId": "pages-admin-email-events--notices"
+        }
+      ]
+    },
+    {
+      "route": "/admin/event-series/[id]",
+      "family": "Admin",
+      "source": "app/admin/event-series/[id]/page.tsx",
+      "previews": []
+    },
+    {
+      "route": "/admin/event-series",
+      "family": "Admin",
+      "source": "app/admin/event-series/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Program Event Lists",
+          "variant": "Series",
+          "scope": "Actual production PageView, query table and local creation/deletion callbacks. Server permissions, related events and editor destination remain outside.",
+          "storyId": "pages-admin-program-event-lists--series"
+        }
+      ]
+    },
+    {
+      "route": "/admin/events",
+      "family": "Admin",
+      "source": "app/admin/events/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Program Event Lists",
+          "variant": "Events",
+          "scope": "Actual production PageView, query table, selection/create and event type manager with typed local actions. Server authorization, event relations/publication and editor destinations remain outside.",
+          "storyId": "pages-admin-program-event-lists--events"
+        }
+      ]
+    },
+    {
+      "route": "/admin/files",
+      "family": "Admin",
+      "source": "app/admin/files/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/File Manager",
+          "variant": "Browser",
+          "scope": "Actual FileManagerView and actual useFileManagerI18n. Local folder/query/type/sort/selection/create/rename/delete/move/detail callbacks in one browser with grid/list/settings and selection controls, plus distinct detail/empty/error/loading/author stories. Responsive sizes use the viewport toolbar. Authentication, app shell, byte upload, server confirmations and persistence remain outside.",
+          "storyId": "pages-admin-file-manager--browser"
+        }
+      ]
+    },
+    {
+      "route": "/admin/formats",
+      "family": "Admin",
+      "source": "app/admin/formats/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Taxonomy",
+          "variant": "Formats",
+          "scope": "Actual production domain PageView, table/query columns, CRUD dialogs and selection using typed local callbacks. Scalar/date filters, sorting and paging use fixture transport; authorization, backend validation, relation impacts and persistence remain outside. User-tag domain exposes create/delete only, matching production.",
+          "storyId": "pages-admin-taxonomy--formats"
+        }
+      ]
+    },
+    {
+      "route": "/admin/forms/[id]/builder",
+      "family": "Admin",
+      "source": "app/admin/forms/[id]/(edit)/builder/page.tsx",
+      "previews": []
+    },
+    {
+      "route": "/admin/forms/[id]/settings",
+      "family": "Admin",
+      "source": "app/admin/forms/[id]/(edit)/settings/page.tsx",
+      "previews": []
+    },
+    {
+      "route": "/admin/forms/[id]/translations",
+      "family": "Admin",
+      "source": "app/admin/forms/[id]/(edit)/translations/page.tsx",
+      "previews": []
+    },
+    {
+      "route": "/admin/forms/[id]",
+      "family": "Admin",
+      "source": "app/admin/forms/[id]/page.tsx",
+      "previews": []
+    },
+    {
+      "route": "/admin/forms/[id]/submissions/[submissionId]",
+      "family": "Admin",
+      "source": "app/admin/forms/[id]/submissions/[submissionId]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Forms/Operations",
+          "variant": "Detail",
+          "scope": "Actual FormSubmissionDetailPageView extracted unchanged from server route with production metadata/response rendering and deletion confirmation; local typed deletion callback. Server schema/read/permissions/persistence outside.",
+          "storyId": "pages-forms-operations--detail"
+        }
+      ]
+    },
+    {
+      "route": "/admin/forms/[id]/submissions",
+      "family": "Admin",
+      "source": "app/admin/forms/[id]/submissions/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Forms/Operations",
+          "variant": "Submissions",
+          "scope": "Actual AdminFormSubmissionsPage including real country/date/search/sort/pagination and deletion controller with local typed actions. Server validation/permission/persistence outside.",
+          "storyId": "pages-forms-operations--submissions"
+        }
+      ]
+    },
+    {
+      "route": "/admin/forms",
+      "family": "Admin",
+      "source": "app/admin/forms/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Communication Lists",
+          "variant": "Forms",
+          "scope": "Actual extracted production FormsPageView composition with original header/table/modal/pagination owners and local create/delete actions. Scalar fixture query transport; permission/publication/backend and destination edit pages remain outside.",
+          "storyId": "pages-admin-communication-lists--forms"
+        }
+      ]
+    },
+    {
+      "route": "/admin/genres",
+      "family": "Admin",
+      "source": "app/admin/genres/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Taxonomy",
+          "variant": "Genres",
+          "scope": "Actual production domain PageView, table/query columns, CRUD dialogs and selection using typed local callbacks. Scalar/date filters, sorting and paging use fixture transport; authorization, backend validation, relation impacts and persistence remain outside. User-tag domain exposes create/delete only, matching production.",
+          "storyId": "pages-admin-taxonomy--genres"
+        }
+      ]
+    },
+    {
+      "route": "/admin/labels",
+      "family": "Admin",
+      "source": "app/admin/labels/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Entity Lists",
+          "variant": "Labels",
+          "scope": "Actual production LabelsPageView extracted from the server route. Domain columns, row menus, creation/deletion controllers, selection and URL query controls use local typed actions/navigation. Text search, scalar fixture filters/sort/pagination only; other operators, auth, draft editor navigation and persistence remain outside.",
+          "storyId": "pages-admin-entity-lists--labels"
+        }
+      ]
+    },
+    {
+      "route": "/admin/map",
+      "family": "Admin",
+      "source": "app/admin/map/page.tsx",
+      "previews": []
+    },
+    {
+      "route": "/admin/map/places/[id]",
+      "family": "Admin",
+      "source": "app/admin/map/places/[id]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Map Places",
+          "variant": "Detail",
+          "scope": "Actual production detail controller, PlaceEditor and complete metadata with typed local read/update/delete callbacks. Google map, geocoding and autocomplete services are outside the fixture.",
+          "storyId": "pages-admin-map-places--detail"
+        }
+      ]
+    },
+    {
+      "route": "/admin/map/places",
+      "family": "Admin",
+      "source": "app/admin/map/places/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Map Places",
+          "variant": "List",
+          "scope": "Actual production list controller, query controls, creation dialog and local typed transport. External Google autocomplete and backend persistence/authorization remain outside.",
+          "storyId": "pages-admin-map-places--list"
+        }
+      ]
+    },
+    {
+      "route": "/admin/map/themes/[id]",
+      "family": "Admin",
+      "source": "app/admin/map/themes/[id]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Map Theme Editor",
+          "variant": "Ready",
+          "scope": "Complete shared production page composition with local data/callbacks. Live authorization, persistence, collaboration, external rendering and translation mutations remain outside; see the story description for fixture limits.",
+          "storyId": "pages-admin-map-theme-editor--ready"
+        }
+      ]
+    },
+    {
+      "route": "/admin/map/themes",
+      "family": "Admin",
+      "source": "app/admin/map/themes/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Map Themes",
+          "variant": "Ready",
+          "scope": "Actual MapThemeListPageView including local copy form, deletion confirmation and default switching. Create action, navigation, persistence and admin permission checks remain outside.",
+          "storyId": "pages-admin-map-themes--ready"
+        }
+      ]
+    },
+    {
+      "route": "/admin/menus",
+      "family": "Admin",
+      "source": "app/admin/menus/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Menus",
+          "variant": "Ready",
+          "scope": "Complete shared production page composition with local data/callbacks. Live authorization, persistence, collaboration, external rendering and translation mutations remain outside; see the story description for fixture limits.",
+          "storyId": "pages-admin-menus--ready"
+        }
+      ]
+    },
+    {
+      "route": "/admin",
+      "family": "Admin",
+      "source": "app/admin/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Dashboard",
+          "variant": "Ready",
+          "scope": "Actual dashboard controller and Core StatCards with typed local stats reader. Ready/zero/pending/error; authorization and live service counts remain outside.",
+          "storyId": "pages-admin-dashboard--ready"
+        }
+      ]
+    },
+    {
+      "route": "/admin/pages",
+      "family": "Admin",
+      "source": "app/admin/pages/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Content Lists",
+          "variant": "Pages",
+          "scope": "Actual PagesPageView unchanged server render extraction, domain columns/row menus, create/delete/bulk selection and URL controls; local typed scalar fixture read/mutations. Auth/server validation/persistence and draft editor destinations outside.",
+          "storyId": "pages-admin-content-lists--pages"
+        }
+      ]
+    },
+    {
+      "route": "/admin/posts",
+      "family": "Admin",
+      "source": "app/admin/posts/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Content Lists",
+          "variant": "Posts",
+          "scope": "Actual PostsPageView unchanged server render extraction, domain columns/authors/row menus, create/delete/bulk selection and URL controls; local typed scalar fixture read/mutations. Auth/server validation/persistence and draft editor destinations outside.",
+          "storyId": "pages-admin-content-lists--posts"
+        }
+      ]
+    },
+    {
+      "route": "/admin/privacy/[id]",
+      "family": "Admin",
+      "source": "app/admin/privacy/[id]/page.tsx",
+      "previews": []
+    },
+    {
+      "route": "/admin/privacy/new",
+      "family": "Admin",
+      "source": "app/admin/privacy/new/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Legal Policies",
+          "variant": "PrivacyCreating",
+          "scope": "Actual shared PolicyVersionCreationPage used by the automatic draft creation route. Pending/success/error local action and recorded navigation. Local destination text is callback evidence only; server creation, persistence and destination editor are outside.",
+          "storyId": "pages-admin-legal-policies--privacy-creating"
+        }
+      ]
+    },
+    {
+      "route": "/admin/privacy",
+      "family": "Admin",
+      "source": "app/admin/privacy/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Legal Policies",
+          "variant": "Privacy",
+          "scope": "Actual PrivacyListClient and shared LegalPolicyListClient with privacy status/search/selection/dialogs and local creation/deletion. Backend version/revision CAS, permissions and edit destination remain outside.",
+          "storyId": "pages-admin-legal-policies--privacy"
+        }
+      ]
+    },
+    {
+      "route": "/admin/releases",
+      "family": "Admin",
+      "source": "app/admin/releases/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Entity Lists",
+          "variant": "Releases",
+          "scope": "Actual production ReleasesPageView extracted from the server route. Domain columns, row menus, creation/deletion controllers, selection and URL query controls use local typed actions/navigation. Text search, scalar fixture filters/sort/pagination only; other operators, auth, draft editor navigation and persistence remain outside.",
+          "storyId": "pages-admin-entity-lists--releases"
+        }
+      ]
+    },
+    {
+      "route": "/admin/series/[id]",
+      "family": "Admin",
+      "source": "app/admin/series/[id]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Editors/Series",
+          "variant": "Admin",
+          "scope": "Complete shared production page composition with local data/callbacks. Live authorization, persistence, collaboration, external rendering and translation mutations remain outside; see the story description for fixture limits.",
+          "storyId": "pages-editors-series--admin"
+        }
+      ]
+    },
+    {
+      "route": "/admin/series",
+      "family": "Admin",
+      "source": "app/admin/series/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Collections",
+          "variant": "Series",
+          "scope": "Actual SeriesPageView with creation form, domain columns/row menus/delete, selection and URL controls backed by local typed actions. Scalar fixture search/filter/sort/paging only; backend authorization/validation/persistence and editor navigation outside.",
+          "storyId": "pages-admin-collections--series"
+        }
+      ]
+    },
+    {
+      "route": "/admin/settings/mail",
+      "family": "Admin",
+      "source": "app/admin/settings/mail/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Mail Adapters",
+          "variant": "Ready",
+          "scope": "Actual production adapter page and create/edit/test/delete dialogs with local typed transport. Mail delivery, server validation and credentials remain outside.",
+          "storyId": "pages-admin-mail-adapters--ready"
+        }
+      ]
+    },
+    {
+      "route": "/admin/settings/og-image",
+      "family": "Admin",
+      "source": "app/admin/settings/og-image/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/OG Image Settings",
+          "variant": "Ready",
+          "scope": "Actual complete production settings controller, both panels, local save and typed run tracking. OG preview renderer image response and service generation remain outside.",
+          "storyId": "pages-admin-og-image-settings--ready"
+        }
+      ]
+    },
+    {
+      "route": "/admin/settings",
+      "family": "Admin",
+      "source": "app/admin/settings/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Site Settings",
+          "variant": "Ready",
+          "scope": "Complete shared production page composition with local data/callbacks. Live authorization, persistence, collaboration, external rendering and translation mutations remain outside; see the story description for fixture limits.",
+          "storyId": "pages-admin-site-settings--ready"
+        }
+      ]
+    },
+    {
+      "route": "/admin/styles",
+      "family": "Admin",
+      "source": "app/admin/styles/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Taxonomy",
+          "variant": "Styles",
+          "scope": "Actual production domain PageView, table/query columns, CRUD dialogs and selection using typed local callbacks. Scalar/date filters, sorting and paging use fixture transport; authorization, backend validation, relation impacts and persistence remain outside. User-tag domain exposes create/delete only, matching production.",
+          "storyId": "pages-admin-taxonomy--styles"
+        }
+      ]
+    },
+    {
+      "route": "/admin/tags",
+      "family": "Admin",
+      "source": "app/admin/tags/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Taxonomy",
+          "variant": "Tags",
+          "scope": "Actual production domain PageView, table/query columns, CRUD dialogs and selection using typed local callbacks. Scalar/date filters, sorting and paging use fixture transport; authorization, backend validation, relation impacts and persistence remain outside. User-tag domain exposes create/delete only, matching production.",
+          "storyId": "pages-admin-taxonomy--tags"
+        }
+      ]
+    },
+    {
+      "route": "/admin/terms/[id]",
+      "family": "Admin",
+      "source": "app/admin/terms/[id]/page.tsx",
+      "previews": []
+    },
+    {
+      "route": "/admin/terms/new",
+      "family": "Admin",
+      "source": "app/admin/terms/new/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Legal Policies",
+          "variant": "TermsCreating",
+          "scope": "Actual shared PolicyVersionCreationPage used by the automatic draft creation route. Pending/success/error local action and recorded navigation. Local destination text is callback evidence only; server creation, persistence and destination editor are outside.",
+          "storyId": "pages-admin-legal-policies--terms-creating"
+        }
+      ]
+    },
+    {
+      "route": "/admin/terms",
+      "family": "Admin",
+      "source": "app/admin/terms/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Legal Policies",
+          "variant": "Terms",
+          "scope": "Actual TermsListClient and shared LegalPolicyListClient with real status/search/selection/dialogs and local creation/deletion. Backend version/revision CAS, permissions and edit destination remain outside.",
+          "storyId": "pages-admin-legal-policies--terms"
+        }
+      ]
+    },
+    {
+      "route": "/admin/translations/jobs",
+      "family": "Admin",
+      "source": "app/admin/translations/jobs/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Translation",
+          "variant": "Jobs",
+          "scope": "Actual production active-jobs controller and cancellation using typed local RPC data. Refresh, empty and read failure states; machine translation, runtime lifecycle stream and server cancellation remain outside.",
+          "storyId": "pages-admin-translation--jobs"
+        }
+      ]
+    },
+    {
+      "route": "/admin/translations",
+      "family": "Admin",
+      "source": "app/admin/translations/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Translation",
+          "variant": "Overview",
+          "scope": "Actual production overview controller with typed in-memory RPC data, refresh and empty/error/pending states. Locale/entity health tables use production owners. Backend auth, translation execution, collaboration events and server data remain outside.",
+          "storyId": "pages-admin-translation--overview"
+        }
+      ]
+    },
+    {
+      "route": "/admin/translations/settings",
+      "family": "Admin",
+      "source": "app/admin/translations/settings/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Translation",
+          "variant": "Settings",
+          "scope": "Actual production dirty settings form and provider CRUD/toggle/confirmation controller with typed in-memory RPC. Ready/empty/read-error/pending/save-error states. Backend CAS, credentials, auth and persistence remain outside.",
+          "storyId": "pages-admin-translation--settings"
+        }
+      ]
+    },
+    {
+      "route": "/admin/user-tags",
+      "family": "Admin",
+      "source": "app/admin/user-tags/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Taxonomy",
+          "variant": "UserTags",
+          "scope": "Actual production domain PageView, table/query columns, CRUD dialogs and selection using typed local callbacks. Scalar/date filters, sorting and paging use fixture transport; authorization, backend validation, relation impacts and persistence remain outside. User-tag domain exposes create/delete only, matching production.",
+          "storyId": "pages-admin-taxonomy--user-tags"
+        }
+      ]
+    },
+    {
+      "route": "/admin/users/[id]",
+      "family": "Admin",
+      "source": "app/admin/users/[id]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/User Edit",
+          "variant": "Ready",
+          "scope": "Actual complete production member detail controller and profile/security sections with local transport. Credential token issuance, SSO continuation, permissions and backend identity invariants remain outside.",
+          "storyId": "pages-admin-user-edit--ready"
+        }
+      ]
+    },
+    {
+      "route": "/admin/users",
+      "family": "Admin",
+      "source": "app/admin/users/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Audience and Users",
+          "variant": "Users",
+          "scope": "Actual production users PageView, table and original modal controllers with local ban/role/unsubscribe/delete callbacks. No real account mutations; server authorization and identity invariants are outside.",
+          "storyId": "pages-admin-audience-and-users--users"
+        }
+      ]
+    },
+    {
+      "route": "/admin/works",
+      "family": "Admin",
+      "source": "app/admin/works/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Collections",
+          "variant": "Works",
+          "scope": "Actual WorksPageView complete production query/mutation controller with local typed actions and create/delete/requery. Fixture text search/paging only; backend filtering/sorting/authorization/validation/persistence and editor destination outside.",
+          "storyId": "pages-admin-collections--works"
+        }
+      ]
+    },
+    {
+      "route": "/editor-lab-local",
+      "family": "Development",
+      "source": "app/editor-lab-local/page.tsx",
+      "previews": []
+    },
+    {
+      "route": "/forms/[slug]/dashboard",
+      "family": "Forms",
+      "source": "app/forms/[slug]/dashboard/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Forms/Operations",
+          "variant": "Dashboard",
+          "scope": "Actual FormDashboardView access/data controller and charts with local typed query transports; populated/empty/error/locked/invalid states. Signed token, access authorization, real aggregation and persistence outside.",
+          "storyId": "pages-forms-operations--dashboard"
+        }
+      ]
+    },
+    {
+      "route": "/forms/[slug]",
+      "family": "Forms",
+      "source": "app/forms/[slug]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Editors/Form",
+          "variant": "Builder",
+          "scope": "Production FormLayoutView and FormEditor/FormBuilder, including header, locale and editable schema. Builder tab only; settings/submissions/translations tabs are separate surfaces. In-memory callbacks; backend collaboration, permissions and persistence are outside.",
+          "storyId": "pages-editors-form--builder",
+          "branch": "edit"
+        },
+        {
+          "storyTitle": "Pages/Forms/Public Response",
+          "variant": "Response",
+          "scope": "Complete production PublicFormView response/access/header composition and typed local submission callbacks. Validation and local success navigation are interactive. Server schema/access projection and canonical editing branches remain separate.",
+          "storyId": "pages-forms-public-response--response"
+        }
+      ]
+    },
+    {
+      "route": "/forms/[slug]/password",
+      "family": "Forms",
+      "source": "app/forms/[slug]/password/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Forms/Operations",
+          "variant": "Password",
+          "scope": "Actual FormPasswordContent access/verification controller and sessionStorage flow with local password signal. Final navigation contained; signed share/token validation, real passwords and authorization outside.",
+          "storyId": "pages-forms-operations--password"
+        }
+      ]
+    },
+    {
+      "route": "/forms/[slug]/success",
+      "family": "Forms",
+      "source": "app/forms/[slug]/success/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Forms/Public Response",
+          "variant": "Success",
+          "scope": "Complete production FormSuccessPageView, branding owner and shared Core form container. Form existence/fallback and server metadata checks remain outside.",
+          "storyId": "pages-forms-public-response--success"
+        }
+      ]
+    },
+    {
+      "route": "/forms",
+      "family": "Forms",
+      "source": "app/forms/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Public/Documents",
+          "variant": "FormsIndex",
+          "scope": "Exact shared PageContentView owner used by the forms CMS route alias; explicit pathname and validated rich-text section fixture. Backend-configured section kinds, missing/restricted branches, server queries and metadata remain outside.",
+          "storyId": "pages-public-documents--forms-index"
+        }
+      ]
+    },
+    {
+      "route": "/s/[token]",
+      "family": "Share",
+      "source": "app/s/[token]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Share/Password Gate",
+          "variant": "Locked",
+          "scope": "Production SharePasswordView and local password validation. Token validation, expiry, access reason and entity destination controller remain outside.",
+          "storyId": "pages-share-password-gate--locked"
+        }
+      ]
+    }
+  ]
+}

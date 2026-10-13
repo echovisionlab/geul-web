@@ -15,11 +15,12 @@ import type { ArtistListProps } from './schema';
 import { ArtistListView } from './View';
 
 interface ArtistListSettingsFormProps {
+  readOnly?: boolean;
   props: Partial<ArtistListProps>;
   updateProps: (props: Record<string, unknown>) => void;
 }
 
-function ArtistListSettingsForm({ props, updateProps }: ArtistListSettingsFormProps) {
+function ArtistListSettingsForm({ props, updateProps, readOnly = false }: ArtistListSettingsFormProps) {
   const tPageEditor = useTranslations('pageEditor');
   const tCommonEntities = useTranslations('common.entities');
   const tCommonLabels = useTranslations('common.labels');
@@ -44,9 +45,12 @@ function ArtistListSettingsForm({ props, updateProps }: ArtistListSettingsFormPr
 
   const updateProp = useCallback(
     (key: string, value: string) => {
+      if (readOnly) {
+        return;
+      }
       updateProps({ [key]: value });
     },
-    [updateProps],
+    [readOnly, updateProps],
   );
 
   const labelOptions =
@@ -66,9 +70,11 @@ function ArtistListSettingsForm({ props, updateProps }: ArtistListSettingsFormPr
     <>
       <QueryErrorAlert queries={[labelsQuery]} />
       <ListBlockEditorBase
+        readOnly={readOnly}
         editorType="artist-list"
         limitLabel={tPageEditor('blockEditor.labels.maxArtists')}
         layout={layout}
+        itemSize={props.itemSize}
         columns={columns}
         limit={limit}
         maxLimit={24}
@@ -84,22 +90,22 @@ function ArtistListSettingsForm({ props, updateProps }: ArtistListSettingsFormPr
         carouselIndicators={carouselIndicators}
         filters={
           <MultiSelect
+            disabled={readOnly}
             label={tCommonEntities('labels')}
             placeholder={tPageEditor('blockEditor.placeholders.allLabels')}
             data={labelOptions}
             value={labelIds ? labelIds.split(',').filter(Boolean) : []}
             onChange={(values) => updateProp('labelIds', values.join(','))}
-            size="xs"
             clearable
             searchable
           />
         }
         extraDisplayOptions={
           <Switch
+            disabled={readOnly}
             label={tPageEditor('blockEditor.labels.showSocialLinks')}
             checked={showMeta === 'true'}
             onChange={(event) => updateProp('showMeta', event.currentTarget.checked ? 'true' : 'false')}
-            size="sm"
           />
         }
         onUpdate={updateProp}
@@ -108,20 +114,29 @@ function ArtistListSettingsForm({ props, updateProps }: ArtistListSettingsFormPr
   );
 }
 
-export function ArtistListSettingsEditor({ props, updateSharedProps }: BlockSettingsEditorProps<ArtistListProps>) {
-  return <ArtistListSettingsForm props={props} updateProps={updateSharedProps} />;
+export function ArtistListSettingsEditor({
+  props,
+  updateSharedProps,
+  allowSharedEdits,
+}: BlockSettingsEditorProps<ArtistListProps>) {
+  return <ArtistListSettingsForm props={props} updateProps={updateSharedProps} readOnly={allowSharedEdits === false} />;
 }
 
 export function ArtistListEditor({ sectionId, props }: BlockEditorProps<ArtistListProps>) {
-  const { updateSection } = usePageEditor();
+  const { updateSection, editable, allowStructuralEdits } = usePageEditor();
   const updateProps = useCallback(
     (nextProps: Record<string, unknown>) => {
+      if (!editable || !allowStructuralEdits) {
+        return;
+      }
       updateSection(sectionId, { props: nextProps });
     },
-    [sectionId, updateSection],
+    [sectionId, updateSection, editable, allowStructuralEdits],
   );
 
-  return <ArtistListSettingsForm props={props} updateProps={updateProps} />;
+  return (
+    <ArtistListSettingsForm props={props} updateProps={updateProps} readOnly={!editable || !allowStructuralEdits} />
+  );
 }
 
 export function ArtistListCanvasPreview({ sectionId, props }: BlockCanvasPreviewProps<ArtistListProps>) {

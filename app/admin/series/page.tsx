@@ -1,7 +1,6 @@
 import { getTranslations } from 'next-intl/server';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import { CreateSeriesButton, SeriesModalProvider, SeriesModals, SeriesTableContent } from '@/features/admin/series';
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
+import { SeriesPageView } from '@/features/admin/series/SeriesPageView';
 import { listSeriesAdmin } from '@/lib/queries/series';
 import type { SeriesStatus } from '@/lib/types/series/model';
 import { parseTableQuery } from '@/lib/utils/table-url';
@@ -52,23 +51,13 @@ export default async function AdminSeriesPage({ searchParams }: PageProps) {
   });
 
   return (
-    <SeriesModalProvider>
-      <AdminPageHeader
-        title={tCommonEntities('series')}
-        items={[{ key: 'create-series', type: 'custom', content: <CreateSeriesButton /> }]}
-      />
-
-      <ServerDataTable namespace="series">
-        <SeriesTableContent
-          result={result}
-          searchPlaceholder={searchPlaceholder}
-          filterFields={filterFields}
-          sortFields={sortFields}
-        />
-        <ServerDataTable.Pagination namespace="series" result={result} searchParams={params} />
-      </ServerDataTable>
-
-      <SeriesModals />
-    </SeriesModalProvider>
+    <SeriesPageView
+      title={tCommonEntities('series')}
+      result={result}
+      searchPlaceholder={searchPlaceholder}
+      filterFields={filterFields}
+      sortFields={sortFields}
+      searchParams={params.toString()}
+    />
   );
 }

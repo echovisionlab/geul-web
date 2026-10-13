@@ -1,7 +1,10 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
-import { Group, Paper } from '@mantine/core';
+import { ToolbarSurface } from '@/components/core/Section';
+import { LayoutInline as EditorDsLayoutInline, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+
+import { useEffect, useState } from 'react';
+
 import type { Editor } from '@tiptap/core';
 import { CellSelection, selectedRect } from '@tiptap/pm/tables';
 import { BubbleMenu } from '@tiptap/react/menus';
@@ -29,9 +32,9 @@ import { IconButton } from '@/components/core/IconButton';
 import {
   EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS,
   EditorToolbarDropdownTarget,
-  EditorToolbarTooltip,
-  type EditorToolbarShortcutHint,
 } from '@/features/editor/toolbars/EditorToolbarTooltip';
+import { EditorToolbarAction, type EditorToolbarActionProps } from '@/features/editor/toolbars/EditorToolbarAction';
+import { Separator } from '@/components/core/Display';
 import {
   useTiptapBubbleMenu,
   useSelectionToolbarEditorTabBridge,
@@ -115,61 +118,11 @@ function selectedCellsAreHeaders(editor: Editor, axis: 'row' | 'column'): boolea
   );
 }
 
-type AvailableTableAction = {
-  unavailable?: false;
-  unavailableReason?: undefined;
-  onClick: () => void;
-};
+type TableActionProps = Omit<EditorToolbarActionProps, 'focusHint' | 'popoverTarget'>;
 
-type UnavailableTableAction = {
-  unavailable: true;
-  unavailableReason: string;
-  onClick?: undefined;
-};
-
-type TableActionProps = {
-  active?: boolean;
-  children: ReactNode;
-  label: string;
-  pressed?: boolean;
-  testId: string;
-  shortcut?: EditorToolbarShortcutHint;
-} & (AvailableTableAction | UnavailableTableAction);
-
-function TableAction({
-  active = false,
-  children,
-  label,
-  pressed,
-  testId,
-  shortcut,
-  unavailable = false,
-  unavailableReason,
-  onClick,
-}: TableActionProps) {
-  const tooltipLabel = unavailable ? `${label}: ${unavailableReason}` : label;
-  return (
-    <EditorToolbarTooltip label={tooltipLabel} shortcut={shortcut}>
-      <span className={classes.actionTarget} data-unavailable={unavailable || undefined}>
-        <IconButton
-          label={label}
-          tone={active ? 'accent' : 'neutral'}
-          emphasis={active ? 'strong' : 'low'}
-          size="sm"
-          disabled={unavailable}
-          tabIndex={unavailable ? -1 : undefined}
-          aria-pressed={pressed}
-          data-selection-toolbar-action=""
-          data-testid={testId}
-          data-unavailable-reason={unavailableReason}
-          onMouseDown={(event) => event.preventDefault()}
-          onClick={onClick}
-        >
-          {children}
-        </IconButton>
-      </span>
-    </EditorToolbarTooltip>
-  );
+/** Table commands keep their focus hints; all other command behavior is the shared editor adapter. */
+function TableAction(props: TableActionProps) {
+  return <EditorToolbarAction {...props} focusHint />;
 }
 
 /** Compact table-only menu that is limited to table selections. */
@@ -192,7 +145,7 @@ export function TiptapTableMenu({ editor }: { editor: Editor }) {
   const menuEligible = editor.isEditable && editor.state.selection instanceof CellSelection;
   useSelectionToolbarEditorTabBridge(editor.view.dom, navigation.focusFirstAction, menuEligible, dismissTableMenu);
 
-  if (!menuEligible) {
+  if (menu.isSuppressed || !menuEligible) {
     return null;
   }
   const alignment = uniformSelectedCellAlignment(editor);
@@ -208,210 +161,212 @@ export function TiptapTableMenu({ editor }: { editor: Editor }) {
       shouldShow={shouldShowTableMenu}
       options={TABLE_BUBBLE_MENU_OPTIONS}
     >
-      <Paper
-        ref={navigation.toolbarRef}
-        className={classes.menu}
-        withBorder
-        shadow="sm"
-        p={4}
-        radius="sm"
-        role="toolbar"
-        aria-label={labels('toolbarLabel')}
-        data-testid="tiptap-table-menu"
-        onKeyDownCapture={navigation.onToolbarKeyDown}
-        onFocusCapture={navigation.onToolbarFocusCapture}
-      >
-        <Group className={classes.menuGroups} gap={2} wrap="nowrap">
-          <DropdownMenu size="standard" placement="bottom-start">
-            <EditorToolbarDropdownTarget label={labels('toolbarLabel')}>
-              {(targetRef) => (
-                <IconButton
-                  ref={targetRef}
-                  label={labels('toolbarLabel')}
-                  tone="neutral"
-                  emphasis="low"
-                  size="sm"
-                  data-selection-toolbar-action=""
-                  data-testid="tiptap-table-options"
-                  onMouseDown={(event) => event.preventDefault()}
+      <div className={classes.menu}>
+        <ToolbarSurface
+          density="compact"
+          wrap="nowrap"
+          ref={navigation.toolbarRef}
+          data-testid="tiptap-table-menu"
+          label={labels('toolbarLabel')}
+          onKeyDownCapture={navigation.onToolbarKeyDown}
+          onFocusCapture={navigation.onToolbarFocusCapture}
+        >
+          <DsLayoutInline gap="xxs" wrap="nowrap">
+            <EditorDsLayoutInline gap="xxs" wrap="nowrap">
+              <DropdownMenu size="standard" placement="bottom-start">
+                <EditorToolbarDropdownTarget label={labels('toolbarLabel')}>
+                  {(targetRef) => (
+                    <IconButton
+                      ref={targetRef}
+                      label={labels('toolbarLabel')}
+                      tone="neutral"
+                      emphasis="low"
+                      size="sm"
+                      data-selection-toolbar-action=""
+                      data-testid="tiptap-table-options"
+                      onMouseDown={(event) => event.preventDefault()}
+                    >
+                      <IconTableOptions size={16} />
+                    </IconButton>
+                  )}
+                </EditorToolbarDropdownTarget>
+                <DropdownMenu.Dropdown>
+                  <DropdownMenu.Item
+                    icon={<IconRowInsertTop size={16} />}
+                    data-testid="tiptap-table-add-row-before"
+                    onClick={() => editor.commands.addTableRowBefore()}
+                  >
+                    {labels('addRowAbove')}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    icon={<IconRowInsertBottom size={16} />}
+                    data-testid="tiptap-table-add-row-after"
+                    onClick={() => editor.commands.addTableRowAfter()}
+                  >
+                    {labels('addRowBelow')}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    icon={<IconTableRow size={16} />}
+                    data-testid="tiptap-table-delete-row"
+                    onClick={() => editor.commands.deleteTableRow()}
+                  >
+                    {labels('deleteRow')}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Divider />
+                  <DropdownMenu.Item
+                    icon={<IconColumnInsertLeft size={16} />}
+                    data-testid="tiptap-table-add-column-before"
+                    onClick={() => editor.commands.addTableColumnBefore()}
+                  >
+                    {labels('addColumnLeft')}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    icon={<IconColumnInsertRight size={16} />}
+                    data-testid="tiptap-table-add-column-after"
+                    onClick={() => editor.commands.addTableColumnAfter()}
+                  >
+                    {labels('addColumnRight')}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    icon={<IconTableColumn size={16} />}
+                    data-testid="tiptap-table-delete-column"
+                    onClick={() => editor.commands.deleteTableColumn()}
+                  >
+                    {labels('deleteColumn')}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Divider />
+                  <DropdownMenu.Item
+                    icon={<IconTable size={16} />}
+                    selected={headerRow}
+                    data-testid="tiptap-table-header-row"
+                    onClick={() => editor.commands.toggleTableHeaderRow()}
+                  >
+                    {labels('toggleHeaderRow')}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    icon={<IconColumns size={16} />}
+                    selected={headerColumn}
+                    data-testid="tiptap-table-header-column"
+                    onClick={() => editor.commands.toggleTableHeaderColumn()}
+                  >
+                    {labels('toggleHeaderColumn')}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Divider />
+                  <DropdownMenu.Item
+                    icon={<IconTableRow size={16} />}
+                    data-testid="tiptap-table-select-row"
+                    onClick={() => editor.commands.selectTableRow()}
+                  >
+                    {labels('selectRow')}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    icon={<IconTableColumn size={16} />}
+                    data-testid="tiptap-table-select-column"
+                    onClick={() => editor.commands.selectTableColumn()}
+                  >
+                    {labels('selectColumn')}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    icon={<IconTableMinus size={16} />}
+                    data-testid="tiptap-table-select"
+                    onClick={() => editor.commands.selectTable()}
+                  >
+                    {labels('selectTable')}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Divider />
+                  <DropdownMenu.Item
+                    icon={<IconArrowsJoin size={16} />}
+                    data-testid="tiptap-table-merge-cells"
+                    disabled
+                  >
+                    {labels('mergeCells')}: {labels('unavailable')}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    icon={<IconArrowsSplit size={16} />}
+                    data-testid="tiptap-table-split-cell"
+                    disabled
+                  >
+                    {labels('splitCell')}: {labels('unavailable')}
+                  </DropdownMenu.Item>
+                </DropdownMenu.Dropdown>
+              </DropdownMenu>
+
+              <Separator orientation="vertical" aria-hidden />
+
+              <DsLayoutInline gap="xxs" wrap="nowrap">
+                <TableAction
+                  label={labels('alignTableLeft')}
+                  pressed={tableAlignment === 'left'}
+                  testId="tiptap-table-layout-left"
+                  onClick={() => setTableAlignmentAndRestoreFocus(editor, 'left')}
                 >
-                  <IconTableOptions size={16} />
-                </IconButton>
-              )}
-            </EditorToolbarDropdownTarget>
-            <DropdownMenu.Dropdown>
-              <DropdownMenu.Item
-                icon={<IconRowInsertTop size={16} />}
-                data-testid="tiptap-table-add-row-before"
-                onClick={() => editor.commands.addTableRowBefore()}
-              >
-                {labels('addRowAbove')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Item
-                icon={<IconRowInsertBottom size={16} />}
-                data-testid="tiptap-table-add-row-after"
-                onClick={() => editor.commands.addTableRowAfter()}
-              >
-                {labels('addRowBelow')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Item
-                icon={<IconTableRow size={16} />}
-                data-testid="tiptap-table-delete-row"
-                onClick={() => editor.commands.deleteTableRow()}
-              >
-                {labels('deleteRow')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Divider />
-              <DropdownMenu.Item
-                icon={<IconColumnInsertLeft size={16} />}
-                data-testid="tiptap-table-add-column-before"
-                onClick={() => editor.commands.addTableColumnBefore()}
-              >
-                {labels('addColumnLeft')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Item
-                icon={<IconColumnInsertRight size={16} />}
-                data-testid="tiptap-table-add-column-after"
-                onClick={() => editor.commands.addTableColumnAfter()}
-              >
-                {labels('addColumnRight')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Item
-                icon={<IconTableColumn size={16} />}
-                data-testid="tiptap-table-delete-column"
-                onClick={() => editor.commands.deleteTableColumn()}
-              >
-                {labels('deleteColumn')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Divider />
-              <DropdownMenu.Item
-                icon={<IconTable size={16} />}
-                selected={headerRow}
-                data-testid="tiptap-table-header-row"
-                onClick={() => editor.commands.toggleTableHeaderRow()}
-              >
-                {labels('toggleHeaderRow')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Item
-                icon={<IconColumns size={16} />}
-                selected={headerColumn}
-                data-testid="tiptap-table-header-column"
-                onClick={() => editor.commands.toggleTableHeaderColumn()}
-              >
-                {labels('toggleHeaderColumn')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Divider />
-              <DropdownMenu.Item
-                icon={<IconTableRow size={16} />}
-                data-testid="tiptap-table-select-row"
-                onClick={() => editor.commands.selectTableRow()}
-              >
-                {labels('selectRow')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Item
-                icon={<IconTableColumn size={16} />}
-                data-testid="tiptap-table-select-column"
-                onClick={() => editor.commands.selectTableColumn()}
-              >
-                {labels('selectColumn')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Item
-                icon={<IconTableMinus size={16} />}
-                data-testid="tiptap-table-select"
-                onClick={() => editor.commands.selectTable()}
-              >
-                {labels('selectTable')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Divider />
-              <DropdownMenu.Item icon={<IconArrowsJoin size={16} />} data-testid="tiptap-table-merge-cells" disabled>
-                {labels('mergeCells')}: {labels('unavailable')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Item icon={<IconArrowsSplit size={16} />} data-testid="tiptap-table-split-cell" disabled>
-                {labels('splitCell')}: {labels('unavailable')}
-              </DropdownMenu.Item>
-            </DropdownMenu.Dropdown>
-          </DropdownMenu>
+                  <IconAlignLeft size={16} />
+                </TableAction>
+                <TableAction
+                  label={labels('alignTableCenter')}
+                  pressed={tableAlignment === 'center'}
+                  testId="tiptap-table-layout-center"
+                  onClick={() => setTableAlignmentAndRestoreFocus(editor, 'center')}
+                >
+                  <IconAlignCenter size={16} />
+                </TableAction>
+                <TableAction
+                  label={labels('alignTableRight')}
+                  pressed={tableAlignment === 'right'}
+                  testId="tiptap-table-layout-right"
+                  onClick={() => setTableAlignmentAndRestoreFocus(editor, 'right')}
+                >
+                  <IconAlignRight size={16} />
+                </TableAction>
+              </DsLayoutInline>
 
-          <span className={classes.separator} aria-hidden="true" />
+              <Separator orientation="vertical" aria-hidden />
 
-          <Group gap={2} wrap="nowrap">
-            <TableAction
-              active={tableAlignment === 'left'}
-              label={labels('alignTableLeft')}
-              pressed={tableAlignment === 'left'}
-              testId="tiptap-table-layout-left"
-              onClick={() => setTableAlignmentAndRestoreFocus(editor, 'left')}
-            >
-              <IconAlignLeft size={16} />
-            </TableAction>
-            <TableAction
-              active={tableAlignment === 'center'}
-              label={labels('alignTableCenter')}
-              pressed={tableAlignment === 'center'}
-              testId="tiptap-table-layout-center"
-              onClick={() => setTableAlignmentAndRestoreFocus(editor, 'center')}
-            >
-              <IconAlignCenter size={16} />
-            </TableAction>
-            <TableAction
-              active={tableAlignment === 'right'}
-              label={labels('alignTableRight')}
-              pressed={tableAlignment === 'right'}
-              testId="tiptap-table-layout-right"
-              onClick={() => setTableAlignmentAndRestoreFocus(editor, 'right')}
-            >
-              <IconAlignRight size={16} />
-            </TableAction>
-          </Group>
+              <DsLayoutInline gap="xxs" wrap="nowrap">
+                <TableAction
+                  label={labels('alignLeft')}
+                  shortcut={EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS}
+                  pressed={alignment === 'left'}
+                  testId="tiptap-table-align-left"
+                  onClick={() => editor.commands.setTableCellAlignment('left')}
+                >
+                  <IconAlignLeft size={16} />
+                </TableAction>
+                <TableAction
+                  label={labels('alignCenter')}
+                  shortcut={EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS}
+                  pressed={alignment === 'center'}
+                  testId="tiptap-table-align-center"
+                  onClick={() => editor.commands.setTableCellAlignment('center')}
+                >
+                  <IconAlignCenter size={16} />
+                </TableAction>
+                <TableAction
+                  label={labels('alignRight')}
+                  shortcut={EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS}
+                  pressed={alignment === 'right'}
+                  testId="tiptap-table-align-right"
+                  onClick={() => editor.commands.setTableCellAlignment('right')}
+                >
+                  <IconAlignRight size={16} />
+                </TableAction>
+              </DsLayoutInline>
 
-          <span className={classes.separator} aria-hidden="true" />
+              <Separator orientation="vertical" aria-hidden />
 
-          <Group gap={2} wrap="nowrap">
-            <TableAction
-              active={alignment === 'left'}
-              label={labels('alignLeft')}
-              shortcut={EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS}
-              pressed={alignment === 'left'}
-              testId="tiptap-table-align-left"
-              onClick={() => editor.commands.setTableCellAlignment('left')}
-            >
-              <IconAlignLeft size={16} />
-            </TableAction>
-            <TableAction
-              active={alignment === 'center'}
-              label={labels('alignCenter')}
-              shortcut={EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS}
-              pressed={alignment === 'center'}
-              testId="tiptap-table-align-center"
-              onClick={() => editor.commands.setTableCellAlignment('center')}
-            >
-              <IconAlignCenter size={16} />
-            </TableAction>
-            <TableAction
-              active={alignment === 'right'}
-              label={labels('alignRight')}
-              shortcut={EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS}
-              pressed={alignment === 'right'}
-              testId="tiptap-table-align-right"
-              onClick={() => editor.commands.setTableCellAlignment('right')}
-            >
-              <IconAlignRight size={16} />
-            </TableAction>
-          </Group>
-
-          <span className={classes.separator} aria-hidden="true" />
-
-          <Group gap={2} wrap="nowrap">
-            <TableAction
-              label={labels('deleteTable')}
-              testId="tiptap-table-delete"
-              onClick={() => editor.commands.removeTable()}
-            >
-              <IconTrash size={16} />
-            </TableAction>
-          </Group>
-        </Group>
-      </Paper>
+              <DsLayoutInline gap="xxs" wrap="nowrap">
+                <TableAction
+                  label={labels('deleteTable')}
+                  testId="tiptap-table-delete"
+                  onClick={() => editor.commands.removeTable()}
+                >
+                  <IconTrash size={16} />
+                </TableAction>
+              </DsLayoutInline>
+            </EditorDsLayoutInline>
+          </DsLayoutInline>
+        </ToolbarSurface>
+      </div>
     </BubbleMenu>
   );
 }

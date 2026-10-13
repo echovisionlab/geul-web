@@ -1,4 +1,5 @@
 .container {
+  --_callout-icon-width: calc(var(--geul-font-size-lg) * 1.5);
   position: relative;
   width: 100%;
 }
@@ -8,97 +9,66 @@
   width: 100%;
 }
 
-.container[data-container-kind='callout'] > .content {
-  padding: var(--mantine-spacing-md);
-  border: 1px solid var(--mantine-color-default-border);
-  border-radius: var(--mantine-radius-default);
+/* Callout geometry keys on the content element itself, so wrappers such as the reorder gutter
+ * between container and content cannot break it. */
+
+.content[data-content-kind='callout'] {
+  padding: var(--geul-spacing-md);
+  border: 1px solid var(--geul-border-default);
+  border-radius: var(--geul-radius-square);
 }
 
-.container[data-container-kind='callout'] > .content > [data-node-view-content-react] {
+.content[data-content-kind='callout'] > [data-node-view-content-react] {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--mantine-spacing-sm);
+  gap: var(--geul-spacing-sm);
+  row-gap: var(--geul-spacing-xs);
 }
 
-.container[data-container-kind='callout'] > .content > [data-node-view-content-react] > [data-content-type='callout'] {
+.content[data-content-kind='callout'] > [data-node-view-content-react] > [data-content-type='callout'] {
   position: relative;
   grid-column: 1 / -1;
   min-width: 0;
-  min-height: var(--mantine-line-height-md);
-  padding-inline-start: calc(1.5em + var(--mantine-spacing-sm));
+  min-height: calc(var(--geul-font-size-lg) * var(--geul-line-height-md));
+  padding-inline-start: calc(var(--_callout-icon-width) + var(--geul-spacing-sm));
 }
 
-.container[data-container-kind='callout']
-  > .content
-  > [data-node-view-content-react]
-  > [data-content-type='callout']::before {
+.content[data-content-kind='callout'] > [data-node-view-content-react] > [data-content-type='callout']::before {
   position: absolute;
   inset-block-start: 0;
   inset-inline-start: 0;
-  width: 1.5em;
+  width: var(--_callout-icon-width);
   content: '💡';
-  font-size: var(--mantine-font-size-lg);
-  line-height: var(--mantine-line-height-md);
+  font-size: var(--geul-font-size-lg);
+  line-height: var(--geul-line-height-md);
   text-align: center;
 }
 
-.container[data-container-kind='callout']
-  > .content
+.content[data-content-kind='callout']
   > [data-node-view-content-react]
   > [data-content-type='callout'][data-icon]::before {
   content: attr(data-icon);
 }
 
-.container[data-container-kind='callout'][data-callout-icon-picker='true']
-  > .content
-  > [data-node-view-content-react]
-  > [data-content-type='callout']::before {
-  content: '';
-}
-
-.container[data-container-kind='callout'] > .content > [data-node-view-content-react] > [data-node-type='blockGroup'] {
+.content[data-content-kind='callout'] > [data-node-view-content-react] > [data-node-type='blockGroup'] {
   grid-column: 1 / -1;
   min-width: 0;
-  padding-inline-start: calc(1.5em + var(--mantine-spacing-sm) + 1.75rem);
+  padding-inline-start: calc(var(--_callout-icon-width) + var(--geul-spacing-sm));
   margin-top: 0;
 }
 
 .content > [data-node-view-content-react] > [data-node-type='blockGroup'] {
-  padding-inline-start: var(--mantine-spacing-lg);
-  margin-top: var(--mantine-spacing-xs);
-}
-
-.handle {
-  position: absolute;
-  top: 0;
-  inset-inline-start: -1.75rem;
-  z-index: 2;
-  opacity: 0;
-  transition: opacity 100ms ease;
+  padding-inline-start: var(--_hierarchy-step, var(--geul-hierarchy-step));
+  margin-top: var(--geul-spacing-xs);
 }
 
 .calloutIconPicker {
   position: absolute;
   z-index: 3;
-  inset-block-start: var(--mantine-spacing-sm);
-  inset-inline-start: var(--mantine-spacing-sm);
+  inset-block-start: var(--geul-spacing-md);
+  inset-inline-start: var(--geul-spacing-md);
 }
 
-.container:hover > .handle,
-.container:focus-within > .handle,
-.container[data-selected='true'] > .handle {
-  opacity: 1;
-}
-
-/* Nested Blocks remain independently draggable, but only the deepest active
- * Block owns the gutter. This mirrors container authoring without stacking a
- * parent handle over a child handle or the Callout icon. */
-.container:has(.container:hover) > .handle,
-.container:has(.container:focus-within) > .handle {
-  opacity: 0;
-}
-
-.container:hover:not(:has(.container:hover)) > .handle,
-.container[data-selected='true'] > .handle {
-  opacity: 1;
+.calloutPickerGlyph {
+  visibility: hidden;
 }

@@ -1,3 +1,4 @@
+import type { AvatarSize } from '@/components/core/Display';
 import { UserInlineLinks, type UserInlineLinkUser } from '@/features/user/UserInlineLinks';
 
 export type PostAuthorLinkAuthor = UserInlineLinkUser;
@@ -6,9 +7,8 @@ interface PostAuthorLinksProps {
   authors: PostAuthorLinkAuthor[];
   unknownLabel: string;
   textSize?: 'xs' | 'sm';
-  textColor?: string;
-  avatarSize?: number;
-  avatarBorderColor?: string;
+  textColor?: import('@/components/core/Typography').TextTone;
+  avatarSize?: AvatarSize;
   showAvatars?: boolean;
   maxVisibleAuthors?: number;
   separator?: 'none' | 'comma' | 'slash' | 'pipe';
@@ -19,8 +19,7 @@ export function PostAuthorLinks({
   unknownLabel,
   textSize = 'xs',
   textColor,
-  avatarSize = 18,
-  avatarBorderColor,
+  avatarSize = 'xs',
   showAvatars = true,
   maxVisibleAuthors,
   separator,
@@ -32,7 +31,6 @@ export function PostAuthorLinks({
       textSize={textSize}
       textColor={textColor}
       avatarSize={avatarSize}
-      avatarBorderColor={avatarBorderColor}
       showAvatars={showAvatars}
       maxVisibleUsers={maxVisibleAuthors}
       separator={separator}

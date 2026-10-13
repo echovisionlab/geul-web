@@ -1,24 +1,26 @@
 'use client';
-
-import { useState } from 'react';
-import { FileDownloadAction, FileDownloadAvailability } from '@echovisionlab/geul-proto/public/file_pb.ts';
+import { VisuallyHidden, Text as DsText } from '@/components/core/Typography';
+import { useEffect, useId, useRef, useState } from 'react';
+import type { FileDownloadAction, FileDownloadAvailability } from '@echovisionlab/geul-proto/public/file_pb.ts';
 import { useTranslations } from 'next-intl';
 import { IconDownload } from '@tabler/icons-react';
-import { Text, VisuallyHidden } from '@mantine/core';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { Tooltip } from '@/components/core/Tooltip';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
-import { authorizeFileDownload, type AuthorizeFileDownloadInput } from '@/lib/queries/file-download-browser';
-
+import type { AuthorizeFileDownloadInput } from '@/lib/queries/file-download-browser';
+import { FILE_DOWNLOAD_ACTION, FILE_DOWNLOAD_AVAILABILITY } from './download-wire-values';
 interface AuthorizedDownloadResult {
   access?: {
     availability: FileDownloadAvailability;
     action: FileDownloadAction;
   };
-  download?: { url: string } | undefined;
+  download?:
+    | {
+        url: string;
+      }
+    | undefined;
 }
-
 export interface AuthorizedDownloadActionProps extends AuthorizeFileDownloadInput {
   availability: FileDownloadAvailability;
   action: FileDownloadAction;
@@ -33,7 +35,6 @@ export interface AuthorizedDownloadActionProps extends AuthorizeFileDownloadInpu
   allowFileAuthorization?: boolean;
   presentation?: 'button' | 'icon';
 }
-
 export function AuthorizedDownloadAction({
   availability,
   action,
@@ -54,6 +55,27 @@ export function AuthorizedDownloadAction({
   const [effectiveAction, setEffectiveAction] = useState(action);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const errorId = useId();
+  const requestGeneration = useRef(0);
+  const authorizationKey = JSON.stringify([
+    input.entityType,
+    input.entityId,
+    input.selector?.blockId,
+    input.selector?.referencePath,
+    input.trackId,
+    fileName,
+    initialDownloadUrl,
+  ]);
+  useEffect(() => {
+    requestGeneration.current += 1;
+    setEffectiveAvailability(availability);
+    setEffectiveAction(action);
+    setError('');
+    setLoading(false);
+    return () => {
+      requestGeneration.current += 1;
+    };
+  }, [authorizationKey, availability, action]);
   const context = title?.trim() || fileName.trim() || t('fileFallback');
   const go = (href: string) => {
     if (navigate) {
@@ -62,11 +84,10 @@ export function AuthorizedDownloadAction({
       window.location.assign(href);
     }
   };
-
   if (
-    effectiveAvailability !== FileDownloadAvailability.AVAILABLE ||
-    effectiveAction === FileDownloadAction.NONE ||
-    effectiveAction === FileDownloadAction.UNSPECIFIED
+    effectiveAvailability !== FILE_DOWNLOAD_AVAILABILITY.AVAILABLE ||
+    effectiveAction === FILE_DOWNLOAD_ACTION.NONE ||
+    effectiveAction === FILE_DOWNLOAD_ACTION.UNSPECIFIED
   ) {
     if (presentation === 'icon') {
       const unavailableLabel = t('unavailableFor', { name: context });
@@ -87,47 +108,54 @@ export function AuthorizedDownloadAction({
       );
     }
     return (
-      <Text size="xs" c="dimmed" role="status" aria-label={t('unavailableFor', { name: context })}>
+      <DsText size="xs" tone="secondary" role="status" aria-label={t('unavailableFor', { name: context })}>
         {t('unavailable')}
-      </Text>
+      </DsText>
     );
   }
-
-  const isSignIn = effectiveAction === FileDownloadAction.SIGN_IN;
+  const isSignIn = effectiveAction === FILE_DOWNLOAD_ACTION.SIGN_IN;
   const handleClick = async () => {
+    if (loading) {
+      return;
+    }
+    const generation = requestGeneration.current;
     setError('');
     if (isSignIn) {
       const currentLocation = returnTo || `${window.location.pathname}${window.location.search}${window.location.hash}`;
       go(buildLoginRedirectHref(currentLocation));
       return;
     }
-
     const initialExpiry = initialDownloadExpiresAt ? Date.parse(initialDownloadExpiresAt) : Number.NaN;
-    if (initialDownloadUrl && (!Number.isFinite(initialExpiry) || initialExpiry > Date.now() + 5_000)) {
+    if (initialDownloadUrl && (!Number.isFinite(initialExpiry) || initialExpiry > Date.now() + 5000)) {
       go(initialDownloadUrl);
       return;
     }
-
     setLoading(true);
     try {
       if (!authorize && !allowFileAuthorization) {
         setError(t('failed'));
         return;
       }
-      const response = await (authorize ?? authorizeFileDownload)(input);
-      const responseAvailability = response.access?.availability ?? FileDownloadAvailability.UNAVAILABLE;
-      const responseAction = response.access?.action ?? FileDownloadAction.NONE;
+      // The browser RPC client loads on the first authorization request, not with the page.
+      const response = await (authorize ?? (await import('@/lib/queries/file-download-browser')).authorizeFileDownload)(
+        input,
+      );
+      if (generation !== requestGeneration.current) {
+        return;
+      }
+      const responseAvailability = response.access?.availability ?? FILE_DOWNLOAD_AVAILABILITY.UNAVAILABLE;
+      const responseAction = response.access?.action ?? FILE_DOWNLOAD_ACTION.NONE;
       setEffectiveAvailability(responseAvailability);
       setEffectiveAction(responseAction);
       if (
-        responseAvailability === FileDownloadAvailability.AVAILABLE &&
-        responseAction === FileDownloadAction.DOWNLOAD &&
+        responseAvailability === FILE_DOWNLOAD_AVAILABILITY.AVAILABLE &&
+        responseAction === FILE_DOWNLOAD_ACTION.DOWNLOAD &&
         response.download?.url
       ) {
         go(response.download.url);
         return;
       }
-      if (responseAction === FileDownloadAction.SIGN_IN) {
+      if (responseAction === FILE_DOWNLOAD_ACTION.SIGN_IN) {
         const currentLocation =
           returnTo || `${window.location.pathname}${window.location.search}${window.location.hash}`;
         go(buildLoginRedirectHref(currentLocation));
@@ -135,14 +163,16 @@ export function AuthorizedDownloadAction({
       }
       setError(t('unavailable'));
     } catch {
-      setError(t('failed'));
+      if (generation === requestGeneration.current) {
+        setError(t('failed'));
+      }
     } finally {
-      setLoading(false);
+      if (generation === requestGeneration.current) {
+        setLoading(false);
+      }
     }
   };
-
   const actionLabel = isSignIn ? t('signInFor', { name: context }) : t('downloadFor', { name: context });
-
   if (presentation === 'icon') {
     const tooltipLabel = error || actionLabel;
     return (
@@ -150,6 +180,7 @@ export function AuthorizedDownloadAction({
         <Tooltip label={tooltipLabel} withArrow>
           <IconButton
             label={actionLabel}
+            aria-describedby={error ? errorId : undefined}
             size="sm"
             emphasis="low"
             loading={loading}
@@ -160,14 +191,13 @@ export function AuthorizedDownloadAction({
           </IconButton>
         </Tooltip>
         {error ? (
-          <VisuallyHidden role="alert" aria-live="assertive">
+          <VisuallyHidden id={errorId} role="alert" aria-live="assertive">
             {error}
           </VisuallyHidden>
         ) : null}
       </>
     );
   }
-
   return (
     <>
       <Button
@@ -175,14 +205,15 @@ export function AuthorizedDownloadAction({
         emphasis="medium"
         loading={loading}
         aria-label={actionLabel}
+        aria-describedby={error ? errorId : undefined}
         onClick={() => void handleClick()}
       >
         {isSignIn ? t('signIn') : t('download')}
       </Button>
       {error ? (
-        <Text size="xs" c="red" role="alert">
+        <DsText id={errorId} size="xs" tone="danger" role="alert">
           {error}
-        </Text>
+        </DsText>
       ) : null}
     </>
   );

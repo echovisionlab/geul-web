@@ -1,127 +1,106 @@
 'use client';
-
 import dynamic from 'next/dynamic';
-import { Box, SimpleGrid, Skeleton, Stack } from '@mantine/core';
-import { ContentCard } from '@/components/core/Section';
-import { getSlideSize } from './constants';
-
+import { LayoutInline, LayoutGrid, LayoutStack, LayoutInset } from '@/components/core/Layout';
+import {
+  Collection,
+  CollectionMedia,
+  getCollectionMetrics,
+  type CollectionSize,
+  type CollectionMediaProps,
+} from '@/components/core/Collection';
+import { Skeleton } from '@/components/core/Display';
+import { SectionCard } from '@/components/core/Section';
+import { contentColumns } from './content-layout';
+import { getResponsiveSlideSize } from './constants';
 const ListCarousel = dynamic(() => import('./ListCarouselRuntime').then((module) => module.ListCarouselRuntime));
-
 interface ListBlockSkeletonProps {
   className: string;
   columns?: number;
   limit?: number;
   layout?: string;
+  itemSize?: CollectionSize;
+  showImage?: boolean;
+  imageAspectRatio?: CollectionMediaProps['aspectRatio'];
   carouselLoop?: boolean;
   carouselIndicators?: boolean;
-  gridCols?: {
-    base: number;
-    sm: number;
-  };
+  gridCols?: { base: number; sm: number };
 }
-
-function GridSkeletonCard() {
-  return (
-    <Stack gap="sm">
-      <Skeleton h={180} />
-      <Skeleton h={16} w="60%" />
-      <Skeleton h={12} w="45%" />
-    </Stack>
-  );
-}
-
 export function ListBlockSkeleton({
   className,
   columns = 3,
   limit = 6,
   layout = 'grid',
+  itemSize = 'm',
+  showImage = true,
+  imageAspectRatio = '16:9',
   carouselLoop = true,
   carouselIndicators = true,
   gridCols = { base: 1, sm: 2 },
 }: ListBlockSkeletonProps) {
-  if (layout === 'minimal') {
-    return (
-      <Stack gap={0} className={className}>
-        {Array.from({ length: limit }).map((_, index) => (
-          <Stack key={index} gap={6} py="xs">
-            <Skeleton h={16} w="55%" />
-            <Skeleton h={12} w="35%" />
-          </Stack>
-        ))}
-      </Stack>
+  const metrics = getCollectionMetrics(itemSize);
+  const horizontal = layout === 'list' || layout === 'cards' || (layout === 'carousel' && columns !== 1);
+  const cards = Array.from({ length: limit }, (_, index) => {
+    const text = (
+      <LayoutStack flexible gap={metrics.itemGap}>
+        <Skeleton roleType="text" width="medium" />
+        <Skeleton roleType="text" width="short" />
+      </LayoutStack>
     );
-  }
-
-  if (layout === 'list') {
+    const media =
+      showImage && layout !== 'minimal' ? (
+        <CollectionMedia
+          width={horizontal ? 'thumbnail' : 'full'}
+          aspectRatio={imageAspectRatio === 'auto' ? '16:9' : imageAspectRatio}
+          hero={layout === 'carousel' && columns === 1}
+        >
+          <Skeleton roleType="fill" />
+        </CollectionMedia>
+      ) : null;
     return (
-      <Stack gap="md" className={className}>
-        {Array.from({ length: limit }).map((_, index) => (
-          <Box
-            key={index}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '96px minmax(0, 1fr)',
-              gap: '0.875rem',
-            }}
-          >
-            <Skeleton h={64} />
-            <Stack gap={6}>
-              <Skeleton h={16} w="60%" />
-              <Skeleton h={12} w="45%" />
-            </Stack>
-          </Box>
-        ))}
-      </Stack>
+      <SectionCard appearance="plain" key={index} padding="none" withBorder={false}>
+        {layout === 'minimal' ? (
+          <LayoutInset block={metrics.rowInset}>{text}</LayoutInset>
+        ) : horizontal ? (
+          <LayoutInline wrap="nowrap" align="start" gap={metrics.rowGap}>
+            {media}
+            {text}
+          </LayoutInline>
+        ) : (
+          <LayoutStack gap={metrics.itemGap}>
+            {media}
+            {text}
+          </LayoutStack>
+        )}
+      </SectionCard>
     );
-  }
-
-  if (layout === 'cards') {
-    return (
-      <SimpleGrid cols={{ base: 1, sm: 2, md: columns }} spacing="lg" className={className}>
-        {Array.from({ length: limit }).map((_, index) => (
-          <Box
-            key={index}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '112px minmax(0, 1fr)',
-              gap: '1rem',
-            }}
-          >
-            <Skeleton h={84} />
-            <Stack gap={6}>
-              <Skeleton h={16} w="65%" />
-              <Skeleton h={12} w="50%" />
-            </Stack>
-          </Box>
-        ))}
-      </SimpleGrid>
-    );
-  }
-
-  const cards = Array.from({ length: limit }).map((_, index) => (
-    <ContentCard key={index} padding={0} radius={0} withBorder={false} style={{ background: 'transparent' }}>
-      <GridSkeletonCard />
-    </ContentCard>
-  ));
-
-  if (layout === 'carousel') {
-    const slideSize = getSlideSize(columns);
-    return (
+  });
+  const body =
+    layout === 'list' || layout === 'minimal' ? (
+      <LayoutStack gap={layout === 'minimal' ? 'none' : metrics.rowGap}>{cards}</LayoutStack>
+    ) : layout === 'carousel' ? (
       <ListCarousel
-        slideSize={{ base: '100%', sm: columns === 1 ? '100%' : '50%', md: slideSize }}
-        slideGap="lg"
-        emblaOptions={{ loop: carouselLoop }}
+        slideSize={getResponsiveSlideSize(columns)}
+        slideGap={metrics.rowGap}
+        loop={carouselLoop}
         withIndicators={carouselIndicators}
-        className={className}
       >
         {cards}
       </ListCarousel>
+    ) : (
+      <LayoutGrid
+        columns={{
+          base: contentColumns(layout === 'cards' ? 1 : gridCols.base),
+          sm: contentColumns(layout === 'cards' ? 2 : gridCols.sm),
+          md: contentColumns(columns),
+        }}
+        gap={metrics.gridGap}
+      >
+        {cards}
+      </LayoutGrid>
     );
-  }
-
   return (
-    <SimpleGrid cols={{ base: gridCols.base, sm: gridCols.sm, md: columns }} spacing="lg" className={className}>
-      {cards}
-    </SimpleGrid>
+    <div className={className}>
+      <Collection size={itemSize}>{body}</Collection>
+    </div>
   );
 }

@@ -14,7 +14,7 @@ function errorMessage(error: unknown): string {
   return error instanceof Error && error.message ? error.message : 'Failed to load OG generation run';
 }
 
-export function useOgGenerationRun() {
+export function useOgGenerationRun(readRun: typeof getOgGenerationRunAction = getOgGenerationRunAction) {
   const [runId, setRunId] = useState<string | null>(null);
   const [run, setRun] = useState<OgGenerationRunState | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +68,7 @@ export function useOgGenerationRun() {
     const poll = async () => {
       let result: Awaited<ReturnType<typeof getOgGenerationRunAction>>;
       try {
-        result = await getOgGenerationRunAction(runId);
+        result = await readRun(runId);
       } catch (queryError) {
         if (stopped || trackingEpochRef.current !== trackingEpoch || currentRunIdRef.current !== runId) {
           return;
@@ -98,7 +98,7 @@ export function useOgGenerationRun() {
         clearTimeout(timer);
       }
     };
-  }, [runId]);
+  }, [runId, readRun]);
 
   return {
     runId,

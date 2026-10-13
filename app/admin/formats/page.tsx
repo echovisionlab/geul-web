@@ -1,8 +1,7 @@
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getTranslations } from 'next-intl/server';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import { CreateFormatButton, FormatModalProvider, FormatModals, FormatsTableContent } from '@/features/admin/format';
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
+import { FormatsPageView } from '@/features/admin/format/FormatsPageView';
 import { listFormatsAdminAction } from '@/lib/actions/format';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
@@ -42,23 +41,13 @@ export default async function AdminFormatsPage({ searchParams }: PageProps) {
   }).then(unwrapQueryResult);
 
   return (
-    <FormatModalProvider>
-      <AdminPageHeader
-        title={formatsLabel}
-        items={[{ key: 'create-format', type: 'custom', content: <CreateFormatButton /> }]}
-      />
-
-      <ServerDataTable namespace="formats">
-        <FormatsTableContent
-          result={result}
-          searchPlaceholder={searchPlaceholder}
-          filterFields={filterFields}
-          sortFields={sortFields}
-        />
-        <ServerDataTable.Pagination namespace="formats" result={result} searchParams={params} />
-      </ServerDataTable>
-
-      <FormatModals />
-    </FormatModalProvider>
+    <FormatsPageView
+      title={formatsLabel}
+      result={result}
+      filterFields={filterFields}
+      sortFields={sortFields}
+      searchPlaceholder={searchPlaceholder}
+      searchParams={params.toString()}
+    />
   );
 }

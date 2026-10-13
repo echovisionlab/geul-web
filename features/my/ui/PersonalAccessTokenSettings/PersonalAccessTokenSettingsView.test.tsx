@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
+import { DesignSystemTestProvider as DesignSystemProvider } from '@/test/TestProviders';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   PersonalAccessTokenSettingsView,
@@ -58,7 +59,7 @@ const onCloseSecret = vi.fn();
 function render(overrides: Partial<React.ComponentProps<typeof PersonalAccessTokenSettingsView>> = {}) {
   act(() => {
     root.render(
-      <MantineProvider env="test">
+      <DesignSystemProvider forceColorScheme="light">
         <PersonalAccessTokenSettingsView
           token={null}
           labels={labels}
@@ -69,7 +70,7 @@ function render(overrides: Partial<React.ComponentProps<typeof PersonalAccessTok
           onCloseSecret={onCloseSecret}
           {...overrides}
         />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
 }

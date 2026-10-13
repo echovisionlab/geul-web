@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { PublicMediaEntityType } from '@echovisionlab/geul-proto/public/file_pb.ts';
+import { PUBLIC_MEDIA_ENTITY_TYPE } from '@/features/media-download/download-wire-values';
 import { ContentMediaDeliveryProvider, useContentMediaDelivery } from '@/features/media/ContentMediaDeliveryContext';
 
 export function PostMediaDownloadProvider({
@@ -25,7 +25,7 @@ export function PostMediaDownloadProvider({
       sharePassword={sharePassword}
       mediaAssetsEndpoint="/api/post/media-assets"
       mediaDownloadEndpoint="/api/post/media-download"
-      entityType={PublicMediaEntityType.POST}
+      entityType={PUBLIC_MEDIA_ENTITY_TYPE.POST}
     >
       {children}
     </ContentMediaDeliveryProvider>

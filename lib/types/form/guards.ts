@@ -2,8 +2,8 @@
  * Type guards and Zod schemas for form field values
  */
 
-import { z } from 'zod';
-import { PhoneNumber, phoneNumberDataSchema } from '@/lib/types/phone/PhoneNumber';
+import * as z from '@/lib/zod-mini';
+import { phoneNumberDataSchema } from '@/lib/types/phone/phone-number-data';
 
 // =============================================================================
 // Zod Schemas
@@ -51,9 +51,9 @@ export function isStringArray(v: unknown): v is string[] {
 // Value Extractors (with Zod catch for fallback)
 // =============================================================================
 
-const stringWithFallback = z.string().catch('');
-const booleanWithFallback = z.boolean().catch(false);
-const stringArrayWithFallback = z.array(z.string()).catch([]);
+const stringWithFallback = z.catch(z.string(), '');
+const booleanWithFallback = z.catch(z.boolean(), false);
+const stringArrayWithFallback = z.catch(z.array(z.string()), []);
 
 export function toStringValue(v: unknown): string {
   return stringWithFallback.parse(v);
@@ -65,11 +65,4 @@ export function toBooleanValue(v: unknown): boolean {
 
 export function toStringArrayValue(v: unknown): string[] {
   return stringArrayWithFallback.parse(v);
-}
-
-/**
- * Extract PhoneNumber from unknown value
- */
-export function extractPhoneValue(v: unknown, defaultCountry: string = 'US'): PhoneNumber {
-  return PhoneNumber.fromUnknown(v, defaultCountry);
 }

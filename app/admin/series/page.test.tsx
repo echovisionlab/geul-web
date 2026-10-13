@@ -22,6 +22,11 @@ vi.mock('@/features/data-table/ServerDataTable', () => {
   return { ServerDataTable };
 });
 
+// SeriesPageView renders the client pagination owner directly; its URL controls are outside this query test.
+vi.mock('@/features/data-table/ServerDataTable/ServerDataTablePaginationClient', () => ({
+  ServerDataTablePaginationClient: () => null,
+}));
+
 vi.mock('@/features/admin/series', () => ({
   CreateSeriesButton: () => null,
   SeriesModalProvider: ({ children }: { children: ReactNode }) => <>{children}</>,

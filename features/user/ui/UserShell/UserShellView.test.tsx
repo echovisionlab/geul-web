@@ -85,6 +85,9 @@ describe('UserShellView', () => {
     const profileTab = container.querySelector<HTMLButtonElement>('[data-user-shell-tab="profile"]');
     const settingsTab = container.querySelector<HTMLButtonElement>('[data-user-shell-tab="settings"]');
 
+    // Arrow keys move within a tab list that already holds keyboard focus.
+    act(() => profileTab?.focus());
+    expect(document.activeElement).toBe(profileTab);
     act(() => {
       profileTab?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     });
@@ -96,11 +99,14 @@ describe('UserShellView', () => {
   it('keeps the tab list wrapping within the shell width', () => {
     renderView();
 
+    // Core Tabs owns the wrapping geometry (bounded list width, non-shrinking tabs) behind `wrap`.
     const tabList = container.querySelector<HTMLElement>('[data-user-shell-tab-list]');
-    expect(tabList?.style.flexWrap).toBe('wrap');
-    expect(tabList?.style.maxWidth).toBe('100%');
+    expect(tabList?.getAttribute('role')).toBe('tablist');
+    expect(tabList?.getAttribute('data-wrap')).toBe('wrap');
+    expect(tabList?.hasAttribute('style')).toBe(false);
     for (const tab of container.querySelectorAll<HTMLElement>('[data-user-shell-tab]')) {
-      expect(tab.style.flexShrink).toBe('0');
+      expect(tab.getAttribute('role')).toBe('tab');
+      expect(tab.hasAttribute('style')).toBe(false);
     }
   });
 });

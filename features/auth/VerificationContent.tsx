@@ -1,9 +1,9 @@
 'use client';
-
+import { LayoutInset as DsLayoutInset, LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { Center, Stack, Text } from '@mantine/core';
 import { Button } from '@/components/core/Button';
 import { PageLoader } from '@/features/site/PageLoader';
 import { requestEmailChangeAction } from '@/lib/actions/email';
@@ -25,7 +25,6 @@ import { VerificationFlowView, type VerificationViewState } from './ui/Verificat
 import { useAuthCodeTiming } from './use-auth-code-timing';
 import { getVerificationNodeValue, hasVerificationFlowError, type VerificationFlow } from './verification-flow';
 import { loadVerificationFlow, resendVerificationCode, submitVerificationCodeRequest } from './verification-transport';
-
 function localizeEmailActionMessage(
   message: string,
   t: ReturnType<typeof useTranslations<'auth.verification'>>,
@@ -50,7 +49,6 @@ function localizeEmailActionMessage(
   }
   return t('errors.sendVerificationEmail');
 }
-
 export function VerificationContent() {
   const locale = useLocale();
   const t = useTranslations('auth.verification');
@@ -71,7 +69,6 @@ export function VerificationContent() {
   const verificationFlowPath = useCallback((id: string) => `/verify?flow=${encodeURIComponent(id)}`, []);
   const codeParam = searchParams.get('code');
   const submittedCodeParamRef = useRef<string | null>(null);
-
   const [flow, setFlow] = useState<VerificationFlow | null>(null);
   const [email, setEmail] = useState('');
   const [code, setCode] = useState(codeParam ?? '');
@@ -92,7 +89,6 @@ export function VerificationContent() {
     flowId: flow?.id ?? flowId ?? 'pending',
     purpose: 'verification',
   });
-
   const reconcileEmailMutation = useCallback(
     async (targetEmail: string) => {
       const observation = await observeCanonicalEmailChange({ targetEmail });
@@ -131,16 +127,13 @@ export function VerificationContent() {
     [clearAcceptedDelivery, mode, refetchSession, router, t, verificationPath],
   );
   const reconcileEmailMutationRef = useRef(reconcileEmailMutation);
-
   useEffect(() => {
     reconcileEmailMutationRef.current = reconcileEmailMutation;
   }, [reconcileEmailMutation]);
-
   useEffect(() => {
     if (!flowId) {
       return;
     }
-
     setLoading(true);
     setFlow(null);
     loadVerificationFlow(flowId)
@@ -168,20 +161,17 @@ export function VerificationContent() {
       })
       .finally(() => setLoading(false));
   }, [flowId, t]);
-
   const submitVerificationCode = async (verificationCode: string) => {
     const trimmedCode = verificationCode.trim();
     if (!flow || !trimmedCode || submittingCode) {
       return;
     }
-
     setSubmittingCode(true);
     setError(null);
     const targetEmail = getVerificationNodeValue(flow, 'email') || email;
     try {
       const result = await submitVerificationCodeRequest(flow, trimmedCode, locale);
       const nextFlow = result.flow;
-
       if (!result.ok) {
         const replacementFlowId = getReplacementVerificationFlowId(result.payload);
         let replacementFlow: VerificationFlow | null = null;
@@ -198,7 +188,6 @@ export function VerificationContent() {
             router.replace(verificationFlowPath(replacementFlowId));
           }
         }
-
         if (!replacementFlow && nextFlow) {
           setFlow(nextFlow);
         }
@@ -214,13 +203,11 @@ export function VerificationContent() {
         setError(observation.kind === 'unavailable' ? t('errors.submitRetry') : t('errors.submit'));
         return;
       }
-
       if (!nextFlow) {
         setCode('');
         setError(t('errors.submit'));
         return;
       }
-
       setFlow(nextFlow);
       if (nextFlow.state === 'passed_challenge') {
         clearAcceptedDelivery();
@@ -228,7 +215,6 @@ export function VerificationContent() {
         await reconcileEmailMutation(targetEmail);
         return;
       }
-
       if (hasVerificationFlowError(nextFlow)) {
         setCode('');
         setError(t('errors.submit'));
@@ -240,7 +226,6 @@ export function VerificationContent() {
       setSubmittingCode(false);
     }
   };
-
   useEffect(() => {
     if (!flow || !codeParam || submittedCodeParamRef.current === codeParam) {
       return;
@@ -248,12 +233,10 @@ export function VerificationContent() {
     if (flow.state !== 'sent_email' && flow.state !== 'choose_method') {
       return;
     }
-
     submittedCodeParamRef.current = codeParam;
     setCode(codeParam);
     void submitVerificationCode(codeParam);
   }, [codeParam, flow]);
-
   const handleRequestVerificationCode = useCallback(
     async (targetEmail: string) => {
       const trimmedEmail = targetEmail.trim();
@@ -261,7 +244,6 @@ export function VerificationContent() {
         setError(t('errors.emailRequired'));
         return;
       }
-
       setRequestingCode(true);
       setError(null);
       setApplicationTarget(null);
@@ -307,18 +289,15 @@ export function VerificationContent() {
       verificationFlowPath,
     ],
   );
-
   const handleRequestCode = async () => {
     await handleRequestVerificationCode(email);
   };
-
   const handleRestartVerification = useCallback(
     async (targetEmail: string) => {
       const trimmedEmail = targetEmail.trim();
       if (!trimmedEmail || requestingCode) {
         return;
       }
-
       setRequestingCode(true);
       setError(null);
       try {
@@ -366,7 +345,6 @@ export function VerificationContent() {
       verificationFlowPath,
     ],
   );
-
   useEffect(() => {
     if (searchParams.get(EMAIL_VERIFICATION_CONTINUATION_PARAM) !== '1') {
       return;
@@ -386,12 +364,10 @@ export function VerificationContent() {
       void handleRequestVerificationCode(continuation.email);
     }
   }, [handleRequestVerificationCode, handleRestartVerification, mode, searchParams, subjectId, verificationPath]);
-
   const handleResendCode = async () => {
     if (!flow || requestingCode) {
       return;
     }
-
     const targetEmail = (getVerificationNodeValue(flow, 'email') || email).trim();
     setRequestingCode(true);
     setError(null);
@@ -415,12 +391,10 @@ export function VerificationContent() {
       setRequestingCode(false);
     }
   };
-
   const handleCheckApplied = async () => {
     if (!applicationTarget) {
       return;
     }
-
     setCheckingApplication(true);
     try {
       await reconcileEmailMutation(applicationTarget);
@@ -428,38 +402,36 @@ export function VerificationContent() {
       setCheckingApplication(false);
     }
   };
-
   if (loading) {
     return <PageLoader message={t('loading')} />;
   }
-
   if (error && flowId && !flow) {
     return (
-      <Center style={{ flex: 1 }} p="md">
-        <Stack align="center" gap="md">
-          <Text c="red" size="lg" fw={500}>
-            {error}
-          </Text>
-          <Button
-            tone="neutral"
-            emphasis="low"
-            onClick={() => {
-              clearAcceptedDelivery();
-              setError(null);
-              router.replace(verificationPath);
-            }}
-          >
-            {t('startOver')}
-          </Button>
-        </Stack>
-      </Center>
+      <DsLayoutInset space="md">
+        <DsLayoutStack align="center" justify="center" flexible>
+          <DsLayoutStack align="center" gap="md">
+            <DsText tone="danger" size="lg" weight="medium">
+              {error}
+            </DsText>
+            <Button
+              tone="neutral"
+              emphasis="low"
+              onClick={() => {
+                clearAcceptedDelivery();
+                setError(null);
+                router.replace(verificationPath);
+              }}
+            >
+              {t('startOver')}
+            </Button>
+          </DsLayoutStack>
+        </DsLayoutStack>
+      </DsLayoutInset>
     );
   }
-
   if (flowId && !flow) {
     return null;
   }
-
   const flowError = error || (hasVerificationFlowError(flow) ? t('errors.submit') : null);
   const viewState: VerificationViewState | null = applicationTarget
     ? 'applying'
@@ -473,57 +445,58 @@ export function VerificationContent() {
   if (!viewState) {
     return null;
   }
-
   return (
-    <Center style={{ flex: 1 }} p="md">
-      <VerificationFlowView
-        code={code}
-        email={email}
-        error={flowError}
-        labels={{
-          back: tCommonActions('back'),
-          chooseDescription: t('chooseMethod.description'),
-          chooseSubmit: t('chooseMethod.submit'),
-          chooseTitle: t('chooseMethod.title'),
-          code: {
-            codeAriaLabel: t('sentEmail.codeLabel'),
-            codeExpired: tAuthCommon('codeTiming.expired'),
-            codeExpiresIn: (time) => tAuthCommon('codeTiming.expiresIn', { time }),
-            flowExpired: t('errors.flowNotFound'),
-            resend: t('sentEmail.resend'),
-            resendIn: (time) => tAuthCommon('codeTiming.resendIn', { time }),
-            startOver: t('startOver'),
-            submit: t('sentEmail.submitting'),
-          },
-          emailLabel: tCommonLabels('email'),
-          emailPlaceholder: tCommonPlaceholders('emailExample'),
-          passedAction: t('passedChallenge.action'),
-          passedDescription: t('passedChallenge.description'),
-          passedTitle: t('passedChallenge.title'),
-          applyingDescription: t('applying.description'),
-          applyingRetry: t('applying.checkAgain'),
-          applyingTitle: t('applying.title'),
-          sentDescription: t('sentEmail.description'),
-          sentTitle: tAuthCommon('checkYourEmailTitle'),
-          submittingCode: t('sentEmail.submitting'),
-        }}
-        onBack={() => router.push('/my/security')}
-        onCodeChange={setCode}
-        onCodeSubmit={(value) => void submitVerificationCode(value)}
-        onEmailChange={setEmail}
-        onPassed={() => {
-          router.push('/my/security');
-        }}
-        onCheckApplied={() => void handleCheckApplied()}
-        onRequestCode={() => void handleRequestCode()}
-        onResendCode={() => void handleResendCode()}
-        onStartOver={() => void handleRestartVerification(email)}
-        requestingCode={requestingCode}
-        checkingApplication={checkingApplication || requestingCode}
-        state={viewState}
-        submittingCode={submittingCode}
-        timing={codeTiming}
-      />
-    </Center>
+    <DsLayoutInset space="md">
+      <DsLayoutStack align="center" justify="center" flexible>
+        <VerificationFlowView
+          code={code}
+          email={email}
+          error={flowError}
+          labels={{
+            back: tCommonActions('back'),
+            chooseDescription: t('chooseMethod.description'),
+            chooseSubmit: t('chooseMethod.submit'),
+            chooseTitle: t('chooseMethod.title'),
+            code: {
+              codeAriaLabel: t('sentEmail.codeLabel'),
+              codeExpired: tAuthCommon('codeTiming.expired'),
+              codeExpiresIn: (time) => tAuthCommon('codeTiming.expiresIn', { time }),
+              flowExpired: t('errors.flowNotFound'),
+              resend: t('sentEmail.resend'),
+              resendIn: (time) => tAuthCommon('codeTiming.resendIn', { time }),
+              startOver: t('startOver'),
+              submit: t('sentEmail.submitting'),
+            },
+            emailLabel: tCommonLabels('email'),
+            emailPlaceholder: tCommonPlaceholders('emailExample'),
+            passedAction: t('passedChallenge.action'),
+            passedDescription: t('passedChallenge.description'),
+            passedTitle: t('passedChallenge.title'),
+            applyingDescription: t('applying.description'),
+            applyingRetry: t('applying.checkAgain'),
+            applyingTitle: t('applying.title'),
+            sentDescription: t('sentEmail.description'),
+            sentTitle: tAuthCommon('checkYourEmailTitle'),
+            submittingCode: t('sentEmail.submitting'),
+          }}
+          onBack={() => router.push('/my/security')}
+          onCodeChange={setCode}
+          onCodeSubmit={(value) => void submitVerificationCode(value)}
+          onEmailChange={setEmail}
+          onPassed={() => {
+            router.push('/my/security');
+          }}
+          onCheckApplied={() => void handleCheckApplied()}
+          onRequestCode={() => void handleRequestCode()}
+          onResendCode={() => void handleResendCode()}
+          onStartOver={() => void handleRestartVerification(email)}
+          requestingCode={requestingCode}
+          checkingApplication={checkingApplication || requestingCode}
+          state={viewState}
+          submittingCode={submittingCode}
+          timing={codeTiming}
+        />
+      </DsLayoutStack>
+    </DsLayoutInset>
   );
 }

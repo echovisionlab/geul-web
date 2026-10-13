@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconBan, IconCheck, IconMailOff, IconTrash, IconUserCog } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { TableRowMenu, type TableRowMenuItem } from '@/components/core/DataTable';
 import { unbanUserAction } from '@/lib/actions/user';
 import { useUserModal, type UserModalTarget } from './UserModalContext';
@@ -26,10 +26,10 @@ export function UserRowMenu({ user }: UserRowMenuProps) {
     try {
       const result = await unbanUserAction(user.id);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tUserProfile('notifications.userUnbanned'), color: 'green' });
+      notifications.show({ message: tUserProfile('notifications.userUnbanned'), tone: 'positive' });
       router.refresh();
     } finally {
       setUnbanning(false);
@@ -57,7 +57,7 @@ export function UserRowMenu({ user }: UserRowMenuProps) {
         label: tCommon('actions.ban'),
         icon: <IconBan size={16} />,
         onClick: () => openBan(user),
-        color: 'orange',
+        tone: 'warning',
       });
     }
   }
@@ -67,7 +67,7 @@ export function UserRowMenu({ user }: UserRowMenuProps) {
       label: tCommon('actions.unsubscribe'),
       icon: <IconMailOff size={16} />,
       onClick: () => openNewsletterUnsubscribe(user),
-      color: 'orange',
+      tone: 'warning',
     });
   }
 
@@ -75,7 +75,7 @@ export function UserRowMenu({ user }: UserRowMenuProps) {
     label: tCommon('actions.delete'),
     icon: <IconTrash size={16} />,
     onClick: () => openDelete(user),
-    color: 'red',
+    tone: 'danger',
   });
 
   return <TableRowMenu aria-label={tTable('aria.rowActions', { label: user.nickname })} items={items} />;

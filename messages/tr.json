@@ -1,6 +1,7 @@
 {
   "common": {
     "actions": {
+      "move": "Taşı",
       "save": "Kaydet",
       "saveChanges": "Değişiklikleri Kaydet",
       "create": "Oluştur",
@@ -59,7 +60,7 @@
       "reply": "Yanıtla",
       "insertVariable": "Değişken ekle",
       "acceptAll": "Tümünü kabul et",
-      "rejectNonEssential": "Gerekli olmayanları reddet",
+      "rejectNonEssential": "Reddet",
       "savePreferences": "Tercihleri kaydet",
       "import": "İthalat",
       "export": "İhracat",
@@ -127,10 +128,7 @@
       "file": "Dosya",
       "bio": "Biyografi",
       "realName": "Gerçek isim",
-      "countryCode": "Ülke kodu",
       "slug": "Sümüklüböcek",
-      "slugAutoModeEnabled": "Başlıkla otomatik senkronizasyon (devre dışı bırakmak için tıklayın)",
-      "slugAutoModeManual": "Manuel mod (otomatik senkronizasyonu etkinleştirmek için tıklayın)",
       "submissions": "Gönderimler",
       "public": "halka açık",
       "location": "Konum",
@@ -162,7 +160,6 @@
       "logoLight": "Işık Logosu",
       "logoDark": "Koyu Logo",
       "joined": "Katıldı",
-      "subscribed": "Abone olundu",
       "featured": "Öne Çıkanlar",
       "order": "Sipariş",
       "sortOrder": "Sıralama düzeni",
@@ -177,7 +174,6 @@
       "minutes": "dakika",
       "seconds": "Saniye",
       "time": "Zaman",
-      "generationInfo": "Nesil bilgisi",
       "body": "Vücut",
       "content": "İçerik",
       "bodyPreview": "Gövde önizlemesi",
@@ -280,6 +276,7 @@
     },
     "messages": {
       "noUsersFound": "Kullanıcı bulunamadı",
+      "noAuthorsFound": "Yazar bulunamadı.",
       "noVersionsFound": "Sürüm bulunamadı.",
       "typeAtLeast2Characters": "En az 2 karakter yazın",
       "itemCreated": "{item} oluşturuldu",
@@ -295,24 +292,22 @@
       "deleteItemConfirm": "Bu {item} öğesini silmek istediğinizden emin misiniz? Bu eylem geri alınamaz.",
       "deleteNamedItemConfirm": "\"{name}\" dosyasını silmek istediğinizden emin misiniz? Bu eylem geri alınamaz.",
       "confirmDeleteSelectedCount": "{count, plural, one {# seçili öğe} other {# seçili öğe}} silmek istediğinizden emin misiniz? Bu eylem geri alınamaz.",
-      "deleteDraftVersionConfirm": "Bu taslak sürümü silmek istediğinizden emin misiniz?",
       "confirmDeleteNamedRich": "<strong>{name}</strong>'yi silmek istediğinizden emin misiniz?",
-      "activeCount": "{count} etkin",
       "effectiveFromDate": "{date} tarihinden itibaren geçerlidir",
       "noUpdateRecorded": "Güncelleme kaydedilmedi",
-      "exportedEmails": "Dışa aktarıldı {count, plural, one {# e-posta} other {# e-posta}}",
       "formSubmittedSuccessfully": "Yanıtınız başarıyla gönderildi.",
       "userDate": "{user} · {date}",
       "scheduleActivationTitle": "Etkinleştirmeyi Planla",
       "scheduleActivationDescription": "Bu sürümün ne zaman aktif hale geleceğini seçin. Planlandığında tüm aktif hesaplara bildirim e-postaları gönderilecektir.",
       "scheduleActivationNotice": "Planlama, tüm aktif hesaplara önizleme bağlantısı içeren bildirim e-postaları gönderecektir.",
-      "translationDetailUnavailable": "Ayrıntılı çeviri verileri yüklenemedi. Geçerli genel çeviriyi hâlâ düzenleyebilirsiniz.",
       "invalidConfirmationLinkFromEmail": "Geçersiz onay bağlantısı. Lütfen onay e-postanızdaki bağlantıyı kullanın.",
       "noPostsFound": "Hiçbir gönderi bulunamadı.",
       "noWorksFound": "Hiçbir çalışma bulunamadı.",
-      "urlCopiedToClipboard": "URL panoya kopyalandı",
       "failedToLoad": "Veriler yüklenemedi.",
-      "relatedItemsWillBeUnlinked": "{count} ile ilgili öğelerin bağlantısı kaldırılacak."
+      "relatedItemsWillBeUnlinked": "{count} ile ilgili öğelerin bağlantısı kaldırılacak.",
+      "noArtistsFound": "Hiçbir sanatçı bulunamadı.",
+      "noLabelsFound": "Etiket bulunamadı.",
+      "noReleasesFound": "Hiçbir yayın bulunamadı."
     },
     "notifications": {
       "categoryCreated": "Kategori oluşturuldu",
@@ -372,8 +367,6 @@
       "testEmail": "test@email.com",
       "testEmailExample": "test@example.com",
       "noReplyEmail": "noreply@example.com",
-      "translationLiveRowMissing": "Bu yerel ayar için henüz genel çeviri mevcut değil. Buraya kaydettiğinizde hemen bir tane oluşturulur.",
-      "translationBodyPreviewUnavailable": "Gövde önizlemesi mevcut değil.",
       "selectDateAndTime": "Tarih ve saati seçin",
       "streetAddress": "Açık adres",
       "regionSubdivision": "Eyalet/İl"
@@ -408,12 +401,11 @@
       "generating": "Oluşturuluyor...",
       "true": "Doğru",
       "false": "Yanlış",
-      "loading": "Yükleniyor..."
+      "loading": "Yükleniyor...",
+      "toBeAnnounced": "TBA"
     },
     "roles": {
       "admin": "Yönetici",
-      "editor": "Editör",
-      "viewer": "Görüntüleyici",
       "author": "Yazar",
       "user": "Kullanıcı"
     },
@@ -445,6 +437,11 @@
       "unsubscribed": "Abonelikten çıkıldı",
       "subscribed": "Abone olundu",
       "onboardingPending": "İlk katılım bekleniyor"
+    },
+    "motion": {
+      "pause": "Animasyonu duraklat",
+      "resume": "Animasyonu sürdür",
+      "readAllInformation": "Sahnenin tüm bilgilerini oku"
     }
   },
   "shell": {
@@ -931,7 +928,6 @@
     },
     "mapThemes": {
       "empty": "Harita teması bulunamadı.",
-      "notFound": "Harita teması bulunamadı.",
       "loadFailed": "Harita temaları yüklenemedi.",
       "defaultDisabled": "Bu zaten varsayılan temadır.",
       "deleteDisabled": {
@@ -939,9 +935,7 @@
         "last": "Son harita teması silinemez."
       },
       "reloadRequired": {
-        "title": "Yeniden yükleme gerekli",
-        "message": "Bu tema daha yeni bir revizyondan kaydedildi. Düzenlemeye devam etmeden önce yeniden yükleyin.",
-        "action": "Yeniden yükle"
+        "title": "Yeniden yükleme gerekli"
       },
       "variants": {
         "light": "Işık",
@@ -972,8 +966,7 @@
       },
       "editor": {
         "notifications": {
-          "defaultSet": "Tema varsayılan olarak ayarlandı",
-          "variantRequired": "En az bir çeşit (açık veya koyu) gerekli"
+          "defaultSet": "Tema varsayılan olarak ayarlandı"
         },
         "controls": {
           "map": {
@@ -1310,7 +1303,6 @@
     },
     "verification": {
       "loading": "Doğrulama formu yükleniyor...",
-      "redirecting": "Yönlendiriliyor...",
       "startOver": "Yeniden başla",
       "errors": {
         "flowNotFound": "Doğrulama akışı bulunamadı veya süresi dolmuş",
@@ -1373,21 +1365,14 @@
   "featuredImage": {
     "label": "Öne Çıkan Resim",
     "alt": "Öne çıkan görsel",
-    "hint": "Değiştirmek için resme tıklayın",
     "cropTitle": "Öne Çıkan Resmi Kırp",
-    "empty": {
-      "editable": "Yüklemek için bırakın veya tıklayın ({ratio})",
-      "readOnly": "Resim yok"
-    },
     "errors": {
       "fileRejected": "Dosya reddedildi",
       "fileTooLarge": "Dosya çok büyük. Maksimum boyut: {maxSize}",
       "invalidFileType": "Geçersiz dosya türü"
     },
     "actions": {
-      "changeAria": "Öne çıkan görseli değiştir",
-      "removeAria": "Öne çıkan görseli kaldır",
-      "remove": "Resmi kaldır"
+      "removeAria": "Öne çıkan görseli kaldır"
     }
   },
   "artistPage": {
@@ -1495,7 +1480,6 @@
       "slug": "sanatçı sümüklüböcek",
       "name": "Sahne adı / sanatçı adı",
       "realName": "Yasal ad (isteğe bağlı)",
-      "countryCode": "ör. ABD, KR, JP",
       "labels": "Etiketleri seçin...",
       "parentArtist": "Bir ana sanatçı seçin..."
     },
@@ -1518,15 +1502,7 @@
     },
     "placeholders": {
       "name": "Etiket adı",
-      "countryCode": "ör. DE, ABD, KR",
       "parentLabel": "Üst etiketi seçin (isteğe bağlı)"
-    }
-  },
-  "workCollaborators": {
-    "empty": "Henüz ortak çalışan yok",
-    "notifications": {
-      "added": "Ortak çalışan eklendi",
-      "removed": "Ortak çalışan kaldırıldı"
     }
   },
   "comments": {
@@ -1585,17 +1561,6 @@
     "credits": {
       "other": "Diğer"
     },
-    "music": {
-      "released": "Yayınlandı: {value}",
-      "spotify": "Spotify",
-      "bandcamp": "Grup kampı",
-      "soundcloud": "SoundCloud",
-      "youtube": "YouTube",
-      "openSpotify": "Spotify'ı aç",
-      "openBandcamp": "Bandcamp'ı aç",
-      "openSoundcloud": "SoundCloud'u açın",
-      "openYoutube": "YouTube'u aç"
-    },
     "portfolio": {
       "tech": "Teknoloji:"
     },
@@ -1643,7 +1608,6 @@
     }
   },
   "cookieConsentCommon": {
-    "essentialLabel": "Temel çerezler (her zaman aktif)",
     "analyticsLabel": "Analytics çerezleri (Google Analytics)"
   },
   "nicknameField": {
@@ -1690,7 +1654,6 @@
       "failedToRevokeSession": "Oturum iptal edilemedi",
       "failedToRevokeSessions": "Oturumlar iptal edilemedi",
       "failedToRequestDeletion": "Hesabın silinmesi isteği başarısız oldu",
-      "cannotUnlinkMessage": "En az bir kimlik doğrulama yönteminiz olmalıdır",
       "connectedMessage": "{provider} hesabı başarıyla bağlandı.",
       "disconnectedMessage": "{provider} bağlantısı kesildi.",
       "failedToUpdateMainEmail": "Birincil e-posta güncellenemedi",
@@ -1751,8 +1714,6 @@
       "added": "{date} eklendi",
       "lastMethod": "Bu şifre anahtarını kaldırmadan önce başka bir oturum açma yöntemi ekleyin.",
       "removeNamed": "{name} şifre anahtarını kaldır",
-      "reauth": "Şifre anahtarlarını değiştirmeden önce tekrar oturum açın.",
-      "reauthAction": "Tekrar oturum açın",
       "errors": {
         "load": "Şifre anahtarları yüklenemedi.",
         "remove": "Bu şifre anahtarı kaldırılamadı.",
@@ -1789,21 +1750,11 @@
     "email": {
       "title": "Birincil e-posta",
       "description": "Bildirimleri ve hesap mesajlarını alacak doğrulanmış e-postayı seçin.",
-      "addEmail": "E-posta ekle",
       "canonical": "Birincil e-posta",
-      "canonicalCannotRemove": "Bu adresi kaldırmadan önce başka bir birincil e-posta seçin.",
       "setCanonical": "Birincil e-posta olarak ayarla",
-      "noEmail": "E-posta seti yok",
-      "helper": "Birincil e-posta olarak yalnızca bir doğrulanmış e-posta mevcuttur.",
-      "selectLabel": "Birincil e-posta",
       "changeAction": "Birincil e-postayı değiştir",
       "sources": {
-        "current": "Mevcut birincil e-posta",
-        "emailCode": "E-posta",
-        "pending": "Doğrulama bekleniyor"
-      },
-      "messages": {
-        "pendingVerification": "Bu e-posta için doğrulama zaten bekleniyor. Doğrulama e-postasını tekrar gönderebilirsiniz."
+        "emailCode": "E-posta"
       },
       "mainEmailUpdated": "Birincil e-posta güncellendi.",
       "canonicalUpdated": "Birincil e-posta güncellendi."
@@ -1834,7 +1785,6 @@
   },
   "seriesDetail": {
     "slug": {
-      "autoDescription": "Otomatik mod: başlık, güncelleme bilgisini otomatik olarak değiştirir.",
       "manualDescription": "Manuel mod: siz otomatik modu düzenleyene veya yeniden etkinleştirene kadar bilgi sabit kalır."
     },
     "notifications": {
@@ -1870,10 +1820,6 @@
     }
   },
   "works": {
-    "tabs": {
-      "editable": "Düzenlenebilir"
-    },
-    "emptyEditable": "Size atanan düzenlenebilir çalışma yok.",
     "emptyCredits": "Kredilendirilen çalışma bulunamadı.",
     "columns": {
       "creditedAs": "Kredilendirildi",
@@ -1995,6 +1941,7 @@
         "patternPlaceholder": "ör. ^[A-Z]{3}$",
         "customErrorMessage": "Özel Hata Mesajı",
         "optional": "İsteğe bağlı",
+        "dragValidator": "Doğrulama kuralını sürükle",
         "removeValidator": "Doğrulayıcıyı kaldır"
       },
       "fieldTypes": {
@@ -2062,10 +2009,6 @@
       }
     },
     "settings": {
-      "notifications": {
-        "managerAdded": "Form yöneticisi eklendi",
-        "managerRemoved": "Form yöneticisi kaldırıldı"
-      },
       "urlPublic": {
         "title": "URL ve Genel Erişim",
         "allowPublic": "Genel URL erişimine izin ver",
@@ -2085,13 +2028,7 @@
         "description": "Yönetici erişimi olmadan form istatistiklerini görüntülemek için kontrol paneli bağlantılarını paylaşın"
       },
       "managers": {
-        "adminControls": "Yönetici kontrolleri",
-        "readOnly": "Salt okunur",
-        "description": "Yöneticiler bu formu düzenleyebilir, gönderimleri görüntüleyebilir ve paylaşım bağlantılarını yönetebilir.",
-        "searchPlaceholder": "Yönetici eklenecek kullanıcıları arayın...",
-        "adminOnly": "Yalnızca yöneticiler yönetici ekleyebilir veya kaldırabilir.",
-        "empty": "Henüz atanan yönetici yok.",
-        "removeManager": "{name} yöneticisini kaldır"
+        "description": "Yöneticiler bu formu düzenleyebilir, gönderimleri görüntüleyebilir ve paylaşım bağlantılarını yönetebilir."
       },
       "access": {
         "title": "Erişim Kontrolü",
@@ -2120,7 +2057,11 @@
   "dataTable": {
     "aria": {
       "sortBy": "{label} ölçütüne göre sırala",
-      "rowActions": "{label} için işlemler"
+      "rowActions": "{label} için işlemler",
+      "selectAllRows": "Tüm satırları seç",
+      "selectRow": "{label} seç",
+      "resultSummary": "{totalPages, plural, =0 {{count, plural, one {# sonuç} other {# sonuç}}} other {{count, plural, one {# sonuç} other {# sonuç}}, {totalPages} sayfadan {page}. sayfa}}",
+      "loadingMessage": "Yükleniyor"
     },
     "sort": {
       "button": "Sırala",
@@ -2133,7 +2074,9 @@
         "moveUp": "{label} yukarıya taşı",
         "moveDown": "{label} aşağı taşı",
         "toggleDirection": "{label} için sıralama yönünü değiştir",
-        "removeSort": "{label} için sıralamayı kaldır"
+        "removeSort": "{label} için sıralamayı kaldır",
+        "directionAscending": "Şu anda artan sırada",
+        "directionDescending": "Şu anda azalan sırada"
       }
     },
     "filter": {
@@ -2148,7 +2091,8 @@
       "drawerTitle": "Filtre",
       "aria": {
         "backToFields": "Filtre alanlarına geri dön",
-        "removeFilter": "{label} filtresini kaldır"
+        "removeFilter": "{label} filtresini kaldır",
+        "logic": "Filtre birleştirme"
       },
       "operators": {
         "eq": "eşittir",
@@ -2181,7 +2125,8 @@
       "previousPage": "Önceki sayfa",
       "nextPage": "Sonraki sayfa",
       "lastPage": "Son sayfa",
-      "page": "Sayfa {page}"
+      "page": "Sayfa {page}",
+      "navigation": "Sayfa gezinme"
     }
   },
   "versionHistory": {
@@ -2193,7 +2138,9 @@
     "restoreTitle": "Sürümü geri yükle",
     "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
     "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document."
+    "restoreFailed": "Failed to restore the source document.",
+    "loadFailed": "Sürüm geçmişi yüklenemedi.",
+    "end": "Tüm sürümler yüklendi."
   },
   "shareLinks": {
     "title": "Bağlantıları Paylaş",
@@ -2203,7 +2150,6 @@
     "createError": "Bağlantı oluşturulamadı",
     "deleteSuccess": "Bağlantı silindi",
     "deleteError": "Bağlantı silinemedi",
-    "invalidUrl": "Geçersiz URL",
     "noLinks": "Bağlantı oluşturulmadı",
     "showLess": "Daha az göster",
     "showMore": "{count} tane daha göster",
@@ -2218,21 +2164,9 @@
     "passwordPlaceholder": "Bir paylaşım şifresi belirleyin",
     "maximumExpiration": "Paylaşım bağlantılarının süresi şu andan itibaren bir yıla kadar uzayabilir.",
     "expirationInvalid": "Bir yıl içinde bir son kullanma tarihi seçin.",
-    "bypassFormPassword": "Form şifresini atla",
-    "bypassFormPasswordDescription": "Devre dışı bırakılırsa izleyicilerin form şifresini girmesi gerekir",
-    "bypassAuthentication": "Kimlik doğrulamayı atla",
-    "bypassAuthenticationDescription": "Etkinleştirilirse, paylaşım bağlantısı gerekli kimlik doğrulama kapılarını atlar",
-    "bypassRoleChecks": "Rol kontrollerini atla",
-    "bypassRoleChecksDescription": "Etkinleştirilirse paylaşım bağlantısı izin verilen rol kapılarını atlar",
     "policies": {
       "passwordProtected": "Şifre korumalı",
-      "noPassword": "Şifre yok",
-      "passwordBypass": "Şifre atlama",
-      "passwordRequired": "Şifre gerekli",
-      "authBypass": "Kimlik doğrulama atlaması",
-      "authEnforced": "Yetkilendirme zorunlu kılındı",
-      "roleBypass": "Rol atlama",
-      "roleEnforced": "Rol uygulandı"
+      "noPassword": "Şifre yok"
     },
     "expirationBadge": {
       "expired": "Süresi dolmuş",
@@ -2264,7 +2198,9 @@
     "label": "Sosyal bağlantılar",
     "addLink": "Bağlantı ekle",
     "platformPlaceholder": "platformu",
-    "valuePlaceholder": "URL veya kullanıcı adı"
+    "valuePlaceholder": "URL veya kullanıcı adı",
+    "reorderInstructions": "Bu bağlantının konumunu değiştirmek için yukarı ve aşağı ok tuşlarını kullanın.",
+    "positionChanged": "Bağlantı, {count} konumdan {position}. konuma taşındı."
   },
   "termsPage": {
     "active": {
@@ -2424,7 +2360,6 @@
     }
   },
   "releasePage": {
-    "previewTitle": "Sürüm Önizlemesi",
     "streaming": "Akış",
     "metadata": {
       "fallbackDescription": "{title}",
@@ -2494,8 +2429,7 @@
         "title": "Parça ekle"
       },
       "placeholders": {
-        "title": "Parça başlığı",
-        "durationSeconds": "örneğin 240"
+        "title": "Parça başlığı"
       },
       "deleteConfirm": "Bu parçayı silmek istediğinizden emin misiniz?",
       "creditsModal": {
@@ -2517,8 +2451,7 @@
   "contentMetadata": {
     "preview": {
       "page": "Sayfa Önizlemesi",
-      "post": "Gönderi Önizlemesi",
-      "work": "İş Önizlemesi"
+      "post": "Gönderi Önizlemesi"
     }
   },
   "editorMetadata": {
@@ -2541,8 +2474,6 @@
   "postHeader": {
     "actions": {
       "editPost": "Gönderiyi düzenle",
-      "sharePost": "Gönderiyi paylaş",
-      "printPost": "Gönderiyi yazdır",
       "exportMarkdown": "Gönderiyi Markdown olarak dışa aktar"
     }
   },
@@ -2551,7 +2482,6 @@
     "intro": "Kimlik doğrulama ve site işletimi için temel çerezleri, site kullanımını anlamak için ise isteğe bağlı analiz çerezlerini kullanırız.",
     "learnMore": "<privacy>Gizlilik Politikamıza</privacy> ve <terms>Hizmet Şartlarımıza</terms> bakın.",
     "actions": {
-      "hidePreferences": "Tercihleri gizle",
       "customize": "Özelleştirmek"
     }
   },
@@ -2569,7 +2499,6 @@
   },
   "locationSelector": {
     "placeholder": "Konum seçin...",
-    "clearSelection": "Seçilen yeri temizle",
     "emptySearch": "Haritada bir yer arayın",
     "emptyResults": "Hiçbir yer bulunamadı"
   },
@@ -2602,9 +2531,6 @@
     "actions": {
       "copyId": "Kimliği kopyala",
       "copyUrl": "URL'yi kopyala"
-    },
-    "notifications": {
-      "copied": "{label} kopyalandı"
     }
   },
   "formValidation": {
@@ -2644,7 +2570,7 @@
   },
   "ogImagePreview": {
     "alt": "Grafik önizlemesini aç",
-    "empty": "OG görüntüsü henüz oluşturulmadı",
+    "empty": "OG görseli yok",
     "actions": {
       "regenerate": "OG Görüntüsünü Yeniden Oluştur"
     },
@@ -2768,7 +2694,6 @@
     "scheduleModal": {
       "description": "Bu kampanyayı göndermek için bir tarih ve saat seçin.",
       "dateLabel": "Planlanan tarih ve saat",
-      "datePlaceholder": "Tarih ve saati seçin",
       "previousMonth": "Önceki ay",
       "nextMonth": "Gelecek ay",
       "audience": "Kitle: {audience}",
@@ -2858,7 +2783,6 @@
       "notFoundMessage": "Kategori bulunamadı"
     },
     "seriesSelector": {
-      "searchPlaceholder": "Arayın veya oluşturun...",
       "states": {
         "empty": "Mevcut seri yok",
         "select": "Seri seç...",
@@ -2871,14 +2795,12 @@
       },
       "notifications": {
         "assigned": "Diziye atanan gönderi",
-        "reorderFailed": "Seri yeniden sıralanamadı",
         "createFailed": "Seri oluşturulamadı",
         "seriesUnavailable": "Bu seri artık yönetilemiyor. Önceki atama tutuldu.",
         "updateFailed": "Gönderi serisi güncellenemedi. Önceki atama tutuldu."
       }
     },
     "notifications": {
-      "slugUpdateFailed": "Bilgi notu güncellenemedi",
       "deleted": "Gönderi silindi",
       "published": "Yayın yayınlandı",
       "unpublished": "Yayın yayından kaldırıldı",
@@ -3065,10 +2987,6 @@
     "pinned": "Sabitlendi"
   },
   "pageEditor": {
-    "localRecovery": {
-      "message": "Yeniden bağlanmadan önce yerel düzenleme kopyanız korundu. Yenilemeden veya ayrılmadan önce indirin.",
-      "action": "Kurtarma kopyasını indir"
-    },
     "shareLinksDescription": "Yayınlanmamış sayfalar için bağlantıları önizleme",
     "showTitleOnPage": "Başlığı sayfada göster",
     "slugValidation": {
@@ -3126,6 +3044,9 @@
       }
     },
     "columnsEditor": {
+      "labels": {
+        "ratio": "Sütun oranı"
+      },
       "badges": {
         "columnCount": "{count} sütun"
       },
@@ -3150,20 +3071,18 @@
       "menuLabel": "Bölüm Ekle",
       "emptyColumn": "Boş sütun - içerik eklemek için +'ya tıklayın",
       "actions": {
-        "addSectionToColumn": "{index} sütununa bölüm ekle",
-        "removeSectionFromColumn": "{section} sütununu {index} sütunundan kaldırın"
+        "addSectionToColumn": "{index} sütununa bölüm ekle"
       }
     },
     "notifications": {
       "published": "Sayfa yayınlandı",
       "unpublished": "Sayfa yayından kaldırıldı",
       "deleted": "Sayfa silindi",
-      "slugUpdateFailed": "Sayfa bilgisi güncellenemedi",
-      "confirmSummaryFailed": "Özet güncellemesi onaylanamadı."
+      "slugUpdateFailed": "Sayfa bilgisi güncellenemedi"
     },
     "mapEditor": {
       "title": "Harita",
-      "placeCount": "{count} {count, plural, one {place} other {places}}",
+      "placeCount": "{count} {count, plural, one {yer} other {yer}}",
       "fullscreen": "Tam ekran",
       "captionPlaceholder": "Haritanın altına isteğe bağlı bir başlık ekleyin...",
       "emptyState": "Henüz harita yeri seçilmedi.",
@@ -3217,7 +3136,6 @@
         "content": "İçerik",
         "marqueeBehavior": "Seçim çerçevesi davranışı",
         "scenePlayback": "Oynatma",
-        "sceneRender": "Oluşturucu",
         "sceneMotion": "Hareket",
         "sceneUnits": "Birimler",
         "sceneSettings": "Sahne",
@@ -3234,7 +3152,6 @@
         "columns": "Sütunlar",
         "infiniteLoop": "Sonsuz döngü",
         "showIndicators": "Göstergeleri göster",
-        "showFeaturedImage": "Öne çıkan görseli göster",
         "imageAspectRatio": "Görüntü en boy oranı",
         "showMeta": "Metayı göster",
         "sortBy": "Sırala",
@@ -3253,7 +3170,6 @@
         "showImage": "Resmi göster",
         "selectForm": "Formu seç",
         "showFormTitle": "Form başlığını göster",
-        "showTitle": "Başlığı göster",
         "numberOfWorks": "Eser sayısı",
         "numberOfReleases": "Sürüm sayısı",
         "numberOfProgramEvents": "Etkinlik sayısı",
@@ -3323,7 +3239,10 @@
         "textColorSource": "Metin rengi",
         "lightTextColor": "Açık metin",
         "darkTextColorSource": "Koyu metin",
-        "darkTextColor": "Koyu metin rengi"
+        "darkTextColor": "Koyu metin rengi",
+        "itemSize": "Öğe boyutu",
+        "showAvatar": "Avatarı göster",
+        "maxLabels": "En fazla plak şirketi"
       },
       "fieldLabels": {
         "year": "Yıl",
@@ -3334,11 +3253,7 @@
       },
       "badges": {
         "posts": "{count} gönderi",
-        "rows": "{count} satır",
-        "authors": "{count} yazar",
-        "artists": "{count} sanatçı",
-        "works": "{count} çalışıyor",
-        "releases": "{count} sürüm"
+        "rows": "{count} satır"
       },
       "placeholders": {
         "publishedByDefault": "Varsayılan olarak yayınlandı",
@@ -3358,7 +3273,6 @@
           "auto": "Otomatik"
         },
         "sortBy": {
-          "dateAdded": "Eklenme tarihi",
           "startDate": "Başlangıç tarihi",
           "endDate": "Bitiş tarihi",
           "publishedDate": "Yayınlanma tarihi",
@@ -3367,9 +3281,7 @@
         },
         "sortOrder": {
           "newest": "En yeni",
-          "oldest": "En eski",
-          "azOldest": "A'dan Z'ye / En Eski",
-          "zaNewest": "Z-A / En Yeni"
+          "oldest": "En eski"
         },
         "mapPrimaryLabel": {
           "placeName": "Yer adı"
@@ -3443,6 +3355,11 @@
           "theme": "Temayı takip et",
           "custom": "Özel",
           "inherit": "Işığı takip et"
+        },
+        "itemSize": {
+          "s": "S · Kompakt",
+          "m": "M · Standart",
+          "l": "L · Büyük"
         }
       },
       "actions": {
@@ -3453,8 +3370,6 @@
         "moveUnitUp": "Üniteyi yukarı taşı",
         "moveUnitDown": "Üniteyi aşağı taşı",
         "removeSceneUnit": "Üniteyi kaldır",
-        "expandSceneUnit": "Üniteyi genişlet",
-        "collapseSceneUnit": "Üniteyi daralt",
         "replaceMesh": "GLB'yi değiştirin",
         "uploadMesh": "GLB'yi yükle",
         "clearMeshAsset": "Mesh varlığını temizle",
@@ -3493,6 +3408,12 @@
         "meshOptimizationCancelled": "İptal edildi",
         "optimizedMeshCleanupFailed": "Optimize edilmiş öğe referansı kaldırıldı ancak temizleme başarısız oldu: {error}",
         "optimizedMeshCleanupFailedDefault": "Optimize edilmiş öğe referansı kaldırıldı ancak temizleme başarısız oldu"
+      },
+      "authorSelection": {
+        "maxSelected": "En fazla {count} yazar seçilebilir.",
+        "empty": "Yazar seçilmedi. Bu blok boş kalacak.",
+        "unavailable": "Bu yazar artık kullanılamıyor.",
+        "unavailableWarning": "Kullanılamayan yazarlar herkese açık sayfada gösterilmez. Onları kaldırın veya başka bir yazar seçin."
       }
     },
     "embed": {
@@ -3545,8 +3466,6 @@
       "matchDescription": "Seçilen rol, etiket ve bülten gruplarını birleştirin.",
       "any": "Seçilen gruplardan herhangi biri",
       "all": "Seçilen grupların tümü",
-      "roles": "Roller",
-      "rolesDescription": "Seçilen rollerden herhangi birine sahip olmak yeterlidir.",
       "roleUser": "Üyeler",
       "memberDescription": "Bu sayfayı yalnızca oturum açmış üyeler görüntüleyebilir.",
       "authorDescription": "Yazar rolüne sahip üyeler.",
@@ -3574,13 +3493,23 @@
       "restrictedTitle": "Bu sayfaya erişiminiz yok",
       "restrictedDescription": "Hesabınız bu sayfanın erişim koşullarını karşılamıyor.",
       "signIn": "Oturum aç"
+    },
+    "a11y": {
+      "sectionPosition": "{section} · {index}/{count}",
+      "dragInstructions": "Taşımaya başlamak için Boşluk tuşuna basın, ardından konumu ok tuşlarıyla değiştirin. Onaylamak için Boşluk, iptal etmek için Escape tuşuna basın.",
+      "dragStart": "{section} · Taşı · Devam ediyor · {index}/{count}",
+      "dragOver": "{section} · Taşı · {index}/{count}",
+      "dragEnd": "{section} · Taşı · Onayla · {index}/{count}",
+      "dragCancel": "{section} · Taşı · İptal edildi",
+      "sectionDeleted": "{section} silindi",
+      "sectionAdded": "{section} oluşturuldu · {index}/{count}",
+      "columnsPosition": "{column} · {section} · {index}/{count}"
     }
   },
   "editorCommon": {
     "reloadRequired": {
       "title": "Yeniden yükleme gerekli",
-      "message": "Bu düzenleyici açıkken daha yeni bir sürüm kaydedildi. Düzenlemeye devam etmeden önce yeniden yükleyin.",
-      "action": "Yeniden yükle"
+      "message": "Bu düzenleyici açıkken daha yeni bir sürüm kaydedildi. Düzenlemeye devam etmeden önce yeniden yükleyin."
     },
     "permissionRevoked": {
       "title": "Düzenleme izni iptal edildi",
@@ -3640,7 +3569,6 @@
         "mute": "Sesi kapat",
         "unmute": "Sesi aç",
         "volume": "Ses seviyesi",
-        "original": "Orijinal",
         "waveform": "Dalga formu",
         "spectrogram": "Spektrogram",
         "spectrogramAlt": "Ses spektrogramı",
@@ -3657,10 +3585,8 @@
         "addItem": "{item} ekle",
         "replaceItem": "{item}'yi değiştirin",
         "browse": "Dosyalara göz atın",
-        "or": "VEYA",
         "importFromUrl": "URL'den içe aktar",
         "directVideoUrlHelp": "Yalnızca doğrudan video dosyası URL'leri. YouTube veya Vimeo için Harici videoyu kullanın.",
-        "confirm": "Göm",
         "resumeAvailable": "Kesintiye uğramış yükleme bulundu",
         "resumeInstructionNamed": "Yüklemeye kaldığı yerden devam etmek için tekrar {name} seçeneğini seçin.",
         "backToUpload": "Dosya yükle",
@@ -3756,11 +3682,8 @@
       }
     },
     "mapBlock": {
-      "clickToAddPlace": "Yer eklemek için tıklayın",
       "captionPlaceholder": "Bir başlık ekleyin...",
-      "clickToAddCaption": "Başlık eklemek için tıklayın",
-      "externalPlaceholder": "Harita: {count} {count, plural, one {place} other {places}}",
-      "viewOnGoogleMaps": "Google Haritalar'da görüntüle ({lat}, {lng})"
+      "clickToAddCaption": "Başlık eklemek için tıklayın"
     },
     "mapPlacesModal": {
       "title": "Yerleri yönet",
@@ -3770,22 +3693,9 @@
       "centeredTitle": "ortalanmış",
       "setAsCenterTitle": "Merkez olarak ayarla"
     },
-    "blockAlign": {
-      "left": "Sola hizala",
-      "center": "Ortaya hizala",
-      "right": "Sağa hizala"
-    },
-    "mathInline": {
-      "clickToEdit": "Düzenlemek için tıklayın",
-      "convertToBlock": "Bloğa dönüştür"
-    },
-    "mathInlineButton": {
-      "label": "Satır içi matematik"
-    },
     "editor": {
       "slashMenu": {
         "placeholder": "Komutlar için '/' yazın",
-        "empty": "Öğe yok",
         "unavailable": "Kullanılamıyor",
         "groups": {
           "headings": "Başlıklar",
@@ -3950,9 +3860,6 @@
         "alignLeft": "Sola hizala",
         "alignCenter": "Ortaya hizala",
         "alignRight": "Sağa hizala",
-        "alignJustify": "Metni iki yana yasla",
-        "textColor": "Metin",
-        "backgroundColor": "Arka plan",
         "nest": "Bloğu içeri al",
         "unnest": "Bloğu dışarı al",
         "inlineMath": "Satır içi matematik",
@@ -3967,36 +3874,19 @@
         "urlPlaceholder": "URL düzenle"
       },
       "math": {
-        "inline": "Satır içi matematik",
-        "block": "Matematik Bloğu",
-        "clickToEdit": "Düzenlemek için tıklayın",
-        "convertToBlock": "Bloğa dönüştür"
+        "selectBlock": "Matematik bloğunu seç",
+        "block": "Matematik Bloğu"
       },
       "file": {
-        "add": "{item} ekle",
         "replace": "{item}'yi değiştirin",
-        "delete": "Sil",
-        "download": "İndir",
-        "caption": "Bir başlık ekleyin...",
-        "upload": "Dosya yükle",
-        "embed": "Göm",
-        "urlPlaceholder": "URL düzenle"
+        "delete": "Sil"
       },
       "resize": {
-        "image": "Boyutlandır — Resim",
-        "audio": "Boyutlandır — Ses",
-        "video": "Boyutlandır — Video",
-        "file": "Boyutlandır — Dosya eki",
         "map": "Boyutlandır — Harita",
-        "externalVideo": "Boyutlandır — Harici video",
-        "p5Sketch": "Boyutlandır — p5.js",
-        "threeScene": "Boyutlandır — Three.js",
-        "dragHandle": "Boyutlandırmak için sürükleyin",
-        "shader": "Yeniden boyutlandır — GLSL gölgelendiricisi"
+        "externalVideo": "Boyutlandır — Harici video"
       },
       "drag": {
         "openBlockMenu": "Blok menüsünü aç",
-        "addBlock": "Blok ekle",
         "delete": "Sil",
         "colors": "Renkler"
       },
@@ -4028,7 +3918,6 @@
         "toggleHeaderColumn": "Başlık sütunu",
         "selectRow": "Satırı seç",
         "selectColumn": "Sütunu seç",
-        "selectCells": "Seçili hücreler",
         "selectTable": "Tabloyu seç",
         "deleteTable": "Tabloyu sil",
         "mergeCells": "Hücreleri birleştir",
@@ -4042,17 +3931,11 @@
         "unavailable": "Kullanılamıyor"
       },
       "map": {
-        "insert": "Harita",
-        "clickToAddPlace": "Yer eklemek için tıklayın",
-        "captionPlaceholder": "Bir başlık ekleyin...",
         "managePlaces": "Yerleri yönet"
       },
       "embeds": {
         "map": "Harita",
-        "externalVideo": "Harici video",
-        "p5Sketch": "p5.js",
-        "threeScene": "Three.js",
-        "shader": "GLSL gölgelendiricisi"
+        "externalVideo": "Harici video"
       },
       "runtimeLabels": {
         "code": {
@@ -4139,12 +4022,7 @@
         }
       },
       "media": {
-        "browse": "Dosyalara göz atın",
-        "importFromUrl": "URL'den içe aktar",
-        "embed": "Göm",
-        "openLibrary": "Dosya kitaplığı",
-        "uploadFiles": "Dosya yükle",
-        "selectFile": "Dosya seç"
+        "importFromUrl": "URL'den içe aktar"
       }
     }
   },
@@ -4170,7 +4048,6 @@
       "brainstorm": "Beyin fırtınası"
     },
     "sections": {
-      "original": "Orijinal",
       "result": "Yapay Zeka Sonucu"
     },
     "actions": {
@@ -4220,8 +4097,7 @@
       "pinClickable": "Tıklanabilir Pin"
     },
     "themeOptions": {
-      "none": "Hiçbiri",
-      "systemSuffix": "(Sistem)"
+      "none": "Hiçbiri"
     },
     "scheme": {
       "auto": "Otomatik",
@@ -4237,13 +4113,7 @@
     "copyValueTitle": "{label} değerini kopyalamak için tıklayın"
   },
   "postMembers": {
-    "removeAria": "{name}'ı kaldır",
-    "roles": {
-      "owner": "Mal sahibi"
-    },
-    "states": {
-      "memberFallback": "üye"
-    }
+    "removeAria": "{name}'ı kaldır"
   },
   "workCredits": {
     "divider": "veya kredi ekleyin",
@@ -4275,9 +4145,6 @@
     "emptyResults": {
       "artist": "Hiçbir sanatçı bulunamadı",
       "name": "İsim bulunamadı"
-    },
-    "states": {
-      "unknownInitial": "?"
     },
     "notifications": {
       "groupCreated": "Grup oluşturuldu",
@@ -4334,13 +4201,11 @@
       }
     },
     "statuses": {
-      "missing": "Eksik",
       "existing": "Existing"
     },
     "states": {
       "loadFailed": "Çeviriler yüklenemedi.",
       "missingTarget": "No target document yet.",
-      "sourceRow": "Bu yerel ayar ana kaynak düzenleyicide düzenlenir.",
       "sourceEditorHint": "Orijinal metni ana düzenleyicide düzenleyin.",
       "updatedAt": "{date} güncellendi"
     },
@@ -4354,52 +4219,19 @@
   },
   "translationPanelMenu": {
     "description": "Review source menu labels and existing translation documents.",
-    "sourceLocaleDescription": "The menu editor above owns structure, ordering, links, visibility, and source labels. Target translations below are read-only previews.",
-    "states": {
-      "sourcePreview": "Kaynak menü etiketleri ({locale}): {labels}",
-      "sourceEditorHint": "Bu etiketler yukarıdaki menü düzenleyicisinden gelir.",
-      "missingTarget": "No labels are saved for this locale yet.",
-      "noItems": "Henüz gösterilecek menü etiketi yok.",
-      "translationPreview": "Existing {locale} labels: {labels}"
-    },
     "previewModal": {
       "title": "{locale} menu translation preview",
-      "descriptions": {
-        "missing": "No public menu translation exists for this locale. The source is shown until an Admin generates it.",
-        "existing": "Shows the current public translated labels for this menu as read-only."
-      },
       "fields": {
-        "linkType": "Link type",
-        "destination": "Destination",
-        "children": "Nested items",
-        "localizedLabelForLocale": "{locale} public label",
-        "sourceLabelForLocale": "{locale} source label",
-        "localizedLabelDescription": "The current translated label shown in public menus; it cannot be changed here.",
-        "sourceLabelDescription": "Comes from the source menu editor and cannot be changed here.",
-        "fixedLocaleLockedDescription": "This item is fixed to the {locale} label and is read-only."
-      },
-      "states": {
-        "detailUnavailable": "Detailed translated menu data could not be loaded.",
-        "noItems": "There are no menu items to preview."
+        "localizedLabelForLocale": "{locale} public label"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template.",
-      "sourceLocaleDescription": "Kaynak şablonu konuyu, gövde metnini ve çalışma zamanı değişken adlarını kontrol eder.",
-      "states": {
-        "sourceEditorHint": "Kaynak şablonunu ana düzenleyicide düzenleyin.",
-        "noContent": "Henüz tercüme edilmiş bir konu veya metin mevcut değildir."
-      }
+      "description": "Manage the source language and existing translation documents for this email template."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout.",
-      "sourceLocaleDescription": "Kaynak düzeni, e-posta oluşturma için sarmalayıcı HTML'yi ve yapısal yer tutucu adlarını kontrol eder.",
-      "states": {
-        "sourceEditorHint": "Kaynak düzenini ana düzenleyicide düzenleyin.",
-        "noContent": "Henüz çevrilmiş düzen HTML'si mevcut değil."
-      }
+      "description": "Manage the source language and existing translation documents for this email layout."
     }
   },
   "localizationNotice": {
@@ -4408,9 +4240,7 @@
       "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
     },
     "fallback": {
-      "title": "Geri dönüş dili",
-      "english": "İstenen {requested} çevirisi mevcut değil, dolayısıyla bu sayfa {displayed} olarak gösteriliyor.",
-      "source": "İstenen {requested} çevirisi mevcut değil, dolayısıyla bu sayfa orijinal {source} biçiminde gösteriliyor."
+      "title": "Geri dönüş dili"
     },
     "actions": {
       "viewOriginal": "Orijinali görüntüle ({source})"
@@ -4440,7 +4270,6 @@
       "policy": "Politika",
       "lastTargetUpdate": "Last target update",
       "entity": "Varlık",
-      "existing": "Existing translations",
       "sources": "Kaynaklar",
       "lastSourceUpdate": "Son kaynak güncellemesi"
     },
@@ -4628,33 +4457,22 @@
       "summary": "Kısa bir özet ekleyin..."
     },
     "tooltips": {
-      "generatingNamed": "{name} bir özet oluşturuyor",
-      "applyingNamed": "{name} oluşturulan özeti uyguluyor",
-      "readyNamed": "{name} oluşturulmuş bir özete hazır"
+      "generatingNamed": "{name} bir özet oluşturuyor"
     },
     "feedback": {
       "failedDefault": "Özet oluşturma işlemi başarısız oldu.",
-      "invalidJson": "AI yanıtı özet JSON olarak ayrıştırılamadı.",
       "alreadyRunning": "Özet oluşturma zaten çalışıyor.",
-      "applyingGenerated": "Oluşturulan özet uygulanıyor.",
-      "resetOlderSession": "Eski bir oturumdan eski oluşturulmuş özet durumunu sıfırlayın.",
-      "resetUnrestorable": "Geri yüklenemeyen eski oluşturulmuş özet durumunu sıfırlayın.",
-      "missingJobPayload": "Özet oluşturma bir iş yükü döndürmedi.",
       "missingSuggestionPayload": "Özet oluşturma, öneri yükü olmadan tamamlandı.",
       "staleSuggestion": "Bu öneri bayat. Başvurmadan önce yeniden oluşturun veya reddedin.",
       "unableToApplyNow": "Oluşturulan özet şu anda uygulanamıyor.",
       "applyFailed": "Oluşturulan özet uygulanamadı.",
       "applied": "Oluşturulan özet uygulandı.",
-      "appliedJobUnresolved": "Özet uygulandı ancak AI işi otomatik olarak çözülemedi.",
-      "dismissedJobUnresolved": "Özet önerisi yerel olarak reddedildi ancak yapay zeka işi otomatik olarak çözülemedi.",
-      "readyBeforeApplying": "Önce oluşturulan özeti uygulayın veya reddedin.",
       "readyToApply": "Oluşturulan özet uygulamaya hazır."
     },
     "ready": {
       "title": "Oluşturulan özet",
       "suggestedSummary": "Önerilen özet",
       "anotherCollaborator": "Başka bir işbirlikçi",
-      "anotherCollaboratorFallback": "Başka bir ortak çalışanın oluşturulmuş bir özeti hazır.",
       "anotherCollaboratorNamed": "{name}'nin oluşturulmuş bir özeti hazır."
     }
   },
@@ -4702,8 +4520,7 @@
       "roleUpdated": "Rol güncellendi",
       "userBanned": "Kullanıcı yasaklandı",
       "userUnbanned": "Kullanıcının yasağı kaldırıldı",
-      "userDeleted": "Kullanıcı silindi",
-      "userCreated": "Kullanıcı oluşturuldu"
+      "userDeleted": "Kullanıcı silindi"
     }
   },
   "adminUserDetail": {
@@ -4740,16 +4557,13 @@
       "userIdCopied": "Kullanıcı kimliği kopyalandı",
       "userIdCopyFailed": "Kullanıcı kimliği kopyalanamadı",
       "emailSuppressionReleased": "E-posta engelleme özelliği yayınlandı",
-      "mainEmailUpdated": "Birincil e-posta güncellendi",
       "ssoProviderRemoved": "TOA sağlayıcısı kaldırıldı"
     },
     "auth": {
       "emptyEmail": "E-posta yok",
       "delivery": {
         "title": "Teslimat e-postası",
-        "description": "Kampanya, bildirim ve hesap postası seçilen birincil e-postayı kullanır.",
-        "changePlaceholder": "Doğrulanmış bir e-posta seçin",
-        "changeHelp": "Bu seçimi değiştirmek anında kaydedilir."
+        "description": "Kampanya, bildirim ve hesap postası seçilen birincil e-postayı kullanır."
       },
       "providers": {
         "title": "Bağlı SSO sağlayıcıları",
@@ -4758,7 +4572,6 @@
         "remove": "TOA sağlayıcısını kaldır"
       },
       "sources": {
-        "current": "Mevcut e-posta",
         "emailCode": "E-postayla oturum açma"
       },
       "ban": {
@@ -4793,7 +4606,6 @@
         "noChanges": "Kaydedilecek değişiklik yok"
       },
       "validation": {
-        "invalidUrl": "Geçersiz URL biçimi",
         "invalidEmail": "Geçersiz e-posta biçimi",
         "invalidHexColor": "Geçersiz onaltılı renk biçimi",
         "invalidGoogleAnalyticsId": "Geçersiz Google Analytics Kimliği biçimi"
@@ -5102,14 +4914,12 @@
   },
   "formSuccessPage": {
     "metadata": {
-      "fallbackTitle": "Form gönderildi",
       "title": "{formTitle} - Gönderildi"
     },
     "title": "Teşekkür ederim"
   },
   "formPasswordPage": {
     "metadata": {
-      "fallbackTitle": "Form Erişimi",
       "description": "Bu forma erişmek için şifreyi girin"
     },
     "title": "Şifre Korumalı",
@@ -5121,7 +4931,6 @@
   },
   "formDashboardPage": {
     "metadata": {
-      "fallbackTitle": "Form Kontrol Paneli",
       "title": "{formTitle} - Kontrol Paneli",
       "description": "Form gönderme istatistikleri ve analizleri"
     },
@@ -5131,7 +4940,28 @@
     "stats": {
       "total": "Toplam"
     },
-    "fieldStatistics": "Saha İstatistikleri"
+    "fieldStatistics": "Saha İstatistikleri",
+    "charts": {
+      "donut": "Halka",
+      "pie": "Pasta",
+      "bar-horizontal": "Yatay çubuklar",
+      "bar-vertical": "Dikey çubuklar",
+      "radar": "Radar",
+      "table": "Tablo",
+      "area": "Alan",
+      "line": "Çizgi",
+      "histogram": "Histogram",
+      "noResponses": "Henüz yanıt yok",
+      "emptyValue": "(boş)",
+      "min": "En düşük",
+      "max": "En yüksek",
+      "avg": "Ortalama",
+      "count": "Sayı",
+      "date": "Tarih",
+      "value": "Değer",
+      "range": "Aralık",
+      "chartType": "Grafik türü"
+    }
   },
   "embeddedForm": {
     "states": {
@@ -5182,10 +5012,7 @@
       "locationMode": "Konum modu",
       "ticketUrl": "Bilet URL'si",
       "streamUrl": "Akış URL'si",
-      "externalUrl": "Harici URL",
-      "participants": "Katılımcılar",
-      "textCredits": "Metin kredisi",
-      "textCreditsDescription": "Hat başına bir kredi. Rol Kullan: Bir role ihtiyaç duyulduğunda ad verin."
+      "externalUrl": "Harici URL"
     },
     "locationModes": {
       "mapPlace": "mekan",
@@ -5198,7 +5025,6 @@
       "tickets": "Biletler",
       "stream": "Aktarım",
       "link": "Bağlantı",
-      "participants": "Katılımcılar",
       "empty": "Hiçbir etkinlik bulunamadı.",
       "date": "Tarih",
       "credits": "Kredi"
@@ -5215,152 +5041,14 @@
       "deleteMessage": "Bu etkinlik türü yalnızca onu kullanan hiçbir etkinlik olmadığında silinebilir."
     }
   },
-  "tools": {
-    "portadj": {
-      "metadataTitle": "PortaDJ",
-      "metadataDescription": "İki DJ deck’i ile yerel ses dosyalarını tarayıcınızda çalın ve miksleyin."
-    },
-    "youtubeAudio": {
-      "title": "YouTube Sesi",
-      "urlLabel": "Video bağlantısı",
-      "urlPlaceholder": "https://…",
-      "resolve": "Sesi yükle",
-      "resolving": "Ses yükleniyor",
-      "clear": "Kaynağı temizle",
-      "metadataTitle": "YouTube Sesi",
-      "metadataDescription": "Kimliği doğrulanmış bir YouTube kaynağındaki sesi tarayıcınızda dönüştürün.",
-      "errors": {
-        "INTERNAL_ERROR": "Ses kaynağı yüklenemedi. Tekrar deneyin.",
-        "INVALID_REQUEST": "Geçerli bir YouTube video URL'si girin.",
-        "INVALID_UPSTREAM_RESPONSE": "YouTube beklenmeyen bir ses kaynağı döndürdü. Başka bir video deneyin.",
-        "REQUEST_ABORTED": "İstek iptal edildi.",
-        "SOURCE_EXPIRED": "Bu ses kaynağının süresi doldu. URL'yi yeniden yükleyin.",
-        "SOURCE_NOT_FOUND": "Bu ses kaynağı artık kullanılamıyor. URL'yi yeniden yükleyin.",
-        "UNAUTHORIZED": "Bu aracı kullanmak için yeniden oturum açın.",
-        "UNSUPPORTED_VIDEO": "Bu video, desteklenen ve sonlu süreli bir ses kaynağı sunmuyor.",
-        "UPSTREAM_FAILURE": "YouTube sesi şu anda yüklenemiyor. Tekrar deneyin."
-      }
-    },
-    "transcode": {
-      "title": "Ses Dönüştürücü",
-      "targetIdle": "Bekliyor",
-      "targetChecking": "Kontrol ediliyor",
-      "targetReady": "Hazır",
-      "targetError": "Kullanılamıyor",
-      "dropTitle": "Ses dosyalarını bırakın veya seçin",
-      "dropDescription": "En fazla 10 dosya · Klasör yok · Bu cihazda işlendi",
-      "chooseFiles": "Ses dosyalarını seçin",
-      "supportedFormatsLabel": "Desteklenen formatlar",
-      "supportedFormats": "Desteklenenler: CAF, AIFF/AIFC, WAV, FLAC, MP3, AAC/M4A, Ogg/Opus ve MP4, MOV, MKV/WebM veya TS'de ses. Dosya başına kontrol edildi.",
-      "filesSelected": "Dosyalar",
-      "outputSettings": "Çıkış ayarları",
-      "outputSettingsHelper": "Kanallar değişmeden kalır. Otomatik, dosya başına uyumlu bir hız seçer.",
-      "processingDetails": "İşleme ayrıntıları",
-      "processingDetailsDescription": "Dengeli yeniden örnekleme. Tamsayı çıktısı titrektir. Büyük WAV dosyaları RF64 kullanır.",
-      "format": "Biçim",
-      "sampleRate": "Örnekleme oranı",
-      "bitrate": "Bit hızı",
-      "bitDepth": "Bit derinliği",
-      "bitDepthContainerEffective": "{containerBits}-bit kapsayıcı / {effectiveBits}-bit etkili",
-      "codec": "Kodlayıcı",
-      "sampleFormat": "Örnek format",
-      "float": "Batmadan yüzmek",
-      "integer": "Tamsayı PCM",
-      "constantBitrate": "CBR",
-      "variableBitrate": "VBR",
-      "sourcePcmFloat": "{bitDepth}-bit kayan nokta",
-      "sourcePcmInteger": "{bitDepth}-bit tamsayı",
-      "sourcePcmSignedInteger": "{bitDepth}-bit işaretli tamsayı",
-      "sourcePcmUnsignedInteger": "{bitDepth}-bit işaretsiz tamsayı",
-      "automatic": "Otomatik",
-      "preserveSource": "Kaynağı koru",
-      "unavailable": "Kullanılamıyor",
-      "sampleRateAvailableFor": "{supported, number} adet {total, number} dosya",
-      "sampleRateResetAutomatic": "Önceki örnekleme hızı bu çıkış ayarları için geçerli değil. Örnekleme hızı Otomatik olarak değiştirildi.",
-      "unknownAudio": "Ses",
-      "channelCount": "{count, plural, one {# kanal} other {# kanal}}",
-      "queue": "Dönüşüm kuyruğu",
-      "convert": "Dönüştürmek",
-      "cancelAll": "Tümünü iptal et",
-      "clear": "Temizlemek",
-      "download": "Dönüştürülmüşü kaydet",
-      "downloadSource": "Özgünü kaydet",
-      "sourceDownloadExpired": "Kaynağın süresi doldu veya kaynak kullanılamıyor. YouTube URL’sini yeniden yükleyin.",
-      "sourceDownloadFailed": "Orijinal indirilemedi. Bağlantınızı kontrol edip kaynağı yeniden yükleyin.",
-      "retry": "Yeniden dene",
-      "cancel": "İptal",
-      "remove": "Kaldır",
-      "sourceValue": "Kaynak ({value})",
-      "mono": "Mono",
-      "stereo": "Stereo",
-      "targetWaitingForFiles": "Seçilen çıkış hedefini kontrol etmek için desteklenen bir ses dosyası ekleyin.",
-      "targetCheckingMessage": "Bu tarayıcının seçilen çıktı hedefini destekleyip desteklemediği kontrol ediliyor.",
-      "targetReadyMessage": "Seçilen çıktı hedefi bu tarayıcıda mevcuttur.",
-      "targetAvailability": "{available, number} dosyaları dönüştürme için kullanılabilir; {unavailable, number} bu ayarlarla kullanılamaz durumda kalır.",
-      "engineLoading": "{asset} ses motoru yükleniyor.",
-      "engineVerifying": "{asset} ses motoru doğrulanıyor.",
-      "engineLoadFailed": "{asset} ses motoru yüklenemedi.",
-      "capacityExceeded": "{count, number} dosyaları eklenmedi. Sırada en fazla {max, number} dosya bulunabilir.",
-      "statusInspectionQueued": "Muayene bekleniyor",
-      "statusInspecting": "Teftiş",
-      "statusReady": "Hazır",
-      "statusQueued": "Sıraya alındı",
-      "statusQueuedAvailability": "{converting, number} dosyaları dönüştürme için sıraya alındı; {unavailable, number} hâlâ kullanılamıyor.",
-      "statusConverting": "Dönüştürme",
-      "statusConvertingAvailability": "{converting, number} dosyaları dönüştürülüyor; {unavailable, number} hâlâ kullanılamıyor.",
-      "statusComplete": "Tamamlamak",
-      "statusCompleteAvailability": "{converted, number} dosyaları dönüştürüldü; {unavailable, number} hâlâ kullanılamıyor.",
-      "statusBatchResult": "Çalıştırma tamamlandı: {eligible, number} uygun, {attempted, number} denendi, {succeeded, number} başarılı oldu, {failed, number} başarısız oldu, {unavailable, number} kullanılamıyor.",
-      "statusUnsupported": "Desteklenmiyor",
-      "statusError": "Hata",
-      "statusCancelled": "İptal edildi",
-      "unsupportedInput": "Bu dosya desteklenen bir ses girişi değil.",
-      "unsupportedCodec": "Bu tarayıcı bu dosyadaki ses codec bileşeninin kodunu çözemiyor.",
-      "inspectionFailed": "Dosya incelenemedi. Tekrar deneyin.",
-      "inspectionInconclusive": "Tarayıcı bu sesi güvenli okuma sınırı dahilinde tanımlayamadı. Başka bir dosya veya format deneyin.",
-      "outputUnsupported": "Seçilen çıktı ayarları bu tarayıcıda desteklenmiyor.",
-      "outputProbeFailed": "Çıkış desteği kontrol edilemedi. Tekrar deneyin.",
-      "outputEngineUnavailable": "{preset} için çalışma zamanı motoru başlatılamadı. Ağı veya varlık politikasını kontrol edin ve yeniden deneyin.",
-      "outputChannelsUnsupported": "Bu çıktı, {minimum, number}–{maximum, number} kaynak kanallarını destekler, ancak bu dosyada {actual, number} bulunur. Kanallar korunur ve karıştırılmaz.",
-      "sourceInspectionMissing": "Kaynak kanal sayısı veya örnekleme hızı belirlenemedi. Okunabilir ses meta verilerine sahip bir dosya seçin.",
-      "outputConfigurationUnavailable": "Seçilen format ve kodlama ayarları kullanılabilir bir çıktı konfigürasyonu oluşturmuyor.",
-      "preserveSourceRateUnsupported": "Kaynağı koru, bu çıktı için {sourceRate} kullanamaz. İzin verilen ücretler: {allowed}.",
-      "sourceResamplingRateUnsupported": "Bu {sourceRate} kaynağı yeniden örnekleme aralığının dışında ({minimum}–{maximum}). Yalnızca uyumlu bir çıkışa geçebilir.",
-      "targetResamplingRateUnsupported": "Seçilen {targetRate} hedefi yeniden örnekleme aralığının dışında ({minimum}–{maximum}).",
-      "automaticRateUnavailable": "Otomatik, bu {sourceRate} kaynağı için geçerli bir ücret seçemiyor. İzin verilen çıktı oranları: {allowed}.",
-      "presetRateUnsupported": "Bu çıktı {targetRate}'yi desteklemiyor. İzin verilen ücretler: {allowed}.",
-      "conversionFailed": "Ses dönüştürme başarısız oldu.",
-      "conversionStorageLimitExceeded": "Bu tarayıcı beklenen çıktıyı yerel geçici depolamada tutamaz. Daha küçük veya sıkıştırılmış bir format seçin veya büyük yerel çıktıları destekleyen bir tarayıcıda yeniden deneyin.",
-      "conversionTargetSizeLimitExceeded": "Seçilen çıktı formatı bu kadar büyük bir dosyayı temsil edemez. Başka bir format seçin veya örnekleme hızını, bit derinliğini veya kanal sayısını azaltın.",
-      "cancelledMessage": "Dönüşüm iptal edildi.",
-      "sourceSummary": "{container} · {sampleRate} · {channels} · {bitDepth}",
-      "outputSummary": "{preset} · {size}",
-      "progressLabel": "{phase} · {progress, number}%",
-      "phasePrepare": "Hazırlanıyor",
-      "phaseDecode": "Kod çözme",
-      "phaseEncode": "Kodlama",
-      "phaseFinalize": "Sonlandırılıyor",
-      "bytes": "{count, number} bayt",
-      "storageOpfs": "Özel tarayıcı depolama alanı",
-      "storageMemory": "Tarayıcı belleği",
-      "metadataTitle": "Ses Dönüştürücü",
-      "metadataDescription": "Tarayıcınızda sesi dönüştürün. Dosyalar asla cihazınızdan ayrılmaz.",
-      "notices": "Açık kaynak lisansları"
-    },
-    "hwp": {
-      "title": "HWP düzenleyici",
-      "metadataDescription": "HWP ve HWPX belgelerini tarayıcınızda açın, düzenleyin ve kaydedin.",
-      "description": "HWP veya HWPX dosyalarını açmak ve kaydetmek için düzenleyicinin Dosya menüsünü kullanın. Belgeler yüklenmeden bu cihazda işlenir.",
-      "loading": "Düzenleyici yükleniyor…",
-      "error": "Düzenleyici yüklenemedi. Tekrar deneyin.",
-      "retry": "Tekrar dene",
-      "metadataTitle": "HWP düzenleyici"
-    }
-  },
   "myMetadata": {
     "description": "{siteName} üzerindeki hesabınız için {title} sayfası."
   },
   "fileManager": {
+    "pagination": {
+      "end": "Sonuçların sonu"
+    },
+    "selectionUnavailableDescription": "Bu dosya eklenemez. Önizlemek için Enter tuşuna basın.",
     "title": "Dosyalar",
     "description": "Dosyaları site genelinde yükleyin, düzenleyin, inceleyin ve yeniden kullanın.",
     "root": "Dosyalar",
@@ -5398,7 +5086,7 @@
     "sortBy": "{name} ölçütüne göre sırala",
     "selectedCount": "{count, plural, one {# öğe seçildi} other {# öğe seçildi}}",
     "itemCount": "{count, plural, one {# öğe} other {# öğe}}",
-    "searchResultCount": "{count} sonuç bulundu",
+    "searchResultCount": "{count, plural, one {# sonuç bulundu} other {# sonuç bulundu}}",
     "uploadProgress": "%{percentage} yükleniyor",
     "types": {
       "all": "Tüm türler",
@@ -5484,9 +5172,7 @@
       "move-files": {
         "title": "Dosyaları taşı"
       },
-      "targetFolderId": "Hedef klasör kimliği",
       "extensionSeparate": ".{extension} uzantısı ayrı tutulur.",
-      "rootWhenEmpty": "Köke gitmek için boş bırakın.",
       "delete": {
         "title": "Sil",
         "folder": "Bu klasör ve altındaki kullanılmayan tüm dosyalar silinsin mi?",
@@ -5496,14 +5182,26 @@
         "byDomain": "Alan adına göre: {summary}",
         "more": "ve {count} tane daha. Tam listeyi incelemek için dosya ayrıntılarını açın."
       }
+    },
+    "viewSettings": {
+      "title": "Görünüm ayarları",
+      "iconSize": "Simge boyutu",
+      "spacing": "Öğe aralığı",
+      "columns": "Sütunlar",
+      "auto": "Otomatik",
+      "small": "Küçük",
+      "medium": "Orta",
+      "large": "Büyük",
+      "compact": "Sıkışık",
+      "standard": "Standart",
+      "comfortable": "Geniş",
+      "reset": "Görünümü sıfırla"
     }
   },
   "fileDownloadAccess": {
     "editor": {
       "sectionTitle": "İndirme erişimi",
-      "sectionDescription": "Orijinal dosyayı kimin indirebileceğini kontrol edin.",
       "loading": "İndirme erişimi yükleniyor…",
-      "audienceLabel": "Kitleyi indir",
       "audiences": {
         "disabled": {
           "label": "Engelli",
@@ -5522,15 +5220,10 @@
           "description": "Bu dosyayı yalnızca seçilen hedef kitlelerdeki kullanıcılar indirebilir."
         }
       },
-      "segmentsLabel": "Kitleler",
-      "segmentsDescription": "Mevcut bir veya daha fazla Kitle segmentini seçin.",
-      "segmentsPlaceholder": "Kitleleri seçin",
       "segmentsLoadError": "Politika yüklendi ancak kitleler yüklenemedi.",
       "segmentsEmpty": "Hiçbir Kitle segmenti mevcut değil.",
       "restrictedWithoutAudience": "Bu kısıtlı politikanın Hedef Kitlesi yok. Siz en az bir Hedef Kitle seçene kadar herkesin indirme işlemi reddedilir.",
-      "segmentRequiresSubscription": "{name} (bülten aboneliği gereklidir)",
       "additionalSelected": "{count} tane daha seçildi",
-      "loadMoreSegments": "Daha fazla kitle yükle",
       "loadError": "İndirme erişimi yüklenemedi.",
       "saveError": "İndirme erişimi kaydedilemedi.",
       "fileRequired": "İndirme erişimini yapılandırmadan önce dosyayı kaydedin."
@@ -5552,5 +5245,29 @@
     "empty": "Diyagram kaynağını girin",
     "invalid": "Geçersiz diyagram",
     "loading": "Oluşturuluyor…"
+  },
+  "errorPage": {
+    "titles": {
+      "400": "Geçersiz istek",
+      "401": "Oturum açmanız gerekiyor",
+      "403": "Erişim reddedildi",
+      "404": "Sayfa bulunamadı",
+      "408": "İstek zaman aşımına uğradı",
+      "409": "İstek mevcut durumla çakışıyor",
+      "410": "Bu sayfa artık kullanılamıyor",
+      "413": "İstek çok büyük",
+      "422": "İstek işlenemiyor",
+      "429": "Çok fazla istek",
+      "500": "Bir şeyler ters gitti",
+      "501": "Bu istek desteklenmiyor",
+      "502": "Bağlı bir hizmette hata oluştu",
+      "503": "Hizmet geçici olarak kullanılamıyor",
+      "504": "Hizmet yanıtı zaman aşımına uğradı"
+    },
+    "actions": {
+      "goHome": "Eve git",
+      "tryAgain": "Tekrar dene",
+      "login": "Girişe Geri Dön"
+    }
   }
 }

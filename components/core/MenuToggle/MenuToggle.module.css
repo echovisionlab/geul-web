@@ -1,0 +1,10 @@
+/* Geometry, glyph size and states are owned by the Core IconButton chrome size. */
+.root {
+  display: contents;
+}
+
+@media (width >= $mantine-breakpoint-sm) {
+  .root[data-visibility='mobile-only'] {
+    display: none;
+  }
+}

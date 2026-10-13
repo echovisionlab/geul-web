@@ -3,7 +3,7 @@
  * WebUI에서 생성하고 DB/JSON으로 저장 가능
  */
 
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 import { createFilterSchema, createSimpleListInputSchema, createSortSchema } from '../trpc/schema';
 import { formFilterFields, formSortFields } from './table-spec';
 
@@ -173,8 +173,8 @@ const fieldValidatorZod = z.object({
   id: z.string(),
   name: z.string(),
   predicate: z.string(),
-  value: z.unknown().optional(),
-  message: z.string().optional(),
+  value: z.optional(z.unknown()),
+  message: z.optional(z.string()),
 });
 
 const formFieldValidationZod = z.object({
@@ -182,9 +182,9 @@ const formFieldValidationZod = z.object({
 });
 
 // Condition schemas (defined before field schemas to allow field.condition)
-const formConditionSchemaZod: z.ZodType<FormConditionSchema> = z.object({
-  fieldId: z.string().optional(),
-  field: z.string().optional(),
+const formConditionSchemaZod: z.ZodMiniType<FormConditionSchema> = z.object({
+  fieldId: z.optional(z.string()),
+  field: z.optional(z.string()),
   operator: z.enum([
     'eq',
     'neq',
@@ -199,10 +199,10 @@ const formConditionSchemaZod: z.ZodType<FormConditionSchema> = z.object({
     'containsAll',
     'exists',
   ]),
-  value: z.union([z.string(), z.number(), z.boolean(), z.array(z.string()), z.array(z.number())]).optional(),
+  value: z.optional(z.union([z.string(), z.number(), z.boolean(), z.array(z.string()), z.array(z.number())])),
 });
 
-const formConditionGroupZod: z.ZodType<FormConditionGroup> = z.lazy(() =>
+const formConditionGroupZod: z.ZodMiniType<FormConditionGroup> = z.lazy(() =>
   z.object({
     logic: z.enum(['and', 'or']),
     conditions: z.array(z.union([formConditionSchemaZod, formConditionGroupZod])),
@@ -214,56 +214,56 @@ const formStepConditionZod = z.union([formConditionSchemaZod, formConditionGroup
 // Field schemas
 const formFieldSchemaBaseZod = z.object({
   id: z.string(),
-  key: z.string().optional(),
-  name: z.string().optional(),
-  label: z.string().optional(),
-  description: z.string().optional(),
-  placeholder: z.string().optional(),
-  defaultValue: z.unknown().optional(),
-  validation: formFieldValidationZod.optional(),
-  condition: formStepConditionZod.optional(),
+  key: z.optional(z.string()),
+  name: z.optional(z.string()),
+  label: z.optional(z.string()),
+  description: z.optional(z.string()),
+  placeholder: z.optional(z.string()),
+  defaultValue: z.optional(z.unknown()),
+  validation: z.optional(formFieldValidationZod),
+  condition: z.optional(formStepConditionZod),
 });
 
-const optionZod: z.ZodType<FormFieldOption> = z.object({
+const optionZod: z.ZodMiniType<FormFieldOption> = z.object({
   id: z.string(),
   label: z.string(),
   value: z.string(),
 });
 
 const formFieldSchemaZod = z.union([
-  formFieldSchemaBaseZod.extend({ type: z.enum(['text', 'email', 'textarea']) }),
-  formFieldSchemaBaseZod.extend({
+  z.extend(formFieldSchemaBaseZod, { type: z.enum(['text', 'email', 'textarea']) }),
+  z.extend(formFieldSchemaBaseZod, {
     type: z.literal('tel'),
-    defaultCountry: z.string().optional(),
-    showValidationIcon: z.boolean().optional(),
+    defaultCountry: z.optional(z.string()),
+    showValidationIcon: z.optional(z.boolean()),
   }),
-  formFieldSchemaBaseZod.extend({
+  z.extend(formFieldSchemaBaseZod, {
     type: z.literal('number'),
-    numberType: z.enum(['integer', 'float']).optional(),
-    decimalPlaces: z.number().int().min(0).max(10).optional(),
+    numberType: z.optional(z.enum(['integer', 'float'])),
+    decimalPlaces: z.optional(z.number().check(z.int(), z.gte(0), z.lte(10))),
   }),
-  formFieldSchemaBaseZod.extend({ type: z.literal('select'), options: z.array(optionZod) }),
-  formFieldSchemaBaseZod.extend({ type: z.literal('multiselect'), options: z.array(optionZod) }),
-  formFieldSchemaBaseZod.extend({
+  z.extend(formFieldSchemaBaseZod, { type: z.literal('select'), options: z.array(optionZod) }),
+  z.extend(formFieldSchemaBaseZod, { type: z.literal('multiselect'), options: z.array(optionZod) }),
+  z.extend(formFieldSchemaBaseZod, {
     type: z.literal('checkbox'),
-    checkboxLabel: z.string().optional(),
+    checkboxLabel: z.optional(z.string()),
   }),
-  formFieldSchemaBaseZod.extend({ type: z.literal('switch') }),
-  formFieldSchemaBaseZod.extend({
+  z.extend(formFieldSchemaBaseZod, { type: z.literal('switch') }),
+  z.extend(formFieldSchemaBaseZod, {
     type: z.literal('date'),
-    minDate: z.string().optional(),
-    maxDate: z.string().optional(),
-    timezone: z.string().optional(),
+    minDate: z.optional(z.string()),
+    maxDate: z.optional(z.string()),
+    timezone: z.optional(z.string()),
   }),
 ]);
 
 const formStepSchemaZod = z.object({
   id: z.string(),
-  title: z.string().optional(),
-  showTitle: z.boolean().optional(),
-  description: z.string().optional(),
-  fields: z.array(formFieldSchemaZod).optional(),
-  condition: formStepConditionZod.optional(),
+  title: z.optional(z.string()),
+  showTitle: z.optional(z.boolean()),
+  description: z.optional(z.string()),
+  fields: z.optional(z.array(formFieldSchemaZod)),
+  condition: z.optional(formStepConditionZod),
 });
 
 export const formSchemaZod = z.object({

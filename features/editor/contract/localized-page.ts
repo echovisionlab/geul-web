@@ -22,6 +22,9 @@ import { materializeLocalizedRichTextTree, type LocalizedRichTextBlock } from '.
 
 type JsonRecord = Record<string, unknown>;
 
+/** Section maximum widths stored by the wire contract (`PageSectionSettings.MaxWidth`). */
+export type PageSectionMaxWidth = 'full' | 'container' | 'narrow';
+
 export interface LocalizedPageColumn {
   id: string;
   ratio: number;
@@ -37,7 +40,7 @@ export interface LocalizedPageSection {
     paddingBottom?: string;
     paddingLeft?: string;
     paddingRight?: string;
-    maxWidth?: 'full' | 'container' | 'narrow';
+    maxWidth?: PageSectionMaxWidth;
   };
   props: Record<string, unknown>;
   richText: readonly LocalizedRichTextBlock[] | null;

@@ -61,19 +61,6 @@ vi.mock('@tanstack/react-query', async () => {
   };
 });
 
-vi.mock('@mantine/core', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@mantine/core')>();
-  const React = await import('react');
-  return {
-    ...actual,
-    Box: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    Group: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    SimpleGrid: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    Stack: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    Text: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
-  };
-});
-
 vi.mock('@mantine/hooks', async () => {
   const React = await import('react');
   return {
@@ -84,7 +71,7 @@ vi.mock('@mantine/hooks', async () => {
   };
 });
 
-vi.mock('@mantine/notifications', () => ({ notifications: { show: mocks.notificationsShow } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: mocks.notificationsShow } }));
 
 vi.mock('@tabler/icons-react', () => ({
   IconCalendar: () => null,

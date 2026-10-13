@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { ColorInput } from './ColorInput';
+import { semanticThemes } from '../design-tokens';
 
 const meta = {
   title: 'Core/Input/ColorInput',
@@ -10,7 +11,6 @@ const meta = {
     label: 'Accent color',
     placeholder: 'Choose a color',
     format: 'hex',
-    w: 360,
   },
 } satisfies Meta<typeof ColorInput>;
 
@@ -27,3 +27,5 @@ export const Error: Story = { args: { error: 'Enter a valid color' } };
 export const Disabled: Story = {
   args: { defaultValue: '#228be6', disabled: true },
 };
+
+export const Rgba: Story = { args: { defaultValue: semanticThemes.light['action-primary'], format: 'rgba' } };

@@ -1,6 +1,7 @@
 {
   "common": {
     "actions": {
+      "move": "移动",
       "save": "保存",
       "saveChanges": "保存更改",
       "create": "创建",
@@ -59,7 +60,7 @@
       "reply": "回复",
       "insertVariable": "插入变量",
       "acceptAll": "全部接受",
-      "rejectNonEssential": "拒绝非必要项",
+      "rejectNonEssential": "拒绝",
       "savePreferences": "保存偏好设置",
       "import": "导入",
       "export": "导出",
@@ -127,10 +128,7 @@
       "file": "文件",
       "bio": "简介",
       "realName": "真实姓名",
-      "countryCode": "国家代码",
       "slug": "短标识",
-      "slugAutoModeEnabled": "与标题自动同步（单击以禁用）",
-      "slugAutoModeManual": "手动模式（点击启用自动同步）",
       "submissions": "提交数",
       "public": "公开",
       "location": "位置",
@@ -162,7 +160,6 @@
       "logoLight": "浅色标志",
       "logoDark": "深色标志",
       "joined": "加入日期",
-      "subscribed": "订阅日期",
       "featured": "精选",
       "order": "顺序",
       "sortOrder": "排序顺序",
@@ -177,7 +174,6 @@
       "minutes": "分钟",
       "seconds": "秒",
       "time": "时间",
-      "generationInfo": "生成信息",
       "body": "正文",
       "content": "内容",
       "bodyPreview": "正文预览",
@@ -280,6 +276,7 @@
     },
     "messages": {
       "noUsersFound": "未找到用户",
+      "noAuthorsFound": "未找到作者。",
       "noVersionsFound": "未找到版本",
       "typeAtLeast2Characters": "请至少输入 2 个字符",
       "itemCreated": "{item} 已创建",
@@ -295,24 +292,22 @@
       "deleteItemConfirm": "您确定要删除此 {item} 吗？此操作无法撤消",
       "deleteNamedItemConfirm": "您确定要删除“{name}”吗？此操作无法撤消",
       "confirmDeleteSelectedCount": "您确定要删除 {count} 个已选项目吗？此操作无法撤消",
-      "deleteDraftVersionConfirm": "您确定要删除此草稿版本吗",
       "confirmDeleteNamedRich": "您确定要删除 <strong>{name}</strong> 吗",
-      "activeCount": "{count} 个活跃项",
       "effectiveFromDate": "自 {date} 起生效",
       "noUpdateRecorded": "未记录更新",
-      "exportedEmails": "已导出 {count, plural, one {# 封邮件} other {# 封邮件}}",
       "formSubmittedSuccessfully": "您的回复已成功提交",
       "userDate": "{user} · {date}",
       "scheduleActivationTitle": "安排激活",
       "scheduleActivationDescription": "选择此版本何时生效。届时将向所有活跃账户发送通知邮件。",
       "scheduleActivationNotice": "计划将向所有活跃账户发送带预览链接的通知邮件。",
-      "translationDetailUnavailable": "无法加载详细翻译数据。您仍然可以编辑当前公开翻译",
       "invalidConfirmationLinkFromEmail": "确认链接无效。请使用确认邮件中的链接",
       "noPostsFound": "未找到文章",
       "noWorksFound": "未找到作品",
-      "urlCopiedToClipboard": "URL 已复制到剪贴板",
       "failedToLoad": "无法加载数据。",
-      "relatedItemsWillBeUnlinked": "将解除 {count} 个相关项目的关联。"
+      "relatedItemsWillBeUnlinked": "将解除 {count} 个相关项目的关联。",
+      "noArtistsFound": "没有找到艺术家",
+      "noLabelsFound": "没有找到标签",
+      "noReleasesFound": "未找到任何版本"
     },
     "notifications": {
       "categoryCreated": "分类已创建",
@@ -372,8 +367,6 @@
       "testEmail": "测试@email.com",
       "testEmailExample": "test@example.com",
       "noReplyEmail": "noreply@example.com",
-      "translationLiveRowMissing": "此语言目前尚无公开翻译。保存在这里会立即创建一个",
-      "translationBodyPreviewUnavailable": "正文预览不可用",
       "selectDateAndTime": "选择日期和时间",
       "streetAddress": "街道地址",
       "regionSubdivision": "州/省"
@@ -408,12 +401,11 @@
       "generating": "生成...",
       "true": "真的",
       "false": "错误的",
-      "loading": "加载中..."
+      "loading": "加载中...",
+      "toBeAnnounced": "待定"
     },
     "roles": {
       "admin": "行政",
-      "editor": "编辑",
-      "viewer": "观众",
       "author": "作者",
       "user": "用户"
     },
@@ -445,6 +437,11 @@
       "unsubscribed": "已取消订阅",
       "subscribed": "已订阅",
       "onboardingPending": "尚未完成引导"
+    },
+    "motion": {
+      "pause": "暂停动画",
+      "resume": "继续动画",
+      "readAllInformation": "阅读场景的全部信息"
     }
   },
   "shell": {
@@ -931,7 +928,6 @@
     },
     "mapThemes": {
       "empty": "未找到地图主题",
-      "notFound": "未找到地图主题。",
       "loadFailed": "无法加载地图主题。",
       "defaultDisabled": "这已经是默认主题。",
       "deleteDisabled": {
@@ -939,9 +935,7 @@
         "last": "无法删除最后一个地图主题。"
       },
       "reloadRequired": {
-        "title": "需要刷新",
-        "message": "此主题已从较新的修订版本保存。继续编辑前请刷新。",
-        "action": "刷新"
+        "title": "需要刷新"
       },
       "variants": {
         "light": "光",
@@ -972,8 +966,7 @@
       },
       "editor": {
         "notifications": {
-          "defaultSet": "主题设置为默认",
-          "variantRequired": "至少需要一种变体（浅色或深色）"
+          "defaultSet": "主题设置为默认"
         },
         "controls": {
           "map": {
@@ -1310,7 +1303,6 @@
     },
     "verification": {
       "loading": "Loading verification form...",
-      "redirecting": "Redirecting...",
       "startOver": "Start over",
       "errors": {
         "flowNotFound": "Verification flow not found or expired",
@@ -1373,21 +1365,14 @@
   "featuredImage": {
     "label": "特色图片",
     "alt": "特色图片",
-    "hint": "点击图片以替换",
     "cropTitle": "裁剪特色图片",
-    "empty": {
-      "editable": "拖放或点击上传 ({ratio})",
-      "readOnly": "没有图片"
-    },
     "errors": {
       "fileRejected": "文件被拒绝",
       "fileTooLarge": "文件过大。最大尺寸：{maxSize}",
       "invalidFileType": "无效的文件类型"
     },
     "actions": {
-      "changeAria": "更改特色图片",
-      "removeAria": "移除特色图片",
-      "remove": "移除图片"
+      "removeAria": "移除特色图片"
     }
   },
   "artistPage": {
@@ -1495,7 +1480,6 @@
       "slug": "艺术家蛞蝓",
       "name": "艺名/艺人姓名",
       "realName": "法定名称（可选）",
-      "countryCode": "例如，美国、韩国、日本",
       "labels": "选择厂牌...",
       "parentArtist": "选择上级艺术家..."
     },
@@ -1518,15 +1502,7 @@
     },
     "placeholders": {
       "name": "厂牌名称",
-      "countryCode": "例如，德国、美国、韩国",
       "parentLabel": "选择上级厂牌（可选）"
-    }
-  },
-  "workCollaborators": {
-    "empty": "暂无协作者",
-    "notifications": {
-      "added": "协作者已添加",
-      "removed": "协作者已移除"
     }
   },
   "comments": {
@@ -1585,17 +1561,6 @@
     "credits": {
       "other": "其他"
     },
-    "music": {
-      "released": "发行：{value}",
-      "spotify": "Spotify",
-      "bandcamp": "Bandcamp",
-      "soundcloud": "SoundCloud",
-      "youtube": "YouTube",
-      "openSpotify": "在 Spotify 打开",
-      "openBandcamp": "在 Bandcamp 打开",
-      "openSoundcloud": "在 SoundCloud 打开",
-      "openYoutube": "在 YouTube 打开"
-    },
     "portfolio": {
       "tech": "技术"
     },
@@ -1643,7 +1608,6 @@
     }
   },
   "cookieConsentCommon": {
-    "essentialLabel": "必要 Cookie（始终启用）",
     "analyticsLabel": "分析 Cookie（Google Analytics）"
   },
   "nicknameField": {
@@ -1690,7 +1654,6 @@
       "failedToRevokeSession": "撤销会话失败",
       "failedToRevokeSessions": "撤销会话失败",
       "failedToRequestDeletion": "请求删除帐户失败",
-      "cannotUnlinkMessage": "您必须至少有一种身份验证方法",
       "connectedMessage": "{provider} 账户已成功连接",
       "disconnectedMessage": "{provider} 已断开连接",
       "failedToUpdateMainEmail": "无法更新主邮箱",
@@ -1739,21 +1702,11 @@
     "email": {
       "title": "主邮箱",
       "description": "从已验证的邮箱中选择用于接收通知和账号消息的地址。",
-      "addEmail": "添加邮箱",
       "canonical": "主邮箱",
-      "canonicalCannotRemove": "移除此地址前，请先选择其他主邮箱。",
       "setCanonical": "设为主邮箱",
-      "noEmail": "没有设置电子邮件",
-      "helper": "目前只有一个已验证邮箱可设为主邮箱。",
-      "selectLabel": "主邮箱",
       "changeAction": "更改主邮箱",
       "sources": {
-        "current": "当前主邮箱",
-        "emailCode": "邮箱",
-        "pending": "等待验证"
-      },
-      "messages": {
-        "pendingVerification": "此邮箱已在等待验证。你可以重新发送验证邮件。"
+        "emailCode": "邮箱"
       },
       "mainEmailUpdated": "主邮箱已更新。",
       "canonicalUpdated": "主邮箱已更新。"
@@ -1812,8 +1765,6 @@
       "added": "添加于 {date}",
       "lastMethod": "删除此通行密钥前，请先添加其他登录方式。",
       "removeNamed": "删除通行密钥 {name}",
-      "reauth": "更改通行密钥前请重新登录。",
-      "reauthAction": "重新登录",
       "errors": {
         "load": "无法加载通行密钥。",
         "remove": "无法删除此通行密钥。",
@@ -1834,7 +1785,6 @@
   },
   "seriesDetail": {
     "slug": {
-      "autoDescription": "自动生成的说明",
       "manualDescription": "手动说明"
     },
     "notifications": {
@@ -1870,10 +1820,6 @@
     }
   },
   "works": {
-    "tabs": {
-      "editable": "可编辑"
-    },
-    "emptyEditable": "没有可编辑作品",
     "emptyCredits": "没有署名",
     "columns": {
       "creditedAs": "署名为",
@@ -1995,6 +1941,7 @@
         "patternPlaceholder": "例如，^[A-Z]{3}$",
         "customErrorMessage": "自定义错误消息",
         "optional": "可选",
+        "dragValidator": "拖动验证规则",
         "removeValidator": "删除验证器"
       },
       "fieldTypes": {
@@ -2062,10 +2009,6 @@
       }
     },
     "settings": {
-      "notifications": {
-        "managerAdded": "表单管理员已添加",
-        "managerRemoved": "表单管理员已移除"
-      },
       "urlPublic": {
         "title": "URL 和公开访问",
         "allowPublic": "允许公开 URL 访问",
@@ -2085,13 +2028,7 @@
         "description": "分享仪表板链接，以便在无需管理员权限的情况下查看表单统计"
       },
       "managers": {
-        "adminControls": "管理员控制",
-        "readOnly": "只读",
-        "description": "管理员可以编辑此表单、查看提交并管理分享链接。",
-        "searchPlaceholder": "搜索要添加的用户...",
-        "adminOnly": "只有管理员可以添加或移除管理员",
-        "empty": "尚未分配管理员",
-        "removeManager": "移除管理员 {name}"
+        "description": "管理员可以编辑此表单、查看提交并管理分享链接。"
       },
       "access": {
         "title": "访问控制",
@@ -2120,7 +2057,11 @@
   "dataTable": {
     "aria": {
       "sortBy": "按 {label} 排序",
-      "rowActions": "{label} 的操作"
+      "rowActions": "{label} 的操作",
+      "selectAllRows": "选择所有行",
+      "selectRow": "选择{label}",
+      "resultSummary": "{totalPages, plural, =0 {共{count}个结果} other {共{count}个结果，第{page}页，共{totalPages}页}}",
+      "loadingMessage": "正在加载"
     },
     "sort": {
       "button": "排序",
@@ -2133,7 +2074,9 @@
         "moveUp": "将 {label} 向上移动",
         "moveDown": "向下移动 {label}",
         "toggleDirection": "切换 {label} 的排序方向",
-        "removeSort": "删除 {label} 的排序"
+        "removeSort": "删除 {label} 的排序",
+        "directionAscending": "当前升序",
+        "directionDescending": "当前降序"
       }
     },
     "filter": {
@@ -2148,7 +2091,8 @@
       "drawerTitle": "筛选",
       "aria": {
         "backToFields": "返回筛选字段",
-        "removeFilter": "删除 {label} 的过滤器"
+        "removeFilter": "删除 {label} 的过滤器",
+        "logic": "筛选条件组合方式"
       },
       "operators": {
         "eq": "等于",
@@ -2181,7 +2125,8 @@
       "previousPage": "上一页",
       "nextPage": "下一页",
       "lastPage": "最后一页",
-      "page": "第 {page} 页"
+      "page": "第 {page} 页",
+      "navigation": "页面导航"
     }
   },
   "versionHistory": {
@@ -2193,7 +2138,9 @@
     "restoreTitle": "恢复版本",
     "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
     "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document."
+    "restoreFailed": "Failed to restore the source document.",
+    "loadFailed": "无法加载版本历史记录。",
+    "end": "已加载所有版本。"
   },
   "shareLinks": {
     "title": "分享链接",
@@ -2203,7 +2150,6 @@
     "createError": "创建链接失败",
     "deleteSuccess": "链接已删除",
     "deleteError": "删除链接失败",
-    "invalidUrl": "无效网址",
     "noLinks": "尚未创建链接",
     "showLess": "显示较少",
     "showMore": "显示更多 {count} 个",
@@ -2218,21 +2164,9 @@
     "passwordPlaceholder": "设置分享密码",
     "maximumExpiration": "分享链接的有效期最长为一年。",
     "expirationInvalid": "请选择一年以内的到期时间。",
-    "bypassFormPassword": "绕过表单密码",
-    "bypassFormPasswordDescription": "如果禁用，查看者必须输入表单密码",
-    "bypassAuthentication": "绕过身份验证",
-    "bypassAuthenticationDescription": "若禁用，查看者必须输入表单密码",
-    "bypassRoleChecks": "绕过角色检查",
-    "bypassRoleChecksDescription": "若启用，分享链接会跳过允许的角色限制",
     "policies": {
       "passwordProtected": "密码保护",
-      "noPassword": "无密码",
-      "passwordBypass": "密码绕过",
-      "passwordRequired": "需要密码",
-      "authBypass": "身份验证绕过",
-      "authEnforced": "强制身份验证",
-      "roleBypass": "角色绕过",
-      "roleEnforced": "强制角色"
+      "noPassword": "无密码"
     },
     "expirationBadge": {
       "expired": "已到期",
@@ -2264,7 +2198,9 @@
     "label": "社交链接",
     "addLink": "添加链接",
     "platformPlaceholder": "平台",
-    "valuePlaceholder": "URL 或用户名"
+    "valuePlaceholder": "URL 或用户名",
+    "reorderInstructions": "使用向上和向下箭头键更改此链接的位置。",
+    "positionChanged": "链接已移至{count}个中的第{position}个位置。"
   },
   "termsPage": {
     "active": {
@@ -2424,7 +2360,6 @@
     }
   },
   "releasePage": {
-    "previewTitle": "发行预览",
     "streaming": "流媒体",
     "metadata": {
       "fallbackDescription": "{title}",
@@ -2494,8 +2429,7 @@
         "title": "添加曲目"
       },
       "placeholders": {
-        "title": "曲目标题",
-        "durationSeconds": "例如，240"
+        "title": "曲目标题"
       },
       "deleteConfirm": "确定要删除这首曲目吗？",
       "creditsModal": {
@@ -2517,8 +2451,7 @@
   "contentMetadata": {
     "preview": {
       "page": "页面预览",
-      "post": "文章预览",
-      "work": "作品预览"
+      "post": "文章预览"
     }
   },
   "editorMetadata": {
@@ -2541,8 +2474,6 @@
   "postHeader": {
     "actions": {
       "editPost": "编辑文章",
-      "sharePost": "分享文章",
-      "printPost": "打印文章",
       "exportMarkdown": "将文章导出为 Markdown"
     }
   },
@@ -2551,7 +2482,6 @@
     "intro": "我们使用基本 cookie 进行身份验证和网站操作，并使用可选的分析 cookie 来了解网站使用情况",
     "learnMore": "查看我们的 <privacy>隐私政策</privacy> 和 <terms>服务条款</terms>",
     "actions": {
-      "hidePreferences": "隐藏偏好设置",
       "customize": "自定义"
     }
   },
@@ -2569,7 +2499,6 @@
   },
   "locationSelector": {
     "placeholder": "选择位置..",
-    "clearSelection": "清除所选地点",
     "emptySearch": "搜索地图地点",
     "emptyResults": "没有找到地点"
   },
@@ -2602,9 +2531,6 @@
     "actions": {
       "copyId": "复制 ID",
       "copyUrl": "复制 URL"
-    },
-    "notifications": {
-      "copied": "{label} 已复制"
     }
   },
   "formValidation": {
@@ -2644,7 +2570,7 @@
   },
   "ogImagePreview": {
     "alt": "Open Graph 预览",
-    "empty": "OG 图像尚未生成",
+    "empty": "暂无 OG 图片",
     "actions": {
       "regenerate": "重新生成 OG 图像"
     },
@@ -2768,7 +2694,6 @@
     "scheduleModal": {
       "description": "选择发送此活动的日期和时间",
       "dateLabel": "预定日期和时间",
-      "datePlaceholder": "选择日期和时间",
       "previousMonth": "上个月",
       "nextMonth": "下个月",
       "audience": "受众：{audience}",
@@ -2858,7 +2783,6 @@
       "notFoundMessage": "没有找到类别"
     },
     "seriesSelector": {
-      "searchPlaceholder": "搜索或创建...",
       "states": {
         "empty": "无可用系列",
         "select": "选择系列..",
@@ -2871,14 +2795,12 @@
       },
       "notifications": {
         "assigned": "分配给系列的文章",
-        "reorderFailed": "系列重新排序失败",
         "createFailed": "无法创建系列",
         "seriesUnavailable": "该系列已无法管理，原有归属已保留。",
         "updateFailed": "无法更改文章系列，原有归属已保留。"
       }
     },
     "notifications": {
-      "slugUpdateFailed": "无法更新 slug",
       "deleted": "文章已删除",
       "published": "发表文章",
       "unpublished": "文章未发表",
@@ -3065,10 +2987,6 @@
     "pinned": "固定"
   },
   "pageEditor": {
-    "localRecovery": {
-      "message": "已保留重新连接前的本地编辑内容。请在刷新或离开前下载恢复副本。",
-      "action": "下载恢复副本"
-    },
     "shareLinksDescription": "未发布页面的预览链接",
     "showTitleOnPage": "在页面上显示标题",
     "slugValidation": {
@@ -3139,6 +3057,9 @@
       }
     },
     "columnsEditor": {
+      "labels": {
+        "ratio": "列比例"
+      },
       "badges": {
         "columnCount": "{count} 列"
       },
@@ -3163,16 +3084,14 @@
       "menuLabel": "添加部分",
       "emptyColumn": "空列 - 单击 + 添加内容",
       "actions": {
-        "addSectionToColumn": "将部分添加到列 {index}",
-        "removeSectionFromColumn": "移除 {section}，位于第 {index} 列"
+        "addSectionToColumn": "将部分添加到列 {index}"
       }
     },
     "notifications": {
       "published": "页面已发布",
       "unpublished": "页面未发布",
       "deleted": "页面已删除",
-      "slugUpdateFailed": "无法更新页面 slug",
-      "confirmSummaryFailed": "无法确认摘要更新"
+      "slugUpdateFailed": "无法更新页面 slug"
     },
     "mapEditor": {
       "title": "地图",
@@ -3217,7 +3136,6 @@
         "content": "内容",
         "marqueeBehavior": "跑马灯行为",
         "scenePlayback": "Playback",
-        "sceneRender": "Renderer",
         "sceneMotion": "Motion",
         "sceneUnits": "Units",
         "sceneSettings": "Scene",
@@ -3234,7 +3152,6 @@
         "columns": "列数",
         "infiniteLoop": "无限循环",
         "showIndicators": "显示指示器",
-        "showFeaturedImage": "显示封面图",
         "imageAspectRatio": "图片宽高比",
         "showMeta": "显示元信息（日期、作者）",
         "sortBy": "排序方式",
@@ -3253,7 +3170,6 @@
         "showImage": "显示图片",
         "selectForm": "选择表单",
         "showFormTitle": "显示表单标题",
-        "showTitle": "显示标题",
         "numberOfWorks": "作品数量",
         "numberOfReleases": "发行数量",
         "numberOfProgramEvents": "活动数量",
@@ -3323,7 +3239,10 @@
         "textColorSource": "Text color",
         "lightTextColor": "Light text",
         "darkTextColorSource": "Dark text",
-        "darkTextColor": "Dark text color"
+        "darkTextColor": "Dark text color",
+        "itemSize": "项目大小",
+        "showAvatar": "显示头像",
+        "maxLabels": "厂牌数量上限"
       },
       "fieldLabels": {
         "year": "年",
@@ -3334,11 +3253,7 @@
       },
       "badges": {
         "posts": "{count} 篇文章",
-        "rows": "{count} 行",
-        "authors": "{count} 位作者",
-        "artists": "{count} 位艺术家",
-        "works": "{count} 个作品",
-        "releases": "{count} 个发行"
+        "rows": "{count} 行"
       },
       "placeholders": {
         "publishedByDefault": "默认显示已发布",
@@ -3358,7 +3273,6 @@
           "auto": "自动"
         },
         "sortBy": {
-          "dateAdded": "添加日期",
           "startDate": "开始日期",
           "endDate": "结束日期",
           "publishedDate": "发布日期",
@@ -3367,9 +3281,7 @@
         },
         "sortOrder": {
           "newest": "最新",
-          "oldest": "最早",
-          "azOldest": "A-Z / 最早",
-          "zaNewest": "Z-A / 最新"
+          "oldest": "最早"
         },
         "mapPrimaryLabel": {
           "placeName": "地点名称"
@@ -3443,6 +3355,11 @@
           "theme": "Follow theme",
           "custom": "Custom",
           "inherit": "Follow light"
+        },
+        "itemSize": {
+          "s": "S · 紧凑",
+          "m": "M · 标准",
+          "l": "L · 大"
         }
       },
       "actions": {
@@ -3453,8 +3370,6 @@
         "moveUnitUp": "Move unit up",
         "moveUnitDown": "Move unit down",
         "removeSceneUnit": "Remove unit",
-        "expandSceneUnit": "Expand unit",
-        "collapseSceneUnit": "Collapse unit",
         "replaceMesh": "Replace GLB",
         "uploadMesh": "Upload GLB",
         "clearMeshAsset": "Clear mesh asset",
@@ -3493,6 +3408,12 @@
         "meshOptimizationCancelled": "Cancelled",
         "optimizedMeshCleanupFailed": "Optimized asset reference removed, but cleanup failed: {error}",
         "optimizedMeshCleanupFailedDefault": "Optimized asset reference removed, but cleanup failed"
+      },
+      "authorSelection": {
+        "maxSelected": "最多可选择 {count} 位作者。",
+        "empty": "尚未选择作者。此区块将为空。",
+        "unavailable": "此作者已不可用。",
+        "unavailableWarning": "不可用的作者不会显示在公开页面上。请移除他们或选择其他作者。"
       }
     },
     "embed": {
@@ -3545,8 +3466,6 @@
       "matchDescription": "组合所选的角色、标签和通讯订阅条件组。",
       "any": "任一所选条件组",
       "all": "所有所选条件组",
-      "roles": "角色",
-      "rolesDescription": "符合任一所选角色即可。",
       "roleUser": "成员",
       "memberDescription": "只有已登录的成员可以查看此页面。",
       "authorDescription": "具有作者角色的成员。",
@@ -3574,13 +3493,23 @@
       "restrictedTitle": "你无权访问此页面",
       "restrictedDescription": "你的账号不符合此页面的访问条件。",
       "signIn": "登录"
+    },
+    "a11y": {
+      "sectionPosition": "{section} · {index}/{count}",
+      "dragInstructions": "按空格键开始移动，使用箭头键更改位置。按空格键确认，或按 Escape 键取消。",
+      "dragStart": "{section} · 移动 · 进行中 · {index}/{count}",
+      "dragOver": "{section} · 移动 · {index}/{count}",
+      "dragEnd": "{section} · 移动 · 确认 · {index}/{count}",
+      "dragCancel": "{section} · 移动 · 已取消",
+      "sectionDeleted": "{section} 已删除",
+      "sectionAdded": "{section} 已创建 · {index}/{count}",
+      "columnsPosition": "{column} · {section} · {index}/{count}"
     }
   },
   "editorCommon": {
     "reloadRequired": {
       "title": "需要重新加载",
-      "message": "编辑器打开期间已保存更新版本。请重新加载后再继续编辑。",
-      "action": "重新加载"
+      "message": "编辑器打开期间已保存更新版本。请重新加载后再继续编辑。"
     },
     "permissionRevoked": {
       "title": "编辑权限已被撤销",
@@ -3640,7 +3569,6 @@
         "mute": "静音",
         "unmute": "取消静音",
         "volume": "音频音量",
-        "original": "原始文件",
         "waveform": "波形",
         "spectrogram": "频谱图",
         "spectrogramAlt": "音频频谱图",
@@ -3657,10 +3585,8 @@
         "addItem": "添加{item}",
         "replaceItem": "替换{item}",
         "browse": "选择文件",
-        "or": "或",
         "importFromUrl": "从 URL 导入",
         "directVideoUrlHelp": "仅支持视频文件直链。对于 YouTube 或 Vimeo，请使用“外部视频”。",
-        "confirm": "插入",
         "resumeAvailable": "Interrupted upload found",
         "resumeInstructionNamed": "Select {name} again to continue the upload from where it stopped.",
         "backToUpload": "上传文件",
@@ -3756,11 +3682,8 @@
       }
     },
     "mapBlock": {
-      "clickToAddPlace": "点击添加地点",
       "captionPlaceholder": "添加说明文字...",
-      "clickToAddCaption": "点击添加说明文字",
-      "externalPlaceholder": "地图：{count}个地点",
-      "viewOnGoogleMaps": "在 Google 地图中查看 ({lat}, {lng})"
+      "clickToAddCaption": "点击添加说明文字"
     },
     "mapPlacesModal": {
       "title": "管理地点",
@@ -3770,22 +3693,9 @@
       "centeredTitle": "已居中",
       "setAsCenterTitle": "设为中心"
     },
-    "blockAlign": {
-      "left": "左对齐",
-      "center": "居中对齐",
-      "right": "右对齐"
-    },
-    "mathInline": {
-      "clickToEdit": "点击编辑",
-      "convertToBlock": "转换为块"
-    },
-    "mathInlineButton": {
-      "label": "行内公式"
-    },
     "editor": {
       "slashMenu": {
         "placeholder": "输入 '/' 查看命令",
-        "empty": "没有项目",
         "unavailable": "不可用",
         "groups": {
           "headings": "标题",
@@ -3950,9 +3860,6 @@
         "alignLeft": "左对齐",
         "alignCenter": "居中对齐",
         "alignRight": "右对齐",
-        "alignJustify": "两端对齐",
-        "textColor": "文本",
-        "backgroundColor": "背景",
         "nest": "嵌套",
         "unnest": "取消嵌套",
         "inlineMath": "行内公式",
@@ -3967,36 +3874,19 @@
         "urlPlaceholder": "编辑链接地址"
       },
       "math": {
-        "inline": "行内公式",
-        "block": "数学块",
-        "clickToEdit": "点击编辑",
-        "convertToBlock": "转换为块"
+        "selectBlock": "选择数学公式块",
+        "block": "数学块"
       },
       "file": {
-        "add": "添加{item}",
         "replace": "替换{item}",
-        "delete": "删除",
-        "download": "下载",
-        "caption": "添加说明文字...",
-        "upload": "上传文件",
-        "embed": "插入",
-        "urlPlaceholder": "编辑链接地址"
+        "delete": "删除"
       },
       "resize": {
-        "image": "调整大小 — 图片",
-        "audio": "调整大小 — 音频",
-        "video": "调整大小 — 视频",
-        "file": "调整大小 — 附件",
         "map": "调整大小 — 地图",
-        "externalVideo": "调整大小 — 外部视频",
-        "p5Sketch": "调整大小 — p5.js",
-        "threeScene": "调整大小 — Three.js",
-        "dragHandle": "拖动以调整大小",
-        "shader": "调整大小 — GLSL 着色器"
+        "externalVideo": "调整大小 — 外部视频"
       },
       "drag": {
         "openBlockMenu": "打开菜单",
-        "addBlock": "添加块",
         "delete": "删除",
         "colors": "颜色"
       },
@@ -4028,7 +3918,6 @@
         "toggleHeaderColumn": "列标题",
         "selectRow": "选择行",
         "selectColumn": "选择列",
-        "selectCells": "所选单元格",
         "selectTable": "选择表格",
         "deleteTable": "删除表格",
         "mergeCells": "合并单元格",
@@ -4042,17 +3931,11 @@
         "unavailable": "不可用"
       },
       "map": {
-        "insert": "地图",
-        "clickToAddPlace": "点击添加地点",
-        "captionPlaceholder": "添加说明文字...",
         "managePlaces": "管理地点"
       },
       "embeds": {
         "map": "地图",
-        "externalVideo": "外部视频",
-        "p5Sketch": "p5.js",
-        "threeScene": "Three.js",
-        "shader": "GLSL 着色器"
+        "externalVideo": "外部视频"
       },
       "runtimeLabels": {
         "code": {
@@ -4139,12 +4022,7 @@
         }
       },
       "media": {
-        "browse": "选择文件",
-        "importFromUrl": "从 URL 导入",
-        "embed": "插入",
-        "openLibrary": "文件库",
-        "uploadFiles": "上传文件",
-        "selectFile": "选择文件"
+        "importFromUrl": "从 URL 导入"
       }
     }
   },
@@ -4170,7 +4048,6 @@
       "brainstorm": "头脑风暴"
     },
     "sections": {
-      "original": "原文",
       "result": "AI 结果"
     },
     "actions": {
@@ -4220,8 +4097,7 @@
       "pinClickable": "引脚可点击"
     },
     "themeOptions": {
-      "none": "没有任何",
-      "systemSuffix": "（系统）"
+      "none": "没有任何"
     },
     "scheme": {
       "auto": "汽车",
@@ -4237,13 +4113,7 @@
     "copyValueTitle": "点击复制{label}值"
   },
   "postMembers": {
-    "removeAria": "移除 {name}",
-    "roles": {
-      "owner": "所有者"
-    },
-    "states": {
-      "memberFallback": "成员"
-    }
+    "removeAria": "移除 {name}"
   },
   "workCredits": {
     "divider": "或添加署名",
@@ -4275,9 +4145,6 @@
     "emptyResults": {
       "artist": "未找到艺术家",
       "name": "未找到姓名"
-    },
-    "states": {
-      "unknownInitial": "？"
     },
     "notifications": {
       "groupCreated": "分组已创建",
@@ -4334,13 +4201,11 @@
       }
     },
     "statuses": {
-      "missing": "丢失的",
       "existing": "Existing"
     },
     "states": {
       "loadFailed": "无法加载翻译",
       "missingTarget": "No target document yet.",
-      "sourceRow": "该语言环境是在主源代码编辑器中编辑的",
       "sourceEditorHint": "在主编辑器中编辑原始文本",
       "updatedAt": "更新了{date}"
     },
@@ -4354,52 +4219,19 @@
   },
   "translationPanelMenu": {
     "description": "Review source menu labels and existing translation documents.",
-    "sourceLocaleDescription": "The menu editor above owns structure, ordering, links, visibility, and source labels. Target translations below are read-only previews.",
-    "states": {
-      "sourcePreview": "来源标签 ({locale})：{labels}",
-      "sourceEditorHint": "在主菜单编辑器中编辑菜单结构",
-      "missingTarget": "No labels are saved for this locale yet.",
-      "noItems": "还没有本地化标签",
-      "translationPreview": "Existing {locale} labels: {labels}"
-    },
     "previewModal": {
       "title": "{locale} menu translation preview",
-      "descriptions": {
-        "missing": "No public menu translation exists for this locale. The source is shown until an Admin generates it.",
-        "existing": "Shows the current public translated labels for this menu as read-only."
-      },
       "fields": {
-        "linkType": "Link type",
-        "destination": "Destination",
-        "children": "Nested items",
-        "localizedLabelForLocale": "{locale} public label",
-        "sourceLabelForLocale": "{locale} source label",
-        "localizedLabelDescription": "The current translated label shown in public menus; it cannot be changed here.",
-        "sourceLabelDescription": "Comes from the source menu editor and cannot be changed here.",
-        "fixedLocaleLockedDescription": "This item is fixed to the {locale} label and is read-only."
-      },
-      "states": {
-        "detailUnavailable": "Detailed translated menu data could not be loaded.",
-        "noItems": "There are no menu items to preview."
+        "localizedLabelForLocale": "{locale} public label"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template.",
-      "sourceLocaleDescription": "源模板控制主题、正文副本和运行时变量名称",
-      "states": {
-        "sourceEditorHint": "在主编辑器中编辑源模板",
-        "noContent": "尚不存在翻译的主题或正文"
-      }
+      "description": "Manage the source language and existing translation documents for this email template."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout.",
-      "sourceLocaleDescription": "源布局控制用于电子邮件呈现的包装器 HTML 和结构占位符名称",
-      "states": {
-        "sourceEditorHint": "在主编辑器中编辑源布局",
-        "noContent": "尚不存在已翻译的布局 HTML"
-      }
+      "description": "Manage the source language and existing translation documents for this email layout."
     }
   },
   "localizationNotice": {
@@ -4408,9 +4240,7 @@
       "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
     },
     "fallback": {
-      "title": "后备语言",
-      "english": "请求的 {requested} 翻译不可用，因此此页面面显示在 {displayed} 中",
-      "source": "请求的 {requested} 翻译不可用，因此此页面面显示在原始 {source} 中"
+      "title": "后备语言"
     },
     "actions": {
       "viewOriginal": "查看原文 ({source})"
@@ -4440,7 +4270,6 @@
       "policy": "政策",
       "lastTargetUpdate": "Last target update",
       "entity": "实体",
-      "existing": "Existing translations",
       "sources": "来源",
       "lastSourceUpdate": "上次源更新"
     },
@@ -4628,33 +4457,22 @@
       "summary": "添加一个简洁的摘要..."
     },
     "tooltips": {
-      "generatingNamed": "{name} 正在生成摘要",
-      "applyingNamed": "{name} 正在应用生成的摘要",
-      "readyNamed": "{name}已准备好生成的摘要"
+      "generatingNamed": "{name} 正在生成摘要"
     },
     "feedback": {
       "failedDefault": "处理摘要生成失败",
-      "invalidJson": "AI 响应无法解析为摘要 JSON",
       "alreadyRunning": "摘要生成已在运行",
-      "applyingGenerated": "正在应用生成的摘要",
-      "resetOlderSession": "已重置旧会话中遗留的生成摘要状态。",
-      "resetUnrestorable": "已重置无法恢复的旧生成摘要状态。",
-      "missingJobPayload": "摘要生成未返回作业有效负载",
       "missingSuggestionPayload": "摘要生成已完成，无需建议负载",
       "staleSuggestion": "此建议已过时。请先重新生成或关闭后再应用",
       "unableToApplyNow": "目前无法应用生成的摘要",
       "applyFailed": "应用生成的摘要失败",
       "applied": "已应用生成的摘要",
-      "appliedJobUnresolved": "摘要已应用，但 AI 作业无法自动解决",
-      "dismissedJobUnresolved": "摘要建议已在本地关闭，但无法自动完成 AI job 状态处理。",
-      "readyBeforeApplying": "请先应用或关闭生成的摘要。",
       "readyToApply": "生成的摘要可以应用了。"
     },
     "ready": {
       "title": "生成的摘要",
       "suggestedSummary": "建议摘要",
       "anotherCollaborator": "其他协作者",
-      "anotherCollaboratorFallback": "其他协作者已准备好生成的摘要。",
       "anotherCollaboratorNamed": "{name}已准备好生成的摘要。"
     }
   },
@@ -4702,8 +4520,7 @@
       "roleUpdated": "角色已更新",
       "userBanned": "用户已封禁",
       "userUnbanned": "用户已解封",
-      "userDeleted": "用户已删除",
-      "userCreated": "用户已创建"
+      "userDeleted": "用户已删除"
     }
   },
   "adminUserDetail": {
@@ -4740,16 +4557,13 @@
       "userIdCopied": "用户 ID 已复制",
       "userIdCopyFailed": "复制用户 ID 失败",
       "emailSuppressionReleased": "已解除邮件发送屏蔽",
-      "mainEmailUpdated": "主邮箱已更新",
       "ssoProviderRemoved": "已移除 SSO 提供商"
     },
     "auth": {
       "emptyEmail": "无邮箱",
       "delivery": {
         "title": "接收邮箱",
-        "description": "活动、通知和账户邮件会发送到选定的主邮箱。",
-        "changePlaceholder": "选择已验证邮箱",
-        "changeHelp": "更改选择后会立即保存。"
+        "description": "活动、通知和账户邮件会发送到选定的主邮箱。"
       },
       "providers": {
         "title": "已连接的 SSO 提供方",
@@ -4758,7 +4572,6 @@
         "remove": "移除 SSO 提供商"
       },
       "sources": {
-        "current": "当前邮箱",
         "emailCode": "邮箱登录"
       },
       "ban": {
@@ -4793,7 +4606,6 @@
         "noChanges": "没有可保存的更改"
       },
       "validation": {
-        "invalidUrl": "URL 格式无效",
         "invalidEmail": "电子邮件格式无效",
         "invalidHexColor": "十六进制颜色格式无效",
         "invalidGoogleAnalyticsId": "Google Analytics ID 格式无效"
@@ -5102,14 +4914,12 @@
   },
   "formSuccessPage": {
     "metadata": {
-      "fallbackTitle": "表单已提交",
       "title": "{formTitle} - 已提交"
     },
     "title": "谢谢"
   },
   "formPasswordPage": {
     "metadata": {
-      "fallbackTitle": "表单访问",
       "description": "输入密码以访问此表单"
     },
     "title": "密码保护",
@@ -5121,7 +4931,6 @@
   },
   "formDashboardPage": {
     "metadata": {
-      "fallbackTitle": "表单仪表板",
       "title": "{formTitle} - 仪表板",
       "description": "表单提交统计和分析"
     },
@@ -5131,7 +4940,28 @@
     "stats": {
       "total": "总计"
     },
-    "fieldStatistics": "字段统计"
+    "fieldStatistics": "字段统计",
+    "charts": {
+      "donut": "环形",
+      "pie": "饼图",
+      "bar-horizontal": "横向条形",
+      "bar-vertical": "纵向条形",
+      "radar": "雷达",
+      "table": "表格",
+      "area": "面积",
+      "line": "折线",
+      "histogram": "直方图",
+      "noResponses": "暂无回复",
+      "emptyValue": "（空）",
+      "min": "最小值",
+      "max": "最大值",
+      "avg": "平均值",
+      "count": "数量",
+      "date": "日期",
+      "value": "值",
+      "range": "区间",
+      "chartType": "图表类型"
+    }
   },
   "embeddedForm": {
     "states": {
@@ -5182,10 +5012,7 @@
       "locationMode": "地点模式",
       "ticketUrl": "票务 URL",
       "streamUrl": "直播 URL",
-      "externalUrl": "外部 URL",
-      "participants": "参与者",
-      "textCredits": "文字署名",
-      "textCreditsDescription": "每行一个署名。需要角色时使用“角色: 姓名”格式。"
+      "externalUrl": "外部 URL"
     },
     "locationModes": {
       "mapPlace": "场地",
@@ -5198,7 +5025,6 @@
       "tickets": "票务",
       "stream": "直播",
       "link": "链接",
-      "participants": "参与者",
       "empty": "未找到活动。",
       "date": "日期",
       "credits": "署名"
@@ -5215,152 +5041,14 @@
       "deleteMessage": "只有未被任何活动使用的类型才能删除。"
     }
   },
-  "tools": {
-    "portadj": {
-      "metadataTitle": "PortaDJ",
-      "metadataDescription": "在浏览器中使用两个 DJ 播放器播放和混音本地音频文件。"
-    },
-    "youtubeAudio": {
-      "title": "YouTube 音频",
-      "urlLabel": "视频链接",
-      "urlPlaceholder": "https://…",
-      "resolve": "加载音频",
-      "resolving": "正在加载音频",
-      "clear": "清除来源",
-      "metadataTitle": "YouTube 音频",
-      "metadataDescription": "在浏览器中转换经过身份验证的 YouTube 来源音频。",
-      "errors": {
-        "INTERNAL_ERROR": "无法加载音频源。请重试。",
-        "INVALID_REQUEST": "请输入有效的 YouTube 视频网址。",
-        "INVALID_UPSTREAM_RESPONSE": "YouTube 返回了意外的音频源。请尝试其他视频。",
-        "REQUEST_ABORTED": "请求已取消。",
-        "SOURCE_EXPIRED": "此音频源已过期。请重新加载网址。",
-        "SOURCE_NOT_FOUND": "此音频源已不可用。请重新加载网址。",
-        "UNAUTHORIZED": "请重新登录以使用此工具。",
-        "UNSUPPORTED_VIDEO": "此视频未提供受支持的有限时长音频源。",
-        "UPSTREAM_FAILURE": "目前无法加载 YouTube 音频。请重试。"
-      }
-    },
-    "transcode": {
-      "title": "音频转码器",
-      "targetIdle": "等待中",
-      "targetChecking": "检查中",
-      "targetReady": "已就绪",
-      "targetError": "不可用",
-      "dropTitle": "拖放或选择音频文件",
-      "dropDescription": "最多 10 个 · 不支持文件夹 · 仅在此设备处理",
-      "chooseFiles": "选择音频文件",
-      "supportedFormatsLabel": "支持的格式",
-      "supportedFormats": "支持：CAF、AIFF/AIFC、WAV、FLAC、MP3、AAC/M4A、Ogg/Opus，以及 MP4、MOV、MKV/WebM 或 TS 中的音频。按文件检查。",
-      "filesSelected": "文件",
-      "outputSettings": "输出设置",
-      "format": "格式",
-      "sampleRate": "采样率",
-      "bitrate": "比特率",
-      "bitDepth": "位深度",
-      "codec": "编解码器",
-      "sampleFormat": "采样格式",
-      "float": "浮点",
-      "integer": "整数 PCM",
-      "sourcePcmFloat": "{bitDepth} 位浮点",
-      "sourcePcmInteger": "{bitDepth} 位整数",
-      "sourcePcmSignedInteger": "{bitDepth} 位有符号整数",
-      "sourcePcmUnsignedInteger": "{bitDepth} 位无符号整数",
-      "automatic": "自动",
-      "unknownAudio": "音频",
-      "channelCount": "{count, plural, other {# 个声道}}",
-      "queue": "转换队列",
-      "convert": "转换",
-      "cancelAll": "全部取消",
-      "clear": "清空",
-      "download": "保存转换结果",
-      "downloadSource": "保存原音频",
-      "sourceDownloadExpired": "源已过期或不可用。请重新加载 YouTube URL。",
-      "sourceDownloadFailed": "无法下载原始文件。请检查网络连接并重新加载源。",
-      "retry": "重试",
-      "cancel": "取消",
-      "remove": "移除",
-      "sourceValue": "源文件 ({value})",
-      "mono": "单声道",
-      "stereo": "立体声",
-      "targetWaitingForFiles": "添加受支持的音频文件后，将检查所选输出格式。",
-      "targetCheckingMessage": "正在检查此浏览器是否支持所选输出格式。",
-      "targetReadyMessage": "此浏览器支持所选输出格式。",
-      "engineLoading": "正在加载 {asset} 音频引擎。",
-      "engineVerifying": "正在验证 {asset} 音频引擎。",
-      "engineLoadFailed": "无法加载 {asset} 音频引擎。",
-      "capacityExceeded": "有 {count, number} 个文件未添加。队列最多可容纳 {max, number} 个文件。",
-      "statusInspectionQueued": "等待检查",
-      "statusInspecting": "正在检查",
-      "statusReady": "已就绪",
-      "statusQueued": "已加入队列",
-      "statusConverting": "正在转换",
-      "statusComplete": "已完成",
-      "statusUnsupported": "不受支持",
-      "statusError": "错误",
-      "statusCancelled": "已取消",
-      "unsupportedInput": "这不是受支持的音频文件。",
-      "unsupportedCodec": "此浏览器无法解码该文件中的音频编解码器。",
-      "inspectionFailed": "无法检查文件，请重试。",
-      "inspectionInconclusive": "浏览器无法在安全读取限制内识别此音频。请尝试其他文件或格式。",
-      "outputUnsupported": "此浏览器不支持所选输出设置。",
-      "outputProbeFailed": "无法检查输出支持情况，请重试。",
-      "conversionFailed": "音频转换失败。",
-      "conversionStorageLimitExceeded": "此浏览器的本地临时存储空间不足以保存预计的输出。请选择更小或压缩的格式，或使用支持大型本地输出的浏览器重试。",
-      "conversionTargetSizeLimitExceeded": "所选输出格式无法表示如此大的文件。请选择其他格式，或降低采样率、位深或声道数。",
-      "cancelledMessage": "转换已取消。",
-      "sourceSummary": "{container} · {sampleRate} · {channels} · {bitDepth}",
-      "outputSummary": "{preset} · {size}",
-      "progressLabel": "{phase} · {progress, number}%",
-      "phasePrepare": "准备中",
-      "phaseDecode": "解码中",
-      "phaseEncode": "编码中",
-      "phaseFinalize": "完成处理中",
-      "bytes": "{count, number} 字节",
-      "storageOpfs": "浏览器私有存储",
-      "storageMemory": "浏览器内存",
-      "metadataTitle": "音频转码器",
-      "metadataDescription": "在浏览器中转换音频。文件不会离开您的设备。",
-      "outputSettingsHelper": "声道保持不变。自动模式会为每个文件选择兼容的采样率。",
-      "processingDetails": "处理详情",
-      "processingDetailsDescription": "使用均衡质量重采样。整数输出使用抖动。大型 WAV 文件使用 RF64。",
-      "bitDepthContainerEffective": "{containerBits} 位容器 / {effectiveBits} 位有效精度",
-      "constantBitrate": "CBR",
-      "variableBitrate": "VBR",
-      "preserveSource": "保留源采样率",
-      "unavailable": "不可用",
-      "sampleRateAvailableFor": "{total, number} 个文件中有 {supported, number} 个可用",
-      "sampleRateResetAutomatic": "先前的采样率不适用于当前输出设置，已改为自动。",
-      "targetAvailability": "可转换 {available, number} 个文件；{unavailable, number} 个文件在当前设置下仍不可用。",
-      "statusQueuedAvailability": "已将 {converting, number} 个文件加入转换队列；{unavailable, number} 个仍不可用。",
-      "statusConvertingAvailability": "正在转换 {converting, number} 个文件；{unavailable, number} 个仍不可用。",
-      "statusCompleteAvailability": "已转换 {converted, number} 个文件；{unavailable, number} 个仍不可用。",
-      "statusBatchResult": "运行完成：{eligible, number} 个符合条件，尝试 {attempted, number} 个，成功 {succeeded, number} 个，失败 {failed, number} 个，不可用 {unavailable, number} 个。",
-      "outputEngineUnavailable": "无法启动 {preset} 的运行时引擎。请检查网络或资源策略后重试。",
-      "outputChannelsUnsupported": "此输出支持 {minimum, number}–{maximum, number} 个源声道，但该文件有 {actual, number} 个。声道会保持原样，不会下混。",
-      "sourceInspectionMissing": "无法识别源声道数或采样率。请选择可读取音频元数据的文件。",
-      "outputConfigurationUnavailable": "所选格式和编码设置无法组成可用的输出配置。",
-      "preserveSourceRateUnsupported": "此输出无法保留源采样率 {sourceRate}。允许的采样率：{allowed}。",
-      "sourceResamplingRateUnsupported": "{sourceRate} 的源超出重采样范围（{minimum}–{maximum}），只能直通到兼容输出。",
-      "targetResamplingRateUnsupported": "所选目标 {targetRate} 超出重采样范围（{minimum}–{maximum}）。",
-      "automaticRateUnavailable": "自动模式无法为 {sourceRate} 的源选择有效采样率。允许的输出采样率：{allowed}。",
-      "presetRateUnsupported": "此输出不支持 {targetRate}。允许的采样率：{allowed}。",
-      "notices": "开源许可证"
-    },
-    "hwp": {
-      "title": "HWP 编辑器",
-      "metadataDescription": "在浏览器中打开、编辑并保存 HWP 和 HWPX 文档。",
-      "description": "使用编辑器的文件菜单打开和保存 HWP 或 HWPX 文件。文档在本设备上处理，无需上传。",
-      "loading": "正在加载编辑器…",
-      "error": "无法加载编辑器。请重试。",
-      "retry": "重试",
-      "metadataTitle": "HWP 编辑器"
-    }
-  },
   "myMetadata": {
     "description": "{siteName} 上的 {title} 页面"
   },
   "fileManager": {
+    "pagination": {
+      "end": "已到结果末尾"
+    },
+    "selectionUnavailableDescription": "无法添加此文件。按 Enter 键预览。",
     "title": "文件",
     "description": "在整个站点上传、整理、检查和复用文件。",
     "root": "文件",
@@ -5484,9 +5172,7 @@
       "move-files": {
         "title": "移动文件"
       },
-      "targetFolderId": "目标文件夹 ID",
       "extensionSeparate": ".{extension} 扩展名将单独保留。",
-      "rootWhenEmpty": "留空将移动到根目录。",
       "delete": {
         "title": "删除",
         "folder": "删除此文件夹及其下所有未使用的文件？",
@@ -5496,14 +5182,26 @@
         "byDomain": "按域：{summary}",
         "more": "另有 {count} 个。请在文件详情中查看完整列表。"
       }
+    },
+    "viewSettings": {
+      "title": "视图设置",
+      "iconSize": "图标大小",
+      "spacing": "项目间距",
+      "columns": "列数",
+      "auto": "自动",
+      "small": "小",
+      "medium": "中",
+      "large": "大",
+      "compact": "紧凑",
+      "standard": "标准",
+      "comfortable": "宽松",
+      "reset": "重置视图设置"
     }
   },
   "fileDownloadAccess": {
     "editor": {
       "sectionTitle": "下载权限",
-      "sectionDescription": "设置谁可以下载原始文件。",
       "loading": "正在加载下载权限…",
-      "audienceLabel": "下载对象",
       "audiences": {
         "disabled": {
           "label": "已禁用",
@@ -5522,15 +5220,10 @@
           "description": "只有所选受众中的用户可以下载此文件。"
         }
       },
-      "segmentsLabel": "受众",
-      "segmentsDescription": "选择一个或多个现有受众细分。",
-      "segmentsPlaceholder": "选择受众",
       "segmentsLoadError": "策略已加载，但无法加载受众。",
       "segmentsEmpty": "没有可用的受众细分。",
       "restrictedWithoutAudience": "此受限策略未指定受众。在选择至少一个受众之前，所有人的下载都将被拒绝。",
-      "segmentRequiresSubscription": "{name}（需要订阅简报）",
       "additionalSelected": "另有 {count} 项已选择",
-      "loadMoreSegments": "加载更多受众",
       "loadError": "无法加载下载权限。",
       "saveError": "无法保存下载权限。",
       "fileRequired": "请先保存文件，再配置下载权限。"
@@ -5552,5 +5245,29 @@
     "empty": "输入图表源码",
     "invalid": "图表语法有误",
     "loading": "正在绘制…"
+  },
+  "errorPage": {
+    "titles": {
+      "400": "无效请求",
+      "401": "需要登录",
+      "403": "没有访问权限",
+      "404": "页面未找到",
+      "408": "请求超时",
+      "409": "请求与当前状态冲突",
+      "410": "此页面已不可用",
+      "413": "请求过大",
+      "422": "无法处理请求",
+      "429": "请求过于频繁",
+      "500": "出了点问题",
+      "501": "不支持此请求",
+      "502": "上游服务出错",
+      "503": "服务暂时不可用",
+      "504": "服务响应超时"
+    },
+    "actions": {
+      "goHome": "返回首页",
+      "tryAgain": "重试",
+      "login": "返回登录"
+    }
   }
 }

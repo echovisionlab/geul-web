@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDebouncedCallback } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { updateCampaignNameAction } from '@/lib/actions/campaign';
 
 const TITLE_DEBOUNCE_MS = 500;
@@ -33,7 +33,7 @@ export function useCampaignName({ campaignId, campaign, editable }: Options) {
     mutationFn: (nextName: string) => updateCampaignNameAction(campaignId, nextName),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         setName(campaign?.name ?? '');
         void queryClient.invalidateQueries({ queryKey: ['campaigns', campaignId] });
         void queryClient.invalidateQueries({ queryKey: ['campaigns'] });
@@ -49,7 +49,7 @@ export function useCampaignName({ campaignId, campaign, editable }: Options) {
       }
     },
     onError: (error) => {
-      notifications.show({ message: error.message, color: 'red' });
+      notifications.show({ message: error.message, tone: 'danger' });
       setName(campaign?.name ?? '');
       void queryClient.invalidateQueries({ queryKey: ['campaigns', campaignId] });
       void queryClient.invalidateQueries({ queryKey: ['campaigns'] });

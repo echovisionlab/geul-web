@@ -1,7 +1,8 @@
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { afterEach, describe, expect, it } from 'vitest';
 import { renderToString } from 'react-dom/server';
-import { MantineProvider } from '@mantine/core';
-import { DateTimePicker } from '@mantine/dates';
+
+import { DateTimePicker } from '@/components/core/Input';
 import { instantToZonedDateTimeInput } from '@/lib/utils/zoned-date-time';
 
 const originalTimeZone = process.env.TZ;
@@ -12,9 +13,9 @@ afterEach(() => {
 
 function renderEventDateTime(instant: Date, eventTimeZone: string): string {
   return renderToString(
-    <MantineProvider env="test">
+    <DesignSystemProvider forceColorScheme="light">
       <DateTimePicker label="Starts at" value={instantToZonedDateTimeInput(instant, eventTimeZone)} />
-    </MantineProvider>,
+    </DesignSystemProvider>,
   );
 }
 
@@ -28,6 +29,9 @@ describe('program event date-time SSR', () => {
     const browserMarkup = renderEventDateTime(instant, 'UTC');
 
     expect(serverMarkup).toBe(browserMarkup);
-    expect(serverMarkup).toContain('29/08/2026 02:01');
+    expect(serverMarkup).toContain('data-type="year"');
+    expect(serverMarkup).toContain('aria-valuenow="2026"');
+    expect(serverMarkup).toContain('aria-valuenow="29"');
+    expect(serverMarkup).toContain('aria-valuenow="2"');
   });
 });

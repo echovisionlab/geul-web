@@ -48,13 +48,8 @@ vi.mock('@tanstack/react-query', () => ({
   useQuery: () => ({ data: [] }),
   useQueryClient: () => ({ invalidateQueries: vi.fn() }),
 }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: mocks.notification } }));
-vi.mock('@mantine/core', () => ({
-  Group: 'div',
-  SimpleGrid: 'div',
-  Stack: 'div',
-  Text: 'span',
-}));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: mocks.notification } }));
+
 vi.mock('@tabler/icons-react', () => ({ IconUsers: () => null }));
 vi.mock('@/components/core/Input', () => ({
   MultiSelect: ({ id, value, onChange }: { id: string; value: string[]; onChange: (value: string[]) => void }) => {
@@ -501,7 +496,7 @@ describe('Artist and Label save barriers', () => {
 
     expect(mocks.routerPush).not.toHaveBeenCalled();
     expect(mocks.mutation).not.toHaveBeenCalled();
-    expect(mocks.notification).toHaveBeenCalledWith({ message: 'notifications.saveFailed', color: 'red' });
+    expect(mocks.notification).toHaveBeenCalledWith({ message: 'notifications.saveFailed', tone: 'danger' });
   });
 
   it('does not open the Artist delete confirmation when pending saves fail', async () => {
@@ -520,6 +515,6 @@ describe('Artist and Label save barriers', () => {
     });
 
     expect(mocks.deleteOpened).toBe(false);
-    expect(mocks.notification).toHaveBeenCalledWith({ message: 'notifications.saveFailed', color: 'red' });
+    expect(mocks.notification).toHaveBeenCalledWith({ message: 'notifications.saveFailed', tone: 'danger' });
   });
 });

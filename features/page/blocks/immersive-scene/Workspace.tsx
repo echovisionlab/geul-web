@@ -2,7 +2,10 @@
 
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Box, Modal, ScrollArea } from '@mantine/core';
+
+import { ScrollArea } from '@/components/core/Display';
+import { InputSizeProvider } from '@/components/core/Input';
+import { ContentModal } from '@/components/core/Modal';
 import { Tabs } from '@/components/core/Tabs';
 import { parseImmersiveSceneConfig, type ImmersiveSceneProps } from './schema';
 import { ImmersiveSceneRenderer } from './SceneRenderer';
@@ -12,6 +15,7 @@ import styles from './Workspace.module.css';
 interface ImmersiveSceneWorkspaceContentProps {
   sectionId: string;
   pageId: string;
+  contentLanguage?: string;
   props: Partial<ImmersiveSceneProps>;
   updateSharedProps: (props: Record<string, unknown>) => void;
   updateLocalizedProps: (props: Record<string, unknown>) => void;
@@ -28,6 +32,7 @@ export interface ImmersiveSceneWorkspaceProps extends ImmersiveSceneWorkspaceCon
 export function ImmersiveSceneWorkspaceContent({
   sectionId,
   pageId,
+  contentLanguage,
   props,
   updateSharedProps,
   updateLocalizedProps,
@@ -60,77 +65,72 @@ export function ImmersiveSceneWorkspaceContent({
   const previewProgress = config.units.length <= 1 ? 0 : selectedUnitIndex / (config.units.length - 1);
 
   return (
-    <Box className={styles.container} data-testid="immersive-scene-workspace-container">
-      <Box className={styles.workspace} data-testid="immersive-scene-workspace">
-        <Box className={styles.preview} data-testid="immersive-scene-workspace-preview">
+    <div className={styles.container} data-testid="immersive-scene-workspace-container">
+      <div className={styles.workspace} data-testid="immersive-scene-workspace">
+        <div className={styles.preview} lang={contentLanguage} data-testid="immersive-scene-workspace-preview">
           <ImmersiveSceneRenderer config={config} preview progress={previewProgress} />
-        </Box>
+        </div>
 
-        <Box className={styles.inspector}>
-          <Tabs
-            value={activePanel}
-            onChange={(value) => setActivePanel((value as typeof activePanel | null) ?? 'unit')}
-            keepMounted={false}
-            style={{ display: 'flex', minHeight: 0, flex: 1, flexDirection: 'column' }}
-          >
-            <Tabs.List grow px="md" pt="sm">
-              <Tabs.Tab value="unit">{t('blockEditor.sections.sceneUnits')}</Tabs.Tab>
-              <Tabs.Tab value="scene">{t('blockEditor.sections.sceneSettings')}</Tabs.Tab>
-              {sectionSettings ? <Tabs.Tab value="section">{t('sectionItem.settings.tabs.section')}</Tabs.Tab> : null}
-            </Tabs.List>
+        <div className={styles.inspector}>
+          <InputSizeProvider size="xs">
+            <Tabs
+              value={activePanel}
+              onChange={(value) => setActivePanel((value as typeof activePanel | null) ?? 'unit')}
+              keepMounted={false}
+              fill
+            >
+              <Tabs.List grow inset="md" paddingTop="sm">
+                <Tabs.Tab value="unit">{t('blockEditor.sections.sceneUnits')}</Tabs.Tab>
+                <Tabs.Tab value="scene">{t('blockEditor.sections.sceneSettings')}</Tabs.Tab>
+                {sectionSettings ? <Tabs.Tab value="section">{t('sectionItem.settings.tabs.section')}</Tabs.Tab> : null}
+              </Tabs.List>
 
-            <ScrollArea style={{ minHeight: 0, flex: 1 }} type="auto">
-              <Tabs.Panel value="unit" p="md">
-                <ImmersiveSceneSettingsForm
-                  sectionId={sectionId}
-                  pageId={pageId}
-                  props={props}
-                  updateSharedProps={updateSharedProps}
-                  updateLocalizedProps={updateLocalizedProps}
-                  uploadControls={uploadControls}
-                  panel="unit"
-                  selectedUnitId={expandedUnitId}
-                  onSelectedUnitChange={selectEditorUnit}
-                />
-              </Tabs.Panel>
-              <Tabs.Panel value="scene" p="md">
-                <ImmersiveSceneSettingsForm
-                  sectionId={sectionId}
-                  pageId={pageId}
-                  props={props}
-                  updateSharedProps={updateSharedProps}
-                  updateLocalizedProps={updateLocalizedProps}
-                  uploadControls={uploadControls}
-                  panel="scene"
-                />
-              </Tabs.Panel>
-              {sectionSettings ? (
-                <Tabs.Panel value="section" p="md">
-                  {sectionSettings}
+              <ScrollArea grow>
+                <Tabs.Panel value="unit" inset="md">
+                  <ImmersiveSceneSettingsForm
+                    sectionId={sectionId}
+                    pageId={pageId}
+                    contentLanguage={contentLanguage}
+                    props={props}
+                    updateSharedProps={updateSharedProps}
+                    updateLocalizedProps={updateLocalizedProps}
+                    uploadControls={uploadControls}
+                    panel="unit"
+                    selectedUnitId={expandedUnitId}
+                    onSelectedUnitChange={selectEditorUnit}
+                  />
                 </Tabs.Panel>
-              ) : null}
-            </ScrollArea>
-          </Tabs>
-        </Box>
-      </Box>
-    </Box>
+                <Tabs.Panel value="scene" inset="md">
+                  <ImmersiveSceneSettingsForm
+                    sectionId={sectionId}
+                    pageId={pageId}
+                    contentLanguage={contentLanguage}
+                    props={props}
+                    updateSharedProps={updateSharedProps}
+                    updateLocalizedProps={updateLocalizedProps}
+                    uploadControls={uploadControls}
+                    panel="scene"
+                  />
+                </Tabs.Panel>
+                {sectionSettings ? (
+                  <Tabs.Panel value="section" inset="md">
+                    {sectionSettings}
+                  </Tabs.Panel>
+                ) : null}
+              </ScrollArea>
+            </Tabs>
+          </InputSizeProvider>
+        </div>
+      </div>
+    </div>
   );
 }
 
 export function ImmersiveSceneWorkspace({ opened, title, onClose, ...contentProps }: ImmersiveSceneWorkspaceProps) {
+  const tModalActions = useTranslations('common.actions');
   return (
-    <Modal
-      opened={opened}
-      onClose={onClose}
-      title={title}
-      fullScreen
-      padding={0}
-      styles={{
-        header: { padding: '12px 16px' },
-        body: { height: 'calc(100dvh - 60px)', padding: 0 },
-      }}
-    >
+    <ContentModal opened={opened} onClose={onClose} title={title} closeLabel={tModalActions('close')} size="workspace">
       <ImmersiveSceneWorkspaceContent {...contentProps} />
-    </Modal>
+    </ContentModal>
   );
 }

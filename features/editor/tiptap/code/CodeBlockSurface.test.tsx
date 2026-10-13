@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CodeBlockSurface } from './CodeBlockSurface';
 
@@ -45,7 +46,7 @@ describe('CodeBlockSurface', () => {
 
     await act(async () => {
       root.render(
-        <MantineProvider env="test">
+        <DesignSystemProvider forceColorScheme="light">
           <CodeBlockSurface
             title="번역된 예제"
             fallbackTitle="코드 블록"
@@ -57,7 +58,7 @@ describe('CodeBlockSurface', () => {
             monacoLanguage="typescript"
             modelPath="public/code/example.ts"
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
@@ -70,7 +71,6 @@ describe('CodeBlockSurface', () => {
         readOnly: true,
         bordered: false,
         editorOptions: {
-          lineDecorationsWidth: 16,
           renderValidationDecorations: 'off',
         },
       }),
@@ -90,7 +90,7 @@ describe('CodeBlockSurface', () => {
 
     await act(async () => {
       root.render(
-        <MantineProvider env="test">
+        <DesignSystemProvider forceColorScheme="light">
           <CodeBlockSurface
             title=""
             fallbackTitle="Code block"
@@ -112,7 +112,7 @@ describe('CodeBlockSurface', () => {
             onTitleChange={onTitleChange}
             onLanguageChange={onLanguageChange}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
@@ -138,7 +138,6 @@ describe('CodeBlockSurface', () => {
       expect.objectContaining({
         readOnly: false,
         editorOptions: {
-          lineDecorationsWidth: 16,
           renderValidationDecorations: 'on',
         },
       }),

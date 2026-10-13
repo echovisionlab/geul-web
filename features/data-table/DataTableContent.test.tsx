@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { DataTableContent } from './DataTableContent';
 
 const mocks = vi.hoisted(() => ({
@@ -72,9 +73,9 @@ function renderContent(context: unknown, sortConfig = '[]', maxSorts = '3') {
 
   act(() => {
     root?.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <DataTableContent />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
 }
@@ -96,7 +97,7 @@ describe('DataTableContent', () => {
     expect(loader?.getAttribute('data-min-height')).toBe('0');
     expect(loader?.parentElement?.hasAttribute('data-datatable-loading')).toBe(true);
     expect(loader?.parentElement?.getAttribute('aria-busy')).toBe('true');
-    expect(loader?.parentElement?.style.position).toBe('relative');
+    expect(loader?.parentElement?.className).toContain('loading');
     expect(loader?.parentElement?.style.minHeight).toBe('240px');
 
     renderContent({
@@ -155,12 +156,16 @@ describe('DataTableContent', () => {
     expect(document.body.textContent).toContain('Alpha');
     expect(document.body.textContent).toContain('#3');
     expect(document.body.textContent).toContain('↓');
+    const sortButton = host!.querySelector<HTMLButtonElement>('button[aria-label="aria.sortBy:Name"]')!;
+    expect(document.getElementById(sortButton.getAttribute('aria-describedby')!)?.textContent).toBe(
+      'sort.aria.directionDescending',
+    );
 
     const alphaCheckbox = document.querySelector<HTMLInputElement>('input[aria-label="Select Alpha"]');
     alphaCheckbox?.click();
     expect(onSelectedRowKeysChange).toHaveBeenCalledWith([]);
 
-    const selectAll = document.querySelector<HTMLInputElement>('input[aria-label="Select all rows"]');
+    const selectAll = document.querySelector<HTMLInputElement>('input[aria-label="aria.selectAllRows"]');
     selectAll?.click();
     expect(onSelectedRowKeysChange).toHaveBeenCalledWith(['row-1', 'row-2']);
 

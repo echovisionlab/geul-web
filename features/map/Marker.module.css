@@ -20,9 +20,9 @@
   display: flex;
   flex-direction: row;
   height: 120px;
-  background-color: var(--mantine-color-body);
-  color: var(--mantine-color-text);
-  border: 1px solid var(--mantine-color-default-border);
+  background-color: var(--geul-background);
+  color: var(--geul-text-primary);
+  border: 1px solid var(--geul-border-default);
 }
 
 .imageContainer {
@@ -41,7 +41,7 @@
 .noImage {
   width: 120px;
   height: 120px;
-  background-color: var(--mantine-color-default-hover);
+  background-color: var(--geul-surface-hover);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,10 +50,10 @@
 
 .textContent {
   width: 194px;
-  padding: var(--mantine-spacing-xs);
+  padding: var(--geul-spacing-xs);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 4px;
+  gap: var(--geul-spacing-xxs);
   word-break: keep-all;
 }

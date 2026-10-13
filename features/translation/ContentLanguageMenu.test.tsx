@@ -1,14 +1,15 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import enMessages from '@/messages/en.json';
 import { ContentLanguageMenu } from './ContentLanguageMenu';
 
-vi.mock('@/components/core/DropdownMenu', async () => {
+vi.mock('@/components/core/DropdownMenu/OnDemandDropdownMenu', async () => {
   const React = await import('react');
 
   const DropdownMenuContext = React.createContext<{
@@ -72,7 +73,7 @@ vi.mock('@/components/core/DropdownMenu', async () => {
   }
 
   return {
-    DropdownMenu: Object.assign(MockDropdownMenu, {
+    OnDemandDropdownMenu: Object.assign(MockDropdownMenu, {
       Target: MockDropdownMenuTarget,
       Dropdown: MockDropdownMenuDropdown,
       Item: MockDropdownMenuItem,
@@ -118,7 +119,9 @@ function renderDropdownMenu(node: ReactNode) {
   act(() => {
     root?.render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <MantineProvider>{node}</MantineProvider>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
+          {node}
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
   });
@@ -160,58 +163,53 @@ describe('ContentLanguageMenu', () => {
     expect(document.body.textContent).toContain('English');
     expect(document.body.textContent).not.toContain('日本語');
     expect(document.body.textContent).not.toContain('Français');
-    expect(document.querySelector('button')?.textContent).toBe('EN');
+    expect(document.querySelector('button')?.textContent).toBe('English');
     expect(document.querySelector('[role="menuitem"][data-selected]')?.textContent).toBe('English');
   });
 
   it.each([
-    { name: 'with inventory', displayedLocale: 'ko', availableLocales: ['ko', 'en'], code: 'KO', label: '한국어' },
+    { name: 'with inventory', displayedLocale: 'ko', availableLocales: ['ko', 'en'], label: '한국어' },
     {
       name: 'with a listed target',
       displayedLocale: 'ko',
       availableLocales: ['ko', 'en', 'ja'],
-      code: 'KO',
       label: '한국어',
     },
-    { name: 'without inventory', displayedLocale: 'ko', availableLocales: undefined, code: 'KO', label: '한국어' },
+    { name: 'without inventory', displayedLocale: 'ko', availableLocales: undefined, label: '한국어' },
     {
       name: 'regional source',
       displayedLocale: 'pt-BR',
       availableLocales: undefined,
-      code: 'PT-BR',
       label: 'Português (Brasil)',
     },
-  ])(
-    'shows and selects the displayed source fallback $name',
-    async ({ displayedLocale, availableLocales, code, label }) => {
-      renderDropdownMenu(
-        <ContentLanguageMenu
-          pathname="/test"
-          query={{ lang: 'ja', page: '2', share: 'share-token' }}
-          requestedLocale="ja"
-          localizationInfo={{
-            displayedLocale,
-            sourceLocale: displayedLocale,
-            availableLocales,
-          }}
-        />,
-      );
+  ])('shows and selects the displayed source fallback $name', async ({ displayedLocale, availableLocales, label }) => {
+    renderDropdownMenu(
+      <ContentLanguageMenu
+        pathname="/test"
+        query={{ lang: 'ja', page: '2', share: 'share-token' }}
+        requestedLocale="ja"
+        localizationInfo={{
+          displayedLocale,
+          sourceLocale: displayedLocale,
+          availableLocales,
+        }}
+      />,
+    );
 
-      expect(document.querySelector('button')?.textContent).toBe(code);
-      expect(document.querySelector('button')?.getAttribute('aria-label')).toContain(label);
-      await clickElement(document.querySelector('button'));
+    expect(document.querySelector('button')?.textContent).toBe(label);
+    expect(document.querySelector('button')?.getAttribute('aria-label')).toContain(label);
+    await clickElement(document.querySelector('button'));
 
-      const selectedItems = document.querySelectorAll('[role="menuitem"][data-selected]');
-      expect(selectedItems).toHaveLength(1);
-      expect(selectedItems[0]?.textContent).toBe(`Original (${label})`);
-      expect(selectedItems[0]?.getAttribute('href')).toBe(`/test?page=2&share=share-token&lang=${displayedLocale}`);
-    },
-  );
+    const selectedItems = document.querySelectorAll('[role="menuitem"][data-selected]');
+    expect(selectedItems).toHaveLength(1);
+    expect(selectedItems[0]?.textContent).toBe(`Original (${label})`);
+    expect(selectedItems[0]?.getAttribute('href')).toBe(`/test?page=2&share=share-token&lang=${displayedLocale}`);
+  });
 
   it('keeps the requested locale when display metadata is absent', async () => {
     renderDropdownMenu(<ContentLanguageMenu pathname="/test" requestedLocale="pt-PT" />);
 
-    expect(document.querySelector('button')?.textContent).toBe('PT-PT');
+    expect(document.querySelector('button')?.textContent).toBe('Português (Portugal)');
     expect(document.querySelector('button')?.getAttribute('aria-label')).toContain('Português (Portugal)');
     await clickElement(document.querySelector('button'));
     expect(document.querySelector('[role="menuitem"][data-selected]')?.textContent).toBe(

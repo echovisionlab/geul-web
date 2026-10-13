@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemTestProvider as DesignSystemProvider } from '@/test/TestProviders';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { ProfileFormView, type ProfileFormViewLabels, type ProfileFormViewProps } from './ProfileFormView';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -49,10 +50,11 @@ const labels: ProfileFormViewLabels = {
   socialValue: 'URL or username',
   removeSocialLink: (position) => `Remove social link ${position}`,
   reorderSocialLink: (position) => `Reorder social link ${position}`,
+  reorderInstructions: 'Use the Up and Down arrow keys to change this link’s position.',
+  positionChanged: (position, count) => `Link moved to position ${position} of ${count}.`,
   submit: 'Update profile',
 };
 
-const onCopyUid = vi.fn();
 const onNicknameChange = vi.fn();
 const onNormalizeSocialLink = vi.fn((_platform: string, value: string) => value);
 const onSubmit = vi.fn();
@@ -73,7 +75,7 @@ const defaultProps: ProfileFormViewProps = {
     { value: 'github', label: 'GitHub', placeholder: 'https://github.com/username' },
   ],
   showExtendedFields: true,
-  events: { onCopyUid, onNicknameChange, onNormalizeSocialLink, onSubmit },
+  events: { onNicknameChange, onNormalizeSocialLink, onSubmit },
 };
 
 beforeEach(() => {
@@ -85,7 +87,6 @@ beforeEach(() => {
 afterEach(() => {
   act(() => root.unmount());
   container.remove();
-  onCopyUid.mockReset();
   onNicknameChange.mockReset();
   onNormalizeSocialLink.mockReset();
   onNormalizeSocialLink.mockImplementation((_platform, value) => value);
@@ -95,9 +96,9 @@ afterEach(() => {
 function renderView(overrides: Partial<ProfileFormViewProps> = {}) {
   act(() => {
     root.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <ProfileFormView {...defaultProps} {...overrides} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
 }
@@ -109,7 +110,9 @@ function setInputValue(input: HTMLInputElement, value: string) {
 }
 
 describe('ProfileFormView', () => {
-  it('renders display-ready values and forwards copy intent with semantic Core tones', () => {
+  it('renders display-ready values and copies the UID with semantic Core tones', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
     renderView();
 
     expect(container.querySelector<HTMLInputElement>('#profile-uid')?.value).toBe('usr_profile_1');
@@ -118,10 +121,11 @@ describe('ProfileFormView', () => {
     const copyButton = container.querySelector<HTMLButtonElement>('[aria-label="Copy UID"]');
     expect(copyButton?.dataset.tone).toBe('neutral');
 
-    act(() => copyButton?.click());
-    expect(onCopyUid).toHaveBeenCalledOnce();
+    await act(async () => copyButton?.click());
+    expect(writeText).toHaveBeenCalledWith('usr_profile_1');
+    expect(copyButton?.dataset.tone).toBe('positive');
 
-    for (const control of container.querySelectorAll<HTMLElement>('[data-tone]')) {
+    for (const control of container.querySelectorAll<HTMLElement>('[data-control-kind][data-tone]')) {
       expect(['accent', 'neutral', 'positive', 'warning', 'danger']).toContain(control.dataset.tone);
     }
   });
@@ -138,10 +142,12 @@ describe('ProfileFormView', () => {
     );
     act(() => addButton?.click());
     expect(container.querySelectorAll('[data-social-link-row]')).toHaveLength(2);
+    expect(container.querySelector('[data-social-link-row="new-0"]')?.contains(document.activeElement)).toBe(true);
 
     const removeSecond = container.querySelector<HTMLButtonElement>('[aria-label="Remove social link 2"]');
     act(() => removeSecond?.click());
     expect(container.querySelectorAll('[data-social-link-row]')).toHaveLength(1);
+    expect(document.activeElement).toBe(container.querySelector('[aria-label="Remove social link 1"]'));
 
     const form = container.querySelector('form');
     act(() => {
@@ -186,10 +192,19 @@ describe('ProfileFormView', () => {
     const firstReorderButton = container.querySelector<HTMLButtonElement>(
       '[data-social-link-row="instagram"] [aria-label="Reorder social link 1"]',
     );
+    firstReorderButton?.focus();
     act(() => firstReorderButton?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true })));
 
     const rows = Array.from(container.querySelectorAll<HTMLElement>('[data-social-link-row]'));
     expect(rows.map((row) => row.dataset.socialLinkRow)).toEqual(['github', 'instagram']);
+    expect(document.activeElement).toBe(firstReorderButton);
+    expect(firstReorderButton?.getAttribute('aria-keyshortcuts')).toBe('ArrowUp ArrowDown');
+    expect(document.getElementById(firstReorderButton!.getAttribute('aria-describedby')!)?.textContent).toBe(
+      labels.reorderInstructions,
+    );
+    expect(Array.from(container.querySelectorAll('[role="status"]'), (status) => status.textContent)).toContain(
+      'Link moved to position 2 of 2.',
+    );
 
     act(() => {
       container.querySelector('form')?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
@@ -290,6 +305,10 @@ describe('ProfileFormView', () => {
 
     expect(container.querySelector<HTMLInputElement>('#profile-nickname')?.disabled).toBe(true);
     expect(container.querySelector<HTMLTextAreaElement>('#profile-bio')?.disabled).toBe(true);
-    expect(container.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(true);
+    const save = Array.from(container.querySelectorAll<HTMLButtonElement>('button')).find((button) =>
+      button.textContent?.includes(labels.submit),
+    );
+    expect(save?.disabled).toBe(true);
+    expect(save?.getAttribute('data-loading')).toBe('true');
   });
 });

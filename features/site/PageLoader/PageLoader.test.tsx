@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { PageLoader } from './PageLoader';
 
 let settingsMock = {
@@ -96,18 +97,18 @@ describe('PageLoader', () => {
     };
     const random = vi.spyOn(Math, 'random');
     const serverMarkup = renderToStaticMarkup(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <PageLoader />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
     expect(serverMarkup).toContain('first.gif?version=2');
     expect(serverMarkup).not.toContain('rel="preload" as="image"');
 
     act(() => {
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <PageLoader />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
@@ -117,9 +118,9 @@ describe('PageLoader', () => {
     expect(image?.getAttribute('data-preload')).toBe('undefined');
     act(() =>
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <PageLoader />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       ),
     );
     expect(container?.querySelector('img')?.getAttribute('src')).toBe(image?.getAttribute('src'));
@@ -131,9 +132,9 @@ describe('PageLoader', () => {
 
     act(() => {
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <PageLoader />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
@@ -147,17 +148,17 @@ describe('PageLoader', () => {
     settingsMock = { loader_urls: ['https://cdn.example.com/loader.gif'] };
     act(() =>
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <PageLoader message="불러오는 중..." />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       ),
     );
     expect(container?.querySelector('[role="status"]')?.textContent).toBe('');
     act(() =>
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <PageLoader message="Redirecting to sign in" />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       ),
     );
     expect(container?.textContent).toContain('Redirecting to sign in');
@@ -167,9 +168,9 @@ describe('PageLoader', () => {
     settingsMock = { loader_urls: ['/asset/configured-loader.gif?version=2'] };
     act(() =>
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <PageLoader />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       ),
     );
     expect(container?.querySelector('img')?.getAttribute('src')).toBe(
@@ -182,9 +183,9 @@ describe('PageLoader', () => {
     settingsMock = { loader_urls: ['https://cdn.example.com/loader.gif'] };
     act(() =>
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <PageLoader size="sm" minHeight={300} />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       ),
     );
     expect(container?.querySelector('img')?.getAttribute('width')).toBe('64');
@@ -195,9 +196,9 @@ describe('PageLoader', () => {
     settingsMock = { loader_urls: ['https://cdn.example.com/replacement.svg?version=2'] };
     act(() =>
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <PageLoader size="sm" minHeight={300} />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       ),
     );
     expect(container?.querySelector('img')?.getAttribute('src')).toContain('replacement.svg');

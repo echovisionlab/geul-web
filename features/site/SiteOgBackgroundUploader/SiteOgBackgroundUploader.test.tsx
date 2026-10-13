@@ -40,7 +40,7 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string, values?: Record<string, string>) => values?.label ?? key,
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: {
     show: vi.fn(),
   },

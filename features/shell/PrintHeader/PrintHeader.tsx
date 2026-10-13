@@ -1,6 +1,7 @@
 'use client';
 
-import { useComputedColorScheme } from '@mantine/core';
+import { useComputedColorScheme } from '@/lib/providers/DesignSystemProvider';
+
 import { PrintHeaderView } from '@/features/shell/ui/PrintHeader';
 import { useSiteSettings } from '@/lib/contexts/ManifestContext';
 import { toCdnUrl } from '@/lib/utils/file-url';
@@ -8,7 +9,7 @@ import { selectThemeAssetUrl } from '@/lib/utils/theme-asset';
 
 export function PrintHeader() {
   const { settings } = useSiteSettings();
-  const colorScheme = useComputedColorScheme('light');
+  const colorScheme = useComputedColorScheme();
   const logoUrl = selectThemeAssetUrl(colorScheme, {
     lightUrl: settings.logo_light_url,
     darkUrl: settings.logo_dark_url,

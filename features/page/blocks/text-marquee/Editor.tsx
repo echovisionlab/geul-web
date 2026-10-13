@@ -1,12 +1,18 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutStack as DsLayoutStack,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+import { VisuallyHidden, Text as DsText } from '@/components/core/Typography';
+import { useCallback, useId, useMemo } from 'react';
+import { usePageSectionDragAccessibility } from '@/features/page/PageEditor/usePageSectionDragAccessibility';
 import { closestCenter, DndContext, type DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableSurface, useSortableItem } from '@/components/core/Sortable';
 import { IconGripVertical, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Box, Divider, Group, Stack, Text } from '@mantine/core';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { TextInput } from '@/components/core/Input';
@@ -36,7 +42,7 @@ interface SortableTextMarqueeItemRowProps {
   onRemove: (index: number) => void;
 }
 
-function SortableTextMarqueeItemRow({
+export function SortableTextMarqueeItemRow({
   id,
   index,
   item,
@@ -47,71 +53,71 @@ function SortableTextMarqueeItemRow({
   onChange,
   onRemove,
 }: SortableTextMarqueeItemRowProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const descriptionId = useId();
+  const sortable = useSortableItem({
     id,
   });
 
   return (
-    <Box
-      ref={setNodeRef}
-      py="xs"
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.5 : 1,
-        borderBottom: '1px solid var(--mantine-color-default-border)',
-      }}
-    >
-      <Group gap="xs" align="flex-end" wrap="nowrap">
-        <IconButton
-          emphasis="low"
-          size="xs"
-          style={{ cursor: 'grab', flexShrink: 0 }}
-          {...attributes}
-          {...listeners}
-          aria-label={dragLabel}
-        >
-          <IconGripVertical size={14} />
-        </IconButton>
-        <Text size="xs" c="dimmed" w={24} ta="right" style={{ flexShrink: 0 }}>
-          {index}
-        </Text>
-        <TextInput
-          label={textLabel}
-          value={item.text}
-          onChange={(event) =>
-            onChange(index, {
-              ...item,
-              text: event.currentTarget.value,
-            })
-          }
-          size="xs"
-          style={{ flex: 1, minWidth: 0 }}
-        />
-        <TextInput
-          label={hrefLabel}
-          value={item.href}
-          onChange={(event) =>
-            onChange(index, {
-              ...item,
-              href: event.currentTarget.value,
-            })
-          }
-          size="xs"
-          style={{ flex: 1, minWidth: 0 }}
-        />
-        <IconButton
-          tone="danger"
-          emphasis="low"
-          size="xs"
-          onClick={() => onRemove(index)}
-          aria-label={removeLabel}
-          style={{ flexShrink: 0 }}
-        >
-          <IconTrash size={14} />
-        </IconButton>
-      </Group>
-    </Box>
+    <SortableSurface ref={sortable.setNodeRef} motion={sortable.motion}>
+      <DsLayoutInset block="xxs" role="group" aria-label={`${textLabel} ${index + 1}`} aria-describedby={descriptionId}>
+        <VisuallyHidden id={descriptionId}>
+          {index + 1}
+          {item.text ? ` · ${item.text}` : ''}
+        </VisuallyHidden>
+        <DsLayoutInline gap="xxs" align="end" wrap="nowrap">
+          <IconButton
+            emphasis="low"
+            interaction="drag-handle"
+            draggable={false}
+            {...sortable.handle}
+            aria-label={dragLabel}
+            aria-describedby={[sortable.handle['aria-describedby'], descriptionId].filter(Boolean).join(' ')}
+          >
+            <IconGripVertical aria-hidden />
+          </IconButton>
+          <DsText as="span" size="xs" tone="secondary" shrink={false}>
+            {index + 1}
+          </DsText>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <TextInput
+              grow
+              label={textLabel}
+              value={item.text}
+              onChange={(event) =>
+                onChange(index, {
+                  ...item,
+                  text: event.currentTarget.value,
+                })
+              }
+            />
+          </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <TextInput
+              grow
+              label={hrefLabel}
+              value={item.href}
+              onChange={(event) =>
+                onChange(index, {
+                  ...item,
+                  href: event.currentTarget.value,
+                })
+              }
+            />
+          </div>
+          <IconButton
+            tone="danger"
+            emphasis="low"
+            size="compact"
+            onClick={() => onRemove(index)}
+            aria-label={removeLabel}
+            aria-describedby={descriptionId}
+          >
+            <IconTrash size={14} />
+          </IconButton>
+        </DsLayoutInline>
+      </DsLayoutInset>
+    </SortableSurface>
   );
 }
 
@@ -135,6 +141,10 @@ function TextMarqueeSettingsForm({ props, updateProps }: TextMarqueeSettingsForm
   const tb = (key: TextMarqueeEditorMessageKey, _fallback: string) => tPageEditor(key);
   const sensors = useSortableSensors();
   const items = useMemo(() => parseTextMarqueeEditorItems(props.itemsJson), [props.itemsJson]);
+  const dragAccessibility = usePageSectionDragAccessibility(
+    items.map((item, index) => ({ id: String(index), type: 'text-marquee', props: { text: item.text } })),
+    (section) => String(section.props?.text || tb('blockEditor.labels.marqueeItemText', 'Text')),
+  );
   const sortableIds = useMemo(() => items.map((_, index) => String(index)), [items]);
 
   const updateProp = useCallback(
@@ -188,24 +198,29 @@ function TextMarqueeSettingsForm({ props, updateProps }: TextMarqueeSettingsForm
   );
 
   return (
-    <Stack gap="sm" data-page-block-editor="text-marquee">
-      <Group justify="space-between" gap="sm" align="center">
-        <Stack gap={2}>
-          <Text size="xs" c="dimmed" fw={500}>
+    <DsLayoutStack gap="lg" data-page-block-editor="text-marquee">
+      <DsLayoutInline justify="between" gap="sm" align="center">
+        <DsLayoutStack gap="xxs">
+          <DsText size="xs" tone="secondary" weight="medium">
             {tb('blockEditor.sections.content', 'Content')}
-          </Text>
-          <Text size="xs" c="dimmed">
+          </DsText>
+          <DsText size="xs" tone="secondary">
             {tb('blockEditor.descriptions.marqueeTextItems', 'Add text items one by one.')}
-          </Text>
-        </Stack>
+          </DsText>
+        </DsLayoutStack>
         <Button size="xs" emphasis="medium" leftSection={<IconPlus size={14} />} onClick={handleItemAdd}>
           {tb('blockEditor.actions.addMarqueeItem', 'Add item')}
         </Button>
-      </Group>
+      </DsLayoutInline>
       {items.length > 0 ? (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext
+          accessibility={dragAccessibility}
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
           <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
-            <Stack gap={0}>
+            <DsLayoutStack gap="none">
               {items.map((item, index) => (
                 <SortableTextMarqueeItemRow
                   key={sortableIds[index]}
@@ -220,15 +235,14 @@ function TextMarqueeSettingsForm({ props, updateProps }: TextMarqueeSettingsForm
                   onRemove={handleItemRemove}
                 />
               ))}
-            </Stack>
+            </DsLayoutStack>
           </SortableContext>
         </DndContext>
       ) : (
         <>
-          <Divider />
-          <Text size="xs" c="dimmed">
+          <DsText size="xs" tone="secondary">
             {tb('blockEditor.empty.marqueeItems', 'No items yet.')}
-          </Text>
+          </DsText>
         </>
       )}
       <MarqueeCommonFields
@@ -242,7 +256,7 @@ function TextMarqueeSettingsForm({ props, updateProps }: TextMarqueeSettingsForm
         linkTarget={props.linkTarget || 'same-tab'}
         onUpdate={updateProp}
       />
-    </Stack>
+    </DsLayoutStack>
   );
 }
 

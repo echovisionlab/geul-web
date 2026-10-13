@@ -196,10 +196,12 @@ export function ShaderPreviewSurface({
       />
       <ExecutableRuntimeStatus status={status} running={labels.running} stopped={labels.stopped} />
       {error ? (
-        <Alert className={classes.error} tone="danger" title={labels.error} data-testid="shader-error">
-          {error.message}
-          {error.line ? ` (${error.line}:${error.column ?? 1})` : ''}
-        </Alert>
+        <div className={classes.error}>
+          <Alert tone="danger" title={labels.error} data-testid="shader-error">
+            {error.message}
+            {error.line ? ` (${error.line}:${error.column ?? 1})` : ''}
+          </Alert>
+        </div>
       ) : null}
     </div>
   );

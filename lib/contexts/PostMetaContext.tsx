@@ -11,7 +11,7 @@ import { useBlockRoomConnection, type BlockRoomConnection } from '@/lib/collab/u
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 
-interface PostMetaContextValue {
+export interface PostMetaContextValue {
   sourceTitle: string;
   sourceSummary: string;
   setSourceTitle: (title: string) => void;
@@ -43,6 +43,9 @@ interface PostMetaContextValue {
 }
 
 const PostMetaContext = createContext<PostMetaContextValue | null>(null);
+
+/** Same state contract for local composition previews and the connected provider. */
+export const PostMetaStateProvider = PostMetaContext.Provider;
 interface PostMetaProviderProps {
   postId: string;
   initialMeta: PostMeta;

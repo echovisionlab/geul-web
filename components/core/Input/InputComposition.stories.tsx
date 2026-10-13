@@ -1,7 +1,8 @@
-import type { SubmitEvent } from 'react';
+import { localizeFixtureTree, useStorybookText } from '@/.storybook/fixture-i18n';
+import { useState, type SubmitEvent } from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
-import { Stack } from '@mantine/core';
+import { LayoutStack as Stack } from '../Layout';
 import { Button } from '../Button';
 import { Checkbox } from './Checkbox';
 import { MultiSelect } from './MultiSelect';
@@ -14,14 +15,18 @@ interface ProfileFormCompositionProps {
 }
 
 function ProfileFormComposition({ onSubmit }: ProfileFormCompositionProps) {
+  const text = useStorybookText();
+  const [saved, setSaved] = useState(false);
+
   const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     onSubmit();
+    setSaved(true);
   };
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <Stack gap="md" w="min(420px, 88vw)">
+  return localizeFixtureTree(
+    <form onSubmit={handleSubmit} onChange={() => setSaved(false)}>
+      <Stack gap="md">
         <TextInput label="Display name" placeholder="Enter a display name" required />
         <Select label="Language" placeholder="Choose a language" data={['English', 'Korean', 'Japanese']} />
         <MultiSelect
@@ -31,14 +36,17 @@ function ProfileFormComposition({ onSubmit }: ProfileFormCompositionProps) {
         />
         <Textarea label="Bio" placeholder="Write a short bio" minRows={4} />
         <Checkbox label="Show this profile publicly" defaultChecked />
-        <Button type="submit">Save profile</Button>
+        <Button type="submit" disabled={saved}>
+          {saved ? 'Profile saved' : 'Save profile'}
+        </Button>
       </Stack>
-    </form>
+    </form>,
+    text,
   );
 }
 
 const meta = {
-  title: 'Core/Input/Composition/ProfileForm',
+  title: 'Composition/Profile Form',
   component: ProfileFormComposition,
   parameters: { layout: 'centered' },
   args: { onSubmit: () => {} },

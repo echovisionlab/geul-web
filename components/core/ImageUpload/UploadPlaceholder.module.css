@@ -3,78 +3,78 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: var(--geul-spacing-xs);
   width: 100%;
-  padding: 1rem;
-  border: 1px dashed var(--mantine-color-default-border);
-  border-radius: 0;
+  padding: var(--geul-spacing-md);
+  border: var(--geul-border-thin) dashed var(--geul-border-default);
+  border-radius: var(--geul-radius-square);
   background: transparent;
-  color: var(--mantine-color-text);
+  color: var(--geul-text-primary);
   text-align: center;
-  transition:
-    border-color 0.16s ease,
-    background-color 0.16s ease;
+  transition: border-color var(--geul-motion-normal) var(--geul-motion-easing);
+}
+
+.surface[data-shape='circle'] {
+  border-radius: var(--geul-radius-circle);
 }
 
 .surface[data-interactive='true'] {
   cursor: pointer;
 }
 
-.surface[data-interactive='true']:hover {
-  border-color: var(--mantine-color-default-border);
-  background: var(--mantine-color-default-hover);
-}
-
+.surface[data-interactive='true']:hover,
 .surface[data-drop-active='true'] {
-  border-color: var(--mantine-primary-color-filled);
-  background: var(--mantine-primary-color-light);
+  border-color: var(--geul-border-strong);
 }
 
 .surface[data-compact='true'] {
   container-type: inline-size;
-  gap: 0.375rem;
+  gap: var(--geul-spacing-xxs);
   overflow: hidden;
-  padding: 0.5rem;
+  padding: var(--geul-spacing-xs);
 }
 
 .icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--mantine-color-dimmed);
+  color: var(--geul-text-muted);
+  font-size: var(--geul-spacing-xl);
+}
+
+.icon[data-size='sm'] {
+  font-size: var(--geul-font-size-xl);
+}
+
+.icon[data-size='lg'] {
+  font-size: var(--geul-control-height-lg);
+}
+
+.surface[data-compact='true'] .icon {
+  font-size: var(--geul-chrome-icon-size);
+}
+
+.icon svg {
+  width: 1em;
+  height: 1em;
 }
 
 .text {
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: var(--geul-spacing-xxs);
   width: 100%;
   max-width: 26rem;
 }
 
-.statusRow {
-  min-width: 0;
-}
-
-.title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1.35;
-  letter-spacing: -0.01em;
-}
-
-.description {
-  color: var(--mantine-color-dimmed);
-  font-size: 0.75rem;
-  line-height: 1.45;
-}
-
-.progress {
-  width: 100%;
-}
-
 @container (max-width: 18rem) {
-  .surface[data-compact='true'] .description {
-    display: none;
+  .surface[data-compact='true'] .text {
+    overflow: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .surface {
+    transition: none;
   }
 }

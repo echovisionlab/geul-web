@@ -5,8 +5,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { EditorMediaCommandPort, SelectedFileBlock } from '../lib/media-block-updates';
 import { DefaultFileToolbarButtons } from './FileToolbarButtons';
-
-vi.mock('next-intl', () => ({ useLocale: () => 'en' }));
+import { TestProviders } from '@/test/TestProviders';
 
 const imageBlock: SelectedFileBlock = {
   id: 'block-image-1',
@@ -44,7 +43,9 @@ describe('DefaultFileToolbarButtons', () => {
 
     act(() =>
       root?.render(
-        <DefaultFileToolbarButtons port={port} selectedBlock={imageBlock} onOpenMediaIngest={onOpenMediaIngest} />,
+        <TestProviders>
+          <DefaultFileToolbarButtons port={port} selectedBlock={imageBlock} onOpenMediaIngest={onOpenMediaIngest} />
+        </TestProviders>,
       ),
     );
     const replace = container.querySelector('[data-test="replaceFileButton"]') as HTMLButtonElement;
@@ -64,11 +65,13 @@ describe('DefaultFileToolbarButtons', () => {
 
     act(() =>
       root?.render(
-        <DefaultFileToolbarButtons
-          port={createPort(busyBlock)}
-          selectedBlock={busyBlock}
-          onOpenMediaIngest={vi.fn()}
-        />,
+        <TestProviders>
+          <DefaultFileToolbarButtons
+            port={createPort(busyBlock)}
+            selectedBlock={busyBlock}
+            onOpenMediaIngest={vi.fn()}
+          />
+        </TestProviders>,
       ),
     );
 

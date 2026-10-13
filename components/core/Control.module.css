@@ -1,0 +1,457 @@
+/* One action family. React Aria owns interaction; Core owns geometry and states. */
+.root {
+  --_action-ink: var(--geul-action-ink);
+  --_action-ink-muted: var(--geul-action-ink-muted);
+  --_action-fill: var(--geul-action-primary);
+  --_action-fill-hover: var(--geul-action-primary-hover);
+  --_action-fill-pressed: var(--geul-action-primary-pressed);
+  --_action-boundary: var(--geul-action-boundary);
+  appearance: none;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  max-width: 100%;
+  margin: 0;
+  border: var(--geul-border-thin) solid transparent;
+  border-radius: var(--geul-radius-square);
+  padding: 0 var(--geul-control-padding-standard);
+  background: transparent;
+  color: var(--_action-ink);
+  font-family: inherit;
+  font-size: var(--geul-font-size-sm);
+  font-weight: var(--geul-font-weight-medium);
+  line-height: var(--geul-line-height-sm);
+  letter-spacing: 0;
+  text-decoration: none;
+  text-underline-offset: var(--geul-spacing-xxs);
+  text-decoration-thickness: var(--geul-border-thin);
+  cursor: pointer;
+  box-shadow: none;
+  transition:
+    color var(--geul-motion-fast) var(--geul-motion-easing),
+    background-color var(--geul-motion-fast) var(--geul-motion-easing),
+    border-color var(--geul-motion-fast) var(--geul-motion-easing);
+}
+
+.root[data-tone='accent'] {
+  --_action-ink: var(--geul-status-accent);
+  --_action-ink-muted: var(--geul-status-accent);
+  --_action-fill: var(--geul-action-accent);
+  --_action-fill-hover: var(--geul-action-accent-hover);
+  --_action-fill-pressed: var(--geul-action-accent-pressed);
+  --_action-boundary: var(--geul-status-accent);
+}
+
+.root[data-tone='positive'] {
+  --_action-ink: var(--geul-status-positive);
+  --_action-ink-muted: var(--geul-status-positive);
+  --_action-fill: var(--geul-action-positive);
+  --_action-fill-hover: var(--geul-action-positive-hover);
+  --_action-fill-pressed: var(--geul-action-positive-pressed);
+  --_action-boundary: var(--geul-status-positive);
+}
+
+.root[data-tone='warning'] {
+  --_action-ink: var(--geul-status-warning);
+  --_action-ink-muted: var(--geul-status-warning);
+  --_action-fill: var(--geul-action-warning);
+  --_action-fill-hover: var(--geul-action-warning-hover);
+  --_action-fill-pressed: var(--geul-action-warning-pressed);
+  --_action-boundary: var(--geul-status-warning);
+}
+
+.root[data-tone='danger'] {
+  --_action-ink: var(--geul-status-danger);
+  --_action-ink-muted: var(--geul-status-danger);
+  --_action-fill: var(--geul-action-danger);
+  --_action-fill-hover: var(--geul-action-danger-hover);
+  --_action-fill-pressed: var(--geul-action-danger-pressed);
+  --_action-boundary: var(--geul-status-danger);
+}
+
+.root[data-emphasis='low'] {
+  color: var(--_action-ink-muted);
+}
+
+.root[data-emphasis='outline'] {
+  border-color: var(--_action-boundary);
+}
+
+.root[data-emphasis='strong'] {
+  border: 0;
+  background: var(--_action-fill);
+  color: var(--geul-text-on-action);
+}
+
+/* Persistent selection is a state signal, not a principal commit action. */
+.root:not([data-emphasis='strong']):is([aria-pressed='true'], [aria-current='page'], [aria-current='true']) {
+  background: var(--geul-surface-muted);
+  color: var(--_action-ink);
+}
+
+.root:not([data-emphasis='strong']):not([data-tone='inverse']):not([data-tone='inverse-secondary']):not(
+    [data-tone='inherit']
+  ):not([data-disabled]):not([data-pending]):is(:hover, [data-hovered]) {
+  color: var(--_action-ink);
+}
+/* Inline text uses a glyph signal; control actions use a surface signal. */
+a.root[data-control-kind='text']:is([data-emphasis='low'], [data-emphasis='medium']):not([data-disabled]):is(
+    :hover,
+    [data-hovered]
+  ) {
+  text-decoration: underline;
+  text-underline-offset: var(--geul-spacing-xxs);
+  text-decoration-thickness: var(--geul-border-thin);
+}
+
+button.root[data-control-kind='text']:not([data-disabled]):is(:hover, [data-hovered]),
+.root[data-control-kind='button']:is([data-emphasis='low'], [data-emphasis='medium']):not([data-disabled]):not(
+    [data-pending]
+  ):is(:hover, [data-hovered]),
+.root[data-control-kind='icon']:not([data-emphasis='strong']):not([data-disabled]):not([data-pending]):is(
+    :hover,
+    [data-hovered]
+  ) {
+  background: var(--geul-surface-hover);
+}
+
+.root[data-emphasis='outline']:not([data-disabled]):not([data-pending]):is(:hover, [data-hovered]) {
+  border-color: currentColor;
+}
+
+.root[data-emphasis='strong']:not([data-disabled]):not([data-pending]):is(:hover, [data-hovered]) {
+  background: var(--_action-fill-hover);
+}
+
+.root:not([data-emphasis='strong']):not([data-disabled]):not([data-pending]):active,
+.root:not([data-emphasis='strong']):not([data-disabled]):not([data-pending])[data-pressed] {
+  background: var(--geul-surface-active);
+}
+
+.root[data-emphasis='strong']:not([data-disabled]):not([data-pending]):active,
+.root[data-emphasis='strong']:not([data-disabled]):not([data-pending])[data-pressed] {
+  background: var(--_action-fill-pressed);
+}
+
+.root:is(:focus-visible, [data-focus-visible]) {
+  outline: var(--geul-border-focus) solid var(--geul-focus);
+  outline-offset: var(--geul-border-focus);
+}
+
+.root:is(:disabled, [data-disabled]) {
+  color: var(--geul-text-muted);
+  opacity: var(--geul-opacity-disabled);
+  cursor: not-allowed;
+}
+
+.root[data-emphasis='strong']:is(:disabled, [data-disabled]) {
+  background: var(--geul-surface-muted);
+  border-color: var(--geul-action-boundary);
+}
+
+.root[data-pending] {
+  cursor: progress;
+}
+
+.root[data-loading] .label,
+.root[data-loading] .section {
+  opacity: var(--geul-opacity-disabled);
+}
+
+.root[data-full-width] {
+  width: 100%;
+}
+
+.root[data-justify='start'] {
+  justify-content: flex-start;
+}
+
+.root[data-justify='between'] .inner {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.root[data-control-size='xs'] {
+  --_control-height: var(--geul-control-height-xs);
+}
+
+.root[data-control-size='sm'] {
+  --_control-height: var(--geul-control-height-sm);
+}
+
+.root[data-control-size='md'] {
+  --_control-height: var(--geul-control-height-md);
+}
+
+.root[data-control-size='lg'] {
+  --_control-height: var(--geul-control-height-lg);
+}
+
+.root[data-control-size='xl'] {
+  --_control-height: var(--geul-control-height-xl);
+}
+
+.root[data-control-size='chrome'] {
+  --_control-height: var(--geul-control-height-chrome);
+}
+
+.root[data-control-size] {
+  min-height: max(var(--_control-height), var(--geul-interaction-minimum));
+}
+
+.root:is([data-control-kind='button'], [data-control-kind='icon'])[data-control-size] {
+  height: max(var(--_control-height), var(--geul-interaction-minimum));
+}
+
+.root[data-control-kind='button'][data-size='xs'] {
+  font-size: var(--geul-font-size-xs);
+  padding-inline: var(--geul-control-padding-xs);
+}
+
+.root[data-control-kind='button'][data-size='xs'][data-geul-control-header-density='compact'] {
+  padding-inline: var(--geul-control-padding-compact);
+}
+
+.root[data-geul-control-header-density='compact'] .inner {
+  gap: var(--geul-spacing-role-control-label-compact);
+}
+
+.root[data-control-kind='button']:is([data-size='lg'], [data-size='xl']) {
+  font-size: var(--geul-font-size-md);
+  padding-inline: var(--geul-control-padding-large);
+}
+
+.root[data-control-kind='button'][data-size='compact'] {
+  min-height: max(var(--geul-control-height-compact), var(--geul-interaction-minimum));
+  padding-inline: var(--geul-control-padding-compact);
+  font-size: var(--geul-font-size-xs);
+}
+
+.root[data-control-kind='icon'] {
+  width: max(var(--_control-height), var(--geul-interaction-minimum));
+  padding: 0;
+}
+
+.root[data-shape='circle'] {
+  border-radius: var(--geul-radius-circle);
+}
+
+.root[data-interaction='drag-handle'] {
+  cursor: grab;
+  touch-action: none;
+}
+
+/* A grip is a sensor affordance. Its target remains stable in the leading track;
+ * hover and press strengthen the ink without painting a command-sized square. */
+.root[data-control-kind='icon'][data-interaction='drag-handle']:not([data-disabled]):not([data-pending]):is(
+    :hover,
+    [data-hovered],
+    :active,
+    [data-pressed],
+    [aria-pressed='true']
+  ) {
+  background: transparent;
+  color: var(--_action-ink);
+}
+
+/* Icon glyphs use one Core size regardless of a library's intrinsic SVG size.
+ * Keep the independently sized hit area and avatar/media children intact. */
+.root[data-control-kind='icon'] svg {
+  width: var(--geul-chrome-icon-size);
+  height: var(--geul-chrome-icon-size);
+}
+
+.root[data-interaction='drag-handle']:not([data-disabled]):is(:active, [data-pressed]) {
+  cursor: grabbing;
+}
+
+.root[data-interaction='drag-handle'][data-disabled] {
+  cursor: not-allowed;
+  touch-action: auto;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: inherit;
+  min-width: 0;
+  gap: var(--geul-spacing-role-control-label);
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.section {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.section > :is(svg, img) {
+  max-width: var(--geul-chrome-icon-size);
+  max-height: var(--geul-chrome-icon-size);
+}
+
+/* Command glyphs belong to Core, including icons wrapped by a status/tooltip.
+ * Media in a section keeps its own aspect ratio. */
+.section svg {
+  display: block;
+  width: var(--geul-chrome-icon-size);
+  height: var(--geul-chrome-icon-size);
+  flex: none;
+}
+
+.indicator {
+  flex: none;
+  width: var(--geul-chrome-icon-size);
+  height: var(--geul-chrome-icon-size);
+  transition: transform var(--geul-motion-fast) var(--geul-motion-easing);
+}
+
+.root[aria-expanded='true'] .indicator {
+  transform: rotate(180deg);
+}
+
+.spinner {
+  position: absolute;
+  width: var(--geul-chrome-icon-size);
+  height: var(--geul-chrome-icon-size);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    transition: none;
+  }
+
+  .indicator {
+    transition: none;
+  }
+}
+
+@media print {
+  .root[data-print-visibility='hidden'] {
+    display: none;
+  }
+}
+
+.root[data-control-kind='icon'][data-placement='overlay-start'] {
+  position: absolute;
+  inset-block-start: var(--geul-spacing-md);
+  inset-inline-start: var(--geul-spacing-md);
+  z-index: var(--geul-layer-popup);
+}
+
+.root[data-control-kind='icon'][data-placement='overlay-end'] {
+  position: absolute;
+  inset-block-start: calc(-1 * var(--geul-spacing-xxs));
+  inset-inline-end: calc(-1 * var(--geul-spacing-xxs));
+  z-index: var(--geul-layer-popup);
+}
+
+.root[data-control-kind='icon'][data-placement='overlay-end-inside'] {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  z-index: var(--geul-layer-popup);
+}
+
+.root[data-control-kind='button'][data-label-wrap='wrap'] {
+  height: auto;
+  padding-block: var(--geul-spacing-xs);
+}
+
+.root[data-label-wrap='wrap'] .label {
+  white-space: normal;
+  overflow: visible;
+  text-align: center;
+}
+
+.counter {
+  position: absolute;
+  inset-block-start: calc(-1 * var(--geul-spacing-xxs));
+  inset-inline-end: calc(-1 * var(--geul-spacing-xxs));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: calc(var(--geul-font-size-xs) + var(--geul-spacing-xxs));
+  padding: 0 var(--geul-spacing-xxs);
+  font-size: var(--geul-font-size-xs);
+  line-height: var(--geul-line-height-xs);
+  font-weight: var(--geul-font-weight-medium);
+  background: var(--_action-fill);
+  color: var(--geul-text-on-action);
+  border: var(--geul-border-thin) solid var(--geul-action-boundary);
+  pointer-events: none;
+}
+
+.root[data-contrast='inverse']:is([data-tone='neutral'], [data-tone='accent']):not([data-emphasis='strong']) {
+  color: var(--geul-text-inverse-primary);
+}
+
+.root[data-contrast='inverse']:is([data-tone='neutral'], [data-tone='accent']):not([data-emphasis='strong']):not(
+    [data-disabled]
+  ):not([data-pending]):is(:hover, [data-hovered], [data-pressed]) {
+  color: var(--geul-text-inverse-primary);
+  background: var(--geul-overlay-control);
+}
+
+.root[data-contrast='inverse']:is([data-tone='neutral'], [data-tone='accent'])[data-emphasis='strong'] {
+  background: var(--geul-text-inverse-primary);
+  color: var(--geul-paper-ink);
+}
+
+.root[data-contrast='inverse'][data-emphasis='outline'] {
+  border-color: var(--geul-overlay-control-border);
+}
+
+.root[data-contrast='inverse']:is(:focus-visible, [data-focus-visible]) {
+  outline-color: var(--geul-text-inverse-primary);
+}
+
+.root[data-geul-control-toolbar-density='compact']:is(:focus-visible, [data-focus-visible]) {
+  outline-offset: calc(-1 * var(--geul-border-focus));
+}
+
+.root[data-control-size='compact'] {
+  --_control-height: var(--geul-control-height-compact);
+}
+
+.root[data-control-kind='icon'][data-placement='overlay-start-inside'] {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: var(--geul-layer-popup);
+}
+
+/* Photo overlays need contrast against authored pixels in both app themes. */
+.root[data-control-kind='icon'][data-contrast='inverse']:is(
+    [data-placement='overlay-start-inside'],
+    [data-placement='overlay-end-inside']
+  ) {
+  color: var(--geul-text-on-image);
+  background: var(--geul-overlay-control);
+}
+
+.root[data-control-kind='icon'][data-contrast='inverse']:is(
+    [data-placement='overlay-start-inside'],
+    [data-placement='overlay-end-inside']
+  ):not([data-disabled]):not([data-pending]):is(:hover, [data-hovered], [data-pressed]) {
+  color: var(--geul-text-on-image);
+  background: var(--geul-overlay-strong);
+}
+
+/* Standalone chrome navigation is actionable; prose links retain natural line flow. */
+@media (any-pointer: coarse) {
+  .root[data-control-kind='text'][data-density='chrome'] {
+    min-height: var(--geul-interaction-minimum);
+  }
+}

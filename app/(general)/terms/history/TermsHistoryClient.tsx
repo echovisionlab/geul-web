@@ -5,7 +5,12 @@ import { resolveContentRequestedLocale } from '@/lib/translation/content-languag
 import type { PublicLegalHistoryInitialData } from '@/lib/queries/legal-history';
 import { useLocale, useTranslations } from 'next-intl';
 import { LegalPolicyHistoryClient } from '@/features/policy/LegalPolicyHistoryClient';
-import { getActiveTerms, listArchivedTerms } from '@/lib/queries/terms-browser';
+
+// The server renders the document; the browser RPC client loads only when a query has to run here
+// (token preview, missing or stale server data).
+const loadTermsQueries = () => import('@/lib/queries/terms-browser');
+const getActiveTerms = async (requestedLocale?: string) => (await loadTermsQueries()).getActiveTerms(requestedLocale);
+const listArchivedTerms = async () => (await loadTermsQueries()).listArchivedTerms();
 
 export function TermsHistoryClient({ initialData }: { initialData?: PublicLegalHistoryInitialData }) {
   const requestedLocale = resolveContentRequestedLocale(useLocale(), Object.fromEntries(useSearchParams().entries()));

@@ -1,2 +1,2 @@
 export { SiteLogoView } from './SiteLogoView';
-export type { SiteLogoViewProps } from './SiteLogoView';
+export type { SiteLogoViewProps, SiteLogoSize } from './SiteLogoView';

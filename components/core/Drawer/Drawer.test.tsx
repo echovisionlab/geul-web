@@ -3,7 +3,7 @@
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+import { I18nProvider } from 'react-aria-components';
 import { Drawer } from './Drawer';
 
 let container: HTMLDivElement;
@@ -36,7 +36,7 @@ afterEach(() => {
 
 function renderDrawer(node: ReactNode) {
   act(() => {
-    root.render(<MantineProvider env="test">{node}</MantineProvider>);
+    root.render(<I18nProvider locale="en-US">{node}</I18nProvider>);
   });
 }
 
@@ -52,7 +52,7 @@ describe('Drawer', () => {
   it('uses the owning feature close label and emits close events', () => {
     const onClose = vi.fn();
     renderDrawer(
-      <Drawer opened onClose={onClose} title="Filters" closeLabel="Close filters">
+      <Drawer id="application-navigation" opened onClose={onClose} title="Filters" closeLabel="Close filters">
         Filter controls
       </Drawer>,
     );
@@ -60,6 +60,8 @@ describe('Drawer', () => {
     const dialog = getDialog();
     const closeButton = dialog.querySelector<HTMLButtonElement>('[aria-label="Close filters"]');
 
+    expect(dialog.id).toBe('application-navigation');
+    expect(document.getElementById('application-navigation')).toBe(dialog);
     expect(dialog.getAttribute('aria-labelledby')).toBeTruthy();
     expect(dialog.textContent).toContain('Filter controls');
     expect(closeButton).not.toBeNull();
@@ -86,7 +88,20 @@ describe('Drawer', () => {
     const drawerRoot = document.body.querySelector<HTMLElement>('[data-placement="left"][data-size="compact"]');
 
     expect(drawerRoot).not.toBeNull();
-    expect(drawerRoot?.className).toContain('mantine-hidden-from-sm');
+    expect(drawerRoot?.getAttribute('data-mobile-only')).toBe('true');
+  });
+
+  it('defaults to compact density independently of width and supports standard chrome', () => {
+    const view = (density?: 'standard' | 'compact') => (
+      <Drawer opened onClose={vi.fn()} title="History" closeLabel="Close history" size="large" density={density}>
+        History entries
+      </Drawer>
+    );
+    renderDrawer(view());
+    expect(document.body.querySelector('[data-density="compact"][data-size="large"]')).not.toBeNull();
+    renderDrawer(view('standard'));
+    expect(document.body.querySelector('[data-density="standard"][data-size="large"]')).not.toBeNull();
+    expect(getDialog()).toHaveAccessibleName('History');
   });
 
   it('locks close controls and marks the surface busy while loading', () => {

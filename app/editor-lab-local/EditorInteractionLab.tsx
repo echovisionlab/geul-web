@@ -1,5 +1,11 @@
 'use client';
 
+import { primitiveTokens } from '@/components/core/design-tokens';
+
+import { Button } from '@/components/core/Button';
+import { LayoutContainer, LayoutInset, LayoutStack, LayoutInline } from '@/components/core/Layout';
+import { Heading, Text } from '@/components/core/Typography';
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fromJson, toJson, type JsonValue } from '@bufbuild/protobuf';
 import {
@@ -416,7 +422,7 @@ export function EditorInteractionLab() {
   const [selectionDebugLog, setSelectionDebugLog] = useState<SelectionDebugEntry[]>([]);
   const [selectionDebugCopied, setSelectionDebugCopied] = useState(false);
   const authoringMode = useMemo(() => ({ allowNeutralBlockEdits: true, allowLocalizedBlockEdits: true }), []);
-  const localUser = useMemo(() => ({ name: 'Local editor tester', color: '#1c7ed6' }), []);
+  const localUser = useMemo(() => ({ name: 'Local editor tester', color: primitiveTokens.colors.annotation }), []);
 
   const appendSelectionDebugLog = useCallback((editor: Editor, trigger: string, event?: Event) => {
     selectionDebugSequenceRef.current += 1;
@@ -544,69 +550,79 @@ export function EditorInteractionLab() {
   );
 
   return (
-    <main style={{ margin: '0 auto', maxWidth: 1120, padding: '24px' }}>
-      <h1>Local Tiptap interaction lab</h1>
-      <p>This route uses the production editor with an in-memory Block Room. It does not connect to API or Collab.</p>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
-        <button type="button" onClick={() => setEditable((value) => !value)}>
-          {editable ? 'Switch read-only' : 'Switch editable'}
-        </button>
-        <button type="button" onClick={() => setEditorKey((value) => value + 1)}>
-          Remount editor
-        </button>
-      </div>
-      <div>
-        <EditorAuthoringModeProvider value={authoringMode}>
-          <TiptapEditor
-            key={editorKey}
-            blockRoomController={fixture.controller}
-            awareness={fixture.awareness}
-            localUser={localUser}
-            editable={editable}
-            mediaRuntimeStore={fixture.runtimeStore}
-            onEditorReady={onEditorReady}
-          />
-        </EditorAuthoringModeProvider>
-      </div>
-      <details open style={{ marginTop: 24 }}>
-        <summary>Selection debug log (local only)</summary>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, margin: '12px 0' }}>
-          <button
-            type="button"
-            onClick={() => {
-              void navigator.clipboard
-                .writeText(JSON.stringify(selectionDebugLog, null, 2))
-                .then(() => setSelectionDebugCopied(true));
-            }}
-          >
-            {selectionDebugCopied ? 'Copied' : 'Copy log'}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              selectionDebugSequenceRef.current = 0;
-              setSelectionDebugLog([]);
-              setSelectionDebugCopied(false);
-            }}
-          >
-            Clear log
-          </button>
-          <span>{selectionDebugLog.length} entries (keeps latest 200)</span>
-        </div>
-        <pre
-          ref={selectionDebugOutputRef}
-          data-testid="selection-debug-log"
-          style={{ maxHeight: 520, overflow: 'auto', whiteSpace: 'pre-wrap' }}
-        >
-          {selectionDebugLog.map((entry) => JSON.stringify(entry)).join('\n')}
-        </pre>
-      </details>
-      <details open style={{ marginTop: 24 }}>
-        <summary>Canonical Block Room snapshot</summary>
-        <pre data-testid="canonical-snapshot" style={{ maxHeight: 420, overflow: 'auto', whiteSpace: 'pre-wrap' }}>
-          {snapshot}
-        </pre>
-      </details>
-    </main>
+    <LayoutContainer as="main" size="wide">
+      <LayoutInset space="md">
+        <LayoutStack gap="md">
+          <Heading level={1} scale={2}>
+            Local Tiptap interaction lab
+          </Heading>
+          <Text>
+            This route uses the production editor with an in-memory Block Room. It does not connect to API or Collab.
+          </Text>
+          <LayoutInline gap="sm" wrap="wrap">
+            <Button size="xs" type="button" onClick={() => setEditable((value) => !value)}>
+              {editable ? 'Switch read-only' : 'Switch editable'}
+            </Button>
+            <Button size="xs" type="button" onClick={() => setEditorKey((value) => value + 1)}>
+              Remount editor
+            </Button>
+          </LayoutInline>
+          <div>
+            <EditorAuthoringModeProvider value={authoringMode}>
+              <TiptapEditor
+                key={editorKey}
+                blockRoomController={fixture.controller}
+                awareness={fixture.awareness}
+                localUser={localUser}
+                editable={editable}
+                mediaRuntimeStore={fixture.runtimeStore}
+                onEditorReady={onEditorReady}
+              />
+            </EditorAuthoringModeProvider>
+          </div>
+          <details open style={{ marginTop: 'var(--geul-spacing-xl)' }}>
+            <summary>Selection debug log (local only)</summary>
+            <LayoutInline gap="xs" wrap="wrap">
+              <Button
+                size="xs"
+                type="button"
+                onClick={() => {
+                  void navigator.clipboard
+                    .writeText(JSON.stringify(selectionDebugLog, null, 2))
+                    .then(() => setSelectionDebugCopied(true));
+                }}
+              >
+                {selectionDebugCopied ? 'Copied' : 'Copy log'}
+              </Button>
+              <Button
+                size="xs"
+                type="button"
+                onClick={() => {
+                  selectionDebugSequenceRef.current = 0;
+                  setSelectionDebugLog([]);
+                  setSelectionDebugCopied(false);
+                }}
+              >
+                Clear log
+              </Button>
+              <Text size="sm">{selectionDebugLog.length} entries (keeps latest 200)</Text>
+            </LayoutInline>
+            <pre
+              ref={selectionDebugOutputRef}
+              data-testid="selection-debug-log"
+              style={{ maxHeight: 520, overflow: 'auto', whiteSpace: 'pre-wrap' }}
+            >
+              {selectionDebugLog.map((entry) => JSON.stringify(entry)).join('\n')}
+            </pre>
+          </details>
+          <details open style={{ marginTop: 'var(--geul-spacing-xl)' }}>
+            <summary>Canonical Block Room snapshot</summary>
+            <pre data-testid="canonical-snapshot" style={{ maxHeight: 420, overflow: 'auto', whiteSpace: 'pre-wrap' }}>
+              {snapshot}
+            </pre>
+          </details>
+        </LayoutStack>
+      </LayoutInset>
+    </LayoutContainer>
   );
 }

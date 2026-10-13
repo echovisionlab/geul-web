@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { STRING_LIST_SPLIT_CHARS } from './stringList';
 import { WorkMetaForm } from './WorkMetaForm';
 
@@ -13,11 +14,8 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-vi.mock('@mantine/dates', () => ({
-  MonthPickerInput: ({ id, label }: { id?: string; label?: string }) => <div data-testid={id}>{label}</div>,
-}));
-
 vi.mock('@/components/core/Input', () => ({
+  MonthPickerInput: ({ id, label }: { id?: string; label?: string }) => <div data-testid={id}>{label}</div>,
   NativeSelect: () => null,
   NumberInput: () => null,
   Switch: () => null,
@@ -72,14 +70,6 @@ vi.mock('@/components/core/Section', () => ({
   SectionHeader: ({ title }: { title: string }) => <div>{title}</div>,
 }));
 
-vi.mock('@mantine/core', async () => {
-  const actual = await vi.importActual<typeof import('@mantine/core')>('@mantine/core');
-
-  return {
-    ...actual,
-  };
-});
-
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 Object.defineProperty(window, 'matchMedia', {
@@ -118,7 +108,7 @@ describe('WorkMetaForm', () => {
     await act(async () => {
       root = createRoot(container);
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <WorkMetaForm
             workId="work-1"
             type="portfolio"
@@ -131,7 +121,7 @@ describe('WorkMetaForm', () => {
             featured={false}
             onChange={() => {}}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
@@ -146,7 +136,7 @@ describe('WorkMetaForm', () => {
     await act(async () => {
       root = createRoot(container);
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <WorkMetaForm
             workId="work-2"
             type="portfolio"
@@ -159,7 +149,7 @@ describe('WorkMetaForm', () => {
             featured={false}
             onChange={onChange}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 

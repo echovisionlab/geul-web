@@ -1,9 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
-import { IconHistory } from '@tabler/icons-react';
+import { useArgs, useState } from 'storybook/preview-api';
+import { Button } from '../Button';
 
 import { EditorHeaderView, type EditorHeaderViewLabels } from './EditorHeaderView';
 
 const labels: EditorHeaderViewLabels = {
+  title: 'Title',
   back: 'Back',
   untitled: 'Untitled',
   delete: 'Delete',
@@ -22,6 +24,22 @@ const meta: Meta<typeof EditorHeaderView> = {
   title: 'Core/Layout/EditorHeader',
   component: EditorHeaderView,
   parameters: { layout: 'padded' },
+  render: function HeaderPreview(args) {
+    const [, updateArgs] = useArgs();
+    const [deleted, setDeleted] = useState(false);
+    if (deleted) {
+      return <Button onClick={() => setDeleted(false)}>Restore entry</Button>;
+    }
+    return (
+      <EditorHeaderView
+        {...args}
+        hideBack
+        onTitleChange={args.onTitleChange ? (title) => updateArgs({ title }) : undefined}
+        onStatusChange={args.onStatusChange ? (status) => updateArgs({ status }) : undefined}
+        onDelete={args.onDelete ? () => setDeleted(true) : undefined}
+      />
+    );
+  },
   args: {
     title: 'Field recordings',
     isConnected: true,
@@ -56,13 +74,6 @@ export const EditableWithCollaboration: Story = {
     onTitleChange: () => {},
     onStatusChange: () => {},
     groupStatusWithCollab: true,
-    collabActions: [
-      {
-        label: 'Version history',
-        icon: <IconHistory size={14} />,
-        onClick: () => {},
-      },
-    ],
   },
 };
 
@@ -73,5 +84,15 @@ export const Destructive: Story = {
       title: 'Delete entry',
       message: 'This action cannot be undone.',
     },
+  },
+};
+
+export const PhoneActions: Story = {
+  ...EditableWithCollaboration,
+  globals: { viewport: { value: 'phone', isRotated: false } },
+  args: {
+    ...EditableWithCollaboration.args,
+    labels: { ...labels, collabButton: 'Draft · Collaborative editing' },
+    onDelete: () => {},
   },
 };

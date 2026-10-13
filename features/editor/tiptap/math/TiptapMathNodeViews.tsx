@@ -5,7 +5,6 @@ import {
   type MouseEvent as ReactMouseEvent,
   useCallback,
   useId,
-  useMemo,
 } from 'react';
 import {
   NodeViewContent,
@@ -18,7 +17,11 @@ import { TextSelection, Plugin, PluginKey, type Selection } from '@tiptap/pm/sta
 import type { EditorView } from '@tiptap/pm/view';
 import { WireMath, WireMathInline } from '../wire-schema';
 import { useExactTiptapNodeSelection } from '../useExactTiptapNodeSelection';
-import { renderMath } from './math-render';
+import { useTiptapEditorEditable } from '../useTiptapEditorEditable';
+import enMessages from '@/messages/en.json';
+import { ScrollArea } from '@/components/core/Display';
+import { BlockSelectionTarget } from '@/components/core/SelectionSurface';
+import { useRenderedMath } from './math-render-runtime';
 import classes from './TiptapMathNodeViews.module.css';
 
 function selectNode({ editor, getPos }: Pick<NodeViewProps, 'editor' | 'getPos'>) {
@@ -29,11 +32,14 @@ function selectNode({ editor, getPos }: Pick<NodeViewProps, 'editor' | 'getPos'>
 }
 
 function MathPreview({ latex, displayMode }: { latex: string; displayMode: boolean }) {
-  const rendered = useMemo(() => renderMath(latex, displayMode), [displayMode, latex]);
+  // KaTeX loads with the first rendered math node; the preview fills in once it has loaded.
+  const rendered = useRenderedMath(latex, displayMode);
   return (
     <>
-      <span className={classes.rendered} dangerouslySetInnerHTML={{ __html: rendered.html }} />
-      {rendered.error ? <span className={classes.error}>{rendered.error}</span> : null}
+      <ScrollArea scrollbars="x" data-math-scroll="">
+        <span className={classes.rendered} dangerouslySetInnerHTML={{ __html: rendered?.html ?? '' }} />
+      </ScrollArea>
+      {rendered?.error ? <span className={classes.error}>{rendered.error}</span> : null}
     </>
   );
 }
@@ -93,7 +99,8 @@ function createInlineMathEditingPlugin(): Plugin {
 
 function TiptapMathInlineNodeView(props: NodeViewProps) {
   const source = inlineMathSource(props.node);
-  const rendered = useMemo(() => renderMath(source, false), [source]);
+  // Until KaTeX has loaded, the inline source stays visible as it does for unrenderable input.
+  const rendered = useRenderedMath(source, false);
   const errorId = useId();
   const editing = useEditorState({
     editor: props.editor,
@@ -106,7 +113,7 @@ function TiptapMathInlineNodeView(props: NodeViewProps) {
       );
     },
   });
-  const renderable = Boolean(source && !rendered.error);
+  const renderable = Boolean(source && rendered && !rendered.error);
   const editAtPointer = useCallback(
     (event: ReactMouseEvent<HTMLSpanElement>) => {
       const currentPosition = props.getPos();
@@ -140,25 +147,25 @@ function TiptapMathInlineNodeView(props: NodeViewProps) {
       data-math-inline-editing={editing || undefined}
       data-renderable={renderable || undefined}
       data-empty={!source || undefined}
-      title={rendered.error ?? undefined}
+      title={rendered?.error ?? undefined}
       onMouseDown={editAtPointer}
     >
       <NodeViewContent<'span'>
         as="span"
         className={classes.inlineSource}
         aria-hidden={(renderable && !editing) || undefined}
-        aria-invalid={Boolean(rendered.error) || undefined}
-        aria-describedby={rendered.error ? errorId : undefined}
+        aria-invalid={Boolean(rendered?.error) || undefined}
+        aria-describedby={rendered?.error ? errorId : undefined}
       />
       {renderable ? (
         <span
           className={classes.inlinePreview}
           contentEditable={false}
           aria-hidden={editing || undefined}
-          dangerouslySetInnerHTML={{ __html: rendered.html }}
+          dangerouslySetInnerHTML={{ __html: rendered?.html ?? '' }}
         />
       ) : null}
-      {rendered.error ? (
+      {rendered?.error ? (
         <span id={errorId} className={classes.visuallyHidden}>
           {rendered.error}
         </span>
@@ -169,10 +176,15 @@ function TiptapMathInlineNodeView(props: NodeViewProps) {
 
 function TiptapMathBlockNodeView(props: NodeViewProps) {
   const source = String(props.node.attrs.latex ?? '');
+  const editable = useTiptapEditorEditable(props.editor);
+  const selectBlockLabel = props.extension.options.selectBlockLabel as string;
   const exactNodeSelected = useExactTiptapNodeSelection(props);
   const select = useCallback(() => {
     selectNode(props);
   }, [props]);
+  if (!selectBlockLabel?.trim()) {
+    throw new TypeError('A math block selection action needs a localized accessible name');
+  }
 
   return (
     <NodeViewWrapper
@@ -181,20 +193,31 @@ function TiptapMathBlockNodeView(props: NodeViewProps) {
       data-math-block=""
       data-selected={exactNodeSelected || undefined}
       onClick={(event: ReactMouseEvent<HTMLDivElement>) => {
-        event.preventDefault();
-        select();
-      }}
-      onFocus={select}
-      onKeyDown={(event: ReactKeyboardEvent<HTMLDivElement>) => {
-        if (event.key === 'Enter' || event.key === ' ') {
+        if (editable) {
           event.preventDefault();
           select();
         }
       }}
-      role="button"
-      tabIndex={0}
     >
       <MathPreview latex={source} displayMode />
+      {editable ? (
+        <BlockSelectionTarget
+          label={selectBlockLabel}
+          onFocus={select}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            select();
+          }}
+          onKeyDown={(event: ReactKeyboardEvent<HTMLButtonElement>) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              event.stopPropagation();
+              select();
+            }
+          }}
+        />
+      ) : null}
     </NodeViewWrapper>
   );
 }
@@ -208,7 +231,14 @@ export const TiptapMathInlineNode = WireMathInline.extend({
   },
 });
 
-export const TiptapMathBlockNode = WireMath.extend({
+export interface TiptapMathOptions {
+  selectBlockLabel: string;
+}
+
+export const TiptapMathBlockNode = WireMath.extend<TiptapMathOptions>({
+  addOptions() {
+    return { selectBlockLabel: enMessages.editorCommon.editor.math.selectBlock };
+  },
   addNodeView() {
     return ReactNodeViewRenderer(TiptapMathBlockNodeView);
   },

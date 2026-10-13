@@ -1,12 +1,13 @@
 'use client';
+import { LayoutStack as DsLayoutStack, LayoutGrid as DsLayoutGrid } from '@/components/core/Layout';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useMemo } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { SimpleGrid, Stack } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { MultiSelect } from '@/components/core/Input';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
 import { listCategoriesAction } from '@/lib/actions/category';
@@ -99,13 +100,13 @@ export function ReleaseTagsSection({
     onSettled: (result, error) => onCategoriesMutationSettled?.(!error && !result?.error),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       publishEditorEntityChange(`release:${releaseId}`);
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: tCommon('entities.categories') }),
-        color: 'green',
+        tone: 'positive',
       });
     },
   });
@@ -117,13 +118,13 @@ export function ReleaseTagsSection({
     onSettled: (result, error) => onGenresMutationSettled?.(!error && !result?.error),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       publishEditorEntityChange(`release:${releaseId}`);
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: tCommon('entities.genres') }),
-        color: 'green',
+        tone: 'positive',
       });
     },
   });
@@ -135,13 +136,13 @@ export function ReleaseTagsSection({
     onSettled: (result, error) => onStylesMutationSettled?.(!error && !result?.error),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       publishEditorEntityChange(`release:${releaseId}`);
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: tCommon('entities.styles') }),
-        color: 'green',
+        tone: 'positive',
       });
     },
   });
@@ -169,13 +170,13 @@ export function ReleaseTagsSection({
     onSettled: (result, error) => onFormatsMutationSettled?.(!error && !result?.error),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       publishEditorEntityChange(`release:${releaseId}`);
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: tCommon('entities.formats') }),
-        color: 'green',
+        tone: 'positive',
       });
     },
   });
@@ -244,10 +245,10 @@ export function ReleaseTagsSection({
   return (
     <SectionCard>
       <QueryErrorAlert queries={[allCategoriesQuery, allGenresQuery, allStylesQuery, allFormatsQuery]} />
-      <Stack>
+      <DsLayoutStack>
         <SectionHeader title={t('title')} />
 
-        <SimpleGrid cols={{ base: 1, md: 2, xl: 4 }} spacing="md" verticalSpacing="md">
+        <DsLayoutGrid columns={{ base: 1, md: 2, xl: 4 }} gap="md" rowGap="md">
           <MultiSelect
             id={idPrefix ? `${idPrefix}-categories` : undefined}
             label={tCommon('entities.categories')}
@@ -291,8 +292,8 @@ export function ReleaseTagsSection({
             searchable
             clearable
           />
-        </SimpleGrid>
-      </Stack>
+        </DsLayoutGrid>
+      </DsLayoutStack>
     </SectionCard>
   );
 }

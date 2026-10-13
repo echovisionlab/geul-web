@@ -1,20 +1,25 @@
 .playground {
   width: 100%;
+  max-width: 960px;
+  min-width: 0;
+  margin-inline: auto;
 }
 
-.previewHeader {
-  width: 100%;
-  margin-bottom: var(--mantine-spacing-xl);
-  break-after: avoid-page;
+.resident {
+  min-height: 420px;
+  min-width: 0;
+}
+
+.resident [hidden] {
+  display: none !important;
 }
 
 @media print {
   .playground {
-    display: block;
-    padding: 0 !important;
+    max-width: none;
   }
 
-  .previewHeader {
-    margin-bottom: 0.8cm;
+  .resident {
+    min-height: 0;
   }
 }

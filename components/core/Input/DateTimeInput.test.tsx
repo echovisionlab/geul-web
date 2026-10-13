@@ -3,7 +3,6 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
 import { dateTimeValueToDate, dateToDateTimeValue, DateTimeInput } from './DateTimeInput';
 
 let container: HTMLDivElement;
@@ -54,38 +53,31 @@ describe('DateTimeInput', () => {
     expect(dateTimeValueToDate({ date: '2026-08-05', time: '' })).toBeNull();
   });
 
-  it('renders a localized date input and a dropdown-free 24-hour time input', () => {
-    act(() => {
+  it('renders localized calendar and 24-hour segmented time controls', () => {
+    act(() =>
       root.render(
-        <MantineProvider env="test">
-          <DateTimeInput
-            locale="ko"
-            dateLabel="날짜"
-            timeLabel="시각"
-            previousLabel="이전 달"
-            nextLabel="다음 달"
-            hoursLabel="시간"
-            minutesLabel="분"
-            value={{ date: '2026-08-05', time: '20:46' }}
-            onChange={vi.fn()}
-          />
-        </MantineProvider>,
-      );
-    });
-
-    const input = container.querySelector<HTMLButtonElement>('[data-dates-input]');
-    expect(input).not.toBeNull();
-    expect(input?.textContent).toContain('2026. 08. 05.');
-    const hoursInput = container.querySelector<HTMLInputElement>('input[aria-label="시간"]');
-    const minutesInput = container.querySelector<HTMLInputElement>('input[aria-label="분"]');
-    expect(hoursInput?.value).toBe('20');
-    expect(minutesInput?.value).toBe('46');
-    expect(container.querySelector('input[aria-label*="AM"]')).toBeNull();
-    expect(container.querySelector('select')).toBeNull();
-
-    act(() => input?.click());
-
-    expect(document.body.querySelector('[data-dates-dropdown]')).not.toBeNull();
+        <DateTimeInput
+          locale="ko"
+          dateLabel="날짜"
+          timeLabel="시각"
+          previousLabel="이전 달"
+          nextLabel="다음 달"
+          hoursLabel="시간"
+          minutesLabel="분"
+          value={{ date: '2026-08-05', time: '20:46' }}
+          onChange={vi.fn()}
+        />,
+      ),
+    );
+    expect(container.querySelector('[data-type="year"]')?.textContent).toContain('2026');
+    expect(container.querySelector('[data-type="month"]')?.textContent).toContain('8');
+    expect(container.querySelector('[data-type="day"]')?.textContent).toContain('5');
+    expect(container.querySelector('[data-type="hour"]')?.getAttribute('aria-valuenow')).toBe('20');
+    expect(container.querySelector('[data-type="minute"]')?.getAttribute('aria-valuenow')).toBe('46');
+    expect(container.querySelector('[data-type="dayPeriod"]')).toBeNull();
+    const calendarButton = container.querySelector('button');
+    act(() => calendarButton?.click());
+    expect(document.body.querySelector('[role="dialog"]')).not.toBeNull();
     expect(document.body.textContent).toContain('2026년 8월');
     expect(document.body.querySelector('button[aria-label="이전 달"]')).not.toBeNull();
     expect(document.body.querySelector('button[aria-label="다음 달"]')).not.toBeNull();

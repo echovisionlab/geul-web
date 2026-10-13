@@ -1,0 +1,157 @@
+.root {
+  --_frame-navigation-width: 14rem;
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  color: var(--geul-text-primary);
+}
+
+.root[data-navigation-mode='compact'] {
+  --_frame-navigation-width: var(--geul-chrome-rail-width);
+}
+
+.header {
+  position: fixed;
+  z-index: calc(var(--geul-layer-backdrop) - 1);
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: calc(var(--geul-chrome-header-height-base) + env(safe-area-inset-top));
+  padding-block-start: env(safe-area-inset-top);
+  border-block-end: var(--geul-border-thin) solid var(--geul-border-default);
+  background: var(--geul-background);
+}
+
+.main {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  padding: var(--geul-spacing-md);
+}
+
+.root[data-frame-kind='site'] .main {
+  padding-block-start: calc(var(--geul-chrome-header-height-base) + env(safe-area-inset-top) + var(--geul-spacing-md));
+}
+
+.navigation {
+  position: fixed;
+  z-index: calc(var(--geul-layer-backdrop) - 1);
+  inset-block: 0;
+  inset-inline-start: 0;
+  display: flex;
+  width: var(--_frame-navigation-width);
+  flex-direction: column;
+  padding: var(--geul-spacing-xs);
+  border-inline-end: var(--geul-border-thin) solid var(--geul-border-default);
+  background: var(--geul-background);
+  transition: width var(--geul-motion-normal) var(--geul-motion-easing);
+}
+
+.root[data-navigation-mode='compact'] .navigation {
+  padding: var(--geul-spacing-xxs);
+}
+
+.root[data-frame-kind='workspace'] .main {
+  min-height: 100dvh;
+  margin-inline-start: var(--_frame-navigation-width);
+  transition: margin-inline-start var(--geul-motion-normal) var(--geul-motion-easing);
+}
+
+.edgeToggle {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: calc(var(--geul-control-height-xs) / -2);
+  width: var(--geul-control-height-xs);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--geul-border-default);
+  cursor: ew-resize;
+}
+
+.edgeToggle::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 50%;
+  width: var(--geul-border-thin);
+  background: currentColor;
+  content: '';
+}
+
+.edgeToggle[data-hovered] {
+  color: var(--geul-action-primary);
+}
+
+.edgeToggle[data-focus-visible] {
+  outline: var(--geul-border-focus) solid var(--geul-focus);
+  outline-offset: calc(var(--geul-border-focus) * -1);
+}
+
+.footer {
+  background: var(--geul-background);
+  padding: var(--geul-spacing-lg) var(--geul-spacing-md) calc(var(--geul-spacing-lg) + env(safe-area-inset-bottom));
+  border-block-start: var(--geul-border-thin) solid var(--geul-border-default);
+}
+
+.root:has([data-content-height='viewport'][data-footer-layout='flow']) .main {
+  min-height: 100dvh;
+  flex: none;
+}
+
+.root:has([data-content-height='viewport']) .main > [data-content-layout],
+.root:has([data-footer-layout='pinned']) .main > [data-content-layout] {
+  flex: 1;
+}
+
+.root:has([data-footer-layout='pinned']) .footer {
+  background: var(--geul-background);
+  position: sticky;
+  z-index: 1;
+  inset-block-end: 0;
+}
+
+@media (width >= $mantine-breakpoint-sm) {
+  .header {
+    height: calc(var(--geul-chrome-header-height-sm) + env(safe-area-inset-top));
+  }
+
+  .root[data-frame-kind='site'] .main {
+    padding-block-start: calc(var(--geul-chrome-header-height-sm) + env(safe-area-inset-top) + var(--geul-spacing-md));
+  }
+
+  .footer {
+    background: var(--geul-background);
+    padding-inline: var(--geul-spacing-lg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navigation,
+  .main {
+    transition: none;
+  }
+}
+
+@media print {
+  .root,
+  .main {
+    display: block;
+    height: auto;
+    min-height: 0 !important;
+    overflow: visible;
+  }
+
+  /* Site and workspace frames offset main for fixed chrome; that chrome is not printed, so the
+     frame-kind selectors are reset too (paper margins come from @page). */
+  .root .main,
+  .root[data-frame-kind] .main {
+    margin: 0;
+    padding: 0;
+  }
+
+  .header,
+  .navigation,
+  .footer {
+    display: none;
+  }
+}

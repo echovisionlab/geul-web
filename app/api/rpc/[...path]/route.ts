@@ -12,7 +12,7 @@ import {
   hasCookieNamed,
 } from '@/lib/auth/session-cookie';
 import { getApiUrl, getSessionCookieName } from '@/lib/env';
-import { getPublicApiUrl } from '@/lib/public-runtime-config';
+import { getServerPublicRuntimeConfig } from '@/lib/public-runtime-config.server';
 import { createLogger } from '@/lib/utils/logger';
 
 const logger = createLogger('rpc-proxy-api');
@@ -30,7 +30,7 @@ const HOP_BY_HOP_HEADERS = new Set([
 
 const RESPONSE_HEADERS_TO_STRIP = new Set(['content-length', 'content-encoding']);
 function buildApiTargets(): string[] {
-  const targets = [getApiUrl(), getPublicApiUrl()].map((url) => url.replace(/\/+$/, ''));
+  const targets = [getApiUrl(), getServerPublicRuntimeConfig().apiUrl].map((url) => url.replace(/\/+$/, ''));
   return [...new Set(targets)];
 }
 

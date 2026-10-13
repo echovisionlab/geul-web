@@ -1,25 +1,13 @@
 // @vitest-environment jsdom
 
-import { act, forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
+import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TextButton } from '@/components/core/TextButton';
+import { preloadOnDemandOverlays } from '@/components/core/on-demand-overlays';
 import { TestProviders } from '@/test/TestProviders';
+import { preloadShellNavigation } from './ShellIslands';
 import { ShellView, type ShellViewNavigationItem, type ShellViewProps, type ShellViewUser } from './ShellView';
-
-const TestLink = forwardRef<HTMLAnchorElement, ComponentPropsWithoutRef<'a'>>(({ href, onClick, ...props }, ref) => (
-  <a
-    ref={ref}
-    {...props}
-    data-test-link-transport
-    href={href}
-    onClick={(event) => {
-      event.preventDefault();
-      onClick?.(event);
-    }}
-  />
-));
-TestLink.displayName = 'TestLink';
 
 const events = {
   onToggleNavigation: vi.fn(),
@@ -115,12 +103,14 @@ const defaultProps: ShellViewProps = {
     ),
     socialLinks: <a href="https://example.com/social">Social profile</a>,
   },
-  linkComponent: TestLink,
-  children: <main>Public page content</main>,
+  children: <div>Public page content</div>,
 };
 
 let container: HTMLDivElement;
 let root: Root;
+
+// The shell uses on-demand Core overlays and navigation list; once loaded they render synchronously.
+beforeAll(() => Promise.all([preloadOnDemandOverlays(), preloadShellNavigation()]), 30000);
 
 beforeEach(() => {
   container = document.createElement('div');
@@ -147,6 +137,17 @@ function renderView(overrides: Partial<ShellViewProps> = {}, children?: ReactNod
 }
 
 describe('ShellView', () => {
+  it('keeps the home link named and focusable when the logo slot has no image', () => {
+    renderView({ slots: { ...defaultProps.slots, logo: null } });
+    const home = container.querySelector<HTMLAnchorElement>('header a[href="/"][data-appearance="block"]');
+    expect(home).toHaveAccessibleName(defaultProps.footer.siteTitle);
+    expect(home?.textContent).toBe('');
+    home?.focus();
+    expect(home).toHaveFocus();
+    act(() => home?.click());
+    expect(events.onNavigate).toHaveBeenCalledWith('/');
+  });
+
   it('renders the public header, active navigation, print slots, page content, and semantic footer', () => {
     renderView();
 
@@ -201,16 +202,32 @@ describe('ShellView', () => {
     for (const [index, loginAction] of loginActions.entries()) {
       expect(loginAction.textContent?.trim()).toBe('Sign in');
       expect(loginAction.getAttribute('data-size')).toBe('xs');
-      expect(loginAction.getAttribute('data-control-size')).toBe('sm');
+      expect(loginAction.getAttribute('data-density')).toBe('chrome');
       expect(loginAction.getAttribute('data-weight')).toBe('medium');
       expect(loginAction.getAttribute('data-shell-login-action')).toBe(index === 0 ? 'desktop' : 'mobile');
-      expect(loginAction.className).toContain('loginAction');
+      expect(loginAction.className).not.toContain('loginAction');
       expect(loginAction.querySelector('svg')).toBeNull();
     }
   });
 
+  it('keeps the phone account drawer open instead of opening the hidden desktop account menu', async () => {
+    // The shared matchMedia stub reports a phone width, so only the mobile account drawer may open.
+    renderView({ user: authenticatedUser, userMenuOpened: true });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    });
+    expect(document.querySelector('[role="menu"]')).toBeNull();
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(events.onCloseUserMenu).not.toHaveBeenCalled();
+  });
+
   it('forwards navigation, search, theme, cookie, and authenticated account events', () => {
     renderView({ user: authenticatedUser, userMenuOpened: true });
+    const accountTrigger = container.querySelector<HTMLElement>('[aria-label="June Han"]');
+    expect(accountTrigger?.textContent).toContain(authenticatedUser.name);
+    expect(document.getElementById(accountTrigger!.getAttribute('aria-describedby')!)?.textContent).toBe(
+      defaultProps.labels.account,
+    );
 
     const navigationToggle = container.querySelector<HTMLButtonElement>('button[aria-label="Toggle navigation"]');
     const searchButton = container.querySelector<HTMLButtonElement>('button[aria-label="Search"]');
@@ -245,7 +262,7 @@ describe('ShellView', () => {
     expect(events.onNavigate).toHaveBeenCalledWith('/my/profile');
     expect(events.onNavigate).toHaveBeenCalledWith('/privacy');
     expect(events.onNavigate).toHaveBeenCalledWith('/login?intent=newsletter');
-    expect(privacyLink?.hasAttribute('data-test-link-transport')).toBe(true);
+    expect(privacyLink?.getAttribute('data-control-kind')).toBe('text');
     expect(events.onSignOut).toHaveBeenCalledOnce();
   });
 
@@ -272,16 +289,18 @@ describe('ShellView', () => {
   });
 
   it('uses Core menu and disclosure controls for accessible mobile navigation', () => {
-    renderView();
+    renderView({ navigationOpened: true });
 
     const navigationToggle = container.querySelector<HTMLButtonElement>('[data-menu-toggle]');
-    const disclosure = container.querySelector<HTMLElement>('[data-shell-mobile-navigation] [data-disclosure]');
+    const disclosure = document.body.querySelector<HTMLElement>('[data-shell-mobile-navigation] [data-disclosure]');
     const disclosureToggle = disclosure?.querySelector<HTMLButtonElement>('button[data-accordion-control]');
 
     expect(navigationToggle?.getAttribute('aria-label')).toBe('Toggle navigation');
-    expect(navigationToggle?.getAttribute('aria-expanded')).toBe('false');
+    expect(navigationToggle?.getAttribute('aria-expanded')).toBe('true');
     expect(navigationToggle?.getAttribute('aria-controls')).toBe('shell-mobile-navigation');
-    expect(disclosure?.getAttribute('data-appearance')).toBe('filled');
+    expect(disclosure?.getAttribute('data-appearance')).toBe('plain');
+    expect(disclosure?.getAttribute('data-divider')).toBe('none');
+    expect(disclosure?.getAttribute('data-content-indent')).toBe('label');
     expect(disclosure?.getAttribute('data-density')).toBe('compact');
     expect(disclosureToggle?.textContent).toBe('Explore');
     expect(disclosureToggle?.getAttribute('aria-expanded')).toBe('false');
@@ -305,9 +324,10 @@ describe('ShellView', () => {
     expect(shell?.getAttribute('data-navigation-opened')).toBe('true');
     expect(shell?.getAttribute('data-user-menu-opened')).toBe('true');
     expect(shell?.getAttribute('data-theme-mode')).toBe('pending');
-    expect(container.querySelector('[data-shell-mobile-navigation]')).not.toBeNull();
+    expect(document.body.querySelector('[data-shell-mobile-navigation]')).not.toBeNull();
+    expect(document.getElementById('shell-mobile-navigation')?.getAttribute('role')).toBe('dialog');
     expect(document.body.textContent).toContain('Account');
     expect(container.querySelector('a[href="/changelog"]')).not.toBeNull();
-    expect(container.querySelector('a[href="/changelog"]')?.hasAttribute('data-test-link-transport')).toBe(true);
+    expect(container.querySelector('a[href="/changelog"]')?.getAttribute('data-control-kind')).toBe('text');
   });
 });

@@ -2,7 +2,7 @@
 
 import { act, useState, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+import { I18nProvider } from 'react-aria-components';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Popover, type PopoverSize } from './Popover';
 
@@ -30,13 +30,30 @@ Object.defineProperty(window, 'ResizeObserver', {
   },
 });
 
-function renderPopover(node: ReactNode, env: 'default' | 'test' = 'test') {
+function renderPopover(node: ReactNode, _env: 'default' | 'test' = 'test') {
   act(() => {
-    root.render(<MantineProvider env={env}>{node}</MantineProvider>);
+    root.render(<I18nProvider locale="en-US">{node}</I18nProvider>);
   });
 }
 
 describe('Popover', () => {
+  it('preserves alertdialog meaning and rejects roles that the dialog surface cannot implement', () => {
+    const renderRole = (role: 'dialog' | 'alertdialog') =>
+      renderPopover(
+        <Popover defaultOpen portal={false}>
+          <Popover.Target>
+            <button type="button">Review notice</button>
+          </Popover.Target>
+          <Popover.Dropdown role={role} aria-label="Notice">
+            Notice details
+          </Popover.Dropdown>
+        </Popover>,
+      );
+    renderRole('alertdialog');
+    expect(container.querySelector('[role="alertdialog"]')?.getAttribute('aria-label')).toBe('Notice');
+    expect(() => renderRole('menu' as 'dialog')).toThrow('Invalid popover role');
+  });
+
   it('exposes the required compound API', () => {
     expect(Popover.Target).toBeDefined();
     expect(Popover.Dropdown).toBeDefined();
@@ -60,11 +77,28 @@ describe('Popover', () => {
 
     expect(target?.getAttribute('aria-expanded')).toBe('true');
     expect(container.querySelector('[role="dialog"]')?.textContent).toContain('Popover details');
+    expect(container.querySelector('[role="dialog"]')?.getAttribute('aria-labelledby')).toBe(target?.id);
 
     act(() => target?.click());
 
     expect(target?.getAttribute('aria-expanded')).toBe('false');
     expect(container.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('names its dialog from the consumer heading', () => {
+    renderPopover(
+      <Popover defaultOpen portal={false}>
+        <Popover.Target>
+          <button type="button">View settings</button>
+        </Popover.Target>
+        <Popover.Dropdown aria-labelledby="view-heading" aria-describedby="view-description">
+          <h2 id="view-heading">View settings</h2>
+          <p id="view-description">Applies to this view</p>
+        </Popover.Dropdown>
+      </Popover>,
+    );
+    expect(container.querySelector('[role="dialog"]')?.getAttribute('aria-labelledby')).toBe('view-heading');
+    expect(container.querySelector('[role="dialog"]')?.getAttribute('aria-describedby')).toBe('view-description');
   });
 
   it('reports controlled dismissal through semantic state callbacks', () => {
@@ -108,11 +142,7 @@ describe('Popover', () => {
     expect(container.querySelector('[role="dialog"]')).toBeNull();
   });
 
-  it.each([
-    ['compact', 'calc(17.5rem * var(--mantine-scale))'],
-    ['standard', 'calc(18.75rem * var(--mantine-scale))'],
-    ['wide', 'calc(31.25rem * var(--mantine-scale))'],
-  ] satisfies Array<[PopoverSize, string]>)('maps the %s size to a stable width', (size, width) => {
+  it.each(['compact', 'standard', 'wide'] satisfies PopoverSize[])('maps the %s size to a stable width', (size) => {
     renderPopover(
       <Popover defaultOpen size={size} placement="bottom-end" portal={false}>
         <Popover.Target>
@@ -125,11 +155,8 @@ describe('Popover', () => {
     );
 
     const dropdown = container.querySelector<HTMLElement>(`[data-popover-surface="${size}"]`);
-    expect(dropdown?.style.width).toBe(width);
-    expect(dropdown?.style.maxWidth).toBe('calc(100vw - var(--mantine-spacing-xl))');
-    expect(dropdown?.style.padding).toBe('0rem');
-    expect(dropdown?.style.getPropertyValue('--popover-radius')).toBe('0rem');
-    expect(dropdown?.style.getPropertyValue('--popover-shadow')).toBe('var(--mantine-shadow-md)');
+    expect(dropdown?.getAttribute('data-size')).toBe(size);
+    expect(dropdown?.querySelector('[role="dialog"]')?.getAttribute('data-padding')).toBe('none');
     expect(dropdown?.dataset.position).toBe('bottom-end');
   });
 

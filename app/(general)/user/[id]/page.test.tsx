@@ -1,6 +1,6 @@
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
 
 const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
@@ -12,6 +12,11 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('next-intl/server', () => ({
   getTranslations: mocks.getTranslations,
+}));
+
+// The route renders the client UserProfilePageView, which reads the section title through next-intl.
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string) => key,
 }));
 
 vi.mock('next/navigation', () => ({
@@ -103,12 +108,12 @@ describe('UserProfilePage', () => {
 
     const module = await import('./page');
     const html = renderToStaticMarkup(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         {await module.default({
           params: Promise.resolve({ id: 'user-1' }),
           searchParams: Promise.resolve({ 'userPosts.search': 'draft' }),
         })}
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
 
     expect(mocks.getSession).toHaveBeenCalled();

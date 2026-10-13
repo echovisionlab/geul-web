@@ -1,14 +1,23 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
-import { useMemo, type ReactNode } from 'react';
-import { IconArrowsExchange, IconUserOff, IconUserPlus, IconX } from '@tabler/icons-react';
-import { Avatar, Group, Loader, ScrollArea, Stack, Text, useCombobox } from '@mantine/core';
-import { LabelBadge } from '@/components/core/Badge';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+
+import { useInputCombobox, SearchComboboxView, Select } from '@/components/core/Input';
+
+import { useId, useMemo, type ReactNode } from 'react';
+import { IconArrowsExchange, IconUserPlus, IconX } from '@tabler/icons-react';
+
+import { Avatar, Spinner as Loader, ScrollArea } from '@/components/core/Display';
 import { IconButton } from '@/components/core/IconButton';
-import { SearchComboboxView, Select } from '@/components/core/Input';
+
 import { ContentModal } from '@/components/core/Modal';
 import { Tooltip } from '@/components/core/Tooltip';
-import styles from './LabelParticipantsDialogView.module.css';
+import { ParticipantRow } from '@/features/participants/ParticipantRow';
 
 export type LabelParticipantRoleName = 'owner' | 'manager';
 
@@ -84,7 +93,8 @@ export function LabelParticipantsDialogView({
   onChangeRole,
   labels,
 }: LabelParticipantsDialogViewProps) {
-  const combobox = useCombobox({ onDropdownClose: () => combobox.resetSelectedOption() });
+  const combobox = useInputCombobox();
+  const dialogId = useId();
   const ownerCount = participants.filter((participant) => participant.role === 'owner').length;
   const roleOptions = useMemo(
     () => [
@@ -96,15 +106,15 @@ export function LabelParticipantsDialogView({
 
   return (
     <ContentModal opened={opened} onClose={onClose} title={labels.title} closeLabel={labels.close} size="standard">
-      <Stack gap="md">
+      <DsLayoutStack gap="md">
         {queryFailure}
         {canManageParticipants ? (
-          <Stack gap="xs">
-            <Text size="sm" fw={500}>
+          <DsLayoutStack gap="xs">
+            <DsText size="sm" weight="medium">
               {labels.addParticipant}
-            </Text>
-            <div className={styles.addControls}>
-              <div className={styles.searchControl} data-participant-search-control>
+            </DsText>
+            <DsLayoutInline gap="xs" align="end" wrap="nowrap" direction={{ base: 'column', xs: 'row' }}>
+              <DsLayoutStack gap="none" flexible fill="inline" data-participant-search-control>
                 <SearchComboboxView
                   combobox={combobox}
                   search={searchQuery}
@@ -120,52 +130,45 @@ export function LabelParticipantsDialogView({
                     combobox.closeDropdown();
                   }}
                   renderItem={(candidate) => (
-                    <Group gap="sm" wrap="nowrap">
-                      <Avatar src={candidate.avatarUrl} size="sm" radius="xl">
-                        {candidate.nickname.charAt(0)}
-                      </Avatar>
-                      <Text size="sm" truncate>
+                    <DsLayoutInline gap="sm" wrap="nowrap">
+                      <Avatar src={candidate.avatarUrl} size="sm" shape="circle" name={candidate.nickname} />
+                      <DsText size="sm" truncate>
                         {candidate.nickname}
-                      </Text>
-                    </Group>
+                      </DsText>
+                    </DsLayoutInline>
                   )}
                   getItemId={(candidate) => candidate.id}
+                  getItemText={(candidate) => candidate.nickname}
                   minimumQueryMessage={labels.typeAtLeast2Characters}
                   noResultsMessage={labels.noUsersFound}
                   size="sm"
                 />
-              </div>
-              <div className={styles.roleControl} data-participant-role-select>
-                <span className={styles.roleWidthSizer} aria-hidden="true">
-                  <span>{labels.role}</span>
-                  <span>{labels.owner}</span>
-                  <span>{labels.manager}</span>
-                </span>
-                <Select
-                  label={labels.role}
-                  value={selectedRole}
-                  onChange={(value) => value && onSelectedRoleChange(value as LabelParticipantRoleName)}
-                  data={roleOptions}
-                  allowDeselect={false}
-                  size="sm"
-                  classNames={{ root: styles.roleSelectRoot, input: styles.roleSelectInput }}
-                />
-              </div>
-            </div>
-          </Stack>
+              </DsLayoutStack>
+              <Select
+                width="content"
+                data-participant-role-select
+                label={labels.role}
+                value={selectedRole}
+                onChange={(value) => value && onSelectedRoleChange(value as LabelParticipantRoleName)}
+                data={roleOptions}
+                allowDeselect={false}
+                size="sm"
+              />
+            </DsLayoutInline>
+          </DsLayoutStack>
         ) : null}
 
         {loading ? (
-          <Group justify="center" py="md">
-            <Loader size="sm" />
-          </Group>
+          <DsLayoutInset block="md">
+            <DsLayoutInline justify="center">
+              <Loader size="sm" />
+            </DsLayoutInline>
+          </DsLayoutInset>
         ) : participants.length === 0 ? (
-          <Text size="sm" c="dimmed">
-            {labels.empty}
-          </Text>
+          <SupportingText tone="secondary">{labels.empty}</SupportingText>
         ) : (
-          <ScrollArea.Autosize mah={360}>
-            <Stack gap="xs">
+          <ScrollArea.Autosize size="large">
+            <DsLayoutStack gap="xs">
               {participants.map((participant) => {
                 const isOwner = participant.role === 'owner';
                 const isLastOwner = isOwner && ownerCount <= 1;
@@ -178,69 +181,60 @@ export function LabelParticipantsDialogView({
                 const changeLabel = isOwner ? labels.makeManager : labels.makeOwner;
                 const disabledReason = isLastOwner ? labels.lastOwner : changeLabel;
                 return (
-                  <div
+                  <ParticipantRow
                     key={participant.memberId}
-                    data-participant-id={participant.memberId}
-                    className={styles.participantRow}
-                  >
-                    <Group gap="sm" wrap="nowrap" className={styles.participantIdentity}>
-                      <Avatar src={participant.avatarUrl} size="sm" radius="xl">
-                        {participant.nickname.charAt(0)}
-                      </Avatar>
-                      <Group gap={4} wrap="nowrap" className={styles.participantText}>
-                        <Text size="sm" truncate>
-                          {participant.nickname}
-                        </Text>
-                        {!participant.hasEffectiveAuthority ? (
-                          <Tooltip label={labels.inactive}>
-                            <span className={styles.inactiveStatus} role="img" aria-label={labels.inactive}>
-                              <IconUserOff size={14} aria-hidden="true" />
-                            </span>
-                          </Tooltip>
+                    memberId={participant.memberId}
+                    identityId={`${dialogId}-${participant.memberId}`}
+                    nickname={participant.nickname}
+                    avatarUrl={participant.avatarUrl}
+                    roleLabel={isOwner ? labels.owner : labels.manager}
+                    principal={isOwner}
+                    inactiveLabel={participant.hasEffectiveAuthority ? undefined : labels.inactive}
+                    actions={
+                      <>
+                        {isLastOwner ? (
+                          <span hidden id={`${dialogId}-${participant.memberId}-last-owner`}>
+                            {labels.lastOwner}
+                          </span>
                         ) : null}
-                      </Group>
-                    </Group>
-                    <div className={styles.participantActions} data-participant-actions>
-                      <span className={styles.roleBadgeContainer} data-participant-role-badge>
-                        <LabelBadge tone={isOwner ? 'accent' : 'neutral'} size="sm" className={styles.roleBadge}>
-                          {isOwner ? labels.owner : labels.manager}
-                        </LabelBadge>
-                      </span>
-                      <Tooltip label={canChangeRole ? changeLabel : disabledReason}>
-                        <span className={styles.actionButton}>
-                          <IconButton
-                            emphasis="low"
-                            size="sm"
-                            aria-label={changeLabel}
-                            disabled={!canChangeRole || mutating}
-                            onClick={() => onChangeRole(participant.memberId, targetRole)}
-                          >
-                            <IconArrowsExchange size={14} />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                      <Tooltip label={canRemove ? labels.remove : disabledReason}>
-                        <span className={styles.actionButton}>
-                          <IconButton
-                            tone="danger"
-                            emphasis="low"
-                            size="sm"
-                            aria-label={labels.remove}
-                            disabled={!canRemove || mutating}
-                            onClick={() => onRemove(participant.memberId)}
-                          >
-                            <IconX size={14} />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                    </div>
-                  </div>
+                        <Tooltip label={canChangeRole ? changeLabel : disabledReason}>
+                          <span>
+                            <IconButton
+                              emphasis="low"
+                              size="sm"
+                              aria-label={changeLabel}
+                              aria-describedby={`${dialogId}-${participant.memberId}${isLastOwner ? ` ${dialogId}-${participant.memberId}-last-owner` : ''}`}
+                              disabled={!canChangeRole || mutating}
+                              onClick={() => onChangeRole(participant.memberId, targetRole)}
+                            >
+                              <IconArrowsExchange size={14} />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                        <Tooltip label={canRemove ? labels.remove : disabledReason}>
+                          <span>
+                            <IconButton
+                              tone="danger"
+                              emphasis="low"
+                              size="sm"
+                              aria-label={labels.remove}
+                              aria-describedby={`${dialogId}-${participant.memberId}${isLastOwner ? ` ${dialogId}-${participant.memberId}-last-owner` : ''}`}
+                              disabled={!canRemove || mutating}
+                              onClick={() => onRemove(participant.memberId)}
+                            >
+                              <IconX size={14} />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      </>
+                    }
+                  />
                 );
               })}
-            </Stack>
+            </DsLayoutStack>
           </ScrollArea.Autosize>
         )}
-      </Stack>
+      </DsLayoutStack>
     </ContentModal>
   );
 }

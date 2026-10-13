@@ -1,5 +1,6 @@
 import type { Block, InlineContent } from '@/lib/types/page-content';
 import type { LocalizedRichTextBlock } from '@/features/editor/contract/localized-rich-text';
+import type { LocalizedPageSection } from '@/features/editor/contract/localized-page';
 import type { RichTextInline } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 
 export interface TocItem {
@@ -50,6 +51,20 @@ export function buildGeneratedBlockTocItems(blocks: readonly LocalizedRichTextBl
   return items;
 }
 
+/** Follows the same section/column order as GeneratedPageRenderer. */
+export function buildGeneratedPageTocItems(sections: readonly LocalizedPageSection[] | null | undefined): TocItem[] {
+  const items: TocItem[] = [];
+  const visit = (section: LocalizedPageSection) => {
+    if (section.kind === 'rich-text') {
+      items.push(...buildGeneratedBlockTocItems(section.richText));
+    } else if (section.kind === 'columns') {
+      section.columns?.forEach((column) => column.sections.forEach(visit));
+    }
+  };
+  sections?.forEach(visit);
+  return items;
+}
+
 function getGeneratedInlinePlainText(content: readonly RichTextInline[]): string {
   return content
     .map((item) => {
@@ -91,7 +106,8 @@ export function buildHtmlTocDocument(html: string | null | undefined): HtmlTocDo
     tocItems.push({
       id,
       label,
-      level: Number(heading.tagName.slice(1)) || 1,
+      // Outline depth is the authored level; a demoted element (below a document title) keeps it.
+      level: Number(heading.getAttribute('data-heading-level') ?? heading.tagName.slice(1)) || 1,
     });
   });
 

@@ -11,14 +11,17 @@ export type FileManagerErrorKey = FileManagerActionErrorCode | 'load' | 'mutatio
 
 export function useFileManagerI18n() {
   const t = useTranslations('fileManager');
+  const actionT = useTranslations('common.actions');
   const entityT = useTranslations('common.entities');
   const siteSettingsT = useTranslations('adminSettings.site');
+  const stateT = useTranslations('common.states');
   const errorMessage = useCallback((key: FileManagerErrorKey) => t(`errors.${key}`), [t]);
 
   const labels: FileManagerViewLabels = {
     title: t('title'),
     description: t('description'),
     root: t('root'),
+    back: actionT('back'),
     search: t('search'),
     allTypes: t('types.all'),
     images: t('types.images'),
@@ -46,7 +49,15 @@ export function useFileManagerI18n() {
     cancel: t('actions.cancel'),
     gridView: t('actions.gridView'),
     listView: t('actions.listView'),
+    viewMode: actionT('view'),
     loadMore: t('actions.loadMore'),
+    pagination: {
+      load: t('actions.loadMore'),
+      loading: stateT('loading'),
+      end: t('pagination.end'),
+      retry: actionT('tryAgain'),
+      failed: t('errors.load'),
+    },
     name: t('columns.name'),
     type: t('columns.type'),
     size: t('columns.size'),

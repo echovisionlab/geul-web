@@ -5,3 +5,7 @@ export type { ContentLayoutFieldLabels, ContentLayoutFieldViewProps } from './Co
 export { ContentLayoutView } from './ContentLayoutView';
 export type { ContentLayoutViewProps } from './ContentLayoutView';
 export type { DocumentChromeLayoutViewModel, DocumentContentHeightViewModel, DocumentLayoutViewModel } from './types';
+export { DocumentHeadingScope, useDocumentHeadingParentLevel } from './DocumentHeadingScope';
+export type { DocumentHeadingScopeProps } from './DocumentHeadingScope';
+export { DOCUMENT_TITLE_HEADING_LEVEL, documentHeadingTag } from './document-heading-level';
+export type { DocumentHeadingParentLevel, DocumentHeadingTag } from './document-heading-level';

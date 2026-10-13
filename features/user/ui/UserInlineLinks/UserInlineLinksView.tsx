@@ -1,40 +1,35 @@
 'use client';
-
-import type { CSSProperties, MouseEvent, ReactNode } from 'react';
-import { Avatar, Group } from '@mantine/core';
+import type { MouseEvent, ReactNode } from 'react';
+import { LayoutInline } from '@/components/core/Layout';
+import { Text, type TextTone } from '@/components/core/Typography';
+import { Avatar, type AvatarSize } from '@/components/core/Display';
 import { TextButton } from '@/components/core/TextButton';
-import classes from './UserInlineLinksView.module.css';
-
 export interface UserInlineLinkViewModel {
   id: string;
   href: string;
   label: string;
   avatarSrc: string | null;
-  avatarFallback: string | null;
+  /** Display name for the Avatar's Core-derived fallback initial. */
+  avatarName: string | null;
 }
-
 export interface UserInlineLinksViewProps {
   users: UserInlineLinkViewModel[];
   textSize?: 'xs' | 'sm';
-  textColor?: string;
-  avatarSize?: number;
-  avatarBorderColor?: string;
+  textColor?: TextTone;
+  avatarSize?: AvatarSize;
   showAvatars?: boolean;
   maxVisibleUsers?: number;
   overflowLabel?: string | ((hiddenCount: number) => string);
   separator?: 'none' | 'comma' | 'slash' | 'pipe';
 }
-
 function stopCardNavigation(event: MouseEvent<HTMLElement>) {
   event.stopPropagation();
 }
-
 export function UserInlineLinksView({
   users,
   textSize = 'xs',
   textColor,
-  avatarSize = 18,
-  avatarBorderColor,
+  avatarSize = 'xs',
   showAvatars = true,
   maxVisibleUsers,
   overflowLabel,
@@ -43,16 +38,9 @@ export function UserInlineLinksView({
   if (users.length === 0) {
     return null;
   }
-
   const visibleUsers =
     typeof maxVisibleUsers === 'number' && maxVisibleUsers > 0 ? users.slice(0, maxVisibleUsers) : users;
   const hiddenUserCount = Math.max(users.length - visibleUsers.length, 0);
-  const linkStyle = textColor ? ({ '--user-inline-link-color': textColor } as CSSProperties) : ({} as CSSProperties);
-
-  if (avatarBorderColor) {
-    linkStyle['--user-inline-avatar-border-color' as keyof CSSProperties] = avatarBorderColor as never;
-  }
-
   const resolvedOverflowLabel =
     hiddenUserCount > 0
       ? typeof overflowLabel === 'function'
@@ -61,54 +49,44 @@ export function UserInlineLinksView({
       : null;
   const separatorLabel = separator === 'comma' ? ', ' : separator === 'slash' ? '/' : separator === 'pipe' ? '|' : null;
   const items: ReactNode[] = [];
-
   visibleUsers.forEach((user, index) => {
     if (separatorLabel && index > 0) {
       items.push(
-        <span key={`separator-${user.id}`} className={classes.separator} style={linkStyle}>
+        <Text as="span" size={textSize} tone={textColor ?? 'inherit'} key={`separator-${user.id}`} nowrap>
           {separatorLabel}
-        </span>,
+        </Text>,
       );
     }
-
     items.push(
       <span key={user.id} role="presentation" onClick={stopCardNavigation}>
-        <TextButton
-          href={user.href}
-          size={textSize}
-          className={classes.userLink}
-          style={linkStyle}
-          aria-label={user.label}
-        >
+        <TextButton href={user.href} size={textSize} tone={textColor ?? 'inherit'} aria-label={user.label}>
           {showAvatars ? (
-            <Avatar src={user.avatarSrc} size={avatarSize} radius="xl" className={classes.userAvatar}>
-              {user.avatarFallback}
-            </Avatar>
+            <Avatar src={user.avatarSrc} size={avatarSize} shape="circle" interactive name={user.avatarName} />
           ) : null}
-          <span className={classes.userLabel}>{user.label}</span>
+          <Text as="span" size={textSize} tone="inherit" nowrap>
+            {user.label}
+          </Text>
         </TextButton>
       </span>,
     );
   });
-
   if (resolvedOverflowLabel) {
     if (separatorLabel && items.length > 0) {
       items.push(
-        <span key="separator-overflow" className={classes.separator} style={linkStyle}>
+        <Text as="span" size={textSize} tone={textColor ?? 'inherit'} key="separator-overflow" nowrap>
           {separatorLabel}
-        </span>,
+        </Text>,
       );
     }
     items.push(
-      <span key="overflow" className={classes.userOverflowLabel} style={linkStyle}>
+      <Text as="span" size={textSize} tone={textColor ?? 'inherit'} key="overflow" nowrap>
         {resolvedOverflowLabel}
-      </span>,
+      </Text>,
     );
   }
-
   return (
-    <Group gap={4} wrap="wrap" className={classes.userList}>
+    <LayoutInline gap="xxs" wrap="wrap">
       {items}
-    </Group>
+    </LayoutInline>
   );
 }

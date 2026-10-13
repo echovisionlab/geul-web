@@ -1,16 +1,21 @@
+import { useState } from 'react';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { localizedRender } from '@/.storybook/fixture-i18n';
 import type { Meta, StoryObj } from '@storybook/nextjs';
-import { Button, PasswordInput, Stack, TextInput } from '@mantine/core';
+
+import { Button } from '../Button';
+import { NativeSelect, PasswordInput, TextInput } from '@/components/core';
 import { Field } from './Field';
 
 const meta: Meta<typeof Field> = {
-  title: 'Core/Field',
+  title: 'Core/Layout/Field',
   component: Field,
   parameters: {
     layout: 'centered',
   },
   decorators: [
     (Story) => (
-      <div style={{ width: 420 }}>
+      <div style={{ width: 'min(420px, 100%)' }}>
         <Story />
       </div>
     ),
@@ -29,20 +34,30 @@ export const Basic: Story = {
   },
 };
 
-export const RequiredWithAction: Story = {
-  args: {
-    label: 'Password',
-    description: 'Use at least 12 characters.',
-    required: true,
-    htmlFor: 'field-story-password',
-    actions: (
-      <Button variant="subtle" size="compact-xs">
-        Generate
-      </Button>
-    ),
-    children: <PasswordInput placeholder="Password" />,
-  },
-};
+function PasswordFieldPreview() {
+  const [password, setPassword] = useState('');
+  return (
+    <Field
+      label="Password"
+      description="Use at least 12 characters."
+      required
+      htmlFor="field-story-password"
+      actions={
+        <Button emphasis="low" size="compact" onClick={() => setPassword(crypto.randomUUID())}>
+          Generate
+        </Button>
+      }
+    >
+      <PasswordInput
+        id="field-story-password"
+        value={password}
+        onChange={(event) => setPassword(event.currentTarget.value)}
+        placeholder="Password"
+      />
+    </Field>
+  );
+}
+export const RequiredWithAction: Story = { render: localizedRender(() => <PasswordFieldPreview />) };
 
 export const ErrorState: Story = {
   args: {
@@ -55,14 +70,71 @@ export const ErrorState: Story = {
 };
 
 export const StateMatrix: Story = {
-  render: () => (
-    <Stack gap="lg">
+  render: localizedRender(() => (
+    <DsLayoutStack gap="lg">
       <Field label="Display name" description="Shown publicly on profile pages." htmlFor="field-story-matrix-name">
         <TextInput placeholder="Name" />
       </Field>
       <Field label="Email" error="Enter a valid email address." htmlFor="field-story-matrix-email">
         <TextInput placeholder="name@example.com" />
       </Field>
-    </Stack>
-  ),
+    </DsLayoutStack>
+  )),
+};
+
+export const Inline: Story = {
+  args: {
+    layout: 'inline',
+    label: 'Language',
+    description: 'Language',
+    htmlFor: 'field-inline-language',
+    children: <NativeSelect density="compact" data={['English', '한국어']} />,
+  },
+};
+
+export const ReadOnly: Story = {
+  args: {
+    label: 'Display name',
+    description: 'This value can be reviewed but cannot be edited.',
+    htmlFor: 'field-readonly-name',
+    required: true,
+    children: <TextInput defaultValue="Example Studio" readOnly />,
+  },
+};
+
+export const LongContent: Story = {
+  args: {
+    layout: 'inline',
+    label: 'Language used for the source text and all subsequent translations',
+    description: 'Keep this source language consistent when reviewing translated content and its publication settings.',
+    error: 'Choose the language that matches the source text before saving these changes.',
+    htmlFor: 'field-long-language',
+    required: true,
+    actions: (
+      <Button emphasis="low" size="compact">
+        Review
+      </Button>
+    ),
+    children: <NativeSelect density="compact" data={['English — source language for this publication', '한국어']} />,
+  },
+};
+
+export const EditableLabel: Story = {
+  args: {
+    label: 'Description',
+    description: 'Activate the label to focus the editable description.',
+    htmlFor: 'field-editable-description',
+    children: (
+      <div
+        contentEditable
+        suppressContentEditableWarning
+        role="textbox"
+        aria-label="Description"
+        aria-multiline="true"
+        tabIndex={0}
+      >
+        Editable description
+      </div>
+    ),
+  },
 };

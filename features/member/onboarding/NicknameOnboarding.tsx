@@ -1,22 +1,20 @@
 'use client';
-
-import { useState } from 'react';
+import { LayoutStack as DsLayoutStack, LayoutInline } from '@/components/core/Layout';
+import { useId, useState } from 'react';
+import { VisuallyHidden } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Box, Stack } from '@mantine/core';
 import { Button } from '@/components/core/Button';
 import { ValidatingTextInput, type TextValidationStatus } from '@/components/core/Input';
 import { PageHeader } from '@/components/core/PageHeader';
 import { TextButton } from '@/components/core/TextButton';
 import { completeMyOnboardingAction, type MemberSummaryResult, type NicknameErrorCode } from '@/lib/actions/user';
 import { useNicknameValidation, type NicknameAvailabilityCheck } from '@/features/member/useNicknameValidation';
-
 type CompleteOnboarding = (nickname: string) => Promise<{
   member?: MemberSummaryResult;
   onboarded?: boolean;
   error?: string;
   errorCode?: NicknameErrorCode;
 }>;
-
 interface NicknameOnboardingProps {
   initialNickname: string;
   onCompleted: (member: MemberSummaryResult) => void;
@@ -24,7 +22,6 @@ interface NicknameOnboardingProps {
   checkAvailability?: NicknameAvailabilityCheck;
   completeOnboarding?: CompleteOnboarding;
 }
-
 function visualStatus(status: ReturnType<typeof useNicknameValidation>['status']): TextValidationStatus {
   switch (status) {
     case 'checking':
@@ -40,7 +37,6 @@ function visualStatus(status: ReturnType<typeof useNicknameValidation>['status']
       return 'idle';
   }
 }
-
 export function NicknameOnboarding({
   initialNickname,
   onCompleted,
@@ -51,9 +47,13 @@ export function NicknameOnboarding({
   const t = useTranslations('memberOnboarding');
   const tNickname = useTranslations('nicknameField');
   const tCommonActions = useTranslations('common.actions');
+  const formTitleId = useId();
   const [nickname, setNickname] = useState(initialNickname);
   const [pending, setPending] = useState(false);
-  const [submitError, setSubmitError] = useState<{ message: string; status: 'invalid' | 'error' } | null>(null);
+  const [submitError, setSubmitError] = useState<{
+    message: string;
+    status: 'invalid' | 'error';
+  } | null>(null);
   const validation = useNicknameValidation(nickname, checkAvailability ? { check: checkAvailability } : undefined);
   const validationStatus = submitError?.status ?? visualStatus(validation.status);
   const validationMessage =
@@ -76,7 +76,6 @@ export function NicknameOnboarding({
     validation.status === 'unavailable' ||
     validation.status === 'error' ||
     submitError?.status === 'invalid';
-
   const submit = async () => {
     if (submitDisabled) {
       return;
@@ -104,19 +103,21 @@ export function NicknameOnboarding({
       setPending(false);
     }
   };
-
   return (
-    <Box w={400} maw="calc(100vw - 2rem)">
-      <Stack gap="md">
+    <div style={{ width: 400, maxWidth: 'calc(100vw - 2rem)' }}>
+      <DsLayoutStack gap="md">
         <PageHeader title={t('title')} description={t('description')} />
 
         <form
+          aria-labelledby={formTitleId}
+          aria-busy={pending}
           onSubmit={(event) => {
             event.preventDefault();
             void submit();
           }}
         >
-          <Stack gap="md">
+          <DsLayoutStack gap="md">
+            <VisuallyHidden id={formTitleId}>{t('title')}</VisuallyHidden>
             <ValidatingTextInput
               id="member-nickname"
               label={tNickname('label')}
@@ -130,6 +131,7 @@ export function NicknameOnboarding({
               required
               disabled={pending}
               status={validationStatus}
+              statusLabel={validationMessage || undefined}
               description={
                 validationStatus === 'checking' || validationStatus === 'valid'
                   ? validationMessage || undefined
@@ -144,21 +146,22 @@ export function NicknameOnboarding({
             <Button type="submit" loading={pending} disabled={submitDisabled} fullWidth>
               {tCommonActions('continue')}
             </Button>
-            <TextButton
-              type="button"
-              appearance="accent"
-              size="sm"
-              controlSize="sm"
-              weight="medium"
-              onClick={onLogout}
-              disabled={pending}
-              style={{ alignSelf: 'center' }}
-            >
-              {tCommonActions('logOut')}
-            </TextButton>
-          </Stack>
+            <LayoutInline justify="center" gap="none">
+              <TextButton
+                type="button"
+                appearance="accent"
+                size="sm"
+                controlSize="sm"
+                weight="medium"
+                onClick={onLogout}
+                disabled={pending}
+              >
+                {tCommonActions('logOut')}
+              </TextButton>
+            </LayoutInline>
+          </DsLayoutStack>
         </form>
-      </Stack>
-    </Box>
+      </DsLayoutStack>
+    </div>
   );
 }

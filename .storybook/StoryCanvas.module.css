@@ -1,0 +1,49 @@
+.canvas {
+  min-height: 100vh;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  background: var(--geul-background);
+  color: var(--geul-text-primary);
+}
+
+/* Documentation examples grow with their content; standalone Canvas stories
+   retain the viewport surface used for responsive review. */
+.canvas[data-embedded] {
+  min-height: 0;
+}
+
+.header {
+  border-bottom: var(--geul-border-thin) solid var(--geul-border-default);
+}
+
+/* Centered stories include both Storybook and canvas insets. Constrain the
+   fixture to the available content width instead of stacking viewport widths. */
+:global(.sb-main-centered) :global(#storybook-root) {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.canvas > div > [data-geul-layout='inset'] > * {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  max-inline-size: min(100%, var(--_layout-container-width, 100%));
+}
+
+/* Fixed shell chrome belongs to the preview surface below its context header. */
+.frameSurface {
+  contain: layout;
+  min-block-size: 100dvh;
+}
+
+/* Print previews mirror production paper: the review context header is screen-only and the
+   canvas neither paints the theme surface nor forces an extra viewport-height page. */
+@media print {
+  .canvas {
+    min-height: 0;
+    background: transparent;
+  }
+
+  .header {
+    display: none;
+  }
+}

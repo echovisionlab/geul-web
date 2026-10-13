@@ -15,6 +15,7 @@ import { useContentMediaDelivery } from '@/features/media/ContentMediaDeliveryCo
 import { P5_CAPABILITIES, type P5Capability } from '@/features/editor/tiptap/p5/p5-capabilities';
 import {
   SHADER_STAGE_DEFINITIONS,
+  EMPTY_SHADER_CHANNELS,
   validateShaderPassGraph,
   type ShaderChannel,
   type ShaderProgramDocument,
@@ -97,7 +98,7 @@ function shaderProgram(block: Extract<LocalizedRichTextBlock, { kind: 'shader' }
     }
     sources[stage] = value.source;
     if (index >= 2) {
-      const parsed = value.channels.map(shaderChannel);
+      const parsed = value.channels.length === 0 ? [...EMPTY_SHADER_CHANNELS] : value.channels.map(shaderChannel);
       if (parsed.length !== 4 || parsed.some((channel) => channel === null)) {
         return null;
       }

@@ -1,10 +1,10 @@
 'use client';
 
 import { Component, type ComponentType, type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { LayoutInset } from '@/components/core/Layout';
 import { useTranslations } from 'next-intl';
 import { useDebouncedValue, useHotkeys } from '@mantine/hooks';
-import { createSpotlight, SpotlightEmpty, SpotlightRoot, SpotlightSearch, useSpotlight } from '@mantine/spotlight';
-import { IconSearch } from '@tabler/icons-react';
+import { CommandPalette, CommandPaletteResults } from '@/components/core/CommandPalette';
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
 import { loadPostSpotlightRuntime } from './post-spotlight-runtime-loader';
@@ -33,8 +33,8 @@ class SearchBoundary extends Component<
 /** Open the input immediately; mount search data/results only after invocation. */
 export function PostSpotlight() {
   const t = useTranslations('common');
-  const [[store, controls]] = useState(createSpotlight);
-  const { opened } = useSpotlight(store);
+  const [opened, setOpened] = useState(false);
+  const close = useCallback(() => setOpened(false), []);
   const [query, setQuery] = useState('');
   const [debouncedQuery] = useDebouncedValue(query, 300);
   const tPlaceholders = useTranslations('common.placeholders');
@@ -50,7 +50,7 @@ export function PostSpotlight() {
   const open = useCallback(() => {
     setOpenRequest((request) => request + 1);
     setFailed(false);
-    controls.open();
+    setOpened(true);
     if (loaded.current || pending.current) {
       return;
     }
@@ -70,7 +70,7 @@ export function PostSpotlight() {
       .finally(() => {
         pending.current = false;
       });
-  }, [controls]);
+  }, []);
 
   useEffect(() => {
     mounted.current = true;
@@ -83,19 +83,26 @@ export function PostSpotlight() {
     handleOpen();
     return () => {
       mounted.current = false;
-      controls.close();
+      close();
       window.removeEventListener(POST_SPOTLIGHT_OPEN_EVENT, handleOpen);
     };
-  }, [open, controls]);
+  }, [open, close]);
 
   useHotkeys([['mod + K', open]]);
 
   const fallback = (
-    <Alert tone="danger" role="alert" title={t('labels.error')} withCloseButton onClose={controls.close}>
+    <Alert
+      tone="danger"
+      role="alert"
+      title={t('labels.error')}
+      withCloseButton
+      onClose={close}
+      closeButtonLabel={t('actions.close')}
+    >
       {t('errors.generic')}
-      <Button onClick={open} mt="sm">
-        {t('actions.tryAgain')}
-      </Button>
+      <LayoutInset blockStart="sm">
+        <Button onClick={open}>{t('actions.tryAgain')}</Button>
+      </LayoutInset>
     </Alert>
   );
 
@@ -107,25 +114,15 @@ export function PostSpotlight() {
         : tStates('loading');
 
   return (
-    <SpotlightRoot
-      store={store}
+    <CommandPalette
+      opened={opened}
+      onClose={close}
+      title={tPlaceholders('searchPosts')}
+      closeLabel={t('actions.close')}
       query={query}
       onQueryChange={setQuery}
-      shortcut={null}
-      styles={{
-        content: { padding: 'var(--mantine-spacing-sm)' },
-        search: {
-          border: 'none',
-          borderBottom: '1px solid var(--mantine-color-default-border)',
-          borderRadius: 0,
-          background: 'transparent',
-        },
-        action: { padding: 'var(--mantine-spacing-sm)', borderRadius: 'var(--mantine-radius-md)' },
-        actionBody: { flex: 1 },
-        actionsGroup: { padding: 'var(--mantine-spacing-xs) 0' },
-      }}
+      placeholder={tPlaceholders('searchPosts')}
     >
-      <SpotlightSearch placeholder={tPlaceholders('searchPosts')} leftSection={<IconSearch size={20} />} />
       {opened &&
         (failed ? (
           fallback
@@ -134,8 +131,8 @@ export function PostSpotlight() {
             <Runtime query={query} debouncedQuery={debouncedQuery} opened={opened} />
           </SearchBoundary>
         ) : (
-          <SpotlightEmpty>{pendingMessage}</SpotlightEmpty>
+          <CommandPaletteResults items={[]} label={tPlaceholders('searchPosts')} emptyLabel={pendingMessage} />
         ))}
-    </SpotlightRoot>
+    </CommandPalette>
   );
 }

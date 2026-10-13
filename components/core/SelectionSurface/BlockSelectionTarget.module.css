@@ -1,0 +1,22 @@
+/* Covers its positioned block; it sits above block content and below resize handles. */
+.target {
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--geul-radius-square);
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+}
+
+.target[data-geul-block-selection-pointer='pass-through'] {
+  pointer-events: none;
+}
+
+.target:focus-visible {
+  outline: var(--geul-border-focus) solid var(--geul-focus);
+  outline-offset: var(--geul-border-focus);
+}

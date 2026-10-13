@@ -1,9 +1,11 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
 import { useCallback } from 'react';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { useTranslations } from 'next-intl';
-import { Stack, Text } from '@mantine/core';
+
 import { MapView } from '@/features/page/blocks/map/View';
 import { usePageEditor } from '@/features/page/PageEditor/PageEditorContext';
 import type { SectionMeta } from '@/features/page/PageEditor/types';
@@ -42,7 +44,7 @@ function CollaborativePageSectionEditor({
     return (
       <div className={classes.columns} style={{ gridTemplateColumns: ratios.map((ratio) => `${ratio}fr`).join(' ') }}>
         {section.columns.map((column) => (
-          <Stack key={column.id} gap="md">
+          <DsLayoutStack key={column.id} gap="md">
             {column.sections.map((childSection) => (
               <CollaborativePageSectionEditor
                 key={childSection.id}
@@ -51,7 +53,7 @@ function CollaborativePageSectionEditor({
                 onPropChange={onPropChange}
               />
             ))}
-          </Stack>
+          </DsLayoutStack>
         ))}
       </div>
     );
@@ -75,29 +77,29 @@ function CollaborativePageSectionEditor({
 
   if (section.type === 'map') {
     return (
-      <Stack gap="sm">
+      <DsLayoutStack gap="sm">
         <div className={classes.dynamicSectionPreview}>
           <MapView sectionId={section.id} props={section.props ?? {}} requestedLocale={locale} />
         </div>
-        <Text size="xs" c="dimmed">
+        <DsText size="xs" tone="secondary">
           {t('sharedStructureSectionDescription')}
-        </Text>
-      </Stack>
+        </DsText>
+      </DsLayoutStack>
     );
   }
 
   return (
-    <Stack gap="sm">
+    <DsLayoutStack gap="sm">
       <SectionLocalePropFields section={section} editable={editable} onPropChange={onPropChange} />
       <div className={classes.dynamicSectionNotice}>
-        <Text size="sm" fw={500}>
+        <DsText size="sm" weight="medium">
           {humanizeSectionType(section.type)}
-        </Text>
-        <Text size="xs" c="dimmed">
+        </DsText>
+        <DsText size="xs" tone="secondary">
           {t('sharedStructureSectionDescription')}
-        </Text>
+        </DsText>
       </div>
-    </Stack>
+    </DsLayoutStack>
   );
 }
 
@@ -114,11 +116,7 @@ export function LocalizedCollaborativePageBodyEditor({
   );
 
   if (sections.length === 0) {
-    return (
-      <Text size="sm" c="dimmed">
-        {fallbackText}
-      </Text>
-    );
+    return <SupportingText>{fallbackText}</SupportingText>;
   }
   return (
     <div className={classes.pageSections}>

@@ -34,6 +34,8 @@ interface UseSlugManagementOptions {
   debounceMs?: number;
   /** Callback when slug is available and should be saved (for auto-save scenarios) */
   onSave?: (slug: string) => void | Promise<unknown>;
+  /** Optional typed transport for local views; production uses the entity registry. */
+  checkAvailability?: (slug: string, excludeId?: string) => Promise<PageSlugAvailabilityResult>;
 }
 
 interface UseSlugManagementReturn {
@@ -77,6 +79,7 @@ export function useSlugManagement({
   onSlugChange,
   debounceMs = 1000,
   onSave,
+  checkAvailability,
 }: UseSlugManagementOptions): UseSlugManagementReturn {
   const registryEntityType = entityType === 'series' ? 'post_series' : entityType;
   const document = `${registryEntityType}:${entityId}`;
@@ -143,7 +146,7 @@ export function useSlugManagement({
     [slugSave],
   );
 
-  const checkAction = checkSlugActions[entityType];
+  const checkAction = checkAvailability ?? checkSlugActions[entityType];
   const isSlugEmpty = slug.length === 0;
 
   const { data, isFetching, isError } = useQuery({

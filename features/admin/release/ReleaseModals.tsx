@@ -1,15 +1,21 @@
 'use client';
+import { ConfirmationDialog } from '@/features/confirmation';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
-import { ConfirmModal } from '@/components/core/Modal';
+
+import { notifications } from '@/components/core/Notification';
+
 import { deleteReleaseAction } from '@/lib/actions/release';
 import { useReleaseModal } from './ReleaseModalContext';
 
-export function ReleaseModals() {
+interface ReleaseModalsProps {
+  deleteAction?: typeof deleteReleaseAction;
+  onDeleted?: (id: string) => void;
+}
+export function ReleaseModals({ deleteAction = deleteReleaseAction, onDeleted }: ReleaseModalsProps = {}) {
   const router = useRouter();
   const tCommon = useTranslations('common');
   const { deletingRelease, closeDelete } = useReleaseModal();
@@ -22,35 +28,40 @@ export function ReleaseModals() {
     }
     setDeleteLoading(true);
     try {
-      const result = await deleteReleaseAction(deletingRelease.id);
+      const result = await deleteAction(deletingRelease.id);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       notifications.show({
         message: tCommon('messages.itemDeleted', { item: tCommon('entities.release') }),
-        color: 'red',
+        tone: 'positive',
       });
       closeDelete();
-      router.refresh();
+      if (onDeleted) {
+        onDeleted(deletingRelease.id);
+      } else {
+        router.refresh();
+      }
     } finally {
       setDeleteLoading(false);
     }
   };
 
   return (
-    <ConfirmModal
+    <ConfirmationDialog
+      intent="delete"
       opened={!!deletingRelease}
       onClose={closeDelete}
       onConfirm={handleDelete}
       title={tCommon('actions.delete')}
       message={
-        <Text>
+        <DsText>
           {tCommon.rich('messages.confirmDeleteNamedRich', {
             name: deletingRelease?.title || tCommon('states.untitled'),
             strong: (chunks) => <strong>{chunks}</strong>,
           })}
-        </Text>
+        </DsText>
       }
       confirmLabel={tCommon('actions.delete')}
       cancelLabel={tCommon('actions.cancel')}

@@ -2,6 +2,7 @@ import { unwrapQueryResult } from '@/lib/api/query-result';
 import { Suspense } from 'react';
 import { ServerDataTablePagination } from '@/features/data-table/ServerDataTable/ServerDataTablePagination';
 import { listArtistsForBlockAction } from '@/lib/actions/artist';
+import { prepareSocialLinksDisplay } from '@/features/social-links/prepare-social-links-display';
 import { parseBooleanProp, parseIntegerProp, splitCsv } from '../list-shared';
 import { buildBlockTableNamespace, parseBlockTableQuery, queryRecordToSearchParams } from '../table-utils';
 import type { BlockViewProps } from '../types';
@@ -14,6 +15,8 @@ async function ArtistListViewServer({ sectionId, props, query, requestedLocale }
   const labelIds = splitCsv(p.labelIds);
   const limit = parseIntegerProp(p.limit, 12);
   const showPagination = parseBooleanProp(p.showPagination, false);
+  // Hidden metadata must not add prepared glyph paths to the HTML/RSC payload.
+  const showMeta = p.showMeta !== 'false';
   const namespace = buildBlockTableNamespace('artistList', sectionId);
   const searchParams = queryRecordToSearchParams(query);
   const tableQuery = showPagination
@@ -35,7 +38,7 @@ async function ArtistListViewServer({ sectionId, props, query, requestedLocale }
     title: a.name,
     imageUrl: a.imageUrl ?? null,
     imageAlt: a.name,
-    socialLinks: a.socialLinks ?? null,
+    socialLinkEntries: showMeta ? prepareSocialLinksDisplay(a.socialLinks ?? {}) : [],
   }));
 
   const result = {
@@ -69,6 +72,9 @@ export function ArtistListViewStreaming(blockProps: BlockViewProps) {
           limit={limit}
           columns={columns}
           layout={p.layout}
+          itemSize={p.itemSize}
+          showImage={p.showImage !== 'false'}
+          imageAspectRatio={p.imageAspectRatio}
           carouselLoop={p.carouselLoop !== 'false'}
           carouselIndicators={p.carouselIndicators !== 'false'}
         />

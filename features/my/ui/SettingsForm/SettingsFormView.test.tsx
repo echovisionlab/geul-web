@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemTestProvider as DesignSystemProvider } from '@/test/TestProviders';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { SettingsFormView, type SettingsFormViewLabels, type SettingsFormViewProps } from './SettingsFormView';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -42,9 +43,9 @@ afterEach(() => {
 function renderView(overrides: Partial<SettingsFormViewProps> = {}) {
   act(() => {
     root.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <SettingsFormView {...defaultProps} {...overrides} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
 }
@@ -73,7 +74,7 @@ describe('SettingsFormView', () => {
     expect(container.textContent).toContain(labels.unsubscribedAlert);
     const button = container.querySelector<HTMLButtonElement>('button');
     expect(button?.textContent).toContain(labels.subscribe);
-    expect(button?.dataset.tone).toBe('accent');
+    expect(button?.dataset.tone).toBe('neutral');
     expect(button?.dataset.emphasis).toBe('strong');
 
     act(() => button?.click());
@@ -85,7 +86,7 @@ describe('SettingsFormView', () => {
 
     expect(container.querySelector('[role="alert"]')?.textContent).toContain('Subscription update failed.');
     const pendingButton = container.querySelector<HTMLButtonElement>('button');
-    expect(pendingButton?.disabled).toBe(true);
+    expect(pendingButton?.getAttribute('aria-disabled')).toBe('true');
 
     act(() => pendingButton?.click());
     expect(onSubscriptionChange).not.toHaveBeenCalled();

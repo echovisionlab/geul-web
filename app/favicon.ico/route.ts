@@ -1,5 +1,5 @@
 import { getPublicSettings } from '@/lib/queries/manifest';
-import { getPublicCdnUrl } from '@/lib/public-runtime-config';
+import { getServerPublicRuntimeConfig } from '@/lib/public-runtime-config.server';
 import { proxyFaviconRequest } from '@/lib/utils/favicon-proxy';
 
 export const dynamic = 'force-dynamic';
@@ -10,7 +10,7 @@ async function forwardFavicon(request: Request, method: string): Promise<Respons
   const sourceUrl = settings.favicon_asset_set?.icon_ico_url ?? null;
 
   return proxyFaviconRequest({
-    allowedCdnUrl: getPublicCdnUrl(),
+    allowedCdnUrl: getServerPublicRuntimeConfig().cdnUrl,
     method,
     requestHeaders: request.headers,
     sourceUrl,

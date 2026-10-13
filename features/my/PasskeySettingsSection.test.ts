@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, createElement, type ComponentProps, type ComponentType, type ReactNode } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import type { SettingsFlow } from '@/features/auth/settings-flow';
 import { rememberPasskeySecurityContinuation } from '@/features/auth/security-reauthentication';
 import enMessages from '@/messages/en.json';
@@ -256,7 +257,7 @@ describe('getPasskeyItems', () => {
             TestIntlProvider,
             { locale: 'en', messages: enMessages },
             createElement(
-              MantineProvider,
+              DesignSystemProvider,
               null,
               createElement(
                 TestManifestProvider,
@@ -357,7 +358,7 @@ describe('getPasskeyItems', () => {
         createElement(
           TestIntlProvider,
           { locale: 'en', messages: enMessages },
-          createElement(MantineProvider, null, createElement(PasskeySettingsSection, { subjectId: 'member-1' })),
+          createElement(DesignSystemProvider, null, createElement(PasskeySettingsSection, { subjectId: 'member-1' })),
         ),
       );
     });

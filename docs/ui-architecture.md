@@ -19,11 +19,11 @@ component belongs to a named feature.
 - Must not import app routes, features, generated contracts, API clients, auth, queries, mutations,
   notifications, or translation providers.
 - Owns visual tokens and semantic control APIs. Consumers use `tone`, `emphasis`, `appearance`,
-  and `shape`; Mantine `color`, `variant`, and `radius` are implementation details.
+  and `shape`; foreign `color`, `variant`, and `radius` APIs are not public styling escapes.
 - `PageHeader` owns the shared route-title scale and separates semantic `h1|h2` level from visual
   size. `SectionHeader` remains the compact heading for controls grouped inside a page, while
   content heroes and editor titles keep their dedicated Feature/Core owners.
-- May use React, Mantine internals, browser interaction state, and local pure utilities.
+- May use React, React Aria behavior, native semantic elements, browser interaction state, and local pure utilities.
 - Composition alone does not make a component feature-specific. A composed control belongs here
   when every displayed value, label, state, and event is supplied by props and its API has no
   domain vocabulary.
@@ -32,7 +32,7 @@ component belongs to a named feature.
 - `TextButton.size` owns typography only. `controlSize` opts into control hit-area geometry; composite
   controls may override the typed `--text-button-*` style variables when their surrounding layout
   owns an established row height or padding contract.
-- Storybook gives each primitive its own `Core/<family>/<component>` group and separate state
+- Storybook gives each primitive its own `Core/<family>/<component>/States` group and separate state
   stories. Cross-component examples live only under an explicit `Composition` subgroup; primitive
   catalogs must not be collapsed into one all-controls story.
 
@@ -61,13 +61,14 @@ Controllers and hooks outside `features/<domain>/ui/**` connect Feature UI to se
 
 ## Page composition
 
-`app/**` loads route data and composes controllers. Route-level compositions are verified through
-their controller and view unit tests; they are not registered in Storybook.
+`app/**` loads route data and composes controllers. Route-level service behavior is verified through
+controller and view unit tests. `stories/kit/**` previews the same production views at page scale
+with deterministic fixture data and local intent handlers. These previews do not execute route
+modules, service controllers, authentication, or persistence.
 
 - Route modules should not invent a second visual implementation for a Core or Feature control.
-- A route-to-story inventory in `docs/ui-inventory.md` records every served page and its UI owner.
-- `docs/ui-component-inventory.md` records every remaining direct interactive dependency and the
-  migration gate required before it can be banned outside Core.
+- A route-to-story inventory in `docs/design-system/generated-inventory.md` records every served page and its UI owner.
+- `docs/design-system/component-inventory.md` records component owners, consumers, importing stories and tests.
 - Page `external-video` sections own only the shared URL/aspect-ratio and localized caption wiring.
   Post and Page rich-text public views, including generated localized Post/Page documents, may promote an exact
   standalone YouTube/Vimeo link; Work, Event, nested rich-text children, and the global `DefaultBlockView` do not
@@ -151,16 +152,34 @@ justify a new global folder, and “composed” does not mean “feature-specifi
   a component.
 - State transitions, branching, callbacks, and data mapping require unit coverage; a browser flow
   must not substitute for a missing unit test.
-- Storybook is a visual catalog of fixed, props-only Core and Feature UI states. Story modules do
-  not own `play` assertions, local controller hooks, service contracts, providers, or runtime
-  harnesses.
+- Storybook includes fixed, props-only Core and Feature states plus an interactive UI kit.
+  Existing colocated stories keep their prop-driven catalog role. Explicitly labeled offline
+  `Interactive` and `Runtime` labs retain their fixture owners and do not establish pure-view or
+  route coverage. Preview-only adapters under
+  `stories/kit/**` may own local React state to connect real UI callbacks, fixture validation,
+  selection, sorting, tabs, and dialog transitions. They reuse production components and remain
+  outside every production import graph; they never become replacement product components.
+- Interactive adapters must not import app routes, API clients, query/mutation controllers,
+  auth/session clients, collaboration providers, or generated service contracts. The global preview owns locale, NextIntl messages, theme, and request time zone. Story-local
+  providers or per-story Locale/Theme globals must not override the toolbar. Production vocabulary
+  and preview UI labels follow all supported toolbar locales; authored sample content remains unchanged. There is no backend mocking or live service connection in the UI kit.
+- `Foundations` exposes the real token source, `Core` keeps individual primitive catalogs,
+  `Composition` combines controls, `Feature` exposes domain views, and `Pages` previews actual
+  route-owned views or sections. Each page preview documents the represented route and omissions;
+  a generic composition example must not be reported as a covered application page.
 - CI validates and builds the catalog but does not execute every story in a browser. Component
   behavior, callbacks, accessibility, branching, mapping, and state transitions belong to Vitest.
-- There is no production E2E suite, Storybook browser runner, Playwright dependency, manual-story
-  exception, or page/runtime story registry.
+- `stories/kit/PreviewInteractions.test.tsx` verifies adapter transitions against the real UI with
+  Vitest. This complements production component tests; it does not replace controller coverage.
+  `.storybook/tsconfig.json` checks preview sources separately because the app config excludes
+  stories. It skips third-party declaration checking due to the installed Storybook declarations'
+  incompatibility with TypeScript 7; application source checking remains unchanged.
+- There is no production E2E suite or Storybook browser runner dependency. Browser spot checks may
+  verify the built preview's theme, controls, viewport, and interaction behavior. The actual route
+  preview matrix and limitations live in `docs/ui-kit.md` and the generated design-system inventory.
 
 ESLint enforces that `components/**` contains only `core`, protects Core and Feature UI dependency
-boundaries, and rejects direct Mantine interactive controls outside Core. Relative imports may
+boundaries, and rejects direct framework presentation imports outside Core. Relative imports may
 compose siblings inside the same Core or feature `ui` subtree but may not escape that boundary;
 Feature UI also cannot import locale/message modules or any `@echovisionlab/*` domain contract directly.
 
@@ -184,33 +203,6 @@ a query failure renders an error. ShareLink previews retain their exact version 
 token and locale query, and never consume a public initial snapshot. History queries
 retain their existing interfaces.
 
-### Measured loading verification (2026-10-01)
-
-Compared the two page client modules at `f1e21bf2456ebbf62e19122cfaabe2e0c049f679`
-with this change using the same React/Vitest/JSDOM fixtures, English locale, one
-published paragraph, empty query cache and the existing 60-second freshness window.
-Only the baseline page modules were swapped; query mocks and rendering fixtures
-were identical. Both pages changed as follows:
-
-| Measurement                          | Before | After |
-| ------------------------------------ | -----: | ----: |
-| Initial client query function calls  |      2 |     0 |
-| Published paragraphs in initial HTML |      0 |     1 |
-
-The initial client query calls dropped by 100%. When the server snapshot is unavailable,
-the client now invokes one combined query; the query boundary test verifies exactly
-one `get({})` RPC for both current and scheduled values.
-
-These are deterministic query/HTML measurements, not real network timings. Production
-LCP and CLS have not been measured for the changed version because it has not been
-deployed; the local-contract build uses local service endpoints, not the audited live
-site's content. Actual layout and timing improvement needs the same browser/cache
-conditions as the public-page audit after deployment. The alternatives verified here
-are real paragraph SSR, hydration preserving the server DOM, query counts, locale and
-ShareLink isolation, return visits with older or pending browser data, and authoritative
-empty versus service failure behavior. Server request-cache tests model React's cache
-semantics and do not constitute production RPC tracing.
-
 ## Public runtime loading boundaries
 
 Public route compositions import a domain-owned `Lazy*Editor` client entrypoint. That
@@ -224,10 +216,11 @@ modules with SSR enabled, preserving document HTML and printable source. Generat
 file blocks own their media implementation separately. Download authority, durable
 attachment state and missing-media presentation are preserved by those modules.
 
-The root layout owns Mantine Core, notifications, spotlight and document styles.
-Dates, charts, carousel, KaTeX and Video.js vendor styles belong to actual feature
-consumers. Math modules import KaTeX; both the video player and legacy media hydrator
-import Video.js. Storybook retains its independent preview styling.
+The root layout owns the DesignSystemProvider, Core notification region and document styles.
+Core owns date controls, charts and carousel presentation. KaTeX and Video.js styles remain with
+actual specialist consumers. Math modules import KaTeX; both the video player and legacy media
+hydrator import Video.js. Storybook uses the same DesignSystemProvider and generated token CSS;
+the shared provider is the theme authority.
 
 `MapViewEmbedded` starts the shared runtime import when a map is needed, overlapping
 its theme query. The dynamic renderer reuses the same promise. Empty unused maps do

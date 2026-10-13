@@ -1,7 +1,9 @@
 'use client';
 
-import { Fragment } from 'react';
-import { Group, Text } from '@mantine/core';
+import { LayoutInline as DsLayoutInline, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+import { Fragment, useId } from 'react';
+
 import {
   IconArrowsHorizontal,
   IconMapPin,
@@ -12,7 +14,6 @@ import {
 } from '@tabler/icons-react';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
 import { IconButton } from '@/components/core/IconButton';
-import { Tooltip } from '@/components/core/Tooltip';
 import { EditorToolbarDropdownTarget } from '@/features/editor/toolbars/EditorToolbarTooltip';
 import {
   AlignmentMenuActions,
@@ -79,6 +80,7 @@ export function MapSelectionMenu({
   onDelete,
   onEscape,
 }: MapSelectionMenuProps) {
+  const resizeHintId = useId();
   const widthStatus = `${labels.width}: ${previewWidth}%${isResizing ? ` (${labels.resizing})` : ''}`;
 
   return (
@@ -90,7 +92,7 @@ export function MapSelectionMenu({
       onEscape={onEscape}
     >
       <DropdownMenu size="compact" placement="bottom-start" portal={false}>
-        <EditorToolbarDropdownTarget label={labels.places}>
+        <EditorToolbarDropdownTarget focusHint={false} label={labels.places}>
           {(targetRef) => (
             <IconButton
               ref={targetRef}
@@ -147,23 +149,25 @@ export function MapSelectionMenu({
         testIdPrefix="tiptap-map-align"
       />
 
-      <Tooltip label={labels.resizeHint} withArrow>
-        <Group
+      <DsLayoutInset inline="xxs">
+        <DsLayoutInline
           role="status"
+          aria-describedby={resizeHintId}
           aria-label={widthStatus}
-          gap={4}
+          gap="xxs"
           wrap="nowrap"
-          h={30}
-          px={6}
           data-resizing={isResizing || undefined}
           data-testid="tiptap-map-width"
         >
           <IconArrowsHorizontal size={16} aria-hidden />
-          <Text component="output" size="xs" fw={500}>
+          <DsText as="output" size="xs" weight="medium">
             {previewWidth}%
-          </Text>
-        </Group>
-      </Tooltip>
+          </DsText>
+        </DsLayoutInline>
+      </DsLayoutInset>
+      <span id={resizeHintId} hidden>
+        {labels.resizeHint}
+      </span>
 
       <SelectionMenuAction
         label={labels.focusCaption}

@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { I18nProvider as DesignSystemProvider } from 'react-aria-components';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import classes from './Input.module.css';
 import { NumberInput } from './NumberInput';
 
@@ -25,9 +26,9 @@ describe('NumberInput', () => {
   it('uses the shared underline and focus-animation styles', () => {
     act(() => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider>
           <NumberInput label="Order" defaultValue={1} />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 

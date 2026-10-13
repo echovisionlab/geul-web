@@ -1,0 +1,14 @@
+.item {
+  position: relative;
+  min-width: 0;
+}
+
+/* Move the original renderer, including expanded content and control geometry. */
+.item[data-dragging] {
+  z-index: var(--geul-layer-popup);
+  background: var(--geul-surface);
+  outline: var(--geul-border-thin) solid var(--geul-border-strong);
+  outline-offset: calc(-1 * var(--geul-border-thin));
+  box-shadow: var(--geul-shadow-floating);
+  cursor: grabbing;
+}

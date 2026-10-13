@@ -7,7 +7,6 @@ const meta = {
   parameters: { layout: 'centered' },
   args: {
     defaultValue: 40,
-    w: 420,
     'aria-label': 'Volume',
   },
 } satisfies Meta<typeof Slider>;
@@ -25,7 +24,6 @@ export const WithMarks: Story = {
       { value: 50, label: '50' },
       { value: 100, label: '100' },
     ],
-    mb: 28,
   },
 };
 export const FineGrained: Story = { args: { defaultValue: 0.7, min: 0, max: 1, step: 0.01 } };

@@ -1,25 +1,258 @@
-.root[data-shape='square'] .item,
-.root[data-shape='square'] .control {
-  border-radius: 0;
+.root {
+  --_disclosure-inline-inset: var(--geul-spacing-md);
+  --_disclosure-control-gap: var(--geul-spacing-sm);
+  --_disclosure-title-padding: var(--_disclosure-inline-inset);
+  --_disclosure-control-border: var(--geul-border-thin);
+  --_disclosure-chevron-track: var(--geul-chrome-icon-size);
+  --_disclosure-label-inset: calc(var(--_disclosure-title-padding) + var(--_disclosure-control-border));
+  --_disclosure-chevron-inset: calc(var(--_disclosure-chevron-track) + var(--_disclosure-control-gap));
+  --_disclosure-title-inset: var(--_disclosure-label-inset);
+  color: var(--geul-text-primary);
+  border-bottom: var(--geul-border-thin) solid var(--geul-border-default);
 }
 
-.root[data-density='compact'] .control {
-  min-height: var(--chrome-row-height);
-  padding: 0 8px;
-  font-size: var(--chrome-font-size);
+.root[data-appearance='filled'] {
+  background: var(--geul-surface-muted);
 }
 
-.root[data-density='compact'] .label {
-  padding: 4px 0;
-  font-size: var(--chrome-font-size);
-  line-height: 1.25;
+/* The parent body starts at its label. Compensate this child's own label inset,
+ * rather than adding a second full step. Leading actions already supply a track. */
+.root[data-geul-hierarchy-nested]:not([data-leading-actions]) {
+  margin-inline-start: max(
+    0px,
+    calc(var(--_hierarchy-step, var(--geul-hierarchy-step)) - var(--_disclosure-title-inset))
+  );
 }
 
-.root[data-density='compact'] .chevron {
-  width: var(--chrome-icon-size);
-  height: var(--chrome-icon-size);
+.root[data-divider='none'] {
+  border-bottom: 0;
 }
 
-.root[data-density='compact'][data-content-indent='small'] .content {
-  padding: 2px 0 4px 8px;
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--geul-spacing-xxs);
+}
+
+.actions {
+  flex: none;
+  padding-inline-end: var(--_disclosure-inline-inset);
+}
+
+.leadingActions {
+  flex: none;
+  padding-inline-start: var(--_disclosure-inline-inset);
+}
+
+.heading {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.control {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--_disclosure-control-gap);
+  min-height: var(--geul-control-height-md);
+  padding: var(--geul-spacing-xs) var(--_disclosure-inline-inset);
+  border: var(--geul-border-thin) solid transparent;
+  border-radius: var(--geul-radius-square);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  font-size: var(--geul-font-size-sm);
+  cursor: pointer;
+}
+
+.control:not([data-disabled]):is(:hover, [data-hovered]) {
+  background: var(--geul-surface-hover);
+}
+
+.control:not([data-disabled]):is(:active, [data-pressed]) {
+  background: var(--geul-surface-active);
+}
+
+.control[data-focus-visible] {
+  outline: var(--geul-border-focus) solid var(--geul-focus);
+  outline-offset: calc(var(--geul-border-focus) * -1);
+}
+
+.control[data-disabled] {
+  color: var(--geul-text-muted);
+  cursor: default;
+}
+
+.root[data-leading-actions] {
+  --_disclosure-inline-inset: var(--geul-spacing-xs);
+  --_disclosure-control-gap: var(--geul-spacing-xs);
+}
+
+.root[data-density='compact'] {
+  --_disclosure-inline-inset: var(--geul-spacing-xxs);
+  --_disclosure-control-gap: var(--geul-spacing-xxs);
+  --_disclosure-control-border: 0px;
+  --_disclosure-chevron-track: max(var(--geul-control-height-compact), var(--geul-interaction-minimum));
+}
+
+.root[data-chevron-position='start'] {
+  --_disclosure-title-inset: calc(var(--_disclosure-label-inset) + var(--_disclosure-chevron-inset));
+}
+
+.chevron {
+  flex: none;
+  width: var(--geul-chrome-icon-size);
+  height: var(--geul-chrome-icon-size);
+  transition: transform var(--geul-motion-fast) var(--geul-motion-easing);
+}
+
+.chevronSlot {
+  display: contents;
+}
+
+.root[data-expanded] > .header > .heading > .control > .chevronSlot > .chevron {
+  transform: rotate(180deg);
+}
+
+.root[data-chevron-position='start'] > .header > .heading > .control {
+  justify-content: flex-start;
+}
+
+.root[data-chevron-position='start'] > .header > .heading > .control > .chevronSlot > .chevron {
+  transform: rotate(-90deg);
+}
+
+.root[data-chevron-position='start'][data-expanded] > .header > .heading > .control > .chevronSlot > .chevron {
+  transform: none;
+}
+
+.content {
+  padding: var(--geul-spacing-sm) var(--geul-spacing-md);
+}
+
+.root[data-content-indent='none'] > .content {
+  padding-inline: 0;
+}
+
+.root[data-density='compact'] > .header > .heading > .control {
+  min-height: max(var(--geul-control-height-compact), var(--geul-interaction-minimum));
+  padding: 0 var(--_disclosure-inline-inset);
+  border: 0;
+  font-size: var(--geul-chrome-font-size);
+}
+
+/* Compact controls share adjacent compact action tracks. Outer inset belongs to
+ * the action slots; do not repeat it between a handle and the title trigger. */
+.root[data-density='compact'] > .header {
+  gap: 0;
+}
+
+.root[data-density='compact'] > .header > .heading > .control > .chevronSlot {
+  display: inline-grid;
+  flex: none;
+  width: max(var(--geul-control-height-compact), var(--geul-interaction-minimum));
+  height: max(var(--geul-control-height-compact), var(--geul-interaction-minimum));
+  place-items: center;
+}
+
+.root[data-density='compact'][data-chevron-position='end'] > .header > .heading > .control {
+  padding-inline-end: 0;
+}
+
+.root[data-density='compact'][data-leading-actions] {
+  --_disclosure-title-padding: 0px;
+}
+
+.root[data-density='compact'][data-leading-actions] > .header > .heading > .control {
+  padding-inline-start: 0;
+}
+
+.root[data-density='compact'][data-content-indent='small'] > .content {
+  padding: var(--geul-spacing-xxs) var(--geul-spacing-xs);
+}
+
+.root[data-density='compact'] > .content {
+  padding-block: var(--geul-spacing-xxs);
+}
+
+/* Header and body share tracks; arbitrary leading actions need no width estimate. */
+.root[data-content-indent='label'] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: var(--geul-spacing-xxs);
+}
+
+.root[data-content-indent='label'][data-leading-actions] {
+  grid-template-columns: max-content minmax(0, 1fr);
+}
+
+.root[data-content-indent='label'][data-actions] {
+  grid-template-columns: minmax(0, 1fr) max-content;
+}
+
+.root[data-content-indent='label'][data-leading-actions][data-actions] {
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
+}
+
+.root[data-content-indent='label'][data-density='compact'] {
+  column-gap: 0;
+}
+
+.root[data-content-indent='label'] > .header {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+}
+
+.root[data-content-indent='label'] > .header > .heading {
+  grid-column: 1;
+}
+
+.root[data-content-indent='label'][data-leading-actions] > .header > .heading {
+  grid-column: 2;
+}
+
+.root[data-content-indent='label'] > .header > .leadingActions {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.root[data-content-indent='label'] > .header > .actions {
+  grid-column: -2 / -1;
+  grid-row: 1;
+}
+
+.root[data-content-indent='label'] > .content {
+  min-width: 0;
+  grid-column: 1 / -1;
+  padding-inline: var(--_disclosure-title-inset) var(--_disclosure-inline-inset);
+}
+
+.root[data-content-indent='label'][data-leading-actions] > .content {
+  grid-column: 2 / -1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
+}
+
+.region {
+  min-width: 0;
+}
+
+.region[hidden] {
+  display: none;
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--geul-spacing-xs);
+  min-width: 0;
+  text-align: start;
 }

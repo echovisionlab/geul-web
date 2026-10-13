@@ -1,9 +1,11 @@
 'use client';
 
+import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
+
 import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
 import { OgImagePreview } from '@/features/metadata/OgImagePreview';
 import { SiteOgBackgroundUploader } from '@/features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader';
@@ -11,27 +13,35 @@ import { getSiteOgStatusAction, regenerateSiteOgImageAction } from '@/lib/action
 import { useOgImage } from '@/lib/hooks/useOgImage';
 import { SITE_OG_TARGET_ID } from '@/lib/og-generation-targets';
 
+export interface SiteOgImageBindings {
+  status: typeof getSiteOgStatusAction;
+  regenerate: typeof regenerateSiteOgImageAction;
+  read: import('@/lib/hooks/useOgImage').OgImageReadBindings;
+  asset: import('@/features/site/site-asset-bindings').SiteAssetBindings;
+}
 interface SiteOgImagePanelProps {
+  bindings?: SiteOgImageBindings;
   currentBackgroundUrl: string | null;
   automaticGenerationRunId?: string;
 }
 
 const SITE_OG_STATUS_QUERY_KEY = ['siteOgStatus'] as const;
 
-export function SiteOgImagePanel({ currentBackgroundUrl, automaticGenerationRunId }: SiteOgImagePanelProps) {
+export function SiteOgImagePanel({ currentBackgroundUrl, automaticGenerationRunId, bindings }: SiteOgImagePanelProps) {
   const tCommonNotifications = useTranslations('common.notifications');
   const queryClient = useQueryClient();
   const queryKey = SITE_OG_STATUS_QUERY_KEY;
 
   const status = useQuery({
     queryKey,
-    queryFn: getSiteOgStatusAction,
+    queryFn: bindings?.status ?? getSiteOgStatusAction,
   });
   const ogImage = useOgImage({
     entityType: 'site',
     entityId: SITE_OG_TARGET_ID,
     initialOgImageUrl: status.data?.data?.url,
     provider: null,
+    readBindings: bindings?.read,
   });
 
   useEffect(() => {
@@ -47,13 +57,13 @@ export function SiteOgImagePanel({ currentBackgroundUrl, automaticGenerationRunI
   }, [ogImage.readyGenerationId, queryClient, queryKey]);
 
   const regenerate = useMutation({
-    mutationFn: regenerateSiteOgImageAction,
+    mutationFn: bindings?.regenerate ?? regenerateSiteOgImageAction,
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tCommonNotifications('ogGenerationRequested'), color: 'green' });
+      notifications.show({ message: tCommonNotifications('ogGenerationRequested'), tone: 'positive' });
       if (result.generationId) {
         ogImage.trackGeneration(result.generationId);
       } else {
@@ -65,16 +75,19 @@ export function SiteOgImagePanel({ currentBackgroundUrl, automaticGenerationRunI
 
   return (
     <MediaPreviewGrid>
-      <OgImagePreview
-        src={ogImage.src}
-        canRegenerate
-        isRegenerating={regenerate.isPending || ogImage.isRegenerating}
-        generationStatus={ogImage.status}
-        generationError={ogImage.error}
-        onRegenerate={() => regenerate.mutate()}
-      />
+      <AuthoringExtension kind="generation">
+        <OgImagePreview
+          src={ogImage.src}
+          canRegenerate
+          isRegenerating={regenerate.isPending || ogImage.isRegenerating}
+          generationStatus={ogImage.status}
+          generationError={ogImage.error}
+          onRegenerate={() => regenerate.mutate()}
+        />
+      </AuthoringExtension>
       <SiteOgBackgroundUploader
         type="site_og_background"
+        bindings={bindings?.asset}
         currentUrl={currentBackgroundUrl}
         onSuccess={(runId) => {
           if (runId) {

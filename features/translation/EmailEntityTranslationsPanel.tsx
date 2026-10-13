@@ -1,5 +1,7 @@
 'use client';
 
+import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
+
 import { EntityTranslationsPanel } from './EntityTranslationsPanel';
 
 interface EmailEntityTranslationsPanelProps {
@@ -8,5 +10,9 @@ interface EmailEntityTranslationsPanelProps {
 }
 
 export function EmailEntityTranslationsPanel({ entityId, canManage = true }: EmailEntityTranslationsPanelProps) {
-  return <EntityTranslationsPanel entityType="email_layout" entityId={entityId} canManage={canManage} />;
+  return (
+    <AuthoringExtension kind="translations">
+      <EntityTranslationsPanel entityType="email_layout" entityId={entityId} canManage={canManage} />
+    </AuthoringExtension>
+  );
 }

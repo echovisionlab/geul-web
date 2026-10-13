@@ -1,0 +1,67 @@
+.root {
+  width: 100%;
+  min-width: 0;
+}
+
+.viewport {
+  overflow: hidden;
+  outline: none;
+}
+
+.viewport:focus-visible {
+  outline: var(--geul-border-focus) solid var(--geul-focus);
+  outline-offset: var(--geul-border-focus);
+}
+
+.track {
+  display: flex;
+  gap: var(--_carousel-gap);
+  touch-action: pan-y pinch-zoom;
+}
+
+.slide {
+  min-width: 0;
+  flex: 0 0 calc(var(--_carousel-slide-base) - var(--_carousel-gap) * var(--_carousel-gap-share-base));
+}
+
+.footer {
+  padding-block-start: var(--geul-spacing-xs);
+}
+
+.indicator {
+  display: block;
+  width: var(--geul-spacing-xxs);
+  height: var(--geul-spacing-xxs);
+  background: currentcolor;
+  border-radius: var(--geul-radius-circle);
+}
+
+@media (width >= $mantine-breakpoint-xs) {
+  .slide {
+    flex-basis: calc(var(--_carousel-slide-xs) - var(--_carousel-gap) * var(--_carousel-gap-share-xs));
+  }
+}
+
+@media (width >= $mantine-breakpoint-sm) {
+  .slide {
+    flex-basis: calc(var(--_carousel-slide-sm) - var(--_carousel-gap) * var(--_carousel-gap-share-sm));
+  }
+}
+
+@media (width >= $mantine-breakpoint-md) {
+  .slide {
+    flex-basis: calc(var(--_carousel-slide-md) - var(--_carousel-gap) * var(--_carousel-gap-share-md));
+  }
+}
+
+@media (width >= $mantine-breakpoint-lg) {
+  .slide {
+    flex-basis: calc(var(--_carousel-slide-lg) - var(--_carousel-gap) * var(--_carousel-gap-share-lg));
+  }
+}
+
+@media (width >= $mantine-breakpoint-xl) {
+  .slide {
+    flex-basis: calc(var(--_carousel-slide-xl) - var(--_carousel-gap) * var(--_carousel-gap-share-xl));
+  }
+}

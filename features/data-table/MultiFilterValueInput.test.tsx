@@ -1,7 +1,7 @@
 import { PassThrough } from 'node:stream';
 import type { ReactNode } from 'react';
 import { renderToPipeableStream } from 'react-dom/server';
-import type { DateInputProps } from '@mantine/dates';
+import type { DateInputProps } from '@/components/core/Input';
 import { describe, expect, it, vi } from 'vitest';
 import { MultiFilterValueInput } from './MultiFilterValueInput';
 
@@ -23,7 +23,7 @@ vi.mock('next/dynamic', async () => {
   };
 });
 
-vi.mock('@mantine/dates', () => {
+vi.mock('@/components/core/Input', () => {
   probes.datesLoaded += 1;
   return {
     DateInput: (props: DateInputProps) => {
@@ -33,10 +33,6 @@ vi.mock('@mantine/dates', () => {
   };
 });
 
-vi.mock('@mantine/core', () => ({
-  Group: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  Stack: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-}));
 vi.mock('@/components/core/Input/TextInput', () => ({
   TextInput: ({ value }: { value: string }) => <input aria-label="Text value" defaultValue={value} />,
 }));
@@ -118,10 +114,8 @@ describe('date filter runtime boundary', () => {
     expect(input).toMatchObject({
       label: 'Date value',
       size: 'xs',
-      valueFormat: 'YYYY-MM-DD',
       value: new Date('2026-10-03'),
       clearable: true,
-      popoverProps: { withinPortal: false },
       disabled: true,
     });
     input.onChange?.('2026-10-04');
@@ -147,13 +141,11 @@ describe('date filter runtime boundary', () => {
     expect(from).toMatchObject({
       label: 'From',
       value: new Date('2026-10-01'),
-      popoverProps: { withinPortal: true },
       disabled: false,
     });
     expect(to).toMatchObject({
       label: 'To',
       value: new Date('2026-10-03'),
-      popoverProps: { withinPortal: true },
       disabled: false,
     });
     from.onChange?.('2026-10-02');

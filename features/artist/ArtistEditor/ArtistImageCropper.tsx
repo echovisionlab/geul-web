@@ -1,14 +1,16 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useCallback, useState } from 'react';
 import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { useTranslations } from 'next-intl';
-import { Stack } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { ImageCropper } from '@/components/core/ImageCropper';
+import { useImageCropAccessibility } from '@/lib/i18n/useImageCropAccessibility';
 import { ImageUploadField, type ImageUploadRejection } from '@/components/core/ImageUpload';
 import { getUploadSelectionMimeTypes, UPLOAD_CONFIGS } from '@/lib/constants/upload-config';
-import { formatFileSize, formatMimeTypes } from '@/lib/utils/upload';
+import { formatFileSize, formatMimeTypes, imageSelectionAcceptTypes } from '@/lib/utils/upload';
 import { prepareImageFileForPreview } from '@/lib/utils/upload-pipeline';
 import { getUploadSelectionMaxSize } from '@/lib/utils/upload-policy';
 import { getPublicCdnUrl } from '@/lib/public-runtime-config';
@@ -59,33 +61,43 @@ export function ArtistImageCropper({
   const config = UPLOAD_CONFIGS[UploadType.ARTIST_IMAGE];
   const selectionMimeTypes = getUploadSelectionMimeTypes(UploadType.ARTIST_IMAGE);
   const resolvedLabel = label ?? tCommon('labels.image');
+  const cropAccessibility = useImageCropAccessibility(tCommon('messages.cropItem', { item: resolvedLabel }));
   const inputMaxSize = getUploadSelectionMaxSize(UploadType.ARTIST_IMAGE, 'image/jpeg', config.maxSize);
-  const constraintText = tCommon('uploadField.constraints', {
-    formats: formatMimeTypes([...selectionMimeTypes]),
-    maxSize: formatFileSize(inputMaxSize),
-  });
   const placeholderMetrics = getArtistImagePlaceholderMetrics(size);
 
   const [loading, setLoading] = useState(false);
-  const [operation, setOperation] = useState<'idle' | 'uploading' | 'deleting'>('idle');
+  const [operation, setOperation] = useState<'idle' | 'preparing' | 'uploading' | 'deleting'>('idle');
   const [cropModalOpen, setCropModalOpen] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
 
   const openFile = useCallback(
     async (file: File) => {
+      setOperation('preparing');
+      setLoading(true);
       try {
         const previewFile = await prepareImageFileForPreview(file, UploadType.ARTIST_IMAGE);
-        const reader = new FileReader();
-        reader.addEventListener('load', () => {
-          setImageSrc(reader.result as string);
-          setCropModalOpen(true);
+        const preview = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            if (typeof reader.result === 'string') {
+              resolve(reader.result);
+            } else {
+              reject(new Error('Failed to read image preview.'));
+            }
+          };
+          reader.onerror = () => reject(new Error('Failed to read image preview.'));
+          reader.readAsDataURL(previewFile);
         });
-        reader.readAsDataURL(previewFile);
+        setImageSrc(preview);
+        setCropModalOpen(true);
       } catch (error) {
         notifications.show({
           message: error instanceof Error ? error.message : tCommon('messages.uploadImageFailed'),
-          color: 'red',
+          tone: 'danger',
         });
+      } finally {
+        setOperation('idle');
+        setLoading(false);
       }
     },
     [tCommon],
@@ -94,7 +106,7 @@ export function ArtistImageCropper({
   const handleReject = useCallback(
     (rejections: ImageUploadRejection[]) => {
       const rejection = rejections[0];
-      let message = `${resolvedLabel}: ${constraintText}`;
+      let message = tCommon('messages.uploadImageFailed');
 
       if (rejection?.reason === 'too-large') {
         message = `File too large. Maximum size: ${formatFileSize(inputMaxSize)}`;
@@ -102,9 +114,9 @@ export function ArtistImageCropper({
         message = `Invalid file type. Supported formats: ${formatMimeTypes([...selectionMimeTypes])}`;
       }
 
-      notifications.show({ message, color: 'red' });
+      notifications.show({ message, tone: 'danger' });
     },
-    [constraintText, inputMaxSize, resolvedLabel, selectionMimeTypes],
+    [inputMaxSize, selectionMimeTypes, tCommon],
   );
 
   const handleCrop = async (blob: Blob) => {
@@ -119,7 +131,7 @@ export function ArtistImageCropper({
 
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: resolvedLabel }),
-        color: 'green',
+        tone: 'positive',
       });
 
       setCropModalOpen(false);
@@ -127,7 +139,7 @@ export function ArtistImageCropper({
     } catch (error) {
       notifications.show({
         message: error instanceof Error ? error.message : tCommon('messages.uploadImageFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     } finally {
       setLoading(false);
@@ -151,12 +163,12 @@ export function ArtistImageCropper({
 
       notifications.show({
         message: tCommon('messages.itemRemoved', { item: resolvedLabel }),
-        color: 'green',
+        tone: 'positive',
       });
     } catch (error) {
       notifications.show({
         message: error instanceof Error ? error.message : tCommon('messages.removeImageFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     } finally {
       setLoading(false);
@@ -164,19 +176,19 @@ export function ArtistImageCropper({
     }
   };
 
-  const processing = operation === 'uploading' && loading;
-  const isPreparingImage = processing && uploadProgress <= 0;
+  const processing = (operation === 'uploading' || operation === 'preparing') && loading;
+  const isPreparingImage = operation === 'preparing' || (processing && uploadProgress <= 0);
 
   return (
-    <Stack gap={4}>
+    <DsLayoutStack gap="xxs">
       <ImageUploadField
         imageUrl={currentImage}
         alt={artistName || resolvedLabel}
         label={label ? resolvedLabel : undefined}
         inputId={inputId}
         dropzoneId={inputId ? `${inputId}-dropzone` : undefined}
-        accept={selectionMimeTypes}
-        maxSize={inputMaxSize}
+        accept={imageSelectionAcceptTypes(selectionMimeTypes)}
+        maxSize={Number.isFinite(inputMaxSize) ? inputMaxSize : undefined}
         disabled={loading}
         loading={processing}
         loadingLabel={
@@ -184,8 +196,6 @@ export function ArtistImageCropper({
         }
         progress={isPreparingImage ? undefined : uploadProgress}
         emptyTitle={tCommon('actions.uploadItem', { item: resolvedLabel })}
-        emptyDescription={`${tCommon('uploadField.instruction')} · ${constraintText}`}
-        changeHint={currentImage ? tCommon('uploadField.changeHint') : undefined}
         removeButtonAriaLabel={tCommon('actions.remove')}
         removeButtonLoading={operation === 'deleting' && loading}
         preview={{
@@ -198,7 +208,7 @@ export function ArtistImageCropper({
           width: placeholderMetrics.width,
           height: placeholderMetrics.height,
           minHeight: placeholderMetrics.height,
-          iconSize: 26,
+          iconSize: 'md',
         }}
         onFileSelect={(file) => void openFile(file)}
         onValidationReject={handleReject}
@@ -207,6 +217,7 @@ export function ArtistImageCropper({
 
       {imageSrc && (
         <ImageCropper
+          cropAccessibility={cropAccessibility}
           imageSrc={imageSrc}
           opened={cropModalOpen}
           onClose={() => {
@@ -224,6 +235,6 @@ export function ArtistImageCropper({
           processingLabel={tCommon('uploadField.status.preparingImage')}
         />
       )}
-    </Stack>
+    </DsLayoutStack>
   );
 }

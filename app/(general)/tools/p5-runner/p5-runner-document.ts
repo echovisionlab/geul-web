@@ -1,3 +1,4 @@
+import { primitiveTokens } from '@/components/core/design-tokens';
 import { createHash } from 'node:crypto';
 import { installP5DeviceRunner } from '../../../../features/editor/tiptap/p5/p5-device-runner';
 import { P5_LIBRARY_INTEGRITY, P5_LOCAL_LIBRARY_PATH } from '../../../../features/editor/tiptap/p5/p5-runtime-assets';
@@ -8,7 +9,7 @@ export interface P5RunnerDocument {
 }
 
 const P5_RUNNER_STYLE =
-  'html,body,#sketch{width:100%;height:100%;margin:0;overflow:hidden;background:#101113}' +
+  `html,body,#sketch{width:100%;height:100%;margin:0;overflow:hidden;background:${primitiveTokens.colors.canvas}}` +
   '#sketch{display:grid;place-items:center}' +
   'canvas{display:block;max-width:100%;max-height:100%;width:auto!important;height:auto!important}';
 

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "description": "Reviewed existing migration debt. Do not regenerate to silence new violations. Counts are per file, kind, value and context, independent of line numbers. CSS spacing and legacy variables.css allowances were seeded from pre-change git HEAD, not the working-tree migration.",
+  "entries": {},
+  "auditReference": {
+    "gitHead": "6a5c53dcc339d6f023bdeb789d92ac2aa4a70028",
+    "description": "Pre-change tracked HEAD measured by the final scanner policy; excludes intentional authored-color exception files and counts editor palette separately. This is not a reconstruction of preexisting uncommitted changes.",
+    "interfaceRuntimeColors": 227,
+    "cssInterfaceColors": 156,
+    "editorPaletteColors": 36,
+    "cssSpacingTypography": 289,
+    "customDefinitions": 180
+  }
+}

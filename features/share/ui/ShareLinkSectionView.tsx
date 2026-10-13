@@ -1,13 +1,21 @@
 'use client';
+import { useEffect, useId, useRef } from 'react';
 
-import { IconCopy, IconExternalLink, IconLink, IconPlus, IconTrash } from '@tabler/icons-react';
-import { Group, Loader, Stack, Text } from '@mantine/core';
-import { DateTimePicker } from '@mantine/dates';
-import '@mantine/dates/styles.css';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutGrid,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+import { IconExternalLink, IconPlus, IconTrash } from '@tabler/icons-react';
+import { CopyButton } from '@/components/core/CopyButton';
+import { Spinner as Loader } from '@/components/core/Display';
+import { DateTimePicker, PasswordInput, Select, TextInput } from '@/components/core/Input';
 import { LabelBadge } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
-import { PasswordInput, Select, TextInput } from '@/components/core/Input';
+
 import { SectionCard, SectionHeader } from '@/components/core/Section';
 import { Tooltip } from '@/components/core/Tooltip';
 
@@ -45,7 +53,7 @@ export interface ShareLinkSectionViewLabels {
   noLinks: string;
   showLess: string;
   showMore: string;
-  copy: string;
+  copied: string;
   openInNewTab: string;
   delete: string;
   copyAria: string;
@@ -79,7 +87,6 @@ export interface ShareLinkSectionViewProps {
   onCustomDateChange: (timestamp: number | null) => void;
   onPasswordChange: (value: string) => void;
   onCreate: () => void;
-  onCopy: (id: string) => void;
   onDelete: (id: string) => void;
   onToggleShowAll: () => void;
 }
@@ -110,55 +117,85 @@ export function ShareLinkSectionView({
   onCustomDateChange,
   onPasswordChange,
   onCreate,
-  onCopy,
   onDelete,
   onToggleShowAll,
 }: ShareLinkSectionViewProps) {
+  const formId = useId();
+  const listId = useId();
+  const newLinkRef = useRef<HTMLButtonElement>(null);
+  const labelRef = useRef<HTMLInputElement>(null);
+  const wasOpened = useRef(formOpened);
+  useEffect(() => {
+    if (hydrated && formOpened !== wasOpened.current) {
+      (formOpened ? labelRef.current : newLinkRef.current)?.focus();
+    }
+    wasOpened.current = formOpened;
+  }, [formOpened, hydrated]);
   return (
-    <SectionCard>
-      <Stack gap="md">
+    <SectionCard padding={{ base: 'none', sm: 'md' }}>
+      <DsLayoutStack gap="md">
         <SectionHeader
+          descriptionPlacement="below-row"
           title={
-            <Group gap="xs">
-              <IconLink size={18} />
-              <Text fw={500}>{labels.title}</Text>
+            <DsLayoutInline gap="xs">
+              <span>{labels.title}</span>
               {totalLinkCount > 0 ? <LabelBadge size="sm">{totalLinkCount}</LabelBadge> : null}
-            </Group>
+            </DsLayoutInline>
           }
           description={description}
           actions={
-            <Button
-              emphasis="medium"
-              size="xs"
-              leftSection={<IconPlus size={14} />}
-              onClick={onToggleForm}
-              disabled={disabled}
-            >
-              {labels.newLink}
-            </Button>
+            <Tooltip label={labels.newLink}>
+              <IconButton
+                ref={newLinkRef}
+                aria-expanded={hydrated && formOpened}
+                aria-controls={hydrated && formOpened ? formId : undefined}
+                emphasis="medium"
+                size="compact"
+                aria-label={labels.newLink}
+                onClick={onToggleForm}
+                disabled={disabled}
+              >
+                <IconPlus aria-hidden />
+              </IconButton>
+            </Tooltip>
           }
         />
 
         {hydrated && formOpened ? (
-          <SectionCard p="sm" bg="var(--mantine-color-gray-light)">
-            <Stack gap="sm">
-              <TextInput
-                label={labels.labelOptional}
-                placeholder={labels.labelPlaceholder}
-                value={label}
-                onChange={(event) => onLabelChange(event.currentTarget.value)}
-                size="sm"
-                disabled={disabled}
-              />
-              <Group gap="sm" align="flex-end" grow>
+          <SectionCard appearance="plain" padding="none" withBorder={false}>
+            <DsLayoutStack gap="xs" id={formId} role="group" aria-label={labels.newLink} aria-busy={isCreating}>
+              <LayoutGrid columns={{ base: 1, sm: 2 }} gap="xs">
+                <TextInput
+                  ref={labelRef}
+                  label={labels.labelOptional}
+                  placeholder={labels.labelPlaceholder}
+                  value={label}
+                  onChange={(event) => onLabelChange(event.currentTarget.value)}
+                  size="xs"
+                  density="compact"
+                  disabled={disabled}
+                />
+                <PasswordInput
+                  label={labels.passwordOptional}
+                  placeholder={labels.passwordPlaceholder}
+                  value={password}
+                  onChange={(event) => onPasswordChange(event.currentTarget.value)}
+                  autoComplete="new-password"
+                  size="xs"
+                  density="compact"
+                  disabled={disabled}
+                />
+              </LayoutGrid>
+              <LayoutGrid columns={{ base: 1, sm: 2 }} gap="xs" align="end">
                 <Select
                   label={labels.expiration}
-                  size="sm"
+                  description={labels.maximumExpiration}
+                  size="xs"
+                  density="compact"
                   value={preset}
                   onChange={(value) => value && onPresetChange(value)}
                   data={expirationOptions}
                   allowDeselect={false}
-                  style={{ flex: 1 }}
                   disabled={disabled}
                 />
                 {preset === 'custom' ? (
@@ -167,54 +204,46 @@ export function ShareLinkSectionView({
                     value={customDateTimestamp ? new Date(customDateTimestamp) : null}
                     onChange={(value) => onCustomDateChange(value ? new Date(value).getTime() : null)}
                     placeholder={labels.selectDateAndTime}
-                    size="sm"
+                    size="xs"
+                    density="compact"
                     minDate={new Date()}
                     maxDate={new Date(maxDateTimestamp)}
-                    style={{ flex: 1 }}
-                    valueFormat="YYYY-MM-DD HH:mm"
                     disabled={disabled}
                   />
                 ) : null}
-              </Group>
-              <PasswordInput
-                label={labels.passwordOptional}
-                placeholder={labels.passwordPlaceholder}
-                value={password}
-                onChange={(event) => onPasswordChange(event.currentTarget.value)}
-                autoComplete="new-password"
-                size="sm"
-                disabled={disabled}
-              />
-              <Text size="xs" c="dimmed">
-                {labels.maximumExpiration}
-              </Text>
-              <Group gap="xs" justify="flex-end">
-                <Button tone="neutral" emphasis="low" size="xs" onClick={onCloseForm}>
+              </LayoutGrid>
+              <DsLayoutInline gap="xs" justify="end">
+                <Button tone="neutral" emphasis="low" size="compact" onClick={onCloseForm}>
                   {labels.cancel}
                 </Button>
                 <Button
-                  size="xs"
+                  size="compact"
+                  emphasis="medium"
                   onClick={onCreate}
                   loading={isCreating}
                   disabled={disabled || (preset === 'custom' && customDateTimestamp === null)}
                 >
                   {labels.create}
                 </Button>
-              </Group>
-            </Stack>
+              </DsLayoutInline>
+            </DsLayoutStack>
           </SectionCard>
         ) : null}
 
         {isLoading ? (
-          <Group justify="center" py="md">
-            <Loader size="sm" />
-          </Group>
+          <DsLayoutInset block="md">
+            <DsLayoutInline justify="center">
+              <Loader size="sm" />
+            </DsLayoutInline>
+          </DsLayoutInset>
         ) : totalLinkCount === 0 ? (
-          <Text size="sm" c="dimmed" ta="center" py="md">
-            {labels.noLinks}
-          </Text>
+          <DsLayoutInset block="md">
+            <DsText size="xs" tone="secondary" align="center">
+              {labels.noLinks}
+            </DsText>
+          </DsLayoutInset>
         ) : (
-          <Stack gap="xs">
+          <DsLayoutStack gap="xs" id={listId}>
             {links.map((link) => (
               <ShareLinkItemView
                 key={link.id}
@@ -222,18 +251,24 @@ export function ShareLinkSectionView({
                 labels={labels}
                 disabled={disabled}
                 isDeleting={deletingLinkId === link.id}
-                onCopy={onCopy}
                 onDelete={onDelete}
               />
             ))}
             {hasMore ? (
-              <Button tone="neutral" emphasis="low" size="xs" onClick={onToggleShowAll}>
+              <Button
+                tone="neutral"
+                emphasis="low"
+                size="xs"
+                onClick={onToggleShowAll}
+                aria-expanded={showAll}
+                aria-controls={listId}
+              >
                 {showAll ? labels.showLess : labels.showMore}
               </Button>
             ) : null}
-          </Stack>
+          </DsLayoutStack>
         )}
-      </Stack>
+      </DsLayoutStack>
     </SectionCard>
   );
 }
@@ -243,81 +278,91 @@ interface ShareLinkItemViewProps {
   labels: ShareLinkSectionViewLabels;
   disabled?: boolean;
   isDeleting: boolean;
-  onCopy: (id: string) => void;
   onDelete: (id: string) => void;
 }
 
-function ShareLinkItemView({ link, labels, disabled, isDeleting, onCopy, onDelete }: ShareLinkItemViewProps) {
+function ShareLinkItemView({ link, labels, disabled, isDeleting, onDelete }: ShareLinkItemViewProps) {
   const canUseLink = Boolean(link.openUrl) && !link.expired;
-  const openLinkProps = canUseLink
-    ? { component: 'a' as const, href: link.openUrl ?? undefined, target: '_blank', rel: 'noopener noreferrer' }
-    : { 'aria-disabled': true, tabIndex: -1 };
+  const contextId = useId();
 
   return (
-    <Group gap="xs" wrap="nowrap" style={{ opacity: link.expired ? 0.5 : 1 }}>
-      <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
-        <Group gap="xs">
-          {link.label ? (
-            <Text size="sm" fw={500}>
-              {link.label}
-            </Text>
-          ) : null}
-          {link.badges.map((badge, index) => (
-            <LabelBadge key={`${badge.label}-${index}`} size="xs" tone={badge.tone}>
-              {badge.label}
-            </LabelBadge>
-          ))}
-        </Group>
-        <Text size="xs" ff="monospace" c="dimmed" truncate>
-          {link.displayUrl}
-        </Text>
-      </Stack>
-      <Group gap={4} wrap="nowrap">
-        <Tooltip label={labels.copy}>
-          <span style={{ display: 'inline-flex' }}>
-            <IconButton
-              emphasis="low"
-              size="sm"
-              onClick={() => onCopy(link.id)}
-              disabled={!canUseLink}
-              aria-label={labels.copyAria}
-              data-testid={`share-link-copy-${link.id}`}
-            >
-              <IconCopy size={14} />
-            </IconButton>
-          </span>
-        </Tooltip>
-        <Tooltip label={labels.openInNewTab}>
-          <span style={{ display: 'inline-flex' }}>
-            <IconButton
-              emphasis="low"
-              size="sm"
-              disabled={!canUseLink}
-              aria-label={labels.openAria}
-              data-testid={`share-link-open-${link.id}`}
-              {...openLinkProps}
-            >
-              <IconExternalLink size={14} />
-            </IconButton>
-          </span>
-        </Tooltip>
-        <Tooltip label={labels.delete}>
-          <span style={{ display: 'inline-flex' }}>
-            <IconButton
-              tone="danger"
-              emphasis="low"
-              size="sm"
-              onClick={() => onDelete(link.id)}
-              loading={isDeleting}
-              disabled={disabled}
-              aria-label={labels.deleteAria}
-              data-testid={`share-link-delete-${link.id}`}
-            >
-              <IconTrash size={14} />
-            </IconButton>
-          </span>
-        </Tooltip>
-      </Group>
-    </Group>
+    <SectionCard padding="none" appearance="plain" withBorder={false} state={link.expired ? 'disabled' : 'default'}>
+      <DsLayoutInline gap="xs" wrap="nowrap">
+        <DsLayoutStack gap="xxs" flexible id={contextId}>
+          <DsLayoutInline gap="xs">
+            {link.label ? (
+              <DsText size="sm" weight="medium">
+                {link.label}
+              </DsText>
+            ) : null}
+            {link.badges.map((badge, index) => (
+              <LabelBadge key={`${badge.label}-${index}`} tone={badge.tone}>
+                {badge.label}
+              </LabelBadge>
+            ))}
+          </DsLayoutInline>
+          <DsText size="xs" font="mono" tone="secondary" truncate>
+            {link.displayUrl}
+          </DsText>
+        </DsLayoutStack>
+        <DsLayoutInline gap="xxs" wrap="nowrap">
+          <CopyButton
+            size="sm"
+            value={link.openUrl ?? ''}
+            label={labels.copyAria}
+            copiedLabel={labels.copied}
+            disabled={!canUseLink}
+            aria-describedby={contextId}
+            data-testid={`share-link-copy-${link.id}`}
+          />
+          <Tooltip label={labels.openInNewTab}>
+            <span style={{ display: 'inline-flex' }}>
+              {canUseLink && link.openUrl ? (
+                <IconButton
+                  href={link.openUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  emphasis="low"
+                  size="sm"
+                  aria-label={labels.openAria}
+                  aria-describedby={contextId}
+                  data-testid={`share-link-open-${link.id}`}
+                >
+                  <IconExternalLink size={14} />
+                </IconButton>
+              ) : (
+                <IconButton
+                  emphasis="low"
+                  size="sm"
+                  disabled
+                  aria-label={labels.openAria}
+                  aria-describedby={contextId}
+                  data-testid={`share-link-open-${link.id}`}
+                >
+                  <IconExternalLink size={14} />
+                </IconButton>
+              )}
+            </span>
+          </Tooltip>
+          <Tooltip label={labels.delete}>
+            <span style={{ display: 'inline-flex' }}>
+              <IconButton
+                tone="danger"
+                emphasis="low"
+                size="sm"
+                onClick={() => onDelete(link.id)}
+                loading={isDeleting}
+                disabled={disabled}
+                aria-label={labels.deleteAria}
+                aria-describedby={contextId}
+                data-testid={`share-link-delete-${link.id}`}
+              >
+                <IconTrash size={14} />
+              </IconButton>
+            </span>
+          </Tooltip>
+        </DsLayoutInline>
+      </DsLayoutInline>
+    </SectionCard>
   );
 }

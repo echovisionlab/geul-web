@@ -1,3 +1,4 @@
+import { DEFAULT_SITE_BRAND_COLOR } from '@/lib/theme/site-brand';
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
@@ -90,7 +91,7 @@ const DEFAULT_MANIFEST: Manifest = {
     favicon_url: null,
     favicon_asset_set: null,
     loader_urls: [],
-    primary_color: '#b02d23',
+    primary_color: DEFAULT_SITE_BRAND_COLOR,
     google_analytics_id: null,
     site_og_image_url: null,
     company_name: '',
@@ -169,7 +170,7 @@ function fromProtoSettings(settings: ProtoSiteSettings | undefined): ManifestSet
       : assetRefUrl(settings.faviconAsset),
     favicon_asset_set: faviconAssetSet,
     loader_urls: loaderUrls,
-    primary_color: settings.primaryColor || '#b02d23',
+    primary_color: settings.primaryColor || DEFAULT_SITE_BRAND_COLOR,
     google_analytics_id: settings.googleAnalyticsId ?? null,
     site_og_image_url: settings.siteOgAsset?.url ?? null,
     company_name: settings.companyName,

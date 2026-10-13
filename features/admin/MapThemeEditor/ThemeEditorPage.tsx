@@ -1,11 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { LayoutInset as DsLayoutInset } from '@/components/core/Layout';
+import { useComputedColorScheme } from '@/lib/providers/DesignSystemProvider';
+
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Divider, useComputedColorScheme } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+import { Separator as Divider } from '@/components/core/Display';
+import { notifications } from '@/components/core/Notification';
 import { Alert } from '@/components/core/Alert';
 import { EditorHeader, type StatusOption } from '@/features/editor/EditorHeader';
 import { useEditorNavigation } from '@/features/editor/useEditorNavigation';
@@ -25,7 +28,7 @@ interface ThemeEditorPageProps {
 
 type MapThemeHeaderStatus = 'custom' | 'default';
 
-export function ThemeEditorPage({ themeId, initialTheme }: ThemeEditorPageProps) {
+function useThemeEditorPageModel({ themeId, initialTheme }: ThemeEditorPageProps) {
   const t = useTranslations('adminList.mapThemes.editor');
   const tPage = useTranslations('adminList.mapThemes');
   const tCommonActions = useTranslations('common.actions');
@@ -33,7 +36,7 @@ export function ThemeEditorPage({ themeId, initialTheme }: ThemeEditorPageProps)
   const router = useRouter();
   const performNavigation = useEditorNavigation(`map_theme:${themeId}`);
   const queryClient = useQueryClient();
-  const colorScheme = useComputedColorScheme('light');
+  const colorScheme = useComputedColorScheme();
 
   const theme = initialTheme;
   const {
@@ -89,14 +92,14 @@ export function ThemeEditorPage({ themeId, initialTheme }: ThemeEditorPageProps)
     mutationFn: () => setDefaultMapThemeAction(themeId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: tPage('notifications.defaultUpdateFailed'), color: 'red' });
+        notifications.show({ message: tPage('notifications.defaultUpdateFailed'), tone: 'danger' });
         return;
       }
       void queryClient.invalidateQueries({ queryKey: ['mapThemes', 'list'] });
-      notifications.show({ message: t('notifications.defaultSet'), color: 'green' });
+      notifications.show({ message: t('notifications.defaultSet'), tone: 'positive' });
     },
     onError: () => {
-      notifications.show({ message: tPage('notifications.defaultUpdateFailed'), color: 'red' });
+      notifications.show({ message: tPage('notifications.defaultUpdateFailed'), tone: 'danger' });
     },
   });
 
@@ -139,7 +142,7 @@ export function ThemeEditorPage({ themeId, initialTheme }: ThemeEditorPageProps)
     [activeTab, canMutate, darkVariant, lightVariant, updateDarkVariant, updateLightVariant],
   );
 
-  const headerStatus = isDefault ? 'default' : 'custom';
+  const headerStatus: MapThemeHeaderStatus = isDefault ? 'default' : 'custom';
   const headerStatusOptions = useMemo<StatusOption<MapThemeHeaderStatus>[]>(() => {
     if (isDefault) {
       return [
@@ -170,61 +173,43 @@ export function ThemeEditorPage({ themeId, initialTheme }: ThemeEditorPageProps)
   const currentVariant = activeTab === 'dark' ? darkVariant : lightVariant;
 
   if (isThemeListLoading) {
-    return <PageLoader />;
+    return { kind: 'state' as const, content: <PageLoader /> };
   }
 
   if (isThemeListError) {
-    return (
-      <Alert role="alert" tone="danger">
-        {tPage('loadFailed')}
-      </Alert>
-    );
+    return {
+      kind: 'state' as const,
+      content: (
+        <Alert role="alert" tone="danger">
+          {tPage('loadFailed')}
+        </Alert>
+      ),
+    };
   }
 
-  return (
-    <Box
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: 'calc(100dvh - 2rem)',
-        background: 'var(--mantine-color-body)',
-      }}
-    >
-      <Box px="md" py="xs">
-        <EditorHeader
-          title={name}
-          onTitleChange={canMutate ? setName : undefined}
-          status={headerStatus}
-          statusOptions={headerStatusOptions}
-          isConnected={isConnected}
-          isSynced={isSynced}
-          onBack={handleBack}
-          onStatusChange={canMutate && !isDefault ? handleStatusChange : undefined}
-          isStatusChanging={setDefaultTheme.isPending}
-          backTooltip={tCommonActions('back')}
-        />
-      </Box>
-
-      <Divider />
-
-      <Box px="md" py="xs">
-        <MapThemeVariantTabs value={activeTab} onChange={setActiveTab} disabled={blocked} />
-      </Box>
-
-      <Divider />
-
-      <Box style={{ flex: 1, minHeight: 0, position: 'relative' }}>
-        <ThemeEditorCanvas
-          variant={currentVariant}
-          settings={settings}
-          showControls={canMutate}
-          onVariantChange={handleVariantChange}
-          onSettingsChange={handleSettingsChange}
-        />
-      </Box>
-      <MapThemeEditorInterruptionDialogs interruption={interruption} />
-    </Box>
-  );
+  return {
+    kind: 'ready' as const,
+    name,
+    canMutate,
+    setName,
+    headerStatus,
+    headerStatusOptions,
+    isConnected,
+    isSynced,
+    handleBack,
+    isDefault,
+    handleStatusChange,
+    isSettingDefault: setDefaultTheme.isPending,
+    tCommonActions,
+    activeTab,
+    setActiveTab,
+    blocked,
+    currentVariant,
+    settings,
+    handleVariantChange,
+    handleSettingsChange,
+    interruption,
+  };
 }
 
 function omitId(variant: ThemeVariant): Omit<ThemeVariant, 'id'> {
@@ -257,4 +242,97 @@ function fieldEquals(left: unknown, right: unknown): boolean {
     return JSON.stringify(left) === JSON.stringify(right);
   }
   return false;
+}
+
+export type ThemeEditorPageViewModel = ReturnType<typeof useThemeEditorPageModel>;
+export function ThemeEditorPageView({ model }: { model: ThemeEditorPageViewModel }) {
+  const semanticId = useId();
+  if (model.kind !== 'ready') {
+    return model.content;
+  }
+  const {
+    name,
+    canMutate,
+    setName,
+    headerStatus,
+    headerStatusOptions,
+    isConnected,
+    isSynced,
+    handleBack,
+    isDefault,
+    handleStatusChange,
+    isSettingDefault,
+    tCommonActions,
+    activeTab,
+    setActiveTab,
+    blocked,
+    currentVariant,
+    settings,
+    handleVariantChange,
+    handleSettingsChange,
+    interruption,
+  } = model;
+  const panelId = `${semanticId}-variant-panel`;
+  const tabIds = { light: `${semanticId}-variant-light`, dark: `${semanticId}-variant-dark` };
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 'calc(100dvh - 2rem)',
+        background: 'var(--geul-background)',
+      }}
+    >
+      <DsLayoutInset inline="md" block="xs">
+        <DsLayoutInset space="none">
+          <EditorHeader
+            title={name}
+            onTitleChange={canMutate ? setName : undefined}
+            status={headerStatus}
+            statusOptions={headerStatusOptions}
+            isConnected={isConnected}
+            isSynced={isSynced}
+            onBack={handleBack}
+            onStatusChange={canMutate && !isDefault ? handleStatusChange : undefined}
+            isStatusChanging={isSettingDefault}
+            backTooltip={tCommonActions('back')}
+          />
+        </DsLayoutInset>
+      </DsLayoutInset>
+
+      <DsLayoutInset inline="md" block="xs">
+        <DsLayoutInset space="none">
+          <MapThemeVariantTabs
+            value={activeTab}
+            onChange={setActiveTab}
+            disabled={blocked}
+            panelId={panelId}
+            tabIds={tabIds}
+          />
+        </DsLayoutInset>
+      </DsLayoutInset>
+
+      <Divider />
+
+      <div
+        id={panelId}
+        role="tabpanel"
+        aria-labelledby={tabIds[activeTab]}
+        tabIndex={canMutate ? undefined : 0}
+        style={{ flex: 1, minHeight: 0, position: 'relative' }}
+      >
+        <ThemeEditorCanvas
+          variant={currentVariant}
+          settings={settings}
+          showControls={canMutate}
+          onVariantChange={handleVariantChange}
+          onSettingsChange={handleSettingsChange}
+        />
+      </div>
+      <MapThemeEditorInterruptionDialogs interruption={interruption} />
+    </div>
+  );
+}
+export function ThemeEditorPage(...args: Parameters<typeof useThemeEditorPageModel>) {
+  return <ThemeEditorPageView model={useThemeEditorPageModel(...args)} />;
 }

@@ -1,7 +1,9 @@
-import type { ComboboxItem, OptionsFilter } from '@mantine/core';
 import { COUNTRY_CATALOG } from '@/lib/constants/countries.generated';
 
-export interface CountrySelectOption extends ComboboxItem {
+export interface CountrySelectOption {
+  value: string;
+  label: string;
+  disabled?: boolean;
   code: string;
   name: string;
   englishName: string;
@@ -66,6 +68,6 @@ export function searchCountrySelectOptions(search: string, options: CountrySelec
   return options.filter((option) => option.searchText.includes(normalizedQuery));
 }
 
-export const filterCountrySelectOptions: OptionsFilter = ({ options, search }) => {
+export const filterCountrySelectOptions = ({ options, search }: { options: CountrySelectOption[]; search: string }) => {
   return searchCountrySelectOptions(search, options as CountrySelectOption[]);
 };

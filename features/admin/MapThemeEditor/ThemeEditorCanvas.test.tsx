@@ -16,61 +16,6 @@ vi.mock('next/dynamic', () => ({
     },
 }));
 
-vi.mock('leva', async () => {
-  const React = await import('react');
-
-  function unwrapControls(config: Record<string, unknown>) {
-    const entries: Array<{ value: unknown; onChange?: (value: unknown) => void }> = [];
-
-    for (const entry of Object.values(config)) {
-      if (!entry || typeof entry !== 'object') {
-        continue;
-      }
-
-      if ('__folder' in entry) {
-        const folderEntry = entry as unknown as { controls: Record<string, unknown> };
-        entries.push(...unwrapControls(folderEntry.controls));
-        continue;
-      }
-
-      if ('value' in entry) {
-        entries.push(entry as { value: unknown; onChange?: (value: unknown) => void });
-      }
-    }
-
-    return entries;
-  }
-
-  return {
-    button: (onClick: () => void) => ({ __button: true, onClick }),
-    folder: (controls: Record<string, unknown>) => ({ __folder: true, controls }),
-    LevaPanel: () => null,
-    useCreateStore: () => React.useRef({}).current,
-    useControls: (factory: () => Record<string, unknown>, _options?: unknown, _deps?: unknown) => {
-      const previousValuesRef = React.useRef<unknown[] | null>(null);
-      const replayedRef = React.useRef(false);
-      const config = factory();
-      const controls = unwrapControls(config);
-
-      React.useEffect(() => {
-        if (!replayedRef.current && previousValuesRef.current) {
-          controls.forEach((control, index) => {
-            if (typeof control.onChange === 'function') {
-              control.onChange(previousValuesRef.current?.[index]);
-            }
-          });
-          replayedRef.current = true;
-        }
-
-        previousValuesRef.current = controls.map((control) => control.value);
-      });
-
-      const setControls = React.useCallback(() => {}, []);
-      return [{}, setControls];
-    },
-  };
-});
-
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 Object.defineProperty(window, 'matchMedia', {
@@ -220,6 +165,69 @@ describe('ThemeEditorCanvas', () => {
     expect(parseColorToRgba('rgba( 17, 34 , 51, 0.5 )')).toEqual({ r: 17, g: 34, b: 51, a: 0.5 });
     expect(parseColorToRgba('transparent')).toEqual({ r: 0, g: 0, b: 0, a: 0 });
     expect(() => parseColorToRgba('rgb(999, 34, 51)')).toThrow('Unsupported Map Theme color');
+  });
+
+  it('edits actual Core controls and cannot remove the last callout field', async () => {
+    const onVariantChange = vi.fn();
+    const onSettingsChange = vi.fn();
+    render(
+      <ThemeEditorCanvas
+        variant={LIGHT_VARIANT}
+        settings={{ ...DEFAULT_THEME_SETTINGS, calloutFields: ['name'] }}
+        onVariantChange={onVariantChange}
+        onSettingsChange={onSettingsChange}
+      />,
+    );
+    const triggers = Array.from(
+      container!.querySelectorAll<HTMLButtonElement>('button[data-accordion-control][aria-expanded]'),
+    );
+    act(() => {
+      triggers.forEach((button) => {
+        if (button.getAttribute('aria-expanded') === 'false') {
+          button.click();
+        }
+      });
+    });
+    await flushUpdates();
+    const stroke = Array.from(container!.querySelectorAll<HTMLInputElement>('input[type=checkbox]')).find((input) =>
+      input.closest('label')?.textContent?.includes('Stroke'),
+    );
+    expect(stroke).toBeTruthy();
+    act(() => stroke!.click());
+    expect(onVariantChange).toHaveBeenCalledWith(
+      expect.objectContaining({ buildingStrokeEnabled: true, backgroundColor: LIGHT_VARIANT.backgroundColor }),
+    );
+    const name = Array.from(container!.querySelectorAll<HTMLInputElement>('input[type=checkbox]')).find(
+      (input) => input.closest('label')?.textContent?.replace('✓', '').trim() === 'Name',
+    );
+    expect(name).toBeTruthy();
+    act(() => name!.click());
+    expect(onSettingsChange).not.toHaveBeenCalled();
+  });
+
+  it('exposes separate view, sample count and rotation names without changing visible labels', async () => {
+    render(
+      <ThemeEditorCanvas
+        variant={LIGHT_VARIANT}
+        settings={DEFAULT_THEME_SETTINGS}
+        onVariantChange={() => {}}
+        onSettingsChange={() => {}}
+      />,
+    );
+    const mode = container!.querySelector<HTMLElement>('[role="radiogroup"][aria-label="View Mode"]')!;
+    expect(mode).not.toBeNull();
+    const places = container!.querySelector<HTMLElement>('[role="radiogroup"][aria-label="Mock Places"]')!;
+    expect(places).not.toBeNull();
+    expect(mode.querySelector<HTMLInputElement>('input[value="2d"]')?.checked).toBe(true);
+    expect(places.querySelector<HTMLInputElement>('input[value="1"]')?.checked).toBe(true);
+    act(() => mode.querySelector<HTMLInputElement>('input[value="3d"]')!.click());
+    await flushUpdates();
+    const rotate = container!.querySelector<HTMLInputElement>('input[role="switch"][aria-label="Auto Rotate"]')!;
+    expect(rotate).not.toBeNull();
+    expect((rotate as HTMLInputElement).checked).toBe(false);
+    act(() => rotate.click());
+    await flushUpdates();
+    expect(rotate.checked).toBe(true);
   });
 
   it('keeps dark variant colors when switching schemes', async () => {

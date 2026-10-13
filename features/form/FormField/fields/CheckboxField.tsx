@@ -1,16 +1,16 @@
 'use client';
 
-import { Input } from '@mantine/core';
+import { Field } from '@/components/core/Field';
 import { Checkbox } from '@/components/core/Input';
 import { toBooleanValue } from '@/lib/types/form/guards';
 import type { FormFieldSchemaCheckbox } from '@/lib/types/form/schema';
 import { parseMarkdown } from '@/lib/utils/parse-markdown';
-import { inputStyles } from '../styles';
 import { getFieldLabel } from '../utils';
 
 export interface CheckboxFieldProps {
   field: FormFieldSchemaCheckbox;
   value: unknown;
+  disabled?: boolean;
   onChange: (value: boolean) => void;
   onFocus: () => void;
   onBlur: () => void;
@@ -18,25 +18,34 @@ export interface CheckboxFieldProps {
   isRequired: boolean;
 }
 
-export function CheckboxField({ field, value, onChange, onFocus, onBlur, error, isRequired }: CheckboxFieldProps) {
+export function CheckboxField({
+  field,
+  disabled,
+  value,
+  onChange,
+  onFocus,
+  onBlur,
+  error,
+  isRequired,
+}: CheckboxFieldProps) {
   return (
-    <Input.Wrapper
+    <Field
       label={parseMarkdown(getFieldLabel(field))}
       description={field.description ? parseMarkdown(field.description) : undefined}
       error={error}
-      withAsterisk={isRequired}
-      styles={inputStyles}
+      required={isRequired}
     >
       <Checkbox
+        disabled={disabled}
         checked={toBooleanValue(value)}
         onChange={(e) => {
           onChange(e.currentTarget.checked);
           requestAnimationFrame(() => onBlur());
         }}
         onFocus={onFocus}
+        onBlur={onBlur}
         label={field.checkboxLabel ? parseMarkdown(field.checkboxLabel) : undefined}
-        mt="xs"
       />
-    </Input.Wrapper>
+    </Field>
   );
 }

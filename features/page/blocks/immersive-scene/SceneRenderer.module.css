@@ -1,11 +1,11 @@
 .root {
   position: relative;
-  min-height: var(--immersive-scene-intrinsic-height);
+  min-height: var(--_immersive-scene-intrinsic-height);
   overflow: clip;
 }
 
 .root[data-height-mode='scroll'] {
-  min-height: var(--immersive-scene-scroll-document-height);
+  min-height: var(--_immersive-scene-scroll-document-height);
 }
 
 .root[data-preview='true'] {
@@ -15,7 +15,7 @@
 
 .viewport {
   position: relative;
-  height: var(--immersive-scene-intrinsic-height);
+  height: var(--_immersive-scene-intrinsic-height);
   overflow: hidden;
 }
 

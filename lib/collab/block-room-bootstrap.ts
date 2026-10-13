@@ -12,7 +12,7 @@ import {
   type LocalizedRichTextDocument,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { AIDocumentFieldTargetSchema, type AIDocumentFieldTarget } from '@echovisionlab/geul-proto/secure/ai_pb.ts';
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 import * as Y from 'yjs';
 
 export type { BlockRoomDocumentType };
@@ -48,30 +48,26 @@ const documentTypeSchema = z.enum([
   'terms-history',
   'privacy-history',
 ]);
-const nonEmptyStringSchema = z.string().trim().min(1);
-const uuidSchema = z.string().uuid();
+const nonEmptyStringSchema = z.string().check(z.trim(), z.minLength(1));
+const uuidSchema = z.string().check(z.uuid());
 export const targetRevisionSchema = z
   .string()
-  .refine((value) => value.trim().length > 0, 'Target revision must be a nonblank opaque token.');
-const base64Schema = z.string().regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u);
-const localeMetadataSchema = z
-  .object({
-    locale: nonEmptyStringSchema,
-    title: z.string().optional(),
-    summary: z.string().optional(),
-    subject: z.string().optional(),
-    creditNotes: z
-      .array(
-        z
-          .object({
-            creditId: nonEmptyStringSchema,
-            note: z.string(),
-          })
-          .strict(),
-      )
-      .optional(),
-  })
-  .strict();
+  .check(z.refine((value) => value.trim().length > 0, 'Target revision must be a nonblank opaque token.'));
+const base64Schema = z.string().check(z.regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u));
+const localeMetadataSchema = z.strictObject({
+  locale: nonEmptyStringSchema,
+  title: z.optional(z.string()),
+  summary: z.optional(z.string()),
+  subject: z.optional(z.string()),
+  creditNotes: z.optional(
+    z.array(
+      z.strictObject({
+        creditId: nonEmptyStringSchema,
+        note: z.string(),
+      }),
+    ),
+  ),
+});
 type LocaleMetadata = z.infer<typeof localeMetadataSchema>;
 
 function localeMetadataEquals(left: LocaleMetadata, right: LocaleMetadata): boolean {
@@ -89,30 +85,28 @@ function localeMetadataEquals(left: LocaleMetadata, right: LocaleMetadata): bool
   );
 }
 
-const bootstrapEnvelopeSchema = z
-  .object({
-    kind: z.literal('block_room.bootstrap'),
-    protocolVersion: z.literal(2),
-    bootstrapChallenge: nonEmptyStringSchema,
-    documentName: nonEmptyStringSchema,
-    documentType: documentTypeSchema,
-    document: z.unknown(),
-    documentRevision: uuidSchema,
-    sourceLocale: nonEmptyStringSchema,
-    locale: nonEmptyStringSchema,
-    localeExists: z.boolean(),
-    targetRevision: targetRevisionSchema.optional(),
-    presentLocaleValues: z.array(z.unknown()),
-    sourceMetadata: localeMetadataSchema,
-    documentMetadata: z.record(z.string(), z.unknown()),
-    metadataSequence: z.number().int().nonnegative(),
-    localeMetadata: localeMetadataSchema.optional(),
-    blockCatalogFingerprint: nonEmptyStringSchema,
-    serverInstanceId: nonEmptyStringSchema,
-    roomEpoch: uuidSchema,
-    yjsBootstrapUpdate: base64Schema,
-  })
-  .strict();
+const bootstrapEnvelopeSchema = z.strictObject({
+  kind: z.literal('block_room.bootstrap'),
+  protocolVersion: z.literal(2),
+  bootstrapChallenge: nonEmptyStringSchema,
+  documentName: nonEmptyStringSchema,
+  documentType: documentTypeSchema,
+  document: z.unknown(),
+  documentRevision: uuidSchema,
+  sourceLocale: nonEmptyStringSchema,
+  locale: nonEmptyStringSchema,
+  localeExists: z.boolean(),
+  targetRevision: z.optional(targetRevisionSchema),
+  presentLocaleValues: z.array(z.unknown()),
+  sourceMetadata: localeMetadataSchema,
+  documentMetadata: z.record(z.string(), z.unknown()),
+  metadataSequence: z.number().check(z.int(), z.nonnegative()),
+  localeMetadata: z.optional(localeMetadataSchema),
+  blockCatalogFingerprint: nonEmptyStringSchema,
+  serverInstanceId: nonEmptyStringSchema,
+  roomEpoch: uuidSchema,
+  yjsBootstrapUpdate: base64Schema,
+});
 
 interface BlockRoomBootstrapBase {
   documentName: string;

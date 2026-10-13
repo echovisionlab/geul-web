@@ -1,10 +1,13 @@
 // @vitest-environment jsdom
 
-import { MantineProvider } from '@mantine/core';
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { NextIntlClientProvider } from 'next-intl';
+import koMessages from '@/messages/ko.json';
 import { ApplicationErrorPage } from './ApplicationErrorPage';
+import { getFallbackErrorPageMessages } from './error-page-fallback-messages';
 import { getErrorPageContent } from './error-status';
 
 let root: ReturnType<typeof createRoot> | undefined;
@@ -16,9 +19,11 @@ async function render(status: number, retry = vi.fn()) {
   root = createRoot(container);
   await act(async () =>
     root!.render(
-      <MantineProvider env="test">
-        <ApplicationErrorPage status={status} locale="ko" onRetry={retry} fullScreen />
-      </MantineProvider>,
+      <NextIntlClientProvider locale="ko" messages={koMessages}>
+        <DesignSystemProvider forceColorScheme="light">
+          <ApplicationErrorPage status={status} onRetry={retry} fullScreen />
+        </DesignSystemProvider>
+      </NextIntlClientProvider>,
     ),
   );
 }
@@ -35,7 +40,9 @@ describe('shared application error surface', () => {
       await render(status);
       const section = container.querySelector('[data-error-page]')!;
       expect(section.querySelector('[data-error-code]')?.getAttribute('data-error-code')).toBe(String(status));
-      expect(section.querySelector('h1')?.textContent).toBe(getErrorPageContent(status, 'ko').title);
+      expect(section.querySelector('h1')?.textContent).toBe(
+        getErrorPageContent(status, getFallbackErrorPageMessages('ko')).title,
+      );
       expect(container.querySelector('a[href="/"]')?.textContent).toBe('홈으로 가기');
       for (const action of section.querySelectorAll('a, button')) {
         expect(action.getAttribute('data-emphasis')).toBe('low');
@@ -56,9 +63,11 @@ describe('shared application error surface', () => {
     expect(container.querySelector('button')).toBeNull();
     await act(async () =>
       root!.render(
-        <MantineProvider env="test">
-          <ApplicationErrorPage status={403} locale="ko" onRetry={vi.fn()} />
-        </MantineProvider>,
+        <NextIntlClientProvider locale="ko" messages={koMessages}>
+          <DesignSystemProvider forceColorScheme="light">
+            <ApplicationErrorPage status={403} onRetry={vi.fn()} />
+          </DesignSystemProvider>
+        </NextIntlClientProvider>,
       ),
     );
     expect(container.querySelector('button')).toBeNull();

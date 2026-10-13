@@ -16,12 +16,8 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: mocks.notificationsShow } }));
-vi.mock('@mantine/core', () => ({
-  Loader: () => null,
-  Stack: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  Text: ({ children }: { children: ReactNode }) => <span>{children}</span>,
-}));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: mocks.notificationsShow } }));
+
 vi.mock('@/lib/actions/audience', () => ({
   archiveSegmentAction: vi.fn(),
   createSegmentAction: vi.fn(),

@@ -1,5 +1,6 @@
+import { useArgs } from 'storybook/preview-api';
+import { withFeatureLabels } from '@/stories/feature-localization';
 import type { Meta, StoryObj } from '@storybook/nextjs';
-import { Box } from '@mantine/core';
 
 import { SettingsFormView, type SettingsFormViewLabels } from './SettingsFormView';
 
@@ -12,25 +13,35 @@ const labels: SettingsFormViewLabels = {
   errorTitle: 'Error',
 };
 
-const longLocaleLabels: SettingsFormViewLabels = {
-  subscribedAlert: 'Sie haben unseren Newsletter und unsere E-Mails zu aktuellen Kampagnen abonniert.',
-  unsubscribedAlert: 'Sie haben unseren Newsletter und unsere E-Mails zu aktuellen Kampagnen nicht abonniert.',
-  subscribe: 'Newsletter und Kampagnenmitteilungen abonnieren',
-  unsubscribe: 'Newsletter und Kampagnenmitteilungen abbestellen',
-  footer:
-    'Sicherheitswarnungen, Mitteilungen zum Zurücksetzen des Passworts und rechtliche Hinweise werden unabhängig von Ihrem Abonnementstatus immer gesendet.',
-  errorTitle: 'Die Einstellung konnte nicht gespeichert werden',
-};
-
 const meta: Meta<typeof SettingsFormView> = {
   title: 'Feature/My/SettingsForm',
   component: SettingsFormView,
+  render: function InteractiveStory(args) {
+    const [, updateArgs] = useArgs();
+    return (
+      <SettingsFormView
+        {...args}
+        events={{ onSubscriptionChange: (subscribed) => updateArgs({ subscribed, error: null }) }}
+      />
+    );
+  },
   parameters: { layout: 'centered' },
   decorators: [
+    withFeatureLabels({
+      labels: {
+        subscribedAlert: 'settings.newsletter.subscribedAlert',
+        unsubscribedAlert: 'settings.newsletter.unsubscribedAlert',
+        subscribe: 'settings.newsletter.subscribe',
+        unsubscribe: 'settings.newsletter.unsubscribe',
+        footer: 'settings.newsletter.footer',
+        errorTitle: 'common.labels.error',
+      },
+      project: (args, t) => ({ error: args.error ? t('common.messages.failedToLoad') : args.error }),
+    }),
     (Story) => (
-      <Box w={560} maw="calc(100vw - 2rem)" p="md">
+      <div style={{ width: 560, maxWidth: '100%', padding: 'var(--geul-spacing-md)' }}>
         <Story />
-      </Box>
+      </div>
     ),
   ],
   args: {
@@ -67,11 +78,7 @@ export const Error: Story = {
   },
 };
 
-export const LongLocale: Story = {
-  args: { labels: longLocaleLabels },
-};
-
 export const NarrowViewport: Story = {
-  args: { subscribed: false, labels: longLocaleLabels },
-  parameters: { viewport: { defaultViewport: 'mobile1' } },
+  args: { subscribed: false },
+  globals: { viewport: { value: 'phone', isRotated: false } },
 };

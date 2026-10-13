@@ -29,6 +29,9 @@ describe('RouteProgressBar', () => {
     expect(rootElement?.hasAttribute('aria-hidden')).toBe(false);
     expect(progress?.getAttribute('aria-label')).toBe('Loading page');
     expect(progress?.hasAttribute('aria-valuenow')).toBe(false);
+    expect(progress).toHaveAttribute('data-core-progress');
+    expect(progress).toHaveAttribute('data-size', 'xs');
+    expect(progress).not.toHaveAttribute('hidden');
   });
 
   it('hides the idle indicator from assistive technology', () => {
@@ -41,5 +44,17 @@ describe('RouteProgressBar', () => {
     act(() => root.render(<RouteProgressBar phase="waiting" aria-label="Loading page" />));
 
     expect(container.querySelector('[data-route-progress]')?.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('uses the same bar for route commit and projects completion only after the phase changes', () => {
+    act(() => root.render(<RouteProgressBar phase="loading" aria-label="Loading page" />));
+    const bar = container.querySelector('[data-core-progress]')!;
+    expect(bar).not.toHaveAttribute('aria-valuenow');
+    act(() => root.render(<RouteProgressBar phase="completing" aria-label="Loading page" />));
+    expect(container.querySelectorAll('[role="progressbar"]')).toHaveLength(1);
+    expect(container.querySelector('[data-core-progress]')).toBe(bar);
+    expect(bar).toHaveAttribute('aria-valuenow', '100');
+    act(() => root.render(<RouteProgressBar phase="idle" aria-label="Loading page" />));
+    expect(bar).toHaveAttribute('hidden');
   });
 });

@@ -5,151 +5,363 @@
  */
 
 :is(.prose, .tiptap-editor) {
-  --document-list-indent: var(--mantine-spacing-lg);
-  --document-check-size: var(--mantine-font-size-sm);
-
-  color: var(--mantine-color-text);
-  font-family: var(--mantine-font-family);
+  color: var(--geul-text-primary);
+  font-family: var(--font-family-sans);
+  font-size: var(--geul-font-size-md);
+  font-weight: var(--geul-font-weight-regular);
+  line-height: var(--geul-line-height-md);
 }
 
-/* Generated public blocks use the same vertical rhythm as Tiptap's block group. */
+.prose,
+.prose [data-document-children],
+.prose [data-callout-content] {
+  counter-reset: document-numbered-list;
+}
+
+.prose [data-document-block] {
+  min-width: 0;
+  width: 100%;
+}
+
+/*
+ * Reading measure (posts): running text keeps the `reading` content width, centered in the document
+ * box. Full-width dense blocks (tables, code, diagrams) may extend to `standard`; full-width visual
+ * blocks (images, video, external video, maps, executable scenes) to `wide`. Breakouts never exceed
+ * the document box, which the table of contents layout already keeps clear of the outline.
+ * `data-document-measure` is set by the public block view from the block kind and preview width.
+ */
+.prose[data-reading-measure] > [data-document-block] {
+  max-width: var(--geul-content-width-reading);
+  margin-inline: auto;
+}
+
+.prose[data-reading-measure] > [data-document-measure='standard'] {
+  max-width: var(--geul-content-width-standard);
+}
+
+.prose[data-reading-measure] > [data-document-measure='wide']:not([data-document-block='file']),
+.prose[data-reading-measure]
+  > [data-document-block='file'][data-document-measure='wide']:has(> :is(.image-block, .video-block)) {
+  max-width: var(--geul-content-width-wide);
+}
+
+/* Paper keeps the print page measure owned by print.css. */
+@media print {
+  .prose[data-reading-measure] > [data-document-block] {
+    max-width: none;
+    margin-inline: 0;
+  }
+}
+
+.prose [data-document-children] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--geul-spacing-xs);
+  padding-inline-start: var(--_hierarchy-step, var(--geul-hierarchy-step));
+  margin-block-start: var(--geul-spacing-xs);
+}
+
+.prose [data-document-block='numbered-list-item'] {
+  counter-increment: document-numbered-list;
+}
+
+/* A list item's children live inside its `<li>`, whose content already starts one list indent (`lg`) in.
+ * They start from the document ink: the item's authored text color belongs to its own text and marker. */
+.prose li > [data-document-children] {
+  padding-inline-start: max(0px, calc(var(--_hierarchy-step, var(--geul-hierarchy-step)) - var(--geul-spacing-lg)));
+  color: var(--geul-text-primary);
+}
+
+.prose [data-document-block='numbered-list-item'] > ol > li::before {
+  content: counter(document-numbered-list) '.\00a0';
+}
+
+/* Match ProseMirror's preserved author spaces without affecting runtime chrome. */
+:is(.prose, .tiptap-editor)
+  :is(
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    blockquote,
+    [data-content-type='heading'],
+    [data-callout-copy],
+    .check-list-item > span
+  ),
+.prose [data-document-block] > :is(ul, ol) > li {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/*
+ * Block rhythm. Consecutive blocks are `md` (12px) apart: paragraphs, quotes, callouts, lists, media,
+ * tables and code. Items of one list (the same list kind in a row) stay `xs` (8px) apart. A heading
+ * that follows content opens `xl` (24px) above it and keeps `xs` below: twice the block gap above and
+ * less than it below, so the heading groups with the text it introduces. Published blocks, materialized
+ * HTML, nested children and Tiptap's block group produce the same totals, on paper too. The Tiptap block
+ * group, nested children and callout content are flex columns with an `xs` gap, so their margins add
+ * the difference.
+ */
+.prose > [data-document-block] + [data-document-block],
+/* `:where()` keeps this generic pair at 0,2,0 so the list and heading pairs below (0,2,1) win. */
 .prose
   > :is(h1, h2, h3, h4, h5, h6, p, ul, ol, blockquote, pre, hr, table, figure, aside, .check-list-item)
+  + :where(h1, h2, h3, h4, h5, h6, p, ul, ol, blockquote, pre, hr, table, figure, aside, .check-list-item) {
+  margin-block-start: var(--geul-spacing-md);
+}
+
+.prose > [data-document-block='bullet-list-item'] + [data-document-block='bullet-list-item'],
+.prose > [data-document-block='numbered-list-item'] + [data-document-block='numbered-list-item'],
+.prose > [data-document-block='check-list-item'] + [data-document-block='check-list-item'],
+.prose > :is(ul, ol) > li + li,
+.prose > [data-document-block='heading'] + [data-document-block],
+.prose
+  > :is(h1, h2, h3, h4, h5, h6)
   + :is(h1, h2, h3, h4, h5, h6, p, ul, ol, blockquote, pre, hr, table, figure, aside, .check-list-item) {
-  margin-block-start: var(--mantine-spacing-xs);
+  margin-block-start: var(--geul-spacing-xs);
+}
+
+.prose > [data-document-block] + [data-document-block='heading'],
+.prose
+  > :is(h1, h2, h3, h4, h5, h6, p, ul, ol, blockquote, pre, hr, table, figure, aside, .check-list-item)
+  + :is(h1, h2, h3, h4, h5, h6) {
+  margin-block-start: var(--geul-spacing-xl);
+}
+
+.prose :is([data-document-children], [data-callout-content]) > [data-document-block] + [data-document-block],
+.tiptap-editor .editor-block-group > :has(> [data-container-kind]) + :has(> [data-container-kind]) {
+  margin-block-start: calc(var(--geul-spacing-md) - var(--geul-spacing-xs));
+}
+
+.prose
+  :is([data-document-children], [data-callout-content])
+  > :is(
+    [data-document-block='bullet-list-item'] + [data-document-block='bullet-list-item'],
+    [data-document-block='numbered-list-item'] + [data-document-block='numbered-list-item'],
+    [data-document-block='check-list-item'] + [data-document-block='check-list-item'],
+    [data-document-block='heading'] + [data-document-block]
+  ),
+.tiptap-editor
+  .editor-block-group
+  > :is(
+    :has(> [data-container-kind='bulletListItem']) + :has(> [data-container-kind='bulletListItem']),
+    :has(> [data-container-kind='numberedListItem']) + :has(> [data-container-kind='numberedListItem']),
+    :has(> [data-container-kind='checkListItem']) + :has(> [data-container-kind='checkListItem']),
+    :has(> [data-container-kind='heading']) + :has(> [data-container-kind])
+  ) {
+  margin-block-start: 0;
+}
+
+.prose :is([data-document-children], [data-callout-content]) > [data-document-block] + [data-document-block='heading'],
+.tiptap-editor .editor-block-group > :has(> [data-container-kind]) + :has(> [data-container-kind='heading']) {
+  margin-block-start: calc(var(--geul-spacing-xl) - var(--geul-spacing-xs));
 }
 
 .prose [data-callout] {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--mantine-spacing-sm);
-  padding: var(--mantine-spacing-md);
-  border: 1px solid var(--mantine-color-default-border);
-  border-radius: var(--mantine-radius-default);
+  gap: var(--geul-spacing-sm);
+  padding: var(--geul-spacing-md);
+  border: 1px solid var(--geul-border-default);
+  border-radius: var(--geul-radius-square);
 }
 
 .prose [data-callout-icon] {
   min-width: 1.5em;
-  font-size: var(--mantine-font-size-lg);
-  line-height: var(--mantine-line-height-md);
+  font-size: var(--geul-font-size-lg);
+  line-height: var(--geul-line-height-md);
   text-align: center;
 }
 
 .prose [data-callout-content] {
   display: flex;
   flex-direction: column;
-  gap: var(--mantine-spacing-xs);
+  gap: var(--geul-spacing-xs);
   min-width: 0;
 }
 
 .prose [data-callout-copy] {
-  min-height: 1lh;
+  min-height: calc(var(--geul-font-size-lg) * var(--geul-line-height-md));
+}
+
+:is(.prose [data-callout-copy], .tiptap-editor [data-content-type='callout']) {
+  line-height: var(--geul-line-height-document);
 }
 
 :is(.prose, .tiptap-editor) a {
-  color: var(--mantine-color-anchor);
+  color: var(--geul-action-primary);
   text-decoration-color: currentcolor;
   text-underline-offset: 0.125em;
 }
 
 :is(.prose, .tiptap-editor) a:hover {
-  color: var(--mantine-primary-color-filled-hover);
+  color: var(--geul-action-primary-hover);
 }
 
 :is(.prose blockquote, .tiptap-editor [data-content-type='quote']) {
   min-height: 1lh;
   margin: 0;
-  padding-inline-start: var(--mantine-spacing-md);
-  border-inline-start: 2px solid var(--mantine-color-default-border);
-  color: var(--mantine-color-dimmed);
-  font-size: var(--mantine-font-size-md);
-  line-height: var(--mantine-line-height-md);
+  padding-inline-start: var(--geul-spacing-md);
+  border-inline-start: 2px solid var(--geul-border-default);
+  color: var(--geul-text-muted);
+  font-size: var(--geul-font-size-md);
+  line-height: var(--geul-line-height-document);
   overflow-wrap: anywhere;
 }
 
 :is(.prose, .tiptap-editor) code {
-  font-family: var(--mantine-font-family-monospace);
-  font-size: var(--mantine-font-size-sm);
+  font-family: var(--font-mono);
+  font-size: var(--geul-font-size-sm);
 }
 
 .prose pre {
   overflow-x: auto;
   margin: 0;
-  padding: var(--mantine-spacing-md);
-  border: 1px solid var(--mantine-color-default-border);
-  border-radius: var(--mantine-radius-default);
-  background: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+  padding: var(--geul-spacing-md);
+  border: 1px solid var(--geul-border-default);
+  border-radius: var(--geul-radius-square);
+  background: light-dark(var(--geul-surface-muted), var(--geul-surface));
 }
 
 :is(.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6, .tiptap-editor [data-content-type='heading']) {
-  margin: 0;
-  padding: 0;
-  font-family: var(--mantine-font-family-headings);
-  text-wrap: var(--mantine-heading-text-wrap);
-  scroll-margin-top: var(--scroll-offset);
-}
-
-:is(
-  .prose h1,
-  .tiptap-editor [data-content-type='heading']:not([data-level]),
-  .tiptap-editor [data-content-type='heading'][data-level='1']
-) {
-  font-size: var(--mantine-h1-font-size);
-  font-weight: var(--mantine-h1-font-weight);
-  line-height: var(--mantine-h1-line-height);
-}
-
-:is(.prose h2, .tiptap-editor [data-content-type='heading'][data-level='2']) {
-  font-size: var(--mantine-h2-font-size);
-  font-weight: var(--mantine-h2-font-weight);
-  line-height: var(--mantine-h2-line-height);
-}
-
-:is(.prose h3, .tiptap-editor [data-content-type='heading'][data-level='3']) {
-  font-size: var(--mantine-h3-font-size);
-  font-weight: var(--mantine-h3-font-weight);
-  line-height: var(--mantine-h3-line-height);
-}
-
-:is(.prose h4, .tiptap-editor [data-content-type='heading'][data-level='4']) {
-  font-size: var(--mantine-h4-font-size);
-  font-weight: var(--mantine-h4-font-weight);
-  line-height: var(--mantine-h4-line-height);
-}
-
-:is(.prose h5, .tiptap-editor [data-content-type='heading'][data-level='5']) {
-  font-size: var(--mantine-h5-font-size);
-  font-weight: var(--mantine-h5-font-weight);
-  line-height: var(--mantine-h5-line-height);
-}
-
-:is(.prose h6, .tiptap-editor [data-content-type='heading'][data-level='6']) {
-  font-size: var(--mantine-h6-font-size);
-  font-weight: var(--mantine-h6-font-weight);
-  line-height: var(--mantine-h6-line-height);
-}
-
-:is(.prose p, .tiptap-editor [data-content-type='paragraph']) {
   min-height: 1lh;
   margin: 0;
   padding: 0;
-  font-size: var(--mantine-font-size-md);
-  font-weight: var(--mantine-font-weight-regular);
-  line-height: var(--mantine-line-height-md);
+  font-family: var(--font-family-sans);
+  text-wrap: balance;
+  scroll-margin-top: var(--geul-chrome-scroll-offset);
+}
+
+/*
+ * Body heading sizes follow the authored level. Published headings carry it as `data-heading-level`:
+ * under a document title their element is one level lower (authored H1 renders `h2`) for a single-h1
+ * outline, at the same size. Materialized HTML without the attribute falls back to the element at
+ * class-level specificity (`:where`), so a Core `Heading` inside a `.prose` region keeps its own role
+ * (the legal editor preview title is `Heading scale="title"`).
+ */
+:is(
+  .prose :is(h1, h2, h3, h4, h5, h6)[data-heading-level='1'],
+  .tiptap-editor [data-content-type='heading']:not([data-level]),
+  .tiptap-editor [data-content-type='heading'][data-level='1']
+) {
+  font-size: var(--geul-heading-h1);
+  font-weight: var(--geul-font-weight-strong);
+  line-height: var(--geul-heading-line-height);
+}
+
+/* Element fallback for HTML without the attribute; class-level specificity, so Core headings keep their role. */
+.prose :where(h1:not([data-heading-level])) {
+  font-size: var(--geul-heading-h1);
+  font-weight: var(--geul-font-weight-strong);
+  line-height: var(--geul-heading-line-height);
+}
+
+:is(
+  .prose :is(h1, h2, h3, h4, h5, h6)[data-heading-level='2'],
+  .tiptap-editor [data-content-type='heading'][data-level='2']
+) {
+  font-size: var(--geul-heading-h2);
+  font-weight: var(--geul-font-weight-strong);
+  line-height: var(--geul-heading-line-height);
+}
+
+.prose :where(h2:not([data-heading-level])) {
+  font-size: var(--geul-heading-h2);
+  font-weight: var(--geul-font-weight-strong);
+  line-height: var(--geul-heading-line-height);
+}
+
+:is(
+  .prose :is(h1, h2, h3, h4, h5, h6)[data-heading-level='3'],
+  .tiptap-editor [data-content-type='heading'][data-level='3']
+) {
+  font-size: var(--geul-heading-h3);
+  font-weight: var(--geul-font-weight-strong);
+  line-height: var(--geul-heading-line-height);
+}
+
+.prose :where(h3:not([data-heading-level])) {
+  font-size: var(--geul-heading-h3);
+  font-weight: var(--geul-font-weight-strong);
+  line-height: var(--geul-heading-line-height);
+}
+
+:is(
+  .prose :is(h1, h2, h3, h4, h5, h6)[data-heading-level='4'],
+  .tiptap-editor [data-content-type='heading'][data-level='4']
+) {
+  font-size: var(--geul-heading-h4);
+  font-weight: var(--geul-font-weight-strong);
+  line-height: var(--geul-heading-line-height);
+}
+
+.prose :where(h4:not([data-heading-level])) {
+  font-size: var(--geul-heading-h4);
+  font-weight: var(--geul-font-weight-strong);
+  line-height: var(--geul-heading-line-height);
+}
+
+:is(
+  .prose :is(h1, h2, h3, h4, h5, h6)[data-heading-level='5'],
+  .tiptap-editor [data-content-type='heading'][data-level='5']
+) {
+  font-size: var(--geul-heading-h5);
+  font-weight: var(--geul-font-weight-strong);
+  line-height: var(--geul-heading-line-height);
+}
+
+.prose :where(h5:not([data-heading-level])) {
+  font-size: var(--geul-heading-h5);
+  font-weight: var(--geul-font-weight-strong);
+  line-height: var(--geul-heading-line-height);
+}
+
+:is(
+  .prose :is(h1, h2, h3, h4, h5, h6)[data-heading-level='6'],
+  .tiptap-editor [data-content-type='heading'][data-level='6']
+) {
+  font-size: var(--geul-heading-h6);
+  font-weight: var(--geul-font-weight-strong);
+  line-height: var(--geul-heading-line-height);
+}
+
+.prose :where(h6:not([data-heading-level])) {
+  font-size: var(--geul-heading-h6);
+  font-weight: var(--geul-font-weight-strong);
+  line-height: var(--geul-heading-line-height);
+}
+
+.prose p,
+.tiptap-editor [data-content-type='paragraph'] {
+  min-height: 1lh;
+  margin: 0;
+  padding: 0;
+  font-size: var(--geul-font-size-md);
+  font-weight: var(--geul-font-weight-regular);
+  line-height: var(--geul-line-height-document);
 }
 
 .prose :is(ul, ol) {
   margin: 0;
   padding: 0;
-  padding-inline-start: var(--document-list-indent);
-  font-size: var(--mantine-font-size-md);
-  line-height: var(--mantine-line-height-md);
+  padding-inline-start: var(--geul-spacing-lg);
+  font-size: var(--geul-font-size-md);
+  line-height: var(--geul-line-height-document);
   list-style: none;
 }
 
 .prose :is(ul, ol) :is(ul, ol) {
-  margin-block-start: var(--mantine-spacing-xs);
-  margin-inline-start: var(--document-list-indent);
+  margin-block-start: var(--geul-spacing-xs);
+  margin-inline-start: max(0px, calc(var(--_hierarchy-step, var(--geul-hierarchy-step)) - var(--geul-spacing-lg)));
+}
+
+/* A published list block's own list sits flush in its block; block rhythm and nesting own the spacing. */
+.prose [data-document-block] > :is(ul, ol) {
+  margin-block-start: 0;
+  margin-inline-start: 0;
 }
 
 .prose ol {
@@ -158,17 +370,18 @@
 
 .prose li {
   position: relative;
+  min-height: 1lh;
   padding: 0;
-  line-height: var(--mantine-line-height-md);
+  line-height: var(--geul-line-height-document);
 }
 
 .prose :is(ul, ol) > li::before {
   position: absolute;
-  inset-inline-start: calc(-1 * var(--document-list-indent));
-  width: var(--document-list-indent);
-  font-family: var(--mantine-font-family);
-  font-size: var(--mantine-font-size-md);
-  line-height: var(--mantine-line-height-md);
+  inset-inline-start: calc(-1 * var(--geul-spacing-lg));
+  width: var(--geul-spacing-lg);
+  font-family: var(--font-family-sans);
+  font-size: var(--geul-font-size-md);
+  line-height: var(--geul-line-height-document);
   text-align: end;
   white-space: nowrap;
 }
@@ -195,9 +408,10 @@
   .tiptap-editor [data-content-type='checkListItem']
 ) {
   position: relative;
-  padding-inline-start: var(--document-list-indent);
-  font-size: var(--mantine-font-size-md);
-  line-height: var(--mantine-line-height-md);
+  min-height: 1lh;
+  padding-inline-start: var(--geul-spacing-lg);
+  font-size: var(--geul-font-size-md);
+  line-height: var(--geul-line-height-document);
 }
 
 :is(
@@ -206,10 +420,10 @@
 )::before {
   position: absolute;
   inset-inline-start: 0;
-  width: var(--document-list-indent);
-  font-family: var(--mantine-font-family);
-  font-size: var(--mantine-font-size-md);
-  line-height: var(--mantine-line-height-md);
+  width: var(--geul-spacing-lg);
+  font-family: var(--font-family-sans);
+  font-size: var(--geul-font-size-md);
+  line-height: var(--geul-line-height-document);
   text-align: end;
   white-space: nowrap;
 }
@@ -230,13 +444,13 @@
 .prose .check-list-item input,
 .prose ul > li[data-checked]::before {
   box-sizing: border-box;
-  width: var(--document-check-size);
-  height: var(--document-check-size);
-  border: 1px solid var(--mantine-color-default-border);
-  border-radius: var(--mantine-radius-xs);
+  width: var(--geul-font-size-sm);
+  height: var(--geul-font-size-sm);
+  border: 1px solid var(--geul-border-default);
+  border-radius: var(--geul-radius-square);
   background-position: center;
   background-repeat: no-repeat;
-  background-size: calc(var(--document-check-size) - 2px);
+  background-size: calc(var(--geul-font-size-sm) - 2px);
 }
 
 .tiptap-editor [data-content-type='checkListItem']::before {
@@ -249,9 +463,9 @@
 .prose .check-list-item {
   position: relative;
   min-height: 1lh;
-  padding-inline-start: var(--document-list-indent);
-  font-size: var(--mantine-font-size-md);
-  line-height: var(--mantine-line-height-md);
+  padding-inline-start: var(--geul-spacing-lg);
+  font-size: var(--geul-font-size-md);
+  line-height: var(--geul-line-height-document);
 }
 
 .prose .check-list-item input {
@@ -264,22 +478,30 @@
 
 .prose ul > li[data-checked]::before {
   inset-block-start: 0.3em;
-  inset-inline-start: calc(-1 * var(--document-list-indent));
+  inset-inline-start: calc(-1 * var(--geul-spacing-lg));
   content: '';
 }
 
 .tiptap-editor [data-content-type='checkListItem'][data-checked='true']::before,
 .prose .check-list-item input:checked,
 .prose ul > li[data-checked='true']::before {
-  border-color: var(--mantine-primary-color-filled);
-  background-color: var(--mantine-primary-color-filled);
+  border-color: var(--geul-action-primary);
+  background-color: var(--geul-action-primary);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6l2.5 2.5L10 3' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
+/* Embedded SVG is an image asset, so CSS variables cannot resolve inside its URL.
+   This dark variant follows the black on-action foreground from the token theme. */
+[data-geul-theme='dark'] .tiptap-editor [data-content-type='checkListItem'][data-checked='true']::before,
+[data-geul-theme='dark'] .prose .check-list-item input:checked,
+[data-geul-theme='dark'] .prose ul > li[data-checked='true']::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6l2.5 2.5L10 3' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
 :is(.prose hr, .tiptap-editor [data-content-type='divider']) {
-  margin: var(--mantine-spacing-xs) 0;
+  margin: 0;
   border: 0;
-  border-block-start: 1px solid var(--mantine-color-default-border);
+  border-block-start: 1px solid var(--geul-border-default);
 }
 
 .prose table {
@@ -288,37 +510,44 @@
   border-spacing: 0;
   border-collapse: collapse;
   table-layout: fixed;
-  font-size: var(--mantine-font-size-sm);
-  line-height: var(--mantine-line-height);
+  font-size: var(--geul-font-size-sm);
+  line-height: var(--geul-line-height-md);
   overflow-wrap: break-word;
 }
 
 .prose :is(th, td) {
-  padding: var(--mantine-spacing-xs);
-  border: 1px solid var(--mantine-color-default-border);
+  padding: var(--geul-spacing-xs);
+  border: 1px solid var(--geul-border-default);
   text-align: start;
   vertical-align: top;
 }
 
 .prose th {
-  background: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+  background: light-dark(var(--geul-surface-muted), var(--geul-surface));
   font-weight: 600;
   vertical-align: middle;
 }
 
-.prose figure {
+:is(.prose, .tiptap-editor) :is(th, td) > p {
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  text-align: inherit;
+}
+
+.prose > figure {
   margin: 0;
   padding: 0;
 }
 
-.prose figure figcaption {
+.prose > figure figcaption {
   display: block;
   width: 100%;
-  margin-block-start: var(--mantine-spacing-xs);
-  color: var(--mantine-color-dimmed);
-  font-size: var(--mantine-font-size-sm);
-  font-weight: var(--mantine-font-weight-regular);
-  line-height: var(--mantine-line-height-sm);
+  margin-block-start: var(--geul-spacing-xs);
+  color: var(--geul-text-muted);
+  font-size: var(--geul-font-size-sm);
+  font-weight: var(--geul-font-weight-regular);
+  line-height: var(--geul-line-height-sm);
   text-align: start;
 }
 
@@ -438,30 +667,30 @@
 
 /* Legacy materialized code retains its generated Shiki theme variables. */
 .prose pre.shiki {
-  background: var(--shiki-light-bg, var(--mantine-color-gray-0)) !important;
-  color: var(--shiki-light, var(--mantine-color-dark-9)) !important;
+  background: var(--shiki-light-bg, var(--geul-surface-muted)) !important;
+  color: var(--shiki-light, var(--geul-background)) !important;
 }
 
-[data-mantine-color-scheme='dark'] .prose pre.shiki {
-  background: var(--shiki-dark-bg, var(--mantine-color-dark-6)) !important;
-  color: var(--shiki-dark, var(--mantine-color-gray-2)) !important;
+[data-geul-theme='dark'] .prose pre.shiki {
+  background: var(--shiki-dark-bg, var(--geul-surface)) !important;
+  color: var(--shiki-dark, var(--geul-surface-active)) !important;
 }
 
-[data-mantine-color-scheme='dark'] .prose pre.shiki span {
+[data-geul-theme='dark'] .prose pre.shiki span {
   color: var(--shiki-dark, inherit) !important;
 }
 
 @media print {
-  [data-mantine-color-scheme] .prose pre.shiki {
+  [data-geul-theme] .prose pre.shiki {
     overflow: visible;
-    background: var(--shiki-light-bg, #f6f8fa) !important;
-    color: var(--shiki-light, #24292f) !important;
+    background: var(--shiki-light-bg, var(--geul-source-background)) !important;
+    color: var(--shiki-light, var(--geul-source-text)) !important;
     white-space: normal !important;
     break-inside: auto;
     print-color-adjust: exact;
   }
 
-  [data-mantine-color-scheme] .prose pre.shiki span {
+  [data-geul-theme] .prose pre.shiki span {
     color: var(--shiki-light, inherit) !important;
   }
 
@@ -491,8 +720,8 @@
 }
 
 .prose .math-block {
-  overflow-x: auto;
-  padding-block: var(--mantine-spacing-md);
+  min-height: 3rem;
+  padding: var(--geul-spacing-sm);
   text-align: center;
 }
 

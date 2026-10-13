@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { deleteWorkAction, publishWorkAction, unpublishWorkAction } from '@/lib/actions/work';
 import { resolveWorkLifecycleControls, type WorkEditorStatus } from './work-lifecycle-controls';
 
@@ -28,12 +28,12 @@ export function useWorkLifecycle({ workId, initialStatus, canEdit, isAdmin, onDe
     mutationFn: () => publishWorkAction(workId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       const reloadAfterPublish = status === 'archived';
       setStatus('published');
-      notifications.show({ message: t('notifications.published'), color: 'green' });
+      notifications.show({ message: t('notifications.published'), tone: 'positive' });
       if (reloadAfterPublish) {
         window.location.reload();
       }
@@ -44,11 +44,11 @@ export function useWorkLifecycle({ workId, initialStatus, canEdit, isAdmin, onDe
     mutationFn: () => unpublishWorkAction(workId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       setStatus('draft');
-      notifications.show({ message: t('notifications.unpublished'), color: 'yellow' });
+      notifications.show({ message: t('notifications.unpublished'), tone: 'positive' });
     },
   });
 
@@ -56,10 +56,10 @@ export function useWorkLifecycle({ workId, initialStatus, canEdit, isAdmin, onDe
     mutationFn: () => deleteWorkAction(workId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: t('notifications.deleted'), color: 'red' });
+      notifications.show({ message: t('notifications.deleted'), tone: 'positive' });
       onDeleted();
     },
   });

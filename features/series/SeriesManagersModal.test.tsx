@@ -3,7 +3,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MantineProvider } from '@mantine/core';
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SeriesManagersModal } from './SeriesManagersModal';
 
@@ -20,7 +20,7 @@ vi.mock('next-intl', () => ({
     namespace === 'seriesMembers' && key === 'title' ? 'Managers' : key,
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: { show: mocks.notification },
 }));
 
@@ -44,9 +44,9 @@ async function renderModal(canManageManagers: boolean) {
   await act(async () => {
     root.render(
       <QueryClientProvider client={queryClient}>
-        <MantineProvider env="test">
+        <DesignSystemProvider forceColorScheme="light">
           <SeriesManagersModal seriesId="series-1" opened onClose={vi.fn()} canManageManagers={canManageManagers} />
-        </MantineProvider>
+        </DesignSystemProvider>
       </QueryClientProvider>,
     );
   });
@@ -87,7 +87,7 @@ describe('SeriesManagersModal', () => {
     await vi.waitFor(() =>
       expect(mocks.notification).toHaveBeenCalledWith({
         message: 'notifications.removeFailed',
-        color: 'red',
+        tone: 'danger',
       }),
     );
     expect(mocks.notification).not.toHaveBeenCalledWith(expect.objectContaining({ message: 'raw permission detail' }));

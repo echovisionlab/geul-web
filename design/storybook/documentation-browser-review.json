@@ -1,0 +1,862 @@
+{
+  "schemaVersion": 1,
+  "reviewDate": "2026-10-12",
+  "status": "reviewed_snapshot",
+  "reviewEntry": "http://localhost:6010/?path=/story/foundations-overview--start",
+  "conditions": {
+    "browser": "Codex in-app browser",
+    "pointer": "fine pointer; viewport overrides do not emulate physical touch input",
+    "documentationLanguage": "en",
+    "uiLocalesObserved": ["en", "ko", "ar"],
+    "themePresetsObserved": ["light", "dark", "ocean-light", "ocean-dark"],
+    "automatedThemeCoverage": "Base light and dark and both named custom presets are covered by source theme regression tests; full story execution uses each story’s own globals."
+  },
+  "browserObservations": {
+    "buttonDark": {
+      "background": "#161918",
+      "color": "rgb(215, 234, 250)",
+      "height": 36,
+      "label": "저장",
+      "language": "ko",
+      "mode": "dark",
+      "preset": "ocean-dark",
+      "scrollWidth": 1125,
+      "width": 1125
+    },
+    "buttonLight": {
+      "background": "#edf5fb",
+      "color": "rgb(23, 50, 74)",
+      "height": 36,
+      "label": "저장",
+      "language": "ko",
+      "mode": "light",
+      "preset": "ocean-light",
+      "scrollWidth": 1125,
+      "width": 1125
+    },
+    "profileTablet": {
+      "background": "#161918",
+      "clientWidth": 834,
+      "formWidth": 688,
+      "locale": "ko",
+      "scrollWidth": 834,
+      "surface": "#17324a",
+      "theme": "ocean-dark",
+      "viewport": 834
+    },
+    "profilePhone": {
+      "clientWidth": 375,
+      "formWidth": 343,
+      "locale": "ko",
+      "scrollWidth": 375,
+      "targets": [
+        {
+          "height": 30,
+          "name": "링크 추가",
+          "width": 93.5234375
+        },
+        {
+          "height": 28,
+          "name": "순서 소셜 링크 1",
+          "width": 28
+        },
+        {
+          "height": 30,
+          "name": "제안 사항 표시",
+          "width": 30
+        },
+        {
+          "height": 28,
+          "name": "제거 소셜 링크 1",
+          "width": 28
+        },
+        {
+          "height": 36,
+          "name": "프로필 업데이트",
+          "width": 343
+        }
+      ],
+      "theme": "ocean-dark",
+      "viewport": 390
+    },
+    "profilePhone320": {
+      "clientWidth": 305,
+      "formWidth": 273,
+      "locale": "ko",
+      "scrollWidth": 305,
+      "theme": "ocean-dark",
+      "viewport": 320
+    },
+    "profileDesktop": {
+      "clientWidth": 1425,
+      "formWidth": 688,
+      "locale": "ko",
+      "scrollWidth": 1425,
+      "theme": "ocean-dark",
+      "viewport": 1440
+    },
+    "portaledControl": {
+      "layers": [
+        {
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(237, 238, 231)",
+          "tag": "DIV"
+        },
+        {
+          "background": "rgb(23, 50, 74)",
+          "color": "rgb(237, 238, 231)",
+          "tag": "DIV"
+        },
+        {
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(237, 238, 231)",
+          "tag": "DIV"
+        },
+        {
+          "background": "rgb(22, 25, 24)",
+          "color": "rgb(237, 238, 231)",
+          "tag": "BODY"
+        }
+      ],
+      "portaled": true,
+      "roleSurface": "#17324a",
+      "theme": "ocean-dark"
+    },
+    "spacingPhone": {
+      "buttons": [
+        {
+          "externalGap": "8px",
+          "glyph": 16,
+          "height": 36,
+          "internalGroups": [
+            {
+              "display": "flex",
+              "gap": "8px"
+            },
+            {
+              "display": "flex",
+              "gap": "normal"
+            }
+          ]
+        },
+        {
+          "externalGap": "8px",
+          "glyph": 16,
+          "height": 30,
+          "internalGroups": [
+            {
+              "display": "flex",
+              "gap": "4px"
+            },
+            {
+              "display": "flex",
+              "gap": "normal"
+            }
+          ]
+        }
+      ],
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "viewport": 390
+    },
+    "iconPhone": {
+      "clientWidth": 375,
+      "icons": [
+        {
+          "glyph": 16,
+          "height": 30,
+          "label": "닫기",
+          "padding": "0px",
+          "viewBox": "0 0 24 24",
+          "width": 30
+        },
+        {
+          "glyph": 16,
+          "height": 30,
+          "label": "메뉴",
+          "padding": "0px",
+          "viewBox": "0 0 24 24",
+          "width": 30
+        },
+        {
+          "glyph": 16,
+          "height": 30,
+          "label": "추가",
+          "padding": "0px",
+          "viewBox": "0 0 24 24",
+          "width": 30
+        },
+        {
+          "glyph": 16,
+          "height": 30,
+          "label": "펼치기",
+          "padding": "0px",
+          "viewBox": "0 0 24 24",
+          "width": 30
+        },
+        {
+          "glyph": 16,
+          "height": 30,
+          "label": "이동",
+          "padding": "0px",
+          "viewBox": "0 0 24 24",
+          "width": 30
+        },
+        {
+          "glyph": 16,
+          "height": 30,
+          "label": "검색",
+          "padding": "0px",
+          "viewBox": "0 0 24 24",
+          "width": 30
+        }
+      ],
+      "scrollWidth": 375,
+      "viewport": 390
+    },
+    "tableActionsPhone": {
+      "clientWidth": 375,
+      "gap": "8px",
+      "glyph": 16,
+      "scrollWidth": 375,
+      "target": 28,
+      "viewport": 390
+    },
+    "profileArabic320": {
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "rootLanguage": "ar",
+      "rootDirection": "rtl",
+      "documentation": {
+        "text": "Pages · account settings",
+        "language": "en",
+        "direction": "ltr"
+      },
+      "product": {
+        "direction": "rtl",
+        "font": "\"Noto Sans Arabic\", \"Noto Sans\", \"Noto Color Emoji\", sans-serif"
+      }
+    },
+    "docsPhone": {
+      "client": 375,
+      "documentationLanguage": "en",
+      "regions": [
+        {
+          "client": 270,
+          "firstColumn": [
+            {
+              "label": "Name",
+              "whiteSpace": "nowrap",
+              "width": 81.7890625
+            },
+            {
+              "label": "children",
+              "whiteSpace": "nowrap",
+              "width": 81.7890625
+            },
+            {
+              "label": "tone",
+              "whiteSpace": "nowrap",
+              "width": 81.7890625
+            },
+            {
+              "label": "emphasis",
+              "whiteSpace": "nowrap",
+              "width": 81.7890625
+            }
+          ],
+          "name": "Live example Controls",
+          "scroll": 544,
+          "tabIndex": 0
+        },
+        {
+          "client": 295,
+          "firstColumn": [
+            {
+              "label": "Prop",
+              "whiteSpace": "nowrap",
+              "width": 135.375
+            },
+            {
+              "label": "autoFocus",
+              "whiteSpace": "nowrap",
+              "width": 135.375
+            },
+            {
+              "label": "children",
+              "whiteSpace": "nowrap",
+              "width": 135.375
+            },
+            {
+              "label": "contrast",
+              "whiteSpace": "nowrap",
+              "width": 135.375
+            }
+          ],
+          "name": "Public API table",
+          "scroll": 768,
+          "tabIndex": 0
+        }
+      ],
+      "scroll": 375,
+      "viewport": 390,
+      "actualLabel": "저장",
+      "keyboardScroll": {
+        "focused": true,
+        "left": 40
+      }
+    },
+    "docsPhone320": {
+      "client": 305,
+      "scroll": 305,
+      "viewport": 320
+    },
+    "foundationTable": {
+      "client": 343,
+      "headers": [
+        {
+          "text": "Role",
+          "whiteSpace": "nowrap",
+          "width": 73.640625
+        },
+        {
+          "text": "Alias / value",
+          "whiteSpace": "nowrap",
+          "width": 113.953125
+        },
+        {
+          "text": "Relationship",
+          "whiteSpace": "nowrap",
+          "width": 138.7421875
+        },
+        {
+          "text": "Owner",
+          "whiteSpace": "nowrap",
+          "width": 121.6640625
+        }
+      ],
+      "scroll": 448,
+      "tabIndex": 0,
+      "keyboard": {
+        "focused": true,
+        "left": 40
+      }
+    },
+    "sourceSyntaxThemes": [
+      {
+        "leafCount": 39,
+        "minContrast": {
+          "editor": 8.137775747674354,
+          "line": 7.221602401197224,
+          "selection": 4.967065854840611
+        },
+        "surfaces": {
+          "editor": "rgb(22, 25, 24)",
+          "line": "#202422",
+          "selection": "#1d405d"
+        },
+        "theme": "ocean-dark",
+        "play": "pass; actual Interaction rows checked for the selected preset",
+        "axeViolations": 0
+      },
+      {
+        "leafCount": 39,
+        "minContrast": {
+          "editor": 7.256748567889985,
+          "line": 6.689523522194772,
+          "selection": 5.436566765652149
+        },
+        "surfaces": {
+          "editor": "rgb(242, 241, 235)",
+          "line": "#eae8df",
+          "selection": "#d6d2c7"
+        },
+        "theme": "light",
+        "play": "pass; actual Interaction rows checked for the selected preset",
+        "axeViolations": 0
+      },
+      {
+        "leafCount": 39,
+        "minContrast": {
+          "editor": 8.137775747674354,
+          "line": 6.708358493207537,
+          "selection": 4.695198497113795
+        },
+        "surfaces": {
+          "editor": "rgb(22, 25, 24)",
+          "line": "#252a27",
+          "selection": "#3b433d"
+        },
+        "theme": "dark",
+        "play": "pass; actual Interaction rows checked for the selected preset",
+        "axeViolations": 0
+      },
+      {
+        "leafCount": 39,
+        "minContrast": {
+          "editor": 7.45136337304839,
+          "line": 7.256748567889985,
+          "selection": 5.205213102121655
+        },
+        "surfaces": {
+          "editor": "rgb(237, 245, 251)",
+          "line": "#f2f1eb",
+          "selection": "#b1d2ed"
+        },
+        "theme": "ocean-light",
+        "play": "pass; actual Interaction rows checked for the selected preset",
+        "axeViolations": 0
+      }
+    ],
+    "mathKeyboard": {
+      "editor": {
+        "MathML": true,
+        "client": 645,
+        "pointerOverlaidByButton": false,
+        "scrollLeft": 40,
+        "scrollWidth": 1312,
+        "tabIndex": 0
+      },
+      "public": {
+        "MathML": true,
+        "client": 669,
+        "focused": true,
+        "scrollLeft": 40,
+        "scrollWidth": 1312,
+        "tabIndex": 0
+      },
+      "axeViolations": 0
+    },
+    "mermaidReady": [
+      {
+        "pixelAlt": "",
+        "pixelComplete": true,
+        "pixelWidth": 300,
+        "role": "img",
+        "tag": "DIV"
+      },
+      {
+        "pixelAlt": "",
+        "pixelComplete": true,
+        "pixelWidth": 300,
+        "role": "img",
+        "tag": "DIV"
+      }
+    ],
+    "mermaidAuthoredDescription": {
+      "description": "Draft review and publication Drafts enter review. Approved drafts are published; rejected drafts return to drafting.",
+      "host": "DIV",
+      "name": "Publication workflow",
+      "pixelAlt": "",
+      "pixelWidth": 300,
+      "role": "img",
+      "axeViolations": 0
+    },
+    "finalDocumentation": {
+      "transitions": [
+        {
+          "color": "rgb(23, 50, 74)",
+          "label": "저장",
+          "locale": "ko",
+          "opened": "true",
+          "preset": "ocean-light"
+        },
+        {
+          "color": "rgb(23, 50, 74)",
+          "label": "Save",
+          "locale": "en",
+          "opened": "true",
+          "preset": "ocean-light"
+        },
+        {
+          "direction": "rtl",
+          "font": "\"Noto Sans Arabic\", \"Noto Sans\", \"Noto Color Emoji\", sans-serif",
+          "label": "حفظ",
+          "locale": "ar",
+          "opened": "true",
+          "preset": "ocean-light"
+        }
+      ],
+      "explicitClose": {
+        "afterThemeSwitch": "false"
+      },
+      "current": {
+        "url": "http://localhost:6010/?path=/docs/core-actions-button--documentation&globals=locale:ko;theme:ocean-light",
+        "titleLanguage": {
+          "direction": "ltr",
+          "lang": "en"
+        },
+        "textControl": {
+          "id": "control-react-aria2799425662-_r_69_-core-actions-button--default-children",
+          "name": "children",
+          "value": "Save"
+        },
+        "expanded": "true"
+      },
+      "phone": {
+        "clientWidth": 270,
+        "documentClientWidth": 375,
+        "documentScrollWidth": 375,
+        "focused": true,
+        "names": ["children"],
+        "scrollLeft": 40,
+        "scrollWidth": 544,
+        "tabIndex": 0
+      }
+    }
+  },
+  "interactions": [
+    {
+      "name": "Source-backed Docs Controls",
+      "result": "pass",
+      "observed": "Changing tone to danger and emphasis to strong changes actual Button data attributes and rendered colors; controls reset after review."
+    },
+    {
+      "name": "Documentation language and product locale",
+      "result": "pass",
+      "observed": "English narration stays English while actual Save button and account form labels switch between English and Korean. Authored June Han profile content remains unchanged."
+    },
+    {
+      "name": "Docs section navigation",
+      "result": "pass",
+      "observed": "Public API contents link navigates to the actual heading after smooth scrolling."
+    },
+    {
+      "name": "Source token reference navigation",
+      "result": "pass",
+      "observed": "Related token reference link navigates the manager and preserves selected locale and theme; table shows actual active custom values and override origin."
+    },
+    {
+      "name": "Icon geometry specimen",
+      "result": "pass",
+      "observed": "Add increments localized local count from 0 to 1. Other samples intentionally remain disabled."
+    },
+    {
+      "name": "Open Docs example across header changes",
+      "result": "pass",
+      "observed": "Actual example remains expanded through custom theme and English/Korean/Arabic locale changes. An explicit close remains closed on the next theme change."
+    },
+    {
+      "name": "Installed Docs string-control property names",
+      "result": "pass",
+      "observed": "Final built Controls expose the children property name. Mobile Controls retain a keyboard focusable local scroll region, ArrowRight moves it 40px, and the document has no horizontal overflow."
+    }
+  ],
+  "screenshots": [
+    "previews/documentation/button-docs-desktop-ocean-dark-ko.png",
+    "previews/documentation/button-docs-desktop-ocean-light-ko.png",
+    "previews/documentation/button-docs-live-example-desktop-dark-ko.png",
+    "previews/documentation/button-docs-phone-dark-ko.png",
+    "previews/documentation/button-docs-phone-ocean-light-ko.png",
+    "previews/documentation/math-keyboard-scroll.png",
+    "previews/documentation/mermaid-authored-description-ocean-dark.png",
+    "previews/documentation/pages-catalog-tablet-dark-ko.png",
+    "previews/documentation/profile-desktop-ocean-dark-ko.png",
+    "previews/documentation/profile-phone-320-ocean-dark-ar.png",
+    "previews/documentation/profile-phone-320-ocean-dark-ko.png",
+    "previews/documentation/profile-phone-ocean-dark-ko.png",
+    "previews/documentation/profile-tablet-ocean-dark-ko.png",
+    "previews/documentation/source-editor-ocean-dark.png",
+    "previews/documentation/spacing-phone-ocean-dark-ko.png"
+  ],
+  "remainingBoundaries": [
+    "Native VoiceOver/Orca task acceptance",
+    "Authentication, authorization, server persistence and real service adapters",
+    "External media/map/WebGL hardware behavior and authored content alternatives",
+    "User visual design approval and deployment"
+  ],
+  "checks": {
+    "systemTests": {
+      "passed": 137,
+      "failed": 0
+    },
+    "selectedSourceTests": {
+      "testFiles": 47,
+      "passed": 409,
+      "failed": 0,
+      "workers": 2,
+      "note": "An initial unrestricted-worker batch hit the existing 5-second lazy SSR test deadline. The unchanged assertions passed when rerun with two workers."
+    },
+    "storybookTypecheck": "pass",
+    "coreTypeContracts": "pass",
+    "generationAndOwnershipChecks": "pass",
+    "fullStoryRuns": [
+      {
+        "states": 1307,
+        "passed": 1295,
+        "failed": 12,
+        "scope": "Earlier build, before source fixes"
+      },
+      {
+        "states": 1311,
+        "passed": 1308,
+        "failed": 3,
+        "scope": "Before final editor/source syntax fixes"
+      },
+      {
+        "states": 1312,
+        "passed": 1309,
+        "failed": 3,
+        "scope": "Resolved original syntax contrast and empty-heading/task/runtime/tab defects; subsequent comparison hydration exposed Math keyboard scrolling and a widget heading assertion; new syntax play comment lookup did not normalize Monaco NBSP. Resolved by the later focused and full runs."
+      },
+      {
+        "states": 1313,
+        "passed": 1313,
+        "failed": 0,
+        "pending": 0,
+        "suites": 244,
+        "scope": "Final application story source: configured plays and axe, including hydrated comparisons and permitted Mermaid host."
+      }
+    ],
+    "focusedStoryRuns": [
+      {
+        "states": 7,
+        "passed": 6,
+        "failed": 1,
+        "scope": "Comparison/source build: actual SVG hydration exposed repeated Mermaid image/caption names."
+      },
+      {
+        "states": 7,
+        "passed": 5,
+        "failed": 2,
+        "scope": "Comparison/source build: image naming fixed; native figure role override failed aria-allowed-role. Corrected in the later final-source focused and full runs."
+      },
+      {
+        "states": 29,
+        "passed": 29,
+        "failed": 0,
+        "suites": 4,
+        "scope": "Final source editor, Mermaid, Tiptap playground and hydrated editor/public comparison contracts."
+      }
+    ],
+    "mermaidHostRegression": {
+      "passed": 24,
+      "failed": 0,
+      "includes": "Actual installed axe role, name and alt checks; former native figure role override is a failing control."
+    },
+    "fullStoryExecution": {
+      "passed": 1313,
+      "failed": 0,
+      "skipped": 0,
+      "suites": 244
+    },
+    "documentationRemountTests": {
+      "testFiles": 1,
+      "passed": 3,
+      "failed": 0,
+      "scope": "Actual React key remount, explicit close, independent titles and same-instance document navigation."
+    },
+    "installedDocsControlTests": {
+      "passed": 3,
+      "failed": 0,
+      "scope": "Actual installed public TextControl and PureArgsTable accessible names, ID/callback/required/limit/readonly/autofocus contracts; scoped axe; frozen installation."
+    },
+    "frozenDependencyInstall": "pass",
+    "finalDocumentationBuild": "pass",
+    "finalDocumentationFreshness": "pass",
+    "finalDocumentationTypecheck": "pass"
+  },
+  "tokenConsolidation": {
+    "registeredBefore": 227,
+    "registeredAfter": 220,
+    "removedUnusedRoles": 7,
+    "newSemanticRoles": 0,
+    "newPrimitiveColors": 0,
+    "customPresetOverrideCounts": {
+      "ocean-light": 16,
+      "ocean-dark": 13
+    },
+    "actionGroupGapPx": 8,
+    "toolbarItemGapPx": 4,
+    "defaultControlLabelGapPx": 8,
+    "compactHeaderLabelGapPx": 4
+  },
+  "retiredWorkflow": {
+    "repositoryWorkflow": "Penpot generation/synchronization, artifacts, docs and package commands retired",
+    "localRecoveryPath": "/tmp/geul-retired-penpot-20261012-042614",
+    "externalProjects": "preserved",
+    "unrelatedConnections": "preserved"
+  },
+  "testedStoryBuild": {
+    "sourceManifestHash": "e88e2dc71e94ce3cdede5f033bc4ceb83be2bcbfbfaa03197cbef3c29d0a4729",
+    "indexSha256": "5b958d5646dd0e17feb2cbc1a054805316d32339e43bef46aecf7ac14e754451",
+    "storybook": "10.5.8",
+    "command": "UI_KIT_MINIFY=0 storybook build --disable-telemetry",
+    "url": "http://127.0.0.1:6010",
+    "runnerWorkers": 2,
+    "coverage": "Every registered story test; Docs pages are separately checked in the browser. Story globals are respected, not multiplied across all locale/theme combinations."
+  },
+  "reports": [
+    {
+      "path": "design/storybook/review-results/stories.json",
+      "sha256": "8d369ee9aee2e0b5801d1b33dabfd48a8d985c4dfb193d5bb4901620c367fc78"
+    },
+    {
+      "path": "design/storybook/review-results/source-tests.json",
+      "sha256": "66f9ab0a56a5a1078793d9dee6872f42bfbe22f622897cc78662dcfe8c70bd32"
+    },
+    {
+      "path": "design/storybook/review-results/focused-stories.json",
+      "sha256": "08ea221ab79b4ba9e791717b86afce160ec3ce5268151428dd914395b9575424"
+    },
+    {
+      "path": "design/storybook/review-results/system-tests.tap",
+      "sha256": "8d8590aeed712b85875ddc0d10ca68c6b98c9813862eca587d38e84ba893098f"
+    },
+    {
+      "path": "design/storybook/review-results/documentation-state.json",
+      "sha256": "f0dd3bb24b883a2eaaeeae080ce25ecdd5be1b3967dd5d08d4216fdb32054a1c"
+    }
+  ],
+  "documentationRefresh": {
+    "scope": "Documentation-only expansion state and property naming; application Core/PageView/story source is unchanged after the passing full story run.",
+    "status": "pass",
+    "sourceManifestHash": "e5cc08b16cd6f2039f0b85b8e338f844f97195948ba3d08b2d68051eec3b9fb9",
+    "compatibilityPatch": "patches/@storybook__addon-docs@10.5.8.patch",
+    "sourceNameRegression": "The original placeholder passes axe label rules; accessible-name assertions reproduce the missing or count-only property name and ambiguous setter.",
+    "indexSha256": "5b958d5646dd0e17feb2cbc1a054805316d32339e43bef46aecf7ac14e754451",
+    "indexIdenticalToFullStoryRun": true,
+    "storybook": "10.5.8",
+    "command": "UI_KIT_MINIFY=0 storybook build --quiet --disable-telemetry",
+    "mainBundle": "main.99916261.iframe.bundle.js",
+    "mainBundleSha256": "e18bbfd926794e12950e1fc37727503bb8ea701e570ccdc63184e55d1ca1f64c",
+    "browserChecked": "English documentation, real Korean/English/Arabic Button, custom theme transitions, explicit close, property-named Controls and mobile local keyboard scrolling.",
+    "buildNote": "The local review build is unminified. Default and CI minification settings remain enabled; this record does not claim a new final minified build. Webpack reported bundle-size warnings."
+  },
+  "sourceIdentity": {
+    "manifestScope": "The generated manifest covers the TS/TSX source census, including tests. It does not cover every stylesheet, asset, document or dependency. Critical shared owners and dependency patches are separately hashed here.",
+    "counts": {
+      "sourceFiles": 3502,
+      "productionSourceFiles": 2141,
+      "componentFiles": 857,
+      "coreFamilies": 54,
+      "featureDomains": 53,
+      "storyFiles": 244,
+      "storyVariants": 1313,
+      "pageEntrypoints": 115,
+      "layouts": 5
+    },
+    "criticalFiles": [
+      {
+        "path": ".storybook/preview.tsx",
+        "sha256": "cb16dd623d32a2f08f67257602f94155a179f4ae102837887531dc925130c44a"
+      },
+      {
+        "path": ".storybook/DesignSystemDocs.tsx",
+        "sha256": "7a7c9031c0fe4cc4e5d134d99e0e5fe02fefaaad4fa8b4fd5693c292f753b63b"
+      },
+      {
+        "path": ".storybook/DesignSystemDocs.module.css",
+        "sha256": "cd7bbf2a19f01b503c0d9e3461ca2bdf7759a7ddf7983825a7070c7d648f5feb"
+      },
+      {
+        "path": ".storybook/StoryCanvas.module.css",
+        "sha256": "0ec9cfba10f1d5168c690ae186ab9ecc7d4c1d518c4ab6ef9d8c3583d08cadee"
+      },
+      {
+        "path": "components/core/design-tokens.ts",
+        "sha256": "d3cceae924b77055e7a5611359494125c7b167d1512f26e203c97e98948f3bf3"
+      },
+      {
+        "path": "lib/styles/design-tokens.css",
+        "sha256": "ef5dd3f4829efcf7a0e3b90a62880235569361ef8ebd8eeb92cac4954846b919"
+      },
+      {
+        "path": "lib/theme/themes.ts",
+        "sha256": "062776c909347dddc075563c2c45b07214f73060d96501d88e3917c4693da3d5"
+      },
+      {
+        "path": "lib/providers/DesignSystemProvider.tsx",
+        "sha256": "51012f9d2136869174591cf4f6d915fa8d89700cbea22714043e1596427bcb6a"
+      },
+      {
+        "path": "package.json",
+        "sha256": "b3c1618f639a0ee86dddf88cf84e6e0e431da0a41eb34408de661f55945ebe56"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "sha256": "0d5e39cf94945c9e055a8af22673cfa67226d206f0d8e8cd372fdad65c744a2f"
+      },
+      {
+        "path": "patches/react-aria@3.53.1.patch",
+        "sha256": "adf6fa13734064b2be434e08faf306627091c2ee248dfd4be32bac11ee35de37"
+      },
+      {
+        "path": "patches/@storybook__addon-docs@10.5.8.patch",
+        "sha256": "089b933d8377238ffcfa50792208c3bb13eeb7afaa90852f418dd09e69d87917"
+      }
+    ]
+  },
+  "screenshotHashes": [
+    {
+      "path": "previews/documentation/button-docs-desktop-ocean-dark-ko.png",
+      "sha256": "91415c00ed3758be72088308b7564603ee031e6b11f44cfea7e523f0f493c441"
+    },
+    {
+      "path": "previews/documentation/button-docs-desktop-ocean-light-ko.png",
+      "sha256": "2c53191a60ca316c7a3389581523702f3318c772a083a65b26346506e7ff0b86"
+    },
+    {
+      "path": "previews/documentation/button-docs-live-example-desktop-dark-ko.png",
+      "sha256": "139758be74fba2b497c913b560380a4142df8cf2a9078f5c01e813291360f3ef"
+    },
+    {
+      "path": "previews/documentation/button-docs-phone-dark-ko.png",
+      "sha256": "8c9b3f182d6132b92a4dbbdacb9527b714c99fe48d73f1de384d63dded6af0b5"
+    },
+    {
+      "path": "previews/documentation/button-docs-phone-ocean-light-ko.png",
+      "sha256": "3f093fef451306dbc53754b59ac51316509a30b19df6f41beba2f5200645af53"
+    },
+    {
+      "path": "previews/documentation/math-keyboard-scroll.png",
+      "sha256": "e1a0c247e5704f6a745c050d7944f0a7b93623b72698f8d05c9583d8da8baf1f"
+    },
+    {
+      "path": "previews/documentation/mermaid-authored-description-ocean-dark.png",
+      "sha256": "d23bc9d8b53d92629c73ea81ea34cdcdf09b40fc737f482a43f7e126c07289eb"
+    },
+    {
+      "path": "previews/documentation/pages-catalog-tablet-dark-ko.png",
+      "sha256": "c9dad2a4d8d8b82c30313f4196de05e0fe1a201e96e87579405a5bf8aaccd725"
+    },
+    {
+      "path": "previews/documentation/profile-desktop-ocean-dark-ko.png",
+      "sha256": "877cfd4f168e362f3e72c2ec340b55c2efdb847aa1935eefebf199ffe8157639"
+    },
+    {
+      "path": "previews/documentation/profile-phone-320-ocean-dark-ar.png",
+      "sha256": "b2ff5f39191082360abe9b8c81308ce3c6d09c5d6c81f7b96aadde258bcf6711"
+    },
+    {
+      "path": "previews/documentation/profile-phone-320-ocean-dark-ko.png",
+      "sha256": "4843297a53b0b5c1e9e746e18292338a2166880a8d9176830d3df89b23a67dba"
+    },
+    {
+      "path": "previews/documentation/profile-phone-ocean-dark-ko.png",
+      "sha256": "f87c3d0a7eaa4b0cefabdaf5214709d54a53d3abe8a0b714e059b089ed5d6979"
+    },
+    {
+      "path": "previews/documentation/profile-tablet-ocean-dark-ko.png",
+      "sha256": "19da007370bdd4dee6a6b02b7ce6b4d9ada535847ed5fceed52c09d365bcd1ca"
+    },
+    {
+      "path": "previews/documentation/source-editor-ocean-dark.png",
+      "sha256": "92056f6472b2c50be3761765745167aa11ebe57d755c6fc1bd65999906013e65"
+    },
+    {
+      "path": "previews/documentation/spacing-phone-ocean-dark-ko.png",
+      "sha256": "e410790cfdd2844dcbc35984dab274fa4ccac5f630286fa2503f2d11af6a851a"
+    }
+  ],
+  "subsequentScopedRevision": {
+    "record": "design/storybook/interaction-review.json",
+    "scope": "Review corrections to shared tooltip placement, contextual toolbar density/edit focus, file browser inset, consent decisions and grip/date geometry. Earlier execution results apply only to their recorded snapshots."
+  },
+  "latestScopedRevision": {
+    "record": "design/storybook/compact-product-review.json",
+    "scope": "User review corrections to shared loading, dialog/bubble behavior, account controls, link forms, translation/identity, automatic file/history paging, image preparation, drag rendering, PostHero and cookie consent. Production owners and actual Storybook consumers change together.",
+    "note": "Earlier results retain their own snapshot identities and do not establish acceptance of later source."
+  }
+}

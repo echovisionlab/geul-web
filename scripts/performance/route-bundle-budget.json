@@ -1,0 +1,479 @@
+{
+  "description": "Per-route first-load client gzip budget (bytes) for scripts/performance/route-bundle-budget.mjs. Regenerate with `pnpm perf:bundle:update` after an intentional, reviewed size change.",
+  "measuredBuildId": "IdWPq-1N_bOYXg2RgiqlK",
+  "headroom": "max(3%, 4 KiB) rounded up to 1 KiB",
+  "shared": {
+    "jsGzip": 232448,
+    "cssGzip": 40960
+  },
+  "unbudgetedRoute": {
+    "jsGzip": 417792,
+    "cssGzip": 43008
+  },
+  "routes": {
+    "/(general)/[...slug]": {
+      "jsGzip": 291840,
+      "cssGzip": 43008
+    },
+    "/(general)/account/deletion/cancel": {
+      "jsGzip": 254976,
+      "cssGzip": 40960
+    },
+    "/(general)/account/deletion/confirm": {
+      "jsGzip": 254976,
+      "cssGzip": 40960
+    },
+    "/(general)/account/recover": {
+      "jsGzip": 265216,
+      "cssGzip": 40960
+    },
+    "/(general)/account/recovery/confirm": {
+      "jsGzip": 254976,
+      "cssGzip": 40960
+    },
+    "/(general)/artists/[idOrSlug]": {
+      "jsGzip": 307200,
+      "cssGzip": 43008
+    },
+    "/(general)/artists": {
+      "jsGzip": 291840,
+      "cssGzip": 43008
+    },
+    "/(general)/campaigns/[id]/analytics": {
+      "jsGzip": 315392,
+      "cssGzip": 43008
+    },
+    "/(general)/campaigns/[id]": {
+      "jsGzip": 862208,
+      "cssGzip": 43008
+    },
+    "/(general)/category/[slug]": {
+      "jsGzip": 391168,
+      "cssGzip": 40960
+    },
+    "/(general)/changelog": {
+      "jsGzip": 260096,
+      "cssGzip": 40960
+    },
+    "/(general)/event-series/[idOrSlug]": {
+      "jsGzip": 413696,
+      "cssGzip": 43008
+    },
+    "/(general)/events/[idOrSlug]": {
+      "jsGzip": 296960,
+      "cssGzip": 43008
+    },
+    "/(general)/events": {
+      "jsGzip": 291840,
+      "cssGzip": 43008
+    },
+    "/(general)/files": {
+      "jsGzip": 253952,
+      "cssGzip": 40960
+    },
+    "/(general)/labels/[idOrSlug]": {
+      "jsGzip": 306176,
+      "cssGzip": 43008
+    },
+    "/(general)/labels": {
+      "jsGzip": 291840,
+      "cssGzip": 43008
+    },
+    "/(general)/login/error": {
+      "jsGzip": 254976,
+      "cssGzip": 40960
+    },
+    "/(general)/login": {
+      "jsGzip": 280576,
+      "cssGzip": 40960
+    },
+    "/(general)/my/artists": {
+      "jsGzip": 495616,
+      "cssGzip": 40960
+    },
+    "/(general)/my": {
+      "jsGzip": 390144,
+      "cssGzip": 40960
+    },
+    "/(general)/my/posts": {
+      "jsGzip": 557056,
+      "cssGzip": 40960
+    },
+    "/(general)/my/profile": {
+      "jsGzip": 471040,
+      "cssGzip": 40960
+    },
+    "/(general)/my/security": {
+      "jsGzip": 434176,
+      "cssGzip": 40960
+    },
+    "/(general)/my/series/[id]": {
+      "jsGzip": 699392,
+      "cssGzip": 43008
+    },
+    "/(general)/my/series": {
+      "jsGzip": 390144,
+      "cssGzip": 40960
+    },
+    "/(general)/my/settings": {
+      "jsGzip": 451584,
+      "cssGzip": 40960
+    },
+    "/(general)/my/works": {
+      "jsGzip": 495616,
+      "cssGzip": 40960
+    },
+    "/(general)/oauth/authorize/consent": {
+      "jsGzip": 254976,
+      "cssGzip": 40960
+    },
+    "/(general)/onboarding/nickname": {
+      "jsGzip": 266240,
+      "cssGzip": 40960
+    },
+    "/(general)": {
+      "jsGzip": 290816,
+      "cssGzip": 43008
+    },
+    "/(general)/posts/[idOrSlug]": {
+      "jsGzip": 367616,
+      "cssGzip": 43008
+    },
+    "/(general)/posts": {
+      "jsGzip": 291840,
+      "cssGzip": 43008
+    },
+    "/(general)/privacy/history/[id]": {
+      "jsGzip": 281600,
+      "cssGzip": 40960
+    },
+    "/(general)/privacy/history": {
+      "jsGzip": 277504,
+      "cssGzip": 40960
+    },
+    "/(general)/privacy": {
+      "jsGzip": 281600,
+      "cssGzip": 40960
+    },
+    "/(general)/releases/[idOrSlug]": {
+      "jsGzip": 322560,
+      "cssGzip": 43008
+    },
+    "/(general)/releases": {
+      "jsGzip": 291840,
+      "cssGzip": 43008
+    },
+    "/(general)/series/[idOrSlug]": {
+      "jsGzip": 291840,
+      "cssGzip": 43008
+    },
+    "/(general)/sitemap": {
+      "jsGzip": 254976,
+      "cssGzip": 40960
+    },
+    "/(general)/subscribe/confirm": {
+      "jsGzip": 253952,
+      "cssGzip": 40960
+    },
+    "/(general)/subscribe": {
+      "jsGzip": 253952,
+      "cssGzip": 40960
+    },
+    "/(general)/tag/[slug]": {
+      "jsGzip": 391168,
+      "cssGzip": 40960
+    },
+    "/(general)/terms/history/[id]": {
+      "jsGzip": 281600,
+      "cssGzip": 40960
+    },
+    "/(general)/terms/history": {
+      "jsGzip": 277504,
+      "cssGzip": 40960
+    },
+    "/(general)/terms": {
+      "jsGzip": 281600,
+      "cssGzip": 40960
+    },
+    "/(general)/unsubscribe": {
+      "jsGzip": 264192,
+      "cssGzip": 40960
+    },
+    "/(general)/user/[id]": {
+      "jsGzip": 357376,
+      "cssGzip": 40960
+    },
+    "/(general)/verify": {
+      "jsGzip": 277504,
+      "cssGzip": 40960
+    },
+    "/(general)/works/[idOrSlug]": {
+      "jsGzip": 315392,
+      "cssGzip": 43008
+    },
+    "/(general)/works": {
+      "jsGzip": 291840,
+      "cssGzip": 43008
+    },
+    "/_not-found": {
+      "jsGzip": 232448,
+      "cssGzip": 40960
+    },
+    "/admin/artists": {
+      "jsGzip": 336896,
+      "cssGzip": 41984
+    },
+    "/admin/audience-segments": {
+      "jsGzip": 476160,
+      "cssGzip": 41984
+    },
+    "/admin/campaigns/[id]/analytics": {
+      "jsGzip": 316416,
+      "cssGzip": 41984
+    },
+    "/admin/campaigns/[id]": {
+      "jsGzip": 828416,
+      "cssGzip": 41984
+    },
+    "/admin/campaigns": {
+      "jsGzip": 335872,
+      "cssGzip": 41984
+    },
+    "/admin/categories": {
+      "jsGzip": 338944,
+      "cssGzip": 41984
+    },
+    "/admin/clients/[id]": {
+      "jsGzip": 442368,
+      "cssGzip": 44032
+    },
+    "/admin/clients": {
+      "jsGzip": 335872,
+      "cssGzip": 41984
+    },
+    "/admin/email-layouts/[id]": {
+      "jsGzip": 571392,
+      "cssGzip": 41984
+    },
+    "/admin/email-layouts": {
+      "jsGzip": 451584,
+      "cssGzip": 41984
+    },
+    "/admin/email-templates/[id]": {
+      "jsGzip": 773120,
+      "cssGzip": 41984
+    },
+    "/admin/email-templates": {
+      "jsGzip": 405504,
+      "cssGzip": 41984
+    },
+    "/admin/emails": {
+      "jsGzip": 308224,
+      "cssGzip": 41984
+    },
+    "/admin/event-series/[id]": {
+      "jsGzip": 307200,
+      "cssGzip": 41984
+    },
+    "/admin/event-series": {
+      "jsGzip": 334848,
+      "cssGzip": 41984
+    },
+    "/admin/events": {
+      "jsGzip": 367616,
+      "cssGzip": 41984
+    },
+    "/admin/files": {
+      "jsGzip": 436224,
+      "cssGzip": 54272
+    },
+    "/admin/formats": {
+      "jsGzip": 337920,
+      "cssGzip": 41984
+    },
+    "/admin/forms/[id]/(edit)/builder": {
+      "jsGzip": 711680,
+      "cssGzip": 41984
+    },
+    "/admin/forms/[id]/(edit)/settings": {
+      "jsGzip": 751616,
+      "cssGzip": 44032
+    },
+    "/admin/forms/[id]/(edit)/translations": {
+      "jsGzip": 525312,
+      "cssGzip": 41984
+    },
+    "/admin/forms/[id]": {
+      "jsGzip": 313344,
+      "cssGzip": 41984
+    },
+    "/admin/forms/[id]/submissions/[submissionId]": {
+      "jsGzip": 314368,
+      "cssGzip": 41984
+    },
+    "/admin/forms/[id]/submissions": {
+      "jsGzip": 396288,
+      "cssGzip": 41984
+    },
+    "/admin/forms": {
+      "jsGzip": 335872,
+      "cssGzip": 41984
+    },
+    "/admin/genres": {
+      "jsGzip": 338944,
+      "cssGzip": 41984
+    },
+    "/admin/labels": {
+      "jsGzip": 334848,
+      "cssGzip": 41984
+    },
+    "/admin/map": {
+      "jsGzip": 307200,
+      "cssGzip": 41984
+    },
+    "/admin/map/places/[id]": {
+      "jsGzip": 379904,
+      "cssGzip": 41984
+    },
+    "/admin/map/places": {
+      "jsGzip": 420864,
+      "cssGzip": 41984
+    },
+    "/admin/map/themes/[id]": {
+      "jsGzip": 517120,
+      "cssGzip": 41984
+    },
+    "/admin/map/themes": {
+      "jsGzip": 325632,
+      "cssGzip": 41984
+    },
+    "/admin/menus": {
+      "jsGzip": 593920,
+      "cssGzip": 41984
+    },
+    "/admin": {
+      "jsGzip": 371712,
+      "cssGzip": 41984
+    },
+    "/admin/pages": {
+      "jsGzip": 336896,
+      "cssGzip": 41984
+    },
+    "/admin/posts": {
+      "jsGzip": 336896,
+      "cssGzip": 41984
+    },
+    "/admin/privacy/[id]": {
+      "jsGzip": 307200,
+      "cssGzip": 41984
+    },
+    "/admin/privacy/new": {
+      "jsGzip": 309248,
+      "cssGzip": 41984
+    },
+    "/admin/privacy": {
+      "jsGzip": 394240,
+      "cssGzip": 41984
+    },
+    "/admin/releases": {
+      "jsGzip": 336896,
+      "cssGzip": 41984
+    },
+    "/admin/series/[id]": {
+      "jsGzip": 687104,
+      "cssGzip": 44032
+    },
+    "/admin/series": {
+      "jsGzip": 337920,
+      "cssGzip": 41984
+    },
+    "/admin/settings/mail": {
+      "jsGzip": 390144,
+      "cssGzip": 41984
+    },
+    "/admin/settings/og-image": {
+      "jsGzip": 423936,
+      "cssGzip": 41984
+    },
+    "/admin/settings": {
+      "jsGzip": 541696,
+      "cssGzip": 44032
+    },
+    "/admin/styles": {
+      "jsGzip": 338944,
+      "cssGzip": 41984
+    },
+    "/admin/tags": {
+      "jsGzip": 338944,
+      "cssGzip": 41984
+    },
+    "/admin/terms/[id]": {
+      "jsGzip": 307200,
+      "cssGzip": 41984
+    },
+    "/admin/terms/new": {
+      "jsGzip": 309248,
+      "cssGzip": 41984
+    },
+    "/admin/terms": {
+      "jsGzip": 394240,
+      "cssGzip": 41984
+    },
+    "/admin/translations/jobs": {
+      "jsGzip": 363520,
+      "cssGzip": 41984
+    },
+    "/admin/translations": {
+      "jsGzip": 363520,
+      "cssGzip": 41984
+    },
+    "/admin/translations/settings": {
+      "jsGzip": 417792,
+      "cssGzip": 41984
+    },
+    "/admin/user-tags": {
+      "jsGzip": 337920,
+      "cssGzip": 41984
+    },
+    "/admin/users/[id]": {
+      "jsGzip": 496640,
+      "cssGzip": 41984
+    },
+    "/admin/users": {
+      "jsGzip": 359424,
+      "cssGzip": 41984
+    },
+    "/admin/works": {
+      "jsGzip": 398336,
+      "cssGzip": 41984
+    },
+    "/editor-lab-local": {
+      "jsGzip": 968704,
+      "cssGzip": 57344
+    },
+    "/forms/[slug]/dashboard": {
+      "jsGzip": 488448,
+      "cssGzip": 43008
+    },
+    "/forms/[slug]": {
+      "jsGzip": 420864,
+      "cssGzip": 43008
+    },
+    "/forms/[slug]/password": {
+      "jsGzip": 306176,
+      "cssGzip": 43008
+    },
+    "/forms/[slug]/success": {
+      "jsGzip": 290816,
+      "cssGzip": 43008
+    },
+    "/forms": {
+      "jsGzip": 281600,
+      "cssGzip": 43008
+    },
+    "/s/[token]": {
+      "jsGzip": 573440,
+      "cssGzip": 43008
+    }
+  }
+}

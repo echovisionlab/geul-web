@@ -1,14 +1,24 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { normalizeRichTextHref } from '@echovisionlab/geul-common/editor/link-normalization';
 import type { RichTextInline, RichTextStyledText } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import type { LocalizedRichTextBlock } from '@/features/editor/contract/localized-rich-text';
+import { localizedRichTextInlinePlainText } from '@/features/editor/contract/localized-rich-text-text';
+import { documentHeadingTag } from '@/features/document-layout/ui/document-heading-level';
+import { useDocumentHeadingParentLevel } from '@/features/document-layout/ui/DocumentHeadingScope';
 import { resolveGeneratedStandaloneExternalVideoLink } from '@/features/media/standalone-external-video';
 import { mediaContainerStyleToReact, resolveMediaContainerStyle } from '@/lib/media/shared';
-import { alignment, assertNever, containerStyle, requireHeadingLevel } from './GeneratedRichTextViewUtils';
+import { isPublicListItemKind, PublicDocumentBlock, PublicListItem } from './PublicDocumentBlock';
+import {
+  alignment,
+  assertNever,
+  containerStyle,
+  documentBlockMeasure,
+  requireHeadingLevel,
+} from './GeneratedRichTextViewUtils';
 import type { GeneratedRichTextBlock, GeneratedRichTextBlockViewProps } from './GeneratedRichTextBlockView.types';
 
 const ExternalVideoView = dynamic(() =>
@@ -133,16 +143,51 @@ function GeneratedParagraphBlock({
     );
   }
 
-  return <p style={{ textAlign: alignment(block.base.props?.textAlignment) }}>{inlineContent(block.locale.content)}</p>;
+  return (
+    <p {...textPresentation(block.base.props)} style={{ textAlign: alignment(block.base.props?.textAlignment) }}>
+      {inlineContent(block.locale.content)}
+    </p>
+  );
 }
 
-export function GeneratedRichTextBlockView({
+export function GeneratedRichTextBlockView(props: GeneratedRichTextBlockViewProps) {
+  const { block } = props;
+  const nested =
+    block.kind !== 'callout' && block.children.length > 0
+      ? block.children.map((child) => (
+          <GeneratedRichTextBlockView key={child.id} {...props} block={child} isTopLevel={false} />
+        ))
+      : undefined;
+  return (
+    <PublicDocumentBlock
+      id={block.id}
+      kind={block.kind}
+      start={block.kind === 'numbered-list-item' ? block.base.props?.start : undefined}
+      measure={documentBlockMeasure(block, {
+        isTopLevel: props.isTopLevel ?? true,
+        allowStandaloneExternalVideo: props.allowStandaloneExternalVideo ?? false,
+      })}
+      nested={isPublicListItemKind(block.kind) ? undefined : nested}
+    >
+      <GeneratedRichTextBlockContent {...props} nested={isPublicListItemKind(block.kind) ? nested : undefined} />
+    </PublicDocumentBlock>
+  );
+}
+
+function textPresentation(props: { textColor?: string; backgroundColor?: string } | undefined) {
+  return { 'data-text-color': props?.textColor, 'data-bg-color': props?.backgroundColor };
+}
+
+function GeneratedRichTextBlockContent({
   block,
   requestedLocale,
   downloadOwner,
   allowStandaloneExternalVideo = false,
   isTopLevel = true,
-}: GeneratedRichTextBlockViewProps) {
+  nested,
+}: GeneratedRichTextBlockViewProps & { nested?: ReactNode }) {
+  const contentId = useId();
+  const headingParentLevel = useDocumentHeadingParentLevel();
   switch (block.kind) {
     case 'paragraph':
       return (
@@ -154,58 +199,65 @@ export function GeneratedRichTextBlockView({
       );
     case 'heading': {
       const level = requireHeadingLevel(block.base.props?.level ?? 1);
-      const Heading = `h${level}` as 'h1' | 'h2' | 'h3';
+      // The element follows the page outline (below the document title); size and depth stay authored.
+      const Heading = documentHeadingTag(level, headingParentLevel);
+      const content = inlineContent(block.locale.content);
+      if (!localizedRichTextInlinePlainText(block.locale.content).trim()) {
+        return null;
+      }
       return (
-        <Heading id={block.id} style={{ textAlign: alignment(block.base.props?.textAlignment) }}>
-          {inlineContent(block.locale.content)}
+        <Heading
+          {...textPresentation(block.base.props)}
+          id={block.id}
+          data-heading-level={level}
+          style={{ textAlign: alignment(block.base.props?.textAlignment) }}
+        >
+          {content}
         </Heading>
       );
     }
     case 'bullet-list-item':
+    case 'numbered-list-item': {
+      const List = block.kind === 'bullet-list-item' ? 'ul' : 'ol';
       return (
-        <ul>
-          <li>
+        <List start={block.kind === 'numbered-list-item' ? block.base.props?.start : undefined}>
+          <PublicListItem
+            presentation={textPresentation(block.base.props)}
+            textAlign={alignment(block.base.props?.textAlignment)}
+            nested={nested}
+          >
             {inlineContent(block.locale.content)}
-            {block.children.map((child) => (
-              <GeneratedRichTextBlockView
-                key={child.id}
-                block={child}
-                requestedLocale={requestedLocale}
-                downloadOwner={downloadOwner}
-                allowStandaloneExternalVideo={allowStandaloneExternalVideo}
-                isTopLevel={false}
-              />
-            ))}
-          </li>
-        </ul>
+          </PublicListItem>
+        </List>
       );
-    case 'numbered-list-item':
+    }
+    case 'check-list-item': {
+      const content = inlineContent(block.locale.content);
+      const hasTask = Boolean(localizedRichTextInlinePlainText(block.locale.content).trim());
       return (
-        <ol start={block.base.props?.start}>
-          <li>
-            {inlineContent(block.locale.content)}
-            {block.children.map((child) => (
-              <GeneratedRichTextBlockView
-                key={child.id}
-                block={child}
-                requestedLocale={requestedLocale}
-                downloadOwner={downloadOwner}
-                allowStandaloneExternalVideo={allowStandaloneExternalVideo}
-                isTopLevel={false}
-              />
-            ))}
-          </li>
-        </ol>
-      );
-    case 'check-list-item':
-      return (
-        <div className="check-list-item">
-          <input type="checkbox" checked={block.base.props?.checked ?? false} readOnly />
-          <span>{inlineContent(block.locale.content)}</span>
+        <div
+          className="check-list-item"
+          {...textPresentation(block.base.props)}
+          style={{ textAlign: alignment(block.base.props?.textAlignment) }}
+        >
+          {hasTask ? (
+            <input
+              type="checkbox"
+              checked={block.base.props?.checked ?? false}
+              readOnly
+              aria-readonly="true"
+              aria-labelledby={contentId}
+              onChange={(event) => {
+                event.currentTarget.checked = block.base.props?.checked ?? false;
+              }}
+            />
+          ) : null}
+          <span id={contentId}>{content}</span>
         </div>
       );
+    }
     case 'quote':
-      return <blockquote>{inlineContent(block.locale.content)}</blockquote>;
+      return <blockquote {...textPresentation(block.base.props)}>{inlineContent(block.locale.content)}</blockquote>;
     case 'callout':
       return (
         <aside
@@ -262,11 +314,13 @@ export function GeneratedRichTextBlockView({
                   return (
                     <Cell
                       key={cellIndex}
+                      {...textPresentation(cell.props)}
+                      scope={cell.header ? (rowIndex === 0 ? 'col' : cellIndex === 0 ? 'row' : undefined) : undefined}
                       colSpan={cell.props?.colspan}
                       rowSpan={cell.props?.rowspan}
                       style={{ textAlign: alignment(cell.props?.textAlignment) }}
                     >
-                      {inlineContent(localized.content)}
+                      <p>{inlineContent(localized.content)}</p>
                     </Cell>
                   );
                 })}

@@ -1,16 +1,33 @@
+import { navigatePreview } from '@/stories/shared/preview-navigation';
+import { withFeatureLabels } from '@/stories/feature-localization';
 import type { Meta, StoryObj } from '@storybook/nextjs';
-import { Box } from '@mantine/core';
+
 import { AccountEmailSettingsView } from './ui/AccountEmailSettings';
 
 const meta = {
   title: 'Feature/My/Primary Email Settings',
   component: AccountEmailSettingsView,
+  render: (args) => (
+    <AccountEmailSettingsView
+      {...args}
+      onChangeEmail={() => navigatePreview('/?path=/story/feature-auth-verification-flow-view--choose-email')}
+    />
+  ),
   parameters: { layout: 'centered' },
   decorators: [
+    withFeatureLabels({
+      labels: {
+        canonical: 'security.email.canonical',
+        change: 'security.email.changeAction',
+        description: 'security.email.description',
+        emailCode: 'security.email.sources.emailCode',
+        title: 'security.email.title',
+      },
+    }),
     (Story) => (
-      <Box w={680} maw="calc(100vw - 2rem)">
+      <div style={{ width: 680, maxWidth: '100%' }}>
         <Story />
-      </Box>
+      </div>
     ),
   ],
   args: {
@@ -30,3 +47,8 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 export const CanonicalEmail: Story = {};
 export const PendingVerification: Story = { args: { emailCodeAvailable: false } };
+
+export const NarrowViewport: Story = {
+  args: { email: 'studio.long-account-name@example.invalid' },
+  globals: { viewport: { value: 'phone', isRotated: false } },
+};

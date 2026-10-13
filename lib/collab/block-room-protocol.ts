@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 import * as Y from 'yjs';
 import {
   applyBlockRoomBootstrap,
@@ -8,99 +8,86 @@ import {
   type BlockRoomDocumentType,
 } from '@/lib/collab/block-room-bootstrap';
 
-const metadataUpdateSchema = z
-  .object({
-    operation: z.enum(['locale', 'document', 'page_layout']),
-    values: z.record(z.string(), z.unknown()),
-    sequence: z.number().int().positive(),
-  })
-  .strict();
+const metadataUpdateSchema = z.strictObject({
+  operation: z.enum(['locale', 'document', 'page_layout']),
+  values: z.record(z.string(), z.unknown()),
+  sequence: z.number().check(z.int(), z.positive()),
+});
 
-const metadataAckSchema = z
-  .object({
-    documentRevision: z.string().uuid(),
-    targetRevision: targetRevisionSchema.optional(),
-    changed: z.boolean(),
-    sourceChanged: z.boolean(),
-    changedLocales: z.array(z.string()),
-    locale: z.string().trim().min(1),
-    metadataUpdate: metadataUpdateSchema,
-  })
-  .strict();
+const metadataAckSchema = z.strictObject({
+  documentRevision: z.string().check(z.uuid()),
+  targetRevision: z.optional(targetRevisionSchema),
+  changed: z.boolean(),
+  sourceChanged: z.boolean(),
+  changedLocales: z.array(z.string()),
+  locale: z.string().check(z.trim(), z.minLength(1)),
+  metadataUpdate: metadataUpdateSchema,
+});
 
-const persistedSchema = z
-  .object({
-    kind: z.literal('block_room.persisted'),
-    protocolVersion: z.literal(2),
-    documentName: z.string().min(1),
-    stateVector: z.string().min(1),
-    deleted: z.record(
-      z.string().regex(/^\d+$/u),
-      z.array(z.object({ clock: z.number().int().nonnegative(), len: z.number().int().positive() }).strict()),
+const persistedSchema = z.strictObject({
+  kind: z.literal('block_room.persisted'),
+  protocolVersion: z.literal(2),
+  documentName: z.string().check(z.minLength(1)),
+  stateVector: z.string().check(z.minLength(1)),
+  deleted: z.record(
+    z.string().check(z.regex(/^\d+$/u)),
+    z.array(
+      z.strictObject({
+        clock: z.number().check(z.int(), z.nonnegative()),
+        len: z.number().check(z.int(), z.positive()),
+      }),
     ),
-  })
-  .strict();
+  ),
+});
 
 export interface BlockRoomPersistedState {
   stateVector: Uint8Array;
   deleted: Record<string, Array<{ clock: number; len: number }>>;
 }
 
-const readySchema = z
-  .object({
-    kind: z.literal('block_room.ready'),
-    protocolVersion: z.literal(2),
-    bootstrapChallenge: z.string().trim().min(1),
-  })
-  .strict();
+const readySchema = z.strictObject({
+  kind: z.literal('block_room.ready'),
+  protocolVersion: z.literal(2),
+  bootstrapChallenge: z.string().check(z.trim(), z.minLength(1)),
+});
 
-const metadataResultSchema = z
-  .object({
-    kind: z.literal('block_room.metadata_result'),
-    protocolVersion: z.literal(2),
-    requestId: z.string().uuid(),
-    ok: z.boolean(),
-    ack: z.unknown().optional(),
-    error: z.string().optional(),
-  })
-  .strict();
+const metadataResultSchema = z.strictObject({
+  kind: z.literal('block_room.metadata_result'),
+  protocolVersion: z.literal(2),
+  requestId: z.string().check(z.uuid()),
+  ok: z.boolean(),
+  ack: z.optional(z.unknown()),
+  error: z.optional(z.string()),
+});
 
-const metadataChangedSchema = z
-  .object({
-    kind: z.literal('block_room.metadata_changed'),
-    protocolVersion: z.literal(2),
-    documentName: z.string().min(1),
-    ack: metadataAckSchema,
-  })
-  .strict();
+const metadataChangedSchema = z.strictObject({
+  kind: z.literal('block_room.metadata_changed'),
+  protocolVersion: z.literal(2),
+  documentName: z.string().check(z.minLength(1)),
+  ack: metadataAckSchema,
+});
 
-const snapshotSchema = z
-  .object({
-    documentRevision: z.string().uuid(),
-    targetRevision: targetRevisionSchema.optional(),
-    sourceLocale: z.string().trim().min(1),
-    locale: z.string().trim().min(1),
-    localeExists: z.boolean(),
-  })
-  .strict();
+const snapshotSchema = z.strictObject({
+  documentRevision: z.string().check(z.uuid()),
+  targetRevision: z.optional(targetRevisionSchema),
+  sourceLocale: z.string().check(z.trim(), z.minLength(1)),
+  locale: z.string().check(z.trim(), z.minLength(1)),
+  localeExists: z.boolean(),
+});
 
-const snapshotResultSchema = z
-  .object({
-    kind: z.literal('block_room.snapshot_result'),
-    protocolVersion: z.literal(2),
-    requestId: z.string().uuid(),
-    ok: z.boolean(),
-    snapshot: z.unknown().optional(),
-    error: z.string().optional(),
-  })
-  .strict();
+const snapshotResultSchema = z.strictObject({
+  kind: z.literal('block_room.snapshot_result'),
+  protocolVersion: z.literal(2),
+  requestId: z.string().check(z.uuid()),
+  ok: z.boolean(),
+  snapshot: z.optional(z.unknown()),
+  error: z.optional(z.string()),
+});
 
-const reloadSchema = z
-  .object({
-    kind: z.literal('reload_required'),
-    reason: z.literal('reload_required'),
-  })
-  .strict();
+const reloadSchema = z.strictObject({
+  kind: z.literal('reload_required'),
+  reason: z.literal('reload_required'),
+});
 
 export type BlockRoomMetadataUpdate = z.infer<typeof metadataUpdateSchema>;
 export type BlockRoomMetadataAck = z.infer<typeof metadataAckSchema>;

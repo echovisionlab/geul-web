@@ -1,0 +1,10 @@
+{
+  "sourceManifestHash": "9bac936b21085bfe626cff408b91de1d106f4a264e2d85e26debed10351f3a43",
+  "indexSha256": "da445dbf8017dc1335fc176b16074382f4d97a49ca609532368f5224deeaa7b2",
+  "mainBundles": [
+    {
+      "path": "main.64ddf33f.iframe.bundle.js",
+      "sha256": "0261034d11f1135763dcf41ebaae5c36cb6703356e70cb696e10432743e08ff5"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 'use client';
+import { breakpointQuery } from '@/components/core/Layout/breakpoints';
 
 import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -26,7 +27,7 @@ export function MobileBlockTablePaginationScroll({ namespace, targetId }: Mobile
 
     previousPageRef.current = page;
 
-    if (typeof window === 'undefined' || !window.matchMedia('(max-width: 768px)').matches) {
+    if (typeof window === 'undefined' || !window.matchMedia(breakpointQuery('sm')).matches) {
       return;
     }
 

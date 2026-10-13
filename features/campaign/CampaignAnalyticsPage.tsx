@@ -1,4 +1,12 @@
 'use client';
+import { SupportingText, Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutGrid as DsLayoutGrid,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
@@ -15,40 +23,63 @@ import {
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Group, Pagination, Progress, SimpleGrid, Stack, Table, Text, Title } from '@mantine/core';
-import { statusToneFromColor, StatusBadge } from '@/components/core/Badge';
+import { SegmentedProgress } from '@/components/core/Progress';
+import { Pagination, Table } from '@/components/core/Display';
+import { StatusBadge, type StatusTone } from '@/components/core/Badge';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
 import { IconButton } from '@/components/core/IconButton';
 import { PageLoader } from '@/features/site/PageLoader';
-import { SectionCard } from '@/components/core/Section';
+import { SectionCard, StatCard } from '@/components/core/Section';
 import { Tooltip } from '@/components/core/Tooltip';
 import { getCampaignAction, getCampaignRecipientsAction, getCampaignStatsAction } from '@/lib/actions/campaign';
 import { guardNotFound } from '@/lib/utils/not-found-guard';
 
-function getRecipientBadgeColor(status: string): string {
+function getRecipientStatusTone(status: string): StatusTone {
   switch (status) {
     case 'sent':
-      return 'green';
+      return 'positive';
     case 'queued':
     case 'rendering':
     case 'sending':
-      return 'blue';
+      return 'accent';
     case 'permanent_failed':
     case 'transient_failed':
     case 'blocked':
-      return 'red';
+      return 'danger';
     case 'suppressed':
-      return 'orange';
+      return 'warning';
     case 'skipped':
-      return 'gray';
+      return 'neutral';
     default:
-      return 'gray';
+      return 'neutral';
   }
 }
 
+const CAMPAIGN_STATUS_TONES: Record<string, StatusTone> = {
+  draft: 'neutral',
+  scheduled: 'accent',
+  sending: 'accent',
+  sent: 'positive',
+  failed: 'danger',
+};
+
 const RECIPIENTS_PAGE_SIZE = 50;
 
-export default function CampaignAnalyticsPage() {
+export interface CampaignAnalyticsBindings {
+  getCampaign: typeof getCampaignAction;
+  getStats: typeof getCampaignStatsAction;
+  getRecipients: typeof getCampaignRecipientsAction;
+}
+const defaultBindings: CampaignAnalyticsBindings = {
+  getCampaign: getCampaignAction,
+  getStats: getCampaignStatsAction,
+  getRecipients: getCampaignRecipientsAction,
+};
+export default function CampaignAnalyticsPage({
+  bindings = defaultBindings,
+  id,
+}: { bindings?: CampaignAnalyticsBindings; id?: string } = {}) {
+  const tPagination = useTranslations('dataTable.pagination');
   const params = useParams();
   const router = useRouter();
   const dateTime = useDateTimeFormatter();
@@ -56,7 +87,7 @@ export default function CampaignAnalyticsPage() {
   const tCommonLabels = useTranslations('common.labels');
   const tCommonStates = useTranslations('common.states');
   const tCampaignStatuses = useTranslations('adminList.campaigns.statuses');
-  const campaignId = params.id as string;
+  const campaignId = id ?? (params.id as string);
   const [recipientPage, setRecipientPage] = useState(1);
 
   function getRecipientStatusLabel(status: string): string {
@@ -90,22 +121,22 @@ export default function CampaignAnalyticsPage() {
 
   const campaignQuery = useQuery({
     queryKey: ['campaigns', campaignId],
-    queryFn: () => getCampaignAction(campaignId).then(unwrapQueryResult),
+    queryFn: () => bindings.getCampaign(campaignId).then(unwrapQueryResult),
   });
   const { data: campaign, isLoading: isLoadingCampaign } = campaignQuery;
 
   const statsQuery = useQuery({
     queryKey: ['campaigns', 'stats', campaignId],
-    queryFn: () => getCampaignStatsAction(campaignId).then(unwrapQueryResult),
+    queryFn: () => bindings.getStats(campaignId).then(unwrapQueryResult),
   });
   const { data: stats, isLoading: isLoadingStats } = statsQuery;
 
   const recipientsQuery = useQuery({
     queryKey: ['campaigns', 'recipients', campaignId, recipientPage],
     queryFn: () =>
-      getCampaignRecipientsAction(campaignId, RECIPIENTS_PAGE_SIZE, (recipientPage - 1) * RECIPIENTS_PAGE_SIZE).then(
-        unwrapQueryResult,
-      ),
+      bindings
+        .getRecipients(campaignId, RECIPIENTS_PAGE_SIZE, (recipientPage - 1) * RECIPIENTS_PAGE_SIZE)
+        .then(unwrapQueryResult),
   });
   const { data: recipientResult, isLoading: isLoadingRecipients } = recipientsQuery;
 
@@ -136,9 +167,9 @@ export default function CampaignAnalyticsPage() {
   );
 
   return (
-    <Stack>
+    <DsLayoutStack>
       <QueryErrorAlert queries={[campaignQuery, statsQuery, recipientsQuery]} />
-      <Group>
+      <DsLayoutInline>
         <Tooltip label={t('actions.backToCampaign')}>
           <IconButton
             emphasis="low"
@@ -148,185 +179,160 @@ export default function CampaignAnalyticsPage() {
             <IconArrowLeft size={20} />
           </IconButton>
         </Tooltip>
-        <Title order={2}>{t('title')}</Title>
-        <StatusBadge tone={campaign.status === 'sent' ? 'positive' : 'neutral'}>
+        <DsHeading level={2}>{t('title')}</DsHeading>
+        <StatusBadge tone={CAMPAIGN_STATUS_TONES[campaign.status] ?? 'neutral'}>
           {tCampaignStatuses(campaign.status)}
         </StatusBadge>
-      </Group>
+      </DsLayoutInline>
 
-      <Text size="lg" fw={500}>
+      <DsText size="lg" weight="medium">
         {campaign.name || campaign.subject || tCommonStates('noSubject')}
-      </Text>
+      </DsText>
 
-      <Text size="sm" c="dimmed">
+      <DsText size="sm" tone="secondary">
         {campaign.subject || tCommonStates('noSubject')}
-      </Text>
+      </DsText>
 
       {campaign.sentAt && (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           {t('sentAt', {
             date: dateTime.date(campaign.sentAt),
             time: dateTime.time(campaign.sentAt),
           })}
-        </Text>
+        </DsText>
       )}
 
-      <SimpleGrid cols={{ base: 2, sm: 6 }}>
-        <SectionCard withBorder p="md">
-          <Group gap="xs">
-            <IconUsers size={20} />
-            <Text size="sm" c="dimmed">
-              {tCommonLabels('recipients')}
-            </Text>
-          </Group>
-          <Text size="xl" fw={700}>
-            {totalRecipients}
-          </Text>
-        </SectionCard>
-        <SectionCard withBorder p="md">
-          <Group gap="xs">
-            <IconCheck size={20} color="green" />
-            <Text size="sm" c="dimmed">
-              {t('stats.sent')}
-            </Text>
-          </Group>
-          <Text size="xl" fw={700} c="green">
-            {stats?.totalSent || 0}
-          </Text>
-        </SectionCard>
-        <SectionCard withBorder p="md">
-          <Group gap="xs">
-            <IconMailOff size={20} color="red" />
-            <Text size="sm" c="dimmed">
-              {t('stats.failed')}
-            </Text>
-          </Group>
-          <Text size="xl" fw={700} c="red">
-            {stats?.totalFailed || 0}
-          </Text>
-        </SectionCard>
-        <SectionCard withBorder p="md">
-          <Group gap="xs">
-            <IconBan size={20} color="red" />
-            <Text size="sm" c="dimmed">
-              {t('stats.blocked')}
-            </Text>
-          </Group>
-          <Text size="xl" fw={700} c="red">
-            {stats?.totalBlocked || 0}
-          </Text>
-        </SectionCard>
-        <SectionCard withBorder p="md">
-          <Group gap="xs">
-            <IconShieldOff size={20} color="orange" />
-            <Text size="sm" c="dimmed">
-              {t('stats.suppressed')}
-            </Text>
-          </Group>
-          <Text size="xl" fw={700} c="orange">
-            {stats?.totalSuppressed || 0}
-          </Text>
-        </SectionCard>
-        <SectionCard withBorder p="md">
-          <Group gap="xs">
-            <IconPlayerSkipForward size={20} />
-            <Text size="sm" c="dimmed">
-              {t('stats.skipped')}
-            </Text>
-          </Group>
-          <Text size="xl" fw={700} c="dimmed">
-            {stats?.totalSkipped || 0}
-          </Text>
-        </SectionCard>
-      </SimpleGrid>
+      <DsLayoutGrid columns={{ base: 2, md: 3, lg: 6 }}>
+        <StatCard label={tCommonLabels('recipients')} value={totalRecipients} icon={IconUsers} />
+        <StatCard label={t('stats.sent')} value={stats?.totalSent || 0} icon={IconCheck} tone="positive" />
+        <StatCard label={t('stats.failed')} value={stats?.totalFailed || 0} icon={IconMailOff} tone="danger" />
+        <StatCard label={t('stats.blocked')} value={stats?.totalBlocked || 0} icon={IconBan} tone="danger" />
+        <StatCard
+          label={t('stats.suppressed')}
+          value={stats?.totalSuppressed || 0}
+          icon={IconShieldOff}
+          tone="warning"
+        />
+        <StatCard
+          label={t('stats.skipped')}
+          value={stats?.totalSkipped || 0}
+          icon={IconPlayerSkipForward}
+          tone="neutral"
+        />
+      </DsLayoutGrid>
 
       {totalRecipients > 0 && (
-        <SectionCard withBorder p="md">
-          <Text size="sm" fw={500} mb="xs">
-            {t('deliveryStatus')}
-          </Text>
-          <Progress.Root size="xl">
-            <Tooltip label={t('tooltips.sent', { count: stats?.totalSent || 0 })}>
-              <Progress.Section value={percent(stats?.totalSent || 0)} color="green">
-                <Progress.Label>{percent(stats?.totalSent || 0).toFixed(0)}%</Progress.Label>
-              </Progress.Section>
-            </Tooltip>
-            <Tooltip label={t('tooltips.failed', { count: stats?.totalFailed || 0 })}>
-              <Progress.Section value={percent(stats?.totalFailed || 0)} color="red">
-                {percent(stats?.totalFailed || 0) > 5 ? (
-                  <Progress.Label>{percent(stats?.totalFailed || 0).toFixed(0)}%</Progress.Label>
-                ) : null}
-              </Progress.Section>
-            </Tooltip>
-            <Tooltip label={t('tooltips.blocked', { count: stats?.totalBlocked || 0 })}>
-              <Progress.Section value={percent(stats?.totalBlocked || 0)} color="red" />
-            </Tooltip>
-            <Tooltip label={t('tooltips.suppressed', { count: stats?.totalSuppressed || 0 })}>
-              <Progress.Section value={percent(stats?.totalSuppressed || 0)} color="orange" />
-            </Tooltip>
-            <Tooltip label={t('tooltips.skipped', { count: stats?.totalSkipped || 0 })}>
-              <Progress.Section value={percent(stats?.totalSkipped || 0)} color="gray">
-                {percent(stats?.totalSkipped || 0) > 5 ? (
-                  <Progress.Label>{percent(stats?.totalSkipped || 0).toFixed(0)}%</Progress.Label>
-                ) : null}
-              </Progress.Section>
-            </Tooltip>
-          </Progress.Root>
+        <SectionCard padding="md">
+          <DsLayoutInset blockEnd="xs">
+            <DsText size="sm" weight="medium">
+              {t('deliveryStatus')}
+            </DsText>
+          </DsLayoutInset>
+          <SegmentedProgress
+            label={t('deliveryStatus')}
+            segments={[
+              {
+                id: 'sent',
+                value: percent(stats?.totalSent || 0),
+                tone: 'positive',
+                label: t('tooltips.sent', { count: stats?.totalSent || 0 }),
+              },
+              {
+                id: 'failed',
+                value: percent(stats?.totalFailed || 0),
+                tone: 'danger',
+                label: t('tooltips.failed', { count: stats?.totalFailed || 0 }),
+              },
+              {
+                id: 'blocked',
+                value: percent(stats?.totalBlocked || 0),
+                tone: 'danger',
+                label: t('tooltips.blocked', { count: stats?.totalBlocked || 0 }),
+              },
+              {
+                id: 'suppressed',
+                value: percent(stats?.totalSuppressed || 0),
+                tone: 'warning',
+                label: t('tooltips.suppressed', { count: stats?.totalSuppressed || 0 }),
+              },
+              {
+                id: 'skipped',
+                value: percent(stats?.totalSkipped || 0),
+                tone: 'neutral',
+                label: t('tooltips.skipped', { count: stats?.totalSkipped || 0 }),
+              },
+            ]}
+          />
         </SectionCard>
       )}
 
-      <Title order={4}>{tCommonLabels('recipients')}</Title>
+      <DsHeading level={3} scale={4}>
+        {tCommonLabels('recipients')}
+      </DsHeading>
 
       {sortedRecipients.length === 0 ? (
-        <Text c="dimmed">{t('empty')}</Text>
+        <SupportingText role="status" tone="secondary">
+          {t('empty')}
+        </SupportingText>
       ) : (
-        <Table highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>{tCommonLabels('email')}</Table.Th>
-              <Table.Th>{tCommonLabels('status')}</Table.Th>
-              <Table.Th>{tCommonLabels('time')}</Table.Th>
-              <Table.Th>{tCommonLabels('details')}</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {sortedRecipients.map((recipient) => (
-              <Table.Tr key={recipient.email}>
-                <Table.Td>
-                  <Text size="sm">{recipient.email}</Text>
-                </Table.Td>
-                <Table.Td>
-                  <StatusBadge tone={statusToneFromColor(getRecipientBadgeColor(recipient.status))} size="sm">
-                    {getRecipientStatusLabel(recipient.status)}
-                  </StatusBadge>
-                </Table.Td>
-                <Table.Td>
-                  <Text size="sm" c="dimmed">
-                    {formatDate(recipient.terminalAt ?? recipient.sentAt)}
-                  </Text>
-                </Table.Td>
-                <Table.Td>
-                  {recipient.errorType ? (
-                    <Text size="xs" c="red" lineClamp={1}>
-                      {recipient.errorType}
-                    </Text>
-                  ) : (
-                    <Text size="xs" c="dimmed">
-                      -
-                    </Text>
-                  )}
-                </Table.Td>
+        <Table.ScrollContainer minWidth={640} role="region" aria-label={tCommonLabels('email')} tabIndex={0}>
+          <Table highlightOnHover aria-label={tCommonLabels('recipients')}>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>{tCommonLabels('email')}</Table.Th>
+                <Table.Th>{tCommonLabels('status')}</Table.Th>
+                <Table.Th>{tCommonLabels('time')}</Table.Th>
+                <Table.Th>{tCommonLabels('details')}</Table.Th>
               </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
+            </Table.Thead>
+            <Table.Tbody>
+              {sortedRecipients.map((recipient) => (
+                <Table.Tr key={recipient.email}>
+                  <Table.Td>
+                    <DsText size="sm">{recipient.email}</DsText>
+                  </Table.Td>
+                  <Table.Td>
+                    <StatusBadge tone={getRecipientStatusTone(recipient.status)} size="sm">
+                      {getRecipientStatusLabel(recipient.status)}
+                    </StatusBadge>
+                  </Table.Td>
+                  <Table.Td>
+                    <DsText size="sm" tone="secondary">
+                      {formatDate(recipient.terminalAt ?? recipient.sentAt)}
+                    </DsText>
+                  </Table.Td>
+                  <Table.Td>
+                    {recipient.errorType ? (
+                      <DsText size="sm" tone="danger" lines={1}>
+                        {recipient.errorType}
+                      </DsText>
+                    ) : (
+                      <DsText size="sm" tone="secondary">
+                        -
+                      </DsText>
+                    )}
+                  </Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        </Table.ScrollContainer>
       )}
 
       {recipientPageCount > 1 ? (
-        <Group justify="center">
-          <Pagination value={recipientPage} total={recipientPageCount} onChange={setRecipientPage} />
-        </Group>
+        <DsLayoutInline justify="center">
+          <Pagination
+            value={recipientPage}
+            total={recipientPageCount}
+            onChange={setRecipientPage}
+            labels={{
+              previousPage: tPagination('previousPage'),
+              nextPage: tPagination('nextPage'),
+              page: (page) => tPagination('page', { page }),
+            }}
+          />
+        </DsLayoutInline>
       ) : null}
-    </Stack>
+    </DsLayoutStack>
   );
 }

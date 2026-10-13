@@ -1,8 +1,7 @@
-import type { ButtonHTMLAttributes } from 'react';
-import { Button, type ButtonProps } from '@/components/core/Button';
+import { componentBindings } from '@/components/core/bindings';
+import { Button, type ButtonActionProps } from '@/components/core/Button';
 
-export type AuthActionButtonProps = Omit<ButtonProps, 'fullWidth'> &
-  Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'color'>;
+export type AuthActionButtonProps = Omit<ButtonActionProps, 'fullWidth'>;
 
 /**
  * Keeps every login method on the same Core Button sizing and full-width
@@ -10,5 +9,5 @@ export type AuthActionButtonProps = Omit<ButtonProps, 'fullWidth'> &
  * owned by the caller.
  */
 export function AuthActionButton(props: AuthActionButtonProps) {
-  return <Button {...props} fullWidth />;
+  return <Button labelWrap="wrap" {...componentBindings(props)} fullWidth />;
 }

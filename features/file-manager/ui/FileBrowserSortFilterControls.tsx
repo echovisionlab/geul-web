@@ -1,8 +1,7 @@
 'use client';
 
-import { Group } from '@mantine/core';
+import { LayoutGrid } from '@/components/core/Layout';
 import { Select } from '@/components/core/Input';
-import classes from './FileBrowserSortFilterControls.module.css';
 
 export interface FileBrowserSortFilterLabels {
   type: string;
@@ -23,7 +22,6 @@ export interface FileBrowserSortFilterControlsProps {
   labels: FileBrowserSortFilterLabels;
   mimeTypePrefix: string;
   sort: string;
-  className?: string;
   onMimeTypePrefixChange: (value: string) => void;
   onSortChange: (value: string) => void;
 }
@@ -33,14 +31,12 @@ export function FileBrowserSortFilterControls({
   labels,
   mimeTypePrefix,
   sort,
-  className,
   onMimeTypePrefixChange,
   onSortChange,
 }: FileBrowserSortFilterControlsProps) {
   return (
-    <Group gap="xs" wrap="nowrap" className={`${classes.root} ${className ?? ''}`.trim()}>
+    <LayoutGrid columns={2} gap="xs">
       <Select
-        className={classes.control}
         aria-label={labels.sortLabel}
         value={sort}
         onChange={(value) => onSortChange(value ?? 'name:asc')}
@@ -54,7 +50,6 @@ export function FileBrowserSortFilterControls({
         ]}
       />
       <Select
-        className={classes.control}
         aria-label={labels.type}
         value={mimeTypePrefix}
         onChange={(value) => onMimeTypePrefixChange(value ?? '')}
@@ -66,6 +61,6 @@ export function FileBrowserSortFilterControls({
           { value: 'application/', label: labels.documents },
         ]}
       />
-    </Group>
+    </LayoutGrid>
   );
 }

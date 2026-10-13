@@ -1,6 +1,13 @@
 'use client';
 
-import { Box, Group, Stack, Text } from '@mantine/core';
+import {
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+} from '@/components/core/Layout';
+
+import { Text as DsText } from '@/components/core/Typography';
+
 import { Button } from '@/components/core/Button';
 import { TextButton } from '@/components/core/TextButton';
 import { DataTable } from '@/features/data-table/DataTable';
@@ -32,6 +39,7 @@ export interface EventSeriesEventsTableItem {
 }
 
 export interface EventSeriesEventsTableViewLabels {
+  image: string;
   date: string;
   event: string;
   type: string;
@@ -96,52 +104,48 @@ function formatEventDate(
 function buildColumns(
   locale: string,
   requestTimeZone: string,
-  labels: Pick<EventSeriesEventsTableViewLabels, 'date' | 'event' | 'type' | 'location' | 'tba'>,
+  labels: Pick<EventSeriesEventsTableViewLabels, 'image' | 'date' | 'event' | 'type' | 'location' | 'tba'>,
   locationLabels: Record<BrowserProgramEventLocationMode, string>,
 ): ColumnDef<EventSeriesEventsTableItem>[] {
   return [
     {
       key: 'poster',
       header: '',
+      accessibleLabel: labels.image,
       width: 72,
       cell: (event) => (
-        <Box
-          style={{
-            width: 48,
-            height: 64,
-            overflow: 'hidden',
-            background: 'var(--mantine-color-dark-6)',
-          }}
-        >
-          {event.posterUrl ? (
-            <img
-              src={buildManagedImageUrl(event.posterUrl, MANAGED_IMAGE_PRESET.POSTER_THUMB) ?? event.posterUrl}
-              alt={event.title}
-              style={{
-                display: 'block',
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-              }}
-            />
-          ) : null}
-        </Box>
+        <div style={{ width: 48, height: 64, overflow: 'hidden' }}>
+          <DsLayoutInset space="none">
+            {event.posterUrl ? (
+              <img
+                src={buildManagedImageUrl(event.posterUrl, MANAGED_IMAGE_PRESET.POSTER_THUMB) ?? event.posterUrl}
+                alt={event.title}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+            ) : null}
+          </DsLayoutInset>
+        </div>
       ),
     },
     {
       key: 'title',
       header: labels.event,
       cell: (event) => (
-        <Stack gap={2}>
+        <DsLayoutStack gap="xxs">
           <TextButton href={event.href} size="sm" appearance="default">
             {event.title}
           </TextButton>
           {event.summary ? (
-            <Text size="sm" c="dimmed" lineClamp={2}>
+            <DsText size="sm" tone="secondary" lines={2}>
               {event.summary}
-            </Text>
+            </DsText>
           ) : null}
-        </Stack>
+        </DsLayoutStack>
       ),
     },
     {
@@ -149,9 +153,9 @@ function buildColumns(
       header: labels.date,
       width: 180,
       cell: (event) => (
-        <Text size="sm" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
+        <DsText size="sm" tone="secondary" nowrap>
           {formatEventDate(event, locale, requestTimeZone, labels.tba)}
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -159,9 +163,9 @@ function buildColumns(
       header: labels.type,
       width: 160,
       cell: (event) => (
-        <Text size="sm" c={event.typeName ? undefined : 'dimmed'}>
+        <DsText size="sm" tone={event.typeName ? undefined : 'secondary'}>
           {event.typeName || '-'}
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -169,9 +173,9 @@ function buildColumns(
       header: labels.location,
       width: 140,
       cell: (event) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           {locationLabels[event.locationMode]}
-        </Text>
+        </DsText>
       ),
     },
   ];
@@ -195,7 +199,7 @@ export function EventSeriesEventsTableView({
   const remaining = Math.max(result.total - result.data.length, 0);
 
   return (
-    <Stack gap="sm">
+    <DsLayoutStack gap="sm">
       <DataTable
         columns={buildColumns(locale, requestTimeZone, labels, locationLabels)}
         result={result}
@@ -207,24 +211,24 @@ export function EventSeriesEventsTableView({
       >
         <DataTable.Toolbar>
           <DataTable.Search placeholder={labels.searchPlaceholder} />
-          <Group gap={4}>
+          <DsLayoutInline gap="xxs">
             <DataTable.MultiFilter fields={filterFields} allowLogicToggle={false} />
-          </Group>
+          </DsLayoutInline>
         </DataTable.Toolbar>
-        <DataTable.Content reservedRowCount={pageSize} />
+        <DataTable.Content reservedRowCount={loading ? pageSize : undefined} />
       </DataTable>
       {error ? (
-        <Text c="red" size="sm">
+        <DsText tone="danger" size="sm">
           {error}
-        </Text>
+        </DsText>
       ) : null}
       {remaining > 0 ? (
-        <Group justify="center">
+        <DsLayoutInline justify="center">
           <Button tone="neutral" emphasis="low" loading={isLoadingMore} onClick={onLoadMore}>
             {labels.showMore(remaining)}
           </Button>
-        </Group>
+        </DsLayoutInline>
       ) : null}
-    </Stack>
+    </DsLayoutStack>
   );
 }

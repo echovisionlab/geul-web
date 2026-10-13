@@ -1,0 +1,128 @@
+// @vitest-environment jsdom
+import { act, type ReactNode } from 'react';
+import { createRoot, type Root } from 'react-dom/client';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { TestProviders } from '@/test/TestProviders';
+import { MailAdaptersPreview } from './MailAdapters.stories';
+import { CampaignAnalyticsPreview } from './CampaignAnalytics.stories';
+import { CommunicationListsPreview } from './AdminCommunicationLists.stories';
+import { AdminUserEditPreview } from './AdminUserEdit.stories';
+import { OgImageSettingsPreview } from './OgImageSettings.stories';
+import { ProgramEventListsPreview } from './ProgramEventLists.stories';
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
+  usePathname: () => '/preview',
+  useSearchParams: () => new URLSearchParams(),
+  useParams: () => ({ id: 'local-campaign' }),
+}));
+vi.stubGlobal(
+  'ResizeObserver',
+  class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  },
+);
+let host: HTMLDivElement;
+let root: Root;
+afterEach(() => {
+  act(() => root?.unmount());
+  host?.remove();
+  vi.restoreAllMocks();
+});
+async function flush() {
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 30));
+  });
+}
+async function render(node: ReactNode) {
+  host = document.createElement('div');
+  document.body.append(host);
+  root = createRoot(host);
+  await act(async () => root.render(<TestProviders>{node}</TestProviders>));
+  await flush();
+}
+function button(text: string) {
+  return [...host.querySelectorAll<HTMLButtonElement>('button')].find((b) => b.textContent?.includes(text));
+}
+describe('complete production page preview controllers', () => {
+  it('shows a failed OG preview response as a retryable error instead of indefinite loading', async () => {
+    const fetchPreview = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 500 }));
+    await render(<OgImageSettingsPreview />);
+    await vi.waitFor(async () => {
+      await flush();
+      expect(host.querySelector('[role=alert]')).not.toBeNull();
+    });
+    expect(host.textContent).not.toContain('Generating preview');
+    const requests = fetchPreview.mock.calls.length;
+    await act(async () => button('Try again')!.click());
+    await vi.waitFor(async () => {
+      await flush();
+      expect(fetchPreview.mock.calls.length).toBeGreaterThan(requests);
+    });
+  });
+  it('renders member profile and security owners with the required session context', async () => {
+    await render(<AdminUserEditPreview />);
+    expect(host.querySelector('input[value="June Han"]')).not.toBeNull();
+    expect(host.textContent).toContain('Connected SSO providers');
+    expect(host.textContent).toContain('Personal access token');
+    const nickname = host.querySelector<HTMLInputElement>('input[value="June Han"]')!;
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(nickname, 'June Local');
+      nickname.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+    });
+    expect(host.textContent).toContain('This nickname is available.');
+    await act(async () => button('Save')!.click());
+    await flush();
+    expect(host.querySelector('h1')?.textContent).toBe('June Local');
+  });
+  it('reports adapter read failure as an error rather than an empty adapter list', async () => {
+    await render(<MailAdaptersPreview state="failed" />);
+    expect(host.querySelector('[role=alert]')).not.toBeNull();
+    expect(host.textContent).not.toContain('No adapters configured');
+    expect(host.querySelector('[role=switch]')).toBeNull();
+  });
+  it('persists an adapter switch update after the real query invalidation/refetch', async () => {
+    await render(<MailAdaptersPreview />);
+    const control = host.querySelector<HTMLInputElement>('input[role=switch]')!;
+    expect(control.checked).toBe(true);
+    await act(async () => control.click());
+    await flush();
+    expect(host.querySelector<HTMLInputElement>('input[role=switch]')!.checked).toBe(false);
+    expect(host.textContent).toContain('Local logging');
+  });
+  it('loads the next recipient page through the actual analytics pagination', async () => {
+    await render(<CampaignAnalyticsPreview />);
+    expect(host.textContent).toContain('listener-1@example.com');
+    const next = host.querySelector<HTMLButtonElement>('button[aria-label="Next page"]')!;
+    expect(next).not.toBeNull();
+    await act(async () => next.click());
+    await flush();
+    expect(host.textContent).toContain('listener-51@example.com');
+    expect(host.textContent).not.toContain('listener-1@example.com');
+  });
+  it.each(['forms', 'campaigns'] as const)(
+    'creates a local %s through the original production controller',
+    async (domain) => {
+      await render(<CommunicationListsPreview domain={domain} />);
+      const before = host.querySelectorAll('tbody tr').length;
+      const create = button('New')!;
+      expect(create).toBeDefined();
+      await act(async () => create.click());
+      await flush();
+      expect(host.querySelectorAll('tbody tr').length).toBe(before + 1);
+    },
+  );
+  it('creates a programme event through its actual production button', async () => {
+    await render(<ProgramEventListsPreview />);
+    const before = host.querySelectorAll('tbody tr').length;
+    const create = button('New')!;
+    expect(create).toBeDefined();
+    await act(async () => create.click());
+    await flush();
+    expect(host.querySelectorAll('tbody tr').length).toBe(before + 1);
+  });
+});

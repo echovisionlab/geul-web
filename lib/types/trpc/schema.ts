@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 import type { ValueType } from './model';
 
 // === Filter Schema Builders (per value type) ===
@@ -129,7 +129,7 @@ export function createFilterSchema<TFields extends Record<string, ValueType>>(fi
 export function createSortSchema<const T extends readonly [string, ...string[]]>(fields: T) {
   return z.object({
     field: z.enum(fields),
-    order: z.enum(['asc', 'desc']).default('desc'),
+    order: z._default(z.enum(['asc', 'desc']), 'desc'),
   });
 }
 
@@ -137,25 +137,27 @@ export function createSortSchema<const T extends readonly [string, ...string[]]>
 
 export const identifierSchema = z
   .object({
-    id: z.uuid().optional(),
-    slug: z.string().min(1).optional(),
+    id: z.optional(z.uuid()),
+    slug: z.optional(z.string().check(z.minLength(1))),
   })
-  .refine((data) => data.id || data.slug, {
-    message: 'id 또는 slug 중 하나는 필수',
-  });
+  .check(
+    z.refine((data) => data.id || data.slug, {
+      message: 'id 또는 slug 중 하나는 필수',
+    }),
+  );
 
 // === List Input Schema Factory ===
 
 export function createSimpleListInputSchema<TFilter, TSort extends string>(config: {
-  filterSchema: z.ZodType<TFilter>;
-  sortSchema: z.ZodType<{ field: TSort; order?: 'asc' | 'desc' }>;
+  filterSchema: z.ZodMiniType<TFilter>;
+  sortSchema: z.ZodMiniType<{ field: TSort; order?: 'asc' | 'desc' }>;
 }) {
   return z.object({
-    filter: z.array(config.filterSchema).default([]),
-    filterBy: z.enum(['AND', 'OR']).default('AND'),
-    sort: z.array(config.sortSchema).optional(),
-    page: z.number().min(1).default(1),
-    pageSize: z.number().min(1).max(100).default(20),
-    search: z.string().optional(),
+    filter: z._default(z.array(config.filterSchema), []),
+    filterBy: z._default(z.enum(['AND', 'OR']), 'AND'),
+    sort: z.optional(z.array(config.sortSchema)),
+    page: z._default(z.number().check(z.gte(1)), 1),
+    pageSize: z._default(z.number().check(z.gte(1), z.lte(100)), 20),
+    search: z.optional(z.string()),
   });
 }

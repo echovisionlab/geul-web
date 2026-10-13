@@ -26,7 +26,7 @@ export function CampaignRowMenu({ campaign }: CampaignRowMenuProps) {
       label: tCommon('actions.delete'),
       icon: <IconTrash size={16} />,
       onClick: () => openDelete(campaign),
-      color: 'red',
+      tone: 'danger',
       disabled: campaign.status !== 'draft',
     },
   ];

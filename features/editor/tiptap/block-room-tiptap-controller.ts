@@ -72,6 +72,10 @@ export class PostBlockRoomTiptapController {
     return this.#paragraphExternalVideo;
   }
 
+  get locale(): string {
+    return this.#bridge.locale;
+  }
+
   get connected(): boolean {
     return this.#connected;
   }

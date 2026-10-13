@@ -1,0 +1,278 @@
+.frame {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--geul-canvas-black);
+}
+
+.frame :global([data-video-player-mount]) {
+  line-height: 0;
+}
+
+.frame :global(video),
+.frame :global(.video-js) {
+  display: block;
+  width: 100% !important;
+  max-width: 100% !important;
+  background: var(--geul-canvas-black);
+}
+
+.frame :global(.vjs-tech),
+.frame :global(.vjs-poster),
+.frame :global(.vjs-poster img) {
+  object-fit: contain;
+}
+
+.frame[data-video-player-processing='true'] :global(.vjs-big-play-button),
+.frame[data-video-player-processing='true'] :global(.vjs-control-bar) {
+  visibility: hidden;
+}
+
+.frame:fullscreen :global(video),
+.frame:fullscreen :global(.video-js),
+.frame :global(.video-js.vjs-fullscreen) {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-height: 100vh;
+}
+
+.video:global(.video-js) {
+  color: var(--geul-text-inverse-primary);
+  font-family: var(--font-family-sans), sans-serif;
+  font-size: var(--geul-font-size-sm);
+}
+
+/* Neutralize SDK button skins before the shared Control state selectors apply. */
+.video:global(.video-js) :global(.vjs-button[data-control-kind]) {
+  background: transparent;
+  background-image: none;
+  border: var(--geul-border-thin) solid transparent;
+  border-radius: var(--geul-radius-square);
+  box-shadow: none;
+}
+
+/* native-video.ts assigns chrome to SDK icon commands and lg to the big play command. */
+.video:global(.video-js) :global(.vjs-button[data-control-kind='icon']) {
+  width: var(--geul-control-height-chrome);
+  height: var(--geul-control-height-chrome);
+  padding: 0;
+}
+
+.video:global(.video-js) :global(.vjs-big-play-button[data-control-kind='icon']) {
+  width: var(--geul-control-height-lg);
+  height: var(--geul-control-height-lg);
+}
+
+.video:global(.video-js) :global(.vjs-button[data-control-kind='button']) {
+  padding: 0 var(--geul-spacing-md);
+}
+
+.video:global(.video-js) :global(.vjs-button[data-control-kind]):focus-visible {
+  outline: var(--geul-border-focus) solid var(--geul-text-inverse-primary);
+  outline-offset: var(--geul-border-focus);
+}
+
+.video:global(.video-js) :global(.vjs-modal-dialog .vjs-button[data-control-kind]):focus-visible {
+  outline-color: var(--geul-focus);
+}
+
+.video :global(.vjs-control-bar) {
+  height: calc(var(--geul-control-height-chrome) + var(--geul-spacing-sm));
+  padding: var(--geul-spacing-xs) var(--geul-spacing-xs) 0;
+  align-items: center;
+  background: var(--geul-overlay-video-gradient);
+}
+
+.video :global(.vjs-button > .vjs-icon-placeholder)::before {
+  font-size: var(--geul-chrome-icon-size);
+  line-height: var(--geul-control-height-chrome);
+}
+
+.video :global(.vjs-big-play-button) {
+  margin-top: calc(-1 * var(--geul-control-height-lg) / 2);
+  margin-left: calc(-1 * var(--geul-control-height-lg) / 2);
+  filter: drop-shadow(var(--geul-shadow-video-text));
+}
+
+.video:global(.video-js):hover :global(.vjs-big-play-button):not(:hover):not(:focus-visible) {
+  background: transparent;
+  color: var(--geul-text-inverse-primary);
+}
+
+.video :global(.vjs-big-play-button .vjs-icon-placeholder)::before {
+  line-height: var(--geul-control-height-lg);
+  font-size: var(--geul-font-size-xl);
+}
+
+.video :global(.vjs-progress-control) {
+  position: absolute;
+  top: 0;
+  inset-inline: var(--geul-spacing-sm);
+  width: auto;
+  height: var(--geul-spacing-xs);
+}
+
+.video :global(.vjs-progress-control .vjs-progress-holder) {
+  height: var(--geul-border-focus);
+  margin: 0;
+  background: var(--geul-overlay-track);
+}
+
+.video :global(.vjs-load-progress),
+.video :global(.vjs-load-progress div) {
+  background: var(--geul-overlay-track-hover);
+}
+
+.video :global(.vjs-play-progress),
+.video :global(.vjs-volume-level) {
+  background: var(--geul-text-inverse-primary);
+}
+
+.video :global(.vjs-play-progress)::before,
+.video :global(.vjs-volume-level)::before {
+  color: var(--geul-text-inverse-primary);
+}
+
+.video :global(.vjs-slider):focus-visible {
+  box-shadow: none;
+  outline: var(--geul-border-focus) solid var(--geul-text-inverse-primary);
+  outline-offset: var(--geul-border-focus);
+}
+
+.video :global(.vjs-time-control) {
+  display: flex;
+  width: auto;
+  min-width: 0;
+  height: var(--geul-control-height-chrome);
+  align-items: center;
+  padding: 0 var(--geul-spacing-xxs);
+  font-size: var(--geul-font-size-xs);
+  line-height: var(--geul-line-height-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.video :global(.vjs-volume-panel),
+.video :global(.vjs-volume-panel .vjs-volume-control) {
+  height: var(--geul-control-height-chrome);
+}
+
+.video :global(.vjs-volume-panel) {
+  width: var(--geul-control-height-chrome);
+}
+
+.video :global(.vjs-volume-panel.vjs-hover),
+.video :global(.vjs-volume-panel):focus-within {
+  width: calc(var(--geul-control-height-chrome) * 3);
+}
+
+.video :global(.vjs-volume-bar) {
+  background: var(--geul-overlay-track);
+}
+
+.video :global(.vjs-playback-rate-value) {
+  display: grid;
+  height: 100%;
+  place-items: center;
+  font-size: var(--geul-font-size-xs);
+}
+
+.video :global(.vjs-menu-button-popup .vjs-menu .vjs-menu-content) {
+  width: 10rem;
+  background: var(--geul-surface);
+  color: var(--geul-text-primary);
+  border: var(--geul-border-thin) solid var(--geul-border-default);
+  box-shadow: var(--geul-shadow-panel);
+}
+
+.video:global(.video-js) :global(.vjs-menu li.vjs-menu-item) {
+  font-size: var(--geul-font-size-xs);
+  line-height: var(--geul-line-height-xs);
+  color: inherit;
+  background: transparent;
+}
+
+.video:global(.video-js) :global(.vjs-menu li.vjs-menu-item[data-core-selected]) {
+  background: var(--geul-surface-active);
+  color: var(--geul-text-primary);
+}
+
+.video :global(.vjs-loading-spinner) {
+  width: var(--geul-control-height-chrome);
+  height: var(--geul-control-height-chrome);
+  margin: 0;
+  color: var(--geul-text-inverse-primary);
+  border: 0;
+  opacity: 1;
+}
+
+.video :global(.vjs-loading-spinner)::before,
+.video :global(.vjs-loading-spinner)::after {
+  display: none;
+}
+
+.video:global(.video-js) :global(.vjs-modal-dialog) {
+  background: var(--geul-surface);
+  color: var(--geul-text-primary);
+  border: var(--geul-border-thin) solid var(--geul-border-default);
+}
+
+.video :global(.vjs-modal-dialog .vjs-modal-dialog-content) {
+  padding: var(--geul-spacing-md);
+  color: var(--geul-text-primary);
+  font-size: var(--geul-font-size-sm);
+  line-height: var(--geul-line-height-sm);
+}
+
+.video :global(.vjs-text-track-settings select) {
+  background: transparent;
+  color: var(--geul-text-primary);
+  font-size: var(--geul-font-size-xs);
+  margin: 0;
+  padding: var(--geul-spacing-xxs) var(--geul-spacing-xs);
+}
+
+.video :global(.vjs-text-track-settings fieldset) {
+  margin: 0;
+  padding: var(--geul-spacing-xs);
+  border: 0;
+}
+
+.video :global(.vjs-text-track-settings legend),
+.video :global(.vjs-text-track-settings label) {
+  color: var(--geul-text-primary);
+  font-size: var(--geul-font-size-xs);
+  font-weight: var(--geul-font-weight-medium);
+}
+
+.video :global(.vjs-text-track-settings fieldset span) {
+  padding: var(--geul-spacing-xxs);
+}
+
+.video :global(.vjs-text-track-settings .vjs-label) {
+  margin: 0;
+}
+
+.video :global(.vjs-track-settings-controls) {
+  display: flex;
+  gap: var(--geul-spacing-role-action-group);
+  flex-wrap: wrap;
+}
+
+.video :global(.vjs-track-settings-controls .vjs-default-button) {
+  margin: 0;
+}
+
+.actionSlot {
+  display: flex;
+  width: var(--geul-control-height-chrome);
+  height: var(--geul-control-height-chrome);
+  flex: 0 0 var(--geul-control-height-chrome);
+  align-items: center;
+  justify-content: center;
+}
+
+.actionSlot:empty {
+  display: none;
+}

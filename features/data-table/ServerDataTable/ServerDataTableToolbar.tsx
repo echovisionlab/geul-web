@@ -7,6 +7,6 @@ import { DataTableToolbar, type DataTableToolbarProps } from '@/components/core/
 
 export type ServerDataTableToolbarProps = DataTableToolbarProps;
 
-export function ServerDataTableToolbar({ children, justify = 'space-between' }: ServerDataTableToolbarProps) {
+export function ServerDataTableToolbar({ children, justify = 'between' }: ServerDataTableToolbarProps) {
   return <DataTableToolbar justify={justify}>{children}</DataTableToolbar>;
 }

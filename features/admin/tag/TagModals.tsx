@@ -1,16 +1,30 @@
 'use client';
+import { ConfirmationDialog } from '@/features/confirmation';
 
+import { Text as DsText } from '@/components/core/Typography';
+import { LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { TextInput } from '@/components/core/Input';
-import { ConfirmModal, FormModal } from '@/components/core/Modal';
+import { FormModal } from '@/components/core/Modal';
 import { createTagAction, deleteTagAction, updateTagAction } from '@/lib/actions/tag';
 import { useTagModal } from './TagModalContext';
 
-export function TagModals() {
+export interface TagModalsProps {
+  createAction?: typeof createTagAction;
+  deleteAction?: typeof deleteTagAction;
+  updateAction?: typeof updateTagAction;
+  refresh?: () => void;
+}
+export function TagModals({
+  createAction = createTagAction,
+  deleteAction = deleteTagAction,
+  updateAction = updateTagAction,
+  refresh,
+}: TagModalsProps = {}) {
   const tCommon = useTranslations('common');
   const tAdmin = useTranslations('adminList');
   const router = useRouter();
@@ -44,14 +58,14 @@ export function TagModals() {
   const handleCreate = async () => {
     setCreateLoading(true);
     try {
-      const result = await createTagAction(createName);
+      const result = await createAction(createName);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tCommon('notifications.tagCreated'), color: 'green' });
+      notifications.show({ message: tCommon('notifications.tagCreated'), tone: 'positive' });
       closeCreate();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setCreateLoading(false);
     }
@@ -63,14 +77,14 @@ export function TagModals() {
     }
     setEditLoading(true);
     try {
-      const result = await updateTagAction(editingTag.id, editName);
+      const result = await updateAction(editingTag.id, editName);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tAdmin('tags.updated'), color: 'green' });
+      notifications.show({ message: tAdmin('tags.updated'), tone: 'positive' });
       closeEdit();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setEditLoading(false);
     }
@@ -82,14 +96,14 @@ export function TagModals() {
     }
     setDeleteLoading(true);
     try {
-      const result = await deleteTagAction(deletingTag.id);
+      const result = await deleteAction(deletingTag.id);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tCommon('notifications.tagDeleted'), color: 'red' });
+      notifications.show({ message: tCommon('notifications.tagDeleted'), tone: 'positive' });
       closeDelete();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setDeleteLoading(false);
     }
@@ -140,25 +154,28 @@ export function TagModals() {
       </FormModal>
 
       {/* Delete Modal */}
-      <ConfirmModal
+      <ConfirmationDialog
+        intent="delete"
         opened={!!deletingTag}
         onClose={closeDelete}
         onConfirm={handleDelete}
         title={tAdmin('tags.deleteTitle')}
         message={
           <>
-            <Text>
+            <DsText>
               {tCommon.rich('messages.confirmDeleteNamedRich', {
                 name: deletingTag?.name ?? '',
                 strong: (chunks) => <strong>{chunks}</strong>,
               })}
-            </Text>
+            </DsText>
             {deletingTag && deletingTag.postCount > 0 && (
-              <Text size="sm" c="orange" mt="xs">
-                {tAdmin('tags.deleteWarning', {
-                  count: String(deletingTag.postCount),
-                })}
-              </Text>
+              <DsLayoutInset blockStart="xs">
+                <DsText size="sm" tone="warning">
+                  {tAdmin('tags.deleteWarning', {
+                    count: String(deletingTag.postCount),
+                  })}
+                </DsText>
+              </DsLayoutInset>
             )}
           </>
         }

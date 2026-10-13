@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemTestProvider as DesignSystemProvider } from '@/test/TestProviders';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { AdminPageHeader } from './AdminPageHeader';
 
 vi.mock('next/link', () => ({
@@ -41,7 +42,7 @@ function render(node: ReactNode) {
   root = createRoot(container);
 
   act(() => {
-    root?.render(<MantineProvider>{node}</MantineProvider>);
+    root?.render(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>);
   });
 }
 
@@ -103,7 +104,8 @@ describe('AdminPageHeader', () => {
       />,
     );
 
-    expect(document.querySelector('h2')?.textContent).toBe('Posts');
+    expect(document.querySelector('h1')?.textContent).toBe('Posts');
+    expect(document.querySelector('h1')?.getAttribute('data-level')).toBe('2');
     expect(document.body.textContent).toContain('Manage published and draft posts.');
     expect(document.body.textContent).toContain('New post');
     expect(document.body.textContent).toContain('Guidelines');
@@ -120,7 +122,7 @@ describe('AdminPageHeader', () => {
   it('renders cleanly without action items', () => {
     render(<AdminPageHeader title="Forms" description="Shared form definitions" />);
 
-    expect(document.querySelector('h2')?.textContent).toBe('Forms');
+    expect(document.querySelector('h1')?.textContent).toBe('Forms');
     expect(document.body.textContent).toContain('Shared form definitions');
     expect(document.querySelectorAll('button').length).toBe(0);
     expect(document.querySelectorAll('a').length).toBe(0);

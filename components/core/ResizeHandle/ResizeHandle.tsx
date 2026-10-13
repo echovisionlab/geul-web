@@ -1,12 +1,17 @@
 'use client';
 
 import type { FocusEventHandler, KeyboardEventHandler, PointerEventHandler } from 'react';
+import type { ClosedVisualProps } from '../visual-contract';
 import classes from './ResizeHandle.module.css';
 
 export type ResizeHandleDirection = 'left' | 'right';
 
-export interface ResizeHandleProps {
-  className?: string;
+export type ResizeHandlePlacement = 'inline' | 'media-edge';
+export type ResizeHandleVisibility = 'always' | 'on-interaction' | 'active';
+
+export interface ResizeHandleProps extends ClosedVisualProps {
+  placement?: ResizeHandlePlacement;
+  visibility?: ResizeHandleVisibility;
   direction: ResizeHandleDirection;
   value: number;
   min: number;
@@ -18,11 +23,12 @@ export interface ResizeHandleProps {
 }
 
 /**
- * Pure accessible resize control. Layout, persistence, and drag math belong
- * to the feature adapter so this control remains reusable outside editors.
+ * Core owns placement and visibility feedback. The adapter supplies authored
+ * geometry, interaction state and drag math through the closed contract.
  */
 export function ResizeHandle({
-  className,
+  placement = 'inline',
+  visibility = 'always',
   direction,
   value,
   min,
@@ -32,10 +38,15 @@ export function ResizeHandle({
   onKeyDown,
   onBlur,
 }: ResizeHandleProps) {
+  if (!['inline', 'media-edge'].includes(placement) || !['always', 'on-interaction', 'active'].includes(visibility)) {
+    throw new RangeError('Resize handles require registered placement and visibility roles.');
+  }
   return (
     <button
       type="button"
-      className={[classes.handle, 'resizable-block__handle', className].filter(Boolean).join(' ')}
+      className={classes.handle}
+      data-geul-resize-placement={placement}
+      data-geul-resize-visibility={visibility}
       data-resize-handle
       data-resize-direction={direction}
       aria-label={ariaLabel}

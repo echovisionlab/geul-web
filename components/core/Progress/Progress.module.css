@@ -1,0 +1,70 @@
+.root {
+  --_progress-ink: var(--geul-action-primary);
+  --_progress-track: var(--geul-surface-active);
+  width: 100%;
+}
+
+.root[data-tone='accent'] {
+  --_progress-ink: var(--geul-status-accent);
+}
+
+.root[data-tone='positive'] {
+  --_progress-ink: var(--geul-status-positive);
+}
+
+.root[data-tone='warning'] {
+  --_progress-ink: var(--geul-status-warning);
+}
+
+.root[data-tone='danger'] {
+  --_progress-ink: var(--geul-status-danger);
+}
+
+.root[data-contrast='image'] {
+  --_progress-ink: var(--geul-text-on-image);
+  --_progress-track: var(--geul-overlay-track);
+}
+
+.track {
+  overflow: hidden;
+  height: var(--geul-spacing-xxs);
+  background: var(--_progress-track);
+}
+
+.root[data-size='xs'] .track {
+  height: calc(var(--geul-spacing-xxs) / 2);
+}
+
+.root[data-size='md'] .track,
+.root[data-size='lg'] .track {
+  height: var(--geul-spacing-xs);
+}
+
+.root[data-size='xl'] .track {
+  height: var(--geul-spacing-sm);
+}
+
+.fill {
+  height: 100%;
+  background: var(--_progress-ink);
+}
+
+.root:is([data-indeterminate], [data-pending]) .fill {
+  animation: progress-pulse var(--geul-motion-slow) var(--geul-motion-easing) infinite alternate;
+}
+
+@keyframes progress-pulse {
+  from {
+    opacity: var(--geul-opacity-disabled);
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root:is([data-indeterminate], [data-pending]) .fill {
+    animation: none;
+  }
+}

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
-import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
-import { Collapse, Group, Stack } from '@mantine/core';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { useId, useState, type ReactNode } from 'react';
+import { DisclosureRegion } from '@/components/core/Disclosure';
 import { Button } from '@/components/core/Button';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
 
@@ -31,37 +31,43 @@ export function TranslationPanelSectionCard({
   collapsible = true,
   toggleId,
 }: TranslationPanelSectionCardProps) {
+  const panelId = useId();
   const [expanded, setExpanded] = useState(defaultExpanded);
   const isExpanded = collapsible ? expanded : true;
 
   return (
-    <SectionCard>
-      <Stack gap="md">
+    <SectionCard padding={{ base: 'none', sm: 'md' }}>
+      <DsLayoutStack gap="md">
         <SectionHeader
+          descriptionPlacement="below-row"
           title={title}
           description={description}
           actions={
-            <Group gap="xs">
+            <DsLayoutInline gap="xs">
               {persistentActions}
               {isExpanded ? actions : null}
               {collapsible ? (
                 <Button
                   id={toggleId}
+                  aria-expanded={expanded}
+                  aria-controls={panelId}
                   size="xs"
-                  tone={expanded ? 'accent' : 'neutral'}
+                  tone="neutral"
                   emphasis="medium"
-                  rightSection={expanded ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
+                  indicator="disclosure"
                   onClick={() => setExpanded((current) => !current)}
                 >
                   {expanded ? collapseLabel : expandLabel}
                 </Button>
               ) : null}
-            </Group>
+            </DsLayoutInline>
           }
         />
 
-        {isExpanded ? <Collapse expanded>{children}</Collapse> : null}
-      </Stack>
+        <DisclosureRegion id={panelId} expanded={isExpanded} keepMounted={false}>
+          {children}
+        </DisclosureRegion>
+      </DsLayoutStack>
     </SectionCard>
   );
 }

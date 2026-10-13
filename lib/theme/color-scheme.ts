@@ -1,8 +1,15 @@
-import type { MantineColorScheme, MantineColorSchemeManager } from '@mantine/core';
+export type ColorScheme = 'light' | 'dark' | 'auto';
+interface ColorSchemeManager {
+  get: (defaultValue: ColorScheme) => ColorScheme;
+  set: (value: ColorScheme) => void;
+  subscribe: (onUpdate: (value: ColorScheme) => void) => void;
+  unsubscribe: () => void;
+  clear: () => void;
+}
 
 export const COLOR_SCHEME_STORAGE_KEY = 'mantine-color-scheme-value';
 
-function isMantineColorScheme(value: string | null | undefined): value is MantineColorScheme {
+function isColorScheme(value: string | null | undefined): value is ColorScheme {
   return value === 'auto' || value === 'light' || value === 'dark';
 }
 
@@ -19,7 +26,7 @@ function readCookieValue(cookieHeader: string, name: string): string | null {
   return decodeURIComponent(match.slice(name.length + 1));
 }
 
-function writeCookieValue(name: string, value: MantineColorScheme) {
+function writeCookieValue(name: string, value: ColorScheme) {
   if (typeof document === 'undefined') {
     return;
   }
@@ -28,19 +35,16 @@ function writeCookieValue(name: string, value: MantineColorScheme) {
   document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${60 * 60 * 24 * 365}; SameSite=Lax${secure}`;
 }
 
-export function normalizeColorScheme(value: string | null | undefined): MantineColorScheme | null {
-  return isMantineColorScheme(value) ? value : null;
+export function normalizeColorScheme(value: string | null | undefined): ColorScheme | null {
+  return isColorScheme(value) ? value : null;
 }
 
-export function readColorSchemeCookie(
-  cookieHeader: string,
-  name = COLOR_SCHEME_STORAGE_KEY,
-): MantineColorScheme | null {
+export function readColorSchemeCookie(cookieHeader: string, name = COLOR_SCHEME_STORAGE_KEY): ColorScheme | null {
   return normalizeColorScheme(readCookieValue(cookieHeader, name));
 }
 
 export function resolveInitialHtmlColorScheme(
-  colorScheme: MantineColorScheme | null | undefined,
+  colorScheme: ColorScheme | null | undefined,
 ): 'light' | 'dark' | undefined {
   if (colorScheme === 'light' || colorScheme === 'dark') {
     return colorScheme;
@@ -50,7 +54,7 @@ export function resolveInitialHtmlColorScheme(
 }
 
 export function resolveComputedColorScheme(
-  colorScheme: MantineColorScheme | null | undefined,
+  colorScheme: ColorScheme | null | undefined,
   prefersDark: boolean,
 ): 'light' | 'dark' {
   return colorScheme === 'light' || colorScheme === 'dark' ? colorScheme : prefersDark ? 'dark' : 'light';
@@ -62,17 +66,17 @@ export function resolveComputedColorScheme(
  * localStorage fallback for backwards compatibility.
  */
 export function buildInitialColorSchemeScript(
-  cookieColorScheme: MantineColorScheme | null | undefined,
+  cookieColorScheme: ColorScheme | null | undefined,
   key = COLOR_SCHEME_STORAGE_KEY,
 ): string {
   const preference = normalizeColorScheme(cookieColorScheme);
   const keyLiteral = JSON.stringify(key);
   const preferenceLiteral = JSON.stringify(preference);
 
-  return `(function(){var key=${keyLiteral};var preference=${preferenceLiteral};try{if(preference!==null){window.localStorage.setItem(key,preference);}else{var stored=window.localStorage.getItem(key);if(stored==="light"||stored==="dark"||stored==="auto"){preference=stored;}}}catch(e){}if(preference!=="light"&&preference!=="dark"&&preference!=="auto"){preference="auto";}var computed=preference==="auto"?(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):preference;document.documentElement.setAttribute("data-mantine-color-scheme",computed);}());`;
+  return `(function(){var key=${keyLiteral};var preference=${preferenceLiteral};try{if(preference!==null){window.localStorage.setItem(key,preference);}else{var stored=window.localStorage.getItem(key);if(stored==="light"||stored==="dark"||stored==="auto"){preference=stored;}}}catch(e){}if(preference!=="light"&&preference!=="dark"&&preference!=="auto"){preference="auto";}var computed=preference==="auto"?(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):preference;document.documentElement.setAttribute("data-geul-theme",computed);}());`;
 }
 
-export function createCookieBackedColorSchemeManager(key = COLOR_SCHEME_STORAGE_KEY): MantineColorSchemeManager {
+export function createCookieBackedColorSchemeManager(key = COLOR_SCHEME_STORAGE_KEY): ColorSchemeManager {
   let handleStorageEvent: ((event: StorageEvent) => void) | undefined;
 
   return {

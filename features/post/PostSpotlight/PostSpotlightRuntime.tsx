@@ -1,12 +1,10 @@
 'use client';
 
 import NextImage from 'next/image';
-import { useRouter } from 'next/navigation';
 import { IconArticle } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box } from '@mantine/core';
-import { SpotlightAction, SpotlightActionsList, SpotlightEmpty } from '@mantine/spotlight';
+import { CommandPaletteResults } from '@/components/core/CommandPalette';
 import { searchPublishedPosts } from '@/lib/queries/post-browser';
 
 interface SearchedPost {
@@ -23,7 +21,6 @@ export interface PostSpotlightRuntimeProps {
 }
 
 export function PostSpotlightRuntime({ query, debouncedQuery, opened }: PostSpotlightRuntimeProps) {
-  const router = useRouter();
   const tCommonMessages = useTranslations('common.messages');
   const tCommonPlaceholders = useTranslations('common.placeholders');
   const tCommonStates = useTranslations('common.states');
@@ -40,31 +37,12 @@ export function PostSpotlightRuntime({ query, debouncedQuery, opened }: PostSpot
   const actions = posts.map((post) => ({
     id: post.id,
     label: post.title || tCommonStates('untitledPlain'),
-    leftSection: post.featuredImageUrl ? (
-      <Box
-        style={{
-          width: 38,
-          height: 38,
-          borderRadius: 'var(--mantine-radius-sm)',
-          overflow: 'hidden',
-          position: 'relative',
-          flexShrink: 0,
-        }}
-      >
-        <NextImage
-          src={post.featuredImageUrl}
-          alt={post.title || ''}
-          fill
-          sizes="38px"
-          style={{ objectFit: 'cover' }}
-        />
-      </Box>
+    icon: post.featuredImageUrl ? (
+      <NextImage src={post.featuredImageUrl} alt="" fill sizes="36px" style={{ objectFit: 'cover' }} />
     ) : (
-      <IconArticle size={24} />
+      <IconArticle size="1em" />
     ),
-    onClick: () => {
-      router.push(`/posts/${post.slug || post.id}`);
-    },
+    href: `/posts/${post.slug || post.id}`,
   }));
 
   const getNothingFoundMessage = () => {
@@ -83,15 +61,12 @@ export function PostSpotlightRuntime({ query, debouncedQuery, opened }: PostSpot
     return tCommonMessages('noPostsFound');
   };
 
-  if (actions.length === 0) {
-    return <SpotlightEmpty>{getNothingFoundMessage()}</SpotlightEmpty>;
-  }
-
   return (
-    <SpotlightActionsList>
-      {actions.map((action) => (
-        <SpotlightAction key={action.id} {...action} highlightQuery />
-      ))}
-    </SpotlightActionsList>
+    <CommandPaletteResults
+      items={actions}
+      label={tCommonPlaceholders('searchPosts')}
+      emptyLabel={getNothingFoundMessage()}
+      loading={isLoading}
+    />
   );
 }

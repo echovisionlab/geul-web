@@ -1,5 +1,6 @@
+import { DesignSystemTestProvider as DesignSystemProvider } from '@/test/TestProviders';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { MantineProvider } from '@mantine/core';
+
 import { describe, expect, it, vi } from 'vitest';
 import { FileBlockMetadataFields } from './FileBlockMetadataFields';
 
@@ -12,7 +13,7 @@ const labels = {
 
 function render(overrides: Partial<React.ComponentProps<typeof FileBlockMetadataFields>> = {}) {
   return renderToStaticMarkup(
-    <MantineProvider>
+    <DesignSystemProvider forceColorScheme="light">
       <FileBlockMetadataFields
         labels={labels}
         mimeType="image/png"
@@ -26,7 +27,7 @@ function render(overrides: Partial<React.ComponentProps<typeof FileBlockMetadata
         onCaptionChange={vi.fn()}
         {...overrides}
       />
-    </MantineProvider>,
+    </DesignSystemProvider>,
   );
 }
 

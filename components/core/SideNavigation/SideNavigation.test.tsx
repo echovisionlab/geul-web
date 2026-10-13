@@ -1,27 +1,12 @@
 // @vitest-environment jsdom
 
-import { act, forwardRef, type ComponentPropsWithoutRef } from 'react';
+import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+import { I18nProvider, RouterProvider } from 'react-aria-components';
+import { NavigationIntentProvider } from '../Navigation';
+import { NavigationPrefetchContext } from '../Navigation/navigation-prefetch';
 import { SideNavigation, type SideNavigationProps, type SideNavigationSection } from './SideNavigation';
-
-type TestLinkProps = ComponentPropsWithoutRef<'a'> & { prefetch?: boolean };
-
-const TestLink = forwardRef<HTMLAnchorElement, TestLinkProps>(({ href, onClick, prefetch, ...props }, ref) => (
-  <a
-    ref={ref}
-    {...props}
-    href={href}
-    data-test-link
-    data-prefetch={prefetch === false ? 'false' : undefined}
-    onClick={(event) => {
-      event.preventDefault();
-      onClick?.(event);
-    }}
-  />
-));
-TestLink.displayName = 'TestLink';
 
 const sections: readonly SideNavigationSection[] = [
   {
@@ -100,7 +85,6 @@ function renderNavigation(overrides: Partial<SideNavigationProps> = {}) {
     sections,
     mode: 'expanded',
     openSectionKeys: ['workspace', 'account'],
-    linkComponent: TestLink,
     onToggleSection: vi.fn(),
     onSelectItem: vi.fn(),
     ...overrides,
@@ -108,9 +92,9 @@ function renderNavigation(overrides: Partial<SideNavigationProps> = {}) {
 
   act(() => {
     root.render(
-      <MantineProvider env="test">
+      <I18nProvider locale="en">
         <SideNavigation {...props} />
-      </MantineProvider>,
+      </I18nProvider>,
     );
   });
 
@@ -138,6 +122,40 @@ function getItemLink(key: string) {
 }
 
 describe('SideNavigation', () => {
+  it.each(['expanded', 'compact'] as const)('preserves the application navigation guard in %s mode', (mode) => {
+    const navigate = vi.fn();
+    const guard = vi.fn((_, event: { preventDefault: () => void }) => event.preventDefault());
+    const onSelectItem = vi.fn();
+    act(() =>
+      root.render(
+        <I18nProvider locale="en">
+          <RouterProvider navigate={navigate}>
+            <NavigationIntentProvider onNavigationIntent={guard}>
+              <SideNavigation
+                ariaLabel="Primary navigation"
+                sections={sections}
+                mode={mode}
+                openSectionKeys={['account']}
+                onToggleSection={vi.fn()}
+                onSelectItem={onSelectItem}
+              />
+            </NavigationIntentProvider>
+          </RouterProvider>
+        </I18nProvider>,
+      ),
+    );
+    if (mode === 'compact') {
+      act(() => getSectionButton('Account').click());
+    }
+    act(() => getItemLink('profile').click());
+    expect(guard).toHaveBeenCalledWith(
+      { href: 'http://localhost:3000/account/profile' },
+      { preventDefault: expect.any(Function) },
+    );
+    expect(navigate).not.toHaveBeenCalled();
+    expect(onSelectItem).toHaveBeenCalledWith(sections[2].items[0]);
+  });
+
   it('exposes expanded sections as controlled disclosures', () => {
     const onToggleSection = vi.fn();
     renderNavigation({ openSectionKeys: ['workspace'], onToggleSection });
@@ -177,9 +195,9 @@ describe('SideNavigation', () => {
 
     expect(navigation?.getAttribute('data-mode')).toBe('compact');
     expect(Array.from(sectionContents).every((content) => !content.hidden)).toBe(true);
-    expect(container.querySelectorAll<HTMLAnchorElement>('[data-test-link]')).toHaveLength(1);
-    expect(workspaceButton.getAttribute('aria-haspopup')).toBe('menu');
-    expect(accountButton.getAttribute('aria-haspopup')).toBe('menu');
+    expect(container.querySelectorAll<HTMLAnchorElement>('a[href]')).toHaveLength(1);
+    expect(workspaceButton.getAttribute('aria-haspopup')).toBe('true');
+    expect(accountButton.getAttribute('aria-haspopup')).toBe('true');
     expect(container.querySelector('[data-section-key="root"]')?.hasAttribute('aria-label')).toBe(false);
     expect(getItemLink('dashboard').getAttribute('aria-label')).toBe('Dashboard');
 
@@ -194,11 +212,22 @@ describe('SideNavigation', () => {
     expect(onSelectItem).toHaveBeenCalledWith(sections[2].items[0]);
   });
 
-  it('forwards an explicit no-prefetch boundary to sensitive destinations', () => {
-    renderNavigation();
-
-    expect(getItemLink('activity').getAttribute('data-prefetch')).toBe('false');
-    expect(getItemLink('dashboard').hasAttribute('data-prefetch')).toBe(false);
+  it('never prefetches sensitive destinations and prepares normal navigation on focus', () => {
+    const prefetch = vi.fn();
+    const props = renderNavigation();
+    act(() =>
+      root.render(
+        <I18nProvider locale="en">
+          <NavigationPrefetchContext.Provider value={prefetch}>
+            <SideNavigation {...props} />
+          </NavigationPrefetchContext.Provider>
+        </I18nProvider>,
+      ),
+    );
+    act(() => getItemLink('activity').focus());
+    expect(prefetch).not.toHaveBeenCalled();
+    act(() => getItemLink('dashboard').focus());
+    expect(prefetch).toHaveBeenCalledWith('/dashboard');
   });
 
   it('marks only active items as the current page', () => {
@@ -209,13 +238,12 @@ describe('SideNavigation', () => {
     expect(getItemLink('dashboard').hasAttribute('data-active')).toBe(true);
   });
 
-  it('renders the generic link component and emits item selection through its callback', () => {
+  it('renders the Core link and emits item selection through its callback', () => {
     const onSelectItem = vi.fn();
     renderNavigation({ onSelectItem });
 
     const profileLink = getItemLink('profile');
     expect(profileLink.getAttribute('href')).toBe('/account/profile');
-    expect(profileLink.hasAttribute('data-test-link')).toBe(true);
 
     act(() => profileLink.click());
 

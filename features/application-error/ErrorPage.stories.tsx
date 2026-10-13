@@ -1,3 +1,4 @@
+import { navigatePreview } from '@/stories/shared/preview-navigation';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { useLocale } from 'next-intl';
 import { DEFAULT_LOCALE, normalizeLocale } from '@/lib/i18n/locale';
@@ -12,23 +13,16 @@ function ErrorPreview({
   status?: number;
 }) {
   const locale = normalizeLocale(useLocale()) ?? DEFAULT_LOCALE;
+  const retry = () => navigatePreview(kind === 'admin' ? '/admin' : '/');
   const code = status ?? (kind === 'notFound' ? 404 : 500);
   if (kind === 'global') {
-    return <RootErrorPageView status={code} locale={locale} onRetry={() => {}} />;
+    return <RootErrorPageView status={code} locale={locale} onRetry={retry} />;
   }
-  return (
-    <ApplicationErrorPage
-      status={code}
-      locale={locale}
-      homeHref={kind === 'admin' ? '/admin' : '/'}
-      onRetry={() => {}}
-      fullScreen
-    />
-  );
+  return <ApplicationErrorPage status={code} homeHref={kind === 'admin' ? '/admin' : '/'} onRetry={retry} fullScreen />;
 }
 
 const meta: Meta<typeof ErrorPreview> = {
-  title: 'Core/Feedback/ErrorPage',
+  title: 'Feature/Application Error/ErrorPage',
   component: ErrorPreview,
   parameters: { layout: 'fullscreen' },
   argTypes: {

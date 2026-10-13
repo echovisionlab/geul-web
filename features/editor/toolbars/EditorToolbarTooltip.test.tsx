@@ -3,9 +3,11 @@
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
-import { MantineProvider } from '@mantine/core';
+import { I18nProvider } from 'react-aria-components';
+import { userEvent } from 'storybook/test';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
+import { IconButton } from '@/components/core/IconButton';
 import {
   EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS,
   EditorToolbarDropdownTarget,
@@ -30,13 +32,14 @@ afterEach(() => {
   container = null;
   root = null;
   vi.restoreAllMocks();
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
 });
 
 function render(node: ReactNode) {
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
-  act(() => root?.render(<MantineProvider env="test">{node}</MantineProvider>));
+  act(() => root?.render(<I18nProvider locale="en-US">{node}</I18nProvider>));
 }
 
 describe('EditorToolbarTooltip', () => {
@@ -146,12 +149,54 @@ describe('EditorToolbarTooltip', () => {
       </DropdownMenu>,
     );
     const button = container!.querySelector<HTMLButtonElement>('button[aria-label="Block type"]')!;
-    expect(button.getAttribute('aria-haspopup')).toBe('menu');
+    expect(['menu', 'true']).toContain(button.getAttribute('aria-haspopup'));
     act(() => button.focus());
     expect(document.querySelector('[role="tooltip"]')?.textContent).toBe('Block type');
     act(() => button.click());
     expect(button.getAttribute('aria-expanded')).toBe('true');
     expect(document.querySelector('[role="menuitem"]')?.textContent).toBe('Paragraph');
+  });
+
+  it('opens a Core dropdown tooltip on hover when focus hints are disabled and suppresses it while the menu is open', async () => {
+    const onOpenChange = vi.fn();
+    render(
+      <DropdownMenu portal={false} onChange={onOpenChange}>
+        <EditorToolbarDropdownTarget label="Places" focusHint={false}>
+          {(targetRef) => (
+            <IconButton ref={targetRef} label="Places">
+              <svg aria-hidden />
+            </IconButton>
+          )}
+        </EditorToolbarDropdownTarget>
+        <DropdownMenu.Dropdown>
+          <DropdownMenu.Item>Place</DropdownMenu.Item>
+        </DropdownMenu.Dropdown>
+      </DropdownMenu>,
+    );
+    const button = container!.querySelector<HTMLButtonElement>('button[aria-label="Places"]')!;
+    expect(container!.querySelectorAll('button')).toHaveLength(1);
+    expect(button.tabIndex).toBe(0);
+    expect(['menu', 'true']).toContain(button.getAttribute('aria-haspopup'));
+    act(() => {
+      button.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+      button.focus();
+    });
+    expect(document.querySelector('[role="tooltip"]')).toBeNull();
+    expect(document.activeElement).toBe(button);
+    act(() => button.blur());
+    await act(async () => {
+      await userEvent.hover(container!);
+      await userEvent.hover(button);
+    });
+    const tooltip = document.querySelector('[role="tooltip"]');
+    expect(tooltip).toHaveTextContent('Places');
+    expect(button).toHaveAccessibleName('Places');
+    act(() => button.click());
+    expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(true);
+    expect(button).toHaveAttribute('aria-expanded', 'true');
+    expect(document.querySelector('[role="menuitem"]')).toHaveTextContent('Place');
+    expect(tooltip).not.toBeVisible();
+    expect(button).not.toHaveAttribute('aria-describedby');
   });
 
   it('opens and closes a ref-target tooltip from native focus and pointer listeners', () => {
@@ -172,18 +217,21 @@ describe('EditorToolbarTooltip', () => {
         </DropdownMenu>,
       );
       const button = container!.querySelector<HTMLButtonElement>('button[aria-label="Places"]')!;
-      act(() => button.dispatchEvent(new FocusEvent('focusin', { bubbles: true })));
+      act(() => button.focus());
       expect(document.querySelector('[role="tooltip"]')?.textContent).toBe('Places');
       act(() => {
-        button.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+        button.blur();
         vi.runAllTimers();
       });
       expect(document.querySelector('[role="tooltip"]')).toBeNull();
 
-      act(() => button.dispatchEvent(new MouseEvent('mouseenter')));
+      act(() => {
+        button.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, pointerType: 'mouse' }));
+        button.dispatchEvent(new PointerEvent('pointerover', { bubbles: true, pointerType: 'mouse' }));
+      });
       expect(document.querySelector('[role="tooltip"]')?.textContent).toBe('Places');
       act(() => {
-        button.dispatchEvent(new MouseEvent('mouseleave'));
+        button.dispatchEvent(new PointerEvent('pointerout', { bubbles: true, pointerType: 'mouse' }));
         vi.runAllTimers();
       });
       expect(document.querySelector('[role="tooltip"]')).toBeNull();

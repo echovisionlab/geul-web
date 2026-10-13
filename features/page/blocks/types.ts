@@ -1,6 +1,6 @@
 import type { ComponentType, ReactNode } from 'react';
 import type { IconProps } from '@tabler/icons-react';
-import type { ZodSchema } from 'zod';
+import type * as z from '@/lib/zod-mini';
 import type { Block, ColumnData } from '@/lib/types/page-content';
 import type { SectionSettings } from '@/features/page/blocks/section-schema';
 
@@ -87,7 +87,7 @@ export interface BlockDefinition<T = unknown> {
   category: BlockCategory;
 
   /** Zod schema for props validation */
-  schema: ZodSchema<T>;
+  schema: z.ZodMiniType<T>;
 
   /** Parser function that applies defaults */
   parse: (props: unknown) => T;

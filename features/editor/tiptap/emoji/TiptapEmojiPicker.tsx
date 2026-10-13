@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { EmojiItem } from '@tiptap/extension-emoji';
 import { EmojiPicker, type EmojiPickerItem } from '@/components/core/EmojiPicker';
-import { geulTiptapEmojis } from './emoji-extension';
+import { loadTiptapEmojiData, useTiptapEmojiData, type TiptapEmojiData } from './emoji-runtime';
 
 const POPULAR_SHORTCODES = [
   'grinning',
@@ -60,8 +60,8 @@ function itemLabel(item: EmojiItem): string {
   return item.shortcodes[0] ?? item.name;
 }
 
-export function tiptapEmojiPickerItems(query: string): EmojiPickerItem[] {
-  return filterTiptapEmojiItems(geulTiptapEmojis, query).flatMap((item) =>
+export function tiptapEmojiPickerItems(data: TiptapEmojiData, query: string): EmojiPickerItem[] {
+  return filterTiptapEmojiItems(data.items, query).flatMap((item) =>
     item.emoji ? [{ id: item.name, value: item.emoji, label: `:${itemLabel(item)}:` }] : [],
   );
 }
@@ -106,11 +106,20 @@ export function TiptapEmojiPicker({
   onSelect,
 }: TiptapEmojiPickerProps) {
   const [query, setQuery] = useState('');
-  const pickerItems = useMemo(() => tiptapEmojiPickerItems(query), [query]);
+  const data = useTiptapEmojiData();
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  // The Emoji data loads when the picker is requested; the picker opens once its items exist.
+  useEffect(() => {
+    if (opened && !data) {
+      loadTiptapEmojiData().catch(() => closeRef.current());
+    }
+  }, [data, opened]);
+  const pickerItems = useMemo(() => (data ? tiptapEmojiPickerItems(data, query) : []), [data, query]);
 
   return (
     <EmojiPicker
-      opened={opened}
+      opened={opened && data !== null}
       title={title}
       searchPlaceholder={searchPlaceholder}
       noResults={noResults}

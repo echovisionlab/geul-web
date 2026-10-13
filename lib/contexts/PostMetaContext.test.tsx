@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { act, StrictMode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -57,7 +57,7 @@ const localeRoom = vi.hoisted(() => ({
 }));
 
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 
 vi.mock('@/lib/collab/useBlockRoomConnection', () => ({
   useBlockRoomConnection: (...args: unknown[]) => {
@@ -275,7 +275,7 @@ it('reports taxonomy failure and retries the retained fields together with the n
     await vi.advanceTimersByTimeAsync(250);
   });
   expect(notifications.show).toHaveBeenCalledWith(
-    expect.objectContaining({ message: 'permission denied', color: 'red' }),
+    expect.objectContaining({ message: 'permission denied', tone: 'danger' }),
   );
   expect(acceptEpochAck).not.toHaveBeenCalled();
   await act(async () => {

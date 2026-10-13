@@ -1,21 +1,28 @@
 'use client';
+import { SectionCard as DsSectionCard, SectionCard } from '@/components/core/Section';
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
-import { useMemo, useState } from 'react';
-import { closestCenter, DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
+import { useId, useMemo, useState } from 'react';
+import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { IconPlus, IconUserPlus } from '@tabler/icons-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Avatar, Divider, Group, Loader, Paper, Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
-import { LabelBadge } from '@/components/core/Badge';
+
+import { Avatar, Separator as Divider, Spinner as Loader } from '@/components/core/Display';
+import { notifications } from '@/components/core/Notification';
 import { Button } from '@/components/core/Button';
 import { TextInput, SegmentedControl } from '@/components/core/Input';
 import { SearchCombobox } from '@/features/search/SearchCombobox';
-import { SectionCard } from '@/components/core/Section';
+
 import { SortableCreditRow } from '@/features/work/WorkEditor/credits/SortableCreditRow';
 import {
   addProgramEventCreditAction,
@@ -60,15 +67,14 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
   const tCommon = useTranslations('common');
   const tCommonActions = useTranslations('common.actions');
   const tCommonMessages = useTranslations('common.messages');
-  const tCommonStates = useTranslations('common.states');
   const [credits, setCredits] = useState(() => sortCredits(initialCredits));
   const [searchType, setSearchType] = useState<CreditSearchType>('artist');
   const [creditRole, setCreditRole] = useState('');
   const [creditName, setCreditName] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const addFormId = useId();
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [updatingRoleId, setUpdatingRoleId] = useState<string | null>(null);
-  const [activeCredit, setActiveCredit] = useState<WorkCreditWithDetails | null>(null);
   const { search, setSearch, debouncedSearch, combobox, isEnabled, reset } = useSearchCombobox();
   const sensors = useSortableSensors();
 
@@ -111,7 +117,7 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
       if (result.error || !result.credit) {
         notifications.show({
           message: result.error ?? tCommon('notifications.saveFailed'),
-          color: 'red',
+          tone: 'danger',
         });
         return;
       }
@@ -119,7 +125,7 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
       reset();
       setCreditName('');
       setCreditRole('');
-      notifications.show({ message: t('notifications.creditAdded'), color: 'green' });
+      notifications.show({ message: t('notifications.creditAdded'), tone: 'positive' });
     },
   });
 
@@ -130,7 +136,7 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
       if (result.error || !result.credit) {
         notifications.show({
           message: result.error ?? tCommon('notifications.saveFailed'),
-          color: 'red',
+          tone: 'danger',
         });
         return;
       }
@@ -146,13 +152,13 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
     onMutate: (creditId) => setRemovingId(creditId),
     onSuccess: (result, creditId) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       setCredits((current) =>
         current.filter((credit) => credit.id !== creditId).map((credit, index) => ({ ...credit, sortOrder: index })),
       );
-      notifications.show({ message: t('notifications.creditRemoved'), color: 'yellow' });
+      notifications.show({ message: t('notifications.creditRemoved'), tone: 'positive' });
     },
     onSettled: () => setRemovingId(null),
   });
@@ -161,7 +167,7 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
     mutationFn: (creditIds: string[]) => reorderProgramEventCreditsAction(eventId, creditIds),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
       }
     },
   });
@@ -187,13 +193,7 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
     updateCredit.mutate({ creditId, creditRole: nextRole });
   };
 
-  const handleDragStart = (event: DragStartEvent) => {
-    const creditId = String(event.active.id).replace(/^credit-/, '');
-    setActiveCredit(sortableCredits.find((credit) => credit.id === creditId) ?? null);
-  };
-
   const handleDragEnd = (event: DragEndEvent) => {
-    setActiveCredit(null);
     const { active, over } = event;
     if (!over || active.id === over.id) {
       return;
@@ -214,29 +214,40 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
   };
 
   return (
-    <SectionCard withBorder p="md">
+    <SectionCard withBorder padding="md">
       <QueryErrorAlert queries={[memberResultsQuery, artistResultsQuery]} />
-      <Group justify="space-between" mb="sm">
-        <Text size="sm" fw={500}>
-          {tCommon('entities.credits')}
-        </Text>
-        {canEdit ? (
-          <Button
-            size="xs"
-            emphasis="medium"
-            leftSection={<IconPlus size={14} />}
-            onClick={() => setShowAddForm((value) => !value)}
-          >
-            {showAddForm ? tCommonActions('hide') : tCommonActions('add')}
-          </Button>
-        ) : null}
-      </Group>
+      <DsLayoutInset blockEnd="sm">
+        <DsLayoutInline justify="between">
+          <DsText size="sm" weight="medium">
+            {tCommon('entities.credits')}
+          </DsText>
+          {canEdit ? (
+            <Button
+              size="xs"
+              emphasis="medium"
+              leftSection={<IconPlus size={14} />}
+              onClick={() => setShowAddForm((value) => !value)}
+              aria-expanded={showAddForm}
+              aria-controls={showAddForm ? addFormId : undefined}
+            >
+              {showAddForm ? tCommonActions('hide') : tCommonActions('add')}
+            </Button>
+          ) : null}
+        </DsLayoutInline>
+      </DsLayoutInset>
 
       {canEdit && showAddForm ? (
-        <Paper p="sm" mb="sm" bg="var(--mantine-color-default)" radius="sm">
-          <Stack gap="xs">
-            <Group gap="xs">
+        <DsSectionCard
+          id={addFormId}
+          padding="sm"
+          appearance="muted"
+          role="group"
+          aria-label={tCommon('entities.credits')}
+        >
+          <DsLayoutStack gap="xs">
+            <DsLayoutInline gap="xs">
               <SegmentedControl
+                aria-label={tCommon('entities.credit')}
                 size="xs"
                 value={searchType}
                 onChange={(value) => {
@@ -250,25 +261,29 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
                   { label: tCommon('labels.name'), value: 'name' },
                 ]}
               />
-              <TextInput
-                size="xs"
-                placeholder={t('fields.rolePlaceholder')}
-                value={creditRole}
-                onChange={(event) => setCreditRole(event.currentTarget.value)}
-                w={160}
-              />
-            </Group>
+              <div style={{ width: 160 }}>
+                <TextInput
+                  size="xs"
+                  aria-label={tCommon('labels.role')}
+                  placeholder={t('fields.rolePlaceholder')}
+                  value={creditRole}
+                  onChange={(event) => setCreditRole(event.currentTarget.value)}
+                />
+              </div>
+            </DsLayoutInline>
             <Divider label={t('divider')} labelPosition="center" />
             {searchType === 'name' ? (
-              <Group gap="xs">
+              <DsLayoutInline gap="xs">
                 <TextInput
-                  flex={1}
+                  grow
                   size="xs"
+                  aria-label={tCommon('labels.name')}
                   placeholder={t('fields.creditNamePlaceholder')}
                   value={creditName}
                   onChange={(event) => setCreditName(event.currentTarget.value)}
                   onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
+                    if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+                      event.preventDefault();
                       handleAddByName();
                     }
                   }}
@@ -283,7 +298,7 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
                 >
                   {tCommonActions('add')}
                 </Button>
-              </Group>
+              </DsLayoutInline>
             ) : (
               <SearchCombobox
                 combobox={combobox}
@@ -296,39 +311,35 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
                 debouncedSearch={debouncedSearch}
                 onSelect={handleAddCredit}
                 getItemId={(item) => item.id}
+                getItemText={(item) => item.name ?? ''}
                 emptyMessage={
                   searchType === 'member' ? tCommonMessages('noUsersFound') : t(`emptyResults.${searchType}`)
                 }
                 renderItem={(item) => (
-                  <Group gap="sm">
-                    <Avatar src={item.imageUrl} size="xs" radius="xl">
-                      {item.name?.charAt(0)}
-                    </Avatar>
-                    <Text size="xs">{item.name}</Text>
-                  </Group>
+                  <DsLayoutInline gap="sm">
+                    <Avatar src={item.imageUrl} size="xs" shape="circle" name={item.name} />
+                    <DsText size="xs">{item.name}</DsText>
+                  </DsLayoutInline>
                 )}
               />
             )}
-          </Stack>
-        </Paper>
+          </DsLayoutStack>
+        </DsSectionCard>
       ) : null}
 
       {credits.length === 0 ? (
-        <Text size="xs" c="dimmed" ta="center" py="sm">
-          {t('empty')}
-        </Text>
+        <DsLayoutInset block="sm">
+          <DsText size="xs" tone="secondary" align="center">
+            {t('empty')}
+          </DsText>
+        </DsLayoutInset>
       ) : (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext
             items={sortableCredits.map((credit) => `credit-${credit.id}`)}
             strategy={verticalListSortingStrategy}
           >
-            <Stack gap={0}>
+            <DsLayoutStack gap="none">
               {sortableCredits.map((credit) => (
                 <SortableCreditRow
                   key={credit.id}
@@ -341,50 +352,17 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
                   isUpdating={updatingRoleId === credit.id}
                 />
               ))}
-            </Stack>
+            </DsLayoutStack>
           </SortableContext>
-
-          <DragOverlay>
-            {activeCredit ? (
-              <Group
-                gap="xs"
-                py={4}
-                px="xs"
-                style={{
-                  backgroundColor: 'var(--mantine-color-body)',
-                  borderRadius: 'var(--mantine-radius-sm)',
-                  boxShadow: 'var(--mantine-shadow-sm)',
-                }}
-              >
-                <Avatar src={activeCredit.artist?.imageUrl || activeCredit.member?.image || null} size="xs" radius="xl">
-                  {(
-                    activeCredit.artist?.name ||
-                    activeCredit.member?.name ||
-                    activeCredit.name ||
-                    t('states.unknownInitial')
-                  ).charAt(0)}
-                </Avatar>
-                <Text size="xs">
-                  {activeCredit.artist?.name ||
-                    activeCredit.member?.name ||
-                    activeCredit.name ||
-                    tCommonStates('unknown')}
-                </Text>
-                {(activeCredit.artist || activeCredit.member) && (
-                  <LabelBadge size="xs" tone="accent">
-                    {activeCredit.artist ? tCommon('entities.artist') : tCommon('entities.user')}
-                  </LabelBadge>
-                )}
-              </Group>
-            ) : null}
-          </DragOverlay>
         </DndContext>
       )}
 
       {reorderCredits.isPending ? (
-        <Group justify="flex-end" mt="xs">
-          <Loader size="xs" />
-        </Group>
+        <DsLayoutInset blockStart="xs">
+          <DsLayoutInline justify="end">
+            <Loader size="xs" />
+          </DsLayoutInline>
+        </DsLayoutInset>
       ) : null}
     </SectionCard>
   );

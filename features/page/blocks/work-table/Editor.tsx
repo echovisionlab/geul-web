@@ -1,9 +1,15 @@
 'use client';
 
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useCallback } from 'react';
 import { IconFilter, IconTable } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Box, Group, Stack, Text } from '@mantine/core';
+
 import { LabelBadge } from '@/components/core/Badge';
 import { MultiSelect, NumberInput, Switch } from '@/components/core/Input';
 import { usePageEditor } from '@/features/page/PageEditor/PageEditorContext';
@@ -68,24 +74,26 @@ function WorkTableSettingsForm({ props, updateProps }: WorkTableSettingsFormProp
   );
 
   return (
-    <Box data-page-block-editor="work-table">
-      <Group gap="xs" mb="md">
-        <IconTable size={18} />
-        <Text size="sm" fw={500}>
-          {tPageEditor('sectionTypes.workTable')}
-        </Text>
-        <LabelBadge size="sm" tone="neutral">
-          {tPageEditor('blockEditor.badges.rows', { count: pageSize })}
-        </LabelBadge>
-      </Group>
+    <div data-page-block-editor="work-table">
+      <DsLayoutInset blockEnd="md">
+        <DsLayoutInline gap="xs">
+          <IconTable size={18} />
+          <DsText size="sm" weight="medium">
+            {tPageEditor('sectionTypes.workTable')}
+          </DsText>
+          <LabelBadge size="sm" tone="neutral">
+            {tPageEditor('blockEditor.badges.rows', { count: pageSize })}
+          </LabelBadge>
+        </DsLayoutInline>
+      </DsLayoutInset>
 
-      <Stack gap="sm">
-        <Group gap="xs">
+      <DsLayoutStack gap="md">
+        <DsLayoutInline gap="xs">
           <IconFilter size={14} />
-          <Text size="xs" c="dimmed" fw={500}>
+          <DsText size="xs" tone="secondary" weight="medium">
             {tPageEditor('blockEditor.sections.defaultFilters')}
-          </Text>
-        </Group>
+          </DsText>
+        </DsLayoutInline>
 
         <MultiSelect
           label={tPageEditor('blockEditor.labels.workTypes')}
@@ -93,7 +101,6 @@ function WorkTableSettingsForm({ props, updateProps }: WorkTableSettingsFormProp
           data={getWorkTableEditorTypeOptions(labelOverrides)}
           value={workTypes ? workTypes.split(',').filter(Boolean) : []}
           onChange={(values) => updateProp('workTypes', values.join(','))}
-          size="xs"
           searchable
           clearable
         />
@@ -104,7 +111,6 @@ function WorkTableSettingsForm({ props, updateProps }: WorkTableSettingsFormProp
           data={getWorkTableStatusOptions(labelOverrides)}
           value={statuses ? statuses.split(',').filter(Boolean) : []}
           onChange={(values) => updateProp('statuses', values.join(','))}
-          size="xs"
           clearable
         />
 
@@ -112,7 +118,6 @@ function WorkTableSettingsForm({ props, updateProps }: WorkTableSettingsFormProp
           label={tPageEditor('blockEditor.labels.featuredWorksOnly')}
           checked={featuredOnly === 'true'}
           onChange={(event) => updateProp('featuredOnly', event.currentTarget.checked ? 'true' : 'false')}
-          size="sm"
         />
 
         <MultiSelect
@@ -123,7 +128,6 @@ function WorkTableSettingsForm({ props, updateProps }: WorkTableSettingsFormProp
           }))}
           value={filterFields}
           onChange={(values) => updateProp('filterFields', values.join(','))}
-          size="xs"
           clearable
         />
 
@@ -135,7 +139,6 @@ function WorkTableSettingsForm({ props, updateProps }: WorkTableSettingsFormProp
           }))}
           value={sortFields}
           onChange={(values) => updateProp('sortFields', values.join(','))}
-          size="xs"
           clearable
         />
 
@@ -145,10 +148,9 @@ function WorkTableSettingsForm({ props, updateProps }: WorkTableSettingsFormProp
           onChange={(value) => updateProp('pageSize', String(value || 10))}
           min={1}
           max={50}
-          size="xs"
         />
-      </Stack>
-    </Box>
+      </DsLayoutStack>
+    </div>
   );
 }
 

@@ -3,8 +3,10 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { JsonLdScript } from '@/features/metadata/ui/JsonLdScript';
 import { PostTaxonomyListPage } from '@/features/post/PostTaxonomyListPage';
+import { TAXONOMY_POSTS_INITIAL_QUERY } from '@/features/post/post-taxonomy-query';
 import { getCategoryMetadataDocument } from '@/lib/queries/metadata';
 import { getPublicCategoryBySlug } from '@/lib/queries/taxonomy';
+import { getPublishedPostsByTaxonomyFirstPage } from '@/lib/queries/post-taxonomy-list.server';
 import { buildTaxonomyJsonLd } from '@/lib/utils/json-ld';
 import { buildPageOgMetadata } from '@/lib/utils/og';
 
@@ -46,6 +48,11 @@ export default async function CategoryPostsPage({ params }: Props) {
   if (!category) {
     notFound();
   }
+  const firstPage = await getPublishedPostsByTaxonomyFirstPage({
+    taxonomyType: 'category',
+    taxonomyId: category.id,
+    query: TAXONOMY_POSTS_INITIAL_QUERY,
+  });
 
   return (
     <>
@@ -55,6 +62,8 @@ export default async function CategoryPostsPage({ params }: Props) {
         taxonomyId={category.id}
         name={category.name}
         description={category.description}
+        initialResult={firstPage?.result}
+        initialResultUpdatedAt={firstPage?.updatedAt}
       />
     </>
   );

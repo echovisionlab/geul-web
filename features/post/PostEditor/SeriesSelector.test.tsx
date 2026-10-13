@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SeriesSelector } from './SeriesSelector';
 
@@ -22,7 +23,7 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: { show: mocks.notification },
 }));
 
@@ -72,7 +73,7 @@ async function renderSelector(options: {
   await act(async () => {
     root.render(
       <QueryClientProvider client={queryClient}>
-        <MantineProvider env="test">
+        <DesignSystemProvider forceColorScheme="light">
           <SeriesSelector
             postId="post-1"
             idPrefix="series"
@@ -83,16 +84,29 @@ async function renderSelector(options: {
             series={[oldSeries, nextSeries]}
             onPostPermissionRevoked={options.onPostPermissionRevoked ?? vi.fn()}
           />
-        </MantineProvider>
+        </DesignSystemProvider>
       </QueryClientProvider>,
     );
   });
 }
 
-async function selectNextSeries() {
-  const trigger = container.querySelector<HTMLButtonElement>('#series-trigger');
+function seriesField() {
+  const trigger = container.querySelector<HTMLInputElement>('#series-trigger');
   expect(trigger).not.toBeNull();
-  act(() => trigger?.click());
+  return trigger!;
+}
+
+/** Core Select opens its listbox from the field's popup button; the field input is the named trigger. */
+function openSeriesOptions() {
+  const opener = seriesField()
+    .closest('[data-geul-input]')
+    ?.querySelector<HTMLButtonElement>('button[aria-haspopup="listbox"]');
+  expect(opener).toBeDefined();
+  act(() => opener?.click());
+}
+
+async function selectNextSeries() {
+  openSeriesOptions();
   await vi.waitFor(() => {
     const option = Array.from(document.querySelectorAll<HTMLElement>('[role="option"]')).find(
       (item) => item.textContent === nextSeries.title,
@@ -125,7 +139,9 @@ describe('SeriesSelector authority boundary', () => {
   it('hides remove and reorder controls when a refreshed managed-Series list drops the current Series', async () => {
     await renderSelector({ available: [] });
 
-    await vi.waitFor(() => expect(container.textContent).toContain('states.unavailable'));
+    await vi.waitFor(() => expect(seriesField().placeholder).toBe('states.unavailable'));
+    expect(seriesField().value).toBe('');
+    expect(container.querySelector('[aria-label="remove"]')).toBeNull();
     expect(container.querySelector('[aria-label="Remove series"]')).toBeNull();
     expect(container.querySelector('[aria-label="Move series up"]')).toBeNull();
     expect(container.querySelector('[aria-label="Move series down"]')).toBeNull();
@@ -135,12 +151,15 @@ describe('SeriesSelector authority boundary', () => {
     await renderSelector({ loadError: new Error('network down') });
     await vi.waitFor(() => expect(mocks.listMySeries).toHaveBeenCalled());
 
-    act(() => container.querySelector<HTMLButtonElement>('#series-trigger')?.click());
+    openSeriesOptions();
 
-    await vi.waitFor(() => expect(mocks.notification).toHaveBeenCalledWith({ message: 'updateFailed', color: 'red' }));
+    await vi.waitFor(() =>
+      expect(mocks.notification).toHaveBeenCalledWith({ message: 'updateFailed', tone: 'danger' }),
+    );
     expect(mocks.assign).not.toHaveBeenCalled();
     expect(mocks.listMySeries.mock.calls.length).toBeGreaterThanOrEqual(2);
-    expect(container.querySelector('[aria-label="Remove series"]')).toBeNull();
+    expect(document.querySelector('[role="option"]')).toBeNull();
+    expect(container.querySelector('[aria-label="remove"]')).toBeNull();
   });
 
   it('renders a dense visible ordinal from the ordered result even if a stored order has a legacy gap', async () => {
@@ -154,6 +173,7 @@ describe('SeriesSelector authority boundary', () => {
 
     await vi.waitFor(() => expect(container.textContent).toContain('2 / 2'));
     expect(container.textContent).toContain('#2');
+    // Removal from the Series is the Core Select clear command, named for its effect.
     expect(container.querySelector('[aria-label="remove"]')).not.toBeNull();
     expect(container.querySelector('[aria-label="moveUp"]')).not.toBeNull();
     expect(container.querySelector('[aria-label="moveDown"]')).not.toBeNull();
@@ -167,10 +187,10 @@ describe('SeriesSelector authority boundary', () => {
     await selectNextSeries();
 
     await vi.waitFor(() => {
-      expect(container.textContent).toContain(oldSeries.title);
+      expect(seriesField().value).toBe(oldSeries.title);
       expect(mocks.notification).toHaveBeenCalledWith({
         message: 'notifications.seriesUnavailable',
-        color: 'red',
+        tone: 'danger',
       });
     });
     expect(onPostPermissionRevoked).not.toHaveBeenCalled();
@@ -185,10 +205,10 @@ describe('SeriesSelector authority boundary', () => {
     await selectNextSeries();
 
     await vi.waitFor(() => expect(onPostPermissionRevoked).toHaveBeenCalledOnce());
-    expect(container.textContent).toContain(oldSeries.title);
+    expect(seriesField().value).toBe(oldSeries.title);
     expect(mocks.notification).not.toHaveBeenCalledWith({
       message: 'notifications.seriesUnavailable',
-      color: 'red',
+      tone: 'danger',
     });
   });
 });

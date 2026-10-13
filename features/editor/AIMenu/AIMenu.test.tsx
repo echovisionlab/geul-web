@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { create } from '@bufbuild/protobuf';
@@ -14,7 +15,7 @@ import {
   AIEditorTurnTerminalOutcomeSchema,
   AIEditorTurnTerminalStatus,
 } from '@echovisionlab/geul-proto/secure/ai_pb.ts';
-import { MantineProvider } from '@mantine/core';
+
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import enMessages from '@/messages/en.json';
@@ -115,17 +116,23 @@ describe('AI menu orchestration stream', () => {
     act(() => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider env="test">
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <AIMenu
               client={client}
               context={{ currentBlockId: 'paragraph-1', isSupported: true, mode: 'modify', selectedBlockIds: [] }}
               target={target}
               onClose={vi.fn()}
+              dragHandleClassName="test-ai-drag-handle"
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
+
+    const moveHandle = container.querySelector<HTMLButtonElement>('[data-ai-floating-drag-handle]');
+    expect(moveHandle?.getAttribute('aria-label')).toBe('Move');
+    expect(moveHandle?.getAttribute('aria-keyshortcuts')).toBe('ArrowUp ArrowDown ArrowLeft ArrowRight');
+    expect(container.querySelector('button')).toBe(moveHandle);
 
     const improve = [...container.querySelectorAll('button')].find((button) => button.textContent === 'Improve');
     await act(async () => {

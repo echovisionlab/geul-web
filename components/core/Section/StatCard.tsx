@@ -1,37 +1,57 @@
+import { SupportingText, Text } from '../Typography';
+import type { TablerIcon } from '@tabler/icons-react';
 import type { ReactNode } from 'react';
-import { Box, Group, Stack, Text } from '@mantine/core';
-import { getBadgeToneColor, type BadgeTone } from '../Badge';
-import { SectionCard, type SectionCardProps } from './SectionCard';
+import type { BadgeTone } from '../Badge';
+import { LayoutInline, LayoutStack } from '../Layout';
+import { NavigationLink } from '../Navigation/NavigationLink';
 
+import { SectionCard, type SectionCardProps } from './SectionCard';
 export interface StatCardProps extends Omit<SectionCardProps, 'children'> {
   label: ReactNode;
   value: ReactNode;
-  icon?: ReactNode;
+  /** Decorative glyph component. Core owns its 20px size, 1.5 stroke and tone. */
+  icon?: TablerIcon;
   description?: ReactNode;
   tone?: BadgeTone;
+  /** Makes the whole card one navigation link to the metric's detail screen. */
+  href?: string;
+  prefetch?: boolean;
 }
-
-export function StatCard({ label, value, icon, description, tone = 'neutral', ...props }: StatCardProps) {
-  const color = `var(--mantine-color-${getBadgeToneColor(tone)}-6)`;
-
-  return (
+export function StatCard({
+  label,
+  value,
+  icon: Glyph,
+  description,
+  tone = 'neutral',
+  href,
+  prefetch,
+  ...props
+}: StatCardProps) {
+  const card = (
     <SectionCard {...props}>
-      <Stack gap="xs">
-        <Group gap="xs">
-          {icon ? <Box c={color}>{icon}</Box> : null}
-          <Text size="sm" c="dimmed">
+      <LayoutStack gap="xs">
+        <LayoutInline gap="xs">
+          {Glyph ? (
+            <Text as="span" tone={tone}>
+              <Glyph size={20} stroke={1.5} aria-hidden focusable={false} />
+            </Text>
+          ) : null}
+          <Text size="sm" tone="muted">
             {label}
           </Text>
-        </Group>
-        <Text size="xl" fw={700} c={tone === 'neutral' ? undefined : color}>
+        </LayoutInline>
+        <Text size="xl" weight="strong" tone={tone}>
           {value}
         </Text>
-        {description ? (
-          <Text size="xs" c="dimmed">
-            {description}
-          </Text>
-        ) : null}
-      </Stack>
+        {description ? <SupportingText tone="muted">{description}</SupportingText> : null}
+      </LayoutStack>
     </SectionCard>
+  );
+  return href === undefined ? (
+    card
+  ) : (
+    <NavigationLink href={href} prefetch={prefetch} appearance="block">
+      {card}
+    </NavigationLink>
   );
 }

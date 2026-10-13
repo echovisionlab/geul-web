@@ -1,15 +1,23 @@
 'use client';
-
+import type { ClosedVisualProps } from '../visual-contract';
 import type { ReactNode } from 'react';
-import { Combobox, InputBase, Loader, useCombobox } from '@mantine/core';
-
-export interface SearchComboboxViewProps<T> {
-  combobox: ReturnType<typeof useCombobox>;
+import { ComboBox, Group, Input, Label, ListBox, ListBoxItem, Popover } from 'react-aria-components';
+import { ComboboxOpenBridge } from './ComboboxOpenBridge';
+import type { InputComboboxController } from './useInputCombobox';
+import type { InputSize } from './input-contract';
+import classes from './Input.module.css';
+import { inputPopoverPresentation } from './InputParts';
+import { SearchGlyph } from './SearchInput';
+import { InputValidationGlyph } from './InputGlyphs';
+export interface SearchComboboxViewProps<T> extends ClosedVisualProps {
+  combobox: InputComboboxController;
   search: string;
   onSearchChange: (value: string) => void;
   placeholder: string;
   label?: ReactNode;
   leftSection?: ReactNode;
+  /** Core's leading search glyph for free-text lookup. Do not combine with leftSection. */
+  leadingGlyph?: 'search';
   items: T[];
   isLoading?: boolean;
   minQueryLength?: number;
@@ -17,74 +25,100 @@ export interface SearchComboboxViewProps<T> {
   onSelect: (id: string) => void;
   renderItem: (item: T) => ReactNode;
   getItemId: (item: T) => string;
+  getItemText: (item: T) => string;
   inputId?: string;
   emptyMessage?: string;
   minimumQueryMessage: string;
   noResultsMessage: string;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  flex?: number;
+  size?: InputSize;
+  disabled?: boolean;
+  grow?: boolean;
+  error?: ReactNode;
 }
-
-export function SearchComboboxView<T>({
-  combobox,
-  search,
-  onSearchChange,
-  placeholder,
-  label,
-  leftSection,
-  items,
-  isLoading = false,
-  minQueryLength = 2,
-  debouncedSearch,
-  onSelect,
-  renderItem,
-  getItemId,
-  inputId,
-  emptyMessage,
-  minimumQueryMessage,
-  noResultsMessage,
-  size = 'xs',
-  flex,
-}: SearchComboboxViewProps<T>) {
+export function SearchComboboxView<T>(props: SearchComboboxViewProps<T>) {
+  if (props.leadingGlyph !== undefined && (props.leadingGlyph !== 'search' || props.leftSection !== undefined)) {
+    throw new TypeError(
+      'SearchComboboxView leadingGlyph accepts only "search" and cannot be combined with leftSection',
+    );
+  }
+  const items = props.items.map((item) => ({ id: props.getItemId(item), item }));
   return (
-    <Combobox store={combobox} onOptionSubmit={onSelect}>
-      <Combobox.Target>
-        <InputBase
+    <ComboBox
+      className={classes.root}
+      data-geul-input
+      data-geul-input-grow={props.grow || undefined}
+      data-geul-input-size={props.size ?? 'xs'}
+      items={items}
+      isDisabled={props.disabled}
+      isInvalid={Boolean(props.error)}
+      aria-label={props.label ? undefined : props.placeholder}
+      inputValue={props.search}
+      onInputChange={(value) => {
+        props.onSearchChange(value);
+        props.combobox.openDropdown();
+      }}
+      onSelectionChange={(key) => {
+        if (key !== null) {
+          props.onSelect(String(key));
+          props.combobox.closeDropdown();
+        }
+      }}
+      selectedKey={null}
+      allowsCustomValue
+      allowsEmptyCollection
+      menuTrigger="focus"
+      onOpenChange={(open) => {
+        if (open) {
+          props.combobox.openDropdown();
+        } else {
+          props.combobox.closeDropdown();
+        }
+      }}
+    >
+      <ComboboxOpenBridge opened={props.combobox.dropdownOpened} />
+      {props.label ? <Label className={classes.label}>{props.label}</Label> : null}
+      <Group className={classes.wrapper}>
+        {props.leadingGlyph === 'search' ? (
+          <span className={classes.section}>
+            <SearchGlyph />
+          </span>
+        ) : props.leftSection ? (
+          <span className={classes.section}>{props.leftSection}</span>
+        ) : null}
+        <Input
+          id={props.inputId}
+          className={classes.input}
           data-search-combobox-target
-          id={inputId}
-          label={label}
-          size={size}
-          flex={flex}
-          placeholder={placeholder}
-          value={search}
-          onChange={(e) => {
-            onSearchChange(e.currentTarget.value);
-            combobox.openDropdown();
-          }}
-          onFocus={() => {
-            if (search.length >= minQueryLength) {
-              combobox.openDropdown();
-            }
-          }}
-          rightSection={isLoading ? <Loader size={size === 'xs' ? 12 : 16} /> : null}
-          leftSection={leftSection}
+          placeholder={props.placeholder}
+          aria-busy={props.isLoading || undefined}
         />
-      </Combobox.Target>
-      <Combobox.Dropdown data-search-combobox-dropdown>
-        <Combobox.Options>
-          {items.length === 0 ? (
-            <Combobox.Empty>
-              {debouncedSearch.length < minQueryLength ? minimumQueryMessage : emptyMessage || noResultsMessage}
-            </Combobox.Empty>
-          ) : (
-            items.map((item) => (
-              <Combobox.Option key={getItemId(item)} value={getItemId(item)}>
-                {renderItem(item)}
-              </Combobox.Option>
-            ))
+        {props.isLoading ? (
+          <span className={classes.section} aria-hidden>
+            <InputValidationGlyph status="checking" />
+          </span>
+        ) : null}
+      </Group>
+      <Popover {...inputPopoverPresentation({ size: props.size ?? 'xs' })} data-search-combobox-dropdown>
+        <ListBox<{ id: string; item: T }>
+          className={classes.list}
+          renderEmptyState={() =>
+            props.debouncedSearch.length < (props.minQueryLength ?? 2)
+              ? props.minimumQueryMessage
+              : props.emptyMessage || props.noResultsMessage
+          }
+        >
+          {(entry) => (
+            <ListBoxItem
+              id={entry.id}
+              textValue={props.getItemText(entry.item)}
+              aria-label={props.getItemText(entry.item)}
+              className={classes.option}
+            >
+              {props.renderItem(entry.item)}
+            </ListBoxItem>
           )}
-        </Combobox.Options>
-      </Combobox.Dropdown>
-    </Combobox>
+        </ListBox>
+      </Popover>
+    </ComboBox>
   );
 }

@@ -1,6 +1,9 @@
 'use client';
+import { useId } from 'react';
 
-import { Group, Text } from '@mantine/core';
+import { LayoutInline as DsLayoutInline, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+
 import { IconArrowsHorizontal, IconAspectRatio, IconLink } from '@tabler/icons-react';
 import {
   EXTERNAL_VIDEO_ASPECT_RATIO_VALUES,
@@ -8,7 +11,6 @@ import {
 } from '@echovisionlab/geul-common/media/block-schemas';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
 import { IconButton } from '@/components/core/IconButton';
-import { Tooltip } from '@/components/core/Tooltip';
 import { EditorToolbarDropdownTarget } from '@/features/editor/toolbars/EditorToolbarTooltip';
 import {
   AlignmentMenuActions,
@@ -54,6 +56,7 @@ export function ExternalVideoSelectionMenu({
   onChangeAlignment,
   onEscape,
 }: ExternalVideoSelectionMenuProps) {
+  const resizeHintId = useId();
   return (
     <SelectionMenuSurface
       label={labels.menu}
@@ -72,7 +75,7 @@ export function ExternalVideoSelectionMenu({
       </SelectionMenuAction>
 
       <DropdownMenu size="compact" placement="bottom-start" portal={false}>
-        <EditorToolbarDropdownTarget label={labels.aspectRatio}>
+        <EditorToolbarDropdownTarget focusHint={false} label={labels.aspectRatio}>
           {(targetRef) => (
             <IconButton
               ref={targetRef}
@@ -110,22 +113,24 @@ export function ExternalVideoSelectionMenu({
         testIdPrefix="tiptap-external-video-align"
       />
 
-      <Tooltip label={labels.resizeHint} withArrow>
-        <Group
+      <DsLayoutInset inline="xxs">
+        <DsLayoutInline
           role="status"
+          aria-describedby={resizeHintId}
           aria-label={`${labels.width}: ${previewWidth}%`}
-          gap={4}
+          gap="xxs"
           wrap="nowrap"
-          h={30}
-          px={6}
           data-testid="tiptap-external-video-width"
         >
           <IconArrowsHorizontal size={16} aria-hidden />
-          <Text component="output" size="xs" fw={500}>
+          <DsText as="output" size="xs" weight="medium">
             {previewWidth}%
-          </Text>
-        </Group>
-      </Tooltip>
+          </DsText>
+        </DsLayoutInline>
+      </DsLayoutInset>
+      <span id={resizeHintId} hidden>
+        {labels.resizeHint}
+      </span>
     </SelectionMenuSurface>
   );
 }

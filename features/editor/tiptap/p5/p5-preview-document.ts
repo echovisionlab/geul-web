@@ -1,10 +1,11 @@
+import { primitiveTokens } from '@/components/core/design-tokens';
 import { installP5SandboxRunner } from './p5-sandbox-runner';
 import { P5_LIBRARY_INTEGRITY, P5_LIBRARY_VERSION, P5_LOCAL_LIBRARY_PATH } from './p5-runtime-assets';
 
 const DEFAULT_P5_LIBRARY_URL = `https://cdn.jsdelivr.net/npm/p5@${P5_LIBRARY_VERSION}/lib/p5.min.js`;
 
 const P5_PREVIEW_DOCUMENT_STYLE =
-  'html,body,#sketch{width:100%;height:100%;margin:0;overflow:hidden;background:#101113}' +
+  `html,body,#sketch{width:100%;height:100%;margin:0;overflow:hidden;background:${primitiveTokens.colors.canvas}}` +
   '#sketch{display:grid;place-items:center}' +
   'canvas{display:block;max-width:100%;max-height:100%;width:auto!important;height:auto!important}';
 

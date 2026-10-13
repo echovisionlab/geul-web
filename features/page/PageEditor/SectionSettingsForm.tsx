@@ -1,20 +1,28 @@
 'use client';
 
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInset as DsLayoutInset,
+  LayoutInline as DsLayoutInline,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { Group, Stack, Text } from '@mantine/core';
+
 import { Select, ColorInput, NumberInput } from '@/components/core/Input';
+import type { PageSectionMaxWidth } from '@/features/editor/contract/localized-page';
 import type { SectionSettings } from './types';
 
 interface SectionSettingsFormProps {
   settings: SectionSettings;
   onChange: (settings: Partial<SectionSettings>) => void;
+  readOnly?: boolean;
 }
 
-export function SectionSettingsForm({ settings, onChange }: SectionSettingsFormProps) {
+/** Section width choices, in the order of the stored values. */
+export function usePageSectionMaxWidthOptions(): { value: PageSectionMaxWidth; label: string }[] {
   const t = useTranslations('pageEditor');
-  const tCommonLabels = useTranslations('common.labels');
-  const maxWidthOptions = useMemo(
+  return useMemo(
     () => [
       { value: 'full', label: t('sectionItem.maxWidth.full') },
       { value: 'container', label: t('sectionItem.maxWidth.container') },
@@ -22,16 +30,25 @@ export function SectionSettingsForm({ settings, onChange }: SectionSettingsFormP
     ],
     [t],
   );
+}
+
+export function SectionSettingsForm({ settings, onChange, readOnly = false }: SectionSettingsFormProps) {
+  const t = useTranslations('pageEditor');
+  const tCommonLabels = useTranslations('common.labels');
+  const maxWidthOptions = usePageSectionMaxWidthOptions();
   const handleChange = useCallback(
     <K extends keyof SectionSettings>(key: K, value: SectionSettings[K]) => {
-      onChange({ [key]: value });
+      if (!readOnly) {
+        onChange({ [key]: value });
+      }
     },
-    [onChange],
+    [onChange, readOnly],
   );
 
   return (
-    <Stack gap="sm">
+    <DsLayoutStack gap="sm">
       <ColorInput
+        disabled={readOnly}
         label={tCommonLabels('background')}
         value={settings.backgroundColor || ''}
         onChange={(value) => handleChange('backgroundColor', value)}
@@ -40,18 +57,23 @@ export function SectionSettingsForm({ settings, onChange }: SectionSettingsFormP
       />
 
       <Select
+        disabled={readOnly}
         label={t('sectionItem.settings.maxWidth')}
         data={maxWidthOptions}
-        value={settings.maxWidth || 'container'}
-        onChange={(value) => handleChange('maxWidth', (value as 'full' | 'container' | 'narrow') || 'container')}
+        // Unset renders full width (schema and renderer default), so the field shows that value.
+        value={settings.maxWidth || 'full'}
+        onChange={(value) => handleChange('maxWidth', (value as PageSectionMaxWidth | null) || 'full')}
         size="xs"
       />
 
-      <Text size="xs" c="dimmed" mt="xs">
-        {t('sectionItem.settings.padding')}
-      </Text>
-      <Group grow>
+      <DsLayoutInset blockStart="xs">
+        <DsText size="xs" tone="secondary">
+          {t('sectionItem.settings.padding')}
+        </DsText>
+      </DsLayoutInset>
+      <DsLayoutInline grow>
         <NumberInput
+          disabled={readOnly}
           label={tCommonLabels('top')}
           value={parseInt(settings.paddingTop || '48', 10)}
           onChange={(value) => handleChange('paddingTop', String(value || 0))}
@@ -60,6 +82,7 @@ export function SectionSettingsForm({ settings, onChange }: SectionSettingsFormP
           size="xs"
         />
         <NumberInput
+          disabled={readOnly}
           label={tCommonLabels('bottom')}
           value={parseInt(settings.paddingBottom || '48', 10)}
           onChange={(value) => handleChange('paddingBottom', String(value || 0))}
@@ -67,9 +90,10 @@ export function SectionSettingsForm({ settings, onChange }: SectionSettingsFormP
           max={200}
           size="xs"
         />
-      </Group>
-      <Group grow>
+      </DsLayoutInline>
+      <DsLayoutInline grow>
         <NumberInput
+          disabled={readOnly}
           label={tCommonLabels('left')}
           value={parseInt(settings.paddingLeft || '24', 10)}
           onChange={(value) => handleChange('paddingLeft', String(value || 0))}
@@ -78,6 +102,7 @@ export function SectionSettingsForm({ settings, onChange }: SectionSettingsFormP
           size="xs"
         />
         <NumberInput
+          disabled={readOnly}
           label={tCommonLabels('right')}
           value={parseInt(settings.paddingRight || '24', 10)}
           onChange={(value) => handleChange('paddingRight', String(value || 0))}
@@ -85,7 +110,7 @@ export function SectionSettingsForm({ settings, onChange }: SectionSettingsFormP
           max={200}
           size="xs"
         />
-      </Group>
-    </Stack>
+      </DsLayoutInline>
+    </DsLayoutStack>
   );
 }

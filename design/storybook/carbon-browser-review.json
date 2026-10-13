@@ -1,0 +1,3010 @@
+{
+  "schemaVersion": 1,
+  "status": "partial-browser-observations",
+  "observationCount": 13,
+  "toolbarKeyboardObservationCount": 4,
+  "provenance": {
+    "inputEvidencePath": ".artifacts/design-system/carbon-review/carbon-browser-review.json",
+    "inputEvidenceSha256": "242221c434389876b0d4501d6042ef4ca006b9eefd734645f70ed00ed667c76f",
+    "inputSavedAt": "2026-10-11T17:24:42.105Z",
+    "sourceSnapshotCapturedAt": "2026-10-11T17:30:17.874Z",
+    "sourceHashAlgorithm": "sha256",
+    "sourceSnapshotStableDuringCapture": true,
+    "observationTimeSourceHashes": null,
+    "observationToCurrentSourceParity": "unverified: these hashes identify current files at sourceSnapshotCapturedAt, not files at the earlier browser observation times",
+    "currentOwnerSources": [
+      {
+        "path": ".storybook/StoryCanvas.tsx",
+        "sha256": "2d3aaabd0402217abef1c319412b1001f8b6568af4d71e7326d97c22254f3656"
+      },
+      {
+        "path": ".storybook/preview.tsx",
+        "sha256": "bffc975870e1b25672c95dc150dd75acdbe3fa8bd4f5f9b3dbf3c75079ae4198"
+      },
+      {
+        "path": "components/core/Button/Button.stories.tsx",
+        "sha256": "cf8cabdbc7ae0b705ba17cdc0448537b2dd895d01decfc95fdc9db464ed1eb8c"
+      },
+      {
+        "path": "components/core/Button/Button.tsx",
+        "sha256": "a112861b4998eb2cb9ad011933f368091949b9aaa31131dd4da5a8f4aa263ace"
+      },
+      {
+        "path": "components/core/Control.module.css",
+        "sha256": "cdc340d17fd7521b87d1cfb2d01331164bc5cc989211c52b4844c03571a1a069"
+      },
+      {
+        "path": "components/core/DataTable/DataTableSelectionToolbar.tsx",
+        "sha256": "460b6ea2db516519350fef74d3030818f79c1bc9bc127d7944100dbde289192a"
+      },
+      {
+        "path": "components/core/DataTable/DataTableView.module.css",
+        "sha256": "5f08d59a3e26f54bd9e8bbd286aa220ec87e53da7b9ad86600521a0248c92c48"
+      },
+      {
+        "path": "components/core/DataTable/DataTableView.tsx",
+        "sha256": "3d6fd268534459e5fcd4201846dd2a360867b8739b744beb2f2aa5f3f642c8e3"
+      },
+      {
+        "path": "components/core/Field/Field.module.css",
+        "sha256": "266cdb38697fc306cc423b4804da54d3f362e9c9677e7e89e22854f32439121c"
+      },
+      {
+        "path": "components/core/Field/Field.tsx",
+        "sha256": "034f68c0a3ab2b1d9a8c47cd53742bbe6566260b884c9ee934798b1cb84c5d0d"
+      },
+      {
+        "path": "components/core/Input/InputParts.tsx",
+        "sha256": "f515306f3d878c7e84c725e840cbe9983db6fa6e8aa69a2445876d74b8f09b54"
+      },
+      {
+        "path": "components/core/Layout/Layout.module.css",
+        "sha256": "8ff4e3406e672f0fe6d10474c08cd80dd881444ca12a7f950ff9f033f897d38a"
+      },
+      {
+        "path": "components/core/Layout/Layout.tsx",
+        "sha256": "543c56b48d99c5c46298ed92af28ed6160f780fb9e5bd48061d9adbd8d307706"
+      },
+      {
+        "path": "components/core/Modal/ConfirmModal.tsx",
+        "sha256": "442d1bd114dc9b4c632850b46fac57563e3edb7ea274f97c1017727a0db9263b"
+      },
+      {
+        "path": "components/core/Modal/OverlayDialog.tsx",
+        "sha256": "17a03e6fa711c12f21293a5b4f98cea159f39b3d4be4b74d36c8b1dfcb6fe027"
+      },
+      {
+        "path": "components/core/Overlay.module.css",
+        "sha256": "abffec79375db788ddb70d20ce8e771dbbe8e6b968d511c141434686afeda85e"
+      },
+      {
+        "path": "components/core/Section/ToolbarCommand.tsx",
+        "sha256": "8989eb094cf0bc0940faf69e22937490d7c13521c15d8f0e4da3d3e8a44c11aa"
+      },
+      {
+        "path": "components/core/Section/ToolbarLayout.module.css",
+        "sha256": "7f373b3076b1506302c53f1e8da17aa4d5328a9b58a38c33a1175bb53bb0634c"
+      },
+      {
+        "path": "components/core/Section/ToolbarLayout.tsx",
+        "sha256": "c0e7be7b0e650706959f9fc087f6e3387aabed844227b29b73631a87250af1a1"
+      },
+      {
+        "path": "components/core/Section/ToolbarSurface.module.css",
+        "sha256": "34968fe7810101edf233f8235bc73372928fca90983d75f1dca60fb46b387b17"
+      },
+      {
+        "path": "components/core/Section/ToolbarSurface.stories.tsx",
+        "sha256": "4c30b9dba89788dd4de467496f66ce728b2978b16d0912734935a023e3815165"
+      },
+      {
+        "path": "components/core/Section/ToolbarSurface.tsx",
+        "sha256": "bf5e1697c607d388b56dd6dcd03bd252b17b80ec8f2943ee4d1926c4b8623f4a"
+      },
+      {
+        "path": "components/core/design-tokens.ts",
+        "sha256": "a1a6a8bb11ee34de4ad763809c17ac449cc872ebe65005a6517b755cceec38d8"
+      },
+      {
+        "path": "features/admin/post/PostModals.tsx",
+        "sha256": "0600d14dafef7772a39c29d04a09781b86ed141ab04badbefff690f4ece2d1b4"
+      },
+      {
+        "path": "features/admin/post/PostsPageView.tsx",
+        "sha256": "f9384384f46f8a71c0b3834b52c2a010ef2965cd1c24c92349318e8a74082d26"
+      },
+      {
+        "path": "features/admin/post/PostsTableContent.tsx",
+        "sha256": "99f7399ed0dac01739eb13ea636339532e3424f75da0695c40142be94a6dc2fa"
+      },
+      {
+        "path": "features/auth/McpConsentPageView.tsx",
+        "sha256": "05f1c361ca6fbd973db66e17269d487ae4a9b8024171564938f03099bb4c3bf2"
+      },
+      {
+        "path": "features/confirmation/ui/ConfirmationDialog.tsx",
+        "sha256": "f52886f7478c3395e7498d1b9e74b1358a26a8f3ce7a16626c2ec587d4b76186"
+      },
+      {
+        "path": "features/confirmation/ui/confirmation-intent.ts",
+        "sha256": "ee4cffd7d19acfd081628fd48e9e217855188daeefbfd8c1c891f6914aea9c6b"
+      },
+      {
+        "path": "features/data-table/ServerDataTable/ServerDataTableContent.tsx",
+        "sha256": "3a581be8126ea9d867a1820f37cc198a78dc1c8da82a48f566180ccd724b6021"
+      },
+      {
+        "path": "features/data-table/ServerDataTable/ServerDataTableSelectableSection.tsx",
+        "sha256": "959cae95fbef3e87fe48c7dcdc6cc3e90dcbf67a0ed6664e0e3cbc5ee4ad995d"
+      },
+      {
+        "path": "features/my/MyProfilePageView.tsx",
+        "sha256": "160dcf34d08338b6cd997c19e43c0ee7cc04882c87954f115fe7d6eb93067f18"
+      },
+      {
+        "path": "features/my/ProfileForm.tsx",
+        "sha256": "354185d92424db6e584faa120c6da4828f560607d56d2e798922a548f25ea3cc"
+      },
+      {
+        "path": "features/my/ui/ProfileForm/ProfileFormView.tsx",
+        "sha256": "e4e801366b2f215234df15064403edb60a404fda417d454e10fd4a63ee60338f"
+      },
+      {
+        "path": "lib/providers/DesignSystemProvider.tsx",
+        "sha256": "75465986ea7b62682b54435effdcc803776c1f74ae4f470569cac9998c3f0f75"
+      },
+      {
+        "path": "lib/styles/font-assignment.css",
+        "sha256": "9ec93f3f65ca1f7a42d993d5552ba1eeeffcce35e850a371045b8fd76e0abbd6"
+      },
+      {
+        "path": "lib/styles/variables.css",
+        "sha256": "9fe840ebff3aba438040736b3318aff6bdc288ec54aa9c031987687e23449136"
+      },
+      {
+        "path": "stories/pages/AdminContent.stories.tsx",
+        "sha256": "8583ba839301550d45c605a028fcaabd3e3c77d67a6f8340b06e33ad8b41a3a3"
+      },
+      {
+        "path": "stories/pages/AdminListAccessibility.ts",
+        "sha256": "82e86dad2ffcf8e7a83a36001d39df9474c0b12bbc6a929fed9f579fed286eed"
+      },
+      {
+        "path": "stories/pages/MyAccountPages.stories.tsx",
+        "sha256": "fa7a0bbfbccff079f0115afeebea82a471e89537b13ee755aa6a34d13727a5fa"
+      },
+      {
+        "path": "stories/pages/OAuth.stories.tsx",
+        "sha256": "2ae803e5575a6e003bfb257916dc56765650f4d4580f1a53f30aaead4d976e9c"
+      },
+      {
+        "path": "theme.ts",
+        "sha256": "2c9b98ec8e0d64774e3179b39ada6a02f5eb0ad445d81a21fb4575d763aee53b"
+      }
+    ],
+    "imageCopies": "Original JPEG bytes preserved under previews/carbon-review with .jpg extensions; original evidence files unchanged."
+  },
+  "scope": {
+    "reportedBrowserScope": "Current local revamp Storybook on localhost:6012. Real desktop browser; 390/834/1440 viewport sizes, no touch or assistive technology certification.",
+    "originReportedByEvidence": "http://localhost:6012",
+    "productionRoutesVerified": false,
+    "touchOrCoarseVerified": false,
+    "assistiveTechnologyVerified": false,
+    "designApproved": false,
+    "recordedPointerCondition": "false in all twelve product View observations; not recorded for the pending specimen or Toolbar keyboard entries",
+    "themeLocaleCoverage": "OAuth, Posts and deletion Dialog: light/ko; Profile: dark/ko; pending Button: dark/en. No full theme/locale matrix.",
+    "screenshotDimensionMismatchCount": 3,
+    "screenshotDimensionMismatchObservationIds": ["browser-02", "browser-12", "browser-13"],
+    "limitations": [
+      "Product View fixtures use local data and callbacks outside authenticated routes, backend and complete application shells.",
+      "Three screenshots have different pixel dimensions from the recorded DOM viewport. Their whole-viewport visual extent is unconfirmed.",
+      "Portable report preparation read saved files and current source only; no live browser, interaction, MCP or network rerun.",
+      "Dialog initial focus is recorded; Tab trap, Escape, cancellation focus restoration and AT announcements are not established by this observation set.",
+      "Toolbar keyboard context lacks story, timestamp, viewport, theme and locale fields in the input evidence."
+    ]
+  },
+  "observations": [
+    {
+      "story": "pages-auth-oauth-consent--long-names",
+      "origin": "http://localhost:6012",
+      "timestamp": "2026-10-11T16:52:29.929Z",
+      "actions": [
+        {
+          "box": [51.765625, 38.296875],
+          "busy": null,
+          "disabled": null,
+          "glyph": null,
+          "kind": "button",
+          "labelGap": "8px",
+          "name": null,
+          "padding": "8px 12px",
+          "pressed": null,
+          "size": "sm",
+          "tag": "BUTTON",
+          "text": "취소"
+        },
+        {
+          "box": [51.765625, 38.296875],
+          "busy": null,
+          "disabled": null,
+          "glyph": null,
+          "kind": "button",
+          "labelGap": "8px",
+          "name": null,
+          "padding": "8px 12px",
+          "pressed": null,
+          "size": "sm",
+          "tag": "BUTTON",
+          "text": "연결"
+        }
+      ],
+      "coarse": false,
+      "documentWidth": 390,
+      "locale": "ko",
+      "scrollWidth": 390,
+      "theme": "light",
+      "viewport": [390, 844],
+      "screenshot": "previews/carbon-review/oauth-390.jpg",
+      "id": "browser-01",
+      "evidenceClassification": "production-view-with-local-fixtures",
+      "currentOwnerSourcePaths": [
+        ".storybook/preview.tsx",
+        ".storybook/StoryCanvas.tsx",
+        "lib/providers/DesignSystemProvider.tsx",
+        "theme.ts",
+        "lib/styles/variables.css",
+        "lib/styles/font-assignment.css",
+        "components/core/design-tokens.ts",
+        "components/core/Control.module.css",
+        "components/core/Layout/Layout.tsx",
+        "components/core/Layout/Layout.module.css",
+        "stories/pages/OAuth.stories.tsx",
+        "features/auth/McpConsentPageView.tsx",
+        "components/core/Button/Button.tsx"
+      ],
+      "sourceParityAtObservation": "unverified: observation-time source hashes were not captured",
+      "screenshotEvidence": {
+        "originalPath": ".artifacts/design-system/carbon-review/oauth-390.png",
+        "sha256": "7d3d6f923fd932db1577c0a55fd8a9af1abcad22ba02bcf2dece77ed5c5626d6",
+        "mimeType": "image/jpeg",
+        "pixelDimensions": [390, 844],
+        "recordedViewport": [390, 844],
+        "dimensionsMatchRecordedViewport": true,
+        "fullViewportVisualCoverage": "dimensions match; this does not imply full-state design approval",
+        "note": "Original .png file contains JPEG bytes. Portable .jpg copy preserves those bytes without transcoding."
+      }
+    },
+    {
+      "story": "pages-auth-oauth-consent--long-names",
+      "origin": "http://localhost:6012",
+      "timestamp": "2026-10-11T16:52:30.160Z",
+      "actions": [
+        {
+          "box": [51.765625, 38.296875],
+          "busy": null,
+          "disabled": null,
+          "glyph": null,
+          "kind": "button",
+          "labelGap": "8px",
+          "name": null,
+          "padding": "8px 12px",
+          "pressed": null,
+          "size": "sm",
+          "tag": "BUTTON",
+          "text": "취소"
+        },
+        {
+          "box": [51.765625, 38.296875],
+          "busy": null,
+          "disabled": null,
+          "glyph": null,
+          "kind": "button",
+          "labelGap": "8px",
+          "name": null,
+          "padding": "8px 12px",
+          "pressed": null,
+          "size": "sm",
+          "tag": "BUTTON",
+          "text": "연결"
+        }
+      ],
+      "coarse": false,
+      "documentWidth": 834,
+      "locale": "ko",
+      "scrollWidth": 834,
+      "theme": "light",
+      "viewport": [834, 1112],
+      "screenshot": "previews/carbon-review/oauth-834.jpg",
+      "id": "browser-02",
+      "evidenceClassification": "production-view-with-local-fixtures",
+      "currentOwnerSourcePaths": [
+        ".storybook/preview.tsx",
+        ".storybook/StoryCanvas.tsx",
+        "lib/providers/DesignSystemProvider.tsx",
+        "theme.ts",
+        "lib/styles/variables.css",
+        "lib/styles/font-assignment.css",
+        "components/core/design-tokens.ts",
+        "components/core/Control.module.css",
+        "components/core/Layout/Layout.tsx",
+        "components/core/Layout/Layout.module.css",
+        "stories/pages/OAuth.stories.tsx",
+        "features/auth/McpConsentPageView.tsx",
+        "components/core/Button/Button.tsx"
+      ],
+      "sourceParityAtObservation": "unverified: observation-time source hashes were not captured",
+      "screenshotEvidence": {
+        "originalPath": ".artifacts/design-system/carbon-review/oauth-834.png",
+        "sha256": "c368ed6604371c33d744bae9cec3b1fe324f5baf6ee90209986212dab46a89ce",
+        "mimeType": "image/jpeg",
+        "pixelDimensions": [514, 1112],
+        "recordedViewport": [834, 1112],
+        "dimensionsMatchRecordedViewport": false,
+        "fullViewportVisualCoverage": "unconfirmed: capture extent differs from recorded viewport",
+        "note": "Original .png file contains JPEG bytes. Portable .jpg copy preserves those bytes without transcoding.",
+        "captureLimitation": "Captured app-pane pixels differ from DOM viewport dimensions. Cause is unverified; panel changes or capture resizing are possible explanations. This is not evidence of product overflow or full-viewport visual approval."
+      }
+    },
+    {
+      "story": "pages-auth-oauth-consent--long-names",
+      "origin": "http://localhost:6012",
+      "timestamp": "2026-10-11T16:52:30.408Z",
+      "actions": [
+        {
+          "box": [51.765625, 38.296875],
+          "busy": null,
+          "disabled": null,
+          "glyph": null,
+          "kind": "button",
+          "labelGap": "8px",
+          "name": null,
+          "padding": "8px 12px",
+          "pressed": null,
+          "size": "sm",
+          "tag": "BUTTON",
+          "text": "취소"
+        },
+        {
+          "box": [51.765625, 38.296875],
+          "busy": null,
+          "disabled": null,
+          "glyph": null,
+          "kind": "button",
+          "labelGap": "8px",
+          "name": null,
+          "padding": "8px 12px",
+          "pressed": null,
+          "size": "sm",
+          "tag": "BUTTON",
+          "text": "연결"
+        }
+      ],
+      "coarse": false,
+      "documentWidth": 1440,
+      "locale": "ko",
+      "scrollWidth": 1440,
+      "theme": "light",
+      "viewport": [1440, 900],
+      "screenshot": "previews/carbon-review/oauth-1440.jpg",
+      "id": "browser-03",
+      "evidenceClassification": "production-view-with-local-fixtures",
+      "currentOwnerSourcePaths": [
+        ".storybook/preview.tsx",
+        ".storybook/StoryCanvas.tsx",
+        "lib/providers/DesignSystemProvider.tsx",
+        "theme.ts",
+        "lib/styles/variables.css",
+        "lib/styles/font-assignment.css",
+        "components/core/design-tokens.ts",
+        "components/core/Control.module.css",
+        "components/core/Layout/Layout.tsx",
+        "components/core/Layout/Layout.module.css",
+        "stories/pages/OAuth.stories.tsx",
+        "features/auth/McpConsentPageView.tsx",
+        "components/core/Button/Button.tsx"
+      ],
+      "sourceParityAtObservation": "unverified: observation-time source hashes were not captured",
+      "screenshotEvidence": {
+        "originalPath": ".artifacts/design-system/carbon-review/oauth-1440.png",
+        "sha256": "94a2bd130348f6e4b1f13a83e7d0535f7b46367a83d7ef06b1d945abc33b254e",
+        "mimeType": "image/jpeg",
+        "pixelDimensions": [1440, 900],
+        "recordedViewport": [1440, 900],
+        "dimensionsMatchRecordedViewport": true,
+        "fullViewportVisualCoverage": "dimensions match; this does not imply full-state design approval",
+        "note": "Original .png file contains JPEG bytes. Portable .jpg copy preserves those bytes without transcoding."
+      }
+    },
+    {
+      "containers": [
+        {
+          "bounds": {
+            "height": 373.6875,
+            "width": 390,
+            "x": 0,
+            "y": 33.796875
+          },
+          "maxWidth": "min(100%, 1200px)"
+        }
+      ],
+      "controls": [
+        {
+          "bounds": {
+            "height": 36,
+            "width": 105.4453125,
+            "x": 272.5546875,
+            "y": 33.796875
+          },
+          "gap": "normal",
+          "name": null,
+          "padding": "0px 12px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 285.5546875,
+            "y": 43.796875
+          },
+          "text": "새 포스트"
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 342,
+            "x": 36,
+            "y": 81.796875
+          },
+          "gap": "normal",
+          "name": "포스트 검색...",
+          "padding": "4px 8px",
+          "role": null,
+          "svg": null,
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 28,
+            "x": 12,
+            "y": 118.796875
+          },
+          "gap": "normal",
+          "name": "필터",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 18,
+            "y": 124.796875
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 28,
+            "x": 44,
+            "y": 118.796875
+          },
+          "gap": "normal",
+          "name": "정렬 (1)",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 50,
+            "y": 124.796875
+          },
+          "text": "1"
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 28,
+            "x": 350,
+            "y": 118.796875
+          },
+          "gap": "normal",
+          "name": "포스트 작업 메뉴",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 356,
+            "y": 124.796875
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 13,
+            "width": 13,
+            "x": 19.5,
+            "y": 179.4453125
+          },
+          "gap": "normal",
+          "name": "Listening Notes",
+          "padding": "0px",
+          "role": null,
+          "svg": null,
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 348,
+            "y": 166.796875
+          },
+          "gap": "normal",
+          "name": "Listening Notes 작업 메뉴",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 355,
+            "y": 173.796875
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 13,
+            "width": 13,
+            "x": 19.5,
+            "y": 299.8359375
+          },
+          "gap": "normal",
+          "name": "First Draft",
+          "padding": "0px",
+          "role": null,
+          "svg": null,
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 348,
+            "y": 287.1875
+          },
+          "gap": "normal",
+          "name": "First Draft 작업 메뉴",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 355,
+            "y": 294.1875
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 104,
+            "y": 377.484375
+          },
+          "gap": "normal",
+          "name": "첫 페이지",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 111,
+            "y": 384.484375
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 142,
+            "y": 377.484375
+          },
+          "gap": "normal",
+          "name": "이전 페이지",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 149,
+            "y": 384.484375
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 218,
+            "y": 377.484375
+          },
+          "gap": "normal",
+          "name": "다음 페이지",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 225,
+            "y": 384.484375
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 256,
+            "y": 377.484375
+          },
+          "gap": "normal",
+          "name": "마지막 페이지",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 263,
+            "y": 384.484375
+          },
+          "text": ""
+        }
+      ],
+      "groups": [
+        {
+          "bounds": {
+            "height": 194.6875,
+            "width": 366,
+            "x": 12,
+            "y": 158.796875
+          },
+          "labelledBy": null,
+          "name": "포스트"
+        }
+      ],
+      "pointerCoarse": false,
+      "regions": [
+        {
+          "bounds": {
+            "height": 33.796875,
+            "width": 390,
+            "x": 0,
+            "y": 0
+          },
+          "name": "Pages/Admin/Content Lists · Posts",
+          "tabIndex": -1
+        },
+        {
+          "bounds": {
+            "height": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "name": "포스트",
+          "tabIndex": 0
+        }
+      ],
+      "scrollWidth": 390,
+      "sorts": [
+        {
+          "sort": "descending",
+          "text": "제목↓현재 내림차순"
+        }
+      ],
+      "story": "pages-admin-content-lists--posts",
+      "tableCount": 2,
+      "text": "Pages/Admin/Content Lists · Posts한국어 · 밝게포스트새 포스트현재 오름차순현재 내림차순1결과 2개, 1페이지 중 1페이지제목↓현재 내림차순작성자상태생성일수정일동작Listening Notes/listening-notesJJune Han게시됨2026. 9. 12.2026. 9. 12.First Draft-임시저장--Listening Notes/listening-notes작성자:JJune Han상태:게시됨생성일:2026. 9. 12.수정일:2026. 9. 12.First Draft작성자:-상태:임시저장생성일:-수정일:-1",
+      "viewport": [390, 844],
+      "screenshot": "previews/carbon-review/posts-390.jpg",
+      "theme": "light",
+      "locale": "ko",
+      "query": "title desc, 2 rows",
+      "observedAt": "2026-10-11T17:05:51.472Z",
+      "id": "browser-04",
+      "evidenceClassification": "production-view-with-local-fixtures",
+      "currentOwnerSourcePaths": [
+        ".storybook/preview.tsx",
+        ".storybook/StoryCanvas.tsx",
+        "lib/providers/DesignSystemProvider.tsx",
+        "theme.ts",
+        "lib/styles/variables.css",
+        "lib/styles/font-assignment.css",
+        "components/core/design-tokens.ts",
+        "components/core/Control.module.css",
+        "components/core/Layout/Layout.tsx",
+        "components/core/Layout/Layout.module.css",
+        "stories/pages/AdminContent.stories.tsx",
+        "stories/pages/AdminListAccessibility.ts",
+        "features/admin/post/PostsPageView.tsx",
+        "features/admin/post/PostsTableContent.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableSelectableSection.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableContent.tsx",
+        "components/core/DataTable/DataTableView.tsx",
+        "components/core/DataTable/DataTableView.module.css",
+        "components/core/DataTable/DataTableSelectionToolbar.tsx",
+        "components/core/Section/ToolbarLayout.tsx",
+        "components/core/Section/ToolbarLayout.module.css"
+      ],
+      "sourceParityAtObservation": "unverified: observation-time source hashes were not captured",
+      "screenshotEvidence": {
+        "originalPath": ".artifacts/design-system/carbon-review/posts-390.png",
+        "sha256": "a117b3a6ca5f6fa9cdbc8992daa3c554f363bfcad69a832c7b295c4c16ed4d99",
+        "mimeType": "image/jpeg",
+        "pixelDimensions": [390, 844],
+        "recordedViewport": [390, 844],
+        "dimensionsMatchRecordedViewport": true,
+        "fullViewportVisualCoverage": "dimensions match; this does not imply full-state design approval",
+        "note": "Original .png file contains JPEG bytes. Portable .jpg copy preserves those bytes without transcoding."
+      },
+      "tableCountInterpretation": "tableCount counts DOM table elements, not records. Recorded query and visible content contain two rows: Listening Notes and First Draft."
+    },
+    {
+      "containers": [
+        {
+          "bounds": {
+            "height": 261.390625,
+            "width": 834,
+            "x": 0,
+            "y": 33.796875
+          },
+          "maxWidth": "min(100%, 1200px)"
+        }
+      ],
+      "controls": [
+        {
+          "bounds": {
+            "height": 36,
+            "width": 105.4453125,
+            "x": 716.5546875,
+            "y": 33.796875
+          },
+          "gap": "normal",
+          "name": null,
+          "padding": "0px 12px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 729.5546875,
+            "y": 43.796875
+          },
+          "text": "새 포스트"
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 682,
+            "x": 36,
+            "y": 81.796875
+          },
+          "gap": "normal",
+          "name": "포스트 검색...",
+          "padding": "4px 8px",
+          "role": null,
+          "svg": null,
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 28,
+            "x": 726,
+            "y": 82.296875
+          },
+          "gap": "normal",
+          "name": "필터",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 732,
+            "y": 88.296875
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 28,
+            "x": 758,
+            "y": 82.296875
+          },
+          "gap": "normal",
+          "name": "정렬 (1)",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 764,
+            "y": 88.296875
+          },
+          "text": "1"
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 28,
+            "x": 794,
+            "y": 82.296875
+          },
+          "gap": "normal",
+          "name": "포스트 작업 메뉴",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 800,
+            "y": 88.296875
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 13,
+            "width": 13,
+            "x": 27.5,
+            "y": 139.4453125
+          },
+          "gap": "normal",
+          "name": "모든 행 선택",
+          "padding": "0px",
+          "role": null,
+          "svg": null,
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 20.296875,
+            "width": 158.359375,
+            "x": 64,
+            "y": 126.796875
+          },
+          "gap": "4px",
+          "name": "제목 정렬",
+          "padding": "0px",
+          "role": null,
+          "svg": null,
+          "text": "제목\n↓\n현재 내림차순"
+        },
+        {
+          "bounds": {
+            "height": 20.296875,
+            "width": 88.71875,
+            "x": 406.75,
+            "y": 126.796875
+          },
+          "gap": "4px",
+          "name": "상태 정렬",
+          "padding": "0px",
+          "role": null,
+          "svg": null,
+          "text": "상태"
+        },
+        {
+          "bounds": {
+            "height": 13,
+            "width": 13,
+            "x": 27.5,
+            "y": 179.140625
+          },
+          "gap": "normal",
+          "name": "Listening Notes",
+          "padding": "0px",
+          "role": null,
+          "svg": null,
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 780,
+            "y": 161.640625
+          },
+          "gap": "normal",
+          "name": "Listening Notes 작업 메뉴",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 787,
+            "y": 168.640625
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 13,
+            "width": 13,
+            "x": 27.5,
+            "y": 223.6875
+          },
+          "gap": "normal",
+          "name": "First Draft",
+          "padding": "0px",
+          "role": null,
+          "svg": null,
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 780,
+            "y": 206.1875
+          },
+          "gap": "normal",
+          "name": "First Draft 작업 메뉴",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 787,
+            "y": 213.1875
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 326,
+            "y": 265.1875
+          },
+          "gap": "normal",
+          "name": "첫 페이지",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 333,
+            "y": 272.1875
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 364,
+            "y": 265.1875
+          },
+          "gap": "normal",
+          "name": "이전 페이지",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 371,
+            "y": 272.1875
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 440,
+            "y": 265.1875
+          },
+          "gap": "normal",
+          "name": "다음 페이지",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 447,
+            "y": 272.1875
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 478,
+            "y": 265.1875
+          },
+          "gap": "normal",
+          "name": "마지막 페이지",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 485,
+            "y": 272.1875
+          },
+          "text": ""
+        }
+      ],
+      "groups": [
+        {
+          "bounds": {
+            "height": 118.390625,
+            "width": 810,
+            "x": 12,
+            "y": 122.796875
+          },
+          "labelledBy": null,
+          "name": "포스트"
+        }
+      ],
+      "pointerCoarse": false,
+      "regions": [
+        {
+          "bounds": {
+            "height": 33.796875,
+            "width": 834,
+            "x": 0,
+            "y": 0
+          },
+          "name": "Pages/Admin/Content Lists · Posts",
+          "tabIndex": -1
+        },
+        {
+          "bounds": {
+            "height": 118.390625,
+            "width": 810,
+            "x": 12,
+            "y": 122.796875
+          },
+          "name": "포스트",
+          "tabIndex": 0
+        }
+      ],
+      "scrollWidth": 834,
+      "sorts": [
+        {
+          "sort": "descending",
+          "text": "제목↓현재 내림차순"
+        }
+      ],
+      "story": "pages-admin-content-lists--posts",
+      "tableCount": 2,
+      "text": "Pages/Admin/Content Lists · Posts한국어 · 밝게포스트새 포스트현재 오름차순현재 내림차순1결과 2개, 1페이지 중 1페이지제목↓현재 내림차순작성자상태생성일수정일동작Listening Notes/listening-notesJJune Han게시됨2026. 9. 12.2026. 9. 12.First Draft-임시저장--Listening Notes/listening-notes작성자:JJune Han상태:게시됨생성일:2026. 9. 12.수정일:2026. 9. 12.First Draft작성자:-상태:임시저장생성일:-수정일:-1",
+      "viewport": [834, 1024],
+      "screenshot": "previews/carbon-review/posts-834.jpg",
+      "theme": "light",
+      "locale": "ko",
+      "query": "title desc, 2 rows",
+      "observedAt": "2026-10-11T17:05:51.593Z",
+      "id": "browser-05",
+      "evidenceClassification": "production-view-with-local-fixtures",
+      "currentOwnerSourcePaths": [
+        ".storybook/preview.tsx",
+        ".storybook/StoryCanvas.tsx",
+        "lib/providers/DesignSystemProvider.tsx",
+        "theme.ts",
+        "lib/styles/variables.css",
+        "lib/styles/font-assignment.css",
+        "components/core/design-tokens.ts",
+        "components/core/Control.module.css",
+        "components/core/Layout/Layout.tsx",
+        "components/core/Layout/Layout.module.css",
+        "stories/pages/AdminContent.stories.tsx",
+        "stories/pages/AdminListAccessibility.ts",
+        "features/admin/post/PostsPageView.tsx",
+        "features/admin/post/PostsTableContent.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableSelectableSection.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableContent.tsx",
+        "components/core/DataTable/DataTableView.tsx",
+        "components/core/DataTable/DataTableView.module.css",
+        "components/core/DataTable/DataTableSelectionToolbar.tsx",
+        "components/core/Section/ToolbarLayout.tsx",
+        "components/core/Section/ToolbarLayout.module.css"
+      ],
+      "sourceParityAtObservation": "unverified: observation-time source hashes were not captured",
+      "screenshotEvidence": {
+        "originalPath": ".artifacts/design-system/carbon-review/posts-834.png",
+        "sha256": "cf2f464ded3c59dad730f1245e88620691f626716b6411db7237cbd8648d3519",
+        "mimeType": "image/jpeg",
+        "pixelDimensions": [834, 1024],
+        "recordedViewport": [834, 1024],
+        "dimensionsMatchRecordedViewport": true,
+        "fullViewportVisualCoverage": "dimensions match; this does not imply full-state design approval",
+        "note": "Original .png file contains JPEG bytes. Portable .jpg copy preserves those bytes without transcoding."
+      },
+      "tableCountInterpretation": "tableCount counts DOM table elements, not records. Recorded query and visible content contain two rows: Listening Notes and First Draft."
+    },
+    {
+      "containers": [
+        {
+          "bounds": {
+            "height": 261.390625,
+            "width": 1200,
+            "x": 120,
+            "y": 33.796875
+          },
+          "maxWidth": "min(100%, 1200px)"
+        }
+      ],
+      "controls": [
+        {
+          "bounds": {
+            "height": 36,
+            "width": 105.4453125,
+            "x": 1202.5546875,
+            "y": 33.796875
+          },
+          "gap": "normal",
+          "name": null,
+          "padding": "0px 12px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 1215.5546875,
+            "y": 43.796875
+          },
+          "text": "새 포스트"
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 1048,
+            "x": 156,
+            "y": 81.796875
+          },
+          "gap": "normal",
+          "name": "포스트 검색...",
+          "padding": "4px 8px",
+          "role": null,
+          "svg": null,
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 28,
+            "x": 1212,
+            "y": 82.296875
+          },
+          "gap": "normal",
+          "name": "필터",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 1218,
+            "y": 88.296875
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 28,
+            "x": 1244,
+            "y": 82.296875
+          },
+          "gap": "normal",
+          "name": "정렬 (1)",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 1250,
+            "y": 88.296875
+          },
+          "text": "1"
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 28,
+            "x": 1280,
+            "y": 82.296875
+          },
+          "gap": "normal",
+          "name": "포스트 작업 메뉴",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 1286,
+            "y": 88.296875
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 13,
+            "width": 13,
+            "x": 147.5,
+            "y": 139.4453125
+          },
+          "gap": "normal",
+          "name": "모든 행 선택",
+          "padding": "0px",
+          "role": null,
+          "svg": null,
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 20.296875,
+            "width": 247.484375,
+            "x": 184,
+            "y": 126.796875
+          },
+          "gap": "4px",
+          "name": "제목 정렬",
+          "padding": "0px",
+          "role": null,
+          "svg": null,
+          "text": "제목\n↓\n현재 내림차순"
+        },
+        {
+          "bounds": {
+            "height": 20.296875,
+            "width": 142.25,
+            "x": 701.953125,
+            "y": 126.796875
+          },
+          "gap": "4px",
+          "name": "상태 정렬",
+          "padding": "0px",
+          "role": null,
+          "svg": null,
+          "text": "상태"
+        },
+        {
+          "bounds": {
+            "height": 13,
+            "width": 13,
+            "x": 147.5,
+            "y": 179.140625
+          },
+          "gap": "normal",
+          "name": "Listening Notes",
+          "padding": "0px",
+          "role": null,
+          "svg": null,
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 1266,
+            "y": 161.640625
+          },
+          "gap": "normal",
+          "name": "Listening Notes 작업 메뉴",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 1273,
+            "y": 168.640625
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 13,
+            "width": 13,
+            "x": 147.5,
+            "y": 223.6875
+          },
+          "gap": "normal",
+          "name": "First Draft",
+          "padding": "0px",
+          "role": null,
+          "svg": null,
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 1266,
+            "y": 206.1875
+          },
+          "gap": "normal",
+          "name": "First Draft 작업 메뉴",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 1273,
+            "y": 213.1875
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 629,
+            "y": 265.1875
+          },
+          "gap": "normal",
+          "name": "첫 페이지",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 636,
+            "y": 272.1875
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 667,
+            "y": 265.1875
+          },
+          "gap": "normal",
+          "name": "이전 페이지",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 674,
+            "y": 272.1875
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 743,
+            "y": 265.1875
+          },
+          "gap": "normal",
+          "name": "다음 페이지",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 750,
+            "y": 272.1875
+          },
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 781,
+            "y": 265.1875
+          },
+          "gap": "normal",
+          "name": "마지막 페이지",
+          "padding": "0px",
+          "role": null,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 788,
+            "y": 272.1875
+          },
+          "text": ""
+        }
+      ],
+      "groups": [
+        {
+          "bounds": {
+            "height": 118.390625,
+            "width": 1176,
+            "x": 132,
+            "y": 122.796875
+          },
+          "labelledBy": null,
+          "name": "포스트"
+        }
+      ],
+      "pointerCoarse": false,
+      "regions": [
+        {
+          "bounds": {
+            "height": 33.796875,
+            "width": 1440,
+            "x": 0,
+            "y": 0
+          },
+          "name": "Pages/Admin/Content Lists · Posts",
+          "tabIndex": -1
+        },
+        {
+          "bounds": {
+            "height": 118.390625,
+            "width": 1176,
+            "x": 132,
+            "y": 122.796875
+          },
+          "name": "포스트",
+          "tabIndex": 0
+        }
+      ],
+      "scrollWidth": 1440,
+      "sorts": [
+        {
+          "sort": "descending",
+          "text": "제목↓현재 내림차순"
+        }
+      ],
+      "story": "pages-admin-content-lists--posts",
+      "tableCount": 2,
+      "text": "Pages/Admin/Content Lists · Posts한국어 · 밝게포스트새 포스트현재 오름차순현재 내림차순1결과 2개, 1페이지 중 1페이지제목↓현재 내림차순작성자상태생성일수정일동작Listening Notes/listening-notesJJune Han게시됨2026. 9. 12.2026. 9. 12.First Draft-임시저장--Listening Notes/listening-notes작성자:JJune Han상태:게시됨생성일:2026. 9. 12.수정일:2026. 9. 12.First Draft작성자:-상태:임시저장생성일:-수정일:-1",
+      "viewport": [1440, 900],
+      "screenshot": "previews/carbon-review/posts-1440.jpg",
+      "theme": "light",
+      "locale": "ko",
+      "query": "title desc, 2 rows",
+      "observedAt": "2026-10-11T17:05:51.693Z",
+      "id": "browser-06",
+      "evidenceClassification": "production-view-with-local-fixtures",
+      "currentOwnerSourcePaths": [
+        ".storybook/preview.tsx",
+        ".storybook/StoryCanvas.tsx",
+        "lib/providers/DesignSystemProvider.tsx",
+        "theme.ts",
+        "lib/styles/variables.css",
+        "lib/styles/font-assignment.css",
+        "components/core/design-tokens.ts",
+        "components/core/Control.module.css",
+        "components/core/Layout/Layout.tsx",
+        "components/core/Layout/Layout.module.css",
+        "stories/pages/AdminContent.stories.tsx",
+        "stories/pages/AdminListAccessibility.ts",
+        "features/admin/post/PostsPageView.tsx",
+        "features/admin/post/PostsTableContent.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableSelectableSection.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableContent.tsx",
+        "components/core/DataTable/DataTableView.tsx",
+        "components/core/DataTable/DataTableView.module.css",
+        "components/core/DataTable/DataTableSelectionToolbar.tsx",
+        "components/core/Section/ToolbarLayout.tsx",
+        "components/core/Section/ToolbarLayout.module.css"
+      ],
+      "sourceParityAtObservation": "unverified: observation-time source hashes were not captured",
+      "screenshotEvidence": {
+        "originalPath": ".artifacts/design-system/carbon-review/posts-1440.png",
+        "sha256": "8d1485c0562afd5431de6f21716941d93ce6947b7622724ebfdca6f8796e7a29",
+        "mimeType": "image/jpeg",
+        "pixelDimensions": [1440, 900],
+        "recordedViewport": [1440, 900],
+        "dimensionsMatchRecordedViewport": true,
+        "fullViewportVisualCoverage": "dimensions match; this does not imply full-state design approval",
+        "note": "Original .png file contains JPEG bytes. Portable .jpg copy preserves those bytes without transcoding."
+      },
+      "tableCountInterpretation": "tableCount counts DOM table elements, not records. Recorded query and visible content contain two rows: Listening Notes and First Draft."
+    },
+    {
+      "dialogs": [
+        {
+          "bounds": {
+            "height": 151.796875,
+            "width": 368,
+            "x": 11,
+            "y": 11
+          },
+          "buttons": [
+            {
+              "background": "rgba(0, 0, 0, 0)",
+              "bounds": {
+                "height": 30,
+                "width": 30,
+                "x": 337,
+                "y": 23
+              },
+              "emphasis": "low",
+              "name": "닫기",
+              "padding": "0px",
+              "text": "",
+              "tone": "neutral"
+            },
+            {
+              "background": "rgba(0, 0, 0, 0)",
+              "bounds": {
+                "height": 36,
+                "width": 51.765625,
+                "x": 253.46875,
+                "y": 114.796875
+              },
+              "emphasis": "low",
+              "name": null,
+              "padding": "0px 12px",
+              "text": "취소",
+              "tone": "neutral"
+            },
+            {
+              "background": "rgb(128, 32, 25)",
+              "bounds": {
+                "height": 36,
+                "width": 49.765625,
+                "x": 317.234375,
+                "y": 114.796875
+              },
+              "emphasis": "strong",
+              "name": null,
+              "padding": "0px 12px",
+              "text": "삭제",
+              "tone": "danger"
+            }
+          ],
+          "describedBy": null,
+          "labelledBy": "react-aria8255342670-_r_62_",
+          "role": "dialog",
+          "text": "삭제Listening Notes을(를) 삭제하시겠습니까?취소삭제"
+        }
+      ],
+      "focus": "취소",
+      "pointerCoarse": false,
+      "scrollWidth": 390,
+      "story": "pages-admin-content-lists--posts",
+      "viewport": [390, 844],
+      "screenshot": "previews/carbon-review/post-dialog-390.jpg",
+      "theme": "light",
+      "locale": "ko",
+      "state": "Listening Notes 삭제 확인, 취소 initial focus",
+      "observedAt": "2026-10-11T17:06:50.998Z",
+      "id": "browser-07",
+      "evidenceClassification": "production-view-with-local-fixtures",
+      "currentOwnerSourcePaths": [
+        ".storybook/preview.tsx",
+        ".storybook/StoryCanvas.tsx",
+        "lib/providers/DesignSystemProvider.tsx",
+        "theme.ts",
+        "lib/styles/variables.css",
+        "lib/styles/font-assignment.css",
+        "components/core/design-tokens.ts",
+        "components/core/Control.module.css",
+        "components/core/Layout/Layout.tsx",
+        "components/core/Layout/Layout.module.css",
+        "stories/pages/AdminContent.stories.tsx",
+        "features/admin/post/PostModals.tsx",
+        "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/confirmation/ui/confirmation-intent.ts",
+        "components/core/Modal/ConfirmModal.tsx",
+        "components/core/Modal/OverlayDialog.tsx",
+        "components/core/Overlay.module.css",
+        "components/core/Button/Button.tsx"
+      ],
+      "sourceParityAtObservation": "unverified: observation-time source hashes were not captured",
+      "screenshotEvidence": {
+        "originalPath": ".artifacts/design-system/carbon-review/post-dialog-390.png",
+        "sha256": "c0ac10d64dd63f4f9418e2540bc23448a0d79c9cfdcd0f10d8613b3cded1c311",
+        "mimeType": "image/jpeg",
+        "pixelDimensions": [390, 844],
+        "recordedViewport": [390, 844],
+        "dimensionsMatchRecordedViewport": true,
+        "fullViewportVisualCoverage": "dimensions match; this does not imply full-state design approval",
+        "note": "Original .png file contains JPEG bytes. Portable .jpg copy preserves those bytes without transcoding."
+      }
+    },
+    {
+      "dialogs": [
+        {
+          "bounds": {
+            "height": 151.796875,
+            "width": 446,
+            "x": 194,
+            "y": 25
+          },
+          "buttons": [
+            {
+              "background": "rgba(0, 0, 0, 0)",
+              "bounds": {
+                "height": 30,
+                "width": 30,
+                "x": 598,
+                "y": 37
+              },
+              "emphasis": "low",
+              "name": "닫기",
+              "padding": "0px",
+              "text": "",
+              "tone": "neutral"
+            },
+            {
+              "background": "rgba(0, 0, 0, 0)",
+              "bounds": {
+                "height": 36,
+                "width": 51.765625,
+                "x": 514.46875,
+                "y": 128.796875
+              },
+              "emphasis": "low",
+              "name": null,
+              "padding": "0px 12px",
+              "text": "취소",
+              "tone": "neutral"
+            },
+            {
+              "background": "rgb(128, 32, 25)",
+              "bounds": {
+                "height": 36,
+                "width": 49.765625,
+                "x": 578.234375,
+                "y": 128.796875
+              },
+              "emphasis": "strong",
+              "name": null,
+              "padding": "0px 12px",
+              "text": "삭제",
+              "tone": "danger"
+            }
+          ],
+          "describedBy": null,
+          "labelledBy": "react-aria8255342670-_r_62_",
+          "role": "dialog",
+          "text": "삭제Listening Notes을(를) 삭제하시겠습니까?취소삭제"
+        }
+      ],
+      "focus": "취소",
+      "pointerCoarse": false,
+      "scrollWidth": 834,
+      "story": "pages-admin-content-lists--posts",
+      "viewport": [834, 1024],
+      "screenshot": "previews/carbon-review/post-dialog-834.jpg",
+      "theme": "light",
+      "locale": "ko",
+      "state": "Listening Notes 삭제 확인, 취소 initial focus",
+      "observedAt": "2026-10-11T17:06:51.280Z",
+      "id": "browser-08",
+      "evidenceClassification": "production-view-with-local-fixtures",
+      "currentOwnerSourcePaths": [
+        ".storybook/preview.tsx",
+        ".storybook/StoryCanvas.tsx",
+        "lib/providers/DesignSystemProvider.tsx",
+        "theme.ts",
+        "lib/styles/variables.css",
+        "lib/styles/font-assignment.css",
+        "components/core/design-tokens.ts",
+        "components/core/Control.module.css",
+        "components/core/Layout/Layout.tsx",
+        "components/core/Layout/Layout.module.css",
+        "stories/pages/AdminContent.stories.tsx",
+        "features/admin/post/PostModals.tsx",
+        "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/confirmation/ui/confirmation-intent.ts",
+        "components/core/Modal/ConfirmModal.tsx",
+        "components/core/Modal/OverlayDialog.tsx",
+        "components/core/Overlay.module.css",
+        "components/core/Button/Button.tsx"
+      ],
+      "sourceParityAtObservation": "unverified: observation-time source hashes were not captured",
+      "screenshotEvidence": {
+        "originalPath": ".artifacts/design-system/carbon-review/post-dialog-834.png",
+        "sha256": "726db4c0c23ab41cf1ab0b37bcf0ee586bd743993b1a908f9c9148408c8dd9b1",
+        "mimeType": "image/jpeg",
+        "pixelDimensions": [834, 1024],
+        "recordedViewport": [834, 1024],
+        "dimensionsMatchRecordedViewport": true,
+        "fullViewportVisualCoverage": "dimensions match; this does not imply full-state design approval",
+        "note": "Original .png file contains JPEG bytes. Portable .jpg copy preserves those bytes without transcoding."
+      }
+    },
+    {
+      "dialogs": [
+        {
+          "bounds": {
+            "height": 151.796875,
+            "width": 446,
+            "x": 497,
+            "y": 25
+          },
+          "buttons": [
+            {
+              "background": "rgba(0, 0, 0, 0)",
+              "bounds": {
+                "height": 30,
+                "width": 30,
+                "x": 901,
+                "y": 37
+              },
+              "emphasis": "low",
+              "name": "닫기",
+              "padding": "0px",
+              "text": "",
+              "tone": "neutral"
+            },
+            {
+              "background": "rgba(0, 0, 0, 0)",
+              "bounds": {
+                "height": 36,
+                "width": 51.765625,
+                "x": 817.46875,
+                "y": 128.796875
+              },
+              "emphasis": "low",
+              "name": null,
+              "padding": "0px 12px",
+              "text": "취소",
+              "tone": "neutral"
+            },
+            {
+              "background": "rgb(128, 32, 25)",
+              "bounds": {
+                "height": 36,
+                "width": 49.765625,
+                "x": 881.234375,
+                "y": 128.796875
+              },
+              "emphasis": "strong",
+              "name": null,
+              "padding": "0px 12px",
+              "text": "삭제",
+              "tone": "danger"
+            }
+          ],
+          "describedBy": null,
+          "labelledBy": "react-aria8255342670-_r_62_",
+          "role": "dialog",
+          "text": "삭제Listening Notes을(를) 삭제하시겠습니까?취소삭제"
+        }
+      ],
+      "focus": "취소",
+      "pointerCoarse": false,
+      "scrollWidth": 1440,
+      "story": "pages-admin-content-lists--posts",
+      "viewport": [1440, 900],
+      "screenshot": "previews/carbon-review/post-dialog-1440.jpg",
+      "theme": "light",
+      "locale": "ko",
+      "state": "Listening Notes 삭제 확인, 취소 initial focus",
+      "observedAt": "2026-10-11T17:06:51.491Z",
+      "id": "browser-09",
+      "evidenceClassification": "production-view-with-local-fixtures",
+      "currentOwnerSourcePaths": [
+        ".storybook/preview.tsx",
+        ".storybook/StoryCanvas.tsx",
+        "lib/providers/DesignSystemProvider.tsx",
+        "theme.ts",
+        "lib/styles/variables.css",
+        "lib/styles/font-assignment.css",
+        "components/core/design-tokens.ts",
+        "components/core/Control.module.css",
+        "components/core/Layout/Layout.tsx",
+        "components/core/Layout/Layout.module.css",
+        "stories/pages/AdminContent.stories.tsx",
+        "features/admin/post/PostModals.tsx",
+        "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/confirmation/ui/confirmation-intent.ts",
+        "components/core/Modal/ConfirmModal.tsx",
+        "components/core/Modal/OverlayDialog.tsx",
+        "components/core/Overlay.module.css",
+        "components/core/Button/Button.tsx"
+      ],
+      "sourceParityAtObservation": "unverified: observation-time source hashes were not captured",
+      "screenshotEvidence": {
+        "originalPath": ".artifacts/design-system/carbon-review/post-dialog-1440.png",
+        "sha256": "8d5dbc36894b5c4c1136822e5f8b0e28de05818fb531a17eaec524d4e50cdcc4",
+        "mimeType": "image/jpeg",
+        "pixelDimensions": [1440, 900],
+        "recordedViewport": [1440, 900],
+        "dimensionsMatchRecordedViewport": true,
+        "fullViewportVisualCoverage": "dimensions match; this does not imply full-state design approval",
+        "note": "Original .png file contains JPEG bytes. Portable .jpg copy preserves those bytes without transcoding."
+      }
+    },
+    {
+      "containers": [
+        {
+          "bounds": {
+            "height": 551.671875,
+            "width": 390,
+            "x": 0,
+            "y": 33.796875
+          },
+          "maxWidth": "min(100%, 992px)"
+        }
+      ],
+      "controls": [
+        {
+          "bounds": {
+            "height": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "",
+          "labelledBy": null,
+          "name": null,
+          "padding": "10px 16px",
+          "required": false,
+          "svg": null,
+          "tag": "BUTTON",
+          "text": "Set string"
+        },
+        {
+          "bounds": {
+            "height": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "",
+          "labelledBy": null,
+          "name": null,
+          "padding": "10px 16px",
+          "required": false,
+          "svg": null,
+          "tag": "BUTTON",
+          "text": "Set string"
+        },
+        {
+          "bounds": {
+            "height": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "",
+          "labelledBy": null,
+          "name": null,
+          "padding": "10px 16px",
+          "required": false,
+          "svg": null,
+          "tag": "BUTTON",
+          "text": "Set string"
+        },
+        {
+          "bounds": {
+            "height": 36,
+            "width": 328,
+            "x": 12,
+            "y": 103.890625
+          },
+          "describedBy": null,
+          "disabled": true,
+          "fontSize": "14px",
+          "id": "profile-uid",
+          "labelledBy": "react-aria6616515489-_r_4_",
+          "name": null,
+          "padding": "4px 8px",
+          "required": false,
+          "svg": null,
+          "tag": "INPUT",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 344,
+            "y": 106.890625
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "react-aria6616515489-_r_9_",
+          "labelledBy": null,
+          "name": "복사",
+          "padding": "0px",
+          "required": false,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 351,
+            "y": 113.890625
+          },
+          "tag": "BUTTON",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 36,
+            "width": 332.4375,
+            "x": 12,
+            "y": 177.1875
+          },
+          "describedBy": "react-aria6616515489-_r_e_",
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "profile-nickname",
+          "labelledBy": "react-aria6616515489-_r_c_",
+          "name": null,
+          "padding": "4px 8px",
+          "required": true,
+          "svg": null,
+          "tag": "INPUT",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 60.890625,
+            "width": 366,
+            "x": 12,
+            "y": 279.78125
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "profile-bio",
+          "labelledBy": null,
+          "name": "소개",
+          "padding": "4px 8px",
+          "required": false,
+          "svg": null,
+          "tag": "TEXTAREA",
+          "text": "Field recordings and shared listening."
+        },
+        {
+          "bounds": {
+            "height": 36,
+            "width": 366,
+            "x": 12,
+            "y": 386.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "profile-website",
+          "labelledBy": null,
+          "name": "웹사이트",
+          "padding": "4px 8px",
+          "required": false,
+          "svg": null,
+          "tag": "INPUT",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 93.5234375,
+            "x": 284.4765625,
+            "y": 435.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "react-aria6616515489-_r_t_",
+          "labelledBy": null,
+          "name": null,
+          "padding": "0px 10px",
+          "required": false,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 295.4765625,
+            "y": 442.4609375
+          },
+          "tag": "BUTTON",
+          "text": "링크 추가"
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 28,
+            "x": 12,
+            "y": 491.46875
+          },
+          "describedBy": "_r_1_",
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "",
+          "labelledBy": null,
+          "name": "변경 소셜 링크 1",
+          "padding": "0px",
+          "required": false,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 18,
+            "y": 497.46875
+          },
+          "tag": "BUTTON",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 272,
+            "x": 44,
+            "y": 474.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "profile-social-platform-0",
+          "labelledBy": null,
+          "name": "플랫폼",
+          "padding": "4px 8px",
+          "required": false,
+          "svg": null,
+          "tag": "INPUT",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 316,
+            "y": 473.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "react-aria6616515489-_r_v_",
+          "labelledBy": null,
+          "name": "제안 사항 표시",
+          "padding": "1px 6px",
+          "required": false,
+          "svg": null,
+          "tag": "BUTTON",
+          "text": "⌄"
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 302,
+            "x": 44,
+            "y": 508.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "profile-social-value-0",
+          "labelledBy": null,
+          "name": "URL 또는 사용자명",
+          "padding": "4px 8px",
+          "required": false,
+          "svg": null,
+          "tag": "INPUT",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 28,
+            "x": 350,
+            "y": 491.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "react-aria6616515489-_r_1h_",
+          "labelledBy": null,
+          "name": "제거 소셜 링크 1",
+          "padding": "0px",
+          "required": false,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 356,
+            "y": 497.46875
+          },
+          "tag": "BUTTON",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 36,
+            "width": 366,
+            "x": 12,
+            "y": 549.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "_r_2_",
+          "labelledBy": null,
+          "name": null,
+          "padding": "0px 12px",
+          "required": false,
+          "svg": null,
+          "tag": "BUTTON",
+          "text": "프로필 업데이트"
+        }
+      ],
+      "pointerCoarse": false,
+      "scrollWidth": 390,
+      "story": "pages-account-full-pages--profile",
+      "text": "Pages/Account/Full Pages · Profile한국어 · 어둡게프로필UID닉네임 *✓사용할 수 있는 닉네임입니다.소개38/500Field recordings and shared listening.웹사이트소셜 링크링크 추가⌄위쪽 및 아래쪽 화살표 키로 이 링크의 순서를 변경합니다.프로필 업데이트",
+      "viewport": [390, 844],
+      "screenshot": "previews/carbon-review/profile-390.jpg",
+      "theme": "dark",
+      "locale": "ko",
+      "state": "Profile ready with 1 social link",
+      "observedAt": "2026-10-11T17:10:23.067Z",
+      "id": "browser-10",
+      "evidenceClassification": "production-view-with-local-fixtures",
+      "currentOwnerSourcePaths": [
+        ".storybook/preview.tsx",
+        ".storybook/StoryCanvas.tsx",
+        "lib/providers/DesignSystemProvider.tsx",
+        "theme.ts",
+        "lib/styles/variables.css",
+        "lib/styles/font-assignment.css",
+        "components/core/design-tokens.ts",
+        "components/core/Control.module.css",
+        "components/core/Layout/Layout.tsx",
+        "components/core/Layout/Layout.module.css",
+        "stories/pages/MyAccountPages.stories.tsx",
+        "features/my/MyProfilePageView.tsx",
+        "features/my/ProfileForm.tsx",
+        "features/my/ui/ProfileForm/ProfileFormView.tsx",
+        "components/core/Field/Field.tsx",
+        "components/core/Field/Field.module.css",
+        "components/core/Input/InputParts.tsx"
+      ],
+      "sourceParityAtObservation": "unverified: observation-time source hashes were not captured",
+      "screenshotEvidence": {
+        "originalPath": ".artifacts/design-system/carbon-review/profile-390.png",
+        "sha256": "ac9b3798d1377edd9fadf5bc1e238ed07e4e9632981042bacc7f8b07f576ee44",
+        "mimeType": "image/jpeg",
+        "pixelDimensions": [390, 844],
+        "recordedViewport": [390, 844],
+        "dimensionsMatchRecordedViewport": true,
+        "fullViewportVisualCoverage": "dimensions match; this does not imply full-state design approval",
+        "note": "Original .png file contains JPEG bytes. Portable .jpg copy preserves those bytes without transcoding."
+      }
+    },
+    {
+      "containers": [
+        {
+          "bounds": {
+            "height": 518.671875,
+            "width": 834,
+            "x": 0,
+            "y": 33.796875
+          },
+          "maxWidth": "min(100%, 992px)"
+        }
+      ],
+      "controls": [
+        {
+          "bounds": {
+            "height": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "",
+          "labelledBy": null,
+          "name": null,
+          "padding": "10px 16px",
+          "required": false,
+          "svg": null,
+          "tag": "BUTTON",
+          "text": "Set string"
+        },
+        {
+          "bounds": {
+            "height": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "",
+          "labelledBy": null,
+          "name": null,
+          "padding": "10px 16px",
+          "required": false,
+          "svg": null,
+          "tag": "BUTTON",
+          "text": "Set string"
+        },
+        {
+          "bounds": {
+            "height": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "",
+          "labelledBy": null,
+          "name": null,
+          "padding": "10px 16px",
+          "required": false,
+          "svg": null,
+          "tag": "BUTTON",
+          "text": "Set string"
+        },
+        {
+          "bounds": {
+            "height": 36,
+            "width": 772,
+            "x": 12,
+            "y": 103.890625
+          },
+          "describedBy": null,
+          "disabled": true,
+          "fontSize": "14px",
+          "id": "profile-uid",
+          "labelledBy": "react-aria6616515489-_r_4_",
+          "name": null,
+          "padding": "4px 8px",
+          "required": false,
+          "svg": null,
+          "tag": "INPUT",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 788,
+            "y": 106.890625
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "react-aria6616515489-_r_9_",
+          "labelledBy": null,
+          "name": "복사",
+          "padding": "0px",
+          "required": false,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 795,
+            "y": 113.890625
+          },
+          "tag": "BUTTON",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 36,
+            "width": 776.4375,
+            "x": 12,
+            "y": 177.1875
+          },
+          "describedBy": "react-aria6616515489-_r_e_",
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "profile-nickname",
+          "labelledBy": "react-aria6616515489-_r_c_",
+          "name": null,
+          "padding": "4px 8px",
+          "required": true,
+          "svg": null,
+          "tag": "INPUT",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 60.890625,
+            "width": 810,
+            "x": 12,
+            "y": 279.78125
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "profile-bio",
+          "labelledBy": null,
+          "name": "소개",
+          "padding": "4px 8px",
+          "required": false,
+          "svg": null,
+          "tag": "TEXTAREA",
+          "text": "Field recordings and shared listening."
+        },
+        {
+          "bounds": {
+            "height": 36,
+            "width": 810,
+            "x": 12,
+            "y": 386.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "profile-website",
+          "labelledBy": null,
+          "name": "웹사이트",
+          "padding": "4px 8px",
+          "required": false,
+          "svg": null,
+          "tag": "INPUT",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 93.5234375,
+            "x": 728.4765625,
+            "y": 435.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "react-aria6616515489-_r_t_",
+          "labelledBy": null,
+          "name": null,
+          "padding": "0px 10px",
+          "required": false,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 739.4765625,
+            "y": 442.4609375
+          },
+          "tag": "BUTTON",
+          "text": "링크 추가"
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 28,
+            "x": 12,
+            "y": 474.96875
+          },
+          "describedBy": "_r_1_",
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "",
+          "labelledBy": null,
+          "name": "변경 소셜 링크 1",
+          "padding": "0px",
+          "required": false,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 18,
+            "y": 480.96875
+          },
+          "tag": "BUTTON",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 144,
+            "x": 44,
+            "y": 474.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "profile-social-platform-0",
+          "labelledBy": null,
+          "name": "플랫폼",
+          "padding": "4px 8px",
+          "required": false,
+          "svg": null,
+          "tag": "INPUT",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 188,
+            "y": 473.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "react-aria6616515489-_r_v_",
+          "labelledBy": null,
+          "name": "제안 사항 표시",
+          "padding": "1px 6px",
+          "required": false,
+          "svg": null,
+          "tag": "BUTTON",
+          "text": "⌄"
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 144,
+            "x": 222,
+            "y": 473.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "profile-social-value-0",
+          "labelledBy": null,
+          "name": "URL 또는 사용자명",
+          "padding": "4px 8px",
+          "required": false,
+          "svg": null,
+          "tag": "INPUT",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 28,
+            "x": 794,
+            "y": 474.96875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "react-aria6616515489-_r_1h_",
+          "labelledBy": null,
+          "name": "제거 소셜 링크 1",
+          "padding": "0px",
+          "required": false,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 800,
+            "y": 480.96875
+          },
+          "tag": "BUTTON",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 36,
+            "width": 810,
+            "x": 12,
+            "y": 516.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "_r_2_",
+          "labelledBy": null,
+          "name": null,
+          "padding": "0px 12px",
+          "required": false,
+          "svg": null,
+          "tag": "BUTTON",
+          "text": "프로필 업데이트"
+        }
+      ],
+      "pointerCoarse": false,
+      "scrollWidth": 834,
+      "story": "pages-account-full-pages--profile",
+      "text": "Pages/Account/Full Pages · Profile한국어 · 어둡게프로필UID닉네임 *✓사용할 수 있는 닉네임입니다.소개38/500Field recordings and shared listening.웹사이트소셜 링크링크 추가⌄위쪽 및 아래쪽 화살표 키로 이 링크의 순서를 변경합니다.프로필 업데이트",
+      "viewport": [834, 1024],
+      "screenshot": "previews/carbon-review/profile-834.jpg",
+      "theme": "dark",
+      "locale": "ko",
+      "state": "Profile ready with 1 social link",
+      "observedAt": "2026-10-11T17:10:23.140Z",
+      "id": "browser-11",
+      "evidenceClassification": "production-view-with-local-fixtures",
+      "currentOwnerSourcePaths": [
+        ".storybook/preview.tsx",
+        ".storybook/StoryCanvas.tsx",
+        "lib/providers/DesignSystemProvider.tsx",
+        "theme.ts",
+        "lib/styles/variables.css",
+        "lib/styles/font-assignment.css",
+        "components/core/design-tokens.ts",
+        "components/core/Control.module.css",
+        "components/core/Layout/Layout.tsx",
+        "components/core/Layout/Layout.module.css",
+        "stories/pages/MyAccountPages.stories.tsx",
+        "features/my/MyProfilePageView.tsx",
+        "features/my/ProfileForm.tsx",
+        "features/my/ui/ProfileForm/ProfileFormView.tsx",
+        "components/core/Field/Field.tsx",
+        "components/core/Field/Field.module.css",
+        "components/core/Input/InputParts.tsx"
+      ],
+      "sourceParityAtObservation": "unverified: observation-time source hashes were not captured",
+      "screenshotEvidence": {
+        "originalPath": ".artifacts/design-system/carbon-review/profile-834.png",
+        "sha256": "83b61732ec948957c1a6a13c7502f8e78261d97bacb9f792a47a65150a50743b",
+        "mimeType": "image/jpeg",
+        "pixelDimensions": [834, 1024],
+        "recordedViewport": [834, 1024],
+        "dimensionsMatchRecordedViewport": true,
+        "fullViewportVisualCoverage": "dimensions match; this does not imply full-state design approval",
+        "note": "Original .png file contains JPEG bytes. Portable .jpg copy preserves those bytes without transcoding."
+      }
+    },
+    {
+      "containers": [
+        {
+          "bounds": {
+            "height": 518.671875,
+            "width": 992,
+            "x": 224,
+            "y": 33.796875
+          },
+          "maxWidth": "min(100%, 992px)"
+        }
+      ],
+      "controls": [
+        {
+          "bounds": {
+            "height": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "",
+          "labelledBy": null,
+          "name": null,
+          "padding": "10px 16px",
+          "required": false,
+          "svg": null,
+          "tag": "BUTTON",
+          "text": "Set string"
+        },
+        {
+          "bounds": {
+            "height": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "",
+          "labelledBy": null,
+          "name": null,
+          "padding": "10px 16px",
+          "required": false,
+          "svg": null,
+          "tag": "BUTTON",
+          "text": "Set string"
+        },
+        {
+          "bounds": {
+            "height": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "",
+          "labelledBy": null,
+          "name": null,
+          "padding": "10px 16px",
+          "required": false,
+          "svg": null,
+          "tag": "BUTTON",
+          "text": "Set string"
+        },
+        {
+          "bounds": {
+            "height": 36,
+            "width": 930,
+            "x": 236,
+            "y": 103.890625
+          },
+          "describedBy": null,
+          "disabled": true,
+          "fontSize": "14px",
+          "id": "profile-uid",
+          "labelledBy": "react-aria6616515489-_r_4_",
+          "name": null,
+          "padding": "4px 8px",
+          "required": false,
+          "svg": null,
+          "tag": "INPUT",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 1170,
+            "y": 106.890625
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "react-aria6616515489-_r_9_",
+          "labelledBy": null,
+          "name": "복사",
+          "padding": "0px",
+          "required": false,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 1177,
+            "y": 113.890625
+          },
+          "tag": "BUTTON",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 36,
+            "width": 934.4375,
+            "x": 236,
+            "y": 177.1875
+          },
+          "describedBy": "react-aria6616515489-_r_e_",
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "profile-nickname",
+          "labelledBy": "react-aria6616515489-_r_c_",
+          "name": null,
+          "padding": "4px 8px",
+          "required": true,
+          "svg": null,
+          "tag": "INPUT",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 60.890625,
+            "width": 968,
+            "x": 236,
+            "y": 279.78125
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "profile-bio",
+          "labelledBy": null,
+          "name": "소개",
+          "padding": "4px 8px",
+          "required": false,
+          "svg": null,
+          "tag": "TEXTAREA",
+          "text": "Field recordings and shared listening."
+        },
+        {
+          "bounds": {
+            "height": 36,
+            "width": 968,
+            "x": 236,
+            "y": 386.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "profile-website",
+          "labelledBy": null,
+          "name": "웹사이트",
+          "padding": "4px 8px",
+          "required": false,
+          "svg": null,
+          "tag": "INPUT",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 93.5234375,
+            "x": 1110.4765625,
+            "y": 435.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "react-aria6616515489-_r_t_",
+          "labelledBy": null,
+          "name": null,
+          "padding": "0px 10px",
+          "required": false,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 1121.4765625,
+            "y": 442.4609375
+          },
+          "tag": "BUTTON",
+          "text": "링크 추가"
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 28,
+            "x": 236,
+            "y": 474.96875
+          },
+          "describedBy": "_r_1_",
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "",
+          "labelledBy": null,
+          "name": "변경 소셜 링크 1",
+          "padding": "0px",
+          "required": false,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 242,
+            "y": 480.96875
+          },
+          "tag": "BUTTON",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 144,
+            "x": 268,
+            "y": 474.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "profile-social-platform-0",
+          "labelledBy": null,
+          "name": "플랫폼",
+          "padding": "4px 8px",
+          "required": false,
+          "svg": null,
+          "tag": "INPUT",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 30,
+            "width": 30,
+            "x": 412,
+            "y": 473.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "react-aria6616515489-_r_v_",
+          "labelledBy": null,
+          "name": "제안 사항 표시",
+          "padding": "1px 6px",
+          "required": false,
+          "svg": null,
+          "tag": "BUTTON",
+          "text": "⌄"
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 144,
+            "x": 446,
+            "y": 473.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "12px",
+          "id": "profile-social-value-0",
+          "labelledBy": null,
+          "name": "URL 또는 사용자명",
+          "padding": "4px 8px",
+          "required": false,
+          "svg": null,
+          "tag": "INPUT",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 28,
+            "width": 28,
+            "x": 1176,
+            "y": 474.96875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "react-aria6616515489-_r_1h_",
+          "labelledBy": null,
+          "name": "제거 소셜 링크 1",
+          "padding": "0px",
+          "required": false,
+          "svg": {
+            "height": 16,
+            "width": 16,
+            "x": 1182,
+            "y": 480.96875
+          },
+          "tag": "BUTTON",
+          "text": ""
+        },
+        {
+          "bounds": {
+            "height": 36,
+            "width": 968,
+            "x": 236,
+            "y": 516.46875
+          },
+          "describedBy": null,
+          "disabled": false,
+          "fontSize": "14px",
+          "id": "_r_2_",
+          "labelledBy": null,
+          "name": null,
+          "padding": "0px 12px",
+          "required": false,
+          "svg": null,
+          "tag": "BUTTON",
+          "text": "프로필 업데이트"
+        }
+      ],
+      "pointerCoarse": false,
+      "scrollWidth": 1440,
+      "story": "pages-account-full-pages--profile",
+      "text": "Pages/Account/Full Pages · Profile한국어 · 어둡게프로필UID닉네임 *✓사용할 수 있는 닉네임입니다.소개38/500Field recordings and shared listening.웹사이트소셜 링크링크 추가⌄위쪽 및 아래쪽 화살표 키로 이 링크의 순서를 변경합니다.프로필 업데이트",
+      "viewport": [1440, 900],
+      "screenshot": "previews/carbon-review/profile-1440.jpg",
+      "theme": "dark",
+      "locale": "ko",
+      "state": "Profile ready with 1 social link",
+      "observedAt": "2026-10-11T17:10:23.197Z",
+      "id": "browser-12",
+      "evidenceClassification": "production-view-with-local-fixtures",
+      "currentOwnerSourcePaths": [
+        ".storybook/preview.tsx",
+        ".storybook/StoryCanvas.tsx",
+        "lib/providers/DesignSystemProvider.tsx",
+        "theme.ts",
+        "lib/styles/variables.css",
+        "lib/styles/font-assignment.css",
+        "components/core/design-tokens.ts",
+        "components/core/Control.module.css",
+        "components/core/Layout/Layout.tsx",
+        "components/core/Layout/Layout.module.css",
+        "stories/pages/MyAccountPages.stories.tsx",
+        "features/my/MyProfilePageView.tsx",
+        "features/my/ProfileForm.tsx",
+        "features/my/ui/ProfileForm/ProfileFormView.tsx",
+        "components/core/Field/Field.tsx",
+        "components/core/Field/Field.module.css",
+        "components/core/Input/InputParts.tsx"
+      ],
+      "sourceParityAtObservation": "unverified: observation-time source hashes were not captured",
+      "screenshotEvidence": {
+        "originalPath": ".artifacts/design-system/carbon-review/profile-1440.png",
+        "sha256": "60bf5e16f6d35992c597179229eb33fd018ff020c9db5e4e6dc913b028abe2e9",
+        "mimeType": "image/jpeg",
+        "pixelDimensions": [733, 900],
+        "recordedViewport": [1440, 900],
+        "dimensionsMatchRecordedViewport": false,
+        "fullViewportVisualCoverage": "unconfirmed: capture extent differs from recorded viewport",
+        "note": "Original .png file contains JPEG bytes. Portable .jpg copy preserves those bytes without transcoding.",
+        "captureLimitation": "Captured app-pane pixels differ from DOM viewport dimensions. Cause is unverified; panel changes or capture resizing are possible explanations. This is not evidence of product overflow or full-viewport visual approval."
+      }
+    },
+    {
+      "button": [
+        {
+          "busy": "true",
+          "disabled": false,
+          "labelledBy": "_r_0_",
+          "text": "Saving"
+        }
+      ],
+      "progress": [
+        {
+          "labelledBy": "_r_0_",
+          "name": null
+        }
+      ],
+      "story": "core-actions-button--loading",
+      "viewport": [1440, 900],
+      "screenshot": "previews/carbon-review/button-pending.jpg",
+      "theme": "dark",
+      "locale": "en",
+      "state": "Saving action; AX button name Saving once, ProgressBar Saving separately",
+      "observedAt": "2026-10-11T17:12:49.698Z",
+      "id": "browser-13",
+      "evidenceClassification": "core-specimen",
+      "currentOwnerSourcePaths": [
+        ".storybook/preview.tsx",
+        ".storybook/StoryCanvas.tsx",
+        "lib/providers/DesignSystemProvider.tsx",
+        "theme.ts",
+        "lib/styles/variables.css",
+        "lib/styles/font-assignment.css",
+        "components/core/design-tokens.ts",
+        "components/core/Control.module.css",
+        "components/core/Layout/Layout.tsx",
+        "components/core/Layout/Layout.module.css",
+        "components/core/Button/Button.stories.tsx",
+        "components/core/Button/Button.tsx"
+      ],
+      "sourceParityAtObservation": "unverified: observation-time source hashes were not captured",
+      "screenshotEvidence": {
+        "originalPath": ".artifacts/design-system/carbon-review/button-pending.png",
+        "sha256": "06faf9947b48b54cacbf958e21b9bedbbcbebc7c0b0d7bb5aa46c65eda1386b3",
+        "mimeType": "image/jpeg",
+        "pixelDimensions": [1425, 891],
+        "recordedViewport": [1440, 900],
+        "dimensionsMatchRecordedViewport": false,
+        "fullViewportVisualCoverage": "unconfirmed: capture extent differs from recorded viewport",
+        "note": "Original .png file contains JPEG bytes. Portable .jpg copy preserves those bytes without transcoding.",
+        "captureLimitation": "Captured app-pane pixels differ from DOM viewport dimensions. Cause is unverified; panel changes or capture resizing are possible explanations. This is not evidence of product overflow or full-viewport visual approval."
+      }
+    }
+  ],
+  "toolbarKeyboard": [
+    {
+      "key": "ArrowRight from Bold",
+      "focusName": "Italic",
+      "outline": "2px",
+      "visible": 30
+    },
+    {
+      "key": "Home",
+      "focusName": "Bold",
+      "outline": "2px"
+    },
+    {
+      "key": "End",
+      "focusName": "Align left",
+      "outline": "2px"
+    },
+    {
+      "key": "Right",
+      "focusName": "Bold",
+      "outline": "2px"
+    }
+  ],
+  "toolbarKeyboardProvenance": {
+    "observedAt": null,
+    "story": null,
+    "viewport": null,
+    "theme": null,
+    "locale": null,
+    "note": "Input evidence contains only the four key/focus/outline entries. Their labels match the Core ToolbarSurface Formatting specimen, but this does not establish the exact story context or Posts consumer keyboard behavior.",
+    "currentCandidateOwnerSources": [
+      "components/core/Section/ToolbarSurface.tsx",
+      "components/core/Section/ToolbarSurface.stories.tsx",
+      "components/core/Section/ToolbarSurface.module.css",
+      "components/core/Section/ToolbarCommand.tsx"
+    ]
+  },
+  "sourceFactsAtSnapshot": {
+    "profileContainer": {
+      "storySource": "stories/pages/MyAccountPages.stories.tsx",
+      "size": "standard",
+      "token": "62rem",
+      "pixelsAt16pxRoot": 992
+    },
+    "postsContainer": {
+      "storySource": "stories/pages/AdminContent.stories.tsx",
+      "size": "wide",
+      "token": "75rem",
+      "pixelsAt16pxRoot": 1200
+    },
+    "buttonPending": {
+      "ownerSource": "components/core/Button/Button.tsx",
+      "contract": "The current action and indeterminate ProgressBar reference the visible action label separately. Recorded action name is Saving once; aria-busy is true and native disabled is false. No pending activation interaction is recorded."
+    }
+  }
+}

@@ -1,7 +1,40 @@
+import { useEffect, useState } from 'react';
+import { Text } from '../Typography';
+import { LayoutStack } from '../Layout';
+import { LayoutInline as StoryLayoutInline } from '@/components/core/Layout';
+import { localizedRender } from '@/.storybook/fixture-i18n';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
-import { Group } from '@mantine/core';
-import { ImageUploadField } from './ImageUploadField';
+import { ImageUploadField, type ImageUploadFieldProps } from './ImageUploadField';
+function UploadPreview(args: ImageUploadFieldProps) {
+  const [imageUrl, setImageUrl] = useState(args.imageUrl);
+  const [error, setError] = useState('');
+  useEffect(() => setImageUrl(args.imageUrl), [args.imageUrl]);
+  return (
+    <LayoutStack gap="xs">
+      <ImageUploadField
+        {...args}
+        imageUrl={imageUrl}
+        onFileSelect={(file) => {
+          setError('');
+          const reader = new FileReader();
+          reader.onload = () => setImageUrl(String(reader.result));
+          reader.onerror = () => setError('Unable to read image');
+          reader.readAsDataURL(file);
+        }}
+        onValidationReject={(rejections) =>
+          setError(rejections.map(({ file, reason }) => `${file.name}: ${reason}`).join(', '))
+        }
+        onRemove={() => setImageUrl(null)}
+      />
+      {error && (
+        <Text role="alert" tone="danger">
+          {error}
+        </Text>
+      )}
+    </LayoutStack>
+  );
+}
 
 const previewImage = `data:image/svg+xml,${encodeURIComponent(`
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
@@ -12,9 +45,10 @@ const previewImage = `data:image/svg+xml,${encodeURIComponent(`
 `)}`;
 
 const meta: Meta<typeof ImageUploadField> = {
-  title: 'Core/ImageUpload',
+  title: 'Core/Media/ImageUploadField',
   component: ImageUploadField,
   parameters: { layout: 'centered' },
+  render: localizedRender((args) => <UploadPreview {...args} />),
   args: {
     alt: 'Preview',
     emptyTitle: 'Upload image',
@@ -46,9 +80,9 @@ export const Loading: Story = {
 };
 
 export const Avatar: Story = {
-  render: (args) => (
-    <Group>
-      <ImageUploadField
+  render: localizedRender((args) => (
+    <StoryLayoutInline>
+      <UploadPreview
         {...args}
         imageUrl={null}
         preview={{ mode: 'circle', width: 80, height: 80, fit: 'cover' }}
@@ -56,24 +90,23 @@ export const Avatar: Story = {
           width: 80,
           height: 80,
           minHeight: 80,
-          radius: '50%',
+          shape: 'circle',
           compact: true,
         }}
       />
-      <ImageUploadField
+      <UploadPreview
         {...args}
         imageUrl={previewImage}
         removeButtonAriaLabel="Remove avatar"
-        onRemove={() => {}}
         preview={{ mode: 'circle', width: 80, height: 80, fit: 'cover' }}
         placeholder={{
           width: 80,
           height: 80,
           minHeight: 80,
-          radius: '50%',
+          shape: 'circle',
           compact: true,
         }}
       />
-    </Group>
-  ),
+    </StoryLayoutInline>
+  )),
 };

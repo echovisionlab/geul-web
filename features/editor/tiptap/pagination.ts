@@ -326,7 +326,7 @@ export function createTiptapPaginationExtension() {
                   const total = breaks.length + 1;
                   root.dataset.paginationPageTotal = String(total);
                   root.style.setProperty(
-                    '--pages-height',
+                    '--_editor-pages-height',
                     `${total * state.height + Math.max(0, total - 1) * state.gap}px`,
                   );
                   const finalFooter = root.querySelector<HTMLElement>('[data-pagination-final-footer]');

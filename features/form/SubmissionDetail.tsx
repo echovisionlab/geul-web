@@ -1,12 +1,16 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
 import { useMemo, type ReactNode } from 'react';
+import { useTranslations } from 'next-intl';
 import { IconCheck, IconX } from '@tabler/icons-react';
-import { Group, Stack, Text } from '@mantine/core';
+
 import { LabelBadge } from '@/components/core/Badge';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
 import { getFieldKey, getFieldLabel } from '@/features/form/FormField/utils';
 import type { FormFieldSchema, FormSchema as StoredFormSchema } from '@/lib/types/form/schema';
+import { StatusIcon } from '@/components/core/Display';
 
 interface Submission {
   id: string;
@@ -29,45 +33,55 @@ export function SubmissionDetail({ submission, deleteButton }: SubmissionDetailP
   const dateTime = useDateTimeFormatter();
 
   return (
-    <Stack gap="xs">
-      <Group justify="space-between">
-        <Group>
-          <Text size="sm" c="dimmed" w={80}>
-            ID
-          </Text>
-          <Text size="sm" style={{ fontFamily: 'monospace' }}>
+    <DsLayoutStack gap="xs">
+      <DsLayoutInline justify="between">
+        <DsLayoutInline>
+          <div style={{ width: 80 }}>
+            <DsText size="sm" tone="secondary">
+              ID
+            </DsText>
+          </div>
+          <DsText font="mono" size="sm">
             {submission.id}
-          </Text>
-        </Group>
+          </DsText>
+        </DsLayoutInline>
         {deleteButton}
-      </Group>
-      <Group>
-        <Text size="sm" c="dimmed" w={80}>
-          Submitted
-        </Text>
-        <Text size="sm">
+      </DsLayoutInline>
+      <DsLayoutInline>
+        <div style={{ width: 80 }}>
+          <DsText size="sm" tone="secondary">
+            Submitted
+          </DsText>
+        </div>
+        <DsText size="sm">
           {submission.createdAt ? `${dateTime.dateTime(submission.createdAt)} (${dateTime.timeZone})` : '-'}
-        </Text>
-      </Group>
-      <Group>
-        <Text size="sm" c="dimmed" w={80}>
-          Country
-        </Text>
-        <Text size="sm">{submission.countryCode ?? '-'}</Text>
-      </Group>
-      <Group>
-        <Text size="sm" c="dimmed" w={80}>
-          IP
-        </Text>
-        <Text size="sm">{submission.ipAddress ?? '-'}</Text>
-      </Group>
-      <Group>
-        <Text size="sm" c="dimmed" w={80}>
-          User
-        </Text>
-        <Text size="sm">{submission.memberId ?? 'Anonymous'}</Text>
-      </Group>
-    </Stack>
+        </DsText>
+      </DsLayoutInline>
+      <DsLayoutInline>
+        <div style={{ width: 80 }}>
+          <DsText size="sm" tone="secondary">
+            Country
+          </DsText>
+        </div>
+        <DsText size="sm">{submission.countryCode ?? '-'}</DsText>
+      </DsLayoutInline>
+      <DsLayoutInline>
+        <div style={{ width: 80 }}>
+          <DsText size="sm" tone="secondary">
+            IP
+          </DsText>
+        </div>
+        <DsText size="sm">{submission.ipAddress ?? '-'}</DsText>
+      </DsLayoutInline>
+      <DsLayoutInline>
+        <div style={{ width: 80 }}>
+          <DsText size="sm" tone="secondary">
+            User
+          </DsText>
+        </div>
+        <DsText size="sm">{submission.memberId ?? 'Anonymous'}</DsText>
+      </DsLayoutInline>
+    </DsLayoutStack>
   );
 }
 
@@ -79,6 +93,7 @@ interface ResponsesProps {
 }
 
 function Responses({ data, schema }: ResponsesProps) {
+  const t = useTranslations('formAdmin.builder.conditions');
   const dateTime = useDateTimeFormatter();
 
   // Build field map from schema
@@ -98,9 +113,9 @@ function Responses({ data, schema }: ResponsesProps) {
 
     if (value === null || value === undefined || value === '') {
       return (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           -
-        </Text>
+        </DsText>
       );
     }
 
@@ -108,18 +123,18 @@ function Responses({ data, schema }: ResponsesProps) {
     if (field?.type === 'checkbox' || field?.type === 'switch') {
       const checked = value === true;
       return checked ? (
-        <IconCheck size={16} color="var(--mantine-color-green-6)" />
+        <StatusIcon icon={IconCheck} tone="positive" label={t('trueOption')} />
       ) : (
-        <IconX size={16} color="var(--mantine-color-gray-6)" />
+        <StatusIcon icon={IconX} tone="neutral" label={t('falseOption')} />
       );
     }
 
     // Date
     if (field?.type === 'date' && typeof value === 'string') {
       try {
-        return <Text size="sm">{dateTime.date(value)}</Text>;
+        return <DsText size="sm">{dateTime.date(value)}</DsText>;
       } catch {
-        return <Text size="sm">{value}</Text>;
+        return <DsText size="sm">{value}</DsText>;
       }
     }
 
@@ -132,12 +147,12 @@ function Responses({ data, schema }: ResponsesProps) {
     // Multiselect - show labels
     if (field?.type === 'multiselect' && Array.isArray(value)) {
       return (
-        <Group gap="xs">
+        <DsLayoutInline gap="xs">
           {value.map((v, i) => {
             const option = field.options.find((o) => o.value === v);
             return <LabelBadge key={i}>{option?.label ?? v}</LabelBadge>;
           })}
-        </Group>
+        </DsLayoutInline>
       );
     }
 
@@ -145,28 +160,28 @@ function Responses({ data, schema }: ResponsesProps) {
     if (typeof value === 'object' && 'countryCode' in value && 'nationalNumber' in value) {
       const phone = value as { countryCode: string; nationalNumber: string };
       return (
-        <Text size="sm">
+        <DsText size="sm">
           +{phone.countryCode} {phone.nationalNumber}
-        </Text>
+        </DsText>
       );
     }
 
     // Array (fallback)
     if (Array.isArray(value)) {
-      return <Text size="sm">{value.join(', ')}</Text>;
+      return <DsText size="sm">{value.join(', ')}</DsText>;
     }
 
     // Object (fallback)
     if (typeof value === 'object') {
       return (
-        <Text size="sm" style={{ fontFamily: 'monospace' }}>
+        <DsText font="mono" size="sm">
           {JSON.stringify(value)}
-        </Text>
+        </DsText>
       );
     }
 
     // Default
-    return <Text size="sm">{String(value)}</Text>;
+    return <DsText size="sm">{String(value)}</DsText>;
   };
 
   // Get ordered fields from schema
@@ -199,21 +214,19 @@ function Responses({ data, schema }: ResponsesProps) {
   }
 
   return (
-    <Stack gap="xs">
+    <DsLayoutStack gap="xs">
       {orderedFields.map(({ id, name, value }) => (
-        <Group key={id} justify="space-between" align="flex-start">
-          <Text size="sm" c="dimmed" style={{ minWidth: 120 }}>
-            {name}
-          </Text>
+        <DsLayoutInline key={id} role="group" aria-label={name} justify="between" align="start">
+          <div style={{ minWidth: 120 }}>
+            <DsText size="sm" tone="secondary">
+              {name}
+            </DsText>
+          </div>
           {renderValue(id, value)}
-        </Group>
+        </DsLayoutInline>
       ))}
-      {orderedFields.length === 0 && (
-        <Text size="sm" c="dimmed">
-          No data
-        </Text>
-      )}
-    </Stack>
+      {orderedFields.length === 0 && <SupportingText tone="secondary">No data</SupportingText>}
+    </DsLayoutStack>
   );
 }
 

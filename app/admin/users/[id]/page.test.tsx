@@ -91,14 +91,8 @@ vi.mock('@mantine/form', () => ({
   }),
 }));
 vi.mock('@mantine/hooks', () => ({ useDisclosure: () => [false, { open: vi.fn(), close: vi.fn() }] }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
-vi.mock('@mantine/core', () => ({
-  Divider: () => null,
-  Group: ({ children }: { children?: unknown }) => children,
-  Modal: ({ children }: { children?: unknown }) => children,
-  Stack: ({ children }: { children?: unknown }) => children,
-  Text: ({ children }: { children?: unknown }) => children,
-}));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
+
 vi.mock('@/components/core/Alert', () => ({ Alert: () => null }));
 vi.mock('@/components/core/Button', () => ({ Button: () => null }));
 vi.mock('@/components/core/Input', () => ({ Select: () => null, TextInput: () => null }));

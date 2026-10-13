@@ -4,6 +4,8 @@ import { memo, useEffect, useMemo, useRef } from 'react';
 import type { Editor, JSONContent } from '@tiptap/core';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { IconVariable } from '@tabler/icons-react';
+import { useLocale, useTranslations } from 'next-intl';
+import { IconButton } from '@/components/core/IconButton';
 import type { Awareness } from 'y-protocols/awareness';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
 import { normalizeRichTextHtmlLinks } from '@echovisionlab/geul-common/editor/link-normalization';
@@ -59,6 +61,7 @@ interface VariableInserterProps {
 }
 
 function VariableInserter({ availableVariables, onInsert }: VariableInserterProps) {
+  const t = useTranslations('common.actions');
   const variables = useMemo(() => {
     const source = availableVariables?.length ? availableVariables : ['site_name', 'site_origin', 'recipient_name'];
     return [...new Set(source.map((variable) => variable.trim().toLocaleLowerCase()).filter(Boolean))];
@@ -67,9 +70,9 @@ function VariableInserter({ availableVariables, onInsert }: VariableInserterProp
   return (
     <DropdownMenu size="expanded">
       <DropdownMenu.Target>
-        <button type="button" className="email-tiptap-editor__variable-button" aria-label="Insert variable">
-          <IconVariable size={18} />
-        </button>
+        <IconButton size="xs" label={t('insertVariable')}>
+          <IconVariable size={16} />
+        </IconButton>
       </DropdownMenu.Target>
       <DropdownMenu.Dropdown>
         {variables.map((variable) => (
@@ -83,6 +86,8 @@ function VariableInserter({ availableVariables, onInsert }: VariableInserterProp
 }
 
 interface EmailTiptapEditorSharedProps {
+  accessibleLabel?: string;
+  contentLanguage?: string;
   editable?: boolean;
   structureLocked?: boolean;
   availableVariables?: string[];
@@ -104,6 +109,8 @@ const IsolatedEditorContent = memo(({ editor }: { editor: Editor }) => {
 IsolatedEditorContent.displayName = 'IsolatedEditorContent';
 
 function EmailTiptapEditorRuntime({
+  accessibleLabel,
+  contentLanguage,
   blockRoomController,
   awareness,
   userName,
@@ -115,6 +122,19 @@ function EmailTiptapEditorRuntime({
   onEditorReady,
   onContentChange,
 }: EmailTiptapEditorProps) {
+  const interfaceLocale = useLocale();
+  const labels = useTranslations('common.labels');
+  const editorAttributes = useMemo(
+    () => ({
+      class: `editor-content ${classes.content}`,
+      'data-testid': 'email-campaign-tiptap-editor-content',
+      role: editable ? 'textbox' : 'document',
+      'aria-label': accessibleLabel ?? labels('content'),
+      ...(editable ? { 'aria-multiline': 'true' } : {}),
+      lang: contentLanguage ?? blockRoomController.locale ?? interfaceLocale,
+    }),
+    [accessibleLabel, blockRoomController, contentLanguage, editable, interfaceLocale, labels],
+  );
   const readyCallbackRef = useRef(onEditorReady);
   const changeCallbackRef = useRef(onContentChange);
   readyCallbackRef.current = onEditorReady;
@@ -136,10 +156,7 @@ function EmailTiptapEditorRuntime({
       immediatelyRender: false,
       shouldRerenderOnTransaction: false,
       editorProps: {
-        attributes: {
-          class: `editor-content ${classes.content}`,
-          'data-testid': 'email-campaign-tiptap-editor-content',
-        },
+        attributes: editorAttributes,
       },
       onCreate: ({ editor: currentEditor }) => readyCallbackRef.current?.(createHandle(currentEditor)),
       onUpdate: ({ editor: currentEditor }) => changeCallbackRef.current?.(createHandle(currentEditor)),
@@ -154,8 +171,11 @@ function EmailTiptapEditorRuntime({
   }, [blockRoomController, editor]);
 
   useEffect(() => {
-    editor?.setEditable(editable);
-  }, [editable, editor]);
+    if (editor && !editor.isDestroyed) {
+      editor.setEditable(editable);
+      editor.setOptions({ editorProps: { ...editor.options.editorProps, attributes: editorAttributes } });
+    }
+  }, [editable, editor, editorAttributes]);
 
   if (!editor) {
     return null;

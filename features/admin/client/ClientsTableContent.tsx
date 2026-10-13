@@ -1,7 +1,8 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
+
 import { LabelBadge } from '@/components/core/Badge';
 import { TextButton } from '@/components/core/TextButton';
 import {
@@ -72,9 +73,9 @@ function getColumns(labels: {
             {row.website.replace(/^https?:\/\//, '')}
           </TextButton>
         ) : (
-          <Text size="sm" c="dimmed">
+          <DsText size="sm" tone="secondary">
             -
-          </Text>
+          </DsText>
         ),
     },
     {
@@ -86,9 +87,9 @@ function getColumns(labels: {
       key: 'created',
       header: labels.created,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.createdAt} />
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -102,13 +103,20 @@ function getColumns(labels: {
 }
 
 interface ClientsTableContentProps {
+  deleteAction?: typeof deleteClientAction;
   result: ServerDataTableSelectableSectionProps<ClientRow>['result'];
   searchPlaceholder: string;
   filterFields: ServerDataTableSelectableSectionProps<ClientRow>['filterFields'];
   sortFields: ServerDataTableSelectableSectionProps<ClientRow>['sortFields'];
 }
 
-export function ClientsTableContent({ result, searchPlaceholder, filterFields, sortFields }: ClientsTableContentProps) {
+export function ClientsTableContent({
+  result,
+  searchPlaceholder,
+  filterFields,
+  sortFields,
+  deleteAction = deleteClientAction,
+}: ClientsTableContentProps) {
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
   const tPage = useTranslations('adminList.clients');
@@ -132,7 +140,7 @@ export function ClientsTableContent({ result, searchPlaceholder, filterFields, s
       sortFields={sortFields}
       bulkDelete={{
         entityLabel: tCommonEntities('clients'),
-        deleteAction: deleteClientAction,
+        deleteAction,
         getRowLabel: (row) => row.name || row.website || row.id,
       }}
     />

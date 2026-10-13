@@ -159,10 +159,9 @@ describe('MapView', () => {
 
     const caption = container?.querySelector<HTMLElement>('[data-public-map-caption]');
     expect(caption?.textContent).toBe('Stored viewport');
-    expect(caption?.style.textAlign).toBe('left');
-    expect(caption?.style.marginTop).toBe('0.25rem');
-    expect(caption?.style.padding).toBe('0px');
-    expect(caption?.style.fontSize).toBe('var(--mantine-font-size-sm)');
-    expect(caption?.style.lineHeight).toBe('1.55');
+    expect(caption).toHaveAttribute('data-align', 'start');
+    expect(caption).toHaveAttribute('data-size', 'xs');
+    expect(caption).toHaveAttribute('data-tone', 'muted');
+    expect(caption?.parentElement).toHaveAttribute('data-geul-layout', 'inset');
   });
 });

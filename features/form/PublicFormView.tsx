@@ -1,15 +1,22 @@
 'use client';
+import { SectionCard as DsSectionCard } from '@/components/core/Section';
+import Link from '@/components/core/Navigation';
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutContainer as DsLayoutContainer,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+import { Heading as DsHeading } from '@/components/core/Typography';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
-
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { IconEyeOff } from '@tabler/icons-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Container, Paper, Stack, Title } from '@mantine/core';
 import { Alert } from '@/components/core/Alert';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { PageLoader } from '@/features/site/PageLoader';
 import { SiteLogo } from '@/features/site/SiteLogo';
 import { FormAccessBoundary } from '@/features/form/FormAccessBoundary';
@@ -28,7 +35,12 @@ import {
 import { useSiteSettings } from '@/lib/contexts/ManifestContext';
 import { buildForm } from '@/lib/form/build';
 import { resolveSiteHref } from '@/lib/utils/site-url';
-
+export interface PublicFormBindings {
+  checkFormAccessAction: typeof checkFormAccessAction;
+  submitFormAction: typeof submitFormAction;
+  verifyFormPasswordAction: typeof verifyFormPasswordAction;
+}
+const defaultBindings: PublicFormBindings = { checkFormAccessAction, submitFormAction, verifyFormPasswordAction };
 interface PublicFormViewProps {
   slug: string;
   form: PublicFormData | null;
@@ -37,8 +49,9 @@ interface PublicFormViewProps {
   viewerCountryCode?: string | null;
   previewShareToken?: string;
   previewSharePassword?: string;
+  bindings?: PublicFormBindings;
+  navigate?: (href: string) => void;
 }
-
 export function PublicFormView({
   slug,
   form: initialForm,
@@ -47,36 +60,42 @@ export function PublicFormView({
   viewerCountryCode,
   previewShareToken,
   previewSharePassword,
+  bindings = defaultBindings,
+  navigate,
 }: PublicFormViewProps) {
   const t = useTranslations('publicForm');
   const validationMessages = useFormValidationMessages();
+  const tCommonErrors = useTranslations('common.errors');
   const router = useRouter();
   const searchParams = useSearchParams();
   const { settings } = useSiteSettings();
-
   const shareToken = previewShareToken ?? searchParams.get('share') ?? '';
   const isShareMode = !!shareToken;
   const accessReason = accessData?.reason;
   const logoHref = resolveSiteHref(settings.site_origin);
   const logoHeader = (
-    <a href={logoHref} aria-label={t('logoLinkAria')} style={{ display: 'inline-flex' }}>
+    <Link href={logoHref} appearance="graphic" aria-label={t('logoLinkAria')}>
       <SiteLogo height={16} />
-    </a>
+    </Link>
   );
-
   const renderWithHeader = (content: ReactNode) => (
-    <Box mih="100dvh" bg="var(--mantine-color-body)" style={{ display: 'flex', flexDirection: 'column' }}>
-      <Box component="header" px="xl" py="md">
-        {logoHeader}
-      </Box>
-      <Box component="main" px="xl" pb="xl" style={{ flex: 1 }}>
-        <Container size="md" px={0}>
-          {content}
-        </Container>
-      </Box>
-    </Box>
+    <div style={{ minHeight: '100dvh' }}>
+      <DsSectionCard padding="none" appearance="surface" border="none">
+        <DsLayoutStack>
+          <DsLayoutInset inline={{ base: 'md', md: 'xl' }} block="md">
+            <DsLayoutInset space="none" as="header">
+              {logoHeader}
+            </DsLayoutInset>
+          </DsLayoutInset>
+          <DsLayoutInset inline={{ base: 'md', md: 'xl' }} blockEnd="xl">
+            <DsLayoutInset flexible as="main" space="none">
+              <DsLayoutContainer size="standard">{content}</DsLayoutContainer>
+            </DsLayoutInset>
+          </DsLayoutInset>
+        </DsLayoutStack>
+      </DsSectionCard>
+    </div>
   );
-
   const [passwordVerified, setPasswordVerified] = useState(false);
   const [checkingPassword, setCheckingPassword] = useState(accessReason === 'password_required');
   const [passwordCheckError, setPasswordCheckError] = useState<unknown>(null);
@@ -101,29 +120,25 @@ export function PublicFormView({
     const search = params.toString();
     return search ? `/forms/${slug}/success?${search}` : `/forms/${slug}/success`;
   }, [requestedLocale, slug]);
-
   useEffect(() => {
     if (accessReason !== 'password_required') {
       setCheckingPassword(false);
       setPasswordVerified(false);
       return;
     }
-
     const storedPassword = sessionStorage.getItem(`form-password-${slug}`);
     if (!storedPassword) {
       setCheckingPassword(false);
       setPasswordVerified(false);
       return;
     }
-
     let cancelled = false;
     setCheckingPassword(true);
-
     const run = async () => {
       try {
-        const result = await verifyFormPasswordAction(slug, storedPassword, isShareMode ? shareToken : undefined).then(
-          unwrapQueryResult,
-        );
+        const result = await bindings
+          .verifyFormPasswordAction(slug, storedPassword, isShareMode ? shareToken : undefined)
+          .then(unwrapQueryResult);
         if (cancelled) {
           return;
         }
@@ -143,20 +158,17 @@ export function PublicFormView({
         }
       }
     };
-
     run();
-
     return () => {
       cancelled = true;
     };
   }, [accessReason, isShareMode, shareToken, slug, passwordCheckAttempt]);
-
   const needsProtectedFetch = accessReason === 'password_required' && passwordVerified;
   const protectedAccessQuery = useQuery({
     queryKey: ['form-access', slug, shareToken, passwordVerified, requestedLocale],
     queryFn: async () => {
       const storedPassword = sessionStorage.getItem(`form-password-${slug}`) ?? undefined;
-      return checkFormAccessAction({
+      return bindings.checkFormAccessAction({
         slug,
         context: 'url',
         shareToken: isShareMode ? shareToken : undefined,
@@ -168,21 +180,21 @@ export function PublicFormView({
     enabled: needsProtectedFetch,
   });
   const { data: protectedAccess, isLoading: protectedAccessLoading } = protectedAccessQuery;
-
   const form = initialForm ?? (protectedAccess?.accessible && protectedAccess.form ? protectedAccess.form : null);
   const contentPathname = isShareMode ? `/s/${shareToken}` : `/forms/${slug}`;
   const contentQuery = Object.fromEntries(searchParams.entries());
   const languageControl = form?.localizationInfo ? (
-    <Box className="print-hide" style={{ alignSelf: 'flex-end' }}>
-      <ContentLanguageMenu
-        pathname={contentPathname}
-        query={contentQuery}
-        requestedLocale={requestedLocale}
-        localizationInfo={form.localizationInfo}
-      />
-    </Box>
+    <div className="print-hide" style={{ alignSelf: 'flex-end' }}>
+      <DsLayoutInset space="none">
+        <ContentLanguageMenu
+          pathname={contentPathname}
+          query={contentQuery}
+          requestedLocale={requestedLocale}
+          localizationInfo={form.localizationInfo}
+        />
+      </DsLayoutInset>
+    </div>
   ) : null;
-
   const builtForm = useMemo(() => {
     if (!form) {
       return null;
@@ -201,20 +213,21 @@ export function PublicFormView({
       }),
     [requestedLocale, viewerCountryCode],
   );
-
   const submitForm = useMutation({
     mutationFn: (data: { formId: string; data: Record<string, unknown>; password?: string }) =>
-      submitFormAction(data.formId, data.data, data.password, requestedLocale),
+      bindings.submitFormAction(data.formId, data.data, data.password, requestedLocale),
+    onError: () => {
+      notifications.show({ message: tCommonErrors('generic'), tone: 'danger' });
+    },
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       setRedirectingToSuccess(true);
-      router.push(successPath);
+      (navigate ?? router.push)(successPath);
     },
   });
-
   const isLoading = checkingPassword || (needsProtectedFetch && protectedAccessLoading);
   if (passwordCheckError !== null || protectedAccessQuery.isError) {
     return renderWithHeader(
@@ -235,12 +248,15 @@ export function PublicFormView({
   }
   if (isLoading) {
     return (
-      <Box mih="100dvh" bg="var(--mantine-color-body)">
-        <PageLoader />
-      </Box>
+      <div style={{ minHeight: '100dvh' }}>
+        <DsSectionCard padding="none" appearance="surface" border="none">
+          <DsLayoutInset space="none">
+            <PageLoader />
+          </DsLayoutInset>
+        </DsSectionCard>
+      </div>
     );
   }
-
   if (!form) {
     return renderWithHeader(
       <FormAccessBoundary
@@ -252,38 +268,39 @@ export function PublicFormView({
       />,
     );
   }
-
   if (!builtForm) {
     return renderWithHeader(
       <FormAccessBoundary reason="server_error" slug={slug} shareToken={shareToken} mode="inline" />,
     );
   }
-
   if (isShareMode) {
     return renderWithHeader(
-      <Stack gap="md">
+      <DsLayoutStack gap="md">
         {languageControl}
         <Alert tone="warning" icon={<IconEyeOff size={16} />} title={t('previewMode.title')}>
           {t('previewMode.description')}
         </Alert>
 
-        <Paper p="xl">
-          <Stack gap="lg">
-            <Title order={2}>{form.title}</Title>
+        <DsSectionCard padding="md">
+          <DsLayoutStack gap="lg">
+            <DsHeading level={2} aria-level={1}>
+              {form.title}
+            </DsHeading>
             <FormRenderer form={builtForm} previewMode phoneDefaultCountry={phoneDefaultCountry} />
-          </Stack>
-        </Paper>
-      </Stack>,
+          </DsLayoutStack>
+        </DsSectionCard>
+      </DsLayoutStack>,
     );
   }
-
   return renderWithHeader(
-    <Stack gap="md">
+    <DsLayoutStack gap="md">
       {languageControl}
-      <Paper p="xl">
-        <Box pos="relative" aria-busy={submitForm.isPending || redirectingToSuccess}>
-          <Stack gap="lg">
-            <Title order={2}>{form.title}</Title>
+      <DsSectionCard padding="md">
+        <div style={{ position: 'relative' }} aria-busy={submitForm.isPending || redirectingToSuccess}>
+          <DsLayoutStack gap="lg">
+            <DsHeading level={2} aria-level={1}>
+              {form.title}
+            </DsHeading>
 
             <FormRenderer
               form={builtForm}
@@ -297,25 +314,19 @@ export function PublicFormView({
                 });
               }}
             />
-          </Stack>
+          </DsLayoutStack>
 
           {submitForm.isPending || redirectingToSuccess ? (
-            <Box
-              style={{
-                position: 'absolute',
-                inset: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'rgba(0, 0, 0, 0.55)',
-                zIndex: 1,
-              }}
-            >
-              <FormSubmissionPendingState minHeight={320} />
-            </Box>
+            <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
+              <DsSectionCard padding="none" appearance="overlay" border="none">
+                <DsLayoutInline align="center" justify="center">
+                  <FormSubmissionPendingState minHeight={320} />
+                </DsLayoutInline>
+              </DsSectionCard>
+            </div>
           ) : null}
-        </Box>
-      </Paper>
-    </Stack>,
+        </div>
+      </DsSectionCard>
+    </DsLayoutStack>,
   );
 }

@@ -1,49 +1,17 @@
 'use client';
 
+import { ToolbarSurface } from '@/components/core/Section';
+import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 import type { ReactNode } from 'react';
-import { Group, Paper } from '@mantine/core';
-import { IconButton } from '@/components/core/IconButton';
-import { EditorToolbarTooltip, type EditorToolbarShortcutHint } from '@/features/editor/toolbars/EditorToolbarTooltip';
+
+import { EditorToolbarAction, type EditorToolbarActionProps } from '@/features/editor/toolbars/EditorToolbarAction';
 import { useSelectionToolbarEditorTabBridge, useSelectionToolbarNavigation } from '../useSelectionToolbarNavigation';
 
-export interface SelectionMenuActionProps {
-  label: string;
-  children: ReactNode;
-  onClick?: () => void;
-  pressed?: boolean;
-  disabled?: boolean;
-  tone?: 'neutral' | 'danger';
-  testId?: string;
-  shortcut?: EditorToolbarShortcutHint;
-}
+export type SelectionMenuActionProps = Omit<EditorToolbarActionProps, 'popoverTarget' | 'focusHint'>;
 
-export function SelectionMenuAction({
-  label,
-  children,
-  onClick,
-  pressed,
-  disabled = false,
-  tone = 'neutral',
-  testId,
-  shortcut,
-}: SelectionMenuActionProps) {
-  return (
-    <EditorToolbarTooltip label={label} shortcut={shortcut}>
-      <IconButton
-        label={label}
-        tone={pressed ? 'accent' : tone}
-        emphasis={pressed ? 'medium' : 'low'}
-        size="sm"
-        aria-pressed={pressed}
-        disabled={disabled || !onClick}
-        data-testid={testId}
-        data-selection-toolbar-action=""
-        onClick={onClick}
-      >
-        {children}
-      </IconButton>
-    </EditorToolbarTooltip>
-  );
+/** Selection menus consume the shared editor toolbar command adapter. */
+export function SelectionMenuAction(props: SelectionMenuActionProps) {
+  return <EditorToolbarAction {...props} />;
 }
 
 export function SelectionMenuSurface({
@@ -65,23 +33,20 @@ export function SelectionMenuSurface({
   useSelectionToolbarEditorTabBridge(editorElement, navigation.focusFirstAction, navigationEnabled, onEscape);
 
   return (
-    <Paper
+    <ToolbarSurface
       ref={navigation.toolbarRef}
-      role="toolbar"
-      aria-label={label}
-      withBorder
-      shadow="sm"
-      p={4}
-      radius={0}
+      label={label}
+      density="compact"
+      wrap="nowrap"
       data-testid={testId}
       onKeyDownCapture={navigation.onToolbarKeyDown}
       onFocusCapture={navigation.onToolbarFocusCapture}
       onPointerDown={(event) => event.preventDefault()}
       onMouseDown={(event) => event.preventDefault()}
     >
-      <Group gap={2} wrap="nowrap">
+      <DsLayoutInline gap="xxs" wrap="nowrap">
         {children}
-      </Group>
-    </Paper>
+      </DsLayoutInline>
+    </ToolbarSurface>
   );
 }

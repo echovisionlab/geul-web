@@ -1,14 +1,20 @@
 'use client';
 
+import type { StatusBadgeTone } from '@/components/core/Badge';
+
+import { Text as DsText } from '@/components/core/Typography';
+import { LayoutInline as DsLayoutInline, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { UploadSessionStatus } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { IconCheck, IconPlayerStop, IconTriangle, IconUpload, IconX } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Group, Loader, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { Spinner as Loader } from '@/components/core/Display';
+import { notifications } from '@/components/core/Notification';
 import { IconButton } from '@/components/core/IconButton';
+import { FilePicker } from '@/components/core/Input';
 import { Tooltip } from '@/components/core/Tooltip';
 import { isClientMediaRestoreMismatchError } from '@/lib/upload/upload-errors';
 import { UploadPausedError } from '@/lib/upload/file-upload-contract';
@@ -128,7 +134,6 @@ export function TrackAudioUploader({
     fileId: string;
     attemptId: string;
   } | null>(null);
-  const inputRef = useRef<HTMLInputElement | null>(null);
   const cancelRequestedRef = useRef(false);
   const lastReportedUploadProgressRef = useRef<string | null>(null);
   const activePendingAttemptRef = useRef(String(pendingUploadAttemptId || ''));
@@ -349,14 +354,14 @@ export function TrackAudioUploader({
       if (!isUploading) {
         notifications.show({
           message: tCommon('statuses.cancelled'),
-          color: 'gray',
+          tone: 'neutral',
         });
       }
     },
     onError: (error) => {
       notifications.show({
         message: error instanceof Error ? error.message : tCommon('messages.uploadFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
@@ -460,7 +465,7 @@ export function TrackAudioUploader({
       setIsFinalizingUpload(true);
       setUploadStage('finalizing');
       setUploadProgress((current) => Math.max(current, 100));
-      notifications.show({ message: t('uploaded'), color: 'green' });
+      notifications.show({ message: t('uploaded'), tone: 'positive' });
       setCompletionRetryPending(false);
       clearPendingUpload(activeUploadAttemptId);
     } catch (error) {
@@ -471,7 +476,7 @@ export function TrackAudioUploader({
           markPendingUpload(session.fileId, activeUploadAttemptId);
         }
         if (isClientMediaRestoreMismatchError(error)) {
-          notifications.show({ message: error.message, color: 'red' });
+          notifications.show({ message: error.message, tone: 'danger' });
         }
         return;
       }
@@ -493,7 +498,7 @@ export function TrackAudioUploader({
         clearPendingUpload(activeUploadAttemptId);
         notifications.show({
           message: tCommon('statuses.cancelled'),
-          color: 'gray',
+          tone: 'neutral',
         });
         return;
       }
@@ -531,7 +536,7 @@ export function TrackAudioUploader({
             : error instanceof Error
               ? error.message
               : tCommon('messages.uploadFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     } finally {
       if (isCurrentUploadRun()) {
@@ -544,17 +549,15 @@ export function TrackAudioUploader({
     }
   };
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      void handleUpload(file);
+  const handleFileSelect = (files: File[]) => {
+    if (files[0]) {
+      void handleUpload(files[0]);
     }
-    event.target.value = '';
   };
 
   const getStatusDisplay = (): {
     label: string | null;
-    tone: 'dimmed' | 'gray' | 'blue' | 'cyan' | 'green' | 'red' | 'yellow';
+    tone: StatusBadgeTone;
     kind: 'idle' | 'warning' | 'processing' | 'ready' | 'failed';
   } => {
     const hasActiveProcessingLifecycle = Boolean(audioAttached && processingActive);
@@ -562,7 +565,7 @@ export function TrackAudioUploader({
     if (isFinalizingOperation) {
       return {
         label: mediaStatusLabels.stage.finalizing,
-        tone: 'cyan',
+        tone: 'accent',
         kind: 'processing',
       };
     }
@@ -570,25 +573,25 @@ export function TrackAudioUploader({
     if (isAnyUploadActive && isResumingCurrentUpload) {
       return {
         label: activeUploadLabel,
-        tone: activeUploadDisplay.color,
+        tone: 'accent',
         kind: 'processing',
       };
     }
 
     if (isAnyUploadActive) {
-      return { label: activeUploadLabel, tone: activeUploadDisplay.color, kind: 'processing' };
+      return { label: activeUploadLabel, tone: 'accent', kind: 'processing' };
     }
 
     if (isPendingExpired) {
-      return { label: resumeInstruction ?? t('resumeExpired'), tone: 'red', kind: 'warning' };
+      return { label: resumeInstruction ?? t('resumeExpired'), tone: 'warning', kind: 'warning' };
     }
 
     if (hasActiveProcessingLifecycle) {
-      return { label: activeLifecycleLabel ?? t('processing'), tone: 'yellow', kind: 'processing' };
+      return { label: activeLifecycleLabel ?? t('processing'), tone: 'accent', kind: 'processing' };
     }
 
     if (processingStatus === TRACK_PROCESSING_STATUS_COMPLETED) {
-      return { label: t('ready'), tone: 'green', kind: 'ready' };
+      return { label: t('ready'), tone: 'positive', kind: 'ready' };
     }
 
     if (
@@ -598,25 +601,25 @@ export function TrackAudioUploader({
       if (audioAttached) {
         return {
           label: activeLifecycleLabel ?? t('processing'),
-          tone: 'yellow',
+          tone: 'accent',
           kind: 'processing',
         };
       }
 
       return {
         label: resumeInstruction ?? (hasTrackedPendingUpload ? tIngestDialog('resumeAvailable') : null),
-        tone: hasTrackedPendingUpload ? 'yellow' : 'dimmed',
+        tone: hasTrackedPendingUpload ? 'warning' : 'neutral',
         kind: hasTrackedPendingUpload ? 'warning' : 'idle',
       };
     }
 
     if (processingStatus === TRACK_PROCESSING_STATUS_FAILED) {
-      return { label: tCommon('statuses.failed'), tone: 'red', kind: 'failed' };
+      return { label: tCommon('statuses.failed'), tone: 'danger', kind: 'failed' };
     }
 
     return {
       label: resumeInstruction ?? (hasTrackedPendingUpload ? tIngestDialog('resumeAvailable') : null),
-      tone: hasTrackedPendingUpload ? 'yellow' : 'dimmed',
+      tone: hasTrackedPendingUpload ? 'warning' : 'neutral',
       kind: hasTrackedPendingUpload ? 'warning' : 'idle',
     };
   };
@@ -654,17 +657,6 @@ export function TrackAudioUploader({
     };
   }, [reportUploadProgress]);
 
-  const uploadInput = (
-    <input
-      ref={inputRef}
-      id={inputId}
-      type="file"
-      accept={ACCEPT_TRACK_AUDIO}
-      style={{ display: 'none' }}
-      onChange={handleFileSelect}
-      disabled={isBusy}
-    />
-  );
   const uploadButtonId = `release-track-audio-upload-button-${trackId}`;
   const uploadButtonWrapperId = `release-track-audio-upload-action-${trackId}`;
   const cancelButtonId = `release-track-audio-cancel-button-${trackId}`;
@@ -685,15 +677,15 @@ export function TrackAudioUploader({
   if (mode === 'status-only') {
     if (status.kind === 'idle' || !status.label) {
       return (
-        <Text size={compact ? 'xs' : 'sm'} c="dimmed" span>
+        <DsText size={compact ? 'xs' : 'sm'} tone="secondary" as="span">
           -
-        </Text>
+        </DsText>
       );
     }
 
     return (
       <Tooltip label={status.label}>
-        <Text span>{statusIcon}</Text>
+        <DsText as="span">{statusIcon}</DsText>
       </Tooltip>
     );
   }
@@ -701,18 +693,22 @@ export function TrackAudioUploader({
   const uploadButton = showUploadButton ? (
     <div id={uploadButtonWrapperId}>
       <Tooltip label={resumeInstruction ?? t('uploadTooltip')}>
-        <label style={{ cursor: isBusy ? 'wait' : 'pointer' }}>
-          {uploadInput}
-          <IconButton
-            id={uploadButtonId}
-            size={compact ? 'sm' : 'md'}
-            loading={isBusy}
-            component="span"
-            aria-label={t('uploadTooltip')}
-          >
-            <IconUpload size={14} />
-          </IconButton>
-        </label>
+        <span>
+          <FilePicker id={inputId} accept={ACCEPT_TRACK_AUDIO} disabled={isBusy} onChange={handleFileSelect}>
+            {(onBrowse) => (
+              <IconButton
+                id={uploadButtonId}
+                size={compact ? 'sm' : 'md'}
+                loading={isBusy}
+                disabled={isBusy}
+                onClick={onBrowse}
+                aria-label={t('uploadTooltip')}
+              >
+                <IconUpload size={14} />
+              </IconButton>
+            )}
+          </FilePicker>
+        </span>
       </Tooltip>
     </div>
   ) : null;
@@ -723,7 +719,7 @@ export function TrackAudioUploader({
         <IconButton
           id={cancelButtonId}
           size={compact ? 'sm' : 'md'}
-          tone={isPendingExpired ? 'danger' : 'neutral'}
+          tone={isPendingExpired ? 'warning' : 'neutral'}
           emphasis="low"
           loading={cancelPendingUpload.isPending}
           disabled={isFinalizingOperation}
@@ -741,29 +737,31 @@ export function TrackAudioUploader({
 
   if (mode === 'button-only') {
     return (
-      <Group gap={compact ? 4 : 'xs'} wrap="nowrap">
+      <DsLayoutInline gap={compact ? 'xxs' : 'xs'} wrap="nowrap">
         {uploadButton}
         {cancelButton}
-      </Group>
+      </DsLayoutInline>
     );
   }
 
   return (
-    <Box>
-      <Group gap={compact ? 6 : 'xs'} wrap="nowrap">
+    <div>
+      <DsLayoutInline gap={compact ? 'xxs' : 'xs'} wrap="nowrap">
         <Tooltip label={status.label}>{statusIcon}</Tooltip>
         {uploadButton}
         {cancelButton}
-      </Group>
+      </DsLayoutInline>
 
       {(isResumingCurrentUpload ? activeResumeLabel : resumeInstruction) &&
       !isAnyUploadActive &&
       !cancelPendingUpload.isPending ? (
-        <Text id={resumeMessageId} size="xs" c={isPendingExpired ? 'red' : 'dimmed'} mt="xs">
-          {isResumingCurrentUpload ? activeResumeLabel : resumeInstruction}
-        </Text>
+        <DsLayoutInset blockStart="xs">
+          <DsText id={resumeMessageId} size="xs" tone={isPendingExpired ? 'warning' : 'secondary'}>
+            {isResumingCurrentUpload ? activeResumeLabel : resumeInstruction}
+          </DsText>
+        </DsLayoutInset>
       ) : null}
-    </Box>
+    </div>
   );
 }
 
@@ -776,7 +774,7 @@ function TrackAudioStatusIcon({
 }: {
   id?: string;
   kind: 'idle' | 'warning' | 'processing' | 'ready' | 'failed';
-  tone: 'dimmed' | 'gray' | 'blue' | 'cyan' | 'green' | 'red' | 'yellow';
+  tone: StatusBadgeTone;
   label: string;
   compact: boolean;
 }) {
@@ -785,39 +783,25 @@ function TrackAudioStatusIcon({
 
   if (kind === 'idle') {
     return (
-      <Text
-        id={id}
-        size={compact ? 'sm' : 'md'}
-        c="dimmed"
-        aria-label={label}
-        component="span"
-        style={{ display: 'inline-flex', lineHeight: 1 }}
-      >
+      <DsText id={id} size={compact ? 'sm' : 'md'} tone="secondary" aria-label={label} as="span">
         -
-      </Text>
+      </DsText>
     );
   }
 
   if (kind === 'processing') {
     return (
-      <Text id={id} size={compact ? 'sm' : 'md'} component="span" style={{ display: 'inline-flex', lineHeight: 1 }}>
-        <Loader id={stateIconId} size={iconSize} color={tone} aria-label={label} style={{ display: 'inline-flex' }} />
-      </Text>
+      <DsText id={id} size={compact ? 'sm' : 'md'} as="span">
+        <Loader id={stateIconId} size="xs" tone={tone} aria-label={label} />
+      </DsText>
     );
   }
 
   const Icon = kind === 'ready' ? IconCheck : kind === 'failed' ? IconX : IconTriangle;
 
   return (
-    <Text
-      id={id}
-      size={compact ? 'sm' : 'md'}
-      c={tone}
-      aria-label={label}
-      component="span"
-      style={{ display: 'inline-flex', lineHeight: 1 }}
-    >
+    <DsText id={id} size={compact ? 'sm' : 'md'} tone={tone} aria-label={label} as="span">
       <Icon id={stateIconId} size={iconSize} stroke={2.2} />
-    </Text>
+    </DsText>
   );
 }

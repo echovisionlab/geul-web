@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -25,7 +26,7 @@ vi.mock('next-intl', () => ({
 vi.mock('@mantine/hooks', () => ({
   useDebouncedCallback: (callback: (...args: unknown[]) => unknown) => callback,
 }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: mocks.notification } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: mocks.notification } }));
 vi.mock('@/features/editor/EditorHeader', () => ({
   createDraftPublishedStatusOptions: () => [],
   EditorHeader: ({
@@ -118,7 +119,7 @@ describe('ProgramEventSeriesEditor status transition', () => {
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <MantineProvider env="test">
+          <DesignSystemProvider forceColorScheme="light">
             <ProgramEventSeriesEditor
               seriesId="series-1"
               initialTitle="Series"
@@ -131,7 +132,7 @@ describe('ProgramEventSeriesEditor status transition', () => {
               siteName="Geul"
               baseUrl="https://example.test"
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </QueryClientProvider>,
       );
     });
@@ -146,7 +147,7 @@ describe('ProgramEventSeriesEditor status transition', () => {
 
     await act(async () => resolveUpdate?.({ error: 'transition failed' }));
     await vi.waitFor(() => expect(container.querySelector('[data-testid="series-status"]')?.textContent).toBe('draft'));
-    expect(mocks.notification).toHaveBeenCalledWith({ message: 'transition failed', color: 'red' });
+    expect(mocks.notification).toHaveBeenCalledWith({ message: 'transition failed', tone: 'danger' });
   });
 
   it('flushes a pending title edit before navigating back', async () => {
@@ -161,7 +162,7 @@ describe('ProgramEventSeriesEditor status transition', () => {
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <MantineProvider env="test">
+          <DesignSystemProvider forceColorScheme="light">
             <ProgramEventSeriesEditor
               seriesId="series-1"
               initialTitle="Series"
@@ -174,7 +175,7 @@ describe('ProgramEventSeriesEditor status transition', () => {
               siteName="Geul"
               baseUrl="https://example.test"
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </QueryClientProvider>,
       );
     });
@@ -197,7 +198,7 @@ describe('ProgramEventSeriesEditor status transition', () => {
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <MantineProvider env="test">
+          <DesignSystemProvider forceColorScheme="light">
             <ProgramEventSeriesEditor
               seriesId="series-1"
               initialTitle="Series"
@@ -210,7 +211,7 @@ describe('ProgramEventSeriesEditor status transition', () => {
               siteName="Geul"
               baseUrl="https://example.test"
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </QueryClientProvider>,
       );
     });
@@ -221,6 +222,6 @@ describe('ProgramEventSeriesEditor status transition', () => {
       expect(mocks.updateProgramEventSeriesAction).toHaveBeenCalledWith('series-1', { title: 'Edited series' }),
     );
     await vi.waitFor(() => expect(mocks.routerPush).not.toHaveBeenCalled());
-    expect(mocks.notification).toHaveBeenCalledWith({ message: 'saveFailed', color: 'red' });
+    expect(mocks.notification).toHaveBeenCalledWith({ message: 'saveFailed', tone: 'danger' });
   });
 });

@@ -8,6 +8,7 @@ import { resolveStandaloneExternalVideoLink } from '@/features/media/standalone-
 import { mediaContainerStyleToReact, resolveMediaContainerStyle } from '@/lib/media/shared';
 import type { Block } from '@/lib/types/page-content';
 import { DefaultBlockView } from './DefaultBlockView';
+import { PublicDocumentBlock } from './PublicDocumentBlock';
 
 const ExternalVideoView = dynamic(() =>
   import('@/features/media/ExternalVideoView').then((module) => module.ExternalVideoView),
@@ -31,14 +32,16 @@ export function PublicRichTextBlockView({
   });
   if (externalVideo) {
     return (
-      <VideoView
-        url={externalVideo.url}
-        title={externalVideo.title}
-        aspectRatio={externalVideo.aspectRatio}
-        style={mediaContainerStyleToReact(
-          resolveMediaContainerStyle(externalVideo.previewWidth, externalVideo.textAlignment),
-        )}
-      />
+      <PublicDocumentBlock id={block.id} kind="paragraph">
+        <VideoView
+          url={externalVideo.url}
+          title={externalVideo.title}
+          aspectRatio={externalVideo.aspectRatio}
+          style={mediaContainerStyleToReact(
+            resolveMediaContainerStyle(externalVideo.previewWidth, externalVideo.textAlignment),
+          )}
+        />
+      </PublicDocumentBlock>
     );
   }
 

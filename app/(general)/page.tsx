@@ -1,7 +1,10 @@
 // Server Component - no 'use client'
+
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { Center, Stack, Text, Title } from '@mantine/core';
+
 import { JsonLdScript } from '@/features/metadata/ui/JsonLdScript';
 import { PageContentView } from '@/features/page/PageView/PageContentView';
 import { PageMediaDeliveryProvider } from '@/features/page/PageMediaDeliveryContext';
@@ -76,12 +79,14 @@ export default async function HomePage({
     return (
       <>
         <JsonLdScript data={homeJsonLd} />
-        <Center mih="60vh">
-          <Stack align="center" gap="xs">
-            <Title order={1}>{t('title')}</Title>
-            <Text c="dimmed">{t('description')}</Text>
-          </Stack>
-        </Center>
+        <div style={{ minHeight: '60vh' }}>
+          <DsLayoutStack align="center" justify="center">
+            <DsLayoutStack align="center" gap="xs">
+              <DsHeading level={1}>{t('title')}</DsHeading>
+              <DsText tone="secondary">{t('description')}</DsText>
+            </DsLayoutStack>
+          </DsLayoutStack>
+        </div>
       </>
     );
   }

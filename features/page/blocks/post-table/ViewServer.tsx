@@ -1,6 +1,8 @@
+import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
-import { Group, Text } from '@mantine/core';
+
 import { ServerDataTable } from '@/features/data-table/ServerDataTable';
 import { listPublishedPostsTable } from '@/lib/queries/post';
 import { InvalidPublicTableQueryError } from '@/lib/queries/public-table';
@@ -99,18 +101,20 @@ async function PostTableViewServer({ sectionId, props, query, requestedLocale }:
   }
 
   return (
-    <div id={anchorId} style={{ scrollMarginTop: 'var(--scroll-offset, 80px)' }}>
+    <div id={anchorId} style={{ scrollMarginTop: 'var(--geul-chrome-scroll-offset)' }}>
       <MobileBlockTablePaginationScroll namespace={namespace} targetId={anchorId} />
       <ServerDataTable namespace={namespace}>
         <ServerDataTable.Toolbar>
           <ServerDataTable.Search namespace={namespace} placeholder={tCommonPlaceholders('searchPosts')} />
-          <Group gap={4}>
+          <DsLayoutInline gap="xxs">
             <ServerDataTable.MultiFilter namespace={namespace} fields={filterFields} allowLogicToggle={false} />
             <ServerDataTable.MultiSort namespace={namespace} fields={sortFields} />
-          </Group>
+          </DsLayoutInline>
         </ServerDataTable.Toolbar>
         {queryError ? (
-          <Text c="red">{queryError}</Text>
+          <DsText size="sm" tone="danger">
+            {queryError}
+          </DsText>
         ) : (
           <PostTableServerContent
             result={result}

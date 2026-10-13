@@ -1,0 +1,9 @@
+.content {
+  flex: 1;
+  min-width: min(100%, 20ch);
+}
+
+.rowTitle {
+  flex: 1;
+  min-width: 0;
+}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { useTranslations } from 'next-intl';
 import { BlockRoomMetadataError } from '@/lib/collab/block-room-metadata';
 import type { BlockRoomConnection } from '@/lib/collab/useBlockRoomConnection';
@@ -72,7 +72,7 @@ export function useDebouncedRoomMetadata<T extends object>({
         if (error instanceof BlockRoomMetadataError && error.reloadRequired) {
           currentWriter.current.connection.reloadCanonical();
         }
-        notifications.show({ message: error instanceof Error ? error.message : t('saveFailed'), color: 'red' });
+        notifications.show({ message: error instanceof Error ? error.message : t('saveFailed'), tone: 'danger' });
         throw error;
       }
     },

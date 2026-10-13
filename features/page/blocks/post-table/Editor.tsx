@@ -1,4 +1,10 @@
 'use client';
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
@@ -6,7 +12,7 @@ import { useCallback } from 'react';
 import { IconFilter, IconTable } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Divider, Group, Stack, Text } from '@mantine/core';
+
 import { LabelBadge } from '@/components/core/Badge';
 import { MultiSelect, Select, NumberInput } from '@/components/core/Input';
 import { listCategoriesAction } from '@/lib/actions/category';
@@ -88,25 +94,27 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
   );
 
   return (
-    <Box data-page-block-editor="post-table">
+    <DsLayoutStack gap="lg" data-page-block-editor="post-table">
       <QueryErrorAlert queries={[categoriesQuery, tagsQuery, seriesQuery]} />
-      <Group gap="xs" mb="md">
-        <IconTable size={18} />
-        <Text size="sm" fw={500}>
-          {tPageEditor('sectionTypes.postTable')}
-        </Text>
-        <LabelBadge size="sm" tone="neutral">
-          {tPageEditor('blockEditor.badges.rows', { count: pageSize })}
-        </LabelBadge>
-      </Group>
+      <DsLayoutInset blockEnd="md">
+        <DsLayoutInline gap="xs">
+          <IconTable size={18} />
+          <DsText size="sm" weight="medium">
+            {tPageEditor('sectionTypes.postTable')}
+          </DsText>
+          <LabelBadge size="sm" tone="neutral">
+            {tPageEditor('blockEditor.badges.rows', { count: pageSize })}
+          </LabelBadge>
+        </DsLayoutInline>
+      </DsLayoutInset>
 
-      <Stack gap="sm">
-        <Group gap="xs">
+      <DsLayoutStack gap="md">
+        <DsLayoutInline gap="xs">
           <IconFilter size={14} />
-          <Text size="xs" c="dimmed" fw={500}>
+          <DsText size="xs" tone="secondary" weight="medium">
             {tPageEditor('blockEditor.sections.defaultFilters')}
-          </Text>
-        </Group>
+          </DsText>
+        </DsLayoutInline>
 
         <MultiSelect
           label={tCommonEntities('categories')}
@@ -117,7 +125,6 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
           }))}
           value={categoryIds ? categoryIds.split(',').filter(Boolean) : []}
           onChange={(values) => updateProp('categoryIds', values.join(','))}
-          size="xs"
           searchable
           clearable
         />
@@ -128,7 +135,6 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
           data={(series ?? []).map((item) => ({ value: item.id, label: item.title }))}
           value={seriesId || null}
           onChange={(value) => updateProp('seriesId', value || '')}
-          size="xs"
           searchable
           clearable
         />
@@ -139,7 +145,6 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
           data={statusOptions}
           value={statuses ? statuses.split(',').filter(Boolean) : []}
           onChange={(values) => updateProp('statuses', values.join(','))}
-          size="xs"
           clearable
         />
 
@@ -152,7 +157,6 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
           }))}
           value={authorIds ? authorIds.split(',').filter(Boolean) : []}
           onChange={(values) => updateProp('authorIds', values.join(','))}
-          size="xs"
           searchable
           clearable
         />
@@ -163,7 +167,6 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
           data={(tags ?? []).map((tag) => ({ value: tag.id, label: tag.name }))}
           value={tagIds ? tagIds.split(',').filter(Boolean) : []}
           onChange={(values) => updateProp('tagIds', values.join(','))}
-          size="xs"
           searchable
           clearable
         />
@@ -176,7 +179,6 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
           }))}
           value={filterFields}
           onChange={(values) => updateProp('filterFields', values.join(','))}
-          size="xs"
           clearable
         />
 
@@ -188,12 +190,9 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
           }))}
           value={sortFields}
           onChange={(values) => updateProp('sortFields', values.join(','))}
-          size="xs"
           clearable
         />
-      </Stack>
-
-      <Divider my="sm" />
+      </DsLayoutStack>
 
       <NumberInput
         label={tPageEditor('blockEditor.labels.rowsPerPage')}
@@ -201,9 +200,8 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
         onChange={(value) => updateProp('pageSize', String(value || 10))}
         min={1}
         max={50}
-        size="xs"
       />
-    </Box>
+    </DsLayoutStack>
   );
 }
 

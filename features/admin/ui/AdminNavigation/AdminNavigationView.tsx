@@ -1,12 +1,17 @@
 'use client';
 
-import { useMemo, type ComponentType, type ElementType, type ReactNode } from 'react';
+import { Text as DsText } from '@/components/core/Typography';
+import { LayoutInset as DsLayoutInset, LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { useMemo, type ComponentType, type ReactNode } from 'react';
 import { IconArrowLeft, IconMoon, IconSun, IconSunMoon, type IconProps } from '@tabler/icons-react';
-import { Stack, Text } from '@mantine/core';
+
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { SideNavigation, type SideNavigationMode, type SideNavigationSection } from '@/components/core/SideNavigation';
 import { Tooltip } from '@/components/core/Tooltip';
+import Link from '@/components/core/Navigation';
+import { SectionCard } from '@/components/core/Section';
+import { Separator, ScrollArea } from '@/components/core/Display';
 import classes from './AdminNavigationView.module.css';
 
 export interface AdminNavigationItem {
@@ -49,7 +54,6 @@ export interface AdminNavigationViewProps {
   events: AdminNavigationEvents;
   logoSlot: ReactNode;
   compactLogoSlot: ReactNode;
-  linkComponent?: ElementType;
 }
 
 /** Pure admin navigation composition. Routing, translations, and responsive state live in its controller. */
@@ -62,9 +66,7 @@ export function AdminNavigationView({
   events,
   logoSlot,
   compactLogoSlot,
-  linkComponent,
 }: AdminNavigationViewProps) {
-  const LinkComponent = linkComponent ?? 'a';
   const compact = mode === 'compact';
   const themeTooltip =
     colorScheme === 'dark' ? labels.lightMode : colorScheme === 'light' ? labels.darkMode : labels.toggleColorScheme;
@@ -99,99 +101,105 @@ export function AdminNavigationView({
   );
 
   const logoLink = (
-    <LinkComponent
+    <Link
       href="/admin"
-      className={classes.logoLink}
+      appearance="block"
       aria-label={compact ? labels.compactLabel : undefined}
       onClick={() => events.onNavigate('/admin')}
     >
-      {compact ? compactLogoSlot : logoSlot}
+      <DsLayoutInset inline={compact ? 'none' : 'sm'}>{compact ? compactLogoSlot : logoSlot}</DsLayoutInset>
       {compact ? null : (
-        <Text size="xs" c="dimmed" fw={500} mt={4}>
-          {labels.subtitle}
-        </Text>
+        <DsLayoutInset blockStart="xxs">
+          <DsText size="xs" tone="secondary" weight="medium">
+            {labels.subtitle}
+          </DsText>
+        </DsLayoutInset>
       )}
-    </LinkComponent>
+    </Link>
   );
 
   return (
     <div className={classes.root} data-admin-navigation data-mode={mode}>
-      <header className={classes.header}>{compact ? <Stack align="center">{logoLink}</Stack> : logoLink}</header>
+      <header>
+        <SectionCard padding="none" border="block-end" appearance="plain">
+          <DsLayoutInset block="xxs">
+            {compact ? <DsLayoutStack align="center">{logoLink}</DsLayoutStack> : logoLink}
+          </DsLayoutInset>
+        </SectionCard>
+      </header>
 
-      <div className={classes.navigationViewport} data-admin-navigation-viewport>
+      <ScrollArea grow scrollbars="y" data-admin-navigation-viewport>
         <SideNavigation
           ariaLabel={labels.navigation}
           sections={navigationSections}
           mode={mode}
           showExpandedIcons={false}
           openSectionKeys={openSectionKeys}
-          linkComponent={LinkComponent}
           onToggleSection={events.onToggleSection}
           onSelectItem={(item) => events.onNavigate(item.href)}
         />
-      </div>
+      </ScrollArea>
 
-      <footer className={classes.footer}>
-        {compact ? (
-          <>
-            <Tooltip label={themeTooltip}>
-              <IconButton
-                size={40}
+      <Separator />
+      <DsLayoutInset as="footer" blockStart="xxs">
+        <DsLayoutStack gap="none" align={compact ? 'center' : 'stretch'}>
+          {compact ? (
+            <>
+              <Tooltip label={themeTooltip}>
+                <IconButton
+                  size="chrome"
+                  tone="neutral"
+                  emphasis="low"
+                  onClick={events.onToggleColorScheme}
+                  aria-label={labels.toggleColorScheme}
+                >
+                  {themeIcon}
+                </IconButton>
+              </Tooltip>
+              <Tooltip label={labels.backToSite}>
+                <IconButton
+                  href="/"
+                  size="chrome"
+                  tone="neutral"
+                  emphasis="low"
+                  aria-label={labels.backToSite}
+                  onClick={() => events.onNavigate('/')}
+                >
+                  <IconArrowLeft size={16} aria-hidden />
+                </IconButton>
+              </Tooltip>
+            </>
+          ) : (
+            <>
+              <Button
+                type="button"
+                size="xs"
+                fullWidth
+                justify="start"
                 tone="neutral"
                 emphasis="low"
                 onClick={events.onToggleColorScheme}
                 aria-label={labels.toggleColorScheme}
+                data-admin-navigation-action="theme"
               >
-                {themeIcon}
-              </IconButton>
-            </Tooltip>
-            <Tooltip label={labels.backToSite}>
-              <IconButton
-                component={LinkComponent as 'a'}
+                {themeTooltip}
+              </Button>
+              <Button
                 href="/"
-                size={40}
+                size="xs"
+                fullWidth
+                justify="start"
                 tone="neutral"
                 emphasis="low"
-                aria-label={labels.backToSite}
                 onClick={() => events.onNavigate('/')}
+                data-admin-navigation-action="back"
               >
-                <IconArrowLeft size={16} aria-hidden />
-              </IconButton>
-            </Tooltip>
-          </>
-        ) : (
-          <>
-            <Button
-              type="button"
-              size="xs"
-              fullWidth
-              justify="flex-start"
-              tone="neutral"
-              emphasis="low"
-              className={classes.footerAction}
-              onClick={events.onToggleColorScheme}
-              aria-label={labels.toggleColorScheme}
-              data-admin-navigation-action="theme"
-            >
-              {themeTooltip}
-            </Button>
-            <Button
-              component={LinkComponent as 'a'}
-              href="/"
-              size="xs"
-              fullWidth
-              justify="flex-start"
-              tone="neutral"
-              emphasis="low"
-              className={classes.footerAction}
-              onClick={() => events.onNavigate('/')}
-              data-admin-navigation-action="back"
-            >
-              {labels.backToSite}
-            </Button>
-          </>
-        )}
-      </footer>
+                {labels.backToSite}
+              </Button>
+            </>
+          )}
+        </DsLayoutStack>
+      </DsLayoutInset>
     </div>
   );
 }

@@ -1,8 +1,11 @@
 'use client';
 
+import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Avatar, Group, Text } from '@mantine/core';
-import { badgeToneFromColor, statusToneFromColor, LabelBadge, StatusBadge } from '@/components/core/Badge';
+
+import { Avatar } from '@/components/core/Display';
+import { LabelBadge, StatusBadge, type StatusTone } from '@/components/core/Badge';
 import { DateTime } from '@/features/date-time/DateTime';
 import { TextButton } from '@/components/core/TextButton';
 import {
@@ -25,16 +28,9 @@ interface ReleaseRow {
   artworkUrl: string | null;
 }
 
-const TYPE_COLORS: Record<string, string> = {
-  album: 'blue',
-  ep: 'green',
-  single: 'orange',
-  compilation: 'grape',
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  draft: 'gray',
-  published: 'green',
+const STATUS_TONES: Record<string, StatusTone> = {
+  draft: 'neutral',
+  published: 'positive',
 };
 
 function getColumns(labels: {
@@ -52,28 +48,31 @@ function getColumns(labels: {
       key: 'release',
       header: labels.release,
       cell: (row) => (
-        <Group gap="sm">
-          <Avatar src={buildManagedImageUrl(row.artworkUrl, MANAGED_IMAGE_PRESET.COVER_THUMB)} size="md" radius="sm">
-            {(row.title || 'U').charAt(0)}
-          </Avatar>
+        <DsLayoutInline gap="sm">
+          <Avatar
+            src={buildManagedImageUrl(row.artworkUrl, MANAGED_IMAGE_PRESET.COVER_THUMB)}
+            size="md"
+            shape="square"
+            name={row.title}
+          />
           <div>
             <TextButton href={`/releases/${row.id}?edit=true`} size="sm" weight="medium" appearance="default">
               {row.title || labels.untitled}
             </TextButton>
             {row.slug && (
-              <Text size="xs" c="dimmed">
+              <DsText size="xs" tone="secondary">
                 /{row.slug}
-              </Text>
+              </DsText>
             )}
           </div>
-        </Group>
+        </DsLayoutInline>
       ),
     },
     {
       key: 'type',
       header: labels.type,
       cell: (row) => (
-        <LabelBadge appearance="soft" size="sm" tone={badgeToneFromColor(TYPE_COLORS[row.type] || 'gray')}>
+        <LabelBadge appearance="soft" size="sm" tone="neutral">
           {(() => {
             const normalizedType = normalizeEnumToken(row.type);
             switch (normalizedType) {
@@ -96,20 +95,16 @@ function getColumns(labels: {
       key: 'releaseDate',
       header: labels.releaseDate,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.releaseDate} timeZone="UTC" />
-        </Text>
+        </DsText>
       ),
     },
     {
       key: 'status',
       header: labels.status,
       cell: (row) => (
-        <StatusBadge
-          appearance="dot"
-          size="sm"
-          tone={statusToneFromColor(STATUS_COLORS[normalizeEnumToken(row.status)] || 'gray')}
-        >
+        <StatusBadge appearance="dot" size="sm" tone={STATUS_TONES[normalizeEnumToken(row.status)] ?? 'neutral'}>
           {normalizeEnumToken(row.status) === 'published'
             ? labels.published
             : normalizeEnumToken(row.status) === 'draft'
@@ -129,6 +124,7 @@ function getColumns(labels: {
 }
 
 interface ReleasesTableContentProps {
+  deleteAction?: typeof deleteReleaseAction;
   result: ServerDataTableSelectableSectionProps<ReleaseRow>['result'];
   searchPlaceholder: string;
   filterFields: ServerDataTableSelectableSectionProps<ReleaseRow>['filterFields'];
@@ -137,6 +133,7 @@ interface ReleasesTableContentProps {
 
 export function ReleasesTableContent({
   result,
+  deleteAction = deleteReleaseAction,
   searchPlaceholder,
   filterFields,
   sortFields,
@@ -173,7 +170,7 @@ export function ReleasesTableContent({
       sortFields={sortFields}
       bulkDelete={{
         entityLabel: tCommonEntities('releases'),
-        deleteAction: deleteReleaseAction,
+        deleteAction,
         getRowLabel: (row) => row.title || row.slug || row.id,
       }}
     />

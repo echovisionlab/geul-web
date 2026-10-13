@@ -1,0 +1,79 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  min-height: var(--geul-control-height-xs);
+  gap: var(--geul-spacing-xs);
+}
+
+.headerActions {
+  flex-shrink: 0;
+}
+
+.wrapper {
+  position: relative;
+  min-width: 0;
+}
+
+.dropzone {
+  min-width: 0;
+  outline: none;
+}
+
+.trigger {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+.trigger[data-disabled] {
+  cursor: default;
+}
+
+.trigger[data-focus-visible],
+.dropzone[data-focus-visible] {
+  outline: var(--geul-border-focus) solid var(--geul-focus);
+  outline-offset: var(--geul-border-focus);
+}
+
+.frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--geul-surface);
+  border-radius: var(--geul-radius-square);
+}
+
+.frame[data-shape='circle'] {
+  border-radius: var(--geul-radius-circle);
+}
+
+.frame[data-surface='muted'] {
+  background: var(--geul-surface-muted);
+}
+
+.frame[data-surface='transparent'] {
+  background: transparent;
+}
+
+.frame[data-border] {
+  border: var(--geul-border-thin) solid var(--geul-border-default);
+}
+
+.frame[data-drop-active] {
+  border-color: var(--geul-focus);
+}
+
+.empty {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}

@@ -1,10 +1,13 @@
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { PassThrough } from 'node:stream';
 import type { ReactNode } from 'react';
 import { renderToPipeableStream } from 'react-dom/server';
-import { MantineProvider } from '@mantine/core';
+
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 import enMessages from '@/messages/en.json';
+import { selectClientMessages } from '@/lib/i18n/client-messages';
+import { prepareSocialLinksDisplay } from '@/features/social-links/prepare-social-links-display';
 import { ArtistListViewClient } from './ViewClient';
 import { parseArtistListProps } from './schema';
 import { AuthorListViewClient } from '../author-list/ViewClient';
@@ -42,7 +45,7 @@ vi.mock('next/dynamic', async () => {
   };
 });
 
-function renderServer(node: ReactNode) {
+function renderServer(node: ReactNode, messages: Partial<typeof enMessages> = enMessages) {
   return new Promise<string>((resolve, reject) => {
     const output = new PassThrough();
     let html = '';
@@ -52,8 +55,10 @@ function renderServer(node: ReactNode) {
     output.on('end', () => resolve(html));
     output.on('error', reject);
     const stream = renderToPipeableStream(
-      <NextIntlClientProvider locale="en" messages={enMessages} timeZone="UTC">
-        <MantineProvider>{node}</MantineProvider>
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <DesignSystemProvider locale="en" forceColorScheme="light">
+          {node}
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
       {
         onAllReady() {
@@ -77,7 +82,7 @@ describe('optional list runtime boundaries', () => {
       {
         node: (
           <ArtistListViewClient
-            artists={[{ ...item, socialLinks: null }]}
+            artists={[{ ...item, socialLinkEntries: [] }]}
             parsedProps={parseArtistListProps(listProps)}
           />
         ),
@@ -184,4 +189,31 @@ describe('optional list runtime boundaries', () => {
       expect(probes.loads).toBe(index + 1);
     }
   }, 15_000);
+
+  it('renders public collection empty states with the reduced anonymous catalogue', async () => {
+    const publicMessages = selectClientMessages(enMessages, { pathWithSearch: '/' });
+    expect(publicMessages).not.toHaveProperty('adminList');
+    const nodes = [
+      <ArtistListViewClient key="artists" artists={[]} parsedProps={parseArtistListProps(listProps)} />,
+      <LabelListViewClient key="labels" labels={[]} parsedProps={parseLabelListProps(listProps)} />,
+      <ReleaseListViewClient key="releases" releases={[]} parsedProps={parseReleaseListProps(listProps)} />,
+    ];
+    const copy = ['No artists found.', 'No labels found.', 'No releases found.'];
+    for (const [index, node] of nodes.entries()) {
+      const html = await renderServer(node, publicMessages);
+      expect(html).toContain(copy[index]);
+      expect(html).not.toContain('adminList');
+    }
+  }, 15_000);
+
+  it('renders server-prepared artist social links without the client icon catalog', async () => {
+    const html = await renderServer(
+      <ArtistListViewClient
+        artists={[{ ...item, socialLinkEntries: prepareSocialLinksDisplay({ instagram: 'https://instagram.com/a' }) }]}
+        parsedProps={parseArtistListProps(listProps)}
+      />,
+    );
+    expect(html).toContain('href="https://instagram.com/a"');
+    expect(html).toContain('<svg');
+  });
 });

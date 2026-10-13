@@ -184,16 +184,47 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Lint JavaScript and TypeScript
         run: pnpm lint
+      - name: Check translation catalogues against English and client message scopes
+        run: pnpm i18n:check
       - name: Lint stylesheets
         run: pnpm lint:styles
+      - name: Check design tokens and inventory freshness
+        run: pnpm design-system:check
+      - name: Test design-system enforcement
+        run: pnpm design-system:test
+      - name: Verify accepted and rejected Core presentation contracts
+        run: pnpm design-system:typecheck
+      - name: Check light and dark color contrast contracts
+        run: pnpm design-system:test:contrast
       - name: Prepare MapLibre worker
         run: pnpm prepare:maplibre-worker
       - name: Prepare p5 runtime
         run: pnpm prepare:p5-runtime
       - name: Build with TypeScript 7
         run: pnpm build
+      - name: Check per-route first-load client bundle budget
+        run: pnpm perf:bundle
       - name: Build Storybook catalog
         run: pnpm storybook:build
+      - name: Typecheck interactive preview sources
+        run: pnpm storybook:typecheck
+      - name: Install Chromium for Storybook accessibility tests
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Check accessibility and keyboard behavior of Core controls and post authoring
+        run: |
+          pnpm storybook:preview > /tmp/geul-storybook-preview.log 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:6010/index.json > /dev/null; then
+              pnpm storybook:test:a11y --ci
+              pnpm storybook:test:author --ci
+              exit $?
+            fi
+            sleep 1
+          done
+          cat /tmp/geul-storybook-preview.log
+          exit 1
 
   unit:
     name: Unit tests (${{ matrix.shard }}/2)

@@ -1,10 +1,14 @@
 'use client';
+import { LayoutInline as DsLayoutInline, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
+import { useTranslations } from 'next-intl';
+
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Group, Pagination } from '@mantine/core';
+
+import { Pagination } from '@/components/core/Display';
 import { listLabelsForBlockAction } from '@/lib/actions/label';
 import { parseBooleanProp, parseIntegerProp } from '../list-view-utils';
 import { ListBlockSkeleton } from '../ListBlockSkeleton';
@@ -13,6 +17,7 @@ import { parseLabelListProps } from './schema';
 import { LabelListViewClient } from './ViewClient';
 
 export function LabelListView({ props }: BlockViewProps) {
+  const tPagination = useTranslations('dataTable.pagination');
   const p = parseLabelListProps(props);
   const [page, setPage] = useState(1);
   const sortBy = p.sortBy || 'name';
@@ -43,6 +48,9 @@ export function LabelListView({ props }: BlockViewProps) {
         columns={columns}
         limit={Math.min(limit, 12)}
         layout={p.layout}
+        itemSize={p.itemSize}
+        showImage={p.showImage !== 'false'}
+        imageAspectRatio={p.imageAspectRatio}
         carouselLoop={p.carouselLoop !== 'false'}
         carouselIndicators={p.carouselIndicators !== 'false'}
       />
@@ -65,9 +73,20 @@ export function LabelListView({ props }: BlockViewProps) {
       />
 
       {showPagination && data.pagination.total > limit ? (
-        <Group justify="center" mt="md">
-          <Pagination total={Math.ceil(data.pagination.total / limit)} value={page} onChange={setPage} />
-        </Group>
+        <DsLayoutInset blockStart="md">
+          <DsLayoutInline justify="center">
+            <Pagination
+              total={Math.ceil(data.pagination.total / limit)}
+              value={page}
+              onChange={setPage}
+              labels={{
+                previousPage: tPagination('previousPage'),
+                nextPage: tPagination('nextPage'),
+                page: (page) => tPagination('page', { page }),
+              }}
+            />
+          </DsLayoutInline>
+        </DsLayoutInset>
       ) : null}
     </>
   );

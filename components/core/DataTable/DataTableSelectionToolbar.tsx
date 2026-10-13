@@ -1,5 +1,8 @@
+import { Text } from '../Typography';
+import { ToolbarLayout } from '../Section/ToolbarLayout';
+import { LayoutInline as DsLayoutInline } from '../Layout';
+
 import type { ReactNode } from 'react';
-import { Group, Text } from '@mantine/core';
 
 export interface DataTableSelectionToolbarProps {
   search: ReactNode;
@@ -17,20 +20,25 @@ export function DataTableSelectionToolbar({
   actions,
 }: DataTableSelectionToolbarProps) {
   return (
-    <Group justify="space-between" wrap="wrap" gap="sm" style={{ width: '100%' }}>
-      <Group gap="sm" wrap="wrap" style={{ flex: 1, minWidth: 0 }}>
-        {search}
-        {selectedCountLabel ? (
-          <Text size="sm" c="dimmed">
-            {selectedCountLabel}
-          </Text>
-        ) : null}
-      </Group>
-      <Group gap={4} wrap="wrap" justify="flex-end" style={{ marginLeft: 'auto' }}>
-        {filters}
-        {sorts}
-        {actions}
-      </Group>
-    </Group>
+    <ToolbarLayout
+      arrangement="actions-end"
+      search={
+        <DsLayoutInline gap="xs" wrap="wrap" flexible>
+          {search}
+          {selectedCountLabel ? (
+            <Text size="xs" tone="secondary" truncate>
+              {selectedCountLabel}
+            </Text>
+          ) : null}
+        </DsLayoutInline>
+      }
+      filters={
+        <DsLayoutInline gap="xxs" wrap="wrap">
+          {filters}
+          {sorts}
+        </DsLayoutInline>
+      }
+      actions={actions}
+    />
   );
 }

@@ -1,8 +1,11 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
-import type { ReactNode } from 'react';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+
+import { useId, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { Stack, Text } from '@mantine/core';
+
 import { SectionCard } from '@/components/core/Section';
 
 interface Props {
@@ -14,25 +17,36 @@ interface Props {
 
 export function ActiveEditLocaleContentPreviewView({ localeLabel, hasLiveRow, loading, children }: Props) {
   const t = useTranslations('translationPanel.activeEditLocale');
+  const titleId = useId();
+  const descriptionId = useId();
   return (
-    <SectionCard withBorder p="md" style={{ minHeight: 300 }}>
-      <Stack gap="sm">
-        <Text size="sm" fw={500}>
-          {t('bodyPreviewTitle', { locale: localeLabel })}
-        </Text>
-        <Text size="xs" c="dimmed">
-          {hasLiveRow
-            ? t('bodyPreviewDescription', { locale: localeLabel })
-            : t('missingDescription', { locale: localeLabel })}
-        </Text>
-        {loading ? (
-          <Text size="sm" c="dimmed">
-            {t('loading')}
-          </Text>
-        ) : (
-          children
-        )}
-      </Stack>
-    </SectionCard>
+    <div style={{ minHeight: 300 }}>
+      <SectionCard
+        withBorder
+        padding="md"
+        role="group"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+        aria-busy={loading}
+      >
+        <DsLayoutStack gap="sm">
+          <DsText id={titleId} size="sm" weight="medium">
+            {t('bodyPreviewTitle', { locale: localeLabel })}
+          </DsText>
+          <DsText id={descriptionId} size="xs" tone="secondary">
+            {hasLiveRow
+              ? t('bodyPreviewDescription', { locale: localeLabel })
+              : t('missingDescription', { locale: localeLabel })}
+          </DsText>
+          {loading ? (
+            <SupportingText tone="secondary" role="status">
+              {t('loading')}
+            </SupportingText>
+          ) : (
+            children
+          )}
+        </DsLayoutStack>
+      </SectionCard>
+    </div>
   );
 }

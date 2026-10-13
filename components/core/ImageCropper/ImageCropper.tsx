@@ -1,13 +1,24 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
-import ReactCrop, { centerCrop, makeAspectCrop, type PercentCrop, type PixelCrop } from 'react-image-crop';
-import { Box, Group, Loader, Modal, Stack, Text } from '@mantine/core';
+import { useCallback, useId, useRef, useState } from 'react';
+import { VisuallyHidden } from 'react-aria-components';
+import ReactCrop, {
+  centerCrop,
+  makeAspectCrop,
+  type PercentCrop,
+  type PixelCrop,
+  type ReactCropProps,
+} from 'react-image-crop';
+import { LayoutInline } from '../Layout';
+import { Text } from '../Typography';
+import { ContentModal, DialogActions } from '../Modal';
+import { Spinner as Loader } from '../Display';
 import { Button } from '../Button';
 import { cropImage } from './image-crop';
 import { clampToAspectRange } from './aspect-range';
 
 import 'react-image-crop/dist/ReactCrop.css';
+import classes from './ImageCropper.module.css';
 
 /** Aspect ratio configuration */
 export type AspectRatioConfig =
@@ -15,7 +26,15 @@ export type AspectRatioConfig =
   | 'free' // No aspect ratio constraint
   | { min: number; max: number }; // Range constraint (e.g., 9/16 to 16/9)
 
+export interface CropAccessibility {
+  labels: NonNullable<ReactCropProps['ariaLabels']>;
+  describeSelection: (crop: PercentCrop) => string;
+  instructions?: string;
+}
+
 export interface ImageCropperProps {
+  /** Semantic copy is separate from the displayed title, preview and actions. */
+  cropAccessibility?: CropAccessibility;
   /** Image source (data URL or blob URL) */
   imageSrc: string;
   /** Whether the modal is open */
@@ -134,7 +153,11 @@ export function ImageCropper({
   maxOutputWidth,
   maxOutputHeight,
   outputQuality,
+  cropAccessibility,
 }: ImageCropperProps) {
+  const helpId = useId();
+  const selectionId = useId();
+  const instructionsId = useId();
   const [crop, setCrop] = useState<PercentCrop>();
   const [completedCrop, setCompletedCrop] = useState<PercentCrop>();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -205,50 +228,80 @@ export function ImageCropper({
   const reactCropAspect = typeof aspectRatio === 'number' ? aspectRatio : undefined;
 
   return (
-    <Modal opened={opened} onClose={onClose} title={title} size="lg" centered>
-      <Stack gap="md">
-        <Box style={{ maxHeight: '60dvh', overflow: 'auto' }}>
+    <ContentModal
+      opened={opened}
+      onClose={onClose}
+      title={title}
+      closeLabel={labels.cancel}
+      size="large"
+      bodyLayout="fit"
+      loading={isProcessing}
+      centered
+    >
+      <div className={classes.content}>
+        <div
+          className={classes.stage}
+          role="group"
+          aria-label={title}
+          aria-describedby={
+            [
+              helpText ? helpId : null,
+              cropAccessibility?.instructions ? instructionsId : null,
+              cropAccessibility && completedCrop ? selectionId : null,
+            ]
+              .filter(Boolean)
+              .join(' ') || undefined
+          }
+          aria-busy={isProcessing || undefined}
+        >
           <ReactCrop
+            className={classes.cropper}
+            ariaLabels={cropAccessibility?.labels}
+            disabled={isProcessing}
             crop={crop}
             onChange={handleCropChange}
             onComplete={handleCropComplete}
             aspect={reactCropAspect}
             circularCrop={circularCrop}
           >
-            <img
-              ref={imgRef}
-              src={imageSrc}
-              alt={labels.previewAlt}
-              onLoad={onImageLoad}
-              style={{ maxWidth: '100%' }}
-            />
+            <img ref={imgRef} src={imageSrc} alt={labels.previewAlt} onLoad={onImageLoad} className={classes.image} />
           </ReactCrop>
-        </Box>
+        </div>
 
+        {cropAccessibility ? (
+          <>
+            {cropAccessibility.instructions ? (
+              <VisuallyHidden id={instructionsId}>{cropAccessibility.instructions}</VisuallyHidden>
+            ) : null}
+            <VisuallyHidden id={selectionId} role="status" aria-live="polite" aria-atomic="true">
+              {completedCrop ? cropAccessibility.describeSelection(completedCrop) : null}
+            </VisuallyHidden>
+          </>
+        ) : null}
         {helpText && (
-          <Text size="xs" c="dimmed">
+          <Text id={helpId} size="xs" tone="muted">
             {helpText}
           </Text>
         )}
 
         {isProcessing && processingLabel ? (
-          <Group gap="xs" justify="flex-end">
+          <LayoutInline gap="xs" justify="end" role="status" aria-live="polite">
             <Loader size="xs" />
-            <Text size="xs" c="dimmed">
+            <Text size="xs" tone="muted">
               {processingLabel}
             </Text>
-          </Group>
+          </LayoutInline>
         ) : null}
 
-        <Group justify="flex-end">
-          <Button tone="neutral" emphasis="medium" onClick={onClose}>
+        <DialogActions>
+          <Button tone="neutral" emphasis="medium" onClick={onClose} disabled={isProcessing}>
             {labels.cancel}
           </Button>
-          <Button onClick={handleConfirm} loading={isProcessing} disabled={!completedCrop}>
+          <Button emphasis="strong" onClick={handleConfirm} loading={isProcessing} disabled={!completedCrop}>
             {labels.confirm}
           </Button>
-        </Group>
-      </Stack>
-    </Modal>
+        </DialogActions>
+      </div>
+    </ContentModal>
   );
 }

@@ -1,11 +1,13 @@
+/* Source notation and Monaco viewport measurements stay LTR in every UI locale. */
 .root {
+  direction: ltr;
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
-  border: 1px solid var(--mantine-color-default-border);
-  background: var(--mantine-color-body);
+  border: 1px solid var(--geul-border-default);
+  background: var(--geul-background);
 }
 
 .root :global(.monaco-editor),
@@ -22,6 +24,6 @@
   display: grid;
   min-height: 10rem;
   place-items: center;
-  color: var(--mantine-color-dimmed);
-  font-size: var(--mantine-font-size-sm);
+  color: var(--geul-text-muted);
+  font-size: var(--geul-font-size-sm);
 }

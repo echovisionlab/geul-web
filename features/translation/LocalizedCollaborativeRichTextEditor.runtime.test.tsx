@@ -60,11 +60,8 @@ vi.mock('@/features/editor/MapInsertModal', () => ({ MapInsertModal: () => null 
 vi.mock('@/features/editor/contexts/EditorMediaIngestContext', () => ({
   EditorMediaIngestProvider: ({ children }: { children: ReactNode }) => children,
 }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@mantine/core', () => ({
-  Box: ({ children, ...props }: { children?: ReactNode }) => <div {...props}>{children}</div>,
-}));
 
 let root: Root | null = null;
 let host: HTMLDivElement | null = null;

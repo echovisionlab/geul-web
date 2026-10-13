@@ -1,15 +1,21 @@
 'use client';
+import { ConfirmationDialog } from '@/features/confirmation';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
-import { ConfirmModal } from '@/components/core/Modal';
+
+import { notifications } from '@/components/core/Notification';
+
 import { deleteClientAction } from '@/lib/actions/client';
 import { useClientModal } from './ClientModalContext';
 
-export function ClientModals() {
+export interface ClientModalsProps {
+  deleteAction?: typeof deleteClientAction;
+  onDeleted?: () => void;
+}
+export function ClientModals({ deleteAction = deleteClientAction, onDeleted }: ClientModalsProps = {}) {
   const tCommon = useTranslations('common');
   const tPage = useTranslations('adminList.clients');
   const router = useRouter();
@@ -23,26 +29,31 @@ export function ClientModals() {
     }
     setDeleteLoading(true);
     try {
-      const result = await deleteClientAction(deletingClient.id);
+      const result = await deleteAction(deletingClient.id);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tPage('deleted'), color: 'red' });
+      notifications.show({ message: tPage('deleted'), tone: 'positive' });
       closeDelete();
-      router.refresh();
+      if (onDeleted) {
+        onDeleted();
+      } else {
+        router.refresh();
+      }
     } finally {
       setDeleteLoading(false);
     }
   };
 
   return (
-    <ConfirmModal
+    <ConfirmationDialog
+      intent="delete"
       opened={!!deletingClient}
       onClose={closeDelete}
       onConfirm={handleDelete}
       title={tPage('deleteTitle')}
-      message={<Text>{tPage('deleteConfirm', { name: deletingClient?.name ?? '' })}</Text>}
+      message={<DsText>{tPage('deleteConfirm', { name: deletingClient?.name ?? '' })}</DsText>}
       confirmLabel={tCommon('actions.delete')}
       cancelLabel={tCommon('actions.cancel')}
       closeLabel={tCommon('actions.close')}

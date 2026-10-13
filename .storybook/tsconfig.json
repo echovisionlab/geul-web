@@ -1,0 +1,22 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "incremental": false,
+    "skipLibCheck": true
+  },
+  "include": [
+    "../next-env.d.ts",
+    "./**/*.ts",
+    "./**/*.tsx",
+    "../components/**/*.stories.tsx",
+    "../features/**/*.stories.tsx",
+    "../stories/**/*.ts",
+    "../stories/**/*.tsx",
+    "../global.d.ts",
+    "../types/**/*.d.ts",
+    "../features/auth/ui/auth-accessibility.test.tsx",
+    "../features/my/account-controls-accessibility.test.tsx",
+    "../features/share/ui/ShareLinkSectionView.test.tsx"
+  ],
+  "exclude": ["../node_modules"]
+}

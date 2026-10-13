@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 import { createFilterSchema, createSimpleListInputSchema, createSortSchema } from '../trpc/schema';
 import { userFilterFields, userSortFields } from './table-spec';
 

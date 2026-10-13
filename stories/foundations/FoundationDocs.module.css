@@ -1,0 +1,89 @@
+.document {
+  max-inline-size: var(--geul-content-width-standard);
+  margin-inline: auto;
+  padding: var(--geul-spacing-lg);
+  min-inline-size: 0;
+}
+
+.tableScroll {
+  max-inline-size: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--geul-font-size-sm);
+  line-height: var(--geul-line-height-sm);
+}
+
+.table caption {
+  text-align: start;
+  font-weight: var(--geul-font-weight-medium);
+  padding-block-end: var(--geul-spacing-xs);
+}
+
+.table :is(th, td) {
+  text-align: start;
+  vertical-align: top;
+  padding: var(--geul-spacing-xs);
+  border-block-end: var(--geul-border-thin) solid var(--geul-border-default);
+  overflow-wrap: anywhere;
+}
+
+.table th {
+  font-weight: var(--geul-font-weight-strong);
+  background: var(--geul-surface-muted);
+  white-space: nowrap;
+}
+
+.wideTable {
+  min-inline-size: var(--geul-content-width-form);
+}
+
+.code {
+  margin: 0;
+  padding: var(--geul-spacing-md);
+  background: var(--geul-surface-muted);
+  color: var(--geul-text-primary);
+  font-family: var(--font-mono), monospace;
+  font-size: var(--geul-font-size-xs);
+  line-height: var(--geul-line-height-md);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.swatch {
+  display: inline-block;
+  inline-size: var(--geul-control-height-chrome);
+  block-size: var(--geul-control-height-chrome);
+  border: var(--geul-border-thin) solid var(--geul-border-default);
+  vertical-align: middle;
+  margin-inline-end: var(--geul-spacing-xs);
+}
+
+.sample {
+  padding: var(--geul-spacing-md);
+  border: var(--geul-border-thin) solid var(--geul-border-default);
+  min-inline-size: 0;
+}
+
+.spaceBar {
+  background: var(--geul-action-primary);
+  block-size: var(--geul-spacing-xs);
+}
+
+.glyphFrame {
+  display: inline-flex;
+  outline: var(--geul-border-thin) solid var(--geul-border-default);
+}
+
+.glyphFrame svg {
+  inline-size: var(--geul-chrome-icon-size);
+  block-size: var(--geul-chrome-icon-size);
+}
+
+.targetFrame {
+  display: inline-flex;
+  outline: var(--geul-border-thin) solid var(--geul-border-default);
+}

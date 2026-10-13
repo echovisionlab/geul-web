@@ -1,6 +1,7 @@
 {
   "common": {
     "actions": {
+      "move": "ย้าย",
       "save": "บันทึก",
       "saveChanges": "บันทึกการเปลี่ยนแปลง",
       "create": "สร้าง",
@@ -59,7 +60,7 @@
       "reply": "ตอบกลับ",
       "insertVariable": "แทรกตัวแปร",
       "acceptAll": "ยอมรับทั้งหมด",
-      "rejectNonEssential": "ปฏิเสธสิ่งที่ไม่จำเป็น",
+      "rejectNonEssential": "ปฏิเสธ",
       "savePreferences": "บันทึกการตั้งค่า",
       "import": "นำเข้า",
       "export": "ส่งออก",
@@ -127,10 +128,7 @@
       "file": "ไฟล์",
       "bio": "ไบโอ",
       "realName": "ชื่อจริง",
-      "countryCode": "รหัสประเทศ",
       "slug": "ทาก",
-      "slugAutoModeEnabled": "ซิงค์อัตโนมัติกับชื่อ (คลิกเพื่อปิดใช้งาน)",
-      "slugAutoModeManual": "โหมดแมนนวล (คลิกเพื่อเปิดใช้งานการซิงค์อัตโนมัติ)",
       "submissions": "การส่งผลงาน",
       "public": "สาธารณะ",
       "location": "ที่ตั้ง",
@@ -162,7 +160,6 @@
       "logoLight": "โลโก้แสง",
       "logoDark": "โลโก้สีเข้ม",
       "joined": "เข้าร่วม",
-      "subscribed": "สมัครสมาชิกแล้ว",
       "featured": "จุดเด่น",
       "order": "สั่งซื้อ",
       "sortOrder": "เรียงลำดับ",
@@ -177,7 +174,6 @@
       "minutes": "รายงานการประชุม",
       "seconds": "วินาที",
       "time": "เวลา",
-      "generationInfo": "ข้อมูลการสร้าง",
       "body": "ร่างกาย",
       "content": "เนื้อหา",
       "bodyPreview": "การแสดงตัวอย่างร่างกาย",
@@ -280,6 +276,7 @@
     },
     "messages": {
       "noUsersFound": "ไม่พบผู้ใช้",
+      "noAuthorsFound": "ไม่พบผู้เขียน",
       "noVersionsFound": "ไม่พบเวอร์ชัน",
       "typeAtLeast2Characters": "พิมพ์อย่างน้อย 2 ตัวอักษร",
       "itemCreated": "สร้าง {item} แล้ว",
@@ -295,24 +292,22 @@
       "deleteItemConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบ {item} นี้ การดำเนินการนี้ไม่สามารถยกเลิกได้",
       "deleteNamedItemConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบ \"{name}\"? การดำเนินการนี้ไม่สามารถยกเลิกได้",
       "confirmDeleteSelectedCount": "คุณแน่ใจหรือไม่ว่าต้องการลบ {count, plural, one {# รายการที่เลือก} other {# รายการที่เลือก}} การดำเนินการนี้ไม่สามารถยกเลิกได้",
-      "deleteDraftVersionConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบเวอร์ชันร่างนี้",
       "confirmDeleteNamedRich": "คุณแน่ใจหรือไม่ว่าต้องการลบ <strong>{name}</strong>",
-      "activeCount": "{count} ใช้งานอยู่",
       "effectiveFromDate": "มีผลตั้งแต่ {date}",
       "noUpdateRecorded": "ไม่มีการบันทึกการอัปเดต",
-      "exportedEmails": "ส่งออก {count, plural, one {# อีเมล} other {# อีเมล}}",
       "formSubmittedSuccessfully": "คำตอบของคุณถูกส่งเรียบร้อยแล้ว",
       "userDate": "{user} · {date}",
       "scheduleActivationTitle": "กำหนดการเปิดใช้งาน",
       "scheduleActivationDescription": "เลือกว่าเวอร์ชันนี้จะใช้งานได้เมื่อใด อีเมลแจ้งเตือนจะถูกส่งไปยังบัญชีที่ใช้งานอยู่ทั้งหมดเมื่อกำหนดเวลา",
       "scheduleActivationNotice": "การตั้งเวลาจะส่งอีเมลแจ้งเตือนไปยังบัญชีที่ใช้งานอยู่ทั้งหมดพร้อมลิงก์แสดงตัวอย่าง",
-      "translationDetailUnavailable": "ไม่สามารถโหลดข้อมูลการแปลโดยละเอียด คุณยังคงสามารถแก้ไขคำแปลสาธารณะในปัจจุบันได้",
       "invalidConfirmationLinkFromEmail": "ลิงก์ยืนยันไม่ถูกต้อง โปรดใช้ลิงก์จากอีเมลยืนยันของคุณ",
       "noPostsFound": "ไม่พบโพสต์",
       "noWorksFound": "ไม่พบผลงาน.",
-      "urlCopiedToClipboard": "คัดลอก URL ไปยังคลิปบอร์ดแล้ว",
       "failedToLoad": "โหลดข้อมูลไม่สำเร็จ",
-      "relatedItemsWillBeUnlinked": "{count} รายการที่เกี่ยวข้องจะถูกยกเลิกการลิงก์"
+      "relatedItemsWillBeUnlinked": "{count} รายการที่เกี่ยวข้องจะถูกยกเลิกการลิงก์",
+      "noArtistsFound": "ไม่พบศิลปิน",
+      "noLabelsFound": "ไม่พบป้ายกำกับ",
+      "noReleasesFound": "ไม่พบการเผยแพร่"
     },
     "notifications": {
       "categoryCreated": "สร้างหมวดหมู่แล้ว",
@@ -372,8 +367,6 @@
       "testEmail": "test@email.com",
       "testEmailExample": "test@example.com",
       "noReplyEmail": "noreply@example.com",
-      "translationLiveRowMissing": "ยังไม่มีการแปลแบบสาธารณะสำหรับสถานที่นี้ การบันทึกที่นี่จะสร้างรายการขึ้นมาทันที",
-      "translationBodyPreviewUnavailable": "การแสดงตัวอย่างร่างกายไม่พร้อมใช้งาน",
       "selectDateAndTime": "เลือกวันที่และเวลา",
       "streetAddress": "ที่อยู่",
       "regionSubdivision": "รัฐ/จังหวัด"
@@ -408,12 +401,11 @@
       "generating": "กำลังสร้าง...",
       "true": "จริง",
       "false": "เท็จ",
-      "loading": "กำลังโหลด..."
+      "loading": "กำลังโหลด...",
+      "toBeAnnounced": "จะแจ้งภายหลัง"
     },
     "roles": {
       "admin": "ผู้ดูแลระบบ",
-      "editor": "บรรณาธิการ",
-      "viewer": "ผู้ดู",
       "author": "ผู้เขียน",
       "user": "ผู้ใช้"
     },
@@ -445,6 +437,11 @@
       "unsubscribed": "ยกเลิกการสมัคร",
       "subscribed": "สมัครสมาชิกแล้ว",
       "onboardingPending": "รอการเริ่มต้นใช้งาน"
+    },
+    "motion": {
+      "pause": "หยุดภาพเคลื่อนไหวชั่วคราว",
+      "resume": "เล่นภาพเคลื่อนไหวต่อ",
+      "readAllInformation": "อ่านข้อมูลทั้งหมดของฉาก"
     }
   },
   "shell": {
@@ -931,7 +928,6 @@
     },
     "mapThemes": {
       "empty": "ไม่พบธีมแผนที่",
-      "notFound": "ไม่พบธีมแผนที่",
       "loadFailed": "โหลดธีมแผนที่ไม่สำเร็จ",
       "defaultDisabled": "นี่เป็นธีมเริ่มต้นอยู่แล้ว",
       "deleteDisabled": {
@@ -939,9 +935,7 @@
         "last": "ไม่สามารถลบธีมแผนที่สุดท้ายได้"
       },
       "reloadRequired": {
-        "title": "ต้องโหลดซ้ำ",
-        "message": "ธีมนี้ถูกบันทึกจากการแก้ไขที่ใหม่กว่า โหลดซ้ำก่อนที่จะแก้ไขต่อ",
-        "action": "โหลดซ้ำ"
+        "title": "ต้องโหลดซ้ำ"
       },
       "variants": {
         "light": "เบา",
@@ -972,8 +966,7 @@
       },
       "editor": {
         "notifications": {
-          "defaultSet": "ธีมที่ตั้งไว้เป็นค่าเริ่มต้น",
-          "variantRequired": "ต้องมีอย่างน้อย 1 รูปแบบ (สีอ่อนหรือสีเข้ม)"
+          "defaultSet": "ธีมที่ตั้งไว้เป็นค่าเริ่มต้น"
         },
         "controls": {
           "map": {
@@ -1310,7 +1303,6 @@
     },
     "verification": {
       "loading": "กำลังโหลดแบบฟอร์มการยืนยัน...",
-      "redirecting": "กำลังเปลี่ยนเส้นทาง...",
       "startOver": "เริ่มต้นใหม่",
       "errors": {
         "flowNotFound": "ไม่พบขั้นตอนการยืนยันหรือหมดอายุ",
@@ -1373,21 +1365,14 @@
   "featuredImage": {
     "label": "รูปภาพเด่น",
     "alt": "รูปภาพเด่น",
-    "hint": "คลิกที่ภาพเพื่อแทนที่",
     "cropTitle": "ครอบตัดรูปภาพเด่น",
-    "empty": {
-      "editable": "วางหรือคลิกเพื่ออัปโหลด ({ratio})",
-      "readOnly": "ไม่มีภาพ"
-    },
     "errors": {
       "fileRejected": "ไฟล์ถูกปฏิเสธ",
       "fileTooLarge": "ไฟล์มีขนาดใหญ่เกินไป ขนาดสูงสุด: {maxSize}",
       "invalidFileType": "ประเภทไฟล์ไม่ถูกต้อง"
     },
     "actions": {
-      "changeAria": "เปลี่ยนภาพเด่น",
-      "removeAria": "ลบภาพเด่นออก",
-      "remove": "ลบรูปภาพ"
+      "removeAria": "ลบภาพเด่นออก"
     }
   },
   "artistPage": {
@@ -1495,7 +1480,6 @@
       "slug": "ศิลปินทาก",
       "name": "ชื่อในวงการ/ชื่อศิลปิน",
       "realName": "ชื่อตามกฎหมาย (ไม่บังคับ)",
-      "countryCode": "เช่น US, KR, JP",
       "labels": "เลือกป้ายกำกับ...",
       "parentArtist": "เลือกศิลปินหลัก..."
     },
@@ -1518,15 +1502,7 @@
     },
     "placeholders": {
       "name": "ชื่อป้ายกำกับ",
-      "countryCode": "เช่น DE, US, KR",
       "parentLabel": "เลือกป้ายกำกับหลัก (ไม่บังคับ)"
-    }
-  },
-  "workCollaborators": {
-    "empty": "ยังไม่มีผู้ร่วมงาน",
-    "notifications": {
-      "added": "เพิ่มผู้ทำงานร่วมกันแล้ว",
-      "removed": "นำผู้ทำงานร่วมกันออกแล้ว"
     }
   },
   "comments": {
@@ -1585,17 +1561,6 @@
     "credits": {
       "other": "อื่น"
     },
-    "music": {
-      "released": "เผยแพร่: {value}",
-      "spotify": "สปอทิฟาย",
-      "bandcamp": "แบนด์แคมป์",
-      "soundcloud": "ซาวด์คลาวด์",
-      "youtube": "ยูทูบ",
-      "openSpotify": "เปิด Spotify",
-      "openBandcamp": "เปิดแบนด์แคมป์",
-      "openSoundcloud": "เปิด SoundCloud",
-      "openYoutube": "เปิดยูทูป"
-    },
     "portfolio": {
       "tech": "เทคโนโลยี:"
     },
@@ -1643,7 +1608,6 @@
     }
   },
   "cookieConsentCommon": {
-    "essentialLabel": "คุกกี้ที่จำเป็น (ใช้งานอยู่เสมอ)",
     "analyticsLabel": "คุกกี้การวิเคราะห์ (Google Analytics)"
   },
   "nicknameField": {
@@ -1690,7 +1654,6 @@
       "failedToRevokeSession": "ไม่สามารถเพิกถอนเซสชันได้",
       "failedToRevokeSessions": "ไม่สามารถเพิกถอนเซสชันได้",
       "failedToRequestDeletion": "ไม่สามารถขอลบบัญชีได้",
-      "cannotUnlinkMessage": "คุณต้องมีวิธีการรับรองความถูกต้องอย่างน้อยหนึ่งวิธี",
       "connectedMessage": "เชื่อมต่อบัญชี {provider} สำเร็จแล้ว",
       "disconnectedMessage": "{provider} ถูกตัดการเชื่อมต่อแล้ว",
       "failedToUpdateMainEmail": "ไม่สามารถอัปเดตอีเมลหลักได้",
@@ -1751,8 +1714,6 @@
       "added": "เพิ่ม {date}",
       "lastMethod": "เพิ่มวิธีการลงชื่อเข้าใช้อื่นก่อนที่จะลบรหัสผ่านนี้",
       "removeNamed": "ลบรหัสผ่าน {name}",
-      "reauth": "ลงชื่อเข้าใช้อีกครั้งก่อนที่จะเปลี่ยนรหัสผ่าน",
-      "reauthAction": "ลงชื่อเข้าใช้อีกครั้ง",
       "errors": {
         "load": "ไม่สามารถโหลดพาสคีย์ได้",
         "remove": "ไม่สามารถลบรหัสผ่านนี้ได้",
@@ -1789,21 +1750,11 @@
     "email": {
       "title": "อีเมลหลัก",
       "description": "เลือกอีเมลที่ยืนยันแล้วซึ่งจะได้รับการแจ้งเตือนและข้อความบัญชี",
-      "addEmail": "เพิ่มอีเมล",
       "canonical": "อีเมลหลัก",
-      "canonicalCannotRemove": "เลือกอีเมลหลักอื่นก่อนที่จะลบที่อยู่นี้",
       "setCanonical": "ตั้งเป็นอีเมลหลัก",
-      "noEmail": "ไม่มีการตั้งค่าอีเมล",
-      "helper": "มีอีเมลที่ยืนยันแล้วเพียงอีเมลเดียวเท่านั้นที่ใช้เป็นอีเมลหลักได้",
-      "selectLabel": "อีเมลหลัก",
       "changeAction": "เปลี่ยนอีเมลหลัก",
       "sources": {
-        "current": "อีเมลหลักปัจจุบัน",
-        "emailCode": "อีเมล",
-        "pending": "อยู่ระหว่างการตรวจสอบ"
-      },
-      "messages": {
-        "pendingVerification": "การยืนยันอยู่ระหว่างรอดำเนินการสำหรับอีเมลนี้ คุณสามารถส่งอีเมลยืนยันอีกครั้งได้"
+        "emailCode": "อีเมล"
       },
       "mainEmailUpdated": "อัปเดตอีเมลหลักแล้ว",
       "canonicalUpdated": "อัปเดตอีเมลหลักแล้ว"
@@ -1834,7 +1785,6 @@
   },
   "seriesDetail": {
     "slug": {
-      "autoDescription": "โหมดอัตโนมัติ: เปลี่ยนชื่ออัปเดตกระสุนอัตโนมัติ",
       "manualDescription": "โหมดแมนนวล: บุ้งจะคงที่จนกว่าคุณจะแก้ไขหรือเปิดใช้งานโหมดอัตโนมัติอีกครั้ง"
     },
     "notifications": {
@@ -1870,10 +1820,6 @@
     }
   },
   "works": {
-    "tabs": {
-      "editable": "แก้ไขได้"
-    },
-    "emptyEditable": "ไม่มีงานที่สามารถแก้ไขได้มอบหมายให้กับคุณ",
     "emptyCredits": "ไม่พบผลงานที่ได้รับเครดิต",
     "columns": {
       "creditedAs": "เครดิตเป็น",
@@ -1995,6 +1941,7 @@
         "patternPlaceholder": "เช่น ^[A-Z]{3}$",
         "customErrorMessage": "ข้อความแสดงข้อผิดพลาดแบบกำหนดเอง",
         "optional": "ไม่จำเป็น",
+        "dragValidator": "ลากกฎการตรวจสอบ",
         "removeValidator": "ลบเครื่องมือตรวจสอบ"
       },
       "fieldTypes": {
@@ -2062,10 +2009,6 @@
       }
     },
     "settings": {
-      "notifications": {
-        "managerAdded": "เพิ่มตัวจัดการแบบฟอร์มแล้ว",
-        "managerRemoved": "ตัวจัดการแบบฟอร์มถูกลบออก"
-      },
       "urlPublic": {
         "title": "URL และการเข้าถึงสาธารณะ",
         "allowPublic": "อนุญาตการเข้าถึง URL สาธารณะ",
@@ -2085,13 +2028,7 @@
         "description": "แชร์ลิงก์แดชบอร์ดเพื่อดูสถิติแบบฟอร์มโดยไม่ต้องมีการเข้าถึงของผู้ดูแลระบบ"
       },
       "managers": {
-        "adminControls": "การควบคุมของผู้ดูแลระบบ",
-        "readOnly": "อ่านอย่างเดียว",
-        "description": "ผู้จัดการสามารถแก้ไขแบบฟอร์มนี้ ดูการส่ง และจัดการลิงก์แชร์ได้",
-        "searchPlaceholder": "ค้นหาผู้ใช้เพื่อเพิ่มผู้จัดการ...",
-        "adminOnly": "มีเพียงผู้ดูแลระบบเท่านั้นที่สามารถเพิ่มหรือลบผู้จัดการได้",
-        "empty": "ยังไม่มีการมอบหมายผู้จัดการ",
-        "removeManager": "ลบผู้จัดการ {name}"
+        "description": "ผู้จัดการสามารถแก้ไขแบบฟอร์มนี้ ดูการส่ง และจัดการลิงก์แชร์ได้"
       },
       "access": {
         "title": "การควบคุมการเข้าถึง",
@@ -2120,7 +2057,11 @@
   "dataTable": {
     "aria": {
       "sortBy": "จัดเรียงตาม {label}",
-      "rowActions": "การดำเนินการสำหรับ {label}"
+      "rowActions": "การดำเนินการสำหรับ {label}",
+      "selectAllRows": "เลือกทุกแถว",
+      "selectRow": "เลือก {label}",
+      "resultSummary": "{totalPages, plural, =0 {ผลลัพธ์ {count} รายการ} other {ผลลัพธ์ {count} รายการ หน้า {page} จาก {totalPages}}}",
+      "loadingMessage": "กำลังโหลด"
     },
     "sort": {
       "button": "เรียงลำดับ",
@@ -2133,7 +2074,9 @@
         "moveUp": "เลื่อน {label} ขึ้น",
         "moveDown": "เลื่อน {label} ลง",
         "toggleDirection": "สลับทิศทางการจัดเรียงสำหรับ {label}",
-        "removeSort": "ลบการเรียงลำดับสำหรับ {label}"
+        "removeSort": "ลบการเรียงลำดับสำหรับ {label}",
+        "directionAscending": "ปัจจุบันเรียงจากน้อยไปมาก",
+        "directionDescending": "ปัจจุบันเรียงจากมากไปน้อย"
       }
     },
     "filter": {
@@ -2148,7 +2091,8 @@
       "drawerTitle": "ตัวกรอง",
       "aria": {
         "backToFields": "กลับไปที่ช่องตัวกรอง",
-        "removeFilter": "ลบตัวกรองสำหรับ {label}"
+        "removeFilter": "ลบตัวกรองสำหรับ {label}",
+        "logic": "วิธีรวมตัวกรอง"
       },
       "operators": {
         "eq": "เท่ากับ",
@@ -2181,7 +2125,8 @@
       "previousPage": "หน้าก่อน",
       "nextPage": "หน้าถัดไป",
       "lastPage": "หน้าสุดท้าย",
-      "page": "หน้า {page}"
+      "page": "หน้า {page}",
+      "navigation": "การนำทางหน้า"
     }
   },
   "versionHistory": {
@@ -2193,7 +2138,9 @@
     "restoreTitle": "คืนค่าเวอร์ชัน",
     "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
     "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document."
+    "restoreFailed": "Failed to restore the source document.",
+    "loadFailed": "ไม่สามารถโหลดประวัติเวอร์ชันได้",
+    "end": "โหลดทุกเวอร์ชันแล้ว"
   },
   "shareLinks": {
     "title": "แบ่งปันลิงค์",
@@ -2203,7 +2150,6 @@
     "createError": "ไม่สามารถสร้างลิงก์ได้",
     "deleteSuccess": "ลบลิงค์แล้ว",
     "deleteError": "ลบลิงก์ไม่สำเร็จ",
-    "invalidUrl": "URL ไม่ถูกต้อง",
     "noLinks": "ไม่มีการสร้างลิงก์",
     "showLess": "แสดงน้อยลง",
     "showMore": "แสดงอีก {count}",
@@ -2218,21 +2164,9 @@
     "passwordPlaceholder": "ตั้งรหัสผ่านการแชร์",
     "maximumExpiration": "แชร์ลิงก์สามารถหมดอายุได้ภายในหนึ่งปีนับจากนี้",
     "expirationInvalid": "เลือกวันหมดอายุภายในหนึ่งปี",
-    "bypassFormPassword": "บายพาสรหัสผ่านแบบฟอร์ม",
-    "bypassFormPasswordDescription": "หากปิดใช้งาน ผู้ชมจะต้องป้อนรหัสผ่านของแบบฟอร์ม",
-    "bypassAuthentication": "ข้ามการรับรองความถูกต้อง",
-    "bypassAuthenticationDescription": "หากเปิดใช้งาน ลิงก์แชร์จะข้ามประตู need-auth",
-    "bypassRoleChecks": "บายพาสการตรวจสอบบทบาท",
-    "bypassRoleChecksDescription": "หากเปิดใช้งาน ลิงก์แชร์จะข้ามเกตบทบาทที่อนุญาต",
     "policies": {
       "passwordProtected": "ป้องกันด้วยรหัสผ่าน",
-      "noPassword": "ไม่มีรหัสผ่าน",
-      "passwordBypass": "บายพาสรหัสผ่าน",
-      "passwordRequired": "ต้องใช้รหัสผ่าน",
-      "authBypass": "บายพาสการรับรองความถูกต้อง",
-      "authEnforced": "บังคับใช้การตรวจสอบสิทธิ์แล้ว",
-      "roleBypass": "ข้ามบทบาท",
-      "roleEnforced": "บทบาทที่บังคับใช้"
+      "noPassword": "ไม่มีรหัสผ่าน"
     },
     "expirationBadge": {
       "expired": "หมดอายุแล้ว",
@@ -2264,7 +2198,9 @@
     "label": "ลิงค์โซเชียล",
     "addLink": "เพิ่มลิงค์",
     "platformPlaceholder": "แพลตฟอร์ม",
-    "valuePlaceholder": "URL หรือชื่อผู้ใช้"
+    "valuePlaceholder": "URL หรือชื่อผู้ใช้",
+    "reorderInstructions": "ใช้ปุ่มลูกศรขึ้นและลงเพื่อเปลี่ยนตำแหน่งของลิงก์นี้",
+    "positionChanged": "ย้ายลิงก์ไปยังตำแหน่ง {position} จาก {count} แล้ว"
   },
   "termsPage": {
     "active": {
@@ -2424,7 +2360,6 @@
     }
   },
   "releasePage": {
-    "previewTitle": "ดูตัวอย่างการเปิดตัว",
     "streaming": "สตรีมมิ่ง",
     "metadata": {
       "fallbackDescription": "{title}",
@@ -2494,8 +2429,7 @@
         "title": "เพิ่มแทร็ก"
       },
       "placeholders": {
-        "title": "ชื่อแทร็ก",
-        "durationSeconds": "เช่น 240"
+        "title": "ชื่อแทร็ก"
       },
       "deleteConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบแทร็กนี้",
       "creditsModal": {
@@ -2517,8 +2451,7 @@
   "contentMetadata": {
     "preview": {
       "page": "ดูตัวอย่างหน้า",
-      "post": "ดูตัวอย่างโพสต์",
-      "work": "ดูตัวอย่างงาน"
+      "post": "ดูตัวอย่างโพสต์"
     }
   },
   "editorMetadata": {
@@ -2541,8 +2474,6 @@
   "postHeader": {
     "actions": {
       "editPost": "แก้ไขโพสต์",
-      "sharePost": "แชร์โพสต์",
-      "printPost": "พิมพ์โพสต์",
       "exportMarkdown": "ส่งออกโพสต์เป็น Markdown"
     }
   },
@@ -2551,7 +2482,6 @@
     "intro": "เราใช้คุกกี้ที่จำเป็นสำหรับการตรวจสอบสิทธิ์และการทำงานของไซต์ และคุกกี้การวิเคราะห์เพิ่มเติมเพื่อทำความเข้าใจการใช้งานไซต์",
     "learnMore": "ดู <privacy>นโยบายความเป็นส่วนตัว</privacy> และ <terms>ข้อกำหนดในการให้บริการ</terms> ของเรา",
     "actions": {
-      "hidePreferences": "ซ่อนการตั้งค่า",
       "customize": "ปรับแต่ง"
     }
   },
@@ -2569,7 +2499,6 @@
   },
   "locationSelector": {
     "placeholder": "เลือกสถานที่...",
-    "clearSelection": "ล้างสถานที่ที่เลือก",
     "emptySearch": "ค้นหาสถานที่บนแผนที่",
     "emptyResults": "ไม่พบสถานที่"
   },
@@ -2602,9 +2531,6 @@
     "actions": {
       "copyId": "คัดลอกบัตรประจำตัว",
       "copyUrl": "คัดลอก URL"
-    },
-    "notifications": {
-      "copied": "คัดลอก {label} แล้ว"
     }
   },
   "formValidation": {
@@ -2644,7 +2570,7 @@
   },
   "ogImagePreview": {
     "alt": "เปิดตัวอย่างกราฟ",
-    "empty": "ยังไม่ได้สร้างภาพ OG",
+    "empty": "ยังไม่มีภาพ OG",
     "actions": {
       "regenerate": "สร้างอิมเมจ OG ใหม่"
     },
@@ -2768,7 +2694,6 @@
     "scheduleModal": {
       "description": "เลือกวันที่และเวลาที่จะส่งแคมเปญนี้",
       "dateLabel": "วันและเวลาที่กำหนดไว้",
-      "datePlaceholder": "เลือกวันที่และเวลา",
       "previousMonth": "เดือนที่แล้ว",
       "nextMonth": "เดือนหน้า",
       "audience": "ผู้ชม: {audience}",
@@ -2858,7 +2783,6 @@
       "notFoundMessage": "ไม่พบหมวดหมู่"
     },
     "seriesSelector": {
-      "searchPlaceholder": "ค้นหาหรือสร้าง...",
       "states": {
         "empty": "ไม่มีซีรีส์ที่มีจำหน่าย",
         "select": "เลือกซีรีส์...",
@@ -2871,14 +2795,12 @@
       },
       "notifications": {
         "assigned": "โพสต์ที่กำหนดให้กับซีรีส์",
-        "reorderFailed": "ไม่สามารถเรียงลำดับซีรี่ส์ใหม่ได้",
         "createFailed": "ไม่สามารถสร้างซีรีส์ได้",
         "seriesUnavailable": "ซีรีส์นั้นไม่มีให้จัดการอีกต่อไป งานก่อนหน้านี้ถูกเก็บไว้",
         "updateFailed": "ไม่สามารถอัปเดตชุดโพสต์ได้ งานก่อนหน้านี้ถูกเก็บไว้"
       }
     },
     "notifications": {
-      "slugUpdateFailed": "ไม่สามารถอัปเดตตัวบุ้ง",
       "deleted": "ลบโพสต์แล้ว",
       "published": "โพสต์เผยแพร่แล้ว",
       "unpublished": "โพสต์ที่ไม่ได้เผยแพร่",
@@ -3065,10 +2987,6 @@
     "pinned": "ปักหมุดแล้ว"
   },
   "pageEditor": {
-    "localRecovery": {
-      "message": "เก็บสำเนาการแก้ไขในเครื่องไว้ก่อนเชื่อมต่อใหม่แล้ว โปรดดาวน์โหลดก่อนโหลดหน้าใหม่หรือออกจากหน้า",
-      "action": "ดาวน์โหลดสำเนาสำหรับกู้คืน"
-    },
     "shareLinksDescription": "ดูตัวอย่างลิงก์สำหรับหน้าที่ยังไม่ได้เผยแพร่",
     "showTitleOnPage": "แสดงชื่อเรื่องในหน้า",
     "slugValidation": {
@@ -3126,6 +3044,9 @@
       }
     },
     "columnsEditor": {
+      "labels": {
+        "ratio": "สัดส่วนคอลัมน์"
+      },
       "badges": {
         "columnCount": "{count} คอลัมน์"
       },
@@ -3150,16 +3071,14 @@
       "menuLabel": "เพิ่มส่วน",
       "emptyColumn": "คอลัมน์ว่าง - คลิก + เพื่อเพิ่มเนื้อหา",
       "actions": {
-        "addSectionToColumn": "เพิ่มส่วนในคอลัมน์ {index}",
-        "removeSectionFromColumn": "ลบ {section} ออกจากคอลัมน์ {index}"
+        "addSectionToColumn": "เพิ่มส่วนในคอลัมน์ {index}"
       }
     },
     "notifications": {
       "published": "เผยแพร่เพจแล้ว",
       "unpublished": "เพจไม่ได้เผยแพร่",
       "deleted": "ลบเพจแล้ว",
-      "slugUpdateFailed": "ไม่สามารถอัปเดตตัวบุ้งหน้าได้",
-      "confirmSummaryFailed": "ไม่สามารถยืนยันการอัปเดตสรุปได้"
+      "slugUpdateFailed": "ไม่สามารถอัปเดตตัวบุ้งหน้าได้"
     },
     "mapEditor": {
       "title": "แผนที่",
@@ -3217,7 +3136,6 @@
         "content": "เนื้อหา",
         "marqueeBehavior": "พฤติกรรมของกระโจม",
         "scenePlayback": "การเล่น",
-        "sceneRender": "เรนเดอร์",
         "sceneMotion": "การเคลื่อนไหว",
         "sceneUnits": "หน่วย",
         "sceneSettings": "ฉาก",
@@ -3234,7 +3152,6 @@
         "columns": "คอลัมน์",
         "infiniteLoop": "วนซ้ำไม่สิ้นสุด",
         "showIndicators": "แสดงตัวบ่งชี้",
-        "showFeaturedImage": "แสดงภาพเด่น",
         "imageAspectRatio": "อัตราส่วนภาพ",
         "showMeta": "แสดงเมตา",
         "sortBy": "เรียงตาม",
@@ -3253,7 +3170,6 @@
         "showImage": "แสดงภาพ",
         "selectForm": "เลือกแบบฟอร์ม",
         "showFormTitle": "แสดงชื่อแบบฟอร์ม",
-        "showTitle": "แสดงชื่อ",
         "numberOfWorks": "จำนวนผลงาน",
         "numberOfReleases": "จำนวนการเผยแพร่",
         "numberOfProgramEvents": "จำนวนเหตุการณ์",
@@ -3323,7 +3239,10 @@
         "textColorSource": "สีข้อความ",
         "lightTextColor": "ข้อความสีอ่อน",
         "darkTextColorSource": "ข้อความสีเข้ม",
-        "darkTextColor": "สีข้อความเข้ม"
+        "darkTextColor": "สีข้อความเข้ม",
+        "itemSize": "ขนาดรายการ",
+        "showAvatar": "แสดงอวาตาร์",
+        "maxLabels": "จำนวนค่ายเพลงสูงสุด"
       },
       "fieldLabels": {
         "year": "ปี",
@@ -3334,11 +3253,7 @@
       },
       "badges": {
         "posts": "{count} โพสต์",
-        "rows": "{count} แถว",
-        "authors": "ผู้เขียน {count} คน",
-        "artists": "ศิลปิน {count} คน",
-        "works": "{count} ใช้งานได้",
-        "releases": "{count} เผยแพร่"
+        "rows": "{count} แถว"
       },
       "placeholders": {
         "publishedByDefault": "เผยแพร่โดยค่าเริ่มต้น",
@@ -3358,7 +3273,6 @@
           "auto": "อัตโนมัติ"
         },
         "sortBy": {
-          "dateAdded": "เพิ่มวันที่แล้ว",
           "startDate": "วันที่เริ่มต้น",
           "endDate": "วันที่สิ้นสุด",
           "publishedDate": "วันที่เผยแพร่",
@@ -3367,9 +3281,7 @@
         },
         "sortOrder": {
           "newest": "ใหม่ล่าสุด",
-          "oldest": "เก่าแก่ที่สุด",
-          "azOldest": "A-Z / เก่าที่สุด",
-          "zaNewest": "Z-A / ใหม่ล่าสุด"
+          "oldest": "เก่าแก่ที่สุด"
         },
         "mapPrimaryLabel": {
           "placeName": "ชื่อสถานที่"
@@ -3443,6 +3355,11 @@
           "theme": "ทำตามธีม",
           "custom": "กำหนดเอง",
           "inherit": "ตามแสง"
+        },
+        "itemSize": {
+          "s": "S · กะทัดรัด",
+          "m": "M · มาตรฐาน",
+          "l": "L · ใหญ่"
         }
       },
       "actions": {
@@ -3453,8 +3370,6 @@
         "moveUnitUp": "ย้ายหน่วยขึ้น",
         "moveUnitDown": "ย้ายหน่วยลง",
         "removeSceneUnit": "ถอดหน่วยออก",
-        "expandSceneUnit": "ขยายหน่วย",
-        "collapseSceneUnit": "ยุบหน่วย",
         "replaceMesh": "เปลี่ยน GLB",
         "uploadMesh": "อัพโหลด GLB",
         "clearMeshAsset": "ล้างทรัพย์สินตาข่าย",
@@ -3493,6 +3408,12 @@
         "meshOptimizationCancelled": "ยกเลิก",
         "optimizedMeshCleanupFailed": "ลบการอ้างอิงเนื้อหาที่เพิ่มประสิทธิภาพแล้ว แต่การล้างข้อมูลล้มเหลว: {error}",
         "optimizedMeshCleanupFailedDefault": "ลบการอ้างอิงเนื้อหาที่ปรับให้เหมาะสมแล้ว แต่การล้างข้อมูลล้มเหลว"
+      },
+      "authorSelection": {
+        "maxSelected": "เลือกผู้เขียนได้สูงสุด {count} คน",
+        "empty": "ยังไม่ได้เลือกผู้เขียน บล็อกนี้จะว่างเปล่า",
+        "unavailable": "ผู้เขียนนี้ไม่พร้อมใช้งานอีกต่อไป",
+        "unavailableWarning": "ผู้เขียนที่ไม่พร้อมใช้งานจะไม่แสดงบนหน้าสาธารณะ ลบออกหรือเลือกผู้เขียนคนอื่น"
       }
     },
     "embed": {
@@ -3545,8 +3466,6 @@
       "matchDescription": "รวมกลุ่มบทบาท แท็ก และจดหมายข่าวที่เลือกไว้",
       "any": "กลุ่มใดกลุ่มหนึ่งที่เลือก",
       "all": "ทุกกลุ่มที่เลือก",
-      "roles": "บทบาท",
-      "rolesDescription": "มีบทบาทใดบทบาทหนึ่งที่เลือกไว้ก็ตรงตามเงื่อนไข",
       "roleUser": "สมาชิก",
       "memberDescription": "เฉพาะสมาชิกที่เข้าสู่ระบบเท่านั้นที่ดูหน้านี้ได้",
       "authorDescription": "สมาชิกที่มีบทบาทผู้เขียน",
@@ -3574,13 +3493,23 @@
       "restrictedTitle": "คุณไม่มีสิทธิ์เข้าถึงหน้านี้",
       "restrictedDescription": "บัญชีของคุณไม่ตรงตามเงื่อนไขการเข้าถึงหน้านี้",
       "signIn": "เข้าสู่ระบบ"
+    },
+    "a11y": {
+      "sectionPosition": "{section} · {index}/{count}",
+      "dragInstructions": "กด Space เพื่อเริ่มย้าย แล้วใช้ปุ่มลูกศรเพื่อเปลี่ยนตำแหน่ง กด Space เพื่อยืนยันหรือ Escape เพื่อยกเลิก",
+      "dragStart": "{section} · ย้าย · อยู่ระหว่างดำเนินการ · {index}/{count}",
+      "dragOver": "{section} · ย้าย · {index}/{count}",
+      "dragEnd": "{section} · ย้าย · ยืนยัน · {index}/{count}",
+      "dragCancel": "{section} · ย้าย · ยกเลิก",
+      "sectionDeleted": "ลบ {section} แล้ว",
+      "sectionAdded": "สร้าง {section} แล้ว · {index}/{count}",
+      "columnsPosition": "{column} · {section} · {index}/{count}"
     }
   },
   "editorCommon": {
     "reloadRequired": {
       "title": "ต้องโหลดซ้ำ",
-      "message": "มีการบันทึกเวอร์ชันที่ใหม่กว่าในขณะที่เปิดโปรแกรมแก้ไขนี้ โหลดซ้ำก่อนที่จะแก้ไขต่อ",
-      "action": "โหลดซ้ำ"
+      "message": "มีการบันทึกเวอร์ชันที่ใหม่กว่าในขณะที่เปิดโปรแกรมแก้ไขนี้ โหลดซ้ำก่อนที่จะแก้ไขต่อ"
     },
     "permissionRevoked": {
       "title": "เพิกถอนสิทธิ์ในการแก้ไขแล้ว",
@@ -3640,7 +3569,6 @@
         "mute": "ปิดเสียง",
         "unmute": "เปิดเสียง",
         "volume": "ระดับเสียง",
-        "original": "ต้นฉบับ",
         "waveform": "รูปคลื่น",
         "spectrogram": "สเปกโตรแกรม",
         "spectrogramAlt": "สเปกตรัมเสียง",
@@ -3657,10 +3585,8 @@
         "addItem": "เพิ่ม {item}",
         "replaceItem": "แทนที่ {item}",
         "browse": "เรียกดูไฟล์",
-        "or": "หรือ",
         "importFromUrl": "นำเข้าจาก URL",
         "directVideoUrlHelp": "URL ไฟล์วิดีโอโดยตรงเท่านั้น สำหรับ YouTube หรือ Vimeo ให้ใช้วิดีโอภายนอก",
-        "confirm": "ฝัง",
         "resumeAvailable": "พบการอัปโหลดที่ถูกขัดจังหวะ",
         "resumeInstructionNamed": "เลือก {name} อีกครั้งเพื่ออัปโหลดต่อจากจุดที่หยุดไว้",
         "backToUpload": "อัปโหลดไฟล์",
@@ -3756,11 +3682,8 @@
       }
     },
     "mapBlock": {
-      "clickToAddPlace": "คลิกเพื่อเพิ่มสถานที่",
       "captionPlaceholder": "เพิ่มคำบรรยาย...",
-      "clickToAddCaption": "คลิกเพื่อเพิ่มคำบรรยาย",
-      "externalPlaceholder": "แผนที่: {count} {count, plural, one {place} other {places}}",
-      "viewOnGoogleMaps": "ดูบน Google แผนที่ ({lat}, {lng})"
+      "clickToAddCaption": "คลิกเพื่อเพิ่มคำบรรยาย"
     },
     "mapPlacesModal": {
       "title": "จัดการสถานที่",
@@ -3770,22 +3693,9 @@
       "centeredTitle": "อยู่ตรงกลาง",
       "setAsCenterTitle": "ตั้งเป็นศูนย์กลาง"
     },
-    "blockAlign": {
-      "left": "จัดชิดซ้าย",
-      "center": "จัดกึ่งกลาง",
-      "right": "จัดชิดขวา"
-    },
-    "mathInline": {
-      "clickToEdit": "คลิกเพื่อแก้ไข",
-      "convertToBlock": "แปลงเป็นบล็อก"
-    },
-    "mathInlineButton": {
-      "label": "คณิตศาสตร์แบบอินไลน์"
-    },
     "editor": {
       "slashMenu": {
         "placeholder": "พิมพ์ '/' เพื่อดูคำสั่ง",
-        "empty": "ไม่มีรายการ",
         "unavailable": "ไม่พร้อมใช้งาน",
         "groups": {
           "headings": "หัวข้อ",
@@ -3950,9 +3860,6 @@
         "alignLeft": "จัดชิดซ้าย",
         "alignCenter": "จัดกึ่งกลาง",
         "alignRight": "จัดชิดขวา",
-        "alignJustify": "จัดข้อความชิดขอบ",
-        "textColor": "ข้อความ",
-        "backgroundColor": "พื้นหลัง",
         "nest": "ซ้อนบล็อก",
         "unnest": "ยกเลิกการซ้อน",
         "inlineMath": "คณิตศาสตร์แบบอินไลน์",
@@ -3967,36 +3874,19 @@
         "urlPlaceholder": "แก้ไข URL"
       },
       "math": {
-        "inline": "คณิตศาสตร์แบบอินไลน์",
-        "block": "บล็อกคณิตศาสตร์",
-        "clickToEdit": "คลิกเพื่อแก้ไข",
-        "convertToBlock": "แปลงเป็นบล็อก"
+        "selectBlock": "เลือกบล็อกสมการ",
+        "block": "บล็อกคณิตศาสตร์"
       },
       "file": {
-        "add": "เพิ่ม {item}",
         "replace": "แทนที่ {item}",
-        "delete": "ลบ",
-        "download": "ดาวน์โหลด",
-        "caption": "เพิ่มคำบรรยาย...",
-        "upload": "อัปโหลดไฟล์",
-        "embed": "ฝัง",
-        "urlPlaceholder": "แก้ไข URL"
+        "delete": "ลบ"
       },
       "resize": {
-        "image": "ปรับขนาด — รูปภาพ",
-        "audio": "ปรับขนาด — เสียง",
-        "video": "ปรับขนาด — วิดีโอ",
-        "file": "ปรับขนาด — เอกสารแนบ",
         "map": "ปรับขนาด — แผนที่",
-        "externalVideo": "ปรับขนาด — วิดีโอภายนอก",
-        "p5Sketch": "ปรับขนาด — p5.js",
-        "threeScene": "ปรับขนาด — Three.js",
-        "dragHandle": "ลากเพื่อปรับขนาด",
-        "shader": "ปรับขนาด — เชเดอร์ GLSL"
+        "externalVideo": "ปรับขนาด — วิดีโอภายนอก"
       },
       "drag": {
         "openBlockMenu": "เปิดเมนูบล็อก",
-        "addBlock": "เพิ่มบล็อก",
         "delete": "ลบ",
         "colors": "สี"
       },
@@ -4028,7 +3918,6 @@
         "toggleHeaderColumn": "คอลัมน์ส่วนหัว",
         "selectRow": "เลือกแถว",
         "selectColumn": "เลือกคอลัมน์",
-        "selectCells": "เซลล์ที่เลือก",
         "selectTable": "เลือกตาราง",
         "deleteTable": "ลบตาราง",
         "mergeCells": "ผสานเซลล์",
@@ -4042,17 +3931,11 @@
         "unavailable": "ไม่พร้อมใช้งาน"
       },
       "map": {
-        "insert": "แผนที่",
-        "clickToAddPlace": "คลิกเพื่อเพิ่มสถานที่",
-        "captionPlaceholder": "เพิ่มคำบรรยาย...",
         "managePlaces": "จัดการสถานที่"
       },
       "embeds": {
         "map": "แผนที่",
-        "externalVideo": "วิดีโอภายนอก",
-        "p5Sketch": "p5.js",
-        "threeScene": "Three.js",
-        "shader": "เชเดอร์ GLSL"
+        "externalVideo": "วิดีโอภายนอก"
       },
       "runtimeLabels": {
         "code": {
@@ -4139,12 +4022,7 @@
         }
       },
       "media": {
-        "browse": "เรียกดูไฟล์",
-        "importFromUrl": "นำเข้าจาก URL",
-        "embed": "ฝัง",
-        "openLibrary": "คลังไฟล์",
-        "uploadFiles": "อัปโหลดไฟล์",
-        "selectFile": "เลือกไฟล์"
+        "importFromUrl": "นำเข้าจาก URL"
       }
     }
   },
@@ -4170,7 +4048,6 @@
       "brainstorm": "ระดมความคิด"
     },
     "sections": {
-      "original": "ต้นฉบับ",
       "result": "ผลลัพธ์เอไอ"
     },
     "actions": {
@@ -4220,8 +4097,7 @@
       "pinClickable": "ปักหมุดคลิกได้"
     },
     "themeOptions": {
-      "none": "ไม่มี",
-      "systemSuffix": "(ระบบ)"
+      "none": "ไม่มี"
     },
     "scheme": {
       "auto": "อัตโนมัติ",
@@ -4237,13 +4113,7 @@
     "copyValueTitle": "คลิกเพื่อคัดลอกค่า {label}"
   },
   "postMembers": {
-    "removeAria": "ลบ {name}",
-    "roles": {
-      "owner": "เจ้าของ"
-    },
-    "states": {
-      "memberFallback": "สมาชิก"
-    }
+    "removeAria": "ลบ {name}"
   },
   "workCredits": {
     "divider": "หรือเพิ่มเครดิต",
@@ -4275,9 +4145,6 @@
     "emptyResults": {
       "artist": "ไม่พบศิลปิน",
       "name": "ไม่พบชื่อ"
-    },
-    "states": {
-      "unknownInitial": "?"
     },
     "notifications": {
       "groupCreated": "สร้างกลุ่มแล้ว",
@@ -4334,13 +4201,11 @@
       }
     },
     "statuses": {
-      "missing": "หายไป",
       "existing": "Existing"
     },
     "states": {
       "loadFailed": "โหลดคำแปลไม่สำเร็จ",
       "missingTarget": "No target document yet.",
-      "sourceRow": "โลแคลนี้ได้รับการแก้ไขในตัวแก้ไขซอร์สหลัก",
       "sourceEditorHint": "แก้ไขข้อความต้นฉบับในตัวแก้ไขหลัก",
       "updatedAt": "อัปเดต {date}"
     },
@@ -4354,52 +4219,19 @@
   },
   "translationPanelMenu": {
     "description": "Review source menu labels and existing translation documents.",
-    "sourceLocaleDescription": "The menu editor above owns structure, ordering, links, visibility, and source labels. Target translations below are read-only previews.",
-    "states": {
-      "sourcePreview": "เลเบลเมนูต้นทาง ({locale}): {labels}",
-      "sourceEditorHint": "ป้ายกำกับเหล่านี้มาจากเครื่องมือแก้ไขเมนูด้านบน",
-      "missingTarget": "No labels are saved for this locale yet.",
-      "noItems": "ยังไม่มีป้ายเมนูที่จะแสดง",
-      "translationPreview": "Existing {locale} labels: {labels}"
-    },
     "previewModal": {
       "title": "{locale} menu translation preview",
-      "descriptions": {
-        "missing": "No public menu translation exists for this locale. The source is shown until an Admin generates it.",
-        "existing": "Shows the current public translated labels for this menu as read-only."
-      },
       "fields": {
-        "linkType": "Link type",
-        "destination": "Destination",
-        "children": "Nested items",
-        "localizedLabelForLocale": "{locale} public label",
-        "sourceLabelForLocale": "{locale} source label",
-        "localizedLabelDescription": "The current translated label shown in public menus; it cannot be changed here.",
-        "sourceLabelDescription": "Comes from the source menu editor and cannot be changed here.",
-        "fixedLocaleLockedDescription": "This item is fixed to the {locale} label and is read-only."
-      },
-      "states": {
-        "detailUnavailable": "Detailed translated menu data could not be loaded.",
-        "noItems": "There are no menu items to preview."
+        "localizedLabelForLocale": "{locale} public label"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template.",
-      "sourceLocaleDescription": "เทมเพลตต้นฉบับควบคุมหัวเรื่อง สำเนาเนื้อหา และชื่อตัวแปรรันไทม์",
-      "states": {
-        "sourceEditorHint": "แก้ไขเทมเพลตต้นฉบับในตัวแก้ไขหลัก",
-        "noContent": "ยังไม่มีหัวเรื่องหรือเนื้อหาที่แปลแล้ว"
-      }
+      "description": "Manage the source language and existing translation documents for this email template."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout.",
-      "sourceLocaleDescription": "เค้าโครงต้นฉบับจะควบคุม wrapper HTML และชื่อตัวยึดโครงสร้างสำหรับการแสดงผลอีเมล",
-      "states": {
-        "sourceEditorHint": "แก้ไขเค้าโครงต้นฉบับในตัวแก้ไขหลัก",
-        "noContent": "ยังไม่มี HTML ของเลย์เอาต์ที่แปลแล้ว"
-      }
+      "description": "Manage the source language and existing translation documents for this email layout."
     }
   },
   "localizationNotice": {
@@ -4408,9 +4240,7 @@
       "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
     },
     "fallback": {
-      "title": "ภาษาทางเลือก",
-      "english": "การแปล {requested} ที่ร้องขอไม่พร้อมใช้งาน ดังนั้นหน้านี้จึงแสดงใน {displayed}",
-      "source": "การแปล {requested} ที่ร้องขอไม่พร้อมใช้งาน ดังนั้นหน้านี้จึงแสดงใน {source} ดั้งเดิม"
+      "title": "ภาษาทางเลือก"
     },
     "actions": {
       "viewOriginal": "ดูต้นฉบับ ({source})"
@@ -4440,7 +4270,6 @@
       "policy": "นโยบาย",
       "lastTargetUpdate": "Last target update",
       "entity": "เอนทิตี",
-      "existing": "Existing translations",
       "sources": "แหล่งที่มา",
       "lastSourceUpdate": "อัปเดตแหล่งที่มาล่าสุด"
     },
@@ -4628,33 +4457,22 @@
       "summary": "เพิ่มเรื่องย่อแบบกระชับ..."
     },
     "tooltips": {
-      "generatingNamed": "{name} กำลังสร้างข้อมูลสรุป",
-      "applyingNamed": "{name} กำลังใช้การสรุปที่สร้างขึ้น",
-      "readyNamed": "{name} มีข้อมูลสรุปที่สร้างขึ้นพร้อมแล้ว"
+      "generatingNamed": "{name} กำลังสร้างข้อมูลสรุป"
     },
     "feedback": {
       "failedDefault": "ล้มเหลวในการประมวลผลการสร้างสรุป",
-      "invalidJson": "ไม่สามารถแยกวิเคราะห์การตอบสนองของ AI เป็น JSON สรุปได้",
       "alreadyRunning": "การสร้างข้อมูลสรุปกำลังทำงานอยู่",
-      "applyingGenerated": "กำลังใช้ข้อมูลสรุปที่สร้างขึ้น",
-      "resetOlderSession": "รีเซ็ตสถานะสรุปที่สร้างขึ้นเก่าจากเซสชันเก่า",
-      "resetUnrestorable": "รีเซ็ตสถานะสรุปที่สร้างขึ้นเก่าซึ่งไม่สามารถกู้คืนได้",
-      "missingJobPayload": "การสร้างสรุปไม่ได้ส่งคืนเพย์โหลดงาน",
       "missingSuggestionPayload": "การสร้างสรุปเสร็จสมบูรณ์โดยไม่มีเพย์โหลดคำแนะนำ",
       "staleSuggestion": "คำแนะนำนี้เก่าแล้ว สร้างใหม่หรือยกเลิกก่อนนำไปใช้",
       "unableToApplyNow": "ไม่สามารถใช้ข้อมูลสรุปที่สร้างขึ้นได้ในขณะนี้",
       "applyFailed": "ล้มเหลวในการใช้ข้อมูลสรุปที่สร้างขึ้น",
       "applied": "ใช้ข้อมูลสรุปที่สร้างขึ้นแล้ว",
-      "appliedJobUnresolved": "ใช้สรุปแล้ว แต่งาน AI ไม่สามารถแก้ไขได้โดยอัตโนมัติ",
-      "dismissedJobUnresolved": "ข้อเสนอแนะสรุปถูกยกเลิกภายในเครื่อง แต่งาน AI ไม่สามารถแก้ไขได้โดยอัตโนมัติ",
-      "readyBeforeApplying": "ใช้หรือยกเลิกสรุปที่สร้างขึ้นก่อน",
       "readyToApply": "สรุปที่สร้างขึ้นพร้อมใช้แล้ว"
     },
     "ready": {
       "title": "สรุปที่สร้างขึ้น",
       "suggestedSummary": "บทสรุปที่แนะนำ",
       "anotherCollaborator": "ผู้ร่วมงานอีกคน",
-      "anotherCollaboratorFallback": "ผู้ทำงานร่วมกันอีกคนมีข้อมูลสรุปที่สร้างขึ้นพร้อมแล้ว",
       "anotherCollaboratorNamed": "{name} มีข้อมูลสรุปที่สร้างขึ้นพร้อมแล้ว"
     }
   },
@@ -4702,8 +4520,7 @@
       "roleUpdated": "อัปเดตบทบาทแล้ว",
       "userBanned": "ผู้ใช้ถูกแบน",
       "userUnbanned": "ผู้ใช้ถูกแบน",
-      "userDeleted": "ลบผู้ใช้แล้ว",
-      "userCreated": "ผู้ใช้สร้างขึ้น"
+      "userDeleted": "ลบผู้ใช้แล้ว"
     }
   },
   "adminUserDetail": {
@@ -4740,16 +4557,13 @@
       "userIdCopied": "คัดลอกรหัสผู้ใช้แล้ว",
       "userIdCopyFailed": "ไม่สามารถคัดลอก ID ผู้ใช้",
       "emailSuppressionReleased": "ระงับอีเมลแล้ว",
-      "mainEmailUpdated": "อัปเดตอีเมลหลักแล้ว",
       "ssoProviderRemoved": "นำผู้ให้บริการ SSO ออกแล้ว"
     },
     "auth": {
       "emptyEmail": "ไม่มีอีเมล",
       "delivery": {
         "title": "อีเมล์จัดส่ง",
-        "description": "จดหมายของแคมเปญ การแจ้งเตือน และบัญชีใช้อีเมลหลักที่เลือก",
-        "changePlaceholder": "เลือกอีเมลที่ยืนยันแล้ว",
-        "changeHelp": "การเปลี่ยนแปลงการเลือกนี้จะบันทึกทันที"
+        "description": "จดหมายของแคมเปญ การแจ้งเตือน และบัญชีใช้อีเมลหลักที่เลือก"
       },
       "providers": {
         "title": "ผู้ให้บริการ SSO ที่เชื่อมต่อ",
@@ -4758,7 +4572,6 @@
         "remove": "ลบผู้ให้บริการ SSO"
       },
       "sources": {
-        "current": "อีเมลปัจจุบัน",
         "emailCode": "ลงชื่อเข้าใช้อีเมล"
       },
       "ban": {
@@ -4793,7 +4606,6 @@
         "noChanges": "ไม่มีการเปลี่ยนแปลงที่จะบันทึก"
       },
       "validation": {
-        "invalidUrl": "รูปแบบ URL ไม่ถูกต้อง",
         "invalidEmail": "รูปแบบอีเมลไม่ถูกต้อง",
         "invalidHexColor": "รูปแบบสีฐานสิบหกไม่ถูกต้อง",
         "invalidGoogleAnalyticsId": "รูปแบบรหัส Google Analytics ไม่ถูกต้อง"
@@ -5102,14 +4914,12 @@
   },
   "formSuccessPage": {
     "metadata": {
-      "fallbackTitle": "ส่งแบบฟอร์มแล้ว",
       "title": "{formTitle} - ส่งแล้ว"
     },
     "title": "ขอบคุณ"
   },
   "formPasswordPage": {
     "metadata": {
-      "fallbackTitle": "การเข้าถึงแบบฟอร์ม",
       "description": "ป้อนรหัสผ่านเพื่อเข้าถึงแบบฟอร์มนี้"
     },
     "title": "ป้องกันด้วยรหัสผ่าน",
@@ -5121,7 +4931,6 @@
   },
   "formDashboardPage": {
     "metadata": {
-      "fallbackTitle": "แดชบอร์ดแบบฟอร์ม",
       "title": "{formTitle} - แดชบอร์ด",
       "description": "สถิติการส่งแบบฟอร์มและการวิเคราะห์"
     },
@@ -5131,7 +4940,28 @@
     "stats": {
       "total": "ทั้งหมด"
     },
-    "fieldStatistics": "สถิติภาคสนาม"
+    "fieldStatistics": "สถิติภาคสนาม",
+    "charts": {
+      "donut": "โดนัท",
+      "pie": "วงกลม",
+      "bar-horizontal": "แท่งแนวนอน",
+      "bar-vertical": "แท่งแนวตั้ง",
+      "radar": "เรดาร์",
+      "table": "ตาราง",
+      "area": "พื้นที่",
+      "line": "เส้น",
+      "histogram": "ฮิสโตแกรม",
+      "noResponses": "ยังไม่มีคำตอบ",
+      "emptyValue": "(ว่าง)",
+      "min": "ค่าต่ำสุด",
+      "max": "ค่าสูงสุด",
+      "avg": "ค่าเฉลี่ย",
+      "count": "จำนวน",
+      "date": "วันที่",
+      "value": "ค่า",
+      "range": "ช่วง",
+      "chartType": "ประเภทแผนภูมิ"
+    }
   },
   "embeddedForm": {
     "states": {
@@ -5182,10 +5012,7 @@
       "locationMode": "โหมดตำแหน่ง",
       "ticketUrl": "URL ตั๋ว",
       "streamUrl": "URL สตรีม",
-      "externalUrl": "URL ภายนอก",
-      "participants": "ผู้เข้าร่วม",
-      "textCredits": "เครดิตข้อความ",
-      "textCreditsDescription": "หนึ่งเครดิตต่อบรรทัด ใช้บทบาท: ตั้งชื่อเมื่อจำเป็นต้องใช้บทบาท"
+      "externalUrl": "URL ภายนอก"
     },
     "locationModes": {
       "mapPlace": "สถานที่",
@@ -5198,7 +5025,6 @@
       "tickets": "ตั๋ว",
       "stream": "ลำธาร",
       "link": "ลิงค์",
-      "participants": "ผู้เข้าร่วม",
       "empty": "ไม่พบกิจกรรม",
       "date": "วันที่",
       "credits": "เครดิต"
@@ -5215,152 +5041,14 @@
       "deleteMessage": "ประเภทกิจกรรมนี้สามารถลบได้เฉพาะเมื่อไม่มีกิจกรรมใช้เท่านั้น"
     }
   },
-  "tools": {
-    "portadj": {
-      "metadataTitle": "PortaDJ",
-      "metadataDescription": "เล่นและมิกซ์ไฟล์เสียงในเครื่องผ่านเบราว์เซอร์ด้วยเด็ค DJ สองตัว"
-    },
-    "youtubeAudio": {
-      "title": "เสียงจาก YouTube",
-      "urlLabel": "ลิงก์วิดีโอ",
-      "urlPlaceholder": "https://…",
-      "resolve": "โหลดเสียง",
-      "resolving": "กำลังโหลดเสียง",
-      "clear": "ล้างแหล่งเสียง",
-      "metadataTitle": "เสียงจาก YouTube",
-      "metadataDescription": "แปลงเสียงจากแหล่ง YouTube ที่ยืนยันสิทธิ์แล้วในเบราว์เซอร์ของคุณ",
-      "errors": {
-        "INTERNAL_ERROR": "ไม่สามารถโหลดแหล่งเสียงได้ โปรดลองอีกครั้ง",
-        "INVALID_REQUEST": "ป้อน URL วิดีโอ YouTube ที่ถูกต้อง",
-        "INVALID_UPSTREAM_RESPONSE": "YouTube ส่งคืนแหล่งเสียงที่ไม่คาดคิด โปรดลองวิดีโออื่น",
-        "REQUEST_ABORTED": "คำขอถูกยกเลิกแล้ว",
-        "SOURCE_EXPIRED": "แหล่งเสียงนี้หมดอายุแล้ว โปรดโหลด URL อีกครั้ง",
-        "SOURCE_NOT_FOUND": "แหล่งเสียงนี้ไม่พร้อมใช้งานแล้ว โปรดโหลด URL อีกครั้ง",
-        "UNAUTHORIZED": "ลงชื่อเข้าใช้อีกครั้งเพื่อใช้เครื่องมือนี้",
-        "UNSUPPORTED_VIDEO": "วิดีโอนี้ไม่มีแหล่งเสียงที่รองรับและมีความยาวจำกัด",
-        "UPSTREAM_FAILURE": "ไม่สามารถโหลดเสียงจาก YouTube ได้ในขณะนี้ โปรดลองอีกครั้ง"
-      }
-    },
-    "transcode": {
-      "title": "ตัวแปลงสัญญาณเสียง",
-      "targetIdle": "กำลังรอ",
-      "targetChecking": "กำลังตรวจสอบ",
-      "targetReady": "พร้อม",
-      "targetError": "ไม่พร้อมใช้งาน",
-      "dropTitle": "วางหรือเลือกไฟล์เสียง",
-      "dropDescription": "สูงสุด 10 ไฟล์ · ไม่มีโฟลเดอร์ · ประมวลผลบนอุปกรณ์นี้",
-      "chooseFiles": "เลือกไฟล์เสียง",
-      "supportedFormatsLabel": "รูปแบบที่รองรับ",
-      "supportedFormats": "รองรับ: CAF, AIFF/AIFC, WAV, FLAC, MP3, AAC/M4A, Ogg/Opus และเสียงในรูปแบบ MP4, MOV, MKV/WebM หรือ TS ตรวจสอบแล้วต่อไฟล์",
-      "filesSelected": "ไฟล์",
-      "outputSettings": "การตั้งค่าเอาท์พุต",
-      "outputSettingsHelper": "ช่องยังคงไม่เปลี่ยนแปลง อัตโนมัติเลือกอัตราที่เข้ากันได้ต่อไฟล์",
-      "processingDetails": "รายละเอียดการประมวลผล",
-      "processingDetailsDescription": "การสุ่มตัวอย่างที่สมดุล เอาต์พุตจำนวนเต็มจะถูกแยกส่วน ไฟล์ WAV ขนาดใหญ่ใช้ RF64",
-      "format": "รูปแบบ",
-      "sampleRate": "อัตราตัวอย่าง",
-      "bitrate": "บิตเรต",
-      "bitDepth": "ความลึกบิต",
-      "bitDepthContainerEffective": "คอนเทนเนอร์ {containerBits} บิต / {effectiveBits} บิตมีประสิทธิภาพ",
-      "codec": "ตัวแปลงสัญญาณ",
-      "sampleFormat": "รูปแบบตัวอย่าง",
-      "float": "ลอย",
-      "integer": "PCM จำนวนเต็ม",
-      "constantBitrate": "ซีบีอาร์",
-      "variableBitrate": "วีบีอาร์",
-      "sourcePcmFloat": "{bitDepth}-บิตลอย",
-      "sourcePcmInteger": "{bitDepth}-จำนวนเต็มบิต",
-      "sourcePcmSignedInteger": "{bitDepth}-จำนวนเต็มลงนามบิต",
-      "sourcePcmUnsignedInteger": "{bitDepth}-บิตจำนวนเต็มที่ไม่ได้ลงนาม",
-      "automatic": "อัตโนมัติ",
-      "preserveSource": "เก็บรักษาแหล่งที่มา",
-      "unavailable": "ไม่พร้อมใช้งาน",
-      "sampleRateAvailableFor": "{supported, number} จาก {total, number} ไฟล์",
-      "sampleRateResetAutomatic": "อัตราตัวอย่างก่อนหน้าไม่ถูกต้องสำหรับการตั้งค่าเอาต์พุตเหล่านี้ อัตราตัวอย่างถูกเปลี่ยนเป็นแบบอัตโนมัติ",
-      "unknownAudio": "เสียง",
-      "channelCount": "{count, plural, one {# ช่อง} other {# ช่อง}}",
-      "queue": "คิวการแปลง",
-      "convert": "แปลง",
-      "cancelAll": "ยกเลิกทั้งหมด",
-      "clear": "ชัดเจน",
-      "download": "บันทึกไฟล์ที่แปลง",
-      "downloadSource": "บันทึกต้นฉบับ",
-      "sourceDownloadExpired": "ต้นทางหมดอายุหรือไม่พร้อมใช้งาน โปรดโหลด URL ของ YouTube อีกครั้ง",
-      "sourceDownloadFailed": "ดาวน์โหลดต้นฉบับไม่ได้ โปรดตรวจสอบการเชื่อมต่อและโหลดต้นทางอีกครั้ง",
-      "retry": "ลองอีกครั้ง",
-      "cancel": "ยกเลิก",
-      "remove": "ลบ",
-      "sourceValue": "แหล่งที่มา ({value})",
-      "mono": "โมโน",
-      "stereo": "สเตอริโอ",
-      "targetWaitingForFiles": "เพิ่มไฟล์เสียงที่รองรับเพื่อตรวจสอบเป้าหมายเอาต์พุตที่เลือก",
-      "targetCheckingMessage": "ตรวจสอบว่าเบราว์เซอร์นี้รองรับเป้าหมายเอาต์พุตที่เลือกหรือไม่",
-      "targetReadyMessage": "เป้าหมายเอาต์พุตที่เลือกมีอยู่ในเบราว์เซอร์นี้",
-      "targetAvailability": "ไฟล์ {available, number} พร้อมสำหรับการแปลง; {unavailable, number} ยังคงไม่สามารถใช้งานได้กับการตั้งค่าเหล่านี้",
-      "engineLoading": "กำลังโหลดเอ็นจิ้นเสียง {asset}",
-      "engineVerifying": "กำลังตรวจสอบกลไกเสียง {asset}",
-      "engineLoadFailed": "ไม่สามารถโหลดเอ็นจิ้นเสียง {asset} ได้",
-      "capacityExceeded": "ไม่ได้เพิ่มไฟล์ {count, number} คิวสามารถเก็บไฟล์ได้สูงสุด {max, number}",
-      "statusInspectionQueued": "รอการตรวจสอบ",
-      "statusInspecting": "กำลังตรวจสอบ",
-      "statusReady": "พร้อม",
-      "statusQueued": "เข้าคิว",
-      "statusQueuedAvailability": "เข้าคิวไฟล์ {converting, number} สำหรับการแปลง {unavailable, number} ยังคงไม่พร้อมใช้งาน",
-      "statusConverting": "กำลังแปลง",
-      "statusConvertingAvailability": "กำลังแปลงไฟล์ {converting, number}; {unavailable, number} ยังคงไม่พร้อมใช้งาน",
-      "statusComplete": "สมบูรณ์",
-      "statusCompleteAvailability": "แปลงไฟล์ {converted, number}; {unavailable, number} ยังคงไม่พร้อมใช้งาน",
-      "statusBatchResult": "รันเสร็จสิ้น: {eligible, number} มีสิทธิ์, {attempted, number} พยายาม, {succeeded, number} สำเร็จ, {failed, number} ล้มเหลว, {unavailable, number} ไม่พร้อมใช้งาน",
-      "statusUnsupported": "ไม่รองรับ",
-      "statusError": "เกิดข้อผิดพลาด",
-      "statusCancelled": "ยกเลิก",
-      "unsupportedInput": "ไฟล์นี้ไม่ใช่อินพุตเสียงที่รองรับ",
-      "unsupportedCodec": "เบราว์เซอร์นี้ไม่สามารถถอดรหัสตัวแปลงสัญญาณเสียงในไฟล์นี้ได้",
-      "inspectionFailed": "ไม่สามารถตรวจสอบไฟล์ได้ ลองอีกครั้ง",
-      "inspectionInconclusive": "เบราว์เซอร์ไม่สามารถระบุเสียงนี้ภายในขีดจำกัดการอ่านที่ปลอดภัย ลองไฟล์หรือรูปแบบอื่น",
-      "outputUnsupported": "การตั้งค่าเอาต์พุตที่เลือกไม่ได้รับการสนับสนุนในเบราว์เซอร์นี้",
-      "outputProbeFailed": "ไม่สามารถตรวจสอบการสนับสนุนเอาต์พุตได้ ลองอีกครั้ง",
-      "outputEngineUnavailable": "ไม่สามารถสตาร์ทเอ็นจิ้นรันไทม์สำหรับ {preset} ได้ ตรวจสอบนโยบายเครือข่ายหรือสินทรัพย์แล้วลองอีกครั้ง",
-      "outputChannelsUnsupported": "เอาต์พุตนี้สนับสนุนช่องต้นทาง {minimum, number}–{maximum, number} แต่ไฟล์นี้มี {actual, number} ช่องจะถูกเก็บรักษาไว้และไม่ถูกดาวน์มิกซ์",
-      "sourceInspectionMissing": "ไม่สามารถระบุจำนวนช่องสัญญาณหรืออัตราตัวอย่างได้ เลือกไฟล์ที่มีข้อมูลเมตาเสียงที่อ่านได้",
-      "outputConfigurationUnavailable": "การตั้งค่ารูปแบบและการเข้ารหัสที่เลือกไม่ก่อให้เกิดการกำหนดค่าเอาต์พุตที่ใช้ได้",
-      "preserveSourceRateUnsupported": "รักษาแหล่งที่มาไม่สามารถใช้ {sourceRate} สำหรับเอาต์พุตนี้ อัตราที่อนุญาต: {allowed}",
-      "sourceResamplingRateUnsupported": "แหล่งที่มา {sourceRate} นี้อยู่นอกช่วงการสุ่มตัวอย่างใหม่ ({minimum}–{maximum}) สามารถส่งผ่านไปยังเอาต์พุตที่เข้ากันได้เท่านั้น",
-      "targetResamplingRateUnsupported": "เป้าหมาย {targetRate} ที่เลือกอยู่นอกช่วงการสุ่มตัวอย่างใหม่ ({minimum}–{maximum})",
-      "automaticRateUnavailable": "อัตโนมัติไม่สามารถเลือกอัตราที่ถูกต้องสำหรับแหล่งที่มา {sourceRate} นี้ อัตราเอาต์พุตที่อนุญาต: {allowed}",
-      "presetRateUnsupported": "เอาต์พุตนี้ไม่รองรับ {targetRate} อัตราที่อนุญาต: {allowed}",
-      "conversionFailed": "การแปลงเสียงล้มเหลว",
-      "conversionStorageLimitExceeded": "เบราว์เซอร์นี้ไม่สามารถเก็บเอาต์พุตที่คาดหวังไว้ในที่เก็บข้อมูลชั่วคราวในเครื่องได้ เลือกรูปแบบที่เล็กกว่าหรือบีบอัด หรือลองอีกครั้งในเบราว์เซอร์ที่รองรับเอาต์พุตในเครื่องขนาดใหญ่",
-      "conversionTargetSizeLimitExceeded": "รูปแบบเอาต์พุตที่เลือกไม่สามารถแสดงไฟล์ที่มีขนาดใหญ่ขนาดนี้ได้ เลือกรูปแบบอื่น หรือลดอัตราตัวอย่าง ความลึกบิต หรือจำนวนช่อง",
-      "cancelledMessage": "การแปลงถูกยกเลิก",
-      "sourceSummary": "{container} · {sampleRate} · {channels} · {bitDepth}",
-      "outputSummary": "{preset} · {size}",
-      "progressLabel": "{phase} · {progress, number}%",
-      "phasePrepare": "กำลังเตรียมตัว",
-      "phaseDecode": "การถอดรหัส",
-      "phaseEncode": "การเข้ารหัส",
-      "phaseFinalize": "กำลังสรุป",
-      "bytes": "{count, number} ไบต์",
-      "storageOpfs": "พื้นที่เก็บข้อมูลเบราว์เซอร์ส่วนตัว",
-      "storageMemory": "หน่วยความจำเบราว์เซอร์",
-      "metadataTitle": "ตัวแปลงสัญญาณเสียง",
-      "metadataDescription": "แปลงเสียงในเบราว์เซอร์ของคุณ ไฟล์จะไม่ออกจากอุปกรณ์ของคุณ",
-      "notices": "ใบอนุญาตโอเพ่นซอร์ส"
-    },
-    "hwp": {
-      "title": "ตัวแก้ไข HWP",
-      "metadataDescription": "เปิด แก้ไข และบันทึกเอกสาร HWP และ HWPX ในเบราว์เซอร์",
-      "description": "ใช้เมนูไฟล์ของตัวแก้ไขเพื่อเปิดและบันทึกไฟล์ HWP หรือ HWPX เอกสารจะประมวลผลบนอุปกรณ์นี้โดยไม่อัปโหลด",
-      "loading": "กำลังโหลดตัวแก้ไข…",
-      "error": "โหลดตัวแก้ไขไม่สำเร็จ โปรดลองอีกครั้ง",
-      "retry": "ลองอีกครั้ง",
-      "metadataTitle": "ตัวแก้ไข HWP"
-    }
-  },
   "myMetadata": {
     "description": "{title} เพจสำหรับบัญชีของคุณบน {siteName}"
   },
   "fileManager": {
+    "pagination": {
+      "end": "สิ้นสุดผลลัพธ์"
+    },
+    "selectionUnavailableDescription": "ไม่สามารถเพิ่มไฟล์นี้ได้ กด Enter เพื่อดูตัวอย่าง",
     "title": "ไฟล์",
     "description": "อัปโหลด จัดระเบียบ ตรวจสอบ และนำไฟล์กลับมาใช้ใหม่ทั่วทั้งไซต์",
     "root": "ไฟล์",
@@ -5484,9 +5172,7 @@
       "move-files": {
         "title": "ย้ายไฟล์"
       },
-      "targetFolderId": "รหัสโฟลเดอร์เป้าหมาย",
       "extensionSeparate": "ส่วนขยาย .{extension} ถูกเก็บไว้แยกกัน",
-      "rootWhenEmpty": "เว้นว่างไว้เพื่อย้ายไปยังราก",
       "delete": {
         "title": "ลบ",
         "folder": "ลบโฟลเดอร์นี้และไฟล์ที่ไม่ได้ใช้ทั้งหมดที่อยู่ด้านล่างใช่ไหม",
@@ -5496,14 +5182,26 @@
         "byDomain": "ตามโดเมน: {summary}",
         "more": "และอีก {count} เปิดรายละเอียดไฟล์เพื่อตรวจสอบรายการทั้งหมด"
       }
+    },
+    "viewSettings": {
+      "title": "การตั้งค่ามุมมอง",
+      "iconSize": "ขนาดไอคอน",
+      "spacing": "ระยะห่างรายการ",
+      "columns": "จำนวนคอลัมน์",
+      "auto": "อัตโนมัติ",
+      "small": "เล็ก",
+      "medium": "กลาง",
+      "large": "ใหญ่",
+      "compact": "กระชับ",
+      "standard": "มาตรฐาน",
+      "comfortable": "กว้าง",
+      "reset": "รีเซ็ตมุมมอง"
     }
   },
   "fileDownloadAccess": {
     "editor": {
       "sectionTitle": "ดาวน์โหลดการเข้าถึง",
-      "sectionDescription": "ควบคุมว่าใครสามารถดาวน์โหลดไฟล์ต้นฉบับได้",
       "loading": "กำลังโหลดการเข้าถึงการดาวน์โหลด...",
-      "audienceLabel": "ดาวน์โหลดผู้ชม",
       "audiences": {
         "disabled": {
           "label": "พิการ",
@@ -5522,15 +5220,10 @@
           "description": "เฉพาะผู้ใช้ในกลุ่มผู้ชมที่เลือกเท่านั้นที่สามารถดาวน์โหลดไฟล์นี้ได้"
         }
       },
-      "segmentsLabel": "ผู้ชม",
-      "segmentsDescription": "เลือกกลุ่มผู้ชมที่มีอยู่อย่างน้อย 1 กลุ่ม",
-      "segmentsPlaceholder": "เลือกผู้ชม",
       "segmentsLoadError": "โหลดนโยบายแล้วแต่ไม่สามารถโหลดผู้ชมได้",
       "segmentsEmpty": "ไม่มีกลุ่มผู้ชมที่พร้อมใช้งาน",
       "restrictedWithoutAudience": "นโยบายที่ถูกจำกัดนี้ไม่มีผู้ชม การดาวน์โหลดจะถูกปฏิเสธสำหรับทุกคนจนกว่าคุณจะเลือกผู้ชมอย่างน้อยหนึ่งคน",
-      "segmentRequiresSubscription": "{name} (ต้องสมัครรับจดหมายข่าว)",
       "additionalSelected": "เลือกอีก {count} รายการ",
-      "loadMoreSegments": "โหลดผู้ชมเพิ่มเติม",
       "loadError": "ไม่สามารถโหลดการเข้าถึงการดาวน์โหลด",
       "saveError": "ไม่สามารถบันทึกการเข้าถึงการดาวน์โหลด",
       "fileRequired": "บันทึกไฟล์ก่อนกำหนดค่าการเข้าถึงการดาวน์โหลด"
@@ -5552,5 +5245,29 @@
     "empty": "ป้อนซอร์สของไดอะแกรม",
     "invalid": "ไดอะแกรมไม่ถูกต้อง",
     "loading": "กำลังวาด…"
+  },
+  "errorPage": {
+    "titles": {
+      "400": "คำขอไม่ถูกต้อง",
+      "401": "ต้องเข้าสู่ระบบ",
+      "403": "ไม่มีสิทธิ์เข้าถึง",
+      "404": "ไม่พบหน้า",
+      "408": "คำขอหมดเวลา",
+      "409": "คำขอขัดแย้งกับสถานะปัจจุบัน",
+      "410": "หน้านี้ไม่พร้อมใช้งานอีกต่อไป",
+      "413": "คำขอมีขนาดใหญ่เกินไป",
+      "422": "ไม่สามารถประมวลผลคำขอได้",
+      "429": "ส่งคำขอมากเกินไป",
+      "500": "มีบางอย่างผิดพลาด",
+      "501": "ไม่รองรับคำขอนี้",
+      "502": "บริการที่เชื่อมต่อเกิดข้อผิดพลาด",
+      "503": "บริการไม่พร้อมใช้งานชั่วคราว",
+      "504": "การตอบกลับของบริการหมดเวลา"
+    },
+    "actions": {
+      "goHome": "กลับบ้าน",
+      "tryAgain": "ลองอีกครั้ง",
+      "login": "กลับไปที่เข้าสู่ระบบ"
+    }
   }
 }

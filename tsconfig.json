@@ -44,11 +44,15 @@
   ],
   "exclude": [
     "node_modules",
+    "stories/**",
     ".storybook/**/*.ts",
     ".storybook/**/*.tsx",
     "**/*.story.ts",
     "**/*.story.tsx",
     "**/*.stories.ts",
-    "**/*.stories.tsx"
+    "**/*.stories.tsx",
+    "features/auth/ui/auth-accessibility.test.tsx",
+    "features/my/account-controls-accessibility.test.tsx",
+    "features/share/ui/ShareLinkSectionView.test.tsx"
   ]
 }

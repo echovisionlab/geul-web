@@ -1,7 +1,10 @@
 'use client';
 
+import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Avatar, Group, Text } from '@mantine/core';
+
+import { Avatar } from '@/components/core/Display';
 import { LabelBadge, StatusBadge } from '@/components/core/Badge';
 import { TextButton } from '@/components/core/TextButton';
 import {
@@ -37,21 +40,24 @@ function getColumns(labels: {
       key: 'artist',
       header: labels.artist,
       cell: (artist) => (
-        <Group gap="sm">
-          <Avatar src={buildManagedImageUrl(artist.imageUrl, MANAGED_IMAGE_PRESET.AVATAR_SM)} size="sm" radius="xl">
-            {artist.name.charAt(0).toUpperCase()}
-          </Avatar>
+        <DsLayoutInline gap="sm">
+          <Avatar
+            src={buildManagedImageUrl(artist.imageUrl, MANAGED_IMAGE_PRESET.AVATAR_SM)}
+            size="sm"
+            shape="circle"
+            name={artist.name}
+          />
           <div>
             <TextButton href={`/artists/${artist.id}?edit=true`} size="sm" weight="medium" appearance="default">
               {artist.name}
             </TextButton>
             {artist.slug && (
-              <Text size="xs" c="dimmed">
+              <DsText size="xs" tone="secondary">
                 /{artist.slug}
-              </Text>
+              </DsText>
             )}
           </div>
-        </Group>
+        </DsLayoutInline>
       ),
     },
     {
@@ -76,9 +82,9 @@ function getColumns(labels: {
       key: 'created',
       header: labels.created,
       cell: (artist) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={artist.createdAt} />
-        </Text>
+        </DsText>
       ),
     },
     {

@@ -1,4 +1,5 @@
 export { DropdownMenu } from './DropdownMenu';
+export { OnDemandDropdownMenu, preloadDropdownMenu } from './OnDemandDropdownMenu';
 export type {
   DropdownMenuDividerProps,
   DropdownMenuDropdownProps,
@@ -6,6 +7,7 @@ export type {
   DropdownMenuLabelProps,
   DropdownMenuPlacement,
   DropdownMenuProps,
+  DropdownMenuSectionProps,
   DropdownMenuSize,
   DropdownMenuSubDropdownProps,
   DropdownMenuSubPlacement,

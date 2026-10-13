@@ -1,0 +1,91 @@
+{
+  "engine": "Codex in-app browser",
+  "pointer": "fine; viewport changes do not emulate physical touch",
+  "representativeWidths": [390, 834, 1440],
+  "locales": ["ko", "en"],
+  "themePresets": ["ocean-light", "ocean-dark"],
+  "screenshotTiming": "Production Views were reviewed during integration. Most images precede final shared scroll accessibility/sensor focus repairs; those two owners are rechecked after the final build. Final catalog checks identify the complete final snapshot.",
+  "observations": [
+    {
+      "scenario": "Selection bubble More",
+      "result": "Korean portaled menu has three items outside the toolbar rail; popup top102/bottom180 within 380px iframe. Escape returns focus to More, keeps toolbar visible and clears expanded state."
+    },
+    {
+      "scenario": "Cookie phone",
+      "result": "390px viewport; banner left12/right378, height118.39px, no horizontal overflow. Reject/Accept all labels are 거부/모두 허용; both commands30px high and share neutral compact styling. Core minimum is28px."
+    },
+    {
+      "scenario": "PostHero and real body",
+      "result": "Long title and metadata reviewed at390/834/1440px, image bounds match document width, no horizontal overflow or clipped metadata. Body uses aligned md inset/gap. Light/dark custom themes and Korean/English observed."
+    },
+    {
+      "scenario": "Shared progress",
+      "result": "Processing status/title12px with actual named45% Core bar on image contrast. Route bar top0, height2px, parent padding0, indeterminate while loading."
+    },
+    {
+      "scenario": "Version history",
+      "result": "Korean/Ocean dark automatic fixture appended20→40→60 rows;60 native time elements and localized end feedback. Drawer382px wide, trailing Restore. Local API audit distinguishes20-row default and100 request max from history retention."
+    },
+    {
+      "scenario": "Password",
+      "result": "Eye/EyeOff actual SVG,30px accessory. Clicking visibility changes input type totext, preserves button focus and updates Korean name to 비밀번호 숨기기."
+    },
+    {
+      "scenario": "Share form",
+      "result": "390px story frame uses plain compact form, plus-only creation with accessible 새 링크 name and28px target; compact Cancel/Create commands. No nested oversized form card."
+    },
+    {
+      "scenario": "Social links narrow",
+      "result": "320px track; URL inputs224px wide, platform icon and searchable picker. Actual play selected Bandcamp, returned focus to trigger, retained entered URL and Korean accessible context."
+    },
+    {
+      "scenario": "File search",
+      "result": "Automatic paginated story reaches51 results and localized end feedback with no document overflow. Search scope uses compact text commands without 검색: prefix; view controls28px. No persistent More button."
+    },
+    {
+      "scenario": "Map directions and loader",
+      "result": "Directions382px compact panel with30px provider commands. Loading status and parent transparent. Configured site loader image loaded from shared PageLoader/CDN binding. Provider navigation and live tiles not accepted."
+    },
+    {
+      "scenario": "Avatar removal",
+      "result": "Remove target28×28px, glyph16px, danger/strong background rgb128,32,25. Ordinary image selection unchanged."
+    },
+    {
+      "scenario": "Translation and legal",
+      "result": "Phone Korean translation rows show 영어/일본어 without EN/JA duplicates; source 한국어(원문), title/missing notice and actions remain. Legal 현재/보관됨 use plain Text. Missing XL logo shows Example Studio title."
+    },
+    {
+      "scenario": "Account access",
+      "result": "URL term is absolute1×1px visually hidden; definition aria-labelledby resolves URL and retains endpoint. Logout other sessions parent justify-content flex-end and button right matches parent right."
+    },
+    {
+      "scenario": "Artwork preparation",
+      "result": "Actual browser PNG→WebP crop-dialog play executes locally without transport, thenEscape closes. MIME/extension hints include HEIC and omit GIF for artwork; persistent ratio/help absent. Native all-files overrides still require runtime validation."
+    },
+    {
+      "scenario": "Final shared modal native keyboard",
+      "result": "Fresh final build: named Long content region tabindex0; trusted Home reached scrollTop0, PageDown reached443 with focus retained and header top25 unchanged. Body scrollHeight1824/clientHeight463. Native scrolling is preserved, with no scripted key interception."
+    },
+    {
+      "scenario": "Final native drag counter sample",
+      "result": "Actual 12-field Core fixture, same horizontal36px fine-pointer gesture followed by Sample: latest Group2/item12→Group2/item16 (delta0/4). Previous sensor-churn build gave delta2/16. Domain order unchanged. Activation/drop and sampling are included; profiling commits0 in ordinary production build, so no FPS/latency claim."
+    },
+    {
+      "scenario": "Final production FormBuilder reorder",
+      "result": "Korean Large Form Reorder actual24-field/two-step play: step2 now precedes step1, live preview updates to step2, and original moved grip is still connected and focused with current name 2단계 드래그. Preview no longer steals focus."
+    },
+    {
+      "scenario": "Final English Handbook",
+      "result": "Reference now opens Compact product interfaces inside Storybook, with all nine detailed contract links. Visible heading ancestor lang=en while header locale is Korean and custom Ocean dark surface rgb22,25,24. English documentation remains independent of translated preview language."
+    },
+    {
+      "scenario": "Final header controls",
+      "result": "Selected English through actual toolbar option; visible Compact product interfaces heading remains lang=en and iframe document language changes to en. Selected Ocean light through actual toolbar option; computed body background changes from rgb22,25,24 to rgb237,245,251. Temporary viewport override reset before handoff."
+    }
+  ],
+  "historicalBuildIdentities": [
+    "design/storybook/review-results/compact-first-build-identity.json",
+    "design/storybook/review-results/compact-second-build-identity.json",
+    "design/storybook/review-results/compact-third-build-identity.json"
+  ]
+}

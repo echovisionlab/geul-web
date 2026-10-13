@@ -12,6 +12,8 @@ export function useOgLifecycleSubscription(
     entityType: OgGenerationLifecycleRuntimeEvent['entityType'];
     entityId?: string;
     locale?: string | null;
+    /** Lifecycle events could not be delivered; re-read the latest generation. */
+    onResync?: () => void;
   },
 ): void {
   useEditorRuntimeEvents(
@@ -25,6 +27,11 @@ export function useOgLifecycleSubscription(
       entityType: options.entityType,
       entityId: options.entityId,
       locale: options.locale,
+      onResync: () => {
+        if (options.enabled !== false) {
+          options.onResync?.();
+        }
+      },
     },
   );
 }

@@ -1,0 +1,930 @@
+{
+  "date": "2026-10-11",
+  "scope": "Static Storybook initial snapshot before Author fixes; default theme/locale only",
+  "command": "storybook:test",
+  "testCount": 1148,
+  "passed": 995,
+  "failed": 153,
+  "nativeScreenReaderTested": false,
+  "currentConformanceClaim": false,
+  "failures": [
+    {
+      "test": "Core/Actions/TextButton Width Contract smoke-test",
+      "storyId": "core-actions-textbutton--width-contract",
+      "rules": ["target-size"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Forms/Operations Submissions smoke-test",
+      "storyId": "pages-forms-operations--submissions",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Taxonomy Genres smoke-test",
+      "storyId": "pages-admin-taxonomy--genres",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Taxonomy Formats smoke-test",
+      "storyId": "pages-admin-taxonomy--formats",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Taxonomy Styles smoke-test",
+      "storyId": "pages-admin-taxonomy--styles",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Taxonomy Categories smoke-test",
+      "storyId": "pages-admin-taxonomy--categories",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Taxonomy Tags smoke-test",
+      "storyId": "pages-admin-taxonomy--tags",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Taxonomy User Tags smoke-test",
+      "storyId": "pages-admin-taxonomy--user-tags",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Taxonomy Mutation Failed smoke-test",
+      "storyId": "pages-admin-taxonomy--mutation-failed",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Taxonomy Phone smoke-test",
+      "storyId": "pages-admin-taxonomy--phone",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Legal Policies Terms smoke-test",
+      "storyId": "pages-admin-legal-policies--terms",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Legal Policies Terms Action Failed smoke-test",
+      "storyId": "pages-admin-legal-policies--terms-action-failed",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Legal Policies Privacy smoke-test",
+      "storyId": "pages-admin-legal-policies--privacy",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Legal Policies Privacy Action Failed smoke-test",
+      "storyId": "pages-admin-legal-policies--privacy-action-failed",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Legal Policies Phone smoke-test",
+      "storyId": "pages-admin-legal-policies--phone",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Translation Overview smoke-test",
+      "storyId": "pages-admin-translation--overview",
+      "rules": ["heading-order"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Collections Clients smoke-test",
+      "storyId": "pages-admin-collections--clients",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Collections Client Create Failed smoke-test",
+      "storyId": "pages-admin-collections--client-create-failed",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Collections Series smoke-test",
+      "storyId": "pages-admin-collections--series",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Collections Series Create Failed smoke-test",
+      "storyId": "pages-admin-collections--series-create-failed",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Collections Phone smoke-test",
+      "storyId": "pages-admin-collections--phone",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Account/Owned Lists Artists smoke-test",
+      "storyId": "pages-account-owned-lists--artists",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Account/Owned Lists Phone smoke-test",
+      "storyId": "pages-account-owned-lists--phone",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Email Catalog Layouts smoke-test",
+      "storyId": "pages-admin-email-catalog--layouts",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Account/Full Pages Settings smoke-test",
+      "storyId": "pages-account-full-pages--settings",
+      "rules": ["heading-order"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Account/Full Pages Basic Settings smoke-test",
+      "storyId": "pages-account-full-pages--basic-settings",
+      "rules": ["heading-order"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Account/Full Pages Settings Failed smoke-test",
+      "storyId": "pages-account-full-pages--settings-failed",
+      "rules": ["heading-order"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Entity Lists Artists smoke-test",
+      "storyId": "pages-admin-entity-lists--artists",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Entity Lists Artist Create Failed smoke-test",
+      "storyId": "pages-admin-entity-lists--artist-create-failed",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Entity Lists Labels smoke-test",
+      "storyId": "pages-admin-entity-lists--labels",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Entity Lists Releases smoke-test",
+      "storyId": "pages-admin-entity-lists--releases",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Entity Lists Phone smoke-test",
+      "storyId": "pages-admin-entity-lists--phone",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Feature/Confirmation/Dialog Delete smoke-test",
+      "storyId": "feature-confirmation-dialog--delete",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Feature/Confirmation/Dialog Discard smoke-test",
+      "storyId": "feature-confirmation-dialog--discard",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Feature/Confirmation/Dialog Revoke smoke-test",
+      "storyId": "feature-confirmation-dialog--revoke",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Feature/Confirmation/Dialog Archive smoke-test",
+      "storyId": "feature-confirmation-dialog--archive",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Feature/Confirmation/Dialog Restore smoke-test",
+      "storyId": "feature-confirmation-dialog--restore",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Feature/Confirmation/Dialog Regenerate smoke-test",
+      "storyId": "feature-confirmation-dialog--regenerate",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Feature/Confirmation/Dialog Neutral smoke-test",
+      "storyId": "feature-confirmation-dialog--neutral",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Feature/Confirmation/Dialog Loading smoke-test",
+      "storyId": "feature-confirmation-dialog--loading",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Feature/Confirmation/Dialog Blocked smoke-test",
+      "storyId": "feature-confirmation-dialog--blocked",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Feature/Editor/File Library Picker Search Results smoke-test",
+      "storyId": "feature-editor-file-library-picker--search-results",
+      "rules": ["aria-input-field-name"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Feature/Editor/File Library Picker Paginated Search Results smoke-test",
+      "storyId": "feature-editor-file-library-picker--paginated-search-results",
+      "rules": ["aria-input-field-name"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Feature/Editor/File Library Picker Loading More Search Results smoke-test",
+      "storyId": "feature-editor-file-library-picker--loading-more-search-results",
+      "rules": ["aria-input-field-name"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Feature/Editor/File Library Picker Accessible Root smoke-test",
+      "storyId": "feature-editor-file-library-picker--accessible-root",
+      "rules": ["aria-input-field-name"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Feature/Editor/File Library Picker Browser smoke-test",
+      "storyId": "feature-editor-file-library-picker--browser",
+      "rules": ["aria-input-field-name"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Communication Lists Forms smoke-test",
+      "storyId": "pages-admin-communication-lists--forms",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Communication Lists Forms Action Failed smoke-test",
+      "storyId": "pages-admin-communication-lists--forms-action-failed",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Communication Lists Campaigns smoke-test",
+      "storyId": "pages-admin-communication-lists--campaigns",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Communication Lists Campaigns Action Failed smoke-test",
+      "storyId": "pages-admin-communication-lists--campaigns-action-failed",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Communication Lists Phone smoke-test",
+      "storyId": "pages-admin-communication-lists--phone",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Audience and Users Users smoke-test",
+      "storyId": "pages-admin-audience-and-users--users",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Audience and Users Users Action Failed smoke-test",
+      "storyId": "pages-admin-audience-and-users--users-action-failed",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Audience and Users Segments smoke-test",
+      "storyId": "pages-admin-audience-and-users--segments",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Audience and Users Segments Action Failed smoke-test",
+      "storyId": "pages-admin-audience-and-users--segments-action-failed",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Audience and Users Phone smoke-test",
+      "storyId": "pages-admin-audience-and-users--phone",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Email Editors Layout smoke-test",
+      "storyId": "pages-admin-email-editors--layout",
+      "rules": ["aria-prohibited-attr"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Content Lists Posts smoke-test",
+      "storyId": "pages-admin-content-lists--posts",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Content Lists Post Create Failed smoke-test",
+      "storyId": "pages-admin-content-lists--post-create-failed",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Content Lists Pages smoke-test",
+      "storyId": "pages-admin-content-lists--pages",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Content Lists Page Create Failed smoke-test",
+      "storyId": "pages-admin-content-lists--page-create-failed",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Content Lists Phone smoke-test",
+      "storyId": "pages-admin-content-lists--phone",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Map Places List smoke-test",
+      "storyId": "pages-admin-map-places--list",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Core/Input/MultiSelect Collapsed Selected Values Open smoke-test",
+      "storyId": "core-input-multiselect--collapsed-selected-values-open",
+      "rules": ["aria-hidden-focus"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Program Event Lists Events smoke-test",
+      "storyId": "pages-admin-program-event-lists--events",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Program Event Lists Events Action Failed smoke-test",
+      "storyId": "pages-admin-program-event-lists--events-action-failed",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Program Event Lists Series smoke-test",
+      "storyId": "pages-admin-program-event-lists--series",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Program Event Lists Phone smoke-test",
+      "storyId": "pages-admin-program-event-lists--phone",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Feature/Editor/Menus Formatting Bubble smoke-test",
+      "storyId": "feature-editor-menus--formatting-bubble",
+      "rules": ["aria-allowed-attr"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Application/Frames Public smoke-test",
+      "storyId": "pages-application-frames--public",
+      "rules": ["landmark-no-duplicate-banner"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Application/Frames Signed In smoke-test",
+      "storyId": "pages-application-frames--signed-in",
+      "rules": ["landmark-no-duplicate-banner"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Application/Frames Phone smoke-test",
+      "storyId": "pages-application-frames--phone",
+      "rules": ["landmark-no-duplicate-banner"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Application/Frames Navigation Hierarchy smoke-test",
+      "storyId": "pages-application-frames--navigation-hierarchy",
+      "rules": ["landmark-no-duplicate-banner"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Forms/Public Response Response smoke-test",
+      "storyId": "pages-forms-public-response--response",
+      "rules": ["landmark-no-duplicate-banner"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Forms/Public Response Closed smoke-test",
+      "storyId": "pages-forms-public-response--closed",
+      "rules": ["landmark-no-duplicate-banner"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Forms/Public Response Not Public smoke-test",
+      "storyId": "pages-forms-public-response--not-public",
+      "rules": ["landmark-no-duplicate-banner"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Forms/Public Response Submit Failed smoke-test",
+      "storyId": "pages-forms-public-response--submit-failed",
+      "rules": ["landmark-no-duplicate-banner"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Forms/Public Response Phone smoke-test",
+      "storyId": "pages-forms-public-response--phone",
+      "rules": ["landmark-no-duplicate-banner"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Editors/Campaign Ready smoke-test",
+      "storyId": "pages-editors-campaign--ready",
+      "rules": ["aria-prohibited-attr"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/File Manager Browser smoke-test",
+      "storyId": "pages-admin-file-manager--browser",
+      "rules": ["aria-input-field-name"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/File Manager Error smoke-test",
+      "storyId": "pages-admin-file-manager--error",
+      "rules": ["aria-input-field-name"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/File Manager Author smoke-test",
+      "storyId": "pages-admin-file-manager--author",
+      "rules": ["aria-input-field-name"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Auth/Login Email smoke-test",
+      "storyId": "pages-auth-login--email",
+      "rules": ["link-in-text-block"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Auth/Login Code smoke-test",
+      "storyId": "pages-auth-login--code",
+      "rules": ["link-in-text-block"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Auth/Login Expired smoke-test",
+      "storyId": "pages-auth-login--expired",
+      "rules": ["link-in-text-block"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Auth/Login Error smoke-test",
+      "storyId": "pages-auth-login--error",
+      "rules": ["link-in-text-block"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Auth/Login Pending smoke-test",
+      "storyId": "pages-auth-login--pending",
+      "rules": ["link-in-text-block"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Auth/Login Phone smoke-test",
+      "storyId": "pages-auth-login--phone",
+      "rules": ["link-in-text-block"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Feature/Program Event/Event Series Public View Poster And Events smoke-test",
+      "storyId": "feature-program-event-event-series-public-view--poster-and-events",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Feature/Program Event/Event Series Public View No Poster smoke-test",
+      "storyId": "feature-program-event-event-series-public-view--no-poster",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Feature/Program Event/Event Series Public View Long Title Narrow smoke-test",
+      "storyId": "feature-program-event-event-series-public-view--long-title-narrow",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Feature/Program Event/Event Series Public View Narrow With Image smoke-test",
+      "storyId": "feature-program-event-event-series-public-view--narrow-with-image",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Core/Interaction/SelectionSurface Grid Columns smoke-test",
+      "storyId": "core-interaction-selectionsurface--grid-columns",
+      "rules": ["aria-input-field-name"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Core/Interaction/SelectionSurface File Icons smoke-test",
+      "storyId": "core-interaction-selectionsurface--file-icons",
+      "rules": ["aria-input-field-name"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Editors/Program Events Series smoke-test",
+      "storyId": "pages-editors-program-events--series",
+      "rules": ["aria-prohibited-attr"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Core/Media/ImageUploadCropField Empty smoke-test",
+      "storyId": "core-media-imageuploadcropfield--empty",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Core/Media/ImageUploadCropField With Image smoke-test",
+      "storyId": "core-media-imageuploadcropfield--with-image",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Core/Media/ImageUploadCropField Uploading smoke-test",
+      "storyId": "core-media-imageuploadcropfield--uploading",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Core/Media/ImageUploadCropField Crop Open smoke-test",
+      "storyId": "core-media-imageuploadcropfield--crop-open",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Core/Media/ImageUploadCropField Compact Social Card smoke-test",
+      "storyId": "core-media-imageuploadcropfield--compact-social-card",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Core/Overlays/ConfirmModal Confirm smoke-test",
+      "storyId": "core-overlays-confirmmodal--confirm",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Core/Overlays/ConfirmModal Destructive smoke-test",
+      "storyId": "core-overlays-confirmmodal--destructive",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Core/Overlays/ConfirmModal Loading smoke-test",
+      "storyId": "core-overlays-confirmmodal--loading",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Core/Overlays/ConfirmModal Disabled smoke-test",
+      "storyId": "core-overlays-confirmmodal--disabled",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Core/Overlays/ConfirmModal Compact Centered smoke-test",
+      "storyId": "core-overlays-confirmmodal--compact-centered",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Pages/Admin/Map Theme Editor Ready smoke-test",
+      "storyId": "pages-admin-map-theme-editor--ready",
+      "rules": ["aria-prohibited-attr"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Map Theme Editor Disconnected smoke-test",
+      "storyId": "pages-admin-map-theme-editor--disconnected",
+      "rules": ["aria-prohibited-attr"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Admin/Map Theme Editor Phone smoke-test",
+      "storyId": "pages-admin-map-theme-editor--phone",
+      "rules": ["aria-prohibited-attr"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Composition/Admin Workspace Workspace smoke-test",
+      "storyId": "composition-admin-workspace--workspace",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Composition/Admin Workspace Error smoke-test",
+      "storyId": "composition-admin-workspace--error",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Composition/Admin Workspace Phone smoke-test",
+      "storyId": "composition-admin-workspace--phone",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Public/Event Series Ready smoke-test",
+      "storyId": "pages-public-event-series--ready",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Public/Event Series Load Failed smoke-test",
+      "storyId": "pages-public-event-series--load-failed",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Public/Event Series Phone smoke-test",
+      "storyId": "pages-public-event-series--phone",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Campaign/Analytics Ready smoke-test",
+      "storyId": "pages-campaign-analytics--ready",
+      "rules": ["heading-order"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Composition/Data Table Playground smoke-test",
+      "storyId": "composition-data-table--playground",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Composition/Data Table Error smoke-test",
+      "storyId": "composition-data-table--error",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Composition/Data Table Phone smoke-test",
+      "storyId": "composition-data-table--phone",
+      "rules": ["empty-table-header"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Editors/Series Admin smoke-test",
+      "storyId": "pages-editors-series--admin",
+      "rules": ["aria-prohibited-attr"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Editors/Series Mine smoke-test",
+      "storyId": "pages-editors-series--mine",
+      "rules": ["aria-prohibited-attr"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Editors/Series Empty smoke-test",
+      "storyId": "pages-editors-series--empty",
+      "rules": ["aria-prohibited-attr"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Editors/Series Disconnected smoke-test",
+      "storyId": "pages-editors-series--disconnected",
+      "rules": ["aria-prohibited-attr"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Editors/Series Phone smoke-test",
+      "storyId": "pages-editors-series--phone",
+      "rules": ["aria-prohibited-attr"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Core/Layout/EditorHeader Default smoke-test",
+      "storyId": "core-layout-editorheader--default",
+      "rules": ["aria-prohibited-attr"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Core/Layout/EditorHeader Destructive smoke-test",
+      "storyId": "core-layout-editorheader--destructive",
+      "rules": ["aria-prohibited-attr"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Feature/Editor/Executables Code Keyboard Selection play-test",
+      "storyId": "feature-editor-executables--code-keyboard-selection",
+      "rules": ["target-size"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Public/Utilities Sitemap smoke-test",
+      "storyId": "pages-public-utilities--sitemap",
+      "rules": ["heading-order"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Public/Utilities Sitemap Phone smoke-test",
+      "storyId": "pages-public-utilities--sitemap-phone",
+      "rules": ["heading-order"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Public/Utilities Changelog smoke-test",
+      "storyId": "pages-public-utilities--changelog",
+      "rules": ["landmark-no-duplicate-banner"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Public/Utilities Changelog Empty smoke-test",
+      "storyId": "pages-public-utilities--changelog-empty",
+      "rules": ["landmark-no-duplicate-banner"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Editors/Label Ready smoke-test",
+      "storyId": "pages-editors-label--ready",
+      "rules": ["aria-prohibited-attr"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Editors/Form Builder smoke-test",
+      "storyId": "pages-editors-form--builder",
+      "rules": ["aria-valid-attr-value"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Editors/Form Disconnected smoke-test",
+      "storyId": "pages-editors-form--disconnected",
+      "rules": ["aria-valid-attr-value"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Editors/Form Read Only smoke-test",
+      "storyId": "pages-editors-form--read-only",
+      "rules": ["aria-valid-attr-value"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Pages/Editors/Form Phone smoke-test",
+      "storyId": "pages-editors-form--phone",
+      "rules": ["aria-valid-attr-value"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Feature/Editor/Public Block Comparison Typography And Spacing smoke-test",
+      "storyId": "feature-editor-public-block-comparison--typography-and-spacing",
+      "rules": ["aria-command-name"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Feature/Editor/Public Block Comparison Document Colors play-test",
+      "storyId": "feature-editor-public-block-comparison--document-colors",
+      "rules": ["aria-allowed-attr"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Feature/Editor/Source Editor Standard play-test",
+      "storyId": "feature-editor-source-editor--standard",
+      "rules": ["color-contrast"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Core/Input/DateTimeInput Default smoke-test",
+      "storyId": "core-input-datetimeinput--default",
+      "rules": ["target-size"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Core/Input/DateTimeInput Required smoke-test",
+      "storyId": "core-input-datetimeinput--required",
+      "rules": ["target-size"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Core/Input/DateTimeInput Narrow smoke-test",
+      "storyId": "core-input-datetimeinput--narrow",
+      "rules": ["target-size"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Feature/Page/Editor Columns Reorder Between Columns smoke-test",
+      "storyId": "feature-page-editor-columns--reorder-between-columns",
+      "rules": ["landmark-unique"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Feature/Page/Editor Columns Readonly smoke-test",
+      "storyId": "feature-page-editor-columns--readonly",
+      "rules": ["landmark-unique"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Core/Data Display/PublicMetadata Inverse smoke-test",
+      "storyId": "core-data-display-publicmetadata--inverse",
+      "rules": ["color-contrast"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Core/Data Display/Display States smoke-test",
+      "storyId": "core-data-display-display--states",
+      "rules": ["color-contrast"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Core/Layout/ApplicationFrame Site smoke-test",
+      "storyId": "core-layout-applicationframe--site",
+      "rules": ["landmark-no-duplicate-banner"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Core/Overlays/ContentModal Content smoke-test",
+      "storyId": "core-overlays-contentmodal--content",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Core/Overlays/ContentModal Compact smoke-test",
+      "storyId": "core-overlays-contentmodal--compact",
+      "rules": [],
+      "category": "story-or-runtime-failure"
+    },
+    {
+      "test": "Core/Navigation/TableOfContents Default smoke-test",
+      "storyId": "core-navigation-tableofcontents--default",
+      "rules": ["target-size"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Core/Feedback/ProcessingOverlay Processing smoke-test",
+      "storyId": "core-feedback-processingoverlay--processing",
+      "rules": ["color-contrast"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Feature/Form/Field Statistics Interactive smoke-test",
+      "storyId": "feature-form-field-statistics--interactive",
+      "rules": ["aria-hidden-focus"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Core/Overlays/FloatingPanel Drag smoke-test",
+      "storyId": "core-overlays-floatingpanel--drag",
+      "rules": ["landmark-no-duplicate-banner"],
+      "category": "axe-violation"
+    },
+    {
+      "test": "Core/Data Display/Chart Modes smoke-test",
+      "storyId": "core-data-display-chart--modes",
+      "rules": ["aria-hidden-focus"],
+      "category": "axe-violation"
+    }
+  ]
+}

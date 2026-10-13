@@ -1,8 +1,15 @@
 'use client';
 
+import { SectionCard as DsSectionCard } from '@/components/core/Section';
+import { Text as DsText, Heading as DsHeading } from '@/components/core/Typography';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutContainer as DsLayoutContainer,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Box, Center, Container, Stack, Text, Title } from '@mantine/core';
+
 import { Button } from '@/components/core/Button';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import type { AccessReason } from '@/lib/types/form/model';
@@ -31,19 +38,27 @@ function FormAccessContent({ reason, slug, shareToken, passwordPath }: FormAcces
   switch (reason) {
     case 'form_not_found':
     case 'form_not_published':
-      return <Text c="dimmed">{t('states.formNotFound')}</Text>;
+      return (
+        <DsText size="sm" tone="secondary">
+          {t('states.formNotFound')}
+        </DsText>
+      );
     case 'not_public':
       return (
-        <Stack align="center" gap="xs">
-          <Title order={3}>{t('notPublic.title')}</Title>
-          <Text c="dimmed">{t('notPublic.description')}</Text>
-        </Stack>
+        <DsLayoutStack align="center" gap="xs">
+          <DsHeading level={3}>{t('notPublic.title')}</DsHeading>
+          <DsText size="sm" tone="secondary">
+            {t('notPublic.description')}
+          </DsText>
+        </DsLayoutStack>
       );
     case 'password_required':
       return (
-        <Stack align="center" gap="xs">
-          <Title order={3}>{t('passwordRequired.title')}</Title>
-          <Text c="dimmed">{t('passwordRequired.description')}</Text>
+        <DsLayoutStack align="center" gap="xs">
+          <DsHeading level={3}>{t('passwordRequired.title')}</DsHeading>
+          <DsText size="sm" tone="secondary">
+            {t('passwordRequired.description')}
+          </DsText>
           <Button
             tone="neutral"
             emphasis="low"
@@ -65,81 +80,107 @@ function FormAccessContent({ reason, slug, shareToken, passwordPath }: FormAcces
           >
             {t('passwordRequired.action')}
           </Button>
-        </Stack>
+        </DsLayoutStack>
       );
     case 'already_submitted':
       return (
-        <Stack align="center" gap="xs">
-          <Title order={3}>{t('alreadySubmitted.title')}</Title>
-          <Text c="dimmed">{t('alreadySubmitted.description')}</Text>
-        </Stack>
+        <DsLayoutStack align="center" gap="xs">
+          <DsHeading level={3}>{t('alreadySubmitted.title')}</DsHeading>
+          <DsText size="sm" tone="secondary">
+            {t('alreadySubmitted.description')}
+          </DsText>
+        </DsLayoutStack>
       );
     case 'not_yet_open':
       return (
-        <Stack align="center" gap="xs">
-          <Title order={3}>{t('notYetOpen.title')}</Title>
-          <Text c="dimmed">{t('notYetOpen.description')}</Text>
-        </Stack>
+        <DsLayoutStack align="center" gap="xs">
+          <DsHeading level={3}>{t('notYetOpen.title')}</DsHeading>
+          <DsText size="sm" tone="secondary">
+            {t('notYetOpen.description')}
+          </DsText>
+        </DsLayoutStack>
       );
     case 'closed':
       return (
-        <Stack align="center" gap="xs">
-          <Title order={3}>{t('closed.title')}</Title>
-          <Text c="dimmed">{t('closed.description')}</Text>
-        </Stack>
+        <DsLayoutStack align="center" gap="xs">
+          <DsHeading level={3}>{t('closed.title')}</DsHeading>
+          <DsText size="sm" tone="secondary">
+            {t('closed.description')}
+          </DsText>
+        </DsLayoutStack>
       );
     case 'max_submissions_reached':
       return (
-        <Stack align="center" gap="xs">
-          <Title order={3}>{t('maxSubmissionsReached.title')}</Title>
-          <Text c="dimmed">{t('maxSubmissionsReached.description')}</Text>
-        </Stack>
+        <DsLayoutStack align="center" gap="xs">
+          <DsHeading level={3}>{t('maxSubmissionsReached.title')}</DsHeading>
+          <DsText size="sm" tone="secondary">
+            {t('maxSubmissionsReached.description')}
+          </DsText>
+        </DsLayoutStack>
       );
     case 'auth_required':
       return (
-        <Stack align="center" gap="xs">
-          <Title order={3}>{t('authRequired.title')}</Title>
-          <Text c="dimmed">{t('authRequired.description')}</Text>
+        <DsLayoutStack align="center" gap="xs">
+          <DsHeading level={3}>{t('authRequired.title')}</DsHeading>
+          <DsText size="sm" tone="secondary">
+            {t('authRequired.description')}
+          </DsText>
           <Button tone="neutral" emphasis="low" onClick={() => router.push(buildLoginRedirectHref(redirectPath))}>
             {t('authRequired.action')}
           </Button>
-        </Stack>
+        </DsLayoutStack>
       );
     case 'role_not_allowed':
       return (
-        <Stack align="center" gap="xs">
-          <Title order={3}>{t('roleNotAllowed.title')}</Title>
-          <Text c="dimmed">{t('roleNotAllowed.description')}</Text>
-        </Stack>
+        <DsLayoutStack align="center" gap="xs">
+          <DsHeading level={3}>{t('roleNotAllowed.title')}</DsHeading>
+          <DsText size="sm" tone="secondary">
+            {t('roleNotAllowed.description')}
+          </DsText>
+        </DsLayoutStack>
       );
     case 'server_error':
       return (
-        <Stack align="center" gap="xs">
-          <Title order={3}>{t('serverError.title')}</Title>
-          <Text c="dimmed">{t('serverError.description')}</Text>
-        </Stack>
+        <DsLayoutStack align="center" gap="xs">
+          <DsHeading level={3}>{t('serverError.title')}</DsHeading>
+          <DsText size="sm" tone="danger">
+            {t('serverError.description')}
+          </DsText>
+        </DsLayoutStack>
       );
     default:
-      return <Text c="dimmed">{t('states.unavailable')}</Text>;
+      return (
+        <DsText size="sm" tone="secondary">
+          {t('states.unavailable')}
+        </DsText>
+      );
   }
 }
 
 export function FormAccessBoundary({ reason, slug, shareToken, mode = 'page', passwordPath }: FormAccessBoundaryProps) {
   if (mode === 'inline') {
     return (
-      <Box py="xl" ta="center">
-        <FormAccessContent reason={reason} slug={slug} shareToken={shareToken} passwordPath={passwordPath} />
-      </Box>
+      <DsLayoutInset block="xl">
+        <DsLayoutInset textAlign="center" space="none">
+          <FormAccessContent reason={reason} slug={slug} shareToken={shareToken} passwordPath={passwordPath} />
+        </DsLayoutInset>
+      </DsLayoutInset>
     );
   }
 
   return (
-    <Box mih="100dvh" bg="var(--mantine-color-body)">
-      <Container size="sm" py="xl">
-        <Center>
-          <FormAccessContent reason={reason} slug={slug} shareToken={shareToken} passwordPath={passwordPath} />
-        </Center>
-      </Container>
-    </Box>
+    <div style={{ minHeight: '100dvh' }}>
+      <DsSectionCard padding="none" appearance="surface" border="none">
+        <DsLayoutInset space="none">
+          <DsLayoutInset block="xl">
+            <DsLayoutContainer size="compact">
+              <DsLayoutStack align="center" justify="center">
+                <FormAccessContent reason={reason} slug={slug} shareToken={shareToken} passwordPath={passwordPath} />
+              </DsLayoutStack>
+            </DsLayoutContainer>
+          </DsLayoutInset>
+        </DsLayoutInset>
+      </DsSectionCard>
+    </div>
   );
 }

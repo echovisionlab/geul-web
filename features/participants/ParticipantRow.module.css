@@ -1,0 +1,11 @@
+.role {
+  min-width: 0;
+  max-width: 9.5rem;
+  overflow: hidden;
+}
+
+@media (width < $mantine-breakpoint-xs) {
+  .role {
+    max-width: 100%;
+  }
+}

@@ -1,3 +1,4 @@
+import { primitiveTokens } from '@/components/core/design-tokens';
 import { Extension } from '@tiptap/core';
 import type { Node as ProseMirrorNode, ResolvedPos } from '@tiptap/pm/model';
 import { NodeSelection, Plugin, PluginKey, Selection } from '@tiptap/pm/state';
@@ -121,7 +122,9 @@ function cursorDecorations(document: ProseMirrorNode, awareness: Awareness): Dec
       continue;
     }
     const color =
-      typeof state.user.color === 'string' && hexColor.test(state.user.color) ? state.user.color : '#666666';
+      typeof state.user.color === 'string' && hexColor.test(state.user.color)
+        ? state.user.color
+        : primitiveTokens.colors.neutral[700];
     const name = typeof state.user.name === 'string' ? state.user.name : '';
     if (anchor !== head) {
       decorations.push(
@@ -141,8 +144,9 @@ function cursorDecorations(document: ProseMirrorNode, awareness: Awareness): Dec
           caret.style.position = 'relative';
           const label = documentNode('span', 'block-room-cursor-label');
           label.style.backgroundColor = color;
-          label.style.color = '#ffffff';
-          label.style.fontSize = '11px';
+          label.style.color = primitiveTokens.colors.white;
+          label.style.fontSize = 'var(--geul-font-size-xs)';
+          label.style.lineHeight = 'var(--geul-line-height-xs)';
           label.style.left = '-2px';
           label.style.padding = '1px 4px';
           label.style.position = 'absolute';
@@ -152,7 +156,8 @@ function cursorDecorations(document: ProseMirrorNode, awareness: Awareness): Dec
           caret.append(label);
           return caret;
         },
-        { key: `block-room-cursor-${clientId}`, side: -1 },
+        // A stable peer ID alone would reuse the old DOM when identity metadata changes.
+        { key: JSON.stringify(['block-room-cursor', clientId, color, name]), side: -1 },
       ),
     );
   }

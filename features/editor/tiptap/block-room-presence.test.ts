@@ -57,11 +57,52 @@ describe('typed Block-room presence', () => {
     });
     const cursor = secondEditor.view.dom.querySelector('.block-room-cursor');
     expect(cursor?.querySelector('.block-room-cursor-label')?.textContent).toBe('Alice');
+    expect((cursor as HTMLElement)?.style.borderLeftColor).toBe('rgb(17, 34, 51)');
+    expect((cursor?.querySelector('.block-room-cursor-label') as HTMLElement)?.style.backgroundColor).toBe(
+      'rgb(17, 34, 51)',
+    );
+    expect((cursor?.querySelector('.block-room-cursor-label') as HTMLElement)?.style.color).toBe('rgb(255, 255, 255)');
+
+    first.setLocalStateField('user', { name: 'Renamed Alice', color: '#aabbcc' });
+    applyAwarenessUpdate(second, encodeAwarenessUpdate(first, [first.clientID]), 'presence-test');
+    vi.advanceTimersByTime(16);
+    const updated = secondEditor.view.dom.querySelector<HTMLElement>('.block-room-cursor');
+    expect(updated?.querySelector('.block-room-cursor-label')?.textContent).toBe('Renamed Alice');
+    expect(updated?.style.borderLeftColor).toBe('rgb(170, 187, 204)');
+    expect((updated?.querySelector('.block-room-cursor-label') as HTMLElement)?.style.backgroundColor).toBe(
+      'rgb(170, 187, 204)',
+    );
+
+    first.setLocalStateField('user', { name: 'Renamed Alice', color: 'invalid-peer-color' });
+    applyAwarenessUpdate(second, encodeAwarenessUpdate(first, [first.clientID]), 'presence-test');
+    vi.advanceTimersByTime(16);
+    expect(secondEditor.view.dom.querySelector<HTMLElement>('.block-room-cursor')?.style.borderLeftColor).toBe(
+      'rgb(92, 89, 79)',
+    );
 
     firstEditor.destroy();
     secondEditor.destroy();
     first.destroy();
     second.destroy();
+  });
+
+  it('uses the shared neutral fallback for an invalid initial remote identity', () => {
+    const remote = new Awareness(new Y.Doc());
+    const local = new Awareness(new Y.Doc());
+    remote.setLocalState({
+      user: { name: 'Unknown', color: 'invalid-peer-color' },
+      geulBlockCursor: {
+        anchor: { blockId: BLOCK_ID, offset: 2 },
+        head: { blockId: BLOCK_ID, offset: 2 },
+      },
+    });
+    applyAwarenessUpdate(local, encodeAwarenessUpdate(remote, [remote.clientID]), 'presence-test');
+    const editor = createEditor(local, 'Alice', '#112233');
+    const cursor = editor.view.dom.querySelector<HTMLElement>('.block-room-cursor');
+    expect(cursor?.style.borderLeftColor).toBe('rgb(92, 89, 79)');
+    editor.destroy();
+    remote.destroy();
+    local.destroy();
   });
 
   it('coalesces selection transaction bursts and still publishes the final cursor', () => {

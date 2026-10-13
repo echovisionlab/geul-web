@@ -1,12 +1,14 @@
 'use client';
 
+import { Text as EditorDsText } from '@/components/core/Typography';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from '@tiptap/react';
 import { Selection } from '@tiptap/pm/state';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Text } from '@mantine/core';
+
 import { useDisclosure } from '@mantine/hooks';
+import { TextButton } from '@/components/core/TextButton';
 import { TextInput } from '@/components/core/Input';
 import { PlacesManageModal } from '@/features/place/PlacesManageModal';
 import { MapLibreMapEditor } from '@/features/map/MapLibreMapEditor';
@@ -381,11 +383,10 @@ function TiptapMapNodeView({
         onResizeRightKeyDown={onResizeKeyDown}
         onResizeBlur={onResizeBlur}
       >
-        <Box
+        <div
           className="editor-visual-media"
           data-map-static-surface=""
-          w="100%"
-          style={{ aspectRatio: config.aspectRatio.replace(':', ' / '), overflow: 'hidden' }}
+          style={{ aspectRatio: config.aspectRatio.replace(':', ' / '), overflow: 'hidden', width: '100%' }}
         >
           <MapLibreMapEditor
             places={rendererPlaces}
@@ -399,11 +400,13 @@ function TiptapMapNodeView({
             themes={themes}
             resolveTheme={resolveTheme}
             height="100%"
-            levaProps={{ floating: true, hidden: !canEditNeutral }}
+            settingsPanel={{ placement: 'map-corner', hidden: !canEditNeutral }}
           />
-        </Box>
+        </div>
         {isEditingCaption && canEditLocalized ? (
           <TextInput
+            appearance="bare"
+            textRole="caption"
             ref={captionInputRef}
             value={caption}
             onChange={(event) => updateLocalizedAttrs({ caption: event.currentTarget.value })}
@@ -415,18 +418,27 @@ function TiptapMapNodeView({
             }}
             placeholder={tMap('captionPlaceholder')}
             size="xs"
-            variant="unstyled"
             autoFocus
-            classNames={{ input: styles.captionInput }}
           />
         ) : canEditLocalized ? (
-          <button className={styles.caption} type="button" onClick={focusCaption} data-testid="tiptap-map-caption">
-            {caption || tMap('clickToAddCaption')}
-          </button>
+          <div className={styles.caption}>
+            <TextButton
+              size="xs"
+              tone="muted"
+              display="flex"
+              fullWidth
+              onClick={focusCaption}
+              data-testid="tiptap-map-caption"
+            >
+              {caption || tMap('clickToAddCaption')}
+            </TextButton>
+          </div>
         ) : caption ? (
-          <Text className={styles.caption} size="xs" c="dimmed">
-            {caption}
-          </Text>
+          <div className={styles.caption}>
+            <EditorDsText size="xs" tone="muted">
+              {caption}
+            </EditorDsText>
+          </div>
         ) : null}
         {canEditNeutral ? (
           <PlacesManageModal

@@ -1,13 +1,15 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { IconCookie } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Group, Stack, Text } from '@mantine/core';
+
 import { Alert } from '@/components/core/Alert';
 import { Switch } from '@/components/core/Input';
-import { notifications } from '@mantine/notifications';
-import { Button } from '@/components/core/Button';
+import { notifications } from '@/components/core/Notification';
+import { TextButton } from '@/components/core/TextButton';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
 import { persistCurrentUserCookieConsentAction } from '@/lib/actions/cookie-consent';
 import {
@@ -25,6 +27,7 @@ import {
 
 interface CookieConsentSettingsProps {
   initialAnalytics: boolean | null;
+  persistAction?: typeof persistCurrentUserCookieConsentAction;
   initialUpdatedAt: string | null;
 }
 
@@ -51,7 +54,11 @@ function emitConsentChange(preferences: CookieConsentPreferences) {
   );
 }
 
-export function CookieConsentSettings({ initialAnalytics, initialUpdatedAt }: CookieConsentSettingsProps) {
+export function CookieConsentSettings({
+  initialAnalytics,
+  initialUpdatedAt,
+  persistAction = persistCurrentUserCookieConsentAction,
+}: CookieConsentSettingsProps) {
   const t = useTranslations('settings.cookieConsent');
   const tSettingsPage = useTranslations('settings.page');
   const tCookieConsentCommon = useTranslations('cookieConsentCommon');
@@ -103,7 +110,7 @@ export function CookieConsentSettings({ initialAnalytics, initialUpdatedAt }: Co
     setRequiresReview(false);
 
     startTransition(async () => {
-      const result = await persistCurrentUserCookieConsentAction({
+      const result = await persistAction({
         analytics,
         source: 'my_settings',
         version: preferences.version,
@@ -113,7 +120,7 @@ export function CookieConsentSettings({ initialAnalytics, initialUpdatedAt }: Co
         notifications.show({
           title: tSettingsPage('cookiePreferencesTitle'),
           message: result.error ?? t('syncError'),
-          color: 'red',
+          tone: 'danger',
         });
         return;
       }
@@ -125,24 +132,21 @@ export function CookieConsentSettings({ initialAnalytics, initialUpdatedAt }: Co
       notifications.show({
         title: tSettingsPage('cookiePreferencesTitle'),
         message: result.persisted ? t('savedAccount') : t('savedBrowser'),
-        color: 'green',
+        tone: 'positive',
       });
     });
   };
 
   return (
-    <Stack gap="sm" data-testid="my-cookie-consent-section">
+    <DsLayoutStack gap="sm" data-testid="my-cookie-consent-section">
       {requiresReview && (
         <Alert tone="warning" data-testid="my-cookie-consent-version-warning">
           {t('versionWarning', { version: COOKIE_CONSENT_VERSION })}
         </Alert>
       )}
 
-      <Alert icon={<IconCookie size={16} />} tone="accent">
-        {t('essentialIntro')}
-      </Alert>
+      <Alert icon={<IconCookie size={16} />}>{t('essentialIntro')}</Alert>
 
-      <Switch checked disabled label={tCookieConsentCommon('essentialLabel')} />
       <Switch
         checked={analyticsEnabled}
         disabled={controlsDisabled}
@@ -151,42 +155,34 @@ export function CookieConsentSettings({ initialAnalytics, initialUpdatedAt }: Co
         data-testid="my-cookie-consent-analytics-switch"
       />
 
-      <Group gap="xs">
-        <Button
+      <DsLayoutInline gap="action-group" justify="end">
+        <TextButton
           size="xs"
-          tone="neutral"
-          emphasis="medium"
+          controlSize="xs"
+          density="chrome"
+
           disabled={controlsDisabled}
           onClick={() => saveConsent(false)}
-          loading={isPending}
           data-testid="my-cookie-consent-reject"
         >
           {tCommon('rejectNonEssential')}
-        </Button>
-        <Button
+        </TextButton>
+        <TextButton
           size="xs"
-          disabled={controlsDisabled}
-          onClick={() => saveConsent(true)}
-          loading={isPending}
-          data-testid="my-cookie-consent-accept"
-        >
-          {tCommon('acceptAll')}
-        </Button>
-        <Button
-          size="xs"
-          emphasis="medium"
+          controlSize="xs"
+          density="chrome"
+
           disabled={controlsDisabled}
           onClick={() => saveConsent(analyticsEnabled)}
-          loading={isPending}
           data-testid="my-cookie-consent-save"
         >
           {tCommon('savePreferences')}
-        </Button>
-      </Group>
+        </TextButton>
+      </DsLayoutInline>
 
-      <Text size="xs" c="dimmed" data-testid="my-cookie-consent-updated-at">
+      <DsText size="xs" tone="secondary" data-testid="my-cookie-consent-updated-at">
         {t('lastSynced', { value: updatedAtLabel })}
-      </Text>
-    </Stack>
+      </DsText>
+    </DsLayoutStack>
   );
 }

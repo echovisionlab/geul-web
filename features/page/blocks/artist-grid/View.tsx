@@ -1,11 +1,16 @@
 'use client';
+import { LayoutInline as DsLayoutInline, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
+import { useTranslations } from 'next-intl';
+
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Group, Pagination } from '@mantine/core';
+
+import { Pagination } from '@/components/core/Display';
 import { listArtistsForBlockAction } from '@/lib/actions/artist';
+import { prepareSocialLinksDisplay } from '@/features/social-links/prepare-social-links-display';
 import { parseBooleanProp, parseIntegerProp, splitCsv } from '../list-view-utils';
 import { ListBlockSkeleton } from '../ListBlockSkeleton';
 import type { BlockViewProps } from '../types';
@@ -13,6 +18,7 @@ import { parseArtistListProps } from './schema';
 import { ArtistListViewClient } from './ViewClient';
 
 export function ArtistListView({ props }: BlockViewProps) {
+  const tPagination = useTranslations('dataTable.pagination');
   const p = parseArtistListProps(props);
   const [page, setPage] = useState(1);
   const labelIds = splitCsv(p.labelIds);
@@ -21,6 +27,7 @@ export function ArtistListView({ props }: BlockViewProps) {
   const limit = parseIntegerProp(p.limit, 12);
   const columns = parseIntegerProp(p.columns, 3);
   const showPagination = parseBooleanProp(p.showPagination, false);
+  const showMeta = p.showMeta !== 'false';
 
   const recipientsQuery = useQuery({
     queryKey: ['artists', 'forBlock', { labelIds, sortBy, sortOrder, limit, page }],
@@ -45,6 +52,9 @@ export function ArtistListView({ props }: BlockViewProps) {
         columns={columns}
         limit={Math.min(limit, 12)}
         layout={p.layout}
+        itemSize={p.itemSize}
+        showImage={p.showImage !== 'false'}
+        imageAspectRatio={p.imageAspectRatio}
         carouselLoop={p.carouselLoop !== 'false'}
         carouselIndicators={p.carouselIndicators !== 'false'}
       />
@@ -61,15 +71,26 @@ export function ArtistListView({ props }: BlockViewProps) {
           title: artist.name,
           imageUrl: artist.imageUrl,
           imageAlt: artist.name,
-          socialLinks: artist.socialLinks ?? null,
+          socialLinkEntries: showMeta ? prepareSocialLinksDisplay(artist.socialLinks ?? {}) : [],
         }))}
         parsedProps={p}
       />
 
       {showPagination && data.pagination.total > limit ? (
-        <Group justify="center" mt="md">
-          <Pagination total={Math.ceil(data.pagination.total / limit)} value={page} onChange={setPage} />
-        </Group>
+        <DsLayoutInset blockStart="md">
+          <DsLayoutInline justify="center">
+            <Pagination
+              total={Math.ceil(data.pagination.total / limit)}
+              value={page}
+              onChange={setPage}
+              labels={{
+                previousPage: tPagination('previousPage'),
+                nextPage: tPagination('nextPage'),
+                page: (page) => tPagination('page', { page }),
+              }}
+            />
+          </DsLayoutInline>
+        </DsLayoutInset>
       ) : null}
     </>
   );

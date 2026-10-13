@@ -1,16 +1,30 @@
 'use client';
+import { ConfirmationDialog } from '@/features/confirmation';
 
+import { Text as DsText } from '@/components/core/Typography';
+import { LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { Textarea, TextInput } from '@/components/core/Input';
-import { ConfirmModal, FormModal } from '@/components/core/Modal';
+import { FormModal } from '@/components/core/Modal';
 import { createGenreAction, deleteGenreAction, updateGenreAction } from '@/lib/actions/genre';
 import { useGenreModal } from './GenreModalContext';
 
-export function GenreModals() {
+export interface GenreModalsProps {
+  createAction?: typeof createGenreAction;
+  deleteAction?: typeof deleteGenreAction;
+  updateAction?: typeof updateGenreAction;
+  refresh?: () => void;
+}
+export function GenreModals({
+  createAction = createGenreAction,
+  deleteAction = deleteGenreAction,
+  updateAction = updateGenreAction,
+  refresh,
+}: GenreModalsProps = {}) {
   const tCommon = useTranslations('common');
   const tAdmin = useTranslations('adminList');
   const router = useRouter();
@@ -69,14 +83,14 @@ export function GenreModals() {
   const handleCreate = async () => {
     setCreateLoading(true);
     try {
-      const result = await createGenreAction(createName, createDescription || undefined);
+      const result = await createAction(createName, createDescription || undefined);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tAdmin('genres.created'), color: 'green' });
+      notifications.show({ message: tAdmin('genres.created'), tone: 'positive' });
       closeCreate();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setCreateLoading(false);
     }
@@ -104,14 +118,14 @@ export function GenreModals() {
 
     setEditLoading(true);
     try {
-      const result = await updateGenreAction(editingGenre.id, changes);
+      const result = await updateAction(editingGenre.id, changes);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tAdmin('genres.updated'), color: 'green' });
+      notifications.show({ message: tAdmin('genres.updated'), tone: 'positive' });
       closeEdit();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setEditLoading(false);
     }
@@ -123,14 +137,14 @@ export function GenreModals() {
     }
     setDeleteLoading(true);
     try {
-      const result = await deleteGenreAction(deletingGenre.id);
+      const result = await deleteAction(deletingGenre.id);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tAdmin('genres.deleted'), color: 'red' });
+      notifications.show({ message: tAdmin('genres.deleted'), tone: 'positive' });
       closeDelete();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setDeleteLoading(false);
     }
@@ -195,25 +209,28 @@ export function GenreModals() {
       </FormModal>
 
       {/* Delete Modal */}
-      <ConfirmModal
+      <ConfirmationDialog
+        intent="delete"
         opened={!!deletingGenre}
         onClose={closeDelete}
         onConfirm={handleDelete}
         title={tAdmin('genres.deleteTitle')}
         message={
           <>
-            <Text>
+            <DsText>
               {tCommon.rich('messages.confirmDeleteNamedRich', {
                 name: deletingGenre?.name ?? '',
                 strong: (chunks) => <strong>{chunks}</strong>,
               })}
-            </Text>
+            </DsText>
             {deletingGenre && deletingGenre.releaseCount > 0 && (
-              <Text size="sm" c="orange" mt="xs">
-                {tAdmin('genres.deleteWarning', {
-                  count: String(deletingGenre.releaseCount),
-                })}
-              </Text>
+              <DsLayoutInset blockStart="xs">
+                <DsText size="sm" tone="warning">
+                  {tAdmin('genres.deleteWarning', {
+                    count: String(deletingGenre.releaseCount),
+                  })}
+                </DsText>
+              </DsLayoutInset>
             )}
           </>
         }

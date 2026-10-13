@@ -1,7 +1,10 @@
 'use client';
+import { getCollectionMetrics } from '@/components/core/Collection/collection-contract';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useLocale, useTranslations } from 'next-intl';
-import { Stack, Text } from '@mantine/core';
+
 import { formatDateTimeInZone } from '@/components/core/DateTime';
 import { useRequestTimeZone } from '@/lib/providers/RequestTimeZoneProvider';
 import { EntityListView, type EntityListItem } from '../EntityListView';
@@ -53,6 +56,7 @@ export function ProgramEventListViewClient({
   const locale = localeProp || contextLocale;
   const requestTimeZone = useRequestTimeZone();
   const tProgramEventAdmin = useTranslations('programEventAdmin');
+  const metrics = getCollectionMetrics(p.itemSize);
   const layout = p.layout || 'grid';
   const columns = parseInt(p.columns || '3', 10);
   const showImage = p.showImage !== 'false';
@@ -67,6 +71,7 @@ export function ProgramEventListViewClient({
       className="program-event-list-block"
       emptyLabel={tProgramEventAdmin('public.empty')}
       layout={layout}
+      itemSize={p.itemSize}
       columns={columns}
       showImage={showImage}
       imageAspectRatio={imageAspectRatio}
@@ -77,18 +82,18 @@ export function ProgramEventListViewClient({
           ? (event) => {
               const date = formatEventDate(event, locale, requestTimeZone);
               return (
-                <Stack gap={2}>
+                <DsLayoutStack gap="xxs">
                   {event.typeName ? (
-                    <Text size="xs" c="dimmed">
+                    <DsText size={metrics.metaSize} tone="secondary">
                       {event.typeName}
-                    </Text>
+                    </DsText>
                   ) : null}
                   {date ? (
-                    <Text size="xs" c="dimmed">
+                    <DsText size={metrics.metaSize} tone="secondary">
                       {date}
-                    </Text>
+                    </DsText>
                   ) : null}
-                </Stack>
+                </DsLayoutStack>
               );
             }
           : undefined

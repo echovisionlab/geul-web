@@ -1,8 +1,55 @@
 // @vitest-environment jsdom
 
 import { describe, expect, it } from 'vitest';
+import { create } from '@bufbuild/protobuf';
+import { HeadingBlockSchema, HeadingBlockLocaleSchema } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
+import type { LocalizedPageSection } from '@/features/editor/contract/localized-page';
 import type { Block } from '@/lib/types/page-content';
-import { buildBlockTocItems, buildHtmlTocDocument, getInlinePlainText } from './toc-items';
+import { buildBlockTocItems, buildGeneratedPageTocItems, buildHtmlTocDocument, getInlinePlainText } from './toc-items';
+
+describe('buildGeneratedPageTocItems', () => {
+  const section = (id: string, label: string): LocalizedPageSection => ({
+    id: `${id}-section`,
+    kind: 'rich-text',
+    settings: {},
+    props: {},
+    columns: [],
+    richText: [
+      {
+        id,
+        kind: 'heading',
+        children: [],
+        base: create(HeadingBlockSchema, { props: { level: 2 } }),
+        locale: create(HeadingBlockLocaleSchema, {
+          content: [{ value: { case: 'text', value: { text: label } } }],
+        }),
+      },
+    ],
+  });
+
+  it('preserves renderer reading order across sections and nested columns', () => {
+    const columns: LocalizedPageSection = {
+      id: 'columns',
+      kind: 'columns',
+      settings: {},
+      props: {},
+      richText: null,
+      columns: [
+        { id: 'left', ratio: 1, sections: [section('second', ' Left heading ')] },
+        { id: 'right', ratio: 1, sections: [section('third', 'Right heading')] },
+      ],
+    };
+    expect(buildGeneratedPageTocItems([section('first', 'First'), columns, section('empty', ' ')])).toEqual([
+      { id: 'first', label: 'First', level: 2 },
+      { id: 'second', label: 'Left heading', level: 2 },
+      { id: 'third', label: 'Right heading', level: 2 },
+    ]);
+  });
+  it('omits headings for absent content and non-rich-text sections', () => {
+    expect(buildGeneratedPageTocItems(null)).toEqual([]);
+    expect(buildGeneratedPageTocItems([{ ...section('map', 'Hidden'), kind: 'map' }])).toEqual([]);
+  });
+});
 
 describe('getInlinePlainText', () => {
   it('flattens text, links, and inline math in document order', () => {
@@ -71,6 +118,15 @@ describe('buildHtmlTocDocument', () => {
     expect(result.html).toContain('<h2 id="release-notes">Release Notes</h2>');
     expect(result.html).toContain('<h3 id="known-id">Fixed</h3>');
     expect(result.html).toContain('<h2 id="release-notes-1">Release Notes</h2>');
+  });
+
+  it('keeps the authored depth of headings demoted below a document title', () => {
+    expect(
+      buildHtmlTocDocument('<h2 data-heading-level="1">Scope</h2><h3 data-heading-level="2">Definitions</h3>').tocItems,
+    ).toEqual([
+      { id: 'scope', label: 'Scope', level: 1 },
+      { id: 'definitions', label: 'Definitions', level: 2 },
+    ]);
   });
 
   it('ignores empty headings and returns empty output for absent html', () => {

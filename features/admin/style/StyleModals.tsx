@@ -1,16 +1,30 @@
 'use client';
+import { ConfirmationDialog } from '@/features/confirmation';
 
+import { Text as DsText } from '@/components/core/Typography';
+import { LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { Textarea, TextInput } from '@/components/core/Input';
-import { ConfirmModal, FormModal } from '@/components/core/Modal';
+import { FormModal } from '@/components/core/Modal';
 import { createStyleAction, deleteStyleAction, updateStyleAction } from '@/lib/actions/style';
 import { useStyleModal } from './StyleModalContext';
 
-export function StyleModals() {
+export interface StyleModalsProps {
+  createAction?: typeof createStyleAction;
+  deleteAction?: typeof deleteStyleAction;
+  updateAction?: typeof updateStyleAction;
+  refresh?: () => void;
+}
+export function StyleModals({
+  createAction = createStyleAction,
+  deleteAction = deleteStyleAction,
+  updateAction = updateStyleAction,
+  refresh,
+}: StyleModalsProps = {}) {
   const tCommon = useTranslations('common');
   const tAdmin = useTranslations('adminList');
   const router = useRouter();
@@ -69,14 +83,14 @@ export function StyleModals() {
   const handleCreate = async () => {
     setCreateLoading(true);
     try {
-      const result = await createStyleAction(createName, createDescription || undefined);
+      const result = await createAction(createName, createDescription || undefined);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tAdmin('styles.created'), color: 'green' });
+      notifications.show({ message: tAdmin('styles.created'), tone: 'positive' });
       closeCreate();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setCreateLoading(false);
     }
@@ -104,14 +118,14 @@ export function StyleModals() {
 
     setEditLoading(true);
     try {
-      const result = await updateStyleAction(editingStyle.id, changes);
+      const result = await updateAction(editingStyle.id, changes);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tAdmin('styles.updated'), color: 'green' });
+      notifications.show({ message: tAdmin('styles.updated'), tone: 'positive' });
       closeEdit();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setEditLoading(false);
     }
@@ -123,14 +137,14 @@ export function StyleModals() {
     }
     setDeleteLoading(true);
     try {
-      const result = await deleteStyleAction(deletingStyle.id);
+      const result = await deleteAction(deletingStyle.id);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tAdmin('styles.deleted'), color: 'red' });
+      notifications.show({ message: tAdmin('styles.deleted'), tone: 'positive' });
       closeDelete();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setDeleteLoading(false);
     }
@@ -195,25 +209,28 @@ export function StyleModals() {
       </FormModal>
 
       {/* Delete Modal */}
-      <ConfirmModal
+      <ConfirmationDialog
+        intent="delete"
         opened={!!deletingStyle}
         onClose={closeDelete}
         onConfirm={handleDelete}
         title={tAdmin('styles.deleteTitle')}
         message={
           <>
-            <Text>
+            <DsText>
               {tCommon.rich('messages.confirmDeleteNamedRich', {
                 name: deletingStyle?.name ?? '',
                 strong: (chunks) => <strong>{chunks}</strong>,
               })}
-            </Text>
+            </DsText>
             {deletingStyle && deletingStyle.releaseCount > 0 && (
-              <Text size="sm" c="orange" mt="xs">
-                {tAdmin('styles.deleteWarning', {
-                  count: String(deletingStyle.releaseCount),
-                })}
-              </Text>
+              <DsLayoutInset blockStart="xs">
+                <DsText size="sm" tone="warning">
+                  {tAdmin('styles.deleteWarning', {
+                    count: String(deletingStyle.releaseCount),
+                  })}
+                </DsText>
+              </DsLayoutInset>
             )}
           </>
         }

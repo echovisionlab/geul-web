@@ -1,16 +1,19 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { formatLocaleCode } from '@/components/core/Typography/locale-code';
+
+import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { useDisclosure } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
-import { listVersionsRequest, restoreVersionRequest } from '@/lib/client/version-history';
+import { restoreVersionRequest } from '@/lib/client/version-history';
 import { useLocale } from '@/lib/providers/LocaleProvider';
 import type { VersionContributor, VersionedEntityType, VersionInfo } from '@/lib/types/version-history';
 import { formatRelativeTime } from '@/lib/utils/formatDate';
+import { useVersionHistoryQuery } from './useVersionHistoryQuery';
 import {
   VersionHistoryDrawerView,
   type VersionHistoryDrawerViewLabels,
@@ -58,32 +61,22 @@ export function VersionHistoryDrawer({
   const dateTime = useDateTimeFormatter();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [versions, setVersions] = useState<VersionInfo[]>([]);
-  const [loading, setLoading] = useState(false);
+  const history = useVersionHistoryQuery({ entityType, entityId, opened });
+  const versions = history.versions;
   const [restoring, setRestoring] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState<VersionInfo | null>(null);
   const [confirmOpened, { open: openConfirm, close: closeConfirm }] = useDisclosure(false);
   const restoreAvailable = canRestore && Boolean(currentSourceLocale);
 
-  const fetchVersions = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await listVersionsRequest(entityType, entityId);
-      if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
-        return;
-      }
-      setVersions(result.versions ?? []);
-    } finally {
-      setLoading(false);
+  const loadMore = useCallback(async () => {
+    const result = await history.fetchNextPage();
+    if (result.isError) {
+      throw result.error;
     }
-  }, [entityType, entityId]);
-
-  useEffect(() => {
-    if (opened) {
-      void fetchVersions();
-    }
-  }, [opened, fetchVersions]);
+  }, [history.fetchNextPage]);
+  const retry = useCallback(async () => {
+    await history.refetch();
+  }, [history.refetch]);
 
   const handleRestore = async () => {
     if (!restoreAvailable || !selectedVersion) {
@@ -93,23 +86,27 @@ export function VersionHistoryDrawer({
     try {
       const result = await restoreVersionRequest(entityType, entityId, selectedVersion.id);
       if (result.error) {
-        notifications.show({ message: getBoundedVersionHistoryError(result.error, t('restoreFailed')), color: 'red' });
+        notifications.show({
+          message: getBoundedVersionHistoryError(result.error, t('restoreFailed')),
+          tone: 'danger',
+        });
         return;
       }
       await onRestored?.();
       await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['version-history', entityType, entityId] }),
         queryClient.invalidateQueries({ queryKey: ['entity-translations', entityType, entityId] }),
         queryClient.invalidateQueries({ queryKey: ['entity-translation-jobs', entityType, entityId] }),
       ]);
       router.refresh();
       notifications.show({
         message: t('restored', { version: selectedVersion.version }),
-        color: 'green',
+        tone: 'positive',
       });
       closeConfirm();
       onClose();
     } catch {
-      notifications.show({ message: t('restoreFailed'), color: 'red' });
+      notifications.show({ message: t('restoreFailed'), tone: 'danger' });
     } finally {
       setRestoring(false);
     }
@@ -134,7 +131,8 @@ export function VersionHistoryDrawer({
       version: version.version,
       versionLabel: `v${version.version}`,
       title: version.title || tCommonStates('untitledPlain'),
-      sourceLocaleLabel: `${tCommonLabels('locale')}: ${version.sourceLocale}`,
+      sourceLocaleLabel: `${tCommonLabels('locale')}: ${formatLocaleCode(version.sourceLocale)}`,
+      createdAt: version.createdAt,
       createdAtLabel: formatRelativeTime(version.createdAt, locale, dateTime.timeZone) ?? tCommonStates('unknown'),
       createdAtTooltip: dateTime.dateTime(version.createdAt),
       contributorLabel: contributorNames ? t('by', { contributors: contributorNames }) : t('systemOrLegacy'),
@@ -152,14 +150,18 @@ export function VersionHistoryDrawer({
       selectedVersion && currentSourceLocale && selectedVersion.sourceLocale !== currentSourceLocale
         ? t('restoreCrossLocaleBody', {
             version: selectedVersion.version,
-            selectedLocale: selectedVersion.sourceLocale,
-            currentLocale: currentSourceLocale,
+            selectedLocale: formatLocaleCode(selectedVersion.sourceLocale),
+            currentLocale: formatLocaleCode(currentSourceLocale),
           })
         : t('restoreSameLocaleBody', {
             version: selectedVersion?.version ?? '',
-            locale: selectedVersion?.sourceLocale ?? currentSourceLocale ?? '',
+            locale: formatLocaleCode(selectedVersion?.sourceLocale ?? currentSourceLocale ?? ''),
           }),
     cancel: tActions('cancel'),
+    loadMore: tActions('continue'),
+    loadFailed: t('loadFailed'),
+    end: t('end'),
+    retry: tActions('tryAgain'),
   };
 
   return (
@@ -168,7 +170,16 @@ export function VersionHistoryDrawer({
       onClose={onClose}
       versions={versionItems}
       labels={labels}
-      loading={loading}
+      loading={history.isLoading}
+      error={history.isError ? labels.loadFailed : null}
+      onRetry={retry}
+      pagination={{
+        contextKey: `${entityType}:${entityId}`,
+        nextPage: history.nextPage,
+        loading: history.isFetchingNextPage,
+        error: history.isError ? labels.loadFailed : null,
+        onLoad: loadMore,
+      }}
       restoring={restoring}
       canRestore={restoreAvailable}
       selectedVersionId={selectedVersion?.id ?? null}

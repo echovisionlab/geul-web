@@ -1,9 +1,10 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
+
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
-import classes from './LegalDocumentView.module.css';
+import { LayoutInline } from '@/components/core/Layout';
 
 type LegalDocumentDate = Date | string | null | undefined;
 
@@ -20,24 +21,24 @@ export function LegalDocumentMetadata({ version, effectiveFrom, effectiveUntil }
   const tHistory = useTranslations('legalHistoryDetailCommon');
 
   return (
-    <div className={classes.metadata}>
-      <Text size="sm" c="dimmed">
+    <LayoutInline gap="md" wrap="wrap">
+      <DsText size="sm" tone="secondary">
         {tLabels('version')} {version}
-      </Text>
+      </DsText>
       {effectiveFrom ? (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           {tMessages('effectiveFromDate', {
             date: dateTime.date(effectiveFrom, { year: 'numeric', month: 'long', day: 'numeric' }),
           })}
-        </Text>
+        </DsText>
       ) : null}
       {effectiveUntil ? (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           {tHistory('effectiveUntil', {
             date: dateTime.date(effectiveUntil, { year: 'numeric', month: 'long', day: 'numeric' }),
           })}
-        </Text>
+        </DsText>
       ) : null}
-    </div>
+    </LayoutInline>
   );
 }

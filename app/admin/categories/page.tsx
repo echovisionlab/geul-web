@@ -1,13 +1,7 @@
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getTranslations } from 'next-intl/server';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import {
-  CategoriesTableContent,
-  CategoryModalProvider,
-  CategoryModals,
-  CreateCategoryButton,
-} from '@/features/admin/category';
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
+import { CategoriesPageView } from '@/features/admin/category/CategoriesPageView';
 import { listCategoriesAdminAction } from '@/lib/actions/category';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
@@ -55,23 +49,13 @@ export default async function AdminCategoriesPage({ searchParams }: PageProps) {
   );
 
   return (
-    <CategoryModalProvider>
-      <AdminPageHeader
-        title={categoriesLabel}
-        items={[{ key: 'create-category', type: 'custom', content: <CreateCategoryButton /> }]}
-      />
-
-      <ServerDataTable namespace="categories">
-        <CategoriesTableContent
-          result={result}
-          searchPlaceholder={searchPlaceholder}
-          filterFields={filterFields}
-          sortFields={sortFields}
-        />
-        <ServerDataTable.Pagination namespace="categories" result={result} searchParams={params} />
-      </ServerDataTable>
-
-      <CategoryModals />
-    </CategoryModalProvider>
+    <CategoriesPageView
+      title={categoriesLabel}
+      result={result}
+      filterFields={filterFields}
+      sortFields={sortFields}
+      searchPlaceholder={searchPlaceholder}
+      searchParams={params.toString()}
+    />
   );
 }

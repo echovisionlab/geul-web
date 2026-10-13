@@ -1,8 +1,12 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { Box, Divider, Group, Stack, Text } from '@mantine/core';
+import type { CollectionSize } from '@/components/core/Collection/collection-contract';
+import { CollectionSizeControl } from './CollectionSizeControl';
+
 import { Select, NumberInput, SegmentedControl, Switch } from '@/components/core/Input';
 import {
   COLUMN_OPTIONS,
@@ -14,8 +18,10 @@ import {
 
 interface ListBlockEditorBaseProps {
   editorType: string;
+  readOnly?: boolean;
   limitLabel: string;
   layout: string;
+  itemSize?: CollectionSize;
   columns: string;
   limit: string;
   maxLimit: number;
@@ -39,8 +45,10 @@ interface ListBlockEditorBaseProps {
 
 export function ListBlockEditorBase({
   editorType,
+  readOnly = false,
   limitLabel,
   layout,
+  itemSize,
   columns,
   limit,
   maxLimit,
@@ -81,34 +89,87 @@ export function ListBlockEditorBase({
   const hasSortingSection = sortByOptions || sortOrder || showPagination !== undefined;
 
   return (
-    <Box data-page-block-editor={editorType}>
+    <DsLayoutStack gap="lg" data-page-block-editor={editorType}>
       {filters ? (
-        <>
-          <Stack gap="sm">
-            <Text size="xs" c="dimmed" fw={500}>
-              {tPageEditor('blockEditor.sections.filters')}
-            </Text>
-            {filters}
-          </Stack>
-          <Box h="sm" />
-        </>
+        <DsLayoutStack gap="md">
+          <DsText size="xs" tone="secondary" weight="medium">
+            {tPageEditor('blockEditor.sections.filters')}
+          </DsText>
+          {filters}
+        </DsLayoutStack>
       ) : null}
 
-      <Stack gap="sm">
-        <Text size="xs" c="dimmed" fw={500}>
+      <DsLayoutStack gap="md">
+        <DsText size="xs" tone="secondary" weight="medium">
+          {hasSortingSection
+            ? tPageEditor('blockEditor.sections.sorting')
+            : tPageEditor('blockEditor.sections.content')}
+        </DsText>
+
+        {sortByOptions && sortBy ? (
+          <DsLayoutInline grow>
+            <Select
+              disabled={readOnly}
+              label={tPageEditor('blockEditor.labels.sortBy')}
+              data={[...sortByOptions]}
+              value={sortBy}
+              onChange={(value) => !readOnly && onUpdate('sortBy', value || sortBy)}
+            />
+            {sortOrder ? (
+              <Select
+                disabled={readOnly}
+                label={tCommonLabels('order')}
+                data={[...sortOrderOptions]}
+                value={sortOrder}
+                onChange={(value) => !readOnly && onUpdate('sortOrder', value || sortOrder)}
+              />
+            ) : null}
+          </DsLayoutInline>
+        ) : null}
+
+        {showPagination !== undefined ? (
+          <Switch
+            disabled={readOnly}
+            label={tPageEditor('blockEditor.labels.showPagination')}
+            checked={showPagination === 'true'}
+            onChange={(event) =>
+              !readOnly && onUpdate('showPagination', event.currentTarget.checked ? 'true' : 'false')
+            }
+          />
+        ) : null}
+
+        <NumberInput
+          disabled={readOnly}
+          label={limitLabel}
+          value={Number.parseInt(limit || defaultLimit, 10)}
+          onChange={(value) => !readOnly && onUpdate('limit', String(value || Number.parseInt(defaultLimit, 10)))}
+          min={1}
+          max={maxLimit}
+        />
+      </DsLayoutStack>
+
+      <DsLayoutStack gap="md">
+        <DsText size="xs" tone="secondary" weight="medium">
           {tPageEditor('blockEditor.sections.layout')}
-        </Text>
+        </DsText>
 
         <SegmentedControl
+          disabled={readOnly}
           data={[...layoutOptions]}
           value={layout}
-          onChange={(value) => onUpdate('layout', value)}
-          size="xs"
+          onChange={(value) => !readOnly && onUpdate('layout', value)}
           fullWidth
+        />
+
+        <CollectionSizeControl
+          disabled={readOnly}
+          value={itemSize}
+          onChange={(value) => !readOnly && onUpdate('itemSize', value)}
         />
 
         {layout === 'grid' || layout === 'cards' || layout === 'carousel' ? (
           <Select
+            disabled={readOnly}
             label={
               layout === 'carousel'
                 ? tPageEditor('blockEditor.labels.slidesToShow')
@@ -116,107 +177,60 @@ export function ListBlockEditorBase({
             }
             data={[...(layout === 'carousel' ? slidesToShowOptions : columnOptions)]}
             value={columns}
-            onChange={(value) => onUpdate('columns', value || defaultColumns)}
-            size="xs"
+            onChange={(value) => !readOnly && onUpdate('columns', value || defaultColumns)}
           />
         ) : null}
 
         {layout === 'carousel' ? (
           <>
             <Switch
+              disabled={readOnly}
               label={tPageEditor('blockEditor.labels.infiniteLoop')}
               checked={carouselLoop === 'true'}
-              onChange={(event) => onUpdate('carouselLoop', event.currentTarget.checked ? 'true' : 'false')}
-              size="sm"
+              onChange={(event) =>
+                !readOnly && onUpdate('carouselLoop', event.currentTarget.checked ? 'true' : 'false')
+              }
             />
             <Switch
+              disabled={readOnly}
               label={tPageEditor('blockEditor.labels.showIndicators')}
               checked={carouselIndicators === 'true'}
-              onChange={(event) => onUpdate('carouselIndicators', event.currentTarget.checked ? 'true' : 'false')}
-              size="sm"
+              onChange={(event) =>
+                !readOnly && onUpdate('carouselIndicators', event.currentTarget.checked ? 'true' : 'false')
+              }
             />
           </>
         ) : null}
-      </Stack>
+      </DsLayoutStack>
 
       {hasDisplaySection ? (
-        <>
-          <Divider my="sm" />
-          <Stack gap="sm">
-            <Text size="xs" c="dimmed" fw={500}>
-              {tPageEditor('blockEditor.sections.displayOptions')}
-            </Text>
+        <DsLayoutStack gap="md">
+          <DsText size="xs" tone="secondary" weight="medium">
+            {tPageEditor('blockEditor.sections.displayOptions')}
+          </DsText>
 
-            {showImage !== undefined ? (
-              <Switch
-                label={showImageLabel ?? tPageEditor('blockEditor.labels.showImage')}
-                checked={showImage === 'true'}
-                onChange={(event) => onUpdate('showImage', event.currentTarget.checked ? 'true' : 'false')}
-                size="sm"
-              />
-            ) : null}
-
-            {showImage === 'true' && imageAspectRatio !== undefined ? (
-              <Select
-                label={tPageEditor('blockEditor.labels.imageAspectRatio')}
-                data={[...aspectRatioOptions]}
-                value={imageAspectRatio}
-                onChange={(value) => onUpdate('imageAspectRatio', value || '16:9')}
-                size="xs"
-              />
-            ) : null}
-
-            {extraDisplayOptions}
-          </Stack>
-        </>
-      ) : null}
-
-      <Divider my="sm" />
-
-      <Stack gap="sm">
-        <Text size="xs" c="dimmed" fw={500}>
-          {hasSortingSection ? tPageEditor('blockEditor.sections.sorting') : 'Data'}
-        </Text>
-
-        {sortByOptions && sortBy ? (
-          <Group grow>
-            <Select
-              label={tPageEditor('blockEditor.labels.sortBy')}
-              data={[...sortByOptions]}
-              value={sortBy}
-              onChange={(value) => onUpdate('sortBy', value || sortBy)}
-              size="xs"
+          {showImage !== undefined ? (
+            <Switch
+              disabled={readOnly}
+              label={showImageLabel ?? tPageEditor('blockEditor.labels.showImage')}
+              checked={showImage === 'true'}
+              onChange={(event) => !readOnly && onUpdate('showImage', event.currentTarget.checked ? 'true' : 'false')}
             />
-            {sortOrder ? (
-              <Select
-                label={tCommonLabels('order')}
-                data={[...sortOrderOptions]}
-                value={sortOrder}
-                onChange={(value) => onUpdate('sortOrder', value || sortOrder)}
-                size="xs"
-              />
-            ) : null}
-          </Group>
-        ) : null}
+          ) : null}
 
-        {showPagination !== undefined ? (
-          <Switch
-            label={tPageEditor('blockEditor.labels.showPagination')}
-            checked={showPagination === 'true'}
-            onChange={(event) => onUpdate('showPagination', event.currentTarget.checked ? 'true' : 'false')}
-            size="sm"
-          />
-        ) : null}
+          {showImage === 'true' && imageAspectRatio !== undefined ? (
+            <Select
+              disabled={readOnly}
+              label={tPageEditor('blockEditor.labels.imageAspectRatio')}
+              data={[...aspectRatioOptions]}
+              value={imageAspectRatio}
+              onChange={(value) => !readOnly && onUpdate('imageAspectRatio', value || '16:9')}
+            />
+          ) : null}
 
-        <NumberInput
-          label={limitLabel}
-          value={Number.parseInt(limit || defaultLimit, 10)}
-          onChange={(value) => onUpdate('limit', String(value || Number.parseInt(defaultLimit, 10)))}
-          min={1}
-          max={maxLimit}
-          size="xs"
-        />
-      </Stack>
-    </Box>
+          {extraDisplayOptions}
+        </DsLayoutStack>
+      ) : null}
+    </DsLayoutStack>
   );
 }

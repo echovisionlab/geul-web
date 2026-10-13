@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type AnchorHTMLAttributes, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { UserInlineLinks } from './UserInlineLinks';
 
 vi.mock('next/link', () => ({
@@ -48,7 +49,7 @@ function render(node: ReactNode) {
   root = createRoot(container);
 
   act(() => {
-    root?.render(<MantineProvider>{node}</MantineProvider>);
+    root?.render(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>);
   });
 }
 

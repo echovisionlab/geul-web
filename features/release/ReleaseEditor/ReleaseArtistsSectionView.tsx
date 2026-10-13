@@ -1,6 +1,8 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import {
   closestCenter,
   DndContext,
@@ -14,37 +16,39 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { useSortableItem } from '@/components/core/Sortable';
 import { IconGripVertical, IconPlus, IconX } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Box, Group, Modal, Stack, Table, Text } from '@mantine/core';
+import { Table } from '@/components/core/Display';
+import { ContentModal, DialogActions } from '@/components/core/Modal';
 import { useDisclosure } from '@mantine/hooks';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { Select } from '@/components/core/Input';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
 import type { ReleaseArtistItem } from '@/lib/types/release/model';
-
 export interface ReleaseArtistOption {
   id: string;
   name: string;
   slug: string | null;
 }
-
 interface ReleaseArtistsSectionViewProps {
   idPrefix?: string;
   artists: ReleaseArtistItem[];
   options: ReleaseArtistOption[];
   onChange: (
     artists: ReleaseArtistItem[],
-    orderIntent?: { itemId: string; previousItemId?: string; nextItemId?: string },
+    orderIntent?: {
+      itemId: string;
+      previousItemId?: string;
+      nextItemId?: string;
+    },
   ) => void;
 }
-
 export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange }: ReleaseArtistsSectionViewProps) {
+  const tModalActions = useTranslations('common.actions');
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.artists');
   const [opened, { open, close }] = useDisclosure(false);
@@ -54,22 +58,23 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
   const availableOptions = options.filter((option) => !artists.some((artist) => artist.artist_id === option.id));
-
   const closeModal = () => {
     setSelectedArtistId(null);
     close();
   };
-
   const normalizeAndChange = (
     nextArtists: ReleaseArtistItem[],
-    orderIntent?: { itemId: string; previousItemId?: string; nextItemId?: string },
+    orderIntent?: {
+      itemId: string;
+      previousItemId?: string;
+      nextItemId?: string;
+    },
   ) => {
     onChange(
       nextArtists.map((artist, index) => ({ ...artist, sort_order: index })),
       orderIntent,
     );
   };
-
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) {
       return;
@@ -86,7 +91,6 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
       });
     }
   };
-
   const handleAdd = () => {
     const option = options.find((candidate) => candidate.id === selectedArtistId);
     if (!option) {
@@ -103,10 +107,9 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
     ]);
     closeModal();
   };
-
   return (
     <SectionCard>
-      <Stack>
+      <DsLayoutStack>
         <SectionHeader
           title={tCommon('entities.artists')}
           actions={
@@ -123,18 +126,16 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
         />
 
         {artists.length === 0 ? (
-          <Text size="sm" c="dimmed">
-            {t('empty')}
-          </Text>
+          <SupportingText tone="secondary">{t('empty')}</SupportingText>
         ) : (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={artists.map((artist) => artist.artist_id)} strategy={verticalListSortingStrategy}>
-              <Table>
+              <Table density="compact">
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th w={40} />
+                    <Table.Th />
                     <Table.Th>{tCommon('entities.artist')}</Table.Th>
-                    <Table.Th w={50} />
+                    <Table.Th />
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -150,10 +151,10 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
             </SortableContext>
           </DndContext>
         )}
-      </Stack>
+      </DsLayoutStack>
 
-      <Modal opened={opened} onClose={closeModal} title={t('modal.title')}>
-        <Stack>
+      <ContentModal opened={opened} onClose={closeModal} title={t('modal.title')} closeLabel={tModalActions('close')}>
+        <DsLayoutStack>
           <Select
             id={idPrefix ? `${idPrefix}-select` : undefined}
             label={tCommon('entities.artist')}
@@ -163,41 +164,53 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
             onChange={setSelectedArtistId}
             searchable
           />
-          <Group justify="flex-end">
+          <DialogActions>
             <Button emphasis="low" onClick={closeModal}>
               {tCommon('actions.cancel')}
             </Button>
-            <Button onClick={handleAdd} disabled={!selectedArtistId}>
+            <Button tone="neutral" emphasis="strong" onClick={handleAdd} disabled={!selectedArtistId}>
               {tCommon('actions.add')}
             </Button>
-          </Group>
-        </Stack>
-      </Modal>
+          </DialogActions>
+        </DsLayoutStack>
+      </ContentModal>
     </SectionCard>
   );
 }
-
-function SortableArtistRow({ artist, onRemove }: { artist: ReleaseArtistItem; onRemove: () => void }) {
+export function SortableArtistRow({ artist, onRemove }: { artist: ReleaseArtistItem; onRemove: () => void }) {
+  const artistNameId = useId();
   const tCommon = useTranslations('common');
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const tSort = useTranslations('dataTable.sort');
+  const sortable = useSortableItem({
     id: artist.artist_id,
   });
-
   return (
-    <Table.Tr
-      ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
-    >
+    <Table.Tr ref={sortable.setNodeRef} dragState={sortable.dragState}>
       <Table.Td>
-        <Box {...attributes} {...listeners} style={{ cursor: 'grab' }}>
-          <IconGripVertical size={14} color="gray" />
-        </Box>
+        <IconButton
+          emphasis="low"
+          interaction="drag-handle"
+          draggable={false}
+          {...sortable.handle}
+          aria-label={tSort('aria.reorder', { label: artist.artist_name })}
+        >
+          <IconGripVertical aria-hidden />
+        </IconButton>
       </Table.Td>
       <Table.Td>
-        <Text size="sm">{artist.artist_name}</Text>
+        <DsText id={artistNameId} size="sm">
+          {artist.artist_name}
+        </DsText>
       </Table.Td>
       <Table.Td>
-        <IconButton tone="danger" emphasis="low" size="sm" aria-label={tCommon('actions.remove')} onClick={onRemove}>
+        <IconButton
+          tone="danger"
+          emphasis="low"
+          size="compact"
+          aria-label={tCommon('actions.remove')}
+          aria-describedby={artistNameId}
+          onClick={onRemove}
+        >
           <IconX size={14} />
         </IconButton>
       </Table.Td>

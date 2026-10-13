@@ -2,7 +2,7 @@
 
 import { useCallback, type RefObject } from 'react';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { UPLOAD_ABORTED_MESSAGE } from '@/lib/upload/failure';
 import type { ImmersiveSceneUnit } from './schema';
 import { buildSceneAssetSlotId, clearMeshOptimizationFields } from './settings-model';
@@ -77,7 +77,7 @@ export function useImmersiveUnitAssetUploads({
         }
         notifications.show({
           message: error instanceof Error ? error.message : 'Failed to upload mesh',
-          color: 'red',
+          tone: 'danger',
         });
       } finally {
         resetAssetFileInput(assetKey);
@@ -155,7 +155,7 @@ export function useImmersiveUnitAssetUploads({
         }
         notifications.show({
           message: error instanceof Error ? error.message : 'Failed to upload texture',
-          color: 'red',
+          tone: 'danger',
         });
       } finally {
         resetAssetFileInput(assetKey);

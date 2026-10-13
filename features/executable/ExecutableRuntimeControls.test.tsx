@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
-import { act } from 'react';
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
+import { act, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ExecutableBlockTitle, ExecutableRuntimeControls, ExecutableRuntimeStatus } from './ExecutableRuntimeControls';
 
@@ -18,18 +19,18 @@ describe('ExecutableRuntimeControls', () => {
 
     act(() => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <ExecutableRuntimeStatus status="running" running="Running" stopped="Stopped" />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
     const status = host.querySelector<HTMLElement>('[data-executable-runtime-status]');
     expect(status?.tagName).toBe('SPAN');
     expect(status?.textContent).toBe('Running');
-    expect(status?.style.fontSize).toBe('var(--mantine-font-size-xs)');
-    expect(status?.style.color).toBe('var(--mantine-color-dimmed)');
-    expect(status?.style.padding).toBe('2px 5px');
+    expect(status?.dataset.placement).toBe('overlay-start');
+    expect(status?.getAttribute('aria-live')).toBe('polite');
+    expect(status?.style.padding).toBe('');
 
     act(() => root.unmount());
   });
@@ -42,24 +43,58 @@ describe('ExecutableRuntimeControls', () => {
 
     act(() => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <ExecutableBlockTitle title="" fallback="Three.js scene" editable onChange={onChange} />
           <ExecutableBlockTitle title="Localized scene" fallback="Three.js scene" editable={false} />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
     const rows = host.querySelectorAll('[data-executable-title]');
     expect(rows).toHaveLength(2);
-    const titleInput = host.querySelector<HTMLInputElement>('[data-core-executable-title-input]');
-    expect(titleInput?.value).toBe('Three.js scene');
-    expect(titleInput?.closest('.mantine-TextInput-root')).not.toBeNull();
+    const titleInput = host.querySelector<HTMLInputElement>('[data-executable-title-input]');
+    expect(titleInput?.value).toBe('');
+    expect(titleInput?.placeholder).toBe('Three.js scene');
+    expect(titleInput?.closest('[data-executable-title]')).not.toBeNull();
     expect(host.querySelector('figcaption')?.textContent).toBe('Localized scene');
     expect((rows[0] as HTMLElement).style.padding).toBe((rows[1] as HTMLElement).style.padding);
     expect((rows[0] as HTMLElement).style.color).toBe((rows[1] as HTMLElement).style.color);
     expect((rows[0] as HTMLElement).style.borderBottom).toBe('');
     expect((rows[1] as HTMLElement).style.borderBottom).toBe('');
 
+    act(() => root.unmount());
+  });
+
+  it('can clear and replace an authored title without persisting fallback copy', () => {
+    function Titles() {
+      const [title, setTitle] = useState('Original scene');
+      return (
+        <>
+          <ExecutableBlockTitle title={title} fallback="Three.js scene" editable onChange={setTitle} />
+          <ExecutableBlockTitle title={title} fallback="Three.js scene" editable={false} />
+        </>
+      );
+    }
+    const host = document.createElement('div');
+    document.body.append(host);
+    const root = createRoot(host);
+    act(() =>
+      root.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <Titles />
+        </DesignSystemProvider>,
+      ),
+    );
+    const input = host.querySelector<HTMLInputElement>('[data-executable-title-input]')!;
+    const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+    for (const title of ['', '밤하늘 Scene', '']) {
+      act(() => {
+        setValue.call(input, title);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+      expect(input.value).toBe(title);
+      expect(host.querySelector('figcaption')?.textContent).toBe(title || 'Three.js scene');
+    }
     act(() => root.unmount());
   });
 
@@ -71,7 +106,7 @@ describe('ExecutableRuntimeControls', () => {
 
     act(() => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <ExecutableRuntimeControls
             type="p5Sketch"
             running
@@ -81,7 +116,7 @@ describe('ExecutableRuntimeControls', () => {
             onRestart={callbacks.restart}
             onResetOriginal={callbacks.reset}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
@@ -93,7 +128,6 @@ describe('ExecutableRuntimeControls', () => {
       'Reset to original',
     ]);
     expect(buttons.every((button) => button.getAttribute('data-emphasis') === 'low')).toBe(true);
-    expect(buttons.every((button) => button.getAttribute('data-variant') === 'subtle')).toBe(true);
 
     act(() => buttons.forEach((button) => button.click()));
     expect(callbacks.stop).toHaveBeenCalledOnce();

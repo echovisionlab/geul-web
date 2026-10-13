@@ -49,30 +49,30 @@ function catalog(options: Partial<CreateTiptapSlashCatalogOptions> = {}) {
 }
 
 describe('Tiptap slash catalog policy', () => {
-  it('keeps Geul order and appends the approved runtime workflows before AI', () => {
+  it('keeps a basic-first order with contiguous executable workflows before AI', () => {
     expect(catalog().map((item) => item.key)).toEqual([
+      'paragraph',
       'heading',
       'heading_2',
       'heading_3',
+      'bullet_list',
+      'numbered_list',
+      'check_list',
       'quote',
       'callout',
-      'numbered_list',
-      'bullet_list',
-      'check_list',
-      'paragraph',
       'code_block',
       'divider',
       'table',
-      'emoji',
       'math',
       'inline-math',
+      'file',
       'map',
       'external-video',
-      'file',
       'mermaid',
       'p5',
       'three',
       'shader',
+      'emoji',
       'ai',
     ]);
   });
@@ -82,28 +82,28 @@ describe('Tiptap slash catalog policy', () => {
     const grouped = createTiptapSlashCatalog(messages, {});
 
     expect(grouped.map(({ key, group }) => [key, group])).toEqual([
-      ['heading', '제목'],
-      ['heading_2', '제목'],
-      ['heading_3', '제목'],
+      ['paragraph', '기본 블록'],
+      ['heading', '기본 블록'],
+      ['heading_2', '기본 블록'],
+      ['heading_3', '기본 블록'],
+      ['bullet_list', '기본 블록'],
+      ['numbered_list', '기본 블록'],
+      ['check_list', '기본 블록'],
       ['quote', '기본 블록'],
       ['callout', '기본 블록'],
-      ['numbered_list', '기본 블록'],
-      ['bullet_list', '기본 블록'],
-      ['check_list', '기본 블록'],
-      ['paragraph', '기본 블록'],
       ['code_block', '기본 블록'],
       ['divider', '기본 블록'],
       ['table', '고급'],
-      ['emoji', '기타'],
       ['math', '수학'],
       ['inline-math', '인라인'],
+      ['file', '미디어'],
       ['map', '임베드'],
       ['external-video', '임베드'],
-      ['file', '미디어'],
       ['mermaid', '임베드'],
       ['p5', '임베드'],
       ['three', '임베드'],
       ['shader', '임베드'],
+      ['emoji', '기타'],
       ['ai', 'AI'],
     ]);
   });

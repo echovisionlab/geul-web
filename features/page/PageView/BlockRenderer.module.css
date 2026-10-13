@@ -26,8 +26,9 @@
     overflow: visible !important;
   }
 
+  /* Stacked sections and columns separate by the shared section relationship (spacing-xl). */
   .section + .section {
-    margin-top: 6mm;
+    margin-block-start: var(--geul-spacing-xl);
   }
 
   :global(.columns-section) {
@@ -35,6 +36,6 @@
   }
 
   :global(.column-content + .column-content) {
-    margin-top: 6mm;
+    margin-block-start: var(--geul-spacing-xl);
   }
 }

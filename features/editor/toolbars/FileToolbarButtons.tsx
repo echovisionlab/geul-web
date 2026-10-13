@@ -1,6 +1,8 @@
 'use client';
 
 import { IconMusic, IconPaperclip, IconPhoto, IconTrash, IconVideo } from '@tabler/icons-react';
+import { useTranslations } from 'next-intl';
+import { IconButton } from '@/components/core/IconButton';
 import {
   deleteCurrentAndNeutralBlock,
   type EditorMediaCommandPort,
@@ -44,41 +46,41 @@ export function DefaultFileToolbarButtons({
   onOpenMediaIngest,
   allowStructuralEdits = true,
 }: DefaultFileToolbarButtonsProps) {
+  const t = useTranslations('common.actions');
   if (!isMediaBlock(selectedBlock)) {
     return null;
   }
 
-  const replaceTooltip = 'Replace file';
-  const removeTooltip = 'Remove';
+  const replaceTooltip = t('change');
+  const removeTooltip = t('remove');
   const canReplace = allowStructuralEdits && !isMediaBlockBusy(selectedBlock);
 
   return (
     <>
       {canReplace ? (
-        <button
-          type="button"
-          className="bn-button"
+        <IconButton
+          size="xs"
           data-test="replaceFileButton"
-          aria-label={replaceTooltip}
+          label={replaceTooltip}
           title={replaceTooltip}
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => onOpenMediaIngest(selectedBlock.id)}
         >
           {resolveReplaceIcon(selectedBlock.props.mimeType)}
-        </button>
+        </IconButton>
       ) : null}
       {allowStructuralEdits ? (
-        <button
-          type="button"
-          className="bn-button"
+        <IconButton
+          size="xs"
+          tone="danger"
           data-test="deleteFileButton"
-          aria-label={removeTooltip}
+          label={removeTooltip}
           title={removeTooltip}
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => deleteCurrentAndNeutralBlock(port, selectedBlock)}
         >
           <IconTrash size={16} />
-        </button>
+        </IconButton>
       ) : null}
     </>
   );

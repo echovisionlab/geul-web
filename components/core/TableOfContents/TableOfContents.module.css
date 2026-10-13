@@ -1,137 +1,308 @@
+/*
+ * Outline geometry is component-private. The entry is the rail's pointer target (28px, 44px on
+ * coarse pointers); the column is the persistent wide-screen outline. The layout keeps both outside
+ * the document text: rail width below lg, column + xl gap from lg. The reserve is balanced so the
+ * reading column stays centered under the title. The document box between the reserves is
+ * 100% − 2 × 16.5rem: from lg it holds the 44rem reading measure once the frame is 77rem wide
+ * (1232px plus the frame inset, 1256px at the site's 12px inset); between 1200 and 1255px the
+ * measure is bounded by the box (648–703px) and never reaches the column.
+ */
+:global([data-table-of-contents-scope]),
+.layout,
 .wrapper {
-  position: fixed;
-  right: 20px;
-  top: calc(var(--safe-area-top) + 96px);
-  bottom: calc(var(--safe-area-bottom) + 24px + var(--toc-footer-overlap, 0px));
-  z-index: 100;
+  --_toc-entry-width: max(var(--geul-control-height-compact), var(--geul-interaction-minimum));
+  --_toc-column-width: 15rem;
+  --_toc-column-track: calc(var(--_toc-column-width) + var(--geul-spacing-xl));
+  --_toc-top: calc(var(--geul-chrome-scroll-offset) + var(--geul-spacing-xl));
+}
+
+/*
+ * The reserved inline space. The layout pads itself with it; a `tableOfContentsScope` ancestor
+ * publishes the same values to document chrome outside the layout (titles, heroes, overlaid
+ * controls) so they align with the reserved document box. Without an outline both are 0.
+ */
+:global([data-table-of-contents-scope]):has(.layout[data-outline]),
+.layout[data-outline] {
+  --_table-of-contents-inset-start: 0px;
+  --_table-of-contents-inset-end: var(--_toc-entry-width);
+}
+
+@media (width >= $mantine-breakpoint-sm) {
+  :global([data-table-of-contents-scope]):has(.layout[data-outline][data-placement='center']),
+  .layout[data-outline][data-placement='center'] {
+    --_table-of-contents-inset-start: var(--_toc-entry-width);
+  }
+}
+
+@media (width >= $mantine-breakpoint-lg) {
+  :global([data-table-of-contents-scope]):has(.layout[data-outline]),
+  .layout[data-outline] {
+    --_table-of-contents-inset-end: var(--_toc-column-track);
+  }
+
+  :global([data-table-of-contents-scope]):has(.layout[data-outline][data-placement='center']),
+  .layout[data-outline][data-placement='center'] {
+    --_table-of-contents-inset-start: var(--_toc-column-track);
+  }
+}
+
+/* A column flex box so viewport-height and pinned-footer document layouts still grow their content. */
+.layout {
+  position: relative;
   display: flex;
-  align-items: center;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.layout[data-outline] {
+  padding-inline: var(--_table-of-contents-inset-start) var(--_table-of-contents-inset-end);
+}
+
+.track {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  z-index: var(--geul-layer-sticky);
+  width: var(--_toc-entry-width);
   pointer-events: none;
 }
 
-.root {
-  --bar-width: 20px;
-  --bar-width-active: 24px;
-  --bar-height: 2px;
-  --toc-rail-height: calc(100dvh - var(--safe-area-top) - var(--safe-area-bottom) - 160px);
-  --toc-row-height: clamp(2px, calc(var(--toc-rail-height) / var(--toc-count)), 9px);
+@media (width >= $mantine-breakpoint-lg) {
+  /* A centered document stays one composition on very wide screens: breakouts up to `standard`
+     with the column beside them, instead of the column drifting to the far viewport edge. */
+  .layout[data-outline][data-placement='center'] {
+    width: 100%;
+    max-width: calc(var(--geul-content-width-standard) + 2 * var(--_toc-column-track));
+    margin-inline: auto;
+  }
+
+  .track {
+    width: var(--_toc-column-width);
+  }
+}
+
+/* The outline sticks below the site header and never leaves the document box. It starts at the top
+   of that box so the rail is on screen beside the first lines of a document, and it is never taller
+   than the visible viewport below that line (the script subtracts the distance still to scroll). */
+.wrapper {
+  position: sticky;
+  top: var(--_toc-top);
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  max-height: min(100%, var(--toc-rail-height));
-  overflow: visible;
-  pointer-events: auto;
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
+  height: min(100%, calc(100dvh - var(--_toc-top) - var(--geul-spacing-xl) - var(--_toc-start-offset, 0px)));
+  align-items: flex-start;
+  justify-content: flex-end;
+  pointer-events: none;
 }
 
-.root[data-scrubbing='true'] {
-  cursor: grabbing;
-}
-
-.title {
-  display: none;
-}
-
-.indicator {
-  display: none;
-}
-
-.link {
+.rail {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
-  text-decoration: none;
-  min-height: calc(var(--toc-row-height) + var(--toc-row-extra, 0px));
-  line-height: 1;
+  width: var(--_toc-entry-width);
+  height: min(100%, calc(var(--_toc-mark-count) * var(--geul-spacing-md) + var(--geul-spacing-xs) * 2));
+  max-height: 20rem;
+  padding-block: var(--geul-spacing-xs);
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.marks {
   position: relative;
-  -webkit-user-drag: none;
-  transition:
-    min-height 120ms ease,
-    opacity 150ms ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 100%;
+  width: var(--geul-spacing-xl);
 }
 
-.link::after {
-  content: '';
-  flex-shrink: 0;
-  width: calc(var(--bar-width) + var(--toc-bar-extra, 0px));
-  height: var(--bar-height);
-  border-radius: 1px;
-  background-color: light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-5));
-  transform: scaleY(var(--toc-bar-scale, 1));
-  transform-origin: right center;
-  transition:
-    background-color 150ms ease,
-    opacity 150ms ease,
-    transform 150ms ease,
-    width 150ms ease;
+/* Depth is encoded by length on one end-aligned axis: outer sections are longest. */
+.mark {
+  display: block;
+  flex: none;
+  width: var(--geul-spacing-md);
+  height: 2px;
+  background: var(--geul-text-muted);
+  opacity: 0.55;
 }
 
-.link:hover::after {
-  background-color: light-dark(var(--mantine-color-gray-5), var(--mantine-color-dark-3));
-  transform: scaleY(2);
-  width: calc(var(--bar-width-active) + var(--toc-bar-extra, 0px));
+.mark[data-depth='1'] {
+  width: var(--geul-spacing-xs);
 }
 
-.linkActive::after {
-  background-color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
-  transform: scaleY(2);
-  width: calc(var(--bar-width-active) + var(--toc-bar-extra, 0px));
+.mark[data-depth='2'] {
+  width: var(--geul-spacing-xxs);
 }
 
-.linkText {
-  font-size: var(--mantine-font-size-sm);
-  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
-  white-space: nowrap;
-  max-width: 0;
+.currentMark {
+  position: absolute;
+  inset-inline-end: 0;
+  width: var(--geul-spacing-xl);
+  height: 2px;
+  background: var(--geul-text-primary);
+  transform: translateY(-50%);
+}
+
+.outline,
+.column,
+.nested {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.outline {
+  position: absolute;
+  inset-inline-end: var(--_toc-entry-width);
+  width: min(20rem, calc(100vw - var(--geul-spacing-xl) * 2 - var(--_toc-entry-width)));
+  max-height: min(100%, 28rem);
+  padding: var(--geul-spacing-xs);
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+  pointer-events: auto;
+  color: var(--geul-text-secondary);
+  background: var(--geul-surface);
+  border: var(--geul-border-thin) solid var(--geul-border-default);
+  border-radius: var(--geul-radius-square);
+  box-shadow: var(--geul-shadow-panel);
+}
+
+.outline[hidden] {
+  display: none;
+}
+
+/* Rows indent one md step per outline level (capped), so wrapped lines hang under their text. */
+.link {
+  display: flex;
+  align-items: center;
+  min-height: max(var(--geul-control-height-compact), var(--geul-interaction-minimum));
+  padding-block: var(--geul-spacing-xxs);
+  padding-inline: calc(var(--geul-spacing-xs) + var(--_toc-depth) * var(--geul-spacing-md)) var(--geul-spacing-xs);
+  color: var(--geul-text-secondary);
+  font-size: var(--geul-font-size-sm);
+  line-height: var(--geul-line-height-sm);
+  text-decoration: none;
+}
+
+.label {
+  display: -webkit-box;
+  min-width: 0;
   overflow: hidden;
-  opacity: 0;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+.link:hover {
+  color: var(--geul-text-primary);
+  background: var(--geul-surface-hover);
+}
+
+.link[data-ancestor] {
+  color: var(--geul-text-primary);
+}
+
+.outline .link[aria-current='location'] {
+  color: var(--geul-text-primary);
+  font-weight: var(--geul-font-weight-strong);
+}
+
+.link[data-scrub-target],
+.outline .link[data-scrub-target] {
+  color: var(--geul-text-primary);
+  background: var(--geul-surface-active);
+}
+
+/* Persistent column: label, one 1px line, secondary rows, the current row in ink with a 2px marker. */
+.wrapper[data-presentation='column'] {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: var(--geul-spacing-xs);
+  width: var(--_toc-column-width);
+  pointer-events: auto;
+}
+
+.columnTitle {
+  padding-inline-start: var(--geul-spacing-md);
+}
+
+.column {
+  position: relative;
+  min-height: 0;
+  flex: 0 1 auto;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+}
+
+.column .link {
+  /* Compact rows for a fine pointer; the shared 44px minimum on coarse-pointer wide screens (tablets). */
+  min-height: var(--geul-interaction-minimum);
+  padding-block: var(--geul-spacing-xxs);
+  padding-inline: calc(var(--geul-spacing-md) + var(--_toc-depth) * var(--geul-spacing-md)) var(--geul-spacing-xs);
+  border-inline-start: var(--geul-border-thin) solid var(--geul-border-default);
+}
+
+.column .link:hover {
+  background: none;
+}
+
+.column .link[aria-current='location'] {
+  color: var(--geul-text-primary);
+}
+
+.columnMarker {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  width: 2px;
+  background: var(--geul-text-primary);
+  pointer-events: none;
+}
+
+.columnMarker[data-placed] {
   transition:
-    max-width 200ms ease,
-    opacity 150ms ease;
+    transform var(--geul-motion-normal) var(--geul-motion-easing),
+    height var(--geul-motion-normal) var(--geul-motion-easing);
 }
 
-.link:hover .linkText,
-.linkPointed .linkText {
-  max-width: 250px;
-  opacity: 1;
+.rail:focus-visible,
+.link:focus-visible {
+  outline: var(--geul-border-focus) solid var(--geul-focus);
+  outline-offset: calc(-1 * var(--geul-border-focus));
 }
 
-.linkActive .linkText {
-  color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
-  font-weight: 500;
-}
-
-/* Heading level - shorter bars for deeper levels */
-.level3::after,
-.level4::after,
-.level5::after,
-.level6::after {
-  width: calc(var(--bar-width) * 0.6);
-  opacity: 0.7;
-}
-
-.linkRevealedChild {
-  animation: toc-reveal 120ms ease-out;
-}
-
-@keyframes toc-reveal {
-  from {
-    opacity: 0;
-    min-height: 0;
-  }
-
-  to {
-    opacity: 1;
+@media (prefers-reduced-motion: reduce) {
+  .columnMarker[data-placed] {
+    transition: none;
   }
 }
 
-/* Hide on mobile */
-@media (max-width: 992px) {
-  .wrapper {
+/* The outline is screen chrome; Core owns its print omission and the reserved space. */
+@media print {
+  .wrapper,
+  .track {
     display: none;
+  }
+
+  :global([data-table-of-contents-scope]):has(.layout[data-outline]),
+  :global([data-table-of-contents-scope]):has(.layout[data-outline][data-placement='center']),
+  .layout[data-outline],
+  .layout[data-outline][data-placement='center'] {
+    --_table-of-contents-inset-start: 0px;
+    --_table-of-contents-inset-end: 0px;
+  }
+
+  .layout[data-outline],
+  .layout[data-outline][data-placement='center'] {
+    max-width: none;
+    padding-inline: 0;
   }
 }

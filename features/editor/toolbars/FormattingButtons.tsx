@@ -11,10 +11,10 @@ import {
   IconStrikethrough,
   IconUnderline,
 } from '@tabler/icons-react';
-import { IconButton } from '@/components/core/IconButton';
 import { BlockAlignButtons, type BlockAlignButtonsProps } from './BlockAlignButton';
 import { ContentBlockTypeSelect, type ContentBlockTypeSelectProps } from './ContentBlockTypeSelect';
-import { EDITOR_TOOLBAR_SHORTCUTS, EditorToolbarTooltip } from './EditorToolbarTooltip';
+import { EDITOR_TOOLBAR_SHORTCUTS } from './EditorToolbarTooltip';
+import { EditorToolbarAction } from './EditorToolbarAction';
 import { EditorColorStyleButton, type EditorColorStyleButtonProps } from './EditorColorStyleButton';
 
 export type BasicTextStyle = 'bold' | 'italic' | 'underline' | 'strike' | 'code';
@@ -103,23 +103,17 @@ export function StandardFormattingButtons({
               if (!label) {
                 return null;
               }
-              const active = activeTextStyles.has(style);
               return (
-                <EditorToolbarTooltip key={style} label={label} shortcut={EDITOR_TOOLBAR_SHORTCUTS[style]}>
-                  <IconButton
-                    label={label}
-                    tone={active ? 'accent' : 'neutral'}
-                    emphasis={active ? 'medium' : 'low'}
-                    size="sm"
-                    data-selection-toolbar-action=""
-                    aria-pressed={active}
-                    disabled={disabled || textStylesDisabled}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => onToggleTextStyle(style)}
-                  >
-                    <Icon size={16} />
-                  </IconButton>
-                </EditorToolbarTooltip>
+                <EditorToolbarAction
+                  key={style}
+                  label={label}
+                  shortcut={EDITOR_TOOLBAR_SHORTCUTS[style]}
+                  pressed={activeTextStyles.has(style)}
+                  disabled={disabled || textStylesDisabled}
+                  onClick={() => onToggleTextStyle(style)}
+                >
+                  <Icon size={16} />
+                </EditorToolbarAction>
               );
             })
         : null}
@@ -132,52 +126,19 @@ export function StandardFormattingButtons({
       ) : null}
       {color ? <EditorColorStyleButton {...color} disabled={disabled || color.disabled} /> : null}
       {onNestBlock && labels.nest ? (
-        <EditorToolbarTooltip label={labels.nest}>
-          <IconButton
-            label={labels.nest}
-            tone="neutral"
-            emphasis="low"
-            size="sm"
-            data-selection-toolbar-action=""
-            disabled={disabled || nestDisabled}
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={onNestBlock}
-          >
-            <IconIndentIncrease size={16} />
-          </IconButton>
-        </EditorToolbarTooltip>
+        <EditorToolbarAction label={labels.nest} disabled={disabled || nestDisabled} onClick={onNestBlock}>
+          <IconIndentIncrease size={16} />
+        </EditorToolbarAction>
       ) : null}
       {onUnnestBlock && labels.unnest ? (
-        <EditorToolbarTooltip label={labels.unnest}>
-          <IconButton
-            label={labels.unnest}
-            tone="neutral"
-            emphasis="low"
-            size="sm"
-            data-selection-toolbar-action=""
-            disabled={disabled || unnestDisabled}
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={onUnnestBlock}
-          >
-            <IconIndentDecrease size={16} />
-          </IconButton>
-        </EditorToolbarTooltip>
+        <EditorToolbarAction label={labels.unnest} disabled={disabled || unnestDisabled} onClick={onUnnestBlock}>
+          <IconIndentDecrease size={16} />
+        </EditorToolbarAction>
       ) : null}
       {onCreateLink ? (
-        <EditorToolbarTooltip label={labels.link}>
-          <IconButton
-            label={labels.link}
-            tone="neutral"
-            emphasis="low"
-            size="sm"
-            data-selection-toolbar-action=""
-            disabled={disabled || linkDisabled}
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={onCreateLink}
-          >
-            <IconLink size={16} />
-          </IconButton>
-        </EditorToolbarTooltip>
+        <EditorToolbarAction label={labels.link} disabled={disabled || linkDisabled} onClick={onCreateLink}>
+          <IconLink size={16} />
+        </EditorToolbarAction>
       ) : null}
       {children}
     </>

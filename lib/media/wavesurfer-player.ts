@@ -1,3 +1,4 @@
+import { readWaveMediaColors } from '@/components/core/MediaControls';
 import { clampMediaTime, normalizeHydrationUrl } from './shared';
 
 export interface WaveSurferPlayerState {
@@ -33,20 +34,6 @@ export interface MountedWaveSurferPlayer {
 
 type WaveSurferModule = typeof import('wavesurfer.js');
 type HlsModule = typeof import('hls.js');
-
-function readCssColor(element: HTMLElement, property: string, fallback: string) {
-  const value = getComputedStyle(element).getPropertyValue(property).trim();
-  return value || fallback;
-}
-
-function readWaveSurferColors(container: HTMLElement) {
-  const colorRoot = container.closest<HTMLElement>('[data-audio-player]') || container;
-  return {
-    waveColor: readCssColor(colorRoot, '--audio-wave-color', 'rgba(0, 0, 0, 0.16)'),
-    progressColor: readCssColor(colorRoot, '--audio-progress-color', '#1c7ed6'),
-    cursorColor: readCssColor(colorRoot, '--audio-cursor-color', 'rgba(15, 23, 42, 0.88)'),
-  };
-}
 
 function resolveMediaDuration(audio: HTMLMediaElement, durationOverride?: number) {
   if (Number.isFinite(audio.duration) && audio.duration > 0) {
@@ -124,7 +111,7 @@ export async function mountWaveSurferPlayer(
 
   const container = options.container;
   container.innerHTML = '';
-  const initialColors = readWaveSurferColors(container);
+  const initialColors = readWaveMediaColors(container);
   let waveReady = false;
   const peaks = normalizeWaveformPeaks(options.waveform);
 
@@ -210,12 +197,12 @@ export async function mountWaveSurferPlayer(
   audio.addEventListener('loadedmetadata', handleLoadedMetadata);
 
   const syncWaveSurferColors = () => {
-    wavesurfer.setOptions(readWaveSurferColors(container));
+    wavesurfer.setOptions(readWaveMediaColors(container));
   };
 
   const observerTargets = [
     container.closest('[data-audio-player]'),
-    container.closest('[data-mantine-color-scheme]'),
+    container.closest('[data-geul-theme]'),
     document.documentElement,
   ].filter((target): target is HTMLElement => Boolean(target));
   const mutationObserver =
@@ -226,7 +213,7 @@ export async function mountWaveSurferPlayer(
       : null;
   mutationObserver?.observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ['data-mantine-color-scheme', 'class', 'style'],
+    attributeFilter: ['data-geul-theme', 'class', 'style'],
   });
   observerTargets.forEach((target) => {
     if (target === document.documentElement) {
@@ -234,7 +221,7 @@ export async function mountWaveSurferPlayer(
     }
     mutationObserver?.observe(target, {
       attributes: true,
-      attributeFilter: ['data-mantine-color-scheme', 'class', 'style'],
+      attributeFilter: ['data-geul-theme', 'class', 'style'],
     });
   });
 

@@ -1,12 +1,16 @@
 'use client';
 
+import type { OverlayPresentationProps } from '../overlay-contract';
+
 import type { ReactNode, SubmitEvent } from 'react';
-import { Box, Group, Modal, Stack, type ModalProps as MantineModalProps } from '@mantine/core';
+import { LayoutStack } from '../Layout';
+import { DialogActions } from './DialogActions';
+import { OverlayDialog } from './OverlayDialog';
 import { Button, type ControlTone } from '../Button';
 
 export type FormModalSize = 'compact' | 'standard' | 'large';
 
-export interface FormModalProps {
+export interface FormModalProps extends OverlayPresentationProps {
   opened: boolean;
   onClose: () => void;
   onSubmit: () => void;
@@ -20,12 +24,6 @@ export interface FormModalProps {
   submitDisabled?: boolean;
   size?: FormModalSize;
 }
-
-const MODAL_SIZES: Record<FormModalSize, NonNullable<MantineModalProps['size']>> = {
-  compact: 'sm',
-  standard: 'md',
-  large: 'lg',
-};
 
 export function FormModal({
   opened,
@@ -49,30 +47,34 @@ export function FormModal({
   };
 
   return (
-    <Modal
+    <OverlayDialog
       opened={opened}
       onClose={onClose}
       title={title}
-      closeOnClickOutside={!loading}
-      closeOnEscape={!loading}
-      withCloseButton={!loading}
-      closeButtonProps={{ 'aria-label': closeLabel }}
-      size={MODAL_SIZES[size]}
-      data-size={size}
+      dismissible={!loading}
+      busy={loading}
+      closeLabel={closeLabel}
+      size={size}
     >
-      <Box component="form" onSubmit={handleSubmit}>
-        <Stack>
+      <form onSubmit={handleSubmit}>
+        <LayoutStack>
           {children}
-          <Group justify="flex-end">
+          <DialogActions>
             <Button type="button" tone="neutral" emphasis="low" onClick={onClose} disabled={loading}>
               {cancelLabel}
             </Button>
-            <Button type="submit" loading={loading} disabled={submitDisabled || loading} tone={submitTone}>
+            <Button
+              emphasis="strong"
+              type="submit"
+              loading={loading}
+              disabled={submitDisabled || loading}
+              tone={submitTone}
+            >
               {submitLabel}
             </Button>
-          </Group>
-        </Stack>
-      </Box>
-    </Modal>
+          </DialogActions>
+        </LayoutStack>
+      </form>
+    </OverlayDialog>
   );
 }

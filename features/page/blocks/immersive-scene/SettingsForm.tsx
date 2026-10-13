@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { getMapColorSchemeOptions } from '../constants';
 import {
   ImmersiveSceneSceneSettingsPanel,
@@ -54,6 +54,7 @@ type ImmersiveSceneSettingsMessageKey =
 interface ImmersiveSceneSettingsFormProps {
   sectionId: string;
   pageId: string;
+  contentLanguage?: string;
   props: Partial<ImmersiveSceneProps>;
   updateSharedProps: (props: Record<string, unknown>) => void;
   updateLocalizedProps: (props: Record<string, unknown>) => void;
@@ -66,6 +67,7 @@ interface ImmersiveSceneSettingsFormProps {
 export function ImmersiveSceneSettingsForm({
   sectionId,
   pageId,
+  contentLanguage,
   props,
   updateSharedProps,
   updateLocalizedProps,
@@ -130,7 +132,7 @@ export function ImmersiveSceneSettingsForm({
           if (result.error) {
             notifications.show({
               message: `Asset reference removed, but file cleanup failed: ${result.error}`,
-              color: 'yellow',
+              tone: 'warning',
             });
           }
         })
@@ -140,7 +142,7 @@ export function ImmersiveSceneSettingsForm({
               error instanceof Error
                 ? `Asset reference removed, but file cleanup failed: ${error.message}`
                 : 'Asset reference removed, but file cleanup failed',
-            color: 'yellow',
+            tone: 'warning',
           });
         });
     },
@@ -166,7 +168,7 @@ export function ImmersiveSceneSettingsForm({
               message: tPageEditor('blockEditor.status.optimizedMeshCleanupFailed', {
                 error: result.error,
               }),
-              color: 'yellow',
+              tone: 'warning',
             });
           }
         })
@@ -178,7 +180,7 @@ export function ImmersiveSceneSettingsForm({
                     error: error.message,
                   })
                 : tPageEditor('blockEditor.status.optimizedMeshCleanupFailedDefault'),
-            color: 'yellow',
+            tone: 'warning',
           });
         });
     },
@@ -369,6 +371,7 @@ export function ImmersiveSceneSettingsForm({
     return (
       <ImmersiveSceneUnitSettingsPanel
         pageId={pageId}
+        contentLanguage={contentLanguage}
         sectionId={sectionId}
         config={config}
         activeSelectedUnitId={activeSelectedUnitId}

@@ -1,6 +1,7 @@
 {
   "common": {
     "actions": {
+      "move": "移動",
       "save": "儲存",
       "saveChanges": "儲存變更",
       "create": "建立",
@@ -59,7 +60,7 @@
       "reply": "回覆",
       "insertVariable": "插入變數",
       "acceptAll": "全部接受",
-      "rejectNonEssential": "拒絕非必要項",
+      "rejectNonEssential": "拒絕",
       "savePreferences": "儲存偏好設定",
       "import": "匯入",
       "export": "匯出",
@@ -127,10 +128,7 @@
       "file": "檔案",
       "bio": "簡介",
       "realName": "真實姓名",
-      "countryCode": "國家代碼",
       "slug": "短標識",
-      "slugAutoModeEnabled": "與標題自動同步（點擊以停用）",
-      "slugAutoModeManual": "手動模式（點擊啟用自動同步）",
       "submissions": "提交數",
       "public": "公開",
       "location": "地點",
@@ -162,7 +160,6 @@
       "logoLight": "淺色標誌",
       "logoDark": "深色標誌",
       "joined": "加入日期",
-      "subscribed": "訂閱日期",
       "featured": "精選",
       "order": "順序",
       "sortOrder": "排序順序",
@@ -177,7 +174,6 @@
       "minutes": "分鐘",
       "seconds": "秒",
       "time": "時間",
-      "generationInfo": "生成資訊",
       "body": "內文",
       "content": "內容",
       "bodyPreview": "內文預覽",
@@ -280,6 +276,7 @@
     },
     "messages": {
       "noUsersFound": "未找到使用者",
+      "noAuthorsFound": "找不到作者。",
       "noVersionsFound": "未找到版本",
       "typeAtLeast2Characters": "請至少輸入 2 個字元",
       "itemCreated": "{item} 已建立",
@@ -295,24 +292,22 @@
       "deleteItemConfirm": "您確定要刪除此 {item} 嗎？此操作無法復原",
       "deleteNamedItemConfirm": "您確定要刪除「{name}」嗎？此操作無法復原",
       "confirmDeleteSelectedCount": "您確定要刪除 {count} 個已選項目嗎？此操作無法復原",
-      "deleteDraftVersionConfirm": "您確定要刪除此草稿版本嗎",
       "confirmDeleteNamedRich": "您確定要刪除 <strong>{name}</strong> 嗎",
-      "activeCount": "{count} 個啟用項目",
       "effectiveFromDate": "自 {date} 起生效",
       "noUpdateRecorded": "尚未記錄更新",
-      "exportedEmails": "已匯出 {count, plural, one {# 封郵件} other {# 封郵件}}",
       "formSubmittedSuccessfully": "您的回覆已成功提交",
       "userDate": "{user} · {date}",
       "scheduleActivationTitle": "安排啟用",
       "scheduleActivationDescription": "選擇此版本何時生效。屆時將向所有有效帳號寄送通知郵件。",
       "scheduleActivationNotice": "排程會向所有有效帳號寄送附帶預覽連結的通知郵件。",
-      "translationDetailUnavailable": "無法載入詳細翻譯資料。您仍然可以編輯目前公開翻譯",
       "invalidConfirmationLinkFromEmail": "確認連結無效。請使用確認郵件中的連結",
       "noPostsFound": "未找到文章",
       "noWorksFound": "未找到作品",
-      "urlCopiedToClipboard": "URL 已複製到剪貼簿",
       "failedToLoad": "無法載入資料。",
-      "relatedItemsWillBeUnlinked": "將解除 {count} 個相關項目的連結。"
+      "relatedItemsWillBeUnlinked": "將解除 {count} 個相關項目的連結。",
+      "noArtistsFound": "沒有找到藝術家",
+      "noLabelsFound": "沒有找到標籤",
+      "noReleasesFound": "未找到任何版本"
     },
     "notifications": {
       "categoryCreated": "類別已建立",
@@ -372,8 +367,6 @@
       "testEmail": "測試@email.com",
       "testEmailExample": "test@example.com",
       "noReplyEmail": "noreply@example.com",
-      "translationLiveRowMissing": "此語言目前尚無公開翻譯。儲存在這裡會立即建立一個",
-      "translationBodyPreviewUnavailable": "內文預覽不可用",
       "selectDateAndTime": "選擇日期和時間",
       "streetAddress": "街道地址",
       "regionSubdivision": "州／省"
@@ -408,12 +401,11 @@
       "generating": "生成...",
       "true": "真的",
       "false": "錯誤的",
-      "loading": "載入中..."
+      "loading": "載入中...",
+      "toBeAnnounced": "待定"
     },
     "roles": {
       "admin": "行政",
-      "editor": "編輯",
-      "viewer": "觀眾",
       "author": "作者",
       "user": "使用者"
     },
@@ -445,6 +437,11 @@
       "unsubscribed": "已取消訂閱",
       "subscribed": "已訂閱",
       "onboardingPending": "尚未完成引導"
+    },
+    "motion": {
+      "pause": "暫停動畫",
+      "resume": "繼續動畫",
+      "readAllInformation": "閱讀場景的全部資訊"
     }
   },
   "shell": {
@@ -931,7 +928,6 @@
     },
     "mapThemes": {
       "empty": "未找到地圖主題",
-      "notFound": "找不到地圖主題。",
       "loadFailed": "無法載入地圖主題。",
       "defaultDisabled": "這已經是預設主題。",
       "deleteDisabled": {
@@ -939,9 +935,7 @@
         "last": "無法刪除最後一個地圖主題。"
       },
       "reloadRequired": {
-        "title": "需要重新整理",
-        "message": "此主題已由較新的修訂版本儲存。繼續編輯前請重新整理。",
-        "action": "重新整理"
+        "title": "需要重新整理"
       },
       "variants": {
         "light": "光",
@@ -972,8 +966,7 @@
       },
       "editor": {
         "notifications": {
-          "defaultSet": "主題設定為預設",
-          "variantRequired": "至少需要一種變體（淺色或深色）"
+          "defaultSet": "主題設定為預設"
         },
         "controls": {
           "map": {
@@ -1310,7 +1303,6 @@
     },
     "verification": {
       "loading": "Loading verification form...",
-      "redirecting": "Redirecting...",
       "startOver": "Start over",
       "errors": {
         "flowNotFound": "Verification flow not found or expired",
@@ -1373,21 +1365,14 @@
   "featuredImage": {
     "label": "特色圖片",
     "alt": "特色圖片",
-    "hint": "點擊圖片以替換",
     "cropTitle": "裁切特色圖片",
-    "empty": {
-      "editable": "拖放或點擊上傳 ({ratio})",
-      "readOnly": "沒有圖片"
-    },
     "errors": {
       "fileRejected": "檔案已被拒絕",
       "fileTooLarge": "檔案過大。最大大小：{maxSize}",
       "invalidFileType": "無效的檔案類型"
     },
     "actions": {
-      "changeAria": "變更特色圖片",
-      "removeAria": "移除特色圖片",
-      "remove": "移除圖片"
+      "removeAria": "移除特色圖片"
     }
   },
   "artistPage": {
@@ -1495,7 +1480,6 @@
       "slug": "藝術家蛞蝓",
       "name": "藝名/藝人姓名",
       "realName": "法定名稱（可選）",
-      "countryCode": "例如，美國、韓國、日本",
       "labels": "選擇廠牌...",
       "parentArtist": "選擇上層藝術家..."
     },
@@ -1518,15 +1502,7 @@
     },
     "placeholders": {
       "name": "廠牌名稱",
-      "countryCode": "例如，德國、美國、韓國",
       "parentLabel": "選擇上層廠牌（可選）"
-    }
-  },
-  "workCollaborators": {
-    "empty": "目前沒有協作者",
-    "notifications": {
-      "added": "協作者已新增",
-      "removed": "協作者已移除"
     }
   },
   "comments": {
@@ -1585,17 +1561,6 @@
     "credits": {
       "other": "其他"
     },
-    "music": {
-      "released": "發行：{value}",
-      "spotify": "Spotify",
-      "bandcamp": "Bandcamp",
-      "soundcloud": "SoundCloud",
-      "youtube": "YouTube",
-      "openSpotify": "在 Spotify 開啟",
-      "openBandcamp": "在 Bandcamp 開啟",
-      "openSoundcloud": "在 SoundCloud 開啟",
-      "openYoutube": "在 YouTube 開啟"
-    },
     "portfolio": {
       "tech": "技術"
     },
@@ -1643,7 +1608,6 @@
     }
   },
   "cookieConsentCommon": {
-    "essentialLabel": "基本 cookie（始終處於活動狀態）",
     "analyticsLabel": "分析 cookie（Google分析）"
   },
   "nicknameField": {
@@ -1690,7 +1654,6 @@
       "failedToRevokeSession": "撤銷會話失敗",
       "failedToRevokeSessions": "撤銷會話失敗",
       "failedToRequestDeletion": "請求刪除帳戶失敗",
-      "cannotUnlinkMessage": "您必須至少有一種身份驗證方法",
       "connectedMessage": "{provider} 帳戶連接成功",
       "disconnectedMessage": "{provider} 已斷開連接",
       "failedToUpdateMainEmail": "無法更新主要電子郵件",
@@ -1739,21 +1702,11 @@
     "email": {
       "title": "主要電子郵件",
       "description": "從已驗證的電子郵件中選擇用於接收通知與帳號訊息的地址。",
-      "addEmail": "新增電子郵件",
       "canonical": "主要電子郵件",
-      "canonicalCannotRemove": "移除此地址前，請先選擇其他主要電子郵件。",
       "setCanonical": "設為主要電子郵件",
-      "noEmail": "沒有設定電子郵件",
-      "helper": "目前只有一個已驗證地址可設為主要電子郵件。",
-      "selectLabel": "主要電子郵件",
       "changeAction": "變更主要電子郵件",
       "sources": {
-        "current": "目前主要電子郵件",
-        "emailCode": "電子郵件",
-        "pending": "等待驗證"
-      },
-      "messages": {
-        "pendingVerification": "此電子郵件已在等待驗證。你可以重新寄送驗證信。"
+        "emailCode": "電子郵件"
       },
       "mainEmailUpdated": "主要電子郵件已更新。",
       "canonicalUpdated": "主要電子郵件已更新。"
@@ -1812,8 +1765,6 @@
       "added": "新增於 {date}",
       "lastMethod": "刪除此通行密鑰前，請先新增其他登入方式。",
       "removeNamed": "刪除通行密鑰 {name}",
-      "reauth": "變更通行密鑰前請重新登入。",
-      "reauthAction": "重新登入",
       "errors": {
         "load": "無法載入通行密鑰。",
         "remove": "無法刪除此通行密鑰。",
@@ -1834,7 +1785,6 @@
   },
   "seriesDetail": {
     "slug": {
-      "autoDescription": "自動產生的說明",
       "manualDescription": "手動說明"
     },
     "notifications": {
@@ -1870,10 +1820,6 @@
     }
   },
   "works": {
-    "tabs": {
-      "editable": "可編輯"
-    },
-    "emptyEditable": "沒有可編輯作品",
     "emptyCredits": "沒有署名",
     "columns": {
       "creditedAs": "署名為",
@@ -1995,6 +1941,7 @@
         "patternPlaceholder": "例如，^[A-Z]{3}$",
         "customErrorMessage": "自訂錯誤訊息",
         "optional": "可選",
+        "dragValidator": "拖曳驗證規則",
         "removeValidator": "刪除驗證器"
       },
       "fieldTypes": {
@@ -2062,10 +2009,6 @@
       }
     },
     "settings": {
-      "notifications": {
-        "managerAdded": "表單管理員已新增",
-        "managerRemoved": "表單管理員已移除"
-      },
       "urlPublic": {
         "title": "URL 與公開存取",
         "allowPublic": "允許公開 URL 存取",
@@ -2085,13 +2028,7 @@
         "description": "分享儀表板連結，以便在沒有管理員存取權的情況下查看表單統計"
       },
       "managers": {
-        "adminControls": "管理控制",
-        "readOnly": "只讀",
-        "description": "管理員可以編輯此表單、查看提交以及管理分享連結。",
-        "searchPlaceholder": "搜尋要新增的使用者...",
-        "adminOnly": "只有管理員可以新增或移除管理員",
-        "empty": "尚未指派管理員",
-        "removeManager": "移除管理員 {name}"
+        "description": "管理員可以編輯此表單、查看提交以及管理分享連結。"
       },
       "access": {
         "title": "存取控制",
@@ -2120,7 +2057,11 @@
   "dataTable": {
     "aria": {
       "sortBy": "按 {label} 排序",
-      "rowActions": "{label} 的操作"
+      "rowActions": "{label} 的操作",
+      "selectAllRows": "選取所有列",
+      "selectRow": "選取{label}",
+      "resultSummary": "{totalPages, plural, =0 {共{count}個結果} other {共{count}個結果，第{page}頁，共{totalPages}頁}}",
+      "loadingMessage": "載入中"
     },
     "sort": {
       "button": "排序",
@@ -2133,7 +2074,9 @@
         "moveUp": "將 {label} 向上移動",
         "moveDown": "向下移動 {label}",
         "toggleDirection": "切換 {label} 的排序方向",
-        "removeSort": "刪除 {label} 的排序"
+        "removeSort": "刪除 {label} 的排序",
+        "directionAscending": "目前升冪",
+        "directionDescending": "目前降冪"
       }
     },
     "filter": {
@@ -2148,7 +2091,8 @@
       "drawerTitle": "篩選",
       "aria": {
         "backToFields": "返回篩選字段",
-        "removeFilter": "刪除 {label} 的過濾器"
+        "removeFilter": "刪除 {label} 的過濾器",
+        "logic": "篩選條件組合方式"
       },
       "operators": {
         "eq": "等於",
@@ -2181,7 +2125,8 @@
       "previousPage": "上一頁",
       "nextPage": "下一頁",
       "lastPage": "最後一頁",
-      "page": "第 {page} 頁"
+      "page": "第 {page} 頁",
+      "navigation": "頁面導覽"
     }
   },
   "versionHistory": {
@@ -2193,7 +2138,9 @@
     "restoreTitle": "恢復版本",
     "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
     "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document."
+    "restoreFailed": "Failed to restore the source document.",
+    "loadFailed": "無法載入版本歷史記錄。",
+    "end": "已載入所有版本。"
   },
   "shareLinks": {
     "title": "分享連結",
@@ -2203,7 +2150,6 @@
     "createError": "建立連結失敗",
     "deleteSuccess": "連結已刪除",
     "deleteError": "刪除連結失敗",
-    "invalidUrl": "無效網址",
     "noLinks": "尚未建立連結",
     "showLess": "顯示較少",
     "showMore": "顯示更多 {count} 個",
@@ -2218,21 +2164,9 @@
     "passwordPlaceholder": "留空表示不使用密碼",
     "maximumExpiration": "最長有效期限為一年",
     "expirationInvalid": "請選擇有效的未來到期時間",
-    "bypassFormPassword": "繞過表單密碼",
-    "bypassFormPasswordDescription": "如果停用，查看者必須輸入表單密碼",
-    "bypassAuthentication": "繞過身份驗證",
-    "bypassAuthenticationDescription": "若停用，檢視者必須輸入表單密碼",
-    "bypassRoleChecks": "繞過角色檢查",
-    "bypassRoleChecksDescription": "若啟用，分享連結會略過允許的角色限制",
     "policies": {
-      "passwordBypass": "密碼繞過",
-      "passwordRequired": "需要密碼",
       "passwordProtected": "受密碼保護",
-      "noPassword": "無密碼",
-      "authBypass": "身分驗證繞過",
-      "authEnforced": "強制身分驗證",
-      "roleBypass": "角色繞過",
-      "roleEnforced": "強制角色"
+      "noPassword": "無密碼"
     },
     "expirationBadge": {
       "expired": "已到期",
@@ -2264,7 +2198,9 @@
     "label": "社群連結",
     "addLink": "新增連結",
     "platformPlaceholder": "平台",
-    "valuePlaceholder": "URL 或使用者名稱"
+    "valuePlaceholder": "URL 或使用者名稱",
+    "reorderInstructions": "使用向上和向下方向鍵變更此連結的位置。",
+    "positionChanged": "連結已移至{count}個中的第{position}個位置。"
   },
   "termsPage": {
     "active": {
@@ -2424,7 +2360,6 @@
     }
   },
   "releasePage": {
-    "previewTitle": "發行預覽",
     "streaming": "串流",
     "metadata": {
       "fallbackDescription": "{title}",
@@ -2494,8 +2429,7 @@
         "title": "新增曲目"
       },
       "placeholders": {
-        "title": "曲目標題",
-        "durationSeconds": "例如，240"
+        "title": "曲目標題"
       },
       "deleteConfirm": "確定要刪除此曲目嗎？",
       "creditsModal": {
@@ -2517,8 +2451,7 @@
   "contentMetadata": {
     "preview": {
       "page": "頁面預覽",
-      "post": "文章預覽",
-      "work": "作品預覽"
+      "post": "文章預覽"
     }
   },
   "editorMetadata": {
@@ -2541,8 +2474,6 @@
   "postHeader": {
     "actions": {
       "editPost": "編輯文章",
-      "sharePost": "分享文章",
-      "printPost": "列印文章",
       "exportMarkdown": "將文章匯出為 Markdown"
     }
   },
@@ -2551,7 +2482,6 @@
     "intro": "我們使用基本 cookie 進行身份驗證和網站操作，並使用可選的分析 cookie 來了解網站使用情況",
     "learnMore": "查看我們的 <privacy>隱私權政策</privacy> 和 <terms>服務條款</terms>",
     "actions": {
-      "hidePreferences": "隱藏偏好設定",
       "customize": "自訂"
     }
   },
@@ -2569,7 +2499,6 @@
   },
   "locationSelector": {
     "placeholder": "選擇位置..",
-    "clearSelection": "清除所選地點",
     "emptySearch": "搜尋地圖地點",
     "emptyResults": "沒有找到地點"
   },
@@ -2602,9 +2531,6 @@
     "actions": {
       "copyId": "複製 ID",
       "copyUrl": "複製 URL"
-    },
-    "notifications": {
-      "copied": "{label} 已複製"
     }
   },
   "formValidation": {
@@ -2644,7 +2570,7 @@
   },
   "ogImagePreview": {
     "alt": "Open Graph 預覽",
-    "empty": "OG 圖像尚未產生",
+    "empty": "尚無 OG 圖片",
     "actions": {
       "regenerate": "重新產生 OG 圖像"
     },
@@ -2768,7 +2694,6 @@
     "scheduleModal": {
       "description": "選擇已傳送此行銷活動的日期和時間",
       "dateLabel": "已排程日期和時間",
-      "datePlaceholder": "選擇日期和時間",
       "previousMonth": "上個月",
       "nextMonth": "下個月",
       "audience": "觀眾：{audience}",
@@ -2858,7 +2783,6 @@
       "notFoundMessage": "沒有找到類別"
     },
     "seriesSelector": {
-      "searchPlaceholder": "搜尋或建立...",
       "states": {
         "empty": "無可用系列",
         "select": "選擇系列..",
@@ -2871,14 +2795,12 @@
       },
       "notifications": {
         "assigned": "分配給系列的文章",
-        "reorderFailed": "系列重新排序失敗",
         "createFailed": "無法建立系列",
         "seriesUnavailable": "此系列已無法管理，原有歸屬已保留。",
         "updateFailed": "無法變更文章系列，原有歸屬已保留。"
       }
     },
     "notifications": {
-      "slugUpdateFailed": "無法更新 slug",
       "deleted": "文章已刪除",
       "published": "發佈文章",
       "unpublished": "文章未發表",
@@ -3065,10 +2987,6 @@
     "pinned": "固定"
   },
   "pageEditor": {
-    "localRecovery": {
-      "message": "已保留重新連線前的本機編輯內容。請在重新整理或離開前下載復原副本。",
-      "action": "下載復原副本"
-    },
     "shareLinksDescription": "未發布頁面的預覽鏈接",
     "showTitleOnPage": "在頁面上顯示標題",
     "slugValidation": {
@@ -3139,6 +3057,9 @@
       }
     },
     "columnsEditor": {
+      "labels": {
+        "ratio": "欄比例"
+      },
       "badges": {
         "columnCount": "{count} 列"
       },
@@ -3163,16 +3084,14 @@
       "menuLabel": "添加部分",
       "emptyColumn": "空列 - 點選 + 新增內容",
       "actions": {
-        "addSectionToColumn": "將部分新增至列 {index}",
-        "removeSectionFromColumn": "移除 {section}，位於第 {index} 欄"
+        "addSectionToColumn": "將部分新增至列 {index}"
       }
     },
     "notifications": {
       "published": "頁面已發布",
       "unpublished": "頁面未發布",
       "deleted": "頁面已刪除",
-      "slugUpdateFailed": "無法更新頁面 slug",
-      "confirmSummaryFailed": "無法確認摘要更新"
+      "slugUpdateFailed": "無法更新頁面 slug"
     },
     "mapEditor": {
       "title": "地圖",
@@ -3217,7 +3136,6 @@
         "content": "內容",
         "marqueeBehavior": "跑馬燈行為",
         "scenePlayback": "Playback",
-        "sceneRender": "Renderer",
         "sceneMotion": "Motion",
         "sceneUnits": "Units",
         "sceneSettings": "Scene",
@@ -3234,7 +3152,6 @@
         "columns": "欄數",
         "infiniteLoop": "無限循環",
         "showIndicators": "顯示指示器",
-        "showFeaturedImage": "顯示精選圖片",
         "imageAspectRatio": "圖片長寬比",
         "showMeta": "顯示中繼資訊（日期、作者）",
         "sortBy": "排序方式",
@@ -3253,7 +3170,6 @@
         "showImage": "顯示圖片",
         "selectForm": "選擇表單",
         "showFormTitle": "顯示表單標題",
-        "showTitle": "顯示標題",
         "numberOfWorks": "作品數量",
         "numberOfReleases": "發行數量",
         "numberOfProgramEvents": "活動數量",
@@ -3323,7 +3239,10 @@
         "textColorSource": "Text color",
         "lightTextColor": "Light text",
         "darkTextColorSource": "Dark text",
-        "darkTextColor": "Dark text color"
+        "darkTextColor": "Dark text color",
+        "itemSize": "項目大小",
+        "showAvatar": "顯示頭像",
+        "maxLabels": "廠牌數量上限"
       },
       "fieldLabels": {
         "year": "年",
@@ -3334,11 +3253,7 @@
       },
       "badges": {
         "posts": "{count} 篇文章",
-        "rows": "{count} 列",
-        "authors": "{count} 位作者",
-        "artists": "{count} 位藝人",
-        "works": "{count} 個作品",
-        "releases": "{count} 個發行"
+        "rows": "{count} 列"
       },
       "placeholders": {
         "publishedByDefault": "預設為已發佈",
@@ -3358,7 +3273,6 @@
           "auto": "自動"
         },
         "sortBy": {
-          "dateAdded": "加入日期",
           "startDate": "開始日期",
           "endDate": "結束日期",
           "publishedDate": "發布日期",
@@ -3367,9 +3281,7 @@
         },
         "sortOrder": {
           "newest": "最新優先",
-          "oldest": "最舊優先",
-          "azOldest": "A-Z / 最舊優先",
-          "zaNewest": "Z-A / 最新優先"
+          "oldest": "最舊優先"
         },
         "mapPrimaryLabel": {
           "placeName": "地點名稱"
@@ -3443,6 +3355,11 @@
           "theme": "Follow theme",
           "custom": "Custom",
           "inherit": "Follow light"
+        },
+        "itemSize": {
+          "s": "S · 緊湊",
+          "m": "M · 標準",
+          "l": "L · 大"
         }
       },
       "actions": {
@@ -3453,8 +3370,6 @@
         "moveUnitUp": "Move unit up",
         "moveUnitDown": "Move unit down",
         "removeSceneUnit": "Remove unit",
-        "expandSceneUnit": "Expand unit",
-        "collapseSceneUnit": "Collapse unit",
         "replaceMesh": "Replace GLB",
         "uploadMesh": "Upload GLB",
         "clearMeshAsset": "Clear mesh asset",
@@ -3493,6 +3408,12 @@
         "meshOptimizationCancelled": "Cancelled",
         "optimizedMeshCleanupFailed": "Optimized asset reference removed, but cleanup failed: {error}",
         "optimizedMeshCleanupFailedDefault": "Optimized asset reference removed, but cleanup failed"
+      },
+      "authorSelection": {
+        "maxSelected": "最多可選擇 {count} 位作者。",
+        "empty": "尚未選擇作者。此區塊將為空。",
+        "unavailable": "此作者已無法使用。",
+        "unavailableWarning": "無法使用的作者不會顯示在公開頁面上。請移除他們或選擇其他作者。"
       }
     },
     "embed": {
@@ -3545,8 +3466,6 @@
       "matchDescription": "組合所選的角色、標籤和電子報訂閱條件群組。",
       "any": "任一所選條件群組",
       "all": "所有所選條件群組",
-      "roles": "角色",
-      "rolesDescription": "符合任一所選角色即可。",
       "roleUser": "成員",
       "memberDescription": "只有已登入的成員可以檢視此頁面。",
       "authorDescription": "具有作者角色的成員。",
@@ -3574,13 +3493,23 @@
       "restrictedTitle": "你沒有此頁面的存取權限",
       "restrictedDescription": "你的帳號不符合此頁面的存取條件。",
       "signIn": "登入"
+    },
+    "a11y": {
+      "sectionPosition": "{section} · {index}/{count}",
+      "dragInstructions": "按空白鍵開始移動，使用方向鍵變更位置。按空白鍵確認，或按 Escape 鍵取消。",
+      "dragStart": "{section} · 移動 · 進行中 · {index}/{count}",
+      "dragOver": "{section} · 移動 · {index}/{count}",
+      "dragEnd": "{section} · 移動 · 確認 · {index}/{count}",
+      "dragCancel": "{section} · 移動 · 已取消",
+      "sectionDeleted": "{section} 已刪除",
+      "sectionAdded": "{section} 已建立 · {index}/{count}",
+      "columnsPosition": "{column} · {section} · {index}/{count}"
     }
   },
   "editorCommon": {
     "reloadRequired": {
       "title": "需要重新載入",
-      "message": "編輯器開啟期間已儲存較新的版本。請重新載入後再繼續編輯。",
-      "action": "重新載入"
+      "message": "編輯器開啟期間已儲存較新的版本。請重新載入後再繼續編輯。"
     },
     "permissionRevoked": {
       "title": "編輯權限已被撤銷",
@@ -3640,7 +3569,6 @@
         "mute": "靜音",
         "unmute": "取消靜音",
         "volume": "音訊音量",
-        "original": "原始檔案",
         "waveform": "波形",
         "spectrogram": "頻譜圖",
         "spectrogramAlt": "音訊頻譜圖",
@@ -3657,10 +3585,8 @@
         "addItem": "新增{item}",
         "replaceItem": "取代{item}",
         "browse": "選擇檔案",
-        "or": "或",
         "importFromUrl": "從 URL 匯入",
         "directVideoUrlHelp": "僅支援影片檔案的直接網址。YouTube 或 Vimeo 請使用「外部影片」。",
-        "confirm": "插入",
         "resumeAvailable": "Interrupted upload found",
         "resumeInstructionNamed": "Select {name} again to continue the upload from where it stopped.",
         "backToUpload": "上傳檔案",
@@ -3756,11 +3682,8 @@
       }
     },
     "mapBlock": {
-      "clickToAddPlace": "點擊新增地點",
       "captionPlaceholder": "新增說明文字...",
-      "clickToAddCaption": "點擊新增說明文字",
-      "externalPlaceholder": "地圖：{count} 個地點",
-      "viewOnGoogleMaps": "在 Google 地圖中查看 ({lat}, {lng})"
+      "clickToAddCaption": "點擊新增說明文字"
     },
     "mapPlacesModal": {
       "title": "管理地點",
@@ -3770,22 +3693,9 @@
       "centeredTitle": "已設為中心",
       "setAsCenterTitle": "設為中心"
     },
-    "blockAlign": {
-      "left": "靠左對齊",
-      "center": "置中對齊",
-      "right": "靠右對齊"
-    },
-    "mathInline": {
-      "clickToEdit": "點擊編輯",
-      "convertToBlock": "轉換為區塊"
-    },
-    "mathInlineButton": {
-      "label": "行內公式"
-    },
     "editor": {
       "slashMenu": {
         "placeholder": "輸入 '/' 查看指令",
-        "empty": "沒有項目",
         "unavailable": "無法使用",
         "groups": {
           "headings": "標題",
@@ -3950,9 +3860,6 @@
         "alignLeft": "靠左對齊",
         "alignCenter": "置中對齊",
         "alignRight": "靠右對齊",
-        "alignJustify": "兩端對齊",
-        "textColor": "文字",
-        "backgroundColor": "背景",
         "nest": "巢狀",
         "unnest": "取消巢狀",
         "inlineMath": "行內公式",
@@ -3967,36 +3874,19 @@
         "urlPlaceholder": "編輯連結網址"
       },
       "math": {
-        "inline": "行內公式",
-        "block": "數學區塊",
-        "clickToEdit": "點擊編輯",
-        "convertToBlock": "轉換為區塊"
+        "selectBlock": "選取數學公式區塊",
+        "block": "數學區塊"
       },
       "file": {
-        "add": "新增{item}",
         "replace": "取代{item}",
-        "delete": "刪除",
-        "download": "下載",
-        "caption": "新增說明文字...",
-        "upload": "上傳檔案",
-        "embed": "插入",
-        "urlPlaceholder": "編輯連結網址"
+        "delete": "刪除"
       },
       "resize": {
-        "image": "調整大小 — 圖片",
-        "audio": "調整大小 — 音訊",
-        "video": "調整大小 — 影片",
-        "file": "調整大小 — 附件",
         "map": "調整大小 — 地圖",
-        "externalVideo": "調整大小 — 外部影片",
-        "p5Sketch": "調整大小 — p5.js",
-        "threeScene": "調整大小 — Three.js",
-        "dragHandle": "拖曳以調整大小",
-        "shader": "調整大小 — GLSL 著色器"
+        "externalVideo": "調整大小 — 外部影片"
       },
       "drag": {
         "openBlockMenu": "開啟選單",
-        "addBlock": "新增區塊",
         "delete": "刪除",
         "colors": "顏色"
       },
@@ -4028,7 +3918,6 @@
         "toggleHeaderColumn": "欄標題",
         "selectRow": "選取列",
         "selectColumn": "選取欄",
-        "selectCells": "選取的儲存格",
         "selectTable": "選取表格",
         "deleteTable": "刪除表格",
         "mergeCells": "合併儲存格",
@@ -4042,17 +3931,11 @@
         "unavailable": "無法使用"
       },
       "map": {
-        "insert": "地圖",
-        "clickToAddPlace": "點擊新增地點",
-        "captionPlaceholder": "新增說明文字...",
         "managePlaces": "管理地點"
       },
       "embeds": {
         "map": "地圖",
-        "externalVideo": "外部影片",
-        "p5Sketch": "p5.js",
-        "threeScene": "Three.js",
-        "shader": "GLSL 著色器"
+        "externalVideo": "外部影片"
       },
       "runtimeLabels": {
         "code": {
@@ -4139,12 +4022,7 @@
         }
       },
       "media": {
-        "browse": "選擇檔案",
-        "importFromUrl": "從 URL 匯入",
-        "embed": "插入",
-        "openLibrary": "檔案庫",
-        "uploadFiles": "上傳檔案",
-        "selectFile": "選取檔案"
+        "importFromUrl": "從 URL 匯入"
       }
     }
   },
@@ -4170,7 +4048,6 @@
       "brainstorm": "腦力激盪"
     },
     "sections": {
-      "original": "原文",
       "result": "AI 結果"
     },
     "actions": {
@@ -4220,8 +4097,7 @@
       "pinClickable": "引腳可點擊"
     },
     "themeOptions": {
-      "none": "沒有任何",
-      "systemSuffix": "（系統）"
+      "none": "沒有任何"
     },
     "scheme": {
       "auto": "汽車",
@@ -4237,13 +4113,7 @@
     "copyValueTitle": "點擊複製{label}值"
   },
   "postMembers": {
-    "removeAria": "移除 {name}",
-    "roles": {
-      "owner": "擁有者"
-    },
-    "states": {
-      "memberFallback": "成員"
-    }
+    "removeAria": "移除 {name}"
   },
   "workCredits": {
     "divider": "或新增署名",
@@ -4275,9 +4145,6 @@
     "emptyResults": {
       "artist": "找不到藝術家",
       "name": "找不到姓名"
-    },
-    "states": {
-      "unknownInitial": "？"
     },
     "notifications": {
       "groupCreated": "分組已建立",
@@ -4334,13 +4201,11 @@
       }
     },
     "statuses": {
-      "missing": "遺失的",
       "existing": "Existing"
     },
     "states": {
       "loadFailed": "無法載入翻譯",
       "missingTarget": "No target document yet.",
-      "sourceRow": "該語言環境是在主原始碼編輯器中編輯的",
       "sourceEditorHint": "在主編輯器中編輯原始文字",
       "updatedAt": "更新了{date}"
     },
@@ -4354,52 +4219,19 @@
   },
   "translationPanelMenu": {
     "description": "Review source menu labels and existing translation documents.",
-    "sourceLocaleDescription": "The menu editor above owns structure, ordering, links, visibility, and source labels. Target translations below are read-only previews.",
-    "states": {
-      "sourcePreview": "來源標籤 ({locale})：{labels}",
-      "sourceEditorHint": "在主選單編輯器中編輯選單結構",
-      "missingTarget": "No labels are saved for this locale yet.",
-      "noItems": "還沒有本地化標籤",
-      "translationPreview": "Existing {locale} labels: {labels}"
-    },
     "previewModal": {
       "title": "{locale} menu translation preview",
-      "descriptions": {
-        "missing": "No public menu translation exists for this locale. The source is shown until an Admin generates it.",
-        "existing": "Shows the current public translated labels for this menu as read-only."
-      },
       "fields": {
-        "linkType": "Link type",
-        "destination": "Destination",
-        "children": "Nested items",
-        "localizedLabelForLocale": "{locale} public label",
-        "sourceLabelForLocale": "{locale} source label",
-        "localizedLabelDescription": "The current translated label shown in public menus; it cannot be changed here.",
-        "sourceLabelDescription": "Comes from the source menu editor and cannot be changed here.",
-        "fixedLocaleLockedDescription": "This item is fixed to the {locale} label and is read-only."
-      },
-      "states": {
-        "detailUnavailable": "Detailed translated menu data could not be loaded.",
-        "noItems": "There are no menu items to preview."
+        "localizedLabelForLocale": "{locale} public label"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template.",
-      "sourceLocaleDescription": "來源模板控制主題、正文副本和執行時間變數名稱",
-      "states": {
-        "sourceEditorHint": "在主編輯器中編輯來源範本",
-        "noContent": "尚不存在翻譯的主題或正文"
-      }
+      "description": "Manage the source language and existing translation documents for this email template."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout.",
-      "sourceLocaleDescription": "來源佈局控制用於電子郵件呈現的包裝器 HTML 和結構佔位符名稱",
-      "states": {
-        "sourceEditorHint": "在主編輯器中編輯來源佈局",
-        "noContent": "尚不存在已翻譯的佈局 HTML"
-      }
+      "description": "Manage the source language and existing translation documents for this email layout."
     }
   },
   "localizationNotice": {
@@ -4408,9 +4240,7 @@
       "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
     },
     "fallback": {
-      "title": "後備語言",
-      "english": "要求的 {requested} 翻譯不可用，因此此頁面面顯示在 {displayed} 中",
-      "source": "要求的 {requested} 翻譯不可用，因此此頁面面顯示在原始 {source} 中"
+      "title": "後備語言"
     },
     "actions": {
       "viewOriginal": "看原文 ({source})"
@@ -4440,7 +4270,6 @@
       "policy": "政策",
       "lastTargetUpdate": "Last target update",
       "entity": "實體",
-      "existing": "Existing translations",
       "sources": "來源",
       "lastSourceUpdate": "最後一次來源更新"
     },
@@ -4628,33 +4457,22 @@
       "summary": "新增一個簡潔的摘要..."
     },
     "tooltips": {
-      "generatingNamed": "{name} 正在產生摘要",
-      "applyingNamed": "{name} 正在套用產生的摘要",
-      "readyNamed": "{name}已準備好產生的摘要"
+      "generatingNamed": "{name} 正在產生摘要"
     },
     "feedback": {
       "failedDefault": "無法處理摘要產生",
-      "invalidJson": "AI 回應無法解析為摘要 JSON",
       "alreadyRunning": "摘要生成已在運行",
-      "applyingGenerated": "應用產生的摘要",
-      "resetOlderSession": "已重設舊工作階段遺留的產生摘要狀態。",
-      "resetUnrestorable": "已重設無法還原的舊產生摘要狀態。",
-      "missingJobPayload": "摘要產生未返回作業有效負載",
       "missingSuggestionPayload": "摘要產生已完成，無需建議負載",
       "staleSuggestion": "這個建議已經過時了。在應用之前重新生成或駁回它",
       "unableToApplyNow": "目前無法套用產生的摘要",
       "applyFailed": "無法套用產生的摘要",
       "applied": "應用產生的摘要",
-      "appliedJobUnresolved": "摘要已套用，但 AI 作業無法自動解決",
-      "dismissedJobUnresolved": "摘要建議已在本機關閉，但無法自動完成 AI job 狀態處理。",
-      "readyBeforeApplying": "請先套用或關閉產生的摘要。",
       "readyToApply": "產生的摘要可以套用了。"
     },
     "ready": {
       "title": "產生的摘要",
       "suggestedSummary": "建議摘要",
       "anotherCollaborator": "其他協作者",
-      "anotherCollaboratorFallback": "其他協作者已準備好產生的摘要。",
       "anotherCollaboratorNamed": "{name}已準備好產生的摘要。"
     }
   },
@@ -4702,8 +4520,7 @@
       "roleUpdated": "角色已更新",
       "userBanned": "使用者已封鎖",
       "userUnbanned": "使用者已解除封鎖",
-      "userDeleted": "使用者已刪除",
-      "userCreated": "使用者已建立"
+      "userDeleted": "使用者已刪除"
     }
   },
   "adminUserDetail": {
@@ -4740,16 +4557,13 @@
       "userIdCopied": "已複製使用者 ID",
       "userIdCopyFailed": "複製使用者 ID 失敗",
       "emailSuppressionReleased": "已解除郵件傳送封鎖",
-      "mainEmailUpdated": "主要電子郵件已更新",
       "ssoProviderRemoved": "已移除 SSO 提供者"
     },
     "auth": {
       "emptyEmail": "無電子郵件",
       "delivery": {
         "title": "接收電子郵件",
-        "description": "活動、通知和帳戶郵件會傳送到選定的主要電子郵件。",
-        "changePlaceholder": "選擇已驗證信箱",
-        "changeHelp": "變更選擇後會立即儲存。"
+        "description": "活動、通知和帳戶郵件會傳送到選定的主要電子郵件。"
       },
       "providers": {
         "title": "已連接的 SSO 提供者",
@@ -4758,7 +4572,6 @@
         "remove": "移除 SSO 提供者"
       },
       "sources": {
-        "current": "目前信箱",
         "emailCode": "電子郵件登入"
       },
       "ban": {
@@ -4793,7 +4606,6 @@
         "noChanges": "沒有要儲存的更改"
       },
       "validation": {
-        "invalidUrl": "網址格式無效",
         "invalidEmail": "電子郵件格式無效",
         "invalidHexColor": "十六進位顏色格式無效",
         "invalidGoogleAnalyticsId": "Google Analytics ID 格式無效"
@@ -5102,14 +4914,12 @@
   },
   "formSuccessPage": {
     "metadata": {
-      "fallbackTitle": "表單已提交",
       "title": "{formTitle} - 已提交"
     },
     "title": "謝謝"
   },
   "formPasswordPage": {
     "metadata": {
-      "fallbackTitle": "表單訪問",
       "description": "輸入密碼以存取此表單"
     },
     "title": "密碼保護",
@@ -5121,7 +4931,6 @@
   },
   "formDashboardPage": {
     "metadata": {
-      "fallbackTitle": "表單儀表板",
       "title": "{formTitle} - 儀表板",
       "description": "表單提交統計與分析"
     },
@@ -5131,7 +4940,28 @@
     "stats": {
       "total": "總計"
     },
-    "fieldStatistics": "欄位統計"
+    "fieldStatistics": "欄位統計",
+    "charts": {
+      "donut": "環形",
+      "pie": "圓餅",
+      "bar-horizontal": "橫向長條",
+      "bar-vertical": "縱向長條",
+      "radar": "雷達",
+      "table": "表格",
+      "area": "面積",
+      "line": "折線",
+      "histogram": "直方圖",
+      "noResponses": "尚無回覆",
+      "emptyValue": "（空）",
+      "min": "最小值",
+      "max": "最大值",
+      "avg": "平均值",
+      "count": "數量",
+      "date": "日期",
+      "value": "值",
+      "range": "區間",
+      "chartType": "圖表類型"
+    }
   },
   "embeddedForm": {
     "states": {
@@ -5182,10 +5012,7 @@
       "locationMode": "地點模式",
       "ticketUrl": "票務 URL",
       "streamUrl": "串流 URL",
-      "externalUrl": "外部 URL",
-      "participants": "參與者",
-      "textCredits": "文字署名",
-      "textCreditsDescription": "每行一個署名。需要角色時使用「角色: 姓名」格式。"
+      "externalUrl": "外部 URL"
     },
     "locationModes": {
       "mapPlace": "場地",
@@ -5198,7 +5025,6 @@
       "tickets": "票務",
       "stream": "串流",
       "link": "連結",
-      "participants": "參與者",
       "empty": "找不到活動。",
       "date": "日期",
       "credits": "署名"
@@ -5215,152 +5041,14 @@
       "deleteMessage": "只有未被任何活動使用的類型才能刪除。"
     }
   },
-  "tools": {
-    "portadj": {
-      "metadataTitle": "PortaDJ",
-      "metadataDescription": "在瀏覽器中使用兩個 DJ 播放器播放及混音本機音訊檔案。"
-    },
-    "youtubeAudio": {
-      "title": "YouTube 音訊",
-      "urlLabel": "影片連結",
-      "urlPlaceholder": "https://…",
-      "resolve": "載入音訊",
-      "resolving": "正在載入音訊",
-      "clear": "清除來源",
-      "metadataTitle": "YouTube 音訊",
-      "metadataDescription": "在瀏覽器中轉換已驗證的 YouTube 來源音訊。",
-      "errors": {
-        "INTERNAL_ERROR": "無法載入音訊來源。請再試一次。",
-        "INVALID_REQUEST": "請輸入有效的 YouTube 影片網址。",
-        "INVALID_UPSTREAM_RESPONSE": "YouTube 傳回了非預期的音訊來源。請嘗試其他影片。",
-        "REQUEST_ABORTED": "要求已取消。",
-        "SOURCE_EXPIRED": "此音訊來源已過期。請重新載入網址。",
-        "SOURCE_NOT_FOUND": "此音訊來源已無法使用。請重新載入網址。",
-        "UNAUTHORIZED": "請重新登入以使用此工具。",
-        "UNSUPPORTED_VIDEO": "此影片未提供受支援的有限長度音訊來源。",
-        "UPSTREAM_FAILURE": "目前無法載入 YouTube 音訊。請再試一次。"
-      }
-    },
-    "transcode": {
-      "title": "音訊轉碼器",
-      "targetIdle": "等待中",
-      "targetChecking": "檢查中",
-      "targetReady": "已就緒",
-      "targetError": "無法使用",
-      "dropTitle": "拖放或選取音訊檔案",
-      "dropDescription": "最多 10 個 · 不支援資料夾 · 僅在此裝置處理",
-      "chooseFiles": "選取音訊檔案",
-      "supportedFormatsLabel": "支援的格式",
-      "supportedFormats": "支援：CAF、AIFF/AIFC、WAV、FLAC、MP3、AAC/M4A、Ogg/Opus，以及 MP4、MOV、MKV/WebM 或 TS 中的音訊。逐一檔案檢查。",
-      "filesSelected": "檔案",
-      "outputSettings": "輸出設定",
-      "format": "格式",
-      "sampleRate": "取樣率",
-      "bitrate": "位元率",
-      "bitDepth": "位元深度",
-      "codec": "編解碼器",
-      "sampleFormat": "取樣格式",
-      "float": "浮點",
-      "integer": "整數 PCM",
-      "sourcePcmFloat": "{bitDepth} 位元浮點",
-      "sourcePcmInteger": "{bitDepth} 位元整數",
-      "sourcePcmSignedInteger": "{bitDepth} 位元有號整數",
-      "sourcePcmUnsignedInteger": "{bitDepth} 位元無號整數",
-      "automatic": "自動",
-      "unknownAudio": "音訊",
-      "channelCount": "{count, plural, other {# 個聲道}}",
-      "queue": "轉換佇列",
-      "convert": "轉換",
-      "cancelAll": "全部取消",
-      "clear": "清除",
-      "download": "儲存轉換結果",
-      "downloadSource": "儲存原音訊",
-      "sourceDownloadExpired": "來源已過期或無法使用。請重新載入 YouTube URL。",
-      "sourceDownloadFailed": "無法下載原始檔案。請檢查網路連線並重新載入來源。",
-      "retry": "重試",
-      "cancel": "取消",
-      "remove": "移除",
-      "sourceValue": "來源檔案 ({value})",
-      "mono": "單聲道",
-      "stereo": "立體聲",
-      "targetWaitingForFiles": "新增支援的音訊檔案後，將檢查所選輸出格式。",
-      "targetCheckingMessage": "正在檢查此瀏覽器是否支援所選輸出格式。",
-      "targetReadyMessage": "此瀏覽器支援所選輸出格式。",
-      "engineLoading": "正在載入 {asset} 音訊引擎。",
-      "engineVerifying": "正在驗證 {asset} 音訊引擎。",
-      "engineLoadFailed": "無法載入 {asset} 音訊引擎。",
-      "capacityExceeded": "有 {count, number} 個檔案未新增。佇列最多可容納 {max, number} 個檔案。",
-      "statusInspectionQueued": "等待檢查",
-      "statusInspecting": "正在檢查",
-      "statusReady": "已就緒",
-      "statusQueued": "已加入佇列",
-      "statusConverting": "正在轉換",
-      "statusComplete": "已完成",
-      "statusUnsupported": "不支援",
-      "statusError": "錯誤",
-      "statusCancelled": "已取消",
-      "unsupportedInput": "這不是支援的音訊檔案。",
-      "unsupportedCodec": "此瀏覽器無法解碼該檔案中的音訊編解碼器。",
-      "inspectionFailed": "無法檢查檔案，請再試一次。",
-      "inspectionInconclusive": "瀏覽器無法在安全讀取限制內識別此音訊。請嘗試其他檔案或格式。",
-      "outputUnsupported": "此瀏覽器不支援所選輸出設定。",
-      "outputProbeFailed": "無法檢查輸出支援情況，請再試一次。",
-      "conversionFailed": "音訊轉換失敗。",
-      "conversionStorageLimitExceeded": "此瀏覽器的本機暫存空間不足以儲存預期的輸出。請選擇較小或壓縮格式，或改用支援大型本機輸出的瀏覽器重試。",
-      "conversionTargetSizeLimitExceeded": "所選輸出格式無法表示這麼大的檔案。請選擇其他格式，或降低取樣率、位元深度或聲道數。",
-      "cancelledMessage": "轉換已取消。",
-      "sourceSummary": "{container} · {sampleRate} · {channels} · {bitDepth}",
-      "outputSummary": "{preset} · {size}",
-      "progressLabel": "{phase} · {progress, number}%",
-      "phasePrepare": "準備中",
-      "phaseDecode": "解碼中",
-      "phaseEncode": "編碼中",
-      "phaseFinalize": "完成處理中",
-      "bytes": "{count, number} 位元組",
-      "storageOpfs": "瀏覽器私人儲存空間",
-      "storageMemory": "瀏覽器記憶體",
-      "metadataTitle": "音訊轉碼器",
-      "metadataDescription": "在瀏覽器中轉換音訊。檔案不會離開您的裝置。",
-      "outputSettingsHelper": "聲道維持不變。自動模式會為每個檔案選擇相容的取樣率。",
-      "processingDetails": "處理詳情",
-      "processingDetailsDescription": "使用均衡品質重新取樣。整數輸出使用抖動。大型 WAV 檔案使用 RF64。",
-      "bitDepthContainerEffective": "{containerBits} 位元容器 / {effectiveBits} 位元有效精度",
-      "constantBitrate": "CBR",
-      "variableBitrate": "VBR",
-      "preserveSource": "保留來源取樣率",
-      "unavailable": "無法使用",
-      "sampleRateAvailableFor": "{total, number} 個檔案中有 {supported, number} 個可用",
-      "sampleRateResetAutomatic": "先前的取樣率不適用於目前輸出設定，已改為自動。",
-      "targetAvailability": "可轉換 {available, number} 個檔案；{unavailable, number} 個檔案在目前設定下仍無法使用。",
-      "statusQueuedAvailability": "已將 {converting, number} 個檔案加入轉換佇列；{unavailable, number} 個仍無法使用。",
-      "statusConvertingAvailability": "正在轉換 {converting, number} 個檔案；{unavailable, number} 個仍無法使用。",
-      "statusCompleteAvailability": "已轉換 {converted, number} 個檔案；{unavailable, number} 個仍無法使用。",
-      "statusBatchResult": "執行完成：{eligible, number} 個符合條件，嘗試 {attempted, number} 個，成功 {succeeded, number} 個，失敗 {failed, number} 個，無法使用 {unavailable, number} 個。",
-      "outputEngineUnavailable": "無法啟動 {preset} 的執行階段引擎。請檢查網路或資源政策後重試。",
-      "outputChannelsUnsupported": "此輸出支援 {minimum, number}–{maximum, number} 個來源聲道，但此檔案有 {actual, number} 個。聲道會保持原樣，不會向下混音。",
-      "sourceInspectionMissing": "無法識別來源聲道數或取樣率。請選擇可讀取音訊中繼資料的檔案。",
-      "outputConfigurationUnavailable": "所選格式和編碼設定無法組成可用的輸出配置。",
-      "preserveSourceRateUnsupported": "此輸出無法保留來源取樣率 {sourceRate}。允許的取樣率：{allowed}。",
-      "sourceResamplingRateUnsupported": "{sourceRate} 的來源超出重新取樣範圍（{minimum}–{maximum}），只能直通至相容輸出。",
-      "targetResamplingRateUnsupported": "所選目標 {targetRate} 超出重新取樣範圍（{minimum}–{maximum}）。",
-      "automaticRateUnavailable": "自動模式無法為 {sourceRate} 的來源選擇有效取樣率。允許的輸出取樣率：{allowed}。",
-      "presetRateUnsupported": "此輸出不支援 {targetRate}。允許的取樣率：{allowed}。",
-      "notices": "開放原始碼授權"
-    },
-    "hwp": {
-      "title": "HWP 編輯器",
-      "metadataDescription": "在瀏覽器中開啟、編輯並儲存 HWP 與 HWPX 文件。",
-      "description": "使用編輯器的檔案選單開啟和儲存 HWP 或 HWPX 檔案。文件在此裝置上處理，不會上傳。",
-      "loading": "正在載入編輯器…",
-      "error": "無法載入編輯器。請再試一次。",
-      "retry": "再試一次",
-      "metadataTitle": "HWP 編輯器"
-    }
-  },
   "myMetadata": {
     "description": "{siteName} 上的 {title} 頁面"
   },
   "fileManager": {
+    "pagination": {
+      "end": "已到結果末尾"
+    },
+    "selectionUnavailableDescription": "無法新增此檔案。按 Enter 鍵預覽。",
     "title": "檔案",
     "description": "在整個網站上傳、整理、檢查並重複使用檔案。",
     "root": "檔案",
@@ -5484,9 +5172,7 @@
       "move-files": {
         "title": "移動檔案"
       },
-      "targetFolderId": "目標資料夾 ID",
       "extensionSeparate": ".{extension} 副檔名會分開保留。",
-      "rootWhenEmpty": "留空會移動到根目錄。",
       "delete": {
         "title": "刪除",
         "folder": "刪除此資料夾及其下所有未使用的檔案？",
@@ -5496,14 +5182,26 @@
         "byDomain": "依網域：{summary}",
         "more": "另有 {count} 個。請在檔案詳細資料中查看完整清單。"
       }
+    },
+    "viewSettings": {
+      "title": "檢視設定",
+      "iconSize": "圖示大小",
+      "spacing": "項目間距",
+      "columns": "欄數",
+      "auto": "自動",
+      "small": "小",
+      "medium": "中",
+      "large": "大",
+      "compact": "緊密",
+      "standard": "標準",
+      "comfortable": "寬鬆",
+      "reset": "重設檢視設定"
     }
   },
   "fileDownloadAccess": {
     "editor": {
       "sectionTitle": "下載權限",
-      "sectionDescription": "設定誰可以下載原始檔案。",
       "loading": "正在載入下載權限…",
-      "audienceLabel": "下載對象",
       "audiences": {
         "disabled": {
           "label": "已停用",
@@ -5522,15 +5220,10 @@
           "description": "只有所選受眾中的使用者可以下載此檔案。"
         }
       },
-      "segmentsLabel": "受眾",
-      "segmentsDescription": "選擇一個或多個現有受眾區隔。",
-      "segmentsPlaceholder": "選擇受眾",
       "segmentsLoadError": "政策已載入，但無法載入受眾。",
       "segmentsEmpty": "沒有可用的受眾區隔。",
       "restrictedWithoutAudience": "此受限政策未指定受眾。在選取至少一個受眾之前，所有人的下載都會被拒絕。",
-      "segmentRequiresSubscription": "{name}（需要訂閱電子報）",
       "additionalSelected": "另有 {count} 項已選取",
-      "loadMoreSegments": "載入更多受眾",
       "loadError": "無法載入下載權限。",
       "saveError": "無法儲存下載權限。",
       "fileRequired": "請先儲存檔案，再設定下載權限。"
@@ -5552,5 +5245,29 @@
     "empty": "輸入圖表原始碼",
     "invalid": "圖表語法有誤",
     "loading": "正在繪製…"
+  },
+  "errorPage": {
+    "titles": {
+      "400": "無效的請求",
+      "401": "需要登入",
+      "403": "沒有存取權限",
+      "404": "找不到頁面",
+      "408": "請求逾時",
+      "409": "請求與目前狀態衝突",
+      "410": "此頁面已無法使用",
+      "413": "請求過大",
+      "422": "無法處理請求",
+      "429": "請求過於頻繁",
+      "500": "出了點問題",
+      "501": "不支援此請求",
+      "502": "上游服務發生錯誤",
+      "503": "服務暫時無法使用",
+      "504": "服務回應逾時"
+    },
+    "actions": {
+      "goHome": "返回首頁",
+      "tryAgain": "再試一次",
+      "login": "返回登入"
+    }
   }
 }

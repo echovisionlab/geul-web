@@ -1,14 +1,15 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const fakes = vi.hoisted(() => ({
   addCommand: vi.fn(),
   currentProps: null as Record<string, unknown> | null,
   markerCalls: vi.fn(),
+  defineTheme: vi.fn(),
   modelSetValue: vi.fn(),
   modelUndo: vi.fn(),
   pushStackElement: vi.fn(),
@@ -27,7 +28,7 @@ vi.mock('@monaco-editor/react', async () => {
   const monaco = {
     KeyCode: { Enter: 3, Escape: 9, KeyY: 56, KeyZ: 57 },
     KeyMod: { CtrlCmd: 2048, Shift: 1024 },
-    editor: { setModelMarkers: fakes.markerCalls },
+    editor: { setModelMarkers: fakes.markerCalls, defineTheme: fakes.defineTheme },
   };
   const model = {
     getValue: () => fakes.modelValue,
@@ -111,16 +112,17 @@ vi.mock('@monaco-editor/react', async () => {
 });
 
 import { MonacoSourceEditor, type MonacoSourceEditorProps } from './MonacoSourceEditor';
+import { getThemeTokens, themeIds, type ThemeId } from '@/lib/theme/themes';
 
-async function mountEditor(props: MonacoSourceEditorProps) {
+async function mountEditor(props: MonacoSourceEditorProps, themeId: ThemeId = 'light') {
   const host = document.createElement('div');
   document.body.append(host);
   const root: Root = createRoot(host);
   await act(async () => {
     root.render(
-      <MantineProvider>
+      <DesignSystemProvider forceTheme={themeId}>
         <MonacoSourceEditor {...props} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
   for (let attempt = 0; attempt < 50 && !host.querySelector('textarea'); attempt += 1) {
@@ -154,6 +156,7 @@ async function changeInput(input: HTMLTextAreaElement, value: string) {
 beforeEach(() => {
   fakes.addCommand.mockReset();
   fakes.markerCalls.mockReset();
+  fakes.defineTheme.mockReset();
   fakes.modelSetValue.mockReset();
   fakes.modelUndo.mockReset();
   fakes.pushStackElement.mockReset();
@@ -165,7 +168,92 @@ beforeEach(() => {
   fakes.undoGroupStart = null;
 });
 
+afterEach(() => {
+  vi.restoreAllMocks();
+  document.documentElement.style.removeProperty('--font-mono');
+  document.documentElement.style.removeProperty('font-size');
+});
+
 describe('MonacoSourceEditor', () => {
+  it('isolates source notation from an RTL page while retaining the localized accessible label', async () => {
+    const initialDirection = document.documentElement.getAttribute('dir');
+    document.documentElement.dir = 'rtl';
+    const label = 'المصدر';
+    try {
+      const mounted = await mountEditor(
+        { value: 'const answer = 42;', language: 'javascript', ariaLabel: label, modelPath: 'rtl-source.js' },
+        'dark',
+      );
+      const sourceViewport = mounted.input.closest<HTMLElement>('[data-source-editor="monaco"]')!;
+      expect(sourceViewport.dir).toBe('ltr');
+      expect(mounted.input.closest('[dir]')).toBe(sourceViewport);
+      expect(mounted.input).toHaveAttribute('aria-label', label);
+      expect(mounted.input.value).toBe('const answer = 42;');
+      expect(document.documentElement.dir).toBe('rtl');
+      await mounted.unmount();
+    } finally {
+      if (initialDirection === null) {
+        document.documentElement.removeAttribute('dir');
+      } else {
+        document.documentElement.setAttribute('dir', initialDirection);
+      }
+    }
+  });
+
+  it('registers shared UI themes and resolves mono/rem metrics and reduced-motion preferences for the mounted editor', async () => {
+    let listener: (() => void) | undefined;
+    const media = {
+      matches: true,
+      addEventListener: vi.fn((_event: string, callback: () => void) => {
+        listener = callback;
+      }),
+      removeEventListener: vi.fn(),
+    };
+    vi.spyOn(window, 'matchMedia').mockReturnValue(media as unknown as MediaQueryList);
+    document.documentElement.style.setProperty('--font-mono', 'Fixture mono, monospace');
+    document.documentElement.style.fontSize = '20px';
+    const mounted = await mountEditor(
+      { value: '', language: 'javascript', ariaLabel: 'Source', modelPath: 'source.js' },
+      'dark',
+    );
+    expect(fakes.defineTheme).toHaveBeenCalledWith('geul-source-light', expect.any(Object));
+    expect(fakes.defineTheme).toHaveBeenCalledWith('geul-source-dark', expect.any(Object));
+    expect(fakes.currentProps).toMatchObject({
+      theme: 'geul-source-dark',
+      options: {
+        fontFamily: 'Fixture mono, monospace',
+        fontSize: 17.5,
+        cursorSmoothCaretAnimation: 'off',
+        smoothScrolling: false,
+      },
+    });
+    media.matches = false;
+    await act(async () => listener?.());
+    expect(fakes.currentProps).toMatchObject({ options: { cursorSmoothCaretAnimation: 'on', smoothScrolling: true } });
+    await mounted.unmount();
+    expect(media.removeEventListener).toHaveBeenCalledWith('change', listener);
+  });
+
+  it.each(['ocean-light', 'ocean-dark'] as const)(
+    'mounts the actual %s editor preset and registers every available theme',
+    async (themeId) => {
+      const mounted = await mountEditor(
+        { value: 'const count = 1;', language: 'javascript', ariaLabel: 'Source', modelPath: 'preset.js' },
+        themeId,
+      );
+      expect(fakes.currentProps?.theme).toBe(`geul-source-${themeId}`);
+      for (const id of themeIds) {
+        expect(fakes.defineTheme).toHaveBeenCalledWith(
+          `geul-source-${id}`,
+          expect.objectContaining({
+            colors: expect.objectContaining({ 'editor.background': getThemeTokens(id).background }),
+          }),
+        );
+      }
+      await mounted.unmount();
+    },
+  );
+
   it('emits range-based content changes and configures a stable in-memory model', async () => {
     const onChange = vi.fn();
     const mounted = await mountEditor({
@@ -192,6 +280,8 @@ describe('MonacoSourceEditor', () => {
       options: {
         wordWrap: 'on',
         wrappingIndent: 'indent',
+        accessibilitySupport: 'auto',
+        tabFocusMode: true,
       },
     });
     expect(mounted.input.closest('[data-source-editor="monaco"]')).not.toBeNull();
@@ -271,20 +361,22 @@ describe('MonacoSourceEditor', () => {
       onMount: () => fakes.mountCleanup,
     });
 
-    expect(fakes.addCommand).toHaveBeenCalledTimes(4);
+    expect(fakes.addCommand).toHaveBeenCalledTimes(5);
     const commands = fakes.addCommand.mock.calls.map(([, handler]) => handler as () => void);
     commands[0]();
     commands[1]();
     commands[3]();
-    const escapeEvent = { keyCode: 9, preventDefault: vi.fn(), stopPropagation: vi.fn() };
-    const escapeHandler = fakes.onKeyDown.mock.calls[0]?.[0] as (event: typeof escapeEvent) => void;
-    escapeHandler(escapeEvent);
+    commands[4]();
+    expect(fakes.addCommand).toHaveBeenLastCalledWith(
+      9,
+      onEscape,
+      'editorTextFocus && !suggestWidgetVisible && !findWidgetVisible && !renameInputVisible && !parameterHintsVisible && !inSnippetMode',
+    );
+    expect(fakes.onKeyDown).not.toHaveBeenCalled();
     expect(onUndo).toHaveBeenCalledOnce();
     expect(onRedo).toHaveBeenCalledOnce();
     expect(onEscape).toHaveBeenCalledOnce();
     expect(onApply).toHaveBeenCalledOnce();
-    expect(escapeEvent.preventDefault).toHaveBeenCalledOnce();
-    expect(escapeEvent.stopPropagation).toHaveBeenCalledOnce();
     const historyUndo = new InputEvent('beforeinput', {
       bubbles: true,
       cancelable: true,

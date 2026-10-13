@@ -1,0 +1,16 @@
+.root {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.indent[data-geul-hierarchy-indent='content'] {
+  padding-inline-start: var(--_hierarchy-step, var(--geul-hierarchy-step));
+}
+
+.indent[data-geul-hierarchy-indent='parent-label'] {
+  padding-inline-start: var(--geul-hierarchy-reorder-step);
+}
+
+.root[hidden] {
+  display: none;
+}

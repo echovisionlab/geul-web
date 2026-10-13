@@ -1,7 +1,9 @@
 'use client';
 
+import { useComputedColorScheme } from '@/lib/providers/DesignSystemProvider';
+
 import type { CSSProperties } from 'react';
-import { useComputedColorScheme } from '@mantine/core';
+
 import { toCdnUrl } from '@/lib/utils/file-url';
 import { selectThemeAssetUrl } from '@/lib/utils/theme-asset';
 import { ThemedAssetImageView } from './ui/ThemedAssetImageView';
@@ -27,7 +29,7 @@ export function ThemedAssetImage({
   className,
   style,
 }: ThemedAssetImageProps) {
-  const colorScheme = useComputedColorScheme('light');
+  const colorScheme = useComputedColorScheme();
   const url = selectThemeAssetUrl(colorScheme, { lightUrl, darkUrl, fallbackUrl });
 
   return (

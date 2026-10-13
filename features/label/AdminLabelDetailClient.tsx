@@ -1,15 +1,25 @@
 'use client';
 
+import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutGrid as DsLayoutGrid,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
-import { useCallback, useLayoutEffect, useState } from 'react';
+import { type ReactElement, useCallback, useLayoutEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconUsers } from '@tabler/icons-react';
 import { LabelAction } from '@echovisionlab/geul-proto/secure/label_pb.ts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Group, SimpleGrid, Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { Button } from '@/components/core/Button';
 import { EditorHeader, type StatusOption } from '@/features/editor/EditorHeader';
 import { EditorPermissionRevokedDialog } from '@/features/editor/EditorPermissionRevokedDialog';
@@ -58,12 +68,7 @@ interface AdminLabelDetailClientProps {
   backHref?: string;
 }
 
-export function AdminLabelDetailClient({
-  id,
-  label,
-  baseUrl,
-  backHref = '/admin/labels',
-}: AdminLabelDetailClientProps) {
+function useLabelEditorViewModel({ id, label, baseUrl, backHref = '/admin/labels' }: AdminLabelDetailClientProps) {
   const router = useRouter();
   const t = useTranslations('labelAdminDetail');
   const tCommon = useTranslations('common');
@@ -251,12 +256,12 @@ export function AdminLabelDetailClient({
     mutationFn: (labelId: string) => publishLabelAction(labelId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       notifications.show({
         message: tCommon('messages.itemPublished', { item: tCommon('entities.label') }),
-        color: 'green',
+        tone: 'positive',
       });
       setCurrentStatus('published');
       queryClient.invalidateQueries({ queryKey: ['labels'] });
@@ -267,12 +272,12 @@ export function AdminLabelDetailClient({
     mutationFn: (labelId: string) => unpublishLabelAction(labelId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       notifications.show({
         message: tCommon('messages.itemUnpublished', { item: tCommon('entities.label') }),
-        color: 'yellow',
+        tone: 'positive',
       });
       setCurrentStatus('draft');
       queryClient.invalidateQueries({ queryKey: ['labels'] });
@@ -282,7 +287,7 @@ export function AdminLabelDetailClient({
   const flushPendingSaves = useCallback(async () => {
     const saved = await flushEditorSaves(`label:${id}`);
     if (!saved) {
-      notifications.show({ message: tCommon('notifications.saveFailed'), color: 'red' });
+      notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' });
     }
     return saved;
   }, [id, tCommon]);
@@ -352,9 +357,140 @@ export function AdminLabelDetailClient({
     return <PageLoader />;
   }
 
+  return {
+    currentProvider,
+    id,
+    protocol,
+    labelsForParentQuery: {
+      isError: labelsForParentQuery.isError,
+      error: labelsForParentQuery.error,
+      isFetching: labelsForParentQuery.isFetching,
+      refetch: async () => {
+        await labelsForParentQuery.refetch();
+      },
+    },
+    displayedName,
+    canEditLocalizedName,
+    handleScopedLocaleNameChange,
+    tCommon,
+    currentStatus,
+    labelStatusOptions,
+    currentIsConnected,
+    currentIsSynced,
+    handleBack,
+    canEditNeutral,
+    canPublish,
+    canUnpublish,
+    handleStatusChange,
+    publishLabel: { isPending: publishLabel.isPending },
+    unpublishLabel: { isPending: unpublishLabel.isPending },
+    t,
+    activeEditLocale: {
+      isControlVisible: activeEditLocale.isControlVisible,
+      activeLocale: activeEditLocale.activeLocale,
+      activeLocaleLabel: activeEditLocale.activeLocaleLabel,
+      sourceLocale: activeEditLocale.sourceLocale,
+      localeOptions: activeEditLocale.localeOptions,
+      setActiveLocale: activeEditLocale.setActiveLocale,
+      isLoading: activeEditLocale.isLoading,
+      contentPreviewLoading: activeEditLocale.contentPreviewLoading,
+    },
+    canMutate,
+    canManageParticipants,
+    setParticipantsOpened,
+    logoImages: { light: logoImages.light, dark: logoImages.dark },
+    handleImageChange,
+    baseUrl,
+    fields: {
+      slug: fields.slug,
+      countryCode: fields.countryCode,
+      website: fields.website,
+      parentLabelId: fields.parentLabelId,
+      socialLinks: fields.socialLinks,
+    },
+    slugMgmt: {
+      isAvailable: slugMgmt.isAvailable,
+      error: slugMgmt.error,
+      isChecking: slugMgmt.isChecking,
+      handleChange: slugMgmt.handleChange,
+    },
+    isEditingScopedLocale,
+    hasScopedLocaleLiveRow,
+    localizedDescriptionSession,
+    descriptionEditorKey,
+    currentLocaleCanEdit,
+    editorSession,
+    setField,
+    parentLabelOptions,
+    canManageShareLinks,
+    participantsOpened,
+    canRemoveOwner,
+    permissionRevocation: {
+      revoked: permissionRevocation.revoked,
+      sessionExpired: permissionRevocation.sessionExpired,
+    },
+    router: { replace: router.replace },
+    label: { slug: label.slug },
+  };
+}
+
+export function AdminLabelDetailClient(props: AdminLabelDetailClientProps) {
+  const model = useLabelEditorViewModel(props);
+  return 'currentProvider' in model ? <LabelEditorView model={model} /> : model;
+}
+
+export type LabelEditorViewModel = Exclude<ReturnType<typeof useLabelEditorViewModel>, ReactElement>;
+
+/** Complete production editor composition; controllers supply data and commands. */
+export function LabelEditorView({ model }: { model: LabelEditorViewModel }) {
+  const {
+    currentProvider,
+    id,
+    protocol,
+    labelsForParentQuery,
+    displayedName,
+    canEditLocalizedName,
+    handleScopedLocaleNameChange,
+    tCommon,
+    currentStatus,
+    labelStatusOptions,
+    currentIsConnected,
+    currentIsSynced,
+    handleBack,
+    canEditNeutral,
+    canPublish,
+    canUnpublish,
+    handleStatusChange,
+    publishLabel,
+    unpublishLabel,
+    t,
+    activeEditLocale,
+    canMutate,
+    canManageParticipants,
+    setParticipantsOpened,
+    logoImages,
+    handleImageChange,
+    baseUrl,
+    fields,
+    slugMgmt,
+    isEditingScopedLocale,
+    hasScopedLocaleLiveRow,
+    localizedDescriptionSession,
+    descriptionEditorKey,
+    currentLocaleCanEdit,
+    editorSession,
+    setField,
+    parentLabelOptions,
+    canManageShareLinks,
+    participantsOpened,
+    canRemoveOwner,
+    permissionRevocation,
+    router,
+    label,
+  } = model;
   return (
     <EditorRuntimeProvider provider={currentProvider} entityType="label" entityId={id} blockRoomProtocol={protocol}>
-      <Stack>
+      <DsLayoutStack>
         <QueryErrorAlert queries={[labelsForParentQuery]} />
         <EditorHeader
           title={displayedName}
@@ -399,30 +535,34 @@ export function AdminLabelDetailClient({
           }
         />
 
-        <Stack gap="md">
-          <LabelLogoUploader
-            labelId={id}
-            currentImage={logoImages.light}
-            variant="light"
-            name={displayedName}
-            inputId={`label-${id}-image`}
-            size={100}
-            label={tCommon('labels.logoLight')}
-            disabled={!canEditNeutral}
-            onImageChange={(url) => handleImageChange('light', url)}
-          />
+        <DsLayoutStack gap="md">
+          <AuthoringExtension kind="uploads">
+            <LabelLogoUploader
+              labelId={id}
+              currentImage={logoImages.light}
+              variant="light"
+              name={displayedName}
+              inputId={`label-${id}-image`}
+              size={100}
+              label={tCommon('labels.logoLight')}
+              disabled={!canEditNeutral}
+              onImageChange={(url) => handleImageChange('light', url)}
+            />
+          </AuthoringExtension>
 
-          <LabelLogoUploader
-            labelId={id}
-            currentImage={logoImages.dark}
-            variant="dark"
-            name={displayedName}
-            inputId={`label-${id}-image-dark`}
-            size={100}
-            label={tCommon('labels.logoDark')}
-            disabled={!canEditNeutral}
-            onImageChange={(url) => handleImageChange('dark', url)}
-          />
+          <AuthoringExtension kind="uploads">
+            <LabelLogoUploader
+              labelId={id}
+              currentImage={logoImages.dark}
+              variant="dark"
+              name={displayedName}
+              inputId={`label-${id}-image-dark`}
+              size={100}
+              label={tCommon('labels.logoDark')}
+              disabled={!canEditNeutral}
+              onImageChange={(url) => handleImageChange('dark', url)}
+            />
+          </AuthoringExtension>
 
           <TextInput
             id={`label-${id}-name`}
@@ -447,10 +587,10 @@ export function AdminLabelDetailClient({
             onChange={slugMgmt.handleChange}
           />
 
-          <Stack gap="xs">
-            <Text size="sm" fw={500}>
+          <DsLayoutStack gap="xs">
+            <DsText size="sm" weight="medium">
               {tCommon('labels.description')}
-            </Text>
+            </DsText>
             {isEditingScopedLocale && activeEditLocale.activeLocaleLabel ? (
               hasScopedLocaleLiveRow ? (
                 localizedDescriptionSession ? (
@@ -464,9 +604,7 @@ export function AdminLabelDetailClient({
                     structureLocked
                   />
                 ) : (
-                  <Text size="sm" c="dimmed">
-                    {tCommon('states.loading')}
-                  </Text>
+                  <SupportingText tone="secondary">{tCommon('states.loading')}</SupportingText>
                 )
               ) : (
                 <ActiveEditLocaleContentPreview
@@ -499,13 +637,11 @@ export function AdminLabelDetailClient({
                 structureLocked={false}
               />
             ) : (
-              <Text size="sm" c="dimmed">
-                {tCommon('states.loading')}
-              </Text>
+              <SupportingText tone="secondary">{tCommon('states.loading')}</SupportingText>
             )}
-          </Stack>
+          </DsLayoutStack>
 
-          <SimpleGrid cols={2}>
+          <DsLayoutGrid columns={2}>
             <CountryCodeSelect
               id={`label-${id}-country-code`}
               label={tCommon('labels.country')}
@@ -522,7 +658,7 @@ export function AdminLabelDetailClient({
               onChange={(event) => setField('website', event.currentTarget.value)}
               disabled={!canEditNeutral}
             />
-          </SimpleGrid>
+          </DsLayoutGrid>
 
           <Select
             id={`label-${id}-parent-label-id`}
@@ -543,14 +679,18 @@ export function AdminLabelDetailClient({
             disabled={!canEditNeutral}
           />
           {canManageShareLinks ? (
-            <ShareLinkSection entityType="label" entityId={id} disabled={!canEditNeutral} />
+            <AuthoringExtension kind="sharing">
+              <ShareLinkSection entityType="label" entityId={id} disabled={!canEditNeutral} />
+            </AuthoringExtension>
           ) : null}
-          <Group justify="flex-end" mt="md">
-            <Button tone="neutral" emphasis="low" onClick={handleBack}>
-              {tCommon('actions.cancel')}
-            </Button>
-          </Group>
-        </Stack>
+          <DsLayoutInset blockStart="md">
+            <DsLayoutInline justify="end">
+              <Button tone="neutral" emphasis="low" onClick={handleBack}>
+                {tCommon('actions.cancel')}
+              </Button>
+            </DsLayoutInline>
+          </DsLayoutInset>
+        </DsLayoutStack>
 
         <LabelParticipantsDialog
           labelId={id}
@@ -560,7 +700,11 @@ export function AdminLabelDetailClient({
           canRemoveOwner={canEditNeutral && canRemoveOwner}
         />
 
-        {canMutate ? <EntityTranslationsPanel entityType="label" entityId={id} /> : null}
+        {canMutate ? (
+          <AuthoringExtension kind="translations">
+            <EntityTranslationsPanel entityType="label" entityId={id} />
+          </AuthoringExtension>
+        ) : null}
 
         <EditorPermissionRevokedDialog
           opened={permissionRevocation.revoked}
@@ -570,7 +714,7 @@ export function AdminLabelDetailClient({
           opened={permissionRevocation.sessionExpired}
           onConfirm={() => window.location.assign(buildLoginRedirectHref(getCurrentPath()))}
         />
-      </Stack>
+      </DsLayoutStack>
     </EditorRuntimeProvider>
   );
 }

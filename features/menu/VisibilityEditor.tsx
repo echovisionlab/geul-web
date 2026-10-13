@@ -1,6 +1,12 @@
 'use client';
 
-import { Group, Stack, Text } from '@mantine/core';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+
 import { Checkbox, Radio } from '@/components/core/Input';
 
 // Local types for flexibility with action return types
@@ -37,10 +43,10 @@ const MODE_OPTIONS: { value: VisibilityMode; label: string; description: string 
 
 export function VisibilityEditor({ value, onChange, disabled = false }: VisibilityEditorProps) {
   return (
-    <Stack gap="sm">
-      <Text size="sm" fw={500}>
+    <DsLayoutStack gap="sm">
+      <DsText size="sm" weight="medium">
         Visibility
-      </Text>
+      </DsText>
 
       <Radio.Group
         value={value.mode}
@@ -51,7 +57,7 @@ export function VisibilityEditor({ value, onChange, disabled = false }: Visibili
           })
         }
       >
-        <Stack gap="xs">
+        <DsLayoutStack gap="xs">
           {MODE_OPTIONS.map((option) => (
             <Radio
               key={option.value}
@@ -61,7 +67,7 @@ export function VisibilityEditor({ value, onChange, disabled = false }: Visibili
               disabled={disabled}
             />
           ))}
-        </Stack>
+        </DsLayoutStack>
       </Radio.Group>
 
       {value.mode === 'roles' && (
@@ -69,14 +75,16 @@ export function VisibilityEditor({ value, onChange, disabled = false }: Visibili
           value={value.roles || []}
           onChange={(roles) => onChange({ ...value, roles: roles as VisibilityRole[] })}
         >
-          <Group gap="md" mt="xs">
-            {ROLES.map((role) => (
-              <Checkbox key={role.value} value={role.value} label={role.label} disabled={disabled} />
-            ))}
-          </Group>
+          <DsLayoutInset blockStart="xs">
+            <DsLayoutInline gap="md">
+              {ROLES.map((role) => (
+                <Checkbox key={role.value} value={role.value} label={role.label} disabled={disabled} />
+              ))}
+            </DsLayoutInline>
+          </DsLayoutInset>
         </Checkbox.Group>
       )}
-    </Stack>
+    </DsLayoutStack>
   );
 }
 

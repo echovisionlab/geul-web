@@ -19,7 +19,7 @@ const { persistCollaborativeDocumentNow } = vi.hoisted(() => ({
   persistCollaborativeDocumentNow: vi.fn<() => Promise<void>>(),
 }));
 
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 vi.mock('@/lib/collab/persist-now', () => ({ persistCollaborativeDocumentNow }));
 vi.mock('@/lib/utils/client-logger', () => ({
   createClientLogger: () => ({ error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() }),

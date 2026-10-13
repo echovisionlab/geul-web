@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { EditorHeaderView, type EditorHeaderProps, type EditorHeaderViewLabels } from '@/components/core/EditorHeader';
+import { ConfirmationDialog } from '@/features/confirmation';
 
 export function EditorHeader<TStatus extends string = string>(props: EditorHeaderProps<TStatus>) {
   const t = useTranslations('editorHeader');
@@ -15,6 +16,7 @@ export function EditorHeader<TStatus extends string = string>(props: EditorHeade
   const labels: EditorHeaderViewLabels = {
     back: tCommonActions('back'),
     untitled: tStates('untitledPlain'),
+    title: tCommonLabels('title'),
     delete: tCommonActions('delete'),
     cancel: tCommonActions('cancel'),
     close: tCommonActions('close'),
@@ -30,7 +32,25 @@ export function EditorHeader<TStatus extends string = string>(props: EditorHeade
     syncStatus,
   };
 
-  return <EditorHeaderView {...props} labels={labels} />;
+  return (
+    <EditorHeaderView
+      {...props}
+      labels={labels}
+      renderDeleteConfirmation={(state) =>
+        props.deleteConfirmation ? (
+          <ConfirmationDialog
+            {...state}
+            intent="delete"
+            title={props.deleteConfirmation.title}
+            message={props.deleteConfirmation.message}
+            confirmLabel={props.deleteConfirmation.confirmLabel ?? labels.delete}
+            cancelLabel={props.deleteConfirmation.cancelLabel ?? labels.cancel}
+            closeLabel={labels.close}
+          />
+        ) : null
+      }
+    />
+  );
 }
 
 export type {

@@ -1,6 +1,7 @@
 import { POST_SHARED_FIELD_KEYS, postCollabFieldsSchema } from '@echovisionlab/geul-common/collaboration/post';
 import { DEFAULT_DOCUMENT_LAYOUT } from '@echovisionlab/geul-common/collaboration/document-layout';
 import { z } from 'zod';
+import * as zm from '@/lib/zod-mini';
 
 export const categorySchema = z.object({
   id: z.string(),
@@ -28,12 +29,10 @@ export const PostMetaSchema = z
   })
   .strict();
 
-export const PostTransientMetaSchema = postCollabFieldsSchema
-  .pick({
-    categoryIds: true,
-    tagIds: true,
-  })
-  .required();
+// Common schemas are zod/mini types; derive from them with the functional API.
+export const PostTransientMetaSchema = zm.required(
+  zm.pick(postCollabFieldsSchema, { categoryIds: true, tagIds: true }),
+);
 
 export type PostMeta = z.infer<typeof PostMetaSchema>;
 export type PostTransientMeta = z.infer<typeof PostTransientMetaSchema>;

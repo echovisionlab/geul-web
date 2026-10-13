@@ -1,13 +1,24 @@
 'use client';
 
-import { forwardRef, type AriaRole, type MouseEventHandler, type ReactElement, type ReactNode } from 'react';
-import { Popover as MantinePopover, type PopoverProps as MantinePopoverProps } from '@mantine/core';
-
+import {
+  createContext,
+  forwardRef,
+  useContext,
+  useState,
+  type MouseEventHandler,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
+import { Dialog, DialogTrigger, Popover as AriaPopover } from 'react-aria-components';
+import { overlayDataAttributes, type OverlayPresentationProps } from '../overlay-contract';
+import { OverlayTriggerTarget } from '../OverlayTriggerTarget';
+import { overlayLayers } from '../layer-contract';
+import classes from '../Overlay.module.css';
 export type PopoverPlacement = 'bottom-start' | 'bottom' | 'bottom-end' | 'top-start' | 'top' | 'top-end';
 export type PopoverSize = 'compact' | 'standard' | 'wide';
 export type PopoverPadding = 'none' | 'compact' | 'standard';
-
-export interface PopoverProps {
+export type PopoverRole = 'dialog' | 'alertdialog';
+export interface PopoverProps extends OverlayPresentationProps {
   children?: ReactNode;
   open?: boolean;
   defaultOpen?: boolean;
@@ -18,38 +29,27 @@ export interface PopoverProps {
   size?: PopoverSize;
   portal?: boolean;
 }
-
-export interface PopoverTargetProps {
+export interface PopoverTargetProps extends OverlayPresentationProps {
   children: ReactElement;
 }
-
-export interface PopoverDropdownProps {
+export interface PopoverDropdownProps extends OverlayPresentationProps {
   children?: ReactNode;
   padding?: PopoverPadding;
   id?: string;
-  role?: AriaRole;
+  'aria-label'?: string;
+  'aria-labelledby'?: string;
+  'aria-describedby'?: string;
+  role?: PopoverRole;
   onClick?: MouseEventHandler<HTMLDivElement>;
   onMouseDown?: MouseEventHandler<HTMLDivElement>;
   [dataAttribute: `data-${string}`]: string | number | boolean | undefined;
 }
-
-type ResolvedPopoverPosition = NonNullable<MantinePopoverProps['position']>;
-
-const POPOVER_POSITIONS: Record<PopoverPlacement, ResolvedPopoverPosition> = {
-  'bottom-start': 'bottom-start',
-  bottom: 'bottom',
-  'bottom-end': 'bottom-end',
-  'top-start': 'top-start',
-  top: 'top',
-  'top-end': 'top-end',
-};
-
-const POPOVER_WIDTHS: Record<PopoverSize, number> = {
-  compact: 280,
-  standard: 300,
-  wide: 500,
-};
-
+const PopoverPresentation = createContext<{
+  placement: PopoverPlacement;
+  size: PopoverSize;
+  portal: boolean;
+  container: HTMLSpanElement | null;
+}>({ placement: 'bottom-start', size: 'standard', portal: true, container: null });
 function PopoverRoot({
   children,
   open,
@@ -61,46 +61,80 @@ function PopoverRoot({
   size = 'standard',
   portal = true,
 }: PopoverProps) {
+  const [container, setContainer] = useState<HTMLSpanElement | null>(null);
   return (
-    <MantinePopover
-      opened={open}
-      defaultOpened={defaultOpen}
-      onChange={onOpenChange}
-      onOpen={onOpen}
-      onClose={onClose}
-      position={POPOVER_POSITIONS[placement]}
-      width={POPOVER_WIDTHS[size]}
-      withinPortal={portal}
-      shadow="md"
-      radius={0}
-      styles={{
-        dropdown: {
-          boxSizing: 'border-box',
-          maxWidth: 'calc(100vw - var(--mantine-spacing-xl))',
-          overflowWrap: 'anywhere',
-        },
-      }}
-    >
-      {children}
-    </MantinePopover>
+    <span ref={setContainer} className={classes.anchor}>
+      <PopoverPresentation.Provider value={{ placement, size, portal, container }}>
+        <DialogTrigger
+          isOpen={open}
+          defaultOpen={defaultOpen}
+          onOpenChange={(next) => {
+            onOpenChange?.(next);
+            if (next) {
+              onOpen?.();
+            } else {
+              onClose?.();
+            }
+          }}
+        >
+          {children}
+        </DialogTrigger>
+      </PopoverPresentation.Provider>
+    </span>
   );
 }
-
 PopoverRoot.displayName = 'Popover';
-
 const PopoverTarget = forwardRef<HTMLElement, PopoverTargetProps>(({ children }, ref) => (
-  <MantinePopover.Target ref={ref}>{children}</MantinePopover.Target>
+  <OverlayTriggerTarget forwardedRef={ref}>{children}</OverlayTriggerTarget>
 ));
-
 PopoverTarget.displayName = 'Popover.Target';
-
-const PopoverDropdown = forwardRef<HTMLDivElement, PopoverDropdownProps>(({ padding = 'standard', ...props }, ref) => (
-  <MantinePopover.Dropdown ref={ref} p={padding === 'none' ? 0 : padding === 'compact' ? 'xs' : undefined} {...props} />
-));
-
+const PopoverDropdown = forwardRef<HTMLDivElement, PopoverDropdownProps>(
+  (
+    {
+      padding = 'standard',
+      children,
+      id,
+      role = 'dialog',
+      onClick,
+      onMouseDown,
+      'aria-label': ariaLabel,
+      'aria-labelledby': ariaLabelledBy,
+      'aria-describedby': ariaDescribedBy,
+      ...props
+    },
+    ref,
+  ) => {
+    const presentation = useContext(PopoverPresentation);
+    if (role !== 'dialog' && role !== 'alertdialog') {
+      throw new RangeError('Invalid popover role');
+    }
+    return (
+      <AriaPopover
+        ref={ref}
+        className={classes.popover}
+        placement={presentation.placement.replace('-', ' ') as 'bottom start'}
+        style={{ zIndex: overlayLayers.popup }}
+        data-size={presentation.size}
+        data-position={presentation.placement}
+        UNSTABLE_portalContainer={!presentation.portal ? (presentation.container ?? undefined) : undefined}
+        {...overlayDataAttributes(props)}
+        onClick={onClick}
+        onMouseDown={onMouseDown}
+      >
+        <Dialog
+          id={id}
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledBy}
+          aria-describedby={ariaDescribedBy}
+          role={role}
+          className={classes.popoverContent}
+          data-padding={padding}
+        >
+          {children}
+        </Dialog>
+      </AriaPopover>
+    );
+  },
+);
 PopoverDropdown.displayName = 'Popover.Dropdown';
-
-export const Popover = Object.assign(PopoverRoot, {
-  Target: PopoverTarget,
-  Dropdown: PopoverDropdown,
-});
+export const Popover = Object.assign(PopoverRoot, { Target: PopoverTarget, Dropdown: PopoverDropdown });

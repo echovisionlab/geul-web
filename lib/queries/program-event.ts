@@ -18,6 +18,7 @@ import {
   createProgramEventTypeClient,
   createPublicProgramEventClient,
   createPublicProgramEventClientWithAuth,
+  createPublicProgramEventTypeClientWithAuth,
 } from '@/lib/api/server-client';
 import { mapPublicLocalizationInfo, maybeFetchSourceLocale } from '@/lib/queries/localized-public';
 import { materializeLocalizedRichTextTree } from '@/features/editor/contract/localized-rich-text';
@@ -624,6 +625,20 @@ export async function listProgramEventsForSeries(input: {
     offset: input.offset,
     requestedLocale: input.requestedLocale,
   });
+}
+
+/** Server counterpart of `listProgramEventTypeOptionsBrowser` (public event type filter options). */
+export async function listProgramEventTypeOptions(requestedLocale?: string | null) {
+  const client = await createPublicProgramEventTypeClientWithAuth(requestedLocale);
+  const response = await client.list({
+    pagination: { limit: 100, offset: 0 },
+    sorts: [create(SortSpecSchema, { field: 'sort_order', order: SortOrder.ASC })],
+  });
+  return (response.types ?? []).map((type) => ({
+    id: type.id,
+    slug: type.slug,
+    name: type.name,
+  }));
 }
 
 export async function getProgramEventView(

@@ -2,7 +2,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import type { UploadType } from '@/lib/types/upload/model';
 import { useImageAssetUpload } from './useImageAssetUpload';
 
@@ -52,15 +52,15 @@ export function useFeaturedImageCommands({
     },
     onSuccess: (result, fileId) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       if (!setImage(fileId, result.imageUrl ?? null)) {
-        notifications.show({ message: t('updateFailed'), color: 'red' });
+        notifications.show({ message: t('updateFailed'), tone: 'danger' });
         return;
       }
       notifyGeneration(result);
-      notifications.show({ message: t('featuredImageUpdated'), color: 'green' });
+      notifications.show({ message: t('featuredImageUpdated'), tone: 'positive' });
     },
   });
 
@@ -71,20 +71,20 @@ export function useFeaturedImageCommands({
     },
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       if (!clearImage()) {
-        notifications.show({ message: t('updateFailed'), color: 'red' });
+        notifications.show({ message: t('updateFailed'), tone: 'danger' });
         return;
       }
       notifyGeneration(result);
-      notifications.show({ message: t('featuredImageRemoved'), color: 'yellow' });
+      notifications.show({ message: t('featuredImageRemoved'), tone: 'warning' });
     },
     onError: (error) => {
       notifications.show({
         message: error instanceof Error ? error.message : t('updateFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });

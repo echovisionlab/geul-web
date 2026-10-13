@@ -17,6 +17,7 @@ import { PrivacyService as PublicPrivacyService } from '@echovisionlab/geul-prot
 import {
   ProgramEventSeriesService as PublicProgramEventSeriesService,
   ProgramEventService as PublicProgramEventService,
+  ProgramEventTypeService as PublicProgramEventTypeService,
 } from '@echovisionlab/geul-proto/public/program_event_pb.ts';
 import { ReleaseService as PublicReleaseService } from '@echovisionlab/geul-proto/public/release_pb.ts';
 import { SeriesService as PublicSeriesService } from '@echovisionlab/geul-proto/public/series_pb.ts';
@@ -177,6 +178,13 @@ export function createPublicProgramEventClient() {
 export async function createPublicProgramEventClientWithAuth(acceptLanguageOverride?: string | null) {
   return createClient(
     PublicProgramEventService,
+    await createServerTransport({ acceptLanguageOverride, authOptional: true }),
+  );
+}
+
+export async function createPublicProgramEventTypeClientWithAuth(acceptLanguageOverride?: string | null) {
+  return createClient(
+    PublicProgramEventTypeService,
     await createServerTransport({ acceptLanguageOverride, authOptional: true }),
   );
 }

@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { Editor } from '@tiptap/core';
 import { NodeSelection, TextSelection } from '@tiptap/pm/state';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createTiptapWireExtensions } from '../../wire-schema';
 import type { ExternalVideoSelectionMenuLabels } from './ExternalVideoSelectionMenu';
@@ -190,9 +191,9 @@ describe('map and external-video selection menu dismissal', () => {
 
     act(() => {
       root.render(
-        <MantineProvider env="test">
+        <DesignSystemProvider forceColorScheme="light">
           <TiptapMapSelectionBubbleMenu editor={editor} labels={mapLabels} registry={registry} />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
     expect(container.querySelector('[data-testid="tiptap-map-menu"]')).not.toBeNull();
@@ -238,9 +239,9 @@ describe('map and external-video selection menu dismissal', () => {
 
     act(() => {
       root.render(
-        <MantineProvider env="test">
+        <DesignSystemProvider forceColorScheme="light">
           <TiptapExternalVideoSelectionBubbleMenu editor={editor} labels={externalVideoLabels} />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
     expect(container.querySelector('[data-testid="tiptap-external-video-selection-menu"]')).not.toBeNull();

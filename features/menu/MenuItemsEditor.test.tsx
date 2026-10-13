@@ -32,16 +32,6 @@ vi.mock('@dnd-kit/sortable', () => ({
   }),
 }));
 
-vi.mock('@mantine/core', () => ({
-  Collapse: ({ children, expanded }: { children: ReactNode; expanded: boolean }) =>
-    expanded ? <div>{children}</div> : null,
-  Divider: () => null,
-  Group: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  Paper: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  Stack: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  Text: ({ children }: { children: ReactNode }) => <span>{children}</span>,
-}));
-
 vi.mock('@/components/core/Button', () => ({
   Button: ({ children, disabled, onClick }: { children: ReactNode; disabled?: boolean; onClick?: () => void }) => (
     <button type="button" disabled={disabled} onClick={onClick}>
@@ -60,13 +50,15 @@ vi.mock('@/components/core/IconButton', () => ({
     disabled,
     onClick,
     'aria-label': ariaLabel,
+    label,
   }: {
     children: ReactNode;
     disabled?: boolean;
     onClick?: () => void;
     'aria-label'?: string;
+    label?: string;
   }) => (
-    <button type="button" aria-label={ariaLabel} disabled={disabled} onClick={onClick}>
+    <button type="button" aria-label={ariaLabel ?? label} disabled={disabled} onClick={onClick}>
       {children}
     </button>
   ),
@@ -232,12 +224,6 @@ describe('SortableMenuItem editing', () => {
     });
   };
 
-  const clickAt = async (selector: string, index: number) => {
-    await act(async () => {
-      container.querySelectorAll<HTMLButtonElement>(selector).item(index)?.click();
-    });
-  };
-
   const clickText = async (text: string) => {
     const button = Array.from(container.querySelectorAll<HTMLButtonElement>('button')).find(
       (candidate) => candidate.textContent === text,
@@ -245,12 +231,36 @@ describe('SortableMenuItem editing', () => {
     await act(async () => button?.click());
   };
 
+  it('keeps the drag activator outside the title trigger and trailing actions', async () => {
+    await render({
+      item: {
+        id: 'root',
+        label: 'Root',
+        linkType: 'custom',
+        url: '/root',
+        children: [{ id: 'child', label: 'Child', linkType: 'custom', url: '/child' }],
+      },
+      onUpdate: vi.fn(),
+      onUpdateChild: vi.fn(),
+    });
+    const handle = container.querySelector<HTMLButtonElement>('button[aria-label="aria.reorder"]');
+    const header = container.querySelector('[data-disclosure] > div');
+    const controls = Array.from(header?.querySelectorAll<HTMLButtonElement>('button') ?? []);
+    expect(controls[0]).toBe(handle);
+    expect(controls[1]?.hasAttribute('data-accordion-control')).toBe(true);
+    expect(controls.at(-1)?.getAttribute('aria-label')).toBe('actions.delete Root');
+    expect(controls[1]?.contains(handle)).toBe(false);
+    await click('[data-accordion-control]');
+    expect(container.querySelector('[data-accordion-control]')?.getAttribute('aria-expanded')).toBe('true');
+    expect(container.textContent).toContain('Child');
+  });
+
   it('saves a root label edit over the latest peer URL, visibility, and tab setting', async () => {
     const onUpdate = vi.fn();
     const item: MenuItem = { id: 'root', label: 'Original', linkType: 'custom', url: '/original' };
     const props = { item, onUpdate, onUpdateChild: vi.fn() };
     await render(props);
-    await click('button[aria-label="actions.edit"]');
+    await click('button[aria-label="actions.edit Original"]');
 
     const label = container.querySelector<HTMLInputElement>('[data-testid="labelPlaceholder"]');
     expect(label).not.toBeNull();
@@ -289,8 +299,9 @@ describe('SortableMenuItem editing', () => {
     };
     const props = { item: parent, onUpdate: vi.fn(), onUpdateChild };
     await render(props);
-    await click('button[aria-label="Expand submenu"]');
-    await clickAt('button[aria-label="actions.edit"]', 1);
+    await click('[data-accordion-control]');
+    const childTrigger = container.querySelectorAll<HTMLButtonElement>('[data-accordion-control]')[1];
+    await act(async () => childTrigger?.click());
 
     const linkType = container.querySelector<HTMLSelectElement>('[data-testid="link-type-select"]');
     expect(linkType).not.toBeNull();
@@ -350,7 +361,9 @@ describe('SortableMenuItem editing', () => {
     const item: MenuItem = { id: 'root', label: 'Original', linkType: 'custom', url: '/original' };
     const props = { item, onUpdate, onUpdateChild: vi.fn() };
     await render(props);
-    await click('button[aria-label="actions.edit"]');
+    await click('[data-accordion-control]');
+    const childTrigger = container.querySelectorAll<HTMLButtonElement>('[data-accordion-control]')[1];
+    await act(async () => childTrigger?.click());
 
     const latestItem = { ...item, label: 'Peer label' };
     await render({ ...props, item: latestItem });

@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 
-import { MantineProvider } from '@mantine/core';
-import { theme } from '@/theme';
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { readFileSync } from 'node:fs';
@@ -26,9 +25,9 @@ describe('root error fallback', () => {
     const retry = vi.fn();
     await act(async () =>
       root!.render(
-        <MantineProvider theme={theme} env="test">
+        <DesignSystemProvider>
           <RootErrorPageView locale="ko" onRetry={retry} />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       ),
     );
     expect(container.querySelector('h1')?.textContent).toBe(messages.ko.titles['500']);
@@ -50,6 +49,8 @@ describe('root error fallback', () => {
         login: catalogue.common.actions.backToLogin,
       });
       expect(Object.values(messages[locale].titles).every((title) => title.length > 0)).toBe(true);
+      // In-layout error surfaces read the same copy from the client catalogue's errorPage namespace.
+      expect(catalogue.errorPage).toEqual(messages[locale]);
     }
   });
 });

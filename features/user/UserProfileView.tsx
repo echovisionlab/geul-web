@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { useDisclosure } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
 import { UserProfileView as UserProfileFeatureView, type UserProfileSocialLink } from '@/features/user/ui/UserProfile';
 import { banUserAction, deleteUserAction, unbanUserAction, updateUserAction } from '@/lib/actions/user';
-import { PLATFORM_CONFIGS, type SocialLinks } from '@/lib/types/common/social-links';
+import type { SocialLinkDisplayViewModel } from '@/features/social-links/ui/SocialLinksDisplayView';
+import type { SocialLinks } from '@/lib/types/common/social-links-model';
 import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
-import { getDisplaySocialLinkEntries } from '@/lib/utils/social-links';
 
 export interface UserProfileViewUser {
   id: string;
@@ -28,8 +28,20 @@ export interface UserProfileViewUser {
   deleted?: boolean;
 }
 
+export interface UserProfileBindings {
+  banUserAction: typeof banUserAction;
+  deleteUserAction: typeof deleteUserAction;
+  unbanUserAction: typeof unbanUserAction;
+  updateUserAction: typeof updateUserAction;
+}
+const defaultBindings: UserProfileBindings = { banUserAction, deleteUserAction, unbanUserAction, updateUserAction };
 export interface UserProfileViewProps {
   user: UserProfileViewUser;
+  /** `user.social_links` prepared on the server by `prepareSocialLinksDisplay`. */
+  socialLinkEntries: SocialLinkDisplayViewModel[];
+  bindings?: UserProfileBindings;
+  refresh?: () => void;
+  navigate?: (href: string) => void;
 }
 
 interface UserActionResult {
@@ -37,7 +49,13 @@ interface UserActionResult {
   error?: string;
 }
 
-export function UserProfileView({ user }: UserProfileViewProps) {
+export function UserProfileView({
+  user,
+  socialLinkEntries,
+  bindings = defaultBindings,
+  refresh,
+  navigate,
+}: UserProfileViewProps) {
   const t = useTranslations('userProfile');
   const tCommon = useTranslations('common');
   const tSocialLinks = useTranslations('socialLinks');
@@ -53,67 +71,70 @@ export function UserProfileView({ user }: UserProfileViewProps) {
 
   const refreshProfile = () => {
     void queryClient.invalidateQueries({ queryKey: ['user', 'profile', user.id] });
-    router.refresh();
+    (refresh ?? router.refresh)();
   };
 
   const updateUser = useMutation<void, Error, { id: string; role: string }>({
     mutationFn: async ({ id, role }) => {
-      await requireSuccessfulAction(updateUserAction(id, { role }));
+      await requireSuccessfulAction(bindings.updateUserAction(id, { role }));
     },
     onSuccess: () => {
-      notifications.show({ message: t('notifications.roleUpdated'), color: 'green' });
+      notifications.show({ message: t('notifications.roleUpdated'), tone: 'positive' });
       refreshProfile();
       roleModal.close();
     },
     onError: (error) => {
-      notifications.show({ message: error.message, color: 'red' });
+      notifications.show({ message: error.message, tone: 'danger' });
     },
   });
 
   const ban = useMutation<void, Error, { id: string; reason?: string }>({
     mutationFn: async ({ id, reason }) => {
-      await requireSuccessfulAction(banUserAction(id, reason));
+      await requireSuccessfulAction(bindings.banUserAction(id, reason));
     },
     onSuccess: () => {
-      notifications.show({ message: t('notifications.userBanned'), color: 'red' });
+      notifications.show({ message: t('notifications.userBanned'), tone: 'danger' });
       refreshProfile();
       banModal.close();
       setBanReason('');
     },
     onError: (error) => {
-      notifications.show({ message: error.message, color: 'red' });
+      notifications.show({ message: error.message, tone: 'danger' });
     },
   });
 
   const unban = useMutation<void, Error, { id: string }>({
     mutationFn: async ({ id }) => {
-      await requireSuccessfulAction(unbanUserAction(id));
+      await requireSuccessfulAction(bindings.unbanUserAction(id));
     },
     onSuccess: () => {
-      notifications.show({ message: t('notifications.userUnbanned'), color: 'green' });
+      notifications.show({ message: t('notifications.userUnbanned'), tone: 'positive' });
       refreshProfile();
     },
     onError: (error) => {
-      notifications.show({ message: error.message, color: 'red' });
+      notifications.show({ message: error.message, tone: 'danger' });
     },
   });
 
   const deleteUser = useMutation<void, Error, { id: string }>({
     mutationFn: async ({ id }) => {
-      await requireSuccessfulAction(deleteUserAction(id));
+      await requireSuccessfulAction(bindings.deleteUserAction(id));
     },
     onSuccess: () => {
-      notifications.show({ message: t('notifications.userDeleted'), color: 'red' });
+      notifications.show({ message: t('notifications.userDeleted'), tone: 'danger' });
       deleteModal.close();
-      router.push('/admin/users');
+      (navigate ?? router.push)('/admin/users');
     },
     onError: (error) => {
-      notifications.show({ message: error.message, color: 'red' });
+      notifications.show({ message: error.message, tone: 'danger' });
     },
   });
 
   const displayName = user.name?.trim() ?? '';
-  const socialLinks = useMemo(() => buildSocialLinks(user.social_links ?? {}), [user.social_links]);
+  const socialLinks = useMemo<UserProfileSocialLink[]>(
+    () => socialLinkEntries.map(({ key, url, label, platform, glyph }) => ({ key, href: url, label, platform, glyph })),
+    [socialLinkEntries],
+  );
   const joinedLabel = user.created_at ? `${t('joined')} ${dateTime.date(user.created_at)}` : null;
   const roleLabel =
     user.role === 'admin'
@@ -289,16 +310,4 @@ function getInitials(name: string) {
     .map((part) => part.charAt(0))
     .join('')
     .toUpperCase();
-}
-
-function buildSocialLinks(links: SocialLinks): UserProfileSocialLink[] {
-  return getDisplaySocialLinkEntries(links).map(({ key, platform, url }) => {
-    const config = PLATFORM_CONFIGS[platform];
-    return {
-      key,
-      href: url,
-      label: config.label,
-      platform,
-    };
-  });
 }

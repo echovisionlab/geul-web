@@ -1,16 +1,17 @@
 'use client';
+import { SupportingText } from '@/components/core/Typography';
+
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 
 import { useCallback, useEffect, useRef } from 'react';
-import type { HocuspocusProvider } from '@hocuspocus/provider';
 import type { Monaco } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import { useTranslations } from 'next-intl';
 import type * as Y from 'yjs';
-import { Stack, Text } from '@mantine/core';
-import { MonacoSourceEditor } from '@/features/editor/tiptap/code-editor';
+
+import { MonacoSourceEditor, type SourceEditorBehaviorOptions } from '@/features/editor/tiptap/code-editor';
 
 interface EmailLayoutEditorProps {
-  provider: HocuspocusProvider;
   doc: Y.Doc;
   isSynced?: boolean;
   initialContent?: string;
@@ -18,13 +19,9 @@ interface EmailLayoutEditorProps {
   onChange?: (content: string) => void;
 }
 
-const MONACO_OPTIONS: editor.IStandaloneEditorConstructionOptions = {
-  minimap: { enabled: false },
-  fontSize: 13,
+const MONACO_OPTIONS: SourceEditorBehaviorOptions = {
   lineNumbers: 'on',
   wordWrap: 'on',
-  scrollBeyondLastLine: false,
-  automaticLayout: true,
   tabSize: 2,
   // Keep raw {{variable}} placeholders byte-stable; Monaco's HTML formatter
   // rewrites them into invalid brace-separated output.
@@ -35,14 +32,13 @@ const MONACO_OPTIONS: editor.IStandaloneEditorConstructionOptions = {
 function LoadingPlaceholder() {
   const t = useTranslations('adminList.emailLayouts.detail');
   return (
-    <Stack align="center" justify="center" h="100%">
-      <Text c="dimmed">{t('states.loadingEditor')}</Text>
-    </Stack>
+    <DsLayoutStack align="center" justify="center" fill="block">
+      <SupportingText tone="secondary">{t('states.loadingEditor')}</SupportingText>
+    </DsLayoutStack>
   );
 }
 
 export function EmailLayoutEditor({
-  provider: _provider,
   doc,
   isSynced = false,
   initialContent,
@@ -192,7 +188,6 @@ export function EmailLayoutEditor({
 
   return (
     <MonacoSourceEditor
-      height="100%"
       language="html"
       value={doc.getText('html-content').toString() || initialContent || ''}
       modelPath={`inmemory://email-layout/${doc.clientID}.html`}
@@ -200,6 +195,7 @@ export function EmailLayoutEditor({
       readOnly={!editable}
       bordered={false}
       onMount={handleMount}
+      density="standard"
       editorOptions={MONACO_OPTIONS}
       loading={<LoadingPlaceholder />}
     />

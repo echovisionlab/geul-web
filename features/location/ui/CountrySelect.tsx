@@ -1,4 +1,7 @@
-import { Group, Text } from '@mantine/core';
+import { componentBindings } from '@/components/core/bindings';
+import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+
 import { Select, type SelectProps } from '@/components/core/Input';
 
 export interface CountrySelectOption {
@@ -18,25 +21,29 @@ export interface CountrySelectProps extends Omit<SelectProps, 'data' | 'renderOp
 export function CountrySelect({ options, noResultsLabel, ...props }: CountrySelectProps) {
   return (
     <Select
-      {...props}
+      {...componentBindings(props)}
       data={options}
+      getSearchText={(option) => {
+        const country = options.find((country) => country.value === option.value);
+        return [option.label, country?.name, country?.nativeName, country?.code].filter(Boolean).join(' ');
+      }}
       nothingFoundMessage={noResultsLabel}
       renderOption={({ option }) => {
         const country = option as CountrySelectOption;
         return (
-          <Group gap="xs" wrap="nowrap" justify="space-between">
-            <Group gap="xs" wrap="nowrap">
-              <Text span>{country.name}</Text>
-              <Text span size="sm" c="dimmed">
+          <DsLayoutInline gap="xs" wrap="nowrap" justify="between">
+            <DsLayoutInline gap="xs" wrap="nowrap">
+              <DsText as="span">{country.name}</DsText>
+              <DsText as="span" size="sm" tone="secondary">
                 {country.code}
-              </Text>
-            </Group>
+              </DsText>
+            </DsLayoutInline>
             {country.nativeName && country.nativeName !== country.name ? (
-              <Text span size="sm" c="dimmed">
+              <DsText as="span" size="sm" tone="secondary">
                 {country.nativeName}
-              </Text>
+              </DsText>
             ) : null}
-          </Group>
+          </DsLayoutInline>
         );
       }}
     />

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Anchor } from '@mantine/core';
+import { NavigationLink as Anchor } from '@/components/core/Navigation';
 
 /**
  * Parse markdown-style formatting in text and return ReactNode
@@ -18,7 +18,7 @@ export function parseMarkdown(text: string): ReactNode {
     {
       regex: /\[([^\]]+)\]\(([^)]+)\)/,
       render: (key, match) => (
-        <Anchor key={key} component="a" href={match[2]} target="_blank" inherit>
+        <Anchor key={key} href={match[2]} target="_blank" rel="noopener noreferrer" tone="inherit">
           {parseMarkdown(match[1])}
         </Anchor>
       ),

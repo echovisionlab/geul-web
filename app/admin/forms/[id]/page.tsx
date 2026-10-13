@@ -1,4 +1,5 @@
 'use client';
+import { LayoutStack as DsLayoutStack, LayoutGrid as DsLayoutGrid } from '@/components/core/Layout';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
@@ -6,7 +7,7 @@ import { useParams } from 'next/navigation';
 import { IconCalendar, IconCalendarMonth, IconCalendarWeek, IconChartBar } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { SimpleGrid, Stack } from '@mantine/core';
+
 import { PageLoader } from '@/features/site/PageLoader';
 import { StatCard } from '@/components/core/Section';
 import { getFormSubmissionStatsAction } from '@/lib/actions/form';
@@ -31,30 +32,30 @@ export default function AdminFormOverviewPage() {
   }
 
   return (
-    <Stack>
+    <DsLayoutStack>
       <QueryErrorAlert queries={[statsQuery]} />
-      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
+      <DsLayoutGrid columns={{ base: 2, sm: 4 }} gap="md">
         <StatCard
           label={t('totalSubmissions')}
           value={(stats?.totalSubmissions ?? 0).toLocaleString()}
-          icon={<IconChartBar size={20} />}
+          icon={IconChartBar}
         />
         <StatCard
           label={tCommonTimeRanges('today')}
           value={(stats?.submissionsToday ?? 0).toLocaleString()}
-          icon={<IconCalendar size={20} />}
+          icon={IconCalendar}
         />
         <StatCard
           label={tCommonTimeRanges('thisWeek')}
           value={(stats?.submissionsThisWeek ?? 0).toLocaleString()}
-          icon={<IconCalendarWeek size={20} />}
+          icon={IconCalendarWeek}
         />
         <StatCard
           label={tCommonTimeRanges('thisMonth')}
           value={(stats?.submissionsThisMonth ?? 0).toLocaleString()}
-          icon={<IconCalendarMonth size={20} />}
+          icon={IconCalendarMonth}
         />
-      </SimpleGrid>
-    </Stack>
+      </DsLayoutGrid>
+    </DsLayoutStack>
   );
 }

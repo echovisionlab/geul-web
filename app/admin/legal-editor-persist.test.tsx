@@ -37,36 +37,21 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: { show: mocks.notifications },
 }));
 
-vi.mock('@mantine/core', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@mantine/core')>();
-  return {
-    ...actual,
-    Box: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-    Divider: () => <hr />,
-    Group: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-    Modal: ({ opened, title, children }: { opened: boolean; title?: ReactNode; children?: ReactNode }) =>
-      opened ? (
-        <section data-testid="modal">
-          <h2>{title}</h2>
-          {children}
-        </section>
-      ) : null,
-    Stack: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-    Text: ({ children }: { children?: ReactNode }) => <span>{children}</span>,
-    Title: ({ children }: { children?: ReactNode }) => <h1>{children}</h1>,
-  };
-});
-
-vi.mock('@mantine/dates', () => ({
-  DateTimePicker: ({ onChange }: { onChange: (value: string | null) => void }) => (
-    <button type="button" data-testid="set-effective-date" onClick={() => onChange('2026-09-01T00:00:00.000Z')}>
-      set date
-    </button>
+vi.mock('@/components/core/Modal', () => ({
+  DialogActions: ({ children, leadingActions }: { children?: ReactNode; leadingActions?: ReactNode }) => (
+    <div>
+      {leadingActions}
+      {children}
+    </div>
   ),
+  ContentModal: ({ opened, children }: { opened: boolean; children?: ReactNode }) =>
+    opened ? <div data-testid="modal">{children}</div> : null,
+  ConfirmModal: ({ opened, title }: { opened: boolean; title?: ReactNode }) =>
+    opened ? <section role="alertdialog">{title}</section> : null,
 }));
 
 vi.mock('@/components/core/Alert', () => ({
@@ -87,6 +72,11 @@ vi.mock('@/components/core/Button', () => ({
 
 vi.mock('@/components/core/Input', () => ({
   SegmentedControl: () => null,
+  DateTimePicker: ({ onChange }: { onChange: (value: string) => void }) => (
+    <button type="button" data-testid="set-effective-date" onClick={() => onChange('2030-01-01T00:00:00Z')}>
+      Set date
+    </button>
+  ),
 }));
 
 vi.mock('@/features/editor/EditorHeader', () => ({

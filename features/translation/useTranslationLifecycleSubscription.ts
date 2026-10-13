@@ -97,6 +97,8 @@ export function useTranslationLifecycleSubscription({
           entityType: entityType ? (translationJobEntityTypeFilterValue(entityType) as RuntimeEntityType) : undefined,
           entityId,
           locale: targetLocale ?? undefined,
+          // Lifecycle events could not be delivered: refetch as after a reconnect.
+          onResync: () => void onReconnectRef.current?.(),
         }
       : undefined,
   );

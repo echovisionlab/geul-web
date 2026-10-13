@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "title": "Long-document table of contents review",
+  "scope": "Shared Core page-side rail and independently scrolling outline following direct Notion desktop inspection, with production post/page fixtures.",
+  "sourceTests": [
+    "components/core/TableOfContents/TableOfContents.test.tsx",
+    "components/core/TableOfContents/toc-rail.test.ts",
+    "components/core/Popover/Popover.test.tsx",
+    "components/core/OverlayBehavior.test.tsx",
+    "lib/toc-items.test.ts",
+    "features/post/PostViewContent.test.ts",
+    "features/policy/public-legal-page.test.tsx",
+    "features/page/PageView/PageContentView.test.tsx"
+  ],
+  "toolingTests": ["scripts/design-system"],
+  "checks": [
+    {
+      "name": "core-types",
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "components/core/tsconfig.type-test.json"
+      ]
+    },
+    {
+      "name": "toc-lint",
+      "command": [
+        "node",
+        "node_modules/eslint/bin/eslint.js",
+        "components/core/TableOfContents",
+        "stories/pages/PublicDocuments.stories.tsx",
+        "--max-warnings",
+        "0"
+      ]
+    },
+    {
+      "name": "toc-styles",
+      "command": [
+        "node",
+        "node_modules/stylelint/bin/stylelint.mjs",
+        "components/core/TableOfContents/TableOfContents.module.css",
+        "components/core/Overlay.module.css"
+      ]
+    }
+  ],
+  "build": {
+    "minify": false
+  },
+  "storybook": {
+    "url": "http://127.0.0.1:6010"
+  },
+  "criticalPaths": [
+    "components/core/TableOfContents",
+    "components/core/Popover",
+    "components/core/Disclosure",
+    "components/core/IconButton",
+    "components/core/Input",
+    "components/core/Overlay.module.css",
+    "features/navigation",
+    "lib/toc-items.ts",
+    "features/post/PostViewContent.tsx",
+    "features/page/PageView",
+    "features/policy",
+    "features/changelog",
+    "docs/design-system",
+    "stories",
+    "scripts/design-system"
+  ],
+  "manualNotes": "design/storybook/review-notes/toc-navigation.json",
+  "screenshots": [
+    "design/storybook/previews/toc-navigation/closed-ko.png",
+    "design/storybook/previews/toc-navigation/open-ko.png",
+    "design/storybook/previews/toc-navigation/scrolled-ko.png",
+    "design/storybook/previews/toc-navigation/selected-ko.png",
+    "design/storybook/previews/toc-navigation/reopened-ko.png",
+    "design/storybook/previews/toc-navigation/long-labels-dark-en.png",
+    "design/storybook/previews/toc-navigation/post-consumer-ko.png",
+    "design/storybook/previews/toc-navigation/page-consumer-ko.png",
+    "design/storybook/previews/toc-navigation/phone-ko.png",
+    "design/storybook/previews/toc-navigation/tablet-ko.png",
+    "design/storybook/previews/toc-navigation/footer-boundary-ko.png"
+  ],
+  "priorRuns": [],
+  "boundaries": [
+    "Production Core/Views use local fixtures. Browser evidence does not establish native VoiceOver/Orca or physical touch acceptance.",
+    "Decorative density is a Geul geometry choice. Every source heading remains in the scrolling list.",
+    "The existing three-or-fewer-headings and below-md omission boundaries remain."
+  ]
+}

@@ -3,11 +3,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { ImageDropzone } from '@/features/site/SiteAssetUploader/ImageDropzone';
 import type { ImageUploadAccept } from '@/components/core/ImageUpload';
 import { deleteSiteAssetAction, setSiteAssetAction } from '@/lib/actions/site-setting';
 import { getUploadSelectionMimeTypes, UPLOAD_CONFIGS } from '@/lib/constants/upload-config';
+import type { SiteAssetBindings } from '@/features/site/site-asset-bindings';
 import { useUpload } from '@/lib/hooks/useUpload';
 import { useUploadValidation } from '@/lib/hooks/useUploadValidation';
 import { SITE_ASSET_TO_UPLOAD_TYPE, type SiteAssetType } from '@/lib/types/upload/model';
@@ -51,9 +52,10 @@ export interface SiteAssetUploaderProps {
   currentUrl: string | null;
   /** Called after successful upload/delete to refresh data */
   onSuccess?: (ogGenerationRunId?: string) => void;
+  bindings?: SiteAssetBindings;
 }
 
-export function SiteAssetUploader({ type, currentUrl, onSuccess }: SiteAssetUploaderProps) {
+export function SiteAssetUploader({ type, currentUrl, onSuccess, bindings }: SiteAssetUploaderProps) {
   const t = useTranslations('adminSettings.site');
   const tCommon = useTranslations('common');
   const tCommonNotifications = useTranslations('common.notifications');
@@ -61,7 +63,9 @@ export function SiteAssetUploader({ type, currentUrl, onSuccess }: SiteAssetUplo
   const config = UPLOAD_CONFIGS[uploadType];
   const accept = getSiteAssetSelectionAccept(type, getUploadSelectionMimeTypes(uploadType));
   const { validateFile } = useUploadValidation();
-  const { uploadFile, isUploading } = useUpload(uploadType);
+  const uploadTransport = useUpload(uploadType);
+  const { isUploading } = uploadTransport;
+  const uploadFile = bindings?.uploadFile ?? uploadTransport.uploadFile;
   const preview = SITE_ASSET_PREVIEW[type];
   const label = t(`assets.${type}.label`);
   const description = t(`assets.${type}.description`);
@@ -93,32 +97,33 @@ export function SiteAssetUploader({ type, currentUrl, onSuccess }: SiteAssetUplo
   );
 
   const setAsset = useMutation({
-    mutationFn: (data: { type: SiteAssetType; fileId: string }) => setSiteAssetAction(data.type, data.fileId),
+    mutationFn: (data: { type: SiteAssetType; fileId: string }) =>
+      (bindings?.set ?? setSiteAssetAction)(data.type, data.fileId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       if (result.warning) {
-        notifications.show({ message: result.warning, color: 'orange' });
+        notifications.show({ message: result.warning, tone: 'warning' });
       } else {
-        notifications.show({ message: t('assets.uploaded', { label }), color: 'green' });
+        notifications.show({ message: t('assets.uploaded', { label }), tone: 'positive' });
       }
       onSuccess?.(result.ogGenerationRunId);
     },
   });
 
   const deleteAsset = useMutation({
-    mutationFn: (data: { type: SiteAssetType }) => deleteSiteAssetAction(data.type),
+    mutationFn: (data: { type: SiteAssetType }) => (bindings?.remove ?? deleteSiteAssetAction)(data.type),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       if (result.warning) {
-        notifications.show({ message: result.warning, color: 'orange' });
+        notifications.show({ message: result.warning, tone: 'warning' });
       } else {
-        notifications.show({ message: t('assets.removed', { label }), color: 'yellow' });
+        notifications.show({ message: t('assets.removed', { label }), tone: 'positive' });
       }
       setAssetUrl(null);
       onSuccess?.(result.ogGenerationRunId);
@@ -134,7 +139,7 @@ export function SiteAssetUploader({ type, currentUrl, onSuccess }: SiteAssetUplo
     // Validate before upload
     const validation = validateFile(file, uploadType);
     if (!validation.valid) {
-      notifications.show({ message: validation.error, color: 'red' });
+      notifications.show({ message: validation.error, tone: 'danger' });
       return;
     }
 
@@ -153,7 +158,7 @@ export function SiteAssetUploader({ type, currentUrl, onSuccess }: SiteAssetUplo
     } catch (error) {
       notifications.show({
         message: error instanceof Error ? error.message : tCommonNotifications('uploadFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     } finally {
       setUploading(false);

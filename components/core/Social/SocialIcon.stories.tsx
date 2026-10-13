@@ -1,5 +1,12 @@
+import {
+  LayoutGrid as DsLayoutGrid,
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import type { Meta, StoryObj } from '@storybook/nextjs';
-import { Anchor, Box, Group, SimpleGrid, Stack, Text } from '@mantine/core';
+import { NavigationLink as Anchor } from '@/components/core/Navigation';
+import { useTranslations } from 'next-intl';
 
 import { getSocialIconLabel, SocialIcon, type SocialPlatform } from './SocialIcon';
 import { SOCIAL_ICON_PLATFORMS } from './platforms';
@@ -20,13 +27,13 @@ const darkVariantPlatforms: SocialPlatform[] = [
 ];
 
 const meta: Meta<typeof SocialIcon> = {
-  title: 'Core/Social',
+  title: 'Core/Data Display/SocialIcon',
   component: SocialIcon,
   tags: ['core-social'],
   parameters: { layout: 'centered' },
   args: {
     platform: 'instagram',
-    size: 24,
+    size: 'xl',
     colorMode: 'currentColor',
   },
 };
@@ -36,64 +43,98 @@ type Story = StoryObj<typeof SocialIcon>;
 
 function ThemeAwareBrandIcons() {
   return (
-    <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="lg">
+    <DsLayoutGrid columns={{ base: 2, sm: 4 }} gap="lg">
       {darkVariantPlatforms.map((platform) => (
-        <Stack key={platform} gap={6} align="center">
-          <SocialIcon platform={platform} size={32} colorMode="brand" data-testid={`${platform}-theme-icon`} />
-          <Text size="xs">{getSocialIconLabel(platform)}</Text>
-        </Stack>
+        <DsLayoutStack key={platform} gap="xxs" align="center">
+          <SocialIcon platform={platform} size="xl" colorMode="brand" data-testid={`${platform}-theme-icon`} />
+          <DsText size="xs">{getSocialIconLabel(platform)}</DsText>
+        </DsLayoutStack>
       ))}
-    </SimpleGrid>
+    </DsLayoutGrid>
   );
 }
 
 export const RepresentativePlatforms: Story = {
   render: () => (
-    <Group gap="lg">
+    <DsLayoutInline gap="lg">
       {representativePlatforms.map((platform) => (
-        <Stack key={platform} gap={6} align="center">
-          <SocialIcon platform={platform} size={28} colorMode="brand" />
-          <Text size="xs">{getSocialIconLabel(platform)}</Text>
-        </Stack>
+        <DsLayoutStack key={platform} gap="xxs" align="center">
+          <SocialIcon platform={platform} size="xl" colorMode="brand" />
+          <DsText size="xs">{getSocialIconLabel(platform)}</DsText>
+        </DsLayoutStack>
       ))}
-    </Group>
+    </DsLayoutInline>
   ),
 };
 
 export const AllPlatforms: Story = {
   parameters: { layout: 'padded' },
   render: () => (
-    <SimpleGrid cols={{ base: 2, sm: 4, md: 6 }} spacing="lg" data-testid="all-platforms">
+    <DsLayoutGrid columns={{ base: 2, sm: 4, md: 6 }} gap="lg" data-testid="all-platforms">
       {SOCIAL_ICON_PLATFORMS.map((platform) => (
-        <Stack key={platform} gap={6} align="center" data-platform={platform}>
-          <SocialIcon platform={platform} size={26} colorMode="brand" />
-          <Text size="xs" ta="center">
+        <DsLayoutStack key={platform} gap="xxs" align="center" data-platform={platform}>
+          <SocialIcon platform={platform} size="xl" colorMode="brand" />
+          <DsText size="xs" align="center">
             {getSocialIconLabel(platform)}
-          </Text>
-        </Stack>
+          </DsText>
+        </DsLayoutStack>
       ))}
-    </SimpleGrid>
+    </DsLayoutGrid>
   ),
 };
 
-export const BrandColorsLight: Story = {
-  globals: { theme: 'light' },
+export const ThemeAwareBrandColors: Story = {
   parameters: { layout: 'padded' },
   render: () => <ThemeAwareBrandIcons />,
 };
 
-export const BrandColorsDark: Story = {
-  globals: { theme: 'dark' },
-  parameters: { layout: 'padded' },
-  render: () => <ThemeAwareBrandIcons />,
-};
+function InteractiveLink() {
+  const t = useTranslations('common.actions');
+  return (
+    <div style={{ padding: 'var(--geul-spacing-md)' }}>
+      <Anchor
+        href="https://bandcamp.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`${t('open')}: Bandcamp`}
+      >
+        <SocialIcon platform="bandcamp" size="xl" colorMode="hoverBrand" />
+      </Anchor>
+    </div>
+  );
+}
 
 export const AccessibleInteractiveLink: Story = {
+  render: () => <InteractiveLink />,
+};
+
+export const SharedSizeScale: Story = {
   render: () => (
-    <Box p="md">
-      <Anchor href="https://bandcamp.com" target="_blank" rel="noopener noreferrer" aria-label="Open Bandcamp">
-        <SocialIcon platform="bandcamp" size={32} colorMode="hoverBrand" />
-      </Anchor>
-    </Box>
+    <DsLayoutInline gap="lg" align="center">
+      {(['xs', 'sm', 'md', 'lg', 'xl'] as const).map((size) => (
+        <DsLayoutStack key={size} gap="xxs" align="center">
+          <SocialIcon platform="github" size={size} colorMode="brand" />
+          <DsText size="xs">{size}</DsText>
+        </DsLayoutStack>
+      ))}
+    </DsLayoutInline>
+  ),
+};
+
+/** Sign-in identities: Google keeps its four fixed segment colors in brand mode; currentColor draws one color. */
+export const SignInIdentities: Story = {
+  render: () => (
+    <DsLayoutInline gap="lg" align="center">
+      {(['brand', 'currentColor'] as const).map((colorMode) =>
+        (['google', 'github'] as const).map((platform) => (
+          <DsLayoutStack key={`${platform}-${colorMode}`} gap="xxs" align="center">
+            <SocialIcon platform={platform} size="xl" colorMode={colorMode} />
+            <DsText size="xs">
+              {platform} · {colorMode}
+            </DsText>
+          </DsLayoutStack>
+        )),
+      )}
+    </DsLayoutInline>
   ),
 };

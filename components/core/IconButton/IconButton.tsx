@@ -1,68 +1,267 @@
-import { forwardRef } from 'react';
-import { ActionIcon, createPolymorphicComponent, type ActionIconProps, type MantineSize } from '@mantine/core';
-import { resolveControlStyle, type ControlEmphasis, type ControlTone } from '../control-style';
-import classes from './IconButton.module.css';
+'use client';
 
-// ActionIcon's named sizes differ from Button's. Use controlSize in mixed action rows.
-const BUTTON_CONTROL_HEIGHTS: Record<MantineSize, string> = {
-  xs: '1.875rem',
-  sm: '2.25rem',
-  md: '2.625rem',
-  lg: '3.125rem',
-  xl: '3.75rem',
-};
+import {
+  forwardRef,
+  useCallback,
+  type ForwardedRef,
+  type DragEvent,
+  type ReactElement,
+  type ReactNode,
+  type RefAttributes,
+} from 'react';
+import { Button as AriaButton, Link as AriaLink, ProgressBar } from 'react-aria-components';
+import { ariaControlClick, controlNativeProps, type ControlNativeProps } from '../control-props';
+import { controlLinkRender } from '../control-render';
+import type { ControlEmphasis, ControlTone, ControlSize } from '../control-style';
+import {
+  navigationHref,
+  useNavigationClick,
+  useNavigationPrefetchHandlers,
+  type NavigationOptions,
+} from '../Navigation/navigation-events';
+import classes from '../Control.module.css';
+import spinnerClasses from '../Spinner.module.css';
+import {
+  resolveActionSize,
+  useActionRowSize,
+  useControlContrast,
+  useToolbarDensity,
+  type ControlContrast,
+} from '../control-context';
 
 export type IconButtonAccessibleName =
   | { label: string; 'aria-label'?: never; 'aria-labelledby'?: never }
   | { label?: never; 'aria-label': string; 'aria-labelledby'?: never }
   | { label?: never; 'aria-label'?: never; 'aria-labelledby': string };
-
-export type IconButtonProps = Omit<ActionIconProps, 'aria-label' | 'aria-labelledby' | 'color' | 'radius' | 'variant'> &
+export type IconButtonSize = ControlSize | 'chrome' | 'compact';
+interface IconButtonSharedProps extends Omit<ControlNativeProps, 'aria-label' | 'aria-labelledby' | 'aria-pressed'> {
+  children?: ReactNode;
+  count?: number;
+  contrast?: ControlContrast;
+  tone?: ControlTone;
+  emphasis?: ControlEmphasis;
+  shape?: 'square' | 'circle';
+  loading?: boolean;
+  disabled?: boolean;
+  printVisibility?: 'normal' | 'hidden';
+  placement?: 'inline' | 'overlay-start' | 'overlay-start-inside' | 'overlay-end' | 'overlay-end-inside';
+}
+/**
+ * A command chooses its tone and emphasis. A toggle reports `pressed`; Core then owns the
+ * neutral resting treatment and the persistent selected surface, so callers cannot pick a
+ * different tone or emphasis for the same pressed state.
+ */
+export type IconButtonPressState = { pressed?: undefined } | { pressed: boolean; tone?: never; emphasis?: never };
+/** Reorder geometry is owned by Core; action sizing cannot leak into a sensor handle. */
+type IconButtonGeometry =
+  | { interaction?: 'action'; size?: IconButtonSize; type?: 'button' | 'submit' | 'reset'; 'aria-pressed'?: never }
+  | {
+      interaction: 'drag-handle';
+      size?: never;
+      type?: 'button';
+      pressed?: never;
+      /** Sensor libraries report their own pressed state on the activator. */
+      'aria-pressed'?: ControlNativeProps['aria-pressed'];
+    };
+export type IconButtonActionProps = IconButtonSharedProps &
+  IconButtonGeometry &
+  IconButtonPressState &
   IconButtonAccessibleName & {
-    tone?: ControlTone;
-    emphasis?: ControlEmphasis;
-    shape?: 'square' | 'circle';
-    /** Match the height of a Core Button with the same size; overrides standalone size. */
-    controlSize?: MantineSize;
+    href?: never;
+    target?: never;
+    rel?: never;
+    download?: never;
+    replace?: never;
+    scroll?: never;
+    prefetch?: never;
+    onNavigate?: never;
   };
-
+export type IconButtonLinkProps = IconButtonSharedProps & {
+  interaction?: 'action';
+  size?: IconButtonSize;
+  pressed?: never;
+} & IconButtonAccessibleName &
+  NavigationOptions & { type?: never };
+export type IconButtonProps = IconButtonActionProps | IconButtonLinkProps;
+type IconButtonComponent = {
+  (props: IconButtonActionProps & RefAttributes<HTMLButtonElement>): ReactElement | null;
+  (props: IconButtonLinkProps & RefAttributes<HTMLAnchorElement>): ReactElement | null;
+};
 function IconButtonInner(
   {
-    tone = 'neutral',
-    emphasis = 'low',
+    tone: requestedTone = 'neutral',
+    contrast,
+    emphasis: requestedEmphasis = 'low',
+    pressed,
     shape = 'square',
+    size,
     label,
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,
-    className,
-    controlSize,
-    size,
+    children,
+    count,
+    loading = false,
+    disabled = false,
+    interaction = 'action',
+    printVisibility,
+    placement = 'inline',
     ...props
   }: IconButtonProps,
-  ref: React.ForwardedRef<HTMLButtonElement>,
+  ref: ForwardedRef<HTMLButtonElement | HTMLAnchorElement>,
 ) {
-  const style = resolveControlStyle(tone, emphasis);
-
-  return (
-    <ActionIcon
-      ref={ref}
-      {...props}
-      size={controlSize ? `calc(${BUTTON_CONTROL_HEIGHTS[controlSize]} * var(--mantine-scale))` : size}
-      color={style.color}
-      variant={style.variant}
-      radius={shape === 'circle' ? 'xl' : 0}
+  const { href, onClick, ...native } = props;
+  const toggle = interaction !== 'drag-handle' && href === undefined && typeof pressed === 'boolean';
+  // A toggle's resting and selected appearance belongs to Core, not to the caller's tone choice.
+  const tone = toggle ? 'neutral' : requestedTone;
+  const emphasis = toggle ? 'low' : requestedEmphasis;
+  // React Aria filters draggable from its DOM props. Preserve the native drag
+  // affordance on the actual control, including consumers' forwarded refs.
+  const controlRef = useCallback(
+    (element: HTMLButtonElement | HTMLAnchorElement | null) => {
+      if (element) {
+        element.draggable = !disabled && !loading && (native.draggable ?? interaction === 'drag-handle');
+      }
+      if (typeof ref === 'function') {
+        ref(element);
+      } else if (ref) {
+        ref.current = element;
+      }
+    },
+    [interaction, native.draggable, disabled, loading, ref],
+  );
+  const navigation = props as IconButtonLinkProps;
+  const navigationClick = useNavigationClick({ ...navigation, href: href ?? '' }, onClick);
+  const rowSize = useActionRowSize();
+  const inheritedContrast = useControlContrast();
+  const toolbarDensity = useToolbarDensity();
+  const resolvedSize =
+    interaction === 'drag-handle' ? 'compact' : resolveActionSize(size ?? 'xs', rowSize, toolbarDensity);
+  const prefetchHandlers = useNavigationPrefetchHandlers(
+    {
+      ...navigation,
+      href: href ?? '',
+      prefetch: href === undefined || disabled || loading ? false : navigation.prefetch,
+    },
+    props,
+  );
+  const shared = {
+    ...controlNativeProps(native),
+    className: classes.root,
+    'data-contrast': contrast ?? inheritedContrast,
+    'aria-label': ariaLabel ?? label,
+    'aria-labelledby': ariaLabelledBy,
+    'aria-busy': loading || undefined,
+    ...(toggle ? { 'aria-pressed': pressed } : interaction === 'action' ? { 'aria-pressed': undefined } : {}),
+    'data-tone': tone,
+    'data-emphasis': emphasis,
+    'data-shape': shape,
+    'data-control-size': resolvedSize,
+    'data-geul-control-toolbar-density': toolbarDensity,
+    'data-control-kind': 'icon',
+    'data-loading': loading || undefined,
+    'data-interaction': interaction,
+    'data-print-visibility': printVisibility,
+    'data-placement': placement,
+  };
+  if (count !== undefined && (!Number.isSafeInteger(count) || count < 0)) {
+    throw new RangeError('Core IconButton count must be a nonnegative safe integer');
+  }
+  const nameChannels = [label, ariaLabel, ariaLabelledBy].filter((name) => name !== undefined);
+  if (nameChannels.length !== 1 || typeof nameChannels[0] !== 'string' || !nameChannels[0].trim()) {
+    throw new TypeError('Core IconButton requires exactly one nonempty label, aria-label, or aria-labelledby');
+  }
+  const content = loading ? (
+    <ProgressBar
+      isIndeterminate
       aria-label={ariaLabel ?? label}
       aria-labelledby={ariaLabelledBy}
-      data-tone={tone}
-      data-emphasis={emphasis}
-      data-shape={shape}
-      data-control-size={controlSize}
-      className={[classes.root, className].filter(Boolean).join(' ')}
+      className={`${spinnerClasses.spinner} ${classes.spinner}`}
     />
+  ) : (
+    <>
+      {children}
+      {count ? (
+        <span className={classes.counter} aria-hidden>
+          {count > 99 ? '99+' : count}
+        </span>
+      ) : null}
+    </>
+  );
+  if (href !== undefined) {
+    return (
+      <AriaLink
+        {...shared}
+        ref={controlRef}
+        href={navigationHref(href)}
+        target={navigation.target}
+        rel={navigation.rel}
+        download={navigation.download}
+        routerOptions={{ replace: navigation.replace, scroll: navigation.scroll }}
+        // Link has no excludeFromTabOrder API. Its documented render hook preserves native tabIndex.
+        render={controlLinkRender({ title: native.title, tabIndex: native.tabIndex, pending: loading, disabled })}
+        isDisabled={disabled || loading}
+        onClick={navigationClick}
+        {...prefetchHandlers}
+      >
+        {content}
+      </AriaLink>
+    );
+  }
+  // A sensor handle is not a press action: its Space/Enter keys must bubble
+  // to the active document-level reorder sensor, including the drop key.
+  if (interaction === 'drag-handle') {
+    const onDragStart = (event: DragEvent<HTMLButtonElement>) => {
+      if (disabled || loading) {
+        event.preventDefault();
+        return;
+      }
+      const row = event.currentTarget.closest<HTMLElement>('[data-geul-reorder-row]');
+      if (row && event.dataTransfer.setDragImage) {
+        const bounds = row.getBoundingClientRect();
+        event.dataTransfer.setDragImage(row, event.clientX - bounds.left, event.clientY - bounds.top);
+      }
+      native.onDragStart?.(event);
+    };
+    return (
+      <button
+        {...shared}
+        ref={controlRef}
+        type="button"
+        disabled={disabled || loading}
+        data-disabled={disabled || loading || undefined}
+        data-pending={loading || undefined}
+        onClick={loading ? undefined : onClick}
+        onDragStart={onDragStart}
+      >
+        {content}
+      </button>
+    );
+  }
+  return (
+    <AriaButton
+      {...shared}
+      ref={controlRef}
+      type={loading ? 'button' : ((props as IconButtonActionProps).type ?? 'button')}
+      isDisabled={disabled}
+      excludeFromTabOrder={native.tabIndex === -1}
+      isPending={loading}
+      render={(domProps) => (
+        <button
+          {...domProps}
+          type={domProps.type === 'submit' ? 'submit' : domProps.type === 'reset' ? 'reset' : 'button'}
+          // React Aria filters `title` from DOM props; keep the accepted native advisory text.
+          title={native.title}
+          aria-busy={loading || undefined}
+          // Progress stays named separately; it must not be appended to the action name.
+          aria-labelledby={loading ? ariaLabelledBy : domProps['aria-labelledby']}
+        />
+      )}
+      onClick={ariaControlClick(loading ? undefined : onClick)}
+    >
+      {content}
+    </AriaButton>
   );
 }
-
-const IconButtonBase = forwardRef<HTMLButtonElement, IconButtonProps>(IconButtonInner);
+const IconButtonBase = forwardRef<HTMLButtonElement | HTMLAnchorElement, IconButtonProps>(IconButtonInner);
 IconButtonBase.displayName = 'IconButton';
-
-export const IconButton = createPolymorphicComponent<'button', IconButtonProps>(IconButtonBase);
+export const IconButton = IconButtonBase as IconButtonComponent;

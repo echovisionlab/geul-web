@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
-import { Title } from '@mantine/core';
-import { ProfileForm } from '@/features/my/ProfileForm';
+
+import { MyProfilePageView } from '@/features/my/MyProfilePageView';
 import { getMyProfile } from '@/lib/queries/my-account';
 import { getSession } from '@/lib/utils/session.server';
 
@@ -10,7 +9,7 @@ export default async function MyProfilePage() {
   if (!session?.user) {
     redirect('/login');
   }
-  const [tCommonLabels, profile] = await Promise.all([getTranslations('common.labels'), getMyProfile()]);
+  const profile = await getMyProfile();
   if (!profile) {
     redirect('/');
   }
@@ -20,21 +19,15 @@ export default async function MyProfilePage() {
   }
 
   return (
-    <>
-      <Title order={2} mb="md">
-        {tCommonLabels('profile')}
-      </Title>
-
-      <ProfileForm
-        initialUser={{
-          id: summary.id,
-          nickname: summary.nickname,
-          role: session.user.role,
-          bio: profile.bio ?? null,
-          website: profile.website ?? null,
-          socialLinks: profile.socialLinks,
-        }}
-      />
-    </>
+    <MyProfilePageView
+      initialUser={{
+        id: summary.id,
+        nickname: summary.nickname,
+        role: session.user.role,
+        bio: profile.bio ?? null,
+        website: profile.website ?? null,
+        socialLinks: profile.socialLinks,
+      }}
+    />
   );
 }

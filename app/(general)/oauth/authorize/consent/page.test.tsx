@@ -1,5 +1,6 @@
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { MantineProvider } from '@mantine/core';
+
 import { createTranslator } from 'next-intl';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import messages from '@/messages/en.json';
@@ -39,7 +40,7 @@ async function renderConsent(scopes: string[]) {
   const page = await McpConsentPage({
     searchParams: Promise.resolve({ consent_challenge: 'test-challenge' }),
   });
-  return renderToStaticMarkup(<MantineProvider env="test">{page}</MantineProvider>);
+  return renderToStaticMarkup(<DesignSystemProvider forceColorScheme="light">{page}</DesignSystemProvider>);
 }
 
 describe('MCP consent explanation', () => {

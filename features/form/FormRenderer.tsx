@@ -1,27 +1,34 @@
 'use client';
+import { SupportingText, Code } from '@/components/core/Typography';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Code, Modal, Progress, Stack, Text } from '@mantine/core';
-import { useDisclosure, useWindowEvent } from '@mantine/hooks';
+import { Progress } from '@/components/core/Progress';
+import { ContentModal } from '@/components/core/Modal';
+import { useDisclosure } from '@mantine/hooks';
 import type { FieldValue, FormValues } from '@/lib/types/form/guards';
 import type { BuiltForm } from '@/lib/types/form/model';
+import { loadPhoneField } from './FormField/load-phone-field';
 import { getFieldKey } from './FormField/utils';
 import { FormStep } from './FormStep';
-
 interface FormRendererProps<T extends FormValues = FormValues> {
   form: BuiltForm<T>;
   onSubmit?: (values: T) => void | Promise<void>;
   previewMode?: boolean;
   phoneDefaultCountry?: string | null;
+  stepHeadingLevel?: 2 | 3;
+  stepHeadingAriaLevel?: 2 | 3 | 4;
 }
-
 export function FormRenderer<T extends FormValues = FormValues>({
   form,
   onSubmit,
   previewMode = false,
   phoneDefaultCountry,
+  stepHeadingLevel = 2,
+  stepHeadingAriaLevel,
 }: FormRendererProps<T>) {
+  const tModalActions = useTranslations('common.actions');
   const t = useTranslations('formRenderer');
   const initialValues = (): T => {
     const values: Record<string, unknown> = {};
@@ -34,37 +41,47 @@ export function FormRenderer<T extends FormValues = FormValues>({
     }
     return values as T;
   };
-
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [navigationRequest, setNavigationRequest] = useState(0);
   const [values, setValues] = useState<T>(initialValues);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCurrentStepValid, setIsCurrentStepValid] = useState(false);
   const [previewModalOpened, { open: openPreviewModal, close: closePreviewModal }] = useDisclosure(false);
-
+  const hasPhoneField = form.schema.steps.some((step) => (step.fields ?? []).some((field) => field.type === 'tel'));
+  // Start loading the phone field (and `libphonenumber-js`) before a later step shows it.
+  useEffect(() => {
+    if (hasPhoneField) {
+      void loadPhoneField();
+    }
+  }, [hasPhoneField]);
   // Memoize visible steps to prevent unnecessary recalculations
   const visibleSteps = useMemo(() => form.getVisibleSteps(values), [form, values]);
-
   const currentStep = visibleSteps[currentStepIndex];
   const progress = visibleSteps.length > 0 ? ((currentStepIndex + 1) / visibleSteps.length) * 100 : 0;
-
   // Adjust currentStepIndex if it goes out of bounds when steps change
   useEffect(() => {
     if (currentStepIndex >= visibleSteps.length && visibleSteps.length > 0) {
       setCurrentStepIndex(visibleSteps.length - 1);
     }
   }, [visibleSteps.length, currentStepIndex]);
-
-  const setFieldValue = useCallback((name: string, value: FieldValue) => {
-    setValues((prev) => ({ ...prev, [name]: value }) as T);
+  const setFieldValue = useCallback((name: string, value: FieldValue | undefined) => {
+    setValues((prev) => {
+      const next: Record<string, FieldValue> = { ...prev };
+      if (value === undefined) {
+        delete next[name];
+      } else {
+        next[name] = value;
+      }
+      return next as T;
+    });
   }, []);
-
   const goToNext = useCallback(async () => {
     if (!currentStep || !isCurrentStepValid || isSubmitting) {
       return;
     }
-
     if (currentStepIndex < visibleSteps.length - 1) {
       setCurrentStepIndex((prev) => prev + 1);
+      setNavigationRequest((request) => request + 1);
     } else if (previewMode) {
       openPreviewModal();
     } else {
@@ -88,32 +105,43 @@ export function FormRenderer<T extends FormValues = FormValues>({
     previewMode,
     openPreviewModal,
   ]);
-
   const goToPrev = useCallback(() => {
     if (currentStepIndex > 0) {
       setCurrentStepIndex((prev) => prev - 1);
+      setNavigationRequest((request) => request + 1);
     }
   }, [currentStepIndex]);
-
-  useWindowEvent('keydown', (event) => {
-    if (event.key !== 'Enter' || event.shiftKey || !isCurrentStepValid || isSubmitting) {
-      return;
-    }
-
-    const activeElement = document.activeElement;
-    if (activeElement?.tagName !== 'TEXTAREA') {
-      event.preventDefault();
-      goToNext();
-    }
-  });
-
   if (!currentStep) {
     return null;
   }
-
   return (
     <>
-      <Stack gap="xl">
+      <DsLayoutStack
+        gap="xl"
+        aria-busy={isSubmitting}
+        onKeyDown={(event) => {
+          // Text-field submission is local to this renderer. Menus, buttons,
+          // multiline inputs, IME composition and other forms own their keys.
+          if (
+            event.defaultPrevented ||
+            event.key !== 'Enter' ||
+            event.shiftKey ||
+            event.ctrlKey ||
+            event.metaKey ||
+            event.altKey ||
+            event.nativeEvent.isComposing ||
+            !isCurrentStepValid ||
+            isSubmitting ||
+            !(event.target instanceof HTMLInputElement) ||
+            !['text', 'email', 'tel', 'number'].includes(event.target.type) ||
+            event.target.getAttribute('role') === 'combobox'
+          ) {
+            return;
+          }
+          event.preventDefault();
+          void goToNext();
+        }}
+      >
         {visibleSteps.length > 1 ? (
           <Progress
             value={progress}
@@ -127,6 +155,10 @@ export function FormRenderer<T extends FormValues = FormValues>({
 
         <FormStep
           step={currentStep}
+          navigationRequest={navigationRequest}
+          navigationLabel={t('progressAria', { current: currentStepIndex + 1, total: visibleSteps.length })}
+          headingLevel={stepHeadingLevel}
+          headingAriaLevel={stepHeadingAriaLevel}
           values={values}
           phoneDefaultCountry={phoneDefaultCountry}
           onChange={setFieldValue}
@@ -137,18 +169,22 @@ export function FormRenderer<T extends FormValues = FormValues>({
           isLast={currentStepIndex === visibleSteps.length - 1}
           isSubmitting={isSubmitting}
         />
-      </Stack>
+      </DsLayoutStack>
 
-      <Modal opened={previewModalOpened} onClose={closePreviewModal} title={t('preview.title')} size="lg">
-        <Stack gap="md">
-          <Text size="sm" c="dimmed">
-            {t('preview.description')}
-          </Text>
-          <Code block style={{ maxHeight: 400, overflow: 'auto' }}>
+      <ContentModal
+        opened={previewModalOpened}
+        onClose={closePreviewModal}
+        title={t('preview.title')}
+        size="large"
+        closeLabel={tModalActions('close')}
+      >
+        <DsLayoutStack gap="md">
+          <SupportingText tone="secondary">{t('preview.description')}</SupportingText>
+          <Code block scroll="standard" wrap="anywhere">
             {JSON.stringify(values, null, 2)}
           </Code>
-        </Stack>
-      </Modal>
+        </DsLayoutStack>
+      </ContentModal>
     </>
   );
 }

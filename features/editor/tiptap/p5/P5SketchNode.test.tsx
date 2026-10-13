@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, useEffect, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Editor, type NodeType, type TextType } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/react';
-import { MantineProvider } from '@mantine/core';
+
 import { redo, undo } from 'y-prosemirror';
 import type { EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { createTiptapWireExtensions } from '../wire-schema';
@@ -121,7 +122,7 @@ function mountReact(node: ReactNode) {
   const container = document.createElement('div');
   document.body.append(container);
   const root = createRoot(container);
-  act(() => root.render(<MantineProvider env="test">{node}</MantineProvider>));
+  act(() => root.render(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>));
   return {
     container,
     unmount() {
@@ -455,8 +456,19 @@ describe('authoring p5.js sketch resize', () => {
     act(() => capabilityTrigger?.click());
     const microphone = document.querySelector<HTMLInputElement>(
       `input[aria-label="${KOREAN_P5_SKETCH_LABELS.capabilityLabels.microphone}"]`,
-    );
+    )!;
     expect(microphone?.checked).toBe(true);
+    const capabilityPanel = document.querySelector('[data-p5-capability-panel]')!;
+    expect(capabilityPanel.querySelector('label label, button input, button button')).toBeNull();
+    const microphoneRow = capabilityPanel.querySelector('[data-p5-capability="microphone"]')!;
+    expect(microphoneRow.getAttribute('data-selected')).toBe('true');
+    const microphoneAction = microphoneRow.querySelector<HTMLButtonElement>('button')!;
+    act(() => microphoneAction.click());
+    await vi.waitFor(() => expect(sketchNode(editor!)?.attrs?.capabilities).toBe(''));
+    expect(microphone.checked).toBe(false);
+    act(() => microphoneAction.click());
+    await vi.waitFor(() => expect(sketchNode(editor!)?.attrs?.capabilities).toBe('microphone'));
+    expect(microphone.checked).toBe(true);
     expect(
       document.querySelector<HTMLInputElement>(
         `input[aria-label="${KOREAN_P5_SKETCH_LABELS.capabilityLabels.location}"]`,
@@ -510,6 +522,9 @@ describe('authoring p5.js sketch resize', () => {
       return element!;
     });
     expect(mounted.container.querySelector('[data-testid="p5-preview"]')).not.toBeNull();
+    const previewGroup = mounted.container.querySelector('[data-testid="p5-preview"] [role="group"]');
+    expect(previewGroup?.getAttribute('aria-label')).toBe(KOREAN_P5_SKETCH_LABELS.preview);
+    expect(previewGroup?.hasAttribute('aria-hidden')).toBe(false);
     const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
     act(() => input.dispatchEvent(enter));
     expect(enter.defaultPrevented).toBe(false);
@@ -683,6 +698,9 @@ describe('public p5.js sketch interaction', () => {
       />,
     );
     await vi.waitFor(() => expect(run).toHaveBeenCalledWith('function draw() { circle(4, 4, 4); }'));
+    const previewGroup = mounted.container.querySelector('[data-testid="p5-preview"] [role="group"]');
+    expect(previewGroup?.getAttribute('aria-label')).toBe(KOREAN_P5_SKETCH_LABELS.preview);
+    expect(previewGroup?.hasAttribute('aria-hidden')).toBe(false);
     act(() => {
       editor!.view.dispatch(editor!.state.tr.setSelection(NodeSelection.create(editor!.state.doc, 2)));
     });

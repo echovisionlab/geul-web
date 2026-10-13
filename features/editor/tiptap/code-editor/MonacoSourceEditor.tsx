@@ -4,6 +4,7 @@ import { lazy, Suspense, type ReactNode } from 'react';
 import type { Monaco } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import classes from './MonacoSourceEditor.module.css';
+import type { SourceEditorBehaviorOptions, SourceEditorDensity } from './source-editor-presentation';
 
 /** Monaco language id. JavaScript, TypeScript and local GLSL are first-class. */
 export type SourceEditorLanguage = 'javascript' | 'typescript' | 'glsl' | (string & {});
@@ -51,7 +52,9 @@ export interface MonacoSourceEditorProps {
   /** Stable, caller-owned identity such as `p5/<block-id>.js`. */
   modelPath: string;
   height?: number | string;
-  editorOptions?: editor.IStandaloneEditorConstructionOptions;
+  /** Shared text/density scale. No arbitrary font or padding overrides. */
+  density?: SourceEditorDensity;
+  editorOptions?: SourceEditorBehaviorOptions;
   loading?: ReactNode;
   bordered?: boolean;
   maxLength?: number;
@@ -74,7 +77,9 @@ export function MonacoSourceEditor(props: MonacoSourceEditorProps) {
       className={wrapperClassName}
       data-testid="tiptap-monaco-source-editor"
       data-source-editor="monaco"
+      dir="ltr"
       data-language={language}
+      data-density={props.density ?? 'standard'}
       style={{ height }}
     >
       <Suspense fallback={loading ?? <div className={classes.loading}>{ariaLabel}</div>}>

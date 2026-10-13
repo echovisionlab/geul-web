@@ -6,8 +6,8 @@ const meta = {
   component: UserInlineLinksView,
   args: {
     users: [
-      { id: '1', href: '/user/1', label: 'Writer One', avatarSrc: null, avatarFallback: 'W' },
-      { id: '2', href: '/user/2', label: 'Writer Two', avatarSrc: null, avatarFallback: 'W' },
+      { id: '1', href: '/user/1', label: 'Writer One', avatarSrc: null, avatarName: 'Writer One' },
+      { id: '2', href: '/user/2', label: 'Writer Two', avatarSrc: null, avatarName: 'Writer Two' },
     ],
   },
 } satisfies Meta<typeof UserInlineLinksView>;

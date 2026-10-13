@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Editor, type NodeType, type TextType } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/react';
-import { MantineProvider } from '@mantine/core';
+
 import { createTiptapWireExtensions } from '../wire-schema';
 import { executableBlockIdForPosition } from '../executable-source';
 import {
@@ -16,6 +17,7 @@ import {
   replaceShaderStageChannels,
   replaceShaderStageSource,
   selectShaderNode,
+  setShaderNodeTitle,
 } from './ShaderNode';
 import { ShaderPublicPreview } from './ShaderPublicPreview';
 import { DEFAULT_SHADER_PROGRAM, SHADER_STAGE_DEFINITIONS } from './shader-program';
@@ -206,6 +208,36 @@ describe('Shader source and wire contract', () => {
 });
 
 describe('Shader Monaco authoring boundary', () => {
+  it.each([1, 2])(
+    'retains selection at %s while a localized title changes and leaves the program intact',
+    (selectedPosition) => {
+      const editor = new Editor({
+        extensions: [
+          ...createTiptapWireExtensions(),
+          createShaderExtension({
+            labels: KOREAN_SHADER_LABELS,
+            authoringMode: { allowNeutralBlockEdits: false, allowLocalizedBlockEdits: true },
+          }),
+        ],
+        content: documentWithShader(DEFAULT_SHADER_FRAGMENT_SOURCE, 'preview'),
+      });
+      editor.view.dispatch(editor.state.tr.setSelection(NodeSelection.create(editor.state.doc, selectedPosition)));
+      const source = shader(editor)?.content;
+      const attributes = shader(editor)?.attrs;
+      for (const title of ['Edited executable title', '', '밤하늘 Shader']) {
+        expect(setShaderNodeTitle(editor, () => 2, title)).toBe(true);
+        expect(shader(editor)?.attrs).toEqual({ ...attributes, title });
+        expect(shader(editor)?.content).toEqual(source);
+        expect(editor.state.selection).toBeInstanceOf(NodeSelection);
+        expect(editor.state.selection.from).toBe(selectedPosition);
+      }
+      editor.setEditable(false);
+      expect(setShaderNodeTitle(editor, () => 2, 'Unavailable')).toBe(false);
+      expect(shader(editor)?.attrs.title).toBe('밤하늘 Shader');
+      editor.destroy();
+    },
+  );
+
   it('uses local view mode when the editable surface lacks neutral authority', () => {
     expect(resolveShaderViewMode(false, 'edit', 'preview')).toBe('preview');
     expect(resolveShaderViewMode(false, 'edit', 'source')).toBe('source');
@@ -317,9 +349,9 @@ describe('Shader Monaco authoring boundary', () => {
     const root = createRoot(element);
     await act(async () => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <AuthoringShader />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => setTimeout(resolve, 50));
     });
@@ -330,20 +362,37 @@ describe('Shader Monaco authoring boundary', () => {
     expect(preview.dataset.previewHeight).toBe('320');
     expect(preview.style.height).toBe('320px');
     expect(element.querySelector('[data-testid="shader-result-pane"]')).not.toBeNull();
-    const availableInputs = element.querySelector<HTMLDetailsElement>('[data-testid="shader-available-inputs"]');
-    expect(availableInputs?.open).toBe(false);
-    expect(availableInputs?.querySelector('summary')?.textContent).toContain('Available inputs');
+    const availableInputs = element.querySelector<HTMLElement>('[data-testid="shader-available-inputs"]');
+    const referenceTrigger = availableInputs?.querySelector<HTMLButtonElement>('[data-accordion-control]');
+    expect(referenceTrigger?.getAttribute('aria-expanded')).toBe('false');
+    expect(referenceTrigger?.textContent).toContain('Available inputs');
     expect(availableInputs?.textContent).toContain('mainImage');
     expect(availableInputs?.textContent).toContain('iResolution');
     const referenceMouseDown = new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0 });
     await act(async () => {
-      availableInputs?.querySelector('summary')?.dispatchEvent(referenceMouseDown);
+      referenceTrigger?.dispatchEvent(referenceMouseDown);
     });
     expect((editorInstance as Editor | null)?.state.selection).not.toBeInstanceOf(NodeSelection);
+    await act(async () => referenceTrigger?.click());
+    expect(referenceTrigger?.getAttribute('aria-expanded')).toBe('true');
+    expect(
+      availableInputs?.querySelector(`#${referenceTrigger?.getAttribute('aria-controls')}`)?.hasAttribute('hidden'),
+    ).toBe(false);
     const canvas = element.querySelector<HTMLCanvasElement>('[data-testid="shader-preview"] canvas');
     expect((canvas?.width ?? 0) / (canvas?.height ?? 1)).toBeCloseTo(16 / 9, 5);
     const resultPane = element.querySelector<HTMLElement>('[data-testid="shader-result-pane"]')!;
     const sourceEditor = element.querySelector<HTMLElement>('[data-testid="tiptap-monaco-source-editor"]')!;
+    const sourcePanel = element.querySelector<HTMLElement>('[role="tabpanel"]')!;
+    const stageTabs = [...element.querySelectorAll<HTMLElement>('[role="tab"]')];
+    const selectedStage = stageTabs.find((tab) => tab.getAttribute('aria-selected') === 'true')!;
+    expect(stageTabs).toHaveLength(9);
+    expect(stageTabs.every((tab) => document.getElementById(tab.getAttribute('aria-controls')!) === sourcePanel)).toBe(
+      true,
+    );
+    expect(document.getElementById(sourcePanel.getAttribute('aria-labelledby')!)).toBe(selectedStage);
+    expect(selectedStage.textContent).toBe('frag.glsl');
+    expect(sourcePanel.contains(sourceEditor)).toBe(true);
+    expect(sourcePanel.contains(availableInputs)).toBe(true);
     expect(resultPane.compareDocumentPosition(sourceEditor) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect([...element.querySelectorAll('button')].some((button) => button.getAttribute('aria-label') === 'Stop')).toBe(
       true,
@@ -381,12 +430,18 @@ describe('Shader Monaco authoring boundary', () => {
     );
     await act(async () => sourceButton?.click());
     expect(element.querySelector('[data-testid="tiptap-monaco-source-editor"]')).toBeNull();
+    expect(element.querySelector('[role="tabpanel"]')).toBeNull();
     expect(element.querySelector('[data-testid="shader-preview"]')).not.toBeNull();
     await act(async () => {
       sourceButton?.click();
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
     expect(element.querySelector('[data-testid="tiptap-monaco-source-editor"]')).not.toBeNull();
+    const restoredPanel = element.querySelector<HTMLElement>('[role="tabpanel"]')!;
+    const restoredSelected = element.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')!;
+    expect(restoredPanel.id).toBe(sourcePanel.id);
+    expect(document.getElementById(restoredSelected.getAttribute('aria-controls')!)).toBe(restoredPanel);
+    expect(document.getElementById(restoredPanel.getAttribute('aria-labelledby')!)).toBe(restoredSelected);
     expect(element.querySelector('[data-testid="shader-preview"]')?.getAttribute('data-status')).toBe('running');
     await act(async () => root.unmount());
     element.remove();
@@ -436,9 +491,9 @@ describe('Shader Monaco authoring boundary', () => {
     const root = createRoot(element);
     await act(async () => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <RecoveringAuthoringShader />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => setTimeout(resolve, 50));
     });
@@ -568,9 +623,9 @@ describe('Shader preview worker lifecycle', () => {
     const root = createRoot(element);
     await act(async () => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <ShaderPublicPreview program={programWithImage()} runtimeFactory={runtimeFactory} />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
@@ -631,9 +686,9 @@ describe('Shader preview worker lifecycle', () => {
     const root = createRoot(element);
     await act(async () => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <ReadOnlyShader />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => setTimeout(resolve, 50));
     });
@@ -666,7 +721,7 @@ describe('Shader preview worker lifecycle', () => {
     const root = createRoot(element);
     await act(async () => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <ShaderPublicPreview
             program={programWithImage()}
             active
@@ -674,14 +729,14 @@ describe('Shader preview worker lifecycle', () => {
             runtimeFactory={runtimeFactory}
             onError={() => undefined}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
     expect(canvases).toHaveLength(1);
     await act(async () => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <ShaderPublicPreview
             program={programWithImage()}
             active
@@ -689,14 +744,14 @@ describe('Shader preview worker lifecycle', () => {
             runtimeFactory={runtimeFactory}
             onError={() => undefined}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
     expect(canvases).toHaveLength(1);
     await act(async () => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <ShaderPublicPreview
             program={programWithImage()}
             active
@@ -704,7 +759,7 @@ describe('Shader preview worker lifecycle', () => {
             runtimeFactory={runtimeFactory}
             onError={() => undefined}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => setTimeout(resolve, 0));
     });

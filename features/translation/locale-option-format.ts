@@ -1,5 +1,7 @@
 'use client';
 
+import { formatLocaleCode } from '@/components/core/Typography/locale-code';
+
 import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { normalizeLocale } from '@/lib/i18n/locale';
@@ -10,13 +12,15 @@ export interface TranslationLocaleSelectOption {
   isSource?: boolean;
 }
 
-function getSourceTranslationLocaleOptionLabel(option: TranslationLocaleSelectOption): string {
-  const codeSuffix = ` (${option.value})`;
-  if (option.label.endsWith(codeSuffix)) {
-    return option.label.slice(0, -codeSuffix.length);
-  }
+export function getTranslationLocaleOptionName(option: TranslationLocaleSelectOption): string {
+  const suffix = option.label.match(/ \(([^()]+)\)$/);
+  return suffix && formatLocaleCode(suffix[1]) === formatLocaleCode(option.value)
+    ? option.label.slice(0, -suffix[0].length)
+    : option.label;
+}
 
-  return option.label;
+function getLocaleOptionLabel(option: TranslationLocaleSelectOption): string {
+  return getTranslationLocaleOptionName(option);
 }
 
 function isSourceTranslationLocaleOption(
@@ -58,8 +62,8 @@ export function useFormatTranslationLocaleOptionLabel() {
   return useCallback(
     (option: TranslationLocaleSelectOption, sourceLocale: string | null | undefined) =>
       isSourceTranslationLocaleOption(option, sourceLocale)
-        ? t('sourceOption', { locale: getSourceTranslationLocaleOptionLabel(option) })
-        : option.label,
+        ? t('sourceOption', { locale: getTranslationLocaleOptionName(option) })
+        : getLocaleOptionLabel(option),
     [t],
   );
 }

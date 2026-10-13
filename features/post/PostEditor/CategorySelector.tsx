@@ -5,7 +5,7 @@ import { unwrapQueryResult } from '@/lib/api/query-result';
 import { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { MultiSelectCombobox } from '@/features/post/MultiSelectCombobox';
 import { createCategoryAction, listCategoriesAction } from '@/lib/actions/category';
 import type { Category } from '@/lib/collab/post-meta';
@@ -59,7 +59,7 @@ export function CategorySelector({ postId, canEdit, isAdmin, categories: initial
     mutationFn: (name: string) => createCategoryAction({ name }),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       if (result.data) {
@@ -70,7 +70,7 @@ export function CategorySelector({ postId, canEdit, isAdmin, categories: initial
           slug: result.data.slug ?? '',
         };
         setCategoryIds([...categoryIds, newCategory.id]);
-        notifications.show({ message: tCommonNotifications('categoryCreated'), color: 'green' });
+        notifications.show({ message: tCommonNotifications('categoryCreated'), tone: 'positive' });
       }
     },
   });

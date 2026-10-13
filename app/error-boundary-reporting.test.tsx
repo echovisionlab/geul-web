@@ -2,7 +2,7 @@
 
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import GeneralError from './(general)/error';
 import AdminError from './admin/error';
@@ -15,13 +15,18 @@ vi.mock('@/lib/observability/client-render-failure', () => ({
   reportClientRenderFailure: mocks.report,
 }));
 
-vi.mock('next-intl', () => ({
-  useLocale: () => 'ko',
-  useTranslations: () =>
-    Object.assign((key: string) => key, {
-      rich: (key: string) => key,
-    }),
-}));
+vi.mock('next-intl', async () => {
+  const { default: errorPageMessages } = await import('@/lib/i18n/error-page-messages.json');
+  return {
+    useLocale: () => 'ko',
+    // In-layout boundaries read the active locale's errorPage copy from the client catalogue.
+    useMessages: () => ({ errorPage: errorPageMessages.ko }),
+    useTranslations: () =>
+      Object.assign((key: string) => key, {
+        rich: (key: string) => key,
+      }),
+  };
+});
 
 const mountedRoots: Array<{ root: ReturnType<typeof createRoot>; container: HTMLElement }> = [];
 
@@ -48,14 +53,14 @@ describe('application error boundary reporting', () => {
     const adminError = new Error('admin');
 
     await renderBoundary(
-      <MantineProvider env="test">
+      <DesignSystemProvider>
         <GeneralError error={generalError} reset={vi.fn()} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
     await renderBoundary(
-      <MantineProvider env="test">
+      <DesignSystemProvider>
         <AdminError error={adminError} reset={vi.fn()} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
 
     expect(mocks.report).toHaveBeenCalledWith('general', generalError);
@@ -65,9 +70,9 @@ describe('application error boundary reporting', () => {
   it('covers routes outside the general/admin groups with the common boundary', async () => {
     const error = Object.assign(new Error('upstream'), { status: 503 });
     await renderBoundary(
-      <MantineProvider env="test">
+      <DesignSystemProvider>
         <RootError error={error} reset={vi.fn()} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
     expect(document.querySelector('[data-error-code]')?.getAttribute('data-error-code')).toBe('503');
     expect(mocks.report).toHaveBeenCalledWith('general', error);

@@ -1,16 +1,29 @@
 'use client';
+import { ConfirmationDialog } from '@/features/confirmation';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { TextInput } from '@/components/core/Input';
-import { ConfirmModal, FormModal } from '@/components/core/Modal';
+import { FormModal } from '@/components/core/Modal';
 import { createSeriesAction, deleteSeriesAction } from '@/lib/actions/series';
 import { useSeriesModal } from './SeriesModalContext';
 
-export function SeriesModals() {
+export interface SeriesModalsProps {
+  createAction?: typeof createSeriesAction;
+  deleteAction?: typeof deleteSeriesAction;
+  onCreated?: (id: string) => void;
+  onDeleted?: () => void;
+}
+export function SeriesModals({
+  createAction = createSeriesAction,
+  deleteAction = deleteSeriesAction,
+  onCreated,
+  onDeleted,
+}: SeriesModalsProps = {}) {
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
   const tCommonNotifications = useTranslations('common.notifications');
@@ -38,23 +51,32 @@ export function SeriesModals() {
   const handleCreate = async () => {
     setCreateLoading(true);
     try {
-      const result = await createSeriesAction({
+      const result = await createAction({
         title: createTitle,
         description: createDescription || undefined,
       });
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tCommonNotifications('seriesCreated'), color: 'green' });
+      notifications.show({ message: tCommonNotifications('seriesCreated'), tone: 'positive' });
       if (result.data) {
+        if (onCreated) {
+          closeCreate();
+          onCreated(result.data.id);
+          return;
+        }
         const href = `/admin/series/${result.data.id}`;
         startNavigation(() => {
           router.push(href);
         });
       } else {
         closeCreate();
-        router.refresh();
+        if (onDeleted) {
+          onDeleted();
+        } else {
+          router.refresh();
+        }
       }
     } finally {
       setCreateLoading(false);
@@ -67,14 +89,18 @@ export function SeriesModals() {
     }
     setDeleteLoading(true);
     try {
-      const result = await deleteSeriesAction(deletingSeries.id);
+      const result = await deleteAction(deletingSeries.id);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tPage('deleted'), color: 'red' });
+      notifications.show({ message: tPage('deleted'), tone: 'positive' });
       closeDelete();
-      router.refresh();
+      if (onDeleted) {
+        onDeleted();
+      } else {
+        router.refresh();
+      }
     } finally {
       setDeleteLoading(false);
     }
@@ -110,12 +136,13 @@ export function SeriesModals() {
       </FormModal>
 
       {/* Delete Modal */}
-      <ConfirmModal
+      <ConfirmationDialog
+        intent="delete"
         opened={!!deletingSeries}
         onClose={closeDelete}
         onConfirm={handleDelete}
         title={tPage('deleteTitle')}
-        message={<Text>{tPage('deleteConfirm')}</Text>}
+        message={<DsText>{tPage('deleteConfirm')}</DsText>}
         confirmLabel={tCommon('actions.delete')}
         cancelLabel={tCommon('actions.cancel')}
         closeLabel={tCommon('actions.close')}

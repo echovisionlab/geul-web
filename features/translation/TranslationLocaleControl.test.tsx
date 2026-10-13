@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { TranslationLocaleControl } from './TranslationLocaleControl';
+import { HeaderDensityProvider } from '@/components/core/control-context';
 
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string, values?: Record<string, string>) => {
@@ -127,7 +129,7 @@ function render(node: React.ReactNode) {
   root = createRoot(container);
 
   act(() => {
-    root?.render(<MantineProvider>{node}</MantineProvider>);
+    root?.render(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>);
   });
 }
 
@@ -146,6 +148,28 @@ afterEach(() => {
 });
 
 describe('TranslationLocaleControl', () => {
+  it.each([
+    ['ko', '한국어'],
+    ['en', 'English'],
+    ['ja', '日本語'],
+    ['pt-BR', 'Português (Brasil)'],
+  ])('shows the native %s name in compact headers with source-aware naming', (locale, label) => {
+    render(
+      <HeaderDensityProvider density="compact">
+        <TranslationLocaleControl
+          variant="menu"
+          options={[{ value: locale, label: `${label} (${locale.toUpperCase()})` }]}
+          sourceLocale={locale}
+          value={locale}
+          onChange={() => {}}
+        />
+      </HeaderDensityProvider>,
+    );
+    const button = container?.querySelector('button');
+    expect(button?.textContent).toBe(label);
+    expect(button?.getAttribute('aria-label')).toBe(`Edit locale: ${label} (원문)`);
+    expect(button?.dataset.geulControlHeaderDensity).toBe('compact');
+  });
   it('returns null when there are no locale options', () => {
     render(<TranslationLocaleControl variant="menu" options={[]} sourceLocale="en" value="en" onChange={() => {}} />);
 
@@ -164,7 +188,8 @@ describe('TranslationLocaleControl', () => {
       />,
     );
 
-    expect(container?.textContent).toContain('한국어 (원문)');
+    expect(container?.querySelector('button')?.textContent).toBe('한국어');
+    expect(container?.querySelector('button')?.getAttribute('aria-label')).toContain('한국어 (원문)');
     expect(container?.textContent).not.toContain('Loading locale');
   });
 

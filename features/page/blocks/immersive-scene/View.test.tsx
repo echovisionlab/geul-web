@@ -1,6 +1,9 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
+import { invariantTokens } from '@/components/core/design-tokens';
+import { getThemeDefinition, themeIds } from '@/lib/theme/themes';
+import { themeVariables } from '@/theme';
 import {
   resolveAutoplayClockState,
   resolveAutoplayTimelineState,
@@ -20,7 +23,7 @@ import {
   resolveUnitPresentation,
 } from './scene-renderer-model';
 import { resolveScrollProgress, resolveUnitMeshAsset } from './SceneRenderer';
-import type { ImmersiveSceneUnit } from './schema';
+import { parseImmersiveSceneConfig, type ImmersiveSceneUnit } from './schema';
 import { ImmersiveSceneView } from './ViewRuntime';
 
 const testUnits: ImmersiveSceneUnit[] = [
@@ -47,6 +50,39 @@ const testUnits: ImmersiveSceneUnit[] = [
   },
 ];
 
+function colorChannels(color: string): [number, number, number, number] {
+  if (/^#[\da-f]{6}$/i.test(color)) {
+    return [1, 3, 5].map((offset) => parseInt(color.slice(offset, offset + 2), 16)).concat(1) as [
+      number,
+      number,
+      number,
+      number,
+    ];
+  }
+  const channels = color.match(/[\d.]+/g)?.map(Number);
+  if (!color.startsWith('rgb(') || !channels || channels.length < 3) {
+    throw new Error(`Unsupported contrast-test color: ${color}`);
+  }
+  return [channels[0], channels[1], channels[2], channels[3] === undefined ? 1 : channels[3] / 100];
+}
+
+function textContrast(text: string, background: string) {
+  const [red, green, blue, alpha] = colorChannels(text);
+  const backgroundChannels = colorChannels(background).slice(0, 3);
+  const foregroundChannels = [red, green, blue].map(
+    (channel, index) => channel * alpha + backgroundChannels[index] * (1 - alpha),
+  );
+  const luminance = (channels: number[]) =>
+    channels.reduce((value, channel, index) => {
+      const srgb = channel / 255;
+      return (
+        value + (srgb <= 0.04045 ? srgb / 12.92 : ((srgb + 0.055) / 1.055) ** 2.4) * [0.2126, 0.7152, 0.0722][index]
+      );
+    }, 0);
+  const values = [luminance(foregroundChannels), luminance(backgroundChannels)].sort((a, b) => b - a);
+  return (values[0] + 0.05) / (values[1] + 0.05);
+}
+
 describe('ImmersiveSceneView', () => {
   it('renders a static single-unit scene shell from one unit', () => {
     const html = renderToStaticMarkup(
@@ -64,9 +100,23 @@ describe('ImmersiveSceneView', () => {
     expect(html).toContain('data-playback="static"');
     expect(html).toContain('data-height-mode="intrinsic"');
     expect(html).toContain('data-scroll-owner="document"');
-    expect(html).toContain('--immersive-scene-intrinsic-height:720px');
+    expect(html).toContain('--_immersive-scene-intrinsic-height:720px');
+    expect(html).toContain(`background:${invariantTokens['paper-background']}`);
     expect(html).toContain('Single unit');
     expect(html).toContain('Static copy');
+  });
+
+  it.each(themeIds)('keeps default scene title and body readable in %s without authored color overrides', (themeId) => {
+    const config = parseImmersiveSceneConfig({});
+    const { base } = getThemeDefinition(themeId);
+    const variables = themeVariables(themeId);
+    const background = base === 'dark' ? config.darkBackgroundColor : config.backgroundColor;
+    const text = resolveSceneTextColors(base, config);
+    for (const color of [text.root, text.title, text.body]) {
+      const variable = /^var\((--[\w-]+)\)$/.exec(color)?.[1];
+      const resolved = variable ? variables[variable] : color;
+      expect(textContrast(resolved, background)).toBeGreaterThanOrEqual(4.5);
+    }
   });
 
   it('projects authored renderer controls onto the scene root for each color scheme', () => {
@@ -155,7 +205,7 @@ describe('ImmersiveSceneView', () => {
     expect(html).toContain('data-playback="scroll"');
     expect(html).toContain('data-height-mode="scroll"');
     expect(html).toContain('data-scroll-owner="document"');
-    expect(html).toContain('--immersive-scene-scroll-document-height:360vh');
+    expect(html).toContain('--_immersive-scene-scroll-document-height:360vh');
     expect(html).toContain('data-immersive-scene-unit="intro"');
     expect(html).toContain('data-immersive-scene-unit="goal"');
   });
@@ -454,14 +504,14 @@ describe('ImmersiveSceneView', () => {
     } as const;
 
     expect(resolveSceneTextColors('light', themeTextConfig)).toEqual({
-      root: 'var(--mantine-color-dark-9)',
-      title: 'var(--mantine-color-dark-9)',
-      body: 'var(--mantine-color-dark-6)',
+      root: 'var(--geul-paper-ink)',
+      title: 'var(--geul-paper-ink)',
+      body: 'var(--geul-paper-secondary)',
     });
     expect(resolveSceneTextColors('dark', themeTextConfig)).toEqual({
-      root: 'var(--mantine-color-gray-0)',
-      title: 'var(--mantine-color-gray-0)',
-      body: 'var(--mantine-color-gray-3)',
+      root: 'var(--geul-text-inverse-primary)',
+      title: 'var(--geul-text-inverse-primary)',
+      body: 'var(--geul-text-inverse-secondary)',
     });
     expect(
       resolveSceneTextColors('dark', {

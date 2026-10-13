@@ -1,10 +1,13 @@
 // @vitest-environment jsdom
 
+import enMessages from '@/messages/en.json';
+import { breakpointQuery } from '@/components/core/Layout/breakpoints';
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type AnchorHTMLAttributes, type HTMLAttributes, type ImgHTMLAttributes, type ReactNode } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { parsePostListProps } from './schema';
 import { PostListViewClient } from './ViewClientRuntime';
 
@@ -40,7 +43,7 @@ vi.mock('next/dynamic', async () => {
   return { default: () => ListCarouselRuntime };
 });
 
-vi.mock('@mantine/carousel', () => {
+vi.mock('@/components/core/Carousel', () => {
   const Carousel = ({
     children,
     withControls,
@@ -155,8 +158,10 @@ function render(node: ReactNode) {
 
   act(() => {
     root?.render(
-      <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
-        <MantineProvider>{node}</MantineProvider>
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
+          {node}
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
   });
@@ -210,7 +215,7 @@ describe('PostListViewClient', () => {
     await clickElement(authorLink ?? null);
     const gridCard = document.querySelector('[data-post-list-item-layout="grid"]');
     expect(gridCard).not.toBeNull();
-    expect(gridCard?.getAttribute('role')).toBeNull();
+    expect(gridCard?.getAttribute('role')).toBe('listitem');
     expect(gridCard?.querySelector('a[href="/posts/first-post"]')).not.toBeNull();
     expect(
       gridCard?.querySelector('a[href="/posts/first-post"] img[src="https://example.com/post.jpg"]'),
@@ -236,7 +241,7 @@ describe('PostListViewClient', () => {
 
     const listItem = document.querySelector('[data-post-list-item-layout="list"]');
     expect(listItem).not.toBeNull();
-    expect(listItem?.getAttribute('role')).toBeNull();
+    expect(listItem?.getAttribute('role')).toBe('listitem');
     expect(listItem?.querySelector('[data-post-list-list-media]')).not.toBeNull();
     expect(
       listItem?.querySelector(
@@ -304,7 +309,7 @@ describe('PostListViewClient', () => {
   });
 
   it('compresses hero carousel authors on mobile so the CTA can stay on its own row', () => {
-    installMatchMedia((query) => query === '(max-width: 48em)');
+    installMatchMedia((query) => query === breakpointQuery('sm'));
 
     render(
       <PostListViewClient
@@ -330,7 +335,7 @@ describe('PostListViewClient', () => {
       />,
     );
 
-    const desktopCarousel = document.querySelector('.post-list-block');
+    const desktopCarousel = document.querySelector('.post-list-block [data-with-controls]');
     expect(desktopCarousel?.getAttribute('data-with-controls')).toBe('true');
     expect(desktopCarousel?.getAttribute('data-with-indicators')).toBe('true');
 
@@ -341,7 +346,7 @@ describe('PostListViewClient', () => {
     root = null;
     container = null;
 
-    installMatchMedia((query) => query === '(max-width: 48em)');
+    installMatchMedia((query) => query === breakpointQuery('sm'));
 
     render(
       <PostListViewClient
@@ -350,7 +355,7 @@ describe('PostListViewClient', () => {
       />,
     );
 
-    const mobileCarousel = document.querySelector('.post-list-block');
+    const mobileCarousel = document.querySelector('.post-list-block [data-with-controls]');
     expect(mobileCarousel?.getAttribute('data-with-controls')).toBe('false');
     expect(mobileCarousel?.getAttribute('data-with-indicators')).toBe('true');
   });
@@ -365,7 +370,7 @@ describe('PostListViewClient', () => {
 
     const card = document.querySelector('[data-post-list-item-layout="cards"]');
     expect(card).not.toBeNull();
-    expect(card?.getAttribute('role')).toBeNull();
+    expect(card?.getAttribute('role')).toBe('listitem');
     expect(card?.querySelector('[data-post-list-card-media]')).not.toBeNull();
     expect(card?.querySelector('[data-post-list-card-content]')).not.toBeNull();
     expect(card?.querySelector('[data-post-list-card-meta]')).not.toBeNull();

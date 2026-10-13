@@ -1,7 +1,4 @@
 /* Header Section */
-.header {
-  align-items: flex-start;
-}
 
 /* Image Container */
 .imageContainer {
@@ -9,7 +6,7 @@
   min-width: 0;
 }
 
-@media (min-width: 48em) {
+@media (width >= $mantine-breakpoint-sm) {
   .imageContainer {
     flex: 0 0 40%;
     max-width: 400px;
@@ -43,31 +40,12 @@
   min-height: 44px;
 }
 
-/* Work Row */
-.workRow {
-  display: flex;
-  align-items: center;
-  gap: var(--mantine-spacing-md);
-  padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
-  text-decoration: none;
-  color: inherit;
-  border-top: 1px solid var(--mantine-color-default-border);
-}
-
-.workRow[data-first] {
-  border-top: none;
-}
-
-.workRow:hover {
-  background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
-}
-
 .workThumb {
   width: 48px;
   height: 48px;
   flex-shrink: 0;
   overflow: hidden;
-  background-color: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5));
+  background-color: light-dark(var(--geul-surface-active), var(--geul-surface-hover));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -80,25 +58,5 @@
 }
 
 /* Track Row */
-.trackRow {
-  padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
-  min-height: 44px;
-  border-top: 1px solid var(--mantine-color-default-border);
-}
-
-.trackRow[data-first] {
-  border-top: none;
-}
-
-.trackRow:hover {
-  background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
-}
 
 /* Section Header */
-.sectionHeader {
-  font-family: var(--font-mono);
-  font-size: var(--mantine-font-size-sm);
-  font-weight: 500;
-  color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-2));
-  margin-bottom: var(--mantine-spacing-sm);
-}

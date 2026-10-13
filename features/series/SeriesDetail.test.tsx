@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
+import '@testing-library/jest-dom/vitest';
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { registerEditorSave } from '@/lib/editor/editor-save-registry';
 import { SeriesDetail } from './SeriesDetail';
@@ -23,7 +25,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: mocks.routerPush }) }));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: mocks.notification } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: mocks.notification } }));
 vi.mock('@/components/core/Button', () => ({
   Button: ({ children, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) => (
     <button type="button" {...props}>
@@ -46,7 +48,11 @@ vi.mock('@/components/core/IconButton', () => ({
 }));
 vi.mock('@/components/core/Input', () => ({ Textarea: () => null, TextInput: () => null }));
 vi.mock('@/components/core/TextButton', () => ({
-  TextButton: ({ children }: { children: ReactNode }) => <span>{children}</span>,
+  TextButton: ({ children, href, id }: { children: ReactNode; href: string; id?: string }) => (
+    <a id={id} href={href}>
+      {children}
+    </a>
+  ),
 }));
 vi.mock('@/components/core/MediaPreviewGrid', () => ({ MediaPreviewGrid: () => null }));
 vi.mock('@/components/core/Section', () => ({
@@ -196,7 +202,7 @@ describe('SeriesDetail post ordering', () => {
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <MantineProvider env="test">
+          <DesignSystemProvider forceColorScheme="light">
             <SeriesDetail
               scope="admin"
               initialData={{
@@ -210,7 +216,7 @@ describe('SeriesDetail post ordering', () => {
                 managers: [],
               }}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </QueryClientProvider>,
       );
     });
@@ -279,7 +285,7 @@ describe('SeriesDetail post ordering', () => {
     });
 
     expect(mocks.updateSeries).not.toHaveBeenCalled();
-    expect(mocks.notification).toHaveBeenCalledWith({ message: 'saveFailed', color: 'red' });
+    expect(mocks.notification).toHaveBeenCalledWith({ message: 'saveFailed', tone: 'danger' });
   });
 
   it('optimistically reorders and restores the authoritative order when persistence fails', async () => {
@@ -296,7 +302,7 @@ describe('SeriesDetail post ordering', () => {
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <MantineProvider env="test">
+          <DesignSystemProvider forceColorScheme="light">
             <SeriesDetail
               scope="admin"
               initialData={{
@@ -310,7 +316,7 @@ describe('SeriesDetail post ordering', () => {
                 managers: [],
               }}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </QueryClientProvider>,
       );
     });
@@ -328,18 +334,26 @@ describe('SeriesDetail post ordering', () => {
     expect(mocks.usePostSeriesCollaboration).toHaveBeenCalledWith('series-1', 'en');
     expect(mocks.editorHeader).toHaveBeenCalledWith(expect.objectContaining({ isConnected: true, isSynced: true }));
 
+    const table = container.querySelector('table');
+    expect(table).toHaveAccessibleName('posts.title');
+    expect(
+      Array.from(container.querySelectorAll('thead th')).every((cell) => cell.getAttribute('scope') === 'col'),
+    ).toBe(true);
+    const firstMove = container.querySelector('[aria-label="posts.actions.moveDown"]');
+    expect(firstMove).toHaveAccessibleDescription('First post #1');
     const firstRow = Array.from(container.querySelectorAll('tbody tr')).find((row) =>
       row.textContent?.includes('First post'),
     );
     act(() => firstRow?.querySelector<HTMLButtonElement>('[aria-label="posts.actions.moveDown"]')?.click());
     await vi.waitFor(() => expect(renderedPostTitles()).toEqual(['Second post/second', 'First post/first']));
+    expect(container.querySelector('[role="status"]')).toHaveTextContent('First post: posts.columns.order #2');
 
     await act(async () => resolveReorder?.({ error: 'series_unavailable' }));
 
     await vi.waitFor(() => expect(renderedPostTitles()).toEqual(['First post/first', 'Second post/second']));
     expect(mocks.notification).toHaveBeenCalledWith({
       message: 'notifications.accessChanged',
-      color: 'red',
+      tone: 'danger',
     });
   });
 
@@ -351,7 +365,7 @@ describe('SeriesDetail post ordering', () => {
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <MantineProvider env="test">
+          <DesignSystemProvider forceColorScheme="light">
             <SeriesDetail
               scope="my"
               initialData={{
@@ -365,7 +379,7 @@ describe('SeriesDetail post ordering', () => {
                 managers: [],
               }}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </QueryClientProvider>,
       );
     });
@@ -413,7 +427,7 @@ describe('SeriesDetail post ordering', () => {
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <MantineProvider env="test">
+          <DesignSystemProvider forceColorScheme="light">
             <SeriesDetail
               scope="admin"
               initialData={{
@@ -427,7 +441,7 @@ describe('SeriesDetail post ordering', () => {
                 managers: [],
               }}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </QueryClientProvider>,
       );
     });
@@ -458,7 +472,7 @@ describe('SeriesDetail post ordering', () => {
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <MantineProvider env="test">
+          <DesignSystemProvider forceColorScheme="light">
             <SeriesDetail
               scope="admin"
               initialData={{
@@ -472,7 +486,7 @@ describe('SeriesDetail post ordering', () => {
                 managers: [],
               }}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </QueryClientProvider>,
       );
     });

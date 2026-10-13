@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server';
 import { mySectionToPath, normalizeMySections } from '@/features/user/UserShell/sections';
 import { getMySections } from '@/lib/queries/my-account';
 import { UserShell } from '@/features/user/UserShell/UserShell';
+import { ReactQueryProvider } from '@/lib/providers/ReactQueryProvider';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { getSettings } from '@/lib/queries/manifest';
 import { getRequestHeaders } from '@/lib/utils/header.server';
@@ -110,8 +111,10 @@ export default async function MyLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <UserShell user={session.user} sections={sections}>
-      {children}
-    </UserShell>
+    <ReactQueryProvider>
+      <UserShell user={session.user} sections={sections}>
+        {children}
+      </UserShell>
+    </ReactQueryProvider>
   );
 }

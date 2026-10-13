@@ -50,12 +50,12 @@ export function TiptapExternalVideoSelectionBubbleMenu({
 
   const shouldShow = useCallback(
     ({ editor: current }: { editor: Editor }) =>
-      !menu.isDismissed && current.isEditable && Boolean(resolveSelectedTiptapExternalVideo(current)),
-    [menu.isDismissed],
+      !menu.isSuppressed && current.isEditable && Boolean(resolveSelectedTiptapExternalVideo(current)),
+    [menu.isSuppressed],
   );
 
   const selected = resolveSelectedTiptapExternalVideo(editor);
-  if (menu.isDismissed || !editor.isEditable || !selected) {
+  if (menu.isSuppressed || !editor.isEditable || !selected) {
     return null;
   }
 

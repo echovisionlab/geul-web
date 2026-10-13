@@ -3,13 +3,11 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import satori, { type Font } from 'satori';
 import sharp from 'sharp';
+import { OG_IMAGE_WIDTH as OG_WIDTH, OG_IMAGE_HEIGHT as OG_HEIGHT } from '@/lib/constants/og-image';
 import type { ContentOgImageConfig, HomeOgImageConfig } from '@/lib/types/site-setting/config';
 import { DEFAULT_CONTENT_OG_CONFIG, DEFAULT_HOME_OG_CONFIG } from './og-config';
 
 export { DEFAULT_HOME_OG_CONFIG, DEFAULT_CONTENT_OG_CONFIG };
-
-const OG_WIDTH = 1200;
-const OG_HEIGHT = 630;
 
 // Gradient overlay for featured image (not configurable for simplicity)
 const GRADIENT_OVERLAY = 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%)';

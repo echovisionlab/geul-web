@@ -28,9 +28,11 @@ afterEach(() => {
 });
 
 function renderAction(props: Partial<React.ComponentProps<typeof AuthorizedDownloadAction>> = {}) {
-  host = document.createElement('div');
-  document.body.appendChild(host);
-  root = createRoot(host);
+  host ??= document.createElement('div');
+  if (!host.isConnected) {
+    document.body.appendChild(host);
+  }
+  root ??= createRoot(host);
   act(() => {
     root?.render(
       <TestProviders>
@@ -50,6 +52,81 @@ function renderAction(props: Partial<React.ComponentProps<typeof AuthorizedDownl
 }
 
 describe('AuthorizedDownloadAction', () => {
+  it('reflects changed file access and ignores an older file authorization response', async () => {
+    let resolve!: (result: {
+      access: { availability: FileDownloadAvailability; action: FileDownloadAction };
+      download: { url: string };
+    }) => void;
+    const authorize = vi.fn(
+      () =>
+        new Promise<{
+          access: { availability: FileDownloadAvailability; action: FileDownloadAction };
+          download: { url: string };
+        }>((next) => {
+          resolve = next;
+        }),
+    );
+    const navigate = vi.fn();
+    renderAction({ authorize, navigate });
+    await act(async () => {
+      host?.querySelector<HTMLButtonElement>('button')?.click();
+      await Promise.resolve();
+    });
+    renderAction({
+      entityId: 'post-2',
+      availability: FileDownloadAvailability.UNAVAILABLE,
+      action: FileDownloadAction.NONE,
+      authorize,
+      navigate,
+    });
+    expect(host?.querySelector('button')).toBeNull();
+    await act(async () => {
+      resolve({
+        access: { availability: FileDownloadAvailability.AVAILABLE, action: FileDownloadAction.DOWNLOAD },
+        download: { url: '/old-file.wav' },
+      });
+      await Promise.resolve();
+    });
+    expect(navigate).not.toHaveBeenCalled();
+    expect(host?.querySelector('button')).toBeNull();
+    expect(host?.querySelector('[role="status"]')?.textContent).toBe('Unavailable');
+  });
+
+  it.each(['button', 'icon'] as const)(
+    'connects authorization failures to the %s control and permits an independent retry',
+    async (presentation) => {
+      const authorize = vi
+        .fn()
+        .mockRejectedValueOnce(new Error('Connection failed'))
+        .mockResolvedValueOnce({
+          access: { availability: FileDownloadAvailability.AVAILABLE, action: FileDownloadAction.DOWNLOAD },
+          download: { url: '/recording.wav' },
+        });
+      const navigate = vi.fn();
+      renderAction({ presentation, authorize, navigate });
+      const button = host?.querySelector<HTMLButtonElement>('button');
+      const originalLabel = button?.getAttribute('aria-label');
+      const originalText = button?.textContent;
+      await act(async () => {
+        button?.click();
+        await Promise.resolve();
+      });
+      const errorId = button?.getAttribute('aria-describedby');
+      const alert = errorId ? document.getElementById(errorId) : null;
+      expect(alert?.getAttribute('role')).toBe('alert');
+      expect(alert?.textContent).toBe('The download could not be authorized. Try again.');
+      expect(button?.getAttribute('aria-label')).toBe(originalLabel);
+      expect(button?.textContent).toBe(originalText);
+      await act(async () => {
+        button?.click();
+        await Promise.resolve();
+      });
+      expect(authorize).toHaveBeenCalledTimes(2);
+      expect(navigate).toHaveBeenCalledWith('/recording.wav');
+      expect(button?.hasAttribute('aria-describedby')).toBe(false);
+    },
+  );
+
   it('uses a fresh Post response download ref without calling File authorization', async () => {
     const authorize = vi.fn();
     const navigate = vi.fn();

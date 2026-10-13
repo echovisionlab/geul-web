@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { MyArtistsDataTable, type MyArtistsDataTableLabels, type MyArtistsDataTableProps } from './MyArtistsDataTable';
 import type { MyArtistsTableRowViewModel } from './ui/MyArtistsTable';
 
@@ -17,6 +18,7 @@ vi.mock('@/features/site/PageLoader', () => ({
 
 const labels: MyArtistsDataTableLabels = {
   title: 'Artists',
+  image: 'Image',
   name: 'Name',
   status: 'Status',
   created: 'Created',
@@ -30,9 +32,9 @@ const rows: MyArtistsTableRowViewModel[] = [
     name: 'Mina Park',
     slugLabel: '/mina-park',
     imageUrl: 'https://cdn.example.com/mina.jpg?w=96',
-    avatarFallback: 'M',
     href: '/artists/artist-1?edit=true',
     statusLabel: 'Published',
+    statusTone: 'positive',
     createdLabel: '7/4/2026',
   },
 ];
@@ -69,9 +71,9 @@ afterEach(() => {
 function renderDataTable(overrides: Partial<MyArtistsDataTableProps> = {}) {
   act(() => {
     root.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <MyArtistsDataTable {...defaultProps} {...overrides} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
 }
@@ -80,7 +82,11 @@ describe('MyArtistsDataTable', () => {
   it('renders only preformatted row display values and the supplied edit href', () => {
     renderDataTable();
 
-    expect(container.querySelector('h2')?.textContent).toBe(labels.title);
+    expect(container.querySelector('h1')?.textContent).toBe(labels.title);
+    expect(container.querySelector('table')?.getAttribute('aria-label')).toBe(labels.title);
+    const imageHeader = container.querySelector('thead th:first-child');
+    expect(imageHeader).toHaveAccessibleName(labels.image);
+    expect(imageHeader?.getAttribute('style')).toContain('width: 50px');
     const link = container.querySelector<HTMLAnchorElement>('a[href="/artists/artist-1?edit=true"]');
     expect(link?.textContent).toBe('Mina Park');
     expect(container.textContent).toContain('/mina-park');
@@ -95,7 +101,8 @@ describe('MyArtistsDataTable', () => {
     expect(container.textContent).toContain(labels.empty);
 
     renderDataTable({ result: emptyResult, loading: true });
-    expect(container.querySelector('[role="status"]')?.textContent).toBe('Loading artists');
+    expect(container.querySelector('[role="status"]')?.textContent).toBe('aria.loadingMessage');
+    expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
     expect(container.textContent).not.toContain(labels.empty);
   });
 

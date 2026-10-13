@@ -38,7 +38,7 @@ function runBootstrap({
     document: {
       documentElement: {
         setAttribute: (name: string, value: string) => {
-          if (name === 'data-mantine-color-scheme') {
+          if (name === 'data-geul-theme') {
             htmlColorScheme = value;
           }
         },

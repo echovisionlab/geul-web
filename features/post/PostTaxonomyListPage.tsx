@@ -1,18 +1,22 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText, Heading as DsHeading } from '@/components/core/Typography';
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { hashKey, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Group, Stack, Text, Title } from '@mantine/core';
+
 import { DateTime } from '@/features/date-time/DateTime';
 import { TextButton } from '@/components/core/TextButton';
 import { DataTable } from '@/features/data-table/DataTable';
 import type { FilterFieldConfig } from '@/features/data-table/DataTableMultiFilter';
 import type { SortFieldConfig } from '@/features/data-table/DataTableMultiSort';
 import { UserInlineLinks } from '@/features/user/UserInlineLinks';
-import { listPublishedPostsByTaxonomy } from '@/lib/queries/post-browser';
+import { TAXONOMY_POSTS_INITIAL_QUERY } from '@/features/post/post-taxonomy-query';
+import type { listPublishedPostsByTaxonomy } from '@/lib/queries/post-browser';
 import type { ColumnDef } from '@/lib/types/common/data-table';
 import type { PaginatedQuery } from '@/lib/types/common/query';
+import type { PaginatedQueryResult } from '@/lib/types/repository/result';
 
 interface TaxonomyAuthor {
   id: string;
@@ -30,11 +34,21 @@ interface TaxonomyPostRow {
 type TaxonomyKind = 'category' | 'tag';
 
 interface PostTaxonomyListPageProps {
+  listAction?: typeof listPublishedPostsByTaxonomy;
   kind: TaxonomyKind;
   taxonomyId: string;
   name: string;
   description?: string | null;
+  /** Server-rendered result of `TAXONOMY_POSTS_INITIAL_QUERY`. */
+  initialResult?: PaginatedQueryResult<TaxonomyPostRow>;
+  initialResultUpdatedAt?: number;
 }
+
+const initialQueryHash = hashKey([TAXONOMY_POSTS_INITIAL_QUERY]);
+
+// The server renders the first page; the browser RPC client loads when the visitor changes the query.
+const listPublishedPostsByTaxonomyInBrowser: typeof listPublishedPostsByTaxonomy = async (input) =>
+  (await import('@/lib/queries/post-browser')).listPublishedPostsByTaxonomy(input);
 
 interface TaxonomyPostColumnLabels {
   title: string;
@@ -49,11 +63,11 @@ function getColumns(labels: TaxonomyPostColumnLabels): ColumnDef<TaxonomyPostRow
       key: 'title',
       header: labels.title,
       cell: (row) => (
-        <Stack gap={2}>
+        <DsLayoutStack gap="xxs">
           <TextButton href={`/posts/${row.slug || row.id}`} size="sm" weight="medium" appearance="default">
             {row.title || labels.untitled}
           </TextButton>
-        </Stack>
+        </DsLayoutStack>
       ),
     },
     {
@@ -66,9 +80,9 @@ function getColumns(labels: TaxonomyPostColumnLabels): ColumnDef<TaxonomyPostRow
 
         if (namedAuthors.length === 0) {
           return (
-            <Text size="sm" c="dimmed">
+            <DsText size="sm" tone="secondary">
               -
-            </Text>
+            </DsText>
           );
         }
 
@@ -81,15 +95,23 @@ function getColumns(labels: TaxonomyPostColumnLabels): ColumnDef<TaxonomyPostRow
       key: 'publishedAt',
       header: labels.published,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.publishedAt} />
-        </Text>
+        </DsText>
       ),
     },
   ];
 }
 
-export function PostTaxonomyListPage({ kind, taxonomyId, name, description }: PostTaxonomyListPageProps) {
+export function PostTaxonomyListPage({
+  kind,
+  taxonomyId,
+  name,
+  description,
+  listAction = listPublishedPostsByTaxonomyInBrowser,
+  initialResult,
+  initialResultUpdatedAt,
+}: PostTaxonomyListPageProps) {
   const tCommonEntities = useTranslations('common.entities');
   const tCommonLabels = useTranslations('common.labels');
   const tCommonMessages = useTranslations('common.messages');
@@ -120,31 +142,29 @@ export function PostTaxonomyListPage({ kind, taxonomyId, name, description }: Po
     () => [{ field: 'published_at', label: publishedLabel, type: 'date' }],
     [publishedLabel],
   );
-  const [query, setQuery] = useState<PaginatedQuery>({
-    page: 1,
-    pageSize: 20,
-    sorts: [{ field: 'published_at', direction: 'desc' }],
-  });
+  const [query, setQuery] = useState<PaginatedQuery>(TAXONOMY_POSTS_INITIAL_QUERY);
 
   const { data, isLoading } = useQuery({
     queryKey: ['posts', 'taxonomy', kind, taxonomyId, query],
     queryFn: () =>
-      listPublishedPostsByTaxonomy({
+      listAction({
         taxonomyType: kind,
         taxonomyId,
         query,
       }),
+    initialData: hashKey([query]) === initialQueryHash ? initialResult : undefined,
+    initialDataUpdatedAt: initialResultUpdatedAt,
   });
 
   return (
-    <Stack gap="md">
-      <Stack gap={4}>
-        <Title order={1}>{name}</Title>
-        <Text c="dimmed" size="sm">
+    <DsLayoutStack gap="md">
+      <DsLayoutStack gap="xxs">
+        <DsHeading level={1}>{name}</DsHeading>
+        <DsText tone="secondary" size="sm">
           {taxonomyLabel} · {postsLabel}
-        </Text>
-        {description && <Text c="dimmed">{description}</Text>}
-      </Stack>
+        </DsText>
+        {description && <DsText tone="secondary">{description}</DsText>}
+      </DsLayoutStack>
 
       <DataTable
         columns={columns}
@@ -157,14 +177,14 @@ export function PostTaxonomyListPage({ kind, taxonomyId, name, description }: Po
       >
         <DataTable.Toolbar>
           <DataTable.Search placeholder={tCommonPlaceholders('searchPosts')} />
-          <Group gap={4}>
+          <DsLayoutInline gap="xxs">
             <DataTable.MultiFilter fields={filterFields} />
             <DataTable.MultiSort fields={sortFields} />
-          </Group>
+          </DsLayoutInline>
         </DataTable.Toolbar>
         <DataTable.Content />
         <DataTable.Pagination />
       </DataTable>
-    </Stack>
+    </DsLayoutStack>
   );
 }

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { deleteReleaseArtworkAction, setReleaseArtworkAction } from '@/lib/actions/release';
 import { useUpload } from '@/lib/hooks/useUpload';
 import { UploadType } from '@/lib/types/upload/model';
@@ -33,7 +33,7 @@ export function ReleaseArtworkUploader({
     mutationFn: (fileId: string) => setReleaseArtworkAction(releaseId, fileId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       if (result.url) {
@@ -41,7 +41,7 @@ export function ReleaseArtworkUploader({
       }
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: t('label') }),
-        color: 'green',
+        tone: 'positive',
       });
     },
   });
@@ -50,13 +50,13 @@ export function ReleaseArtworkUploader({
     mutationFn: () => deleteReleaseArtworkAction(releaseId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       onArtworkChange(null);
       notifications.show({
         message: tCommon('messages.itemRemoved', { item: t('label') }),
-        color: 'yellow',
+        tone: 'positive',
       });
     },
   });
@@ -78,7 +78,7 @@ export function ReleaseArtworkUploader({
       });
       notifications.show({
         message: error instanceof Error ? error.message : tCommon('messages.uploadImageFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     } finally {
       setUploadProgress(0);

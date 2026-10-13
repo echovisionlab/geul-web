@@ -3,9 +3,9 @@
 import { useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useDisclosure, useMounted } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
-import { useCopyToClipboard } from '@/lib/hooks/useCopyToClipboard';
+import { notifications } from '@/components/core/Notification';
 import { useShareLinks } from '@/lib/hooks/useShareLinks';
+import { useShareLinkServices } from './ShareLinkServicesContext';
 import {
   EXPIRATION_PRESETS,
   type ExpirationPreset,
@@ -67,14 +67,14 @@ export function ShareLinkSection<T extends ShareEntityType>({
   const locale = useLocale();
   const t = useTranslations('shareLinks');
   const tActions = useTranslations('common.actions');
-  const tMessages = useTranslations('common.messages');
   const tPlaceholders = useTranslations('common.placeholders');
   const hydrated = useMounted();
-  const { copy } = useCopyToClipboard();
+  const services = useShareLinkServices();
   const { shareLinks, isLoading, isCreating, isDeleting, create, remove } = useShareLinks({
     entityType,
     entityId,
     initialData,
+    services,
   });
   const [formOpened, { open: openForm, close: closeForm }] = useDisclosure(false);
   const [label, setLabel] = useState('');
@@ -111,7 +111,7 @@ export function ShareLinkSection<T extends ShareEntityType>({
     noLinks: t('noLinks'),
     showLess: t('showLess'),
     showMore: t('showMore', { count: Math.max(shareLinks.length - maxVisibleLinks, 0) }),
-    copy: tActions('copy'),
+    copied: tActions('copied'),
     openInNewTab: tActions('openInNewTab'),
     delete: tActions('delete'),
     copyAria: t('copyAria'),
@@ -147,7 +147,7 @@ export function ShareLinkSection<T extends ShareEntityType>({
     try {
       const expiresAt = getExpiresAtFromPreset(preset, customDateTimestamp);
       if (expiresAt && (expiresAt.getTime() <= Date.now() || expiresAt.getTime() > maxDateTimestamp)) {
-        notifications.show({ message: t('expirationInvalid'), color: 'red' });
+        notifications.show({ message: t('expirationInvalid'), tone: 'danger' });
         return;
       }
       await create({
@@ -155,7 +155,7 @@ export function ShareLinkSection<T extends ShareEntityType>({
         expiresAt,
         password: password.trim() || undefined,
       });
-      notifications.show({ message: t('createSuccess'), color: 'green' });
+      notifications.show({ message: t('createSuccess'), tone: 'positive' });
       closeForm();
       setLabel('');
       setPreset('7d');
@@ -165,7 +165,7 @@ export function ShareLinkSection<T extends ShareEntityType>({
       const message = error instanceof Error ? error.message : t('createError');
       notifications.show({
         message,
-        color: 'red',
+        tone: 'danger',
       });
     }
   };
@@ -173,23 +173,14 @@ export function ShareLinkSection<T extends ShareEntityType>({
   const handleDelete = async (id: string) => {
     try {
       await remove(id);
-      notifications.show({ message: t('deleteSuccess'), color: 'yellow' });
+      notifications.show({ message: t('deleteSuccess'), tone: 'positive' });
     } catch (error) {
       const message = error instanceof Error ? error.message : t('deleteError');
       notifications.show({
         message,
-        color: 'red',
+        tone: 'danger',
       });
     }
-  };
-
-  const handleCopy = (id: string) => {
-    const link = linkViewModels.find((item) => item.id === id);
-    if (!link?.openUrl) {
-      notifications.show({ message: t('invalidUrl'), color: 'red' });
-      return;
-    }
-    copy(link.openUrl, { successMessage: tMessages('urlCopiedToClipboard') });
   };
 
   return (
@@ -219,7 +210,6 @@ export function ShareLinkSection<T extends ShareEntityType>({
       onCustomDateChange={setCustomDateTimestamp}
       onPasswordChange={setPassword}
       onCreate={handleCreate}
-      onCopy={handleCopy}
       onDelete={handleDelete}
       onToggleShowAll={() => setShowAll((current) => !current)}
     />

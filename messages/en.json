@@ -1,6 +1,7 @@
 {
   "common": {
     "actions": {
+      "move": "Move",
       "save": "Save",
       "saveChanges": "Save Changes",
       "create": "Create",
@@ -59,7 +60,7 @@
       "reply": "Reply",
       "insertVariable": "Insert variable",
       "acceptAll": "Accept all",
-      "rejectNonEssential": "Reject non-essential",
+      "rejectNonEssential": "Reject",
       "savePreferences": "Save preferences",
       "import": "Import",
       "export": "Export",
@@ -127,10 +128,7 @@
       "file": "File",
       "bio": "Bio",
       "realName": "Real name",
-      "countryCode": "Country code",
       "slug": "Slug",
-      "slugAutoModeEnabled": "Auto sync with title (click to disable)",
-      "slugAutoModeManual": "Manual mode (click to enable auto sync)",
       "submissions": "Submissions",
       "public": "Public",
       "location": "Location",
@@ -162,7 +160,6 @@
       "logoLight": "Light Logo",
       "logoDark": "Dark Logo",
       "joined": "Joined",
-      "subscribed": "Subscribed",
       "featured": "Featured",
       "order": "Order",
       "sortOrder": "Sort order",
@@ -177,7 +174,6 @@
       "minutes": "Minutes",
       "seconds": "Seconds",
       "time": "Time",
-      "generationInfo": "Generation info",
       "body": "Body",
       "content": "Content",
       "bodyPreview": "Body preview",
@@ -280,6 +276,7 @@
     },
     "messages": {
       "noUsersFound": "No users found",
+      "noAuthorsFound": "No authors found.",
       "noVersionsFound": "No versions found.",
       "typeAtLeast2Characters": "Type at least 2 characters",
       "itemCreated": "{item} created",
@@ -295,24 +292,22 @@
       "deleteItemConfirm": "Are you sure you want to delete this {item}? This action cannot be undone.",
       "deleteNamedItemConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
       "confirmDeleteSelectedCount": "Are you sure you want to delete {count, plural, one {# selected item} other {# selected items}}? This action cannot be undone.",
-      "deleteDraftVersionConfirm": "Are you sure you want to delete this draft version?",
       "confirmDeleteNamedRich": "Are you sure you want to delete <strong>{name}</strong>?",
-      "activeCount": "{count} active",
       "effectiveFromDate": "Effective from {date}",
       "noUpdateRecorded": "No update recorded",
-      "exportedEmails": "Exported {count, plural, one {# email} other {# emails}}",
       "formSubmittedSuccessfully": "Your response has been submitted successfully.",
       "userDate": "{user} · {date}",
       "scheduleActivationTitle": "Schedule Activation",
       "scheduleActivationDescription": "Select when this version should become active. Notification emails will be sent to all active accounts when scheduled.",
       "scheduleActivationNotice": "Scheduling will send notification emails to all active accounts with a preview link.",
-      "translationDetailUnavailable": "Failed to load detailed translation data. You can still edit the current public translation.",
       "invalidConfirmationLinkFromEmail": "Invalid confirmation link. Please use the link from your confirmation email.",
       "noPostsFound": "No posts found.",
       "noWorksFound": "No works found.",
-      "urlCopiedToClipboard": "URL copied to clipboard",
       "failedToLoad": "Failed to load data.",
-      "relatedItemsWillBeUnlinked": "{count} related items will be unlinked."
+      "relatedItemsWillBeUnlinked": "{count} related items will be unlinked.",
+      "noArtistsFound": "No artists found.",
+      "noLabelsFound": "No labels found.",
+      "noReleasesFound": "No releases found."
     },
     "notifications": {
       "categoryCreated": "Category created",
@@ -372,8 +367,6 @@
       "testEmail": "test@email.com",
       "testEmailExample": "test@example.com",
       "noReplyEmail": "noreply@example.com",
-      "translationLiveRowMissing": "No public translation exists for this locale yet. Saving here will create one immediately.",
-      "translationBodyPreviewUnavailable": "Body preview is not available.",
       "selectDateAndTime": "Select date and time",
       "streetAddress": "Street address",
       "regionSubdivision": "State/Province"
@@ -408,12 +401,11 @@
       "generating": "Generating...",
       "true": "True",
       "false": "False",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "toBeAnnounced": "TBA"
     },
     "roles": {
       "admin": "Admin",
-      "editor": "Editor",
-      "viewer": "Viewer",
       "author": "Author",
       "user": "User"
     },
@@ -445,6 +437,11 @@
       "unsubscribed": "Unsubscribed",
       "subscribed": "Subscribed",
       "onboardingPending": "Onboarding pending"
+    },
+    "motion": {
+      "pause": "Pause animation",
+      "resume": "Resume animation",
+      "readAllInformation": "Read all scene information"
     }
   },
   "shell": {
@@ -931,7 +928,6 @@
     },
     "mapThemes": {
       "empty": "No map themes found.",
-      "notFound": "Map theme not found.",
       "loadFailed": "Failed to load map themes.",
       "defaultDisabled": "This is already the default theme.",
       "deleteDisabled": {
@@ -939,9 +935,7 @@
         "last": "The last map theme cannot be deleted."
       },
       "reloadRequired": {
-        "title": "Reload required",
-        "message": "This theme was saved from a newer revision. Reload before continuing to edit.",
-        "action": "Reload"
+        "title": "Reload required"
       },
       "variants": {
         "light": "Light",
@@ -972,8 +966,7 @@
       },
       "editor": {
         "notifications": {
-          "defaultSet": "Theme set as default",
-          "variantRequired": "At least one variant (light or dark) is required"
+          "defaultSet": "Theme set as default"
         },
         "controls": {
           "map": {
@@ -1310,7 +1303,6 @@
     },
     "verification": {
       "loading": "Loading verification form...",
-      "redirecting": "Redirecting...",
       "startOver": "Start over",
       "errors": {
         "flowNotFound": "Verification flow not found or expired",
@@ -1373,21 +1365,14 @@
   "featuredImage": {
     "label": "Featured Image",
     "alt": "Featured image",
-    "hint": "Click image to replace",
     "cropTitle": "Crop Featured Image",
-    "empty": {
-      "editable": "Drop or click to upload ({ratio})",
-      "readOnly": "No image"
-    },
     "errors": {
       "fileRejected": "File rejected",
       "fileTooLarge": "File too large. Maximum size: {maxSize}",
       "invalidFileType": "Invalid file type"
     },
     "actions": {
-      "changeAria": "Change featured image",
-      "removeAria": "Remove featured image",
-      "remove": "Remove image"
+      "removeAria": "Remove featured image"
     }
   },
   "artistPage": {
@@ -1495,7 +1480,6 @@
       "slug": "artist-slug",
       "name": "Stage name / artist name",
       "realName": "Legal name (optional)",
-      "countryCode": "e.g., US, KR, JP",
       "labels": "Select labels...",
       "parentArtist": "Select a parent artist..."
     },
@@ -1518,15 +1502,7 @@
     },
     "placeholders": {
       "name": "Label name",
-      "countryCode": "e.g., DE, US, KR",
       "parentLabel": "Select parent label (optional)"
-    }
-  },
-  "workCollaborators": {
-    "empty": "No collaborators yet",
-    "notifications": {
-      "added": "Collaborator added",
-      "removed": "Collaborator removed"
     }
   },
   "comments": {
@@ -1585,17 +1561,6 @@
     "credits": {
       "other": "Other"
     },
-    "music": {
-      "released": "Released: {value}",
-      "spotify": "Spotify",
-      "bandcamp": "Bandcamp",
-      "soundcloud": "SoundCloud",
-      "youtube": "YouTube",
-      "openSpotify": "Open Spotify",
-      "openBandcamp": "Open Bandcamp",
-      "openSoundcloud": "Open SoundCloud",
-      "openYoutube": "Open YouTube"
-    },
     "portfolio": {
       "tech": "Tech:"
     },
@@ -1643,7 +1608,6 @@
     }
   },
   "cookieConsentCommon": {
-    "essentialLabel": "Essential cookies (always active)",
     "analyticsLabel": "Analytics cookies (Google Analytics)"
   },
   "nicknameField": {
@@ -1690,7 +1654,6 @@
       "failedToRevokeSession": "Failed to revoke session",
       "failedToRevokeSessions": "Failed to revoke sessions",
       "failedToRequestDeletion": "Failed to request account deletion",
-      "cannotUnlinkMessage": "You must have at least one authentication method",
       "connectedMessage": "{provider} account connected successfully.",
       "disconnectedMessage": "{provider} has been disconnected.",
       "failedToUpdateMainEmail": "Failed to update primary email",
@@ -1751,8 +1714,6 @@
       "added": "Added {date}",
       "lastMethod": "Add another sign-in method before removing this passkey.",
       "removeNamed": "Remove passkey {name}",
-      "reauth": "Sign in again before changing passkeys.",
-      "reauthAction": "Sign in again",
       "errors": {
         "load": "Could not load passkeys.",
         "remove": "Could not remove this passkey.",
@@ -1789,21 +1750,11 @@
     "email": {
       "title": "Primary email",
       "description": "Choose the verified email that will receive notices and account messages.",
-      "addEmail": "Add email",
       "canonical": "Primary email",
-      "canonicalCannotRemove": "Choose another primary email before removing this address.",
       "setCanonical": "Set as primary email",
-      "noEmail": "No email set",
-      "helper": "Only one verified email is available as the primary email.",
-      "selectLabel": "Primary email",
       "changeAction": "Change primary email",
       "sources": {
-        "current": "Current primary email",
-        "emailCode": "Email",
-        "pending": "Verification pending"
-      },
-      "messages": {
-        "pendingVerification": "Verification is already pending for this email. You can resend the verification email."
+        "emailCode": "Email"
       },
       "mainEmailUpdated": "Primary email updated.",
       "canonicalUpdated": "Primary email updated."
@@ -1834,7 +1785,6 @@
   },
   "seriesDetail": {
     "slug": {
-      "autoDescription": "Auto mode: title changes update slug automatically.",
       "manualDescription": "Manual mode: slug stays fixed until you edit or re-enable auto mode."
     },
     "notifications": {
@@ -1870,10 +1820,6 @@
     }
   },
   "works": {
-    "tabs": {
-      "editable": "Editable"
-    },
-    "emptyEditable": "No editable works assigned to you.",
     "emptyCredits": "No credited works found.",
     "columns": {
       "creditedAs": "Credited As",
@@ -1995,6 +1941,7 @@
         "patternPlaceholder": "e.g., ^[A-Z]{3}$",
         "customErrorMessage": "Custom Error Message",
         "optional": "Optional",
+        "dragValidator": "Drag validator",
         "removeValidator": "Remove validator"
       },
       "fieldTypes": {
@@ -2062,10 +2009,6 @@
       }
     },
     "settings": {
-      "notifications": {
-        "managerAdded": "Form manager added",
-        "managerRemoved": "Form manager removed"
-      },
       "urlPublic": {
         "title": "URL & Public Access",
         "allowPublic": "Allow public URL access",
@@ -2085,13 +2028,7 @@
         "description": "Share dashboard links to view form statistics without admin access"
       },
       "managers": {
-        "adminControls": "Admin controls",
-        "readOnly": "Read only",
-        "description": "Managers can edit this form, view submissions, and manage share links.",
-        "searchPlaceholder": "Search users to add manager...",
-        "adminOnly": "Only admins can add or remove managers.",
-        "empty": "No managers assigned yet.",
-        "removeManager": "Remove manager {name}"
+        "description": "Managers can edit this form, view submissions, and manage share links."
       },
       "access": {
         "title": "Access Control",
@@ -2120,7 +2057,11 @@
   "dataTable": {
     "aria": {
       "sortBy": "Sort by {label}",
-      "rowActions": "Actions for {label}"
+      "rowActions": "Actions for {label}",
+      "selectAllRows": "Select all rows",
+      "selectRow": "Select {label}",
+      "resultSummary": "{totalPages, plural, =0 {{count, plural, one {# result} other {# results}}} other {{count, plural, one {# result} other {# results}}, page {page} of {totalPages}}}",
+      "loadingMessage": "Loading"
     },
     "sort": {
       "button": "Sort",
@@ -2133,7 +2074,9 @@
         "moveUp": "Move {label} up",
         "moveDown": "Move {label} down",
         "toggleDirection": "Toggle sort direction for {label}",
-        "removeSort": "Remove sort for {label}"
+        "removeSort": "Remove sort for {label}",
+        "directionAscending": "Currently ascending",
+        "directionDescending": "Currently descending"
       }
     },
     "filter": {
@@ -2148,7 +2091,8 @@
       "drawerTitle": "Filter",
       "aria": {
         "backToFields": "Back to filter fields",
-        "removeFilter": "Remove filter for {label}"
+        "removeFilter": "Remove filter for {label}",
+        "logic": "Filter combination"
       },
       "operators": {
         "eq": "equals",
@@ -2181,7 +2125,8 @@
       "previousPage": "Previous page",
       "nextPage": "Next page",
       "lastPage": "Last page",
-      "page": "Page {page}"
+      "page": "Page {page}",
+      "navigation": "Pagination"
     }
   },
   "versionHistory": {
@@ -2193,7 +2138,9 @@
     "restoreTitle": "Restore version",
     "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
     "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document."
+    "restoreFailed": "Failed to restore the source document.",
+    "loadFailed": "Could not load version history.",
+    "end": "All versions loaded."
   },
   "shareLinks": {
     "title": "Share Links",
@@ -2203,7 +2150,6 @@
     "createError": "Failed to create link",
     "deleteSuccess": "Link deleted",
     "deleteError": "Failed to delete link",
-    "invalidUrl": "Invalid URL",
     "noLinks": "No links created",
     "showLess": "Show less",
     "showMore": "Show {count} more",
@@ -2218,21 +2164,9 @@
     "passwordPlaceholder": "Set a share password",
     "maximumExpiration": "Share links can expire up to one year from now.",
     "expirationInvalid": "Choose an expiration within one year.",
-    "bypassFormPassword": "Bypass form password",
-    "bypassFormPasswordDescription": "If disabled, viewers must enter the form password",
-    "bypassAuthentication": "Bypass authentication",
-    "bypassAuthenticationDescription": "If enabled, the share link skips require-auth gates",
-    "bypassRoleChecks": "Bypass role checks",
-    "bypassRoleChecksDescription": "If enabled, the share link skips allowed-role gates",
     "policies": {
       "passwordProtected": "Password protected",
-      "noPassword": "No password",
-      "passwordBypass": "Password bypass",
-      "passwordRequired": "Password required",
-      "authBypass": "Auth bypass",
-      "authEnforced": "Auth enforced",
-      "roleBypass": "Role bypass",
-      "roleEnforced": "Role enforced"
+      "noPassword": "No password"
     },
     "expirationBadge": {
       "expired": "Expired",
@@ -2264,7 +2198,9 @@
     "label": "Social links",
     "addLink": "Add link",
     "platformPlaceholder": "Platform",
-    "valuePlaceholder": "URL or username"
+    "valuePlaceholder": "URL or username",
+    "reorderInstructions": "Use the Up and Down arrow keys to change this link’s position.",
+    "positionChanged": "Link moved to position {position} of {count}."
   },
   "termsPage": {
     "active": {
@@ -2424,7 +2360,6 @@
     }
   },
   "releasePage": {
-    "previewTitle": "Release Preview",
     "streaming": "Streaming",
     "metadata": {
       "fallbackDescription": "{title}",
@@ -2494,8 +2429,7 @@
         "title": "Add track"
       },
       "placeholders": {
-        "title": "Track title",
-        "durationSeconds": "e.g., 240"
+        "title": "Track title"
       },
       "deleteConfirm": "Are you sure you want to delete this track?",
       "creditsModal": {
@@ -2517,8 +2451,7 @@
   "contentMetadata": {
     "preview": {
       "page": "Page Preview",
-      "post": "Post Preview",
-      "work": "Work Preview"
+      "post": "Post Preview"
     }
   },
   "editorMetadata": {
@@ -2541,8 +2474,6 @@
   "postHeader": {
     "actions": {
       "editPost": "Edit post",
-      "sharePost": "Share post",
-      "printPost": "Print post",
       "exportMarkdown": "Export post as Markdown"
     }
   },
@@ -2551,7 +2482,6 @@
     "intro": "We use essential cookies for authentication and site operation, and optional analytics cookies to understand site usage.",
     "learnMore": "See our <privacy>Privacy Policy</privacy> and <terms>Terms of Service</terms>.",
     "actions": {
-      "hidePreferences": "Hide preferences",
       "customize": "Customize"
     }
   },
@@ -2569,7 +2499,6 @@
   },
   "locationSelector": {
     "placeholder": "Select location...",
-    "clearSelection": "Clear selected place",
     "emptySearch": "Search for a map place",
     "emptyResults": "No places found"
   },
@@ -2602,9 +2531,6 @@
     "actions": {
       "copyId": "Copy ID",
       "copyUrl": "Copy URL"
-    },
-    "notifications": {
-      "copied": "{label} copied"
     }
   },
   "formValidation": {
@@ -2644,7 +2570,7 @@
   },
   "ogImagePreview": {
     "alt": "Open Graph preview",
-    "empty": "OG image not yet generated",
+    "empty": "No OG image",
     "actions": {
       "regenerate": "Regenerate OG Image"
     },
@@ -2768,7 +2694,6 @@
     "scheduleModal": {
       "description": "Choose a date and time to send this campaign.",
       "dateLabel": "Scheduled date and time",
-      "datePlaceholder": "Pick date and time",
       "previousMonth": "Previous month",
       "nextMonth": "Next month",
       "audience": "Audience: {audience}",
@@ -2858,7 +2783,6 @@
       "notFoundMessage": "No categories found"
     },
     "seriesSelector": {
-      "searchPlaceholder": "Search or create...",
       "states": {
         "empty": "No series available",
         "select": "Select series...",
@@ -2871,14 +2795,12 @@
       },
       "notifications": {
         "assigned": "Post assigned to series",
-        "reorderFailed": "Failed to reorder series",
         "createFailed": "Could not create the series",
         "seriesUnavailable": "That series is no longer available to manage. The previous assignment was kept.",
         "updateFailed": "Could not update the post series. The previous assignment was kept."
       }
     },
     "notifications": {
-      "slugUpdateFailed": "Failed to update slug",
       "deleted": "Post deleted",
       "published": "Post published",
       "unpublished": "Post unpublished",
@@ -3065,10 +2987,6 @@
     "pinned": "Pinned"
   },
   "pageEditor": {
-    "localRecovery": {
-      "message": "Your local editing copy was preserved before reconnecting. Download it before reloading or leaving.",
-      "action": "Download recovery copy"
-    },
     "shareLinksDescription": "Preview links for unpublished pages",
     "showTitleOnPage": "Show title on page",
     "slugValidation": {
@@ -3126,6 +3044,9 @@
       }
     },
     "columnsEditor": {
+      "labels": {
+        "ratio": "Column ratio"
+      },
       "badges": {
         "columnCount": "{count} cols"
       },
@@ -3150,16 +3071,14 @@
       "menuLabel": "Add Section",
       "emptyColumn": "Empty column - click + to add content",
       "actions": {
-        "addSectionToColumn": "Add section to column {index}",
-        "removeSectionFromColumn": "Remove {section} from column {index}"
+        "addSectionToColumn": "Add section to column {index}"
       }
     },
     "notifications": {
       "published": "Page published",
       "unpublished": "Page unpublished",
       "deleted": "Page deleted",
-      "slugUpdateFailed": "Failed to update page slug",
-      "confirmSummaryFailed": "Failed to confirm summary update."
+      "slugUpdateFailed": "Failed to update page slug"
     },
     "mapEditor": {
       "title": "Map",
@@ -3217,7 +3136,6 @@
         "content": "Content",
         "marqueeBehavior": "Marquee behavior",
         "scenePlayback": "Playback",
-        "sceneRender": "Renderer",
         "sceneMotion": "Motion",
         "sceneUnits": "Units",
         "sceneSettings": "Scene",
@@ -3234,7 +3152,6 @@
         "columns": "Columns",
         "infiniteLoop": "Infinite loop",
         "showIndicators": "Show indicators",
-        "showFeaturedImage": "Show featured image",
         "imageAspectRatio": "Image aspect ratio",
         "showMeta": "Show meta",
         "sortBy": "Sort by",
@@ -3253,7 +3170,6 @@
         "showImage": "Show image",
         "selectForm": "Select form",
         "showFormTitle": "Show form title",
-        "showTitle": "Show title",
         "numberOfWorks": "Number of works",
         "numberOfReleases": "Number of releases",
         "numberOfProgramEvents": "Number of events",
@@ -3323,7 +3239,10 @@
         "textColorSource": "Text color",
         "lightTextColor": "Light text",
         "darkTextColorSource": "Dark text",
-        "darkTextColor": "Dark text color"
+        "darkTextColor": "Dark text color",
+        "itemSize": "Item size",
+        "showAvatar": "Show avatar",
+        "maxLabels": "Max labels"
       },
       "fieldLabels": {
         "year": "Year",
@@ -3334,11 +3253,7 @@
       },
       "badges": {
         "posts": "{count} posts",
-        "rows": "{count} rows",
-        "authors": "{count} authors",
-        "artists": "{count} artists",
-        "works": "{count} works",
-        "releases": "{count} releases"
+        "rows": "{count} rows"
       },
       "placeholders": {
         "publishedByDefault": "Published by default",
@@ -3358,7 +3273,6 @@
           "auto": "Auto"
         },
         "sortBy": {
-          "dateAdded": "Date added",
           "startDate": "Start date",
           "endDate": "End date",
           "publishedDate": "Published date",
@@ -3367,9 +3281,7 @@
         },
         "sortOrder": {
           "newest": "Newest",
-          "oldest": "Oldest",
-          "azOldest": "A-Z / Oldest",
-          "zaNewest": "Z-A / Newest"
+          "oldest": "Oldest"
         },
         "mapPrimaryLabel": {
           "placeName": "Place name"
@@ -3443,6 +3355,11 @@
           "theme": "Follow theme",
           "custom": "Custom",
           "inherit": "Follow light"
+        },
+        "itemSize": {
+          "s": "S · Compact",
+          "m": "M · Standard",
+          "l": "L · Large"
         }
       },
       "actions": {
@@ -3453,8 +3370,6 @@
         "moveUnitUp": "Move unit up",
         "moveUnitDown": "Move unit down",
         "removeSceneUnit": "Remove unit",
-        "expandSceneUnit": "Expand unit",
-        "collapseSceneUnit": "Collapse unit",
         "replaceMesh": "Replace GLB",
         "uploadMesh": "Upload GLB",
         "clearMeshAsset": "Clear mesh asset",
@@ -3493,6 +3408,12 @@
         "meshOptimizationCancelled": "Cancelled",
         "optimizedMeshCleanupFailed": "Optimized asset reference removed, but cleanup failed: {error}",
         "optimizedMeshCleanupFailedDefault": "Optimized asset reference removed, but cleanup failed"
+      },
+      "authorSelection": {
+        "maxSelected": "Up to {count} authors can be selected.",
+        "empty": "No authors selected. This block will be empty.",
+        "unavailable": "This author is no longer available.",
+        "unavailableWarning": "Unavailable authors are omitted from the public page. Remove them or select a replacement."
       }
     },
     "embed": {
@@ -3545,8 +3466,6 @@
       "matchDescription": "Combine the selected role, tag, and newsletter groups.",
       "any": "Any selected group",
       "all": "Every selected group",
-      "roles": "Roles",
-      "rolesDescription": "Any selected role qualifies.",
       "roleUser": "Members",
       "memberDescription": "Only signed-in members can view this page.",
       "authorDescription": "Members with the author role.",
@@ -3574,13 +3493,23 @@
       "restrictedTitle": "You do not have access to this page",
       "restrictedDescription": "Your account does not meet this page’s access conditions.",
       "signIn": "Sign in"
+    },
+    "a11y": {
+      "sectionPosition": "{section} · {index}/{count}",
+      "dragInstructions": "Press Space to start moving, then use the arrow keys to change position. Press Space to confirm or Escape to cancel.",
+      "dragStart": "{section} · Move · In progress · {index}/{count}",
+      "dragOver": "{section} · Move · {index}/{count}",
+      "dragEnd": "{section} · Move · Confirm · {index}/{count}",
+      "dragCancel": "{section} · Move · Cancelled",
+      "sectionDeleted": "{section} deleted",
+      "sectionAdded": "{section} created · {index}/{count}",
+      "columnsPosition": "{column} · {section} · {index}/{count}"
     }
   },
   "editorCommon": {
     "reloadRequired": {
       "title": "Reload required",
-      "message": "A newer version was saved while this editor was open. Reload before continuing to edit.",
-      "action": "Reload"
+      "message": "A newer version was saved while this editor was open. Reload before continuing to edit."
     },
     "permissionRevoked": {
       "title": "Editing permission revoked",
@@ -3640,7 +3569,6 @@
         "mute": "Mute audio",
         "unmute": "Unmute audio",
         "volume": "Audio volume",
-        "original": "Original",
         "waveform": "Waveform",
         "spectrogram": "Spectrogram",
         "spectrogramAlt": "Audio spectrogram",
@@ -3657,10 +3585,8 @@
         "addItem": "Add {item}",
         "replaceItem": "Replace {item}",
         "browse": "Browse files",
-        "or": "OR",
         "importFromUrl": "Import from URL",
         "directVideoUrlHelp": "Direct video file URLs only. For YouTube or Vimeo, use External video.",
-        "confirm": "Embed",
         "resumeAvailable": "Interrupted upload found",
         "resumeInstructionNamed": "Select {name} again to continue the upload from where it stopped.",
         "backToUpload": "Upload files",
@@ -3756,11 +3682,8 @@
       }
     },
     "mapBlock": {
-      "clickToAddPlace": "Click to add place",
       "captionPlaceholder": "Add a caption...",
-      "clickToAddCaption": "Click to add caption",
-      "externalPlaceholder": "Map: {count} {count, plural, one {place} other {places}}",
-      "viewOnGoogleMaps": "View on Google Maps ({lat}, {lng})"
+      "clickToAddCaption": "Click to add caption"
     },
     "mapPlacesModal": {
       "title": "Manage places",
@@ -3770,22 +3693,9 @@
       "centeredTitle": "Centered",
       "setAsCenterTitle": "Set as center"
     },
-    "blockAlign": {
-      "left": "Align left",
-      "center": "Align center",
-      "right": "Align right"
-    },
-    "mathInline": {
-      "clickToEdit": "Click to edit",
-      "convertToBlock": "Convert to block"
-    },
-    "mathInlineButton": {
-      "label": "Inline math"
-    },
     "editor": {
       "slashMenu": {
         "placeholder": "Type '/' for commands",
-        "empty": "No items found",
         "unavailable": "Unavailable",
         "groups": {
           "headings": "Headings",
@@ -3950,9 +3860,6 @@
         "alignLeft": "Align left",
         "alignCenter": "Align center",
         "alignRight": "Align right",
-        "alignJustify": "Justify text",
-        "textColor": "Text",
-        "backgroundColor": "Background",
         "nest": "Nest block",
         "unnest": "Unnest block",
         "inlineMath": "Inline math",
@@ -3967,36 +3874,19 @@
         "urlPlaceholder": "Edit URL"
       },
       "math": {
-        "inline": "Inline math",
-        "block": "Math Block",
-        "clickToEdit": "Click to edit",
-        "convertToBlock": "Convert to block"
+        "selectBlock": "Select math block",
+        "block": "Math Block"
       },
       "file": {
-        "add": "Add {item}",
         "replace": "Replace {item}",
-        "delete": "Delete",
-        "download": "Download",
-        "caption": "Add a caption...",
-        "upload": "Upload files",
-        "embed": "Embed",
-        "urlPlaceholder": "Edit URL"
+        "delete": "Delete"
       },
       "resize": {
-        "image": "Resize — Image",
-        "audio": "Resize — Audio",
-        "video": "Resize — Video",
-        "file": "Resize — Attach files",
         "map": "Resize — Map",
-        "externalVideo": "Resize — External video",
-        "p5Sketch": "Resize — p5.js",
-        "threeScene": "Resize — Three.js",
-        "dragHandle": "Drag to resize",
-        "shader": "Resize — GLSL shader"
+        "externalVideo": "Resize — External video"
       },
       "drag": {
         "openBlockMenu": "Open block menu",
-        "addBlock": "Add block",
         "delete": "Delete",
         "colors": "Colors"
       },
@@ -4028,7 +3918,6 @@
         "toggleHeaderColumn": "Header column",
         "selectRow": "Select row",
         "selectColumn": "Select column",
-        "selectCells": "Selected cells",
         "selectTable": "Select table",
         "deleteTable": "Delete table",
         "mergeCells": "Merge cells",
@@ -4042,17 +3931,11 @@
         "unavailable": "Unavailable"
       },
       "map": {
-        "insert": "Map",
-        "clickToAddPlace": "Click to add place",
-        "captionPlaceholder": "Add a caption...",
         "managePlaces": "Manage places"
       },
       "embeds": {
         "map": "Map",
-        "externalVideo": "External video",
-        "p5Sketch": "p5.js",
-        "threeScene": "Three.js",
-        "shader": "GLSL shader"
+        "externalVideo": "External video"
       },
       "runtimeLabels": {
         "code": {
@@ -4139,12 +4022,7 @@
         }
       },
       "media": {
-        "browse": "Browse files",
-        "importFromUrl": "Import from URL",
-        "embed": "Embed",
-        "openLibrary": "File library",
-        "uploadFiles": "Upload files",
-        "selectFile": "Select a file"
+        "importFromUrl": "Import from URL"
       }
     }
   },
@@ -4170,7 +4048,6 @@
       "brainstorm": "Brainstorm"
     },
     "sections": {
-      "original": "Original",
       "result": "AI Result"
     },
     "actions": {
@@ -4220,8 +4097,7 @@
       "pinClickable": "Pin Clickable"
     },
     "themeOptions": {
-      "none": "None",
-      "systemSuffix": "(System)"
+      "none": "None"
     },
     "scheme": {
       "auto": "Auto",
@@ -4237,13 +4113,7 @@
     "copyValueTitle": "Click to copy {label} value"
   },
   "postMembers": {
-    "removeAria": "Remove {name}",
-    "roles": {
-      "owner": "Owner"
-    },
-    "states": {
-      "memberFallback": "member"
-    }
+    "removeAria": "Remove {name}"
   },
   "workCredits": {
     "divider": "or add credit",
@@ -4275,9 +4145,6 @@
     "emptyResults": {
       "artist": "No artists found",
       "name": "No names found"
-    },
-    "states": {
-      "unknownInitial": "?"
     },
     "notifications": {
       "groupCreated": "Group created",
@@ -4334,13 +4201,11 @@
       }
     },
     "statuses": {
-      "missing": "Missing",
       "existing": "Existing"
     },
     "states": {
       "loadFailed": "Failed to load translations.",
       "missingTarget": "No target document yet.",
-      "sourceRow": "This locale is edited in the main source editor.",
       "sourceEditorHint": "Edit the original text in the main editor.",
       "updatedAt": "Updated {date}"
     },
@@ -4354,52 +4219,19 @@
   },
   "translationPanelMenu": {
     "description": "Review source menu labels and existing translation documents.",
-    "sourceLocaleDescription": "The menu editor above owns structure, ordering, links, visibility, and source labels. Target translations below are read-only previews.",
-    "states": {
-      "sourcePreview": "Source menu labels ({locale}): {labels}",
-      "sourceEditorHint": "These labels come from the menu editor above.",
-      "missingTarget": "No labels are saved for this locale yet.",
-      "noItems": "No menu labels to show yet.",
-      "translationPreview": "Existing {locale} labels: {labels}"
-    },
     "previewModal": {
       "title": "{locale} menu translation preview",
-      "descriptions": {
-        "missing": "No public menu translation exists for this locale. The source is shown until an Admin generates it.",
-        "existing": "Shows the current public translated labels for this menu as read-only."
-      },
       "fields": {
-        "linkType": "Link type",
-        "destination": "Destination",
-        "children": "Nested items",
-        "localizedLabelForLocale": "{locale} public label",
-        "sourceLabelForLocale": "{locale} source label",
-        "localizedLabelDescription": "The current translated label shown in public menus; it cannot be changed here.",
-        "sourceLabelDescription": "Comes from the source menu editor and cannot be changed here.",
-        "fixedLocaleLockedDescription": "This item is fixed to the {locale} label and is read-only."
-      },
-      "states": {
-        "detailUnavailable": "Detailed translated menu data could not be loaded.",
-        "noItems": "There are no menu items to preview."
+        "localizedLabelForLocale": "{locale} public label"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template.",
-      "sourceLocaleDescription": "The source template controls the subject, body copy, and runtime variable names.",
-      "states": {
-        "sourceEditorHint": "Edit the source template in the main editor.",
-        "noContent": "No translated subject or body exists yet."
-      }
+      "description": "Manage the source language and existing translation documents for this email template."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout.",
-      "sourceLocaleDescription": "The source layout controls wrapper HTML and structural placeholder names for email rendering.",
-      "states": {
-        "sourceEditorHint": "Edit the source layout in the main editor.",
-        "noContent": "No translated layout HTML exists yet."
-      }
+      "description": "Manage the source language and existing translation documents for this email layout."
     }
   },
   "localizationNotice": {
@@ -4408,9 +4240,7 @@
       "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
     },
     "fallback": {
-      "title": "Fallback language",
-      "english": "The requested {requested} translation is unavailable, so this page is shown in {displayed}.",
-      "source": "The requested {requested} translation is unavailable, so this page is shown in the original {source}."
+      "title": "Fallback language"
     },
     "actions": {
       "viewOriginal": "View original ({source})"
@@ -4440,7 +4270,6 @@
       "policy": "Policy",
       "lastTargetUpdate": "Last target update",
       "entity": "Entity",
-      "existing": "Existing translations",
       "sources": "Sources",
       "lastSourceUpdate": "Last source update"
     },
@@ -4628,33 +4457,22 @@
       "summary": "Add a concise summary..."
     },
     "tooltips": {
-      "generatingNamed": "{name} is generating a summary",
-      "applyingNamed": "{name} is applying the generated summary",
-      "readyNamed": "{name} has a generated summary ready"
+      "generatingNamed": "{name} is generating a summary"
     },
     "feedback": {
       "failedDefault": "Failed to process summary generation.",
-      "invalidJson": "AI response could not be parsed as summary JSON.",
       "alreadyRunning": "Summary generation is already running.",
-      "applyingGenerated": "Applying generated summary.",
-      "resetOlderSession": "Reset a stale generated-summary state from an older session.",
-      "resetUnrestorable": "Reset a stale generated-summary state that could not be restored.",
-      "missingJobPayload": "Summary generation did not return a job payload.",
       "missingSuggestionPayload": "Summary generation completed without a suggestion payload.",
       "staleSuggestion": "This suggestion is stale. Regenerate or dismiss it before applying.",
       "unableToApplyNow": "Unable to apply the generated summary right now.",
       "applyFailed": "Failed to apply the generated summary.",
       "applied": "Generated summary applied.",
-      "appliedJobUnresolved": "Summary applied, but the AI job could not be resolved automatically.",
-      "dismissedJobUnresolved": "Summary suggestion was dismissed locally, but the AI job could not be resolved automatically.",
-      "readyBeforeApplying": "Apply or dismiss the generated summary first.",
       "readyToApply": "Generated summary is ready to apply."
     },
     "ready": {
       "title": "Generated summary",
       "suggestedSummary": "Suggested summary",
       "anotherCollaborator": "Another collaborator",
-      "anotherCollaboratorFallback": "Another collaborator has a generated summary ready.",
       "anotherCollaboratorNamed": "{name} has a generated summary ready."
     }
   },
@@ -4702,8 +4520,7 @@
       "roleUpdated": "Role updated",
       "userBanned": "User banned",
       "userUnbanned": "User unbanned",
-      "userDeleted": "User deleted",
-      "userCreated": "User created"
+      "userDeleted": "User deleted"
     }
   },
   "adminUserDetail": {
@@ -4740,16 +4557,13 @@
       "userIdCopied": "User ID copied",
       "userIdCopyFailed": "Failed to copy user ID",
       "emailSuppressionReleased": "Email suppression released",
-      "mainEmailUpdated": "Primary email updated",
       "ssoProviderRemoved": "SSO provider removed"
     },
     "auth": {
       "emptyEmail": "No email",
       "delivery": {
         "title": "Delivery email",
-        "description": "Campaign, notification, and account mail use the selected primary email.",
-        "changePlaceholder": "Select a verified email",
-        "changeHelp": "Changing this selection saves immediately."
+        "description": "Campaign, notification, and account mail use the selected primary email."
       },
       "providers": {
         "title": "Connected SSO providers",
@@ -4758,7 +4572,6 @@
         "remove": "Remove SSO provider"
       },
       "sources": {
-        "current": "Current email",
         "emailCode": "Email sign-in"
       },
       "ban": {
@@ -4793,7 +4606,6 @@
         "noChanges": "No changes to save"
       },
       "validation": {
-        "invalidUrl": "Invalid URL format",
         "invalidEmail": "Invalid email format",
         "invalidHexColor": "Invalid hex color format",
         "invalidGoogleAnalyticsId": "Invalid Google Analytics ID format"
@@ -5102,14 +4914,12 @@
   },
   "formSuccessPage": {
     "metadata": {
-      "fallbackTitle": "Form submitted",
       "title": "{formTitle} - Submitted"
     },
     "title": "Thank you"
   },
   "formPasswordPage": {
     "metadata": {
-      "fallbackTitle": "Form Access",
       "description": "Enter password to access this form"
     },
     "title": "Password Protected",
@@ -5121,7 +4931,6 @@
   },
   "formDashboardPage": {
     "metadata": {
-      "fallbackTitle": "Form Dashboard",
       "title": "{formTitle} - Dashboard",
       "description": "Form submission statistics and analytics"
     },
@@ -5131,7 +4940,28 @@
     "stats": {
       "total": "Total"
     },
-    "fieldStatistics": "Field Statistics"
+    "fieldStatistics": "Field Statistics",
+    "charts": {
+      "donut": "Donut",
+      "pie": "Pie",
+      "bar-horizontal": "Horizontal bars",
+      "bar-vertical": "Vertical bars",
+      "radar": "Radar",
+      "table": "Table",
+      "area": "Area",
+      "line": "Line",
+      "histogram": "Histogram",
+      "noResponses": "No responses yet",
+      "emptyValue": "(empty)",
+      "min": "Minimum",
+      "max": "Maximum",
+      "avg": "Average",
+      "count": "Count",
+      "date": "Date",
+      "value": "Value",
+      "range": "Range",
+      "chartType": "Chart type"
+    }
   },
   "embeddedForm": {
     "states": {
@@ -5182,10 +5012,7 @@
       "locationMode": "Location mode",
       "ticketUrl": "Ticket URL",
       "streamUrl": "Stream URL",
-      "externalUrl": "External URL",
-      "participants": "Participants",
-      "textCredits": "Text credits",
-      "textCreditsDescription": "One credit per line. Use Role: Name when a role is needed."
+      "externalUrl": "External URL"
     },
     "locationModes": {
       "mapPlace": "Venue",
@@ -5198,7 +5025,6 @@
       "tickets": "Tickets",
       "stream": "Stream",
       "link": "Link",
-      "participants": "Participants",
       "empty": "No events found.",
       "date": "Date",
       "credits": "Credits"
@@ -5215,152 +5041,14 @@
       "deleteMessage": "This event type can be deleted only when no events use it."
     }
   },
-  "tools": {
-    "portadj": {
-      "metadataTitle": "PortaDJ",
-      "metadataDescription": "Play and mix local audio files in your browser with two DJ decks."
-    },
-    "youtubeAudio": {
-      "title": "YouTube Audio",
-      "urlLabel": "Video link",
-      "urlPlaceholder": "https://…",
-      "resolve": "Load audio",
-      "resolving": "Loading audio",
-      "clear": "Clear source",
-      "metadataTitle": "YouTube Audio",
-      "metadataDescription": "Convert audio from an authenticated YouTube source in your browser.",
-      "errors": {
-        "INTERNAL_ERROR": "The audio source could not be loaded. Try again.",
-        "INVALID_REQUEST": "Enter a valid YouTube video URL.",
-        "INVALID_UPSTREAM_RESPONSE": "YouTube returned an unexpected audio source. Try another video.",
-        "REQUEST_ABORTED": "The request was cancelled.",
-        "SOURCE_EXPIRED": "This audio source expired. Load the URL again.",
-        "SOURCE_NOT_FOUND": "This audio source is no longer available. Load the URL again.",
-        "UNAUTHORIZED": "Sign in again to use this tool.",
-        "UNSUPPORTED_VIDEO": "This video does not provide a supported finite audio source.",
-        "UPSTREAM_FAILURE": "YouTube audio could not be loaded right now. Try again."
-      }
-    },
-    "transcode": {
-      "title": "Audio Transcoder",
-      "targetIdle": "Waiting",
-      "targetChecking": "Checking",
-      "targetReady": "Ready",
-      "targetError": "Unavailable",
-      "dropTitle": "Drop or choose audio files",
-      "dropDescription": "Up to 10 files · No folders · Processed on this device",
-      "chooseFiles": "Choose audio files",
-      "supportedFormatsLabel": "Supported formats",
-      "supportedFormats": "Supported: CAF, AIFF/AIFC, WAV, FLAC, MP3, AAC/M4A, Ogg/Opus, and audio in MP4, MOV, MKV/WebM, or TS. Checked per file.",
-      "filesSelected": "Files",
-      "outputSettings": "Output settings",
-      "outputSettingsHelper": "Channels stay unchanged. Automatic selects a compatible rate per file.",
-      "processingDetails": "Processing details",
-      "processingDetailsDescription": "Balanced resampling. Integer output is dithered. Large WAV files use RF64.",
-      "format": "Format",
-      "sampleRate": "Sample rate",
-      "bitrate": "Bitrate",
-      "bitDepth": "Bit depth",
-      "bitDepthContainerEffective": "{containerBits}-bit container / {effectiveBits}-bit effective",
-      "codec": "Codec",
-      "sampleFormat": "Sample format",
-      "float": "Float",
-      "integer": "Integer PCM",
-      "constantBitrate": "CBR",
-      "variableBitrate": "VBR",
-      "sourcePcmFloat": "{bitDepth}-bit float",
-      "sourcePcmInteger": "{bitDepth}-bit integer",
-      "sourcePcmSignedInteger": "{bitDepth}-bit signed integer",
-      "sourcePcmUnsignedInteger": "{bitDepth}-bit unsigned integer",
-      "automatic": "Automatic",
-      "preserveSource": "Preserve source",
-      "unavailable": "Unavailable",
-      "sampleRateAvailableFor": "{supported, number} of {total, number} files",
-      "sampleRateResetAutomatic": "The previous sample rate is not valid for these output settings. Sample rate was changed to Automatic.",
-      "unknownAudio": "Audio",
-      "channelCount": "{count, plural, one {# channel} other {# channels}}",
-      "queue": "Conversion queue",
-      "convert": "Convert",
-      "cancelAll": "Cancel all",
-      "clear": "Clear",
-      "download": "Save converted",
-      "downloadSource": "Save original",
-      "sourceDownloadExpired": "The source has expired or is unavailable. Load the YouTube URL again.",
-      "sourceDownloadFailed": "The original could not be downloaded. Check your connection and load the source again.",
-      "retry": "Retry",
-      "cancel": "Cancel",
-      "remove": "Remove",
-      "sourceValue": "Source ({value})",
-      "mono": "Mono",
-      "stereo": "Stereo",
-      "targetWaitingForFiles": "Add a supported audio file to check the selected output target.",
-      "targetCheckingMessage": "Checking whether this browser supports the selected output target.",
-      "targetReadyMessage": "The selected output target is available in this browser.",
-      "targetAvailability": "{available, number} files are available for conversion; {unavailable, number} remain unavailable with these settings.",
-      "engineLoading": "Loading the {asset} audio engine.",
-      "engineVerifying": "Verifying the {asset} audio engine.",
-      "engineLoadFailed": "The {asset} audio engine could not be loaded.",
-      "capacityExceeded": "{count, number} files were not added. The queue can hold up to {max, number} files.",
-      "statusInspectionQueued": "Waiting for inspection",
-      "statusInspecting": "Inspecting",
-      "statusReady": "Ready",
-      "statusQueued": "Queued",
-      "statusQueuedAvailability": "Queued {converting, number} files for conversion; {unavailable, number} remain unavailable.",
-      "statusConverting": "Converting",
-      "statusConvertingAvailability": "Converting {converting, number} files; {unavailable, number} remain unavailable.",
-      "statusComplete": "Complete",
-      "statusCompleteAvailability": "Converted {converted, number} files; {unavailable, number} remain unavailable.",
-      "statusBatchResult": "Run finished: {eligible, number} eligible, {attempted, number} attempted, {succeeded, number} succeeded, {failed, number} failed, {unavailable, number} unavailable.",
-      "statusUnsupported": "Unsupported",
-      "statusError": "Error",
-      "statusCancelled": "Cancelled",
-      "unsupportedInput": "This file is not a supported audio input.",
-      "unsupportedCodec": "This browser cannot decode the audio codec in this file.",
-      "inspectionFailed": "The file could not be inspected. Try again.",
-      "inspectionInconclusive": "The browser could not identify this audio within the safe read limit. Try another file or format.",
-      "outputUnsupported": "The selected output settings are not supported in this browser.",
-      "outputProbeFailed": "Output support could not be checked. Try again.",
-      "outputEngineUnavailable": "The runtime engine for {preset} could not be started. Check the network or asset policy and retry.",
-      "outputChannelsUnsupported": "This output supports {minimum, number}–{maximum, number} source channels, but this file has {actual, number}. Channels are preserved and are not downmixed.",
-      "sourceInspectionMissing": "The source channel count or sample rate could not be identified. Choose a file with readable audio metadata.",
-      "outputConfigurationUnavailable": "The selected format and encoding settings do not form an available output configuration.",
-      "preserveSourceRateUnsupported": "Preserve source cannot use {sourceRate} for this output. Allowed rates: {allowed}.",
-      "sourceResamplingRateUnsupported": "This {sourceRate} source is outside the resampling range ({minimum}–{maximum}). It can only pass through to a compatible output.",
-      "targetResamplingRateUnsupported": "The selected {targetRate} target is outside the resampling range ({minimum}–{maximum}).",
-      "automaticRateUnavailable": "Automatic cannot choose a valid rate for this {sourceRate} source. Allowed output rates: {allowed}.",
-      "presetRateUnsupported": "This output does not support {targetRate}. Allowed rates: {allowed}.",
-      "conversionFailed": "The audio conversion failed.",
-      "conversionStorageLimitExceeded": "This browser cannot hold the expected output in local temporary storage. Choose a smaller or compressed format, or retry in a browser that supports large local outputs.",
-      "conversionTargetSizeLimitExceeded": "The selected output format cannot represent a file this large. Choose another format, or reduce the sample rate, bit depth, or channel count.",
-      "cancelledMessage": "The conversion was cancelled.",
-      "sourceSummary": "{container} · {sampleRate} · {channels} · {bitDepth}",
-      "outputSummary": "{preset} · {size}",
-      "progressLabel": "{phase} · {progress, number}%",
-      "phasePrepare": "Preparing",
-      "phaseDecode": "Decoding",
-      "phaseEncode": "Encoding",
-      "phaseFinalize": "Finalizing",
-      "bytes": "{count, number} bytes",
-      "storageOpfs": "Private browser storage",
-      "storageMemory": "Browser memory",
-      "metadataTitle": "Audio Transcoder",
-      "metadataDescription": "Convert audio in your browser. Files never leave your device.",
-      "notices": "Open-source licenses"
-    },
-    "hwp": {
-      "title": "HWP editor",
-      "metadataDescription": "Open, edit, and save HWP and HWPX documents in your browser.",
-      "description": "Use the editor’s File menu to open and save HWP or HWPX files. Documents are processed on this device without being uploaded.",
-      "loading": "Loading editor…",
-      "error": "The editor could not be loaded. Try again.",
-      "retry": "Try again",
-      "metadataTitle": "HWP editor"
-    }
-  },
   "myMetadata": {
     "description": "{title} page for your account on {siteName}."
   },
   "fileManager": {
+    "pagination": {
+      "end": "End of results"
+    },
+    "selectionUnavailableDescription": "This file cannot be added. Press Enter to preview it.",
     "title": "Files",
     "description": "Upload, organize, inspect, and reuse files across the site.",
     "root": "Files",
@@ -5484,9 +5172,7 @@
       "move-files": {
         "title": "Move files"
       },
-      "targetFolderId": "Target folder ID",
       "extensionSeparate": "The .{extension} extension is kept separately.",
-      "rootWhenEmpty": "Leave empty to move to the root.",
       "delete": {
         "title": "Delete",
         "folder": "Delete this folder and all unused files below it?",
@@ -5496,14 +5182,26 @@
         "byDomain": "By domain: {summary}",
         "more": "and {count} more. Open file details to review the full list."
       }
+    },
+    "viewSettings": {
+      "title": "View settings",
+      "iconSize": "Icon size",
+      "spacing": "Item spacing",
+      "columns": "Columns",
+      "auto": "Automatic",
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "compact": "Compact",
+      "standard": "Standard",
+      "comfortable": "Comfortable",
+      "reset": "Reset view settings"
     }
   },
   "fileDownloadAccess": {
     "editor": {
       "sectionTitle": "Download access",
-      "sectionDescription": "Control who can download the original file.",
       "loading": "Loading download access…",
-      "audienceLabel": "Download audience",
       "audiences": {
         "disabled": {
           "label": "Disabled",
@@ -5522,15 +5220,10 @@
           "description": "Only users in the selected audiences can download this file."
         }
       },
-      "segmentsLabel": "Audiences",
-      "segmentsDescription": "Select one or more existing Audience segments.",
-      "segmentsPlaceholder": "Select audiences",
       "segmentsLoadError": "The policy loaded, but audiences could not be loaded.",
       "segmentsEmpty": "No Audience segments are available.",
       "restrictedWithoutAudience": "This restricted policy has no Audience. Downloads are denied for everyone until you select at least one Audience.",
-      "segmentRequiresSubscription": "{name} (newsletter subscription required)",
       "additionalSelected": "{count} more selected",
-      "loadMoreSegments": "Load more audiences",
       "loadError": "Download access could not be loaded.",
       "saveError": "Download access could not be saved.",
       "fileRequired": "Save the file before configuring download access."
@@ -5552,5 +5245,29 @@
     "empty": "Add diagram source",
     "invalid": "Invalid diagram",
     "loading": "Rendering…"
+  },
+  "errorPage": {
+    "titles": {
+      "400": "Invalid request",
+      "401": "Sign in required",
+      "403": "Access denied",
+      "404": "Page not found",
+      "408": "Request timed out",
+      "409": "Request conflicts with the current state",
+      "410": "This page is no longer available",
+      "413": "Request is too large",
+      "422": "Unable to process the request",
+      "429": "Too many requests",
+      "500": "Something went wrong",
+      "501": "This request is not supported",
+      "502": "An upstream service failed",
+      "503": "Service temporarily unavailable",
+      "504": "Service response timed out"
+    },
+    "actions": {
+      "goHome": "Go home",
+      "tryAgain": "Try again",
+      "login": "Back to Login"
+    }
   }
 }

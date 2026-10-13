@@ -1,5 +1,7 @@
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { Suspense, type ReactNode } from 'react';
-import { MantineProvider } from '@mantine/core';
+import { NextIntlClientProvider } from 'next-intl';
+import koMessages from '@/messages/ko.json';
 import type { PageMetadataDocument } from '@/lib/queries/metadata';
 import { renderToReadableStream } from 'react-dom/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -86,9 +88,12 @@ async function start(element: ReactNode) {
     <html lang="ko">
       <head />
       <body>
-        <MantineProvider>
-          <Suspense fallback={<span>outer pending</span>}>{element}</Suspense>
-        </MantineProvider>
+        {/* The app layout provides client messages; the page body now includes the client outline. */}
+        <NextIntlClientProvider locale="ko" messages={koMessages}>
+          <DesignSystemProvider forceColorScheme="light">
+            <Suspense fallback={<span>outer pending</span>}>{element}</Suspense>
+          </DesignSystemProvider>
+        </NextIntlClientProvider>
       </body>
     </html>,
   );

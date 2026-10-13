@@ -191,7 +191,8 @@ describe('EditorRuntimeProvider', () => {
       });
     });
 
-    expect(firstListener).toHaveBeenCalledTimes(1);
+    // The runtime-event parser loads on demand; under a loaded suite the first event waits for it.
+    await vi.waitFor(() => expect(firstListener).toHaveBeenCalledTimes(1));
     expect(secondListener).not.toHaveBeenCalled();
 
     act(() => {

@@ -1,8 +1,13 @@
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs';
-import { Box } from '@mantine/core';
 
-import { Button } from '@/components/core/Button';
-import { EventSeriesEventsTableView, type EventSeriesEventsTableItem } from './EventSeriesEventsTableView';
+import { useLocale, useTranslations } from 'next-intl';
+
+import {
+  EventSeriesEventsTableView,
+  type EventSeriesEventsTableItem,
+  type EventSeriesEventsQuery,
+} from './EventSeriesEventsTableView';
 import { ProgramEventSeriesPublicView } from './ProgramEventSeriesPublicView';
 
 const SERIES_POSTER = `data:image/svg+xml,${encodeURIComponent(`
@@ -60,19 +65,39 @@ interface StoryViewProps {
 }
 
 function StoryView({ withPoster, empty, sparse, longTitle }: StoryViewProps) {
-  const storyEvents = empty ? [] : events;
+  const t = useTranslations();
+  const locale = useLocale();
+  const locationLabels = {
+    map_place: t('programEventAdmin.locationModes.mapPlace'),
+    online: t('programEventAdmin.locationModes.online'),
+    hybrid: t('programEventAdmin.locationModes.hybrid'),
+    tba: t('programEventAdmin.locationModes.tba'),
+  };
+  const [query, setQuery] = useState<EventSeriesEventsQuery>({ page: 1, pageSize: 10 });
+  const storyEvents = (empty ? [] : events).filter((event) => {
+    if (query.search && !`${event.title} ${event.summary ?? ''}`.toLowerCase().includes(query.search.toLowerCase())) {
+      return false;
+    }
+    const matches = (query.filters ?? []).map((filter) => {
+      const value = filter.field === 'type_id' ? event.typeName?.toLowerCase() : event.locationMode;
+      return Array.isArray(filter.value) ? filter.value.includes(value) : String(filter.value) === value;
+    });
+    return matches.length === 0 || (query.filterBy === 'OR' ? matches.some(Boolean) : matches.every(Boolean));
+  });
   const title = longTitle
     ? 'Night Signals: A Continuing Program of Sound, Moving Image, Performance, and Collective Listening Across the City'
     : 'Night Signals';
 
   return (
-    <Box
+    <div
+      style={{
+        ...{ overflow: 'hidden' },
+        width: 'min(1120px, 100%)',
+        maxWidth: 'calc(100vw - 2rem)',
+        marginInline: 'auto',
+        padding: 'var(--geul-spacing-md)',
+      }}
       data-testid="program-event-series-story-frame"
-      w="min(1120px, 100%)"
-      maw="calc(100vw - 2rem)"
-      mx="auto"
-      p="md"
-      style={{ overflow: 'hidden' }}
     >
       <ProgramEventSeriesPublicView
         title={title}
@@ -82,8 +107,7 @@ function StoryView({ withPoster, empty, sparse, longTitle }: StoryViewProps) {
             : 'Performances, installations, and listening sessions presented from July through September.\nThe series title and poster remain locale-neutral.'
         }
         posterUrl={withPoster ? SERIES_POSTER : null}
-        controls={<Button size="xs">Share</Button>}
-        eventsLabel="Events"
+        eventsLabel={t('common.entities.programEvents')}
       >
         <EventSeriesEventsTableView
           result={{
@@ -94,29 +118,25 @@ function StoryView({ withPoster, empty, sparse, longTitle }: StoryViewProps) {
             totalPages: storyEvents.length > 0 ? 1 : 0,
           }}
           loading={false}
-          query={{ page: 1, pageSize: 10 }}
+          query={query}
           pageSize={10}
-          locale="en-US"
+          locale={locale}
           labels={{
-            date: 'Date',
-            event: 'Event',
-            type: 'Type',
-            location: 'Location',
-            tba: 'To be announced',
-            empty: 'No events found',
-            searchPlaceholder: 'Search',
-            showMore: (count) => `Show ${count} more`,
+            image: t('common.labels.image'),
+            date: t('programEventAdmin.public.date'),
+            event: t('common.labels.event'),
+            type: t('common.labels.type'),
+            location: t('common.labels.location'),
+            tba: t('programEventAdmin.locationModes.tba'),
+            empty: t('programEventAdmin.public.empty'),
+            searchPlaceholder: t('common.placeholders.search'),
+            showMore: (count) => t('shareLinks.showMore', { count }),
           }}
-          locationLabels={{
-            map_place: 'Venue',
-            online: 'Online',
-            hybrid: 'Hybrid',
-            tba: 'To be announced',
-          }}
+          locationLabels={locationLabels}
           filterFields={[
             {
               field: 'type_id',
-              label: 'Type',
+              label: t('common.labels.type'),
               type: 'uuid',
               operators: ['in'],
               options: [
@@ -126,23 +146,23 @@ function StoryView({ withPoster, empty, sparse, longTitle }: StoryViewProps) {
             },
             {
               field: 'location_mode',
-              label: 'Location',
+              label: t('common.labels.location'),
               type: 'string',
               operators: ['in'],
               options: [
-                { value: 'map_place', label: 'Venue' },
-                { value: 'online', label: 'Online' },
-                { value: 'hybrid', label: 'Hybrid' },
-                { value: 'tba', label: 'To be announced' },
+                { value: 'map_place', label: locationLabels.map_place },
+                { value: 'online', label: locationLabels.online },
+                { value: 'hybrid', label: locationLabels.hybrid },
+                { value: 'tba', label: locationLabels.tba },
               ],
             },
           ]}
           isLoadingMore={false}
-          onQueryChange={() => {}}
+          onQueryChange={(value) => setQuery(value as EventSeriesEventsQuery)}
           onLoadMore={() => {}}
         />
       </ProgramEventSeriesPublicView>
-    </Box>
+    </div>
   );
 }
 
@@ -192,5 +212,10 @@ export const EmptyWithoutOptionalCopy: Story = {
 
 export const LongTitleNarrow: Story = {
   args: { withPoster: false, longTitle: true },
-  globals: { viewport: { value: 'mobile1', isRotated: false } },
+  globals: { viewport: { value: 'phone', isRotated: false } },
+};
+
+export const NarrowWithImage: Story = {
+  args: { withPoster: true },
+  globals: { viewport: { value: 'phone', isRotated: false } },
 };

@@ -1,7 +1,8 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useTranslations } from 'next-intl';
-import { Stack } from '@mantine/core';
+
 import { Select, TextInput } from '@/components/core/Input';
 import { resolveExternalVideo } from '@/lib/media/external-video';
 import { parseExternalVideoProps, type ExternalVideoProps } from './schema';
@@ -26,7 +27,7 @@ export function ExternalVideoSettingsForm({
   }));
 
   return (
-    <Stack gap="sm" data-page-block-editor="external-video">
+    <DsLayoutStack gap="md" data-page-block-editor="external-video">
       <TextInput
         label={t('urlLabel')}
         description={t('urlDescription')}
@@ -48,6 +49,6 @@ export function ExternalVideoSettingsForm({
         value={parsed.caption}
         onChange={(event) => updateLocalizedProps({ caption: event.currentTarget.value })}
       />
-    </Stack>
+    </DsLayoutStack>
   );
 }

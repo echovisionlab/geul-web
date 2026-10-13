@@ -1,19 +1,23 @@
 // @vitest-environment jsdom
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { Code, ConnectError } from '@connectrpc/connect';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { QueryErrorAlert } from './QueryErrorAlert';
 
-vi.mock('next-intl', () => ({ useLocale: () => 'ko' }));
+vi.mock('next-intl', async () => {
+  const { default: errorPageMessages } = await import('@/lib/i18n/error-page-messages.json');
+  return { useLocale: () => 'ko', useMessages: () => ({ errorPage: errorPageMessages.ko }) };
+});
 let root: Root;
 let container: HTMLDivElement;
 function render(node: ReactNode) {
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
-  act(() => root.render(<MantineProvider>{node}</MantineProvider>));
+  act(() => root.render(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>));
 }
 afterEach(() => {
   act(() => root?.unmount());

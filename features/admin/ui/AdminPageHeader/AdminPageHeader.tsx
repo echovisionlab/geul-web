@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react';
-import Link from '@/components/core/Navigation';
-import { Group, Stack, Text, Title } from '@mantine/core';
+import { LayoutInline, LayoutInset } from '@/components/core/Layout';
+import { PageHeader } from '@/components/core/PageHeader';
 import { Button, type ControlEmphasis, type ControlTone } from '@/components/core/Button';
-import styles from './AdminPageHeader.module.css';
 
 export type AdminPageHeaderItem =
   | {
@@ -26,60 +25,55 @@ export type AdminPageHeaderItem =
 export interface AdminPageHeaderProps {
   title: ReactNode;
   description?: ReactNode;
+  level?: 1 | 2;
   items?: AdminPageHeaderItem[];
 }
 
-export function AdminPageHeader({ title, description, items = [] }: AdminPageHeaderProps) {
+export function AdminPageHeader({ title, description, level = 1, items = [] }: AdminPageHeaderProps) {
   return (
-    <Group justify="space-between" gap="sm" wrap="wrap" mb="md" className={styles.root}>
-      <Stack gap={2} className={styles.titleStack}>
-        <Title order={2} className={styles.title}>
-          {title}
-        </Title>
-        {description ? (
-          <Text size="sm" c="dimmed">
-            {description}
-          </Text>
-        ) : null}
-      </Stack>
-      {items.length > 0 ? (
-        <div className={styles.actions}>
-          {items.map((item) =>
-            item.type === 'custom' ? (
-              <div key={item.key} className={styles.customAction}>
-                {item.content}
-              </div>
-            ) : item.href ? (
-              <Button
-                key={item.key}
-                component={Link}
-                href={item.href}
-                leftSection={item.icon}
-                disabled={item.disabled}
-                loading={item.loading}
-                tone={item.tone}
-                emphasis={item.emphasis}
-                className={styles.actionButton}
-              >
-                {item.label}
-              </Button>
-            ) : (
-              <Button
-                key={item.key}
-                leftSection={item.icon}
-                onClick={item.onClick}
-                disabled={item.disabled}
-                loading={item.loading}
-                tone={item.tone}
-                emphasis={item.emphasis}
-                className={styles.actionButton}
-              >
-                {item.label}
-              </Button>
-            ),
-          )}
-        </div>
-      ) : null}
-    </Group>
+    <LayoutInset blockEnd="md">
+      <PageHeader
+        title={title}
+        description={description}
+        level={level}
+        actions={
+          items.length > 0 ? (
+            <LayoutInline justify="end" align="center" gap="xs" wrap="wrap">
+              {items.map((item) =>
+                item.type === 'custom' ? (
+                  <LayoutInline key={item.key} align="center" gap="none">
+                    {item.content}
+                  </LayoutInline>
+                ) : item.href ? (
+                  <Button
+                    key={item.key}
+                    href={item.href}
+                    leftSection={item.icon}
+                    disabled={item.disabled}
+                    loading={item.loading}
+                    tone={item.tone}
+                    emphasis={item.emphasis}
+                  >
+                    {item.label}
+                  </Button>
+                ) : (
+                  <Button
+                    key={item.key}
+                    leftSection={item.icon}
+                    onClick={item.onClick}
+                    disabled={item.disabled}
+                    loading={item.loading}
+                    tone={item.tone}
+                    emphasis={item.emphasis}
+                  >
+                    {item.label}
+                  </Button>
+                ),
+              )}
+            </LayoutInline>
+          ) : undefined
+        }
+      />
+    </LayoutInset>
   );
 }

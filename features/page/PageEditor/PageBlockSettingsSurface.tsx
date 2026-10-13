@@ -1,11 +1,15 @@
 'use client';
+import { breakpointQuery } from '@/components/core/Layout/breakpoints';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { Modal, Stack } from '@mantine/core';
+
+import { ContentModal } from '@/components/core/Modal';
 import { useMediaQuery } from '@mantine/hooks';
 import { Drawer } from '@/components/core/Drawer';
 import { Tabs } from '@/components/core/Tabs';
+import { InputSizeProvider } from '@/components/core/Input';
 
 interface PageBlockSettingsSurfaceProps {
   opened: boolean;
@@ -22,23 +26,26 @@ export function PageBlockSettingsSurface({
   sectionSettings,
   onClose,
 }: PageBlockSettingsSurfaceProps) {
+  const tModalActions = useTranslations('common.actions');
   const t = useTranslations('pageEditor');
   const tCommonActions = useTranslations('common.actions');
-  const isMobile = useMediaQuery('(max-width: 48em)');
+  const isMobile = useMediaQuery(breakpointQuery('sm'));
   const content = (
-    <Tabs defaultValue="block" keepMounted={false}>
-      <Tabs.List>
-        <Tabs.Tab value="block">{t('sectionItem.settings.tabs.block')}</Tabs.Tab>
-        <Tabs.Tab value="section">{t('sectionItem.settings.tabs.section')}</Tabs.Tab>
-      </Tabs.List>
+    <InputSizeProvider size="xs">
+      <Tabs aria-label={title} defaultValue="block" keepMounted={false}>
+        <Tabs.List>
+          <Tabs.Tab value="block">{t('sectionItem.settings.tabs.block')}</Tabs.Tab>
+          <Tabs.Tab value="section">{t('sectionItem.settings.tabs.section')}</Tabs.Tab>
+        </Tabs.List>
 
-      <Tabs.Panel value="block" pt="md">
-        <Stack gap="sm">{blockSettings}</Stack>
-      </Tabs.Panel>
-      <Tabs.Panel value="section" pt="md">
-        {sectionSettings}
-      </Tabs.Panel>
-    </Tabs>
+        <Tabs.Panel value="block" paddingTop="md">
+          <DsLayoutStack gap="sm">{blockSettings}</DsLayoutStack>
+        </Tabs.Panel>
+        <Tabs.Panel value="section" paddingTop="md">
+          {sectionSettings}
+        </Tabs.Panel>
+      </Tabs>
+    </InputSizeProvider>
   );
 
   if (isMobile) {
@@ -57,8 +64,15 @@ export function PageBlockSettingsSurface({
   }
 
   return (
-    <Modal opened={opened} onClose={onClose} title={title} size="lg" centered>
+    <ContentModal
+      opened={opened}
+      onClose={onClose}
+      title={title}
+      size="large"
+      centered
+      closeLabel={tModalActions('close')}
+    >
       {content}
-    </Modal>
+    </ContentModal>
   );
 }

@@ -1,70 +1,83 @@
 'use client';
 
-import NextLink, { type LinkProps as NextLinkNativeProps } from 'next/link';
-import { forwardRef, useCallback, useRef, type ComponentProps, type ForwardedRef } from 'react';
-import { useNavigationIntentHandler } from './NavigationIntentProvider';
+import { forwardRef, type ReactNode } from 'react';
+import { Link as AriaLink } from 'react-aria-components';
+import { controlNativeProps, type ControlNativeProps } from '../control-props';
+import { controlLinkRender } from '../control-render';
+import {
+  navigationHref,
+  useNavigationClick,
+  useNavigationPrefetchHandlers,
+  type NavigationOptions,
+} from './navigation-events';
+import classes from './NavigationLink.module.css';
 
-export type LinkProps = ComponentProps<typeof NextLink>;
-export type NextLinkProps = NextLinkNativeProps;
-
-type OnNavigateEvent = NonNullable<NextLinkNativeProps['onNavigate']> extends (event: infer T) => void ? T : never;
-
-function setRef(ref: ForwardedRef<HTMLAnchorElement>, anchor: HTMLAnchorElement | null) {
-  if (typeof ref === 'function') {
-    ref(anchor);
-  } else if (ref) {
-    ref.current = anchor;
-  }
+export interface LinkProps extends ControlNativeProps, NavigationOptions {
+  children?: ReactNode;
+  /**
+   * `content` underlined text; `quiet` underline on hover; `block`/`row` block regions;
+   * `media` overlay covering media; `graphic` a content-sized inline box around a logo or image.
+   */
+  appearance?: 'content' | 'quiet' | 'block' | 'media' | 'row' | 'graphic';
+  mediaPosition?: 'fill' | 'flow';
+  separator?: 'none' | 'start';
+  size?: 'xs' | 'sm' | 'md';
+  weight?: 'regular' | 'medium' | 'strong';
+  tone?: 'primary' | 'secondary' | 'muted' | 'inverse' | 'inherit';
 }
+export type NextLinkProps = NavigationOptions;
 
-const NavigationLink = forwardRef<HTMLAnchorElement, LinkProps>((props, forwardedRef) => {
-  const { onNavigate, replace, scroll, ...linkProps } = props;
-  const anchorRef = useRef<HTMLAnchorElement | null>(null);
-  const handleNavigationIntent = useNavigationIntentHandler();
-
-  const setAnchorRef = useCallback(
-    (anchor: HTMLAnchorElement | null) => {
-      anchorRef.current = anchor;
-      setRef(forwardedRef, anchor);
+const NavigationLink = forwardRef<HTMLAnchorElement, LinkProps>(
+  (
+    {
+      href,
+      replace,
+      scroll,
+      prefetch,
+      target,
+      rel,
+      download,
+      onNavigate,
+      onClick,
+      children,
+      appearance = 'content',
+      mediaPosition = 'fill',
+      separator = 'none',
+      size,
+      weight,
+      tone = 'primary',
+      ...props
     },
-    [forwardedRef],
-  );
-
-  const handleNavigate = useCallback(
-    (event: OnNavigateEvent) => {
-      let userPreventedNavigation = false;
-      onNavigate?.({
-        preventDefault() {
-          userPreventedNavigation = true;
-          event.preventDefault();
-        },
-      });
-
-      if (userPreventedNavigation || !handleNavigationIntent) {
-        return;
-      }
-
-      const href = anchorRef.current?.href;
-      if (!href) {
-        return;
-      }
-
-      handleNavigationIntent(
-        {
-          href,
-          ...(replace === undefined ? {} : { replace }),
-          ...(scroll === undefined ? {} : { scroll }),
-        },
-        { preventDefault: () => event.preventDefault() },
-      );
-    },
-    [handleNavigationIntent, onNavigate, replace, scroll],
-  );
-
-  return <NextLink {...linkProps} ref={setAnchorRef} replace={replace} scroll={scroll} onNavigate={handleNavigate} />;
-});
-
+    ref,
+  ) => {
+    const handleClick = useNavigationClick({ href, replace, scroll, target, download, onNavigate }, onClick);
+    const prefetchHandlers = useNavigationPrefetchHandlers({ href, prefetch, target, download }, props);
+    const native = controlNativeProps(props);
+    return (
+      <AriaLink
+        {...native}
+        ref={ref}
+        href={navigationHref(href)}
+        target={target}
+        rel={rel}
+        download={download}
+        routerOptions={{ replace, scroll }}
+        onClick={handleClick}
+        {...prefetchHandlers}
+        render={controlLinkRender({ title: native.title, tabIndex: native.tabIndex })}
+        className={classes.root}
+        data-appearance={appearance}
+        data-media-position={appearance === 'media' ? mediaPosition : undefined}
+        data-separator={separator}
+        data-size={size}
+        data-weight={weight}
+        data-tone={tone}
+      >
+        {children}
+      </AriaLink>
+    );
+  },
+);
 NavigationLink.displayName = 'NavigationLink';
-
 export { NavigationLink };
 export default NavigationLink;

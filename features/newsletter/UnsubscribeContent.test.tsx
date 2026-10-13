@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { UnsubscribeContent } from './UnsubscribeContent';
 
 const mocks = vi.hoisted(() => ({
@@ -32,9 +33,9 @@ async function render() {
   await act(async () => {
     root.render(
       <QueryClientProvider client={client}>
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <UnsubscribeContent />
-        </MantineProvider>
+        </DesignSystemProvider>
       </QueryClientProvider>,
     );
   });

@@ -63,7 +63,7 @@ export function CodeBlockSelectionMenu({
     editor.state.selection instanceof NodeSelection && editor.state.selection.node.type.name === 'codeBlock'
       ? getSelectedCodeBlock(editor)
       : null;
-  if (authoringMode?.allowNeutralBlockEdits !== true || !selected) {
+  if (menu.isSuppressed || authoringMode?.allowNeutralBlockEdits !== true || !selected) {
     return null;
   }
 

@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { ImageUploadCropController } from '@/features/upload/ImageUploadCropController';
 import { deleteSiteAssetAction, setSiteAssetAction } from '@/lib/actions/site-setting';
 import { getUploadSelectionMimeTypes, UPLOAD_CONFIGS } from '@/lib/constants/upload-config';
+import type { SiteAssetBindings } from '@/features/site/site-asset-bindings';
 import { useUpload } from '@/lib/hooks/useUpload';
 import { SITE_ASSET_TO_UPLOAD_TYPE, type SiteAssetType } from '@/lib/types/upload/model';
 
@@ -19,14 +20,17 @@ interface SiteOgBackgroundUploaderProps {
   type: SiteOgBackgroundAssetType;
   currentUrl: string | null;
   onSuccess?: (ogGenerationRunId?: string) => void;
+  bindings?: SiteAssetBindings;
 }
 
-export function SiteOgBackgroundUploader({ type, currentUrl, onSuccess }: SiteOgBackgroundUploaderProps) {
+export function SiteOgBackgroundUploader({ type, currentUrl, onSuccess, bindings }: SiteOgBackgroundUploaderProps) {
   const t = useTranslations('adminSettings.site');
   const tCommonNotifications = useTranslations('common.notifications');
   const uploadType = SITE_ASSET_TO_UPLOAD_TYPE[type];
   const config = UPLOAD_CONFIGS[uploadType];
-  const { upload, isUploading } = useUpload(uploadType);
+  const uploadTransport = useUpload(uploadType);
+  const { isUploading } = uploadTransport;
+  const upload = bindings?.upload ?? uploadTransport.upload;
   const [imageUrl, setImageUrl] = useState(currentUrl);
   const [uploadProgress, setUploadProgress] = useState(0);
 
@@ -37,32 +41,32 @@ export function SiteOgBackgroundUploader({ type, currentUrl, onSuccess }: SiteOg
   }, [currentUrl]);
 
   const setAsset = useMutation({
-    mutationFn: (fileId: string) => setSiteAssetAction(type, fileId),
+    mutationFn: (fileId: string) => (bindings?.set ?? setSiteAssetAction)(type, fileId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       if (result.warning) {
-        notifications.show({ message: result.warning, color: 'orange' });
+        notifications.show({ message: result.warning, tone: 'warning' });
       } else {
-        notifications.show({ message: t('assets.uploaded', { label }), color: 'green' });
+        notifications.show({ message: t('assets.uploaded', { label }), tone: 'positive' });
       }
       onSuccess?.(result.ogGenerationRunId);
     },
   });
 
   const deleteAsset = useMutation({
-    mutationFn: () => deleteSiteAssetAction(type),
+    mutationFn: () => (bindings?.remove ?? deleteSiteAssetAction)(type),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       if (result.warning) {
-        notifications.show({ message: result.warning, color: 'orange' });
+        notifications.show({ message: result.warning, tone: 'warning' });
       } else {
-        notifications.show({ message: t('assets.removed', { label }), color: 'yellow' });
+        notifications.show({ message: t('assets.removed', { label }), tone: 'positive' });
       }
       setImageUrl(null);
       onSuccess?.(result.ogGenerationRunId);
@@ -83,7 +87,7 @@ export function SiteOgBackgroundUploader({ type, currentUrl, onSuccess }: SiteOg
     } catch (error) {
       notifications.show({
         message: error instanceof Error ? error.message : tCommonNotifications('uploadFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     } finally {
       setUploadProgress(0);
@@ -99,8 +103,6 @@ export function SiteOgBackgroundUploader({ type, currentUrl, onSuccess }: SiteOg
       isRemoving={deleteAsset.isPending}
       onUpload={handleUpload}
       onRemove={() => deleteAsset.mutate()}
-      aspectRatio={1200 / 630}
-      previewMinHeight={120}
       label={label}
       acceptMimeTypes={getUploadSelectionMimeTypes(uploadType)}
       maxSize={config.maxSize}

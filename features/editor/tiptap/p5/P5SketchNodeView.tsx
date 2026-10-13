@@ -1,8 +1,15 @@
 'use client';
 
+import { SectionCard as ExecutableSurface } from '@/components/core/Section';
+import {
+  LayoutInset as ExecutableInset,
+  LayoutStack as EditorDsLayoutStack,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+
 import { useCallback, useMemo, useRef } from 'react';
 import { NodeViewContent, NodeViewWrapper, type NodeViewProps } from '@tiptap/react';
-import { Stack } from '@mantine/core';
+
 import { ExecutableBlockTitle, ExecutableRuntimeControls } from '@/features/executable/ExecutableRuntimeControls';
 import { useBlockResize } from '@/features/editor/hooks/useBlockResize';
 import { EditorMediaBlockFrame } from '@/features/editor/ui/EditorMediaBlockShell';
@@ -153,75 +160,86 @@ export function P5SketchNodeView({
         resizeRightLabel={labels.resizeRight}
       >
         <div className={classes.root} data-testid="p5-content">
-          <div className={classes.header}>
-            <ExecutableBlockTitle
-              title={title}
-              fallback={labels.title}
-              editable={canEditTitle}
-              onChange={(nextTitle) => updateAttributes({ title: nextTitle })}
-            />
-          </div>
+          <ExecutableSurface padding="none" withBorder clip>
+            <div className={classes.header}>
+              <ExecutableSurface padding="none" appearance="muted" border="block-end">
+                <ExecutableInset block="xxs" inline="xs">
+                  <ExecutableBlockTitle
+                    title={title}
+                    fallback={labels.title}
+                    editable={canEditTitle}
+                    onChange={(nextTitle) => updateAttributes({ title: nextTitle })}
+                  />
+                </ExecutableInset>
+              </ExecutableSurface>
+            </div>
 
-          <Stack className={classes.body} data-view-mode={mode} gap={0}>
-            <P5PreviewSurface
-              key={revision}
-              source={source}
-              height={previewHeight}
-              revision={revision}
-              active={running}
-              runtimeFactory={runtimeFactory}
-              labels={labels}
-              onRuntime={setRuntime}
-              capabilities={capabilities}
-              onInactive={markInactive}
-            />
-
-            <ExecutableRuntimeControls
-              className={classes.controls}
-              type="p5Sketch"
-              labels={labels}
-              running={running}
-              onRun={restart}
-              onStop={stop}
-              onRestart={restart}
-              capabilityControl={
-                <P5CapabilityControl
-                  capabilities={capabilities}
-                  editable={canEditNeutral}
-                  labels={labels}
-                  suggestedCapabilities={suggestedCapabilities}
-                  onToggle={toggleCapability}
-                />
-              }
-              sourceControl={{ label: labels.source, expanded: codeVisible, onClick: toggleSource }}
-              onResetOriginal={codeVisible ? resetOriginal : undefined}
-              resetDisabled={!hasDraftChanges && temporarySource === originalSource}
-              copyControl={
-                codeVisible ? { label: copied ? labels.copied : labels.copy, onClick: copySource } : undefined
-              }
-              applyControl={
-                mode === 'edit' ? { label: labels.apply, disabled: !hasDraftChanges, onClick: applyDraft } : undefined
-              }
-            />
-
-            {codeVisible ? (
-              <Stack gap={0}>
-                <MonacoSourceEditor
-                  className={classes.editor}
-                  value={mode === 'edit' ? draftSource : source}
-                  language="javascript"
-                  ariaLabel={labels.sourceInput}
-                  modelPath={`p5/${blockId}.js`}
+            <div className={classes.body} data-view-mode={mode}>
+              <EditorDsLayoutStack gap="none">
+                <P5PreviewSurface
+                  key={revision}
+                  source={source}
                   height={previewHeight}
-                  maxLength={maxSourceLength}
-                  onChange={mode === 'edit' ? setDraftSource : undefined}
-                  onApply={mode === 'edit' ? applyDraft : undefined}
-                  onEscape={canEditNeutral ? selectBlock : undefined}
-                  readOnly={mode !== 'edit'}
+                  revision={revision}
+                  active={running}
+                  runtimeFactory={runtimeFactory}
+                  labels={labels}
+                  onRuntime={setRuntime}
+                  capabilities={capabilities}
+                  onInactive={markInactive}
                 />
-              </Stack>
-            ) : null}
-          </Stack>
+
+                <ExecutableInset block="xxs" inline="xs">
+                  <ExecutableRuntimeControls
+                    type="p5Sketch"
+                    labels={labels}
+                    running={running}
+                    onRun={restart}
+                    onStop={stop}
+                    onRestart={restart}
+                    capabilityControl={
+                      <P5CapabilityControl
+                        capabilities={capabilities}
+                        editable={canEditNeutral}
+                        labels={labels}
+                        suggestedCapabilities={suggestedCapabilities}
+                        onToggle={toggleCapability}
+                      />
+                    }
+                    sourceControl={{ label: labels.source, expanded: codeVisible, onClick: toggleSource }}
+                    onResetOriginal={codeVisible ? resetOriginal : undefined}
+                    resetDisabled={!hasDraftChanges && temporarySource === originalSource}
+                    copyControl={
+                      codeVisible ? { label: copied ? labels.copied : labels.copy, onClick: copySource } : undefined
+                    }
+                    applyControl={
+                      mode === 'edit'
+                        ? { label: labels.apply, disabled: !hasDraftChanges, onClick: applyDraft }
+                        : undefined
+                    }
+                  />
+                </ExecutableInset>
+
+                {codeVisible ? (
+                  <DsLayoutStack gap="none">
+                    <MonacoSourceEditor
+                      className={classes.editor}
+                      value={mode === 'edit' ? draftSource : source}
+                      language="javascript"
+                      ariaLabel={labels.sourceInput}
+                      modelPath={`p5/${blockId}.js`}
+                      height={previewHeight}
+                      maxLength={maxSourceLength}
+                      onChange={mode === 'edit' ? setDraftSource : undefined}
+                      onApply={mode === 'edit' ? applyDraft : undefined}
+                      onEscape={canEditNeutral ? selectBlock : undefined}
+                      readOnly={mode !== 'edit'}
+                    />
+                  </DsLayoutStack>
+                ) : null}
+              </EditorDsLayoutStack>
+            </div>
+          </ExecutableSurface>
         </div>
       </EditorMediaBlockFrame>
       <NodeViewContent className={classes.content} aria-hidden="true" />

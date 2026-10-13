@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { preloadOnDemandOverlays } from '@/components/core/on-demand-overlays';
+
 import { LocationPlaceMenu } from './LocationPlaceMenu';
 import { LocationPlaceMetadataRows } from './LocationPlaceMetadataRows';
 
@@ -121,7 +123,9 @@ function renderLocationPlaceMenu(node: ReactNode) {
   act(() => {
     root?.render(
       <NextIntlClientProvider locale="en" messages={messages}>
-        <MantineProvider>{node}</MantineProvider>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
+          {node}
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
   });
@@ -145,6 +149,9 @@ async function clickElement(element: Element | null | undefined) {
 
   await flushUpdates();
 }
+
+// The menu loads its overlay code on first interaction; tests open it synchronously.
+beforeAll(() => preloadOnDemandOverlays(), 30000);
 
 describe('LocationPlaceMenu', () => {
   it('shows Google and Naver map options and opens the selected provider link', async () => {

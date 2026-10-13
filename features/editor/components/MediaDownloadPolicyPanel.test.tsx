@@ -1,6 +1,7 @@
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import type { FileDownloadPolicyEditorAdapter } from '@/features/media-download/FileDownloadPolicyEditor';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
@@ -37,7 +38,7 @@ vi.mock('@/lib/actions/file-download-access', () => ({
 }));
 
 function renderPanel(panel: React.ReactNode): string {
-  return renderToStaticMarkup(<MantineProvider>{panel}</MantineProvider>);
+  return renderToStaticMarkup(<DesignSystemProvider forceColorScheme="light">{panel}</DesignSystemProvider>);
 }
 
 const adapter = {} as FileDownloadPolicyEditorAdapter;

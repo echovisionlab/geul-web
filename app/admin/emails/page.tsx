@@ -1,19 +1,20 @@
 'use client';
+import { SupportingText, Heading as DsHeading } from '@/components/core/Typography';
+
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 
 import { IconChartBar, IconDatabaseOff } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Stack, Text, Title } from '@mantine/core';
+
 import { Alert } from '@/components/core/Alert';
 
 export default function AdminEmailsPage() {
   const tPage = useTranslations('adminList.emailEvents');
 
   return (
-    <Stack>
-      <Title order={2}>{tPage('title')}</Title>
-      <Text size="sm" c="dimmed">
-        {tPage('description')}
-      </Text>
+    <DsLayoutStack>
+      <DsHeading level={2}>{tPage('title')}</DsHeading>
+      <SupportingText tone="secondary">{tPage('description')}</SupportingText>
 
       <Alert icon={<IconDatabaseOff size={18} />} title={tPage('databaseLogsRemovedTitle')}>
         {tPage('databaseLogsRemovedDescription')}
@@ -22,6 +23,6 @@ export default function AdminEmailsPage() {
       <Alert icon={<IconChartBar size={18} />} title={tPage('dashboardTitle')}>
         {tPage('dashboardDescription')}
       </Alert>
-    </Stack>
+    </DsLayoutStack>
   );
 }

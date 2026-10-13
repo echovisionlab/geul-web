@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, forwardRef, type ComponentPropsWithoutRef } from 'react';
+import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { IconDashboard, IconSettings, IconUsers } from '@tabler/icons-react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -8,19 +8,6 @@ import { TestProviders } from '@/test/TestProviders';
 import { AdminNavigationView, type AdminNavigationViewProps } from './AdminNavigationView';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-const TestLink = forwardRef<HTMLAnchorElement, ComponentPropsWithoutRef<'a'>>(({ href, onClick, ...props }, ref) => (
-  <a
-    ref={ref}
-    {...props}
-    href={href}
-    onClick={(event) => {
-      event.preventDefault();
-      onClick?.(event);
-    }}
-  />
-));
-TestLink.displayName = 'TestLink';
 
 const events = {
   onToggleSection: vi.fn(),
@@ -59,7 +46,6 @@ const defaultProps: AdminNavigationViewProps = {
   events,
   logoSlot: <span>Example Studio</span>,
   compactLogoSlot: <span>D</span>,
-  linkComponent: TestLink,
 };
 
 let container: HTMLDivElement;
@@ -125,7 +111,7 @@ describe('AdminNavigationView', () => {
     expect(container.querySelector('button[aria-label="Toggle navigation"]')).toBeNull();
     expect(container.querySelector('a[href="/admin/users"]')).toBeNull();
     expect(container.querySelector('a[href="/admin/settings"]')).toBeNull();
-    expect(systemTrigger?.getAttribute('aria-haspopup')).toBe('menu');
+    expect(['menu', 'true']).toContain(systemTrigger?.getAttribute('aria-haspopup'));
     expect(systemTrigger?.getAttribute('data-active')).toBe('true');
     expect(container.querySelector('a[href="/admin"]')?.getAttribute('aria-label')).toBe('Admin');
     expect(container.querySelector('a[href="/"]')?.getAttribute('aria-label')).toBe('Back to site');

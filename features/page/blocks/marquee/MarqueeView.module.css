@@ -12,7 +12,7 @@
   display: flex;
   width: max-content;
   animation-name: marquee-scroll-left;
-  animation-duration: var(--marquee-duration);
+  animation-duration: var(--_marquee-duration);
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }
@@ -30,12 +30,37 @@
   animation-play-state: paused;
 }
 
+.root:focus-within .track,
+.root[data-static='true'] .track {
+  animation-play-state: paused;
+}
+
+/* Keep the animated lane mounted so an explicit resume retains its position. */
+.root[data-static='true'] .track {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.staticGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--_marquee-gap);
+}
+
+.staticGroup .item {
+  max-inline-size: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .group {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
-  gap: var(--marquee-gap);
-  padding-inline-end: var(--marquee-gap);
+  gap: var(--_marquee-gap);
+  padding-inline-end: var(--_marquee-gap);
 }
 
 .measureGroup {
@@ -51,18 +76,10 @@
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
-  min-height: var(--marquee-item-height);
-  color: var(--mantine-color-text);
+  min-height: var(--_marquee-item-height);
+  color: var(--geul-text-primary);
   text-decoration: none;
   white-space: nowrap;
-}
-
-.link {
-  cursor: pointer;
-}
-
-.link:hover {
-  color: var(--mantine-color-anchor);
 }
 
 .logo {
@@ -70,30 +87,30 @@
   flex: 0 0 auto;
   width: auto;
   max-width: min(240px, 42vw);
-  max-height: var(--marquee-item-height);
+  max-height: var(--_marquee-item-height);
   border: 0;
   object-fit: contain;
 }
 
 /* MarqueeLogoImage sets this only for loaded logos whose CSS box collapsed to 0x0. */
 .logo[data-size-fallback='true'] {
-  height: var(--marquee-item-height);
+  height: var(--_marquee-item-height);
 }
 
 .root[data-logo-scale='fill-height'] .logo {
-  height: var(--marquee-item-height);
+  height: var(--_marquee-item-height);
   width: auto;
 }
 
 .text {
-  font-size: var(--marquee-text-size);
-  font-weight: 600;
-  line-height: 1;
+  font-size: var(--_marquee-text-size);
+  font-weight: var(--geul-font-weight-strong);
+  line-height: var(--geul-line-height-xs);
 }
 
-@media (max-width: 48em) {
+@media (width < $mantine-breakpoint-sm) {
   .text {
-    font-size: min(var(--marquee-text-size), 18px);
+    font-size: min(var(--_marquee-text-size), var(--geul-font-size-lg));
   }
 }
 

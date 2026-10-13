@@ -1,7 +1,8 @@
 'use client';
 
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
 import type { ReactNode } from 'react';
-import { Text } from '@mantine/core';
+
 import { useTranslations } from 'next-intl';
 import { ActiveEditLocaleContentPreviewView } from './ActiveEditLocaleContentPreviewView';
 
@@ -23,11 +24,14 @@ export function ActiveEditLocaleContentPreview({
   const t = useTranslations('translationPanel.activeEditLocale');
   return (
     <ActiveEditLocaleContentPreviewView localeLabel={localeLabel} hasLiveRow={hasLiveRow} loading={loading}>
-      {children ?? (
-        <Text size="sm" c="dimmed" role="status">
-          {contentPreview || t('bodyPreviewEmpty')}
-        </Text>
-      )}
+      {children ??
+        (contentPreview ? (
+          <DsText size="sm" tone="secondary">
+            {contentPreview}
+          </DsText>
+        ) : (
+          <SupportingText role="status">{t('bodyPreviewEmpty')}</SupportingText>
+        ))}
     </ActiveEditLocaleContentPreviewView>
   );
 }

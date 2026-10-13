@@ -1,9 +1,8 @@
 'use client';
-
-import { SimpleGrid, Stack, Text } from '@mantine/core';
+import { Text as DsText } from '@/components/core/Typography';
 import { SegmentedControl } from '@/components/core/Input';
+import { LayoutInline, LayoutStack } from '@/components/core/Layout';
 import type { DocumentChromeLayoutViewModel, DocumentContentHeightViewModel, DocumentLayoutViewModel } from './types';
-
 export interface ContentLayoutFieldLabels {
   contentHeight: string;
   content: string;
@@ -13,24 +12,23 @@ export interface ContentLayoutFieldLabels {
   flow: string;
   pinned: string;
 }
-
 export interface ContentLayoutFieldViewProps {
   value: DocumentLayoutViewModel;
   onChange: (value: DocumentLayoutViewModel) => void;
   labels: ContentLayoutFieldLabels;
   disabled?: boolean;
 }
-
 export function ContentLayoutFieldView({ value, onChange, labels, disabled }: ContentLayoutFieldViewProps) {
   return (
-    <SimpleGrid cols={{ base: 1, md: 3 }} spacing="md">
-      <Stack gap={4}>
-        <Text size="xs" fw={500}>
+    <LayoutInline gap="md" align="start" wrap="wrap">
+      <LayoutStack gap="xxs" align="start">
+        <DsText size="xs" weight="medium">
           {labels.contentHeight}
-        </Text>
+        </DsText>
         <SegmentedControl
-          fullWidth
+          aria-label={labels.contentHeight}
           size="xs"
+          density="compact"
           value={value.contentHeight}
           disabled={disabled}
           data={[
@@ -41,14 +39,15 @@ export function ContentLayoutFieldView({ value, onChange, labels, disabled }: Co
             onChange({ ...value, contentHeight: contentHeight as DocumentContentHeightViewModel })
           }
         />
-      </Stack>
-      <Stack gap={4}>
-        <Text size="xs" fw={500}>
+      </LayoutStack>
+      <LayoutStack gap="xxs" align="start">
+        <DsText size="xs" weight="medium">
           {labels.pageChrome}
-        </Text>
+        </DsText>
         <SegmentedControl
-          fullWidth
+          aria-label={labels.pageChrome}
           size="xs"
+          density="compact"
           value={value.pageChrome}
           disabled={disabled}
           data={[
@@ -57,14 +56,15 @@ export function ContentLayoutFieldView({ value, onChange, labels, disabled }: Co
           ]}
           onChange={(pageChrome) => onChange({ ...value, pageChrome: pageChrome as DocumentChromeLayoutViewModel })}
         />
-      </Stack>
-      <Stack gap={4}>
-        <Text size="xs" fw={500}>
+      </LayoutStack>
+      <LayoutStack gap="xxs" align="start">
+        <DsText size="xs" weight="medium">
           {labels.footer}
-        </Text>
+        </DsText>
         <SegmentedControl
-          fullWidth
+          aria-label={labels.footer}
           size="xs"
+          density="compact"
           value={value.footer}
           disabled={disabled}
           data={[
@@ -73,7 +73,7 @@ export function ContentLayoutFieldView({ value, onChange, labels, disabled }: Co
           ]}
           onChange={(footer) => onChange({ ...value, footer: footer as DocumentChromeLayoutViewModel })}
         />
-      </Stack>
-    </SimpleGrid>
+      </LayoutStack>
+    </LayoutInline>
   );
 }

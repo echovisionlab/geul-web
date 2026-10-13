@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { PostAction } from '@echovisionlab/geul-proto/secure/post_pb.ts';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 import type { StatusOption } from '@/features/editor/EditorHeader';
 import {
@@ -113,14 +113,14 @@ export function usePostLifecycle({
     if (!error) {
       return false;
     }
-    notifications.show({ message: error, color: 'red' });
+    notifications.show({ message: error, tone: 'danger' });
     return true;
   }, []);
 
   const runAfterEditorSave = useCallback(
     <T>(action: () => Promise<T>) =>
       runPostLifecycleActionAfterSave(postId, lifecycleCommandInFlight, action, () =>
-        notifications.show({ message: tCommonNotifications('saveFailed'), color: 'red' }),
+        notifications.show({ message: tCommonNotifications('saveFailed'), tone: 'danger' }),
       ),
     [postId, tCommonNotifications],
   );
@@ -138,7 +138,7 @@ export function usePostLifecycle({
       setStatus('published');
       setScheduledAt(null);
       setScheduledTimeZone(null);
-      notifications.show({ message: t('notifications.published'), color: 'green' });
+      notifications.show({ message: t('notifications.published'), tone: 'positive' });
       router.refresh();
     },
   });
@@ -153,7 +153,7 @@ export function usePostLifecycle({
         return;
       }
       setStatus('draft');
-      notifications.show({ message: t('notifications.unpublished'), color: 'yellow' });
+      notifications.show({ message: t('notifications.unpublished'), tone: 'positive' });
       router.refresh();
     },
   });
@@ -168,7 +168,7 @@ export function usePostLifecycle({
         return;
       }
       setStatus('archived');
-      notifications.show({ message: t('notifications.archived'), color: 'orange' });
+      notifications.show({ message: t('notifications.archived'), tone: 'positive' });
       router.refresh();
     },
   });
@@ -187,7 +187,7 @@ export function usePostLifecycle({
       setScheduledAt(resolution.instant.toISOString());
       setScheduledTimeZone(resolution.timeZone);
       closeSchedule();
-      notifications.show({ message: t('notifications.scheduled'), color: 'green' });
+      notifications.show({ message: t('notifications.scheduled'), tone: 'positive' });
       router.refresh();
     },
   });
@@ -204,7 +204,7 @@ export function usePostLifecycle({
       setStatus('draft');
       setScheduledAt(null);
       setScheduledTimeZone(null);
-      notifications.show({ message: t('notifications.scheduleCancelled'), color: 'yellow' });
+      notifications.show({ message: t('notifications.scheduleCancelled'), tone: 'positive' });
       router.refresh();
     },
   });
@@ -219,7 +219,7 @@ export function usePostLifecycle({
         return;
       }
       setStatus('published');
-      notifications.show({ message: t('notifications.republished'), color: 'green' });
+      notifications.show({ message: t('notifications.republished'), tone: 'positive' });
       router.refresh();
     },
   });
@@ -230,7 +230,7 @@ export function usePostLifecycle({
         reportActionError(result.error);
         return;
       }
-      notifications.show({ message: t('notifications.deleted'), color: 'red' });
+      notifications.show({ message: t('notifications.deleted'), tone: 'positive' });
       router.push('/my/posts');
     },
   });

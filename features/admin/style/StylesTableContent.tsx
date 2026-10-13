@@ -1,7 +1,8 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
+
 import { LabelBadge } from '@/components/core/Badge';
 import {
   ServerDataTableSelectableSection,
@@ -22,13 +23,20 @@ interface StyleRow {
 }
 
 interface StylesTableContentProps {
+  deleteAction?: typeof deleteStyleAction;
   result: ServerDataTableSelectableSectionProps<StyleRow>['result'];
   searchPlaceholder: string;
   filterFields: ServerDataTableSelectableSectionProps<StyleRow>['filterFields'];
   sortFields: ServerDataTableSelectableSectionProps<StyleRow>['sortFields'];
 }
 
-export function StylesTableContent({ result, searchPlaceholder, filterFields, sortFields }: StylesTableContentProps) {
+export function StylesTableContent({
+  result,
+  searchPlaceholder,
+  filterFields,
+  sortFields,
+  deleteAction = deleteStyleAction,
+}: StylesTableContentProps) {
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
   const tAdmin = useTranslations('adminList');
@@ -38,12 +46,12 @@ export function StylesTableContent({ result, searchPlaceholder, filterFields, so
       header: tCommon('entities.style'),
       cell: (row: StyleRow) => (
         <div>
-          <Text size="sm" fw={500}>
+          <DsText size="sm" weight="medium">
             {row.name}
-          </Text>
-          <Text size="xs" c="dimmed">
+          </DsText>
+          <DsText size="xs" tone="secondary">
             /{row.slug}
-          </Text>
+          </DsText>
         </div>
       ),
     },
@@ -51,9 +59,9 @@ export function StylesTableContent({ result, searchPlaceholder, filterFields, so
       key: 'description',
       header: tCommon('labels.description'),
       cell: (row: StyleRow) => (
-        <Text size="sm" c="dimmed" lineClamp={1}>
+        <DsText size="sm" tone="secondary" lines={1}>
           {row.description || '-'}
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -65,9 +73,9 @@ export function StylesTableContent({ result, searchPlaceholder, filterFields, so
       key: 'createdAt',
       header: tCommon('labels.created'),
       cell: (row: StyleRow) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.createdAt} />
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -91,7 +99,7 @@ export function StylesTableContent({ result, searchPlaceholder, filterFields, so
       sortFields={sortFields}
       bulkDelete={{
         entityLabel: tCommonEntities('styles'),
-        deleteAction: deleteStyleAction,
+        deleteAction,
         getRowLabel: (row) => row.name || row.slug || row.id,
       }}
     />

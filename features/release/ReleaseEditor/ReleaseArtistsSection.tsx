@@ -4,7 +4,7 @@ import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { listArtistsAction } from '@/lib/actions/artist';
 import { setReleaseArtistsAction } from '@/lib/actions/release';
 import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
@@ -52,13 +52,13 @@ export function ReleaseArtistsSection({
     onSettled: (result, error) => onMutationSettled?.(!error && !result?.error),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       publishEditorEntityChange(`release:${releaseId}`);
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: tCommon('entities.artists') }),
-        color: 'green',
+        tone: 'positive',
       });
     },
   });

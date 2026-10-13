@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { NextIntlClientProvider } from 'next-intl';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import enMessages from '@/messages/en.json';
 import { PrintButton } from './PrintButton';
@@ -31,16 +32,17 @@ describe('PrintButton', () => {
     act(() => {
       root?.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <PrintButton />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
 
     const button = container.querySelector<HTMLButtonElement>('button[aria-label="Print"]');
     expect(button).not.toBeNull();
-    expect(button?.classList.contains('print-hide')).toBe(true);
+    // Core owns print omission through its print-visibility contract.
+    expect(button?.getAttribute('data-print-visibility')).toBe('hidden');
     act(() => button?.click());
     expect(print).toHaveBeenCalledOnce();
   });

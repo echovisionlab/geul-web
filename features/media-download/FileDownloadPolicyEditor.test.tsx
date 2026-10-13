@@ -4,7 +4,7 @@ import { act, StrictMode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
 import type {
@@ -15,7 +15,7 @@ import type {
 } from '@/lib/types/file-download-access';
 import { FileDownloadPolicyEditor, type FileDownloadPolicyEditorAdapter } from './FileDownloadPolicyEditor';
 
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -162,7 +162,8 @@ function expectSelectedAccess(label: string) {
 async function selectOption(label: string, option: string) {
   const input = inputForLabel(label);
   await act(async () => {
-    input.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    input.focus();
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', code: 'ArrowDown', bubbles: true }));
     await Promise.resolve();
   });
   const optionElement = Array.from(document.body.querySelectorAll<HTMLElement>('[role="option"]')).find(
@@ -439,9 +440,15 @@ describe('FileDownloadPolicyEditor', () => {
     expect(headerControl?.closest('.mantine-Card-root')).toBeNull();
     expectSelectedAccess('Signed-in users');
     expect(audienceInput).toBeInstanceOf(HTMLInputElement);
-    expect(audienceInput?.getAttribute('placeholder')).toBeNull();
+    expect(audienceInput?.getAttribute('placeholder') ?? '').toBe('');
     expect(host?.textContent).not.toContain('Control who can download the original file.');
-    expect(host?.textContent).not.toContain('Any signed-in user can download this file.');
+    const description = headerControl?.querySelector<HTMLElement>('[data-file-download-access-description]');
+    expect(audienceInput?.getAttribute('aria-describedby')?.split(' ')).toContain(description?.id);
+    expect(description?.textContent).toBe('Any signed-in user can download this file.');
+    expect(description?.className).toContain('visuallyHidden');
+    const visualCopy = headerControl?.cloneNode(true) as HTMLElement;
+    visualCopy.querySelector('[data-file-download-access-description]')?.remove();
+    expect(visualCopy.textContent).not.toContain('Any signed-in user can download this file.');
     expect(host?.textContent).not.toContain('Save access');
   });
 
@@ -578,13 +585,18 @@ describe('FileDownloadPolicyEditor', () => {
 
     renderEditor(adapter);
     await settle();
+    const synchronizationStatus = host?.querySelector('[data-file-download-policy-sync]');
+    expect(synchronizationStatus?.textContent).toBe('');
     vi.useFakeTimers();
     await selectOption('Download access', 'Signed-in users');
+    expect(synchronizationStatus?.textContent).toBe('Syncing...');
     await flushAutosave();
     await settle();
 
     expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'authenticated', [], expect.any(Object));
     expectSelectedAccess('Signed-in users');
+    expect(host?.querySelector('[data-file-download-policy-sync]')).toBe(synchronizationStatus);
+    expect(synchronizationStatus?.textContent).toBe('Synced');
     expect(host?.textContent).toContain('Synced');
     expect(host?.textContent).not.toContain('Save access');
   });
@@ -849,7 +861,7 @@ describe('FileDownloadPolicyEditor', () => {
     expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'disabled', [], expect.any(Object));
     expect(notifications.show).toHaveBeenCalledWith({
       autoClose: false,
-      color: 'red',
+      tone: 'danger',
       title: 'Download access',
       message: 'Download access could not be saved. Try again',
     });
@@ -884,7 +896,7 @@ describe('FileDownloadPolicyEditor', () => {
     expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'disabled', [], expect.any(Object));
     expect(notifications.show).toHaveBeenCalledWith({
       autoClose: false,
-      color: 'red',
+      tone: 'danger',
       title: 'Download access',
       message: 'A newer version was saved while this editor was open. Reload before continuing to edit.',
     });
@@ -1191,7 +1203,9 @@ describe('FileDownloadPolicyEditor', () => {
       await vi.advanceTimersByTimeAsync(200);
     });
 
-    const loadingStatus = host?.querySelector('[role="status"][aria-live="polite"]');
+    const loadingStatus = [...(host?.querySelectorAll('[role="status"][aria-live="polite"]') ?? [])].find((status) =>
+      status.textContent?.includes('Loading download access'),
+    );
     expect(loadingStatus?.textContent).toContain('Loading download access');
     expect(loadSegments).toHaveBeenCalledTimes(3);
 
@@ -1429,6 +1443,7 @@ describe('FileDownloadPolicyEditor', () => {
       candidate.textContent?.includes('Download access could not be saved'),
     );
     expect(saveError).toBeTruthy();
+    expect(inputForLabel('Download access').getAttribute('aria-describedby')?.split(' ')).toContain(saveError?.id);
     expect(host?.textContent).not.toContain('Synced');
     expect(host?.querySelector('[data-file-download-policy-presentation="media-header"]')).toBeTruthy();
     expect(host?.textContent).not.toContain('Save access');

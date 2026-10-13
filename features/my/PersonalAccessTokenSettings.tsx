@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
 import { startPrivilegedReauthentication } from '@/features/auth/login-redirect';
 import {
@@ -31,7 +31,24 @@ import {
   type PersonalAccessTokenViewModel,
 } from './ui/PersonalAccessTokenSettings';
 
+export interface PersonalAccessTokenBindings {
+  createAccountPersonalAccessTokenAction: typeof createAccountPersonalAccessTokenAction;
+  createMyPersonalAccessTokenAction: typeof createMyPersonalAccessTokenAction;
+  deleteAccountPersonalAccessTokenAction: typeof deleteAccountPersonalAccessTokenAction;
+  deleteMyPersonalAccessTokenAction: typeof deleteMyPersonalAccessTokenAction;
+  regenerateAccountPersonalAccessTokenAction: typeof regenerateAccountPersonalAccessTokenAction;
+  regenerateMyPersonalAccessTokenAction: typeof regenerateMyPersonalAccessTokenAction;
+}
+const defaultBindings: PersonalAccessTokenBindings = {
+  createAccountPersonalAccessTokenAction,
+  createMyPersonalAccessTokenAction,
+  deleteAccountPersonalAccessTokenAction,
+  deleteMyPersonalAccessTokenAction,
+  regenerateAccountPersonalAccessTokenAction,
+  regenerateMyPersonalAccessTokenAction,
+};
 interface PersonalAccessTokenSettingsProps {
+  bindings?: PersonalAccessTokenBindings;
   subjectId: string;
   initialPersonalAccessTokens: PersonalAccessTokenSettingsItem[];
   initialLoadFailed?: boolean;
@@ -48,6 +65,7 @@ function mutationContinuation(
 }
 
 export function PersonalAccessTokenSettings({
+  bindings = defaultBindings,
   subjectId,
   initialPersonalAccessTokens,
   initialLoadFailed = false,
@@ -56,6 +74,7 @@ export function PersonalAccessTokenSettings({
   return (
     <SubjectPersonalAccessTokenSettings
       key={`${mode}:${subjectId}`}
+      bindings={bindings}
       subjectId={subjectId}
       initialPersonalAccessTokens={initialPersonalAccessTokens}
       initialLoadFailed={initialLoadFailed}
@@ -65,6 +84,7 @@ export function PersonalAccessTokenSettings({
 }
 
 function SubjectPersonalAccessTokenSettings({
+  bindings = defaultBindings,
   subjectId,
   initialPersonalAccessTokens,
   initialLoadFailed = false,
@@ -107,7 +127,7 @@ function SubjectPersonalAccessTokenSettings({
         startPrivilegedReauthentication(personalAccessTokenReauthenticationReturnTo(pathname));
         return;
       }
-      notifications.show({ message: t('requestFailed'), color: 'red' });
+      notifications.show({ message: t('requestFailed'), tone: 'danger' });
     },
     [pathname, subjectId, t],
   );
@@ -118,8 +138,8 @@ function SubjectPersonalAccessTokenSettings({
     try {
       const result =
         mode === 'admin'
-          ? await createAccountPersonalAccessTokenAction(subjectId)
-          : await createMyPersonalAccessTokenAction();
+          ? await bindings.createAccountPersonalAccessTokenAction(subjectId)
+          : await bindings.createMyPersonalAccessTokenAction();
       if (!result.personalAccessToken || !result.secret) {
         handleError(result.error, continuation);
         return false;
@@ -142,8 +162,8 @@ function SubjectPersonalAccessTokenSettings({
       try {
         const result =
           mode === 'admin'
-            ? await regenerateAccountPersonalAccessTokenAction(subjectId, personalAccessTokenId)
-            : await regenerateMyPersonalAccessTokenAction(personalAccessTokenId);
+            ? await bindings.regenerateAccountPersonalAccessTokenAction(subjectId, personalAccessTokenId)
+            : await bindings.regenerateMyPersonalAccessTokenAction(personalAccessTokenId);
         if (!result.personalAccessToken || !result.secret) {
           handleError(result.error, continuation);
           return false;
@@ -165,8 +185,8 @@ function SubjectPersonalAccessTokenSettings({
       try {
         const result =
           mode === 'admin'
-            ? await deleteAccountPersonalAccessTokenAction(subjectId, personalAccessTokenId)
-            : await deleteMyPersonalAccessTokenAction(personalAccessTokenId);
+            ? await bindings.deleteAccountPersonalAccessTokenAction(subjectId, personalAccessTokenId)
+            : await bindings.deleteMyPersonalAccessTokenAction(personalAccessTokenId);
         if (!result.deleted) {
           handleError(result.error, continuation);
           return false;

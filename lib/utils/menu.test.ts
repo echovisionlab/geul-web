@@ -1,6 +1,13 @@
 import { LinkType, type MenuItem } from '@echovisionlab/geul-proto/public/manifest_pb.ts';
 import { describe, expect, it } from 'vitest';
-import { isMenuUrlActive, resolveMenuUrl } from './menu';
+import { isMenuUrlActive, MENU_LINK_TYPE, resolveMenuUrl } from './menu';
+
+describe('MENU_LINK_TYPE', () => {
+  it('mirrors every generated LinkType wire value', () => {
+    const generated = Object.fromEntries(Object.entries(LinkType).filter(([name]) => Number.isNaN(Number(name))));
+    expect(MENU_LINK_TYPE).toEqual(generated);
+  });
+});
 
 describe('isMenuUrlActive', () => {
   it('matches exact links and slash-delimited descendant paths', () => {

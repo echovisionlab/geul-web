@@ -3,15 +3,15 @@
 import type { CSSProperties } from 'react';
 import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import type { AspectRatioConfig } from '@/components/core/ImageCropper';
 import { ImageUploadCropField, type ImageUploadRejection } from '@/components/core/ImageUpload';
 import { getUploadSelectionMimeTypes, UPLOAD_CONFIGS } from '@/lib/constants/upload-config';
-import { formatFileSize, formatMimeTypes } from '@/lib/utils/upload';
+import { imageSelectionAcceptTypes } from '@/lib/utils/upload';
 import { getUploadSelectionMaxSize } from '@/lib/utils/upload-policy';
 import { useImageUploadCrop } from './useImageUploadCrop';
-
-const DEFAULT_IMAGE_UPLOAD_CONFIG = UPLOAD_CONFIGS[UploadType.FEATURED_IMAGE];
+import { useImageCropAccessibility } from '@/lib/i18n/useImageCropAccessibility';
+import { OG_IMAGE_ASPECT_RATIO } from '@/lib/constants/og-image';
 
 export interface ImageUploadCropControllerProps {
   imageUrl: string | null;
@@ -42,22 +42,29 @@ export function ImageUploadCropController({
   isRemoving,
   onUpload,
   onRemove,
-  aspectRatio = 16 / 9,
+  aspectRatio = OG_IMAGE_ASPECT_RATIO,
   previewWidth = '100%',
   previewMaxWidth,
-  previewMinHeight = 120,
+  previewMinHeight,
   label,
-  acceptMimeTypes = getUploadSelectionMimeTypes(UploadType.FEATURED_IMAGE),
-  maxSize = DEFAULT_IMAGE_UPLOAD_CONFIG.maxSize,
+  acceptMimeTypes,
+  maxSize,
   uploadType = UploadType.FEATURED_IMAGE,
 }: ImageUploadCropControllerProps) {
   const t = useTranslations('featuredImage');
   const tCommon = useTranslations('common');
-  const inputMaxSize = getUploadSelectionMaxSize(uploadType, 'image/jpeg', maxSize);
-  const { tempImageSrc, cropModalOpened, handleFileDrop, handleCropComplete, handleCropCancel } = useImageUploadCrop({
-    onUpload,
+  const cropAccessibility = useImageCropAccessibility(t('cropTitle'));
+  const selectedMimeTypes = acceptMimeTypes ?? getUploadSelectionMimeTypes(uploadType);
+  const inputMaxSize = getUploadSelectionMaxSize(
     uploadType,
-  });
+    'image/jpeg',
+    maxSize ?? UPLOAD_CONFIGS[uploadType].maxSize,
+  );
+  const { tempImageSrc, cropModalOpened, isPreparing, handleFileDrop, handleCropComplete, handleCropCancel } =
+    useImageUploadCrop({
+      onUpload,
+      uploadType,
+    });
 
   const handleReject = (rejections: ImageUploadRejection[]) => {
     const rejection = rejections[0];
@@ -73,40 +80,32 @@ export function ImageUploadCropController({
       message = t('errors.invalidFileType');
     }
 
-    notifications.show({ message, color: 'red' });
+    notifications.show({ message, tone: 'danger' });
   };
 
   const resolvedLabel = label ?? t('label');
-  const constraintText = tCommon('uploadField.constraints', {
-    formats: formatMimeTypes([...acceptMimeTypes]),
-    maxSize: formatFileSize(inputMaxSize),
-  });
-  const ratioLabel = formatAspectRatio(aspectRatio);
-  const emptyDescription = ratioLabel
-    ? `${t('empty.editable', { ratio: ratioLabel })} · ${constraintText}`
-    : constraintText;
-  const isPreparingImage = isUploading && uploadProgress <= 0;
+  const isPreparingImage = isPreparing || (isUploading && uploadProgress <= 0);
   const uploadStatusLabel = isPreparingImage
     ? tCommon('uploadField.status.preparingImage')
     : tCommon('uploadField.status.uploading');
 
   return (
     <ImageUploadCropField
+      cropAccessibility={cropAccessibility}
       imageUrl={imageUrl}
       cropImageSrc={tempImageSrc}
       cropOpened={cropModalOpened}
       idPrefix={idPrefix}
       canEdit={canEdit}
-      loading={isUploading}
+      loading={isUploading || isPreparing}
       progress={isPreparingImage ? undefined : uploadProgress}
       removeButtonLoading={isRemoving}
       labels={{
         field: resolvedLabel,
         imageAlt: t('alt'),
         emptyTitle: canEdit ? tCommon('actions.uploadItem', { item: resolvedLabel }) : resolvedLabel,
-        emptyDescription,
-        readOnlyDescription: t('empty.readOnly'),
-        changeHint: t('hint'),
+        emptyDescription: '',
+        readOnlyDescription: '',
         loading: uploadStatusLabel,
         removeButtonAriaLabel: t('actions.removeAria'),
         cropTitle: t('cropTitle'),
@@ -115,8 +114,8 @@ export function ImageUploadCropController({
         cropConfirm: tCommon('actions.confirm'),
         cropProcessing: tCommon('uploadField.status.preparingImage'),
       }}
-      accept={acceptMimeTypes}
-      maxSize={inputMaxSize}
+      accept={imageSelectionAcceptTypes(selectedMimeTypes)}
+      maxSize={Number.isFinite(inputMaxSize) ? inputMaxSize : undefined}
       aspectRatio={aspectRatio}
       previewWidth={previewWidth}
       previewMaxWidth={previewMaxWidth}
@@ -128,30 +127,6 @@ export function ImageUploadCropController({
       onCropClose={handleCropCancel}
     />
   );
-}
-
-function formatAspectRatio(aspectRatio: AspectRatioConfig): string | null {
-  if (aspectRatio === 'free') {
-    return null;
-  }
-
-  if (typeof aspectRatio === 'number') {
-    return formatNumericAspectRatio(aspectRatio);
-  }
-
-  return `${formatNumericAspectRatio(aspectRatio.min)}-${formatNumericAspectRatio(aspectRatio.max)}`;
-}
-
-function formatNumericAspectRatio(aspectRatio: number): string {
-  const commonRatios = [
-    [1, 1],
-    [16, 9],
-    [4, 3],
-    [9, 16],
-    [40, 21],
-  ];
-  const ratio = commonRatios.find(([width, height]) => width / height === aspectRatio);
-  return ratio ? `${ratio[0]}:${ratio[1]}` : `${aspectRatio}:1`;
 }
 
 function formatBytes(bytes: number): string {

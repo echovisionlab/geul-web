@@ -1,14 +1,18 @@
 'use client';
-
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useCallback, useEffect, useState } from 'react';
-import { Stack } from '@mantine/core';
-import type { FileRejection } from '@mantine/dropzone';
-import { ImageCropper } from '@/components/core/ImageCropper';
-import { ImageUploadField, type ImageUploadRejection } from '@/components/core/ImageUpload';
+import dynamic from 'next/dynamic';
+import { type FileRejection, ImageUploadField, type ImageUploadRejection } from '@/components/core/ImageUpload';
+import { ToolbarDensityProvider } from '@/components/core/control-context';
+import type { CropAccessibility } from '@/components/core/ImageCropper/ImageCropper';
 
+// The cropper (react-image-crop and its stylesheet) renders only after a file is chosen.
+// Loading it on demand keeps it out of every account route that shows the avatar control.
+const ImageCropper = dynamic(() => import('@/components/core/ImageCropper').then((m) => m.ImageCropper), {
+  ssr: false,
+});
 const USER_AVATAR_OUTPUT_DIMENSION = 1024;
 const USER_AVATAR_OUTPUT_QUALITY = 0.85;
-
 export interface ProfileAvatarControlLabels {
   alt: string;
   upload: string;
@@ -20,13 +24,13 @@ export interface ProfileAvatarControlLabels {
   confirm: string;
   preparing: string;
 }
-
 export interface ProfileAvatarControlProps {
   imageUrl?: string | null;
   size?: number;
   accept: readonly string[];
   maxSize: number;
   labels: ProfileAvatarControlLabels;
+  cropAccessibility?: CropAccessibility;
   disabled?: boolean;
   validateFile?: (file: File) => string | null;
   prepareFile?: (file: File) => Promise<File>;
@@ -36,7 +40,6 @@ export interface ProfileAvatarControlProps {
   onSave: (blob: Blob) => Promise<boolean>;
   onRemove?: () => Promise<boolean>;
 }
-
 /**
  * Pure profile-avatar editing UI. Upload policy, persistence, notifications,
  * and session refresh are supplied by its controller through props.
@@ -47,6 +50,7 @@ export function ProfileAvatarControl({
   accept,
   maxSize,
   labels,
+  cropAccessibility,
   disabled = false,
   validateFile,
   prepareFile,
@@ -61,7 +65,6 @@ export function ProfileAvatarControl({
   const [cropImageUrl, setCropImageUrl] = useState<string | null>(null);
   const normalizedImageUrl = imageUrl?.trim() ?? '';
   const hasImage = normalizedImageUrl.length > 0;
-
   const clearCropImage = useCallback(() => {
     setCropImageUrl((current) => {
       if (current) {
@@ -71,9 +74,7 @@ export function ProfileAvatarControl({
     });
     setCropModalOpen(false);
   }, []);
-
   useEffect(() => clearCropImage, [clearCropImage]);
-
   const openFile = useCallback(
     async (file: File) => {
       const validationError = validateFile?.(file);
@@ -81,7 +82,6 @@ export function ProfileAvatarControl({
         onValidationError?.(validationError);
         return;
       }
-
       setOperation('preparing');
       try {
         const previewFile = prepareFile ? await prepareFile(file) : file;
@@ -96,7 +96,6 @@ export function ProfileAvatarControl({
     },
     [clearCropImage, onValidationError, prepareFile, validateFile],
   );
-
   const handleCrop = useCallback(
     async (blob: Blob) => {
       const saved = await onSave(blob);
@@ -107,12 +106,10 @@ export function ProfileAvatarControl({
     },
     [clearCropImage, onSave],
   );
-
   const handleRemove = useCallback(async () => {
     if (!onRemove || !hasImage) {
       return;
     }
-
     setOperation('removing');
     try {
       await onRemove();
@@ -120,42 +117,43 @@ export function ProfileAvatarControl({
       setOperation('idle');
     }
   }, [hasImage, onRemove]);
-
   const busy = disabled || operation !== 'idle';
-
   return (
-    <Stack gap={4}>
-      <ImageUploadField
-        imageUrl={normalizedImageUrl || null}
-        alt={labels.alt}
-        dropzoneAriaLabel={hasImage ? labels.change : labels.upload}
-        accept={accept}
-        maxSize={maxSize}
-        disabled={busy}
-        loading={operation === 'preparing'}
-        loadingLabel={labels.preparing}
-        removeButtonAriaLabel={labels.remove}
-        removeButtonLoading={operation === 'removing'}
-        removeButtonOffset={0}
-        preview={{
-          mode: 'circle',
-          width: size,
-          height: size,
-          fit: 'cover',
-        }}
-        placeholder={{
-          width: size,
-          height: size,
-          minHeight: size,
-          radius: '50%',
-          iconSize: Math.max(20, size * 0.35),
-          compact: true,
-        }}
-        onFileSelect={(file) => void openFile(file)}
-        onReject={onFileRejected}
-        onValidationReject={onValidationReject}
-        onRemove={onRemove && hasImage ? handleRemove : undefined}
-      />
+    <DsLayoutStack gap="xxs">
+      <ToolbarDensityProvider density="compact">
+        <ImageUploadField
+          imageUrl={normalizedImageUrl || null}
+          alt={labels.alt}
+          dropzoneAriaLabel={hasImage ? labels.change : labels.upload}
+          accept={accept}
+          maxSize={maxSize}
+          disabled={busy}
+          loading={operation === 'preparing'}
+          loadingLabel={labels.preparing}
+          removeButtonAriaLabel={labels.remove}
+          removeButtonLoading={operation === 'removing'}
+          removeButtonEmphasis="strong"
+          removeButtonPlacement="inside"
+          preview={{
+            mode: 'circle',
+            width: size,
+            height: size,
+            fit: 'cover',
+          }}
+          placeholder={{
+            width: size,
+            height: size,
+            minHeight: size,
+            shape: 'circle',
+            iconSize: 'md',
+            compact: true,
+          }}
+          onFileSelect={(file) => void openFile(file)}
+          onReject={onFileRejected}
+          onValidationReject={onValidationReject}
+          onRemove={onRemove && hasImage ? handleRemove : undefined}
+        />
+      </ToolbarDensityProvider>
 
       {cropImageUrl ? (
         <ImageCropper
@@ -164,6 +162,7 @@ export function ProfileAvatarControl({
           onClose={clearCropImage}
           onCrop={handleCrop}
           title={labels.cropTitle}
+          cropAccessibility={cropAccessibility}
           labels={{
             previewAlt: labels.cropPreview,
             cancel: labels.cancel,
@@ -177,6 +176,6 @@ export function ProfileAvatarControl({
           outputQuality={USER_AVATAR_OUTPUT_QUALITY}
         />
       ) : null}
-    </Stack>
+    </DsLayoutStack>
   );
 }

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
-import { Box } from '@mantine/core';
+import { LayoutInset } from '../Layout';
 
 import { ValidatingTextInput } from './ValidatingTextInput';
 
@@ -10,9 +10,9 @@ const meta: Meta<typeof ValidatingTextInput> = {
   parameters: { layout: 'centered' },
   decorators: [
     (Story) => (
-      <Box w={420} maw="calc(100vw - 2rem)" p="md">
+      <LayoutInset space="md">
         <Story />
-      </Box>
+      </LayoutInset>
     ),
   ],
   args: {
@@ -49,7 +49,6 @@ export const NarrowRequiredChecking: Story = {
     required: true,
     status: 'checking',
     description: 'Checking availability…',
-    w: 260,
   },
 };
 
@@ -59,6 +58,5 @@ export const LongChecking: Story = {
     required: true,
     status: 'checking',
     description: 'Checking availability…',
-    w: 260,
   },
 };

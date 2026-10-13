@@ -10,7 +10,8 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import TranslationSettingsPage, { buildSettingsUpdateMutation } from './page';
+import { buildSettingsUpdateMutation } from '@/features/translation/admin/TranslationSettingsPage';
+import TranslationSettingsPage from './page';
 
 const api = vi.hoisted(() => ({
   getTranslationSettings: vi.fn(),
@@ -52,57 +53,8 @@ vi.mock('@tabler/icons-react', () => ({
   IconTrash: () => null,
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications,
-}));
-
-vi.mock('@mantine/core', () => ({
-  Divider: ({ label }: { label?: ReactNode }) => <hr aria-label={String(label ?? 'divider')} />,
-  Group: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  Modal: ({ opened, title, children }: { opened: boolean; title?: ReactNode; children: ReactNode }) =>
-    opened ? (
-      <section role="dialog">
-        <h2>{title}</h2>
-        {children}
-      </section>
-    ) : null,
-  NumberInput: ({
-    label,
-    value,
-    onChange,
-  }: {
-    label: string;
-    value: number | '';
-    onChange: (value: number | '') => void;
-  }) => (
-    <label>
-      {label}
-      <input
-        aria-label={label}
-        type="number"
-        value={value}
-        onChange={(event) => onChange(event.currentTarget.value === '' ? '' : Number(event.currentTarget.value))}
-      />
-    </label>
-  ),
-  Paper: ({ children }: { children: ReactNode }) => <section>{children}</section>,
-  Stack: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  Switch: ({
-    checked,
-    label,
-    onChange,
-  }: {
-    checked: boolean;
-    label: string;
-    onChange: ComponentProps<'input'>['onChange'];
-  }) => (
-    <label>
-      <input aria-label={label} type="checkbox" checked={checked} onChange={onChange} />
-      {label}
-    </label>
-  ),
-  Text: ({ children }: { children: ReactNode }) => <p>{children}</p>,
-  Title: ({ children }: { children: ReactNode }) => <h1>{children}</h1>,
 }));
 
 vi.mock('@/components/core/Badge', () => ({
@@ -247,6 +199,19 @@ vi.mock('@/components/core/Input', () => ({
 }));
 
 vi.mock('@/components/core/Modal', () => ({
+  DialogActions: ({ children, leadingActions }: { children?: ReactNode; leadingActions?: ReactNode }) => (
+    <div>
+      {leadingActions}
+      {children}
+    </div>
+  ),
+  ContentModal: ({ opened, title, children }: { opened: boolean; title: string; children: ReactNode }) =>
+    opened ? (
+      <section role="dialog">
+        <h2>{title}</h2>
+        {children}
+      </section>
+    ) : null,
   ConfirmModal: ({
     confirmLabel,
     message,
@@ -598,12 +563,12 @@ describe('TranslationSettingsPage', () => {
 
     await act(async () => buttonByText('translationSettingsPage.actions.save').click());
     await settle();
-    expect(notifications.show).toHaveBeenCalledWith({ color: 'red', message: 'Forbidden' });
+    expect(notifications.show).toHaveBeenCalledWith({ tone: 'danger', message: 'Forbidden' });
 
     await act(async () => buttonByText('translationSettingsPage.actions.save').click());
     await settle();
     expect(notifications.show).toHaveBeenCalledWith({
-      color: 'red',
+      tone: 'danger',
       message: 'translationSettingsPage.notifications.saveFailed',
     });
     expect(JSON.stringify(notifications.show.mock.calls)).not.toContain('raw provider credential failure');
@@ -624,7 +589,7 @@ describe('TranslationSettingsPage', () => {
     });
 
     expect(notifications.show).toHaveBeenCalledWith({
-      color: 'red',
+      tone: 'danger',
       message: 'translationSettingsPage.validation.providerNameRequired',
     });
 
@@ -675,7 +640,9 @@ describe('TranslationSettingsPage', () => {
 
     await act(async () => {
       (
-        document.querySelector('[aria-label="translationSettingsPage.actions.editProvider"]') as HTMLButtonElement
+        document.querySelector(
+          '[aria-label="translationSettingsPage.actions.editProvider DeepL Provider"]',
+        ) as HTMLButtonElement
       ).click();
     });
 
@@ -707,7 +674,9 @@ describe('TranslationSettingsPage', () => {
 
     await act(async () => {
       (
-        document.querySelector('[aria-label="translationSettingsPage.actions.deleteProvider"]') as HTMLButtonElement
+        document.querySelector(
+          '[aria-label="translationSettingsPage.actions.deleteProvider DeepL Provider"]',
+        ) as HTMLButtonElement
       ).click();
     });
     expect(document.body.textContent).toContain('translationSettingsPage.modal.deleteProviderMessage DeepL Provider');

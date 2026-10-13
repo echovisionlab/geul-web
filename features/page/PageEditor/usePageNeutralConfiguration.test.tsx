@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
-import { MantineProvider } from '@mantine/core';
+
 import { PageAccessSettings } from './PageAccessSettings';
 import { createRoot, type Root } from 'react-dom/client';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
@@ -67,9 +68,9 @@ function HookHarness(props: Parameters<typeof usePageNeutralConfiguration>[0]) {
 function AccessHarness(props: Parameters<typeof usePageNeutralConfiguration>[0]) {
   const neutral = usePageNeutralConfiguration(props);
   return (
-    <MantineProvider env="test">
+    <DesignSystemProvider forceColorScheme="light">
       <PageAccessSettings value={neutral.configuration.accessPolicy} tagOptions={[]} onSave={neutral.saveAccess} />
-    </MantineProvider>
+    </DesignSystemProvider>
   );
 }
 
@@ -329,7 +330,12 @@ describe('usePageNeutralConfiguration', () => {
     const authorLabel = [...host.querySelectorAll<HTMLLabelElement>('label')].find(
       (label) => label.textContent === 'roleAuthor',
     )!;
-    act(() => document.getElementById(authorLabel.htmlFor)!.click());
+    act(() =>
+      (authorLabel.htmlFor
+        ? document.getElementById(authorLabel.htmlFor)!
+        : authorLabel.querySelector('input')!
+      ).click(),
+    );
     remote = config({ accessPolicy: canonical });
     const save = [...host.querySelectorAll<HTMLButtonElement>('button')].find(
       (button) => button.textContent === 'save',
@@ -343,7 +349,9 @@ describe('usePageNeutralConfiguration', () => {
     const userLabel = [...host.querySelectorAll<HTMLLabelElement>('label')].find(
       (label) => label.textContent === 'roleAdmin',
     )!;
-    expect(document.getElementById(userLabel.htmlFor)).toBeChecked();
+    expect(
+      userLabel.htmlFor ? document.getElementById(userLabel.htmlFor) : userLabel.querySelector('input'),
+    ).toBeChecked();
     expect(host.querySelector('[role="status"]')).toHaveTextContent('saved');
     expect(
       [...host.querySelectorAll<HTMLButtonElement>('button')].find((button) => button.textContent === 'save'),

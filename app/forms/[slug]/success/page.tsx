@@ -1,8 +1,6 @@
+import { FormSuccessPageView } from '@/features/form/FormSuccessPageView';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { Box, Container, Paper, Stack } from '@mantine/core';
-import { SiteLogo } from '@/features/site/SiteLogo';
-import { FormSubmissionSuccessState } from '@/features/form/FormSubmissionState';
 import { getFormMetadataDocument } from '@/lib/queries/metadata';
 import { buildFormOgMetadata } from '@/lib/utils/og';
 import { withNoIndex } from '@/lib/utils/route-metadata';
@@ -41,19 +39,5 @@ export default async function FormSuccessPage({ params }: { params: Promise<{ sl
   if (!(await getFormMetadataDocument(slug))) {
     return renderPageRouteFallback(['forms', slug, 'success'], {});
   }
-  return (
-    <Box mih="100dvh" bg="var(--mantine-color-body)">
-      <Container size="sm" py="xl">
-        <Stack gap="md">
-          <Box ta="center">
-            <SiteLogo height={24} />
-          </Box>
-
-          <Paper p="xl" withBorder w="100%" maw={500} mx="auto">
-            <FormSubmissionSuccessState />
-          </Paper>
-        </Stack>
-      </Container>
-    </Box>
-  );
+  return <FormSuccessPageView />;
 }

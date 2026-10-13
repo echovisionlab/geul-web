@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import {
   AccountEmailOptionContent,
   AccountEmailSelectRightSection,
@@ -34,7 +35,7 @@ const currentAndProvider: AccountEmailOptionSource[] = [
 ];
 
 function render(node: React.ReactNode) {
-  return renderToStaticMarkup(<MantineProvider>{node}</MantineProvider>);
+  return renderToStaticMarkup(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>);
 }
 
 describe('AccountEmailOption', () => {

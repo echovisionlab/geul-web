@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import messages from '@/messages/en.json';
 import { PageEditorInterruptionDialogs } from './PageEditorInterruptionDialogs';
@@ -41,7 +42,7 @@ function renderDialogs(props: Partial<React.ComponentProps<typeof PageEditorInte
   act(() => {
     root.render(
       <NextIntlClientProvider locale="en" messages={messages}>
-        <MantineProvider env="test">
+        <DesignSystemProvider locale="en" forceColorScheme="light">
           <PageEditorInterruptionDialogs
             interruption={null}
             permissionRevokedDestination="/about"
@@ -49,7 +50,7 @@ function renderDialogs(props: Partial<React.ComponentProps<typeof PageEditorInte
             currentPath={() => '/about?edit=true&locale=ko#body'}
             {...props}
           />
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
   });

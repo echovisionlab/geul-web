@@ -1,68 +1,9 @@
 .editor {
   position: relative;
   width: 100%;
-  color: var(--mantine-color-text);
-  background: var(--mantine-color-body);
+  color: var(--geul-text-primary);
+  background: var(--geul-background);
   font-family: var(--font-family-sans), sans-serif;
-}
-
-.formattingMenu {
-  display: flex;
-  gap: 0.125rem;
-  align-items: center;
-  padding: 0.25rem;
-  border: 1px solid var(--mantine-color-default-border);
-  border-radius: var(--mantine-radius-sm);
-  background: var(--mantine-color-body);
-  box-shadow: var(--mantine-shadow-sm);
-}
-
-/* BubbleMenu content is portaled by Tiptap, outside the editor root. */
-:global(.tiptap-editor__formatting-menu),
-:global(.tiptap-editor__context-menu) {
-  display: flex;
-  gap: 0.125rem;
-  align-items: center;
-  max-width: min(100vw - 1rem, 32rem);
-  padding: 0.25rem;
-  border: 1px solid var(--mantine-color-default-border);
-  border-radius: var(--mantine-radius-sm);
-  background: var(--mantine-color-body);
-  box-shadow: var(--mantine-shadow-sm);
-}
-
-:global(.tiptap-editor__bubble-menu-group) {
-  display: inline-flex;
-  gap: 0.125rem;
-  padding-inline: 0.125rem;
-  border-inline: 1px solid var(--mantine-color-default-border);
-}
-
-:global(.tiptap-editor__math-source),
-:global(.tiptap-editor__link-source) {
-  min-width: 0;
-}
-
-:global(.tiptap-editor__math-source input),
-:global(.tiptap-editor__link-source input) {
-  width: min(16rem, 42vw);
-  min-height: 2rem;
-  padding-inline: 0.5rem;
-  color: inherit;
-  border: 1px solid var(--mantine-color-default-border);
-  border-radius: 0;
-  background: var(--mantine-color-body);
-}
-
-@media (max-width: 36rem) {
-  :global(.tiptap-editor__context-menu) {
-    gap: 0;
-  }
-
-  :global(.tiptap-editor__math-source input),
-  :global(.tiptap-editor__link-source input) {
-    width: min(11rem, 38vw);
-  }
 }
 
 .surface {
@@ -76,45 +17,46 @@
 .content {
   width: 100%;
   min-height: 240px;
-  padding: var(--mantine-spacing-md);
+  padding: var(--geul-spacing-md);
   outline: 0;
 }
 
 .editor[data-pagination-enabled='true'] {
   overflow: hidden;
-  background: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-8));
+  background: light-dark(var(--geul-surface-muted), var(--geul-background));
 }
 
 .editor[data-pagination-enabled='true'] .surface {
   overflow-x: auto;
-  padding-block: var(--mantine-spacing-lg);
+  padding-block: var(--geul-spacing-lg);
 }
 
 .editor[data-pagination-enabled='true'] .paper {
   display: flow-root;
   box-sizing: border-box;
-  width: var(--page-width);
-  min-width: var(--page-width);
-  min-height: var(--page-height);
+  width: var(--_editor-page-width);
+  min-width: var(--_editor-page-width);
+  min-height: var(--_editor-page-height);
   margin-inline: auto;
-  background: var(--mantine-color-body);
-  box-shadow: var(--mantine-shadow-md);
+  background: var(--geul-background);
+  box-shadow: var(--geul-shadow-floating);
 }
 
 .editor[data-pagination-enabled='true'] .content {
   box-sizing: border-box;
   width: 100%;
-  min-height: var(--page-height);
-  padding: var(--page-margin-top) var(--page-margin-right) var(--page-margin-bottom) var(--page-margin-left);
+  min-height: var(--_editor-page-height);
+  padding: var(--_editor-page-margin-top) var(--_editor-page-margin-right) var(--_editor-page-margin-bottom)
+    var(--_editor-page-margin-left);
 }
 
 .editor[data-pagination-enabled='true'] .paper:has(.paginationLead) .content {
   min-height: 0;
-  padding-top: 1rem;
+  padding-top: var(--geul-spacing-md);
 }
 
 .paginationLead {
-  margin: var(--page-margin-top) var(--page-margin-right) 0 var(--page-margin-left);
+  margin: var(--_editor-page-margin-top) var(--_editor-page-margin-right) 0 var(--_editor-page-margin-left);
 }
 
 .pageHeader,
@@ -124,9 +66,9 @@
   position: absolute;
   z-index: 1;
   overflow: hidden;
-  color: var(--mantine-color-dimmed);
-  font-size: var(--mantine-font-size-xs);
-  line-height: 1.2;
+  color: var(--geul-text-muted);
+  font-size: var(--geul-font-size-xs);
+  line-height: var(--geul-line-height-xs);
   text-overflow: ellipsis;
   white-space: nowrap;
   pointer-events: none;
@@ -134,23 +76,23 @@
 }
 
 .pageHeader {
-  inset-block-start: calc(var(--page-margin-top) * 0.34);
-  inset-inline: var(--page-margin-left) var(--page-margin-right);
+  inset-block-start: calc(var(--_editor-page-margin-top) * 0.34);
+  inset-inline: var(--_editor-page-margin-left) var(--_editor-page-margin-right);
 }
 
 .finalPageFooter {
-  top: calc(var(--pages-height) - var(--page-margin-bottom) * 0.5);
-  inset-inline: var(--page-margin-left) var(--page-margin-right);
+  top: calc(var(--_editor-pages-height) - var(--_editor-page-margin-bottom) * 0.5);
+  inset-inline: var(--_editor-page-margin-left) var(--_editor-page-margin-right);
   text-align: center;
 }
 
 .editor[data-pagination-enabled='true'] :global(.tiptap-page-break) {
   position: relative;
   box-sizing: border-box;
-  width: calc(100% + var(--page-margin-left) + var(--page-margin-right));
-  height: calc(var(--page-margin-top) + var(--page-gap) + var(--page-margin-bottom) - 1rem);
-  margin-inline-start: calc(-1 * var(--page-margin-left));
-  background: var(--mantine-color-body);
+  width: calc(100% + var(--_editor-page-margin-left) + var(--_editor-page-margin-right));
+  height: calc(var(--_editor-page-margin-top) + var(--_editor-page-gap) + var(--_editor-page-margin-bottom) - 1rem);
+  margin-inline-start: calc(-1 * var(--_editor-page-margin-left));
+  background: var(--geul-background);
   pointer-events: none;
   user-select: none;
 }
@@ -158,23 +100,23 @@
 .editor[data-pagination-enabled='true'] :global(.tiptap-page-break)::before {
   position: absolute;
   inset-inline: 0;
-  top: calc(var(--page-margin-bottom) - 0.5rem);
-  height: var(--page-gap);
+  top: calc(var(--_editor-page-margin-bottom) - 0.5rem);
+  height: var(--_editor-page-gap);
   box-sizing: border-box;
-  background: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-8));
-  border-block: 1px solid var(--mantine-color-default-border);
+  background: light-dark(var(--geul-surface-muted), var(--geul-background));
+  border-block: var(--geul-border-thin) solid var(--geul-border-default);
   content: '';
 }
 
 .editor[data-pagination-enabled='true'] :global(.tiptap-page-footer) {
-  top: calc(var(--page-margin-bottom) * 0.5 - 0.6em);
+  top: calc(var(--_editor-page-margin-bottom) * 0.5 - 0.6em);
   inset-inline: 0;
   text-align: center;
 }
 
 .editor[data-pagination-enabled='true'] :global(.tiptap-page-header--next) {
-  top: calc(var(--page-margin-bottom) + var(--page-gap) + var(--page-margin-top) * 0.34);
-  inset-inline: var(--page-margin-left) var(--page-margin-right);
+  top: calc(var(--_editor-page-margin-bottom) + var(--_editor-page-gap) + var(--_editor-page-margin-top) * 0.34);
+  inset-inline: var(--_editor-page-margin-left) var(--_editor-page-margin-right);
 }
 
 .editor[data-pagination-page-size='a3'][data-pagination-orientation='portrait'] .paper {
@@ -353,7 +295,7 @@
   }
 
   .editor[data-pagination-enabled='true'] .paginationLead {
-    margin: 0 0 1rem;
+    margin: 0 0 var(--geul-spacing-md);
   }
 
   .editor[data-pagination-enabled='true'] .pageHeader {
@@ -367,13 +309,13 @@
     position: fixed;
     inset: auto 0 -12mm;
     display: block;
-    color: var(--mantine-color-dimmed);
+    color: var(--geul-text-muted);
     font-size: 0;
     text-align: start;
   }
 
   .editor[data-pagination-enabled='true'] .finalPageFooter::before {
-    font-size: var(--mantine-font-size-xs);
+    font-size: var(--geul-font-size-xs);
     content: attr(data-footer-text);
   }
 
@@ -434,7 +376,7 @@
 .editor :global(.editor-block-group) {
   display: flex;
   flex-direction: column;
-  gap: var(--mantine-spacing-xs);
+  gap: var(--geul-spacing-xs);
   width: 100%;
 }
 
@@ -445,15 +387,15 @@
 
 .editor[data-editor-editable='true'] :global(.ProseMirror-selectednoderange) {
   position: relative;
-  outline: 2px solid var(--mantine-primary-color-filled);
-  outline-offset: 2px;
+  outline: var(--geul-border-focus) solid var(--geul-action-primary);
+  outline-offset: var(--geul-border-focus);
 }
 
 .editor[data-editor-editable='true'] :global(.ProseMirror-selectednoderange)::after {
   position: absolute;
   z-index: 5;
-  inset: -2px;
-  background: var(--mantine-primary-color-filled);
+  inset: calc(-1 * var(--geul-border-focus));
+  background: var(--geul-action-primary);
   content: '';
   opacity: 0.18;
   pointer-events: none;
@@ -475,7 +417,7 @@
   position: absolute;
   top: -2px;
   width: 1.25rem;
-  border-top: 1px solid var(--mantine-primary-color-filled);
+  border-top: var(--geul-border-thin) solid var(--geul-action-primary);
   animation: editor-gap-cursor-blink 1.1s steps(2, start) infinite;
   content: '';
 }
@@ -499,13 +441,13 @@
   inset-block: 0;
   inset-inline-start: 0;
   width: 0.625em;
-  border-inline-start: 2px solid var(--mantine-primary-color-filled);
-  background: var(--mantine-primary-color-light);
+  border-inline-start: 2px solid var(--geul-action-primary);
+  background: var(--geul-surface-active);
   content: '';
   pointer-events: none;
 }
 
 .editor :global(.tiptap-file-node[data-selected='true'] > *) {
-  outline: 1px solid var(--mantine-primary-color-filled);
-  outline-offset: 2px;
+  outline: var(--geul-border-thin) solid var(--geul-action-primary);
+  outline-offset: var(--geul-border-focus);
 }

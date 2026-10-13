@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SeriesPublicPostsView, SeriesPublicView } from './SeriesPublicView';
 
@@ -20,7 +21,7 @@ const labels = {
 
 function render(view: ReactNode) {
   act(() => {
-    root.render(<MantineProvider env="test">{view}</MantineProvider>);
+    root.render(<DesignSystemProvider forceColorScheme="light">{view}</DesignSystemProvider>);
   });
 }
 
@@ -54,6 +55,7 @@ describe('SeriesPublicView', () => {
     render(
       <SeriesPublicView {...series} postsLabel="Posts" controls={<button type="button">Share</button>}>
         <SeriesPublicPostsView
+          tableLabel="Posts"
           posts={[
             {
               id: 'post-1',
@@ -73,6 +75,9 @@ describe('SeriesPublicView', () => {
     expect(container.querySelector('img')).toHaveAttribute('alt', series.title);
     expect(container.querySelector('button')).toHaveTextContent('Share');
     expect(container.querySelector('a')).toHaveAttribute('href', '/posts/listening-to-the-city');
+    expect(container.querySelector('table')).toHaveAttribute('aria-label', 'Posts');
+    expect(container.querySelector('[role="region"]')).toHaveAttribute('tabindex', '0');
+    expect(container.querySelectorAll('thead th[scope="col"]')).toHaveLength(3);
     expect(container).toHaveTextContent('Listening to the city');
     expect(container).toHaveTextContent('Mina Park');
     expect(container).not.toHaveTextContent(series.description);

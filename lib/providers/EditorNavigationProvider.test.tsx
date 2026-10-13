@@ -5,55 +5,20 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NavigationLink } from '@/components/core/Navigation';
 import { registerEditorSave } from '@/lib/editor/editor-save-registry';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { EditorNavigationProvider } from './EditorNavigationProvider';
 
 const mocks = vi.hoisted(() => ({
   push: vi.fn(),
   replace: vi.fn(),
   show: vi.fn(),
-  onNavigate: null as null | ((event: { preventDefault: () => void }) => void),
 }));
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: mocks.push, replace: mocks.replace }),
 }));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => `common.notifications.${key}` }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: mocks.show } }));
-vi.mock('next/link', async () => {
-  const React = await import('react');
-
-  const MockNextLink = React.forwardRef<HTMLAnchorElement, Record<string, unknown>>((props, ref) => {
-    const {
-      href,
-      onNavigate,
-      children,
-      replace,
-      scroll,
-      prefetch,
-      locale,
-      shallow,
-      passHref,
-      legacyBehavior,
-      transitionTypes,
-      ...anchorProps
-    } = props;
-    mocks.onNavigate = onNavigate as typeof mocks.onNavigate;
-
-    return React.createElement(
-      'a',
-      {
-        ...(anchorProps as import('react').AnchorHTMLAttributes<HTMLAnchorElement>),
-        href: typeof href === 'string' ? href : '/object-href',
-        ref,
-      },
-      children as ReactNode,
-    );
-  });
-
-  return { default: MockNextLink };
-});
-
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: mocks.show } }));
 let host: HTMLDivElement;
 let root: Root;
 const unregisterSaves: Array<() => void> = [];
@@ -62,7 +27,6 @@ beforeEach(() => {
   mocks.push.mockReset();
   mocks.replace.mockReset();
   mocks.show.mockReset();
-  mocks.onNavigate = null;
   unregisterSaves.length = 0;
   window.sessionStorage.clear();
   host = document.createElement('div');
@@ -85,10 +49,15 @@ function render(node: ReactNode) {
 }
 
 function navigate(event: { preventDefault: () => void }) {
-  if (!mocks.onNavigate) {
-    throw new Error('Next Link did not receive the navigation callback');
-  }
-  act(() => mocks.onNavigate?.(event));
+  const native = new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 });
+  const preventBrowserNavigation = native.preventDefault.bind(native);
+  native.preventDefault = () => {
+    event.preventDefault();
+    preventBrowserNavigation();
+  };
+  // Prevent jsdom navigation only after the actual Core navigation guard has run.
+  host.addEventListener('click', preventBrowserNavigation, { once: true });
+  act(() => host.querySelector('a')!.dispatchEvent(native));
 }
 
 describe('EditorNavigationProvider', () => {
@@ -167,7 +136,7 @@ describe('EditorNavigationProvider', () => {
     expect(host.querySelector('a')?.textContent).toBe('Next');
     expect(notifications.show).toHaveBeenCalledExactlyOnceWith({
       message: 'common.notifications.saveFailed',
-      color: 'red',
+      tone: 'danger',
     });
   });
 

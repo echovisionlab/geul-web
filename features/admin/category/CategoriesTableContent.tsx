@@ -1,7 +1,8 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
+
 import { LabelBadge } from '@/components/core/Badge';
 import {
   ServerDataTableSelectableSection,
@@ -33,12 +34,12 @@ function getColumns(labels: {
       header: labels.category,
       cell: (row) => (
         <div>
-          <Text size="sm" fw={500}>
+          <DsText size="sm" weight="medium">
             {row.name}
-          </Text>
-          <Text size="xs" c="dimmed">
+          </DsText>
+          <DsText size="xs" tone="secondary">
             /{row.slug || '-'}
-          </Text>
+          </DsText>
         </div>
       ),
     },
@@ -46,9 +47,9 @@ function getColumns(labels: {
       key: 'description',
       header: labels.description,
       cell: (row) => (
-        <Text size="sm" c="dimmed" lineClamp={1}>
+        <DsText size="sm" tone="secondary" lines={1}>
           {row.description || '-'}
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -60,9 +61,9 @@ function getColumns(labels: {
       key: 'createdAt',
       header: labels.created,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.createdAt} />
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -76,6 +77,7 @@ function getColumns(labels: {
 }
 
 interface CategoriesTableContentProps {
+  deleteAction?: typeof deleteCategoryAction;
   result: ServerDataTableSelectableSectionProps<CategoryRow>['result'];
   searchPlaceholder: string;
   filterFields: ServerDataTableSelectableSectionProps<CategoryRow>['filterFields'];
@@ -87,6 +89,7 @@ export function CategoriesTableContent({
   searchPlaceholder,
   filterFields,
   sortFields,
+  deleteAction = deleteCategoryAction,
 }: CategoriesTableContentProps) {
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
@@ -110,7 +113,7 @@ export function CategoriesTableContent({
       sortFields={sortFields}
       bulkDelete={{
         entityLabel: tCommonEntities('categories'),
-        deleteAction: deleteCategoryAction,
+        deleteAction,
         getRowLabel: (row) => row.name || row.slug || row.id,
       }}
     />

@@ -1,18 +1,15 @@
 'use client';
-
-import { Group, Text } from '@mantine/core';
-import classes from './FileBrowserStatusBar.module.css';
-
+import { SelectionStatus } from '@/components/core/SelectionSurface';
+import { LayoutInset } from '@/components/core/Layout';
 export interface FileBrowserStatusBarProps {
   status: string;
 }
-
 export function FileBrowserStatusBar({ status }: FileBrowserStatusBarProps) {
   return (
-    <Group className={classes.statusBar} justify="space-between" wrap="nowrap" data-file-browser-status>
-      <Text size="xs" c="dimmed" aria-live="polite">
+    <LayoutInset inline={{ base: 'sm', sm: 'md' }} block="none">
+      <SelectionStatus divider="none" data-file-browser-status>
         {status}
-      </Text>
-    </Group>
+      </SelectionStatus>
+    </LayoutInset>
   );
 }

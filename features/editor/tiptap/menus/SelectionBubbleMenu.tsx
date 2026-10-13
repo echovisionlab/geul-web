@@ -1,12 +1,21 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
+import { LayoutInline as LinkActions } from '@/components/core/Layout';
+import { Separator } from '@/components/core/Display';
+import { DropdownMenu } from '@/components/core/DropdownMenu';
+import { ToolbarSurface } from '@/components/core/Section';
+import { useCallback, useEffect, useMemo, useState, type MouseEvent, type PointerEvent } from 'react';
 import type { Editor } from '@tiptap/core';
 import { PluginKey } from '@tiptap/pm/state';
 import type { Messages } from 'next-intl';
 import { BubbleMenu, type BubbleMenuProps } from '@tiptap/react/menus';
 import {
   IconCheck,
+  IconDots,
+  IconCode,
+  IconIndentIncrease,
+  IconIndentDecrease,
+  IconStrikethrough,
   IconExternalLink,
   IconLink,
   IconLinkOff,
@@ -23,9 +32,10 @@ import { StandardFormattingButtons } from '@/features/editor/toolbars/Formatting
 import { type EditorColor } from '@/features/editor/toolbars/EditorColorStyleButton';
 import {
   EDITOR_TOOLBAR_SHORTCUTS,
-  EditorToolbarTooltip,
-  type EditorToolbarShortcutHint,
+  EditorToolbarDropdownTarget,
+  EditorToolbarShortcutText,
 } from '@/features/editor/toolbars/EditorToolbarTooltip';
+import { EditorToolbarAction as Action } from '@/features/editor/toolbars/EditorToolbarAction';
 import {
   canShowSelectionBubbleMenu,
   createSelectionBubbleMenuCommands,
@@ -47,6 +57,7 @@ export const SELECTION_BUBBLE_MENU_PLUGIN_KEY = new PluginKey('tiptap-selection-
 
 export interface SelectionBubbleMenuLabels {
   menu: string;
+  more?: string;
   blockType: string;
   blockTypes: Record<SelectionBlockType, string>;
   formatting: Record<SelectionTextStyle, string>;
@@ -87,10 +98,11 @@ export interface SelectionBubbleMenuProps extends SelectionBubbleMenuCommandOpti
 
 export function createSelectionBubbleMenuLabels(
   messages: Messages['editorCommon']['editor'],
-  actions: { save: string; cancel: string },
+  actions: { save: string; cancel: string; more?: string },
 ): SelectionBubbleMenuLabels {
   return {
     menu: messages.formatting.blockType,
+    more: actions.more,
     blockType: messages.formatting.blockType,
     blockTypes: {
       paragraph: messages.slashMenu.items.paragraph.title,
@@ -171,44 +183,6 @@ function preserveSelection(event: MouseEvent | PointerEvent) {
   }
 }
 
-function Action({
-  label,
-  children,
-  active,
-  disabled = false,
-  onClick,
-  testId,
-  shortcut,
-}: {
-  label: string;
-  children: ReactNode;
-  active?: boolean;
-  disabled?: boolean;
-  onClick: () => void;
-  testId: string;
-  shortcut?: EditorToolbarShortcutHint;
-}) {
-  return (
-    <EditorToolbarTooltip label={label} shortcut={shortcut}>
-      <IconButton
-        label={label}
-        tone={active === true ? 'accent' : 'neutral'}
-        emphasis={active === true ? 'medium' : 'low'}
-        size="sm"
-        aria-pressed={active}
-        disabled={disabled}
-        data-selection-toolbar-action=""
-        data-testid={testId}
-        onMouseDown={preserveSelection}
-        onPointerDown={preserveSelection}
-        onClick={onClick}
-      >
-        {children}
-      </IconButton>
-    </EditorToolbarTooltip>
-  );
-}
-
 function LinkEditor({
   commands,
   labels,
@@ -279,24 +253,10 @@ function LinkEditor({
           }
         }}
       />
-      <Button
-        className={classes.linkEditorAction}
-        type="submit"
-        size="xs"
-        disabled={!href.trim()}
-        leftSection={<IconCheck size={14} />}
-      >
+      <Button type="submit" size="xs" disabled={!href.trim()} leftSection={<IconCheck size={14} />}>
         {labels.link.save}
       </Button>
-      <Button
-        className={classes.linkEditorAction}
-        type="button"
-        size="xs"
-        tone="neutral"
-        emphasis="low"
-        leftSection={<IconX size={14} />}
-        onClick={onClose}
-      >
+      <Button type="button" size="xs" tone="neutral" emphasis="low" leftSection={<IconX size={14} />} onClick={onClose}>
         {labels.link.cancel}
       </Button>
     </form>
@@ -322,13 +282,14 @@ function LinkControls({
         portal={false}
         size="wide"
       >
-        <Popover.Target>
-          <span>
-            <Action label={labels.link.create} testId="tiptap-selection-link-create" onClick={() => setMode('create')}>
-              <IconLink size={16} />
-            </Action>
-          </span>
-        </Popover.Target>
+        <Action
+          popoverTarget
+          label={labels.link.create}
+          testId="tiptap-selection-link-create"
+          onClick={() => setMode('create')}
+        >
+          <IconLink size={16} />
+        </Action>
         <Popover.Dropdown padding="compact">
           <LinkEditor commands={commands} labels={labels} mode="create" snapshot={snapshot} onClose={close} />
         </Popover.Dropdown>
@@ -336,26 +297,21 @@ function LinkControls({
     );
   }
   return (
-    <div className={classes.group} role="group" aria-label={labels.link.edit}>
-      <Action label={labels.link.open} testId="tiptap-selection-link-open" onClick={commands.openLink}>
-        <IconExternalLink size={16} />
-      </Action>
+    <LinkActions gap="xxs" wrap="nowrap" role="group" aria-label={labels.link.edit}>
       <Popover open={mode === 'edit'} onOpenChange={(open) => setMode(open ? 'edit' : null)} portal={false} size="wide">
-        <Popover.Target>
-          <span>
-            <Action label={labels.link.edit} testId="tiptap-selection-link-edit" onClick={() => setMode('edit')}>
-              <IconPencil size={16} />
-            </Action>
-          </span>
-        </Popover.Target>
+        <Action
+          popoverTarget
+          label={labels.link.edit}
+          testId="tiptap-selection-link-edit"
+          onClick={() => setMode('edit')}
+        >
+          <IconPencil size={16} />
+        </Action>
         <Popover.Dropdown padding="compact">
           <LinkEditor commands={commands} labels={labels} mode="edit" snapshot={snapshot} onClose={close} />
         </Popover.Dropdown>
       </Popover>
-      <Action label={labels.link.remove} testId="tiptap-selection-link-remove" onClick={commands.removeLink}>
-        <IconLinkOff size={16} />
-      </Action>
-    </div>
+    </LinkActions>
   );
 }
 
@@ -381,97 +337,167 @@ export function SelectionBubbleMenuView({
   const hasLinkControls = (commands.hasSafeInlineSelection && !commands.inlineCodeActive) || Boolean(commands.linkHref);
   const hasContextualControls = hasLinkControls || commands.canConvertToInlineMath || commands.canOpenAI;
   return (
-    <div
-      ref={navigation.toolbarRef}
-      className={classes.menu}
-      role="toolbar"
-      aria-label={labels.menu}
-      data-testid="tiptap-selection-menu"
-      onMouseDownCapture={preserveSelection}
-      onPointerDownCapture={preserveSelection}
-      onKeyDownCapture={navigation.onToolbarKeyDown}
-      onFocusCapture={navigation.onToolbarFocusCapture}
-    >
-      <StandardFormattingButtons
-        labels={{
-          bold: labels.formatting.bold,
-          italic: labels.formatting.italic,
-          underline: labels.formatting.underline,
-          strike: labels.formatting.strike,
-          code: labels.formatting.code,
-          link: labels.link.create,
-          nest: labels.nest,
-          unnest: labels.unnest,
-          alignment: labels.alignment.group,
-        }}
-        blockType={
-          commands.hasTextSelection
-            ? {
-                label: labels.blockType,
-                value: commands.blockType ?? '',
-                options: SELECTION_BLOCK_TYPES.map((type) => ({ value: type, label: labels.blockTypes[type] })),
-                onChange: (value) => commands.setBlockType(value as SelectionBlockType),
-                disabled: !commands.canChangeBlockType,
-              }
-            : undefined
-        }
-        alignment={
-          commands.canAlign
-            ? {
-                value: commands.alignment,
-                labels: labels.alignment,
-                onChange: commands.setAlignment,
-              }
-            : undefined
-        }
-        color={
-          commands.hasTextSelection
-            ? {
-                labels: {
-                  button: labels.colors.button,
-                  text: labels.colors.text,
-                  background: labels.colors.background,
-                  colors: labels.colors.values,
-                },
-                textColor: commands.textColor,
-                backgroundColor: commands.backgroundColor,
-                onTextColorChange: commands.setTextColor,
-                onBackgroundColorChange: commands.setBackgroundColor,
-                disabled: commands.inlineCodeActive || !commands.canColor,
-              }
-            : undefined
-        }
-        activeTextStyles={commands.activeTextStyles}
-        onToggleTextStyle={commands.hasTextSelection ? commands.toggleTextStyle : undefined}
-        onNestBlock={commands.hasSafeInlineSelection ? commands.nest : undefined}
-        onUnnestBlock={commands.hasSafeInlineSelection ? commands.unnest : undefined}
-        textStylesDisabled={!commands.canFormatText}
-        nestDisabled={!commands.canNest}
-        unnestDisabled={!commands.canUnnest}
-      />
-      {hasFormattingControls && hasContextualControls ? <span className={classes.divider} aria-hidden /> : null}
-      {hasLinkControls ? <LinkControls commands={commands} labels={labels} snapshot={linkSelection} /> : null}
-      {commands.canConvertToInlineMath ? (
-        <Action label={labels.inlineMath} testId="tiptap-selection-inline-math" onClick={commands.convertToInlineMath}>
-          <IconMathFunction size={16} />
-        </Action>
-      ) : null}
-      {commands.canOpenAI ? (
-        <Action
-          label={labels.ai}
-          shortcut={EDITOR_TOOLBAR_SHORTCUTS.ai}
-          testId="tiptap-selection-ai"
-          onClick={commands.openAI}
-        >
-          <IconSparkles size={16} />
-        </Action>
-      ) : null}
+    <div className={classes.menu}>
+      <ToolbarSurface
+        ref={navigation.toolbarRef}
+        density="compact"
+        wrap="nowrap"
+        label={labels.menu}
+        data-testid="tiptap-selection-menu"
+        onMouseDownCapture={preserveSelection}
+        onPointerDownCapture={preserveSelection}
+        onKeyDownCapture={navigation.onToolbarKeyDown}
+        onFocusCapture={navigation.onToolbarFocusCapture}
+      >
+        <StandardFormattingButtons
+          textStyles={['bold', 'italic', 'underline']}
+          labels={{
+            bold: labels.formatting.bold,
+            italic: labels.formatting.italic,
+            underline: labels.formatting.underline,
+            strike: labels.formatting.strike,
+            code: labels.formatting.code,
+            link: labels.link.create,
+            nest: labels.nest,
+            unnest: labels.unnest,
+            alignment: labels.alignment.group,
+          }}
+          blockType={
+            commands.hasTextSelection
+              ? {
+                  label: labels.blockType,
+                  value: commands.blockType ?? '',
+                  options: SELECTION_BLOCK_TYPES.map((type) => ({ value: type, label: labels.blockTypes[type] })),
+                  onChange: (value) => commands.setBlockType(value as SelectionBlockType),
+                  disabled: !commands.canChangeBlockType,
+                }
+              : undefined
+          }
+          alignment={
+            commands.canAlign
+              ? {
+                  value: commands.alignment,
+                  presentation: 'menu',
+                  labels: labels.alignment,
+                  onChange: commands.setAlignment,
+                }
+              : undefined
+          }
+          color={
+            commands.hasTextSelection
+              ? {
+                  labels: {
+                    button: labels.colors.button,
+                    text: labels.colors.text,
+                    background: labels.colors.background,
+                    colors: labels.colors.values,
+                  },
+                  textColor: commands.textColor,
+                  backgroundColor: commands.backgroundColor,
+                  onTextColorChange: commands.setTextColor,
+                  onBackgroundColorChange: commands.setBackgroundColor,
+                  disabled: commands.inlineCodeActive || !commands.canColor,
+                }
+              : undefined
+          }
+          activeTextStyles={commands.activeTextStyles}
+          onToggleTextStyle={commands.hasTextSelection ? commands.toggleTextStyle : undefined}
+          textStylesDisabled={!commands.canFormatText}
+          nestDisabled={!commands.canNest}
+          unnestDisabled={!commands.canUnnest}
+        />
+        {hasFormattingControls && hasContextualControls ? <Separator orientation="vertical" aria-hidden /> : null}
+        {hasLinkControls ? <LinkControls commands={commands} labels={labels} snapshot={linkSelection} /> : null}
+        <DropdownMenu placement="bottom-end" size="compact">
+          <EditorToolbarDropdownTarget label={labels.more ?? labels.menu} focusHint={false}>
+            {(targetRef) => (
+              <IconButton
+                ref={targetRef}
+                label={labels.more ?? labels.menu}
+                data-selection-toolbar-action=""
+                data-testid="tiptap-selection-more"
+                onMouseDown={preserveSelection}
+              >
+                <IconDots size={16} />
+              </IconButton>
+            )}
+          </EditorToolbarDropdownTarget>
+          <DropdownMenu.Dropdown>
+            {commands.linkHref ? (
+              <>
+                <DropdownMenu.Item icon={<IconExternalLink size={16} />} onClick={commands.openLink}>
+                  {labels.link.open}
+                </DropdownMenu.Item>
+                <DropdownMenu.Item icon={<IconLinkOff size={16} />} onClick={commands.removeLink}>
+                  {labels.link.remove}
+                </DropdownMenu.Item>
+              </>
+            ) : null}
+            {commands.hasTextSelection ? (
+              <>
+                <DropdownMenu.Item
+                  selected={commands.activeTextStyles.has('strike')}
+                  disabled={!commands.canFormatText}
+                  icon={<IconStrikethrough size={16} />}
+                  onClick={() => commands.toggleTextStyle('strike')}
+                >
+                  {labels.formatting.strike}
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  selected={commands.activeTextStyles.has('code')}
+                  disabled={!commands.canFormatText}
+                  icon={<IconCode size={16} />}
+                  onClick={() => commands.toggleTextStyle('code')}
+                >
+                  {labels.formatting.code}
+                </DropdownMenu.Item>
+              </>
+            ) : null}
+            {commands.canNest ? (
+              <DropdownMenu.Item icon={<IconIndentIncrease size={16} />} onClick={commands.nest}>
+                {labels.nest}
+              </DropdownMenu.Item>
+            ) : null}
+            {commands.canUnnest ? (
+              <DropdownMenu.Item icon={<IconIndentDecrease size={16} />} onClick={commands.unnest}>
+                {labels.unnest}
+              </DropdownMenu.Item>
+            ) : null}
+            {commands.canConvertToInlineMath ? (
+              <DropdownMenu.Item icon={<IconMathFunction size={16} />} onClick={commands.convertToInlineMath}>
+                {labels.inlineMath}
+              </DropdownMenu.Item>
+            ) : null}
+            {commands.canOpenAI ? (
+              <DropdownMenu.Item icon={<IconSparkles size={16} />} onClick={commands.openAI}>
+                <LinkActions gap="md" justify="between">
+                  <span>{labels.ai}</span>
+                  <EditorToolbarShortcutText shortcut={EDITOR_TOOLBAR_SHORTCUTS.ai} />
+                </LinkActions>
+              </DropdownMenu.Item>
+            ) : null}
+          </DropdownMenu.Dropdown>
+        </DropdownMenu>
+      </ToolbarSurface>
     </div>
   );
 }
 
+function hasFocusedOwnedPopup(element: HTMLElement): boolean {
+  const focused = element.ownerDocument.activeElement;
+  if (!focused) {
+    return false;
+  }
+  return [...element.querySelectorAll<HTMLElement>('[aria-controls]')].some((trigger) =>
+    (trigger.getAttribute('aria-controls')?.split(/\s+/).filter(Boolean) ?? []).some((id) =>
+      element.ownerDocument.getElementById(id)?.contains(focused),
+    ),
+  );
+}
+
 export const shouldShowSelectionBubbleMenu: NonNullable<BubbleMenuProps['shouldShow']> = ({ editor, element, view }) =>
-  canShowSelectionBubbleMenu(editor) && (view.hasFocus() || element.contains(document.activeElement));
+  canShowSelectionBubbleMenu(editor) &&
+  (view.hasFocus() || element.contains(element.ownerDocument.activeElement) || hasFocusedOwnedPopup(element));
 
 export function updateSelectionBubbleMenuPosition(editor: Editor) {
   if (editor.isDestroyed || !canShowSelectionBubbleMenu(editor)) {
@@ -509,10 +535,10 @@ export function TiptapSelectionBubbleMenu({ editor, labels, onAIActivate, onOpen
   );
   const shouldShow = useCallback(
     (props: Parameters<NonNullable<BubbleMenuProps['shouldShow']>>[0]) =>
-      !menu.isDismissed && shouldShowSelectionBubbleMenu(props),
-    [menu.isDismissed],
+      !menu.isSuppressed && shouldShowSelectionBubbleMenu(props),
+    [menu.isSuppressed],
   );
-  if (!editor.isEditable || menu.isDismissed) {
+  if (!editor.isEditable || menu.isSuppressed) {
     return null;
   }
   const selectionSnapshot = {

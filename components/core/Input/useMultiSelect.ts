@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { useCombobox } from '@mantine/core';
+import { useInputCombobox } from './useInputCombobox';
 
 export interface MultiSelectItem {
   id: string;
@@ -28,10 +28,7 @@ export function useMultiSelect<T extends MultiSelectItem>({
 }: UseMultiSelectOptions<T>) {
   const [search, setSearch] = useState('');
 
-  const combobox = useCombobox({
-    onDropdownClose: () => combobox.resetSelectedOption(),
-    onDropdownOpen: () => combobox.updateSelectedOptionIndex('active'),
-  });
+  const combobox = useInputCombobox();
 
   const selectedIds = useMemo(() => new Set(selectedItems.map((item) => item.id)), [selectedItems]);
 
@@ -117,6 +114,7 @@ export function useMultiSelect<T extends MultiSelectItem>({
     setSearch,
     combobox,
     filteredOptions,
+    allOptions,
     selectedIds,
     isSelected,
     canCreate,

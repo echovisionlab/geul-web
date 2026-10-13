@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useId, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { normalizeRichTextHref } from '@echovisionlab/geul-common/editor/link-normalization';
@@ -14,6 +15,8 @@ import {
   richTextBlockKindByProtoCase,
   type RichTextBlockKind,
 } from '@echovisionlab/geul-proto/content/block_catalog.ts';
+import { documentHeadingTag } from '@/features/document-layout/ui/document-heading-level';
+import { useDocumentHeadingParentLevel } from '@/features/document-layout/ui/DocumentHeadingScope';
 import { AttachmentMediaView } from '@/features/media/ui/AttachmentMediaView';
 import { ImageMediaView } from '@/features/media/ui/ImageMediaView';
 import { MissingMediaView, type MissingMediaKind } from '@/features/media/ui/MissingMediaView';
@@ -27,6 +30,7 @@ import type { Block, InlineContent } from '@/lib/types/page-content';
 import { getFileTypeName } from '@/lib/utils/file-icon';
 import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
 import { isBlockId } from '@/lib/editor/block-id';
+import { isPublicListItemKind, PublicDocumentBlock, PublicListItem } from './PublicDocumentBlock';
 import { getContainerStyle } from './DefaultBlockView.utils';
 
 const AudioMediaView = dynamic(() => import('@/features/media/AudioMediaView').then((module) => module.AudioMediaView));
@@ -95,6 +99,37 @@ function getInlineHref(item: InlineContent): string | undefined {
 
 export function DefaultBlockView({ block, requestedLocale }: DefaultBlockViewProps) {
   const kind = publicRichTextKind(block.type);
+  if (kind === 'file' && !hasAttachedFileId(block.props.fileId)) {
+    return null;
+  }
+  const nested =
+    kind !== 'callout' && block.children?.length
+      ? block.children.map((child) => (
+          <DefaultBlockView key={child.id} block={child} requestedLocale={requestedLocale} />
+        ))
+      : undefined;
+  const listItem = isPublicListItemKind(kind);
+  return (
+    <PublicDocumentBlock
+      id={block.id}
+      kind={kind}
+      start={kind === 'numbered-list-item' && typeof block.props.start === 'number' ? block.props.start : undefined}
+      nested={listItem ? undefined : nested}
+    >
+      <DefaultBlockContent block={block} requestedLocale={requestedLocale} nested={listItem ? nested : undefined} />
+    </PublicDocumentBlock>
+  );
+}
+
+function textPresentation(block: Block) {
+  return {
+    'data-text-color': getBlockPropString(block.props, 'textColor') || undefined,
+    'data-bg-color': getBlockPropString(block.props, 'backgroundColor') || undefined,
+  };
+}
+
+function DefaultBlockContent({ block, requestedLocale, nested }: DefaultBlockViewProps & { nested?: ReactNode }) {
+  const kind = publicRichTextKind(block.type);
   if (block.type === 'file' && !hasAttachedFileId(block.props.fileId)) {
     return null;
   }
@@ -109,9 +144,9 @@ export function DefaultBlockView({ block, requestedLocale }: DefaultBlockViewPro
     case 'heading':
       return <HeadingBlock block={block} />;
     case 'bullet-list-item':
-      return <BulletListItem block={block} requestedLocale={requestedLocale} />;
+      return <BulletListItem block={block} nested={nested} />;
     case 'numbered-list-item':
-      return <NumberedListItem block={block} requestedLocale={requestedLocale} />;
+      return <NumberedListItem block={block} nested={nested} />;
     case 'check-list-item':
       return <CheckListItem block={block} />;
     case 'quote':
@@ -279,18 +314,49 @@ function renderInlineContent(content: InlineContent[] | undefined): React.ReactN
   });
 }
 
+function hasReadableInlineContent(content: InlineContent[] | undefined): boolean {
+  return (
+    content?.some((item) => {
+      if (item.type === 'text') {
+        return Boolean(item.text?.trim());
+      }
+      if (item.type === 'link') {
+        return hasReadableInlineContent(item.content);
+      }
+      if (item.type === 'mathInline') {
+        return typeof item.props?.latex === 'string' && Boolean(item.props.latex.trim());
+      }
+      return false;
+    }) ?? false
+  );
+}
+
 function ParagraphBlock({ block }: { block: Block }) {
   const alignment = (block.props.textAlignment as string) || 'left';
-  return <p style={{ textAlign: alignment as 'left' | 'center' | 'right' }}>{renderInlineContent(block.content)}</p>;
+  return (
+    <p {...textPresentation(block)} style={{ textAlign: alignment as 'left' | 'center' | 'right' }}>
+      {renderInlineContent(block.content)}
+    </p>
+  );
 }
 
 function HeadingBlock({ block }: { block: Block }) {
-  const level = (block.props.level as number) || 1;
+  const level = Math.min(6, Math.max(1, Math.trunc(Number(block.props.level)) || 1));
   const alignment = (block.props.textAlignment as string) || 'left';
-  const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+  // The element follows the page outline (below the document title); size and depth stay authored.
+  const Tag = documentHeadingTag(level, useDocumentHeadingParentLevel());
+
+  if (!hasReadableInlineContent(block.content)) {
+    return null;
+  }
 
   return (
-    <Tag id={block.id} style={{ textAlign: alignment as 'left' | 'center' | 'right' }}>
+    <Tag
+      {...textPresentation(block)}
+      id={block.id}
+      data-heading-level={level}
+      style={{ textAlign: alignment as 'left' | 'center' | 'right' }}
+    >
       {renderInlineContent(block.content)}
     </Tag>
   );
@@ -299,7 +365,7 @@ function HeadingBlock({ block }: { block: Block }) {
 function QuoteBlock({ block }: { block: Block }) {
   const alignment = (block.props.textAlignment as string) || 'left';
   return (
-    <blockquote style={{ textAlign: alignment as 'left' | 'center' | 'right' }}>
+    <blockquote {...textPresentation(block)} style={{ textAlign: alignment as 'left' | 'center' | 'right' }}>
       {renderInlineContent(block.content)}
     </blockquote>
   );
@@ -325,46 +391,57 @@ function CalloutBlock({ block, requestedLocale }: { block: Block; requestedLocal
   );
 }
 
-function BulletListItem({ block, requestedLocale }: { block: Block; requestedLocale?: string }) {
+function BulletListItem({ block, nested }: { block: Block; nested?: ReactNode }) {
   return (
     <ul>
-      <li>
+      <PublicListItem
+        presentation={textPresentation(block)}
+        textAlign={(getBlockPropString(block.props, 'textAlignment') || 'left') as 'left'}
+        nested={nested}
+      >
         {renderInlineContent(block.content)}
-        {block.children && block.children.length > 0 && (
-          <ul>
-            {block.children.map((child) => (
-              <DefaultBlockView key={child.id} block={child} requestedLocale={requestedLocale} />
-            ))}
-          </ul>
-        )}
-      </li>
+      </PublicListItem>
     </ul>
   );
 }
 
-function NumberedListItem({ block, requestedLocale }: { block: Block; requestedLocale?: string }) {
+function NumberedListItem({ block, nested }: { block: Block; nested?: ReactNode }) {
   return (
-    <ol>
-      <li>
+    <ol start={typeof block.props.start === 'number' ? block.props.start : undefined}>
+      <PublicListItem
+        presentation={textPresentation(block)}
+        textAlign={(getBlockPropString(block.props, 'textAlignment') || 'left') as 'left'}
+        nested={nested}
+      >
         {renderInlineContent(block.content)}
-        {block.children && block.children.length > 0 && (
-          <ol>
-            {block.children.map((child) => (
-              <DefaultBlockView key={child.id} block={child} requestedLocale={requestedLocale} />
-            ))}
-          </ol>
-        )}
-      </li>
+      </PublicListItem>
     </ol>
   );
 }
 
 function CheckListItem({ block }: { block: Block }) {
+  const contentId = useId();
   const checked = (block.props.checked as boolean) || false;
+  const hasTask = hasReadableInlineContent(block.content);
   return (
-    <div className="check-list-item">
-      <input type="checkbox" checked={checked} readOnly />
-      <span>{renderInlineContent(block.content)}</span>
+    <div
+      className="check-list-item"
+      {...textPresentation(block)}
+      style={{ textAlign: (getBlockPropString(block.props, 'textAlignment') || 'left') as 'left' }}
+    >
+      {hasTask ? (
+        <input
+          type="checkbox"
+          checked={checked}
+          readOnly
+          aria-readonly="true"
+          aria-labelledby={contentId}
+          onChange={(event) => {
+            event.currentTarget.checked = checked;
+          }}
+        />
+      ) : null}
+      <span id={contentId}>{renderInlineContent(block.content)}</span>
     </div>
   );
 }
@@ -433,25 +510,48 @@ function executableSource(block: Block): string {
 }
 
 function TableBlock({ block }: { block: Block }) {
+  type Cell = {
+    content: InlineContent[];
+    header?: boolean;
+    props?: {
+      textColor?: string;
+      backgroundColor?: string;
+      textAlignment?: string;
+      colspan?: number;
+      rowspan?: number;
+    };
+  };
   const durableContent = block.content as unknown as
-    | {
-        type: 'tableContent';
-        columnWidths?: number[];
-        rows: Array<{ cells: Array<{ content: InlineContent[] }> }>;
-      }
-    | undefined;
+    { type: 'tableContent'; columnWidths?: number[]; rows: Array<{ cells: Cell[] }> } | undefined;
   const legacyContent = block.props.content as { rows: { cells: InlineContent[][] }[] } | undefined;
-  const rows =
+  const rows: Array<{ cells: Cell[] }> | undefined =
     durableContent?.type === 'tableContent'
-      ? durableContent.rows.map((row) => ({ cells: row.cells.map((cell) => cell.content) }))
-      : legacyContent?.rows;
-
+      ? durableContent.rows
+      : legacyContent?.rows.map((row) => ({ cells: row.cells.map((content) => ({ content })) }));
   if (!rows) {
     return null;
   }
-
-  const [headerRow, ...bodyRows] = rows;
-
+  const renderRow = (row: { cells: Cell[] }, rowIndex: number) => (
+    <tr key={rowIndex}>
+      {row.cells.map((cell, cellIndex) => {
+        const Tag = (cell.header ?? rowIndex === 0) ? 'th' : 'td';
+        return (
+          <Tag
+            key={cellIndex}
+            scope={Tag === 'th' ? (rowIndex === 0 ? 'col' : cellIndex === 0 ? 'row' : undefined) : undefined}
+            data-text-color={cell.props?.textColor === 'default' ? undefined : cell.props?.textColor}
+            data-bg-color={cell.props?.backgroundColor === 'default' ? undefined : cell.props?.backgroundColor}
+            colSpan={cell.props?.colspan}
+            rowSpan={cell.props?.rowspan}
+            style={cell.props?.textAlignment ? { textAlign: cell.props.textAlignment as 'left' } : undefined}
+          >
+            <p>{renderInlineContent(cell.content)}</p>
+          </Tag>
+        );
+      })}
+    </tr>
+  );
+  const headerRow = rows[0]?.cells.every((cell) => cell.header ?? true) ? rows[0] : undefined;
   return (
     <table style={getContainerStyle(block)}>
       {durableContent?.columnWidths?.length ? (
@@ -461,24 +561,8 @@ function TableBlock({ block }: { block: Block }) {
           ))}
         </colgroup>
       ) : null}
-      {headerRow ? (
-        <thead>
-          <tr>
-            {headerRow.cells.map((cell, cellIndex) => (
-              <th key={cellIndex}>{renderInlineContent(cell)}</th>
-            ))}
-          </tr>
-        </thead>
-      ) : null}
-      <tbody>
-        {bodyRows.map((row, rowIndex) => (
-          <tr key={rowIndex}>
-            {row.cells.map((cell, cellIndex) => (
-              <td key={cellIndex}>{renderInlineContent(cell)}</td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
+      {headerRow ? <thead>{renderRow(headerRow, 0)}</thead> : null}
+      <tbody>{rows.map((row, index) => (row === headerRow ? null : renderRow(row, index)))}</tbody>
     </table>
   );
 }

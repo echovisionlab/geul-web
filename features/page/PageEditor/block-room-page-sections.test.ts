@@ -89,6 +89,35 @@ function targetRoom(): Y.Doc {
 }
 
 describe('typed Page Block-room section controller', () => {
+  it.each([
+    'post-list',
+    'work-list',
+    'program-event-list',
+    'release-list',
+    'artist-list',
+    'label-list',
+    'author-list',
+  ] as const)('persists %s collection size through canonical save, reload, and later edits', (kind) => {
+    const document = room();
+    const controller = createBlockRoomPageSectionsController(document, 'ko');
+    const section = createDefaultSection(kind);
+    controller.insert(section, { index: 0 });
+    expect(controller.read()[0]?.props).toMatchObject({ itemSize: 'm' });
+
+    for (const itemSize of ['s', 'l', 'm'] as const) {
+      controller.update(section.id, { props: { itemSize } });
+      const canonical = materializeCanonicalBlockRoom(document, 'page');
+      const reloaded = new Y.Doc();
+      hydrateCanonicalBlockRoom(reloaded, 'page', 'ko', canonical, []);
+      const reloadedController = createBlockRoomPageSectionsController(reloaded, 'ko');
+      expect(reloadedController.read()[0]?.props).toMatchObject({ itemSize });
+      reloadedController.update(section.id, { props: { columns: '2' } });
+      expect(reloadedController.read()[0]?.props).toMatchObject({ itemSize, columns: '2' });
+      reloaded.destroy();
+    }
+    document.destroy();
+  });
+
   it('does not notify the Page section projection for rich-text body edits', () => {
     const document = room();
     const controller = createBlockRoomPageSectionsController(document, 'ko');

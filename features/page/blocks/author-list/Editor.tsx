@@ -1,12 +1,20 @@
 'use client';
 
+import { SectionCard as DsSectionCard } from '@/components/core/Section';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { IconAlertTriangle, IconArrowDown, IconArrowUp, IconTrash, IconUserPlus } from '@tabler/icons-react';
-import { Avatar, Box, Group, Paper, Stack, Text } from '@mantine/core';
+
+import { Avatar } from '@/components/core/Display';
 import { Alert } from '@/components/core/Alert';
 import { IconButton } from '@/components/core/IconButton';
 import { Select, NumberInput, SegmentedControl, Switch } from '@/components/core/Input';
@@ -19,15 +27,18 @@ import { COLUMN_OPTIONS, getLayoutOptionsGridList, MAX_LIMIT_AUTHORS } from '../
 import type { BlockCanvasPreviewProps, BlockEditorProps, BlockSettingsEditorProps } from '../types';
 import { parseAuthorIds, type AuthorListProps } from './schema';
 import { AuthorListView } from './View';
+import { CollectionSizeControl } from '../CollectionSizeControl';
 
 const MAX_SELECTED_AUTHORS = 24;
 
 interface AuthorListSettingsFormProps {
+  readOnly?: boolean;
   props: Partial<AuthorListProps>;
   updateProps: (props: Record<string, unknown>) => void;
 }
 
-function AuthorListSettingsForm({ props, updateProps }: AuthorListSettingsFormProps) {
+function AuthorListSettingsForm({ props, updateProps, readOnly = false }: AuthorListSettingsFormProps) {
+  const t = useTranslations();
   const tPageEditor = useTranslations('pageEditor');
   const tCommonLabels = useTranslations('common.labels');
 
@@ -57,21 +68,35 @@ function AuthorListSettingsForm({ props, updateProps }: AuthorListSettingsFormPr
   const candidatesQuery = useQuery({
     queryKey: ['members', 'author-candidates', debouncedSearch, selectedIds],
     queryFn: () => searchMembers(debouncedSearch, selectedIds, 10, true),
-    enabled: source === 'selected' && isEnabled && selectedIds.length < MAX_SELECTED_AUTHORS,
+    enabled: source === 'selected' && !readOnly && isEnabled && selectedIds.length < MAX_SELECTED_AUTHORS,
   });
   const { data: candidates = [], isFetching: candidatesFetching } = candidatesQuery;
 
   const updateProp = useCallback(
     (key: keyof AuthorListProps, value: string) => {
+      if (readOnly) {
+        return;
+      }
       updateProps({ [key]: value });
     },
-    [updateProps],
+    [readOnly, updateProps],
   );
 
-  const updateSelectedIds = useCallback((ids: string[]) => updateProp('authorIds', ids.join(',')), [updateProp]);
+  const updateSelectedIds = useCallback(
+    (ids: string[]) => {
+      if (readOnly) {
+        return;
+      }
+      updateProp('authorIds', ids.join(','));
+    },
+    [readOnly, updateProp],
+  );
 
   const moveSelectedAuthor = useCallback(
     (index: number, direction: -1 | 1) => {
+      if (readOnly) {
+        return;
+      }
       const target = index + direction;
       if (target < 0 || target >= selectedIds.length) {
         return;
@@ -80,14 +105,15 @@ function AuthorListSettingsForm({ props, updateProps }: AuthorListSettingsFormPr
       [next[index], next[target]] = [next[target], next[index]];
       updateSelectedIds(next);
     },
-    [selectedIds, updateSelectedIds],
+    [readOnly, selectedIds, updateSelectedIds],
   );
 
   return (
-    <Box data-page-block-editor="author-list">
+    <div data-page-block-editor="author-list">
       <QueryErrorAlert queries={[candidatesQuery, selectedAuthorsQuery]} />
-      <Stack gap="sm">
+      <DsLayoutStack gap="md">
         <Select
+          disabled={readOnly}
           label={tPageEditor('blockEditor.labels.source')}
           data={[
             {
@@ -101,16 +127,20 @@ function AuthorListSettingsForm({ props, updateProps }: AuthorListSettingsFormPr
           ]}
           value={source}
           onChange={(value) => updateProp('source', value || 'automatic')}
-          size="xs"
         />
 
         {source === 'selected' ? (
-          <Stack gap="xs">
+          <DsLayoutStack gap="xs">
             {selectedIds.length < MAX_SELECTED_AUTHORS ? (
               <SearchCombobox
+                disabled={readOnly}
                 combobox={combobox}
                 search={search}
-                onSearchChange={setSearch}
+                onSearchChange={(value) => {
+                  if (!readOnly) {
+                    setSearch(value);
+                  }
+                }}
                 placeholder={tCommonLabels('authors')}
                 label={tCommonLabels('authors')}
                 leftSection={<IconUserPlus size={14} />}
@@ -118,158 +148,177 @@ function AuthorListSettingsForm({ props, updateProps }: AuthorListSettingsFormPr
                 isLoading={candidatesFetching}
                 debouncedSearch={debouncedSearch}
                 onSelect={(memberId) => {
+                  if (readOnly) {
+                    return;
+                  }
                   if (!selectedIds.includes(memberId)) {
                     updateSelectedIds([...selectedIds, memberId]);
                   }
                   reset();
                 }}
                 renderItem={(candidate) => (
-                  <Group gap="xs" wrap="nowrap">
-                    <Avatar src={candidate.avatarUrl} size="xs" radius="xl">
-                      {candidate.nickname.charAt(0)}
-                    </Avatar>
-                    <Text size="xs" truncate>
+                  <DsLayoutInline gap="xs" wrap="nowrap">
+                    <Avatar src={candidate.avatarUrl} size="xs" shape="circle" name={candidate.nickname} />
+                    <DsText size="xs" truncate>
                       {candidate.nickname}
-                    </Text>
-                  </Group>
+                    </DsText>
+                  </DsLayoutInline>
                 )}
                 getItemId={(candidate) => candidate.id}
+                getItemText={(candidate) => candidate.nickname}
               />
             ) : (
-              <Text size="xs" c="dimmed">
-                Maximum {MAX_SELECTED_AUTHORS} authors selected
-              </Text>
+              <DsText size="xs" tone="secondary">
+                {tPageEditor('blockEditor.authorSelection.maxSelected', { count: MAX_SELECTED_AUTHORS })}
+              </DsText>
             )}
 
             {selectedIds.length === 0 ? (
-              <Text size="xs" c="dimmed">
-                No authors selected. This block will be empty.
-              </Text>
+              <DsText size="xs" tone="secondary">
+                {tPageEditor('blockEditor.authorSelection.empty')}
+              </DsText>
             ) : (
               selectedIds.map((memberId, index) => {
                 const author = selectedAuthorsById.get(memberId);
+                const authorName = author?.name?.trim() || t('common.states.unknownAuthor');
                 const unavailable = selectedAuthorsFetched && !author;
                 return (
-                  <Paper key={memberId} withBorder p="xs" radius="sm">
-                    <Group gap="xs" wrap="nowrap">
-                      <Avatar src={author?.image} size="sm" radius="xl">
-                        {author?.name?.charAt(0) ?? '?'}
-                      </Avatar>
-                      <Box style={{ flex: 1, minWidth: 0 }}>
-                        <Text size="xs" truncate>
-                          {author?.name ?? memberId}
-                        </Text>
+                  <DsSectionCard withBorder padding="xs" key={memberId}>
+                    <DsLayoutInline gap="xs" wrap="nowrap">
+                      <Avatar src={author?.image} size="sm" shape="circle" name={authorName} />
+                      <DsLayoutInset flexible space="none">
+                        <DsText size="xs" truncate>
+                          {authorName}
+                        </DsText>
                         {unavailable ? (
-                          <Text size="xs" c="red">
-                            This author is no longer available.
-                          </Text>
+                          <DsText size="xs" tone="danger">
+                            {tPageEditor('blockEditor.authorSelection.unavailable')}
+                          </DsText>
                         ) : null}
-                      </Box>
+                      </DsLayoutInset>
                       <IconButton
-                        aria-label={`Move ${author?.name ?? memberId} up`}
+                        aria-label={t('dataTable.sort.aria.moveUp', { label: authorName })}
                         size="xs"
-                        disabled={index === 0}
+                        disabled={readOnly || index === 0}
                         onClick={() => moveSelectedAuthor(index, -1)}
                       >
                         <IconArrowUp size={13} />
                       </IconButton>
                       <IconButton
-                        aria-label={`Move ${author?.name ?? memberId} down`}
+                        aria-label={t('dataTable.sort.aria.moveDown', { label: authorName })}
                         size="xs"
-                        disabled={index === selectedIds.length - 1}
+                        disabled={readOnly || index === selectedIds.length - 1}
                         onClick={() => moveSelectedAuthor(index, 1)}
                       >
                         <IconArrowDown size={13} />
                       </IconButton>
                       <IconButton
-                        aria-label={`Remove ${author?.name ?? memberId}`}
+                        aria-label={t('postMembers.removeAria', { name: authorName })}
+                        disabled={readOnly}
                         size="xs"
                         tone="danger"
                         onClick={() => updateSelectedIds(selectedIds.filter((id) => id !== memberId))}
                       >
                         <IconTrash size={13} />
                       </IconButton>
-                    </Group>
-                  </Paper>
+                    </DsLayoutInline>
+                  </DsSectionCard>
                 );
               })
             )}
 
             {selectedAuthorsFetched && selectedAuthors.length < selectedIds.length ? (
-              <Alert icon={<IconAlertTriangle size={14} />} tone="warning" p="xs">
-                Unavailable authors are omitted from the public page. Remove them or select a replacement.
+              <Alert density="compact" icon={<IconAlertTriangle size={14} />} tone="warning">
+                {tPageEditor('blockEditor.authorSelection.unavailableWarning')}
               </Alert>
             ) : null}
-          </Stack>
+          </DsLayoutStack>
         ) : null}
 
-        <Text size="xs" c="dimmed" fw={500}>
+        <DsText size="xs" tone="secondary" weight="medium">
           {tPageEditor('blockEditor.sections.layout')}
-        </Text>
+        </DsText>
         <SegmentedControl
+          disabled={readOnly}
           data={[...layoutOptions]}
           value={layout}
           onChange={(value) => updateProp('layout', value)}
-          size="xs"
           fullWidth
+        />
+
+        <CollectionSizeControl
+          disabled={readOnly}
+          value={props.itemSize}
+          onChange={(value) => updateProp('itemSize', value)}
         />
 
         {layout === 'grid' && (
           <Select
+            disabled={readOnly}
             label={tPageEditor('blockEditor.labels.columns')}
             data={[...COLUMN_OPTIONS]}
             value={columns}
             onChange={(value) => updateProp('columns', value || '3')}
-            size="xs"
           />
         )}
 
         {source === 'automatic' ? (
           <NumberInput
+            disabled={readOnly}
             label={tPageEditor('blockEditor.labels.numberOfAuthors')}
             value={parseInt(limit, 10)}
             onChange={(value) => updateProp('limit', String(value || 6))}
             min={1}
             max={MAX_LIMIT_AUTHORS}
-            size="xs"
           />
         ) : null}
 
-        <Text size="xs" c="dimmed" fw={500} mt="xs">
-          {tPageEditor('blockEditor.sections.displayOptions')}
-        </Text>
+        <DsLayoutInset blockStart="xs">
+          <DsText size="xs" tone="secondary" weight="medium">
+            {tPageEditor('blockEditor.sections.displayOptions')}
+          </DsText>
+        </DsLayoutInset>
 
         <Switch
+          disabled={readOnly}
           label={tPageEditor('blockEditor.labels.showBio')}
           checked={showBio === 'true'}
           onChange={(e) => updateProp('showBio', e.currentTarget.checked ? 'true' : 'false')}
-          size="sm"
         />
         <Switch
-          label="Show avatar"
+          disabled={readOnly}
+          label={tPageEditor('blockEditor.labels.showAvatar')}
           checked={showAvatar === 'true'}
           onChange={(e) => updateProp('showAvatar', e.currentTarget.checked ? 'true' : 'false')}
-          size="sm"
         />
-      </Stack>
-    </Box>
+      </DsLayoutStack>
+    </div>
   );
 }
 
-export function AuthorListSettingsEditor({ props, updateSharedProps }: BlockSettingsEditorProps<AuthorListProps>) {
-  return <AuthorListSettingsForm props={props} updateProps={updateSharedProps} />;
+export function AuthorListSettingsEditor({
+  props,
+  updateSharedProps,
+  allowSharedEdits,
+}: BlockSettingsEditorProps<AuthorListProps>) {
+  return <AuthorListSettingsForm props={props} updateProps={updateSharedProps} readOnly={allowSharedEdits === false} />;
 }
 
 export function AuthorListEditor({ sectionId, props }: BlockEditorProps<AuthorListProps>) {
-  const { updateSection } = usePageEditor();
+  const { updateSection, editable, allowStructuralEdits } = usePageEditor();
   const updateProps = useCallback(
     (nextProps: Record<string, unknown>) => {
+      if (!editable || !allowStructuralEdits) {
+        return;
+      }
       updateSection(sectionId, { props: nextProps });
     },
-    [sectionId, updateSection],
+    [sectionId, updateSection, editable, allowStructuralEdits],
   );
 
-  return <AuthorListSettingsForm props={props} updateProps={updateProps} />;
+  return (
+    <AuthorListSettingsForm props={props} updateProps={updateProps} readOnly={!editable || !allowStructuralEdits} />
+  );
 }
 
 export function AuthorListCanvasPreview({ sectionId, props }: BlockCanvasPreviewProps<AuthorListProps>) {

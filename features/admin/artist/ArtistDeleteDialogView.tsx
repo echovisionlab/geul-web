@@ -1,7 +1,10 @@
 'use client';
+import { SupportingText, List, Text as DsText } from '@/components/core/Typography';
+import { ConfirmationDialog } from '@/features/confirmation';
 
-import { Anchor, List, Stack, Text } from '@mantine/core';
-import { ConfirmModal } from '@/components/core/Modal';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+
+import { NavigationLink as Anchor } from '@/components/core/Navigation';
 
 export interface ArtistDeleteImpactViewModel {
   domain: number;
@@ -49,19 +52,20 @@ export function ArtistDeleteDialogView({
   onConfirm,
 }: ArtistDeleteDialogViewProps) {
   return (
-    <ConfirmModal
+    <ConfirmationDialog
+      intent="delete"
       opened={opened}
       onClose={onClose}
       onConfirm={onConfirm}
       title={labels.title}
       message={
-        <Stack gap="sm">
-          <Text>{labels.confirmation.replace('{name}', artistName)}</Text>
-          {previewLoading ? <Text c="dimmed">{labels.loading}</Text> : null}
-          {previewError ? <Text c="red">{previewError || labels.failed}</Text> : null}
+        <DsLayoutStack gap="sm">
+          <DsText>{labels.confirmation.replace('{name}', artistName)}</DsText>
+          {previewLoading ? <SupportingText tone="secondary">{labels.loading}</SupportingText> : null}
+          {previewError ? <DsText tone="danger">{previewError || labels.failed}</DsText> : null}
           {preview ? (
             <>
-              <Text>{labels.relationSummary.replace('{count}', String(preview.totalRelationCount))}</Text>
+              <DsText size="sm">{labels.relationSummary.replace('{count}', String(preview.totalRelationCount))}</DsText>
               {preview.impacts.length > 0 ? (
                 <List spacing="xs">
                   {preview.impacts.map((impact) => {
@@ -69,7 +73,7 @@ export function ArtistDeleteDialogView({
                     const content = `${impact.label} (${impact.relationCount})`;
                     return (
                       <List.Item key={`${impact.domain}:${impact.entityId}`}>
-                        {href ? <Anchor href={href}>{content}</Anchor> : <Text span>{content}</Text>}
+                        {href ? <Anchor href={href}>{content}</Anchor> : <DsText as="span">{content}</DsText>}
                       </List.Item>
                     );
                   })}
@@ -77,7 +81,7 @@ export function ArtistDeleteDialogView({
               ) : null}
             </>
           ) : null}
-        </Stack>
+        </DsLayoutStack>
       }
       confirmLabel={labels.confirm}
       cancelLabel={labels.cancel}

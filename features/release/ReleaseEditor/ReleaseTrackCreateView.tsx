@@ -1,12 +1,12 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { IconPlus } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Group, Modal, Stack } from '@mantine/core';
-import { TimePicker } from '@mantine/dates';
-import '@mantine/dates/styles.css';
+
+import { ContentModal, DialogActions } from '@/components/core/Modal';
+import { TimePicker, TextInput } from '@/components/core/Input';
 import { Button } from '@/components/core/Button';
-import { TextInput } from '@/components/core/Input';
 
 interface ReleaseTrackCreateViewProps {
   idPrefix?: string;
@@ -33,6 +33,7 @@ export function ReleaseTrackCreateView({
   onDurationChange,
   onSubmit,
 }: ReleaseTrackCreateViewProps) {
+  const tModalActions = useTranslations('common.actions');
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.tracks');
 
@@ -48,8 +49,8 @@ export function ReleaseTrackCreateView({
         {tCommon('actions.addItem', { item: tCommon('entities.track') })}
       </Button>
 
-      <Modal opened={opened} onClose={onClose} title={t('addModal.title')}>
-        <Stack>
+      <ContentModal opened={opened} onClose={onClose} title={t('addModal.title')} closeLabel={tModalActions('close')}>
+        <DsLayoutStack>
           <TextInput
             id={idPrefix ? `${idPrefix}-title-input` : 'release-track-add-title-input'}
             label={tCommon('labels.title')}
@@ -69,16 +70,16 @@ export function ReleaseTrackCreateView({
             minutesInputLabel={tCommon('labels.minutes')}
             secondsInputLabel={tCommon('labels.seconds')}
           />
-          <Group justify="flex-end">
+          <DialogActions>
             <Button emphasis="low" onClick={onClose}>
               {tCommon('actions.cancel')}
             </Button>
-            <Button onClick={onSubmit} loading={isCreating} disabled={!title.trim()}>
+            <Button emphasis="strong" onClick={onSubmit} loading={isCreating} disabled={!title.trim()}>
               {tCommon('actions.add')}
             </Button>
-          </Group>
-        </Stack>
-      </Modal>
+          </DialogActions>
+        </DsLayoutStack>
+      </ContentModal>
     </>
   );
 }

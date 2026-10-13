@@ -1,20 +1,6 @@
-.sortableHeaderButton {
-  color: inherit;
-  transition: color 0.15s ease;
-}
-
-.sortableHeaderButton:hover,
-.sortableHeaderButton:focus-visible {
-  color: var(--mantine-primary-color-filled);
-}
-
-.sortableHeaderButton:disabled {
-  color: inherit;
-}
-
 .rowWithAction:has(.rowActionControl:focus-visible) {
-  outline: 2px solid var(--mantine-primary-color-filled);
-  outline-offset: -2px;
+  outline: var(--geul-border-focus) solid var(--geul-focus);
+  outline-offset: calc(-1 * var(--geul-border-focus));
 }
 
 .rowActionControl {
@@ -22,7 +8,7 @@
   width: 1px;
   height: 1px;
   padding: 0;
-  margin: -1px;
+  margin: 0;
   overflow: hidden;
   white-space: nowrap;
   border: 0;
@@ -30,14 +16,132 @@
 }
 
 .disabledRow {
-  opacity: 0.5;
+  opacity: var(--geul-opacity-disabled);
 }
 
 .dimmedRow {
-  opacity: 0.5;
+  color: var(--geul-text-muted);
 }
 
-.dimmedRow:hover,
-.dimmedRow:focus-visible {
-  opacity: 0.72;
+.loading {
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+.selectionTrack {
+  width: var(--geul-interaction-touch);
+}
+
+.scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.mobileRow {
+  position: relative;
+  min-width: 0;
+  padding-block: var(--geul-spacing-sm);
+  font-size: var(--geul-font-size-sm);
+  line-height: var(--geul-line-height-sm);
+}
+
+.mobileRow:not(:last-child) {
+  border-bottom: var(--geul-border-thin) solid var(--geul-border-default);
+}
+
+.mobileRow[data-density='compact'] {
+  padding-block: var(--geul-spacing-xs);
+}
+
+.mobileRow[data-selected] {
+  background: var(--geul-surface-active);
+}
+
+.mobileRow[data-interactive] {
+  cursor: pointer;
+}
+
+.mobileRow[data-prevent-selection] {
+  user-select: none;
+}
+
+.mobileRow[data-interactive]:focus-visible {
+  outline: var(--geul-border-focus) solid var(--geul-focus);
+  outline-offset: calc(-1 * var(--geul-border-focus));
+}
+
+.root {
+  min-width: 0;
+  container: data-table / inline-size;
+}
+
+.root:is([data-mobile-layout='compact'], [data-mobile-layout='inline']) .mobile {
+  display: none;
+}
+
+.mobileSelection {
+  display: flex;
+  align-items: center;
+  min-height: calc(var(--geul-font-size-sm) * var(--geul-line-height-sm));
+  flex: none;
+  width: var(--geul-control-height-sm);
+}
+
+@container data-table (width < $mantine-breakpoint-sm) {
+  .root:is([data-mobile-layout='compact'], [data-mobile-layout='inline']) .desktop {
+    display: none;
+  }
+
+  .root:is([data-mobile-layout='compact'], [data-mobile-layout='inline']) .mobile {
+    display: block;
+  }
+}
+
+/* Selection controls must not inherit inline text baseline spacing from table cells. */
+.selectionControl {
+  display: flex;
+  align-items: center;
+}
+
+.root table[data-column-sizing='fixed'] {
+  table-layout: fixed;
+}
+
+/* One line: a reserved selection slot, flexible primary content and short trailing metadata. */
+.inlineRow {
+  display: flex;
+  align-items: center;
+  gap: var(--geul-spacing-xs);
+  min-height: var(--geul-control-height-sm);
+  padding-inline: var(--geul-spacing-xs);
+}
+
+.inlineSelection {
+  display: flex;
+  align-items: center;
+  flex: none;
+  width: var(--geul-control-height-sm);
+}
+
+.inlinePrimary {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.inlineMetadata {
+  flex: none;
+  white-space: nowrap;
+}
+
+.inlineActions {
+  display: flex;
+  align-items: center;
+  gap: var(--geul-spacing-xxs);
+  flex: none;
+}
+
+.root[data-mobile-layout='inline'] .mobileRow[data-density='compact'] {
+  padding-block: var(--geul-spacing-xxs);
 }

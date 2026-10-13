@@ -171,6 +171,7 @@ describe('PlaceEditor', () => {
     onSubmit: (updates: Partial<PlaceEditorFormState>) => Promise<boolean>,
     data = initialData,
     identity = 'place-1',
+    localOnly = false,
   ) {
     container = document.createElement('div');
     document.body.appendChild(container);
@@ -179,7 +180,7 @@ describe('PlaceEditor', () => {
     act(() => {
       root?.render(
         <TestProviders locale="en">
-          <PlaceEditor key={identity} initialData={data} onSubmit={onSubmit} onBack={vi.fn()} />
+          <PlaceEditor localOnly={localOnly} key={identity} initialData={data} onSubmit={onSubmit} onBack={vi.fn()} />
         </TestProviders>,
       );
     });
@@ -190,6 +191,31 @@ describe('PlaceEditor', () => {
       container?.querySelector<HTMLButtonElement>(`[data-testid="${testId}"]`)?.click();
     });
   }
+
+  it('keeps manual edit/save fields available on mobile without a map service', async () => {
+    const matchMedia = vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
+      matches: true,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+    const onSubmit = vi.fn().mockResolvedValue(true);
+    renderPlaceEditor(onSubmit, initialData, 'local-place', true);
+    expect(container?.querySelector('[data-testid="base-map"]')).toBeNull();
+    expect(container?.querySelector('[data-testid="places-autocomplete"]')).toBeNull();
+    expect(container?.querySelector('[data-testid="place-detail-form"]')).not.toBeNull();
+    click('change-name');
+    await act(async () => {
+      container?.querySelector<HTMLButtonElement>('[data-testid="header-action-save"]')?.click();
+      await Promise.resolve();
+    });
+    expect(onSubmit).toHaveBeenCalledWith({ name: 'Updated name' });
+    matchMedia.mockRestore();
+  });
 
   it('uses the canonical translated authoring header', () => {
     container = document.createElement('div');

@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ComponentProps, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
-import { MantineProvider } from '@mantine/core';
+
 import type { PostBlockRoomTiptapController } from '@/features/editor/tiptap/block-room-tiptap-controller';
 import { getEditorBodyLoadingId, getEditorBodyReadyId } from '@/features/editor/lib/media-test-ids';
 import { PostEditorBody } from './PostEditorBody';
@@ -53,9 +54,9 @@ let root: Root | null = null;
 async function render(bodyMode: ComponentProps<typeof PostEditorBody>['bodyMode'], withSession = true) {
   await act(async () => {
     root?.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <PostEditorBody {...baseProps} bodyMode={bodyMode} session={withSession ? editorSession : null} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
     await Promise.resolve();
   });
@@ -100,6 +101,7 @@ describe('PostEditorBody', () => {
     await render('locale-editor');
     expect(localizedEditorMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
+        accessibleLabel: 'Body',
         editable: true,
         allowNeutralBlockEdits: true,
         allowStructuralEdits: true,
@@ -108,7 +110,7 @@ describe('PostEditorBody', () => {
 
     await act(async () => {
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <PostEditorBody
             {...baseProps}
             bodyMode="locale-editor"
@@ -116,7 +118,7 @@ describe('PostEditorBody', () => {
             activeLocale="en"
             isSourceLocale={false}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await Promise.resolve();
     });
@@ -134,9 +136,9 @@ describe('PostEditorBody', () => {
   it('mounts an archived Author in the real room while keeping every editor mutation read-only', async () => {
     await act(async () => {
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <PostEditorBody {...baseProps} bodyMode="locale-editor" session={editorSession} editable={false} />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await Promise.resolve();
     });

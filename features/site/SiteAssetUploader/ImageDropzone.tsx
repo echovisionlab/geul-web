@@ -1,6 +1,6 @@
 'use client';
 
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import type { ImageUploadAccept, ImageUploadRejection } from '@/components/core/ImageUpload';
 import { ImageDropzoneView } from './ui/ImageDropzoneView';
 
@@ -68,7 +68,7 @@ export function ImageDropzone({
     if (minSize && file.size < minSize) {
       notifications.show({
         message: `File too small. Minimum size: ${formatBytes(minSize)}`,
-        color: 'red',
+        tone: 'danger',
       });
       return;
     }
@@ -89,7 +89,7 @@ export function ImageDropzone({
       message = errorMessage || 'Invalid file type';
     }
 
-    notifications.show({ message, color: 'red' });
+    notifications.show({ message, tone: 'danger' });
   };
 
   return (

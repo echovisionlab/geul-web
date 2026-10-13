@@ -3,11 +3,15 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { createReleaseAction } from '@/lib/actions/release';
 import { CreateReleaseButtonView } from './CreateReleaseButtonView';
 
-export function CreateReleaseButton() {
+export interface CreateReleaseButtonProps {
+  createAction?: typeof createReleaseAction;
+  onCreated?: (id: string) => void;
+}
+export function CreateReleaseButton({ createAction = createReleaseAction, onCreated }: CreateReleaseButtonProps = {}) {
   const tReleaseEditor = useTranslations('releaseEditor');
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -16,15 +20,19 @@ export function CreateReleaseButton() {
   const handleCreate = async () => {
     setLoading(true);
     try {
-      const result = await createReleaseAction({
+      const result = await createAction({
         title: tReleaseEditor('titleFallback'),
         type: 'album',
       });
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       if (result.data) {
+        if (onCreated) {
+          onCreated(result.data.id);
+          return;
+        }
         const href = `/releases/${result.data.id}?edit=true`;
         startNavigation(() => {
           router.push(href);

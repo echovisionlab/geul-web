@@ -1,4 +1,9 @@
+import { useTranslations } from 'next-intl';
+import { navigatePreview, goBackPreview } from '@/stories/shared/preview-navigation';
+import { withFeatureLabels } from '@/stories/feature-localization';
 import type { Meta, StoryObj } from '@storybook/nextjs';
+import { useEffect, useState } from 'react';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { VerificationFlowView } from './VerificationFlowView';
 
@@ -33,7 +38,109 @@ const labels = {
 const meta = {
   title: 'Feature/Auth/Verification Flow View',
   component: VerificationFlowView,
-  parameters: { layout: 'centered' },
+  decorators: [
+    withFeatureLabels({
+      labels: {
+        back: 'common.actions.back',
+        chooseDescription: 'auth.verification.chooseMethod.description',
+        chooseSubmit: 'auth.verification.chooseMethod.submit',
+        chooseTitle: 'auth.verification.chooseMethod.title',
+        emailLabel: 'common.labels.email',
+        emailPlaceholder: 'common.placeholders.emailExample',
+        passedAction: 'auth.verification.passedChallenge.action',
+        passedDescription: 'auth.verification.passedChallenge.description',
+        passedTitle: 'auth.verification.passedChallenge.title',
+        applyingDescription: 'auth.verification.applying.description',
+        applyingRetry: 'auth.verification.applying.checkAgain',
+        applyingTitle: 'auth.verification.applying.title',
+        sentDescription: 'auth.verification.sentEmail.description',
+        sentTitle: 'auth.common.checkYourEmailTitle',
+        submittingCode: 'auth.verification.sentEmail.submitting',
+        code: (t) => ({
+          codeAriaLabel: t('auth.verification.sentEmail.codeLabel'),
+          codeExpired: t('auth.common.codeTiming.expired'),
+          codeExpiresIn: (time: string) => t('auth.common.codeTiming.expiresIn', { time }),
+          flowExpired: t('auth.verification.errors.flowNotFound'),
+          resend: t('auth.verification.sentEmail.resend'),
+          resendIn: (time: string) => t('auth.common.codeTiming.resendIn', { time }),
+          startOver: t('auth.verification.startOver'),
+          submit: t('auth.verification.sentEmail.submitting'),
+        }),
+      },
+      project: (args, t) => ({
+        error: args.error
+          ? t(args.state === 'sent_email' ? 'auth.verification.errors.submit' : 'auth.verification.errors.submitRetry')
+          : args.error,
+      }),
+    }),
+  ],
+  parameters: {
+    layout: 'centered',
+    docs: {
+      description: {
+        component:
+          'Verification uses the existing Core input and action contracts. Back is a text-only command that preserves its localized name, callback and keyboard focus; it does not submit the email form.',
+      },
+    },
+  },
+  render: function EditableVerificationState(args) {
+    const t = useTranslations('auth.verification.errors');
+    const [email, setEmail] = useState(args.email);
+    const [code, setCode] = useState(args.code);
+    const [state, setState] = useState(args.state);
+    const [error, setError] = useState(args.error);
+    useEffect(() => setEmail(args.email), [args.email]);
+    useEffect(() => setCode(args.code), [args.code]);
+    useEffect(() => setState(args.state), [args.state]);
+    useEffect(() => setError(args.error), [args.error]);
+    return (
+      <VerificationFlowView
+        {...args}
+        email={email}
+        code={code}
+        state={state}
+        error={error}
+        onEmailChange={(email) => {
+          setEmail(email);
+          args.onEmailChange(email);
+        }}
+        onCodeChange={(code) => {
+          setCode(code);
+          args.onCodeChange(code);
+        }}
+        onBack={goBackPreview}
+        onCodeSubmit={(value) => {
+          if (value !== '123456') {
+            setError(t('submit'));
+            return;
+          }
+          setError(null);
+          setState('passed');
+          args.onCodeSubmit(code);
+        }}
+        onCheckApplied={() => {
+          setState('passed');
+          args.onCheckApplied();
+        }}
+        onPassed={() => navigatePreview('/my/security')}
+        onRequestCode={() => {
+          setState('sent_email');
+          setCode('');
+          args.onRequestCode();
+        }}
+        onResendCode={() => {
+          setCode('');
+          args.onResendCode();
+        }}
+        onStartOver={() => {
+          setState('choose_email');
+          setCode('');
+          setError(null);
+          args.onStartOver();
+        }}
+      />
+    );
+  },
   args: {
     code: '',
     email: 'new@example.com',
@@ -59,7 +166,14 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const ChooseEmail: Story = {};
+export const ChooseEmail: Story = {
+  play: async ({ canvasElement }) => {
+    const back = canvasElement.querySelector<HTMLButtonElement>('[data-testid="verification-back"]')!;
+    await expect(back).toHaveAccessibleName();
+    await expect(back.querySelector('svg')).toBeNull();
+    await expect(back).toHaveAttribute('type', 'button');
+  },
+};
 
 export const RequestingCode: Story = {
   args: { requestingCode: true },
@@ -83,4 +197,43 @@ export const Applying: Story = {
 
 export const Passed: Story = {
   args: { state: 'passed' },
+};
+
+export const KeyboardVerification: Story = {
+  tags: ['a11y-account'],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const email = canvas.getByRole('textbox');
+    email.focus();
+    await userEvent.clear(email);
+    await userEvent.keyboard('reader@example.com{Enter}');
+    await waitFor(() => expect(canvas.getAllByRole('textbox')).toHaveLength(6));
+    await expect(canvas.getAllByRole('textbox')[0]).toHaveFocus();
+    await userEvent.keyboard('123456');
+    await waitFor(() => expect(canvas.queryAllByRole('textbox')).toHaveLength(0));
+    await expect(canvas.getByRole('heading', { level: 1 })).toHaveFocus();
+    await expect(canvas.getByRole('button')).toHaveAccessibleName();
+  },
+};
+
+export const KeyboardInvalidCode: Story = {
+  tags: ['a11y-account'],
+  args: { state: 'sent_email', code: '' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    canvas.getAllByRole('textbox')[0].focus();
+    await userEvent.keyboard('654321');
+    await waitFor(() => expect(canvas.getByRole('alert')).toBeVisible());
+    const error = canvas.getByRole('alert');
+    for (const digit of canvas.getAllByRole('textbox')) {
+      await expect(digit).toHaveAttribute('aria-invalid', 'true');
+      await expect(digit).toHaveAccessibleDescription(expect.stringContaining(error.textContent ?? ''));
+    }
+    await expect(
+      canvas
+        .getAllByRole('textbox')
+        .map((input) => (input as HTMLInputElement).value)
+        .join(''),
+    ).toBe('654321');
+  },
 };

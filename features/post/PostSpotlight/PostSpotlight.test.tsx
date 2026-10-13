@@ -3,7 +3,7 @@
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { MantineProvider } from '@mantine/core';
+import { I18nProvider } from 'react-aria-components';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PostSpotlightRuntimeProps } from './PostSpotlightRuntime';
 
@@ -39,9 +39,9 @@ function Runtime(props: PostSpotlightRuntimeProps) {
 async function mount() {
   await act(async () =>
     root.render(
-      <MantineProvider env="test">
+      <I18nProvider locale="en">
         <PostSpotlight />
-      </MantineProvider>,
+      </I18nProvider>,
     ),
   );
 }
@@ -61,9 +61,9 @@ afterEach(async () => {
 describe('PostSpotlight demand-loaded results', () => {
   it('renders no dialog or results runtime on SSR and idle hydration', async () => {
     const html = renderToStaticMarkup(
-      <MantineProvider env="test">
+      <I18nProvider locale="en">
         <PostSpotlight />
-      </MantineProvider>,
+      </I18nProvider>,
     );
     expect(html).not.toContain('role="dialog"');
     await mount();

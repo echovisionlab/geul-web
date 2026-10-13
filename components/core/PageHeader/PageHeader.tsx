@@ -1,9 +1,10 @@
+import { SupportingText, Heading } from '../Typography';
 import type { ReactNode } from 'react';
-import { Group, Stack, Text } from '@mantine/core';
+import { LayoutInline, LayoutStack } from '../Layout';
 
+import { ActionRowSizeProvider } from '../control-context';
 export type PageHeaderAlign = 'start' | 'center';
 export type PageHeaderLevel = 1 | 2;
-
 export interface PageHeaderProps {
   title: ReactNode;
   description?: ReactNode;
@@ -11,24 +12,27 @@ export interface PageHeaderProps {
   align?: PageHeaderAlign;
   level?: PageHeaderLevel;
 }
-
-/** Domain-free route heading with a stable visual scale independent from its semantic level. */
+/** A semantic page heading and shared action row, without per-route styling. */
 export function PageHeader({ title, description, actions, align = 'start', level = 1 }: PageHeaderProps) {
-  const heading = `h${level}` as 'h1' | 'h2';
-
   return (
-    <Group justify="space-between" align="flex-start" wrap="wrap" gap="md">
-      <Stack gap={4} ta={align} style={{ minWidth: 0, flex: 1 }}>
-        <Text component={heading} fz="1.5rem" fw={700} lh={1.3} m={0}>
+    <LayoutInline justify="between" align="start" wrap="wrap" gap="md">
+      <LayoutStack gap="xxs">
+        <Heading level={level} scale={2} align={align}>
           {title}
-        </Text>
+        </Heading>
         {description ? (
-          <Text component="p" size="sm" c="dimmed" m={0}>
+          <SupportingText as="p" tone="secondary" align={align}>
             {description}
-          </Text>
+          </SupportingText>
         ) : null}
-      </Stack>
-      {actions ? <Group gap="xs">{actions}</Group> : null}
-    </Group>
+      </LayoutStack>
+      {actions ? (
+        <ActionRowSizeProvider size="sm">
+          <LayoutInline gap="xs" align="center">
+            {actions}
+          </LayoutInline>
+        </ActionRowSizeProvider>
+      ) : null}
+    </LayoutInline>
   );
 }

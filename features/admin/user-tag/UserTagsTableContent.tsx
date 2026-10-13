@@ -1,7 +1,8 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
+
 import { LabelBadge } from '@/components/core/Badge';
 import {
   ServerDataTableSelectableSection,
@@ -25,9 +26,9 @@ function getColumns(labels: { name: string; users: string; created: string }): C
       key: 'name',
       header: labels.name,
       cell: (row) => (
-        <Text size="sm" fw={500}>
+        <DsText size="sm" weight="medium">
           {row.name}
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -39,9 +40,9 @@ function getColumns(labels: { name: string; users: string; created: string }): C
       key: 'createdAt',
       header: labels.created,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.created_at} />
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -55,6 +56,7 @@ function getColumns(labels: { name: string; users: string; created: string }): C
 }
 
 interface UserTagsTableContentProps {
+  deleteAction?: typeof deleteUserTagAction;
   result: ServerDataTableSelectableSectionProps<UserTagRow>['result'];
   searchPlaceholder: string;
   filterFields: ServerDataTableSelectableSectionProps<UserTagRow>['filterFields'];
@@ -66,6 +68,7 @@ export function UserTagsTableContent({
   searchPlaceholder,
   filterFields,
   sortFields,
+  deleteAction = deleteUserTagAction,
 }: UserTagsTableContentProps) {
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
@@ -88,7 +91,7 @@ export function UserTagsTableContent({
       sortFields={sortFields}
       bulkDelete={{
         entityLabel: tCommonEntities('userTags'),
-        deleteAction: deleteUserTagAction,
+        deleteAction,
         getRowLabel: (row) => row.name || row.id,
       }}
     />

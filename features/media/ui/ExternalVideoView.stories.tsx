@@ -22,7 +22,6 @@ export default meta;
 type Story = StoryObj<typeof ExternalVideoPlayerView>;
 
 export const YouTube: Story = {};
-export const KeyboardFocusFallback: Story = {};
 export const Vimeo: Story = {
   args: {
     provider: 'vimeo',

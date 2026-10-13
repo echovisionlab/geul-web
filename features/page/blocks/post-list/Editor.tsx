@@ -19,11 +19,12 @@ import type { PostListProps } from './schema';
 import { PostListView } from './View';
 
 interface PostListSettingsFormProps {
+  readOnly?: boolean;
   props: Partial<PostListProps>;
   updateProps: (props: Record<string, unknown>) => void;
 }
 
-function PostListSettingsForm({ props, updateProps }: PostListSettingsFormProps) {
+function PostListSettingsForm({ props, updateProps, readOnly = false }: PostListSettingsFormProps) {
   const tPageEditor = useTranslations('pageEditor');
   const tCommonEntities = useTranslations('common.entities');
   const tCommonLabels = useTranslations('common.labels');
@@ -81,9 +82,12 @@ function PostListSettingsForm({ props, updateProps }: PostListSettingsFormProps)
 
   const updateProp = useCallback(
     (key: keyof PostListProps, value: string) => {
+      if (readOnly) {
+        return;
+      }
       updateProps({ [key]: value });
     },
-    [updateProps],
+    [readOnly, updateProps],
   );
 
   const updateBaseProp = useCallback(
@@ -102,9 +106,11 @@ function PostListSettingsForm({ props, updateProps }: PostListSettingsFormProps)
     <>
       <QueryErrorAlert queries={[categoriesQuery, seriesListQuery, tagsQuery]} />
       <ListBlockEditorBase
+        readOnly={readOnly}
         editorType="post-list"
         limitLabel={tPageEditor('blockEditor.labels.numberOfPosts')}
         layout={layout}
+        itemSize={props.itemSize}
         columns={columns}
         limit={limit}
         maxLimit={MAX_LIMIT_POSTS}
@@ -121,42 +127,42 @@ function PostListSettingsForm({ props, updateProps }: PostListSettingsFormProps)
         filters={
           <>
             <MultiSelect
+              disabled={readOnly}
               label={tCommonEntities('categories')}
               placeholder={tPageEditor('mapEditor.allCategoriesPlaceholder')}
               data={categoryOptions}
               value={categoryIds ? categoryIds.split(',').filter(Boolean) : []}
               onChange={(values) => updateProp('categoryIds', values.join(','))}
-              size="xs"
               clearable
               searchable
             />
             <Select
+              disabled={readOnly}
               label={tCommonEntities('series')}
               placeholder={tPageEditor('mapEditor.allSeriesPlaceholder')}
               data={seriesOptions}
               value={seriesId || null}
               onChange={(value) => updateProp('seriesId', value || '')}
-              size="xs"
               clearable
               searchable
             />
             <MultiSelect
+              disabled={readOnly}
               label={tCommonLabels('authors')}
               placeholder={tPageEditor('mapEditor.allAuthorsPlaceholder')}
               data={authorOptions}
               value={authorIds ? authorIds.split(',').filter(Boolean) : []}
               onChange={(values) => updateProp('authorIds', values.join(','))}
-              size="xs"
               clearable
               searchable
             />
             <MultiSelect
+              disabled={readOnly}
               label={tCommonEntities('tags')}
               placeholder={tPageEditor('mapEditor.allTagsPlaceholder')}
               data={tagOptions}
               value={tagIds ? tagIds.split(',').filter(Boolean) : []}
               onChange={(values) => updateProp('tagIds', values.join(','))}
-              size="xs"
               clearable
               searchable
             />
@@ -164,10 +170,10 @@ function PostListSettingsForm({ props, updateProps }: PostListSettingsFormProps)
         }
         extraDisplayOptions={
           <Switch
+            disabled={readOnly}
             label={tPageEditor('blockEditor.labels.showMeta')}
             checked={showMeta === 'true'}
             onChange={(event) => updateProp('showMeta', event.currentTarget.checked ? 'true' : 'false')}
-            size="sm"
           />
         }
         onUpdate={updateBaseProp}
@@ -176,20 +182,27 @@ function PostListSettingsForm({ props, updateProps }: PostListSettingsFormProps)
   );
 }
 
-export function PostListSettingsEditor({ props, updateSharedProps }: BlockSettingsEditorProps<PostListProps>) {
-  return <PostListSettingsForm props={props} updateProps={updateSharedProps} />;
+export function PostListSettingsEditor({
+  props,
+  updateSharedProps,
+  allowSharedEdits,
+}: BlockSettingsEditorProps<PostListProps>) {
+  return <PostListSettingsForm props={props} updateProps={updateSharedProps} readOnly={allowSharedEdits === false} />;
 }
 
 export function PostListEditor({ sectionId, props }: BlockEditorProps<PostListProps>) {
-  const { updateSection } = usePageEditor();
+  const { updateSection, editable, allowStructuralEdits } = usePageEditor();
   const updateProps = useCallback(
     (nextProps: Record<string, unknown>) => {
+      if (!editable || !allowStructuralEdits) {
+        return;
+      }
       updateSection(sectionId, { props: nextProps });
     },
-    [sectionId, updateSection],
+    [sectionId, updateSection, editable, allowStructuralEdits],
   );
 
-  return <PostListSettingsForm props={props} updateProps={updateProps} />;
+  return <PostListSettingsForm props={props} updateProps={updateProps} readOnly={!editable || !allowStructuralEdits} />;
 }
 
 export function PostListCanvasPreview({ sectionId, props }: BlockCanvasPreviewProps<PostListProps>) {

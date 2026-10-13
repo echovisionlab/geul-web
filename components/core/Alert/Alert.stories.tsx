@@ -1,14 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { IconAlertTriangle, IconCircleCheck, IconInfoCircle, IconX } from '@tabler/icons-react';
-import { Group, Stack, Text } from '@mantine/core';
-import { Button } from '../Button';
 import { Alert } from './Alert';
 
-const onReview = () => {};
-
 const meta: Meta<typeof Alert> = {
-  title: 'Core/Alert',
+  title: 'Core/Feedback/Alert',
   component: Alert,
   tags: ['alert'],
   parameters: { layout: 'centered' },
@@ -65,23 +61,5 @@ export const LongContent: Story = {
     title: 'Before you continue',
     children:
       'Publishing updates every public profile surface. Existing links remain active, but visitors may need to refresh before the latest details appear.',
-  },
-};
-
-export const WithAction: Story = {
-  args: {
-    icon: <IconAlertTriangle size={18} aria-hidden />,
-    title: 'Unpublished changes',
-    tone: 'warning',
-    children: (
-      <Stack gap="sm">
-        <Text size="sm">Review the pending edits before leaving this page.</Text>
-        <Group>
-          <Button tone="warning" emphasis="outline" onClick={onReview}>
-            Review changes
-          </Button>
-        </Group>
-      </Stack>
-    ),
   },
 };

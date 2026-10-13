@@ -8,7 +8,7 @@ import type { ReleaseTrackItem } from '@/lib/collab/schemas/release-fields.schem
 import { restoreTrackOrder, useTrackOrderSave } from './useTrackOrderSave';
 
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 vi.mock('@/lib/actions/track', () => ({ reorderTracksAction: vi.fn() }));
 const track = (id: string, number: number): ReleaseTrackItem => ({
   id,

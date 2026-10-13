@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { useTranslations } from 'next-intl';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import type * as Y from 'yjs';
@@ -72,7 +72,7 @@ interface PendingClientSave {
   desiredClients: string[];
 }
 
-interface WorkMetaContextValue extends WorkMeta {
+export interface WorkMetaContextValue extends WorkMeta {
   workId: string;
   featuredImageUrl: string | null;
   setTitle: (title: string) => void;
@@ -101,6 +101,9 @@ interface WorkMetaContextValue extends WorkMeta {
 }
 
 const WorkMetaContext = createContext<WorkMetaContextValue | null>(null);
+
+/** Same state contract for local composition previews and the connected provider. */
+export const WorkMetaStateProvider = WorkMetaContext.Provider;
 
 export function WorkMetaProvider({
   workId,
@@ -186,7 +189,7 @@ export function WorkMetaProvider({
             if (aliveRef.current) {
               notifications.show({
                 message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
-                color: 'red',
+                tone: 'danger',
               });
             }
             notifyEditorSaveStateChanged(`work:${workId}`);

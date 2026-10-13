@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { IconHistory } from '@tabler/icons-react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import enMessages from '@/messages/en.json';
 import { EditorHeader } from '.';
 
@@ -165,7 +166,9 @@ function renderEditorHeader(node: ReactNode) {
   act(() => {
     root?.render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <MantineProvider>{node}</MantineProvider>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
+          {node}
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
   });
@@ -417,7 +420,7 @@ describe('EditorHeader', () => {
     expect(document.querySelector('[data-testid="editor-header-change-status"]')).toBeNull();
   });
 
-  it('moves editor controls into a single mobile action bar', () => {
+  it('keeps locale and collaboration together with compact commands in the same row', () => {
     mockMatchMedia(true);
 
     renderEditorHeader(
@@ -453,10 +456,18 @@ describe('EditorHeader', () => {
 
     expect(mobileRoot).not.toBeNull();
     expect(mobileActionBar).not.toBeNull();
-    expect(mobileActionBar?.textContent).toContain('Draft · Collab');
+    expect(mobileActionBar?.textContent).toContain('Draft');
+    expect(document.querySelector('[data-testid="editor-header-collab-button"]')?.getAttribute('aria-label')).toContain(
+      'Draft · Collab',
+    );
     expect(mobileActionBar?.textContent).toContain('Locale control');
     expect(document.querySelector('[data-testid="editor-header"]')).toBeNull();
-    expect(document.querySelector('button[aria-label="Open fullscreen"]')).not.toBeNull();
+    const toolbar = document.querySelector('[data-testid="editor-header-command-toolbar"]');
+    expect(toolbar?.getAttribute('role')).toBe('toolbar');
+    expect(toolbar?.textContent).not.toContain('Fullscreen');
+    expect(toolbar?.contains(document.querySelector('button[aria-label="Open fullscreen"]'))).toBe(true);
+    expect(mobileActionBar?.contains(toolbar)).toBe(true);
+    expect(document.querySelector('button[aria-label="Actions"]')).toBeNull();
   });
 
   it('requires confirmation before invoking delete when deleteConfirmation is provided', async () => {

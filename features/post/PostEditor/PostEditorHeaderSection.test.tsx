@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import type { EditorHeaderActionItem, EditorHeaderCollabAction } from '@/features/editor/EditorHeader';
 import { PostEditorHeaderSection } from './PostEditorHeaderSection';
 
@@ -71,7 +72,7 @@ let root: Root | null = null;
 function renderHeader(isZenMode: boolean) {
   act(() => {
     root?.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <PostEditorHeaderSection
           postId="post-1"
           title="Post title"
@@ -88,7 +89,7 @@ function renderHeader(isZenMode: boolean) {
           scheduledTimeZone="Asia/Seoul"
           {...callbacks}
         />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
 }

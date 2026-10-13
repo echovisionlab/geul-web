@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import koMessages from '@/messages/ko.json';
 import { LanguagePreferenceSettings } from './LanguagePreferenceSettings';
 
@@ -70,7 +71,9 @@ function render(node: React.ReactNode) {
     root?.render(
       <QueryClientProvider client={queryClient}>
         <NextIntlClientProvider locale="ko" messages={koMessages}>
-          <MantineProvider>{node}</MantineProvider>
+          <DesignSystemProvider locale="ko" forceColorScheme="light">
+            {node}
+          </DesignSystemProvider>
         </NextIntlClientProvider>
       </QueryClientProvider>,
     );

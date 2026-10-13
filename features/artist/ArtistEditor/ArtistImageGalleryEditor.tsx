@@ -1,9 +1,14 @@
 'use client';
 
+import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
+
+import { MediaImage } from '@/components/core/MediaImage';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useEffect, useState } from 'react';
 import { IconArrowLeft, IconArrowRight, IconStar, IconTrash } from '@tabler/icons-react';
-import { Group, Image, Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { IconButton } from '@/components/core/IconButton';
 import { Tooltip } from '@/components/core/Tooltip';
 import { ArtistImageUploader } from '@/features/artist/ArtistImageUploader';
@@ -56,7 +61,7 @@ export function ArtistImageGalleryEditor({
       const result = await setArtistImagesAction(artistId, fileIds, revision);
       if (!result.data) {
         const message = result.error ?? labels.updateFailed;
-        notifications.show({ message, color: 'red' });
+        notifications.show({ message, tone: 'danger' });
         throw new Error(message);
       }
       setImages(result.data.images);
@@ -70,17 +75,19 @@ export function ArtistImageGalleryEditor({
   const primary = images[0] ?? null;
 
   return (
-    <Stack gap="sm" aria-busy={saving}>
-      <ArtistImageUploader
-        artistId={artistId}
-        currentImage={primary?.url}
-        artistName={artistName}
-        inputId={inputId}
-        size={100}
-        label={labels.image}
-        onFileUploaded={({ fileId }) => persist([fileId, ...currentFileIds.filter((id) => id !== fileId)])}
-        onDeleteRequested={() => persist(currentFileIds.slice(1))}
-      />
+    <DsLayoutStack gap="sm" aria-busy={saving}>
+      <AuthoringExtension kind="uploads">
+        <ArtistImageUploader
+          artistId={artistId}
+          currentImage={primary?.url}
+          artistName={artistName}
+          inputId={inputId}
+          size={100}
+          label={labels.image}
+          onFileUploaded={({ fileId }) => persist([fileId, ...currentFileIds.filter((id) => id !== fileId)])}
+          onDeleteRequested={() => persist(currentFileIds.slice(1))}
+        />
+      </AuthoringExtension>
 
       <ArtistImageGalleryView
         images={images}
@@ -90,7 +97,7 @@ export function ArtistImageGalleryEditor({
         onMove={(from, to) => persist(moveItem(currentFileIds, from, to))}
         onRemove={(fileId) => persist(currentFileIds.filter((id) => id !== fileId))}
       />
-    </Stack>
+    </DsLayoutStack>
   );
 }
 
@@ -116,22 +123,28 @@ export function ArtistImageGalleryView({
     return null;
   }
   return (
-    <Stack gap="xs">
-      <Text size="sm" fw={500}>
+    <DsLayoutStack gap="xs">
+      <DsText size="sm" weight="medium">
         {labels.gallery}
-      </Text>
-      <Group gap="sm" align="flex-start">
+      </DsText>
+      <DsLayoutInline gap="sm" align="start">
         {images.map((image, index) => (
-          <Stack key={image.fileId} gap={4} align="center">
-            <Image
+          <DsLayoutStack
+            key={image.fileId}
+            gap="xxs"
+            align="center"
+            role="group"
+            aria-label={`${labels.gallery} ${index + 1}`}
+          >
+            <MediaImage
               src={image.url}
               alt=""
-              w={72}
-              h={72}
+              width={72}
+              height={72}
               fit="cover"
               fallbackSrc="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
             />
-            <Group gap={2} wrap="nowrap">
+            <DsLayoutInline gap="xxs" wrap="nowrap">
               {index > 0 ? (
                 <Tooltip label={labels.makePrimary}>
                   <IconButton
@@ -175,11 +188,11 @@ export function ArtistImageGalleryView({
                   <IconTrash size={15} />
                 </IconButton>
               </Tooltip>
-            </Group>
-          </Stack>
+            </DsLayoutInline>
+          </DsLayoutStack>
         ))}
-      </Group>
-    </Stack>
+      </DsLayoutInline>
+    </DsLayoutStack>
   );
 }
 

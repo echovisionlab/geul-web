@@ -1,6 +1,7 @@
 {
   "common": {
     "actions": {
+      "move": "이동",
       "save": "저장",
       "saveChanges": "변경 사항 저장",
       "create": "만들기",
@@ -59,7 +60,7 @@
       "reply": "답글",
       "insertVariable": "변수 삽입",
       "acceptAll": "모두 허용",
-      "rejectNonEssential": "비필수만 거부",
+      "rejectNonEssential": "거부",
       "savePreferences": "설정 저장",
       "import": "가져오기",
       "export": "내보내기",
@@ -127,10 +128,7 @@
       "file": "파일",
       "bio": "소개",
       "realName": "실명",
-      "countryCode": "국가 코드",
       "slug": "슬러그",
-      "slugAutoModeEnabled": "제목과 자동 동기화 중 (클릭하여 해제)",
-      "slugAutoModeManual": "수동 모드 (클릭하여 자동 동기화 활성화)",
       "submissions": "제출 수",
       "public": "공개",
       "location": "위치",
@@ -162,7 +160,6 @@
       "logoLight": "라이트 로고",
       "logoDark": "다크 로고",
       "joined": "가입일",
-      "subscribed": "구독일",
       "featured": "추천",
       "order": "순서",
       "sortOrder": "정렬 순서",
@@ -177,7 +174,6 @@
       "minutes": "분",
       "seconds": "초",
       "time": "시간",
-      "generationInfo": "생성 정보",
       "body": "본문",
       "content": "콘텐츠",
       "bodyPreview": "본문 미리보기",
@@ -280,6 +276,7 @@
     },
     "messages": {
       "noUsersFound": "사용자를 찾을 수 없습니다",
+      "noAuthorsFound": "작가를 찾을 수 없습니다.",
       "noVersionsFound": "버전이 없습니다.",
       "typeAtLeast2Characters": "최소 2글자 이상 입력하세요",
       "itemCreated": "{item}을 만들었습니다",
@@ -295,24 +292,22 @@
       "deleteItemConfirm": "이 {item}을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
       "deleteNamedItemConfirm": "\"{name}\"을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
       "confirmDeleteSelectedCount": "선택한 항목 {count}개를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-      "deleteDraftVersionConfirm": "이 임시 버전을 삭제하시겠습니까?",
       "confirmDeleteNamedRich": "<strong>{name}</strong>을(를) 삭제하시겠습니까?",
-      "activeCount": "{count} 활성",
       "effectiveFromDate": "{date}부터 적용",
       "noUpdateRecorded": "업데이트 기록 없음",
-      "exportedEmails": "이메일 {count, plural, one {#개} other {#개}}를 내보냈습니다",
       "formSubmittedSuccessfully": "응답이 성공적으로 제출되었습니다.",
       "userDate": "{user} · {date}",
       "scheduleActivationTitle": "적용 예약",
       "scheduleActivationDescription": "이 버전이 적용될 시점을 선택하세요. 예약되면 모든 활성 계정에 안내 메일이 발송됩니다.",
       "scheduleActivationNotice": "예약 시 모든 활성 계정에 미리보기 링크가 포함된 안내 메일이 발송됩니다.",
-      "translationDetailUnavailable": "상세 번역 정보를 불러오지 못했습니다. 현재 공개 번역 기준으로 계속 수정할 수 있습니다.",
       "invalidConfirmationLinkFromEmail": "유효하지 않은 확인 링크입니다. 확인 이메일의 링크를 사용해 주세요.",
       "noPostsFound": "포스트가 없습니다.",
       "noWorksFound": "작업물이 없습니다.",
-      "urlCopiedToClipboard": "URL이 클립보드에 복사되었습니다",
       "failedToLoad": "데이터를 불러오지 못했습니다.",
-      "relatedItemsWillBeUnlinked": "연결된 항목 {count}개의 연결이 해제됩니다."
+      "relatedItemsWillBeUnlinked": "연결된 항목 {count}개의 연결이 해제됩니다.",
+      "noArtistsFound": "아티스트가 없습니다.",
+      "noLabelsFound": "레이블이 없습니다.",
+      "noReleasesFound": "릴리즈가 없습니다."
     },
     "notifications": {
       "categoryCreated": "카테고리를 만들었습니다",
@@ -372,8 +367,6 @@
       "testEmail": "test@email.com",
       "testEmailExample": "test@example.com",
       "noReplyEmail": "noreply@example.com",
-      "translationLiveRowMissing": "아직 이 언어의 공개 번역이 없습니다. 여기서 저장하면 바로 생성됩니다.",
-      "translationBodyPreviewUnavailable": "본문 미리보기를 표시할 수 없습니다.",
       "selectDateAndTime": "날짜와 시간을 선택하세요",
       "streetAddress": "도로명 주소",
       "regionSubdivision": "시/도"
@@ -408,12 +401,11 @@
       "generating": "생성 중...",
       "true": "예",
       "false": "아니오",
-      "loading": "불러오는 중..."
+      "loading": "불러오는 중...",
+      "toBeAnnounced": "미정"
     },
     "roles": {
       "admin": "관리자",
-      "editor": "편집자",
-      "viewer": "뷰어",
       "author": "작성자",
       "user": "사용자"
     },
@@ -445,6 +437,11 @@
       "unsubscribed": "구독 해지됨",
       "subscribed": "구독 중",
       "onboardingPending": "온보딩 미완료"
+    },
+    "motion": {
+      "pause": "애니메이션 일시 정지",
+      "resume": "애니메이션 재개",
+      "readAllInformation": "장면의 모든 정보 읽기"
     }
   },
   "shell": {
@@ -931,7 +928,6 @@
     },
     "mapThemes": {
       "empty": "지도 테마가 없습니다.",
-      "notFound": "지도 테마를 찾을 수 없습니다.",
       "loadFailed": "지도 테마를 불러오지 못했습니다.",
       "defaultDisabled": "이미 기본 테마입니다.",
       "deleteDisabled": {
@@ -939,9 +935,7 @@
         "last": "마지막 지도 테마는 삭제할 수 없습니다."
       },
       "reloadRequired": {
-        "title": "새로고침이 필요합니다",
-        "message": "더 최신 버전에서 테마가 저장되었습니다. 편집을 계속하려면 새로고침하세요.",
-        "action": "새로고침"
+        "title": "새로고침이 필요합니다"
       },
       "variants": {
         "light": "라이트",
@@ -972,8 +966,7 @@
       },
       "editor": {
         "notifications": {
-          "defaultSet": "테마를 기본값으로 설정했습니다",
-          "variantRequired": "라이트 또는 다크 중 최소 한 가지 변형이 필요합니다"
+          "defaultSet": "테마를 기본값으로 설정했습니다"
         },
         "controls": {
           "map": {
@@ -1310,7 +1303,6 @@
     },
     "verification": {
       "loading": "인증 폼을 불러오는 중...",
-      "redirecting": "이동 중...",
       "startOver": "처음부터 다시 시작",
       "errors": {
         "flowNotFound": "인증 플로우를 찾을 수 없거나 만료되었습니다",
@@ -1373,21 +1365,14 @@
   "featuredImage": {
     "label": "대표 이미지",
     "alt": "대표 이미지",
-    "hint": "이미지를 클릭해 교체",
     "cropTitle": "대표 이미지 자르기",
-    "empty": {
-      "editable": "드롭하거나 클릭해 업로드 ({ratio})",
-      "readOnly": "이미지 없음"
-    },
     "errors": {
       "fileRejected": "파일이 거부되었습니다",
       "fileTooLarge": "파일이 너무 큽니다. 최대 크기: {maxSize}",
       "invalidFileType": "지원하지 않는 파일 형식입니다"
     },
     "actions": {
-      "changeAria": "대표 이미지 변경",
-      "removeAria": "대표 이미지 제거",
-      "remove": "이미지 제거"
+      "removeAria": "대표 이미지 제거"
     }
   },
   "artistPage": {
@@ -1495,7 +1480,6 @@
       "slug": "artist-slug",
       "name": "활동명 / 아티스트명",
       "realName": "실명 (선택)",
-      "countryCode": "예: US, KR, JP",
       "labels": "레이블 선택...",
       "parentArtist": "상위 아티스트 선택..."
     },
@@ -1518,15 +1502,7 @@
     },
     "placeholders": {
       "name": "레이블 이름",
-      "countryCode": "예: DE, US, KR",
       "parentLabel": "상위 레이블 선택 (선택)"
-    }
-  },
-  "workCollaborators": {
-    "empty": "아직 협업자가 없습니다",
-    "notifications": {
-      "added": "협업자가 추가되었습니다",
-      "removed": "협업자가 제거되었습니다"
     }
   },
   "comments": {
@@ -1585,17 +1561,6 @@
     "credits": {
       "other": "기타"
     },
-    "music": {
-      "released": "발매일: {value}",
-      "spotify": "Spotify",
-      "bandcamp": "Bandcamp",
-      "soundcloud": "SoundCloud",
-      "youtube": "YouTube",
-      "openSpotify": "Spotify 열기",
-      "openBandcamp": "Bandcamp 열기",
-      "openSoundcloud": "SoundCloud 열기",
-      "openYoutube": "YouTube 열기"
-    },
     "portfolio": {
       "tech": "기술:"
     },
@@ -1643,7 +1608,6 @@
     }
   },
   "cookieConsentCommon": {
-    "essentialLabel": "필수 쿠키 (항상 활성화)",
     "analyticsLabel": "분석 쿠키 (Google Analytics)"
   },
   "nicknameField": {
@@ -1690,7 +1654,6 @@
       "failedToRevokeSession": "세션 해제에 실패했습니다",
       "failedToRevokeSessions": "세션 해제에 실패했습니다",
       "failedToRequestDeletion": "계정 삭제 요청에 실패했습니다",
-      "cannotUnlinkMessage": "최소 하나의 인증 수단은 유지해야 합니다",
       "connectedMessage": "{provider} 계정이 성공적으로 연결되었습니다.",
       "disconnectedMessage": "{provider} 연결이 해제되었습니다.",
       "failedToUpdateMainEmail": "대표 이메일을 변경하지 못했습니다",
@@ -1751,8 +1714,6 @@
       "added": "{date}에 추가",
       "lastMethod": "이 패스키를 제거하기 전에 다른 로그인 수단을 추가하세요.",
       "removeNamed": "{name} 패스키 제거",
-      "reauth": "패스키를 변경하려면 다시 로그인해 주세요.",
-      "reauthAction": "다시 로그인",
       "errors": {
         "load": "패스키를 불러오지 못했습니다.",
         "remove": "이 패스키를 제거하지 못했습니다.",
@@ -1789,21 +1750,11 @@
     "email": {
       "title": "대표 이메일",
       "description": "계정에서 확인된 이메일 중 공지·계정 안내를 받을 이메일을 선택합니다.",
-      "addEmail": "이메일 추가",
       "canonical": "대표 이메일",
-      "canonicalCannotRemove": "이 주소를 제거하려면 먼저 다른 대표 이메일을 선택하세요.",
       "setCanonical": "대표 이메일로 설정",
-      "noEmail": "설정된 이메일이 없습니다",
-      "helper": "대표 이메일로 선택할 수 있는 인증된 이메일이 하나뿐입니다.",
-      "selectLabel": "대표 이메일",
       "changeAction": "대표 이메일 변경",
       "sources": {
-        "current": "현재 대표 이메일",
-        "emailCode": "Email",
-        "pending": "인증 대기 중"
-      },
-      "messages": {
-        "pendingVerification": "이 이메일은 이미 인증 대기 중입니다. 인증 메일을 다시 보낼 수 있습니다."
+        "emailCode": "Email"
       },
       "mainEmailUpdated": "대표 이메일을 변경했습니다.",
       "canonicalUpdated": "대표 이메일을 변경했습니다."
@@ -1834,7 +1785,6 @@
   },
   "seriesDetail": {
     "slug": {
-      "autoDescription": "자동 모드에서는 제목이 바뀌면 슬러그도 함께 업데이트됩니다.",
       "manualDescription": "수동 모드에서는 직접 수정하거나 자동 모드를 다시 켜기 전까지 슬러그가 유지됩니다."
     },
     "notifications": {
@@ -1870,10 +1820,6 @@
     }
   },
   "works": {
-    "tabs": {
-      "editable": "편집 가능"
-    },
-    "emptyEditable": "편집 가능한 작업물이 없습니다.",
     "emptyCredits": "크레딧 작업물을 찾을 수 없습니다.",
     "columns": {
       "creditedAs": "표시 이름",
@@ -1995,6 +1941,7 @@
         "patternPlaceholder": "예: ^[A-Z]{3}$",
         "customErrorMessage": "사용자 정의 오류 메시지",
         "optional": "선택 사항",
+        "dragValidator": "검증 규칙 드래그",
         "removeValidator": "검증 규칙 삭제"
       },
       "fieldTypes": {
@@ -2062,10 +2009,6 @@
       }
     },
     "settings": {
-      "notifications": {
-        "managerAdded": "폼 관리자가 추가되었습니다",
-        "managerRemoved": "폼 관리자가 제거되었습니다"
-      },
       "urlPublic": {
         "title": "URL 및 공개 접근",
         "allowPublic": "공개 URL 접근 허용",
@@ -2085,13 +2028,7 @@
         "description": "관리자 권한 없이 폼 통계를 볼 수 있는 대시보드 링크를 공유합니다"
       },
       "managers": {
-        "adminControls": "관리자 제어",
-        "readOnly": "읽기 전용",
-        "description": "관리자는 이 양식을 편집하고 제출을 확인하며 공유 링크를 관리할 수 있습니다.",
-        "searchPlaceholder": "추가할 사용자를 검색하세요...",
-        "adminOnly": "관리자만 관리자를 추가하거나 제거할 수 있습니다.",
-        "empty": "아직 지정된 관리자가 없습니다.",
-        "removeManager": "{name} 관리자 제거"
+        "description": "관리자는 이 양식을 편집하고 제출을 확인하며 공유 링크를 관리할 수 있습니다."
       },
       "access": {
         "title": "접근 제어",
@@ -2120,7 +2057,11 @@
   "dataTable": {
     "aria": {
       "sortBy": "{label} 정렬",
-      "rowActions": "{label} 작업 메뉴"
+      "rowActions": "{label} 작업 메뉴",
+      "selectAllRows": "모든 행 선택",
+      "selectRow": "{label} 선택",
+      "resultSummary": "{totalPages, plural, =0 {결과 {count}개} other {결과 {count}개, {totalPages}페이지 중 {page}페이지}}",
+      "loadingMessage": "불러오는 중"
     },
     "sort": {
       "button": "정렬",
@@ -2133,7 +2074,9 @@
         "moveUp": "{label} 위로 이동",
         "moveDown": "{label} 아래로 이동",
         "toggleDirection": "{label} 정렬 방향 전환",
-        "removeSort": "{label} 정렬 제거"
+        "removeSort": "{label} 정렬 제거",
+        "directionAscending": "현재 오름차순",
+        "directionDescending": "현재 내림차순"
       }
     },
     "filter": {
@@ -2148,7 +2091,8 @@
       "drawerTitle": "필터",
       "aria": {
         "backToFields": "필터 필드로 돌아가기",
-        "removeFilter": "{label} 필터 제거"
+        "removeFilter": "{label} 필터 제거",
+        "logic": "필터 결합 방식"
       },
       "operators": {
         "eq": "같음",
@@ -2181,7 +2125,8 @@
       "previousPage": "이전 페이지",
       "nextPage": "다음 페이지",
       "lastPage": "마지막 페이지",
-      "page": "{page}페이지"
+      "page": "{page}페이지",
+      "navigation": "페이지 탐색"
     }
   },
   "versionHistory": {
@@ -2193,7 +2138,9 @@
     "restoreTitle": "버전 복원",
     "restoreSameLocaleBody": "원문 v{version}({locale})을 복원하면 원문 문서만 변경됩니다. 기존 대상 문서와 번역 작업은 그대로 유지되며 번역은 자동 생성되지 않습니다. 계속하시겠습니까?",
     "restoreCrossLocaleBody": "원문 v{version}을 복원하면 원문 언어가 {currentLocale}에서 {selectedLocale}(으)로 전환되고 원문 포인터만 변경됩니다. 기존 대상 문서와 번역 작업은 그대로 유지되며 번역은 자동 생성되지 않습니다. 계속하시겠습니까?",
-    "restoreFailed": "원문 문서를 복원하지 못했습니다."
+    "restoreFailed": "원문 문서를 복원하지 못했습니다.",
+    "loadFailed": "버전 기록을 불러오지 못했습니다.",
+    "end": "모든 버전을 불러왔습니다."
   },
   "shareLinks": {
     "title": "공유 링크",
@@ -2203,7 +2150,6 @@
     "createError": "링크 생성에 실패했습니다",
     "deleteSuccess": "링크가 삭제되었습니다",
     "deleteError": "링크 삭제에 실패했습니다",
-    "invalidUrl": "유효하지 않은 URL입니다",
     "noLinks": "생성된 링크가 없습니다",
     "showLess": "접기",
     "showMore": "{count}개 더 보기",
@@ -2218,21 +2164,9 @@
     "passwordPlaceholder": "공유 비밀번호 설정",
     "maximumExpiration": "공유 링크는 최대 1년까지 설정할 수 있습니다.",
     "expirationInvalid": "1년 이내의 만료 시각을 선택하세요.",
-    "bypassFormPassword": "폼 비밀번호 우회",
-    "bypassFormPasswordDescription": "끄면 보는 사람이 폼 비밀번호를 입력해야 합니다",
-    "bypassAuthentication": "인증 우회",
-    "bypassAuthenticationDescription": "켜면 공유 링크가 로그인 필요 제한을 건너뜁니다",
-    "bypassRoleChecks": "권한 검사 우회",
-    "bypassRoleChecksDescription": "켜면 공유 링크가 허용 역할 제한을 건너뜁니다",
     "policies": {
       "passwordProtected": "비밀번호 보호",
-      "noPassword": "비밀번호 없음",
-      "passwordBypass": "비밀번호 우회",
-      "passwordRequired": "비밀번호 필요",
-      "authBypass": "인증 우회",
-      "authEnforced": "인증 필요",
-      "roleBypass": "권한 우회",
-      "roleEnforced": "권한 필요"
+      "noPassword": "비밀번호 없음"
     },
     "expirationBadge": {
       "expired": "만료됨",
@@ -2264,7 +2198,9 @@
     "label": "소셜 링크",
     "addLink": "링크 추가",
     "platformPlaceholder": "플랫폼",
-    "valuePlaceholder": "URL 또는 사용자명"
+    "valuePlaceholder": "URL 또는 사용자명",
+    "reorderInstructions": "위쪽 및 아래쪽 화살표 키로 이 링크의 순서를 변경합니다.",
+    "positionChanged": "링크가 {count}개 중 {position}번째로 이동했습니다."
   },
   "termsPage": {
     "active": {
@@ -2424,7 +2360,6 @@
     }
   },
   "releasePage": {
-    "previewTitle": "릴리즈 미리보기",
     "streaming": "스트리밍",
     "metadata": {
       "fallbackDescription": "{title}",
@@ -2494,8 +2429,7 @@
         "title": "트랙 추가"
       },
       "placeholders": {
-        "title": "트랙 제목",
-        "durationSeconds": "예: 240"
+        "title": "트랙 제목"
       },
       "deleteConfirm": "이 트랙을 삭제하시겠습니까?",
       "creditsModal": {
@@ -2517,8 +2451,7 @@
   "contentMetadata": {
     "preview": {
       "page": "페이지 미리보기",
-      "post": "포스트 미리보기",
-      "work": "작업물 미리보기"
+      "post": "포스트 미리보기"
     }
   },
   "editorMetadata": {
@@ -2541,8 +2474,6 @@
   "postHeader": {
     "actions": {
       "editPost": "포스트 편집",
-      "sharePost": "포스트 공유",
-      "printPost": "포스트 인쇄",
       "exportMarkdown": "포스트를 마크다운으로 내보내기"
     }
   },
@@ -2551,7 +2482,6 @@
     "intro": "인증과 사이트 운영을 위해 필수 쿠키를 사용하며, 사이트 이용 현황을 이해하기 위해 선택형 분석 쿠키를 사용합니다.",
     "learnMore": "<privacy>개인정보 처리방침</privacy> 및 <terms>서비스 약관</terms>을(를) 확인하세요.",
     "actions": {
-      "hidePreferences": "설정 숨기기",
       "customize": "사용자 지정"
     }
   },
@@ -2569,7 +2499,6 @@
   },
   "locationSelector": {
     "placeholder": "위치 선택...",
-    "clearSelection": "선택한 장소 지우기",
     "emptySearch": "지도 장소를 검색하세요",
     "emptyResults": "장소를 찾을 수 없습니다"
   },
@@ -2602,9 +2531,6 @@
     "actions": {
       "copyId": "ID 복사",
       "copyUrl": "URL 복사"
-    },
-    "notifications": {
-      "copied": "{label} 복사됨"
     }
   },
   "formValidation": {
@@ -2644,7 +2570,7 @@
   },
   "ogImagePreview": {
     "alt": "오픈 그래프 미리보기",
-    "empty": "아직 OG 이미지가 생성되지 않았습니다",
+    "empty": "OG 이미지 없음",
     "actions": {
       "regenerate": "OG 이미지 다시 생성"
     },
@@ -2768,7 +2694,6 @@
     "scheduleModal": {
       "description": "이 캠페인을 발송할 날짜와 시간을 선택하세요.",
       "dateLabel": "예약 발송 일시",
-      "datePlaceholder": "날짜와 시간을 선택하세요",
       "previousMonth": "이전 달",
       "nextMonth": "다음 달",
       "audience": "오디언스: {audience}",
@@ -2858,7 +2783,6 @@
       "notFoundMessage": "카테고리를 찾을 수 없습니다"
     },
     "seriesSelector": {
-      "searchPlaceholder": "검색하거나 만들기...",
       "states": {
         "empty": "사용 가능한 시리즈가 없습니다",
         "select": "시리즈 선택...",
@@ -2871,14 +2795,12 @@
       },
       "notifications": {
         "assigned": "포스트를 시리즈에 추가했습니다",
-        "reorderFailed": "시리즈 순서 변경에 실패했습니다",
         "createFailed": "시리즈를 만들지 못했습니다",
         "seriesUnavailable": "해당 시리즈를 더 이상 관리할 수 없습니다. 기존 소속은 유지했습니다.",
         "updateFailed": "포스트 시리즈를 변경하지 못했습니다. 기존 소속은 유지했습니다."
       }
     },
     "notifications": {
-      "slugUpdateFailed": "슬러그 업데이트에 실패했습니다",
       "deleted": "포스트가 삭제되었습니다",
       "published": "포스트가 게시되었습니다",
       "unpublished": "포스트 게시가 해제되었습니다",
@@ -3065,10 +2987,6 @@
     "pinned": "고정"
   },
   "pageEditor": {
-    "localRecovery": {
-      "message": "재연결 전의 편집 내용을 보관했습니다. 새로고침하거나 나가기 전에 복구 사본을 다운로드하세요.",
-      "action": "복구 사본 다운로드"
-    },
     "shareLinksDescription": "미게시 페이지 미리보기 링크",
     "showTitleOnPage": "페이지에 제목 표시",
     "slugValidation": {
@@ -3126,6 +3044,9 @@
       }
     },
     "columnsEditor": {
+      "labels": {
+        "ratio": "열 비율"
+      },
       "badges": {
         "columnCount": "{count}열"
       },
@@ -3150,16 +3071,14 @@
       "menuLabel": "섹션 추가",
       "emptyColumn": "비어 있는 컬럼입니다. +를 눌러 콘텐츠를 추가하세요",
       "actions": {
-        "addSectionToColumn": "컬럼 {index}에 섹션 추가",
-        "removeSectionFromColumn": "컬럼 {index}에서 {section} 제거"
+        "addSectionToColumn": "컬럼 {index}에 섹션 추가"
       }
     },
     "notifications": {
       "published": "페이지가 게시되었습니다",
       "unpublished": "페이지 게시가 해제되었습니다",
       "deleted": "페이지가 삭제되었습니다",
-      "slugUpdateFailed": "페이지 슬러그 업데이트에 실패했습니다",
-      "confirmSummaryFailed": "요약 업데이트 확인에 실패했습니다."
+      "slugUpdateFailed": "페이지 슬러그 업데이트에 실패했습니다"
     },
     "mapEditor": {
       "title": "지도",
@@ -3217,7 +3136,6 @@
         "content": "콘텐츠",
         "marqueeBehavior": "마퀴 동작",
         "scenePlayback": "재생",
-        "sceneRender": "렌더러",
         "sceneMotion": "모션",
         "sceneUnits": "유닛",
         "sceneSettings": "씬",
@@ -3234,7 +3152,6 @@
         "columns": "컬럼",
         "infiniteLoop": "무한 반복",
         "showIndicators": "인디케이터 표시",
-        "showFeaturedImage": "대표 이미지 표시",
         "imageAspectRatio": "이미지 화면 비율",
         "showMeta": "메타 정보 표시",
         "sortBy": "정렬 기준",
@@ -3253,7 +3170,6 @@
         "showImage": "이미지 표시",
         "selectForm": "폼 선택",
         "showFormTitle": "폼 제목 표시",
-        "showTitle": "제목 표시",
         "numberOfWorks": "표시할 작업물 수",
         "numberOfReleases": "표시할 릴리즈 수",
         "numberOfProgramEvents": "이벤트 수",
@@ -3323,7 +3239,10 @@
         "textColorSource": "Text color",
         "lightTextColor": "Light text",
         "darkTextColorSource": "Dark text",
-        "darkTextColor": "Dark text color"
+        "darkTextColor": "Dark text color",
+        "itemSize": "항목 크기",
+        "showAvatar": "프로필 이미지 표시",
+        "maxLabels": "최대 레이블 수"
       },
       "fieldLabels": {
         "year": "연도",
@@ -3334,11 +3253,7 @@
       },
       "badges": {
         "posts": "포스트 {count}개",
-        "rows": "{count}행",
-        "authors": "작성자 {count}명",
-        "artists": "아티스트 {count}명",
-        "works": "작업물 {count}개",
-        "releases": "릴리즈 {count}개"
+        "rows": "{count}행"
       },
       "placeholders": {
         "publishedByDefault": "기본값은 게시됨",
@@ -3358,7 +3273,6 @@
           "auto": "자동"
         },
         "sortBy": {
-          "dateAdded": "추가일",
           "startDate": "시작일",
           "endDate": "종료일",
           "publishedDate": "게시일",
@@ -3367,9 +3281,7 @@
         },
         "sortOrder": {
           "newest": "최신순",
-          "oldest": "오래된순",
-          "azOldest": "가나다순 / 오래된순",
-          "zaNewest": "역순 / 최신순"
+          "oldest": "오래된순"
         },
         "mapPrimaryLabel": {
           "placeName": "장소 이름"
@@ -3443,6 +3355,11 @@
           "theme": "Follow theme",
           "custom": "Custom",
           "inherit": "Follow light"
+        },
+        "itemSize": {
+          "s": "S · 컴팩트",
+          "m": "M · 기본",
+          "l": "L · 크게"
         }
       },
       "actions": {
@@ -3453,8 +3370,6 @@
         "moveUnitUp": "유닛 위로 이동",
         "moveUnitDown": "유닛 아래로 이동",
         "removeSceneUnit": "유닛 제거",
-        "expandSceneUnit": "유닛 펼치기",
-        "collapseSceneUnit": "유닛 접기",
         "replaceMesh": "GLB 교체",
         "uploadMesh": "GLB 업로드",
         "clearMeshAsset": "메쉬 파일 지우기",
@@ -3493,6 +3408,12 @@
         "meshOptimizationCancelled": "Cancelled",
         "optimizedMeshCleanupFailed": "Optimized asset reference removed, but cleanup failed: {error}",
         "optimizedMeshCleanupFailedDefault": "Optimized asset reference removed, but cleanup failed"
+      },
+      "authorSelection": {
+        "maxSelected": "작가는 최대 {count}명까지 선택할 수 있습니다.",
+        "empty": "선택한 작가가 없습니다. 이 블록은 비어 있게 됩니다.",
+        "unavailable": "이 작가는 더 이상 사용할 수 없습니다.",
+        "unavailableWarning": "사용할 수 없는 작가는 공개 페이지에 표시되지 않습니다. 제거하거나 다른 작가를 선택하세요."
       }
     },
     "embed": {
@@ -3545,8 +3466,6 @@
       "matchDescription": "선택한 역할·태그·뉴스레터 조건을 조합합니다.",
       "any": "선택한 조건 중 하나",
       "all": "선택한 조건 모두",
-      "roles": "회원 역할",
-      "rolesDescription": "선택한 역할 중 하나에 해당하면 충족합니다.",
       "roleUser": "회원",
       "memberDescription": "로그인한 회원만 이 페이지를 볼 수 있습니다.",
       "authorDescription": "작성자 역할을 가진 회원입니다.",
@@ -3574,13 +3493,23 @@
       "restrictedTitle": "이 페이지에 접근할 권한이 없습니다",
       "restrictedDescription": "계정이 이 페이지의 접근 조건을 충족하지 않습니다.",
       "signIn": "로그인"
+    },
+    "a11y": {
+      "sectionPosition": "{section} · {index}/{count}",
+      "dragInstructions": "스페이스 키로 이동을 시작하고 화살표 키로 위치를 변경합니다. 스페이스 키로 확정하거나 Escape 키로 취소합니다.",
+      "dragStart": "{section} · 이동 · 진행 중 · {index}/{count}",
+      "dragOver": "{section} · 이동 · {index}/{count}",
+      "dragEnd": "{section} · 이동 · 확인 · {index}/{count}",
+      "dragCancel": "{section} · 이동 · 취소됨",
+      "sectionDeleted": "{section}을 삭제했습니다",
+      "sectionAdded": "{section}을 만들었습니다 · {index}/{count}",
+      "columnsPosition": "{column} · {section} · {index}/{count}"
     }
   },
   "editorCommon": {
     "reloadRequired": {
       "title": "새로고침이 필요합니다",
-      "message": "편집 화면이 열린 동안 더 최신 버전이 저장되었습니다. 계속 편집하려면 새로고침하세요.",
-      "action": "새로고침"
+      "message": "편집 화면이 열린 동안 더 최신 버전이 저장되었습니다. 계속 편집하려면 새로고침하세요."
     },
     "permissionRevoked": {
       "title": "편집 권한이 회수되었습니다",
@@ -3640,7 +3569,6 @@
         "mute": "음소거",
         "unmute": "음소거 해제",
         "volume": "오디오 볼륨",
-        "original": "원본",
         "waveform": "파형",
         "spectrogram": "스펙트로그램",
         "spectrogramAlt": "오디오 스펙트로그램",
@@ -3657,10 +3585,8 @@
         "addItem": "{item} 추가",
         "replaceItem": "{item} 교체",
         "browse": "파일 찾아보기",
-        "or": "OR",
         "importFromUrl": "URL에서 가져오기",
         "directVideoUrlHelp": "직접 영상 파일 URL만 사용할 수 있습니다. YouTube 또는 Vimeo는 외부 영상을 사용하세요.",
-        "confirm": "삽입",
         "resumeAvailable": "중단된 업로드가 있습니다",
         "resumeInstructionNamed": "{name} 파일을 다시 선택하면 업로드를 이어서 진행합니다.",
         "backToUpload": "파일 업로드",
@@ -3756,11 +3682,8 @@
       }
     },
     "mapBlock": {
-      "clickToAddPlace": "클릭하여 장소 추가",
       "captionPlaceholder": "캡션 추가...",
-      "clickToAddCaption": "클릭하여 캡션 추가",
-      "externalPlaceholder": "지도: 장소 {count}개",
-      "viewOnGoogleMaps": "Google 지도에서 보기 ({lat}, {lng})"
+      "clickToAddCaption": "클릭하여 캡션 추가"
     },
     "mapPlacesModal": {
       "title": "장소 관리",
@@ -3770,22 +3693,9 @@
       "centeredTitle": "중심으로 설정됨",
       "setAsCenterTitle": "중심으로 설정"
     },
-    "blockAlign": {
-      "left": "왼쪽 정렬",
-      "center": "가운데 정렬",
-      "right": "오른쪽 정렬"
-    },
-    "mathInline": {
-      "clickToEdit": "클릭하여 편집",
-      "convertToBlock": "블록으로 변환"
-    },
-    "mathInlineButton": {
-      "label": "인라인 수식"
-    },
     "editor": {
       "slashMenu": {
         "placeholder": "명령어를 보려면 '/'를 입력하세요",
-        "empty": "항목이 없습니다",
         "unavailable": "사용할 수 없음",
         "groups": {
           "headings": "제목",
@@ -3950,9 +3860,6 @@
         "alignLeft": "왼쪽 정렬",
         "alignCenter": "가운데 정렬",
         "alignRight": "오른쪽 정렬",
-        "alignJustify": "양쪽 정렬",
-        "textColor": "글자색",
-        "backgroundColor": "배경색",
         "nest": "들여쓰기",
         "unnest": "내어쓰기",
         "inlineMath": "인라인 수식",
@@ -3967,36 +3874,19 @@
         "urlPlaceholder": "URL 편집"
       },
       "math": {
-        "inline": "인라인 수식",
-        "block": "수학 블록",
-        "clickToEdit": "클릭하여 편집",
-        "convertToBlock": "블록으로 변환"
+        "selectBlock": "수식 블록 선택",
+        "block": "수학 블록"
       },
       "file": {
-        "add": "{item} 추가",
         "replace": "{item} 교체",
-        "delete": "삭제",
-        "download": "다운로드",
-        "caption": "캡션 추가...",
-        "upload": "파일 업로드",
-        "embed": "삽입",
-        "urlPlaceholder": "URL 편집"
+        "delete": "삭제"
       },
       "resize": {
-        "image": "크기 조절 — 이미지",
-        "audio": "크기 조절 — 오디오",
-        "video": "크기 조절 — 영상",
-        "file": "크기 조절 — 파일 첨부",
         "map": "크기 조절 — 지도",
-        "externalVideo": "크기 조절 — 외부 영상",
-        "p5Sketch": "크기 조절 — p5.js",
-        "threeScene": "크기 조절 — Three.js",
-        "dragHandle": "끌어서 크기 조절",
-        "shader": "크기 조절 — GLSL 셰이더"
+        "externalVideo": "크기 조절 — 외부 영상"
       },
       "drag": {
         "openBlockMenu": "블록 메뉴 열기",
-        "addBlock": "블록 추가",
         "delete": "삭제",
         "colors": "색상"
       },
@@ -4028,7 +3918,6 @@
         "toggleHeaderColumn": "머리글 열",
         "selectRow": "행 선택",
         "selectColumn": "열 선택",
-        "selectCells": "선택한 셀",
         "selectTable": "표 선택",
         "deleteTable": "표 삭제",
         "mergeCells": "셀 병합",
@@ -4042,17 +3931,11 @@
         "unavailable": "사용할 수 없음"
       },
       "map": {
-        "insert": "지도",
-        "clickToAddPlace": "클릭하여 장소 추가",
-        "captionPlaceholder": "캡션 추가...",
         "managePlaces": "장소 관리"
       },
       "embeds": {
         "map": "지도",
-        "externalVideo": "외부 영상",
-        "p5Sketch": "p5.js",
-        "threeScene": "Three.js",
-        "shader": "GLSL 셰이더"
+        "externalVideo": "외부 영상"
       },
       "runtimeLabels": {
         "code": {
@@ -4139,12 +4022,7 @@
         }
       },
       "media": {
-        "browse": "파일 찾아보기",
-        "importFromUrl": "URL에서 가져오기",
-        "embed": "삽입",
-        "openLibrary": "파일 라이브러리",
-        "uploadFiles": "파일 업로드",
-        "selectFile": "파일 선택"
+        "importFromUrl": "URL에서 가져오기"
       }
     }
   },
@@ -4170,7 +4048,6 @@
       "brainstorm": "아이디어 확장"
     },
     "sections": {
-      "original": "원문",
       "result": "AI 결과"
     },
     "actions": {
@@ -4220,8 +4097,7 @@
       "pinClickable": "핀 클릭 가능"
     },
     "themeOptions": {
-      "none": "없음",
-      "systemSuffix": "(시스템)"
+      "none": "없음"
     },
     "scheme": {
       "auto": "자동",
@@ -4237,13 +4113,7 @@
     "copyValueTitle": "{label} 값 복사"
   },
   "postMembers": {
-    "removeAria": "{name} 제거",
-    "roles": {
-      "owner": "소유자"
-    },
-    "states": {
-      "memberFallback": "멤버"
-    }
+    "removeAria": "{name} 제거"
   },
   "workCredits": {
     "divider": "또는 크레딧 추가",
@@ -4275,9 +4145,6 @@
     "emptyResults": {
       "artist": "아티스트를 찾을 수 없습니다",
       "name": "이름 결과가 없습니다"
-    },
-    "states": {
-      "unknownInitial": "?"
     },
     "notifications": {
       "groupCreated": "그룹을 만들었습니다",
@@ -4334,13 +4201,11 @@
       }
     },
     "statuses": {
-      "missing": "없음",
       "existing": "기존"
     },
     "states": {
       "loadFailed": "번역 정보를 불러오지 못했습니다.",
       "missingTarget": "대상 문서가 아직 없습니다.",
-      "sourceRow": "이 언어는 메인 원문 편집기에서 수정합니다.",
       "sourceEditorHint": "원문은 메인 편집기에서 수정하세요.",
       "updatedAt": "{date}에 업데이트됨"
     },
@@ -4354,52 +4219,19 @@
   },
   "translationPanelMenu": {
     "description": "원문 메뉴 라벨과 기존 번역 문서를 확인합니다.",
-    "sourceLocaleDescription": "위 메뉴 편집기가 구조, 순서, 링크, 공개 조건, 원문 라벨을 관리합니다. 아래 target 번역은 읽기 전용 미리보기입니다.",
-    "states": {
-      "sourcePreview": "원문 메뉴 라벨 ({locale}): {labels}",
-      "sourceEditorHint": "위 메뉴 편집기에 저장된 원문 라벨입니다.",
-      "missingTarget": "이 언어의 라벨이 아직 저장되지 않았습니다.",
-      "noItems": "표시할 메뉴 라벨이 아직 없습니다.",
-      "translationPreview": "기존 {locale} 라벨: {labels}"
-    },
     "previewModal": {
       "title": "{locale} 메뉴 번역 미리보기",
-      "descriptions": {
-        "missing": "이 언어에는 아직 공개 메뉴 번역이 없습니다. 관리자가 번역을 생성할 때까지 원문이 표시됩니다.",
-        "existing": "이 메뉴의 현재 공개 번역 라벨을 읽기 전용으로 표시합니다."
-      },
       "fields": {
-        "linkType": "링크 유형",
-        "destination": "연결 대상",
-        "children": "하위 항목",
-        "localizedLabelForLocale": "{locale} 공개 라벨",
-        "sourceLabelForLocale": "{locale} 원문 라벨",
-        "localizedLabelDescription": "공개 메뉴에 표시되는 현재 번역 라벨이며 여기서는 바꿀 수 없습니다.",
-        "sourceLabelDescription": "원문 메뉴 편집기에서 가져온 값이며 여기서는 바꿀 수 없습니다.",
-        "fixedLocaleLockedDescription": "이 항목은 {locale} 라벨로 고정되어 있으며 읽기 전용입니다."
-      },
-      "states": {
-        "detailUnavailable": "상세 메뉴 번역 정보를 불러오지 못했습니다.",
-        "noItems": "미리볼 메뉴 항목이 없습니다."
+        "localizedLabelForLocale": "{locale} 공개 라벨"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "이 이메일 템플릿의 원문 언어와 기존 번역 문서를 관리합니다.",
-      "sourceLocaleDescription": "원문 템플릿이 제목, 본문 카피, 런타임 변수 이름을 관리합니다.",
-      "states": {
-        "sourceEditorHint": "원문 템플릿은 메인 편집기에서 수정하세요.",
-        "noContent": "번역된 제목 또는 본문이 아직 없습니다."
-      }
+      "description": "이 이메일 템플릿의 원문 언어와 기존 번역 문서를 관리합니다."
     },
     "layout": {
-      "description": "이 이메일 레이아웃의 원문 언어와 기존 번역 문서를 관리합니다.",
-      "sourceLocaleDescription": "원문 레이아웃이 래퍼 HTML과 구조용 플레이스홀더 이름을 관리합니다.",
-      "states": {
-        "sourceEditorHint": "원문 레이아웃은 메인 편집기에서 수정하세요.",
-        "noContent": "번역된 레이아웃 HTML이 아직 없습니다."
-      }
+      "description": "이 이메일 레이아웃의 원문 언어와 기존 번역 문서를 관리합니다."
     }
   },
   "localizationNotice": {
@@ -4408,9 +4240,7 @@
       "description": "현재 {displayed} 번역본을 표시하며 {source} 원문이 우선합니다."
     },
     "fallback": {
-      "title": "대체 언어",
-      "english": "{requested} 번역이 없어 현재 {displayed}로 표시합니다.",
-      "source": "{requested} 번역이 없어 현재 원문 {source}로 표시합니다."
+      "title": "대체 언어"
     },
     "actions": {
       "viewOriginal": "원문 보기 ({source})"
@@ -4440,7 +4270,6 @@
       "policy": "정책",
       "lastTargetUpdate": "마지막 대상 업데이트",
       "entity": "엔티티",
-      "existing": "기존 번역",
       "sources": "원문 수",
       "lastSourceUpdate": "마지막 원문 업데이트"
     },
@@ -4628,33 +4457,22 @@
       "summary": "간결한 요약을 입력하세요..."
     },
     "tooltips": {
-      "generatingNamed": "{name}님이 요약을 생성 중입니다",
-      "applyingNamed": "{name}님이 생성된 요약을 적용 중입니다",
-      "readyNamed": "{name}님이 생성된 요약을 준비해 두었습니다"
+      "generatingNamed": "{name}님이 요약을 생성 중입니다"
     },
     "feedback": {
       "failedDefault": "요약 생성 처리에 실패했습니다.",
-      "invalidJson": "AI 응답을 요약 JSON으로 해석할 수 없습니다.",
       "alreadyRunning": "요약 생성이 이미 진행 중입니다.",
-      "applyingGenerated": "생성된 요약을 적용 중입니다.",
-      "resetOlderSession": "이전 세션의 오래된 생성 요약 상태를 초기화했습니다.",
-      "resetUnrestorable": "복원할 수 없는 오래된 생성 요약 상태를 초기화했습니다.",
-      "missingJobPayload": "요약 생성이 job payload를 반환하지 않았습니다.",
       "missingSuggestionPayload": "요약 생성은 완료되었지만 suggestion payload가 없습니다.",
       "staleSuggestion": "이 제안은 오래되었습니다. 적용 전에 다시 생성하거나 닫아주세요.",
       "unableToApplyNow": "지금은 생성된 요약을 적용할 수 없습니다.",
       "applyFailed": "생성된 요약을 적용하지 못했습니다.",
       "applied": "생성된 요약을 적용했습니다.",
-      "appliedJobUnresolved": "요약은 적용되었지만 AI job 상태를 자동으로 정리하지 못했습니다.",
-      "dismissedJobUnresolved": "요약 제안은 로컬에서 닫혔지만 AI job 상태를 자동으로 정리하지 못했습니다.",
-      "readyBeforeApplying": "생성된 요약을 먼저 적용하거나 닫아주세요.",
       "readyToApply": "생성된 요약을 적용할 수 있습니다."
     },
     "ready": {
       "title": "생성된 요약",
       "suggestedSummary": "제안된 요약",
       "anotherCollaborator": "다른 협업자",
-      "anotherCollaboratorFallback": "다른 협업자가 생성된 요약을 준비해 두었습니다.",
       "anotherCollaboratorNamed": "{name}님이 생성된 요약을 준비해 두었습니다."
     }
   },
@@ -4702,8 +4520,7 @@
       "roleUpdated": "역할을 업데이트했습니다",
       "userBanned": "사용자를 정지했습니다",
       "userUnbanned": "사용자 정지를 해제했습니다",
-      "userDeleted": "사용자를 삭제했습니다",
-      "userCreated": "사용자를 생성했습니다"
+      "userDeleted": "사용자를 삭제했습니다"
     }
   },
   "adminUserDetail": {
@@ -4740,16 +4557,13 @@
       "userIdCopied": "사용자 ID를 복사했습니다",
       "userIdCopyFailed": "사용자 ID를 복사하지 못했습니다",
       "emailSuppressionReleased": "이메일 전송 차단을 해제했습니다",
-      "mainEmailUpdated": "대표 이메일을 변경했습니다",
       "ssoProviderRemoved": "SSO 공급자를 제거했습니다"
     },
     "auth": {
       "emptyEmail": "이메일 없음",
       "delivery": {
         "title": "수신 이메일",
-        "description": "캠페인, 알림, 계정 안내 메일은 선택된 대표 이메일로 전송됩니다.",
-        "changePlaceholder": "인증된 이메일을 선택하세요",
-        "changeHelp": "선택을 변경하면 즉시 저장됩니다."
+        "description": "캠페인, 알림, 계정 안내 메일은 선택된 대표 이메일로 전송됩니다."
       },
       "providers": {
         "title": "연결된 SSO 공급자",
@@ -4758,7 +4572,6 @@
         "remove": "SSO 공급자 제거"
       },
       "sources": {
-        "current": "현재 이메일",
         "emailCode": "이메일 로그인"
       },
       "ban": {
@@ -4793,7 +4606,6 @@
         "noChanges": "저장할 변경 사항이 없습니다"
       },
       "validation": {
-        "invalidUrl": "URL 형식이 올바르지 않습니다",
         "invalidEmail": "이메일 형식이 올바르지 않습니다",
         "invalidHexColor": "16진수 색상 형식이 올바르지 않습니다",
         "invalidGoogleAnalyticsId": "Google Analytics ID 형식이 올바르지 않습니다"
@@ -5102,14 +4914,12 @@
   },
   "formSuccessPage": {
     "metadata": {
-      "fallbackTitle": "폼 제출 완료",
       "title": "{formTitle} - 제출 완료"
     },
     "title": "감사합니다"
   },
   "formPasswordPage": {
     "metadata": {
-      "fallbackTitle": "폼 접근",
       "description": "이 폼에 접근하려면 비밀번호를 입력하세요"
     },
     "title": "비밀번호 보호",
@@ -5121,7 +4931,6 @@
   },
   "formDashboardPage": {
     "metadata": {
-      "fallbackTitle": "폼 대시보드",
       "title": "{formTitle} - 대시보드",
       "description": "폼 제출 통계와 분석"
     },
@@ -5131,7 +4940,28 @@
     "stats": {
       "total": "전체"
     },
-    "fieldStatistics": "필드 통계"
+    "fieldStatistics": "필드 통계",
+    "charts": {
+      "donut": "도넛",
+      "pie": "원형",
+      "bar-horizontal": "가로 막대",
+      "bar-vertical": "세로 막대",
+      "radar": "방사형",
+      "table": "표",
+      "area": "영역",
+      "line": "선",
+      "histogram": "히스토그램",
+      "noResponses": "아직 응답이 없습니다",
+      "emptyValue": "(비어 있음)",
+      "min": "최솟값",
+      "max": "최댓값",
+      "avg": "평균",
+      "count": "개수",
+      "date": "날짜",
+      "value": "값",
+      "range": "구간",
+      "chartType": "차트 유형"
+    }
   },
   "embeddedForm": {
     "states": {
@@ -5182,10 +5012,7 @@
       "locationMode": "장소 방식",
       "ticketUrl": "티켓 URL",
       "streamUrl": "스트림 URL",
-      "externalUrl": "외부 URL",
-      "participants": "참여자",
-      "textCredits": "텍스트 크레딧",
-      "textCreditsDescription": "한 줄에 하나씩 입력하세요. 역할이 필요하면 역할: 이름 형식을 사용하세요."
+      "externalUrl": "외부 URL"
     },
     "locationModes": {
       "mapPlace": "장소",
@@ -5198,7 +5025,6 @@
       "tickets": "티켓",
       "stream": "스트림",
       "link": "링크",
-      "participants": "참여자",
       "empty": "이벤트가 없습니다.",
       "date": "일시",
       "credits": "크레딧"
@@ -5215,152 +5041,14 @@
       "deleteMessage": "이벤트에서 사용하지 않는 유형만 삭제할 수 있습니다."
     }
   },
-  "tools": {
-    "portadj": {
-      "metadataTitle": "PortaDJ",
-      "metadataDescription": "브라우저에서 두 DJ 덱으로 로컬 음원을 재생하고 믹싱합니다."
-    },
-    "youtubeAudio": {
-      "title": "YouTube 오디오",
-      "urlLabel": "동영상 링크",
-      "urlPlaceholder": "https://…",
-      "resolve": "오디오 불러오기",
-      "resolving": "오디오 불러오는 중",
-      "clear": "소스 지우기",
-      "metadataTitle": "YouTube 오디오",
-      "metadataDescription": "인증된 YouTube 소스의 오디오를 브라우저에서 변환합니다.",
-      "errors": {
-        "INTERNAL_ERROR": "오디오 소스를 불러오지 못했습니다. 다시 시도해 주세요.",
-        "INVALID_REQUEST": "올바른 YouTube 동영상 URL을 입력해 주세요.",
-        "INVALID_UPSTREAM_RESPONSE": "YouTube가 예상과 다른 오디오 소스를 반환했습니다. 다른 동영상으로 시도해 주세요.",
-        "REQUEST_ABORTED": "요청이 취소되었습니다.",
-        "SOURCE_EXPIRED": "오디오 소스가 만료되었습니다. URL을 다시 불러와 주세요.",
-        "SOURCE_NOT_FOUND": "오디오 소스를 더 이상 사용할 수 없습니다. URL을 다시 불러와 주세요.",
-        "UNAUTHORIZED": "이 도구를 사용하려면 다시 로그인해 주세요.",
-        "UNSUPPORTED_VIDEO": "이 동영상에는 지원되는 유한 길이 오디오 소스가 없습니다.",
-        "UPSTREAM_FAILURE": "지금은 YouTube 오디오를 불러올 수 없습니다. 다시 시도해 주세요."
-      }
-    },
-    "transcode": {
-      "title": "오디오 트랜스코더",
-      "targetIdle": "대기 중",
-      "targetChecking": "확인 중",
-      "targetReady": "준비됨",
-      "targetError": "사용 불가",
-      "dropTitle": "오디오 파일을 끌어 놓거나 선택",
-      "dropDescription": "최대 10개 · 폴더 제외 · 이 기기에서만 처리",
-      "chooseFiles": "오디오 파일 선택",
-      "supportedFormatsLabel": "지원 형식",
-      "supportedFormats": "지원: CAF, AIFF/AIFC, WAV, FLAC, MP3, AAC/M4A, Ogg/Opus 및 MP4, MOV, MKV/WebM, TS의 오디오. 파일별로 확인합니다.",
-      "filesSelected": "파일",
-      "outputSettings": "출력 설정",
-      "outputSettingsHelper": "채널은 원본대로 유지됩니다. 자동은 파일별 호환 레이트를 선택합니다.",
-      "processingDetails": "처리 상세",
-      "processingDetailsDescription": "균형 품질로 리샘플링합니다. 정수 출력에는 디더를 적용하며 큰 WAV는 RF64를 사용합니다.",
-      "format": "형식",
-      "sampleRate": "샘플 레이트",
-      "bitrate": "비트레이트",
-      "bitDepth": "비트 심도",
-      "bitDepthContainerEffective": "{containerBits}비트 컨테이너 / 유효 {effectiveBits}비트",
-      "codec": "코덱",
-      "sampleFormat": "샘플 형식",
-      "float": "부동소수점",
-      "integer": "정수 PCM",
-      "constantBitrate": "CBR",
-      "variableBitrate": "VBR",
-      "sourcePcmFloat": "{bitDepth}비트 부동소수점",
-      "sourcePcmInteger": "{bitDepth}비트 정수",
-      "sourcePcmSignedInteger": "{bitDepth}비트 부호 있는 정수",
-      "sourcePcmUnsignedInteger": "{bitDepth}비트 부호 없는 정수",
-      "automatic": "자동",
-      "preserveSource": "원본 유지",
-      "unavailable": "사용 불가",
-      "sampleRateAvailableFor": "{total, number}개 중 {supported, number}개 파일 가능",
-      "sampleRateResetAutomatic": "이전 샘플 레이트를 현재 출력 설정에서 사용할 수 없어 자동으로 변경했습니다.",
-      "unknownAudio": "오디오",
-      "channelCount": "{count, plural, other {#채널}}",
-      "queue": "변환 대기열",
-      "convert": "변환",
-      "cancelAll": "모두 취소",
-      "clear": "비우기",
-      "download": "변환본 저장",
-      "downloadSource": "원본 저장",
-      "sourceDownloadExpired": "원본이 만료되었거나 사용할 수 없습니다. YouTube URL을 다시 불러오세요.",
-      "sourceDownloadFailed": "원본을 다운로드하지 못했습니다. 연결을 확인하고 원본을 다시 불러오세요.",
-      "retry": "다시 시도",
-      "cancel": "취소",
-      "remove": "제거",
-      "sourceValue": "원본 ({value})",
-      "mono": "모노",
-      "stereo": "스테레오",
-      "targetWaitingForFiles": "지원되는 오디오 파일을 추가하면 선택한 출력 형식을 확인합니다.",
-      "targetCheckingMessage": "이 브라우저가 선택한 출력 형식을 지원하는지 확인하고 있습니다.",
-      "targetReadyMessage": "선택한 출력 형식을 이 브라우저에서 사용할 수 있습니다.",
-      "targetAvailability": "{available, number}개 파일은 변환할 수 있고 {unavailable, number}개는 현재 설정에서 사용할 수 없습니다.",
-      "engineLoading": "{asset} 오디오 엔진을 불러오는 중입니다.",
-      "engineVerifying": "{asset} 오디오 엔진을 확인하는 중입니다.",
-      "engineLoadFailed": "{asset} 오디오 엔진을 불러오지 못했습니다.",
-      "capacityExceeded": "{count, number}개 파일을 추가하지 못했습니다. 대기열에는 최대 {max, number}개까지 넣을 수 있습니다.",
-      "statusInspectionQueued": "검사 대기 중",
-      "statusInspecting": "검사 중",
-      "statusReady": "준비됨",
-      "statusQueued": "대기열에 추가됨",
-      "statusQueuedAvailability": "{converting, number}개 파일을 변환 대기열에 넣었고 {unavailable, number}개는 사용할 수 없습니다.",
-      "statusConverting": "변환 중",
-      "statusConvertingAvailability": "{converting, number}개 파일을 변환 중이며 {unavailable, number}개는 사용할 수 없습니다.",
-      "statusComplete": "완료",
-      "statusCompleteAvailability": "{converted, number}개 파일 변환을 마쳤고 {unavailable, number}개는 사용할 수 없습니다.",
-      "statusBatchResult": "실행 완료: 변환 대상 {eligible, number}개, 시도 {attempted, number}개, 성공 {succeeded, number}개, 실패 {failed, number}개, 사용 불가 {unavailable, number}개.",
-      "statusUnsupported": "지원되지 않음",
-      "statusError": "오류",
-      "statusCancelled": "취소됨",
-      "unsupportedInput": "지원되는 오디오 파일이 아닙니다.",
-      "unsupportedCodec": "이 브라우저에서는 이 파일의 오디오 코덱을 디코딩할 수 없습니다.",
-      "inspectionFailed": "파일을 검사하지 못했습니다. 다시 시도하세요.",
-      "inspectionInconclusive": "브라우저가 안전한 읽기 범위 안에서 이 오디오를 판별하지 못했습니다. 다른 파일이나 형식을 시도하세요.",
-      "outputUnsupported": "선택한 출력 설정은 이 브라우저에서 지원되지 않습니다.",
-      "outputProbeFailed": "출력 지원 여부를 확인하지 못했습니다. 다시 시도하세요.",
-      "outputEngineUnavailable": "{preset} 런타임 엔진을 시작하지 못했습니다. 네트워크 또는 에셋 정책을 확인한 뒤 다시 시도하세요.",
-      "outputChannelsUnsupported": "이 출력은 원본 {minimum, number}–{maximum, number}채널을 지원하지만 이 파일은 {actual, number}채널입니다. 채널은 원본대로 유지하며 다운믹스하지 않습니다.",
-      "sourceInspectionMissing": "원본 채널 수 또는 샘플 레이트를 확인하지 못했습니다. 오디오 메타데이터를 읽을 수 있는 파일을 선택하세요.",
-      "outputConfigurationUnavailable": "선택한 형식과 인코딩 설정에 해당하는 출력 구성이 없습니다.",
-      "preserveSourceRateUnsupported": "이 출력에서는 원본 {sourceRate}를 유지할 수 없습니다. 허용 샘플 레이트: {allowed}.",
-      "sourceResamplingRateUnsupported": "원본 {sourceRate}는 리샘플링 범위({minimum}–{maximum}) 밖입니다. 호환되는 출력으로 그대로 전달할 때만 사용할 수 있습니다.",
-      "targetResamplingRateUnsupported": "선택한 {targetRate} 출력은 리샘플링 범위({minimum}–{maximum}) 밖입니다.",
-      "automaticRateUnavailable": "자동이 {sourceRate} 원본에 유효한 샘플 레이트를 선택할 수 없습니다. 허용 출력 레이트: {allowed}.",
-      "presetRateUnsupported": "이 출력은 {targetRate}를 지원하지 않습니다. 허용 샘플 레이트: {allowed}.",
-      "conversionFailed": "오디오 변환에 실패했습니다.",
-      "conversionStorageLimitExceeded": "이 브라우저의 로컬 임시 저장공간으로는 예상 결과물을 만들 수 없습니다. 더 작거나 압축된 포맷을 선택하거나 대용량 로컬 출력을 지원하는 브라우저에서 다시 시도하세요.",
-      "conversionTargetSizeLimitExceeded": "선택한 출력 포맷은 이 크기의 파일을 표현할 수 없습니다. 다른 포맷을 선택하거나 샘플레이트, 비트 심도 또는 채널 수를 낮추세요.",
-      "cancelledMessage": "변환을 취소했습니다.",
-      "sourceSummary": "{container} · {sampleRate} · {channels} · {bitDepth}",
-      "outputSummary": "{preset} · {size}",
-      "progressLabel": "{phase} · {progress, number}%",
-      "phasePrepare": "준비 중",
-      "phaseDecode": "디코딩 중",
-      "phaseEncode": "인코딩 중",
-      "phaseFinalize": "마무리 중",
-      "bytes": "{count, number}바이트",
-      "storageOpfs": "브라우저 전용 저장소",
-      "storageMemory": "브라우저 메모리",
-      "metadataTitle": "오디오 트랜스코더",
-      "metadataDescription": "파일을 업로드하지 않고 브라우저에서 오디오를 변환하세요.",
-      "notices": "오픈소스 라이선스"
-    },
-    "hwp": {
-      "title": "한글 문서 편집기",
-      "metadataDescription": "브라우저에서 HWP와 HWPX 문서를 열고 편집하고 저장하세요.",
-      "description": "편집기의 파일 메뉴에서 HWP·HWPX 파일을 열고 저장할 수 있습니다. 문서는 서버에 업로드하지 않고 이 기기에서 처리합니다.",
-      "loading": "편집기를 불러오는 중…",
-      "error": "편집기를 불러오지 못했습니다. 다시 시도하세요.",
-      "retry": "다시 시도",
-      "metadataTitle": "한글 문서 편집기"
-    }
-  },
   "myMetadata": {
     "description": "{siteName}에서 내 계정의 {title} 페이지입니다."
   },
   "fileManager": {
+    "pagination": {
+      "end": "검색 결과 끝"
+    },
+    "selectionUnavailableDescription": "이 파일은 추가할 수 없습니다. Enter 키로 미리 볼 수 있습니다.",
     "title": "파일",
     "description": "사이트 전체에서 파일을 업로드하고 정리하며 사용처를 확인하고 재사용합니다.",
     "root": "파일",
@@ -5484,9 +5172,7 @@
       "move-files": {
         "title": "파일 이동"
       },
-      "targetFolderId": "대상 폴더 ID",
       "extensionSeparate": ".{extension} 확장자는 별도로 유지됩니다.",
-      "rootWhenEmpty": "비워두면 루트로 이동합니다.",
       "delete": {
         "title": "삭제",
         "folder": "이 폴더와 하위의 사용되지 않는 파일을 모두 삭제할까요?",
@@ -5496,14 +5182,26 @@
         "byDomain": "도메인별: {summary}",
         "more": "외 {count}개. 전체 목록은 파일 상세에서 확인하세요."
       }
+    },
+    "viewSettings": {
+      "title": "보기 설정",
+      "iconSize": "아이콘 크기",
+      "spacing": "항목 간격",
+      "columns": "열 수",
+      "auto": "자동",
+      "small": "작게",
+      "medium": "보통",
+      "large": "크게",
+      "compact": "좁게",
+      "standard": "기본",
+      "comfortable": "넓게",
+      "reset": "보기 설정 초기화"
     }
   },
   "fileDownloadAccess": {
     "editor": {
       "sectionTitle": "다운로드 접근 권한",
-      "sectionDescription": "원본 파일을 다운로드할 수 있는 대상을 설정합니다.",
       "loading": "다운로드 접근 권한을 불러오는 중…",
-      "audienceLabel": "다운로드 대상",
       "audiences": {
         "disabled": {
           "label": "사용 안 함",
@@ -5522,15 +5220,10 @@
           "description": "선택한 오디언스에 속한 사용자만 이 파일을 다운로드할 수 있습니다."
         }
       },
-      "segmentsLabel": "오디언스",
-      "segmentsDescription": "기존 오디언스 세그먼트를 하나 이상 선택하세요.",
-      "segmentsPlaceholder": "오디언스 선택",
       "segmentsLoadError": "정책은 불러왔지만 오디언스를 불러오지 못했습니다.",
       "segmentsEmpty": "사용 가능한 오디언스 세그먼트가 없습니다.",
       "restrictedWithoutAudience": "이 제한 정책에 오디언스가 지정되어 있지 않습니다. 하나 이상의 오디언스를 선택할 때까지 모든 사용자의 다운로드가 차단됩니다.",
-      "segmentRequiresSubscription": "{name} (뉴스레터 구독 필요)",
       "additionalSelected": "{count}개 더 선택됨",
-      "loadMoreSegments": "오디언스 더 불러오기",
       "loadError": "다운로드 접근 권한을 불러오지 못했습니다.",
       "saveError": "다운로드 접근 권한을 저장하지 못했습니다.",
       "fileRequired": "다운로드 접근 권한을 설정하기 전에 파일을 저장하세요."
@@ -5552,5 +5245,29 @@
     "empty": "다이어그램 소스를 입력하세요",
     "invalid": "다이어그램 문법을 확인하세요",
     "loading": "그리는 중…"
+  },
+  "errorPage": {
+    "titles": {
+      "400": "잘못된 요청입니다",
+      "401": "로그인이 필요합니다",
+      "403": "접근 권한이 없습니다",
+      "404": "페이지를 찾을 수 없습니다",
+      "408": "요청 시간이 초과되었습니다",
+      "409": "요청이 현재 상태와 충돌합니다",
+      "410": "더 이상 사용할 수 없는 페이지입니다",
+      "413": "요청 크기가 너무 큽니다",
+      "422": "요청을 처리할 수 없습니다",
+      "429": "요청이 너무 많습니다",
+      "500": "문제가 발생했습니다",
+      "501": "지원하지 않는 요청입니다",
+      "502": "연결된 서비스에 오류가 발생했습니다",
+      "503": "서비스를 잠시 사용할 수 없습니다",
+      "504": "서비스 응답 시간이 초과되었습니다"
+    },
+    "actions": {
+      "goHome": "홈으로 가기",
+      "tryAgain": "다시 시도",
+      "login": "로그인으로 돌아가기"
+    }
   }
 }

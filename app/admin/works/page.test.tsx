@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import AdminWorksPage from './page';
 
 const pushMock = vi.fn();
@@ -34,7 +35,7 @@ vi.mock('next-intl', () => ({
   },
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: {
     show: vi.fn(),
   },
@@ -78,9 +79,7 @@ vi.mock('@/components/core/Button', () => ({
 }));
 
 vi.mock('@/components/core/Badge', () => ({
-  badgeToneFromColor: () => 'neutral',
   LabelBadge: ({ children }: { children: ReactNode }) => <span>{children}</span>,
-  statusToneFromColor: () => 'neutral',
   StatusBadge: ({ children }: { children: ReactNode }) => <span>{children}</span>,
 }));
 
@@ -134,9 +133,9 @@ function render() {
   act(() => {
     root?.render(
       <QueryClientProvider client={queryClient!}>
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <AdminWorksPage />
-        </MantineProvider>
+        </DesignSystemProvider>
       </QueryClientProvider>,
     );
   });

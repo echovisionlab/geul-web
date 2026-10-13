@@ -1,6 +1,7 @@
 {
   "common": {
     "actions": {
+      "move": "移動",
       "save": "保存",
       "saveChanges": "変更を保存",
       "create": "作成",
@@ -59,7 +60,7 @@
       "reply": "返信",
       "insertVariable": "変数を挿入",
       "acceptAll": "すべて許可",
-      "rejectNonEssential": "必須以外を拒否",
+      "rejectNonEssential": "拒否",
       "savePreferences": "設定を保存",
       "import": "インポート",
       "export": "エクスポート",
@@ -127,10 +128,7 @@
       "file": "ファイル",
       "bio": "プロフィール",
       "realName": "本名",
-      "countryCode": "国コード",
       "slug": "スラッグ",
-      "slugAutoModeEnabled": "タイトルと自動同期中 クリックで無効化",
-      "slugAutoModeManual": "手動モード クリックで自動同期を有効化",
       "submissions": "送信数",
       "public": "公開",
       "location": "場所",
@@ -162,7 +160,6 @@
       "logoLight": "ライトロゴ",
       "logoDark": "ダークロゴ",
       "joined": "参加日",
-      "subscribed": "購読開始日",
       "featured": "注目",
       "order": "順序",
       "sortOrder": "並び順",
@@ -177,7 +174,6 @@
       "minutes": "分",
       "seconds": "秒",
       "time": "時間",
-      "generationInfo": "生成情報",
       "body": "本文",
       "content": "内容",
       "bodyPreview": "本文プレビュー",
@@ -280,6 +276,7 @@
     },
     "messages": {
       "noUsersFound": "ユーザーが見つかりません",
+      "noAuthorsFound": "著者が見つかりません。",
       "noVersionsFound": "バージョンが見つかりません",
       "typeAtLeast2Characters": "2文字以上入力してください",
       "itemCreated": "{item}を作成しました",
@@ -295,24 +292,22 @@
       "deleteItemConfirm": "この{item}を削除しますか この操作は元に戻せません",
       "deleteNamedItemConfirm": "\"{name}\"を削除しますか この操作は元に戻せません",
       "confirmDeleteSelectedCount": "選択した項目 {count}件を削除しますか この操作は元に戻せません",
-      "deleteDraftVersionConfirm": "この下書きバージョンを削除しますか",
       "confirmDeleteNamedRich": "<strong>{name}</strong>を削除しますか",
-      "activeCount": "{count}件が有効",
       "effectiveFromDate": "{date}から適用",
       "noUpdateRecorded": "更新履歴はありません",
-      "exportedEmails": "{count, plural, one {# 件のメールアドレスをエクスポートしました} other {# 件のメールアドレスをエクスポートしました}}",
       "formSubmittedSuccessfully": "回答を送信しました",
       "userDate": "{user} · {date}",
       "scheduleActivationTitle": "有効化を予約",
       "scheduleActivationDescription": "このバージョンを有効にする日時を選択してください。予約するとすべての有効なアカウントに通知メールが送信されます。",
       "scheduleActivationNotice": "予約するとプレビューリンク付きの通知メールがすべての有効なアカウントに送信されます。",
-      "translationDetailUnavailable": "詳細な翻訳データを読み込めませんでした 現在公開中の翻訳は引き続き編集できます",
       "invalidConfirmationLinkFromEmail": "確認リンクが無効です 確認メール内のリンクを使用してください",
       "noPostsFound": "投稿が見つかりません",
       "noWorksFound": "作品が見つかりません",
-      "urlCopiedToClipboard": "URLをクリップボードにコピーしました",
       "failedToLoad": "データを読み込めませんでした。",
-      "relatedItemsWillBeUnlinked": "関連する{count}件のリンクが解除されます。"
+      "relatedItemsWillBeUnlinked": "関連する{count}件のリンクが解除されます。",
+      "noArtistsFound": "アーティストが見つかりません",
+      "noLabelsFound": "レーベルが見つかりません",
+      "noReleasesFound": "リリースが見つかりません"
     },
     "notifications": {
       "categoryCreated": "カテゴリを作成しました",
@@ -372,8 +367,6 @@
       "testEmail": "test@email.com",
       "testEmailExample": "test@example.com",
       "noReplyEmail": "noreply@example.com",
-      "translationLiveRowMissing": "このロケールの公開翻訳はまだありません ここで保存するとすぐに作成されます",
-      "translationBodyPreviewUnavailable": "本文プレビューは利用できません",
       "selectDateAndTime": "日時を選択",
       "streetAddress": "住所",
       "regionSubdivision": "都道府県"
@@ -408,12 +401,11 @@
       "generating": "生成中...",
       "true": "はい",
       "false": "いいえ",
-      "loading": "読み込み中..."
+      "loading": "読み込み中...",
+      "toBeAnnounced": "未定"
     },
     "roles": {
       "admin": "管理者",
-      "editor": "編集者",
-      "viewer": "閲覧者",
       "author": "作成者",
       "user": "ユーザー"
     },
@@ -445,6 +437,11 @@
       "unsubscribed": "購読解除",
       "subscribed": "購読中",
       "onboardingPending": "オンボーディング未完了"
+    },
+    "motion": {
+      "pause": "アニメーションを一時停止",
+      "resume": "アニメーションを再開",
+      "readAllInformation": "シーンのすべての情報を読む"
     }
   },
   "shell": {
@@ -931,7 +928,6 @@
     },
     "mapThemes": {
       "empty": "マップテーマが見つかりません",
-      "notFound": "地図テーマが見つかりません。",
       "loadFailed": "地図テーマを読み込めませんでした。",
       "defaultDisabled": "すでにデフォルトのテーマです。",
       "deleteDisabled": {
@@ -939,9 +935,7 @@
         "last": "最後の地図テーマは削除できません。"
       },
       "reloadRequired": {
-        "title": "再読み込みが必要です",
-        "message": "このテーマは新しいリビジョンで保存されました。編集を続ける前に再読み込みしてください。",
-        "action": "再読み込み"
+        "title": "再読み込みが必要です"
       },
       "variants": {
         "light": "ライト",
@@ -972,8 +966,7 @@
       },
       "editor": {
         "notifications": {
-          "defaultSet": "テーマをデフォルトに設定しました",
-          "variantRequired": "少なくとも 1 つのバリアント（light または dark）が必要です"
+          "defaultSet": "テーマをデフォルトに設定しました"
         },
         "controls": {
           "map": {
@@ -1310,7 +1303,6 @@
     },
     "verification": {
       "loading": "Loading verification form...",
-      "redirecting": "Redirecting...",
       "startOver": "Start over",
       "errors": {
         "flowNotFound": "Verification flow not found or expired",
@@ -1373,21 +1365,14 @@
   "featuredImage": {
     "label": "アイキャッチ画像",
     "alt": "アイキャッチ画像",
-    "hint": "画像をクリックして差し替え",
     "cropTitle": "アイキャッチ画像を切り抜き",
-    "empty": {
-      "editable": "ドロップまたはクリックしてアップロード ({ratio})",
-      "readOnly": "画像なし"
-    },
     "errors": {
       "fileRejected": "ファイルが拒否されました",
       "fileTooLarge": "ファイルサイズが大きすぎます。最大サイズ: {maxSize}",
       "invalidFileType": "無効なファイル形式です"
     },
     "actions": {
-      "changeAria": "アイキャッチ画像を変更",
-      "removeAria": "アイキャッチ画像を削除",
-      "remove": "画像を削除"
+      "removeAria": "アイキャッチ画像を削除"
     }
   },
   "artistPage": {
@@ -1495,7 +1480,6 @@
       "slug": "artist-slug",
       "name": "ステージ名 / アーティスト名",
       "realName": "本名（任意）",
-      "countryCode": "例: US, KR, JP",
       "labels": "レーベルを選択...",
       "parentArtist": "親アーティストを選択..."
     },
@@ -1518,15 +1502,7 @@
     },
     "placeholders": {
       "name": "レーベル名",
-      "countryCode": "例: DE, US, KR",
       "parentLabel": "親レーベルを選択（任意）"
-    }
-  },
-  "workCollaborators": {
-    "empty": "共同編集者はまだいません",
-    "notifications": {
-      "added": "共同編集者を追加しました",
-      "removed": "共同編集者を削除しました"
     }
   },
   "comments": {
@@ -1585,17 +1561,6 @@
     "credits": {
       "other": "その他"
     },
-    "music": {
-      "released": "リリース日: {value}",
-      "spotify": "Spotify",
-      "bandcamp": "Bandcamp",
-      "soundcloud": "SoundCloud",
-      "youtube": "YouTube",
-      "openSpotify": "Spotify を開く",
-      "openBandcamp": "Bandcamp を開く",
-      "openSoundcloud": "SoundCloud を開く",
-      "openYoutube": "YouTube を開く"
-    },
     "portfolio": {
       "tech": "技術:"
     },
@@ -1643,7 +1608,6 @@
     }
   },
   "cookieConsentCommon": {
-    "essentialLabel": "必須Cookie（常に有効）",
     "analyticsLabel": "分析Cookie（Google Analytics）"
   },
   "nicknameField": {
@@ -1690,7 +1654,6 @@
       "failedToRevokeSession": "セッションを無効化できませんでした",
       "failedToRevokeSessions": "セッションを無効化できませんでした",
       "failedToRequestDeletion": "アカウント削除をリクエストできませんでした",
-      "cannotUnlinkMessage": "少なくとも1つの認証手段を残す必要があります",
       "connectedMessage": "{provider}アカウントを連携しました",
       "disconnectedMessage": "{provider}の連携を解除しました",
       "failedToUpdateMainEmail": "メインのメールアドレスを更新できませんでした",
@@ -1739,21 +1702,11 @@
     "email": {
       "title": "メインのメールアドレス",
       "description": "確認済みのメールアドレスから、通知やアカウント案内を受け取るアドレスを選択します。",
-      "addEmail": "メールアドレスを追加",
       "canonical": "メインのメールアドレス",
-      "canonicalCannotRemove": "このアドレスを削除する前に、別のメインのメールアドレスを選択してください。",
       "setCanonical": "メインのメールアドレスに設定",
-      "noEmail": "メールアドレスが設定されていません",
-      "helper": "メインのメールアドレスとして選択できる認証済みアドレスは1件のみです。",
-      "selectLabel": "メインのメールアドレス",
       "changeAction": "メインのメールアドレスを変更",
       "sources": {
-        "current": "現在のメインのメールアドレス",
-        "emailCode": "メール",
-        "pending": "認証待ち"
-      },
-      "messages": {
-        "pendingVerification": "このメールはすでに認証待ちです。認証メールを再送できます。"
+        "emailCode": "メール"
       },
       "mainEmailUpdated": "メインのメールアドレスを更新しました。",
       "canonicalUpdated": "メインのメールアドレスを更新しました。"
@@ -1812,8 +1765,6 @@
       "added": "{date} に追加",
       "lastMethod": "このパスキーを削除する前に、別のログイン方法を追加してください。",
       "removeNamed": "パスキー「{name}」を削除",
-      "reauth": "パスキーを変更する前に、もう一度ログインしてください。",
-      "reauthAction": "もう一度ログイン",
       "errors": {
         "load": "パスキーを読み込めませんでした。",
         "remove": "このパスキーを削除できませんでした。",
@@ -1834,7 +1785,6 @@
   },
   "seriesDetail": {
     "slug": {
-      "autoDescription": "自動モードではタイトルの変更に合わせてスラッグも更新されます",
       "manualDescription": "手動モードでは自分で編集するか自動モードを再度有効にするまでスラッグは固定されます"
     },
     "notifications": {
@@ -1870,10 +1820,6 @@
     }
   },
   "works": {
-    "tabs": {
-      "editable": "編集可能"
-    },
-    "emptyEditable": "編集可能な作品はありません",
     "emptyCredits": "クレジット付き作品が見つかりません",
     "columns": {
       "creditedAs": "クレジット名",
@@ -1995,6 +1941,7 @@
         "patternPlaceholder": "例: ^[A-Z]{3}$",
         "customErrorMessage": "カスタムエラーメッセージ",
         "optional": "任意",
+        "dragValidator": "検証ルールをドラッグ",
         "removeValidator": "バリデーターを削除"
       },
       "fieldTypes": {
@@ -2062,10 +2009,6 @@
       }
     },
     "settings": {
-      "notifications": {
-        "managerAdded": "フォーム管理者を追加しました",
-        "managerRemoved": "フォーム管理者を削除しました"
-      },
       "urlPublic": {
         "title": "URL と公開アクセス",
         "allowPublic": "公開 URL アクセスを許可",
@@ -2085,13 +2028,7 @@
         "description": "管理権限なしでフォーム統計を確認するためのダッシュボードリンクを共有します"
       },
       "managers": {
-        "adminControls": "管理者権限",
-        "readOnly": "閲覧のみ",
-        "description": "管理者はこのフォームの編集、送信の確認、共有リンクの管理ができます。",
-        "searchPlaceholder": "追加する管理者を検索...",
-        "adminOnly": "管理者の追加または削除は管理者のみ実行できます",
-        "empty": "管理者はまだ割り当てられていません",
-        "removeManager": "管理者 {name} を削除"
+        "description": "管理者はこのフォームの編集、送信の確認、共有リンクの管理ができます。"
       },
       "access": {
         "title": "アクセス制御",
@@ -2120,7 +2057,11 @@
   "dataTable": {
     "aria": {
       "sortBy": "{label} で並び替え",
-      "rowActions": "{label} の操作"
+      "rowActions": "{label} の操作",
+      "selectAllRows": "すべての行を選択",
+      "selectRow": "{label}を選択",
+      "resultSummary": "{totalPages, plural, =0 {結果{count}件} other {結果{count}件、{totalPages}ページ中{page}ページ}}",
+      "loadingMessage": "読み込み中"
     },
     "sort": {
       "button": "並び替え",
@@ -2133,7 +2074,9 @@
         "moveUp": "{label} を上へ移動",
         "moveDown": "{label} を下へ移動",
         "toggleDirection": "{label} の並び替え方向を切り替え",
-        "removeSort": "{label} の並び替えを削除"
+        "removeSort": "{label} の並び替えを削除",
+        "directionAscending": "現在は昇順",
+        "directionDescending": "現在は降順"
       }
     },
     "filter": {
@@ -2148,7 +2091,8 @@
       "drawerTitle": "フィルター",
       "aria": {
         "backToFields": "フィルターフィールドに戻る",
-        "removeFilter": "{label} のフィルターを削除"
+        "removeFilter": "{label} のフィルターを削除",
+        "logic": "フィルターの組み合わせ"
       },
       "operators": {
         "eq": "等しい",
@@ -2181,7 +2125,8 @@
       "previousPage": "前のページ",
       "nextPage": "次のページ",
       "lastPage": "最後のページ",
-      "page": "ページ {page}"
+      "page": "ページ {page}",
+      "navigation": "ページ移動"
     }
   },
   "versionHistory": {
@@ -2193,7 +2138,9 @@
     "restoreTitle": "バージョンを復元",
     "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
     "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document."
+    "restoreFailed": "Failed to restore the source document.",
+    "loadFailed": "バージョン履歴を読み込めませんでした。",
+    "end": "すべてのバージョンを読み込みました。"
   },
   "shareLinks": {
     "title": "共有リンク",
@@ -2203,7 +2150,6 @@
     "createError": "リンクの作成に失敗しました",
     "deleteSuccess": "リンクを削除しました",
     "deleteError": "リンクの削除に失敗しました",
-    "invalidUrl": "無効な URL です",
     "noLinks": "作成されたリンクがありません",
     "showLess": "表示を減らす",
     "showMore": "あと {count} 件表示",
@@ -2218,21 +2164,9 @@
     "passwordPlaceholder": "共有パスワードを設定",
     "maximumExpiration": "共有リンクの有効期限は最大1年です。",
     "expirationInvalid": "1年以内の有効期限を選択してください。",
-    "bypassFormPassword": "フォームパスワードをバイパス",
-    "bypassFormPasswordDescription": "無効にすると閲覧者はフォームパスワードを入力する必要があります",
-    "bypassAuthentication": "認証をバイパス",
-    "bypassAuthenticationDescription": "有効にすると共有リンクで require-auth 制限をスキップします",
-    "bypassRoleChecks": "ロールチェックをバイパス",
-    "bypassRoleChecksDescription": "有効にすると共有リンクで allowed-role 制限をスキップします",
     "policies": {
       "passwordProtected": "パスワード保護",
-      "noPassword": "パスワードなし",
-      "passwordBypass": "パスワードをバイパス",
-      "passwordRequired": "パスワード必須",
-      "authBypass": "認証をバイパス",
-      "authEnforced": "認証必須",
-      "roleBypass": "ロールをバイパス",
-      "roleEnforced": "ロール必須"
+      "noPassword": "パスワードなし"
     },
     "expirationBadge": {
       "expired": "期限切れ",
@@ -2264,7 +2198,9 @@
     "label": "ソーシャルリンク",
     "addLink": "リンクを追加",
     "platformPlaceholder": "プラットフォーム",
-    "valuePlaceholder": "URL またはユーザー名"
+    "valuePlaceholder": "URL またはユーザー名",
+    "reorderInstructions": "上下の矢印キーでこのリンクの位置を変更します。",
+    "positionChanged": "リンクを{count}個中{position}番目に移動しました。"
   },
   "termsPage": {
     "active": {
@@ -2424,7 +2360,6 @@
     }
   },
   "releasePage": {
-    "previewTitle": "リリースプレビュー",
     "streaming": "ストリーミング",
     "metadata": {
       "fallbackDescription": "{title}",
@@ -2494,8 +2429,7 @@
         "title": "トラックを追加"
       },
       "placeholders": {
-        "title": "トラック名",
-        "durationSeconds": "例: 240"
+        "title": "トラック名"
       },
       "deleteConfirm": "このトラックを削除してもよろしいですか",
       "creditsModal": {
@@ -2517,8 +2451,7 @@
   "contentMetadata": {
     "preview": {
       "page": "ページプレビュー",
-      "post": "投稿プレビュー",
-      "work": "作品プレビュー"
+      "post": "投稿プレビュー"
     }
   },
   "editorMetadata": {
@@ -2541,8 +2474,6 @@
   "postHeader": {
     "actions": {
       "editPost": "投稿を編集",
-      "sharePost": "投稿を共有",
-      "printPost": "投稿を印刷",
       "exportMarkdown": "投稿を Markdown として書き出し"
     }
   },
@@ -2551,7 +2482,6 @@
     "intro": "認証とサイト運営のために必須 Cookie を使用し、サイト利用状況の把握のために任意の解析 Cookie を使用します",
     "learnMore": "<privacy>プライバシーポリシー</privacy> と <terms>利用規約</terms>をご確認ください",
     "actions": {
-      "hidePreferences": "設定を隠す",
       "customize": "カスタマイズ"
     }
   },
@@ -2569,7 +2499,6 @@
   },
   "locationSelector": {
     "placeholder": "場所を選択...",
-    "clearSelection": "選択した場所をクリア",
     "emptySearch": "地図上の場所を検索",
     "emptyResults": "場所が見つかりません"
   },
@@ -2602,9 +2531,6 @@
     "actions": {
       "copyId": "ID をコピー",
       "copyUrl": "URL をコピー"
-    },
-    "notifications": {
-      "copied": "{label} をコピーしました"
     }
   },
   "formValidation": {
@@ -2644,7 +2570,7 @@
   },
   "ogImagePreview": {
     "alt": "Open Graph プレビュー",
-    "empty": "OG 画像はまだ生成されていません",
+    "empty": "OG画像なし",
     "actions": {
       "regenerate": "OG 画像を再生成"
     },
@@ -2768,7 +2694,6 @@
     "scheduleModal": {
       "description": "このキャンペーンを送信する日時を選択してください",
       "dateLabel": "送信予定日時",
-      "datePlaceholder": "日時を選択",
       "previousMonth": "前の月",
       "nextMonth": "次の月",
       "audience": "オーディエンス: {audience}",
@@ -2858,7 +2783,6 @@
       "notFoundMessage": "カテゴリが見つかりません"
     },
     "seriesSelector": {
-      "searchPlaceholder": "検索または作成...",
       "states": {
         "empty": "利用可能なシリーズがありません",
         "select": "シリーズを選択...",
@@ -2871,14 +2795,12 @@
       },
       "notifications": {
         "assigned": "投稿をシリーズに割り当てました",
-        "reorderFailed": "シリーズの並び替えに失敗しました",
         "createFailed": "シリーズを作成できませんでした",
         "seriesUnavailable": "そのシリーズを管理できなくなりました。以前の割り当ては維持されています。",
         "updateFailed": "投稿のシリーズを変更できませんでした。以前の割り当ては維持されています。"
       }
     },
     "notifications": {
-      "slugUpdateFailed": "スラッグの更新に失敗しました",
       "deleted": "投稿を削除しました",
       "published": "投稿を公開しました",
       "unpublished": "投稿の公開を解除しました",
@@ -3065,10 +2987,6 @@
     "pinned": "固定"
   },
   "pageEditor": {
-    "localRecovery": {
-      "message": "再接続前の編集内容を保存しました。再読み込みや終了の前に復旧用コピーをダウンロードしてください。",
-      "action": "復旧用コピーをダウンロード"
-    },
     "shareLinksDescription": "未公開ページ用のプレビューリンク",
     "showTitleOnPage": "ページにタイトルを表示",
     "slugValidation": {
@@ -3139,6 +3057,9 @@
       }
     },
     "columnsEditor": {
+      "labels": {
+        "ratio": "列の比率"
+      },
       "badges": {
         "columnCount": "{count} 列"
       },
@@ -3163,16 +3084,14 @@
       "menuLabel": "セクションを追加",
       "emptyColumn": "空のカラムです。+ をクリックしてコンテンツを追加してください",
       "actions": {
-        "addSectionToColumn": "カラム {index} にセクションを追加",
-        "removeSectionFromColumn": "カラム {index} から {section} を削除"
+        "addSectionToColumn": "カラム {index} にセクションを追加"
       }
     },
     "notifications": {
       "published": "ページを公開しました",
       "unpublished": "ページの公開を解除しました",
       "deleted": "ページを削除しました",
-      "slugUpdateFailed": "ページスラッグの更新に失敗しました",
-      "confirmSummaryFailed": "要約更新の確認に失敗しました"
+      "slugUpdateFailed": "ページスラッグの更新に失敗しました"
     },
     "mapEditor": {
       "title": "地図",
@@ -3217,7 +3136,6 @@
         "content": "コンテンツ",
         "marqueeBehavior": "マーキーの動作",
         "scenePlayback": "Playback",
-        "sceneRender": "Renderer",
         "sceneMotion": "Motion",
         "sceneUnits": "Units",
         "sceneSettings": "Scene",
@@ -3234,7 +3152,6 @@
         "columns": "列数",
         "infiniteLoop": "無限ループ",
         "showIndicators": "インジケーターを表示",
-        "showFeaturedImage": "アイキャッチ画像を表示",
         "imageAspectRatio": "画像アスペクト比",
         "showMeta": "メタ情報を表示（日付・作成者）",
         "sortBy": "並び順の基準",
@@ -3253,7 +3170,6 @@
         "showImage": "画像を表示",
         "selectForm": "フォームを選択",
         "showFormTitle": "フォームタイトルを表示",
-        "showTitle": "タイトルを表示",
         "numberOfWorks": "作品数",
         "numberOfReleases": "リリース数",
         "numberOfProgramEvents": "イベント数",
@@ -3323,7 +3239,10 @@
         "textColorSource": "Text color",
         "lightTextColor": "Light text",
         "darkTextColorSource": "Dark text",
-        "darkTextColor": "Dark text color"
+        "darkTextColor": "Dark text color",
+        "itemSize": "項目サイズ",
+        "showAvatar": "アバターを表示",
+        "maxLabels": "レーベルの最大数"
       },
       "fieldLabels": {
         "year": "年",
@@ -3334,11 +3253,7 @@
       },
       "badges": {
         "posts": "投稿 {count} 件",
-        "rows": "{count} 行",
-        "authors": "作成者 {count} 名",
-        "artists": "アーティスト {count} 名",
-        "works": "作品 {count} 件",
-        "releases": "リリース {count} 件"
+        "rows": "{count} 行"
       },
       "placeholders": {
         "publishedByDefault": "既定では公開済み",
@@ -3358,7 +3273,6 @@
           "auto": "自動"
         },
         "sortBy": {
-          "dateAdded": "追加日",
           "startDate": "開始日",
           "endDate": "終了日",
           "publishedDate": "公開日",
@@ -3367,9 +3281,7 @@
         },
         "sortOrder": {
           "newest": "新しい順",
-          "oldest": "古い順",
-          "azOldest": "A-Z / 古い順",
-          "zaNewest": "Z-A / 新しい順"
+          "oldest": "古い順"
         },
         "mapPrimaryLabel": {
           "placeName": "場所名"
@@ -3443,6 +3355,11 @@
           "theme": "Follow theme",
           "custom": "Custom",
           "inherit": "Follow light"
+        },
+        "itemSize": {
+          "s": "S · コンパクト",
+          "m": "M · 標準",
+          "l": "L · 大"
         }
       },
       "actions": {
@@ -3453,8 +3370,6 @@
         "moveUnitUp": "Move unit up",
         "moveUnitDown": "Move unit down",
         "removeSceneUnit": "Remove unit",
-        "expandSceneUnit": "Expand unit",
-        "collapseSceneUnit": "Collapse unit",
         "replaceMesh": "Replace GLB",
         "uploadMesh": "Upload GLB",
         "clearMeshAsset": "Clear mesh asset",
@@ -3493,6 +3408,12 @@
         "meshOptimizationCancelled": "Cancelled",
         "optimizedMeshCleanupFailed": "Optimized asset reference removed, but cleanup failed: {error}",
         "optimizedMeshCleanupFailedDefault": "Optimized asset reference removed, but cleanup failed"
+      },
+      "authorSelection": {
+        "maxSelected": "著者は最大{count}人まで選択できます。",
+        "empty": "著者が選択されていません。このブロックは空になります。",
+        "unavailable": "この著者は利用できなくなりました。",
+        "unavailableWarning": "利用できない著者は公開ページに表示されません。削除するか、別の著者を選択してください。"
       }
     },
     "embed": {
@@ -3545,8 +3466,6 @@
       "matchDescription": "選択した役割・タグ・ニュースレターの条件グループを組み合わせます。",
       "any": "選択したグループのいずれか",
       "all": "選択したグループすべて",
-      "roles": "役割",
-      "rolesDescription": "選択した役割のいずれかに該当すれば条件を満たします。",
       "roleUser": "メンバー",
       "memberDescription": "ログインしたメンバーのみがこのページを閲覧できます。",
       "authorDescription": "作成者の役割を持つメンバーです。",
@@ -3574,13 +3493,23 @@
       "restrictedTitle": "このページへのアクセス権がありません",
       "restrictedDescription": "アカウントがこのページのアクセス条件を満たしていません。",
       "signIn": "ログイン"
+    },
+    "a11y": {
+      "sectionPosition": "{section} · {index}/{count}",
+      "dragInstructions": "スペースキーで移動を開始し、矢印キーで位置を変更します。スペースキーで確定し、Escapeキーでキャンセルします。",
+      "dragStart": "{section} · 移動 · 進行中 · {index}/{count}",
+      "dragOver": "{section} · 移動 · {index}/{count}",
+      "dragEnd": "{section} · 移動 · 確認 · {index}/{count}",
+      "dragCancel": "{section} · 移動 · キャンセル済み",
+      "sectionDeleted": "{section}を削除しました",
+      "sectionAdded": "{section}を作成しました · {index}/{count}",
+      "columnsPosition": "{column} · {section} · {index}/{count}"
     }
   },
   "editorCommon": {
     "reloadRequired": {
       "title": "再読み込みが必要です",
-      "message": "このエディターを開いている間に新しいバージョンが保存されました。編集を続ける前に再読み込みしてください。",
-      "action": "再読み込み"
+      "message": "このエディターを開いている間に新しいバージョンが保存されました。編集を続ける前に再読み込みしてください。"
     },
     "permissionRevoked": {
       "title": "編集権限が取り消されました",
@@ -3640,7 +3569,6 @@
         "mute": "ミュート",
         "unmute": "ミュート解除",
         "volume": "音声の音量",
-        "original": "元ファイル",
         "waveform": "波形",
         "spectrogram": "スペクトログラム",
         "spectrogramAlt": "音声スペクトログラム",
@@ -3657,10 +3585,8 @@
         "addItem": "{item}を追加",
         "replaceItem": "{item}を置き換え",
         "browse": "ファイルを選択",
-        "or": "OR",
         "importFromUrl": "URLからインポート",
         "directVideoUrlHelp": "動画ファイルの直接 URL のみ使用できます。YouTube または Vimeo には「外部動画」を使用してください。",
-        "confirm": "挿入",
         "resumeAvailable": "Interrupted upload found",
         "resumeInstructionNamed": "Select {name} again to continue the upload from where it stopped.",
         "backToUpload": "ファイルをアップロード",
@@ -3756,11 +3682,8 @@
       }
     },
     "mapBlock": {
-      "clickToAddPlace": "クリックして場所を追加",
       "captionPlaceholder": "キャプションを追加...",
-      "clickToAddCaption": "クリックしてキャプションを追加",
-      "externalPlaceholder": "地図: 場所{count}件",
-      "viewOnGoogleMaps": "Googleマップで表示 ({lat}, {lng})"
+      "clickToAddCaption": "クリックしてキャプションを追加"
     },
     "mapPlacesModal": {
       "title": "場所を管理",
@@ -3770,22 +3693,9 @@
       "centeredTitle": "中心に設定済み",
       "setAsCenterTitle": "中心に設定"
     },
-    "blockAlign": {
-      "left": "左揃え",
-      "center": "中央揃え",
-      "right": "右揃え"
-    },
-    "mathInline": {
-      "clickToEdit": "クリックして編集",
-      "convertToBlock": "ブロックに変換"
-    },
-    "mathInlineButton": {
-      "label": "インライン数式"
-    },
     "editor": {
       "slashMenu": {
         "placeholder": "'/' でコマンドを表示",
-        "empty": "項目がありません",
         "unavailable": "利用できません",
         "groups": {
           "headings": "見出し",
@@ -3950,9 +3860,6 @@
         "alignLeft": "左揃え",
         "alignCenter": "中央揃え",
         "alignRight": "右揃え",
-        "alignJustify": "両端揃え",
-        "textColor": "テキスト",
-        "backgroundColor": "背景",
         "nest": "インデント増",
         "unnest": "インデント減",
         "inlineMath": "インライン数式",
@@ -3967,36 +3874,19 @@
         "urlPlaceholder": "URLを編集"
       },
       "math": {
-        "inline": "インライン数式",
-        "block": "数式ブロック",
-        "clickToEdit": "クリックして編集",
-        "convertToBlock": "ブロックに変換"
+        "selectBlock": "数式ブロックを選択",
+        "block": "数式ブロック"
       },
       "file": {
-        "add": "{item}を追加",
         "replace": "{item}を置き換え",
-        "delete": "削除",
-        "download": "ダウンロード",
-        "caption": "キャプションを追加...",
-        "upload": "ファイルをアップロード",
-        "embed": "挿入",
-        "urlPlaceholder": "URLを編集"
+        "delete": "削除"
       },
       "resize": {
-        "image": "サイズ変更 — 画像",
-        "audio": "サイズ変更 — 音声",
-        "video": "サイズ変更 — 動画",
-        "file": "サイズ変更 — 添付ファイル",
         "map": "サイズ変更 — 地図",
-        "externalVideo": "サイズ変更 — 外部動画",
-        "p5Sketch": "サイズ変更 — p5.js",
-        "threeScene": "サイズ変更 — Three.js",
-        "dragHandle": "ドラッグしてサイズ変更",
-        "shader": "サイズ変更 — GLSLシェーダー"
+        "externalVideo": "サイズ変更 — 外部動画"
       },
       "drag": {
         "openBlockMenu": "ブロックメニュー",
-        "addBlock": "ブロックを追加",
         "delete": "削除",
         "colors": "色を変更"
       },
@@ -4028,7 +3918,6 @@
         "toggleHeaderColumn": "列の見出し",
         "selectRow": "行を選択",
         "selectColumn": "列を選択",
-        "selectCells": "選択したセル",
         "selectTable": "表を選択",
         "deleteTable": "表を削除",
         "mergeCells": "セルを結合",
@@ -4042,17 +3931,11 @@
         "unavailable": "利用できません"
       },
       "map": {
-        "insert": "地図",
-        "clickToAddPlace": "クリックして場所を追加",
-        "captionPlaceholder": "キャプションを追加...",
         "managePlaces": "場所を管理"
       },
       "embeds": {
         "map": "地図",
-        "externalVideo": "外部動画",
-        "p5Sketch": "p5.js",
-        "threeScene": "Three.js",
-        "shader": "GLSLシェーダー"
+        "externalVideo": "外部動画"
       },
       "runtimeLabels": {
         "code": {
@@ -4139,12 +4022,7 @@
         }
       },
       "media": {
-        "browse": "ファイルを選択",
-        "importFromUrl": "URLからインポート",
-        "embed": "挿入",
-        "openLibrary": "ファイルライブラリ",
-        "uploadFiles": "ファイルをアップロード",
-        "selectFile": "ファイルを選択してください"
+        "importFromUrl": "URLからインポート"
       }
     }
   },
@@ -4170,7 +4048,6 @@
       "brainstorm": "アイデア出し"
     },
     "sections": {
-      "original": "原文",
       "result": "AI 結果"
     },
     "actions": {
@@ -4220,8 +4097,7 @@
       "pinClickable": "ピンをクリック可能"
     },
     "themeOptions": {
-      "none": "なし",
-      "systemSuffix": "(システム)"
+      "none": "なし"
     },
     "scheme": {
       "auto": "自動",
@@ -4237,13 +4113,7 @@
     "copyValueTitle": "{label} の値をコピー"
   },
   "postMembers": {
-    "removeAria": "{name} を削除",
-    "roles": {
-      "owner": "オーナー"
-    },
-    "states": {
-      "memberFallback": "メンバー"
-    }
+    "removeAria": "{name} を削除"
   },
   "workCredits": {
     "divider": "またはクレジットを追加",
@@ -4275,9 +4145,6 @@
     "emptyResults": {
       "artist": "アーティストが見つかりません",
       "name": "名前が見つかりません"
-    },
-    "states": {
-      "unknownInitial": "?"
     },
     "notifications": {
       "groupCreated": "グループを作成しました",
@@ -4334,13 +4201,11 @@
       }
     },
     "statuses": {
-      "missing": "未作成",
       "existing": "Existing"
     },
     "states": {
       "loadFailed": "翻訳の読み込みに失敗しました",
       "missingTarget": "No target document yet.",
-      "sourceRow": "このロケールはメインの原文エディタで編集します",
       "sourceEditorHint": "原文はメインエディタで編集してください",
       "updatedAt": "{date} に更新"
     },
@@ -4354,52 +4219,19 @@
   },
   "translationPanelMenu": {
     "description": "Review source menu labels and existing translation documents.",
-    "sourceLocaleDescription": "The menu editor above owns structure, ordering, links, visibility, and source labels. Target translations below are read-only previews.",
-    "states": {
-      "sourcePreview": "原文ラベル ({locale}): {labels}",
-      "sourceEditorHint": "メニュー構造はメインのメニューエディタで編集してください",
-      "missingTarget": "No labels are saved for this locale yet.",
-      "noItems": "ローカライズされたラベルはまだありません",
-      "translationPreview": "Existing {locale} labels: {labels}"
-    },
     "previewModal": {
       "title": "{locale} menu translation preview",
-      "descriptions": {
-        "missing": "No public menu translation exists for this locale. The source is shown until an Admin generates it.",
-        "existing": "Shows the current public translated labels for this menu as read-only."
-      },
       "fields": {
-        "linkType": "Link type",
-        "destination": "Destination",
-        "children": "Nested items",
-        "localizedLabelForLocale": "{locale} public label",
-        "sourceLabelForLocale": "{locale} source label",
-        "localizedLabelDescription": "The current translated label shown in public menus; it cannot be changed here.",
-        "sourceLabelDescription": "Comes from the source menu editor and cannot be changed here.",
-        "fixedLocaleLockedDescription": "This item is fixed to the {locale} label and is read-only."
-      },
-      "states": {
-        "detailUnavailable": "Detailed translated menu data could not be loaded.",
-        "noItems": "There are no menu items to preview."
+        "localizedLabelForLocale": "{locale} public label"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template.",
-      "sourceLocaleDescription": "原文テンプレートが件名、本文コピー、ランタイム変数名を管理します",
-      "states": {
-        "sourceEditorHint": "原文テンプレートはメインエディタで編集してください",
-        "noContent": "翻訳済みの件名または本文はまだありません"
-      }
+      "description": "Manage the source language and existing translation documents for this email template."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout.",
-      "sourceLocaleDescription": "原文レイアウトがラッパー HTML とメール描画用の構造プレースホルダー名を管理します",
-      "states": {
-        "sourceEditorHint": "原文レイアウトはメインエディタで編集してください",
-        "noContent": "翻訳済みレイアウト HTML はまだありません"
-      }
+      "description": "Manage the source language and existing translation documents for this email layout."
     }
   },
   "localizationNotice": {
@@ -4408,9 +4240,7 @@
       "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
     },
     "fallback": {
-      "title": "代替言語",
-      "english": "リクエストされた{requested}翻訳は利用できないため このページは{displayed}で表示されています",
-      "source": "リクエストされた{requested}翻訳は利用できないため このページは原文の{source}で表示されています"
+      "title": "代替言語"
     },
     "actions": {
       "viewOriginal": "原文を表示 ({source})"
@@ -4440,7 +4270,6 @@
       "policy": "ポリシー",
       "lastTargetUpdate": "Last target update",
       "entity": "エンティティ",
-      "existing": "Existing translations",
       "sources": "原文数",
       "lastSourceUpdate": "最終原文更新"
     },
@@ -4628,33 +4457,22 @@
       "summary": "簡潔な要約を追加..."
     },
     "tooltips": {
-      "generatingNamed": "{name} が要約を生成しています",
-      "applyingNamed": "{name} が生成された要約を適用しています",
-      "readyNamed": "{name}が生成済みの要約を用意しています"
+      "generatingNamed": "{name} が要約を生成しています"
     },
     "feedback": {
       "failedDefault": "要約生成の処理に失敗しました",
-      "invalidJson": "AI の応答を要約 JSON として解析できませんでした",
       "alreadyRunning": "要約生成はすでに実行中です",
-      "applyingGenerated": "生成された要約を適用しています",
-      "resetOlderSession": "以前のセッションに残っていた古い生成要約状態をリセットしました。",
-      "resetUnrestorable": "復元できない古い生成要約状態をリセットしました。",
-      "missingJobPayload": "要約生成で job payload が返されませんでした",
       "missingSuggestionPayload": "要約生成は完了しましたが suggestion payload がありませんでした",
       "staleSuggestion": "この提案は古くなっています。適用する前に再生成するか閉じてください",
       "unableToApplyNow": "現在は生成された要約を適用できません",
       "applyFailed": "生成された要約の適用に失敗しました",
       "applied": "生成された要約を適用しました",
-      "appliedJobUnresolved": "要約は適用されましたが、AI ジョブを自動的に解決できませんでした",
-      "dismissedJobUnresolved": "要約候補はローカルで閉じられましたが、AIジョブ状態を自動で解決できませんでした。",
-      "readyBeforeApplying": "生成された要約を先に適用するか閉じてください。",
       "readyToApply": "生成された要約を適用できます。"
     },
     "ready": {
       "title": "生成された要約",
       "suggestedSummary": "提案された要約",
       "anotherCollaborator": "他の共同編集者",
-      "anotherCollaboratorFallback": "他の共同編集者が生成済みの要約を用意しています。",
       "anotherCollaboratorNamed": "{name}が生成済みの要約を用意しています。"
     }
   },
@@ -4702,8 +4520,7 @@
       "roleUpdated": "役割を更新しました",
       "userBanned": "ユーザーを停止しました",
       "userUnbanned": "ユーザーの停止を解除しました",
-      "userDeleted": "ユーザーを削除しました",
-      "userCreated": "ユーザーを作成しました"
+      "userDeleted": "ユーザーを削除しました"
     }
   },
   "adminUserDetail": {
@@ -4740,16 +4557,13 @@
       "userIdCopied": "ユーザー ID をコピーしました",
       "userIdCopyFailed": "ユーザー ID のコピーに失敗しました",
       "emailSuppressionReleased": "メール送信ブロックを解除しました",
-      "mainEmailUpdated": "メインのメールアドレスを変更しました",
       "ssoProviderRemoved": "SSOプロバイダーを削除しました"
     },
     "auth": {
       "emptyEmail": "メールなし",
       "delivery": {
         "title": "受信メール",
-        "description": "キャンペーン、通知、アカウント案内メールは、選択された代表メールアドレスに送信されます。",
-        "changePlaceholder": "確認済みメールを選択",
-        "changeHelp": "選択を変更するとすぐに保存されます。"
+        "description": "キャンペーン、通知、アカウント案内メールは、選択された代表メールアドレスに送信されます。"
       },
       "providers": {
         "title": "接続済みSSOプロバイダー",
@@ -4758,7 +4572,6 @@
         "remove": "SSOプロバイダーを削除"
       },
       "sources": {
-        "current": "現在のメール",
         "emailCode": "メールでログイン"
       },
       "ban": {
@@ -4793,7 +4606,6 @@
         "noChanges": "保存する変更はありません"
       },
       "validation": {
-        "invalidUrl": "URL 形式が正しくありません",
         "invalidEmail": "メールアドレス形式が正しくありません",
         "invalidHexColor": "16 進カラー形式が正しくありません",
         "invalidGoogleAnalyticsId": "Google Analytics ID の形式が正しくありません"
@@ -5102,14 +4914,12 @@
   },
   "formSuccessPage": {
     "metadata": {
-      "fallbackTitle": "フォームを送信しました",
       "title": "{formTitle} - 送信完了"
     },
     "title": "ありがとうございます"
   },
   "formPasswordPage": {
     "metadata": {
-      "fallbackTitle": "フォームアクセス",
       "description": "このフォームにアクセスするにはパスワードを入力してください"
     },
     "title": "パスワード保護",
@@ -5121,7 +4931,6 @@
   },
   "formDashboardPage": {
     "metadata": {
-      "fallbackTitle": "フォームダッシュボード",
       "title": "{formTitle} - ダッシュボード",
       "description": "フォーム送信の統計と分析"
     },
@@ -5131,7 +4940,28 @@
     "stats": {
       "total": "合計"
     },
-    "fieldStatistics": "フィールド統計"
+    "fieldStatistics": "フィールド統計",
+    "charts": {
+      "donut": "ドーナツ",
+      "pie": "円",
+      "bar-horizontal": "横棒",
+      "bar-vertical": "縦棒",
+      "radar": "レーダー",
+      "table": "表",
+      "area": "面",
+      "line": "折れ線",
+      "histogram": "ヒストグラム",
+      "noResponses": "回答はまだありません",
+      "emptyValue": "（空）",
+      "min": "最小値",
+      "max": "最大値",
+      "avg": "平均",
+      "count": "件数",
+      "date": "日付",
+      "value": "値",
+      "range": "範囲",
+      "chartType": "グラフの種類"
+    }
   },
   "embeddedForm": {
     "states": {
@@ -5182,10 +5012,7 @@
       "locationMode": "場所の種類",
       "ticketUrl": "チケットURL",
       "streamUrl": "配信URL",
-      "externalUrl": "外部URL",
-      "participants": "参加者",
-      "textCredits": "テキストクレジット",
-      "textCreditsDescription": "1行に1件ずつ入力します。役割が必要な場合は「役割: 名前」の形式を使います。"
+      "externalUrl": "外部URL"
     },
     "locationModes": {
       "mapPlace": "会場",
@@ -5198,7 +5025,6 @@
       "tickets": "チケット",
       "stream": "配信",
       "link": "リンク",
-      "participants": "参加者",
       "empty": "イベントが見つかりません。",
       "date": "日時",
       "credits": "クレジット"
@@ -5215,152 +5041,14 @@
       "deleteMessage": "どのイベントにも使用されていない種別のみ削除できます。"
     }
   },
-  "tools": {
-    "portadj": {
-      "metadataTitle": "PortaDJ",
-      "metadataDescription": "ブラウザ上の2つのDJデッキで、ローカルの音声ファイルを再生・ミックスできます。"
-    },
-    "youtubeAudio": {
-      "title": "YouTube オーディオ",
-      "urlLabel": "動画リンク",
-      "urlPlaceholder": "https://…",
-      "resolve": "オーディオを読み込む",
-      "resolving": "オーディオを読み込み中",
-      "clear": "ソースをクリア",
-      "metadataTitle": "YouTube オーディオ",
-      "metadataDescription": "認証済みの YouTube ソースからオーディオをブラウザー内で変換します。",
-      "errors": {
-        "INTERNAL_ERROR": "オーディオソースを読み込めませんでした。もう一度お試しください。",
-        "INVALID_REQUEST": "有効な YouTube 動画 URL を入力してください。",
-        "INVALID_UPSTREAM_RESPONSE": "YouTube から予期しないオーディオソースが返されました。別の動画をお試しください。",
-        "REQUEST_ABORTED": "リクエストはキャンセルされました。",
-        "SOURCE_EXPIRED": "このオーディオソースは期限切れです。URL を再度読み込んでください。",
-        "SOURCE_NOT_FOUND": "このオーディオソースは利用できなくなりました。URL を再度読み込んでください。",
-        "UNAUTHORIZED": "このツールを使用するには、もう一度ログインしてください。",
-        "UNSUPPORTED_VIDEO": "この動画には、対応している有限長のオーディオソースがありません。",
-        "UPSTREAM_FAILURE": "現在 YouTube オーディオを読み込めません。もう一度お試しください。"
-      }
-    },
-    "transcode": {
-      "title": "オーディオトランスコーダー",
-      "targetIdle": "待機中",
-      "targetChecking": "確認中",
-      "targetReady": "準備完了",
-      "targetError": "利用不可",
-      "dropTitle": "オーディオファイルをドロップまたは選択",
-      "dropDescription": "最大10ファイル · フォルダー不可 · このデバイス内で処理",
-      "chooseFiles": "オーディオファイルを選択",
-      "supportedFormatsLabel": "対応フォーマット",
-      "supportedFormats": "対応: CAF、AIFF/AIFC、WAV、FLAC、MP3、AAC/M4A、Ogg/Opus、および MP4、MOV、MKV/WebM、TS 内のオーディオ。ファイルごとに確認します。",
-      "filesSelected": "ファイル",
-      "outputSettings": "出力設定",
-      "format": "形式",
-      "sampleRate": "サンプルレート",
-      "bitrate": "ビットレート",
-      "bitDepth": "ビット深度",
-      "codec": "コーデック",
-      "sampleFormat": "サンプル形式",
-      "float": "浮動小数点",
-      "integer": "整数 PCM",
-      "sourcePcmFloat": "{bitDepth}ビット浮動小数点",
-      "sourcePcmInteger": "{bitDepth}ビット整数",
-      "sourcePcmSignedInteger": "{bitDepth}ビット符号付き整数",
-      "sourcePcmUnsignedInteger": "{bitDepth}ビット符号なし整数",
-      "automatic": "自動",
-      "unknownAudio": "オーディオ",
-      "channelCount": "{count, plural, other {#チャンネル}}",
-      "queue": "変換キュー",
-      "convert": "変換",
-      "cancelAll": "すべてキャンセル",
-      "clear": "クリア",
-      "download": "変換後を保存",
-      "downloadSource": "元音声を保存",
-      "sourceDownloadExpired": "ソースの有効期限が切れたか、利用できません。YouTube URLを再読み込みしてください。",
-      "sourceDownloadFailed": "元ファイルをダウンロードできませんでした。接続を確認し、ソースを再読み込みしてください。",
-      "retry": "再試行",
-      "cancel": "キャンセル",
-      "remove": "削除",
-      "sourceValue": "ソース ({value})",
-      "mono": "モノラル",
-      "stereo": "ステレオ",
-      "targetWaitingForFiles": "対応するオーディオファイルを追加すると、選択した出力形式を確認します。",
-      "targetCheckingMessage": "このブラウザーが選択した出力形式に対応しているか確認しています。",
-      "targetReadyMessage": "選択した出力形式はこのブラウザーで利用できます。",
-      "engineLoading": "{asset} オーディオエンジンを読み込んでいます。",
-      "engineVerifying": "{asset} オーディオエンジンを検証しています。",
-      "engineLoadFailed": "{asset} オーディオエンジンを読み込めませんでした。",
-      "capacityExceeded": "{count, number} 件のファイルを追加できませんでした。キューには最大 {max, number} 件まで追加できます。",
-      "statusInspectionQueued": "検査待ち",
-      "statusInspecting": "検査中",
-      "statusReady": "準備完了",
-      "statusQueued": "キューに追加済み",
-      "statusConverting": "変換中",
-      "statusComplete": "完了",
-      "statusUnsupported": "非対応",
-      "statusError": "エラー",
-      "statusCancelled": "キャンセル済み",
-      "unsupportedInput": "対応しているオーディオファイルではありません。",
-      "unsupportedCodec": "このブラウザーでは、このファイルのオーディオコーデックをデコードできません。",
-      "inspectionFailed": "ファイルを検査できませんでした。もう一度お試しください。",
-      "inspectionInconclusive": "ブラウザーが安全な読み取り上限内でこのオーディオを判別できませんでした。別のファイルまたは形式をお試しください。",
-      "outputUnsupported": "選択した出力設定はこのブラウザーでは利用できません。",
-      "outputProbeFailed": "出力対応状況を確認できませんでした。もう一度お試しください。",
-      "conversionFailed": "オーディオの変換に失敗しました。",
-      "conversionStorageLimitExceeded": "このブラウザーのローカル一時ストレージには、予想される出力を保存できません。より小さい形式か圧縮形式を選ぶか、大容量のローカル出力に対応したブラウザーでもう一度お試しください。",
-      "conversionTargetSizeLimitExceeded": "選択した出力形式では、この大きさのファイルを表現できません。別の形式を選ぶか、サンプルレート、ビット深度、またはチャンネル数を下げてください。",
-      "cancelledMessage": "変換をキャンセルしました。",
-      "sourceSummary": "{container} · {sampleRate} · {channels} · {bitDepth}",
-      "outputSummary": "{preset} · {size}",
-      "progressLabel": "{phase} · {progress, number}%",
-      "phasePrepare": "準備中",
-      "phaseDecode": "デコード中",
-      "phaseEncode": "エンコード中",
-      "phaseFinalize": "完了処理中",
-      "bytes": "{count, number} バイト",
-      "storageOpfs": "ブラウザーのプライベートストレージ",
-      "storageMemory": "ブラウザーメモリ",
-      "metadataTitle": "オーディオトランスコーダー",
-      "metadataDescription": "ブラウザーでオーディオを変換します。ファイルはデバイス外へ送信されません。",
-      "outputSettingsHelper": "チャンネル数は維持されます。自動はファイルごとに互換性のあるレートを選択します。",
-      "processingDetails": "処理の詳細",
-      "processingDetailsDescription": "バランス品質でリサンプリングします。整数出力にはディザーを適用し、大容量 WAV には RF64 を使用します。",
-      "bitDepthContainerEffective": "{containerBits}ビットコンテナ / 有効{effectiveBits}ビット",
-      "constantBitrate": "CBR",
-      "variableBitrate": "VBR",
-      "preserveSource": "ソースを維持",
-      "unavailable": "利用不可",
-      "sampleRateAvailableFor": "{total, number}ファイル中{supported, number}ファイル",
-      "sampleRateResetAutomatic": "以前のサンプルレートは現在の出力設定では無効なため、自動に変更されました。",
-      "targetAvailability": "{available, number}ファイルを変換できます。{unavailable, number}ファイルは現在の設定では利用できません。",
-      "statusQueuedAvailability": "{converting, number}ファイルを変換待ちに追加しました。{unavailable, number}ファイルは利用できません。",
-      "statusConvertingAvailability": "{converting, number}ファイルを変換中です。{unavailable, number}ファイルは利用できません。",
-      "statusCompleteAvailability": "{converted, number}ファイルを変換しました。{unavailable, number}ファイルは利用できません。",
-      "statusBatchResult": "実行完了: 対象{eligible, number}、試行{attempted, number}、成功{succeeded, number}、失敗{failed, number}、利用不可{unavailable, number}。",
-      "outputEngineUnavailable": "{preset} のランタイムエンジンを開始できませんでした。ネットワークまたはアセットポリシーを確認して再試行してください。",
-      "outputChannelsUnsupported": "この出力は{minimum, number}～{maximum, number}ソースチャンネルに対応しますが、このファイルは{actual, number}チャンネルです。チャンネルは維持され、ダウンミックスされません。",
-      "sourceInspectionMissing": "ソースのチャンネル数またはサンプルレートを特定できませんでした。オーディオメタデータを読み取れるファイルを選択してください。",
-      "outputConfigurationUnavailable": "選択した形式とエンコード設定に対応する出力構成がありません。",
-      "preserveSourceRateUnsupported": "この出力ではソースの {sourceRate} を維持できません。許可されるレート: {allowed}。",
-      "sourceResamplingRateUnsupported": "{sourceRate} のソースはリサンプリング範囲（{minimum}～{maximum}）外です。互換性のある出力へそのまま渡す場合のみ使用できます。",
-      "targetResamplingRateUnsupported": "選択した {targetRate} はリサンプリング範囲（{minimum}～{maximum}）外です。",
-      "automaticRateUnavailable": "自動では {sourceRate} のソースに有効なレートを選択できません。許可される出力レート: {allowed}。",
-      "presetRateUnsupported": "この出力は {targetRate} に対応していません。許可されるレート: {allowed}。",
-      "notices": "オープンソースライセンス"
-    },
-    "hwp": {
-      "title": "HWPエディター",
-      "metadataDescription": "ブラウザーでHWP・HWPX文書を開き、編集して保存できます。",
-      "description": "エディターのファイルメニューからHWP・HWPXファイルを開いて保存できます。文書はアップロードせず、この端末で処理します。",
-      "loading": "エディターを読み込み中…",
-      "error": "エディターを読み込めませんでした。再試行してください。",
-      "retry": "再試行",
-      "metadataTitle": "HWPエディター"
-    }
-  },
   "myMetadata": {
     "description": "{siteName}のあなたのアカウントにある{title}ページ"
   },
   "fileManager": {
+    "pagination": {
+      "end": "検索結果は以上です"
+    },
+    "selectionUnavailableDescription": "このファイルは追加できません。Enter キーでプレビューできます。",
     "title": "ファイル",
     "description": "サイト全体のファイルをアップロード、整理、確認、再利用します。",
     "root": "ファイル",
@@ -5484,9 +5172,7 @@
       "move-files": {
         "title": "ファイルを移動"
       },
-      "targetFolderId": "移動先フォルダーID",
       "extensionSeparate": ".{extension} 拡張子は別に保持されます。",
-      "rootWhenEmpty": "空欄にするとルートへ移動します。",
       "delete": {
         "title": "削除",
         "folder": "このフォルダーと配下の未使用ファイルをすべて削除しますか？",
@@ -5496,14 +5182,26 @@
         "byDomain": "ドメイン別: {summary}",
         "more": "ほか{count}件。完全な一覧はファイル詳細で確認してください。"
       }
+    },
+    "viewSettings": {
+      "title": "表示設定",
+      "iconSize": "アイコンサイズ",
+      "spacing": "項目の間隔",
+      "columns": "列数",
+      "auto": "自動",
+      "small": "小",
+      "medium": "中",
+      "large": "大",
+      "compact": "狭い",
+      "standard": "標準",
+      "comfortable": "広い",
+      "reset": "表示設定をリセット"
     }
   },
   "fileDownloadAccess": {
     "editor": {
       "sectionTitle": "ダウンロードアクセス",
-      "sectionDescription": "元のファイルをダウンロードできる対象を設定します。",
       "loading": "ダウンロードアクセスを読み込み中…",
-      "audienceLabel": "ダウンロード対象",
       "audiences": {
         "disabled": {
           "label": "無効",
@@ -5522,15 +5220,10 @@
           "description": "選択したオーディエンスのユーザーのみ、このファイルをダウンロードできます。"
         }
       },
-      "segmentsLabel": "オーディエンス",
-      "segmentsDescription": "既存のオーディエンスセグメントを1つ以上選択します。",
-      "segmentsPlaceholder": "オーディエンスを選択",
       "segmentsLoadError": "ポリシーは読み込まれましたが、オーディエンスを読み込めませんでした。",
       "segmentsEmpty": "利用可能なオーディエンスセグメントがありません。",
       "restrictedWithoutAudience": "この制限付きポリシーにはオーディエンスが指定されていません。少なくとも1つのオーディエンスを選択するまで、すべてのユーザーのダウンロードが拒否されます。",
-      "segmentRequiresSubscription": "{name}（ニュースレター購読が必要）",
       "additionalSelected": "他に{count}件選択済み",
-      "loadMoreSegments": "オーディエンスをさらに読み込む",
       "loadError": "ダウンロードアクセスを読み込めませんでした。",
       "saveError": "ダウンロードアクセスを保存できませんでした。",
       "fileRequired": "ダウンロードアクセスを設定する前にファイルを保存してください。"
@@ -5552,5 +5245,29 @@
     "empty": "図のソースを入力",
     "invalid": "図の構文を確認してください",
     "loading": "描画中…"
+  },
+  "errorPage": {
+    "titles": {
+      "400": "無効なリクエストです",
+      "401": "ログインが必要です",
+      "403": "アクセス権限がありません",
+      "404": "ページが見つかりません",
+      "408": "リクエストがタイムアウトしました",
+      "409": "リクエストが現在の状態と競合しています",
+      "410": "このページは利用できなくなりました",
+      "413": "リクエストのサイズが大きすぎます",
+      "422": "リクエストを処理できません",
+      "429": "リクエストが多すぎます",
+      "500": "問題が発生しました",
+      "501": "対応していないリクエストです",
+      "502": "接続先のサービスでエラーが発生しました",
+      "503": "サービスを一時的に利用できません",
+      "504": "サービスの応答がタイムアウトしました"
+    },
+    "actions": {
+      "goHome": "ホームへ移動",
+      "tryAgain": "再試行",
+      "login": "ログインに戻る"
+    }
   }
 }

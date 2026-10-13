@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { I18nProvider as DesignSystemProvider } from 'react-aria-components';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { ColorInput } from './ColorInput';
 import { FileInput } from './FileInput';
 import classes from './Input.module.css';
@@ -35,11 +36,11 @@ describe('text-like Core inputs', () => {
   it('share the underline and focus-animation classes', () => {
     act(() => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider>
           <ColorInput label="Color" />
           <FileInput label="File" />
           <TagsInput label="Tags" />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 

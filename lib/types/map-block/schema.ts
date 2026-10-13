@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 import { MAP_MAX_ZOOM_LIMIT, MAP_MIN_ZOOM_LIMIT } from '@/lib/types/map/model';
 import { LEGACY_MAP_BLOCK_WIRE_FIELDS, MAP_BLOCK_FIELDS } from './fields';
 import type { DurablePropSchema } from '@/lib/types/editor/schema';
@@ -8,49 +8,68 @@ import type { DurablePropSchema } from '@/lib/types/editor/schema';
 /**
  * Validate latitude string: empty allowed, otherwise must be number in range [-90, 90]
  */
-const latitudeString = z
-  .string()
-  .refine(
-    (val) => {
-      if (val === '') {
-        return true;
-      }
-      const num = parseFloat(val);
-      if (isNaN(num)) {
-        return false;
-      }
-      return num >= -90 && num <= 90;
-    },
-    { message: 'Latitude must be a number between -90 and 90' },
-  )
-  .default('');
+const latitudeString = z._default(
+  z.string().check(
+    z.refine(
+      (val) => {
+        if (val === '') {
+          return true;
+        }
+        const num = parseFloat(val);
+        if (isNaN(num)) {
+          return false;
+        }
+        return num >= -90 && num <= 90;
+      },
+      { message: 'Latitude must be a number between -90 and 90' },
+    ),
+  ),
+  '',
+);
 
 /**
  * Validate longitude string: empty allowed, otherwise must be number in range [-180, 180]
  */
-const longitudeString = z
-  .string()
-  .refine(
-    (val) => {
-      if (val === '') {
-        return true;
-      }
-      const num = parseFloat(val);
-      if (isNaN(num)) {
-        return false;
-      }
-      return num >= -180 && num <= 180;
-    },
-    { message: 'Longitude must be a number between -180 and 180' },
-  )
-  .default('');
+const longitudeString = z._default(
+  z.string().check(
+    z.refine(
+      (val) => {
+        if (val === '') {
+          return true;
+        }
+        const num = parseFloat(val);
+        if (isNaN(num)) {
+          return false;
+        }
+        return num >= -180 && num <= 180;
+      },
+      { message: 'Longitude must be a number between -180 and 180' },
+    ),
+  ),
+  '',
+);
 
 /**
  * Validate zoom string: must be a number in range [1, 20]
  */
-const zoomString = z
-  .string()
-  .refine(
+const zoomString = z._default(
+  z.string().check(
+    z.refine(
+      (val) => {
+        const num = parseFloat(val);
+        if (isNaN(num)) {
+          return false;
+        }
+        return num >= MAP_MIN_ZOOM_LIMIT && num <= MAP_MAX_ZOOM_LIMIT;
+      },
+      { message: `Zoom must be a number between ${MAP_MIN_ZOOM_LIMIT} and ${MAP_MAX_ZOOM_LIMIT}` },
+    ),
+  ),
+  '15',
+);
+
+const zoomBoundString = z.string().check(
+  z.refine(
     (val) => {
       const num = parseFloat(val);
       if (isNaN(num)) {
@@ -58,21 +77,10 @@ const zoomString = z
       }
       return num >= MAP_MIN_ZOOM_LIMIT && num <= MAP_MAX_ZOOM_LIMIT;
     },
-    { message: `Zoom must be a number between ${MAP_MIN_ZOOM_LIMIT} and ${MAP_MAX_ZOOM_LIMIT}` },
-  )
-  .default('15');
-
-const zoomBoundString = z.string().refine(
-  (val) => {
-    const num = parseFloat(val);
-    if (isNaN(num)) {
-      return false;
-    }
-    return num >= MAP_MIN_ZOOM_LIMIT && num <= MAP_MAX_ZOOM_LIMIT;
-  },
-  {
-    message: `Zoom bound must be a number between ${MAP_MIN_ZOOM_LIMIT} and ${MAP_MAX_ZOOM_LIMIT}`,
-  },
+    {
+      message: `Zoom bound must be a number between ${MAP_MIN_ZOOM_LIMIT} and ${MAP_MAX_ZOOM_LIMIT}`,
+    },
+  ),
 );
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -143,45 +151,43 @@ export function normalizeMapBlockPropsInput(data: unknown): Record<string, unkno
 /**
  * Zod schema for Map Block props - explicitly typed for proper inference
  */
-export const mapBlockSchema = z
-  .object({
-    // Place references
-    mapPlaceIds: z.string().default(''),
-    // Display
-    aspectRatio: z.enum(['16:9', '4:3', '1:1']).default('16:9'),
-    previewWidth: z.string().default('100'),
-    zoom: zoomString,
-    minZoom: zoomBoundString.default(String(MAP_MIN_ZOOM_LIMIT)),
-    maxZoom: zoomBoundString.default(String(MAP_MAX_ZOOM_LIMIT)),
-    // Durable resize-shell fields
-    url: z.string().default('map'),
-    showPreview: z.enum(['true', 'false']).default('true'),
-    // Interaction
-    draggable: z.enum(['true', 'false']).default('true'),
-    zoomable: z.enum(['true', 'false']).default('true'),
-    rotatable: z.enum(['true', 'false']).default('false'),
-    tiltable: z.enum(['true', 'false']).default('false'),
-    pinClickable: z.enum(['true', 'false']).default('true'),
-    // Center
-    centerLat: latitudeString,
-    centerLng: longitudeString,
-    // 3D
-    pitch: z.string().default('0'),
-    bearing: z.string().default('0'),
-    show3DBuildings: z.enum(['true', 'false']).default('false'),
-    autoRotate: z.enum(['true', 'false']).default('false'),
-    autoRotateSpeed: z.string().default('1'),
-    showDirections: z.enum(['true', 'false']).default('true'),
-    // Style
-    variant: z.enum(['default']).default('default'),
-    themeId: z.string().default(''),
-    preferredScheme: z.enum(['auto', 'light', 'dark']).default('auto'),
-    areaLabelsMode: z.enum(['inherit', 'show', 'hide']).default('inherit'),
-    poiLabelsMode: z.enum(['inherit', 'show', 'hide']).default('inherit'),
-    // Caption
-    caption: z.string().default(''),
-  })
-  .strip();
+export const mapBlockSchema = z.object({
+  // Place references
+  mapPlaceIds: z._default(z.string(), ''),
+  // Display
+  aspectRatio: z._default(z.enum(['16:9', '4:3', '1:1']), '16:9'),
+  previewWidth: z._default(z.string(), '100'),
+  zoom: zoomString,
+  minZoom: z._default(zoomBoundString, String(MAP_MIN_ZOOM_LIMIT)),
+  maxZoom: z._default(zoomBoundString, String(MAP_MAX_ZOOM_LIMIT)),
+  // Durable resize-shell fields
+  url: z._default(z.string(), 'map'),
+  showPreview: z._default(z.enum(['true', 'false']), 'true'),
+  // Interaction
+  draggable: z._default(z.enum(['true', 'false']), 'true'),
+  zoomable: z._default(z.enum(['true', 'false']), 'true'),
+  rotatable: z._default(z.enum(['true', 'false']), 'false'),
+  tiltable: z._default(z.enum(['true', 'false']), 'false'),
+  pinClickable: z._default(z.enum(['true', 'false']), 'true'),
+  // Center
+  centerLat: latitudeString,
+  centerLng: longitudeString,
+  // 3D
+  pitch: z._default(z.string(), '0'),
+  bearing: z._default(z.string(), '0'),
+  show3DBuildings: z._default(z.enum(['true', 'false']), 'false'),
+  autoRotate: z._default(z.enum(['true', 'false']), 'false'),
+  autoRotateSpeed: z._default(z.string(), '1'),
+  showDirections: z._default(z.enum(['true', 'false']), 'true'),
+  // Style
+  variant: z._default(z.enum(['default']), 'default'),
+  themeId: z._default(z.string(), ''),
+  preferredScheme: z._default(z.enum(['auto', 'light', 'dark']), 'auto'),
+  areaLabelsMode: z._default(z.enum(['inherit', 'show', 'hide']), 'inherit'),
+  poiLabelsMode: z._default(z.enum(['inherit', 'show', 'hide']), 'inherit'),
+  // Caption
+  caption: z._default(z.string(), ''),
+});
 
 export type MapBlockProps = z.infer<typeof mapBlockSchema>;
 

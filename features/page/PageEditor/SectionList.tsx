@@ -1,6 +1,10 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { VisuallyHidden } from '@/components/core/Typography';
+import { usePageSectionDragAccessibility } from './usePageSectionDragAccessibility';
+import { focusPageSection } from './section-focus';
 import {
   closestCenter,
   DndContext,
@@ -14,7 +18,7 @@ import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrate
 import { IconPlus } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
-import { Stack } from '@mantine/core';
+
 import { Button } from '@/components/core/Button';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
 import { usePageEditor } from '@/features/page/PageEditor/PageEditorContext';
@@ -27,7 +31,23 @@ import type { SectionType } from './types';
 
 export function SectionList() {
   const t = useTranslations('pageEditor');
-  const { sections, addSection, deleteSection, moveSections, editable } = usePageEditor();
+  const { sections, addSection, deleteSection, moveSections, editable, allowStructuralEdits } = usePageEditor();
+  const canEditStructure = editable && allowStructuralEdits;
+  const listRef = useRef<HTMLDivElement>(null);
+  const pendingFocus = useRef<string | 'add' | null>(null);
+  const [announcement, setAnnouncement] = useState('');
+  const dragAccessibility = usePageSectionDragAccessibility(sections);
+  useEffect(() => {
+    if (!pendingFocus.current) {
+      return;
+    }
+    const target = pendingFocus.current;
+    const frame = requestAnimationFrame(() => {
+      focusPageSection(listRef.current, target);
+      pendingFocus.current = null;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [sections]);
   const [pendingType, setPendingType] = useState<ConfiguredSectionType | null>(null);
   const { data: publishedForms, isLoading: formsLoading } = useQuery({
     queryKey: ['forms', 'listPublished', 50, 'page-preinsert'],
@@ -46,7 +66,7 @@ export function SectionList() {
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
-      if (!editable) {
+      if (!canEditStructure) {
         return;
       }
       const { active, over } = event;
@@ -59,45 +79,85 @@ export function SectionList() {
         moveSections(oldIndex, newIndex);
       }
     },
-    [editable, moveSections, sections],
+    [canEditStructure, moveSections, sections],
   );
 
   const handleAddSection = useCallback(
     (type: SectionType) => {
+      if (!canEditStructure) {
+        return;
+      }
       if (type === 'external-video' || type === 'embed' || type === 'form') {
         setPendingType(type);
         return;
       }
-      addSection(type);
+      const added = addSection(type);
+      if (added) {
+        pendingFocus.current = added.id;
+        setAnnouncement(
+          t('a11y.sectionAdded', {
+            section: sectionTypeLabels[type],
+            index: sections.length + 1,
+            count: sections.length + 1,
+          }),
+        );
+      }
     },
-    [addSection],
+    [addSection, canEditStructure, sectionTypeLabels, sections.length, t],
   );
 
   const closePreinsert = useCallback(() => setPendingType(null), []);
   const confirmPreinsert = useCallback(
     (type: ConfiguredSectionType, props: Record<string, unknown>) => {
-      addSection(type, undefined, props);
+      const added = addSection(type, undefined, props);
+      if (added) {
+        pendingFocus.current = added.id;
+        setAnnouncement(
+          t('a11y.sectionAdded', {
+            section: sectionTypeLabels[type],
+            index: sections.length + 1,
+            count: sections.length + 1,
+          }),
+        );
+      }
       closePreinsert();
     },
-    [addSection, closePreinsert],
+    [addSection, closePreinsert, sectionTypeLabels, sections.length, t],
   );
 
   return (
-    <Stack gap="md">
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    <DsLayoutStack gap="md" ref={listRef}>
+      <VisuallyHidden role="status" aria-live="polite" aria-atomic="true">
+        {announcement}
+      </VisuallyHidden>
+      <DndContext
+        accessibility={dragAccessibility}
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
         <SortableContext items={sections.map((section) => section.id)} strategy={verticalListSortingStrategy}>
-          {sections.map((section) => (
+          {sections.map((section, index) => (
             <SectionItem
               key={section.id}
               section={section}
-              onDelete={() => deleteSection(section.id)}
+              positionDescription={t('a11y.sectionPosition', {
+                section: sectionTypeLabels[section.type],
+                index: index + 1,
+                count: sections.length,
+              })}
+              onDelete={() => {
+                pendingFocus.current = sections[index + 1]?.id ?? sections[index - 1]?.id ?? 'add';
+                deleteSection(section.id);
+                setAnnouncement(t('a11y.sectionDeleted', { section: sectionTypeLabels[section.type] }));
+              }}
               editable={editable}
             />
           ))}
         </SortableContext>
       </DndContext>
 
-      {editable ? (
+      {canEditStructure ? (
         <DropdownMenu>
           <DropdownMenu.Target>
             <Button
@@ -131,6 +191,6 @@ export function SectionList() {
           onInsert={confirmPreinsert}
         />
       ) : null}
-    </Stack>
+    </DsLayoutStack>
   );
 }

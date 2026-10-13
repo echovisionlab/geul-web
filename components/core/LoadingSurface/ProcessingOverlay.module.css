@@ -1,0 +1,21 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  /* The status content sits on the scrim itself, including over light media. */
+  background: var(--geul-overlay-strong);
+  color: var(--geul-text-inverse-primary);
+}
+
+.content {
+  width: 80%;
+  max-width: 25rem;
+  min-width: 0;
+  text-align: center;
+}
+
+.overlay[hidden] {
+  display: none !important;
+}

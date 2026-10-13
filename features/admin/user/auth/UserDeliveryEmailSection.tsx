@@ -1,7 +1,10 @@
 'use client';
+import { Text as DsText } from '@/components/core/Typography';
+
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 
 import { useTranslations } from 'next-intl';
-import { Group, Stack, Text } from '@mantine/core';
+
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
 import { DateTime } from '@/features/date-time/DateTime';
@@ -9,7 +12,6 @@ import { Select } from '@/components/core/Input';
 import {
   AccountEmailOptionContent,
   AccountEmailSelectRightSection,
-  getAccountEmailSelectRightSectionWidth,
   type AccountEmailOptionSource,
 } from '@/features/account-email/AccountEmailOption';
 import type { UserFull } from '@/lib/types/user/model';
@@ -80,8 +82,9 @@ export function UserDeliveryEmailSection({
     <InfoSection title={tSecurityEmail('title')} description={tSecurityEmail('description')}>
       {candidateOptions.length > 1 ? (
         <InfoRow label={tCommonLabels('email')}>
-          <Stack gap={4}>
+          <DsLayoutStack gap="xxs">
             <Select
+              aria-label={tCommonLabels('email')}
               data={candidateOptions}
               value={selectedCandidateValue}
               disabled={isSetCanonicalEmailPending}
@@ -94,62 +97,59 @@ export function UserDeliveryEmailSection({
               }}
               placeholder={tSecurityEmail('setCanonical')}
               size="sm"
-              {...(selectedCandidateOption
-                ? {
-                    rightSection: <AccountEmailSelectRightSection sources={selectedCandidateOption.sources} />,
-                    rightSectionPointerEvents: 'none' as const,
-                    rightSectionWidth: getAccountEmailSelectRightSectionWidth(selectedCandidateOption.sources),
-                  }
-                : {})}
+              rightSection={
+                selectedCandidateOption ? (
+                  <AccountEmailSelectRightSection sources={selectedCandidateOption.sources} />
+                ) : undefined
+              }
               renderOption={({ option }) => {
                 const emailOption = option as DeliveryCandidateOption;
                 return <AccountEmailOptionContent email={emailOption.label} sources={emailOption.sources} />;
               }}
             />
-          </Stack>
+          </DsLayoutStack>
         </InfoRow>
       ) : (
         <InfoRow label={tCommonLabels('email')}>
-          <Group gap="sm" align="baseline">
-            <Text fw={600}>{user.email || tPage('auth.emptyEmail')}</Text>
+          <DsLayoutInline gap="sm" align="baseline">
+            <DsText weight="strong">{user.email || tPage('auth.emptyEmail')}</DsText>
             {deliveryStatus ? <StatusValue tone={deliveryStatus.tone}>{deliveryStatus.label}</StatusValue> : null}
-          </Group>
+          </DsLayoutInline>
         </InfoRow>
       )}
       {isSuppressionLoading ? (
         <InfoRow label={tPage('emailSuppression.title')}>
-          <Text size="sm" c="dimmed">
-            {tCommonStates('loading')}
-          </Text>
+          <DsText tone="secondary">{tCommonStates('loading')}</DsText>
         </InfoRow>
       ) : null}
       {suppression ? (
         <Alert tone="danger" title={tPage('emailSuppression.title')}>
-          <Stack gap={6}>
-            <Text size="sm">{tPage('emailSuppression.description')}</Text>
+          <DsLayoutStack gap="xxs">
+            <DsText size="sm" tone="secondary">
+              {tPage('emailSuppression.description')}
+            </DsText>
             <InfoRow label={tPage('emailSuppression.reason')} compact>
-              <Text size="sm">{suppression.reason}</Text>
+              <DsText>{suppression.reason}</DsText>
             </InfoRow>
             {suppression.lastError ? (
               <InfoRow label={tPage('emailSuppression.lastError')} compact>
-                <Text size="sm">{suppression.lastError}</Text>
+                <DsText>{suppression.lastError}</DsText>
               </InfoRow>
             ) : null}
             <InfoRow label={tPage('emailSuppression.suppressedAt')} compact>
-              <Text size="sm">
+              <DsText>
                 <DateTime value={suppression.suppressedAt} display="dateTime" />
-              </Text>
+              </DsText>
             </InfoRow>
             <Button
               size="xs"
               tone="positive"
               onClick={() => onReleaseSuppression?.(suppression.email)}
               loading={isReleasePending || isSuppressionLoading}
-              w="fit-content"
             >
               {tPage('emailSuppression.release')}
             </Button>
-          </Stack>
+          </DsLayoutStack>
         </Alert>
       ) : null}
     </InfoSection>

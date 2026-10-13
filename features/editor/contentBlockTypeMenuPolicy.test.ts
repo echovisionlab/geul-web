@@ -9,16 +9,17 @@ describe('Tiptap content block type policy', () => {
   it('allows only the durable rich-text block commands, including H1-H3', () => {
     const items = filterContentBlockTypeMenuItems(createTiptapSlashItems(editorMessages));
 
+    // The reviewed catalog groups basic blocks first; that order is also the keyboard traversal order.
     expect(items.map((item) => item.key)).toEqual([
+      'paragraph',
       'heading',
       'heading_2',
       'heading_3',
+      'bullet_list',
+      'numbered_list',
+      'check_list',
       'quote',
       'callout',
-      'numbered_list',
-      'bullet_list',
-      'check_list',
-      'paragraph',
       'code_block',
       'divider',
     ]);

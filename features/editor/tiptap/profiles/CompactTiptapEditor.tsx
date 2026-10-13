@@ -1,10 +1,12 @@
 'use client';
 
+import type { ClosedVisualProps } from '@/components/core/visual-contract';
 import { memo, useEffect, useMemo, useRef } from 'react';
 import { Extension, type Editor } from '@tiptap/core';
 import { Plugin } from '@tiptap/pm/state';
 import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import { EditorContent, useEditor } from '@tiptap/react';
+import { useLocale, useTranslations } from 'next-intl';
 import type { Awareness } from 'y-protocols/awareness';
 import { useRegisterEditorAuthoringMode, type EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { TranslationStructureLockExtension } from '@/lib/editor/extensions/TranslationStructureLockExtension';
@@ -99,13 +101,16 @@ function createCompactPlaceholderExtension(placeholder: string) {
   });
 }
 
-interface CompactTiptapEditorSharedProps {
+interface CompactTiptapEditorSharedProps extends ClosedVisualProps {
+  accessibleLabel?: string;
+  contentLanguage?: string;
+  id?: string;
   editable?: boolean;
   readOnly?: boolean;
   placeholder?: string;
   userName?: string;
   userColor?: string;
-  className?: string;
+  className?: never;
   onChange?: (editor: Editor) => void;
   structureLocked?: boolean;
 }
@@ -116,6 +121,8 @@ export interface CompactTiptapEditorProps extends CompactTiptapEditorSharedProps
 }
 
 export function CompactTiptapEditor({
+  accessibleLabel,
+  contentLanguage,
   blockRoomController,
   awareness,
   editable = true,
@@ -123,13 +130,26 @@ export function CompactTiptapEditor({
   placeholder = '',
   userName,
   userColor,
-  className,
+  id,
   onChange,
   structureLocked = false,
 }: CompactTiptapEditorProps) {
+  const commonLabels = useTranslations('common.labels');
+  const interfaceLocale = useLocale();
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
   const isEditable = editable && !readOnly;
+  const editorAttributes = useMemo(
+    () => ({
+      class: `editor-content ${editorClasses.content} ${classes.content}`,
+      'data-testid': 'compact-tiptap-editor-content',
+      role: isEditable ? 'textbox' : 'document',
+      'aria-label': accessibleLabel ?? commonLabels('content'),
+      ...(isEditable ? { 'aria-multiline': 'true' } : {}),
+      lang: contentLanguage ?? blockRoomController.locale ?? interfaceLocale,
+    }),
+    [accessibleLabel, blockRoomController, commonLabels, contentLanguage, interfaceLocale, isEditable],
+  );
   const authoringMode = useMemo<EditorAuthoringMode>(
     () => resolveCompactEditorAuthoringMode(isEditable, structureLocked),
     [isEditable, structureLocked],
@@ -154,10 +174,7 @@ export function CompactTiptapEditor({
       shouldRerenderOnTransaction: false,
       onUpdate: ({ editor: updatedEditor }) => onChangeRef.current?.(updatedEditor),
       editorProps: {
-        attributes: {
-          class: `editor-content ${editorClasses.content} ${classes.content}`,
-          'data-testid': 'compact-tiptap-editor-content',
-        },
+        attributes: editorAttributes,
       },
     },
     [extensions],
@@ -173,7 +190,8 @@ export function CompactTiptapEditor({
 
   useEffect(() => {
     editor?.setEditable(isEditable);
-  }, [editor, isEditable]);
+    editor?.setOptions({ editorProps: { ...editor.options.editorProps, attributes: editorAttributes } });
+  }, [editor, editorAttributes, isEditable]);
 
   useEffect(() => {
     if (!userName || !userColor) {
@@ -184,7 +202,9 @@ export function CompactTiptapEditor({
 
   return (
     <div
-      className={[editorClasses.editor, 'tiptap-editor', className].filter(Boolean).join(' ')}
+      id={id}
+      className={`${editorClasses.editor} ${classes.frame} tiptap-editor`}
+      data-editor-readonly={!isEditable || undefined}
       data-editor-engine="tiptap"
       data-profile="compact"
     >

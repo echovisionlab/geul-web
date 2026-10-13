@@ -2,6 +2,7 @@
 
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { VersionContributor, VersionInfo } from '@/lib/types/version-history';
 import type { VersionHistoryDrawerViewProps } from './ui/VersionHistoryDrawerView';
@@ -35,7 +36,8 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ refresh: routerRefreshMock }),
 }));
 
-vi.mock('@tanstack/react-query', () => ({
+vi.mock('@tanstack/react-query', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@tanstack/react-query')>()),
   useQueryClient: () => ({ invalidateQueries: queryInvalidateMock }),
 }));
 
@@ -51,7 +53,7 @@ vi.mock('@/lib/client/version-history', () => ({
   restoreVersionRequest: restoreVersionRequestMock,
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: { show: notificationShowMock },
 }));
 
@@ -112,6 +114,7 @@ const versions: VersionInfo[] = [
 
 let container: HTMLDivElement;
 let root: Root;
+let queryClient: QueryClient;
 
 function currentViewProps() {
   const props = getViewProps();
@@ -128,22 +131,30 @@ function renderController(
   entityType: 'post' | 'page' | 'work' = 'work',
 ) {
   root.render(
-    <VersionHistoryDrawer
-      entityType={entityType}
-      entityId={`${entityType}-1`}
-      opened={opened}
-      onClose={callbacks.onClose}
-      currentSourceLocale="en"
-      canRestore={canRestore}
-      onRestored={callbacks.onRestored}
-    />,
+    <QueryClientProvider client={queryClient}>
+      <VersionHistoryDrawer
+        entityType={entityType}
+        entityId={`${entityType}-1`}
+        opened={opened}
+        onClose={callbacks.onClose}
+        currentSourceLocale="en"
+        canRestore={canRestore}
+        onRestored={callbacks.onRestored}
+      />
+    </QueryClientProvider>,
   );
+}
+
+async function renderSettledController(...args: Parameters<typeof renderController>) {
+  await act(async () => renderController(...args));
+  await act(async () => vi.waitFor(() => expect(currentViewProps().loading).toBe(false)));
 }
 
 beforeEach(() => {
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
+  queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
   setViewProps(null);
   listVersionsRequestMock.mockResolvedValue({ versions });
   restoreVersionRequestMock.mockResolvedValue({ success: true });
@@ -152,6 +163,7 @@ beforeEach(() => {
 
 afterEach(() => {
   act(() => root.unmount());
+  queryClient.clear();
   container.remove();
   setViewProps(null);
   vi.clearAllMocks();
@@ -164,16 +176,17 @@ describe('VersionHistoryDrawer controller', () => {
     act(() => renderController(false, callbacks));
     expect(listVersionsRequestMock).not.toHaveBeenCalled();
 
-    await act(async () => renderController(true, callbacks));
+    await renderSettledController(true, callbacks);
 
-    expect(listVersionsRequestMock).toHaveBeenCalledWith('work', 'work-1');
+    expect(listVersionsRequestMock).toHaveBeenCalledWith('work', 'work-1', 1, 20, expect.any(AbortSignal));
     expect(currentViewProps().versions).toEqual([
       {
         id: 'version-2',
         version: 2,
         versionLabel: 'v2',
         title: 'common.states.untitledPlain',
-        sourceLocaleLabel: 'common.labels.locale: en',
+        sourceLocaleLabel: 'common.labels.locale: EN',
+        createdAt: '2026-07-20T01:00:00.000Z',
         createdAtLabel: 'relative:2026-07-20T01:00:00.000Z:en',
         createdAtTooltip: 'absolute:2026-07-20T01:00:00.000Z:en',
         contributorLabel: 'by Mina and Jules',
@@ -192,20 +205,20 @@ describe('VersionHistoryDrawer controller', () => {
       versions: [{ ...versions[0], contributors: [] }],
     });
 
-    await act(async () => renderController(true, { onClose: vi.fn(), onRestored: vi.fn() }));
+    await renderSettledController(true, { onClose: vi.fn(), onRestored: vi.fn() });
 
     expect(currentViewProps().versions[0]?.contributorLabel).toBe('System or earlier version');
   });
 
   it('restores the selected service version, closes both surfaces, and reports completion', async () => {
     const callbacks = { onClose: vi.fn(), onRestored: vi.fn() };
-    await act(async () => renderController(true, callbacks));
+    await renderSettledController(true, callbacks);
 
     act(() => currentViewProps().onSelectVersion('version-2'));
     expect(currentViewProps().selectedVersionId).toBe('version-2');
     expect(currentViewProps().restoreConfirmationOpened).toBe(true);
     expect(currentViewProps().labels.restoreBody).toBe(
-      'Same-locale restore v2 (en) stales translations without regeneration.',
+      'Same-locale restore v2 (EN) stales translations without regeneration.',
     );
 
     await act(async () => currentViewProps().onRestore());
@@ -213,24 +226,25 @@ describe('VersionHistoryDrawer controller', () => {
     expect(restoreVersionRequestMock).toHaveBeenCalledWith('work', 'work-1', 'version-2');
     expect(notificationShowMock).toHaveBeenCalledWith({
       message: 'Restored v2',
-      color: 'green',
+      tone: 'positive',
     });
     expect(currentViewProps().restoreConfirmationOpened).toBe(false);
     expect(callbacks.onClose).toHaveBeenCalledOnce();
     expect(callbacks.onRestored).toHaveBeenCalledOnce();
     expect(queryInvalidateMock).toHaveBeenCalledWith({ queryKey: ['entity-translations', 'work', 'work-1'] });
     expect(queryInvalidateMock).toHaveBeenCalledWith({ queryKey: ['entity-translation-jobs', 'work', 'work-1'] });
+    expect(queryInvalidateMock).toHaveBeenCalledWith({ queryKey: ['version-history', 'work', 'work-1'] });
     expect(routerRefreshMock).toHaveBeenCalledOnce();
   });
 
   it.each(['post', 'page', 'work'] as const)(
     'uses the same-locale source-only restore warning for %s',
     async (entityType) => {
-      await act(async () => renderController(true, { onClose: vi.fn(), onRestored: vi.fn() }, true, entityType));
+      await renderSettledController(true, { onClose: vi.fn(), onRestored: vi.fn() }, true, entityType);
 
       act(() => currentViewProps().onSelectVersion('version-2'));
       expect(currentViewProps().labels.restoreBody).toBe(
-        'Same-locale restore v2 (en) stales translations without regeneration.',
+        'Same-locale restore v2 (EN) stales translations without regeneration.',
       );
     },
   );
@@ -239,24 +253,24 @@ describe('VersionHistoryDrawer controller', () => {
     listVersionsRequestMock.mockResolvedValue({
       versions: [{ ...versions[0], sourceLocale: 'ko' }],
     });
-    await act(async () => renderController(true, { onClose: vi.fn(), onRestored: vi.fn() }));
+    await renderSettledController(true, { onClose: vi.fn(), onRestored: vi.fn() });
 
     act(() => currentViewProps().onSelectVersion('version-2'));
 
     expect(currentViewProps().labels.restoreBody).toBe(
-      'Cross-locale restore v2: en to ko deletes targets without fan-out.',
+      'Cross-locale restore v2: EN to KO deletes targets without fan-out.',
     );
   });
 
   it('keeps the restore flow open and reports service errors', async () => {
     const callbacks = { onClose: vi.fn(), onRestored: vi.fn() };
     restoreVersionRequestMock.mockResolvedValue({ error: 'raw provider secret: abc123' });
-    await act(async () => renderController(true, callbacks));
+    await renderSettledController(true, callbacks);
     act(() => currentViewProps().onSelectVersion('version-2'));
 
     await act(async () => currentViewProps().onRestore());
 
-    expect(notificationShowMock).toHaveBeenCalledWith({ message: 'Failed to restore source document', color: 'red' });
+    expect(notificationShowMock).toHaveBeenCalledWith({ message: 'Failed to restore source document', tone: 'danger' });
     expect(currentViewProps().restoreConfirmationOpened).toBe(true);
     expect(callbacks.onClose).not.toHaveBeenCalled();
     expect(callbacks.onRestored).not.toHaveBeenCalled();
@@ -267,19 +281,19 @@ describe('VersionHistoryDrawer controller', () => {
   it('keeps the drawer and confirmation open when the restore request rejects', async () => {
     restoreVersionRequestMock.mockRejectedValue(new Error('upstream provider secret'));
     const callbacks = { onClose: vi.fn(), onRestored: vi.fn() };
-    await act(async () => renderController(true, callbacks));
+    await renderSettledController(true, callbacks);
     act(() => currentViewProps().onSelectVersion('version-2'));
 
     await act(async () => currentViewProps().onRestore());
 
-    expect(notificationShowMock).toHaveBeenCalledWith({ message: 'Failed to restore source document', color: 'red' });
+    expect(notificationShowMock).toHaveBeenCalledWith({ message: 'Failed to restore source document', tone: 'danger' });
     expect(currentViewProps().restoreConfirmationOpened).toBe(true);
     expect(callbacks.onClose).not.toHaveBeenCalled();
   });
 
   it('keeps version history readable but rejects restore intent while locked', async () => {
     const callbacks = { onClose: vi.fn(), onRestored: vi.fn() };
-    await act(async () => renderController(true, callbacks, false));
+    await renderSettledController(true, callbacks, false);
 
     expect(currentViewProps().versions).toHaveLength(1);
     expect(currentViewProps().canRestore).toBe(false);
@@ -289,5 +303,46 @@ describe('VersionHistoryDrawer controller', () => {
     expect(currentViewProps().selectedVersionId).toBeNull();
     expect(currentViewProps().restoreConfirmationOpened).toBe(false);
     expect(restoreVersionRequestMock).not.toHaveBeenCalled();
+  });
+
+  it('connects continuation intent to the real paginated query without losing loaded versions', async () => {
+    const first = Array.from({ length: 20 }, (_, index) => ({
+      ...versions[0]!,
+      id: `version-${41 - index}`,
+      version: 41 - index,
+    }));
+    const second = Array.from({ length: 20 }, (_, index) => ({
+      ...versions[0]!,
+      id: `version-${21 - index}`,
+      version: 21 - index,
+    }));
+    listVersionsRequestMock
+      .mockResolvedValueOnce({ versions: first, total: 41 })
+      .mockResolvedValueOnce({ versions: second, total: 41 })
+      .mockResolvedValueOnce({ versions: [{ ...versions[0]!, id: 'version-1', version: 1 }], total: 41 });
+    await renderSettledController(true, { onClose: vi.fn(), onRestored: vi.fn() });
+    expect(currentViewProps().versions).toHaveLength(20);
+    expect(currentViewProps().pagination.nextPage).toBe(2);
+    await act(async () => currentViewProps().pagination.onLoad());
+    await act(async () => vi.waitFor(() => expect(currentViewProps().versions).toHaveLength(40)));
+    expect(currentViewProps().versions[0]?.id).toBe('version-41');
+    expect(currentViewProps().pagination.nextPage).toBe(3);
+    await act(async () => currentViewProps().pagination.onLoad());
+    await act(async () => vi.waitFor(() => expect(currentViewProps().versions).toHaveLength(41)));
+    expect(currentViewProps().pagination.nextPage).toBeNull();
+    expect(listVersionsRequestMock.mock.calls.map((call) => call[2])).toEqual([1, 2, 3]);
+  });
+
+  it('bounds a list failure and allows an explicit initial retry', async () => {
+    listVersionsRequestMock
+      .mockResolvedValueOnce({ error: 'upstream provider secret' })
+      .mockResolvedValueOnce({ versions, total: 1 });
+    await renderSettledController(true, { onClose: vi.fn(), onRestored: vi.fn() });
+    expect(currentViewProps().error).toBe('versionHistory.loadFailed');
+    expect(currentViewProps().versions).toEqual([]);
+    expect(notificationShowMock).not.toHaveBeenCalled();
+    await act(async () => currentViewProps().onRetry());
+    await act(async () => vi.waitFor(() => expect(currentViewProps().versions).toHaveLength(1)));
+    expect(currentViewProps().error).toBeNull();
   });
 });

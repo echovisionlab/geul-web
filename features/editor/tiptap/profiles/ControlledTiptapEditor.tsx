@@ -2,7 +2,8 @@
 
 import { type Editor, type Extensions, type JSONContent } from '@tiptap/core';
 import { EditorContent, useEditor } from '@tiptap/react';
-import { memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 
 const IsolatedEditorContent = memo(({ editor }: { editor: Editor | null }) => (
   <EditorContent editor={editor} className="tiptap-editor__surface" />
@@ -10,6 +11,12 @@ const IsolatedEditorContent = memo(({ editor }: { editor: Editor | null }) => (
 IsolatedEditorContent.displayName = 'IsolatedEditorContent';
 
 interface ControlledTiptapEditorProps {
+  accessibleLabel?: string;
+  /** Existing descriptive content owned by the surrounding field. */
+  accessibleDescriptionId?: string;
+  /** Identity of the actual editable surface, distinct from its layout wrapper. */
+  contentId?: string;
+  contentLanguage?: string;
   value: string;
   extensions: Extensions;
   parseValue: (value: string) => JSONContent;
@@ -25,6 +32,10 @@ interface ControlledTiptapEditorProps {
 
 /** Shared controlled-value lifecycle for small standalone Tiptap fields. */
 export function ControlledTiptapEditor({
+  accessibleLabel,
+  accessibleDescriptionId,
+  contentId,
+  contentLanguage,
   value,
   extensions,
   parseValue,
@@ -37,6 +48,30 @@ export function ControlledTiptapEditor({
   onEditorReady,
   profile,
 }: ControlledTiptapEditorProps) {
+  const interfaceLocale = useLocale();
+  const labels = useTranslations('common.labels');
+  const editorAttributes = useMemo(
+    () => ({
+      class: contentClassName ?? '',
+      ...(contentTestId ? { 'data-testid': contentTestId } : {}),
+      ...(contentId ? { id: contentId } : {}),
+      role: 'textbox',
+      'aria-label': accessibleLabel ?? labels('content'),
+      ...(accessibleDescriptionId ? { 'aria-describedby': accessibleDescriptionId } : {}),
+      'aria-multiline': 'true',
+      lang: contentLanguage ?? interfaceLocale,
+    }),
+    [
+      accessibleDescriptionId,
+      accessibleLabel,
+      contentClassName,
+      contentId,
+      contentLanguage,
+      contentTestId,
+      interfaceLocale,
+      labels,
+    ],
+  );
   const valueRef = useRef(value);
   valueRef.current = value;
   const applyingExternalValue = useRef(false);
@@ -49,10 +84,7 @@ export function ControlledTiptapEditor({
       immediatelyRender: false,
       shouldRerenderOnTransaction: false,
       editorProps: {
-        attributes: {
-          class: contentClassName ?? '',
-          ...(contentTestId ? { 'data-testid': contentTestId } : {}),
-        },
+        attributes: editorAttributes,
       },
       onUpdate: ({ editor: updatedEditor }) => {
         if (applyingExternalValue.current) {
@@ -66,6 +98,12 @@ export function ControlledTiptapEditor({
     },
     [extensions],
   );
+
+  useEffect(() => {
+    if (editor && !editor.isDestroyed) {
+      editor.setOptions({ editorProps: { ...editor.options.editorProps, attributes: editorAttributes } });
+    }
+  }, [editor, editorAttributes]);
 
   useEffect(() => {
     onEditorReady?.(editor);

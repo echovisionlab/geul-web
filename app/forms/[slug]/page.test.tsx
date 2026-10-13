@@ -16,6 +16,10 @@ const mocks = vi.hoisted(() => ({
 vi.mock('next/navigation', () => ({ redirect: mocks.redirect, notFound: mocks.notFound }));
 vi.mock('@/features/site/PageLoader', () => ({ PageLoader: vi.fn(() => null) }));
 vi.mock('@/features/form/PublicFormView', () => ({ PublicFormView: vi.fn(() => null) }));
+// Render the lazily loaded edit route synchronously for static markup.
+vi.mock('@/features/form/LazyFormEditRoute', async () => ({
+  LazyFormEditRoute: (await import('@/features/form/FormEditRoute')).FormEditRoute,
+}));
 vi.mock('@/features/form/FormEditor/FormEditor', () => ({ FormEditor: () => <div>form-editor</div> }));
 vi.mock('@/features/translation/EntityTranslationsPanel', () => ({ EntityTranslationsPanel: vi.fn(() => null) }));
 vi.mock('@/lib/actions/form', () => ({ checkFormAccessibilityBySlugAction: vi.fn() }));

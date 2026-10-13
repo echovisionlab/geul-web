@@ -38,6 +38,8 @@ describe('EmailTemplateEditor', () => {
       root?.render(
         <EmailTemplateEditor
           templateId="template-1"
+          accessibleLabel="Email content"
+          contentLanguage="ko"
           provider={{ awareness: {} } as never}
           blockRoomController={controller as never}
         />,
@@ -46,6 +48,8 @@ describe('EmailTemplateEditor', () => {
 
     expect(container.querySelector('[data-testid="email-tiptap-editor"]')).not.toBeNull();
     expect(profileProps[0]?.blockRoomController).toBe(controller);
+    expect(profileProps[0]?.accessibleLabel).toBe('Email content');
+    expect(profileProps[0]?.contentLanguage).toBe('ko');
     expect(profileProps[0]).not.toHaveProperty('fragment');
     expect(profileProps[0]?.availableVariables).toBeUndefined();
   });

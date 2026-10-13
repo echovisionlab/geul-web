@@ -1,16 +1,28 @@
 'use client';
+import { ConfirmationDialog } from '@/features/confirmation';
 
+import { Text as DsText } from '@/components/core/Typography';
+import { LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { TextInput } from '@/components/core/Input';
-import { ConfirmModal, FormModal } from '@/components/core/Modal';
+import { FormModal } from '@/components/core/Modal';
 import { createUserTagAction, deleteUserTagAction } from '@/lib/actions/user-tag';
 import { useUserTagModal } from './UserTagModalContext';
 
-export function UserTagModals() {
+export interface UserTagModalsProps {
+  createAction?: typeof createUserTagAction;
+  deleteAction?: typeof deleteUserTagAction;
+  refresh?: () => void;
+}
+export function UserTagModals({
+  createAction = createUserTagAction,
+  deleteAction = deleteUserTagAction,
+  refresh,
+}: UserTagModalsProps = {}) {
   const tCommon = useTranslations('common');
   const tPage = useTranslations('adminList.userTags');
   const router = useRouter();
@@ -29,14 +41,14 @@ export function UserTagModals() {
   const handleCreate = async () => {
     setCreateLoading(true);
     try {
-      const result = await createUserTagAction(createName);
+      const result = await createAction(createName);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tCommon('notifications.tagCreated'), color: 'green' });
+      notifications.show({ message: tCommon('notifications.tagCreated'), tone: 'positive' });
       closeCreate();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setCreateLoading(false);
     }
@@ -48,14 +60,14 @@ export function UserTagModals() {
     }
     setDeleteLoading(true);
     try {
-      const result = await deleteUserTagAction(deletingTag.id);
+      const result = await deleteAction(deletingTag.id);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tCommon('notifications.tagDeleted'), color: 'red' });
+      notifications.show({ message: tCommon('notifications.tagDeleted'), tone: 'positive' });
       closeDelete();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setDeleteLoading(false);
     }
@@ -83,18 +95,21 @@ export function UserTagModals() {
         />
       </FormModal>
 
-      <ConfirmModal
+      <ConfirmationDialog
+        intent="delete"
         opened={!!deletingTag}
         onClose={closeDelete}
         onConfirm={handleDelete}
         title={tPage('deleteTitle')}
         message={
           <>
-            <Text>{tPage('deleteConfirm', { name: deletingTag?.name ?? '' })}</Text>
+            <DsText>{tPage('deleteConfirm', { name: deletingTag?.name ?? '' })}</DsText>
             {deletingTag && deletingTag.user_count > 0 && (
-              <Text size="sm" c="orange" mt="xs">
-                {tPage('deleteAssignedWarning', { count: deletingTag.user_count })}
-              </Text>
+              <DsLayoutInset blockStart="xs">
+                <DsText size="sm" tone="warning">
+                  {tPage('deleteAssignedWarning', { count: deletingTag.user_count })}
+                </DsText>
+              </DsLayoutInset>
             )}
           </>
         }

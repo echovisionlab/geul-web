@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { deleteArtistAvatarAction, setArtistImageAction } from '@/lib/actions/artist';
 import { useUpload } from '@/lib/hooks/useUpload';
 import { UploadType } from '@/lib/types/upload/model';
@@ -91,7 +91,7 @@ export function ArtistImageUploader({
         } else {
           const result = await setImage.mutateAsync({ artistId, fileId });
           if (result.error) {
-            notifications.show({ message: result.error, color: 'red' });
+            notifications.show({ message: result.error, tone: 'danger' });
             throw new Error(result.error);
           }
         }
@@ -111,7 +111,7 @@ export function ArtistImageUploader({
     }
     const result = await deleteAvatar.mutateAsync({ artistId });
     if (result.error) {
-      notifications.show({ message: result.error, color: 'red' });
+      notifications.show({ message: result.error, tone: 'danger' });
       throw new Error(result.error);
     }
     return result;

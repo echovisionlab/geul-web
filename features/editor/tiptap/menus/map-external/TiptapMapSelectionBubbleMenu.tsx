@@ -60,14 +60,14 @@ export function TiptapMapSelectionBubbleMenu({
   const shouldShow = useCallback(
     ({ editor: current }: { editor: Editor }) => {
       const selectedBlockId = resolveSelectedTiptapMapBlockId(current);
-      return !menu.isDismissed && current.isEditable && Boolean(selectedBlockId && registry?.get(selectedBlockId));
+      return !menu.isSuppressed && current.isEditable && Boolean(selectedBlockId && registry?.get(selectedBlockId));
     },
-    [menu.isDismissed, registry],
+    [menu.isSuppressed, registry],
   );
 
   const blockId = resolveSelectedTiptapMapBlockId(editor);
   const binding = blockId && registry ? registry.get(blockId) : undefined;
-  if (menu.isDismissed || !editor.isEditable || !blockId || !binding) {
+  if (menu.isSuppressed || !editor.isEditable || !blockId || !binding) {
     return null;
   }
 

@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Stack } from '@mantine/core';
+
 import { ContentModal } from '@/components/core/Modal';
 import { Tabs } from '@/components/core/Tabs';
-import { EditorFileLibraryPicker } from '@/features/editor/components/EditorFileLibraryPicker';
+import {
+  EditorFileLibraryPicker,
+  type EditorFileLibraryDataSource,
+} from '@/features/editor/components/EditorFileLibraryPicker';
 import { EditorFileInsertPanel } from '@/features/editor/components/EditorFileInsertPanel';
 import { applyEditorLibraryFileSelection } from '@/features/editor/lib/editor-library-file-selection';
 import { getEditorMediaIngestDialogId } from '@/features/editor/lib/media-test-ids';
@@ -13,7 +16,7 @@ import { EditorMediaCommandPort, EditorMediaBlockType, SelectedFileBlock } from 
 
 export type MediaIngestDialogCloseReason = 'cancelled' | 'committed';
 
-interface MediaIngestDialogProps {
+export interface MediaIngestDialogProps {
   opened: boolean;
   editor: EditorMediaCommandPort;
   selectedBlock: SelectedFileBlock;
@@ -21,6 +24,7 @@ interface MediaIngestDialogProps {
   onClose: (reason: MediaIngestDialogCloseReason) => void;
   mode?: 'add' | 'replace' | 'auto';
   onUploadFiles?: (files: File[]) => void;
+  libraryDataSource?: EditorFileLibraryDataSource;
   onSelectLibraryFiles?: (files: Parameters<typeof applyEditorLibraryFileSelection>[3][]) => void;
 }
 
@@ -37,6 +41,7 @@ export function MediaIngestDialog({
   mode = 'auto',
   onUploadFiles,
   onSelectLibraryFiles,
+  libraryDataSource,
 }: MediaIngestDialogProps) {
   const tMedia = useTranslations('editorCommon.media');
   const tCommonActions = useTranslations('common.actions');
@@ -57,7 +62,8 @@ export function MediaIngestDialog({
       : tMedia('ingestDialog.replaceItem', { item: itemLabel });
   const libraryPicker = (
     <EditorFileLibraryPicker
-      allowMultiple={resolvedMode === 'add'}
+      dataSource={libraryDataSource}
+      allowMultiple={resolvedMode === 'add' && Boolean(onSelectLibraryFiles)}
       onSelect={(files) => {
         onClose('committed');
         if (onSelectLibraryFiles) {
@@ -74,7 +80,8 @@ export function MediaIngestDialog({
   const uploadPanel = (
     <EditorFileInsertPanel
       multiple={resolvedMode === 'add'}
-      showLibraryAction
+      showLibraryAction={false}
+      showDescription={false}
       onFilesSelected={(files) => {
         onClose('committed');
         onUploadFiles(files);
@@ -89,21 +96,25 @@ export function MediaIngestDialog({
       onClose={() => onClose('cancelled')}
       title={title}
       centered
-      size="workspace"
+      size={libraryOpened ? 'wide' : 'compact'}
+      density="compact"
       closeLabel={tCommonActions('close')}
     >
       <Tabs
         value={libraryOpened ? 'library' : 'upload'}
         onChange={(value) => setLibraryOpened(value === 'library')}
-        style={{ display: 'flex', flex: '1 1 auto', flexDirection: 'column', minHeight: 0 }}
+        keepMounted={false}
       >
-        <Tabs.List>
+        <Tabs.List aria-label={title}>
           <Tabs.Tab value="upload">{tMedia('ingestDialog.backToUpload')}</Tabs.Tab>
           <Tabs.Tab value="library">{tMedia('ingestDialog.openLibrary')}</Tabs.Tab>
         </Tabs.List>
-        <Stack gap="md" style={{ flex: '1 1 auto', minHeight: 0, paddingTop: 'var(--mantine-spacing-md)' }}>
-          {libraryOpened ? libraryPicker : uploadPanel}
-        </Stack>
+        <Tabs.Panel value="upload" paddingTop="sm">
+          {uploadPanel}
+        </Tabs.Panel>
+        <Tabs.Panel value="library" paddingTop="sm">
+          {libraryPicker}
+        </Tabs.Panel>
       </Tabs>
     </ContentModal>
   );

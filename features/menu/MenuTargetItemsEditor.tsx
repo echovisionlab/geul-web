@@ -1,10 +1,13 @@
 'use client';
 
-import { Stack, Text } from '@mantine/core';
+import { HierarchyIndent } from '@/components/core/Hierarchy';
+
+import { Text as DsText } from '@/components/core/Typography';
+import { LayoutStack as DsLayoutStack, LayoutInset as DsLayoutInset, LayoutInline } from '@/components/core/Layout';
+
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/core/Button';
 import { TextInput } from '@/components/core/Input';
-import { SectionCard } from '@/components/core/Section';
 import { isMenuItemLabelApplicableToLocale } from '@/features/translation/menu-translation-model';
 import type { MenuItem } from './menu-editor-model';
 
@@ -25,10 +28,10 @@ export function MenuTargetItemsEditor({
 }) {
   const t = useTranslations('translationPanelMenu.previewModal.fields');
   if (items.length === 0) {
-    return <Text c="dimmed">-</Text>;
+    return <DsText tone="secondary">-</DsText>;
   }
   return (
-    <Stack gap="sm">
+    <DsLayoutStack gap="xxs">
       {items.map((item) => (
         <TargetItem
           key={item.id}
@@ -41,7 +44,7 @@ export function MenuTargetItemsEditor({
           label={t('localizedLabelForLocale', { locale })}
         />
       ))}
-    </Stack>
+    </DsLayoutStack>
   );
 }
 
@@ -66,41 +69,44 @@ function TargetItem({
   const applicable = isMenuItemLabelApplicableToLocale(item, locale);
   const explicit = Object.hasOwn(requestedLabels, item.id);
   return (
-    <SectionCard p="sm">
-      <Stack gap="xs">
+    <DsLayoutInset block="xxs">
+      <DsLayoutStack gap="xs">
         <TextInput
           label={label}
           value={item.label}
           onChange={(event) => onChange(item.id, event.currentTarget.value)}
           disabled={!editable || !applicable}
         />
-        <Button
-          size="xs"
-          emphasis="low"
-          tone="neutral"
-          onClick={() => onUseSource(item.id)}
-          disabled={!editable || !applicable || !explicit}
-          style={{ alignSelf: 'flex-end' }}
-        >
-          {tCommonLabels('source')}
-        </Button>
+        <LayoutInline justify="end" gap="none">
+          <Button
+            size="xs"
+            emphasis="low"
+            tone="neutral"
+            onClick={() => onUseSource(item.id)}
+            disabled={!editable || !applicable || !explicit}
+          >
+            {tCommonLabels('source')}
+          </Button>
+        </LayoutInline>
         {item.children?.length ? (
-          <Stack gap="xs" pl="md">
-            {item.children.map((child) => (
-              <TargetItem
-                key={child.id}
-                item={child}
-                locale={locale}
-                requestedLabels={requestedLabels}
-                editable={editable}
-                onChange={onChange}
-                onUseSource={onUseSource}
-                label={label}
-              />
-            ))}
-          </Stack>
+          <HierarchyIndent>
+            <DsLayoutStack gap="xs">
+              {item.children.map((child) => (
+                <TargetItem
+                  key={child.id}
+                  item={child}
+                  locale={locale}
+                  requestedLabels={requestedLabels}
+                  editable={editable}
+                  onChange={onChange}
+                  onUseSource={onUseSource}
+                  label={label}
+                />
+              ))}
+            </DsLayoutStack>
+          </HierarchyIndent>
         ) : null}
-      </Stack>
-    </SectionCard>
+      </DsLayoutStack>
+    </DsLayoutInset>
   );
 }

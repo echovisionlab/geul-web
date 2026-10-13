@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { act } from 'react';
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_MAP_CONFIG } from '@/lib/types/map/model';
@@ -31,10 +32,6 @@ vi.mock('@tanstack/react-query', () => ({
   }),
 }));
 
-vi.mock('leva', () => ({
-  Leva: () => <button data-testid="copy-value" title="Idle" type="button" />,
-}));
-
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string, values?: Record<string, string>) => {
     if (key === 'copyValueTitle') {
@@ -45,14 +42,8 @@ vi.mock('next-intl', () => ({
   },
 }));
 
-vi.mock('@mantine/core', () => ({
-  Box: ({ children, h: _height, pos: _position, ...props }: any) => <div {...props}>{children}</div>,
-  Alert: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  useComputedColorScheme: () => 'light',
-}));
-
-vi.mock('@/features/map/MapLevaControls', () => ({
-  useMapLevaControls: () => undefined,
+vi.mock('@/features/map/MapParameterControls', () => ({
+  useMapParameterControls: () => ({ model: { Zoom: { kind: 'number', value: 12 } } }),
 }));
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -79,40 +70,21 @@ afterEach(() => {
 
 function renderEditor() {
   act(() => {
-    root?.render(<MapLibreMapEditor config={DEFAULT_MAP_CONFIG} onConfigChange={vi.fn()} places={[]} />);
+    root?.render(
+      <DesignSystemProvider>
+        <MapLibreMapEditor
+          config={DEFAULT_MAP_CONFIG}
+          onConfigChange={vi.fn()}
+          places={[]}
+          settingsPanel={{ collapsed: false }}
+        />
+      </DesignSystemProvider>,
+    );
   });
 
-  const target = container?.querySelector<HTMLElement>('[data-testid="copy-value"]');
+  const target = container?.querySelector<HTMLElement>('button[aria-label*="Zoom"]');
   expect(target).toBeTruthy();
   return target as HTMLElement;
-}
-
-async function changeTitleAndCollectMutations(target: HTMLElement) {
-  const mutations: MutationRecord[] = [];
-  let sentinelApplied = false;
-  const observer = new MutationObserver((records) => {
-    mutations.push(...records);
-
-    if (!sentinelApplied && mutations.length >= 4) {
-      sentinelApplied = true;
-      target.setAttribute('title', 'Mutation loop stopped');
-    }
-  });
-  observer.observe(target, {
-    attributes: true,
-    attributeFilter: ['title'],
-  });
-
-  target.setAttribute('title', 'Click to copy Zoom value');
-
-  await act(async () => {
-    for (let index = 0; index < 8; index += 1) {
-      await Promise.resolve();
-    }
-  });
-
-  observer.disconnect();
-  return mutations;
 }
 
 describe('MapLibreMapEditor interactions', () => {
@@ -192,12 +164,14 @@ describe('MapLibreMapEditor interactions', () => {
   ])('$name', ({ config, expected, interactive }) => {
     act(() => {
       root?.render(
-        <MapLibreMapEditor
-          config={{ ...DEFAULT_MAP_CONFIG, ...config }}
-          interactive={interactive}
-          onConfigChange={vi.fn()}
-          places={[]}
-        />,
+        <DesignSystemProvider>
+          <MapLibreMapEditor
+            config={{ ...DEFAULT_MAP_CONFIG, ...config }}
+            interactive={interactive}
+            onConfigChange={vi.fn()}
+            places={[]}
+          />
+        </DesignSystemProvider>,
       );
     });
 
@@ -205,23 +179,10 @@ describe('MapLibreMapEditor interactions', () => {
   });
 });
 
-describe('MapLibreMapEditor Leva title localization', () => {
-  it('does not rewrite an English title when its translation is identical', async () => {
+describe('MapLibreMapEditor parameter copy localization', () => {
+  it.each(['en', 'ko'])('projects localized copy actions in %s', (locale) => {
+    mocks.locale = locale;
     const target = renderEditor();
-
-    const mutations = await changeTitleAndCollectMutations(target);
-
-    expect(target.title).toBe('Click to copy Zoom value');
-    expect(mutations).toHaveLength(1);
-  });
-
-  it('localizes a newly added English title exactly once in Korean', async () => {
-    mocks.locale = 'ko';
-    const target = renderEditor();
-
-    const mutations = await changeTitleAndCollectMutations(target);
-
-    expect(target.title).toBe('Zoom 값 복사');
-    expect(mutations).toHaveLength(2);
+    expect(target.getAttribute('aria-label')).toBe(locale === 'ko' ? 'Zoom 값 복사' : 'Click to copy Zoom value');
   });
 });

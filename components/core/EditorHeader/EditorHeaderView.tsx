@@ -1,8 +1,11 @@
 'use client';
+import { breakpointQuery } from '../Layout/breakpoints';
+import { SupportingText, Heading } from '../Typography';
+import { LayoutInset as DsLayoutInset, LayoutInline as DsLayoutInline, LayoutStack as DsLayoutStack } from '../Layout';
 
-import { useEffect, useState, type ReactNode } from 'react';
-import { IconArrowLeft, IconChevronDown, IconTrash } from '@tabler/icons-react';
-import { Box, Flex, Group, Stack, Text } from '@mantine/core';
+import { useEffect, useId, useState, type ReactNode } from 'react';
+import { IconArrowLeft, IconTrash } from '@tabler/icons-react';
+import { VisuallyHidden } from 'react-aria-components';
 import { useMediaQuery } from '@mantine/hooks';
 import { LabelBadge } from '../Badge';
 import { Button, type ControlEmphasis, type ControlTone } from '../Button';
@@ -12,14 +15,16 @@ import { TextInput } from '../Input';
 import { ConfirmModal } from '../Modal';
 import { Tooltip } from '../Tooltip';
 import { CollabSyncStatusIndicator } from './CollabSyncStatusIndicator';
-
+import { ActionRowSizeProvider, HeaderDensityProvider } from '../control-context';
+import { ToolbarSurface } from '../Section/ToolbarSurface';
+import { ToolbarCommand } from '../Section/ToolbarCommand';
+import classes from './EditorHeaderView.module.css';
 export interface StatusOption<TStatus extends string> {
   value: TStatus;
   label: string;
   actionLabel: string;
   tone: ControlTone;
 }
-
 export interface EditorHeaderCollabAction {
   label: string;
   onClick: () => void;
@@ -27,7 +32,6 @@ export interface EditorHeaderCollabAction {
   tone?: ControlTone;
   disabled?: boolean;
 }
-
 export interface EditorHeaderActionItem {
   key: string;
   label: string;
@@ -41,7 +45,6 @@ export interface EditorHeaderActionItem {
   tone?: ControlTone;
   emphasis?: ControlEmphasis;
 }
-
 export interface EditorHeaderProps<TStatus extends string = string> {
   title: string;
   onTitleChange?: (value: string) => void;
@@ -57,7 +60,6 @@ export interface EditorHeaderProps<TStatus extends string = string> {
   actionItems?: EditorHeaderActionItem[];
   actions?: ReactNode;
   hideBack?: boolean;
-
   // Status - all optional
   status?: TStatus;
   statusOptions?: StatusOption<TStatus>[];
@@ -66,7 +68,6 @@ export interface EditorHeaderProps<TStatus extends string = string> {
   hideStatus?: boolean;
   groupStatusWithCollab?: boolean;
   collabActions?: EditorHeaderCollabAction[];
-
   // Delete - optional
   onDelete?: () => void;
   isDeleting?: boolean;
@@ -77,9 +78,15 @@ export interface EditorHeaderProps<TStatus extends string = string> {
     cancelLabel?: string;
     confirmTone?: ControlTone;
   };
+  renderDeleteConfirmation?: (state: {
+    opened: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+    loading: boolean;
+  }) => ReactNode;
 }
-
 export interface EditorHeaderViewLabels {
+  title: string;
   back: string;
   untitled: string;
   delete: string;
@@ -93,11 +100,9 @@ export interface EditorHeaderViewLabels {
   actions: string;
   syncStatus: string;
 }
-
 export interface EditorHeaderViewProps<TStatus extends string = string> extends EditorHeaderProps<TStatus> {
   labels: EditorHeaderViewLabels;
 }
-
 export function EditorHeaderView<TStatus extends string = string>({
   title,
   onTitleChange,
@@ -115,6 +120,7 @@ export function EditorHeaderView<TStatus extends string = string>({
   isStatusChanging,
   isDeleting,
   deleteConfirmation,
+  renderDeleteConfirmation,
   backTooltip,
   controls,
   actionItems,
@@ -125,10 +131,10 @@ export function EditorHeaderView<TStatus extends string = string>({
   collabActions,
   labels,
 }: EditorHeaderViewProps<TStatus>) {
-  const isMobile = Boolean(useMediaQuery('(max-width: 48em)'));
+  const syncDescriptionId = useId();
+  const isMobile = Boolean(useMediaQuery(breakpointQuery('sm')));
   const [deleteConfirmOpened, setDeleteConfirmOpened] = useState(false);
   const [draftTitle, setDraftTitle] = useState(title);
-
   useEffect(() => {
     setDraftTitle(title);
   }, [title]);
@@ -156,40 +162,39 @@ export function EditorHeaderView<TStatus extends string = string>({
       )}
     </>
   ) : null;
-
   const handleDeleteClick = () => {
     if (!onDelete) {
       return;
     }
-
     if (deleteConfirmation) {
       setDeleteConfirmOpened(true);
       return;
     }
-
     onDelete();
   };
-
   const handleDeleteConfirm = () => {
     if (!onDelete) {
       return;
     }
-
     onDelete();
   };
-
   const titleRow = (
-    <Group flex={1} gap="xs" wrap="nowrap" style={{ minWidth: 0 }}>
+    <DsLayoutInline flexible gap="xs" wrap="nowrap">
       {!hideBack && (
         <Tooltip label={backTooltip || labels.back}>
-          <IconButton emphasis="low" onClick={onBack} aria-label={backTooltip || labels.back} style={{ flexShrink: 0 }}>
-            <IconArrowLeft size={20} />
+          <IconButton emphasis="low" onClick={onBack} aria-label={backTooltip || labels.back}>
+            <IconArrowLeft />
           </IconButton>
         </Tooltip>
       )}
       {onTitleChange ? (
         <TextInput
+          grow
+          appearance="bare"
+          textRole="title"
+          size={isMobile ? 'lg' : 'xl'}
           id={titleInputId}
+          aria-label={labels.title}
           placeholder={titlePlaceholder ?? labels.untitled}
           value={draftTitle}
           onChange={(event) => {
@@ -199,40 +204,55 @@ export function EditorHeaderView<TStatus extends string = string>({
               onTitleChange(value);
             }
           }}
-          variant="unstyled"
-          styles={{
-            root: { flex: 1, minWidth: 0 },
-            input: {
-              margin: 0,
-              padding: '0.25rem 0.5rem',
-              fontSize: isMobile ? '1.25rem' : '1.5rem',
-              fontWeight: 700,
-              lineHeight: 1.2,
-            },
-          }}
           disabled={titleDisabled}
         />
       ) : (
-        <Text
-          component="h1"
-          fw={700}
-          fz={isMobile ? '1.25rem' : '1.5rem'}
-          lh={1.2}
-          m={0}
-          truncate
-          style={{ minWidth: 0 }}
-        >
+        <Heading level={1} scale={isMobile ? 3 : 2} flexible truncate>
           {title || titlePlaceholder || labels.untitled}
-        </Text>
+        </Heading>
       )}
       {inlineMeta ? (
-        <Group gap="xs" wrap="nowrap" ml="auto" style={{ flexShrink: 0 }}>
-          {inlineMeta}
-        </Group>
+        <DsLayoutInline flexible justify="end" gap="none">
+          <DsLayoutInline gap="xs" wrap="nowrap" shrink={false}>
+            {inlineMeta}
+          </DsLayoutInline>
+        </DsLayoutInline>
       ) : null}
-    </Group>
+    </DsLayoutInline>
   );
-
+  const hasCommands = Boolean(actionItems?.length || actions || onDelete);
+  const commands = (
+    <ToolbarSurface label={labels.actions} appearance="inline" wrap="wrap" data-testid="editor-header-command-toolbar">
+      {actionItems?.map((item) => (
+        <ToolbarCommand
+          key={item.key}
+          {...(item.iconOnly && item.icon
+            ? { presentation: 'icon' as const, icon: item.icon }
+            : { presentation: 'label' as const, icon: item.icon })}
+          label={item.label}
+          tooltipLabel={item.tooltip}
+          aria-label={item.ariaLabel ?? item.label}
+          tone={item.tone}
+          emphasis={item.emphasis}
+          onClick={item.onClick}
+          disabled={item.disabled}
+          loading={item.loading}
+        />
+      ))}
+      {actions}
+      {onDelete ? (
+        <ToolbarCommand
+          presentation="icon"
+          icon={<IconTrash size="1em" />}
+          label={labels.delete}
+          tone="danger"
+          onClick={handleDeleteClick}
+          loading={isDeleting}
+          data-editor-delete
+        />
+      ) : null}
+    </ToolbarSurface>
+  );
   const actionBar = (
     <>
       {showCollabMenu ? (
@@ -240,6 +260,12 @@ export function EditorHeaderView<TStatus extends string = string>({
           <DropdownMenu.Target>
             <Button
               data-testid="editor-header-collab-button"
+              aria-label={
+                isMobile && currentOption && !hideStatus
+                  ? `${currentOption.label} ${labels.collabButton}`
+                  : labels.collabButton
+              }
+              aria-describedby={syncDescriptionId}
               emphasis="medium"
               size="xs"
               loading={Boolean(hasStatus && !hideStatus && isStatusChanging)}
@@ -251,38 +277,38 @@ export function EditorHeaderView<TStatus extends string = string>({
                   withTooltip={false}
                 />
               }
-              rightSection={<IconChevronDown size={14} />}
-              style={{ flexShrink: 0 }}
+              indicator="menu"
             >
-              {labels.collabButton}
+              <span className={classes.contextLabel}>
+                {isMobile && currentOption && !hideStatus ? currentOption.label : labels.collabButton}
+              </span>
+              <VisuallyHidden id={syncDescriptionId}>{labels.syncStatus}</VisuallyHidden>
             </Button>
           </DropdownMenu.Target>
           <DropdownMenu.Dropdown data-testid="editor-header-collab-dropdown">
             <DropdownMenu.Label>{labels.connection}</DropdownMenu.Label>
-            <Box px="sm" py={6} data-testid="editor-header-collab-connection">
-              <Group gap="xs" wrap="nowrap">
+            <DsLayoutInset inline="sm" block="xxs" data-testid="editor-header-collab-connection">
+              <DsLayoutInline gap="xs" wrap="nowrap">
                 <CollabSyncStatusIndicator
                   isConnected={isConnected}
                   isSynced={isSynced}
                   label={labels.syncStatus}
                   withTooltip={false}
                 />
-                <Text size="sm">{labels.syncStatus}</Text>
-              </Group>
-            </Box>
+                <SupportingText tone="primary">{labels.syncStatus}</SupportingText>
+              </DsLayoutInline>
+            </DsLayoutInset>
 
             {hasStatus && !hideStatus && (
               <>
                 <DropdownMenu.Divider />
                 <DropdownMenu.Label>{labels.status}</DropdownMenu.Label>
-                <Box px="sm" py={6} data-testid="editor-header-collab-current-status">
-                  <Group justify="space-between" wrap="nowrap">
-                    <Text size="sm" c="dimmed">
-                      {labels.current}
-                    </Text>
+                <DsLayoutInset inline="sm" block="xxs" data-testid="editor-header-collab-current-status">
+                  <DsLayoutInline justify="between" wrap="nowrap">
+                    <SupportingText tone="secondary">{labels.current}</SupportingText>
                     <LabelBadge tone={currentOption?.tone ?? 'neutral'}>{currentOption?.label ?? status}</LabelBadge>
-                  </Group>
-                </Box>
+                  </DsLayoutInline>
+                </DsLayoutInset>
                 {onStatusChange &&
                   otherOptions.map((opt) => (
                     <DropdownMenu.Item
@@ -321,65 +347,11 @@ export function EditorHeaderView<TStatus extends string = string>({
         </DropdownMenu>
       ) : null}
       {controls ? (
-        <Group gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
+        <DsLayoutInline gap="xs" wrap="nowrap" shrink={false}>
           {controls}
-        </Group>
+        </DsLayoutInline>
       ) : null}
-      {actionItems && actionItems.length > 0 ? (
-        <Group gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
-          {actionItems.map((item) =>
-            item.iconOnly ? (
-              <Tooltip key={item.key} label={item.tooltip ?? item.label}>
-                <IconButton
-                  tone={item.tone}
-                  emphasis={item.emphasis ?? 'low'}
-                  onClick={item.onClick}
-                  disabled={item.disabled}
-                  loading={item.loading}
-                  aria-label={item.ariaLabel ?? item.label}
-                  style={{ flexShrink: 0 }}
-                >
-                  {item.icon}
-                </IconButton>
-              </Tooltip>
-            ) : (
-              <Button
-                key={item.key}
-                size="xs"
-                tone={item.tone}
-                emphasis={item.emphasis}
-                leftSection={item.icon}
-                onClick={item.onClick}
-                disabled={item.disabled}
-                loading={item.loading}
-                style={{ minWidth: 0, flexShrink: 0 }}
-              >
-                {item.label}
-              </Button>
-            ),
-          )}
-        </Group>
-      ) : null}
-      {actions ? (
-        <Group gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
-          {actions}
-        </Group>
-      ) : null}
-      {onDelete && (
-        <Tooltip label={labels.delete}>
-          <IconButton
-            tone="danger"
-            emphasis="low"
-            onClick={handleDeleteClick}
-            loading={isDeleting}
-            aria-label={labels.delete}
-            data-editor-delete
-            style={{ flexShrink: 0 }}
-          >
-            <IconTrash size={20} />
-          </IconButton>
-        </Tooltip>
-      )}
+      {hasCommands ? commands : null}
       {!showCollabMenu && hasStatus && !hideStatus && onStatusChange && otherOptions.length === 1 ? (
         <Button
           emphasis="medium"
@@ -387,20 +359,13 @@ export function EditorHeaderView<TStatus extends string = string>({
           size="xs"
           onClick={() => onStatusChange(otherOptions[0].value)}
           loading={isStatusChanging}
-          style={{ flexShrink: 0 }}
         >
           {otherOptions[0].actionLabel}
         </Button>
       ) : !showCollabMenu && hasStatus && !hideStatus && onStatusChange && otherOptions.length > 1 ? (
         <DropdownMenu size="compact">
           <DropdownMenu.Target>
-            <Button
-              data-testid="editor-header-change-status"
-              emphasis="medium"
-              size="xs"
-              loading={isStatusChanging}
-              style={{ flexShrink: 0 }}
-            >
+            <Button data-testid="editor-header-change-status" emphasis="medium" size="xs" loading={isStatusChanging}>
               {labels.changeStatus}
             </Button>
           </DropdownMenu.Target>
@@ -415,53 +380,54 @@ export function EditorHeaderView<TStatus extends string = string>({
       ) : null}
     </>
   );
-
   return (
     <>
-      {isMobile ? (
-        <Stack gap="xs" data-testid="editor-header-mobile">
-          {titleRow}
-          {hasActionBar ? (
-            <Box
-              data-testid="editor-header-mobile-action-bar"
-              style={{
-                maxWidth: '100%',
-                overflowX: 'auto',
-                overflowY: 'hidden',
-                WebkitOverflowScrolling: 'touch',
-                display: 'flex',
-                justifyContent: 'flex-end',
-              }}
-            >
-              <Group gap="xs" wrap="nowrap" align="center" justify="flex-end" style={{ minWidth: 'max-content' }}>
-                {actionBar}
-              </Group>
-            </Box>
-          ) : null}
-        </Stack>
-      ) : (
-        <Flex align="flex-start" justify="space-between" gap="sm" data-testid="editor-header">
-          {titleRow}
-          {hasActionBar ? (
-            <Group gap="xs" wrap="nowrap" align="center" justify="flex-end" style={{ minWidth: 0, flexShrink: 0 }}>
-              {actionBar}
-            </Group>
-          ) : null}
-        </Flex>
-      )}
+      <HeaderDensityProvider density={isMobile ? 'compact' : 'comfortable'}>
+        <ActionRowSizeProvider size="xs">
+          {isMobile ? (
+            <DsLayoutStack gap="xxs" data-testid="editor-header-mobile">
+              {titleRow}
+              {hasActionBar ? (
+                <div data-testid="editor-header-mobile-action-bar">
+                  <div className={classes.mobileActions}>{actionBar}</div>
+                </div>
+              ) : null}
+            </DsLayoutStack>
+          ) : (
+            <DsLayoutInline align="center" justify="between" gap="sm" data-testid="editor-header">
+              {titleRow}
+              {hasActionBar ? (
+                <DsLayoutInline gap="xs" wrap="nowrap" align="center" justify="end" shrink={false}>
+                  {actionBar}
+                </DsLayoutInline>
+              ) : null}
+            </DsLayoutInline>
+          )}
+        </ActionRowSizeProvider>
+      </HeaderDensityProvider>
       {onDelete && deleteConfirmation ? (
-        <ConfirmModal
-          opened={deleteConfirmOpened}
-          onClose={() => setDeleteConfirmOpened(false)}
-          onConfirm={handleDeleteConfirm}
-          title={deleteConfirmation.title}
-          message={deleteConfirmation.message}
-          confirmLabel={deleteConfirmation.confirmLabel ?? labels.delete}
-          cancelLabel={deleteConfirmation.cancelLabel ?? labels.cancel}
-          closeLabel={labels.close}
-          confirmTone={deleteConfirmation.confirmTone}
-          loading={Boolean(isDeleting)}
-        />
+        renderDeleteConfirmation ? (
+          renderDeleteConfirmation({
+            opened: deleteConfirmOpened,
+            onClose: () => setDeleteConfirmOpened(false),
+            onConfirm: handleDeleteConfirm,
+            loading: Boolean(isDeleting),
+          })
+        ) : (
+          <ConfirmModal
+            opened={deleteConfirmOpened}
+            onClose={() => setDeleteConfirmOpened(false)}
+            onConfirm={handleDeleteConfirm}
+            title={deleteConfirmation.title}
+            message={deleteConfirmation.message}
+            confirmLabel={deleteConfirmation.confirmLabel ?? labels.delete}
+            cancelLabel={deleteConfirmation.cancelLabel ?? labels.cancel}
+            closeLabel={labels.close}
+            confirmTone={deleteConfirmation.confirmTone ?? 'danger'}
+            confirmEmphasis="strong"
+            loading={Boolean(isDeleting)}
+          />
+        )
       ) : null}
     </>
   );

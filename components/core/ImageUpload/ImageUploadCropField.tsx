@@ -1,15 +1,25 @@
 'use client';
+import { SupportingText } from '../Typography';
 
 import type { CSSProperties } from 'react';
-import { Stack, Text } from '@mantine/core';
+import { LayoutInline, LayoutStack } from '../Layout';
+import { IconInfoCircle } from '@tabler/icons-react';
+
+import { Progress } from '../Progress';
 import { ImageCropper, type AspectRatioConfig } from '../ImageCropper';
+import type { CropAccessibility } from '../ImageCropper/ImageCropper';
 import { ImageUploadField, type ImageUploadAccept, type ImageUploadRejection } from './ImageUploadField';
+import { ImagePreviewHeader } from './ImagePreviewHeader';
+import { Popover } from '../Popover';
+import { IconButton } from '../IconButton';
 
 export interface ImageUploadCropFieldLabels {
   field: string;
   imageAlt: string;
   emptyTitle: string;
   emptyDescription: string;
+  constraints?: string;
+  constraintsLabel?: string;
   readOnlyDescription: string;
   changeHint?: string;
   loading: string;
@@ -22,6 +32,7 @@ export interface ImageUploadCropFieldLabels {
 }
 
 export interface ImageUploadCropFieldProps {
+  cropAccessibility?: CropAccessibility;
   imageUrl: string | null;
   cropImageSrc: string | null;
   cropOpened: boolean;
@@ -50,6 +61,7 @@ export interface ImageUploadCropFieldProps {
  */
 export function ImageUploadCropField({
   imageUrl,
+  cropAccessibility,
   cropImageSrc,
   cropOpened,
   idPrefix,
@@ -63,18 +75,17 @@ export function ImageUploadCropField({
   aspectRatio = 16 / 9,
   previewWidth = '100%',
   previewMaxWidth,
-  previewMinHeight = 120,
+  previewMinHeight,
   onFileSelect,
   onReject,
   onRemove,
   onCrop,
   onCropClose,
 }: ImageUploadCropFieldProps) {
+  const minHeight = previewMinHeight ?? (typeof aspectRatio === 'number' ? undefined : 120);
   return (
-    <Stack gap={4} style={{ position: 'relative', zIndex: 1 }}>
-      <Text size="xs" c="dimmed">
-        {labels.field}
-      </Text>
+    <LayoutStack gap="xxs">
+      <ImagePreviewHeader label={labels.field} />
 
       <ImageUploadField
         imageUrl={imageUrl}
@@ -89,7 +100,6 @@ export function ImageUploadCropField({
         loadingLabel={labels.loading}
         progress={progress}
         emptyTitle={labels.emptyTitle}
-        emptyDescription={canEdit ? labels.emptyDescription : labels.readOnlyDescription}
         changeHint={imageUrl && canEdit ? labels.changeHint : undefined}
         removeButtonAriaLabel={labels.removeButtonAriaLabel}
         removeButtonLoading={removeButtonLoading}
@@ -98,21 +108,53 @@ export function ImageUploadCropField({
           width: previewWidth,
           maxWidth: previewMaxWidth,
           aspectRatio: typeof aspectRatio === 'number' ? `${aspectRatio}` : undefined,
-          minHeight: previewMinHeight,
+          minHeight,
           fit: aspectRatio === 'free' ? 'contain' : 'cover',
         }}
         placeholder={{
           width: previewWidth,
-          minHeight: previewMinHeight,
-          iconSize: 22,
+          minHeight,
+          iconSize: 'md',
+          compact: true,
+          showCompactText: false,
         }}
         onFileSelect={onFileSelect}
         onValidationReject={onReject}
         onRemove={imageUrl && canEdit ? onRemove : undefined}
       />
 
+      {loading ? (
+        <div role="status" aria-live="polite">
+          <Progress
+            value={progress ?? null}
+            title={labels.loading}
+            status={progress !== undefined ? `${Math.round(progress)}%` : undefined}
+            aria-label={labels.loading}
+          />
+        </div>
+      ) : !imageUrl && (canEdit ? labels.emptyDescription || labels.constraints : labels.readOnlyDescription) ? (
+        <LayoutInline gap="xxs" justify="between" align="start" wrap="nowrap">
+          <SupportingText tone="muted" wrap="preserve">
+            {canEdit ? labels.emptyDescription : labels.readOnlyDescription}
+          </SupportingText>
+          {canEdit && labels.constraints && labels.constraintsLabel ? (
+            <Popover size="compact" placement="bottom-end">
+              <Popover.Target>
+                <IconButton size="xs" emphasis="low" aria-label={labels.constraintsLabel}>
+                  <IconInfoCircle size="1em" />
+                </IconButton>
+              </Popover.Target>
+              <Popover.Dropdown padding="compact">
+                <SupportingText tone="secondary">{labels.constraints}</SupportingText>
+              </Popover.Dropdown>
+            </Popover>
+          ) : null}
+        </LayoutInline>
+      ) : null}
+
       {cropImageSrc ? (
         <ImageCropper
+          cropAccessibility={cropAccessibility}
           imageSrc={cropImageSrc}
           opened={cropOpened}
           onClose={onCropClose}
@@ -127,6 +169,6 @@ export function ImageUploadCropField({
           processingLabel={labels.cropProcessing}
         />
       ) : null}
-    </Stack>
+    </LayoutStack>
   );
 }

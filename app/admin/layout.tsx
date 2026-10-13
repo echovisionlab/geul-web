@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { AdminShell } from '@/features/admin/AdminShell/AdminShell';
+import { ReactQueryProvider } from '@/lib/providers/ReactQueryProvider';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { getSettings } from '@/lib/queries/manifest';
 import { getRequestHeaders } from '@/lib/utils/header.server';
@@ -43,5 +44,9 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     redirect('/');
   }
 
-  return <AdminShell>{children}</AdminShell>;
+  return (
+    <ReactQueryProvider>
+      <AdminShell>{children}</AdminShell>
+    </ReactQueryProvider>
+  );
 }

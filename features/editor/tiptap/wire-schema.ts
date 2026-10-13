@@ -7,8 +7,9 @@ import {
   type Attribute,
   type Extensions,
 } from '@tiptap/core';
-import { Gapcursor } from '@tiptap/extensions';
+import { Dropcursor, Gapcursor } from '@tiptap/extensions';
 import type { DOMOutputSpec } from '@tiptap/pm/model';
+import { primitiveTokens, tokenVar } from '@/components/core/design-tokens';
 import { resolveCodeBlockLanguage } from '@/lib/editor/code-block-options';
 import { fileBlockPropSchema } from '@/lib/media/block-schemas';
 import { mapBlockWirePropSchema } from '@/lib/types/map-block/schema';
@@ -241,6 +242,17 @@ export const WireNumberedListItem = createBlockContentNode({
   name: 'numberedListItem',
   content: 'inline*',
   propSchema: { ...defaultTextBlockProps, start: { default: undefined, type: 'number' } },
+}).extend({
+  // An explicit start restarts the visible number here, as the published list's `counter-set` does.
+  renderHTML({ node, HTMLAttributes }) {
+    const start = node.attrs.start;
+    const attributes = mergeAttributes(
+      HTMLAttributes,
+      { 'data-content-type': 'numberedListItem' },
+      typeof start === 'number' && Number.isFinite(start) ? { style: `counter-set: numbered-list ${start}` } : {},
+    );
+    return ['div', attributes, 0] as DOMOutputSpec;
+  },
 });
 
 export const WireCheckListItem = createBlockContentNode({
@@ -502,6 +514,10 @@ export function createTiptapWireExtensions(options: TiptapWireSchemaOptions = {}
     WireBackgroundColor,
     WireLink,
     BlockMixedSelectionExtension,
+    Dropcursor.configure({
+      color: tokenVar('focus'),
+      width: Number.parseFloat(primitiveTokens.border.focus),
+    }),
     Gapcursor,
     EmptyParagraphRangeSelection,
     TiptapKeyboardShortcuts,

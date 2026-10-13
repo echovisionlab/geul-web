@@ -1,9 +1,12 @@
 'use client';
 
-import { Group } from '@mantine/core';
+import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+
 import { IconAlignCenter, IconAlignLeft, IconAlignRight } from '@tabler/icons-react';
+import { DropdownMenu } from '@/components/core/DropdownMenu';
 import { IconButton } from '@/components/core/IconButton';
-import { EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS, EditorToolbarTooltip } from './EditorToolbarTooltip';
+import { EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS, EditorToolbarDropdownTarget } from './EditorToolbarTooltip';
+import { EditorToolbarAction } from './EditorToolbarAction';
 
 export type BlockAlignment = 'left' | 'center' | 'right';
 
@@ -22,6 +25,7 @@ export interface BlockAlignButtonsProps {
   /** Localized label for the one alignment action group. Defaults for standalone compatibility. */
   groupLabel?: string;
   disabled?: boolean;
+  presentation?: 'buttons' | 'menu';
 }
 
 const alignments = [
@@ -40,31 +44,61 @@ export function BlockAlignButtons({
   onChange,
   groupLabel = labels.left,
   disabled = false,
+  presentation = 'buttons',
 }: BlockAlignButtonsProps) {
+  if (presentation === 'menu') {
+    const CurrentIcon = alignments.find((item) => item.value === value)?.Icon ?? IconAlignLeft;
+    return (
+      <DropdownMenu portal={false} placement="bottom-start" size="compact">
+        <EditorToolbarDropdownTarget label={groupLabel} focusHint={false}>
+          {(targetRef) => (
+            <IconButton
+              ref={targetRef}
+              label={groupLabel}
+              disabled={disabled}
+              data-selection-toolbar-action=""
+              onMouseDown={(event) => event.preventDefault()}
+            >
+              <CurrentIcon size={16} />
+            </IconButton>
+          )}
+        </EditorToolbarDropdownTarget>
+        <DropdownMenu.Dropdown>
+          {alignments.map(({ value: alignment, Icon }) => (
+            <DropdownMenu.Item
+              key={alignment}
+              selected={value === alignment}
+              disabled={disabled}
+              icon={<Icon size={16} />}
+              onClick={() => onChange(alignment)}
+            >
+              {labels[alignment]}
+            </DropdownMenu.Item>
+          ))}
+        </DropdownMenu.Dropdown>
+      </DropdownMenu>
+    );
+  }
   return (
-    <Group gap={2} wrap="nowrap" role="group" aria-label={groupLabel}>
+    <DsLayoutInline gap="xxs" wrap="nowrap" role="group" aria-label={groupLabel}>
       {alignments.map(({ value: alignment, Icon }) => {
         const label = labels[alignment];
         return (
-          <EditorToolbarTooltip key={alignment} label={label} shortcut={EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS}>
-            <IconButton
-              label={label}
-              tone={value === alignment ? 'accent' : 'neutral'}
-              emphasis={value === alignment ? 'medium' : 'low'}
-              size="sm"
-              data-selection-toolbar-action=""
-              data-testid={`tiptap-toolbar-align-${alignment}`}
-              data-test={`alignBlock${alignment.slice(0, 1).toUpperCase()}${alignment.slice(1)}`}
-              aria-pressed={value === alignment}
-              disabled={disabled}
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => onChange(alignment)}
-            >
-              <Icon size={16} />
-            </IconButton>
-          </EditorToolbarTooltip>
+          <EditorToolbarAction
+            key={alignment}
+            label={label}
+            shortcut={EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS}
+            focusHint
+            pressed={value === alignment}
+            disabled={disabled}
+            testId={`tiptap-toolbar-align-${alignment}`}
+            data-test={`alignBlock${alignment.slice(0, 1).toUpperCase()}${alignment.slice(1)}`}
+            onClick={() => onChange(alignment)}
+          >
+            <Icon size={16} />
+          </EditorToolbarAction>
         );
       })}
-    </Group>
+    </DsLayoutInline>
   );
 }

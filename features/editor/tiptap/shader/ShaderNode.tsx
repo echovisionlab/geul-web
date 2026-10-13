@@ -1,10 +1,20 @@
 'use client';
+import { Tabs } from '@/components/core/Tabs';
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
+import { SectionCard as ExecutableSurface } from '@/components/core/Section';
+import {
+  LayoutInset as ExecutableInset,
+  LayoutStack as EditorDsLayoutStack,
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+} from '@/components/core/Layout';
+
+import { Text as DsText } from '@/components/core/Typography';
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type ComponentType } from 'react';
 import { mergeAttributes, Node, type CommandProps, type Editor, type Extensions } from '@tiptap/core';
-import { Selection } from '@tiptap/pm/state';
+import { NodeSelection, Selection } from '@tiptap/pm/state';
 import { NodeViewContent, NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from '@tiptap/react';
-import { Group, Stack, Text } from '@mantine/core';
+
 import { Button } from '@/components/core/Button';
 import { ContentModal } from '@/components/core/Modal';
 import { Checkbox, Select } from '@/components/core/Input';
@@ -12,7 +22,7 @@ import type { EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode'
 import { useBlockResize, type TextAlignment } from '@/features/editor/hooks/useBlockResize';
 import { EditorMediaBlockFrame } from '@/features/editor/ui/EditorMediaBlockShell';
 import {
-  isMonacoSourceEditorEvent,
+  withMonacoSourceEditorEvents,
   MonacoSourceEditor,
   type SourceEditorMarker,
 } from '@/features/editor/tiptap/code-editor';
@@ -232,6 +242,44 @@ export function selectShaderNode(editor: Editor, getPos: () => number | undefine
   return true;
 }
 
+/** Node markup replacement must retain an existing exact block selection. */
+export function setShaderNodeMode(editor: Editor, getPos: () => number | undefined, mode: ShaderMode): boolean {
+  return setShaderNodeAttributes(editor, getPos, { mode });
+}
+
+export function setShaderNodeTitle(editor: Editor, getPos: () => number | undefined, title: string): boolean {
+  return setShaderNodeAttributes(editor, getPos, { title });
+}
+
+function setShaderNodeAttributes(
+  editor: Editor,
+  getPos: () => number | undefined,
+  attributes: { mode: ShaderMode } | { title: string },
+): boolean {
+  if (!editor.isEditable) {
+    return false;
+  }
+  return editor.commands.command(({ tr, state }) => {
+    const position = getPos();
+    if (typeof position !== 'number') {
+      return false;
+    }
+    const node = state.doc.nodeAt(position);
+    if (node?.type.name !== 'shader') {
+      return false;
+    }
+    const selected = state.selection;
+    const retainSelection =
+      selected instanceof NodeSelection &&
+      (selected.from === position || (selected.node.type.name === 'blockContainer' && selected.from + 1 === position));
+    tr.setNodeMarkup(position, undefined, { ...node.attrs, ...attributes });
+    if (retainSelection) {
+      tr.setSelection(NodeSelection.create(tr.doc, selected.from));
+    }
+    return true;
+  });
+}
+
 function makeBlockId(): string {
   return globalThis.crypto?.randomUUID?.() ?? `shader-${Date.now().toString(36)}`;
 }
@@ -379,12 +427,13 @@ function ShaderChannelPanel({
     onChange(next);
   };
   return (
-    <Stack gap="xs" data-testid="shader-channel-panel">
+    <DsLayoutStack gap="xs" data-testid="shader-channel-panel">
       {normalized.map((channel, index) => (
-        <Group key={index} gap="xs" align="end" wrap="wrap">
-          <Text size="xs">iChannel{index}</Text>
+        <DsLayoutInline key={index} gap="xs" align="end" wrap="wrap">
+          <DsText size="xs">iChannel{index}</DsText>
           <Select
             size="xs"
+            aria-label={`iChannel${index}.kind`}
             value={channel.kind}
             data={
               FilePicker
@@ -406,6 +455,7 @@ function ShaderChannelPanel({
           {channel.kind === 'buffer' ? (
             <Select
               size="xs"
+              aria-label={`iChannel${index}.buffer`}
               value={channel.buffer}
               data={['A', 'B', 'C', 'D']}
               onChange={(buffer) => update(index, { kind: 'buffer', buffer: (buffer ?? 'A') as 'A' | 'B' | 'C' | 'D' })}
@@ -415,6 +465,7 @@ function ShaderChannelPanel({
             <>
               <Select
                 size="xs"
+                aria-label={`iChannel${index}.sampler.filter`}
                 value={channel.sampler.filter}
                 data={['nearest', 'linear']}
                 onChange={(filter) =>
@@ -426,6 +477,7 @@ function ShaderChannelPanel({
               />
               <Select
                 size="xs"
+                aria-label={`iChannel${index}.sampler.wrap`}
                 value={channel.sampler.wrap}
                 data={['clamp', 'repeat']}
                 onChange={(wrap) =>
@@ -449,13 +501,13 @@ function ShaderChannelPanel({
             </>
           ) : null}
           {channel.kind === 'textureFile' || channel.kind === 'videoFile' ? (
-            <Text size="xs">File {channel.fileId.slice(0, 12)}</Text>
+            <DsText size="xs">File {channel.fileId.slice(0, 12)}</DsText>
           ) : null}
           {channel.kind === 'cubemapFiles'
             ? channel.fileIds.map((fileId, faceIndex) => (
                 <Button
                   key={cubeFaces[faceIndex]}
-                  size="compact-xs"
+                  size="compact"
                   tone="neutral"
                   emphasis="low"
                   onClick={() => setPicker({ index, kind: 'cubemapFiles', face: faceIndex })}
@@ -468,7 +520,7 @@ function ShaderChannelPanel({
             ? cubeFaces.map((face, faceIndex) => (
                 <Button
                   key={face}
-                  size="compact-xs"
+                  size="compact"
                   tone="neutral"
                   emphasis="low"
                   onClick={() => setPicker({ index, kind: 'cubemapFiles', face: faceIndex })}
@@ -477,7 +529,7 @@ function ShaderChannelPanel({
                 </Button>
               ))
             : null}
-        </Group>
+        </DsLayoutInline>
       ))}
       {picker && FilePicker ? (
         <ContentModal
@@ -520,7 +572,7 @@ function ShaderChannelPanel({
           />
         </ContentModal>
       ) : null}
-    </Stack>
+    </DsLayoutStack>
   );
 }
 
@@ -558,6 +610,8 @@ export function ShaderNodeView(props: NodeViewProps & ShaderOptions) {
   const [temporaryProgram, setTemporaryProgram] = useState<ShaderProgramDocument>(originalProgram);
   const [hasTemporaryFork, setHasTemporaryFork] = useState(false);
   const [activeStage, setActiveStage] = useState<ShaderStage>('image');
+  const sourceId = useId();
+  const sourcePanelId = `${sourceId}-panel`;
   const mode = resolveShaderViewMode(canEditNeutral, durableMode, publicMode);
   const program = hasTemporaryFork ? temporaryProgram : originalProgram;
   const activeSource = program.sources[activeStage];
@@ -666,7 +720,7 @@ export function ShaderNodeView(props: NodeViewProps & ShaderOptions) {
   const setMode = useCallback(
     (nextMode: ShaderMode) => {
       if (editor.isEditable && authoringMode?.allowNeutralBlockEdits === true) {
-        updateAttributes({ mode: nextMode });
+        setShaderNodeMode(editor, getPos, nextMode);
       } else {
         setPublicMode(nextMode);
       }
@@ -679,7 +733,7 @@ export function ShaderNodeView(props: NodeViewProps & ShaderOptions) {
         setRunning(false);
       }
     },
-    [authoringMode, editor, updateAttributes],
+    [authoringMode, editor, getPos],
   );
   const restart = useCallback(() => {
     setRuntimeError(null);
@@ -884,124 +938,141 @@ export function ShaderNodeView(props: NodeViewProps & ShaderOptions) {
         onResizeBlur={resize.onResizeBlur}
       >
         <div className={classes.root}>
-          <div className={classes.header}>
-            <ExecutableBlockTitle
-              title={title}
-              fallback={labels.title}
-              editable={canEditTitle}
-              onChange={(nextTitle) => updateAttributes({ title: nextTitle })}
-            />
-          </div>
-          <Stack className={classes.body} data-mode={mode} gap={0}>
-            {previewVisible ? (
-              <div className={classes.resultPane} data-testid="shader-result-pane">
-                <ShaderPreviewSurface
-                  program={program}
-                  resolveAsset={resolveAsset}
-                  height={previewHeight}
-                  revision={revision}
-                  active={running}
-                  runtimeFactory={runtimeFactory}
-                  labels={labels}
-                  onRuntime={setRuntime}
-                  onError={handleRuntimeError}
-                  onPointer={sendPointer}
-                  onResize={resizeRuntime}
-                />
-              </div>
-            ) : null}
-            <ExecutableRuntimeControls
-              className={classes.runtimeControls}
-              type="shader"
-              labels={labels}
-              running={running}
-              onRun={restart}
-              onStop={stop}
-              onRestart={restart}
-              sourceControl={{ label: labels.source, expanded: codeVisible, onClick: toggleSource }}
-              onResetOriginal={codeVisible ? resetOriginal : undefined}
-              resetDisabled={!hasActiveDraftChanges && shaderProgramKey(program) === shaderProgramKey(originalProgram)}
-              copyControl={
-                codeVisible ? { label: copied ? labels.copied : labels.copy, onClick: copySource } : undefined
-              }
-              applyControl={
-                mode === 'edit'
-                  ? { label: labels.apply, disabled: !hasActiveDraftChanges, onClick: applyActiveDraft }
-                  : undefined
-              }
-              audioControl={
-                canEditNeutral && program.sources.sound.trim() && !audioEnabled
-                  ? {
-                      label: labels.audio ?? 'Audio',
-                      onClick: () => {
-                        runtimeRef.current?.enableAudio();
-                        setAudioEnabled(true);
-                      },
-                    }
-                  : undefined
-              }
-            />
-            {mode === 'edit' || mode === 'source' ? (
-              <Stack gap="xs" data-testid="shader-stage-source">
-                <Group gap={4} role="tablist" aria-label={labels.sourceInput}>
-                  {SHADER_STAGE_DEFINITIONS.map(([stage, , filename]) => (
-                    <Button
-                      key={stage}
-                      role="tab"
-                      aria-selected={activeStage === stage}
-                      size="compact-xs"
-                      tone="neutral"
-                      emphasis={activeStage === stage ? 'strong' : 'low'}
-                      onClick={() => setActiveStage(stage)}
-                    >
-                      {filename}
-                    </Button>
-                  ))}
-                </Group>
-                {mode === 'edit' && canEditNeutral && CHANNEL_STAGES.has(activeStage) ? (
-                  <ShaderChannelPanel
-                    labels={labels}
-                    FilePicker={FilePicker}
-                    channels={program.channels[activeStage as ShaderChannelStage] ?? []}
-                    onChange={(channels) => {
-                      replaceShaderStageChannels({
-                        editor,
-                        getPos,
-                        stage: activeStage as ShaderChannelStage,
-                        channels,
-                        canEditNeutral: authoringMode?.allowNeutralBlockEdits === true,
-                      });
-                    }}
+          <ExecutableSurface padding="none" withBorder clip>
+            <div className={classes.header}>
+              <ExecutableSurface padding="none" appearance="muted" border="block-end">
+                <ExecutableInset block="xxs" inline="xs">
+                  <ExecutableBlockTitle
+                    title={title}
+                    fallback={labels.title}
+                    editable={canEditTitle}
+                    onChange={(nextTitle) => setShaderNodeTitle(editor, getPos, nextTitle)}
                   />
+                </ExecutableInset>
+              </ExecutableSurface>
+            </div>
+            <div className={classes.body} data-mode={mode}>
+              <EditorDsLayoutStack gap="none">
+                {previewVisible ? (
+                  <div className={classes.resultPane} data-testid="shader-result-pane">
+                    <ShaderPreviewSurface
+                      program={program}
+                      resolveAsset={resolveAsset}
+                      height={previewHeight}
+                      revision={revision}
+                      active={running}
+                      runtimeFactory={runtimeFactory}
+                      labels={labels}
+                      onRuntime={setRuntime}
+                      onError={handleRuntimeError}
+                      onPointer={sendPointer}
+                      onResize={resizeRuntime}
+                    />
+                  </div>
                 ) : null}
-                <ShaderAvailableInputs
-                  stage={activeStage}
-                  channels={
-                    CHANNEL_STAGES.has(activeStage) ? (program.channels[activeStage as ShaderChannelStage] ?? []) : []
-                  }
+                <ExecutableRuntimeControls
+                  className={classes.runtimeControls}
+                  type="shader"
                   labels={labels}
-                />
-                <MonacoSourceEditor
-                  value={mode === 'edit' ? activeDraftSource : activeSource}
-                  onChange={
+                  running={running}
+                  onRun={restart}
+                  onStop={stop}
+                  onRestart={restart}
+                  sourceControl={{ label: labels.source, expanded: codeVisible, onClick: toggleSource }}
+                  onResetOriginal={codeVisible ? resetOriginal : undefined}
+                  resetDisabled={
+                    !hasActiveDraftChanges && shaderProgramKey(program) === shaderProgramKey(originalProgram)
+                  }
+                  copyControl={
+                    codeVisible ? { label: copied ? labels.copied : labels.copy, onClick: copySource } : undefined
+                  }
+                  applyControl={
                     mode === 'edit'
-                      ? (value) => setDraftSources((current) => ({ ...current, [activeStage]: value }))
+                      ? { label: labels.apply, disabled: !hasActiveDraftChanges, onClick: applyActiveDraft }
                       : undefined
                   }
-                  onApply={applyActiveDraft}
-                  onEscape={selectBlock}
-                  language="glsl"
-                  readOnly={mode !== 'edit' || (!canEditNeutral && !hasTemporaryFork)}
-                  ariaLabel={`${SHADER_STAGE_DEFINITIONS.find(([stage]) => stage === activeStage)?.[2]} ${labels.sourceInput}`}
-                  modelPath={`shader/${blockId}/${SHADER_STAGE_DEFINITIONS.find(([stage]) => stage === activeStage)?.[2]}`}
-                  height={Math.max(240, previewHeight)}
-                  maxLength={SHADER_MAX_SOURCE_LENGTH}
-                  markers={markerFor(runtimeError, activeStage)}
-                  onMount={installShaderInputMonacoApi}
+                  audioControl={
+                    canEditNeutral && program.sources.sound.trim() && !audioEnabled
+                      ? {
+                          label: labels.audio ?? 'Audio',
+                          onClick: () => {
+                            runtimeRef.current?.enableAudio();
+                            setAudioEnabled(true);
+                          },
+                        }
+                      : undefined
+                  }
                 />
-              </Stack>
-            ) : null}
-          </Stack>
+                {mode === 'edit' || mode === 'source' ? (
+                  <DsLayoutStack gap="xs" data-testid="shader-stage-source">
+                    <Tabs value={activeStage} onChange={(stage) => stage && setActiveStage(stage as ShaderStage)}>
+                      <Tabs.List aria-label={labels.sourceInput}>
+                        {SHADER_STAGE_DEFINITIONS.map(([stage, , filename]) => (
+                          <Tabs.Tab
+                            key={stage}
+                            value={stage}
+                            externalPanel={{ id: sourcePanelId, tabId: `${sourceId}-${stage}` }}
+                          >
+                            {filename}
+                          </Tabs.Tab>
+                        ))}
+                      </Tabs.List>
+                    </Tabs>
+                    <DsLayoutStack
+                      gap="xs"
+                      id={sourcePanelId}
+                      role="tabpanel"
+                      aria-labelledby={`${sourceId}-${activeStage}`}
+                    >
+                      {mode === 'edit' && canEditNeutral && CHANNEL_STAGES.has(activeStage) ? (
+                        <ShaderChannelPanel
+                          labels={labels}
+                          FilePicker={FilePicker}
+                          channels={program.channels[activeStage as ShaderChannelStage] ?? []}
+                          onChange={(channels) => {
+                            replaceShaderStageChannels({
+                              editor,
+                              getPos,
+                              stage: activeStage as ShaderChannelStage,
+                              channels,
+                              canEditNeutral: authoringMode?.allowNeutralBlockEdits === true,
+                            });
+                          }}
+                        />
+                      ) : null}
+                      <ShaderAvailableInputs
+                        stage={activeStage}
+                        channels={
+                          CHANNEL_STAGES.has(activeStage)
+                            ? (program.channels[activeStage as ShaderChannelStage] ?? [])
+                            : []
+                        }
+                        labels={labels}
+                      />
+                      <MonacoSourceEditor
+                        value={mode === 'edit' ? activeDraftSource : activeSource}
+                        onChange={
+                          mode === 'edit'
+                            ? (value) => setDraftSources((current) => ({ ...current, [activeStage]: value }))
+                            : undefined
+                        }
+                        onApply={applyActiveDraft}
+                        onEscape={selectBlock}
+                        language="glsl"
+                        readOnly={mode !== 'edit' || (!canEditNeutral && !hasTemporaryFork)}
+                        ariaLabel={`${SHADER_STAGE_DEFINITIONS.find(([stage]) => stage === activeStage)?.[2]} ${labels.sourceInput}`}
+                        modelPath={`shader/${blockId}/${SHADER_STAGE_DEFINITIONS.find(([stage]) => stage === activeStage)?.[2]}`}
+                        height={Math.max(240, previewHeight)}
+                        maxLength={SHADER_MAX_SOURCE_LENGTH}
+                        markers={markerFor(runtimeError, activeStage)}
+                        onMount={installShaderInputMonacoApi}
+                      />
+                    </DsLayoutStack>
+                  </DsLayoutStack>
+                ) : null}
+              </EditorDsLayoutStack>
+            </div>
+          </ExecutableSurface>
         </div>
       </EditorMediaBlockFrame>
       <NodeViewContent className={classes.content} aria-hidden="true" />
@@ -1088,11 +1159,11 @@ export function createShaderExtension(options: ShaderOptions = {}): Extensions[n
       return ['div', mergeAttributes(HTMLAttributes, { 'data-content-type': 'shader' }), 0];
     },
     addNodeView() {
-      return ReactNodeViewRenderer((props) => <ShaderNodeView {...props} {...this.options} />, {
-        stopEvent: ({ event }) =>
-          isMonacoSourceEditorEvent(event) ||
-          (event.target instanceof Element && event.target.closest('[data-testid="shader-available-inputs"]') !== null),
-      });
+      return withMonacoSourceEditorEvents(
+        ReactNodeViewRenderer((props) => <ShaderNodeView {...props} {...this.options} />),
+        (event) =>
+          event.target instanceof Element && event.target.closest('[data-testid="shader-available-inputs"]') !== null,
+      );
     },
     addCommands() {
       return {

@@ -2,13 +2,13 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
 import { clearEditorSaveRecovery } from '@/lib/editor/editor-save-recovery';
 import { useEditorNavigation } from './useEditorNavigation';
 
 vi.mock('next-intl', () => ({ useTranslations: (namespace: string) => (key: string) => `${namespace}.${key}` }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 
 let root: Root;
 let host: HTMLDivElement;
@@ -100,6 +100,6 @@ it('keeps the editor mounted and reports the common save failure when acknowledg
   expect(host.querySelector('button')?.textContent).toBe('Leave editor');
   expect(notifications.show).toHaveBeenCalledWith({
     message: 'common.notifications.saveFailed',
-    color: 'red',
+    tone: 'danger',
   });
 });

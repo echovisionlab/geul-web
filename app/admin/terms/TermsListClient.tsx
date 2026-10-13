@@ -1,11 +1,20 @@
 'use client';
 
+import type { ComponentProps } from 'react';
 import { useTranslations } from 'next-intl';
 import { LegalPolicyListClient, type LegalPolicyListItem } from '@/features/policy/LegalPolicyListClient';
 import { createTermsVersionAction, deleteTermsVersionAction } from '@/lib/actions/terms';
 import { getTermsStatusColor, isTermsDraft, isTermsScheduled, TERMS_STATUS } from '@/lib/policy-status';
 
-export function TermsListClient({ initialVersions }: { initialVersions: LegalPolicyListItem[] }) {
+export function TermsListClient({
+  initialVersions,
+  createVersion = createTermsVersionAction,
+  deleteVersion = deleteTermsVersionAction,
+}: {
+  initialVersions: LegalPolicyListItem[];
+  createVersion?: ComponentProps<typeof LegalPolicyListClient>['createVersion'];
+  deleteVersion?: ComponentProps<typeof LegalPolicyListClient>['deleteVersion'];
+}) {
   const tPage = useTranslations('adminList.terms');
   return (
     <LegalPolicyListClient
@@ -20,8 +29,8 @@ export function TermsListClient({ initialVersions }: { initialVersions: LegalPol
         isScheduled: isTermsScheduled,
         getColor: getTermsStatusColor,
       }}
-      createVersion={createTermsVersionAction}
-      deleteVersion={deleteTermsVersionAction}
+      createVersion={createVersion}
+      deleteVersion={deleteVersion}
       searchPlaceholder={tPage('searchPlaceholder')}
     />
   );

@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import EmailLayoutEditPage from '@/app/admin/email-layouts/[id]/page';
 import EmailTemplateEditPage from '@/app/admin/email-templates/[id]/page';
 
@@ -85,18 +86,9 @@ vi.mock('next-intl', () => ({
   },
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: { show: vi.fn() },
 }));
-
-vi.mock('@mantine/core', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@mantine/core')>();
-  return {
-    ...actual,
-    Modal: ({ opened, children }: { opened: boolean; children: ReactNode }) =>
-      opened ? <div role="dialog">{children}</div> : null,
-  };
-});
 
 vi.mock('@/lib/actions/email-template', () => ({
   getEmailTemplateAction: api.getEmailTemplateAction,
@@ -326,7 +318,7 @@ function renderPage(node: ReactNode) {
   act(() => {
     root?.render(
       <QueryClientProvider client={queryClient!}>
-        <MantineProvider>{node}</MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>
       </QueryClientProvider>,
     );
   });
@@ -505,7 +497,7 @@ describe('email authoring detail pages', () => {
     expect(pushMock).not.toHaveBeenCalled();
     expect(notifications.show).toHaveBeenCalledWith({
       message: 'common.notifications.saveFailed',
-      color: 'red',
+      tone: 'danger',
     });
   });
 
@@ -602,7 +594,7 @@ describe('email authoring detail pages', () => {
     await flush();
 
     const layout = findInputByLabelText('adminList.emailTemplates.detail.fields.layoutLabel');
-    act(() => layout.click());
+    act(() => layout.focus());
     await flush();
     const option = [...document.querySelectorAll('[role="option"]')].find((candidate) =>
       candidate.textContent?.includes('Custom layout'),

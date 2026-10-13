@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { invariantTokens } from '@/components/core/design-tokens';
 import {
   diffRemovedImmersiveSceneAssetFileIds,
   parseImmersiveSceneConfig,
@@ -21,6 +22,7 @@ describe('immersive scene schema', () => {
     expect(config.unitHoldSeconds).toBe('5');
     expect(config.unitGapSeconds).toBe('1.5');
     expect(config.textColorSource).toBe('theme');
+    expect(config.backgroundColor).toBe(invariantTokens['paper-background']);
     expect(config.lightTextColor).toBe('#111827');
     expect(config.darkTextColorSource).toBe('inherit');
     expect(config.darkTextColor).toBe('#f8fafc');
@@ -50,12 +52,16 @@ describe('immersive scene schema', () => {
       lightTextColor: '#101010',
       darkTextColorSource: 'custom',
       darkTextColor: '#fefefe',
+      backgroundColor: '#070a0d',
+      darkBackgroundColor: '#102030',
     });
 
     expect(config.textColorSource).toBe('custom');
     expect(config.lightTextColor).toBe('#101010');
     expect(config.darkTextColorSource).toBe('custom');
     expect(config.darkTextColor).toBe('#fefefe');
+    expect(config.backgroundColor).toBe('#070a0d');
+    expect(config.darkBackgroundColor).toBe('#102030');
   });
 
   it('keeps visual units and localized copy separable by id', () => {

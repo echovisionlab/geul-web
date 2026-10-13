@@ -1,0 +1,62 @@
+.guide {
+  color: var(--geul-text-primary);
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.guide section {
+  margin-block: var(--geul-spacing-xl);
+}
+
+.guide :is(p, li) {
+  line-height: var(--geul-line-height-md);
+}
+
+:global(#storybook-docs) .guide code {
+  font-size: var(--geul-font-size-xs);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.guide a {
+  color: var(--geul-action-primary);
+  text-decoration: underline;
+}
+
+.tableScroll {
+  overflow: auto;
+  max-inline-size: 100%;
+}
+
+.tableScroll table {
+  inline-size: 100%;
+  min-inline-size: var(--geul-content-width-form);
+  border-collapse: collapse;
+}
+
+.tableScroll :is(th, td) {
+  padding: var(--geul-spacing-xs);
+  border-bottom: var(--geul-border-thin) solid var(--geul-border-default);
+  text-align: start;
+  vertical-align: top;
+}
+
+.tableScroll th,
+.tableScroll td:first-child {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+.tableScroll .apiTable {
+  min-inline-size: var(--geul-content-width-compact);
+}
+
+.apiTable :is(th, td):first-child {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+:global(#storybook-docs) .apiTable td:first-child code {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}

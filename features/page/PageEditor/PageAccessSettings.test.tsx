@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_PAGE_ACCESS_POLICY } from '@/lib/types/page-access';
 import { PageAccessSettings, type PageAccessSettingsProps } from './PageAccessSettings';
@@ -22,9 +23,9 @@ function render(changes: Partial<PageAccessSettingsProps> = {}) {
   props = { ...props, ...changes };
   act(() =>
     root.render(
-      <MantineProvider env="test">
+      <DesignSystemProvider forceColorScheme="light">
         <PageAccessSettings {...props} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     ),
   );
 }
@@ -36,21 +37,31 @@ function button(text: string) {
 }
 
 function checkbox(label: string) {
-  const found = [...host.querySelectorAll<HTMLLabelElement>('label')].find((node) => node.textContent === label);
+  const found = [...host.querySelectorAll<HTMLLabelElement>('label')].find((node) => {
+    const accessibleLabel = node.cloneNode(true) as HTMLLabelElement;
+    accessibleLabel.querySelectorAll('[aria-hidden="true"], input').forEach((child) => child.remove());
+    return accessibleLabel.textContent?.trim() === label;
+  });
   expect(found, `checkbox ${label}`).toBeDefined();
-  return document.getElementById(found!.htmlFor) as HTMLInputElement;
+  const input = found!.control ?? found!.querySelector('input');
+  expect(input, `checkbox input ${label}`).toBeInstanceOf(HTMLInputElement);
+  return input as HTMLInputElement;
 }
 
-function choose(label: string, option: string) {
+async function choose(label: string, option: string) {
   const found = [...host.querySelectorAll<HTMLLabelElement>('label')].find((node) => node.textContent === label);
   expect(found, `select ${label}`).toBeDefined();
-  const input = document.getElementById(found!.htmlFor)!;
-  act(() => input.click());
+  const input = found!.control as HTMLInputElement;
+  const field = input.closest('[data-geul-input]')!;
+  const opener =
+    field.querySelector<HTMLButtonElement>('button[aria-haspopup="listbox"]') ??
+    [...field.querySelectorAll<HTMLButtonElement>('button')].at(-1)!;
+  await act(async () => opener.click());
   const choice = [...document.querySelectorAll<HTMLElement>('[role="option"]')].find(
-    (node) => node.textContent === option,
+    (node) => node.textContent?.trim() === option,
   );
   expect(choice, `option ${option}`).toBeDefined();
-  act(() => choice!.click());
+  await act(async () => choice!.click());
 }
 
 async function save() {
@@ -102,7 +113,7 @@ describe('PageAccessSettings', () => {
 
   it('selects membership automatically when a member tag is chosen', async () => {
     render();
-    choose('userTags', 'Supporter');
+    await choose('userTags', 'Supporter');
     expect(checkbox('roleUser')).toBeChecked();
     expect(host.textContent).not.toContain('matchDescription');
     await save();
@@ -119,10 +130,10 @@ describe('PageAccessSettings', () => {
     act(() => checkbox('roleAdmin').click());
     expect(checkbox('roleUser')).toBeChecked();
     expect(host.textContent).not.toContain('matchDescription');
-    choose('userTags', 'Supporter');
+    await choose('userTags', 'Supporter');
     expect(host.textContent).toContain('matchDescription');
     act(() => checkbox('newsletter').click());
-    choose('match', 'all');
+    await choose('match', 'all');
     await save();
     expect(props.onSave).toHaveBeenCalledWith({
       mode: 'conditions',
@@ -246,7 +257,9 @@ describe('PageAccessSettings', () => {
     act(() => button('save').click());
     expect(checkbox('roleUser')).toBeDisabled();
     expect(button('cancel')).toBeDisabled();
-    expect(button('saving')).toBeDisabled();
+    expect(button('saving')).toHaveAttribute('aria-disabled', 'true');
+    act(() => button('saving').click());
+    expect(props.onSave).toHaveBeenCalledOnce();
     await act(async () => reject(new Error('Network unavailable')));
     expect(host.querySelector('[role="alert"]')).toHaveTextContent('saveError');
     expect(checkbox('newsletter')).toBeChecked();

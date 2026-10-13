@@ -1,7 +1,10 @@
 'use client';
 
+import { SectionCard as EditorDsSectionCard } from '@/components/core/Section';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
 import { IconPaperclip } from '@tabler/icons-react';
-import { Box, Group, Paper, Stack, Text, Title } from '@mantine/core';
+
 import { Button } from '@/components/core/Button';
 import { ContentModal } from '@/components/core/Modal';
 import { Tabs } from '@/components/core/Tabs';
@@ -56,21 +59,21 @@ export function UnifiedFileAttachmentPagePreview({
   onBackToUpload,
 }: UnifiedFileAttachmentPagePreviewProps) {
   return (
-    <Box maw={1120} mx="auto">
-      <Stack gap="lg">
-        <Stack gap={4}>
-          <Text size="xs" tt="uppercase" c="dimmed" fw={700}>
+    <div style={{ maxWidth: 1120, marginInline: 'auto' }}>
+      <DsLayoutStack gap="lg">
+        <DsLayoutStack gap="xxs">
+          <DsText size="xs" casing="uppercase" tone="secondary" weight="strong">
             {labels.pageEyebrow}
-          </Text>
-          <Title order={2}>{labels.pageTitle}</Title>
-        </Stack>
+          </DsText>
+          <DsHeading level={2}>{labels.pageTitle}</DsHeading>
+        </DsLayoutStack>
 
-        <Paper withBorder radius={0} p="xl">
-          <Stack gap="lg">
-            <Group justify="space-between">
-              <Text size="sm" fw={600}>
+        <EditorDsSectionCard withBorder padding="xl">
+          <DsLayoutStack gap="lg">
+            <DsLayoutInline justify="between">
+              <DsText size="sm" weight="strong">
                 {labels.editorLabel}
-              </Text>
+              </DsText>
               <Button
                 size="xs"
                 tone="neutral"
@@ -80,8 +83,8 @@ export function UnifiedFileAttachmentPagePreview({
               >
                 {labels.slashAction}
               </Button>
-            </Group>
-            <Text>{labels.editorBody}</Text>
+            </DsLayoutInline>
+            <DsText>{labels.editorBody}</DsText>
             <FileBlockView
               kind="empty"
               emptyTitle={labels.emptyBlockTitle}
@@ -89,9 +92,9 @@ export function UnifiedFileAttachmentPagePreview({
               loadingLabel=""
               onActivate={onOpen}
             />
-          </Stack>
-        </Paper>
-      </Stack>
+          </DsLayoutStack>
+        </EditorDsSectionCard>
+      </DsLayoutStack>
 
       <ContentModal
         id="unified-file-attachment-preview"
@@ -102,16 +105,12 @@ export function UnifiedFileAttachmentPagePreview({
         centered
         size="workspace"
       >
-        <Tabs
-          value={step}
-          onChange={(value) => (value === 'library' ? onOpenLibrary() : onBackToUpload())}
-          style={{ display: 'flex', flex: '1 1 auto', flexDirection: 'column', minHeight: 0 }}
-        >
+        <Tabs value={step} onChange={(value) => (value === 'library' ? onOpenLibrary() : onBackToUpload())} fill>
           <Tabs.List>
             <Tabs.Tab value="upload">{labels.uploadTab}</Tabs.Tab>
             <Tabs.Tab value="library">{labels.libraryTab}</Tabs.Tab>
           </Tabs.List>
-          <Box style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, paddingTop: 'var(--mantine-spacing-md)' }}>
+          <div style={{ ...{ display: 'flex', flex: '1 1 auto', minHeight: 0, paddingTop: 'var(--geul-spacing-md)' } }}>
             {step === 'upload' ? (
               <EditorFileInsertView
                 labels={insertLabels}
@@ -122,9 +121,9 @@ export function UnifiedFileAttachmentPagePreview({
             ) : (
               <EditorFileLibraryPickerView {...pickerProps} />
             )}
-          </Box>
+          </div>
         </Tabs>
       </ContentModal>
-    </Box>
+    </div>
   );
 }

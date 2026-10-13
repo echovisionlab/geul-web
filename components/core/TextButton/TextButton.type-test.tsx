@@ -12,7 +12,7 @@ export function TextButtonTypeContract() {
   );
   const injectedTrigger = <TextButton ref={buttonRef}>Language</TextButton>;
   const compactBlockAction = (
-    <TextButton display="block" controlSize="xs" style={{ '--text-button-line-height': 1.2 }}>
+    <TextButton display="block" controlSize="xs">
       Download file
     </TextButton>
   );
@@ -38,6 +38,13 @@ export function TextButtonTypeContract() {
   // @ts-expect-error native button actions require a button ref
   const buttonWithLinkRef = <TextButton ref={linkRef}>Cookie settings</TextButton>;
 
+  // @ts-expect-error text action styles belong to Core
+  const styled: TextButtonProps = { children: 'Open', style: { color: 'red' } };
+  // @ts-expect-error arbitrary link renderers are not public Core transport
+  const renderer: TextButtonProps = { children: 'About', href: '/about', linkComponent: 'a' };
+  // @ts-expect-error control geometry is finite
+  const geometry: TextButtonProps = { children: 'Open', controlSize: '44px' };
+
   return (
     <>
       {button}
@@ -50,6 +57,39 @@ export function TextButtonTypeContract() {
       {typedLink}
       {linkWithButtonRef}
       {buttonWithLinkRef}
+      {styled}
+      {renderer}
+      {geometry}
     </>
   );
 }
+
+const menuIndicator = (
+  <TextButton indicator="menu" aria-expanded={false}>
+    Options
+  </TextButton>
+);
+const disclosureIndicator = (
+  <TextButton indicator="disclosure" aria-expanded>
+    Details
+  </TextButton>
+);
+const indicatorLink = (
+  // @ts-expect-error opening affordances belong to actions, not navigation links
+  <TextButton href="/about" indicator="menu">
+    About
+  </TextButton>
+);
+// @ts-expect-error indicator variants are finite
+const inventedIndicator = <TextButton indicator="triangle">Options</TextButton>;
+void [menuIndicator, disclosureIndicator, indicatorLink, inventedIndicator];
+
+<TextButton justify="end">Sort</TextButton>;
+// @ts-expect-error Alignment remains a closed Core role.
+<TextButton justify="stretch">Sort</TextButton>;
+
+// @ts-expect-error Router options require an href, including typed prop objects.
+const actionNavigation: TextButtonProps = { children: 'Open', prefetch: false };
+// @ts-expect-error Form association belongs to the action branch.
+const formLink: TextButtonProps = { children: 'About', href: '/about', form: 'editor' };
+void [actionNavigation, formLink];

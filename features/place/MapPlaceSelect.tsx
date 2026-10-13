@@ -1,10 +1,13 @@
 'use client';
+import { LayoutInline as DsLayoutInline, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+import { Select, useInputCombobox } from '@/components/core/Input';
 
 import { useCallback, useMemo, useState } from 'react';
 import { IconMapPin, IconPlus, IconSearch } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Combobox, Group, InputBase, Loader, Text, useCombobox } from '@mantine/core';
+
 import { Button } from '@/components/core/Button';
 import { createMapPlaceBrowserClient } from '@/lib/api/map-place-browser-client';
 import type { MapPlaceBasic } from '@/lib/types/map-place/model';
@@ -43,9 +46,7 @@ export function MapPlaceSelect({
   const tCommonPlaceholders = useTranslations('common.placeholders');
   const mapPlaceClient = useMemo(() => createMapPlaceBrowserClient(), []);
   const [search, setSearch] = useState('');
-  const combobox = useCombobox({
-    onDropdownClose: () => combobox.resetSelectedOption(),
-  });
+  const combobox = useInputCombobox();
 
   // Get selected place details
   const { data: selectedPlace } = useQuery({
@@ -115,94 +116,81 @@ export function MapPlaceSelect({
     setSearch('');
   }, [onChange]);
 
-  const displayValue = selectedPlace ? selectedPlace.name : search;
-
   return (
-    <Box>
-      {label && (
-        <Text size="sm" fw={500} mb={4}>
-          {label}
-        </Text>
-      )}
-      <Group gap="xs" align="flex-start">
-        <Combobox store={combobox} onOptionSubmit={handleOptionSubmit}>
-          <Combobox.Target>
-            <InputBase
-              leftSection={selectedPlace ? <IconMapPin size={16} /> : <IconSearch size={16} />}
-              rightSection={isLoading ? <Loader size={16} /> : null}
-              placeholder={selectedPlace ? undefined : (placeholder ?? tCommonPlaceholders('searchPlaces'))}
-              value={displayValue}
-              onChange={(e) => handleInputChange(e.currentTarget.value)}
-              onClick={() => {
-                if (!selectedPlace && search.length > 0 && searchResults && searchResults.length > 0) {
-                  combobox.openDropdown();
-                }
-              }}
-              onFocus={() => {
-                if (!selectedPlace && search.length > 0 && searchResults && searchResults.length > 0) {
-                  combobox.openDropdown();
-                }
-              }}
-              onBlur={() => setTimeout(() => combobox.closeDropdown(), 300)}
-              disabled={disabled}
-              error={error}
-              rightSectionPointerEvents={selectedPlace ? 'all' : 'none'}
-              style={{ flex: 1 }}
-            />
-          </Combobox.Target>
-
-          <Combobox.Dropdown hidden={!search.trim() || (!searchResults?.length && !onCreateNew)}>
-            <Combobox.Options>
-              {searchResults?.map((place) => (
-                <Combobox.Option key={place.id} value={place.id} onMouseDown={(e) => e.preventDefault()}>
-                  <div>
-                    <Text size="sm" fw={500}>
-                      {place.name}
-                    </Text>
-                    <Text size="xs" c="dimmed" lineClamp={1}>
-                      {place.address}
-                    </Text>
-                  </div>
-                </Combobox.Option>
-              ))}
-              {onCreateNew && search.trim() && (
-                <Combobox.Option value="__create_new__" onMouseDown={(e) => e.preventDefault()}>
-                  <Group gap="xs">
-                    <IconPlus size={16} />
-                    <Text size="sm">{tCommonActions('createNamed', { name: search.trim() })}</Text>
-                  </Group>
-                </Combobox.Option>
-              )}
-            </Combobox.Options>
-          </Combobox.Dropdown>
-        </Combobox>
+    <div>
+      <DsLayoutInline gap="xs" wrap="nowrap">
+        <Select
+          label={label}
+          searchable
+          disabled={disabled}
+          error={error}
+          placeholder={placeholder ?? tCommonPlaceholders('searchPlaces')}
+          value={value}
+          searchValue={combobox.dropdownOpened ? search : (selectedPlace?.name ?? search)}
+          onSearchChange={handleInputChange}
+          dropdownOpened={combobox.dropdownOpened}
+          onDropdownOpen={combobox.openDropdown}
+          onDropdownClose={combobox.closeDropdown}
+          data={[
+            ...(selectedPlace ? [{ value: selectedPlace.id, label: selectedPlace.name }] : []),
+            ...(searchResults ?? [])
+              .filter((item) => item.id !== selectedPlace?.id)
+              .map((item) => ({ value: item.id, label: item.name })),
+            ...(onCreateNew && search.trim()
+              ? [{ value: '__create_new__', label: tCommonActions('createNamed', { name: search.trim() }) }]
+              : []),
+          ]}
+          onChange={(id) => {
+            if (id) {
+              handleOptionSubmit(id);
+            }
+          }}
+          leftSection={selectedPlace ? <IconMapPin size={16} /> : <IconSearch size={16} />}
+          aria-busy={isLoading || undefined}
+          grow
+          renderOption={({ option }) => {
+            const place = searchResults?.find((item) => item.id === option.value);
+            return place ? (
+              <div>
+                <strong>{place.name}</strong>
+                <div>{place.address}</div>
+              </div>
+            ) : (
+              option.label
+            );
+          }}
+        />
 
         {selectedPlace && (
           <Button tone="neutral" emphasis="low" size="sm" onClick={handleClear}>
             {t('clear')}
           </Button>
         )}
-      </Group>
+      </DsLayoutInline>
 
       {selectedPlace && (
-        <Text size="xs" c="dimmed" mt={4}>
-          {selectedPlace.address}
-        </Text>
+        <DsLayoutInset blockStart="xxs">
+          <DsText size="xs" tone="secondary">
+            {selectedPlace.address}
+          </DsText>
+        </DsLayoutInset>
       )}
 
       {onCreateNew && showCreateButton && !selectedPlace && (
-        <Group justify="flex-end" mt={8}>
-          <Button
-            size="xs"
-            emphasis="medium"
-            leftSection={<IconPlus size={14} />}
-            onClick={() => onCreateNew(search.trim())}
-            disabled={disabled}
-          >
-            {search.trim() ? tCommonActions('createNamed', { name: search.trim() }) : t('createNew')}
-          </Button>
-        </Group>
+        <DsLayoutInset blockStart="xs">
+          <DsLayoutInline justify="end">
+            <Button
+              size="xs"
+              emphasis="medium"
+              leftSection={<IconPlus size={14} />}
+              onClick={() => onCreateNew(search.trim())}
+              disabled={disabled}
+            >
+              {search.trim() ? tCommonActions('createNamed', { name: search.trim() }) : t('createNew')}
+            </Button>
+          </DsLayoutInline>
+        </DsLayoutInset>
       )}
-    </Box>
+    </div>
   );
 }

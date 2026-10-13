@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { ToolModule } from './ToolModule';
 import { loadToolModule, type MountedTool, type ToolModule as Module } from './loadToolModule';
 vi.mock('./loadToolModule', () => ({ loadToolModule: vi.fn() }));
@@ -13,7 +14,7 @@ const uri = 'https://tools-anything.dsub.io/embed/index.js';
 function render(options: { uri?: string; locale?: string; colorScheme?: 'light' | 'dark'; preview?: boolean } = {}) {
   act(() =>
     root.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <ToolModule
           uri={options.uri ?? uri}
           locale={options.locale ?? 'en'}
@@ -23,7 +24,7 @@ function render(options: { uri?: string; locale?: string; colorScheme?: 'light' 
           loadingLabel="loading"
           errorLabel="error"
         />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     ),
   );
 }
@@ -172,7 +173,7 @@ describe('tool module lifecycle', () => {
     });
     act(() =>
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           {['a', 'b'].map((id) => (
             <ToolModule
               key={id}
@@ -185,14 +186,14 @@ describe('tool module lifecycle', () => {
               errorLabel="error"
             />
           ))}
-        </MantineProvider>,
+        </DesignSystemProvider>,
       ),
     );
     await settle();
     expect(instances).toHaveLength(2);
     act(() =>
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           {['b'].map((id) => (
             <ToolModule
               key={id}
@@ -205,7 +206,7 @@ describe('tool module lifecycle', () => {
               errorLabel="error"
             />
           ))}
-        </MantineProvider>,
+        </DesignSystemProvider>,
       ),
     );
     expect(instances[0].destroy).toHaveBeenCalledTimes(1);

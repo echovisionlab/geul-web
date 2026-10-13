@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState, type ChangeEvent } from 'react';
 import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { useDisclosure } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { prepareImageFileForPreview } from '@/lib/utils/upload-pipeline';
 
 export interface UseImageUploadCropOptions {
@@ -13,6 +13,8 @@ export interface UseImageUploadCropOptions {
  * Owns browser-side image preprocessing and crop-session state for upload controllers.
  */
 export function useImageUploadCrop({ onUpload, uploadType = UploadType.FEATURED_IMAGE }: UseImageUploadCropOptions) {
+  const [isPreparing, setIsPreparing] = useState(false);
+  const preparingRef = useRef(false);
   const [tempImageSrc, setTempImageSrc] = useState<string | null>(null);
   const [cropModalOpened, { open: openCropModal, close: closeCropModal }] = useDisclosure(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -20,27 +22,37 @@ export function useImageUploadCrop({ onUpload, uploadType = UploadType.FEATURED_
   const handleFiles = useCallback(
     async (files: File[]) => {
       const file = files[0];
-      if (!file) {
+      if (!file || preparingRef.current) {
         return;
       }
 
-      let previewFile: File;
+      preparingRef.current = true;
+      setIsPreparing(true);
       try {
-        previewFile = await prepareImageFileForPreview(file, uploadType);
+        const previewFile = await prepareImageFileForPreview(file, uploadType);
+        const preview = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            if (typeof reader.result === 'string') {
+              resolve(reader.result);
+            } else {
+              reject(new Error('Failed to read image preview.'));
+            }
+          };
+          reader.onerror = () => reject(new Error('Failed to read image preview.'));
+          reader.readAsDataURL(previewFile);
+        });
+        setTempImageSrc(preview);
+        openCropModal();
       } catch (error) {
         notifications.show({
           message: error instanceof Error ? error.message : 'Failed to prepare image.',
-          color: 'red',
+          tone: 'danger',
         });
-        return;
+      } finally {
+        preparingRef.current = false;
+        setIsPreparing(false);
       }
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setTempImageSrc(e.target?.result as string);
-        openCropModal();
-      };
-      reader.readAsDataURL(previewFile);
     },
     [openCropModal, uploadType],
   );
@@ -79,6 +91,7 @@ export function useImageUploadCrop({ onUpload, uploadType = UploadType.FEATURED_
   }, []);
 
   return {
+    isPreparing,
     tempImageSrc,
     cropModalOpened,
     inputRef,

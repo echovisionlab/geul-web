@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 import type { SocialLinks } from './social-links-model';
 
 // Compatibility facade: form/server validation callers retain their existing API.

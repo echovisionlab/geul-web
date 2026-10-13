@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { reorderTracksAction } from '@/lib/actions/track';
 import type { ReleaseTrackItem } from '@/lib/collab/schemas/release-fields.schema';
 import { requireActionSuccess } from '@/lib/editor/require-action-success';
@@ -48,7 +48,7 @@ export function useTrackOrderSave({
       if (request.version === latestRequest.current) {
         onTracksChange(restoreTrackOrder(tracks, confirmedOrder.current));
       }
-      notifications.show({ message: error instanceof Error ? error.message : t('saveFailed'), color: 'red' });
+      notifications.show({ message: error instanceof Error ? error.message : t('saveFailed'), tone: 'danger' });
     },
   });
   useEffect(() => {

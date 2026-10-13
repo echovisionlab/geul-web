@@ -1,30 +1,37 @@
 'use client';
 
+import { LayoutInline as DsLayoutInline, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 import type { ReactNode } from 'react';
-import { Box, Group, Text } from '@mantine/core';
-import { formErrorTextStyles } from './styles';
+import { Text } from '@/components/core/Typography';
 
 interface FieldFooterProps {
   error?: string;
   errorId?: string;
   right?: ReactNode;
+  rightId?: string;
 }
 
-export function FieldFooter({ error, errorId, right }: FieldFooterProps) {
+export function FieldFooter({ error, errorId, right, rightId }: FieldFooterProps) {
   if (!error && !right) {
     return null;
   }
 
   return (
-    <Group justify="space-between" align="flex-start" gap="xs" wrap="nowrap" mt={4}>
-      <Box style={{ flex: 1, minWidth: 0 }}>
-        {error ? (
-          <Text id={errorId} size="xs" style={{ ...formErrorTextStyles, lineHeight: 1.4 }}>
-            {error}
-          </Text>
+    <DsLayoutInset blockStart="xxs">
+      <DsLayoutInline justify="between" align="start" gap="xs" wrap="nowrap">
+        <DsLayoutInline flexible gap="none">
+          {error ? (
+            <Text id={errorId} size="xs" tone="danger">
+              {error}
+            </Text>
+          ) : null}
+        </DsLayoutInline>
+        {right ? (
+          <DsLayoutInline id={rightId} shrink={false} gap="none">
+            {right}
+          </DsLayoutInline>
         ) : null}
-      </Box>
-      {right ? <Box style={{ flexShrink: 0, minWidth: 0 }}>{right}</Box> : null}
-    </Group>
+      </DsLayoutInline>
+    </DsLayoutInset>
   );
 }

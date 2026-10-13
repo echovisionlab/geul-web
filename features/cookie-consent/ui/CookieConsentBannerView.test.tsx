@@ -3,85 +3,106 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+import { DesignSystemTestProvider } from '@/test/TestProviders';
 import { CookieConsentBannerView, type CookieConsentBannerViewModel } from './CookieConsentBannerView';
 
-let host: HTMLDivElement | null = null;
-let root: Root | null = null;
+const model: CookieConsentBannerViewModel = {
+  isOpen: true,
+  requiresRenewal: false,
+  labels: {
+    renewalNotice: 'Renew consent',
+    intro: 'Essential cookies run the site. Analytics is optional.',
+    rejectNonEssential: 'Reject optional',
+    analytics: 'Analytics cookies (Google Analytics)',
+    acceptAll: 'Accept all',
+  },
+  learnMore: [
+    { text: 'Read ' },
+    { text: 'Privacy', href: '/privacy' },
+    { text: ' and ' },
+    { text: 'Terms', href: '/terms' },
+    { text: '.' },
+  ],
+};
+
+let host: HTMLDivElement;
+let root: Root;
+
+function button(name: string) {
+  const match = [...host.querySelectorAll<HTMLButtonElement>('button')].find((control) => control.textContent === name);
+  if (!match) {
+    throw new Error(`Missing button: ${name}`);
+  }
+  return match;
+}
+
+function mount(overrides: Partial<CookieConsentBannerViewModel> = {}) {
+  const callbacks = {
+    onRejectNonEssential: vi.fn(),
+    onAcceptAll: vi.fn(),
+  };
+  host = document.createElement('div');
+  document.body.appendChild(host);
+  root = createRoot(host);
+  act(() =>
+    root.render(
+      <DesignSystemTestProvider forceColorScheme="light">
+        <CookieConsentBannerView model={{ ...model, ...overrides }} {...callbacks} />
+      </DesignSystemTestProvider>,
+    ),
+  );
+  return callbacks;
+}
 
 afterEach(() => {
   act(() => root?.unmount());
   host?.remove();
-  host = null;
-  root = null;
 });
 
 describe('CookieConsentBannerView', () => {
-  it('renders injected copy and emits consent intents', () => {
-    const onRejectNonEssential = vi.fn();
-    const onTogglePreferences = vi.fn();
-    const onAcceptAll = vi.fn();
-    const onAnalyticsChange = vi.fn();
-    const onSavePreferences = vi.fn();
-    const model: CookieConsentBannerViewModel = {
-      isOpen: true,
-      requiresRenewal: true,
-      showPreferences: true,
-      analyticsEnabled: false,
-      labels: {
-        renewalNotice: 'Renew consent',
-        intro: 'Cookie intro',
-        rejectNonEssential: 'Reject optional',
-        hidePreferences: 'Hide options',
-        customize: 'Customize',
-        acceptAll: 'Accept everything',
-        essential: 'Essential cookies',
-        analytics: 'Analytics cookies',
-        savePreferences: 'Save choices',
-      },
-      learnMore: [
-        { text: 'Read ' },
-        { text: 'Privacy', href: '/privacy' },
-        { text: ' and ' },
-        { text: 'Terms', href: '/terms' },
-        { text: '.' },
-      ],
-    };
+  it('exposes the single optional choice through equally available rejection and acceptance', () => {
+    mount();
+    expect(host.querySelector('[role="switch"]')).toBeNull();
+    expect(host.querySelector('aside')).toHaveAccessibleName(model.labels.intro);
+    expect(host.querySelectorAll('button')).toHaveLength(2);
+    expect(host.querySelector('a[href="/privacy"]')).toHaveAttribute('href', '/privacy');
+    expect(host.querySelector('a[href="/terms"]')).toHaveAttribute('href', '/terms');
+    expect(document.querySelector('[aria-expanded]')).toBeNull();
+  });
 
-    host = document.createElement('div');
-    document.body.appendChild(host);
-    root = createRoot(host);
-    act(() => {
-      root?.render(
-        <MantineProvider>
-          <CookieConsentBannerView
-            model={model}
-            onRejectNonEssential={onRejectNonEssential}
-            onTogglePreferences={onTogglePreferences}
-            onAcceptAll={onAcceptAll}
-            onAnalyticsChange={onAnalyticsChange}
-            onSavePreferences={onSavePreferences}
-          />
-        </MantineProvider>,
-      );
-    });
+  it('keeps renewal guidance and essential/optional context visible', () => {
+    mount({ requiresRenewal: true });
+    expect(host.querySelector('aside')).toHaveAccessibleName(model.labels.renewalNotice);
+    expect([...host.querySelectorAll('*')].find((node) => node.textContent === model.labels.intro)).toBeVisible();
+  });
 
-    expect(host.textContent).toContain('Renew consent');
-    expect(host.querySelector<HTMLAnchorElement>('a[href="/privacy"]')?.textContent).toBe('Privacy');
-    expect(host.querySelector<HTMLAnchorElement>('a[href="/terms"]')?.textContent).toBe('Terms');
+  it('requires an explicit decision and keeps reject and accept callbacks separate', () => {
+    const callbacks = mount();
+    expect(callbacks.onAcceptAll).not.toHaveBeenCalled();
+    expect(callbacks.onRejectNonEssential).not.toHaveBeenCalled();
+    act(() => button('Reject optional').click());
+    expect(callbacks.onRejectNonEssential).toHaveBeenCalledTimes(1);
+    expect(callbacks.onAcceptAll).not.toHaveBeenCalled();
+    act(() => button('Accept all').click());
+    expect(callbacks.onAcceptAll).toHaveBeenCalledTimes(1);
+  });
 
-    const buttons = [...host.querySelectorAll<HTMLButtonElement>('button')];
-    act(() => buttons.find((button) => button.textContent === 'Reject optional')?.click());
-    act(() => buttons.find((button) => button.textContent === 'Hide options')?.click());
-    act(() => buttons.find((button) => button.textContent === 'Accept everything')?.click());
-    act(() => buttons.find((button) => button.textContent === 'Save choices')?.click());
-    const analytics = [...host.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')][1];
-    act(() => analytics?.click());
+  it('gives both decisions the same compact text-button size and emphasis', () => {
+    mount();
+    for (const button of host.querySelectorAll('button')) {
+      expect(button).toHaveAttribute('data-size', 'xs');
+      expect(button).toHaveAttribute('data-tone', 'neutral');
+      expect(button).toHaveAttribute('data-emphasis', 'medium');
+      expect(button).toHaveAttribute('data-control-size', 'xs');
+      expect(button).toHaveAccessibleDescription(model.labels.intro);
+      expect(button).not.toHaveAttribute('data-full-width');
+    }
+  });
 
-    expect(onRejectNonEssential).toHaveBeenCalledTimes(1);
-    expect(onTogglePreferences).toHaveBeenCalledTimes(1);
-    expect(onAcceptAll).toHaveBeenCalledTimes(1);
-    expect(onSavePreferences).toHaveBeenCalledTimes(1);
-    expect(onAnalyticsChange).toHaveBeenCalledWith(true);
+  it('renders no interactive controls while closed', () => {
+    mount({ isOpen: false });
+    expect(host.querySelector('aside')).toBeNull();
+    expect(host.querySelector('[role="switch"]')).toBeNull();
+    expect(host.querySelector('button')).toBeNull();
   });
 });

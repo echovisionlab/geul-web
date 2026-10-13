@@ -1,0 +1,41 @@
+.mobileActions {
+  display: flex;
+  align-items: center;
+  gap: var(--geul-spacing-xxs);
+  min-width: 0;
+}
+
+.mobileActions > :first-child {
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+.mobileActions > :last-child:not(:first-child) {
+  margin-inline-start: auto;
+  flex-shrink: 0;
+}
+
+.contextLabel {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.syncIndicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--geul-chrome-icon-size);
+  height: var(--geul-chrome-icon-size);
+  font-size: var(--geul-chrome-icon-size);
+  line-height: 0;
+}
+
+.syncIndicator > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

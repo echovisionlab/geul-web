@@ -48,6 +48,35 @@ afterEach(() => {
 const labels = { title: 'Share', description: 'Protected', password: 'Password', submit: 'Open' };
 
 describe('SharePasswordForm', () => {
+  it('moves focus into unlocked content without adding it to sequential keyboard navigation', async () => {
+    act(() =>
+      root.render(
+        <SharePasswordForm
+          action={async () => ({
+            content: (
+              <article>
+                <h1>Shared post</h1>
+                <p>Body</p>
+              </article>
+            ),
+          })}
+          initialState={{}}
+          hiddenFields={{ token: 'share-token' }}
+          labels={labels}
+          getErrorMessage={(error: string) => error}
+        />,
+      ),
+    );
+    await act(async () => {
+      container.querySelector<HTMLFormElement>('form')?.requestSubmit();
+    });
+    const heading = container.querySelector('h1');
+    expect(document.activeElement).toBe(heading);
+    expect(heading).toHaveAttribute('tabindex', '-1');
+    expect(container.querySelector('form')).toBeNull();
+    act(() => (heading as HTMLElement).blur());
+    expect(heading).not.toHaveAttribute('tabindex');
+  });
   it('renders initial content without mounting a form', () => {
     act(() => {
       root.render(
@@ -98,6 +127,17 @@ describe('SharePasswordForm', () => {
 
     expect(action).toHaveBeenCalledTimes(1);
     expect((action.mock.calls[0]?.[1] as FormData).get('password')).toBe('wrong');
+    expect(container.querySelector('output')?.textContent).toBe('translated:incorrect_password');
+    act(() => {
+      const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+      setValue?.call(input, 'correcting');
+      input?.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    expect(container.querySelector('output')).toBeNull();
+    act(() => container.querySelector<HTMLFormElement>('form')?.requestSubmit());
+    await act(async () => {
+      await Promise.resolve();
+    });
     expect(container.querySelector('output')?.textContent).toBe('translated:incorrect_password');
   });
 });

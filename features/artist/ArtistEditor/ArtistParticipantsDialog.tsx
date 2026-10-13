@@ -1,15 +1,25 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useId, useState } from 'react';
 import { IconArrowsExchange, IconUserOff, IconUserPlus, IconX } from '@tabler/icons-react';
 import { ArtistParticipantRole } from '@echovisionlab/geul-proto/secure/artist_pb.ts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Avatar, Group, Loader, Modal, ScrollArea, Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { Avatar, Spinner as Loader, ScrollArea } from '@/components/core/Display';
+import { ContentModal } from '@/components/core/Modal';
+import { notifications } from '@/components/core/Notification';
 import { LabelBadge } from '@/components/core/Badge';
 import { IconButton } from '@/components/core/IconButton';
 import { Select } from '@/components/core/Input';
@@ -47,6 +57,7 @@ export function ArtistParticipantsDialog({
   canManageParticipants,
   canRemoveOwner,
 }: ArtistParticipantsDialogProps) {
+  const tModalActions = useTranslations('common.actions');
   const t = useTranslations('artistManagers');
   const tCommonPlaceholders = useTranslations('common.placeholders');
   const tCommonMessages = useTranslations('common.messages');
@@ -75,10 +86,10 @@ export function ArtistParticipantsDialog({
       setArtistParticipantAction(artistId, memberId, role),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: t('notifications.updated'), color: 'green' });
+      notifications.show({ message: t('notifications.updated'), tone: 'positive' });
       queryClient.invalidateQueries({ queryKey });
       reset();
     },
@@ -88,10 +99,10 @@ export function ArtistParticipantsDialog({
     mutationFn: (memberId: string) => removeArtistParticipantAction(artistId, memberId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: t('notifications.removed'), color: 'yellow' });
+      notifications.show({ message: t('notifications.removed'), tone: 'positive' });
       queryClient.invalidateQueries({ queryKey });
     },
   });
@@ -118,73 +129,80 @@ export function ArtistParticipantsDialog({
   const renderContent = (): ReactNode => {
     if (isLoading) {
       return (
-        <Group justify="center" py="md">
-          <Loader size="sm" />
-        </Group>
+        <DsLayoutInset block="md">
+          <DsLayoutInline justify="center">
+            <Loader size="sm" />
+          </DsLayoutInline>
+        </DsLayoutInset>
       );
     }
     if (participants.length === 0) {
       return (
-        <Text c="dimmed" ta="center" py="md">
-          {t('empty')}
-        </Text>
+        <DsLayoutInset block="md">
+          <SupportingText tone="secondary" align="center">
+            {t('empty')}
+          </SupportingText>
+        </DsLayoutInset>
       );
     }
     return participants.length <= 5 ? (
       participantList
     ) : (
-      <ScrollArea.Autosize mah={280}>{participantList}</ScrollArea.Autosize>
+      <ScrollArea.Autosize size="standard">{participantList}</ScrollArea.Autosize>
     );
   };
 
   return (
-    <Modal opened={opened} onClose={onClose} title={t('title')} size="lg">
+    <ContentModal opened={opened} onClose={onClose} title={t('title')} size="large" closeLabel={tModalActions('close')}>
       <QueryErrorAlert queries={[searchResultsQuery, participantsQuery]} />
       {canManageParticipants && (
-        <Group gap="sm" mb="md" align="flex-end" wrap="nowrap">
-          <SearchCombobox
-            inputId={`artist-${artistId}-participant-search`}
-            combobox={combobox}
-            search={search}
-            onSearchChange={setSearch}
-            placeholder={tCommonPlaceholders('searchByEmailOrName')}
-            leftSection={<IconUserPlus size={16} />}
-            items={searchResults}
-            isLoading={isFetching}
-            debouncedSearch={debouncedSearch}
-            onSelect={(memberId) => setParticipant.mutate({ memberId, role: newRole })}
-            getItemId={(member) => member.id}
-            emptyMessage={tCommonMessages('noUsersFound')}
-            size="sm"
-            flex={1}
-            renderItem={(member) => (
-              <Group gap="sm">
-                <Avatar
-                  src={buildManagedImageUrl(member.avatarUrl, MANAGED_IMAGE_PRESET.AVATAR_SM)}
-                  size="sm"
-                  radius="xl"
-                >
-                  {member.nickname.charAt(0)}
-                </Avatar>
-                <Text size="sm">{member.nickname}</Text>
-              </Group>
-            )}
-          />
-          <Select
-            label={t('role')}
-            value={String(newRole)}
-            data={[
-              { value: String(ArtistParticipantRole.OWNER), label: t('owner') },
-              { value: String(ArtistParticipantRole.MANAGER), label: t('manager') },
-            ]}
-            onChange={(value) => setNewRole(Number(value) as ArtistParticipantRole)}
-            allowDeselect={false}
-            w={160}
-          />
-        </Group>
+        <DsLayoutInset blockEnd="md">
+          <DsLayoutInline gap="sm" align="end" wrap="nowrap">
+            <SearchCombobox
+              inputId={`artist-${artistId}-participant-search`}
+              combobox={combobox}
+              search={search}
+              onSearchChange={setSearch}
+              placeholder={tCommonPlaceholders('searchByEmailOrName')}
+              leftSection={<IconUserPlus size={16} />}
+              items={searchResults}
+              isLoading={isFetching}
+              debouncedSearch={debouncedSearch}
+              onSelect={(memberId) => setParticipant.mutate({ memberId, role: newRole })}
+              getItemId={(member) => member.id}
+              getItemText={(member) => member.nickname}
+              emptyMessage={tCommonMessages('noUsersFound')}
+              size="sm"
+              grow
+              renderItem={(member) => (
+                <DsLayoutInline gap="sm">
+                  <Avatar
+                    src={buildManagedImageUrl(member.avatarUrl, MANAGED_IMAGE_PRESET.AVATAR_SM)}
+                    size="sm"
+                    shape="circle"
+                    name={member.nickname}
+                  />
+                  <DsText size="sm">{member.nickname}</DsText>
+                </DsLayoutInline>
+              )}
+            />
+            <div style={{ width: 160 }}>
+              <Select
+                label={t('role')}
+                value={String(newRole)}
+                data={[
+                  { value: String(ArtistParticipantRole.OWNER), label: t('owner') },
+                  { value: String(ArtistParticipantRole.MANAGER), label: t('manager') },
+                ]}
+                onChange={(value) => setNewRole(Number(value) as ArtistParticipantRole)}
+                allowDeselect={false}
+              />
+            </div>
+          </DsLayoutInline>
+        </DsLayoutInset>
       )}
       {renderContent()}
-    </Modal>
+    </ContentModal>
   );
 }
 
@@ -212,38 +230,42 @@ export function ArtistParticipantsListView({
   onChangeRole: (memberId: string, role: ArtistParticipantRole) => void;
   onRemove: (memberId: string) => void;
 }) {
+  const listId = useId();
   return (
-    <Stack gap="xs">
+    <DsLayoutStack gap="xs">
       {participants.map((participant) => {
         const isOwner = participant.role === ArtistParticipantRole.OWNER;
         const canChangeRole = canManageParticipants && (!isOwner || canRemoveOwner);
         const canRemove = canManageParticipants && (!isOwner || canRemoveOwner);
         return (
-          <Group
+          <DsLayoutInline
             key={participant.memberId}
-            justify="space-between"
+            justify="between"
             wrap="nowrap"
             data-participant-id={participant.memberId}
+            role="group"
+            aria-labelledby={`${listId}-${participant.memberId}-name ${listId}-${participant.memberId}-role`}
           >
-            <Group gap="sm" wrap="nowrap" miw={0}>
-              <Avatar
-                src={buildManagedImageUrl(participant.avatarUrl, MANAGED_IMAGE_PRESET.AVATAR_SM)}
-                size="sm"
-                radius="xl"
-              >
-                {participant.nickname.charAt(0)}
-              </Avatar>
-              <Text size="sm" truncate>
-                {participant.nickname}
-              </Text>
-              {!participant.hasEffectiveAuthority ? (
-                <Tooltip label={labels.inactive}>
-                  <IconUserOff size={16} aria-label={labels.inactive} />
-                </Tooltip>
-              ) : null}
-            </Group>
-            <Group gap="xs" wrap="nowrap">
-              <LabelBadge size="sm" tone={isOwner ? 'accent' : 'neutral'}>
+            <div style={{ minWidth: 0 }}>
+              <DsLayoutInline gap="sm" wrap="nowrap">
+                <Avatar
+                  src={buildManagedImageUrl(participant.avatarUrl, MANAGED_IMAGE_PRESET.AVATAR_SM)}
+                  size="sm"
+                  shape="circle"
+                  name={participant.nickname}
+                />
+                <DsText id={`${listId}-${participant.memberId}-name`} size="sm" truncate>
+                  {participant.nickname}
+                </DsText>
+                {!participant.hasEffectiveAuthority ? (
+                  <Tooltip label={labels.inactive}>
+                    <IconUserOff size={16} role="img" aria-label={labels.inactive} />
+                  </Tooltip>
+                ) : null}
+              </DsLayoutInline>
+            </div>
+            <DsLayoutInline gap="xs" wrap="nowrap">
+              <LabelBadge id={`${listId}-${participant.memberId}-role`} size="sm" tone={isOwner ? 'accent' : 'neutral'}>
                 {isOwner ? labels.owner : labels.manager}
               </LabelBadge>
               <Tooltip label={isOwner ? labels.makeManager : labels.makeOwner}>
@@ -251,6 +273,7 @@ export function ArtistParticipantsListView({
                   emphasis="low"
                   size="sm"
                   aria-label={isOwner ? labels.makeManager : labels.makeOwner}
+                  aria-describedby={`${listId}-${participant.memberId}-name`}
                   disabled={!canChangeRole || pending}
                   onClick={() =>
                     onChangeRole(
@@ -268,16 +291,17 @@ export function ArtistParticipantsListView({
                   emphasis="low"
                   size="sm"
                   aria-label={labels.remove}
+                  aria-describedby={`${listId}-${participant.memberId}-name`}
                   disabled={!canRemove || pending}
                   onClick={() => onRemove(participant.memberId)}
                 >
                   <IconX size={14} />
                 </IconButton>
               </Tooltip>
-            </Group>
-          </Group>
+            </DsLayoutInline>
+          </DsLayoutInline>
         );
       })}
-    </Stack>
+    </DsLayoutStack>
   );
 }

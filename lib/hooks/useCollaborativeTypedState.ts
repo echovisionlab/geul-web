@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import type * as Y from 'yjs';
-import type * as z from 'zod';
 import type { TypedMetaMap } from '@/lib/collab/TypedMetaMap';
+import type * as z from '@/lib/zod-mini';
 import { useHocuspocusConnection } from './useHocuspocusConnection';
 
-type ZodObjectSchema = z.ZodObject<z.ZodRawShape>;
+/** An object schema from either zod entry point (Common's collaboration schemas use classic zod). */
+type ZodObjectSchema = z.core.$ZodObject;
 type SchemaState<TSchema extends ZodObjectSchema> = z.infer<TSchema>;
 type SchemaKey<TSchema extends ZodObjectSchema> = keyof SchemaState<TSchema> & string;
 

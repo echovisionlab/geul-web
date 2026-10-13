@@ -1,8 +1,10 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import type { ReactNode } from 'react';
 import { IconCalendar, IconHistory, IconMarkdown, IconMaximize, IconMinimize, IconUsers } from '@tabler/icons-react';
-import { Stack, Text } from '@mantine/core';
+
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
 import {
@@ -74,14 +76,14 @@ export function PostEditorHeaderSection({
     collabActions.push({
       label: tCommonLabels('versionHistory'),
       onClick: onOpenVersionHistory,
-      icon: <IconHistory size={16} />,
+      icon: <IconHistory />,
     });
   }
   if (showEditorChrome && onOpenParticipants) {
     collabActions.push({
       label: t('participantsAction'),
       onClick: onOpenParticipants,
-      icon: <IconUsers size={16} />,
+      icon: <IconUsers />,
     });
   }
 
@@ -92,7 +94,7 @@ export function PostEditorHeaderSection({
       label: zenModeLabel,
       tooltip: zenModeLabel,
       ariaLabel: zenModeLabel,
-      icon: isZenMode ? <IconMinimize size={20} /> : <IconMaximize size={20} />,
+      icon: isZenMode ? <IconMinimize /> : <IconMaximize />,
       iconOnly: true,
       onClick: onToggleZenMode,
     },
@@ -105,7 +107,7 @@ export function PostEditorHeaderSection({
       label: rescheduleLabel,
       tooltip: rescheduleLabel,
       ariaLabel: rescheduleLabel,
-      icon: <IconCalendar size={20} />,
+      icon: <IconCalendar />,
       iconOnly: true,
       onClick: onReschedule,
     });
@@ -117,14 +119,14 @@ export function PostEditorHeaderSection({
       label: markdownLabel,
       tooltip: markdownLabel,
       ariaLabel: markdownLabel,
-      icon: <IconMarkdown size={20} />,
+      icon: <IconMarkdown />,
       iconOnly: true,
       onClick: onExportMarkdown,
     });
   }
 
   return (
-    <Stack gap="xs">
+    <DsLayoutStack gap="xs">
       <EditorHeader
         title={title}
         onTitleChange={canEditTitle ? onTitleChange : undefined}
@@ -143,12 +145,12 @@ export function PostEditorHeaderSection({
             ? {
                 title: tCommon('actions.delete'),
                 message: (
-                  <Text>
+                  <DsText>
                     {tCommon.rich('messages.confirmDeleteNamedRich', {
                       name: title || tCommon('states.untitled'),
                       strong: (chunks) => <strong>{chunks}</strong>,
                     })}
-                  </Text>
+                  </DsText>
                 ),
               }
             : undefined
@@ -165,7 +167,7 @@ export function PostEditorHeaderSection({
       />
 
       {showScheduleSummary ? (
-        <Text size="xs" c="dimmed">
+        <DsText size="xs" tone="secondary">
           {t('schedule.scheduledFor', {
             value: scheduledDateTime.dateTime(scheduledAt, {
               dateStyle: 'medium',
@@ -173,8 +175,8 @@ export function PostEditorHeaderSection({
             }),
             timeZone: scheduledTimeZone,
           })}
-        </Text>
+        </DsText>
       ) : null}
-    </Stack>
+    </DsLayoutStack>
   );
 }

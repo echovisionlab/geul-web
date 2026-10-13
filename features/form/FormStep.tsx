@@ -1,8 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+import { Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Group, Stack, Text, Title } from '@mantine/core';
+
 import { Button } from '@/components/core/Button';
 import { evaluateConditionLogic } from '@/lib/form/build';
 import type { FieldValue, FormValues } from '@/lib/types/form/guards';
@@ -13,9 +19,14 @@ import { getFieldKey } from './FormField/utils';
 
 export interface FormStepProps {
   step: FormStepSchema;
+  /** Explicit renderer navigation requests focus; passive schema updates do not. */
+  navigationRequest?: number;
+  navigationLabel?: string;
+  headingLevel?: 2 | 3;
+  headingAriaLevel?: 2 | 3 | 4;
   values: FormValues;
   phoneDefaultCountry?: string | null;
-  onChange: (name: string, value: FieldValue) => void;
+  onChange: (name: string, value: FieldValue | undefined) => void;
   onStepValidityChange: (isValid: boolean) => void;
   onNext: () => void;
   onPrev: () => void;
@@ -26,6 +37,10 @@ export interface FormStepProps {
 
 export function FormStep({
   step,
+  navigationRequest = 0,
+  navigationLabel,
+  headingLevel = 2,
+  headingAriaLevel,
   values,
   phoneDefaultCountry,
   onChange,
@@ -37,6 +52,15 @@ export function FormStep({
   isSubmitting,
 }: FormStepProps) {
   const t = useTranslations('publicForm.navigation');
+  const headingId = useId();
+  const stepRef = useRef<HTMLElement>(null);
+  const previousNavigationRequest = useRef(navigationRequest);
+  useEffect(() => {
+    if (previousNavigationRequest.current !== navigationRequest) {
+      previousNavigationRequest.current = navigationRequest;
+      stepRef.current?.focus({ preventScroll: true });
+    }
+  }, [navigationRequest]);
   const allFields = step.fields ?? [];
   const stepTitle = step.title?.trim() ? step.title : undefined;
   const shouldShowTitle = step.showTitle !== false && !!stepTitle;
@@ -57,11 +81,6 @@ export function FormStep({
 
   // FormStep collects field validity
   const [fieldValidity, setFieldValidity] = useState<Record<string, boolean | null>>({});
-
-  // Reset field validity when step changes
-  useEffect(() => {
-    setFieldValidity({});
-  }, [step.id]);
 
   const handleFieldValidityChange = useCallback((name: string, isValid: boolean | null) => {
     setFieldValidity((prev) => ({ ...prev, [name]: isValid }));
@@ -86,22 +105,34 @@ export function FormStep({
   }, [isStepValid]);
 
   return (
-    <Stack gap="xl">
+    <DsLayoutStack
+      ref={stepRef}
+      gap="xl"
+      role="group"
+      tabIndex={-1}
+      aria-labelledby={shouldShowTitle ? headingId : undefined}
+      aria-label={shouldShowTitle ? undefined : (stepTitle ?? navigationLabel)}
+    >
       {(shouldShowTitle || shouldShowDescription) && (
-        <Stack gap="xs">
-          {shouldShowTitle ? <Title order={2}>{parseMarkdown(stepTitle ?? '')}</Title> : null}
+        <DsLayoutStack gap="xs">
+          {shouldShowTitle ? (
+            <DsHeading id={headingId} level={headingLevel} aria-level={headingAriaLevel}>
+              {parseMarkdown(stepTitle ?? '')}
+            </DsHeading>
+          ) : null}
           {step.description && (
-            <Text c="dimmed" size="lg">
+            <DsText tone="secondary" size="sm">
               {parseMarkdown(step.description)}
-            </Text>
+            </DsText>
           )}
-        </Stack>
+        </DsLayoutStack>
       )}
 
       {visibleFields.map((field) => (
         <FormField
           key={field.id}
           field={field}
+          disabled={isSubmitting}
           phoneDefaultCountry={phoneDefaultCountry}
           value={values[getFieldKey(field)]}
           onChange={(value) => onChange(getFieldKey(field), value)}
@@ -109,16 +140,18 @@ export function FormStep({
         />
       ))}
 
-      <Group justify={isFirst ? 'flex-end' : 'space-between'} mt="xl">
-        {!isFirst ? (
-          <Button tone="neutral" emphasis="low" onClick={onPrev}>
-            {t('previous')}
+      <DsLayoutInset blockStart="xl">
+        <DsLayoutInline justify={isFirst ? 'end' : 'between'}>
+          {!isFirst ? (
+            <Button tone="neutral" emphasis="low" disabled={isSubmitting} onClick={onPrev}>
+              {t('previous')}
+            </Button>
+          ) : null}
+          <Button onClick={onNext} loading={isSubmitting && isLast} disabled={!isStepValid || isSubmitting}>
+            {isLast ? t('submit') : t('next')}
           </Button>
-        ) : null}
-        <Button onClick={onNext} loading={isSubmitting && isLast} disabled={!isStepValid}>
-          {isLast ? t('submit') : t('next')}
-        </Button>
-      </Group>
-    </Stack>
+        </DsLayoutInline>
+      </DsLayoutInset>
+    </DsLayoutStack>
   );
 }

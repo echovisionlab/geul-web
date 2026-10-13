@@ -3,8 +3,10 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { JsonLdScript } from '@/features/metadata/ui/JsonLdScript';
 import { PostTaxonomyListPage } from '@/features/post/PostTaxonomyListPage';
+import { TAXONOMY_POSTS_INITIAL_QUERY } from '@/features/post/post-taxonomy-query';
 import { getTagMetadataDocument } from '@/lib/queries/metadata';
 import { getPublicTagBySlug } from '@/lib/queries/taxonomy';
+import { getPublishedPostsByTaxonomyFirstPage } from '@/lib/queries/post-taxonomy-list.server';
 import { buildTaxonomyJsonLd } from '@/lib/utils/json-ld';
 import { buildPageOgMetadata } from '@/lib/utils/og';
 
@@ -43,11 +45,22 @@ export default async function TagPostsPage({ params }: Props) {
   if (!tag) {
     notFound();
   }
+  const firstPage = await getPublishedPostsByTaxonomyFirstPage({
+    taxonomyType: 'tag',
+    taxonomyId: tag.id,
+    query: TAXONOMY_POSTS_INITIAL_QUERY,
+  });
 
   return (
     <>
       {tagMetadata && <JsonLdScript data={buildTaxonomyJsonLd(tagMetadata)} />}
-      <PostTaxonomyListPage kind="tag" taxonomyId={tag.id} name={tag.name} />
+      <PostTaxonomyListPage
+        kind="tag"
+        taxonomyId={tag.id}
+        name={tag.name}
+        initialResult={firstPage?.result}
+        initialResultUpdatedAt={firstPage?.updatedAt}
+      />
     </>
   );
 }

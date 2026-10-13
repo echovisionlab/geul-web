@@ -42,6 +42,7 @@ export function FileMediaPreview({ source }: { source: FileMediaPreviewSource })
     return (
       <div data-file-media-preview="video" style={{ width: '100%' }}>
         <VideoPlayer
+          name={source.name}
           hlsSrc={source.hlsUrl}
           src={source.originalUrl}
           poster={source.posterUrl}

@@ -1,14 +1,19 @@
 'use client';
+import { List, Text as DsText } from '@/components/core/Typography';
+import { ConfirmationDialog } from '@/features/confirmation';
+
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+
 import { unwrapQueryResult, type QueryValue } from '@/lib/api/query-result';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { List, Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { TableRowMenu } from '@/components/core/DataTable';
-import { ConfirmModal } from '@/components/core/Modal';
+
 import { deleteLabelAction, previewDeleteLabelAction } from '@/lib/actions/label';
 
 interface Label {
@@ -17,11 +22,19 @@ interface Label {
   slug?: string | null;
 }
 
-interface LabelRowMenuProps {
+export interface LabelRowMenuProps {
+  previewAction?: typeof previewDeleteLabelAction;
+  deleteAction?: typeof deleteLabelAction;
+  onDeleted?: (id: string) => void;
   label: Label;
 }
 
-export function LabelRowMenu({ label }: LabelRowMenuProps) {
+export function LabelRowMenu({
+  label,
+  previewAction = previewDeleteLabelAction,
+  deleteAction = deleteLabelAction,
+  onDeleted,
+}: LabelRowMenuProps) {
   const tCommon = useTranslations('common');
   const tTable = useTranslations('dataTable');
   const router = useRouter();
@@ -34,9 +47,9 @@ export function LabelRowMenu({ label }: LabelRowMenuProps) {
   const openDelete = async () => {
     setDeleteLoading(true);
     try {
-      const preview = await previewDeleteLabelAction(label.id).then(unwrapQueryResult);
+      const preview = await previewAction(label.id).then(unwrapQueryResult);
       if (!preview) {
-        notifications.show({ message: tCommon('messages.failedToLoad'), color: 'red' });
+        notifications.show({ message: tCommon('messages.failedToLoad'), tone: 'danger' });
         return;
       }
       setDeletePreview(preview);
@@ -52,18 +65,22 @@ export function LabelRowMenu({ label }: LabelRowMenuProps) {
       if (!deletePreview) {
         return;
       }
-      const result = await deleteLabelAction(label.id, deletePreview.revision);
+      const result = await deleteAction(label.id, deletePreview.revision);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       notifications.show({
         message: tCommon('messages.itemDeleted', { item: tCommon('entities.label') }),
-        color: 'red',
+        tone: 'positive',
       });
       setDeleteOpened(false);
       setDeletePreview(null);
-      router.refresh();
+      if (onDeleted) {
+        onDeleted(label.id);
+      } else {
+        router.refresh();
+      }
     } finally {
       setDeleteLoading(false);
     }
@@ -83,11 +100,12 @@ export function LabelRowMenu({ label }: LabelRowMenuProps) {
             label: tCommon('actions.delete'),
             icon: <IconTrash size={16} />,
             onClick: openDelete,
-            color: 'red',
+            tone: 'danger',
           },
         ]}
       />
-      <ConfirmModal
+      <ConfirmationDialog
+        intent="delete"
         opened={deleteOpened}
         onClose={() => {
           setDeleteOpened(false);
@@ -96,18 +114,18 @@ export function LabelRowMenu({ label }: LabelRowMenuProps) {
         onConfirm={handleDelete}
         title={tCommon('actions.delete')}
         message={
-          <Stack gap="xs">
-            <Text>
+          <DsLayoutStack gap="xs">
+            <DsText>
               {tCommon.rich('messages.confirmDeleteNamedRich', {
                 name: label.name,
                 strong: (chunks) => <strong>{chunks}</strong>,
               })}
-            </Text>
+            </DsText>
             {deletePreview && deletePreview.impacts.length > 0 ? (
               <>
-                <Text size="sm" c="dimmed">
+                <DsText size="sm" tone="warning">
                   {tCommon('messages.relatedItemsWillBeUnlinked', { count: deletePreview.impacts.length })}
-                </Text>
+                </DsText>
                 <List size="sm">
                   {deletePreview.impacts.map((impact) => (
                     <List.Item key={`${impact.kind}-${impact.entityId}`}>{impact.displayName}</List.Item>
@@ -115,7 +133,7 @@ export function LabelRowMenu({ label }: LabelRowMenuProps) {
                 </List>
               </>
             ) : null}
-          </Stack>
+          </DsLayoutStack>
         }
         confirmLabel={tCommon('actions.delete')}
         cancelLabel={tCommon('actions.cancel')}

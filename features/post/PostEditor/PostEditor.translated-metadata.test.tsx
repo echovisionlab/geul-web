@@ -56,16 +56,13 @@ vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
 vi.mock('@tanstack/react-query', () => ({
   useMutation: () => ({ isPending: false, mutate: vi.fn(), mutateAsync: vi.fn(async () => undefined) }),
 }));
-vi.mock('@mantine/core', () => ({
-  SimpleGrid: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  Stack: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  Text: ({ children }: { children: ReactNode }) => <span>{children}</span>,
-}));
+
 vi.mock('@mantine/hooks', () => ({
+  useMediaQuery: () => false,
   useDisclosure: () => [false, { open: vi.fn(), close: vi.fn() }],
   useWindowEvent: vi.fn(),
 }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 vi.mock('@/components/core/Input', () => ({ Checkbox: () => null }));
 vi.mock('@/lib/contexts/EditorRuntimeContext', () => ({
   EditorRuntimeProvider: ({ children }: { children: ReactNode }) => children,

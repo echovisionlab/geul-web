@@ -30,7 +30,7 @@ export function EntityRowMenu<TEntity>({ entity, label, editHref, onEdit, onDele
           label: tCommon('actions.delete'),
           icon: <IconTrash size={16} />,
           onClick: () => onDelete(entity),
-          color: 'red',
+          tone: 'danger',
         },
       ]}
     />

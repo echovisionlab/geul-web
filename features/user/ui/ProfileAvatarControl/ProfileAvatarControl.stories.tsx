@@ -1,7 +1,8 @@
+import { useArgs } from 'storybook/preview-api';
+import { withFeatureLabels } from '@/stories/feature-localization';
 import type { Meta, StoryObj } from '@storybook/nextjs';
-import { Box, Stack, Text } from '@mantine/core';
-import { LabelBadge } from '@/components/core/Badge';
 import { ProfileAvatarControl } from './ProfileAvatarControl';
+import { useImageCropAccessibility } from '@/lib/i18n/useImageCropAccessibility';
 
 const demoAvatar =
   'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"%3E%3Crect width="256" height="256" fill="%23547985"/%3E%3Ccircle cx="128" cy="91" r="51" fill="%23d9b59a"/%3E%3C/svg%3E';
@@ -20,20 +21,48 @@ const labels = {
 const meta = {
   title: 'Feature/User/ProfileAvatarControl',
   component: ProfileAvatarControl,
+  render: function InteractiveStory(args) {
+    const [, updateArgs] = useArgs();
+    const cropAccessibility = useImageCropAccessibility(args.labels.cropTitle);
+    return (
+      <ProfileAvatarControl
+        {...args}
+        cropAccessibility={cropAccessibility}
+        onSave={async (blob) => {
+          const imageUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+          updateArgs({ imageUrl });
+          return true;
+        }}
+        onRemove={async () => {
+          updateArgs({ imageUrl: null });
+          return true;
+        }}
+      />
+    );
+  },
   parameters: { layout: 'centered' },
   decorators: [
+    withFeatureLabels({
+      labels: {
+        upload: (t) => t('common.actions.uploadItem', { item: t('userAvatar.label') }),
+        change: 'common.uploadField.changeHint',
+        remove: 'common.actions.remove',
+        cropTitle: 'userAvatar.cropTitle',
+        cropPreview: 'userAvatar.cropTitle',
+        cancel: 'common.actions.cancel',
+        confirm: 'common.actions.confirm',
+        preparing: 'common.uploadField.status.preparingImage',
+      },
+    }),
     (Story) => (
-      <Box w={420} p="xl">
-        <Stack align="center" gap="md">
-          <Story />
-          <Stack gap={4} align="center">
-            <Text size="lg" fw={500}>
-              johndoe
-            </Text>
-            <LabelBadge tone="danger">Admin</LabelBadge>
-          </Stack>
-        </Stack>
-      </Box>
+      <div style={{ padding: 'var(--geul-spacing-xl)' }}>
+        <Story />
+      </div>
     ),
   ],
   args: {

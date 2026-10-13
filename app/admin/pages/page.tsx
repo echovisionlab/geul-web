@@ -1,7 +1,6 @@
 import { getTranslations } from 'next-intl/server';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import { CreatePageButton, PageModalProvider, PageModals, PagesTableContent } from '@/features/admin/cms-page';
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
+import { PagesPageView } from '@/features/admin/cms-page/PagesPageView';
 import { listPagesAdmin } from '@/lib/queries/page';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
@@ -54,23 +53,13 @@ export default async function AdminPagesPage({ searchParams }: PageProps) {
   });
 
   return (
-    <PageModalProvider>
-      <AdminPageHeader
-        title={pagesLabel}
-        items={[{ key: 'create-page', type: 'custom', content: <CreatePageButton /> }]}
-      />
-
-      <ServerDataTable namespace="pages">
-        <PagesTableContent
-          result={result}
-          searchPlaceholder={searchPlaceholder}
-          filterFields={filterFields}
-          sortFields={sortFields}
-        />
-        <ServerDataTable.Pagination namespace="pages" result={result} searchParams={params} />
-      </ServerDataTable>
-
-      <PageModals />
-    </PageModalProvider>
+    <PagesPageView
+      title={pagesLabel}
+      result={result}
+      filterFields={filterFields}
+      sortFields={sortFields}
+      searchPlaceholder={searchPlaceholder}
+      searchParams={params.toString()}
+    />
   );
 }

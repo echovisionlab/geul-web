@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { ServerDataTableMultiFilter } from './ServerDataTableMultiFilterRuntime';
 
 const pushMock = vi.fn();
@@ -68,20 +69,6 @@ vi.mock('@/components/core/Drawer', () => ({
     ) : null,
 }));
 
-vi.mock('@mantine/core', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@mantine/core')>();
-
-  return {
-    ...actual,
-    Indicator: ({ children }: { children: ReactNode }) => <>{children}</>,
-    ScrollArea: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-    Popover: Object.assign(({ children }: { children?: ReactNode }) => <div>{children}</div>, {
-      Target: ({ children }: { children?: ReactNode }) => <>{children}</>,
-      Dropdown: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-    }),
-  };
-});
-
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 Object.defineProperty(window, 'matchMedia', {
@@ -109,7 +96,7 @@ function render(node: ReactNode) {
   root = createRoot(container);
 
   act(() => {
-    root?.render(<MantineProvider>{node}</MantineProvider>);
+    root?.render(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>);
   });
 }
 
@@ -159,7 +146,7 @@ describe('ServerDataTableMultiFilter', () => {
       <ServerDataTableMultiFilter namespace="posts" fields={[{ field: 'title', label: 'Title', type: 'string' }]} />,
     );
 
-    const trigger = findButtonByLabel('Filter');
+    const trigger = findButtonByLabel('Filter (1)');
     expect(trigger).toBeDefined();
 
     act(() => {

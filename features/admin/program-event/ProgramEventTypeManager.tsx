@@ -1,13 +1,15 @@
 'use client';
+import { ConfirmationDialog } from '@/features/confirmation';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useMemo, useState } from 'react';
 import { IconListDetails } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Group, Stack } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { Button } from '@/components/core/Button';
 import { Checkbox, NumberInput, Select, Textarea, TextInput } from '@/components/core/Input';
-import { ConfirmModal, ContentModal } from '@/components/core/Modal';
+import { ContentModal, DialogActions } from '@/components/core/Modal';
 import {
   createProgramEventTypeAction,
   deleteProgramEventTypeAction,
@@ -97,7 +99,7 @@ export function ProgramEventTypeManagerView({
   return (
     <>
       <ContentModal opened={opened} onClose={onClose} title={labels.title} closeLabel={labels.close} size="standard">
-        <Stack gap="md">
+        <DsLayoutStack gap="md">
           <Select
             label={labels.type}
             value={selectedValue}
@@ -153,27 +155,36 @@ export function ProgramEventTypeManagerView({
             checked={draft.requiresStreamUrl}
             onChange={(event) => onDraftChange({ ...draft, requiresStreamUrl: event.currentTarget.checked })}
           />
-          <Group justify="space-between">
-            <Button type="button" tone="danger" emphasis="low" onClick={onRequestDelete} disabled={!draft.id || saving}>
-              {labels.delete}
-            </Button>
-            <Group gap="xs">
-              <Button type="button" tone="neutral" emphasis="low" onClick={onClose} disabled={saving}>
-                {labels.cancel}
-              </Button>
+          <DialogActions
+            leadingActions={
               <Button
                 type="button"
-                onClick={onSave}
-                loading={saving}
-                disabled={!draft.name.trim() || !draft.slug.trim()}
+                tone="danger"
+                emphasis="low"
+                onClick={onRequestDelete}
+                disabled={!draft.id || saving}
               >
-                {labels.save}
+                {labels.delete}
               </Button>
-            </Group>
-          </Group>
-        </Stack>
+            }
+          >
+            <Button type="button" tone="neutral" emphasis="low" onClick={onClose} disabled={saving}>
+              {labels.cancel}
+            </Button>
+            <Button
+              emphasis="strong"
+              type="button"
+              onClick={onSave}
+              loading={saving}
+              disabled={!draft.name.trim() || !draft.slug.trim()}
+            >
+              {labels.save}
+            </Button>
+          </DialogActions>
+        </DsLayoutStack>
       </ContentModal>
-      <ConfirmModal
+      <ConfirmationDialog
+        intent="delete"
         opened={deleteConfirmationOpened}
         onClose={onCancelDelete}
         onConfirm={onConfirmDelete}
@@ -189,7 +200,23 @@ export function ProgramEventTypeManagerView({
   );
 }
 
-export function ProgramEventTypeManagerButton({ initialTypes }: { initialTypes: AdminProgramEventTypeOption[] }) {
+export interface ProgramEventTypeBindings {
+  createProgramEventTypeAction: typeof createProgramEventTypeAction;
+  deleteProgramEventTypeAction: typeof deleteProgramEventTypeAction;
+  updateProgramEventTypeAction: typeof updateProgramEventTypeAction;
+}
+const defaultBindings: ProgramEventTypeBindings = {
+  createProgramEventTypeAction,
+  deleteProgramEventTypeAction,
+  updateProgramEventTypeAction,
+};
+export function ProgramEventTypeManagerButton({
+  initialTypes,
+  bindings = defaultBindings,
+}: {
+  initialTypes: AdminProgramEventTypeOption[];
+  bindings?: ProgramEventTypeBindings;
+}) {
   const locale = useLocale();
   const tCommon = useTranslations('common');
   const tTypes = useTranslations('programEventAdmin.types');
@@ -233,8 +260,8 @@ export function ProgramEventTypeManagerButton({ initialTypes }: { initialTypes: 
   const save = async () => {
     setSaving(true);
     const result = draft.id
-      ? await updateProgramEventTypeAction(draft.id, { ...draft, locale })
-      : await createProgramEventTypeAction({
+      ? await bindings.updateProgramEventTypeAction(draft.id, { ...draft, locale })
+      : await bindings.createProgramEventTypeAction({
           name: draft.name,
           slug: draft.slug,
           sortOrder: draft.sortOrder,
@@ -244,7 +271,7 @@ export function ProgramEventTypeManagerButton({ initialTypes }: { initialTypes: 
         });
     setSaving(false);
     if ('error' in result && result.error) {
-      notifications.show({ message: result.error, color: 'red' });
+      notifications.show({ message: result.error, tone: 'danger' });
       return;
     }
     if (!draft.id && 'data' in result && result.data) {
@@ -277,17 +304,17 @@ export function ProgramEventTypeManagerButton({ initialTypes }: { initialTypes: 
         ),
       );
     }
-    notifications.show({ message: tCommon('notifications.saveSuccess'), color: 'green' });
+    notifications.show({ message: tCommon('notifications.saveSuccess'), tone: 'positive' });
   };
   const confirmDelete = async () => {
     if (!draft.id) {
       return;
     }
     setDeleting(true);
-    const result = await deleteProgramEventTypeAction(draft.id);
+    const result = await bindings.deleteProgramEventTypeAction(draft.id);
     setDeleting(false);
     if ('error' in result && result.error) {
-      notifications.show({ message: result.error, color: 'red' });
+      notifications.show({ message: result.error, tone: 'danger' });
       return;
     }
     const remaining = types.filter((type) => type.id !== draft.id);

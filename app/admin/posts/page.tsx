@@ -1,7 +1,6 @@
 import { getTranslations } from 'next-intl/server';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import { CreatePostButton, PostModalProvider, PostModals, PostsTableContent } from '@/features/admin/post';
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
+import { PostsPageView } from '@/features/admin/post/PostsPageView';
 import { listPostsAdmin } from '@/lib/queries/post';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
@@ -54,23 +53,13 @@ export default async function AdminPostsPage({ searchParams }: PageProps) {
   });
 
   return (
-    <PostModalProvider>
-      <AdminPageHeader
-        title={postsLabel}
-        items={[{ key: 'create-post', type: 'custom', content: <CreatePostButton /> }]}
-      />
-
-      <ServerDataTable namespace="posts">
-        <PostsTableContent
-          result={result}
-          filterFields={filterFields}
-          sortFields={sortFields}
-          searchPlaceholder={tCommon('actions.searchItems', { items: postsLabel.toLowerCase() })}
-        />
-        <ServerDataTable.Pagination namespace="posts" result={result} searchParams={params} />
-      </ServerDataTable>
-
-      <PostModals />
-    </PostModalProvider>
+    <PostsPageView
+      title={postsLabel}
+      result={result}
+      filterFields={filterFields}
+      sortFields={sortFields}
+      searchPlaceholder={tCommon('actions.searchItems', { items: postsLabel.toLowerCase() })}
+      searchParams={params.toString()}
+    />
   );
 }

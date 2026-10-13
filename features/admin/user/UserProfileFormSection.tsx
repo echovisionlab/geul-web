@@ -1,17 +1,22 @@
 'use client';
 
+import { fieldBindings } from '@/components/core/bindings';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutGrid as DsLayoutGrid,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useCallback } from 'react';
-import { IconCopy } from '@tabler/icons-react';
+import { CopyButton } from '@/components/core/CopyButton';
 import { useTranslations } from 'next-intl';
-import { Group, SimpleGrid, Stack, Text } from '@mantine/core';
+
 import type { UseFormReturnType } from '@mantine/form';
-import { badgeToneFromColor, LabelBadge, StatusBadge } from '@/components/core/Badge';
-import { IconButton } from '@/components/core/IconButton';
+import { LabelBadge, StatusBadge } from '@/components/core/Badge';
 import { MultiSelect, Select, Textarea, TextInput, ValidatingTextInput } from '@/components/core/Input';
 import { SectionHeader } from '@/components/core/Section';
-import { Tooltip } from '@/components/core/Tooltip';
 import { SocialLinksEditor } from '@/features/social-links/SocialLinksEditor';
-import { useNicknameValidation } from '@/features/member/useNicknameValidation';
+import { useNicknameValidation, type NicknameAvailabilityCheck } from '@/features/member/useNicknameValidation';
 import { UserAvatarUploader } from '@/features/user/UserAvatarUploader';
 import { checkNicknameAvailabilityAction } from '@/lib/actions/user';
 import { normalizeEnumToken } from '@/lib/i18n/admin-labels';
@@ -36,18 +41,9 @@ interface UserProfileFormSectionProps {
   onWebsiteChange: (value: string) => void;
   onSocialLinksChange: (value: SocialLinks) => void;
   onImageChange: (url: string | null) => Promise<void>;
-  onCopyUserId: () => void;
-}
-
-function roleTone(role: string | null | undefined) {
-  const normalized = normalizeEnumToken(role);
-  if (normalized === 'admin') {
-    return badgeToneFromColor('red');
-  }
-  if (normalized === 'author') {
-    return badgeToneFromColor('violet');
-  }
-  return badgeToneFromColor('blue');
+  /** Shows recovery feedback when the clipboard rejects the member ID copy. */
+  onCopyUserIdError: () => void;
+  checkNickname?: NicknameAvailabilityCheck;
 }
 
 export function UserProfileFormSection({
@@ -60,7 +56,8 @@ export function UserProfileFormSection({
   onWebsiteChange,
   onSocialLinksChange,
   onImageChange,
-  onCopyUserId,
+  onCopyUserIdError,
+  checkNickname = checkNicknameAvailabilityAction,
 }: UserProfileFormSectionProps) {
   const tCommon = useTranslations('common');
   const tCommonLabels = useTranslations('common.labels');
@@ -70,14 +67,12 @@ export function UserProfileFormSection({
   const tPage = useTranslations('adminUserDetail');
   const tNickname = useTranslations('nicknameField');
   const dateTime = useDateTimeFormatter();
-  const checkNickname = useCallback(
+  const checkAvailableNickname = useCallback(
     (nickname: string) =>
-      nickname === user.nickname.trim()
-        ? Promise.resolve({ available: true })
-        : checkNicknameAvailabilityAction(nickname),
-    [user.nickname],
+      nickname === user.nickname.trim() ? Promise.resolve({ available: true }) : checkNickname(nickname),
+    [user.nickname, checkNickname],
   );
-  const nicknameValidation = useNicknameValidation(form.values.nickname, { check: checkNickname });
+  const nicknameValidation = useNicknameValidation(form.values.nickname, { check: checkAvailableNickname });
   const displayLabel = user.nickname;
   const joined = user.created_at ? dateTime.date(user.created_at) : tCommonStates('unknown');
   const roleLabel =
@@ -90,10 +85,10 @@ export function UserProfileFormSection({
           : user.role;
 
   return (
-    <Stack gap="md">
+    <DsLayoutStack gap="md">
       <SectionHeader title={tCommonLabels('profile')} />
 
-      <Group align="center" gap="sm">
+      <DsLayoutInline align="center" gap="sm">
         <UserAvatarUploader
           memberId={memberId}
           currentImage={user.image}
@@ -101,17 +96,17 @@ export function UserProfileFormSection({
           size={56}
           onImageChange={onImageChange}
         />
-        <Stack gap={4}>
-          <Text size="sm" fw={500}>
+        <DsLayoutStack gap="xxs">
+          <DsText size="sm" weight="medium">
             {displayLabel}
-          </Text>
+          </DsText>
           {user.email ? (
-            <Text size="xs" c="dimmed">
+            <DsText size="xs" tone="secondary">
               {user.email}
-            </Text>
+            </DsText>
           ) : null}
-          <Group gap="xs">
-            <LabelBadge tone={roleTone(user.role)} size="sm">
+          <DsLayoutInline gap="xs">
+            <LabelBadge tone="neutral" size="sm">
               {roleLabel}
             </LabelBadge>
             {user.banned ? (
@@ -120,13 +115,13 @@ export function UserProfileFormSection({
               </StatusBadge>
             ) : null}
             {!user.onboarded ? (
-              <StatusBadge tone="warning" size="sm">
+              <StatusBadge tone="neutral" size="sm">
                 {tCommonStatuses('onboardingPending')}
               </StatusBadge>
             ) : null}
-          </Group>
-        </Stack>
-      </Group>
+          </DsLayoutInline>
+        </DsLayoutStack>
+      </DsLayoutInline>
 
       <ValidatingTextInput
         id="admin-member-nickname"
@@ -161,7 +156,7 @@ export function UserProfileFormSection({
         }
       />
 
-      <SimpleGrid cols={{ base: 1, sm: 2 }}>
+      <DsLayoutGrid columns={{ base: 1, sm: 2 }}>
         <Select
           label={tCommonLabels('role')}
           data={[
@@ -169,11 +164,11 @@ export function UserProfileFormSection({
             { value: 'author', label: tCommonRoles('author') },
             { value: 'admin', label: tCommonRoles('admin') },
           ]}
-          {...form.getInputProps('role')}
+          {...fieldBindings(form.getInputProps('role'))}
         />
 
-        <TextInput label={tCommonLabels('joined')} value={joined} readOnly />
-      </SimpleGrid>
+        <TextInput textRole="code" label={tCommonLabels('joined')} value={joined} readOnly />
+      </DsLayoutGrid>
 
       <MultiSelect
         label={tCommonLabels('tags')}
@@ -181,45 +176,46 @@ export function UserProfileFormSection({
         data={tagOptions}
         searchable
         clearable
-        {...form.getInputProps('tagIds')}
+        {...fieldBindings(form.getInputProps('tagIds'))}
       />
 
       <TextInput
+        textRole="code"
         label={tPage('labels.memberId')}
         value={user.id ?? memberId}
         readOnly
-        styles={{ input: { fontFamily: 'monospace' } }}
-        rightSectionPointerEvents="all"
         rightSection={
-          <Tooltip label={tPage('actions.copyUuid')}>
-            <IconButton emphasis="low" size="sm" onClick={onCopyUserId} aria-label={tPage('actions.copyUuid')}>
-              <IconCopy size={14} />
-            </IconButton>
-          </Tooltip>
+          <CopyButton
+            size="sm"
+            value={user.id ?? memberId}
+            label={tPage('actions.copyUuid')}
+            copiedLabel={tPage('notifications.userIdCopied')}
+            onCopyError={onCopyUserIdError}
+          />
         }
       />
 
       <Textarea
         label={
-          <Group justify="space-between">
-            <Text size="sm" fw={500}>
+          <DsLayoutInline justify="between">
+            <DsText size="sm" weight="medium">
               {tCommonLabels('bio')}
-            </Text>
-            <Text size="xs" c="dimmed">
+            </DsText>
+            <DsText size="xs" tone="secondary">
               {form.values.bio.length}/500
-            </Text>
-          </Group>
+            </DsText>
+          </DsLayoutInline>
         }
-        labelProps={{ w: '100%' }}
         placeholder={tPage('placeholders.bio')}
         minRows={3}
         maxRows={6}
         maxLength={500}
         autosize
-        {...form.getInputProps('bio')}
+        {...fieldBindings(form.getInputProps('bio'))}
       />
 
       <TextInput
+        textRole="code"
         label={tCommonLabels('website')}
         placeholder={tCommon('placeholders.exampleUrl')}
         value={website}
@@ -227,6 +223,6 @@ export function UserProfileFormSection({
       />
 
       <SocialLinksEditor value={socialLinks} onChange={onSocialLinksChange} addButtonMode="icon" />
-    </Stack>
+    </DsLayoutStack>
   );
 }

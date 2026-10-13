@@ -1,6 +1,16 @@
-import { forwardRef, useLayoutEffect, useMemo, useState, type ComponentPropsWithoutRef, type ReactNode } from 'react';
+import { useColorScheme } from '@/lib/providers/DesignSystemProvider';
+import { localizeFixtureTree, useStorybookText } from '@/.storybook/fixture-i18n';
+import { useLocale } from 'next-intl';
+import { DropdownMenu } from '@/components/core/DropdownMenu';
+import { ContentModal } from '@/components/core/Modal';
+import { FormModal } from '@/components/core/Modal/FormModal';
+import { Checkbox, TextInput } from '@/components/core/Input';
+import { Text } from '@/components/core/Typography';
+import { navigatePreview, resolvePreviewStory } from '../../shared/preview-navigation';
+import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { useMemo, useState, type ReactNode } from 'react';
 import { IconLanguage } from '@tabler/icons-react';
-import { Group } from '@mantine/core';
+
 import { IconButton } from '@/components/core/IconButton';
 import { SocialIcon } from '@/components/core/Social';
 import { TextButton } from '@/components/core/TextButton';
@@ -50,42 +60,52 @@ function isActive(pathname: string, href: string) {
 }
 
 function toNavigation(items: NavigationFixture[], pathname: string): ShellViewNavigationItem[] {
-  return items.map((item) => ({
-    id: item.id,
-    label: item.label,
-    href: item.href,
-    active: isActive(pathname, item.href),
-    openInNewTab: item.openInNewTab ?? false,
-    children: toNavigation(item.children ?? [], pathname),
-  }));
+  return items
+    .filter((item) => resolvePreviewStory(item.href))
+    .map((item) => ({
+      id: item.id,
+      label: item.label,
+      href: item.href,
+      active: isActive(pathname, item.href),
+      openInNewTab: item.openInNewTab ?? false,
+      children: toNavigation(item.children ?? [], pathname),
+    }));
 }
 
-const StoryLink = forwardRef<HTMLAnchorElement, ComponentPropsWithoutRef<'a'>>(({ href, onClick, ...props }, ref) => (
-  <a
-    ref={ref}
-    {...props}
-    href={href}
-    onClick={(event) => {
-      event.preventDefault();
-      onClick?.(event);
-    }}
-  />
-));
-StoryLink.displayName = 'StoryLink';
-
-function HeaderLanguageControl() {
+function LanguageControl({ footer = false }: { footer?: boolean }) {
+  const locale = useLocale();
+  const text = useStorybookText();
+  const changeLocale = (value: string) => {
+    const target = window.parent && window.parent !== window ? window.parent : window;
+    const url = new URL(target.location.href);
+    const globals = (url.searchParams.get('globals') ?? '')
+      .split(';')
+      .filter((entry) => entry && !entry.startsWith('locale:'));
+    url.searchParams.set('globals', [...globals, `locale:${value}`].join(';'));
+    target.location.assign(url.toString());
+  };
   return (
-    <IconButton size={32} aria-label="Change language">
-      <IconLanguage size={16} aria-hidden />
-    </IconButton>
-  );
-}
-
-function FooterLanguageControl() {
-  return (
-    <TextButton appearance="muted" size="xs" controlSize="xs" aria-label="Change language">
-      English
-    </TextButton>
+    <DropdownMenu>
+      <DropdownMenu.Target>
+        {footer ? (
+          <TextButton appearance="muted" size="xs" controlSize="xs" aria-label={text('Change language')}>
+            {locale === 'ko' ? '한국어' : 'English'}
+          </TextButton>
+        ) : (
+          <IconButton size="chrome" aria-label={text('Change language')}>
+            <IconLanguage aria-hidden />
+          </IconButton>
+        )}
+      </DropdownMenu.Target>
+      <DropdownMenu.Dropdown>
+        <DropdownMenu.Item selected={locale === 'ko'} onClick={() => changeLocale('ko')}>
+          한국어
+        </DropdownMenu.Item>
+        <DropdownMenu.Item selected={locale === 'en'} onClick={() => changeLocale('en')}>
+          English
+        </DropdownMenu.Item>
+      </DropdownMenu.Dropdown>
+    </DropdownMenu>
   );
 }
 
@@ -96,42 +116,26 @@ export interface PublicShellStoryHarnessProps {
 }
 
 /** Storybook-only composition of the same pure shell View used by public routes. */
-export function PublicShellStoryHarness({
-  children,
-  initialPath,
-  initialTheme = 'light',
-}: PublicShellStoryHarnessProps) {
+export function PublicShellStoryHarness({ children, initialPath }: PublicShellStoryHarnessProps) {
   const [pathname, setPathname] = useState(initialPath);
+  const [panel, setPanel] = useState<'search' | 'cookies' | null>(null);
+  const [query, setQuery] = useState('');
+  const [analytics, setAnalytics] = useState(false);
+  const [savedAnalytics, setSavedAnalytics] = useState(false);
   const [navigationOpened, setNavigationOpened] = useState(false);
-  const [themeMode, setThemeMode] = useState(initialTheme);
+  const { computedColorScheme: themeMode, toggleColorScheme } = useColorScheme();
+  const text = useStorybookText();
   const headerItems = useMemo(() => toNavigation(HEADER_ITEMS, pathname), [pathname]);
   const secondaryItems = useMemo(() => toNavigation(SECONDARY_ITEMS, pathname), [pathname]);
   const footerItems = useMemo(() => toNavigation(FOOTER_ITEMS, pathname), [pathname]);
 
-  useLayoutEffect(() => {
-    if (themeMode === null) {
-      return;
-    }
-
-    const root = document.documentElement;
-    const previousScheme = root.getAttribute('data-mantine-color-scheme');
-    root.setAttribute('data-mantine-color-scheme', themeMode);
-
-    return () => {
-      if (previousScheme === null) {
-        root.removeAttribute('data-mantine-color-scheme');
-      } else {
-        root.setAttribute('data-mantine-color-scheme', previousScheme);
-      }
-    };
-  }, [themeMode]);
-
   const handleNavigate = (href: string) => {
     setPathname(href);
+    navigatePreview(href);
     setNavigationOpened(false);
   };
 
-  return (
+  return localizeFixtureTree(
     <ShellView
       loginHref={`/login?redirect=${encodeURIComponent(pathname)}`}
       navigationOpened={navigationOpened}
@@ -173,10 +177,16 @@ export function PublicShellStoryHarness({
         onToggleNavigation: () => setNavigationOpened((opened) => !opened),
         onOpenUserMenu: () => undefined,
         onCloseUserMenu: () => undefined,
-        onSearch: () => undefined,
-        onToggleColorScheme: () => setThemeMode((mode) => (mode === 'dark' ? 'light' : 'dark')),
+        onSearch: () => {
+          setQuery('');
+          setPanel('search');
+        },
+        onToggleColorScheme: toggleColorScheme,
         onSignOut: () => undefined,
-        onOpenCookieSettings: () => undefined,
+        onOpenCookieSettings: () => {
+          setAnalytics(savedAnalytics);
+          setPanel('cookies');
+        },
         onNavigate: handleNavigate,
       }}
       slots={{
@@ -190,24 +200,65 @@ export function PublicShellStoryHarness({
           />
         ),
         printWatermark: <SiteLogoView src={EXAMPLE_STUDIO_LOGO_STORY_URL} alt="Example Studio" height={24} />,
-        languageDesktop: <HeaderLanguageControl />,
-        languageMobile: <HeaderLanguageControl />,
-        languageFooterDesktop: <FooterLanguageControl />,
-        languageFooterMobile: <FooterLanguageControl />,
+        languageDesktop: <LanguageControl />,
+        languageMobile: <LanguageControl />,
+        languageFooterDesktop: <LanguageControl footer />,
+        languageFooterMobile: <LanguageControl footer />,
         socialLinks: (
-          <Group gap="sm">
+          <DsLayoutInline gap="sm">
             <a href="https://instagram.com" aria-label="Instagram">
-              <SocialIcon platform="instagram" size={18} colorMode="hoverBrand" />
+              <SocialIcon platform="instagram" size="lg" colorMode="hoverBrand" />
             </a>
             <a href="https://youtube.com" aria-label="YouTube">
-              <SocialIcon platform="youtube" size={18} colorMode="hoverBrand" />
+              <SocialIcon platform="youtube" size="lg" colorMode="hoverBrand" />
             </a>
-          </Group>
+          </DsLayoutInline>
         ),
       }}
-      linkComponent={StoryLink}
     >
       {children}
-    </ShellView>
+      <ContentModal
+        opened={panel === 'search'}
+        onClose={() => setPanel(null)}
+        title={text('Search')}
+        closeLabel={text('Close')}
+      >
+        <TextInput label={text('Search')} value={query} onChange={(event) => setQuery(event.currentTarget.value)} />
+        {[...HEADER_ITEMS, ...HEADER_ITEMS.flatMap((item) => item.children ?? []), ...FOOTER_ITEMS]
+          .filter((item) => resolvePreviewStory(item.href))
+          .filter((item) => text(item.label).toLowerCase().includes(query.toLowerCase()))
+          .map((item) => (
+            <TextButton
+              key={item.id}
+              onClick={() => {
+                setPanel(null);
+                handleNavigate(item.href);
+              }}
+            >
+              {text(item.label)}
+            </TextButton>
+          ))}
+      </ContentModal>
+      <FormModal
+        opened={panel === 'cookies'}
+        onClose={() => setPanel(null)}
+        title={text('Cookie settings')}
+        submitLabel={text('Save changes')}
+        cancelLabel={text('Cancel')}
+        closeLabel={text('Close')}
+        onSubmit={() => {
+          setSavedAnalytics(analytics);
+          setPanel(null);
+        }}
+      >
+        <Checkbox
+          label={text('Analytics')}
+          checked={analytics}
+          onChange={(event) => setAnalytics(event.currentTarget.checked)}
+        />
+        <Text size="sm">{text('Preferences are stored in this preview.')}</Text>
+      </FormModal>
+    </ShellView>,
+    text,
   );
 }

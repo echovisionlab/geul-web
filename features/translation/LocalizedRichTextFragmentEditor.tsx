@@ -8,6 +8,8 @@ import type { RichTextBlockRoomTiptapController } from '@/features/editor/tiptap
 import { LocalizedCollaborativeRichTextEditor } from './LocalizedCollaborativeRichTextEditor';
 
 interface LocalizedRichTextFragmentEditorSharedProps {
+  accessibleLabel?: string;
+  contentLanguage?: string;
   provider: HocuspocusProvider | null;
   blockRoomController: RichTextBlockRoomTiptapController | null;
   userName: string;
@@ -23,6 +25,8 @@ interface LocalizedRichTextFragmentEditorSharedProps {
 type LocalizedRichTextFragmentEditorProps = LocalizedRichTextFragmentEditorSharedProps;
 
 export function LocalizedRichTextFragmentEditor({
+  accessibleLabel,
+  contentLanguage,
   provider,
   blockRoomController,
   userName,
@@ -40,6 +44,8 @@ export function LocalizedRichTextFragmentEditor({
 
   return (
     <LocalizedCollaborativeRichTextEditor
+      accessibleLabel={accessibleLabel}
+      contentLanguage={contentLanguage}
       provider={provider}
       blockRoomController={blockRoomController}
       userName={userName}

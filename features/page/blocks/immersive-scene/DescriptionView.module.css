@@ -2,7 +2,7 @@
   max-width: 720px;
   margin-inline: auto;
   font-size: inherit;
-  line-height: 1.55;
+  line-height: var(--geul-line-height-md);
   overflow-wrap: anywhere;
 }
 
@@ -18,34 +18,34 @@
 .root h3,
 .root h4,
 .root h5 {
-  margin: 0.4em 0;
+  margin: var(--geul-spacing-xs) 0;
   white-space: pre-wrap;
 }
 
 .root h3 {
-  font-size: 1.35em;
-  line-height: 1.25;
+  font-size: var(--geul-heading-h3);
+  line-height: var(--geul-heading-line-height);
 }
 
 .root h4 {
-  font-size: 1.18em;
-  line-height: 1.3;
+  font-size: var(--geul-heading-h4);
+  line-height: var(--geul-heading-line-height);
 }
 
 .root h5 {
-  font-size: 1.05em;
-  line-height: 1.35;
+  font-size: var(--geul-heading-h5);
+  line-height: var(--geul-line-height-xs);
 }
 
 .root ul,
 .root ol {
-  margin: 0.4em auto;
-  padding-left: 1.4em;
+  margin: var(--geul-spacing-xs) auto;
+  padding-left: var(--geul-spacing-lg);
   text-align: left;
 }
 
 .root li + li {
-  margin-top: 0.18em;
+  margin-top: var(--geul-spacing-xxs);
 }
 
 .root a {
@@ -56,16 +56,24 @@
 }
 
 .root a:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
+  outline: var(--geul-border-focus) solid var(--geul-focus);
+  outline-offset: var(--geul-border-focus);
 }
 
 .root[data-variant='attribution'] {
   max-width: none;
   margin: 0;
-  font-size: clamp(0.72rem, 0.9vw, 0.84rem);
-  line-height: 1.35;
+  font-size: var(--geul-font-size-xs);
+  line-height: var(--geul-line-height-xs);
   text-align: end;
+}
+
+/* Scene credits step up with the scene on wide viewports (was a 0.9vw clamp between xs and sm). */
+@media (width >= $mantine-breakpoint-xl) {
+  .root[data-variant='attribution'] {
+    font-size: var(--geul-font-size-sm);
+    line-height: var(--geul-line-height-sm);
+  }
 }
 
 .root[data-variant='attribution'] p,
@@ -74,12 +82,12 @@
 .root[data-variant='attribution'] h5,
 .root[data-variant='attribution'] ul,
 .root[data-variant='attribution'] ol {
-  margin: 0.16em 0;
+  margin: var(--geul-spacing-xxs) 0;
 }
 
 .root[data-variant='attribution'] h3,
 .root[data-variant='attribution'] h4,
 .root[data-variant='attribution'] h5 {
   font: inherit;
-  font-weight: 600;
+  font-weight: var(--geul-font-weight-strong);
 }
