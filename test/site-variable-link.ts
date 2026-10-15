@@ -5,7 +5,7 @@ import type { LocalizedRichTextBlock } from '@/features/editor/contract/localize
 export const siteVariableLinkLabel =
   '{{site.title}} | {{site.url}}/tools/hwp | {{site.companyName}} | {{contact.legalEmail}} | {{contact.supportEmail}} | {{contact.privacyEmail}} | {{Site.title}} {{site.unknown}} {{ site.title }} {site.title}';
 export const resolvedSiteVariableLinkLabel =
-  'Rawsector | https://www.rawsector.com/tools/hwp | Example Studio Ltd. | legal@example.com | support@example.com | privacy@example.com | {{Site.title}} {{site.unknown}} {{ site.title }} {site.title}';
+  'rawsector | https://www.rawsector.com/tools/hwp | Example Studio Ltd. | legal@example.com | support@example.com | privacy@example.com | {{Site.title}} {{site.unknown}} {{ site.title }} {site.title}';
 export const siteVariableLink = create(RichTextInlineSchema, {
   value: {
     case: 'link',

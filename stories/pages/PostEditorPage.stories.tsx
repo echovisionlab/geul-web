@@ -21,7 +21,7 @@ import { DocumentEditorFrame, editorPageParameters, editorStateArgTypes } from '
 import { useDocumentEditor, noop, pending, type EditorPreviewState } from './fixtures/use-document-editor';
 // The room provider of the access scenario stories, for their play functions.
 let accessScenarioProvider: object | null = null;
-const previewOgImage = `data:image/svg+xml;charset=utf-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><rect width="1200" height="630" fill="#202020"/><text x="80" y="330" fill="white" font-family="sans-serif" font-size="72">Post editor preview</text><text x="800" y="560" fill="#b02d23" font-family="sans-serif" font-weight="bold" font-size="64">Rawsector</text></svg>')}`;
+const previewOgImage = `data:image/svg+xml;charset=utf-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><rect width="1200" height="630" fill="#202020"/><text x="80" y="330" fill="white" font-family="sans-serif" font-size="72">Post editor preview</text><text x="800" y="560" fill="#b02d23" font-family="sans-serif" font-weight="bold" font-size="64">rawsector</text></svg>')}`;
 function Preview({
   state = 'ready',
   zen = false,

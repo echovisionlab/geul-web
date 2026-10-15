@@ -15,7 +15,7 @@ vi.mock('@/lib/utils/og-image', async () => ({
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.session.mockResolvedValue({ user: { role: 'admin' } });
-  mocks.settings.mockResolvedValue({ site_title: 'Rawsector' });
+  mocks.settings.mockResolvedValue({ site_title: 'rawsector' });
   mocks.home.mockResolvedValue(Buffer.from('image'));
 });
 const request = (body: string) => new NextRequest('https://www.rawsector.com/api/og-preview', { method: 'POST', body });

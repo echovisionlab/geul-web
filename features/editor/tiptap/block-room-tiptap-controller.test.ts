@@ -1208,7 +1208,7 @@ describe('incremental Block-room input boundaries', () => {
       expect(fixture.editor.state.doc.nodeAt(at)?.type.name).toBe('siteVariable');
       expect(fixture.editor.state.doc.nodeAt(at)?.attrs).toMatchObject({ key: 'contact.supportEmail', linked: true });
       fixture.editor.storage.siteVariable.context = {
-        siteTitle: 'Rawsector',
+        siteTitle: 'rawsector',
         siteUrl: '',
         companyName: '',
         legalEmail: '',

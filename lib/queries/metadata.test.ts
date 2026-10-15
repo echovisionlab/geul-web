@@ -441,7 +441,7 @@ describe('getHomeMetadataDocument', () => {
     async (kind) => {
       getManifestRpcMock.mockResolvedValue({
         settings: {
-          siteTitle: 'Rawsector',
+          siteTitle: 'rawsector',
           companyName: '{{site.title}}',
           siteOrigin: 'https://www.rawsector.com',
           socialLinks: {},
@@ -497,7 +497,7 @@ describe('getHomeMetadataDocument', () => {
   it('preserves API-resolved manifest text in site and home metadata', async () => {
     getManifestRpcMock.mockResolvedValue({
       settings: {
-        siteTitle: 'Rawsector',
+        siteTitle: 'rawsector',
         companyName: '{{site.title}}',
         metaDescription: 'Visit {{site.title}}', // API expanded {{site.companyName}} once.
         siteOrigin: 'https://www.rawsector.com',
@@ -517,7 +517,7 @@ describe('getHomeMetadataDocument', () => {
     async (kind) => {
       getManifestRpcMock.mockResolvedValue({
         settings: {
-          siteTitle: 'Rawsector',
+          siteTitle: 'rawsector',
           companyName: '{{site.title}}',
           siteOrigin: 'https://www.rawsector.com',
           socialLinks: {},

@@ -58,7 +58,7 @@ describe('generatedRichTextDocumentMarkdown', () => {
     });
     const context = siteVariableContext(siteVariableManifest.settings);
     expect(generatedRichTextDocumentMarkdown(document, 'post', context)).toBe(
-      '[**Rawsector \\| https://www.rawsector.com/tools/hwp \\| Example Studio Ltd. \\| legal@example.com \\| support@example.com \\| privacy@example.com \\| {{Site.title}} {{site.unknown}} {{ site.title }} {site.title}**](/tools/hwp)\n',
+      '[**rawsector \\| https://www.rawsector.com/tools/hwp \\| Example Studio Ltd. \\| legal@example.com \\| support@example.com \\| privacy@example.com \\| {{Site.title}} {{site.unknown}} {{ site.title }} {site.title}**](/tools/hwp)\n',
     );
     expect(
       generatedRichTextDocumentMarkdown(document, 'post', {
@@ -84,7 +84,7 @@ describe('generatedRichTextDocumentMarkdown', () => {
     });
     expect(
       generatedRichTextDocumentMarkdown(document, 'post', siteVariableContext(siteVariableManifest.settings)),
-    ).toBe('Welcome to Rawsector. For help, write to [support@example.com](mailto:support@example.com).\n');
+    ).toBe('Welcome to rawsector. For help, write to [support@example.com](mailto:support@example.com).\n');
     expect(
       generatedRichTextDocumentMarkdown(document, 'post', {
         ...siteVariableContext(siteVariableManifest.settings),

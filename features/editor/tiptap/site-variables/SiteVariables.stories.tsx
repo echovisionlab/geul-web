@@ -152,7 +152,7 @@ export const PublicReader: Story = {
   play: async ({ canvasElement }) => {
     const link = await within(canvasElement).findByRole('link', { name: 'support@example.com' });
     expect(link).toHaveAttribute('href', 'mailto:support@example.com');
-    expect(canvasElement).toHaveTextContent('Welcome to Rawsector.');
+    expect(canvasElement).toHaveTextContent('Welcome to rawsector.');
     expect(canvasElement.querySelector('[data-site-variable]')).toBeNull();
   },
 };

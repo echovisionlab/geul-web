@@ -18,7 +18,7 @@ describe('legal metadata', () => {
     'extracts labels without emitting or expanding hrefs: $name',
     async ({ source, settings }) => {
       mocks.site.mockResolvedValue({
-        siteTitle: 'Rawsector',
+        siteTitle: 'rawsector',
         siteVariables: siteVariableContext({ ...siteVariableManifest.settings, ...settings }),
       });
       mocks.policy.mockResolvedValue({ data: { active: { content: [siteVariableHrefBlock(source)] } } });

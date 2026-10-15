@@ -30,7 +30,7 @@ describe('public site variable projection', () => {
         context,
       ),
     ).toBe(
-      'Rawsector | https://www.rawsector.com | Example Studio Ltd. | legal@example.com | support@example.com | privacy@example.com',
+      'rawsector | https://www.rawsector.com | Example Studio Ltd. | legal@example.com | support@example.com | privacy@example.com',
     );
     expect(
       resolveSiteVariableTokens('{{site.title}} {{Site.title}} {{other}}', { ...context, siteTitle: '{{site.url}}' }),

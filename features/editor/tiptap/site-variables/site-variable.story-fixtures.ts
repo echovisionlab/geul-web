@@ -10,7 +10,7 @@ import type { Manifest } from '@/lib/queries/manifest';
 export const siteVariableManifest: Manifest = {
   settings: {
     ...DEFAULT_SITE_SETTINGS_VIEW,
-    site_title: 'Rawsector',
+    site_title: 'rawsector',
     site_origin: 'https://www.rawsector.com',
     company_name: 'Example Studio Ltd.',
     legal_email: 'legal@example.com',

@@ -131,7 +131,7 @@ describe('Block-room Tiptap codec', () => {
     try {
       expect(splitPayload(parseDocument(editor.getJSON())[0]!).locale.content).toEqual(content);
       expect(editor.state.doc.child(0).child(0).child(0).childCount).toBe(4);
-      expect(JSON.stringify(editor.getJSON())).not.toContain('Rawsector');
+      expect(JSON.stringify(editor.getJSON())).not.toContain('rawsector');
       expect(() =>
         documentToTiptap([
           descriptor(

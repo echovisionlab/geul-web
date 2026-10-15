@@ -62,10 +62,10 @@ describe('siteVariable editor adapter', () => {
       );
     };
     try {
-      await render('Rawsector');
+      await render('rawsector');
       const authored = editor.getJSON();
-      expect(host.querySelector('button[aria-label="Site name: Rawsector"]')).not.toBeNull();
-      expect(editor.getText()).toContain('Hello Rawsector');
+      expect(host.querySelector('button[aria-label="Site name: rawsector"]')).not.toBeNull();
+      expect(editor.getText()).toContain('Hello rawsector');
       await render('Updated site');
       expect(host.querySelector('button[aria-label="Site name: Updated site"]')).not.toBeNull();
       expect(editor.getJSON()).toEqual(authored);
