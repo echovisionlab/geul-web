@@ -110,12 +110,13 @@ jobs:
 
       - name: Validate credentials
         env:
+          PRIVATE_DEPS_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
           HARBOR_REGISTRY_USERNAME: ${{ secrets.HARBOR_REGISTRY_USERNAME }}
           HARBOR_REGISTRY_PASSWORD: ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
           NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
         run: |
           set -euo pipefail
-          for var in HARBOR_REGISTRY_USERNAME HARBOR_REGISTRY_PASSWORD NEXT_SERVER_ACTIONS_ENCRYPTION_KEY; do
+          for var in PRIVATE_DEPS_TOKEN HARBOR_REGISTRY_USERNAME HARBOR_REGISTRY_PASSWORD NEXT_SERVER_ACTIONS_ENCRYPTION_KEY; do
             if [ -z "${!var:-}" ]; then
               echo "Missing secret: ${var}" >&2
               exit 1
@@ -151,6 +152,7 @@ jobs:
         id: published-image
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         env:
+          NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
           NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
         with:
           context: .
@@ -159,6 +161,7 @@ jobs:
           build-args: |
             RELEASE_IMAGE_BUILD=true
           secret-envs: |
+            NODE_AUTH_TOKEN=NODE_AUTH_TOKEN
             NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
           labels: |
             org.opencontainers.image.created=${{ steps.release-context.outputs.created_at }}
