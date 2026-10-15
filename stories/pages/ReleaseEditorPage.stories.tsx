@@ -95,7 +95,7 @@ function Preview({ state = 'ready' }: { state?: EditorPreviewState }) {
     currentLocaleCanEdit: local.canEdit,
     tStates,
     editorSession: local.session,
-    beginRelationSave: noop,
+    beginRelationSave: () => undefined,
     settleRelationSave: noop,
     creditNotes,
     blockRoomController: local.room.controller,

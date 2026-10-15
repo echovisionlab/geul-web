@@ -12,6 +12,7 @@ import { PageLoader } from '@/features/site/PageLoader';
 import { Alert } from '@/components/core/Alert';
 import { notifications } from '@/components/core/Notification';
 import { DEFAULT_CAMPAIGN_FIELDS } from '@/lib/collab/schemas/campaign-fields.schema';
+import type { CampaignEditorConfiguration } from '@/features/campaign/useCampaignName';
 import type { CampaignViewMode } from '@/features/campaign/useCampaignPreview';
 import type { DateTimeValue } from '@/components/core/Input/DateTimeInput';
 import { normalizeLocale } from '@/lib/i18n/locale';
@@ -45,7 +46,10 @@ function Preview({ state = 'ready' }: { state?: 'ready' | 'pending' | 'failed' |
   const [name, setName] = useState('Listening room invitation'),
     [currentSubject, setSubject] = useState('Night Signals · October'),
     [locale, setLocale] = useState('ko'),
-    [fields, setFields] = useState(DEFAULT_CAMPAIGN_FIELDS),
+    [fields, setFields] = useState<CampaignEditorConfiguration>({
+      ...DEFAULT_CAMPAIGN_FIELDS,
+      name: 'Autumn listening',
+    }),
     [viewMode, changeViewMode] = useState<CampaignViewMode>('split');
   const [testModalOpened, setTestModal] = useState(false),
     [sendModalOpened, setSendModal] = useState(false),
