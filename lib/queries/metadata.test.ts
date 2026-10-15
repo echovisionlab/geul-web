@@ -539,7 +539,7 @@ describe('getHomeMetadataDocument', () => {
                 content: [
                   { siteVariable: { key: 'site.companyName' } },
                   { text: { text: ' / ' } },
-                  { link: { href: '{{site.url}}/about', content: [{ text: '{{site.companyName}}' }] } },
+                  { link: { href: '/about', content: [{ text: '{{site.companyName}}' }] } },
                 ],
               },
             },

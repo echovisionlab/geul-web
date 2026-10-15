@@ -1,5 +1,5 @@
 import { resolveSiteVariable, type SiteVariableContext } from '@echovisionlab/geul-common/site-variables';
-import { isSiteVariableKey } from '@echovisionlab/geul-proto/content/block_catalog.ts';
+import type { SiteVariableKey } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import { normalizeRichTextHref } from '@echovisionlab/geul-common/editor/link-normalization';
 
 /** The public manifest is the only source of values for authored references. */
@@ -19,6 +19,11 @@ export function siteVariableContext(settings: {
     supportEmail: settings.support_email ?? '',
     privacyEmail: settings.privacy_email ?? '',
   };
+}
+
+/** Public readers stay off the proto runtime: the key set is the label map below. */
+export function isSiteVariableKey(key: string): key is SiteVariableKey {
+  return Object.hasOwn(siteVariableLabelKeys, key);
 }
 
 export function canLinkSiteVariable(key: string): boolean {
@@ -88,4 +93,4 @@ export const siteVariableLabelKeys = {
   'contact.legalEmail': 'legalEmail',
   'contact.supportEmail': 'supportEmail',
   'contact.privacyEmail': 'privacyEmail',
-} as const;
+} as const satisfies Record<SiteVariableKey, string>;

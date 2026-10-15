@@ -2,7 +2,7 @@ import {
   siteVariableDocument,
   siteVariableManifest,
 } from '@/features/editor/tiptap/site-variables/site-variable.story-fixtures';
-import { siteVariableLink, siteVariableHrefCases, siteVariableHrefBlock } from '@/test/site-variable-link';
+import { siteVariableLink, contentSiteVariableHrefCases, siteVariableHrefBlock } from '@/test/site-variable-link';
 import { siteVariableContext } from '@/lib/site-variables';
 import { create, fromJson } from '@bufbuild/protobuf';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
@@ -15,7 +15,7 @@ import { describe, expect, it } from 'vitest';
 import { generatedRichTextDocumentMarkdown } from './generated-rich-text-markdown';
 
 describe('generatedRichTextDocumentMarkdown', () => {
-  it.each(siteVariableHrefCases)('exports resolved href: $name', ({ source, expected, settings }) => {
+  it.each(contentSiteVariableHrefCases)('exports resolved href: $name', ({ source, expected, settings }) => {
     const localized = siteVariableDocument();
     const paragraph = localized.localeOverlay!.blocks[0]!.value;
     if (paragraph.case !== 'paragraph') {

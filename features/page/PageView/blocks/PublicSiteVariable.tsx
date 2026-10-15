@@ -2,9 +2,9 @@
 
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { resolveSiteVariable } from '@echovisionlab/geul-common/site-variables';
-import { isSiteVariableKey } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import { useSiteSettings } from '@/lib/contexts/ManifestContext';
 import {
+  isSiteVariableKey,
   resolveSiteVariableHref,
   resolveSiteVariableTokens,
   siteVariableContext,

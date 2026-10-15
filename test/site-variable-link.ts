@@ -77,3 +77,8 @@ export function siteVariableHrefBlock(href: string): LocalizedRichTextBlock {
     },
   } as LocalizedRichTextBlock;
 }
+
+/** Content-catalog hrefs accept only the contact tokens; site paths are stored root-relative. */
+export const contentSiteVariableHrefCases = siteVariableHrefCases.filter(
+  ({ source }) => !source.startsWith('{{site.url}}'),
+);
