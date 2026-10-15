@@ -1,6 +1,5 @@
 'use client';
 
-import { flushRoomJournals } from '@/lib/collab/room-journal-store';
 import { areUnsavedEditorEditsDurable } from './editor-save-registry';
 import { suspendEditorUnloadGuard } from './usePendingEditorUnload';
 
@@ -14,6 +13,8 @@ import { suspendEditorUnloadGuard } from './usePendingEditorUnload';
  * failed or did not finish in time all keep the prompt.
  */
 export async function prepareToLeaveWithDurableEdits(): Promise<void> {
+  // Loaded on demand: the same module instance editors registered their journals with.
+  const { flushRoomJournals } = await import('@/lib/collab/room-journal-store');
   const journalsWritten = await flushRoomJournals();
   if (journalsWritten && areUnsavedEditorEditsDurable()) {
     suspendEditorUnloadGuard();

@@ -1,7 +1,6 @@
 'use client';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { announceSignOut } from '@/lib/auth/active-member';
-import { clearRoomJournalsForSignOut } from '@/lib/collab/room-journal-store';
 import { suspendEditorUnloadGuard } from '@/lib/editor/usePendingEditorUnload';
 
 import { listSessionsAction, revokeOtherSessionsAction, revokeSessionAction } from '@/lib/actions/session';
@@ -39,9 +38,17 @@ export function signOut() {
   const memberId = announceSignOut();
   // Unsaved edits were saved or the editor agreed to discard them.
   suspendEditorUnloadGuard();
-  void (memberId ? clearRoomJournalsForSignOut(memberId) : Promise.resolve()).finally(() => {
-    window.location.href = '/api/auth/logout';
-  });
+  // Loaded on demand: journals exist only after an editor opened them, and every page ships this.
+  const clearJournals = memberId
+    ? import('@/lib/collab/room-journal-store').then(({ clearRoomJournalsForSignOut }) =>
+        clearRoomJournalsForSignOut(memberId),
+      )
+    : Promise.resolve();
+  void clearJournals
+    .catch(() => undefined)
+    .finally(() => {
+      window.location.href = '/api/auth/logout';
+    });
 }
 
 export const authClient = {

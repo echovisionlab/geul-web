@@ -30,7 +30,8 @@ it('ends the member everywhere and deletes their unsaved-edit journals before th
   // Other tabs and this tab's backups observe the announcement (see active-member).
   expect(mocks.announceSignOut).toHaveBeenCalledOnce();
   expect(mocks.suspendEditorUnloadGuard).toHaveBeenCalledOnce();
-  expect(mocks.clearRoomJournalsForSignOut).toHaveBeenCalledWith('member-a');
+  // The journal store loads on demand; the logout waits for it.
+  await vi.waitFor(() => expect(mocks.clearRoomJournalsForSignOut).toHaveBeenCalledWith('member-a'));
   expect(location.href).toBe('/editor');
 
   finishClear();
