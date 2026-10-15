@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "5542403b2bb760272e73173fd210ec543e94569a8ce7851aa4340644ca3f5340",
+  "manifestHash": "c44fd24bd2fce296006add5560d8664c8eb8e573018ef5203a5461d3bcc01639",
   "counts": {
-    "sourceFiles": 3752,
-    "productionSourceFiles": 2280,
+    "sourceFiles": 3755,
+    "productionSourceFiles": 2279,
     "componentFiles": 901,
     "coreFamilies": 57,
     "featureDomains": 53,
     "storyFiles": 256,
-    "storyVariants": 1444,
+    "storyVariants": 1445,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -1304,6 +1304,7 @@
     "features/editor/contract/localized-page.test.ts",
     "features/editor/contract/localized-page.ts",
     "features/editor/contract/localized-rich-text-story-fixtures.ts",
+    "features/editor/contract/localized-rich-text-text.test.ts",
     "features/editor/contract/localized-rich-text-text.ts",
     "features/editor/contract/localized-rich-text.test.ts",
     "features/editor/contract/localized-rich-text.ts",
@@ -2347,6 +2348,7 @@
     "features/policy/LegalPolicyHistoryClient.test.tsx",
     "features/policy/LegalPolicyHistoryClient.tsx",
     "features/policy/LegalPolicyListClient.tsx",
+    "features/policy/LegalRichTextContent.test.tsx",
     "features/policy/LegalRichTextContent.tsx",
     "features/policy/LegalShareDocumentView.test.tsx",
     "features/policy/LegalShareDocumentView.tsx",
@@ -2357,6 +2359,7 @@
     "features/policy/PrivacyEditor.tsx",
     "features/policy/TermsEditor.tsx",
     "features/policy/legal-policy-types.ts",
+    "features/policy/public-legal-page.server.test.ts",
     "features/policy/public-legal-page.server.ts",
     "features/policy/public-legal-page.test.tsx",
     "features/policy/public-legal-route.test.tsx",
@@ -3312,7 +3315,6 @@
     "lib/queries/site-setting-mapper.test.ts",
     "lib/queries/site-setting-mapper.ts",
     "lib/queries/site-setting.ts",
-    "lib/queries/site-variable-text.server.ts",
     "lib/queries/sitemap.ts",
     "lib/queries/taxonomy.ts",
     "lib/queries/terms-browser.ts",
@@ -3547,6 +3549,7 @@
     "lib/utils/og.ts",
     "lib/utils/page-route.test.ts",
     "lib/utils/page-route.ts",
+    "lib/utils/parse-markdown.test.tsx",
     "lib/utils/parse-markdown.tsx",
     "lib/utils/proto.ts",
     "lib/utils/request-path.test.ts",
@@ -53959,12 +53962,13 @@
         "PublicDocumentBlock",
         "PublicListItem",
         "PublicSiteVariable",
+        "PublicSiteVariableLink",
+        "PublicSiteVariableText",
         "QuoteBlock",
         "TableBlock",
         "Tag",
         "VideoBlock",
         "VideoMediaView",
-        "a",
         "aside",
         "blockquote",
         "br",
@@ -54302,7 +54306,8 @@
         "PublicDocumentBlock",
         "PublicListItem",
         "PublicSiteVariable",
-        "a",
+        "PublicSiteVariableLink",
+        "PublicSiteVariableText",
         "aside",
         "blockquote",
         "br",
@@ -54671,6 +54676,14 @@
         {
           "name": "PublicSiteVariable",
           "kind": "function"
+        },
+        {
+          "name": "PublicSiteVariableText",
+          "kind": "function"
+        },
+        {
+          "name": "PublicSiteVariableLink",
+          "kind": "function"
         }
       ],
       "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
@@ -54683,7 +54696,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": ["a"]
+      "composedJsx": ["a", "span"]
     },
     {
       "file": "features/page/blocks/CollectionSizeControl.tsx",
@@ -56606,7 +56619,12 @@
           ]
         }
       ],
-      "typeAliasEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "MarkdownNode",
+          "type": "{ type: string; url?: string; children?: MarkdownNode[] }"
+        }
+      ],
       "productionConsumers": ["features/page/blocks/immersive-scene/SceneRenderer.tsx"],
       "catalogAdapters": [],
       "tests": ["features/page/blocks/immersive-scene/DescriptionView.test.tsx"],
@@ -61945,7 +61963,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": ["features/policy/LegalDocumentLayout.tsx", "features/policy/LegalPolicyEditor.tsx"],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/policy/LegalRichTextContent.test.tsx"],
       "stories": [],
       "composedJsx": ["GeneratedRichTextBlockView", "div"]
     },
@@ -68449,7 +68467,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": ["Disclosure", "Divider", "DsLayoutStack", "DsText", "TextButton"]
+      "composedJsx": ["Disclosure", "Divider", "DsLayoutStack", "DsText", "TextButton", "span"]
     },
     {
       "file": "features/shell/ui/Shell/ShellView.tsx",
@@ -75432,6 +75450,7 @@
         "features/editor/contentBlockTypeMenuPolicy.test.ts",
         "features/editor/contract/block-registry.test.ts",
         "features/editor/contract/localized-page.test.ts",
+        "features/editor/contract/localized-rich-text-text.test.ts",
         "features/editor/contract/localized-rich-text.test.ts",
         "features/editor/editor-color-theme.test.ts",
         "features/editor/extensions/KeyboardShortcutsExtension.test.ts",
@@ -76820,8 +76839,10 @@
       "tests": [
         "features/policy/LegalOgImagePanel.test.tsx",
         "features/policy/LegalPolicyHistoryClient.test.tsx",
+        "features/policy/LegalRichTextContent.test.tsx",
         "features/policy/LegalShareDocumentView.test.tsx",
         "features/policy/PolicyVersionCreationPage.test.tsx",
+        "features/policy/public-legal-page.server.test.ts",
         "features/policy/public-legal-page.test.tsx",
         "features/policy/public-legal-route.test.tsx",
         "features/policy/useLegalPolicyCommands.test.tsx"
@@ -82010,6 +82031,11 @@
           "name": "PublicReader",
           "args": "{ reader: true }",
           "preview": "http://localhost:6010/?path=/story/feature-editor-site-variables--public-reader"
+        },
+        {
+          "name": "PublicTokenLinks",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-editor-site-variables--public-token-links"
         }
       ],
       "importedSources": [
@@ -82021,7 +82047,8 @@
         "features/editor/tiptap/TiptapPlayground.story-fixtures.ts",
         "features/editor/tiptap/site-variables/site-variable.story-fixtures.ts",
         "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx",
-        "lib/contexts/ManifestContext.tsx"
+        "lib/contexts/ManifestContext.tsx",
+        "lib/i18n/locale.ts"
       ]
     },
     {

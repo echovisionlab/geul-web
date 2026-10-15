@@ -249,14 +249,14 @@ importers:
         specifier: 0.2.1
         version: 0.2.1
       '@echovisionlab/geul-common':
-        specifier: 0.6.1
-        version: 0.6.1(yjs@13.6.33)
+        specifier: 0.7.0
+        version: 0.7.0(yjs@13.6.33)
       '@echovisionlab/geul-event':
-        specifier: 0.6.0
-        version: 0.6.0(@echovisionlab/geul-proto@0.6.0)
+        specifier: 0.7.0
+        version: 0.7.0(@echovisionlab/geul-proto@0.7.0)
       '@echovisionlab/geul-proto':
-        specifier: 0.6.0
-        version: 0.6.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@echovisionlab/geul-telemetry':
         specifier: 0.2.0
         version: 0.2.0
@@ -1421,19 +1421,19 @@ packages:
     resolution: {integrity: sha512-SbtEssiGAEHyBmVONl2hVz+0hKUkoaGbj4bblyGdmBkHF1cprfgSUH/ZqRoRutPkESJqlb1ft9/GkiD/T6EBqg==}
     engines: {node: 24.21.0}
 
-  '@echovisionlab/geul-common@0.6.1':
-    resolution: {integrity: sha512-/fKidbvEBCxz1OjZuqH53v7YKbGvdizxK75MRFg6envX9NJ3dhZ8ZI/qwkdBA1DPzemVVkcPBwWiRfmVFhl7Nw==}
+  '@echovisionlab/geul-common@0.7.0':
+    resolution: {integrity: sha512-sfz6OwKY6a9mkey7aZCCuM2t2J+0prM2ljhaFuBTQ1V6GEHU2ZkKw86AOc8ole/9f02vwgoknd53aMEcJCmr+w==}
     engines: {node: 24.21.0}
     peerDependencies:
       yjs: ^13.6.33
 
-  '@echovisionlab/geul-event@0.6.0':
-    resolution: {integrity: sha512-MGjJbZ3UPkj9YAoPMB4O36yItWqaxHZQQroL1q6qKKkcIPwZUEn70dOlaA34lHsC4kVl9ww7Dd5DQ9AjnJ1/sg==}
+  '@echovisionlab/geul-event@0.7.0':
+    resolution: {integrity: sha512-jiA26MPwcS2X8eZ8mo7jHjP9OYDDhMrcFttKsAHZCDCJDiHvFwOtCcar5IXrlnvMuUyq9C+SqmxUJ4aS6hgQHQ==}
     peerDependencies:
-      '@echovisionlab/geul-proto': ^0.6.0
+      '@echovisionlab/geul-proto': ^0.7.0
 
-  '@echovisionlab/geul-proto@0.6.0':
-    resolution: {integrity: sha512-K3T5xvpYtJCBBI4kA8Ik47EQv8QgpBmldqwTUbeC2Hyn/1SD3xTLc2VuzFL12XuK5ucnYZJxGYl5wHms1jakkQ==}
+  '@echovisionlab/geul-proto@0.7.0':
+    resolution: {integrity: sha512-UInNV0Dymx1tyALVeu2/slU5lg60bt/XzYauDa5hpHdHH3+OSY81ZXfNuRz5ucRtF2O5nXSqiB26WTQ2He27fg==}
 
   '@echovisionlab/geul-telemetry@0.2.0':
     resolution: {integrity: sha512-V0jBpcqCNwfThM2L3VdZWat1TEkf8H5fg1tZXbQ/lFnNWcYrUrg6/OMte54mzfUT+zKmZj8M0TrmZncrbyPaoQ==}
@@ -10031,20 +10031,20 @@ snapshots:
     dependencies:
       mediabunny: 1.61.3
 
-  '@echovisionlab/geul-common@0.6.1(yjs@13.6.33)':
+  '@echovisionlab/geul-common@0.7.0(yjs@13.6.33)':
     dependencies:
       '@bufbuild/protobuf': 2.16.0
-      '@echovisionlab/geul-proto': 0.6.0
+      '@echovisionlab/geul-proto': 0.7.0
       diff: 9.0.0
       yjs: 13.6.33
       zod: 4.6.5
 
-  '@echovisionlab/geul-event@0.6.0(@echovisionlab/geul-proto@0.6.0)':
+  '@echovisionlab/geul-event@0.7.0(@echovisionlab/geul-proto@0.7.0)':
     dependencies:
       '@bufbuild/protobuf': 2.16.0
-      '@echovisionlab/geul-proto': 0.6.0
+      '@echovisionlab/geul-proto': 0.7.0
 
-  '@echovisionlab/geul-proto@0.6.0':
+  '@echovisionlab/geul-proto@0.7.0':
     dependencies:
       '@bufbuild/protobuf': 2.16.0
 
