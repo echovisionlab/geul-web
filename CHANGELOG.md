@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.0](https://github.com/echovisionlab/geul-web/compare/v0.12.0...v0.13.0) (2026-10-15)
+
+
+### Features
+
+* Core design system and durable, Notion-like collaborative editing ([#124](https://github.com/echovisionlab/geul-web/issues/124)) ([846267c](https://github.com/echovisionlab/geul-web/commit/846267c4fd836db8f7a5dc01a8ddf7cdede3959d))
+
 ## [0.12.0](https://github.com/echovisionlab/geul-web/compare/v0.11.2...v0.12.0) (2026-10-09)
 
 
