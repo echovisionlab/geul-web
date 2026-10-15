@@ -17,11 +17,9 @@ line can be used in `~/.npmrc` for other checkouts.
 `@echovisionlab/ionian` and `@echovisionlab/audio-transcoder` remain on public
 npmjs through explicit, versioned tarball dependencies in `package.json` and the
 lockfile. They do not need republishing to GitHub Packages. When upgrading them,
-update their tarball URLs and lockfile entries together.
 
 ```sh
 cp .env.example .env
-node scripts/resolve-private-packages.mjs
 pnpm install --frozen-lockfile
 pnpm prepare:maplibre-worker
 pnpm prepare:p5-runtime

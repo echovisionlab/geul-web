@@ -148,7 +148,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
         run: |
-          node scripts/resolve-private-packages.mjs
           pnpm install --frozen-lockfile
       - name: Check Prettier formatting
         env:
@@ -221,7 +220,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
         run: |
-          node scripts/resolve-private-packages.mjs
           pnpm install --frozen-lockfile
       - name: Lint JavaScript and TypeScript
         env:
@@ -299,7 +297,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
         run: |
-          node scripts/resolve-private-packages.mjs
           pnpm install --frozen-lockfile
       - name: Run unit-test shard
         run: pnpm exec vitest run --fileParallelism --shard=${{ matrix.shard }}/2

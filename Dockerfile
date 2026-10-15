@@ -18,9 +18,8 @@ COPY --link patches ./patches
 COPY --link tooling/typescript-eslint ./tooling/typescript-eslint
 COPY --link tooling/typescript6 ./tooling/typescript6
 COPY --link scripts/prepare-client-media-codecs.mjs ./scripts/prepare-client-media-codecs.mjs
-COPY --link scripts/resolve-private-packages.mjs ./scripts/resolve-private-packages.mjs
 RUN --mount=type=secret,id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN,required=true \
-    node scripts/resolve-private-packages.mjs && pnpm fetch
+    pnpm fetch
 RUN --mount=type=secret,id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN,required=true \
     pnpm install --frozen-lockfile --offline
 

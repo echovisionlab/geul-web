@@ -246,8 +246,8 @@ importers:
         specifier: ^3.2.2
         version: 3.2.2(react@19.3.0)
       '@echovisionlab/audio-transcoder':
-        specifier: https://registry.npmjs.org/@echovisionlab/audio-transcoder/-/audio-transcoder-0.2.1.tgz
-        version: https://registry.npmjs.org/@echovisionlab/audio-transcoder/-/audio-transcoder-0.2.1.tgz
+        specifier: 0.2.1
+        version: 0.2.1
       '@echovisionlab/geul-common':
         specifier: 0.7.2
         version: 0.7.2(yjs@13.6.33)
@@ -261,8 +261,8 @@ importers:
         specifier: 0.2.1
         version: 0.2.1
       '@echovisionlab/ionian':
-        specifier: https://registry.npmjs.org/@echovisionlab/ionian/-/ionian-0.2.0.tgz
-        version: https://registry.npmjs.org/@echovisionlab/ionian/-/ionian-0.2.0.tgz(mitt@3.0.1)(three-stdlib@2.36.1(three@0.186.1))(three@0.186.1)
+        specifier: 0.2.0
+        version: 0.2.0(mitt@3.0.1)(three-stdlib@2.36.1(three@0.186.1))(three@0.186.1)
       '@hocuspocus/provider':
         specifier: ^4.6.0
         version: 4.6.0(y-protocols@1.0.7(yjs@13.6.33))(yjs@13.6.33)
@@ -1417,9 +1417,8 @@ packages:
     peerDependencies:
       react: '>=16.8.0'
 
-  '@echovisionlab/audio-transcoder@https://registry.npmjs.org/@echovisionlab/audio-transcoder/-/audio-transcoder-0.2.1.tgz':
-    resolution: {integrity: sha512-SbtEssiGAEHyBmVONl2hVz+0hKUkoaGbj4bblyGdmBkHF1cprfgSUH/ZqRoRutPkESJqlb1ft9/GkiD/T6EBqg==, tarball: https://registry.npmjs.org/@echovisionlab/audio-transcoder/-/audio-transcoder-0.2.1.tgz}
-    version: 0.2.1
+  '@echovisionlab/audio-transcoder@0.2.1':
+    resolution: {integrity: sha512-SbtEssiGAEHyBmVONl2hVz+0hKUkoaGbj4bblyGdmBkHF1cprfgSUH/ZqRoRutPkESJqlb1ft9/GkiD/T6EBqg==}
     engines: {node: 24.21.0}
 
   '@echovisionlab/geul-common@0.7.2':
@@ -1440,9 +1439,8 @@ packages:
     resolution: {integrity: sha512-b2anyVtbeuBZeCnGDm22YTTRgwyMLq5F/OxilDcmhQ4PPzMMHhNFc4PS7QgQ4+Ff4OtD5d8879/JgufwvCXeug==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-telemetry/0.2.1/01c157cd94c0401273b748adc4de74c61af58eb4}
     engines: {node: 24.21.0}
 
-  '@echovisionlab/ionian@https://registry.npmjs.org/@echovisionlab/ionian/-/ionian-0.2.0.tgz':
-    resolution: {integrity: sha512-6m4lvKbmvzEqdFivlAd5elDPujS9CTkkojJ1Hj6d63RGeIDpQrVHlvk0fxBXzHNKXsoEN1JgwqkP6pCYK1hHYQ==, tarball: https://registry.npmjs.org/@echovisionlab/ionian/-/ionian-0.2.0.tgz}
-    version: 0.2.0
+  '@echovisionlab/ionian@0.2.0':
+    resolution: {integrity: sha512-6m4lvKbmvzEqdFivlAd5elDPujS9CTkkojJ1Hj6d63RGeIDpQrVHlvk0fxBXzHNKXsoEN1JgwqkP6pCYK1hHYQ==}
     engines: {node: 24.21.0}
     peerDependencies:
       mitt: ^3.0.1
@@ -10029,7 +10027,7 @@ snapshots:
       react: 19.3.0
       tslib: 2.8.1
 
-  '@echovisionlab/audio-transcoder@https://registry.npmjs.org/@echovisionlab/audio-transcoder/-/audio-transcoder-0.2.1.tgz':
+  '@echovisionlab/audio-transcoder@0.2.1':
     dependencies:
       mediabunny: 1.61.3
 
@@ -10054,7 +10052,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.1
 
-  '@echovisionlab/ionian@https://registry.npmjs.org/@echovisionlab/ionian/-/ionian-0.2.0.tgz(mitt@3.0.1)(three-stdlib@2.36.1(three@0.186.1))(three@0.186.1)':
+  '@echovisionlab/ionian@0.2.0(mitt@3.0.1)(three-stdlib@2.36.1(three@0.186.1))(three@0.186.1)':
     dependencies:
       mitt: 3.0.1
       three: 0.186.1
