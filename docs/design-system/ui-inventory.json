@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "843e30a9e468cae1db46c01a8dfe0695d8c71e7310c15c7131b37268d41f3553",
+  "manifestHash": "c8644f176a9dc18910a18a72db2e1f51cdf7c69cfe19239f85a77ac965db9391",
   "counts": {
-    "sourceFiles": 3741,
-    "productionSourceFiles": 2272,
+    "sourceFiles": 3742,
+    "productionSourceFiles": 2273,
     "componentFiles": 897,
     "coreFamilies": 56,
     "featureDomains": 53,
@@ -1446,6 +1446,7 @@
     "features/editor/tiptap/emoji/emoji-extension.ts",
     "features/editor/tiptap/emoji/emoji-runtime.ts",
     "features/editor/tiptap/emoji/index.ts",
+    "features/editor/tiptap/emoji/useTiptapEmojiData.ts",
     "features/editor/tiptap/executable-source.test.ts",
     "features/editor/tiptap/executable-source.ts",
     "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.test.tsx",
@@ -75007,6 +75008,7 @@
         "features/editor/tiptap/emoji/emoji-extension.ts",
         "features/editor/tiptap/emoji/emoji-runtime.ts",
         "features/editor/tiptap/emoji/index.ts",
+        "features/editor/tiptap/emoji/useTiptapEmojiData.ts",
         "features/editor/tiptap/executable-source.ts",
         "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.tsx",
         "features/editor/tiptap/external-video/index.ts",
@@ -103356,14 +103358,19 @@
               "typeOnly": false
             },
             {
-              "exported": "useTiptapEmojiData",
-              "imported": "useTiptapEmojiData",
-              "typeOnly": false
-            },
-            {
               "exported": "TiptapEmojiData",
               "imported": "TiptapEmojiData",
               "typeOnly": true
+            }
+          ]
+        },
+        {
+          "target": "features/editor/tiptap/emoji/useTiptapEmojiData.ts",
+          "symbols": [
+            {
+              "exported": "useTiptapEmojiData",
+              "imported": "useTiptapEmojiData",
+              "typeOnly": false
             }
           ]
         }

@@ -1,4 +1,3 @@
-import { useSyncExternalStore } from 'react';
 import type { EmojiItem } from '@tiptap/extension-emoji';
 
 /** Emoji lookups backed by the Tiptap data set, which is loaded only when authoring needs it. */
@@ -49,10 +48,6 @@ export function subscribeTiptapEmojiData(listener: () => void): () => void {
   return () => {
     listeners.delete(listener);
   };
-}
-
-export function useTiptapEmojiData(): TiptapEmojiData | null {
-  return useSyncExternalStore(subscribeTiptapEmojiData, getTiptapEmojiData, getTiptapEmojiData);
 }
 
 /** Emoji nodes exist only after the data has loaded, so the codec can resolve them synchronously. */

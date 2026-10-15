@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { EmojiItem } from '@tiptap/extension-emoji';
 import { EmojiPicker, type EmojiPickerItem } from '@/components/core/EmojiPicker';
-import { loadTiptapEmojiData, useTiptapEmojiData, type TiptapEmojiData } from './emoji-runtime';
+import { loadTiptapEmojiData, type TiptapEmojiData } from './emoji-runtime';
+import { useTiptapEmojiData } from './useTiptapEmojiData';
 
 const POPULAR_SHORTCODES = [
   'grinning',
