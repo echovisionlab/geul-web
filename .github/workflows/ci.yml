@@ -215,7 +215,7 @@ jobs:
           pnpm storybook:preview > /tmp/geul-storybook-preview.log 2>&1 &
           preview_pid=$!
           trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
-          for attempt in {1..30}; do
+          for _ in {1..30}; do
             if curl --fail --silent http://127.0.0.1:6010/index.json > /dev/null; then
               pnpm storybook:test:a11y --ci
               pnpm storybook:test:author --ci

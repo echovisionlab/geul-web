@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "77844ca6dae7f85e4776f3854b2af4efc2cf5d835b89c091cccabb5e3ae9ce75",
+  "manifestHash": "9117fd804e8f6f77e695620fc660967edcf4eb27a98b5eabc4f55f9e7cb465a0",
   "counts": {
     "sourceFiles": 3740,
     "productionSourceFiles": 2271,
@@ -10,7 +10,7 @@
     "coreFamilies": 56,
     "featureDomains": 53,
     "storyFiles": 255,
-    "storyVariants": 1436,
+    "storyVariants": 1438,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -86576,6 +86576,16 @@
           "preview": "http://localhost:6010/?path=/story/pages-editors-post--read-only"
         },
         {
+          "name": "DowngradedInPlace",
+          "args": "{ followRoomAccess: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-editors-post--downgraded-in-place"
+        },
+        {
+          "name": "UpgradedInPlace",
+          "args": "{ followRoomAccess: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-editors-post--upgraded-in-place"
+        },
+        {
           "name": "Phone",
           "args": null,
           "preview": "http://localhost:6010/?path=/story/pages-editors-post--phone"
@@ -86649,12 +86659,15 @@
       "importedSources": [
         "features/authoring/AuthoringExtensionsContext.tsx",
         "features/editor/contexts/EditorMediaServicesContext.tsx",
+        "features/editor/useEditorAccessLevel.ts",
         "features/post/PostEditor/PostEditor.tsx",
         "features/site/PageLoader/index.ts",
         "features/translation/TranslationServicesContext.tsx",
+        "lib/collab/provider-control-state.ts",
         "lib/contexts/PostMetaContext.tsx",
         "lib/i18n/locale.ts",
         "lib/providers/AppNotificationRegion.tsx",
+        "lib/providers/EditorNavigationProvider.tsx",
         "lib/utils/export.ts",
         "stories/pages/fixtures/DocumentEditorFrame.tsx",
         "stories/pages/fixtures/author-media.ts",
