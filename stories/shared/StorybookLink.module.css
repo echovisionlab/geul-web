@@ -1,0 +1,6 @@
+.link {
+  color: var(--geul-action-primary);
+  text-decoration: underline;
+  text-underline-offset: var(--geul-spacing-xs);
+  overflow-wrap: anywhere;
+}

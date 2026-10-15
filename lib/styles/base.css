@@ -1,0 +1,62 @@
+/* Native application defaults. Core components own their visual variants. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family-sans), sans-serif;
+  font-size: var(--geul-font-size-md);
+  font-weight: var(--geul-font-weight-regular);
+  line-height: var(--geul-line-height-md);
+  background: var(--geul-background);
+  color: var(--geul-text-primary);
+}
+
+/*
+ * Korean breaks lines at spaces, not inside words (eojeol). Japanese and Chinese keep breaking between
+ * characters. `overflow-wrap: anywhere` stays the fallback for words longer than their box.
+ */
+:lang(ko) {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* `word-break` inherits: content that declares another language inside Korean UI breaks by its own rules. */
+[lang]:not(:lang(ko)) {
+  word-break: normal;
+}
+
+button,
+input,
+select,
+textarea {
+  margin: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+button:enabled {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+img,
+svg {
+  vertical-align: middle;
+}
+
+[hidden] {
+  display: none !important;
+}

@@ -9,7 +9,7 @@
   width: 100%;
   max-width: 100%;
   border: 0;
-  background: var(--mantine-color-body);
+  background: var(--geul-background);
 }
 
 .activation {
@@ -17,13 +17,13 @@
   inset: 0;
   display: grid;
   place-items: center;
-  background: light-dark(rgb(255 255 255 / 20%), rgb(0 0 0 / 20%));
+  background: var(--geul-embed-overlay);
 }
 
 .placeholder {
   display: grid;
   min-height: 180px;
-  padding: var(--mantine-spacing-md);
-  border: 1px dashed var(--mantine-color-default-border);
+  padding: var(--geul-spacing-md);
+  border: 1px dashed var(--geul-border-default);
   place-items: center;
 }

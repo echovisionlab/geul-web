@@ -1,10 +1,17 @@
 'use client';
+import { SupportingText, Heading as DsHeading } from '@/components/core/Typography';
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutStack as DsLayoutStack,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+import { SectionCard as DsSectionCard } from '@/components/core/Section';
 
 import { useEffect, useMemo, useState, type SubmitEvent } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Skeleton, Stack, Text, Title } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+import { Skeleton } from '@/components/core/Display';
+import { notifications } from '@/components/core/Notification';
 import { Button } from '@/components/core/Button';
 import { PasswordInput } from '@/components/core/Input';
 import { FormAccessBoundary } from '@/features/form/FormAccessBoundary';
@@ -16,13 +23,11 @@ import { checkFormAccessAction, submitFormAction } from '@/lib/actions/form';
 import { buildForm } from '@/lib/form/build';
 import type { FormValues } from '@/lib/types/form/guards';
 import type { FormProps } from './schema';
-
 interface FormViewClientProps {
   props: FormProps;
   requestedLocale?: string;
   preview?: boolean;
 }
-
 export function FormViewClient({ props, requestedLocale, preview = false }: FormViewClientProps) {
   const tEmbeddedForm = useTranslations('embeddedForm');
   const tCommonActions = useTranslations('common.actions');
@@ -34,7 +39,6 @@ export function FormViewClient({ props, requestedLocale, preview = false }: Form
   const [passwordInput, setPasswordInput] = useState('');
   const [submittedPassword, setSubmittedPassword] = useState<string>();
   const [passwordError, setPasswordError] = useState(false);
-
   const {
     data: accessData,
     isLoading,
@@ -51,7 +55,6 @@ export function FormViewClient({ props, requestedLocale, preview = false }: Form
       }),
     enabled: !!formId,
   });
-
   useEffect(() => {
     if (!submittedPassword) {
       return;
@@ -64,9 +67,7 @@ export function FormViewClient({ props, requestedLocale, preview = false }: Form
       setPasswordError(true);
     }
   }, [accessData?.accessible, accessData?.reason, submittedPassword]);
-
   const form = accessData?.accessible ? (accessData.form ?? null) : null;
-
   const submitMutation = useMutation({
     mutationFn: (data: FormValues) => {
       if (!form?.id) {
@@ -79,7 +80,7 @@ export function FormViewClient({ props, requestedLocale, preview = false }: Form
         notifications.show({
           title: tEmbeddedForm('submission.failedTitle'),
           message: result.error,
-          color: 'red',
+          tone: 'danger',
         });
       } else {
         setSubmitted(true);
@@ -89,11 +90,10 @@ export function FormViewClient({ props, requestedLocale, preview = false }: Form
       notifications.show({
         title: tEmbeddedForm('submission.failedTitle'),
         message: err instanceof Error ? err.message : tEmbeddedForm('submission.unknownError'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
-
   const builtForm = useMemo(() => {
     if (!form?.schema) {
       return null;
@@ -111,15 +111,12 @@ export function FormViewClient({ props, requestedLocale, preview = false }: Form
       }),
     [requestedLocale],
   );
-
   const handleSubmit = async (values: FormValues) => {
     if (preview) {
       return;
     }
-
     await submitMutation.mutateAsync(values);
   };
-
   const handlePasswordSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     const password = passwordInput.trim();
@@ -127,141 +124,152 @@ export function FormViewClient({ props, requestedLocale, preview = false }: Form
       notifications.show({
         title: tEmbeddedForm('password.requiredTitle'),
         message: tEmbeddedForm('password.requiredMessage'),
-        color: 'red',
+        tone: 'danger',
       });
       return;
     }
     setPasswordError(false);
     setSubmittedPassword(password);
   };
-
   if (!formId) {
     return (
-      <Box className="form-block" py="xl">
-        <Stack gap="md">
-          <Text c="dimmed" ta="center">
-            {tEmbeddedForm('states.noFormSelected')}
-          </Text>
-        </Stack>
-      </Box>
+      <div className="form-block">
+        <DsLayoutInset block="xl">
+          <DsLayoutInset space="none">
+            <DsLayoutStack gap="md">
+              <SupportingText tone="secondary" align="center">
+                {tEmbeddedForm('states.noFormSelected')}
+              </SupportingText>
+            </DsLayoutStack>
+          </DsLayoutInset>
+        </DsLayoutInset>
+      </div>
     );
   }
-
   if (isLoading) {
     return (
-      <Box className="form-block">
-        <Stack gap="md">
-          {showTitle === 'true' && <Skeleton height={32} width="40%" />}
-          <Skeleton height={40} />
-          <Skeleton height={40} />
-          <Skeleton height={36} width={100} />
-        </Stack>
-      </Box>
+      <div className="form-block">
+        <DsLayoutStack gap="md">
+          {showTitle === 'true' && <Skeleton roleType="field" width="short" />}
+          <Skeleton roleType="field" />
+          <Skeleton roleType="field" />
+          <Skeleton roleType="field" />
+        </DsLayoutStack>
+      </div>
     );
   }
-
   if (error) {
     return (
-      <Box className="form-block" py="xl">
-        <Stack gap="md">
-          <FormAccessBoundary reason="server_error" slug={formId} mode="inline" />
-        </Stack>
-      </Box>
+      <div className="form-block">
+        <DsLayoutInset block="xl">
+          <DsLayoutInset space="none">
+            <DsLayoutStack gap="md">
+              <FormAccessBoundary reason="server_error" slug={formId} mode="inline" />
+            </DsLayoutStack>
+          </DsLayoutInset>
+        </DsLayoutInset>
+      </div>
     );
   }
-
   if (!accessData?.accessible) {
     if (accessData?.reason === 'password_required') {
       return (
-        <Box className="form-block" py="xl">
-          <Stack gap="md">
-            <Stack gap="md" maw={420} mx="auto">
-              <Title order={4}>{tFormAccess('passwordRequired.title')}</Title>
-              <Text c="dimmed" size="sm">
-                {tEmbeddedForm('password.description')}
-              </Text>
-              <form onSubmit={handlePasswordSubmit}>
-                <Stack gap="sm">
-                  <PasswordInput
-                    value={passwordInput}
-                    onChange={(event) => setPasswordInput(event.currentTarget.value)}
-                    placeholder={tCommonPlaceholders('password')}
-                    error={passwordError ? tEmbeddedForm('password.incorrect') : undefined}
-                  />
-                  <Button type="submit" loading={isFetching}>
-                    {tCommonActions('continue')}
-                  </Button>
-                </Stack>
-              </form>
-            </Stack>
-          </Stack>
-        </Box>
+        <div className="form-block">
+          <DsLayoutInset block="xl">
+            <DsLayoutInset space="none">
+              <DsLayoutStack gap="md">
+                <div style={{ maxWidth: 420, marginInline: 'auto' }}>
+                  <DsLayoutStack gap="md">
+                    <DsHeading level={4}>{tFormAccess('passwordRequired.title')}</DsHeading>
+                    <SupportingText tone="secondary">{tEmbeddedForm('password.description')}</SupportingText>
+                    <form onSubmit={handlePasswordSubmit}>
+                      <DsLayoutStack gap="sm">
+                        <PasswordInput
+                          value={passwordInput}
+                          onChange={(event) => setPasswordInput(event.currentTarget.value)}
+                          placeholder={tCommonPlaceholders('password')}
+                          error={passwordError ? tEmbeddedForm('password.incorrect') : undefined}
+                        />
+                        <Button type="submit" loading={isFetching}>
+                          {tCommonActions('continue')}
+                        </Button>
+                      </DsLayoutStack>
+                    </form>
+                  </DsLayoutStack>
+                </div>
+              </DsLayoutStack>
+            </DsLayoutInset>
+          </DsLayoutInset>
+        </div>
       );
     }
-
     return (
-      <Box className="form-block" py="xl">
-        <Stack gap="md">
-          <FormAccessBoundary reason={accessData?.reason ?? 'server_error'} slug={formId} mode="inline" />
-        </Stack>
-      </Box>
+      <div className="form-block">
+        <DsLayoutInset block="xl">
+          <DsLayoutInset space="none">
+            <DsLayoutStack gap="md">
+              <FormAccessBoundary reason={accessData?.reason ?? 'server_error'} slug={formId} mode="inline" />
+            </DsLayoutStack>
+          </DsLayoutInset>
+        </DsLayoutInset>
+      </div>
     );
   }
-
   if (!form) {
     return (
-      <Box className="form-block" py="xl">
-        <Stack gap="md">
-          <FormAccessBoundary reason="form_not_found" slug={formId} mode="inline" />
-        </Stack>
-      </Box>
+      <div className="form-block">
+        <DsLayoutInset block="xl">
+          <DsLayoutInset space="none">
+            <DsLayoutStack gap="md">
+              <FormAccessBoundary reason="form_not_found" slug={formId} mode="inline" />
+            </DsLayoutStack>
+          </DsLayoutInset>
+        </DsLayoutInset>
+      </div>
     );
   }
-
   if (submitted) {
     return (
-      <Box className="form-block">
-        <Stack gap="lg" py="xl">
-          <FormSubmissionSuccessState />
-        </Stack>
-      </Box>
+      <div className="form-block">
+        <DsLayoutInset block="xl">
+          <DsLayoutStack gap="lg">
+            <FormSubmissionSuccessState />
+          </DsLayoutStack>
+        </DsLayoutInset>
+      </div>
     );
   }
-
   if (!builtForm) {
     return (
-      <Box className="form-block" py="xl">
-        <Stack gap="md">
-          <FormAccessBoundary reason="server_error" slug={formId} mode="inline" />
-        </Stack>
-      </Box>
+      <div className="form-block">
+        <DsLayoutInset block="xl">
+          <DsLayoutInset space="none">
+            <DsLayoutStack gap="md">
+              <FormAccessBoundary reason="server_error" slug={formId} mode="inline" />
+            </DsLayoutStack>
+          </DsLayoutInset>
+        </DsLayoutInset>
+      </div>
     );
   }
-
   return (
-    <Box className="form-block">
-      <Box pos="relative" aria-busy={submitMutation.isPending}>
-        <Stack gap="md">
-          {showTitle === 'true' && form.title && <Title order={3}>{form.title}</Title>}
+    <div className="form-block">
+      <div style={{ position: 'relative' }} aria-busy={submitMutation.isPending}>
+        <DsLayoutStack gap="md">
+          {showTitle === 'true' && form.title && <DsHeading level={3}>{form.title}</DsHeading>}
           <FormRenderer form={builtForm} phoneDefaultCountry={phoneDefaultCountry} onSubmit={handleSubmit} />
-        </Stack>
+        </DsLayoutStack>
 
         {submitMutation.isPending ? (
-          <Box
-            style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'rgba(0, 0, 0, 0.55)',
-              zIndex: 1,
-            }}
-          >
-            <FormSubmissionPendingState />
-          </Box>
+          <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
+            <DsSectionCard padding="none" appearance="overlay" border="none">
+              <DsLayoutInline align="center" justify="center">
+                <FormSubmissionPendingState />
+              </DsLayoutInline>
+            </DsSectionCard>
+          </div>
         ) : null}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

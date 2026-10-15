@@ -5,7 +5,7 @@ import { unwrapQueryResult } from '@/lib/api/query-result';
 import { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { MultiSelectCombobox } from '@/features/post/MultiSelectCombobox';
 import { createTagAction, listTagsAction } from '@/lib/actions/tag';
 import type { Tag } from '@/lib/collab/post-meta';
@@ -59,7 +59,7 @@ export function TagSelector({ postId, canEdit, isAdmin, tags: initialTags }: Tag
     mutationFn: (name: string) => createTagAction(name),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       if (result.data) {
@@ -70,7 +70,7 @@ export function TagSelector({ postId, canEdit, isAdmin, tags: initialTags }: Tag
           slug: result.data.slug ?? '',
         };
         setTagIds([...tagIds, newTag.id]);
-        notifications.show({ message: tCommonNotifications('tagCreated'), color: 'green' });
+        notifications.show({ message: tCommonNotifications('tagCreated'), tone: 'positive' });
       }
     },
   });

@@ -30,6 +30,7 @@ interface MyArtistsResult {
 }
 
 interface MyArtistsTableProps {
+  listAction?: typeof listMyArtistsAction;
   initialData: MyArtistsResult;
 }
 
@@ -75,15 +76,15 @@ function toRowViewModel(
     name: artist.name,
     slugLabel: artist.slug ? `/${artist.slug}` : null,
     imageUrl: buildManagedImageUrl(artist.imageUrl, MANAGED_IMAGE_PRESET.AVATAR_SM) ?? null,
-    avatarFallback: artist.name.charAt(0).toUpperCase(),
     href: `/artists/${artist.id}?edit=true`,
     statusLabel: getArtistStatusLabel(artist.status, statusLabels),
+    statusTone: normalizeArtistStatus(artist.status) === 'published' ? 'positive' : 'neutral',
     createdLabel: artist.createdAt ? formatDate(artist.createdAt) : '-',
   };
 }
 
 /** Connects My Artists queries and localization to the table controller. */
-export function MyArtistsTable({ initialData }: MyArtistsTableProps) {
+export function MyArtistsTable({ initialData, listAction = listMyArtistsAction }: MyArtistsTableProps) {
   const t = useTranslations('artists');
   const tCommon = useTranslations('common');
   const dateTime = useDateTimeFormatter();
@@ -95,7 +96,7 @@ export function MyArtistsTable({ initialData }: MyArtistsTableProps) {
   const loadedDataQuery = useQuery({
     queryKey: ['artists', 'my', query],
     queryFn: () =>
-      listMyArtistsAction({
+      listAction({
         filter: query.filters,
         filterBy: query.filterBy,
         sort: query.sorts?.map((sort) => ({ field: sort.field, order: sort.direction })),
@@ -126,6 +127,7 @@ export function MyArtistsTable({ initialData }: MyArtistsTableProps) {
         result={result}
         labels={{
           title: tCommon('entities.artists'),
+          image: tCommon('labels.image'),
           name: tCommon('labels.name'),
           status: tCommon('labels.status'),
           created: tCommon('labels.created'),

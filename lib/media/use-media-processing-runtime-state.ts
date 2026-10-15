@@ -196,7 +196,23 @@ export function useMediaProcessingRuntimeState<T>({
     ],
   );
 
-  useEditorRuntimeEvents(null, handleRuntimeEvent);
+  // Lifecycle events could not be delivered (the event parser chunk did not load): read the
+  // current status instead, so a missed final `ready` does not leave the UI processing.
+  const resync = useCallback(() => {
+    const statusFileId = identity.fileId || identity.pendingUploadFileId;
+    if (!enabled || !statusFileId) {
+      return;
+    }
+    void getEditorFileStatus(statusFileId)
+      .then((status) => {
+        if (currentIdentityKeyRef.current === identityKey) {
+          setRuntimeState({ identityKey, value: mapStatus(status) });
+        }
+      })
+      .catch(() => undefined);
+  }, [enabled, identity.fileId, identity.pendingUploadFileId, identityKey, mapStatus]);
+
+  useEditorRuntimeEvents(null, handleRuntimeEvent, { onResync: resync });
 
   const runtimeValue = runtimeState.identityKey === identityKey ? runtimeState.value : null;
 

@@ -1,8 +1,10 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Stack, Text } from '@mantine/core';
-import { statusToneFromColor, StatusBadge } from '@/components/core/Badge';
+
+import { StatusBadge, type StatusTone } from '@/components/core/Badge';
 import { TextButton } from '@/components/core/TextButton';
 import {
   ServerDataTableSelectableSection,
@@ -13,10 +15,10 @@ import { DateTime } from '@/features/date-time/DateTime';
 import type { ColumnDef } from '@/lib/types/common/data-table';
 import { SeriesRowMenu } from './SeriesRowMenu';
 
-const STATUS_COLORS: Record<string, string> = {
-  draft: 'yellow',
-  published: 'green',
-  archived: 'gray',
+const STATUS_TONES: Record<string, StatusTone> = {
+  draft: 'neutral',
+  published: 'positive',
+  archived: 'neutral',
 };
 
 interface SeriesRow {
@@ -42,28 +44,28 @@ function getColumns(labels: {
       key: 'title',
       header: labels.title,
       cell: (row) => (
-        <Stack gap={2}>
+        <DsLayoutStack gap="xxs">
           <TextButton href={`/admin/series/${row.id}`} size="sm" weight="medium" appearance="default">
             {row.title}
           </TextButton>
           {row.slug && (
-            <Text size="xs" c="dimmed">
+            <DsText size="xs" tone="secondary">
               /{row.slug}
-            </Text>
+            </DsText>
           )}
-        </Stack>
+        </DsLayoutStack>
       ),
     },
     {
       key: 'postCount',
       header: labels.posts,
-      cell: (row) => <Text size="sm">{row.postCount}</Text>,
+      cell: (row) => <DsText size="sm">{row.postCount}</DsText>,
     },
     {
       key: 'status',
       header: labels.status,
       cell: (row) => (
-        <StatusBadge tone={statusToneFromColor(STATUS_COLORS[row.status] || 'blue')} size="sm">
+        <StatusBadge tone={STATUS_TONES[row.status] ?? 'neutral'} size="sm">
           {row.status === 'published'
             ? labels.published
             : row.status === 'archived'
@@ -78,9 +80,9 @@ function getColumns(labels: {
       key: 'createdAt',
       header: labels.created,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.createdAt} />
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -94,13 +96,20 @@ function getColumns(labels: {
 }
 
 interface SeriesTableContentProps {
+  deleteAction?: typeof deleteSeriesAction;
   result: ServerDataTableSelectableSectionProps<SeriesRow>['result'];
   searchPlaceholder: string;
   filterFields: ServerDataTableSelectableSectionProps<SeriesRow>['filterFields'];
   sortFields: ServerDataTableSelectableSectionProps<SeriesRow>['sortFields'];
 }
 
-export function SeriesTableContent({ result, searchPlaceholder, filterFields, sortFields }: SeriesTableContentProps) {
+export function SeriesTableContent({
+  result,
+  searchPlaceholder,
+  filterFields,
+  sortFields,
+  deleteAction = deleteSeriesAction,
+}: SeriesTableContentProps) {
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
   const tPage = useTranslations('adminList.series');
@@ -126,7 +135,7 @@ export function SeriesTableContent({ result, searchPlaceholder, filterFields, so
       sortFields={sortFields}
       bulkDelete={{
         entityLabel: tCommonEntities('series'),
-        deleteAction: deleteSeriesAction,
+        deleteAction,
         getRowLabel: (row) => row.title || row.slug || row.id,
       }}
     />

@@ -1,9 +1,13 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline, LayoutInset } from '@/components/core/Layout';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { IconRestore, IconWand, IconX } from '@tabler/icons-react';
-import { Box, Group, Loader, Stack, Text } from '@mantine/core';
+import { SectionCard } from '@/components/core/Section/SectionCard';
+
+import { Spinner as Loader } from '@/components/core/Display';
 import { Slider } from '@/components/core/Input';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
@@ -88,7 +92,7 @@ export type MeshOptimizationMessageKey =
   | 'blockEditor.actions.generateOptimizedMesh'
   | 'blockEditor.actions.useOptimizedMesh';
 
-type PanelStatus = { tone: 'dimmed' | 'red' | 'green'; message: string } | null;
+type PanelStatus = { tone: 'secondary' | 'danger' | 'positive'; message: string } | null;
 
 function formatByteSize(bytes: number) {
   if (!Number.isFinite(bytes) || bytes <= 0) {
@@ -190,34 +194,28 @@ function CandidateStats({
   const reduction = reductionPercent(candidate.originalFileSize ?? sourceSizeBytes, candidate.fileSize);
 
   return (
-    <Group
-      gap={16}
-      wrap="wrap"
-      style={{
-        fontVariantNumeric: 'tabular-nums',
-      }}
-    >
-      <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
+    <DsLayoutInline gap="md" wrap="wrap">
+      <DsText size="xs" tone="secondary" nowrap>
         {t('blockEditor.labels.optimizedMeshSize')}{' '}
-        <Text component="span" size="xs" c="inherit" fw={600}>
+        <DsText as="span" size="xs" tone="inherit" weight="strong">
           {formatByteSize(candidate.fileSize)}
-        </Text>
+        </DsText>
         {reduction !== null ? (
-          <Text component="span" size="xs" c="dimmed">
+          <DsText as="span" size="xs" tone="secondary">
             {' '}
             (-{reduction}%)
-          </Text>
+          </DsText>
         ) : null}
-      </Text>
+      </DsText>
       {candidate.triangleCount ? (
-        <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
+        <DsText size="xs" tone="secondary" nowrap>
           {t('blockEditor.labels.meshOptimizationTriangles')}{' '}
-          <Text component="span" size="xs" c="inherit" fw={600}>
+          <DsText as="span" size="xs" tone="inherit" weight="strong">
             {formatCountWithRatio(candidate.triangleCount, candidate.originalTriangleCount)}
-          </Text>
-        </Text>
+          </DsText>
+        </DsText>
       ) : null}
-    </Group>
+    </DsLayoutInline>
   );
 }
 
@@ -280,7 +278,7 @@ export function MeshOptimizationPanel({
           ),
         );
         if (result.error) {
-          setStatus({ tone: 'red', message: result.error });
+          setStatus({ tone: 'danger', message: result.error });
         }
       } finally {
         if (!silent) {
@@ -341,7 +339,7 @@ export function MeshOptimizationPanel({
         targetRatioPercent: normalizeMeshOptimizationTargetRatioPercent(targetRatioPercent),
       });
       if (result.error) {
-        setStatus({ tone: 'red', message: result.error });
+        setStatus({ tone: 'danger', message: result.error });
         return;
       }
       const candidate = result.candidate;
@@ -350,13 +348,13 @@ export function MeshOptimizationPanel({
         setCandidates((current) => upsertCandidate(current, candidate));
         if (candidate.status !== 'completed') {
           setStatus({
-            tone: 'dimmed',
+            tone: 'secondary',
             message: t('blockEditor.status.meshOptimizationQueued'),
           });
           return;
         }
         setStatus({
-          tone: 'green',
+          tone: 'positive',
           message: t('blockEditor.status.meshOptimizationGenerated'),
         });
       }
@@ -378,12 +376,12 @@ export function MeshOptimizationPanel({
           candidateId: candidate.id,
         });
         if (result.error) {
-          setStatus({ tone: 'red', message: result.error });
+          setStatus({ tone: 'danger', message: result.error });
           return;
         }
         onUseCandidate(result.candidate ?? candidate);
         setStatus({
-          tone: 'green',
+          tone: 'positive',
           message: t('blockEditor.status.meshOptimizationSelected'),
         });
       } finally {
@@ -402,7 +400,7 @@ export function MeshOptimizationPanel({
     try {
       onClearSelected();
       setStatus({
-        tone: 'green',
+        tone: 'positive',
         message: t('blockEditor.status.meshOptimizationCleared'),
       });
     } finally {
@@ -425,7 +423,7 @@ export function MeshOptimizationPanel({
         });
         if (result.error || !result.success) {
           setStatus({
-            tone: 'red',
+            tone: 'danger',
             message: result.error || t('blockEditor.status.meshOptimizationDeleteFailed'),
           });
           return;
@@ -436,7 +434,7 @@ export function MeshOptimizationPanel({
           onClearSelected();
         }
         setStatus({
-          tone: 'green',
+          tone: 'positive',
           message: t('blockEditor.status.meshOptimizationDeleted'),
         });
       } finally {
@@ -458,82 +456,82 @@ export function MeshOptimizationPanel({
     `${t('blockEditor.actions.deleteOptimizedMeshCandidate')} (${formatCandidateDescriptor(candidate)})`;
 
   return (
-    <Stack gap={8} data-testid={`immersive-scene-mesh-optimization-${unitId}`}>
-      <Group justify="space-between" gap="xs" align="flex-start">
-        <Text size="xs" fw={500}>
+    <DsLayoutStack gap="xs" data-testid={`immersive-scene-mesh-optimization-${unitId}`}>
+      <DsLayoutInline justify="between" gap="xs" align="start">
+        <DsText size="xs" weight="medium">
           {t('blockEditor.labels.meshOptimization')}
-        </Text>
+        </DsText>
         {loading ? <Loader size="xs" /> : null}
-      </Group>
+      </DsLayoutInline>
 
       {selection ? (
-        <Box
-          py={8}
-          style={{
-            borderTop: '1px solid var(--mantine-color-default-border)',
-            borderBottom: '1px solid var(--mantine-color-default-border)',
-          }}
+        <SectionCard
+          padding="none"
+          appearance="plain"
+          border="block"
           data-testid={`immersive-scene-selected-mesh-optimization-${unitId}`}
         >
-          <Group justify="space-between" gap="xs" align="flex-start" wrap="nowrap">
-            <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
-              <Group gap={6} wrap="nowrap">
-                <Text size="xs" fw={500}>
-                  {t('blockEditor.labels.selectedOptimizedMesh')}
-                </Text>
-                {selectedTargetRatioPercent ? (
-                  <Text size="xs" c="dimmed">
-                    {selectedTargetRatioPercent}%
-                  </Text>
+          <LayoutInset block="xs">
+            <DsLayoutInline justify="between" gap="xs" align="start" wrap="nowrap">
+              <DsLayoutStack gap="xxs" flexible>
+                <DsLayoutInline gap="xxs" wrap="nowrap">
+                  <DsText size="xs" weight="medium">
+                    {t('blockEditor.labels.selectedOptimizedMesh')}
+                  </DsText>
+                  {selectedTargetRatioPercent ? (
+                    <DsText size="xs" tone="secondary">
+                      {selectedTargetRatioPercent}%
+                    </DsText>
+                  ) : null}
+                </DsLayoutInline>
+                <DsText size="xs" tone="secondary" lines={1}>
+                  <strong>{selectedCandidate?.fileName || selection.fileId || selection.candidateId}</strong>
+                </DsText>
+                {selectedCandidate ? (
+                  <CandidateStats candidate={selectedCandidate} sourceSizeBytes={sourceFile.sizeBytes} t={t} />
                 ) : null}
-              </Group>
-              <Text size="xs" c="dimmed" lineClamp={1}>
-                <strong>{selectedCandidate?.fileName || selection.fileId || selection.candidateId}</strong>
-              </Text>
-              {selectedCandidate ? (
-                <CandidateStats candidate={selectedCandidate} sourceSizeBytes={sourceFile.sizeBytes} t={t} />
-              ) : null}
-            </Stack>
-            <Group gap={2} wrap="nowrap">
-              <IconButton
-                size="xs"
-                emphasis="low"
-                disabled={candidateActionsDisabled || clearing}
-                loading={clearing}
-                title={t('blockEditor.actions.clearOptimizedMesh')}
-                aria-label={t('blockEditor.actions.clearOptimizedMesh')}
-                onClick={() => void clearSelected()}
-              >
-                <IconRestore size={14} />
-              </IconButton>
-              {selectedCandidate ? (
+              </DsLayoutStack>
+              <DsLayoutInline gap="xxs" wrap="nowrap">
                 <IconButton
                   size="xs"
-                  tone="danger"
                   emphasis="low"
-                  disabled={candidateActionsDisabled}
-                  loading={deletingCandidateId === selectedCandidate.id}
-                  title={candidateDeleteLabel(selectedCandidate)}
-                  aria-label={candidateDeleteLabel(selectedCandidate)}
-                  onClick={() => void deleteCandidate(selectedCandidate)}
+                  disabled={candidateActionsDisabled || clearing}
+                  loading={clearing}
+                  title={t('blockEditor.actions.clearOptimizedMesh')}
+                  aria-label={t('blockEditor.actions.clearOptimizedMesh')}
+                  onClick={() => void clearSelected()}
                 >
-                  <IconX size={14} />
+                  <IconRestore size={14} />
                 </IconButton>
-              ) : null}
-            </Group>
-          </Group>
-        </Box>
+                {selectedCandidate ? (
+                  <IconButton
+                    size="xs"
+                    tone="danger"
+                    emphasis="low"
+                    disabled={candidateActionsDisabled}
+                    loading={deletingCandidateId === selectedCandidate.id}
+                    title={candidateDeleteLabel(selectedCandidate)}
+                    aria-label={candidateDeleteLabel(selectedCandidate)}
+                    onClick={() => void deleteCandidate(selectedCandidate)}
+                  >
+                    <IconX size={14} />
+                  </IconButton>
+                ) : null}
+              </DsLayoutInline>
+            </DsLayoutInline>
+          </LayoutInset>
+        </SectionCard>
       ) : null}
 
-      <Stack gap={6}>
-        <Group justify="space-between" gap="xs">
-          <Text size="xs" fw={500}>
+      <DsLayoutStack gap="xxs">
+        <DsLayoutInline justify="between" gap="xs">
+          <DsText size="xs" weight="medium">
             {t('blockEditor.labels.meshOptimizationTargetRatio')}
-          </Text>
-          <Text size="xs" c="dimmed">
+          </DsText>
+          <DsText size="xs" tone="secondary">
             {targetRatioPercent}%
-          </Text>
-        </Group>
+          </DsText>
+        </DsLayoutInline>
         <Slider
           thumbLabel={t('blockEditor.labels.meshOptimizationTargetRatio')}
           data-testid={`immersive-scene-mesh-optimization-target-ratio-${unitId}`}
@@ -543,7 +541,6 @@ export function MeshOptimizationPanel({
           value={targetRatioPercent}
           disabled={candidateActionsDisabled}
           onChange={(value) => setTargetRatioPercent(normalizeMeshOptimizationTargetRatioPercent(value))}
-          size="xs"
         />
         <Button
           size="xs"
@@ -555,80 +552,128 @@ export function MeshOptimizationPanel({
         >
           {t('blockEditor.actions.generateOptimizedMesh')}
         </Button>
-      </Stack>
+      </DsLayoutStack>
 
       {runningCandidates.length > 0 ? (
-        <Stack gap={6}>
+        <DsLayoutStack gap="xxs">
           {runningCandidates.map((candidate) => (
-            <Box
+            <SectionCard
               key={candidate.id}
-              pt={8}
-              style={{
-                borderTop: '1px solid var(--mantine-color-default-border)',
-              }}
+              padding="none"
+              appearance="plain"
+              border="block-start"
               data-testid={`immersive-scene-mesh-optimization-candidate-${candidate.id}`}
             >
-              <Group justify="space-between" gap="xs" align="flex-start" wrap="nowrap">
-                <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
-                  <Text size="xs" fw={500}>
-                    {formatCandidateDescriptor(candidate)}
-                  </Text>
-                  <Text size="xs" c="dimmed">
-                    {statusLabel(candidate, t)}
-                  </Text>
-                </Stack>
-                <Group gap={2} wrap="nowrap">
-                  <Loader size="xs" />
-                  <IconButton
-                    size="xs"
-                    tone="danger"
-                    emphasis="low"
-                    disabled={candidateActionsDisabled}
-                    loading={deletingCandidateId === candidate.id}
-                    title={candidateDeleteLabel(candidate)}
-                    aria-label={candidateDeleteLabel(candidate)}
-                    onClick={() => void deleteCandidate(candidate)}
-                  >
-                    <IconX size={14} />
-                  </IconButton>
-                </Group>
-              </Group>
-            </Box>
+              <LayoutInset blockStart="xs">
+                <DsLayoutInline justify="between" gap="xs" align="start" wrap="nowrap">
+                  <DsLayoutStack gap="xxs" flexible>
+                    <DsText size="xs" weight="medium">
+                      {formatCandidateDescriptor(candidate)}
+                    </DsText>
+                    <DsText size="xs" tone="secondary">
+                      {statusLabel(candidate, t)}
+                    </DsText>
+                  </DsLayoutStack>
+                  <DsLayoutInline gap="xxs" wrap="nowrap">
+                    <Loader size="xs" />
+                    <IconButton
+                      size="xs"
+                      tone="danger"
+                      emphasis="low"
+                      disabled={candidateActionsDisabled}
+                      loading={deletingCandidateId === candidate.id}
+                      title={candidateDeleteLabel(candidate)}
+                      aria-label={candidateDeleteLabel(candidate)}
+                      onClick={() => void deleteCandidate(candidate)}
+                    >
+                      <IconX size={14} />
+                    </IconButton>
+                  </DsLayoutInline>
+                </DsLayoutInline>
+              </LayoutInset>
+            </SectionCard>
           ))}
-        </Stack>
+        </DsLayoutStack>
       ) : null}
 
       {selectableCompletedCandidates.length > 0 ? (
-        <Stack gap={6}>
+        <DsLayoutStack gap="xxs">
           {selectableCompletedCandidates.map((candidate) => (
-            <Box
+            <SectionCard
               key={candidate.id}
-              pt={8}
-              style={{
-                borderTop: '1px solid var(--mantine-color-default-border)',
-              }}
+              padding="none"
+              appearance="plain"
+              border="block-start"
               data-testid={`immersive-scene-mesh-optimization-candidate-${candidate.id}`}
             >
-              <Group justify="space-between" gap="xs" align="flex-start" wrap="nowrap">
-                <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
-                  <Text size="xs" fw={500}>
-                    {formatCandidateDescriptor(candidate)}
-                  </Text>
-                  <Text size="xs" c="dimmed" lineClamp={1}>
-                    {candidate.fileName}
-                  </Text>
-                  <CandidateStats candidate={candidate} sourceSizeBytes={sourceFile.sizeBytes} t={t} />
-                </Stack>
-                <Group gap={2} wrap="nowrap">
-                  <Button
-                    size="xs"
-                    emphasis="low"
-                    disabled={candidateActionsDisabled}
-                    loading={usingCandidateId === candidate.id}
-                    onClick={() => void useCandidate(candidate)}
-                  >
-                    {t('blockEditor.actions.useOptimizedMesh')}
-                  </Button>
+              <LayoutInset blockStart="xs">
+                <DsLayoutInline justify="between" gap="xs" align="start" wrap="nowrap">
+                  <DsLayoutStack gap="xxs" flexible>
+                    <DsText size="xs" weight="medium">
+                      {formatCandidateDescriptor(candidate)}
+                    </DsText>
+                    <DsText size="xs" tone="secondary" lines={1}>
+                      {candidate.fileName}
+                    </DsText>
+                    <CandidateStats candidate={candidate} sourceSizeBytes={sourceFile.sizeBytes} t={t} />
+                  </DsLayoutStack>
+                  <DsLayoutInline gap="xxs" wrap="nowrap">
+                    <Button
+                      size="xs"
+                      emphasis="low"
+                      disabled={candidateActionsDisabled}
+                      loading={usingCandidateId === candidate.id}
+                      onClick={() => void useCandidate(candidate)}
+                    >
+                      {t('blockEditor.actions.useOptimizedMesh')}
+                    </Button>
+                    <IconButton
+                      size="xs"
+                      tone="danger"
+                      emphasis="low"
+                      disabled={candidateActionsDisabled}
+                      loading={deletingCandidateId === candidate.id}
+                      title={candidateDeleteLabel(candidate)}
+                      aria-label={candidateDeleteLabel(candidate)}
+                      onClick={() => void deleteCandidate(candidate)}
+                    >
+                      <IconX size={14} />
+                    </IconButton>
+                  </DsLayoutInline>
+                </DsLayoutInline>
+              </LayoutInset>
+            </SectionCard>
+          ))}
+        </DsLayoutStack>
+      ) : null}
+
+      {failedCandidates.length > 0 ? (
+        <DsLayoutStack gap="xxs">
+          {failedCandidates.map((candidate) => (
+            <SectionCard
+              key={candidate.id}
+              padding="none"
+              appearance="plain"
+              border="block-start"
+              data-testid={`immersive-scene-mesh-optimization-candidate-${candidate.id}`}
+            >
+              <LayoutInset blockStart="xs">
+                <DsLayoutInline justify="between" gap="xs" align="start" wrap="nowrap">
+                  <DsLayoutStack gap="xxs" flexible>
+                    <DsLayoutInline gap="xxs" wrap="wrap">
+                      <DsText size="xs" weight="medium" tone="danger">
+                        {formatCandidateDescriptor(candidate)}
+                      </DsText>
+                      <DsText size="xs" tone="danger">
+                        {statusLabel(candidate, t)}
+                      </DsText>
+                    </DsLayoutInline>
+                    {candidate.errorMessage ? (
+                      <DsText size="xs" tone="secondary">
+                        {candidate.errorMessage}
+                      </DsText>
+                    ) : null}
+                  </DsLayoutStack>
                   <IconButton
                     size="xs"
                     tone="danger"
@@ -641,63 +686,18 @@ export function MeshOptimizationPanel({
                   >
                     <IconX size={14} />
                   </IconButton>
-                </Group>
-              </Group>
-            </Box>
+                </DsLayoutInline>
+              </LayoutInset>
+            </SectionCard>
           ))}
-        </Stack>
-      ) : null}
-
-      {failedCandidates.length > 0 ? (
-        <Stack gap={6}>
-          {failedCandidates.map((candidate) => (
-            <Box
-              key={candidate.id}
-              pt={8}
-              style={{
-                borderTop: '1px solid var(--mantine-color-default-border)',
-              }}
-              data-testid={`immersive-scene-mesh-optimization-candidate-${candidate.id}`}
-            >
-              <Group justify="space-between" gap="xs" align="flex-start" wrap="nowrap">
-                <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
-                  <Group gap={6} wrap="wrap">
-                    <Text size="xs" fw={500} c="red">
-                      {formatCandidateDescriptor(candidate)}
-                    </Text>
-                    <Text size="xs" c="red">
-                      {statusLabel(candidate, t)}
-                    </Text>
-                  </Group>
-                  {candidate.errorMessage ? (
-                    <Text size="xs" c="dimmed">
-                      {candidate.errorMessage}
-                    </Text>
-                  ) : null}
-                </Stack>
-                <IconButton
-                  size="xs"
-                  tone="danger"
-                  emphasis="low"
-                  disabled={candidateActionsDisabled}
-                  loading={deletingCandidateId === candidate.id}
-                  title={candidateDeleteLabel(candidate)}
-                  aria-label={candidateDeleteLabel(candidate)}
-                  onClick={() => void deleteCandidate(candidate)}
-                >
-                  <IconX size={14} />
-                </IconButton>
-              </Group>
-            </Box>
-          ))}
-        </Stack>
+        </DsLayoutStack>
       ) : null}
 
       {status ? (
-        <Text size="xs" c={status.tone}>
+        <DsText size="xs" tone={status.tone}>
           {status.message}
-        </Text>
+        </DsText>
       ) : null}
-    </Stack>
+    </DsLayoutStack>
   );
 }

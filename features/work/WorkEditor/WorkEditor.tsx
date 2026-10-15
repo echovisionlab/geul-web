@@ -1,13 +1,21 @@
 'use client';
 
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+
+import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
+
+import { DocumentEditorPanels } from '@/features/authoring/DocumentEditorPanels';
+
+import { Text as DsText } from '@/components/core/Typography';
+import { LayoutStack as DsLayoutStack, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { IconHistory } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { EditorHeader } from '@/features/editor/EditorHeader';
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
 import { OgImagePreview } from '@/features/metadata/OgImagePreview';
@@ -54,6 +62,7 @@ import { useWorkLifecycle } from './useWorkLifecycle';
 import { requireActionSuccess } from '@/lib/editor/require-action-success';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
+import { useAuthoritativeConfiguration } from '@/lib/editor/useAuthoritativeConfiguration';
 
 interface ClientDetails {
   id: string;
@@ -132,6 +141,8 @@ export function WorkEditor(props: WorkEditorProps) {
       workId={props.workId}
       initialMeta={initialMeta}
       initialFeaturedImageUrl={props.initialFeaturedImageUrl}
+      initialMapPlaceId={props.initialMapPlaceId}
+      canEdit={props.canEdit}
     >
       <MapPlaceActionProvider createMapPlaceForBlock={createMapPlaceForBlockWithBrowserClient}>
         <WorkEditorContent {...props} />
@@ -140,7 +151,7 @@ export function WorkEditor(props: WorkEditorProps) {
   );
 }
 
-function WorkEditorContent({
+function useWorkEditorViewModel({
   workId,
   currentMemberId,
   initialTitle,
@@ -172,7 +183,7 @@ function WorkEditorContent({
   const flushPendingSaves = useCallback(async () => {
     const saved = await flushEditorSaves(`work:${workId}`);
     if (!saved) {
-      notifications.show({ message: tCommon('notifications.saveFailed'), color: 'red' });
+      notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' });
     }
     return saved;
   }, [tCommon, workId]);
@@ -183,13 +194,18 @@ function WorkEditorContent({
   }, [flushPendingSaves, navigateBack]);
   const lifecycle = useWorkLifecycle({ workId, initialStatus, canEdit, isAdmin, onDeleted: navigateBack });
   const { status } = lifecycle;
-  const canEditWork = lifecycle.canEdit;
-  const [mapPlaceId, setMapPlaceId] = useState<string | null>(initialMapPlaceId);
+  const mapConfiguration = useAuthoritativeConfiguration({
+    document: `work:${workId}`,
+    initialConfiguration: { mapPlaceId: initialMapPlaceId },
+  });
+
   const [createPlaceOpened, setCreatePlaceOpened] = useState(false);
   const [createPlaceInitialName, setCreatePlaceInitialName] = useState('');
   const [versionHistoryOpened, setVersionHistoryOpened] = useState(false);
 
   const {
+    configuration,
+    refreshConfiguration,
     slug,
     type,
     year,
@@ -218,8 +234,23 @@ function WorkEditorContent({
     roomLocale,
     localeSession,
   } = useWorkMeta();
+  const mapPlaceId = configuration
+    ? configuration.getConfiguration().mapPlaceId
+    : mapConfiguration.getConfiguration().mapPlaceId;
+  const setMapPlaceId = (mapPlaceId: string | null) => (configuration ?? mapConfiguration).edit({ mapPlaceId });
   const currentProvider = provider;
-  useEditorEntityChanges(`work:${workId}`, () => router.refresh(), currentProvider);
+  const accessLevel = useEditorAccessLevel(provider);
+  const canEditWork = lifecycle.canEdit && accessLevel === 'edit';
+  useEditorEntityChanges(
+    `work:${workId}`,
+    () => {
+      void refreshConfiguration?.();
+      router.refresh();
+    },
+    currentProvider,
+    undefined,
+    configuration?.captureOwnChange,
+  );
   const handleStatusChange = useCallback(
     async (nextStatus: Parameters<typeof lifecycle.changeStatus>[0]) => {
       if (await flushPendingSaves()) {
@@ -235,10 +266,10 @@ function WorkEditorContent({
   }, [flushPendingSaves, lifecycle.deleteWork.mutate]);
   const observedMetadataRef = useRef(metadata);
   useEffect(() => {
-    if (!Object.hasOwn(getPendingEditorPatch(`work:${workId}`), 'metadata')) {
+    if (!configuration && !Object.hasOwn(getPendingEditorPatch(`work:${workId}`), 'metadata')) {
       observedMetadataRef.current = structuredClone(initialMetadata);
     }
-  }, [initialMetadata, workId]);
+  }, [configuration, initialMetadata, workId]);
   const { activeEditLocale } = localeSession;
   const canEditTranslationSource = canEditWork;
   const hasLocaleRoomMutationAuthority = localeSession.hasRoomMutationAuthority({
@@ -283,49 +314,65 @@ function WorkEditorContent({
     mutationFn: (request: { locale: string; targetKey: string }) => regenerateWorkOgImageAction(workId, request.locale),
     onSuccess: (result, request) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tCommon('notifications.ogGenerationRequested'), color: 'blue' });
+      notifications.show({ message: tCommon('notifications.ogGenerationRequested'), tone: 'neutral' });
       ogImage.trackRequestedGeneration(result.generationId, request.targetKey);
     },
   });
 
   const updateSlug = useMutation({
-    mutationFn: (slug: string | null) => updateWorkSlugAction(workId, slug),
+    mutationFn: async (slug: string | null) => {
+      const write = configuration?.beginWrite({ slug });
+      try {
+        const result = await updateWorkSlugAction(workId, slug, write?.origin);
+        if (result.error) {
+          write?.fail();
+        } else {
+          write?.acknowledge({ slug: result.slug ?? slug }, { authoritative: false });
+          void refreshConfiguration?.();
+        }
+        return result;
+      } catch (error) {
+        write?.fail();
+        throw error;
+      }
+    },
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
       }
     },
   });
 
   const updateWork = useMutation({
-    mutationFn: (data: { mapPlaceId?: string | null }) => updateWorkAction(workId, data),
+    mutationFn: async (data: { mapPlaceId?: string | null }) => {
+      const write = (configuration ?? mapConfiguration).beginWrite(data);
+      try {
+        const result = await updateWorkAction(workId, data, write.origin);
+        if (result.error) {
+          write.fail();
+        } else {
+          write.acknowledge(data, { authoritative: false });
+          void refreshConfiguration?.();
+          publishEditorEntityChange(`work:${workId}`, write?.origin);
+        }
+        return result;
+      } catch (error) {
+        write.fail();
+        throw error;
+      }
+    },
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
       }
     },
     onError: (error) => {
       notifications.show({
         message: error instanceof Error ? error.message : t('notifications.updateFailed'),
-        color: 'red',
-      });
-    },
-  });
-
-  const updateWorkFields = useMutation({
-    mutationFn: (data: Parameters<typeof updateWorkFieldsAction>[1]) => updateWorkFieldsAction(workId, data),
-    onSuccess: (result) => {
-      if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
-      }
-    },
-    onError: (error) => {
-      notifications.show({
-        message: error instanceof Error ? error.message : t('notifications.updateFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
@@ -344,7 +391,7 @@ function WorkEditorContent({
       if (result.error || !result.data?.id) {
         notifications.show({
           message: result.error || tCommon('notifications.createPlaceFailed'),
-          color: 'red',
+          tone: 'danger',
         });
         return;
       }
@@ -355,13 +402,13 @@ function WorkEditorContent({
       setCreatePlaceOpened(false);
       notifications.show({
         message: tCommon('notifications.placeCreatedAndLinked'),
-        color: 'green',
+        tone: 'positive',
       });
     },
     onError: (error) => {
       notifications.show({
         message: error instanceof Error ? error.message : tCommon('notifications.createPlaceFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
@@ -422,12 +469,31 @@ function WorkEditorContent({
   });
   const debouncedWorkFieldsUpdate = useDebouncedPatch({
     write: async (update: WorkFieldsUpdate) => {
-      const result = await updateWorkFields.mutateAsync(update);
-      await requireActionSuccess(Promise.resolve(result));
+      const { observedMetadata: _observedMetadata, observedClients: _observedClients, ...patch } = update;
+      void _observedMetadata;
+      void _observedClients;
+      const write = configuration?.beginWrite(patch as Partial<WorkMeta>);
+      let result;
+      try {
+        result = await updateWorkFieldsAction(workId, update, write?.origin);
+        await requireActionSuccess(Promise.resolve(result));
+        write?.acknowledge(
+          { ...patch, ...(result.metadata ? { metadata: result.metadata } : {}) } as Partial<WorkMeta>,
+          { authoritative: Object.keys(patch).every((field) => field === 'metadata') && result.metadata !== undefined },
+        );
+      } catch (error) {
+        write?.fail();
+        notifications.show({
+          message: error instanceof Error ? error.message : t('notifications.updateFailed'),
+          tone: 'danger',
+        });
+        throw error;
+      }
       if (update.metadata !== undefined) {
         observedMetadataRef.current = structuredClone(result.metadata ?? update.metadata);
       }
-      publishEditorEntityChange(`work:${workId}`);
+      publishEditorEntityChange(`work:${workId}`, write?.origin);
+      void refreshConfiguration?.();
     },
     delay: 500,
     scope: workId,
@@ -505,7 +571,9 @@ function WorkEditorContent({
       if (updates.metadata !== undefined) {
         setMetadata(updates.metadata);
         durableUpdate.metadata = updates.metadata;
-        durableUpdate.observedMetadata = structuredClone(observedMetadataRef.current);
+        durableUpdate.observedMetadata = structuredClone(
+          configuration?.getCanonical().metadata ?? observedMetadataRef.current,
+        );
       }
       if (updates.featured !== undefined) {
         setFeatured(updates.featured);
@@ -513,7 +581,7 @@ function WorkEditorContent({
       }
       debouncedWorkFieldsUpdate(durableUpdate);
     },
-    [canEditNeutral, debouncedWorkFieldsUpdate, setFeatured, setMetadata, setPeriod, setType],
+    [canEditNeutral, configuration, debouncedWorkFieldsUpdate, setFeatured, setMetadata, setPeriod, setType],
   );
 
   const handleSummaryChange = useCallback(
@@ -561,9 +629,156 @@ function WorkEditorContent({
 
   const displayedTitle = roomLocale ? residentTitle : activeEditLocale.displayTitle;
   const displayedSummary = roomLocale ? residentSummary : activeEditLocale.displaySummary;
+  return {
+    currentProvider,
+    workId,
+    protocol,
+    displayedTitle,
+    currentLocaleCanEdit,
+    currentIsSynced,
+    handleScopedLocaleTitleChange,
+    tCommon,
+    roomLocale,
+    status,
+    lifecycle: {
+      isChanging: lifecycle.isChanging,
+      controls: { statusOptions: lifecycle.controls.statusOptions, canDelete: lifecycle.controls.canDelete },
+      deleteWork: { isPending: lifecycle.deleteWork.isPending },
+    },
+    currentIsConnected,
+    handleBack,
+    canEditNeutral,
+    handleStatusChange,
+    handleDelete,
+    tCommonLabels,
+    setVersionHistoryOpened,
+    activeEditLocale,
+    ogImage: {
+      src: ogImage.src,
+      isRegenerating: ogImage.isRegenerating,
+      status: ogImage.status,
+      error: ogImage.error,
+      targetKey: ogImage.targetKey,
+      trackLatest: ogImage.trackLatest,
+    },
+    canEditWork,
+    regenerateOgImage: { isPending: regenerateOgImage.isPending, mutate: regenerateOgImage.mutate },
+    baseUrl,
+    slug,
+    slugMgmt: {
+      isAvailable: slugMgmt.isAvailable,
+      error: slugMgmt.error,
+      isChecking: slugMgmt.isChecking,
+      handleChange: slugMgmt.handleChange,
+      handleBlur: slugMgmt.handleBlur,
+    },
+    updateSlug: { isPending: updateSlug.isPending },
+    t,
+    isAdmin,
+    mapPlaceId,
+    handleMapPlaceChange,
+    handleCreatePlaceStart,
+    type,
+    year,
+    month,
+    untilYear,
+    untilMonth,
+    isPresent,
+    metadata,
+    featured,
+    handleMetaChange,
+    displayedSummary,
+    canEditTranslationSource,
+    currentDoc,
+    currentMemberId,
+    userName,
+    handleSummaryChange,
+    canonicalOrigin,
+    siteName,
+    featuredImageUrl,
+    initialClientDetails,
+    blockRoomController,
+    versionHistoryOpened,
+    reloadCanonical,
+    createPlaceOpened,
+    setCreatePlaceOpened,
+    handleCreatePlaceSubmit,
+    createPlace: { isPending: createPlace.isPending },
+    createPlaceInitialName,
+  };
+}
+
+function WorkEditorContent(props: WorkEditorProps) {
+  return <WorkEditorView model={useWorkEditorViewModel(props)} />;
+}
+
+export type WorkEditorViewModel = ReturnType<typeof useWorkEditorViewModel>;
+
+/** Complete production editor composition; controllers supply data and commands. */
+export function WorkEditorView({ model }: { model: WorkEditorViewModel }) {
+  const {
+    currentProvider,
+    workId,
+    protocol,
+    displayedTitle,
+    currentLocaleCanEdit,
+    currentIsSynced,
+    handleScopedLocaleTitleChange,
+    tCommon,
+    roomLocale,
+    status,
+    lifecycle,
+    currentIsConnected,
+    handleBack,
+    canEditNeutral,
+    handleStatusChange,
+    handleDelete,
+    tCommonLabels,
+    setVersionHistoryOpened,
+    activeEditLocale,
+    ogImage,
+    canEditWork,
+    regenerateOgImage,
+    baseUrl,
+    slug,
+    slugMgmt,
+    updateSlug,
+    t,
+    isAdmin,
+    mapPlaceId,
+    handleMapPlaceChange,
+    handleCreatePlaceStart,
+    type,
+    year,
+    month,
+    untilYear,
+    untilMonth,
+    isPresent,
+    metadata,
+    featured,
+    handleMetaChange,
+    displayedSummary,
+    canEditTranslationSource,
+    currentDoc,
+    currentMemberId,
+    userName,
+    handleSummaryChange,
+    canonicalOrigin,
+    siteName,
+    featuredImageUrl,
+    initialClientDetails,
+    blockRoomController,
+    versionHistoryOpened,
+    reloadCanonical,
+    createPlaceOpened,
+    setCreatePlaceOpened,
+    handleCreatePlaceSubmit,
+    createPlace,
+    createPlaceInitialName,
+  } = model;
   return (
     <EditorRuntimeProvider provider={currentProvider} entityType="work" entityId={workId} blockRoomProtocol={protocol}>
-      <Stack h="100%" gap="md">
+      <DsLayoutStack fill="block" gap={{ base: 'xs', sm: 'md' }}>
         <EditorHeader
           title={displayedTitle}
           onTitleChange={currentLocaleCanEdit && currentIsSynced ? handleScopedLocaleTitleChange : undefined}
@@ -582,12 +797,12 @@ function WorkEditorContent({
               ? {
                   title: tCommon('actions.delete'),
                   message: (
-                    <Text>
+                    <DsText>
                       {tCommon.rich('messages.confirmDeleteNamedRich', {
                         name: displayedTitle || tCommon('states.untitled'),
                         strong: (chunks) => <strong>{chunks}</strong>,
                       })}
-                    </Text>
+                    </DsText>
                   ),
                 }
               : undefined
@@ -600,160 +815,181 @@ function WorkEditorContent({
             {
               label: tCommonLabels('versionHistory'),
               onClick: () => setVersionHistoryOpened(true),
-              icon: <IconHistory size={16} />,
+              icon: <IconHistory />,
             },
           ]}
           controls={<EditorActiveLocaleControl state={activeEditLocale} />}
         />
 
-        {/* OG Image & Featured Image */}
-        <MediaPreviewGrid>
-          <OgImagePreview
-            src={ogImage.src}
-            canRegenerate={canEditWork && activeEditLocale.hasLiveRow && Boolean(activeEditLocale.activeLocale)}
-            isRegenerating={regenerateOgImage.isPending || ogImage.isRegenerating}
-            generationStatus={ogImage.status}
-            generationError={ogImage.error}
-            onRegenerate={() => {
-              if (activeEditLocale.activeLocale) {
-                regenerateOgImage.mutate({
-                  locale: activeEditLocale.activeLocale,
-                  targetKey: ogImage.targetKey,
-                });
-              }
-            }}
-          />
-          <WorkFeaturedImageUploader
-            workId={workId}
-            idPrefix={`work-${workId}-featured-image`}
-            canEdit={canEditNeutral}
-            onOgGenerationRequested={() => void ogImage.trackLatest()}
-          />
-        </MediaPreviewGrid>
-
-        {/* URL Section */}
-        <UrlSection
-          baseUrl={baseUrl}
-          entityType="work"
-          entityId={workId}
-          slug={toSlugInputValue(slug)}
-          isAvailable={slugMgmt.isAvailable}
-          idPrefix={`work-${workId}`}
-          error={slugMgmt.error}
-          saving={slugMgmt.isChecking || updateSlug.isPending}
-          onChange={slugMgmt.handleChange}
-          onBlur={slugMgmt.handleBlur}
-          disabled={!canEditNeutral}
-        />
-
-        {/* Share Links */}
-        <ShareLinkSection
-          entityType="work"
-          entityId={workId}
-          description={t('shareLinksDescription')}
-          disabled={!canEditNeutral}
-        />
-
-        <EntityTranslationsPanel
-          entityType="work"
-          entityId={workId}
-          canManage={canEditWork}
-          canAdministerTranslations={isAdmin && canEditWork}
-          canMutateTargets={canEditWork}
-        />
-
-        <Stack gap={4}>
-          <LocationSelector
-            value={mapPlaceId}
-            idPrefix={`work-${workId}-location`}
-            canEdit={canEditNeutral}
-            onChange={handleMapPlaceChange}
-            onCreateNew={handleCreatePlaceStart}
-          />
-        </Stack>
-
-        {/* Meta Form */}
-        <WorkMetaForm
-          workId={workId}
-          type={type}
-          year={year}
-          month={month}
-          untilYear={untilYear}
-          untilMonth={untilMonth}
-          isPresent={isPresent}
-          metadata={metadata}
-          featured={featured}
-          disabled={!canEditNeutral}
-          onChange={handleMetaChange}
-        />
-
-        <SummaryFieldCard
-          entityType="work"
-          entityId={workId}
-          title={displayedTitle}
-          summary={displayedSummary}
-          summaryReadOnly={!canEditTranslationSource || !roomLocale || !currentLocaleCanEdit || !currentIsSynced}
-          hideAiActions={!currentLocaleCanEdit || !currentIsSynced || !roomLocale}
-          aiTarget={
-            currentLocaleCanEdit && currentIsSynced && roomLocale
-              ? { type: 'work', id: workId, locale: roomLocale }
-              : undefined
-          }
-          provider={currentLocaleCanEdit ? currentProvider : null}
-          doc={currentLocaleCanEdit ? currentDoc : null}
-          currentMemberId={currentMemberId}
-          currentMemberDisplayName={userName}
-          onSummaryChange={currentLocaleCanEdit ? handleSummaryChange : undefined}
-        />
-
-        <MetadataPanel
-          title={displayedTitle}
-          summary={displayedSummary}
-          routePath={`/works/${slug || workId}`}
-          canonicalOrigin={canonicalOrigin}
-          siteName={siteName}
-          defaultImageUrl={featuredImageUrl}
-          defaultSchemaType="CreativeWork"
-        />
-
-        {/* Credits */}
-        <WorkCreditsSection workId={workId} canEdit={canEditNeutral} />
-
-        {/* Clients */}
-        <WorkClientsSection workId={workId} canEdit={canEditNeutral} initialClientDetails={initialClientDetails} />
-
-        {/* Content Editor */}
-        <SectionCard withBorder p="md" flex={1} style={{ minHeight: 300, display: 'flex', flexDirection: 'column' }}>
-          <Text size="sm" fw={500} mb="xs">
-            {tCommon('labels.body')}
-          </Text>
-          <Box flex={1} pos="relative">
-            {currentProvider && blockRoomController && currentIsSynced ? (
-              <Box id={getEditorBodyReadyId('work', workId)} h="100%">
-                <LocalizedRichTextFragmentEditor
-                  key={`work-${workId}-${roomLocale ?? 'source'}`}
-                  provider={currentProvider}
-                  blockRoomController={blockRoomController}
-                  userName={userName}
-                  editable={currentLocaleCanEdit}
-                  entityId={workId}
-                  entityType={TranscodeEntityType.WORK}
-                  allowNeutralBlockEdits={activeEditLocale.isSourceLocale}
-                  allowStructuralEdits={activeEditLocale.isSourceLocale}
-                  aiTarget={
-                    currentLocaleCanEdit && activeEditLocale.activeLocale
-                      ? { type: 'work', id: workId, locale: activeEditLocale.activeLocale }
-                      : undefined
-                  }
+        <DocumentEditorPanels
+          settings={
+            <>
+              {/* OG Image & Featured Image */}
+              <MediaPreviewGrid>
+                <OgImagePreview
+                  src={ogImage.src}
+                  canRegenerate={canEditWork && activeEditLocale.hasLiveRow && Boolean(activeEditLocale.activeLocale)}
+                  isRegenerating={regenerateOgImage.isPending || ogImage.isRegenerating}
+                  generationStatus={ogImage.status}
+                  generationError={ogImage.error}
+                  onRegenerate={() => {
+                    if (activeEditLocale.activeLocale) {
+                      regenerateOgImage.mutate({
+                        locale: activeEditLocale.activeLocale,
+                        targetKey: ogImage.targetKey,
+                      });
+                    }
+                  }}
                 />
-              </Box>
-            ) : (
-              <Box id={getEditorBodyLoadingId('work', workId)}>
-                <PageLoader size="sm" minHeight={300} />
-              </Box>
-            )}
-          </Box>
-        </SectionCard>
+                <AuthoringExtension kind="uploads">
+                  <WorkFeaturedImageUploader
+                    workId={workId}
+                    idPrefix={`work-${workId}-featured-image`}
+                    canEdit={canEditNeutral}
+                    onOgGenerationRequested={() => void ogImage.trackLatest()}
+                  />
+                </AuthoringExtension>
+              </MediaPreviewGrid>
+
+              {/* URL Section */}
+              <UrlSection
+                baseUrl={baseUrl}
+                entityType="work"
+                entityId={workId}
+                slug={toSlugInputValue(slug)}
+                isAvailable={slugMgmt.isAvailable}
+                idPrefix={`work-${workId}`}
+                error={slugMgmt.error}
+                saving={slugMgmt.isChecking || updateSlug.isPending}
+                onChange={slugMgmt.handleChange}
+                onBlur={slugMgmt.handleBlur}
+                disabled={!canEditNeutral}
+              />
+
+              {/* Share Links */}
+              <AuthoringExtension kind="sharing">
+                <ShareLinkSection
+                  entityType="work"
+                  entityId={workId}
+                  description={t('shareLinksDescription')}
+                  disabled={!canEditNeutral}
+                />
+              </AuthoringExtension>
+
+              <AuthoringExtension kind="translations">
+                <EntityTranslationsPanel
+                  entityType="work"
+                  entityId={workId}
+                  canManage
+                  canAdministerTranslations={isAdmin && canEditWork}
+                  canMutateTargets={canEditWork}
+                />
+              </AuthoringExtension>
+
+              <DsLayoutStack gap="xxs">
+                <LocationSelector
+                  value={mapPlaceId}
+                  idPrefix={`work-${workId}-location`}
+                  canEdit={canEditNeutral}
+                  onChange={handleMapPlaceChange}
+                  onCreateNew={handleCreatePlaceStart}
+                />
+              </DsLayoutStack>
+
+              {/* Meta Form */}
+              <WorkMetaForm
+                workId={workId}
+                type={type}
+                year={year}
+                month={month}
+                untilYear={untilYear}
+                untilMonth={untilMonth}
+                isPresent={isPresent}
+                metadata={metadata}
+                featured={featured}
+                disabled={!canEditNeutral}
+                onChange={handleMetaChange}
+              />
+
+              <SummaryFieldCard
+                entityType="work"
+                entityId={workId}
+                title={displayedTitle}
+                summary={displayedSummary}
+                summaryReadOnly={!canEditTranslationSource || !roomLocale || !currentLocaleCanEdit || !currentIsSynced}
+                hideAiActions={!currentLocaleCanEdit || !currentIsSynced || !roomLocale}
+                aiTarget={
+                  currentLocaleCanEdit && currentIsSynced && roomLocale
+                    ? { type: 'work', id: workId, locale: roomLocale }
+                    : undefined
+                }
+                provider={currentLocaleCanEdit ? currentProvider : null}
+                doc={currentLocaleCanEdit ? currentDoc : null}
+                currentMemberId={currentMemberId}
+                currentMemberDisplayName={userName}
+                onSummaryChange={currentLocaleCanEdit ? handleSummaryChange : undefined}
+              />
+
+              <MetadataPanel
+                title={displayedTitle}
+                summary={displayedSummary}
+                routePath={`/works/${slug || workId}`}
+                canonicalOrigin={canonicalOrigin}
+                siteName={siteName}
+                defaultImageUrl={featuredImageUrl}
+                defaultSchemaType="CreativeWork"
+              />
+
+              {/* Credits */}
+              <AuthoringExtension kind="relations">
+                <WorkCreditsSection workId={workId} canEdit={canEditNeutral} />
+              </AuthoringExtension>
+
+              {/* Clients */}
+              <AuthoringExtension kind="relations">
+                <WorkClientsSection
+                  workId={workId}
+                  canEdit={canEditNeutral}
+                  initialClientDetails={initialClientDetails}
+                />
+              </AuthoringExtension>
+            </>
+          }
+        >
+          {/* Content Editor */}
+          <div style={{ ...{ minHeight: 300, display: 'flex', flexDirection: 'column' }, flex: 1 }}>
+            <SectionCard layout="stack" grow padding={{ base: 'none', sm: 'md' }}>
+              <div style={{ position: 'relative' }}>
+                <DsLayoutInset flexible space="none">
+                  {currentProvider && blockRoomController ? (
+                    <div style={{ height: '100%' }} id={getEditorBodyReadyId('work', workId)}>
+                      <LocalizedRichTextFragmentEditor
+                        key={`work-${workId}-${roomLocale ?? 'source'}`}
+                        provider={currentProvider}
+                        blockRoomController={blockRoomController}
+                        userName={userName}
+                        editable={currentLocaleCanEdit}
+                        entityId={workId}
+                        entityType={TranscodeEntityType.WORK}
+                        allowNeutralBlockEdits={activeEditLocale.isSourceLocale}
+                        allowStructuralEdits={activeEditLocale.isSourceLocale}
+                        aiTarget={
+                          currentLocaleCanEdit && activeEditLocale.activeLocale
+                            ? { type: 'work', id: workId, locale: activeEditLocale.activeLocale }
+                            : undefined
+                        }
+                      />
+                    </div>
+                  ) : (
+                    <div id={getEditorBodyLoadingId('work', workId)}>
+                      <PageLoader size="sm" minHeight={300} />
+                    </div>
+                  )}
+                </DsLayoutInset>
+              </div>
+            </SectionCard>
+          </div>
+        </DocumentEditorPanels>
 
         {/* Version History */}
         <VersionHistoryDrawer
@@ -776,7 +1012,7 @@ function WorkEditorContent({
           isPending={createPlace.isPending}
           initialName={createPlaceInitialName}
         />
-      </Stack>
+      </DsLayoutStack>
     </EditorRuntimeProvider>
   );
 }

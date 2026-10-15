@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import {
-  createMapThemeInputSchema,
-  DEFAULT_DARK_VARIANT,
-  DEFAULT_LIGHT_VARIANT,
-  DEFAULT_THEME_SETTINGS,
-} from './schema';
+import { createMapThemeInputSchema } from './input-schema';
+import { DEFAULT_DARK_VARIANT, DEFAULT_LIGHT_VARIANT, DEFAULT_THEME_SETTINGS } from './schema';
 
 const validInput = {
   name: '  Editorial  ',

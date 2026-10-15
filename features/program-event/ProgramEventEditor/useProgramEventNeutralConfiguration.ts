@@ -1,12 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import {
   getProgramEventNeutralConfigurationAction,
   type ProgramEventNeutralConfiguration,
 } from '@/lib/actions/program-event';
 import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
+import {
+  useAuthoritativeConfiguration,
+  type AuthoritativeConfiguration,
+} from '@/lib/editor/useAuthoritativeConfiguration';
 import type { ProgramEventUpdate } from './useProgramEventLifecycle';
 
 export type ProgramEventNeutralField = Exclude<keyof ProgramEventNeutralConfiguration, 'typeName'>;
@@ -24,12 +28,8 @@ type ProgramEventNeutralPatch = Partial<ProgramEventNeutralConfiguration> & {
   };
 };
 
-interface ConfigurationState {
-  eventId: string;
-  configuration: ProgramEventNeutralConfiguration;
-}
-
 interface ProgramEventNeutralWrite {
+  origin: string;
   acknowledge: (patch: ProgramEventUpdate) => void;
   fail: () => void;
 }
@@ -95,193 +95,111 @@ export function useProgramEventNeutralConfiguration({
   onAdopt,
 }: UseProgramEventNeutralConfigurationOptions) {
   const document = `program_event:${eventId}`;
-  const activeScopeRef = useRef({ eventId, generation: 0 });
-  const canonicalRef = useRef<ConfigurationState>({ eventId, configuration: initialConfiguration });
-  const requestGenerationRef = useRef(0);
-  const draftsRef = useRef(new Map<ProgramEventNeutralField, unknown>());
-  const draftVersionsRef = useRef(new Map<ProgramEventNeutralField, number>());
-  const pendingWritesRef = useRef(new Map<ProgramEventNeutralField, Set<symbol>>());
-  const onAdoptRef = useRef(onAdopt);
-  if (activeScopeRef.current.eventId !== eventId) {
-    activeScopeRef.current = { eventId, generation: activeScopeRef.current.generation + 1 };
-    requestGenerationRef.current += 1;
-    draftsRef.current.clear();
-    draftVersionsRef.current.clear();
-    pendingWritesRef.current.clear();
-    canonicalRef.current = { eventId, configuration: initialConfiguration };
-  }
-  const scopeGeneration = activeScopeRef.current.generation;
-
-  useLayoutEffect(() => {
-    onAdoptRef.current = onAdopt;
-  });
-
-  const refresh = useCallback(async () => {
-    if (activeScopeRef.current.eventId !== eventId || activeScopeRef.current.generation !== scopeGeneration) {
-      return;
-    }
-    const requestedEventId = eventId;
-    const generation = ++requestGenerationRef.current;
-    try {
-      const result = await loadConfiguration(requestedEventId);
-      if (
-        !result.ok ||
-        activeScopeRef.current.eventId !== requestedEventId ||
-        activeScopeRef.current.generation !== scopeGeneration ||
-        requestGenerationRef.current !== generation
-      ) {
+  const recordingDraft = useRef(false);
+  const adoptingController = useRef<AuthoritativeConfiguration<ProgramEventNeutralConfiguration> | null>(null);
+  const controller = useAuthoritativeConfiguration({
+    document,
+    initialConfiguration,
+    onAdopt: (patch) => {
+      if (recordingDraft.current) {
         return;
       }
-
-      canonicalRef.current = { eventId: requestedEventId, configuration: result.configuration };
-      const adopted: Partial<ProgramEventNeutralConfiguration> = {};
-      for (const field of FIELDS) {
-        if (pendingWritesRef.current.get(field)?.size) {
-          continue;
-        }
-        const draft = draftsRef.current.get(field);
-        if (draftsRef.current.has(field) && !sameValue(draft, result.configuration[field])) {
-          continue;
-        }
-        draftsRef.current.delete(field);
-        adopted[field] = result.configuration[field] as never;
-      }
-      const typeIdDraft = draftsRef.current.get('typeId');
-      if (
-        !pendingWritesRef.current.get('typeId')?.size &&
-        (!draftsRef.current.has('typeId') || sameValue(typeIdDraft, result.configuration.typeId))
-      ) {
-        adopted.typeName = result.configuration.typeName;
+      const adopted = { ...patch };
+      if (adoptingController.current?.isDraft('typeId')) {
+        delete adopted.typeName;
       }
       if (Object.keys(adopted).length) {
-        onAdoptRef.current(adopted);
+        onAdopt(adopted);
+      }
+    },
+  });
+  adoptingController.current = controller;
+  const activeController = useRef<typeof controller | null>(controller);
+  activeController.current = controller;
+
+  const refresh = useCallback(async () => {
+    if (activeController.current !== controller) {
+      return;
+    }
+    const read = controller.beginRead();
+    try {
+      const result = await loadConfiguration(eventId);
+      if (result.ok && activeController.current === controller) {
+        controller.adoptRead(read, result.configuration);
       }
     } catch {
       // An authorized getter failure leaves local edits intact; a later hint can retry it.
     }
-  }, [eventId, loadConfiguration, scopeGeneration]);
+  }, [controller, eventId, loadConfiguration]);
 
-  useEditorEntityChanges(document, () => void refresh(), provider);
+  useEditorEntityChanges(document, () => void refresh(), provider, undefined, controller.captureOwnChange);
 
   useEffect(() => {
+    activeController.current = controller;
     void refresh();
     return () => {
-      if (activeScopeRef.current.eventId === eventId && activeScopeRef.current.generation === scopeGeneration) {
-        requestGenerationRef.current += 1;
+      controller.beginRead();
+      if (activeController.current === controller) {
+        activeController.current = null;
       }
     };
-  }, [eventId, refresh, scopeGeneration]);
+  }, [controller, refresh]);
 
   const setDraft = useCallback(
     <K extends ProgramEventNeutralField>(field: K, value: ProgramEventNeutralConfiguration[K]) => {
-      if (activeScopeRef.current.eventId !== eventId || activeScopeRef.current.generation !== scopeGeneration) {
+      if (activeController.current !== controller) {
         return;
       }
-      const canonical =
-        canonicalRef.current.eventId === eventId ? canonicalRef.current.configuration : initialConfiguration;
-      if (sameValue(value, canonical[field])) {
-        draftsRef.current.delete(field);
-      } else {
-        draftsRef.current.set(field, value);
+      // The display label belongs to the selected type and shares its protection.
+      recordingDraft.current = true;
+      try {
+        controller.edit({
+          [field]: value,
+          ...(field === 'typeId' ? { typeName: controller.getConfiguration().typeName } : {}),
+        });
+      } finally {
+        recordingDraft.current = false;
       }
-      draftVersionsRef.current.set(field, (draftVersionsRef.current.get(field) ?? 0) + 1);
     },
-    [eventId, initialConfiguration, scopeGeneration],
+    [controller],
   );
 
   const beginWrite = useCallback(
     (patch: ProgramEventUpdate): ProgramEventNeutralWrite => {
-      const requestedEventId = eventId;
-      const requestedScopeGeneration = scopeGeneration;
-      if (
-        activeScopeRef.current.eventId !== requestedEventId ||
-        activeScopeRef.current.generation !== requestedScopeGeneration
-      ) {
-        return {
-          acknowledge: () => publishEditorEntityChange(`program_event:${requestedEventId}`),
-          fail: () => undefined,
-        };
-      }
-      const fields = FIELDS.filter((field) => patch[field] !== undefined);
-      const versions = new Map(fields.map((field) => [field, draftVersionsRef.current.get(field) ?? 0]));
-      const token = Symbol('program-event-neutral-write');
-      for (const field of fields) {
-        const requests = pendingWritesRef.current.get(field) ?? new Set<symbol>();
-        requests.add(token);
-        pendingWritesRef.current.set(field, requests);
-      }
-      let finished = false;
-      const finish = () => {
-        if (finished) {
-          return;
+      const requested: Partial<ProgramEventNeutralConfiguration> = {};
+      for (const field of FIELDS) {
+        if (patch[field] !== undefined) {
+          requested[field] = patch[field] as never;
         }
-        finished = true;
-        for (const field of fields) {
-          const requests = pendingWritesRef.current.get(field);
-          requests?.delete(token);
-          if (requests?.size === 0) {
-            pendingWritesRef.current.delete(field);
-          }
-        }
-      };
-
+      }
+      if (Object.hasOwn(requested, 'typeId')) {
+        requested.typeName = controller.getConfiguration().typeName;
+      }
+      recordingDraft.current = true;
+      let write;
+      try {
+        write = controller.beginWrite(requested);
+      } finally {
+        recordingDraft.current = false;
+      }
       return {
+        origin: write.origin,
         acknowledge: (savedPatch) => {
-          finish();
-          if (
-            activeScopeRef.current.eventId !== requestedEventId ||
-            activeScopeRef.current.generation !== requestedScopeGeneration
-          ) {
-            publishEditorEntityChange(`program_event:${requestedEventId}`);
-            return;
-          }
-          const current =
-            canonicalRef.current.eventId === requestedEventId
-              ? canonicalRef.current.configuration
-              : initialConfiguration;
-          const canonical = { ...current };
-          for (const field of fields) {
-            const value = savedPatch[field];
-            if (value !== undefined) {
-              canonical[field] = value as never;
-            }
-            if (draftVersionsRef.current.get(field) === versions.get(field)) {
-              draftsRef.current.delete(field);
+          const snapshot: Partial<ProgramEventNeutralConfiguration> = {};
+          for (const field of FIELDS) {
+            if (savedPatch[field] !== undefined) {
+              snapshot[field] = savedPatch[field] as never;
             }
           }
-          canonicalRef.current = { eventId: requestedEventId, configuration: canonical };
-          publishEditorEntityChange(`program_event:${requestedEventId}`);
+          write.acknowledge(snapshot, { authoritative: false });
+          publishEditorEntityChange(document, write.origin);
           void refresh();
         },
-        fail: () => finish(),
+        fail: write.fail,
       };
     },
-    [eventId, initialConfiguration, refresh, scopeGeneration],
+    [controller, document, refresh],
   );
 
   return { beginWrite, refresh, setDraft };
-}
-
-function sameValue(left: unknown, right: unknown): boolean {
-  if (Object.is(left, right)) {
-    return true;
-  }
-  if (left instanceof Date && right instanceof Date) {
-    return left.getTime() === right.getTime();
-  }
-  if (Array.isArray(left) && Array.isArray(right)) {
-    return left.length === right.length && left.every((value, index) => sameValue(value, right[index]));
-  }
-  if (isRecord(left) && isRecord(right)) {
-    const leftKeys = Object.keys(left);
-    return (
-      leftKeys.length === Object.keys(right).length &&
-      leftKeys.every((key) => Object.hasOwn(right, key) && sameValue(left[key], right[key]))
-    );
-  }
-  return false;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);
 }

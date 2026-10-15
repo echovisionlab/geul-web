@@ -1,8 +1,6 @@
+import { createLogger } from '@/lib/utils/logger';
+import { parseServerMessage, type ServerMessageOf } from '@echovisionlab/geul-common/collaboration/protocol';
 import { UndoManager, type Doc } from 'yjs';
-
-const BEGIN_KIND = 'interactive_mutation.begin';
-const END_KIND = 'interactive_mutation.end';
-const canonicalUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
 
 type EditableProbe = () => boolean;
 type UndoStackItem = UndoManager['undoStack'][number];
@@ -14,35 +12,18 @@ interface ActiveMutation {
   stackItem?: UndoStackItem;
 }
 
-type InteractiveMutationMarker =
-  | { kind: typeof BEGIN_KIND; mutationId: string }
-  | { kind: typeof END_KIND; mutationId: string; outcome: 'accepted' | 'aborted' };
+type InteractiveMutationMarker = ServerMessageOf<'interactive_mutation.begin' | 'interactive_mutation.end'>;
 
 function markerFromPayload(payload: string): InteractiveMutationMarker | null {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(payload);
-  } catch {
+  const parsed = parseServerMessage(payload);
+  if (!parsed.ok) {
+    void createLogger('collaboration').warn('Ignoring collaboration message', { data: { ...parsed } });
     return null;
   }
-  if (!parsed || typeof parsed !== 'object') {
-    return null;
-  }
-  const value = parsed as Record<string, unknown>;
-  if (typeof value.mutationId !== 'string' || !canonicalUuid.test(value.mutationId)) {
-    return null;
-  }
-  if (value.kind === BEGIN_KIND && Object.keys(value).length === 2) {
-    return { kind: BEGIN_KIND, mutationId: value.mutationId };
-  }
-  if (
-    value.kind === END_KIND &&
-    Object.keys(value).length === 3 &&
-    (value.outcome === 'accepted' || value.outcome === 'aborted')
-  ) {
-    return { kind: END_KIND, mutationId: value.mutationId, outcome: value.outcome };
-  }
-  return null;
+  return parsed.ok &&
+    (parsed.message.kind === 'interactive_mutation.begin' || parsed.message.kind === 'interactive_mutation.end')
+    ? parsed.message
+    : null;
 }
 
 class BlockRoomUndoCoordinator {
@@ -152,7 +133,7 @@ class BlockRoomUndoCoordinator {
     if (!marker) {
       return;
     }
-    if (marker.kind === BEGIN_KIND) {
+    if (marker.kind === 'interactive_mutation.begin') {
       this.#cancelPending(provider);
       if (!this.#hasEditableSession()) {
         return;
@@ -261,4 +242,9 @@ export function redoBlockRoomEditor(editor: object): boolean {
 
 export function blockRoomUndoDepth(document: Doc): number {
   return coordinatorFor(document).manager.undoStack.length;
+}
+
+/** Separate a composition from adjacent typing without tracking remote origins. */
+export function stopCapturingBlockRoomUndo(document: Doc): void {
+  coordinatorFor(document).manager.stopCapturing();
 }

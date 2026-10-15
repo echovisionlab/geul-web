@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { act } from 'react';
+import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ImageUploadCropFieldProps, ImageUploadRejectionReason } from '@/components/core/ImageUpload';
@@ -37,6 +38,7 @@ vi.mock('@/components/core/ImageUpload', () => ({
 
 vi.mock('./useImageUploadCrop', () => ({
   useImageUploadCrop: () => ({
+    isPreparing: false,
     tempImageSrc: null,
     cropModalOpened: false,
     handleFileDrop: handleFileDropMock,
@@ -45,11 +47,12 @@ vi.mock('./useImageUploadCrop', () => ({
   }),
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: { show: notificationShowMock },
 }));
 
 vi.mock('next-intl', () => ({
+  useLocale: () => 'en',
   useTranslations: (namespace: string) => (key: string, values?: { ratio?: string }) =>
     values?.ratio ? `${namespace}.${key}: ${values.ratio}` : `${namespace}.${key}`,
 }));
@@ -99,6 +102,19 @@ afterEach(() => {
 });
 
 describe('ImageUploadCropController rejection policy', () => {
+  it('rejects crop completion and file selection if editing stops while mounted', () => {
+    renderController();
+    const field = container.querySelector('[data-testid="image-upload-crop-field"]');
+    renderController({ canEdit: false });
+    const props = getRenderedCropFieldProps();
+    expect(props.canEdit).toBe(false);
+    expect(props.cropOpened).toBe(false);
+    props.onFileSelect(new File(['image'], 'image.png', { type: 'image/png' }));
+    props.onCrop(new Blob(['cropped']));
+    expect(handleFileDropMock).not.toHaveBeenCalled();
+    expect(handleCropCompleteMock).not.toHaveBeenCalled();
+    expect(container.querySelector('[data-testid="image-upload-crop-field"]')).toBe(field);
+  });
   it.each([
     ['too-large', 'featuredImage.errors.fileTooLarge'],
     ['invalid-type', 'featuredImage.errors.invalidFileType'],
@@ -113,39 +129,57 @@ describe('ImageUploadCropController rejection policy', () => {
 
       expect(notificationShowMock).toHaveBeenCalledWith({
         message: expectedMessage,
-        color: 'red',
+        tone: 'danger',
       });
     },
   );
 });
 
 describe('ImageUploadCropController aspect ratio', () => {
-  it('defaults to a 16:9 crop and matching upload instruction', () => {
+  it('passes named crop handles and current selection values without adding visible guidance', () => {
     renderController();
     const props = getRenderedCropFieldProps();
-    expect(props.aspectRatio).toBe(16 / 9);
-    expect(props.labels.emptyDescription).toContain('featuredImage.empty.editable: 16:9');
+    expect(Object.keys(props.cropAccessibility?.labels ?? {})).toHaveLength(9);
+    expect(props.cropAccessibility?.labels.cropArea).toBe('featuredImage.cropTitle');
+    expect(props.cropAccessibility?.labels.nwDragHandle).toContain('common.labels.top');
+    expect(props.cropAccessibility?.labels.nwDragHandle).toContain('common.labels.left');
+    expect(props.cropAccessibility?.describeSelection({ unit: '%', x: 10, y: 20, width: 30, height: 40 })).toContain(
+      'common.labels.width: 30%',
+    );
+    expect(props.labels.emptyDescription).toBe('');
+    expect(props.labels.constraints).toBeUndefined();
   });
 
-  it.each([
-    [16 / 9, '16:9'],
-    [1, '1:1'],
-    [4 / 3, '4:3'],
-    [9 / 16, '9:16'],
-    [1200 / 630, '40:21'],
-    [1.234, '1.234:1'],
-  ])('describes the actual numeric crop %s as %s', (aspectRatio, expected) => {
-    renderController({ aspectRatio });
-    expect(getRenderedCropFieldProps().labels.emptyDescription).toContain(`featuredImage.empty.editable: ${expected}`);
+  it('keeps the social-card crop without persistent size captions or help controls', () => {
+    renderController();
+    const props = getRenderedCropFieldProps();
+    expect(props.aspectRatio).toBe(1200 / 630);
+    expect(props.previewMinHeight).toBeUndefined();
+    expect(props.labels.emptyDescription).toBe('');
+    expect(props.labels.readOnlyDescription).toBe('');
+    expect(props.labels.constraints).toBeUndefined();
+    expect(props.labels.changeHint).toBeUndefined();
   });
 
-  it('describes both range bounds without rounding them', () => {
-    renderController({ aspectRatio: { min: 9 / 16, max: 1.234 } });
-    expect(getRenderedCropFieldProps().labels.emptyDescription).toContain('featuredImage.empty.editable: 9:16-1.234:1');
-  });
+  it.each([16 / 9, 1, 4 / 3, 9 / 16, 1.234, { min: 9 / 16, max: 1.234 }, 'free'] as const)(
+    'keeps crop geometry %j without persistent captions or constraint controls',
+    (aspectRatio) => {
+      renderController({ aspectRatio });
+      const props = getRenderedCropFieldProps();
+      expect(props.aspectRatio).toEqual(aspectRatio);
+      expect(props.labels.emptyDescription).toBe('');
+      expect(props.labels.constraints).toBeUndefined();
+      expect(props.labels.constraintsLabel).toBeUndefined();
+      expect(props.labels.changeHint).toBeUndefined();
+    },
+  );
 
-  it('omits a fixed-ratio instruction for a free crop', () => {
-    renderController({ aspectRatio: 'free' });
-    expect(getRenderedCropFieldProps().labels.emptyDescription).not.toContain('featuredImage.empty.editable');
+  it('filters artwork selection to its supported source formats without rejecting by original byte size', () => {
+    renderController({ uploadType: UploadType.RELEASE_ARTWORK, aspectRatio: 1 });
+    const props = getRenderedCropFieldProps();
+    expect(props.accept).toHaveProperty('image/heic');
+    expect(props.accept).toHaveProperty('image/png');
+    expect(props.accept).not.toHaveProperty('image/gif');
+    expect(props.maxSize).toBeUndefined();
   });
 });

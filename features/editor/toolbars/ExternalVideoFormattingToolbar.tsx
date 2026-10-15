@@ -8,7 +8,10 @@ import {
 import { IconAlignCenter, IconAlignLeft, IconAlignRight, IconAspectRatio, IconLink } from '@tabler/icons-react';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
 import { IconButton } from '@/components/core/IconButton';
-import { Tooltip } from '@/components/core/Tooltip';
+import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { ToolbarSurface } from '@/components/core/Section';
+import { EditorToolbarAction } from './EditorToolbarAction';
+import { EditorToolbarDropdownTarget } from './EditorToolbarTooltip';
 
 export type ExternalVideoAlignment = 'left' | 'center' | 'right';
 
@@ -19,6 +22,8 @@ export interface ExternalVideoToolbarSelection {
 
 export interface ExternalVideoFormattingToolbarProps {
   labels: {
+    /** Accessible name of the contextual video toolbar. */
+    toolbar: string;
     editLink: string;
     aspectRatio: string;
     automaticAspectRatio: string;
@@ -60,67 +65,51 @@ export function ExternalVideoFormattingToolbar({
   const disabled = !enabled || !onUpdateLayout;
 
   return (
-    <div className="tiptap-editor__context-menu" data-testid="tiptap-external-video-menu">
-      {alignments.map(({ value, Icon, labelKey }) => {
-        const label = labels[labelKey];
-        return (
-          <Tooltip key={value} label={label} withArrow>
-            <IconButton
-              label={label}
-              tone={selection.textAlignment === value ? 'accent' : 'neutral'}
-              emphasis={selection.textAlignment === value ? 'medium' : 'low'}
-              size="sm"
-              aria-pressed={selection.textAlignment === value}
-              disabled={disabled}
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => onUpdateLayout?.({ textAlignment: value })}
-            >
-              <Icon size={16} />
-            </IconButton>
-          </Tooltip>
-        );
-      })}
-      <DropdownMenu portal={false} placement="bottom-start">
-        <DropdownMenu.Target>
-          <Tooltip label={labels.aspectRatio} withArrow>
-            <IconButton
-              label={labels.aspectRatio}
-              tone="neutral"
-              emphasis="low"
-              size="sm"
-              disabled={disabled}
-              onMouseDown={(event) => event.preventDefault()}
-            >
-              <IconAspectRatio size={16} />
-            </IconButton>
-          </Tooltip>
-        </DropdownMenu.Target>
-        <DropdownMenu.Dropdown>
-          {EXTERNAL_VIDEO_ASPECT_RATIO_VALUES.map((aspectRatio) => (
-            <DropdownMenu.Item
-              key={aspectRatio}
-              selected={selection.aspectRatio === aspectRatio}
-              disabled={disabled}
-              onClick={() => onUpdateLayout?.({ aspectRatio })}
-            >
-              {aspectRatio === 'auto' ? labels.automaticAspectRatio : aspectRatio}
-            </DropdownMenu.Item>
-          ))}
-        </DropdownMenu.Dropdown>
-      </DropdownMenu>
-      <Tooltip label={labels.editLink} withArrow>
-        <IconButton
-          label={labels.editLink}
-          tone="neutral"
-          emphasis="low"
-          size="sm"
-          disabled={!enabled || !onEditLink}
-          onMouseDown={(event) => event.preventDefault()}
-          onClick={() => onEditLink?.()}
-        >
+    <ToolbarSurface label={labels.toolbar} density="compact" wrap="nowrap" data-testid="tiptap-external-video-menu">
+      <DsLayoutInline gap="xxs" wrap="nowrap">
+        {alignments.map(({ value, Icon, labelKey }) => (
+          <EditorToolbarAction
+            key={value}
+            label={labels[labelKey]}
+            pressed={selection.textAlignment === value}
+            disabled={disabled}
+            onClick={() => onUpdateLayout?.({ textAlignment: value })}
+          >
+            <Icon size={16} />
+          </EditorToolbarAction>
+        ))}
+        <DropdownMenu portal={false} placement="bottom-start">
+          <EditorToolbarDropdownTarget label={labels.aspectRatio} focusHint={false}>
+            {(targetRef) => (
+              <IconButton
+                ref={targetRef}
+                label={labels.aspectRatio}
+                size="sm"
+                disabled={disabled}
+                data-selection-toolbar-action=""
+                onMouseDown={(event) => event.preventDefault()}
+              >
+                <IconAspectRatio size={16} />
+              </IconButton>
+            )}
+          </EditorToolbarDropdownTarget>
+          <DropdownMenu.Dropdown>
+            {EXTERNAL_VIDEO_ASPECT_RATIO_VALUES.map((aspectRatio) => (
+              <DropdownMenu.Item
+                key={aspectRatio}
+                selected={selection.aspectRatio === aspectRatio}
+                disabled={disabled}
+                onClick={() => onUpdateLayout?.({ aspectRatio })}
+              >
+                {aspectRatio === 'auto' ? labels.automaticAspectRatio : aspectRatio}
+              </DropdownMenu.Item>
+            ))}
+          </DropdownMenu.Dropdown>
+        </DropdownMenu>
+        <EditorToolbarAction label={labels.editLink} disabled={!enabled} onClick={onEditLink}>
           <IconLink size={16} />
-        </IconButton>
-      </Tooltip>
-    </div>
+        </EditorToolbarAction>
+      </DsLayoutInline>
+    </ToolbarSurface>
   );
 }

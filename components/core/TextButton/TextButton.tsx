@@ -1,144 +1,212 @@
+'use client';
+
 import {
   forwardRef,
-  type ComponentPropsWithoutRef,
+  useId,
   type CSSProperties,
-  type ElementType,
   type ForwardedRef,
-  type MouseEventHandler,
   type ReactElement,
   type ReactNode,
   type RefAttributes,
 } from 'react';
-import Link, { type LinkProps as NextLinkProps } from '../Navigation';
+import { Button as AriaButton, Link as AriaLink } from 'react-aria-components';
+import { ariaControlClick, controlNativeProps, type ControlNativeProps } from '../control-props';
+import { controlLinkRender } from '../control-render';
+import {
+  navigationHref,
+  useNavigationClick,
+  useNavigationPrefetchHandlers,
+  type NavigationHref,
+  type NavigationOptions,
+} from '../Navigation/navigation-events';
+import controlClasses from '../Control.module.css';
 import classes from './TextButton.module.css';
+import {
+  resolveActionSize,
+  useActionRowSize,
+  useControlContrast,
+  useToolbarDensity,
+  type ControlContrast,
+} from '../control-context';
+import { ControlIndicator, type ControlIndicatorKind } from '../control-indicator';
+import { useHierarchyStep } from '../Hierarchy';
 
 export type TextButtonAppearance = 'default' | 'muted' | 'accent';
 export type TextButtonSize = 'xs' | 'sm' | 'md';
 export type TextButtonControlSize = 'xs' | 'sm' | 'md';
 export type TextButtonWeight = 'regular' | 'medium' | 'semibold';
 export type TextButtonDisplay = 'inline' | 'inline-flex' | 'flex' | 'block';
-
-export interface TextButtonCssVariables {
-  '--text-button-color'?: CSSProperties['color'];
-  '--text-button-hover-color'?: CSSProperties['color'];
-  '--text-button-font-size'?: CSSProperties['fontSize'];
-  '--text-button-font-weight'?: CSSProperties['fontWeight'];
-  '--text-button-line-height'?: CSSProperties['lineHeight'];
-  '--text-button-min-height'?: CSSProperties['minHeight'];
-  '--text-button-padding-block'?: CSSProperties['paddingBlock'];
-  '--text-button-padding-inline'?: CSSProperties['paddingInline'];
-  '--text-button-width'?: CSSProperties['width'];
-  '--text-button-max-width'?: CSSProperties['maxWidth'];
-}
-
-export type TextButtonStyle = CSSProperties & TextButtonCssVariables;
-
-interface TextButtonSharedProps {
+interface TextButtonSharedProps extends ControlNativeProps {
   children: ReactNode;
   appearance?: TextButtonAppearance;
+  contrast?: ControlContrast;
+  tone?: import('../Typography').TextTone;
   size?: TextButtonSize;
   controlSize?: TextButtonControlSize;
   weight?: TextButtonWeight;
   display?: TextButtonDisplay;
   fullWidth?: boolean;
   nowrap?: boolean;
-  className?: string;
-  style?: TextButtonStyle;
+  font?: 'ui' | 'mono';
+  density?: 'inline' | 'chrome';
+  justify?: 'start' | 'center' | 'end' | 'between';
+  selected?: boolean;
+  nested?: boolean;
+  gap?: 'none' | 'xxs' | 'xs' | 'sm';
 }
-
-export type TextButtonButtonProps = TextButtonSharedProps &
-  Omit<ComponentPropsWithoutRef<'button'>, keyof TextButtonSharedProps | 'color' | 'onClick'> & {
-    href?: never;
-    linkComponent?: never;
-    onClick?: MouseEventHandler<HTMLButtonElement>;
-    onNavigate?: never;
-    target?: never;
-    rel?: never;
-    download?: never;
-  };
-
-export type TextButtonLinkProps = TextButtonSharedProps &
-  Omit<
-    ComponentPropsWithoutRef<typeof Link>,
-    | keyof TextButtonSharedProps
-    | 'color'
-    | 'disabled'
-    | 'href'
-    | 'linkComponent'
-    | 'legacyBehavior'
-    | 'onNavigate'
-    | 'passHref'
-    | 'type'
-  > & {
-    href: NextLinkProps['href'];
-    linkComponent?: ElementType;
-    disabled?: never;
-    onClick?: never;
-    onNavigate?: (href: NextLinkProps['href']) => void;
-    type?: never;
-  };
-
+export interface TextButtonButtonProps extends TextButtonSharedProps {
+  indicator?: ControlIndicatorKind;
+  href?: never;
+  type?: 'button' | 'submit' | 'reset';
+  form?: string;
+  disabled?: boolean;
+  target?: never;
+  rel?: never;
+  download?: never;
+  onNavigate?: never;
+  replace?: never;
+  scroll?: never;
+  prefetch?: never;
+}
+export interface TextButtonLinkProps
+  extends Omit<TextButtonSharedProps, 'onClick'>, Omit<NavigationOptions, 'onNavigate'> {
+  indicator?: never;
+  disabled?: never;
+  onClick?: never;
+  type?: never;
+  form?: never;
+  onNavigate?: (href: NavigationHref) => void;
+}
 export type TextButtonProps = TextButtonButtonProps | TextButtonLinkProps;
-
 type TextButtonComponent = {
   (props: TextButtonButtonProps & RefAttributes<HTMLButtonElement>): ReactElement | null;
   (props: TextButtonLinkProps & RefAttributes<HTMLAnchorElement>): ReactElement | null;
 };
-
-function TextButtonInner(props: TextButtonProps, ref: ForwardedRef<HTMLButtonElement | HTMLAnchorElement>) {
-  const {
-    href,
-    linkComponent: LinkComponent = Link,
-    onNavigate,
+function TextButtonInner(
+  {
     appearance = 'default',
+    tone,
+    contrast,
     size = 'sm',
-    controlSize,
-    weight = 'regular',
+    controlSize: requestedControlSize,
+    weight,
     display = 'inline-flex',
     fullWidth = false,
     nowrap = false,
-    className,
-    style,
-    ...elementProps
-  } = props;
-  const rootClassName = [classes.root, className].filter(Boolean).join(' ');
-  const visualProps = {
-    className: rootClassName,
-    style,
+    font = 'ui',
+    density = 'inline',
+    justify = 'start',
+    selected = false,
+    nested = false,
+    gap = 'xxs',
+    children,
+    indicator,
+    ...props
+  }: TextButtonProps,
+  ref: ForwardedRef<HTMLButtonElement | HTMLAnchorElement>,
+) {
+  const descriptionId = useId();
+  const description = props['aria-description'];
+  const rowSize = useActionRowSize();
+  const hierarchyStep = useHierarchyStep();
+  const inheritedContrast = useControlContrast();
+  const toolbarDensity = useToolbarDensity();
+  const controlSize = resolveActionSize(requestedControlSize, rowSize, toolbarDensity);
+  const { href, onNavigate, onClick, ...native } = props;
+  const navigation = props as TextButtonLinkProps;
+  const navigationClick = useNavigationClick({
+    ...navigation,
+    href: href ?? '',
+    onNavigate: onNavigate ? () => onNavigate(href!) : undefined,
+  });
+  const prefetchHandlers = useNavigationPrefetchHandlers(
+    { ...navigation, href: href ?? '', prefetch: href === undefined ? false : navigation.prefetch },
+    props,
+  );
+  const shared = {
+    ...controlNativeProps(native),
+    'aria-describedby':
+      [native['aria-describedby'], description ? descriptionId : undefined].filter(Boolean).join(' ') || undefined,
+    className: `${controlClasses.root} ${classes.root}`,
+    'data-contrast': contrast ?? inheritedContrast,
     'data-appearance': appearance,
-    'data-size': size,
+    'data-size': toolbarDensity === 'compact' ? 'xs' : size,
     'data-control-size': controlSize,
-    'data-weight': weight,
+    'data-weight': weight ?? (controlSize ? 'medium' : 'regular'),
     'data-display': display,
     'data-full-width': fullWidth || undefined,
     'data-nowrap': nowrap || undefined,
+    'data-font': font,
+    'data-density': density,
+    'data-justify': justify,
+    'data-selected': selected || undefined,
+    'data-geul-hierarchy-nested': nested || undefined,
+    style: { '--_hierarchy-step': hierarchyStep } as CSSProperties,
+    'data-gap': gap,
+    'data-control-kind': 'text',
+    'data-tone': tone ?? (appearance === 'accent' ? 'accent' : 'neutral'),
+    'data-emphasis': appearance === 'muted' ? 'low' : 'medium',
   };
-
+  const content = indicator ? (
+    <>
+      <span className={`${controlClasses.label} ${classes.label}`}>{children}</span>
+      <ControlIndicator kind={indicator} />
+    </>
+  ) : (
+    children
+  );
   if (href !== undefined) {
-    const navigationProps = onNavigate ? { onClick: () => onNavigate(href) } : {};
-
     return (
-      <LinkComponent
-        {...(elementProps as Omit<TextButtonLinkProps, keyof TextButtonSharedProps | 'href' | 'linkComponent'>)}
-        {...visualProps}
+      <AriaLink
+        {...shared}
         ref={ref as ForwardedRef<HTMLAnchorElement>}
-        href={href}
-        {...navigationProps}
-      />
+        href={navigationHref(href)}
+        target={navigation.target}
+        rel={navigation.rel}
+        download={navigation.download}
+        routerOptions={{ replace: navigation.replace, scroll: navigation.scroll }}
+        // Link has no excludeFromTabOrder API. Its documented render hook preserves native tabIndex.
+        render={controlLinkRender({ title: native.title, tabIndex: native.tabIndex })}
+        onClick={navigationClick}
+        {...prefetchHandlers}
+      >
+        {content}
+        {description ? (
+          <span id={descriptionId} hidden>
+            {description}
+          </span>
+        ) : null}
+      </AriaLink>
     );
   }
-
-  const { type = 'button', ...buttonProps } = elementProps as Omit<
-    TextButtonButtonProps,
-    keyof TextButtonSharedProps | 'href'
-  >;
-
-  // `type` is constrained by native button props and defaults to "button" above.
-  // eslint-disable-next-line react/button-has-type
-  return <button {...buttonProps} {...visualProps} ref={ref as ForwardedRef<HTMLButtonElement>} type={type} />;
+  const action = props as TextButtonButtonProps;
+  return (
+    <AriaButton
+      {...shared}
+      ref={ref as ForwardedRef<HTMLButtonElement>}
+      type={action.type ?? 'button'}
+      form={action.form}
+      isDisabled={action.disabled}
+      excludeFromTabOrder={native.tabIndex === -1}
+      render={(domProps) => (
+        <button
+          {...domProps}
+          type={domProps.type === 'submit' ? 'submit' : domProps.type === 'reset' ? 'reset' : 'button'}
+          // React Aria filters `title` from DOM props; keep the accepted native advisory text.
+          title={native.title}
+        />
+      )}
+      onClick={ariaControlClick(onClick)}
+    >
+      {content}
+      {description ? (
+        <span id={descriptionId} hidden>
+          {description}
+        </span>
+      ) : null}
+    </AriaButton>
+  );
 }
-
 const TextButtonBase = forwardRef<HTMLButtonElement | HTMLAnchorElement, TextButtonProps>(TextButtonInner);
 TextButtonBase.displayName = 'TextButton';
-
 export const TextButton = TextButtonBase as TextButtonComponent;

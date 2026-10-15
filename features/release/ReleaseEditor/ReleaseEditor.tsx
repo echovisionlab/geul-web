@@ -1,4 +1,17 @@
 'use client';
+
+import { ReleaseEditorAccessProvider } from './ReleaseEditorAccessContext';
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+
+import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutGrid as DsLayoutGrid,
+} from '@/components/core/Layout';
+
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
@@ -6,12 +19,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Group, SimpleGrid, Stack, Text } from '@mantine/core';
-import { DateInput, type DateValue } from '@mantine/dates';
-import '@mantine/dates/styles.css';
-import { notifications } from '@mantine/notifications';
+
+import { DateInput, type DateValue, Select, TextInput } from '@/components/core/Input';
+import { notifications } from '@/components/core/Notification';
 import { EditorHeader, type StatusOption } from '@/features/editor/EditorHeader';
-import { Select, TextInput } from '@/components/core/Input';
+
 import { SectionCard } from '@/components/core/Section';
 import { ShareLinkSection } from '@/features/share/ShareLinkSection';
 import { UrlSection } from '@/features/metadata/UrlSection';
@@ -23,6 +35,7 @@ import { useLocaleDocumentSession } from '@/features/translation/useLocaleDocume
 import {
   deleteReleaseAction,
   getReleaseEditorRelationsAction,
+  getReleaseAdminAction,
   publishReleaseAction,
   unpublishReleaseAction,
   updateReleaseFieldsAction,
@@ -56,6 +69,7 @@ import { ReleaseTagsSection } from './ReleaseTagsSection';
 import { ReleaseTracksSection } from './ReleaseTracksSection';
 import { requireActionSuccess } from '@/lib/editor/require-action-success';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
+import { useAuthoritativeConfiguration, type ConfigurationWrite } from '@/lib/editor/useAuthoritativeConfiguration';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
 import { flushAllEditorSaves, getPendingEditorPatch } from '@/lib/editor/editor-save-registry';
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
@@ -85,23 +99,12 @@ interface ReleaseEditorProps {
   baseUrl: string;
 }
 
+type ReleaseEditorConfiguration = ReleaseFields & { slug: string | null; status: ReleaseStatus };
+
 type ReleaseRelationField =
   'artists' | 'labels' | 'categories' | 'genres' | 'styles' | 'formats' | 'credits' | 'tracks';
 
-function isReleaseRelationField(key: keyof ReleaseFields): key is ReleaseRelationField {
-  return (
-    key === 'artists' ||
-    key === 'labels' ||
-    key === 'categories' ||
-    key === 'genres' ||
-    key === 'styles' ||
-    key === 'formats' ||
-    key === 'credits' ||
-    key === 'tracks'
-  );
-}
-
-export function ReleaseEditor({
+function useReleaseEditorViewModel({
   releaseId,
   initialTitle,
   initialSlug,
@@ -157,7 +160,21 @@ export function ReleaseEditor({
     tracks: initialTracks,
     artists: initialArtists,
   });
-  const relationDirty = useRef(new Set<ReleaseRelationField>());
+  const configuration = useAuthoritativeConfiguration({
+    document: `release:${releaseId}`,
+    initialConfiguration: { ...fields, slug, status },
+    onAdopt: (patch) => {
+      setFields((current) => ({ ...current, ...patch }));
+      if (Object.hasOwn(patch, 'slug')) {
+        setSlug(patch.slug ?? null);
+      }
+      if (patch.status !== undefined) {
+        setStatus(patch.status);
+      }
+    },
+  });
+  const relationWrites = useRef(new Map<ReleaseRelationField, ConfigurationWrite<ReleaseEditorConfiguration>>());
+  const relationSubmittedValues = useRef(new Map<ReleaseRelationField, ReleaseFields[ReleaseRelationField]>());
   const relationMutationCount = useRef(new Map<string, number>());
   const relationMutationFailed = useRef(new Set<string>());
   const relationRefreshSequence = useRef(0);
@@ -165,10 +182,12 @@ export function ReleaseEditor({
   const [relationRefreshPending, setRelationRefreshPending] = useState(false);
   const refreshReleaseRelations = useCallback(async () => {
     const sequence = ++relationRefreshSequence.current;
+    const read = configuration.beginRead();
     setRelationRefreshPending(true);
     const results = await Promise.allSettled([
       getReleaseEditorRelationsAction(releaseId),
       getReleaseTrackSnapshotAction(releaseId).then(unwrapQueryResult),
+      getReleaseAdminAction(releaseId),
     ]);
     if (sequence !== relationRefreshSequence.current) {
       return;
@@ -178,46 +197,38 @@ export function ReleaseEditor({
     setRelationRefreshError(failure?.status === 'rejected' ? failure.reason : null);
     const relations = results[0].status === 'fulfilled' ? results[0].value : null;
     const tracks = results[1].status === 'fulfilled' ? results[1].value : null;
-    setFields((current) => {
-      const next = { ...current };
-      const dirty = relationDirty.current;
-      if (relations) {
-        if (!dirty.has('artists')) {
-          next.artists = relations.artists;
-        }
-        if (!dirty.has('labels')) {
-          next.labels = relations.labels;
-        }
-        if (!dirty.has('categories')) {
-          next.categories = relations.categories;
-        }
-        if (!dirty.has('genres')) {
-          next.genres = relations.genres;
-        }
-        if (!dirty.has('styles')) {
-          next.styles = relations.styles;
-        }
-        if (!dirty.has('formats')) {
-          next.formats = relations.formats;
-        }
-        if (!dirty.has('credits')) {
-          next.credits = relations.credits;
-        }
-      }
-      if (tracks && !dirty.has('tracks')) {
-        next.tracks = tracks;
-      }
-      return next;
+    const release = results[2].status === 'fulfilled' ? results[2].value : null;
+    configuration.adoptRead(read, {
+      ...(relations ?? {}),
+      ...(tracks ? { tracks } : {}),
+      ...(release
+        ? {
+            slug: release.slug,
+            status: release.status,
+            type: release.type,
+            releaseDate: release.releaseDate?.toISOString().split('T')[0] ?? null,
+            artworkUrl: release.artworkUrl,
+            spotifyUrl: release.spotifyUrl ?? '',
+            appleMusicUrl: release.appleMusicUrl ?? '',
+            bandcampUrl: release.bandcampUrl ?? '',
+            youtubeMusicUrl: release.youtubeMusicUrl ?? '',
+          }
+        : {}),
     });
-  }, [releaseId]);
-  const beginRelationSave = useCallback((field: ReleaseRelationField) => {
-    relationDirty.current.add(field);
-    const count = relationMutationCount.current.get(field) ?? 0;
-    if (count === 0) {
-      relationMutationFailed.current.delete(field);
-    }
-    relationMutationCount.current.set(field, count + 1);
-  }, []);
+  }, [configuration, releaseId]);
+  const beginRelationSave = useCallback(
+    (field: ReleaseRelationField) => {
+      const count = relationMutationCount.current.get(field) ?? 0;
+      if (count === 0) {
+        relationMutationFailed.current.delete(field);
+        relationWrites.current.set(field, configuration.beginWrite([field]));
+      }
+      relationMutationCount.current.set(field, count + 1);
+      relationSubmittedValues.current.set(field, configuration.getConfiguration()[field]);
+      return relationWrites.current.get(field)?.origin;
+    },
+    [configuration],
+  );
   const settleRelationSave = useCallback(
     (field: ReleaseRelationField, succeeded: boolean) => {
       if (!succeeded) {
@@ -229,13 +240,23 @@ export function ReleaseEditor({
         return;
       }
       relationMutationCount.current.delete(field);
+      const write = relationWrites.current.get(field);
+      relationWrites.current.delete(field);
+      const submitted = relationSubmittedValues.current.get(field);
+      relationSubmittedValues.current.delete(field);
       if (relationMutationFailed.current.has(field)) {
-        return;
+        write?.fail();
+      } else {
+        write?.acknowledge({ [field]: submitted }, { authoritative: false });
       }
-      relationDirty.current.delete(field);
+      // Relation sections finish failed operations without a retry queue. Release
+      // only the submitted intent; an edit waiting to start another write stays protected.
+      if (configuration.getConfiguration()[field] === submitted) {
+        configuration.discard([field]);
+      }
       void refreshReleaseRelations();
     },
-    [refreshReleaseRelations],
+    [configuration, refreshReleaseRelations],
   );
   const localeSession = useLocaleDocumentSession({
     entityType: 'release',
@@ -244,12 +265,12 @@ export function ReleaseEditor({
     sourceSummary: '',
   });
   const { activeEditLocale, roomLocale } = localeSession;
-  const canEditTranslationSource = true;
   const { isEditingScopedLocale, shouldUseLocaleDocument } = localeSession.mode;
   const blockRoom = useBlockRoomConnection('release', releaseId, roomLocale);
   const { provider, doc, bootstrap, protocol, isConnected, isSynced } = blockRoom;
   const blockRoomController = useRichTextBlockRoomController('release', doc, roomLocale);
   const currentProvider = provider;
+  const canEditTranslationSource = useEditorAccessLevel(provider) === 'edit';
   const currentIsConnected = isConnected;
   const currentIsSynced = isSynced;
   useEditorEntityChanges(
@@ -258,6 +279,8 @@ export function ReleaseEditor({
       void refreshReleaseRelations();
     },
     currentProvider,
+    undefined,
+    configuration.captureOwnChange,
   );
   const [creditNotes, setCreditNotes] = useState<Record<string, string>>({});
   const localeMetadataDocument = `release:${releaseId}`;
@@ -312,31 +335,33 @@ export function ReleaseEditor({
     documentRevision: bootstrap?.documentRevision ?? null,
     targetRevision: bootstrap?.targetRevision,
   });
-  const currentLocaleCanEdit = activeEditLocale.canEditActiveLocale && hasLocaleRoomMutationAuthority;
+  const currentLocaleCanEdit =
+    canEditTranslationSource && activeEditLocale.canEditActiveLocale && hasLocaleRoomMutationAuthority;
   const canEditNeutral = currentLocaleCanEdit && activeEditLocale.isSourceLocale;
   const canEditLocalizedTitle = isLocaleDocumentEditable({
     activeLocale: activeEditLocale.activeLocale,
     shouldUseLocaleDocument,
     canEditActiveLocale: currentLocaleCanEdit,
     isSynced: currentIsSynced,
+
+    isReady: Boolean(doc),
   });
   const editorSession =
-    currentProvider && blockRoomController && currentIsSynced
-      ? { provider: currentProvider, controller: blockRoomController }
-      : null;
+    currentProvider && blockRoomController ? { provider: currentProvider, controller: blockRoomController } : null;
   const localizedDescriptionSession = editorSession;
 
   const updateReleaseFields = useMutation({
-    mutationFn: (input: Parameters<typeof updateReleaseFieldsAction>[1]) => updateReleaseFieldsAction(releaseId, input),
+    mutationFn: (request: { input: Parameters<typeof updateReleaseFieldsAction>[1]; origin: string }) =>
+      updateReleaseFieldsAction(releaseId, request.input, request.origin),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
       }
     },
     onError: (error) => {
       notifications.show({
         message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
@@ -355,8 +380,29 @@ export function ReleaseEditor({
     ) => updateBlockRoomLocaleMetadata(protocol, { type: 'release', ...input }),
   });
   const debouncedReleaseFieldsUpdate = useDebouncedPatch({
-    write: (input: Parameters<typeof updateReleaseFieldsAction>[1]) =>
-      requireActionSuccess(updateReleaseFields.mutateAsync(input)),
+    write: async (input: Parameters<typeof updateReleaseFieldsAction>[1]) => {
+      const patch: Partial<ReleaseFields> = {};
+      if (input.type !== undefined) {
+        patch.type = releaseTypeSchema.parse(input.type);
+      }
+      if (input.releaseDate !== undefined) {
+        patch.releaseDate = input.releaseDate?.toISOString().split('T')[0] ?? null;
+      }
+      for (const key of ['spotifyUrl', 'appleMusicUrl', 'bandcampUrl', 'youtubeMusicUrl'] as const) {
+        if (input[key] !== undefined) {
+          patch[key] = input[key] ?? '';
+        }
+      }
+      const write = configuration.beginWrite(patch);
+      try {
+        await requireActionSuccess(updateReleaseFields.mutateAsync({ input, origin: write.origin }));
+        write.acknowledge(patch, { authoritative: false });
+        await refreshReleaseRelations();
+      } catch (error) {
+        write.fail();
+        throw error;
+      }
+    },
     delay: 500,
     scope: releaseId,
     document: localeMetadataDocument,
@@ -366,10 +412,14 @@ export function ReleaseEditor({
       if (!canEditNeutral) {
         return;
       }
-      if (isReleaseRelationField(key)) {
-        relationDirty.current.add(key);
+      if (key === 'artworkUrl') {
+        // The artwork adapter invokes this callback after its mutation commits.
+        const write = configuration.beginWrite({ artworkUrl: value as string | null });
+        write.acknowledge({ artworkUrl: value as string | null }, { authoritative: false });
+        void refreshReleaseRelations();
+        return;
       }
-      setFields((current) => ({ ...current, [key]: value }));
+      configuration.setDraft<keyof ReleaseFields>(key, value);
       switch (key) {
         case 'type':
           debouncedReleaseFieldsUpdate({ type: value as string });
@@ -390,34 +440,62 @@ export function ReleaseEditor({
           debouncedReleaseFieldsUpdate({ youtubeMusicUrl: String(value) || null });
       }
     },
-    [canEditNeutral, debouncedReleaseFieldsUpdate],
+    [canEditNeutral, configuration, debouncedReleaseFieldsUpdate, refreshReleaseRelations],
   );
   const publishRelease = useMutation({
-    mutationFn: () => publishReleaseAction(releaseId),
+    mutationFn: async () => {
+      const write = configuration.beginWrite(['status']);
+      try {
+        const result = await publishReleaseAction(releaseId, write.origin);
+        if (result.error) {
+          write.fail();
+        } else {
+          write.acknowledge({ status: 'published' }, { authoritative: false });
+          await refreshReleaseRelations();
+        }
+        return result;
+      } catch (error) {
+        write.fail();
+        throw error;
+      }
+    },
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      setStatus('published');
       notifications.show({
         message: tCommon('messages.itemPublished', { item: tCommon('entities.release') }),
-        color: 'green',
+        tone: 'positive',
       });
     },
   });
 
   const unpublishRelease = useMutation({
-    mutationFn: () => unpublishReleaseAction(releaseId),
+    mutationFn: async () => {
+      const write = configuration.beginWrite(['status']);
+      try {
+        const result = await unpublishReleaseAction(releaseId, write.origin);
+        if (result.error) {
+          write.fail();
+        } else {
+          write.acknowledge({ status: 'draft' }, { authoritative: false });
+          await refreshReleaseRelations();
+        }
+        return result;
+      } catch (error) {
+        write.fail();
+        throw error;
+      }
+    },
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      setStatus('draft');
       notifications.show({
         message: tCommon('messages.itemUnpublished', { item: tCommon('entities.release') }),
-        color: 'yellow',
+        tone: 'positive',
       });
     },
   });
@@ -426,21 +504,36 @@ export function ReleaseEditor({
     mutationFn: () => deleteReleaseAction(releaseId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       notifications.show({
         message: tCommon('messages.itemDeleted', { item: tCommon('entities.release') }),
-        color: 'red',
+        tone: 'positive',
       });
       router.push('/admin/releases');
     },
   });
   const updateSlug = useMutation({
-    mutationFn: (nextSlug: string | null) => updateReleaseSlugAction(releaseId, nextSlug),
+    mutationFn: async (nextSlug: string | null) => {
+      const write = configuration.beginWrite({ slug: nextSlug });
+      try {
+        const result = await updateReleaseSlugAction(releaseId, nextSlug, write.origin);
+        if (result.error) {
+          write.fail();
+        } else {
+          write.acknowledge({ slug: result.slug ?? null }, { authoritative: false });
+          await refreshReleaseRelations();
+        }
+        return result;
+      } catch (error) {
+        write.fail();
+        throw error;
+      }
+    },
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
       }
     },
   });
@@ -448,7 +541,7 @@ export function ReleaseEditor({
     async (transition: () => void | Promise<void>) => {
       try {
         if (!(await flushAllEditorSaves(`release:${releaseId}`))) {
-          notifications.show({ message: tCommon('notifications.saveFailed'), color: 'red' });
+          notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' });
           return false;
         }
         if (currentProvider) {
@@ -457,7 +550,7 @@ export function ReleaseEditor({
         await transition();
         return true;
       } catch {
-        notifications.show({ message: tCommon('notifications.saveFailed'), color: 'red' });
+        notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' });
         return false;
       }
     },
@@ -494,7 +587,7 @@ export function ReleaseEditor({
     slug: toSlugInputValue(slug),
     onSlugChange: (value) => {
       if (canEditNeutral) {
-        setSlug(toNullableSlug(value));
+        configuration.setDraft('slug', toNullableSlug(value));
       }
     },
     onSave: (nextSlug) => {
@@ -505,7 +598,7 @@ export function ReleaseEditor({
   });
 
   // Convert string date to Date object for DateInput
-  const releaseDateValue = fields.releaseDate ? new Date(fields.releaseDate) : null;
+  const releaseDateValue = fields.releaseDate || null;
 
   // Helper to convert DateInput value to ISO string
   const handleReleaseDateChange = (val: DateValue) => {
@@ -513,9 +606,7 @@ export function ReleaseEditor({
       setField('releaseDate', null);
       return;
     }
-    // Ensure val is a Date object before calling toISOString
-    const dateValue = val instanceof Date ? val : new Date(val);
-    setField('releaseDate', dateValue.toISOString().split('T')[0]);
+    setField('releaseDate', val);
   };
   const handleScopedLocaleTitleChange = useCallback(
     (value: string) => {
@@ -565,310 +656,461 @@ export function ReleaseEditor({
     [currentIsSynced, currentLocaleCanEdit, debouncedLocaleMetadataUpdate, roomLocale],
   );
 
+  return {
+    currentProvider,
+    releaseId,
+    protocol,
+    relationRefreshError,
+    relationRefreshPending,
+    refreshReleaseRelations,
+    displayedTitle,
+    canEditLocalizedTitle,
+    handleScopedLocaleTitleChange,
+    tCommon,
+    status,
+    releaseStatusOptions,
+    currentIsConnected,
+    currentIsSynced,
+    runReleaseTransition,
+    router: { back: router.back },
+    canEditNeutral,
+    handleStatusChange,
+    deleteRelease: { mutate: deleteRelease.mutate, isPending: deleteRelease.isPending },
+    tActions,
+    t,
+    publishRelease: { isPending: publishRelease.isPending },
+    unpublishRelease: { isPending: unpublishRelease.isPending },
+    activeEditLocale,
+    baseUrl,
+    slug,
+    slugMgmt: {
+      isAvailable: slugMgmt.isAvailable,
+      error: slugMgmt.error,
+      isChecking: slugMgmt.isChecking,
+      handleChange: slugMgmt.handleChange,
+      handleBlur: slugMgmt.handleBlur,
+    },
+    updateSlug: { isPending: updateSlug.isPending },
+    fields: {
+      artworkUrl: fields.artworkUrl,
+      type: fields.type,
+      spotifyUrl: fields.spotifyUrl,
+      appleMusicUrl: fields.appleMusicUrl,
+      bandcampUrl: fields.bandcampUrl,
+      youtubeMusicUrl: fields.youtubeMusicUrl,
+      artists: fields.artists,
+      labels: fields.labels,
+      categories: fields.categories,
+      genres: fields.genres,
+      styles: fields.styles,
+      formats: fields.formats,
+      credits: fields.credits,
+      tracks: fields.tracks,
+    },
+    setField,
+    releaseTypeOptions,
+    releaseDateValue,
+    handleReleaseDateChange,
+    isEditingScopedLocale,
+    shouldUseLocaleDocument,
+    localizedDescriptionSession,
+    descriptionEditorKey,
+    currentLocaleCanEdit,
+    tStates,
+    editorSession,
+    beginRelationSave,
+    settleRelationSave,
+    creditNotes,
+    blockRoomController,
+    handleCreditNoteChange,
+    canEditTranslationSource,
+  };
+}
+
+export function ReleaseEditor(props: ReleaseEditorProps) {
+  return <ReleaseEditorView model={useReleaseEditorViewModel(props)} />;
+}
+
+export type ReleaseEditorViewModel = ReturnType<typeof useReleaseEditorViewModel>;
+
+/** Complete production editor composition; controllers supply data and commands. */
+export function ReleaseEditorView({ model }: { model: ReleaseEditorViewModel }) {
+  const {
+    currentProvider,
+    releaseId,
+    protocol,
+    relationRefreshError,
+    relationRefreshPending,
+    refreshReleaseRelations,
+    displayedTitle,
+    canEditLocalizedTitle,
+    handleScopedLocaleTitleChange,
+    tCommon,
+    status,
+    releaseStatusOptions,
+    currentIsConnected,
+    currentIsSynced,
+    runReleaseTransition,
+    router,
+    canEditNeutral,
+    handleStatusChange,
+    deleteRelease,
+    tActions,
+    t,
+    publishRelease,
+    unpublishRelease,
+    activeEditLocale,
+    baseUrl,
+    slug,
+    slugMgmt,
+    updateSlug,
+    fields,
+    setField,
+    releaseTypeOptions,
+    releaseDateValue,
+    handleReleaseDateChange,
+    isEditingScopedLocale,
+    shouldUseLocaleDocument,
+    localizedDescriptionSession,
+    descriptionEditorKey,
+    currentLocaleCanEdit,
+    tStates,
+    editorSession,
+    beginRelationSave,
+    settleRelationSave,
+    creditNotes,
+    blockRoomController,
+    handleCreditNoteChange,
+    canEditTranslationSource,
+  } = model;
   return (
-    <EditorRuntimeProvider
-      provider={currentProvider}
-      entityType="release"
-      entityId={releaseId}
-      blockRoomProtocol={protocol}
-    >
-      <Stack>
-        <QueryErrorAlert
-          queries={[
-            {
-              isError: relationRefreshError !== null,
-              error: relationRefreshError,
-              isFetching: relationRefreshPending,
-              refetch: refreshReleaseRelations,
-            },
-          ]}
-        />
-        <EditorHeader
-          title={displayedTitle}
-          onTitleChange={canEditLocalizedTitle ? handleScopedLocaleTitleChange : undefined}
-          titleInputId={`release-${releaseId}-header-title`}
-          titlePlaceholder={tCommon('states.untitledEntity', { entity: tCommon('entities.release') })}
-          titleDisabled={!canEditLocalizedTitle}
-          status={status}
-          statusOptions={releaseStatusOptions}
-          isConnected={currentIsConnected}
-          isSynced={currentIsSynced}
-          onBack={() => {
-            void runReleaseTransition(() => router.back());
-          }}
-          onStatusChange={
-            canEditNeutral ? (nextStatus) => void runReleaseTransition(() => handleStatusChange(nextStatus)) : undefined
-          }
-          onDelete={canEditNeutral ? () => void runReleaseTransition(() => deleteRelease.mutate()) : undefined}
-          deleteConfirmation={{
-            title: tActions('delete'),
-            message: (
-              <Text>
-                {tCommon.rich('messages.confirmDeleteNamedRich', {
-                  name: displayedTitle || t('titleFallback'),
-                  strong: (chunks) => <strong>{chunks}</strong>,
-                })}
-              </Text>
-            ),
-          }}
-          isStatusChanging={publishRelease.isPending || unpublishRelease.isPending}
-          isDeleting={deleteRelease.isPending}
-          groupStatusWithCollab
-          controls={<EditorActiveLocaleControl state={activeEditLocale} />}
-        />
+    <ReleaseEditorAccessProvider value={canEditNeutral}>
+      <EditorRuntimeProvider
+        provider={currentProvider}
+        entityType="release"
+        entityId={releaseId}
+        blockRoomProtocol={protocol}
+      >
+        <DsLayoutStack>
+          <QueryErrorAlert
+            queries={[
+              {
+                isError: relationRefreshError !== null,
+                error: relationRefreshError,
+                isFetching: relationRefreshPending,
+                refetch: refreshReleaseRelations,
+              },
+            ]}
+          />
+          <EditorHeader
+            title={displayedTitle}
+            onTitleChange={canEditLocalizedTitle ? handleScopedLocaleTitleChange : undefined}
+            titleInputId={`release-${releaseId}-header-title`}
+            titlePlaceholder={tCommon('states.untitledEntity', { entity: tCommon('entities.release') })}
+            titleDisabled={!canEditLocalizedTitle}
+            status={status}
+            statusOptions={releaseStatusOptions}
+            isConnected={currentIsConnected}
+            isSynced={currentIsSynced}
+            onBack={() => {
+              void runReleaseTransition(() => router.back());
+            }}
+            onStatusChange={
+              canEditNeutral
+                ? (nextStatus) => void runReleaseTransition(() => handleStatusChange(nextStatus))
+                : undefined
+            }
+            onDelete={canEditNeutral ? () => void runReleaseTransition(() => deleteRelease.mutate()) : undefined}
+            deleteConfirmation={{
+              title: tActions('delete'),
+              message: (
+                <DsText>
+                  {tCommon.rich('messages.confirmDeleteNamedRich', {
+                    name: displayedTitle || t('titleFallback'),
+                    strong: (chunks) => <strong>{chunks}</strong>,
+                  })}
+                </DsText>
+              ),
+            }}
+            isStatusChanging={publishRelease.isPending || unpublishRelease.isPending}
+            isDeleting={deleteRelease.isPending}
+            groupStatusWithCollab
+            controls={<EditorActiveLocaleControl state={activeEditLocale} />}
+          />
 
-        <UrlSection
-          baseUrl={baseUrl}
-          entityType="release"
-          entityId={releaseId}
-          slug={toSlugInputValue(slug)}
-          isAvailable={slugMgmt.isAvailable}
-          idPrefix={`release-${releaseId}`}
-          error={slugMgmt.error}
-          saving={slugMgmt.isChecking || updateSlug.isPending}
-          disabled={!canEditNeutral}
-          onChange={slugMgmt.handleChange}
-          onBlur={slugMgmt.handleBlur}
-        />
+          <UrlSection
+            baseUrl={baseUrl}
+            entityType="release"
+            entityId={releaseId}
+            slug={toSlugInputValue(slug)}
+            isAvailable={slugMgmt.isAvailable}
+            idPrefix={`release-${releaseId}`}
+            error={slugMgmt.error}
+            saving={slugMgmt.isChecking || updateSlug.isPending}
+            disabled={!canEditNeutral}
+            onChange={slugMgmt.handleChange}
+            onBlur={slugMgmt.handleBlur}
+          />
 
-        {/* Basic Info */}
-        <SectionCard withBorder>
-          <Stack>
-            <Text size="sm" fw={500}>
-              {t('sections.basicInformation')}
-            </Text>
+          {/* Basic Info */}
+          <SectionCard withBorder role="group" aria-labelledby={`release-${releaseId}-basic-information-heading`}>
+            <DsLayoutStack>
+              <DsText id={`release-${releaseId}-basic-information-heading`} size="sm" weight="medium">
+                {t('sections.basicInformation')}
+              </DsText>
 
-            <Group align="flex-start">
-              {canEditNeutral ? (
-                <ReleaseArtworkUploader
-                  releaseId={releaseId}
-                  artworkUrl={fields.artworkUrl}
-                  inputId={`release-${releaseId}-artwork`}
-                  onArtworkChange={(url) => setField('artworkUrl', url)}
-                />
-              ) : null}
-              <Stack style={{ flex: 1 }} gap="sm">
-                <TextInput
-                  id={`release-${releaseId}-title`}
-                  label={tCommon('labels.title')}
-                  value={displayedTitle}
-                  onChange={(e) => handleScopedLocaleTitleChange(e.currentTarget.value)}
-                  disabled={!canEditLocalizedTitle}
-                  required
-                />
-                {canEditNeutral ? (
-                  <SimpleGrid cols={2}>
-                    <Select
-                      id={`release-${releaseId}-type`}
-                      label={tCommon('labels.type')}
-                      data={releaseTypeOptions}
-                      value={fields.type}
-                      onChange={(val) => {
-                        const parsed = releaseTypeSchema.safeParse(val);
-                        if (parsed.success) {
-                          setField('type', parsed.data);
-                        }
-                      }}
-                      required
-                    />
-                    <DateInput
-                      id={`release-${releaseId}-release-date`}
-                      label={tCommon('labels.releaseDate')}
-                      value={releaseDateValue}
-                      onChange={handleReleaseDateChange}
-                      clearable
-                    />
-                  </SimpleGrid>
-                ) : null}
-              </Stack>
-            </Group>
-
-            <Stack gap="xs">
-              <Text size="sm" fw={500}>
-                {tCommon('labels.description')}
-              </Text>
-              {isEditingScopedLocale && activeEditLocale.activeLocaleLabel ? (
-                shouldUseLocaleDocument ? (
-                  localizedDescriptionSession ? (
-                    <ReleaseDescriptionEditor
-                      key={descriptionEditorKey}
-                      id={`release-${releaseId}-description-${activeEditLocale.activeLocale ?? 'translation'}`}
+              <DsLayoutInline align="start">
+                {activeEditLocale.isSourceLocale ? (
+                  <AuthoringExtension kind="uploads">
+                    <ReleaseArtworkUploader
                       releaseId={releaseId}
-                      provider={localizedDescriptionSession.provider}
-                      blockRoomController={localizedDescriptionSession.controller}
-                      disabled={!currentLocaleCanEdit}
-                      structureLocked
+                      artworkUrl={fields.artworkUrl}
+                      inputId={`release-${releaseId}-artwork`}
+                      onArtworkChange={(url) => setField('artworkUrl', url)}
                     />
-                  ) : (
-                    <Text size="sm" c="dimmed">
-                      {tStates('loading')}
-                    </Text>
-                  )
-                ) : (
-                  <ActiveEditLocaleContentPreview
-                    localeLabel={activeEditLocale.activeLocaleLabel}
-                    hasLiveRow={false}
-                    contentPreview=""
-                    loading={activeEditLocale.contentPreviewLoading}
-                  >
-                    {localizedDescriptionSession ? (
+                  </AuthoringExtension>
+                ) : null}
+                <DsLayoutStack flexible gap="sm">
+                  <TextInput
+                    id={`release-${releaseId}-title`}
+                    label={tCommon('labels.title')}
+                    value={displayedTitle}
+                    onChange={(e) => handleScopedLocaleTitleChange(e.currentTarget.value)}
+                    disabled={!canEditLocalizedTitle}
+                    required
+                  />
+                  {activeEditLocale.isSourceLocale ? (
+                    <DsLayoutGrid columns={2}>
+                      <Select
+                        disabled={!canEditNeutral}
+                        id={`release-${releaseId}-type`}
+                        label={tCommon('labels.type')}
+                        data={releaseTypeOptions}
+                        value={fields.type}
+                        onChange={(val) => {
+                          const parsed = releaseTypeSchema.safeParse(val);
+                          if (parsed.success) {
+                            setField('type', parsed.data);
+                          }
+                        }}
+                        required
+                      />
+                      <DateInput
+                        disabled={!canEditNeutral}
+                        id={`release-${releaseId}-release-date`}
+                        label={tCommon('labels.releaseDate')}
+                        value={releaseDateValue}
+                        onChange={handleReleaseDateChange}
+                        clearable
+                      />
+                    </DsLayoutGrid>
+                  ) : null}
+                </DsLayoutStack>
+              </DsLayoutInline>
+
+              <DsLayoutStack gap="xs">
+                <DsText size="sm" weight="medium">
+                  {tCommon('labels.description')}
+                </DsText>
+                {isEditingScopedLocale && activeEditLocale.activeLocaleLabel ? (
+                  shouldUseLocaleDocument ? (
+                    localizedDescriptionSession ? (
                       <ReleaseDescriptionEditor
-                        key={`${descriptionEditorKey}-source-fallback`}
-                        id={`release-${releaseId}-description-source-fallback`}
+                        key={descriptionEditorKey}
+                        id={`release-${releaseId}-description-${activeEditLocale.activeLocale ?? 'translation'}`}
                         releaseId={releaseId}
                         provider={localizedDescriptionSession.provider}
                         blockRoomController={localizedDescriptionSession.controller}
-                        disabled
+                        disabled={!currentLocaleCanEdit}
                         structureLocked
                       />
-                    ) : null}
-                  </ActiveEditLocaleContentPreview>
-                )
-              ) : editorSession ? (
-                <ReleaseDescriptionEditor
-                  key={descriptionEditorKey}
-                  id={`release-${releaseId}-description`}
-                  releaseId={releaseId}
-                  provider={editorSession.provider}
-                  blockRoomController={editorSession.controller}
-                  disabled={!currentLocaleCanEdit}
-                  structureLocked={false}
-                />
-              ) : (
-                <Text size="sm" c="dimmed">
-                  {tStates('loading')}
-                </Text>
-              )}
-            </Stack>
-          </Stack>
-        </SectionCard>
-
-        {/* Streaming Links */}
-        {canEditNeutral ? (
-          <SectionCard withBorder>
-            <Stack>
-              <Text size="sm" fw={500}>
-                {t('sections.streamingLinks')}
-              </Text>
-              <SimpleGrid cols={2}>
-                <TextInput
-                  id={`release-${releaseId}-spotify-url`}
-                  label="Spotify"
-                  placeholder="https://open.spotify.com/..."
-                  value={fields.spotifyUrl}
-                  onChange={(e) => setField('spotifyUrl', e.currentTarget.value)}
-                />
-                <TextInput
-                  id={`release-${releaseId}-apple-music-url`}
-                  label="Apple Music"
-                  placeholder="https://music.apple.com/..."
-                  value={fields.appleMusicUrl}
-                  onChange={(e) => setField('appleMusicUrl', e.currentTarget.value)}
-                />
-                <TextInput
-                  id={`release-${releaseId}-bandcamp-url`}
-                  label="Bandcamp"
-                  placeholder="https://....bandcamp.com/..."
-                  value={fields.bandcampUrl}
-                  onChange={(e) => setField('bandcampUrl', e.currentTarget.value)}
-                />
-                <TextInput
-                  id={`release-${releaseId}-youtube-music-url`}
-                  label="YouTube Music"
-                  placeholder="https://music.youtube.com/..."
-                  value={fields.youtubeMusicUrl}
-                  onChange={(e) => setField('youtubeMusicUrl', e.currentTarget.value)}
-                />
-              </SimpleGrid>
-            </Stack>
+                    ) : (
+                      <SupportingText tone="secondary">{tStates('loading')}</SupportingText>
+                    )
+                  ) : (
+                    <ActiveEditLocaleContentPreview
+                      localeLabel={activeEditLocale.activeLocaleLabel}
+                      hasLiveRow={false}
+                      contentPreview=""
+                      loading={activeEditLocale.contentPreviewLoading}
+                    >
+                      {localizedDescriptionSession ? (
+                        <ReleaseDescriptionEditor
+                          key={`${descriptionEditorKey}-source-fallback`}
+                          id={`release-${releaseId}-description-source-fallback`}
+                          releaseId={releaseId}
+                          provider={localizedDescriptionSession.provider}
+                          blockRoomController={localizedDescriptionSession.controller}
+                          disabled
+                          structureLocked
+                        />
+                      ) : null}
+                    </ActiveEditLocaleContentPreview>
+                  )
+                ) : editorSession ? (
+                  <ReleaseDescriptionEditor
+                    key={descriptionEditorKey}
+                    id={`release-${releaseId}-description`}
+                    releaseId={releaseId}
+                    provider={editorSession.provider}
+                    blockRoomController={editorSession.controller}
+                    disabled={!currentLocaleCanEdit}
+                    structureLocked={false}
+                  />
+                ) : (
+                  <SupportingText tone="secondary">{tStates('loading')}</SupportingText>
+                )}
+              </DsLayoutStack>
+            </DsLayoutStack>
           </SectionCard>
-        ) : null}
 
-        {canEditNeutral ? (
-          <ReleaseArtistsSection
-            releaseId={releaseId}
-            idPrefix={`release-${releaseId}-artists`}
-            artists={fields.artists}
-            onArtistsChange={(artists) => setField('artists', artists)}
-            onMutationStart={() => beginRelationSave('artists')}
-            onMutationSettled={(succeeded) => settleRelationSave('artists', succeeded)}
-          />
-        ) : null}
+          {/* Streaming Links */}
+          {activeEditLocale.isSourceLocale ? (
+            <SectionCard withBorder>
+              <DsLayoutStack>
+                <DsText size="sm" weight="medium">
+                  {t('sections.streamingLinks')}
+                </DsText>
+                <DsLayoutGrid columns={2}>
+                  <TextInput
+                    disabled={!canEditNeutral}
+                    id={`release-${releaseId}-spotify-url`}
+                    label="Spotify"
+                    placeholder="https://open.spotify.com/..."
+                    value={fields.spotifyUrl}
+                    onChange={(e) => setField('spotifyUrl', e.currentTarget.value)}
+                  />
+                  <TextInput
+                    disabled={!canEditNeutral}
+                    id={`release-${releaseId}-apple-music-url`}
+                    label="Apple Music"
+                    placeholder="https://music.apple.com/..."
+                    value={fields.appleMusicUrl}
+                    onChange={(e) => setField('appleMusicUrl', e.currentTarget.value)}
+                  />
+                  <TextInput
+                    disabled={!canEditNeutral}
+                    id={`release-${releaseId}-bandcamp-url`}
+                    label="Bandcamp"
+                    placeholder="https://....bandcamp.com/..."
+                    value={fields.bandcampUrl}
+                    onChange={(e) => setField('bandcampUrl', e.currentTarget.value)}
+                  />
+                  <TextInput
+                    disabled={!canEditNeutral}
+                    id={`release-${releaseId}-youtube-music-url`}
+                    label="YouTube Music"
+                    placeholder="https://music.youtube.com/..."
+                    value={fields.youtubeMusicUrl}
+                    onChange={(e) => setField('youtubeMusicUrl', e.currentTarget.value)}
+                  />
+                </DsLayoutGrid>
+              </DsLayoutStack>
+            </SectionCard>
+          ) : null}
 
-        {/* Labels */}
-        {canEditNeutral ? (
-          <ReleaseLabelsSection
-            releaseId={releaseId}
-            idPrefix={`release-${releaseId}-labels`}
-            labels={fields.labels}
-            onLabelsChange={(labels) => setField('labels', labels)}
-            onMutationStart={() => beginRelationSave('labels')}
-            onMutationSettled={(succeeded) => settleRelationSave('labels', succeeded)}
-          />
-        ) : null}
+          {activeEditLocale.isSourceLocale ? (
+            <AuthoringExtension kind="relations">
+              <ReleaseArtistsSection
+                releaseId={releaseId}
+                idPrefix={`release-${releaseId}-artists`}
+                artists={fields.artists}
+                onArtistsChange={(artists) => setField('artists', artists)}
+                onMutationStart={() => beginRelationSave('artists')}
+                onMutationSettled={(succeeded) => settleRelationSave('artists', succeeded)}
+              />
+            </AuthoringExtension>
+          ) : null}
 
-        {/* Genres, Styles, Formats */}
-        {canEditNeutral ? (
-          <ReleaseTagsSection
-            releaseId={releaseId}
-            idPrefix={`release-${releaseId}-tags`}
-            categories={fields.categories}
-            genres={fields.genres}
-            styles={fields.styles}
-            formats={fields.formats}
-            onCategoriesChange={(categories) => setField('categories', categories)}
-            onGenresChange={(genres) => setField('genres', genres)}
-            onStylesChange={(styles) => setField('styles', styles)}
-            onFormatsChange={(formats) => setField('formats', formats)}
-            onCategoriesMutationStart={() => beginRelationSave('categories')}
-            onCategoriesMutationSettled={(succeeded) => settleRelationSave('categories', succeeded)}
-            onGenresMutationStart={() => beginRelationSave('genres')}
-            onGenresMutationSettled={(succeeded) => settleRelationSave('genres', succeeded)}
-            onStylesMutationStart={() => beginRelationSave('styles')}
-            onStylesMutationSettled={(succeeded) => settleRelationSave('styles', succeeded)}
-            onFormatsMutationStart={() => beginRelationSave('formats')}
-            onFormatsMutationSettled={(succeeded) => settleRelationSave('formats', succeeded)}
-          />
-        ) : null}
+          {/* Labels */}
+          {activeEditLocale.isSourceLocale ? (
+            <AuthoringExtension kind="relations">
+              <ReleaseLabelsSection
+                releaseId={releaseId}
+                idPrefix={`release-${releaseId}-labels`}
+                labels={fields.labels}
+                onLabelsChange={(labels) => setField('labels', labels)}
+                onMutationStart={() => beginRelationSave('labels')}
+                onMutationSettled={(succeeded) => settleRelationSave('labels', succeeded)}
+              />
+            </AuthoringExtension>
+          ) : null}
 
-        {/* Credits */}
-        <ReleaseCreditsSection
-          releaseId={releaseId}
-          idPrefix={`release-${releaseId}-credits`}
-          credits={fields.credits}
-          creditNotes={creditNotes}
-          canEdit={canEditNeutral}
-          canEditNotes={Boolean(
-            currentLocaleCanEdit && shouldUseLocaleDocument && blockRoomController && currentIsSynced,
-          )}
-          onCreditsChange={(credits) => setField('credits', credits)}
-          onCreditNoteChange={handleCreditNoteChange}
-          onMutationStart={() => beginRelationSave('credits')}
-          onMutationSettled={(succeeded) => settleRelationSave('credits', succeeded)}
-        />
+          {/* Genres, Styles, Formats */}
+          {activeEditLocale.isSourceLocale ? (
+            <AuthoringExtension kind="relations">
+              <ReleaseTagsSection
+                releaseId={releaseId}
+                idPrefix={`release-${releaseId}-tags`}
+                categories={fields.categories}
+                genres={fields.genres}
+                styles={fields.styles}
+                formats={fields.formats}
+                onCategoriesChange={(categories) => setField('categories', categories)}
+                onGenresChange={(genres) => setField('genres', genres)}
+                onStylesChange={(styles) => setField('styles', styles)}
+                onFormatsChange={(formats) => setField('formats', formats)}
+                onCategoriesMutationStart={() => beginRelationSave('categories')}
+                onCategoriesMutationSettled={(succeeded) => settleRelationSave('categories', succeeded)}
+                onGenresMutationStart={() => beginRelationSave('genres')}
+                onGenresMutationSettled={(succeeded) => settleRelationSave('genres', succeeded)}
+                onStylesMutationStart={() => beginRelationSave('styles')}
+                onStylesMutationSettled={(succeeded) => settleRelationSave('styles', succeeded)}
+                onFormatsMutationStart={() => beginRelationSave('formats')}
+                onFormatsMutationSettled={(succeeded) => settleRelationSave('formats', succeeded)}
+              />
+            </AuthoringExtension>
+          ) : null}
 
-        {/* Tracks */}
-        {canEditNeutral ? (
-          <ReleaseTracksSection
-            releaseId={releaseId}
-            idPrefix={`release-${releaseId}-tracks`}
-            tracks={fields.tracks}
-            onTracksChange={(tracks) => setField('tracks', tracks)}
-            onMutationStart={() => beginRelationSave('tracks')}
-            onMutationSettled={(succeeded) => settleRelationSave('tracks', succeeded)}
-          />
-        ) : null}
+          {/* Credits */}
+          <AuthoringExtension kind="relations">
+            <ReleaseCreditsSection
+              releaseId={releaseId}
+              idPrefix={`release-${releaseId}-credits`}
+              credits={fields.credits}
+              creditNotes={creditNotes}
+              canEdit={canEditNeutral}
+              canEditNotes={Boolean(
+                currentLocaleCanEdit && shouldUseLocaleDocument && blockRoomController && currentIsSynced,
+              )}
+              onCreditsChange={(credits) => setField('credits', credits)}
+              onCreditNoteChange={handleCreditNoteChange}
+              onMutationStart={() => beginRelationSave('credits')}
+              onMutationSettled={(succeeded) => settleRelationSave('credits', succeeded)}
+            />
+          </AuthoringExtension>
 
-        {canEditNeutral ? <ShareLinkSection entityType="release" entityId={releaseId} /> : null}
+          {/* Tracks */}
+          {activeEditLocale.isSourceLocale ? (
+            <AuthoringExtension kind="relations">
+              <ReleaseTracksSection
+                releaseId={releaseId}
+                idPrefix={`release-${releaseId}-tracks`}
+                tracks={fields.tracks}
+                onTracksChange={(tracks) => setField('tracks', tracks)}
+                onMutationStart={() => beginRelationSave('tracks')}
+                onMutationSettled={(succeeded) => settleRelationSave('tracks', succeeded)}
+              />
+            </AuthoringExtension>
+          ) : null}
 
-        <EntityTranslationsPanel
-          entityType="release"
-          entityId={releaseId}
-          canManage={canEditNeutral || activeEditLocale.canEditActiveLocale}
-          canAdministerTranslations={canEditNeutral && activeEditLocale.isSourceLocaleReady}
-          canMutateTargets={canEditTranslationSource}
-        />
-      </Stack>
-    </EditorRuntimeProvider>
+          {activeEditLocale.isSourceLocale ? (
+            <AuthoringExtension kind="sharing">
+              <ShareLinkSection entityType="release" entityId={releaseId} disabled={!canEditNeutral} />
+            </AuthoringExtension>
+          ) : null}
+
+          <AuthoringExtension kind="translations">
+            <EntityTranslationsPanel
+              entityType="release"
+              entityId={releaseId}
+              canManage
+              canAdministerTranslations={canEditNeutral && activeEditLocale.isSourceLocaleReady}
+              canMutateTargets={canEditTranslationSource}
+            />
+          </AuthoringExtension>
+        </DsLayoutStack>
+      </EditorRuntimeProvider>
+    </ReleaseEditorAccessProvider>
   );
 }

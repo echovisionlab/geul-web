@@ -1,17 +1,18 @@
 'use client';
 
-import { Box, Text } from '@mantine/core';
+import { Text as DsText } from '@/components/core/Typography';
+
 import { TextInput } from '@/components/core/Input';
 import { toStringValue } from '@/lib/types/form/guards';
 import type { FormFieldSchemaText } from '@/lib/types/form/schema';
 import { parseMarkdown } from '@/lib/utils/parse-markdown';
 import { FieldFooter } from '../FieldFooter';
-import { inputStyles } from '../styles';
 import { getFieldLabel, getFieldLimits } from '../utils';
 
 export interface TextFieldProps {
   field: FormFieldSchemaText;
   value: unknown;
+  disabled?: boolean;
   onChange: (value: string) => void;
   onFocus: () => void;
   onBlur: () => void;
@@ -19,10 +20,11 @@ export interface TextFieldProps {
   isRequired: boolean;
 }
 
-export function TextField({ field, value, onChange, onFocus, onBlur, error, isRequired }: TextFieldProps) {
+export function TextField({ field, disabled, value, onChange, onFocus, onBlur, error, isRequired }: TextFieldProps) {
   const isEmail = field.type === 'email';
   const inputId = `field-${field.id}`;
   const errorId = `${inputId}-error`;
+  const hintId = `${inputId}-hint`;
   const descriptionId = field.description ? `${inputId}-description` : undefined;
 
   const stringValue = toStringValue(value);
@@ -31,11 +33,13 @@ export function TextField({ field, value, onChange, onFocus, onBlur, error, isRe
   const max = schemaMax ?? defaultMax;
 
   return (
-    <Box>
+    <div>
       <TextInput
+        disabled={disabled}
         id={inputId}
         label={parseMarkdown(getFieldLabel(field))}
-        description={field.description ? parseMarkdown(field.description) : undefined}
+        required={isRequired}
+        description={field.description ? <span id={descriptionId}>{parseMarkdown(field.description)}</span> : undefined}
         type={isEmail ? 'email' : 'text'}
         placeholder={field.placeholder ?? (isEmail ? 'example@email.com' : undefined)}
         value={stringValue}
@@ -43,21 +47,20 @@ export function TextField({ field, value, onChange, onFocus, onBlur, error, isRe
         onFocus={onFocus}
         onBlur={onBlur}
         error={Boolean(error)}
-        withAsterisk={isRequired}
-        styles={inputStyles}
-        aria-describedby={[descriptionId, error ? errorId : undefined].filter(Boolean).join(' ') || undefined}
+        aria-describedby={[descriptionId, hintId, error ? errorId : undefined].filter(Boolean).join(' ') || undefined}
         aria-invalid={error ? true : undefined}
       />
       <FieldFooter
+        rightId={hintId}
         error={error}
         errorId={errorId}
         right={
-          <Text size="xs" c="dimmed" ta="right" style={{ whiteSpace: 'nowrap' }}>
+          <DsText size="xs" tone="secondary" align="end" nowrap>
             {stringValue.length} / {max}
             {min !== undefined && ` (min ${min})`}
-          </Text>
+          </DsText>
         }
       />
-    </Box>
+    </div>
   );
 }

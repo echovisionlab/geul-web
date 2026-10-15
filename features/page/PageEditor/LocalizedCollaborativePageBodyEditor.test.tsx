@@ -36,6 +36,9 @@ const provider = {
   get document() {
     return roomDocument;
   },
+  // The save tracker subscribes to provider sync events; this room never emits any.
+  on() {},
+  off() {},
 } as unknown as HocuspocusProvider;
 const protocol: BlockRoomDurabilityProtocol = {
   subscribePersisted: (_listener: (state: BlockRoomDurabilityState) => void) => () => undefined,

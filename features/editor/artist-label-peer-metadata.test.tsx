@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import { act, createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -48,13 +49,8 @@ vi.mock('@tanstack/react-query', () => ({
   useQuery: () => ({ data: [] }),
   useQueryClient: () => ({ invalidateQueries: vi.fn() }),
 }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: mocks.notification } }));
-vi.mock('@mantine/core', () => ({
-  Group: 'div',
-  SimpleGrid: 'div',
-  Stack: 'div',
-  Text: 'span',
-}));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: mocks.notification } }));
+
 vi.mock('@tabler/icons-react', () => ({ IconUsers: () => null }));
 vi.mock('@/components/core/Input', () => ({
   MultiSelect: ({ id, value, onChange }: { id: string; value: string[]; onChange: (value: string[]) => void }) => {
@@ -185,9 +181,6 @@ vi.mock('@/lib/hooks/useOgGenerationLookupSignal', () => ({ useOgGenerationLooku
 vi.mock('@/features/editor/hooks/useBlockRoomTiptapController', () => ({
   useRichTextBlockRoomController: () => ({}),
 }));
-vi.mock('@/features/editor/useEditorPermissionRevocation', () => ({
-  useEditorPermissionRevocation: () => ({ blocked: false, revoked: false, sessionExpired: false }),
-}));
 vi.mock('@/features/translation/useLocaleDocumentSession', () => ({
   useLocaleDocumentSession: () => ({
     roomLocale: 'en',
@@ -243,7 +236,7 @@ const artist = {
   slug: 'artist-initial',
   labelIds: ['label-initial'],
   parentArtistId: null,
-  allowedActions: [],
+  allowedActions: [ArtistAction.EDIT],
   ogImageUrl: null,
   images: [],
   imageRevision: 0,
@@ -260,7 +253,7 @@ const label = {
   parentLabelId: null,
   imageLightUrl: null,
   imageDarkUrl: null,
-  allowedActions: [],
+  allowedActions: [LabelAction.EDIT],
 } as never;
 
 let container: HTMLDivElement;
@@ -275,7 +268,7 @@ beforeEach(() => {
   unregisterPendingSave = null;
   mocks.listeners = [];
   mocks.connection = {
-    provider: {},
+    provider: { on: vi.fn(), off: vi.fn(), disconnect: vi.fn() },
     doc: {},
     bootstrap: { sourceLocale: 'en', locale: 'en', localeExists: true },
     protocol: {
@@ -325,6 +318,60 @@ function renderLabel() {
 }
 
 describe('Artist and Label peer metadata adoption', () => {
+  it.each(['artist', 'label'] as const)(
+    'upgrades refreshed %s actions and locks a downgrade without replacing controls',
+    (kind) => {
+      const provider = mocks.connection!.provider as object;
+      const render = (canEdit: boolean) =>
+        act(() =>
+          root.render(
+            kind === 'artist' ? (
+              <ArtistDetailEditor
+                id="artist-1"
+                artist={
+                  {
+                    ...(artist as object),
+                    allowedActions: canEdit ? [ArtistAction.EDIT, ArtistAction.PUBLISH] : [],
+                  } as never
+                }
+                baseUrl="https://example.test"
+              />
+            ) : (
+              <AdminLabelDetailClient
+                id="label-1"
+                label={
+                  {
+                    ...(label as object),
+                    allowedActions: canEdit ? [LabelAction.EDIT, LabelAction.PUBLISH] : [],
+                  } as never
+                }
+                baseUrl="https://example.test"
+              />
+            ),
+          ),
+        );
+      setProviderAccessLevel(provider, 'view');
+      render(false);
+      const title = container.querySelector('[data-testid="editor-title"]');
+      expect(mocks.titleChange).toBeNull();
+      act(() => setProviderAccessLevel(provider, 'edit'));
+      expect(mocks.titleChange).toBeNull();
+      render(true);
+      expect(mocks.titleChange).toBeTypeOf('function');
+      expect(mocks.headerStatusChange).toBeTypeOf('function');
+      expect(container.querySelector('[data-testid="editor-title"]')).toBe(title);
+      act(() => mocks.titleChange?.('Editable title'));
+      expect(mocks.title).toBe('Editable title');
+      act(() => setProviderAccessLevel(provider, 'view'));
+      expect(mocks.titleChange).toBeNull();
+      expect(mocks.headerStatusChange).toBeNull();
+      const writes = mocks.writes.length;
+      act(() => mocks.inputChanges[`${kind}-${kind}-1-website`]?.('https://denied.example'));
+      expect(mocks.writes).toHaveLength(writes);
+      expect(container.querySelector('[data-testid="editor-title"]')).toBe(title);
+    },
+  );
+
   it('adopts bootstrap and peer Artist metadata, protects queued local fields, and sends observed values', () => {
     mocks.bootstrapUpdates = [
       { operation: 'locale', values: { title: 'Canonical Artist' }, sequence: 1 },
@@ -487,7 +534,7 @@ describe('Artist and Label save barriers', () => {
       hasPending: () => true,
       getPendingPatch: () => ({ socialLinks: { instagram: 'local' } }),
     });
-    const publishableLabel = { ...(label as object), allowedActions: [LabelAction.PUBLISH] } as never;
+    const publishableLabel = { ...(label as object), allowedActions: [LabelAction.EDIT, LabelAction.PUBLISH] } as never;
     act(() =>
       root.render(<AdminLabelDetailClient id="label-1" label={publishableLabel} baseUrl="https://example.test" />),
     );
@@ -501,7 +548,7 @@ describe('Artist and Label save barriers', () => {
 
     expect(mocks.routerPush).not.toHaveBeenCalled();
     expect(mocks.mutation).not.toHaveBeenCalled();
-    expect(mocks.notification).toHaveBeenCalledWith({ message: 'notifications.saveFailed', color: 'red' });
+    expect(mocks.notification).toHaveBeenCalledWith({ message: 'notifications.saveFailed', tone: 'danger' });
   });
 
   it('does not open the Artist delete confirmation when pending saves fail', async () => {
@@ -510,7 +557,10 @@ describe('Artist and Label save barriers', () => {
       hasPending: () => true,
       getPendingPatch: () => ({ socialLinks: { instagram: 'local' } }),
     });
-    const deletableArtist = { ...(artist as object), allowedActions: [ArtistAction.DELETE] } as never;
+    const deletableArtist = {
+      ...(artist as object),
+      allowedActions: [ArtistAction.EDIT, ArtistAction.DELETE],
+    } as never;
     act(() =>
       root.render(<ArtistDetailEditor id="artist-1" artist={deletableArtist} baseUrl="https://example.test" />),
     );
@@ -520,6 +570,6 @@ describe('Artist and Label save barriers', () => {
     });
 
     expect(mocks.deleteOpened).toBe(false);
-    expect(mocks.notification).toHaveBeenCalledWith({ message: 'notifications.saveFailed', color: 'red' });
+    expect(mocks.notification).toHaveBeenCalledWith({ message: 'notifications.saveFailed', tone: 'danger' });
   });
 });

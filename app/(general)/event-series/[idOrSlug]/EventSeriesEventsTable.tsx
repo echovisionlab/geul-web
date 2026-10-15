@@ -12,10 +12,10 @@ import {
   type EventSeriesEventsQuery,
   type EventSeriesEventsTableItem,
 } from '@/features/program-event/EventSeriesEventsTableView';
-import {
+import type {
+  BrowserProgramEventLocationMode,
   listProgramEventsForBlockBrowser,
   listProgramEventTypeOptionsBrowser,
-  type BrowserProgramEventLocationMode,
 } from '@/lib/queries/program-event-browser';
 import type { FilterSpec } from '@/lib/types/common/filter';
 import type { PaginatedQuery } from '@/lib/types/common/query';
@@ -30,14 +30,23 @@ interface EventSeriesEventsTablePagination {
   hasMore: boolean;
 }
 
+type EventTypeOption = Awaited<ReturnType<typeof listProgramEventTypeOptionsBrowser>>[number];
+
 interface EventSeriesEventsTableProps {
   seriesId: string;
+  /** Server-rendered filter options; the browser fetches them only when missing or stale. */
+  initialTypeOptions?: EventTypeOption[];
+  initialTypeOptionsUpdatedAt?: number;
   initialEvents: EventSeriesEventsTableItem[];
   initialPagination: EventSeriesEventsTablePagination;
   pageSize: number;
   requestedLocale?: string | null;
   locale?: string;
 }
+
+// The server renders the first page and the type options; the browser RPC client loads when the
+// visitor searches, filters or shows more.
+const loadProgramEventQueries = () => import('@/lib/queries/program-event-browser');
 
 const eventSeriesEventsFilterFields = new Set<string>(['type_id', 'location_mode']);
 
@@ -103,7 +112,9 @@ async function fetchEventSeriesEvents(input: {
   pageSize: number;
   requestedLocale?: string | null;
 }): Promise<PaginatedQueryResult<EventSeriesEventsTableItem>> {
-  const response = await listProgramEventsForBlockBrowser({
+  const response = await (
+    await loadProgramEventQueries()
+  ).listProgramEventsForBlockBrowser({
     search: input.query.search,
     typeIds: getFilterValues(input.query.filters, 'type_id'),
     locationModes: getFilterValues(input.query.filters, 'location_mode') as BrowserProgramEventLocationMode[],
@@ -127,6 +138,8 @@ async function fetchEventSeriesEvents(input: {
 
 export function EventSeriesEventsTable({
   seriesId,
+  initialTypeOptions,
+  initialTypeOptionsUpdatedAt,
   initialEvents,
   initialPagination,
   pageSize,
@@ -170,7 +183,9 @@ export function EventSeriesEventsTable({
   };
   const typeOptionsQuery = useQuery({
     queryKey: ['program-event-types', requestedLocale],
-    queryFn: () => listProgramEventTypeOptionsBrowser(requestedLocale),
+    queryFn: async () => (await loadProgramEventQueries()).listProgramEventTypeOptionsBrowser(requestedLocale),
+    initialData: initialTypeOptions,
+    initialDataUpdatedAt: initialTypeOptionsUpdatedAt,
   });
   const { data: typeOptions = [] } = typeOptionsQuery;
   const filterFields: FilterFieldConfig[] = useMemo(
@@ -296,6 +311,7 @@ export function EventSeriesEventsTable({
         pageSize={pageSize}
         locale={locale}
         labels={{
+          image: tCommonLabels('image'),
           date: tProgramEventAdmin('public.date'),
           event: tCommonLabels('event'),
           type: tCommonLabels('type'),

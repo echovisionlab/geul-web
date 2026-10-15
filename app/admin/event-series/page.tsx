@@ -1,8 +1,6 @@
+import { ProgramEventSeriesPageView } from '@/features/admin/program-event/ProgramEventSeriesPageView';
 import { getTranslations } from 'next-intl/server';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import { CreateProgramEventSeriesButton } from '@/features/admin/program-event/CreateProgramEventSeriesButton';
-import { ProgramEventSeriesTableContent } from '@/features/admin/program-event/ProgramEventSeriesTableContent';
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
 import {
   listProgramEventSeriesTableAdmin,
   toManageProgramEventSeriesStatusFilterValue,
@@ -57,29 +55,13 @@ export default async function AdminEventSeriesPage({ searchParams }: PageProps) 
   });
 
   return (
-    <>
-      <AdminPageHeader
-        title={seriesLabel}
-        items={[
-          {
-            key: 'create-event-series',
-            type: 'custom',
-            content: <CreateProgramEventSeriesButton />,
-          },
-        ]}
-      />
-
-      <ServerDataTable namespace="eventSeries">
-        <ProgramEventSeriesTableContent
-          result={result}
-          filterFields={filterFields}
-          sortFields={sortFields}
-          searchPlaceholder={tCommon('actions.searchItems', {
-            items: seriesLabel.toLowerCase(),
-          })}
-        />
-        <ServerDataTable.Pagination namespace="eventSeries" result={result} searchParams={params} />
-      </ServerDataTable>
-    </>
+    <ProgramEventSeriesPageView
+      result={result}
+      filterFields={filterFields}
+      sortFields={sortFields}
+      searchParams={params.toString()}
+      title={seriesLabel}
+      searchPlaceholder={tCommon('actions.searchItems', { items: seriesLabel.toLowerCase() })}
+    />
   );
 }

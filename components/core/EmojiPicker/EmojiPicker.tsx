@@ -1,9 +1,17 @@
 'use client';
+import { SupportingText } from '../Typography';
 
-import { ScrollArea, SimpleGrid, Stack, Text } from '@mantine/core';
-import { IconButton } from '../IconButton';
+import { LayoutStack as DsLayoutStack, LayoutInset as DsLayoutInset } from '../Layout';
+
+import { GridLayout, ListBox, ListBoxItem, Size, Virtualizer } from 'react-aria-components';
+import { primitiveTokens } from '../design-tokens';
+import type { ClosedVisualProps } from '../visual-contract';
+import controlClasses from '../Control.module.css';
+import classes from './EmojiPicker.module.css';
 import { TextInput } from '../Input';
 import { ContentModal } from '../Modal';
+
+export type EmojiPickerDensity = 'compact' | 'standard';
 
 export interface EmojiPickerItem {
   id: string;
@@ -11,7 +19,8 @@ export interface EmojiPickerItem {
   label: string;
 }
 
-export interface EmojiPickerProps {
+export interface EmojiPickerProps extends ClosedVisualProps {
+  density?: EmojiPickerDensity;
   opened: boolean;
   title: string;
   searchPlaceholder: string;
@@ -24,7 +33,8 @@ export interface EmojiPickerProps {
   onSelect: (item: EmojiPickerItem) => void;
 }
 
-export interface EmojiPickerPanelProps {
+export interface EmojiPickerPanelProps extends ClosedVisualProps {
+  density?: EmojiPickerDensity;
   title: string;
   searchPlaceholder: string;
   noResults: string;
@@ -36,6 +46,7 @@ export interface EmojiPickerPanelProps {
 
 /** Searchable Emoji grid shared by modal and anchored picker surfaces. */
 export function EmojiPickerPanel({
+  density = 'standard',
   title,
   searchPlaceholder,
   noResults,
@@ -44,9 +55,18 @@ export function EmojiPickerPanel({
   onQueryChange,
   onSelect,
 }: EmojiPickerPanelProps) {
+  if (density !== 'compact' && density !== 'standard') {
+    throw new RangeError('Core EmojiPicker density must be compact or standard');
+  }
+  const controlSize = density === 'compact' ? 'xs' : 'md';
+  const rootFontSize =
+    typeof document === 'undefined' ? 16 : parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  const itemSize = parseFloat(primitiveTokens.controlHeight[controlSize]) * rootFontSize;
+  const spacing = parseFloat(primitiveTokens.spacing.xxs) * rootFontSize;
   return (
-    <Stack gap="sm">
+    <DsLayoutStack gap={density === 'compact' ? 'xs' : 'sm'}>
       <TextInput
+        size={density === 'compact' ? 'xs' : 'sm'}
         autoFocus
         value={query}
         onChange={(event) => onQueryChange(event.currentTarget.value)}
@@ -54,37 +74,65 @@ export function EmojiPickerPanel({
         aria-label={searchPlaceholder}
       />
       {items.length > 0 ? (
-        <ScrollArea h={320} type="auto" scrollbars="y">
-          <SimpleGrid cols={{ base: 9, xs: 11 }} spacing={2} role="listbox" aria-label={title} p={4} pr="xs">
-            {items.map((item) => (
-              <IconButton
-                key={item.id}
-                type="button"
-                emphasis="low"
-                size="md"
-                label={item.label}
-                title={item.label}
-                role="option"
-                aria-selected={false}
-                fz="lg"
-                onClick={() => onSelect(item)}
-              >
-                {item.value}
-              </IconButton>
-            ))}
-          </SimpleGrid>
-        </ScrollArea>
+        <DsLayoutInset space="xxs" inlineEnd="xs">
+          <Virtualizer
+            layout={GridLayout}
+            layoutOptions={{
+              minItemSize: new Size(itemSize, itemSize),
+              maxItemSize: new Size(itemSize, itemSize),
+              minSpace: new Size(spacing, spacing),
+              maxHorizontalSpace: spacing,
+              maxColumns: 11,
+              preserveAspectRatio: true,
+            }}
+          >
+            <ListBox
+              aria-label={title}
+              items={items}
+              layout="grid"
+              className={classes.grid}
+              data-core-emoji-density={density}
+              data-core-emoji-sparse={items.length <= 4 || undefined}
+              selectionMode="none"
+              onAction={(id) => {
+                const item = items.find((candidate) => candidate.id === id);
+                if (item) {
+                  onSelect(item);
+                }
+              }}
+            >
+              {(item) => (
+                <ListBoxItem
+                  id={item.id}
+                  key={item.id}
+                  textValue={item.label}
+                  aria-label={item.label}
+                  className={`${controlClasses.root} ${classes.item}`}
+                  data-tone="neutral"
+                  data-emphasis="low"
+                  data-control-size={controlSize}
+                  data-control-kind="icon"
+                >
+                  {item.value}
+                </ListBoxItem>
+              )}
+            </ListBox>
+          </Virtualizer>
+        </DsLayoutInset>
       ) : (
-        <Text c="dimmed" ta="center" py="md">
-          {noResults}
-        </Text>
+        <DsLayoutInset block="md">
+          <SupportingText tone="secondary" align="center" role="status">
+            {noResults}
+          </SupportingText>
+        </DsLayoutInset>
       )}
-    </Stack>
+    </DsLayoutStack>
   );
 }
 
 /** Controlled, editor-agnostic Emoji selection surface. */
 export function EmojiPicker({
+  density = 'standard',
   opened,
   title,
   searchPlaceholder,
@@ -99,6 +147,7 @@ export function EmojiPicker({
   return (
     <ContentModal opened={opened} onClose={onClose} title={title} closeLabel={closeLabel} centered size="compact">
       <EmojiPickerPanel
+        density={density}
         title={title}
         searchPlaceholder={searchPlaceholder}
         noResults={noResults}

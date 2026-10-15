@@ -1,7 +1,6 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import type { MantineColor } from '@mantine/core';
 import { PageLoaderView, type PageLoaderViewSize } from '@/components/core/LoadingSurface';
 import { useSiteSettings } from '@/lib/contexts/ManifestContext';
 import { resolvePageLoaderImage } from './loader-image';
@@ -14,12 +13,12 @@ export interface PageLoaderProps {
   /** Loader size. Defaults to 'md'. */
   size?: PageLoaderViewSize;
   /** Retained for caller compatibility. Configured loading images keep their colors. */
-  color?: MantineColor;
+
   /** Optional message to display below the loader. */
   message?: string;
 }
 
-export function PageLoader({ height = '100%', minHeight = 200, size = 'md', color, message }: PageLoaderProps) {
+export function PageLoader({ height = '100%', minHeight = 200, size = 'md', message }: PageLoaderProps) {
   const t = useTranslations('common.states');
   const { settings } = useSiteSettings();
   const image = resolvePageLoaderImage(settings.loader_urls ?? []);
@@ -30,7 +29,6 @@ export function PageLoader({ height = '100%', minHeight = 200, size = 'md', colo
       height={height}
       minHeight={minHeight}
       size={size}
-      color={color}
       message={message?.trim() === loadingLabel.trim() ? undefined : message}
       imageSrc={image.src}
       imageAlt={loadingLabel}

@@ -85,9 +85,10 @@ export async function updatePostAction(
     documentLayout?: DocumentLayout;
   },
   expectedConfigurationRevision: string,
+  editorOrigin?: string,
 ): Promise<ActionResult<{ success: true; configurationRevision: string; configuration: PostConfigurationSnapshot }>> {
   try {
-    const client = await createPostClient();
+    const client = await createPostClient(editorOrigin);
     const request: {
       id: string;
       expectedConfigurationRevision: string;
@@ -157,9 +158,12 @@ export async function deletePostAction(postId: string): Promise<ActionResult<{ s
   }
 }
 
-export async function publishPostAction(postId: string): Promise<ActionResult<{ success: true }>> {
+export async function publishPostAction(
+  postId: string,
+  editorOrigin?: string,
+): Promise<ActionResult<{ success: true }>> {
   try {
-    const client = await createPostClient();
+    const client = await createPostClient(editorOrigin);
     await client.publishPost({ id: postId });
     return actionSuccess({ success: true });
   } catch (err) {
@@ -167,9 +171,12 @@ export async function publishPostAction(postId: string): Promise<ActionResult<{ 
   }
 }
 
-export async function unpublishPostAction(postId: string): Promise<ActionResult<{ success: true }>> {
+export async function unpublishPostAction(
+  postId: string,
+  editorOrigin?: string,
+): Promise<ActionResult<{ success: true }>> {
   try {
-    const client = await createPostClient();
+    const client = await createPostClient(editorOrigin);
     await client.unpublishPost({ id: postId });
     return actionSuccess({ success: true });
   } catch (err) {
@@ -177,9 +184,12 @@ export async function unpublishPostAction(postId: string): Promise<ActionResult<
   }
 }
 
-export async function archivePostAction(postId: string): Promise<ActionResult<{ success: true }>> {
+export async function archivePostAction(
+  postId: string,
+  editorOrigin?: string,
+): Promise<ActionResult<{ success: true }>> {
   try {
-    const client = await createPostClient();
+    const client = await createPostClient(editorOrigin);
     await client.archivePost({ id: postId });
     return actionSuccess({ success: true });
   } catch (err) {
@@ -191,9 +201,10 @@ export async function schedulePostAction(
   postId: string,
   scheduledAt: Date,
   scheduledTimeZone: string,
+  editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
   try {
-    const client = await createPostClient();
+    const client = await createPostClient(editorOrigin);
     await client.schedulePost({
       id: postId,
       scheduledAt: timestampFromDate(scheduledAt),
@@ -205,9 +216,12 @@ export async function schedulePostAction(
   }
 }
 
-export async function cancelPostScheduleAction(postId: string): Promise<ActionResult<{ success: true }>> {
+export async function cancelPostScheduleAction(
+  postId: string,
+  editorOrigin?: string,
+): Promise<ActionResult<{ success: true }>> {
   try {
-    const client = await createPostClient();
+    const client = await createPostClient(editorOrigin);
     await client.cancelPostSchedule({ id: postId });
     return actionSuccess({ success: true });
   } catch (err) {
@@ -215,9 +229,12 @@ export async function cancelPostScheduleAction(postId: string): Promise<ActionRe
   }
 }
 
-export async function republishPostAction(postId: string): Promise<ActionResult<{ success: true }>> {
+export async function republishPostAction(
+  postId: string,
+  editorOrigin?: string,
+): Promise<ActionResult<{ success: true }>> {
   try {
-    const client = await createPostClient();
+    const client = await createPostClient(editorOrigin);
     await client.republishPost({ id: postId });
     return actionSuccess({ success: true });
   } catch (err) {

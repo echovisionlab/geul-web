@@ -10,6 +10,7 @@ import {
 } from '@echovisionlab/geul-common/collaboration/email-layout';
 import { CollaborativeDocumentType, createDocumentName } from '@echovisionlab/geul-common/collaboration/document';
 import type * as Y from 'yjs';
+import { getProviderAccessEnded, getProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import { useHocuspocusConnection } from '@/lib/hooks/useHocuspocusConnection';
 
 function readTargetUnits(document: Y.Doc): MaterializedEmailLayoutUnit[] {
@@ -46,23 +47,33 @@ export function useEmailLayoutCollaboration(entityId: string, locale: string | n
   const setTargetValue = useCallback(
     (handle: string, value: string) => {
       const document = connection.doc;
-      if (!document || !connection.isSynced) {
+      if (
+        !document ||
+        !connection.isSynced ||
+        getProviderAccessEnded(connection.provider) ||
+        getProviderAccessLevel(connection.provider) === 'view'
+      ) {
         return;
       }
       document.transact(() => setEmailLayoutLocaleValue(document, handle, value));
     },
-    [connection.doc, connection.isSynced],
+    [connection.doc, connection.isSynced, connection.provider],
   );
 
   const useSourceFallback = useCallback(
     (handle: string) => {
       const document = connection.doc;
-      if (!document || !connection.isSynced) {
+      if (
+        !document ||
+        !connection.isSynced ||
+        getProviderAccessEnded(connection.provider) ||
+        getProviderAccessLevel(connection.provider) === 'view'
+      ) {
         return;
       }
       document.transact(() => unsetEmailLayoutLocaleValue(document, handle));
     },
-    [connection.doc, connection.isSynced],
+    [connection.doc, connection.isSynced, connection.provider],
   );
 
   return {

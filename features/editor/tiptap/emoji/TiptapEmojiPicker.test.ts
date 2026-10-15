@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { describe, expect, it } from 'vitest';
-import { geulTiptapEmojis } from './emoji-extension';
+import { geulTiptapEmojis } from './emoji-data';
 import { filterTiptapEmojiItems } from './TiptapEmojiPicker';
 
 describe('Tiptap Emoji picker adapter', () => {

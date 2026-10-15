@@ -1,6 +1,14 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
-import { Group, Paper, ScrollArea, Stack, Text } from '@mantine/core';
+import { SectionCard as DsSectionCard } from '@/components/core/Section';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInset as DsLayoutInset,
+  LayoutInline as DsLayoutInline,
+} from '@/components/core/Layout';
+
+import { ScrollArea } from '@/components/core/Display';
 import { useTranslations } from 'next-intl';
 import type { MaterializedEmailLayoutUnit } from '@echovisionlab/geul-common/collaboration/email-layout';
 import { Textarea } from '@/components/core/Input';
@@ -26,53 +34,51 @@ export function EmailLayoutTargetEditor({
   const t = useTranslations('adminList.emailLayouts.detail.targetEditor');
 
   return (
-    <ScrollArea h="100%" type="auto">
-      <Stack gap="sm" p="sm">
-        <Stack gap={2}>
-          <Text size="sm" fw={600}>
-            {t('title')}
-          </Text>
-          <Text size="xs" c="dimmed">
-            {t('description')}
-          </Text>
-        </Stack>
+    <ScrollArea size="fill">
+      <DsLayoutInset space="sm">
+        <DsLayoutStack gap="sm">
+          <DsLayoutStack gap="xxs">
+            <DsText size="sm" weight="strong">
+              {t('title')}
+            </DsText>
+            <DsText size="xs" tone="secondary">
+              {t('description')}
+            </DsText>
+          </DsLayoutStack>
 
-        {units.length === 0 ? (
-          <Text size="sm" c="dimmed">
-            {t('empty')}
-          </Text>
-        ) : null}
+          {units.length === 0 ? <SupportingText tone="secondary">{t('empty')}</SupportingText> : null}
 
-        {units.map((unit) => (
-          <Paper key={unit.handle} withBorder p="sm">
-            <Stack gap="xs">
-              <Textarea
-                label={unitLabel(unit, t('textUnit'))}
-                description={t('sourceValue', { value: unit.sourceValue })}
-                value={unit.value}
-                onChange={(event) => onChange(unit.handle, event.currentTarget.value)}
-                disabled={!editable}
-                autosize
-                minRows={unit.kind === 'text' ? 2 : 1}
-                data-email-layout-unit={unit.handle}
-              />
-              <Group justify="space-between" gap="xs">
-                <Text size="xs" c="dimmed">
-                  {unit.localeValuePresent ? t('translatedValue') : t('sourceFallback')}
-                </Text>
-                <TextButton
-                  appearance="muted"
-                  size="xs"
-                  disabled={!editable || !unit.localeValuePresent}
-                  onClick={() => onUseSource(unit.handle)}
-                >
-                  {t('useSource')}
-                </TextButton>
-              </Group>
-            </Stack>
-          </Paper>
-        ))}
-      </Stack>
+          {units.map((unit) => (
+            <DsSectionCard withBorder padding="sm" key={unit.handle}>
+              <DsLayoutStack gap="xs">
+                <Textarea
+                  label={unitLabel(unit, t('textUnit'))}
+                  description={t('sourceValue', { value: unit.sourceValue })}
+                  value={unit.value}
+                  onChange={(event) => onChange(unit.handle, event.currentTarget.value)}
+                  disabled={!editable}
+                  autosize
+                  minRows={unit.kind === 'text' ? 2 : 1}
+                  data-email-layout-unit={unit.handle}
+                />
+                <DsLayoutInline justify="between" gap="xs">
+                  <DsText size="xs" tone="secondary">
+                    {unit.localeValuePresent ? t('translatedValue') : t('sourceFallback')}
+                  </DsText>
+                  <TextButton
+                    appearance="muted"
+                    size="xs"
+                    disabled={!editable || !unit.localeValuePresent}
+                    onClick={() => onUseSource(unit.handle)}
+                  >
+                    {t('useSource')}
+                  </TextButton>
+                </DsLayoutInline>
+              </DsLayoutStack>
+            </DsSectionCard>
+          ))}
+        </DsLayoutStack>
+      </DsLayoutInset>
     </ScrollArea>
   );
 }

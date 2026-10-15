@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import type { MaterializedEmailLayoutUnit } from '@echovisionlab/geul-common/collaboration/email-layout';
 import { EmailLayoutTargetEditor } from './EmailLayoutTargetEditor';
 
@@ -36,9 +37,9 @@ function renderEditor(units: MaterializedEmailLayoutUnit[], onChange = vi.fn(), 
   root = createRoot(container);
   act(() => {
     root?.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <EmailLayoutTargetEditor units={units} onChange={onChange} onUseSource={onUseSource} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
   return { onChange, onUseSource };
@@ -60,7 +61,8 @@ describe('EmailLayoutTargetEditor', () => {
     ]);
 
     const textarea = document.querySelector<HTMLTextAreaElement>(
-      '[data-email-layout-unit="unit:11111111-1111-4111-8111-111111111111:text"]',
+      // Core inputs carry caller data attributes on the field root; the value belongs to its textarea.
+      '[data-email-layout-unit="unit:11111111-1111-4111-8111-111111111111:text"] textarea',
     );
     expect(textarea?.value).toBe('Source heading');
     const useSource = [...document.querySelectorAll('button')].find((button) => button.textContent === 'useSource');
@@ -93,7 +95,8 @@ describe('EmailLayoutTargetEditor', () => {
 
     expect(
       document.querySelector<HTMLTextAreaElement>(
-        '[data-email-layout-unit="unit:22222222-2222-4222-8222-222222222222:attr:aria-label"]',
+        // Core inputs carry caller data attributes on the field root; the value belongs to its textarea.
+        '[data-email-layout-unit="unit:22222222-2222-4222-8222-222222222222:attr:aria-label"] textarea',
       )?.value,
     ).toBe('');
     const useSource = [...document.querySelectorAll('button')].find((button) => button.textContent === 'useSource');

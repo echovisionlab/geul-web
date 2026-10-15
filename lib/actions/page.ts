@@ -100,9 +100,10 @@ export async function getPageNeutralConfigurationAction(id: string): Promise<
 export async function updatePageAccessPolicyAction(
   id: string,
   accessPolicy: PageAccessPolicyValue,
+  editorOrigin?: string,
 ): Promise<ActionResult<{ accessPolicy: PageAccessPolicyValue }>> {
   try {
-    const client = await createPageClient();
+    const client = await createPageClient(editorOrigin);
     const page = await client.updatePage({ id, accessPolicy: toProtoPageAccessPolicy(accessPolicy) });
     const canonical = fromProtoPageAccessPolicy(page.accessPolicy);
     revalidatePageAfterCommit('/admin/pages');
@@ -142,9 +143,10 @@ export async function getPageAccessTagOptionsAction(): Promise<
 
 export async function publishPageAction(
   id: string,
+  editorOrigin?: string,
 ): Promise<ActionResult<{ success: true; status: PageLifecycleStatus }>> {
   try {
-    const client = await createPageClient();
+    const client = await createPageClient(editorOrigin);
     const response = await client.publishPage({ id });
     revalidatePath('/admin/pages');
     return actionSuccess({ success: true, status: pageLifecycleStatus(response.status) });
@@ -155,9 +157,10 @@ export async function publishPageAction(
 
 export async function unpublishPageAction(
   id: string,
+  editorOrigin?: string,
 ): Promise<ActionResult<{ success: true; status: PageLifecycleStatus }>> {
   try {
-    const client = await createPageClient();
+    const client = await createPageClient(editorOrigin);
     const response = await client.unpublishPage({ id });
     revalidatePath('/admin/pages');
     return actionSuccess({ success: true, status: pageLifecycleStatus(response.status) });
@@ -169,9 +172,10 @@ export async function unpublishPageAction(
 export async function updatePageShowTitleAction(
   id: string,
   showTitle: boolean,
+  editorOrigin?: string,
 ): Promise<ActionResult<{ success: true; showTitle: boolean }>> {
   try {
-    const client = await createPageClient();
+    const client = await createPageClient(editorOrigin);
     const response = await client.updatePage({ id, showTitle });
     return actionSuccess({ success: true, showTitle: response.showTitle });
   } catch (err) {
@@ -182,6 +186,7 @@ export async function updatePageShowTitleAction(
 export async function updatePageSlugAction(
   id: string,
   slug: string | null,
+  editorOrigin?: string,
 ): Promise<
   ActionResult<
     { success: true; slug: string | null },
@@ -189,7 +194,7 @@ export async function updatePageSlugAction(
   >
 > {
   try {
-    const client = await createPageClient();
+    const client = await createPageClient(editorOrigin);
     const requestedSlug = toSlugInputValue(slug);
     const response = await client.updatePage({ id, slug: requestedSlug });
     revalidatePath('/admin/pages');

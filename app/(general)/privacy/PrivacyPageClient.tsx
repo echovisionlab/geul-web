@@ -1,12 +1,16 @@
 'use client';
+import { SupportingText, Heading as DsHeading } from '@/components/core/Typography';
+
+import { SectionCard as DsSectionCard } from '@/components/core/Section/SectionCard';
+import { LayoutInline as DsLayoutInline, LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 
 import { Suspense } from 'react';
-import Link from '@/components/core/Navigation';
+
 import { useSearchParams } from 'next/navigation';
 import { IconCalendar, IconHistory } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocale, useTranslations } from 'next-intl';
-import { Group, Paper, Stack, Text, Title } from '@mantine/core';
+
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
@@ -16,13 +20,16 @@ import { PageLoader } from '@/features/site/PageLoader';
 import { LegalDocumentMetadata } from '@/features/policy/LegalDocumentMetadata';
 import { LegalTranslationNotice } from '@/features/policy/LegalTranslationNotice';
 import { PrintButton } from '@/features/print/PrintButton';
-import { LegalRichTextContent } from '@/features/policy/LegalRichTextContent';
+import { LegalDocumentLayout } from '@/features/policy/LegalDocumentLayout';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
 import { normalizeLocale } from '@/lib/i18n/locale';
-import { getPrivacyPageData, getScheduledPrivacyPreview } from '@/lib/queries/privacy-browser';
 import type { PublicLegalPageInitialData } from '@/lib/queries/legal-public-page';
 import { CONTENT_LANGUAGE_QUERY_PARAM } from '@/lib/translation/content-language';
 import classes from '@/features/policy/LegalDocumentView.module.css';
+
+// The server renders the document; the browser RPC client loads only when a query has to run here
+// (token preview, missing or stale server data).
+const loadPrivacyQueries = () => import('@/lib/queries/privacy-browser');
 
 interface Props {
   initialData?: PublicLegalPageInitialData;
@@ -77,7 +84,7 @@ function PrivacyActive({
   const matchingInitialData = initialData?.requestedLocale === requestedLocale ? initialData : undefined;
   const { data, dataUpdatedAt, isLoading, error } = useQuery({
     queryKey: ['privacy', 'page', requestedLocale],
-    queryFn: () => getPrivacyPageData(requestedLocale),
+    queryFn: async () => (await loadPrivacyQueries()).getPrivacyPageData(requestedLocale),
     initialData: matchingInitialData?.data,
     initialDataUpdatedAt: matchingInitialData?.updatedAt,
   });
@@ -96,73 +103,86 @@ function PrivacyActive({
   }
 
   return (
-    <Stack gap="md" className={classes.document} data-legal-document="privacy">
-      {/* Header */}
-      {activePrivacy?.localizationInfo ? (
-        <LegalTranslationNotice pathname="/privacy" query={query} localizationInfo={activePrivacy.localizationInfo} />
-      ) : null}
-      <Group justify="space-between" align="flex-start" className={classes.header}>
-        <Stack gap="xs" style={{ flex: 1 }} className={classes.title}>
-          <Title order={1} style={{ fontWeight: 700, fontSize: '1.5rem' }}>
-            {tCommonEntities('privacy')}
-          </Title>
-          {activePrivacy ? (
-            <LegalDocumentMetadata version={activePrivacy.version} effectiveFrom={activePrivacy.effectiveFrom} />
-          ) : null}
-        </Stack>
-        <Group gap="xs" className="print-hide">
+    <LegalDocumentLayout
+      data-legal-document="privacy"
+      blocks={activePrivacy?.content}
+      contentLocale={
+        activePrivacy?.localizationInfo?.displayedLocale ||
+        activePrivacy?.localizationInfo?.sourceLocale ||
+        requestedLocale
+      }
+      contentClassName={`prose privacy-content ${classes.content}`}
+      requestedLocale={requestedLocale}
+      empty={
+        <DsLayoutStack align="center">
+          <DsSectionCard padding="xl">
+            <DsLayoutStack align="center" gap="md">
+              <SupportingText tone="secondary">{t('emptyTitle')}</SupportingText>
+              <SupportingText tone="secondary">{t('emptyDescription')}</SupportingText>
+            </DsLayoutStack>
+          </DsSectionCard>
+        </DsLayoutStack>
+      }
+      header={
+        <DsLayoutStack gap="md">
+          {/* Header */}
           {activePrivacy?.localizationInfo ? (
-            <ContentLanguageMenu
+            <LegalTranslationNotice
               pathname="/privacy"
               query={query}
-              requestedLocale={requestedLocale}
               localizationInfo={activePrivacy.localizationInfo}
             />
           ) : null}
-          <PrintButton />
-          <Tooltip label={tCommonLabels('versionHistory')}>
-            <IconButton
-              tone="neutral"
-              emphasis="low"
-              component={Link}
-              href="/privacy/history"
-              aria-label={tCommonLabels('versionHistory')}
-            >
-              <IconHistory size={20} />
-            </IconButton>
-          </Tooltip>
-        </Group>
-      </Group>
+          <DsLayoutInline printFlow="stack" justify="between" align="start">
+            <DsLayoutStack gap="xs" flexible>
+              <DsHeading level={1} scale="title">
+                {tCommonEntities('privacy')}
+              </DsHeading>
+              {activePrivacy ? (
+                <LegalDocumentMetadata version={activePrivacy.version} effectiveFrom={activePrivacy.effectiveFrom} />
+              ) : null}
+            </DsLayoutStack>
+            <div className="print-hide">
+              <DsLayoutInline gap="xs">
+                {activePrivacy?.localizationInfo ? (
+                  <ContentLanguageMenu
+                    pathname="/privacy"
+                    query={query}
+                    requestedLocale={requestedLocale}
+                    localizationInfo={activePrivacy.localizationInfo}
+                  />
+                ) : null}
+                <PrintButton />
+                <Tooltip label={tCommonLabels('versionHistory')}>
+                  <IconButton
+                    tone="neutral"
+                    emphasis="low"
+                    href="/privacy/history"
+                    aria-label={tCommonLabels('versionHistory')}
+                  >
+                    <IconHistory size={20} />
+                  </IconButton>
+                </Tooltip>
+              </DsLayoutInline>
+            </div>
+          </DsLayoutInline>
 
-      {scheduledPrivacy?.effectiveFrom && (
-        <Alert icon={<IconCalendar size={16} />} tone="accent" className={classes.notice}>
-          {tLegalPage('active.upcomingAlert', {
-            date: dateTime.date(scheduledPrivacy.effectiveFrom, {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            }),
-          })}
-        </Alert>
-      )}
-
-      {activePrivacy?.content ? (
-        <LegalRichTextContent
-          blocks={activePrivacy.content}
-          className={`prose privacy-content ${classes.content}`}
-          requestedLocale={requestedLocale}
-        />
-      ) : (
-        <Paper p="xl" withBorder ta="center">
-          <Stack align="center" gap="md">
-            <Text c="dimmed">{t('emptyTitle')}</Text>
-            <Text size="sm" c="dimmed">
-              {t('emptyDescription')}
-            </Text>
-          </Stack>
-        </Paper>
-      )}
-    </Stack>
+          {scheduledPrivacy?.effectiveFrom && (
+            <div className={classes.notice}>
+              <Alert icon={<IconCalendar size={16} />} tone="accent">
+                {tLegalPage('active.upcomingAlert', {
+                  date: dateTime.date(scheduledPrivacy.effectiveFrom, {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  }),
+                })}
+              </Alert>
+            </div>
+          )}
+        </DsLayoutStack>
+      }
+    />
   );
 }
 
@@ -187,7 +207,7 @@ function PrivacyPreview({
     error,
   } = useQuery({
     queryKey: ['privacy', 'preview', id, token, requestedLocale],
-    queryFn: () => getScheduledPrivacyPreview(id, token, requestedLocale),
+    queryFn: async () => (await loadPrivacyQueries()).getScheduledPrivacyPreview(id, token, requestedLocale),
   });
 
   if (isLoading) {
@@ -196,65 +216,81 @@ function PrivacyPreview({
 
   if (error || !previewPrivacy) {
     return (
-      <Stack gap="md">
+      <DsLayoutStack gap="md">
         <Alert tone="danger">{tLegalPage('preview.invalid')}</Alert>
-        <Button component={Link} href="/privacy" emphasis="medium" w="fit-content">
+        <Button href="/privacy" emphasis="medium">
           {t('viewCurrent')}
         </Button>
-      </Stack>
+      </DsLayoutStack>
     );
   }
 
   return (
-    <Stack gap="md" className={classes.document} data-legal-document="privacy-preview">
-      <Alert icon={<IconCalendar size={16} />} tone="accent" className={classes.notice}>
-        {tLegalPage('preview.upcomingAlert', {
-          date: dateTime.date(previewPrivacy.effectiveFrom!, {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          }),
-        })}
-      </Alert>
+    <LegalDocumentLayout
+      data-legal-document="privacy-preview"
+      blocks={previewPrivacy.content}
+      contentLocale={
+        previewPrivacy.localizationInfo?.displayedLocale ||
+        previewPrivacy.localizationInfo?.sourceLocale ||
+        requestedLocale
+      }
+      contentClassName={`prose privacy-content ${classes.content}`}
+      requestedLocale={requestedLocale}
+      empty={
+        <DsLayoutStack align="center">
+          <DsSectionCard padding="xl">
+            <SupportingText tone="secondary">{tLegalPage('preview.empty')}</SupportingText>
+          </DsSectionCard>
+        </DsLayoutStack>
+      }
+      header={
+        <DsLayoutStack gap="md">
+          <div className={classes.notice}>
+            <Alert icon={<IconCalendar size={16} />} tone="accent">
+              {tLegalPage('preview.upcomingAlert', {
+                date: dateTime.date(previewPrivacy.effectiveFrom!, {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                }),
+              })}
+            </Alert>
+          </div>
 
-      {/* Header */}
-      {previewPrivacy?.localizationInfo ? (
-        <LegalTranslationNotice pathname="/privacy" query={query} localizationInfo={previewPrivacy.localizationInfo} />
-      ) : null}
-      <Group justify="space-between" align="flex-start" className={classes.header}>
-        <Stack gap="xs" style={{ flex: 1 }} className={classes.title}>
-          <Title order={1} style={{ fontWeight: 700, fontSize: '1.5rem' }}>
-            {tCommonEntities('privacy')}
-          </Title>
-          <LegalDocumentMetadata version={previewPrivacy.version} effectiveFrom={previewPrivacy.effectiveFrom} />
-        </Stack>
-        <Group gap="xs" className="print-hide">
+          {/* Header */}
           {previewPrivacy?.localizationInfo ? (
-            <ContentLanguageMenu
+            <LegalTranslationNotice
               pathname="/privacy"
               query={query}
-              requestedLocale={requestedLocale}
               localizationInfo={previewPrivacy.localizationInfo}
             />
           ) : null}
-          <PrintButton />
-          <Button component={Link} href="/privacy" emphasis="low" size="sm">
-            {t('viewCurrent')}
-          </Button>
-        </Group>
-      </Group>
-
-      {previewPrivacy.content ? (
-        <LegalRichTextContent
-          blocks={previewPrivacy.content}
-          className={`prose privacy-content ${classes.content}`}
-          requestedLocale={requestedLocale}
-        />
-      ) : (
-        <Paper p="xl" withBorder ta="center">
-          <Text c="dimmed">{tLegalPage('preview.empty')}</Text>
-        </Paper>
-      )}
-    </Stack>
+          <DsLayoutInline printFlow="stack" justify="between" align="start">
+            <DsLayoutStack gap="xs" flexible>
+              <DsHeading level={1} scale="title">
+                {tCommonEntities('privacy')}
+              </DsHeading>
+              <LegalDocumentMetadata version={previewPrivacy.version} effectiveFrom={previewPrivacy.effectiveFrom} />
+            </DsLayoutStack>
+            <div className="print-hide">
+              <DsLayoutInline gap="xs">
+                {previewPrivacy?.localizationInfo ? (
+                  <ContentLanguageMenu
+                    pathname="/privacy"
+                    query={query}
+                    requestedLocale={requestedLocale}
+                    localizationInfo={previewPrivacy.localizationInfo}
+                  />
+                ) : null}
+                <PrintButton />
+                <Button href="/privacy" emphasis="low" size="sm">
+                  {t('viewCurrent')}
+                </Button>
+              </DsLayoutInline>
+            </div>
+          </DsLayoutInline>
+        </DsLayoutStack>
+      }
+    />
   );
 }

@@ -1,8 +1,9 @@
 // @vitest-environment node
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { renderToReadableStream } from 'react-dom/server';
 import { NextIntlClientProvider } from 'next-intl';
-import { MantineProvider } from '@mantine/core';
+
 import { describe, expect, it, vi } from 'vitest';
 import type { Block } from '@/lib/types/page-content';
 import enMessages from '@/messages/en.json';
@@ -28,9 +29,9 @@ vi.mock('@/features/media/VideoMediaView', async () => {
 async function render(block: Block) {
   const stream = await renderToReadableStream(
     <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
-      <MantineProvider>
+      <DesignSystemProvider locale="en" forceColorScheme="light">
         <DefaultBlockView block={block} />
-      </MantineProvider>
+      </DesignSystemProvider>
     </NextIntlClientProvider>,
   );
   await stream.allReady;

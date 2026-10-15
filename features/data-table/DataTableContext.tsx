@@ -8,6 +8,7 @@ import type { PaginatedQueryResult } from '@/lib/types/repository/result';
 
 export interface DataTableContextValue<T> {
   columns: ColumnDef<T>[];
+  accessibleLabel?: string;
   result: PaginatedQueryResult<T> | undefined;
   loading: boolean;
   query: PaginatedQuery;
@@ -15,7 +16,7 @@ export interface DataTableContextValue<T> {
   rowAction?: DataTableViewRowAction<T>;
   onQueryChange: (query: PaginatedQuery) => void;
   emptyMessage?: string;
-  selection?: DataTableRowSelectionState<T>;
+  selection?: DataTableRowSelectionState<T> & { selectAllRowsLabel?: string };
 }
 
 const DataTableContext = createContext<DataTableContextValue<unknown> | null>(null);

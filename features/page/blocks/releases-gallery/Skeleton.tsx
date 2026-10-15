@@ -1,8 +1,13 @@
 'use client';
 
+import type { CollectionMediaProps, CollectionSize } from '@/components/core/Collection';
+
 import { ListBlockSkeleton } from '../ListBlockSkeleton';
 
 interface ReleaseListSkeletonProps {
+  itemSize?: CollectionSize;
+  showImage?: boolean;
+  imageAspectRatio?: CollectionMediaProps['aspectRatio'];
   columns?: number;
   limit?: number;
   layout?: string;
@@ -11,6 +16,9 @@ interface ReleaseListSkeletonProps {
 }
 
 export function ReleaseListSkeleton({
+  itemSize,
+  showImage,
+  imageAspectRatio,
   columns = 4,
   limit = 8,
   layout = 'grid',
@@ -19,6 +27,9 @@ export function ReleaseListSkeleton({
 }: ReleaseListSkeletonProps) {
   return (
     <ListBlockSkeleton
+      itemSize={itemSize}
+      showImage={showImage}
+      imageAspectRatio={imageAspectRatio}
       className="release-list-block"
       columns={columns}
       limit={limit}

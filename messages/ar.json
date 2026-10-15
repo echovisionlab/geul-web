@@ -1,6 +1,7 @@
 {
   "common": {
     "actions": {
+      "move": "نقل",
       "save": "حفظ",
       "saveChanges": "حفظ التغييرات",
       "create": "إنشاء",
@@ -59,7 +60,7 @@
       "reply": "رد",
       "insertVariable": "إدراج متغير",
       "acceptAll": "قبول الكل",
-      "rejectNonEssential": "رفض غير الضرورية",
+      "rejectNonEssential": "رفض",
       "savePreferences": "حفظ التفضيلات",
       "import": "استيراد",
       "export": "تصدير",
@@ -127,10 +128,7 @@
       "file": "ملف",
       "bio": "نبذة",
       "realName": "الاسم الحقيقي",
-      "countryCode": "رمز البلد",
       "slug": "المعرّف المختصر",
-      "slugAutoModeEnabled": "المزامنة التلقائية مع العنوان (انقر للتعطيل)",
-      "slugAutoModeManual": "الوضع اليدوي (انقر للتفعيل التلقائي)",
       "submissions": "الإرسالات",
       "public": "عام",
       "location": "الموقع",
@@ -162,7 +160,6 @@
       "logoLight": "شعار فاتح",
       "logoDark": "شعار داكن",
       "joined": "تاريخ الانضمام",
-      "subscribed": "مشترك",
       "featured": "مميز",
       "order": "الترتيب",
       "sortOrder": "ترتيب الفرز",
@@ -177,7 +174,6 @@
       "minutes": "الدقائق",
       "seconds": "الثواني",
       "time": "الوقت",
-      "generationInfo": "معلومات التوليد",
       "body": "النص",
       "content": "المحتوى",
       "bodyPreview": "معاينة النص",
@@ -280,6 +276,7 @@
     },
     "messages": {
       "noUsersFound": "لم يتم العثور على مستخدمين",
+      "noAuthorsFound": "لم يتم العثور على مؤلفين.",
       "noVersionsFound": "لم يتم العثور على إصدارات",
       "typeAtLeast2Characters": "اكتب حرفين على الأقل",
       "itemCreated": "تم إنشاء {item}",
@@ -294,25 +291,23 @@
       "removeImageFailed": "فشل إزالة الصورة",
       "deleteItemConfirm": "هل أنت متأكد أنك تريد حذف هذا {item}؟ لا يمكن التراجع عن هذا الإجراء",
       "deleteNamedItemConfirm": "هل أنت متأكد أنك تريد حذف \"{name}\"؟ لا يمكن التراجع عن هذا الإجراء",
-      "confirmDeleteSelectedCount": "هل أنت متأكد أنك تريد حذف {count} من العناصر المحددة؟ لا يمكن التراجع عن هذا الإجراء",
-      "deleteDraftVersionConfirm": "هل أنت متأكد أنك تريد حذف هذا الإصدار المسودة؟",
+      "confirmDeleteSelectedCount": "هل أنت متأكد أنك تريد حذف {count, plural, zero {# عنصر محدد} one {# عنصر محدد} two {# عنصرين محددين} few {# عناصر محددة} many {# عنصرًا محددًا} other {# عنصر محدد}}؟ لا يمكن التراجع عن هذا الإجراء",
       "confirmDeleteNamedRich": "هل أنت متأكد أنك تريد حذف <strong>{name}</strong>؟",
-      "activeCount": "{count} نشط",
       "effectiveFromDate": "ساري المفعول من {date}",
       "noUpdateRecorded": "لم يُسجَّل أي تحديث",
-      "exportedEmails": "تم تصدير {count, plural, zero {# بريد إلكتروني} one {# بريد إلكتروني} two {# بريدين إلكترونيين} few {# رسائل بريد إلكتروني} many {# رسالة بريد إلكتروني} other {# بريد إلكتروني}}",
       "formSubmittedSuccessfully": "تم إرسال ردك بنجاح",
       "userDate": "{user} · {date}",
       "scheduleActivationTitle": "جدولة التفعيل",
       "scheduleActivationDescription": "حدد متى ينبغي أن يصبح هذا الإصدار نشطًا. ستُرسل رسائل الإشعار إلى جميع الحسابات النشطة عند الجدولة",
       "scheduleActivationNotice": "ستؤدي الجدولة إلى إرسال رسائل إشعار إلى جميع الحسابات النشطة مع رابط معاينة",
-      "translationDetailUnavailable": "تعذّر تحميل بيانات الترجمة التفصيلية. لا يزال بإمكانك تعديل الترجمة العامة الحالية",
       "invalidConfirmationLinkFromEmail": "رابط التأكيد غير صالح. يرجى استخدام الرابط الموجود في رسالة التأكيد الإلكترونية",
       "noPostsFound": "لم يتم العثور على منشورات",
       "noWorksFound": "لم يتم العثور على أعمال",
-      "urlCopiedToClipboard": "تم نسخ الرابط إلى الحافظة",
       "failedToLoad": "تعذّر تحميل البيانات.",
-      "relatedItemsWillBeUnlinked": "سيتم إلغاء ربط {count} من العناصر المرتبطة."
+      "relatedItemsWillBeUnlinked": "سيتم إلغاء ربط {count} من العناصر المرتبطة.",
+      "noArtistsFound": "لم يتم العثور على فنانين",
+      "noLabelsFound": "لم يتم العثور على تسميات",
+      "noReleasesFound": "لم يتم العثور على إصدارات"
     },
     "notifications": {
       "categoryCreated": "تم إنشاء الفئة",
@@ -334,7 +329,14 @@
       "ogRegenerationFailed": "فشلت إعادة توليد صورة OG",
       "testEmailSent": "تم إرسال بريد الاختبار",
       "saveSuccess": "تم الحفظ",
-      "saveFailed": "فشل الحفظ"
+      "saveFailed": "فشل الحفظ",
+      "saveRetrying": "لم تُحفظ تغييراتك على الخادم. جارٍ إعادة المحاولة.",
+      "editsRestored": "تمت استعادة التعديلات المسترجعة.",
+      "leaveWithRejectedEdits": {
+        "title": "هل تريد المغادرة دون التعديلات التي تعذر حفظها؟",
+        "message": "رفض الخادم بعض التعديلات، لذا لم تُحفظ. انسخها أولاً من قائمة التعاون، أو غادر وتخلّ عنها.",
+        "confirm": "المغادرة والتخلي عن التعديلات"
+      }
     },
     "errors": {
       "generic": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
@@ -372,8 +374,6 @@
       "testEmail": "test@email.com",
       "testEmailExample": "test@example.com",
       "noReplyEmail": "noreply@example.com",
-      "translationLiveRowMissing": "لا توجد ترجمة عامة لهذه اللغة المحلية بعد. سيؤدي الحفظ هنا إلى إنشاء واحدة فورًا",
-      "translationBodyPreviewUnavailable": "معاينة النص غير متاحة",
       "selectDateAndTime": "اختر التاريخ والوقت",
       "streetAddress": "عنوان الشارع",
       "regionSubdivision": "الولاية/المقاطعة"
@@ -408,12 +408,11 @@
       "generating": "جارٍ التوليد...",
       "true": "صحيح",
       "false": "خطأ",
-      "loading": "جارٍ التحميل..."
+      "loading": "جارٍ التحميل...",
+      "toBeAnnounced": "سيعلن لاحقًا"
     },
     "roles": {
       "admin": "مدير",
-      "editor": "محرر",
-      "viewer": "مشاهد",
       "author": "مؤلف",
       "user": "مستخدم"
     },
@@ -445,6 +444,11 @@
       "unsubscribed": "أُلغِي الاشتراك",
       "subscribed": "مشترك",
       "onboardingPending": "لم يكتمل الإعداد"
+    },
+    "motion": {
+      "pause": "إيقاف الحركة مؤقتًا",
+      "resume": "استئناف الحركة",
+      "readAllInformation": "قراءة جميع معلومات المشهد"
     }
   },
   "shell": {
@@ -463,6 +467,11 @@
       "siteInfo": "معلومات الموقع",
       "links": "الروابط",
       "socialMedia": "وسائل التواصل الاجتماعي"
+    },
+    "signOutUnsaved": {
+      "title": "هل تريد تسجيل الخروج مع وجود تعديلات غير محفوظة؟",
+      "message": "لم تُحفظ بعض التعديلات على الخادم. يؤدي تسجيل الخروج إلى حذفها من هذا الجهاز.",
+      "confirm": "تسجيل الخروج والتخلي عن التعديلات"
     }
   },
   "adminShell": {
@@ -503,13 +512,11 @@
   },
   "localizationNotice": {
     "translated": {
-      "title": "Localized version",
-      "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
+      "title": "نسخة مترجمة",
+      "description": "تُعرض هذه النسخة المترجمة بلغة {displayed}؛ وتبقى النسخة الأصلية بلغة {source} هي المرجع المعتمد."
     },
     "fallback": {
-      "title": "لغة بديلة",
-      "english": "الترجمة المطلوبة لـ {requested} غير متاحة، لذا تُعرض هذه الصفحة باللغة {displayed}",
-      "source": "الترجمة المطلوبة لـ {requested} غير متاحة، لذا تُعرض هذه الصفحة باللغة الأصلية {source}"
+      "title": "لغة بديلة"
     },
     "actions": {
       "viewOriginal": "عرض الأصل ({source})"
@@ -558,8 +565,8 @@
           "description": "تأكيد استعادة حسابك في {siteName}"
         },
         "verification": {
-          "title": "Verify Email",
-          "description": "Verify your email address on {siteName}"
+          "title": "التحقق من البريد الإلكتروني",
+          "description": "تحقق من عنوان بريدك الإلكتروني على {siteName}"
         }
       }
     },
@@ -698,35 +705,34 @@
       }
     },
     "verification": {
-      "loading": "Loading verification form...",
-      "redirecting": "Redirecting...",
-      "startOver": "Start over",
+      "loading": "جارٍ تحميل نموذج التحقق...",
+      "startOver": "البدء من جديد",
       "errors": {
-        "flowNotFound": "Verification flow not found or expired",
-        "submit": "Failed to verify email",
-        "submitRetry": "Failed to verify email. Please try again.",
-        "emailRequired": "Enter the email address to verify.",
-        "sendVerificationEmail": "Failed to send verification email",
-        "cooldown": "Please wait {seconds} seconds before requesting another verification email.",
-        "alreadyExists": "This email is already registered.",
-        "currentVerified": "This email is already verified on this account.",
-        "invalidEmail": "Enter a valid email address."
+        "flowNotFound": "لم يتم العثور على عملية التحقق أو انتهت صلاحيتها",
+        "submit": "فشل التحقق من البريد الإلكتروني",
+        "submitRetry": "فشل التحقق من البريد الإلكتروني. حاول مرة أخرى.",
+        "emailRequired": "أدخل عنوان البريد الإلكتروني الذي تريد التحقق منه.",
+        "sendVerificationEmail": "فشل إرسال بريد التحقق",
+        "cooldown": "يرجى الانتظار {seconds} ثانية قبل طلب بريد تحقق آخر.",
+        "alreadyExists": "هذا البريد الإلكتروني مسجل بالفعل.",
+        "currentVerified": "تم التحقق من هذا البريد الإلكتروني بالفعل في هذا الحساب.",
+        "invalidEmail": "أدخل عنوان بريد إلكتروني صالحًا."
       },
       "chooseMethod": {
-        "title": "Verify email",
-        "description": "Enter your email address and we will send you a verification code.",
-        "submit": "Send verification code"
+        "title": "التحقق من البريد الإلكتروني",
+        "description": "أدخل عنوان بريدك الإلكتروني وسنرسل إليك رمز تحقق.",
+        "submit": "إرسال رمز التحقق"
       },
       "sentEmail": {
-        "description": "Enter the verification code from your email to continue.",
-        "codeLabel": "Verification code",
-        "submitting": "Checking code...",
+        "description": "أدخل رمز التحقق الوارد في بريدك الإلكتروني للمتابعة.",
+        "codeLabel": "رمز التحقق",
+        "submitting": "جارٍ التحقق من الرمز...",
         "resend": "إرسال رمز جديد"
       },
       "passedChallenge": {
-        "title": "Email verified",
-        "description": "Your email address has been verified.",
-        "action": "Back to security settings"
+        "title": "تم التحقق من البريد الإلكتروني",
+        "description": "تم التحقق من عنوان بريدك الإلكتروني.",
+        "action": "العودة إلى إعدادات الأمان"
       },
       "applying": {
         "checkAgain": "تحقق مرة أخرى",
@@ -787,7 +793,6 @@
     }
   },
   "cookieConsentCommon": {
-    "essentialLabel": "ملفات تعريف الارتباط الأساسية (نشطة دائمًا)",
     "analyticsLabel": "ملفات تعريف الارتباط التحليلية (Google Analytics)"
   },
   "nicknameField": {
@@ -834,7 +839,6 @@
       "failedToRevokeSession": "فشل إبطال الجلسة",
       "failedToRevokeSessions": "فشل إبطال الجلسات",
       "failedToRequestDeletion": "فشل طلب حذف الحساب",
-      "cannotUnlinkMessage": "يجب أن يكون لديك طريقة مصادقة واحدة على الأقل",
       "connectedMessage": "تم ربط حساب {provider} بنجاح",
       "disconnectedMessage": "تم إلغاء ربط {provider}",
       "failedToUpdateMainEmail": "تعذر تحديث البريد الإلكتروني الأساسي",
@@ -883,21 +887,11 @@
     "email": {
       "title": "البريد الإلكتروني الأساسي",
       "description": "اختر من العناوين المتحقق منها البريد الإلكتروني الذي سيتلقى التنبيهات ورسائل الحساب.",
-      "addEmail": "إضافة بريد إلكتروني",
       "canonical": "البريد الإلكتروني الأساسي",
-      "canonicalCannotRemove": "اختر بريدًا إلكترونيًا أساسيًا آخر قبل إزالة هذا العنوان.",
       "setCanonical": "تعيين كبريد إلكتروني أساسي",
-      "noEmail": "لا يوجد بريد إلكتروني مضبوط",
-      "helper": "يتوفر عنوان موثّق واحد فقط كبريد إلكتروني أساسي.",
-      "selectLabel": "البريد الإلكتروني الأساسي",
       "changeAction": "تغيير البريد الإلكتروني الأساسي",
       "sources": {
-        "current": "البريد الإلكتروني الأساسي الحالي",
-        "emailCode": "البريد الإلكتروني",
-        "pending": "بانتظار التحقق"
-      },
-      "messages": {
-        "pendingVerification": "التحقق من هذا البريد الإلكتروني قيد الانتظار بالفعل. يمكنك إعادة إرسال رسالة التحقق."
+        "emailCode": "البريد الإلكتروني"
       },
       "mainEmailUpdated": "تم تحديث البريد الإلكتروني الأساسي.",
       "canonicalUpdated": "تم تحديث البريد الإلكتروني الأساسي."
@@ -919,16 +913,16 @@
       "consentDescription": "يمكن لهذا العميل قراءة المحتوى وتعديله وإدارة الملفات ضمن صلاحيات حسابك الحالية. ويمكنه إنشاء المحتوى أو تحديثه أو حذفه وتغيير المرفقات الموجودة. لا يمنح الاتصال أي صلاحيات إضافية للحساب.",
       "consentOfflineAccess": "يمكن أن يستمر هذا الاتصال بعد انتهاء جلسة المتصفح الحالية إلى أن تلغيه.",
       "consentRevoke": "يمكنك إلغاء هذا الاتصال من {settings} → Remote MCP.",
-      "connectionsTitle": "Connected MCP clients",
-      "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
-      "connectionsEmpty": "No MCP clients are connected.",
-      "connectedAt": "Connected {date}",
+      "connectionsTitle": "البرامج العميلة المتصلة عبر MCP",
+      "connectionsDescription": "أذونات OAuth هذه مستقلة عن جلسات المتصفح. يؤدي إلغاء أحدها إلى قطع اتصال عميل MCP المعني دون تسجيل خروجك.",
+      "connectionsEmpty": "لا توجد برامج عميلة متصلة عبر MCP.",
+      "connectedAt": "تم الاتصال {date}",
       "revoke": "Revoke",
-      "revokeTitle": "Revoke MCP access",
-      "revokeConfirmation": "Revoke MCP access for {client}? Its current token chain will stop working.",
-      "revokeSuccess": "MCP access was revoked.",
-      "revokeFailed": "Could not revoke MCP access.",
-      "loadFailed": "Could not load connected MCP clients."
+      "revokeTitle": "إلغاء صلاحية الوصول عبر MCP",
+      "revokeConfirmation": "هل تريد إلغاء صلاحية وصول {client} عبر MCP؟ ستتوقف سلسلة رموز الوصول الحالية الخاصة به عن العمل.",
+      "revokeSuccess": "تم إلغاء صلاحية الوصول عبر MCP.",
+      "revokeFailed": "تعذر إلغاء صلاحية الوصول عبر MCP.",
+      "loadFailed": "تعذر تحميل البرامج العميلة المتصلة عبر MCP."
     },
     "personalAccessTokens": {
       "title": "رمز الوصول الشخصي",
@@ -956,8 +950,6 @@
       "added": "تمت الإضافة في {date}",
       "lastMethod": "أضف طريقة تسجيل دخول أخرى قبل إزالة مفتاح المرور هذا.",
       "removeNamed": "إزالة مفتاح المرور {name}",
-      "reauth": "سجّل الدخول مرة أخرى قبل تغيير مفاتيح المرور.",
-      "reauthAction": "تسجيل الدخول مرة أخرى",
       "errors": {
         "load": "تعذر تحميل مفاتيح المرور.",
         "remove": "تعذرت إزالة مفتاح المرور هذا.",
@@ -1069,7 +1061,7 @@
       "deleteConfirm": "هل أنت متأكد أنك تريد حذف هذه الحملة؟",
       "editAndSend": "تعديل وإرسال",
       "deleted": "تم حذف الحملة",
-      "recipients": "{count, plural, one {# مستلم} other {# مستلمين}}",
+      "recipients": "{count, plural, zero {# مستلم} one {# مستلم} two {# مستلمان} few {# مستلمين} many {# مستلمًا} other {# مستلم}}",
       "statuses": {
         "draft": "مسودة",
         "scheduled": "مجدولة",
@@ -1167,13 +1159,13 @@
       "detail": {
         "backTooltip": "العودة إلى تخطيطات البريد الإلكتروني",
         "targetEditor": {
-          "title": "Translated text",
-          "description": "Edit only visible text and accessibility labels. HTML, CSS, links, and placeholders remain owned by the source layout.",
-          "empty": "This layout has no translatable text units.",
+          "title": "النص المترجم",
+          "description": "عدّل النص الظاهر وتسميات إمكانية الوصول فقط. يبقى HTML وCSS والروابط والعناصر النائبة تحت تحكم التخطيط المصدر.",
+          "empty": "لا يحتوي هذا التخطيط على وحدات نصية قابلة للترجمة.",
           "textUnit": "Text",
-          "sourceValue": "Source: {value}",
-          "translatedValue": "This locale provides its own value.",
-          "sourceFallback": "Using the source value.",
+          "sourceValue": "المصدر: {value}",
+          "translatedValue": "توفر هذه اللغة قيمتها الخاصة.",
+          "sourceFallback": "تُستخدم قيمة المصدر.",
           "useSource": "Use source"
         },
         "viewModes": {
@@ -1422,7 +1414,6 @@
     },
     "mapThemes": {
       "empty": "لم يتم العثور على سمات خريطة",
-      "notFound": "لم يتم العثور على سمة الخريطة.",
       "loadFailed": "تعذر تحميل سمات الخريطة.",
       "defaultDisabled": "هذه هي السمة الافتراضية بالفعل.",
       "deleteDisabled": {
@@ -1430,9 +1421,7 @@
         "last": "لا يمكن حذف آخر سمة خريطة."
       },
       "reloadRequired": {
-        "title": "إعادة التحميل مطلوبة",
-        "message": "تم حفظ هذه السمة من مراجعة أحدث. أعد التحميل قبل متابعة التحرير.",
-        "action": "إعادة التحميل"
+        "title": "إعادة التحميل مطلوبة"
       },
       "variants": {
         "light": "فاتح",
@@ -1463,8 +1452,7 @@
       },
       "editor": {
         "notifications": {
-          "defaultSet": "تم تعيين السمة كافتراضية",
-          "variantRequired": "يلزم وجود سمة واحدة على الأقل (فاتحة أو داكنة)"
+          "defaultSet": "تم تعيين السمة كافتراضية"
         },
         "controls": {
           "map": {
@@ -1593,12 +1581,12 @@
       "fixedLocaleItemBadge": "ثابت: {locale}"
     },
     "emailEvents": {
-      "title": "Email Delivery",
-      "description": "Database email event logs have been removed. Delivery status is tracked through delivery runs, suppressions, structured logs, and metrics.",
-      "databaseLogsRemovedTitle": "Database event log removed",
-      "databaseLogsRemovedDescription": "The old email_event table is no longer used for operational mail logs. Campaign and legal notice analytics use delivery recipient state instead.",
-      "dashboardTitle": "Use observability dashboards",
-      "dashboardDescription": "Provider acceptance, worker failures, and delivery-run health should be monitored in Grafana/Loki/Mimir."
+      "title": "تسليم البريد الإلكتروني",
+      "description": "تمت إزالة سجلات أحداث البريد الإلكتروني من قاعدة البيانات. تُتابَع حالة التسليم من خلال عمليات التسليم وقوائم منع الإرسال والسجلات المهيكلة والمقاييس.",
+      "databaseLogsRemovedTitle": "تمت إزالة سجل الأحداث من قاعدة البيانات",
+      "databaseLogsRemovedDescription": "لم يعد جدول email_event القديم يُستخدم للسجلات التشغيلية للبريد. تستخدم تحليلات الحملات والإشعارات القانونية حالة مستلمي الرسائل بدلاً منه.",
+      "dashboardTitle": "استخدم لوحات مراقبة النظام",
+      "dashboardDescription": "ينبغي مراقبة قبول مزوّد الخدمة للرسائل وإخفاقات العمليات العاملة وحالة عمليات التسليم في Grafana/Loki/Mimir."
     },
     "clientsDetail": {
       "newTitle": "عميل جديد",
@@ -1609,48 +1597,46 @@
     }
   },
   "translationPanel": {
-    "description": "Review the source language and existing translation document for each locale.",
+    "description": "راجع لغة المصدر ومستند الترجمة الموجود لكل لغة.",
     "actions": {
       "expand": "توسيع",
       "collapse": "طي",
-      "regenerateAll": "Generate/regenerate all eligible locales",
+      "regenerateAll": "توليد/إعادة توليد الترجمات لجميع اللغات المؤهلة",
       "regenerateLocale": "إعادة توليد",
       "regenerateLocaleAria": "إعادة توليد ترجمة {locale}",
       "generateLocale": "Generate",
-      "generateLocaleAria": "Generate {locale} translation"
+      "generateLocaleAria": "توليد ترجمة بلغة {locale}"
     },
     "sourceLocale": {
       "label": "لغة المصدر",
       "description": "هذه هي لغة المصدر المستخدمة كأساس لترجمات هذا الكيان",
       "confirm": {
         "title": "تغيير لغة المصدر",
-        "description": "Changing the source language updates only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically.",
-        "detail": "{locale} becomes the language of the editable source document. Existing target documents and translation jobs remain unchanged.",
+        "description": "يؤدي تغيير لغة المصدر إلى تحديث مؤشر المصدر فقط. تبقى مستندات الترجمة ومهام الترجمة الموجودة دون تغيير، ولا تُولّد الترجمات تلقائيًا.",
+        "detail": "تصبح {locale} لغة المستند المصدر القابل للتعديل. تبقى مستندات الترجمة ومهام الترجمة الموجودة دون تغيير.",
         "confirm": "التغيير وإعادة الترجمة"
       }
     },
     "activeEditLocale": {
-      "ariaLabel": "Switch content language. Current: {locale}",
+      "ariaLabel": "تبديل لغة المحتوى. الحالية: {locale}",
       "sourceOption": "{locale} (المصدر)",
       "loading": "جارٍ تحميل اللغات...",
-      "missingDescription": "No {locale} target document exists yet. Generate it from the translations panel.",
+      "missingDescription": "لا يوجد مستند ترجمة بلغة {locale} بعد. ولّده من لوحة الترجمات.",
       "bodyPreviewTitle": "معاينة نص {locale}",
-      "bodyPreviewDescription": "The existing translation document is shown with its structure and formatting.",
+      "bodyPreviewDescription": "يُعرض مستند الترجمة الموجود مع بنيته وتنسيقه.",
       "bodyPreviewEmpty": "لا توجد معاينة للنص بعد",
-      "sharedStructureSectionDescription": "This section keeps shared layout or query settings from the source page; translated body content is read-only.",
+      "sharedStructureSectionDescription": "يحتفظ هذا القسم بإعدادات التخطيط أو الاستعلام المشتركة من الصفحة المصدر؛ محتوى النص المترجم للقراءة فقط.",
       "sectionFieldLabels": {
         "caption": "التسمية التوضيحية",
-        "copyJson": "Scene copy"
+        "copyJson": "نص المشهد"
       }
     },
     "statuses": {
-      "missing": "مفقود",
       "existing": "Existing"
     },
     "states": {
       "loadFailed": "فشل تحميل الترجمات",
-      "missingTarget": "No target document yet.",
-      "sourceRow": "تُحرَّر هذه اللغة المحلية في محرر المصدر الرئيسي",
+      "missingTarget": "لا يوجد مستند ترجمة بعد.",
       "sourceEditorHint": "عدّل النص الأصلي في المحرر الرئيسي",
       "updatedAt": "تم التحديث {date}"
     },
@@ -1663,53 +1649,20 @@
     }
   },
   "translationPanelMenu": {
-    "description": "Review source menu labels and existing translation documents.",
-    "sourceLocaleDescription": "The menu editor above owns structure, ordering, links, visibility, and source labels. Target translations below are read-only previews.",
-    "states": {
-      "sourcePreview": "التسميات المصدرية ({locale}): {labels}",
-      "sourceEditorHint": "عدّل بنية القائمة في محرر القوائم الرئيسي",
-      "missingTarget": "No labels are saved for this locale yet.",
-      "noItems": "لا توجد تسميات محلية بعد",
-      "translationPreview": "Existing {locale} labels: {labels}"
-    },
+    "description": "راجع تسميات القائمة المصدر ومستندات الترجمة الموجودة.",
     "previewModal": {
-      "title": "{locale} menu translation preview",
-      "descriptions": {
-        "missing": "No public menu translation exists for this locale. The source is shown until an Admin generates it.",
-        "existing": "Shows the current public translated labels for this menu as read-only."
-      },
+      "title": "معاينة ترجمة القائمة بلغة {locale}",
       "fields": {
-        "linkType": "Link type",
-        "destination": "Destination",
-        "children": "Nested items",
-        "localizedLabelForLocale": "{locale} public label",
-        "sourceLabelForLocale": "{locale} source label",
-        "localizedLabelDescription": "The current translated label shown in public menus; it cannot be changed here.",
-        "sourceLabelDescription": "Comes from the source menu editor and cannot be changed here.",
-        "fixedLocaleLockedDescription": "This item is fixed to the {locale} label and is read-only."
-      },
-      "states": {
-        "detailUnavailable": "Detailed translated menu data could not be loaded.",
-        "noItems": "There are no menu items to preview."
+        "localizedLabelForLocale": "التسمية العامة بلغة {locale}"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template.",
-      "sourceLocaleDescription": "يتحكم قالب المصدر في الموضوع ونص الرسالة وأسماء متغيرات وقت التشغيل",
-      "states": {
-        "sourceEditorHint": "عدّل القالب المصدر في المحرر الرئيسي",
-        "noContent": "لا يوجد موضوع أو نص مترجم بعد"
-      }
+      "description": "أدر لغة المصدر ومستندات الترجمة الموجودة لهذا القالب للبريد الإلكتروني."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout.",
-      "sourceLocaleDescription": "يتحكم تخطيط المصدر في HTML الغلاف وأسماء العناصر النائبة الهيكلية لعرض البريد",
-      "states": {
-        "sourceEditorHint": "عدّل تخطيط المصدر في المحرر الرئيسي",
-        "noContent": "لا يوجد HTML لتخطيط مترجم بعد"
-      }
+      "description": "أدر لغة المصدر ومستندات الترجمة الموجودة لهذا التخطيط للبريد الإلكتروني."
     }
   },
   "translationOverviewPage": {
@@ -1721,17 +1674,16 @@
       "totalLocales": "إجمالي اللغات المحلية",
       "sourceEntities": "عناصر المصدر",
       "activeJobs": "المهام قيد التنفيذ",
-      "existingEntries": "Existing translations"
+      "existingEntries": "الترجمات الموجودة"
     },
     "sections": {
-      "localeHealthTitle": "Translation state by locale",
-      "entityHealthTitle": "Translation state by entity type"
+      "localeHealthTitle": "حالة الترجمة حسب اللغة",
+      "entityHealthTitle": "حالة الترجمة حسب نوع الكيان"
     },
     "columns": {
       "policy": "السياسة",
-      "lastTargetUpdate": "Last target update",
+      "lastTargetUpdate": "آخر تحديث للترجمة",
       "entity": "الكيان",
-      "existing": "Existing translations",
       "sources": "المصادر",
       "lastSourceUpdate": "آخر تحديث للمصدر"
     },
@@ -1766,7 +1718,7 @@
   },
   "translationSettingsPage": {
     "title": "إعدادات الترجمة",
-    "description": "Manage the default source language and automatic translation providers. An Admin explicitly starts translation generation from each editor.",
+    "description": "أدر لغة المصدر الافتراضية ومزوّدي الترجمة الآلية. يبدأ المسؤول توليد الترجمات صراحةً من كل محرر.",
     "actions": {
       "jobs": "المهام",
       "save": "حفظ الإعدادات",
@@ -1776,8 +1728,8 @@
       "createProvider": "إنشاء مزود"
     },
     "sections": {
-      "runtime": "Source defaults",
-      "runtimeDescription": "Set only the language used when a source language has not been established. Source changes never start translation generation automatically.",
+      "runtime": "إعدادات المصدر الافتراضية",
+      "runtimeDescription": "حدد فقط اللغة المستخدمة عندما لا تكون لغة المصدر قد حُددت بعد. لا تؤدي تغييرات المصدر مطلقًا إلى بدء توليد الترجمة تلقائيًا.",
       "providers": "مزودو الترجمة",
       "providersDescription": "إدارة مزودي الترجمة الآلية. يبقى التوليد معطلا حتى يوجد مزود نشط واحد على الأقل ببيانات اعتماد صالحة."
     },
@@ -1787,10 +1739,10 @@
         "description": "تُستخدم عندما لم يتم تعيين لغة مصدر بعد وعندما لا يطابق الطلب لغة محتوى مدعومة"
       },
       "protectedTerms": {
-        "label": "Protected terms",
-        "description": "Exact case-sensitive spellings that translation generation must keep unchanged. No terms are learned or suggested automatically.",
-        "placeholder": "Add a protected term",
-        "examples": "Examples: Photoshop, React Native"
+        "label": "مصطلحات محمية",
+        "description": "صيغ كتابية دقيقة وحساسة لحالة الأحرف يجب أن تبقى دون تغيير عند توليد الترجمة. لا تُتعلّم المصطلحات ولا تُقترح تلقائيًا.",
+        "placeholder": "إضافة مصطلح محمي",
+        "examples": "أمثلة: Photoshop, React Native"
       },
       "providerName": {
         "label": "اسم المزود"
@@ -1820,39 +1772,39 @@
       },
       "llmApiKey": {
         "label": "LLM API key",
-        "descriptionEdit": "Leave blank to keep the stored key."
+        "descriptionEdit": "اتركه فارغًا للاحتفاظ بالمفتاح المخزّن."
       },
       "llmApiBaseUrl": {
         "label": "LLM API base URL",
-        "description": "Required for OpenAI-compatible endpoints; leave blank for Gemini."
+        "description": "مطلوب لنقاط النهاية المتوافقة مع OpenAI؛ اتركه فارغًا لـ Gemini."
       },
       "llmModel": {
         "label": "Model",
-        "description": "Model ID used for translation generation."
+        "description": "معرّف النموذج المستخدم لتوليد الترجمة."
       },
       "llmInputPrice": {
-        "label": "Input USD / 1M tokens",
-        "description": "Optional estimate used for provider comparison and cost planning."
+        "label": "الإدخال USD / 1M رمز",
+        "description": "تقدير اختياري يُستخدم لمقارنة المزوّدين وتخطيط التكاليف."
       },
       "llmOutputPrice": {
-        "label": "Output USD / 1M tokens",
-        "description": "Optional estimate used for provider comparison and cost planning."
+        "label": "الإخراج USD / 1M رمز",
+        "description": "تقدير اختياري يُستخدم لمقارنة المزوّدين وتخطيط التكاليف."
       },
       "llmMaxContextTokens": {
-        "label": "Max context tokens",
-        "description": "Optional routing hint for large translation batches."
+        "label": "الحد الأقصى لرموز السياق",
+        "description": "إرشاد اختياري للتوجيه عند معالجة دفعات ترجمة كبيرة."
       },
       "llmMaxOutputTokens": {
-        "label": "Max output tokens",
-        "description": "Optional per-request cap passed to compatible providers."
+        "label": "الحد الأقصى لرموز الإخراج",
+        "description": "حد اختياري لكل طلب يُمرّر إلى المزوّدين المتوافقين."
       },
       "llmTemperature": {
         "label": "Temperature",
-        "description": "Lower values make structured translation output more deterministic."
+        "description": "تجعل القيم المنخفضة مخرجات الترجمة المهيكلة أكثر حتمية."
       },
       "llmSupportsJsonMode": {
-        "label": "Structured JSON mode",
-        "description": "Enable when the provider supports JSON schema or JSON mode responses."
+        "label": "وضع JSON المهيكل",
+        "description": "فعّله عندما يدعم المزوّد مخطط JSON أو استجابات وضع JSON."
       }
     },
     "states": {
@@ -1886,8 +1838,8 @@
     "validation": {
       "providerNameRequired": "اسم المزود مطلوب.",
       "providerApiKeyRequired": "يتطلب هذا المزود مفتاح API.",
-      "providerModelRequired": "A model is required for LLM providers.",
-      "providerBaseUrlRequired": "An API base URL is required for OpenAI-compatible LLM providers."
+      "providerModelRequired": "يلزم نموذج لمزوّدي LLM.",
+      "providerBaseUrlRequired": "يلزم رابط URL أساسي لواجهة API لمزوّدي LLM المتوافقين مع OpenAI."
     },
     "modal": {
       "createProviderTitle": "إنشاء مزود ترجمة",
@@ -1898,7 +1850,7 @@
     },
     "llmPresets": {
       "gemini": "Gemini",
-      "openaiCompatible": "OpenAI-compatible"
+      "openaiCompatible": "متوافق مع OpenAI"
     }
   },
   "metadataPanel": {
@@ -1947,16 +1899,13 @@
       "userIdCopied": "تم نسخ معرّف المستخدم",
       "userIdCopyFailed": "فشل نسخ معرّف المستخدم",
       "emailSuppressionReleased": "تم رفع حظر البريد الإلكتروني",
-      "mainEmailUpdated": "تم تحديث البريد الإلكتروني الأساسي",
       "ssoProviderRemoved": "تمت إزالة موفر SSO"
     },
     "auth": {
       "emptyEmail": "لا يوجد بريد إلكتروني",
       "delivery": {
         "title": "بريد الاستلام",
-        "description": "تستخدم الحملات والتنبيهات ورسائل الحساب البريد الرئيسي المحدد.",
-        "changePlaceholder": "اختر بريداً موثقاً",
-        "changeHelp": "يتم حفظ تغيير هذا الاختيار فورًا."
+        "description": "تستخدم الحملات والتنبيهات ورسائل الحساب البريد الرئيسي المحدد."
       },
       "providers": {
         "title": "مزودو SSO المتصلون",
@@ -1965,7 +1914,6 @@
         "remove": "إزالة موفر SSO"
       },
       "sources": {
-        "current": "البريد الحالي",
         "emailCode": "تسجيل الدخول بالبريد الإلكتروني"
       },
       "ban": {
@@ -2000,7 +1948,6 @@
         "noChanges": "لا توجد تغييرات للحفظ"
       },
       "validation": {
-        "invalidUrl": "صيغة الرابط غير صالحة",
         "invalidEmail": "صيغة البريد الإلكتروني غير صالحة",
         "invalidHexColor": "صيغة لون Hex غير صالحة",
         "invalidGoogleAnalyticsId": "صيغة معرّف Google Analytics غير صالحة"
@@ -2199,7 +2146,7 @@
             "placeholder": "AKIA..."
           },
           "secretAccessKey": {
-            "label": "Secret Access Key",
+            "label": "مفتاح الوصول السري",
             "placeholder": "أدخل Secret Access Key",
             "descriptionEdit": "مطلوب عند حفظ تغييرات إعداد SES"
           },
@@ -2296,7 +2243,6 @@
     "scheduleModal": {
       "description": "اختر تاريخًا ووقتًا لإرسال هذه الحملة",
       "dateLabel": "التاريخ والوقت المجدولان",
-      "datePlaceholder": "اختر التاريخ والوقت",
       "previousMonth": "الشهر السابق",
       "nextMonth": "الشهر التالي",
       "audience": "الجمهور: {audience}",
@@ -2360,33 +2306,22 @@
       "summary": "أضف ملخصًا موجزًا..."
     },
     "tooltips": {
-      "generatingNamed": "{name} يولّد ملخصًا",
-      "applyingNamed": "{name} يطبّق الملخص المُولَّد",
-      "readyNamed": "{name} لديه ملخص مُولَّد جاهز"
+      "generatingNamed": "{name} يولّد ملخصًا"
     },
     "feedback": {
       "failedDefault": "فشلت معالجة توليد الملخص",
-      "invalidJson": "تعذّر تحليل رد الذكاء الاصطناعي كـ JSON للملخص",
       "alreadyRunning": "توليد الملخص قيد التشغيل بالفعل",
-      "applyingGenerated": "جارٍ تطبيق الملخص المُولَّد",
-      "resetOlderSession": "تمت إعادة تعيين حالة قديمة لملخص مُولَّد من جلسة سابقة.",
-      "resetUnrestorable": "تمت إعادة تعيين حالة قديمة لملخص مُولَّد تعذّر استعادتها.",
-      "missingJobPayload": "لم يُرجع توليد الملخص حمولة مهمة",
       "missingSuggestionPayload": "اكتمل توليد الملخص دون حمولة اقتراح",
       "staleSuggestion": "هذا الاقتراح قديم. أعد توليده أو تجاهله قبل التطبيق",
       "unableToApplyNow": "تعذّر تطبيق الملخص المُولَّد الآن",
       "applyFailed": "فشل تطبيق الملخص المُولَّد",
       "applied": "تم تطبيق الملخص المُولَّد",
-      "appliedJobUnresolved": "تم تطبيق الملخص، لكن تعذّر حل مهمة الذكاء الاصطناعي تلقائيًا",
-      "dismissedJobUnresolved": "تم تجاهل اقتراح الملخص محلياً، لكن تعذّر حل حالة مهمة الذكاء الاصطناعي تلقائياً.",
-      "readyBeforeApplying": "طبّق الملخص المُولَّد أو تجاهله أولاً.",
       "readyToApply": "الملخص المُولَّد جاهز للتطبيق."
     },
     "ready": {
       "title": "الملخص المُولَّد",
       "suggestedSummary": "ملخص مقترح",
       "anotherCollaborator": "متعاون آخر",
-      "anotherCollaboratorFallback": "يوجد لدى متعاون آخر ملخص مُولَّد جاهز.",
       "anotherCollaboratorNamed": "لدى {name} ملخص مُولَّد جاهز."
     }
   },
@@ -2495,6 +2430,7 @@
         "patternPlaceholder": "مثلاً ^[A-Z]{3}$",
         "customErrorMessage": "رسالة خطأ مخصصة",
         "optional": "اختياري",
+        "dragValidator": "اسحب قاعدة التحقق",
         "removeValidator": "إزالة قاعدة التحقق"
       },
       "fieldTypes": {
@@ -2543,7 +2479,7 @@
       "newestFirst": "الأحدث أولًا",
       "oldestFirst": "الأقدم أولًا",
       "clearFilters": "مسح الفلاتر",
-      "count": "{count, plural, one {# إرسال} other {# إرسالات}}",
+      "count": "{count, plural, zero {# إرسال} one {# إرسال} two {# إرسالان} few {# إرسالات} many {# إرسالًا} other {# إرسال}}",
       "filteredSuffix": "(مصفّى)",
       "table": {
         "submitted": "تم الإرسال"
@@ -2562,10 +2498,6 @@
       }
     },
     "settings": {
-      "notifications": {
-        "managerAdded": "تمت إضافة مدير النموذج",
-        "managerRemoved": "تمت إزالة مدير النموذج"
-      },
       "urlPublic": {
         "title": "الرابط والوصول العام",
         "allowPublic": "السماح بالوصول عبر رابط عام",
@@ -2585,13 +2517,7 @@
         "description": "شارك روابط لوحة التحكم لعرض إحصاءات النموذج من دون وصول إداري"
       },
       "managers": {
-        "adminControls": "تحكم إداري",
-        "readOnly": "للقراءة فقط",
-        "description": "يمكن للمديرين تعديل هذا النموذج وعرض الإرسالات وإدارة روابط المشاركة.",
-        "searchPlaceholder": "ابحث عن مستخدم لإضافة مدير...",
-        "adminOnly": "يمكن للمديرين فقط إضافة المديرين أو إزالتهم.",
-        "empty": "لم يتم تعيين مديرين بعد.",
-        "removeManager": "إزالة المدير {name}"
+        "description": "يمكن للمديرين تعديل هذا النموذج وعرض الإرسالات وإدارة روابط المشاركة."
       },
       "access": {
         "title": "التحكم في الوصول",
@@ -2620,20 +2546,26 @@
   "dataTable": {
     "aria": {
       "sortBy": "فرز حسب {label}",
-      "rowActions": "إجراءات {label}"
+      "rowActions": "إجراءات {label}",
+      "selectAllRows": "تحديد جميع الصفوف",
+      "selectRow": "تحديد {label}",
+      "resultSummary": "{totalPages, plural, =0 {{count, plural, zero {# نتيجة} one {نتيجة واحدة} two {نتيجتان} few {# نتائج} many {# نتيجة} other {# نتيجة}}} other {{count, plural, zero {# نتيجة} one {نتيجة واحدة} two {نتيجتان} few {# نتائج} many {# نتيجة} other {# نتيجة}}، الصفحة {page} من {totalPages}}}",
+      "loadingMessage": "جارٍ التحميل"
     },
     "sort": {
       "button": "فرز",
       "none": "لا توجد شروط فرز",
       "selectAbove": "اختر الحقول أعلاه",
       "selectFromLeft": "اختر الحقول من اللوحة اليسرى",
-      "count": "{count, plural, one {# فرز} other {# فرزات}}",
+      "count": "{count, plural, zero {# فرز} one {# فرز} two {# فرزان} few {# فرزات} many {# فرزًا} other {# فرز}}",
       "aria": {
         "reorder": "إعادة ترتيب {label}",
         "moveUp": "نقل {label} للأعلى",
         "moveDown": "نقل {label} للأسفل",
         "toggleDirection": "تبديل اتجاه الفرز لـ {label}",
-        "removeSort": "إزالة الفرز لـ {label}"
+        "removeSort": "إزالة الفرز لـ {label}",
+        "directionAscending": "الترتيب الحالي تصاعدي",
+        "directionDescending": "الترتيب الحالي تنازلي"
       }
     },
     "filter": {
@@ -2648,7 +2580,8 @@
       "drawerTitle": "فلتر",
       "aria": {
         "backToFields": "العودة إلى حقول الفلتر",
-        "removeFilter": "إزالة فلتر {label}"
+        "removeFilter": "إزالة فلتر {label}",
+        "logic": "طريقة دمج عوامل التصفية"
       },
       "operators": {
         "eq": "يساوي",
@@ -2681,7 +2614,8 @@
       "previousPage": "الصفحة السابقة",
       "nextPage": "الصفحة التالية",
       "lastPage": "الصفحة الأخيرة",
-      "page": "الصفحة {page}"
+      "page": "الصفحة {page}",
+      "navigation": "التنقل بين الصفحات"
     }
   },
   "versionHistory": {
@@ -2691,9 +2625,11 @@
     "systemOrLegacy": "النظام أو إصدار سابق",
     "restore": "استعادة",
     "restoreTitle": "استعادة الإصدار",
-    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document."
+    "restoreSameLocaleBody": "تؤدي استعادة المصدر v{version} ({locale}) إلى تغيير المستند المصدر فقط. تبقى مستندات الترجمة ومهام الترجمة الموجودة دون تغيير، ولا تُولّد الترجمات تلقائيًا. هل تريد المتابعة؟",
+    "restoreCrossLocaleBody": "تؤدي استعادة المصدر v{version} إلى تبديل لغة المصدر من {currentLocale} إلى {selectedLocale} وتغيير مؤشر المصدر فقط. تبقى مستندات الترجمة ومهام الترجمة الموجودة دون تغيير، ولا تُولّد الترجمات تلقائيًا. هل تريد المتابعة؟",
+    "restoreFailed": "فشلت استعادة المستند المصدر.",
+    "loadFailed": "تعذر تحميل سجل الإصدارات.",
+    "end": "تم تحميل جميع الإصدارات."
   },
   "shareLinks": {
     "title": "روابط المشاركة",
@@ -2703,7 +2639,6 @@
     "createError": "فشل إنشاء الرابط",
     "deleteSuccess": "تم حذف الرابط",
     "deleteError": "فشل حذف الرابط",
-    "invalidUrl": "رابط غير صالح",
     "noLinks": "لم تُنشأ روابط بعد",
     "showLess": "عرض أقل",
     "showMore": "عرض {count} المزيد",
@@ -2718,21 +2653,9 @@
     "passwordPlaceholder": "اتركها فارغة لعدم استخدام كلمة مرور",
     "maximumExpiration": "الحد الأقصى لانتهاء الصلاحية هو سنة واحدة",
     "expirationInvalid": "اختر وقت انتهاء صالحًا في المستقبل",
-    "bypassFormPassword": "تجاوز كلمة مرور النموذج",
-    "bypassFormPasswordDescription": "إذا كان معطلاً، فسيحتاج المشاهد إلى إدخال كلمة مرور النموذج",
-    "bypassAuthentication": "تجاوز المصادقة",
-    "bypassAuthenticationDescription": "إذا كان مفعلاً، فسيتم تجاوز شرط المصادقة",
-    "bypassRoleChecks": "تجاوز فحوص الأدوار",
-    "bypassRoleChecksDescription": "إذا كان مفعلاً، فسيُتخطّى التحقق من الأدوار المسموح بها",
     "policies": {
-      "passwordBypass": "تجاوز كلمة المرور",
-      "passwordRequired": "كلمة المرور مطلوبة",
       "passwordProtected": "محمي بكلمة مرور",
-      "noPassword": "بدون كلمة مرور",
-      "authBypass": "تجاوز المصادقة",
-      "authEnforced": "المصادقة مطلوبة",
-      "roleBypass": "تجاوز الأدوار",
-      "roleEnforced": "الأدوار مطلوبة"
+      "noPassword": "بدون كلمة مرور"
     },
     "expirationBadge": {
       "expired": "منتهي الصلاحية",
@@ -2819,14 +2742,12 @@
   },
   "formSuccessPage": {
     "metadata": {
-      "fallbackTitle": "تم إرسال النموذج",
       "title": "{formTitle} - تم الإرسال"
     },
     "title": "شكرًا لك"
   },
   "formPasswordPage": {
     "metadata": {
-      "fallbackTitle": "الوصول إلى النموذج",
       "description": "أدخل كلمة المرور للوصول إلى هذا النموذج"
     },
     "title": "محمي بكلمة مرور",
@@ -2838,7 +2759,6 @@
   },
   "formDashboardPage": {
     "metadata": {
-      "fallbackTitle": "لوحة النموذج",
       "title": "{formTitle} - لوحة التحكم",
       "description": "إحصاءات وتحليلات إرسالات النموذج"
     },
@@ -2848,7 +2768,28 @@
     "stats": {
       "total": "الإجمالي"
     },
-    "fieldStatistics": "إحصاءات الحقول"
+    "fieldStatistics": "إحصاءات الحقول",
+    "charts": {
+      "donut": "حلقي",
+      "pie": "دائري",
+      "bar-horizontal": "أشرطة أفقية",
+      "bar-vertical": "أشرطة عمودية",
+      "radar": "رادار",
+      "table": "جدول",
+      "area": "مساحة",
+      "line": "خط",
+      "histogram": "مدرج تكراري",
+      "noResponses": "لا توجد ردود بعد",
+      "emptyValue": "(فارغ)",
+      "min": "الحد الأدنى",
+      "max": "الحد الأقصى",
+      "avg": "المتوسط",
+      "count": "العدد",
+      "date": "التاريخ",
+      "value": "القيمة",
+      "range": "النطاق",
+      "chartType": "نوع الرسم"
+    }
   },
   "embeddedForm": {
     "states": {
@@ -2868,21 +2809,14 @@
   "featuredImage": {
     "label": "الصورة المميزة",
     "alt": "الصورة المميزة",
-    "hint": "انقر على الصورة لاستبدالها",
     "cropTitle": "اقتصاص الصورة المميزة",
-    "empty": {
-      "editable": "اسحب أو انقر للرفع ({ratio})",
-      "readOnly": "لا توجد صورة"
-    },
     "errors": {
       "fileRejected": "تم رفض الملف",
       "fileTooLarge": "الملف كبير جدًا. الحد الأقصى للحجم: {maxSize}",
       "invalidFileType": "نوع الملف غير صالح"
     },
     "actions": {
-      "changeAria": "تغيير الصورة المميزة",
-      "removeAria": "إزالة الصورة المميزة",
-      "remove": "إزالة الصورة"
+      "removeAria": "إزالة الصورة المميزة"
     }
   },
   "artistPage": {
@@ -2932,7 +2866,7 @@
       "disabled": "التعليقات معطلة لهذا المنشور",
       "loginPrompt": "<login>سجّل الدخول</login> لترك تعليق",
       "loadMore": "تحميل المزيد من التعليقات",
-      "loadMoreCount": "{count, plural, one {تحميل # تعليق إضافي} other {تحميل # تعليقات إضافية}}"
+      "loadMoreCount": "{count, plural, zero {تحميل # تعليق إضافي} one {تحميل # تعليق إضافي} two {تحميل # تعليقين إضافيين} few {تحميل # تعليقات إضافية} many {تحميل # تعليقًا إضافيًا} other {تحميل # تعليق إضافي}}"
     },
     "form": {
       "placeholder": "اكتب تعليقًا...",
@@ -2958,10 +2892,10 @@
       },
       "actions": {
         "moreOptions": "خيارات أخرى",
-        "showReplies": "{count, plural, one {إظهار رد واحد} other {إظهار # ردود}}",
-        "hideReplies": "{count, plural, one {إخفاء رد واحد} other {إخفاء # ردود}}",
-        "moreReplies": "(+{count, plural, one {# أخرى} other {# أخرى}})",
-        "loadMoreReplies": "{count, plural, one {تحميل # رد إضافي} other {تحميل # ردود إضافية}}"
+        "showReplies": "{count, plural, zero {إظهار # رد} one {إظهار رد واحد} two {إظهار # ردين} few {إظهار # ردود} many {إظهار # ردًا} other {إظهار # رد}}",
+        "hideReplies": "{count, plural, zero {إخفاء # رد} one {إخفاء رد واحد} two {إخفاء # ردين} few {إخفاء # ردود} many {إخفاء # ردًا} other {إخفاء # رد}}",
+        "moreReplies": "(+{count, plural, zero {# أخرى} one {# أخرى} two {# أخرى} few {# أخرى} many {# أخرى} other {# أخرى}})",
+        "loadMoreReplies": "{count, plural, zero {تحميل # رد إضافي} one {تحميل # رد إضافي} two {تحميل # ردين إضافيين} few {تحميل # ردود إضافية} many {تحميل # ردًا إضافيًا} other {تحميل # رد إضافي}}"
       },
       "notifications": {
         "updated": "تم تحديث التعليق",
@@ -2979,17 +2913,6 @@
     },
     "credits": {
       "other": "أخرى"
-    },
-    "music": {
-      "released": "صدر: {value}",
-      "spotify": "Spotify",
-      "bandcamp": "Bandcamp",
-      "soundcloud": "SoundCloud",
-      "youtube": "YouTube",
-      "openSpotify": "فتح Spotify",
-      "openBandcamp": "فتح Bandcamp",
-      "openSoundcloud": "فتح SoundCloud",
-      "openYoutube": "فتح YouTube"
     },
     "portfolio": {
       "tech": "تقنية:"
@@ -3017,7 +2940,6 @@
   },
   "seriesDetail": {
     "slug": {
-      "autoDescription": "الوضع التلقائي: تغييرات العنوان تحدّث المعرّف تلقائيًا",
       "manualDescription": "الوضع اليدوي: يبقى المعرّف ثابتًا حتى تعدّله أو تعيد تفعيل الوضع التلقائي"
     },
     "notifications": {
@@ -3053,10 +2975,6 @@
     }
   },
   "works": {
-    "tabs": {
-      "editable": "قابلة للتعديل"
-    },
-    "emptyEditable": "لا توجد أعمال قابلة للتعديل مخصّصة لك",
     "emptyCredits": "لم يتم العثور على أعمال مذكورة في الاعتمادات",
     "columns": {
       "creditedAs": "مُعتمد باسم",
@@ -3224,7 +3142,6 @@
     }
   },
   "releasePage": {
-    "previewTitle": "معاينة الإصدار",
     "streaming": "البث",
     "metadata": {
       "fallbackDescription": "{title}",
@@ -3259,7 +3176,6 @@
       "brainstorm": "عصف ذهني"
     },
     "sections": {
-      "original": "الأصل",
       "result": "نتيجة الذكاء الاصطناعي"
     },
     "actions": {
@@ -3293,7 +3209,6 @@
       "slug": "slug-الفنان",
       "name": "اسم العرض / اسم الفنان",
       "realName": "الاسم القانوني (اختياري)",
-      "countryCode": "مثلاً US أو KR أو JP",
       "labels": "اختر التسميات...",
       "parentArtist": "اختر الفنان الرئيسي..."
     },
@@ -3324,8 +3239,7 @@
   "contentMetadata": {
     "preview": {
       "page": "معاينة الصفحة",
-      "post": "معاينة المنشور",
-      "work": "معاينة العمل"
+      "post": "معاينة المنشور"
     }
   },
   "cookieConsentBanner": {
@@ -3333,7 +3247,6 @@
     "intro": "نستخدم ملفات تعريف ارتباط أساسية للمصادقة وتشغيل الموقع، وملفات تعريف ارتباط تحليلية اختيارية لفهم كيفية استخدام الموقع",
     "learnMore": "راجع <privacy>سياسة الخصوصية</privacy> و<terms>شروط الخدمة</terms>",
     "actions": {
-      "hidePreferences": "إخفاء التفضيلات",
       "customize": "تخصيص"
     }
   },
@@ -3348,12 +3261,11 @@
   "editorCommon": {
     "reloadRequired": {
       "title": "إعادة التحميل مطلوبة",
-      "message": "تم حفظ إصدار أحدث أثناء فتح هذا المحرر. أعد التحميل قبل متابعة التحرير.",
-      "action": "إعادة التحميل"
+      "message": "تم حفظ إصدار أحدث أثناء فتح هذا المحرر. أعد التحميل قبل متابعة التحرير."
     },
     "permissionRevoked": {
-      "title": "تم سحب إذن التحرير",
-      "message": "لم يعد لديك إذن لتحرير هذا المحتوى. لن يتم حفظ التغييرات التي أُجريت بعد سحب الإذن."
+      "title": "تمت إزالة الوصول",
+      "message": "لم يعد لديك وصول إلى هذا المحتوى. تبقى التعديلات غير المحفوظة على هذا الجهاز."
     },
     "sessionExpired": {
       "title": "انتهت صلاحية الجلسة",
@@ -3409,7 +3321,6 @@
         "mute": "كتم الصوت",
         "unmute": "إلغاء كتم الصوت",
         "volume": "مستوى صوت الملف",
-        "original": "الأصل",
         "waveform": "شكل الموجة",
         "spectrogram": "المخطط الطيفي",
         "spectrogramAlt": "المخطط الطيفي للصوت",
@@ -3449,7 +3360,7 @@
           "done": "تم",
           "reset": "إعادة الضبط",
           "live": "مباشر",
-          "playingInPictureInPicture": "Playing in picture-in-picture",
+          "playingInPictureInPicture": "جارٍ التشغيل في وضع صورة داخل صورة",
           "videoPlayerLoading": "جارٍ تحميل مشغل الفيديو.",
           "currentTime": "الوقت الحالي",
           "duration": "المدة",
@@ -3478,13 +3389,13 @@
           "depressed": "منخفض",
           "uniform": "منتظم",
           "dropShadow": "الظل",
-          "proportionalSansSerif": "Proportional Sans-Serif",
-          "monospaceSansSerif": "Monospace Sans-Serif",
-          "proportionalSerif": "Proportional Serif",
-          "monospaceSerif": "Monospace Serif",
+          "proportionalSansSerif": "خط متناسب العرض بلا زوائد",
+          "monospaceSansSerif": "خط ثابت العرض بلا زوائد",
+          "proportionalSerif": "خط متناسب العرض بزوائد",
+          "monospaceSerif": "خط ثابت العرض بزوائد",
           "casual": "Casual",
           "script": "Script",
-          "smallCaps": "Small Caps",
+          "smallCaps": "أحرف كبيرة مصغرة",
           "white": "أبيض",
           "black": "أسود",
           "red": "أحمر",
@@ -3510,12 +3421,10 @@
         "addItem": "إضافة {item}",
         "replaceItem": "استبدال {item}",
         "browse": "اختيار الملفات",
-        "or": "OR",
         "importFromUrl": "استيراد من رابط",
         "directVideoUrlHelp": "روابط ملفات الفيديو المباشرة فقط. بالنسبة إلى YouTube أو Vimeo، استخدم الفيديو الخارجي.",
-        "confirm": "تضمين",
-        "resumeAvailable": "Interrupted upload found",
-        "resumeInstructionNamed": "Select {name} again to continue the upload from where it stopped.",
+        "resumeAvailable": "تم العثور على رفع متوقف",
+        "resumeInstructionNamed": "حدد {name} مجددًا لمتابعة الرفع من حيث توقف.",
         "backToUpload": "رفع الملفات",
         "openLibrary": "مكتبة الملفات",
         "unifiedDescription": "ارفع الملفات أو اخترها من المكتبة.",
@@ -3525,11 +3434,8 @@
       }
     },
     "mapBlock": {
-      "clickToAddPlace": "انقر لإضافة موقع",
       "captionPlaceholder": "أضف تسمية توضيحية...",
-      "clickToAddCaption": "انقر لإضافة تسمية توضيحية",
-      "externalPlaceholder": "الخريطة: {count} {count, plural, one {موقع} other {مواقع}}",
-      "viewOnGoogleMaps": "عرض في خرائط Google ({lat}, {lng})"
+      "clickToAddCaption": "انقر لإضافة تسمية توضيحية"
     },
     "mapPlacesModal": {
       "title": "إدارة المواقع",
@@ -3539,22 +3445,9 @@
       "centeredTitle": "تم التوسيط",
       "setAsCenterTitle": "تعيين كمركز"
     },
-    "blockAlign": {
-      "left": "محاذاة لليسار",
-      "center": "توسيط",
-      "right": "محاذاة لليمين"
-    },
-    "mathInline": {
-      "clickToEdit": "انقر للتحرير",
-      "convertToBlock": "تحويل إلى كتلة"
-    },
-    "mathInlineButton": {
-      "label": "معادلة مضمنة"
-    },
     "editor": {
       "slashMenu": {
         "placeholder": "اكتب '/' لعرض الأوامر",
-        "empty": "لا توجد عناصر",
         "unavailable": "غير متاح",
         "groups": {
           "headings": "العناوين",
@@ -3613,14 +3506,14 @@
           "quote": {
             "title": "اقتباس",
             "subtext": "اقتباس أو مقتطف",
-            "aliases": "quotation\nblockquote\nbq",
+            "aliases": "quotation\nblockquote\nbq\nاقتباس\nكتلة اقتباس",
             "group": "الكتل الأساسية"
           },
           "callout": {
             "title": "Callout",
-            "subtext": "Highlight content with an icon",
-            "aliases": "callout\nnotice\ninfo\naside",
-            "group": "Basic blocks"
+            "subtext": "إبراز المحتوى بأيقونة",
+            "aliases": "callout\nnotice\ninfo\naside\nتنبيه\nملاحظة\nمعلومات",
+            "group": "الكتل الأساسية"
           },
           "divider": {
             "title": "فاصل",
@@ -3649,61 +3542,61 @@
           "mathBlock": {
             "title": "كتلة رياضية",
             "subtext": "عرض معادلة باستخدام LaTeX",
-            "aliases": "math\nequation\nlatex\nformula",
+            "aliases": "math\nequation\nlatex\nformula\nرياضيات\nمعادلة\nصيغة",
             "group": "الرياضيات"
           },
           "inlineMath": {
             "title": "رياضيات مضمنة",
             "subtext": "صيغة LaTeX مضمنة",
-            "aliases": "inline\ninline math\ninlinemath\nlatex\n$",
+            "aliases": "inline\ninline math\ninlinemath\nlatex\n$\nرياضيات ضمن السطر\nمعادلة ضمن السطر",
             "group": "مضمن"
           },
           "map": {
             "title": "خريطة",
             "subtext": "إدراج موقع على الخريطة",
-            "aliases": "map\nlocation\nplace\naddress",
+            "aliases": "map\nlocation\nplace\naddress\nخريطة\nموقع\nمكان\nعنوان",
             "group": "التضمينات"
           },
           "externalVideo": {
             "title": "فيديو خارجي",
             "subtext": "إدراج رابط YouTube أو Vimeo",
-            "aliases": "external video\nyoutube\nvimeo\nembed",
+            "aliases": "external video\nyoutube\nvimeo\nembed\nفيديو خارجي\nيوتيوب\nفيميو\nتضمين",
             "group": "التضمينات"
           },
           "p5Sketch": {
             "title": "p5.js",
             "subtext": "إضافة رسم p5.js تفاعلي",
-            "aliases": "p5\np5.js\nsketch\ncreative coding",
+            "aliases": "p5\np5.js\nsketch\ncreative coding\nرسم\nبرمجة إبداعية",
             "group": "التضمينات"
           },
           "threeScene": {
             "title": "Three.js",
             "subtext": "إضافة مشهد Three.js تفاعلي",
-            "aliases": "three\nthree.js\n3d\nscene",
+            "aliases": "three\nthree.js\n3d\nscene\nثلاثي الأبعاد\nمشهد",
             "group": "التضمينات"
           },
           "file": {
             "title": "مرفق",
             "subtext": "إرفاق ملف (PDF، DOC، ZIP، إلخ)",
-            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload",
+            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\nمرفق\nملف\nمستند\nتنزيل",
             "group": "الوسائط"
           },
           "aiAssistant": {
             "title": "مساعد الذكاء الاصطناعي",
             "subtext": "اكتب أو حسّن أو حوّل النص باستخدام الذكاء الاصطناعي",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove",
+            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nذكاء اصطناعي\nمساعد\nكتابة\nتحسين",
             "group": "الذكاء الاصطناعي"
           },
           "shader": {
             "title": "تظليل GLSL",
             "subtext": "أضف تظليل GLSL تفاعليًا",
-            "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "aliases": "shader\nglsl\nfragment shader\nshadertoy\nتظليل\nمظلّل\nمظلّل الأجزاء",
             "group": "التضمينات"
           },
           "mermaid": {
             "title": "Mermaid",
             "subtext": "إنشاء مخطط من النص",
-            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence\nمخطط\nمخطط انسيابي\nتسلسل",
             "group": "التضمينات"
           }
         }
@@ -3719,9 +3612,6 @@
         "alignLeft": "محاذاة لليسار",
         "alignCenter": "توسيط",
         "alignRight": "محاذاة لليمين",
-        "alignJustify": "ضبط النص",
-        "textColor": "النص",
-        "backgroundColor": "الخلفية",
         "nest": "محتويات متداخلة",
         "unnest": "إلغاء التداخل",
         "inlineMath": "معادلة مضمنة",
@@ -3736,36 +3626,19 @@
         "urlPlaceholder": "تحرير الرابط"
       },
       "math": {
-        "inline": "معادلة مضمنة",
-        "block": "كتلة رياضية",
-        "clickToEdit": "انقر للتحرير",
-        "convertToBlock": "تحويل إلى كتلة"
+        "selectBlock": "تحديد كتلة المعادلة",
+        "block": "كتلة رياضية"
       },
       "file": {
-        "add": "إضافة {item}",
         "replace": "استبدال {item}",
-        "delete": "حذف",
-        "download": "تنزيل",
-        "caption": "أضف تسمية توضيحية...",
-        "upload": "رفع الملفات",
-        "embed": "تضمين",
-        "urlPlaceholder": "تحرير الرابط"
+        "delete": "حذف"
       },
       "resize": {
-        "image": "تغيير الحجم — صورة",
-        "audio": "تغيير الحجم — صوت",
-        "video": "تغيير الحجم — فيديو",
-        "file": "تغيير الحجم — مرفق",
         "map": "تغيير الحجم — خريطة",
-        "externalVideo": "تغيير الحجم — فيديو خارجي",
-        "p5Sketch": "تغيير الحجم — p5.js",
-        "threeScene": "تغيير الحجم — Three.js",
-        "dragHandle": "اسحب لتغيير الحجم",
-        "shader": "تغيير الحجم — تظليل GLSL"
+        "externalVideo": "تغيير الحجم — فيديو خارجي"
       },
       "drag": {
         "openBlockMenu": "فتح قائمة الكتلة",
-        "addBlock": "إضافة كتلة",
         "delete": "حذف",
         "colors": "ألوان"
       },
@@ -3797,7 +3670,6 @@
         "toggleHeaderColumn": "عنوان العمود",
         "selectRow": "تحديد الصف",
         "selectColumn": "تحديد العمود",
-        "selectCells": "الخلايا المحددة",
         "selectTable": "تحديد الجدول",
         "deleteTable": "حذف الجدول",
         "mergeCells": "جمع الخلايا",
@@ -3811,17 +3683,11 @@
         "unavailable": "غير متاح"
       },
       "map": {
-        "insert": "خريطة",
-        "clickToAddPlace": "انقر لإضافة موقع",
-        "captionPlaceholder": "أضف تسمية توضيحية...",
         "managePlaces": "إدارة المواقع"
       },
       "embeds": {
         "map": "خريطة",
-        "externalVideo": "فيديو خارجي",
-        "p5Sketch": "p5.js",
-        "threeScene": "Three.js",
-        "shader": "تظليل GLSL"
+        "externalVideo": "فيديو خارجي"
       },
       "runtimeLabels": {
         "code": {
@@ -3908,13 +3774,14 @@
         }
       },
       "media": {
-        "browse": "اختيار الملفات",
-        "importFromUrl": "استيراد من رابط",
-        "embed": "تضمين",
-        "openLibrary": "مكتبة الملفات",
-        "uploadFiles": "رفع الملفات",
-        "selectFile": "اختر ملفًا"
+        "importFromUrl": "استيراد من رابط"
       }
+    },
+    "accessDowngraded": {
+      "message": "تغيرت صلاحيتك إلى العرض فقط. تم إيقاف التعديل؛ تبقى التعديلات التي لم تُحفظ بعد على هذا الجهاز وتُحفظ إذا استعدت صلاحية التعديل."
+    },
+    "accessUpgraded": {
+      "message": "يمكنك التعديل مرة أخرى. يجري حفظ التعديلات المحتفظ بها أثناء الوصول للعرض فقط."
     }
   },
   "editorHeader": {
@@ -3928,6 +3795,24 @@
       "sections": {
         "connection": "الاتصال"
       }
+    },
+    "saveState": {
+      "saved": "تم الحفظ",
+      "saving": "جارٍ الحفظ…",
+      "offline": "غير متصل · التعديلات محفوظة على هذا الجهاز",
+      "error": "فشل الحفظ · جارٍ إعادة المحاولة…",
+      "rejected": "تعذر حفظ بعض التعديلات",
+      "reload": "جارٍ إعادة الاتصال · جارٍ استعادة التعديلات…"
+    },
+    "rejectedEdits": {
+      "open": "مراجعة التعديلات غير المحفوظة",
+      "title": "تعديلات تعذر حفظها",
+      "description": "رفض الخادم هذه التعديلات، لذا لن تُعاد محاولة حفظها. انسخ ما تحتاجه، ثم تخلّ عنها.",
+      "reason": "السبب: {reason}",
+      "copy": "نسخ",
+      "copied": "تم النسخ",
+      "discard": "التخلي عن التعديلات",
+      "empty": "تم حفظ جميع التعديلات."
     }
   },
   "editorMetadata": {
@@ -3958,13 +3843,11 @@
     },
     "placeholders": {
       "name": "اسم التسمية",
-      "countryCode": "مثلاً DE أو US أو KR",
       "parentLabel": "اختر التسمية الأصلية (اختياري)"
     }
   },
   "locationSelector": {
     "placeholder": "اختر الموقع...",
-    "clearSelection": "مسح المكان المحدد",
     "emptySearch": "ابحث عن موقع على الخريطة",
     "emptyResults": "لم يتم العثور على أماكن"
   },
@@ -3998,8 +3881,7 @@
       "pinClickable": "يمكن النقر على الدبوس"
     },
     "themeOptions": {
-      "none": "لا شيء",
-      "systemSuffix": "(النظام)"
+      "none": "لا شيء"
     },
     "scheme": {
       "auto": "تلقائي",
@@ -4037,7 +3919,7 @@
   },
   "ogImagePreview": {
     "alt": "معاينة Open Graph",
-    "empty": "لم يتم توليد صورة OG بعد",
+    "empty": "لا توجد صورة OG",
     "actions": {
       "regenerate": "إعادة توليد صورة OG"
     },
@@ -4131,10 +4013,6 @@
     "pinned": "مثبت"
   },
   "pageEditor": {
-    "localRecovery": {
-      "message": "تم الاحتفاظ بنسخة محلية من تعديلاتك قبل إعادة الاتصال. نزّلها قبل إعادة التحميل أو المغادرة.",
-      "action": "تنزيل نسخة الاسترداد"
-    },
     "shareLinksDescription": "روابط معاينة للصفحات غير المنشورة",
     "showTitleOnPage": "إظهار العنوان على الصفحة",
     "slugValidation": {
@@ -4205,6 +4083,9 @@
       }
     },
     "columnsEditor": {
+      "labels": {
+        "ratio": "نسبة الأعمدة"
+      },
       "badges": {
         "columnCount": "{count} أعمدة"
       },
@@ -4229,20 +4110,18 @@
       "menuLabel": "إضافة قسم",
       "emptyColumn": "عمود فارغ - انقر + لإضافة محتوى",
       "actions": {
-        "addSectionToColumn": "إضافة قسم إلى العمود {index}",
-        "removeSectionFromColumn": "إزالة {section} من العمود {index}"
+        "addSectionToColumn": "إضافة قسم إلى العمود {index}"
       }
     },
     "notifications": {
       "published": "تم نشر الصفحة",
       "unpublished": "تم إلغاء نشر الصفحة",
       "deleted": "تم حذف الصفحة",
-      "slugUpdateFailed": "فشل تحديث slug الصفحة",
-      "confirmSummaryFailed": "فشل تأكيد تحديث الملخص"
+      "slugUpdateFailed": "فشل تحديث slug الصفحة"
     },
     "mapEditor": {
       "title": "خريطة",
-      "placeCount": "{count} {count, plural, one {مكان} other {أماكن}}",
+      "placeCount": "{count} {count, plural, zero {مكان} one {مكان} two {مكانان} few {أماكن} many {مكانًا} other {مكان}}",
       "fullscreen": "ملء الشاشة",
       "captionPlaceholder": "أضف تسمية توضيحية اختيارية أسفل الخريطة...",
       "emptyState": "لا توجد أماكن خريطة محددة بعد.",
@@ -4283,7 +4162,6 @@
         "content": "المحتوى",
         "marqueeBehavior": "سلوك الشريط المتحرك",
         "scenePlayback": "Playback",
-        "sceneRender": "Renderer",
         "sceneMotion": "Motion",
         "sceneUnits": "Units",
         "sceneSettings": "Scene",
@@ -4300,7 +4178,6 @@
         "columns": "الأعمدة",
         "infiniteLoop": "تكرار لا نهائي",
         "showIndicators": "إظهار المؤشرات",
-        "showFeaturedImage": "إظهار الصورة البارزة",
         "imageAspectRatio": "نسبة أبعاد الصورة",
         "showMeta": "إظهار البيانات الوصفية (التاريخ، المؤلف)",
         "sortBy": "الترتيب حسب",
@@ -4318,7 +4195,6 @@
         "showImage": "إظهار الصورة",
         "selectForm": "اختيار نموذج",
         "showFormTitle": "إظهار عنوان النموذج",
-        "showTitle": "إظهار العنوان",
         "numberOfWorks": "عدد الأعمال",
         "numberOfReleases": "عدد الإصدارات",
         "releaseTypes": "أنواع الإصدارات",
@@ -4338,21 +4214,21 @@
         "fallbackMode": "عند غياب الشعار",
         "marqueeItemText": "النص",
         "marqueeItemHref": "رابط URL",
-        "scrollHeight": "Scroll height",
-        "sceneHeight": "Scene height",
-        "unitHoldSeconds": "Unit hold",
+        "scrollHeight": "ارتفاع التمرير",
+        "sceneHeight": "ارتفاع المشهد",
+        "unitHoldSeconds": "مدة ثبات الوحدة",
         "unitGapSeconds": "Unit gap",
-        "unitHoldOverrideSeconds": "Hold override",
+        "unitHoldOverrideSeconds": "تجاوز مدة الثبات",
         "loop": "Loop",
         "colorScheme": "Theme",
-        "backgroundColor": "Light background",
-        "darkBackgroundColor": "Dark background",
+        "backgroundColor": "الخلفية الفاتحة",
+        "darkBackgroundColor": "الخلفية الداكنة",
         "backgroundEnabled": "خلفية المشهد",
-        "textureSize": "Particle count",
-        "particleSize": "Particle size",
-        "particleBrightness": "Light particle brightness",
-        "darkParticleBrightness": "Dark particle brightness",
-        "transitionWindow": "Text blend",
+        "textureSize": "عدد الجسيمات",
+        "particleSize": "حجم الجسيمات",
+        "particleBrightness": "سطوع الجسيمات في الوضع الفاتح",
+        "darkParticleBrightness": "سطوع الجسيمات في الوضع الداكن",
+        "transitionWindow": "مزج النص",
         "transition": "Transition",
         "rotationEnabled": "تحريك الدوران",
         "scrollRotationEnabled": "إضافة دوران عند التمرير",
@@ -4362,34 +4238,37 @@
         "hoverEnabled": "تفاعل المؤشر",
         "hoverRepelRadius": "نصف قطر التحويم",
         "sceneUnit": "Unit",
-        "sceneUnitName": "Unit name",
+        "sceneUnitName": "اسم الوحدة",
         "unitAttribution": "نَسب الوحدة",
-        "meshSource": "Mesh source",
-        "fallbackMesh": "Built-in mesh",
+        "meshSource": "مصدر الشبكة المجسمة",
+        "fallbackMesh": "شبكة مجسمة مدمجة",
         "mesh": "Mesh",
-        "meshObjectName": "Mesh object",
+        "meshObjectName": "كائن الشبكة المجسمة",
         "meshScale": "مقياس المجسم",
         "meshOffsetY": "الإزاحة الرأسية للمجسم",
-        "meshUploadProgress": "Mesh upload progress",
-        "textureSource": "Light texture",
-        "fallbackColor": "Light color",
-        "color": "Light color",
-        "lightTextureUploadProgress": "Light texture upload progress",
-        "darkTextureSource": "Dark texture",
-        "darkFallbackColor": "Dark color",
-        "darkColor": "Dark color",
-        "darkTextureUploadProgress": "Dark texture upload progress",
+        "meshUploadProgress": "تقدم رفع الشبكة المجسمة",
+        "textureSource": "الخامة الفاتحة",
+        "fallbackColor": "اللون الفاتح",
+        "color": "اللون الفاتح",
+        "lightTextureUploadProgress": "تقدم رفع الخامة الفاتحة",
+        "darkTextureSource": "الخامة الداكنة",
+        "darkFallbackColor": "اللون الداكن",
+        "darkColor": "اللون الداكن",
+        "darkTextureUploadProgress": "تقدم رفع الخامة الداكنة",
         "title": "Title",
         "description": "الوصف",
         "meshOptimization": "GLB optimization",
-        "meshOptimizationTargetRatio": "Target mesh ratio",
-        "selectedOptimizedMesh": "Selected compressed GLB",
-        "optimizedMeshSize": "Compressed size",
+        "meshOptimizationTargetRatio": "النسبة المستهدفة للشبكة المجسمة",
+        "selectedOptimizedMesh": "GLB المضغوط المحدد",
+        "optimizedMeshSize": "الحجم المضغوط",
         "meshOptimizationTriangles": "Triangles",
-        "textColorSource": "Text color",
-        "lightTextColor": "Light text",
-        "darkTextColorSource": "Dark text",
-        "darkTextColor": "Dark text color"
+        "textColorSource": "لون النص",
+        "lightTextColor": "النص في الوضع الفاتح",
+        "darkTextColorSource": "النص في الوضع الداكن",
+        "darkTextColor": "لون النص في الوضع الداكن",
+        "itemSize": "حجم العناصر",
+        "showAvatar": "إظهار الصورة الشخصية",
+        "maxLabels": "الحد الأقصى لشركات الإنتاج"
       },
       "fieldLabels": {
         "year": "السنة",
@@ -4400,11 +4279,7 @@
       },
       "badges": {
         "posts": "{count} منشورات",
-        "rows": "{count} صفوف",
-        "authors": "{count} مؤلفون",
-        "artists": "{count} فنانون",
-        "works": "{count} أعمال",
-        "releases": "{count} إصدارات"
+        "rows": "{count} صفوف"
       },
       "placeholders": {
         "publishedByDefault": "منشور افتراضياً",
@@ -4424,7 +4299,6 @@
           "auto": "تلقائي"
         },
         "sortBy": {
-          "dateAdded": "تاريخ الإضافة",
           "startDate": "تاريخ البدء",
           "endDate": "تاريخ الانتهاء",
           "publishedDate": "تاريخ النشر",
@@ -4433,9 +4307,7 @@
         },
         "sortOrder": {
           "newest": "الأحدث",
-          "oldest": "الأقدم",
-          "azOldest": "أ-ي / الأقدم",
-          "zaNewest": "ي-أ / الأحدث"
+          "oldest": "الأقدم"
         },
         "mapPrimaryLabel": {
           "placeName": "اسم المكان"
@@ -4495,7 +4367,7 @@
         "textureSource": {
           "color": "Color",
           "image": "Image",
-          "inherit": "Follow light"
+          "inherit": "اتباع الوضع الفاتح"
         },
         "playback": {
           "scroll": "Scroll",
@@ -4506,9 +4378,14 @@
           "linear": "Linear"
         },
         "textColorSource": {
-          "theme": "Follow theme",
+          "theme": "اتباع السمة",
           "custom": "Custom",
-          "inherit": "Follow light"
+          "inherit": "اتباع الوضع الفاتح"
+        },
+        "itemSize": {
+          "s": "S · مضغوط",
+          "m": "M · قياسي",
+          "l": "L · كبير"
         }
       },
       "actions": {
@@ -4516,27 +4393,25 @@
         "removeMarqueeItem": "إزالة العنصر",
         "moveMarqueeItem": "تغيير ترتيب العنصر",
         "addSceneUnit": "Add unit",
-        "moveUnitUp": "Move unit up",
-        "moveUnitDown": "Move unit down",
-        "removeSceneUnit": "Remove unit",
-        "expandSceneUnit": "Expand unit",
-        "collapseSceneUnit": "Collapse unit",
+        "moveUnitUp": "نقل الوحدة لأعلى",
+        "moveUnitDown": "نقل الوحدة لأسفل",
+        "removeSceneUnit": "إزالة الوحدة",
         "replaceMesh": "Replace GLB",
         "uploadMesh": "Upload GLB",
-        "clearMeshAsset": "Clear mesh asset",
-        "cancelMeshUpload": "Cancel GLB upload",
-        "replaceTexture": "Replace light texture",
-        "uploadTexture": "Upload light texture",
-        "clearTextureAsset": "Clear texture",
-        "cancelTextureUpload": "Cancel light texture upload",
-        "replaceDarkTexture": "Replace dark texture",
-        "uploadDarkTexture": "Upload dark texture",
-        "clearDarkTextureAsset": "Clear dark texture",
-        "cancelDarkTextureUpload": "Cancel dark texture upload",
+        "clearMeshAsset": "إزالة أصل الشبكة المجسمة",
+        "cancelMeshUpload": "إلغاء رفع GLB",
+        "replaceTexture": "استبدال الخامة الفاتحة",
+        "uploadTexture": "رفع الخامة الفاتحة",
+        "clearTextureAsset": "إزالة الخامة",
+        "cancelTextureUpload": "إلغاء رفع الخامة الفاتحة",
+        "replaceDarkTexture": "استبدال الخامة الداكنة",
+        "uploadDarkTexture": "رفع الخامة الداكنة",
+        "clearDarkTextureAsset": "إزالة الخامة الداكنة",
+        "cancelDarkTextureUpload": "إلغاء رفع الخامة الداكنة",
         "generateOptimizedMesh": "Compress GLB",
         "useOptimizedMesh": "Use compressed GLB",
         "clearOptimizedMesh": "Use original GLB",
-        "deleteOptimizedMeshCandidate": "Delete compressed GLB"
+        "deleteOptimizedMeshCandidate": "حذف GLB المضغوط"
       },
       "descriptions": {
         "marqueeTextItems": "أضف عناصر النص واحدًا تلو الآخر.",
@@ -4547,18 +4422,24 @@
         "marqueeItems": "لا توجد عناصر بعد."
       },
       "status": {
-        "meshOptimizationQueued": "GLB optimization queued.",
-        "meshOptimizationGenerated": "Optimized GLB generated.",
-        "meshOptimizationSelected": "Optimized GLB selected.",
-        "meshOptimizationCleared": "Original GLB selected.",
-        "meshOptimizationDeleted": "Compressed GLB deleted.",
-        "meshOptimizationDeleteFailed": "Compressed GLB could not be deleted.",
+        "meshOptimizationQueued": "تمت إضافة تحسين GLB إلى قائمة الانتظار.",
+        "meshOptimizationGenerated": "تم توليد GLB المحسّن.",
+        "meshOptimizationSelected": "تم تحديد GLB المحسّن.",
+        "meshOptimizationCleared": "تم تحديد GLB الأصلي.",
+        "meshOptimizationDeleted": "تم حذف GLB المضغوط.",
+        "meshOptimizationDeleteFailed": "تعذر حذف GLB المضغوط.",
         "meshOptimizationPending": "Queued",
         "meshOptimizationProcessing": "Processing",
         "meshOptimizationFailed": "Failed",
         "meshOptimizationCancelled": "Cancelled",
-        "optimizedMeshCleanupFailed": "Optimized asset reference removed, but cleanup failed: {error}",
-        "optimizedMeshCleanupFailedDefault": "Optimized asset reference removed, but cleanup failed"
+        "optimizedMeshCleanupFailed": "تمت إزالة مرجع الأصل المحسّن، لكن فشلت عملية التنظيف: {error}",
+        "optimizedMeshCleanupFailedDefault": "تمت إزالة مرجع الأصل المحسّن، لكن فشلت عملية التنظيف"
+      },
+      "authorSelection": {
+        "maxSelected": "يمكن اختيار ما يصل إلى {count} مؤلفًا.",
+        "empty": "لم يتم اختيار أي مؤلفين. ستكون هذه الكتلة فارغة.",
+        "unavailable": "هذا المؤلف لم يعد متاحًا.",
+        "unavailableWarning": "لن يظهر المؤلفون غير المتاحين في الصفحة العامة. أزلهم أو اختر بديلًا."
       }
     },
     "embed": {
@@ -4611,8 +4492,6 @@
       "matchDescription": "اجمع بين مجموعات الأدوار والوسوم والنشرة الإخبارية المحددة.",
       "any": "أي مجموعة محددة",
       "all": "كل المجموعات المحددة",
-      "roles": "الأدوار",
-      "rolesDescription": "يكفي أن يكون للعضو أي دور محدد.",
       "roleUser": "الأعضاء",
       "memberDescription": "يمكن للأعضاء المسجلين دخولهم فقط عرض هذه الصفحة.",
       "authorDescription": "الأعضاء الذين لديهم دور المؤلف.",
@@ -4640,36 +4519,47 @@
       "restrictedTitle": "ليس لديك صلاحية الوصول إلى هذه الصفحة",
       "restrictedDescription": "حسابك لا يستوفي شروط الوصول إلى هذه الصفحة.",
       "signIn": "تسجيل الدخول"
+    },
+    "a11y": {
+      "sectionPosition": "{section} · {index}/{count}",
+      "dragInstructions": "اضغط مفتاح المسافة لبدء النقل، ثم استخدم مفاتيح الأسهم لتغيير الموضع. اضغط المسافة للتأكيد أو Escape للإلغاء.",
+      "dragStart": "{section} · نقل · قيد التنفيذ · {index}/{count}",
+      "dragOver": "{section} · نقل · {index}/{count}",
+      "dragEnd": "{section} · نقل · تأكيد · {index}/{count}",
+      "dragCancel": "{section} · نقل · ملغى",
+      "sectionDeleted": "تم حذف {section}",
+      "sectionAdded": "تم إنشاء {section} · {index}/{count}",
+      "columnsPosition": "{column} · {section} · {index}/{count}"
     }
   },
   "formValidation": {
-    "required": "This field is required",
-    "invalidUrl": "Please enter a valid URL",
-    "invalidFormat": "Invalid format",
-    "invalidEmail": "Please enter a valid email",
-    "invalidPhoneNumber": "Invalid phone number",
-    "stringGt": "Must be more than {threshold} characters",
-    "stringGte": "Minimum {threshold} characters",
-    "stringLt": "Must be less than {threshold} characters",
-    "stringLte": "Maximum {threshold} characters",
-    "stringEq": "Must be exactly {threshold} characters",
-    "numberGt": "Must be greater than {threshold}",
-    "numberGte": "Minimum value is {threshold}",
-    "numberLt": "Must be less than {threshold}",
-    "numberLte": "Maximum value is {threshold}",
-    "numberEq": "Must be exactly {threshold}",
-    "arrayGt": "Select more than {threshold}",
-    "arrayGte": "Select at least {threshold}",
-    "arrayLt": "Select less than {threshold}",
-    "arrayLte": "Select at most {threshold}",
-    "arrayEq": "Select exactly {threshold}",
-    "dateMin": "Date must be on or after {date}",
-    "dateMax": "Date must be on or before {date}",
-    "futureDate": "Date must be in the future",
-    "pastDate": "Date must be in the past",
-    "weekdayOnly": "Please select a weekday",
-    "minAge": "Must be at least {age} years old",
-    "maxAge": "Must be at most {age} years old"
+    "required": "هذا الحقل مطلوب",
+    "invalidUrl": "يرجى إدخال رابط URL صالح",
+    "invalidFormat": "صيغة غير صالحة",
+    "invalidEmail": "يرجى إدخال بريد إلكتروني صالح",
+    "invalidPhoneNumber": "رقم هاتف غير صالح",
+    "stringGt": "يجب أن يزيد النص عن {threshold} حرفًا",
+    "stringGte": "الحد الأدنى {threshold} حرفًا",
+    "stringLt": "يجب أن يقل النص عن {threshold} حرفًا",
+    "stringLte": "الحد الأقصى {threshold} حرفًا",
+    "stringEq": "يجب أن يكون النص {threshold} حرفًا بالضبط",
+    "numberGt": "يجب أن تكون القيمة أكبر من {threshold}",
+    "numberGte": "الحد الأدنى للقيمة هو {threshold}",
+    "numberLt": "يجب أن تكون القيمة أقل من {threshold}",
+    "numberLte": "الحد الأقصى للقيمة هو {threshold}",
+    "numberEq": "يجب أن تكون القيمة {threshold} بالضبط",
+    "arrayGt": "حدد أكثر من {threshold}",
+    "arrayGte": "حدد {threshold} على الأقل",
+    "arrayLt": "حدد أقل من {threshold}",
+    "arrayLte": "حدد {threshold} على الأكثر",
+    "arrayEq": "حدد {threshold} بالضبط",
+    "dateMin": "يجب أن يكون التاريخ في {date} أو بعده",
+    "dateMax": "يجب أن يكون التاريخ في {date} أو قبله",
+    "futureDate": "يجب أن يكون التاريخ في المستقبل",
+    "pastDate": "يجب أن يكون التاريخ في الماضي",
+    "weekdayOnly": "يرجى تحديد يوم عمل",
+    "minAge": "يجب ألا يقل العمر عن {age} سنة",
+    "maxAge": "يجب ألا يتجاوز العمر {age} سنة"
   },
   "phoneInput": {
     "noResults": "لا توجد نتائج"
@@ -4730,7 +4620,6 @@
       "notFoundMessage": "لم يتم العثور على فئات"
     },
     "seriesSelector": {
-      "searchPlaceholder": "ابحث أو أنشئ...",
       "states": {
         "empty": "لا توجد سلاسل متاحة",
         "select": "اختر سلسلة...",
@@ -4743,14 +4632,12 @@
       },
       "notifications": {
         "assigned": "تم إسناد المنشور إلى السلسلة",
-        "reorderFailed": "فشل إعادة ترتيب السلسلة",
         "createFailed": "تعذر إنشاء السلسلة",
         "seriesUnavailable": "لم تعد هذه السلسلة متاحة للإدارة. تم الاحتفاظ بالتعيين السابق.",
         "updateFailed": "تعذر تغيير سلسلة المنشور. تم الاحتفاظ بالتعيين السابق."
       }
     },
     "notifications": {
-      "slugUpdateFailed": "فشل تحديث slug",
       "deleted": "تم حذف المنشور",
       "published": "تم نشر المنشور",
       "unpublished": "تم إلغاء نشر المنشور",
@@ -4790,19 +4677,11 @@
   "postHeader": {
     "actions": {
       "editPost": "تعديل المنشور",
-      "sharePost": "مشاركة المنشور",
-      "printPost": "طباعة المنشور",
       "exportMarkdown": "تصدير المنشور كـ Markdown"
     }
   },
   "postMembers": {
-    "removeAria": "إزالة {name}",
-    "roles": {
-      "owner": "المالك"
-    },
-    "states": {
-      "memberFallback": "عضو"
-    }
+    "removeAria": "إزالة {name}"
   },
   "publicTables": {
     "workColumns": {
@@ -4858,8 +4737,7 @@
         "title": "إضافة مقطع"
       },
       "placeholders": {
-        "title": "عنوان المقطع",
-        "durationSeconds": "مثلاً 240"
+        "title": "عنوان المقطع"
       },
       "deleteConfirm": "هل أنت متأكد أنك تريد حذف هذا المقطع؟",
       "creditsModal": {
@@ -4874,7 +4752,7 @@
         "ready": "الصوت جاهز",
         "uploadTooltip": "رفع ملف صوتي",
         "uploaded": "تم رفع الصوت وبدأت المعالجة",
-        "resumeExpired": "Upload session expired. Start a fresh upload."
+        "resumeExpired": "انتهت صلاحية جلسة الرفع. ابدأ عملية رفع جديدة."
       }
     },
     "artists": {
@@ -4895,7 +4773,9 @@
     "label": "روابط التواصل الاجتماعي",
     "addLink": "إضافة رابط",
     "platformPlaceholder": "المنصة",
-    "valuePlaceholder": "URL أو اسم المستخدم"
+    "valuePlaceholder": "URL أو اسم المستخدم",
+    "reorderInstructions": "استخدم مفتاحي السهم لأعلى ولأسفل لتغيير موضع هذا الرابط.",
+    "positionChanged": "تم نقل الرابط إلى الموضع {position} من {count}."
   },
   "tableOfContents": {
     "title": "جدول المحتويات"
@@ -4911,9 +4791,6 @@
     "actions": {
       "copyId": "نسخ المعرّف",
       "copyUrl": "نسخ الرابط"
-    },
-    "notifications": {
-      "copied": "تم نسخ {label}"
     }
   },
   "userAvatar": {
@@ -4966,15 +4843,7 @@
       "roleUpdated": "تم تحديث الدور",
       "userBanned": "تم حظر المستخدم",
       "userUnbanned": "تم إلغاء حظر المستخدم",
-      "userDeleted": "تم حذف المستخدم",
-      "userCreated": "تم إنشاء المستخدم"
-    }
-  },
-  "workCollaborators": {
-    "empty": "لا يوجد متعاونون بعد",
-    "notifications": {
-      "added": "تمت إضافة المتعاون",
-      "removed": "تمت إزالة المتعاون"
+      "userDeleted": "تم حذف المستخدم"
     }
   },
   "workCredits": {
@@ -5007,9 +4876,6 @@
     "emptyResults": {
       "artist": "لم يتم العثور على فنانين",
       "name": "لم يتم العثور على أسماء"
-    },
-    "states": {
-      "unknownInitial": "?"
     },
     "notifications": {
       "groupCreated": "تم إنشاء المجموعة",
@@ -5182,10 +5048,7 @@
       "locationMode": "وضع الموقع",
       "ticketUrl": "رابط التذاكر",
       "streamUrl": "رابط البث",
-      "externalUrl": "رابط خارجي",
-      "participants": "المشاركون",
-      "textCredits": "اعتمادات نصية",
-      "textCreditsDescription": "اعتماد واحد في كل سطر. استخدم الدور: الاسم عندما يكون الدور مطلوبًا."
+      "externalUrl": "رابط خارجي"
     },
     "locationModes": {
       "mapPlace": "المكان",
@@ -5198,7 +5061,6 @@
       "tickets": "التذاكر",
       "stream": "البث",
       "link": "الرابط",
-      "participants": "المشاركون",
       "empty": "لم يتم العثور على أحداث.",
       "date": "التاريخ",
       "credits": "الاعتمادات"
@@ -5215,152 +5077,14 @@
       "deleteMessage": "لا يمكن حذف النوع إلا إذا لم يستخدمه أي حدث."
     }
   },
-  "tools": {
-    "portadj": {
-      "metadataTitle": "PortaDJ",
-      "metadataDescription": "شغّل ملفات الصوت المحلية وامزجها في متصفحك باستخدام مشغّلي DJ."
-    },
-    "youtubeAudio": {
-      "title": "صوت YouTube",
-      "urlLabel": "رابط الفيديو",
-      "urlPlaceholder": "https://…",
-      "resolve": "تحميل الصوت",
-      "resolving": "جارٍ تحميل الصوت",
-      "clear": "مسح المصدر",
-      "metadataTitle": "صوت YouTube",
-      "metadataDescription": "حوّل الصوت من مصدر YouTube موثّق داخل متصفحك.",
-      "errors": {
-        "INTERNAL_ERROR": "تعذّر تحميل مصدر الصوت. حاول مرة أخرى.",
-        "INVALID_REQUEST": "أدخل رابط فيديو YouTube صالحًا.",
-        "INVALID_UPSTREAM_RESPONSE": "أعاد YouTube مصدر صوت غير متوقع. جرّب فيديو آخر.",
-        "REQUEST_ABORTED": "تم إلغاء الطلب.",
-        "SOURCE_EXPIRED": "انتهت صلاحية مصدر الصوت هذا. حمّل الرابط مرة أخرى.",
-        "SOURCE_NOT_FOUND": "لم يعد مصدر الصوت هذا متاحًا. حمّل الرابط مرة أخرى.",
-        "UNAUTHORIZED": "سجّل الدخول مجددًا لاستخدام هذه الأداة.",
-        "UNSUPPORTED_VIDEO": "لا يوفّر هذا الفيديو مصدر صوت محدود المدة ومدعومًا.",
-        "UPSTREAM_FAILURE": "يتعذّر تحميل صوت YouTube الآن. حاول مرة أخرى."
-      }
-    },
-    "transcode": {
-      "title": "محوّل ترميز الصوت",
-      "targetIdle": "في الانتظار",
-      "targetChecking": "جارٍ التحقق",
-      "targetReady": "جاهز",
-      "targetError": "غير متاح",
-      "dropTitle": "أسقط ملفات الصوت أو اخترها",
-      "dropDescription": "حتى 10 ملفات · من دون مجلدات · المعالجة على هذا الجهاز",
-      "chooseFiles": "اختيار ملفات صوت",
-      "supportedFormatsLabel": "التنسيقات المدعومة",
-      "supportedFormats": "المدعوم: CAF وAIFF/AIFC وWAV وFLAC وMP3 وAAC/M4A وOgg/Opus والصوت داخل MP4 أو MOV أو MKV/WebM أو TS. يُتحقق من كل ملف.",
-      "filesSelected": "الملفات",
-      "outputSettings": "إعدادات الإخراج",
-      "format": "التنسيق",
-      "sampleRate": "معدل أخذ العينات",
-      "bitrate": "معدل البت",
-      "bitDepth": "عمق البت",
-      "codec": "برنامج الترميز",
-      "sampleFormat": "تنسيق العينة",
-      "float": "فاصلة عائمة",
-      "integer": "PCM صحيح",
-      "sourcePcmFloat": "فاصلة عائمة {bitDepth}-بت",
-      "sourcePcmInteger": "عدد صحيح {bitDepth}-بت",
-      "sourcePcmSignedInteger": "عدد صحيح بإشارة {bitDepth}-بت",
-      "sourcePcmUnsignedInteger": "عدد صحيح بلا إشارة {bitDepth}-بت",
-      "automatic": "تلقائي",
-      "unknownAudio": "صوت",
-      "channelCount": "{count, plural, zero {لا قنوات} one {قناة واحدة} two {قناتان} few {# قنوات} many {# قناة} other {# قناة}}",
-      "queue": "قائمة انتظار التحويل",
-      "convert": "تحويل",
-      "cancelAll": "إلغاء الكل",
-      "clear": "مسح",
-      "download": "حفظ المحوّل",
-      "downloadSource": "حفظ الأصل",
-      "sourceDownloadExpired": "انتهت صلاحية المصدر أو لم يعد متاحًا. حمّل رابط YouTube مجددًا.",
-      "sourceDownloadFailed": "تعذّر تنزيل الأصل. تحقّق من الاتصال وأعد تحميل المصدر.",
-      "retry": "إعادة المحاولة",
-      "cancel": "إلغاء",
-      "remove": "إزالة",
-      "sourceValue": "المصدر ({value})",
-      "mono": "أحادي",
-      "stereo": "ستيريو",
-      "targetWaitingForFiles": "أضف ملفًا صوتيًا مدعومًا للتحقق من وجهة الإخراج المحددة.",
-      "targetCheckingMessage": "جارٍ التحقق مما إذا كان هذا المتصفح يدعم وجهة الإخراج المحددة.",
-      "targetReadyMessage": "وجهة الإخراج المحددة متاحة في هذا المتصفح.",
-      "engineLoading": "جارٍ تحميل محرك الصوت {asset}.",
-      "engineVerifying": "جارٍ التحقق من محرك الصوت {asset}.",
-      "engineLoadFailed": "تعذر تحميل محرك الصوت {asset}.",
-      "capacityExceeded": "عدد الملفات التي لم تتم إضافتها: {count, number}. تستوعب قائمة الانتظار حتى {max, number} ملفات.",
-      "statusInspectionQueued": "في انتظار الفحص",
-      "statusInspecting": "جارٍ الفحص",
-      "statusReady": "جاهز",
-      "statusQueued": "في قائمة الانتظار",
-      "statusConverting": "جارٍ التحويل",
-      "statusComplete": "مكتمل",
-      "statusUnsupported": "غير مدعوم",
-      "statusError": "خطأ",
-      "statusCancelled": "ملغى",
-      "unsupportedInput": "ملف الصوت هذا غير مدعوم.",
-      "unsupportedCodec": "لا يستطيع هذا المتصفح فك ترميز برنامج ترميز الصوت في هذا الملف.",
-      "inspectionFailed": "تعذر فحص الملف. حاول مرة أخرى.",
-      "inspectionInconclusive": "تعذر على المتصفح تحديد هذا الصوت ضمن حد القراءة الآمن. جرّب ملفًا أو تنسيقًا آخر.",
-      "outputUnsupported": "إعدادات الإخراج المحددة غير مدعومة في هذا المتصفح.",
-      "outputProbeFailed": "تعذر التحقق من دعم الإخراج. حاول مرة أخرى.",
-      "conversionFailed": "فشل تحويل الصوت.",
-      "conversionStorageLimitExceeded": "لا يمكن لهذا المتصفح الاحتفاظ بالإخراج المتوقع في التخزين المحلي المؤقت. اختر تنسيقًا أصغر أو مضغوطًا، أو أعد المحاولة في متصفح يدعم المخرجات المحلية الكبيرة.",
-      "conversionTargetSizeLimitExceeded": "لا يمكن لتنسيق الإخراج المحدد تمثيل ملف بهذا الحجم. اختر تنسيقًا آخر، أو خفّض معدل العينة أو عمق البت أو عدد القنوات.",
-      "cancelledMessage": "تم إلغاء التحويل.",
-      "sourceSummary": "{container} · {sampleRate} · {channels} · {bitDepth}",
-      "outputSummary": "{preset} · {size}",
-      "progressLabel": "{phase} · {progress, number}%",
-      "phasePrepare": "جارٍ التحضير",
-      "phaseDecode": "جارٍ فك الترميز",
-      "phaseEncode": "جارٍ الترميز",
-      "phaseFinalize": "جارٍ الإنهاء",
-      "bytes": "{count, number} بايت",
-      "storageOpfs": "مساحة التخزين الخاصة بالمتصفح",
-      "storageMemory": "ذاكرة المتصفح",
-      "metadataTitle": "محوّل ترميز الصوت",
-      "metadataDescription": "حوّل الصوت في المتصفح. لا تغادر الملفات جهازك.",
-      "outputSettingsHelper": "تبقى القنوات كما هي. يختار الوضع التلقائي معدلًا متوافقًا لكل ملف.",
-      "processingDetails": "تفاصيل المعالجة",
-      "processingDetailsDescription": "إعادة أخذ عينات متوازنة. يُطبّق التشويش على الخرج الصحيح. تستخدم ملفات WAV الكبيرة ‏RF64.",
-      "bitDepthContainerEffective": "حاوية {containerBits} بت / دقة فعلية {effectiveBits} بت",
-      "constantBitrate": "CBR",
-      "variableBitrate": "VBR",
-      "preserveSource": "الحفاظ على المصدر",
-      "unavailable": "غير متاح",
-      "sampleRateAvailableFor": "{supported, number} من أصل {total, number} ملفات",
-      "sampleRateResetAutomatic": "معدل العينات السابق غير صالح لإعدادات الخرج هذه، لذلك تم تغييره إلى تلقائي.",
-      "targetAvailability": "يمكن تحويل {available, number} ملفات؛ وتبقى {unavailable, number} غير متاحة بهذه الإعدادات.",
-      "statusQueuedAvailability": "تمت إضافة {converting, number} ملفات إلى قائمة التحويل؛ وتبقى {unavailable, number} غير متاحة.",
-      "statusConvertingAvailability": "جارٍ تحويل {converting, number} ملفات؛ وتبقى {unavailable, number} غير متاحة.",
-      "statusCompleteAvailability": "تم تحويل {converted, number} ملفات؛ وتبقى {unavailable, number} غير متاحة.",
-      "statusBatchResult": "اكتمل التشغيل: {eligible, number} مؤهلة، و{attempted, number} تمت محاولتها، و{succeeded, number} نجحت، و{failed, number} فشلت، و{unavailable, number} غير متاحة.",
-      "outputEngineUnavailable": "تعذر بدء محرك التشغيل الخاص بـ {preset}. تحقق من الشبكة أو سياسة الأصول ثم أعد المحاولة.",
-      "outputChannelsUnsupported": "يدعم هذا الخرج من {minimum, number} إلى {maximum, number} قنوات مصدر، لكن هذا الملف يحتوي على {actual, number}. تُحفظ القنوات ولا يتم خفض مزجها.",
-      "sourceInspectionMissing": "تعذر تحديد عدد قنوات المصدر أو معدل العينات. اختر ملفًا ببيانات صوتية وصفية قابلة للقراءة.",
-      "outputConfigurationUnavailable": "لا تكوّن إعدادات التنسيق والترميز المحددة إعداد خرج متاحًا.",
-      "preserveSourceRateUnsupported": "لا يمكن الحفاظ على {sourceRate} لهذا الخرج. المعدلات المسموح بها: {allowed}.",
-      "sourceResamplingRateUnsupported": "المصدر ذو المعدل {sourceRate} خارج نطاق إعادة أخذ العينات ({minimum}–{maximum}) ولا يمكن تمريره إلا إلى خرج متوافق.",
-      "targetResamplingRateUnsupported": "الهدف المحدد {targetRate} خارج نطاق إعادة أخذ العينات ({minimum}–{maximum}).",
-      "automaticRateUnavailable": "لا يستطيع الوضع التلقائي اختيار معدل صالح للمصدر ذي المعدل {sourceRate}. معدلات الخرج المسموح بها: {allowed}.",
-      "presetRateUnsupported": "هذا الخرج لا يدعم {targetRate}. المعدلات المسموح بها: {allowed}.",
-      "notices": "تراخيص المصادر المفتوحة"
-    },
-    "hwp": {
-      "title": "محرر HWP",
-      "metadataDescription": "افتح مستندات HWP وHWPX وحررها واحفظها في متصفحك.",
-      "description": "استخدم قائمة الملف في المحرر لفتح ملفات HWP أو HWPX وحفظها. تُعالج المستندات على هذا الجهاز دون رفعها.",
-      "loading": "جارٍ تحميل المحرر…",
-      "error": "تعذر تحميل المحرر. حاول مرة أخرى.",
-      "retry": "إعادة المحاولة",
-      "metadataTitle": "محرر HWP"
-    }
-  },
   "myMetadata": {
     "description": "صفحة {title} لحسابك في {siteName}."
   },
   "fileManager": {
+    "pagination": {
+      "end": "نهاية النتائج"
+    },
+    "selectionUnavailableDescription": "لا يمكن إضافة هذا الملف. اضغط على Enter لمعاينته.",
     "title": "الملفات",
     "description": "ارفع الملفات ونظّمها وافحصها وأعد استخدامها في أنحاء الموقع.",
     "root": "الملفات",
@@ -5396,9 +5120,9 @@
     "selectAll": "تحديد كل العناصر",
     "selectItem": "تحديد {name}",
     "sortBy": "الترتيب حسب {name}",
-    "selectedCount": "تم تحديد {count} عناصر",
-    "itemCount": "{count} عناصر",
-    "searchResultCount": "تم العثور على {count} نتيجة",
+    "selectedCount": "تم تحديد {count, plural, zero {# عنصر} one {# عنصر} two {# عنصرين} few {# عناصر} many {# عنصرًا} other {# عنصر}}",
+    "itemCount": "{count, plural, zero {# عنصر} one {# عنصر} two {# عنصران} few {# عناصر} many {# عنصرًا} other {# عنصر}}",
+    "searchResultCount": "تم العثور على {count, plural, zero {# نتيجة} one {# نتيجة} two {# نتيجتين} few {# نتائج} many {# نتيجةً} other {# نتيجة}}",
     "uploadProgress": "جارٍ الرفع {percentage}%",
     "types": {
       "all": "كل الأنواع",
@@ -5484,9 +5208,7 @@
       "move-files": {
         "title": "نقل الملفات"
       },
-      "targetFolderId": "معرّف المجلد الهدف",
       "extensionSeparate": "سيتم الاحتفاظ بالامتداد .{extension} بشكل منفصل.",
-      "rootWhenEmpty": "اتركه فارغًا للنقل إلى الجذر.",
       "delete": {
         "title": "حذف",
         "folder": "هل تريد حذف هذا المجلد وكل الملفات غير المستخدمة تحته؟",
@@ -5496,14 +5218,26 @@
         "byDomain": "حسب النطاق: {summary}",
         "more": "و{count} أخرى. راجع القائمة الكاملة في تفاصيل الملف."
       }
+    },
+    "viewSettings": {
+      "title": "إعدادات العرض",
+      "iconSize": "حجم الأيقونات",
+      "spacing": "تباعد العناصر",
+      "columns": "الأعمدة",
+      "auto": "تلقائي",
+      "small": "صغير",
+      "medium": "متوسط",
+      "large": "كبير",
+      "compact": "متقارب",
+      "standard": "قياسي",
+      "comfortable": "واسع",
+      "reset": "إعادة ضبط العرض"
     }
   },
   "fileDownloadAccess": {
     "editor": {
       "sectionTitle": "صلاحيات التنزيل",
-      "sectionDescription": "تحكّم في من يمكنه تنزيل الملف الأصلي.",
       "loading": "جارٍ تحميل صلاحيات التنزيل…",
-      "audienceLabel": "جمهور التنزيل",
       "audiences": {
         "disabled": {
           "label": "معطّل",
@@ -5522,15 +5256,10 @@
           "description": "يمكن فقط للمستخدمين ضمن الجماهير المحددة تنزيل هذا الملف."
         }
       },
-      "segmentsLabel": "الجماهير",
-      "segmentsDescription": "حدد شريحة جمهور واحدة أو أكثر.",
-      "segmentsPlaceholder": "حدد الجماهير",
       "segmentsLoadError": "تم تحميل السياسة، لكن تعذر تحميل الجماهير.",
       "segmentsEmpty": "لا توجد شرائح جمهور متاحة.",
       "restrictedWithoutAudience": "لا تحتوي سياسة التقييد هذه على أي جمهور. تُرفض التنزيلات للجميع حتى تختار جمهورًا واحدًا على الأقل.",
-      "segmentRequiresSubscription": "{name} (يتطلب اشتراكًا في النشرة الإخبارية)",
       "additionalSelected": "تم تحديد {count} عناصر إضافية",
-      "loadMoreSegments": "تحميل المزيد من الجماهير",
       "loadError": "تعذر تحميل صلاحيات التنزيل.",
       "saveError": "تعذر حفظ صلاحيات التنزيل.",
       "fileRequired": "احفظ الملف قبل إعداد صلاحيات التنزيل."
@@ -5552,5 +5281,63 @@
     "empty": "أدخل مصدر المخطط",
     "invalid": "مخطط غير صالح",
     "loading": "جارٍ الرسم…"
+  },
+  "errorPage": {
+    "titles": {
+      "400": "طلب غير صالح",
+      "401": "يلزم تسجيل الدخول",
+      "403": "تم رفض الوصول",
+      "404": "الصفحة غير موجودة",
+      "408": "انتهت مهلة الطلب",
+      "409": "يتعارض الطلب مع الحالة الحالية",
+      "410": "لم تعد هذه الصفحة متاحة",
+      "413": "حجم الطلب كبير جدًا",
+      "422": "تعذرت معالجة الطلب",
+      "429": "طلبات كثيرة جدًا",
+      "500": "حدث خطأ ما",
+      "501": "هذا الطلب غير مدعوم",
+      "502": "حدث خطأ في خدمة متصلة",
+      "503": "الخدمة غير متاحة مؤقتًا",
+      "504": "انتهت مهلة استجابة الخدمة"
+    },
+    "actions": {
+      "goHome": "العودة إلى الصفحة الرئيسية",
+      "tryAgain": "حاول مرة أخرى",
+      "login": "العودة إلى تسجيل الدخول"
+    }
+  },
+  "localBackups": {
+    "title": "النسخ الاحتياطية المحلية",
+    "description": "تعديلات غير محفوظة من علامات تبويب مغلقة على هذا الجهاز. افتح المحرر لاستعادتها. تنتهي صلاحية النسخ الاحتياطية بعد 30 يومًا وتُحذف عند تسجيل الخروج.",
+    "empty": "لا توجد نسخ احتياطية محلية لاستعادتها. لا تظهر هنا التعديلات في علامات التبويب المفتوحة.",
+    "unavailable": "تتطلب النسخ الاحتياطية المحلية تخزين المتصفح وWeb Locks على هذا الجهاز.",
+    "loading": "جارٍ البحث عن نسخ احتياطية محلية…",
+    "error": "تعذر إكمال هذا الإجراء. حدّث القائمة وحاول مرة أخرى.",
+    "refresh": "تحديث",
+    "lastChanged": "آخر تغيير {time}",
+    "open": "فتح المحرر",
+    "discard": "التخلي عن التعديلات",
+    "openLabel": "فتح المحرر: {kind} {id}, {locale}",
+    "discardLabel": "التخلي عن التعديلات: {kind} {id}, {locale}",
+    "discardTitle": "هل تريد حذف النسخة الاحتياطية المحلية؟",
+    "discardDescription": "ستُحذف هذه التعديلات غير المحفوظة نهائيًا من هذا الجهاز. لن يتأثر المحتوى المحفوظ.",
+    "kinds": {
+      "post": "منشور",
+      "page": "صفحة",
+      "work": "عمل",
+      "campaign": "حملة",
+      "email-template": "قالب بريد إلكتروني",
+      "email-layout": "تخطيط بريد إلكتروني",
+      "terms-history": "شروط الخدمة",
+      "privacy-history": "سياسة الخصوصية",
+      "artist": "فنان",
+      "release": "إصدار",
+      "label": "تسمية",
+      "form": "نموذج",
+      "map-theme": "سمة خريطة",
+      "program-event": "حدث",
+      "menu": "قائمة",
+      "post-series": "سلسلة منشورات"
+    }
   }
 }

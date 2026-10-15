@@ -1,12 +1,6 @@
+/* Core InputFrame owns the field chrome; this profile owns only its writing-area geometry. */
 .root {
   min-height: 132px;
-  border-bottom: 1px solid var(--mantine-color-default-border);
-  background: var(--mantine-color-default-hover);
-}
-
-.root:focus-within {
-  border-bottom-color: var(--mantine-primary-color-filled);
-  background: var(--mantine-color-default);
 }
 
 .root :global(.bn-container),
@@ -16,7 +10,7 @@
 }
 
 .root :global(.bn-editor) {
-  padding: 10px 8px 14px;
+  padding: var(--geul-spacing-xs) var(--geul-spacing-xs) var(--geul-spacing-md);
 }
 
 .root :global(.bn-block-group) {
@@ -30,5 +24,5 @@
 }
 
 .root[data-variant='attribution'] :global(.bn-editor) {
-  padding-bottom: 10px;
+  padding-bottom: var(--geul-spacing-xs);
 }

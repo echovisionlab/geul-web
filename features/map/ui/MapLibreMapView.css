@@ -1,22 +1,20 @@
 /* MapLibre map view - theme-aware styling */
 
 .mgl-callout {
-  --accent: var(--mantine-primary-color-filled);
-  --callout-line-color: var(--accent);
-  --callout-hover-line-color: var(--accent);
-  --callout-text-color: var(--mantine-color-text);
-  --callout-hover-text-color: var(--callout-text-color);
-  --callout-current-text-color: var(--callout-text-color);
-  --callout-desc-color: var(--mantine-color-dimmed);
-  --callout-hover-desc-color: var(--callout-text-color);
-  --callout-current-desc-color: var(--callout-desc-color);
-  --callout-bg-color: transparent;
-  --callout-hover-bg-color: var(--callout-bg-color);
-  --callout-current-bg-color: var(--callout-bg-color);
-  --callout-offset-x: 20px;
-  --callout-offset-y: 20px;
-  --callout-line-length: 150px;
-  --callout-scale: 1;
+  --_map-callout-line-color: var(--geul-action-primary);
+  --_map-callout-hover-line-color: var(--geul-action-primary);
+  --_map-callout-text-color: var(--geul-text-primary);
+  --_map-callout-hover-text-color: var(--_map-callout-text-color);
+  --_map-callout-current-text-color: var(--_map-callout-text-color);
+  --_map-callout-desc-color: var(--geul-text-muted);
+  --_map-callout-hover-desc-color: var(--_map-callout-text-color);
+  --_map-callout-current-desc-color: var(--_map-callout-desc-color);
+  --_map-callout-bg-color: transparent;
+  --_map-callout-hover-bg-color: var(--_map-callout-bg-color);
+  --_map-callout-current-bg-color: var(--_map-callout-bg-color);
+  --_map-callout-offset-x: 20px;
+  --_map-callout-offset-y: 20px;
+  --_map-callout-scale: 1;
 
   position: relative;
   display: block;
@@ -39,31 +37,31 @@
 .mgl-callout:has(.mgl-callout__card:focus-visible),
 .mgl-callout:has(.mgl-callout__pin:hover),
 .mgl-callout:has(.mgl-callout__pin:focus-visible) {
-  --callout-line-color: var(--callout-hover-line-color);
-  --callout-current-text-color: var(--callout-hover-text-color);
-  --callout-current-desc-color: var(--callout-hover-desc-color);
-  --callout-current-bg-color: var(--callout-hover-bg-color);
+  --_map-callout-line-color: var(--_map-callout-hover-line-color);
+  --_map-callout-current-text-color: var(--_map-callout-hover-text-color);
+  --_map-callout-current-desc-color: var(--_map-callout-hover-desc-color);
+  --_map-callout-current-bg-color: var(--_map-callout-hover-bg-color);
 }
 
 /* Mobile scaling */
-@media (max-width: 768px) {
+@media (width < $mantine-breakpoint-sm) {
   .mgl-callout {
-    --callout-scale: 0.75;
+    --_map-callout-scale: 0.75;
   }
 }
 
 @media (max-width: 480px) {
   .mgl-callout {
-    --callout-scale: 0.65;
+    --_map-callout-scale: 0.65;
   }
 }
 
 /* Pin - centered at marker position */
 .mgl-callout__pin {
   position: absolute;
-  width: calc(8px * var(--callout-scale));
-  height: calc(8px * var(--callout-scale));
-  background: var(--callout-line-color);
+  width: calc(8px * var(--_map-callout-scale));
+  height: calc(8px * var(--_map-callout-scale));
+  background: var(--_map-callout-line-color);
   border-radius: 50%;
   top: 0;
   left: 0;
@@ -83,7 +81,7 @@
   left: 0;
   overflow: visible;
   pointer-events: none;
-  transform: scale(var(--callout-scale));
+  transform: scale(var(--_map-callout-scale));
   transform-origin: 0 0;
 }
 
@@ -96,12 +94,12 @@
   position: absolute;
   pointer-events: auto;
   width: max-content;
-  background-color: var(--callout-current-bg-color);
-  padding: calc(2px * var(--callout-scale)) calc(4px * var(--callout-scale));
+  background-color: var(--_map-callout-current-bg-color);
+  padding: calc(var(--geul-spacing-xxs) * var(--_map-callout-scale));
   border-radius: 2px;
   cursor: pointer;
   transform-origin: left center;
-  scale: var(--callout-scale);
+  scale: var(--_map-callout-scale);
   transition:
     background-color 160ms ease,
     box-shadow 160ms ease,
@@ -118,8 +116,8 @@
 .mgl-callout:has(.mgl-callout__card:focus-visible) .mgl-callout__card,
 .mgl-callout:has(.mgl-callout__pin:hover) .mgl-callout__card,
 .mgl-callout:has(.mgl-callout__pin:focus-visible) .mgl-callout__card {
-  background-color: var(--callout-current-bg-color);
-  box-shadow: 0 10px 28px rgb(15 23 42 / 0.16);
+  background-color: var(--_map-callout-current-bg-color);
+  box-shadow: var(--geul-shadow-map-control);
   opacity: 1;
 }
 
@@ -129,13 +127,13 @@
 .mgl-callout:has(.mgl-callout__card:focus-visible) .mgl-callout__pin,
 .mgl-callout:has(.mgl-callout__pin:hover) .mgl-callout__pin,
 .mgl-callout:has(.mgl-callout__pin:focus-visible) .mgl-callout__pin {
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--callout-line-color) 18%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--_map-callout-line-color) 18%, transparent);
 }
 
 .mgl-callout__name {
-  font-size: 11px;
+  font-size: var(--geul-font-size-xs);
   font-weight: 600;
-  color: var(--callout-current-text-color);
+  color: var(--_map-callout-current-text-color);
   letter-spacing: 0.02em;
   white-space: nowrap;
   overflow: hidden;
@@ -145,8 +143,8 @@
 
 .mgl-callout__address,
 .mgl-callout__line {
-  font-size: 10px;
-  color: var(--callout-current-desc-color);
+  font-size: var(--geul-font-size-xs);
+  color: var(--_map-callout-current-desc-color);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -155,15 +153,15 @@
 
 /* Direction: Right - diagonal up-right, horizontal extends right */
 .mgl-callout--right .mgl-callout__card {
-  top: calc(var(--callout-offset-y) * -1);
-  left: var(--callout-offset-x);
+  top: calc(var(--_map-callout-offset-y) * -1);
+  left: var(--_map-callout-offset-x);
   transform: translateY(-50%);
 }
 
 /* Direction: Left - diagonal up-left, horizontal extends left */
 .mgl-callout--left .mgl-callout__card {
-  top: calc(var(--callout-offset-y) * -1);
-  right: var(--callout-offset-x);
+  top: calc(var(--_map-callout-offset-y) * -1);
+  right: var(--_map-callout-offset-x);
   left: auto;
   transform: translateY(-50%);
 }
@@ -171,11 +169,11 @@
 /* Custom Attribution - Always bottom-right */
 .mgl-attribution {
   position: absolute;
-  bottom: 12px;
-  right: 12px;
-  font-size: 11px;
-  line-height: 1.4;
-  color: rgb(128 128 128 / 0.7);
+  bottom: var(--geul-spacing-md);
+  right: var(--geul-spacing-md);
+  font-size: var(--geul-font-size-xs);
+  line-height: var(--geul-line-height-xs);
+  color: var(--geul-text-muted);
   z-index: 10;
   pointer-events: auto;
 }
@@ -187,61 +185,6 @@
 
 .mgl-attribution a:hover {
   text-decoration: underline;
-}
-
-.mgl-directions-modal {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  min-width: 260px;
-  max-width: min(90%, 360px);
-  opacity: 0.95;
-}
-
-.mgl-directions-modal .mgl-directions-modal__option {
-  --text-button-color: var(--mantine-color-text);
-  --text-button-hover-color: var(--mantine-color-text);
-
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  border: 1px solid var(--mantine-color-gray-3);
-  border-radius: 0;
-  background: var(--mantine-color-body);
-  color: var(--mantine-color-text);
-  cursor: pointer;
-  padding: var(--mantine-spacing-xs);
-  text-align: left;
-  transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    color 160ms ease;
-}
-
-.mgl-directions-modal .mgl-directions-modal__option:not(:last-child) {
-  margin-bottom: var(--mantine-spacing-xs);
-}
-
-.mgl-directions-modal__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-}
-
-.mgl-directions-modal__icon svg {
-  display: block;
-}
-
-.mgl-directions-modal .mgl-directions-modal__option:hover,
-.mgl-directions-modal .mgl-directions-modal__option:focus-visible {
-  background: var(--mantine-color-default-hover);
-  border-color: var(--mantine-color-gray-5);
-  color: var(--mantine-color-text);
-  box-shadow: 0 12px 28px rgb(15 23 42 / 0.12);
-  outline: none;
 }
 
 /* Map cursor overrides */

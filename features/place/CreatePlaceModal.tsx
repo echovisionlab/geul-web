@@ -1,10 +1,19 @@
 'use client';
 
+import {
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+} from '@/components/core/Layout';
+
+import { Text as DsText } from '@/components/core/Typography';
 import { useCallback, useEffect, useState } from 'react';
-import { IconChevronDown } from '@tabler/icons-react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { useTranslations } from 'next-intl';
-import { Accordion, Box, Group, Loader, Modal, Stack, Text } from '@mantine/core';
+
+import { Disclosure } from '@/components/core/Disclosure';
+import { Spinner as Loader } from '@/components/core/Display';
+import { ContentModal, DialogActions } from '@/components/core/Modal';
 import { Button } from '@/components/core/Button';
 import { TextInput, NumberInput } from '@/components/core/Input';
 import { BaseMap } from '@/features/map/BaseMap';
@@ -35,6 +44,9 @@ const initialFormState: CreatePlaceFormState = {
 };
 
 interface CreatePlaceModalContentProps {
+  localOnly?: boolean;
+  geocodingLib: google.maps.GeocodingLibrary | null;
+  placesLib: google.maps.PlacesLibrary | null;
   formState: CreatePlaceFormState;
   setFormState: React.Dispatch<React.SetStateAction<CreatePlaceFormState>>;
   isPending: boolean;
@@ -50,13 +62,14 @@ function CreatePlaceModalContent({
   isFormValid,
   onSubmit,
   onClose,
+  localOnly,
+  geocodingLib,
+  placesLib,
 }: CreatePlaceModalContentProps) {
   const t = useTranslations('createPlaceModal');
   const tCommonActions = useTranslations('common.actions');
   const tCommonLabels = useTranslations('common.labels');
   const tCommonPlaceholders = useTranslations('common.placeholders');
-  const geocodingLib = useMapsLibrary('geocoding');
-  const placesLib = useMapsLibrary('places');
   const [locationPicked, setLocationPicked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -169,35 +182,33 @@ function CreatePlaceModalContent({
   );
 
   return (
-    <Stack>
-      <PlacesAutocomplete onPlaceSelect={handlePlaceSelect} placeholder={t('searchPlaceholder')} />
+    <DsLayoutStack>
+      {!localOnly && (
+        <>
+          <PlacesAutocomplete onPlaceSelect={handlePlaceSelect} placeholder={t('searchPlaceholder')} />
 
-      <Text size="xs" c="dimmed">
-        {t('searchHelper')}
-      </Text>
+          <DsText size="xs" tone="secondary">
+            {t('searchHelper')}
+          </DsText>
 
-      <Box
-        style={{
-          width: '100%',
-          aspectRatio: '16 / 9',
-          overflow: 'hidden',
-          borderRadius: 'var(--mantine-radius-md)',
-          cursor: 'crosshair',
-        }}
-      >
-        <BaseMap
-          center={{ lat: formState.lat, lng: formState.lng }}
-          zoom={locationPicked ? 15 : 12}
-          panTo={locationPicked ? { lat: formState.lat, lng: formState.lng } : null}
-          gestureHandling="greedy"
-          clickableIcons
-          onClick={handleMapSelect}
-          onLongPress={handleMapSelect}
-          onPoiClick={handlePoiClick}
-        >
-          {locationPicked && <Marker position={{ lat: formState.lat, lng: formState.lng }} />}
-        </BaseMap>
-      </Box>
+          <div style={{ width: '100%', aspectRatio: '16 / 9', overflow: 'hidden', cursor: 'crosshair' }}>
+            <DsLayoutInset space="none">
+              <BaseMap
+                center={{ lat: formState.lat, lng: formState.lng }}
+                zoom={locationPicked ? 15 : 12}
+                panTo={locationPicked ? { lat: formState.lat, lng: formState.lng } : null}
+                gestureHandling="greedy"
+                clickableIcons
+                onClick={handleMapSelect}
+                onLongPress={handleMapSelect}
+                onPoiClick={handlePoiClick}
+              >
+                {locationPicked && <Marker position={{ lat: formState.lat, lng: formState.lng }} />}
+              </BaseMap>
+            </DsLayoutInset>
+          </div>
+        </>
+      )}
 
       <TextInput
         label={tCommonLabels('name')}
@@ -221,7 +232,7 @@ function CreatePlaceModalContent({
         required
       />
 
-      <Group grow>
+      <DsLayoutInline grow>
         <NumberInput
           label={tCommonLabels('latitude')}
           value={formState.lat}
@@ -238,120 +249,122 @@ function CreatePlaceModalContent({
           step={0.000001}
           size="xs"
         />
-      </Group>
+      </DsLayoutInline>
 
-      <Accordion variant="contained" chevron={<IconChevronDown size={16} />}>
-        <Accordion.Item value="address-details">
-          <Accordion.Control>
-            <Group gap="xs">
-              <Text size="sm">{tCommonLabels('addressDetails')}</Text>
-              {isLoading && <Loader size={14} />}
-            </Group>
-          </Accordion.Control>
-          <Accordion.Panel>
-            <Stack gap="sm">
-              <TextInput
-                label={tCommonLabels('street')}
-                placeholder={tCommonPlaceholders('streetAddress')}
-                size="xs"
-                value={formState.addressComponents?.street ?? ''}
-                onChange={(event) => {
-                  const value = event.currentTarget.value;
-                  setFormState((prev) => ({
-                    ...prev,
-                    addressComponents: {
-                      ...prev.addressComponents,
-                      street: value || undefined,
-                    },
-                  }));
-                }}
-              />
-              <Group grow>
-                <TextInput
-                  label={tCommonLabels('city')}
-                  placeholder={tCommonLabels('city')}
-                  size="xs"
-                  value={formState.addressComponents?.city ?? ''}
-                  onChange={(event) => {
-                    const value = event.currentTarget.value;
-                    setFormState((prev) => ({
-                      ...prev,
-                      addressComponents: {
-                        ...prev.addressComponents,
-                        city: value || undefined,
-                      },
-                    }));
-                  }}
-                />
-                <TextInput
-                  label={tCommonLabels('postalCode')}
-                  placeholder={tCommonLabels('postalCode')}
-                  size="xs"
-                  value={formState.addressComponents?.postalCode ?? ''}
-                  onChange={(event) => {
-                    const value = event.currentTarget.value;
-                    setFormState((prev) => ({
-                      ...prev,
-                      addressComponents: {
-                        ...prev.addressComponents,
-                        postalCode: value || undefined,
-                      },
-                    }));
-                  }}
-                />
-              </Group>
-              <Group grow>
-                <TextInput
-                  label={tCommonLabels('region')}
-                  placeholder={tCommonPlaceholders('regionSubdivision')}
-                  size="xs"
-                  value={formState.addressComponents?.region ?? ''}
-                  onChange={(event) => {
-                    const value = event.currentTarget.value;
-                    setFormState((prev) => ({
-                      ...prev,
-                      addressComponents: {
-                        ...prev.addressComponents,
-                        region: value || undefined,
-                      },
-                    }));
-                  }}
-                />
-                <TextInput
-                  label={tCommonLabels('country')}
-                  placeholder={tCommonLabels('country')}
-                  size="xs"
-                  value={formState.addressComponents?.country ?? ''}
-                  onChange={(event) => {
-                    const value = event.currentTarget.value;
-                    setFormState((prev) => ({
-                      ...prev,
-                      addressComponents: {
-                        ...prev.addressComponents,
-                        country: value || undefined,
-                      },
-                    }));
-                  }}
-                />
-              </Group>
-            </Stack>
-          </Accordion.Panel>
-        </Accordion.Item>
-      </Accordion>
+      <Disclosure
+        appearance="filled"
+        label={
+          <>
+            <DsText as="span" size="sm">
+              {tCommonLabels('addressDetails')}
+            </DsText>
+            {isLoading && <Loader size="xs" />}
+          </>
+        }
+      >
+        <DsLayoutStack gap="sm">
+          <TextInput
+            label={tCommonLabels('street')}
+            placeholder={tCommonPlaceholders('streetAddress')}
+            size="xs"
+            value={formState.addressComponents?.street ?? ''}
+            onChange={(event) => {
+              const value = event.currentTarget.value;
+              setFormState((prev) => ({
+                ...prev,
+                addressComponents: {
+                  ...prev.addressComponents,
+                  street: value || undefined,
+                },
+              }));
+            }}
+          />
+          <DsLayoutInline grow>
+            <TextInput
+              label={tCommonLabels('city')}
+              placeholder={tCommonLabels('city')}
+              size="xs"
+              value={formState.addressComponents?.city ?? ''}
+              onChange={(event) => {
+                const value = event.currentTarget.value;
+                setFormState((prev) => ({
+                  ...prev,
+                  addressComponents: {
+                    ...prev.addressComponents,
+                    city: value || undefined,
+                  },
+                }));
+              }}
+            />
+            <TextInput
+              label={tCommonLabels('postalCode')}
+              placeholder={tCommonLabels('postalCode')}
+              size="xs"
+              value={formState.addressComponents?.postalCode ?? ''}
+              onChange={(event) => {
+                const value = event.currentTarget.value;
+                setFormState((prev) => ({
+                  ...prev,
+                  addressComponents: {
+                    ...prev.addressComponents,
+                    postalCode: value || undefined,
+                  },
+                }));
+              }}
+            />
+          </DsLayoutInline>
+          <DsLayoutInline grow>
+            <TextInput
+              label={tCommonLabels('region')}
+              placeholder={tCommonPlaceholders('regionSubdivision')}
+              size="xs"
+              value={formState.addressComponents?.region ?? ''}
+              onChange={(event) => {
+                const value = event.currentTarget.value;
+                setFormState((prev) => ({
+                  ...prev,
+                  addressComponents: {
+                    ...prev.addressComponents,
+                    region: value || undefined,
+                  },
+                }));
+              }}
+            />
+            <TextInput
+              label={tCommonLabels('country')}
+              placeholder={tCommonLabels('country')}
+              size="xs"
+              value={formState.addressComponents?.country ?? ''}
+              onChange={(event) => {
+                const value = event.currentTarget.value;
+                setFormState((prev) => ({
+                  ...prev,
+                  addressComponents: {
+                    ...prev.addressComponents,
+                    country: value || undefined,
+                  },
+                }));
+              }}
+            />
+          </DsLayoutInline>
+        </DsLayoutStack>
+      </Disclosure>
 
-      <Group justify="flex-end">
+      <DialogActions>
         <Button emphasis="low" onClick={onClose} disabled={isPending}>
           {tCommonActions('cancel')}
         </Button>
-        <Button onClick={onSubmit} loading={isPending} disabled={!isFormValid || isPending}>
+        <Button emphasis="strong" onClick={onSubmit} loading={isPending} disabled={!isFormValid || isPending}>
           {t('actions.createAndAdd')}
         </Button>
-      </Group>
-    </Stack>
+      </DialogActions>
+    </DsLayoutStack>
   );
 }
 
 interface CreatePlaceModalProps {
+  /** Keep manual inputs available when an external map service is unavailable. */
+  localOnly?: boolean;
   opened: boolean;
   onClose: () => void;
   onSubmit: (data: CreatePlaceFormState) => void;
@@ -360,7 +373,15 @@ interface CreatePlaceModalProps {
   initialName?: string;
 }
 
-export function CreatePlaceModal({ opened, onClose, onSubmit, isPending = false, initialName }: CreatePlaceModalProps) {
+export function CreatePlaceModal({
+  opened,
+  onClose,
+  onSubmit,
+  isPending = false,
+  initialName,
+  localOnly = false,
+}: CreatePlaceModalProps) {
+  const tModalActions = useTranslations('common.actions');
   const t = useTranslations('createPlaceModal');
   const [formState, setFormState] = useState<CreatePlaceFormState>(initialFormState);
 
@@ -385,26 +406,36 @@ export function CreatePlaceModal({ opened, onClose, onSubmit, isPending = false,
 
   const isFormValid = Boolean(formState.name.trim() && formState.address.trim());
 
+  const contentProps = {
+    formState,
+    setFormState,
+    isPending,
+    isFormValid,
+    onSubmit: handleSubmit,
+    onClose: handleClose,
+  };
   return (
-    <Modal
+    <ContentModal
       opened={opened}
       onClose={handleClose}
       title={t('title')}
-      size="lg"
-      closeOnClickOutside={!isPending}
-      closeOnEscape={!isPending}
-      withCloseButton={!isPending}
+      size="large"
+      closeLabel={tModalActions('close')}
+      loading={isPending}
     >
-      <MapProvider>
-        <CreatePlaceModalContent
-          formState={formState}
-          setFormState={setFormState}
-          isPending={isPending}
-          isFormValid={isFormValid}
-          onSubmit={handleSubmit}
-          onClose={handleClose}
-        />
-      </MapProvider>
-    </Modal>
+      {localOnly ? (
+        <CreatePlaceModalContent {...contentProps} localOnly geocodingLib={null} placesLib={null} />
+      ) : (
+        <MapProvider>
+          <MappedCreatePlaceModalContent {...contentProps} />
+        </MapProvider>
+      )}
+    </ContentModal>
   );
+}
+
+function MappedCreatePlaceModalContent(props: Omit<CreatePlaceModalContentProps, 'geocodingLib' | 'placesLib'>) {
+  const geocodingLib = useMapsLibrary('geocoding');
+  const placesLib = useMapsLibrary('places');
+  return <CreatePlaceModalContent {...props} geocodingLib={geocodingLib} placesLib={placesLib} />;
 }

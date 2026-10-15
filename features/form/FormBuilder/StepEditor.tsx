@@ -1,14 +1,22 @@
 'use client';
 
+import { interactionBindings } from '@/components/core/bindings';
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutStack as DsLayoutStack,
+  LayoutInset as DsLayoutInset,
+  LayoutInset,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+
 import { useState } from 'react';
-import { IconChevronDown, IconChevronRight, IconGripVertical, IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconGripVertical, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Box, Collapse, Group, Stack, Text } from '@mantine/core';
+import { Disclosure } from '@/components/core/Disclosure';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { Textarea, TextInput, Checkbox } from '@/components/core/Input';
 import { SectionCard } from '@/components/core/Section';
-import { TextButton } from '@/components/core/TextButton';
 import type { DragHandleProps } from '@/components/core/Sortable';
 import type { FormStepSchema } from '@/lib/types/form/schema';
 import { getFieldLabel } from '../FormField/utils';
@@ -19,6 +27,7 @@ import { StepConditionEditor } from './ConditionEditor';
 // =============================================================================
 
 interface StepEditorProps {
+  containerId?: string;
   step: FormStepSchema;
   allSteps: FormStepSchema[];
   stepIndex: number;
@@ -32,6 +41,7 @@ interface StepEditorProps {
 }
 
 export function StepEditor({
+  containerId,
   step,
   allSteps,
   stepIndex,
@@ -48,7 +58,6 @@ export function StepEditor({
   const tCommonStates = useTranslations('common.states');
   const tPageEditor = useTranslations('pageEditor');
   const [isOpen, setIsOpen] = useState(false);
-  const detailsPanelId = `step-details-${step.id}`;
   const fields = step.fields ?? [];
   const canEditLocalizedText = mode !== 'readOnly';
   const canEditStructure = mode === 'full';
@@ -64,144 +73,147 @@ export function StepEditor({
     }));
 
   return (
-    <SectionCard
-      withBorder
-      p="sm"
-      mb="sm"
-      style={{
-        borderColor: isDropTarget ? 'var(--mantine-color-blue-filled)' : undefined,
-        backgroundColor: isDropTarget ? 'var(--mantine-color-blue-light)' : undefined,
-      }}
-    >
-      <Group justify="space-between">
-        <Group gap="xs" style={{ flex: 1 }}>
-          <IconButton
-            size="sm"
-            emphasis="low"
-            style={{ cursor: 'grab', touchAction: 'none' }}
-            aria-label={t('step.dragStep', { index: stepIndex + 1 })}
-            {...(canEditStructure ? dragHandleProps.attributes : {})}
-            {...(canEditStructure ? dragHandleProps.listeners : {})}
-            disabled={!canEditStructure}
-          >
-            <IconGripVertical size={16} />
-          </IconButton>
-          <TextButton
-            appearance="default"
-            size="sm"
-            fullWidth
-            display="flex"
-            aria-expanded={isOpen}
-            aria-controls={detailsPanelId}
-            onClick={() => setIsOpen((open) => !open)}
-            style={{ flex: 1 }}
-          >
-            <Group gap="xs">
-              {isOpen ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
-              <Text size="sm" fw={500}>
+    <LayoutInset id={containerId} space="none" blockEnd="xxs">
+      <SectionCard state={isDropTarget ? 'drop-target' : 'default'} appearance="plain" padding="none">
+        <Disclosure
+          label={
+            <DsLayoutInline gap="xxs">
+              <DsText size="xs" weight="medium">
                 {step.title || tCommonStates('untitledPlain')}
-              </Text>
-              <Text size="xs" c="dimmed">
+              </DsText>
+              <DsText size="xs" tone="secondary">
                 {t('step.fieldsCount', { count: fields.length })}
-              </Text>
-            </Group>
-          </TextButton>
-        </Group>
-        {canEditStructure ? (
-          <IconButton
-            tone="danger"
-            emphasis="low"
-            aria-label={t('step.removeStep', { index: stepIndex + 1 })}
-            onClick={onRemove}
-          >
-            <IconTrash size={16} />
-          </IconButton>
-        ) : null}
-      </Group>
-
-      <Collapse id={detailsPanelId} expanded={isOpen}>
-        <Stack gap="xs" mt="xs">
-          <TextInput
-            label={tCommonLabels('title')}
-            size="xs"
-            value={step.title ?? ''}
-            onChange={(e) =>
-              onChange({
-                ...step,
-                title: e.currentTarget.value.trim() ? e.currentTarget.value : undefined,
-              })
-            }
-            readOnly={!canEditLocalizedText}
-          />
-          {canEditStructure ? (
-            <Checkbox
-              label={tPageEditor('showTitleOnPage')}
-              size="xs"
-              checked={step.showTitle !== false}
-              onChange={(e) => onChange({ ...step, showTitle: e.currentTarget.checked })}
-            />
-          ) : null}
-          <Textarea
-            label={tCommonLabels('description')}
-            size="xs"
-            value={step.description ?? ''}
-            onChange={(e) => onChange({ ...step, description: e.currentTarget.value || undefined })}
-            minRows={1}
-            readOnly={!canEditLocalizedText}
-          />
-
-          <Box>
-            <Group justify="space-between" mb="xs">
-              <Text size="xs" fw={500}>
-                {t('step.fieldsLabel', { count: fields.length })}
-              </Text>
-              {canEditStructure ? (
-                <Button size="xs" emphasis="medium" leftSection={<IconPlus size={12} />} onClick={onAddField}>
-                  {t('step.addField')}
-                </Button>
-              ) : null}
-            </Group>
-            {children}
-          </Box>
-
-          {mode === 'full' && previousFields.length > 0 && (
-            <Box>
-              <Checkbox
-                label={t('step.hasCondition')}
+              </DsText>
+            </DsLayoutInline>
+          }
+          opened={isOpen}
+          onChange={setIsOpen}
+          density="compact"
+          withDivider={false}
+          chevronPosition="end"
+          leadingActions={
+            canEditStructure ? (
+              <IconButton
+                emphasis="low"
+                interaction="drag-handle"
+                draggable={false}
+                aria-label={t('step.dragStep', { index: stepIndex + 1 })}
+                {...interactionBindings(dragHandleProps.attributes)}
+                {...interactionBindings(dragHandleProps.listeners)}
+              >
+                <IconGripVertical aria-hidden />
+              </IconButton>
+            ) : undefined
+          }
+          actions={
+            canEditStructure ? (
+              <IconButton
+                size="compact"
+                tone="danger"
+                emphasis="low"
+                aria-label={t('step.removeStep', { index: stepIndex + 1 })}
+                onClick={onRemove}
+              >
+                <IconTrash size={16} aria-hidden />
+              </IconButton>
+            ) : undefined
+          }
+        >
+          <DsLayoutInset space="none">
+            <DsLayoutStack gap="xxs">
+              <TextInput
+                label={tCommonLabels('title')}
                 size="xs"
-                checked={!!step.condition}
-                onChange={(e) => {
-                  if (e.currentTarget.checked) {
-                    onChange({
-                      ...step,
-                      condition: { fieldId: previousFields[0].value, operator: 'eq', value: '' },
-                    });
-                  } else {
-                    const { condition: _, ...rest } = step;
-                    onChange(rest);
-                  }
-                }}
+                value={step.title ?? ''}
+                onChange={(e) =>
+                  onChange({
+                    ...step,
+                    title: e.currentTarget.value.trim() ? e.currentTarget.value : undefined,
+                  })
+                }
+                readOnly={!canEditLocalizedText}
               />
-              {step.condition && (
-                <Box mt="xs">
-                  <StepConditionEditor
-                    condition={step.condition}
-                    availableFields={previousFields}
-                    onChange={(condition) => {
-                      if (condition) {
-                        onChange({ ...step, condition });
+              {canEditStructure ? (
+                <Checkbox
+                  label={tPageEditor('showTitleOnPage')}
+                  size="xs"
+                  checked={step.showTitle !== false}
+                  onChange={(e) => onChange({ ...step, showTitle: e.currentTarget.checked })}
+                />
+              ) : null}
+              <Textarea
+                label={tCommonLabels('description')}
+                size="xs"
+                value={step.description ?? ''}
+                onChange={(e) => onChange({ ...step, description: e.currentTarget.value || undefined })}
+                minRows={1}
+                readOnly={!canEditLocalizedText}
+              />
+
+              <div>
+                <DsLayoutInset blockEnd="xxs">
+                  <DsLayoutInline justify="between">
+                    <DsText size="xs" weight="medium">
+                      {t('step.fieldsLabel', { count: fields.length })}
+                    </DsText>
+                    {canEditStructure ? (
+                      <Button
+                        id={containerId ? `${containerId}-add` : undefined}
+                        size="xs"
+                        emphasis="medium"
+                        leftSection={<IconPlus size={12} />}
+                        onClick={onAddField}
+                      >
+                        {t('step.addField')}
+                      </Button>
+                    ) : null}
+                  </DsLayoutInline>
+                </DsLayoutInset>
+                {children}
+              </div>
+
+              {mode === 'full' && previousFields.length > 0 && (
+                <div>
+                  <Checkbox
+                    label={t('step.hasCondition')}
+                    size="xs"
+                    checked={!!step.condition}
+                    onChange={(e) => {
+                      if (e.currentTarget.checked) {
+                        onChange({
+                          ...step,
+                          condition: { fieldId: previousFields[0].value, operator: 'eq', value: '' },
+                        });
                       } else {
                         const { condition: _, ...rest } = step;
                         onChange(rest);
                       }
                     }}
                   />
-                </Box>
+                  {step.condition && (
+                    <DsLayoutInset blockStart="xs">
+                      <DsLayoutInset space="none">
+                        <StepConditionEditor
+                          condition={step.condition}
+                          availableFields={previousFields}
+                          onChange={(condition) => {
+                            if (condition) {
+                              onChange({ ...step, condition });
+                            } else {
+                              const { condition: _, ...rest } = step;
+                              onChange(rest);
+                            }
+                          }}
+                        />
+                      </DsLayoutInset>
+                    </DsLayoutInset>
+                  )}
+                </div>
               )}
-            </Box>
-          )}
-        </Stack>
-      </Collapse>
-    </SectionCard>
+            </DsLayoutStack>
+          </DsLayoutInset>
+        </Disclosure>
+      </SectionCard>
+    </LayoutInset>
   );
 }

@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconPlus } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { Button } from '@/components/core/Button';
 import { createPageAction } from '@/lib/actions/page';
 import { buildPageEditPath } from '@/lib/utils/page-route';
@@ -25,7 +25,7 @@ export function CreatePageButton({ createAction = createPageAction, navigate }: 
     try {
       const result = await createAction();
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       if (result.data) {

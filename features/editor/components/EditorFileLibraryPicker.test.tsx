@@ -1,13 +1,5 @@
 // @vitest-environment jsdom
-
-import {
-  act,
-  type ButtonHTMLAttributes,
-  type HTMLAttributes,
-  type InputHTMLAttributes,
-  type Ref,
-  type ReactNode,
-} from 'react';
+import { act, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react';
 import { randomTestUuid } from '@echovisionlab/geul-common/test/random-id';
 import { FileManagerSortField } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { createRoot, type Root } from 'react-dom/client';
@@ -16,28 +8,17 @@ import type { DataTableViewProps } from '@/components/core/DataTable/DataTableVi
 import type { FileBrowserGridViewProps } from '@/features/file-manager/ui/FileBrowserGridView';
 import type { FileManagerRow, listFileManagerItemsAction, searchFileManagerItemsAction } from '@/lib/actions/file';
 import { EditorFileLibraryPicker } from './EditorFileLibraryPicker';
-
 const mockListFileManagerItemsAction = vi.fn<typeof listFileManagerItemsAction>();
 const mockSearchFileManagerItemsAction = vi.fn<typeof searchFileManagerItemsAction>();
-
 vi.mock('next-intl', () => {
-  const translate = (key: string, values?: { count?: number }) =>
-    values?.count == null ? key : `${key}:${values.count}`;
+  const translate = (
+    key: string,
+    values?: {
+      count?: number;
+    },
+  ) => (values?.count == null ? key : `${key}:${values.count}`);
   return { useTranslations: () => translate };
 });
-
-vi.mock('@mantine/core', () => ({
-  Box: ({ children, ...props }: HTMLAttributes<HTMLDivElement> & { ref?: Ref<HTMLDivElement> }) => (
-    <div {...props}>{children}</div>
-  ),
-  Breadcrumbs: ({ children }: { children: ReactNode }) => <nav>{children}</nav>,
-  Center: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  Group: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  Loader: () => <div>loading</div>,
-  Stack: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  Text: ({ children }: { children: ReactNode }) => <span>{children}</span>,
-}));
-
 vi.mock('@/components/core/Button', () => ({
   Button: ({
     children,
@@ -57,18 +38,28 @@ vi.mock('@/components/core/Button', () => ({
     </button>
   ),
 }));
-
 vi.mock('@/components/core/Input', () => ({
+  SearchInput: ({
+    leftSection: _leftSection,
+    ...props
+  }: InputHTMLAttributes<HTMLInputElement> & {
+    leftSection?: ReactNode;
+  }) => <input type="search" {...props} />,
   TextInput: ({
     leftSection: _leftSection,
     ...props
-  }: InputHTMLAttributes<HTMLInputElement> & { leftSection?: ReactNode }) => <input {...props} />,
+  }: InputHTMLAttributes<HTMLInputElement> & {
+    leftSection?: ReactNode;
+  }) => <input {...props} />,
   Select: ({
     data,
     onChange,
     ...props
   }: {
-    data: { value: string; label: string }[];
+    data: {
+      value: string;
+      label: string;
+    }[];
     value: string;
     onChange: (value: string | null) => void;
     'aria-label': string;
@@ -86,7 +77,10 @@ vi.mock('@/components/core/Input', () => ({
     onChange,
     ...props
   }: {
-    data: { value: string; label: string }[];
+    data: {
+      value: string;
+      label: string;
+    }[];
     value: string;
     onChange: (value: string) => void;
     'aria-label': string;
@@ -100,25 +94,25 @@ vi.mock('@/components/core/Input', () => ({
     </select>
   ),
 }));
-
 vi.mock('@/components/core/TextButton', () => ({
   TextButton: ({
     children,
     appearance: _appearance,
     weight: _weight,
     ...props
-  }: ButtonHTMLAttributes<HTMLButtonElement> & { appearance?: string; weight?: string }) => (
+  }: ButtonHTMLAttributes<HTMLButtonElement> & {
+    appearance?: string;
+    weight?: string;
+  }) => (
     <button type="button" {...props}>
       {children}
     </button>
   ),
 }));
-
 vi.mock('@/components/core/Modal', () => ({
   ContentModal: ({ opened, children }: { opened: boolean; children: ReactNode }) =>
     opened ? <div role="dialog">{children}</div> : null,
 }));
-
 vi.mock('@/components/core/DataTable', () => ({
   DataTableView: ({ rows, rowInteraction, getRowKey, loading }: DataTableViewProps<FileManagerRow>) =>
     loading ? (
@@ -141,7 +135,6 @@ vi.mock('@/components/core/DataTable', () => ({
       </div>
     ),
 }));
-
 vi.mock('@/components/core/DropdownMenu', () => {
   const Root = ({ children }: { children: ReactNode }) => <div>{children}</div>;
   return {
@@ -152,7 +145,6 @@ vi.mock('@/components/core/DropdownMenu', () => {
     }),
   };
 });
-
 vi.mock('@/features/file-manager/ui/FileBrowserGridView', () => ({
   FileBrowserGridView: ({
     items,
@@ -168,6 +160,7 @@ vi.mock('@/features/file-manager/ui/FileBrowserGridView', () => ({
           key={item.id}
           data-selected={selectedItemIds.includes(item.id) || undefined}
           aria-disabled={item.disabled || undefined}
+          data-selection-unavailable={item.selectionUnavailable || undefined}
           onClick={(event) => onItemClick(event, item, index)}
           onDoubleClick={(event) => onItemDoubleClick(event, item, index)}
           onKeyDown={(event) => onItemKeyDown(event, item, index)}
@@ -178,11 +171,9 @@ vi.mock('@/features/file-manager/ui/FileBrowserGridView', () => ({
     </div>
   ),
 }));
-
 vi.mock('@/features/file-manager/ui/FileBrowserViewToggle', () => ({
   FileBrowserViewToggle: () => <div data-view-toggle />,
 }));
-
 vi.mock('@/lib/actions/file', () => ({
   listFileManagerItemsAction: (
     ...args: Parameters<typeof listFileManagerItemsAction>
@@ -191,16 +182,13 @@ vi.mock('@/lib/actions/file', () => ({
     ...args: Parameters<typeof searchFileManagerItemsAction>
   ): ReturnType<typeof searchFileManagerItemsAction> => mockSearchFileManagerItemsAction(...args),
 }));
-
 let container: HTMLDivElement;
 let root: Root;
-
 beforeEach(() => {
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
 });
-
 afterEach(() => {
   vi.useRealTimers();
   act(() => root.unmount());
@@ -208,9 +196,38 @@ afterEach(() => {
   mockListFileManagerItemsAction.mockReset();
   mockSearchFileManagerItemsAction.mockReset();
 });
-
 describe('EditorFileLibraryPicker', () => {
-  it('opens folders on double click or Enter but not on a single click', async () => {
+  it('runs actual browse and search against an injected read transport without calling server actions', async () => {
+    vi.useFakeTimers();
+    const list = vi.fn<typeof listFileManagerItemsAction>().mockResolvedValue({
+      items: [{ kind: 'folder', id: 'local-folder', name: 'Local folder', createdAt: null, updatedAt: null }],
+      total: 1,
+      folderNotFound: false,
+    });
+    const search = vi.fn<typeof searchFileManagerItemsAction>().mockResolvedValue({ items: [], total: 0 });
+    await act(async () => {
+      root.render(<EditorFileLibraryPicker dataSource={{ list, search }} onSelect={vi.fn()} />);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(container.textContent).toContain('Local folder');
+    expect(list).toHaveBeenCalledOnce();
+    expect(mockListFileManagerItemsAction).not.toHaveBeenCalled();
+    const input = container.querySelector<HTMLInputElement>('input[aria-label="search"]')!;
+    act(() => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set?.call(input, 'local');
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(300);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(search).toHaveBeenCalledWith(expect.objectContaining({ query: 'local' }));
+    expect(mockSearchFileManagerItemsAction).not.toHaveBeenCalled();
+  });
+
+  it('selects folders on click and opens them with Enter', async () => {
     const folderId = randomTestUuid();
     mockListFileManagerItemsAction
       .mockResolvedValueOnce({
@@ -227,27 +244,27 @@ describe('EditorFileLibraryPicker', () => {
         folderNotFound: false,
       })
       .mockResolvedValue({ items: [], total: 0, folderNotFound: false });
-
     await act(async () => {
       root.render(<EditorFileLibraryPicker onSelect={vi.fn()} />);
       await Promise.resolve();
       await Promise.resolve();
     });
-
     const folderButton = Array.from(container.querySelectorAll('button')).find(
       (button) => button.textContent === 'Recordings',
     );
-    act(() => folderButton?.click());
-    expect(mockListFileManagerItemsAction).toHaveBeenCalledTimes(1);
-
     await act(async () => {
-      folderButton?.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+      folderButton?.click();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(mockListFileManagerItemsAction).toHaveBeenLastCalledWith(expect.objectContaining({ folderId: undefined }));
+    await act(async () => {
+      folderButton?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
       await Promise.resolve();
       await Promise.resolve();
     });
     expect(mockListFileManagerItemsAction).toHaveBeenLastCalledWith(expect.objectContaining({ folderId }));
   });
-
   it('shows every supported file kind and returns the selected File UUID projection as a list', async () => {
     const audioId = randomTestUuid();
     const videoId = randomTestUuid();
@@ -280,25 +297,71 @@ describe('EditorFileLibraryPicker', () => {
       folderNotFound: false,
     });
     const onSelect = vi.fn();
-
     await act(async () => {
       root.render(<EditorFileLibraryPicker onSelect={onSelect} />);
       await Promise.resolve();
       await Promise.resolve();
     });
-
     expect(mockListFileManagerItemsAction).toHaveBeenCalledWith(expect.objectContaining({ folderId: undefined }));
     expect(container.textContent).toContain('recording.wav');
     expect(container.textContent).toContain('film.mp4');
-
     const recordingButton = Array.from(container.querySelectorAll('button')).find(
       (button) => button.textContent === 'recording.wav',
     );
     act(() => recordingButton?.click());
-    const addButton = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'add');
-    act(() => addButton?.click());
-
     expect(onSelect).toHaveBeenCalledWith([expect.objectContaining({ id: audioId, mimeType: 'audio/wav' })]);
+  });
+  it('preserves multiple selections across keyboard-opened folders and adds all selected files', async () => {
+    const folderId = randomTestUuid();
+    const first = {
+      kind: 'file' as const,
+      id: randomTestUuid(),
+      fileName: 'first',
+      extension: 'wav',
+      mimeType: 'audio/wav',
+      fileSize: 4096,
+      createdAt: null,
+      updatedAt: null,
+      usageCount: 0,
+    };
+    const second = { ...first, id: randomTestUuid(), fileName: 'second' };
+    mockListFileManagerItemsAction
+      .mockResolvedValueOnce({
+        items: [first, { kind: 'folder', id: folderId, name: 'Folder', createdAt: null, updatedAt: null }],
+        total: 2,
+        folderNotFound: false,
+      })
+      .mockResolvedValue({ items: [second], total: 1, folderNotFound: false });
+    const onSelect = vi.fn();
+    await act(async () => {
+      root.render(<EditorFileLibraryPicker allowMultiple onSelect={onSelect} />);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    act(() =>
+      Array.from(container.querySelectorAll('button'))
+        .find((button) => button.textContent === 'first.wav')
+        ?.click(),
+    );
+    await act(async () => {
+      Array.from(container.querySelectorAll('button'))
+        .find((button) => button.textContent === 'Folder')
+        ?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    act(() =>
+      Array.from(container.querySelectorAll('button'))
+        .find((button) => button.textContent === 'second.wav')
+        ?.dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true })),
+    );
+    expect(onSelect).not.toHaveBeenCalled();
+    act(() =>
+      Array.from(container.querySelectorAll('button'))
+        .find((button) => button.textContent === 'add')
+        ?.click(),
+    );
+    expect(onSelect).toHaveBeenCalledWith([first, second]);
   });
 
   it('keeps incompatible site-wide results visible and disabled while preserving the total', async () => {
@@ -342,7 +405,6 @@ describe('EditorFileLibraryPicker', () => {
       total: 12,
       nextPageToken: 'next',
     });
-
     await act(async () => {
       root.render(<EditorFileLibraryPicker onSelect={vi.fn()} />);
       await Promise.resolve();
@@ -360,17 +422,16 @@ describe('EditorFileLibraryPicker', () => {
       await Promise.resolve();
       await Promise.resolve();
     });
-
     expect(mockSearchFileManagerItemsAction).toHaveBeenCalledWith(expect.objectContaining({ query: 'field' }));
     expect(container.textContent).toContain('Recordings');
     expect(container.textContent).toContain('field.wav');
     const incompatible = Array.from(container.querySelectorAll('button')).find(
       (button) => button.textContent === 'poster.png',
     );
-    expect(incompatible?.getAttribute('aria-disabled')).toBe('true');
+    expect(incompatible?.hasAttribute('aria-disabled')).toBe(false);
+    expect(incompatible?.getAttribute('data-selection-unavailable')).toBe('true');
     expect(container.textContent).toContain('searchResultCount:12');
   });
-
   it('switches between the current folder subtree and all files with the shared sort and filter controls', async () => {
     vi.useFakeTimers();
     const folderId = randomTestUuid();
@@ -390,7 +451,6 @@ describe('EditorFileLibraryPicker', () => {
       })
       .mockResolvedValue({ items: [], total: 0, folderNotFound: false });
     mockSearchFileManagerItemsAction.mockResolvedValue({ items: [], total: 0 });
-
     await act(async () => {
       root.render(<EditorFileLibraryPicker onSelect={vi.fn()} />);
       await Promise.resolve();
@@ -402,7 +462,6 @@ describe('EditorFileLibraryPicker', () => {
       folderButton?.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
       await Promise.resolve();
     });
-
     const searchInput = container.querySelector<HTMLInputElement>('input[aria-label="search"]');
     await act(async () => {
       if (searchInput) {
@@ -416,14 +475,12 @@ describe('EditorFileLibraryPicker', () => {
     expect(mockSearchFileManagerItemsAction).toHaveBeenLastCalledWith(
       expect.objectContaining({ query: 'field', folderId }),
     );
-
-    const scope = container.querySelector<HTMLSelectElement>('select[aria-label="searchScope.label"]');
+    const scope = container.querySelector<HTMLButtonElement>('[data-file-search-scope="all"]');
     const sort = container.querySelector<HTMLSelectElement>('select[aria-label="sort.label"]');
     const filter = container.querySelector<HTMLSelectElement>('select[aria-label="columns.type"]');
     await act(async () => {
       if (scope) {
-        scope.value = 'all';
-        scope.dispatchEvent(new Event('change', { bubbles: true }));
+        scope.click();
       }
       if (sort) {
         sort.value = 'size:desc';
@@ -436,7 +493,6 @@ describe('EditorFileLibraryPicker', () => {
       await Promise.resolve();
       await Promise.resolve();
     });
-
     expect(mockSearchFileManagerItemsAction).toHaveBeenLastCalledWith(
       expect.objectContaining({
         query: 'field',
@@ -446,5 +502,67 @@ describe('EditorFileLibraryPicker', () => {
         sortOrder: 'desc',
       }),
     );
+  });
+
+  it('continues the real scoped query, bounds duplicate requests and retries without clearing selected files', async () => {
+    vi.useFakeTimers();
+    const first: FileManagerRow = {
+      kind: 'file',
+      id: randomTestUuid(),
+      fileName: 'field-first',
+      extension: 'wav',
+      mimeType: 'audio/wav',
+      fileSize: 4096,
+      createdAt: null,
+      updatedAt: null,
+      usageCount: 0,
+    };
+    const second: FileManagerRow = { ...first, id: randomTestUuid(), fileName: 'field-second' };
+    let resolvePage!: (result: { items: FileManagerRow[]; total: number }) => void;
+    const pending = new Promise<{ items: FileManagerRow[]; total: number }>((resolve) => {
+      resolvePage = resolve;
+    });
+    mockListFileManagerItemsAction.mockResolvedValue({ items: [], total: 0, folderNotFound: false });
+    mockSearchFileManagerItemsAction
+      .mockResolvedValueOnce({ items: [first], total: 2, nextPageToken: 'page-2' })
+      .mockRejectedValueOnce(new Error('Offline'))
+      .mockReturnValueOnce(pending);
+    await act(async () => root.render(<EditorFileLibraryPicker allowMultiple onSelect={vi.fn()} />));
+    const input = container.querySelector<HTMLInputElement>('input[aria-label="search"]')!;
+    act(() => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set?.call(input, 'field');
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(300);
+    });
+    const firstItem = Array.from(container.querySelectorAll('button')).find(
+      (button) => button.textContent === 'field-first.wav',
+    )!;
+    act(() => firstItem.click());
+    await act(async () => {
+      Array.from(container.querySelectorAll('button'))
+        .find((button) => button.textContent === 'actions.loadMore')
+        ?.click();
+    });
+    expect(container.querySelector('[role="alert"]')?.textContent).toBe('errors.load');
+    expect(container.textContent).toContain('field-first.wav');
+    const retry = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'tryAgain')!;
+    await act(async () => {
+      retry.click();
+      retry.click();
+    });
+    expect(mockSearchFileManagerItemsAction).toHaveBeenCalledTimes(3);
+    expect(mockSearchFileManagerItemsAction).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: 'field', pageToken: 'page-2', folderId: undefined }),
+    );
+    await act(async () => resolvePage({ items: [first, second], total: 2 }));
+    expect(
+      Array.from(container.querySelectorAll('button')).filter((button) => button.textContent === 'field-first.wav'),
+    ).toHaveLength(1);
+    expect(container.textContent).toContain('field-second.wav');
+    expect(container.textContent).toContain('selectedCount:1');
+    expect(container.textContent).toContain('pagination.end');
+    expect(container.querySelector('[role="alert"]')).toBeNull();
   });
 });

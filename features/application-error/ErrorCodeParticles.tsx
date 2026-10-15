@@ -1,11 +1,15 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { Box, Text, useComputedColorScheme } from '@mantine/core';
-import { loadIonianRuntime, loadThreeRuntime } from '@/lib/three/cdn-runtime';
+import { useComputedColorScheme } from '@/lib/providers/DesignSystemProvider';
 
-const WIDTH = 480;
-const HEIGHT = 200;
+import { useEffect, useRef, useState } from 'react';
+import { LayoutStack } from '@/components/core/Layout';
+import { Text } from '@/components/core/Typography';
+import { loadIonianRuntime, loadThreeRuntime } from '@/lib/three/cdn-runtime';
+import { ERROR_CODE_FRAME_HEIGHT, ERROR_CODE_FRAME_WIDTH, errorCodeFrameStyle } from './error-code-frame';
+
+const WIDTH = ERROR_CODE_FRAME_WIDTH;
+const HEIGHT = ERROR_CODE_FRAME_HEIGHT;
 const WORLD_SCALE = 100;
 const PARTICLE_TEXTURE_SIZE = 64;
 const ENTRANCE_DURATION_MS = 1100;
@@ -103,7 +107,7 @@ export function ErrorCodeParticles({ code }: { code: string }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [renderedCode, setRenderedCode] = useState<string | null>(null);
   const [fallbackCode, setFallbackCode] = useState<string | null>(null);
-  const scheme = useComputedColorScheme('light');
+  const scheme = useComputedColorScheme();
   const renderKey = `${code}:${scheme}`;
 
   useEffect(() => {
@@ -353,32 +357,21 @@ export function ErrorCodeParticles({ code }: { code: string }) {
   }, [code, renderKey]);
 
   return (
-    <Box
+    <div
       ref={hostRef}
       aria-hidden="true"
-      c="dimmed"
-      w="min(480px, 80vw)"
-      pos="relative"
-      style={{ aspectRatio: `${WIDTH} / ${HEIGHT}` }}
+      style={errorCodeFrameStyle}
       data-error-code={code}
       data-particle-engine="ionian"
       data-particles-ready={renderedCode === renderKey}
     >
-      <Text
-        fz="6rem"
-        fw={700}
-        ta="center"
-        lh={1}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'grid',
-          placeItems: 'center',
-          opacity: fallbackCode === renderKey ? 1 : 0,
-        }}
-      >
-        {code}
-      </Text>
-    </Box>
+      <div data-error-fallback style={{ position: 'absolute', inset: 0, opacity: fallbackCode === renderKey ? 1 : 0 }}>
+        <LayoutStack fill="both" align="center" justify="center" gap="none">
+          <Text size="display" weight="strong" align="center" tone="secondary">
+            {code}
+          </Text>
+        </LayoutStack>
+      </div>
+    </div>
   );
 }

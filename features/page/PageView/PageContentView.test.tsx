@@ -1,13 +1,25 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+import { create } from '@bufbuild/protobuf';
+import { HeadingBlockSchema, HeadingBlockLocaleSchema } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
+
 import { PageContentView } from './PageContentView';
 
 const contentLanguageMenuSpy = vi.fn();
 const pageRendererSpy = vi.fn();
+const tocSpy = vi.fn();
+
+vi.mock('@/features/navigation/TableOfContents', () => ({
+  TableOfContents: ({ children, ...props }: Record<string, unknown> & { children?: React.ReactNode }) => {
+    tocSpy(props);
+    // The navigation owner wraps the sections so Core can reserve the outline beside them.
+    return <div data-testid="page-toc">{children}</div>;
+  },
+}));
 
 vi.mock('@/features/translation/ContentLanguageMenu', () => ({
   ContentLanguageMenu: (props: Record<string, unknown>) => {
@@ -48,12 +60,13 @@ function render(node: React.ReactNode) {
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
-  act(() => root?.render(<MantineProvider>{node}</MantineProvider>));
+  act(() => root?.render(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>));
 }
 
 beforeEach(() => {
   contentLanguageMenuSpy.mockReset();
   pageRendererSpy.mockReset();
+  tocSpy.mockReset();
 });
 
 afterEach(() => {
@@ -65,6 +78,42 @@ afterEach(() => {
 });
 
 describe('PageContentView', () => {
+  it('connects rendered rich-text heading IDs and labels to the shared navigation owner', () => {
+    render(
+      <PageContentView
+        pathname="/about"
+        requestedLocale="en"
+        page={{
+          title: 'About',
+          showTitle: true,
+          blockMedia: [],
+          documentLayout: { contentHeight: 'content', pageChrome: 'flow', footer: 'flow' },
+          content: [
+            {
+              id: 'copy',
+              kind: 'rich-text',
+              settings: {},
+              props: {},
+              columns: [],
+              richText: [
+                {
+                  id: 'about-heading',
+                  kind: 'heading',
+                  children: [],
+                  base: create(HeadingBlockSchema, { props: { level: 2 } }),
+                  locale: create(HeadingBlockLocaleSchema, {
+                    content: [{ value: { case: 'text', value: { text: 'About this project' } } }],
+                  }),
+                },
+              ],
+            },
+          ],
+        }}
+      />,
+    );
+    expect(tocSpy).toHaveBeenCalledWith({ items: [{ id: 'about-heading', label: 'About this project', level: 2 }] });
+    expect(pageRendererSpy.mock.calls[0][0].sections[0].richText[0].id).toBe('about-heading');
+  });
   it('uses the canonical layout and shared content chrome', () => {
     render(
       <PageContentView
@@ -202,7 +251,11 @@ describe('PageContentView', () => {
     );
 
     render(renderLocale('en', 'section-en'));
-    act(() => root?.render(<MantineProvider>{renderLocale('ko', 'section-ko')}</MantineProvider>));
+    act(() =>
+      root?.render(
+        <DesignSystemProvider forceColorScheme="light">{renderLocale('ko', 'section-ko')}</DesignSystemProvider>,
+      ),
+    );
 
     const layout = document.querySelector('[data-content-layout]');
     expect(layout?.getAttribute('data-content-height')).toBe('viewport');
@@ -214,5 +267,36 @@ describe('PageContentView', () => {
         requestedLocale: 'ko',
       }),
     );
+  });
+});
+
+describe('Page content language', () => {
+  it('uses the displayed fallback language for title and body while interface controls retain interface language', () => {
+    render(
+      <PageContentView
+        pathname="/translated"
+        requestedLocale="en"
+        page={{
+          title: '한국어 원본',
+          showTitle: true,
+          content: [],
+          blockMedia: [],
+          documentLayout: { contentHeight: 'content', pageChrome: 'pinned', footer: 'flow' },
+          localizationInfo: {
+            requestedLocale: 'en',
+            displayedLocale: 'ko',
+            sourceLocale: 'ko',
+            isFallback: true,
+            isOriginal: true,
+            machineGenerated: false,
+            fallbackReason: 1,
+          },
+        }}
+      />,
+    );
+    expect(document.querySelector('[data-content-body]')).toHaveAttribute('lang', 'ko');
+    expect(document.querySelector('[data-content-chrome]')?.parentElement).toHaveAttribute('lang', 'ko');
+    expect(document.querySelector('[data-content-controls]')?.closest('[lang]')).toBeNull();
+    expect(document.querySelector('h1')).toHaveTextContent('한국어 원본');
   });
 });

@@ -15,6 +15,13 @@ function isWithinImportNamespace(source, namespace) {
 }
 
 function isRestrictedSource(boundaryKind, source) {
+  // Reviewed pure presentation entry. Controllers, hooks and the Feature barrel stay restricted.
+  if (
+    boundaryKind === 'feature-ui' &&
+    ['@/features/confirmation/ui/ConfirmationDialog', '@/features/participants/ParticipantRow'].includes(source)
+  ) {
+    return false;
+  }
   if (
     RESTRICTED_RUNTIME_PACKAGE_ROOTS.some((namespace) => isWithinImportNamespace(source, namespace)) ||
     isWithinImportNamespace(source, '@echovisionlab')

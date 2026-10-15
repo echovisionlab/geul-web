@@ -21,7 +21,7 @@ export function UserInlineLinks({ users, unknownLabel, ...viewProps }: UserInlin
         href: `/user/${user.id}`,
         label: user.name || unknownLabel,
         avatarSrc: buildManagedImageUrl(user.image ?? null, MANAGED_IMAGE_PRESET.AVATAR_XS) ?? null,
-        avatarFallback: user.name?.charAt(0) ?? null,
+        avatarName: user.name ?? null,
       }))}
     />
   );

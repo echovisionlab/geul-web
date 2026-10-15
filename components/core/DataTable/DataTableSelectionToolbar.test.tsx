@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { I18nProvider as DesignSystemProvider } from 'react-aria-components';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { DataTableSelectionToolbar } from './DataTableSelectionToolbar';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -42,7 +43,7 @@ function render(node: React.ReactNode) {
   root = createRoot(container);
 
   act(() => {
-    root?.render(<MantineProvider>{node}</MantineProvider>);
+    root?.render(<DesignSystemProvider>{node}</DesignSystemProvider>);
   });
 }
 

@@ -1,79 +1,35 @@
 'use client';
 
+import { createLogger } from '@/lib/utils/logger';
+import { UnretryableSaveError } from '@/lib/editor/save-failure';
+import {
+  encodeMessage,
+  fitsClientMessageBound,
+  parseServerMessage,
+  type ClientMessageOf,
+} from '@echovisionlab/geul-common/collaboration/protocol';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
-
-export const FORM_SCHEMA_PATCH_KIND = 'form.schema.patch';
-export const FORM_SCHEMA_PATCH_ACK_KIND = 'form.schema.patch.ack';
-export const FORM_SCHEMA_CHANGED_KIND = 'form.schema.changed';
-export const FORM_SCHEMA_PROTOCOL_VERSION = 1;
+import { waitForProviderSync } from './hocuspocus-provider';
 
 const FORM_SCHEMA_PATCH_TIMEOUT_MS = 8_000;
 const FORM_SCHEMA_SYNC_TIMEOUT_MS = 2_500;
 
-export interface FormSchemaPatch {
-  requestId: string;
-  documentName: string;
-  previousSchema: unknown;
-  nextSchema: unknown;
-}
+export type FormSchemaPatch = Omit<ClientMessageOf<'form.schema.patch'>, 'kind' | 'v'> & { documentName: string };
 
-interface FormSchemaPatchAck {
-  kind?: string;
-  reason?: string;
-  protocolVersion?: number;
-  requestId?: string;
-  documentName?: string;
-  ok?: boolean;
-  canonicalSchema?: unknown;
-  error?: string;
-}
-
-export class FormSchemaPatchRejectedError extends Error {
+/** A patch that failed transiently or was interrupted by a room rebuild; the save queue retries it. */
+export class FormSchemaPatchFailedError extends Error {
   constructor(readonly reason: string) {
     super(reason);
-    this.name = 'FormSchemaPatchRejectedError';
+    this.name = 'FormSchemaPatchFailedError';
   }
 }
 
-function waitForProviderSync(provider: HocuspocusProvider): Promise<void> {
-  if (!provider.hasUnsyncedChanges) {
-    return Promise.resolve();
+/** A patch collab refused for good (validation, permission or size); it is never retried. */
+export class FormSchemaPatchRejectedError extends UnretryableSaveError {
+  constructor(reason: string, message = reason) {
+    super(message, reason);
+    this.name = 'FormSchemaPatchRejectedError';
   }
-
-  return new Promise((resolve, reject) => {
-    let settled = false;
-    const timer = setTimeout(() => {
-      settled = true;
-      cleanup();
-      reject(new Error('collaborative document sync timed out'));
-    }, FORM_SCHEMA_SYNC_TIMEOUT_MS);
-    const maybeResolve = () => {
-      if (settled || provider.hasUnsyncedChanges) {
-        return;
-      }
-      settled = true;
-      cleanup();
-      resolve();
-    };
-    const onSynced = () => maybeResolve();
-    const onUnsyncedChanges = () => maybeResolve();
-    const cleanup = () => {
-      provider.off('synced', onSynced);
-      provider.off('unsyncedChanges', onUnsyncedChanges);
-      clearTimeout(timer);
-    };
-
-    provider.on('synced', onSynced);
-    provider.on('unsyncedChanges', onUnsyncedChanges);
-    try {
-      provider.forceSync();
-      maybeResolve();
-    } catch (error) {
-      settled = true;
-      cleanup();
-      reject(error);
-    }
-  });
 }
 
 export async function requestFormSchemaPatch(
@@ -86,7 +42,19 @@ export async function requestFormSchemaPatch(
   if (provider.configuration.name !== patch.documentName) {
     throw new Error('form schema patch room does not match the active provider');
   }
-  await waitForProviderSync(provider);
+  const frame = encodeMessage({
+    kind: 'form.schema.patch',
+    requestId: patch.requestId,
+    previousSchema: patch.previousSchema,
+    nextSchema: patch.nextSchema,
+  });
+  // The server drops frames above its bound; fail here instead of waiting for the timeout.
+  if (!fitsClientMessageBound('form.schema.patch', frame)) {
+    throw new FormSchemaPatchRejectedError('too_large');
+  }
+  provider.flushPendingUpdates();
+  await waitForProviderSync(provider, FORM_SCHEMA_SYNC_TIMEOUT_MS);
+  provider.flushPendingUpdates();
 
   return new Promise((resolve, reject) => {
     let timer: ReturnType<typeof setTimeout> | undefined = setTimeout(() => {
@@ -105,42 +73,36 @@ export async function requestFormSchemaPatch(
       if (!raw) {
         return;
       }
-      let result: FormSchemaPatchAck;
-      try {
-        result = JSON.parse(raw) as FormSchemaPatchAck;
-      } catch {
+      const parsed = parseServerMessage(raw);
+      if (!parsed.ok) {
+        void createLogger('collaboration').warn('Ignoring collaboration message', { data: { ...parsed } });
         return;
       }
-      if (result.kind === 'reload_required' && (result.reason === undefined || result.reason === 'reload_required')) {
+      const result = parsed.message;
+      if (result.kind === 'room.reload' || result.kind === 'room.access_ended') {
         cleanup();
-        reject(new FormSchemaPatchRejectedError('reload_required'));
+        // The room is rebuilding or access ended: the patch is retried once the room is back.
+        reject(new FormSchemaPatchFailedError(result.kind === 'room.reload' ? result.reloadReason : result.reason));
         return;
       }
-      if (
-        result.kind !== FORM_SCHEMA_PATCH_ACK_KIND ||
-        result.protocolVersion !== FORM_SCHEMA_PROTOCOL_VERSION ||
-        result.requestId !== patch.requestId ||
-        result.documentName !== patch.documentName
-      ) {
+      if (result.kind !== 'form.schema.patch_result' || result.requestId !== patch.requestId) {
         return;
       }
       cleanup();
-      if (result.ok && result.canonicalSchema !== undefined) {
+      if (result.ok) {
         resolve(result.canonicalSchema);
       } else {
-        reject(new FormSchemaPatchRejectedError(result.error || 'form schema patch failed'));
+        reject(
+          result.error.retryable === false && !result.error.reloadReason
+            ? new FormSchemaPatchRejectedError(result.error.code, result.error.message ?? result.error.code)
+            : new FormSchemaPatchFailedError(result.error.code),
+        );
       }
     };
 
     provider.on('stateless', onStateless);
     try {
-      provider.sendStateless(
-        JSON.stringify({
-          kind: FORM_SCHEMA_PATCH_KIND,
-          protocolVersion: FORM_SCHEMA_PROTOCOL_VERSION,
-          ...patch,
-        }),
-      );
+      provider.sendStateless(frame);
     } catch (error) {
       cleanup();
       reject(error);

@@ -1,10 +1,11 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useEffect, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Stack } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
 import { OgImagePreview } from '@/features/metadata/OgImagePreview';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
@@ -21,6 +22,7 @@ import type { OgGenerationLookupSignal, OgGenerationRunSignal } from '@/lib/type
 
 interface LegalOgImagePanelProps {
   entityType: LegalOgEntityType;
+  canEdit?: boolean;
   locale: string;
   currentBackgroundUrl: string | null;
   sourceTitleGeneration?: OgGenerationLookupSignal | null;
@@ -33,6 +35,7 @@ function assetTypeForEntity(entityType: LegalOgEntityType) {
 
 export function LegalOgImagePanel({
   entityType,
+  canEdit = true,
   locale,
   currentBackgroundUrl,
   sourceTitleGeneration,
@@ -67,10 +70,10 @@ export function LegalOgImagePanel({
       regenerateLegalOgImageAction(entityType, request.locale),
     onSuccess: (result, request) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tCommonNotifications('ogGenerationRequested'), color: 'green' });
+      notifications.show({ message: tCommonNotifications('ogGenerationRequested'), tone: 'positive' });
       ogImage.trackRequestedGeneration(result.generationId, request.targetKey);
       queryClient.invalidateQueries({ queryKey });
     },
@@ -78,18 +81,19 @@ export function LegalOgImagePanel({
 
   return (
     <SectionCard>
-      <Stack gap="md">
+      <DsLayoutStack gap="md">
         <SectionHeader title={tCommonLabels('ogImage')} />
         <MediaPreviewGrid>
           <OgImagePreview
             src={ogImage.src}
-            canRegenerate
+            canRegenerate={canEdit}
             isRegenerating={regenerate.isPending || ogImage.isRegenerating}
             generationStatus={ogImage.status}
             generationError={ogImage.error}
             onRegenerate={() => regenerate.mutate({ locale, targetKey: ogImage.targetKey })}
           />
           <SiteOgBackgroundUploader
+            canEdit={canEdit}
             type={assetTypeForEntity(entityType)}
             currentUrl={currentBackgroundUrl}
             onSuccess={(runId) => {
@@ -101,7 +105,7 @@ export function LegalOgImagePanel({
             }}
           />
         </MediaPreviewGrid>
-      </Stack>
+      </DsLayoutStack>
     </SectionCard>
   );
 }

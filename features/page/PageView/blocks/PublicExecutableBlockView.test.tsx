@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { MantineProvider } from '@mantine/core';
+
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import enMessages from '@/messages/en.json';
@@ -120,7 +121,7 @@ async function mountPublicExecutable({
   await act(async () => {
     root.render(
       <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
-        <MantineProvider>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
           {type === 'shader' ? (
             <PublicExecutableBlockView
               blockId={`${type}-1`}
@@ -146,7 +147,7 @@ async function mountPublicExecutable({
               style={{ width: '48%' }}
             />
           )}
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
     await Promise.resolve();
@@ -184,8 +185,12 @@ describe('PublicExecutableBlockView', () => {
     const rootRule = /\.root\s*\{([^}]*)\}/u.exec(css)?.[1];
 
     expect(rootRule).toBeDefined();
-    expect(rootRule).toMatch(/border:\s*1px solid/u);
-    expect(rootRule).toMatch(/padding:\s*0/u);
+    expect(rootRule).not.toMatch(/border:|background:|padding:/u);
+    const owner = readFileSync(
+      resolve(process.cwd(), 'features/page/PageView/blocks/PublicExecutableBlockView.tsx'),
+      'utf8',
+    );
+    expect(owner).toContain('<ExecutableSurface padding="none" withBorder clip>');
     expect(rootRule).toMatch(/margin:\s*0/u);
   });
 
@@ -211,6 +216,75 @@ describe('PublicExecutableBlockView', () => {
     expect(buttonByText(mounted.host, 'Source')).toBeTruthy();
 
     await mounted.destroy();
+  });
+
+  it('names the p5 preview as a group without hiding its runtime-generated controls', async () => {
+    const { factories, runtimes } = createFactories();
+    factories.p5Sketch = vi.fn((mount) => {
+      const action = document.createElement('button');
+      action.textContent = 'Sketch action';
+      mount.append(action);
+      return runtimes.p5Sketch;
+    });
+    const mounted = await mountPublicExecutable({ type: 'p5Sketch', factories });
+    const preview = mounted.host.querySelector('[data-runtime-surface="p5Sketch"] [role="group"]');
+
+    expect(preview?.getAttribute('aria-label')).toBe('Preview');
+    expect(preview?.hasAttribute('aria-hidden')).toBe(false);
+    expect(preview?.querySelector('button')?.textContent).toBe('Sketch action');
+    expect(preview?.closest('[role="img"]')).toBeNull();
+
+    await mounted.destroy();
+  });
+
+  it('connects public shader stage tabs to their real source panel and updates its name on keyboard selection', async () => {
+    const { factories } = createFactories();
+    const mounted = await mountPublicExecutable({ type: 'shader', factories });
+    await act(async () => buttonByText(mounted.host, 'Source').click());
+    const panel = mounted.host.querySelector<HTMLElement>('[role="tabpanel"]')!;
+    const tabs = [...mounted.host.querySelectorAll<HTMLElement>('[role="tab"]')];
+    const selected = tabs.find((tab) => tab.getAttribute('aria-selected') === 'true')!;
+
+    expect(panel).not.toBeNull();
+    expect(tabs).toHaveLength(9);
+    expect(tabs.every((tab) => document.getElementById(tab.getAttribute('aria-controls')!) === panel)).toBe(true);
+    expect(document.getElementById(panel.getAttribute('aria-labelledby')!)).toBe(selected);
+    expect(selected.textContent).toBe('frag.glsl');
+    expect(panel.querySelector('textarea')?.getAttribute('aria-label')).toBe('GLSL shader — Source — frag.glsl');
+
+    await act(async () => selected.focus());
+    await act(async () =>
+      selected.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true })),
+    );
+    const common = tabs.find((tab) => tab.textContent === 'common.glsl')!;
+    expect(document.activeElement).toBe(common);
+    expect(common.getAttribute('aria-selected')).toBe('true');
+    expect(mounted.host.querySelector('[role="tabpanel"]')).toBe(panel);
+    expect(document.getElementById(panel.getAttribute('aria-labelledby')!)).toBe(common);
+    expect(panel.querySelector('textarea')?.getAttribute('aria-label')).toBe('GLSL shader — Source — common.glsl');
+
+    await mounted.destroy();
+  });
+
+  it('keeps shader panel relationships scoped to each mounted instance of the same public block', async () => {
+    const first = await mountPublicExecutable({ type: 'shader', factories: createFactories().factories });
+    const second = await mountPublicExecutable({ type: 'shader', factories: createFactories().factories });
+    await act(async () => {
+      buttonByText(first.host, 'Source').click();
+      buttonByText(second.host, 'Source').click();
+    });
+    const firstPanel = first.host.querySelector<HTMLElement>('[role="tabpanel"]')!;
+    const secondPanel = second.host.querySelector<HTMLElement>('[role="tabpanel"]')!;
+    expect(firstPanel.id).not.toBe(secondPanel.id);
+    for (const host of [first.host, second.host]) {
+      const panel = host.querySelector<HTMLElement>('[role="tabpanel"]')!;
+      const selected = host.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')!;
+      expect(document.getElementById(selected.getAttribute('aria-controls')!)).toBe(panel);
+      expect(document.getElementById(panel.getAttribute('aria-labelledby')!)).toBe(selected);
+    }
+
+    await first.destroy();
+    await second.destroy();
   });
 
   it.each(['p5Sketch', 'threeScene', 'shader'] as const)(

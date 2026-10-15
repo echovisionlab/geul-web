@@ -184,16 +184,18 @@ export async function preprocessUploadFile(file: File, uploadType: UploadType): 
       quality: 0.86,
       minQuality: 0.56,
       qualityStep: 0.08,
+      strict: true,
     });
   }
 
   if (shouldNormalizeManagedRasterUpload(uploadType, resolvedMimeType)) {
     return convertToWebP(file, {
       maxDimension: MANAGED_RASTER_MAX_DIMENSION,
-      maxBytes: MANAGED_RASTER_FINAL_MAX_SIZE,
+      maxBytes: Math.min(MANAGED_RASTER_FINAL_MAX_SIZE, UPLOAD_CONFIGS[uploadType].maxSize),
       quality: 0.86,
       minQuality: 0.56,
       qualityStep: 0.08,
+      strict: true,
     });
   }
 
@@ -207,13 +209,16 @@ export async function preprocessUploadFile(file: File, uploadType: UploadType): 
   return convertedFile;
 }
 
-/** Decode HEIC/HEIF before a browser preview or crop UI tries to render it. */
+/** Normalize managed raster sources before preview/crop, then validate prepared output. */
 export async function prepareImageFileForPreview(file: File, uploadType: UploadType): Promise<File> {
   const selectionValidation = validateUploadSelectionFile(file, uploadType);
   if (!selectionValidation.valid) {
     throw new Error(selectionValidation.error);
   }
-  if (!isHeicInputMime(selectionValidation.mimeType)) {
+  if (
+    !isHeicInputMime(selectionValidation.mimeType) &&
+    !shouldNormalizeManagedRasterUpload(uploadType, selectionValidation.mimeType)
+  ) {
     return file;
   }
 

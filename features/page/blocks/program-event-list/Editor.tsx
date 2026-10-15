@@ -17,11 +17,12 @@ import type { ProgramEventListProps } from './schema';
 import { ProgramEventListView } from './View';
 
 interface ProgramEventListSettingsFormProps {
+  readOnly?: boolean;
   props: Partial<ProgramEventListProps>;
   updateProps: (props: Record<string, unknown>) => void;
 }
 
-function ProgramEventListSettingsForm({ props, updateProps }: ProgramEventListSettingsFormProps) {
+function ProgramEventListSettingsForm({ props, updateProps, readOnly = false }: ProgramEventListSettingsFormProps) {
   const locale = useLocale();
   const tPageEditor = useTranslations('pageEditor');
 
@@ -71,18 +72,23 @@ function ProgramEventListSettingsForm({ props, updateProps }: ProgramEventListSe
 
   const updateProp = useCallback(
     (key: keyof ProgramEventListProps, value: string) => {
+      if (readOnly) {
+        return;
+      }
       updateProps({ [key]: value });
     },
-    [updateProps],
+    [readOnly, updateProps],
   );
 
   return (
     <>
       <QueryErrorAlert queries={[eventTypesQuery, eventSeriesQuery]} />
       <ListBlockEditorBase
+        readOnly={readOnly}
         editorType="program-event-list"
         limitLabel={tPageEditor('blockEditor.labels.numberOfProgramEvents')}
         layout={layout}
+        itemSize={props.itemSize}
         columns={columns}
         limit={limit}
         maxLimit={24}
@@ -99,33 +105,33 @@ function ProgramEventListSettingsForm({ props, updateProps }: ProgramEventListSe
         filters={
           <>
             <MultiSelect
+              disabled={readOnly}
               label={tPageEditor('blockEditor.labels.programEventTypes')}
               placeholder={tPageEditor('blockEditor.placeholders.allTypes')}
               data={typeOptions}
               value={typeIds ? typeIds.split(',').filter(Boolean) : []}
               onChange={(values) => updateProp('typeIds', values.join(','))}
-              size="xs"
               clearable
               searchable
             />
             <Select
+              disabled={readOnly}
               label={tPageEditor('blockEditor.labels.programEventSeries')}
               placeholder={tPageEditor('blockEditor.placeholders.allSeries')}
               data={seriesOptions}
               value={seriesId || null}
               onChange={(value) => updateProp('seriesId', value || '')}
-              size="xs"
               clearable
               searchable
             />
             <Select
+              disabled={readOnly}
               label={tPageEditor('blockEditor.labels.timeWindow')}
               data={timeWindowOptions}
               value={timeWindow}
               onChange={(value) =>
                 updateProp('timeWindow', (value as ProgramEventListProps['timeWindow'] | null) || 'all')
               }
-              size="xs"
             />
           </>
         }
@@ -138,20 +144,32 @@ function ProgramEventListSettingsForm({ props, updateProps }: ProgramEventListSe
 export function ProgramEventListSettingsEditor({
   props,
   updateSharedProps,
+  allowSharedEdits,
 }: BlockSettingsEditorProps<ProgramEventListProps>) {
-  return <ProgramEventListSettingsForm props={props} updateProps={updateSharedProps} />;
+  return (
+    <ProgramEventListSettingsForm props={props} updateProps={updateSharedProps} readOnly={allowSharedEdits === false} />
+  );
 }
 
 export function ProgramEventListEditor({ sectionId, props }: BlockEditorProps<ProgramEventListProps>) {
-  const { updateSection } = usePageEditor();
+  const { updateSection, editable, allowStructuralEdits } = usePageEditor();
   const updateProps = useCallback(
     (nextProps: Record<string, unknown>) => {
+      if (!editable || !allowStructuralEdits) {
+        return;
+      }
       updateSection(sectionId, { props: nextProps });
     },
-    [sectionId, updateSection],
+    [sectionId, updateSection, editable, allowStructuralEdits],
   );
 
-  return <ProgramEventListSettingsForm props={props} updateProps={updateProps} />;
+  return (
+    <ProgramEventListSettingsForm
+      props={props}
+      updateProps={updateProps}
+      readOnly={!editable || !allowStructuralEdits}
+    />
+  );
 }
 
 export function ProgramEventListCanvasPreview({ sectionId, props }: BlockCanvasPreviewProps<ProgramEventListProps>) {

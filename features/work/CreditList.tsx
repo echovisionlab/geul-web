@@ -1,16 +1,14 @@
 'use client';
 
-import NextImage from 'next/image';
-import Link from '@/components/core/Navigation';
+import { HierarchyIndent } from '@/components/core/Hierarchy';
+import { LayoutInline as DsLayoutInline, LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+import { Avatar } from '@/components/core/Display';
 import { useTranslations } from 'next-intl';
-import { Anchor, Box, Group, Stack, Text } from '@mantine/core';
-import { isManagedCdnAssetUrl } from '@/lib/utils/file-url';
-import classes from './CreditList.module.css';
-
+import { NavigationLink as Anchor } from '@/components/core/Navigation';
 /* -------------------------------------------------------------------------- */
 /*                                   Types                                    */
 /* -------------------------------------------------------------------------- */
-
 interface CreditListItemProps {
   name: string;
   role?: string | null;
@@ -18,131 +16,76 @@ interface CreditListItemProps {
   href?: string | null;
   imageUrl?: string | null;
 }
-
 interface CreditListGroupProps {
   name: string;
   children: React.ReactNode;
 }
-
 interface CreditListRootProps {
   title?: string;
   children: React.ReactNode;
 }
-
 /* -------------------------------------------------------------------------- */
 /*                              CreditList.Item                               */
 /* -------------------------------------------------------------------------- */
-
 function CreditListItem({ name, role, note, href, imageUrl }: CreditListItemProps) {
-  const nameElement = href ? (
-    <Anchor component={Link} href={href} className={classes.itemLink}>
-      {name}
-    </Anchor>
-  ) : (
-    name
-  );
-
+  const nameElement = href ? <Anchor href={href}>{name}</Anchor> : name;
   return (
-    <Group gap="xs" role="listitem">
-      {imageUrl ? (
-        <Box
-          style={{
-            width: 26,
-            height: 26,
-            borderRadius: '50%',
-            overflow: 'hidden',
-            position: 'relative',
-            flexShrink: 0,
-          }}
-        >
-          <NextImage
-            src={imageUrl}
-            alt={name}
-            fill
-            sizes="26px"
-            style={{ objectFit: 'cover' }}
-            unoptimized={imageUrl.startsWith('http') && !isManagedCdnAssetUrl(imageUrl)}
-          />
-        </Box>
-      ) : (
-        <Box
-          style={{
-            width: 26,
-            height: 26,
-            borderRadius: '50%',
-            backgroundColor: 'var(--mantine-color-blue-filled)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            fontSize: 11,
-            fontWeight: 500,
-            flexShrink: 0,
-          }}
-        >
-          {name.charAt(0)}
-        </Box>
-      )}
-      <Stack gap={0}>
-        <Text size="sm">
+    <DsLayoutInline gap="xs" role="listitem">
+      <Avatar src={imageUrl} alt={name} size="sm" shape="circle" name={name} />
+      <DsLayoutStack gap="none">
+        <DsText size="sm">
           {nameElement}
           {role && (
-            <Text span c="dimmed">
+            <DsText as="span" tone="secondary">
               {' '}
               — {role}
-            </Text>
+            </DsText>
           )}
-        </Text>
+        </DsText>
         {note ? (
-          <Text size="xs" c="dimmed">
+          <DsText size="xs" tone="secondary">
             {note}
-          </Text>
+          </DsText>
         ) : null}
-      </Stack>
-    </Group>
+      </DsLayoutStack>
+    </DsLayoutInline>
   );
 }
-
 /* -------------------------------------------------------------------------- */
 /*                              CreditList.Group                              */
 /* -------------------------------------------------------------------------- */
-
 function CreditListGroup({ name, children }: CreditListGroupProps) {
   const t = useTranslations('creditList');
-
   return (
-    <Stack gap={4}>
-      <Text size="sm" c="dimmed" fw={500}>
+    <DsLayoutStack gap="xxs">
+      <DsText size="sm" tone="secondary" weight="medium">
         {name}
-      </Text>
-      <Stack gap={2} pl="sm" role="list" aria-label={t('groupAriaLabel', { name })}>
-        {children}
-      </Stack>
-    </Stack>
+      </DsText>
+      <HierarchyIndent>
+        <DsLayoutStack gap="xxs" role="list" aria-label={t('groupAriaLabel', { name })}>
+          {children}
+        </DsLayoutStack>
+      </HierarchyIndent>
+    </DsLayoutStack>
   );
 }
-
 /* -------------------------------------------------------------------------- */
 /*                               CreditList Root                              */
 /* -------------------------------------------------------------------------- */
-
 function CreditListRoot({ title, children }: CreditListRootProps) {
   const tCommon = useTranslations('common');
-
   return (
-    <Stack gap="sm">
-      <Text size="sm" fw={500}>
+    <DsLayoutStack gap="sm">
+      <DsText size="sm" weight="medium">
         {title || tCommon('entities.credits')}
-      </Text>
-      <Stack gap="sm">{children}</Stack>
-    </Stack>
+      </DsText>
+      <DsLayoutStack gap="sm">{children}</DsLayoutStack>
+    </DsLayoutStack>
   );
 }
-
 /* -------------------------------------------------------------------------- */
 /*                                  Export                                    */
 /* -------------------------------------------------------------------------- */
-
 export const CreditList = Object.assign(CreditListRoot, {
   Group: CreditListGroup,
   Item: CreditListItem,

@@ -104,7 +104,9 @@ describe('GeneratedRichTextBlockView external video', () => {
 
     expect(html).toContain('<aside data-callout="" data-bg-color="yellow" data-text-color="default">');
     expect(html).toContain('<span data-callout-icon="" aria-hidden="true">⚠️</span>');
-    expect(html).toContain('<div data-callout-content=""><div data-callout-copy=""><span>Callout body</span></div><p');
+    expect(html).toContain(
+      '<div data-callout-content=""><div data-callout-copy=""><span>Callout body</span></div><div data-document-block="paragraph"',
+    );
     expect(html).toContain('Clear the rights first.');
   });
 
@@ -280,5 +282,24 @@ describe('GeneratedRichTextBlockView File Block downloads', () => {
 
     await act(async () => root.unmount());
     host.remove();
+  });
+});
+
+describe('GeneratedRichTextBlockView list nesting', () => {
+  it('keeps children inside the item while the authored background and alignment cover only its own text', () => {
+    const html = renderGenerated({
+      ...generatedBulletListItem([generatedParagraph([{ value: { case: 'text', value: { text: 'Child' } } }])]),
+      base: { props: { textColor: 'red', backgroundColor: 'yellow' } },
+      locale: { content: [{ value: { case: 'text', value: { text: 'Parent' } } }] },
+    } as unknown as LocalizedRichTextBlock);
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    const item = host.querySelector('li')!;
+    expect(item.getAttribute('data-text-color')).toBe('red');
+    expect(item.hasAttribute('data-bg-color')).toBe(false);
+    const content = item.querySelector(':scope > [data-list-item-content]')!;
+    expect(content.getAttribute('data-bg-color')).toBe('yellow');
+    expect(content.textContent).toBe('Parent');
+    expect(item.querySelector(':scope > [data-document-children]')?.textContent).toContain('Child');
   });
 });

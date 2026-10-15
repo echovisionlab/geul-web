@@ -1,17 +1,35 @@
 'use client';
+import { ConfirmationDialog } from '@/features/confirmation';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { Select, TextInput } from '@/components/core/Input';
-import { ConfirmModal, FormModal } from '@/components/core/Modal';
+import { FormModal } from '@/components/core/Modal';
 import { banUserAction, deleteUserAction, updateUserAction } from '@/lib/actions/user';
 import { unsubscribeUserFromNewsletterAction } from '@/lib/actions/newsletter';
 import { useUserModal } from './UserModalContext';
 
-export function UserModals() {
+export interface UserModalsBindings {
+  banUserAction: typeof banUserAction;
+  deleteUserAction: typeof deleteUserAction;
+  updateUserAction: typeof updateUserAction;
+  unsubscribeUserFromNewsletterAction: typeof unsubscribeUserFromNewsletterAction;
+}
+const defaultBindings: UserModalsBindings = {
+  banUserAction,
+  deleteUserAction,
+  updateUserAction,
+  unsubscribeUserFromNewsletterAction,
+};
+export function UserModals({
+  bindings = defaultBindings,
+  refresh,
+}: { bindings?: UserModalsBindings; refresh?: () => void } = {}) {
   const tCommon = useTranslations('common');
   const tUserProfile = useTranslations('userProfile');
   const router = useRouter();
@@ -58,14 +76,14 @@ export function UserModals() {
     }
     setBanLoading(true);
     try {
-      const result = await banUserAction(banningUser.id, banReason || undefined);
+      const result = await bindings.banUserAction(banningUser.id, banReason || undefined);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tUserProfile('notifications.userBanned'), color: 'red' });
+      notifications.show({ message: tUserProfile('notifications.userBanned'), tone: 'positive' });
       closeBan();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setBanLoading(false);
     }
@@ -77,14 +95,14 @@ export function UserModals() {
     }
     setRoleLoading(true);
     try {
-      const result = await updateUserAction(roleUser.id, { role: newRole });
+      const result = await bindings.updateUserAction(roleUser.id, { role: newRole });
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tUserProfile('notifications.roleUpdated'), color: 'green' });
+      notifications.show({ message: tUserProfile('notifications.roleUpdated'), tone: 'positive' });
       closeRole();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setRoleLoading(false);
     }
@@ -96,14 +114,14 @@ export function UserModals() {
     }
     setDeleteLoading(true);
     try {
-      const result = await deleteUserAction(deletingUser.id);
+      const result = await bindings.deleteUserAction(deletingUser.id);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tUserProfile('notifications.userDeleted'), color: 'red' });
+      notifications.show({ message: tUserProfile('notifications.userDeleted'), tone: 'positive' });
       closeDelete();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setDeleteLoading(false);
     }
@@ -115,14 +133,14 @@ export function UserModals() {
     }
     setNewsletterLoading(true);
     try {
-      const result = await unsubscribeUserFromNewsletterAction(newsletterUser.id);
+      const result = await bindings.unsubscribeUserFromNewsletterAction(newsletterUser.id);
       if (!result.success) {
-        notifications.show({ message: result.message, color: 'red' });
+        notifications.show({ message: result.message, tone: 'danger' });
         return;
       }
-      notifications.show({ message: result.message, color: 'green' });
+      notifications.show({ message: result.message, tone: 'positive' });
       closeNewsletterUnsubscribe();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setNewsletterLoading(false);
     }
@@ -142,20 +160,20 @@ export function UserModals() {
         submitTone="danger"
         loading={banLoading}
       >
-        <Stack>
-          <Text size="sm">
+        <DsLayoutStack>
+          <DsText>
             {tUserProfile.rich('modals.ban.description', {
               name: banningUser?.nickname || tCommon('entities.member'),
               strong: (chunks) => <strong>{chunks}</strong>,
             })}
-          </Text>
+          </DsText>
           <TextInput
             label={tUserProfile('modals.ban.reasonLabel')}
             placeholder={tUserProfile('modals.ban.reasonPlaceholder')}
             value={banReason}
             onChange={(e) => setBanReason(e.currentTarget.value)}
           />
-        </Stack>
+        </DsLayoutStack>
       </FormModal>
 
       {/* Role Modal */}
@@ -183,30 +201,32 @@ export function UserModals() {
       </FormModal>
 
       {/* Delete Modal */}
-      <ConfirmModal
+      <ConfirmationDialog
+        intent="delete"
         opened={!!deletingUser}
         onClose={closeDelete}
         onConfirm={handleDelete}
         title={tUserProfile('modals.delete.title')}
         message={
-          <Stack gap="xs">
-            <Text>
+          <DsLayoutStack gap="xs">
+            <DsText>
               {tUserProfile.rich('modals.delete.description', {
                 name: deletingUser?.nickname || tCommon('entities.member'),
                 strong: (chunks) => <strong>{chunks}</strong>,
               })}
-            </Text>
-            <Text size="sm" c="dimmed">
+            </DsText>
+            <DsText size="sm" tone="secondary">
               {tUserProfile('modals.delete.warning')}
-            </Text>
-          </Stack>
+            </DsText>
+          </DsLayoutStack>
         }
         confirmLabel={tCommon('actions.delete')}
         cancelLabel={tCommon('actions.cancel')}
         closeLabel={tCommon('actions.close')}
         loading={deleteLoading}
       />
-      <ConfirmModal
+      <ConfirmationDialog
+        intent="confirm"
         opened={!!newsletterUser}
         onClose={closeNewsletterUnsubscribe}
         onConfirm={handleNewsletterUnsubscribe}

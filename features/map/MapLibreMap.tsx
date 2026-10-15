@@ -17,6 +17,7 @@ export type { MapLibreMapProps } from './MapLibreMap.types';
 export function MapLibreMap(props: MapLibreMapProps) {
   const t = useTranslations('map');
   const tCommonLabels = useTranslations('common.labels');
+  const tActions = useTranslations('common.actions');
   const tLoading = useTranslations('map.loading');
   const loadingMessages = useMemo(
     () => ({
@@ -51,7 +52,8 @@ export function MapLibreMap(props: MapLibreMapProps) {
         zoomOut: t('accessibility.zoomOut'),
         resetNorth: t('accessibility.resetNorth'),
         directions: t('directions'),
-        printPreview: 'Map preview',
+        closeDirections: tActions('close'),
+        printPreview: `${tCommonLabels('map')} · ${tCommonLabels('preview')}`,
       }}
       isReady={isReady}
       loadingSurface={<PageLoader height="100%" minHeight={0} message={loadingMessage} />}

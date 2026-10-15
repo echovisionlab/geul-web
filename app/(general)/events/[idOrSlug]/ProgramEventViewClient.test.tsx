@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import type { ComponentProps } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { create } from '@bufbuild/protobuf';
-import { MantineProvider } from '@mantine/core';
+
 import {
   FileBlockLocaleSchema,
   FileBlockSchema,
@@ -23,14 +24,18 @@ vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
 vi.mock('next/image', () => ({
   default: ({ src, alt }: { src: string; alt: string }) => <img src={src} alt={alt} />,
 }));
-vi.mock('@/components/core/Navigation', () => ({
+vi.mock('@/components/core/Navigation', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/components/core/Navigation')>()),
   default: ({ href, children, ...props }: ComponentProps<'a'>) => (
     <a href={href} {...props}>
       {children}
     </a>
   ),
 }));
-vi.mock('@/features/navigation/TableOfContents', () => ({ TableOfContents: () => null }));
+vi.mock('@/features/navigation/TableOfContents', () => ({
+  // The navigation owner wraps the document so Core can reserve the outline beside it.
+  TableOfContents: ({ children }: { children: React.ReactNode }) => children,
+}));
 vi.mock('@/features/location/LocationPlaceMetadataRows', () => ({
   LocationPlaceMetadataRows: (props: { place: LocationPlaceSummary }) => {
     mocks.renderPlace(props);
@@ -76,16 +81,16 @@ function renderEvent(content: Event['content'], overrides: Partial<Event> = {}) 
   };
 
   return renderToStaticMarkup(
-    <MantineProvider>
+    <DesignSystemProvider forceColorScheme="light">
       <ProgramEventViewClient event={event} locale="en" pathname="/events/event-slug" requestedLocale="en" />
-    </MantineProvider>,
+    </DesignSystemProvider>,
   );
 }
 
 describe('ProgramEventViewClient', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('renders the body with one metadata divider and no summary', () => {
+  it('renders the body in its requested language without exposing the stored summary', () => {
     const block = {
       id: 'paragraph-block',
       kind: 'paragraph',
@@ -98,7 +103,7 @@ describe('ProgramEventViewClient', () => {
 
     expect(html).toContain('Event body');
     expect(html).not.toContain('Event summary');
-    expect(html.match(/role="separator"/g)).toHaveLength(1);
+    expect(html).toMatch(/class="prose"[^>]*lang="en"/);
   });
 
   it.each([null, []])('does not show the summary when the body is %j', (content) => {
@@ -128,7 +133,7 @@ describe('ProgramEventViewClient', () => {
 
     expect(html).toContain('First Play.pdf');
     expect(html).not.toContain('Event summary');
-    expect(html.match(/role="separator"/g)).toHaveLength(1);
+    expect(html).toMatch(/class="prose"[^>]*lang="en"/);
     expect(mocks.renderBlock).toHaveBeenCalledWith({
       block,
       requestedLocale: 'en',
@@ -203,7 +208,8 @@ describe('ProgramEventViewClient credits', () => {
       expect(items[0]).toHaveTextContent('Recorded on location');
       expect(items[0].querySelector('a')).toHaveAttribute('href', '/user/member-1');
       expect(items[0].querySelector('img')).toHaveAttribute('src', 'https://example.com/member.jpg');
-      expect(items[0].querySelector('img')).toHaveAttribute('alt', 'Display name');
+      expect(items[0].querySelector('[role="img"]')).toHaveAttribute('aria-label', 'Display name');
+      expect(items[0].querySelector('img')).toHaveAttribute('alt', '');
       expect(items[1]).toHaveTextContent('Artist name — Performer');
       expect(items[1]).toHaveTextContent('Live set');
       expect(items[1].querySelector('a')).toHaveAttribute('href', '/artists/artist-slug');

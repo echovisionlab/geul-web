@@ -1,10 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
+import { VisuallyHidden } from '@/components/core/Typography';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Loader, Stack } from '@mantine/core';
+
+import { Spinner as Loader } from '@/components/core/Display';
 import { useWindowEvent } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { Alert } from '@/components/core/Alert';
 import { StatusBadge } from '@/components/core/Badge';
 import { MultiSelect } from '@/components/core/Input';
@@ -19,6 +23,8 @@ import type {
   FileDownloadPolicyTarget,
 } from '@/lib/types/file-download-access';
 import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
+import { useAuthoritativeConfiguration } from '@/lib/editor/useAuthoritativeConfiguration';
+import { getUntrackedConfigurationWriteOrigin } from '@/lib/editor/editor-write-origin';
 import {
   enqueueFileDownloadPolicyWrite,
   runAfterFileDownloadPolicyWrites,
@@ -34,12 +40,16 @@ export interface FileDownloadPolicyEditorAdapter {
     audience: FileDownloadAudience,
     audienceSegmentIds: string[],
     observedPolicy: FileDownloadPolicyObservedState,
+    editorOrigin?: string,
   ) => Promise<FileDownloadActionResult<FileDownloadPolicyModel>>;
 }
 
 interface FileDownloadPolicyEditorProps extends FileDownloadPolicyTarget {
   adapter: FileDownloadPolicyEditorAdapter;
+  /** Track policies are metadata of their owning Release. */
+  releaseId?: string;
   compact?: boolean;
+  readOnly?: boolean;
   presentation?: 'standalone' | 'media-header';
 }
 
@@ -106,6 +116,22 @@ function policyMatchesTarget(policy: FileDownloadPolicyModel, target: FileDownlo
 
 function policyChangeDocument(target: FileDownloadPolicyTarget): string {
   return `file-policy:${target.expectedFileId}:${target.entityType}:${target.entityId}:${target.blockId ?? ''}:${target.referencePath ?? ''}`;
+}
+
+function policyOwnerDocument(target: FileDownloadPolicyTarget, releaseId?: string): string | null {
+  if (target.entityType === TranscodeEntityType.TRACK) {
+    return releaseId ? `release:${releaseId}` : null;
+  }
+  const ownerType = {
+    [TranscodeEntityType.POST]: 'post',
+    [TranscodeEntityType.PAGE]: 'page',
+    [TranscodeEntityType.WORK]: 'work',
+    [TranscodeEntityType.PROGRAM_EVENT]: 'program-event',
+  }[
+    target.entityType as
+      TranscodeEntityType.POST | TranscodeEntityType.PAGE | TranscodeEntityType.WORK | TranscodeEntityType.PROGRAM_EVENT
+  ];
+  return ownerType ? `${ownerType}:${target.entityId}` : null;
 }
 
 function sortedPolicySegmentIds(policy: FileDownloadPolicyModel): string[] {
@@ -181,13 +207,17 @@ export function FileDownloadPolicyEditor({
   referencePath,
   expectedFileId,
   adapter,
+  releaseId,
   compact = true,
   presentation = 'standalone',
+  readOnly = false,
 }: FileDownloadPolicyEditorProps) {
   const t = useTranslations('fileDownloadAccess.editor');
   const tReloadRequired = useTranslations('editorCommon.reloadRequired');
   const tActions = useTranslations('common.actions');
   const tStates = useTranslations('common.states');
+  const errorId = useId();
+  const audienceDescriptionId = useId();
   const target = useMemo(
     () => ({
       entityType,
@@ -200,8 +230,11 @@ export function FileDownloadPolicyEditor({
   );
   const targetKey = `${target.entityType}:${target.entityId}:${target.blockId ?? ''}:${target.referencePath ?? ''}:${target.expectedFileId}`;
   const enabled = Boolean(target.entityId && target.expectedFileId);
-  const [audience, setAudience] = useState<FileDownloadAudience>('disabled');
-  const [selectedAudienceSegmentIds, setSelectedAudienceSegmentIds] = useState<string[]>([]);
+  const configuration = useAuthoritativeConfiguration<FileDownloadPolicyObservedState>({
+    document: policyChangeDocument(target),
+    initialConfiguration: { audience: 'disabled', audienceSegmentIds: [] },
+  });
+  const { audience, audienceSegmentIds: selectedAudienceSegmentIds } = configuration.getConfiguration();
   const [segments, setSegments] = useState<AudienceSegmentSummary[]>([]);
   const [availableSegmentIds, setAvailableSegmentIds] = useState<string[]>([]);
   const [segmentSearch, setSegmentSearch] = useState('');
@@ -227,7 +260,6 @@ export function FileDownloadPolicyEditor({
   const activeSaveRef = useRef<ActivePolicySave | null>(null);
   const peerRefreshRequestedRef = useRef(false);
   const peerRefreshInFlightRef = useRef(false);
-  const ignoreOwnPeerHintSequenceRef = useRef<number | null>(null);
   const targetStaleRef = useRef(false);
   const blockedSaveSequenceRef = useRef<number | null>(null);
   const hydratingRef = useRef(false);
@@ -250,6 +282,7 @@ export function FileDownloadPolicyEditor({
 
     peerRefreshRequestedRef.current = false;
     peerRefreshInFlightRef.current = true;
+    const read = configuration.beginRead();
     const requestSequence = saveSequenceRef.current;
     const requestTargetKey = targetKey;
     try {
@@ -280,8 +313,10 @@ export function FileDownloadPolicyEditor({
         audience: snapshot.audience,
         audienceSegments: result.data.audienceSegments,
       };
-      setAudience(snapshot.audience);
-      setSelectedAudienceSegmentIds(snapshot.audienceSegmentIds);
+      if (!configuration.adoptRead(read, snapshot)) {
+        peerRefreshRequestedRef.current = true;
+        return;
+      }
       setSegments((current) => mergeSegments(current, result.data!.audienceSegments));
       setAvailableSegmentIds((current) =>
         Array.from(new Set([...current, ...result.data!.audienceSegments.map((segment) => segment.id)])),
@@ -298,12 +333,32 @@ export function FileDownloadPolicyEditor({
         void refreshPolicyFromPeer();
       }
     }
-  }, [adapter, enabled, t, target, targetKey, tReloadRequired]);
+  }, [adapter, configuration, enabled, t, target, targetKey, tReloadRequired]);
 
-  useEditorEntityChanges(policyChangeDocument(target), () => {
-    const ownPublishSequence = ignoreOwnPeerHintSequenceRef.current;
-    ignoreOwnPeerHintSequenceRef.current = null;
-    if (ownPublishSequence === saveSequenceRef.current) {
+  useEditorEntityChanges(
+    policyChangeDocument(target),
+    () => {
+      if (hydratingRef.current) {
+        if (initialPolicyReadStartedRef.current) {
+          peerRefreshRequestedRef.current = true;
+        }
+        return;
+      }
+      peerRefreshRequestedRef.current = true;
+      if (!activeSaveRef.current && !pendingSaveRef.current) {
+        void refreshPolicyFromPeer();
+      }
+    },
+    undefined,
+    undefined,
+    configuration.captureOwnChange,
+  );
+
+  // The owning room supplies server invalidations; the exact selector remains the
+  // browser-channel key. Track IDs do not identify their release owner.
+  const ownerDocument = policyOwnerDocument(target, releaseId);
+  useEditorEntityChanges(ownerDocument ?? policyChangeDocument(target), () => {
+    if (!ownerDocument) {
       return;
     }
     if (hydratingRef.current) {
@@ -322,7 +377,7 @@ export function FileDownloadPolicyEditor({
     (staleTarget: boolean) => {
       notifications.show({
         autoClose: false,
-        color: 'red',
+        tone: 'danger',
         title: t('sectionTitle'),
         message: staleTarget ? tReloadRequired('message') : `${t('saveError')} ${tActions('tryAgain')}`,
       });
@@ -360,8 +415,7 @@ export function FileDownloadPolicyEditor({
     activeSaveRef.current = null;
 
     if (!enabled) {
-      setAudience('disabled');
-      setSelectedAudienceSegmentIds([]);
+      configuration.adoptRead(configuration.beginRead(), { audience: 'disabled', audienceSegmentIds: [] });
       setSegments([]);
       setAvailableSegmentIds([]);
       setSegmentSearch('');
@@ -378,6 +432,7 @@ export function FileDownloadPolicyEditor({
     }
 
     let cancelled = false;
+    let initialRead = configuration.beginRead();
     setLoading(true);
     setSaving(false);
     setSegmentSearch('');
@@ -390,6 +445,7 @@ export function FileDownloadPolicyEditor({
     Promise.all([
       runAfterFileDownloadPolicyWrites(targetKey, () => {
         initialPolicyReadStartedRef.current = true;
+        initialRead = configuration.beginRead();
         return adapter.loadPolicy(target);
       }),
       adapter.loadSegments({ page: 1, pageSize: SEGMENTS_PAGE_SIZE }),
@@ -415,8 +471,15 @@ export function FileDownloadPolicyEditor({
           audience: loadedAudience,
           audienceSegments: policySegments,
         };
-        setAudience(loadedAudience);
-        setSelectedAudienceSegmentIds(policySegments.map((segment) => segment.id));
+        if (
+          !configuration.adoptRead(initialRead, {
+            audience: loadedAudience,
+            audienceSegmentIds: policySegments.map((segment) => segment.id),
+          })
+        ) {
+          peerRefreshRequestedRef.current = true;
+          return;
+        }
         setSegments(mergeSegments(policySegments, listedSegments));
         setAvailableSegmentIds(
           Array.from(
@@ -467,12 +530,14 @@ export function FileDownloadPolicyEditor({
         return;
       }
 
+      const detachedOrigin = getUntrackedConfigurationWriteOrigin(policyChangeDocument(pendingSave.target));
       const detachedSave = enqueueFileDownloadPolicyWrite(pendingSave.targetKey, () =>
         adapter.savePolicy(
           pendingSave.target,
           pendingSave.audience,
           pendingSave.audienceSegmentIds,
           pendingSave.observedPolicy,
+          detachedOrigin,
         ),
       );
       pendingSaveRef.current = null;
@@ -483,12 +548,22 @@ export function FileDownloadPolicyEditor({
           } else if (!policyMatchesTarget(result.data, pendingSave.target)) {
             showDetachedSaveFailure(true);
           } else {
-            publishEditorEntityChange(policyChangeDocument(pendingSave.target));
+            publishEditorEntityChange(policyChangeDocument(pendingSave.target), detachedOrigin);
           }
         })
         .catch(() => showDetachedSaveFailure(false));
     };
-  }, [adapter, enabled, refreshPolicyFromPeer, showDetachedSaveFailure, t, target, targetKey, tReloadRequired]);
+  }, [
+    adapter,
+    configuration,
+    enabled,
+    refreshPolicyFromPeer,
+    showDetachedSaveFailure,
+    t,
+    target,
+    targetKey,
+    tReloadRequired,
+  ]);
 
   const loadSegmentsForSearch = (rawSearch: string) => {
     const search = rawSearch.trim();
@@ -618,6 +693,7 @@ export function FileDownloadPolicyEditor({
     }
 
     pendingSaveRef.current = null;
+    const write = configuration.beginWrite(['audience', 'audienceSegmentIds']);
     const saveToken = Symbol('file-download-policy-save');
     const activeSave: ActivePolicySave = {
       token: saveToken,
@@ -632,12 +708,14 @@ export function FileDownloadPolicyEditor({
           request.audience,
           request.audienceSegmentIds,
           request.observedPolicy,
+          write.origin,
         );
         const detached =
           activeSaveRef.current?.token !== saveToken ||
           request.generation !== saveGenerationRef.current ||
           request.targetKey !== activeTargetKeyRef.current;
         if (detached) {
+          write.fail();
           if (!result.data) {
             showDetachedSaveFailure(result.errorCode === 'staleTarget');
           } else if (!policyMatchesTarget(result.data, request.target)) {
@@ -647,8 +725,10 @@ export function FileDownloadPolicyEditor({
         }
         if (!result.data) {
           if (result.errorCode === 'staleTarget') {
+            write.fail();
             const retryRequest = pendingSaveRef.current ?? request;
             try {
+              const read = configuration.beginRead();
               const currentResult = await adapter.loadPolicy(request.target);
               const refreshDetached =
                 activeSaveRef.current?.token !== saveToken ||
@@ -665,6 +745,10 @@ export function FileDownloadPolicyEditor({
                 return;
               }
               const currentPolicy = currentResult.data;
+              configuration.adoptRead(read, {
+                audience: currentPolicy.audience,
+                audienceSegmentIds: sortedPolicySegmentIds(currentPolicy),
+              });
               const rebased = rebasePendingSaveOntoCurrent(retryRequest, currentPolicy);
               persistedPolicyRef.current = {
                 audience: currentPolicy.audience,
@@ -677,15 +761,13 @@ export function FileDownloadPolicyEditor({
               if (retryRequest.retryCount >= 1) {
                 pendingSaveRef.current = rebased;
                 blockedSaveSequenceRef.current = rebased.sequence;
-                setAudience(rebased.audience);
-                setSelectedAudienceSegmentIds(rebased.audienceSegmentIds);
+                configuration.edit({ audience: rebased.audience, audienceSegmentIds: rebased.audienceSegmentIds });
                 setError(t('saveError'));
                 return;
               }
               pendingSaveRef.current = rebased;
               blockedSaveSequenceRef.current = null;
-              setAudience(rebased.audience);
-              setSelectedAudienceSegmentIds(rebased.audienceSegmentIds);
+              configuration.edit({ audience: rebased.audience, audienceSegmentIds: rebased.audienceSegmentIds });
               setError('');
               return;
             } catch {
@@ -697,19 +779,20 @@ export function FileDownloadPolicyEditor({
               return;
             }
           }
+          write.fail();
           if (request.sequence !== saveSequenceRef.current) {
             return;
           }
           const persistedPolicy = persistedPolicyRef.current;
           if (persistedPolicy) {
-            setAudience(persistedPolicy.audience);
-            setSelectedAudienceSegmentIds(persistedPolicy.audienceSegments.map((segment) => segment.id));
+            configuration.discard(['audience', 'audienceSegmentIds']);
             setSegments((current) => mergeSegments(current, persistedPolicy.audienceSegments));
           }
           setError(t('saveError'));
           return;
         }
         if (!policyMatchesTarget(result.data, request.target)) {
+          write.fail();
           targetStaleRef.current = true;
           setTargetStale(true);
           pendingSaveRef.current = null;
@@ -720,6 +803,7 @@ export function FileDownloadPolicyEditor({
           audience: result.data.audience,
           audienceSegmentIds: sortedPolicySegmentIds(result.data),
         } satisfies FileDownloadPolicyObservedState;
+        write.acknowledge(acknowledgedPolicy);
         persistedPolicyRef.current = {
           audience: result.data.audience,
           audienceSegments: result.data.audienceSegments,
@@ -728,8 +812,7 @@ export function FileDownloadPolicyEditor({
         setAvailableSegmentIds((current) =>
           Array.from(new Set([...current, ...result.data!.audienceSegments.map((segment) => segment.id)])),
         );
-        ignoreOwnPeerHintSequenceRef.current = saveSequenceRef.current;
-        publishEditorEntityChange(policyChangeDocument(request.target));
+        publishEditorEntityChange(policyChangeDocument(request.target), write.origin);
         const pending = pendingSaveRef.current;
         if (
           pending &&
@@ -739,8 +822,10 @@ export function FileDownloadPolicyEditor({
         ) {
           const rebasedPending = rebasePendingSave(pending, request, acknowledgedPolicy);
           pendingSaveRef.current = rebasedPending;
-          setAudience(rebasedPending.audience);
-          setSelectedAudienceSegmentIds(rebasedPending.audienceSegmentIds);
+          configuration.edit({
+            audience: rebasedPending.audience,
+            audienceSegmentIds: rebasedPending.audienceSegmentIds,
+          });
           setSaved(false);
           return;
         }
@@ -748,11 +833,10 @@ export function FileDownloadPolicyEditor({
           peerRefreshRequestedRef.current = true;
           return;
         }
-        setAudience(result.data.audience);
-        setSelectedAudienceSegmentIds(result.data.audienceSegments.map((segment) => segment.id));
         setError('');
         setSaved(true);
       } catch {
+        write.fail();
         const detached =
           activeSaveRef.current?.token !== saveToken ||
           request.generation !== saveGenerationRef.current ||
@@ -769,8 +853,7 @@ export function FileDownloadPolicyEditor({
         ) {
           const persistedPolicy = persistedPolicyRef.current;
           if (persistedPolicy) {
-            setAudience(persistedPolicy.audience);
-            setSelectedAudienceSegmentIds(persistedPolicy.audienceSegments.map((segment) => segment.id));
+            configuration.discard(['audience', 'audienceSegmentIds']);
             setSegments((current) => mergeSegments(current, persistedPolicy.audienceSegments));
           }
           setError(t('saveError'));
@@ -802,7 +885,7 @@ export function FileDownloadPolicyEditor({
   }
 
   const queueSave = (nextAudience: FileDownloadAudience, nextAudienceSegmentIds: string[]) => {
-    if (!enabled || targetStaleRef.current) {
+    if (readOnly || !enabled || targetStaleRef.current) {
       return;
     }
 
@@ -811,6 +894,10 @@ export function FileDownloadPolicyEditor({
       return;
     }
 
+    configuration.edit({
+      audience: nextAudience,
+      audienceSegmentIds: nextAudience === 'restricted' ? nextAudienceSegmentIds : [],
+    });
     const requestSequence = ++saveSequenceRef.current;
     pendingSaveRef.current = {
       generation: saveGenerationRef.current,
@@ -840,72 +927,76 @@ export function FileDownloadPolicyEditor({
         : [ACCESS_SCOPE_VALUES.restricted]
       : [ACCESS_SCOPE_VALUES[resolvedAudience as Exclude<FileDownloadAudience, 'restricted'>]];
   const accessControl = policyLoaded ? (
-    <MultiSelect
-      label={mediaHeader ? undefined : t('sectionTitle')}
-      aria-label={mediaHeader ? t('sectionTitle') : undefined}
-      description={mediaHeader ? undefined : t(`audiences.${resolvedAudience}.description`)}
-      value={selectedAccessValues}
-      data={[
-        { value: ACCESS_SCOPE_VALUES.disabled, label: t('audiences.disabled.label') },
-        { value: ACCESS_SCOPE_VALUES.public, label: t('audiences.public.label') },
-        { value: ACCESS_SCOPE_VALUES.authenticated, label: t('audiences.authenticated.label') },
-        ...(audience === 'restricted' && selectedAudienceSegmentIds.length === 0
-          ? [
-              {
-                value: ACCESS_SCOPE_VALUES.restricted,
-                label: t('audiences.restricted.label'),
-                disabled: true,
-              },
-            ]
-          : []),
-        ...segments.map((segment) => ({
-          value: segment.id,
-          label: segment.name,
-        })),
-      ]}
-      searchable
-      searchValue={segmentSearch}
-      onSearchChange={scheduleSegmentSearch}
-      collapseSelectedValuesToOneLine
-      getCollapsedSummaryLabel={(count) => t('additionalSelected', { count })}
-      size="xs"
-      w="100%"
-      disabled={!enabled || loading || targetStale}
-      rightSection={saving || segmentsLoadingMore ? <Loader size={10} /> : undefined}
-      onChange={(values) => {
-        const addedValue = values.find((value) => !selectedAccessValues.includes(value));
-        if (addedValue && isAccessScopeValue(addedValue)) {
-          if (addedValue === ACCESS_SCOPE_VALUES.restricted) {
+    <div style={{ width: '100%' }}>
+      {mediaHeader ? (
+        <VisuallyHidden id={audienceDescriptionId} data-file-download-access-description>
+          {t(`audiences.${resolvedAudience}.description`)}
+        </VisuallyHidden>
+      ) : null}
+      <MultiSelect
+        label={mediaHeader ? undefined : t('sectionTitle')}
+        aria-label={mediaHeader ? t('sectionTitle') : undefined}
+        aria-describedby={
+          [mediaHeader ? audienceDescriptionId : undefined, error ? errorId : undefined].filter(Boolean).join(' ') ||
+          undefined
+        }
+        description={mediaHeader ? undefined : t(`audiences.${resolvedAudience}.description`)}
+        value={selectedAccessValues}
+        data={[
+          { value: ACCESS_SCOPE_VALUES.disabled, label: t('audiences.disabled.label') },
+          { value: ACCESS_SCOPE_VALUES.public, label: t('audiences.public.label') },
+          { value: ACCESS_SCOPE_VALUES.authenticated, label: t('audiences.authenticated.label') },
+          ...(audience === 'restricted' && selectedAudienceSegmentIds.length === 0
+            ? [
+                {
+                  value: ACCESS_SCOPE_VALUES.restricted,
+                  label: t('audiences.restricted.label'),
+                  disabled: true,
+                },
+              ]
+            : []),
+          ...segments.map((segment) => ({
+            value: segment.id,
+            label: segment.name,
+          })),
+        ]}
+        searchable
+        searchValue={segmentSearch}
+        onSearchChange={scheduleSegmentSearch}
+        collapseSelectedValuesToOneLine
+        getCollapsedSummaryLabel={(count) => t('additionalSelected', { count })}
+        size="xs"
+        disabled={readOnly || !enabled || loading || targetStale}
+        rightSection={saving || segmentsLoadingMore ? <Loader size="xs" /> : undefined}
+        onChange={(values) => {
+          const addedValue = values.find((value) => !selectedAccessValues.includes(value));
+          if (addedValue && isAccessScopeValue(addedValue)) {
+            if (addedValue === ACCESS_SCOPE_VALUES.restricted) {
+              return;
+            }
+            const nextAudience =
+              addedValue === ACCESS_SCOPE_VALUES.disabled
+                ? 'disabled'
+                : addedValue === ACCESS_SCOPE_VALUES.public
+                  ? 'public'
+                  : 'authenticated';
+            setSaved(false);
+            queueSave(nextAudience, []);
             return;
           }
-          const nextAudience =
-            addedValue === ACCESS_SCOPE_VALUES.disabled
-              ? 'disabled'
-              : addedValue === ACCESS_SCOPE_VALUES.public
-                ? 'public'
-                : 'authenticated';
-          setAudience(nextAudience);
-          setSelectedAudienceSegmentIds([]);
-          setSaved(false);
-          queueSave(nextAudience, []);
-          return;
-        }
 
-        const nextAudienceSegmentIds = values.filter((value) => !isAccessScopeValue(value));
-        if (nextAudienceSegmentIds.length === 0) {
-          setAudience('disabled');
-          setSelectedAudienceSegmentIds([]);
-          setSaved(false);
-          queueSave('disabled', []);
-          return;
-        }
+          const nextAudienceSegmentIds = values.filter((value) => !isAccessScopeValue(value));
+          if (nextAudienceSegmentIds.length === 0) {
+            setSaved(false);
+            queueSave('disabled', []);
+            return;
+          }
 
-        setAudience('restricted');
-        setSelectedAudienceSegmentIds(nextAudienceSegmentIds);
-        setSaved(false);
-        queueSave('restricted', nextAudienceSegmentIds);
-      }}
-    />
+          setSaved(false);
+          queueSave('restricted', nextAudienceSegmentIds);
+        }}
+      />
+    </div>
   ) : null;
   const segmentFeedback = policyLoaded ? (
     <>
@@ -913,10 +1004,9 @@ export function FileDownloadPolicyEditor({
         <StatusBadge
           role="status"
           aria-live="polite"
-          size="xs"
           tone="neutral"
           appearance="soft"
-          leftSection={<Loader size={8} />}
+          leftSection={<Loader size="xs" />}
         >
           {t('loading')}
         </StatusBadge>
@@ -940,33 +1030,41 @@ export function FileDownloadPolicyEditor({
   ) : null;
   const synchronizationFeedback =
     saving || saved ? (
-      <Stack align={mediaHeader ? 'flex-start' : 'flex-end'} gap={0} mih={18} aria-live="polite" aria-atomic="true">
-        {saving ? (
-          <StatusBadge size="xs" tone="neutral" appearance="soft" leftSection={<Loader size={8} />}>
-            {tStates('syncing')}
-          </StatusBadge>
-        ) : null}
-        {!saving && saved ? (
-          <StatusBadge size="xs" tone="positive" appearance="soft">
-            {tStates('synced')}
-          </StatusBadge>
-        ) : null}
-      </Stack>
+      <div style={{ minHeight: 18 }}>
+        <DsLayoutStack align={mediaHeader ? 'start' : 'end'} gap="none">
+          {saving ? (
+            <StatusBadge tone="neutral" appearance="soft" leftSection={<Loader size="xs" />}>
+              {tStates('syncing')}
+            </StatusBadge>
+          ) : null}
+          {!saving && saved ? (
+            <StatusBadge tone="positive" appearance="soft">
+              {tStates('synced')}
+            </StatusBadge>
+          ) : null}
+        </DsLayoutStack>
+      </div>
     ) : null;
   const content = loadPending ? (
-    <Alert tone="neutral">{t('loading')}</Alert>
+    <Alert role="status" tone="neutral">
+      {t('loading')}
+    </Alert>
   ) : !enabled ? (
-    <Alert tone="neutral">{t('fileRequired')}</Alert>
+    <Alert role="status" tone="neutral">
+      {t('fileRequired')}
+    </Alert>
   ) : !policyLoaded ? (
     error ? (
-      <Alert tone="danger">{error}</Alert>
+      <Alert id={errorId} role="alert" tone="danger">
+        {error}
+      </Alert>
     ) : null
   ) : (
     <>
       {accessControl}
       {segmentFeedback}
       {error ? (
-        <Alert role="alert" tone="danger">
+        <Alert id={errorId} role="alert" tone="danger">
           {error}
         </Alert>
       ) : null}
@@ -976,34 +1074,49 @@ export function FileDownloadPolicyEditor({
 
   if (mediaHeader) {
     return (
-      <Stack
+      <DsLayoutStack
         gap="xs"
-        w="100%"
+        fill="inline"
+        role="group"
+        aria-label={t('sectionTitle')}
+        aria-busy={loadPending}
         data-file-download-policy-presentation="media-header"
         onMouseDown={(event) => event.stopPropagation()}
         onClick={(event) => event.stopPropagation()}
       >
-        {loadPending ? <Loader size={16} aria-label={t('loading')} /> : null}
+        <VisuallyHidden role="status" aria-live="polite" aria-atomic="true" data-file-download-policy-sync>
+          {saving ? tStates('syncing') : saved ? tStates('synced') : ''}
+        </VisuallyHidden>
+        {loadPending ? <Loader size="xs" aria-label={t('loading')} /> : null}
         {!loadPending && policyLoaded ? accessControl : null}
         {!loadPending && policyLoaded ? segmentFeedback : null}
         {!loadPending && policyLoaded && error ? (
-          <Alert role="alert" tone="danger">
+          <Alert id={errorId} role="alert" tone="danger">
             {error}
           </Alert>
         ) : null}
         {!loadPending && policyLoaded ? synchronizationFeedback : null}
         {!loadPending && !policyLoaded && error ? (
-          <Alert role="alert" tone="danger">
+          <Alert id={errorId} role="alert" tone="danger">
             {error}
           </Alert>
         ) : null}
-      </Stack>
+      </DsLayoutStack>
     );
   }
 
   return (
-    <Stack gap={compact ? 'xs' : 'sm'} data-file-download-policy-presentation="standalone">
+    <DsLayoutStack
+      gap={compact ? 'xs' : 'sm'}
+      data-file-download-policy-presentation="standalone"
+      role="group"
+      aria-label={t('sectionTitle')}
+      aria-busy={loadPending}
+    >
+      <VisuallyHidden role="status" aria-live="polite" aria-atomic="true" data-file-download-policy-sync>
+        {saving ? tStates('syncing') : saved ? tStates('synced') : ''}
+      </VisuallyHidden>
       {content}
-    </Stack>
+    </DsLayoutStack>
   );
 }

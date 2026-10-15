@@ -1,7 +1,6 @@
+import { LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 import { getTranslations } from 'next-intl/server';
-import { Box, Group, Text } from '@mantine/core';
 import { getReservedTableContentMinHeight } from '@/components/core/DataTable';
-import { ServerDataTable } from '@/features/data-table/ServerDataTable';
 import { PageLoader } from '@/features/site/PageLoader';
 import { InvalidPublicTableQueryError } from '@/lib/queries/public-table';
 import { listPublicCategories, listPublicTags } from '@/lib/queries/taxonomy';
@@ -12,18 +11,15 @@ import {
   buildUserPublishedPostsFilterFields,
   buildUserPublishedPostsSortFields,
 } from './user-published-posts-table-spec';
-import { UserPublishedPostsTableContent } from './UserPublishedPostsTableContent';
-
+import { UserPublishedPostsTableView } from './UserPublishedPostsTableView';
 interface UserPublishedPostsTableProps {
   memberId: string;
   requestedLocale?: string | null;
   searchParams: URLSearchParams;
 }
-
 interface UserPublishedPostsTableFallbackProps {
   message?: string;
 }
-
 export async function UserPublishedPostsTable({
   memberId,
   requestedLocale,
@@ -48,17 +44,14 @@ export async function UserPublishedPostsTable({
     title: tCommon('labels.title'),
     published: tCommon('labels.published'),
   });
-
   let result: Awaited<ReturnType<typeof listUserPublishedPostsTable>>;
   let queryError: string | null = null;
-
   try {
     result = await listUserPublishedPostsTable(memberId, query, requestedLocale);
   } catch (error) {
     if (!(error instanceof InvalidPublicTableQueryError)) {
       throw error;
     }
-
     queryError = error.message;
     result = {
       data: [],
@@ -68,42 +61,26 @@ export async function UserPublishedPostsTable({
       totalPages: 0,
     };
   }
-
   return (
-    <ServerDataTable namespace="userPosts">
-      <ServerDataTable.Toolbar>
-        <ServerDataTable.Search namespace="userPosts" placeholder={tCommonPlaceholders('searchPosts')} />
-        <Group gap={4}>
-          <ServerDataTable.MultiFilter namespace="userPosts" fields={filterFields} allowLogicToggle={false} />
-          <ServerDataTable.MultiSort namespace="userPosts" fields={sortFields} />
-        </Group>
-      </ServerDataTable.Toolbar>
-      {queryError ? (
-        <Text c="red">{queryError}</Text>
-      ) : (
-        <UserPublishedPostsTableContent result={result} emptyMessage={tUserProfile('empty.noPublishedPosts')} />
-      )}
-      <ServerDataTable.Pagination
-        namespace="userPosts"
-        result={result}
-        searchParams={searchParams}
-        reserveSpaceWhenHidden
-      />
-    </ServerDataTable>
+    <UserPublishedPostsTableView
+      result={result}
+      emptyMessage={tUserProfile('empty.noPublishedPosts')}
+      searchPlaceholder={tCommonPlaceholders('searchPosts')}
+      filterFields={filterFields}
+      sortFields={sortFields}
+      searchParams={searchParams.toString()}
+      queryError={queryError}
+    />
   );
 }
 
 export function UserPublishedPostsTableFallback({ message }: UserPublishedPostsTableFallbackProps) {
   const minHeight = getReservedTableContentMinHeight(10);
-
   return (
-    <Box
-      style={{
-        minHeight,
-        position: 'relative',
-      }}
-    >
-      <PageLoader minHeight={minHeight} message={message} />
-    </Box>
+    <div style={{ minHeight, position: 'relative' }}>
+      <DsLayoutInset space="none">
+        <PageLoader minHeight={minHeight} message={message} />
+      </DsLayoutInset>
+    </div>
   );
 }

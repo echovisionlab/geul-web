@@ -1,4 +1,12 @@
 'use client';
+import { SupportingText, Heading as DsHeading } from '@/components/core/Typography';
+import { SectionCard as DsSectionCard } from '@/components/core/Section';
+import {
+  LayoutContainer as DsLayoutContainer,
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
@@ -7,8 +15,8 @@ import { useRouter } from 'next/navigation';
 import { IconLock } from '@tabler/icons-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Center, Container, Paper, Stack, Text, Title } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { Button } from '@/components/core/Button';
 import { PasswordInput } from '@/components/core/Input';
 import { PageLoader } from '@/features/site/PageLoader';
@@ -16,13 +24,25 @@ import { SiteLogo } from '@/features/site/SiteLogo';
 import { checkFormAccessAction, verifyFormPasswordAction } from '@/lib/actions/form';
 
 interface FormPasswordContentProps {
+  accessAction?: typeof checkFormAccessAction;
+  verifyAction?: typeof verifyFormPasswordAction;
+  onNavigate?: (href: string) => void;
+
   slug: string;
   shareToken?: string;
   next?: 'form' | 'dashboard';
   requestedLocale: string;
 }
 
-export function FormPasswordContent({ slug, shareToken, next = 'form', requestedLocale }: FormPasswordContentProps) {
+export function FormPasswordContent({
+  slug,
+  shareToken,
+  next = 'form',
+  requestedLocale,
+  accessAction = checkFormAccessAction,
+  verifyAction = verifyFormPasswordAction,
+  onNavigate,
+}: FormPasswordContentProps) {
   const t = useTranslations('formPasswordPage');
   const tCommonActions = useTranslations('common.actions');
   const tCommonPlaceholders = useTranslations('common.placeholders');
@@ -53,7 +73,7 @@ export function FormPasswordContent({ slug, shareToken, next = 'form', requested
   const accessQuery = useQuery({
     queryKey: ['form-password-route-access', slug, next, shareToken, storedPassword, requestedLocale],
     queryFn: () =>
-      checkFormAccessAction({
+      accessAction({
         slug,
         context: 'url',
         shareToken,
@@ -77,19 +97,27 @@ export function FormPasswordContent({ slug, shareToken, next = 'form', requested
       return;
     }
 
-    router.replace(basePath);
-  }, [accessQuery.data, accessQuery.isLoading, basePath, passwordLoaded, router, slug, storedPassword]);
+    if (onNavigate) {
+      onNavigate(basePath);
+    } else {
+      router.replace(basePath);
+    }
+  }, [accessQuery.data, accessQuery.isLoading, basePath, passwordLoaded, router, slug, storedPassword, onNavigate]);
 
   const verifyPassword = useMutation({
     mutationFn: (data: { slug: string; password: string }) =>
-      verifyFormPasswordAction(data.slug, data.password, shareToken).then(unwrapQueryResult),
+      verifyAction(data.slug, data.password, shareToken).then(unwrapQueryResult),
     onSuccess: (data) => {
       if (data.valid) {
         // Store password in session storage for this form
         sessionStorage.setItem(`form-password-${slug}`, password);
-        router.replace(basePath);
+        if (onNavigate) {
+          onNavigate(basePath);
+        } else {
+          router.replace(basePath);
+        }
       } else {
-        notifications.show({ message: t('errors.incorrectPassword'), color: 'red' });
+        notifications.show({ message: t('errors.incorrectPassword'), tone: 'danger' });
       }
     },
   });
@@ -97,7 +125,7 @@ export function FormPasswordContent({ slug, shareToken, next = 'form', requested
   const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!password.trim()) {
-      notifications.show({ message: t('errors.passwordRequired'), color: 'red' });
+      notifications.show({ message: t('errors.passwordRequired'), tone: 'danger' });
       return;
     }
     verifyPassword.mutate({ slug, password });
@@ -109,58 +137,69 @@ export function FormPasswordContent({ slug, shareToken, next = 'form', requested
 
   if (!passwordLoaded || accessQuery.isLoading || accessQuery.data?.reason !== 'password_required') {
     return (
-      <Box mih="100dvh" bg="var(--mantine-color-body)">
-        <PageLoader />
-      </Box>
+      <div style={{ minHeight: '100dvh' }}>
+        <DsSectionCard padding="none" appearance="surface" border="none">
+          <DsLayoutInset space="none">
+            <PageLoader />
+          </DsLayoutInset>
+        </DsSectionCard>
+      </div>
     );
   }
 
   return (
-    <Box mih="100dvh" bg="var(--mantine-color-body)">
-      <Container size="xs" py="xl">
-        <Stack gap="md">
-          <Box ta="center">
-            <SiteLogo height={24} />
-          </Box>
+    <div style={{ minHeight: '100dvh' }}>
+      <DsSectionCard padding="none" appearance="surface" border="none">
+        <DsLayoutInset space="none">
+          <DsLayoutInset block="xl">
+            <DsLayoutContainer size="compact">
+              <DsLayoutStack gap="md">
+                <DsLayoutInset textAlign="center" space="none">
+                  <SiteLogo height={24} />
+                </DsLayoutInset>
 
-          <Center>
-            <Paper p="xl" withBorder w="100%">
-              <form onSubmit={handleSubmit}>
-                <Stack gap="lg" align="center">
-                  <QueryErrorAlert
-                    queries={[
-                      {
-                        isError: verifyPassword.isError,
-                        error: verifyPassword.error,
-                        isFetching: verifyPassword.isPending,
-                        refetch: () => verifyPassword.mutateAsync({ slug, password }),
-                      },
-                    ]}
-                  />
-                  <IconLock size={48} color="var(--mantine-color-dimmed)" />
-                  <div style={{ textAlign: 'center' }}>
-                    <Title order={3}>{t('title')}</Title>
-                    <Text size="sm" c="dimmed" mt="xs">
-                      {t('description')}
-                    </Text>
-                  </div>
+                <DsLayoutStack align="center" justify="center">
+                  <DsSectionCard withBorder padding="xl">
+                    <form onSubmit={handleSubmit}>
+                      <DsLayoutStack gap="lg" align="center">
+                        <QueryErrorAlert
+                          queries={[
+                            {
+                              isError: verifyPassword.isError,
+                              error: verifyPassword.error,
+                              isFetching: verifyPassword.isPending,
+                              refetch: () => verifyPassword.mutateAsync({ slug, password }),
+                            },
+                          ]}
+                        />
+                        <IconLock size={48} color="var(--geul-text-muted)" />
+                        <div style={{ textAlign: 'center' }}>
+                          <DsHeading level={3}>{t('title')}</DsHeading>
+                          <DsLayoutInset blockStart="xs">
+                            <SupportingText tone="secondary">{t('description')}</SupportingText>
+                          </DsLayoutInset>
+                        </div>
 
-                  <PasswordInput
-                    placeholder={tCommonPlaceholders('password')}
-                    value={password}
-                    onChange={(e) => setPassword(e.currentTarget.value)}
-                    style={{ width: '100%' }}
-                  />
+                        <div style={{ width: '100%' }}>
+                          <PasswordInput
+                            placeholder={tCommonPlaceholders('password')}
+                            value={password}
+                            onChange={(e) => setPassword(e.currentTarget.value)}
+                          />
+                        </div>
 
-                  <Button type="submit" fullWidth loading={verifyPassword.isPending}>
-                    {tCommonActions('continue')}
-                  </Button>
-                </Stack>
-              </form>
-            </Paper>
-          </Center>
-        </Stack>
-      </Container>
-    </Box>
+                        <Button type="submit" fullWidth loading={verifyPassword.isPending}>
+                          {tCommonActions('continue')}
+                        </Button>
+                      </DsLayoutStack>
+                    </form>
+                  </DsSectionCard>
+                </DsLayoutStack>
+              </DsLayoutStack>
+            </DsLayoutContainer>
+          </DsLayoutInset>
+        </DsLayoutInset>
+      </DsSectionCard>
+    </div>
   );
 }

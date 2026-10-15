@@ -1,6 +1,6 @@
 'use client';
-
-import { Group, Text } from '@mantine/core';
+import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text } from '@/components/core/Typography';
 import {
   IconCheck,
   IconChevronDown,
@@ -12,12 +12,12 @@ import {
   IconRestore,
   IconVolume,
 } from '@tabler/icons-react';
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { IconButton } from '@/components/core/IconButton';
 import { TextInput } from '@/components/core/Input';
 import { Tooltip } from '@/components/core/Tooltip';
+import { LabelBadge } from '@/components/core/Badge';
 import classes from './ExecutableRuntimeControls.module.css';
-
 export function ExecutableBlockTitle({
   title,
   fallback,
@@ -29,54 +29,34 @@ export function ExecutableBlockTitle({
   editable: boolean;
   onChange?: (title: string) => void;
 }) {
-  const rowStyle: CSSProperties = {
-    boxSizing: 'border-box',
-    display: 'flex',
-    alignItems: 'center',
-    flex: '1 1 12rem',
-    minWidth: 0,
-    height: 20,
-    margin: 0,
-    padding: 0,
-    color: 'var(--mantine-color-text)',
-    background: 'transparent',
-    lineHeight: 1.4,
-  };
-
   if (editable) {
     return (
-      <div data-executable-title="" style={rowStyle}>
+      <DsLayoutInline flexible gap="none" data-executable-title="">
         <TextInput
           animate={false}
-          classNames={{ root: classes.titleRoot, wrapper: classes.titleWrapper, input: classes.titleInput }}
-          data-core-executable-title-input=""
-          value={title.trim() ? title : fallback}
+          data-executable-title-input=""
+          value={title}
+          placeholder={fallback}
           aria-label={fallback}
-          onFocus={(event) => {
-            if (!title.trim()) {
-              event.currentTarget.select();
-            }
-          }}
           onChange={(event) => onChange?.(event.currentTarget.value)}
         />
-      </div>
+      </DsLayoutInline>
     );
   }
-
   return (
-    <Text component="figcaption" data-executable-title="" style={rowStyle} fw={600} size="sm" truncate>
-      {title.trim() || fallback}
-    </Text>
+    <div className={classes.titleDisplay}>
+      <Text as="figcaption" flexible data-executable-title="" size="sm" truncate>
+        {title.trim() || fallback}
+      </Text>
+    </div>
   );
 }
-
 export interface ExecutableRuntimeControlLabels {
   run: string;
   stop: string;
   restart: string;
   resetOriginal: string;
 }
-
 export function ExecutableRuntimeStatus({
   status,
   running,
@@ -87,40 +67,24 @@ export function ExecutableRuntimeStatus({
   stopped: string;
 }) {
   return (
-    <span
-      data-executable-runtime-status=""
-      aria-live="polite"
-      style={{
-        position: 'absolute',
-        zIndex: 1,
-        insetBlockStart: 6,
-        insetInlineStart: 8,
-        margin: 0,
-        padding: '2px 5px',
-        color: 'var(--mantine-color-dimmed)',
-        background: 'color-mix(in srgb, var(--mantine-color-body) 85%, transparent)',
-        fontSize: 'var(--mantine-font-size-xs)',
-        fontWeight: 400,
-        lineHeight: 1.55,
-      }}
-    >
+    <LabelBadge placement="overlay-start" size="sm" data-executable-runtime-status="" aria-live="polite">
       {status === 'running' || status === 'starting' ? running : status === 'stopped' ? stopped : ''}
-    </span>
+    </LabelBadge>
   );
 }
-
 export function ExecutableIconControl({
   label,
   onClick,
   children,
   tone = 'neutral',
   pressed,
-  className,
+  className: _className,
   disabled,
 }: {
   label: string;
   onClick: () => void;
   children: ReactNode;
+  /** Command tone; toggles (`pressed`) use the Core-owned selected appearance instead. */
   tone?: 'accent' | 'neutral';
   pressed?: boolean;
   className?: string;
@@ -132,10 +96,7 @@ export function ExecutableIconControl({
         label={label}
         title={label}
         size="sm"
-        tone={tone}
-        emphasis="low"
-        aria-pressed={pressed}
-        className={className}
+        {...(pressed === undefined ? { tone, emphasis: 'low' as const } : { pressed })}
         disabled={disabled}
         onClick={onClick}
       >
@@ -144,7 +105,6 @@ export function ExecutableIconControl({
     </Tooltip>
   );
 }
-
 export function ExecutableRuntimeControls({
   className,
   labels,
@@ -169,78 +129,93 @@ export function ExecutableRuntimeControls({
   onRestart: () => void;
   onResetOriginal?: () => void;
   resetDisabled?: boolean;
-  sourceControl?: { label: string; expanded: boolean; onClick: () => void };
-  copyControl?: { label: string; onClick: () => void };
-  applyControl?: { label: string; disabled?: boolean; onClick: () => void };
+  sourceControl?: {
+    label: string;
+    expanded: boolean;
+    onClick: () => void;
+  };
+  copyControl?: {
+    label: string;
+    onClick: () => void;
+  };
+  applyControl?: {
+    label: string;
+    disabled?: boolean;
+    onClick: () => void;
+  };
   type: 'p5Sketch' | 'threeScene' | 'shader';
-  audioControl?: { label: string; onClick: () => void; pressed?: boolean };
+  audioControl?: {
+    label: string;
+    onClick: () => void;
+    pressed?: boolean;
+  };
   capabilityControl?: ReactNode;
 }) {
   return (
-    <Group className={className} justify="space-between" gap="xs" wrap="nowrap" data-runtime-controls={type}>
-      <Group gap={2} wrap="nowrap">
-        {running ? (
-          <ExecutableIconControl label={labels.stop} onClick={onStop}>
-            <IconPlayerStop size={16} aria-hidden />
-          </ExecutableIconControl>
-        ) : (
-          <ExecutableIconControl label={labels.run} tone="accent" onClick={onRun}>
-            <IconPlayerPlay size={16} aria-hidden />
-          </ExecutableIconControl>
-        )}
-        <ExecutableIconControl label={labels.restart} tone="accent" onClick={onRestart}>
-          <IconRefresh size={16} aria-hidden />
-        </ExecutableIconControl>
-        {capabilityControl}
-        {sourceControl ? (
-          <ExecutableIconControl
-            label={sourceControl.label}
-            pressed={sourceControl.expanded}
-            tone={sourceControl.expanded ? 'accent' : 'neutral'}
-            onClick={sourceControl.onClick}
-          >
-            {sourceControl.expanded ? (
-              <IconChevronUp size={16} aria-hidden />
-            ) : (
-              <IconChevronDown size={16} aria-hidden />
-            )}
-          </ExecutableIconControl>
-        ) : null}
-        {onResetOriginal ? (
-          <ExecutableIconControl label={labels.resetOriginal} disabled={resetDisabled} onClick={onResetOriginal}>
-            <IconRestore size={16} aria-hidden />
-          </ExecutableIconControl>
-        ) : null}
-        {audioControl ? (
-          <ExecutableIconControl
-            label={audioControl.label}
-            tone={audioControl.pressed ? 'accent' : 'neutral'}
-            pressed={audioControl.pressed}
-            onClick={audioControl.onClick}
-          >
-            <IconVolume size={16} aria-hidden />
-          </ExecutableIconControl>
-        ) : null}
-      </Group>
-      {copyControl || applyControl ? (
-        <Group gap={2} wrap="nowrap">
-          {copyControl ? (
-            <ExecutableIconControl label={copyControl.label} onClick={copyControl.onClick}>
-              <IconCopy size={16} aria-hidden />
+    <div className={className}>
+      <DsLayoutInline justify="between" gap="xs" wrap="nowrap" data-runtime-controls={type}>
+        <DsLayoutInline gap="xxs" wrap="nowrap">
+          {running ? (
+            <ExecutableIconControl label={labels.stop} onClick={onStop}>
+              <IconPlayerStop size={16} aria-hidden />
             </ExecutableIconControl>
-          ) : null}
-          {applyControl ? (
+          ) : (
+            <ExecutableIconControl label={labels.run} tone="accent" onClick={onRun}>
+              <IconPlayerPlay size={16} aria-hidden />
+            </ExecutableIconControl>
+          )}
+          <ExecutableIconControl label={labels.restart} tone="accent" onClick={onRestart}>
+            <IconRefresh size={16} aria-hidden />
+          </ExecutableIconControl>
+          {capabilityControl}
+          {sourceControl ? (
             <ExecutableIconControl
-              label={applyControl.label}
-              tone="accent"
-              disabled={applyControl.disabled}
-              onClick={applyControl.onClick}
+              label={sourceControl.label}
+              pressed={sourceControl.expanded}
+              onClick={sourceControl.onClick}
             >
-              <IconCheck size={16} aria-hidden />
+              {sourceControl.expanded ? (
+                <IconChevronUp size={16} aria-hidden />
+              ) : (
+                <IconChevronDown size={16} aria-hidden />
+              )}
             </ExecutableIconControl>
           ) : null}
-        </Group>
-      ) : null}
-    </Group>
+          {onResetOriginal ? (
+            <ExecutableIconControl label={labels.resetOriginal} disabled={resetDisabled} onClick={onResetOriginal}>
+              <IconRestore size={16} aria-hidden />
+            </ExecutableIconControl>
+          ) : null}
+          {audioControl ? (
+            <ExecutableIconControl
+              label={audioControl.label}
+              pressed={audioControl.pressed}
+              onClick={audioControl.onClick}
+            >
+              <IconVolume size={16} aria-hidden />
+            </ExecutableIconControl>
+          ) : null}
+        </DsLayoutInline>
+        {copyControl || applyControl ? (
+          <DsLayoutInline gap="xxs" wrap="nowrap">
+            {copyControl ? (
+              <ExecutableIconControl label={copyControl.label} onClick={copyControl.onClick}>
+                <IconCopy size={16} aria-hidden />
+              </ExecutableIconControl>
+            ) : null}
+            {applyControl ? (
+              <ExecutableIconControl
+                label={applyControl.label}
+                tone="accent"
+                disabled={applyControl.disabled}
+                onClick={applyControl.onClick}
+              >
+                <IconCheck size={16} aria-hidden />
+              </ExecutableIconControl>
+            ) : null}
+          </DsLayoutInline>
+        ) : null}
+      </DsLayoutInline>
+    </div>
   );
 }

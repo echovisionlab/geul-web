@@ -1,0 +1,64 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--geul-spacing-role-field-label);
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--geul-spacing-sm);
+}
+
+.copy {
+  flex: 1;
+  min-width: 0;
+  /* The label row matches Core Input's label line box, so both stacked fields share one rhythm. */
+  font-size: var(--geul-font-size-sm);
+  line-height: var(--geul-line-height-sm);
+}
+
+.label {
+  color: var(--geul-text-primary);
+  font-size: var(--geul-font-size-sm);
+  font-weight: var(--geul-font-weight-medium);
+}
+
+.description {
+  color: var(--geul-text-muted);
+  font-size: var(--geul-font-size-xs);
+  font-weight: var(--geul-font-weight-regular);
+  line-height: var(--geul-line-height-xs);
+}
+
+.error,
+.required {
+  color: var(--geul-status-danger);
+  font-size: var(--geul-font-size-xs);
+  font-weight: var(--geul-font-weight-regular);
+  line-height: var(--geul-line-height-xs);
+}
+
+.control {
+  min-width: 0;
+}
+
+.root[data-geul-field-layout='inline'] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--geul-spacing-role-field-column);
+  row-gap: var(--geul-spacing-xxs);
+}
+
+.root[data-geul-field-layout='inline'] > :is(.description, .error) {
+  grid-column: 1 / -1;
+}
+
+.root[data-geul-field-layout='inline'] > .control {
+  justify-self: end;
+  width: fit-content;
+  max-width: 100%;
+}

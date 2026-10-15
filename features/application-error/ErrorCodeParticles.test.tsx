@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { MantineProvider } from '@mantine/core';
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import * as THREE from 'three';
@@ -35,17 +35,17 @@ afterEach(async () => {
 async function mount(code = '500') {
   await act(async () => {
     root.render(
-      <MantineProvider env="test">
+      <DesignSystemProvider forceColorScheme="light">
         <ErrorCodeParticles code={code} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
 }
 
 function expectReadable(code: string) {
-  expect(host.querySelector('p')?.textContent).toBe(code);
+  expect(host.querySelector<HTMLElement>('[data-error-fallback]')?.textContent).toBe(code);
   expect(host.querySelector('[data-error-code]')?.getAttribute('data-particles-ready')).toBe('false');
-  expect(host.querySelector('p')?.style.opacity).toBe('1');
+  expect(host.querySelector<HTMLElement>('[data-error-fallback]')?.style.opacity).toBe('1');
 }
 
 function mockGraphics(glyphPending: Promise<void> = Promise.resolve()) {
@@ -148,7 +148,7 @@ describe('error number recovery', () => {
     const { setMeshSequence, scheduleTransition, setAnimationLoop } = mockGraphics();
     await mount();
     expect(setMeshSequence).toHaveBeenCalledWith(['error-scatter', '500']);
-    expect(host.querySelector('p')?.style.opacity).toBe('0');
+    expect(host.querySelector<HTMLElement>('[data-error-fallback]')?.style.opacity).toBe('0');
     expect(scheduleTransition).toHaveBeenCalledExactlyOnceWith(1, 1100, expect.any(Function));
     const draw = setAnimationLoop.mock.lastCall![0] as (time: number) => void;
     for (let time = 1000; time <= 1300; time += 50) {
@@ -233,8 +233,8 @@ describe('error number recovery', () => {
     await mount();
     expect(host.querySelector('canvas')).toBe(canvas);
     // Do not flash a completed text number before the entrance is ready.
-    expect(host.querySelector('p')?.textContent).toBe('500');
-    expect(host.querySelector('p')?.style.opacity).toBe('0');
+    expect(host.querySelector<HTMLElement>('[data-error-fallback]')?.textContent).toBe('500');
+    expect(host.querySelector<HTMLElement>('[data-error-fallback]')?.style.opacity).toBe('0');
     await act(async () => root.unmount());
     await act(async () => completeGlyph());
     expect(engineDispose).toHaveBeenCalledTimes(1);

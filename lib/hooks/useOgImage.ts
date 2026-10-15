@@ -23,7 +23,17 @@ const LOCALE_SCOPED_ENTITIES = new Set<OgGenerationEntityType>([
   'terms',
 ]);
 
+export interface OgImageReadBindings {
+  latest: typeof getLatestOgGenerationAction;
+  generation: typeof getOgGenerationAction;
+}
+const defaultReadBindings: OgImageReadBindings = {
+  latest: getLatestOgGenerationAction,
+  generation: getOgGenerationAction,
+};
+
 export interface UseOgImageOptions {
+  readBindings?: OgImageReadBindings;
   entityType: OgGenerationEntityType;
   entityId: string;
   initialOgImageUrl?: string | null;
@@ -40,7 +50,7 @@ function errorMessage(_error: unknown, fallback: string): string {
 }
 
 export function useOgImage(options: UseOgImageOptions) {
-  const { entityType, entityId, initialOgImageUrl, locale, provider } = options;
+  const { entityType, entityId, initialOgImageUrl, locale, provider, readBindings = defaultReadBindings } = options;
   const targetKey = JSON.stringify([entityType, entityId.trim(), locale?.trim() || null]);
   const localeScoped = LOCALE_SCOPED_ENTITIES.has(entityType);
   const hasLocale = Boolean(locale?.trim());
@@ -109,7 +119,7 @@ export function useOgImage(options: UseOgImageOptions) {
     setLookupError(null);
     let result: Awaited<ReturnType<typeof getLatestOgGenerationAction>>;
     try {
-      result = await getLatestOgGenerationAction({
+      result = await readBindings.latest({
         entityType: target.entityType,
         entityId: target.entityId,
         locale: target.locale,
@@ -146,7 +156,7 @@ export function useOgImage(options: UseOgImageOptions) {
     }
     setLookupError(null);
     return true;
-  }, []);
+  }, [readBindings]);
 
   // The initial lookup establishes the latest durable row. After that, lifecycle
   // events and explicit browser/provider wake-ups converge the target without
@@ -233,6 +243,7 @@ export function useOgImage(options: UseOgImageOptions) {
     entityType,
     entityId,
     locale,
+    onResync: () => void trackLatest(),
   });
 
   useEffect(() => {
@@ -248,7 +259,7 @@ export function useOgImage(options: UseOgImageOptions) {
     const poll = async () => {
       let result: Awaited<ReturnType<typeof getOgGenerationAction>>;
       try {
-        result = await getOgGenerationAction(generationId);
+        result = await readBindings.generation(generationId);
       } catch (error) {
         if (
           stopped ||
@@ -318,7 +329,7 @@ export function useOgImage(options: UseOgImageOptions) {
         clearTimeout(timer);
       }
     };
-  }, [generationId, router, targetKey]);
+  }, [generationId, readBindings, router, targetKey]);
 
   const status: OgGenerationUiStatus | undefined = generation?.status ?? (generationId ? 'queued' : undefined);
   const error =

@@ -1,8 +1,10 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Group, Modal, Stack } from '@mantine/core';
+
+import { ContentModal, DialogActions } from '@/components/core/Modal';
 import { Button } from '@/components/core/Button';
 import { Select, TextInput } from '@/components/core/Input';
 import { resolveEmbedUrl } from '@/features/page/blocks/embed/policy';
@@ -35,6 +37,7 @@ export function PageSectionPreinsertDialog({
   onCancel,
   onInsert,
 }: PageSectionPreinsertDialogProps) {
+  const tModalActions = useTranslations('common.actions');
   const t = useTranslations('pageEditor');
   const tActions = useTranslations('common.actions');
   const [externalVideoUrl, setExternalVideoUrl] = useState('');
@@ -54,8 +57,8 @@ export function PageSectionPreinsertDialog({
   }, [externalVideoUrl, formId, onInsert, type]);
 
   return (
-    <Modal opened onClose={onCancel} title={title} centered>
-      <Stack gap="md">
+    <ContentModal opened onClose={onCancel} title={title} centered closeLabel={tModalActions('close')}>
+      <DsLayoutStack gap="md">
         {type !== 'form' ? (
           <TextInput
             label={type === 'embed' ? t('embed.urlLabel') : 'URL'}
@@ -82,15 +85,15 @@ export function PageSectionPreinsertDialog({
             data-page-section-preinsert-form
           />
         )}
-        <Group justify="flex-end">
+        <DialogActions>
           <Button tone="neutral" emphasis="medium" onClick={onCancel} data-page-section-preinsert-cancel>
             {tActions('cancel')}
           </Button>
-          <Button onClick={confirm} disabled={!canInsert} data-page-section-preinsert-confirm>
+          <Button emphasis="strong" onClick={confirm} disabled={!canInsert} data-page-section-preinsert-confirm>
             {tActions('add')}
           </Button>
-        </Group>
-      </Stack>
-    </Modal>
+        </DialogActions>
+      </DsLayoutStack>
+    </ContentModal>
   );
 }

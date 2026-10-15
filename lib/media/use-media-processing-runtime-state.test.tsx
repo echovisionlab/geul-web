@@ -10,6 +10,7 @@ import { useMediaProcessingRuntimeState } from './use-media-processing-runtime-s
 
 const runtimeEventMock = vi.hoisted(() => ({
   handler: null as ((event: EditorRuntimeEvent) => void) | null,
+  resync: null as (() => void) | null,
 }));
 const getFileStatusActionMock = vi.hoisted(() => vi.fn());
 
@@ -22,9 +23,12 @@ vi.mock('@/lib/actions/file', () => ({
 }));
 
 vi.mock('@/lib/hooks/useEditorRuntimeEvents', () => ({
-  useEditorRuntimeEvents: vi.fn((_provider, onEvent: (event: EditorRuntimeEvent) => void) => {
-    runtimeEventMock.handler = onEvent;
-  }),
+  useEditorRuntimeEvents: vi.fn(
+    (_provider, onEvent: (event: EditorRuntimeEvent) => void, options?: { onResync?: () => void }) => {
+      runtimeEventMock.handler = onEvent;
+      runtimeEventMock.resync = options?.onResync ?? null;
+    },
+  ),
 }));
 
 const mockedGetFileStatusAction = vi.mocked(getFileStatusAction);
@@ -113,10 +117,49 @@ afterEach(() => {
   root = null;
   host = null;
   runtimeEventMock.handler = null;
+  runtimeEventMock.resync = null;
   mockedGetFileStatusAction.mockReset();
 });
 
 describe('useMediaProcessingRuntimeState', () => {
+  it('reads the current status when runtime events could not be delivered (resync)', async () => {
+    const processing = {
+      completed: false,
+      failed: false,
+      unavailable: false,
+      url: '',
+      originalUrl: '',
+      waveformUrl: '',
+      spectrogramUrl: '',
+      thumbnailUrl: '',
+      hlsUrl: '',
+      durationSeconds: 0,
+      processingStatus: MediaProcessingStatus.PROCESSING,
+      processingPercentage: 40,
+    };
+    mockedGetFileStatusAction.mockResolvedValueOnce(processing);
+    await renderProbe({ fileId: 'file-a' });
+    expect(getProbeNode().getAttribute('data-status')).toBe(String(MediaProcessingStatus.PROCESSING));
+
+    // The final `ready` event was lost; the resync reads the delivered state.
+    mockedGetFileStatusAction.mockResolvedValueOnce({
+      ...processing,
+      completed: true,
+      hlsUrl: 'https://cdn.example.com/file-a.m3u8',
+      processingStatus: MediaProcessingStatus.READY,
+      processingPercentage: undefined,
+    });
+    expect(runtimeEventMock.resync).toBeTypeOf('function');
+    await act(async () => {
+      runtimeEventMock.resync?.();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    await flushEffects();
+    expect(mockedGetFileStatusAction).toHaveBeenLastCalledWith('file-a');
+    expect(getProbeNode().getAttribute('data-status')).toBe(String(MediaProcessingStatus.READY));
+    expect(getProbeNode().getAttribute('data-hls-url')).toBe('https://cdn.example.com/file-a.m3u8');
+  });
+
   it('does not bootstrap file delivery from a pending upload id', async () => {
     await renderProbe({
       pendingUploadFileId: 'pending-file',

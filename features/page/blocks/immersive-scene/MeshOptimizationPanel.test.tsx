@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode, useState } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { MESH_OPTIMIZATION_METHOD_DRACO } from '@/lib/types/mesh-optimization';
 import {
@@ -68,7 +69,7 @@ function render(node: ReactNode) {
   root = createRoot(container);
 
   act(() => {
-    root?.render(<MantineProvider>{node}</MantineProvider>);
+    root?.render(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>);
   });
 }
 
@@ -238,17 +239,17 @@ describe('MeshOptimizationPanel', () => {
     );
     await flushEffects();
 
-    const slider = document.querySelector<HTMLElement>(
-      '[data-testid="immersive-scene-mesh-optimization-target-ratio-unit-1"] [role="slider"]',
+    const slider = document.querySelector<HTMLInputElement>(
+      '[data-testid="immersive-scene-mesh-optimization-target-ratio-unit-1"] input[type="range"]',
     );
-    expect(slider?.getAttribute('aria-valuenow')).toBe('70');
+    expect(slider?.value).toBe('70');
     for (let step = 0; step < 10; step += 1) {
       await act(async () => {
         slider?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
         await Promise.resolve();
       });
     }
-    expect(slider?.getAttribute('aria-valuenow')).toBe('60');
+    expect(slider?.value).toBe('60');
 
     await act(async () => {
       [...document.querySelectorAll<HTMLButtonElement>('button')]
@@ -347,10 +348,10 @@ describe('MeshOptimizationPanel', () => {
     expect(selected?.textContent).toContain('1%');
     expect(selected?.textContent).toContain('compressed-mesh.glb');
 
-    const slider = document.querySelector(
-      '[data-testid="immersive-scene-mesh-optimization-target-ratio-unit-1"] [role="slider"]',
+    const slider = document.querySelector<HTMLInputElement>(
+      '[data-testid="immersive-scene-mesh-optimization-target-ratio-unit-1"] input[type="range"]',
     );
-    expect(slider?.getAttribute('aria-valuenow')).toBe('1');
+    expect(slider?.value).toBe('1');
     expect(document.body.textContent).not.toContain('Use compressed GLB');
 
     await act(async () => {

@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
@@ -21,7 +22,7 @@ vi.mock('@/features/form/FormTranslationContext', () => ({
 vi.mock('../FormBuilder/FormBuilder', () => ({
   FormBuilder: (props: unknown) => {
     formBuilderMock(props);
-    return null;
+    return <div data-testid="form-builder" />;
   },
 }));
 
@@ -91,6 +92,34 @@ afterEach(() => {
 });
 
 describe('FormEditor', () => {
+  it.each([true, false])(
+    'upgrades the resident builder in place and rejects writes after downgrade (source: %s)',
+    (isSourceLocale) => {
+      useFormTranslationContextMock.mockReturnValue({
+        activeEditLocale: { activeLocale: isSourceLocale ? 'en' : 'ko', isSourceLocale, hasLiveRow: true },
+        isEditingScopedLocale: !isSourceLocale,
+      });
+      const provider = {};
+      useFormEditorContextMock.mockReturnValue({ ...useFormEditorContextMock(), provider });
+      setProviderAccessLevel(provider, 'view');
+      render();
+      const before = formBuilderMock.mock.lastCall?.[0];
+      const builder = container!.querySelector('[data-testid="form-builder"]');
+      expect(builder).not.toBeNull();
+      expect(before.mode).toBe('readOnly');
+      act(() => setProviderAccessLevel(provider, 'edit'));
+      expect(formBuilderMock.mock.lastCall?.[0].mode).toBe(isSourceLocale ? 'full' : 'translation');
+      expect(container!.querySelector('[data-testid="form-builder"]')).toBe(builder);
+      expect(formBuilderMock.mock.lastCall?.[0].schema).toBe(before.schema);
+      act(() => setProviderAccessLevel(provider, 'view'));
+      const after = formBuilderMock.mock.lastCall?.[0];
+      expect(after.mode).toBe('readOnly');
+      expect(after.schema).toBe(before.schema);
+      expect(container!.querySelector('[data-testid="form-builder"]')).toBe(builder);
+      act(() => after.onChange({ id: 'form-1', steps: [] }));
+      expect(setFieldMock).not.toHaveBeenCalled();
+    },
+  );
   it('keeps the builder read-only until the canonical room has synced', () => {
     const context = useFormEditorContextMock();
     useFormEditorContextMock.mockReturnValue({ ...context, isSynced: false });

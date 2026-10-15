@@ -19,7 +19,7 @@ import {
 } from '@/lib/policy-status';
 import type { SiteSettingsView } from '@/lib/types/site-setting/config';
 
-const PRIVACY_EDITOR_STRATEGY = {
+export const PRIVACY_EDITOR_STRATEGY = {
   entityType: 'privacy',
   translationNamespace: 'privacyEditor',
   listPath: '/admin/privacy',

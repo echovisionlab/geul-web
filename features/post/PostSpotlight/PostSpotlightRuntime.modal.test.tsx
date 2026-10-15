@@ -1,13 +1,14 @@
 // @vitest-environment jsdom
 
+import { AppDesignSystemRouter, DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 
 const probes = vi.hoisted(() => ({ load: vi.fn(), query: vi.fn(), push: vi.fn(), search: vi.fn() }));
 vi.mock('./post-spotlight-runtime-loader', () => ({ loadPostSpotlightRuntime: probes.load }));
-vi.mock('next/navigation', () => ({ useRouter: () => ({ push: probes.push }) }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push: probes.push, replace: vi.fn(), prefetch: vi.fn() }) }));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
 vi.mock('@tanstack/react-query', () => ({ useQuery: probes.query }));
 vi.mock('@/lib/queries/post-browser', () => ({ searchPublishedPosts: probes.search }));
@@ -61,9 +62,11 @@ afterEach(async () => {
 async function mount() {
   await act(async () =>
     root.render(
-      <MantineProvider env="test">
-        <PostSpotlight />
-      </MantineProvider>,
+      <DesignSystemProvider forceColorScheme="light">
+        <AppDesignSystemRouter>
+          <PostSpotlight />
+        </AppDesignSystemRouter>
+      </DesignSystemProvider>,
     ),
   );
 }
@@ -128,8 +131,13 @@ it('honors the full 300 ms debounce even when results code arrives 50 ms after t
   expect(probes.query.mock.lastCall?.[0].enabled).toBe(false);
   await tick(1);
   expect(probes.query.mock.lastCall?.[0].enabled).toBe(true);
+  // The Core search field clears a non-empty query on the first Escape; the next Escape closes the palette.
+  await escape();
+  expect(input().value).toBe('');
+  expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
   await escape();
   await tick(250);
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
   const calls = probes.query.mock.calls.length;
   await tick(500);
   expect(probes.query).toHaveBeenCalledTimes(calls);
@@ -162,21 +170,24 @@ it('cancels a pending open with Escape, returns original focus, and never reopen
   expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
 });
 
-it('keeps Mantine arrow/Enter result selection and returns focus after selecting a post', async () => {
+it('keeps arrow/Enter result selection and returns focus after selecting a post', async () => {
   await mount();
   await act(async () => openPostSpotlight());
   await tick(50);
   await type('ab');
   await tick(300);
-  expect(document.querySelector('[data-action]')?.textContent).toContain('Post');
+  expect(document.querySelector('[role="menuitem"]')?.textContent).toContain('Post');
   await act(async () =>
     input().dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', code: 'ArrowDown', bubbles: true })),
   );
-  expect(document.querySelector('[data-selected]')).not.toBeNull();
+  const active = document.querySelector<HTMLElement>('[role="menuitem"][data-focused]');
+  expect(active?.textContent).toBe('Post');
+  expect(input().getAttribute('aria-activedescendant')).toBe(active?.id);
   await act(async () =>
     input().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true })),
   );
-  expect(probes.push).toHaveBeenCalledWith('/posts/post-slug');
+  expect(probes.push).toHaveBeenCalledOnce();
+  expect(new URL(probes.push.mock.lastCall?.[0], window.location.href).pathname).toBe('/posts/post-slug');
   await tick(250);
   expect(document.querySelector('[role="dialog"]')).toBeNull();
   expect(document.activeElement).toBe(trigger);

@@ -4,7 +4,7 @@ The Geul web application, published as a standalone Next.js source repository.
 
 ## Development
 
-Requirements: Node.js `24.19.0` and pnpm `11.22.0`.
+Requirements: Node.js `24.21.0` and pnpm `11.22.0`.
 
 ```sh
 cp .env.example .env
@@ -14,7 +14,17 @@ pnpm prepare:p5-runtime
 pnpm dev
 ```
 
-Run the focused checks before submitting a change:
+While working, check only what the working tree changed (typecheck, ESLint and
+Stylelint on changed files, `i18n:check` when messages changed, Vitest for related
+tests, and the Storybook test-runner for affected stories against `pnpm storybook`):
+
+```sh
+pnpm verify:changed              # all of the above; --no-storybook / --base <ref>
+pnpm test:changed                # Vitest for related tests only
+pnpm storybook:test:changed      # affected stories only (--dry-run lists them)
+```
+
+Run the full checks before submitting a change:
 
 ```sh
 pnpm lint
@@ -24,12 +34,42 @@ pnpm test
 pnpm build
 ```
 
+Unreleased sibling contracts (`../geul-event-contracts`, `../geul-common`,
+`../geul-telemetry`) are consumed with `LOCAL_CONTRACTS=1` and the
+`*:local-contracts` scripts (`typecheck`, `test`, `storybook`, `build`);
+`LOCAL_CONTRACTS=1 pnpm verify:changed` uses them too. Never point a dependency at a
+sibling checkout with a pnpm `link:` override.
+
 The production image is published by the release workflow as
 `registry.dsub.io/echovisionlab/geul-web:<tag>`.
 
 This standalone repository uses Geul-namespaced browser, storage, runtime, and
 wire identifiers. Deployments provide their public and service URLs through the
 environment contract; no compatibility aliases are supported.
+
+## Translations
+
+`messages/en.json` is the source of truth for UI copy; the other locales must have exactly its
+keys and ICU structure. Run `pnpm i18n:check` after changing messages, and `pnpm i18n:scopes`
+after adding `useTranslations` calls to client components. See [docs/i18n.md](docs/i18n.md).
+
+## Geul design system
+
+Storybook is the documentation and review surface for the design system, production
+Core components, reusable compositions and page fixtures. Tokens, `theme.ts` and
+`components/core/**` own the adopted visual and interaction contracts.
+
+Run `pnpm storybook` to browse **Foundations / Overview**, then the system rules,
+component documentation and page documentation. Theme, locale and viewport controls
+apply to the same production components used by the application.
+
+Read the [design system](docs/design-system.md) for ownership and adopted rules,
+and the [Storybook guide](docs/ui-kit.md) for documentation, previews and checks.
+For a repeatable review, run `node scripts/design-system/review.mjs run compact-product`.
+The [review tooling guide](docs/design-system/review-tools.md) explains plans, status,
+evidence recording and the persistent local output directory.
+A fixture or passing automatic check does not establish complete page or assistive
+technology verification.
 
 ## Page editing durability
 

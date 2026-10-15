@@ -1,95 +1,73 @@
-.actionsWithLanguage,
-.headerWithLanguage {
-  padding-inline-end: var(--content-controls-space);
+/* Plain header actions center on, and never enlarge, the title's first line box. Mirrors the Core
+   heading `title` role, which is responsive in the token layer; PostHeader.test.tsx guards the pairing. */
+.titleActions {
+  display: flex;
+  align-items: center;
+  block-size: calc(var(--geul-heading-title) * var(--geul-heading-line-height));
 }
 
-.heroContent {
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   min-height: 232px;
 }
 
-@media (min-width: 48em) {
-  .heroContent {
+.heroImage {
+  position: absolute;
+  inset: 0;
+}
+
+.heroContent {
+  position: relative;
+  display: flex;
+  min-height: inherit;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-block-start: calc(var(--geul-control-height-sm) + 2 * var(--geul-spacing-md));
+  /* The title shares the post body's reading column (PostViewContent): the md image inset plus this
+     padding equals the body's edges. The body sits in the space the table of contents leaves
+     (`--_table-of-contents-inset-*`, 0 without an outline; asymmetric on phones), behind its own md
+     inset, and centers the reading measure there. */
+  --_hero-start: var(--_table-of-contents-inset-start, 0px);
+  --_hero-end: var(--_table-of-contents-inset-end, 0px);
+  --_hero-free: calc(100% - var(--_hero-start) - var(--_hero-end) - var(--geul-content-width-reading));
+  --_hero-gap: max(0px, var(--_hero-free) / 2 - var(--geul-spacing-md));
+  padding-inline: calc(var(--_hero-start) + var(--_hero-gap)) calc(var(--_hero-end) + var(--_hero-gap));
+}
+
+.heroActions {
+  position: absolute;
+  inset-block-start: var(--geul-spacing-md);
+  inset-inline-end: var(--geul-spacing-md);
+}
+
+@media (width >= $mantine-breakpoint-sm) {
+  .hero {
     min-height: 400px;
   }
 }
 
+/* Paper keeps the screen composition: one unbroken image fragment under the same Core header
+   shade. The document layout owns the hero → body gap; actions are print-hidden. */
 @media print {
   .hero {
-    position: relative !important;
-    display: grid !important;
-    height: auto !important;
-    min-height: 62mm !important;
-    overflow: hidden !important;
-    margin: 0 0 8mm !important;
-    isolation: isolate;
+    min-height: 62mm;
     break-inside: avoid;
     print-color-adjust: exact;
   }
 
-  .heroOverlay {
-    position: absolute !important;
-    display: block !important;
-    inset: 0 !important;
-    background: linear-gradient(to top, rgb(0 0 0 / 88%) 0%, rgb(0 0 0 / 52%) 56%, rgb(0 0 0 / 30%) 100%) !important;
-    print-color-adjust: exact;
-  }
-
   .heroImage {
-    position: absolute !important;
-    display: block !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    max-height: none !important;
-    margin: 0 !important;
-    object-fit: cover !important;
-    filter: brightness(0.62) saturate(0.88);
     print-color-adjust: exact;
   }
 
   .heroContent {
-    position: relative !important;
-    z-index: 1 !important;
-    display: flex !important;
-    height: auto !important;
-    min-height: 62mm !important;
-    justify-content: flex-end !important;
-    padding: 8mm !important;
-    color: #fff !important;
+    padding-block-start: var(--geul-spacing-xl);
+    padding-inline: 0;
   }
 
-  .heroContent * {
-    color: #fff !important;
-  }
-
-  .titleStack {
-    position: static !important;
-    margin-bottom: 0 !important;
-  }
-
-  .heroTitle {
-    margin: 0 !important;
-    color: #fff !important;
-    font-size: 19pt !important;
-    line-height: 1.1 !important;
-  }
-
-  .heroMetadata {
-    position: static !important;
-    gap: 2mm !important;
-  }
-
-  .hero :global(.mantine-Badge-root),
-  .hero :global(.post-meta-chip) {
-    display: inline-flex !important;
-    color: #fff !important;
-    border: 1px solid rgb(255 255 255 / 55%) !important;
-    background: rgb(0 0 0 / 28%) !important;
-    transform: none !important;
-    print-color-adjust: exact;
-  }
-
-  .hero :global(.mantine-Avatar-root) {
-    border-color: rgb(255 255 255 / 72%) !important;
+  /* Actions are print-hidden; their screen line box must not hold the paper title row open. */
+  .titleActions {
+    display: none;
   }
 }

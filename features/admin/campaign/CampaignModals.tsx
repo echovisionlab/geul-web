@@ -1,15 +1,20 @@
 'use client';
+import { ConfirmationDialog } from '@/features/confirmation';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
-import { ConfirmModal } from '@/components/core/Modal';
+
+import { notifications } from '@/components/core/Notification';
+
 import { deleteCampaignAction } from '@/lib/actions/campaign';
 import { useCampaignModal } from './CampaignModalContext';
 
-export function CampaignModals() {
+export function CampaignModals({
+  deleteAction = deleteCampaignAction,
+  refresh,
+}: { deleteAction?: typeof deleteCampaignAction; refresh?: () => void } = {}) {
   const tCommon = useTranslations('common');
   const tPage = useTranslations('adminList.campaigns');
   const router = useRouter();
@@ -24,26 +29,27 @@ export function CampaignModals() {
     }
     setDeleteLoading(true);
     try {
-      const result = await deleteCampaignAction(deletingCampaign.id);
+      const result = await deleteAction(deletingCampaign.id);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tPage('deleted'), color: 'red' });
+      notifications.show({ message: tPage('deleted'), tone: 'positive' });
       closeDelete();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setDeleteLoading(false);
     }
   };
 
   return (
-    <ConfirmModal
+    <ConfirmationDialog
+      intent="delete"
       opened={!!deletingCampaign}
       onClose={closeDelete}
       onConfirm={handleDelete}
       title={tPage('deleteTitle')}
-      message={<Text>{tPage('deleteConfirm')}</Text>}
+      message={<DsText>{tPage('deleteConfirm')}</DsText>}
       confirmLabel={tCommon('actions.delete')}
       cancelLabel={tCommon('actions.cancel')}
       closeLabel={tCommon('actions.close')}

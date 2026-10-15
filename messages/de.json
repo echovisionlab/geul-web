@@ -1,6 +1,7 @@
 {
   "common": {
     "actions": {
+      "move": "Verschieben",
       "save": "Speichern",
       "saveChanges": "Änderungen speichern",
       "create": "Erstellen",
@@ -59,7 +60,7 @@
       "reply": "Antworten",
       "insertVariable": "Variable einfügen",
       "acceptAll": "Alle akzeptieren",
-      "rejectNonEssential": "Nicht notwendige ablehnen",
+      "rejectNonEssential": "Ablehnen",
       "savePreferences": "Einstellungen speichern",
       "import": "Importieren",
       "export": "Exportieren",
@@ -127,10 +128,7 @@
       "file": "Datei",
       "bio": "Biografie",
       "realName": "Realer Name",
-      "countryCode": "Ländercode",
       "slug": "Slug",
-      "slugAutoModeEnabled": "Automatisch mit Titel synchronisieren (zum Deaktivieren klicken)",
-      "slugAutoModeManual": "Manueller Modus (zum Aktivieren der automatischen Synchronisierung klicken)",
       "submissions": "Einreichungen",
       "public": "Öffentlich",
       "location": "Ort",
@@ -162,7 +160,6 @@
       "logoLight": "Helles Logo",
       "logoDark": "Dunkles Logo",
       "joined": "Beigetreten",
-      "subscribed": "Abonniert am",
       "featured": "Hervorgehoben",
       "order": "Reihenfolge",
       "sortOrder": "Sortierreihenfolge",
@@ -177,7 +174,6 @@
       "minutes": "Minuten",
       "seconds": "Sekunden",
       "time": "Zeit",
-      "generationInfo": "Generierungsinfos",
       "body": "Inhalt",
       "content": "Inhalt",
       "bodyPreview": "Vorschau des Inhalts",
@@ -280,6 +276,7 @@
     },
     "messages": {
       "noUsersFound": "Keine Benutzer gefunden",
+      "noAuthorsFound": "Keine Autoren gefunden.",
       "noVersionsFound": "Keine Versionen gefunden.",
       "typeAtLeast2Characters": "Geben Sie mindestens 2 Zeichen ein",
       "itemCreated": "{item} erstellt",
@@ -294,25 +291,23 @@
       "removeImageFailed": "Bild konnte nicht entfernt werden",
       "deleteItemConfirm": "Möchten Sie dieses {item} wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
       "deleteNamedItemConfirm": "Möchten Sie \"{name}\" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
-      "confirmDeleteSelectedCount": "Möchten Sie {count} ausgewählte Elemente wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
-      "deleteDraftVersionConfirm": "Möchten Sie diesen Entwurf wirklich löschen?",
+      "confirmDeleteSelectedCount": "Möchten Sie {count, plural, one {# ausgewähltes Element} other {# ausgewählte Elemente}} wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
       "confirmDeleteNamedRich": "Möchten Sie <strong>{name}</strong> wirklich löschen?",
-      "activeCount": "{count} aktiv",
       "effectiveFromDate": "Gültig ab {date}",
       "noUpdateRecorded": "Keine Aktualisierung erfasst",
-      "exportedEmails": "Exportierte {count, plural, one {# E-Mail} other {# E-Mails}}",
       "formSubmittedSuccessfully": "Ihre Antwort wurde erfolgreich gesendet.",
       "userDate": "{user} · {date}",
       "scheduleActivationTitle": "Aktivierung planen",
       "scheduleActivationDescription": "Wählen Sie aus, wann diese Version aktiv werden soll. Zum geplanten Zeitpunkt werden Benachrichtigungs-E-Mails an alle aktiven Konten gesendet.",
       "scheduleActivationNotice": "Die Planung sendet Benachrichtigungs-E-Mails mit einem Vorschau-Link an alle aktiven Konten.",
-      "translationDetailUnavailable": "Die detaillierten Übersetzungsdaten konnten nicht geladen werden. Sie können die aktuelle öffentliche Übersetzung trotzdem bearbeiten.",
       "invalidConfirmationLinkFromEmail": "Ungültiger Bestätigungslink. Verwenden Sie bitte den Link aus Ihrer Bestätigungs-E-Mail.",
       "noPostsFound": "Keine Beiträge gefunden.",
       "noWorksFound": "Keine Werke gefunden.",
-      "urlCopiedToClipboard": "URL in die Zwischenablage kopiert",
       "failedToLoad": "Daten konnten nicht geladen werden.",
-      "relatedItemsWillBeUnlinked": "{count} verknüpfte Elemente werden getrennt."
+      "relatedItemsWillBeUnlinked": "{count} verknüpfte Elemente werden getrennt.",
+      "noArtistsFound": "Keine Künstler gefunden.",
+      "noLabelsFound": "Keine Labels gefunden.",
+      "noReleasesFound": "Keine Veröffentlichungen gefunden."
     },
     "notifications": {
       "categoryCreated": "Kategorie erstellt",
@@ -334,7 +329,14 @@
       "ogRegenerationFailed": "OG-Bild konnte nicht neu generiert werden",
       "testEmailSent": "Test-E-Mail gesendet",
       "saveSuccess": "Gespeichert",
-      "saveFailed": "Speichern fehlgeschlagen"
+      "saveFailed": "Speichern fehlgeschlagen",
+      "saveRetrying": "Ihre Änderungen wurden noch nicht auf dem Server gespeichert. Wir versuchen es erneut.",
+      "editsRestored": "Wiederhergestellte Änderungen wurden übernommen.",
+      "leaveWithRejectedEdits": {
+        "title": "Ohne die Änderungen verlassen, die nicht gespeichert werden konnten?",
+        "message": "Der Server hat einige Änderungen abgelehnt, sodass sie nicht gespeichert wurden. Kopieren Sie sie zuerst über das Zusammenarbeitsmenü oder verlassen Sie die Seite und verwerfen Sie sie.",
+        "confirm": "Verlassen und verwerfen"
+      }
     },
     "errors": {
       "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
@@ -372,8 +374,6 @@
       "testEmail": "test@beispiel.de",
       "testEmailExample": "test@example.com",
       "noReplyEmail": "noreply@example.com",
-      "translationLiveRowMissing": "Für dieses Gebietsschema gibt es noch keine öffentliche Übersetzung. Wenn Sie hier speichern, wird sofort eine erstellt.",
-      "translationBodyPreviewUnavailable": "Die Inhaltsvorschau ist nicht verfügbar.",
       "selectDateAndTime": "Datum und Uhrzeit auswählen",
       "streetAddress": "Straßenadresse",
       "regionSubdivision": "Bundesland/Provinz"
@@ -408,12 +408,11 @@
       "generating": "Wird generiert...",
       "true": "Wahr",
       "false": "Falsch",
-      "loading": "Wird geladen..."
+      "loading": "Wird geladen...",
+      "toBeAnnounced": "Wird bekannt gegeben"
     },
     "roles": {
       "admin": "Administrator",
-      "editor": "Redakteur",
-      "viewer": "Betrachter",
       "author": "Autor",
       "user": "Benutzer"
     },
@@ -445,6 +444,11 @@
       "unsubscribed": "Abgemeldet",
       "subscribed": "Abonniert",
       "onboardingPending": "Onboarding ausstehend"
+    },
+    "motion": {
+      "pause": "Animation pausieren",
+      "resume": "Animation fortsetzen",
+      "readAllInformation": "Alle Szeneninformationen lesen"
     }
   },
   "shell": {
@@ -463,6 +467,11 @@
       "siteInfo": "Website-Informationen",
       "links": "Links",
       "socialMedia": "Soziale Medien"
+    },
+    "signOutUnsaved": {
+      "title": "Mit ungespeicherten Änderungen abmelden?",
+      "message": "Einige Änderungen wurden noch nicht auf dem Server gespeichert. Bei der Abmeldung werden sie von diesem Gerät gelöscht.",
+      "confirm": "Abmelden und verwerfen"
     }
   },
   "adminShell": {
@@ -503,13 +512,11 @@
   },
   "localizationNotice": {
     "translated": {
-      "title": "Localized version",
-      "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
+      "title": "Lokalisierte Version",
+      "description": "Diese lokalisierte Version wird auf {displayed} angezeigt; das Original auf {source} bleibt maßgeblich."
     },
     "fallback": {
-      "title": "Ersatzsprache",
-      "english": "Die angeforderte {requested}-Übersetzung ist nicht verfügbar, daher wird diese Seite in {displayed} angezeigt.",
-      "source": "Die angeforderte {requested}-Übersetzung ist nicht verfügbar, daher wird diese Seite in der Originalsprache {source} angezeigt."
+      "title": "Ersatzsprache"
     },
     "actions": {
       "viewOriginal": "Original anzeigen ({source})"
@@ -558,8 +565,8 @@
           "description": "Wiederherstellung Ihres {siteName}-Kontos bestätigen"
         },
         "verification": {
-          "title": "Verify Email",
-          "description": "Verify your email address on {siteName}"
+          "title": "E-Mail bestätigen",
+          "description": "Bestätigen Sie Ihre E-Mail-Adresse auf {siteName}"
         }
       }
     },
@@ -698,35 +705,34 @@
       }
     },
     "verification": {
-      "loading": "Loading verification form...",
-      "redirecting": "Redirecting...",
-      "startOver": "Start over",
+      "loading": "Bestätigungsformular wird geladen...",
+      "startOver": "Neu beginnen",
       "errors": {
-        "flowNotFound": "Verification flow not found or expired",
-        "submit": "Failed to verify email",
-        "submitRetry": "Failed to verify email. Please try again.",
-        "emailRequired": "Enter the email address to verify.",
-        "sendVerificationEmail": "Failed to send verification email",
-        "cooldown": "Please wait {seconds} seconds before requesting another verification email.",
-        "alreadyExists": "This email is already registered.",
-        "currentVerified": "This email is already verified on this account.",
-        "invalidEmail": "Enter a valid email address."
+        "flowNotFound": "Bestätigungsvorgang nicht gefunden oder abgelaufen",
+        "submit": "E-Mail konnte nicht bestätigt werden",
+        "submitRetry": "E-Mail konnte nicht bestätigt werden. Bitte versuchen Sie es erneut.",
+        "emailRequired": "Geben Sie die zu bestätigende E-Mail-Adresse ein.",
+        "sendVerificationEmail": "Bestätigungs-E-Mail konnte nicht gesendet werden",
+        "cooldown": "Bitte warten Sie {seconds} Sekunden, bevor Sie eine weitere Bestätigungs-E-Mail anfordern.",
+        "alreadyExists": "Diese E-Mail-Adresse ist bereits registriert.",
+        "currentVerified": "Diese E-Mail-Adresse ist für dieses Konto bereits bestätigt.",
+        "invalidEmail": "Geben Sie eine gültige E-Mail-Adresse ein."
       },
       "chooseMethod": {
-        "title": "Verify email",
-        "description": "Enter your email address and we will send you a verification code.",
-        "submit": "Send verification code"
+        "title": "E-Mail bestätigen",
+        "description": "Geben Sie Ihre E-Mail-Adresse ein. Wir senden Ihnen einen Bestätigungscode.",
+        "submit": "Bestätigungscode senden"
       },
       "sentEmail": {
-        "description": "Enter the verification code from your email to continue.",
-        "codeLabel": "Verification code",
-        "submitting": "Checking code...",
+        "description": "Geben Sie den Bestätigungscode aus Ihrer E-Mail ein, um fortzufahren.",
+        "codeLabel": "Bestätigungscode",
+        "submitting": "Code wird geprüft...",
         "resend": "Neuen Code senden"
       },
       "passedChallenge": {
-        "title": "Email verified",
-        "description": "Your email address has been verified.",
-        "action": "Back to security settings"
+        "title": "E-Mail bestätigt",
+        "description": "Ihre E-Mail-Adresse wurde bestätigt.",
+        "action": "Zurück zu den Sicherheitseinstellungen"
       },
       "applying": {
         "checkAgain": "Erneut prüfen",
@@ -787,7 +793,6 @@
     }
   },
   "cookieConsentCommon": {
-    "essentialLabel": "Essenzielle Cookies (immer aktiv)",
     "analyticsLabel": "Analyse-Cookies (Google Analytics)"
   },
   "nicknameField": {
@@ -834,7 +839,6 @@
       "failedToRevokeSession": "Sitzung konnte nicht widerrufen werden",
       "failedToRevokeSessions": "Sitzungen konnten nicht widerrufen werden",
       "failedToRequestDeletion": "Kontolöschung konnte nicht angefordert werden",
-      "cannotUnlinkMessage": "Sie müssen mindestens eine Authentifizierungsmethode behalten",
       "connectedMessage": "Das {provider}-Konto wurde erfolgreich verbunden.",
       "disconnectedMessage": "{provider} wurde getrennt.",
       "failedToUpdateMainEmail": "Primäre E-Mail-Adresse konnte nicht aktualisiert werden",
@@ -883,21 +887,11 @@
     "email": {
       "title": "Primäre E-Mail-Adresse",
       "description": "Wähle aus den verifizierten Adressen die E-Mail für Benachrichtigungen und Kontohinweise aus.",
-      "addEmail": "E-Mail hinzufügen",
       "canonical": "Primäre E-Mail-Adresse",
-      "canonicalCannotRemove": "Wähle vor dem Entfernen dieser Adresse eine andere primäre E-Mail-Adresse.",
       "setCanonical": "Als primäre E-Mail-Adresse festlegen",
-      "noEmail": "Keine E-Mail festgelegt",
-      "helper": "Nur eine verifizierte E-Mail-Adresse kann als primäre E-Mail-Adresse ausgewählt werden.",
-      "selectLabel": "Primäre E-Mail-Adresse",
       "changeAction": "Primäre E-Mail-Adresse ändern",
       "sources": {
-        "current": "Aktuelle primäre E-Mail-Adresse",
-        "emailCode": "E-Mail",
-        "pending": "Verifizierung ausstehend"
-      },
-      "messages": {
-        "pendingVerification": "Diese E-Mail wartet bereits auf die Verifizierung. Du kannst die Verifizierungs-E-Mail erneut senden."
+        "emailCode": "E-Mail"
       },
       "mainEmailUpdated": "Primäre E-Mail-Adresse aktualisiert.",
       "canonicalUpdated": "Primäre E-Mail-Adresse aktualisiert."
@@ -919,16 +913,16 @@
       "consentDescription": "Dieser Client kann innerhalb Ihrer bestehenden Kontoberechtigungen Inhalte lesen und bearbeiten und Dateien verwalten. Er kann Inhalte erstellen, aktualisieren oder löschen und bestehende Dateianhänge ändern. Die Verbindung gewährt keine zusätzlichen Kontoberechtigungen.",
       "consentOfflineAccess": "Diese Verbindung kann nach dem Ende Ihrer aktuellen Browsersitzung fortbestehen, bis Sie sie widerrufen.",
       "consentRevoke": "Sie können diese Verbindung unter {settings} → Remote MCP widerrufen.",
-      "connectionsTitle": "Connected MCP clients",
-      "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
-      "connectionsEmpty": "No MCP clients are connected.",
-      "connectedAt": "Connected {date}",
+      "connectionsTitle": "Verbundene MCP-Clients",
+      "connectionsDescription": "Diese OAuth-Berechtigungen sind von Browsersitzungen getrennt. Durch den Widerruf wird der jeweilige MCP-Client getrennt, ohne Sie abzumelden.",
+      "connectionsEmpty": "Keine MCP-Clients verbunden.",
+      "connectedAt": "Verbunden am {date}",
       "revoke": "Revoke",
-      "revokeTitle": "Revoke MCP access",
-      "revokeConfirmation": "Revoke MCP access for {client}? Its current token chain will stop working.",
-      "revokeSuccess": "MCP access was revoked.",
-      "revokeFailed": "Could not revoke MCP access.",
-      "loadFailed": "Could not load connected MCP clients."
+      "revokeTitle": "MCP-Zugriff widerrufen",
+      "revokeConfirmation": "MCP-Zugriff für {client} widerrufen? Die aktuelle Token-Kette dieses Clients funktioniert danach nicht mehr.",
+      "revokeSuccess": "MCP-Zugriff wurde widerrufen.",
+      "revokeFailed": "MCP-Zugriff konnte nicht widerrufen werden.",
+      "loadFailed": "Verbundene MCP-Clients konnten nicht geladen werden."
     },
     "personalAccessTokens": {
       "title": "Persönliches Zugriffstoken",
@@ -956,8 +950,6 @@
       "added": "Hinzugefügt am {date}",
       "lastMethod": "Fügen Sie eine weitere Anmeldemethode hinzu, bevor Sie diesen Passkey entfernen.",
       "removeNamed": "Passkey {name} entfernen",
-      "reauth": "Melden Sie sich erneut an, bevor Sie Passkeys ändern.",
-      "reauthAction": "Erneut anmelden",
       "errors": {
         "load": "Passkeys konnten nicht geladen werden.",
         "remove": "Dieser Passkey konnte nicht entfernt werden.",
@@ -1167,13 +1159,13 @@
       "detail": {
         "backTooltip": "Zurück zu den E-Mail-Layouts",
         "targetEditor": {
-          "title": "Translated text",
-          "description": "Edit only visible text and accessibility labels. HTML, CSS, links, and placeholders remain owned by the source layout.",
-          "empty": "This layout has no translatable text units.",
+          "title": "Übersetzter Text",
+          "description": "Bearbeiten Sie nur sichtbaren Text und Barrierefreiheitsbeschriftungen. HTML, CSS, Links und Platzhalter werden weiterhin vom Quelllayout vorgegeben.",
+          "empty": "Dieses Layout enthält keine übersetzbaren Texteinheiten.",
           "textUnit": "Text",
-          "sourceValue": "Source: {value}",
-          "translatedValue": "This locale provides its own value.",
-          "sourceFallback": "Using the source value.",
+          "sourceValue": "Quelle: {value}",
+          "translatedValue": "Für dieses Gebietsschema ist ein eigener Wert hinterlegt.",
+          "sourceFallback": "Der Quellwert wird verwendet.",
           "useSource": "Use source"
         },
         "viewModes": {
@@ -1422,7 +1414,6 @@
     },
     "mapThemes": {
       "empty": "Keine Kartenthemen gefunden.",
-      "notFound": "Kartenthema nicht gefunden.",
       "loadFailed": "Kartenthemen konnten nicht geladen werden.",
       "defaultDisabled": "Dies ist bereits das Standardthema.",
       "deleteDisabled": {
@@ -1430,9 +1421,7 @@
         "last": "Das letzte Kartenthema kann nicht gelöscht werden."
       },
       "reloadRequired": {
-        "title": "Neu laden erforderlich",
-        "message": "Dieses Thema wurde in einer neueren Revision gespeichert. Laden Sie neu, bevor Sie weiterarbeiten.",
-        "action": "Neu laden"
+        "title": "Neu laden erforderlich"
       },
       "variants": {
         "light": "Hell",
@@ -1463,8 +1452,7 @@
       },
       "editor": {
         "notifications": {
-          "defaultSet": "Thema als Standard festgelegt",
-          "variantRequired": "Mindestens eine Variante (hell oder dunkel) ist erforderlich"
+          "defaultSet": "Thema als Standard festgelegt"
         },
         "controls": {
           "map": {
@@ -1593,12 +1581,12 @@
       "fixedLocaleItemBadge": "Fixiert: {locale}"
     },
     "emailEvents": {
-      "title": "Email Delivery",
-      "description": "Database email event logs have been removed. Delivery status is tracked through delivery runs, suppressions, structured logs, and metrics.",
-      "databaseLogsRemovedTitle": "Database event log removed",
-      "databaseLogsRemovedDescription": "The old email_event table is no longer used for operational mail logs. Campaign and legal notice analytics use delivery recipient state instead.",
-      "dashboardTitle": "Use observability dashboards",
-      "dashboardDescription": "Provider acceptance, worker failures, and delivery-run health should be monitored in Grafana/Loki/Mimir."
+      "title": "E-Mail-Zustellung",
+      "description": "Datenbankprotokolle für E-Mail-Ereignisse wurden entfernt. Der Zustellstatus wird über Versandläufe, Unterdrückungen, strukturierte Protokolle und Metriken verfolgt.",
+      "databaseLogsRemovedTitle": "Datenbank-Ereignisprotokoll entfernt",
+      "databaseLogsRemovedDescription": "Die alte Tabelle email_event wird nicht mehr für betriebliche E-Mail-Protokolle verwendet. Für Kampagnen und rechtliche Mitteilungen wird stattdessen der Status der Versandempfänger ausgewertet.",
+      "dashboardTitle": "Observability-Dashboards verwenden",
+      "dashboardDescription": "Die Annahme durch den Anbieter, Worker-Ausfälle und der Zustand der Versandläufe sollten in Grafana/Loki/Mimir überwacht werden."
     },
     "clientsDetail": {
       "newTitle": "Neuer Kunde",
@@ -1609,48 +1597,46 @@
     }
   },
   "translationPanel": {
-    "description": "Review the source language and existing translation document for each locale.",
+    "description": "Prüfen Sie die Quellsprache und das vorhandene Übersetzungsdokument für jedes Gebietsschema.",
     "actions": {
       "expand": "Erweitern",
       "collapse": "Reduzieren",
-      "regenerateAll": "Generate/regenerate all eligible locales",
+      "regenerateAll": "Für alle geeigneten Gebietsschemata generieren/neu generieren",
       "regenerateLocale": "Neu generieren",
       "regenerateLocaleAria": "Übersetzung für {locale} neu generieren",
       "generateLocale": "Generate",
-      "generateLocaleAria": "Generate {locale} translation"
+      "generateLocaleAria": "Übersetzung für {locale} generieren"
     },
     "sourceLocale": {
       "label": "Quellsprache",
       "description": "Dies ist die Quellsprache, die als Grundlage für die Übersetzungen dieser Entität dient.",
       "confirm": {
         "title": "Quellsprache ändern",
-        "description": "Changing the source language updates only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically.",
-        "detail": "{locale} becomes the language of the editable source document. Existing target documents and translation jobs remain unchanged.",
+        "description": "Beim Ändern der Quellsprache wird nur der Quellverweis aktualisiert. Vorhandene Zieldokumente und Übersetzungsaufträge bleiben unverändert, und Übersetzungen werden nicht automatisch generiert.",
+        "detail": "{locale} wird zur Sprache des bearbeitbaren Quelldokuments. Vorhandene Zieldokumente und Übersetzungsaufträge bleiben unverändert.",
         "confirm": "Ändern und neu übersetzen"
       }
     },
     "activeEditLocale": {
-      "ariaLabel": "Switch content language. Current: {locale}",
+      "ariaLabel": "Inhaltssprache wechseln. Aktuell: {locale}",
       "sourceOption": "{locale} (Quelle)",
       "loading": "Sprachen werden geladen...",
-      "missingDescription": "No {locale} target document exists yet. Generate it from the translations panel.",
+      "missingDescription": "Es gibt noch kein Zieldokument für {locale}. Generieren Sie es im Übersetzungspanel.",
       "bodyPreviewTitle": "{locale}-Inhaltsvorschau",
-      "bodyPreviewDescription": "The existing translation document is shown with its structure and formatting.",
+      "bodyPreviewDescription": "Das vorhandene Übersetzungsdokument wird mit seiner Struktur und Formatierung angezeigt.",
       "bodyPreviewEmpty": "Noch keine lokalisierte Inhaltsvorschau.",
-      "sharedStructureSectionDescription": "This section keeps shared layout or query settings from the source page; translated body content is read-only.",
+      "sharedStructureSectionDescription": "Dieser Abschnitt behält gemeinsame Layout- oder Abfrageeinstellungen der Quellseite bei; der übersetzte Inhalt ist schreibgeschützt.",
       "sectionFieldLabels": {
         "caption": "Beschriftung",
-        "copyJson": "Scene copy"
+        "copyJson": "Szenentext"
       }
     },
     "statuses": {
-      "missing": "Fehlt",
       "existing": "Existing"
     },
     "states": {
       "loadFailed": "Übersetzungen konnten nicht geladen werden.",
-      "missingTarget": "No target document yet.",
-      "sourceRow": "Dieses Gebietsschema wird im Haupteditor bearbeitet.",
+      "missingTarget": "Noch kein Zieldokument vorhanden.",
       "sourceEditorHint": "Bearbeiten Sie den Originaltext im Haupteditor.",
       "updatedAt": "Aktualisiert am {date}"
     },
@@ -1663,53 +1649,20 @@
     }
   },
   "translationPanelMenu": {
-    "description": "Review source menu labels and existing translation documents.",
-    "sourceLocaleDescription": "The menu editor above owns structure, ordering, links, visibility, and source labels. Target translations below are read-only previews.",
-    "states": {
-      "sourcePreview": "Quellbezeichnungen ({locale}): {labels}",
-      "sourceEditorHint": "Bearbeiten Sie die Menüstruktur im Haupteditor.",
-      "missingTarget": "No labels are saved for this locale yet.",
-      "noItems": "Noch keine lokalisierten Bezeichnungen.",
-      "translationPreview": "Existing {locale} labels: {labels}"
-    },
+    "description": "Prüfen Sie die Quellbeschriftungen des Menüs und vorhandene Übersetzungsdokumente.",
     "previewModal": {
-      "title": "{locale} menu translation preview",
-      "descriptions": {
-        "missing": "No public menu translation exists for this locale. The source is shown until an Admin generates it.",
-        "existing": "Shows the current public translated labels for this menu as read-only."
-      },
+      "title": "Vorschau der Menüübersetzung für {locale}",
       "fields": {
-        "linkType": "Link type",
-        "destination": "Destination",
-        "children": "Nested items",
-        "localizedLabelForLocale": "{locale} public label",
-        "sourceLabelForLocale": "{locale} source label",
-        "localizedLabelDescription": "The current translated label shown in public menus; it cannot be changed here.",
-        "sourceLabelDescription": "Comes from the source menu editor and cannot be changed here.",
-        "fixedLocaleLockedDescription": "This item is fixed to the {locale} label and is read-only."
-      },
-      "states": {
-        "detailUnavailable": "Detailed translated menu data could not be loaded.",
-        "noItems": "There are no menu items to preview."
+        "localizedLabelForLocale": "Öffentliche Beschriftung für {locale}"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template.",
-      "sourceLocaleDescription": "Die Quellvorlage steuert den Betreff, den Textinhalt und die Namen der Laufzeitvariablen.",
-      "states": {
-        "sourceEditorHint": "Bearbeiten Sie die Quellvorlage im Haupteditor.",
-        "noContent": "Noch kein übersetzter Betreff oder Textinhalt vorhanden."
-      }
+      "description": "Verwalten Sie die Quellsprache und vorhandene Übersetzungsdokumente für diese E-Mail-Vorlage."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout.",
-      "sourceLocaleDescription": "Das Quell-Layout steuert das Wrapper-HTML und die strukturellen Platzhalternamen für das E-Mail-Rendering.",
-      "states": {
-        "sourceEditorHint": "Bearbeiten Sie das Quell-Layout im Haupteditor.",
-        "noContent": "Noch kein übersetztes Layout-HTML vorhanden."
-      }
+      "description": "Verwalten Sie die Quellsprache und vorhandene Übersetzungsdokumente für dieses E-Mail-Layout."
     }
   },
   "translationOverviewPage": {
@@ -1721,17 +1674,16 @@
       "totalLocales": "Gebietsschemata insgesamt",
       "sourceEntities": "Quellentitäten",
       "activeJobs": "Aufträge in Arbeit",
-      "existingEntries": "Existing translations"
+      "existingEntries": "Vorhandene Übersetzungen"
     },
     "sections": {
-      "localeHealthTitle": "Translation state by locale",
-      "entityHealthTitle": "Translation state by entity type"
+      "localeHealthTitle": "Übersetzungsstatus nach Gebietsschema",
+      "entityHealthTitle": "Übersetzungsstatus nach Entitätstyp"
     },
     "columns": {
       "policy": "Richtlinie",
-      "lastTargetUpdate": "Last target update",
+      "lastTargetUpdate": "Letzte Aktualisierung des Zieldokuments",
       "entity": "Entität",
-      "existing": "Existing translations",
       "sources": "Quellen",
       "lastSourceUpdate": "Letzte Quellaktualisierung"
     },
@@ -1766,7 +1718,7 @@
   },
   "translationSettingsPage": {
     "title": "Übersetzungseinstellungen",
-    "description": "Manage the default source language and automatic translation providers. An Admin explicitly starts translation generation from each editor.",
+    "description": "Verwalten Sie die Standardquellsprache und Anbieter für automatische Übersetzungen. Ein Administrator startet die Übersetzungsgenerierung ausdrücklich im jeweiligen Editor.",
     "actions": {
       "jobs": "Aufträge",
       "save": "Einstellungen speichern",
@@ -1776,8 +1728,8 @@
       "createProvider": "Anbieter erstellen"
     },
     "sections": {
-      "runtime": "Source defaults",
-      "runtimeDescription": "Set only the language used when a source language has not been established. Source changes never start translation generation automatically.",
+      "runtime": "Quellstandardwerte",
+      "runtimeDescription": "Legen Sie nur die Sprache fest, die verwendet wird, wenn noch keine Quellsprache feststeht. Änderungen an der Quelle starten niemals automatisch die Übersetzungsgenerierung.",
       "providers": "Übersetzungsanbieter",
       "providersDescription": "Machine-Translation-Anbieter verwalten. Die Generierung bleibt deaktiviert, bis mindestens ein aktiver Anbieter gültige Zugangsdaten hat."
     },
@@ -1787,10 +1739,10 @@
         "description": "Wird verwendet, wenn noch kein Quellgebietsschema festgelegt wurde oder wenn eine Anfrage keinem unterstützten Inhaltsgebietsschema zugeordnet werden kann."
       },
       "protectedTerms": {
-        "label": "Protected terms",
-        "description": "Exact case-sensitive spellings that translation generation must keep unchanged. No terms are learned or suggested automatically.",
-        "placeholder": "Add a protected term",
-        "examples": "Examples: Photoshop, React Native"
+        "label": "Geschützte Begriffe",
+        "description": "Exakte Schreibweisen mit Beachtung der Groß- und Kleinschreibung, die bei der Übersetzungsgenerierung unverändert bleiben müssen. Begriffe werden weder automatisch gelernt noch vorgeschlagen.",
+        "placeholder": "Geschützten Begriff hinzufügen",
+        "examples": "Beispiele: Photoshop, React Native"
       },
       "providerName": {
         "label": "Anbietername"
@@ -1812,7 +1764,7 @@
         "descriptionEdit": "Leer lassen, um den gespeicherten Schlüssel beizubehalten."
       },
       "deeplApiBaseUrl": {
-        "label": "DeepL API base URL",
+        "label": "DeepL-API-Basis-URL",
         "description": "Verwenden Sie den Standardwert, außer Sie nutzen einen Proxy oder eigenen Endpunkt."
       },
       "llmPreset": {
@@ -1820,39 +1772,39 @@
       },
       "llmApiKey": {
         "label": "LLM API key",
-        "descriptionEdit": "Leave blank to keep the stored key."
+        "descriptionEdit": "Leer lassen, um den gespeicherten Schlüssel beizubehalten."
       },
       "llmApiBaseUrl": {
         "label": "LLM API base URL",
-        "description": "Required for OpenAI-compatible endpoints; leave blank for Gemini."
+        "description": "Für OpenAI-kompatible Endpunkte erforderlich; für Gemini leer lassen."
       },
       "llmModel": {
         "label": "Model",
-        "description": "Model ID used for translation generation."
+        "description": "Modell-ID für die Übersetzungsgenerierung."
       },
       "llmInputPrice": {
-        "label": "Input USD / 1M tokens",
-        "description": "Optional estimate used for provider comparison and cost planning."
+        "label": "Eingabe USD / 1M Tokens",
+        "description": "Optionale Schätzung zum Anbietervergleich und zur Kostenplanung."
       },
       "llmOutputPrice": {
-        "label": "Output USD / 1M tokens",
-        "description": "Optional estimate used for provider comparison and cost planning."
+        "label": "Ausgabe USD / 1M Tokens",
+        "description": "Optionale Schätzung zum Anbietervergleich und zur Kostenplanung."
       },
       "llmMaxContextTokens": {
-        "label": "Max context tokens",
-        "description": "Optional routing hint for large translation batches."
+        "label": "Max. Kontext-Tokens",
+        "description": "Optionaler Routing-Hinweis für große Übersetzungsstapel."
       },
       "llmMaxOutputTokens": {
-        "label": "Max output tokens",
-        "description": "Optional per-request cap passed to compatible providers."
+        "label": "Max. Ausgabe-Tokens",
+        "description": "Optionale Obergrenze pro Anfrage, die an kompatible Anbieter übergeben wird."
       },
       "llmTemperature": {
         "label": "Temperature",
-        "description": "Lower values make structured translation output more deterministic."
+        "description": "Niedrigere Werte machen strukturierte Übersetzungsausgaben deterministischer."
       },
       "llmSupportsJsonMode": {
-        "label": "Structured JSON mode",
-        "description": "Enable when the provider supports JSON schema or JSON mode responses."
+        "label": "Strukturierter JSON-Modus",
+        "description": "Aktivieren, wenn der Anbieter Antworten mit JSON-Schema oder im JSON-Modus unterstützt."
       }
     },
     "states": {
@@ -1886,8 +1838,8 @@
     "validation": {
       "providerNameRequired": "Ein Anbietername ist erforderlich.",
       "providerApiKeyRequired": "Für diesen Anbieter ist ein API-Schlüssel erforderlich.",
-      "providerModelRequired": "A model is required for LLM providers.",
-      "providerBaseUrlRequired": "An API base URL is required for OpenAI-compatible LLM providers."
+      "providerModelRequired": "Für LLM-Anbieter ist ein Modell erforderlich.",
+      "providerBaseUrlRequired": "Für OpenAI-kompatible LLM-Anbieter ist eine API-Basis-URL erforderlich."
     },
     "modal": {
       "createProviderTitle": "Übersetzungsanbieter erstellen",
@@ -1898,7 +1850,7 @@
     },
     "llmPresets": {
       "gemini": "Gemini",
-      "openaiCompatible": "OpenAI-compatible"
+      "openaiCompatible": "OpenAI-kompatibel"
     }
   },
   "metadataPanel": {
@@ -1947,16 +1899,13 @@
       "userIdCopied": "Benutzer-ID kopiert",
       "userIdCopyFailed": "Benutzer-ID konnte nicht kopiert werden",
       "emailSuppressionReleased": "E-Mail-Sperre aufgehoben",
-      "mainEmailUpdated": "Primäre E-Mail-Adresse aktualisiert",
       "ssoProviderRemoved": "SSO-Anbieter entfernt"
     },
     "auth": {
       "emptyEmail": "Keine E-Mail",
       "delivery": {
         "title": "Empfangs-E-Mail",
-        "description": "Kampagnen, Benachrichtigungen und Kontomails werden an die ausgewählte primäre E-Mail-Adresse gesendet.",
-        "changePlaceholder": "Verifizierte E-Mail auswählen",
-        "changeHelp": "Die Änderung dieser Auswahl wird sofort gespeichert."
+        "description": "Kampagnen, Benachrichtigungen und Kontomails werden an die ausgewählte primäre E-Mail-Adresse gesendet."
       },
       "providers": {
         "title": "Verknüpfte SSO-Anbieter",
@@ -1965,7 +1914,6 @@
         "remove": "SSO-Anbieter entfernen"
       },
       "sources": {
-        "current": "Aktuelle E-Mail",
         "emailCode": "E-Mail-Anmeldung"
       },
       "ban": {
@@ -2000,7 +1948,6 @@
         "noChanges": "Keine Änderungen zum Speichern"
       },
       "validation": {
-        "invalidUrl": "Ungültiges URL-Format",
         "invalidEmail": "Ungültiges E-Mail-Format",
         "invalidHexColor": "Ungültiges Hex-Farbformat",
         "invalidGoogleAnalyticsId": "Ungültiges Google-Analytics-ID-Format"
@@ -2296,7 +2243,6 @@
     "scheduleModal": {
       "description": "Wählen Sie Datum und Uhrzeit aus, um diese Kampagne zu senden.",
       "dateLabel": "Geplantes Datum und Uhrzeit",
-      "datePlaceholder": "Datum und Uhrzeit auswählen",
       "previousMonth": "Vorheriger Monat",
       "nextMonth": "Nächster Monat",
       "audience": "Zielgruppe: {audience}",
@@ -2360,33 +2306,22 @@
       "summary": "Fügen Sie eine kurze Zusammenfassung hinzu..."
     },
     "tooltips": {
-      "generatingNamed": "{name} generiert eine Zusammenfassung",
-      "applyingNamed": "{name} wendet die generierte Zusammenfassung an",
-      "readyNamed": "{name} hat eine generierte Zusammenfassung bereit"
+      "generatingNamed": "{name} generiert eine Zusammenfassung"
     },
     "feedback": {
       "failedDefault": "Zusammenfassungs-Generierung konnte nicht verarbeitet werden.",
-      "invalidJson": "Die KI-Antwort konnte nicht als Zusammenfassungs-JSON geparst werden.",
       "alreadyRunning": "Die Zusammenfassungs-Generierung läuft bereits.",
-      "applyingGenerated": "Generierte Zusammenfassung wird angewendet.",
-      "resetOlderSession": "Ein veralteter Status einer generierten Zusammenfassung aus einer älteren Sitzung wurde zurückgesetzt.",
-      "resetUnrestorable": "Ein veralteter Status einer generierten Zusammenfassung, der nicht wiederhergestellt werden konnte, wurde zurückgesetzt.",
-      "missingJobPayload": "Die Zusammenfassungs-Generierung hat keine Job-Nutzlast zurückgegeben.",
       "missingSuggestionPayload": "Die Zusammenfassungs-Generierung wurde ohne Vorschlags-Nutzlast abgeschlossen.",
       "staleSuggestion": "Dieser Vorschlag ist veraltet. Generieren Sie ihn neu oder verwerfen Sie ihn, bevor Sie ihn anwenden.",
       "unableToApplyNow": "Die generierte Zusammenfassung kann gerade nicht angewendet werden.",
       "applyFailed": "Die generierte Zusammenfassung konnte nicht angewendet werden.",
       "applied": "Generierte Zusammenfassung angewendet.",
-      "appliedJobUnresolved": "Zusammenfassung angewendet, aber der KI-Job konnte nicht automatisch aufgelöst werden.",
-      "dismissedJobUnresolved": "Der Zusammenfassungsvorschlag wurde lokal verworfen, aber der Status des KI-Jobs konnte nicht automatisch aufgelöst werden.",
-      "readyBeforeApplying": "Wenden Sie die generierte Zusammenfassung zuerst an oder verwerfen Sie sie.",
       "readyToApply": "Die generierte Zusammenfassung kann jetzt angewendet werden."
     },
     "ready": {
       "title": "Generierte Zusammenfassung",
       "suggestedSummary": "Vorgeschlagene Zusammenfassung",
       "anotherCollaborator": "Ein anderer Mitwirkender",
-      "anotherCollaboratorFallback": "Ein anderer Mitwirkender hat eine generierte Zusammenfassung bereit.",
       "anotherCollaboratorNamed": "{name} hat eine generierte Zusammenfassung bereit."
     }
   },
@@ -2495,6 +2430,7 @@
         "patternPlaceholder": "z. B. ^[A-Z]{3}$",
         "customErrorMessage": "Benutzerdefinierte Fehlermeldung",
         "optional": "Optional",
+        "dragValidator": "Validierungsregel ziehen",
         "removeValidator": "Validator entfernen"
       },
       "fieldTypes": {
@@ -2562,10 +2498,6 @@
       }
     },
     "settings": {
-      "notifications": {
-        "managerAdded": "Formularverantwortlicher hinzugefügt",
-        "managerRemoved": "Formularverantwortlicher entfernt"
-      },
       "urlPublic": {
         "title": "URL und öffentlicher Zugriff",
         "allowPublic": "Öffentlichen URL-Zugriff erlauben",
@@ -2585,13 +2517,7 @@
         "description": "Dashboard-Links teilen, um Formularstatistiken ohne Admin-Zugriff anzuzeigen"
       },
       "managers": {
-        "adminControls": "Admin-Steuerung",
-        "readOnly": "Nur lesen",
-        "description": "Verantwortliche können dieses Formular bearbeiten, Einreichungen ansehen und Freigabelinks verwalten.",
-        "searchPlaceholder": "Benutzer zum Hinzufügen als Verantwortliche suchen...",
-        "adminOnly": "Nur Admins können Verantwortliche hinzufügen oder entfernen.",
-        "empty": "Noch keine Verantwortlichen zugewiesen.",
-        "removeManager": "Verantwortlichen {name} entfernen"
+        "description": "Verantwortliche können dieses Formular bearbeiten, Einreichungen ansehen und Freigabelinks verwalten."
       },
       "access": {
         "title": "Zugriffskontrolle",
@@ -2620,7 +2546,11 @@
   "dataTable": {
     "aria": {
       "sortBy": "Nach {label} sortieren",
-      "rowActions": "Aktionen für {label}"
+      "rowActions": "Aktionen für {label}",
+      "selectAllRows": "Alle Zeilen auswählen",
+      "selectRow": "{label} auswählen",
+      "resultSummary": "{totalPages, plural, =0 {{count, plural, one {# Ergebnis} other {# Ergebnisse}}} other {{count, plural, one {# Ergebnis} other {# Ergebnisse}}, Seite {page} von {totalPages}}}",
+      "loadingMessage": "Wird geladen"
     },
     "sort": {
       "button": "Sortieren",
@@ -2633,7 +2563,9 @@
         "moveUp": "{label} nach oben verschieben",
         "moveDown": "{label} nach unten verschieben",
         "toggleDirection": "Sortierrichtung für {label} umschalten",
-        "removeSort": "Sortierung für {label} entfernen"
+        "removeSort": "Sortierung für {label} entfernen",
+        "directionAscending": "Aktuell aufsteigend",
+        "directionDescending": "Aktuell absteigend"
       }
     },
     "filter": {
@@ -2648,7 +2580,8 @@
       "drawerTitle": "Filter",
       "aria": {
         "backToFields": "Zurück zu den Filterfeldern",
-        "removeFilter": "Filter für {label} entfernen"
+        "removeFilter": "Filter für {label} entfernen",
+        "logic": "Verknüpfung der Filter"
       },
       "operators": {
         "eq": "entspricht",
@@ -2681,7 +2614,8 @@
       "previousPage": "Vorherige Seite",
       "nextPage": "Nächste Seite",
       "lastPage": "Letzte Seite",
-      "page": "Seite {page}"
+      "page": "Seite {page}",
+      "navigation": "Seitennavigation"
     }
   },
   "versionHistory": {
@@ -2691,9 +2625,11 @@
     "systemOrLegacy": "System oder frühere Version",
     "restore": "Wiederherstellen",
     "restoreTitle": "Version wiederherstellen",
-    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document."
+    "restoreSameLocaleBody": "Beim Wiederherstellen der Quelle v{version} ({locale}) wird nur das Quelldokument geändert. Vorhandene Zieldokumente und Übersetzungsaufträge bleiben unverändert, und Übersetzungen werden nicht automatisch generiert. Fortfahren?",
+    "restoreCrossLocaleBody": "Beim Wiederherstellen der Quelle v{version} wird das Quellgebietsschema von {currentLocale} auf {selectedLocale} umgestellt und nur der Quellverweis geändert. Vorhandene Zieldokumente und Übersetzungsaufträge bleiben unverändert, und Übersetzungen werden nicht automatisch generiert. Fortfahren?",
+    "restoreFailed": "Quelldokument konnte nicht wiederhergestellt werden.",
+    "loadFailed": "Der Versionsverlauf konnte nicht geladen werden.",
+    "end": "Alle Versionen wurden geladen."
   },
   "shareLinks": {
     "title": "Freigabelinks",
@@ -2703,7 +2639,6 @@
     "createError": "Link konnte nicht erstellt werden",
     "deleteSuccess": "Link gelöscht",
     "deleteError": "Link konnte nicht gelöscht werden",
-    "invalidUrl": "Ungültige URL",
     "noLinks": "Keine Links erstellt",
     "showLess": "Weniger anzeigen",
     "showMore": "{count} weitere anzeigen",
@@ -2718,21 +2653,9 @@
     "passwordPlaceholder": "Leer lassen für kein Passwort",
     "maximumExpiration": "Die maximale Laufzeit beträgt ein Jahr",
     "expirationInvalid": "Wählen Sie einen gültigen zukünftigen Ablaufzeitpunkt",
-    "bypassFormPassword": "Formularpasswort umgehen",
-    "bypassFormPasswordDescription": "Wenn deaktiviert, müssen Betrachter das Formularpasswort eingeben",
-    "bypassAuthentication": "Authentifizierung umgehen",
-    "bypassAuthenticationDescription": "Wenn aktiviert, überspringt der Freigabelink require-auth-Grenzen",
-    "bypassRoleChecks": "Rollenprüfungen umgehen",
-    "bypassRoleChecksDescription": "Wenn aktiviert, überspringt der Freigabelink erlaubte Rollen",
     "policies": {
-      "passwordBypass": "Passwortumgehung",
-      "passwordRequired": "Passwort erforderlich",
       "passwordProtected": "Passwortgeschützt",
-      "noPassword": "Kein Passwort",
-      "authBypass": "Auth-Umgehung",
-      "authEnforced": "Auth erzwungen",
-      "roleBypass": "Rollenumgehung",
-      "roleEnforced": "Rollen erzwungen"
+      "noPassword": "Kein Passwort"
     },
     "expirationBadge": {
       "expired": "Abgelaufen",
@@ -2819,14 +2742,12 @@
   },
   "formSuccessPage": {
     "metadata": {
-      "fallbackTitle": "Formular eingereicht",
       "title": "{formTitle} - Eingereicht"
     },
     "title": "Danke"
   },
   "formPasswordPage": {
     "metadata": {
-      "fallbackTitle": "Formularzugriff",
       "description": "Geben Sie das Passwort ein, um auf dieses Formular zuzugreifen"
     },
     "title": "Passwortgeschützt",
@@ -2838,7 +2759,6 @@
   },
   "formDashboardPage": {
     "metadata": {
-      "fallbackTitle": "Formular-Dashboard",
       "title": "{formTitle} - Dashboard",
       "description": "Statistiken und Analysen zu Formulareinreichungen"
     },
@@ -2848,7 +2768,28 @@
     "stats": {
       "total": "Gesamt"
     },
-    "fieldStatistics": "Feldstatistiken"
+    "fieldStatistics": "Feldstatistiken",
+    "charts": {
+      "donut": "Ring",
+      "pie": "Kreis",
+      "bar-horizontal": "Horizontale Balken",
+      "bar-vertical": "Vertikale Balken",
+      "radar": "Radar",
+      "table": "Tabelle",
+      "area": "Fläche",
+      "line": "Linie",
+      "histogram": "Histogramm",
+      "noResponses": "Noch keine Antworten",
+      "emptyValue": "(leer)",
+      "min": "Minimum",
+      "max": "Maximum",
+      "avg": "Durchschnitt",
+      "count": "Anzahl",
+      "date": "Datum",
+      "value": "Wert",
+      "range": "Bereich",
+      "chartType": "Diagrammtyp"
+    }
   },
   "embeddedForm": {
     "states": {
@@ -2931,7 +2872,6 @@
       "slug": "artist-slug",
       "name": "Künstlername / Name des Künstlers",
       "realName": "Gesetzlicher Name (optional)",
-      "countryCode": "z. B. US, KR, JP",
       "labels": "Labels auswählen...",
       "parentArtist": "Übergeordneten Künstler auswählen..."
     },
@@ -2954,15 +2894,7 @@
     },
     "placeholders": {
       "name": "Labelname",
-      "countryCode": "z. B. DE, US, KR",
       "parentLabel": "Übergeordnetes Label auswählen (optional)"
-    }
-  },
-  "workCollaborators": {
-    "empty": "Noch keine Mitwirkenden",
-    "notifications": {
-      "added": "Mitwirkender hinzugefügt",
-      "removed": "Mitwirkender entfernt"
     }
   },
   "userAvatar": {
@@ -2975,7 +2907,9 @@
     "label": "Soziale Links",
     "addLink": "Link hinzufügen",
     "platformPlaceholder": "Plattform",
-    "valuePlaceholder": "URL oder Benutzername"
+    "valuePlaceholder": "URL oder Benutzername",
+    "reorderInstructions": "Ändern Sie die Position dieses Links mit den Pfeiltasten nach oben und unten.",
+    "positionChanged": "Link an Position {position} von {count} verschoben."
   },
   "releaseEditor": {
     "titleFallback": "Unbenannte Veröffentlichung",
@@ -3025,8 +2959,7 @@
         "title": "Titel hinzufügen"
       },
       "placeholders": {
-        "title": "Titel",
-        "durationSeconds": "z. B. 240"
+        "title": "Titel"
       },
       "deleteConfirm": "Möchten Sie diesen Titel wirklich löschen?",
       "creditsModal": {
@@ -3041,7 +2974,7 @@
         "ready": "Audio bereit",
         "uploadTooltip": "Audiodatei hochladen",
         "uploaded": "Audio hochgeladen, Verarbeitung gestartet",
-        "resumeExpired": "Upload session expired. Start a fresh upload."
+        "resumeExpired": "Upload-Sitzung abgelaufen. Starten Sie einen neuen Upload."
       }
     },
     "artists": {
@@ -3057,8 +2990,7 @@
   "contentMetadata": {
     "preview": {
       "page": "Seitenvorschau",
-      "post": "Beitragsvorschau",
-      "work": "Werkvorschau"
+      "post": "Beitragsvorschau"
     }
   },
   "editorMetadata": {
@@ -3081,8 +3013,6 @@
   "postHeader": {
     "actions": {
       "editPost": "Beitrag bearbeiten",
-      "sharePost": "Beitrag teilen",
-      "printPost": "Beitrag drucken",
       "exportMarkdown": "Beitrag als Markdown exportieren"
     }
   },
@@ -3091,13 +3021,11 @@
     "intro": "Wir verwenden notwendige Cookies pour Authentifizierung und den Betrieb der Website sowie optionale Analyse-Cookies, um die Nutzung der Website zu verstehen.",
     "learnMore": "Siehe unsere <privacy>Datenschutzerklärung</privacy> und unsere <terms>Nutzungsbedingungen</terms>.",
     "actions": {
-      "hidePreferences": "Einstellungen ausblenden",
       "customize": "Anpassen"
     }
   },
   "locationSelector": {
     "placeholder": "Ort auswählen...",
-    "clearSelection": "Ausgewählten Ort löschen",
     "emptySearch": "Suchen Sie nach einem Ort auf der Karte",
     "emptyResults": "Keine Orte gefunden"
   },
@@ -3117,6 +3045,24 @@
       "sections": {
         "connection": "Verbindung"
       }
+    },
+    "saveState": {
+      "saved": "Gespeichert",
+      "saving": "Wird gespeichert…",
+      "offline": "Offline · Änderungen auf diesem Gerät behalten",
+      "error": "Speichern fehlgeschlagen · erneuter Versuch…",
+      "rejected": "Einige Änderungen konnten nicht gespeichert werden",
+      "reload": "Verbindung wird wiederhergestellt · Änderungen werden wiederhergestellt…"
+    },
+    "rejectedEdits": {
+      "open": "Ungespeicherte Änderungen prüfen",
+      "title": "Änderungen, die nicht gespeichert werden konnten",
+      "description": "Der Server hat diese Änderungen endgültig abgelehnt; sie werden nicht erneut gesendet. Kopieren Sie alles, was Sie benötigen, und verwerfen Sie sie anschließend.",
+      "reason": "Grund: {reason}",
+      "copy": "Kopieren",
+      "copied": "Kopiert",
+      "discard": "Verwerfen",
+      "empty": "Alle Änderungen wurden gespeichert."
     }
   },
   "urlSection": {
@@ -3130,39 +3076,36 @@
     "actions": {
       "copyId": "ID kopieren",
       "copyUrl": "URL kopieren"
-    },
-    "notifications": {
-      "copied": "{label} kopiert"
     }
   },
   "formValidation": {
-    "required": "This field is required",
-    "invalidUrl": "Please enter a valid URL",
-    "invalidFormat": "Invalid format",
-    "invalidEmail": "Please enter a valid email",
-    "invalidPhoneNumber": "Invalid phone number",
-    "stringGt": "Must be more than {threshold} characters",
-    "stringGte": "Minimum {threshold} characters",
-    "stringLt": "Must be less than {threshold} characters",
-    "stringLte": "Maximum {threshold} characters",
-    "stringEq": "Must be exactly {threshold} characters",
-    "numberGt": "Must be greater than {threshold}",
-    "numberGte": "Minimum value is {threshold}",
-    "numberLt": "Must be less than {threshold}",
-    "numberLte": "Maximum value is {threshold}",
-    "numberEq": "Must be exactly {threshold}",
-    "arrayGt": "Select more than {threshold}",
-    "arrayGte": "Select at least {threshold}",
-    "arrayLt": "Select less than {threshold}",
-    "arrayLte": "Select at most {threshold}",
-    "arrayEq": "Select exactly {threshold}",
-    "dateMin": "Date must be on or after {date}",
-    "dateMax": "Date must be on or before {date}",
-    "futureDate": "Date must be in the future",
-    "pastDate": "Date must be in the past",
-    "weekdayOnly": "Please select a weekday",
-    "minAge": "Must be at least {age} years old",
-    "maxAge": "Must be at most {age} years old"
+    "required": "Dieses Feld ist erforderlich",
+    "invalidUrl": "Bitte geben Sie eine gültige URL ein",
+    "invalidFormat": "Ungültiges Format",
+    "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+    "invalidPhoneNumber": "Ungültige Telefonnummer",
+    "stringGt": "Die Länge muss mehr als {threshold} Zeichen betragen",
+    "stringGte": "Mindestens {threshold} Zeichen",
+    "stringLt": "Die Länge muss weniger als {threshold} Zeichen betragen",
+    "stringLte": "Höchstens {threshold} Zeichen",
+    "stringEq": "Die Länge muss genau {threshold} Zeichen betragen",
+    "numberGt": "Der Wert muss größer als {threshold} sein",
+    "numberGte": "Der Mindestwert ist {threshold}",
+    "numberLt": "Der Wert muss kleiner als {threshold} sein",
+    "numberLte": "Der Höchstwert ist {threshold}",
+    "numberEq": "Der Wert muss genau {threshold} betragen",
+    "arrayGt": "Wählen Sie mehr als {threshold} aus",
+    "arrayGte": "Wählen Sie mindestens {threshold} aus",
+    "arrayLt": "Wählen Sie weniger als {threshold} aus",
+    "arrayLte": "Wählen Sie höchstens {threshold} aus",
+    "arrayEq": "Wählen Sie genau {threshold} aus",
+    "dateMin": "Das Datum muss am oder nach dem {date} liegen",
+    "dateMax": "Das Datum muss am oder vor dem {date} liegen",
+    "futureDate": "Das Datum muss in der Zukunft liegen",
+    "pastDate": "Das Datum muss in der Vergangenheit liegen",
+    "weekdayOnly": "Bitte wählen Sie einen Wochentag aus",
+    "minAge": "Das Alter muss mindestens {age} Jahre betragen",
+    "maxAge": "Das Alter darf höchstens {age} Jahre betragen"
   },
   "phoneInput": {
     "noResults": "Keine Ergebnisse"
@@ -3172,7 +3115,7 @@
   },
   "ogImagePreview": {
     "alt": "OG-Vorschau",
-    "empty": "OG-Bild noch nicht generiert",
+    "empty": "Kein OG-Bild",
     "actions": {
       "regenerate": "OG-Bild neu generieren"
     },
@@ -3300,7 +3243,6 @@
       "notFoundMessage": "Keine Kategorien gefunden"
     },
     "seriesSelector": {
-      "searchPlaceholder": "Suchen oder erstellen...",
       "states": {
         "empty": "Keine Reihe verfügbar",
         "select": "Reihe auswählen...",
@@ -3313,14 +3255,12 @@
       },
       "notifications": {
         "assigned": "Der Beitrag wurde der Reihe zugewiesen",
-        "reorderFailed": "Neuanordnung der Reihe fehlgeschlagen",
         "createFailed": "Reihe konnte nicht erstellt werden",
         "seriesUnavailable": "Diese Reihe kann nicht mehr verwaltet werden. Die bisherige Zuordnung wurde beibehalten.",
         "updateFailed": "Die Reihenzuordnung konnte nicht geändert werden. Die bisherige Zuordnung wurde beibehalten."
       }
     },
     "notifications": {
-      "slugUpdateFailed": "Aktualisierung des Slugs fehlgeschlagen",
       "deleted": "Beitrag gelöscht",
       "published": "Beitrag veröffentlicht",
       "unpublished": "Beitrag zurückgezogen",
@@ -3507,10 +3447,6 @@
     "pinned": "Fixiert"
   },
   "pageEditor": {
-    "localRecovery": {
-      "message": "Ihre lokale Bearbeitungskopie wurde vor dem erneuten Verbinden gesichert. Laden Sie sie vor dem Neuladen oder Verlassen herunter.",
-      "action": "Wiederherstellungskopie herunterladen"
-    },
     "shareLinksDescription": "Vorschaulinks für unveröffentlichte Seiten",
     "showTitleOnPage": "Titel auf der Seite anzeigen",
     "slugValidation": {
@@ -3581,6 +3517,9 @@
       }
     },
     "columnsEditor": {
+      "labels": {
+        "ratio": "Spaltenverhältnis"
+      },
       "badges": {
         "columnCount": "{count} Spalten"
       },
@@ -3605,16 +3544,14 @@
       "menuLabel": "Abschnitt hinzufügen",
       "emptyColumn": "Leere Spalte - klicken Sie auf +, um Inhalt hinzuzufügen",
       "actions": {
-        "addSectionToColumn": "Abschnitt zu Spalte {index} hinzufügen",
-        "removeSectionFromColumn": "{section} aus Spalte {index} entfernen"
+        "addSectionToColumn": "Abschnitt zu Spalte {index} hinzufügen"
       }
     },
     "notifications": {
       "published": "Seite veröffentlicht",
       "unpublished": "Seite zurückgezogen",
       "deleted": "Seite gelöscht",
-      "slugUpdateFailed": "Aktualisierung des Seiten-Slugs fehlgeschlagen",
-      "confirmSummaryFailed": "Bestätigung der Zusammenfassungsaktualisierung fehlgeschlagen"
+      "slugUpdateFailed": "Aktualisierung des Seiten-Slugs fehlgeschlagen"
     },
     "mapEditor": {
       "title": "Karte",
@@ -3659,7 +3596,6 @@
         "content": "Inhalt",
         "marqueeBehavior": "Marquee-Verhalten",
         "scenePlayback": "Playback",
-        "sceneRender": "Renderer",
         "sceneMotion": "Motion",
         "sceneUnits": "Units",
         "sceneSettings": "Scene",
@@ -3676,7 +3612,6 @@
         "columns": "Spalten",
         "infiniteLoop": "Endlosschleife",
         "showIndicators": "Indikatoren anzeigen",
-        "showFeaturedImage": "Titelbild anzeigen",
         "imageAspectRatio": "Bildseitenverhältnis",
         "showMeta": "Metadaten anzeigen (Datum, Autor)",
         "sortBy": "Sortieren nach",
@@ -3694,7 +3629,6 @@
         "showImage": "Bild anzeigen",
         "selectForm": "Formular auswählen",
         "showFormTitle": "Formulartitel anzeigen",
-        "showTitle": "Titel anzeigen",
         "numberOfWorks": "Anzahl der Werke",
         "numberOfReleases": "Anzahl der Veröffentlichungen",
         "releaseTypes": "Release-Typen",
@@ -3714,21 +3648,21 @@
         "fallbackMode": "Fehlendes Logo",
         "marqueeItemText": "Textinhalt",
         "marqueeItemHref": "Link-URL",
-        "scrollHeight": "Scroll height",
-        "sceneHeight": "Scene height",
-        "unitHoldSeconds": "Unit hold",
+        "scrollHeight": "Scrollhöhe",
+        "sceneHeight": "Szenenhöhe",
+        "unitHoldSeconds": "Haltedauer der Einheit",
         "unitGapSeconds": "Unit gap",
-        "unitHoldOverrideSeconds": "Hold override",
+        "unitHoldOverrideSeconds": "Haltedauer überschreiben",
         "loop": "Loop",
         "colorScheme": "Theme",
-        "backgroundColor": "Light background",
-        "darkBackgroundColor": "Dark background",
+        "backgroundColor": "Heller Hintergrund",
+        "darkBackgroundColor": "Dunkler Hintergrund",
         "backgroundEnabled": "Szenenhintergrund",
-        "textureSize": "Particle count",
-        "particleSize": "Particle size",
-        "particleBrightness": "Light particle brightness",
-        "darkParticleBrightness": "Dark particle brightness",
-        "transitionWindow": "Text blend",
+        "textureSize": "Partikelanzahl",
+        "particleSize": "Partikelgröße",
+        "particleBrightness": "Partikelhelligkeit im hellen Modus",
+        "darkParticleBrightness": "Partikelhelligkeit im dunklen Modus",
+        "transitionWindow": "Textüberblendung",
         "transition": "Transition",
         "rotationEnabled": "Drehung animieren",
         "scrollRotationEnabled": "Scroll-Drehung hinzufügen",
@@ -3738,34 +3672,37 @@
         "hoverEnabled": "Zeigerinteraktion",
         "hoverRepelRadius": "Hover-Radius",
         "sceneUnit": "Unit",
-        "sceneUnitName": "Unit name",
+        "sceneUnitName": "Name der Einheit",
         "unitAttribution": "Urheberangabe der Unit",
-        "meshSource": "Mesh source",
-        "fallbackMesh": "Built-in mesh",
+        "meshSource": "Mesh-Quelle",
+        "fallbackMesh": "Integriertes Mesh",
         "mesh": "Mesh",
-        "meshObjectName": "Mesh object",
+        "meshObjectName": "Mesh-Objekt",
         "meshScale": "Mesh-Skalierung",
         "meshOffsetY": "Höhenversatz des Meshes",
-        "meshUploadProgress": "Mesh upload progress",
-        "textureSource": "Light texture",
-        "fallbackColor": "Light color",
-        "color": "Light color",
-        "lightTextureUploadProgress": "Light texture upload progress",
-        "darkTextureSource": "Dark texture",
-        "darkFallbackColor": "Dark color",
-        "darkColor": "Dark color",
-        "darkTextureUploadProgress": "Dark texture upload progress",
+        "meshUploadProgress": "Mesh-Upload-Fortschritt",
+        "textureSource": "Helle Textur",
+        "fallbackColor": "Helle Farbe",
+        "color": "Helle Farbe",
+        "lightTextureUploadProgress": "Upload-Fortschritt der hellen Textur",
+        "darkTextureSource": "Dunkle Textur",
+        "darkFallbackColor": "Dunkle Farbe",
+        "darkColor": "Dunkle Farbe",
+        "darkTextureUploadProgress": "Upload-Fortschritt der dunklen Textur",
         "title": "Title",
         "description": "Beschreibung",
         "meshOptimization": "GLB optimization",
-        "meshOptimizationTargetRatio": "Target mesh ratio",
-        "selectedOptimizedMesh": "Selected compressed GLB",
-        "optimizedMeshSize": "Compressed size",
+        "meshOptimizationTargetRatio": "Zielverhältnis des Meshs",
+        "selectedOptimizedMesh": "Ausgewählte komprimierte GLB",
+        "optimizedMeshSize": "Komprimierte Größe",
         "meshOptimizationTriangles": "Triangles",
-        "textColorSource": "Text color",
-        "lightTextColor": "Light text",
-        "darkTextColorSource": "Dark text",
-        "darkTextColor": "Dark text color"
+        "textColorSource": "Textfarbe",
+        "lightTextColor": "Heller Text",
+        "darkTextColorSource": "Dunkler Text",
+        "darkTextColor": "Dunkle Textfarbe",
+        "itemSize": "Elementgröße",
+        "showAvatar": "Avatar anzeigen",
+        "maxLabels": "Maximale Anzahl an Labels"
       },
       "fieldLabels": {
         "year": "Jahr",
@@ -3776,11 +3713,7 @@
       },
       "badges": {
         "posts": "{count} Beiträge",
-        "rows": "{count} Zeilen",
-        "authors": "{count} Autoren",
-        "artists": "{count} Künstler",
-        "works": "{count} Werke",
-        "releases": "{count} Veröffentlichungen"
+        "rows": "{count} Zeilen"
       },
       "placeholders": {
         "publishedByDefault": "Standardmäßig veröffentlicht",
@@ -3800,7 +3733,6 @@
           "auto": "Auto"
         },
         "sortBy": {
-          "dateAdded": "Hinzugefügt am",
           "startDate": "Startdatum",
           "endDate": "Enddatum",
           "publishedDate": "Veröffentlichungsdatum",
@@ -3809,9 +3741,7 @@
         },
         "sortOrder": {
           "newest": "Neueste zuerst",
-          "oldest": "Älteste zuerst",
-          "azOldest": "A-Z / Älteste zuerst",
-          "zaNewest": "Z-A / Neueste zuerst"
+          "oldest": "Älteste zuerst"
         },
         "mapPrimaryLabel": {
           "placeName": "Ortsname"
@@ -3871,7 +3801,7 @@
         "textureSource": {
           "color": "Color",
           "image": "Image",
-          "inherit": "Follow light"
+          "inherit": "Hellem Modus folgen"
         },
         "playback": {
           "scroll": "Scroll",
@@ -3882,9 +3812,14 @@
           "linear": "Linear"
         },
         "textColorSource": {
-          "theme": "Follow theme",
+          "theme": "Theme folgen",
           "custom": "Custom",
-          "inherit": "Follow light"
+          "inherit": "Hellem Modus folgen"
+        },
+        "itemSize": {
+          "s": "S · Kompakt",
+          "m": "M · Standard",
+          "l": "L · Groß"
         }
       },
       "actions": {
@@ -3892,27 +3827,25 @@
         "removeMarqueeItem": "Element entfernen",
         "moveMarqueeItem": "Element neu anordnen",
         "addSceneUnit": "Add unit",
-        "moveUnitUp": "Move unit up",
-        "moveUnitDown": "Move unit down",
-        "removeSceneUnit": "Remove unit",
-        "expandSceneUnit": "Expand unit",
-        "collapseSceneUnit": "Collapse unit",
+        "moveUnitUp": "Einheit nach oben verschieben",
+        "moveUnitDown": "Einheit nach unten verschieben",
+        "removeSceneUnit": "Einheit entfernen",
         "replaceMesh": "Replace GLB",
         "uploadMesh": "Upload GLB",
-        "clearMeshAsset": "Clear mesh asset",
-        "cancelMeshUpload": "Cancel GLB upload",
-        "replaceTexture": "Replace light texture",
-        "uploadTexture": "Upload light texture",
-        "clearTextureAsset": "Clear texture",
-        "cancelTextureUpload": "Cancel light texture upload",
-        "replaceDarkTexture": "Replace dark texture",
-        "uploadDarkTexture": "Upload dark texture",
-        "clearDarkTextureAsset": "Clear dark texture",
-        "cancelDarkTextureUpload": "Cancel dark texture upload",
+        "clearMeshAsset": "Mesh-Asset entfernen",
+        "cancelMeshUpload": "GLB-Upload abbrechen",
+        "replaceTexture": "Helle Textur ersetzen",
+        "uploadTexture": "Helle Textur hochladen",
+        "clearTextureAsset": "Textur entfernen",
+        "cancelTextureUpload": "Upload der hellen Textur abbrechen",
+        "replaceDarkTexture": "Dunkle Textur ersetzen",
+        "uploadDarkTexture": "Dunkle Textur hochladen",
+        "clearDarkTextureAsset": "Dunkle Textur entfernen",
+        "cancelDarkTextureUpload": "Upload der dunklen Textur abbrechen",
         "generateOptimizedMesh": "Compress GLB",
         "useOptimizedMesh": "Use compressed GLB",
         "clearOptimizedMesh": "Use original GLB",
-        "deleteOptimizedMeshCandidate": "Delete compressed GLB"
+        "deleteOptimizedMeshCandidate": "Komprimierte GLB löschen"
       },
       "descriptions": {
         "marqueeTextItems": "Textelemente einzeln hinzufügen.",
@@ -3923,18 +3856,24 @@
         "marqueeItems": "Noch keine Elemente."
       },
       "status": {
-        "meshOptimizationQueued": "GLB optimization queued.",
-        "meshOptimizationGenerated": "Optimized GLB generated.",
-        "meshOptimizationSelected": "Optimized GLB selected.",
-        "meshOptimizationCleared": "Original GLB selected.",
-        "meshOptimizationDeleted": "Compressed GLB deleted.",
-        "meshOptimizationDeleteFailed": "Compressed GLB could not be deleted.",
+        "meshOptimizationQueued": "GLB-Optimierung in die Warteschlange gestellt.",
+        "meshOptimizationGenerated": "Optimierte GLB generiert.",
+        "meshOptimizationSelected": "Optimierte GLB ausgewählt.",
+        "meshOptimizationCleared": "Original-GLB ausgewählt.",
+        "meshOptimizationDeleted": "Komprimierte GLB gelöscht.",
+        "meshOptimizationDeleteFailed": "Komprimierte GLB konnte nicht gelöscht werden.",
         "meshOptimizationPending": "Queued",
         "meshOptimizationProcessing": "Processing",
         "meshOptimizationFailed": "Failed",
         "meshOptimizationCancelled": "Cancelled",
-        "optimizedMeshCleanupFailed": "Optimized asset reference removed, but cleanup failed: {error}",
-        "optimizedMeshCleanupFailedDefault": "Optimized asset reference removed, but cleanup failed"
+        "optimizedMeshCleanupFailed": "Verweis auf das optimierte Asset entfernt, aber Bereinigung fehlgeschlagen: {error}",
+        "optimizedMeshCleanupFailedDefault": "Verweis auf das optimierte Asset entfernt, aber Bereinigung fehlgeschlagen"
+      },
+      "authorSelection": {
+        "maxSelected": "Es können bis zu {count} Autoren ausgewählt werden.",
+        "empty": "Keine Autoren ausgewählt. Dieser Block bleibt leer.",
+        "unavailable": "Dieser Autor ist nicht mehr verfügbar.",
+        "unavailableWarning": "Nicht verfügbare Autoren werden auf der öffentlichen Seite nicht angezeigt. Entfernen Sie sie oder wählen Sie einen Ersatz."
       }
     },
     "embed": {
@@ -3987,8 +3926,6 @@
       "matchDescription": "Kombiniere die ausgewählten Gruppen für Rollen, Tags und Newsletter.",
       "any": "Eine der ausgewählten Gruppen",
       "all": "Alle ausgewählten Gruppen",
-      "roles": "Rollen",
-      "rolesDescription": "Eine der ausgewählten Rollen genügt.",
       "roleUser": "Mitglieder",
       "memberDescription": "Nur angemeldete Mitglieder können diese Seite ansehen.",
       "authorDescription": "Mitglieder mit der Autorenrolle.",
@@ -4016,17 +3953,27 @@
       "restrictedTitle": "Du hast keinen Zugriff auf diese Seite",
       "restrictedDescription": "Dein Konto erfüllt die Zugriffsbedingungen dieser Seite nicht.",
       "signIn": "Anmelden"
+    },
+    "a11y": {
+      "sectionPosition": "{section} · {index}/{count}",
+      "dragInstructions": "Drücken Sie die Leertaste zum Verschieben und ändern Sie die Position mit den Pfeiltasten. Bestätigen Sie mit der Leertaste oder brechen Sie mit Escape ab.",
+      "dragStart": "{section} · Verschieben · In Bearbeitung · {index}/{count}",
+      "dragOver": "{section} · Verschieben · {index}/{count}",
+      "dragEnd": "{section} · Verschieben · Bestätigen · {index}/{count}",
+      "dragCancel": "{section} · Verschieben · Abgebrochen",
+      "sectionDeleted": "{section} gelöscht",
+      "sectionAdded": "{section} erstellt · {index}/{count}",
+      "columnsPosition": "{column} · {section} · {index}/{count}"
     }
   },
   "editorCommon": {
     "reloadRequired": {
       "title": "Neu laden erforderlich",
-      "message": "Während dieser Editor geöffnet war, wurde eine neuere Version gespeichert. Laden Sie neu, bevor Sie weiter bearbeiten.",
-      "action": "Neu laden"
+      "message": "Während dieser Editor geöffnet war, wurde eine neuere Version gespeichert. Laden Sie neu, bevor Sie weiter bearbeiten."
     },
     "permissionRevoked": {
-      "title": "Bearbeitungsberechtigung entzogen",
-      "message": "Du bist nicht mehr berechtigt, diesen Inhalt zu bearbeiten. Änderungen nach dem Entzug der Berechtigung werden nicht gespeichert."
+      "title": "Zugriff entfernt",
+      "message": "Sie haben keinen Zugriff mehr auf diesen Inhalt. Noch nicht gespeicherte Änderungen bleiben auf diesem Gerät."
     },
     "sessionExpired": {
       "title": "Sitzung abgelaufen",
@@ -4082,7 +4029,6 @@
         "mute": "Audio stummschalten",
         "unmute": "Stummschaltung aufheben",
         "volume": "Audiolautstärke",
-        "original": "Original",
         "waveform": "Wellenform",
         "spectrogram": "Spektrogramm",
         "spectrogramAlt": "Audio-Spektrogramm",
@@ -4122,7 +4068,7 @@
           "done": "Fertig",
           "reset": "Zurücksetzen",
           "live": "LIVE",
-          "playingInPictureInPicture": "Playing in picture-in-picture",
+          "playingInPictureInPicture": "Wiedergabe im Bild-in-Bild-Modus",
           "videoPlayerLoading": "Videoplayer wird geladen.",
           "currentTime": "Aktueller Zeitpunkt",
           "duration": "Dauer",
@@ -4152,9 +4098,9 @@
           "uniform": "Uniform",
           "dropShadow": "Schlagschatten",
           "proportionalSansSerif": "Proportionale Sans-Serif",
-          "monospaceSansSerif": "Monospace Sans-Serif",
+          "monospaceSansSerif": "Nichtproportionale serifenlose Schrift",
           "proportionalSerif": "Proportionale Serif",
-          "monospaceSerif": "Monospace Serif",
+          "monospaceSerif": "Nichtproportionale Serifenschrift",
           "casual": "Zwanglos",
           "script": "Schreibschrift",
           "smallCaps": "Small-Caps",
@@ -4183,12 +4129,10 @@
         "addItem": "{item} hinzufügen",
         "replaceItem": "{item} ersetzen",
         "browse": "Dateien auswählen",
-        "or": "OR",
         "importFromUrl": "Von URL importieren",
         "directVideoUrlHelp": "Nur direkte Videodatei-URLs. Verwende für YouTube oder Vimeo Externes Video.",
-        "confirm": "Einbetten",
-        "resumeAvailable": "Interrupted upload found",
-        "resumeInstructionNamed": "Select {name} again to continue the upload from where it stopped.",
+        "resumeAvailable": "Unterbrochener Upload gefunden",
+        "resumeInstructionNamed": "Wählen Sie {name} erneut aus, um den Upload an der Stelle fortzusetzen, an der er unterbrochen wurde.",
         "backToUpload": "Dateien hochladen",
         "openLibrary": "Dateibibliothek",
         "unifiedDescription": "Dateien hochladen oder aus der Bibliothek auswählen.",
@@ -4198,11 +4142,8 @@
       }
     },
     "mapBlock": {
-      "clickToAddPlace": "Klicken, um einen Ort hinzuzufügen",
       "captionPlaceholder": "Beschriftung hinzufügen...",
-      "clickToAddCaption": "Klicken, um eine Beschriftung hinzuzufügen",
-      "externalPlaceholder": "Karte: {count} {count, plural, one {Ort} other {Orte}}",
-      "viewOnGoogleMaps": "In Google Maps ansehen ({lat}, {lng})"
+      "clickToAddCaption": "Klicken, um eine Beschriftung hinzuzufügen"
     },
     "mapPlacesModal": {
       "title": "Orte verwalten",
@@ -4212,22 +4153,9 @@
       "centeredTitle": "Zentriert",
       "setAsCenterTitle": "Als Zentrum festlegen"
     },
-    "blockAlign": {
-      "left": "Linksbündig ausrichten",
-      "center": "Zentrieren",
-      "right": "Rechtsbündig ausrichten"
-    },
-    "mathInline": {
-      "clickToEdit": "Zum Bearbeiten klicken",
-      "convertToBlock": "In Block umwandeln"
-    },
-    "mathInlineButton": {
-      "label": "Inline-Mathematik"
-    },
     "editor": {
       "slashMenu": {
         "placeholder": "'/' für Befehle eingeben",
-        "empty": "Keine Einträge",
         "unavailable": "Nicht verfügbar",
         "groups": {
           "headings": "Überschriften",
@@ -4286,14 +4214,14 @@
           "quote": {
             "title": "Zitat",
             "subtext": "Zitat oder Auszug",
-            "aliases": "quotation\nblockquote\nbq",
+            "aliases": "quotation\nblockquote\nbq\nzitat\nzitatblock",
             "group": "Grundlegende Blöcke"
           },
           "callout": {
             "title": "Callout",
-            "subtext": "Highlight content with an icon",
-            "aliases": "callout\nnotice\ninfo\naside",
-            "group": "Basic blocks"
+            "subtext": "Inhalte mit einem Symbol hervorheben",
+            "aliases": "callout\nnotice\ninfo\naside\nhinweis\ninformation\nhervorhebung",
+            "group": "Grundlegende Blöcke"
           },
           "divider": {
             "title": "Trennlinie",
@@ -4322,61 +4250,61 @@
           "mathBlock": {
             "title": "Mathe-Block",
             "subtext": "Gleichung mit LaTeX anzeigen",
-            "aliases": "math\nequation\nlatex\nformula",
+            "aliases": "math\nequation\nlatex\nformula\nmathematik\ngleichung\nformel",
             "group": "Mathe"
           },
           "inlineMath": {
             "title": "Inline-Mathe",
             "subtext": "Inline-LaTeX-Formel",
-            "aliases": "inline\ninline math\ninlinemath\nlatex\n$",
+            "aliases": "inline\ninline math\ninlinemath\nlatex\n$\ninline-mathe\nformel im text",
             "group": "Inline"
           },
           "map": {
             "title": "Karte",
             "subtext": "Einen Ort auf der Karte einfügen",
-            "aliases": "map\nlocation\nplace\naddress",
+            "aliases": "map\nlocation\nplace\naddress\nkarte\nstandort\nort\nadresse",
             "group": "Einbettungen"
           },
           "externalVideo": {
             "title": "Externes Video",
             "subtext": "YouTube- oder Vimeo-Link einfügen",
-            "aliases": "external video\nyoutube\nvimeo\nembed",
+            "aliases": "external video\nyoutube\nvimeo\nembed\nexternes video\neinbetten",
             "group": "Einbettungen"
           },
           "p5Sketch": {
             "title": "p5.js",
             "subtext": "Interaktive p5.js-Skizze hinzufügen",
-            "aliases": "p5\np5.js\nsketch\ncreative coding",
+            "aliases": "p5\np5.js\nsketch\ncreative coding\nskizze\nkreatives programmieren",
             "group": "Einbettungen"
           },
           "threeScene": {
             "title": "Three.js",
             "subtext": "Interaktive Three.js-Szene hinzufügen",
-            "aliases": "three\nthree.js\n3d\nscene",
+            "aliases": "three\nthree.js\n3d\nscene\nszene",
             "group": "Einbettungen"
           },
           "file": {
             "title": "Anhang",
             "subtext": "Datei anhängen (PDF, DOC, ZIP usw.)",
-            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload",
+            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\nanhang\ndatei\ndokument\nherunterladen",
             "group": "Medien"
           },
           "aiAssistant": {
             "title": "KI-Assistent",
             "subtext": "Text mit KI schreiben, verbessern oder umwandeln",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove",
+            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nki\nassistent\nschreiben\nverbessern",
             "group": "KI"
           },
           "shader": {
             "title": "GLSL-Shader",
             "subtext": "Interaktiven GLSL-Shader hinzufügen",
-            "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "aliases": "shader\nglsl\nfragment shader\nshadertoy\nfragment-shader",
             "group": "Einbettungen"
           },
           "mermaid": {
             "title": "Mermaid",
             "subtext": "Diagramm aus Text erstellen",
-            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence\ndiagramm\nflussdiagramm\nsequenzdiagramm",
             "group": "Einbettungen"
           }
         }
@@ -4392,9 +4320,6 @@
         "alignLeft": "Linksbündig ausrichten",
         "alignCenter": "Zentrieren",
         "alignRight": "Rechtsbündig ausrichten",
-        "alignJustify": "Blocksatz",
-        "textColor": "Text",
-        "backgroundColor": "Hintergrund",
         "nest": "Block verschachteln",
         "unnest": "Block entnesten",
         "inlineMath": "Inline-Mathematik",
@@ -4409,36 +4334,19 @@
         "urlPlaceholder": "URL bearbeiten"
       },
       "math": {
-        "inline": "Inline-Mathematik",
-        "block": "Mathe-Block",
-        "clickToEdit": "Zum Bearbeiten klicken",
-        "convertToBlock": "In Block umwandeln"
+        "selectBlock": "Mathematikblock auswählen",
+        "block": "Mathe-Block"
       },
       "file": {
-        "add": "{item} hinzufügen",
         "replace": "{item} ersetzen",
-        "delete": "Löschen",
-        "download": "Herunterladen",
-        "caption": "Beschriftung hinzufügen...",
-        "upload": "Dateien hochladen",
-        "embed": "Einbetten",
-        "urlPlaceholder": "URL bearbeiten"
+        "delete": "Löschen"
       },
       "resize": {
-        "image": "Größe ändern — Bild",
-        "audio": "Größe ändern — Audio",
-        "video": "Größe ändern — Video",
-        "file": "Größe ändern — Anhang",
         "map": "Größe ändern — Karte",
-        "externalVideo": "Größe ändern — Externes Video",
-        "p5Sketch": "Größe ändern — p5.js",
-        "threeScene": "Größe ändern — Three.js",
-        "dragHandle": "Ziehen, um die Größe zu ändern",
-        "shader": "Größe ändern — GLSL-Shader"
+        "externalVideo": "Größe ändern — Externes Video"
       },
       "drag": {
         "openBlockMenu": "Blockmenü öffnen",
-        "addBlock": "Block hinzufügen",
         "delete": "Löschen",
         "colors": "Farben"
       },
@@ -4470,7 +4378,6 @@
         "toggleHeaderColumn": "Kopfspalte",
         "selectRow": "Zeile auswählen",
         "selectColumn": "Spalte auswählen",
-        "selectCells": "Ausgewählte Zellen",
         "selectTable": "Tabelle auswählen",
         "deleteTable": "Tabelle löschen",
         "mergeCells": "Zellen zusammenführen",
@@ -4484,17 +4391,11 @@
         "unavailable": "Nicht verfügbar"
       },
       "map": {
-        "insert": "Karte",
-        "clickToAddPlace": "Klicken, um einen Ort hinzuzufügen",
-        "captionPlaceholder": "Beschriftung hinzufügen...",
         "managePlaces": "Orte verwalten"
       },
       "embeds": {
         "map": "Karte",
-        "externalVideo": "Externes Video",
-        "p5Sketch": "p5.js",
-        "threeScene": "Three.js",
-        "shader": "GLSL-Shader"
+        "externalVideo": "Externes Video"
       },
       "runtimeLabels": {
         "code": {
@@ -4581,13 +4482,14 @@
         }
       },
       "media": {
-        "browse": "Dateien auswählen",
-        "importFromUrl": "Von URL importieren",
-        "embed": "Einbetten",
-        "openLibrary": "Dateibibliothek",
-        "uploadFiles": "Dateien hochladen",
-        "selectFile": "Datei auswählen"
+        "importFromUrl": "Von URL importieren"
       }
+    },
+    "accessDowngraded": {
+      "message": "Ihr Zugriff wurde auf Lesen beschränkt. Die Bearbeitung ist deaktiviert; noch nicht gespeicherte Änderungen bleiben auf diesem Gerät und werden gespeichert, wenn Sie wieder Bearbeitungszugriff erhalten."
+    },
+    "accessUpgraded": {
+      "message": "Sie können wieder bearbeiten. Änderungen, die während der reinen Ansicht aufbewahrt wurden, werden gespeichert."
     }
   },
   "aiAssistant": {
@@ -4612,7 +4514,6 @@
       "brainstorm": "Ideen sammeln"
     },
     "sections": {
-      "original": "Originaltext",
       "result": "KI-Ergebnis"
     },
     "actions": {
@@ -4662,8 +4563,7 @@
       "pinClickable": "Pin anklickbar"
     },
     "themeOptions": {
-      "none": "Keine",
-      "systemSuffix": "(System)"
+      "none": "Keine"
     },
     "scheme": {
       "auto": "Automatisch",
@@ -4679,13 +4579,7 @@
     "copyValueTitle": "Klicken, um den Wert von {label} zu kopieren"
   },
   "postMembers": {
-    "removeAria": "Entfernen {name}",
-    "roles": {
-      "owner": "Eigentümer"
-    },
-    "states": {
-      "memberFallback": "Mitglied"
-    }
+    "removeAria": "Entfernen {name}"
   },
   "workCredits": {
     "divider": "oder Mitwirkung hinzufügen",
@@ -4717,9 +4611,6 @@
     "emptyResults": {
       "artist": "Keine Künstler gefunden",
       "name": "Keine Namen gefunden"
-    },
-    "states": {
-      "unknownInitial": "?"
     },
     "notifications": {
       "groupCreated": "Gruppe erstellt",
@@ -4772,8 +4663,7 @@
       "roleUpdated": "Rolle aktualisiert",
       "userBanned": "Benutzer gesperrt",
       "userUnbanned": "Benutzer entsperrt",
-      "userDeleted": "Benutzer gelöscht",
-      "userCreated": "Benutzer erstellt"
+      "userDeleted": "Benutzer gelöscht"
     }
   },
   "mapView": {
@@ -4789,21 +4679,14 @@
   "featuredImage": {
     "label": "Beitragsbild",
     "alt": "Beitragsbild",
-    "hint": "Bild anklicken, um es zu ersetzen",
     "cropTitle": "Beitragsbild zuschneiden",
-    "empty": {
-      "editable": "Zum Hochladen ablegen oder klicken ({ratio})",
-      "readOnly": "Kein Bild"
-    },
     "errors": {
       "fileRejected": "Datei abgelehnt",
       "fileTooLarge": "Datei zu groß. Maximale Größe: {maxSize}",
       "invalidFileType": "Ungültiger Dateityp"
     },
     "actions": {
-      "changeAria": "Beitragsbild ändern",
-      "removeAria": "Beitragsbild entfernen",
-      "remove": "Bild entfernen"
+      "removeAria": "Beitragsbild entfernen"
     }
   },
   "artistPage": {
@@ -4816,7 +4699,7 @@
     "sections": {
       "biography": "Biografie",
       "gallery": "Galerie",
-      "tracks": "Tracks ({count})"
+      "tracks": "Titel ({count})"
     },
     "tracks": {
       "more": "+{count} weitere Tracks"
@@ -4901,17 +4784,6 @@
     "credits": {
       "other": "Sonstiges"
     },
-    "music": {
-      "released": "Veröffentlicht: {value}",
-      "spotify": "Spotify",
-      "bandcamp": "Bandcamp",
-      "soundcloud": "SoundCloud",
-      "youtube": "YouTube",
-      "openSpotify": "Spotify öffnen",
-      "openBandcamp": "Bandcamp öffnen",
-      "openSoundcloud": "SoundCloud öffnen",
-      "openYoutube": "YouTube öffnen"
-    },
     "portfolio": {
       "tech": "Tech :"
     },
@@ -4938,7 +4810,6 @@
   },
   "seriesDetail": {
     "slug": {
-      "autoDescription": "Automodus: Titeländerungen aktualisieren den Slug automatisch.",
       "manualDescription": "Manueller Modus: Der Slug bleibt fix, bis Sie ihn bearbeiten oder den Automodus wieder aktivieren."
     },
     "notifications": {
@@ -4974,10 +4845,6 @@
     }
   },
   "works": {
-    "tabs": {
-      "editable": "Bearbeitbar"
-    },
-    "emptyEditable": "Ihnen sind keine bearbeitbaren Werke zugewiesen.",
     "emptyCredits": "Keine Werke mit Credits gefunden.",
     "columns": {
       "creditedAs": "Als genannt",
@@ -5145,7 +5012,6 @@
     }
   },
   "releasePage": {
-    "previewTitle": "Veröffentlichungsvorschau",
     "streaming": "Streaming",
     "metadata": {
       "fallbackDescription": "{title}",
@@ -5182,10 +5048,7 @@
       "locationMode": "Ortsmodus",
       "ticketUrl": "Ticket-URL",
       "streamUrl": "Stream-URL",
-      "externalUrl": "Externe URL",
-      "participants": "Teilnehmende",
-      "textCredits": "Text-Credits",
-      "textCreditsDescription": "Ein Credit pro Zeile. Verwende Rolle: Name, wenn eine Rolle benötigt wird."
+      "externalUrl": "Externe URL"
     },
     "locationModes": {
       "mapPlace": "Ort",
@@ -5198,7 +5061,6 @@
       "tickets": "Tickets",
       "stream": "Stream",
       "link": "Link",
-      "participants": "Teilnehmende",
       "empty": "Keine Events gefunden.",
       "date": "Datum",
       "credits": "Credits"
@@ -5215,152 +5077,14 @@
       "deleteMessage": "Nur Event-Typen, die von keinem Event verwendet werden, können gelöscht werden."
     }
   },
-  "tools": {
-    "portadj": {
-      "metadataTitle": "PortaDJ",
-      "metadataDescription": "Spiele und mische lokale Audiodateien mit zwei DJ-Decks in deinem Browser."
-    },
-    "youtubeAudio": {
-      "title": "YouTube-Audio",
-      "urlLabel": "Videolink",
-      "urlPlaceholder": "https://…",
-      "resolve": "Audio laden",
-      "resolving": "Audio wird geladen",
-      "clear": "Quelle löschen",
-      "metadataTitle": "YouTube-Audio",
-      "metadataDescription": "Konvertiere Audio aus einer authentifizierten YouTube-Quelle in deinem Browser.",
-      "errors": {
-        "INTERNAL_ERROR": "Die Audioquelle konnte nicht geladen werden. Versuche es erneut.",
-        "INVALID_REQUEST": "Gib eine gültige YouTube-Video-URL ein.",
-        "INVALID_UPSTREAM_RESPONSE": "YouTube hat eine unerwartete Audioquelle zurückgegeben. Probiere ein anderes Video.",
-        "REQUEST_ABORTED": "Die Anfrage wurde abgebrochen.",
-        "SOURCE_EXPIRED": "Diese Audioquelle ist abgelaufen. Lade die URL erneut.",
-        "SOURCE_NOT_FOUND": "Diese Audioquelle ist nicht mehr verfügbar. Lade die URL erneut.",
-        "UNAUTHORIZED": "Melde dich erneut an, um dieses Werkzeug zu verwenden.",
-        "UNSUPPORTED_VIDEO": "Dieses Video stellt keine unterstützte Audioquelle mit begrenzter Dauer bereit.",
-        "UPSTREAM_FAILURE": "YouTube-Audio kann derzeit nicht geladen werden. Versuche es erneut."
-      }
-    },
-    "transcode": {
-      "title": "Audio-Transcoder",
-      "targetIdle": "Wartet",
-      "targetChecking": "Wird geprüft",
-      "targetReady": "Bereit",
-      "targetError": "Nicht verfügbar",
-      "dropTitle": "Audiodateien ablegen oder auswählen",
-      "dropDescription": "Bis zu 10 Dateien · Keine Ordner · Verarbeitung auf diesem Gerät",
-      "chooseFiles": "Audiodateien auswählen",
-      "supportedFormatsLabel": "Unterstützte Formate",
-      "supportedFormats": "Unterstützt: CAF, AIFF/AIFC, WAV, FLAC, MP3, AAC/M4A, Ogg/Opus und Audio in MP4, MOV, MKV/WebM oder TS. Prüfung pro Datei.",
-      "filesSelected": "Dateien",
-      "outputSettings": "Ausgabeeinstellungen",
-      "format": "Format",
-      "sampleRate": "Abtastrate",
-      "bitrate": "Bitrate",
-      "bitDepth": "Bittiefe",
-      "codec": "Codec",
-      "sampleFormat": "Sampleformat",
-      "float": "Gleitkomma",
-      "integer": "Ganzzahl-PCM",
-      "sourcePcmFloat": "{bitDepth}-Bit Gleitkomma",
-      "sourcePcmInteger": "{bitDepth}-Bit Ganzzahl",
-      "sourcePcmSignedInteger": "{bitDepth}-Bit Ganzzahl mit Vorzeichen",
-      "sourcePcmUnsignedInteger": "{bitDepth}-Bit Ganzzahl ohne Vorzeichen",
-      "automatic": "Automatisch",
-      "unknownAudio": "Audio",
-      "channelCount": "{count, plural, one {# Kanal} other {# Kanäle}}",
-      "queue": "Konvertierungswarteschlange",
-      "convert": "Konvertieren",
-      "cancelAll": "Alle abbrechen",
-      "clear": "Leeren",
-      "download": "Konvertiert speichern",
-      "downloadSource": "Original speichern",
-      "sourceDownloadExpired": "Die Quelle ist abgelaufen oder nicht verfügbar. Lade die YouTube-URL erneut.",
-      "sourceDownloadFailed": "Das Original konnte nicht heruntergeladen werden. Prüfe die Verbindung und lade die Quelle erneut.",
-      "retry": "Erneut versuchen",
-      "cancel": "Abbrechen",
-      "remove": "Entfernen",
-      "sourceValue": "Quelle ({value})",
-      "mono": "Mono",
-      "stereo": "Stereo",
-      "targetWaitingForFiles": "Fügen Sie eine unterstützte Audiodatei hinzu, um das gewählte Ausgabeziel zu prüfen.",
-      "targetCheckingMessage": "Es wird geprüft, ob dieser Browser das gewählte Ausgabeziel unterstützt.",
-      "targetReadyMessage": "Das gewählte Ausgabeziel ist in diesem Browser verfügbar.",
-      "engineLoading": "Die Audio-Engine {asset} wird geladen.",
-      "engineVerifying": "Die Audio-Engine {asset} wird überprüft.",
-      "engineLoadFailed": "Die Audio-Engine {asset} konnte nicht geladen werden.",
-      "capacityExceeded": "{count, number} Dateien wurden nicht hinzugefügt. Die Warteschlange fasst bis zu {max, number} Dateien.",
-      "statusInspectionQueued": "Wartet auf Prüfung",
-      "statusInspecting": "Wird geprüft",
-      "statusReady": "Bereit",
-      "statusQueued": "In Warteschlange",
-      "statusConverting": "Wird konvertiert",
-      "statusComplete": "Abgeschlossen",
-      "statusUnsupported": "Nicht unterstützt",
-      "statusError": "Fehler",
-      "statusCancelled": "Abgebrochen",
-      "unsupportedInput": "Diese Audiodatei wird nicht unterstützt.",
-      "unsupportedCodec": "Dieser Browser kann den Audio-Codec dieser Datei nicht dekodieren.",
-      "inspectionFailed": "Die Datei konnte nicht geprüft werden. Versuchen Sie es erneut.",
-      "inspectionInconclusive": "Der Browser konnte diese Audiodatei innerhalb des sicheren Leselimits nicht eindeutig bestimmen. Versuchen Sie es mit einer anderen Datei oder einem anderen Format.",
-      "outputUnsupported": "Die gewählten Ausgabeeinstellungen werden von diesem Browser nicht unterstützt.",
-      "outputProbeFailed": "Die Ausgabeunterstützung konnte nicht geprüft werden. Versuchen Sie es erneut.",
-      "conversionFailed": "Die Audiokonvertierung ist fehlgeschlagen.",
-      "conversionStorageLimitExceeded": "Der lokale temporäre Speicher dieses Browsers reicht für die erwartete Ausgabe nicht aus. Wählen Sie ein kleineres oder komprimiertes Format oder versuchen Sie es in einem Browser erneut, der große lokale Ausgaben unterstützt.",
-      "conversionTargetSizeLimitExceeded": "Das ausgewählte Ausgabeformat kann eine Datei dieser Größe nicht darstellen. Wählen Sie ein anderes Format oder reduzieren Sie Abtastrate, Bittiefe oder Kanalzahl.",
-      "cancelledMessage": "Die Konvertierung wurde abgebrochen.",
-      "sourceSummary": "{container} · {sampleRate} · {channels} · {bitDepth}",
-      "outputSummary": "{preset} · {size}",
-      "progressLabel": "{phase} · {progress, number}%",
-      "phasePrepare": "Vorbereiten",
-      "phaseDecode": "Dekodieren",
-      "phaseEncode": "Kodieren",
-      "phaseFinalize": "Abschließen",
-      "bytes": "{count, number} Byte",
-      "storageOpfs": "Privater Browserspeicher",
-      "storageMemory": "Browserspeicher",
-      "metadataTitle": "Audio-Transcoder",
-      "metadataDescription": "Audio im Browser konvertieren. Dateien verlassen das Gerät nicht.",
-      "outputSettingsHelper": "Kanäle bleiben unverändert. Automatisch wählt pro Datei eine kompatible Rate.",
-      "processingDetails": "Verarbeitungsdetails",
-      "processingDetailsDescription": "Ausgewogenes Resampling. Integer-Ausgaben werden gedithert. Große WAV-Dateien verwenden RF64.",
-      "bitDepthContainerEffective": "{containerBits}-Bit-Container / {effectiveBits} Bit effektiv",
-      "constantBitrate": "CBR",
-      "variableBitrate": "VBR",
-      "preserveSource": "Quelle beibehalten",
-      "unavailable": "Nicht verfügbar",
-      "sampleRateAvailableFor": "{supported, number} von {total, number} Dateien",
-      "sampleRateResetAutomatic": "Die vorherige Abtastrate ist für diese Ausgabeeinstellungen ungültig. Sie wurde auf Automatisch gesetzt.",
-      "targetAvailability": "{available, number} Dateien können konvertiert werden; {unavailable, number} bleiben mit diesen Einstellungen nicht verfügbar.",
-      "statusQueuedAvailability": "{converting, number} Dateien zur Konvertierung eingereiht; {unavailable, number} bleiben nicht verfügbar.",
-      "statusConvertingAvailability": "{converting, number} Dateien werden konvertiert; {unavailable, number} bleiben nicht verfügbar.",
-      "statusCompleteAvailability": "{converted, number} Dateien konvertiert; {unavailable, number} bleiben nicht verfügbar.",
-      "statusBatchResult": "Lauf beendet: {eligible, number} geeignet, {attempted, number} versucht, {succeeded, number} erfolgreich, {failed, number} fehlgeschlagen, {unavailable, number} nicht verfügbar.",
-      "outputEngineUnavailable": "Die Laufzeit-Engine für {preset} konnte nicht gestartet werden. Netzwerk- oder Asset-Richtlinie prüfen und erneut versuchen.",
-      "outputChannelsUnsupported": "Diese Ausgabe unterstützt {minimum, number}–{maximum, number} Quellkanäle, diese Datei hat jedoch {actual, number}. Kanäle bleiben erhalten und werden nicht heruntergemischt.",
-      "sourceInspectionMissing": "Kanalzahl oder Abtastrate der Quelle konnte nicht erkannt werden. Bitte eine Datei mit lesbaren Audiometadaten wählen.",
-      "outputConfigurationUnavailable": "Die gewählten Format- und Kodierungseinstellungen ergeben keine verfügbare Ausgabekonfiguration.",
-      "preserveSourceRateUnsupported": "{sourceRate} kann für diese Ausgabe nicht beibehalten werden. Zulässige Raten: {allowed}.",
-      "sourceResamplingRateUnsupported": "Die Quelle mit {sourceRate} liegt außerhalb des Resampling-Bereichs ({minimum}–{maximum}) und kann nur an eine kompatible Ausgabe durchgereicht werden.",
-      "targetResamplingRateUnsupported": "Das Ziel {targetRate} liegt außerhalb des Resampling-Bereichs ({minimum}–{maximum}).",
-      "automaticRateUnavailable": "Automatisch kann für diese {sourceRate}-Quelle keine gültige Rate wählen. Zulässige Ausgaberaten: {allowed}.",
-      "presetRateUnsupported": "Diese Ausgabe unterstützt {targetRate} nicht. Zulässige Raten: {allowed}.",
-      "notices": "Open-Source-Lizenzen"
-    },
-    "hwp": {
-      "title": "HWP-Editor",
-      "metadataDescription": "HWP- und HWPX-Dokumente im Browser öffnen, bearbeiten und speichern.",
-      "description": "Öffnen und speichern Sie HWP- oder HWPX-Dateien über das Dateimenü des Editors. Dokumente werden auf diesem Gerät verarbeitet, ohne hochgeladen zu werden.",
-      "loading": "Editor wird geladen…",
-      "error": "Der Editor konnte nicht geladen werden. Versuchen Sie es erneut.",
-      "retry": "Erneut versuchen",
-      "metadataTitle": "HWP-Editor"
-    }
-  },
   "myMetadata": {
     "description": "Seite {title} für Ihr Konto auf {siteName}."
   },
   "fileManager": {
+    "pagination": {
+      "end": "Ende der Ergebnisse"
+    },
+    "selectionUnavailableDescription": "Diese Datei kann nicht hinzugefügt werden. Drücke die Eingabetaste für eine Vorschau.",
     "title": "Dateien",
     "description": "Dateien für die gesamte Website hochladen, organisieren, prüfen und wiederverwenden.",
     "root": "Dateien",
@@ -5396,8 +5120,8 @@
     "selectAll": "Alle Elemente auswählen",
     "selectItem": "{name} auswählen",
     "sortBy": "Nach {name} sortieren",
-    "selectedCount": "{count} Elemente ausgewählt",
-    "itemCount": "{count} Elemente",
+    "selectedCount": "{count, plural, one {# Element ausgewählt} other {# Elemente ausgewählt}}",
+    "itemCount": "{count, plural, one {# Element} other {# Elemente}}",
     "searchResultCount": "{count, plural, one {# Ergebnis gefunden} other {# Ergebnisse gefunden}}",
     "uploadProgress": "Upload {percentage}%",
     "types": {
@@ -5484,9 +5208,7 @@
       "move-files": {
         "title": "Dateien verschieben"
       },
-      "targetFolderId": "Zielordner-ID",
       "extensionSeparate": "Die Erweiterung .{extension} wird separat beibehalten.",
-      "rootWhenEmpty": "Leer lassen, um ins Stammverzeichnis zu verschieben.",
       "delete": {
         "title": "Löschen",
         "folder": "Diesen Ordner und alle ungenutzten Dateien darunter löschen?",
@@ -5496,14 +5218,26 @@
         "byDomain": "Nach Bereich: {summary}",
         "more": "und {count} weitere. Die vollständige Liste steht in den Dateidetails."
       }
+    },
+    "viewSettings": {
+      "title": "Ansichtseinstellungen",
+      "iconSize": "Symbolgröße",
+      "spacing": "Elementabstand",
+      "columns": "Spalten",
+      "auto": "Automatisch",
+      "small": "Klein",
+      "medium": "Mittel",
+      "large": "Groß",
+      "compact": "Kompakt",
+      "standard": "Standard",
+      "comfortable": "Geräumig",
+      "reset": "Ansicht zurücksetzen"
     }
   },
   "fileDownloadAccess": {
     "editor": {
       "sectionTitle": "Download-Zugriff",
-      "sectionDescription": "Legen Sie fest, wer die Originaldatei herunterladen darf.",
       "loading": "Download-Zugriff wird geladen…",
-      "audienceLabel": "Download-Zielgruppe",
       "audiences": {
         "disabled": {
           "label": "Deaktiviert",
@@ -5522,15 +5256,10 @@
           "description": "Nur Benutzer in den ausgewählten Zielgruppen können diese Datei herunterladen."
         }
       },
-      "segmentsLabel": "Zielgruppen",
-      "segmentsDescription": "Wählen Sie ein oder mehrere vorhandene Zielgruppensegmente aus.",
-      "segmentsPlaceholder": "Zielgruppen auswählen",
       "segmentsLoadError": "Die Richtlinie wurde geladen, die Zielgruppen jedoch nicht.",
       "segmentsEmpty": "Es sind keine Zielgruppensegmente verfügbar.",
       "restrictedWithoutAudience": "Dieser eingeschränkten Richtlinie ist keine Zielgruppe zugewiesen. Downloads werden für alle verweigert, bis Sie mindestens eine Zielgruppe auswählen.",
-      "segmentRequiresSubscription": "{name} (Newsletter-Abonnement erforderlich)",
       "additionalSelected": "{count} weitere ausgewählt",
-      "loadMoreSegments": "Weitere Zielgruppen laden",
       "loadError": "Der Download-Zugriff konnte nicht geladen werden.",
       "saveError": "Der Download-Zugriff konnte nicht gespeichert werden.",
       "fileRequired": "Speichern Sie die Datei, bevor Sie den Download-Zugriff konfigurieren."
@@ -5552,5 +5281,63 @@
     "empty": "Diagramm-Quelltext eingeben",
     "invalid": "Ungültiges Diagramm",
     "loading": "Wird gerendert…"
+  },
+  "errorPage": {
+    "titles": {
+      "400": "Ungültige Anfrage",
+      "401": "Anmeldung erforderlich",
+      "403": "Zugriff verweigert",
+      "404": "Seite nicht gefunden",
+      "408": "Zeitüberschreitung der Anfrage",
+      "409": "Die Anfrage steht im Konflikt mit dem aktuellen Zustand",
+      "410": "Diese Seite ist nicht mehr verfügbar",
+      "413": "Die Anfrage ist zu groß",
+      "422": "Die Anfrage kann nicht verarbeitet werden",
+      "429": "Zu viele Anfragen",
+      "500": "Etwas ist schiefgelaufen",
+      "501": "Diese Anfrage wird nicht unterstützt",
+      "502": "Ein vorgelagerter Dienst ist fehlgeschlagen",
+      "503": "Dienst vorübergehend nicht verfügbar",
+      "504": "Zeitüberschreitung der Dienstantwort"
+    },
+    "actions": {
+      "goHome": "Zur Startseite",
+      "tryAgain": "Erneut versuchen",
+      "login": "Zur Anmeldung"
+    }
+  },
+  "localBackups": {
+    "title": "Lokale Sicherungen",
+    "description": "Ungespeicherte Änderungen aus geschlossenen Tabs auf diesem Gerät. Öffnen Sie den Editor, um sie wiederherzustellen. Sicherungen laufen nach 30 Tagen ab und werden bei der Abmeldung entfernt.",
+    "empty": "Keine lokalen Sicherungen zum Wiederherstellen. Änderungen in offenen Tabs werden hier nicht aufgeführt.",
+    "unavailable": "Lokale Sicherungen erfordern Browserspeicher und Web Locks auf diesem Gerät.",
+    "loading": "Lokale Sicherungen werden gesucht…",
+    "error": "Diese Aktion konnte nicht abgeschlossen werden. Aktualisieren Sie die Liste und versuchen Sie es erneut.",
+    "refresh": "Aktualisieren",
+    "lastChanged": "Zuletzt geändert {time}",
+    "open": "Editor öffnen",
+    "discard": "Verwerfen",
+    "openLabel": "Editor öffnen: {kind} {id}, {locale}",
+    "discardLabel": "Verwerfen: {kind} {id}, {locale}",
+    "discardTitle": "Lokale Sicherung verwerfen?",
+    "discardDescription": "Diese ungespeicherten Änderungen werden dauerhaft von diesem Gerät entfernt. Gespeicherte Inhalte bleiben erhalten.",
+    "kinds": {
+      "post": "Beitrag",
+      "page": "Seite",
+      "work": "Werk",
+      "campaign": "Kampagne",
+      "email-template": "E-Mail-Vorlage",
+      "email-layout": "E-Mail-Layout",
+      "terms-history": "Nutzungsbedingungen",
+      "privacy-history": "Datenschutzerklärung",
+      "artist": "Künstler",
+      "release": "Veröffentlichung",
+      "label": "Label",
+      "form": "Formular",
+      "map-theme": "Kartenthema",
+      "program-event": "Veranstaltung",
+      "menu": "Menü",
+      "post-series": "Beitragsserie"
+    }
   }
 }

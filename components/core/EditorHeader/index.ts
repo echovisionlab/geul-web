@@ -10,3 +10,5 @@ export type {
   EditorHeaderViewProps,
   StatusOption,
 } from './EditorHeaderView';
+
+export type { EditorSaveState } from './save-state';

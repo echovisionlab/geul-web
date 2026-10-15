@@ -200,6 +200,7 @@ describe('useOgImage', () => {
       entityType: 'post',
       entityId: 'post-1',
       locale: null,
+      onResync: expect.any(Function),
     });
     act(() => {
       mocks.lifecycleCallback?.({ kind: 'og.lifecycle', generationId: 'premature' });
@@ -328,7 +329,16 @@ describe('useOgImage', () => {
       entityType: 'post',
       entityId: 'post-1',
       locale: 'ko',
+      onResync: expect.any(Function),
     });
+
+    // Undeliverable lifecycle events (resync) also re-read the latest target generation.
+    mocks.getLatest.mockClear();
+    act(() => {
+      (mocks.subscriptionOptions as { onResync: () => void }).onResync();
+    });
+    await flushWork();
+    expect(mocks.getLatest).toHaveBeenCalledTimes(1);
 
     act(() => {
       mocks.lifecycleCallback?.({ kind: 'og.lifecycle', generationId: 'stale-event' });

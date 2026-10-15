@@ -17,7 +17,7 @@ import { isBlockId } from '@/lib/editor/block-id';
 import type { ProseMirrorBlockDescriptor } from './block-room-prosemirror-bridge';
 import { richTextProseMirrorAdapterForProtoCase } from './block-room-prosemirror-registry';
 import { SHADER_STAGE_DEFINITIONS } from './shader/shader-program';
-import { emojiTextForName } from './emoji/emoji-extension';
+import { emojiTextForName } from './emoji/emoji-runtime';
 
 export type JsonObject = Readonly<Record<string, JsonValue>>;
 type TiptapMark = NonNullable<JSONContent['marks']>[number];
@@ -84,7 +84,9 @@ function enumToken(value: string | number): string {
     .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
     .replace(/[^A-Za-z0-9]+/g, '_')
     .toUpperCase();
-  return /^[0-9]/.test(normalized) ? `X_${normalized}` : normalized;
+  // Numeric catalog enums (Heading Level) use LEVEL_2 in protobuf JSON.
+  // String enums such as "4:3" use the generated X_4_3 identifier.
+  return typeof value === 'string' && /^[0-9]/.test(normalized) ? `X_${normalized}` : normalized;
 }
 
 export function decodeCatalogValue(spec: CatalogFieldSpec, value: JsonValue): JsonValue {
@@ -336,6 +338,7 @@ function requireTableIdentity(value: unknown, description: string): string {
 
 function tableToTiptap(base: JsonObject, locale: JsonObject): readonly JSONContent[] {
   const baseRows = array(object(base.content).rows);
+  const columnWidths = array(object(base.content).columnWidths);
   const localeRows = array(object(locale.content).rows);
   const resolvedBaseRows = baseRows.map((baseRow) => {
     const row = object(baseRow);
@@ -396,6 +399,7 @@ function tableToTiptap(base: JsonObject, locale: JsonObject): readonly JSONConte
     if (localeByCellId.size !== cells.length) {
       throw new Error(`Generated table base and locale durable cell sets do not match for row ${rowId}.`);
     }
+    let columnIndex = 0;
     return {
       type: 'tableRow',
       attrs: { id: rowId },
@@ -405,9 +409,18 @@ function tableToTiptap(base: JsonObject, locale: JsonObject): readonly JSONConte
           throw new Error(`Generated table locale row ${rowId} is missing durable cell ${cellId}.`);
         }
         const props = object(cell.props);
+        const colspan = typeof props.colspan === 'number' ? props.colspan : 1;
+        const colwidth = columnWidths.slice(columnIndex, columnIndex + colspan);
+        columnIndex += colspan;
         return {
           type: cell.header === true ? 'tableHeader' : 'tableCell',
-          attrs: { id: cellId, ...tableCellPropsToTiptap(props) },
+          attrs: {
+            id: cellId,
+            ...tableCellPropsToTiptap(props),
+            ...(colwidth.length === colspan && colwidth.every((width) => typeof width === 'number' && width > 0)
+              ? { colwidth }
+              : {}),
+          },
           content: [
             {
               type: 'tableParagraph',
@@ -638,7 +651,11 @@ export function jsonEqual(left: JsonValue | undefined, right: JsonValue | undefi
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
-function tableFromTiptap(content: readonly JSONContent[]): { baseRows: JsonValue[]; localeRows: JsonValue[] } {
+function tableFromTiptap(content: readonly JSONContent[]): {
+  baseRows: JsonValue[];
+  localeRows: JsonValue[];
+  columnWidths: number[];
+} {
   const baseRows: JsonValue[] = [];
   const localeRows: JsonValue[] = [];
   const rowIds = new Set<string>();
@@ -683,7 +700,23 @@ function tableFromTiptap(content: readonly JSONContent[]): { baseRows: JsonValue
     baseRows.push({ id: rowId, cells: baseCells });
     localeRows.push({ rowId, cells: localeCells });
   }
-  return { baseRows, localeRows };
+  const firstRowWidths = (content[0]?.content ?? []).flatMap((cell) => {
+    const widths: unknown = cell.attrs?.colwidth;
+    const colspan = Number(cell.attrs?.colspan) || 1;
+    return Array.isArray(widths) &&
+      widths.length === colspan &&
+      widths.every((width) => typeof width === 'number' && width > 0)
+      ? (widths as number[])
+      : [];
+  });
+  const columnCount = (content[0]?.content ?? []).reduce(
+    (count, cell) => count + (Number(cell.attrs?.colspan) || 1),
+    0,
+  );
+  const total = firstRowWidths.reduce((sum, width) => sum + width, 0);
+  const columnWidths =
+    firstRowWidths.length === columnCount && total > 0 ? firstRowWidths.map((width) => (width / total) * 100) : [];
+  return { baseRows, localeRows, columnWidths };
 }
 
 function wireValueToCatalog(
@@ -797,7 +830,7 @@ export function splitPayload(block: TiptapBlockSnapshot): { base: JsonObject; lo
   }
   if (shape === 'table') {
     const table = tableFromTiptap(block.content);
-    base.content = { rows: table.baseRows };
+    base.content = { rows: table.baseRows, ...(table.columnWidths.length ? { columnWidths: table.columnWidths } : {}) };
     locale.content = { rows: table.localeRows };
   }
   if (shape === 'source-text') {

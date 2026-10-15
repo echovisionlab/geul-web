@@ -455,12 +455,14 @@ function createExplicitTableEditingPlugin(): Plugin {
   });
 }
 
-function currentBlockContent(editor: Editor): { position: number; node: ProseMirrorNode } | null {
-  const { $from } = editor.state.selection;
+function currentBlockContent(
+  state: Pick<Transaction, 'selection' | 'doc'>,
+): { position: number; node: ProseMirrorNode } | null {
+  const { $from } = state.selection;
   for (let depth = $from.depth; depth > 0; depth -= 1) {
     if ($from.node(depth).type.name === 'blockContainer') {
       const position = $from.before(depth) + 1;
-      const node = editor.state.doc.nodeAt(position);
+      const node = state.doc.nodeAt(position);
       return node ? { position, node } : null;
     }
   }
@@ -528,7 +530,7 @@ export function createTableCommands(options: TableExtensionOptions = {}) {
         if (!node || geometryError) {
           return report(options, 'invalid-table-shape', `Could not create a valid table shape: ${geometryError}`);
         }
-        const target = currentBlockContent(editor);
+        const target = currentBlockContent(tr);
         if (!target) {
           return report(options, 'not-in-table', 'Place the cursor in an editable block first.');
         }

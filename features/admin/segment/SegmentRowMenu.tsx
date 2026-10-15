@@ -26,7 +26,7 @@ export function SegmentRowMenu({ segment }: SegmentRowMenuProps) {
         label: tPage('archive'),
         icon: <IconArchive size={16} />,
         onClick: () => openArchive(segment),
-        color: 'orange' as const,
+        tone: 'warning' as const,
       };
 
   return (

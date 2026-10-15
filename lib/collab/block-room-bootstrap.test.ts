@@ -41,8 +41,8 @@ function bootstrapMessage(
     summary: 'Canonical source summary',
   };
   return {
-    kind: 'block_room.bootstrap',
-    protocolVersion: 2,
+    kind: 'room.bootstrap',
+    v: 3,
     bootstrapChallenge: 'challenge-1',
     documentName: `post:${entityId}:${roomLocale}`,
     documentType: 'post',
@@ -180,4 +180,36 @@ describe('block-room WebSocket bootstrap', () => {
     );
     expect(() => applyBlockRoomBootstrap(bootstrap)).toThrow(/do not match/u);
   });
+});
+
+it('validates an omitted bootstrap body against the matching typed SSR snapshot', () => {
+  const document = typedDocument();
+  const message = bootstrapMessage(document);
+  const { document: _body, ...omitted } = message;
+  const snapshot = {
+    document,
+    locale: message.locale,
+    sourceLocale: message.sourceLocale,
+    localeExists: true,
+    documentRevision: message.documentRevision,
+    editable: true,
+    title: '',
+    summary: '',
+  };
+  const bootstrap = parseBlockRoomBootstrap(omitted, 'post', entityId, 'en', snapshot);
+  expect(bootstrap.document).toBe(document);
+  const room = applyBlockRoomBootstrap(bootstrap);
+  room.destroy();
+  expect(() => parseBlockRoomBootstrap(omitted, 'post', entityId, 'en')).toThrow(/matching SSR snapshot/);
+  expect(() => parseBlockRoomBootstrap(omitted, 'post', entityId, 'en', { ...snapshot, locale: 'ko' })).toThrow(
+    /matching SSR snapshot/,
+  );
+  expect(() =>
+    parseBlockRoomBootstrap(omitted, 'post', entityId, 'en', { ...snapshot, documentRevision: entityId }),
+  ).toThrow(/matching SSR snapshot/);
+  // A valid typed body with different locale overlay content still cannot admit the Yjs update.
+  const different = typedDocument();
+  different.profile = RichTextProfile.COMPACT;
+  const invalid = parseBlockRoomBootstrap(omitted, 'post', entityId, 'en', { ...snapshot, document: different });
+  expect(() => applyBlockRoomBootstrap(invalid)).toThrow(/do not match|failed validation/);
 });

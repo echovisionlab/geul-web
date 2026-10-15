@@ -1,7 +1,6 @@
 'use client';
-
 import { useCallback, useMemo } from 'react';
-import NextImage from 'next/image';
+import { Avatar } from '@/components/core/Display';
 import { usePathname, useRouter } from 'next/navigation';
 import { MySection } from '@echovisionlab/geul-proto/secure/member_pb.ts';
 import {
@@ -15,16 +14,19 @@ import {
   IconUser,
 } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Box } from '@mantine/core';
 import { UserAvatarUploader } from '@/features/user/UserAvatarUploader';
 import { UserShellView, type UserShellViewTab } from '@/features/user/ui/UserShell';
 import { useSession } from '@/lib/auth/client';
-import { isManagedCdnAssetUrl } from '@/lib/utils/file-url';
 import { normalizeMySections } from './sections';
-
 type SectionTabLabelKey = 'profile' | 'security' | 'settings' | 'posts' | 'series' | 'works' | 'artists' | 'forms';
-
-const SECTION_TABS: Record<MySection, { value: string; labelKey: SectionTabLabelKey; icon: typeof IconUser }> = {
+const SECTION_TABS: Record<
+  MySection,
+  {
+    value: string;
+    labelKey: SectionTabLabelKey;
+    icon: typeof IconUser;
+  }
+> = {
   [MySection.UNSPECIFIED]: { value: 'profile', labelKey: 'profile', icon: IconUser },
   [MySection.PROFILE]: { value: 'profile', labelKey: 'profile', icon: IconUser },
   [MySection.SECURITY]: { value: 'security', labelKey: 'security', icon: IconShield },
@@ -35,7 +37,6 @@ const SECTION_TABS: Record<MySection, { value: string; labelKey: SectionTabLabel
   [MySection.ARTISTS]: { value: 'artists', labelKey: 'artists', icon: IconMicrophone },
   [MySection.FORMS]: { value: 'forms', labelKey: 'forms', icon: IconForms },
 };
-
 interface UserShellProps {
   children: React.ReactNode;
   sections: MySection[];
@@ -46,7 +47,6 @@ interface UserShellProps {
     role?: string | null;
   };
 }
-
 export function UserShell({ children, sections, user }: UserShellProps) {
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
@@ -54,7 +54,6 @@ export function UserShell({ children, sections, user }: UserShellProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const displayUser = session?.user ?? user;
-
   const tabs = useMemo<UserShellViewTab[]>(() => {
     return normalizeMySections(sections)
       .map((section) => SECTION_TABS[section])
@@ -80,11 +79,9 @@ export function UserShell({ children, sections, user }: UserShellProps) {
                         : tCommon('labels.settings'),
       }));
   }, [displayUser.role, sections, tCommon, tCommonEntities]);
-
   const pathnameSegments = pathname.split('/').filter(Boolean);
   const currentTabCandidate = pathnameSegments[0] === 'my' ? (pathnameSegments[1] ?? 'profile') : 'profile';
   const currentTab = tabs.some((tab) => tab.value === currentTabCandidate) ? currentTabCandidate : 'profile';
-
   const handleTabChange = useCallback(
     (value: string | null) => {
       if (value) {
@@ -93,9 +90,7 @@ export function UserShell({ children, sections, user }: UserShellProps) {
     },
     [router],
   );
-
   const events = useMemo(() => ({ onTabChange: handleTabChange }), [handleTabChange]);
-
   const roleLabel =
     displayUser.role === 'admin'
       ? tCommon('roles.admin')
@@ -104,7 +99,6 @@ export function UserShell({ children, sections, user }: UserShellProps) {
         : displayUser.role === 'user' || !displayUser.role
           ? tCommon('roles.user')
           : displayUser.role;
-
   const avatarSlot =
     currentTab === 'profile' ? (
       <UserAvatarUploader
@@ -114,50 +108,21 @@ export function UserShell({ children, sections, user }: UserShellProps) {
         size={80}
         isOwnProfile
       />
-    ) : displayUser.image ? (
-      <Box
-        style={{
-          width: 80,
-          height: 80,
-          borderRadius: '50%',
-          overflow: 'hidden',
-          position: 'relative',
-        }}
-      >
-        <NextImage
-          src={displayUser.image}
-          alt={displayUser.nickname}
-          fill
-          sizes="80px"
-          style={{ objectFit: 'cover' }}
-          unoptimized={displayUser.image.startsWith('http') && !isManagedCdnAssetUrl(displayUser.image)}
-        />
-      </Box>
     ) : (
-      <Box
-        style={{
-          width: 80,
-          height: 80,
-          borderRadius: '50%',
-          backgroundColor: 'var(--mantine-color-blue-filled)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontSize: 32,
-          fontWeight: 500,
-        }}
-      >
-        {displayUser.nickname.charAt(0).toUpperCase()}
-      </Box>
+      <Avatar
+        src={displayUser.image}
+        alt={displayUser.nickname}
+        size="profile"
+        shape="circle"
+        name={displayUser.nickname}
+      />
     );
-
   return (
     <UserShellView
       user={{
         name: displayUser.nickname,
         roleLabel,
-        roleTone: displayUser.role === 'admin' ? 'danger' : displayUser.role === 'author' ? 'accent' : 'neutral',
+        roleTone: displayUser.role === 'admin' ? 'accent' : 'neutral',
         navigationLabel: `${tCommon('labels.account')} ${tCommon('labels.menu')}`,
       }}
       tabs={tabs}

@@ -1,0 +1,337 @@
+.backdrop {
+  --_overlay-inset-top: max(var(--geul-spacing-xl), env(safe-area-inset-top));
+  --_overlay-inset-right: max(var(--geul-spacing-xl), env(safe-area-inset-right));
+  --_overlay-inset-bottom: max(var(--geul-spacing-xl), env(safe-area-inset-bottom));
+  --_overlay-inset-left: max(var(--geul-spacing-xl), env(safe-area-inset-left));
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--_overlay-inset-top) var(--_overlay-inset-right) var(--_overlay-inset-bottom) var(--_overlay-inset-left);
+  overflow-y: auto;
+  background: var(--geul-overlay-dialog);
+}
+
+.backdrop[data-centered] {
+  align-items: center;
+}
+
+/* Access to the page ended: nothing behind the dialog may stay readable. */
+.backdrop[data-backdrop='obscure'] {
+  background: var(--geul-background);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-sizing: border-box;
+  width: 28rem;
+  max-width: 100%;
+  max-height: calc(100dvh - var(--_overlay-inset-top) - var(--_overlay-inset-bottom));
+  color: var(--geul-text-primary);
+  background: var(--geul-surface);
+  border: var(--geul-border-thin) solid var(--geul-border-default);
+  border-radius: var(--geul-radius-square);
+  box-shadow: var(--geul-shadow-panel);
+  overflow: hidden;
+}
+
+.panel[data-size='compact'] {
+  width: 24rem;
+}
+
+.panel[data-size='large'] {
+  width: 40rem;
+}
+
+.panel[data-size='wide'] {
+  width: 60rem;
+}
+
+.panel[data-size='workspace'] {
+  width: calc(100vw - var(--geul-spacing-xl) * 2);
+  height: calc(100dvh - var(--_overlay-inset-top) - var(--_overlay-inset-bottom));
+}
+
+.dialog {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+  min-height: 0;
+  outline: none;
+}
+
+.panel[data-size='workspace'] .dialog {
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--geul-spacing-sm);
+  padding: var(--geul-spacing-md);
+  border-bottom: var(--geul-border-thin) solid var(--geul-border-default);
+}
+
+.title {
+  margin: 0;
+  font-family: inherit;
+  font-size: var(--geul-font-size-md);
+  font-weight: var(--geul-font-weight-medium);
+  line-height: var(--geul-line-height-md);
+}
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--geul-spacing-md);
+  overflow: auto;
+}
+
+.body:focus-visible {
+  outline: var(--geul-border-focus) solid var(--geul-focus);
+  outline-offset: calc(var(--geul-border-focus) * -1);
+}
+
+/* Compact dialog and drawer chrome reuses spacing/type roles. Size remains independent. */
+.panel[data-density='compact'] .header,
+.panel[data-density='compact'] .body {
+  padding: var(--geul-spacing-xs);
+}
+
+.panel[data-density='compact'] .title {
+  font-size: var(--geul-font-size-sm);
+  line-height: var(--geul-line-height-sm);
+}
+
+.panel[data-size='workspace'] .body {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Resizable content shares the modal's viewport budget, including header and padding. */
+.panel[data-body-layout='fit'] {
+  display: flex;
+  overflow: hidden;
+}
+
+.panel[data-body-layout='fit'] .dialog {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.panel[data-body-layout='fit'] .body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.backdrop[data-placement] {
+  padding: 0;
+}
+
+.backdrop[data-placement='left'] {
+  justify-content: flex-start;
+}
+
+.backdrop[data-placement='right'] {
+  justify-content: flex-end;
+}
+
+.backdrop[data-placement='bottom'] {
+  align-items: flex-end;
+}
+
+.panel[data-placement='left'],
+.panel[data-placement='right'] {
+  height: 100dvh;
+  max-height: 100dvh;
+}
+
+.panel[data-placement='bottom'] {
+  width: 100%;
+  height: 80dvh;
+  max-height: 100dvh;
+}
+
+.panel[data-placement='bottom'][data-size='compact'] {
+  height: 60dvh;
+}
+
+.panel[data-placement='bottom'][data-size='large'] {
+  height: 85dvh;
+}
+
+.panel[data-size='auto'] {
+  width: max-content;
+  height: auto;
+}
+
+/* Shared floating panel surface: Popover, Tooltip and DropdownMenu panels. */
+.popover,
+.tooltip,
+.menuSurface {
+  box-sizing: border-box;
+  max-width: calc(100vw - var(--geul-spacing-xl));
+  border: var(--geul-border-thin) solid var(--geul-border-default);
+  background: var(--geul-surface);
+  color: var(--geul-text-primary);
+  border-radius: var(--geul-radius-square);
+  box-shadow: var(--geul-shadow-panel);
+  font-family: inherit;
+}
+
+.popover {
+  display: flex;
+  flex-direction: column;
+  width: 18.75rem;
+  overflow-wrap: anywhere;
+  overflow: hidden;
+}
+
+.popover[data-size='compact'] {
+  width: 15rem;
+}
+
+.popover[data-size='wide'] {
+  width: 31.25rem;
+}
+
+.popoverContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--geul-spacing-md);
+  outline: none;
+}
+
+.popoverContent[data-padding='none'] {
+  padding: 0;
+}
+
+.popoverContent[data-padding='compact'] {
+  padding: var(--geul-spacing-xs);
+}
+
+.tooltip {
+  padding: var(--geul-spacing-xxs) var(--geul-spacing-xs);
+  font-size: var(--geul-font-size-xs);
+  line-height: var(--geul-line-height-xs);
+  pointer-events: none;
+}
+
+.tooltip[data-multiline] {
+  white-space: normal;
+}
+
+.arrow {
+  fill: var(--geul-surface);
+  stroke: var(--geul-border-default);
+  stroke-width: var(--geul-border-thin);
+}
+
+.backdrop[data-entering],
+.popover[data-entering],
+.tooltip[data-entering] {
+  animation: appear var(--geul-motion-fast) var(--geul-motion-easing);
+}
+
+.backdrop[data-exiting],
+.popover[data-exiting],
+.tooltip[data-exiting] {
+  animation: appear var(--geul-motion-fast) var(--geul-motion-easing) reverse;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .popover,
+  .tooltip {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (width < $mantine-breakpoint-sm) {
+  .backdrop {
+    --_overlay-inset-top: max(var(--geul-spacing-sm), env(safe-area-inset-top));
+    --_overlay-inset-right: max(var(--geul-spacing-sm), env(safe-area-inset-right));
+    --_overlay-inset-bottom: max(var(--geul-spacing-sm), env(safe-area-inset-bottom));
+    --_overlay-inset-left: max(var(--geul-spacing-sm), env(safe-area-inset-left));
+  }
+
+  .panel[data-size='workspace'] {
+    width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+
+  .backdrop:has(.panel[data-size='workspace']) {
+    padding: 0;
+  }
+}
+
+@media (width >= $mantine-breakpoint-sm) {
+  .backdrop[data-mobile-only] {
+    display: none;
+  }
+}
+
+.anchor {
+  display: contents;
+}
+
+.tooltip[data-size='compact'] {
+  width: 15rem;
+}
+
+.tooltip[data-size='standard'] {
+  width: 17.5rem;
+}
+
+.tooltip[data-size='wide'] {
+  width: 20rem;
+}
+
+.tooltipContent {
+  display: inline-flex;
+  gap: var(--geul-spacing-xs);
+  align-items: center;
+  white-space: nowrap;
+}
+
+.tooltipLabel {
+  font-weight: var(--geul-font-weight-medium);
+}
+
+.shortcut {
+  padding-inline-start: var(--geul-spacing-xs);
+  color: var(--geul-text-secondary);
+  font-family: var(--font-mono), monospace;
+  font-size: var(--geul-font-size-xs);
+  font-weight: var(--geul-font-weight-regular);
+  line-height: var(--geul-line-height-xs);
+  background: transparent;
+  border: 0;
+  border-inline-start: var(--geul-border-thin) solid var(--geul-border-default);
+  border-radius: var(--geul-radius-square);
+}

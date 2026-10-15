@@ -1,14 +1,14 @@
 'use client';
 
-import '@mantine/core/styles.css';
 import '@/lib/styles/variables.css';
 import '@/lib/styles/font-assignment.css';
+import '@/lib/styles/base.css';
 
 import { useEffect, useSyncExternalStore } from 'react';
 import { resolveErrorStatus } from '@/features/application-error/error-status';
 import { RootErrorPageView } from '@/features/application-error/RootErrorPageView';
 import { DEFAULT_LOCALE, getLocaleDirection, getLocaleFontProfile, normalizeLocale } from '@/lib/i18n/locale';
-import { AppMantineProvider } from '@/lib/providers/AppMantineProvider';
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { readLocaleCookie } from '@/lib/i18n/locale-cookie';
 import { reportClientRenderFailure } from '@/lib/observability/client-render-failure';
 
@@ -45,9 +45,9 @@ export default function GlobalError({ error, reset }: Props) {
   return (
     <html lang={locale} dir={getLocaleDirection(locale)} data-font-profile={getLocaleFontProfile(locale)}>
       <body>
-        <AppMantineProvider defaultColorScheme="auto">
+        <DesignSystemProvider defaultColorScheme="auto" locale={locale}>
           <RootErrorPageView status={resolveErrorStatus(error)} locale={locale} onRetry={reset} />
-        </AppMantineProvider>
+        </DesignSystemProvider>
       </body>
     </html>
   );

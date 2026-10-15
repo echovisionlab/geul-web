@@ -1,9 +1,8 @@
+import { McpConsentPageView } from '@/features/auth/McpConsentPageView';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { Center, Container, Group, Paper, Stack, Text, Title } from '@mantine/core';
-import { IconPlugConnected } from '@tabler/icons-react';
-import { Button } from '@/components/core/Button';
+
 import { approveMcpConsent, rejectMcpConsentAction } from '@/features/auth/hydra-mcp-oauth-actions';
 import {
   assertMcpConsentRequest,
@@ -59,40 +58,17 @@ export default async function McpConsentPage({ searchParams }: PageProps) {
   ]);
 
   return (
-    <Container size="xs" py="xl">
-      <Center mih="70vh">
-        <Paper withBorder p="xl" radius="md" w="100%">
-          <Stack gap="lg">
-            <IconPlugConnected size={36} aria-hidden />
-            <Stack gap="xs">
-              <Title order={1}>Remote MCP</Title>
-              <Text fw={600}>{clientName}</Text>
-              <Text c="dimmed">{mcp('consentDescription')}</Text>
-              {request.requested_scope.includes('offline_access') && (
-                <Text size="sm" c="dimmed">
-                  {mcp('consentOfflineAccess')}
-                </Text>
-              )}
-              <Text size="sm" c="dimmed">
-                {mcp('consentRevoke', { settings: labels('settings') })}
-              </Text>
-              <Text size="sm" c="dimmed">
-                {delegationName}
-              </Text>
-            </Stack>
-            <Group justify="flex-end">
-              <form action={reject}>
-                <Button type="submit" tone="neutral" emphasis="medium">
-                  {actions('cancel')}
-                </Button>
-              </form>
-              <form action={approve}>
-                <Button type="submit">{actions('connect')}</Button>
-              </form>
-            </Group>
-          </Stack>
-        </Paper>
-      </Center>
-    </Container>
+    <McpConsentPageView
+      clientName={clientName}
+      delegationName={delegationName}
+      offlineAccess={request.requested_scope.includes('offline_access')}
+      description={mcp('consentDescription')}
+      offlineDescription={mcp('consentOfflineAccess')}
+      revokeDescription={mcp('consentRevoke', { settings: labels('settings') })}
+      cancelLabel={actions('cancel')}
+      connectLabel={actions('connect')}
+      approveAction={approve}
+      rejectAction={reject}
+    />
   );
 }

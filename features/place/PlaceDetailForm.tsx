@@ -1,8 +1,10 @@
 'use client';
 
-import { IconChevronDown } from '@tabler/icons-react';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Accordion, Group, Loader, Stack, Text } from '@mantine/core';
+import { Disclosure } from '@/components/core/Disclosure';
+import { Spinner as Loader } from '@/components/core/Display';
 import { TextInput, NumberInput } from '@/components/core/Input';
 import type { PlaceEditorFormState } from '@/lib/types/map-place/model';
 
@@ -17,7 +19,7 @@ export function PlaceDetailForm({ formState, onFormChange, loading }: PlaceDetai
   const tCommonPlaceholders = useTranslations('common.placeholders');
 
   return (
-    <Stack gap="md">
+    <DsLayoutStack gap="md">
       <TextInput
         label={tCommonLabels('name')}
         placeholder={tCommonPlaceholders('placeName')}
@@ -34,7 +36,7 @@ export function PlaceDetailForm({ formState, onFormChange, loading }: PlaceDetai
         required
       />
 
-      <Group grow>
+      <DsLayoutInline grow>
         <NumberInput
           label={tCommonLabels('latitude')}
           value={formState.lat}
@@ -51,101 +53,101 @@ export function PlaceDetailForm({ formState, onFormChange, loading }: PlaceDetai
           step={0.000001}
           size="xs"
         />
-      </Group>
+      </DsLayoutInline>
 
-      <Accordion variant="contained" chevron={<IconChevronDown size={16} />}>
-        <Accordion.Item value="address-details">
-          <Accordion.Control>
-            <Group gap="xs">
-              <Text size="sm">{tCommonLabels('addressDetails')}</Text>
-              {loading && <Loader size={14} />}
-            </Group>
-          </Accordion.Control>
-          <Accordion.Panel>
-            <Stack gap="sm">
-              <TextInput
-                label={tCommonLabels('street')}
-                placeholder={tCommonPlaceholders('streetAddress')}
-                size="xs"
-                value={formState.addressComponents?.street ?? ''}
-                onChange={(e) =>
-                  onFormChange({
-                    ...formState,
-                    addressComponents: {
-                      ...formState.addressComponents,
-                      street: e.currentTarget.value || undefined,
-                    },
-                  })
-                }
-              />
-              <Group grow>
-                <TextInput
-                  label={tCommonLabels('city')}
-                  placeholder={tCommonLabels('city')}
-                  size="xs"
-                  value={formState.addressComponents?.city ?? ''}
-                  onChange={(e) =>
-                    onFormChange({
-                      ...formState,
-                      addressComponents: {
-                        ...formState.addressComponents,
-                        city: e.currentTarget.value || undefined,
-                      },
-                    })
-                  }
-                />
-                <TextInput
-                  label={tCommonLabels('postalCode')}
-                  placeholder={tCommonLabels('postalCode')}
-                  size="xs"
-                  value={formState.addressComponents?.postalCode ?? ''}
-                  onChange={(e) =>
-                    onFormChange({
-                      ...formState,
-                      addressComponents: {
-                        ...formState.addressComponents,
-                        postalCode: e.currentTarget.value || undefined,
-                      },
-                    })
-                  }
-                />
-              </Group>
-              <Group grow>
-                <TextInput
-                  label={tCommonLabels('region')}
-                  placeholder={tCommonPlaceholders('regionSubdivision')}
-                  size="xs"
-                  value={formState.addressComponents?.region ?? ''}
-                  onChange={(e) =>
-                    onFormChange({
-                      ...formState,
-                      addressComponents: {
-                        ...formState.addressComponents,
-                        region: e.currentTarget.value || undefined,
-                      },
-                    })
-                  }
-                />
-                <TextInput
-                  label={tCommonLabels('country')}
-                  placeholder={tCommonLabels('country')}
-                  size="xs"
-                  value={formState.addressComponents?.country ?? ''}
-                  onChange={(e) =>
-                    onFormChange({
-                      ...formState,
-                      addressComponents: {
-                        ...formState.addressComponents,
-                        country: e.currentTarget.value || undefined,
-                      },
-                    })
-                  }
-                />
-              </Group>
-            </Stack>
-          </Accordion.Panel>
-        </Accordion.Item>
-      </Accordion>
-    </Stack>
+      <Disclosure
+        appearance="filled"
+        label={
+          <>
+            <DsText as="span" size="sm">
+              {tCommonLabels('addressDetails')}
+            </DsText>
+            {loading && <Loader size="xs" />}
+          </>
+        }
+      >
+        <DsLayoutStack gap="sm">
+          <TextInput
+            label={tCommonLabels('street')}
+            placeholder={tCommonPlaceholders('streetAddress')}
+            size="xs"
+            value={formState.addressComponents?.street ?? ''}
+            onChange={(e) =>
+              onFormChange({
+                ...formState,
+                addressComponents: {
+                  ...formState.addressComponents,
+                  street: e.currentTarget.value || undefined,
+                },
+              })
+            }
+          />
+          <DsLayoutInline grow>
+            <TextInput
+              label={tCommonLabels('city')}
+              placeholder={tCommonLabels('city')}
+              size="xs"
+              value={formState.addressComponents?.city ?? ''}
+              onChange={(e) =>
+                onFormChange({
+                  ...formState,
+                  addressComponents: {
+                    ...formState.addressComponents,
+                    city: e.currentTarget.value || undefined,
+                  },
+                })
+              }
+            />
+            <TextInput
+              label={tCommonLabels('postalCode')}
+              placeholder={tCommonLabels('postalCode')}
+              size="xs"
+              value={formState.addressComponents?.postalCode ?? ''}
+              onChange={(e) =>
+                onFormChange({
+                  ...formState,
+                  addressComponents: {
+                    ...formState.addressComponents,
+                    postalCode: e.currentTarget.value || undefined,
+                  },
+                })
+              }
+            />
+          </DsLayoutInline>
+          <DsLayoutInline grow>
+            <TextInput
+              label={tCommonLabels('region')}
+              placeholder={tCommonPlaceholders('regionSubdivision')}
+              size="xs"
+              value={formState.addressComponents?.region ?? ''}
+              onChange={(e) =>
+                onFormChange({
+                  ...formState,
+                  addressComponents: {
+                    ...formState.addressComponents,
+                    region: e.currentTarget.value || undefined,
+                  },
+                })
+              }
+            />
+            <TextInput
+              label={tCommonLabels('country')}
+              placeholder={tCommonLabels('country')}
+              size="xs"
+              value={formState.addressComponents?.country ?? ''}
+              onChange={(e) =>
+                onFormChange({
+                  ...formState,
+                  addressComponents: {
+                    ...formState.addressComponents,
+                    country: e.currentTarget.value || undefined,
+                  },
+                })
+              }
+            />
+          </DsLayoutInline>
+        </DsLayoutStack>
+      </Disclosure>
+    </DsLayoutStack>
   );
 }

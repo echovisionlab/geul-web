@@ -1,0 +1,2055 @@
+{
+  "schemaVersion": 1,
+  "rows": {
+    "C02": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "needs-fix",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "C03": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "C04": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "C05": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "C06": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "C07": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "C08": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "C11": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "C12": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "needs-fix",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "C13": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "C14": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "C16": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "G01": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "G02": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "G03": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "G04": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "I01": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "I02": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "I03": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "I04": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "I05": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "L01": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "L02": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E01": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E02": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E03": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E04": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E05": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E06": {
+      "N": "in-progress",
+      "R": "needs-fix",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E07": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "needs-fix",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E08": {
+      "N": "needs-fix",
+      "R": "needs-fix",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E09": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E10": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E11": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E12": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E13": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E14": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "needs-fix",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E15": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E16": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E17": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E18": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E19": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "E20": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress",
+      "D": "needs-fix"
+    },
+    "E21": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "P01": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "P02": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "P03": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "P04": {
+      "N": "in-progress",
+      "R": "needs-fix",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "P05": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "needs-fix",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "P06": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "P07": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "P08": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "P09": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "P10": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "M01": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "M02": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "M03": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "M04": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "M05": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "needs-fix",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "M06": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "M07": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "M08": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "M09": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "M10": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "M11": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "C10": {
+      "K": "needs-fix",
+      "S": "in-progress",
+      "D": "needs-fix"
+    },
+    "core:Alert": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:ApplicationFrame": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Badge": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Button": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "needs-fix",
+      "S": "in-progress",
+      "B": "needs-fix"
+    },
+    "core:Carousel": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Chart": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Collection": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:CommandPalette": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:DataTable": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:DateTime": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Disclosure": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Display": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "needs-fix",
+      "D": "needs-fix"
+    },
+    "core:DocumentColorPreview": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Drawer": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:DropdownMenu": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:EditorHeader": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:EmojiPicker": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:ErrorPage": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Field": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:FloatingPanel": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Hierarchy": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:IconButton": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:ImageCropper": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:ImageUpload": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Input": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "needs-fix",
+      "D": "needs-fix"
+    },
+    "core:Layout": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:LoadingSurface": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:MapNavigation": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:MediaControls": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:MediaImage": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:MediaPreviewGrid": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:MenuToggle": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Modal": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Navigation": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Notification": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "needs-fix",
+      "S": "in-progress",
+      "B": "needs-fix"
+    },
+    "core:PageHeader": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:ParameterPanel": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Popover": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Progress": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:PublicMetadata": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "needs-fix",
+      "D": "needs-fix"
+    },
+    "core:ResizeHandle": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Section": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:SelectionSurface": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:SideNavigation": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Social": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Sortable": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:TableOfContents": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "needs-fix",
+      "D": "needs-fix"
+    },
+    "core:Tabs": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:TextButton": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "needs-fix",
+      "D": "needs-fix"
+    },
+    "core:Tooltip": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "core:Typography": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "C01": {
+      "D": "in-progress"
+    },
+    "C09": {
+      "D": "needs-fix",
+      "B": "needs-fix"
+    },
+    "field:text": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "field:email": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "field:textarea": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "field:tel": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "field:number": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "field:date": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "field:select": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "field:multiselect": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "field:checkbox": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "field:switch": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:rich-text": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:external-video": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:post-list": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:post-table": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:post-map": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:work-map": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:work-table": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:work-list": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:program-event-list": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:release-list": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:artist-list": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:label-list": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:author-list": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:form": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:text-marquee": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:client-marquee": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:label-marquee": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:map": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:immersive-scene": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:columns": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:mermaid": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "section:embed": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "block:paragraph": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "block:heading": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "block:bullet-list-item": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "block:numbered-list-item": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "block:check-list-item": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "block:quote": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "block:code-block": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "block:divider": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "block:table": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "block:p5-sketch": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "block:three-scene": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "block:shader": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "block:math": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "block:map": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "block:file": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "block:callout": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "block:mermaid": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/account/recover": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/account/recovery/confirm": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/login": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/login/error": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/my/profile": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/my/security": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/onboarding/nickname": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/verify": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/map/themes/[id]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/series/[id]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/my/series/[id]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/artists/[idOrSlug]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/forms/[slug]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/forms/[slug]/dashboard": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/forms/[slug]/password": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/forms/[slug]/success": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/labels/[idOrSlug]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/privacy": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/releases/[idOrSlug]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/terms": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/artists": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/categories": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/clients": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/email-layouts": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/email-templates": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/event-series": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/events": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/files": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/formats": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/forms": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/genres": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/labels": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/menus": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/pages": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/posts": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/releases": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/settings": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/settings/mail": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/settings/og-image": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/styles": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/tags": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/translations": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/translations/jobs": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/translations/settings": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/user-tags": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/users": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/admin/works": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "page:/campaigns/[id]/analytics": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "edit:/[...slug]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "edit:/artists/[idOrSlug]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "edit:/campaigns/[id]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "edit:/event-series/[idOrSlug]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "edit:/events/[idOrSlug]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "edit:/forms/[slug]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "edit:/labels/[idOrSlug]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "edit:/posts/[idOrSlug]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "edit:/privacy/history/[id]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "edit:/releases/[idOrSlug]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "edit:/terms/history/[id]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "edit:/works/[idOrSlug]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "surface:/forms/[slug]:edit=true&tab=settings": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "surface:/forms/[slug]:edit=true&tab=translations": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "surface:/forms/[slug]:edit=true&tab=submissions": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "surface:/forms/[slug]:edit=true&tab=submissions&submission=[submissionId]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "surface:/privacy:preview=[id]&token=[token]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    },
+    "surface:/terms:preview=[id]&token=[token]": {
+      "N": "in-progress",
+      "R": "in-progress",
+      "V": "in-progress",
+      "K": "in-progress",
+      "A": "in-progress",
+      "S": "in-progress",
+      "B": "in-progress"
+    }
+  },
+  "notes": {
+    "C01": [
+      "The recorded change modified/deleted none of 76,180 existing messages across 20 UI locales and added 19 accessibility-only keys to each locale. Full-screen visual comparison (D) was not run."
+    ],
+    "C10": [
+      "Marquee and meaningful immersive-scene pause/full-information navigation paths were incomplete in the saved record. An accessible name alone does not pass this scope. Extend shared behavior while respecting separately authorized visual scope.",
+      "The saved Chromium/axe run reported TableOfContents link target-size failures. Existing link height was approximately 19.6px; retaining that geometry does not establish a pass.",
+      "The saved Form Submissions run reported a DateRange Calendar trigger obscured by the following sort button. Its nominal 30×30 target exposed only approximately 23.8px width. Review width/layout rather than adding ARIA or an audit exclusion.",
+      "The full run also reported target-size failures in TextButton Inline, three DateTimeInput states and executable controls. Include these shared size/spacing consumers alongside contents links and DateRange overlap."
+    ],
+    "E14": [
+      "Body/settings persistence and responsive-mode transitions are separate. Recheck editor selection, local state and focus return when mobile/focused/desktop wrappers change."
+    ],
+    "E06": [
+      "Code-editor/menu keyboard paths were improved, while adequate Mermaid/canvas alternatives still require authored-data and output contracts.",
+      "The unnamed equation command in public-block comparison is tracked under E08 N/R. It is not a math-render race; preserve MathML reading structure while separating control semantics."
+    ],
+    "P04": [
+      "Audio/video and file controls were improved. Caption/transcript authoring, persistence and Audio/VideoViewModel integration were incomplete because the current product data contract does not provide them."
+    ],
+    "P05": [
+      "Map-callout semantics and settings operation were improved. Equivalent keyboard discovery/selection for actual places in external map clusters/canvas still required preparation."
+    ],
+    "C09": [
+      "The saved 32 theme-contrast unit checks passed, while actual Display, PublicMetadata, ProcessingOverlay and SourceEditor states failed color-contrast in full rendering. Palette tests do not establish consumer contrast. Existing color/opacity/CSS was not arbitrarily changed in that run.",
+      "Six Login states failed link-in-text-block in the saved run. Preserve copy and review link distinction at the shared design owner."
+    ],
+    "core:TableOfContents": [
+      "Keyboard heading navigation and current-position relationships were improved. The saved axe target-size failure at existing geometry requires visual review."
+    ],
+    "C03": [
+      "Field names, descriptions and errors were connected to actual inputs and contenteditable label-click focus was improved. Error, disabled and IME behavior remained under consumer review."
+    ],
+    "C04": [
+      "SearchCombobox human-readable item text was connected to nine consumers. Selection/grid/Dnd/slider keyboard contracts remained under review."
+    ],
+    "C13": [
+      "Nineteen of twenty administration lists and four actual 390×844 mobile cases passed the saved keyboard/axe checks. The remaining deletion case had a RAC pending-announcement dangling-IDREF lifetime failure. Empty action-column names use actual hidden translated text without changing displayed headers/width."
+    ],
+    "E11": [
+      "A translation-request focus-loss defect caused by native disabled was corrected. Same-language cancellation and restored commands after completion were checked without stealing focus if the user had moved elsewhere."
+    ],
+    "P07": [
+      "Actual production PublicFormView field names, required/errors, IME, step navigation and pending/failure recovery were under typed local-transport review."
+    ],
+    "P08": [
+      "Actual FormLayoutView response-list/detail tabs were connected to local transport. Eight editor-tab cases, five builder cases and Chart passed the saved axe run; date-filter target size remained unresolved.",
+      "The saved Form Submissions run reported a DateRange Calendar trigger obscured by the following sort button. Its nominal 30×30 target exposed only approximately 23.8px width. Review width/layout rather than adding ARIA or an audit exclusion."
+    ],
+    "P09": [
+      "Actual legal content, scheduled previews, translation fallback and failure states were reproduced without a server; language and document structure remained under review."
+    ],
+    "core:Input": [
+      "The saved Form Submissions run reported a DateRange Calendar trigger obscured by the following sort button. Its nominal 30×30 target exposed only approximately 23.8px width. Review width/layout rather than adding ARIA or an audit exclusion."
+    ],
+    "C02": [
+      "The saved RAC pending-button deletion case unmounted aria-labelledby targets retained by a live-announcement role=img, causing role-img-alt failure. Correct the upstream name lifetime; do not hide it with exclusions or by removing isPending."
+    ],
+    "C12": [
+      "The saved RAC pending-button deletion case unmounted aria-labelledby targets retained by a live-announcement role=img, causing role-img-alt failure. Correct the upstream name lifetime; do not hide it with exclusions or by removing isPending.",
+      "The saved RAC Toast dismissal case similarly removed the title referenced by LiveAnnouncer. Recheck toast lifetime against the currently installed implementation before claiming this historical failure resolved."
+    ],
+    "core:Button": [
+      "The saved RAC pending-button deletion case unmounted aria-labelledby targets retained by a live-announcement role=img, causing role-img-alt failure. Correct the upstream name lifetime; do not hide it with exclusions or by removing isPending."
+    ],
+    "core:Notification": [
+      "The saved RAC Toast dismissal case removed the title referenced by LiveAnnouncer. Recheck toast lifetime against the currently installed implementation before claiming this historical failure resolved."
+    ],
+    "E07": [
+      "FileLibraryPicker insertion/selection restrictions and permitted Enter preview are separate states. Review whole-row aria-disabled semantics against the independent preview contract."
+    ],
+    "M05": [
+      "FileLibraryPicker insertion/selection restrictions and permitted Enter preview are separate states. Review whole-row aria-disabled semantics against the independent preview contract."
+    ],
+    "core:SelectionSurface": [
+      "FileManager nested listbox commands were separated into grid/row/gridcell semantics with keyboard selection and independent menus. Three files retained identical displayed strings, coordinates and dimensions at the same viewport. This does not establish visual review of every consumer."
+    ],
+    "core:Display": [
+      "Some states failed color-contrast in the saved full render. ARIA does not conceal or correct contrast failures."
+    ],
+    "core:PublicMetadata": [
+      "Some states failed color-contrast in the saved full render. ARIA does not conceal or correct contrast failures."
+    ],
+    "core:TextButton": [
+      "The saved actual TextButton Inline story failed target-size. Existing small-link/button geometry was not arbitrarily changed in that run."
+    ],
+    "E20": [
+      "The saved run reported SourceEditor rendered contrast and executable-control target-size failures. Visual review is separate from improved code/output names and keyboard paths."
+    ],
+    "E08": [
+      "The saved TiptapMathNodeViews wrapper exposed role=button with an empty command name in both reading/editing states. aria-command-name also failed with fully rendered MathML. Separate equation reading content from selection controls; do not mask fractions/radicals with a temporary aria-label."
+    ]
+  },
+  "storybookOrigin": "http://localhost:6016",
+  "runSummary": [
+    "The saved full-build record inspected 230 Storybook files and 1,244 states with Chromium play/axe: 1,219 passed, 25 failed, none skipped. This does not establish complete accessibility preparation.",
+    "The recorded failures were 8 dangling notification IDREFs, 7 target-size failures, 3 contrast failures, 6 inline-link distinction failures and 1 unnamed math-block command. SourceEditor contrast was also detected in an earlier full run and remains a recheck item.",
+    "Six account scenarios per Korean/English locale and four actual 390×844 mobile-list cases were checked separately. Actual VoiceOver/Orca speech and full-screen pixel comparison were not run.",
+    "Story existence, source type checks and passing axe results do not establish every page semantic, reading order, state or user scenario."
+  ]
+}

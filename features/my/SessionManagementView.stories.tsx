@@ -1,5 +1,9 @@
+import { useArgs } from 'storybook/preview-api';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { withFeatureLabels } from '@/stories/feature-localization';
 import type { Meta, StoryObj } from '@storybook/nextjs';
-import { Box } from '@mantine/core';
+import { DEFAULT_LOCALE } from '@/lib/i18n/locale';
+
 import { SessionManagementView, type SessionManagementItem } from './ui/SessionManagement';
 
 const sessions: SessionManagementItem[] = [
@@ -35,16 +39,54 @@ const sessions: SessionManagementItem[] = [
 const meta = {
   title: 'Feature/My/Session Management',
   component: SessionManagementView,
-  parameters: { layout: 'centered' },
+  render: function InteractiveStory(args) {
+    const [, updateArgs] = useArgs();
+    return (
+      <SessionManagementView
+        {...args}
+        onRevokeSession={(id) => updateArgs({ sessions: args.sessions.filter((session) => session.id !== id) })}
+        onRevokeOtherSessions={() =>
+          updateArgs({ sessions: args.sessions.filter((session) => session.id === args.currentSessionId) })
+        }
+      />
+    );
+  },
+  parameters: {
+    layout: 'centered',
+    docs: {
+      description: {
+        component:
+          'The bulk logout command sits at the end of its action row. Session-specific commands retain row descriptions; revocation preserves the current session and restores focus when controls disappear. The layout follows the document direction, including RTL.',
+      },
+    },
+  },
   decorators: [
+    withFeatureLabels({
+      localeProp: true,
+      labels: {
+        activeNow: 'security.sessions.activeNow',
+        description: 'security.sessions.description',
+        logOutOthers: 'security.sessions.logoutOthers',
+        revoke: 'security.sessions.revoke',
+        thisDevice: 'security.sessions.thisDevice',
+        title: 'security.sessions.title',
+        browser: (t) => (value: string) =>
+          t(value === 'unknown' ? 'common.states.unknown' : `security.sessions.browser.${value}`),
+        device: (t) => (value: string) =>
+          t(value === 'unknown' ? 'common.states.unknown' : `security.sessions.device.${value}`),
+        os: (t) => (value: string) =>
+          t(value === 'unknown' ? 'common.states.unknown' : `security.sessions.os.${value}`),
+      },
+    }),
     (Story) => (
-      <Box w={620} maw="calc(100vw - 2rem)">
+      <div style={{ width: 620, maxWidth: '100%' }}>
         <Story />
-      </Box>
+      </div>
     ),
   ],
   args: {
     currentSessionId: 'current-session',
+    locale: DEFAULT_LOCALE,
     labels: {
       activeNow: 'Active now',
       browser: (value) => value,
@@ -56,7 +98,7 @@ const meta = {
       thisDevice: 'This device',
       title: 'Sessions',
     },
-    locale: 'en',
+
     onRevokeOtherSessions: () => {},
     onRevokeSession: () => {},
     revokingSessionId: null,
@@ -66,7 +108,40 @@ const meta = {
 } satisfies Meta<typeof SessionManagementView>;
 export default meta;
 type Story = StoryObj<typeof meta>;
-export const MultipleSessions: Story = {};
+export const MultipleSessions: Story = {
+  play: async ({ canvasElement }) => {
+    const row = canvasElement.querySelector<HTMLElement>('[data-testid="security-session-actions"]')!;
+    const action = row.querySelector<HTMLElement>('[data-testid="security-revoke-other-sessions"]')!;
+    const rowBounds = row.getBoundingClientRect();
+    const actionBounds = action.getBoundingClientRect();
+    const rtl = getComputedStyle(row).direction === 'rtl';
+    const endGap = rtl ? actionBounds.left - rowBounds.left : rowBounds.right - actionBounds.right;
+    await expect(Math.abs(endGap)).toBeLessThanOrEqual(1);
+    await expect(action).toHaveAccessibleName();
+  },
+};
 export const RevokingOneSession: Story = { args: { revokingSessionId: 'phone-session' } };
 export const RevokingAllOtherSessions: Story = { args: { revokeOthersLoading: true } };
 export const OnlyCurrentSession: Story = { args: { sessions: [sessions[0]] } };
+
+export const KeyboardRevocation: Story = {
+  tags: ['a11y-account'],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const first = canvasElement.querySelector<HTMLElement>('[data-testid="security-revoke-session-phone-session"]')!;
+    await expect(first).toHaveAccessibleDescription(expect.stringContaining('203.0.113.*'));
+    first.focus();
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() =>
+      expect(canvasElement.querySelector('[data-testid="security-revoke-session-phone-session"]')).toBeNull(),
+    );
+    const next = canvasElement.querySelector<HTMLElement>('[data-testid="security-revoke-session-desktop-session"]')!;
+    await expect(next).toHaveFocus();
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() =>
+      expect(canvasElement.querySelector('[data-testid="security-revoke-session-desktop-session"]')).toBeNull(),
+    );
+    await expect(canvas.getByRole('heading', { level: 2 })).toHaveFocus();
+    await expect(canvas.queryAllByRole('button')).toHaveLength(0);
+  },
+};

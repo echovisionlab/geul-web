@@ -63,6 +63,8 @@ export function useDebouncedPatch<T extends object>({
           flush: state.queue.flush,
           cancel: state.queue.cancel,
           hasPending: state.queue.hasPending,
+          hasParked: state.queue.hasParked,
+          resumeParked: state.queue.resumeParked,
           getPendingPatch: state.queue.getPendingPatch,
         },
       ),

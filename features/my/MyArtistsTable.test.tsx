@@ -140,6 +140,7 @@ describe('MyArtistsTable controller', () => {
     expect(getDataTableProps()).toMatchObject({
       labels: {
         title: 'common.entities.artists',
+        image: 'common.labels.image',
         name: 'common.labels.name',
         status: 'common.labels.status',
         created: 'common.labels.created',
@@ -159,9 +160,9 @@ describe('MyArtistsTable controller', () => {
             name: 'Mina Park',
             slugLabel: '/mina-park',
             imageUrl: 'managed:/media/mina.jpg:avatar-sm',
-            avatarFallback: 'M',
             href: '/artists/artist-published?edit=true',
             statusLabel: 'common.statuses.published',
+            statusTone: 'positive',
             createdLabel: createdAt.toLocaleDateString('en-US'),
           },
           {
@@ -169,9 +170,9 @@ describe('MyArtistsTable controller', () => {
             name: 'Untitled Unit',
             slugLabel: null,
             imageUrl: null,
-            avatarFallback: 'U',
             href: '/artists/artist-unknown?edit=true',
             statusLabel: 'ARTIST_STATUS_REVIEW',
+            statusTone: 'neutral',
             createdLabel: '-',
           },
         ],

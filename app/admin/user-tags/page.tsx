@@ -1,13 +1,7 @@
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getTranslations } from 'next-intl/server';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import {
-  CreateUserTagButton,
-  UserTagModalProvider,
-  UserTagModals,
-  UserTagsTableContent,
-} from '@/features/admin/user-tag';
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
+import { UserTagsPageView } from '@/features/admin/user-tag/UserTagsPageView';
 import { listUserTagsAdminAction } from '@/lib/actions/user-tag';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
@@ -50,24 +44,14 @@ export default async function AdminUserTagsPage({ searchParams }: PageProps) {
   }).then(unwrapQueryResult);
 
   return (
-    <UserTagModalProvider>
-      <AdminPageHeader
-        title={tCommonEntities('userTags')}
-        description={tPage('description')}
-        items={[{ key: 'create-user-tag', type: 'custom', content: <CreateUserTagButton /> }]}
-      />
-
-      <ServerDataTable namespace="userTags">
-        <UserTagsTableContent
-          result={result}
-          searchPlaceholder={searchPlaceholder}
-          filterFields={filterFields}
-          sortFields={sortFields}
-        />
-        <ServerDataTable.Pagination namespace="userTags" result={result} searchParams={params} />
-      </ServerDataTable>
-
-      <UserTagModals />
-    </UserTagModalProvider>
+    <UserTagsPageView
+      title={tCommonEntities('userTags')}
+      result={result}
+      filterFields={filterFields}
+      sortFields={sortFields}
+      searchPlaceholder={searchPlaceholder}
+      searchParams={params.toString()}
+      description={tPage('description')}
+    />
   );
 }

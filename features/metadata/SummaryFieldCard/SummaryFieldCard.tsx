@@ -1,5 +1,7 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import {
@@ -9,8 +11,8 @@ import {
 import { IconCircleCheck, IconLoader2, IconSparkles } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import type * as Y from 'yjs';
-import { Box, Group, Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { Textarea } from '@/components/core/Input';
@@ -164,7 +166,7 @@ export function SummaryFieldCard({
 
     const generationId = collaborativeAi.startGeneration(['summary'], true);
     if (!generationId) {
-      notifications.show({ message: generationTooltip, color: 'yellow' });
+      notifications.show({ message: generationTooltip, tone: 'warning' });
       return;
     }
 
@@ -253,18 +255,18 @@ export function SummaryFieldCard({
       }
       const message = value instanceof Error ? value.message : t('feedback.failedDefault');
       setFeedback({ color: 'red', message });
-      notifications.show({ message, color: 'red' });
+      notifications.show({ message, tone: 'danger' });
     }
   }, [aiPromptAdditions, aiTarget, canGenerate, clearTurnState, client, collaborativeAi, generationTooltip, t]);
 
   const handleApplySuggestion = useCallback(async () => {
     const turn = turnRef.current;
     const generationId = generationRef.current;
-    if (!turn || !approval || !generationId || !collaborativeAi.isRequester) {
+    if (summaryReadOnly || !turn || !approval || !generationId || !collaborativeAi.isRequester) {
       return;
     }
     if (!collaborativeAi.markApplying(generationId)) {
-      notifications.show({ message: t('feedback.unableToApplyNow'), color: 'red' });
+      notifications.show({ message: t('feedback.unableToApplyNow'), tone: 'danger' });
       return;
     }
     try {
@@ -273,14 +275,14 @@ export function SummaryFieldCard({
       collaborativeAi.updateReadyFields(generationId, ['summary'], true);
       const message = value instanceof Error ? value.message : t('feedback.applyFailed');
       setFeedback({ color: 'red', message });
-      notifications.show({ message, color: 'red' });
+      notifications.show({ message, tone: 'danger' });
     }
-  }, [approval, collaborativeAi, t]);
+  }, [summaryReadOnly, approval, collaborativeAi, t]);
 
   const handleDismissSuggestion = useCallback(async () => {
     const turn = turnRef.current;
     const generationId = generationRef.current;
-    if (!turn || !approval || !generationId || !collaborativeAi.isRequester) {
+    if (summaryReadOnly || !turn || !approval || !generationId || !collaborativeAi.isRequester) {
       return;
     }
     dismissedRef.current = true;
@@ -293,7 +295,7 @@ export function SummaryFieldCard({
       clearTurnState(generationId);
       setFeedback(null);
     }
-  }, [approval, clearTurnState, collaborativeAi.isRequester]);
+  }, [summaryReadOnly, approval, clearTurnState, collaborativeAi.isRequester]);
 
   const generateIcon =
     collaborativeAi.sharedState.status === 'generating' || collaborativeAi.sharedState.status === 'applying' ? (
@@ -303,14 +305,14 @@ export function SummaryFieldCard({
     );
 
   return (
-    <SectionCard>
-      <Stack gap="md">
+    <SectionCard padding={{ base: 'none', sm: 'md' }}>
+      <DsLayoutStack gap="md">
         <SectionHeader
           title={tCommonLabels('summary')}
           description={t('description')}
           actions={
             hideAiActions ? null : (
-              <Group gap="xs" wrap="nowrap">
+              <DsLayoutInline gap="xs" wrap="nowrap">
                 <StatusBadge
                   id={`${entityType}-${entityId}-metadata-generation-status`}
                   data-metadata-ai-status={visualStatus}
@@ -319,8 +321,7 @@ export function SummaryFieldCard({
                   {buildStatusLabel(t, visualStatus)}
                 </StatusBadge>
                 <Tooltip label={generationTooltip}>
-                  <Box
-                    component="span"
+                  <span
                     style={{ display: 'inline-flex' }}
                     data-testid={`${entityType}-${entityId}-generate-summary-trigger`}
                   >
@@ -335,9 +336,9 @@ export function SummaryFieldCard({
                     >
                       {generateIcon}
                     </IconButton>
-                  </Box>
+                  </span>
                 </Tooltip>
-              </Group>
+              </DsLayoutInline>
             )
           }
         />
@@ -354,30 +355,30 @@ export function SummaryFieldCard({
         {!hideAiActions &&
         !collaborativeAi.isRequester &&
         (collaborativeAi.sharedState.status === 'ready' || collaborativeAi.sharedState.status === 'applying') ? (
-          <Text size="xs" c="dimmed">
+          <DsText size="xs" tone="secondary">
             {t('ready.anotherCollaboratorNamed', {
               name: requesterNickname || t('ready.anotherCollaborator'),
             })}
-          </Text>
+          </DsText>
         ) : null}
 
         {!hideAiActions && approval && proposedSummary && collaborativeAi.isRequester ? (
-          <SectionCard p="sm">
-            <Stack gap="sm">
-              <Text size="sm" fw={500}>
+          <SectionCard padding="sm">
+            <DsLayoutStack gap="sm">
+              <DsText size="sm" weight="medium">
                 {t('ready.title')}
-              </Text>
-              <Stack gap={4}>
-                <Text size="sm" fw={500}>
+              </DsText>
+              <DsLayoutStack gap="xxs">
+                <DsText size="sm" weight="medium">
                   {t('ready.suggestedSummary')}
-                </Text>
-                <Text size="sm">{proposedSummary}</Text>
-              </Stack>
-              <Group>
+                </DsText>
+                <DsText size="sm">{proposedSummary}</DsText>
+              </DsLayoutStack>
+              <DsLayoutInline>
                 <Button
                   id={`${entityType}-${entityId}-apply-ai-metadata`}
                   leftSection={<IconCircleCheck size={16} />}
-                  disabled={collaborativeAi.sharedState.status === 'applying'}
+                  disabled={summaryReadOnly || collaborativeAi.sharedState.status === 'applying'}
                   onClick={() => void handleApplySuggestion()}
                 >
                   {t('actions.apply')}
@@ -386,22 +387,22 @@ export function SummaryFieldCard({
                   id={`${entityType}-${entityId}-dismiss-ai-metadata`}
                   tone="neutral"
                   emphasis="medium"
-                  disabled={collaborativeAi.sharedState.status === 'applying'}
+                  disabled={summaryReadOnly || collaborativeAi.sharedState.status === 'applying'}
                   onClick={() => void handleDismissSuggestion()}
                 >
                   {tCommonActions('dismiss')}
                 </Button>
-              </Group>
-            </Stack>
+              </DsLayoutInline>
+            </DsLayoutStack>
           </SectionCard>
         ) : null}
 
         {feedback ? (
-          <Text size="xs" c={feedback.color === 'red' ? 'red' : 'teal'}>
+          <DsText size="xs" tone={feedback.color === 'red' ? 'danger' : 'positive'}>
             {feedback.message}
-          </Text>
+          </DsText>
         ) : null}
-      </Stack>
+      </DsLayoutStack>
     </SectionCard>
   );
 }

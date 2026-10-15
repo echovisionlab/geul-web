@@ -50,7 +50,7 @@ const documentEntityId = '11111111-1111-4111-8111-111111111111';
 function createProvider(documentName = `post:${documentEntityId}:en`) {
   const document = new Y.Doc();
   documents.push(document);
-  let statelessHandler: ((input: { payload: string }) => void) | null = null;
+  const statelessHandlers = new Set<(input: { payload: string }) => void>();
   const provider = {
     document,
     isSynced: true,
@@ -58,15 +58,23 @@ function createProvider(documentName = `post:${documentEntityId}:en`) {
     configuration: { name: documentName },
     on: vi.fn((event: string, handler: (input: { payload: string }) => void) => {
       if (event === 'stateless') {
-        statelessHandler = handler;
+        statelessHandlers.add(handler);
       }
     }),
-    off: vi.fn(),
+    off: vi.fn((event: string, handler: (input: { payload: string }) => void) => {
+      if (event === 'stateless') {
+        statelessHandlers.delete(handler);
+      }
+    }),
   };
 
   return {
     provider: provider as unknown as HocuspocusProvider,
-    emit: (event: EditorRuntimeEvent) => statelessHandler?.({ payload: JSON.stringify(event) }),
+    emit: (event: EditorRuntimeEvent) => {
+      for (const handler of statelessHandlers) {
+        handler({ payload: JSON.stringify({ v: 3, kind: 'runtime.event', event }) });
+      }
+    },
     on: provider.on,
     off: provider.off,
   };
@@ -172,7 +180,7 @@ describe('EditorRuntimeProvider', () => {
       runtimeProvider.provider,
     );
 
-    expect(runtimeProvider.on.mock.calls.filter(([event]) => event === 'stateless')).toHaveLength(1);
+    expect(runtimeProvider.on.mock.calls.filter(([event]) => event === 'stateless')).toHaveLength(2);
 
     act(() => {
       runtimeProvider.emit({
@@ -191,14 +199,15 @@ describe('EditorRuntimeProvider', () => {
       });
     });
 
-    expect(firstListener).toHaveBeenCalledTimes(1);
+    // The runtime-event parser loads on demand; under a loaded suite the first event waits for it.
+    await vi.waitFor(() => expect(firstListener).toHaveBeenCalledTimes(1));
     expect(secondListener).not.toHaveBeenCalled();
 
     act(() => {
       root?.unmount();
     });
     root = null;
-    expect(runtimeProvider.off.mock.calls.filter(([event]) => event === 'stateless')).toHaveLength(1);
+    expect(runtimeProvider.off.mock.calls.filter(([event]) => event === 'stateless')).toHaveLength(2);
   });
 
   it('registers local provider document edits as a save for the owning entity', async () => {

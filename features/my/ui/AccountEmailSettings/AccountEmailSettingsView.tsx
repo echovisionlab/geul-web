@@ -1,7 +1,9 @@
 'use client';
+import { useId } from 'react';
 
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { IconCheck, IconMail } from '@tabler/icons-react';
-import { Badge, Box, Group, Stack, Text } from '@mantine/core';
 import { LabelBadge } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
@@ -26,59 +28,57 @@ export function AccountEmailSettingsView({
   labels,
   onChangeEmail,
 }: AccountEmailSettingsViewProps) {
+  const emailId = useId();
   return (
-    <>
-      <SectionHeader title={labels.title} description={labels.description} />
+    <DsLayoutStack gap="md">
+      <SectionHeader
+        title={
+          <span role="heading" aria-level={2}>
+            {labels.title}
+          </span>
+        }
+        description={labels.description}
+      />
 
-      <SectionCard p="sm" data-testid="security-account-email">
-        <Group justify="space-between" align="center" wrap="nowrap">
-          <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-            <Box
-              style={{
-                width: 30,
-                height: 30,
-                borderRadius: 8,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <IconMail size={18} aria-hidden />
-            </Box>
-            <Stack gap={5} style={{ minWidth: 0 }}>
-              <Text size="sm" fw={600} truncate>
+      <SectionCard appearance="plain" padding="none" data-testid="security-account-email">
+        <DsLayoutInline justify="between" align="start" direction={{ base: 'column', xs: 'row' }} wrap="nowrap">
+          <DsLayoutInline gap="sm" wrap="nowrap" flexible>
+            <IconMail size={18} aria-hidden />
+            <DsLayoutStack gap="xxs">
+              <DsText id={emailId} size="sm" weight="strong" wrap="anywhere">
                 {email || '—'}
-              </Text>
-              <Group gap={6}>
+              </DsText>
+              <DsLayoutInline gap="xxs">
                 <LabelBadge
                   size="sm"
                   tone="accent"
                   appearance="soft"
-                  leftSection={<IconCheck size={11} />}
+                  leftSection={<IconCheck size={11} aria-hidden />}
                   data-testid="security-primary-email"
                 >
                   {labels.canonical}
                 </LabelBadge>
                 {emailCodeAvailable ? (
-                  <Badge size="sm" variant="light" color="gray">
+                  <LabelBadge size="sm" tone="neutral" appearance="soft">
                     {labels.emailCode}
-                  </Badge>
+                  </LabelBadge>
                 ) : null}
-              </Group>
-            </Stack>
-          </Group>
+              </DsLayoutInline>
+            </DsLayoutStack>
+          </DsLayoutInline>
           <Button
             size="xs"
             tone="neutral"
             emphasis="medium"
+            labelWrap="wrap"
             onClick={onChangeEmail}
             data-testid="security-change-email"
+            aria-describedby={emailId}
           >
             {labels.change}
           </Button>
-        </Group>
+        </DsLayoutInline>
       </SectionCard>
-    </>
+    </DsLayoutStack>
   );
 }

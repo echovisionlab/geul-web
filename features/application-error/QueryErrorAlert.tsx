@@ -1,11 +1,11 @@
 'use client';
 
-import { useLocale } from 'next-intl';
-import { Group } from '@mantine/core';
+import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
 import Link from '@/components/core/Navigation';
-import { DEFAULT_LOCALE, normalizeLocale } from '@/lib/i18n/locale';
+import { useErrorPageMessages } from './error-page-messages';
 import { canRetryErrorStatus, getErrorPageContent, resolveErrorStatus } from './error-status';
 
 interface QueryFailure {
@@ -25,12 +25,12 @@ export function QueryErrorAlert({ queries }: { queries: readonly QueryFailure[] 
 }
 
 function QueryErrorAlertContent({ failed }: { failed: readonly QueryFailure[] }) {
-  const locale = normalizeLocale(useLocale()) ?? DEFAULT_LOCALE;
+  const messages = useErrorPageMessages();
   const status = resolveErrorStatus(failed[0].error);
-  const content = getErrorPageContent(status, locale);
+  const content = getErrorPageContent(status, messages);
   return (
     <Alert tone="danger" role="alert" title={`${status} · ${content.title}`}>
-      <Group gap="sm">
+      <DsLayoutInline gap="sm">
         {status === 401 ? <Link href="/login">{content.login}</Link> : null}
         {failed.some((query) => canRetryErrorStatus(resolveErrorStatus(query.error))) ? (
           <Button
@@ -42,7 +42,7 @@ function QueryErrorAlertContent({ failed }: { failed: readonly QueryFailure[] })
             {content.tryAgain}
           </Button>
         ) : null}
-      </Group>
+      </DsLayoutInline>
     </Alert>
   );
 }

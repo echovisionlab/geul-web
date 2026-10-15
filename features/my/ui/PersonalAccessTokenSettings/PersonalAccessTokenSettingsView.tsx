@@ -1,11 +1,15 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+import { ConfirmationDialog } from '@/features/confirmation/ui/ConfirmationDialog';
+
+import { MetadataPair } from '@/components/core/PublicMetadata';
+import { LayoutInline as DsLayoutInline, LayoutStack as DsLayoutStack, LayoutInset } from '@/components/core/Layout';
 
 import { useState } from 'react';
-import { Code, Group, Stack, Text } from '@mantine/core';
 import { IconCopy, IconKey, IconPlus, IconRefresh, IconTrash } from '@tabler/icons-react';
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
-import { ConfirmModal, ContentModal } from '@/components/core/Modal';
+import { ContentModal, DialogActions } from '@/components/core/Modal';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
 
 export interface PersonalAccessTokenViewModel {
@@ -83,12 +87,17 @@ export function PersonalAccessTokenSettingsView({
   return (
     <>
       <SectionHeader
-        title={labels.title}
+        title={
+          <span role="heading" aria-level={2}>
+            {labels.title}
+          </span>
+        }
         description={labels.description}
         actions={
           token || loadFailed ? null : (
             <Button
               size="xs"
+              emphasis="medium"
               leftSection={<IconPlus size={14} aria-hidden />}
               onClick={() => void onCreate()}
               loading={pendingAction === 'create'}
@@ -102,55 +111,62 @@ export function PersonalAccessTokenSettingsView({
       />
 
       {loadFailed ? (
-        <Alert tone="danger" mt="sm" data-testid="security-personal-access-token-load-error">
-          <Text size="sm">{labels.loadFailed}</Text>
-        </Alert>
+        <LayoutInset space="none" blockStart="sm">
+          <Alert tone="danger" data-testid="security-personal-access-token-load-error">
+            <DsText size="sm" tone="secondary">
+              {labels.loadFailed}
+            </DsText>
+          </Alert>
+        </LayoutInset>
       ) : !token ? (
-        <SectionCard mt="sm" data-testid="security-personal-access-token-empty">
-          <Group gap="sm">
-            <IconKey size={18} aria-hidden />
-            <Text size="sm" c="dimmed">
-              {labels.empty}
-            </Text>
-          </Group>
-        </SectionCard>
+        <LayoutInset space="none" blockStart="sm">
+          <SectionCard appearance="plain" padding="none" data-testid="security-personal-access-token-empty">
+            <DsLayoutInline gap="sm">
+              <IconKey size={18} aria-hidden />
+              <SupportingText tone="secondary">{labels.empty}</SupportingText>
+            </DsLayoutInline>
+          </SectionCard>
+        </LayoutInset>
       ) : (
-        <SectionCard mt="sm" p="sm" data-testid={`security-personal-access-token-${token.id}`}>
-          <Group justify="space-between" align="center" wrap="wrap">
-            <Text size="xs" c="dimmed">
-              {labels.created}: {token.createdAtLabel}
-            </Text>
-            <Group gap="xs" wrap="nowrap">
-              {token.canRegenerate ? (
+        <LayoutInset space="none" blockStart="sm">
+          <SectionCard appearance="plain" padding="none" data-testid={`security-personal-access-token-${token.id}`}>
+            <DsLayoutInline justify="between" align="center" wrap="wrap">
+              <DsText size="xs" tone="secondary">
+                {labels.created}: {token.createdAtLabel}
+              </DsText>
+              <DsLayoutInline gap="xs" wrap="nowrap">
+                {token.canRegenerate ? (
+                  <Button
+                    size="xs"
+                    tone="neutral"
+                    emphasis="medium"
+                    leftSection={<IconRefresh size={14} aria-hidden />}
+                    onClick={() => setConfirmation('regenerate')}
+                    disabled={pendingAction !== null}
+                    data-testid={`security-regenerate-personal-access-token-${token.id}`}
+                  >
+                    {labels.regenerate}
+                  </Button>
+                ) : null}
                 <Button
                   size="xs"
-                  tone="neutral"
+                  tone="danger"
                   emphasis="medium"
-                  leftSection={<IconRefresh size={14} aria-hidden />}
-                  onClick={() => setConfirmation('regenerate')}
+                  leftSection={<IconTrash size={14} aria-hidden />}
+                  onClick={() => setConfirmation('delete')}
                   disabled={pendingAction !== null}
-                  data-testid={`security-regenerate-personal-access-token-${token.id}`}
+                  data-testid={`security-delete-personal-access-token-${token.id}`}
                 >
-                  {labels.regenerate}
+                  {labels.delete}
                 </Button>
-              ) : null}
-              <Button
-                size="xs"
-                tone="danger"
-                emphasis="outline"
-                leftSection={<IconTrash size={14} aria-hidden />}
-                onClick={() => setConfirmation('delete')}
-                disabled={pendingAction !== null}
-                data-testid={`security-delete-personal-access-token-${token.id}`}
-              >
-                {labels.delete}
-              </Button>
-            </Group>
-          </Group>
-        </SectionCard>
+              </DsLayoutInline>
+            </DsLayoutInline>
+          </SectionCard>
+        </LayoutInset>
       )}
 
-      <ConfirmModal
+      <ConfirmationDialog
+        intent={confirmation === 'delete' ? 'delete' : 'regenerate'}
         opened={confirmation !== null}
         onClose={() => {
           if (!confirmationPending) {
@@ -163,7 +179,6 @@ export function PersonalAccessTokenSettingsView({
         confirmLabel={confirmation === 'regenerate' ? labels.regenerate : labels.delete}
         cancelLabel={labels.cancel}
         closeLabel={labels.close}
-        confirmTone={confirmation === 'delete' ? 'danger' : 'accent'}
         loading={Boolean(confirmationPending)}
       />
 
@@ -174,17 +189,16 @@ export function PersonalAccessTokenSettingsView({
         closeLabel={labels.close}
         centered
       >
-        <Stack gap="md" data-testid="security-personal-access-token-secret">
+        <DsLayoutStack gap="md" data-testid="security-personal-access-token-secret">
           <Alert tone="warning">
-            <Text size="sm">{labels.oneTimeWarning}</Text>
+            <DsText size="sm">{labels.oneTimeWarning}</DsText>
           </Alert>
-          <Text size="xs" c="dimmed">
-            {labels.secret}
-          </Text>
-          <Code block style={{ overflowWrap: 'anywhere', whiteSpace: 'pre-wrap', userSelect: 'all' }}>
-            {secret?.value}
-          </Code>
-          <Group justify="flex-end">
+          <MetadataPair label={labels.secret} layout="stacked">
+            <DsText size="sm" font="mono" wrap="anywhere">
+              {secret?.value}
+            </DsText>
+          </MetadataPair>
+          <DialogActions>
             <Button tone="neutral" emphasis="medium" onClick={onCloseSecret}>
               {labels.close}
             </Button>
@@ -195,8 +209,8 @@ export function PersonalAccessTokenSettingsView({
             >
               {labels.copy}
             </Button>
-          </Group>
-        </Stack>
+          </DialogActions>
+        </DsLayoutStack>
       </ContentModal>
     </>
   );

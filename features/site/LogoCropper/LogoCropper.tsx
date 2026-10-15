@@ -1,10 +1,12 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useCallback, useState } from 'react';
 import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { useTranslations } from 'next-intl';
-import { Stack } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+import { useImageCropAccessibility } from '@/lib/i18n/useImageCropAccessibility';
+
+import { notifications } from '@/components/core/Notification';
 import { ImageCropper } from '@/components/core/ImageCropper';
 import { ImageUploadField, type ImageUploadRejection } from '@/components/core/ImageUpload';
 import { getUploadSelectionMimeTypes, UPLOAD_CONFIGS } from '@/lib/constants/upload-config';
@@ -44,6 +46,8 @@ export function LogoCropper({
   const config = UPLOAD_CONFIGS[UploadType.LABEL_IMAGE];
   const selectionMimeTypes = getUploadSelectionMimeTypes(UploadType.LABEL_IMAGE);
   const resolvedLabel = label ?? tCommon('labels.logo');
+  const cropTitle = tCommon('messages.cropItem', { item: resolvedLabel });
+  const cropAccessibility = useImageCropAccessibility(cropTitle);
   const uploadActionLabel = tCommon('actions.uploadItem', { item: resolvedLabel });
   const constraintText = tCommon('uploadField.constraints', {
     formats: formatMimeTypes([...selectionMimeTypes]),
@@ -66,7 +70,7 @@ export function LogoCropper({
 
         notifications.show({
           message: tCommon('messages.itemUpdated', { item: resolvedLabel }),
-          color: 'green',
+          tone: 'positive',
         });
 
         setCropModalOpen(false);
@@ -74,7 +78,7 @@ export function LogoCropper({
       } catch (error) {
         notifications.show({
           message: error instanceof Error ? error.message : tCommon('messages.uploadImageFailed'),
-          color: 'red',
+          tone: 'danger',
         });
       } finally {
         setLoading(false);
@@ -103,7 +107,7 @@ export function LogoCropper({
       } catch (error) {
         notifications.show({
           message: error instanceof Error ? error.message : tCommon('messages.uploadImageFailed'),
-          color: 'red',
+          tone: 'danger',
         });
       }
     },
@@ -121,7 +125,7 @@ export function LogoCropper({
         message = `Invalid file type. Supported formats: ${formatMimeTypes([...selectionMimeTypes])}`;
       }
 
-      notifications.show({ message, color: 'red' });
+      notifications.show({ message, tone: 'danger' });
     },
     [config.maxSize, constraintText, resolvedLabel, selectionMimeTypes],
   );
@@ -142,12 +146,12 @@ export function LogoCropper({
 
       notifications.show({
         message: tCommon('messages.itemRemoved', { item: resolvedLabel }),
-        color: 'green',
+        tone: 'positive',
       });
     } catch (error) {
       notifications.show({
         message: error instanceof Error ? error.message : tCommon('messages.removeImageFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     } finally {
       setLoading(false);
@@ -160,7 +164,7 @@ export function LogoCropper({
   const uploadPrompt = `${tCommon('uploadField.instruction')} · ${constraintText}`;
 
   return (
-    <Stack gap={4}>
+    <DsLayoutStack gap="xxs">
       <ImageUploadField
         imageUrl={currentImage}
         alt={name || resolvedLabel}
@@ -179,7 +183,7 @@ export function LogoCropper({
         emptyTitle={uploadActionLabel}
         emptyDescription={uploadPrompt}
         changeHint={currentImage && size >= 80 ? tCommon('uploadField.changeHint') : undefined}
-        removeButtonAriaLabel={tCommon('actions.remove')}
+        removeButtonAriaLabel={`${tCommon('actions.remove')} ${name || resolvedLabel}`}
         removeButtonLoading={operation === 'deleting' && loading}
         preview={{
           mode: 'hug',
@@ -195,7 +199,7 @@ export function LogoCropper({
           height: 'auto',
           minHeight: 0,
           aspectRatio: '3 / 1',
-          iconSize: 26,
+          iconSize: 'md',
           compact: true,
           showCompactText: true,
         }}
@@ -213,7 +217,8 @@ export function LogoCropper({
             setImageSrc(null);
           }}
           onCrop={handleCrop}
-          title={tCommon('messages.cropItem', { item: resolvedLabel })}
+          title={cropTitle}
+          cropAccessibility={cropAccessibility}
           labels={{
             previewAlt: resolvedLabel,
             cancel: tCommon('actions.cancel'),
@@ -223,6 +228,6 @@ export function LogoCropper({
           processingLabel={tCommon('uploadField.status.preparingImage')}
         />
       )}
-    </Stack>
+    </DsLayoutStack>
   );
 }

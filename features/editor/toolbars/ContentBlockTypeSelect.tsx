@@ -35,7 +35,7 @@ export function ContentBlockTypeSelect({
 }: ContentBlockTypeSelectProps) {
   return (
     <DropdownMenu portal={false} placement="bottom-start">
-      <EditorToolbarDropdownTarget label={label}>
+      <EditorToolbarDropdownTarget label={label} focusHint={false}>
         {(targetRef) => (
           <IconButton
             ref={targetRef}

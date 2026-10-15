@@ -5,6 +5,10 @@ import { DEFAULT_PAGE_ACCESS_POLICY } from '@/lib/types/page-access';
 const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
   getPage: vi.fn(),
+  getPageEditorSnapshot: vi.fn(async (_id: string, locale: string) => ({
+    snapshot: { locale, sourceLocale: 'en', localeExists: true, documentRevision: 'ssr-revision', editable: false },
+    documentLayout: {},
+  })),
   getPageView: vi.fn(),
   getPageAccessView: vi.fn(),
   getPageMetadataDocument: vi.fn(),
@@ -24,6 +28,7 @@ vi.mock('next/navigation', () => ({
 vi.mock('@/lib/utils/session.server', () => ({ getSession: mocks.getSession }));
 vi.mock('@/lib/queries/page', () => ({
   getPage: mocks.getPage,
+  getPageEditorSnapshot: mocks.getPageEditorSnapshot,
   getPageView: mocks.getPageView,
   getPageAccessView: mocks.getPageAccessView,
 }));
@@ -46,6 +51,7 @@ vi.mock('./PageContent', () => ({ PageContent: vi.fn(() => null) }));
 vi.mock('./PageContentWithToken', () => ({ PageContentWithToken: vi.fn(() => null) }));
 
 const page = {
+  sourceLocale: 'en',
   id: 'page-uuid',
   title: 'Page title',
   summary: null,

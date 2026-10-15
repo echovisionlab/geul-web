@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "title": "Editor settings and dialog command review",
+  "scope": "Shared Page/Post layout choices, Core Switch and SegmentedControl geometry, native language names and end-aligned modal actions in production consumers.",
+  "sourceTests": [
+    "components/core/Input/Switch.test.tsx",
+    "components/core/Input/SegmentedControl.test.tsx",
+    "components/core/Input/ChoiceContracts.test.tsx",
+    "components/core/Input/SegmentedControlField.test.tsx",
+    "components/core/Modal/ConfirmModal.test.tsx",
+    "components/core/Modal/ContentModal.test.tsx",
+    "components/core/Modal/FormModal.test.tsx",
+    "components/core/Modal/OverlayDialog.test.tsx",
+    "components/core/Modal/confirm-dialogs.test.tsx",
+    "components/core/ImageCropper/ImageCropper.test.tsx",
+    "features/document-layout/ContentLayoutField.test.tsx",
+    "features/document-layout/ContentLayoutFieldView.naming.test.tsx",
+    "features/translation/TranslationLocaleControl.test.tsx",
+    "features/translation/ContentLanguageMenu.test.tsx",
+    "features/translation/locale-option-format.test.tsx",
+    "features/translation/EntityTranslationsPanel.test.tsx",
+    "lib/translation/content-language.test.ts",
+    "features/editor/components/EditorFileLibraryPicker.test.tsx",
+    "features/editor/components/EditorFileLibraryPickerView.test.tsx",
+    "features/editor/components/EditorFileInsertView.test.tsx",
+    "features/editor/components/MediaIngestDialog.test.tsx",
+    "features/post/PostEditor/PostScheduleDialog.test.tsx",
+    "features/page/PageEditor/PageEditorInterruptionDialogs.test.tsx",
+    "features/email/AdminEmailDeletionPages.test.tsx",
+    "features/place/CreatePlaceModal.test.tsx",
+    "features/release/ReleaseEditor/ReleaseTracksSection.test.tsx",
+    "features/my/ui/PersonalAccessTokenSettings/PersonalAccessTokenSettingsView.test.tsx",
+    "features/file-manager/FileManagerView.test.tsx"
+  ],
+  "toolingTests": ["scripts/design-system"],
+  "checks": [
+    {
+      "name": "core-types",
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "components/core/tsconfig.type-test.json"
+      ]
+    },
+    {
+      "name": "input-styles",
+      "command": ["node", "node_modules/stylelint/bin/stylelint.mjs", "components/core/Input/Input.module.css"]
+    }
+  ],
+  "build": { "minify": false },
+  "storybook": { "url": "http://127.0.0.1:6010" },
+  "criticalPaths": [
+    "components/core/Input",
+    "components/core/Modal",
+    "components/core/ImageCropper",
+    "features",
+    "lib/translation",
+    "stories",
+    "docs/design-system",
+    "docs/design-system.md",
+    "components/core/design-tokens.ts",
+    "lib/styles/design-tokens.css",
+    "scripts/design-system"
+  ],
+  "manualNotes": "design/storybook/review-notes/editor-chrome.json",
+  "screenshots": [
+    "design/storybook/previews/editor-chrome/layout-phone-ko.png",
+    "design/storybook/previews/editor-chrome/layout-desktop-en.png",
+    "design/storybook/previews/editor-chrome/switch-light-ko.png",
+    "design/storybook/previews/editor-chrome/switch-dark-en.png",
+    "design/storybook/previews/editor-chrome/post-language-ko.png",
+    "design/storybook/previews/editor-chrome/file-dialog-ko.png"
+  ],
+  "priorRuns": [],
+  "boundaries": [
+    "Production Views use local fixtures; backend persistence and native assistive technology acceptance are outside this review.",
+    "Responsive browser checks use a fine pointer. They do not emulate physical touch."
+  ]
+}

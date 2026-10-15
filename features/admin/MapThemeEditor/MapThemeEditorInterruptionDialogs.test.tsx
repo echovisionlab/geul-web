@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import enMessages from '@/messages/en.json';
 import { MapThemeEditorInterruptionDialogs } from './MapThemeEditorInterruptionDialogs';
 
@@ -43,9 +44,9 @@ function renderDialogs({ interruption }: { interruption: 'permission_revoked' | 
   act(() => {
     root.render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <MantineProvider env="test">
+        <DesignSystemProvider locale="en" forceColorScheme="light">
           <MapThemeEditorInterruptionDialogs interruption={interruption} navigate={navigate} />
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
   });
@@ -63,9 +64,13 @@ describe('MapThemeEditorInterruptionDialogs', () => {
     expect(navigate).toHaveBeenCalledWith('/');
   });
 
-  it('starts login with the exact current page as return target', () => {
+  it('starts login with the exact current page as return target', async () => {
     const { navigate } = renderDialogs({ interruption: 'session_expired' });
-    expect(navigate).toHaveBeenCalledWith('/login?redirect=%2Fadmin%2Fmap%2Fthemes%2Ftheme-1%3Flocale%3Dko%23palette');
+    await vi.waitFor(() =>
+      expect(navigate).toHaveBeenCalledWith(
+        '/login?redirect=%2Fadmin%2Fmap%2Fthemes%2Ftheme-1%3Flocale%3Dko%23palette',
+      ),
+    );
   });
 
   it('shows no blocking dialog without an access interruption', () => {

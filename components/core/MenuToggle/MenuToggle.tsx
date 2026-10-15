@@ -1,54 +1,40 @@
 'use client';
 
+import type { OverlayPresentationProps } from '../overlay-contract';
+
 import { forwardRef, type MouseEventHandler } from 'react';
-import { Burger as MantineBurger } from '@mantine/core';
-
-export type MenuToggleSize = 'compact' | 'standard';
+import { IconMenu2, IconX } from '@tabler/icons-react';
+import { IconButton } from '../IconButton/IconButton';
+import classes from './MenuToggle.module.css';
 export type MenuToggleVisibility = 'always' | 'mobile-only';
-
-export interface MenuToggleProps {
+/** Disclosure toggle for a navigation region: owns aria-expanded/aria-controls and the menu/close glyph swap. */
+export interface MenuToggleProps extends OverlayPresentationProps {
   opened: boolean;
   label: string;
   onClick: MouseEventHandler<HTMLButtonElement>;
-  size?: MenuToggleSize;
   visibility?: MenuToggleVisibility;
   controls?: string;
   disabled?: boolean;
   id?: string;
-  className?: string;
 }
-
-const MENU_TOGGLE_SIZES = {
-  compact: { icon: 16, control: 32 },
-  standard: { icon: 20, control: 40 },
-} as const;
-
 export const MenuToggle = forwardRef<HTMLButtonElement, MenuToggleProps>(
-  ({ opened, label, onClick, size = 'standard', visibility = 'always', controls, disabled, ...props }, ref) => {
-    const dimensions = MENU_TOGGLE_SIZES[size];
-
-    return (
-      <MantineBurger
+  ({ opened, label, onClick, visibility = 'always', controls, disabled, id }, ref) => (
+    <span className={classes.root} data-visibility={visibility}>
+      <IconButton
         ref={ref}
-        {...props}
-        type="button"
-        opened={opened}
-        onClick={onClick}
+        id={id}
+        size="chrome"
+        label={label}
         disabled={disabled}
-        size={dimensions.icon}
-        w={dimensions.control}
-        h={dimensions.control}
-        hiddenFrom={visibility === 'mobile-only' ? 'sm' : undefined}
-        aria-label={label}
+        onClick={disabled ? undefined : onClick}
         aria-expanded={opened}
         aria-controls={controls}
         data-opened={opened}
-        data-size={size}
-        data-visibility={visibility}
         data-menu-toggle
-      />
-    );
-  },
+      >
+        {opened ? <IconX size="1em" aria-hidden /> : <IconMenu2 size="1em" aria-hidden />}
+      </IconButton>
+    </span>
+  ),
 );
-
 MenuToggle.displayName = 'MenuToggle';

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { create } from '@bufbuild/protobuf';
 import {
@@ -8,7 +9,7 @@ import {
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { hydrateRoot, type Root } from 'react-dom/client';
 import { renderToReadableStream } from 'react-dom/server.browser';
-import { MantineProvider } from '@mantine/core';
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { LegalPolicyHistoryClient } from './LegalPolicyHistoryClient';
@@ -32,7 +33,10 @@ vi.mock('@/features/date-time/DateTime', () => ({
 }));
 vi.mock('@/features/policy/LegalTranslationNotice', () => ({ LegalTranslationNotice: () => null }));
 vi.mock('@/features/translation/ContentLanguageMenu', () => ({ ContentLanguageMenu: () => null }));
-vi.mock('@/features/navigation/TableOfContents', () => ({ TableOfContents: () => null }));
+vi.mock('@/features/navigation/TableOfContents', () => ({
+  // The navigation owner wraps the document so Core can reserve the outline beside it.
+  TableOfContents: ({ children }: { children: React.ReactNode }) => children,
+}));
 vi.mock('@/features/print/PrintButton', () => ({ PrintButton: () => null }));
 vi.mock('@/features/site/PageLoader', () => ({ PageLoader: () => <span>Loading policy</span> }));
 
@@ -63,7 +67,7 @@ afterEach(() => {
 function wrapper(content: ReactNode, client: QueryClient) {
   return (
     <QueryClientProvider client={client}>
-      <MantineProvider>{content}</MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">{content}</DesignSystemProvider>
     </QueryClientProvider>
   );
 }
@@ -128,6 +132,15 @@ describe('legal history server snapshots', () => {
       '/privacy/history/old?lang=ko',
     ]);
     expect(container!.querySelector('tbody > a')).toBeNull();
+    expect(container!.querySelector('h1')).toHaveTextContent('History');
+    expect(container!.querySelector('h1')).toHaveAttribute('data-level', '2');
+    expect(container!.querySelector('table')).toHaveAttribute('aria-label', 'History');
+    expect(container!.querySelectorAll('thead th[scope="col"]')).toHaveLength(3);
+    const statusCells = [...container!.querySelectorAll('tbody tr')].map((row) => row.children[1]);
+    expect(statusCells.map((cell) => cell?.textContent)).toEqual(['Current', 'Archived']);
+    for (const cell of statusCells) {
+      expect(cell?.querySelector('[data-core-typography="text"]')).toHaveAttribute('data-size', 'sm');
+    }
     expect(getActive).not.toHaveBeenCalled();
     expect(listArchived).not.toHaveBeenCalled();
   });

@@ -1,5 +1,6 @@
 'use client';
 
+import { DEFAULT_SITE_BRAND_COLOR } from '@/lib/theme/site-brand';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Extension, type Editor } from '@tiptap/core';
 import { Plugin } from '@tiptap/pm/state';
@@ -11,6 +12,10 @@ import {
 } from '@echovisionlab/geul-common/editor/link-normalization';
 import type { RichTextBlockRoomTiptapController } from '../block-room-tiptap-controller';
 import { inlineEditorColorStyle } from '../editor-color-presentation';
+import {
+  documentHeadingTag,
+  type DocumentHeadingParentLevel,
+} from '@/features/document-layout/ui/document-heading-level';
 import { EditorAuthoringModeProvider, type EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { TiptapEditor } from '@/features/editor/tiptap/TiptapEditor';
 import type { TiptapAuthoringCapabilities } from '@/features/editor/tiptap/TiptapAuthoringControls';
@@ -175,7 +180,7 @@ function renderTable(node: ProseMirrorNode): string {
   return `<table><tbody>${rows}</tbody></table>`;
 }
 
-function renderPolicyBlock(block: ProseMirrorNode, children: string): string {
+function renderPolicyBlock(block: ProseMirrorNode, children: string, options: PolicyHtmlOptions): string {
   const inline = block.content.content.map(renderInline).join('');
   const alignment = textAlignmentAttribute(block);
   switch (block.type.name) {
@@ -183,7 +188,12 @@ function renderPolicyBlock(block: ProseMirrorNode, children: string): string {
       return `<p${alignment}>${inline}</p>${children}`;
     case 'heading': {
       const level = Math.min(3, Math.max(1, Number(block.attrs.level ?? 1)));
-      return `<h${level}${alignment}>${inline}</h${level}>${children}`;
+      if (!options.headingParentLevel) {
+        return `<h${level}${alignment}>${inline}</h${level}>${children}`;
+      }
+      // Below a document title the element moves down the outline; the authored level keeps the size.
+      const tag = documentHeadingTag(level, options.headingParentLevel);
+      return `<${tag} data-heading-level="${level}"${alignment}>${inline}</${tag}>${children}`;
     }
     case 'bulletListItem':
     case 'numberedListItem':
@@ -208,16 +218,20 @@ function renderPolicyBlock(block: ProseMirrorNode, children: string): string {
   }
 }
 
-function renderPolicyContainer(container: ProseMirrorNode): string {
+function renderPolicyContainer(container: ProseMirrorNode, options: PolicyHtmlOptions): string {
   const block = container.firstChild;
   if (!block) {
     return '';
   }
   const childGroup = container.childCount > 1 ? container.child(1) : null;
-  return renderPolicyBlock(block, childGroup?.type.name === 'blockGroup' ? renderPolicyGroup(childGroup) : '');
+  return renderPolicyBlock(
+    block,
+    childGroup?.type.name === 'blockGroup' ? renderPolicyGroup(childGroup, options) : '',
+    options,
+  );
 }
 
-function renderPolicyGroup(group: ProseMirrorNode): string {
+function renderPolicyGroup(group: ProseMirrorNode, options: PolicyHtmlOptions): string {
   let html = '';
   for (let index = 0; index < group.childCount;) {
     const container = group.child(index);
@@ -225,27 +239,35 @@ function renderPolicyGroup(group: ProseMirrorNode): string {
     if (type === 'bulletListItem' || type === 'numberedListItem' || type === 'checkListItem') {
       const items: string[] = [];
       for (; index < group.childCount && group.child(index).firstChild?.type.name === type; index += 1) {
-        items.push(renderPolicyContainer(group.child(index)));
+        items.push(renderPolicyContainer(group.child(index), options));
       }
       const tag = type === 'numberedListItem' ? 'ol' : 'ul';
       const checkAttribute = type === 'checkListItem' ? ' data-checklist="true"' : '';
       html += `<${tag}${checkAttribute}>${items.join('')}</${tag}>`;
       continue;
     }
-    html += renderPolicyContainer(container);
+    html += renderPolicyContainer(container, options);
     index += 1;
   }
   return html;
 }
 
+interface PolicyHtmlOptions {
+  /**
+   * The heading level the HTML sits under (1 below a visible document title). Headings then render one
+   * element lower with `data-heading-level` carrying the authored level; omitted, the authored element.
+   */
+  headingParentLevel?: DocumentHeadingParentLevel;
+}
+
 /** Serializes the durable policy JSON to public policy HTML. */
-export function policyTiptapDocumentToHtml(document: ProseMirrorNode): string {
+export function policyTiptapDocumentToHtml(document: ProseMirrorNode, options: PolicyHtmlOptions = {}): string {
   const validationError = validatePolicyTiptapDocument(document);
   if (validationError) {
     throw new Error(validationError);
   }
   const group = document.firstChild;
-  return normalizePolicyHtmlLinks(group?.type.name === 'blockGroup' ? renderPolicyGroup(group) : '');
+  return normalizePolicyHtmlLinks(group?.type.name === 'blockGroup' ? renderPolicyGroup(group, options) : '');
 }
 
 const POLICY_AUTHORING_CAPABILITIES = {
@@ -296,7 +318,7 @@ export function PolicyTiptapEditor({
     [editable, structureLocked],
   );
   const localUser = useMemo(
-    () => ({ name: userName ?? 'Admin', color: userColor ?? '#b02d23' }),
+    () => ({ name: userName ?? 'Admin', color: userColor ?? DEFAULT_SITE_BRAND_COLOR }),
     [userColor, userName],
   );
   const additionalExtensions = useMemo(() => [createPolicyContentGuard(reportUnsupported)], [reportUnsupported]);

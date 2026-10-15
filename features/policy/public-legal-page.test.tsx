@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import { renderToReadableStream } from 'react-dom/server.browser';
-import { MantineProvider } from '@mantine/core';
+
 import { create } from '@bufbuild/protobuf';
 import {
   ParagraphBlockSchema,
@@ -52,7 +53,10 @@ vi.mock('@/lib/queries/terms-browser', () => ({
 vi.mock('@/features/date-time/DateTime', () => ({
   useDateTimeFormatter: () => ({ date: (date: Date) => date.toISOString() }),
 }));
-vi.mock('@/features/navigation/TableOfContents', () => ({ TableOfContents: () => null }));
+vi.mock('@/features/navigation/TableOfContents', () => ({
+  // The navigation owner wraps the document so Core can reserve the outline beside it.
+  TableOfContents: ({ children }: { children: React.ReactNode }) => children,
+}));
 vi.mock('@/features/policy/LegalTranslationNotice', () => ({ LegalTranslationNotice: () => null }));
 vi.mock('@/features/translation/ContentLanguageMenu', () => ({ ContentLanguageMenu: () => null }));
 vi.mock('@/features/print/PrintButton', () => ({ PrintButton: () => <button type="button">Print</button> }));
@@ -92,9 +96,9 @@ function screen(kind: 'privacy' | 'terms', initialData?: PublicLegalPageInitialD
   const Page = kind === 'privacy' ? PrivacyPageClient : TermsPageClient;
   return (
     <QueryClientProvider client={client}>
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <Page initialData={initialData} />
-      </MantineProvider>
+      </DesignSystemProvider>
     </QueryClientProvider>
   );
 }

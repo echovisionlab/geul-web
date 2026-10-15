@@ -1,12 +1,19 @@
 'use client';
 
-import { Stack } from '@mantine/core';
-import { SocialLinksDisplay } from '@/features/social-links/SocialLinksDisplay';
+import { useTranslations } from 'next-intl';
+
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+
+import {
+  SocialLinksDisplayView,
+  type SocialLinkDisplayViewModel,
+} from '@/features/social-links/ui/SocialLinksDisplayView';
 import { EntityListView, type EntityListItem } from '../EntityListView';
 import type { ArtistListProps } from './schema';
 
 interface ArtistListItem extends EntityListItem {
-  socialLinks: Record<string, string> | null;
+  /** Prepared by the caller with `prepareSocialLinksDisplay`, so this runtime never loads the icon catalog. */
+  socialLinkEntries: SocialLinkDisplayViewModel[];
 }
 
 export interface ArtistListViewClientProps {
@@ -15,6 +22,7 @@ export interface ArtistListViewClientProps {
 }
 
 export function ArtistListViewClient({ artists, parsedProps: p }: ArtistListViewClientProps) {
+  const t = useTranslations();
   const layout = p.layout || 'grid';
   const columns = parseInt(p.columns || '3', 10);
   const showImage = p.showImage !== 'false';
@@ -27,8 +35,9 @@ export function ArtistListViewClient({ artists, parsedProps: p }: ArtistListView
     <EntityListView
       items={artists}
       className="artist-list-block"
-      emptyLabel="No artists found"
+      emptyLabel={t('common.messages.noArtistsFound')}
       layout={layout}
+      itemSize={p.itemSize}
       columns={columns}
       showImage={showImage}
       imageAspectRatio={imageAspectRatio}
@@ -37,10 +46,10 @@ export function ArtistListViewClient({ artists, parsedProps: p }: ArtistListView
       renderMeta={
         showMeta
           ? (artist) =>
-              artist.socialLinks && Object.keys(artist.socialLinks).length > 0 ? (
-                <Stack gap={2}>
-                  <SocialLinksDisplay links={artist.socialLinks} gap="xs" />
-                </Stack>
+              artist.socialLinkEntries.length > 0 ? (
+                <DsLayoutStack gap="xxs">
+                  <SocialLinksDisplayView entries={artist.socialLinkEntries} gap="xs" />
+                </DsLayoutStack>
               ) : null
           : undefined
       }

@@ -1,8 +1,13 @@
 'use client';
+import { SupportingText } from '@/components/core/Typography';
+
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+
+import { useComputedColorScheme } from '@/lib/providers/DesignSystemProvider';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { Stack, Text, useComputedColorScheme } from '@mantine/core';
+
 import { Button } from '@/components/core/Button';
 import {
   buildEmbedAllow,
@@ -26,7 +31,7 @@ export interface EmbedFrameProps {
 export function EmbedFrame({ props, preview = false }: EmbedFrameProps) {
   const t = useTranslations('pageEditor.embed');
   const locale = useLocale();
-  const colorScheme = useComputedColorScheme('light');
+  const colorScheme = useComputedColorScheme();
   const [parentOrigin, setParentOrigin] = useState<string | null>(null);
   const sandbox = buildEmbedSandbox(props);
   const allow = buildEmbedAllow(props);
@@ -39,17 +44,17 @@ export function EmbedFrame({ props, preview = false }: EmbedFrameProps) {
   const canRender = url && parentOrigin !== null && !unsafe;
 
   return (
-    <Stack gap="xs">
+    <DsLayoutStack gap="xs">
       {canRender && module ? (
         untrustedModule ? (
-          <Text role="alert" c="dimmed" size="sm">
+          <SupportingText role="alert" tone="secondary">
             {t('toolOriginError')}
-          </Text>
+          </SupportingText>
         ) : (
           <ToolModule
             key={url.href}
             uri={url.href}
-            title={props.title.trim()}
+            title={props.title.trim() || t('playerTitle')}
             preview={preview}
             locale={locale}
             colorScheme={colorScheme}
@@ -78,7 +83,7 @@ export function EmbedFrame({ props, preview = false }: EmbedFrameProps) {
               : undefined
           }
         >
-          <Text c="dimmed" size="sm">
+          <SupportingText tone="secondary">
             {unsafe
               ? t('unsafeOrigin')
               : url && parentOrigin === null
@@ -86,10 +91,10 @@ export function EmbedFrame({ props, preview = false }: EmbedFrameProps) {
                 : props.uri.trim()
                   ? t('invalidPreview')
                   : t('emptyPreview')}
-          </Text>
+          </SupportingText>
         </div>
       )}
-    </Stack>
+    </DsLayoutStack>
   );
 }
 
@@ -153,13 +158,21 @@ function EmbedDocument({
         allow={buildEmbedAllow(props)}
         allowFullScreen={props.allowFullscreen === 'true'}
         tabIndex={active ? undefined : -1}
+        aria-hidden={!active || undefined}
+        inert={!active || undefined}
         referrerPolicy="no-referrer"
         loading="lazy"
         onLoad={initialize}
       />
       {!active && (
         <div className={classes.activation}>
-          <Button size="sm" onClick={() => setActive(true)}>
+          <Button
+            size="sm"
+            onClick={() => {
+              setActive(true);
+              requestAnimationFrame(() => frame.current?.focus());
+            }}
+          >
             {activateLabel}
           </Button>
         </div>

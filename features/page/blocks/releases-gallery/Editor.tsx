@@ -18,14 +18,16 @@ import type { ReleaseListProps } from './schema';
 import { ReleaseListView } from './View';
 
 interface ReleaseListSettingsFormProps {
+  readOnly?: boolean;
   props: Partial<ReleaseListProps>;
   updateProps: (props: Record<string, unknown>) => void;
 }
 
-function ReleaseListSettingsForm({ props, updateProps }: ReleaseListSettingsFormProps) {
+function ReleaseListSettingsForm({ props, updateProps, readOnly = false }: ReleaseListSettingsFormProps) {
   const tPageEditor = useTranslations('pageEditor');
   const tReleaseTypes = useTranslations('releasePage.types');
   const tCommonEntities = useTranslations('common.entities');
+  const tCommonLabels = useTranslations('common.labels');
   const artistsQuery = useQuery({
     queryKey: ['artists', 'selector'],
     queryFn: () => listArtistsAction().then(unwrapQueryResult),
@@ -60,9 +62,12 @@ function ReleaseListSettingsForm({ props, updateProps }: ReleaseListSettingsForm
 
   const updateProp = useCallback(
     (key: string, value: string) => {
+      if (readOnly) {
+        return;
+      }
       updateProps({ [key]: value });
     },
-    [updateProps],
+    [readOnly, updateProps],
   );
 
   const typeOptions = [
@@ -73,7 +78,7 @@ function ReleaseListSettingsForm({ props, updateProps }: ReleaseListSettingsForm
   ] as const;
 
   const sortByOptions = [
-    { value: 'release_date', label: 'Release date' },
+    { value: 'release_date', label: tCommonLabels('releaseDate') },
     {
       value: 'published_at',
       label: tPageEditor('blockEditor.options.sortBy.publishedDate'),
@@ -85,9 +90,11 @@ function ReleaseListSettingsForm({ props, updateProps }: ReleaseListSettingsForm
     <>
       <QueryErrorAlert queries={[labelsQuery, artistsQuery, categoriesQuery]} />
       <ListBlockEditorBase
+        readOnly={readOnly}
         editorType="release-list"
         limitLabel={tPageEditor('blockEditor.labels.numberOfReleases')}
         layout={layout}
+        itemSize={props.itemSize}
         columns={columns}
         limit={limit}
         maxLimit={24}
@@ -104,18 +111,19 @@ function ReleaseListSettingsForm({ props, updateProps }: ReleaseListSettingsForm
         filters={
           <>
             <MultiSelect
+              disabled={readOnly}
               label={tPageEditor('blockEditor.labels.releaseTypes')}
-              placeholder="All release types"
+              placeholder={tPageEditor('blockEditor.placeholders.allTypes')}
               data={typeOptions}
               value={types ? types.split(',').filter(Boolean) : []}
               onChange={(values) => updateProp('types', values.join(','))}
-              size="xs"
               searchable
               clearable
             />
             <MultiSelect
+              disabled={readOnly}
               label={tCommonEntities('categories')}
-              placeholder="All categories"
+              placeholder={tPageEditor('blockEditor.options.source.all')}
               data={
                 categories?.map((category) => ({
                   value: category.id,
@@ -124,13 +132,13 @@ function ReleaseListSettingsForm({ props, updateProps }: ReleaseListSettingsForm
               }
               value={categoryIds ? categoryIds.split(',').filter(Boolean) : []}
               onChange={(values) => updateProp('categoryIds', values.join(','))}
-              size="xs"
               searchable
               clearable
             />
             <Select
+              disabled={readOnly}
               label={tCommonEntities('artists')}
-              placeholder="All artists"
+              placeholder={tPageEditor('blockEditor.options.source.all')}
               data={
                 artists?.map((artist) => ({
                   value: artist.id,
@@ -139,11 +147,11 @@ function ReleaseListSettingsForm({ props, updateProps }: ReleaseListSettingsForm
               }
               value={artistId || null}
               onChange={(value) => updateProp('artistId', value || '')}
-              size="xs"
               searchable
               clearable
             />
             <Select
+              disabled={readOnly}
               label={tCommonEntities('labels')}
               placeholder={tPageEditor('blockEditor.placeholders.allLabels')}
               data={
@@ -154,7 +162,6 @@ function ReleaseListSettingsForm({ props, updateProps }: ReleaseListSettingsForm
               }
               value={labelId || null}
               onChange={(value) => updateProp('labelId', value || '')}
-              size="xs"
               searchable
               clearable
             />
@@ -162,10 +169,10 @@ function ReleaseListSettingsForm({ props, updateProps }: ReleaseListSettingsForm
         }
         extraDisplayOptions={
           <Switch
+            disabled={readOnly}
             label={tPageEditor('blockEditor.labels.showMeta')}
             checked={showMeta === 'true'}
             onChange={(event) => updateProp('showMeta', event.currentTarget.checked ? 'true' : 'false')}
-            size="sm"
           />
         }
         onUpdate={updateProp}
@@ -174,20 +181,31 @@ function ReleaseListSettingsForm({ props, updateProps }: ReleaseListSettingsForm
   );
 }
 
-export function ReleaseListSettingsEditor({ props, updateSharedProps }: BlockSettingsEditorProps<ReleaseListProps>) {
-  return <ReleaseListSettingsForm props={props} updateProps={updateSharedProps} />;
+export function ReleaseListSettingsEditor({
+  props,
+  updateSharedProps,
+  allowSharedEdits,
+}: BlockSettingsEditorProps<ReleaseListProps>) {
+  return (
+    <ReleaseListSettingsForm props={props} updateProps={updateSharedProps} readOnly={allowSharedEdits === false} />
+  );
 }
 
 export function ReleaseListEditor({ sectionId, props }: BlockEditorProps<ReleaseListProps>) {
-  const { updateSection } = usePageEditor();
+  const { updateSection, editable, allowStructuralEdits } = usePageEditor();
   const updateProps = useCallback(
     (nextProps: Record<string, unknown>) => {
+      if (!editable || !allowStructuralEdits) {
+        return;
+      }
       updateSection(sectionId, { props: nextProps });
     },
-    [sectionId, updateSection],
+    [sectionId, updateSection, editable, allowStructuralEdits],
   );
 
-  return <ReleaseListSettingsForm props={props} updateProps={updateProps} />;
+  return (
+    <ReleaseListSettingsForm props={props} updateProps={updateProps} readOnly={!editable || !allowStructuralEdits} />
+  );
 }
 
 export function ReleaseListCanvasPreview({ sectionId, props }: BlockCanvasPreviewProps<ReleaseListProps>) {

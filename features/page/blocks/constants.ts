@@ -1,3 +1,4 @@
+import type { CarouselSlideSize } from '@/components/core/Carousel';
 /**
  * Shared constants for page blocks.
  * Centralized to avoid duplication across block editors.
@@ -225,7 +226,7 @@ export const MAX_LIMIT_ARTISTS = 24;
 /**
  * Calculate the slide size percentage for carousels.
  */
-export function getSlideSize(columns: number): string {
+export function getSlideSize(columns: number): CarouselSlideSize {
   switch (columns) {
     case 1:
       return '100%';
@@ -241,12 +242,12 @@ export function getSlideSize(columns: number): string {
 }
 
 /**
- * Get responsive slide sizes for Mantine Carousel.
+ * Get the four supported content column fractions for Core Carousel.
  */
 export function getResponsiveSlideSize(columns: number): {
-  base: string;
-  sm: string;
-  md: string;
+  base: CarouselSlideSize;
+  sm: CarouselSlideSize;
+  md: CarouselSlideSize;
 } {
   return {
     base: '100%',

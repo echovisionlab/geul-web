@@ -1,9 +1,18 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+  LayoutInset,
+} from '@/components/core/Layout';
 
 import { useMemo } from 'react';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Box, Group, Loader, Stack, Text } from '@mantine/core';
+import { SectionCard } from '@/components/core/Section';
+import { Spinner as Loader } from '@/components/core/Display';
 import { Alert } from '@/components/core/Alert';
 import { Tooltip } from '@/components/core/Tooltip';
 import { buildEmailPreviewSrcDoc } from '@/lib/email/preview-document';
@@ -38,49 +47,47 @@ export function EmailLayoutPreviewView({
   const previewSrcDoc = useMemo(() => buildEmailPreviewSrcDoc(previewHtml, locale), [locale, previewHtml]);
 
   return (
-    <Stack gap={0} style={{ minHeight: 0, height: '100%' }}>
-      <Group justify="space-between" mb={4}>
-        <Group gap="xs">
-          <Text size="xs" c="dimmed">
-            {tCommonLabels('preview')}
-          </Text>
-          {isLoading ? <Loader size={12} /> : null}
-        </Group>
-        <Tooltip label={t('preview.serverHelp')} multiline w={280}>
-          <Text size="xs" c="dimmed" style={{ cursor: 'help' }}>
-            {t('preview.serverLabel')}
-          </Text>
-        </Tooltip>
-      </Group>
+    <DsLayoutStack gap="none" fill="block" role="region" aria-label={tCommonLabels('preview')} aria-busy={isLoading}>
+      <DsLayoutInset blockEnd="xxs">
+        <DsLayoutInline justify="between">
+          <DsLayoutInline gap="xs">
+            <DsText size="xs" tone="secondary">
+              {tCommonLabels('preview')}
+            </DsText>
+            {isLoading ? <Loader size="xs" /> : null}
+          </DsLayoutInline>
+          <Tooltip label={t('preview.serverHelp')} multiline size="standard">
+            <div style={{ cursor: 'help' }}>
+              <DsText size="xs" tone="secondary">
+                {t('preview.serverLabel')}
+              </DsText>
+            </div>
+          </Tooltip>
+        </DsLayoutInline>
+      </DsLayoutInset>
 
       {errors.length > 0 ? (
-        <Alert icon={<IconAlertTriangle size={16} />} tone="danger" mb="xs" p="xs">
-          <Stack gap={4}>
-            {errors.map((error, index) => (
-              <Text key={`${error.code}:${index}`} size="xs">
-                <Text span fw={500}>
-                  {error.code}
-                </Text>
-                :{' '}
-                {error.code in LAYOUT_ERROR_MESSAGE_KEYS
-                  ? t(LAYOUT_ERROR_MESSAGE_KEYS[error.code as keyof typeof LAYOUT_ERROR_MESSAGE_KEYS])
-                  : error.message}
-                {error.line != null ? ` (${t('preview.errorLocation', { line: error.line })})` : null}
-              </Text>
-            ))}
-          </Stack>
-        </Alert>
+        <LayoutInset space="none" blockEnd="xs">
+          <Alert role="alert" density="compact" icon={<IconAlertTriangle size={16} />} tone="danger">
+            <DsLayoutStack gap="xxs">
+              {errors.map((error, index) => (
+                <DsText key={`${error.code}:${index}`} size="xs">
+                  <DsText as="span" weight="medium">
+                    {error.code}
+                  </DsText>
+                  :{' '}
+                  {error.code in LAYOUT_ERROR_MESSAGE_KEYS
+                    ? t(LAYOUT_ERROR_MESSAGE_KEYS[error.code as keyof typeof LAYOUT_ERROR_MESSAGE_KEYS])
+                    : error.message}
+                  {error.line != null ? ` (${t('preview.errorLocation', { line: error.line })})` : null}
+                </DsText>
+              ))}
+            </DsLayoutStack>
+          </Alert>
+        </LayoutInset>
       ) : null}
 
-      <Box
-        style={{
-          flex: 1,
-          border: '1px solid var(--mantine-color-default-border)',
-          borderRadius: 'var(--mantine-radius-default)',
-          overflow: 'hidden',
-          background: '#fff',
-        }}
-      >
+      <SectionCard padding="none" appearance="paper" clip grow>
         {previewSrcDoc ? (
           <iframe
             srcDoc={previewSrcDoc}
@@ -88,11 +95,13 @@ export function EmailLayoutPreviewView({
             title={t('preview.iframeTitle')}
           />
         ) : (
-          <Stack align="center" justify="center" h="100%">
-            <Text c="dimmed">{isLoading ? tCommonStates('loadingPreview') : t('preview.empty')}</Text>
-          </Stack>
+          <DsLayoutStack align="center" justify="center" fill="block">
+            <SupportingText tone="secondary">
+              {isLoading ? tCommonStates('loadingPreview') : t('preview.empty')}
+            </SupportingText>
+          </DsLayoutStack>
         )}
-      </Box>
-    </Stack>
+      </SectionCard>
+    </DsLayoutStack>
   );
 }

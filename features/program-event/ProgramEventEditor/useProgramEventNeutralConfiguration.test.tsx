@@ -81,21 +81,90 @@ function HookHarness(props: Parameters<typeof useProgramEventNeutralConfiguratio
 
 function emitHint(provider: TestProvider, document: string) {
   provider.emit('stateless', {
-    payload: JSON.stringify({ kind: 'editor.entity_changed', version: 1, document }),
+    payload: JSON.stringify({ v: 3, kind: 'entity.changed', entity: document.replaceAll('_', '-'), scope: 'metadata' }),
   });
 }
 
 beforeEach(() => {
+  vi.useFakeTimers();
   host = document.createElement('div');
   root = createRoot(host);
   (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   act(() => root.unmount());
 });
 
 describe('useProgramEventNeutralConfiguration', () => {
+  it('rejects a read predating acknowledgement and keeps a newer same-field reversal protected', async () => {
+    const staleRead = deferred<{ ok: true; configuration: ProgramEventNeutralConfiguration }>();
+    const afterWriteRead = deferred<{ ok: true; configuration: ProgramEventNeutralConfiguration }>();
+    const loadConfiguration = vi
+      .fn()
+      .mockReturnValueOnce(staleRead.promise)
+      .mockReturnValueOnce(afterWriteRead.promise);
+    const onAdopt = vi.fn();
+    act(() =>
+      root.render(
+        <HookHarness
+          eventId="event-1"
+          initialConfiguration={configuration()}
+          loadConfiguration={loadConfiguration}
+          onAdopt={onAdopt}
+        />,
+      ),
+    );
+    act(() => current.setDraft('timezone', 'Asia/Tokyo'));
+    const write = current.beginWrite({ timezone: 'Asia/Tokyo' });
+    act(() => current.setDraft('timezone', 'UTC'));
+    act(() => write.acknowledge({ timezone: 'Asia/Tokyo' }));
+    await act(async () => {
+      staleRead.resolve({ ok: true, configuration: configuration({ timezone: 'stale', allDay: true }) });
+      await staleRead.promise;
+    });
+    expect(onAdopt).not.toHaveBeenCalled();
+    await act(async () => {
+      afterWriteRead.resolve({ ok: true, configuration: configuration({ timezone: 'Asia/Tokyo', allDay: true }) });
+      await afterWriteRead.promise;
+    });
+    expect(onAdopt).toHaveBeenLastCalledWith(expect.objectContaining({ allDay: true }));
+    expect(onAdopt.mock.lastCall?.[0]).not.toHaveProperty('timezone');
+  });
+
+  it('keeps the type label protected together with a locally selected type', async () => {
+    const provider = createProvider();
+    const loadConfiguration = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: true, configuration: configuration() })
+      .mockResolvedValueOnce({
+        ok: true,
+        configuration: configuration({ typeId: 'peer-type', typeName: 'Peer Type', allDay: true }),
+      });
+    const onAdopt = vi.fn();
+    act(() =>
+      root.render(
+        <HookHarness
+          eventId="event-1"
+          initialConfiguration={configuration()}
+          loadConfiguration={loadConfiguration}
+          provider={provider}
+          onAdopt={onAdopt}
+        />,
+      ),
+    );
+    await act(async () => Promise.resolve());
+    act(() => current.setDraft('typeId', 'local-type'));
+    await act(async () => {
+      emitHint(provider, 'program_event:event-1');
+      await vi.advanceTimersByTimeAsync(250);
+    });
+    expect(onAdopt.mock.lastCall?.[0]).not.toHaveProperty('typeId');
+    expect(onAdopt.mock.lastCall?.[0]).not.toHaveProperty('typeName');
+    expect(onAdopt).toHaveBeenLastCalledWith(expect.objectContaining({ allDay: true }));
+  });
+
   it('refetches and adopts canonical peer configuration only for the matching Event', async () => {
     const provider = createProvider();
     const loadConfiguration = vi
@@ -127,9 +196,15 @@ describe('useProgramEventNeutralConfiguration', () => {
     await act(async () => Promise.resolve());
     expect(loadConfiguration).toHaveBeenCalledExactlyOnceWith('event-1');
 
-    act(() => emitHint(provider, 'program_event:other'));
+    await act(async () => {
+      emitHint(provider, 'program_event:other');
+      await vi.advanceTimersByTimeAsync(250);
+    });
     expect(loadConfiguration).toHaveBeenCalledOnce();
-    act(() => emitHint(provider, 'program_event:event-1'));
+    await act(async () => {
+      emitHint(provider, 'program_event:event-1');
+      await vi.advanceTimersByTimeAsync(250);
+    });
     await act(async () => Promise.resolve());
 
     expect(loadConfiguration).toHaveBeenCalledTimes(2);
@@ -144,7 +219,7 @@ describe('useProgramEventNeutralConfiguration', () => {
     );
   });
 
-  it('protects a local scalar draft during peer refresh, then adopts when the draft matches canonical data', async () => {
+  it('protects a local scalar intent during peer refresh even when the draft matches canonical data', async () => {
     const provider = createProvider();
     const loadConfiguration = vi
       .fn()
@@ -166,16 +241,22 @@ describe('useProgramEventNeutralConfiguration', () => {
     );
     await act(async () => Promise.resolve());
     act(() => current.setDraft('timezone', 'America/Los_Angeles'));
-    act(() => emitHint(provider, 'program_event:event-1'));
+    await act(async () => {
+      emitHint(provider, 'program_event:event-1');
+      await vi.advanceTimersByTimeAsync(250);
+    });
     await act(async () => Promise.resolve());
 
     expect(onAdopt).toHaveBeenLastCalledWith(expect.objectContaining({ allDay: true }));
     expect(onAdopt.mock.lastCall?.[0]).not.toHaveProperty('timezone');
 
     act(() => current.setDraft('timezone', 'Asia/Tokyo'));
-    act(() => emitHint(provider, 'program_event:event-1'));
+    await act(async () => {
+      emitHint(provider, 'program_event:event-1');
+      await vi.advanceTimersByTimeAsync(250);
+    });
     await act(async () => Promise.resolve());
-    expect(onAdopt).toHaveBeenLastCalledWith(expect.objectContaining({ timezone: 'Asia/Tokyo' }));
+    expect(onAdopt.mock.lastCall?.[0]).not.toHaveProperty('timezone');
   });
 
   it('isolates A to B to A scope identity from stale setters and reads', async () => {
@@ -211,7 +292,10 @@ describe('useProgramEventNeutralConfiguration', () => {
 
     act(() => staleSetter('timezone', 'stale-local-A'));
     const staleWrite = staleBeginWrite({ timezone: 'stale-local-A' });
-    act(() => emitHint(provider, 'program_event:event-A'));
+    await act(async () => {
+      emitHint(provider, 'program_event:event-A');
+      await vi.advanceTimersByTimeAsync(250);
+    });
     await act(async () => Promise.resolve());
     expect(onAdopt).toHaveBeenLastCalledWith(expect.objectContaining({ timezone: 'Asia/Tokyo' }));
     staleWrite.fail();

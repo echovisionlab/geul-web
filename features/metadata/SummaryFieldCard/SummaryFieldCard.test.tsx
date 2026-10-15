@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { create } from '@bufbuild/protobuf';
 import type { MetadataAiSharedState } from '@echovisionlab/geul-common/collaboration/metadata-ai';
@@ -18,7 +19,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
-import { MantineProvider } from '@mantine/core';
+
 import type { AIEditorAssistantClient } from '@/lib/ai/editor-orchestration';
 import { createAIDocumentRequestIdentity, DCDP_PROTOCOL_VERSION } from '@/lib/ai/document-client';
 import { useCollaborativeMetadataAiState } from '@/lib/hooks/useCollaborativeMetadataAiState';
@@ -78,7 +79,7 @@ vi.mock('@/components/core/Badge', () => ({
   StatusBadge: ({ children, id }: { children: React.ReactNode; id?: string }) => <span id={id}>{children}</span>,
 }));
 
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -127,7 +128,9 @@ function render(node: React.ReactNode) {
   act(() => {
     root?.render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <MantineProvider>{node}</MantineProvider>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
+          {node}
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
   });

@@ -5,6 +5,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createHocuspocusProviderFixture, type HocuspocusProviderFixture } from './hocuspocusProvider.test-fixture';
 import { useEditorPermissionRevocation } from './useEditorPermissionRevocation';
+import { endProviderAccess } from '@/lib/collab/provider-control-state';
 
 let root: Root;
 let container: HTMLDivElement;
@@ -53,7 +54,7 @@ describe('useEditorPermissionRevocation', () => {
 
     act(() =>
       provider.emit('stateless', {
-        payload: JSON.stringify({ kind: 'permission_revoked', reason: 'permission_revoked' }),
+        payload: JSON.stringify({ v: 3, kind: 'room.access_ended', reason: 'permission_revoked' }),
       }),
     );
 
@@ -69,7 +70,7 @@ describe('useEditorPermissionRevocation', () => {
 
     act(() =>
       shared.emit('stateless', {
-        payload: JSON.stringify({ kind: 'permission_revoked', reason: 'permission_revoked' }),
+        payload: JSON.stringify({ v: 3, kind: 'room.access_ended', reason: 'permission_revoked' }),
       }),
     );
 
@@ -87,7 +88,7 @@ describe('useEditorPermissionRevocation', () => {
       act(() => {
         if (source === 'stateless') {
           provider.emit('stateless', {
-            payload: JSON.stringify({ kind: 'session_expired', reason: 'session_expired' }),
+            payload: JSON.stringify({ v: 3, kind: 'room.access_ended', reason: 'session_expired' }),
           });
         } else {
           provider.emit('authenticationFailed', { reason: 'session_expired' });
@@ -100,6 +101,27 @@ describe('useEditorPermissionRevocation', () => {
       expect(container.dataset.blocked).toBe('true');
     },
   );
+
+  it('locks when a readmission is refused because access was removed', () => {
+    const provider = createProvider();
+    act(() => root.render(<Probe provider={provider} />));
+
+    act(() => provider.emit('authenticationFailed', { reason: 'permission_revoked' }));
+
+    expect(provider.disconnect).toHaveBeenCalledOnce();
+    expect(container.dataset.revoked).toBe('true');
+    expect(container.dataset.blocked).toBe('true');
+  });
+
+  it('locks when the room connection ends access for a provider it shows', () => {
+    const provider = createProvider();
+    act(() => root.render(<Probe provider={provider} />));
+
+    act(() => endProviderAccess(provider.provider, 'permission_revoked'));
+
+    expect(container.dataset.revoked).toBe('true');
+    expect(container.dataset.blocked).toBe('true');
+  });
 
   it('does not label an ambiguous authentication failure as session expiry', () => {
     const provider = createProvider();

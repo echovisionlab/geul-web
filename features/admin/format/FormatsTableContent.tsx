@@ -1,7 +1,8 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
+
 import { LabelBadge } from '@/components/core/Badge';
 import {
   ServerDataTableSelectableSection,
@@ -24,18 +25,18 @@ function getColumns(labels: { format: string; slug: string; releases: string }):
       key: 'name',
       header: labels.format,
       cell: (row) => (
-        <Text size="sm" fw={500}>
+        <DsText size="sm" weight="medium">
           {row.name}
-        </Text>
+        </DsText>
       ),
     },
     {
       key: 'slug',
       header: labels.slug,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           {row.slug}
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -54,13 +55,20 @@ function getColumns(labels: { format: string; slug: string; releases: string }):
 }
 
 interface FormatsTableContentProps {
+  deleteAction?: typeof deleteFormatAction;
   result: ServerDataTableSelectableSectionProps<FormatRow>['result'];
   searchPlaceholder: string;
   filterFields: ServerDataTableSelectableSectionProps<FormatRow>['filterFields'];
   sortFields: ServerDataTableSelectableSectionProps<FormatRow>['sortFields'];
 }
 
-export function FormatsTableContent({ result, searchPlaceholder, filterFields, sortFields }: FormatsTableContentProps) {
+export function FormatsTableContent({
+  result,
+  searchPlaceholder,
+  filterFields,
+  sortFields,
+  deleteAction = deleteFormatAction,
+}: FormatsTableContentProps) {
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
   const tAdmin = useTranslations('adminList');
@@ -82,7 +90,7 @@ export function FormatsTableContent({ result, searchPlaceholder, filterFields, s
       sortFields={sortFields}
       bulkDelete={{
         entityLabel: tCommonEntities('formats'),
-        deleteAction: deleteFormatAction,
+        deleteAction,
         getRowLabel: (row) => row.name || row.slug || row.id,
       }}
     />

@@ -1,17 +1,19 @@
 // @vitest-environment jsdom
 
+import { I18nProvider } from 'react-aria-components';
 import { act, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Editor } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/react';
-import { MantineProvider } from '@mantine/core';
+
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 import type { EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import enMessages from '@/messages/en.json';
 import { createTiptapWireExtensions } from './wire-schema';
 import { createTiptapBlockContainer } from './TiptapBlockContainerNodeView';
+import { createAuthoringShortcutGuard } from './integration/authoring-shortcuts';
 
 Object.defineProperty(window, 'ResizeObserver', {
   configurable: true,
@@ -76,7 +78,10 @@ function TestEditor({
   const editor = useEditor({
     immediatelyRender: false,
     editable,
-    extensions: createTiptapWireExtensions({ blockContainerNode: createTiptapBlockContainer(mode) }),
+    extensions: [
+      ...createTiptapWireExtensions({ blockContainerNode: createTiptapBlockContainer(mode) }),
+      createAuthoringShortcutGuard(mode),
+    ],
     content,
   });
   useEffect(() => {
@@ -103,19 +108,16 @@ async function mountEditor({
   await act(async () => {
     root.render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <MantineProvider env="test">
+        <I18nProvider locale="en">
           <TestEditor
             content={{ type: 'doc', content: [{ type: 'blockGroup', content: blocks }] }}
             mode={mode}
             editable={editable}
             onReady={(value) => (editor = value)}
           />
-        </MantineProvider>
+        </I18nProvider>
       </NextIntlClientProvider>,
     );
-  });
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 0));
   });
   if (!editor) {
     throw new Error('Tiptap editor did not mount');
@@ -148,7 +150,6 @@ async function clickBlockHandle(handle: HTMLButtonElement | null | undefined) {
   const blockId = handle.closest<HTMLElement>('[data-id]')?.dataset.id;
   await act(async () => {
     handle.dispatchEvent(new MouseEvent('mousedown', { button: 0, bubbles: true, cancelable: true }));
-    await new Promise((resolve) => setTimeout(resolve, 0));
   });
   const currentHandle = blockId
     ? Array.from(document.querySelectorAll<HTMLButtonElement>('[data-testid="tiptap-block-drag-handle"]')).find(
@@ -158,7 +159,6 @@ async function clickBlockHandle(handle: HTMLButtonElement | null | undefined) {
   await act(async () => {
     currentHandle?.dispatchEvent(new MouseEvent('mouseup', { button: 0, bubbles: true, cancelable: true }));
     currentHandle?.click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
   });
   return currentHandle ?? null;
 }
@@ -170,11 +170,67 @@ async function pressBlockHandle(handle: HTMLButtonElement | null | undefined, ke
       handle?.click();
     }
     handle?.dispatchEvent(new KeyboardEvent('keyup', { key, bubbles: true, cancelable: true }));
-    await new Promise((resolve) => setTimeout(resolve, 0));
   });
 }
 
 describe('Tiptap block handle menu', () => {
+  it('opens the existing current-block menu from Shift+F10 and restores its trigger without changing the document', async () => {
+    const mounted = await mountEditor();
+    try {
+      await act(async () => {
+        mounted.editor.commands.setTextSelection(3);
+        mounted.editor.view.focus();
+      });
+      const source = mounted.editor.state.doc.toJSON();
+      const selection = mounted.editor.state.selection.toJSON();
+      const event = new KeyboardEvent('keydown', { key: 'F10', shiftKey: true, bubbles: true, cancelable: true });
+      await act(async () => mounted.editor.view.dom.dispatchEvent(event));
+      expect(event.defaultPrevented).toBe(true);
+      expect(mounted.element.querySelector('[data-testid="tiptap-block-menu"]')).not.toBeNull();
+      expect(mounted.element.querySelector('[data-id="first"] [data-testid="tiptap-block-menu"]')).not.toBeNull();
+      await vi.waitFor(() => expect(document.activeElement?.closest('[role="menu"]')).not.toBeNull());
+      await act(async () =>
+        document.activeElement?.dispatchEvent(
+          new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+        ),
+      );
+      await vi.waitFor(() => expect(mounted.element.querySelector('[data-testid="tiptap-block-menu"]')).toBeNull());
+      await vi.waitFor(() =>
+        expect(
+          mounted.element.querySelector('[data-id="first"] [data-testid="tiptap-block-drag-handle"]'),
+        ).toHaveFocus(),
+      );
+      expect(mounted.editor.state.doc.toJSON()).toEqual(source);
+      expect(mounted.editor.state.selection.toJSON()).toEqual(selection);
+    } finally {
+      await mounted.destroy();
+    }
+  });
+
+  it('waits for a completed click so pointerdown can start a native drag', async () => {
+    const mounted = await mountEditor();
+    const handle = mounted.element.querySelector<HTMLButtonElement>('[data-testid="tiptap-block-drag-handle"]');
+    await act(async () => {
+      handle?.dispatchEvent(new MouseEvent('mousedown', { button: 0, bubbles: true, cancelable: true }));
+    });
+    expect(handle?.getAttribute('aria-expanded')).not.toBe('true');
+    await act(async () => {
+      handle?.dispatchEvent(new MouseEvent('mouseup', { button: 0, bubbles: true, cancelable: true }));
+      handle?.click();
+    });
+    expect(handle?.getAttribute('aria-expanded')).toBe('true');
+    await mounted.destroy();
+  });
+  it('hides drag handles during text selection and restores them when the caret collapses', async () => {
+    const mounted = await mountEditor();
+    expect(mounted.element.querySelector('[data-testid="tiptap-block-drag-handle"]')).not.toBeNull();
+    await act(async () => mounted.editor.commands.setTextSelection({ from: 3, to: 5 }));
+    expect(mounted.element.querySelector('[data-testid="tiptap-block-drag-handle"]')).toBeNull();
+    await act(async () => mounted.editor.commands.setTextSelection(3));
+    expect(mounted.element.querySelector('[data-testid="tiptap-block-drag-handle"]')).not.toBeNull();
+    await mounted.destroy();
+  });
+
   it('opens a truthful contextual menu and deletes the selected block', async () => {
     const mounted = await mountEditor();
     const handle = mounted.element.querySelector<HTMLButtonElement>('[data-testid="tiptap-block-drag-handle"]');
@@ -198,14 +254,13 @@ describe('Tiptap block handle menu', () => {
     const handle = mounted.element.querySelector<HTMLButtonElement>('[data-testid="tiptap-block-drag-handle"]');
     await clickBlockHandle(handle);
     const colors = getMenuItem('Colors');
-    colors.focus();
+    await act(async () => colors.focus());
     await act(async () => {
       colors.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
-      await new Promise((resolve) => setTimeout(resolve, 0));
     });
     const redTextItem = document
       .querySelector<HTMLElement>('[data-editor-color-swatch="text"][data-color="red"]')
-      ?.closest<HTMLButtonElement>('button');
+      ?.closest<HTMLElement>('[role="menuitem"]');
     expect(document.querySelectorAll('[data-editor-color-swatch="text"]')).toHaveLength(10);
     expect(document.querySelectorAll('[data-editor-color-swatch="background"]')).toHaveLength(10);
     expect(redTextItem?.textContent).toContain('Red');
@@ -215,7 +270,54 @@ describe('Tiptap block handle menu', () => {
     await mounted.destroy();
   });
 
+  it('keeps empty nested Callouts editable with their own Core block menu', async () => {
+    const outer = callout('outer');
+    const nested = {
+      type: 'blockContainer',
+      attrs: { id: 'nested' },
+      content: [{ type: 'callout', attrs: { icon: '🔥' } }],
+    };
+    const mounted = await mountEditor({
+      blocks: [{ ...outer, content: [...outer.content, { type: 'blockGroup', content: [nested] }] }],
+    });
+    try {
+      const nestedElement = mounted.element.querySelector<HTMLElement>('[data-id="nested"]')!;
+      expect(nestedElement.querySelector('[data-content-type="callout"]')?.getAttribute('data-icon')).toBe('🔥');
+      const handle = nestedElement.querySelector<HTMLButtonElement>('[data-testid="tiptap-block-drag-handle"]')!;
+      expect(handle.getAttribute('data-control-size')).toBe('compact');
+      await clickBlockHandle(handle);
+      expect(document.querySelector('[role="menu"]')).not.toBeNull();
+      let position = -1;
+      mounted.editor.state.doc.descendants((node, offset) => {
+        if (node.type.name === 'blockContainer' && node.attrs.id === 'nested') {
+          position = offset + 2;
+        }
+      });
+      expect(position).toBeGreaterThan(0);
+      await act(async () => {
+        mounted.editor.commands.insertContentAt(position, 'Nested input');
+      });
+      const nestedBlock = mounted.editor.state.doc.firstChild?.firstChild?.lastChild?.firstChild;
+      expect(nestedBlock?.firstChild?.textContent).toBe('Nested input');
+      expect(mounted.element.querySelectorAll('[data-content-type="callout"]')).toHaveLength(2);
+    } finally {
+      await mounted.destroy();
+    }
+  });
+
   it('searches the shared Emoji catalog and changes a Callout icon directly', async () => {
+    class TestPointerEvent extends MouseEvent {
+      pointerType = 'mouse';
+      pointerId = 1;
+      width = 1;
+      height = 1;
+      isPrimary = true;
+    }
+    vi.stubGlobal('PointerEvent', TestPointerEvent);
+    // RAC intentionally treats unmeasured jsdom viewports as infinite. Give the real
+    // virtualizer a finite viewport rather than rendering the full emoji catalogue.
+    const width = vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(340);
+    const height = vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(252);
     const applyNeutralBlockProps = vi.fn();
     const mounted = await mountEditor({
       blocks: [callout('notice')],
@@ -226,22 +328,30 @@ describe('Tiptap block handle menu', () => {
 
     await act(async () => {
       picker?.click();
-      await new Promise((resolve) => setTimeout(resolve, 0));
     });
     const search = document.body.querySelector<HTMLInputElement>('[aria-label="Search for and insert an emoji"]');
     await act(async () => {
       const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
       setter?.call(search, 'fire');
       search?.dispatchEvent(new Event('input', { bubbles: true }));
-      await new Promise((resolve) => setTimeout(resolve, 0));
     });
     const fire = document.body.querySelector<HTMLButtonElement>('[role="option"][aria-label=":fire:"]');
     expect(fire?.textContent).toBe('🔥');
-    await act(async () => fire?.click());
+    await act(async () => {
+      fire?.dispatchEvent(new TestPointerEvent('pointerdown', { bubbles: true, cancelable: true, button: 0 }));
+      fire?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0 }));
+      fire?.focus();
+      fire?.dispatchEvent(new TestPointerEvent('pointerup', { bubbles: true, cancelable: true, button: 0 }));
+      fire?.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, button: 0 }));
+      fire?.click();
+    });
 
     expect(mounted.editor.state.doc.firstChild?.firstChild?.firstChild?.attrs.icon).toBe('🔥');
     expect(applyNeutralBlockProps).toHaveBeenCalledWith('notice', { icon: '🔥' });
     await mounted.destroy();
+    width.mockRestore();
+    height.mockRestore();
+    vi.unstubAllGlobals();
   });
 
   it('opens from the keyboard without removing the drag path', async () => {
@@ -254,16 +364,74 @@ describe('Tiptap block handle menu', () => {
     await mounted.destroy();
   });
 
-  it('marks the block selection on native Tiptap drag start without opening the menu', async () => {
+  it('previews the actual drop boundary and moves the whole block without opening the menu', async () => {
     const mounted = await mountEditor();
     const handle = mounted.element.querySelector<HTMLButtonElement>('[data-testid="tiptap-block-drag-handle"]');
+    const payload = new Map<string, string>();
+    const dataTransfer = {
+      files: [],
+      clearData: () => payload.clear(),
+      setData: (type: string, value: string) => payload.set(type, value),
+      getData: (type: string) => payload.get(type) ?? '',
+      setDragImage: vi.fn(),
+      effectAllowed: '',
+    };
+    const dragEvent = (type: string) => {
+      const event = new MouseEvent(type, { bubbles: true, cancelable: true });
+      Object.defineProperty(event, 'dataTransfer', { value: dataTransfer });
+      return event;
+    };
+    // jsdom has no hit testing; retain ProseMirror's real drag/drop handlers.
+    const coordinates = vi.spyOn(mounted.editor.view, 'posAtCoords').mockReturnValue({ pos: 1, inside: 1 });
     await act(async () => {
       handle?.dispatchEvent(new MouseEvent('mousedown', { button: 0, bubbles: true }));
-      handle?.dispatchEvent(new Event('dragstart', { bubbles: true, cancelable: true }));
+      handle?.dispatchEvent(dragEvent('dragstart'));
     });
     expect(mounted.editor.state.selection).toBeInstanceOf(NodeSelection);
+    expect(mounted.editor.view.dragging?.slice.content.firstChild?.attrs.id).toBe('first');
+    expect(payload.get('text/html')).toContain('data-id="first"');
     expect(handle?.getAttribute('aria-expanded')).not.toBe('true');
+    expect(handle?.closest('[data-geul-reorder-gutter]')?.getAttribute('data-geul-reorder-gutter')).toBe('active');
+    const dropPosition = mounted.editor.state.doc.firstChild!.nodeSize - 1;
+    coordinates.mockReturnValue({ pos: dropPosition, inside: 0 });
+    // The native Dropcursor measures the editor's real DOM. Supply geometry
+    // here because jsdom does not perform layout.
+    Object.defineProperties(mounted.editor.view.dom, {
+      offsetParent: { value: mounted.element, configurable: true },
+      offsetWidth: { value: 600, configurable: true },
+      offsetHeight: { value: 100, configurable: true },
+    });
+    Object.defineProperties(mounted.element, {
+      offsetWidth: { value: 600, configurable: true },
+      offsetHeight: { value: 100, configurable: true },
+    });
+    vi.spyOn(mounted.editor.view.dom, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 600, 100));
+    vi.spyOn(mounted.element, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 600, 100));
+    const secondDOM = mounted.editor.view.nodeDOM(
+      1 + mounted.editor.state.doc.firstChild!.firstChild!.nodeSize,
+    ) as HTMLElement;
+    vi.spyOn(secondDOM, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 80, 600, 20));
+    await act(async () => mounted.editor.view.dom.dispatchEvent(dragEvent('dragover')));
+    const guide = mounted.element.querySelector<HTMLElement>('.prosemirror-dropcursor-block');
+    expect(guide?.style.backgroundColor).toBe('var(--geul-focus)');
+    expect(guide?.style.width).toBe('600px');
+    expect(guide?.style.height).toBe('2px');
+    expect(guide?.style.top).toBe('99px');
+    expect(guide?.style.pointerEvents).toBe('none');
+    await act(async () => mounted.editor.view.dom.dispatchEvent(dragEvent('drop')));
+    coordinates.mockRestore();
+    const ids: string[] = [];
+    mounted.editor.state.doc.firstChild?.forEach((block) => ids.push(block.attrs.id));
+    expect(ids).toEqual(['second', 'first']);
+    expect(mounted.editor.view.dragging).toBeNull();
+    await act(async () => handle?.dispatchEvent(dragEvent('dragend')));
+    expect(
+      mounted.element
+        .querySelector('[data-id="first"] [data-geul-reorder-gutter]')
+        ?.getAttribute('data-geul-reorder-gutter'),
+    ).toBe('on-interaction');
     document.dispatchEvent(new Event('dragend'));
+    await vi.waitFor(() => expect(mounted.element.querySelector('.prosemirror-dropcursor-block')).toBeNull());
     await mounted.destroy();
   });
 
@@ -273,7 +441,6 @@ describe('Tiptap block handle menu', () => {
       mounted.editor.view.dispatch(
         mounted.editor.state.tr.setSelection(NodeSelection.create(mounted.editor.state.doc, 1)),
       );
-      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
     let block = mounted.element.querySelector<HTMLElement>('[data-id="first"]');
@@ -281,7 +448,6 @@ describe('Tiptap block handle menu', () => {
     expect(block?.querySelector<HTMLButtonElement>('[data-testid="tiptap-block-drag-handle"]')?.tabIndex).toBe(-1);
     await act(async () => {
       mounted.editor.setEditable(false);
-      await new Promise((resolve) => setTimeout(resolve, 0));
     });
     block = mounted.element.querySelector<HTMLElement>('[data-id="first"]');
     expect(block?.hasAttribute('data-selected')).toBe(false);
@@ -333,14 +499,13 @@ describe('Tiptap block handle menu', () => {
     const handle = mounted.element.querySelector<HTMLButtonElement>('[data-testid="tiptap-block-drag-handle"]');
     await clickBlockHandle(handle);
     const colors = getMenuItem('Colors');
-    colors.focus();
+    await act(async () => colors.focus());
     await act(async () => {
       colors.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
-      await new Promise((resolve) => setTimeout(resolve, 0));
     });
     const blueTextItem = document
       .querySelector<HTMLElement>('[data-editor-color-swatch="text"][data-color="blue"]')
-      ?.closest<HTMLButtonElement>('button');
+      ?.closest<HTMLElement>('[role="menuitem"]');
     expect(blueTextItem?.textContent).toContain('Blue');
     await act(async () => blueTextItem?.click());
     expect(applyNeutralBlockProps).toHaveBeenCalledWith('first', { textColor: 'blue' });
@@ -360,7 +525,7 @@ describe('Tiptap block handle menu', () => {
     const handle = mounted.element.querySelector<HTMLButtonElement>('[data-testid="tiptap-block-drag-handle"]');
     await clickBlockHandle(handle);
     const deleteItem = getMenuItem('Delete');
-    expect(deleteItem.disabled).toBe(true);
+    expect(deleteItem.getAttribute('aria-disabled')).toBe('true');
     await act(async () => deleteItem.click());
     expect(mounted.editor.state.doc.firstChild?.childCount).toBe(1);
     expect(mounted.editor.state.doc.firstChild?.firstChild?.attrs.id).toBe('only');

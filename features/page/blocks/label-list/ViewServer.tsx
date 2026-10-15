@@ -67,6 +67,9 @@ export function LabelListViewStreaming(blockProps: BlockViewProps) {
           columns={columns}
           limit={limit}
           layout={p.layout}
+          itemSize={p.itemSize}
+          showImage={p.showImage !== 'false'}
+          imageAspectRatio={p.imageAspectRatio}
           carouselLoop={p.carouselLoop !== 'false'}
           carouselIndicators={p.carouselIndicators !== 'false'}
         />

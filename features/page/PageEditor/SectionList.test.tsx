@@ -9,12 +9,6 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-vi.mock('@mantine/core', () => ({
-  Group: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Modal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Stack: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
-
 vi.mock('@/components/core/Button', () => ({
   Button: ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
     <button type="button" {...props}>
@@ -108,7 +102,7 @@ describe('Page section pre-insert configuration', () => {
     renderDialog('external-video', onCancel, onInsert);
 
     act(() => {
-      container.querySelector<HTMLButtonElement>('[data-page-section-preinsert-cancel]')?.click();
+      document.querySelector<HTMLButtonElement>('[data-page-section-preinsert-cancel]')?.click();
     });
 
     expect(onCancel).toHaveBeenCalledOnce();
@@ -118,8 +112,8 @@ describe('Page section pre-insert configuration', () => {
   it('inserts an external-video exactly once only after a valid HTTP(S) URI exists', () => {
     const onInsert = vi.fn();
     renderDialog('external-video', vi.fn(), onInsert);
-    const input = container.querySelector<HTMLInputElement>('[data-page-section-preinsert-url]')!;
-    const confirm = container.querySelector<HTMLButtonElement>('[data-page-section-preinsert-confirm]')!;
+    const input = document.querySelector<HTMLInputElement>('[data-page-section-preinsert-url]')!;
+    const confirm = document.querySelector<HTMLButtonElement>('[data-page-section-preinsert-confirm]')!;
 
     expect(confirm.disabled).toBe(true);
     act(() => {
@@ -142,7 +136,7 @@ describe('Page section pre-insert configuration', () => {
     const onCancel = vi.fn();
     const onInsert = vi.fn();
     renderDialog('embed', onCancel, onInsert);
-    act(() => container.querySelector<HTMLButtonElement>('[data-page-section-preinsert-cancel]')?.click());
+    act(() => document.querySelector<HTMLButtonElement>('[data-page-section-preinsert-cancel]')?.click());
     expect(onCancel).toHaveBeenCalledOnce();
     expect(onInsert).not.toHaveBeenCalled();
   });
@@ -150,8 +144,8 @@ describe('Page section pre-insert configuration', () => {
   it('requires a noncredential HTTPS URI before inserting an Embed', () => {
     const onInsert = vi.fn();
     renderDialog('embed', vi.fn(), onInsert);
-    const input = container.querySelector<HTMLInputElement>('[data-page-section-preinsert-url]')!;
-    const confirm = container.querySelector<HTMLButtonElement>('[data-page-section-preinsert-confirm]')!;
+    const input = document.querySelector<HTMLInputElement>('[data-page-section-preinsert-url]')!;
+    const confirm = document.querySelector<HTMLButtonElement>('[data-page-section-preinsert-confirm]')!;
     for (const value of ['', 'invalid', 'http://embed.example', 'https://user:password@embed.example']) {
       act(() => changeInput(input, value));
       expect(confirm.disabled).toBe(true);
@@ -167,8 +161,8 @@ describe('Page section pre-insert configuration', () => {
   it('inserts a Form exactly once only after a published Form is selected', () => {
     const onInsert = vi.fn();
     renderDialog('form', vi.fn(), onInsert);
-    const select = container.querySelector<HTMLSelectElement>('[data-page-section-preinsert-form]')!;
-    const confirm = container.querySelector<HTMLButtonElement>('[data-page-section-preinsert-confirm]')!;
+    const select = document.querySelector<HTMLSelectElement>('[data-page-section-preinsert-form]')!;
+    const confirm = document.querySelector<HTMLButtonElement>('[data-page-section-preinsert-confirm]')!;
 
     expect(confirm.disabled).toBe(true);
     act(() => {

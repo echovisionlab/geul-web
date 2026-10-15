@@ -1,11 +1,11 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import type { ChangeEvent } from 'react';
 import { PAGE_LOCALE_SECTION_PROP_KEYS } from '@echovisionlab/geul-common/collaboration/page';
 import { useTranslations } from 'next-intl';
-import { Stack } from '@mantine/core';
+
 import { Textarea, TextInput } from '@/components/core/Input';
-import classes from './StructuredLocaleContentPreview.module.css';
 
 export type PageSectionLocalePropKey = (typeof PAGE_LOCALE_SECTION_PROP_KEYS)[number];
 
@@ -49,7 +49,7 @@ export function PageSectionLocalePropFields({
   }
 
   return (
-    <Stack gap="xs" className={classes.sectionLocaleFields}>
+    <DsLayoutStack gap="xs">
       {textProps.map(({ key, value }) => {
         const fieldLabel =
           key === 'label'
@@ -73,6 +73,6 @@ export function PageSectionLocalePropFields({
           <TextInput {...sharedProps} />
         );
       })}
-    </Stack>
+    </DsLayoutStack>
   );
 }

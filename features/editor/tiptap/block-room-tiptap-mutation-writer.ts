@@ -62,6 +62,14 @@ export function applyTiptapBlockPayload(
       payload.locale.content,
     );
   } else if (shape === 'table') {
+    replaceArray(
+      bridge,
+      block.id,
+      'base',
+      'content.columnWidths',
+      array(object(previous.basePayload.content).columnWidths),
+      array(object(payload.base.content).columnWidths),
+    );
     const beforeBaseRows = array(object(previous.basePayload.content).rows);
     const afterBaseRows = array(object(payload.base.content).rows);
     const beforeLocaleRows = array(object(previous.localePayload?.content).rows);

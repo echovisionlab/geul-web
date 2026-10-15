@@ -3,7 +3,7 @@
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+import { I18nProvider } from 'react-aria-components';
 import { ConfirmModal } from './ConfirmModal';
 
 let container: HTMLDivElement | null = null;
@@ -40,7 +40,7 @@ afterEach(() => {
 
 function renderModal(node: ReactNode) {
   act(() => {
-    root?.render(<MantineProvider env="test">{node}</MantineProvider>);
+    root?.render(<I18nProvider locale="en-US">{node}</I18nProvider>);
   });
 }
 
@@ -79,7 +79,9 @@ describe('ConfirmModal', () => {
     );
 
     const dialog = getDialog();
+    expect(dialog?.getAttribute('aria-modal')).toBe('true');
     expect(dialog.getAttribute('aria-labelledby')).toBeTruthy();
+    expect(getButtonByText(dialog, 'Delete').getAttribute('data-emphasis')).toBe('strong');
     expect(dialog.textContent).toContain('Delete release');
     expect(dialog.textContent).toContain('This cannot be undone.');
     expect(dialog.querySelector('[aria-label="Close dialog"]')).not.toBeNull();
@@ -158,5 +160,54 @@ describe('ConfirmModal', () => {
     const modalRoot = document.body.querySelector<HTMLElement>('[data-size="compact"][data-centered="true"]');
 
     expect(modalRoot).not.toBeNull();
+  });
+  it('describes a simple confirmation message without flattening structured message content', () => {
+    const common = {
+      opened: true,
+      onClose: vi.fn(),
+      onConfirm: vi.fn(),
+      title: 'Delete release',
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+      closeLabel: 'Close',
+    };
+    renderModal(<ConfirmModal {...common} message="This cannot be undone." />);
+    expect(getDialog()).toHaveAccessibleDescription('This cannot be undone.');
+    renderModal(
+      <ConfirmModal
+        {...common}
+        message={
+          <ul>
+            <li>Related links are removed.</li>
+            <li>Files remain.</li>
+          </ul>
+        }
+      />,
+    );
+    expect(getDialog().hasAttribute('aria-describedby')).toBe(false);
+    expect(getDialog().querySelectorAll('li')).toHaveLength(2);
+  });
+
+  it.each([
+    { tone: 'danger' as const, disabled: false, expected: 'Cancel' },
+    { tone: 'neutral' as const, disabled: false, expected: 'Confirm' },
+    { tone: 'neutral' as const, disabled: true, expected: 'Cancel' },
+  ])('sets initial focus for $tone confirmation (disabled=$disabled)', async ({ tone, disabled, expected }) => {
+    renderModal(
+      <ConfirmModal
+        opened
+        onClose={vi.fn()}
+        onConfirm={vi.fn()}
+        title="Confirm operation"
+        message="Proceed?"
+        confirmTone={tone}
+        confirmDisabled={disabled}
+        confirmLabel="Confirm"
+        cancelLabel="Cancel"
+        closeLabel="Close"
+      />,
+    );
+    await act(async () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+    expect(document.activeElement).toBe(getButtonByText(getDialog(), expected));
   });
 });

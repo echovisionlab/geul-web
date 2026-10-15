@@ -19,7 +19,7 @@ import {
 } from '@/lib/policy-status';
 import type { SiteSettingsView } from '@/lib/types/site-setting/config';
 
-const TERMS_EDITOR_STRATEGY = {
+export const TERMS_EDITOR_STRATEGY = {
   entityType: 'terms',
   translationNamespace: 'termsEditor',
   listPath: '/admin/terms',

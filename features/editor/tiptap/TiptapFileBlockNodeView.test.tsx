@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { EditorContent, useEditor } from '@tiptap/react';
 import type { Editor } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
-import { MantineProvider } from '@mantine/core';
+
 import { MediaProcessingStatus } from '@echovisionlab/geul-proto/common/media_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
@@ -201,14 +202,14 @@ async function mountEditor({ editable, onActivate }: { editable: boolean; onActi
   let editor: Editor | null = null;
   await act(async () => {
     root.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <TestEditor
           editable={editable}
           onActivate={onActivate}
           runtimeStore={runtimeStore}
           onReady={(value) => (editor = value)}
         />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
   await act(async () => {
@@ -228,6 +229,36 @@ async function mountEditor({ editable, onActivate }: { editable: boolean; onActi
 }
 
 describe('Tiptap file node view', () => {
+  it('shows the same missing attachment and caption as the public renderer', async () => {
+    const { editor, element, destroy } = await mountEditor({ editable: true, onActivate: vi.fn() });
+    try {
+      let position = -1;
+      editor.state.doc.descendants((node, pos) => {
+        if (position < 0 && node.type.name === 'file') {
+          position = pos;
+        }
+      });
+      await act(async () => {
+        const node = editor.state.doc.nodeAt(position)!;
+        editor.view.dispatch(
+          editor.state.tr.setNodeMarkup(position, undefined, {
+            ...node.attrs,
+            fileId: '',
+            attachment: { missingAttachment: { formerFileId: imageFileId, mediaKind: 'image' } },
+            caption: 'Missing image caption',
+          }),
+        );
+      });
+      expect(element.querySelector('[data-media-missing-kind="image"]')?.textContent).toContain('imageDeleted');
+      expect(element.querySelector('.media-missing-block .media-block__caption')?.textContent).toBe(
+        'Missing image caption',
+      );
+      expect(element.textContent).not.toContain('Invalid File block');
+    } finally {
+      await destroy();
+    }
+  });
+
   it('routes durable file nodes by verified MIME and matches public attachment presentation', async () => {
     const onActivate = vi.fn();
     const { element, destroy } = await mountEditor({ editable: true, onActivate });
@@ -275,9 +306,9 @@ describe('Tiptap file node view', () => {
 
     await act(async () =>
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <ColdAudioEditor runtimeStore={runtimeStore} />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       ),
     );
     await act(async () => {
@@ -302,9 +333,9 @@ describe('Tiptap file node view', () => {
     let editor: Editor | null = null;
     await act(async () => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <AudioInteractionEditor onReady={(value) => (editor = value)} />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
     if (!editor) {
@@ -339,9 +370,9 @@ describe('Tiptap file node view', () => {
     let editor: Editor | null = null;
     await act(async () => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <AudioInteractionEditor onReady={(value) => (editor = value)} />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
     if (!editor) {

@@ -1,12 +1,10 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { resolveAudioPlaybackHydration } from '@echovisionlab/geul-common/media/hydration';
-import {
-  FileDownloadAction,
-  FileDownloadAvailability,
-  PublicMediaEntityType,
-} from '@echovisionlab/geul-proto/public/file_pb.ts';
-import { Stack } from '@mantine/core';
+import type { FileDownloadAction, FileDownloadAvailability } from '@echovisionlab/geul-proto/public/file_pb.ts';
+import { PUBLIC_MEDIA_ENTITY_TYPE } from '@/features/media-download/download-wire-values';
+
 import { AudioPlayer } from '@/features/media/AudioPlayer';
 import {
   AuthorizedDownloadAction,
@@ -63,7 +61,7 @@ export function ReleaseTrackAudioPlayer({
 
   const downloadControl = fileId ? (
     <AuthorizedDownloadAction
-      entityType={PublicMediaEntityType.RELEASE}
+      entityType={PUBLIC_MEDIA_ENTITY_TYPE.RELEASE}
       entityId={releaseId}
       trackId={trackId}
       fileName={fileName || title}
@@ -91,7 +89,7 @@ export function ReleaseTrackAudioPlayer({
   ) : null;
 
   return (
-    <Stack gap="xs">
+    <DsLayoutStack gap="xs">
       {access.playbackUrl ? (
         <AudioPlayer
           src={access.playbackUrl}
@@ -104,6 +102,6 @@ export function ReleaseTrackAudioPlayer({
         />
       ) : null}
       {!access.playbackUrl ? downloadControl : null}
-    </Stack>
+    </DsLayoutStack>
   );
 }

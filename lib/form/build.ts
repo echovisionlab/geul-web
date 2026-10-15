@@ -2,7 +2,7 @@
  * FormSchema를 런타임 Form으로 변환
  */
 
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 import { defaultFormValidationMessages, type FormValidationMessages } from '@/lib/form/validation-messages';
 import { buildFieldValidator } from '@/lib/form/validation-zod';
 import type { FormValues } from '@/lib/types/form/guards';
@@ -308,11 +308,11 @@ function buildFormValidator(steps: FormStepSchema[], validationMessages: FormVal
   const fieldKeyByID = buildFieldKeyByID(steps);
 
   // Build base shape - conditional fields are optional in base schema
-  const shape: Record<string, z.ZodTypeAny> = {};
+  const shape: Record<string, z.ZodMiniType> = {};
   for (const field of allFields) {
     const validator = buildFieldValidator(field, validationMessages);
     const fieldKey = resolveFieldKey(field);
-    shape[fieldKey] = field.condition ? validator.optional() : validator;
+    shape[fieldKey] = field.condition ? z.optional(validator) : validator;
   }
 
   const baseSchema = z.object(shape);
@@ -323,28 +323,30 @@ function buildFormValidator(steps: FormStepSchema[], validationMessages: FormVal
   }
 
   // Validate conditional fields when their conditions are met
-  return baseSchema.superRefine((data, ctx) => {
-    for (const field of conditionalFields) {
-      if (!field.condition) {
-        continue;
-      }
+  return baseSchema.check(
+    z.superRefine((data, ctx) => {
+      for (const field of conditionalFields) {
+        if (!field.condition) {
+          continue;
+        }
 
-      const conditionMet = evaluateConditionLogic(field.condition, data, fieldKeyByID);
-      if (conditionMet) {
-        const validator = buildFieldValidator(field, validationMessages);
-        const fieldKey = resolveFieldKey(field);
-        const result = validator.safeParse(data[fieldKey]);
-        if (!result.success) {
-          for (const issue of result.error.issues) {
-            ctx.addIssue({
-              ...issue,
-              path: [fieldKey, ...issue.path],
-            });
+        const conditionMet = evaluateConditionLogic(field.condition, data, fieldKeyByID);
+        if (conditionMet) {
+          const validator = buildFieldValidator(field, validationMessages);
+          const fieldKey = resolveFieldKey(field);
+          const result = validator.safeParse(data[fieldKey]);
+          if (!result.success) {
+            for (const issue of result.error.issues) {
+              ctx.addIssue({
+                ...issue,
+                path: [fieldKey, ...issue.path],
+              });
+            }
           }
         }
       }
-    }
-  });
+    }),
+  );
 }
 
 // =============================================================================

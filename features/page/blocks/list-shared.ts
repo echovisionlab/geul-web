@@ -1,4 +1,7 @@
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
+import { COLLECTION_SIZES, DEFAULT_COLLECTION_SIZE } from '@/components/core/Collection/collection-contract';
+
+export const collectionSizeSchema = z._default(z.enum(COLLECTION_SIZES), DEFAULT_COLLECTION_SIZE);
 
 export const booleanString = z.enum(['true', 'false']);
 

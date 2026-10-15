@@ -3,7 +3,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+import { I18nProvider } from 'react-aria-components';
 import { MenuToggle } from './MenuToggle';
 
 let container: HTMLDivElement;
@@ -26,16 +26,15 @@ describe('MenuToggle', () => {
 
     act(() => {
       root.render(
-        <MantineProvider env="test">
+        <I18nProvider locale="en-US">
           <MenuToggle
             opened={false}
             label="Toggle navigation"
             controls="primary-navigation"
-            size="compact"
             visibility="mobile-only"
             onClick={onClick}
           />
-        </MantineProvider>,
+        </I18nProvider>,
       );
     });
 
@@ -45,9 +44,9 @@ describe('MenuToggle', () => {
     expect(toggle?.getAttribute('aria-label')).toBe('Toggle navigation');
     expect(toggle?.getAttribute('aria-expanded')).toBe('false');
     expect(toggle?.getAttribute('aria-controls')).toBe('primary-navigation');
-    expect(toggle?.getAttribute('data-size')).toBe('compact');
-    expect(toggle?.getAttribute('data-visibility')).toBe('mobile-only');
-    expect(toggle?.className).toContain('mantine-hidden-from-sm');
+    expect(toggle?.getAttribute('data-control-kind')).toBe('icon');
+    expect(toggle?.getAttribute('data-control-size')).toBe('chrome');
+    expect(toggle?.parentElement?.getAttribute('data-visibility')).toBe('mobile-only');
 
     act(() => toggle?.click());
     expect(onClick).toHaveBeenCalledOnce();
@@ -58,9 +57,9 @@ describe('MenuToggle', () => {
 
     act(() => {
       root.render(
-        <MantineProvider env="test">
+        <I18nProvider locale="en-US">
           <MenuToggle opened label="Close menu" disabled onClick={onClick} />
-        </MantineProvider>,
+        </I18nProvider>,
       );
     });
 

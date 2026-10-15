@@ -1,7 +1,8 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
+
 import { LabelBadge } from '@/components/core/Badge';
 import {
   ServerDataTableSelectableSection,
@@ -27,12 +28,12 @@ function getColumns(labels: { tag: string; posts: string; created: string }): Co
       header: labels.tag,
       cell: (row) => (
         <div>
-          <Text size="sm" fw={500}>
+          <DsText size="sm" weight="medium">
             {row.name}
-          </Text>
-          <Text size="xs" c="dimmed">
+          </DsText>
+          <DsText size="xs" tone="secondary">
             /{row.slug || '-'}
-          </Text>
+          </DsText>
         </div>
       ),
     },
@@ -45,9 +46,9 @@ function getColumns(labels: { tag: string; posts: string; created: string }): Co
       key: 'createdAt',
       header: labels.created,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.createdAt} />
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -61,13 +62,20 @@ function getColumns(labels: { tag: string; posts: string; created: string }): Co
 }
 
 interface TagsTableContentProps {
+  deleteAction?: typeof deleteTagAction;
   result: ServerDataTableSelectableSectionProps<TagRow>['result'];
   searchPlaceholder: string;
   filterFields: ServerDataTableSelectableSectionProps<TagRow>['filterFields'];
   sortFields: ServerDataTableSelectableSectionProps<TagRow>['sortFields'];
 }
 
-export function TagsTableContent({ result, searchPlaceholder, filterFields, sortFields }: TagsTableContentProps) {
+export function TagsTableContent({
+  result,
+  searchPlaceholder,
+  filterFields,
+  sortFields,
+  deleteAction = deleteTagAction,
+}: TagsTableContentProps) {
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
   const tAdmin = useTranslations('adminList');
@@ -89,7 +97,7 @@ export function TagsTableContent({ result, searchPlaceholder, filterFields, sort
       sortFields={sortFields}
       bulkDelete={{
         entityLabel: tCommonEntities('tags'),
-        deleteAction: deleteTagAction,
+        deleteAction,
         getRowLabel: (row) => row.name || row.slug || row.id,
       }}
     />

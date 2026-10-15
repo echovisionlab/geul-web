@@ -31,6 +31,7 @@ const workClient = vi.hoisted(() => ({
   deleteWorkCreditGroup: vi.fn(),
   deleteWorkFeaturedImage: vi.fn(),
   getWorkCredits: vi.fn(),
+  getWork: vi.fn(),
   listMyCreditedWorks: vi.fn(),
   listWorksAdmin: vi.fn(),
   publishWork: vi.fn(),
@@ -163,6 +164,52 @@ describe('work actions', () => {
     artistClient.listArtists.mockResolvedValue({
       artists: [{ id: 'artist-1', name: 'Artist', imageUrl: undefined }],
     });
+  });
+
+  it('reloads neutral settings through the authorized Work selector without room content', async () => {
+    workClient.getWork.mockResolvedValueOnce({
+      id: 'work-1',
+      title: 'Room title',
+      summary: 'Room summary',
+      document: { private: true },
+      slug: 'work-slug',
+      type: WorkType.PORTFOLIO,
+      year: 2026,
+      month: 4,
+      untilYear: undefined,
+      untilMonth: undefined,
+      isPresent: true,
+      metadata: { peer: 'value' },
+      featured: true,
+      clients: [{ id: 'client-b' }, { id: 'client-a' }],
+      mapPlaceId: 'place-1',
+      featuredImageAsset: assetRefFixture('https://cdn.example/featured.webp'),
+    });
+    await expect(actions.getWorkConfigurationAction('work-1')).resolves.toEqual({
+      data: {
+        slug: 'work-slug',
+        type: 'portfolio',
+        year: 2026,
+        month: 4,
+        untilYear: null,
+        untilMonth: null,
+        isPresent: true,
+        metadata: { peer: 'value' },
+        featured: true,
+        clients: ['client-b', 'client-a'],
+        mapPlaceId: 'place-1',
+        featuredImageUrl: 'https://cdn.example/featured.webp',
+      },
+    });
+    expect(workClient.getWork).toHaveBeenCalledWith({ id: 'work-1' });
+    expect(mocks.createPublicWorkClient).not.toHaveBeenCalled();
+  });
+
+  it('preserves authorized configuration read failures', async () => {
+    workClient.getWork.mockRejectedValueOnce(new ConnectError('Not allowed', Code.PermissionDenied));
+    const result = await actions.getWorkConfigurationAction('work-1');
+    expect(result).toEqual({ error: expect.stringContaining('Not allowed') });
+    expect(result).not.toHaveProperty('data');
   });
 
   it('preserves a committed Work update when cache revalidation fails', async () => {

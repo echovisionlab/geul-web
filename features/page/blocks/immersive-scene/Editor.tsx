@@ -93,7 +93,7 @@ export function ImmersiveSceneSettingsEditor({
   updateSharedProps,
   updateLocalizedProps,
 }: BlockSettingsEditorProps<ImmersiveSceneProps>) {
-  const { pageId } = usePageEditor();
+  const { pageId, locale } = usePageEditor();
   const uploadControls = useImmersiveSceneUploadControls();
   const hydratedProps = useAuthenticatedImmersiveSceneProps(props);
 
@@ -101,6 +101,7 @@ export function ImmersiveSceneSettingsEditor({
     <ImmersiveSceneSettingsForm
       sectionId={sectionId}
       pageId={pageId}
+      contentLanguage={locale}
       props={hydratedProps}
       updateSharedProps={updateSharedProps}
       updateLocalizedProps={updateLocalizedProps}
@@ -119,7 +120,7 @@ export function ImmersiveSceneSettingsSurface({
   updateSharedProps,
   updateLocalizedProps,
 }: BlockSettingsSurfaceProps<ImmersiveSceneProps>) {
-  const { pageId } = usePageEditor();
+  const { pageId, locale } = usePageEditor();
   const uploadControls = useImmersiveSceneUploadControls();
   const hydratedProps = useAuthenticatedImmersiveSceneProps(props);
 
@@ -130,6 +131,7 @@ export function ImmersiveSceneSettingsSurface({
       onClose={onClose}
       sectionId={sectionId}
       pageId={pageId}
+      contentLanguage={locale}
       props={hydratedProps}
       updateSharedProps={updateSharedProps}
       updateLocalizedProps={updateLocalizedProps}

@@ -1,6 +1,7 @@
 'use client';
 
-import { Text } from '@mantine/core';
+import { Text as DsText } from '@/components/core/Typography';
+
 import { DateTime } from '@/features/date-time/DateTime';
 import { TextButton } from '@/components/core/TextButton';
 import type { PublicWorkTableRow } from '@/lib/queries/work';
@@ -44,18 +45,18 @@ export function getWorkTableColumns(labels: WorkTableColumnLabels): ColumnDef<Pu
       key: 'type',
       header: labels.type,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           {WORK_TYPE_LABELS[row.type as WorkType] ?? row.type}
-        </Text>
+        </DsText>
       ),
     },
     {
       key: 'period',
       header: labels.period,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           {formatPeriod(row, labels)}
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -63,9 +64,9 @@ export function getWorkTableColumns(labels: WorkTableColumnLabels): ColumnDef<Pu
       header: labels.published,
       sortable: true,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.publishedAt} />
-        </Text>
+        </DsText>
       ),
     },
   ];

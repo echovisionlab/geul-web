@@ -21,7 +21,6 @@ import { PhoneField } from './fields/PhoneField';
 import { SelectField } from './fields/SelectField';
 import { TextareaField } from './fields/TextareaField';
 import { TextField } from './fields/TextField';
-import { formErrorTextStyles, groupStyles, inputStyles } from './styles';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -82,12 +81,6 @@ function expectSingleError(message: string) {
 }
 
 describe('form field error rendering', () => {
-  it('uses Mantine error token for shared form error text styles', () => {
-    expect(formErrorTextStyles.color).toBe('var(--mantine-color-error)');
-    expect(inputStyles.error.color).toBe('var(--mantine-color-error)');
-    expect(groupStyles.error.color).toBe('var(--mantine-color-error)');
-  });
-
   it('renders each field error message once', () => {
     const textField: FormFieldSchemaText = {
       id: 'text',

@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type * as maplibregl from 'maplibre-gl';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Box } from '@mantine/core';
+
 import { MapViewEmbedded } from '@/features/map/MapViewEmbedded';
 import type { MapRendererPlace, MapServerFeatureSource } from '@/features/map/types';
 import type { MapViewConfig } from '@/lib/types/map/model';
@@ -211,19 +211,19 @@ export function ServerFeatureMapViewClient<
     (featuresQuery.isLoading || featuresQuery.isFetching)
   ) {
     return (
-      <Box ref={containerRef} className={className} pos="relative">
+      <div style={{ position: 'relative' }} ref={containerRef} className={className}>
         <MapViewEmbedded
           key={`${mapViewConfig.aspectRatio}:${mapViewConfig.previewWidth ?? 100}`}
           config={mapConfigForViewport}
           allowEmpty
           labelLocale={requestedLocale}
         />
-      </Box>
+      </div>
     );
   }
 
   return (
-    <Box ref={containerRef} className={className} pos="relative">
+    <div style={{ position: 'relative' }} ref={containerRef} className={className}>
       <MapViewEmbedded
         key={`${mapViewConfig.aspectRatio}:${mapViewConfig.previewWidth ?? 100}`}
         config={mapConfigForViewport}
@@ -276,6 +276,6 @@ export function ServerFeatureMapViewClient<
           router.push(getItemHref(item));
         }}
       />
-    </Box>
+    </div>
   );
 }

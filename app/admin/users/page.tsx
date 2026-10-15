@@ -1,8 +1,7 @@
+import { UsersPageView } from '@/features/admin/user/UsersPageView';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getTranslations } from 'next-intl/server';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import { UserModalProvider, UserModals, UsersTableContent } from '@/features/admin/user';
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
 import { listUsersAdminAction } from '@/lib/actions/user';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
@@ -85,20 +84,13 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
   }).then(unwrapQueryResult);
 
   return (
-    <UserModalProvider>
-      <AdminPageHeader title={usersLabel} />
-
-      <ServerDataTable namespace="users">
-        <UsersTableContent
-          result={result}
-          searchPlaceholder={searchPlaceholder}
-          filterFields={filterFields}
-          sortFields={sortFields}
-        />
-        <ServerDataTable.Pagination namespace="users" result={result} searchParams={params} />
-      </ServerDataTable>
-
-      <UserModals />
-    </UserModalProvider>
+    <UsersPageView
+      result={result}
+      filterFields={filterFields}
+      sortFields={sortFields}
+      searchParams={params.toString()}
+      title={usersLabel}
+      searchPlaceholder={searchPlaceholder}
+    />
   );
 }

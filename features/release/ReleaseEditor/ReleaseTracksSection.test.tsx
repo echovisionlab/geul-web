@@ -1,10 +1,13 @@
 // @vitest-environment jsdom
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+import { ReleaseEditorAccessProvider } from './ReleaseEditorAccessContext';
 
 import { act } from 'react';
 import { randomTestUuid } from '@echovisionlab/geul-common/test/random-id';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import type { ReleaseTrackItem } from '@/lib/collab/schemas/release-fields.schema';
 import { DEFAULT_MEDIA_STATUS_LABELS } from '@/lib/media/status';
 import { TestProviders } from '@/test/TestProviders';
@@ -76,7 +79,7 @@ vi.mock('@dnd-kit/sortable', () => ({
 
 vi.mock('@dnd-kit/utilities', () => ({
   CSS: {
-    Transform: {
+    Translate: {
       toString: () => '',
     },
   },
@@ -109,7 +112,7 @@ vi.mock('@tanstack/react-query', () => ({
   }),
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: {
     show: vi.fn(),
   },
@@ -152,11 +155,15 @@ vi.mock('@/components/core/IconButton', () => ({
 vi.mock('@/components/core/Input', () => ({
   Checkbox: () => null,
   SegmentedControl: () => null,
+  TimePicker: () => null,
   Select: () => null,
   TextInput: () => null,
 }));
 
-vi.mock('@/components/core/Modal', () => ({
+vi.mock('@/components/core/Modal', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/components/core/Modal')>()),
+  ContentModal: ({ opened, children }: { opened: boolean; children: React.ReactNode }) =>
+    opened ? <div role="dialog">{children}</div> : null,
   ConfirmModal: ({
     opened,
     title,
@@ -338,6 +345,44 @@ beforeEach(() => {
 });
 
 describe('ReleaseTracksSection', () => {
+  it('upgrades and downgrades add, audio and drag controls on the same track table', () => {
+    const provider = {};
+    const onTracksChange = vi.fn();
+    const tracks: ReleaseTrackItem[] = ['track-1', 'track-2'].map((id, index) => ({
+      id,
+      title: id,
+      track_number: index + 1,
+      duration_seconds: 90,
+      audio_attached: false,
+      processing_status: null,
+      credits: [],
+    }));
+    function Editor() {
+      const canEdit = useEditorAccessLevel(provider) === 'edit';
+      return (
+        <ReleaseEditorAccessProvider value={canEdit}>
+          <ReleaseTracksSection releaseId="release-1" tracks={tracks} onTracksChange={onTracksChange} />
+        </ReleaseEditorAccessProvider>
+      );
+    }
+    setProviderAccessLevel(provider, 'view');
+    render(<Editor />);
+    const table = document.querySelector('table');
+    const add = document.querySelector('#release-track-add-action button') as HTMLButtonElement;
+    expect(add.disabled).toBe(true);
+    act(() => setProviderAccessLevel(provider, 'edit'));
+    expect(add.disabled).toBe(false);
+    expect(latestTrackAudioUploaderProps['track-1:button-only'].disabled).toBe(false);
+    expect(document.querySelector('table')).toBe(table);
+    act(() => setProviderAccessLevel(provider, 'view'));
+    expect(document.querySelector('table')).toBe(table);
+    expect(table?.textContent).toContain('track-1');
+    expect(add.disabled).toBe(true);
+    expect(latestTrackAudioUploaderProps['track-1:button-only'].disabled).toBe(true);
+    act(() => latestDragEndHandler?.({ active: { id: 'track-2' }, over: { id: 'track-1' } }));
+    expect(onTracksChange).not.toHaveBeenCalled();
+    expect(reorderTracksActionMock).not.toHaveBeenCalled();
+  });
   it('passes failed processing state to the mobile uploader status view', () => {
     setMobileViewport(true);
     const trackId = randomTestUuid();
@@ -433,6 +478,29 @@ describe('ReleaseTracksSection', () => {
     expect(document.querySelector('table')).toBeNull();
     expect(document.querySelector(`#release-track-resume-row-${trackId}`)).toBeNull();
     expect(document.body.textContent).toContain('Interrupted upload found');
+  });
+
+  it('keeps an empty mobile track to one control row when the resume state is idle', () => {
+    setMobileViewport(true);
+    render(
+      <ReleaseTracksSection
+        releaseId={randomTestUuid()}
+        tracks={[
+          {
+            id: 'empty-track',
+            track_number: 1,
+            title: 'Intro',
+            duration_seconds: 90,
+            audio_attached: false,
+            processing_status: null,
+            credits: [],
+          },
+        ]}
+        onTracksChange={vi.fn()}
+      />,
+    );
+    expect(document.querySelector('[data-testid="audio-uploader-empty-track-status-only"]')).toBeNull();
+    expect(document.querySelector('[data-testid="audio-uploader-empty-track-button-only"]')).not.toBeNull();
   });
 
   it('opens the inline track editor from the mobile track layout', async () => {
@@ -631,7 +699,7 @@ describe('ReleaseTracksSection', () => {
       expect.objectContaining({ id: 'track-2', track_number: 1 }),
       expect.objectContaining({ id: 'track-1', track_number: 2 }),
     ]);
-    expect(reorderTracksActionMock).toHaveBeenCalledWith(['track-2', 'track-1']);
+    expect(reorderTracksActionMock).toHaveBeenCalledWith(['track-2', 'track-1'], expect.any(String));
   });
 
   it('restores saved track order and reports a rejected reorder', async () => {
@@ -680,7 +748,7 @@ describe('ReleaseTracksSection', () => {
     await flushUpdates();
     expect(onTracksChange).toHaveBeenLastCalledWith(tracks);
     expect(notifications.show).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'permission denied', color: 'red' }),
+      expect.objectContaining({ message: 'permission denied', tone: 'danger' }),
     );
   });
 
@@ -741,7 +809,7 @@ describe('ReleaseTracksSection', () => {
     );
     await clickElement(confirmButton);
 
-    expect(deleteTrackActionMock).toHaveBeenCalledWith('track-1');
+    expect(deleteTrackActionMock).toHaveBeenCalledWith('track-1', expect.any(String));
     expect(onTracksChange).toHaveBeenCalledWith([]);
   });
 

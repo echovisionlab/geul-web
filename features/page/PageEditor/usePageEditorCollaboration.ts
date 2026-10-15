@@ -14,6 +14,10 @@ export interface PageEditorCollaborationResult {
   recoverySnapshot: ReturnType<typeof useBlockRoomConnection>['recoverySnapshot'];
 }
 
-export function usePageEditorCollaboration(pageId: string, locale: string | null): PageEditorCollaborationResult {
-  return useBlockRoomConnection('page', pageId, locale);
+export function usePageEditorCollaboration(
+  pageId: string,
+  locale: string | null,
+  initialSnapshot?: import('@/features/editor/editor-snapshot').EditorSnapshot,
+): PageEditorCollaborationResult {
+  return useBlockRoomConnection('page', pageId, locale, initialSnapshot);
 }

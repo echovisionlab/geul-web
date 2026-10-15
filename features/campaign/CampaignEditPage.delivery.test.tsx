@@ -1,15 +1,24 @@
 // @vitest-environment jsdom
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import { act, createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CampaignTargetMode } from '@echovisionlab/geul-proto/secure/campaign_pb.ts';
 
 const mocks = vi.hoisted(() => ({
+  provider: { on: vi.fn(), off: vi.fn(), disconnect: vi.fn() },
+  confirmSend: null as null | (() => void),
   campaign: null as Record<string, unknown> | null,
   updateConfiguration: vi.fn(),
+  updateName: vi.fn(),
+  queryClient: { invalidateQueries: vi.fn() },
   sendCampaign: vi.fn(),
   scheduleCampaign: vi.fn(),
   notificationsShow: vi.fn(),
+  refetchCampaign: vi.fn(),
+  getCampaign: vi.fn(),
+  queryFn: null as (() => Promise<unknown>) | null,
+  peerChange: null as (() => void) | null,
 }));
 
 vi.mock('next/navigation', () => ({
@@ -38,12 +47,18 @@ vi.mock('next-intl', () => ({
 
 vi.mock('@tanstack/react-query', async () => {
   return {
-    useQuery: ({ queryKey }: { queryKey: string[] }) => {
+    useMutation: ({ mutationFn }: { mutationFn: (input: unknown) => Promise<unknown> }) => ({
+      mutateAsync: mutationFn,
+      isPending: false,
+    }),
+    useQueryClient: () => mocks.queryClient,
+    useQuery: ({ queryKey, queryFn }: { queryKey: string[]; queryFn: () => Promise<unknown> }) => {
       if (queryKey[0] === 'campaigns') {
+        mocks.queryFn = queryFn;
         return {
           data: mocks.campaign,
           isLoading: false,
-          refetch: async () => ({ data: mocks.campaign }),
+          refetch: mocks.refetchCampaign,
         };
       }
       if (queryKey[0] === 'segments') {
@@ -61,19 +76,6 @@ vi.mock('@tanstack/react-query', async () => {
   };
 });
 
-vi.mock('@mantine/core', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@mantine/core')>();
-  const React = await import('react');
-  return {
-    ...actual,
-    Box: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    Group: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    SimpleGrid: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    Stack: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    Text: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
-  };
-});
-
 vi.mock('@mantine/hooks', async () => {
   const React = await import('react');
   return {
@@ -84,7 +86,7 @@ vi.mock('@mantine/hooks', async () => {
   };
 });
 
-vi.mock('@mantine/notifications', () => ({ notifications: { show: mocks.notificationsShow } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: mocks.notificationsShow } }));
 
 vi.mock('@tabler/icons-react', () => ({
   IconCalendar: () => null,
@@ -100,10 +102,21 @@ vi.mock('@tabler/icons-react', () => ({
 vi.mock('@/features/editor/EditorHeader', () => ({
   EditorHeader: ({
     actionItems,
+    title,
+    onTitleChange,
   }: {
+    title: string;
+    onTitleChange: (value: string) => void;
     actionItems: Array<{ key: string; label: string; disabled?: boolean; onClick: () => void }>;
   }) => (
     <div>
+      <output data-testid="campaign-name">{title}</output>
+      <button type="button" data-testid="name-first" onClick={() => onTitleChange('First draft')}>
+        First name
+      </button>
+      <button type="button" data-testid="name-second" onClick={() => onTitleChange('Second draft')}>
+        Second name
+      </button>
       {actionItems.map((item) => (
         <button type="button" key={item.key} data-testid={item.key} disabled={item.disabled} onClick={item.onClick}>
           {item.label}
@@ -115,9 +128,7 @@ vi.mock('@/features/editor/EditorHeader', () => ({
 
 vi.mock('@/features/editor/EditorPermissionRevokedDialog', () => ({ EditorPermissionRevokedDialog: () => null }));
 vi.mock('@/features/editor/EditorSessionExpiredDialog', () => ({ EditorSessionExpiredDialog: () => null }));
-vi.mock('@/features/editor/useEditorPermissionRevocation', () => ({
-  useEditorPermissionRevocation: () => ({ blocked: false, revoked: false, sessionExpired: false }),
-}));
+
 vi.mock('@/components/core/Input', () => ({
   Select: () => null,
   TextInput: () => null,
@@ -139,9 +150,11 @@ vi.mock('@/features/admin/IconViewModeControl', () => ({ IconViewModeControl: ()
 vi.mock('@/features/campaign/CampaignEditor/CampaignEditor', () => ({ CampaignEditor: () => null }));
 vi.mock('@/features/campaign/CampaignDeliveryDialogs', () => ({
   CampaignDeliveryDialogs: ({
+    readOnly,
     sendDialog,
     scheduleDialog,
   }: {
+    readOnly?: boolean;
     sendDialog: { opened: boolean; pending: boolean; labels: { warning: string }; onSend: () => void };
     scheduleDialog: {
       opened: boolean;
@@ -150,28 +163,36 @@ vi.mock('@/features/campaign/CampaignDeliveryDialogs', () => ({
       onChange: (value: { date: Date | null; time: string }) => void;
       onSchedule: () => void;
     };
-  }) => (
-    <div>
-      <div data-testid="send-warning">{sendDialog.labels.warning}</div>
-      <div data-testid="schedule-audience">{scheduleDialog.audience}</div>
-      <button type="button" data-testid="send-confirm" disabled={sendDialog.pending} onClick={sendDialog.onSend}>
-        Confirm send
-      </button>
-      <button
-        type="button"
-        data-testid="schedule-date"
-        onClick={() => scheduleDialog.onChange({ date: new Date('2030-01-02T00:00:00Z'), time: '12:30' })}
-      />
-      <button
-        type="button"
-        data-testid="schedule-confirm"
-        disabled={scheduleDialog.pending}
-        onClick={scheduleDialog.onSchedule}
-      >
-        Confirm schedule
-      </button>
-    </div>
-  ),
+  }) => {
+    mocks.confirmSend = sendDialog.onSend;
+    return (
+      <div>
+        <div data-testid="send-warning">{sendDialog.labels.warning}</div>
+        <div data-testid="schedule-audience">{scheduleDialog.audience}</div>
+        <button
+          type="button"
+          data-testid="send-confirm"
+          disabled={readOnly || sendDialog.pending}
+          onClick={sendDialog.onSend}
+        >
+          Confirm send
+        </button>
+        <button
+          type="button"
+          data-testid="schedule-date"
+          onClick={() => scheduleDialog.onChange({ date: new Date('2030-01-02T00:00:00Z'), time: '12:30' })}
+        />
+        <button
+          type="button"
+          data-testid="schedule-confirm"
+          disabled={readOnly || scheduleDialog.pending}
+          onClick={scheduleDialog.onSchedule}
+        >
+          Confirm schedule
+        </button>
+      </div>
+    );
+  },
 }));
 vi.mock('@/features/campaign/CampaignRecipientScopeControl', () => ({ CampaignRecipientScopeControl: () => null }));
 vi.mock('@/features/campaign/useCampaignDeliveryCommands', () => ({
@@ -181,9 +202,6 @@ vi.mock('@/features/campaign/useCampaignDeliveryCommands', () => ({
     scheduleCampaign: { mutate: mocks.scheduleCampaign, isPending: false },
     cancelSchedule: { mutate: vi.fn(), isPending: false },
   }),
-}));
-vi.mock('@/features/campaign/useCampaignName', () => ({
-  useCampaignName: () => ({ name: 'Campaign', changeName: vi.fn(), pending: false }),
 }));
 vi.mock('@/features/campaign/useCampaignPreview', () => ({
   useCampaignPreview: () => ({
@@ -249,25 +267,31 @@ vi.mock('@/features/translation/useLocaleDocumentSession', () => ({
 }));
 vi.mock('@/lib/actions/audience', () => ({ listActiveSegmentsAction: vi.fn() }));
 vi.mock('@/lib/actions/campaign', () => ({
-  getCampaignAction: vi.fn(),
+  getCampaignAction: mocks.getCampaign,
   updateCampaignConfigurationAction: mocks.updateConfiguration,
+  updateCampaignNameAction: mocks.updateName,
 }));
 vi.mock('@/lib/collab/persist-now', () => ({ persistCollaborativeDocumentNow: vi.fn(async () => undefined) }));
 vi.mock('@/lib/collab/block-room-metadata', () => ({ updateBlockRoomLocaleMetadata: vi.fn() }));
 vi.mock('@/lib/contexts/EditorRuntimeContext', () => ({
   EditorRuntimeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
-vi.mock('@/lib/editor/editor-save-registry', () => ({ flushEditorSaves: vi.fn(async () => true) }));
+vi.mock('@/lib/editor/editor-save-registry', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/editor/editor-save-registry')>()),
+  flushEditorSaves: vi.fn(async () => true),
+}));
 vi.mock('@/lib/editor/editor-entity-changes', () => ({
   publishEditorEntityChange: vi.fn(),
-  useEditorEntityChanges: vi.fn(),
+  useEditorEntityChanges: (_document: string, callback: () => void) => {
+    mocks.peerChange = callback;
+  },
 }));
 vi.mock('@/lib/editor/useBlockRoomMetadataUpdates', () => ({ useBlockRoomMetadataUpdates: vi.fn() }));
 vi.mock('@/lib/editor/useDebouncedRoomMetadata', () => ({ useDebouncedRoomMetadata: () => vi.fn() }));
 vi.mock('@/features/editor/hooks/useBlockRoomTiptapController', () => ({ useRichTextBlockRoomController: () => null }));
 vi.mock('@/lib/collab/useBlockRoomConnection', () => ({
   useBlockRoomConnection: () => ({
-    provider: null,
+    provider: mocks.provider,
     doc: null,
     bootstrap: null,
     protocol: null,
@@ -297,19 +321,26 @@ describe('CampaignEditPage delivery target confirmation', () => {
   let root: Root;
 
   beforeEach(() => {
+    setProviderAccessLevel(mocks.provider, 'edit');
     mocks.campaign = {
       id: 'campaign-1',
       status: 'draft',
       subject: 'Subject',
+      name: 'Campaign',
       targetMode: CampaignTargetMode.ALL,
       segmentId: null,
       layoutId: null,
       recipientScope: 'SUBSCRIBED_USERS',
     };
     mocks.updateConfiguration.mockReset();
+    mocks.updateName.mockReset();
     mocks.sendCampaign.mockReset();
     mocks.scheduleCampaign.mockReset();
     mocks.notificationsShow.mockReset();
+    mocks.refetchCampaign.mockReset();
+    mocks.getCampaign.mockReset().mockImplementation(async () => ({ ok: true, value: mocks.campaign }));
+    mocks.refetchCampaign.mockImplementation(async () => ({ data: await mocks.queryFn?.() }));
+    mocks.peerChange = null;
     container = document.createElement('div');
     document.body.append(container);
     root = createRoot(container);
@@ -318,6 +349,27 @@ describe('CampaignEditPage delivery target confirmation', () => {
   afterEach(() => {
     act(() => root.unmount());
     container.remove();
+    vi.useRealTimers();
+  });
+
+  it('upgrades and downgrades campaign controls without replacing the open content', async () => {
+    setProviderAccessLevel(mocks.provider, 'view');
+    await act(async () => root.render(createElement(CampaignEditPage)));
+    const content = container.firstElementChild;
+    const controls = [...container.querySelectorAll('[data-testid="change-target"]')];
+    expect(controls.length).toBeGreaterThan(0);
+    expect((container.querySelector('[data-testid="send-confirm"]') as HTMLButtonElement).disabled).toBe(true);
+    act(() => setProviderAccessLevel(mocks.provider, 'edit'));
+    expect((container.querySelector('[data-testid="send-confirm"]') as HTMLButtonElement).disabled).toBe(false);
+    expect(container.firstElementChild).toBe(content);
+    act(() => setProviderAccessLevel(mocks.provider, 'view'));
+    expect(container.firstElementChild).toBe(content);
+    expect(mocks.provider.disconnect).not.toHaveBeenCalled();
+    expect((container.querySelector('[data-testid="send-confirm"]') as HTMLButtonElement).disabled).toBe(true);
+    await act(async () => mocks.confirmSend?.());
+    expect(mocks.sendCampaign).not.toHaveBeenCalled();
+    expect(container.querySelectorAll('[data-testid="change-target"]').length).toBe(controls.length);
+    expect(controls.every((control) => (control as HTMLInputElement).disabled)).toBe(true);
   });
 
   it('blocks send and schedule confirmation until the saved target is reflected in both modals', async () => {
@@ -345,10 +397,14 @@ describe('CampaignEditPage delivery target confirmation', () => {
       container.querySelector<HTMLButtonElement>('[data-testid="change-target"]')!.click();
     });
 
-    expect(mocks.updateConfiguration).toHaveBeenCalledWith('campaign-1', {
-      targetMode: CampaignTargetMode.SEGMENT,
-      segmentId: 'segment-new',
-    });
+    expect(mocks.updateConfiguration).toHaveBeenCalledWith(
+      'campaign-1',
+      {
+        targetMode: CampaignTargetMode.SEGMENT,
+        segmentId: 'segment-new',
+      },
+      expect.any(String),
+    );
     expect(container.querySelector('[data-testid="send-warning"]')?.textContent).toBe('Send to All users');
     expect(container.querySelector('[data-testid="schedule-audience"]')?.textContent).toBe('All users');
     expect(container.querySelector<HTMLButtonElement>('[data-testid="send-confirm"]')?.disabled).toBe(true);
@@ -376,5 +432,61 @@ describe('CampaignEditPage delivery target confirmation', () => {
       scheduledAt: expect.any(Date),
       recipientScope: 'SUBSCRIBED_USERS',
     });
+  });
+  it('drops a peer read started before a configuration write after the write has settled', async () => {
+    const staleRead = deferred<{ ok: true; value: Record<string, unknown> | null }>();
+    const staleCampaign = { ...mocks.campaign };
+    mocks.getCampaign.mockImplementationOnce(() => staleRead.promise);
+    mocks.updateConfiguration.mockImplementation(async (_id: string, values: Record<string, unknown>) => {
+      mocks.campaign = { ...mocks.campaign, ...values };
+      return {};
+    });
+    await act(async () => {
+      root.render(createElement(CampaignEditPage));
+    });
+    act(() => mocks.peerChange?.());
+    await act(async () => {
+      container.querySelector<HTMLButtonElement>('[data-testid="change-target"]')!.click();
+      await Promise.resolve();
+    });
+    expect(container.querySelector('[data-testid="send-warning"]')?.textContent).toBe('Send to New segment');
+    await act(async () => {
+      staleRead.resolve({ ok: true, value: staleCampaign });
+      await staleRead.promise;
+    });
+    expect(container.querySelector('[data-testid="send-warning"]')?.textContent).toBe('Send to New segment');
+  });
+  it('preserves a newer name draft through peer refetch and an older name acknowledgement', async () => {
+    vi.useFakeTimers();
+    const firstWrite = deferred<{ name: string }>();
+    const secondWrite = deferred<{ name: string }>();
+    mocks.updateName.mockImplementation((_id: string, name: string) =>
+      name === 'First draft' ? firstWrite.promise : secondWrite.promise,
+    );
+    await act(async () => root.render(createElement(CampaignEditPage)));
+    act(() => container.querySelector<HTMLButtonElement>('[data-testid="name-first"]')!.click());
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+    act(() => container.querySelector<HTMLButtonElement>('[data-testid="name-second"]')!.click());
+    await act(async () => {
+      mocks.peerChange?.();
+    });
+    expect(container.querySelector('[data-testid="campaign-name"]')?.textContent).toBe('Second draft');
+    await act(async () => {
+      firstWrite.resolve({ name: 'Canonical first' });
+      await firstWrite.promise;
+    });
+    expect(container.querySelector('[data-testid="campaign-name"]')?.textContent).toBe('Second draft');
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+    await act(async () => {
+      secondWrite.resolve({ name: 'Canonical second' });
+      await secondWrite.promise;
+    });
+    expect(container.querySelector('[data-testid="campaign-name"]')?.textContent).toBe('Canonical second');
+    expect(mocks.updateName).toHaveBeenCalledWith('campaign-1', 'First draft', expect.any(String));
+    expect(mocks.updateName).toHaveBeenCalledWith('campaign-1', 'Second draft', expect.any(String));
   });
 });

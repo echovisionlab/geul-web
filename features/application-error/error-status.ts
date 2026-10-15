@@ -1,8 +1,6 @@
 import { preservedQueryErrorStatus } from '@/lib/api/query-error';
 import { Code } from '@connectrpc/connect';
-import { connectErrorCode } from '@/lib/api/connect-error';
-import messages from '@/lib/i18n/error-page-messages.json';
-import { DEFAULT_LOCALE, type SupportedLocale } from '@/lib/i18n/locale';
+import { connectErrorShapeCode } from '@/lib/api/connect-error-shape';
 
 const RPC_STATUS: Partial<Record<Code, number>> = {
   [Code.InvalidArgument]: 400,
@@ -20,7 +18,7 @@ const RPC_STATUS: Partial<Record<Code, number>> = {
 };
 
 export function resolveErrorStatus(error: unknown): number {
-  const rpcCode = connectErrorCode(error);
+  const rpcCode = connectErrorShapeCode(error);
   if (rpcCode !== undefined) {
     return RPC_STATUS[rpcCode] ?? 500;
   }
@@ -35,10 +33,15 @@ export function resolveErrorStatus(error: unknown): number {
   return preservedQueryErrorStatus(error) ?? 500;
 }
 
-export function getErrorPageContent(status: number, locale: SupportedLocale = DEFAULT_LOCALE) {
-  const catalogue = messages[locale];
-  const title = catalogue.titles[String(status) as keyof typeof catalogue.titles] ?? catalogue.titles['500'];
-  return { code: String(status), title, ...catalogue.actions };
+/** One locale of `lib/i18n/error-page-messages.json`; also the `errorPage` client message namespace. */
+export interface ErrorPageMessages {
+  titles: Readonly<Record<string, string>> & { readonly '500': string };
+  actions: { readonly goHome: string; readonly tryAgain: string; readonly login: string };
+}
+
+export function getErrorPageContent(status: number, messages: ErrorPageMessages) {
+  const title = messages.titles[String(status)] ?? messages.titles['500'];
+  return { code: String(status), title, ...messages.actions };
 }
 
 export function canRetryErrorStatus(status: number) {

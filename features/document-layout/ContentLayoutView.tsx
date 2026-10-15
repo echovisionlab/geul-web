@@ -9,16 +9,26 @@ export interface ContentLayoutViewProps {
   controls?: ReactNode;
   children: ReactNode;
   className?: string;
+  /** Language of the document content; interface controls retain their own language. */
+  contentLanguage?: string;
 }
 
 /** Adapts the collaboration contract to the domain-free document-layout surface. */
-export function ContentLayoutView({ layout, chrome, controls, children, className }: ContentLayoutViewProps) {
+export function ContentLayoutView({
+  layout,
+  chrome,
+  controls,
+  children,
+  className,
+  contentLanguage,
+}: ContentLayoutViewProps) {
   return (
     <DocumentLayoutSurface
       layout={toDocumentLayoutViewModel(layout)}
       chrome={chrome}
       controls={controls}
       className={className}
+      contentLanguage={contentLanguage}
     >
       {children}
     </DocumentLayoutSurface>

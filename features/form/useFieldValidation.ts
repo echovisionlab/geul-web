@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useDebouncedValue } from '@mantine/hooks';
 import { useFormValidationMessages } from '@/features/form/useFormValidationMessages';
 import { isEmpty, validateWithZod } from '@/lib/form/validation-core';
-import { extractPhoneValue } from '@/lib/types/form/guards';
+import { isPhoneValueEmpty } from '@/lib/types/phone/phone-number-data';
 import type { FormFieldSchema } from '@/lib/types/form/schema';
 
 export interface UseFieldValidationOptions {
@@ -81,12 +81,12 @@ export function useFieldValidation({
 
     // For phone, check empty immediately
     if (field.type === 'tel') {
-      const phoneNumber = extractPhoneValue(valueForRequired, field.defaultCountry);
-      if (phoneNumber.isEmpty) {
+      const phoneIsEmpty = isPhoneValueEmpty(valueForRequired);
+      if (phoneIsEmpty) {
         setState({
           isValid: !isRequired,
           error: isRequired ? requiredMessage : null,
-          isValidating: shouldDebounce && !phoneNumber.isEmpty,
+          isValidating: shouldDebounce && !phoneIsEmpty,
         });
         return;
       }
@@ -126,19 +126,28 @@ export function useFieldValidation({
       return;
     }
 
-    // Phone validation using PhoneNumber class
+    // Phone validation using PhoneNumber class. `libphonenumber-js` loads with the first phone field
+    // (PhoneField imports the same module), so forms without one do not download it.
     if (field.type === 'tel') {
-      const phoneNumber = extractPhoneValue(valueForFormat, field.defaultCountry);
-      if (phoneNumber.isEmpty) {
+      if (isPhoneValueEmpty(valueForFormat)) {
         return;
       }
 
-      setState({
-        isValid: phoneNumber.isValid,
-        error: phoneNumber.isValid ? null : validationMessages.invalidPhoneNumber,
-        isValidating: false,
+      let current = true;
+      void import('@/lib/types/phone/PhoneNumber').then(({ extractPhoneValue }) => {
+        if (!current) {
+          return;
+        }
+        const phoneNumber = extractPhoneValue(valueForFormat, field.defaultCountry);
+        setState({
+          isValid: phoneNumber.isValid,
+          error: phoneNumber.isValid ? null : validationMessages.invalidPhoneNumber,
+          isValidating: false,
+        });
       });
-      return;
+      return () => {
+        current = false;
+      };
     }
 
     const zodResult = validateWithZod(field, valueForFormat, validationMessages);

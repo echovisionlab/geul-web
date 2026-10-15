@@ -1,4 +1,5 @@
-import { EMBED_MIN_HEIGHT, type EmbedProps } from './schema';
+import { EMBED_MIN_HEIGHT } from './limits';
+import type { EmbedProps } from './schema';
 
 const isLoopback = (hostname: string) => hostname === 'localhost' || hostname === '127.0.0.1';
 

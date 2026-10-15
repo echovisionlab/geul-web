@@ -1,8 +1,11 @@
 'use client';
+import { SupportingText } from '@/components/core/Typography';
+
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 
 import { IconUnlink } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Group, Stack, Text } from '@mantine/core';
+
 import { IconButton } from '@/components/core/IconButton';
 import { Tooltip } from '@/components/core/Tooltip';
 import type { UserFull } from '@/lib/types/user/model';
@@ -24,13 +27,11 @@ export function UserSsoProvidersSection({
   return (
     <InfoSection title={tPage('auth.providers.title')} description={tPage('auth.providers.description')}>
       {auth?.providers.length ? (
-        <Stack gap="xs">
+        <DsLayoutStack gap="xs">
           {auth.providers.map((provider) => (
             <InfoRow key={`${provider.provider}:${provider.identifier}`} label={providerLabel(provider.provider)}>
-              <Group justify="space-between" align="center" wrap="nowrap">
-                <Text size="sm" c="dimmed">
-                  {tCommonStates('connected')}
-                </Text>
+              <DsLayoutInline justify="between" align="center" wrap="nowrap">
+                <SupportingText tone="secondary">{tCommonStates('connected')}</SupportingText>
                 {canRemoveProvider ? (
                   <Tooltip label={tPage('auth.providers.remove')}>
                     <IconButton
@@ -44,14 +45,12 @@ export function UserSsoProvidersSection({
                     </IconButton>
                   </Tooltip>
                 ) : null}
-              </Group>
+              </DsLayoutInline>
             </InfoRow>
           ))}
-        </Stack>
+        </DsLayoutStack>
       ) : (
-        <Text size="sm" c="dimmed">
-          {tPage('auth.providers.empty')}
-        </Text>
+        <SupportingText tone="secondary">{tPage('auth.providers.empty')}</SupportingText>
       )}
     </InfoSection>
   );

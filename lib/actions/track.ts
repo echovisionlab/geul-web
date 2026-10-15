@@ -45,15 +45,18 @@ function mapTrack(t: {
   };
 }
 
-export async function createTrackAction(data: {
-  release_id: string;
-  track_number: number;
-  title: string;
-  duration_seconds?: number;
-  lyrics?: string;
-}): Promise<{ data?: TrackSelect; error?: string }> {
+export async function createTrackAction(
+  data: {
+    release_id: string;
+    track_number: number;
+    title: string;
+    duration_seconds?: number;
+    lyrics?: string;
+  },
+  editorOrigin?: string,
+): Promise<{ data?: TrackSelect; error?: string }> {
   try {
-    const client = await createTrackClient();
+    const client = await createTrackClient(editorOrigin);
     const result = await client.createTrack({
       releaseId: data.release_id,
       trackNumber: data.track_number,
@@ -115,9 +118,10 @@ export async function updateTrackAction(
     processing_status?: string | null;
     lyrics?: string | null;
   },
+  editorOrigin?: string,
 ): Promise<{ success?: boolean; error?: string }> {
   try {
-    const client = await createTrackClient();
+    const client = await createTrackClient(editorOrigin);
     await client.updateTrack({
       id,
       trackNumber: data.track_number,
@@ -140,9 +144,12 @@ export async function updateTrackAction(
   }
 }
 
-export async function deleteTrackAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function deleteTrackAction(
+  id: string,
+  editorOrigin?: string,
+): Promise<{ success?: boolean; error?: string }> {
   try {
-    const client = await createTrackClient();
+    const client = await createTrackClient(editorOrigin);
     await client.deleteTrack({ id });
     return { success: true };
   } catch (err) {
@@ -160,12 +167,13 @@ export async function setTrackCreditsAction(
   trackId: string,
   credits: TrackCreditInput[],
   observedCredits: TrackCreditInput[],
+  editorOrigin?: string,
 ): Promise<{ success?: boolean; error?: string }> {
   if (!Array.isArray(observedCredits)) {
     return { error: 'An observed credit snapshot is required' };
   }
   try {
-    const client = await createTrackClient();
+    const client = await createTrackClient(editorOrigin);
     await client.setTrackCredits({
       trackId,
       credits: credits.map(mapTrackCreditInput),
@@ -183,9 +191,12 @@ export async function setTrackCreditsAction(
   }
 }
 
-export async function reorderTracksAction(trackIds: string[]): Promise<{ success?: boolean; error?: string }> {
+export async function reorderTracksAction(
+  trackIds: string[],
+  editorOrigin?: string,
+): Promise<{ success?: boolean; error?: string }> {
   try {
-    const client = await createTrackClient();
+    const client = await createTrackClient(editorOrigin);
     await client.reorderTracks({ trackIds });
     return { success: true };
   } catch (err) {

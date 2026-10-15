@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
-import { Editor, getSchema, type JSONContent } from '@tiptap/core';
+import { Editor, getSchema, type JSONContent, type NodeType, type TextType } from '@tiptap/core';
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import { TextSelection } from '@tiptap/pm/state';
 import { describe, expect, it } from 'vitest';
 import { editorSchema } from '@/features/editor/schema';
+import { authoredEditorPalettes } from '@/components/core/design-tokens';
 import { normalizeMapBlockPropsInput } from '@/lib/types/map-block/schema';
 import { createP5SketchExtension } from './p5';
 import { KOREAN_P5_SKETCH_LABELS } from './p5/p5-labels.fixtures';
@@ -256,8 +257,52 @@ describe('Tiptap wire schema', () => {
     expect(element.querySelector<HTMLElement>('[stringvalue="blue"]')?.getAttribute('style')).toBeNull();
     expect(element.querySelector<HTMLElement>('[stringvalue="#b02d23"]')?.style.color).toBe('rgb(176, 45, 35)');
     expect(element.querySelector<HTMLElement>('[stringvalue^="red;"]')?.getAttribute('style')).toBeNull();
+    const saved = editor.getJSON();
+    editor.commands.setContent(saved);
+    expect(editor.getJSON()).toEqual(saved);
+    expect(element.querySelector('[stringvalue="blue"]')).not.toBeNull();
+    expect(element.querySelector<HTMLElement>('[stringvalue="#b02d23"]')?.style.color).toBe('rgb(176, 45, 35)');
     editor.destroy();
     element.remove();
+  });
+
+  it('roundtrips every durable authored color name and legacy hex without serializing theme colors', () => {
+    const names = Object.keys(authoredEditorPalettes.light)
+      .filter((name) => name.startsWith('text-color-'))
+      .map((name) => name.replace('text-color-', ''));
+    const content = names.flatMap((name) =>
+      ['textColor', 'backgroundColor'].map((type) => ({
+        type: 'text',
+        text: `${type}:${name}`,
+        marks: [{ type, attrs: { stringValue: name } }],
+      })),
+    );
+    content.push({ type: 'text', text: 'legacy', marks: [{ type: 'textColor', attrs: { stringValue: '#112233' } }] });
+    const editor = new Editor({
+      extensions: createTiptapWireExtensions(),
+      content: documentWithBlocks([block('durable-colors', { type: 'paragraph', content })]),
+    });
+    const saved = editor.getJSON();
+    editor.commands.setContent(saved);
+    expect(editor.getJSON()).toEqual(saved);
+    const group = editor.getJSON().content?.[0];
+    if (!group || 'text' in group) {
+      throw new Error('Expected a persisted block group.');
+    }
+    const container = group.content?.[0];
+    if (!container || 'text' in container) {
+      throw new Error('Expected a persisted block container.');
+    }
+    const paragraph = container.content?.[0];
+    if (!paragraph || 'text' in paragraph || paragraph.type !== 'paragraph') {
+      throw new Error('Expected the authored color paragraph.');
+    }
+    const authoredInline: (NodeType | TextType)[] = paragraph.content ?? [];
+    expect(authoredInline.flatMap((text) => (text.marks ?? []).map((mark) => mark.attrs?.stringValue))).toEqual([
+      ...names.flatMap((name) => [name, name]),
+      '#112233',
+    ]);
+    editor.destroy();
   });
 
   it('matches the durable editor node names, content expressions, and attributes', () => {
@@ -552,5 +597,22 @@ describe('Tiptap wire schema', () => {
     }
 
     mounted.destroy();
+  });
+});
+
+describe('numbered list start', () => {
+  it('restarts the editor counter where the published list does', () => {
+    const editor = new Editor({
+      extensions: createTiptapWireExtensions(),
+      content: documentWithBlocks([
+        block('n1', { type: 'numberedListItem', attrs: { start: 3 }, content: [{ type: 'text', text: 'three' }] }),
+        block('n2', { type: 'numberedListItem', content: [{ type: 'text', text: 'four' }] }),
+      ]),
+    });
+    const [first, second] = editor.view.dom.querySelectorAll<HTMLElement>('[data-content-type="numberedListItem"]');
+    expect(first.style.getPropertyValue('counter-set')).toBe('numbered-list 3');
+    expect(first.getAttribute('data-start')).toBe('3');
+    expect(second.style.getPropertyValue('counter-set')).toBe('');
+    editor.destroy();
   });
 });

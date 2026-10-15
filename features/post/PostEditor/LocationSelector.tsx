@@ -1,11 +1,13 @@
 'use client';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+import { Select, useInputCombobox } from '@/components/core/Input';
 
-import { useCallback, useMemo, useState, type MouseEvent } from 'react';
-import { IconMapPin, IconPlus, IconX } from '@tabler/icons-react';
+import { useCallback, useMemo, useState } from 'react';
+import { IconMapPin } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Combobox, Group, InputBase, Loader, Stack, Text, useCombobox } from '@mantine/core';
-import { IconButton } from '@/components/core/IconButton';
+
 import { createMapPlaceBrowserClient } from '@/lib/api/map-place-browser-client';
 
 interface LocationSelectorProps {
@@ -18,14 +20,12 @@ interface LocationSelectorProps {
 
 export function LocationSelector({ value, idPrefix, canEdit, onChange, onCreateNew }: LocationSelectorProps) {
   const tCommon = useTranslations('common');
-  const tCommonPlaceholders = useTranslations('common.placeholders');
   const t = useTranslations('locationSelector');
   const mapPlaceClient = useMemo(() => createMapPlaceBrowserClient(), []);
   const [search, setSearch] = useState('');
 
-  const combobox = useCombobox({
+  const combobox = useInputCombobox({
     onDropdownClose: () => {
-      combobox.resetSelectedOption();
       setSearch('');
     },
   });
@@ -74,97 +74,61 @@ export function LocationSelector({ value, idPrefix, canEdit, onChange, onCreateN
     [combobox, onChange, onCreateNew, search],
   );
 
-  const handleClear = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
-      event.stopPropagation();
-      onChange(null);
-      setSearch('');
-    },
-    [onChange],
-  );
-
   const exactMatch = searchResults.some((place) => place.name.toLowerCase() === search.trim().toLowerCase());
   const canCreate = Boolean(onCreateNew && search.trim().length > 0 && !exactMatch);
   const isLoading = isSelectedPlaceLoading || isSearchLoading;
 
   return (
-    <Stack gap={4}>
-      <Text size="xs" c="dimmed">
-        {tCommon('labels.location')}
-      </Text>
-      <Combobox store={combobox} onOptionSubmit={handleSelect} withinPortal={false} disabled={!canEdit}>
-        <Combobox.DropdownTarget>
-          <InputBase
-            id={idPrefix ? `${idPrefix}-trigger` : undefined}
-            component="button"
-            type="button"
-            pointer
-            onClick={() => canEdit && combobox.toggleDropdown()}
-            leftSection={<IconMapPin size={16} />}
-            rightSection={
-              isLoading ? (
-                <Loader size={16} />
-              ) : value && canEdit ? (
-                <IconButton size="xs" emphasis="low" onClick={handleClear} aria-label={t('clearSelection')}>
-                  <IconX size={14} />
-                </IconButton>
-              ) : null
-            }
-            disabled={!canEdit}
-            rightSectionPointerEvents={value && canEdit ? 'all' : 'none'}
-          >
-            {selectedPlace ? (
-              <Text size="sm">{selectedPlace.name}</Text>
-            ) : (
-              <Text size="sm" c="dimmed">
-                {t('placeholder')}
-              </Text>
-            )}
-          </InputBase>
-        </Combobox.DropdownTarget>
-
-        <Combobox.Dropdown>
-          <Combobox.Search
-            id={idPrefix ? `${idPrefix}-search` : undefined}
-            value={search}
-            onChange={(event) => setSearch(event.currentTarget.value)}
-            placeholder={tCommonPlaceholders('searchPlaces')}
-          />
-          <Combobox.Options>
-            {searchResults.map((place) => (
-              <Combobox.Option key={place.id} value={place.id} active={place.id === value}>
-                <Stack gap={2}>
-                  <Text size="sm">{place.name}</Text>
-                  <Text size="xs" c="dimmed" lineClamp={1}>
-                    {place.address}
-                  </Text>
-                </Stack>
-              </Combobox.Option>
-            ))}
-
-            {canCreate && (
-              <Combobox.Option value="$create">
-                <Group gap="xs">
-                  <IconPlus size={14} />
-                  <Text size="sm">{tCommon('actions.createNamed', { name: search.trim() })}</Text>
-                </Group>
-              </Combobox.Option>
-            )}
-
-            {search.trim().length === 0 && <Combobox.Empty>{t('emptySearch')}</Combobox.Empty>}
-
-            {search.trim().length > 0 && searchResults.length === 0 && !canCreate && (
-              <Combobox.Empty>{t('emptyResults')}</Combobox.Empty>
-            )}
-          </Combobox.Options>
-        </Combobox.Dropdown>
-      </Combobox>
+    <DsLayoutStack gap="xxs">
+      <Select
+        id={idPrefix ? `${idPrefix}-trigger` : undefined}
+        label={tCommon('labels.location')}
+        searchable
+        disabled={!canEdit}
+        placeholder={t('placeholder')}
+        value={value}
+        searchValue={combobox.dropdownOpened ? search : (selectedPlace?.name ?? '')}
+        onSearchChange={setSearch}
+        dropdownOpened={combobox.dropdownOpened}
+        onDropdownOpen={combobox.openDropdown}
+        onDropdownClose={combobox.closeDropdown}
+        clearable={Boolean(value && canEdit)}
+        onChange={(id) => {
+          if (id) {
+            handleSelect(id);
+          } else {
+            onChange(null);
+            setSearch('');
+          }
+        }}
+        leftSection={<IconMapPin size={16} />}
+        aria-busy={isLoading || undefined}
+        data={[
+          ...(selectedPlace ? [{ value: selectedPlace.id, label: selectedPlace.name }] : []),
+          ...searchResults
+            .filter((place) => place.id !== value)
+            .map((place) => ({ value: place.id, label: place.name })),
+          ...(canCreate ? [{ value: '$create', label: tCommon('actions.createNamed', { name: search.trim() }) }] : []),
+        ]}
+        nothingFoundMessage={search.trim() ? t('emptyResults') : t('emptySearch')}
+        renderOption={({ option }) => {
+          const place = searchResults.find((item) => item.id === option.value);
+          return place ? (
+            <div>
+              <strong>{place.name}</strong>
+              <div>{place.address}</div>
+            </div>
+          ) : (
+            option.label
+          );
+        }}
+      />
 
       {selectedPlace?.address && (
-        <Text size="xs" c="dimmed" lineClamp={1}>
+        <DsText size="xs" tone="secondary" lines={1}>
           {selectedPlace.address}
-        </Text>
+        </DsText>
       )}
-    </Stack>
+    </DsLayoutStack>
   );
 }

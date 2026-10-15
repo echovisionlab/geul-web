@@ -2,8 +2,9 @@ import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { Title } from '@mantine/core';
-import { UserProfileView } from '@/features/user/UserProfileView';
+
+import { prepareSocialLinksDisplay } from '@/features/social-links/prepare-social-links-display';
+import { UserProfilePageView } from '@/features/user/UserProfilePageView';
 import { UserPublishedPostsTable, UserPublishedPostsTableFallback } from '@/features/user/UserPublishedPostsTable';
 import { getMemberMetadataDocument, getSiteMetadataDocument } from '@/lib/queries/metadata';
 import { getUserProfileView } from '@/lib/queries/user';
@@ -49,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function UserProfilePage({ params, searchParams }: Props) {
   const { id } = await params;
-  const [session, uiLocale, tProfile, tCommonStates, resolvedSearchParams] = await Promise.all([
+  const [session, uiLocale, _tProfile, tCommonStates, resolvedSearchParams] = await Promise.all([
     getSession(),
     getUserLocale(),
     getTranslations('userProfile'),
@@ -70,31 +71,27 @@ export default async function UserProfilePage({ params, searchParams }: Props) {
   }
 
   return (
-    <>
-      <UserProfileView
-        user={{
-          id: user.id,
-          name: user.name,
-          image: user.image,
-          bio: user.bio,
-          social_links: user.social_links,
-          role: user.role,
-          banned: user.banned,
-          ban_reason: user.ban_reason,
-          created_at: user.created_at,
-          isAdmin: user.isAdmin,
-          isSelf: user.isSelf,
-          deleted: user.deleted,
-        }}
-      />
-
-      <Title order={3} mt="lg">
-        {tProfile('sections.publishedPosts')}
-      </Title>
-
-      <Suspense fallback={<UserPublishedPostsTableFallback message={tCommonStates('loading')} />}>
-        <UserPublishedPostsTable memberId={id} requestedLocale={uiLocale} searchParams={paramsForTable} />
-      </Suspense>
-    </>
+    <UserProfilePageView
+      user={{
+        id: user.id,
+        name: user.name,
+        image: user.image,
+        bio: user.bio,
+        social_links: user.social_links,
+        role: user.role,
+        banned: user.banned,
+        ban_reason: user.ban_reason,
+        created_at: user.created_at,
+        isAdmin: user.isAdmin,
+        isSelf: user.isSelf,
+        deleted: user.deleted,
+      }}
+      socialLinkEntries={prepareSocialLinksDisplay(user.social_links ?? {})}
+      publishedPosts={
+        <Suspense fallback={<UserPublishedPostsTableFallback message={tCommonStates('loading')} />}>
+          <UserPublishedPostsTable memberId={id} requestedLocale={uiLocale} searchParams={paramsForTable} />
+        </Suspense>
+      }
+    />
   );
 }

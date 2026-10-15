@@ -13,6 +13,8 @@ import {
 import {
   createBlockRoomInsertionAnchor,
   decodeCanonicalBlockRoom,
+  decodeCanonicalBlockRoomAffectedNodes,
+  type BlockRoomChangeSet,
   deleteBlockRoomAtomicValue,
   deleteBlockRoomBaseNode,
   deleteBlockRoomPayloadArrayItem,
@@ -37,7 +39,8 @@ import {
   type BlockRoomPayloadRef,
   type CanonicalBlockRoomSnapshot,
 } from '@echovisionlab/geul-common/collaboration/block-room-codec';
-import type * as Y from 'yjs';
+import * as Y from 'yjs';
+import { projectRoomPayload } from './block-room-payload-projection';
 import { createBlockId, isBlockId } from '@/lib/editor/block-id';
 import {
   blockRoomSnapshotNodeRoute,
@@ -184,6 +187,10 @@ export class BlockRoomProseMirrorBridge {
     return this.#origin;
   }
 
+  get pageSectionId(): string | undefined {
+    return this.#pageSectionId;
+  }
+
   get documentType(): BlockRoomDocumentType {
     return this.#documentType;
   }
@@ -249,6 +256,13 @@ export class BlockRoomProseMirrorBridge {
   }
 
   observe(listener: (blocks: readonly ProseMirrorBlockDescriptor[]) => void): () => void {
+    return this.observeChanges((blocks) => listener(blocks));
+  }
+
+  observeChanges(
+    listener: (blocks: readonly ProseMirrorBlockDescriptor[], changedIds: ReadonlySet<string> | null) => void,
+  ): () => void {
+    let current = this.readBlocks();
     const knownBlockIds = new Set<string>();
     const rememberBlocks = (blocks: readonly ProseMirrorBlockDescriptor[]): void => {
       knownBlockIds.clear();
@@ -261,13 +275,14 @@ export class BlockRoomProseMirrorBridge {
       collectIds(blocks);
     };
     // Capture the last visible IDs so deletions can still be routed after the nodes disappear.
-    rememberBlocks(this.readBlocks());
+    rememberBlocks(current);
     return observeSharedBlockRoomChanges(this.#document, (change) => {
       const { changeSet } = change;
       const publish = (snapshot: CanonicalBlockRoomSnapshot = change.snapshot()): void => {
         const blocks = this.#readBlocks(snapshot);
+        current = blocks;
         rememberBlocks(blocks);
-        listener(blocks);
+        listener(blocks, null);
       };
       if (changeSet.requiresFullDecode || changeSet.documentMetadataChanged || changeSet.documentLayoutChanged) {
         publish();
@@ -281,6 +296,14 @@ export class BlockRoomProseMirrorBridge {
         changeSet.changedContainerOrderKeys.length === 0
       ) {
         return;
+      }
+      if (changeSet.changedContainerOrderKeys.length === 0 && [...changedIds].every((id) => knownBlockIds.has(id))) {
+        const next = this.#readChangedBlocks(current, changedIds, changeSet);
+        if (next) {
+          current = next;
+          listener(next, changedIds);
+          return;
+        }
       }
       if (this.#pageSectionId === undefined) {
         publish();
@@ -299,6 +322,72 @@ export class BlockRoomProseMirrorBridge {
         publish(snapshot);
       }
     });
+  }
+
+  #readChangedBlocks(
+    previous: readonly ProseMirrorBlockDescriptor[],
+    ids: ReadonlySet<string>,
+    changeSet: BlockRoomChangeSet,
+  ): readonly ProseMirrorBlockDescriptor[] | null {
+    const affected = decodeCanonicalBlockRoomAffectedNodes(this.#document, this.#documentType, {
+      ...changeSet,
+      affectedBaseBlockIds: [...ids],
+    });
+    if (affected.deletedBaseBlockIds.length > 0) {
+      return null;
+    }
+    const placements = new Map<string, { parentId: string | null; position: number }>();
+    const index = (nodes: readonly ProseMirrorBlockDescriptor[], parentId: string | null) => {
+      nodes.forEach((node, position) => {
+        placements.set(node.id, { parentId, position });
+        index(node.children, node.id);
+      });
+    };
+    index(previous, this.#pageSectionId ?? null);
+    if (
+      affected.baseNodes.some((node) => {
+        const old = placements.get(node.id);
+        return !old || old.parentId !== node.parentId || old.position !== node.position;
+      })
+    ) {
+      return null;
+    }
+    const base = new Map(affected.baseNodes.map((node) => [node.id, node]));
+    const locale = this.#document.getMap('block-document').get('localeOverlay');
+    if (!(locale instanceof Y.Map)) {
+      return null;
+    }
+    const visit = (nodes: readonly ProseMirrorBlockDescriptor[]): readonly ProseMirrorBlockDescriptor[] => {
+      let changed = false;
+      const next = nodes.map((node) => {
+        const children = visit(node.children);
+        if (!ids.has(node.id) && children === node.children) {
+          return node;
+        }
+        changed = true;
+        if (!ids.has(node.id)) {
+          return { ...node, children };
+        }
+        const nextBase = base.get(node.id);
+        const nextLocale = locale.get(node.id);
+        return {
+          ...node,
+          ...(nextBase
+            ? {
+                adapter: richTextProseMirrorAdapterForProtoCase(nextBase.kind),
+                basePayload: payloadObject(nextBase.payload, `base Block ${node.id}`),
+              }
+            : {}),
+          localePayload:
+            nextLocale instanceof Y.Map
+              ? payloadObject(projectRoomPayload(nextLocale.get('payload')), `localized Block ${node.id}`)
+              : null,
+          children,
+        };
+      });
+      return changed ? next : nodes;
+    };
+    return visit(previous);
   }
 
   createInsertionAnchor(placement: Omit<RichTextBlockPlacementInput, 'anchor'>): Y.RelativePosition {

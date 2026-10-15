@@ -38,8 +38,8 @@ function bootstrapFixture(challenge = 'challenge-1', options: BootstrapFixtureOp
     challenge,
     update,
     payload: JSON.stringify({
-      kind: 'block_room.bootstrap',
-      protocolVersion: 2,
+      kind: 'room.bootstrap',
+      v: 3,
       bootstrapChallenge: challenge,
       documentName: `post:${entityId}:${locale}`,
       documentType: 'post',
@@ -98,21 +98,21 @@ function admit(runtime: ReturnType<typeof setup>, challenge = 'challenge-1', opt
   runtime.protocol.handleProviderSynced();
   runtime.protocol.handleStateless(
     JSON.stringify({
-      kind: 'block_room.ready',
-      protocolVersion: 2,
+      kind: 'room.ready',
+      v: 3,
       bootstrapChallenge: challenge,
     }),
   );
 }
 
 describe('BlockRoomProtocolClient', () => {
-  it('requires reload before applying a bootstrap from an older inline codec protocol', () => {
+  it('ignores an unsupported envelope before applying a bootstrap', () => {
     const runtime = setup();
     const oldBootstrap = JSON.parse(bootstrapFixture().payload);
-    oldBootstrap.protocolVersion = 1;
-    expect(runtime.protocol.handleStateless(JSON.stringify(oldBootstrap))).toBe(true);
+    oldBootstrap.v = 1;
+    expect(runtime.protocol.handleStateless(JSON.stringify(oldBootstrap))).toBe(false);
     runtime.protocol.handleProviderSynced();
-    expect(runtime.onReloadRequired).toHaveBeenCalledOnce();
+    expect(runtime.onReloadRequired).not.toHaveBeenCalled();
     expect(runtime.onBootstrap).not.toHaveBeenCalled();
     expect(runtime.onReady).not.toHaveBeenCalled();
     expect(runtime.sendStateless).not.toHaveBeenCalled();
@@ -135,8 +135,8 @@ describe('BlockRoomProtocolClient', () => {
     expect(runtime.sendStateless).toHaveBeenCalledOnce();
     const ack = JSON.parse(runtime.sendStateless.mock.calls[0]![0]) as Record<string, unknown>;
     expect(ack).toEqual({
-      kind: 'block_room.bootstrap_ack',
-      protocolVersion: 2,
+      kind: 'room.bootstrap_ack',
+      v: 3,
       challenge: 'challenge-1',
       stateVector: expect.any(String),
     });
@@ -148,8 +148,8 @@ describe('BlockRoomProtocolClient', () => {
 
     runtime.protocol.handleStateless(
       JSON.stringify({
-        kind: 'block_room.ready',
-        protocolVersion: 2,
+        kind: 'room.ready',
+        v: 3,
         bootstrapChallenge: 'challenge-1',
       }),
     );
@@ -171,7 +171,7 @@ describe('BlockRoomProtocolClient', () => {
     runtime.protocol.handleStateless(bootstrap.payload);
 
     expect(JSON.parse(runtime.sendStateless.mock.calls[0]![0])).toMatchObject({
-      kind: 'block_room.bootstrap_ack',
+      kind: 'room.bootstrap_ack',
       challenge: 'challenge-1',
     });
     expect(runtime.onReloadRequired).not.toHaveBeenCalled();
@@ -203,8 +203,8 @@ describe('BlockRoomProtocolClient', () => {
 
     runtime.protocol.handleStateless(
       JSON.stringify({
-        kind: 'block_room.ready',
-        protocolVersion: 2,
+        kind: 'room.ready',
+        v: 3,
         bootstrapChallenge: 'another-challenge',
       }),
     );
@@ -227,16 +227,16 @@ describe('BlockRoomProtocolClient', () => {
     const metadata = runtime.protocol.updateMetadata('locale', { locale: 'ko', title: '제목' });
     const metadataRequest = JSON.parse(runtime.sendStateless.mock.calls[0]![0]);
     expect(metadataRequest).toEqual({
-      kind: 'block_room.metadata',
-      protocolVersion: 2,
+      kind: 'room.metadata',
+      v: 3,
       requestId: expect.any(String),
       operation: 'locale',
       payload: { locale: 'ko', title: '제목' },
     });
     runtime.protocol.handleStateless(
       JSON.stringify({
-        kind: 'block_room.metadata_result',
-        protocolVersion: 2,
+        kind: 'room.metadata_result',
+        v: 3,
         requestId: metadataRequest.requestId,
         ok: true,
         ack: {
@@ -259,17 +259,17 @@ describe('BlockRoomProtocolClient', () => {
     const snapshot = runtime.protocol.getSnapshot();
     const snapshotRequest = JSON.parse(runtime.sendStateless.mock.calls[1]![0]);
     expect(snapshotRequest).toEqual({
-      kind: 'block_room.snapshot',
-      protocolVersion: 2,
+      kind: 'room.revision',
+      v: 3,
       requestId: expect.any(String),
     });
     runtime.protocol.handleStateless(
       JSON.stringify({
-        kind: 'block_room.snapshot_result',
-        protocolVersion: 2,
+        kind: 'room.revision_result',
+        v: 3,
         requestId: snapshotRequest.requestId,
         ok: true,
-        snapshot: {
+        revision: {
           documentRevision: '44444444-4444-4444-8444-444444444444',
           sourceLocale: 'ko',
           locale: 'ko',
@@ -297,11 +297,11 @@ describe('BlockRoomProtocolClient', () => {
     const metadataRequest = JSON.parse(runtime.sendStateless.mock.calls[0]![0]);
     runtime.protocol.handleStateless(
       JSON.stringify({
-        kind: 'block_room.metadata_result',
-        protocolVersion: 2,
+        kind: 'room.metadata_result',
+        v: 3,
         requestId: metadataRequest.requestId,
         ok: false,
-        error: 'reload_required',
+        error: { code: 'conflict', reloadReason: 'conflict' },
       }),
     );
     await expect(metadata).rejects.toMatchObject({
@@ -331,8 +331,8 @@ describe('BlockRoomProtocolClient', () => {
     const metadataRequest = JSON.parse(runtime.sendStateless.mock.calls[0]![0]);
     runtime.protocol.handleStateless(
       JSON.stringify({
-        kind: 'block_room.metadata_result',
-        protocolVersion: 2,
+        kind: 'room.metadata_result',
+        v: 3,
         requestId: metadataRequest.requestId,
         ok: true,
         ack: { changed: 'not-a-boolean' },
@@ -359,8 +359,8 @@ describe('BlockRoomProtocolClient', () => {
     const metadataRequest = JSON.parse(runtime.sendStateless.mock.calls[0]![0]);
     runtime.protocol.handleStateless(
       JSON.stringify({
-        kind: 'block_room.metadata_result',
-        protocolVersion: 2,
+        kind: 'room.metadata_result',
+        v: 3,
         requestId: metadataRequest.requestId,
         ok: true,
         ack: {
@@ -380,8 +380,8 @@ describe('BlockRoomProtocolClient', () => {
     const malformedRequest = JSON.parse(runtime.sendStateless.mock.calls[1]![0]);
     runtime.protocol.handleStateless(
       JSON.stringify({
-        kind: 'block_room.metadata_result',
-        protocolVersion: 2,
+        kind: 'room.metadata_result',
+        v: 3,
         requestId: malformedRequest.requestId,
         ok: true,
         ack: {
@@ -414,11 +414,11 @@ describe('BlockRoomProtocolClient', () => {
     const snapshotRequest = JSON.parse(runtime.sendStateless.mock.calls[0]![0]);
     runtime.protocol.handleStateless(
       JSON.stringify({
-        kind: 'block_room.snapshot_result',
-        protocolVersion: 2,
+        kind: 'room.revision_result',
+        v: 3,
         requestId: snapshotRequest.requestId,
         ok: true,
-        snapshot: {
+        revision: {
           documentRevision: '44444444-4444-4444-8444-444444444444',
           targetRevision,
           sourceLocale: 'ko',
@@ -452,11 +452,11 @@ describe('BlockRoomProtocolClient', () => {
     const snapshotRequest = JSON.parse(runtime.sendStateless.mock.calls[0]![0]);
     runtime.protocol.handleStateless(
       JSON.stringify({
-        kind: 'block_room.snapshot_result',
-        protocolVersion: 2,
+        kind: 'room.revision_result',
+        v: 3,
         requestId: snapshotRequest.requestId,
         ok: true,
-        snapshot: {
+        revision: {
           documentRevision: '44444444-4444-4444-8444-444444444444',
           targetRevision: opaqueTargetRevision,
           sourceLocale: 'ko',
@@ -529,8 +529,8 @@ it('projects initial metadata to early and late subscribers and ignores reordere
   const send = (sequence: number, title: string, documentName = `post:${entityId}:ko`) =>
     runtime.protocol.handleStateless(
       JSON.stringify({
-        kind: 'block_room.metadata_changed',
-        protocolVersion: 2,
+        kind: 'room.metadata_changed',
+        v: 3,
         documentName,
         ack: {
           documentRevision: '44444444-4444-4444-8444-444444444444',
@@ -565,8 +565,8 @@ it('requires metadata update details in successful metadata ACKs', async () => {
   const request = JSON.parse(runtime.sendStateless.mock.calls[0]![0]);
   runtime.protocol.handleStateless(
     JSON.stringify({
-      kind: 'block_room.metadata_result',
-      protocolVersion: 2,
+      kind: 'room.metadata_result',
+      v: 3,
       requestId: request.requestId,
       ok: true,
       ack: {
@@ -592,8 +592,8 @@ it('accepts durability hints only for the admitted exact room and valid clocks',
   const send = (documentName = `post:${entityId}:ko`, stateVector = Buffer.from(vector).toString('base64')) =>
     runtime.protocol.handleStateless(
       JSON.stringify({
-        kind: 'block_room.persisted',
-        protocolVersion: 2,
+        kind: 'room.persisted',
+        v: 3,
         documentName,
         stateVector,
         deleted: { '7': [{ clock: 2, len: 3 }] },
@@ -612,4 +612,17 @@ it('accepts durability hints only for the admitted exact room and valid clocks',
   expect(listener).toHaveBeenCalledOnce();
   runtime.protocol.destroy();
   runtime.document.destroy();
+});
+
+describe('reload reasons', () => {
+  it.each(['deploy_or_restart', 'epoch_mismatch', 'external_update', 'conflict', 'permission', 'state_mismatch'])(
+    'routes the shared reload reason %s',
+    (reloadReason) => {
+      const runtime = setup();
+      expect(runtime.protocol.handleStateless(JSON.stringify({ v: 3, kind: 'room.reload', reloadReason }))).toBe(true);
+      expect(runtime.onReloadRequired).toHaveBeenCalledWith(undefined, reloadReason);
+      runtime.protocol.destroy();
+      runtime.document.destroy();
+    },
+  );
 });

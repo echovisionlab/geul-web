@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
 
-import { act, createRef, forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
+import { I18nProvider as DesignSystemProvider } from 'react-aria-components';
+import '@testing-library/jest-dom/vitest';
+import { act, createRef, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DropdownMenu } from '../DropdownMenu';
 import { TextButton } from './TextButton';
@@ -43,6 +45,34 @@ function render(node: ReactNode) {
 }
 
 describe('TextButton', () => {
+  it('retains descriptive copy through a hidden relation when React Aria filters aria-description', () => {
+    render(
+      <>
+        <span id="control-help" hidden>
+          Opens preferences
+        </span>
+        <TextButton aria-description="Cookie settings" aria-describedby="control-help">
+          Settings
+        </TextButton>
+      </>,
+    );
+    const button = container.querySelector('button')!;
+    expect(button).toHaveAccessibleName('Settings');
+    expect(button).toHaveAccessibleDescription('Opens preferences Cookie settings');
+    expect(button.querySelector('[hidden]')?.textContent).toBe('Cookie settings');
+  });
+  it('uses the same description contract for links without renaming their visible text', () => {
+    render(
+      <TextButton href="/terms" aria-description="Current terms">
+        Terms
+      </TextButton>,
+    );
+    const link = container.querySelector('a')!;
+    expect(link).toHaveAccessibleName('Terms');
+    expect(link).toHaveAccessibleDescription('Current terms');
+    expect(link.querySelectorAll('[hidden]')).toHaveLength(1);
+  });
+
   it('renders a native button with semantic visual data and forwarded props', () => {
     const onClick = vi.fn();
     const ref = createRef<HTMLButtonElement>();
@@ -58,8 +88,6 @@ describe('TextButton', () => {
         display="flex"
         fullWidth
         nowrap
-        className="consumer-class"
-        style={{ justifyContent: 'center' }}
         aria-label="Open cookie settings"
         data-consumer="footer"
       >
@@ -70,8 +98,7 @@ describe('TextButton', () => {
     const button = container.querySelector<HTMLButtonElement>('button');
     expect(button).toBe(ref.current);
     expect(button?.type).toBe('button');
-    expect(button?.classList.contains('consumer-class')).toBe(true);
-    expect(button?.style.justifyContent).toBe('center');
+    expect(button?.getAttribute('data-control-kind')).toBe('text');
     expect(button?.getAttribute('aria-label')).toBe('Open cookie settings');
     expect(button?.getAttribute('data-consumer')).toBe('footer');
     expect(button?.getAttribute('data-appearance')).toBe('muted');
@@ -103,32 +130,20 @@ describe('TextButton', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it('keeps geometry opt-in and exposes block display with typed CSS variables', () => {
+  it('retains text typography and explicit control sizing without changing the native role', () => {
     render(
-      <TextButton
-        size="xs"
-        display="block"
-        style={{
-          '--text-button-min-height': '0px',
-          '--text-button-padding-block': '0px',
-          '--text-button-padding-inline': '0px',
-          '--text-button-line-height': 1.2,
-        }}
-      >
+      <TextButton size="xs" display="block">
         Download file
       </TextButton>,
     );
-
-    const button = container.querySelector<HTMLButtonElement>('button');
+    const button = container.querySelector('button');
     expect(button?.hasAttribute('data-control-size')).toBe(false);
-    expect(button?.getAttribute('data-display')).toBe('block');
-    expect(button?.style.getPropertyValue('--text-button-min-height')).toBe('0px');
-    expect(button?.style.getPropertyValue('--text-button-padding-block')).toBe('0px');
-    expect(button?.style.getPropertyValue('--text-button-padding-inline')).toBe('0px');
-    expect(button?.style.getPropertyValue('--text-button-line-height')).toBe('1.2');
+    expect(button?.getAttribute('data-weight')).toBe('regular');
+    render(<TextButton controlSize="sm">Open settings</TextButton>);
+    expect(container.querySelector('button')?.getAttribute('data-weight')).toBe('medium');
   });
 
-  it('renders href actions through Next Link and forwards anchor props and refs', () => {
+  it('renders href actions through an accessible anchor and forwards anchor props and refs', () => {
     const ref = createRef<HTMLAnchorElement>();
 
     render(
@@ -169,60 +184,91 @@ describe('TextButton', () => {
     expect(link?.getAttribute('rel')).toBe('noopener noreferrer');
   });
 
-  it('uses an injected link transport and forwards anchor navigation events', () => {
+  it('runs navigation callbacks for an internal route and leaves external links native', () => {
     const onNavigate = vi.fn();
-    const ref = createRef<HTMLAnchorElement>();
-    const TestLink = forwardRef<HTMLAnchorElement, ComponentPropsWithoutRef<'a'>>(
-      ({ href, onClick: handleClick, ...props }, linkRef) => (
-        <a
-          {...props}
-          ref={linkRef}
-          href={href}
-          data-test-link-transport
-          onClick={(event) => {
-            event.preventDefault();
-            handleClick?.(event);
-          }}
-        />
-      ),
-    );
-
     render(
-      <TextButton ref={ref} href="/privacy" linkComponent={TestLink} onNavigate={onNavigate}>
+      <TextButton href="/privacy" onNavigate={onNavigate}>
         Privacy
       </TextButton>,
     );
-
-    const link = container.querySelector<HTMLAnchorElement>('a[data-test-link-transport]');
-    expect(link).toBe(ref.current);
-    expect(link?.getAttribute('href')).toBe('/privacy');
-
-    act(() => link?.click());
-    expect(onNavigate).toHaveBeenCalledOnce();
+    act(() => container.querySelector('a')?.click());
     expect(onNavigate).toHaveBeenCalledWith('/privacy');
   });
 
-  it('does not synthesize an event handler for a server-renderable link', () => {
-    let receivedOnClick: ComponentPropsWithoutRef<'a'>['onClick'] = vi.fn();
-    const TestLink = forwardRef<HTMLAnchorElement, ComponentPropsWithoutRef<'a'>>(({ onClick, ...props }, linkRef) => {
-      receivedOnClick = onClick;
-      return <a {...props} ref={linkRef} />;
-    });
-
+  it('distinguishes current navigation, toggle state, and selected visual ancestry', () => {
     render(
-      <TextButton href="/" linkComponent={TestLink}>
-        Go home
+      <TextButton href="#current" selected aria-current="page">
+        Current
       </TextButton>,
     );
+    const link = container.querySelector('a')!;
+    expect(link).toHaveAttribute('data-selected', 'true');
+    expect(link).toHaveAttribute('aria-current', 'page');
+    expect(link.hasAttribute('aria-pressed')).toBe(false);
+    render(
+      <TextButton selected aria-haspopup="menu" aria-expanded={false}>
+        Section
+      </TextButton>,
+    );
+    const menu = container.querySelector('button')!;
+    expect(menu.hasAttribute('aria-pressed')).toBe(false);
+    expect(menu).toHaveAttribute('aria-expanded', 'false');
+    render(<TextButton aria-pressed>Bold</TextButton>);
+    expect(container.querySelector('button')).toHaveAttribute('aria-pressed', 'true');
+  });
 
-    expect(receivedOnClick).toBeUndefined();
+  it('does not turn a real navigation link into a Space-activated command', () => {
+    const onNavigate = vi.fn();
+    render(
+      <TextButton href="#target" onNavigate={onNavigate}>
+        Target
+      </TextButton>,
+    );
+    const link = container.querySelector('a')!;
+    act(() => {
+      link.focus();
+      link.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }));
+      link.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true, cancelable: true }));
+    });
+    expect(onNavigate).not.toHaveBeenCalled();
+    act(() => link.click());
+    expect(onNavigate).toHaveBeenCalledWith('#target');
+  });
+
+  it.each([false, true])('retains a long menu name and trigger semantics with nowrap=%s', (nowrap) => {
+    const name = 'Language and regional formatting preferences';
+    render(
+      <DesignSystemProvider>
+        <DropdownMenu portal={false}>
+          <DropdownMenu.Target>
+            <TextButton indicator="menu" fullWidth display="flex" nowrap={nowrap}>
+              {name}
+            </TextButton>
+          </DropdownMenu.Target>
+          <DropdownMenu.Dropdown>
+            <DropdownMenu.Item>English</DropdownMenu.Item>
+          </DropdownMenu.Dropdown>
+        </DropdownMenu>
+      </DesignSystemProvider>,
+    );
+    const button = container.querySelector('button')!;
+    expect(button).toHaveAccessibleName(name);
+    expect(button.hasAttribute('data-nowrap')).toBe(nowrap);
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+    act(() => button.click());
+    expect(button).toHaveAccessibleName(name);
+    expect(button).toHaveAttribute('aria-expanded', 'true');
+    expect(document.querySelector('[role="menu"]')).not.toBeNull();
+    const glyph = button.querySelector('svg')!;
+    expect(glyph).toHaveAttribute('aria-hidden', 'true');
+    expect(button.firstElementChild?.textContent).toBe(name);
   });
 
   it('accepts ref and interaction props injected by DropdownMenu.Target', () => {
     const ref = createRef<HTMLButtonElement>();
 
     render(
-      <MantineProvider env="test">
+      <DesignSystemProvider>
         <DropdownMenu portal={false}>
           <DropdownMenu.Target>
             <TextButton ref={ref} appearance="muted">
@@ -233,17 +279,29 @@ describe('TextButton', () => {
             <DropdownMenu.Item>English</DropdownMenu.Item>
           </DropdownMenu.Dropdown>
         </DropdownMenu>
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
 
     const button = container.querySelector<HTMLButtonElement>('button');
     expect(button).toBe(ref.current);
-    expect(button?.getAttribute('aria-haspopup')).toBe('menu');
+    expect(['true', 'menu']).toContain(button?.getAttribute('aria-haspopup'));
     expect(button?.getAttribute('aria-expanded')).toBe('false');
 
     act(() => button?.click());
 
     expect(button?.getAttribute('aria-expanded')).toBe('true');
     expect(document.querySelector('[role="menu"]')).not.toBeNull();
+  });
+  it('forwards accepted native advisory text on actions and links', () => {
+    render(
+      <>
+        <TextButton title="Opens preferences">Settings</TextButton>
+        <TextButton href="/help" title="Opens help">
+          Help
+        </TextButton>
+      </>,
+    );
+    expect(container.querySelector('button')!.title).toBe('Opens preferences');
+    expect(container.querySelector('a')!.title).toBe('Opens help');
   });
 });

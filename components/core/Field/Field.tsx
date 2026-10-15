@@ -1,7 +1,10 @@
-import { Children, cloneElement, isValidElement, type ReactElement, type ReactNode } from 'react';
-import { Group, Stack, Text } from '@mantine/core';
+'use client';
+import type { ClosedVisualProps } from '../visual-contract';
 
-export interface FieldProps {
+import { Children, cloneElement, isValidElement, useId, type ReactElement, type ReactNode } from 'react';
+import classes from './Field.module.css';
+export interface FieldProps extends ClosedVisualProps {
+  layout?: 'stack' | 'inline';
   label: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
@@ -10,125 +13,94 @@ export interface FieldProps {
   required?: boolean;
   htmlFor?: string;
 }
-
-function mergeDescribedBy(...values: Array<string | undefined>) {
-  const tokens = values.flatMap((value) => value?.split(/\s+/).filter(Boolean) ?? []).filter(Boolean);
-
-  return tokens.length > 0 ? Array.from(new Set(tokens)).join(' ') : undefined;
-}
-
-const srOnlyStyles = {
-  position: 'absolute',
-  width: '1px',
-  height: '1px',
-  padding: 0,
-  margin: '-1px',
-  overflow: 'hidden',
-  clip: 'rect(0, 0, 0, 0)',
-  whiteSpace: 'nowrap',
-  border: 0,
-} as const;
-
-export function Field({ label, description, actions, error, children, required = false, htmlFor }: FieldProps) {
-  const onlyChild = Children.count(children) === 1 ? Children.only(children) : null;
-  const childId =
-    htmlFor ||
-    (isValidElement(onlyChild) && typeof onlyChild.props === 'object'
-      ? (onlyChild.props as { id?: string }).id
-      : undefined);
-  const descriptionId = description && childId ? `${childId}-description` : undefined;
-  const errorId = error && childId ? `${childId}-error` : undefined;
-
-  let resolvedChildren = children;
-  if (isValidElement(onlyChild)) {
-    const child = onlyChild as ReactElement<Record<string, unknown>>;
-    const childProps = child.props ?? {};
-    const mergedDescribedBy = mergeDescribedBy(
-      typeof childProps['aria-describedby'] === 'string' ? (childProps['aria-describedby'] as string) : undefined,
-      descriptionId,
-      errorId,
-    );
-    const nextProps: Record<string, unknown> = {
-      ...(childId && !childProps.id ? { id: childId } : {}),
-      ...(error ? { 'aria-invalid': true } : {}),
-      ...(mergedDescribedBy ? { 'aria-describedby': mergedDescribedBy } : {}),
-    };
-
-    if (typeof child.type !== 'string') {
-      const hiddenDescription =
-        description && !childProps.description ? <span>{description}</span> : childProps.description;
-      const hiddenError = error && !childProps.error ? <span>{error}</span> : childProps.error;
-      if (hiddenDescription) {
-        nextProps.description = hiddenDescription;
-        nextProps.descriptionProps = {
-          ...(typeof childProps.descriptionProps === 'object' ? childProps.descriptionProps : {}),
-          ...(descriptionId ? { id: descriptionId } : {}),
-          style: {
-            ...(typeof childProps.descriptionProps === 'object' &&
-            childProps.descriptionProps &&
-            'style' in childProps.descriptionProps &&
-            typeof childProps.descriptionProps.style === 'object'
-              ? (childProps.descriptionProps.style as Record<string, unknown>)
-              : {}),
-            ...srOnlyStyles,
-          },
-        };
-      }
-
-      if (hiddenError) {
-        nextProps.error = hiddenError;
-        nextProps.errorProps = {
-          ...(typeof childProps.errorProps === 'object' ? childProps.errorProps : {}),
-          ...(errorId ? { id: errorId } : {}),
-          style: {
-            ...(typeof childProps.errorProps === 'object' &&
-            childProps.errorProps &&
-            'style' in childProps.errorProps &&
-            typeof childProps.errorProps.style === 'object'
-              ? (childProps.errorProps.style as Record<string, unknown>)
-              : {}),
-            ...srOnlyStyles,
-          },
-        };
-      }
-
-      nextProps.inputWrapperOrder = [
-        'input',
-        ...(hiddenDescription ? (['description'] as const) : []),
-        ...(hiddenError ? (['error'] as const) : []),
-      ];
-    }
-
-    resolvedChildren = cloneElement(child, nextProps);
+export function Field({
+  label,
+  description,
+  actions,
+  error,
+  children,
+  required = false,
+  htmlFor,
+  layout = 'stack',
+}: FieldProps) {
+  if (layout !== 'stack' && layout !== 'inline') {
+    throw new RangeError('Field layout must be stack or inline');
   }
-
+  const uid = useId();
+  const onlyChild = Children.count(children) === 1 ? Children.only(children) : null;
+  const childProps = isValidElement(onlyChild) ? (onlyChild.props as Record<string, unknown>) : {};
+  const childId = htmlFor ?? (typeof childProps.id === 'string' ? childProps.id : uid);
+  const descriptionId = description ? `${childId}-description` : undefined;
+  const errorId = error ? `${childId}-error` : undefined;
+  const describedBy =
+    [
+      ...new Set(
+        [
+          typeof childProps['aria-describedby'] === 'string' ? childProps['aria-describedby'] : '',
+          descriptionId,
+          errorId,
+        ]
+          .filter(Boolean)
+          .flatMap((value) => value?.split(/\s+/) ?? []),
+      ),
+    ].join(' ') || undefined;
+  const resolved = isValidElement(onlyChild)
+    ? cloneElement(onlyChild as ReactElement<Record<string, unknown>>, {
+        id: childId,
+        ...(required ? { required: true } : {}),
+        'aria-describedby': describedBy,
+        'aria-invalid': error ? true : childProps['aria-invalid'],
+        ...(typeof onlyChild.type !== 'string' ? { error: error ? true : childProps.error } : {}),
+      })
+    : children;
   return (
-    <Stack gap={6}>
-      <Group justify="space-between" align="flex-start" wrap="nowrap" gap="sm">
-        <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
-          <Text component={childId ? 'label' : 'div'} htmlFor={childId} size="sm" fw={500}>
+    <div className={classes.root} data-geul-field-layout={layout}>
+      <div className={classes.header}>
+        <div className={classes.copy}>
+          {/* A field label keeps native label activation. Editable targets need
+              focus delegation, without creating another keyboard stop. */}
+          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
+          <label
+            className={classes.label}
+            htmlFor={childId}
+            onClick={() => {
+              const target = document.getElementById(childId);
+              if (
+                target?.matches('[contenteditable="true"]') &&
+                target.getAttribute('aria-disabled') !== 'true' &&
+                !target.hasAttribute('disabled')
+              ) {
+                target.focus();
+              }
+            }}
+          >
             {label}
             {required ? (
-              <Text component="span" c="red" inherit>
+              <span className={classes.required} aria-hidden>
                 {' '}
                 *
-              </Text>
+              </span>
             ) : null}
-          </Text>
-          {description ? (
-            <Text component="div" size="xs" c="dimmed">
+          </label>
+          {description && layout === 'stack' ? (
+            <div className={classes.description} id={descriptionId}>
               {description}
-            </Text>
+            </div>
           ) : null}
-        </Stack>
+        </div>
         {actions}
-      </Group>
-      {resolvedChildren}
-      {error ? (
-        <Text component="div" size="xs" c="red">
-          {error}
-        </Text>
+      </div>
+      <div className={classes.control}>{resolved}</div>
+      {description && layout === 'inline' ? (
+        <div className={classes.description} id={descriptionId}>
+          {description}
+        </div>
       ) : null}
-    </Stack>
+      {error ? (
+        <div className={classes.error} id={errorId}>
+          {error}
+        </div>
+      ) : null}
+    </div>
   );
 }

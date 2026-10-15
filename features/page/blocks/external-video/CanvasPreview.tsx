@@ -1,8 +1,9 @@
 'use client';
+import { SupportingText } from '@/components/core/Typography';
 
 import type { ComponentType } from 'react';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
+
 import { ExternalVideoView, type ExternalVideoViewProps } from '@/features/media/ExternalVideoView';
 import type { BlockCanvasPreviewProps } from '../types';
 import { parseExternalVideoProps, type ExternalVideoProps } from './schema';
@@ -19,7 +20,7 @@ export function ExternalVideoCanvasPreview({
   const parsed = parseExternalVideoProps(props);
 
   if (!parsed.url.trim()) {
-    return <Text c="dimmed">{t('emptyPreview')}</Text>;
+    return <SupportingText tone="secondary">{t('emptyPreview')}</SupportingText>;
   }
 
   return (

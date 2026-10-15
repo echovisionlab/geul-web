@@ -1,12 +1,16 @@
 'use client';
+import { SupportingText, Heading as DsHeading } from '@/components/core/Typography';
+
+import { SectionCard as DsSectionCard } from '@/components/core/Section/SectionCard';
+import { LayoutInline as DsLayoutInline, LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 
 import { Suspense } from 'react';
-import Link from '@/components/core/Navigation';
+
 import { useSearchParams } from 'next/navigation';
 import { IconCalendar, IconHistory } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocale, useTranslations } from 'next-intl';
-import { Group, Paper, Stack, Text, Title } from '@mantine/core';
+
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
@@ -16,13 +20,16 @@ import { PageLoader } from '@/features/site/PageLoader';
 import { LegalDocumentMetadata } from '@/features/policy/LegalDocumentMetadata';
 import { LegalTranslationNotice } from '@/features/policy/LegalTranslationNotice';
 import { PrintButton } from '@/features/print/PrintButton';
-import { LegalRichTextContent } from '@/features/policy/LegalRichTextContent';
+import { LegalDocumentLayout } from '@/features/policy/LegalDocumentLayout';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
 import { normalizeLocale } from '@/lib/i18n/locale';
-import { getTermsPageData, getScheduledTermsPreview } from '@/lib/queries/terms-browser';
 import type { PublicLegalPageInitialData } from '@/lib/queries/legal-public-page';
 import { CONTENT_LANGUAGE_QUERY_PARAM } from '@/lib/translation/content-language';
 import classes from '@/features/policy/LegalDocumentView.module.css';
+
+// The server renders the document; the browser RPC client loads only when a query has to run here
+// (token preview, missing or stale server data).
+const loadTermsQueries = () => import('@/lib/queries/terms-browser');
 
 interface Props {
   initialData?: PublicLegalPageInitialData;
@@ -77,7 +84,7 @@ function TermsActive({
   const matchingInitialData = initialData?.requestedLocale === requestedLocale ? initialData : undefined;
   const { data, dataUpdatedAt, isLoading, error } = useQuery({
     queryKey: ['terms', 'page', requestedLocale],
-    queryFn: () => getTermsPageData(requestedLocale),
+    queryFn: async () => (await loadTermsQueries()).getTermsPageData(requestedLocale),
     initialData: matchingInitialData?.data,
     initialDataUpdatedAt: matchingInitialData?.updatedAt,
   });
@@ -96,73 +103,80 @@ function TermsActive({
   }
 
   return (
-    <Stack gap="md" className={classes.document} data-legal-document="terms">
-      {/* Header */}
-      {activeTerms?.localizationInfo ? (
-        <LegalTranslationNotice pathname="/terms" query={query} localizationInfo={activeTerms.localizationInfo} />
-      ) : null}
-      <Group justify="space-between" align="flex-start" className={classes.header}>
-        <Stack gap="xs" style={{ flex: 1 }} className={classes.title}>
-          <Title order={1} style={{ fontWeight: 700, fontSize: '1.5rem' }}>
-            {tCommonEntities('terms')}
-          </Title>
-          {activeTerms ? (
-            <LegalDocumentMetadata version={activeTerms.version} effectiveFrom={activeTerms.effectiveFrom} />
-          ) : null}
-        </Stack>
-        <Group gap="xs" className="print-hide">
+    <LegalDocumentLayout
+      data-legal-document="terms"
+      blocks={activeTerms?.content}
+      contentLocale={
+        activeTerms?.localizationInfo?.displayedLocale || activeTerms?.localizationInfo?.sourceLocale || requestedLocale
+      }
+      contentClassName={`prose terms-content ${classes.content}`}
+      requestedLocale={requestedLocale}
+      empty={
+        <DsLayoutStack align="center">
+          <DsSectionCard padding="xl">
+            <DsLayoutStack align="center" gap="md">
+              <SupportingText tone="secondary">{t('emptyTitle')}</SupportingText>
+              <SupportingText tone="secondary">{t('emptyDescription')}</SupportingText>
+            </DsLayoutStack>
+          </DsSectionCard>
+        </DsLayoutStack>
+      }
+      header={
+        <DsLayoutStack gap="md">
+          {/* Header */}
           {activeTerms?.localizationInfo ? (
-            <ContentLanguageMenu
-              pathname="/terms"
-              query={query}
-              requestedLocale={requestedLocale}
-              localizationInfo={activeTerms.localizationInfo}
-            />
+            <LegalTranslationNotice pathname="/terms" query={query} localizationInfo={activeTerms.localizationInfo} />
           ) : null}
-          <PrintButton />
-          <Tooltip label={tCommonLabels('versionHistory')}>
-            <IconButton
-              tone="neutral"
-              emphasis="low"
-              component={Link}
-              href="/terms/history"
-              aria-label={tCommonLabels('versionHistory')}
-            >
-              <IconHistory size={20} />
-            </IconButton>
-          </Tooltip>
-        </Group>
-      </Group>
+          <DsLayoutInline printFlow="stack" justify="between" align="start">
+            <DsLayoutStack gap="xs" flexible>
+              <DsHeading level={1} scale="title">
+                {tCommonEntities('terms')}
+              </DsHeading>
+              {activeTerms ? (
+                <LegalDocumentMetadata version={activeTerms.version} effectiveFrom={activeTerms.effectiveFrom} />
+              ) : null}
+            </DsLayoutStack>
+            <div className="print-hide">
+              <DsLayoutInline gap="xs">
+                {activeTerms?.localizationInfo ? (
+                  <ContentLanguageMenu
+                    pathname="/terms"
+                    query={query}
+                    requestedLocale={requestedLocale}
+                    localizationInfo={activeTerms.localizationInfo}
+                  />
+                ) : null}
+                <PrintButton />
+                <Tooltip label={tCommonLabels('versionHistory')}>
+                  <IconButton
+                    tone="neutral"
+                    emphasis="low"
+                    href="/terms/history"
+                    aria-label={tCommonLabels('versionHistory')}
+                  >
+                    <IconHistory size={20} />
+                  </IconButton>
+                </Tooltip>
+              </DsLayoutInline>
+            </div>
+          </DsLayoutInline>
 
-      {scheduledTerms?.effectiveFrom && (
-        <Alert icon={<IconCalendar size={16} />} tone="accent" className={classes.notice}>
-          {tLegalPage('active.upcomingAlert', {
-            date: dateTime.date(scheduledTerms.effectiveFrom, {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            }),
-          })}
-        </Alert>
-      )}
-
-      {activeTerms?.content ? (
-        <LegalRichTextContent
-          blocks={activeTerms.content}
-          className={`prose terms-content ${classes.content}`}
-          requestedLocale={requestedLocale}
-        />
-      ) : (
-        <Paper p="xl" withBorder ta="center">
-          <Stack align="center" gap="md">
-            <Text c="dimmed">{t('emptyTitle')}</Text>
-            <Text size="sm" c="dimmed">
-              {t('emptyDescription')}
-            </Text>
-          </Stack>
-        </Paper>
-      )}
-    </Stack>
+          {scheduledTerms?.effectiveFrom && (
+            <div className={classes.notice}>
+              <Alert icon={<IconCalendar size={16} />} tone="accent">
+                {tLegalPage('active.upcomingAlert', {
+                  date: dateTime.date(scheduledTerms.effectiveFrom, {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  }),
+                })}
+              </Alert>
+            </div>
+          )}
+        </DsLayoutStack>
+      }
+    />
   );
 }
 
@@ -187,7 +201,7 @@ function TermsPreview({
     error,
   } = useQuery({
     queryKey: ['terms', 'preview', id, token, requestedLocale],
-    queryFn: () => getScheduledTermsPreview(id, token, requestedLocale),
+    queryFn: async () => (await loadTermsQueries()).getScheduledTermsPreview(id, token, requestedLocale),
   });
 
   if (isLoading) {
@@ -196,65 +210,75 @@ function TermsPreview({
 
   if (error || !previewTerms) {
     return (
-      <Stack gap="md">
+      <DsLayoutStack gap="md">
         <Alert tone="danger">{tLegalPage('preview.invalid')}</Alert>
-        <Button component={Link} href="/terms" emphasis="medium" w="fit-content">
+        <Button href="/terms" emphasis="medium">
           {t('viewCurrent')}
         </Button>
-      </Stack>
+      </DsLayoutStack>
     );
   }
 
   return (
-    <Stack gap="md" className={classes.document} data-legal-document="terms-preview">
-      <Alert icon={<IconCalendar size={16} />} tone="accent" className={classes.notice}>
-        {tLegalPage('preview.upcomingAlert', {
-          date: dateTime.date(previewTerms.effectiveFrom!, {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          }),
-        })}
-      </Alert>
+    <LegalDocumentLayout
+      data-legal-document="terms-preview"
+      blocks={previewTerms.content}
+      contentLocale={
+        previewTerms.localizationInfo?.displayedLocale || previewTerms.localizationInfo?.sourceLocale || requestedLocale
+      }
+      contentClassName={`prose terms-content ${classes.content}`}
+      requestedLocale={requestedLocale}
+      empty={
+        <DsLayoutStack align="center">
+          <DsSectionCard padding="xl">
+            <SupportingText tone="secondary">{tLegalPage('preview.empty')}</SupportingText>
+          </DsSectionCard>
+        </DsLayoutStack>
+      }
+      header={
+        <DsLayoutStack gap="md">
+          <div className={classes.notice}>
+            <Alert icon={<IconCalendar size={16} />} tone="accent">
+              {tLegalPage('preview.upcomingAlert', {
+                date: dateTime.date(previewTerms.effectiveFrom!, {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                }),
+              })}
+            </Alert>
+          </div>
 
-      {/* Header */}
-      {previewTerms?.localizationInfo ? (
-        <LegalTranslationNotice pathname="/terms" query={query} localizationInfo={previewTerms.localizationInfo} />
-      ) : null}
-      <Group justify="space-between" align="flex-start" className={classes.header}>
-        <Stack gap="xs" style={{ flex: 1 }} className={classes.title}>
-          <Title order={1} style={{ fontWeight: 700, fontSize: '1.5rem' }}>
-            {tCommonEntities('terms')}
-          </Title>
-          <LegalDocumentMetadata version={previewTerms.version} effectiveFrom={previewTerms.effectiveFrom} />
-        </Stack>
-        <Group gap="xs" className="print-hide">
+          {/* Header */}
           {previewTerms?.localizationInfo ? (
-            <ContentLanguageMenu
-              pathname="/terms"
-              query={query}
-              requestedLocale={requestedLocale}
-              localizationInfo={previewTerms.localizationInfo}
-            />
+            <LegalTranslationNotice pathname="/terms" query={query} localizationInfo={previewTerms.localizationInfo} />
           ) : null}
-          <PrintButton />
-          <Button component={Link} href="/terms" emphasis="low" size="sm">
-            {t('viewCurrent')}
-          </Button>
-        </Group>
-      </Group>
-
-      {previewTerms.content ? (
-        <LegalRichTextContent
-          blocks={previewTerms.content}
-          className={`prose terms-content ${classes.content}`}
-          requestedLocale={requestedLocale}
-        />
-      ) : (
-        <Paper p="xl" withBorder ta="center">
-          <Text c="dimmed">{tLegalPage('preview.empty')}</Text>
-        </Paper>
-      )}
-    </Stack>
+          <DsLayoutInline printFlow="stack" justify="between" align="start">
+            <DsLayoutStack gap="xs" flexible>
+              <DsHeading level={1} scale="title">
+                {tCommonEntities('terms')}
+              </DsHeading>
+              <LegalDocumentMetadata version={previewTerms.version} effectiveFrom={previewTerms.effectiveFrom} />
+            </DsLayoutStack>
+            <div className="print-hide">
+              <DsLayoutInline gap="xs">
+                {previewTerms?.localizationInfo ? (
+                  <ContentLanguageMenu
+                    pathname="/terms"
+                    query={query}
+                    requestedLocale={requestedLocale}
+                    localizationInfo={previewTerms.localizationInfo}
+                  />
+                ) : null}
+                <PrintButton />
+                <Button href="/terms" emphasis="low" size="sm">
+                  {t('viewCurrent')}
+                </Button>
+              </DsLayoutInline>
+            </div>
+          </DsLayoutInline>
+        </DsLayoutStack>
+      }
+    />
   );
 }

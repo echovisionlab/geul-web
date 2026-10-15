@@ -1,5 +1,6 @@
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { MantineProvider } from '@mantine/core';
+
 import { describe, expect, it, vi } from 'vitest';
 import { PageRestrictedAccess } from './PageRestrictedAccess';
 
@@ -8,7 +9,7 @@ vi.mock('next-intl/server', () => ({ getTranslations: async () => (key: string) 
 describe('PageRestrictedAccess', () => {
   it('offers login with the exact return path without page-specific content', async () => {
     const content = await PageRestrictedAccess({ reason: 'authentication-required', returnTo: '/members?lang=ko' });
-    const html = renderToStaticMarkup(<MantineProvider>{content}</MantineProvider>);
+    const html = renderToStaticMarkup(<DesignSystemProvider forceColorScheme="light">{content}</DesignSystemProvider>);
     expect(html).toContain('loginRequiredTitle');
     expect(html).toContain('loginRequiredDescription');
     expect(html).toContain('/login?redirect=%2Fmembers%3Flang%3Dko');
@@ -18,7 +19,7 @@ describe('PageRestrictedAccess', () => {
 
   it('explains unmet conditions without claiming the account is logged out', async () => {
     const content = await PageRestrictedAccess({ reason: 'conditions-not-met', returnTo: '/members' });
-    const html = renderToStaticMarkup(<MantineProvider>{content}</MantineProvider>);
+    const html = renderToStaticMarkup(<DesignSystemProvider forceColorScheme="light">{content}</DesignSystemProvider>);
     expect(html).toContain('restrictedTitle');
     expect(html).toContain('restrictedDescription');
     expect(html).not.toContain('loginRequiredTitle');

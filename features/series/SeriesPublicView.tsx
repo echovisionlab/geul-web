@@ -1,5 +1,13 @@
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+
+import {
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+  LayoutGrid as DsLayoutGrid,
+  LayoutGridItem as DsLayoutGridItem,
+} from '@/components/core/Layout';
 import type { ReactNode } from 'react';
-import { Box, Divider, Grid, GridCol, Stack, Table, Text } from '@mantine/core';
+import { Table } from '@/components/core/Display';
 import { DateTime } from '@/features/date-time/DateTime';
 import { PageHeader } from '@/components/core/PageHeader';
 import { TextButton } from '@/components/core/TextButton';
@@ -15,6 +23,7 @@ export interface SeriesPublicPostItem {
 
 interface SeriesPublicPostsViewProps {
   posts: SeriesPublicPostItem[];
+  tableLabel?: string;
   labels: {
     title: string;
     authors: string;
@@ -25,23 +34,27 @@ interface SeriesPublicPostsViewProps {
   };
 }
 
-export function SeriesPublicPostsView({ posts, labels }: SeriesPublicPostsViewProps) {
+export function SeriesPublicPostsView({ posts, labels, tableLabel = labels.title }: SeriesPublicPostsViewProps) {
   if (posts.length === 0) {
     return (
-      <Text size="sm" c="dimmed" py="md">
-        {labels.empty}
-      </Text>
+      <DsLayoutInset block="md">
+        <SupportingText tone="secondary">{labels.empty}</SupportingText>
+      </DsLayoutInset>
     );
   }
 
   return (
-    <Table.ScrollContainer minWidth={640}>
-      <Table striped highlightOnHover>
+    <Table.ScrollContainer minWidth={640} role="region" aria-label={tableLabel} tabIndex={0}>
+      <Table striped highlightOnHover aria-label={tableLabel}>
         <Table.Thead>
           <Table.Tr>
-            <Table.Th>{labels.title}</Table.Th>
-            <Table.Th w={220}>{labels.authors}</Table.Th>
-            <Table.Th w={150}>{labels.published}</Table.Th>
+            <Table.Th scope="col">{labels.title}</Table.Th>
+            <Table.Th scope="col" width={220}>
+              {labels.authors}
+            </Table.Th>
+            <Table.Th scope="col" width={150}>
+              {labels.published}
+            </Table.Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
@@ -53,16 +66,16 @@ export function SeriesPublicPostsView({ posts, labels }: SeriesPublicPostsViewPr
                 </TextButton>
               </Table.Td>
               <Table.Td>
-                <Text size="sm" c="dimmed">
+                <DsText size="sm" tone="secondary">
                   {post.authors.length > 0
                     ? post.authors.map((author) => author.name || labels.unknown).join(', ')
                     : '-'}
-                </Text>
+                </DsText>
               </Table.Td>
               <Table.Td>
-                <Text size="sm" c="dimmed">
+                <DsText size="sm" tone="secondary">
                   <DateTime value={post.publishedAt} />
-                </Text>
+                </DsText>
               </Table.Td>
             </Table.Tr>
           ))}
@@ -84,29 +97,28 @@ export function SeriesPublicView({ title, featuredImageUrl, controls, postsLabel
   const details = <PageHeader title={title} actions={controls} />;
 
   return (
-    <Stack gap="xl">
+    <DsLayoutStack gap="xl">
       {featuredImageUrl ? (
-        <Grid gap="xl" align="start">
-          <GridCol span={{ base: 12, md: 6 }}>
-            <Box>
+        <DsLayoutGrid columns={12} gap="xl" align="start">
+          <DsLayoutGridItem span={{ base: 12, md: 6 }}>
+            <div>
               <img
                 src={buildManagedImageUrl(featuredImageUrl, MANAGED_IMAGE_PRESET.HEADER_IMAGE) ?? featuredImageUrl}
                 alt={title}
                 style={{ display: 'block', width: '100%', height: 'auto', maxHeight: 640, objectFit: 'contain' }}
               />
-            </Box>
-          </GridCol>
-          <GridCol span={{ base: 12, md: 6 }}>{details}</GridCol>
-        </Grid>
+            </div>
+          </DsLayoutGridItem>
+          <DsLayoutGridItem span={{ base: 12, md: 6 }}>{details}</DsLayoutGridItem>
+        </DsLayoutGrid>
       ) : (
         details
       )}
 
-      <Divider />
-      <Stack gap="sm">
+      <DsLayoutStack gap="sm">
         <PageHeader title={postsLabel} level={2} />
         {children}
-      </Stack>
-    </Stack>
+      </DsLayoutStack>
+    </DsLayoutStack>
   );
 }

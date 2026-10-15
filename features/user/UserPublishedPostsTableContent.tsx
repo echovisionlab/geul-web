@@ -1,8 +1,10 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { Fragment } from 'react';
 import { useTranslations } from 'next-intl';
-import { Stack, Text } from '@mantine/core';
+
 import { DateTime } from '@/features/date-time/DateTime';
 import { TextButton } from '@/components/core/TextButton';
 import { ServerDataTable } from '@/features/data-table/ServerDataTable';
@@ -18,14 +20,14 @@ interface UserPublishedPostsTableContentProps {
 function renderTaxonomyLinks(items: { id: string; name: string; slug: string | null }[], type: 'category' | 'tag') {
   if (items.length === 0) {
     return (
-      <Text size="xs" c="dimmed">
+      <DsText size="xs" tone="secondary">
         -
-      </Text>
+      </DsText>
     );
   }
 
   return (
-    <Text size="xs">
+    <DsText size="xs">
       {items.map((item, index) => (
         <Fragment key={item.id}>
           {index > 0 ? ' / ' : null}
@@ -39,13 +41,13 @@ function renderTaxonomyLinks(items: { id: string; name: string; slug: string | n
               {item.name}
             </TextButton>
           ) : (
-            <Text span c="inherit" inherit>
+            <DsText as="span" tone="inherit">
               {item.name}
-            </Text>
+            </DsText>
           )}
         </Fragment>
       ))}
-    </Text>
+    </DsText>
   );
 }
 
@@ -62,11 +64,11 @@ function getColumns(labels: {
       header: labels.title,
       sortable: true,
       cell: (row) => (
-        <Stack gap={2}>
+        <DsLayoutStack gap="xxs">
           <TextButton href={`/posts/${row.slug || row.id}`} appearance="default" size="sm" weight="medium">
             {row.title || labels.untitled}
           </TextButton>
-        </Stack>
+        </DsLayoutStack>
       ),
     },
     {
@@ -84,9 +86,9 @@ function getColumns(labels: {
       header: labels.published,
       sortable: true,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.publishedAt} />
-        </Text>
+        </DsText>
       ),
     },
   ];
@@ -94,6 +96,7 @@ function getColumns(labels: {
 
 export function UserPublishedPostsTableContent({ result, emptyMessage }: UserPublishedPostsTableContentProps) {
   const tCommon = useTranslations('common');
+  const tProfile = useTranslations('userProfile');
   const columns = getColumns({
     title: tCommon('labels.title'),
     untitled: tCommon('states.untitled'),
@@ -104,6 +107,7 @@ export function UserPublishedPostsTableContent({ result, emptyMessage }: UserPub
 
   return (
     <ServerDataTable.Content
+      accessibleLabel={tProfile('sections.publishedPosts')}
       columns={columns}
       result={result}
       getRowKey={(row) => row.id}

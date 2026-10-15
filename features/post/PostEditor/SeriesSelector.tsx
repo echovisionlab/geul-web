@@ -1,12 +1,15 @@
 'use client';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+import { Select, useInputCombobox } from '@/components/core/Input';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { useCallback, useEffect, useState } from 'react';
-import { IconChevronDown, IconChevronUp, IconX } from '@tabler/icons-react';
+import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Combobox, Group, InputBase, Loader, Stack, Text, useCombobox } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { LabelBadge } from '@/components/core/Badge';
 import { IconButton } from '@/components/core/IconButton';
 import {
@@ -52,9 +55,7 @@ export function SeriesSelector({
   const [search, setSearch] = useState('');
   const [isRefreshingOptions, setIsRefreshingOptions] = useState(false);
 
-  const combobox = useCombobox({
-    onDropdownClose: () => combobox.resetSelectedOption(),
-  });
+  const combobox = useInputCombobox();
 
   const queryClient = useQueryClient();
 
@@ -142,12 +143,12 @@ export function SeriesSelector({
       notifications.show({
         message:
           error === 'series_unavailable' ? t('notifications.seriesUnavailable') : t('notifications.updateFailed'),
-        color: 'red',
+        tone: 'danger',
       });
       if (error === 'series_unavailable') {
         void refreshSeriesOptions().then((success) => {
           if (!success) {
-            notifications.show({ message: tCommonNotifications('updateFailed'), color: 'red' });
+            notifications.show({ message: tCommonNotifications('updateFailed'), tone: 'danger' });
           }
         });
       }
@@ -167,7 +168,7 @@ export function SeriesSelector({
       }
       setCommittedSeriesId(seriesId);
       setCommittedSeriesOrder(null);
-      notifications.show({ message: t('notifications.assigned'), color: 'green' });
+      notifications.show({ message: t('notifications.assigned'), tone: 'positive' });
       void queryClient.invalidateQueries({ queryKey: ['series', seriesId, 'posts'] });
       if (previousId) {
         void queryClient.invalidateQueries({ queryKey: ['series', previousId, 'posts'] });
@@ -184,7 +185,7 @@ export function SeriesSelector({
     mutationFn: (title: string) => createSeriesAction({ title }),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: t('notifications.createFailed'), color: 'red' });
+        notifications.show({ message: t('notifications.createFailed'), tone: 'danger' });
         return;
       }
       if (result.data) {
@@ -194,7 +195,7 @@ export function SeriesSelector({
         setSelectedSeriesId(result.data.id);
         assignPost.mutate({ seriesId: result.data.id, previousId, previousOrder });
         setSeriesOrder(0);
-        notifications.show({ message: tCommonNotifications('seriesCreated'), color: 'green' });
+        notifications.show({ message: tCommonNotifications('seriesCreated'), tone: 'positive' });
         setSearch('');
       }
     },
@@ -214,7 +215,7 @@ export function SeriesSelector({
       setCommittedSeriesOrder(null);
       notifications.show({
         message: tCommonNotifications('postRemovedFromSeries'),
-        color: 'yellow',
+        tone: 'positive',
       });
       void queryClient.invalidateQueries({ queryKey: ['series', seriesId, 'posts'] });
     },
@@ -322,7 +323,6 @@ export function SeriesSelector({
     reorderPosts.isPending ||
     isRefreshingOptions;
 
-  const filteredSeriesList = seriesList.filter((s) => s.title.toLowerCase().includes(search.toLowerCase()));
   const exactMatch = seriesList.some((s) => s.title.toLowerCase() === search.trim().toLowerCase());
   const currentIndex = seriesPosts.findIndex((post) => post.id === postId);
   const displayOrder = currentIndex >= 0 ? currentIndex : seriesOrder;
@@ -330,102 +330,59 @@ export function SeriesSelector({
   const canMoveDown = currentIndex >= 0 && currentIndex < seriesPosts.length - 1;
 
   return (
-    <Stack gap={4}>
+    <DsLayoutStack gap="xxs">
       <QueryErrorAlert queries={[allSeriesListQuery]} />
-      <Text size="xs" c="dimmed">
-        {tCommonEntities('series')}
-      </Text>
-      <Combobox store={combobox} onOptionSubmit={handleSelect} withinPortal={false} disabled={!canEdit}>
-        <Combobox.DropdownTarget>
-          <InputBase
-            id={idPrefix ? `${idPrefix}-trigger` : undefined}
-            component="button"
-            type="button"
-            pointer
-            onClick={() => {
-              if (!canEdit || isPending) {
-                return;
+      <Select
+        id={idPrefix ? `${idPrefix}-trigger` : undefined}
+        label={tCommonEntities('series')}
+        searchable={isAdmin}
+        disabled={!canEdit || isPending}
+        value={selectedSeriesId}
+        searchValue={combobox.dropdownOpened ? search : (selectedSeries?.title ?? '')}
+        onSearchChange={setSearch}
+        dropdownOpened={combobox.dropdownOpened}
+        onDropdownClose={combobox.closeDropdown}
+        onDropdownOpen={() => {
+          if (!combobox.dropdownOpened) {
+            void refreshSeriesOptions().then((success) => {
+              if (success) {
+                combobox.openDropdown();
+              } else {
+                notifications.show({ message: tCommonNotifications('updateFailed'), tone: 'danger' });
               }
-              void refreshSeriesOptions().then((success) => {
-                if (success) {
-                  combobox.openDropdown();
-                  return;
-                }
-                notifications.show({ message: tCommonNotifications('updateFailed'), color: 'red' });
-              });
-            }}
-            rightSection={
-              isPending ? (
-                <Loader size={16} />
-              ) : selectedSeriesId && canEdit && canManageSelectedSeries ? (
-                <IconButton
-                  size="xs"
-                  emphasis="low"
-                  aria-label={tSeriesPostActions('remove')}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemove();
-                  }}
-                >
-                  <IconX size={14} />
-                </IconButton>
-              ) : null
-            }
-            disabled={!canEdit}
-          >
-            {selectedSeries ? (
-              <Group gap="xs">
-                <Text size="sm">{selectedSeries.title}</Text>
-                {displayOrder !== null && <LabelBadge size="xs">#{displayOrder + 1}</LabelBadge>}
-              </Group>
-            ) : selectedSeriesId ? (
-              <Text size="sm" c="dimmed">
-                {t('states.unavailable')}
-              </Text>
-            ) : (
-              <Text size="sm" c="dimmed">
-                {isLoading
-                  ? tCommonStates('loading')
-                  : seriesList.length === 0
-                    ? t('states.empty')
-                    : t('states.select')}
-              </Text>
-            )}
-          </InputBase>
-        </Combobox.DropdownTarget>
-
-        <Combobox.Dropdown>
-          {isAdmin && (
-            <Combobox.Search
-              id={idPrefix ? `${idPrefix}-search` : undefined}
-              value={search}
-              onChange={(event) => setSearch(event.currentTarget.value)}
-              placeholder={t('searchPlaceholder')}
-            />
-          )}
-          <Combobox.Options>
-            {filteredSeriesList.length === 0 && !isAdmin ? (
-              <Combobox.Empty>{seriesList.length === 0 ? t('states.notMember') : t('states.notFound')}</Combobox.Empty>
-            ) : (
-              filteredSeriesList.map((series) => (
-                <Combobox.Option key={series.id} value={series.id} active={series.id === selectedSeriesId}>
-                  <Text size="sm">{series.title}</Text>
-                </Combobox.Option>
-              ))
-            )}
-
-            {isAdmin && !exactMatch && search.trim().length > 0 && (
-              <Combobox.Option value="$create">{t('actions.createNamed', { name: search })}</Combobox.Option>
-            )}
-
-            {filteredSeriesList.length === 0 && isAdmin && search.trim().length === 0 && (
-              <Combobox.Empty>{t('states.empty')}</Combobox.Empty>
-            )}
-          </Combobox.Options>
-        </Combobox.Dropdown>
-      </Combobox>
+            });
+          }
+        }}
+        clearable={Boolean(selectedSeriesId && canEdit && canManageSelectedSeries)}
+        clearLabel={tSeriesPostActions('remove')}
+        onChange={(id) => {
+          if (id) {
+            handleSelect(id);
+          } else {
+            handleRemove();
+          }
+        }}
+        placeholder={
+          // An assigned Series outside the refreshed managed list keeps its unavailable state visible.
+          selectedSeriesId && !selectedSeries
+            ? t('states.unavailable')
+            : isLoading
+              ? tCommonStates('loading')
+              : seriesList.length === 0
+                ? t('states.empty')
+                : t('states.select')
+        }
+        data={[
+          ...seriesList.map((series) => ({ value: series.id, label: series.title })),
+          ...(isAdmin && !exactMatch && search.trim()
+            ? [{ value: '$create', label: t('actions.createNamed', { name: search.trim() }) }]
+            : []),
+        ]}
+        nothingFoundMessage={seriesList.length === 0 ? t('states.notMember') : t('states.notFound')}
+      />
+      {selectedSeriesId && displayOrder !== null ? <LabelBadge>#{displayOrder + 1}</LabelBadge> : null}
       {selectedSeriesId && canManageSelectedSeries && displayOrder !== null && canEdit && seriesPosts.length > 1 && (
-        <Group gap={6}>
+        <DsLayoutInline gap="xxs">
           <IconButton
             size="xs"
             emphasis="low"
@@ -444,11 +401,11 @@ export function SeriesSelector({
           >
             <IconChevronDown size={14} />
           </IconButton>
-          <Text size="xs" c="dimmed">
+          <DsText size="xs" tone="secondary">
             {displayOrder + 1} / {seriesPosts.length}
-          </Text>
-        </Group>
+          </DsText>
+        </DsLayoutInline>
       )}
-    </Stack>
+    </DsLayoutStack>
   );
 }

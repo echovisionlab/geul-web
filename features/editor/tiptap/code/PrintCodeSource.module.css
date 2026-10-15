@@ -7,11 +7,12 @@
     display: block;
     min-width: 0;
     overflow: visible;
-    color: #24292f;
-    background: #f6f8fa;
-    font-family: var(--mantine-font-family-monospace);
-    font-size: 8.5pt;
-    line-height: 1.45;
+    color: var(--geul-source-text);
+    background: var(--geul-source-background);
+    font-family: var(--font-mono);
+    /* Paper code: the sm role prints at 9pt beside 10.5pt running text (print type tokens). */
+    font-size: var(--geul-font-size-sm);
+    line-height: var(--geul-line-height-sm);
     overflow-wrap: anywhere;
     tab-size: 2;
     break-inside: auto;
@@ -24,9 +25,9 @@
     overflow: visible;
     padding: 8pt;
     margin: 0;
-    color: #24292f !important;
+    color: var(--geul-source-text) !important;
     border: 0 !important;
-    background: #f6f8fa !important;
+    background: var(--geul-source-background) !important;
     font: inherit;
     break-inside: auto !important;
   }

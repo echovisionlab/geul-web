@@ -73,4 +73,37 @@ describe('ContentLayoutView', () => {
     expect(layout?.getAttribute('data-has-chrome')).toBe('false');
     expect(container.querySelector('[data-content-body]')?.textContent).toContain('Body only');
   });
+
+  it('scopes the outline inset for chrome and puts reading chrome on the reading column', () => {
+    render(
+      <ContentLayoutView
+        layout={{ contentHeight: 'content', pageChrome: 'flow', footer: 'flow' }}
+        chrome={<ContentChrome measure="reading" title="Notes" />}
+      >
+        <div>Body</div>
+      </ContentLayoutView>,
+    );
+
+    const layout = container.querySelector('[data-content-layout]');
+    expect(layout?.hasAttribute('data-table-of-contents-scope')).toBe(true);
+    const chrome = container.querySelector('[data-content-chrome]');
+    expect(chrome?.getAttribute('data-measure')).toBe('reading');
+    expect(chrome?.firstElementChild?.getAttribute('data-geul-layout-size')).toBe('reading');
+    expect(chrome?.textContent).toBe('Notes');
+  });
+
+  it('keeps full-width chrome by default', () => {
+    render(
+      <ContentLayoutView
+        layout={{ contentHeight: 'content', pageChrome: 'flow', footer: 'flow' }}
+        chrome={<ContentChrome title="Page" />}
+      >
+        <div>Body</div>
+      </ContentLayoutView>,
+    );
+
+    const chrome = container.querySelector('[data-content-chrome]');
+    expect(chrome?.getAttribute('data-measure')).toBe('full');
+    expect(chrome?.querySelector('[data-geul-layout-size]')).toBeNull();
+  });
 });

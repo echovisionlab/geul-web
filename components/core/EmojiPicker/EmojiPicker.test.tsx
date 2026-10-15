@@ -1,84 +1,189 @@
 // @vitest-environment jsdom
-
 import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { EmojiPicker } from './EmojiPicker';
-
-let host: HTMLDivElement;
-let root: Root;
-
-beforeEach(() => {
-  vi.stubGlobal(
-    'ResizeObserver',
-    class {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
-    },
-  );
-  Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    value: vi.fn().mockImplementation((query: string) => ({
-      matches: false,
-      media: query,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    })),
-  });
-  host = document.createElement('div');
-  document.body.append(host);
-  root = createRoot(host);
-});
-
-afterEach(() => {
-  act(() => root.unmount());
-  host.remove();
-  vi.restoreAllMocks();
-  vi.unstubAllGlobals();
-});
-
-describe('EmojiPicker', () => {
-  it('renders controlled Core controls and reports query and item choices without editor knowledge', () => {
-    const onQueryChange = vi.fn();
-    const onSelect = vi.fn();
-    act(() => {
-      root.render(
-        <MantineProvider env="test">
-          <EmojiPicker
-            opened
+import { createRoot } from 'react-dom/client';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { EmojiPickerPanel } from './EmojiPicker';
+afterEach(() => vi.restoreAllMocks());
+describe('Core emoji collection', () => {
+  it('exposes the unchanged empty-result copy as a status while retaining the search input', async () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    const root = createRoot(host);
+    try {
+      await act(async () =>
+        root.render(
+          <EmojiPickerPanel
             title="Emoji"
-            searchPlaceholder="Search Emoji"
+            searchPlaceholder="Search"
             noResults="No results"
-            closeLabel="Close"
-            query="smile"
-            items={[{ id: 'smile', value: '😄', label: ':smile:' }]}
-            onQueryChange={onQueryChange}
-            onClose={() => undefined}
-            onSelect={onSelect}
-          />
-        </MantineProvider>,
+            query="missing"
+            items={[]}
+            onQueryChange={() => {}}
+            onSelect={() => {}}
+          />,
+        ),
       );
+      expect(host.querySelector('[role="status"]')?.textContent).toBe('No results');
+      expect(host.querySelector('input')?.getAttribute('aria-label')).toBe('Search');
+      expect(host.querySelector('[role="listbox"]')).toBeNull();
+    } finally {
+      await act(async () => root.unmount());
+      host.remove();
+    }
+  });
+
+  it('virtualizes a complete large collection and preserves actual option selection', async () => {
+    const widthDescriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientWidth');
+    const heightDescriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientHeight');
+    Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+      configurable: true,
+      get() {
+        return this.getAttribute('role') === 'listbox' ? 340 : 0;
+      },
     });
-
-    const input = document.body.querySelector<HTMLInputElement>('[aria-label="Search Emoji"]');
-    expect(input?.value).toBe('smile');
-    const option = document.body.querySelector<HTMLButtonElement>('[role="option"][aria-label=":smile:"]');
-    expect(option?.textContent).toBe('😄');
-    expect(option?.dataset.size).toBe('md');
-
-    act(() => option?.click());
-    expect(onSelect).toHaveBeenCalledWith({ id: 'smile', value: '😄', label: ':smile:' });
-
-    act(() => {
-      if (!input) {
-        return;
-      }
-      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
-      setter?.call(input, 'heart');
-      input.dispatchEvent(new Event('input', { bubbles: true }));
+    Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
+      configurable: true,
+      get() {
+        return this.getAttribute('role') === 'listbox' ? 252 : 0;
+      },
     });
-    expect(onQueryChange).toHaveBeenCalledWith('heart');
+    const container = document.createElement('div');
+    document.body.append(container);
+    const root = createRoot(container);
+    const onSelect = vi.fn();
+    const items = Array.from({ length: 2000 }, (_, index) => ({
+      id: String(index),
+      label: `Emoji ${index}`,
+      value: '🔥',
+    }));
+    await act(async () =>
+      root.render(
+        <EmojiPickerPanel
+          title="Emoji"
+          searchPlaceholder="Search"
+          noResults="No results"
+          query=""
+          items={items}
+          onQueryChange={() => {}}
+          onSelect={onSelect}
+        />,
+      ),
+    );
+    const options = container.querySelectorAll<HTMLElement>('[role="option"]');
+    expect(options.length).toBeGreaterThan(0);
+    expect(options.length).toBeLessThan(100);
+    expect(options[0]?.getAttribute('aria-label')).toBe('Emoji 0');
+    await act(async () => options[0]?.click());
+    expect(onSelect).toHaveBeenCalledWith(items[0]);
+    await act(async () => {
+      options[0]?.focus();
+      options[0]?.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }));
+    });
+    const lastOption = container.querySelector<HTMLElement>('[role="option"][aria-label="Emoji 1999"]');
+    expect(lastOption).not.toBeNull();
+    expect(document.activeElement).toBe(lastOption);
+    await act(async () => lastOption?.click());
+    expect(onSelect).toHaveBeenCalledWith(items.at(-1));
+    expect(container.querySelectorAll('[role="option"]').length).toBeLessThan(100);
+    await act(async () => root.unmount());
+    container.remove();
+    if (widthDescriptor) {
+      Object.defineProperty(HTMLElement.prototype, 'clientWidth', widthDescriptor);
+    } else {
+      Reflect.deleteProperty(HTMLElement.prototype, 'clientWidth');
+    }
+    if (heightDescriptor) {
+      Object.defineProperty(HTMLElement.prototype, 'clientHeight', heightDescriptor);
+    } else {
+      Reflect.deleteProperty(HTMLElement.prototype, 'clientHeight');
+    }
+  });
+  it('activates compact items through a native pointer press', async () => {
+    class TestPointerEvent extends MouseEvent {
+      pointerType = 'mouse';
+      pointerId = 1;
+      width = 1;
+      height = 1;
+      isPrimary = true;
+    }
+    vi.stubGlobal('PointerEvent', TestPointerEvent);
+    const container = document.createElement('div');
+    document.body.append(container);
+    const root = createRoot(container);
+    const onSelect = vi.fn();
+    const item = { id: 'rocket', label: ':rocket:', value: '🚀' };
+    try {
+      await act(async () => {
+        root.render(
+          <EmojiPickerPanel
+            density="compact"
+            title="Emoji"
+            searchPlaceholder="Search"
+            noResults="None"
+            query="rocket"
+            items={[item]}
+            onQueryChange={() => {}}
+            onSelect={onSelect}
+          />,
+        );
+      });
+      const option = container.querySelector<HTMLElement>('[role="option"]')!;
+      await act(async () => {
+        option.dispatchEvent(
+          new TestPointerEvent('pointerdown', { bubbles: true, cancelable: true, button: 0, clientX: 1, clientY: 1 }),
+        );
+        option.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0, detail: 1 }));
+        option.focus();
+      });
+      await act(async () => {
+        option.dispatchEvent(
+          new TestPointerEvent('pointerup', { bubbles: true, cancelable: true, button: 0, clientX: 1, clientY: 1 }),
+        );
+        option.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, button: 0, detail: 1 }));
+        option.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0, detail: 1 }));
+      });
+      expect(onSelect).toHaveBeenCalledExactlyOnceWith(item);
+    } finally {
+      await act(async () => root.unmount());
+      container.remove();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('uses compact owned cells and a sparse grid for short search results', async () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+    const root = createRoot(container);
+    const onSelect = vi.fn();
+    const item = { id: 'rocket', label: ':rocket:', value: '🚀' };
+    await act(async () =>
+      root.render(
+        <EmojiPickerPanel
+          density="compact"
+          title="Emoji"
+          searchPlaceholder="Search"
+          noResults="No results"
+          query="rocket"
+          items={[item]}
+          onQueryChange={() => {}}
+          onSelect={onSelect}
+        />,
+      ),
+    );
+    const grid = container.querySelector('[role="listbox"]');
+    expect(grid?.getAttribute('data-core-emoji-density')).toBe('compact');
+    expect(grid?.getAttribute('data-core-emoji-sparse')).toBe('true');
+    expect(container.querySelector('[data-geul-input-size]')?.getAttribute('data-geul-input-size')).toBe('xs');
+    const option = container.querySelector<HTMLElement>('[role="option"]');
+    expect(option?.getAttribute('data-control-size')).toBe('xs');
+    expect(option?.parentElement?.style.height).toBe('30px');
+    await act(async () => {
+      option?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0 }));
+      option?.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, button: 0 }));
+      option?.click();
+    });
+    expect(onSelect).toHaveBeenCalledWith(item);
+    await act(async () => root.unmount());
+    container.remove();
   });
 });

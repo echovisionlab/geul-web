@@ -15,22 +15,12 @@
 .root {
   min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--mantine-color-default-border);
-  background: var(--mantine-color-body);
-  color: var(--mantine-color-text);
 }
 
 .body,
 .resultPane {
   min-width: 0;
   max-width: 100%;
-}
-
-.header {
-  min-height: var(--chrome-row-height, 36px);
-  padding: 6px 8px;
-  border-bottom: 1px solid var(--mantine-color-default-border);
-  background: var(--mantine-color-default-hover);
 }
 
 .body {
@@ -43,7 +33,7 @@
 
 .runtimeControls {
   margin: 0;
-  padding: 4px 8px;
+  padding: var(--geul-spacing-xxs) var(--geul-spacing-xs);
 }
 
 .preview {
@@ -51,7 +41,7 @@
   width: 100%;
   max-width: 100%;
   overflow: hidden;
-  background: var(--mantine-color-dark-9, #101113);
+  background: var(--geul-canvas-dark);
 }
 
 .canvas {
@@ -60,16 +50,16 @@
   height: 100%;
   object-fit: contain;
   object-position: center;
-  background: #000;
+  background: var(--geul-canvas-black);
   touch-action: none;
 }
 
 .error {
   position: absolute;
-  inset: auto 8px 8px;
+  inset: auto var(--geul-spacing-xs) var(--geul-spacing-xs);
 }
 
-@media (max-width: 48em) {
+@media (width < $mantine-breakpoint-sm) {
   .header {
     align-items: flex-start;
   }

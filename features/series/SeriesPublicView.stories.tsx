@@ -1,5 +1,5 @@
+import { useTranslations } from 'next-intl';
 import type { Meta, StoryObj } from '@storybook/nextjs';
-import { Button } from '@/components/core/Button';
 import { SeriesPublicPostsView, SeriesPublicView } from './SeriesPublicView';
 
 const posts = [
@@ -20,6 +20,7 @@ const posts = [
 ];
 
 function StoryView({ withImage = false, empty = false }: { withImage?: boolean; empty?: boolean }) {
+  const t = useTranslations();
   const featuredImageUrl = withImage
     ? `data:image/svg+xml,${encodeURIComponent(
         '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800"><rect width="1200" height="800" fill="#1f2937"/><circle cx="850" cy="260" r="180" fill="#d97706"/><path d="M0 650 L420 300 L720 650 Z" fill="#374151"/></svg>',
@@ -28,21 +29,17 @@ function StoryView({ withImage = false, empty = false }: { withImage?: boolean; 
 
   return (
     <div style={{ width: 'min(1040px, 94vw)' }}>
-      <SeriesPublicView
-        title="Night Walks"
-        featuredImageUrl={featuredImageUrl}
-        postsLabel="Posts"
-        controls={<Button size="xs">Share</Button>}
-      >
+      <SeriesPublicView title="Night Walks" featuredImageUrl={featuredImageUrl} postsLabel={t('common.entities.posts')}>
         <SeriesPublicPostsView
+          tableLabel={t('common.entities.posts')}
           posts={empty ? [] : posts}
           labels={{
-            title: 'Title',
-            authors: 'Authors',
-            published: 'Published',
-            empty: 'No posts found',
-            untitled: 'Untitled',
-            unknown: 'Unknown',
+            title: t('common.labels.title'),
+            authors: t('common.labels.authors'),
+            published: t('common.labels.published'),
+            empty: t('common.messages.noPostsFound'),
+            untitled: t('common.states.untitled'),
+            unknown: t('common.states.unknown'),
           }}
         />
       </SeriesPublicView>
@@ -63,3 +60,8 @@ type Story = StoryObj<typeof meta>;
 export const TextOnly: Story = {};
 export const WithFeaturedImage: Story = { args: { withImage: true } };
 export const EmptySeries: Story = { args: { empty: true } };
+
+export const NarrowWithImage: Story = {
+  args: { withImage: true },
+  globals: { viewport: { value: 'phone', isRotated: false } },
+};

@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemTestProvider as DesignSystemProvider } from '@/test/TestProviders';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { prepareSocialIcon } from '@/components/core/Social';
 import { UserProfileView, type UserProfileViewProps } from './UserProfileView';
 
 class ResizeObserverMock {
@@ -95,6 +97,7 @@ function createProps(overrides: Partial<UserProfileViewProps> = {}): UserProfile
           href: 'https://instagram.com/june',
           label: 'Instagram',
           platform: 'instagram',
+          glyph: prepareSocialIcon('instagram'),
         },
       ],
       banned: false,
@@ -125,9 +128,9 @@ function createProps(overrides: Partial<UserProfileViewProps> = {}): UserProfile
 function renderProfile(props: UserProfileViewProps) {
   act(() => {
     root.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <UserProfileView {...props} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
 }

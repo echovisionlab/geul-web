@@ -1,7 +1,8 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
+
 import { LabelBadge, StatusBadge } from '@/components/core/Badge';
 import { TextButton } from '@/components/core/TextButton';
 import {
@@ -11,7 +12,7 @@ import {
 import { ThemedAssetImage } from '@/features/media/ThemedAssetImage';
 import { normalizeEnumToken } from '@/lib/i18n/admin-labels';
 import type { ColumnDef } from '@/lib/types/common/data-table';
-import { LabelRowMenu } from './LabelRowMenu';
+import { LabelRowMenu, type LabelRowMenuProps } from './LabelRowMenu';
 
 interface LabelRow {
   id: string;
@@ -27,15 +28,18 @@ interface LabelRow {
   updatedAt: Date | null;
 }
 
-function getColumns(labels: {
-  logo: string;
-  label: string;
-  slug: string;
-  status: string;
-  releases: string;
-  draft: string;
-  published: string;
-}): ColumnDef<LabelRow>[] {
+function getColumns(
+  labels: {
+    logo: string;
+    label: string;
+    slug: string;
+    status: string;
+    releases: string;
+    draft: string;
+    published: string;
+  },
+  rowActions?: Omit<LabelRowMenuProps, 'label'>,
+): ColumnDef<LabelRow>[] {
   return [
     {
       key: 'logo',
@@ -71,9 +75,9 @@ function getColumns(labels: {
       key: 'slug',
       header: labels.slug,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           /{row.slug}
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -99,30 +103,47 @@ function getColumns(labels: {
       kind: 'action',
       header: '',
       width: 50,
-      cell: (row) => <LabelRowMenu label={row} />,
+      cell: (row) => (
+        <LabelRowMenu
+          label={row}
+          previewAction={rowActions?.previewAction}
+          deleteAction={rowActions?.deleteAction}
+          onDeleted={rowActions?.onDeleted}
+        />
+      ),
     },
   ];
 }
 
 interface LabelsTableContentProps {
+  rowActions?: Omit<LabelRowMenuProps, 'label'>;
   result: ServerDataTableSelectableSectionProps<LabelRow>['result'];
   searchPlaceholder: string;
   filterFields: ServerDataTableSelectableSectionProps<LabelRow>['filterFields'];
   sortFields: ServerDataTableSelectableSectionProps<LabelRow>['sortFields'];
 }
 
-export function LabelsTableContent({ result, searchPlaceholder, filterFields, sortFields }: LabelsTableContentProps) {
+export function LabelsTableContent({
+  result,
+  searchPlaceholder,
+  filterFields,
+  sortFields,
+  rowActions,
+}: LabelsTableContentProps) {
   const tCommon = useTranslations('common');
   const tAdmin = useTranslations('adminList');
-  const columns = getColumns({
-    logo: tCommon('labels.logo'),
-    label: tCommon('entities.label'),
-    slug: tCommon('labels.slug'),
-    status: tCommon('labels.status'),
-    releases: tCommon('entities.releases'),
-    draft: tCommon('statuses.draft'),
-    published: tCommon('statuses.published'),
-  });
+  const columns = getColumns(
+    {
+      logo: tCommon('labels.logo'),
+      label: tCommon('entities.label'),
+      slug: tCommon('labels.slug'),
+      status: tCommon('labels.status'),
+      releases: tCommon('entities.releases'),
+      draft: tCommon('statuses.draft'),
+      published: tCommon('statuses.published'),
+    },
+    rowActions,
+  );
 
   return (
     <ServerDataTableSelectableSection

@@ -9,6 +9,7 @@ import {
 } from '@echovisionlab/geul-common/collaboration/post-series';
 import { CollaborativeDocumentType, createDocumentName } from '@echovisionlab/geul-common/collaboration/document';
 import type * as Y from 'yjs';
+import { getProviderAccessEnded, getProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import { useHocuspocusConnection } from '@/lib/hooks/useHocuspocusConnection';
 
 interface PostSeriesRoomState {
@@ -55,12 +56,17 @@ export function usePostSeriesCollaboration(seriesId: string, locale: string | nu
   const setField = useCallback(
     (field: keyof PostSeriesLocaleFields, value: string) => {
       const document = connection.doc;
-      if (!document || !connection.isSynced) {
+      if (
+        !document ||
+        !connection.isSynced ||
+        getProviderAccessEnded(connection.provider) ||
+        getProviderAccessLevel(connection.provider) === 'view'
+      ) {
         return;
       }
       document.transact(() => setPostSeriesLocaleField(document, field, value));
     },
-    [connection.doc, connection.isSynced],
+    [connection.doc, connection.isSynced, connection.provider],
   );
 
   return {

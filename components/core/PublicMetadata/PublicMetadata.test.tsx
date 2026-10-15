@@ -1,14 +1,53 @@
+import { I18nProvider as DesignSystemProvider } from 'react-aria-components';
 import type { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { PublicMetadataLink, PublicMetadataRow, PublicMetadataRows, PublicMetadataValueGroup } from './PublicMetadata';
+import { MetadataPair } from './MetadataPair';
 
 function renderMetadata(node: ReactNode) {
-  return renderToStaticMarkup(<MantineProvider>{node}</MantineProvider>);
+  return renderToStaticMarkup(<DesignSystemProvider>{node}</DesignSystemProvider>);
 }
 
 describe('PublicMetadata', () => {
+  it('shares the compact scale with nested metadata links and blocks runtime style escapes', () => {
+    const html = renderMetadata(
+      <MetadataPair label="Visibility" size="xs" {...({ style: { fontSize: 32 }, className: 'escape' } as {})}>
+        <PublicMetadataLink href="/visibility/private">Private</PublicMetadataLink>
+      </MetadataPair>,
+    );
+    expect(html).toContain('data-size="xs"');
+    expect(html).not.toContain('data-size="sm"');
+    expect(html).not.toContain('font-size:32');
+    expect(html).not.toContain('escape');
+    expect(html).toContain('href="/visibility/private"');
+    expect(html).toContain('role="term"');
+    expect(html).toMatch(/role="definition" aria-labelledby="[^"]+"/);
+  });
+  it('separates group values with a hidden slash only when requested and centers labels with centered values', () => {
+    const html = renderMetadata(
+      <PublicMetadataRows>
+        <PublicMetadataRow label="Tags" valueAlign="center">
+          <PublicMetadataValueGroup separator="slash">
+            <span>Field recording</span>
+            <span>Archival notes</span>
+            <span>Rooms</span>
+          </PublicMetadataValueGroup>
+        </PublicMetadataRow>
+        <PublicMetadataRow label="Labels">
+          <PublicMetadataValueGroup>
+            <span>One</span>
+            <span>Two</span>
+          </PublicMetadataValueGroup>
+        </PublicMetadataRow>
+      </PublicMetadataRows>,
+    );
+
+    expect(html.match(/aria-hidden="true">\/<\/span>/gu)).toHaveLength(2);
+    expect(html).toMatch(/role="term"[^>]*data-align="center"/u);
+    expect(html).toMatch(/role="term"[^>]*data-align="baseline"/u);
+  });
   it('renders compact label/value rows and value groups', () => {
     const html = renderMetadata(
       <PublicMetadataRows>
@@ -22,6 +61,8 @@ describe('PublicMetadata', () => {
     );
 
     expect(html).toContain('Artists');
+    expect(html).toContain('role="term"');
+    expect(html).toMatch(/role="definition" aria-labelledby="[^"]+"/);
     expect(html).toContain('href="/artist/one"');
     expect(html).toContain('href="/artist/two"');
     expect(html).toContain('One');

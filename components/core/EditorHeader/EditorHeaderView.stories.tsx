@@ -1,9 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
-import { IconHistory } from '@tabler/icons-react';
+import { useArgs, useState } from 'storybook/preview-api';
+import { expect, within, userEvent } from 'storybook/test';
+import { Button } from '../Button';
 
 import { EditorHeaderView, type EditorHeaderViewLabels } from './EditorHeaderView';
 
 const labels: EditorHeaderViewLabels = {
+  title: 'Title',
   back: 'Back',
   untitled: 'Untitled',
   delete: 'Delete',
@@ -22,6 +25,22 @@ const meta: Meta<typeof EditorHeaderView> = {
   title: 'Core/Layout/EditorHeader',
   component: EditorHeaderView,
   parameters: { layout: 'padded' },
+  render: function HeaderPreview(args) {
+    const [, updateArgs] = useArgs();
+    const [deleted, setDeleted] = useState(false);
+    if (deleted) {
+      return <Button onClick={() => setDeleted(false)}>Restore entry</Button>;
+    }
+    return (
+      <EditorHeaderView
+        {...args}
+        hideBack
+        onTitleChange={args.onTitleChange ? (title) => updateArgs({ title }) : undefined}
+        onStatusChange={args.onStatusChange ? (status) => updateArgs({ status }) : undefined}
+        onDelete={args.onDelete ? () => setDeleted(true) : undefined}
+      />
+    );
+  },
   args: {
     title: 'Field recordings',
     isConnected: true,
@@ -56,13 +75,6 @@ export const EditableWithCollaboration: Story = {
     onTitleChange: () => {},
     onStatusChange: () => {},
     groupStatusWithCollab: true,
-    collabActions: [
-      {
-        label: 'Version history',
-        icon: <IconHistory size={14} />,
-        onClick: () => {},
-      },
-    ],
   },
 };
 
@@ -74,4 +86,53 @@ export const Destructive: Story = {
       message: 'This action cannot be undone.',
     },
   },
+};
+
+export const PhoneActions: Story = {
+  ...EditableWithCollaboration,
+  globals: { viewport: { value: 'phone', isRotated: false } },
+  args: {
+    ...EditableWithCollaboration.args,
+    labels: { ...labels, collabButton: 'Draft · Collaborative editing' },
+    onDelete: () => {},
+  },
+};
+
+const checkSaveStatus: Story['play'] = async ({ canvasElement, args }) => {
+  // The indicator names itself in the active locale, so find it by status, not by English text.
+  const indicator = within(canvasElement)
+    .getAllByRole('img')
+    .find((element) => element.getAttribute('data-collab-status') === args.saveState);
+  await expect(indicator).toBeDefined();
+  const name = indicator!.getAttribute('aria-label') ?? '';
+  await expect(name).not.toBe('');
+  // A real pointer arrives by moving; React Aria shows hover hints only after pointer modality.
+  await userEvent.pointer([{ target: canvasElement }, { target: indicator! }]);
+  await userEvent.hover(indicator!);
+  await expect(await within(document.body).findByRole('tooltip', {}, { timeout: 2000 })).toHaveTextContent(name);
+  await userEvent.unhover(indicator!);
+};
+export const Saved: Story = {
+  play: checkSaveStatus,
+  args: { saveState: 'saved', labels: { ...labels, syncStatus: 'Saved' } },
+};
+export const Saving: Story = {
+  play: checkSaveStatus,
+  args: { saveState: 'saving', labels: { ...labels, syncStatus: 'Saving…' } },
+};
+export const Offline: Story = {
+  play: checkSaveStatus,
+  args: { saveState: 'offline', labels: { ...labels, syncStatus: 'Offline · edits kept on this device' } },
+};
+export const Error: Story = {
+  play: checkSaveStatus,
+  args: { saveState: 'error', labels: { ...labels, syncStatus: 'Save failed · retrying…' } },
+};
+export const Rejected: Story = {
+  play: checkSaveStatus,
+  args: { saveState: 'rejected', labels: { ...labels, syncStatus: "Some edits couldn't be saved" } },
+};
+export const Reload: Story = {
+  play: checkSaveStatus,
+  args: { saveState: 'reload', labels: { ...labels, syncStatus: 'Reconnecting · restoring edits…' } },
 };

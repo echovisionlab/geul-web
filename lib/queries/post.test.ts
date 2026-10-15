@@ -22,6 +22,7 @@ const mocks = vi.hoisted(() => ({
 
 const postClient = vi.hoisted(() => ({
   getPost: vi.fn(),
+  getPostEditorDocument: vi.fn(),
   listPostsAdmin: vi.fn(),
 }));
 
@@ -427,5 +428,36 @@ describe('post server queries', () => {
     const transportError = new Error('connection closed');
     publicPostClient.get.mockRejectedValueOnce(transportError);
     await expect(queries.getPostViewWithToken('post', 'token')).rejects.toBe(transportError);
+  });
+});
+
+describe('authorized Post SSR snapshot', () => {
+  it('preserves revision, fallback locale, read-only permission, media and body', async () => {
+    mocks.createPostClient.mockResolvedValue(postClient);
+    postClient.getPostEditorDocument.mockResolvedValue({
+      document: localizedDocument(),
+      locale: 'ko',
+      sourceLocale: 'en',
+      localeExists: false,
+      documentRevision: 'revision-A',
+      editable: false,
+      blockMedia: [],
+    });
+    const snapshot = await queries.getPostEditorSnapshot('post-1', 'ko');
+    expect(postClient.getPostEditorDocument).toHaveBeenCalledWith({ postId: 'post-1', locale: 'ko' });
+    expect(snapshot).toMatchObject({
+      documentRevision: 'revision-A',
+      localeExists: false,
+      editable: false,
+      title: '',
+      summary: '',
+      blockMedia: [],
+      content: { type: 'doc' },
+    });
+  });
+  it('does not fall back to public content after authorization denial', async () => {
+    mocks.createPostClient.mockResolvedValue(postClient);
+    postClient.getPostEditorDocument.mockRejectedValue(new ConnectError('denied', Code.NotFound));
+    expect(await queries.getPostEditorSnapshot('post-1', 'ko')).toBeNull();
   });
 });

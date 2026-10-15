@@ -5,6 +5,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MapViewConfig } from '@/lib/types/map/model';
 import { MapViewEmbedded } from './MapViewEmbedded';
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 
 const mocks = vi.hoisted(() => ({
   themeResolution: {
@@ -30,11 +31,6 @@ vi.mock('@/features/map/MapLibreMap', () => {
 
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
-}));
-
-vi.mock('@mantine/core', () => ({
-  Alert: ({ children }: { children: unknown }) => children,
-  useComputedColorScheme: () => 'light',
 }));
 
 vi.mock('@/features/site/PageLoader', () => ({
@@ -99,7 +95,11 @@ afterEach(() => {
 describe('MapViewEmbedded runtime loading', () => {
   it('starts one runtime import only for a used map and overlaps it with theme resolution', async () => {
     await act(async () => {
-      root?.render(<MapViewEmbedded config={emptyConfig} />);
+      root?.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <MapViewEmbedded config={emptyConfig} />
+        </DesignSystemProvider>,
+      );
       await Promise.resolve();
     });
 
@@ -111,7 +111,11 @@ describe('MapViewEmbedded runtime loading', () => {
     } as MapViewConfig;
 
     await act(async () => {
-      root?.render(<MapViewEmbedded config={mapConfig} />);
+      root?.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <MapViewEmbedded config={mapConfig} />
+        </DesignSystemProvider>,
+      );
       await Promise.resolve();
     });
 
@@ -123,10 +127,32 @@ describe('MapViewEmbedded runtime loading', () => {
     mocks.themeResolution.isLoading = false;
 
     await act(async () => {
-      root?.render(<MapViewEmbedded config={mapConfig} />);
+      root?.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <MapViewEmbedded config={mapConfig} />
+        </DesignSystemProvider>,
+      );
       await Promise.resolve();
     });
 
     expect(mocks.mapRuntimeImportCount).toBe(1);
+  });
+  it('preserves authored map geometry and caption while the theme is unavailable', async () => {
+    mocks.themeResolution.isLoading = false;
+    mocks.themeResolution.isError = true;
+    await act(async () => {
+      root?.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <MapViewEmbedded
+            config={{ ...emptyConfig, aspectRatio: '4:3' }}
+            allowEmpty
+            caption={<span>Map caption</span>}
+          />
+        </DesignSystemProvider>,
+      );
+    });
+    expect(host?.querySelector<HTMLElement>('[style*="aspect-ratio"]')?.style.aspectRatio).toBe('4 / 3');
+    expect(host?.textContent).toContain('themeUnavailable');
+    expect(host?.textContent).toContain('Map caption');
   });
 });

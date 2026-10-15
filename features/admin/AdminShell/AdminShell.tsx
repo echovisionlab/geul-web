@@ -1,7 +1,9 @@
 'use client';
+import { breakpointQuery } from '@/components/core/Layout/breakpoints';
+
+import { useComputedColorScheme, useColorScheme } from '@/lib/providers/DesignSystemProvider';
 
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
-import Link from '@/components/core/Navigation';
 import { usePathname } from 'next/navigation';
 import {
   IconArticle,
@@ -34,7 +36,7 @@ import {
   IconVinyl,
 } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { useComputedColorScheme, useMantineColorScheme } from '@mantine/core';
+
 import { useMediaQuery, useMounted } from '@mantine/hooks';
 import { SiteLogo } from '@/features/site/SiteLogo';
 import type { AdminNavigationSection } from '@/features/admin/ui/AdminNavigation';
@@ -65,13 +67,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const tCommonEntities = useTranslations('common.entities');
   const tFileManager = useTranslations('fileManager');
   const pathname = usePathname();
-  const isDesktop = useMediaQuery('(min-width: 48em)');
+  const isDesktop = useMediaQuery(breakpointQuery('sm', 'at-least'));
   const [desktopNavigationExpanded, setDesktopNavigationExpanded] = useState(true);
   const [openSections, setOpenSections] = useState<Set<string>>(new Set());
-  const { toggleColorScheme } = useMantineColorScheme();
-  const computedColorScheme = useComputedColorScheme('light', {
-    getInitialValueInEffect: false,
-  });
+  const { toggleColorScheme } = useColorScheme();
+  const computedColorScheme = useComputedColorScheme();
   const mounted = useMounted();
 
   const routeSections = useMemo<AdminNavRouteSection[]>(
@@ -267,7 +267,6 @@ export function AdminShell({ children }: { children: ReactNode }) {
       }}
       logoSlot={<SiteLogo height={14} />}
       compactLogoSlot={<SiteLogo height={12} />}
-      linkComponent={Link}
     >
       {children}
     </AdminShellView>

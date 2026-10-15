@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 import { marqueeEntitySchema } from '../marquee/schema';
 
 export const clientMarqueeSchema = marqueeEntitySchema;

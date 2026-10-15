@@ -6,6 +6,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SESSION_INVALIDATED_EVENT } from '@/lib/auth/session-events';
 import type { SessionData } from '@/lib/session-data';
 import { SessionProvider, useSessionContext } from './SessionProvider';
+import { getActiveMember, resetActiveMemberForTests } from '@/lib/auth/active-member';
+
+const leaveMocks = vi.hoisted(() => ({ prepare: vi.fn(async () => undefined) }));
+vi.mock('@/lib/editor/leave-with-durable-edits', () => ({ prepareToLeaveWithDurableEdits: leaveMocks.prepare }));
 
 const cookieMocks = vi.hoisted(() => ({
   clear: vi.fn(),
@@ -100,6 +104,8 @@ beforeEach(() => {
   cookieMocks.write.mockReset();
   sessionRenders = 0;
   observedSession = null;
+  resetActiveMemberForTests();
+  leaveMocks.prepare.mockClear();
   window.history.replaceState({}, '', '/onboarding/nickname');
 });
 
@@ -196,7 +202,6 @@ describe('SessionProvider', () => {
     { ...sessionFixture, onboarded: false },
     { ...sessionFixture, nickname_suggestion: 'Suggested' },
     ...Object.entries({
-      id: 'other',
       nickname: 'Other',
       email: null,
       image: '/avatar',
@@ -392,5 +397,40 @@ describe('SessionProvider', () => {
     await act(async () => finishBody(sessionFixture));
 
     expect(container.textContent).toContain('New session:settled');
+  });
+
+  it('reloads instead of running editors when another member appears in this page', async () => {
+    const reload = vi.fn();
+    vi.stubGlobal('location', { ...window.location, reload, pathname: '/onboarding/nickname' });
+    const other = { ...sessionFixture, user: { ...sessionFixture.user, id: 'other' } } as SessionData;
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(successfulResponse(other)));
+    await renderProvider();
+    expect(getActiveMember()).toBe(sessionFixture.user.id);
+    observedSession = null;
+    await act(async () => window.dispatchEvent(new Event('focus')));
+    // Nothing below the provider runs with the new session before the reload.
+    expect(observedSession).toBeNull();
+    expect(getActiveMember()).toBe(sessionFixture.user.id);
+    await vi.waitFor(() => expect(reload).toHaveBeenCalledOnce());
+    expect(leaveMocks.prepare).toHaveBeenCalledOnce();
+  });
+
+  it('keeps the member through a lost session so its unsaved edits stay durable', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(successfulResponse(null as unknown as SessionData)));
+    await renderProvider();
+    await act(async () => window.dispatchEvent(new Event('focus')));
+    expect(observedSession?.data).toBeNull();
+    expect(getActiveMember()).toBe(sessionFixture.user.id);
+  });
+
+  it('reloads, without the leave prompt, when its member signs out in another tab', async () => {
+    const reload = vi.fn();
+    vi.stubGlobal('location', { ...window.location, reload, pathname: '/onboarding/nickname' });
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(successfulResponse(sessionFixture)));
+    await renderProvider();
+    const otherTab = new BroadcastChannel('geul:active-member:v1');
+    otherTab.postMessage({ signedOut: sessionFixture.user.id });
+    await vi.waitFor(() => expect(reload).toHaveBeenCalledOnce());
+    otherTab.close();
   });
 });

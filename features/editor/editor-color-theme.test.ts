@@ -1,16 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { EDITOR_COLOR_VALUES } from './toolbars/EditorColorStyleButton';
+import { authoredEditorPalettes, primitiveTokens, semanticThemes } from '@/components/core/design-tokens';
+import { theme, themeVariables } from '@/theme';
 
 const read = (relativePath: string) => readFileSync(new URL(relativePath, import.meta.url), 'utf8');
-
-function hexVariable(css: string, name: string): string {
-  const value = css.match(new RegExp(`--${name}: (#[0-9a-f]{6});`, 'i'))?.[1];
-  if (!value) {
-    throw new Error(`Missing hex color variable: ${name}`);
-  }
-  return value;
-}
 
 function relativeLuminance(hex: string): number {
   const channel = (offset: number) => {
@@ -31,16 +25,19 @@ function contrastRatio(first: string, second: string): number {
 
 describe('editor semantic color theme', () => {
   it('defines every durable text and background value for light and dark themes', () => {
-    const variables = read('../../lib/styles/variables.css');
+    const variables = read('../../lib/styles/design-tokens.css');
 
     EDITOR_COLOR_VALUES.forEach((color) => {
       ['text', 'background'].forEach((kind) => {
         const declaration = `--editor-${kind}-color-${color}:`;
-        expect(variables.split(declaration)).toHaveLength(3);
+        // root, system-dark, explicit-light, explicit-dark and print (light on paper) share one generated authority.
+        expect(variables.split(declaration)).toHaveLength(6);
       });
     });
-    expect(variables).toContain("[data-mantine-color-scheme='dark'] {");
-    expect(variables).toContain('--editor-background-color-default: transparent;');
+    expect(variables).toContain("[data-geul-theme='dark'] {");
+    expect(variables).toContain('@media print');
+    expect(variables).toContain('--editor-background-color-default: var(--geul-document-background-default);');
+    expect(read('../../lib/styles/variables.css')).not.toContain('--editor-');
   });
 
   it('routes generated document DOM and table cells through the same semantic tokens', () => {
@@ -66,27 +63,77 @@ describe('editor semantic color theme', () => {
 
     expect(quoteRule).toBeDefined();
     expect(quoteRule).toContain('min-height: 1lh;');
-    expect(quoteRule).toContain('font-size: var(--mantine-font-size-md);');
-    expect(quoteRule).toContain('line-height: var(--mantine-line-height-md);');
+    expect(quoteRule).toContain('font-size: var(--geul-font-size-md);');
+    expect(quoteRule).toContain('line-height: var(--geul-line-height-document);');
   });
 
-  it('keeps light-theme text readable on white and on its same-name background', () => {
-    const allVariables = read('../../lib/styles/variables.css');
-    const paletteStart = allVariables.indexOf('/* Durable editor color names');
-    const darkPaletteStart = allVariables.indexOf("[data-mantine-color-scheme='dark'] {", paletteStart);
-    const variables = allVariables.slice(paletteStart, darkPaletteStart);
+  it('keeps both themes readable on document surfaces, highlights and matching backgrounds', () => {
+    for (const [mode, roles] of Object.entries(semanticThemes)) {
+      EDITOR_COLOR_VALUES.filter((color) => color !== 'default').forEach((color) => {
+        const text = roles[`document-text-${color}`];
+        const background = roles[`document-background-${color}`];
+        expect(contrastRatio(text, roles.surface), `${mode}: ${color} on surface`).toBeGreaterThanOrEqual(4.5);
+        expect(contrastRatio(text, roles.background), `${mode}: ${color} on document`).toBeGreaterThanOrEqual(4.5);
+        expect(contrastRatio(text, background), `${mode}: ${color} on ${color}`).toBeGreaterThanOrEqual(4.5);
+        expect(contrastRatio(roles['text-primary'], background), `${mode}: default on ${color}`).toBeGreaterThanOrEqual(
+          4.5,
+        );
+      });
+      for (const textColor of EDITOR_COLOR_VALUES) {
+        for (const backgroundColor of EDITOR_COLOR_VALUES) {
+          const text = roles[`document-text-${textColor}`];
+          const background =
+            backgroundColor === 'default' ? roles.surface : roles[`document-background-${backgroundColor}`];
+          expect(contrastRatio(text, background), `${mode}: ${textColor} on ${backgroundColor}`).toBeGreaterThanOrEqual(
+            4.5,
+          );
+        }
+      }
+    }
+  });
 
-    EDITOR_COLOR_VALUES.filter((color) => color !== 'default').forEach((color) => {
-      const text = hexVariable(variables, `editor-text-color-${color}`);
-      const background = hexVariable(variables, `editor-background-color-${color}`);
-      expect(contrastRatio(text, '#ffffff'), `${color} on white`).toBeGreaterThanOrEqual(4.5);
-      expect(contrastRatio(text, background), `${color} on ${color}`).toBeGreaterThanOrEqual(4.5);
-    });
+  it('projects all durable names through the default theme and its runtime variable adapter', () => {
+    for (const mode of ['light', 'dark'] as const) {
+      for (const kind of ['text', 'background'] as const) {
+        for (const name of EDITOR_COLOR_VALUES) {
+          const role = `document-${kind}-${name}` as const;
+          const alias = `var(--geul-${role})`;
+          expect(authoredEditorPalettes[mode][`${kind}-color-${name}`]).toBe(alias);
+          expect(theme[mode][role]).toBe(semanticThemes[mode][role]);
+          expect(themeVariables(mode)[`--geul-${role}`]).toBe(semanticThemes[mode][role]);
+          expect(themeVariables(mode)[`--editor-${kind}-color-${name}`]).toBe(alias);
+          expect(typeof semanticThemes[mode][role]).toBe('string');
+        }
+      }
+    }
+  });
+
+  it('reuses the default color families and supplies the missing brown, purple and pink grades', () => {
+    const names = ['brown', 'red', 'orange', 'green', 'blue', 'purple', 'pink'] as const;
+    for (const name of names) {
+      expect(semanticThemes.light[`document-text-${name}`]).toBe(primitiveTokens.colors[name][700]);
+      expect(semanticThemes.dark[`document-text-${name}`]).toBe(primitiveTokens.colors[name][300]);
+      expect(semanticThemes.light[`document-background-${name}`]).toBe(primitiveTokens.colors[name][50]);
+      expect(semanticThemes.dark[`document-background-${name}`]).toBe(primitiveTokens.colors[name][900]);
+    }
+    for (const name of ['brown', 'purple', 'pink'] as const) {
+      const family = primitiveTokens.colors[name];
+      expect(Object.keys(family)).toEqual(['50', '100', '200', '300', '400', '500', '600', '700', '800', '900']);
+      const luminances = Object.values(family).map(relativeLuminance);
+      for (let index = 1; index < luminances.length; index += 1) {
+        expect(luminances[index], `${name} grades increase in darkness`).toBeLessThan(luminances[index - 1]);
+      }
+    }
+    expect(semanticThemes.light['document-text-default']).toBe(semanticThemes.light['text-primary']);
+    expect(semanticThemes.dark['document-text-default']).toBe(semanticThemes.dark['text-primary']);
+    expect(semanticThemes.light['document-background-default']).toBe('transparent');
+    expect(semanticThemes.dark['document-background-default']).toBe('transparent');
   });
 
   it('maps actual inline mark attributes and accepts all ten table colors', () => {
     const documentContent = read('../../lib/styles/document-content.css');
-    const tableExtensions = read('./tiptap/table/table-extensions.tsx');
+    // Table presentation (shared by the live editor and the SSR snapshot) owns the cell colour set.
+    const tableExtensions = read('./tiptap/table/table-presentation.ts');
 
     EDITOR_COLOR_VALUES.filter((color) => color !== 'default').forEach((color) => {
       expect(documentContent).toContain(
@@ -102,12 +149,13 @@ describe('editor semantic color theme', () => {
   });
 
   it('shows transparent default backgrounds as transparency in swatches', () => {
-    const swatches = read('./toolbars/EditorColorStyleButton.module.css');
+    const swatches = read('../../components/core/DocumentColorPreview/DocumentColorPreview.module.css');
+    const preview = read('../../components/core/DocumentColorPreview/DocumentColorPreview.tsx');
     const blockMenu = read('./tiptap/TiptapBlockMenu.tsx');
 
-    expect(swatches).toContain("[data-color-kind='background'][data-color='default']");
-    expect(swatches).toContain("[data-editor-color-swatch='pair'][data-background-color='default']");
-    expect(blockMenu).toContain('<EditorColorSwatch kind={kind} color={color} />');
+    expect(swatches).toContain('[data-transparent]');
+    expect(preview).toContain("kind !== 'text' && background === 'default'");
+    expect(blockMenu).toContain('colorPreview={{ kind, color }}');
   });
 
   it('loads the document bridge globally and KaTeX styles with math renderers', () => {

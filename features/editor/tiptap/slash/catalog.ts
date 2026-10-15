@@ -136,18 +136,18 @@ export function createTiptapSlashCatalog(
       unavailableReason: messages.unavailable,
     });
 
-  return [
-    intrinsic('heading', itemCopy(messages.items.heading, messages.groups.headings), IconH1, {
+  const items = [
+    intrinsic('heading', itemCopy(messages.items.heading, messages.groups.basic), IconH1, {
       type: 'intrinsic',
       nodeName: 'heading',
       attributes: { level: 1 },
     }),
-    intrinsic('heading_2', itemCopy(messages.items.heading2, messages.groups.headings), IconH2, {
+    intrinsic('heading_2', itemCopy(messages.items.heading2, messages.groups.basic), IconH2, {
       type: 'intrinsic',
       nodeName: 'heading',
       attributes: { level: 2 },
     }),
-    intrinsic('heading_3', itemCopy(messages.items.heading3, messages.groups.headings), IconH3, {
+    intrinsic('heading_3', itemCopy(messages.items.heading3, messages.groups.basic), IconH3, {
       type: 'intrinsic',
       nodeName: 'heading',
       attributes: { level: 3 },
@@ -293,6 +293,33 @@ export function createTiptapSlashCatalog(
       unavailableReason: messages.unavailable,
     }),
   ];
+  // A single coherent section per category; this is also the keyboard traversal order.
+  const order = [
+    'paragraph',
+    'heading',
+    'heading_2',
+    'heading_3',
+    'bullet_list',
+    'numbered_list',
+    'check_list',
+    'quote',
+    'callout',
+    'code_block',
+    'divider',
+    'table',
+    'math',
+    'inline-math',
+    'file',
+    'map',
+    'external-video',
+    'mermaid',
+    'p5',
+    'three',
+    'shader',
+    'emoji',
+    'ai',
+  ];
+  return items.sort((left, right) => order.indexOf(left.key) - order.indexOf(right.key));
 }
 
 export function tiptapSlashItemMatchesQuery(item: TiptapSlashItem, query: string, locale: string): boolean {

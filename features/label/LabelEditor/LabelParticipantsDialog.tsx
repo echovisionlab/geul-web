@@ -8,7 +8,7 @@ import { LabelParticipantRole } from '@echovisionlab/geul-proto/secure/label_pb.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { useDebouncedValue } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import {
   listLabelParticipantsAction,
   removeLabelParticipantAction,
@@ -66,23 +66,23 @@ export function LabelParticipantsDialog({
       setLabelParticipantAction(labelId, memberId, toProtoRole(role)),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       void invalidate();
       setSearchQuery('');
-      notifications.show({ message: t('notifications.updated'), color: 'green' });
+      notifications.show({ message: t('notifications.updated'), tone: 'positive' });
     },
   });
   const removeParticipant = useMutation({
     mutationFn: (memberId: string) => removeLabelParticipantAction(labelId, memberId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       void invalidate();
-      notifications.show({ message: t('notifications.removed'), color: 'yellow' });
+      notifications.show({ message: t('notifications.removed'), tone: 'positive' });
     },
   });
 

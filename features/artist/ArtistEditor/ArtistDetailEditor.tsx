@@ -1,16 +1,21 @@
 'use client';
+
+import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+import { LayoutStack as DsLayoutStack, LayoutGrid as DsLayoutGrid } from '@/components/core/Layout';
+
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { type ReactElement, useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconUsers } from '@tabler/icons-react';
 import { ArtistAction } from '@echovisionlab/geul-proto/secure/artist_pb.ts';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { SimpleGrid, Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { EditorHeader, type StatusOption } from '@/features/editor/EditorHeader';
 import { EditorPermissionRevokedDialog } from '@/features/editor/EditorPermissionRevokedDialog';
 import { EditorSessionExpiredDialog } from '@/features/editor/EditorSessionExpiredDialog';
@@ -66,7 +71,7 @@ interface ArtistDetailEditorProps {
   baseUrl: string;
 }
 
-export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorProps) {
+function useArtistDetailEditorViewModel({ id, artist, baseUrl }: ArtistDetailEditorProps) {
   const router = useRouter();
   const t = useTranslations('artistAdminDetail');
   const tCommon = useTranslations('common');
@@ -108,13 +113,13 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
     mutationFn: () => publishArtistAction(id),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       setField('status', 'published');
       notifications.show({
         message: tCommon('messages.itemPublished', { item: tCommon('entities.artist') }),
-        color: 'green',
+        tone: 'positive',
       });
     },
   });
@@ -131,7 +136,7 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
   const { provider, doc, bootstrap, protocol, isConnected, isSynced } = blockRoom;
   const blockRoomController = useRichTextBlockRoomController('artist', doc, roomLocale);
   const permissionRevocation = useEditorPermissionRevocation(provider, 'artist', id);
-  const canMutate = !permissionRevocation.blocked;
+  const canMutate = allowedActions.has(ArtistAction.EDIT) && !permissionRevocation.blocked;
   const hasLocaleRoomMutationAuthority = localeSession.hasRoomMutationAuthority({
     sourceLocale: bootstrap?.sourceLocale ?? null,
     locale: bootstrap?.locale ?? null,
@@ -156,10 +161,10 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
     mutationFn: (request: { locale: string; targetKey: string }) => regenerateArtistOgImageAction(id, request.locale),
     onSuccess: (result, request) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tCommon('notifications.ogGenerationRequested'), color: 'blue' });
+      notifications.show({ message: tCommon('notifications.ogGenerationRequested'), tone: 'neutral' });
       ogImage.trackRequestedGeneration(result.generationId, request.targetKey);
     },
   });
@@ -280,13 +285,13 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
     mutationFn: () => unpublishArtistAction(id),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       setField('status', 'draft');
       notifications.show({
         message: tCommon('messages.itemUnpublished', { item: tCommon('entities.artist') }),
-        color: 'yellow',
+        tone: 'positive',
       });
     },
   });
@@ -294,7 +299,7 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
   const flushPendingSaves = useCallback(async () => {
     const saved = await flushEditorSaves(`artist:${id}`);
     if (!saved) {
-      notifications.show({ message: tCommon('notifications.saveFailed'), color: 'red' });
+      notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' });
     }
     return saved;
   }, [id, tCommon]);
@@ -390,7 +395,7 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
 
   const slugError = slugMgmt.error;
 
-  if (activeEditLocale.isLoading || (roomLocale && (!isSynced || !provider || !doc))) {
+  if (activeEditLocale.isLoading || (roomLocale && (!provider || !doc))) {
     return <PageLoader />;
   }
 
@@ -406,11 +411,11 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
     shouldUseLocaleDocument,
     canEditActiveLocale: currentLocaleCanEdit,
     isSynced: currentIsSynced,
+
+    isReady: Boolean(doc),
   });
   const editorSession =
-    currentProvider && blockRoomController && currentIsSynced
-      ? { provider: currentProvider, controller: blockRoomController }
-      : null;
+    currentProvider && blockRoomController ? { provider: currentProvider, controller: blockRoomController } : null;
   const localizedBioSession = editorSession;
   const displayedName = roomLocale ? residentName : activeEditLocale.displayTitle;
   const artistStatusOptions: StatusOption<ArtistEditorStatus>[] = [
@@ -428,9 +433,166 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
     },
   ];
 
+  return {
+    currentProvider,
+    id,
+    protocol,
+    labelsQuery: {
+      isError: labelsQuery.isError,
+      error: labelsQuery.error,
+      isFetching: labelsQuery.isFetching,
+      refetch: async () => {
+        await labelsQuery.refetch();
+      },
+      data: labelsQuery.data,
+      isLoading: labelsQuery.isLoading,
+    },
+    parentArtistOptionsQuery: {
+      isError: parentArtistOptionsQuery.isError,
+      error: parentArtistOptionsQuery.error,
+      isFetching: parentArtistOptionsQuery.isFetching,
+      refetch: async () => {
+        await parentArtistOptionsQuery.refetch();
+      },
+      data: parentArtistOptionsQuery.data,
+      isLoading: parentArtistOptionsQuery.isLoading,
+    },
+    displayedName,
+    canEditLocalizedName,
+    handleScopedLocaleNameChange,
+    tCommon,
+    currentIsConnected,
+    currentIsSynced,
+    normalizedStatus,
+    artistStatusOptions,
+    handleBack,
+    canEditNeutral,
+    canPublish,
+    canUnpublish,
+    handleStatusChange,
+    canDelete,
+    handleDelete,
+    publishArtist: { isPending: publishArtist.isPending },
+    unpublishArtist: { isPending: unpublishArtist.isPending },
+    activeEditLocale,
+    canManageParticipants,
+    t,
+    setAssignUsersModalOpened,
+    ogImage: {
+      src: ogImage.src,
+      isRegenerating: ogImage.isRegenerating,
+      status: ogImage.status,
+      error: ogImage.error,
+      targetKey: ogImage.targetKey,
+    },
+    canMutate,
+    regenerateOgImage: { isPending: regenerateOgImage.isPending, mutate: regenerateOgImage.mutate },
+    artist: { images: artist.images, imageRevision: artist.imageRevision },
+    baseUrl,
+    fields: {
+      slug: fields.slug,
+      realName: fields.realName,
+      countryCode: fields.countryCode,
+      website: fields.website,
+      labelIds: fields.labelIds,
+      parentArtistId: fields.parentArtistId,
+    },
+    slugMgmt: { isAvailable: slugMgmt.isAvailable, isChecking: slugMgmt.isChecking, handleBlur: slugMgmt.handleBlur },
+    slugError,
+    handleSlugChange,
+    setField,
+    isEditingScopedLocale,
+    hasScopedLocaleLiveRow,
+    localizedBioSession,
+    bioEditorKey,
+    currentLocaleCanEdit,
+    editorSession,
+    labelOptions,
+    handleLabelsChange,
+    parentArtistOptions,
+    localSocialLinks,
+    handleSocialLinksChange,
+    canManageShareLinks,
+    assignUsersModalOpened,
+    canRemoveOwner,
+    deleteDialogOpened,
+    setDeleteDialogOpened,
+    router: { replace: router.replace, refresh: router.refresh },
+    permissionRevocation: {
+      revoked: permissionRevocation.revoked,
+      sessionExpired: permissionRevocation.sessionExpired,
+    },
+  };
+}
+
+export function ArtistDetailEditor(props: ArtistDetailEditorProps) {
+  const model = useArtistDetailEditorViewModel(props);
+  return 'currentProvider' in model ? <ArtistDetailEditorView model={model} /> : model;
+}
+
+export type ArtistDetailEditorViewModel = Exclude<ReturnType<typeof useArtistDetailEditorViewModel>, ReactElement>;
+
+/** Complete production editor composition; controllers supply data and commands. */
+export function ArtistDetailEditorView({ model }: { model: ArtistDetailEditorViewModel }) {
+  const {
+    currentProvider,
+    id,
+    protocol,
+    labelsQuery,
+    parentArtistOptionsQuery,
+    displayedName,
+    canEditLocalizedName,
+    handleScopedLocaleNameChange,
+    tCommon,
+    currentIsConnected,
+    currentIsSynced,
+    normalizedStatus,
+    artistStatusOptions,
+    handleBack,
+    canEditNeutral,
+    canPublish,
+    canUnpublish,
+    handleStatusChange,
+    canDelete,
+    handleDelete,
+    publishArtist,
+    unpublishArtist,
+    activeEditLocale,
+    canManageParticipants,
+    t,
+    setAssignUsersModalOpened,
+    ogImage,
+    canMutate,
+    regenerateOgImage,
+    artist,
+    baseUrl,
+    fields,
+    slugMgmt,
+    slugError,
+    handleSlugChange,
+    setField,
+    isEditingScopedLocale,
+    hasScopedLocaleLiveRow,
+    localizedBioSession,
+    bioEditorKey,
+    currentLocaleCanEdit,
+    editorSession,
+    labelOptions,
+    handleLabelsChange,
+    parentArtistOptions,
+    localSocialLinks,
+    handleSocialLinksChange,
+    canManageShareLinks,
+    assignUsersModalOpened,
+    canRemoveOwner,
+    deleteDialogOpened,
+    setDeleteDialogOpened,
+    router,
+    permissionRevocation,
+  } = model;
   return (
     <EditorRuntimeProvider provider={currentProvider} entityType="artist" entityId={id} blockRoomProtocol={protocol}>
-      <Stack>
+      <DsLayoutStack>
         <QueryErrorAlert queries={[labelsQuery, parentArtistOptionsQuery]} />
         <EditorHeader
           title={displayedName}
@@ -466,7 +628,7 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
           }
         />
 
-        <Stack gap="md">
+        <DsLayoutStack gap="md">
           <OgImagePreview
             src={ogImage.src}
             canRegenerate={canMutate && activeEditLocale.hasLiveRow && Boolean(activeEditLocale.activeLocale)}
@@ -484,22 +646,24 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
           />
 
           {canEditNeutral ? (
-            <ArtistImageGalleryEditor
-              artistId={id}
-              artistName={displayedName}
-              inputId={`artist-${id}-image`}
-              initialImages={artist.images}
-              initialRevision={artist.imageRevision}
-              labels={{
-                image: tCommon('labels.image'),
-                gallery: t('gallery.title'),
-                makePrimary: t('gallery.makePrimary'),
-                moveEarlier: t('gallery.moveEarlier'),
-                moveLater: t('gallery.moveLater'),
-                remove: tCommon('actions.remove'),
-                updateFailed: tCommon('messages.failedToLoad'),
-              }}
-            />
+            <AuthoringExtension kind="uploads">
+              <ArtistImageGalleryEditor
+                artistId={id}
+                artistName={displayedName}
+                inputId={`artist-${id}-image`}
+                initialImages={artist.images}
+                initialRevision={artist.imageRevision}
+                labels={{
+                  image: tCommon('labels.image'),
+                  gallery: t('gallery.title'),
+                  makePrimary: t('gallery.makePrimary'),
+                  moveEarlier: t('gallery.moveEarlier'),
+                  moveLater: t('gallery.moveLater'),
+                  remove: tCommon('actions.remove'),
+                  updateFailed: tCommon('messages.failedToLoad'),
+                }}
+              />
+            </AuthoringExtension>
           ) : null}
 
           <UrlSection
@@ -536,10 +700,10 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
             disabled={!canEditNeutral}
           />
 
-          <Stack gap="xs">
-            <Text size="sm" fw={500}>
+          <DsLayoutStack gap="xs">
+            <DsText size="sm" weight="medium">
               {tCommon('labels.bio')}
-            </Text>
+            </DsText>
             {isEditingScopedLocale && activeEditLocale.activeLocaleLabel ? (
               hasScopedLocaleLiveRow ? (
                 localizedBioSession ? (
@@ -553,9 +717,7 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
                     structureLocked
                   />
                 ) : (
-                  <Text size="sm" c="dimmed">
-                    {tCommon('states.loading')}
-                  </Text>
+                  <SupportingText tone="secondary">{tCommon('states.loading')}</SupportingText>
                 )
               ) : (
                 <ActiveEditLocaleContentPreview
@@ -588,13 +750,11 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
                 structureLocked={false}
               />
             ) : (
-              <Text size="sm" c="dimmed">
-                {tCommon('states.loading')}
-              </Text>
+              <SupportingText tone="secondary">{tCommon('states.loading')}</SupportingText>
             )}
-          </Stack>
+          </DsLayoutStack>
 
-          <SimpleGrid cols={2}>
+          <DsLayoutGrid columns={2}>
             <CountryCodeSelect
               id={`artist-${id}-country-code`}
               label={tCommon('labels.country')}
@@ -611,7 +771,7 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
               onChange={(e) => setField('website', e.currentTarget.value)}
               disabled={!canEditNeutral}
             />
-          </SimpleGrid>
+          </DsLayoutGrid>
 
           <MultiSelect
             id={`artist-${id}-label-ids`}
@@ -645,9 +805,11 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
           />
 
           {canManageShareLinks && (
-            <ShareLinkSection entityType="artist" entityId={id} disabled={!canEditNeutral || !canManageShareLinks} />
+            <AuthoringExtension kind="sharing">
+              <ShareLinkSection entityType="artist" entityId={id} disabled={!canEditNeutral || !canManageShareLinks} />
+            </AuthoringExtension>
           )}
-        </Stack>
+        </DsLayoutStack>
 
         <ArtistParticipantsDialog
           artistId={id}
@@ -667,14 +829,16 @@ export function ArtistDetailEditor({ id, artist, baseUrl }: ArtistDetailEditorPr
           }}
         />
 
-        <EntityTranslationsPanel entityType="artist" entityId={id} canManage={canMutate} />
+        <AuthoringExtension kind="translations">
+          <EntityTranslationsPanel entityType="artist" entityId={id} canManage={canMutate} />
+        </AuthoringExtension>
 
         <EditorPermissionRevokedDialog opened={permissionRevocation.revoked} onConfirm={() => router.replace('/')} />
         <EditorSessionExpiredDialog
           opened={permissionRevocation.sessionExpired}
           onConfirm={() => window.location.assign(buildLoginRedirectHref(getCurrentPath()))}
         />
-      </Stack>
+      </DsLayoutStack>
     </EditorRuntimeProvider>
   );
 }

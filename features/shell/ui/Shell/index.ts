@@ -1,5 +1,8 @@
 export { ShellView } from './ShellView';
+export { ShellLayout } from './ShellLayout';
 export type {
+  ShellLayoutProps,
+  ShellState,
   ShellViewEvents,
   ShellViewFooter,
   ShellViewLabels,
@@ -7,4 +10,4 @@ export type {
   ShellViewProps,
   ShellViewSlots,
   ShellViewUser,
-} from './ShellView';
+} from './shell-types';

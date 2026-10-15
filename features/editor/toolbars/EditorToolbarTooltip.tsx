@@ -1,10 +1,8 @@
 'use client';
 
-import { cloneElement, useEffect, useRef, useState, type ReactElement, type Ref, type RefObject } from 'react';
-import { useMergedRef } from '@mantine/hooks';
+import { useEffect, useRef, useState, type ReactElement, type Ref, type RefObject } from 'react';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
-import { Tooltip } from '@/components/core/Tooltip';
-import classes from './EditorToolbarTooltip.module.css';
+import { Tooltip, TooltipContent, TooltipShortcut } from '@/components/core/Tooltip';
 
 export const EDITOR_TOOLBAR_SHORTCUTS = {
   bold: 'Mod-b',
@@ -77,7 +75,7 @@ function useDisplayedShortcut(shortcut?: EditorToolbarShortcutHint): string | nu
 
 export function EditorToolbarShortcutText({ shortcut }: { shortcut: EditorToolbarShortcutHint }) {
   const displayedShortcut = useDisplayedShortcut(shortcut);
-  return displayedShortcut ? <kbd className={classes.shortcut}>{displayedShortcut}</kbd> : null;
+  return displayedShortcut ? <TooltipShortcut>{displayedShortcut}</TooltipShortcut> : null;
 }
 
 export function EditorToolbarTooltipContent({
@@ -89,9 +87,8 @@ export function EditorToolbarTooltipContent({
 }) {
   const displayedShortcut = useDisplayedShortcut(shortcut);
   return (
-    <span className={classes.content} data-editor-toolbar-tooltip-content="">
-      <span className={classes.label}>{label}</span>
-      {displayedShortcut ? <kbd className={classes.shortcut}>{displayedShortcut}</kbd> : null}
+    <span data-editor-toolbar-tooltip-content="">
+      <TooltipContent label={label} shortcut={displayedShortcut} />
     </span>
   );
 }
@@ -100,78 +97,23 @@ export function EditorToolbarTooltip({
   label,
   shortcut,
   children,
+  focusHint = true,
 }: {
   label: string;
   shortcut?: EditorToolbarShortcutHint;
+  focusHint?: boolean;
   children: ReactElement<{ ref?: Ref<HTMLElement> }>;
 }) {
-  const targetRef = useRef<HTMLElement>(null);
-  const mergedRef = useMergedRef(targetRef, children.props.ref);
-  return (
-    <>
-      {cloneElement(children, { ref: mergedRef })}
-      <EditorToolbarTargetTooltip label={label} shortcut={shortcut} target={targetRef} />
-    </>
-  );
-}
-
-function EditorToolbarTargetTooltip({
-  label,
-  shortcut,
-  target,
-}: {
-  label: string;
-  shortcut?: EditorToolbarShortcutHint;
-  target: RefObject<HTMLElement | null>;
-}) {
-  const [opened, setOpened] = useState(false);
-  useEffect(() => {
-    const element = target.current;
-    if (!element) {
-      return;
-    }
-    let focused = element.matches(':focus');
-    let hovered = false;
-    const sync = () => setOpened(focused || hovered);
-    const onFocusIn = () => {
-      focused = true;
-      sync();
-    };
-    const onFocusOut = () => {
-      focused = false;
-      sync();
-    };
-    const onMouseEnter = () => {
-      hovered = true;
-      sync();
-    };
-    const onMouseLeave = () => {
-      hovered = false;
-      sync();
-    };
-    element.addEventListener('focusin', onFocusIn);
-    element.addEventListener('focusout', onFocusOut);
-    element.addEventListener('mouseenter', onMouseEnter);
-    element.addEventListener('mouseleave', onMouseLeave);
-    return () => {
-      element.removeEventListener('focusin', onFocusIn);
-      element.removeEventListener('focusout', onFocusOut);
-      element.removeEventListener('mouseenter', onMouseEnter);
-      element.removeEventListener('mouseleave', onMouseLeave);
-    };
-  }, [target]);
-
   return (
     <Tooltip
-      target={target}
-      opened={opened}
-      label={<EditorToolbarTooltipContent label={label} shortcut={shortcut} />}
-      classNames={{ tooltip: classes.tooltip }}
-      arrowSize={3}
-      offset={4}
-      transitionProps={{ duration: 80 }}
+      events={{ focus: focusHint }}
+      openDelay={0}
+      closeDelay={0}
       withArrow
-    />
+      label={<EditorToolbarTooltipContent label={label} shortcut={shortcut} />}
+    >
+      {children}
+    </Tooltip>
   );
 }
 
@@ -180,16 +122,25 @@ export function EditorToolbarDropdownTarget({
   label,
   shortcut,
   children,
+  focusHint = true,
 }: {
   label: string;
   shortcut?: EditorToolbarShortcutHint;
+  focusHint?: boolean;
   children: (targetRef: RefObject<HTMLButtonElement | null>) => ReactElement;
 }) {
   const targetRef = useRef<HTMLButtonElement>(null);
   return (
-    <>
-      <DropdownMenu.Target>{children(targetRef)}</DropdownMenu.Target>
-      <EditorToolbarTargetTooltip label={label} shortcut={shortcut} target={targetRef} />
-    </>
+    <DropdownMenu.Target>
+      <Tooltip
+        events={{ focus: focusHint }}
+        openDelay={0}
+        closeDelay={0}
+        withArrow
+        label={<EditorToolbarTooltipContent label={label} shortcut={shortcut} />}
+      >
+        {children(targetRef)}
+      </Tooltip>
+    </DropdownMenu.Target>
   );
 }

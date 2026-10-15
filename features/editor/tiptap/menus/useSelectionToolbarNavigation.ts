@@ -24,10 +24,29 @@ export function useTiptapBubbleMenu(editor: Editor, pluginName: string | PluginK
   const pluginKeyRef = useRef<PluginKey | null>(null);
   const dismissedRef = useRef(false);
   const [isDismissed, setIsDismissed] = useState(false);
+  const [nestedEditing, setNestedEditing] = useState(false);
   if (typeof pluginName === 'string' && !pluginKeyRef.current) {
     pluginKeyRef.current = new PluginKey(pluginName);
   }
   const pluginKey = typeof pluginName === 'string' ? pluginKeyRef.current! : pluginName;
+  useEffect(() => {
+    const element = editor.view.dom;
+    const ownerDocument = element.ownerDocument;
+    const updateFocus = (event?: Event) => {
+      const target =
+        event?.type === 'focusout'
+          ? (event as globalThis.FocusEvent).relatedTarget
+          : (event?.target ?? ownerDocument.activeElement);
+      setNestedEditing(target instanceof Node && element.contains(target) && isNativeTabTarget(target, element));
+    };
+    updateFocus();
+    ownerDocument.addEventListener('focusin', updateFocus, true);
+    ownerDocument.addEventListener('focusout', updateFocus, true);
+    return () => {
+      ownerDocument.removeEventListener('focusin', updateFocus, true);
+      ownerDocument.removeEventListener('focusout', updateFocus, true);
+    };
+  }, [editor]);
   useEffect(() => {
     const reopen = () => {
       if (!dismissedRef.current) {
@@ -52,7 +71,7 @@ export function useTiptapBubbleMenu(editor: Editor, pluginName: string | PluginK
       }
     }, 0);
   }, [editor, pluginKey]);
-  return { pluginKey, hide, isDismissed };
+  return { pluginKey, hide, isDismissed, isSuppressed: isDismissed || nestedEditing };
 }
 
 function isNativeArrowTarget(target: EventTarget | null): boolean {
@@ -199,13 +218,26 @@ export function useSelectionToolbarNavigation({
 
   const onToolbarKeyDown = useCallback(
     (event: ReactKeyboardEvent<HTMLDivElement>) => {
+      if (event.defaultPrevented || event.nativeEvent.isComposing || event.altKey || event.ctrlKey || event.metaKey) {
+        return;
+      }
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      // Capture listeners otherwise dismiss the containing BubbleMenu before
+      // its link form, color menu or other nested popup can cancel itself.
+      const nestedSurface = target?.closest('form, [role="menu"], [role="listbox"], [role="dialog"]');
+      if (
+        target &&
+        (!event.currentTarget.contains(target) || (nestedSurface && event.currentTarget.contains(nestedSurface)))
+      ) {
+        return;
+      }
+      if (isNativeArrowTarget(event.target)) {
+        return;
+      }
       if (event.key === 'Escape' && onEscape) {
         event.preventDefault();
         event.stopPropagation();
         onEscape();
-        return;
-      }
-      if (isNativeArrowTarget(event.target)) {
         return;
       }
 
@@ -220,11 +252,9 @@ export function useSelectionToolbarNavigation({
       }
 
       let nextIndex: number | null = null;
-      if (event.key === 'Tab') {
-        nextIndex = event.shiftKey
-          ? (currentIndex - 1 + actions.length) % actions.length
-          : (currentIndex + 1) % actions.length;
-      } else if (event.key === 'ArrowRight' || (enableVerticalArrows && event.key === 'ArrowDown')) {
+      // Roving focus gives the toolbar one tab stop. Tab must leave it;
+      // consuming Tab here would trap focus, even on a single remaining action.
+      if (event.key === 'ArrowRight' || (enableVerticalArrows && event.key === 'ArrowDown')) {
         nextIndex = (currentIndex + 1) % actions.length;
       } else if (event.key === 'ArrowLeft' || (enableVerticalArrows && event.key === 'ArrowUp')) {
         nextIndex = (currentIndex - 1 + actions.length) % actions.length;

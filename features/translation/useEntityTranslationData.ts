@@ -5,7 +5,7 @@ import { FilterOp } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import type { TranslationJob } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getProtoTranslationEntityType } from '@/features/translation/translation-entity-type';
-import { createTranslationClient } from '@/lib/api/browser/secure-translation';
+import { useTranslationClient } from './TranslationServicesContext';
 import { translationJobEntityTypeFilterValue, type TranslationEntityTypeKey } from '@/lib/translation/lifecycle';
 import {
   filterActiveTranslationJobs,
@@ -31,7 +31,7 @@ interface EntityTranslationDataOptions {
 
 export function useEntityTranslationData({ entityType, entityId, jobsEnabled = true }: EntityTranslationDataOptions) {
   const queryClient = useQueryClient();
-  const translationClient = useMemo(() => createTranslationClient(), []);
+  const translationClient = useTranslationClient();
   const target = useMemo(
     () => ({ entityType: getProtoTranslationEntityType(entityType), entityId }),
     [entityId, entityType],

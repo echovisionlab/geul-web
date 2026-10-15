@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { EmbedSettingsForm } from './SettingsForm';
 import type { EmbedProps } from './schema';
 
@@ -16,20 +17,22 @@ const localized = vi.fn();
 function render(props: Partial<EmbedProps>, allowSharedEdits = true) {
   act(() =>
     root.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <EmbedSettingsForm
           props={props}
           allowSharedEdits={allowSharedEdits}
           updateSharedProps={shared}
           updateLocalizedProps={localized}
         />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     ),
   );
 }
 function input(label: string) {
   const element = Array.from(container.querySelectorAll('label')).find((item) => item.textContent?.startsWith(label))!;
-  return document.getElementById(element.htmlFor) as HTMLInputElement;
+  return (
+    element.htmlFor ? document.getElementById(element.htmlFor) : element.querySelector('input')
+  ) as HTMLInputElement;
 }
 function type(element: HTMLInputElement, value: string) {
   act(() => {
@@ -74,7 +77,7 @@ describe('Embed settings persistence boundaries', () => {
     expect(container.textContent).toContain('heightModeLabel');
     expect(container.querySelectorAll('input[type="checkbox"]')).toHaveLength(8);
   });
-  it('gives every permission a named checkbox and complete accessible description, with clickable labels', () => {
+  it('gives every permission a named checkbox and complete accessible description, with pointer activation', () => {
     render({});
     const permissions = [
       ['allowScripts', 'scriptsLabel', 'scriptsDescription'],
@@ -94,7 +97,12 @@ describe('Embed settings persistence boundaries', () => {
       expect(checkbox).toHaveAccessibleName(label);
       expect(checkbox).toHaveAccessibleDescription(description);
       const wasChecked = checkbox.checked;
-      act(() => checkbox.labels![0].click());
+      const labelElement = checkbox.labels![0];
+      act(() => {
+        labelElement.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0, detail: 1 }));
+        labelElement.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, button: 0, detail: 1 }));
+        labelElement.dispatchEvent(new MouseEvent('click', { bubbles: true, button: 0, detail: 1 }));
+      });
       expect(shared).toHaveBeenLastCalledWith({ [key]: wasChecked ? 'false' : 'true' });
     }
   });

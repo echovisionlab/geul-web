@@ -1,3 +1,9 @@
+import {
+  applyAudioMediaPresentation,
+  applyAudioSeekPresentation,
+  applyVideoFramePresentation,
+} from '@/components/core/MediaControls';
+import { applyTextPresentation } from '@/components/core/Typography/dom-text';
 import type { AudioViewModel } from './audio-view-model';
 import { applyMediaHydrationDomAttrs } from './hydration';
 import { mediaStyleToString, type MediaContainerStyleRecord } from './shared';
@@ -20,12 +26,14 @@ function appendMeta(root: HTMLElement, classPrefix: 'audio' | 'video', title: st
   const titleSpan = document.createElement('span');
   titleSpan.className = `${classPrefix}-block__title`;
   titleSpan.textContent = title;
+  applyTextPresentation(titleSpan, { size: 'sm', weight: 'strong', truncate: true });
   meta.appendChild(titleSpan);
 
   if (sizeText) {
     const sizeSpan = document.createElement('span');
     sizeSpan.className = `${classPrefix}-block__size`;
     sizeSpan.textContent = sizeText;
+    applyTextPresentation(sizeSpan, { size: 'xs', tone: 'muted' });
     meta.appendChild(sizeSpan);
   }
 
@@ -36,14 +44,7 @@ export function createMediaCaptionDom(text: string) {
   const caption = document.createElement('div');
   caption.className = 'media-block__caption';
   caption.textContent = text;
-  caption.style.marginTop = '0.5rem';
-  caption.style.fontSize = '0.6875rem';
-  caption.style.lineHeight = '1.4';
-  caption.style.color = 'var(--mantine-color-dimmed)';
-  caption.style.textAlign = 'left';
-  caption.style.display = 'block';
-  caption.style.width = '100%';
-  caption.style.minHeight = '20px';
+  applyTextPresentation(caption, { size: 'xs', tone: 'muted', align: 'start' });
   return caption;
 }
 
@@ -118,6 +119,8 @@ function createAudioPlayer(model: AudioViewModel) {
   const player = document.createElement('div');
   player.className = 'audio-player geul-media-player';
   player.setAttribute('data-audio-player', 'true');
+  player.setAttribute('role', 'group');
+  player.setAttribute('aria-label', model.title);
   player.setAttribute('data-audio-player-ready', model.isReady ? 'true' : 'false');
   player.setAttribute('data-audio-player-playing', 'false');
 
@@ -152,10 +155,11 @@ function createAudioPlayer(model: AudioViewModel) {
   waveShell.className = 'audio-player__wave-shell';
   const frame = document.createElement('div');
   frame.className = 'audio-player__wave-frame';
-
+  frame.setAttribute('data-audio-player-track', 'true');
   const wave = document.createElement('div');
   wave.className = 'audio-player__wave';
   wave.setAttribute('data-audio-player-wave', 'true');
+  wave.setAttribute('aria-hidden', 'true');
   wave.setAttribute('data-audio-player-wave-ready', 'false');
 
   frame.appendChild(wave);
@@ -170,6 +174,12 @@ function createAudioPlayer(model: AudioViewModel) {
     loading.append(spinner);
     frame.appendChild(loading);
   }
+  applyAudioSeekPresentation(frame, {
+    label: 'Seek audio',
+    currentTime: 0,
+    duration: model.durationSeconds,
+    disabled: !model.isReady || !model.playbackUrl,
+  });
   waveShell.appendChild(frame);
   waveformPanel.appendChild(waveShell);
   visual.appendChild(waveformPanel);
@@ -234,7 +244,6 @@ function createAudioPlayer(model: AudioViewModel) {
   volume.setAttribute('step', '0.01');
   volume.setAttribute('value', '1');
   volume.setAttribute('aria-label', 'Audio volume');
-  volume.style.setProperty('--audio-volume-progress', '100%');
   volume.disabled = !model.playbackUrl;
   controls.appendChild(volume);
 
@@ -272,6 +281,7 @@ function createAudioPlayer(model: AudioViewModel) {
 
   player.appendChild(main);
   player.setAttribute('data-audio-player-view', 'waveform');
+  applyAudioMediaPresentation(player);
   return player;
 }
 
@@ -291,12 +301,14 @@ export function buildAudioMediaDom(model: AudioViewModel, className = 'audio-blo
   const titleSpan = document.createElement('span');
   titleSpan.className = 'audio-block__title';
   titleSpan.textContent = model.title;
+  applyTextPresentation(titleSpan, { size: 'sm', weight: 'strong', truncate: true });
   meta.appendChild(titleSpan);
 
   if (model.sizeText) {
     const sizeSpan = document.createElement('span');
     sizeSpan.className = 'audio-block__size';
     sizeSpan.textContent = model.sizeText;
+    applyTextPresentation(sizeSpan, { size: 'xs', tone: 'muted' });
     meta.appendChild(sizeSpan);
   }
 
@@ -323,10 +335,14 @@ export function buildVideoMediaDom(model: VideoViewModel, className = 'video-blo
   appendMeta(root, 'video', model.title, model.sizeText);
 
   const playerContainer = document.createElement('div');
-  playerContainer.className = 'video-player-container geul-media-player';
+  playerContainer.className = 'video-player-container';
+  playerContainer.setAttribute('role', 'group');
+  playerContainer.setAttribute('aria-label', model.title);
+  applyVideoFramePresentation(playerContainer);
 
   const video = document.createElement('video');
   video.controls = true;
+  video.setAttribute('aria-label', model.title);
   video.preload = 'metadata';
   if (model.domAttrs['data-file-id']) {
     video.setAttribute('data-file-id', model.domAttrs['data-file-id']);

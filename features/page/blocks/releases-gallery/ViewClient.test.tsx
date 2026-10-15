@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
 
+import enMessages from '@/messages/en.json';
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type AnchorHTMLAttributes, type HTMLAttributes, type ImgHTMLAttributes, type ReactNode } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { parseReleaseListProps } from './schema';
 import { ReleaseListViewClient } from './ViewClientRuntime';
 
@@ -33,7 +35,7 @@ vi.mock('next/image', () => ({
   ),
 }));
 
-vi.mock('@mantine/carousel', () => {
+vi.mock('@/components/core/Carousel', () => {
   const Carousel = ({
     children,
     withControls,
@@ -110,8 +112,8 @@ describe('ReleaseListViewClient', () => {
   it('renders release artists as artist links in metadata', () => {
     act(() => {
       root?.render(
-        <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
-          <MantineProvider>
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <ReleaseListViewClient
               releases={[
                 {
@@ -141,7 +143,7 @@ describe('ReleaseListViewClient', () => {
                 showMeta: 'true',
               })}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -158,8 +160,8 @@ describe('ReleaseListViewClient', () => {
   it('renders fallback release metadata when artist and date are missing', () => {
     act(() => {
       root?.render(
-        <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
-          <MantineProvider>
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <ReleaseListViewClient
               releases={[
                 {
@@ -178,7 +180,7 @@ describe('ReleaseListViewClient', () => {
                 showMeta: 'true',
               })}
             />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });

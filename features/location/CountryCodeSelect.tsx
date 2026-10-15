@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { SelectProps } from '@/components/core/Input';
-import { buildCountrySelectOptions, filterCountrySelectOptions } from '@/lib/countries';
+import { buildCountrySelectOptions } from '@/lib/countries';
 import { CountrySelect } from './ui/CountrySelect';
 
 export interface CountryCodeSelectProps extends Omit<
@@ -34,7 +34,6 @@ export function CountryCodeSelect({
       options={countryOptions}
       value={value || null}
       onChange={(nextValue) => onChange(nextValue ?? '')}
-      filter={filterCountrySelectOptions}
       noResultsLabel={tSearchCombobox('noResults')}
     />
   );

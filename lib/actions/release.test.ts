@@ -38,6 +38,25 @@ vi.mock('@/lib/api/server-client', () => ({
 }));
 
 describe('release actions', () => {
+  it('forwards artwork origin with the attached file identity', async () => {
+    const origin = '30000000-0000-4000-8000-000000000005';
+    await expect(actions.setReleaseArtworkAction('release-1', 'file-1', origin)).resolves.toEqual({
+      ok: true,
+      url: 'https://cdn.example/new-art.webp',
+    });
+    expect(mocks.createReleaseClient).toHaveBeenCalledWith(origin);
+    expect(releaseClient.setReleaseArtwork).toHaveBeenCalledWith({ releaseId: 'release-1', fileId: 'file-1' });
+  });
+
+  it.each(['publishReleaseAction', 'unpublishReleaseAction', 'deleteReleaseArtworkAction'] as const)(
+    'forwards the tracked origin for %s',
+    async (action) => {
+      const editorOrigin = '30000000-0000-4000-8000-000000000003';
+      await expect(actions[action]('release-1', editorOrigin)).resolves.toEqual({ ok: true, success: true });
+      expect(mocks.createReleaseClient).toHaveBeenCalledWith(editorOrigin);
+    },
+  );
+
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.createReleaseClient.mockResolvedValue(releaseClient);

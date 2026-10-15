@@ -1,8 +1,9 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 import { useCallback, useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { Center } from '@mantine/core';
+
 import type { AuthProvider } from '@/features/auth/providers';
 import { PageLoader } from '@/features/site/PageLoader';
 import { setCurrentUserNewsletterSubscriptionAction } from '@/lib/actions/newsletter';
@@ -457,62 +458,64 @@ export function LoginController({
   };
 
   return (
-    <Center style={{ flex: 1 }} p="md">
-      {supportsPasskeyRuntime ? (
-        <KratosWebAuthnScript
-          nodes={passkeyScripts}
-          readyKey={`${flow.id}:${String(passkeyOnLoadTrigger ?? '')}`}
-          credentialOperation="get"
-          requiredTriggers={[passkeyTrigger]}
-          onReady={() => {
-            setPasskeyStatus('ready');
-            invokeKratosBrowserTrigger(passkeyOnLoadTrigger);
-          }}
-          onError={() => {
-            setPasskeyStatus('unavailable');
-            setSubmitError(t('passkeyUnavailable'));
-          }}
+    <DsLayoutInset space="md">
+      <DsLayoutStack align="center" justify="center" flexible>
+        {supportsPasskeyRuntime ? (
+          <KratosWebAuthnScript
+            nodes={passkeyScripts}
+            readyKey={`${flow.id}:${String(passkeyOnLoadTrigger ?? '')}`}
+            credentialOperation="get"
+            requiredTriggers={[passkeyTrigger]}
+            onReady={() => {
+              setPasskeyStatus('ready');
+              invokeKratosBrowserTrigger(passkeyOnLoadTrigger);
+            }}
+            onError={() => {
+              setPasskeyStatus('unavailable');
+              setSubmitError(t('passkeyUnavailable'));
+            }}
+          />
+        ) : null}
+        <LoginFlowView
+          flow={flow}
+          actionUrl={transport.actionUrl(flow.id)}
+          newsletterIntent={handlesNewsletterIntent}
+          securityReauthentication={isRefreshFlow && isSecurityReauthenticationReturnTarget(flow.return_to)}
+          email={email}
+          code={code}
+          codeTiming={codeTiming}
+          passkeyLoading={passkeyStatus === 'loading'}
+          passkeyReady={passkeyStatus === 'ready'}
+          pendingAction={pendingAction}
+          submitError={submitError}
+          onEmailChange={setEmail}
+          onCodeChange={setCode}
+          onRequestCode={() => void submitLogin(buildLoginCodePayload({ flow, enteredEmail: email, locale }))}
+          onSubmitCode={(completedCode = code) =>
+            void submitLogin(
+              buildLoginCodePayload({
+                flow,
+                enteredEmail: email,
+                code: completedCode,
+                locale,
+              }),
+            )
+          }
+          onResendCode={() =>
+            void submitLogin(
+              buildLoginCodePayload({
+                flow,
+                enteredEmail: email || getKratosNodeStringValue(flow, 'identifier'),
+                resend: getKratosNodeStringValue(flow, 'resend') || 'code',
+                locale,
+              }),
+            )
+          }
+          onPasskeyLogin={() => void startPasskeyLogin()}
+          onSocialSubmit={startSocialLogin}
+          onStartOver={startOver}
         />
-      ) : null}
-      <LoginFlowView
-        flow={flow}
-        actionUrl={transport.actionUrl(flow.id)}
-        newsletterIntent={handlesNewsletterIntent}
-        securityReauthentication={isRefreshFlow && isSecurityReauthenticationReturnTarget(flow.return_to)}
-        email={email}
-        code={code}
-        codeTiming={codeTiming}
-        passkeyLoading={passkeyStatus === 'loading'}
-        passkeyReady={passkeyStatus === 'ready'}
-        pendingAction={pendingAction}
-        submitError={submitError}
-        onEmailChange={setEmail}
-        onCodeChange={setCode}
-        onRequestCode={() => void submitLogin(buildLoginCodePayload({ flow, enteredEmail: email, locale }))}
-        onSubmitCode={(completedCode = code) =>
-          void submitLogin(
-            buildLoginCodePayload({
-              flow,
-              enteredEmail: email,
-              code: completedCode,
-              locale,
-            }),
-          )
-        }
-        onResendCode={() =>
-          void submitLogin(
-            buildLoginCodePayload({
-              flow,
-              enteredEmail: email || getKratosNodeStringValue(flow, 'identifier'),
-              resend: getKratosNodeStringValue(flow, 'resend') || 'code',
-              locale,
-            }),
-          )
-        }
-        onPasskeyLogin={() => void startPasskeyLogin()}
-        onSocialSubmit={startSocialLogin}
-        onStartOver={startOver}
-      />
-    </Center>
+      </DsLayoutStack>
+    </DsLayoutInset>
   );
 }

@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
-import { FileButton } from '@mantine/core';
+import { FilePicker } from '@/components/core/Input';
 import { useTranslations } from 'next-intl';
 import { getUploadSelectionMimeTypes } from '@/lib/constants/upload-config';
 import { EditorFileInsertView, type EditorFileInsertViewLabels } from './EditorFileInsertView';
@@ -19,6 +19,8 @@ interface EditorFileInsertPanelProps {
   onFilesSelected: (files: File[]) => void;
   onOpenLibrary: () => void;
   showLibraryAction?: boolean;
+  /** Hide redundant guidance when the enclosing dialog already names the upload/library choices. */
+  showDescription?: boolean;
 }
 
 export function EditorFileInsertPanel({
@@ -26,9 +28,9 @@ export function EditorFileInsertPanel({
   onFilesSelected,
   onOpenLibrary,
   showLibraryAction = true,
+  showDescription = true,
 }: EditorFileInsertPanelProps) {
   const tMedia = useTranslations('editorCommon.media.ingestDialog');
-  const resetRef = useRef<() => void>(null);
   const accept = useMemo(
     () =>
       Array.from(
@@ -46,7 +48,6 @@ export function EditorFileInsertPanel({
     if (files.length > 0) {
       onFilesSelected(files);
     }
-    resetRef.current?.();
   };
 
   const renderView = (onBrowse: () => void) => (
@@ -55,16 +56,13 @@ export function EditorFileInsertPanel({
       onBrowse={onBrowse}
       onOpenLibrary={onOpenLibrary}
       showLibraryAction={showLibraryAction}
+      showDescription={showDescription}
     />
   );
 
-  return multiple ? (
-    <FileButton multiple accept={accept} resetRef={resetRef} onChange={handleFiles}>
-      {({ onClick }) => renderView(onClick)}
-    </FileButton>
-  ) : (
-    <FileButton accept={accept} resetRef={resetRef} onChange={(file) => handleFiles(file ? [file] : [])}>
-      {({ onClick }) => renderView(onClick)}
-    </FileButton>
+  return (
+    <FilePicker multiple={multiple} accept={accept} onChange={handleFiles}>
+      {renderView}
+    </FilePicker>
   );
 }

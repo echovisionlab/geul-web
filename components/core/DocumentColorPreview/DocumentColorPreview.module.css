@@ -1,0 +1,42 @@
+.preview {
+  box-sizing: border-box;
+  display: inline-flex;
+  width: calc(var(--geul-chrome-icon-size) + var(--geul-spacing-sm));
+  height: calc(var(--geul-chrome-icon-size) + var(--geul-spacing-xxs));
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border: var(--geul-border-thin) solid var(--geul-border-default);
+  border-radius: var(--geul-radius-square);
+  font-size: var(--geul-font-size-md);
+  font-weight: var(--geul-font-weight-strong);
+  line-height: var(--geul-line-height-xs);
+}
+
+.preview[data-color-kind='text'] {
+  border-color: transparent;
+  text-decoration: underline;
+  text-decoration-thickness: var(--geul-border-focus);
+  text-underline-offset: var(--geul-spacing-xxs);
+}
+
+.preview[data-size='compact'] {
+  width: var(--geul-chrome-icon-size);
+  height: var(--geul-chrome-icon-size);
+  font-size: var(--geul-font-size-xs);
+  line-height: var(--geul-line-height-xs);
+}
+
+.preview[data-transparent] {
+  background-image:
+    linear-gradient(45deg, var(--geul-surface-active) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--geul-surface-active) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--geul-surface-active) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--geul-surface-active) 75%);
+  background-position:
+    0 0,
+    0 var(--geul-spacing-xxs),
+    var(--geul-spacing-xxs) calc(var(--geul-spacing-xxs) * -1),
+    calc(var(--geul-spacing-xxs) * -1) 0;
+  background-size: var(--geul-spacing-xs) var(--geul-spacing-xs);
+}

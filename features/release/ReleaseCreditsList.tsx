@@ -1,6 +1,7 @@
 'use client';
 
-import { Stack } from '@mantine/core';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+
 import { CreditList } from '@/features/work/CreditList';
 
 interface ReleaseCreditEntry {
@@ -24,7 +25,7 @@ interface ReleaseCreditsListProps {
 
 export function ReleaseCreditsList({ groups, unknownLabel }: ReleaseCreditsListProps) {
   return (
-    <Stack gap={4}>
+    <DsLayoutStack gap="xxs">
       {groups.map((group) => (
         <CreditList.Group key={group.id} name={group.name}>
           {group.entries.map((entry) => (
@@ -38,6 +39,6 @@ export function ReleaseCreditsList({ groups, unknownLabel }: ReleaseCreditsListP
           ))}
         </CreditList.Group>
       ))}
-    </Stack>
+    </DsLayoutStack>
   );
 }

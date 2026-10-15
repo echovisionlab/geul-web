@@ -1,8 +1,8 @@
-import '@mantine/core/styles.css';
-import '@mantine/notifications/styles.css';
-import '@mantine/spotlight/styles.css';
+import { semanticThemes } from '@/components/core/design-tokens';
+import { OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT } from '@/lib/constants/og-image';
 import '@/lib/styles/variables.css';
 import '@/lib/styles/font-assignment.css';
+import '@/lib/styles/base.css';
 import '@/lib/styles/document-content.css';
 import '@/lib/styles/print.css';
 
@@ -12,9 +12,8 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { ClientMessagesProvider } from '@/lib/providers/ClientMessagesProvider';
 import { resolvePageLoaderImage } from '@/features/site/PageLoader/loader-image';
-import { mantineHtmlProps } from '@mantine/core';
-import { ModalsProvider } from '@mantine/modals';
-import { Notifications } from '@mantine/notifications';
+import { ConfirmDialogHost } from '@/components/core/Modal/confirm-dialogs';
+import { AppNotificationRegion } from '@/lib/providers/AppNotificationRegion';
 import { ServerSocialLinksDisplay } from '@/features/social-links/ServerSocialLinksDisplay';
 import { CookieConsentBanner } from '@/features/cookie-consent/CookieConsentBanner';
 import { JsonLdScript } from '@/features/metadata/ui/JsonLdScript';
@@ -22,17 +21,16 @@ import { GoogleAnalyticsLoader } from '@/features/analytics/GoogleAnalyticsLoade
 import { loadAfterOnboardingGate } from '@/lib/auth/onboarding-redirect';
 import { ManifestProvider } from '@/lib/contexts/ManifestContext';
 import { getMessagesForLocale } from '@/lib/i18n/messages';
-import { selectClientMessages } from '@/lib/i18n/client-messages';
+import { clientMessageCoverage, selectClientMessages } from '@/lib/i18n/client-messages';
 import { resolveRequestTimeZone } from '@/lib/i18n/request-time-zone';
-import { AppMantineProvider } from '@/lib/providers/AppMantineProvider';
+import { AppDesignSystemProvider } from '@/lib/providers/AppDesignSystemProvider';
 import { LocalePreferenceSync } from '@/lib/providers/LocalePreferenceSync';
 import { LocaleProvider } from '@/lib/providers/LocaleProvider';
-import { ReactQueryProvider } from '@/lib/providers/ReactQueryProvider';
 import { RequestTimeZoneProvider } from '@/lib/providers/RequestTimeZoneProvider';
 import { RouteProgressRuntime } from '@/lib/providers/RouteProgressRuntime';
 import { EditorNavigationProvider } from '@/lib/providers/EditorNavigationProvider';
 import { SessionProvider } from '@/lib/providers/SessionProvider';
-import { getServerPublicRuntimeConfig } from '@/lib/public-runtime-config';
+import { getServerPublicRuntimeConfig } from '@/lib/public-runtime-config.server';
 import { getManifest } from '@/lib/queries/manifest';
 import { getSiteMetadataDocument } from '@/lib/queries/metadata';
 import { toSessionData } from '@/lib/session-data';
@@ -104,7 +102,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'website',
       url: site.canonicalOrigin,
       siteName: title,
-      images: siteOgImageUrl ? [{ url: siteOgImageUrl, width: 1200, height: 630 }] : undefined,
+      images: siteOgImageUrl ? [{ url: siteOgImageUrl, width: OG_IMAGE_WIDTH, height: OG_IMAGE_HEIGHT }] : undefined,
     },
     twitter: {
       card: siteOgImageUrl ? 'summary_large_image' : 'summary',
@@ -135,10 +133,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const session = gated.session;
   const [manifest, site, cookieStore] = gated.bootstrap;
   const fullMessages = await getMessagesForLocale(localeContext.locale);
-  const messages = selectClientMessages(fullMessages, {
-    pathWithSearch: getRequestPathWithSearchFromHeaders(headersList, pathname),
-    hasSession: Boolean(session),
-  });
+  const messagesPathWithSearch = getRequestPathWithSearchFromHeaders(headersList, pathname);
+  const messages = selectClientMessages(fullMessages, { pathWithSearch: messagesPathWithSearch });
   const publicRuntimeConfig = getServerPublicRuntimeConfig();
   const loaderImage = resolvePageLoaderImage(manifest.settings.loader_urls ?? []);
   const google_analytics_id = manifest.settings.google_analytics_id;
@@ -148,14 +144,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const initialHtmlColorScheme = resolveInitialHtmlColorScheme(initialColorScheme);
   const initialSession = session ? toSessionData(session) : null;
   const requestTimeZone = resolveRequestTimeZone(session?.geo?.timeZone);
-  const { ['data-mantine-color-scheme']: _ignoredMantineColorScheme, ...htmlProps } = mantineHtmlProps;
 
   return (
     <html
-      {...htmlProps}
+      suppressHydrationWarning
       lang={localeContext.locale}
       dir={localeContext.definition.dir}
-      data-mantine-color-scheme={initialHtmlColorScheme}
+      data-geul-theme={initialHtmlColorScheme}
       data-font-profile={localeContext.definition.fontProfile}
       data-geul-cdn-url={publicRuntimeConfig.cdnUrl}
       data-geul-api-url={publicRuntimeConfig.apiUrl}
@@ -177,22 +172,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           href={buildFontStylesheetHref(publicRuntimeConfig.cdnUrl, localeContext.definition.fontProfile)}
         />
         {site.logoUrl ? <meta property="og:logo" content={site.logoUrl} /> : null}
-        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-        <meta name="theme-color" content="#1a1b1e" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content={semanticThemes.light.background} media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content={semanticThemes.dark.background} media="(prefers-color-scheme: dark)" />
         <meta name="format-detection" content="telephone=no" />
         <JsonLdScript data={siteJsonLd} />
       </head>
       <body>
         <GoogleAnalyticsLoader googleAnalyticsId={google_analytics_id} />
-        <ReactQueryProvider>
-          <SessionProvider initialData={initialSession}>
+        <SessionProvider initialData={initialSession}>
+          <AppDesignSystemProvider defaultColorScheme={initialColorScheme} locale={localeContext.locale}>
             <ClientMessagesProvider
               loaderImageSrc={loaderImage.src}
               loaderImageUnoptimized={loaderImage.unoptimized}
               key={localeContext.locale}
               locale={localeContext.locale}
               messages={messages}
-              reducedCatalogue={messages !== fullMessages}
+              messageCoverage={clientMessageCoverage(messagesPathWithSearch)}
               timeZone={requestTimeZone}
             >
               <RequestTimeZoneProvider timeZone={requestTimeZone}>
@@ -202,22 +197,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     manifest={manifest}
                     socialLinks={<ServerSocialLinksDisplay links={manifest.settings.social_links} gap="sm" />}
                   >
-                    <AppMantineProvider defaultColorScheme={initialColorScheme}>
-                      <EditorNavigationProvider>
-                        <RouteProgressRuntime />
-                        <ModalsProvider>
-                          <Notifications pauseResetOnHover="notification" />
-                          {children}
-                          <CookieConsentBanner />
-                        </ModalsProvider>
-                      </EditorNavigationProvider>
-                    </AppMantineProvider>
+                    <EditorNavigationProvider>
+                      <RouteProgressRuntime />
+                      <>
+                        <ConfirmDialogHost />
+                        <AppNotificationRegion />
+                        {children}
+                        <CookieConsentBanner />
+                      </>
+                    </EditorNavigationProvider>
                   </ManifestProvider>
                 </LocaleProvider>
               </RequestTimeZoneProvider>
             </ClientMessagesProvider>
-          </SessionProvider>
-        </ReactQueryProvider>
+          </AppDesignSystemProvider>
+        </SessionProvider>
       </body>
     </html>
   );

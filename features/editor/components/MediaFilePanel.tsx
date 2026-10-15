@@ -3,6 +3,7 @@
 import { useOptionalEditorMediaIngestContext } from '@/features/editor/contexts/EditorMediaIngestContext';
 import { type EditorMediaCommandPort, type EditorMediaBlockType } from '../lib/media-block-updates';
 import { MediaIngestDialog, type MediaIngestDialogCloseReason } from './MediaIngestDialog';
+import { useOptionalEditorMediaServices } from '../contexts/EditorMediaServicesContext';
 
 export interface MediaFilePanelProps {
   blockId: string;
@@ -17,6 +18,7 @@ function isSupportedBlockType(value: string | undefined): value is EditorMediaBl
 
 export function MediaFilePanel({ blockId, editor, opened = true, onClose }: MediaFilePanelProps) {
   const mediaIngest = useOptionalEditorMediaIngestContext();
+  const services = useOptionalEditorMediaServices();
   const selectedBlock = editor.getBlock(blockId);
   const blockType = isSupportedBlockType(selectedBlock?.type) ? selectedBlock.type : null;
 
@@ -25,6 +27,7 @@ export function MediaFilePanel({ blockId, editor, opened = true, onClose }: Medi
   }
   return (
     <MediaIngestDialog
+      libraryDataSource={services?.library}
       opened={opened}
       editor={editor}
       selectedBlock={selectedBlock}

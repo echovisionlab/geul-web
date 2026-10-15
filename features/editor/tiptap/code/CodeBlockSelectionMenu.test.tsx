@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Editor } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { createTiptapWireExtensions } from '../wire-schema';
@@ -90,7 +91,7 @@ async function mount({ sole = false, authoringMode }: { sole?: boolean; authorin
   const root = createRoot(menuElement);
   await act(async () => {
     root.render(
-      <MantineProvider env="test">
+      <DesignSystemProvider forceColorScheme="light">
         <CodeBlockSelectionMenu
           editor={editor}
           authoringMode={
@@ -101,7 +102,7 @@ async function mount({ sole = false, authoringMode }: { sole?: boolean; authorin
           }
           labels={labels}
         />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
     await new Promise((resolve) => setTimeout(resolve, 0));
   });

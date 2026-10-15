@@ -1,9 +1,11 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Stack, Text } from '@mantine/core';
-import { statusToneFromColor, StatusBadge } from '@/components/core/Badge';
+
+import { StatusBadge, type StatusTone } from '@/components/core/Badge';
 import { DateTime } from '@/features/date-time/DateTime';
 import { TextButton } from '@/components/core/TextButton';
 import {
@@ -17,9 +19,9 @@ import type { AdminProgramEventSeriesListItem } from '@/lib/queries/program-even
 import type { ColumnDef } from '@/lib/types/common/data-table';
 import type { PaginatedQueryResult } from '@/lib/types/repository/result';
 
-const STATUS_COLORS: Record<AdminProgramEventSeriesListItem['status'], string> = {
-  draft: 'gray',
-  published: 'green',
+const STATUS_TONES: Record<AdminProgramEventSeriesListItem['status'], StatusTone> = {
+  draft: 'neutral',
+  published: 'positive',
 };
 
 interface ProgramEventSeriesTableContentProps {
@@ -27,6 +29,7 @@ interface ProgramEventSeriesTableContentProps {
   filterFields: FilterFieldConfig[];
   sortFields: SortFieldConfig[];
   searchPlaceholder: string;
+  deleteAction?: typeof deleteProgramEventSeriesAction;
 }
 
 function statusLabel(status: AdminProgramEventSeriesListItem['status'], labels: { draft: string; published: string }) {
@@ -44,6 +47,7 @@ export function ProgramEventSeriesTableContent({
   filterFields,
   sortFields,
   searchPlaceholder,
+  deleteAction = deleteProgramEventSeriesAction,
 }: ProgramEventSeriesTableContentProps) {
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
@@ -55,23 +59,23 @@ export function ProgramEventSeriesTableContent({
       key: 'title',
       header: tCommon('labels.title'),
       cell: (row) => (
-        <Stack gap={2}>
+        <DsLayoutStack gap="xxs">
           <TextButton href={`/event-series/${row.id}?edit=true`} size="sm" weight="medium" appearance="accent">
             {row.title || tCommon('states.untitled')}
           </TextButton>
           {row.slug ? (
-            <Text size="xs" c="dimmed">
+            <DsText size="xs" tone="secondary">
               /{row.slug}
-            </Text>
+            </DsText>
           ) : null}
-        </Stack>
+        </DsLayoutStack>
       ),
     },
     {
       key: 'status',
       header: tCommon('labels.status'),
       cell: (row) => (
-        <StatusBadge tone={statusToneFromColor(STATUS_COLORS[row.status])} size="sm">
+        <StatusBadge tone={STATUS_TONES[row.status] ?? 'neutral'} size="sm">
           {statusLabel(row.status, {
             draft: tCommon('statuses.draft'),
             published: tCommon('statuses.published'),
@@ -83,9 +87,9 @@ export function ProgramEventSeriesTableContent({
       key: 'updatedAt',
       header: tCommon('labels.updated'),
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.updatedAt} />
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -103,8 +107,8 @@ export function ProgramEventSeriesTableContent({
           {
             label: tCommon('actions.delete'),
             icon: <IconTrash size={16} />,
-            color: 'red',
-            onClick: () => deleteProgramEventSeriesAction(row.id),
+            tone: 'danger',
+            onClick: () => deleteAction(row.id),
           },
         ];
         return (
@@ -131,7 +135,7 @@ export function ProgramEventSeriesTableContent({
       sortFields={sortFields}
       bulkDelete={{
         entityLabel: tCommonEntities('programEventSeries'),
-        deleteAction: deleteProgramEventSeriesAction,
+        deleteAction,
         getRowLabel: (row) => row.title || row.slug || row.id,
       }}
     />

@@ -1,8 +1,20 @@
 'use client';
+
+import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
+import { SupportingText } from '@/components/core/Typography';
+import { SectionCard as DsSectionCard } from '@/components/core/Section';
+
+import {
+  LayoutGrid as DsLayoutGrid,
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { CampaignTargetMode } from '@echovisionlab/geul-proto/secure/campaign_pb.ts';
 import type { CampaignRecipientScope as CampaignRecipientScopeValue } from '@echovisionlab/geul-common/collaboration/campaign';
@@ -18,9 +30,9 @@ import {
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocale, useTranslations } from 'next-intl';
-import { Box, Group, SimpleGrid, Stack, Text } from '@mantine/core';
+
 import { useDisclosure } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { EditorHeader, type StatusOption } from '@/features/editor/EditorHeader';
 import { EditorPermissionRevokedDialog } from '@/features/editor/EditorPermissionRevokedDialog';
 import { EditorSessionExpiredDialog } from '@/features/editor/EditorSessionExpiredDialog';
@@ -33,7 +45,7 @@ import { CampaignEditor } from '@/features/campaign/CampaignEditor/CampaignEdito
 import { CampaignDeliveryDialogs } from '@/features/campaign/CampaignDeliveryDialogs';
 import { CampaignRecipientScopeControl } from '@/features/campaign/CampaignRecipientScopeControl';
 import { useCampaignDeliveryCommands } from '@/features/campaign/useCampaignDeliveryCommands';
-import { useCampaignName } from '@/features/campaign/useCampaignName';
+import { useCampaignName, type CampaignEditorConfiguration } from '@/features/campaign/useCampaignName';
 import { useCampaignPreview } from '@/features/campaign/useCampaignPreview';
 import {
   CampaignTargetControl,
@@ -52,6 +64,7 @@ import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
+import { useAuthoritativeConfiguration } from '@/lib/editor/useAuthoritativeConfiguration';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { useRichTextBlockRoomController } from '@/features/editor/hooks/useBlockRoomTiptapController';
@@ -67,7 +80,24 @@ import {
 } from '@/lib/types/campaign/policy';
 import { guardNotFound } from '@/lib/utils/not-found-guard';
 
-export default function CampaignEditPage() {
+function campaignConfiguration(
+  source: Pick<CampaignFields, 'targetMode' | 'recipientScope'> & {
+    name: string;
+    subject?: string;
+    segmentId?: string | null;
+    layoutId?: string | null;
+  },
+): CampaignEditorConfiguration {
+  return {
+    targetMode: source.targetMode,
+    segmentId: source.segmentId ?? null,
+    layoutId: source.layoutId ?? null,
+    recipientScope: source.recipientScope,
+    name: source.name || source.subject || '',
+  };
+}
+
+function useCampaignEditPageModel() {
   const t = useTranslations('campaignEditor');
   const tActions = useTranslations('common.actions');
   const tLabels = useTranslations('common.labels');
@@ -91,9 +121,23 @@ export default function CampaignEditPage() {
   const [scheduleModalOpened, { open: openScheduleModal, close: closeScheduleModal }] = useDisclosure(false);
   const supportedLocaleOptions = useMemo(() => getSupportedLocaleOptions(), []);
 
+  const [fields, setCampaignFields] = useState<CampaignEditorConfiguration>({ ...DEFAULT_CAMPAIGN_FIELDS, name: '' });
+  const configuration = useAuthoritativeConfiguration({
+    document: `campaign:${campaignId}`,
+    initialConfiguration: { ...DEFAULT_CAMPAIGN_FIELDS, name: '' },
+    onAdopt: (patch) => setCampaignFields((current) => ({ ...current, ...patch })),
+  });
+  const initialConfigurationRead = useMemo(() => configuration.beginRead(), [configuration]);
   const campaignQuery = useQuery({
     queryKey: ['campaigns', campaignId],
-    queryFn: () => getCampaignAction(campaignId).then(unwrapQueryResult),
+    queryFn: async () => {
+      const read = configuration.beginRead();
+      const campaign = unwrapQueryResult(await getCampaignAction(campaignId));
+      if (campaign) {
+        configuration.adoptRead(read, campaignConfiguration(campaign));
+      }
+      return campaign;
+    },
   });
   const { data: campaign, isLoading, refetch: refetchCampaign } = campaignQuery;
   const localeSession = useLocaleDocumentSession({
@@ -112,70 +156,39 @@ export default function CampaignEditPage() {
   const editorSession =
     currentProvider && blockRoomController ? { provider: currentProvider, controller: blockRoomController } : null;
 
-  const [fields, setCampaignFields] = useState<CampaignFields>(DEFAULT_CAMPAIGN_FIELDS);
   const [pendingConfigRequestCount, setPendingConfigRequestCount] = useState(0);
-  const pendingConfigRequestsRef = useRef(new Map<keyof CampaignFields, Set<number>>());
-  const latestConfigRequestRef = useRef(new Map<keyof CampaignFields, number>());
-  const nextConfigRequestRef = useRef(0);
-  const beginConfigRequest = useCallback((keys: (keyof CampaignFields)[]) => {
-    const requestId = ++nextConfigRequestRef.current;
-    setPendingConfigRequestCount((count) => count + 1);
-    for (const key of keys) {
-      const requests = pendingConfigRequestsRef.current.get(key) ?? new Set<number>();
-      requests.add(requestId);
-      pendingConfigRequestsRef.current.set(key, requests);
-      latestConfigRequestRef.current.set(key, requestId);
-    }
-    return {
-      isLatest: () => keys.every((key) => latestConfigRequestRef.current.get(key) === requestId),
-      finish: () => {
-        setPendingConfigRequestCount((count) => Math.max(0, count - 1));
-        for (const key of keys) {
-          const requests = pendingConfigRequestsRef.current.get(key);
-          requests?.delete(requestId);
-          if (requests?.size === 0) {
-            pendingConfigRequestsRef.current.delete(key);
-          }
-        }
-      },
-    };
-  }, []);
-  const hasPendingCampaignConfiguration = pendingConfigRequestCount > 0;
-  const setField = useCallback(<K extends keyof CampaignFields>(key: K, value: CampaignFields[K]) => {
-    setCampaignFields((current) => ({ ...current, [key]: value }));
-  }, []);
-  const setFields = useCallback((values: Partial<CampaignFields>) => {
-    setCampaignFields((current) => ({ ...current, ...values }));
-  }, []);
-  const adoptCampaignFields = useCallback((source: NonNullable<typeof campaign>) => {
-    setCampaignFields((current) => {
-      const pending = pendingConfigRequestsRef.current;
+  const beginConfigRequest = useCallback(
+    (keys: (keyof CampaignFields)[]) => {
+      setPendingConfigRequestCount((count) => count + 1);
+      const write = configuration.beginWrite(keys);
       return {
-        targetMode: pending.has('targetMode') ? current.targetMode : source.targetMode,
-        segmentId: pending.has('segmentId') ? current.segmentId : (source.segmentId ?? null),
-        layoutId: pending.has('layoutId') ? current.layoutId : (source.layoutId ?? null),
-        recipientScope: pending.has('recipientScope') ? current.recipientScope : source.recipientScope,
+        ...write,
+        finish: () => {
+          write.fail();
+          setPendingConfigRequestCount((count) => Math.max(0, count - 1));
+        },
       };
-    });
-  }, []);
+    },
+    [configuration],
+  );
+  const hasPendingCampaignConfiguration = pendingConfigRequestCount > 0;
   const refetchCampaignFields = useCallback(async () => {
-    const result = await refetchCampaign();
-    if (result.data) {
-      adoptCampaignFields(result.data);
-    }
-  }, [adoptCampaignFields, refetchCampaign]);
+    await refetchCampaign();
+  }, [refetchCampaign]);
   useEditorEntityChanges(
     `campaign:${campaignId}`,
     () => {
       void refetchCampaignFields();
     },
     currentProvider,
+    undefined,
+    configuration.captureOwnChange,
   );
   useEffect(() => {
     if (campaign) {
-      adoptCampaignFields(campaign);
+      configuration.adoptRead(initialConfigurationRead, campaignConfiguration(campaign));
     }
-  }, [adoptCampaignFields, campaign]);
+  }, [campaign, configuration, initialConfigurationRead]);
   const accessInterruption = useEditorPermissionRevocation(currentProvider, 'campaign', campaignId);
 
   const {
@@ -238,7 +251,12 @@ export default function CampaignEditPage() {
     normalizeLocale(activeEditLocale.sourceLocale) ??
     normalizeLocale(currentLocale) ??
     'en';
-  const campaignName = useCampaignName({ campaignId, campaign, editable: canMutate });
+  const campaignName = useCampaignName({
+    campaignId,
+    configuration,
+    refetchConfiguration: refetchCampaignFields,
+    editable: canMutate,
+  });
   const preview = useCampaignPreview({
     campaignId,
     campaignLoaded: Boolean(campaign),
@@ -302,15 +320,18 @@ export default function CampaignEditPage() {
   );
 
   const persistEditableCampaignBeforeDelivery = useCallback(async () => {
+    if (accessInterruption.blocked) {
+      return false;
+    }
     if (!canMutate) {
       return true;
     }
     if (!(await flushEditorSaves(`campaign:${campaignId}`))) {
-      notifications.show({ message: tCommonNotifications('saveFailed'), color: 'red' });
+      notifications.show({ message: tCommonNotifications('saveFailed'), tone: 'danger' });
       return false;
     }
     if (localeMode.shouldUseLocaleDocument && !isSynced) {
-      notifications.show({ message: tStates('syncing'), color: 'yellow' });
+      notifications.show({ message: tStates('syncing'), tone: 'warning' });
       return false;
     }
     try {
@@ -319,11 +340,12 @@ export default function CampaignEditPage() {
     } catch (error) {
       notifications.show({
         message: error instanceof Error ? error.message : tCommonNotifications('saveFailed'),
-        color: 'red',
+        tone: 'danger',
       });
       return false;
     }
   }, [
+    accessInterruption.blocked,
     campaignId,
     currentProvider,
     canMutate,
@@ -336,7 +358,7 @@ export default function CampaignEditPage() {
   const handleBack = useCallback(() => {
     void (async () => {
       if (!(await flushEditorSaves(`campaign:${campaignId}`))) {
-        notifications.show({ message: tCommonNotifications('saveFailed'), color: 'red' });
+        notifications.show({ message: tCommonNotifications('saveFailed'), tone: 'danger' });
         return;
       }
       router.push('/admin/campaigns');
@@ -350,24 +372,29 @@ export default function CampaignEditPage() {
       }
       const request = beginConfigRequest(['targetMode', 'segmentId']);
       try {
-        const result = await updateCampaignConfigurationAction(campaignId, {
-          targetMode: selection.targetMode,
-          segmentId: selection.segmentId,
-        });
+        const result = await updateCampaignConfigurationAction(
+          campaignId,
+          {
+            targetMode: selection.targetMode,
+            segmentId: selection.segmentId,
+          },
+          request.origin,
+        );
         if (result.error) {
-          notifications.show({ message: result.error, color: 'red' });
+          notifications.show({ message: result.error, tone: 'danger' });
         } else {
-          if (request.isLatest()) {
-            setFields({ targetMode: selection.targetMode, segmentId: selection.segmentId });
-          }
-          publishEditorEntityChange(`campaign:${campaignId}`);
+          request.acknowledge(
+            { targetMode: selection.targetMode, segmentId: selection.segmentId },
+            { authoritative: false },
+          );
+          publishEditorEntityChange(`campaign:${campaignId}`, request.origin);
         }
       } finally {
         request.finish();
         await refetchCampaignFields();
       }
     },
-    [beginConfigRequest, campaignId, canMutate, refetchCampaignFields, setFields],
+    [beginConfigRequest, campaignId, canMutate, refetchCampaignFields],
   );
 
   const handleLayoutChange = useCallback(
@@ -378,15 +405,13 @@ export default function CampaignEditPage() {
       const request = beginConfigRequest(['layoutId']);
       let updated = false;
       try {
-        const result = await updateCampaignConfigurationAction(campaignId, { layoutId: value });
+        const result = await updateCampaignConfigurationAction(campaignId, { layoutId: value }, request.origin);
         if (result.error) {
-          notifications.show({ message: result.error, color: 'red' });
+          notifications.show({ message: result.error, tone: 'danger' });
         } else {
           updated = true;
-          if (request.isLatest()) {
-            setField('layoutId', value);
-          }
-          publishEditorEntityChange(`campaign:${campaignId}`);
+          request.acknowledge({ layoutId: value }, { authoritative: false });
+          publishEditorEntityChange(`campaign:${campaignId}`, request.origin);
         }
       } finally {
         request.finish();
@@ -396,7 +421,7 @@ export default function CampaignEditPage() {
         void preview.scheduleRefresh();
       }
     },
-    [beginConfigRequest, campaignId, canMutate, preview, refetchCampaignFields, setField],
+    [beginConfigRequest, campaignId, canMutate, preview, refetchCampaignFields],
   );
 
   const handleRecipientScopeChange = useCallback(
@@ -406,21 +431,19 @@ export default function CampaignEditPage() {
       }
       const request = beginConfigRequest(['recipientScope']);
       try {
-        const result = await updateCampaignConfigurationAction(campaignId, { recipientScope });
+        const result = await updateCampaignConfigurationAction(campaignId, { recipientScope }, request.origin);
         if (result.error) {
-          notifications.show({ message: result.error, color: 'red' });
+          notifications.show({ message: result.error, tone: 'danger' });
         } else {
-          if (request.isLatest()) {
-            setField('recipientScope', recipientScope);
-          }
-          publishEditorEntityChange(`campaign:${campaignId}`);
+          request.acknowledge({ recipientScope }, { authoritative: false });
+          publishEditorEntityChange(`campaign:${campaignId}`, request.origin);
         }
       } finally {
         request.finish();
         await refetchCampaignFields();
       }
     },
-    [beginConfigRequest, campaignId, canMutate, refetchCampaignFields, setField],
+    [beginConfigRequest, campaignId, canMutate, refetchCampaignFields],
   );
 
   const handleActiveLocaleChange = useCallback(
@@ -458,32 +481,39 @@ export default function CampaignEditPage() {
   }, [persistEditableCampaignBeforeDelivery, sendTest, testEmail, testLocale]);
 
   const handleSendAll = useCallback(() => {
-    if (pendingConfigRequestsRef.current.size > 0) {
+    if (configuration.hasPending()) {
       return;
     }
     if (!deliveryTargetComplete) {
-      notifications.show({ message: t('target.audienceRequired'), color: 'red' });
+      notifications.show({ message: t('target.audienceRequired'), tone: 'danger' });
       return;
     }
     void (async () => {
       if (!(await persistEditableCampaignBeforeDelivery())) {
         return;
       }
-      if (pendingConfigRequestsRef.current.size > 0) {
+      if (configuration.hasPending()) {
         return;
       }
       sendCampaign.mutate(fields.recipientScope);
     })();
-  }, [deliveryTargetComplete, fields.recipientScope, persistEditableCampaignBeforeDelivery, sendCampaign, t]);
+  }, [
+    configuration,
+    deliveryTargetComplete,
+    fields.recipientScope,
+    persistEditableCampaignBeforeDelivery,
+    sendCampaign,
+    t,
+  ]);
 
   const handleSchedule = useCallback(() => {
-    if (pendingConfigRequestsRef.current.size > 0) {
+    if (configuration.hasPending()) {
       return;
     }
     const scheduledAt = dateTimeValueToDate(scheduleDate);
     if (!scheduledAt || !deliveryTargetComplete) {
       if (!deliveryTargetComplete) {
-        notifications.show({ message: t('target.audienceRequired'), color: 'red' });
+        notifications.show({ message: t('target.audienceRequired'), tone: 'danger' });
       }
       return;
     }
@@ -491,7 +521,7 @@ export default function CampaignEditPage() {
       if (!(await persistEditableCampaignBeforeDelivery())) {
         return;
       }
-      if (pendingConfigRequestsRef.current.size > 0) {
+      if (configuration.hasPending()) {
         return;
       }
       scheduleCampaign.mutate({
@@ -500,6 +530,7 @@ export default function CampaignEditPage() {
       });
     })();
   }, [
+    configuration,
     deliveryTargetComplete,
     fields.recipientScope,
     persistEditableCampaignBeforeDelivery,
@@ -509,15 +540,17 @@ export default function CampaignEditPage() {
   ]);
 
   const handleCancelSchedule = useCallback(() => {
-    cancelSchedule.mutate();
-  }, [cancelSchedule]);
+    if (!accessInterruption.blocked) {
+      cancelSchedule.mutate();
+    }
+  }, [accessInterruption.blocked, cancelSchedule]);
 
   if (isLoading) {
-    return <PageLoader />;
+    return { kind: 'state' as const, content: <PageLoader /> };
   }
 
   if (campaignQuery.isError && !campaign) {
-    return <QueryErrorAlert queries={[campaignQuery]} />;
+    return { kind: 'state' as const, content: <QueryErrorAlert queries={[campaignQuery]} /> };
   }
 
   guardNotFound(campaign);
@@ -559,6 +592,208 @@ export default function CampaignEditPage() {
     },
   ] satisfies StatusOption<string>[];
 
+  return {
+    kind: 'ready' as const,
+    currentProvider,
+    campaignId,
+    protocol,
+    campaignQuery,
+    campaignName,
+    isEditable,
+    canMutate,
+    campaign,
+    statusOptions,
+    isConnected,
+    isSynced,
+    handleBack,
+    t,
+    tAnalytics,
+    router,
+    tActions,
+    openTestModal,
+    canSchedule,
+    hasPendingCampaignConfiguration,
+    currentSubject,
+    deliveryTargetComplete,
+    openScheduleModal,
+    canSendNow,
+    openSendModal,
+    isScheduled,
+    cancelSchedule,
+    handleCancelSchedule,
+    tLabels,
+    handleSubjectChange,
+    canEditLocalizedSubject,
+    activeEditLocale,
+    handleActiveLocaleChange,
+    fields,
+    segments,
+    segmentsLoading,
+    segmentsLoadError,
+    handleTargetChange,
+    layouts,
+    handleLayoutChange,
+    layoutsLoadError,
+    tStates,
+    handleRecipientScopeChange,
+    preview,
+    viewModeOptions,
+    editorSession,
+    testModalOpened,
+    testEmail,
+    testLocale,
+    supportedLocaleOptions,
+    activePreviewLocale,
+    sendTest,
+    tCommonPlaceholders,
+    closeTestModal,
+    setTestEmail,
+    setTestLocale,
+    handleSendTest,
+    sendModalOpened,
+    sendCampaign,
+    selectedSegmentName,
+    closeSendModal,
+    handleSendAll,
+    scheduleModalOpened,
+    currentLocale,
+    scheduleDate,
+    scheduleCampaign,
+    closeScheduleModal,
+    setScheduleDate,
+    handleSchedule,
+    accessInterruption,
+  };
+}
+
+type CampaignEditPageControllerModel = ReturnType<typeof useCampaignEditPageModel>;
+type CampaignEditPageReadyModel = Extract<CampaignEditPageControllerModel, { kind: 'ready' }>;
+export type CampaignEditPageViewModel =
+  | Exclude<CampaignEditPageControllerModel, { kind: 'ready' }>
+  | (Omit<
+      CampaignEditPageReadyModel,
+      | 'campaignQuery'
+      | 'campaignName'
+      | 'campaign'
+      | 'cancelSchedule'
+      | 'sendTest'
+      | 'sendCampaign'
+      | 'scheduleCampaign'
+      | 'preview'
+      | 'editorSession'
+    > & {
+      campaignQuery: import('react').ComponentProps<typeof QueryErrorAlert>['queries'][number];
+      campaignName:
+        | Pick<NonNullable<CampaignEditPageReadyModel['campaignName']>, 'name' | 'changeName' | 'pending'>
+        | Extract<CampaignEditPageReadyModel['campaignName'], null | undefined>;
+      campaign:
+        | Pick<NonNullable<CampaignEditPageReadyModel['campaign']>, 'status'>
+        | Extract<CampaignEditPageReadyModel['campaign'], null | undefined>;
+      cancelSchedule:
+        | Pick<NonNullable<CampaignEditPageReadyModel['cancelSchedule']>, 'isPending'>
+        | Extract<CampaignEditPageReadyModel['cancelSchedule'], null | undefined>;
+      sendTest:
+        | Pick<NonNullable<CampaignEditPageReadyModel['sendTest']>, 'isPending'>
+        | Extract<CampaignEditPageReadyModel['sendTest'], null | undefined>;
+      sendCampaign:
+        | Pick<NonNullable<CampaignEditPageReadyModel['sendCampaign']>, 'isPending'>
+        | Extract<CampaignEditPageReadyModel['sendCampaign'], null | undefined>;
+      scheduleCampaign:
+        | Pick<NonNullable<CampaignEditPageReadyModel['scheduleCampaign']>, 'isPending'>
+        | Extract<CampaignEditPageReadyModel['scheduleCampaign'], null | undefined>;
+      preview:
+        | Pick<
+            NonNullable<CampaignEditPageReadyModel['preview']>,
+            | 'viewMode'
+            | 'changeViewMode'
+            | 'showEditor'
+            | 'editorReady'
+            | 'editorContentChanged'
+            | 'showPreview'
+            | 'query'
+            | 'previewSrcDoc'
+          >
+        | Extract<CampaignEditPageReadyModel['preview'], null | undefined>;
+      editorSession: {
+        provider: import('@/lib/collab/collaboration-awareness-provider').CollaborationAwarenessProvider;
+        controller: import('@/features/editor/tiptap/block-room-tiptap-controller').RichTextBlockRoomTiptapController;
+      } | null;
+    });
+export function CampaignEditPageView({ model }: { model: CampaignEditPageViewModel }) {
+  if (model.kind !== 'ready') {
+    return model.content;
+  }
+  const {
+    currentProvider,
+    campaignId,
+    protocol,
+    campaignQuery,
+    campaignName,
+    isEditable,
+    canMutate,
+    campaign,
+    statusOptions,
+    isConnected,
+    isSynced,
+    handleBack,
+    t,
+    tAnalytics,
+    router,
+    tActions,
+    openTestModal,
+    canSchedule,
+    hasPendingCampaignConfiguration,
+    currentSubject,
+    deliveryTargetComplete,
+    openScheduleModal,
+    canSendNow,
+    openSendModal,
+    isScheduled,
+    cancelSchedule,
+    handleCancelSchedule,
+    tLabels,
+    handleSubjectChange,
+    canEditLocalizedSubject,
+    activeEditLocale,
+    handleActiveLocaleChange,
+    fields,
+    segments,
+    segmentsLoading,
+    segmentsLoadError,
+    handleTargetChange,
+    layouts,
+    handleLayoutChange,
+    layoutsLoadError,
+    tStates,
+    handleRecipientScopeChange,
+    preview,
+    viewModeOptions,
+    editorSession,
+    testModalOpened,
+    testEmail,
+    testLocale,
+    supportedLocaleOptions,
+    activePreviewLocale,
+    sendTest,
+    tCommonPlaceholders,
+    closeTestModal,
+    setTestEmail,
+    setTestLocale,
+    handleSendTest,
+    sendModalOpened,
+    sendCampaign,
+    selectedSegmentName,
+    closeSendModal,
+    handleSendAll,
+    scheduleModalOpened,
+    currentLocale,
+    scheduleDate,
+    scheduleCampaign,
+    closeScheduleModal,
+    setScheduleDate,
+    handleSchedule,
+    accessInterruption,
+  } = model;
   return (
     <EditorRuntimeProvider
       provider={currentProvider}
@@ -567,7 +802,7 @@ export default function CampaignEditPage() {
       blockRoomProtocol={protocol}
     >
       <QueryErrorAlert queries={[campaignQuery]} />
-      <Stack h="100%" gap="md">
+      <DsLayoutStack fill="block" gap="md">
         <EditorHeader
           title={campaignName.name}
           onTitleChange={campaignName.changeName}
@@ -591,6 +826,7 @@ export default function CampaignEditPage() {
               label: tActions('sendTest'),
               icon: <IconTestPipe size={16} />,
               emphasis: 'medium',
+              disabled: accessInterruption.blocked,
               onClick: openTestModal,
             },
             ...(canSchedule
@@ -600,7 +836,11 @@ export default function CampaignEditPage() {
                     label: tActions('schedule'),
                     icon: <IconCalendar size={16} />,
                     emphasis: 'medium' as const,
-                    disabled: hasPendingCampaignConfiguration || !currentSubject.trim() || !deliveryTargetComplete,
+                    disabled:
+                      accessInterruption.blocked ||
+                      hasPendingCampaignConfiguration ||
+                      !currentSubject.trim() ||
+                      !deliveryTargetComplete,
                     onClick: openScheduleModal,
                   },
                 ]
@@ -611,7 +851,11 @@ export default function CampaignEditPage() {
                     key: 'send-now',
                     label: t('actions.sendNow'),
                     icon: <IconSend size={16} />,
-                    disabled: hasPendingCampaignConfiguration || !currentSubject.trim() || !deliveryTargetComplete,
+                    disabled:
+                      accessInterruption.blocked ||
+                      hasPendingCampaignConfiguration ||
+                      !currentSubject.trim() ||
+                      !deliveryTargetComplete,
                     onClick: openSendModal,
                   },
                 ]
@@ -625,6 +869,7 @@ export default function CampaignEditPage() {
                     tone: 'danger' as const,
                     emphasis: 'medium' as const,
                     loading: cancelSchedule.isPending,
+                    disabled: accessInterruption.blocked,
                     onClick: handleCancelSchedule,
                   },
                 ]
@@ -632,28 +877,31 @@ export default function CampaignEditPage() {
           ]}
         />
 
-        <Group align="flex-end" wrap="wrap">
-          <TextInput
-            label={tLabels('subject')}
-            value={currentSubject}
-            onChange={(event) => handleSubjectChange(event.currentTarget.value)}
-            style={{ flex: 1, minWidth: 260 }}
-            disabled={!canEditLocalizedSubject}
-          />
-          {activeEditLocale.isControlVisible ? (
-            <TranslationLocaleControl
-              variant="select"
-              label={tLabels('language')}
-              value={activeEditLocale.activeLocale}
-              options={activeEditLocale.localeOptions}
-              sourceLocale={activeEditLocale.sourceLocale}
-              onChange={handleActiveLocaleChange}
-              w={220}
+        <DsLayoutInline align="end" wrap="wrap">
+          <div style={{ minWidth: 260, flex: 1 }}>
+            <TextInput
+              grow
+              label={tLabels('subject')}
+              value={currentSubject}
+              onChange={(event) => handleSubjectChange(event.currentTarget.value)}
+              disabled={!canEditLocalizedSubject}
             />
+          </div>
+          {activeEditLocale.isControlVisible ? (
+            <div style={{ width: 220 }}>
+              <TranslationLocaleControl
+                variant="select"
+                label={tLabels('language')}
+                value={activeEditLocale.activeLocale}
+                options={activeEditLocale.localeOptions}
+                sourceLocale={activeEditLocale.sourceLocale}
+                onChange={handleActiveLocaleChange}
+              />
+            </div>
           ) : null}
-          {canMutate ? (
+          {isEditable ? (
             <>
-              <Box w={250}>
+              <div style={{ width: 250 }}>
                 <CampaignTargetControl
                   targetMode={fields.targetMode}
                   segmentId={fields.segmentId}
@@ -662,23 +910,24 @@ export default function CampaignEditPage() {
                   loadError={segmentsLoadError}
                   onChange={handleTargetChange}
                 />
-              </Box>
-              <Select
-                placeholder={t('layout.none')}
-                data={
-                  layouts?.map((layout) => ({
-                    value: layout.id,
-                    label: layout.name,
-                  })) ?? []
-                }
-                value={fields.layoutId}
-                onChange={handleLayoutChange}
-                clearable
-                error={layoutsLoadError ? tStates('notAvailable') : undefined}
-                disabled={!canMutate || layoutsLoadError}
-                w={200}
-              />
-              <Box w={260}>
+              </div>
+              <div style={{ width: 200 }}>
+                <Select
+                  placeholder={t('layout.none')}
+                  data={
+                    layouts?.map((layout) => ({
+                      value: layout.id,
+                      label: layout.name,
+                    })) ?? []
+                  }
+                  value={fields.layoutId}
+                  onChange={handleLayoutChange}
+                  clearable
+                  error={layoutsLoadError ? tStates('notAvailable') : undefined}
+                  disabled={!canMutate || layoutsLoadError}
+                />
+              </div>
+              <div style={{ width: 260 }}>
                 <CampaignRecipientScopeControl
                   value={fields.recipientScope}
                   labels={{
@@ -690,27 +939,32 @@ export default function CampaignEditPage() {
                   onChange={handleRecipientScopeChange}
                   disabled={!canMutate}
                 />
-              </Box>
+              </div>
             </>
           ) : null}
-          <Box ml="auto">
-            <IconViewModeControl value={preview.viewMode} onChange={preview.changeViewMode} options={viewModeOptions} />
-          </Box>
-        </Group>
+          <DsLayoutInline flexible justify="end">
+            <DsLayoutInset space="none">
+              <IconViewModeControl
+                value={preview.viewMode}
+                onChange={preview.changeViewMode}
+                options={viewModeOptions}
+              />
+            </DsLayoutInset>
+          </DsLayoutInline>
+        </DsLayoutInline>
 
-        <SimpleGrid
-          cols={preview.viewMode === 'split' ? { base: 1, sm: 2 } : 1}
-          spacing="md"
-          style={{
-            flex: 1,
-            minHeight: 0,
-            height: '100%',
-            gridTemplateRows: 'minmax(0, 1fr)',
-          }}
+        <DsLayoutGrid
+          columns={preview.viewMode === 'split' ? { base: 1, sm: 2 } : 1}
+          gap="md"
+          rows="stretch"
+          fill="both"
+          flexible
         >
           {preview.showEditor &&
             (editorSession ? (
               <CampaignEditor
+                accessibleLabel={tLabels('content')}
+                contentLanguage={activePreviewLocale}
                 campaignId={campaignId}
                 provider={editorSession.provider}
                 blockRoomController={editorSession.controller}
@@ -720,44 +974,52 @@ export default function CampaignEditPage() {
                 onContentChange={preview.editorContentChanged}
               />
             ) : (
-              <Box p="md">
-                <Text c="dimmed">{tStates('loading')}</Text>
-              </Box>
+              <DsLayoutInset space="md">
+                <DsLayoutInset space="none">
+                  <SupportingText tone="secondary">{tStates('loading')}</SupportingText>
+                </DsLayoutInset>
+              </DsLayoutInset>
             ))}
 
           {preview.showPreview && (
-            <Box flex={1}>
+            <DsLayoutInset space="none" flexible>
               <QueryErrorAlert queries={[preview.query]} />
               {preview.previewSrcDoc ? (
-                <iframe
-                  srcDoc={preview.previewSrcDoc}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    minHeight: 500,
-                    border: '1px solid var(--mantine-color-default-border)',
-                    borderRadius: 'var(--mantine-radius-default)',
-                    background: '#fff',
-                  }}
-                  title={t('preview.frameTitle')}
-                />
+                <DsSectionCard padding="none" withBorder appearance="paper" clip stretch>
+                  <iframe
+                    srcDoc={preview.previewSrcDoc}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      minHeight: 500,
+                      border: 0,
+                    }}
+                    title={t('preview.frameTitle')}
+                  />
+                </DsSectionCard>
               ) : (
-                <Text c="dimmed" ta="center" py="xl">
-                  {t('preview.empty')}
-                </Text>
+                <DsLayoutInset block="xl">
+                  <SupportingText tone="secondary" align="center">
+                    {t('preview.empty')}
+                  </SupportingText>
+                </DsLayoutInset>
               )}
-            </Box>
+            </DsLayoutInset>
           )}
-        </SimpleGrid>
+        </DsLayoutGrid>
 
-        <EntityTranslationsPanel
-          entityType="campaign"
-          entityId={campaignId}
-          canManage={canMutate}
-          canAdministerTranslations={canMutate}
-        />
+        <AuthoringExtension kind="translations">
+          <EntityTranslationsPanel
+            entityType="campaign"
+            entityId={campaignId}
+            canManage
+            canMutateTargets={canMutate}
+            canAdministerTranslations={canMutate}
+          />
+        </AuthoringExtension>
 
         <CampaignDeliveryDialogs
+          readOnly={accessInterruption.blocked}
           commonLabels={{
             close: tActions('close'),
             cancel: tActions('cancel'),
@@ -835,7 +1097,10 @@ export default function CampaignEditPage() {
           opened={accessInterruption.sessionExpired}
           onConfirm={() => router.push(buildLoginRedirectHref(`/campaigns/${campaignId}?edit=true`))}
         />
-      </Stack>
+      </DsLayoutStack>
     </EditorRuntimeProvider>
   );
+}
+export default function CampaignEditPage(...args: Parameters<typeof useCampaignEditPageModel>) {
+  return <CampaignEditPageView model={useCampaignEditPageModel(...args)} />;
 }

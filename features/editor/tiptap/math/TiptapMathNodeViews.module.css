@@ -50,22 +50,22 @@
 }
 
 .inline[data-empty='true'] .inlineSource::before {
-  color: var(--mantine-color-dimmed);
+  color: var(--geul-text-muted);
   content: '$';
 }
 
 .block {
   display: block;
   min-height: 3rem;
-  padding: 0.75rem;
+  padding: var(--geul-spacing-sm);
   border-radius: 0;
   cursor: pointer;
   text-align: center;
 }
 
 .block[data-selected='true'] {
-  outline: 1px solid var(--mantine-primary-color-filled);
-  outline-offset: 2px;
+  outline: var(--geul-border-thin) solid var(--geul-action-primary);
+  outline-offset: var(--geul-border-focus);
   -webkit-user-select: none;
   user-select: none;
 }
@@ -73,14 +73,13 @@
 .rendered {
   display: inline-block;
   max-width: 100%;
-  overflow-x: auto;
 }
 
 .error {
   display: block;
-  margin-top: 0.4rem;
-  color: var(--mantine-color-red-6);
-  font-size: 0.75rem;
+  margin-top: var(--geul-spacing-xxs);
+  color: var(--geul-status-danger);
+  font-size: var(--geul-font-size-xs);
   text-align: left;
   white-space: pre-wrap;
 }

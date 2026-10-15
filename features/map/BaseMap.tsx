@@ -1,8 +1,14 @@
 'use client';
 
+import { SectionCard } from '@/components/core/Section';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+
+import { SupportingText } from '@/components/core/Typography';
+import { useComputedColorScheme } from '@/lib/providers/DesignSystemProvider';
+
 import { useCallback, useEffect, useRef } from 'react';
 import { Map, useMap } from '@vis.gl/react-google-maps';
-import { Box, Text, useComputedColorScheme } from '@mantine/core';
+
 import { getPublicGoogleMapsApiKey } from '@/lib/public-runtime-config';
 
 const LONG_PRESS_DURATION = 500;
@@ -286,7 +292,7 @@ export function BaseMap({
   children,
 }: BaseMapProps) {
   const apiKey = getPublicGoogleMapsApiKey();
-  const colorScheme = useComputedColorScheme('light');
+  const colorScheme = useComputedColorScheme();
   const mapColorScheme = colorScheme === 'dark' ? 'DARK' : 'LIGHT';
 
   const containerStyle: React.CSSProperties = {
@@ -313,20 +319,13 @@ export function BaseMap({
           {children}
         </Map>
       ) : (
-        <Box
-          bg="gray.1"
-          style={{
-            ...containerStyle,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: 200,
-          }}
-        >
-          <Text c="dimmed" size="sm">
-            Google Maps API key not configured
-          </Text>
-        </Box>
+        <div style={{ ...containerStyle, minHeight: 200 }}>
+          <SectionCard appearance="muted" padding="none" border="none" stretch>
+            <DsLayoutStack fill="both" align="center" justify="center">
+              <SupportingText tone="secondary">Google Maps API key not configured</SupportingText>
+            </DsLayoutStack>
+          </SectionCard>
+        </div>
       )}
     </div>
   );

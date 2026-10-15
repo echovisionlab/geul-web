@@ -1,13 +1,15 @@
 'use client';
 
+import type { OverlayPresentationProps } from '../overlay-contract';
+
 import type { ReactNode } from 'react';
-import { Modal, type ModalProps as MantineModalProps } from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
-import classes from './ContentModal.module.css';
+import { OverlayDialog, type OverlayDialogDensity } from './OverlayDialog';
+
+export type ContentModalDensity = OverlayDialogDensity;
 
 export type ContentModalSize = 'compact' | 'standard' | 'large' | 'wide' | 'workspace';
 
-export interface ContentModalProps {
+export interface ContentModalProps extends OverlayPresentationProps {
   id?: string;
   opened: boolean;
   onClose: () => void;
@@ -15,16 +17,14 @@ export interface ContentModalProps {
   closeLabel: string;
   children: ReactNode;
   centered?: boolean;
+  /** Lock escape, outside press and close control while an owned operation is pending. */
+  loading?: boolean;
+  closePolicy?: 'dismissible' | 'non-dismissible';
   size?: ContentModalSize;
+  density?: ContentModalDensity;
+  /** Fit resizable media/work areas to the viewport; content must own its shrinking behavior. */
+  bodyLayout?: 'scroll' | 'fit';
 }
-
-const MODAL_SIZES: Record<ContentModalSize, NonNullable<MantineModalProps['size']>> = {
-  compact: 'sm',
-  standard: 'md',
-  large: 'lg',
-  wide: '60rem',
-  workspace: 'calc(100vw - 3rem)',
-};
 
 export function ContentModal({
   id,
@@ -35,37 +35,26 @@ export function ContentModal({
   children,
   centered = false,
   size = 'standard',
+  density = 'compact',
+  bodyLayout = 'scroll',
+  loading = false,
+  closePolicy = 'dismissible',
 }: ContentModalProps) {
-  const workspaceMobile = useMediaQuery('(max-width: 47.99em)');
-  const workspace = size === 'workspace';
-
   return (
-    <Modal
+    <OverlayDialog
       id={id}
       opened={opened}
       onClose={onClose}
       title={title}
-      closeButtonProps={{ 'aria-label': closeLabel }}
+      closeLabel={closeLabel}
+      dismissible={closePolicy === 'dismissible' && !loading}
+      busy={loading}
       centered={centered}
-      size={MODAL_SIZES[size]}
-      xOffset={workspace ? '1.5rem' : size === 'wide' ? '1rem' : undefined}
-      yOffset={workspace ? '1.5rem' : undefined}
-      fullScreen={workspace && workspaceMobile}
-      radius={0}
-      overlayProps={{ backgroundOpacity: 0.55, blur: 3 }}
-      classNames={
-        workspace
-          ? {
-              content: classes.workspaceContent,
-              header: classes.workspaceHeader,
-              body: classes.workspaceBody,
-            }
-          : undefined
-      }
-      data-centered={centered || undefined}
-      data-size={size}
+      size={size}
+      density={density}
+      bodyLayout={bodyLayout}
     >
       {children}
-    </Modal>
+    </OverlayDialog>
   );
 }

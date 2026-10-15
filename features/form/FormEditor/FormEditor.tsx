@@ -1,5 +1,7 @@
 'use client';
 
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+
 import { useCallback } from 'react';
 import { useFormEditorContext } from '@/lib/contexts/FormEditorContext';
 import { useFormTranslationContext } from '@/features/form/FormTranslationContext';
@@ -7,18 +9,19 @@ import type { FormSchema } from '@/lib/types/form/schema';
 import { FormBuilder } from '../FormBuilder/FormBuilder';
 
 export function FormEditor() {
-  const { fields, isSynced, setField } = useFormEditorContext();
+  const { fields, isSynced, setField, provider } = useFormEditorContext();
   const { activeEditLocale, isEditingScopedLocale } = useFormTranslationContext();
+  const canEdit = useEditorAccessLevel(provider) === 'edit';
   const isViewingTargetLocale = Boolean(activeEditLocale.activeLocale) && !activeEditLocale.isSourceLocale;
   const isExistingTargetLocale = isViewingTargetLocale && activeEditLocale.hasLiveRow;
 
   const handleSchemaChange = useCallback(
     (newSchema: FormSchema) => {
-      if (isSynced && (!isViewingTargetLocale || isExistingTargetLocale)) {
+      if (canEdit && isSynced && (!isViewingTargetLocale || isExistingTargetLocale)) {
         setField('schema', newSchema);
       }
     },
-    [isExistingTargetLocale, isSynced, isViewingTargetLocale, setField],
+    [canEdit, isExistingTargetLocale, isSynced, isViewingTargetLocale, setField],
   );
 
   return (
@@ -27,7 +30,13 @@ export function FormEditor() {
       onChange={handleSchemaChange}
       title={fields.title}
       mode={
-        !isSynced ? 'readOnly' : isExistingTargetLocale ? 'translation' : isEditingScopedLocale ? 'readOnly' : 'full'
+        !canEdit || !isSynced
+          ? 'readOnly'
+          : isExistingTargetLocale
+            ? 'translation'
+            : isEditingScopedLocale
+              ? 'readOnly'
+              : 'full'
       }
     />
   );

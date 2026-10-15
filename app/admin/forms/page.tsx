@@ -1,9 +1,8 @@
+import { FormsPageView } from '@/features/admin/form/FormsPageView';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getTranslations } from 'next-intl/server';
-import { Stack } from '@mantine/core';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import { CreateFormButton, FormModalProvider, FormModals, FormsTableContent } from '@/features/admin/form';
+
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
 import { listFormsAdminAction } from '@/lib/actions/form';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
@@ -58,25 +57,13 @@ export default async function AdminFormsPage({ searchParams }: PageProps) {
   }).then(unwrapQueryResult);
 
   return (
-    <FormModalProvider>
-      <Stack>
-        <AdminPageHeader
-          title={formsLabel}
-          items={[{ key: 'create-form', type: 'custom', content: <CreateFormButton /> }]}
-        />
-
-        <ServerDataTable namespace="forms">
-          <FormsTableContent
-            result={result}
-            searchPlaceholder={searchPlaceholder}
-            filterFields={filterFields}
-            sortFields={sortFields}
-          />
-          <ServerDataTable.Pagination namespace="forms" result={result} searchParams={params} />
-        </ServerDataTable>
-      </Stack>
-
-      <FormModals />
-    </FormModalProvider>
+    <FormsPageView
+      title={formsLabel}
+      result={result}
+      searchPlaceholder={searchPlaceholder}
+      filterFields={filterFields}
+      sortFields={sortFields}
+      searchParams={params.toString()}
+    />
   );
 }

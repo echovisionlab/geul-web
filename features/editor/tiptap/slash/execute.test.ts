@@ -1,13 +1,18 @@
 // @vitest-environment jsdom
 
 import { Editor } from '@tiptap/core';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import enMessages from '@/messages/en.json';
 import { createTiptapWireExtensions } from '../wire-schema';
-import { geulTiptapEmojis } from '../emoji/emoji-extension';
+import { geulTiptapEmojis } from '../emoji/emoji-data';
+import { loadTiptapEmojiData } from '../emoji/emoji-runtime';
 import { createTiptapSlashCatalog } from './catalog';
 import { applyTiptapSlashEmoji, executeTiptapSlashItem } from './execute';
 import type { TiptapSlashCapabilities, TiptapSlashMenuMessages, TiptapSlashRange } from './types';
+
+beforeAll(async () => {
+  await loadTiptapEmojiData();
+});
 
 const serializedSlashMessages = enMessages.editorCommon.editor.slashMenu;
 

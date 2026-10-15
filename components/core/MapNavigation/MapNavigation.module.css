@@ -1,0 +1,24 @@
+.navigation {
+  position: absolute;
+  z-index: 1;
+}
+
+.navigation[data-geul-map-position='top-left'],
+.navigation[data-geul-map-position='top-right'] {
+  top: var(--geul-spacing-xs);
+}
+
+.navigation[data-geul-map-position='bottom-left'],
+.navigation[data-geul-map-position='bottom-right'] {
+  bottom: var(--geul-spacing-xs);
+}
+
+.navigation[data-geul-map-position='top-left'],
+.navigation[data-geul-map-position='bottom-left'] {
+  left: var(--geul-spacing-xs);
+}
+
+.navigation[data-geul-map-position='top-right'],
+.navigation[data-geul-map-position='bottom-right'] {
+  right: var(--geul-spacing-xs);
+}

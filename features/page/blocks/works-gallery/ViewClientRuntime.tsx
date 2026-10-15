@@ -1,7 +1,10 @@
 'use client';
+import { getCollectionMetrics } from '@/components/core/Collection/collection-contract';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Stack, Text } from '@mantine/core';
+
 import { DateTime } from '@/features/date-time/DateTime';
 import { EntityListView, type EntityListItem } from '../EntityListView';
 import type { WorkListProps } from './schema';
@@ -18,6 +21,8 @@ export interface WorkListViewClientProps {
 
 export function WorkListViewClient({ works, parsedProps: p }: WorkListViewClientProps) {
   const tWorks = useTranslations('works');
+  const tCommon = useTranslations('common');
+  const metrics = getCollectionMetrics(p.itemSize);
   const layout = p.layout || 'grid';
   const columns = parseInt(p.columns || '3', 10);
   const showImage = p.showImage !== 'false';
@@ -36,8 +41,9 @@ export function WorkListViewClient({ works, parsedProps: p }: WorkListViewClient
     <EntityListView
       items={works}
       className="work-list-block"
-      emptyLabel="No works found"
+      emptyLabel={tCommon('messages.noWorksFound')}
       layout={layout}
+      itemSize={p.itemSize}
       columns={columns}
       showImage={showImage}
       imageAspectRatio={imageAspectRatio}
@@ -46,16 +52,16 @@ export function WorkListViewClient({ works, parsedProps: p }: WorkListViewClient
       renderMeta={
         showMeta
           ? (work) => (
-              <Stack gap={2}>
-                <Text size="xs" c="dimmed">
+              <DsLayoutStack gap="xxs">
+                <DsText size={metrics.metaSize} tone="secondary">
                   {workTypeLabels[work.type]}
-                </Text>
+                </DsText>
                 {work.publishedAt ? (
-                  <Text size="xs" c="dimmed">
+                  <DsText size={metrics.metaSize} tone="secondary">
                     <DateTime value={work.publishedAt} />
-                  </Text>
+                  </DsText>
                 ) : null}
-              </Stack>
+              </DsLayoutStack>
             )
           : undefined
       }

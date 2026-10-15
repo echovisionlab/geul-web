@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
+import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { IconDashboard, IconSettings, IconUsers } from '@tabler/icons-react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -9,19 +9,6 @@ import { TestProviders } from '@/test/TestProviders';
 import { isAdminNavItemActive } from './AdminShell';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-const TestLink = forwardRef<HTMLAnchorElement, ComponentPropsWithoutRef<'a'>>(({ href, onClick, ...props }, ref) => (
-  <a
-    ref={ref}
-    {...props}
-    href={href}
-    onClick={(event) => {
-      event.preventDefault();
-      onClick?.(event);
-    }}
-  />
-));
-TestLink.displayName = 'TestLink';
 
 const events = {
   onToggleNavigation: vi.fn(),
@@ -79,7 +66,6 @@ const defaultProps: AdminShellViewProps = {
   events,
   logoSlot: <span>Example Studio</span>,
   compactLogoSlot: <span>D</span>,
-  linkComponent: TestLink,
   children: <main>User administration</main>,
 };
 

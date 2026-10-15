@@ -13,16 +13,24 @@ import { ensureShareLinkMutationSucceeded } from '@/lib/hooks/share-link-mutatio
 import type { ShareEntityType, ShareLink } from '@/lib/types/share-link/model';
 import { toDate } from '@/lib/utils/proto';
 
-interface UseShareLinksOptions<T extends ShareEntityType> {
+export interface UseShareLinksOptions<T extends ShareEntityType> {
   entityType: T;
   entityId: string;
   initialData?: ShareLink<T>[];
+  services?: ShareLinkServices;
 }
 
-interface CreateOptions {
+export interface CreateShareLinkOptions {
   label?: string;
   expiresAt?: Date;
   password?: string;
+}
+
+/** Read and commands use the same production controller in hosted and local scenarios. */
+export interface ShareLinkServices {
+  list: (entityType: ShareEntityType, entityId: string) => Promise<ShareLinkItem[]>;
+  create: (entityType: ShareEntityType, entityId: string, options?: CreateShareLinkOptions) => Promise<void>;
+  remove: (entityType: ShareEntityType, entityId: string, id: string) => Promise<void>;
 }
 
 interface UseShareLinksReturn<T extends ShareEntityType> {
@@ -30,7 +38,7 @@ interface UseShareLinksReturn<T extends ShareEntityType> {
   isLoading: boolean;
   isCreating: boolean;
   isDeleting: string | null;
-  create: (options?: CreateOptions) => Promise<void>;
+  create: (options?: CreateShareLinkOptions) => Promise<void>;
   remove: (id: string) => Promise<void>;
   refetch: () => void;
 }
@@ -51,7 +59,7 @@ function toShareLink<T extends ShareEntityType>(entityType: T, entityId: string,
 }
 
 export function useShareLinks<T extends ShareEntityType>(options: UseShareLinksOptions<T>): UseShareLinksReturn<T> {
-  const { entityType, entityId, initialData } = options;
+  const { entityType, entityId, initialData, services } = options;
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
@@ -59,6 +67,9 @@ export function useShareLinks<T extends ShareEntityType>(options: UseShareLinksO
 
   // Query function based on entity type
   const queryFn = useCallback(async (): Promise<ShareLinkItem[]> => {
+    if (services) {
+      return services.list(entityType, entityId);
+    }
     switch (entityType) {
       case 'post':
         return listPostShareLinksAction(entityId);
@@ -83,11 +94,12 @@ export function useShareLinks<T extends ShareEntityType>(options: UseShareLinksO
       default:
         return [];
     }
-  }, [entityType, entityId]);
+  }, [entityType, entityId, services]);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey,
     queryFn,
+    ...(services ? { enabled: true } : {}),
     staleTime: initialData ? Infinity : 0,
   });
 
@@ -108,7 +120,10 @@ export function useShareLinks<T extends ShareEntityType>(options: UseShareLinksO
 
   // Create mutation
   const createMutation = useMutation({
-    mutationFn: async (createOptions?: CreateOptions) => {
+    mutationFn: async (createOptions?: CreateShareLinkOptions) => {
+      if (services) {
+        return services.create(entityType, entityId, createOptions);
+      }
       switch (entityType) {
         case 'post':
           return ensureShareLinkMutationSucceeded(
@@ -189,6 +204,9 @@ export function useShareLinks<T extends ShareEntityType>(options: UseShareLinksO
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      if (services) {
+        return services.remove(entityType, entityId, id);
+      }
       switch (entityType) {
         case 'post':
           return ensureShareLinkMutationSucceeded(await deletePostShareLinkAction(id));
@@ -216,7 +234,7 @@ export function useShareLinks<T extends ShareEntityType>(options: UseShareLinksO
   });
 
   const create = useCallback(
-    async (createOptions?: CreateOptions): Promise<void> => {
+    async (createOptions?: CreateShareLinkOptions): Promise<void> => {
       await createMutation.mutateAsync(createOptions);
     },
     [createMutation],

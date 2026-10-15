@@ -1,13 +1,19 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ColumnsEditor } from './ColumnsEditor';
 import type { ColumnsSection } from '../types';
 
-const state = vi.hoisted(() => ({ editable: false, allowStructuralEdits: false, updateSection: vi.fn() }));
+const state = vi.hoisted(() => ({
+  editable: false,
+  allowStructuralEdits: false,
+  updateSection: vi.fn(),
+  updateLocalizedSectionProps: vi.fn(),
+}));
 vi.mock('../PageEditorContext', () => ({ usePageEditor: () => state }));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
 vi.mock('../usePageSectionTypeLabels', () => ({
@@ -62,9 +68,9 @@ describe('ColumnsEditor authority', () => {
     state.editable = true;
     state.allowStructuralEdits = true;
     const view = render(
-      <MantineProvider env="test">
+      <DesignSystemProvider forceColorScheme="light">
         <ColumnsEditor section={section} SectionRenderer={() => <div>Child content</div>} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
     const open = () => {
       act(() => view.container.querySelector<HTMLButtonElement>('[data-column-section-add="0"]')?.click());
@@ -113,9 +119,9 @@ describe('ColumnsEditor authority', () => {
       state.editable = true;
       state.allowStructuralEdits = true;
       const editor = (currentSection: ColumnsSection) => (
-        <MantineProvider env="test">
+        <DesignSystemProvider forceColorScheme="light">
           <ColumnsEditor section={currentSection} SectionRenderer={() => <div>Child content</div>} />
-        </MantineProvider>
+        </DesignSystemProvider>
       );
       const view = render(editor(section));
       act(() => view.container.querySelector<HTMLButtonElement>('[data-column-section-add="0"]')?.click());
@@ -163,12 +169,14 @@ describe('ColumnsEditor authority', () => {
     state.editable = editable;
     state.allowStructuralEdits = allowStructuralEdits;
     const view = render(
-      <MantineProvider env="test">
+      <DesignSystemProvider forceColorScheme="light">
         <ColumnsEditor section={section} SectionRenderer={() => <div>Child content</div>} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
     expect(view.getByText('Child content')).toBeTruthy();
-    for (const control of view.container.querySelectorAll<HTMLInputElement | HTMLButtonElement>('input, button')) {
+    for (const control of view.container.querySelectorAll<HTMLInputElement | HTMLButtonElement>(
+      'input, button:not([data-page-section-toggle])',
+    )) {
       expect(control.disabled).toBe(true);
       act(() => control.click());
     }

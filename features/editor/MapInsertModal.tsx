@@ -1,10 +1,14 @@
 'use client';
+import { SupportingText } from '@/components/core/Typography';
+
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 
 import { useCallback, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Modal, Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { ContentModal } from '@/components/core/Modal';
+import { notifications } from '@/components/core/Notification';
 import { CreatePlaceModal, type CreatePlaceFormState } from '@/features/place/CreatePlaceModal';
 import { MapPlaceSelect } from '@/features/place/MapPlaceSelect';
 import { useCreateMapPlaceForBlockAction } from '@/lib/contexts/MapPlaceActionContext';
@@ -17,6 +21,7 @@ interface MapInsertModalProps {
 }
 
 export function MapInsertModal({ opened, onClose, onPlaceSelect }: MapInsertModalProps) {
+  const tModalActions = useTranslations('common.actions');
   const t = useTranslations('mapInsertModal');
   const tCommonPlaceholders = useTranslations('common.placeholders');
   const createMapPlaceForBlockAction = useCreateMapPlaceForBlockAction();
@@ -35,7 +40,7 @@ export function MapInsertModal({ opened, onClose, onPlaceSelect }: MapInsertModa
     onSuccess: (newPlace) => {
       if (!newPlace) {
         notifications.show({
-          color: 'red',
+          tone: 'danger',
           message: t('notifications.createFailedPermissions'),
         });
         return;
@@ -45,7 +50,7 @@ export function MapInsertModal({ opened, onClose, onPlaceSelect }: MapInsertModa
     },
     onError: () => {
       notifications.show({
-        color: 'red',
+        tone: 'danger',
         message: t('notifications.createFailed'),
       });
     },
@@ -72,11 +77,15 @@ export function MapInsertModal({ opened, onClose, onPlaceSelect }: MapInsertModa
 
   return (
     <>
-      <Modal opened={opened} onClose={onClose} title={t('title')} size="sm">
-        <Stack gap="md">
-          <Text size="sm" c="dimmed">
-            {t('description')}
-          </Text>
+      <ContentModal
+        opened={opened}
+        onClose={onClose}
+        title={t('title')}
+        size="compact"
+        closeLabel={tModalActions('close')}
+      >
+        <DsLayoutStack gap="md">
+          <SupportingText tone="secondary">{t('description')}</SupportingText>
           <MapPlaceSelect
             value={null}
             onChange={onPlaceSelect}
@@ -84,8 +93,8 @@ export function MapInsertModal({ opened, onClose, onPlaceSelect }: MapInsertModa
             showCreateButton
             placeholder={tCommonPlaceholders('searchPlaces')}
           />
-        </Stack>
-      </Modal>
+        </DsLayoutStack>
+      </ContentModal>
 
       <CreatePlaceModal
         opened={createModalOpened}

@@ -81,12 +81,41 @@ afterEach(() => {
 });
 
 function setInputValue(input: HTMLInputElement, value: string): void {
+  input.focus();
   const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
   valueSetter?.call(input, value);
   input.dispatchEvent(new Event('input', { bubbles: true }));
+  input.blur();
 }
 
 describe('CreatePlaceModal', () => {
+  it('submits manually entered place data without mounting map or autocomplete controls', () => {
+    const onSubmit = vi.fn();
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+    act(() =>
+      root!.render(
+        <TestProviders>
+          <CreatePlaceModal localOnly opened onClose={vi.fn()} onSubmit={onSubmit} />
+        </TestProviders>,
+      ),
+    );
+    expect(document.querySelector('[data-testid="base-map"]')).toBeNull();
+    expect(document.querySelector('[data-testid="places-autocomplete"]')).toBeNull();
+    act(() => {
+      setInputValue(document.querySelector<HTMLInputElement>('input[placeholder="Place name"]')!, 'Manual place');
+      setInputValue(document.querySelector<HTMLInputElement>('input[placeholder="Full address"]')!, 'Manual address');
+    });
+    const create = Array.from(document.querySelectorAll('button')).find((button) =>
+      button.textContent?.includes('Create & Add'),
+    )!;
+    act(() => create.click());
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Manual place', address: 'Manual address', googlePlaceId: null }),
+    );
+  });
+
   it('updates the address input without reading from a cleared change event', () => {
     container = document.createElement('div');
     document.body.appendChild(container);

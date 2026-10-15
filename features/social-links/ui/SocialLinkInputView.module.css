@@ -1,0 +1,26 @@
+.container {
+  container: social-link-input / inline-size;
+  min-inline-size: 0;
+  flex: 1;
+}
+
+.fullPicker {
+  max-inline-size: 40%;
+  min-inline-size: 0;
+  flex: 0 1 auto;
+}
+
+.compactPicker {
+  display: none;
+  flex-shrink: 0;
+}
+
+@container social-link-input (width < $mantine-breakpoint-xs) {
+  .fullPicker {
+    display: none;
+  }
+
+  .compactPicker {
+    display: block;
+  }
+}

@@ -1,12 +1,17 @@
 'use client';
 
-import type { ReactNode } from 'react';
-import { Group, Modal, Stack, Text, type ModalProps as MantineModalProps } from '@mantine/core';
-import { Button, type ControlTone } from '../Button';
+import type { OverlayPresentationProps } from '../overlay-contract';
+
+import { useId, type ReactNode } from 'react';
+import { LayoutStack } from '../Layout';
+import { Text } from '../Typography';
+import { DialogActions } from './DialogActions';
+import { OverlayDialog } from './OverlayDialog';
+import { Button, type ControlEmphasis, type ControlTone } from '../Button';
 
 export type ConfirmModalSize = 'compact' | 'standard' | 'large';
 
-export interface ConfirmModalProps {
+export interface ConfirmModalProps extends OverlayPresentationProps {
   opened: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -16,17 +21,12 @@ export interface ConfirmModalProps {
   cancelLabel: string;
   closeLabel: string;
   confirmTone?: ControlTone;
+  confirmEmphasis?: ControlEmphasis;
   loading?: boolean;
   confirmDisabled?: boolean;
   centered?: boolean;
   size?: ConfirmModalSize;
 }
-
-const MODAL_SIZES: Record<ConfirmModalSize, NonNullable<MantineModalProps['size']>> = {
-  compact: 'sm',
-  standard: 'md',
-  large: 'lg',
-};
 
 export function ConfirmModal({
   opened,
@@ -37,43 +37,60 @@ export function ConfirmModal({
   confirmLabel,
   cancelLabel,
   closeLabel,
-  confirmTone = 'danger',
+  confirmTone = 'neutral',
+  confirmEmphasis = 'strong',
   loading = false,
   confirmDisabled = false,
   centered = false,
   size = 'standard',
 }: ConfirmModalProps) {
+  const messageId = useId();
+  const describeMessage = typeof message === 'string' && Boolean(message.trim());
+  const focusCancel = confirmTone === 'danger' || confirmDisabled;
   return (
-    <Modal
+    <OverlayDialog
       opened={opened}
       onClose={onClose}
       title={title}
-      closeOnClickOutside={!loading}
-      closeOnEscape={!loading}
-      withCloseButton={!loading}
-      closeButtonProps={{ 'aria-label': closeLabel }}
+      descriptionId={describeMessage ? messageId : undefined}
+      dismissible={!loading}
+      busy={loading}
+      closeLabel={closeLabel}
       centered={centered}
-      size={MODAL_SIZES[size]}
-      data-centered={centered || undefined}
-      data-size={size}
+      size={size}
     >
-      <Stack>
-        {typeof message === 'string' ? <Text>{message}</Text> : message}
-        <Group justify="flex-end">
-          <Button type="button" tone="neutral" emphasis="low" onClick={onClose} disabled={loading}>
+      <LayoutStack>
+        {typeof message === 'string' ? (
+          <Text as="p" id={describeMessage ? messageId : undefined}>
+            {message}
+          </Text>
+        ) : (
+          message
+        )}
+        <DialogActions>
+          <Button
+            type="button"
+            tone="neutral"
+            emphasis="low"
+            onClick={onClose}
+            disabled={loading}
+            autoFocus={focusCancel}
+          >
             {cancelLabel}
           </Button>
           <Button
             type="button"
             tone={confirmTone}
+            emphasis={confirmEmphasis}
             onClick={onConfirm}
             loading={loading}
             disabled={confirmDisabled || loading}
+            autoFocus={!focusCancel}
           >
             {confirmLabel}
           </Button>
-        </Group>
-      </Stack>
-    </Modal>
+        </DialogActions>
+      </LayoutStack>
+    </OverlayDialog>
   );
 }

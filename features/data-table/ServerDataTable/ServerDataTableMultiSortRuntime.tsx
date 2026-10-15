@@ -1,7 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import {
+  useServerTablePathname as usePathname,
+  useServerTableRouter as useRouter,
+  useServerTableSearchParams as useSearchParams,
+} from './ServerDataTableNavigation';
 import type { TableSortSpec } from '@/lib/utils/table-query';
 import { buildSortUrl, parseTableQuery } from '@/lib/utils/table-url';
 import { MultiSortView, type SortFieldConfig } from '../MultiSortView';

@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ComponentProps } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import koMessages from '@/messages/ko.json';
 import type { SessionInfo } from '@/lib/types/user/model';
 import { SecurityForm } from './SecurityForm';
@@ -89,7 +90,7 @@ function renderSecurityForm(overrides: Partial<ComponentProps<typeof SecurityFor
   act(() => {
     root.render(
       <NextIntlClientProvider locale="ko" messages={koMessages}>
-        <MantineProvider>
+        <DesignSystemProvider locale="ko" forceColorScheme="light">
           <SecurityForm
             subjectId="user-1"
             initialSessions={[currentSession]}
@@ -98,7 +99,7 @@ function renderSecurityForm(overrides: Partial<ComponentProps<typeof SecurityFor
             initialEmailCodeAvailable
             {...overrides}
           />
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
   });

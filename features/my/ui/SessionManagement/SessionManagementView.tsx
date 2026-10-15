@@ -1,7 +1,10 @@
 'use client';
 
+import { useEffect, useId, useRef } from 'react';
+
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline, LayoutInset } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { IconDeviceDesktop, IconDeviceMobile, IconX } from '@tabler/icons-react';
-import { Box, Group, Stack, Text } from '@mantine/core';
 import { LabelBadge } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
@@ -132,78 +135,115 @@ export function SessionManagementView({
   revokeOthersLoading,
   sessions,
 }: SessionManagementViewProps) {
+  const scopeId = useId();
+  const viewRef = useRef<HTMLElement>(null);
+  const removedFocus = useRef<string | 'others' | null>(null);
+  useEffect(() => {
+    const id = removedFocus.current;
+    if (!id || (id !== 'others' && sessions.some((session) => session.id === id))) {
+      return;
+    }
+    if (id === 'others' && sessions.some((session) => session.id !== currentSessionId)) {
+      return;
+    }
+    removedFocus.current = null;
+    const target =
+      viewRef.current?.querySelector<HTMLElement>('button:not(:disabled)') ??
+      viewRef.current?.querySelector<HTMLElement>('[role="heading"]');
+    target?.focus();
+  }, [currentSessionId, sessions]);
   const otherSessionsCount = sessions.filter((session) => session.id !== currentSessionId).length;
 
   return (
-    <>
-      <SectionHeader title={labels.title} description={labels.description} />
-      <Stack gap="sm">
+    <DsLayoutStack ref={viewRef} gap="md">
+      <SectionHeader
+        title={
+          <span role="heading" aria-level={2} tabIndex={-1}>
+            {labels.title}
+          </span>
+        }
+        description={labels.description}
+      />
+      <DsLayoutStack gap="sm">
         {sessions.map((session) => {
           const { device, browser, os } = parseUserAgent(session.device?.userAgent);
           const isCurrentSession = session.id === currentSessionId;
           const isRevoking = revokingSessionId === session.id;
 
           return (
-            <SectionCard key={session.id} p="sm">
-              <Group justify="space-between" wrap="nowrap">
-                <Group gap="sm" wrap="nowrap">
-                  <Box c="dimmed">
+            <SectionCard
+              appearance="plain"
+              key={session.id}
+              padding="sm"
+              role="group"
+              aria-labelledby={`${scopeId}-${session.id}-name`}
+              aria-describedby={`${scopeId}-${session.id}-details`}
+            >
+              <DsLayoutInline justify="between" wrap="nowrap">
+                <DsLayoutInline gap="sm" wrap="nowrap">
+                  <DsText as="span" tone="secondary">
                     {device === 'mobile' || device === 'tablet' ? (
-                      <IconDeviceMobile size={24} />
+                      <IconDeviceMobile size={24} aria-hidden />
                     ) : (
-                      <IconDeviceDesktop size={24} />
+                      <IconDeviceDesktop size={24} aria-hidden />
                     )}
-                  </Box>
-                  <Box>
-                    <Group gap="xs">
-                      <Text size="sm" fw={500}>
+                  </DsText>
+                  <div>
+                    <DsLayoutInline gap="xs">
+                      <DsText id={`${scopeId}-${session.id}-name`} size="sm" weight="medium">
                         {labels.browser(browser)} · {labels.os(os)}
-                      </Text>
-                      {isCurrentSession ? (
-                        <LabelBadge size="xs" tone="positive">
-                          {labels.thisDevice}
-                        </LabelBadge>
-                      ) : null}
-                    </Group>
-                    <Text size="xs" c="dimmed">
+                      </DsText>
+                      {isCurrentSession ? <LabelBadge tone="positive">{labels.thisDevice}</LabelBadge> : null}
+                    </DsLayoutInline>
+                    <DsText id={`${scopeId}-${session.id}-details`} size="xs" tone="secondary">
                       {maskIpAddress(session.device?.ipAddress)} · {labels.device(device)} ·{' '}
                       {getRelativeTime(session.authenticatedAt, locale, labels.activeNow)}
-                    </Text>
-                  </Box>
-                </Group>
+                    </DsText>
+                  </div>
+                </DsLayoutInline>
                 {!isCurrentSession ? (
                   <Tooltip label={labels.revoke} withArrow>
                     <IconButton
                       tone="neutral"
                       emphasis="low"
                       aria-label={labels.revoke}
-                      onClick={() => onRevokeSession(session.id)}
+                      aria-describedby={`${scopeId}-${session.id}-name ${scopeId}-${session.id}-details`}
+                      onClick={() => {
+                        removedFocus.current = session.id;
+                        onRevokeSession(session.id);
+                      }}
                       loading={isRevoking}
                       disabled={isRevoking}
                       data-testid={`security-revoke-session-${session.id}`}
                     >
-                      <IconX size={16} />
+                      <IconX size={16} aria-hidden />
                     </IconButton>
                   </Tooltip>
                 ) : null}
-              </Group>
+              </DsLayoutInline>
             </SectionCard>
           );
         })}
 
         {otherSessionsCount > 0 ? (
-          <Button
-            tone="danger"
-            emphasis="medium"
-            mt="sm"
-            onClick={onRevokeOtherSessions}
-            loading={revokeOthersLoading}
-            data-testid="security-revoke-other-sessions"
-          >
-            {labels.logOutOthers}
-          </Button>
+          <LayoutInset blockStart="sm">
+            <DsLayoutInline justify="end" gap="action-group" data-testid="security-session-actions">
+              <Button
+                tone="danger"
+                emphasis="medium"
+                onClick={() => {
+                  removedFocus.current = 'others';
+                  onRevokeOtherSessions();
+                }}
+                loading={revokeOthersLoading}
+                data-testid="security-revoke-other-sessions"
+              >
+                {labels.logOutOthers}
+              </Button>
+            </DsLayoutInline>
+          </LayoutInset>
         ) : null}
-      </Stack>
-    </>
+      </DsLayoutStack>
+    </DsLayoutStack>
   );
 }

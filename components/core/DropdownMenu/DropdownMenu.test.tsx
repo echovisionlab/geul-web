@@ -2,9 +2,12 @@
 
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+import { I18nProvider, RouterProvider } from 'react-aria-components';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Tooltip } from '../Tooltip';
+import { IconButton } from '../IconButton';
 import { DropdownMenu } from './DropdownMenu';
+import { NavigationIntentProvider } from '../Navigation';
 
 let container: HTMLDivElement;
 let root: Root;
@@ -38,11 +41,232 @@ Object.defineProperty(window.HTMLElement.prototype, 'scrollIntoView', {
 
 function renderDropdownMenu(node: ReactNode) {
   act(() => {
-    root.render(<MantineProvider>{node}</MantineProvider>);
+    root.render(<I18nProvider locale="en-US">{node}</I18nProvider>);
   });
 }
 
 describe('DropdownMenu', () => {
+  it('lets the application navigation guard cancel an ordinary menu link', () => {
+    const navigate = vi.fn();
+    const guard = vi.fn((_, event: { preventDefault: () => void }) => event.preventDefault());
+    renderDropdownMenu(
+      <RouterProvider navigate={navigate}>
+        <NavigationIntentProvider onNavigationIntent={guard}>
+          <DropdownMenu defaultOpened portal={false}>
+            <DropdownMenu.Target>
+              <button type="button">Navigation</button>
+            </DropdownMenu.Target>
+            <DropdownMenu.Dropdown>
+              <DropdownMenu.Item href="/documents">Documents</DropdownMenu.Item>
+            </DropdownMenu.Dropdown>
+          </DropdownMenu>
+        </NavigationIntentProvider>
+      </RouterProvider>,
+    );
+    act(() => document.querySelector<HTMLAnchorElement>('[role="menuitem"]')!.click());
+    expect(guard).toHaveBeenCalledWith(
+      { href: 'http://localhost:3000/documents' },
+      { preventDefault: expect.any(Function) },
+    );
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('keeps allowed menu routing and leaves modified link clicks outside the application guard', () => {
+    const navigate = vi.fn();
+    const guard = vi.fn();
+    const renderLink = () =>
+      renderDropdownMenu(
+        <RouterProvider navigate={navigate}>
+          <NavigationIntentProvider onNavigationIntent={guard}>
+            <DropdownMenu defaultOpened portal={false}>
+              <DropdownMenu.Target>
+                <button type="button">Navigation</button>
+              </DropdownMenu.Target>
+              <DropdownMenu.Dropdown>
+                <DropdownMenu.Item href="/documents">Documents</DropdownMenu.Item>
+              </DropdownMenu.Dropdown>
+            </DropdownMenu>
+          </NavigationIntentProvider>
+        </RouterProvider>,
+      );
+    renderLink();
+    act(() => document.querySelector<HTMLAnchorElement>('[role="menuitem"]')!.click());
+    expect(guard).toHaveBeenCalledOnce();
+    expect(navigate).toHaveBeenCalledOnce();
+    act(() => root.render(null));
+    guard.mockClear();
+    navigate.mockClear();
+    renderLink();
+    const modifiedClick = new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true });
+    act(() => document.querySelector<HTMLAnchorElement>('[role="menuitem"]')!.dispatchEvent(modifiedClick));
+    expect(guard).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
+    expect(modifiedClick.defaultPrevented).toBe(false);
+  });
+
+  it('opens from the keyboard, skips disabled commands and restores the trigger after Escape', async () => {
+    renderDropdownMenu(
+      <DropdownMenu portal={false}>
+        <DropdownMenu.Target>
+          <button type="button">Document commands</button>
+        </DropdownMenu.Target>
+        <DropdownMenu.Dropdown>
+          <DropdownMenu.Item>Open</DropdownMenu.Item>
+          <DropdownMenu.Item disabled>Unavailable</DropdownMenu.Item>
+          <DropdownMenu.Item>Save</DropdownMenu.Item>
+        </DropdownMenu.Dropdown>
+      </DropdownMenu>,
+    );
+    const trigger = container.querySelector<HTMLButtonElement>('button')!;
+    await act(async () => {
+      trigger.focus();
+      trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+    });
+    const menu = document.querySelector<HTMLElement>('[role="menu"]')!;
+    expect(menu).not.toBeNull();
+    const items = Array.from(menu.querySelectorAll<HTMLElement>('[role="menuitem"]'));
+    expect(document.activeElement).toBe(items[0]);
+    act(() =>
+      items[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true })),
+    );
+    expect(document.activeElement).toBe(items[2]);
+    act(() => items[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true })));
+    expect(document.activeElement).toBe(items[0]);
+    await act(async () => {
+      items[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+      await new Promise((resolve) => window.setTimeout(resolve, 30));
+    });
+    expect(document.querySelector('[role="menu"]')).toBeNull();
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('adapts a native sensor handle through a tooltip to the functional menu trigger', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      renderDropdownMenu(
+        <DropdownMenu portal={false}>
+          <DropdownMenu.Target>
+            <Tooltip label="Block actions" events={{ focus: false }}>
+              <IconButton label="Block actions" interaction="drag-handle">
+                <svg aria-hidden />
+              </IconButton>
+            </Tooltip>
+          </DropdownMenu.Target>
+          <DropdownMenu.Dropdown>
+            <DropdownMenu.Item>Delete block</DropdownMenu.Item>
+          </DropdownMenu.Dropdown>
+        </DropdownMenu>,
+      );
+      const button = container.querySelector('button')!;
+      expect(container.querySelectorAll('button')).toHaveLength(1);
+      expect(container.querySelector('[role="button"]')).toBeNull();
+      act(() => button.click());
+      expect(button.getAttribute('aria-expanded')).toBe('true');
+      expect(document.querySelector('[role="menuitem"]')?.textContent).toBe('Delete block');
+      expect(warning.mock.calls.some((call) => String(call[0]).includes('PressResponder'))).toBe(false);
+    } finally {
+      warning.mockRestore();
+    }
+  });
+
+  it('keeps editing content accessible while a nonmodal contextual menu opens and its document mutates', async () => {
+    const action = vi.fn();
+    renderDropdownMenu(
+      <>
+        <div data-editor-content contentEditable suppressContentEditableWarning>
+          Editable document
+        </div>
+        <DropdownMenu defaultOpened portal={false}>
+          <DropdownMenu.Target>
+            <button type="button">Actions</button>
+          </DropdownMenu.Target>
+          <DropdownMenu.Dropdown>
+            <DropdownMenu.Item onClick={action}>Apply</DropdownMenu.Item>
+          </DropdownMenu.Dropdown>
+        </DropdownMenu>
+      </>,
+    );
+    const editor = container.querySelector<HTMLElement>('[data-editor-content]')!;
+    expect(editor.closest('[aria-hidden="true"]')).toBeNull();
+    await act(async () => {
+      editor.append(document.createElement('span'));
+      await Promise.resolve();
+    });
+    expect(editor.closest('[aria-hidden="true"]')).toBeNull();
+    const item = document.querySelector<HTMLElement>('[role="menuitem"]')!;
+    act(() => item.click());
+    expect(action).toHaveBeenCalledOnce();
+    expect(document.querySelector('[role="menu"]')).toBeNull();
+  });
+
+  it('routes a tooltip trigger ref to its sole action without an extra pressable or tab stop', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      renderDropdownMenu(
+        <DropdownMenu portal={false}>
+          <DropdownMenu.Target>
+            <Tooltip label="Formatting" events={{ focus: false }}>
+              <IconButton label="Formatting">
+                <svg aria-hidden />
+              </IconButton>
+            </Tooltip>
+          </DropdownMenu.Target>
+          <DropdownMenu.Dropdown>
+            <DropdownMenu.Item>Bold</DropdownMenu.Item>
+          </DropdownMenu.Dropdown>
+        </DropdownMenu>,
+      );
+      const trigger = container.querySelector('button')!;
+      expect(container.querySelectorAll('button')).toHaveLength(1);
+      expect(container.querySelector('[role=button]')).toBeNull();
+      act(() => trigger.click());
+      expect(document.querySelector('[role=menu]')).not.toBeNull();
+      expect(trigger.getAttribute('aria-expanded')).toBe('true');
+      expect(warning.mock.calls.some((call) => String(call[0]).includes('Pressable'))).toBe(false);
+    } finally {
+      warning.mockRestore();
+    }
+  });
+  it('suppresses an enclosing hint while the actual menu opens', () => {
+    renderDropdownMenu(
+      <Tooltip label="Command hint" opened withinPortal={false}>
+        <span>
+          <DropdownMenu portal={false}>
+            <DropdownMenu.Target>
+              <button type="button">Commands</button>
+            </DropdownMenu.Target>
+            <DropdownMenu.Dropdown>
+              <DropdownMenu.Item>Open</DropdownMenu.Item>
+            </DropdownMenu.Dropdown>
+          </DropdownMenu>
+        </span>
+      </Tooltip>,
+    );
+    expect(document.querySelector('[role=tooltip]')?.textContent).toContain('Command hint');
+    const trigger = Array.from(container.querySelectorAll('button')).find(
+      (button) => button.textContent === 'Commands',
+    )!;
+    act(() => trigger.click());
+    expect(document.querySelector('[role=menu]')).not.toBeNull();
+    expect(document.querySelector('[role=tooltip]')).toBeNull();
+  });
+  it('suppresses a target hint inside an opened menu boundary', () => {
+    renderDropdownMenu(
+      <DropdownMenu portal={false} defaultOpened>
+        <DropdownMenu.Target>
+          <Tooltip label="Command hint" opened withinPortal={false}>
+            <button type="button">Commands</button>
+          </Tooltip>
+        </DropdownMenu.Target>
+        <DropdownMenu.Dropdown>
+          <DropdownMenu.Item>Open</DropdownMenu.Item>
+        </DropdownMenu.Dropdown>
+      </DropdownMenu>,
+    );
+    expect(document.querySelector('[role=menu]')).not.toBeNull();
+    expect(document.querySelector('[role=tooltip]')).toBeNull();
+  });
   it('exposes the required compound API', () => {
     expect(DropdownMenu.Target).toBeDefined();
     expect(DropdownMenu.Dropdown).toBeDefined();
@@ -82,7 +306,7 @@ describe('DropdownMenu', () => {
     );
 
     const dropdown = document.querySelector<HTMLElement>('[data-menu-dropdown]');
-    const selected = document.querySelector<HTMLButtonElement>('[data-selected="true"]');
+    const selected = document.querySelector<HTMLButtonElement>('[data-core-selected="true"]');
     const disabled = Array.from(document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')).find(
       (item) => item.textContent === 'Locked',
     );
@@ -95,27 +319,17 @@ describe('DropdownMenu', () => {
     const iconSection = selected?.querySelector<HTMLElement>('[data-position="left"]');
     const checkSection = selected?.querySelector<HTMLElement>('[data-position="right"]');
 
-    expect(dropdown?.style.width).toBe('calc(10rem * var(--mantine-scale))');
-    expect(dropdown?.style.getPropertyValue('--popover-radius')).toBe('0rem');
-    expect(dropdown?.style.padding).toBe('3px');
-    expect(selected?.style.fontSize).toBe('var(--mantine-font-size-xs)');
-    expect(selected?.style.minHeight).toBe('30px');
-    expect(selected?.style.padding).toBe('4px 8px');
-    expect(selected?.style.borderRadius).toBe('0px');
-    expect(label?.style.fontSize).toBe('10px');
-    expect(label?.style.fontWeight).toBe('600');
-    expect(label?.style.padding).toBe('3px 8px');
-    expect(divider?.style.margin).toBe('3px 2px');
-    expect(iconSection?.style.width).toBe('16px');
-    expect(iconSection?.style.height).toBe('16px');
-    expect(checkSection?.style.width).toBe('16px');
-    expect(checkSection?.style.height).toBe('16px');
-    expect(trigger?.getAttribute('aria-haspopup')).toBe('menu');
+    expect(dropdown?.getAttribute('data-size')).toBe('compact');
+    expect(label?.textContent).toBe('View');
+    expect(divider?.getAttribute('role')).toBe('separator');
+    expect(iconSection?.querySelector('[data-testid="item-icon"]')).not.toBeNull();
+    expect(checkSection?.querySelector('svg')).not.toBeNull();
+    expect(['menu', 'true']).toContain(trigger?.getAttribute('aria-haspopup'));
     expect(trigger?.getAttribute('aria-expanded')).toBe('true');
     expect(selected?.getAttribute('role')).toBe('menuitem');
     expect(selected?.getAttribute('aria-current')).toBe('true');
-    expect(selected?.getAttribute('data-selected')).toBe('true');
-    expect(disabled?.disabled).toBe(true);
+    expect(selected?.getAttribute('data-core-selected')).toBe('true');
+    expect(disabled?.getAttribute('aria-disabled')).toBe('true');
     expect(destructive?.textContent).toBe('Delete');
 
     act(() => disabled?.click());
@@ -124,4 +338,36 @@ describe('DropdownMenu', () => {
     act(() => selected?.click());
     expect(onSelect).toHaveBeenCalledTimes(1);
   });
+});
+
+it('keeps actions distinct across sibling fragments and nested fragment lists', () => {
+  const first = vi.fn();
+  const second = vi.fn();
+  const last = vi.fn();
+  renderDropdownMenu(
+    <DropdownMenu portal={false} defaultOpened>
+      <DropdownMenu.Target>
+        <button type="button">Actions</button>
+      </DropdownMenu.Target>
+      <DropdownMenu.Dropdown>
+        <>
+          <DropdownMenu.Item onClick={first}>First</DropdownMenu.Item>
+        </>
+        <>
+          <>
+            <DropdownMenu.Item onClick={second}>Second</DropdownMenu.Item>
+          </>
+        </>
+        <>
+          <DropdownMenu.Item onClick={last}>Last</DropdownMenu.Item>
+        </>
+      </DropdownMenu.Dropdown>
+    </DropdownMenu>,
+  );
+  const items = [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')];
+  expect(items.map((item) => item.textContent)).toEqual(['First', 'Second', 'Last']);
+  act(() => items[2].click());
+  expect(last).toHaveBeenCalledOnce();
+  expect(first).not.toHaveBeenCalled();
+  expect(second).not.toHaveBeenCalled();
 });

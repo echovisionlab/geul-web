@@ -1,28 +1,41 @@
-import type { CSSProperties } from 'react';
-import { Box } from '@mantine/core';
+'use client';
+
+import { useState, type CSSProperties } from 'react';
+import { Text, type TextSize } from '@/components/core/Typography';
+import { primitiveTokens } from '@/components/core/design-tokens';
+
+export type SiteLogoSize = Exclude<TextSize, 'display'>;
 
 export interface SiteLogoViewProps {
   src: string | null;
   alt: string;
+  /** Named typography role for the wordmark and the default image height. */
+  size?: SiteLogoSize;
+  /** Explicit authored image geometry remains supported. */
   height?: number;
+  fallbackText?: string | null;
   style?: CSSProperties;
 }
 
-export function SiteLogoView({ src, alt, height = 16, style }: SiteLogoViewProps) {
-  if (!src) {
-    return null;
+export function SiteLogoView({ src, alt, size = 'md', height, fallbackText, style }: SiteLogoViewProps) {
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  if (!src?.trim() || failedSrc === src) {
+    const text = (fallbackText === undefined ? alt : fallbackText)?.trim() || 'LOGO';
+    return (
+      <Text as="span" size={size} weight="medium" nowrap>
+        {text}
+      </Text>
+    );
   }
 
   return (
-    <Box
-      component="img"
+    <img
       src={src}
       alt={alt}
+      onError={() => setFailedSrc(src)}
       style={{
-        height,
+        height: height ?? primitiveTokens.fontSize[size],
         display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
         width: 'auto',
         objectFit: 'contain',
         border: 0,

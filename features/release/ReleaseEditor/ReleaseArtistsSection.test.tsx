@@ -3,7 +3,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import type { ReleaseArtistItem } from '@/lib/types/release/model';
 import { TestProviders } from '@/test/TestProviders';
 import { ReleaseArtistsSection } from './ReleaseArtistsSection';
@@ -52,7 +52,7 @@ vi.mock('@dnd-kit/sortable', () => ({
 
 vi.mock('@dnd-kit/utilities', () => ({
   CSS: {
-    Transform: {
+    Translate: {
       toString: () => '',
     },
   },
@@ -78,21 +78,7 @@ vi.mock('@tanstack/react-query', () => ({
   }),
 }));
 
-vi.mock('@mantine/core', async () => {
-  const actual = await vi.importActual<typeof import('@mantine/core')>('@mantine/core');
-  return {
-    ...actual,
-    Modal: ({ opened, title, children }: { opened: boolean; title?: React.ReactNode; children: React.ReactNode }) =>
-      opened ? (
-        <div data-testid="modal">
-          <div>{title}</div>
-          {children}
-        </div>
-      ) : null,
-  };
-});
-
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: {
     show: vi.fn(),
   },
@@ -272,6 +258,7 @@ describe('ReleaseArtistsSection', () => {
         idPrefix="release-artists"
         artists={[]}
         onArtistsChange={onArtistsChange}
+        onMutationStart={() => 'test-editor-origin'}
       />,
     );
 
@@ -297,6 +284,7 @@ describe('ReleaseArtistsSection', () => {
       [{ artistId: 'artist-1', sortOrder: 0 }],
       [],
       undefined,
+      'test-editor-origin',
     );
     expect(notifications.show).toHaveBeenCalled();
   });
@@ -318,7 +306,14 @@ describe('ReleaseArtistsSection', () => {
       },
     ];
 
-    render(<ReleaseArtistsSection releaseId="release-1" artists={artists} onArtistsChange={onArtistsChange} />);
+    render(
+      <ReleaseArtistsSection
+        releaseId="release-1"
+        artists={artists}
+        onArtistsChange={onArtistsChange}
+        onMutationStart={() => 'test-editor-origin'}
+      />,
+    );
 
     act(() => {
       latestDragEndHandler?.({
@@ -357,6 +352,7 @@ describe('ReleaseArtistsSection', () => {
         previousItemId: undefined,
         nextItemId: 'artist-1',
       },
+      'test-editor-origin',
     );
   });
 });

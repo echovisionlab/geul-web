@@ -1,12 +1,15 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Divider, Group, Modal, Stack, Text } from '@mantine/core';
+import { ContentModal, DialogActions } from '@/components/core/Modal';
 import { useDisclosure } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
 import { SectionHeader } from '@/components/core/Section';
@@ -42,9 +45,23 @@ const PENDING_LINK_PROVIDER_KEY = 'oidc_pending_provider';
 const UNLINK_FLOW_ATTEMPT_KEY = 'oidc_unlink_attempt';
 const PENDING_UNLINK_PROVIDER_KEY = 'oidc_pending_unlink_provider';
 const FLOW_HANDLED_SUFFIX = ':handled';
-const SECTION_DIVIDER_MARGIN = 'lg';
+export interface SecurityFormBindings {
+  getConnectedProvidersAction: typeof getConnectedProvidersAction;
+  revokeMyOtherSessionsAction: typeof revokeMyOtherSessionsAction;
+  revokeMySessionAction: typeof revokeMySessionAction;
+  requestAccountDeletionAction: typeof requestAccountDeletionAction;
+}
+const defaultBindings: SecurityFormBindings = {
+  getConnectedProvidersAction,
+  revokeMyOtherSessionsAction,
+  revokeMySessionAction,
+  requestAccountDeletionAction,
+};
 interface SecurityFormProps {
   subjectId: string;
+  bindings?: SecurityFormBindings;
+  availableMethods?: Partial<Record<'socialConnections' | 'passkeys' | 'accountDeletion', boolean>>;
+  requestPasskeyFlow?: import('react').ComponentProps<typeof PasskeySettingsSection>['requestFlow'];
   initialSessions: SessionInfo[];
   initialProviders: ConnectedProvider[];
   initialCanonicalEmail?: string;
@@ -162,6 +179,9 @@ function formatUnlinkErrorMessage(
 
 export function SecurityForm({
   subjectId,
+  bindings = defaultBindings,
+  availableMethods = {},
+  requestPasskeyFlow,
   initialSessions,
   initialProviders,
   initialCanonicalEmail = '',
@@ -170,6 +190,7 @@ export function SecurityForm({
   initialLinkProviderParam = null,
   initialUnlinkProviderParam = null,
 }: SecurityFormProps) {
+  const tModalActions = useTranslations('common.actions');
   const t = useTranslations('security');
   const tCommonActions = useTranslations('common.actions');
   const tCommonLabels = useTranslations('common.labels');
@@ -236,7 +257,7 @@ export function SecurityForm({
           blockedReason === 'primary_email'
             ? t('providerErrors.primaryEmailRequired')
             : t('providerErrors.mustKeepMethod'),
-        color: 'orange',
+        tone: 'warning',
       });
       return;
     }
@@ -252,7 +273,7 @@ export function SecurityForm({
     async (sessionId: string) => {
       setRevokingSessionId(sessionId);
       try {
-        const result = await revokeMySessionAction(sessionId);
+        const result = await bindings.revokeMySessionAction(sessionId);
         if (result.error === 'reauth_required') {
           rememberAccountSecurityContinuation({ action: 'revoke_session', id: sessionId }, subjectId);
           startPrivilegedReauthentication(accountSecurityReauthenticationReturnTo());
@@ -267,13 +288,13 @@ export function SecurityForm({
         notifications.show({
           title: t('notifications.success'),
           message: t('notifications.sessionRevoked'),
-          color: 'green',
+          tone: 'positive',
         });
       } catch (error) {
         notifications.show({
           title: tCommonLabels('error'),
           message: error instanceof Error ? error.message : t('notifications.failedToRevokeSession'),
-          color: 'red',
+          tone: 'danger',
         });
       } finally {
         setRevokingSessionId(null);
@@ -285,7 +306,7 @@ export function SecurityForm({
   const handleRevokeOtherSessions = useCallback(async () => {
     setRevokeOthersLoading(true);
     try {
-      const result = await revokeMyOtherSessionsAction();
+      const result = await bindings.revokeMyOtherSessionsAction();
       if (result.error === 'reauth_required') {
         rememberAccountSecurityContinuation({ action: 'revoke_other_sessions' }, subjectId);
         startPrivilegedReauthentication(accountSecurityReauthenticationReturnTo());
@@ -300,13 +321,13 @@ export function SecurityForm({
       notifications.show({
         title: t('notifications.success'),
         message: t('notifications.sessionsRevoked'),
-        color: 'green',
+        tone: 'positive',
       });
     } catch (error) {
       notifications.show({
         title: tCommonLabels('error'),
         message: error instanceof Error ? error.message : t('notifications.failedToRevokeSessions'),
-        color: 'red',
+        tone: 'danger',
       });
     } finally {
       setRevokeOthersLoading(false);
@@ -321,7 +342,7 @@ export function SecurityForm({
   const handleRequestAccountDeletion = useCallback(async () => {
     setDeleteLoading(true);
     try {
-      const result = await requestAccountDeletionAction();
+      const result = await bindings.requestAccountDeletionAction();
       if (result.error === 'reauth_required') {
         rememberAccountSecurityContinuation({ action: 'request_account_deletion' }, subjectId);
         startPrivilegedReauthentication(accountSecurityReauthenticationReturnTo());
@@ -332,20 +353,20 @@ export function SecurityForm({
         notifications.show({
           title: t('notifications.confirmationEmailSent'),
           message: result.message,
-          color: 'blue',
+          tone: 'positive',
         });
       } else {
         notifications.show({
           title: tCommonLabels('error'),
           message: result.message || t('notifications.failedToRequestDeletion'),
-          color: 'red',
+          tone: 'danger',
         });
       }
     } catch {
       notifications.show({
         title: tCommonLabels('error'),
         message: t('notifications.failedToRequestDeletion'),
-        color: 'red',
+        tone: 'danger',
       });
     } finally {
       setDeleteLoading(false);
@@ -439,14 +460,14 @@ export function SecurityForm({
           notifications.show({
             title: t('notifications.connectionFailed'),
             message: formatLinkErrorMessage(provider, firstError, t, tCommonProviders),
-            color: 'red',
+            tone: 'danger',
           });
           clearFlowState(attemptKey, handledKey, PENDING_LINK_PROVIDER_KEY);
           router.replace('/my/security');
           return;
         }
 
-        const connectedResult = await getConnectedProvidersAction();
+        const connectedResult = await bindings.getConnectedProvidersAction();
         if (!connectedResult.error && connectedResult.providers.some((connected) => connected.provider === provider)) {
           applySecurityResult(connectedResult);
           notifications.show({
@@ -454,7 +475,7 @@ export function SecurityForm({
             message: t('notifications.connectedMessage', {
               provider: getProviderName(provider, tCommonProviders),
             }),
-            color: 'green',
+            tone: 'positive',
           });
           clearFlowState(attemptKey, handledKey, PENDING_LINK_PROVIDER_KEY);
           router.replace('/my/security');
@@ -465,7 +486,7 @@ export function SecurityForm({
           notifications.show({
             title: t('notifications.connectionFailed'),
             message: t('providerErrors.connectFailed'),
-            color: 'red',
+            tone: 'danger',
           });
           clearFlowState(attemptKey, handledKey, PENDING_LINK_PROVIDER_KEY);
           router.replace('/my/security');
@@ -478,7 +499,7 @@ export function SecurityForm({
         notifications.show({
           title: tCommonLabels('error'),
           message: t('providerErrors.connectFailed'),
-          color: 'red',
+          tone: 'danger',
         });
         clearFlowState(attemptKey, handledKey, PENDING_LINK_PROVIDER_KEY);
         router.replace('/my/security');
@@ -537,14 +558,14 @@ export function SecurityForm({
           notifications.show({
             title: t('notifications.disconnectionFailed'),
             message: formatUnlinkErrorMessage(provider, firstError, t, tCommonProviders),
-            color: 'red',
+            tone: 'danger',
           });
           clearFlowState(attemptKey, handledKey, PENDING_UNLINK_PROVIDER_KEY);
           router.replace('/my/security');
           return;
         }
 
-        const connectedResult = await getConnectedProvidersAction();
+        const connectedResult = await bindings.getConnectedProvidersAction();
         if (!connectedResult.error) {
           applySecurityResult(connectedResult);
         }
@@ -555,7 +576,7 @@ export function SecurityForm({
             message: t('notifications.disconnectedMessage', {
               provider: getProviderName(provider, tCommonProviders),
             }),
-            color: 'green',
+            tone: 'positive',
           });
           clearFlowState(attemptKey, handledKey, PENDING_UNLINK_PROVIDER_KEY);
           router.replace('/my/security');
@@ -568,7 +589,7 @@ export function SecurityForm({
             message: t('providerErrors.disconnectFailed', {
               provider: getProviderName(provider, tCommonProviders),
             }),
-            color: 'red',
+            tone: 'danger',
           });
           clearFlowState(attemptKey, handledKey, PENDING_UNLINK_PROVIDER_KEY);
           router.replace('/my/security');
@@ -582,7 +603,7 @@ export function SecurityForm({
           message: t('providerErrors.disconnectFailed', {
             provider: getProviderName(provider, tCommonProviders),
           }),
-          color: 'red',
+          tone: 'danger',
         });
         clearFlowState(attemptKey, handledKey, PENDING_UNLINK_PROVIDER_KEY);
         router.replace('/my/security');
@@ -604,41 +625,53 @@ export function SecurityForm({
   ]);
 
   return (
-    <>
-      <ConnectedSocialAccountsView
-        availableProviders={availableProviders}
-        connectedProviders={connectedProviderIds}
+    <DsLayoutStack gap="xl">
+      <AccountEmailSettingsView
+        email={canonicalEmail}
+        emailCodeAvailable={emailCodeAvailable}
+        onChangeEmail={() => router.push('/verify')}
         labels={{
-          connect: tCommonActions('connect'),
-          connected: tCommonStates('connected'),
-          description: t('connectedAccounts.description'),
-          disconnect: tCommonActions('disconnect'),
-          lastMethod: t('providerErrors.mustKeepMethod'),
-          notConnected: tCommonStates('notConnected'),
-          primaryEmailRequired: t('providerErrors.primaryEmailRequired'),
-          providerName: (provider) => getProviderName(provider, tCommonProviders),
-          title: t('connectedAccounts.title'),
+          canonical: t('email.canonical'),
+          change: t('email.changeAction'),
+          description: t('email.description'),
+          emailCode: t('email.sources.emailCode'),
+          title: t('email.title'),
         }}
-        linkingProvider={linkingProvider}
-        onLink={(provider) => void handleLinkProvider(provider)}
-        onUnlink={(provider) => void handleUnlinkProvider(provider)}
-        providerIcon={(provider) => (
-          <AccountEmailProviderLogo provider={provider} size={provider === 'google' ? 18 : 16} />
-        )}
-        unlinkBlockedReasons={Object.fromEntries(
-          connectedProviderIds.map((provider) => [provider, providerUnlinkBlockedReason(provider)]),
-        )}
-        unlinkingProvider={unlinkingProvider}
       />
 
-      <Divider my={SECTION_DIVIDER_MARGIN} />
+      {availableMethods.socialConnections !== false ? (
+        <ConnectedSocialAccountsView
+          availableProviders={availableProviders}
+          connectedProviders={connectedProviderIds}
+          labels={{
+            connect: tCommonActions('connect'),
+            connected: tCommonStates('connected'),
+            description: t('connectedAccounts.description'),
+            disconnect: tCommonActions('disconnect'),
+            lastMethod: t('providerErrors.mustKeepMethod'),
+            notConnected: tCommonStates('notConnected'),
+            primaryEmailRequired: t('providerErrors.primaryEmailRequired'),
+            providerName: (provider) => getProviderName(provider, tCommonProviders),
+            title: t('connectedAccounts.title'),
+          }}
+          linkingProvider={linkingProvider}
+          onLink={(provider) => void handleLinkProvider(provider)}
+          onUnlink={(provider) => void handleUnlinkProvider(provider)}
+          providerIcon={(provider) => <AccountEmailProviderLogo provider={provider} />}
+          unlinkBlockedReasons={Object.fromEntries(
+            connectedProviderIds.map((provider) => [provider, providerUnlinkBlockedReason(provider)]),
+          )}
+          unlinkingProvider={unlinkingProvider}
+        />
+      ) : null}
 
-      <PasskeySettingsSection
-        subjectId={subjectId}
-        hasRecoverableAuthenticationMethod={totalRecoverableCredentials > 0}
-      />
-
-      <Divider my={SECTION_DIVIDER_MARGIN} />
+      {availableMethods.passkeys !== false ? (
+        <PasskeySettingsSection
+          requestFlow={requestPasskeyFlow}
+          subjectId={subjectId}
+          hasRecoverableAuthenticationMethod={totalRecoverableCredentials > 0}
+        />
+      ) : null}
 
       <SessionManagementView
         currentSessionId={currentSessionId}
@@ -674,86 +707,87 @@ export function SecurityForm({
         })}
       />
 
-      <Divider my={SECTION_DIVIDER_MARGIN} />
+      {availableMethods.accountDeletion !== false ? (
+        <DsLayoutStack gap="md">
+          <SectionHeader
+            title={
+              <DsText as="span" size="sm" weight="strong" tone="danger" role="heading" aria-level={2}>
+                {t('dangerZone.title')}
+              </DsText>
+            }
+          />
 
-      <AccountEmailSettingsView
-        email={canonicalEmail}
-        emailCodeAvailable={emailCodeAvailable}
-        onChangeEmail={() => router.push('/verify')}
-        labels={{
-          canonical: t('email.canonical'),
-          change: t('email.changeAction'),
-          description: t('email.description'),
-          emailCode: t('email.sources.emailCode'),
-          title: t('email.title'),
-        }}
-      />
+          <Alert tone="danger">
+            <DsText size="sm">{t('dangerZone.alert')}</DsText>
+          </Alert>
 
-      <Divider my={SECTION_DIVIDER_MARGIN} />
+          <Button
+            tone="danger"
+            emphasis="medium"
+            onClick={handleOpenDeleteModal}
+            data-testid="security-request-account-deletion"
+          >
+            {tCommonActions('requestAccountDeletion')}
+          </Button>
+        </DsLayoutStack>
+      ) : null}
 
-      <SectionHeader
-        title={
-          <Text component="span" c="red">
-            {t('dangerZone.title')}
-          </Text>
-        }
-      />
+      {availableMethods.accountDeletion !== false ? (
+        <ContentModal
+          opened={deleteModalOpened}
+          onClose={closeDeleteModal}
+          title={tCommonActions('requestAccountDeletion')}
+          centered
+          closeLabel={tModalActions('close')}
+        >
+          <DsLayoutStack gap="md">
+            {deletionRequested ? (
+              <>
+                <Alert tone="positive">
+                  <DsText size="sm">{t('dangerZone.requestedAlert')}</DsText>
+                </Alert>
+                <SupportingText tone="secondary">{t('dangerZone.requestedHelper')}</SupportingText>
+                <DialogActions>
+                  <Button tone="neutral" emphasis="medium" onClick={closeDeleteModal}>
+                    {tCommonActions('close')}
+                  </Button>
+                </DialogActions>
+              </>
+            ) : (
+              <>
+                <Alert tone="warning" icon={<IconAlertTriangle />}>
+                  <DsText size="sm">{t('dangerZone.pendingIntro')}</DsText>
+                  <DsLayoutStack as="ul" gap="xxs">
+                    <DsText as="li" size="sm">
+                      {t('dangerZone.pendingItems.logout')}
+                    </DsText>
+                    <DsText as="li" size="sm">
+                      {t('dangerZone.pendingItems.recover')}
+                    </DsText>
+                    <DsText as="li" size="sm">
+                      {t('dangerZone.pendingItems.anonymous')}
+                    </DsText>
+                  </DsLayoutStack>
+                </Alert>
 
-      <Alert tone="danger" mb="md">
-        <Text size="sm">{t('dangerZone.alert')}</Text>
-      </Alert>
-
-      <Button
-        tone="danger"
-        emphasis="outline"
-        onClick={handleOpenDeleteModal}
-        data-testid="security-request-account-deletion"
-      >
-        {tCommonActions('requestAccountDeletion')}
-      </Button>
-
-      <Modal
-        opened={deleteModalOpened}
-        onClose={closeDeleteModal}
-        title={tCommonActions('requestAccountDeletion')}
-        centered
-      >
-        <Stack gap="md">
-          {deletionRequested ? (
-            <>
-              <Alert tone="accent">
-                <Text size="sm">{t('dangerZone.requestedAlert')}</Text>
-              </Alert>
-              <Text size="sm" c="dimmed">
-                {t('dangerZone.requestedHelper')}
-              </Text>
-              <Button tone="neutral" emphasis="medium" onClick={closeDeleteModal} fullWidth>
-                {tCommonActions('close')}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Alert tone="warning" icon={<IconAlertTriangle />}>
-                <Text size="sm">{t('dangerZone.pendingIntro')}</Text>
-                <Text size="sm" component="ul" mt="xs" style={{ paddingLeft: '1.2em' }}>
-                  <li>{t('dangerZone.pendingItems.logout')}</li>
-                  <li>{t('dangerZone.pendingItems.recover')}</li>
-                  <li>{t('dangerZone.pendingItems.anonymous')}</li>
-                </Text>
-              </Alert>
-
-              <Group justify="flex-end" gap="sm">
-                <Button tone="neutral" emphasis="medium" onClick={closeDeleteModal}>
-                  {tCommonActions('cancel')}
-                </Button>
-                <Button tone="danger" onClick={handleRequestAccountDeletion} loading={deleteLoading}>
-                  {tCommonActions('sendConfirmationEmail')}
-                </Button>
-              </Group>
-            </>
-          )}
-        </Stack>
-      </Modal>
-    </>
+                <DialogActions>
+                  <Button tone="neutral" emphasis="medium" onClick={closeDeleteModal}>
+                    {tCommonActions('cancel')}
+                  </Button>
+                  <Button
+                    emphasis="strong"
+                    tone="danger"
+                    onClick={handleRequestAccountDeletion}
+                    loading={deleteLoading}
+                  >
+                    {tCommonActions('sendConfirmationEmail')}
+                  </Button>
+                </DialogActions>
+              </>
+            )}
+          </DsLayoutStack>
+        </ContentModal>
+      ) : null}
+    </DsLayoutStack>
   );
 }

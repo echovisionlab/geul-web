@@ -5,7 +5,11 @@
  * The data is pre-fetched on the server, while sorting navigation remains a client controller concern.
  */
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import {
+  useServerTablePathname as usePathname,
+  useServerTableRouter as useRouter,
+  useServerTableSearchParams as useSearchParams,
+} from './ServerDataTableNavigation';
 import { Alert } from '@/components/core/Alert';
 import { useTranslations } from 'next-intl';
 import { DataTableView, type DataTableRowSelectionState } from '@/components/core/DataTable';
@@ -27,6 +31,7 @@ import {
 export interface ServerDataTableContentProps<T> {
   /** Column definitions */
   columns: ColumnDef<T>[];
+  accessibleLabel?: string;
   /** Paginated query result from server */
   result: PaginatedQueryResult<T>;
   /** Function to get unique key for each row */
@@ -36,7 +41,7 @@ export interface ServerDataTableContentProps<T> {
   /** Whether rows should be highlighted on hover (indicates clickable) */
   highlightOnHover?: boolean;
   /** Optional current-page row selection state */
-  selection?: DataTableRowSelectionState<T>;
+  selection?: DataTableRowSelectionState<T> & { selectAllRowsLabel?: string };
   /** Reserve enough vertical space for this many rows even when fewer rows match. */
   reservedRowCount?: number;
   /** When false, keep stale content during navigation and rely on outer suspense fallback instead. */
@@ -45,6 +50,7 @@ export interface ServerDataTableContentProps<T> {
 
 export function ServerDataTableContent<T>({
   columns,
+  accessibleLabel,
   result,
   getRowKey,
   emptyMessage = 'No data found.',
@@ -56,6 +62,7 @@ export function ServerDataTableContent<T>({
   const t = useTranslations('dataTable');
   const tCommonLabels = useTranslations('common.labels');
   const containerRef = useRef<HTMLDivElement>(null);
+  const [rootAccessibleLabel, setRootAccessibleLabel] = useState<string | undefined>();
   const [namespace, setNamespace] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<DataTableSortFieldConfig[]>([]);
   const [maxSorts, setMaxSorts] = useState(DEFAULT_DATA_TABLE_MAX_SORTS);
@@ -78,6 +85,7 @@ export function ServerDataTableContent<T>({
 
     const syncTableConfig = () => {
       const resolvedNamespace = tableRoot.getAttribute('data-namespace');
+      setRootAccessibleLabel(tableRoot.getAttribute('data-accessible-label') ?? undefined);
       const nextSortConfig = parseDataTableSortConfig(tableRoot.getAttribute('data-sort-config'));
       const nextMaxSorts = parseDataTableMaxSorts(tableRoot.getAttribute('data-sort-max'));
       const nextPending = tableRoot.getAttribute('data-pending') === 'true';
@@ -93,11 +101,16 @@ export function ServerDataTableContent<T>({
     const observer = new MutationObserver(syncTableConfig);
     observer.observe(tableRoot, {
       attributes: true,
-      attributeFilter: ['data-namespace', 'data-sort-config', 'data-sort-max', 'data-pending'],
+      attributeFilter: ['data-accessible-label', 'data-namespace', 'data-sort-config', 'data-sort-max', 'data-pending'],
     });
 
     return () => observer.disconnect();
-  }, []);
+  }, [Boolean(result.error)]);
+
+  useEffect(() => {
+    const tableRoot = containerRef.current?.closest('[data-datatable-root]');
+    tableRoot?.setAttribute('aria-busy', tablePending || isPending ? 'true' : 'false');
+  }, [tablePending, isPending, result.error]);
 
   const currentSorts = useMemo(() => {
     if (!namespace) {
@@ -144,6 +157,9 @@ export function ServerDataTableContent<T>({
         sortDisabled: isPending,
         getSortAriaLabel: (columnLabel) => t('aria.sortBy', { label: columnLabel }),
         getSortPriorityLabel: (priority, total) => `${tCommonLabels('priority')} ${priority}/${total}`,
+        getSortDirectionLabel: (direction) =>
+          t(direction === 'asc' ? 'sort.aria.directionAscending' : 'sort.aria.directionDescending'),
+        actionColumnLabel: tCommonLabels('actions'),
         onSort: handleHeaderClick,
       }),
     [columns, currentSorts, handleHeaderClick, isPending, sortConfig, t, tCommonLabels],
@@ -160,6 +176,13 @@ export function ServerDataTableContent<T>({
   return (
     <DataTableView
       rootRef={containerRef}
+      accessibleLabel={accessibleLabel ?? rootAccessibleLabel}
+      loadingMessage={t('aria.loadingMessage')}
+      resultMessage={
+        tablePending || isPending
+          ? t('aria.loadingMessage')
+          : t('aria.resultSummary', { count: result.total, page: result.page, totalPages: result.totalPages })
+      }
       columns={viewColumns}
       rows={result.data}
       getRowKey={getRowKey}
@@ -171,7 +194,7 @@ export function ServerDataTableContent<T>({
         selection
           ? {
               ...selection,
-              selectAllRowsLabel: 'Select all rows',
+              selectAllRowsLabel: selection.selectAllRowsLabel ?? t('aria.selectAllRows'),
             }
           : undefined
       }

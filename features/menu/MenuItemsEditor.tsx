@@ -1,20 +1,17 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import {
-  IconChevronDown,
-  IconChevronRight,
-  IconEdit,
-  IconExternalLink,
-  IconGripVertical,
-  IconPlus,
-  IconTrash,
-} from '@tabler/icons-react';
+  LayoutStack as DsLayoutStack,
+  LayoutInset as DsLayoutInset,
+  LayoutInline as DsLayoutInline,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+import { useMemo, useState } from 'react';
+import { SortableSurface, useSortableItem } from '@/components/core/Sortable';
+import { IconEdit, IconExternalLink, IconGripVertical, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Collapse, Divider, Group, Paper, Stack, Text } from '@mantine/core';
+import { Disclosure } from '@/components/core/Disclosure';
 import { LabelBadge } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
@@ -151,60 +148,27 @@ function MenuItemForm({
   };
 
   return (
-    <Stack gap="xs" mt="sm">
-      <QueryErrorAlert queries={[targetsQuery]} />
-      <TextInput
-        size="xs"
-        label={tPage('sourceLabel')}
-        placeholder={tPage('labelPlaceholder')}
-        description={tPage('sourceLabelDescription')}
-        value={label}
-        onChange={(e) => {
-          const nextLabel = e.currentTarget.value;
-          setDraft((current) => ({ ...current, label: nextLabel }));
-        }}
-        disabled={!editable || !labelOwnedBySource}
-      />
-      <Group grow gap="xs">
-        <Select
+    <DsLayoutInset blockStart="sm">
+      <DsLayoutStack gap="xs">
+        <QueryErrorAlert queries={[targetsQuery]} />
+        <TextInput
           size="xs"
-          value={link.linkType}
-          onChange={(v) => {
-            const nextLinkType = v as MenuLinkType;
-            setDraft((current) => {
-              const currentLink =
-                current.link ??
-                ({
-                  linkType: item.linkType as MenuLinkType,
-                  url: item.url || '',
-                  targetId: item.targetId || null,
-                } satisfies MenuItemLinkDraft);
-              return {
-                ...current,
-                link: {
-                  ...currentLink,
-                  linkType: nextLinkType,
-                  targetId: nextLinkType === currentLink.linkType ? currentLink.targetId : null,
-                },
-              };
-            });
+          label={tPage('sourceLabel')}
+          placeholder={tPage('labelPlaceholder')}
+          description={tPage('sourceLabelDescription')}
+          value={label}
+          onChange={(e) => {
+            const nextLabel = e.currentTarget.value;
+            setDraft((current) => ({ ...current, label: nextLabel }));
           }}
-          data={[
-            { value: 'custom', label: tPage('customUrl') },
-            { value: 'page', label: tCommon('entities.page') },
-            { value: 'category', label: tCommon('entities.category') },
-            { value: 'tag', label: tCommon('entities.tag') },
-            { value: 'series', label: tCommon('entities.series') },
-          ]}
-          disabled={!editable}
+          disabled={!editable || !labelOwnedBySource}
         />
-        {link.linkType === 'custom' ? (
-          <TextInput
+        <DsLayoutInline grow gap="xs">
+          <Select
             size="xs"
-            placeholder={tPage('urlPlaceholder')}
-            value={link.url}
-            onChange={(e) => {
-              const url = e.currentTarget.value;
+            value={link.linkType}
+            onChange={(v) => {
+              const nextLinkType = v as MenuLinkType;
               setDraft((current) => {
                 const currentLink =
                   current.link ??
@@ -213,67 +177,76 @@ function MenuItemForm({
                     url: item.url || '',
                     targetId: item.targetId || null,
                   } satisfies MenuItemLinkDraft);
-                return { ...current, link: { ...currentLink, url } };
+                return {
+                  ...current,
+                  link: {
+                    ...currentLink,
+                    linkType: nextLinkType,
+                    targetId: nextLinkType === currentLink.linkType ? currentLink.targetId : null,
+                  },
+                };
               });
             }}
+            data={[
+              { value: 'custom', label: tPage('customUrl') },
+              { value: 'page', label: tCommon('entities.page') },
+              { value: 'category', label: tCommon('entities.category') },
+              { value: 'tag', label: tCommon('entities.tag') },
+              { value: 'series', label: tCommon('entities.series') },
+            ]}
             disabled={!editable}
           />
-        ) : (
+          {link.linkType === 'custom' ? (
+            <TextInput
+              size="xs"
+              placeholder={tPage('urlPlaceholder')}
+              value={link.url}
+              onChange={(e) => {
+                const url = e.currentTarget.value;
+                setDraft((current) => {
+                  const currentLink =
+                    current.link ??
+                    ({
+                      linkType: item.linkType as MenuLinkType,
+                      url: item.url || '',
+                      targetId: item.targetId || null,
+                    } satisfies MenuItemLinkDraft);
+                  return { ...current, link: { ...currentLink, url } };
+                });
+              }}
+              disabled={!editable}
+            />
+          ) : (
+            <Select
+              size="xs"
+              placeholder={tPage('targetPlaceholder')}
+              value={link.targetId}
+              onChange={(targetId) =>
+                setDraft((current) => {
+                  const currentLink =
+                    current.link ??
+                    ({
+                      linkType: item.linkType as MenuLinkType,
+                      url: item.url || '',
+                      targetId: item.targetId || null,
+                    } satisfies MenuItemLinkDraft);
+                  return { ...current, link: { ...currentLink, targetId } };
+                })
+              }
+              data={targetSelectData}
+              searchable
+              nothingFoundMessage={tPage('noTargets')}
+              disabled={!editable}
+            />
+          )}
+        </DsLayoutInline>
+        <DsLayoutInline grow gap="xs">
           <Select
             size="xs"
-            placeholder={tPage('targetPlaceholder')}
-            value={link.targetId}
-            onChange={(targetId) =>
-              setDraft((current) => {
-                const currentLink =
-                  current.link ??
-                  ({
-                    linkType: item.linkType as MenuLinkType,
-                    url: item.url || '',
-                    targetId: item.targetId || null,
-                  } satisfies MenuItemLinkDraft);
-                return { ...current, link: { ...currentLink, targetId } };
-              })
-            }
-            data={targetSelectData}
-            searchable
-            nothingFoundMessage={tPage('noTargets')}
-            disabled={!editable}
-          />
-        )}
-      </Group>
-      <Group grow gap="xs">
-        <Select
-          size="xs"
-          label={tPage('labelLanguageMode')}
-          value={localization.mode}
-          onChange={(value) => {
-            const nextMode = (value as MenuItemLocalizationMode | null) ?? 'translated';
-            setDraft((current) => ({
-              ...current,
-              localization: {
-                ...(current.localization ?? {
-                  mode: item.localizationMode ?? (item.fixedLocale ? 'fixed_locale' : 'translated'),
-                  fixedLocale: item.fixedLocale || null,
-                }),
-                mode: nextMode,
-                fixedLocale: nextMode === 'fixed_locale' ? localization.fixedLocale : null,
-              },
-            }));
-          }}
-          data={[
-            { value: 'translated', label: tPage('labelLanguageTranslated') },
-            { value: 'fixed_locale', label: tPage('labelLanguageFixedLocale') },
-          ]}
-          disabled={!editable}
-        />
-        {localization.mode === 'fixed_locale' ? (
-          <Select
-            size="xs"
-            label={tCommon('labels.language')}
-            placeholder={tPage('fixedLocalePlaceholder')}
-            value={localization.fixedLocale}
-            onChange={(fixedLocale) =>
+            label={tPage('labelLanguageMode')}
+            value={localization.mode}
+            onChange={(value) => {
+              const nextMode = (value as MenuItemLocalizationMode | null) ?? 'translated';
               setDraft((current) => ({
                 ...current,
                 localization: {
@@ -281,46 +254,71 @@ function MenuItemForm({
                     mode: item.localizationMode ?? (item.fixedLocale ? 'fixed_locale' : 'translated'),
                     fixedLocale: item.fixedLocale || null,
                   }),
-                  fixedLocale,
+                  mode: nextMode,
+                  fixedLocale: nextMode === 'fixed_locale' ? localization.fixedLocale : null,
                 },
-              }))
-            }
-            data={supportedLocaleOptions}
-            searchable
+              }));
+            }}
+            data={[
+              { value: 'translated', label: tPage('labelLanguageTranslated') },
+              { value: 'fixed_locale', label: tPage('labelLanguageFixedLocale') },
+            ]}
             disabled={!editable}
           />
-        ) : null}
-      </Group>
-      <Text size="xs" c="dimmed">
-        {localization.mode === 'fixed_locale'
-          ? tPage('labelLanguageFixedLocaleDescription')
-          : tPage('labelLanguageTranslatedDescription')}
-      </Text>
-      <Checkbox
-        size="xs"
-        label={tCommon('actions.openInNewTab')}
-        checked={openInNewTab}
-        onChange={(e) => {
-          const checked = e.currentTarget.checked;
-          setDraft((current) => ({ ...current, openInNewTab: checked }));
-        }}
-        disabled={!editable}
-      />
-      <Divider my="xs" />
-      <VisibilityEditor
-        value={visibility}
-        onChange={(nextVisibility) => setDraft((current) => ({ ...current, visibility: nextVisibility }))}
-        disabled={!editable}
-      />
-      <Group justify="flex-end" gap="xs">
-        <Button size="xs" tone="neutral" emphasis="medium" onClick={onCancel}>
-          {tCommon('actions.cancel')}
-        </Button>
-        <Button size="xs" onClick={handleSave} disabled={!canSave}>
-          {tCommon('actions.save')}
-        </Button>
-      </Group>
-    </Stack>
+          {localization.mode === 'fixed_locale' ? (
+            <Select
+              size="xs"
+              label={tCommon('labels.language')}
+              placeholder={tPage('fixedLocalePlaceholder')}
+              value={localization.fixedLocale}
+              onChange={(fixedLocale) =>
+                setDraft((current) => ({
+                  ...current,
+                  localization: {
+                    ...(current.localization ?? {
+                      mode: item.localizationMode ?? (item.fixedLocale ? 'fixed_locale' : 'translated'),
+                      fixedLocale: item.fixedLocale || null,
+                    }),
+                    fixedLocale,
+                  },
+                }))
+              }
+              data={supportedLocaleOptions}
+              searchable
+              disabled={!editable}
+            />
+          ) : null}
+        </DsLayoutInline>
+        <DsText size="xs" tone="secondary">
+          {localization.mode === 'fixed_locale'
+            ? tPage('labelLanguageFixedLocaleDescription')
+            : tPage('labelLanguageTranslatedDescription')}
+        </DsText>
+        <Checkbox
+          size="xs"
+          label={tCommon('actions.openInNewTab')}
+          checked={openInNewTab}
+          onChange={(e) => {
+            const checked = e.currentTarget.checked;
+            setDraft((current) => ({ ...current, openInNewTab: checked }));
+          }}
+          disabled={!editable}
+        />
+        <VisibilityEditor
+          value={visibility}
+          onChange={(nextVisibility) => setDraft((current) => ({ ...current, visibility: nextVisibility }))}
+          disabled={!editable}
+        />
+        <DsLayoutInline justify="end" gap="xs">
+          <Button size="xs" tone="neutral" emphasis="low" onClick={onCancel}>
+            {tCommon('actions.cancel')}
+          </Button>
+          <Button size="xs" emphasis="medium" onClick={handleSave} disabled={!canSave}>
+            {tCommon('actions.save')}
+          </Button>
+        </DsLayoutInline>
+      </DsLayoutStack>
+    </DsLayoutInset>
   );
 }
 
@@ -348,187 +346,155 @@ export function SortableMenuItem({
 }) {
   const tCommon = useTranslations('common');
   const tPage = useTranslations('adminList.menus');
+  const tSort = useTranslations('dataTable.sort');
   const [childrenExpanded, setChildrenExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editingChildId, setEditingChildId] = useState<string | null>(null);
 
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const sortable = useSortableItem({
     id: item.id,
     disabled: !editable,
   });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
 
   const hasChildren = item.children && item.children.length > 0;
   const fixedLocaleDisplayLabel = getFixedLocaleDisplayLabel(item.fixedLocale);
   const localizationMode = getMenuItemLocalizationMode(item);
   const usesFixedLocale = localizationMode === 'fixed_locale' && fixedLocaleDisplayLabel !== null;
 
+  const rowLabel = (row: MenuItemBase, count?: number) => (
+    <DsLayoutInline gap="xxs" wrap="nowrap">
+      <DsText as="span" size="xs" weight="medium" truncate title={row.label}>
+        {row.label}
+      </DsText>
+      {row.openInNewTab ? <IconExternalLink size="1em" aria-hidden /> : null}
+      {count ? <LabelBadge>{count}</LabelBadge> : null}
+    </DsLayoutInline>
+  );
+  const linkDescription = (row: MenuItemBase) => (
+    <DsText size="xs" tone="secondary" wrap="anywhere">
+      {getLinkTypeLabel(row.linkType, tCommon, tPage)}
+      {row.linkType === 'custom' && row.url ? `: ${row.url}` : ''}
+      {row.linkType !== 'custom' && row.targetSlug ? `: /${row.targetSlug}` : ''}
+    </DsText>
+  );
   return (
-    <Paper ref={setNodeRef} style={style} p="sm" withBorder mb="xs">
-      <Group gap="xs" wrap="nowrap">
-        <IconButton
-          emphasis="low"
-          size="sm"
-          aria-label="Drag menu item"
-          {...attributes}
-          {...listeners}
-          style={{ cursor: 'grab' }}
-          disabled={!editable}
-        >
-          <IconGripVertical size={16} />
-        </IconButton>
-
-        {allowChildren && hasChildren && (
+    <SortableSurface ref={sortable.setNodeRef} motion={sortable.motion}>
+      <Disclosure
+        density="compact"
+        withDivider={false}
+        label={rowLabel(item, item.children?.length)}
+        opened={editing || childrenExpanded}
+        onChange={(opened) => {
+          if (!opened) {
+            setEditing(false);
+            setChildrenExpanded(false);
+            setEditingChildId(null);
+          } else if (hasChildren) {
+            setChildrenExpanded(true);
+          } else {
+            setEditing(true);
+          }
+        }}
+        leadingActions={
           <IconButton
             emphasis="low"
-            size="sm"
-            aria-label={childrenExpanded ? 'Collapse submenu' : 'Expand submenu'}
-            onClick={() => setChildrenExpanded(!childrenExpanded)}
+            aria-label={tSort('aria.reorder', { label: item.label })}
+            {...sortable.handle}
+            interaction="drag-handle"
+            draggable={false}
+            disabled={!editable}
           >
-            {childrenExpanded ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
+            <IconGripVertical aria-hidden />
           </IconButton>
-        )}
-
-        <Stack gap={2} style={{ flex: 1 }}>
-          <Group gap="xs">
-            <Text size="sm" fw={500}>
-              {item.label}
-            </Text>
-            {item.openInNewTab && <IconExternalLink size={14} color="gray" />}
-            {item.visibility && item.visibility.mode !== 'all' && (
-              <LabelBadge size="xs" tone="accent">
-                {getVisibilityLabel(item.visibility)}
-              </LabelBadge>
-            )}
-            {usesFixedLocale ? (
-              <LabelBadge size="xs" tone="accent">
-                {tPage('fixedLocaleItemBadge', { locale: fixedLocaleDisplayLabel ?? '' })}
-              </LabelBadge>
-            ) : (
-              <LabelBadge size="xs" tone="neutral">
-                {tPage('translatedItemBadge')}
-              </LabelBadge>
-            )}
-          </Group>
-          <Text size="xs" c="dimmed">
-            {getLinkTypeLabel(item.linkType, tCommon, tPage)}
-            {item.linkType === 'custom' && item.url ? `: ${item.url}` : ''}
-            {item.linkType !== 'custom' && item.targetSlug ? `: /${item.targetSlug}` : ''}
-          </Text>
-        </Stack>
-
-        {hasChildren && <LabelBadge size="sm">{item.children!.length}</LabelBadge>}
-
-        <Group gap="xs">
-          {allowChildren && (
+        }
+        actions={
+          <DsLayoutInline gap="none" wrap="nowrap">
+            {allowChildren ? (
+              <IconButton
+                emphasis="low"
+                size="compact"
+                onClick={() => onAddChild?.(item.id)}
+                aria-label={`${tPage('addSubmenu')} ${item.label}`}
+                disabled={!editable}
+              >
+                <IconPlus aria-hidden />
+              </IconButton>
+            ) : null}
             <IconButton
               emphasis="low"
-              size="sm"
-              onClick={() => onAddChild?.(item.id)}
-              label={tPage('addSubmenu')}
-              title={tPage('addSubmenu')}
+              size="compact"
+              aria-expanded={editing}
+              aria-label={`${editing ? tCommon('actions.close') : tCommon('actions.edit')} ${item.label}`}
+              onClick={() => setEditing(!editing)}
               disabled={!editable}
             >
-              <IconPlus size={16} />
+              <IconEdit aria-hidden />
             </IconButton>
+            <IconButton
+              tone="danger"
+              emphasis="low"
+              size="compact"
+              aria-label={`${tCommon('actions.delete')} ${item.label}`}
+              onClick={() => onDelete(item.id)}
+              disabled={!editable}
+            >
+              <IconTrash aria-hidden />
+            </IconButton>
+          </DsLayoutInline>
+        }
+      >
+        <DsLayoutStack gap="xxs">
+          {linkDescription(item)}
+          {usesFixedLocale ? (
+            <DsText size="xs" tone="secondary">
+              {tPage('fixedLocaleItemBadge', { locale: fixedLocaleDisplayLabel ?? '' })}
+            </DsText>
+          ) : (
+            <DsText size="xs" tone="secondary">
+              {tPage('translatedItemBadge')}
+            </DsText>
           )}
-          <IconButton
-            emphasis="low"
-            size="sm"
-            aria-label={editing ? tCommon('actions.close') : tCommon('actions.edit')}
-            onClick={() => setEditing(!editing)}
-            disabled={!editable}
-          >
-            {editing ? <IconChevronDown size={16} /> : <IconEdit size={16} />}
-          </IconButton>
-          <IconButton
-            tone="danger"
-            emphasis="low"
-            size="sm"
-            aria-label={tCommon('actions.delete')}
-            onClick={() => onDelete(item.id)}
-            disabled={!editable}
-          >
-            <IconTrash size={16} />
-          </IconButton>
-        </Group>
-      </Group>
-
-      <Collapse expanded={editing}>
-        <MenuItemForm
-          item={item}
-          onSave={(updated) => {
-            onUpdate(updated as MenuItem);
-            setEditing(false);
-          }}
-          onCancel={() => setEditing(false)}
-          editable={editable}
-          sourceLocale={sourceLocale}
-        />
-      </Collapse>
-
-      {allowChildren && hasChildren && (
-        <Collapse expanded={childrenExpanded}>
-          <Stack gap="xs" mt="sm" ml="xl">
-            {item.children!.map((child) => (
-              <Paper key={child.id} p="xs" withBorder>
-                <Group gap="xs" wrap="nowrap">
-                  <Stack gap={2} style={{ flex: 1 }}>
-                    <Group gap="xs">
-                      <Text size="sm">{child.label}</Text>
-                      {child.openInNewTab && <IconExternalLink size={12} color="gray" />}
-                      {child.visibility && child.visibility.mode !== 'all' && (
-                        <LabelBadge size="xs" tone="accent">
-                          {getVisibilityLabel(child.visibility)}
-                        </LabelBadge>
-                      )}
-                      {getMenuItemLocalizationMode(child) === 'fixed_locale' &&
-                      getFixedLocaleDisplayLabel(child.fixedLocale) != null ? (
-                        <LabelBadge size="xs" tone="accent">
-                          {tPage('fixedLocaleItemBadge', {
-                            locale: getFixedLocaleDisplayLabel(child.fixedLocale) ?? '',
-                          })}
-                        </LabelBadge>
-                      ) : (
-                        <LabelBadge size="xs" tone="neutral">
-                          {tPage('translatedItemBadge')}
-                        </LabelBadge>
-                      )}
-                    </Group>
-                    <Text size="xs" c="dimmed">
-                      {getLinkTypeLabel(child.linkType, tCommon, tPage)}
-                      {child.linkType === 'custom' && child.url ? `: ${child.url}` : ''}
-                      {child.linkType !== 'custom' && child.targetSlug ? `: /${child.targetSlug}` : ''}
-                    </Text>
-                  </Stack>
-                  <Group gap="xs">
-                    <IconButton
-                      emphasis="low"
-                      size="sm"
-                      aria-label={editingChildId === child.id ? tCommon('actions.close') : tCommon('actions.edit')}
-                      onClick={() => setEditingChildId(editingChildId === child.id ? null : child.id)}
-                      disabled={!editable}
-                    >
-                      {editingChildId === child.id ? <IconChevronDown size={14} /> : <IconEdit size={14} />}
-                    </IconButton>
+          {item.visibility && item.visibility.mode !== 'all' ? (
+            <DsText size="xs" tone="secondary">
+              {getVisibilityLabel(item.visibility)}
+            </DsText>
+          ) : null}
+          {editing ? (
+            <MenuItemForm
+              item={item}
+              onSave={(updated) => {
+                onUpdate(updated as MenuItem);
+                setEditing(false);
+              }}
+              onCancel={() => setEditing(false)}
+              editable={editable}
+              sourceLocale={sourceLocale}
+            />
+          ) : null}
+          {allowChildren && childrenExpanded && hasChildren
+            ? item.children!.map((child) => (
+                <Disclosure
+                  nested
+                  key={child.id}
+                  density="compact"
+                  withDivider={false}
+                  label={rowLabel(child)}
+                  opened={editingChildId === child.id}
+                  onChange={(opened) => setEditingChildId(opened ? child.id : null)}
+                  actions={
                     <IconButton
                       tone="danger"
                       emphasis="low"
-                      size="sm"
-                      aria-label={tCommon('actions.delete')}
+                      size="compact"
+                      aria-label={`${tCommon('actions.delete')} ${item.label} ${child.label}`}
                       onClick={() => onDeleteChild?.(item.id, child.id)}
                       disabled={!editable}
                     >
-                      <IconTrash size={14} />
+                      <IconTrash aria-hidden />
                     </IconButton>
-                  </Group>
-                </Group>
-                <Collapse expanded={editingChildId === child.id}>
+                  }
+                >
+                  {linkDescription(child)}
                   <MenuItemForm
                     item={child}
                     onSave={(updated) => {
@@ -539,13 +505,12 @@ export function SortableMenuItem({
                     editable={editable}
                     sourceLocale={sourceLocale}
                   />
-                </Collapse>
-              </Paper>
-            ))}
-          </Stack>
-        </Collapse>
-      )}
-    </Paper>
+                </Disclosure>
+              ))
+            : null}
+        </DsLayoutStack>
+      </Disclosure>
+    </SortableSurface>
   );
 }
 

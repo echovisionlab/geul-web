@@ -1,5 +1,10 @@
 'use client';
 
+import { parseServerMessage } from '@echovisionlab/geul-common/collaboration/protocol';
+import { formSchemaZod } from '@/lib/types/form/schema';
+import { getProviderAccessEnded, getProviderAccessLevel } from '@/lib/collab/provider-control-state';
+import { SaveParkedError } from '@/lib/editor/save-failure';
+import { createLogger } from '@/lib/utils/logger';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   FORM_CANONICAL_CONTEXT_MAP_NAME,
@@ -54,14 +59,7 @@ function stableJson(value: unknown): string {
 }
 
 function createRequestId(): string {
-  try {
-    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-      return `form-schema:${crypto.randomUUID()}`;
-    }
-  } catch {
-    // The timestamp fallback still gives each queued edit a stable retry ID.
-  }
-  return `form-schema:${Date.now().toString(36)}:${Math.random().toString(36).slice(2)}`;
+  return crypto.randomUUID();
 }
 
 function mergeFormSchemaPatches(pending: QueuedFormSchemaPatch, next: QueuedFormSchemaPatch): QueuedFormSchemaPatch {
@@ -109,6 +107,10 @@ export function useFormEditorCollaboration(
   const documentKey = `form:${formId}`;
   const schemaPatchQueue = useDebouncedPatch<QueuedFormSchemaPatch>({
     write: async (queuedPatch) => {
+      // A room downgraded to view keeps the patch for a page reopened with edit access.
+      if (getProviderAccessLevel(providerRef.current) === 'view') {
+        throw new SaveParkedError();
+      }
       const { localRevision, ...patch } = queuedPatch;
       const activeDoc = docRef.current;
       const activeLocale = localeRef.current;
@@ -133,11 +135,12 @@ export function useFormEditorCollaboration(
         patch.nextSchema,
         roomLocale === sourceLocale ? 'source' : 'target',
       ) as FormFields['schema'];
-      const canonicalSchema = await requestFormSchemaPatch(providerRef.current, {
+      const canonicalResponse = await requestFormSchemaPatch(providerRef.current, {
         ...patch,
         previousSchema: currentSchema,
         nextSchema: rebasedNextSchema,
       });
+      const canonicalSchema = formSchemaZod.parse(canonicalResponse);
       if (schemaDraftRef.current?.localRevision === localRevision) {
         const canonicalDraft = {
           documentName: patch.documentName,
@@ -159,17 +162,53 @@ export function useFormEditorCollaboration(
   });
 
   useEffect(() => {
-    if (
-      !isSynced ||
-      !provider ||
-      !documentName ||
-      provider.configuration.name !== documentName ||
-      !schemaPatchQueue.hasPending()
-    ) {
+    if (!isSynced || !provider || !documentName || provider.configuration.name !== documentName) {
+      return;
+    }
+    // A synced room with edit access takes back a patch parked while it was read-only.
+    if (schemaPatchQueue.hasParked() && getProviderAccessLevel(provider) === 'edit') {
+      schemaPatchQueue.resumeParked();
+    }
+    if (!schemaPatchQueue.hasPending()) {
       return;
     }
     void schemaPatchQueue.flush();
   }, [documentName, isSynced, provider, schemaPatchQueue]);
+
+  useEffect(() => {
+    if (!provider || !documentName) {
+      return;
+    }
+    const stateless = ({ payload }: { payload: string }) => {
+      const parsed = parseServerMessage(payload);
+      if (!parsed.ok || parsed.message.kind !== 'form.schema.changed' || parsed.message.documentName !== documentName) {
+        return;
+      }
+      const canonical = formSchemaZod.safeParse(parsed.message.canonicalSchema);
+      if (!canonical.success) {
+        void createLogger('form-schema').warn('Ignoring invalid canonical form schema');
+        return;
+      }
+      // The server also projects this state through Yjs. Retain a local queued
+      // intent; it will rebase over that projection when the queue next flushes.
+      // A pending or parked local intent keeps its draft; it rebases over this projection later.
+      if (schemaPatchQueue.hasPending() || schemaPatchQueue.hasParked()) {
+        return;
+      }
+      const draft = {
+        documentName,
+        schema: canonical.data,
+        patchPreviousSchema: canonical.data,
+        localRevision: localSchemaRevisionRef.current,
+      };
+      schemaDraftRef.current = draft;
+      setSchemaDraft(draft);
+    };
+    provider.on('stateless', stateless);
+    return () => {
+      provider.off('stateless', stateless);
+    };
+  }, [documentName, provider, schemaPatchQueue]);
 
   const activeSchemaDraft = schemaDraft?.documentName === documentName ? schemaDraft : null;
   const fields = activeSchemaDraft ? { ...state, schema: activeSchemaDraft.schema } : state;
@@ -194,6 +233,9 @@ export function useFormEditorCollaboration(
 
   const setField = useCallback(
     <K extends keyof FormFields>(key: K, value: FormFields[K]) => {
+      if (getProviderAccessEnded(providerRef.current)) {
+        return;
+      }
       const previous = fieldsRef.current;
       const next = { ...previous, [key]: value };
       if (key === 'schema') {

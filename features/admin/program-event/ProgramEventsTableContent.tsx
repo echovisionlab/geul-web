@@ -1,9 +1,11 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Stack, Text } from '@mantine/core';
-import { statusToneFromColor, StatusBadge } from '@/components/core/Badge';
+
+import { StatusBadge, type StatusTone } from '@/components/core/Badge';
 import { DateTime } from '@/features/date-time/DateTime';
 import { TextButton } from '@/components/core/TextButton';
 import {
@@ -17,10 +19,10 @@ import type { AdminProgramEventListItem } from '@/lib/queries/program-event';
 import type { ColumnDef } from '@/lib/types/common/data-table';
 import type { PaginatedQueryResult } from '@/lib/types/repository/result';
 
-const STATUS_COLORS: Record<AdminProgramEventListItem['status'], string> = {
-  draft: 'gray',
-  published: 'green',
-  archived: 'orange',
+const STATUS_TONES: Record<AdminProgramEventListItem['status'], StatusTone> = {
+  draft: 'neutral',
+  published: 'positive',
+  archived: 'neutral',
 };
 
 interface ProgramEventsTableContentProps {
@@ -28,6 +30,7 @@ interface ProgramEventsTableContentProps {
   filterFields: FilterFieldConfig[];
   sortFields: SortFieldConfig[];
   searchPlaceholder: string;
+  deleteAction?: typeof deleteProgramEventAction;
 }
 
 function statusLabel(
@@ -50,6 +53,7 @@ export function ProgramEventsTableContent({
   filterFields,
   sortFields,
   searchPlaceholder,
+  deleteAction = deleteProgramEventAction,
 }: ProgramEventsTableContentProps) {
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
@@ -61,7 +65,7 @@ export function ProgramEventsTableContent({
       key: 'title',
       header: tCommon('labels.title'),
       cell: (row) => (
-        <Stack gap={2}>
+        <DsLayoutStack gap="xxs">
           <TextButton
             href={`/events/${encodeURIComponent(row.id)}?edit=true`}
             size="sm"
@@ -71,18 +75,18 @@ export function ProgramEventsTableContent({
             {row.title || tCommon('states.untitled')}
           </TextButton>
           {row.slug ? (
-            <Text size="xs" c="dimmed">
+            <DsText size="xs" tone="secondary">
               /{row.slug}
-            </Text>
+            </DsText>
           ) : null}
-        </Stack>
+        </DsLayoutStack>
       ),
     },
     {
       key: 'status',
       header: tCommon('labels.status'),
       cell: (row) => (
-        <StatusBadge tone={statusToneFromColor(STATUS_COLORS[row.status])} size="sm">
+        <StatusBadge tone={STATUS_TONES[row.status] ?? 'neutral'} size="sm">
           {statusLabel(row.status, {
             draft: tCommon('statuses.draft'),
             published: tCommon('statuses.published'),
@@ -95,18 +99,18 @@ export function ProgramEventsTableContent({
       key: 'startsAt',
       header: tProgramEventAdmin('list.starts'),
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.startsAt} display="dateTime" timeZone={row.timezone} />
-        </Text>
+        </DsText>
       ),
     },
     {
       key: 'updatedAt',
       header: tCommon('labels.updated'),
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.updatedAt} />
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -124,8 +128,8 @@ export function ProgramEventsTableContent({
           {
             label: tCommon('actions.delete'),
             icon: <IconTrash size={16} />,
-            color: 'red',
-            onClick: () => deleteProgramEventAction(row.id),
+            tone: 'danger',
+            onClick: () => deleteAction(row.id),
           },
         ];
         return (
@@ -152,7 +156,7 @@ export function ProgramEventsTableContent({
       sortFields={sortFields}
       bulkDelete={{
         entityLabel: tCommonEntities('programEvents'),
-        deleteAction: deleteProgramEventAction,
+        deleteAction,
         getRowLabel: (row) => row.title || row.slug || row.id,
       }}
     />

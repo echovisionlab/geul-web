@@ -1,10 +1,10 @@
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 import { createFilterSchema, createSimpleListInputSchema, createSortSchema } from '../trpc/schema';
 import type { ReleaseStatus } from './model';
 import { releaseFilterFields, releaseSortFields } from './table-spec';
 
 export const releaseTypeSchema = z.enum(['album', 'compilation', 'ep', 'single']);
-export const releaseStatusSchema: z.ZodType<ReleaseStatus> = z.enum(['draft', 'published']);
+export const releaseStatusSchema: z.ZodMiniType<ReleaseStatus> = z.enum(['draft', 'published']);
 export const releaseTrackPendingUploadStatusSchema = z.enum(['pending', 'expired']);
 
 // List input schema for DataTable
@@ -38,15 +38,15 @@ export function parseReleaseStatus(value: string | null | undefined): ReleaseSta
 export const releaseArtistItemSchema = z.object({
   artist_id: z.uuid(),
   artist_name: z.string(),
-  artist_slug: z.string().nullable(),
+  artist_slug: z.nullable(z.string()),
   sort_order: z.number(),
 });
 
 export const releaseLabelItemSchema = z.object({
   label_id: z.uuid(),
   label_name: z.string(),
-  label_slug: z.string().nullable(),
-  catalog_number: z.string().nullable(),
+  label_slug: z.nullable(z.string()),
+  catalog_number: z.nullable(z.string()),
   sort_order: z.number(),
 });
 
@@ -72,5 +72,5 @@ export const releaseFormatItemSchema = z.object({
   id: z.uuid(),
   name: z.string(),
   slug: z.string(),
-  format_description: z.string().nullable(),
+  format_description: z.nullable(z.string()),
 });

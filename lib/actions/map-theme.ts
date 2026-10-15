@@ -17,7 +17,7 @@ import type {
   ThemeSettings,
   ThemeVariant,
 } from '@/lib/types/map-theme/model';
-import { createMapThemeInputSchema } from '@/lib/types/map-theme/schema';
+import { createMapThemeInputSchema } from '@/lib/types/map-theme/input-schema';
 import { createLogger } from '@/lib/utils/logger';
 
 const logger = createLogger('map-theme-actions');

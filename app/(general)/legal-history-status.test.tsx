@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { PrivacyHistoryDetailClient } from './privacy/history/[id]/PrivacyHistoryDetailClient';
 import { TermsHistoryDetailClient } from './terms/history/[id]/TermsHistoryDetailClient';
 
@@ -41,7 +42,8 @@ vi.mock('next-intl', () => ({
 }));
 
 vi.mock('@/features/navigation/TableOfContents', () => ({
-  TableOfContents: () => null,
+  // The navigation owner wraps the document so Core can reserve the outline beside it.
+  TableOfContents: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 vi.mock('@/features/site/PageLoader', () => ({
@@ -81,9 +83,9 @@ describe('legal history exact-version status', () => {
 
     act(() => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <Component id="current-version" />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 

@@ -23,9 +23,19 @@ export type { PinInputProps } from './PinInput';
 export { Radio } from './Radio';
 export type { RadioProps } from './Radio';
 export { SegmentedControl } from './SegmentedControl';
-export type { SegmentedControlProps } from './SegmentedControl';
+export { InputFrame } from './InputFrame';
+export { InputSizeProvider } from './InputParts';
+export type { InputFrameProps } from './InputFrame';
+export type {
+  SegmentedControlProps,
+  SegmentedControlOption,
+  SegmentedControlTextOption,
+  SegmentedControlIconOption,
+} from './SegmentedControl';
 export { Select } from './Select';
 export type { SelectProps } from './Select';
+export { SearchInput } from './SearchInput';
+export type { SearchInputProps } from './SearchInput';
 export { SearchComboboxView } from './SearchComboboxView';
 export type { SearchComboboxViewProps } from './SearchComboboxView';
 export { Slider } from './Slider';
@@ -42,3 +52,20 @@ export { ValidatingTextInput } from './ValidatingTextInput';
 export type { TextValidationStatus, ValidatingTextInputProps } from './ValidatingTextInput';
 export { useMultiSelect } from './useMultiSelect';
 export type { MultiSelectItem, UseMultiSelectOptions } from './useMultiSelect';
+
+export { useInputCombobox } from './useInputCombobox';
+export type { InputComboboxController } from './useInputCombobox';
+export type { InputSize, InputDensity, InputOption, InputOptions } from './input-contract';
+
+export { DateInput, DateTimePicker, MonthPickerInput, DateRangeInput, TimePicker } from './DateInputs';
+export type {
+  DateInputProps,
+  DateTimePickerProps,
+  MonthPickerInputProps,
+  DateRangeInputProps,
+  TimePickerProps,
+  DateValue,
+  DatesRangeValue,
+} from './DateInputs';
+export { FilePicker } from './FilePicker';
+export type { FilePickerProps } from './FilePicker';

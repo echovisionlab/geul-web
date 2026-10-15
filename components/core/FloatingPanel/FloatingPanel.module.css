@@ -1,0 +1,15 @@
+.panel {
+  position: fixed;
+  z-index: var(--geul-layer-floating);
+  max-width: calc(100% - var(--geul-spacing-md));
+  max-height: calc(100vh - var(--geul-spacing-md));
+  overflow: auto;
+  background: var(--geul-surface);
+  color: var(--geul-text-primary);
+  border: var(--geul-border-thin) solid var(--geul-border-default);
+  box-shadow: var(--geul-shadow-floating);
+}
+
+.panel[hidden] {
+  display: none !important;
+}

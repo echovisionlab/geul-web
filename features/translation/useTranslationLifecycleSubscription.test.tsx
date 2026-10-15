@@ -3,7 +3,7 @@
 import { act, type ReactNode } from 'react';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import type { TranslationLifecycleRefetchHint } from '@/lib/translation/lifecycle';
@@ -64,7 +64,7 @@ class FakeProvider {
   }
 
   emitStateless(event: unknown) {
-    const payload = JSON.stringify(event);
+    const payload = JSON.stringify({ v: 3, kind: 'runtime.event', event });
 
     for (const handler of this.handlers.get('stateless') ?? []) {
       handler({ payload });
@@ -140,7 +140,7 @@ describe('useTranslationLifecycleSubscription', () => {
     expect(FakeEventSource.instances).toHaveLength(0);
   });
 
-  it('uses provider stateless events when a collab provider is available', () => {
+  it('uses provider stateless events when a collab provider is available', async () => {
     const events: TranslationLifecycleRefetchHint[] = [];
     const provider = new FakeProvider();
     container = document.createElement('div');
@@ -163,6 +163,8 @@ describe('useTranslationLifecycleSubscription', () => {
       });
     });
 
+    // Common's runtime-event parser loads on the first subscription; early events are delivered once it has.
+    await vi.waitFor(() => expect(events).toHaveLength(1));
     expect(events).toEqual([
       {
         jobId: 'job-provider-1',
@@ -174,7 +176,7 @@ describe('useTranslationLifecycleSubscription', () => {
     ]);
   });
 
-  it('maps the Post Series UI key to the canonical runtime series filter', () => {
+  it('maps the Post Series UI key to the canonical runtime series filter', async () => {
     const events: TranslationLifecycleRefetchHint[] = [];
     const provider = new FakeProvider();
     container = document.createElement('div');
@@ -202,6 +204,7 @@ describe('useTranslationLifecycleSubscription', () => {
       });
     });
 
+    await vi.waitFor(() => expect(events).toHaveLength(1));
     expect(events).toEqual([
       {
         jobId: 'job-series-1',

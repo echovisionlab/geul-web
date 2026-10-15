@@ -1,4 +1,8 @@
 'use client';
+import { Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
+
+import { SectionCard as DsSectionCard } from '@/components/core/Section';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
@@ -7,12 +11,13 @@ import type { PublicLegalHistoryInitialData } from '@/lib/queries/legal-history'
 import { buildContentLanguageHref } from '@/lib/translation/content-language';
 import { IconArrowLeft, IconFileText } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { Group, Paper, Stack, Table, Text, Title } from '@mantine/core';
-import { StatusBadge } from '@/components/core/Badge';
+
+import { Table } from '@/components/core/Display';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
 import { IconButton } from '@/components/core/IconButton';
 import { Tooltip } from '@/components/core/Tooltip';
 import { PageLoader } from '@/features/site/PageLoader';
+import { EmptyState } from '@/components/core/EmptyState';
 
 export interface LegalPolicyHistoryItem {
   id: string;
@@ -108,59 +113,58 @@ export function LegalPolicyHistoryClient({
   const hasVersions = Boolean(activePolicy || archivedPolicies?.length);
 
   return (
-    <Stack gap="md">
+    <DsLayoutStack gap="md">
       <QueryErrorAlert queries={[queriedActiveQuery, queriedArchivedQuery]} />
-      <Group>
+      <DsLayoutInline>
         <Tooltip label={labels.back}>
-          <IconButton component={Link} href={href(basePath)} emphasis="low" aria-label={labels.back}>
+          <IconButton href={href(basePath)} emphasis="low" aria-label={labels.back}>
             <IconArrowLeft size={20} />
           </IconButton>
         </Tooltip>
-        <Title order={2}>{labels.title}</Title>
-      </Group>
+        <DsHeading level={1} scale={2}>
+          {labels.title}
+        </DsHeading>
+      </DsLayoutInline>
 
       {queriedActiveQuery.isError || queriedArchivedQuery.isError ? null : isLoading ? (
         <PageLoader />
       ) : !hasVersions ? (
-        <Paper p="xl" withBorder ta="center">
-          <Stack align="center" gap="md">
-            <IconFileText size={48} opacity={0.3} />
-            <Text c="dimmed">{labels.noVersions}</Text>
-          </Stack>
-        </Paper>
+        <DsSectionCard withBorder padding="xl">
+          <EmptyState inset="none" icon={IconFileText} title={labels.noVersions} />
+        </DsSectionCard>
       ) : (
-        <Table highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>{labels.version}</Table.Th>
-              <Table.Th>{labels.status}</Table.Th>
-              <Table.Th>{labels.effectivePeriod}</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {activePolicy ? (
-              <PolicyHistoryRow
-                item={activePolicy}
-                href={href(basePath)}
-                status={labels.current}
-                tone="positive"
-                dateRange={formatDateRange(activePolicy.effectiveFrom, null)}
-              />
-            ) : null}
-            {archivedPolicies?.map((item) => (
-              <PolicyHistoryRow
-                key={item.id}
-                item={item}
-                href={href(`${basePath}/history/${item.id}`)}
-                status={labels.archived}
-                tone="neutral"
-                dateRange={formatDateRange(item.effectiveFrom, item.effectiveUntil ?? null)}
-              />
-            ))}
-          </Table.Tbody>
-        </Table>
+        <Table.ScrollContainer minWidth={480} role="region" aria-label={labels.title} tabIndex={0}>
+          <Table highlightOnHover aria-label={labels.title}>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th scope="col">{labels.version}</Table.Th>
+                <Table.Th scope="col">{labels.status}</Table.Th>
+                <Table.Th scope="col">{labels.effectivePeriod}</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {activePolicy ? (
+                <PolicyHistoryRow
+                  item={activePolicy}
+                  href={href(basePath)}
+                  status={labels.current}
+                  dateRange={formatDateRange(activePolicy.effectiveFrom, null)}
+                />
+              ) : null}
+              {archivedPolicies?.map((item) => (
+                <PolicyHistoryRow
+                  key={item.id}
+                  item={item}
+                  href={href(`${basePath}/history/${item.id}`)}
+                  status={labels.archived}
+                  dateRange={formatDateRange(item.effectiveFrom, item.effectiveUntil ?? null)}
+                />
+              ))}
+            </Table.Tbody>
+          </Table>
+        </Table.ScrollContainer>
       )}
-    </Stack>
+    </DsLayoutStack>
   );
 }
 
@@ -168,31 +172,27 @@ function PolicyHistoryRow({
   item,
   href,
   status,
-  tone,
   dateRange,
 }: {
   item: LegalPolicyHistoryItem;
   href: string;
   status: string;
-  tone: 'positive' | 'neutral';
   dateRange: string;
 }) {
   return (
     <Table.Tr>
       <Table.Td>
-        <Text component={Link} href={href} size="sm" fw={500}>
+        <Link appearance="quiet" href={href}>
           v{item.version}
-        </Text>
+        </Link>
       </Table.Td>
       <Table.Td>
-        <StatusBadge tone={tone} size="sm">
-          {status}
-        </StatusBadge>
+        <DsText size="sm">{status}</DsText>
       </Table.Td>
       <Table.Td>
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           {dateRange}
-        </Text>
+        </DsText>
       </Table.Td>
     </Table.Tr>
   );

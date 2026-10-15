@@ -1,9 +1,16 @@
 'use client';
 
+import { Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutGrid as DsLayoutGrid,
+  LayoutGridItem as DsLayoutGridItem,
+} from '@/components/core/Layout';
+
 import { useMemo } from 'react';
-import { IconExternalLink } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Box, Divider, Grid, Group, Stack, Text, Title } from '@mantine/core';
+
 import { LocationPlaceMetadataRows } from '@/features/location/LocationPlaceMetadataRows';
 import {
   PublicMetadataLink,
@@ -12,13 +19,17 @@ import {
   PublicMetadataValueGroup,
 } from '@/components/core/PublicMetadata';
 import { CreditList } from '@/features/work/CreditList';
+// Leaf modules: these documents have no authored layout, so the collaboration schema stays off the route.
+import { ContentChrome } from '@/features/document-layout/ui/ContentChrome';
+import { ContentLayoutView } from '@/features/document-layout/ui/ContentLayoutView';
+import { FLOW_DOCUMENT_LAYOUT } from '@/features/document-layout/ui/types';
 import { TableOfContents } from '@/features/navigation/TableOfContents';
 import { GeneratedRichTextBlockView } from '@/features/page/PageView/blocks/GeneratedRichTextBlockView';
 import { ContentBlockMediaRuntimeProvider } from '@/features/media/ContentBlockMediaRuntimeContext';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
 import { buildGeneratedBlockTocItems } from '@/lib/toc-items';
 import type { ContentBlockMediaItem } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
-import { PublicMediaEntityType } from '@echovisionlab/geul-proto/public/file_pb.ts';
+import { PUBLIC_MEDIA_ENTITY_TYPE } from '@/features/media-download/download-wire-values';
 import type { LocalizedRichTextBlock } from '@/features/editor/contract/localized-rich-text';
 import { formatDateTimeInZone } from '@/components/core/DateTime';
 import type { LocationPlaceSummary } from '@/lib/utils/location-place';
@@ -127,18 +138,22 @@ export function ProgramEventViewClient({ event, locale, pathname, query, request
   ) : null;
 
   const MetadataSection = () => (
-    <Stack gap="md">
-      <Group justify="space-between" align="flex-start">
-        <Stack gap="xs" style={{ flex: 1 }}>
-          <Title order={1} style={{ fontWeight: 700, fontSize: '1.5rem' }}>
+    <DsLayoutStack gap="md">
+      <DsLayoutInline justify="between" align="start">
+        <DsLayoutStack gap="xs" flexible>
+          <DsHeading
+            level={1}
+            scale="title"
+            lang={event.localizationInfo?.displayedLocale || event.localizationInfo?.sourceLocale || requestedLocale}
+          >
             {event.title || tCommonStates('untitledPlain')}
-          </Title>
+          </DsHeading>
           <PublicMetadataRows>
             {event.type ? (
               <PublicMetadataRow label={tCommonLabels('type')}>
-                <Text size="sm" component="span">
+                <DsText size="sm" as="span">
                   {event.type.name}
-                </Text>
+                </DsText>
               </PublicMetadataRow>
             ) : null}
             {event.series ? (
@@ -150,9 +165,9 @@ export function ProgramEventViewClient({ event, locale, pathname, query, request
             ) : null}
             {eventDate ? (
               <PublicMetadataRow label={tProgramEventAdmin('public.date')}>
-                <Text size="sm" component="span">
+                <DsText size="sm" as="span">
                   {eventDate}
-                </Text>
+                </DsText>
               </PublicMetadataRow>
             ) : null}
             {event.locationPlace ? (
@@ -160,25 +175,22 @@ export function ProgramEventViewClient({ event, locale, pathname, query, request
             ) : null}
             {event.ticketUrl ? (
               <PublicMetadataRow label={tProgramEventAdmin('public.tickets')}>
-                <PublicMetadataLink href={event.ticketUrl} external>
+                <PublicMetadataLink href={event.ticketUrl} external indicator="external">
                   {formatDisplayUrl(event.ticketUrl)}
-                  <IconExternalLink size={12} style={{ marginLeft: 4 }} />
                 </PublicMetadataLink>
               </PublicMetadataRow>
             ) : null}
             {event.streamUrl ? (
               <PublicMetadataRow label={tProgramEventAdmin('public.stream')}>
-                <PublicMetadataLink href={event.streamUrl} external>
+                <PublicMetadataLink href={event.streamUrl} external indicator="external">
                   {formatDisplayUrl(event.streamUrl)}
-                  <IconExternalLink size={12} style={{ marginLeft: 4 }} />
                 </PublicMetadataLink>
               </PublicMetadataRow>
             ) : null}
             {event.externalUrl ? (
               <PublicMetadataRow label={tProgramEventAdmin('public.link')}>
-                <PublicMetadataLink href={event.externalUrl} external>
+                <PublicMetadataLink href={event.externalUrl} external indicator="external">
                   {formatDisplayUrl(event.externalUrl)}
-                  <IconExternalLink size={12} style={{ marginLeft: 4 }} />
                 </PublicMetadataLink>
               </PublicMetadataRow>
             ) : null}
@@ -213,9 +225,9 @@ export function ProgramEventViewClient({ event, locale, pathname, query, request
                         {formatNameWithRole(client.name, client.role)}
                       </PublicMetadataLink>
                     ) : (
-                      <Text key={client.id} size="sm" component="span">
+                      <DsText key={client.id} size="sm" as="span">
                         {formatNameWithRole(client.name, client.role)}
-                      </Text>
+                      </DsText>
                     ),
                   )}
                 </PublicMetadataValueGroup>
@@ -223,7 +235,7 @@ export function ProgramEventViewClient({ event, locale, pathname, query, request
             ) : null}
             {event.credits.length > 0 ? (
               <PublicMetadataRow label={tProgramEventAdmin('public.credits')}>
-                <Stack gap="sm" role="list" aria-label={tProgramEventAdmin('public.credits')}>
+                <DsLayoutStack gap="sm" role="list" aria-label={tProgramEventAdmin('public.credits')}>
                   {event.credits.map((credit) => (
                     <CreditList.Item
                       key={credit.id}
@@ -234,68 +246,75 @@ export function ProgramEventViewClient({ event, locale, pathname, query, request
                       imageUrl={credit.artist?.imageUrl ?? credit.member?.image}
                     />
                   ))}
-                </Stack>
+                </DsLayoutStack>
               </PublicMetadataRow>
             ) : null}
           </PublicMetadataRows>
-        </Stack>
-        <Group gap="xs">{languageMenu}</Group>
-      </Group>
-    </Stack>
+        </DsLayoutStack>
+        <DsLayoutInline gap="xs">{languageMenu}</DsLayoutInline>
+      </DsLayoutInline>
+    </DsLayoutStack>
   );
 
+  // Running text reads like a post: the plain header shares the reading column; a poster header keeps
+  // its full-width grid. The outline sits beside the body (`center`).
   return (
-    <>
-      <Stack gap="md">
-        {event.posterUrl ? (
-          <Grid gap="xl">
-            <Grid.Col span={{ base: 12, md: 7 }}>
-              <Box
-                style={{
-                  width: '100%',
-                  maxWidth: '100%',
-                }}
-              >
-                <img
-                  src={event.posterUrl}
-                  alt={event.title}
+    <ContentLayoutView
+      layout={FLOW_DOCUMENT_LAYOUT}
+      chrome={
+        <ContentChrome measure={event.posterUrl ? 'full' : 'reading'}>
+          {event.posterUrl ? (
+            <DsLayoutGrid columns={12} gap="xl">
+              <DsLayoutGridItem span={{ base: 12, md: 7 }}>
+                <div
                   style={{
-                    display: 'block',
                     width: '100%',
-                    height: 'auto',
-                    maxHeight: 'min(80dvh, 900px)',
-                    objectFit: 'contain',
+                    maxWidth: '100%',
                   }}
-                />
-              </Box>
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 5 }}>
-              <MetadataSection />
-            </Grid.Col>
-          </Grid>
-        ) : (
-          <MetadataSection />
-        )}
-
-        {event.content && event.content.length > 0 ? (
-          <>
-            <Divider />
-            <Box className="prose">
-              <ContentBlockMediaRuntimeProvider items={event.blockMedia}>
-                {event.content.map((block) => (
-                  <GeneratedRichTextBlockView
-                    key={block.id}
-                    block={block}
-                    requestedLocale={requestedLocale}
-                    downloadOwner={{ entityType: PublicMediaEntityType.PROGRAM_EVENT, entityId: event.id }}
+                >
+                  <img
+                    src={event.posterUrl}
+                    alt={event.title}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      height: 'auto',
+                      maxHeight: 'min(80dvh, 900px)',
+                      objectFit: 'contain',
+                    }}
                   />
-                ))}
-              </ContentBlockMediaRuntimeProvider>
-            </Box>
-          </>
+                </div>
+              </DsLayoutGridItem>
+              <DsLayoutGridItem span={{ base: 12, md: 5 }}>
+                <MetadataSection />
+              </DsLayoutGridItem>
+            </DsLayoutGrid>
+          ) : (
+            <MetadataSection />
+          )}
+        </ContentChrome>
+      }
+    >
+      <TableOfContents items={tocItems} contentPlacement="center">
+        {event.content && event.content.length > 0 ? (
+          <div
+            className="prose"
+            data-reading-measure=""
+            lang={event.localizationInfo?.displayedLocale || event.localizationInfo?.sourceLocale || requestedLocale}
+          >
+            <ContentBlockMediaRuntimeProvider items={event.blockMedia}>
+              {event.content.map((block) => (
+                <GeneratedRichTextBlockView
+                  key={block.id}
+                  block={block}
+                  requestedLocale={requestedLocale}
+                  downloadOwner={{ entityType: PUBLIC_MEDIA_ENTITY_TYPE.PROGRAM_EVENT, entityId: event.id }}
+                />
+              ))}
+            </ContentBlockMediaRuntimeProvider>
+          </div>
         ) : null}
-      </Stack>
-      <TableOfContents items={tocItems} />
-    </>
+      </TableOfContents>
+    </ContentLayoutView>
   );
 }

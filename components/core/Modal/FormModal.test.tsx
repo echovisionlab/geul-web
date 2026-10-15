@@ -3,7 +3,7 @@
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+import { I18nProvider } from 'react-aria-components';
 import { TextInput } from '../Input';
 import { FormModal } from './FormModal';
 
@@ -41,7 +41,7 @@ afterEach(() => {
 
 function renderModal(node: ReactNode) {
   act(() => {
-    root?.render(<MantineProvider env="test">{node}</MantineProvider>);
+    root?.render(<I18nProvider locale="en-US">{node}</I18nProvider>);
   });
 }
 
@@ -72,8 +72,10 @@ describe('FormModal', () => {
     );
 
     const dialog = getDialog();
+    expect(dialog.getAttribute('aria-modal')).toBe('true');
     const form = dialog.querySelector('form');
     expect(form).not.toBeNull();
+    expect(form?.querySelector('[type="submit"]')?.getAttribute('data-emphasis')).toBe('strong');
     expect(dialog.querySelector('[aria-label="Close dialog"]')).not.toBeNull();
     expect(document.body.querySelector('[data-size="large"]')).not.toBeNull();
 

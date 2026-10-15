@@ -1,21 +1,14 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { Divider, Stack, Title } from '@mantine/core';
+
 import { PageLoader } from '@/features/site/PageLoader';
 import { PublicFormView } from '@/features/form/PublicFormView';
-import { FormEditor } from '@/features/form/FormEditor/FormEditor';
-import { EntityTranslationsPanel } from '@/features/translation/EntityTranslationsPanel';
+import type { FormEditRouteContent } from '@/features/form/FormEditRoute';
+import { LazyFormEditRoute } from '@/features/form/LazyFormEditRoute';
 import { checkFormAccessibilityBySlugAction } from '@/lib/actions/form';
-import { AdminFormLayoutClient } from '@/features/form/AdminFormLayoutClient';
-import AdminFormSubmissionsPage from '@/features/form/AdminFormSubmissionsPage';
-import { FormSettingsContent } from '@/features/form/FormSettingsContent';
-import { SubmissionDeleteButton } from '@/features/form/SubmissionDeleteButton';
-import { SubmissionDetail } from '@/features/form/SubmissionDetail';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { createContext } from '@/lib/context';
-import { FormEditorProvider } from '@/lib/contexts/FormEditorContext';
-import { FormTranslationProvider } from '@/features/form/FormTranslationContext';
 import { getFormMetadataDocument } from '@/lib/queries/metadata';
 import { getFormEditorInitialFields, getFormSettingsMeta, getFormSubmissionWithSchema } from '@/lib/queries/form';
 import { resolveContentRequestedLocale } from '@/lib/translation/content-language';
@@ -131,29 +124,29 @@ async function renderFormEditRoute(slugOrId: string, query: Record<string, strin
   const rawTab = Array.isArray(query.tab) ? query.tab[0] : query.tab;
   const tab = ['builder', 'settings', 'translations', 'submissions'].includes(rawTab ?? '') ? rawTab! : 'builder';
   const editBaseHref = `/forms/${encodeURIComponent(form.id)}?edit=true&tab=submissions`;
-  let content: React.ReactNode;
+  let content: FormEditRouteContent;
 
   if (tab === 'settings') {
     const baseUrl = await getBaseUrl();
-    content = (
-      <FormSettingsContent
-        formId={form.id}
-        baseUrl={baseUrl}
-        initialSlug={form.slug}
-        initialIsPublic={form.isPublic}
-        initialOpensAt={form.opensAt}
-        initialClosesAt={form.closesAt}
-        initialMaxSubmissions={form.maxSubmissions}
-        initialRequireAuth={form.requireAuth}
-        initialAllowedRoles={form.allowedRoles}
-        initialAllowDuplicateSubmission={form.allowDuplicateSubmission}
-        initialHasPassword={form.hasPassword}
-        initialOgImageUrl={form.ogImageUrl}
-        initialFeaturedImageUrl={form.featuredImageUrl}
-      />
-    );
+    content = {
+      tab: 'settings',
+      settings: {
+        baseUrl,
+        initialSlug: form.slug,
+        initialIsPublic: form.isPublic,
+        initialOpensAt: form.opensAt,
+        initialClosesAt: form.closesAt,
+        initialMaxSubmissions: form.maxSubmissions,
+        initialRequireAuth: form.requireAuth,
+        initialAllowedRoles: form.allowedRoles,
+        initialAllowDuplicateSubmission: form.allowDuplicateSubmission,
+        initialHasPassword: form.hasPassword,
+        initialOgImageUrl: form.ogImageUrl,
+        initialFeaturedImageUrl: form.featuredImageUrl,
+      },
+    };
   } else if (tab === 'translations') {
-    content = <EntityTranslationsPanel entityType="form" entityId={form.id} collapsible={false} />;
+    content = { tab: 'translations' };
   } else if (tab === 'submissions') {
     const submissionId = Array.isArray(query.submission) ? query.submission[0] : query.submission;
     if (submissionId) {
@@ -161,35 +154,21 @@ async function renderFormEditRoute(slugOrId: string, query: Record<string, strin
       if (!data || data.submission.formId !== form.id) {
         notFound();
       }
-      content = (
-        <Stack gap="md">
-          <Title order={3}>Metadata</Title>
-          <SubmissionDetail
-            submission={data.submission}
-            formId={form.id}
-            deleteButton={
-              <SubmissionDeleteButton submissionId={data.submission.id} formId={form.id} returnHref={editBaseHref} />
-            }
-          />
-          <Divider />
-          <Title order={3}>Responses</Title>
-          <SubmissionDetail.Responses data={data.submission.data} schema={data.formSchema} />
-        </Stack>
-      );
+      content = {
+        tab: 'submission',
+        submission: data.submission,
+        formSchema: data.formSchema,
+        returnHref: editBaseHref,
+      };
     } else {
-      content = <AdminFormSubmissionsPage formId={form.id} editBaseHref={editBaseHref} />;
+      content = { tab: 'submissions', editBaseHref };
     }
   } else {
-    content = <FormEditor />;
+    content = { tab: 'builder' };
   }
 
+  // The collaborative editor loads on demand so the public form page does not ship Yjs.
   return (
-    <FormEditorProvider formId={form.id} initialFields={initialFields}>
-      <FormTranslationProvider>
-        <AdminFormLayoutClient formId={form.id} initialStatus={form.status}>
-          {content}
-        </AdminFormLayoutClient>
-      </FormTranslationProvider>
-    </FormEditorProvider>
+    <LazyFormEditRoute formId={form.id} initialFields={initialFields} initialStatus={form.status} content={content} />
   );
 }

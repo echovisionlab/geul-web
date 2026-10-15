@@ -22,7 +22,7 @@ import { workTableSchema } from './work-table/schema';
 import { workListSchema } from './works-gallery/schema';
 import { createPageBlockSectionSchema } from './section-base-schema';
 
-function definePageBlock<TType extends string, TSchema extends z.ZodObject, TAllowNested extends boolean>(
+function definePageBlock<TType extends string, TSchema extends z.ZodMiniObject, TAllowNested extends boolean>(
   type: TType,
   schema: TSchema,
   allowNested: TAllowNested,
@@ -85,4 +85,4 @@ export function isPageBlockType(value: string): value is PageBlockType {
 export function isPageBlockNestable(type: PageBlockType): boolean {
   return pageBlockManifest[type].allowNested;
 }
-import type { z } from 'zod';
+import type * as z from '@/lib/zod-mini';

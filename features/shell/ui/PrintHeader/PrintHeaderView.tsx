@@ -1,19 +1,22 @@
-import { Box, Group, Stack, Text } from '@mantine/core';
-
+import { Text as DsText } from '@/components/core/Typography';
+import {
+  LayoutInset as DsLayoutInset,
+  LayoutInline as DsLayoutInline,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
 export interface PrintHeaderViewProps {
   logoSrc: string | null;
   logoAlt: string;
   companyName: string;
   taxId: string | null;
 }
-
 export function PrintHeaderView({ logoSrc, logoAlt, companyName, taxId }: PrintHeaderViewProps) {
   return (
     <div className="print-header">
-      <Group justify="space-between" align="flex-start" wrap="nowrap">
+      {/* The identity block keeps the inline end with or without a logo. */}
+      <DsLayoutInline justify={logoSrc ? 'between' : 'end'} align="start" wrap="nowrap">
         {logoSrc ? (
-          <Box
-            component="img"
+          <img
             src={logoSrc}
             alt={logoAlt}
             style={{
@@ -25,17 +28,19 @@ export function PrintHeaderView({ logoSrc, logoAlt, companyName, taxId }: PrintH
           />
         ) : null}
 
-        <Stack gap={0} align="flex-end">
-          <Text size="sm" fw={600} lh={1}>
+        <DsLayoutStack gap="none" align="end">
+          <DsText size="sm" weight="strong">
             {companyName}
-          </Text>
+          </DsText>
           {taxId ? (
-            <Text size="xs" c="dimmed" lh={1.2} mt={4}>
-              {taxId}
-            </Text>
+            <DsLayoutInset blockStart="xxs">
+              <DsText size="xs" tone="secondary">
+                {taxId}
+              </DsText>
+            </DsLayoutInset>
           ) : null}
-        </Stack>
-      </Group>
+        </DsLayoutStack>
+      </DsLayoutInline>
     </div>
   );
 }

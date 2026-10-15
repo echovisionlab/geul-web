@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import koMessages from '@/messages/ko.json';
 import { rememberEmailVerificationContinuation } from './security-reauthentication';
 import { VerificationContent } from './VerificationContent';
@@ -146,9 +147,9 @@ async function renderVerificationContent() {
   await act(async () => {
     root?.render(
       <NextIntlClientProvider locale="ko" messages={koMessages}>
-        <MantineProvider>
+        <DesignSystemProvider locale="ko" forceColorScheme="light">
           <VerificationContent />
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
   });
@@ -488,6 +489,17 @@ describe('VerificationContent', () => {
     expect(verificationDigitInputs()).toHaveLength(6);
 
     await enterVerificationCode('12345');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    const inputs = verificationDigitInputs();
+    await act(async () => {
+      inputs[5].focus();
+      inputs[5].dispatchEvent(new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true, cancelable: true }));
+    });
+    expect(inputs.map((input) => input.value)).toEqual(['1', '2', '3', '4', '', '']);
+    expect(document.activeElement).toBe(inputs[4]);
+    await act(async () => setInputValue(inputs[1], '9'));
+    expect(inputs.map((input) => input.value)).toEqual(['1', '9', '3', '4', '', '']);
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
     await enterVerificationCode('123456');

@@ -13,6 +13,7 @@ interface PageRowMenuProps {
 export function PageRowMenu({ page }: PageRowMenuProps) {
   const tCommon = useTranslations('common.actions');
   const tDataTable = useTranslations('dataTable.aria');
+  const tCommonStates = useTranslations('common.states');
   const { openDelete } = usePageModal();
 
   const items: TableRowMenuItem[] = [];
@@ -30,8 +31,15 @@ export function PageRowMenu({ page }: PageRowMenuProps) {
     label: tCommon('delete'),
     icon: <IconTrash size={16} />,
     onClick: () => openDelete(page),
-    color: 'red',
+    tone: 'danger',
   });
 
-  return <TableRowMenu aria-label={tDataTable('rowActions', { label: page.title || 'page' })} items={items} />;
+  return (
+    <TableRowMenu
+      aria-label={tDataTable('rowActions', {
+        label: page.title || `${tCommonStates('untitled')} (${page.slug || page.id})`,
+      })}
+      items={items}
+    />
+  );
 }

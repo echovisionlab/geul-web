@@ -1,8 +1,9 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText, VisuallyHidden } from '@/components/core/Typography';
+import { useId, type ReactNode } from 'react';
 import { IconLink, IconUnlink } from '@tabler/icons-react';
-import { Box, Group, Stack, Text } from '@mantine/core';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
@@ -35,24 +36,6 @@ interface ConnectedSocialAccountsViewProps {
   unlinkingProvider: ConnectedSocialProvider | null;
 }
 
-function ProviderBadge({ children, dimmed = false }: { children: ReactNode; dimmed?: boolean }) {
-  return (
-    <Box
-      style={{
-        width: 30,
-        height: 30,
-        borderRadius: 8,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        opacity: dimmed ? 0.7 : 1,
-      }}
-    >
-      {children}
-    </Box>
-  );
-}
-
 export function ConnectedSocialAccountsView({
   availableProviders,
   connectedProviders,
@@ -64,11 +47,19 @@ export function ConnectedSocialAccountsView({
   unlinkBlockedReasons,
   unlinkingProvider,
 }: ConnectedSocialAccountsViewProps) {
+  const scopeId = useId();
   return (
-    <>
-      <SectionHeader title={labels.title} description={labels.description} />
+    <DsLayoutStack gap="md">
+      <SectionHeader
+        title={
+          <span role="heading" aria-level={2}>
+            {labels.title}
+          </span>
+        }
+        description={labels.description}
+      />
 
-      <Stack gap="sm" data-testid="security-connected-accounts-section">
+      <DsLayoutStack gap="sm" data-testid="security-connected-accounts-section">
         {connectedProviders.map((provider) => {
           const isUnlinking = unlinkingProvider === provider;
           const blockedReason = unlinkBlockedReasons[provider];
@@ -80,35 +71,47 @@ export function ConnectedSocialAccountsView({
                 : undefined;
 
           return (
-            <SectionCard key={provider} p="sm" data-testid={`security-provider-${provider}`}>
-              <Group justify="space-between" wrap="nowrap">
-                <Group gap="sm" wrap="nowrap">
-                  <ProviderBadge>{providerIcon(provider)}</ProviderBadge>
-                  <Box>
-                    <Text size="sm" fw={500}>
+            <SectionCard
+              appearance="plain"
+              key={provider}
+              padding="sm"
+              data-testid={`security-provider-${provider}`}
+              role="group"
+              aria-labelledby={`${scopeId}-${provider}-name`}
+              aria-describedby={disabledReason ? `${scopeId}-${provider}-reason` : undefined}
+            >
+              <DsLayoutInline justify="between" wrap="nowrap">
+                <DsLayoutInline gap="sm" wrap="nowrap">
+                  {providerIcon(provider)}
+                  <div>
+                    <DsText id={`${scopeId}-${provider}-name`} size="sm" weight="medium">
                       {labels.providerName(provider)}
-                    </Text>
-                    <Text size="xs" c="dimmed">
+                    </DsText>
+                    <DsText id={`${scopeId}-${provider}-status`} size="xs" tone="secondary">
                       {labels.connected}
-                    </Text>
-                  </Box>
-                </Group>
+                    </DsText>
+                  </div>
+                </DsLayoutInline>
                 <Tooltip label={disabledReason ?? labels.disconnect} withArrow>
                   <span>
                     <IconButton
                       tone="neutral"
                       emphasis="low"
-                      aria-label={`${labels.disconnect} ${labels.providerName(provider)}`}
+                      aria-label={labels.disconnect}
+                      aria-describedby={`${scopeId}-${provider}-name ${scopeId}-${provider}-status${disabledReason ? ` ${scopeId}-${provider}-reason` : ''}`}
                       onClick={() => onUnlink(provider)}
                       loading={isUnlinking}
                       disabled={isUnlinking || Boolean(disabledReason)}
                       data-testid={`security-disconnect-${provider}`}
                     >
-                      <IconUnlink size={16} />
+                      <IconUnlink size={16} aria-hidden />
                     </IconButton>
                   </span>
                 </Tooltip>
-              </Group>
+              </DsLayoutInline>
+              {disabledReason ? (
+                <VisuallyHidden id={`${scopeId}-${provider}-reason`}>{disabledReason}</VisuallyHidden>
+              ) : null}
             </SectionCard>
           );
         })}
@@ -117,34 +120,42 @@ export function ConnectedSocialAccountsView({
           const isLinking = linkingProvider === provider;
 
           return (
-            <SectionCard key={provider} p="sm" style={{ opacity: 0.7 }} data-testid={`security-provider-${provider}`}>
-              <Group justify="space-between" wrap="nowrap">
-                <Group gap="sm" wrap="nowrap">
-                  <ProviderBadge dimmed>{providerIcon(provider)}</ProviderBadge>
-                  <Box>
-                    <Text size="sm" fw={500} c="dimmed">
+            <SectionCard
+              appearance="plain"
+              key={provider}
+              padding="sm"
+              data-testid={`security-provider-${provider}`}
+              role="group"
+              aria-labelledby={`${scopeId}-${provider}-name`}
+            >
+              <DsLayoutInline justify="between" wrap="nowrap">
+                <DsLayoutInline gap="sm" wrap="nowrap">
+                  {providerIcon(provider)}
+                  <div>
+                    <DsText id={`${scopeId}-${provider}-name`} size="sm" weight="medium" tone="secondary">
                       {labels.providerName(provider)}
-                    </Text>
-                    <Text size="xs" c="dimmed">
+                    </DsText>
+                    <DsText id={`${scopeId}-${provider}-status`} size="xs" tone="secondary">
                       {labels.notConnected}
-                    </Text>
-                  </Box>
-                </Group>
+                    </DsText>
+                  </div>
+                </DsLayoutInline>
                 <Button
                   emphasis="medium"
                   size="xs"
-                  leftSection={<IconLink size={14} />}
+                  leftSection={<IconLink size={14} aria-hidden />}
+                  aria-describedby={`${scopeId}-${provider}-name ${scopeId}-${provider}-status`}
                   onClick={() => onLink(provider)}
                   loading={isLinking}
                   data-testid={`security-connect-${provider}`}
                 >
                   {labels.connect}
                 </Button>
-              </Group>
+              </DsLayoutInline>
             </SectionCard>
           );
         })}
-      </Stack>
-    </>
+      </DsLayoutStack>
+    </DsLayoutStack>
   );
 }

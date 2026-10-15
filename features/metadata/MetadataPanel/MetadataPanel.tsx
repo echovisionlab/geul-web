@@ -1,13 +1,13 @@
 'use client';
+import { SupportingText, Code, List, Text as DsText } from '@/components/core/Typography';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Code, List, Stack, Text } from '@mantine/core';
+import { StatusIcon } from '@/components/core/Display';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
 import { buildMetadataHealthChecks, METADATA_HEALTH_CHECKS, type MetadataHealthCheck } from '@/lib/metadata/health';
 import { joinUrl } from '@/lib/utils/url';
-import classes from './MetadataPanel.module.css';
-
 interface MetadataPanelProps {
   title: string;
   summary: string;
@@ -17,11 +17,9 @@ interface MetadataPanelProps {
   defaultImageUrl?: string | null;
   defaultSchemaType: string;
 }
-
 function trimmed(value: string) {
   return value.trim();
 }
-
 function normalizeMetadataHealthCheck(check: string): MetadataHealthCheck {
   switch (check) {
     case 'Summary is missing, so search/social descriptions will be empty.':
@@ -34,7 +32,6 @@ function normalizeMetadataHealthCheck(check: string): MetadataHealthCheck {
       return check as MetadataHealthCheck;
   }
 }
-
 export function MetadataPanel({
   title,
   summary,
@@ -52,34 +49,31 @@ export function MetadataPanel({
     effectiveTitle,
     effectiveDescription,
   });
-
   return (
-    <SectionCard>
-      <Stack gap="md">
+    <SectionCard padding={{ base: 'none', sm: 'md' }}>
+      <DsLayoutStack gap="md">
         <SectionHeader title={t('title')} description={t('description')} />
 
         {healthChecks.length > 0 ? (
-          <Stack gap="xs">
-            <Text size="sm" fw={500}>
+          <DsLayoutStack gap="xs">
+            <DsText size="sm" weight="medium">
               {t('healthChecks')}
-            </Text>
-            <List size="sm" icon={<IconAlertTriangle size={16} className={classes.warningIcon} />}>
+            </DsText>
+            <List size="sm" icon={<StatusIcon icon={IconAlertTriangle} tone="warning" />}>
               {healthChecks.map((check) => (
                 <List.Item key={check}>{t(`checks.${normalizeMetadataHealthCheck(check)}`)}</List.Item>
               ))}
             </List>
-          </Stack>
+          </DsLayoutStack>
         ) : (
-          <Text size="sm" c="dimmed">
-            {t('noWarnings')}
-          </Text>
+          <SupportingText tone="secondary">{t('noWarnings')}</SupportingText>
         )}
 
-        <Stack gap={4}>
-          <Text size="sm" fw={500}>
+        <DsLayoutStack gap="xxs">
+          <DsText size="sm" weight="medium">
             {t('resolvedMetadata')}
-          </Text>
-          <Code block>
+          </DsText>
+          <Code block wrap="anywhere">
             {JSON.stringify(
               {
                 title: effectiveTitle,
@@ -93,8 +87,8 @@ export function MetadataPanel({
               2,
             )}
           </Code>
-        </Stack>
-      </Stack>
+        </DsLayoutStack>
+      </DsLayoutStack>
     </SectionCard>
   );
 }

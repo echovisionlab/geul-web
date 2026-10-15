@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import messages from '@/messages/en.json';
 import { PageEditorInterruptionDialogs } from './PageEditorInterruptionDialogs';
@@ -41,7 +42,7 @@ function renderDialogs(props: Partial<React.ComponentProps<typeof PageEditorInte
   act(() => {
     root.render(
       <NextIntlClientProvider locale="en" messages={messages}>
-        <MantineProvider env="test">
+        <DesignSystemProvider locale="en" forceColorScheme="light">
           <PageEditorInterruptionDialogs
             interruption={null}
             permissionRevokedDestination="/about"
@@ -49,7 +50,7 @@ function renderDialogs(props: Partial<React.ComponentProps<typeof PageEditorInte
             currentPath={() => '/about?edit=true&locale=ko#body'}
             {...props}
           />
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
   });
@@ -65,8 +66,10 @@ describe('PageEditorInterruptionDialogs', () => {
     expect(navigate).toHaveBeenCalledWith('/about');
   });
 
-  it('preserves the exact editor URL when the session expires', () => {
+  it('preserves the exact editor URL when the session expires', async () => {
     const { navigate } = renderDialogs({ interruption: 'session_expired' });
-    expect(navigate).toHaveBeenCalledWith('/login?redirect=%2Fabout%3Fedit%3Dtrue%26locale%3Dko%23body');
+    await vi.waitFor(() =>
+      expect(navigate).toHaveBeenCalledWith('/login?redirect=%2Fabout%3Fedit%3Dtrue%26locale%3Dko%23body'),
+    );
   });
 });

@@ -1,10 +1,16 @@
 'use client';
 
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useCallback } from 'react';
 import { IconFilter, IconMapPin } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Divider, Group, Stack, Text } from '@mantine/core';
+
 import { LabelBadge } from '@/components/core/Badge';
 import { MultiSelect, Select, NumberInput, Switch } from '@/components/core/Input';
 import { listMapThemesAction } from '@/lib/actions/map-theme';
@@ -117,25 +123,27 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
   );
 
   return (
-    <Box data-page-block-editor="work-map">
-      <Group gap="xs" mb="md">
-        <IconMapPin size={18} />
-        <Text size="sm" fw={500}>
-          {tPageEditor('sectionTypes.workMap')}
-        </Text>
-        <LabelBadge size="sm">{t('viewportQueryBadge')}</LabelBadge>
-        <LabelBadge size="sm" tone={featuredOnly ? 'accent' : 'neutral'}>
-          {featuredOnly ? t('featuredOnlyBadge') : t('allMappedWorksBadge')}
-        </LabelBadge>
-      </Group>
+    <DsLayoutStack gap="lg" data-page-block-editor="work-map">
+      <DsLayoutInset blockEnd="md">
+        <DsLayoutInline gap="xs">
+          <IconMapPin size={18} />
+          <DsText size="sm" weight="medium">
+            {tPageEditor('sectionTypes.workMap')}
+          </DsText>
+          <LabelBadge size="sm">{t('viewportQueryBadge')}</LabelBadge>
+          <LabelBadge size="sm" tone={featuredOnly ? 'accent' : 'neutral'}>
+            {featuredOnly ? t('featuredOnlyBadge') : t('allMappedWorksBadge')}
+          </LabelBadge>
+        </DsLayoutInline>
+      </DsLayoutInset>
 
-      <Stack gap="sm">
-        <Group gap="xs">
+      <DsLayoutStack gap="md">
+        <DsLayoutInline gap="xs">
           <IconFilter size={14} />
-          <Text size="xs" c="dimmed" fw={500}>
+          <DsText size="xs" tone="secondary" weight="medium">
             {t('filtersSection')}
-          </Text>
-        </Group>
+          </DsText>
+        </DsLayoutInline>
 
         <MultiSelect
           label={t('workTypesLabel')}
@@ -143,7 +151,6 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
           data={workTypeOptions}
           value={workTypes ? workTypes.split(',') : []}
           onChange={(values) => updateProp('workTypes', values.join(','))}
-          size="xs"
           clearable
         />
 
@@ -151,45 +158,38 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
           label={t('featuredOnlyLabel')}
           checked={featuredOnly}
           onChange={(event) => updateProp('featuredOnly', event.currentTarget.checked ? 'true' : 'false')}
-          size="sm"
         />
 
-        <Text size="xs" c="dimmed">
+        <DsText size="xs" tone="secondary">
           {t('onlyWorksWithAssignedLocation')}
-        </Text>
-      </Stack>
+        </DsText>
+      </DsLayoutStack>
 
-      <Divider my="sm" />
-
-      <Stack gap="sm">
-        <Text size="xs" c="dimmed" fw={500}>
+      <DsLayoutStack gap="md">
+        <DsText size="xs" tone="secondary" weight="medium">
           {t('querySection')}
-        </Text>
+        </DsText>
 
-        <Group grow>
+        <DsLayoutInline grow>
           <Select
             label={t('sortByLabel')}
             data={[...sortByOptions]}
             value={sortBy}
             onChange={(value) => updateProp('sortBy', value || 'published_at')}
-            size="xs"
           />
           <Select
             label={tCommonLabels('order')}
             data={[...sortOrderOptions]}
             value={sortOrder}
             onChange={(value) => updateProp('sortOrder', value || 'desc')}
-            size="xs"
           />
-        </Group>
-      </Stack>
+        </DsLayoutInline>
+      </DsLayoutStack>
 
-      <Divider my="sm" />
-
-      <Stack gap="sm">
-        <Text size="xs" c="dimmed" fw={500}>
+      <DsLayoutStack gap="md">
+        <DsText size="xs" tone="secondary" weight="medium">
           {t('mapSection')}
-        </Text>
+        </DsText>
 
         <Select
           label={t('primaryLabelLabel')}
@@ -197,7 +197,6 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
           data={[...primaryLabelOptions]}
           value={primaryLabel}
           onChange={(value) => updateProp('primaryLabel', value || 'content_title')}
-          size="xs"
         />
 
         <Select
@@ -205,28 +204,25 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
           data={aspectRatioOptions.filter((option) => option.value !== 'auto')}
           value={aspectRatio}
           onChange={(value) => updateProp('aspectRatio', value || '16:9')}
-          size="xs"
         />
 
-        <Group grow>
+        <DsLayoutInline grow>
           <NumberInput
             label={t('previewWidthLabel')}
             value={Number.parseInt(previewWidth, 10)}
             onChange={(value) => updateProp('previewWidth', String(value || 100))}
             min={10}
             max={100}
-            size="xs"
           />
           <Select
             label={tMapControls('fields.colorScheme')}
             data={[...colorSchemeOptions]}
             value={preferredScheme}
             onChange={(value) => updateProp('preferredScheme', value || 'auto')}
-            size="xs"
           />
-        </Group>
+        </DsLayoutInline>
 
-        <Group grow>
+        <DsLayoutInline grow>
           <NumberInput
             label={tMapControls('fields.minZoom')}
             value={minZoom}
@@ -240,7 +236,6 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
             max={MAP_MAX_ZOOM_LIMIT}
             step={0.1}
             decimalScale={1}
-            size="xs"
           />
           <NumberInput
             label={tMapControls('fields.maxZoom')}
@@ -255,26 +250,23 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
             max={MAP_MAX_ZOOM_LIMIT}
             step={0.1}
             decimalScale={1}
-            size="xs"
           />
-        </Group>
+        </DsLayoutInline>
 
-        <Group grow>
+        <DsLayoutInline grow>
           <Select
             label={tMapControls('fields.areaLabels')}
             data={[...labelModeOptions]}
             value={areaLabelsMode}
             onChange={(value) => updateProp('areaLabelsMode', value || 'inherit')}
-            size="xs"
           />
           <Select
             label={tMapControls('fields.poiLabels')}
             data={[...labelModeOptions]}
             value={poiLabelsMode}
             onChange={(value) => updateProp('poiLabelsMode', value || 'inherit')}
-            size="xs"
           />
-        </Group>
+        </DsLayoutInline>
 
         <Select
           label={tMapControls('fields.theme')}
@@ -282,12 +274,11 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
           data={themeOptions}
           value={themeId || null}
           onChange={(value) => updateProp('themeId', value || '')}
-          size="xs"
           clearable
           searchable
         />
-      </Stack>
-    </Box>
+      </DsLayoutStack>
+    </DsLayoutStack>
   );
 }
 

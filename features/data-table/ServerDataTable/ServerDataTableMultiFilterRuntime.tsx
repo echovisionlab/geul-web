@@ -1,7 +1,12 @@
 'use client';
+import { breakpointQuery } from '@/components/core/Layout/breakpoints';
 
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import {
+  useServerTablePathname as usePathname,
+  useServerTableRouter as useRouter,
+  useServerTableSearchParams as useSearchParams,
+} from './ServerDataTableNavigation';
 import { useMediaQuery } from '@mantine/hooks';
 import { getOperatorsForType, isNoValueOperator, type FilterOperator } from '@/lib/types/common/filter';
 import type { TableFilterSpec } from '@/lib/utils/table-query';
@@ -74,7 +79,7 @@ export function ServerDataTableMultiFilter({
   const [closeAfterSuccess, setCloseAfterSuccess] = useState(false);
   const [editState, setEditState] = useState<FilterEditState>({ op: 'eq', value: '', negated: false });
   const lastSyncedQueryKeyRef = useRef<string | null>(null);
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useMediaQuery(breakpointQuery('sm'));
 
   useEffect(() => {
     filterUiState.set(namespace, { opened, selectedField });

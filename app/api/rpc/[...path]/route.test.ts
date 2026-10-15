@@ -3,7 +3,9 @@ import { GET, POST } from './route';
 const mocks = vi.hoisted(() => ({ fetch: vi.fn() }));
 vi.mock('next/headers', () => ({ cookies: async () => ({ getAll: () => [] }) }));
 vi.mock('@/lib/env', () => ({ getApiUrl: () => 'https://api.example', getSessionCookieName: () => 'session' }));
-vi.mock('@/lib/public-runtime-config', () => ({ getPublicApiUrl: () => 'https://api.example' }));
+vi.mock('@/lib/public-runtime-config.server', () => ({
+  getServerPublicRuntimeConfig: () => ({ apiUrl: 'https://api.example' }),
+}));
 vi.mock('@/lib/utils/logger', () => ({ createLogger: () => ({ error: vi.fn() }) }));
 const context = () => ({ params: Promise.resolve({ path: ['test.Service', 'Call'] }) });
 beforeEach(() => {

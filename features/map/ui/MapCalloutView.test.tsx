@@ -56,8 +56,51 @@ describe('MapCalloutView', () => {
     expect(callout?.dataset.placeId).toBe('studio');
     expect(callout?.getAttribute('aria-label')).toBe('Studio');
     expect(host.textContent).toContain('37.500000 / 127.100000');
+    expect(callout?.style.getPropertyValue('--_map-callout-line-color')).toBe(baseProps.colors.lineColor);
+    expect(callout?.style.getPropertyValue('--_map-callout-hover-bg-color')).toBe(
+      baseProps.colors.hoverBackgroundColor,
+    );
+    expect(callout?.style.getPropertyValue('--_map-callout-offset-x')).toBe('110px');
+    expect(callout?.style.getPropertyValue('--_map-callout-offset-y')).toBe('37px');
+    expect(host.querySelector('.mgl-callout__path')?.getAttribute('stroke')).toBe('var(--_map-callout-line-color)');
 
     act(() => callout?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })));
+    expect(baseProps.onClick).toHaveBeenCalledOnce();
+  });
+  it('keeps inert callouts readable without exposing a dead button or tab stop', () => {
+    act(() => root.render(<MapCalloutView {...baseProps} clickable={false} />));
+    const callout = host.querySelector<HTMLElement>('.mgl-callout')!;
+    expect(callout.hasAttribute('role')).toBe(false);
+    expect(callout.hasAttribute('tabindex')).toBe(false);
+    expect(callout.hasAttribute('aria-label')).toBe(false);
+    expect(callout.textContent).toContain('Studio');
+    expect(callout.textContent).toContain('Seoul');
+    expect(callout.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+    act(() => callout.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })));
+    expect(baseProps.onClick).not.toHaveBeenCalled();
+  });
+
+  it('describes secondary place fields separately from the command name and supports button keys', () => {
+    act(() => root.render(<MapCalloutView {...baseProps} />));
+    const callout = host.querySelector<HTMLElement>('.mgl-callout')!;
+    const described = callout
+      .getAttribute('aria-describedby')!
+      .split(' ')
+      .map((id) => document.getElementById(id)?.textContent);
+    expect(described).toEqual(['Seoul', '37.500000 / 127.100000']);
+    expect(callout.getAttribute('aria-label')).toBe('Studio');
+    act(() => callout.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true })));
+    expect(baseProps.onClick).toHaveBeenCalledOnce();
+  });
+
+  it('preserves native link identity and does not treat Space as link activation', () => {
+    act(() => root.render(<MapCalloutView {...baseProps} callout={{ ...baseProps.callout, href: '/works/studio' }} />));
+    const callout = host.querySelector<HTMLElement>('.mgl-callout')!;
+    expect(callout.getAttribute('href')).toBe('/works/studio');
+    expect(callout.hasAttribute('role')).toBe(false);
+    act(() => callout.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true })));
+    expect(baseProps.onClick).not.toHaveBeenCalled();
+    act(() => callout.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })));
     expect(baseProps.onClick).toHaveBeenCalledOnce();
   });
 });

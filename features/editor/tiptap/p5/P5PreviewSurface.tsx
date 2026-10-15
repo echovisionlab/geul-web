@@ -72,12 +72,14 @@ export function P5PreviewSurface({
 
   return (
     <div className={classes.preview} data-testid="p5-preview" data-status={status} style={{ height }}>
-      <div ref={mountRef} className={classes.runtime} aria-label={labels.preview} />
+      <div ref={mountRef} className={classes.runtime} role="group" aria-label={labels.preview} />
       <ExecutableRuntimeStatus status={status} running={labels.running} stopped={labels.stopped} />
       {error ? (
-        <Alert className={classes.error} tone="danger" title={labels.error} data-testid="p5-error">
-          {formatError(error)}
-        </Alert>
+        <div className={classes.error}>
+          <Alert tone="danger" title={labels.error} data-testid="p5-error">
+            {formatError(error)}
+          </Alert>
+        </div>
       ) : null}
     </div>
   );

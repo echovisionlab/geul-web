@@ -1,4 +1,5 @@
 'use client';
+import { breakpointQuery } from '@/components/core/Layout/breakpoints';
 
 import { useMemo, useState } from 'react';
 import { useMediaQuery } from '@mantine/hooks';
@@ -25,7 +26,7 @@ export function DataTableMultiFilter({ fields, placeholder, allowLogicToggle = t
   const [opened, setOpened] = useState(false);
   const [selectedField, setSelectedField] = useState<string | null>(null);
   const [editState, setEditState] = useState<FilterEditState>({ op: 'eq', value: '', negated: false });
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useMediaQuery(breakpointQuery('sm'));
 
   const activeFilters = useMemo<ActiveFilter[]>(() => {
     if (!Array.isArray(query.filters)) {

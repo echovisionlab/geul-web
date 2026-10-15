@@ -1,24 +1,34 @@
 'use client';
+import { SupportingText, Text as DsText, VisuallyHidden } from '@/components/core/Typography';
+
+import { ConfirmationDialog } from '@/features/confirmation';
+
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
 
 import { useEffect, useState } from 'react';
-import { IconSearch, IconSortAscending, IconSortDescending, IconTrash, IconX } from '@tabler/icons-react';
+import { IconSortAscending, IconSortDescending, IconTrash, IconX } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Group, Modal, Pagination, Stack, Table, Text } from '@mantine/core';
-import { DatePickerInput, type DatesRangeValue } from '@mantine/dates';
-import '@mantine/dates/styles.css';
+
+import { Pagination, Table } from '@/components/core/Display';
+import { DateRangeInput, type DatesRangeValue, SearchInput, Select } from '@/components/core/Input';
 import { useDebouncedValue, useDisclosure } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { LabelBadge } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
 import { DateTime } from '@/features/date-time/DateTime';
 import { IconButton } from '@/components/core/IconButton';
-import { Select, TextInput } from '@/components/core/Input';
+
 import { TextButton } from '@/components/core/TextButton';
 import { Tooltip } from '@/components/core/Tooltip';
 import { PageLoader } from '@/features/site/PageLoader';
 import { deleteFormSubmissionAction, listFormSubmissionsAction } from '@/lib/actions/form';
 import { getSubmissionDateRangeBounds } from './submission-date-range';
+import { buildSubmissionHref } from './submission-href';
 
 // Local type for submissions returned from the action (createdAt is optional)
 interface SubmissionListItem {
@@ -32,7 +42,20 @@ interface SubmissionListItem {
   createdAt: Date | undefined;
 }
 
-export default function AdminFormSubmissionsPage({ formId, editBaseHref }: { formId: string; editBaseHref: string }) {
+export interface AdminFormSubmissionsPageProps {
+  formId: string;
+  editBaseHref: string;
+  listAction?: typeof listFormSubmissionsAction;
+  deleteAction?: typeof deleteFormSubmissionAction;
+}
+export default function AdminFormSubmissionsPage({
+  formId,
+  editBaseHref,
+  listAction = listFormSubmissionsAction,
+  deleteAction = deleteFormSubmissionAction,
+}: AdminFormSubmissionsPageProps) {
+  const tPagination = useTranslations('dataTable.pagination');
+  const tModalActions = useTranslations('common.actions');
   const t = useTranslations('formAdmin.submissions');
   const tCommonActions = useTranslations('common.actions');
   const tCommonEntities = useTranslations('common.entities');
@@ -71,7 +94,7 @@ export default function AdminFormSubmissionsPage({ formId, editBaseHref }: { for
     ],
     queryFn: async () => {
       const dateBounds = getSubmissionDateRangeBounds(dateRange);
-      const result = await listFormSubmissionsAction({
+      const result = await listAction({
         formId,
         page,
         limit,
@@ -92,19 +115,19 @@ export default function AdminFormSubmissionsPage({ formId, editBaseHref }: { for
   const [deleteTarget, setDeleteTarget] = useState<SubmissionListItem | null>(null);
 
   const deleteSubmission = useMutation({
-    mutationFn: (data: { id: string }) => deleteFormSubmissionAction(data.id),
+    mutationFn: (data: { id: string }) => deleteAction(data.id),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: t('notifications.deleted'), color: 'red' });
+      notifications.show({ message: t('notifications.deleted'), tone: 'positive' });
       queryClient.invalidateQueries({ queryKey: ['forms', formId, 'submissions'] });
       closeDeleteModal();
       setDeleteTarget(null);
     },
     onError: (error) => {
-      notifications.show({ message: error.message, color: 'red' });
+      notifications.show({ message: error.message, tone: 'danger' });
     },
   });
 
@@ -127,8 +150,10 @@ export default function AdminFormSubmissionsPage({ formId, editBaseHref }: { for
 
   if (submissionsFailed) {
     return (
-      <Stack role="alert" align="center" gap="sm">
-        <Text c="red">{tCommonErrors('generic')}</Text>
+      <DsLayoutStack role="alert" align="center" gap="sm">
+        <DsText size="sm" tone="danger">
+          {tCommonErrors('generic')}
+        </DsText>
         <Button
           emphasis="low"
           loading={submissionsFetching}
@@ -137,7 +162,7 @@ export default function AdminFormSubmissionsPage({ formId, editBaseHref }: { for
         >
           {tCommonActions('tryAgain')}
         </Button>
-      </Stack>
+      </DsLayoutStack>
     );
   }
 
@@ -151,35 +176,40 @@ export default function AdminFormSubmissionsPage({ formId, editBaseHref }: { for
   }));
 
   return (
-    <Stack>
+    <DsLayoutStack>
       {/* Filters */}
-      <Group gap="sm" wrap="wrap">
-        <TextInput
-          placeholder={tCommonPlaceholders('search')}
-          leftSection={<IconSearch size={16} />}
-          value={search}
-          onChange={(e) => setSearch(e.currentTarget.value)}
-          style={{ flex: 1, minWidth: 200 }}
-          size="sm"
-        />
-        <Select
-          placeholder={tCommonLabels('country')}
-          data={countryOptions}
-          value={countryFilter}
-          onChange={setCountryFilter}
-          clearable
-          size="sm"
-          w={120}
-        />
-        <DatePickerInput
-          type="range"
-          placeholder={t('dateRangePlaceholder')}
-          value={dateRange}
-          onChange={setDateRange}
-          clearable
-          size="sm"
-          w={220}
-        />
+      <DsLayoutInline gap="sm" wrap="wrap">
+        <div style={{ minWidth: 200, flex: 1 }}>
+          <SearchInput
+            grow
+            aria-label={tCommonPlaceholders('search')}
+            placeholder={tCommonPlaceholders('search')}
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            size="sm"
+          />
+        </div>
+        <div style={{ width: 120 }}>
+          <Select
+            aria-label={tCommonLabels('country')}
+            placeholder={tCommonLabels('country')}
+            data={countryOptions}
+            value={countryFilter}
+            onChange={setCountryFilter}
+            clearable
+            size="sm"
+          />
+        </div>
+        <div style={{ width: 220 }}>
+          <DateRangeInput
+            aria-label={t('dateRangePlaceholder')}
+            placeholder={t('dateRangePlaceholder')}
+            value={dateRange}
+            onChange={setDateRange}
+            clearable
+            size="sm"
+          />
+        </div>
         <Tooltip label={sortOrder === 'desc' ? t('newestFirst') : t('oldestFirst')}>
           <IconButton
             emphasis="medium"
@@ -202,98 +232,114 @@ export default function AdminFormSubmissionsPage({ formId, editBaseHref }: { for
             <IconX size={16} />
           </IconButton>
         )}
-      </Group>
+      </DsLayoutInline>
 
       {/* Results count */}
-      <Text size="sm" c="dimmed">
+      <SupportingText role="status" aria-live="polite" aria-atomic="true" tone="secondary">
         {t('count', { count: submissionsData?.total ?? 0 })}
         {hasActiveFilters ? ` ${t('filteredSuffix')}` : ''}
-      </Text>
+      </SupportingText>
 
-      <Table highlightOnHover>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>{tCommonLabels('id')}</Table.Th>
-            <Table.Th>{t('table.submitted')}</Table.Th>
-            <Table.Th>{tCommonLabels('country')}</Table.Th>
-            <Table.Th>{tCommonEntities('user')}</Table.Th>
-            <Table.Th />
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {!hasSubmissions && (
+      <Table.ScrollContainer minWidth={640} role="region" aria-label={tCommonLabels('submissions')} tabIndex={0}>
+        <Table highlightOnHover aria-label={tCommonLabels('submissions')} aria-busy={submissionsFetching}>
+          <Table.Thead>
             <Table.Tr>
-              <Table.Td colSpan={5}>
-                <Text c="dimmed" ta="center" py="xl">
-                  {hasActiveFilters ? t('emptyFiltered') : t('empty')}
-                </Text>
-              </Table.Td>
+              <Table.Th>{tCommonLabels('id')}</Table.Th>
+              <Table.Th>{t('table.submitted')}</Table.Th>
+              <Table.Th>{tCommonLabels('country')}</Table.Th>
+              <Table.Th>{tCommonEntities('user')}</Table.Th>
+              <Table.Th>
+                <VisuallyHidden>{tCommonLabels('actions')}</VisuallyHidden>
+              </Table.Th>
             </Table.Tr>
-          )}
-          {submissions.map((submission) => (
-            <Table.Tr key={submission.id}>
-              <Table.Td>
-                <TextButton
-                  href={`${editBaseHref}&submission=${encodeURIComponent(submission.id)}`}
-                  size="sm"
-                  appearance="accent"
-                  style={{ fontFamily: 'monospace' }}
-                >
-                  {submission.id.slice(0, 8)}
-                </TextButton>
-              </Table.Td>
-              <Table.Td>
-                <Text size="sm">
-                  <DateTime value={submission.createdAt} display="dateTime" />
-                </Text>
-              </Table.Td>
-              <Table.Td>
-                <LabelBadge size="sm">{submission.countryCode ?? '-'}</LabelBadge>
-              </Table.Td>
-              <Table.Td>
-                <Text size="sm" c="dimmed">
-                  {submission.memberId ?? tCommonStates('anonymous')}
-                </Text>
-              </Table.Td>
-              <Table.Td>
-                <IconButton
-                  tone="danger"
-                  emphasis="low"
-                  onClick={() => handleDelete(submission)}
-                  aria-label={t('actions.deleteSubmission')}
-                >
-                  <IconTrash size={16} />
-                </IconButton>
-              </Table.Td>
-            </Table.Tr>
-          ))}
-        </Table.Tbody>
-      </Table>
+          </Table.Thead>
+          <Table.Tbody>
+            {!hasSubmissions && (
+              <Table.Tr>
+                <Table.Td colSpan={5}>
+                  <DsLayoutInset block="xl">
+                    <SupportingText tone="secondary" align="center">
+                      {hasActiveFilters ? t('emptyFiltered') : t('empty')}
+                    </SupportingText>
+                  </DsLayoutInset>
+                </Table.Td>
+              </Table.Tr>
+            )}
+            {submissions.map((submission) => (
+              <Table.Tr key={submission.id}>
+                <Table.Td>
+                  <TextButton
+                    id={`submission-${submission.id}`}
+                    href={buildSubmissionHref(editBaseHref, submission.id)}
+                    size="sm"
+                    appearance="accent"
+                    font="mono"
+                  >
+                    {submission.id.slice(0, 8)}
+                  </TextButton>
+                </Table.Td>
+                <Table.Td>
+                  <DsText size="sm">
+                    <DateTime value={submission.createdAt} display="dateTime" />
+                  </DsText>
+                </Table.Td>
+                <Table.Td>
+                  <LabelBadge size="sm">{submission.countryCode ?? '-'}</LabelBadge>
+                </Table.Td>
+                <Table.Td>
+                  <DsText size="sm" tone="secondary">
+                    {submission.memberId ?? tCommonStates('anonymous')}
+                  </DsText>
+                </Table.Td>
+                <Table.Td>
+                  <IconButton
+                    tone="danger"
+                    emphasis="low"
+                    onClick={() => handleDelete(submission)}
+                    aria-label={t('actions.deleteSubmission')}
+                    aria-describedby={`submission-${submission.id}`}
+                  >
+                    <IconTrash size={16} />
+                  </IconButton>
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+      </Table.ScrollContainer>
 
       {submissionsData && submissionsData.totalPages > 1 && (
-        <Group justify="center">
-          <Pagination value={page} onChange={setPage} total={submissionsData.totalPages} />
-        </Group>
+        <DsLayoutInline justify="center">
+          <Pagination
+            value={page}
+            onChange={setPage}
+            total={submissionsData.totalPages}
+            labels={{
+              previousPage: tPagination('previousPage'),
+              nextPage: tPagination('nextPage'),
+              page: (page) => tPagination('page', { page }),
+            }}
+          />
+        </DsLayoutInline>
       )}
 
       {/* Delete Modal */}
-      <Modal opened={deleteModalOpened} onClose={closeDeleteModal} title={t('deleteModal.title')}>
-        <Stack>
-          <Text>{t('deleteModal.body')}</Text>
-          <Group justify="flex-end">
-            <Button emphasis="low" onClick={closeDeleteModal}>
-              {tCommonActions('cancel')}
-            </Button>
-            <Button
-              tone="danger"
-              onClick={() => deleteTarget && deleteSubmission.mutate({ id: deleteTarget.id })}
-              loading={deleteSubmission.isPending}
-            >
-              {tCommonActions('delete')}
-            </Button>
-          </Group>
-        </Stack>
-      </Modal>
-    </Stack>
+      <ConfirmationDialog
+        intent="delete"
+        opened={deleteModalOpened}
+        onClose={closeDeleteModal}
+        onConfirm={() => deleteTarget && deleteSubmission.mutate({ id: deleteTarget.id })}
+        title={t('deleteModal.title')}
+        confirmLabel={tCommonActions('delete')}
+        cancelLabel={tCommonActions('cancel')}
+        closeLabel={tModalActions('close')}
+        loading={deleteSubmission.isPending}
+        message={
+          <>
+            <DsText>{t('deleteModal.body')}</DsText>
+          </>
+        }
+      />
+    </DsLayoutStack>
   );
 }

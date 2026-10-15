@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { ProgramEventSeriesPublicView } from './ProgramEventSeriesPublicView';
@@ -12,7 +13,7 @@ let root: Root;
 
 function render(view: ReactNode) {
   act(() => {
-    root.render(<MantineProvider env="test">{view}</MantineProvider>);
+    root.render(<DesignSystemProvider forceColorScheme="light">{view}</DesignSystemProvider>);
   });
 }
 

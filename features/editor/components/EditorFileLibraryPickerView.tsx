@@ -1,22 +1,46 @@
 'use client';
+import { Text as DsText } from '@/components/core/Typography';
+import type { FileBrowserViewOptions } from '@/features/file-manager/ui/file-browser-view-settings';
+
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
 
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
-import { IconDownload, IconEye, IconFolder, IconFolderOpen, IconSearch } from '@tabler/icons-react';
-import { Box, Center, Group, Loader, Stack, Text } from '@mantine/core';
+import { IconDownload, IconEye, IconFolderOpen } from '@tabler/icons-react';
+import {
+  SelectionEmptyState,
+  SelectionToolbar,
+  SelectionPath,
+  SelectionStatus,
+  SelectionViewport,
+  SelectionMarquee,
+  type SelectionGridColumns,
+} from '@/components/core/SelectionSurface';
+import { NearEndLoader, Spinner as Loader, type NearEndLoaderLabels } from '@/components/core/Display';
 import { Button } from '@/components/core/Button';
-import { DataTableView, type DataTableViewColumn } from '@/components/core/DataTable';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
-import { SegmentedControl, TextInput } from '@/components/core/Input';
-import { ContentModal } from '@/components/core/Modal';
+import { SearchInput } from '@/components/core/Input';
 import { TextButton } from '@/components/core/TextButton';
+import { ContentModal } from '@/components/core/Modal';
 import { FileBrowserGridView, type FileBrowserGridItemView } from '@/features/file-manager/ui/FileBrowserGridView';
+import { FileBrowserListView } from '@/features/file-manager/ui/FileBrowserListView';
 import { FileBrowserSortFilterControls } from '@/features/file-manager/ui/FileBrowserSortFilterControls';
 import { FileBrowserViewToggle } from '@/features/file-manager/ui/FileBrowserViewToggle';
+import { fileBrowserContentInset } from '@/features/file-manager/ui/file-browser-layout';
 import { FilePreview } from '@/features/media/FilePreview';
+import { useFileManagerSelection } from '@/features/file-manager/useFileManagerSelection';
+import {
+  fileBrowserTypeLabel,
+  fileBrowserListPresentation,
+  fileBrowserSizeLabel as formatFileSize,
+} from '@/features/file-manager/file-browser-presentation';
 import type { FileManagerFileRow, FileManagerRow } from '@/lib/actions/file';
-import { formatFileSize } from '@/lib/utils/upload';
 import { editorLibraryFileDisplayName } from '../lib/editor-library-file-selection';
 import classes from './EditorFileLibraryPickerView.module.css';
+import { EmptyState } from '@/components/core/EmptyState';
 
 export interface FileLibraryPathItem {
   id?: string;
@@ -51,13 +75,16 @@ export interface EditorFileLibraryPickerViewLabels {
   back: string;
   add: string;
   loadMore: string;
+  pagination: NearEndLoaderLabels;
   selectAllRows: string;
   open: string;
   preview: string;
   download: string;
   gridView: string;
   listView: string;
+  viewMode: string;
   closePreview: string;
+  selectionUnavailableDescription: string;
   itemCount: (count: number) => string;
   searchResultCount: (count: number) => string;
   selectedCount: (count: number) => string;
@@ -74,11 +101,15 @@ export interface EditorFileLibraryPickerViewProps {
   searching: boolean;
   total: number;
   viewMode?: 'grid' | 'list';
+  viewOptions?: FileBrowserViewOptions;
+  gridColumns?: SelectionGridColumns;
   selectedFiles?: readonly FileManagerFileRow[];
   allowMultiple?: boolean;
   loading?: boolean;
   loadingMore?: boolean;
   hasMore?: boolean;
+  nextPageKey?: string;
+  loadMoreError?: string | null;
   error?: string | null;
   folderNotFound?: boolean;
   isRowDisabled: (row: FileManagerRow) => boolean;
@@ -91,7 +122,7 @@ export interface EditorFileLibraryPickerViewProps {
   onSelectedFilesChange: (files: FileManagerFileRow[]) => void;
   onConfirmFiles: (files: FileManagerFileRow[]) => void;
   onReturnToParent: () => void;
-  onLoadMore: () => void;
+  onLoadMore: () => Promise<void>;
   onViewModeChange: (mode: 'grid' | 'list') => void;
 }
 
@@ -121,29 +152,29 @@ function FilePreviewDetails({
   rootLabel: string;
 }) {
   const details = [
-    [labels.type, row.mimeType],
+    [labels.type, fileBrowserTypeLabel(row, labels.folderType)],
     [labels.size, formatFileSize(row.fileSize)],
     [labels.location, rowLocation(row, rootLabel)],
   ];
 
   return (
-    <Stack gap="md">
-      <Box className={classes.preview}>
+    <DsLayoutStack gap="md">
+      <div className={classes.preview}>
         <FilePreview file={row} />
-      </Box>
-      <Stack component="dl" gap="xs" m={0}>
+      </div>
+      <DsLayoutStack as="dl" gap="xs">
         {details.map(([label, value]) => (
-          <Group component="div" key={label} justify="space-between" align="flex-start" gap="md" wrap="nowrap">
-            <Text component="dt" size="xs" c="dimmed">
+          <DsLayoutInline as="div" key={label} justify="between" align="start" gap="md" wrap="nowrap">
+            <DsText as="dt" size="xs" tone="secondary">
               {label}
-            </Text>
-            <Text component="dd" size="xs" m={0} className={classes.detailValue} lineClamp={2}>
+            </DsText>
+            <DsText as="dd" size="xs" align="end" lines={2}>
               {value}
-            </Text>
-          </Group>
+            </DsText>
+          </DsLayoutInline>
         ))}
-      </Stack>
-    </Stack>
+      </DsLayoutStack>
+    </DsLayoutStack>
   );
 }
 
@@ -156,98 +187,97 @@ export function EditorFileLibraryPickerView(props: EditorFileLibraryPickerViewPr
   const { labels } = props;
   const selectedFiles = props.selectedFiles ?? [];
   const viewMode = props.viewMode ?? 'grid';
-  const selectedFileIds = useMemo(() => new Set(selectedFiles.map((file) => file.id)), [selectedFiles]);
+  // Folders participate in browser selection, but never become file form values.
+  const [selectedFolderIds, setSelectedFolderIds] = useState<string[]>([]);
+  const selectionScope = JSON.stringify([props.path, props.query, props.searchScope]);
+  useEffect(() => setSelectedFolderIds([]), [selectionScope]);
+  const selectedItemIds = [
+    ...selectedFiles.map((file) => file.id),
+    ...selectedFolderIds.filter((id) => props.rows.some((row) => row.kind === 'folder' && row.id === id)),
+  ];
+  const selectedItemIdSet = new Set(selectedItemIds);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [previewFile, setPreviewFile] = useState<FileManagerFileRow | null>(null);
-  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const itemById = useMemo(() => new Map(props.rows.map((row) => [row.id, row])), [props.rows]);
-  const currentFolderLabel = props.path.at(-1)?.name ?? labels.currentFolder;
-
-  useEffect(() => {
-    const target = loadMoreRef.current;
-    if (!target || !props.hasMore || props.loadingMore || props.error || typeof IntersectionObserver === 'undefined') {
-      return;
+  const selection = useFileManagerSelection({
+    items: props.rows,
+    selectedItemIds,
+    getItemKey: (row) => (viewMode === 'list' ? `${row.kind}:${row.id}` : row.id),
+    isItemSelectable: (row) => !props.isRowDisabled(row),
+    onSelectedItemIdsChange: (ids) => {
+      const filesById = new Map([...selectedFiles, ...props.rows].map((row) => [row.id, row]));
+      setSelectedFolderIds(ids.filter((id) => filesById.get(id)?.kind === 'folder'));
+      props.onSelectedFilesChange(
+        ids.flatMap((id) => {
+          const row = filesById.get(id);
+          return row?.kind === 'file' && !props.isRowDisabled(row) ? [row] : [];
+        }),
+      );
+    },
+    onOpenFolder: props.onActivateRow,
+    onOpenFile: (row) => setPreviewFile(row),
+  });
+  const handleSelectionClick = (event: MouseEvent<HTMLElement>, row: FileManagerRow, index: number) => {
+    if (event.shiftKey) {
+      selection.selectItem(event, row, index);
+    } else {
+      selection.anchorItem(row);
     }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          props.onLoadMore();
+  };
+  const selectionSurfaceProps = {
+    onClick: selection.clearSurfaceSelection,
+    ...(props.allowMultiple
+      ? {
+          onPointerDown: selection.startMarquee,
+          onPointerMove: selection.updateMarquee,
+          onPointerUp: selection.finishMarquee,
+          onPointerCancel: selection.finishMarquee,
         }
-      },
-      { rootMargin: '240px 0px' },
-    );
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, [props.error, props.hasMore, props.loadingMore, props.onLoadMore]);
-
-  const columns = useMemo<DataTableViewColumn<FileManagerRow>[]>(
-    () => [
-      {
-        key: 'name',
-        header: labels.name,
-        minWidth: 220,
-        renderCell: (row) => (
-          <Group gap="xs" align="flex-start" wrap="nowrap">
-            {row.kind === 'folder' ? <IconFolder size={18} aria-hidden /> : null}
-            <Stack gap={0} miw={0}>
-              <Text size="sm" truncate>
-                {rowDisplayName(row)}
-              </Text>
-              {props.searching ? (
-                <Text size="xs" c="dimmed" truncate>
-                  {rowLocation(row, props.path[0]?.name ?? '')}
-                </Text>
-              ) : null}
-            </Stack>
-          </Group>
-        ),
-      },
-      {
-        key: 'type',
-        header: labels.type,
-        width: 130,
-        renderCell: (row) => (
-          <Text size="sm" c="dimmed" truncate>
-            {row.kind === 'folder' ? labels.folderType : row.mimeType}
-          </Text>
-        ),
-      },
-      {
-        key: 'size',
-        header: labels.size,
-        width: 80,
-        renderCell: (row) => (
-          <Text size="sm" c="dimmed">
-            {row.kind === 'folder' ? '—' : formatFileSize(row.fileSize)}
-          </Text>
-        ),
-      },
-    ],
-    [labels, props.path, props.searching],
-  );
+      : {}),
+  };
+  const currentFolderLabel = props.path.at(-1)?.name ?? labels.currentFolder;
 
   const gridItems = useMemo<FileBrowserGridItemView[]>(
     () =>
-      props.rows.map((row) => ({
-        id: row.id,
-        kind: row.kind,
-        name: rowDisplayName(row),
-        mimeType: row.kind === 'file' ? row.mimeType : undefined,
-        thumbnailUrl: row.kind === 'file' ? row.thumbnailUrl : undefined,
-        inlineUrl: row.kind === 'file' ? row.inlineUrl : undefined,
-        disabled: props.isRowDisabled(row),
-      })),
+      props.rows.map<FileBrowserGridItemView>((row) => {
+        const item = {
+          id: row.id,
+          kind: row.kind,
+          name: rowDisplayName(row),
+          mimeType: row.kind === 'file' ? row.mimeType : undefined,
+          thumbnailUrl: row.kind === 'file' ? row.thumbnailUrl : undefined,
+          inlineUrl: row.kind === 'file' ? row.inlineUrl : undefined,
+        };
+        return props.isRowDisabled(row)
+          ? {
+              ...item,
+              selectionUnavailable: true,
+              selectionUnavailableDescription: labels.selectionUnavailableDescription,
+            }
+          : item;
+      }),
     [props],
   );
 
-  const selectGridItem = (event: MouseEvent<HTMLElement>, item: FileBrowserGridItemView) => {
+  const selectGridItem = (event: MouseEvent<HTMLElement>, item: FileBrowserGridItemView, index: number) => {
     event.stopPropagation();
     const row = itemById.get(item.id);
     if (!row) {
       return;
     }
     if (row.kind === 'file' && !props.isRowDisabled(row)) {
-      props.onActivateRow(row);
+      if (props.allowMultiple) {
+        selection.selectItem(event, row, index);
+      } else {
+        props.onConfirmFiles([row]);
+      }
+    } else if (row.kind === 'folder') {
+      selection.selectItem(
+        props.allowMultiple ? event : { metaKey: false, ctrlKey: false, shiftKey: false },
+        row,
+        index,
+      );
     }
   };
 
@@ -260,8 +290,8 @@ export function EditorFileLibraryPickerView(props: EditorFileLibraryPickerViewPr
       props.onActivateRow(row);
     } else if (props.isRowDisabled(row)) {
       setPreviewFile(row);
-    } else {
-      props.onConfirmFiles([row]);
+    } else if (props.allowMultiple) {
+      setPreviewFile(row);
     }
   };
 
@@ -271,13 +301,21 @@ export function EditorFileLibraryPickerView(props: EditorFileLibraryPickerViewPr
     setContextMenu({ ...contextCoordinates(event), row });
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLElement>, row: FileManagerRow) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLElement>, row: FileManagerRow, index: number) => {
+    if (
+      event.target !== event.currentTarget &&
+      (event.target as HTMLElement).closest('button, input, select, textarea, a, [role=button]')
+    ) {
+      return;
+    }
     if (event.key === 'Enter') {
       event.preventDefault();
       if (row.kind === 'folder') {
         props.onActivateRow(row);
       } else if (props.isRowDisabled(row)) {
         setPreviewFile(row);
+      } else if (props.allowMultiple) {
+        selection.selectItem(event, row, index);
       } else {
         props.onConfirmFiles([row]);
       }
@@ -285,8 +323,18 @@ export function EditorFileLibraryPickerView(props: EditorFileLibraryPickerViewPr
     }
     if (event.key === ' ') {
       event.preventDefault();
-      if (row.kind === 'file' && !props.isRowDisabled(row)) {
-        props.onActivateRow(row);
+      if (row.kind === 'folder') {
+        selection.selectItem(
+          props.allowMultiple ? event : { metaKey: false, ctrlKey: false, shiftKey: false },
+          row,
+          index,
+        );
+      } else if (!props.isRowDisabled(row)) {
+        if (props.allowMultiple) {
+          selection.selectItem({ ctrlKey: true, metaKey: false, shiftKey: event.shiftKey }, row, index);
+        } else {
+          props.onConfirmFiles([row]);
+        }
       }
       return;
     }
@@ -298,217 +346,254 @@ export function EditorFileLibraryPickerView(props: EditorFileLibraryPickerViewPr
   };
 
   return (
-    <Box className={classes.root} data-editor-file-library-picker data-view={viewMode}>
-      <Box className={classes.workspace}>
-        <Box className={classes.toolbar}>
-          <Group gap={4} wrap="nowrap" className={classes.path}>
-            {props.path.map((item, index) => (
-              <Group key={`${item.id ?? 'root'}-${index}`} gap={4} wrap="nowrap" miw={0}>
-                {index > 0 ? (
-                  <Text size="sm" c="dimmed" aria-hidden>
-                    /
-                  </Text>
-                ) : null}
-                {index < props.path.length - 1 ? (
-                  <TextButton appearance="default" onClick={() => props.onOpenPath(index)}>
-                    {item.name}
-                  </TextButton>
-                ) : (
-                  <Text size="sm" fw={600} truncate>
-                    {item.name}
-                  </Text>
-                )}
-              </Group>
-            ))}
-          </Group>
-          <Box className={classes.viewToggle}>
-            <FileBrowserViewToggle
-              value={viewMode}
-              gridLabel={labels.gridView}
-              listLabel={labels.listView}
-              onChange={props.onViewModeChange}
-            />
-          </Box>
-          <FileBrowserSortFilterControls
-            className={classes.sortFilter}
-            labels={labels}
-            mimeTypePrefix={props.mimeTypePrefix}
-            sort={props.sort}
-            onMimeTypePrefixChange={props.onMimeTypePrefixChange}
-            onSortChange={props.onSortChange}
+    <div className={classes.root} data-editor-file-library-picker data-view={viewMode}>
+      <div className={classes.workspace}>
+        <DsLayoutInset inline={fileBrowserContentInset} block="xxs">
+          <SelectionToolbar
+            divider="none"
+            arrangement="actions-inline"
+            location={<SelectionPath items={props.path} parentLabel={labels.back} onOpen={props.onOpenPath} />}
+            actions={
+              <FileBrowserViewToggle
+                value={viewMode}
+                viewOptions={props.viewOptions}
+                label={labels.viewMode}
+                gridLabel={labels.gridView}
+                listLabel={labels.listView}
+                onChange={props.onViewModeChange}
+              />
+            }
+            filters={
+              <FileBrowserSortFilterControls
+                labels={labels}
+                mimeTypePrefix={props.mimeTypePrefix}
+                sort={props.sort}
+                onMimeTypePrefixChange={props.onMimeTypePrefixChange}
+                onSortChange={props.onSortChange}
+              />
+            }
+            search={
+              <SearchInput
+                value={props.query}
+                onChange={(event) => props.onQueryChange(event.currentTarget.value)}
+                placeholder={labels.search}
+                aria-label={labels.search}
+              />
+            }
           />
-          <TextInput
-            className={classes.search}
-            value={props.query}
-            onChange={(event) => props.onQueryChange(event.currentTarget.value)}
-            placeholder={labels.search}
-            aria-label={labels.search}
-            leftSection={<IconSearch size={16} aria-hidden />}
-          />
-        </Box>
+        </DsLayoutInset>
 
         {props.query.trim() ? (
-          <Group className={classes.scopeBar} gap="xs" wrap="nowrap">
-            <Text size="xs" c="dimmed" fw={600}>
-              {labels.searchScope}:
-            </Text>
-            <SegmentedControl
-              className={classes.scopeControl}
-              size="xs"
-              value={props.searchScope}
-              aria-label={labels.searchScope}
-              data={[
-                { value: 'all', label: labels.allFiles },
-                { value: 'folder', label: `‘${currentFolderLabel}’` },
-              ]}
-              onChange={(value) => props.onSearchScopeChange(value as 'folder' | 'all')}
-            />
-          </Group>
+          <DsLayoutInset inline={fileBrowserContentInset} block="none">
+            <DsLayoutInline gap="xs" role="group" aria-label={labels.searchScope} data-file-search-context>
+              <TextButton
+                size="xs"
+                selected={props.searchScope === 'all'}
+                aria-pressed={props.searchScope === 'all'}
+                aria-label={`${labels.searchScope} · ${labels.allFiles}`}
+                data-file-search-scope="all"
+                onClick={() => props.onSearchScopeChange('all')}
+              >
+                {labels.allFiles}
+              </TextButton>
+              <TextButton
+                size="xs"
+                selected={props.searchScope === 'folder'}
+                aria-pressed={props.searchScope === 'folder'}
+                aria-label={`${labels.searchScope} · ${labels.currentFolder} · ${currentFolderLabel}`}
+                data-file-search-scope="folder"
+                onClick={() => props.onSearchScopeChange('folder')}
+              >
+                {currentFolderLabel}
+              </TextButton>
+            </DsLayoutInline>
+          </DsLayoutInset>
         ) : null}
 
-        <Box className={classes.results}>
+        <div ref={resultsRef} className={classes.results} aria-busy={props.loading || props.loadingMore || false}>
           {props.error ? (
-            <Text size="sm" c="red" p="md">
-              {props.error}
-            </Text>
+            <DsLayoutInset space="md">
+              <DsText size="sm" tone="danger" role="alert">
+                {props.error}
+              </DsText>
+            </DsLayoutInset>
           ) : null}
           {props.folderNotFound ? (
-            <Center className={classes.centerState}>
-              <Stack gap="xs" align="center">
-                <Text size="sm" c="dimmed">
-                  {labels.folderNotFound}
-                </Text>
-                <Button size="xs" tone="neutral" emphasis="medium" onClick={props.onReturnToParent}>
-                  {labels.back}
-                </Button>
-              </Stack>
-            </Center>
-          ) : props.loading ? (
-            <Center className={classes.centerState}>
-              <Loader size="sm" aria-label={labels.loading} />
-            </Center>
-          ) : props.rows.length === 0 ? (
-            <Center className={classes.centerState}>
-              <Text size="sm" c="dimmed">
-                {labels.empty}
-              </Text>
-            </Center>
-          ) : viewMode === 'grid' ? (
-            <Box className={classes.gridSurface}>
-              <FileBrowserGridView
-                items={gridItems}
-                selectedItemIds={selectedFiles.map((file) => file.id)}
-                density="workspace"
-                multiSelect={props.allowMultiple}
-                onItemClick={selectGridItem}
-                onItemDoubleClick={(_event, item) => activateGridItem(item)}
-                onItemContextMenu={(event, item) => {
-                  const row = itemById.get(item.id);
-                  if (row) {
-                    openContextMenu(event, row);
-                  }
-                }}
-                onItemKeyDown={(event, item) => {
-                  const row = itemById.get(item.id);
-                  if (row) {
-                    handleKeyDown(event, row);
-                  }
-                }}
-              />
-              {props.hasMore ? <Box ref={loadMoreRef} className={classes.loadMoreSentinel} aria-hidden /> : null}
-            </Box>
-          ) : (
-            <Box className={classes.listSurface}>
-              <DataTableView
-                columns={columns}
-                rows={props.rows}
-                getRowKey={(row) => `${row.kind}:${row.id}`}
-                emptyMessage={labels.empty}
-                desktopMinWidth={500}
-                highlightOnHover
-                selection={
-                  props.allowMultiple
-                    ? {
-                        selectedRowKeys: selectedFiles.map((file) => `file:${file.id}`),
-                        onSelectedRowKeysChange: (rowKeys) => {
-                          const selectedByKey = new Map(
-                            [
-                              ...selectedFiles,
-                              ...props.rows.filter((row): row is FileManagerFileRow => row.kind === 'file'),
-                            ].map((file) => [`file:${file.id}`, file]),
-                          );
-                          props.onSelectedFilesChange(
-                            rowKeys.flatMap((rowKey) => {
-                              const file = selectedByKey.get(rowKey);
-                              return file && !props.isRowDisabled(file) ? [file] : [];
-                            }),
-                          );
-                        },
-                        selectAllRowsLabel: labels.selectAllRows,
-                        getRowLabel: (row) => rowDisplayName(row),
-                        isRowSelectable: (row) => row.kind === 'file' && !props.isRowDisabled(row),
-                      }
-                    : undefined
+            <SelectionEmptyState>
+              <EmptyState
+                inset="none"
+                title={labels.folderNotFound}
+                action={
+                  props.path.length > 1 ? (
+                    <Button size="xs" tone="neutral" emphasis="medium" onClick={props.onReturnToParent}>
+                      {labels.back}
+                    </Button>
+                  ) : undefined
                 }
-                rowInteraction={{
-                  isSelected: (row) => row.kind === 'file' && selectedFileIds.has(row.id),
-                  isDimmed: props.isRowDisabled,
-                  preventTextSelection: true,
-                  onClick: (_event, row) => {
-                    if (row.kind === 'file' && !props.isRowDisabled(row)) {
-                      props.onActivateRow(row);
-                    }
-                  },
-                  onDoubleClick: (_event, row) => {
-                    if (row.kind === 'file') {
-                      if (props.isRowDisabled(row)) {
-                        setPreviewFile(row);
-                      } else {
-                        props.onConfirmFiles([row]);
-                      }
-                    } else {
-                      props.onActivateRow(row);
-                    }
-                  },
-                  onContextMenu: (event, row) => openContextMenu(event, row),
-                  onKeyDown: (event, row) => handleKeyDown(event, row),
-                }}
               />
-              {props.hasMore ? <Box ref={loadMoreRef} className={classes.loadMoreSentinel} aria-hidden /> : null}
-            </Box>
+            </SelectionEmptyState>
+          ) : props.loading ? (
+            <SelectionEmptyState>
+              <Loader size="sm" aria-label={labels.loading} />
+            </SelectionEmptyState>
+          ) : props.rows.length === 0 ? (
+            <SelectionEmptyState>
+              <EmptyState inset="none" title={labels.empty} />
+            </SelectionEmptyState>
+          ) : viewMode === 'grid' ? (
+            <div className={classes.gridSurface}>
+              <SelectionViewport inset="none" ref={selection.surfaceRef} {...selectionSurfaceProps}>
+                <DsLayoutInset inline={fileBrowserContentInset} block="xs">
+                  <FileBrowserGridView
+                    label={labels.selectFile}
+                    items={gridItems}
+                    selectedItemIds={selectedItemIds}
+                    density="workspace"
+                    columns={props.gridColumns ?? props.viewOptions?.value.columns}
+                    iconSize={props.viewOptions?.value.iconSize}
+                    spacing={props.viewOptions?.value.spacing}
+                    multiSelect={props.allowMultiple ?? false}
+                    onItemClick={selectGridItem}
+                    onItemDoubleClick={(_event, item) => activateGridItem(item)}
+                    onItemContextMenu={(event, item) => {
+                      const row = itemById.get(item.id);
+                      if (row) {
+                        openContextMenu(event, row);
+                      }
+                    }}
+                    onItemKeyDown={(event, item, index) => {
+                      const row = itemById.get(item.id);
+                      if (row) {
+                        handleKeyDown(event, row, index);
+                      }
+                    }}
+                  />
+                </DsLayoutInset>
+                {selection.marqueeRect ? <SelectionMarquee rect={selection.marqueeRect} /> : null}
+              </SelectionViewport>
+            </div>
+          ) : (
+            <div className={classes.listSurface}>
+              <SelectionViewport inset="none" ref={selection.surfaceRef} {...selectionSurfaceProps}>
+                <DsLayoutInset inline={fileBrowserContentInset} block="none">
+                  <FileBrowserListView
+                    accessibleLabel={labels.selectFile}
+                    labels={labels}
+                    getPresentation={(row) =>
+                      fileBrowserListPresentation(
+                        row,
+                        rowDisplayName(row),
+                        labels.folderType,
+                        props.searching ? rowLocation(row, props.path[0]?.name ?? '') : undefined,
+                      )
+                    }
+                    showLocation={props.searching}
+                    rowDividers="between"
+                    rows={props.rows}
+                    getRowKey={(row) => `${row.kind}:${row.id}`}
+                    emptyMessage={labels.empty}
+                    highlightOnHover
+                    selection={
+                      props.allowMultiple
+                        ? {
+                            selectedRowKeys: selectedFiles.map((file) => `file:${file.id}`),
+                            onSelectedRowKeysChange: (rowKeys) => {
+                              selection.changeTableSelection(
+                                rowKeys.map((key) => key.replace(/^file:/, '')),
+                                false,
+                              );
+                            },
+                            onRowSelectionClick: handleSelectionClick,
+                            selectAllRowsLabel: labels.selectAllRows,
+                            getRowLabel: (row) => rowDisplayName(row),
+                            isRowSelectable: (row) => row.kind === 'file' && !props.isRowDisabled(row),
+                          }
+                        : undefined
+                    }
+                    rowInteraction={{
+                      isSelected: (row) => selectedItemIdSet.has(row.id),
+                      isDimmed: props.isRowDisabled,
+                      getDescription: (row) =>
+                        props.isRowDisabled(row) ? labels.selectionUnavailableDescription : undefined,
+                      preventTextSelection: true,
+                      onClick: (event, row, index) => {
+                        if (row.kind === 'folder') {
+                          selection.selectItem(
+                            props.allowMultiple ? event : { metaKey: false, ctrlKey: false, shiftKey: false },
+                            row,
+                            index,
+                          );
+                        } else if (props.allowMultiple) {
+                          selection.selectItem(event, row, index);
+                        } else if (!props.isRowDisabled(row)) {
+                          props.onConfirmFiles([row]);
+                        }
+                      },
+                      onDoubleClick: (_event, row) => {
+                        if (row.kind === 'file') {
+                          if (props.isRowDisabled(row)) {
+                            setPreviewFile(row);
+                          } else if (props.allowMultiple) {
+                            setPreviewFile(row);
+                          }
+                        } else {
+                          props.onActivateRow(row);
+                        }
+                      },
+                      onContextMenu: (event, row) => openContextMenu(event, row),
+                      onKeyDown: (event, row, index) => handleKeyDown(event, row, index),
+                    }}
+                  />
+                </DsLayoutInset>
+                {selection.marqueeRect ? <SelectionMarquee rect={selection.marqueeRect} /> : null}
+              </SelectionViewport>
+            </div>
           )}
 
-          {props.hasMore ? (
-            <Button
-              className={classes.loadMoreFallback}
-              size="xs"
-              tone="neutral"
-              emphasis="low"
-              loading={props.loadingMore}
-              onClick={props.onLoadMore}
-            >
-              {labels.loadMore}
-            </Button>
+          {props.searching && !props.loading ? (
+            <DsLayoutInset inline={fileBrowserContentInset} block="none">
+              <NearEndLoader
+                pageKey={props.hasMore ? (props.nextPageKey ?? null) : null}
+                resetKey={JSON.stringify([
+                  props.query.trim(),
+                  props.searchScope,
+                  props.path,
+                  props.mimeTypePrefix,
+                  props.sort,
+                ])}
+                rootRef={resultsRef}
+                loading={props.loadingMore}
+                error={props.loadMoreError}
+                labels={labels.pagination}
+                onLoad={props.onLoadMore}
+              />
+            </DsLayoutInset>
           ) : null}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      <Group className={classes.footer} justify="space-between" wrap="nowrap">
-        <Text size="xs" c="dimmed" truncate>
-          {selectedFiles.length > 0
-            ? labels.selectedCount(selectedFiles.length)
-            : props.searching
-              ? labels.searchResultCount(props.total)
-              : labels.itemCount(props.rows.length)}
-        </Text>
-        <Button
-          size="sm"
-          disabled={selectedFiles.length === 0}
-          onClick={() => props.onConfirmFiles([...selectedFiles])}
-        >
-          {labels.add}
-        </Button>
-      </Group>
+      <SelectionStatus
+        density="standard"
+        divider="content"
+        trailing={
+          props.allowMultiple ? (
+            <Button
+              emphasis="strong"
+              size="sm"
+              disabled={selectedFiles.length === 0}
+              onClick={() => props.onConfirmFiles([...selectedFiles])}
+            >
+              {labels.add}
+            </Button>
+          ) : undefined
+        }
+      >
+        {selectedItemIds.length > 0
+          ? labels.selectedCount(selectedItemIds.length)
+          : props.searching
+            ? labels.searchResultCount(props.total)
+            : labels.itemCount(props.rows.length)}
+      </SelectionStatus>
 
       {contextMenu ? (
         <DropdownMenu
@@ -521,7 +606,7 @@ export function EditorFileLibraryPickerView(props: EditorFileLibraryPickerViewPr
           placement="bottom-start"
         >
           <DropdownMenu.Target>
-            <Box className={classes.contextTarget} style={{ left: contextMenu.x, top: contextMenu.y }} aria-hidden />
+            <div className={classes.contextTarget} style={{ left: contextMenu.x, top: contextMenu.y }} aria-hidden />
           </DropdownMenu.Target>
           <DropdownMenu.Dropdown>
             {contextMenu.row.kind === 'folder' ? (
@@ -547,7 +632,6 @@ export function EditorFileLibraryPickerView(props: EditorFileLibraryPickerViewPr
                 </DropdownMenu.Item>
                 {contextMenu.row.downloadUrl ? (
                   <DropdownMenu.Item
-                    component="a"
                     href={contextMenu.row.downloadUrl}
                     icon={<IconDownload size={16} />}
                     onClick={() => setContextMenu(null)}
@@ -583,6 +667,6 @@ export function EditorFileLibraryPickerView(props: EditorFileLibraryPickerViewPr
           <FilePreviewDetails row={previewFile} labels={labels} rootLabel={props.path[0]?.name ?? ''} />
         ) : null}
       </ContentModal>
-    </Box>
+    </div>
   );
 }

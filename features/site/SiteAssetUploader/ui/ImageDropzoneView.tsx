@@ -1,6 +1,8 @@
 'use client';
 
-import { Box, Text } from '@mantine/core';
+import { Text as DsText } from '@/components/core/Typography';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+
 import { ImageUploadField, type ImageUploadAccept, type ImageUploadRejection } from '@/components/core/ImageUpload';
 
 interface ImageDropzoneViewProps {
@@ -42,13 +44,16 @@ export function ImageDropzoneView({
   const previewMaxWidth = isAutoWidth ? 400 : previewWidth;
 
   return (
-    <Box>
-      <Text size="sm" fw={500} mb={4}>
-        {label}
-      </Text>
-      <Text size="xs" c="dimmed" mb="xs">
-        {description}
-      </Text>
+    // Same stacked field rhythm as Core Field: label and description form one block above the control.
+    <DsLayoutStack gap="xxs">
+      <DsLayoutStack gap="none">
+        <DsText size="sm" weight="medium">
+          {label}
+        </DsText>
+        <DsText size="xs" tone="secondary">
+          {description}
+        </DsText>
+      </DsLayoutStack>
 
       <ImageUploadField
         imageUrl={currentUrl}
@@ -70,18 +75,17 @@ export function ImageDropzoneView({
           maxWidth: previewMaxWidth,
           maxHeight: previewHeight,
           fit: 'contain',
-          radius: 'var(--mantine-radius-sm)',
         }}
         placeholder={{
           width: '100%',
           height: 'auto',
           minHeight: Math.max(previewHeight, 96),
-          iconSize: 24,
+          iconSize: 'md',
         }}
         onFileSelect={onFileSelect}
         onValidationReject={onReject}
         onRemove={currentUrl && !disabled ? onDelete : undefined}
       />
-    </Box>
+    </DsLayoutStack>
   );
 }

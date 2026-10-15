@@ -1,14 +1,22 @@
 'use client';
 
-import { Box, Group, Loader, Stack, Text } from '@mantine/core';
-import { statusToneFromColor, StatusBadge } from '@/components/core/Badge';
+import { useId } from 'react';
+import { SectionCard as EditorDsSectionCard } from '@/components/core/Section';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+
+import { Spinner as Loader } from '@/components/core/Display';
+import { StatusBadge, type StatusTone } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
 import { Progress } from '@/components/core/Progress';
 
 interface MediaProcessingSurfaceProps {
   id?: string;
   label: string;
-  color: string;
+  /** Identifies the file whose processing state and recovery actions belong to this group. */
+  accessibleLabel?: string;
+  /** Settled lifecycle tone; pending processing always renders the accent tone. */
+  tone: StatusTone;
   progress: number;
   pending: boolean;
   minHeight?: number;
@@ -26,7 +34,8 @@ interface MediaProcessingSurfaceProps {
 export function MediaProcessingSurface({
   id,
   label,
-  color,
+  accessibleLabel,
+  tone,
   progress,
   pending,
   minHeight = 88,
@@ -40,77 +49,85 @@ export function MediaProcessingSurface({
   cancelActionLoading = false,
   onCancelAction,
 }: MediaProcessingSurfaceProps) {
+  const statusId = useId();
+  const descriptionId = useId();
   const hasResumeAction = Boolean(resumeActionLabel && onResumeAction);
   const hasCancelAction = Boolean(cancelActionLabel && onCancelAction);
 
   return (
-    <Box
+    <div
       id={id}
-      style={{
-        minHeight,
-        width: '100%',
-        borderRadius: 0,
-        border: '1px solid var(--mantine-color-default-border)',
-        background: 'var(--mantine-color-body)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem',
-      }}
+      role="group"
+      aria-label={accessibleLabel}
+      aria-labelledby={accessibleLabel ? undefined : statusId}
+      style={{ minHeight, width: '100%' }}
     >
-      <Stack gap={8} style={{ width: '100%' }}>
-        <StatusBadge
-          size="sm"
-          tone={statusToneFromColor(color)}
-          appearance="soft"
-          leftSection={pending ? <Loader size={10} /> : undefined}
-        >
-          {label}
-        </StatusBadge>
-        <Progress
-          value={progress}
-          size="sm"
-          tone={statusToneFromColor(color)}
-          animated={pending}
-          striped={pending}
-          aria-label={label}
-        />
-        {resumeTitle || hasResumeAction || hasCancelAction ? (
-          <Stack gap={6}>
-            {resumeTitle ? (
-              <Text size="xs" fw={600}>
-                {resumeTitle}
-              </Text>
-            ) : null}
-            {resumeDescription ? (
-              <Text size="xs" c="dimmed">
-                {resumeDescription}
-              </Text>
-            ) : null}
-            {hasResumeAction || hasCancelAction ? (
-              <Group gap={6}>
-                {hasResumeAction ? (
-                  <Button id={resumeActionId} size="xs" tone="neutral" emphasis="medium" onClick={onResumeAction}>
-                    {resumeActionLabel}
-                  </Button>
-                ) : null}
-                {hasCancelAction ? (
-                  <Button
-                    id={cancelActionId}
-                    size="xs"
-                    tone="danger"
-                    emphasis="low"
-                    loading={cancelActionLoading}
-                    onClick={onCancelAction}
-                  >
-                    {cancelActionLabel}
-                  </Button>
-                ) : null}
-              </Group>
-            ) : null}
-          </Stack>
-        ) : null}
-      </Stack>
-    </Box>
+      <EditorDsSectionCard padding="md">
+        <DsLayoutStack gap="xs" fill="inline">
+          <StatusBadge
+            id={statusId}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            size="sm"
+            tone={pending ? 'accent' : tone}
+            appearance="soft"
+            leftSection={pending ? <Loader size="xs" /> : undefined}
+          >
+            {label}
+          </StatusBadge>
+          <Progress
+            value={progress}
+            size="sm"
+            tone={pending ? 'accent' : tone}
+            activity={pending ? 'pending' : 'idle'}
+            aria-label={label}
+          />
+          {resumeTitle || hasResumeAction || hasCancelAction ? (
+            <DsLayoutStack gap="xxs">
+              {resumeTitle ? (
+                <DsText size="xs" weight="strong">
+                  {resumeTitle}
+                </DsText>
+              ) : null}
+              {resumeDescription ? (
+                <DsText id={descriptionId} size="xs" tone="secondary">
+                  {resumeDescription}
+                </DsText>
+              ) : null}
+              {hasResumeAction || hasCancelAction ? (
+                <DsLayoutInline gap="xxs">
+                  {hasResumeAction ? (
+                    <Button
+                      aria-describedby={resumeDescription ? descriptionId : undefined}
+                      id={resumeActionId}
+                      size="xs"
+                      tone="neutral"
+                      emphasis="medium"
+                      onClick={onResumeAction}
+                    >
+                      {resumeActionLabel}
+                    </Button>
+                  ) : null}
+                  {hasCancelAction ? (
+                    <Button
+                      id={cancelActionId}
+                      aria-describedby={resumeDescription ? descriptionId : undefined}
+                      size="xs"
+                      tone="danger"
+                      emphasis="low"
+                      loading={cancelActionLoading}
+                      onClick={onCancelAction}
+                    >
+                      {cancelActionLabel}
+                    </Button>
+                  ) : null}
+                </DsLayoutInline>
+              ) : null}
+            </DsLayoutStack>
+          ) : null}
+        </DsLayoutStack>
+      </EditorDsSectionCard>
+    </div>
   );
 }

@@ -1,12 +1,19 @@
 'use client';
 
-import { IconCheck, IconCopy, IconExternalLink } from '@tabler/icons-react';
-import { Group, Loader, SimpleGrid, Stack, Text } from '@mantine/core';
+import { componentBindings } from '@/components/core/bindings';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutGrid as DsLayoutGrid,
+  LayoutInline as DsLayoutInline,
+} from '@/components/core/Layout';
+import { IconCheck, IconExternalLink } from '@tabler/icons-react';
+
+import { CopyButton } from '@/components/core/CopyButton';
+import { Spinner as Loader, StatusIcon } from '@/components/core/Display';
 import { IconButton } from '@/components/core/IconButton';
 import { TextInput, type TextInputProps } from '@/components/core/Input';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
 import { Tooltip } from '@/components/core/Tooltip';
-import styles from './UrlSectionView.module.css';
 
 export interface UrlSectionViewLabels {
   title: string;
@@ -17,6 +24,7 @@ export interface UrlSectionViewLabels {
   publicUrl: string;
   copyId: string;
   copyUrl: string;
+  copied: string;
   openInNewTab: string;
 }
 
@@ -33,8 +41,6 @@ export interface UrlSectionViewProps {
   disabled?: boolean;
   onChange: (value: string) => void;
   onBlur?: () => void;
-  onCopyId: () => void;
-  onCopyUrl: (url: string) => void;
   inputProps?: Partial<TextInputProps>;
 }
 
@@ -51,115 +57,103 @@ export function UrlSectionView({
   disabled,
   onChange,
   onBlur,
-  onCopyId,
-  onCopyUrl,
   inputProps,
 }: UrlSectionViewProps) {
   return (
-    <SectionCard>
-      <Stack gap="md">
+    <SectionCard padding={{ base: 'none', sm: 'md' }}>
+      <DsLayoutStack gap="md">
         <SectionHeader title={labels.title} description={labels.description} />
-        <SimpleGrid cols={{ base: 1, sm: 2 }}>
-          <Stack gap={4}>
-            <Text size="xs" c="dimmed">
-              {labels.id}
-            </Text>
-            <TextInput
-              id={idPrefix ? `${idPrefix}-id` : undefined}
-              value={entityId}
-              readOnly
-              size="sm"
-              classNames={{ input: styles.monospaceInput }}
-              rightSection={
-                <IconButton emphasis="low" size="sm" onClick={onCopyId} aria-label={labels.copyId}>
-                  <IconCopy size={14} />
-                </IconButton>
-              }
-            />
-          </Stack>
-          <Stack gap={4}>
-            <Text size="xs" c="dimmed">
-              {labels.slug}
-            </Text>
-            <TextInput
-              id={idPrefix ? `${idPrefix}-slug` : undefined}
-              placeholder={labels.slugPlaceholder}
-              value={slug}
-              onChange={(event) => onChange(event.currentTarget.value)}
-              onBlur={onBlur}
-              size="sm"
-              disabled={disabled}
-              error={error}
-              rightSection={
-                saving ? (
-                  <Loader size={14} />
-                ) : slug && !error && isAvailable === true ? (
-                  <IconCheck size={16} color="var(--mantine-color-green-6)" />
-                ) : null
-              }
-              {...inputProps}
-            />
-          </Stack>
-        </SimpleGrid>
-        <Stack gap={4}>
-          <Text size="xs" c="dimmed">
-            {labels.publicUrl}
-          </Text>
-          <Stack gap="xs">
-            {publicUrlBySlug ? (
-              <UrlRow
-                url={publicUrlBySlug}
-                copyLabel={labels.copyUrl}
-                openLabel={labels.openInNewTab}
-                onCopy={onCopyUrl}
-              />
-            ) : null}
+        <DsLayoutGrid columns={{ base: 1, sm: 2 }}>
+          <TextInput
+            label={labels.id}
+            textRole="code"
+            id={idPrefix ? `${idPrefix}-id` : undefined}
+            value={entityId}
+            readOnly
+            size="sm"
+            rightSection={<CopyButton size="sm" value={entityId} label={labels.copyId} copiedLabel={labels.copied} />}
+          />
+          <TextInput
+            {...componentBindings(inputProps ?? {})}
+            label={labels.slug}
+            textRole="code"
+            id={idPrefix ? `${idPrefix}-slug` : undefined}
+            placeholder={inputProps?.placeholder ?? labels.slugPlaceholder}
+            value={slug}
+            onChange={(event) => onChange(event.currentTarget.value)}
+            onBlur={onBlur}
+            size="sm"
+            disabled={disabled}
+            error={error}
+            rightSection={
+              saving ? (
+                <Loader size="xs" data-testid="slug-availability-spinner" />
+              ) : slug && !error && isAvailable === true ? (
+                <StatusIcon icon={IconCheck} tone="positive" />
+              ) : null
+            }
+          />
+        </DsLayoutGrid>
+        <DsLayoutStack gap="xxs">
+          {publicUrlBySlug ? (
             <UrlRow
-              url={publicUrlById}
-              muted
+              url={publicUrlBySlug}
+              label={labels.publicUrl}
               copyLabel={labels.copyUrl}
+              copiedLabel={labels.copied}
               openLabel={labels.openInNewTab}
-              onCopy={onCopyUrl}
             />
-          </Stack>
-        </Stack>
-      </Stack>
+          ) : null}
+          <UrlRow
+            url={publicUrlById}
+            label={publicUrlBySlug ? undefined : labels.publicUrl}
+            aria-label={`${labels.publicUrl} (${labels.id})`}
+            copyLabel={labels.copyUrl}
+            copiedLabel={labels.copied}
+            openLabel={labels.openInNewTab}
+          />
+        </DsLayoutStack>
+      </DsLayoutStack>
     </SectionCard>
   );
 }
 
 interface UrlRowProps {
   url: string;
-  muted?: boolean;
+  label?: string;
+  'aria-label'?: string;
   copyLabel: string;
+  copiedLabel: string;
   openLabel: string;
-  onCopy: (url: string) => void;
 }
 
-function UrlRow({ url, muted, copyLabel, openLabel, onCopy }: UrlRowProps) {
+function UrlRow({ url, label, 'aria-label': ariaLabel, copyLabel, copiedLabel, openLabel }: UrlRowProps) {
   return (
-    <Group gap="xs">
-      <Text size="sm" ff="monospace" c={muted ? 'dimmed' : undefined} style={{ flex: 1 }} truncate>
-        {url}
-      </Text>
-      <Tooltip label={copyLabel}>
-        <IconButton emphasis="low" size="sm" onClick={() => onCopy(url)} aria-label={copyLabel}>
-          <IconCopy size={14} />
-        </IconButton>
-      </Tooltip>
-      <Tooltip label={openLabel}>
-        <IconButton
-          emphasis="low"
-          size="sm"
-          component="a"
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={openLabel}
-        >
-          <IconExternalLink size={14} />
-        </IconButton>
-      </Tooltip>
-    </Group>
+    <TextInput
+      label={label}
+      aria-label={ariaLabel}
+      value={url}
+      readOnly
+      size="sm"
+      textRole="code"
+      appearance="bare"
+      rightSection={
+        <DsLayoutInline gap="xxs">
+          <CopyButton size="sm" value={url} label={copyLabel} copiedLabel={copiedLabel} />
+          <Tooltip label={openLabel}>
+            <IconButton
+              emphasis="low"
+              size="sm"
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={openLabel}
+            >
+              <IconExternalLink />
+            </IconButton>
+          </Tooltip>
+        </DsLayoutInline>
+      }
+    />
   );
 }

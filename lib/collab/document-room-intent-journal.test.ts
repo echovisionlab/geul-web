@@ -6,6 +6,8 @@ import type {
 } from './document-room-intent';
 import {
   acknowledgeDocumentRoomIntents,
+  appendDocumentRoomIntents,
+  subscribeDocumentRoomIntentJournal,
   getDocumentRoomIntentBatch,
   getDocumentRoomIntents,
   hasDocumentRoomIntents,
@@ -181,5 +183,40 @@ describe('document room intent journal', () => {
 
     expect(acknowledgeDocumentRoomIntents(PREFIX_TEST_DOCUMENT_NAME, [change(after, before)])).toBe(false);
     expect(getDocumentRoomIntents(PREFIX_TEST_DOCUMENT_NAME, after)).toEqual([change(before, after)]);
+  });
+  it('mirrors every mutation and replays adopted intents in a fresh document', () => {
+    const name = `post-series:${ENTITY_ID}:it`;
+    const before = snapshot({ title: 'Before' }, { documentName: name, locale: 'it' });
+    const after = snapshot({ title: 'After' }, { documentName: name, locale: 'it' });
+    const mirrored: number[] = [];
+    const unsubscribe = subscribeDocumentRoomIntentJournal((documentName, changes) => {
+      if (documentName === name) {
+        mirrored.push(changes.length);
+      }
+    });
+    try {
+      expect(appendDocumentRoomIntents(name, [change(before, after)])).toBe(1);
+      // Adopted intents never belong to the current document, whichever it is.
+      expect(getDocumentRoomIntentBatch(name, before, FIRST_DOCUMENT)).toMatchObject({ requiresReplay: true });
+      expect(appendDocumentRoomIntents(name, [change(before, { ...after, documentName: DOCUMENT_NAME })])).toBe(0);
+      expect(acknowledgeDocumentRoomIntents(name, [change(before, after)])).toBe(true);
+      expect(mirrored).toEqual([1, 0]);
+    } finally {
+      unsubscribe();
+    }
+  });
+  it("replays adopted older intents before this page's newer ones, so local edits win", () => {
+    const name = `post-series:${ENTITY_ID}:pt`;
+    const base = snapshot({ title: 'Base' }, { documentName: name, locale: 'pt' });
+    const latest = snapshot({ title: 'Latest local' }, { documentName: name, locale: 'pt' });
+    const older = snapshot({ title: 'Older orphan' }, { documentName: name, locale: 'pt' });
+    expect(recordDocumentRoomIntent(name, change(base, latest), FIRST_DOCUMENT)).toBe(true);
+    expect(appendDocumentRoomIntents(name, [change(base, older)])).toBe(1);
+    const batch = getDocumentRoomIntentBatch(name, base, FIRST_DOCUMENT);
+    expect(batch.requiresReplay).toBe(true);
+    expect(batch.changes.map(({ after }) => (after as typeof latest).fields.title)).toEqual([
+      'Older orphan',
+      'Latest local',
+    ]);
   });
 });

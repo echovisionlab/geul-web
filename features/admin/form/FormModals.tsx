@@ -1,15 +1,21 @@
 'use client';
+import { ConfirmationDialog } from '@/features/confirmation';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
-import { ConfirmModal } from '@/components/core/Modal';
+
+import { notifications } from '@/components/core/Notification';
+
 import { deleteFormAction } from '@/lib/actions/form';
 import { useFormModal } from './FormModalContext';
 
-export function FormModals() {
+export function FormModals({
+  deleteAction = deleteFormAction,
+  refresh,
+}: { deleteAction?: typeof deleteFormAction; refresh?: () => void } = {}) {
   const router = useRouter();
   const t = useTranslations('formAdmin');
   const tCommon = useTranslations('common');
@@ -23,37 +29,38 @@ export function FormModals() {
     }
     setDeleteLoading(true);
     try {
-      const result = await deleteFormAction(deletingForm.id);
+      const result = await deleteAction(deletingForm.id);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: t('notifications.deleted'), color: 'red' });
+      notifications.show({ message: t('notifications.deleted'), tone: 'positive' });
       closeDelete();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setDeleteLoading(false);
     }
   };
 
   return (
-    <ConfirmModal
+    <ConfirmationDialog
+      intent="delete"
       opened={!!deletingForm}
       onClose={closeDelete}
       onConfirm={handleDelete}
       title={tCommon('actions.delete')}
       message={
-        <Stack gap="xs">
-          <Text>
+        <DsLayoutStack gap="xs">
+          <DsText>
             {tCommon.rich('messages.confirmDeleteNamedRich', {
               name: deletingForm?.title || tCommon('entities.form'),
               strong: (chunks) => <strong>{chunks}</strong>,
             })}
-          </Text>
-          <Text size="sm" c="orange">
+          </DsText>
+          <DsText size="sm" tone="warning">
             {t('deleteModal.warning')}
-          </Text>
-        </Stack>
+          </DsText>
+        </DsLayoutStack>
       }
       confirmLabel={tCommon('actions.delete')}
       cancelLabel={tCommon('actions.cancel')}

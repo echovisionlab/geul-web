@@ -1,12 +1,14 @@
 'use client';
+import { useReleaseEditorCanEdit } from './ReleaseEditorAccessContext';
+import { LayoutStack as DsLayoutStack, LayoutGrid as DsLayoutGrid } from '@/components/core/Layout';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useMemo } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { SimpleGrid, Stack } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { MultiSelect } from '@/components/core/Input';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
 import { listCategoriesAction } from '@/lib/actions/category';
@@ -38,13 +40,13 @@ interface ReleaseTagsSectionProps {
   onGenresChange: (genres: ReleaseGenreItem[]) => void;
   onStylesChange: (styles: ReleaseStyleItem[]) => void;
   onFormatsChange: (formats: ReleaseFormatItem[]) => void;
-  onCategoriesMutationStart?: () => void;
+  onCategoriesMutationStart?: () => string | void;
   onCategoriesMutationSettled?: (succeeded: boolean) => void;
-  onGenresMutationStart?: () => void;
+  onGenresMutationStart?: () => string | void;
   onGenresMutationSettled?: (succeeded: boolean) => void;
-  onStylesMutationStart?: () => void;
+  onStylesMutationStart?: () => string | void;
   onStylesMutationSettled?: (succeeded: boolean) => void;
-  onFormatsMutationStart?: () => void;
+  onFormatsMutationStart?: () => string | void;
   onFormatsMutationSettled?: (succeeded: boolean) => void;
 }
 
@@ -68,6 +70,7 @@ export function ReleaseTagsSection({
   onFormatsMutationStart,
   onFormatsMutationSettled,
 }: ReleaseTagsSectionProps) {
+  const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.tags');
   const tCategorySelector = useTranslations('postEditor.categorySelector');
@@ -93,94 +96,105 @@ export function ReleaseTagsSection({
   const { data: allFormats } = allFormatsQuery;
 
   const setCategories = useMutation({
-    mutationFn: ({ ids, observed }: { ids: string[]; observed: string[] }) =>
-      setReleaseCategoriesAction(releaseId, ids, observed),
-    onMutate: () => onCategoriesMutationStart?.(),
+    mutationFn: async ({ ids, observed }: { ids: string[]; observed: string[] }) => {
+      const editorOrigin = onCategoriesMutationStart?.() ?? undefined;
+      return { ...(await setReleaseCategoriesAction(releaseId, ids, observed, editorOrigin)), editorOrigin };
+    },
     onSettled: (result, error) => onCategoriesMutationSettled?.(!error && !result?.error),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      publishEditorEntityChange(`release:${releaseId}`);
+      publishEditorEntityChange(`release:${releaseId}`, result.editorOrigin);
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: tCommon('entities.categories') }),
-        color: 'green',
+        tone: 'positive',
       });
     },
   });
 
   const setGenres = useMutation({
-    mutationFn: ({ ids, observed }: { ids: string[]; observed: string[] }) =>
-      setReleaseGenresAction(releaseId, ids, observed),
-    onMutate: () => onGenresMutationStart?.(),
+    mutationFn: async ({ ids, observed }: { ids: string[]; observed: string[] }) => {
+      const editorOrigin = onGenresMutationStart?.() ?? undefined;
+      return { ...(await setReleaseGenresAction(releaseId, ids, observed, editorOrigin)), editorOrigin };
+    },
     onSettled: (result, error) => onGenresMutationSettled?.(!error && !result?.error),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      publishEditorEntityChange(`release:${releaseId}`);
+      publishEditorEntityChange(`release:${releaseId}`, result.editorOrigin);
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: tCommon('entities.genres') }),
-        color: 'green',
+        tone: 'positive',
       });
     },
   });
 
   const setStyles = useMutation({
-    mutationFn: ({ ids, observed }: { ids: string[]; observed: string[] }) =>
-      setReleaseStylesAction(releaseId, ids, observed),
-    onMutate: () => onStylesMutationStart?.(),
+    mutationFn: async ({ ids, observed }: { ids: string[]; observed: string[] }) => {
+      const editorOrigin = onStylesMutationStart?.() ?? undefined;
+      return { ...(await setReleaseStylesAction(releaseId, ids, observed, editorOrigin)), editorOrigin };
+    },
     onSettled: (result, error) => onStylesMutationSettled?.(!error && !result?.error),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      publishEditorEntityChange(`release:${releaseId}`);
+      publishEditorEntityChange(`release:${releaseId}`, result.editorOrigin);
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: tCommon('entities.styles') }),
-        color: 'green',
+        tone: 'positive',
       });
     },
   });
 
   const setFormats = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       nextFormats,
       observedFormats,
     }: {
       nextFormats: ReleaseFormatItem[];
       observedFormats: ReleaseFormatItem[];
-    }) =>
-      setReleaseFormatsAction(
-        releaseId,
-        nextFormats.map((format) => ({
-          formatId: format.id,
-          formatDescription: format.format_description ?? undefined,
-        })),
-        observedFormats.map((format) => ({
-          formatId: format.id,
-          formatDescription: format.format_description ?? undefined,
-        })),
-      ),
-    onMutate: () => onFormatsMutationStart?.(),
+    }) => {
+      const editorOrigin = onFormatsMutationStart?.() ?? undefined;
+      return {
+        ...(await setReleaseFormatsAction(
+          releaseId,
+          nextFormats.map((format) => ({
+            formatId: format.id,
+            formatDescription: format.format_description ?? undefined,
+          })),
+          observedFormats.map((format) => ({
+            formatId: format.id,
+            formatDescription: format.format_description ?? undefined,
+          })),
+          editorOrigin,
+        )),
+        editorOrigin,
+      };
+    },
     onSettled: (result, error) => onFormatsMutationSettled?.(!error && !result?.error),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      publishEditorEntityChange(`release:${releaseId}`);
+      publishEditorEntityChange(`release:${releaseId}`, result.editorOrigin);
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: tCommon('entities.formats') }),
-        color: 'green',
+        tone: 'positive',
       });
     },
   });
 
   const handleCategoriesChange = (categoryIds: string[]) => {
+    if (!canEdit) {
+      return;
+    }
     const newCategories: ReleaseCategoryItem[] = categoryIds.flatMap((id) => {
       const category = allCategories?.find((item) => item.id === id);
       return category ? [{ id: category.id, name: category.name, slug: category.slug ?? '' }] : [];
@@ -191,6 +205,9 @@ export function ReleaseTagsSection({
   };
 
   const handleGenresChange = (genreIds: string[]) => {
+    if (!canEdit) {
+      return;
+    }
     const newGenres: ReleaseGenreItem[] = genreIds.flatMap((id) => {
       const genre = allGenres?.find((g) => g.id === id);
       return genre ? [{ id: genre.id, name: genre.name, slug: genre.slug }] : [];
@@ -201,6 +218,9 @@ export function ReleaseTagsSection({
   };
 
   const handleStylesChange = (styleIds: string[]) => {
+    if (!canEdit) {
+      return;
+    }
     const newStyles: ReleaseStyleItem[] = styleIds.flatMap((id) => {
       const style = allStyles?.find((s) => s.id === id);
       return style ? [{ id: style.id, name: style.name, slug: style.slug }] : [];
@@ -211,6 +231,9 @@ export function ReleaseTagsSection({
   };
 
   const handleFormatsChange = (formatIds: string[]) => {
+    if (!canEdit) {
+      return;
+    }
     const newFormats: ReleaseFormatItem[] = formatIds.flatMap((id) => {
       const format = allFormats?.find((f) => f.id === id);
       const previous = formats.find((item) => item.id === id);
@@ -244,11 +267,12 @@ export function ReleaseTagsSection({
   return (
     <SectionCard>
       <QueryErrorAlert queries={[allCategoriesQuery, allGenresQuery, allStylesQuery, allFormatsQuery]} />
-      <Stack>
+      <DsLayoutStack>
         <SectionHeader title={t('title')} />
 
-        <SimpleGrid cols={{ base: 1, md: 2, xl: 4 }} spacing="md" verticalSpacing="md">
+        <DsLayoutGrid columns={{ base: 1, md: 2, xl: 4 }} gap="md" rowGap="md">
           <MultiSelect
+            disabled={!canEdit}
             id={idPrefix ? `${idPrefix}-categories` : undefined}
             label={tCommon('entities.categories')}
             placeholder={tCategorySelector('placeholder')}
@@ -260,6 +284,7 @@ export function ReleaseTagsSection({
           />
 
           <MultiSelect
+            disabled={!canEdit}
             id={idPrefix ? `${idPrefix}-genres` : undefined}
             label={tCommon('entities.genres')}
             placeholder={t('placeholders.genres')}
@@ -271,6 +296,7 @@ export function ReleaseTagsSection({
           />
 
           <MultiSelect
+            disabled={!canEdit}
             id={idPrefix ? `${idPrefix}-styles` : undefined}
             label={tCommon('entities.styles')}
             placeholder={t('placeholders.styles')}
@@ -282,6 +308,7 @@ export function ReleaseTagsSection({
           />
 
           <MultiSelect
+            disabled={!canEdit}
             id={idPrefix ? `${idPrefix}-formats` : undefined}
             label={tCommon('entities.formats')}
             placeholder={t('placeholders.formats')}
@@ -291,8 +318,8 @@ export function ReleaseTagsSection({
             searchable
             clearable
           />
-        </SimpleGrid>
-      </Stack>
+        </DsLayoutGrid>
+      </DsLayoutStack>
     </SectionCard>
   );
 }

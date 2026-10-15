@@ -1,6 +1,7 @@
 {
   "common": {
     "actions": {
+      "move": "Pindah",
       "save": "Simpan",
       "saveChanges": "Simpan Perubahan",
       "create": "Buat",
@@ -59,7 +60,7 @@
       "reply": "Membalas",
       "insertVariable": "Masukkan variabel",
       "acceptAll": "Terima semuanya",
-      "rejectNonEssential": "Tolak yang tidak penting",
+      "rejectNonEssential": "Tolak",
       "savePreferences": "Simpan preferensi",
       "import": "Impor",
       "export": "Ekspor",
@@ -127,10 +128,7 @@
       "file": "Mengajukan",
       "bio": "Biografi",
       "realName": "Nama asli",
-      "countryCode": "Kode negara",
       "slug": "Siput",
-      "slugAutoModeEnabled": "Sinkronisasi otomatis dengan judul (klik untuk menonaktifkan)",
-      "slugAutoModeManual": "Mode manual (klik untuk mengaktifkan sinkronisasi otomatis)",
       "submissions": "Kiriman",
       "public": "Publik",
       "location": "Lokasi",
@@ -162,7 +160,6 @@
       "logoLight": "Logo Ringan",
       "logoDark": "Logo Gelap",
       "joined": "Bergabung",
-      "subscribed": "Berlangganan",
       "featured": "Unggulan",
       "order": "Memesan",
       "sortOrder": "Urutkan pesanan",
@@ -177,7 +174,6 @@
       "minutes": "Menit",
       "seconds": "Detik",
       "time": "Waktu",
-      "generationInfo": "Info generasi",
       "body": "Tubuh",
       "content": "Konten",
       "bodyPreview": "Pratinjau tubuh",
@@ -280,6 +276,7 @@
     },
     "messages": {
       "noUsersFound": "Tidak ada pengguna yang ditemukan",
+      "noAuthorsFound": "Tidak ada penulis yang ditemukan.",
       "noVersionsFound": "Tidak ada versi yang ditemukan.",
       "typeAtLeast2Characters": "Ketikkan minimal 2 karakter",
       "itemCreated": "{item} dibuat",
@@ -295,24 +292,22 @@
       "deleteItemConfirm": "Apakah Anda yakin ingin menghapus {item} ini? Tindakan ini tidak dapat dibatalkan.",
       "deleteNamedItemConfirm": "Apakah Anda yakin ingin menghapus \"{name}\"? Tindakan ini tidak dapat dibatalkan.",
       "confirmDeleteSelectedCount": "Apakah Anda yakin ingin menghapus {count, plural, one {# item yang dipilih} other {# item yang dipilih}}? Tindakan ini tidak dapat dibatalkan.",
-      "deleteDraftVersionConfirm": "Apakah Anda yakin ingin menghapus versi draf ini?",
       "confirmDeleteNamedRich": "Apakah Anda yakin ingin menghapus <strong>{name}</strong>?",
-      "activeCount": "{count} aktif",
       "effectiveFromDate": "Berlaku mulai {date}",
       "noUpdateRecorded": "Tidak ada pembaruan yang dicatat",
-      "exportedEmails": "Diekspor {count, plural, one {# email} other {# email}}",
       "formSubmittedSuccessfully": "Tanggapan Anda telah berhasil dikirimkan.",
       "userDate": "{user} · {date}",
       "scheduleActivationTitle": "Jadwalkan Aktivasi",
       "scheduleActivationDescription": "Pilih kapan versi ini akan aktif. Email pemberitahuan akan dikirim ke semua akun aktif bila dijadwalkan.",
       "scheduleActivationNotice": "Penjadwalan akan mengirimkan email notifikasi ke semua akun aktif dengan link pratinjau.",
-      "translationDetailUnavailable": "Gagal memuat data terjemahan terperinci. Anda masih dapat mengedit terjemahan publik saat ini.",
       "invalidConfirmationLinkFromEmail": "Tautan konfirmasi tidak valid. Silakan gunakan tautan dari email konfirmasi Anda.",
       "noPostsFound": "Tidak ada postingan yang ditemukan.",
       "noWorksFound": "Tidak ada karya yang ditemukan.",
-      "urlCopiedToClipboard": "URL disalin ke papan klip",
       "failedToLoad": "Gagal memuat data.",
-      "relatedItemsWillBeUnlinked": "{count} item terkait akan dibatalkan tautannya."
+      "relatedItemsWillBeUnlinked": "{count} item terkait akan dibatalkan tautannya.",
+      "noArtistsFound": "Tidak ada artis yang ditemukan.",
+      "noLabelsFound": "Tidak ada label yang ditemukan.",
+      "noReleasesFound": "Tidak ada rilis yang ditemukan."
     },
     "notifications": {
       "categoryCreated": "Kategori dibuat",
@@ -334,7 +329,14 @@
       "ogRegenerationFailed": "Gagal membuat ulang gambar OG",
       "testEmailSent": "Email percobaan terkirim",
       "saveSuccess": "Disimpan",
-      "saveFailed": "Gagal menyimpan"
+      "saveFailed": "Gagal menyimpan",
+      "saveRetrying": "Perubahan Anda belum tersimpan di server. Kami sedang mencoba kembali.",
+      "editsRestored": "Suntingan yang dipulihkan telah dikembalikan.",
+      "leaveWithRejectedEdits": {
+        "title": "Keluar tanpa suntingan yang tidak dapat disimpan?",
+        "message": "Server menolak beberapa suntingan sehingga tidak tersimpan. Salin suntingan tersebut dari menu kolaborasi terlebih dahulu, atau keluar dan buang suntingan tersebut.",
+        "confirm": "Keluar dan buang"
+      }
     },
     "errors": {
       "generic": "Ada yang tidak beres. Silakan coba lagi.",
@@ -372,8 +374,6 @@
       "testEmail": "tes@email.com",
       "testEmailExample": "tes@contoh.com",
       "noReplyEmail": "noreply@example.com",
-      "translationLiveRowMissing": "Belum ada terjemahan publik untuk lokal ini. Menyimpan di sini akan segera membuatnya.",
-      "translationBodyPreviewUnavailable": "Pratinjau isi tidak tersedia.",
       "selectDateAndTime": "Pilih tanggal dan waktu",
       "streetAddress": "Alamat jalan",
       "regionSubdivision": "Negara Bagian/Provinsi"
@@ -408,12 +408,11 @@
       "generating": "Menghasilkan...",
       "true": "Benar",
       "false": "Salah",
-      "loading": "Memuat..."
+      "loading": "Memuat...",
+      "toBeAnnounced": "TBA"
     },
     "roles": {
       "admin": "Admin",
-      "editor": "Penyunting",
-      "viewer": "Penampil",
       "author": "Penulis",
       "user": "Pengguna"
     },
@@ -445,6 +444,11 @@
       "unsubscribed": "Berhenti berlangganan",
       "subscribed": "Berlangganan",
       "onboardingPending": "Orientasi tertunda"
+    },
+    "motion": {
+      "pause": "Jeda animasi",
+      "resume": "Lanjutkan animasi",
+      "readAllInformation": "Baca semua informasi adegan"
     }
   },
   "shell": {
@@ -463,6 +467,11 @@
       "siteInfo": "Informasi situs",
       "links": "Tautan",
       "socialMedia": "media sosial"
+    },
+    "signOutUnsaved": {
+      "title": "Keluar dari akun dengan suntingan yang belum tersimpan?",
+      "message": "Beberapa suntingan belum tersimpan di server. Keluar dari akun akan menghapusnya dari perangkat ini.",
+      "confirm": "Keluar dari akun dan buang"
     }
   },
   "adminShell": {
@@ -676,13 +685,13 @@
       "detail": {
         "backTooltip": "Kembali ke tata letak email",
         "targetEditor": {
-          "title": "Translated text",
-          "description": "Edit only visible text and accessibility labels. HTML, CSS, links, and placeholders remain owned by the source layout.",
-          "empty": "This layout has no translatable text units.",
+          "title": "Teks terjemahan",
+          "description": "Sunting hanya teks yang terlihat dan label aksesibilitas. HTML, CSS, tautan, dan placeholder tetap ditentukan oleh tata letak sumber.",
+          "empty": "Tata letak ini tidak memiliki unit teks yang dapat diterjemahkan.",
           "textUnit": "Text",
-          "sourceValue": "Source: {value}",
-          "translatedValue": "This locale provides its own value.",
-          "sourceFallback": "Using the source value.",
+          "sourceValue": "Sumber: {value}",
+          "translatedValue": "Lokal ini menyediakan nilainya sendiri.",
+          "sourceFallback": "Menggunakan nilai sumber.",
           "useSource": "Use source"
         },
         "viewModes": {
@@ -931,7 +940,6 @@
     },
     "mapThemes": {
       "empty": "Tidak ada tema peta yang ditemukan.",
-      "notFound": "Tema peta tidak ditemukan.",
       "loadFailed": "Gagal memuat tema peta.",
       "defaultDisabled": "Ini sudah menjadi tema default.",
       "deleteDisabled": {
@@ -939,9 +947,7 @@
         "last": "Tema peta terakhir tidak dapat dihapus."
       },
       "reloadRequired": {
-        "title": "Perlu memuat ulang",
-        "message": "Tema ini disimpan dari revisi yang lebih baru. Muat ulang sebelum melanjutkan mengedit.",
-        "action": "Muat ulang"
+        "title": "Perlu memuat ulang"
       },
       "variants": {
         "light": "Ringan",
@@ -972,8 +978,7 @@
       },
       "editor": {
         "notifications": {
-          "defaultSet": "Tema disetel sebagai default",
-          "variantRequired": "Setidaknya satu varian (terang atau gelap) diperlukan"
+          "defaultSet": "Tema disetel sebagai default"
         },
         "controls": {
           "map": {
@@ -1310,7 +1315,6 @@
     },
     "verification": {
       "loading": "Memuat formulir verifikasi...",
-      "redirecting": "Mengarahkan...",
       "startOver": "Mulai dari awal",
       "errors": {
         "flowNotFound": "Alur verifikasi tidak ditemukan atau kedaluwarsa",
@@ -1373,21 +1377,14 @@
   "featuredImage": {
     "label": "Gambar Unggulan",
     "alt": "Gambar unggulan",
-    "hint": "Klik gambar untuk mengganti",
     "cropTitle": "Pangkas Gambar Unggulan",
-    "empty": {
-      "editable": "Lepas atau klik untuk mengunggah ({ratio})",
-      "readOnly": "Tidak ada gambar"
-    },
     "errors": {
       "fileRejected": "Berkas ditolak",
       "fileTooLarge": "File terlalu besar. Ukuran maksimum: {maxSize}",
       "invalidFileType": "Jenis berkas tidak valid"
     },
     "actions": {
-      "changeAria": "Ubah gambar unggulan",
-      "removeAria": "Hapus gambar unggulan",
-      "remove": "Hapus gambar"
+      "removeAria": "Hapus gambar unggulan"
     }
   },
   "artistPage": {
@@ -1495,7 +1492,6 @@
       "slug": "artis-siput",
       "name": "Nama panggung/nama artis",
       "realName": "Nama resmi (opsional)",
-      "countryCode": "misalnya AS, KR, JP",
       "labels": "Pilih label...",
       "parentArtist": "Pilih artis induk..."
     },
@@ -1518,15 +1514,7 @@
     },
     "placeholders": {
       "name": "Nama label",
-      "countryCode": "misalnya, DE, AS, KR",
       "parentLabel": "Pilih label induk (opsional)"
-    }
-  },
-  "workCollaborators": {
-    "empty": "Belum ada kolaborator",
-    "notifications": {
-      "added": "Kolaborator menambahkan",
-      "removed": "Kolaborator dihapus"
     }
   },
   "comments": {
@@ -1585,17 +1573,6 @@
     "credits": {
       "other": "Lainnya"
     },
-    "music": {
-      "released": "Dirilis: {value}",
-      "spotify": "Spotify",
-      "bandcamp": "Perkemahan band",
-      "soundcloud": "SoundCloud",
-      "youtube": "YouTube",
-      "openSpotify": "Buka Spotify",
-      "openBandcamp": "Buka Perkemahan Band",
-      "openSoundcloud": "Buka SoundCloud",
-      "openYoutube": "Buka YouTube"
-    },
     "portfolio": {
       "tech": "Teknologi:"
     },
@@ -1643,7 +1620,6 @@
     }
   },
   "cookieConsentCommon": {
-    "essentialLabel": "Cookie penting (selalu aktif)",
     "analyticsLabel": "Cookie Analytics (Google Analytics)"
   },
   "nicknameField": {
@@ -1690,7 +1666,6 @@
       "failedToRevokeSession": "Gagal mencabut sesi",
       "failedToRevokeSessions": "Gagal mencabut sesi",
       "failedToRequestDeletion": "Gagal meminta penghapusan akun",
-      "cannotUnlinkMessage": "Anda harus memiliki setidaknya satu metode autentikasi",
       "connectedMessage": "{provider} akun berhasil terhubung.",
       "disconnectedMessage": "{provider} telah terputus.",
       "failedToUpdateMainEmail": "Gagal memperbarui email utama",
@@ -1714,16 +1689,16 @@
       "consentDescription": "Klien ini dapat membaca dan mengedit konten serta mengelola file sesuai izin akun Anda saat ini. Klien dapat membuat, memperbarui, atau menghapus konten dan mengubah lampiran file yang sudah ada. Koneksi tidak memberikan izin tambahan pada akun.",
       "consentOfflineAccess": "Koneksi ini dapat berlanjut setelah sesi browser Anda saat ini berakhir, hingga Anda mencabutnya.",
       "consentRevoke": "Anda dapat mencabut koneksi ini di {settings} → Remote MCP.",
-      "connectionsTitle": "Connected MCP clients",
-      "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
-      "connectionsEmpty": "No MCP clients are connected.",
-      "connectedAt": "Connected {date}",
+      "connectionsTitle": "Klien MCP yang terhubung",
+      "connectionsDescription": "Otorisasi OAuth ini terpisah dari sesi browser. Mencabut salah satunya akan memutus koneksi klien MCP tersebut tanpa mengeluarkan Anda dari akun.",
+      "connectionsEmpty": "Tidak ada klien MCP yang terhubung.",
+      "connectedAt": "Terhubung {date}",
       "revoke": "Revoke",
-      "revokeTitle": "Revoke MCP access",
-      "revokeConfirmation": "Revoke MCP access for {client}? Its current token chain will stop working.",
-      "revokeSuccess": "MCP access was revoked.",
-      "revokeFailed": "Could not revoke MCP access.",
-      "loadFailed": "Could not load connected MCP clients."
+      "revokeTitle": "Cabut akses MCP",
+      "revokeConfirmation": "Cabut akses MCP untuk {client}? Rantai tokennya saat ini akan berhenti berfungsi.",
+      "revokeSuccess": "Akses MCP telah dicabut.",
+      "revokeFailed": "Tidak dapat mencabut akses MCP.",
+      "loadFailed": "Tidak dapat memuat klien MCP yang terhubung."
     },
     "personalAccessTokens": {
       "title": "Token akses pribadi",
@@ -1751,8 +1726,6 @@
       "added": "Ditambahkan {date}",
       "lastMethod": "Tambahkan metode masuk lain sebelum menghapus kunci sandi ini.",
       "removeNamed": "Hapus kunci sandi {name}",
-      "reauth": "Masuk lagi sebelum mengubah kunci sandi.",
-      "reauthAction": "Masuk lagi",
       "errors": {
         "load": "Tidak dapat memuat kunci sandi.",
         "remove": "Tidak dapat menghapus kunci sandi ini.",
@@ -1789,21 +1762,11 @@
     "email": {
       "title": "Email utama",
       "description": "Pilih email terverifikasi yang akan menerima pemberitahuan dan pesan akun.",
-      "addEmail": "Tambahkan email",
       "canonical": "Email utama",
-      "canonicalCannotRemove": "Pilih email utama lain sebelum menghapus alamat ini.",
       "setCanonical": "Tetapkan sebagai email utama",
-      "noEmail": "Tidak ada email yang disetel",
-      "helper": "Hanya satu email terverifikasi yang tersedia sebagai email utama.",
-      "selectLabel": "Email utama",
       "changeAction": "Ubah email utama",
       "sources": {
-        "current": "Email utama saat ini",
-        "emailCode": "Surel",
-        "pending": "Verifikasi tertunda"
-      },
-      "messages": {
-        "pendingVerification": "Verifikasi sudah menunggu untuk email ini. Anda dapat mengirim ulang email verifikasi."
+        "emailCode": "Surel"
       },
       "mainEmailUpdated": "Email utama diperbarui.",
       "canonicalUpdated": "Email utama diperbarui."
@@ -1834,7 +1797,6 @@
   },
   "seriesDetail": {
     "slug": {
-      "autoDescription": "Mode otomatis: perubahan judul memperbarui siput secara otomatis.",
       "manualDescription": "Mode manual: slug tetap diam sampai Anda mengedit atau mengaktifkan kembali mode otomatis."
     },
     "notifications": {
@@ -1870,10 +1832,6 @@
     }
   },
   "works": {
-    "tabs": {
-      "editable": "Dapat diedit"
-    },
-    "emptyEditable": "Tidak ada karya yang dapat diedit yang diberikan kepada Anda.",
     "emptyCredits": "Tidak ada karya yang dikreditkan ditemukan.",
     "columns": {
       "creditedAs": "Dikreditkan Sebagai",
@@ -1995,6 +1953,7 @@
         "patternPlaceholder": "misalnya, ^[A-Z]{3}$",
         "customErrorMessage": "Pesan Kesalahan Khusus",
         "optional": "Opsional",
+        "dragValidator": "Seret aturan validasi",
         "removeValidator": "Hapus validator"
       },
       "fieldTypes": {
@@ -2062,10 +2021,6 @@
       }
     },
     "settings": {
-      "notifications": {
-        "managerAdded": "Manajer formulir ditambahkan",
-        "managerRemoved": "Manajer formulir dihapus"
-      },
       "urlPublic": {
         "title": "URL & Akses Publik",
         "allowPublic": "Izinkan akses URL publik",
@@ -2085,13 +2040,7 @@
         "description": "Bagikan tautan dasbor untuk melihat statistik formulir tanpa akses admin"
       },
       "managers": {
-        "adminControls": "Kontrol admin",
-        "readOnly": "Hanya baca",
-        "description": "Manajer dapat mengedit formulir ini, melihat kiriman, dan mengelola tautan berbagi.",
-        "searchPlaceholder": "Cari pengguna untuk menambahkan manajer...",
-        "adminOnly": "Hanya admin yang dapat menambah atau menghapus pengelola.",
-        "empty": "Belum ada manajer yang ditugaskan.",
-        "removeManager": "Hapus pengelola {name}"
+        "description": "Manajer dapat mengedit formulir ini, melihat kiriman, dan mengelola tautan berbagi."
       },
       "access": {
         "title": "Kontrol Akses",
@@ -2120,7 +2069,11 @@
   "dataTable": {
     "aria": {
       "sortBy": "Urutkan berdasarkan {label}",
-      "rowActions": "Tindakan untuk {label}"
+      "rowActions": "Tindakan untuk {label}",
+      "selectAllRows": "Pilih semua baris",
+      "selectRow": "Pilih {label}",
+      "resultSummary": "{totalPages, plural, =0 {{count} hasil} other {{count} hasil, halaman {page} dari {totalPages}}}",
+      "loadingMessage": "Memuat"
     },
     "sort": {
       "button": "Sortir",
@@ -2133,7 +2086,9 @@
         "moveUp": "Pindahkan {label} ke atas",
         "moveDown": "Pindahkan {label} ke bawah",
         "toggleDirection": "Alihkan arah pengurutan untuk {label}",
-        "removeSort": "Hapus pengurutan untuk {label}"
+        "removeSort": "Hapus pengurutan untuk {label}",
+        "directionAscending": "Saat ini menaik",
+        "directionDescending": "Saat ini menurun"
       }
     },
     "filter": {
@@ -2148,7 +2103,8 @@
       "drawerTitle": "Menyaring",
       "aria": {
         "backToFields": "Kembali ke bidang filter",
-        "removeFilter": "Hapus filter untuk {label}"
+        "removeFilter": "Hapus filter untuk {label}",
+        "logic": "Kombinasi filter"
       },
       "operators": {
         "eq": "sama",
@@ -2181,7 +2137,8 @@
       "previousPage": "Halaman sebelumnya",
       "nextPage": "Halaman berikutnya",
       "lastPage": "Halaman terakhir",
-      "page": "Halaman {page}"
+      "page": "Halaman {page}",
+      "navigation": "Navigasi halaman"
     }
   },
   "versionHistory": {
@@ -2191,9 +2148,11 @@
     "systemOrLegacy": "Sistem atau versi sebelumnya",
     "restore": "Memulihkan",
     "restoreTitle": "Pulihkan versi",
-    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document."
+    "restoreSameLocaleBody": "Memulihkan sumber v{version} ({locale}) hanya mengubah dokumen sumber. Dokumen target dan pekerjaan terjemahan yang sudah ada tetap tidak berubah, dan terjemahan tidak dibuat secara otomatis. Lanjutkan?",
+    "restoreCrossLocaleBody": "Memulihkan sumber v{version} mengubah lokal sumber dari {currentLocale} ke {selectedLocale} dan hanya mengubah penunjuk sumber. Dokumen target dan pekerjaan terjemahan yang sudah ada tetap tidak berubah, dan terjemahan tidak dibuat secara otomatis. Lanjutkan?",
+    "restoreFailed": "Gagal memulihkan dokumen sumber.",
+    "loadFailed": "Riwayat versi tidak dapat dimuat.",
+    "end": "Semua versi telah dimuat."
   },
   "shareLinks": {
     "title": "Bagikan Tautan",
@@ -2203,7 +2162,6 @@
     "createError": "Gagal membuat tautan",
     "deleteSuccess": "Tautan dihapus",
     "deleteError": "Gagal menghapus tautan",
-    "invalidUrl": "URL tidak valid",
     "noLinks": "Tidak ada tautan yang dibuat",
     "showLess": "Tampilkan lebih sedikit",
     "showMore": "Tampilkan {count} lainnya",
@@ -2218,21 +2176,9 @@
     "passwordPlaceholder": "Tetapkan kata sandi berbagi",
     "maximumExpiration": "Tautan berbagi dapat kedaluwarsa hingga satu tahun dari sekarang.",
     "expirationInvalid": "Pilih masa berlakunya dalam satu tahun.",
-    "bypassFormPassword": "Lewati kata sandi formulir",
-    "bypassFormPasswordDescription": "Jika dinonaktifkan, pemirsa harus memasukkan kata sandi formulir",
-    "bypassAuthentication": "Lewati autentikasi",
-    "bypassAuthenticationDescription": "Jika diaktifkan, tautan berbagi melewati gerbang yang memerlukan autentikasi",
-    "bypassRoleChecks": "Lewati pemeriksaan peran",
-    "bypassRoleChecksDescription": "Jika diaktifkan, tautan berbagi akan melewati gerbang peran yang diizinkan",
     "policies": {
       "passwordProtected": "Dilindungi kata sandi",
-      "noPassword": "Tidak ada kata sandi",
-      "passwordBypass": "Melewati kata sandi",
-      "passwordRequired": "Diperlukan kata sandi",
-      "authBypass": "Bypass autentikasi",
-      "authEnforced": "Otentikasi diberlakukan",
-      "roleBypass": "Melewati peran",
-      "roleEnforced": "Peran ditegakkan"
+      "noPassword": "Tidak ada kata sandi"
     },
     "expirationBadge": {
       "expired": "Kedaluwarsa",
@@ -2264,7 +2210,9 @@
     "label": "Tautan sosial",
     "addLink": "Tambahkan tautan",
     "platformPlaceholder": "Platform",
-    "valuePlaceholder": "URL atau nama pengguna"
+    "valuePlaceholder": "URL atau nama pengguna",
+    "reorderInstructions": "Gunakan tombol panah atas dan bawah untuk mengubah posisi tautan ini.",
+    "positionChanged": "Tautan dipindahkan ke posisi {position} dari {count}."
   },
   "termsPage": {
     "active": {
@@ -2424,7 +2372,6 @@
     }
   },
   "releasePage": {
-    "previewTitle": "Pratinjau Rilis",
     "streaming": "Streaming",
     "metadata": {
       "fallbackDescription": "{title}",
@@ -2494,8 +2441,7 @@
         "title": "Tambahkan trek"
       },
       "placeholders": {
-        "title": "Judul lagu",
-        "durationSeconds": "misalnya, 240"
+        "title": "Judul lagu"
       },
       "deleteConfirm": "Apakah Anda yakin ingin menghapus trek ini?",
       "creditsModal": {
@@ -2517,8 +2463,7 @@
   "contentMetadata": {
     "preview": {
       "page": "Pratinjau Halaman",
-      "post": "Pratinjau Posting",
-      "work": "Pratinjau Pekerjaan"
+      "post": "Pratinjau Posting"
     }
   },
   "editorMetadata": {
@@ -2541,8 +2486,6 @@
   "postHeader": {
     "actions": {
       "editPost": "Sunting postingan",
-      "sharePost": "Bagikan kiriman",
-      "printPost": "Cetak postingan",
       "exportMarkdown": "Ekspor pos sebagai penurunan harga"
     }
   },
@@ -2551,7 +2494,6 @@
     "intro": "Kami menggunakan cookie penting untuk autentikasi dan pengoperasian situs, serta cookie analitik opsional untuk memahami penggunaan situs.",
     "learnMore": "Lihat <privacy>Kebijakan Privasi</privacy> dan <terms>Ketentuan Layanan</terms> kami.",
     "actions": {
-      "hidePreferences": "Sembunyikan preferensi",
       "customize": "Sesuaikan"
     }
   },
@@ -2569,7 +2511,6 @@
   },
   "locationSelector": {
     "placeholder": "Pilih lokasi...",
-    "clearSelection": "Hapus tempat yang dipilih",
     "emptySearch": "Cari tempat di peta",
     "emptyResults": "Tidak ada tempat yang ditemukan"
   },
@@ -2589,6 +2530,24 @@
       "sections": {
         "connection": "Koneksi"
       }
+    },
+    "saveState": {
+      "saved": "Tersimpan",
+      "saving": "Menyimpan…",
+      "offline": "Offline · suntingan disimpan di perangkat ini",
+      "error": "Gagal menyimpan · mencoba kembali…",
+      "rejected": "Beberapa suntingan tidak dapat disimpan",
+      "reload": "Menghubungkan kembali · memulihkan suntingan…"
+    },
+    "rejectedEdits": {
+      "open": "Tinjau suntingan yang belum tersimpan",
+      "title": "Suntingan yang tidak dapat disimpan",
+      "description": "Server menolak suntingan ini sehingga penyimpanannya tidak akan dicoba lagi. Salin yang Anda perlukan, lalu buang suntingan tersebut.",
+      "reason": "Alasan: {reason}",
+      "copy": "Salin",
+      "copied": "Disalin",
+      "discard": "Buang",
+      "empty": "Semua suntingan telah tersimpan."
     }
   },
   "urlSection": {
@@ -2602,9 +2561,6 @@
     "actions": {
       "copyId": "Salin ID",
       "copyUrl": "Salin URL"
-    },
-    "notifications": {
-      "copied": "{label} disalin"
     }
   },
   "formValidation": {
@@ -2644,7 +2600,7 @@
   },
   "ogImagePreview": {
     "alt": "Buka pratinjau Grafik",
-    "empty": "Gambar OG belum dibuat",
+    "empty": "Belum ada gambar OG",
     "actions": {
       "regenerate": "Regenerasi Gambar OG"
     },
@@ -2768,7 +2724,6 @@
     "scheduleModal": {
       "description": "Pilih tanggal dan waktu untuk mengirim kampanye ini.",
       "dateLabel": "Tanggal dan waktu yang dijadwalkan",
-      "datePlaceholder": "Pilih tanggal dan waktu",
       "previousMonth": "Bulan sebelumnya",
       "nextMonth": "Bulan depan",
       "audience": "Penonton: {audience}",
@@ -2858,7 +2813,6 @@
       "notFoundMessage": "Tidak ada kategori yang ditemukan"
     },
     "seriesSelector": {
-      "searchPlaceholder": "Telusuri atau buat...",
       "states": {
         "empty": "Tidak ada seri yang tersedia",
         "select": "Pilih seri...",
@@ -2871,14 +2825,12 @@
       },
       "notifications": {
         "assigned": "Posting ditugaskan ke seri",
-        "reorderFailed": "Gagal menyusun ulang rangkaian",
         "createFailed": "Tidak dapat membuat serial",
         "seriesUnavailable": "Seri tersebut tidak lagi tersedia untuk dikelola. Tugas sebelumnya disimpan.",
         "updateFailed": "Tidak dapat memperbarui seri postingan. Tugas sebelumnya disimpan."
       }
     },
     "notifications": {
-      "slugUpdateFailed": "Gagal memperbarui siput",
       "deleted": "Postingan dihapus",
       "published": "Posting diterbitkan",
       "unpublished": "Postingan tidak dipublikasikan",
@@ -3065,10 +3017,6 @@
     "pinned": "Disematkan"
   },
   "pageEditor": {
-    "localRecovery": {
-      "message": "Salinan perubahan lokal disimpan sebelum menyambungkan kembali. Unduh sebelum memuat ulang atau keluar.",
-      "action": "Unduh salinan pemulihan"
-    },
     "shareLinksDescription": "Pratinjau tautan untuk halaman yang tidak dipublikasikan",
     "showTitleOnPage": "Tampilkan judul di halaman",
     "slugValidation": {
@@ -3126,6 +3074,9 @@
       }
     },
     "columnsEditor": {
+      "labels": {
+        "ratio": "Rasio kolom"
+      },
       "badges": {
         "columnCount": "{count} kolom"
       },
@@ -3150,20 +3101,18 @@
       "menuLabel": "Tambahkan Bagian",
       "emptyColumn": "Kolom kosong - klik + untuk menambahkan konten",
       "actions": {
-        "addSectionToColumn": "Tambahkan bagian ke kolom {index}",
-        "removeSectionFromColumn": "Hapus {section} dari kolom {index}"
+        "addSectionToColumn": "Tambahkan bagian ke kolom {index}"
       }
     },
     "notifications": {
       "published": "Halaman diterbitkan",
       "unpublished": "Halaman tidak dipublikasikan",
       "deleted": "Halaman dihapus",
-      "slugUpdateFailed": "Gagal memperbarui siput halaman",
-      "confirmSummaryFailed": "Gagal mengonfirmasi pembaruan ringkasan."
+      "slugUpdateFailed": "Gagal memperbarui siput halaman"
     },
     "mapEditor": {
       "title": "Peta",
-      "placeCount": "{count} {count, plural, one {place} other {places}}",
+      "placeCount": "{count} {count, plural, one {tempat} other {tempat}}",
       "fullscreen": "Layar penuh",
       "captionPlaceholder": "Tambahkan keterangan opsional di bawah peta...",
       "emptyState": "Belum ada tempat di peta yang dipilih.",
@@ -3217,7 +3166,6 @@
         "content": "Konten",
         "marqueeBehavior": "Perilaku tenda",
         "scenePlayback": "Pemutaran",
-        "sceneRender": "penyaji",
         "sceneMotion": "Gerakan",
         "sceneUnits": "Satuan",
         "sceneSettings": "Adegan",
@@ -3234,7 +3182,6 @@
         "columns": "Kolom",
         "infiniteLoop": "Lingkaran tak terbatas",
         "showIndicators": "Tampilkan indikator",
-        "showFeaturedImage": "Tampilkan gambar unggulan",
         "imageAspectRatio": "Rasio aspek gambar",
         "showMeta": "Tampilkan meta",
         "sortBy": "Urutkan berdasarkan",
@@ -3253,7 +3200,6 @@
         "showImage": "Tampilkan gambar",
         "selectForm": "Pilih formulir",
         "showFormTitle": "Tampilkan judul formulir",
-        "showTitle": "Tampilkan judul",
         "numberOfWorks": "Jumlah karya",
         "numberOfReleases": "Jumlah rilis",
         "numberOfProgramEvents": "Jumlah acara",
@@ -3323,7 +3269,10 @@
         "textColorSource": "Warna teks",
         "lightTextColor": "Teks ringan",
         "darkTextColorSource": "Teks gelap",
-        "darkTextColor": "Warna teks gelap"
+        "darkTextColor": "Warna teks gelap",
+        "itemSize": "Ukuran item",
+        "showAvatar": "Tampilkan avatar",
+        "maxLabels": "Jumlah maksimum label"
       },
       "fieldLabels": {
         "year": "Tahun",
@@ -3334,11 +3283,7 @@
       },
       "badges": {
         "posts": "{count} postingan",
-        "rows": "{count} baris",
-        "authors": "{count} penulis",
-        "artists": "{count} artis",
-        "works": "{count} berfungsi",
-        "releases": "{count} rilis"
+        "rows": "{count} baris"
       },
       "placeholders": {
         "publishedByDefault": "Diterbitkan secara default",
@@ -3358,7 +3303,6 @@
           "auto": "Otomatis"
         },
         "sortBy": {
-          "dateAdded": "Tanggal ditambahkan",
           "startDate": "Tanggal mulai",
           "endDate": "Tanggal akhir",
           "publishedDate": "Tanggal diterbitkan",
@@ -3367,9 +3311,7 @@
         },
         "sortOrder": {
           "newest": "Terbaru",
-          "oldest": "Tertua",
-          "azOldest": "A-Z / Tertua",
-          "zaNewest": "Z-A / Terbaru"
+          "oldest": "Tertua"
         },
         "mapPrimaryLabel": {
           "placeName": "Nama tempat"
@@ -3443,6 +3385,11 @@
           "theme": "Ikuti tema",
           "custom": "Adat",
           "inherit": "Ikuti cahaya"
+        },
+        "itemSize": {
+          "s": "S · Ringkas",
+          "m": "M · Standar",
+          "l": "L · Besar"
         }
       },
       "actions": {
@@ -3453,8 +3400,6 @@
         "moveUnitUp": "Pindahkan unit ke atas",
         "moveUnitDown": "Pindahkan unit ke bawah",
         "removeSceneUnit": "Hapus satuan",
-        "expandSceneUnit": "Perluas satuan",
-        "collapseSceneUnit": "Runtuhnya satuan",
         "replaceMesh": "Ganti GLB",
         "uploadMesh": "Unggah GLB",
         "clearMeshAsset": "Hapus aset mesh",
@@ -3493,6 +3438,12 @@
         "meshOptimizationCancelled": "Dibatalkan",
         "optimizedMeshCleanupFailed": "Referensi aset yang dioptimalkan dihapus, namun pembersihan gagal: {error}",
         "optimizedMeshCleanupFailedDefault": "Referensi aset yang dioptimalkan dihapus, namun pembersihan gagal"
+      },
+      "authorSelection": {
+        "maxSelected": "Maksimal {count} penulis dapat dipilih.",
+        "empty": "Tidak ada penulis yang dipilih. Blok ini akan kosong.",
+        "unavailable": "Penulis ini tidak lagi tersedia.",
+        "unavailableWarning": "Penulis yang tidak tersedia tidak ditampilkan di halaman publik. Hapus atau pilih penggantinya."
       }
     },
     "embed": {
@@ -3545,8 +3496,6 @@
       "matchDescription": "Gabungkan kelompok peran, tag, dan buletin yang dipilih.",
       "any": "Salah satu kelompok yang dipilih",
       "all": "Semua kelompok yang dipilih",
-      "roles": "Peran",
-      "rolesDescription": "Cukup memiliki salah satu peran yang dipilih.",
       "roleUser": "Anggota",
       "memberDescription": "Hanya anggota yang sudah masuk dapat melihat halaman ini.",
       "authorDescription": "Anggota dengan peran penulis.",
@@ -3574,17 +3523,27 @@
       "restrictedTitle": "Anda tidak memiliki akses ke halaman ini",
       "restrictedDescription": "Akun Anda tidak memenuhi syarat akses halaman ini.",
       "signIn": "Login"
+    },
+    "a11y": {
+      "sectionPosition": "{section} · {index}/{count}",
+      "dragInstructions": "Tekan Spasi untuk mulai memindahkan, lalu gunakan tombol panah untuk mengubah posisi. Tekan Spasi untuk mengonfirmasi atau Escape untuk membatalkan.",
+      "dragStart": "{section} · Pindah · Sedang berlangsung · {index}/{count}",
+      "dragOver": "{section} · Pindah · {index}/{count}",
+      "dragEnd": "{section} · Pindah · Konfirmasikan · {index}/{count}",
+      "dragCancel": "{section} · Pindah · Dibatalkan",
+      "sectionDeleted": "{section} dihapus",
+      "sectionAdded": "{section} dibuat · {index}/{count}",
+      "columnsPosition": "{column} · {section} · {index}/{count}"
     }
   },
   "editorCommon": {
     "reloadRequired": {
       "title": "Perlu memuat ulang",
-      "message": "Versi yang lebih baru telah disimpan saat editor ini dibuka. Muat ulang sebelum melanjutkan mengedit.",
-      "action": "Muat ulang"
+      "message": "Versi yang lebih baru telah disimpan saat editor ini dibuka. Muat ulang sebelum melanjutkan mengedit."
     },
     "permissionRevoked": {
-      "title": "Izin mengedit dicabut",
-      "message": "Anda tidak lagi memiliki izin untuk mengedit konten ini. Perubahan yang dilakukan setelah izin dicabut tidak akan disimpan."
+      "title": "Akses dihapus",
+      "message": "Anda tidak lagi memiliki akses ke konten ini. Perubahan yang belum disimpan tetap ada di perangkat ini."
     },
     "sessionExpired": {
       "title": "Sesi berakhir",
@@ -3640,7 +3599,6 @@
         "mute": "Bisukan audio",
         "unmute": "Suarakan audio",
         "volume": "Volume audio",
-        "original": "Asli",
         "waveform": "Bentuk gelombang",
         "spectrogram": "Spektogram",
         "spectrogramAlt": "Spektogram audio",
@@ -3657,10 +3615,8 @@
         "addItem": "Tambahkan {item}",
         "replaceItem": "Ganti {item}",
         "browse": "Telusuri file",
-        "or": "ATAU",
         "importFromUrl": "Impor dari URL",
         "directVideoUrlHelp": "Hanya URL file video langsung. Untuk YouTube atau Vimeo, gunakan video Eksternal.",
-        "confirm": "Menanamkan",
         "resumeAvailable": "Unggahan terputus ditemukan",
         "resumeInstructionNamed": "Pilih {name} lagi untuk melanjutkan upload dari titik berhentinya.",
         "backToUpload": "Unggah file",
@@ -3727,7 +3683,7 @@
           "uniform": "Seragam",
           "dropShadow": "Jatuhkan bayangan",
           "proportionalSansSerif": "Sans-Serif Proporsional",
-          "monospaceSansSerif": "Monospace Sans-Serif",
+          "monospaceSansSerif": "Sans-Serif Monospasi",
           "proportionalSerif": "Serif Proporsional",
           "monospaceSerif": "Serif Monoruang",
           "casual": "Kasual",
@@ -3756,11 +3712,8 @@
       }
     },
     "mapBlock": {
-      "clickToAddPlace": "Klik untuk menambahkan tempat",
       "captionPlaceholder": "Tambahkan keterangan...",
-      "clickToAddCaption": "Klik untuk menambahkan keterangan",
-      "externalPlaceholder": "Peta: {count} {count, plural, one {place} other {places}}",
-      "viewOnGoogleMaps": "Lihat di Google Maps ({lat}, {lng})"
+      "clickToAddCaption": "Klik untuk menambahkan keterangan"
     },
     "mapPlacesModal": {
       "title": "Kelola tempat",
@@ -3770,22 +3723,9 @@
       "centeredTitle": "terpusat",
       "setAsCenterTitle": "Tetapkan sebagai pusat"
     },
-    "blockAlign": {
-      "left": "Sejajarkan ke kiri",
-      "center": "Sejajarkan bagian tengah",
-      "right": "Sejajarkan dengan benar"
-    },
-    "mathInline": {
-      "clickToEdit": "Klik untuk mengedit",
-      "convertToBlock": "Ubah menjadi blok"
-    },
-    "mathInlineButton": {
-      "label": "Matematika sebaris"
-    },
     "editor": {
       "slashMenu": {
         "placeholder": "Ketik '/' untuk melihat perintah",
-        "empty": "Tidak ada item",
         "unavailable": "Tidak tersedia",
         "groups": {
           "headings": "Tajuk",
@@ -3849,9 +3789,9 @@
           },
           "callout": {
             "title": "Callout",
-            "subtext": "Highlight content with an icon",
-            "aliases": "callout\nnotice\ninfo\naside",
-            "group": "Basic blocks"
+            "subtext": "Sorot konten dengan ikon",
+            "aliases": "callout\nnotice\ninfo\naside\npemberitahuan\ninformasi\ncatatan",
+            "group": "Blok dasar"
           },
           "divider": {
             "title": "Pemisah",
@@ -3880,61 +3820,61 @@
           "mathBlock": {
             "title": "Blok Matematika",
             "subtext": "Tampilkan persamaan dengan LaTeX",
-            "aliases": "math\nequation\nlatex\nformula",
+            "aliases": "math\nequation\nlatex\nformula\nmatematika\npersamaan\nrumus",
             "group": "Matematika"
           },
           "inlineMath": {
             "title": "Matematika Sebaris",
             "subtext": "Rumus LaTeX sebaris",
-            "aliases": "inline\ninline math\ninlinemath\nlatex\n$",
+            "aliases": "inline\ninline math\ninlinemath\nlatex\n$\nsebaris\nmatematika sebaris",
             "group": "Sebaris"
           },
           "map": {
             "title": "Peta",
             "subtext": "Masukkan lokasi peta",
-            "aliases": "map\nlocation\nplace\naddress",
+            "aliases": "map\nlocation\nplace\naddress\npeta\nlokasi\ntempat\nalamat",
             "group": "Sematan"
           },
           "externalVideo": {
             "title": "Video eksternal",
             "subtext": "Masukkan tautan YouTube atau Vimeo",
-            "aliases": "external video\nyoutube\nvimeo\nembed",
+            "aliases": "external video\nyoutube\nvimeo\nembed\nvideo eksternal\nsematkan\nsematan",
             "group": "Sematan"
           },
           "p5Sketch": {
             "title": "p5.js",
             "subtext": "Tambahkan sketsa p5.js interaktif",
-            "aliases": "p5\np5.js\nsketch\ncreative coding",
+            "aliases": "p5\np5.js\nsketch\ncreative coding\nsketsa\npemrograman kreatif",
             "group": "Sematan"
           },
           "threeScene": {
             "title": "Three.js",
             "subtext": "Tambahkan adegan Three.js interaktif",
-            "aliases": "three\nthree.js\n3d\nscene",
+            "aliases": "three\nthree.js\n3d\nscene\nadegan\ntiga dimensi",
             "group": "Sematan"
           },
           "file": {
             "title": "Lampiran",
             "subtext": "Lampirkan file (PDF, DOC, ZIP, dll.)",
-            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload",
+            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\nlampiran\nberkas\ndokumen\nunduh",
             "group": "Media"
           },
           "aiAssistant": {
             "title": "Asisten AI",
             "subtext": "Tulis, tingkatkan, atau ubah teks dengan AI",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove",
+            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nasisten\ntulis\nmenulis\ntingkatkan",
             "group": "AI"
           },
           "shader": {
             "title": "Shader GLSL",
             "subtext": "Tambahkan shader GLSL interaktif",
-            "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "aliases": "shader\nglsl\nfragment shader\nshadertoy\npewarna\nshader fragmen",
             "group": "Sematan"
           },
           "mermaid": {
             "title": "Mermaid",
             "subtext": "Buat diagram dari teks",
-            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence\ndiagram alur\nbagan alur\nurutan",
             "group": "Sematan"
           }
         }
@@ -3950,9 +3890,6 @@
         "alignLeft": "Rata kiri",
         "alignCenter": "Rata tengah",
         "alignRight": "Rata kanan",
-        "alignJustify": "Rata kiri-kanan",
-        "textColor": "Teks",
-        "backgroundColor": "Latar belakang",
         "nest": "Tambah inden",
         "unnest": "Kurangi inden",
         "inlineMath": "Matematika sebaris",
@@ -3967,36 +3904,19 @@
         "urlPlaceholder": "Edit URL"
       },
       "math": {
-        "inline": "Matematika sebaris",
-        "block": "Blok Matematika",
-        "clickToEdit": "Klik untuk mengedit",
-        "convertToBlock": "Ubah menjadi blok"
+        "selectBlock": "Pilih blok matematika",
+        "block": "Blok Matematika"
       },
       "file": {
-        "add": "Tambahkan {item}",
         "replace": "Ganti {item}",
-        "delete": "Hapus",
-        "download": "Unduh",
-        "caption": "Tambahkan keterangan...",
-        "upload": "Unggah file",
-        "embed": "Sematkan",
-        "urlPlaceholder": "Edit URL"
+        "delete": "Hapus"
       },
       "resize": {
-        "image": "Ubah ukuran — Gambar",
-        "audio": "Ubah ukuran — Audio",
-        "video": "Ubah ukuran — Video",
-        "file": "Ubah ukuran — Lampiran",
         "map": "Ubah ukuran — Peta",
-        "externalVideo": "Ubah ukuran — Video eksternal",
-        "p5Sketch": "Ubah ukuran — p5.js",
-        "threeScene": "Ubah ukuran — Three.js",
-        "dragHandle": "Seret untuk mengubah ukuran",
-        "shader": "Ubah ukuran — Shader GLSL"
+        "externalVideo": "Ubah ukuran — Video eksternal"
       },
       "drag": {
         "openBlockMenu": "Buka menu blok",
-        "addBlock": "Tambah blok",
         "delete": "Hapus",
         "colors": "Warna"
       },
@@ -4028,7 +3948,6 @@
         "toggleHeaderColumn": "Kolom tajuk",
         "selectRow": "Pilih baris",
         "selectColumn": "Pilih kolom",
-        "selectCells": "Sel terpilih",
         "selectTable": "Pilih tabel",
         "deleteTable": "Hapus tabel",
         "mergeCells": "Gabungkan sel",
@@ -4042,17 +3961,11 @@
         "unavailable": "Tidak tersedia"
       },
       "map": {
-        "insert": "Peta",
-        "clickToAddPlace": "Klik untuk menambahkan tempat",
-        "captionPlaceholder": "Tambahkan keterangan...",
         "managePlaces": "Kelola tempat"
       },
       "embeds": {
         "map": "Peta",
-        "externalVideo": "Video eksternal",
-        "p5Sketch": "p5.js",
-        "threeScene": "Three.js",
-        "shader": "Shader GLSL"
+        "externalVideo": "Video eksternal"
       },
       "runtimeLabels": {
         "code": {
@@ -4139,13 +4052,14 @@
         }
       },
       "media": {
-        "browse": "Telusuri file",
-        "importFromUrl": "Impor dari URL",
-        "embed": "Sematkan",
-        "openLibrary": "Pustaka file",
-        "uploadFiles": "Unggah file",
-        "selectFile": "Pilih file"
+        "importFromUrl": "Impor dari URL"
       }
+    },
+    "accessDowngraded": {
+      "message": "Akses Anda berubah menjadi hanya lihat. Penyuntingan dinonaktifkan; suntingan yang belum tersimpan tetap ada di perangkat ini dan akan disimpan jika Anda mendapatkan kembali akses penyuntingan."
+    },
+    "accessUpgraded": {
+      "message": "Anda dapat mengedit lagi. Perubahan yang disimpan selama Anda hanya dapat melihat sedang disimpan."
     }
   },
   "aiAssistant": {
@@ -4170,7 +4084,6 @@
       "brainstorm": "Bertukar pikiran"
     },
     "sections": {
-      "original": "Asli",
       "result": "Hasil AI"
     },
     "actions": {
@@ -4220,8 +4133,7 @@
       "pinClickable": "Pin Dapat Diklik"
     },
     "themeOptions": {
-      "none": "Tidak ada",
-      "systemSuffix": "(Sistem)"
+      "none": "Tidak ada"
     },
     "scheme": {
       "auto": "Otomatis",
@@ -4237,13 +4149,7 @@
     "copyValueTitle": "Klik untuk menyalin nilai {label}"
   },
   "postMembers": {
-    "removeAria": "Hapus {name}",
-    "roles": {
-      "owner": "Pemilik"
-    },
-    "states": {
-      "memberFallback": "anggota"
-    }
+    "removeAria": "Hapus {name}"
   },
   "workCredits": {
     "divider": "atau tambahkan kredit",
@@ -4276,9 +4182,6 @@
       "artist": "Tidak ada artis yang ditemukan",
       "name": "Tidak ada nama yang ditemukan"
     },
-    "states": {
-      "unknownInitial": "?"
-    },
     "notifications": {
       "groupCreated": "Grup dibuat",
       "groupDeleted": "Grup dihapus",
@@ -4299,48 +4202,46 @@
     "resolvedMetadata": "Metadata Terselesaikan"
   },
   "translationPanel": {
-    "description": "Review the source language and existing translation document for each locale.",
+    "description": "Tinjau bahasa sumber dan dokumen terjemahan yang sudah ada untuk setiap lokal.",
     "actions": {
       "expand": "Memperluas",
       "collapse": "Runtuh",
-      "regenerateAll": "Generate/regenerate all eligible locales",
+      "regenerateAll": "Buat/buat ulang semua lokal yang memenuhi syarat",
       "regenerateLocale": "Diperbarui",
       "regenerateLocaleAria": "Buat ulang terjemahan {locale}",
       "generateLocale": "Generate",
-      "generateLocaleAria": "Generate {locale} translation"
+      "generateLocaleAria": "Buat terjemahan {locale}"
     },
     "sourceLocale": {
       "label": "Bahasa sumber",
       "description": "Ini adalah bahasa sumber yang digunakan sebagai dasar terjemahan entitas ini.",
       "confirm": {
         "title": "Ubah bahasa sumber",
-        "description": "Changing the source language updates only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically.",
-        "detail": "{locale} becomes the language of the editable source document. Existing target documents and translation jobs remain unchanged.",
+        "description": "Mengubah bahasa sumber hanya memperbarui penunjuk sumber. Dokumen target dan pekerjaan terjemahan yang sudah ada tetap tidak berubah, dan terjemahan tidak dibuat secara otomatis.",
+        "detail": "{locale} menjadi bahasa dokumen sumber yang dapat disunting. Dokumen target dan pekerjaan terjemahan yang sudah ada tetap tidak berubah.",
         "confirm": "Ubah bahasa sumber"
       }
     },
     "activeEditLocale": {
-      "ariaLabel": "Switch content language. Current: {locale}",
+      "ariaLabel": "Ubah bahasa konten. Saat ini: {locale}",
       "sourceOption": "{locale} (Sumber)",
       "loading": "Memuat bahasa...",
-      "missingDescription": "No {locale} target document exists yet. Generate it from the translations panel.",
+      "missingDescription": "Belum ada dokumen target {locale}. Buat dari panel terjemahan.",
       "bodyPreviewTitle": "{locale} pratinjau isi",
-      "bodyPreviewDescription": "The existing translation document is shown with its structure and formatting.",
+      "bodyPreviewDescription": "Dokumen terjemahan yang sudah ada ditampilkan dengan struktur dan pemformatannya.",
       "bodyPreviewEmpty": "Belum ada pratinjau isi yang dilokalkan.",
-      "sharedStructureSectionDescription": "This section keeps shared layout or query settings from the source page; translated body content is read-only.",
+      "sharedStructureSectionDescription": "Bagian ini mempertahankan pengaturan tata letak atau kueri bersama dari halaman sumber; konten isi terjemahan hanya dapat dibaca.",
       "sectionFieldLabels": {
         "caption": "Keterangan",
         "copyJson": "Salinan adegan"
       }
     },
     "statuses": {
-      "missing": "Hilang",
       "existing": "Existing"
     },
     "states": {
       "loadFailed": "Gagal memuat terjemahan.",
-      "missingTarget": "No target document yet.",
-      "sourceRow": "Lokal ini diedit di editor sumber utama.",
+      "missingTarget": "Belum ada dokumen target.",
       "sourceEditorHint": "Edit teks asli di editor utama.",
       "updatedAt": "Diperbarui {date}"
     },
@@ -4353,64 +4254,29 @@
     }
   },
   "translationPanelMenu": {
-    "description": "Review source menu labels and existing translation documents.",
-    "sourceLocaleDescription": "The menu editor above owns structure, ordering, links, visibility, and source labels. Target translations below are read-only previews.",
-    "states": {
-      "sourcePreview": "Label menu sumber ({locale}): {labels}",
-      "sourceEditorHint": "Label ini berasal dari editor menu di atas.",
-      "missingTarget": "No labels are saved for this locale yet.",
-      "noItems": "Belum ada label menu untuk ditampilkan.",
-      "translationPreview": "Existing {locale} labels: {labels}"
-    },
+    "description": "Tinjau label menu sumber dan dokumen terjemahan yang sudah ada.",
     "previewModal": {
-      "title": "{locale} menu translation preview",
-      "descriptions": {
-        "missing": "No public menu translation exists for this locale. The source is shown until an Admin generates it.",
-        "existing": "Shows the current public translated labels for this menu as read-only."
-      },
+      "title": "Pratinjau terjemahan menu {locale}",
       "fields": {
-        "linkType": "Link type",
-        "destination": "Destination",
-        "children": "Nested items",
-        "localizedLabelForLocale": "{locale} public label",
-        "sourceLabelForLocale": "{locale} source label",
-        "localizedLabelDescription": "The current translated label shown in public menus; it cannot be changed here.",
-        "sourceLabelDescription": "Comes from the source menu editor and cannot be changed here.",
-        "fixedLocaleLockedDescription": "This item is fixed to the {locale} label and is read-only."
-      },
-      "states": {
-        "detailUnavailable": "Detailed translated menu data could not be loaded.",
-        "noItems": "There are no menu items to preview."
+        "localizedLabelForLocale": "Label publik {locale}"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template.",
-      "sourceLocaleDescription": "Templat sumber mengontrol subjek, body copy, dan nama variabel runtime.",
-      "states": {
-        "sourceEditorHint": "Edit templat sumber di editor utama.",
-        "noContent": "Belum ada subjek atau isi terjemahan."
-      }
+      "description": "Kelola bahasa sumber dan dokumen terjemahan yang sudah ada untuk templat email ini."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout.",
-      "sourceLocaleDescription": "Tata letak sumber mengontrol HTML pembungkus dan nama placeholder struktural untuk rendering email.",
-      "states": {
-        "sourceEditorHint": "Edit tata letak sumber di editor utama.",
-        "noContent": "Belum ada tata letak HTML yang diterjemahkan."
-      }
+      "description": "Kelola bahasa sumber dan dokumen terjemahan yang sudah ada untuk tata letak email ini."
     }
   },
   "localizationNotice": {
     "translated": {
-      "title": "Localized version",
-      "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
+      "title": "Versi lokal",
+      "description": "Versi lokal ini ditampilkan dalam {displayed}; versi asli dalam {source} tetap menjadi acuan resmi."
     },
     "fallback": {
-      "title": "Bahasa pengganti",
-      "english": "Terjemahan {requested} yang diminta tidak tersedia, sehingga laman ini ditampilkan dalam {displayed}.",
-      "source": "Terjemahan {requested} yang diminta tidak tersedia, sehingga laman ini ditampilkan dalam {source} asli."
+      "title": "Bahasa pengganti"
     },
     "actions": {
       "viewOriginal": "Lihat yang asli ({source})"
@@ -4430,17 +4296,16 @@
       "totalLocales": "Total lokal",
       "sourceEntities": "Entitas sumber",
       "activeJobs": "Pekerjaan sedang berlangsung",
-      "existingEntries": "Existing translations"
+      "existingEntries": "Terjemahan yang sudah ada"
     },
     "sections": {
-      "localeHealthTitle": "Translation state by locale",
-      "entityHealthTitle": "Translation state by entity type"
+      "localeHealthTitle": "Status terjemahan menurut lokal",
+      "entityHealthTitle": "Status terjemahan menurut jenis entitas"
     },
     "columns": {
       "policy": "Kebijakan",
-      "lastTargetUpdate": "Last target update",
+      "lastTargetUpdate": "Pembaruan target terakhir",
       "entity": "Entitas",
-      "existing": "Existing translations",
       "sources": "Sumber",
       "lastSourceUpdate": "Pembaruan sumber terakhir"
     },
@@ -4475,7 +4340,7 @@
   },
   "translationSettingsPage": {
     "title": "Pengaturan terjemahan",
-    "description": "Manage the default source language and automatic translation providers. An Admin explicitly starts translation generation from each editor.",
+    "description": "Kelola bahasa sumber bawaan dan penyedia terjemahan otomatis. Administrator secara eksplisit memulai pembuatan terjemahan dari setiap editor.",
     "actions": {
       "jobs": "Pekerjaan",
       "save": "Simpan pengaturan",
@@ -4485,8 +4350,8 @@
       "createProvider": "Buat penyedia"
     },
     "sections": {
-      "runtime": "Source defaults",
-      "runtimeDescription": "Set only the language used when a source language has not been established. Source changes never start translation generation automatically.",
+      "runtime": "Pengaturan bawaan sumber",
+      "runtimeDescription": "Tetapkan hanya bahasa yang digunakan ketika bahasa sumber belum ditetapkan. Perubahan sumber tidak pernah memulai pembuatan terjemahan secara otomatis.",
       "providers": "Penyedia terjemahan",
       "providersDescription": "Kelola penyedia terjemahan mesin. Pembuatan tetap dinonaktifkan hingga setidaknya satu penyedia aktif memiliki kredensial yang valid."
     },
@@ -4496,10 +4361,10 @@
         "description": "Digunakan ketika lokal sumber belum ditetapkan dan ketika permintaan tidak diselesaikan ke lokal konten yang didukung."
       },
       "protectedTerms": {
-        "label": "Protected terms",
-        "description": "Exact case-sensitive spellings that translation generation must keep unchanged. No terms are learned or suggested automatically.",
-        "placeholder": "Add a protected term",
-        "examples": "Examples: Photoshop, React Native"
+        "label": "Istilah yang dilindungi",
+        "description": "Ejaan persis yang peka terhadap huruf besar dan kecil yang harus dipertahankan saat membuat terjemahan. Tidak ada istilah yang dipelajari atau disarankan secara otomatis.",
+        "placeholder": "Tambahkan istilah yang dilindungi",
+        "examples": "Contoh: Photoshop, React Native"
       },
       "providerName": {
         "label": "Nama penyedia"
@@ -4628,33 +4493,22 @@
       "summary": "Tambahkan ringkasan singkat..."
     },
     "tooltips": {
-      "generatingNamed": "{name} sedang membuat ringkasan",
-      "applyingNamed": "{name} menerapkan ringkasan yang dihasilkan",
-      "readyNamed": "{name} telah menghasilkan ringkasan yang siap"
+      "generatingNamed": "{name} sedang membuat ringkasan"
     },
     "feedback": {
       "failedDefault": "Gagal memproses pembuatan ringkasan.",
-      "invalidJson": "Respons AI tidak dapat diurai sebagai ringkasan JSON.",
       "alreadyRunning": "Pembuatan ringkasan sudah berjalan.",
-      "applyingGenerated": "Menerapkan ringkasan yang dihasilkan.",
-      "resetOlderSession": "Reset status ringkasan yang dihasilkan dari sesi yang lebih lama.",
-      "resetUnrestorable": "Setel ulang status ringkasan lama yang dihasilkan dan tidak dapat dipulihkan.",
-      "missingJobPayload": "Pembuatan ringkasan tidak mengembalikan muatan pekerjaan.",
       "missingSuggestionPayload": "Pembuatan ringkasan selesai tanpa muatan saran.",
       "staleSuggestion": "Saran ini sudah basi. Buat ulang atau hilangkan sebelum melamar.",
       "unableToApplyNow": "Tidak dapat menerapkan ringkasan yang dihasilkan saat ini.",
       "applyFailed": "Gagal menerapkan ringkasan yang dihasilkan.",
       "applied": "Ringkasan yang dihasilkan diterapkan.",
-      "appliedJobUnresolved": "Ringkasan diterapkan, namun pekerjaan AI tidak dapat diselesaikan secara otomatis.",
-      "dismissedJobUnresolved": "Saran ringkasan ditolak secara lokal, namun pekerjaan AI tidak dapat diselesaikan secara otomatis.",
-      "readyBeforeApplying": "Terapkan atau tutup ringkasan yang dihasilkan terlebih dahulu.",
       "readyToApply": "Ringkasan yang dihasilkan siap diterapkan."
     },
     "ready": {
       "title": "Ringkasan yang dihasilkan",
       "suggestedSummary": "Ringkasan yang disarankan",
       "anotherCollaborator": "Kolaborator lain",
-      "anotherCollaboratorFallback": "Kolaborator lain telah menyiapkan ringkasan yang dihasilkan.",
       "anotherCollaboratorNamed": "{name} telah menghasilkan ringkasan yang siap."
     }
   },
@@ -4702,8 +4556,7 @@
       "roleUpdated": "Peran diperbarui",
       "userBanned": "Pengguna dilarang",
       "userUnbanned": "Pengguna tidak diblokir",
-      "userDeleted": "Pengguna dihapus",
-      "userCreated": "Pengguna dibuat"
+      "userDeleted": "Pengguna dihapus"
     }
   },
   "adminUserDetail": {
@@ -4740,16 +4593,13 @@
       "userIdCopied": "ID Pengguna disalin",
       "userIdCopyFailed": "Gagal menyalin ID pengguna",
       "emailSuppressionReleased": "Penindasan email dirilis",
-      "mainEmailUpdated": "Email utama diperbarui",
       "ssoProviderRemoved": "Penyedia SSO dihapus"
     },
     "auth": {
       "emptyEmail": "Tidak ada email",
       "delivery": {
         "title": "Email pengiriman",
-        "description": "Kampanye, pemberitahuan, dan email akun menggunakan email utama yang dipilih.",
-        "changePlaceholder": "Pilih email yang terverifikasi",
-        "changeHelp": "Mengubah pilihan ini akan segera disimpan."
+        "description": "Kampanye, pemberitahuan, dan email akun menggunakan email utama yang dipilih."
       },
       "providers": {
         "title": "Penyedia SSO yang terhubung",
@@ -4758,7 +4608,6 @@
         "remove": "Hapus penyedia SSO"
       },
       "sources": {
-        "current": "Email saat ini",
         "emailCode": "Masuk email"
       },
       "ban": {
@@ -4793,7 +4642,6 @@
         "noChanges": "Tidak ada perubahan untuk disimpan"
       },
       "validation": {
-        "invalidUrl": "Format URL tidak valid",
         "invalidEmail": "Format email tidak valid",
         "invalidHexColor": "Format warna hex tidak valid",
         "invalidGoogleAnalyticsId": "Format ID Google Analytics tidak valid"
@@ -5102,14 +4950,12 @@
   },
   "formSuccessPage": {
     "metadata": {
-      "fallbackTitle": "Formulir dikirimkan",
       "title": "{formTitle} - Dikirim"
     },
     "title": "Terima kasih"
   },
   "formPasswordPage": {
     "metadata": {
-      "fallbackTitle": "Akses Formulir",
       "description": "Masukkan kata sandi untuk mengakses formulir ini"
     },
     "title": "Dilindungi Kata Sandi",
@@ -5121,7 +4967,6 @@
   },
   "formDashboardPage": {
     "metadata": {
-      "fallbackTitle": "Dasbor Formulir",
       "title": "{formTitle} - Dasbor",
       "description": "Statistik dan analitik pengiriman formulir"
     },
@@ -5131,7 +4976,28 @@
     "stats": {
       "total": "Total"
     },
-    "fieldStatistics": "Statistik Lapangan"
+    "fieldStatistics": "Statistik Lapangan",
+    "charts": {
+      "donut": "Donat",
+      "pie": "Lingkaran",
+      "bar-horizontal": "Batang horizontal",
+      "bar-vertical": "Batang vertikal",
+      "radar": "Radar",
+      "table": "Tabel",
+      "area": "Area",
+      "line": "Garis",
+      "histogram": "Histogram",
+      "noResponses": "Belum ada respons",
+      "emptyValue": "(kosong)",
+      "min": "Minimum",
+      "max": "Maksimum",
+      "avg": "Rata-rata",
+      "count": "Jumlah",
+      "date": "Tanggal",
+      "value": "Nilai",
+      "range": "Rentang",
+      "chartType": "Jenis grafik"
+    }
   },
   "embeddedForm": {
     "states": {
@@ -5182,10 +5048,7 @@
       "locationMode": "Modus lokasi",
       "ticketUrl": "URL tiket",
       "streamUrl": "URL streaming",
-      "externalUrl": "URL eksternal",
-      "participants": "Peserta",
-      "textCredits": "Kredit teks",
-      "textCreditsDescription": "Satu kredit per baris. Gunakan Peran: Beri nama saat peran diperlukan."
+      "externalUrl": "URL eksternal"
     },
     "locationModes": {
       "mapPlace": "Lokasi",
@@ -5198,7 +5061,6 @@
       "tickets": "Tiket",
       "stream": "Sungai kecil",
       "link": "Link",
-      "participants": "Peserta",
       "empty": "Tidak ada acara yang ditemukan.",
       "date": "Tanggal",
       "credits": "Kredit"
@@ -5215,152 +5077,14 @@
       "deleteMessage": "Jenis acara ini hanya dapat dihapus jika tidak ada acara yang menggunakannya."
     }
   },
-  "tools": {
-    "portadj": {
-      "metadataTitle": "PortaDJ",
-      "metadataDescription": "Putar dan campur file audio lokal di browser dengan dua deck DJ."
-    },
-    "youtubeAudio": {
-      "title": "Audio YouTube",
-      "urlLabel": "Tautan video",
-      "urlPlaceholder": "https://…",
-      "resolve": "Muat audio",
-      "resolving": "Memuat audio",
-      "clear": "Hapus sumber",
-      "metadataTitle": "Audio YouTube",
-      "metadataDescription": "Konversikan audio dari sumber YouTube terautentikasi di browser Anda.",
-      "errors": {
-        "INTERNAL_ERROR": "Sumber audio tidak dapat dimuat. Coba lagi.",
-        "INVALID_REQUEST": "Masukkan URL video YouTube yang valid.",
-        "INVALID_UPSTREAM_RESPONSE": "YouTube mengembalikan sumber audio yang tidak terduga. Coba video lain.",
-        "REQUEST_ABORTED": "Permintaan dibatalkan.",
-        "SOURCE_EXPIRED": "Sumber audio ini telah kedaluwarsa. Muat kembali URL-nya.",
-        "SOURCE_NOT_FOUND": "Sumber audio ini tidak lagi tersedia. Muat kembali URL-nya.",
-        "UNAUTHORIZED": "Masuk kembali untuk menggunakan alat ini.",
-        "UNSUPPORTED_VIDEO": "Video ini tidak menyediakan sumber audio berdurasi terbatas yang didukung.",
-        "UPSTREAM_FAILURE": "Audio YouTube tidak dapat dimuat saat ini. Coba lagi."
-      }
-    },
-    "transcode": {
-      "title": "Transkoder Audio",
-      "targetIdle": "Menunggu",
-      "targetChecking": "Memeriksa",
-      "targetReady": "Siap",
-      "targetError": "Tidak tersedia",
-      "dropTitle": "Jatuhkan atau pilih file audio",
-      "dropDescription": "Maksimal 10 file · Tidak ada folder · Diproses di perangkat ini",
-      "chooseFiles": "Pilih file audio",
-      "supportedFormatsLabel": "Format yang didukung",
-      "supportedFormats": "Didukung: CAF, AIFF/AIFC, WAV, FLAC, MP3, AAC/M4A, Ogg/Opus, dan audio dalam MP4, MOV, MKV/WebM, atau TS. Diperiksa per file.",
-      "filesSelected": "File",
-      "outputSettings": "Pengaturan keluaran",
-      "outputSettingsHelper": "Saluran tetap tidak berubah. Otomatis memilih tarif yang kompatibel per file.",
-      "processingDetails": "Detail pemrosesan",
-      "processingDetailsDescription": "Pengambilan sampel ulang yang seimbang. Output bilangan bulat ragu-ragu. File WAV besar menggunakan RF64.",
-      "format": "Format",
-      "sampleRate": "Tingkat sampel",
-      "bitrate": "Kecepatan bit",
-      "bitDepth": "Kedalaman sedikit",
-      "bitDepthContainerEffective": "{containerBits}-bit container / {effectiveBits}-bit efektif",
-      "codec": "Kodek",
-      "sampleFormat": "Format sampel",
-      "float": "Mengambang",
-      "integer": "PCM bilangan bulat",
-      "constantBitrate": "CBR",
-      "variableBitrate": "VBR",
-      "sourcePcmFloat": "{bitDepth}-bit mengambang",
-      "sourcePcmInteger": "{bitDepth}-bit bilangan bulat",
-      "sourcePcmSignedInteger": "{bitDepth}-bit bilangan bulat bertanda tangan",
-      "sourcePcmUnsignedInteger": "{bitDepth}-bit bilangan bulat tidak bertanda tangan",
-      "automatic": "Otomatis",
-      "preserveSource": "Pertahankan sumbernya",
-      "unavailable": "Tidak tersedia",
-      "sampleRateAvailableFor": "{supported, number} dari {total, number} file",
-      "sampleRateResetAutomatic": "Tingkat sampel sebelumnya tidak valid untuk pengaturan keluaran ini. Kecepatan sampel diubah menjadi Otomatis.",
-      "unknownAudio": "Audio",
-      "channelCount": "{count, plural, one {# saluran} other {# saluran}}",
-      "queue": "Antrean konversi",
-      "convert": "Mengubah",
-      "cancelAll": "Batalkan semuanya",
-      "clear": "Jernih",
-      "download": "Simpan hasil konversi",
-      "downloadSource": "Simpan asli",
-      "sourceDownloadExpired": "Sumber telah kedaluwarsa atau tidak tersedia. Muat ulang URL YouTube.",
-      "sourceDownloadFailed": "File asli tidak dapat diunduh. Periksa koneksi dan muat ulang sumber.",
-      "retry": "Mencoba kembali",
-      "cancel": "Batalkan",
-      "remove": "Hapus",
-      "sourceValue": "Sumber ({value})",
-      "mono": "Mono",
-      "stereo": "Stereo",
-      "targetWaitingForFiles": "Tambahkan file audio yang didukung untuk memeriksa target keluaran yang dipilih.",
-      "targetCheckingMessage": "Memeriksa apakah browser ini mendukung target keluaran yang dipilih.",
-      "targetReadyMessage": "Target keluaran yang dipilih tersedia di browser ini.",
-      "targetAvailability": "{available, number} file tersedia untuk konversi; {unavailable, number} tetap tidak tersedia dengan pengaturan ini.",
-      "engineLoading": "Memuat mesin audio {asset}.",
-      "engineVerifying": "Memverifikasi mesin audio {asset}.",
-      "engineLoadFailed": "Mesin audio {asset} tidak dapat dimuat.",
-      "capacityExceeded": "{count, number} file tidak ditambahkan. Antrian dapat menampung hingga {max, number} file.",
-      "statusInspectionQueued": "Menunggu pemeriksaan",
-      "statusInspecting": "Memeriksa",
-      "statusReady": "Siap",
-      "statusQueued": "Mengantri",
-      "statusQueuedAvailability": "Mengantri {converting, number} file untuk konversi; {unavailable, number} tetap tidak tersedia.",
-      "statusConverting": "Konversi",
-      "statusConvertingAvailability": "Mengonversi file {converting, number}; {unavailable, number} tetap tidak tersedia.",
-      "statusComplete": "Menyelesaikan",
-      "statusCompleteAvailability": "File {converted, number} yang dikonversi; {unavailable, number} tetap tidak tersedia.",
-      "statusBatchResult": "Proses selesai: {eligible, number} memenuhi syarat, {attempted, number} dicoba, {succeeded, number} berhasil, {failed, number} gagal, {unavailable, number} tidak tersedia.",
-      "statusUnsupported": "Tidak didukung",
-      "statusError": "Kesalahan",
-      "statusCancelled": "Dibatalkan",
-      "unsupportedInput": "File ini bukan input audio yang didukung.",
-      "unsupportedCodec": "Browser ini tidak dapat memecahkan kode codec audio dalam file ini.",
-      "inspectionFailed": "File tidak dapat diperiksa. Coba lagi.",
-      "inspectionInconclusive": "Browser tidak dapat mengidentifikasi audio ini dalam batas aman dibaca. Coba file atau format lain.",
-      "outputUnsupported": "Setelan keluaran yang dipilih tidak didukung di browser ini.",
-      "outputProbeFailed": "Dukungan keluaran tidak dapat diperiksa. Coba lagi.",
-      "outputEngineUnavailable": "Mesin runtime untuk {preset} tidak dapat dijalankan. Periksa kebijakan jaringan atau aset dan coba lagi.",
-      "outputChannelsUnsupported": "Output ini mendukung saluran sumber {minimum, number}–{maximum, number}, tetapi file ini memiliki {actual, number}. Saluran dipertahankan dan tidak tercampur.",
-      "sourceInspectionMissing": "Jumlah saluran sumber atau laju sampel tidak dapat diidentifikasi. Pilih file dengan metadata audio yang dapat dibaca.",
-      "outputConfigurationUnavailable": "Pengaturan format dan pengkodean yang dipilih tidak membentuk konfigurasi keluaran yang tersedia.",
-      "preserveSourceRateUnsupported": "Sumber preservasi tidak dapat menggunakan {sourceRate} untuk keluaran ini. Tarif yang diperbolehkan: {allowed}.",
-      "sourceResamplingRateUnsupported": "Sumber {sourceRate} ini berada di luar rentang pengambilan sampel ulang ({minimum}–{maximum}). Itu hanya dapat melewati ke output yang kompatibel.",
-      "targetResamplingRateUnsupported": "Target {targetRate} yang dipilih berada di luar rentang pengambilan sampel ulang ({minimum}–{maximum}).",
-      "automaticRateUnavailable": "Otomatis tidak dapat memilih tarif yang valid untuk sumber {sourceRate} ini. Tingkat keluaran yang diperbolehkan: {allowed}.",
-      "presetRateUnsupported": "Keluaran ini tidak mendukung {targetRate}. Tarif yang diperbolehkan: {allowed}.",
-      "conversionFailed": "Konversi audio gagal.",
-      "conversionStorageLimitExceeded": "Browser ini tidak dapat menyimpan keluaran yang diharapkan di penyimpanan sementara lokal. Pilih format yang lebih kecil atau terkompresi, atau coba lagi di browser yang mendukung keluaran lokal besar.",
-      "conversionTargetSizeLimitExceeded": "Format keluaran yang dipilih tidak dapat mewakili file sebesar ini. Pilih format lain, atau kurangi laju sampel, kedalaman bit, atau jumlah saluran.",
-      "cancelledMessage": "Konversi dibatalkan.",
-      "sourceSummary": "{container} · {sampleRate} · {channels} · {bitDepth}",
-      "outputSummary": "{preset} · {size}",
-      "progressLabel": "{phase} · {progress, number}%",
-      "phasePrepare": "Mempersiapkan",
-      "phaseDecode": "Penguraian kode",
-      "phaseEncode": "Pengkodean",
-      "phaseFinalize": "Menyelesaikan",
-      "bytes": "{count, number} byte",
-      "storageOpfs": "Penyimpanan browser pribadi",
-      "storageMemory": "Memori peramban",
-      "metadataTitle": "Transkoder Audio",
-      "metadataDescription": "Konversi audio di browser Anda. File tidak pernah meninggalkan perangkat Anda.",
-      "notices": "Lisensi sumber terbuka"
-    },
-    "hwp": {
-      "title": "Editor HWP",
-      "metadataDescription": "Buka, edit, dan simpan dokumen HWP dan HWPX di browser.",
-      "description": "Gunakan menu File editor untuk membuka dan menyimpan file HWP atau HWPX. Dokumen diproses di perangkat ini tanpa diunggah.",
-      "loading": "Memuat editor…",
-      "error": "Editor tidak dapat dimuat. Coba lagi.",
-      "retry": "Coba lagi",
-      "metadataTitle": "Editor HWP"
-    }
-  },
   "myMetadata": {
     "description": "{title} halaman untuk akun Anda di {siteName}."
   },
   "fileManager": {
+    "pagination": {
+      "end": "Akhir hasil"
+    },
+    "selectionUnavailableDescription": "File ini tidak dapat ditambahkan. Tekan Enter untuk melihat pratinjau.",
     "title": "File",
     "description": "Unggah, atur, periksa, dan gunakan kembali file di seluruh situs.",
     "root": "File",
@@ -5484,9 +5208,7 @@
       "move-files": {
         "title": "Pindahkan file"
       },
-      "targetFolderId": "ID folder sasaran",
       "extensionSeparate": "Ekstensi .{extension} disimpan secara terpisah.",
-      "rootWhenEmpty": "Biarkan kosong untuk berpindah ke root.",
       "delete": {
         "title": "Hapus",
         "folder": "Hapus folder ini dan semua file yang tidak digunakan di bawahnya?",
@@ -5496,14 +5218,26 @@
         "byDomain": "Berdasarkan domain: {summary}",
         "more": "dan {count} lainnya. Buka detail file untuk meninjau daftar lengkap."
       }
+    },
+    "viewSettings": {
+      "title": "Pengaturan tampilan",
+      "iconSize": "Ukuran ikon",
+      "spacing": "Jarak antar item",
+      "columns": "Kolom",
+      "auto": "Otomatis",
+      "small": "Kecil",
+      "medium": "Sedang",
+      "large": "Besar",
+      "compact": "Rapat",
+      "standard": "Standar",
+      "comfortable": "Longgar",
+      "reset": "Atur ulang tampilan"
     }
   },
   "fileDownloadAccess": {
     "editor": {
       "sectionTitle": "Akses unduhan",
-      "sectionDescription": "Kontrol siapa yang dapat mengunduh file asli.",
       "loading": "Memuat akses unduhan…",
-      "audienceLabel": "Unduh penonton",
       "audiences": {
         "disabled": {
           "label": "Dengan disabilitas",
@@ -5522,15 +5256,10 @@
           "description": "Hanya pengguna di audiens terpilih yang dapat mendownload file ini."
         }
       },
-      "segmentsLabel": "Audiens",
-      "segmentsDescription": "Pilih satu atau beberapa segmen Audiens yang ada.",
-      "segmentsPlaceholder": "Pilih audiens",
       "segmentsLoadError": "Kebijakan telah dimuat, namun audiens tidak dapat dimuat.",
       "segmentsEmpty": "Tidak ada segmen Audiens yang tersedia.",
       "restrictedWithoutAudience": "Kebijakan terbatas ini tidak memiliki Audiens. Pengunduhan ditolak untuk semua orang sampai Anda memilih setidaknya satu Pemirsa.",
-      "segmentRequiresSubscription": "{name} (berlangganan buletin diperlukan)",
       "additionalSelected": "{count} lainnya dipilih",
-      "loadMoreSegments": "Muat lebih banyak pemirsa",
       "loadError": "Akses download tidak dapat dimuat.",
       "saveError": "Akses unduhan tidak dapat disimpan.",
       "fileRequired": "Simpan file sebelum mengonfigurasi akses unduhan."
@@ -5552,5 +5281,63 @@
     "empty": "Masukkan sumber diagram",
     "invalid": "Diagram tidak valid",
     "loading": "Menggambar…"
+  },
+  "errorPage": {
+    "titles": {
+      "400": "Permintaan tidak valid",
+      "401": "Perlu masuk",
+      "403": "Akses ditolak",
+      "404": "Halaman tidak ditemukan",
+      "408": "Waktu permintaan habis",
+      "409": "Permintaan bertentangan dengan keadaan saat ini",
+      "410": "Halaman ini tidak lagi tersedia",
+      "413": "Permintaan terlalu besar",
+      "422": "Permintaan tidak dapat diproses",
+      "429": "Terlalu banyak permintaan",
+      "500": "Ada yang tidak beres",
+      "501": "Permintaan ini tidak didukung",
+      "502": "Layanan terkait mengalami kesalahan",
+      "503": "Layanan sementara tidak tersedia",
+      "504": "Waktu respons layanan habis"
+    },
+    "actions": {
+      "goHome": "Pulang",
+      "tryAgain": "Coba lagi",
+      "login": "Kembali ke Masuk"
+    }
+  },
+  "localBackups": {
+    "title": "Cadangan lokal",
+    "description": "Suntingan yang belum tersimpan dari tab yang ditutup di perangkat ini. Buka editor untuk memulihkannya. Cadangan kedaluwarsa setelah 30 hari dan dihapus saat Anda keluar dari akun.",
+    "empty": "Tidak ada cadangan lokal untuk dipulihkan. Suntingan di tab yang masih terbuka tidak ditampilkan di sini.",
+    "unavailable": "Cadangan lokal memerlukan penyimpanan browser dan Web Locks di perangkat ini.",
+    "loading": "Mencari cadangan lokal…",
+    "error": "Tidak dapat menyelesaikan tindakan ini. Muat ulang daftar dan coba lagi.",
+    "refresh": "Muat ulang",
+    "lastChanged": "Terakhir diubah {time}",
+    "open": "Buka editor",
+    "discard": "Buang",
+    "openLabel": "Buka editor: {kind} {id}, {locale}",
+    "discardLabel": "Buang: {kind} {id}, {locale}",
+    "discardTitle": "Buang cadangan lokal?",
+    "discardDescription": "Suntingan yang belum tersimpan ini akan dihapus secara permanen dari perangkat ini. Konten yang sudah tersimpan tidak terpengaruh.",
+    "kinds": {
+      "post": "Postingan",
+      "page": "Halaman",
+      "work": "Pekerjaan",
+      "campaign": "Kampanye",
+      "email-template": "Templat email",
+      "email-layout": "Tata letak email",
+      "terms-history": "Ketentuan",
+      "privacy-history": "Kebijakan privasi",
+      "artist": "Artis",
+      "release": "Rilis",
+      "label": "Label",
+      "form": "Formulir",
+      "map-theme": "Tema peta",
+      "program-event": "Acara",
+      "menu": "Menu",
+      "post-series": "Rangkaian postingan"
+    }
   }
 }

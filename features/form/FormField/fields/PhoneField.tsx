@@ -1,18 +1,18 @@
 'use client';
 
-import { Input } from '@mantine/core';
+import { Field } from '@/components/core/Field';
 import { PhoneInput } from '@/features/form/PhoneInput';
 import { DEFAULT_COUNTRY_CODE } from '@/lib/constants/phone-countries';
-import { extractPhoneValue } from '@/lib/types/form/guards';
+import { extractPhoneValue } from '@/lib/types/phone/PhoneNumber';
 import type { FormFieldSchemaPhone } from '@/lib/types/form/schema';
 import { parseMarkdown } from '@/lib/utils/parse-markdown';
-import { inputStyles } from '../styles';
 import { getFieldLabel } from '../utils';
 
 export interface PhoneFieldProps {
   field: FormFieldSchemaPhone;
   defaultCountry?: string | null;
   value: unknown;
+  disabled?: boolean;
   onChange: (value: { phone: string; countryCode: string }) => void;
   onFocus: () => void;
   onBlur: () => void;
@@ -22,6 +22,7 @@ export interface PhoneFieldProps {
 
 export function PhoneField({
   field,
+  disabled,
   defaultCountry,
   value,
   onChange,
@@ -33,14 +34,14 @@ export function PhoneField({
   const phoneNumber = extractPhoneValue(value, field.defaultCountry ?? defaultCountry ?? DEFAULT_COUNTRY_CODE);
 
   return (
-    <Input.Wrapper
+    <Field
       label={parseMarkdown(getFieldLabel(field))}
       description={field.description ? parseMarkdown(field.description) : undefined}
       error={error}
-      withAsterisk={isRequired}
-      styles={inputStyles}
+      required={isRequired}
     >
       <PhoneInput
+        disabled={disabled}
         defaultCountry={phoneNumber.countryCode}
         defaultValue={phoneNumber.phone}
         onPhoneChange={(phone, countryCode) => onChange({ phone, countryCode })}
@@ -49,6 +50,6 @@ export function PhoneField({
         error={error}
         showErrorText={false}
       />
-    </Input.Wrapper>
+    </Field>
   );
 }

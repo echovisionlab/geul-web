@@ -73,6 +73,9 @@ export function WorkListViewStreaming(blockProps: BlockViewProps) {
           columns={columns}
           limit={limit}
           layout={layout}
+          itemSize={p.itemSize}
+          showImage={p.showImage !== 'false'}
+          imageAspectRatio={p.imageAspectRatio}
           carouselLoop={carouselLoop}
           carouselIndicators={carouselIndicators}
         />

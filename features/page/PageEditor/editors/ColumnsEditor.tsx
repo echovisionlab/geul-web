@@ -1,13 +1,38 @@
 'use client';
+import { breakpointQuery } from '@/components/core/Layout/breakpoints';
 
-import { useCallback, useMemo, useState, type ComponentType } from 'react';
-import { IconColumns, IconPlus, IconTrash } from '@tabler/icons-react';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutGrid as DsLayoutGrid,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from 'react';
+import { IconColumns, IconPlus } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Group, Paper, Stack, Text } from '@mantine/core';
+import { SectionCard } from '@/components/core/Section';
+import { Field } from '@/components/core/Field';
+import { useMediaQuery } from '@mantine/hooks';
 import { LabelBadge } from '@/components/core/Badge';
 import { IconButton } from '@/components/core/IconButton';
 import { Select, NumberInput, SegmentedControl, Switch } from '@/components/core/Input';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
+import {
+  DndContext,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  useDroppable,
+  closestCenter,
+  type KeyboardCoordinateGetter,
+} from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SectionItemView } from '../SectionItemView';
+import { focusPageSection } from '../section-focus';
+import { usePageSectionDragAccessibility } from '../usePageSectionDragAccessibility';
+import { moveColumnSection } from './move-column-section';
 import { usePageEditor } from '@/features/page/PageEditor/PageEditorContext';
 import { resolveEmbedUrl } from '@/features/page/blocks/embed/policy';
 import { createBlockId } from '@/lib/editor/block-id';
@@ -22,9 +47,101 @@ interface ColumnsEditorProps {
   SectionRenderer: ComponentType<SectionRendererProps>;
 }
 
-export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) {
+interface ColumnsEditorViewProps extends ColumnsEditorProps {
+  editable: boolean;
+  allowStructuralEdits: boolean;
+  updateSection: (sectionId: string, updates: import('../types').SectionUpdates) => void;
+  updateLocalizedSectionProps: (sectionId: string, props: Record<string, unknown>) => void;
+}
+
+function ColumnDropZone({
+  id,
+  children,
+  disabled,
+  labelId,
+}: {
+  id: string;
+  children: ReactNode;
+  disabled: boolean;
+  labelId: string;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id, disabled });
+  return (
+    <SectionCard
+      ref={setNodeRef}
+      role="group"
+      aria-labelledby={labelId}
+      padding="xs"
+      appearance="plain"
+      state={isOver ? 'drop-target' : 'default'}
+      withBorder={false}
+    >
+      {children}
+    </SectionCard>
+  );
+}
+
+const columnKeyboardCoordinates: KeyboardCoordinateGetter = (event, args) => {
+  const sortable = sortableKeyboardCoordinates(event, args);
+  if (sortable) {
+    return sortable;
+  }
+  const directions: Record<string, readonly [number, number]> = {
+    ArrowRight: [1, 0],
+    ArrowLeft: [-1, 0],
+    ArrowDown: [0, 1],
+    ArrowUp: [0, -1],
+  };
+  const direction = directions[event.code];
+  const { collisionRect, droppableContainers, droppableRects } = args.context;
+  if (!direction || !collisionRect) {
+    return undefined;
+  }
+  const destinations = droppableContainers
+    .getEnabled()
+    .map((container) => droppableRects.get(container.id))
+    .filter(
+      (rect) =>
+        rect && (rect.left - collisionRect.left) * direction[0] + (rect.top - collisionRect.top) * direction[1] > 0,
+    )
+    .sort(
+      (a, b) =>
+        Math.hypot(a!.left - collisionRect.left, a!.top - collisionRect.top) -
+        Math.hypot(b!.left - collisionRect.left, b!.top - collisionRect.top),
+    );
+  const destination = destinations[0];
+  return destination ? { x: destination.left, y: destination.top } : undefined;
+};
+
+export function ColumnsEditor(props: ColumnsEditorProps) {
+  const { updateSection, updateLocalizedSectionProps, editable, allowStructuralEdits } = usePageEditor();
+  return (
+    <ColumnsEditorView
+      {...props}
+      updateSection={updateSection}
+      updateLocalizedSectionProps={updateLocalizedSectionProps}
+      editable={editable}
+      allowStructuralEdits={allowStructuralEdits}
+    />
+  );
+}
+
+export function ColumnsEditorView({
+  section,
+  SectionRenderer,
+  updateSection,
+  updateLocalizedSectionProps,
+  editable,
+  allowStructuralEdits,
+}: ColumnsEditorViewProps) {
   const t = useTranslations('pageEditor');
-  const { updateSection, editable, allowStructuralEdits } = usePageEditor();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const pendingFocus = useRef<{ sectionId?: string; columnIndex: number } | null>(null);
+  const isMobile = useMediaQuery(breakpointQuery('sm'));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: columnKeyboardCoordinates }),
+  );
   const canEditStructure = editable && allowStructuralEdits;
   const [pendingEmbedColumn, setPendingEmbedColumn] = useState<string | null>(null);
   const sectionTypeLabels = usePageSectionTypeLabels();
@@ -62,6 +179,22 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
   const columnRatios = (props.columnRatios as string) || '1:1';
   const mobileStack = (props.mobileStack as string) || 'true';
   const columnsData: ColumnData[] = section.columns || [];
+  const dragAccessibility = usePageSectionDragAccessibility(columnsData.flatMap((column) => column.sections));
+  useEffect(() => {
+    const pending = pendingFocus.current;
+    if (!pending) {
+      return;
+    }
+    const frame = requestAnimationFrame(() => {
+      if (pending.sectionId) {
+        focusPageSection(rootRef.current, pending.sectionId);
+      } else {
+        rootRef.current?.querySelector<HTMLElement>(`[data-column-section-add="${pending.columnIndex}"]`)?.focus();
+      }
+      pendingFocus.current = null;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [columnsData]);
 
   const updateProp = useCallback(
     (key: string, value: string) => {
@@ -119,6 +252,10 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
       const newColumns = columnsData.map((col) =>
         col.id === columnId ? { ...col, sections: [...col.sections, child] } : col,
       );
+      pendingFocus.current = {
+        sectionId: child.id,
+        columnIndex: columnsData.findIndex((column) => column.id === columnId),
+      };
       updateSection(section.id, { columns: newColumns });
     },
     [canEditStructure, updateSection, section.id, columnsData],
@@ -129,6 +266,11 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
       if (!canEditStructure) {
         return;
       }
+      const currentColumn = columnsData[columnIndex];
+      pendingFocus.current = {
+        sectionId: currentColumn?.sections[sectionIndex + 1]?.id ?? currentColumn?.sections[sectionIndex - 1]?.id,
+        columnIndex,
+      };
       const newColumns = columnsData.map((col, i) =>
         i === columnIndex ? { ...col, sections: col.sections.filter((_, si) => si !== sectionIndex) } : col,
       );
@@ -138,10 +280,10 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
   );
 
   const ratios = columnRatios.split(':').map(Number);
-  const gridTemplateColumns = ratios.map((r) => `${r}fr`).join(' ');
+  const gridTemplateColumns = isMobile && mobileStack === 'true' ? '1fr' : ratios.map((r) => `${r}fr`).join(' ');
 
   return (
-    <Stack gap="sm" data-page-block-editor="columns">
+    <DsLayoutStack gap="sm" ref={rootRef} data-page-block-editor="columns">
       {pendingEmbedColumn !== null ? (
         <PageSectionPreinsertDialog
           type="embed"
@@ -156,47 +298,47 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
         />
       ) : null}
       {/* Header */}
-      <Group gap="xs">
+      <DsLayoutInline gap="xs">
         <IconColumns size={18} />
-        <Text size="sm" fw={500}>
+        <DsText size="sm" weight="medium">
           {t('sectionTypes.columns')}
-        </Text>
+        </DsText>
         <LabelBadge size="sm">{t('columnsEditor.badges.columnCount', { count: columnCount })}</LabelBadge>
         <LabelBadge size="sm" tone="neutral">
           {columnRatios}
         </LabelBadge>
-      </Group>
+      </DsLayoutInline>
 
       {/* Settings */}
-      <Group gap="sm">
-        <SegmentedControl
-          disabled={!canEditStructure}
-          data={columnCountOptions}
-          value={columnCount}
-          onChange={(value) => updateProp('columns', value)}
-          size="xs"
-        />
-
+      <DsLayoutGrid columns={{ base: 1, sm: 2 }} gap="sm" align="end">
+        <Field label={t('blockEditor.labels.columns')}>
+          <SegmentedControl
+            label={t('blockEditor.labels.columns')}
+            disabled={!canEditStructure}
+            data={columnCountOptions}
+            value={columnCount}
+            onChange={(value) => updateProp('columns', value)}
+            size="xs"
+          />
+        </Field>
         <Select
+          label={t('columnsEditor.labels.ratio')}
           disabled={!canEditStructure}
           data={ratioOptions[columnCount] || ratioOptions['2']}
           value={columnRatios}
           onChange={(value) => updateProp('columnRatios', value || '1:1')}
           size="xs"
-          w={120}
         />
-
         <NumberInput
+          label={t('blockEditor.labels.gap')}
           disabled={!canEditStructure}
           value={parseInt(gap, 10)}
           onChange={(value) => updateProp('gap', String(value || 24))}
           min={0}
           max={100}
           size="xs"
-          w={80}
           suffix="px"
         />
-
         <Switch
           disabled={!canEditStructure}
           label={t('columnsEditor.stackOnMobile')}
@@ -204,84 +346,112 @@ export function ColumnsEditor({ section, SectionRenderer }: ColumnsEditorProps) 
           onChange={(e) => updateProp('mobileStack', e.currentTarget.checked ? 'true' : 'false')}
           size="xs"
         />
-      </Group>
+      </DsLayoutGrid>
 
-      {/* Column Editors */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns,
-          gap: `${gap}px`,
+      {/* Each column consumes the same block chrome and sortable handle as the page canvas. */}
+      <DndContext
+        accessibility={dragAccessibility}
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={({ active, over }) => {
+          if (!canEditStructure || !over) {
+            return;
+          }
+          const moved = moveColumnSection(columnsData, String(active.id), String(over.id));
+          if (moved) {
+            pendingFocus.current = {
+              sectionId: String(active.id),
+              columnIndex: moved.findIndex((column) => column.sections.some((child) => child.id === active.id)),
+            };
+            updateSection(section.id, { columns: moved });
+          }
         }}
       >
-        {columnsData.map((column, columnIndex) => (
-          <Paper key={column.id} p="xs" withBorder>
-            <Group justify="space-between" mb="xs">
-              <Text size="xs" c="dimmed" fw={500}>
-                {t('columnsEditor.column', { index: columnIndex + 1 })}
-              </Text>
-              <DropdownMenu size="compact">
-                <DropdownMenu.Target>
-                  <IconButton
-                    disabled={!canEditStructure}
-                    data-column-section-add={columnIndex}
-                    emphasis="medium"
-                    size="xs"
-                    aria-label={t('columnsEditor.actions.addSectionToColumn', {
-                      index: columnIndex + 1,
-                    })}
-                  >
-                    <IconPlus size={14} />
-                  </IconButton>
-                </DropdownMenu.Target>
-                <DropdownMenu.Dropdown>
-                  <DropdownMenu.Label>{t('columnsEditor.menuLabel')}</DropdownMenu.Label>
-                  {COLUMN_SECTION_MENU.map((type) => (
-                    <DropdownMenu.Item
-                      key={type}
-                      data-column-section-add-item={type}
-                      disabled={!canEditStructure}
-                      onClick={() => addSectionToColumn(column.id, type)}
-                    >
-                      {sectionTypeLabels[type]}
-                    </DropdownMenu.Item>
-                  ))}
-                </DropdownMenu.Dropdown>
-              </DropdownMenu>
-            </Group>
-
-            <Stack gap="xs">
-              {column.sections.length === 0 ? (
-                <Text size="xs" c="dimmed" ta="center" py="md">
-                  {t('columnsEditor.emptyColumn')}
-                </Text>
-              ) : (
-                column.sections.map((childSection, sectionIndex) => (
-                  <Paper key={childSection.id} p="xs" withBorder bg="var(--mantine-color-default)">
-                    <Group justify="space-between" mb="xs">
-                      <LabelBadge size="xs">{sectionTypeLabels[childSection.type]}</LabelBadge>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns,
+            gap: `${gap}px`,
+          }}
+        >
+          {columnsData.map((column, columnIndex) => (
+            <ColumnDropZone
+              key={column.id}
+              id={column.id}
+              labelId={`page-column-${column.id}-label`}
+              disabled={!canEditStructure || column.sections.length > 0}
+            >
+              <DsLayoutInset blockEnd="xs">
+                <DsLayoutInline justify="between">
+                  <DsText id={`page-column-${column.id}-label`} size="xs" tone="secondary" weight="medium">
+                    {t('columnsEditor.column', { index: columnIndex + 1 })}
+                  </DsText>
+                  <DropdownMenu size="compact">
+                    <DropdownMenu.Target>
                       <IconButton
                         disabled={!canEditStructure}
-                        tone="danger"
-                        emphasis="low"
+                        data-column-section-add={columnIndex}
+                        emphasis="medium"
                         size="xs"
-                        aria-label={t('columnsEditor.actions.removeSectionFromColumn', {
-                          section: sectionTypeLabels[childSection.type],
+                        aria-label={t('columnsEditor.actions.addSectionToColumn', {
                           index: columnIndex + 1,
                         })}
-                        onClick={() => removeSectionFromColumn(columnIndex, sectionIndex)}
                       >
-                        <IconTrash size={12} />
+                        <IconPlus size={14} />
                       </IconButton>
-                    </Group>
-                    <SectionRenderer section={childSection} />
-                  </Paper>
-                ))
-              )}
-            </Stack>
-          </Paper>
-        ))}
-      </div>
-    </Stack>
+                    </DropdownMenu.Target>
+                    <DropdownMenu.Dropdown>
+                      <DropdownMenu.Label>{t('columnsEditor.menuLabel')}</DropdownMenu.Label>
+                      {COLUMN_SECTION_MENU.map((type) => (
+                        <DropdownMenu.Item
+                          key={type}
+                          data-column-section-add-item={type}
+                          disabled={!canEditStructure}
+                          onClick={() => addSectionToColumn(column.id, type)}
+                        >
+                          {sectionTypeLabels[type]}
+                        </DropdownMenu.Item>
+                      ))}
+                    </DropdownMenu.Dropdown>
+                  </DropdownMenu>
+                </DsLayoutInline>
+              </DsLayoutInset>
+
+              <SortableContext items={column.sections.map((child) => child.id)} strategy={verticalListSortingStrategy}>
+                <DsLayoutStack gap="xs">
+                  {column.sections.length === 0 ? (
+                    <DsLayoutInset block="md">
+                      <DsText size="xs" tone="secondary" align="center">
+                        {t('columnsEditor.emptyColumn')}
+                      </DsText>
+                    </DsLayoutInset>
+                  ) : (
+                    column.sections.map((childSection, sectionIndex) => (
+                      <SectionItemView
+                        key={childSection.id}
+                        section={childSection}
+                        editable={editable}
+                        allowStructuralEdits={allowStructuralEdits}
+                        initialExpanded
+                        positionDescription={t('a11y.columnsPosition', {
+                          column: t('columnsEditor.column', { index: columnIndex + 1 }),
+                          section: sectionTypeLabels[childSection.type],
+                          index: sectionIndex + 1,
+                          count: column.sections.length,
+                        })}
+                        onDelete={() => removeSectionFromColumn(columnIndex, sectionIndex)}
+                        updateSection={updateSection}
+                        updateLocalizedSectionProps={updateLocalizedSectionProps}
+                        content={<SectionRenderer section={childSection} />}
+                      />
+                    ))
+                  )}
+                </DsLayoutStack>
+              </SortableContext>
+            </ColumnDropZone>
+          ))}
+        </div>
+      </DndContext>
+    </DsLayoutStack>
   );
 }

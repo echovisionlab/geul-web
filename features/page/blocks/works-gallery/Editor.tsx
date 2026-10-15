@@ -12,11 +12,12 @@ import type { WorkListProps } from './schema';
 import { WorkListView } from './View';
 
 interface WorkListSettingsFormProps {
+  readOnly?: boolean;
   props: Partial<WorkListProps>;
   updateProps: (props: Record<string, unknown>) => void;
 }
 
-function WorkListSettingsForm({ props, updateProps }: WorkListSettingsFormProps) {
+function WorkListSettingsForm({ props, updateProps, readOnly = false }: WorkListSettingsFormProps) {
   const tPageEditor = useTranslations('pageEditor');
   const tWorks = useTranslations('works');
 
@@ -36,9 +37,12 @@ function WorkListSettingsForm({ props, updateProps }: WorkListSettingsFormProps)
 
   const updateProp = useCallback(
     (key: string, value: string) => {
+      if (readOnly) {
+        return;
+      }
       updateProps({ [key]: value });
     },
-    [updateProps],
+    [readOnly, updateProps],
   );
 
   const typeOptions = getWorkTableEditorTypeOptions({
@@ -61,9 +65,11 @@ function WorkListSettingsForm({ props, updateProps }: WorkListSettingsFormProps)
 
   return (
     <ListBlockEditorBase
+      readOnly={readOnly}
       editorType="work-list"
       limitLabel={tPageEditor('blockEditor.labels.numberOfWorks')}
       layout={layout}
+      itemSize={props.itemSize}
       columns={columns}
       limit={limit}
       maxLimit={24}
@@ -80,29 +86,29 @@ function WorkListSettingsForm({ props, updateProps }: WorkListSettingsFormProps)
       filters={
         <>
           <MultiSelect
+            disabled={readOnly}
             label={tPageEditor('blockEditor.labels.workTypes')}
             placeholder={tPageEditor('blockEditor.placeholders.allTypes')}
             data={typeOptions}
             value={workTypes ? workTypes.split(',').filter(Boolean) : []}
             onChange={(values) => updateProp('workTypes', values.join(','))}
-            size="xs"
             searchable
             clearable
           />
           <Switch
+            disabled={readOnly}
             label={tPageEditor('blockEditor.labels.featuredWorksOnly')}
             checked={featuredOnly === 'true'}
             onChange={(event) => updateProp('featuredOnly', event.currentTarget.checked ? 'true' : 'false')}
-            size="sm"
           />
         </>
       }
       extraDisplayOptions={
         <Switch
+          disabled={readOnly}
           label={tPageEditor('blockEditor.labels.showMeta')}
           checked={showMeta === 'true'}
           onChange={(event) => updateProp('showMeta', event.currentTarget.checked ? 'true' : 'false')}
-          size="sm"
         />
       }
       onUpdate={updateProp}
@@ -110,20 +116,27 @@ function WorkListSettingsForm({ props, updateProps }: WorkListSettingsFormProps)
   );
 }
 
-export function WorkListSettingsEditor({ props, updateSharedProps }: BlockSettingsEditorProps<WorkListProps>) {
-  return <WorkListSettingsForm props={props} updateProps={updateSharedProps} />;
+export function WorkListSettingsEditor({
+  props,
+  updateSharedProps,
+  allowSharedEdits,
+}: BlockSettingsEditorProps<WorkListProps>) {
+  return <WorkListSettingsForm props={props} updateProps={updateSharedProps} readOnly={allowSharedEdits === false} />;
 }
 
 export function WorkListEditor({ sectionId, props }: BlockEditorProps<WorkListProps>) {
-  const { updateSection } = usePageEditor();
+  const { updateSection, editable, allowStructuralEdits } = usePageEditor();
   const updateProps = useCallback(
     (nextProps: Record<string, unknown>) => {
+      if (!editable || !allowStructuralEdits) {
+        return;
+      }
       updateSection(sectionId, { props: nextProps });
     },
-    [sectionId, updateSection],
+    [sectionId, updateSection, editable, allowStructuralEdits],
   );
 
-  return <WorkListSettingsForm props={props} updateProps={updateProps} />;
+  return <WorkListSettingsForm props={props} updateProps={updateProps} readOnly={!editable || !allowStructuralEdits} />;
 }
 
 export function WorkListCanvasPreview({ sectionId, props }: BlockCanvasPreviewProps<WorkListProps>) {

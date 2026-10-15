@@ -3,11 +3,7 @@ import type * as maplibregl from 'maplibre-gl';
 const HOVERED_PLACE_Z_INDEX = 2000;
 const SELECTED_PLACE_Z_INDEX = 1900;
 const ACTIVE_PLACE_Z_INDEX = 1800;
-const DIRECTIONS_OVERLAY_BASE_Z_INDEX = HOVERED_PLACE_Z_INDEX + 100;
 const UNMATCHED_INTERACTION_KEY = '__none__';
-
-export const DIRECTIONS_BACKDROP_Z_INDEX = DIRECTIONS_OVERLAY_BASE_Z_INDEX;
-export const DIRECTIONS_MODAL_Z_INDEX = DIRECTIONS_OVERLAY_BASE_Z_INDEX + 1;
 
 export type InteractionPriorityMode = 'hover' | 'active';
 

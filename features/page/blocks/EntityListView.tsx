@@ -1,7 +1,8 @@
 'use client';
 
-import type { CSSProperties, ReactNode } from 'react';
-import { Box } from '@mantine/core';
+import type { ReactNode } from 'react';
+import type { CollectionSize } from '@/components/core/Collection';
+
 import { ListViewShell, type ListViewLayout, type ListViewShellItem } from './ListViewShell';
 
 export interface EntityListItem extends ListViewShellItem {
@@ -13,6 +14,7 @@ interface EntityListViewProps<T extends EntityListItem> {
   className: string;
   emptyLabel: string;
   layout: ListViewLayout;
+  itemSize?: CollectionSize;
   columns: number;
   showImage: boolean;
   imageAspectRatio?: string;
@@ -31,6 +33,7 @@ export function EntityListView<T extends EntityListItem>({
   className,
   emptyLabel,
   layout,
+  itemSize,
   columns,
   showImage,
   imageAspectRatio = '16:9',
@@ -39,17 +42,13 @@ export function EntityListView<T extends EntityListItem>({
   gridCols = { base: 1, sm: 2 },
   renderMeta,
 }: EntityListViewProps<T>) {
-  const heroMetaVars = {
-    '--mantine-color-dimmed': 'rgba(255,255,255,0.82)',
-    '--mantine-color-text': 'white',
-  } as CSSProperties;
-
   return (
     <ListViewShell
       items={items}
       className={className}
       emptyLabel={emptyLabel}
       layout={layout}
+      itemSize={itemSize}
       columns={columns}
       showImage={showImage}
       imageAspectRatio={imageAspectRatio}
@@ -61,7 +60,7 @@ export function EntityListView<T extends EntityListItem>({
       renderCardsMeta={renderMeta}
       renderGridMeta={renderMeta}
       renderCarouselCardMeta={renderMeta}
-      renderHeroMeta={renderMeta ? (item) => <Box style={heroMetaVars}>{renderMeta(item)}</Box> : undefined}
+      renderHeroMeta={renderMeta}
     />
   );
 }

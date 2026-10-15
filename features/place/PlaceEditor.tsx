@@ -1,10 +1,21 @@
 'use client';
+import { breakpointQuery } from '@/components/core/Layout/breakpoints';
 
+import { ConfirmationDialog } from '@/features/confirmation';
+import {
+  LayoutInset as DsLayoutInset,
+  LayoutInline as DsLayoutInline,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+
+import { SectionCard as DsSectionCard } from '@/components/core/Section';
+import { Text as DsText } from '@/components/core/Typography';
 import { useCallback, useRef, useState, type ReactNode } from 'react';
 import { IconChevronDown, IconChevronUp, IconTrash } from '@tabler/icons-react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { useTranslations } from 'next-intl';
-import { Box, Divider, Group, Modal, Paper, ScrollArea, Stack, Text } from '@mantine/core';
+
+import { Separator as Divider, ScrollArea } from '@/components/core/Display';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { Button } from '@/components/core/Button';
 import { Drawer } from '@/components/core/Drawer';
@@ -22,6 +33,8 @@ import styles from './PlaceEditor.module.css';
 const DEFAULT_CENTER = { lat: 37.5665, lng: 126.978 };
 
 interface PlaceEditorProps {
+  /** Render manual place fields without requesting the external map service. */
+  localOnly?: boolean;
   /** Initial data for editing existing place */
   initialData?: PlaceEditorFormState;
   /** Submit handler */
@@ -52,14 +65,19 @@ function PlaceEditorContent({
   isSubmitting,
   isDeleting,
   metadata,
-}: PlaceEditorProps) {
+  localOnly = false,
+  geocodingLib,
+  placesLib,
+}: PlaceEditorProps & {
+  geocodingLib: google.maps.GeocodingLibrary | null;
+  placesLib: google.maps.PlacesLibrary | null;
+}) {
+  const tModalActions = useTranslations('common.actions');
   const t = useTranslations('placeEditor');
   const tCommonActions = useTranslations('common.actions');
   const tCommonMessages = useTranslations('common.messages');
   const tCommonPlaceholders = useTranslations('common.placeholders');
-  const geocodingLib = useMapsLibrary('geocoding');
-  const placesLib = useMapsLibrary('places');
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useMediaQuery(breakpointQuery('sm'));
 
   const [formState, setFormState] = useState<PlaceEditorFormState>(
     initialData ?? {
@@ -191,107 +209,135 @@ function PlaceEditorContent({
 
   return (
     <>
-      <Box className={styles.container}>
-        <Box px="md" py="xs" style={{ flexShrink: 0 }}>
-          <EditorHeader
-            title={headerTitle}
-            isConnected
-            isSynced
-            hideConnectionStatus
-            hideStatus
-            onBack={onBack}
-            backTooltip={tCommonActions('back')}
-            actionItems={[
-              ...(!isMobile && onDelete
-                ? [
-                    {
-                      key: 'delete',
-                      label: tCommonActions('delete'),
-                      icon: <IconTrash size={14} />,
-                      tone: 'danger' as const,
-                      emphasis: 'low' as const,
-                      onClick: openDeleteModal,
-                    },
-                  ]
-                : []),
-              {
-                key: 'save',
-                label: resolvedSubmitLabel,
-                disabled: !isFormValid || isSubmitting,
-                loading: isSubmitting,
-                onClick: handleSubmit,
-              },
-            ]}
-          />
-        </Box>
+      <div className={styles.container}>
+        <DsSectionCard padding="none" appearance="surface" stretch layout="stack" clip>
+          <DsLayoutInset inline="md" block="xs">
+            <DsLayoutInset shrink={false} space="none">
+              <EditorHeader
+                title={headerTitle}
+                isConnected
+                isSynced
+                hideConnectionStatus
+                hideStatus
+                onBack={onBack}
+                backTooltip={tCommonActions('back')}
+                actionItems={[
+                  ...((localOnly || !isMobile) && onDelete
+                    ? [
+                        {
+                          key: 'delete',
+                          label: tCommonActions('delete'),
+                          icon: <IconTrash size={14} />,
+                          tone: 'danger' as const,
+                          emphasis: 'low' as const,
+                          onClick: openDeleteModal,
+                        },
+                      ]
+                    : []),
+                  {
+                    key: 'save',
+                    label: resolvedSubmitLabel,
+                    disabled: !isFormValid || isSubmitting,
+                    loading: isSubmitting,
+                    onClick: handleSubmit,
+                  },
+                ]}
+              />
+            </DsLayoutInset>
+          </DsLayoutInset>
 
-        <Divider style={{ flexShrink: 0 }} />
+          <Divider />
 
-        <Box className={styles.content}>
-          <Box className={styles.mapContainer}>
-            {isMobile && (
-              <Box className={styles.floatingSearch}>
-                <PlacesAutocomplete
-                  onPlaceSelect={handlePlaceSelect}
-                  placeholder={tCommonPlaceholders('searchPlaces')}
-                />
-              </Box>
-            )}
+          {localOnly ? (
+            <ScrollArea grow inset="md">
+              <PlaceDetailForm formState={formState} onFormChange={setFormState} />
+              {metadata ? <DsLayoutInset block="md">{metadata}</DsLayoutInset> : null}
+            </ScrollArea>
+          ) : (
+            <DsLayoutInline flexible fill="both" gap="none" wrap="nowrap" clip>
+              <DsLayoutInset flexible fill="both" space="none" clip>
+                <div className={styles.mapContainer}>
+                  {isMobile && (
+                    <div className={styles.floatingSearch}>
+                      <PlacesAutocomplete
+                        onPlaceSelect={handlePlaceSelect}
+                        placeholder={tCommonPlaceholders('searchPlaces')}
+                      />
+                    </div>
+                  )}
 
-            <BaseMap
-              center={{ lat: formState.lat, lng: formState.lng }}
-              zoom={hasLocation ? 15 : 12}
-              panTo={hasLocation ? { lat: formState.lat, lng: formState.lng } : null}
-              gestureHandling="greedy"
-              clickableIcons
-              onClick={handleMapClick}
-              onLongPress={handleMapClick}
-              onPoiClick={handlePoiClick}
-            >
-              {hasLocation && <Marker position={{ lat: formState.lat, lng: formState.lng }} />}
-            </BaseMap>
+                  <BaseMap
+                    center={{ lat: formState.lat, lng: formState.lng }}
+                    zoom={hasLocation ? 15 : 12}
+                    panTo={hasLocation ? { lat: formState.lat, lng: formState.lng } : null}
+                    gestureHandling="greedy"
+                    clickableIcons
+                    onClick={handleMapClick}
+                    onLongPress={handleMapClick}
+                    onPoiClick={handlePoiClick}
+                  >
+                    {hasLocation && <Marker position={{ lat: formState.lat, lng: formState.lng }} />}
+                  </BaseMap>
 
-            {isMobile && (
-              <Box className={styles.bottomBar} onClick={toggleDrawer}>
-                <Group justify="space-between" wrap="nowrap">
-                  <Box style={{ flex: 1, minWidth: 0 }}>
-                    <Text size="sm" fw={500} lineClamp={1}>
-                      {formState.name || formState.address || t('selectLocation')}
-                    </Text>
-                    <Text size="xs" c="dimmed" lineClamp={1}>
-                      {formState.lat.toFixed(6)}, {formState.lng.toFixed(6)}
-                    </Text>
-                  </Box>
-                  {drawerOpened ? <IconChevronDown size={20} /> : <IconChevronUp size={20} />}
-                </Group>
-              </Box>
-            )}
-          </Box>
+                  {isMobile && (
+                    <div className={styles.bottomBar}>
+                      <DsSectionCard border="block-start" padding="md">
+                        <Button
+                          fullWidth
+                          justify="between"
+                          emphasis="low"
+                          labelWrap="wrap"
+                          onClick={toggleDrawer}
+                          aria-expanded={drawerOpened}
+                          rightSection={drawerOpened ? <IconChevronDown size={20} /> : <IconChevronUp size={20} />}
+                        >
+                          <DsLayoutStack as="span" gap="none" flexible>
+                            <DsText as="span" size="sm" weight="medium" lines={1}>
+                              {formState.name || formState.address || t('selectLocation')}
+                            </DsText>
+                            <DsText as="span" size="xs" tone="secondary" lines={1}>
+                              {formState.lat.toFixed(6)}, {formState.lng.toFixed(6)}
+                            </DsText>
+                          </DsLayoutStack>
+                        </Button>
+                      </DsSectionCard>
+                    </div>
+                  )}
+                </div>
+              </DsLayoutInset>
 
-          {!isMobile && (
-            <Paper className={styles.formPanel}>
-              <Box p="md">
-                <PlacesAutocomplete
-                  onPlaceSelect={handlePlaceSelect}
-                  placeholder={tCommonPlaceholders('searchPlaces')}
-                />
-              </Box>
-              <Divider />
-              <ScrollArea style={{ flex: 1 }} p="md">
-                <PlaceDetailForm formState={formState} onFormChange={setFormState} loading={geocodingLoading} />
-              </ScrollArea>
-              {metadata ? (
-                <>
-                  <Divider />
-                  <Box p="md">{metadata}</Box>
-                </>
-              ) : null}
-            </Paper>
+              {!isMobile && (
+                <div className={styles.formPanel}>
+                  <DsSectionCard padding="none" border="inline-start" stretch layout="stack" clip>
+                    <DsLayoutInset space="md">
+                      <DsLayoutInset space="none">
+                        <PlacesAutocomplete
+                          onPlaceSelect={handlePlaceSelect}
+                          placeholder={tCommonPlaceholders('searchPlaces')}
+                        />
+                      </DsLayoutInset>
+                    </DsLayoutInset>
+                    <Divider />
+                    <ScrollArea grow inset="md">
+                      <PlaceDetailForm formState={formState} onFormChange={setFormState} loading={geocodingLoading} />
+                    </ScrollArea>
+                    {metadata ? (
+                      <>
+                        <Divider />
+                        <DsLayoutInset space="md">
+                          <DsLayoutInset space="none">{metadata}</DsLayoutInset>
+                        </DsLayoutInset>
+                      </>
+                    ) : null}
+                  </DsSectionCard>
+                </div>
+              )}
+            </DsLayoutInline>
           )}
-        </Box>
-      </Box>
+        </DsSectionCard>
+      </div>
 
-      {isMobile && (
+      {isMobile && !localOnly && (
         <Drawer
           opened={drawerOpened}
           onClose={toggleDrawer}
@@ -299,8 +345,8 @@ function PlaceEditorContent({
           size="compact"
           closeLabel={tCommonActions('close')}
           title={
-            <Group justify="space-between" w="100%">
-              <Text fw={500}>{t('placeDetails')}</Text>
+            <DsLayoutInline justify="between" fill="inline">
+              <DsText weight="medium">{t('placeDetails')}</DsText>
               {onDelete && (
                 <Button
                   tone="danger"
@@ -315,15 +361,17 @@ function PlaceEditorContent({
                   {tCommonActions('delete')}
                 </Button>
               )}
-            </Group>
+            </DsLayoutInline>
           }
         >
-          <ScrollArea h="calc(60dvh - 80px)" offsetScrollbars>
+          <ScrollArea size="viewport">
             <PlaceDetailForm formState={formState} onFormChange={setFormState} loading={geocodingLoading} />
             {metadata ? (
               <>
-                <Divider my="md" />
-                <Box pb="md">{metadata}</Box>
+                <Divider spaceBefore="md" spaceAfter="md" />
+                <DsLayoutInset blockEnd="md">
+                  <DsLayoutInset space="none">{metadata}</DsLayoutInset>
+                </DsLayoutInset>
               </>
             ) : null}
           </ScrollArea>
@@ -331,33 +379,43 @@ function PlaceEditorContent({
       )}
 
       {onDelete && (
-        <Modal opened={deleteModalOpened} onClose={closeDeleteModal} title={t('deleteModal.title')}>
-          <Stack>
-            <Text>
-              {tCommonMessages.rich('confirmDeleteNamedRich', {
-                name: formState.name,
-                strong: (chunks) => <strong>{chunks}</strong>,
-              })}
-            </Text>
-            <Group justify="flex-end">
-              <Button emphasis="low" onClick={closeDeleteModal}>
-                {tCommonActions('cancel')}
-              </Button>
-              <Button tone="danger" onClick={handleDelete} loading={isDeleting}>
-                {tCommonActions('delete')}
-              </Button>
-            </Group>
-          </Stack>
-        </Modal>
+        <ConfirmationDialog
+          intent="delete"
+          opened={deleteModalOpened}
+          onClose={closeDeleteModal}
+          onConfirm={handleDelete}
+          title={t('deleteModal.title')}
+          confirmLabel={tCommonActions('delete')}
+          cancelLabel={tCommonActions('cancel')}
+          closeLabel={tModalActions('close')}
+          loading={isDeleting}
+          message={
+            <>
+              <DsText>
+                {tCommonMessages.rich('confirmDeleteNamedRich', {
+                  name: formState.name,
+                  strong: (chunks) => <strong>{chunks}</strong>,
+                })}
+              </DsText>
+            </>
+          }
+        />
       )}
     </>
   );
 }
 
+function MappedPlaceEditor(props: PlaceEditorProps) {
+  const geocodingLib = useMapsLibrary('geocoding');
+  const placesLib = useMapsLibrary('places');
+  return <PlaceEditorContent {...props} geocodingLib={geocodingLib} placesLib={placesLib} />;
+}
 export function PlaceEditor(props: PlaceEditorProps) {
-  return (
+  return props.localOnly ? (
+    <PlaceEditorContent {...props} geocodingLib={null} placesLib={null} />
+  ) : (
     <MapProvider>
-      <PlaceEditorContent {...props} />
+      <MappedPlaceEditor {...props} />
     </MapProvider>
   );
 }

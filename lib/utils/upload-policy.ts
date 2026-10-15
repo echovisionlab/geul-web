@@ -3,8 +3,6 @@ import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 export const MANAGED_RASTER_MAX_DIMENSION = 4096;
 export const MANAGED_RASTER_FINAL_MAX_SIZE = 30 * 1024 * 1024; // 30MB post-crop/post-normalization file
 
-const MANAGED_RASTER_SELECTION_MAX_SIZE = 20 * 1024 * 1024; // 20MB original file
-
 const MANAGED_RASTER_UPLOAD_TYPES = new Set<UploadType>([
   UploadType.USER_AVATAR,
   UploadType.ARTIST_IMAGE,
@@ -15,6 +13,9 @@ const MANAGED_RASTER_UPLOAD_TYPES = new Set<UploadType>([
   UploadType.FORM_FEATURED_IMAGE,
   UploadType.PROGRAM_EVENT_POSTER,
   UploadType.RELEASE_ARTWORK,
+  UploadType.MAP_IMAGE,
+  UploadType.LABEL_IMAGE,
+  UploadType.CLIENT_LOGO,
   UploadType.SITE_OG_BACKGROUND,
 ]);
 
@@ -50,7 +51,9 @@ export function getUploadSelectionMaxSize(
   fallbackMaxSize: number,
 ): number {
   if (shouldNormalizeManagedRasterUpload(uploadType, mimeType)) {
-    return Math.min(fallbackMaxSize, MANAGED_RASTER_SELECTION_MAX_SIZE);
+    // Managed originals are decoded and normalized locally. Only the prepared
+    // output is subject to the target upload limit.
+    return Number.POSITIVE_INFINITY;
   }
 
   return fallbackMaxSize;

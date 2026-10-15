@@ -1,0 +1,16 @@
+.image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.image[data-geul-media-fill] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.image[hidden] {
+  display: none !important;
+}

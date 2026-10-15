@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { SiteLoaderAssetsUploader } from './SiteLoaderAssetsUploader';
 
 const uploadFileMock = vi.fn();
@@ -37,10 +38,11 @@ vi.mock('@tanstack/react-query', () => ({
 }));
 
 vi.mock('next-intl', () => ({
+  useLocale: () => 'en',
   useTranslations: () => (key: string, values?: Record<string, string>) => values?.label ?? key,
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: {
     show: vi.fn(),
   },
@@ -120,9 +122,9 @@ describe('SiteLoaderAssetsUploader', () => {
 
     act(() => {
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <SiteLoaderAssetsUploader assets={[]} />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
@@ -138,11 +140,11 @@ describe('SiteLoaderAssetsUploader', () => {
   it('removes a selected loader asset by file id', async () => {
     act(() => {
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <SiteLoaderAssetsUploader
             assets={[{ file_id: 'file-2', url: 'https://cdn.example.com/media/site/loader/file-2.gif' }]}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 

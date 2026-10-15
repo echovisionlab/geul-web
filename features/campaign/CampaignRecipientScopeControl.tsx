@@ -1,7 +1,8 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import type { CampaignRecipientScope } from '@echovisionlab/geul-common/collaboration/campaign';
-import { Stack } from '@mantine/core';
+
 import { Alert } from '@/components/core/Alert';
 import { Select } from '@/components/core/Input';
 
@@ -26,7 +27,7 @@ export function CampaignRecipientScopeControl({
   onChange,
 }: CampaignRecipientScopeControlProps) {
   return (
-    <Stack gap="xs">
+    <DsLayoutStack gap="xs">
       <Select
         aria-label={labels.field}
         data={[
@@ -43,6 +44,6 @@ export function CampaignRecipientScopeControl({
         allowDeselect={false}
       />
       {value === 'ALL_MATCHING_USERS' ? <Alert tone="warning">{labels.allMatchingUsersWarning}</Alert> : null}
-    </Stack>
+    </DsLayoutStack>
   );
 }

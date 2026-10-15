@@ -12,11 +12,12 @@ interface ArtistRowMenuProps {
 export function ArtistRowMenu({ artist }: ArtistRowMenuProps) {
   const tCommon = useTranslations('common.actions');
   const tDataTable = useTranslations('dataTable.aria');
+  const tCommonEntities = useTranslations('common.entities');
   const { openDelete } = useArtistModal();
 
   return (
     <TableRowMenu
-      aria-label={tDataTable('rowActions', { label: artist.name || 'artist' })}
+      aria-label={tDataTable('rowActions', { label: artist.name || `${tCommonEntities('artist')} (${artist.id})` })}
       items={[
         {
           label: tCommon('edit'),
@@ -27,7 +28,7 @@ export function ArtistRowMenu({ artist }: ArtistRowMenuProps) {
           label: tCommon('delete'),
           icon: <IconTrash size={16} />,
           onClick: () => openDelete(artist),
-          color: 'red',
+          tone: 'danger',
         },
       ]}
     />

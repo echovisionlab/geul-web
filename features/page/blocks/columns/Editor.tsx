@@ -1,10 +1,11 @@
+'use client';
+
 /**
  * ColumnsEditor
  *
  * Adapts the columns editor to the block registry while obtaining the recursive
  * section renderer from the PageEditor composition boundary.
  */
-'use client';
 
 import { useMemo } from 'react';
 import { ColumnsEditor as ColumnsEditorInternal } from '@/features/page/PageEditor/editors/ColumnsEditor';

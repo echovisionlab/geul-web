@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useRef, type KeyboardEvent, type PointerEvent } from 'react';
+import { useCallback, useId, useMemo, useRef, type KeyboardEvent, type PointerEvent } from 'react';
 
 export interface MapCalloutViewModel {
   id: string;
@@ -49,10 +49,12 @@ function createCalloutHtml({
   layout,
   containerWidth,
   stackOffsetY,
+  clickable,
+  descriptionId,
 }: Pick<
   MapCalloutViewProps,
-  'callout' | 'direction' | 'colors' | 'layout' | 'containerWidth' | 'stackOffsetY'
->): string {
+  'callout' | 'direction' | 'colors' | 'layout' | 'containerWidth' | 'stackOffsetY' | 'clickable'
+> & { descriptionId: string }): string {
   const screenScale = containerWidth / 1920;
   const totalScale = screenScale * layout.scale;
   const diagonalLength = BASE_DIAGONAL * totalScale;
@@ -67,16 +69,22 @@ function createCalloutHtml({
   const viewBox = `-${svgWidth / 2} -${diagonalOffset + 10} ${svgWidth} ${diagonalOffset + 15}`;
   const cardOffsetX = diagonalOffset + horizontalLength + layout.offsetX;
   const cardOffsetY = diagonalOffset + layout.offsetY + stackOffsetY;
-  const secondaryHtml = callout.secondaryLines.map((text) => `<div class="mgl-callout__line">${text}</div>`).join('');
+  const secondaryHtml = callout.secondaryLines
+    .map((text, index) => `<div id="${descriptionId}-${index}" class="mgl-callout__line">${text}</div>`)
+    .join('');
   const hrefAttr = callout.href ? ` href="${callout.href}"` : '';
-  const interactiveAttrs = callout.href ? '' : ' role="button" tabindex="0"';
-  const labelAttr = ` aria-label="${callout.ariaLabel.replace(/"/g, '&quot;')}"`;
+  const interactiveAttrs = !callout.href && clickable ? ' role="button" tabindex="0"' : '';
+  const labelAttr = callout.href || clickable ? ` aria-label="${callout.ariaLabel.replace(/"/g, '&quot;')}"` : '';
+  const descriptionAttr =
+    (callout.href || clickable) && callout.secondaryLines.length
+      ? ` aria-describedby="${callout.secondaryLines.map((_, index) => `${descriptionId}-${index}`).join(' ')}"`
+      : '';
 
   return `
-    <a class="mgl-callout mgl-callout--${direction}" data-place-id="${callout.id}"${hrefAttr}${interactiveAttrs}${labelAttr} style="--callout-line-color: ${colors.lineColor}; --callout-hover-line-color: ${colors.hoverLineColor}; --callout-text-color: ${colors.textColor}; --callout-hover-text-color: ${colors.hoverTextColor}; --callout-desc-color: ${colors.descriptionColor}; --callout-hover-desc-color: ${colors.hoverDescriptionColor}; --callout-bg-color: ${colors.backgroundColor}; --callout-hover-bg-color: ${colors.hoverBackgroundColor}; --callout-offset-x: ${cardOffsetX}px; --callout-offset-y: ${cardOffsetY}px; --callout-line-length: ${horizontalLength}px;">
+    <a class="mgl-callout mgl-callout--${direction}" data-place-id="${callout.id}"${hrefAttr}${interactiveAttrs}${labelAttr}${descriptionAttr} style="--_map-callout-line-color: ${colors.lineColor}; --_map-callout-hover-line-color: ${colors.hoverLineColor}; --_map-callout-text-color: ${colors.textColor}; --_map-callout-hover-text-color: ${colors.hoverTextColor}; --_map-callout-desc-color: ${colors.descriptionColor}; --_map-callout-hover-desc-color: ${colors.hoverDescriptionColor}; --_map-callout-bg-color: ${colors.backgroundColor}; --_map-callout-hover-bg-color: ${colors.hoverBackgroundColor}; --_map-callout-offset-x: ${cardOffsetX}px; --_map-callout-offset-y: ${cardOffsetY}px;">
       <div class="mgl-callout__pin"></div>
-      <svg class="mgl-callout__lines" viewBox="${viewBox}" preserveAspectRatio="xMidYMid meet" style="width: ${svgWidth}px; height: ${diagonalOffset + 15}px; transform: translate(-${svgWidth / 2}px, -${diagonalOffset + 10}px);">
-        <path class="mgl-callout__path" d="${path}" stroke="var(--callout-line-color)" stroke-width="1.5" fill="none"/>
+      <svg aria-hidden="true" focusable="false" class="mgl-callout__lines" viewBox="${viewBox}" preserveAspectRatio="xMidYMid meet" style="width: ${svgWidth}px; height: ${diagonalOffset + 15}px; transform: translate(-${svgWidth / 2}px, -${diagonalOffset + 10}px);">
+        <path class="mgl-callout__path" d="${path}" stroke="var(--_map-callout-line-color)" stroke-width="1.5" fill="none"/>
       </svg>
       <div class="mgl-callout__card">
         <div class="mgl-callout__name">${callout.primaryText}</div>
@@ -97,6 +105,7 @@ export function MapCalloutView({
   onClick,
   onHoverChange,
 }: MapCalloutViewProps) {
+  const descriptionId = useId();
   const onClickRef = useRef(onClick);
   onClickRef.current = onClick;
 
@@ -120,7 +129,7 @@ export function MapCalloutView({
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (!clickable || (event.key !== 'Enter' && event.key !== ' ')) {
+      if (!clickable || (event.key !== 'Enter' && (event.key !== ' ' || callout.href))) {
         return;
       }
 
@@ -128,7 +137,7 @@ export function MapCalloutView({
       event.stopPropagation();
       onClickRef.current();
     },
-    [clickable],
+    [callout.href, clickable],
   );
 
   const html = useMemo(
@@ -140,8 +149,10 @@ export function MapCalloutView({
         layout,
         containerWidth,
         stackOffsetY,
+        clickable,
+        descriptionId,
       }),
-    [callout, colors, containerWidth, direction, layout, stackOffsetY],
+    [callout, clickable, colors, containerWidth, descriptionId, direction, layout, stackOffsetY],
   );
 
   return (

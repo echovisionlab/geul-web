@@ -162,6 +162,90 @@ function VideoHydrationHarness() {
 }
 
 describe('MediaBlockHydrator', () => {
+  it('keeps the public HTML player independently named and supports seek values, keyboard input and native error state', async () => {
+    host = document.createElement('div');
+    document.body.appendChild(host);
+    root = createRoot(host);
+    await act(async () => {
+      root?.render(
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <AudioHydrationHarness />
+        </NextIntlClientProvider>,
+      );
+      await new Promise((resolve) => window.setTimeout(resolve, 0));
+    });
+    await vi.waitFor(() => expect(lastMountOptions).not.toBeNull());
+    const player = content?.querySelector('[data-audio-player]');
+    const frame = player?.querySelector<HTMLElement>('[data-audio-player-track]');
+    const position = frame?.querySelector<HTMLInputElement>('input[type="range"][data-audio-player-seek]');
+    expect(player?.getAttribute('role')).toBe('group');
+    expect(player?.getAttribute('aria-label')).toBeTruthy();
+    expect(frame?.hasAttribute('role')).toBe(false);
+    expect(frame?.hasAttribute('tabindex')).toBe(false);
+    expect(frame?.querySelectorAll('input[data-audio-player-seek]')).toHaveLength(1);
+    expect(position?.getAttribute('aria-label')).toBe(enMessages.editorCommon.media.audioPlayer.seekPlayback);
+    expect(position?.max).toBe('100');
+    act(() => position?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
+    expect(mockMountedWaveSurfer.setTime).toHaveBeenLastCalledWith(5);
+    expect(position?.value).toBe('5');
+    expect(position?.getAttribute('aria-valuetext')).toBe('0:05 / 1:40');
+    act(() => position?.dispatchEvent(new KeyboardEvent('keydown', { key: 'PageUp', bubbles: true })));
+    expect(mockMountedWaveSurfer.setTime).toHaveBeenLastCalledWith(15);
+    act(() => position?.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true })));
+    expect(mockMountedWaveSurfer.setTime).toHaveBeenLastCalledWith(100);
+    act(() => {
+      position!.value = '40';
+      position?.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    expect(mockMountedWaveSurfer.setTime).toHaveBeenLastCalledWith(40);
+    const audio = content?.querySelector('audio');
+    act(() => audio?.dispatchEvent(new Event('error')));
+    const status = content?.querySelector('[data-audio-player-status]');
+    expect(status?.textContent).toBe(enMessages.editorCommon.media.statuses.failed);
+    expect(status?.className).toContain('visuallyHidden');
+    expect(player?.getAttribute('aria-describedby')).toBe(status?.id);
+    expect(position?.getAttribute('aria-describedby')).toBe(status?.id);
+    expect(position?.disabled).toBe(true);
+    expect(player?.querySelector<HTMLButtonElement>('[data-audio-player-toggle]')?.disabled).toBe(true);
+    act(() => audio?.dispatchEvent(new Event('loadedmetadata')));
+    expect(status?.textContent).toBe('');
+    expect(player?.hasAttribute('aria-describedby')).toBe(false);
+    expect(position?.disabled).toBe(false);
+  });
+
+  it('moves persisted role="slider" timeline semantics onto one Core native range', async () => {
+    const legacy = document.createElement('div');
+    legacy.className = 'audio-block';
+    legacy.setAttribute('data-duration', '60');
+    legacy.innerHTML =
+      '<div class="audio-player" data-audio-player="true"><audio data-file-id="legacy" src="https://cdn.example.com/a.mp3"></audio>' +
+      '<div class="audio-player__track" data-audio-player-track="true" role="slider" tabindex="0" aria-valuenow="0" aria-label="Seek">' +
+      '<span data-audio-player-track-fill="true"></span><span data-audio-player-track-thumb="true"></span></div>' +
+      '<button data-audio-player-toggle="true" aria-label="Play"></button></div>';
+    host = document.createElement('div');
+    document.body.appendChild(host);
+    const containerRef = { current: legacy };
+    host.appendChild(legacy);
+    root = createRoot(document.createElement('div'));
+    await act(async () => {
+      root?.render(
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <MediaBlockHydrator containerRef={containerRef} contentKey="legacy" />
+        </NextIntlClientProvider>,
+      );
+      await new Promise((resolve) => window.setTimeout(resolve, 20));
+    });
+    const track = legacy.querySelector<HTMLElement>('[data-audio-player-track]');
+    await vi.waitFor(() => expect(track?.querySelector('input[data-audio-player-seek]')).not.toBeNull());
+    expect(track?.hasAttribute('role')).toBe(false);
+    expect(track?.hasAttribute('tabindex')).toBe(false);
+    expect(track?.hasAttribute('aria-valuenow')).toBe(false);
+    const range = track?.querySelector<HTMLInputElement>('input[data-audio-player-seek]');
+    expect(range?.type).toBe('range');
+    expect(range?.getAttribute('aria-label')).toBe(enMessages.editorCommon.media.audioPlayer.seekPlayback);
+    expect(range?.getAttribute('aria-valuetext')).toBe('0:00 / 1:00');
+  });
+
   it('updates public audio progress from the shared waveform position stream', async () => {
     host = document.createElement('div');
     document.body.appendChild(host);
@@ -203,7 +287,8 @@ describe('MediaBlockHydrator', () => {
     });
 
     expect(currentTime?.textContent).toBe('0:42');
-    expect(player?.style.getPropertyValue('--audio-playback-progress')).toBe('42%');
+    expect(player?.getAttribute('data-audio-player-ready')).toBe('true');
+    expect(player?.getAttribute('data-audio-player-playing')).toBe('false');
   });
 
   it('mounts and disposes video players through the shared video.js helper', async () => {

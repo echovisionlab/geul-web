@@ -1,0 +1,21 @@
+diff --git a/dist/blocks.js b/dist/blocks.js
+index 54b95e8ea8fd135b9fb3f456e71fda74dcbf520d..f363bf09cfcae8ca9d9958a6b2f3eaec97fb7689 100644
+--- a/dist/blocks.js
++++ b/dist/blocks.js
+@@ -2724,7 +2724,7 @@ var Wrapper5 = styled10.label({
+     return React13.createElement(
+       Button4,
+       {
+-        ariaLabel: !1,
++        ariaLabel: `Set string for ${name}`,
+         variant: "outline",
+         size: "medium",
+         disabled: readonly,
+@@ -2743,6 +2743,7 @@ var Wrapper5 = styled10.label({
+       disabled: readonly,
+       size: "flex",
+       placeholder: "Edit string...",
++      "aria-label": name,
+       autoFocus: forceVisible,
+       "aria-required": required || void 0,
+       valid: isValid ? void 0 : "error",

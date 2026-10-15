@@ -1,6 +1,7 @@
 'use client';
 
 import { type UIEvent, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { BlockCanvasPreviewProps } from '../types';
 import { ImmersiveSceneRenderer } from './SceneRenderer';
 import { parseImmersiveSceneConfig, type ImmersiveSceneProps } from './schema';
@@ -14,6 +15,7 @@ export function ImmersiveSceneCanvasPreview({ props }: BlockCanvasPreviewProps<I
 }
 
 export function ImmersiveScenePreview({ props }: Pick<BlockCanvasPreviewProps<ImmersiveSceneProps>, 'props'>) {
+  const t = useTranslations('pageEditor');
   const config = parseImmersiveSceneConfig(props);
   const [scrollProgress, setScrollProgress] = useState(0);
   const isScrollPreview = config.units.length > 1 && config.playback === 'scroll';
@@ -33,8 +35,12 @@ export function ImmersiveScenePreview({ props }: Pick<BlockCanvasPreviewProps<Im
       setScrollProgress(scrollDistance > 0 ? element.scrollTop / scrollDistance : 0);
     };
 
+    /* eslint-disable jsx-a11y/no-noninteractive-tabindex -- The named scroll viewport needs keyboard focus to scroll authored units. */
     return (
       <div
+        role="region"
+        aria-label={t('sectionTypes.immersiveScene')}
+        tabIndex={0}
         data-immersive-scene-preview-scroll
         data-preview-progress={scrollProgress}
         onScroll={updateScrollProgress}
@@ -52,6 +58,7 @@ export function ImmersiveScenePreview({ props }: Pick<BlockCanvasPreviewProps<Im
         </div>
       </div>
     );
+    /* eslint-enable jsx-a11y/no-noninteractive-tabindex */
   }
 
   return (

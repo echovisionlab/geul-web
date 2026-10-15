@@ -1,22 +1,28 @@
 'use client';
+import { ConfirmationDialog } from '@/features/confirmation/ui/ConfirmationDialog';
 
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
 import type { ReactNode } from 'react';
 import { IconArrowLeft, IconBan, IconCheck, IconTrash } from '@tabler/icons-react';
-import { Avatar, Group, Stack, Text, Title } from '@mantine/core';
+
+import { Avatar } from '@/components/core/Display';
 import { StatusBadge } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { Select, TextInput } from '@/components/core/Input';
-import { ConfirmModal, FormModal } from '@/components/core/Modal';
-import { SocialIcon, type SocialPlatform } from '@/components/core/Social';
+import { FormModal } from '@/components/core/Modal';
+import type { PreparedSocialIcon, SocialPlatform } from '@/components/core/Social';
+// Catalog-free renderer: glyphs are prepared on the server with Core prepareSocialIcon.
+import { SocialIconGlyph } from '@/components/core/Social/SocialIconGlyph';
 import { Tooltip } from '@/components/core/Tooltip';
-import classes from './UserProfileView.module.css';
 
 export interface UserProfileSocialLink {
   key: string;
   href: string;
   label: string;
   platform: SocialPlatform;
+  glyph: PreparedSocialIcon;
 }
 
 export interface UserProfileDisplay {
@@ -105,79 +111,82 @@ export interface UserProfileViewProps {
 /** Pure public profile UI. Service state, formatted values, and commands arrive through props. */
 export function UserProfileView({ profile, labels, dialogs, events, unbanPending = false }: UserProfileViewProps) {
   return (
-    <Stack gap="xl" data-user-profile>
-      <Group gap="sm">
+    <DsLayoutStack gap="xl" data-user-profile>
+      <DsLayoutInline gap="sm">
         <Tooltip label={labels.back}>
           <IconButton aria-label={labels.back} onClick={events.onBack}>
             <IconArrowLeft size={20} aria-hidden />
           </IconButton>
         </Tooltip>
-        <Title order={2}>{labels.title}</Title>
-      </Group>
+        <DsHeading level={1} scale={2}>
+          {labels.title}
+        </DsHeading>
+      </DsLayoutInline>
 
-      <Group justify="space-between" align="flex-start" wrap="wrap" gap="xl">
-        <Group align="flex-start" wrap="nowrap" gap="md" className={classes.identity}>
-          <Avatar src={profile.avatarUrl} alt={profile.name} size={80} radius="50%">
+      <DsLayoutInline
+        justify="between"
+        align="stretch"
+        wrap="nowrap"
+        direction={{ base: 'column', xs: 'row' }}
+        gap="xl"
+      >
+        <DsLayoutInline flexible fill="inline" align="start" wrap="nowrap" gap="md">
+          <Avatar src={profile.avatarUrl} alt={profile.name} size="profile" shape="circle">
             {profile.initials}
           </Avatar>
 
-          <Stack gap={6} className={classes.profileCopy}>
-            <Text size="xl" fw={600} className={classes.longText}>
+          <DsLayoutStack flexible gap="xxs">
+            <DsText wrap="anywhere" size="xl" weight="strong">
               {profile.name}
-            </Text>
+            </DsText>
 
             {profile.roleLabel || profile.banned ? (
-              <Group gap="xs">
+              <DsLayoutInline gap="xs">
                 {profile.roleLabel ? (
-                  <Text size="xs" c="dimmed">
+                  <DsText size="xs" tone="secondary">
                     {profile.roleLabel}
-                  </Text>
+                  </DsText>
                 ) : null}
                 {profile.banned ? (
                   <StatusBadge tone="danger" appearance="solid">
                     {labels.banned}
                   </StatusBadge>
                 ) : null}
-              </Group>
+              </DsLayoutInline>
             ) : null}
 
             {profile.joinedLabel ? (
-              <Text size="xs" c="dimmed">
+              <DsText size="xs" tone="secondary">
                 {profile.joinedLabel}
-              </Text>
+              </DsText>
             ) : null}
 
             {profile.bio ? (
-              <Text size="sm" c="dimmed" maw={640} className={classes.longText}>
-                {profile.bio}
-              </Text>
+              <div style={{ maxWidth: 640 }}>
+                <DsText wrap="anywhere" size="sm" tone="secondary">
+                  {profile.bio}
+                </DsText>
+              </div>
             ) : null}
 
             {profile.socialLinks.length > 0 ? (
-              <Group gap="xs" role="list" aria-label={labels.socialLinks}>
+              <DsLayoutInline gap="xs" role="list" aria-label={labels.socialLinks}>
                 {profile.socialLinks.map((link) => (
                   <Tooltip key={link.key} label={link.label}>
                     <span role="listitem">
-                      <IconButton
-                        component="a"
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={link.label}
-                        className={classes.socialLink}
-                      >
-                        <SocialIcon platform={link.platform} size={18} colorMode="hoverBrand" />
+                      <IconButton href={link.href} target="_blank" rel="noopener noreferrer" aria-label={link.label}>
+                        <SocialIconGlyph icon={link.glyph} size="lg" colorMode="hoverBrand" />
                       </IconButton>
                     </span>
                   </Tooltip>
                 ))}
-              </Group>
+              </DsLayoutInline>
             ) : null}
-          </Stack>
-        </Group>
+          </DsLayoutStack>
+        </DsLayoutInline>
 
         {profile.showAdminActions ? (
-          <Group gap="xs" className={classes.adminActions} data-user-profile-admin-actions>
+          <DsLayoutInline justify={{ base: 'start', xs: 'end' }} gap="xs" data-user-profile-admin-actions>
             <Button type="button" emphasis="medium" size="xs" onClick={events.onOpenRole}>
               {labels.changeRole}
             </Button>
@@ -215,14 +224,14 @@ export function UserProfileView({ profile, labels, dialogs, events, unbanPending
             >
               {labels.delete}
             </Button>
-          </Group>
+          </DsLayoutInline>
         ) : null}
-      </Group>
+      </DsLayoutInline>
 
       {profile.banReason ? (
-        <Text size="sm" c="red" className={classes.longText} data-user-profile-ban-reason>
+        <DsText wrap="anywhere" size="sm" tone="danger" data-user-profile-ban-reason>
           {profile.banReason}
-        </Text>
+        </DsText>
       ) : null}
 
       <FormModal
@@ -236,7 +245,7 @@ export function UserProfileView({ profile, labels, dialogs, events, unbanPending
         submitTone="danger"
         loading={dialogs.ban.pending}
       >
-        {labels.banDialog.description ? <Text>{labels.banDialog.description}</Text> : null}
+        {labels.banDialog.description ? <DsText>{labels.banDialog.description}</DsText> : null}
         <TextInput
           label={labels.banDialog.reason}
           placeholder={labels.banDialog.reasonPlaceholder}
@@ -258,7 +267,7 @@ export function UserProfileView({ profile, labels, dialogs, events, unbanPending
         loading={dialogs.role.pending}
         submitDisabled={!dialogs.role.value}
       >
-        {labels.roleDialog.description ? <Text>{labels.roleDialog.description}</Text> : null}
+        {labels.roleDialog.description ? <DsText>{labels.roleDialog.description}</DsText> : null}
         <Select
           label={labels.roleDialog.role}
           data={dialogs.role.options}
@@ -269,7 +278,8 @@ export function UserProfileView({ profile, labels, dialogs, events, unbanPending
         <DialogError message={dialogs.role.error} />
       </FormModal>
 
-      <ConfirmModal
+      <ConfirmationDialog
+        intent="delete"
         opened={dialogs.delete.opened}
         onClose={events.onCloseDelete}
         onConfirm={events.onConfirmDelete}
@@ -279,16 +289,16 @@ export function UserProfileView({ profile, labels, dialogs, events, unbanPending
         closeLabel={labels.deleteDialog.close}
         loading={dialogs.delete.pending}
         message={
-          <Stack gap="xs">
-            {labels.deleteDialog.description ? <Text>{labels.deleteDialog.description}</Text> : null}
-            <Text c="red" size="sm">
+          <DsLayoutStack gap="xs">
+            {labels.deleteDialog.description ? <DsText>{labels.deleteDialog.description}</DsText> : null}
+            <DsText tone="danger" size="sm">
               {labels.deleteDialog.warning}
-            </Text>
+            </DsText>
             <DialogError message={dialogs.delete.error} />
-          </Stack>
+          </DsLayoutStack>
         }
       />
-    </Stack>
+    </DsLayoutStack>
   );
 }
 
@@ -298,8 +308,8 @@ function DialogError({ message }: { message: string | null }) {
   }
 
   return (
-    <Text role="alert" c="red" size="sm" className={classes.longText}>
+    <DsText wrap="anywhere" role="alert" tone="danger" size="sm">
       {message}
-    </Text>
+    </DsText>
   );
 }

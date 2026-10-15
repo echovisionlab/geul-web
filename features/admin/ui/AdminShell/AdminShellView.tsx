@@ -1,7 +1,7 @@
 'use client';
 
-import type { ElementType, ReactNode } from 'react';
-import { AppShell } from '@mantine/core';
+import type { ReactNode } from 'react';
+import { ApplicationFrame } from '@/components/core/ApplicationFrame';
 import type { SideNavigationMode } from '@/components/core/SideNavigation';
 import {
   AdminNavigationView,
@@ -9,7 +9,6 @@ import {
   type AdminNavigationLabels,
   type AdminNavigationSection,
 } from '../AdminNavigation';
-import classes from './AdminShellView.module.css';
 
 export interface AdminShellViewLabels extends AdminNavigationLabels {
   toggleNavigation: string;
@@ -29,7 +28,6 @@ export interface AdminShellViewProps {
   events: AdminShellViewEvents;
   logoSlot: ReactNode;
   compactLogoSlot: ReactNode;
-  linkComponent?: ElementType;
   children: ReactNode;
 }
 
@@ -44,27 +42,19 @@ export function AdminShellView({
   events,
   logoSlot,
   compactLogoSlot,
-  linkComponent,
   children,
 }: AdminShellViewProps) {
-  const navigationWidth = navigationMode === 'expanded' ? 224 : 48;
-
   return (
-    <AppShell
+    <ApplicationFrame
+      kind="workspace"
       id="admin-shell"
-      className={classes.root}
-      padding="md"
-      navbar={{ width: navigationWidth, breakpoint: 0 }}
       data-admin-shell
-      data-navigation-mode={navigationMode}
       data-theme-mode={colorScheme ?? 'pending'}
-    >
-      <AppShell.Navbar
-        component="aside"
-        p={navigationMode === 'expanded' ? 'xs' : 3}
-        className={classes.navbar}
-        data-admin-shell-navbar
-      >
+      navigationMode={navigationMode}
+      navigationToggle={
+        navigationToggleVisible ? { label: labels.toggleNavigation, onToggle: events.onToggleNavigation } : undefined
+      }
+      navigation={
         <AdminNavigationView
           sections={navSections}
           mode={navigationMode}
@@ -74,23 +64,10 @@ export function AdminShellView({
           events={events}
           logoSlot={logoSlot}
           compactLogoSlot={compactLogoSlot}
-          linkComponent={linkComponent}
         />
-        {navigationToggleVisible ? (
-          <button
-            type="button"
-            className={classes.edgeToggle}
-            aria-label={labels.toggleNavigation}
-            aria-expanded={navigationMode === 'expanded'}
-            onClick={events.onToggleNavigation}
-            data-admin-navigation-edge-toggle
-          />
-        ) : null}
-      </AppShell.Navbar>
-
-      <AppShell.Main className={classes.main} data-admin-shell-main>
-        {children}
-      </AppShell.Main>
-    </AppShell>
+      }
+    >
+      {children}
+    </ApplicationFrame>
   );
 }

@@ -1,49 +1,50 @@
-import { Fragment, type CSSProperties } from 'react';
-import Link from '@/components/core/Navigation';
-import { Anchor, Group, Text } from '@mantine/core';
-import classes from './PostAuthorLinks.module.css';
+import { Fragment } from 'react';
+import { NavigationLink, type LinkProps } from '@/components/core/Navigation';
+import { LayoutInline, LayoutInset } from '@/components/core/Layout';
+import { Text, type TextTone } from '@/components/core/Typography';
 
 export interface PostMetaLinkItem {
   id: string;
   label: string;
   href?: string | null;
 }
-
 interface PostMetaLinksProps {
   items: PostMetaLinkItem[];
   textSize?: 'xs' | 'sm';
-  textColor?: string;
-  separatorColor?: string;
+  tone?: LinkProps['tone'];
+  separatorTone?: TextTone;
 }
-
-export function PostMetaLinks({ items, textSize = 'xs', textColor, separatorColor }: PostMetaLinksProps) {
+export function PostMetaLinks({
+  items,
+  textSize = 'xs',
+  tone = 'inherit',
+  separatorTone = 'secondary',
+}: PostMetaLinksProps) {
   if (items.length === 0) {
     return null;
   }
-
-  const linkStyle = textColor ? ({ '--post-meta-link-color': textColor } as CSSProperties) : undefined;
-  const separatorStyle = separatorColor ? ({ color: separatorColor } as CSSProperties) : undefined;
-
   return (
-    <Group gap={3} wrap="wrap" className={classes.metaLinkList}>
+    <LayoutInline gap="none" align="center" wrap="wrap">
       {items.map((item, index) => (
         <Fragment key={item.id}>
           {index > 0 ? (
-            <Text component="span" size={textSize} className={classes.metaSeparator} style={separatorStyle}>
-              /
-            </Text>
+            <LayoutInset inline="xxs">
+              <Text as="span" size={textSize} tone={separatorTone}>
+                /
+              </Text>
+            </LayoutInset>
           ) : null}
           {item.href ? (
-            <Anchor component={Link} href={item.href} size={textSize} className={classes.metaLink} style={linkStyle}>
+            <NavigationLink href={item.href} appearance="quiet" size={textSize} tone={tone}>
               {item.label}
-            </Anchor>
+            </NavigationLink>
           ) : (
-            <Anchor component="span" size={textSize} className={classes.metaLink} style={linkStyle}>
+            <Text as="span" size={textSize} tone={tone === 'inherit' ? 'primary' : tone}>
               {item.label}
-            </Anchor>
+            </Text>
           )}
         </Fragment>
       ))}
-    </Group>
+    </LayoutInline>
   );
 }

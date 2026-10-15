@@ -14,7 +14,7 @@ import {
 } from 'react';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import type * as Y from 'yjs';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { parseSectionMeta } from '@/features/page/blocks/section-schema';
 import {
   createDefaultSection,
@@ -90,7 +90,7 @@ export function PageEditorProvider({
     (action: string, error: unknown) => {
       const message = error instanceof Error ? error.message : 'Failed to persist page changes';
       logger.error('Failed to persist page changes', { pageId, action, error: message });
-      notifications.show({ message, color: 'red' });
+      notifications.show({ message, tone: 'danger' });
     },
     [pageId],
   );

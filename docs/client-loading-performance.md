@@ -8,6 +8,15 @@ downloads. Node is 24.19.0, pnpm is 11.22.0, Next is 16.3.1, and esbuild is
 Turbopack configuration. Neither build uses `LOCAL_CONTRACTS`, webpack,
 `RELEASE_IMAGE_BUILD`, dotenv files, or production credentials.
 
+## Per-route budget guard
+
+Per-route first-load JS/CSS budgets, the CI check (`pnpm perf:bundle` after
+`pnpm build`), source-map attribution (`next-client-build.mjs <tree> build-sourcemaps`
+with `route-first-load-modules.mjs`), and the 2026-10-12 HEAD and working-tree
+measurements are in [the bundle budget](./performance/bundle-budget.md).
+`route-bundle-budget.mjs <tree> --json <out>` is the per-route comparison companion to the
+whole-graph `next-assets.mjs` below.
+
 ## Repeatable commands
 
 Run the harness from the final checkout, passing either isolated source tree:

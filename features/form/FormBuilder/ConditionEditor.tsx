@@ -1,14 +1,27 @@
 'use client';
 
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+  LayoutGrid as DsLayoutGrid,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Group, Stack, Text } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
-import '@mantine/dates/styles.css';
-import { useMediaQuery } from '@mantine/hooks';
+
+import {
+  DateInput,
+  MultiSelect,
+  Select,
+  TextInput,
+  NumberInput,
+  SegmentedControl,
+  TagsInput,
+} from '@/components/core/Input';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
-import { MultiSelect, Select, TextInput, NumberInput, SegmentedControl, TagsInput } from '@/components/core/Input';
+
 import { DropdownMenu } from '@/components/core/DropdownMenu';
 import { SectionCard } from '@/components/core/Section';
 import { hasOptions, isConditionGroup, isConditionOperator } from '@/lib/types/form/model';
@@ -56,6 +69,8 @@ function ConditionValueEditor({ operator, targetField, value, onChange }: Condit
     if (targetField && hasOptions(targetField)) {
       return (
         <MultiSelect
+          aria-label={tCommonLabels('value')}
+          grow
           size="xs"
           data={targetField.options}
           value={Array.isArray(value) ? value.map(String) : []}
@@ -63,18 +78,18 @@ function ConditionValueEditor({ operator, targetField, value, onChange }: Condit
           placeholder={
             operator === 'in' ? tCommonPlaceholders('selectValues') : t('conditions.excludeValuesPlaceholder')
           }
-          style={{ flex: 1 }}
         />
       );
     }
     // Non-select fields: use TagsInput for array input
     return (
       <TagsInput
+        aria-label={tCommonLabels('value')}
+        grow
         size="xs"
         value={Array.isArray(value) ? value.map(String) : []}
         onChange={(v) => onChange(v)}
         placeholder={t('conditions.enterValuesPlaceholder')}
-        style={{ flex: 1 }}
       />
     );
   }
@@ -86,34 +101,37 @@ function ConditionValueEditor({ operator, targetField, value, onChange }: Condit
       if (operator === 'contains') {
         return (
           <Select
+            aria-label={tCommonLabels('value')}
+            grow
             size="xs"
             data={targetField.options}
             value={typeof value === 'string' ? value : null}
             onChange={(v) => onChange(v ?? '')}
             placeholder={t('conditions.selectValuePlaceholder')}
-            style={{ flex: 1 }}
           />
         );
       }
       return (
         <MultiSelect
+          aria-label={tCommonLabels('value')}
+          grow
           size="xs"
           data={targetField.options}
           value={Array.isArray(value) ? value.map(String) : []}
           onChange={(v) => onChange(v)}
           placeholder={tCommonPlaceholders('selectValues')}
-          style={{ flex: 1 }}
         />
       );
     }
     // Non-option fields: TagsInput
     return (
       <TagsInput
+        aria-label={tCommonLabels('value')}
+        grow
         size="xs"
         value={Array.isArray(value) ? value.map(String) : []}
         onChange={(v) => onChange(v)}
         placeholder={t('conditions.enterValuesShortPlaceholder')}
-        style={{ flex: 1 }}
       />
     );
   }
@@ -122,11 +140,12 @@ function ConditionValueEditor({ operator, targetField, value, onChange }: Condit
   if (!targetField) {
     return (
       <TextInput
+        aria-label={tCommonLabels('value')}
+        grow
         size="xs"
         value={String(value ?? '')}
         onChange={(e) => onChange(e.currentTarget.value)}
         placeholder={tCommonLabels('value')}
-        style={{ flex: 1 }}
       />
     );
   }
@@ -135,12 +154,13 @@ function ConditionValueEditor({ operator, targetField, value, onChange }: Condit
     case 'select':
       return (
         <Select
+          aria-label={tCommonLabels('value')}
+          grow
           size="xs"
           data={targetField.options}
           value={typeof value === 'string' ? value : null}
           onChange={(v) => onChange(v ?? '')}
           placeholder={t('conditions.selectValuePlaceholder')}
-          style={{ flex: 1 }}
         />
       );
 
@@ -148,12 +168,13 @@ function ConditionValueEditor({ operator, targetField, value, onChange }: Condit
       // For eq/neq with array field, select one option to compare
       return (
         <Select
+          aria-label={tCommonLabels('value')}
+          grow
           size="xs"
           data={targetField.options}
           value={typeof value === 'string' ? value : null}
           onChange={(v) => onChange(v ?? '')}
           placeholder={t('conditions.selectCompareValuePlaceholder')}
-          style={{ flex: 1 }}
         />
       );
 
@@ -161,6 +182,8 @@ function ConditionValueEditor({ operator, targetField, value, onChange }: Condit
     case 'checkbox':
       return (
         <Select
+          aria-label={tCommonLabels('value')}
+          grow
           size="xs"
           data={[
             { label: t('conditions.trueOption'), value: 'true' },
@@ -168,41 +191,41 @@ function ConditionValueEditor({ operator, targetField, value, onChange }: Condit
           ]}
           value={String(value ?? 'true')}
           onChange={(v) => onChange(v === 'true')}
-          style={{ flex: 1 }}
         />
       );
 
     case 'number':
       return (
         <NumberInput
+          aria-label={tCommonLabels('value')}
+          grow
           size="xs"
           value={typeof value === 'number' ? value : undefined}
           onChange={(v) => onChange(typeof v === 'number' ? v : undefined)}
           placeholder={tCommonLabels('value')}
-          style={{ flex: 1 }}
         />
       );
 
     case 'date':
       return (
         <DateInput
+          aria-label={tCommonLabels('value')}
           size="xs"
           value={typeof value === 'string' ? value : null}
           onChange={(v) => onChange(v ?? undefined)}
           placeholder={t('conditions.selectDatePlaceholder')}
-          valueFormat="YYYY-MM-DD"
-          style={{ flex: 1 }}
         />
       );
 
     default:
       return (
         <TextInput
+          aria-label={tCommonLabels('value')}
+          grow
           size="xs"
           value={String(value ?? '')}
           onChange={(e) => onChange(e.currentTarget.value)}
           placeholder={tCommonLabels('value')}
-          style={{ flex: 1 }}
         />
       );
   }
@@ -221,7 +244,8 @@ interface SingleConditionEditorProps {
 
 function SingleConditionEditor({ condition, availableFields, onChange, onRemove }: SingleConditionEditorProps) {
   const t = useTranslations('formAdmin.builder');
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const tCommonLabels = useTranslations('common.labels');
+  const tFilter = useTranslations('dataTable.filter');
   const targetField = availableFields.find((f) => f.value === condition.fieldId)?.field;
   const fieldType = targetField?.type;
   const operators = getLocalizedOperatorOptions(t, fieldType);
@@ -255,23 +279,29 @@ function SingleConditionEditor({ condition, availableFields, onChange, onRemove 
   };
 
   return (
-    <SectionCard withBorder p="xs">
-      <Group gap="xs" wrap={isMobile ? 'wrap' : 'nowrap'}>
-        <Select
-          size="xs"
-          data={availableFields.map((f) => ({ label: f.label, value: f.value }))}
-          value={condition.fieldId}
-          onChange={handleFieldChange}
-          style={{ flex: 1, minWidth: isMobile ? '100%' : 100 }}
-          placeholder={t('conditions.selectFieldPlaceholder')}
-        />
-        <Select
-          size="xs"
-          data={operators}
-          value={condition.operator}
-          onChange={handleOperatorChange}
-          style={{ width: isMobile ? '100%' : 120 }}
-        />
+    <SectionCard withBorder padding="xs">
+      <DsLayoutGrid role="group" aria-label={t('conditions.condition')} columns={{ base: 1, sm: 2 }} gap="xxs">
+        <div>
+          <Select
+            grow
+            size="xs"
+            aria-label={tCommonLabels('fields')}
+            data={availableFields.map((f) => ({ label: f.label, value: f.value }))}
+            value={condition.fieldId}
+            onChange={handleFieldChange}
+            placeholder={t('conditions.selectFieldPlaceholder')}
+          />
+        </div>
+        <div>
+          <Select
+            aria-label={tFilter('operator')}
+            grow
+            size="xs"
+            data={operators}
+            value={condition.operator}
+            onChange={handleOperatorChange}
+          />
+        </div>
         <ConditionValueEditor
           operator={condition.operator}
           targetField={targetField}
@@ -280,7 +310,7 @@ function SingleConditionEditor({ condition, availableFields, onChange, onRemove 
         />
         {onRemove && (
           <IconButton
-            size="sm"
+            size="xs"
             tone="danger"
             emphasis="low"
             aria-label={t('conditions.removeCondition')}
@@ -289,7 +319,7 @@ function SingleConditionEditor({ condition, availableFields, onChange, onRemove 
             <IconTrash size={14} />
           </IconButton>
         )}
-      </Group>
+      </DsLayoutGrid>
     </SectionCard>
   );
 }
@@ -358,50 +388,55 @@ function ConditionGroupEditor({ group, availableFields, onChange, onRemove, dept
   };
 
   return (
-    <SectionCard withBorder p="xs" bg={depth > 0 ? 'var(--mantine-color-gray-0)' : undefined}>
-      <Group justify="space-between" mb="xs">
-        <SegmentedControl
-          size="xs"
-          data={[
-            { label: t('conditions.logicAnd'), value: 'and' },
-            { label: t('conditions.logicOr'), value: 'or' },
-          ]}
-          value={group.logic}
-          onChange={(logic) => onChange({ ...group, logic: logic === 'or' ? 'or' : 'and' })}
-        />
-        <Group gap="xs">
-          <DropdownMenu size="compact">
-            <DropdownMenu.Target>
-              <Button size="xs" emphasis="medium" leftSection={<IconPlus size={12} />}>
-                {tCommonActions('add')}
-              </Button>
-            </DropdownMenu.Target>
-            <DropdownMenu.Dropdown>
-              <DropdownMenu.Item onClick={addCondition}>{t('conditions.condition')}</DropdownMenu.Item>
-              {depth < MAX_DEPTH && (
-                <DropdownMenu.Item onClick={addGroup}>{t('conditions.nestedGroup')}</DropdownMenu.Item>
-              )}
-            </DropdownMenu.Dropdown>
-          </DropdownMenu>
-          {onRemove && (
-            <IconButton
-              size="sm"
-              tone="danger"
-              emphasis="low"
-              aria-label={t('conditions.removeConditionGroup')}
-              onClick={onRemove}
-            >
-              <IconTrash size={14} />
-            </IconButton>
-          )}
-        </Group>
-      </Group>
+    <SectionCard nested={depth > 0} appearance={depth > 0 ? 'muted' : 'surface'} withBorder padding="xs">
+      <DsLayoutInset blockEnd="xs">
+        <DsLayoutInline justify="between">
+          <SegmentedControl
+            aria-label={t('conditions.nestedGroup')}
+            size="xs"
+            data={[
+              { label: t('conditions.logicAnd'), value: 'and' },
+              { label: t('conditions.logicOr'), value: 'or' },
+            ]}
+            value={group.logic}
+            onChange={(logic) => onChange({ ...group, logic: logic === 'or' ? 'or' : 'and' })}
+          />
+          <DsLayoutInline gap="xs">
+            <DropdownMenu size="compact">
+              <DropdownMenu.Target>
+                <Button size="xs" emphasis="medium" leftSection={<IconPlus size={12} />}>
+                  {tCommonActions('add')}
+                </Button>
+              </DropdownMenu.Target>
+              <DropdownMenu.Dropdown>
+                <DropdownMenu.Item onClick={addCondition}>{t('conditions.condition')}</DropdownMenu.Item>
+                {depth < MAX_DEPTH && (
+                  <DropdownMenu.Item onClick={addGroup}>{t('conditions.nestedGroup')}</DropdownMenu.Item>
+                )}
+              </DropdownMenu.Dropdown>
+            </DropdownMenu>
+            {onRemove && (
+              <IconButton
+                size="xs"
+                tone="danger"
+                emphasis="low"
+                aria-label={t('conditions.removeConditionGroup')}
+                onClick={onRemove}
+              >
+                <IconTrash size={14} />
+              </IconButton>
+            )}
+          </DsLayoutInline>
+        </DsLayoutInline>
+      </DsLayoutInset>
 
-      <Stack gap="xs">
+      <DsLayoutStack gap="xs">
         {group.conditions.length === 0 ? (
-          <Text size="xs" c="dimmed" ta="center" py="xs">
-            {t('conditions.noConditions')}
-          </Text>
+          <DsLayoutInset block="xs">
+            <DsText size="xs" tone="secondary" align="center">
+              {t('conditions.noConditions')}
+            </DsText>
+          </DsLayoutInset>
         ) : (
           group.conditions.map((c, i) =>
             isConditionGroup(c) ? (
@@ -424,7 +459,7 @@ function ConditionGroupEditor({ group, availableFields, onChange, onRemove, dept
             ),
           )
         )}
-      </Stack>
+      </DsLayoutStack>
     </SectionCard>
   );
 }
@@ -476,9 +511,10 @@ export function StepConditionEditor({ condition, availableFields, onChange }: St
   };
 
   return (
-    <Stack gap="xs">
-      <Group justify="space-between">
+    <DsLayoutStack gap="xs">
+      <DsLayoutInline justify="between">
         <SegmentedControl
+          aria-label={t('conditions.condition')}
           size="xs"
           data={[
             { label: t('conditions.simple'), value: 'simple' },
@@ -490,7 +526,7 @@ export function StepConditionEditor({ condition, availableFields, onChange }: St
         <Button size="xs" tone="danger" emphasis="low" onClick={handleRemoveCondition}>
           {t('conditions.removeConditionAction')}
         </Button>
-      </Group>
+      </DsLayoutInline>
 
       {condition &&
         (isConditionGroup(condition) ? (
@@ -506,6 +542,6 @@ export function StepConditionEditor({ condition, availableFields, onChange }: St
             onChange={(updated) => onChange(updated)}
           />
         ))}
-    </Stack>
+    </DsLayoutStack>
   );
 }

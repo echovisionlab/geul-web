@@ -1,0 +1,3203 @@
+{
+  "numTotalTestSuites": 74,
+  "numPassedTestSuites": 74,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 263,
+  "numPassedTests": 263,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1791773174622,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["cookie consent utilities"],
+          "fullName": "cookie consent utilities extracts cookie value by name",
+          "status": "passed",
+          "title": "extracts cookie value by name",
+          "duration": 0.8558749999999975,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["cookie consent utilities"],
+          "fullName": "cookie consent utilities serializes and parses preferences round-trip",
+          "status": "passed",
+          "title": "serializes and parses preferences round-trip",
+          "duration": 0.39333299999998417,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["cookie consent utilities"],
+          "fullName": "cookie consent utilities returns null for malformed or invalid payloads",
+          "status": "passed",
+          "title": "returns null for malformed or invalid payloads",
+          "duration": 0.14291700000001129,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["cookie consent utilities"],
+          "fullName": "cookie consent utilities treats missing version as outdated consent payload",
+          "status": "passed",
+          "title": "treats missing version as outdated consent payload",
+          "duration": 0.10395900000000324,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["cookie consent utilities"],
+          "fullName": "cookie consent utilities detects analytics consent",
+          "status": "passed",
+          "title": "detects analytics consent",
+          "duration": 0.09833299999999667,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["cookie consent utilities"],
+          "fullName": "cookie consent utilities requires current version for valid analytics consent",
+          "status": "passed",
+          "title": "requires current version for valid analytics consent",
+          "duration": 0.07958300000001373,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773220073,
+      "endTime": 1791773220075.0796,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/lib/cookie-consent.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["CookieConsentBanner single optional choice"],
+          "fullName": "CookieConsentBanner single optional choice starts analytics off and persists only after an explicit selected-choice save",
+          "status": "passed",
+          "title": "starts analytics off and persists only after an explicit selected-choice save",
+          "duration": 119.75137499999983,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["CookieConsentBanner single optional choice"],
+          "fullName": "CookieConsentBanner single optional choice rejects analytics even when the current draft is selected",
+          "status": "passed",
+          "title": "rejects analytics even when the current draft is selected",
+          "duration": 26.74154099999987,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["CookieConsentBanner single optional choice"],
+          "fullName": "CookieConsentBanner single optional choice saves essential-only when the optional choice remains off",
+          "status": "passed",
+          "title": "saves essential-only when the optional choice remains off",
+          "duration": 20.230165999999826,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["CookieConsentBanner single optional choice"],
+          "fullName": "CookieConsentBanner single optional choice preserves the previous renewal draft without treating an old version as current consent",
+          "status": "passed",
+          "title": "preserves the previous renewal draft without treating an old version as current consent",
+          "duration": 87.33991700000024,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["CookieConsentBanner single optional choice"],
+          "fullName": "CookieConsentBanner single optional choice focuses rejection on explicit reopening and returns focus to the invoking control after save",
+          "status": "passed",
+          "title": "focuses rejection on explicit reopening and returns focus to the invoking control after save",
+          "duration": 24.75441600000022,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["CookieConsentBanner single optional choice"],
+          "fullName": "CookieConsentBanner single optional choice keeps browser consent effective if account sync fails and sends only the chosen boolean",
+          "status": "passed",
+          "title": "keeps browser consent effective if account sync fails and sends only the chosen boolean",
+          "duration": 12.857250000000022,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["CookieConsentBanner single optional choice"],
+          "fullName": "CookieConsentBanner single optional choice keeps the banner out of /my/settings",
+          "status": "passed",
+          "title": "keeps the banner out of /my/settings",
+          "duration": 8.928125000000364,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["CookieConsentBanner single optional choice"],
+          "fullName": "CookieConsentBanner single optional choice keeps the banner out of /login",
+          "status": "passed",
+          "title": "keeps the banner out of /login",
+          "duration": 2.516291999999794,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["CookieConsentBanner single optional choice"],
+          "fullName": "CookieConsentBanner single optional choice keeps the banner out of /verify",
+          "status": "passed",
+          "title": "keeps the banner out of /verify",
+          "duration": 3.1418749999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["CookieConsentBanner single optional choice"],
+          "fullName": "CookieConsentBanner single optional choice keeps the banner out of /account/recovery",
+          "status": "passed",
+          "title": "keeps the banner out of /account/recovery",
+          "duration": 5.1088330000002316,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773214772,
+      "endTime": 1791773215084.109,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/cookie-consent/CookieConsentBanner.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["ExecutableRuntimeControls"],
+          "fullName": "ExecutableRuntimeControls uses one explicit runtime status style independent of prose inheritance",
+          "status": "passed",
+          "title": "uses one explicit runtime status style independent of prose inheritance",
+          "duration": 17.074290999999903,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["ExecutableRuntimeControls"],
+          "fullName": "ExecutableRuntimeControls renders authoring and public titles with the same title-row contract",
+          "status": "passed",
+          "title": "renders authoring and public titles with the same title-row contract",
+          "duration": 13.441542000000027,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["ExecutableRuntimeControls"],
+          "fullName": "ExecutableRuntimeControls can clear and replace an authored title without persisting fallback copy",
+          "status": "passed",
+          "title": "can clear and replace an authored title without persisting fallback copy",
+          "duration": 12.412582999999813,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["ExecutableRuntimeControls"],
+          "fullName": "ExecutableRuntimeControls keeps stop, restart and original reset in one transparent icon-control row",
+          "status": "passed",
+          "title": "keeps stop, restart and original reset in one transparent icon-control row",
+          "duration": 15.266250000000127,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773219150,
+      "endTime": 1791773219208.2664,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/executable/ExecutableRuntimeControls.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["FileManager directory loading"],
+          "fullName": "FileManager directory loading clears the previous directory before a failed navigation result",
+          "status": "passed",
+          "title": "clears the previous directory before a failed navigation result",
+          "duration": 31.9626659999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["FileManager directory loading"],
+          "fullName": "FileManager directory loading shows at most five exact usages and derives the remainder from all selected files",
+          "status": "passed",
+          "title": "shows at most five exact usages and derives the remainder from all selected files",
+          "duration": 126.94108299999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["FileManager directory loading"],
+          "fullName": "FileManager directory loading switches to paginated site-wide results and opens a folder by its returned path",
+          "status": "passed",
+          "title": "switches to paginated site-wide results and opens a folder by its returned path",
+          "duration": 15.73845899999992,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773217621,
+      "endTime": 1791773217795.7385,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/file-manager/FileManager.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["FileManagerView"],
+          "fullName": "FileManagerView keeps mobile list commands named and preserves modifier selection, Space and Enter on the native trigger",
+          "status": "passed",
+          "title": "keeps mobile list commands named and preserves modifier selection, Space and Enter on the native trigger",
+          "duration": 319.18899999999985,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["FileManagerView"],
+          "fullName": "FileManagerView supports keyboard focus traversal, selection and activation as separate commands",
+          "status": "passed",
+          "title": "supports keyboard focus traversal, selection and activation as separate commands",
+          "duration": 170.4936670000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["FileManagerView"],
+          "fullName": "FileManagerView names the file workspace, exposes asynchronous failure and keeps the upload progress name stable",
+          "status": "passed",
+          "title": "names the file workspace, exposes asynchronous failure and keeps the upload progress name stable",
+          "duration": 59.963042000000314,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["FileManagerView"],
+          "fullName": "FileManagerView separates move command names from the destination description",
+          "status": "passed",
+          "title": "separates move command names from the destination description",
+          "duration": 120.68283400000018,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["FileManagerView"],
+          "fullName": "FileManagerView contains the configured GIF in the 320px file-list loading surface without a visible generic message",
+          "status": "passed",
+          "title": "contains the configured GIF in the 320px file-list loading surface without a visible generic message",
+          "duration": 106.7782500000003,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["FileManagerView"],
+          "fullName": "FileManagerView renders site-wide paths and keeps the search total independent of selection",
+          "status": "passed",
+          "title": "renders site-wide paths and keeps the search total independent of selection",
+          "duration": 97.63929199999984,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["FileManagerView"],
+          "fullName": "FileManagerView keeps Author actions read-only except upload",
+          "status": "passed",
+          "title": "keeps Author actions read-only except upload",
+          "duration": 62.89033300000028,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["FileManagerView"],
+          "fullName": "FileManagerView keeps Author context mutations visible and disabled",
+          "status": "passed",
+          "title": "keeps Author context mutations visible and disabled",
+          "duration": 224.40491700000075,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["FileManagerView"],
+          "fullName": "FileManagerView uses Finder-style item selection and switches between icon and list views",
+          "status": "passed",
+          "title": "uses Finder-style item selection and switches between icon and list views",
+          "duration": 92.50841600000058,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["FileManagerView"],
+          "fullName": "FileManagerView releases item focus and selection when the blank viewer surface is clicked",
+          "status": "passed",
+          "title": "releases item focus and selection when the blank viewer surface is clicked",
+          "duration": 80.21366599999965,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["FileManagerView"],
+          "fullName": "FileManagerView uses the Core DataTable for list view with selection and sortable columns",
+          "status": "passed",
+          "title": "uses the Core DataTable for list view with selection and sortable columns",
+          "duration": 109.746083,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["FileManagerView"],
+          "fullName": "FileManagerView labels every Site Settings usage slot and links it to settings",
+          "status": "passed",
+          "title": "labels every Site Settings usage slot and links it to settings",
+          "duration": 82.55945799999972,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["FileManagerView"],
+          "fullName": "FileManagerView shows exact Block and Track locators without inventing editor deep-links",
+          "status": "passed",
+          "title": "shows exact Block and Track locators without inventing editor deep-links",
+          "duration": 82.32908299999963,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["FileManagerView"],
+          "fullName": "FileManagerView shows generated output type, status, and current delivery link",
+          "status": "passed",
+          "title": "shows generated output type, status, and current delivery link",
+          "duration": 88.06279100000029,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773194261,
+      "endTime": 1791773195959.0627,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/file-manager/FileManagerView.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["consent-aware shared file browser appearance"],
+          "fullName": "consent-aware shared file browser appearance keeps settings in the session without consent and removes unconsented legacy data",
+          "status": "passed",
+          "title": "keeps settings in the session without consent and removes unconsented legacy data",
+          "duration": 14.13737500000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["consent-aware shared file browser appearance"],
+          "fullName": "consent-aware shared file browser appearance restores only accepted current consent and saves only appearance fields",
+          "status": "passed",
+          "title": "restores only accepted current consent and saves only appearance fields",
+          "duration": 1.5340419999999995,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["consent-aware shared file browser appearance"],
+          "fullName": "consent-aware shared file browser appearance saves current session on acceptance and deletes stored settings on revocation",
+          "status": "passed",
+          "title": "saves current session on acceptance and deletes stored settings on revocation",
+          "duration": 1.1431660000000647,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["consent-aware shared file browser appearance"],
+          "fullName": "consent-aware shared file browser appearance does not restore with obsolete consent or rejected optional cookies",
+          "status": "passed",
+          "title": "does not restore with obsolete consent or rejected optional cookies",
+          "duration": 0.9445839999999635,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["consent-aware shared file browser appearance"],
+          "fullName": "consent-aware shared file browser appearance survives inaccessible storage and rejects corrupt, unsupported and unbounded settings",
+          "status": "passed",
+          "title": "survives inaccessible storage and rejects corrupt, unsupported and unbounded settings",
+          "duration": 1.599292000000105,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["consent-aware shared file browser appearance"],
+          "fullName": "consent-aware shared file browser appearance synchronizes the app manager and picker within the same window",
+          "status": "passed",
+          "title": "synchronizes the app manager and picker within the same window",
+          "duration": 0.6617919999999913,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773219542,
+      "endTime": 1791773219561.6619,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/file-manager/useFileBrowserViewSettings.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["CookieConsentSettings single optional choice"],
+          "fullName": "CookieConsentSettings single optional choice shows one optional switch and two equally sized neutral decisions",
+          "status": "passed",
+          "title": "shows one optional switch and two equally sized neutral decisions",
+          "duration": 52.5473750000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["CookieConsentSettings single optional choice"],
+          "fullName": "CookieConsentSettings single optional choice does not persist a draft toggle and saves the selected value explicitly",
+          "status": "passed",
+          "title": "does not persist a draft toggle and saves the selected value explicitly",
+          "duration": 29.36004200000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["CookieConsentSettings single optional choice"],
+          "fullName": "CookieConsentSettings single optional choice rejects a selected draft while retaining browser persistence and the account error notice",
+          "status": "passed",
+          "title": "rejects a selected draft while retaining browser persistence and the account error notice",
+          "duration": 31.092707999999902,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773218881,
+      "endTime": 1791773218994.0928,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/my/CookieConsentSettings.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["cookie consent actions"],
+          "fullName": "cookie consent actions persists current-user consent through the user service",
+          "status": "passed",
+          "title": "persists current-user consent through the user service",
+          "duration": 3.0385420000000067,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["cookie consent actions"],
+          "fullName": "cookie consent actions uses the browser-cookie path for unauthenticated users",
+          "status": "passed",
+          "title": "uses the browser-cookie path for unauthenticated users",
+          "duration": 12.830624999999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["cookie consent actions"],
+          "fullName": "cookie consent actions reports service responses that omit consent details",
+          "status": "passed",
+          "title": "reports service responses that omit consent details",
+          "duration": 0.21787499999999227,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773219465,
+      "endTime": 1791773219481.2178,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/lib/actions/cookie-consent.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Core chart accessibility and ownership"],
+          "fullName": "Core chart accessibility and ownership places the first donut hover label at its measured coordinates without animating from the origin",
+          "status": "passed",
+          "title": "places the first donut hover label at its measured coordinates without animating from the origin",
+          "duration": 272.02412500000037,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Core chart accessibility and ownership"],
+          "fullName": "Core chart accessibility and ownership places the first pie hover label at its measured coordinates without animating from the origin",
+          "status": "passed",
+          "title": "places the first pie hover label at its measured coordinates without animating from the origin",
+          "duration": 66.28562499999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Core chart accessibility and ownership"],
+          "fullName": "Core chart accessibility and ownership places the first bar-horizontal hover label at its measured coordinates without animating from the origin",
+          "status": "passed",
+          "title": "places the first bar-horizontal hover label at its measured coordinates without animating from the origin",
+          "duration": 223.67849999999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Core chart accessibility and ownership"],
+          "fullName": "Core chart accessibility and ownership places the first bar-vertical hover label at its measured coordinates without animating from the origin",
+          "status": "passed",
+          "title": "places the first bar-vertical hover label at its measured coordinates without animating from the origin",
+          "duration": 106.00358300000016,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Core chart accessibility and ownership"],
+          "fullName": "Core chart accessibility and ownership places the first radar hover label at its measured coordinates without animating from the origin",
+          "status": "passed",
+          "title": "places the first radar hover label at its measured coordinates without animating from the origin",
+          "duration": 93.71304099999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Core chart accessibility and ownership"],
+          "fullName": "Core chart accessibility and ownership places the first area hover label at its measured coordinates without animating from the origin",
+          "status": "passed",
+          "title": "places the first area hover label at its measured coordinates without animating from the origin",
+          "duration": 75.5710409999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Core chart accessibility and ownership"],
+          "fullName": "Core chart accessibility and ownership places the first line hover label at its measured coordinates without animating from the origin",
+          "status": "passed",
+          "title": "places the first line hover label at its measured coordinates without animating from the origin",
+          "duration": 87.25808400000005,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Core chart accessibility and ownership"],
+          "fullName": "Core chart accessibility and ownership places the first histogram hover label at its measured coordinates without animating from the origin",
+          "status": "passed",
+          "title": "places the first histogram hover label at its measured coordinates without animating from the origin",
+          "duration": 89.87345899999991,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Core chart accessibility and ownership"],
+          "fullName": "Core chart accessibility and ownership exposes the full dataset once in a semantic table for donut, independent of SVG measurement",
+          "status": "passed",
+          "title": "exposes the full dataset once in a semantic table for donut, independent of SVG measurement",
+          "duration": 26.21512500000017,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Core chart accessibility and ownership"],
+          "fullName": "Core chart accessibility and ownership exposes the full dataset once in a semantic table for pie, independent of SVG measurement",
+          "status": "passed",
+          "title": "exposes the full dataset once in a semantic table for pie, independent of SVG measurement",
+          "duration": 24.38254199999983,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Core chart accessibility and ownership"],
+          "fullName": "Core chart accessibility and ownership exposes the full dataset once in a semantic table for bar-horizontal, independent of SVG measurement",
+          "status": "passed",
+          "title": "exposes the full dataset once in a semantic table for bar-horizontal, independent of SVG measurement",
+          "duration": 34.930917000000136,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Core chart accessibility and ownership"],
+          "fullName": "Core chart accessibility and ownership exposes the full dataset once in a semantic table for bar-vertical, independent of SVG measurement",
+          "status": "passed",
+          "title": "exposes the full dataset once in a semantic table for bar-vertical, independent of SVG measurement",
+          "duration": 49.60683300000028,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Core chart accessibility and ownership"],
+          "fullName": "Core chart accessibility and ownership exposes the full dataset once in a semantic table for radar, independent of SVG measurement",
+          "status": "passed",
+          "title": "exposes the full dataset once in a semantic table for radar, independent of SVG measurement",
+          "duration": 36.450916000000234,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Core chart accessibility and ownership"],
+          "fullName": "Core chart accessibility and ownership exposes the full dataset once in a semantic table for area, independent of SVG measurement",
+          "status": "passed",
+          "title": "exposes the full dataset once in a semantic table for area, independent of SVG measurement",
+          "duration": 23.325458999999682,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Core chart accessibility and ownership"],
+          "fullName": "Core chart accessibility and ownership exposes the full dataset once in a semantic table for line, independent of SVG measurement",
+          "status": "passed",
+          "title": "exposes the full dataset once in a semantic table for line, independent of SVG measurement",
+          "duration": 79.16341700000021,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Core chart accessibility and ownership"],
+          "fullName": "Core chart accessibility and ownership exposes the full dataset once in a semantic table for histogram, independent of SVG measurement",
+          "status": "passed",
+          "title": "exposes the full dataset once in a semantic table for histogram, independent of SVG measurement",
+          "duration": 38.19695899999988,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Core chart accessibility and ownership"],
+          "fullName": "Core chart accessibility and ownership does not inject consumer appearance or reserved state attributes from runtime spreads",
+          "status": "passed",
+          "title": "does not inject consumer appearance or reserved state attributes from runtime spreads",
+          "duration": 83.37583399999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773193468,
+      "endTime": 1791773194878.3757,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/components/core/Chart/Chart.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["DropdownMenu"],
+          "fullName": "DropdownMenu lets the application navigation guard cancel an ordinary menu link",
+          "status": "passed",
+          "title": "lets the application navigation guard cancel an ordinary menu link",
+          "duration": 400.8681660000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["DropdownMenu"],
+          "fullName": "DropdownMenu keeps allowed menu routing and leaves modified link clicks outside the application guard",
+          "status": "passed",
+          "title": "keeps allowed menu routing and leaves modified link clicks outside the application guard",
+          "duration": 223.58008299999983,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["DropdownMenu"],
+          "fullName": "DropdownMenu opens from the keyboard, skips disabled commands and restores the trigger after Escape",
+          "status": "passed",
+          "title": "opens from the keyboard, skips disabled commands and restores the trigger after Escape",
+          "duration": 280.60704199999964,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["DropdownMenu"],
+          "fullName": "DropdownMenu adapts a native sensor handle through a tooltip to the functional menu trigger",
+          "status": "passed",
+          "title": "adapts a native sensor handle through a tooltip to the functional menu trigger",
+          "duration": 504.83408300000065,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["DropdownMenu"],
+          "fullName": "DropdownMenu keeps editing content accessible while a nonmodal contextual menu opens and its document mutates",
+          "status": "passed",
+          "title": "keeps editing content accessible while a nonmodal contextual menu opens and its document mutates",
+          "duration": 197.92050000000017,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["DropdownMenu"],
+          "fullName": "DropdownMenu routes a tooltip trigger ref to its sole action without an extra pressable or tab stop",
+          "status": "passed",
+          "title": "routes a tooltip trigger ref to its sole action without an extra pressable or tab stop",
+          "duration": 176.59825,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["DropdownMenu"],
+          "fullName": "DropdownMenu suppresses an enclosing hint while the actual menu opens",
+          "status": "passed",
+          "title": "suppresses an enclosing hint while the actual menu opens",
+          "duration": 188.0408749999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["DropdownMenu"],
+          "fullName": "DropdownMenu suppresses a target hint inside an opened menu boundary",
+          "status": "passed",
+          "title": "suppresses a target hint inside an opened menu boundary",
+          "duration": 137.8574579999995,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["DropdownMenu"],
+          "fullName": "DropdownMenu exposes the required compound API",
+          "status": "passed",
+          "title": "exposes the required compound API",
+          "duration": 1.1897079999998823,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["DropdownMenu"],
+          "fullName": "DropdownMenu applies Core sizing and radius while preserving selected, disabled, and destructive semantics",
+          "status": "passed",
+          "title": "applies Core sizing and radius while preserving selected, disabled, and destructive semantics",
+          "duration": 267.884583,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "keeps actions distinct across sibling fragments and nested fragment lists",
+          "status": "passed",
+          "title": "keeps actions distinct across sibling fragments and nested fragment lists",
+          "duration": 98.30579200000011,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773180193,
+      "endTime": 1791773182671.306,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/components/core/DropdownMenu/DropdownMenu.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton keeps sensor geometry compact across parent sizes and unsafe runtime spreads",
+          "status": "passed",
+          "title": "keeps sensor geometry compact across parent sizes and unsafe runtime spreads",
+          "duration": 48.00912499999981,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton uses the actual native reorder row as the drag image and preserves consumer callbacks",
+          "status": "passed",
+          "title": "uses the actual native reorder row as the drag image and preserves consumer callbacks",
+          "duration": 16.407416000000012,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton lets an active reorder sensor receive the drop key on the document",
+          "status": "passed",
+          "title": "lets an active reorder sensor receive the drop key on the document",
+          "duration": 11.170540999999957,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton preserves the actual native drag handle and forwarded ref across updates",
+          "status": "passed",
+          "title": "preserves the actual native drag handle and forwarded ref across updates",
+          "duration": 39.28758300000004,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton preserves an explicit out-of-tab-order handle inside a menu trigger",
+          "status": "passed",
+          "title": "preserves an explicit out-of-tab-order handle inside a menu trigger",
+          "duration": 39.33379100000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton blocks drag initiation when the sensor handle is unavailable",
+          "status": "passed",
+          "title": "blocks drag initiation when the sensor handle is unavailable",
+          "duration": 5.467666000000008,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton matches a text-button control height without changing standalone sizes",
+          "status": "passed",
+          "title": "matches a text-button control height without changing standalone sizes",
+          "duration": 3.064624999999978,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton renders an accessible icon button",
+          "status": "passed",
+          "title": "renders an accessible icon button",
+          "duration": 2.439292000000023,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton retains the explicit action name without appending progress to it: { label: 'Edit record' }",
+          "status": "passed",
+          "title": "retains the explicit action name without appending progress to it: { label: 'Edit record' }",
+          "duration": 137.01208299999985,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton retains the explicit action name without appending progress to it: { 'aria-label': 'Edit record' }",
+          "status": "passed",
+          "title": "retains the explicit action name without appending progress to it: { 'aria-label': 'Edit record' }",
+          "duration": 9.978124999999864,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton retains the explicit action name without appending progress to it: { …(1) }",
+          "status": "passed",
+          "title": "retains the explicit action name without appending progress to it: { …(1) }",
+          "duration": 7.509291999999959,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton replaces glyph and decorative count with separately named progress while pending: action",
+          "status": "passed",
+          "title": "replaces glyph and decorative count with separately named progress while pending: action",
+          "duration": 60.334125000000085,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton replaces glyph and decorative count with separately named progress while pending: drag-handle",
+          "status": "passed",
+          "title": "replaces glyph and decorative count with separately named progress while pending: drag-handle",
+          "duration": 12.20695899999987,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton uses low-emphasis neutral treatment by default",
+          "status": "passed",
+          "title": "uses low-emphasis neutral treatment by default",
+          "duration": 2.4403330000000096,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton maps semantic danger tone without exposing raw colors",
+          "status": "passed",
+          "title": "maps semantic danger tone without exposing raw colors",
+          "duration": 4.771208999999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton preserves aria-labelledby when the label is external",
+          "status": "passed",
+          "title": "preserves aria-labelledby when the label is external",
+          "duration": 1.2478330000001279,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton rejects missing, blank, or ambiguous runtime name channels: {}",
+          "status": "passed",
+          "title": "rejects missing, blank, or ambiguous runtime name channels: {}",
+          "duration": 4.010082999999895,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton rejects missing, blank, or ambiguous runtime name channels: {\"label\":\"\"}",
+          "status": "passed",
+          "title": "rejects missing, blank, or ambiguous runtime name channels: {\"label\":\"\"}",
+          "duration": 0.5388330000000678,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton rejects missing, blank, or ambiguous runtime name channels: {\"aria-label\":\"   \"}",
+          "status": "passed",
+          "title": "rejects missing, blank, or ambiguous runtime name channels: {\"aria-label\":\"   \"}",
+          "duration": 0.4689579999999296,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton rejects missing, blank, or ambiguous runtime name channels: {\"aria-labelledby\":\"\"}",
+          "status": "passed",
+          "title": "rejects missing, blank, or ambiguous runtime name channels: {\"aria-labelledby\":\"\"}",
+          "duration": 0.4461670000000595,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton rejects missing, blank, or ambiguous runtime name channels: {\"label\":\"Edit\",\"aria-label\":\"Edit record\"}",
+          "status": "passed",
+          "title": "rejects missing, blank, or ambiguous runtime name channels: {\"label\":\"Edit\",\"aria-label\":\"Edit record\"}",
+          "duration": 0.44591700000000856,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton resolves an external label as an accessible name for both the command and pending progress",
+          "status": "passed",
+          "title": "resolves an external label as an accessible name for both the command and pending progress",
+          "duration": 2.9757499999998345,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton keeps the visual count decorative and validates numeric badge input",
+          "status": "passed",
+          "title": "keeps the visual count decorative and validates numeric badge input",
+          "duration": 5.998499999999922,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton prevents a pending reset action from performing native form reset",
+          "status": "passed",
+          "title": "prevents a pending reset action from performing native form reset",
+          "duration": 6.570791999999983,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton preserves disabled state",
+          "status": "passed",
+          "title": "preserves disabled state",
+          "duration": 2.2535420000001523,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["IconButton"],
+          "fullName": "IconButton applies the same Core low-emphasis disabled treatment to semantic tones",
+          "status": "passed",
+          "title": "applies the same Core low-emphasis disabled treatment to semantic tones",
+          "duration": 13.929000000000087,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773215743,
+      "endTime": 1791773216181.929,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/components/core/IconButton/IconButton.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["DateTimeInput"],
+          "fullName": "DateTimeInput round-trips a local wall-clock value without applying a time zone",
+          "status": "passed",
+          "title": "round-trips a local wall-clock value without applying a time zone",
+          "duration": 7.020917000000054,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["DateTimeInput"],
+          "fullName": "DateTimeInput renders localized calendar and 24-hour segmented time controls",
+          "status": "passed",
+          "title": "renders localized calendar and 24-hour segmented time controls",
+          "duration": 193.02424999999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773216488,
+      "endTime": 1791773216688.0242,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/components/core/Input/DateTimeInput.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["closed React Aria input behavior"],
+          "fullName": "closed React Aria input behavior content-fitted selects preserve clear actions and read-only protection",
+          "status": "passed",
+          "title": "content-fitted selects preserve clear actions and read-only protection",
+          "duration": 74.71387499999992,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["closed React Aria input behavior"],
+          "fullName": "closed React Aria input behavior preserves mixed semantics and prevents changes to disabled and read-only checkboxes",
+          "status": "passed",
+          "title": "preserves mixed semantics and prevents changes to disabled and read-only checkboxes",
+          "duration": 29.76166699999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["closed React Aria input behavior"],
+          "fullName": "closed React Aria input behavior changes grouped checkbox values through the native input",
+          "status": "passed",
+          "title": "changes grouped checkbox values through the native input",
+          "duration": 10.83245799999986,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["closed React Aria input behavior"],
+          "fullName": "closed React Aria input behavior forwards a native checkbox click with functioning propagation methods and the actual input target",
+          "status": "passed",
+          "title": "forwards a native checkbox click with functioning propagation methods and the actual input target",
+          "duration": 10.091416999999865,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["closed React Aria input behavior"],
+          "fullName": "closed React Aria input behavior opens an RGBA picker and updates hue without losing the alpha channel",
+          "status": "passed",
+          "title": "opens an RGBA picker and updates hue without losing the alpha channel",
+          "duration": 365.577667,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["closed React Aria input behavior"],
+          "fullName": "closed React Aria input behavior keeps grouped source and translation options in the actual collection",
+          "status": "passed",
+          "title": "keeps grouped source and translation options in the actual collection",
+          "duration": 122.7515840000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["closed React Aria input behavior"],
+          "fullName": "closed React Aria input behavior keeps keyboard focus and associated error available when motion is disabled",
+          "status": "passed",
+          "title": "keeps keyboard focus and associated error available when motion is disabled",
+          "duration": 32.329249999999774,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["closed React Aria input behavior"],
+          "fullName": "closed React Aria input behavior projects JS attributes without allowing consumer skins or reserved state overrides",
+          "status": "passed",
+          "title": "projects JS attributes without allowing consumer skins or reserved state overrides",
+          "duration": 7.71029099999987,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["closed React Aria input behavior"],
+          "fullName": "closed React Aria input behavior edits calendar days and clears uncontrolled selections through real pressables",
+          "status": "passed",
+          "title": "edits calendar days and clears uncontrolled selections through real pressables",
+          "duration": 172.6707919999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["closed React Aria input behavior"],
+          "fullName": "closed React Aria input behavior preserves timezone-free date-time and month domain strings",
+          "status": "passed",
+          "title": "preserves timezone-free date-time and month domain strings",
+          "duration": 37.93116699999973,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["closed React Aria input behavior"],
+          "fullName": "closed React Aria input behavior updates range endpoints and seconds without vendor callback shapes",
+          "status": "passed",
+          "title": "updates range endpoints and seconds without vendor callback shapes",
+          "duration": 50.357792000000245,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["closed React Aria input behavior"],
+          "fullName": "closed React Aria input behavior prevents readonly calendar changes and clearing",
+          "status": "passed",
+          "title": "prevents readonly calendar changes and clearing",
+          "duration": 22.334332999999788,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773204913,
+      "endTime": 1791773205850.3342,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/components/core/Input/InputBehavior.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order TextInput relates visible label, helper, error and external description to the actual input",
+          "status": "passed",
+          "title": "TextInput relates visible label, helper, error and external description to the actual input",
+          "duration": 102.164041,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order PasswordInput relates visible label, helper, error and external description to the actual input",
+          "status": "passed",
+          "title": "PasswordInput relates visible label, helper, error and external description to the actual input",
+          "duration": 25.117582999999968,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order NumberInput relates visible label, helper, error and external description to the actual input",
+          "status": "passed",
+          "title": "NumberInput relates visible label, helper, error and external description to the actual input",
+          "duration": 60.252250000000004,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order Select relates visible label, helper, error and external description to the actual input",
+          "status": "passed",
+          "title": "Select relates visible label, helper, error and external description to the actual input",
+          "duration": 102.33674999999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order TextInput preserves read-only focus separately from native disabled",
+          "status": "passed",
+          "title": "TextInput preserves read-only focus separately from native disabled",
+          "duration": 25.243958999999904,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order PasswordInput preserves read-only focus separately from native disabled",
+          "status": "passed",
+          "title": "PasswordInput preserves read-only focus separately from native disabled",
+          "duration": 12.965791999999965,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order NumberInput preserves read-only focus separately from native disabled",
+          "status": "passed",
+          "title": "NumberInput preserves read-only focus separately from native disabled",
+          "duration": 10.691958000000113,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order Select preserves read-only focus separately from native disabled",
+          "status": "passed",
+          "title": "Select preserves read-only focus separately from native disabled",
+          "duration": 10.346291999999949,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order PasswordInput keeps controlled visibility and allows read-only inspection without editing the value",
+          "status": "passed",
+          "title": "PasswordInput keeps controlled visibility and allows read-only inspection without editing the value",
+          "duration": 16.859707999999955,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order PasswordInput visibility command operates once with Enter",
+          "status": "passed",
+          "title": "PasswordInput visibility command operates once with Enter",
+          "duration": 11.72674999999981,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order PasswordInput visibility command operates once with  ",
+          "status": "passed",
+          "title": "PasswordInput visibility command operates once with  ",
+          "duration": 11.682500000000118,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order TextInput preserves external naming and its own help/error relationships together",
+          "status": "passed",
+          "title": "TextInput preserves external naming and its own help/error relationships together",
+          "duration": 10.60345899999993,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order NumberInput keyboard increments follow limits and read-only disables both stepper commands",
+          "status": "passed",
+          "title": "NumberInput keyboard increments follow limits and read-only disables both stepper commands",
+          "duration": 18.885958000000073,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order Select readOnly blocks controlled opening and clear commands while retaining its selected label",
+          "status": "passed",
+          "title": "Select readOnly blocks controlled opening and clear commands while retaining its selected label",
+          "duration": 27.063708000000133,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order Select disabled blocks controlled opening and clear commands while retaining its selected label",
+          "status": "passed",
+          "title": "Select disabled blocks controlled opening and clear commands while retaining its selected label",
+          "duration": 6.920250000000124,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order Select allows deselecting the currently selected option only when the API requests it",
+          "status": "passed",
+          "title": "Select allows deselecting the currently selected option only when the API requests it",
+          "duration": 67.47175000000016,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order NumberInput forwards its promised native input events with an actual input target",
+          "status": "passed",
+          "title": "NumberInput forwards its promised native input events with an actual input target",
+          "duration": 15.450583000000051,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["input contracts in TextInput → PasswordInput → NumberInput → Select order"],
+          "fullName": "input contracts in TextInput → PasswordInput → NumberInput → Select order Select forwards its promised native input events with an actual input target",
+          "status": "passed",
+          "title": "Select forwards its promised native input events with an actual input target",
+          "duration": 7.655334000000039,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773205821,
+      "endTime": 1791773206365.6553,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/components/core/Input/InputContracts.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["SortableGroups"],
+          "fullName": "SortableGroups announces names, positions, destinations and cancellation without leaking generated drag IDs",
+          "status": "passed",
+          "title": "announces names, positions, destinations and cancellation without leaking generated drag IDs",
+          "duration": 5.827957999999967,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["SortableGroups"],
+          "fullName": "SortableGroups moves a field down onto the next field rather than leaving it in place",
+          "status": "passed",
+          "title": "moves a field down onto the next field rather than leaving it in place",
+          "duration": 0.9710410000000138,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["SortableGroups"],
+          "fullName": "SortableGroups resolves step and field identifiers containing hyphens when moving between steps",
+          "status": "passed",
+          "title": "resolves step and field identifiers containing hyphens when moving between steps",
+          "duration": 1.458332999999982,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["SortableGroups"],
+          "fullName": "SortableGroups uses a geometric collision fallback when keyboard dragging has no pointer",
+          "status": "passed",
+          "title": "uses a geometric collision fallback when keyboard dragging has no pointer",
+          "duration": 0.554458000000011,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["SortableGroups"],
+          "fullName": "SortableGroups keeps domain content in caller-provided group and item renderers",
+          "status": "passed",
+          "title": "keeps domain content in caller-provided group and item renderers",
+          "duration": 1.3782090000000267,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773219907,
+      "endTime": 1791773219917.3782,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/components/core/Sortable/SortableGroups.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Core reorder surface"],
+          "fullName": "Core reorder surface translates the complete renderer without applying the sensor scale",
+          "status": "passed",
+          "title": "translates the complete renderer without applying the sensor scale",
+          "duration": 9.960083000000054,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773220175,
+      "endTime": 1791773220184.96,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/components/core/Sortable/SortableSurface.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Tooltip"],
+          "fullName": "Tooltip keeps native sensor Space/Enter keys available without installing a press handler for a focus hint",
+          "status": "passed",
+          "title": "keeps native sensor Space/Enter keys available without installing a press handler for a focus hint",
+          "duration": 125.15899999999988,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tooltip"],
+          "fullName": "Tooltip renders a controlled open tooltip through the Core boundary",
+          "status": "passed",
+          "title": "renders a controlled open tooltip through the Core boundary",
+          "duration": 52.39362499999993,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tooltip"],
+          "fullName": "Tooltip forwards multiline layout props",
+          "status": "passed",
+          "title": "forwards multiline layout props",
+          "duration": 14.811707999999953,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tooltip"],
+          "fullName": "Tooltip does not render tooltip content when disabled",
+          "status": "passed",
+          "title": "does not render tooltip content when disabled",
+          "duration": 3.009166999999934,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tooltip"],
+          "fullName": "Tooltip allows passive non-action hints to remain outside a toolbar tab sequence",
+          "status": "passed",
+          "title": "allows passive non-action hints to remain outside a toolbar tab sequence",
+          "duration": 9.233792000000221,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tooltip"],
+          "fullName": "Tooltip keeps described action focus and Escape available when focus hints are deliberately disabled",
+          "status": "passed",
+          "title": "keeps described action focus and Escape available when focus hints are deliberately disabled",
+          "duration": 4.75974999999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773202823,
+      "endTime": 1791773203032.7598,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/components/core/Tooltip/Tooltip.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["CookieConsentBannerView"],
+          "fullName": "CookieConsentBannerView exposes the single optional choice without a disclosure or accept-all action",
+          "status": "passed",
+          "title": "exposes the single optional choice without a disclosure or accept-all action",
+          "duration": 100.16941700000007,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["CookieConsentBannerView"],
+          "fullName": "CookieConsentBannerView keeps renewal guidance and essential/optional context visible",
+          "status": "passed",
+          "title": "keeps renewal guidance and essential/optional context visible",
+          "duration": 13.000332999999955,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["CookieConsentBannerView"],
+          "fullName": "CookieConsentBannerView separates draft changes, essential-only rejection and selected-choice saving",
+          "status": "passed",
+          "title": "separates draft changes, essential-only rejection and selected-choice saving",
+          "duration": 14.800958000000037,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["CookieConsentBannerView"],
+          "fullName": "CookieConsentBannerView gives both decisions the same standard size, emphasis and wrapping contract",
+          "status": "passed",
+          "title": "gives both decisions the same standard size, emphasis and wrapping contract",
+          "duration": 6.932207999999946,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["CookieConsentBannerView"],
+          "fullName": "CookieConsentBannerView renders no interactive controls while closed",
+          "status": "passed",
+          "title": "renders no interactive controls while closed",
+          "duration": 1.7909170000000358,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773217970,
+      "endTime": 1791773218106.791,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/cookie-consent/ui/CookieConsentBannerView.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["EditorToolbarTooltip"],
+          "fullName": "EditorToolbarTooltip renders only the exact verified editor shortcut mappings",
+          "status": "passed",
+          "title": "renders only the exact verified editor shortcut mappings",
+          "duration": 96.04374999999982,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["EditorToolbarTooltip"],
+          "fullName": "EditorToolbarTooltip opens on keyboard focus without replacing the action accessible name",
+          "status": "passed",
+          "title": "opens on keyboard focus without replacing the action accessible name",
+          "duration": 352.35312499999964,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["EditorToolbarTooltip"],
+          "fullName": "EditorToolbarTooltip omits a shortcut element when no direct command exists",
+          "status": "passed",
+          "title": "omits a shortcut element when no direct command exists",
+          "duration": 1.745082999999795,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["EditorToolbarTooltip"],
+          "fullName": "EditorToolbarTooltip formats Mod semantics for macOS, iPadOS, and Windows without rewriting explicit Ctrl",
+          "status": "passed",
+          "title": "formats Mod semantics for macOS, iPadOS, and Windows without rewriting explicit Ctrl",
+          "duration": 0.3516670000008162,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["EditorToolbarTooltip"],
+          "fullName": "EditorToolbarTooltip renders the Apple shortcut after the client platform effect",
+          "status": "passed",
+          "title": "renders the Apple shortcut after the client platform effect",
+          "duration": 1.148958999999195,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["EditorToolbarTooltip"],
+          "fullName": "EditorToolbarTooltip omits shortcut markup on the server so hydration starts from the same client render",
+          "status": "passed",
+          "title": "omits shortcut markup on the server so hydration starts from the same client render",
+          "duration": 8.491374999999607,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["EditorToolbarTooltip"],
+          "fullName": "EditorToolbarTooltip keeps DropdownMenu ownership on the real button while focus tooltip observes it by ref",
+          "status": "passed",
+          "title": "keeps DropdownMenu ownership on the real button while focus tooltip observes it by ref",
+          "duration": 212.30124999999953,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["EditorToolbarTooltip"],
+          "fullName": "EditorToolbarTooltip opens a Core dropdown tooltip on hover when focus hints are disabled and suppresses it while the menu is open",
+          "status": "passed",
+          "title": "opens a Core dropdown tooltip on hover when focus hints are disabled and suppresses it while the menu is open",
+          "duration": 276.0935840000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["EditorToolbarTooltip"],
+          "fullName": "EditorToolbarTooltip opens and closes a ref-target tooltip from native focus and pointer listeners",
+          "status": "passed",
+          "title": "opens and closes a ref-target tooltip from native focus and pointer listeners",
+          "duration": 134.6170000000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773189727,
+      "endTime": 1791773190810.617,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/editor/toolbars/EditorToolbarTooltip.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["actual field statistics UI"],
+          "fullName": "actual field statistics UI reads distribution values and localized totals in the chart accessible table",
+          "status": "passed",
+          "title": "reads distribution values and localized totals in the chart accessible table",
+          "duration": 189.7823330000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["actual field statistics UI"],
+          "fullName": "actual field statistics UI keeps numeric min/max/mean/count summaries and histogram upper bounds",
+          "status": "passed",
+          "title": "keeps numeric min/max/mean/count summaries and histogram upper bounds",
+          "duration": 154.80354100000022,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["actual field statistics UI"],
+          "fullName": "actual field statistics UI changes the field-specific chart default when the rendered field changes",
+          "status": "passed",
+          "title": "changes the field-specific chart default when the rendered field changes",
+          "duration": 107.41708300000028,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["actual field statistics UI"],
+          "fullName": "actual field statistics UI uses the catalogue locale for the empty response state without rendering a misleading plot",
+          "status": "passed",
+          "title": "uses the catalogue locale for the empty response state without rendering a misleading plot",
+          "duration": 66.87662499999988,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["actual field statistics UI"],
+          "fullName": "actual field statistics UI switches the actual Select across every distribution chart and its visible table",
+          "status": "passed",
+          "title": "switches the actual Select across every distribution chart and its visible table",
+          "duration": 817.7449590000006,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773199758,
+      "endTime": 1791773201094.7449,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/form/FormDashboard/FieldStatsChart.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["CodeBlockSelectionMenu"],
+          "fullName": "CodeBlockSelectionMenu offers edit, alignment and delete in one keyboard toolbar",
+          "status": "passed",
+          "title": "offers edit, alignment and delete in one keyboard toolbar",
+          "duration": 387.91245899999967,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["CodeBlockSelectionMenu"],
+          "fullName": "CodeBlockSelectionMenu does not open for the containing block selection because the code frame itself is not selected",
+          "status": "passed",
+          "title": "does not open for the containing block selection because the code frame itself is not selected",
+          "duration": 89.26633300000003,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["CodeBlockSelectionMenu"],
+          "fullName": "CodeBlockSelectionMenu hides for target-locale neutral lock and disables deletion for the sole top-level block",
+          "status": "passed",
+          "title": "hides for target-locale neutral lock and disables deletion for the sole top-level block",
+          "duration": 64.18516700000009,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773208685,
+      "endTime": 1791773209226.185,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/editor/tiptap/code/CodeBlockSelectionMenu.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["SelectionBubbleMenuView keyboard navigation"],
+          "fullName": "SelectionBubbleMenuView keyboard navigation keeps desktop link action labels out of shrinkable grid tracks",
+          "status": "passed",
+          "title": "keeps desktop link action labels out of shrinkable grid tracks",
+          "duration": 2.820708999999624,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["SelectionBubbleMenuView keyboard navigation"],
+          "fullName": "SelectionBubbleMenuView keyboard navigation uses one tab stop and wraps visible enabled controls with arrow, Home, and End",
+          "status": "passed",
+          "title": "uses one tab stop and wraps visible enabled controls with arrow, Home, and End",
+          "duration": 382.5112079999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["SelectionBubbleMenuView keyboard navigation"],
+          "fullName": "SelectionBubbleMenuView keyboard navigation puts link disclosure and focus on the actual button: tiptap-selection-link-create",
+          "status": "passed",
+          "title": "puts link disclosure and focus on the actual button: tiptap-selection-link-create",
+          "duration": 168.69529200000034,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["SelectionBubbleMenuView keyboard navigation"],
+          "fullName": "SelectionBubbleMenuView keyboard navigation puts link disclosure and focus on the actual button: tiptap-selection-link-edit",
+          "status": "passed",
+          "title": "puts link disclosure and focus on the actual button: tiptap-selection-link-edit",
+          "duration": 160.11295800000016,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["SelectionBubbleMenuView keyboard navigation"],
+          "fullName": "SelectionBubbleMenuView keyboard navigation restores editor focus on Escape without hijacking arrow keys from form inputs",
+          "status": "passed",
+          "title": "restores editor focus on Escape without hijacking arrow keys from form inputs",
+          "duration": 65.22183399999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["SelectionBubbleMenuView keyboard navigation"],
+          "fullName": "SelectionBubbleMenuView keyboard navigation keeps secondary formatting and AI commands in the actual compact menu",
+          "status": "passed",
+          "title": "keeps secondary formatting and AI commands in the actual compact menu",
+          "duration": 197.86279100000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["SelectionBubbleMenuView keyboard navigation"],
+          "fullName": "SelectionBubbleMenuView keyboard navigation offers one alignment trigger while its three actual menu commands remain available",
+          "status": "passed",
+          "title": "offers one alignment trigger while its three actual menu commands remain available",
+          "duration": 106.6985410000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["SelectionBubbleMenu positioning and dismissal"],
+          "fullName": "SelectionBubbleMenu positioning and dismissal requests the current selection position with a history-free metadata transaction",
+          "status": "passed",
+          "title": "requests the current selection position with a history-free metadata transaction",
+          "duration": 40.16154200000028,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773203211,
+      "endTime": 1791773204335.1616,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/editor/tiptap/menus/SelectionBubbleMenu.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["useSelectionToolbarNavigation"],
+          "fullName": "useSelectionToolbarNavigation keeps the container non-focusable and one enabled visible action tabbable",
+          "status": "passed",
+          "title": "keeps the container non-focusable and one enabled visible action tabbable",
+          "duration": 120.97175000000016,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["useSelectionToolbarNavigation"],
+          "fullName": "useSelectionToolbarNavigation wraps horizontal arrows, supports Home/End, and leaves native input arrows alone",
+          "status": "passed",
+          "title": "wraps horizontal arrows, supports Home/End, and leaves native input arrows alone",
+          "duration": 54.653916999999865,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["useSelectionToolbarNavigation"],
+          "fullName": "useSelectionToolbarNavigation leaves Tab and Shift+Tab native on every toolbar action and input",
+          "status": "passed",
+          "title": "leaves Tab and Shift+Tab native on every toolbar action and input",
+          "duration": 41.514250000000175,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["useSelectionToolbarNavigation"],
+          "fullName": "useSelectionToolbarNavigation leaves the only visible action with Tab instead of trapping focus",
+          "status": "passed",
+          "title": "leaves the only visible action with Tab instead of trapping focus",
+          "duration": 11.447167000000036,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["useSelectionToolbarNavigation"],
+          "fullName": "useSelectionToolbarNavigation preserves IME and modified navigation rather than moving toolbar focus",
+          "status": "passed",
+          "title": "preserves IME and modified navigation rather than moving toolbar focus",
+          "duration": 15.245749999999816,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["useSelectionToolbarNavigation"],
+          "fullName": "useSelectionToolbarNavigation uses vertical arrows only when explicitly enabled",
+          "status": "passed",
+          "title": "uses vertical arrows only when explicitly enabled",
+          "duration": 15.069375000000036,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["useSelectionToolbarNavigation"],
+          "fullName": "useSelectionToolbarNavigation lets nested link forms, menus and input controls own Escape before the toolbar dismisses",
+          "status": "passed",
+          "title": "lets nested link forms, menus and input controls own Escape before the toolbar dismisses",
+          "duration": 12.88716700000009,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["useSelectionToolbarNavigation"],
+          "fullName": "useSelectionToolbarNavigation calls Escape and bridges editor Tab directly to the first action",
+          "status": "passed",
+          "title": "calls Escape and bridges editor Tab directly to the first action",
+          "duration": 23.466583000000128,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["useSelectionToolbarNavigation"],
+          "fullName": "useSelectionToolbarNavigation handles eligible editor-root Escape once and passes ineligible, form, and IME events through",
+          "status": "passed",
+          "title": "handles eligible editor-root Escape once and passes ineligible, form, and IME events through",
+          "duration": 14.634042000000136,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["useSelectionToolbarNavigation"],
+          "fullName": "useSelectionToolbarNavigation does not consume editor Tab when its first action rejects focus",
+          "status": "passed",
+          "title": "does not consume editor Tab when its first action rejects focus",
+          "duration": 13.836583999999903,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["useSelectionToolbarNavigation"],
+          "fullName": "useSelectionToolbarNavigation does not consume Escape without a focus-restoration callback",
+          "status": "passed",
+          "title": "does not consume Escape without a focus-restoration callback",
+          "duration": 5.390334000000166,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tiptap BubbleMenu keyboard bridge"],
+          "fullName": "Tiptap BubbleMenu keyboard bridge suppresses block bubbles during nested input/source editing without losing editor selection",
+          "status": "passed",
+          "title": "suppresses block bubbles during nested input/source editing without losing editor selection",
+          "duration": 46.42191700000012,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tiptap BubbleMenu keyboard bridge"],
+          "fullName": "Tiptap BubbleMenu keyboard bridge dismisses from editor-root Escape with the exact selection and one meta-only transaction",
+          "status": "passed",
+          "title": "dismisses from editor-root Escape with the exact selection and one meta-only transaction",
+          "duration": 11.62324999999987,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773209344,
+      "endTime": 1791773209731.6233,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/editor/tiptap/menus/useSelectionToolbarNavigation.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["p5.js sketch source policy"],
+          "fullName": "p5.js sketch source policy rejects network, page, storage and sketch schedulers with a source location",
+          "status": "passed",
+          "title": "rejects network, page, storage and sketch schedulers with a source location",
+          "duration": 6.327166000000034,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["p5.js sketch source policy"],
+          "fullName": "p5.js sketch source policy sanitizes resource URLs while keeping an author source location",
+          "status": "passed",
+          "title": "sanitizes resource URLs while keeping an author source location",
+          "duration": 0.9769169999999576,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["p5.js sketch source policy"],
+          "fullName": "p5.js sketch source policy creates an opaque-frame document that denies network, same-origin and nested execution",
+          "status": "passed",
+          "title": "creates an opaque-frame document that denies network, same-origin and nested execution",
+          "duration": 1.312333000000308,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["p5.js sketch source policy"],
+          "fullName": "p5.js sketch source policy resolves the p5 mount after document load and reports ready only after a canvas is attached",
+          "status": "passed",
+          "title": "resolves the p5 mount after document load and reports ready only after a canvas is attached",
+          "duration": 0.8592920000000959,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["p5.js sketch source policy"],
+          "fullName": "p5.js sketch source policy terminates a preflight that exceeds the CPU budget before mounting a frame",
+          "status": "passed",
+          "title": "terminates a preflight that exceeds the CPU budget before mounting a frame",
+          "duration": 11.275958000000173,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["p5.js sketch source policy"],
+          "fullName": "p5.js sketch source policy does not charge worker startup time to the author setup CPU budget",
+          "status": "passed",
+          "title": "does not charge worker startup time to the author setup CPU budget",
+          "duration": 0.9746250000002874,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["p5.js Tiptap node"],
+          "fullName": "p5.js Tiptap node persists source, view mode and preview settings in the wire document",
+          "status": "passed",
+          "title": "persists source, view mode and preview settings in the wire document",
+          "duration": 113.00283400000035,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["p5.js Tiptap node"],
+          "fullName": "p5.js Tiptap node parses and normalizes durable preview width from HTML",
+          "status": "passed",
+          "title": "parses and normalizes durable preview width from HTML",
+          "duration": 33.05116700000008,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["p5.js Tiptap node"],
+          "fullName": "p5.js Tiptap node inserts a schema-valid block and refuses the command when read-only",
+          "status": "passed",
+          "title": "inserts a schema-valid block and refuses the command when read-only",
+          "duration": 36.3073330000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["authoring p5.js sketch resize"],
+          "fullName": "authoring p5.js sketch resize persists device capabilities and waits for an explicit run",
+          "status": "passed",
+          "title": "persists device capabilities and waits for an explicit run",
+          "duration": 1494.602292,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["authoring p5.js sketch resize"],
+          "fullName": "authoring p5.js sketch resize keeps Monaco edits draft-only until Apply updates source and preview",
+          "status": "passed",
+          "title": "keeps Monaco edits draft-only until Apply updates source and preview",
+          "duration": 321.10120899999947,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["authoring p5.js sketch resize"],
+          "fullName": "authoring p5.js sketch resize exits Monaco to the exact sketch NodeSelection without changing source or mode",
+          "status": "passed",
+          "title": "exits Monaco to the exact sketch NodeSelection without changing source or mode",
+          "duration": 223.05783299999985,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["authoring p5.js sketch resize"],
+          "fullName": "authoring p5.js sketch resize exposes accessible handles and persists keyboard width changes as strings",
+          "status": "passed",
+          "title": "exposes accessible handles and persists keyboard width changes as strings",
+          "duration": 256.79549999999927,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["p5.js neutral authoring authority"],
+          "fullName": "p5.js neutral authoring authority fails closed for a target-locale editor",
+          "status": "passed",
+          "title": "fails closed for a target-locale editor",
+          "duration": 36.51533300000028,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["public p5.js sketch interaction"],
+          "fullName": "public p5.js sketch interaction auto-runs and keeps temporary edits out of the durable document",
+          "status": "passed",
+          "title": "auto-runs and keeps temporary edits out of the durable document",
+          "duration": 98.78429200000028,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["public p5.js sketch interaction"],
+          "fullName": "public p5.js sketch interaction runs a device-capable temporary edit without changing the durable document",
+          "status": "passed",
+          "title": "runs a device-capable temporary edit without changing the durable document",
+          "duration": 59.35816700000032,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773197908,
+      "endTime": 1791773200603.3582,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/editor/tiptap/p5/P5SketchNode.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Shader source and wire contract"],
+          "fullName": "Shader source and wire contract normalizes implementation-specific compile logs into editor markers",
+          "status": "passed",
+          "title": "normalizes implementation-specific compile logs into editor markers",
+          "duration": 3.7202500000003056,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shader source and wire contract"],
+          "fullName": "Shader source and wire contract accepts ordinary fragment main and ShaderToy mainImage entrypoints",
+          "status": "passed",
+          "title": "accepts ordinary fragment main and ShaderToy mainImage entrypoints",
+          "duration": 0.91924999999992,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shader source and wire contract"],
+          "fullName": "Shader source and wire contract only exposes a compile marker on the exact filename tab",
+          "status": "passed",
+          "title": "only exposes a compile marker on the exact filename tab",
+          "duration": 0.8016250000000582,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shader source and wire contract"],
+          "fullName": "Shader source and wire contract stores source as text content and only layout/runtime mode as attributes",
+          "status": "passed",
+          "title": "stores source as text content and only layout/runtime mode as attributes",
+          "duration": 158.69658299999992,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shader source and wire contract"],
+          "fullName": "Shader source and wire contract inserts a text-content shader and refuses document mutation in read-only mode",
+          "status": "passed",
+          "title": "inserts a text-content shader and refuses document mutation in read-only mode",
+          "duration": 109.60283299999992,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shader source and wire contract"],
+          "fullName": "Shader source and wire contract fails closed without neutral authoring authority",
+          "status": "passed",
+          "title": "fails closed without neutral authoring authority",
+          "duration": 18.097791000000143,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shader Monaco authoring boundary"],
+          "fullName": "Shader Monaco authoring boundary retains selection at 1 while a localized title changes and leaves the program intact",
+          "status": "passed",
+          "title": "retains selection at 1 while a localized title changes and leaves the program intact",
+          "duration": 27.647624999999607,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shader Monaco authoring boundary"],
+          "fullName": "Shader Monaco authoring boundary retains selection at 2 while a localized title changes and leaves the program intact",
+          "status": "passed",
+          "title": "retains selection at 2 while a localized title changes and leaves the program intact",
+          "duration": 32.88695900000039,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shader Monaco authoring boundary"],
+          "fullName": "Shader Monaco authoring boundary uses local view mode when the editable surface lacks neutral authority",
+          "status": "passed",
+          "title": "uses local view mode when the editable surface lacks neutral authority",
+          "duration": 0.5803750000004584,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shader Monaco authoring boundary"],
+          "fullName": "Shader Monaco authoring boundary applies only the changed text range and preserves attrs",
+          "status": "passed",
+          "title": "applies only the changed text range and preserves attrs",
+          "duration": 70.24187499999971,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shader Monaco authoring boundary"],
+          "fullName": "Shader Monaco authoring boundary allows target-locale Escape to select the shader without neutral mutation authority",
+          "status": "passed",
+          "title": "allows target-locale Escape to select the shader without neutral mutation authority",
+          "duration": 10.412834000000657,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shader Monaco authoring boundary"],
+          "fullName": "Shader Monaco authoring boundary shows live source and preview together in edit mode without feeding preview chrome into ProseMirror",
+          "status": "passed",
+          "title": "shows live source and preview together in edit mode without feeding preview chrome into ProseMirror",
+          "duration": 1616.8217920000006,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shader Monaco authoring boundary"],
+          "fullName": "Shader Monaco authoring boundary debounces an edit-mode source correction and recovers a terminal preview error",
+          "status": "passed",
+          "title": "debounces an edit-mode source correction and recovers a terminal preview error",
+          "duration": 764.3801669999993,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shader preview worker lifecycle"],
+          "fullName": "Shader preview worker lifecycle contains the 16:9 drawing buffer inside wide and narrow durable preview surfaces",
+          "status": "passed",
+          "title": "contains the 16:9 drawing buffer inside wide and narrow durable preview surfaces",
+          "duration": 0.17620799999895098,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shader preview worker lifecycle"],
+          "fullName": "Shader preview worker lifecycle transfers one OffscreenCanvas, forwards pointer state and terminates on stop/dispose",
+          "status": "passed",
+          "title": "transfers one OffscreenCanvas, forwards pointer state and terminates on stop/dispose",
+          "duration": 4.118708999998489,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shader preview worker lifecycle"],
+          "fullName": "Shader preview worker lifecycle uses a fresh canvas transfer after a visible preview is hidden and resumed",
+          "status": "passed",
+          "title": "uses a fresh canvas transfer after a visible preview is hidden and resumed",
+          "duration": 28.96466700000019,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shader preview worker lifecycle"],
+          "fullName": "Shader preview worker lifecycle does not automatically retry a terminal read-only shader error",
+          "status": "passed",
+          "title": "does not automatically retry a terminal read-only shader error",
+          "duration": 246.63145900000018,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shader preview worker lifecycle"],
+          "fullName": "Shader preview worker lifecycle does not recreate a transferred canvas when callback identities change and uses one new canvas on restart",
+          "status": "passed",
+          "title": "does not recreate a transferred canvas when callback identities change and uses one new canvas on restart",
+          "duration": 16.377957999999126,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773182163,
+      "endTime": 1791773185275.378,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/editor/tiptap/shader/ShaderNode.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Tiptap table commands"],
+          "fullName": "Tiptap table commands renders table content without a separate outer selector control",
+          "status": "passed",
+          "title": "renders table content without a separate outer selector control",
+          "duration": 126.78124999999989,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tiptap table commands"],
+          "fullName": "Tiptap table commands creates a rectangular table with durable header, span, and colwidth attrs",
+          "status": "passed",
+          "title": "creates a rectangular table with durable header, span, and colwidth attrs",
+          "duration": 31.859958000000006,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tiptap table commands"],
+          "fullName": "Tiptap table commands clears table selection and column-resize state when editability is revoked",
+          "status": "passed",
+          "title": "clears table selection and column-resize state when editability is revoked",
+          "duration": 18.206500000000005,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tiptap table commands"],
+          "fullName": "Tiptap table commands does not create row, column, or extension controls on cell hover",
+          "status": "passed",
+          "title": "does not create row, column, or extension controls on cell hover",
+          "duration": 52.66724999999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tiptap table commands"],
+          "fullName": "Tiptap table commands edits rows, columns, headers, cell selection, and cell styles without breaking geometry",
+          "status": "passed",
+          "title": "edits rows, columns, headers, cell selection, and cell styles without breaking geometry",
+          "duration": 33.444958999999926,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tiptap table commands"],
+          "fullName": "Tiptap table commands round-trips pink cell text and background colors through DOM parsing",
+          "status": "passed",
+          "title": "round-trips pink cell text and background colors through DOM parsing",
+          "duration": 26.39537499999983,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tiptap table commands"],
+          "fullName": "Tiptap table commands resizes only an internal boundary and persists normalized percentages",
+          "status": "passed",
+          "title": "resizes only an internal boundary and persists normalized percentages",
+          "duration": 19.486249999999927,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tiptap table commands"],
+          "fullName": "Tiptap table commands resizes allowed outer edges and persists table width without changing column ratios",
+          "status": "passed",
+          "title": "resizes allowed outer edges and persists table width without changing column ratios",
+          "duration": 18.121916000000056,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tiptap table commands"],
+          "fullName": "Tiptap table commands owns pointer drag on the visible outer handle, previews directly, and commits once on release",
+          "status": "passed",
+          "title": "owns pointer drag on the visible outer handle, previews directly, and commits once on release",
+          "duration": 10.77712500000007,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tiptap table commands"],
+          "fullName": "Tiptap table commands rejects malformed dimensions and refuses to mutate an invalid persisted shape",
+          "status": "passed",
+          "title": "rejects malformed dimensions and refuses to mutate an invalid persisted shape",
+          "duration": 8.810875000000124,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tiptap table commands"],
+          "fullName": "Tiptap table commands extends, reorders, and keeps keyboard navigation inside the guarded table geometry",
+          "status": "passed",
+          "title": "extends, reorders, and keeps keyboard navigation inside the guarded table geometry",
+          "duration": 27.804624999999987,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tiptap table commands"],
+          "fullName": "Tiptap table commands fails closed when an edge extension would exceed the configured geometry limit",
+          "status": "passed",
+          "title": "fails closed when an edge extension would exceed the configured geometry limit",
+          "duration": 6.971000000000004,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tiptap table commands"],
+          "fullName": "Tiptap table commands exits below on Enter, does not extend on Tab, and consumes Backspace at any cell start",
+          "status": "passed",
+          "title": "exits below on Enter, does not extend on Tab, and consumes Backspace at any cell start",
+          "duration": 15.239708000000064,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tiptap table commands"],
+          "fullName": "Tiptap table commands keeps Shift+Arrow text selection at both table-cell edges and reserves CellSelection for explicit commands",
+          "status": "passed",
+          "title": "keeps Shift+Arrow text selection at both table-cell edges and reserves CellSelection for explicit commands",
+          "duration": 14.085709000000179,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Tiptap table commands"],
+          "fullName": "Tiptap table commands extends a table-cell text selection by exactly one character for each horizontal Shift+Arrow press",
+          "status": "passed",
+          "title": "extends a table-cell text selection by exactly one character for each horizontal Shift+Arrow press",
+          "duration": 9.056667000000061,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773210283,
+      "endTime": 1791773210704.0566,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/editor/tiptap/table/table-commands.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Three.js scene source policy"],
+          "fullName": "Three.js scene source policy rejects network and dynamic import while preserving source location",
+          "status": "passed",
+          "title": "rejects network and dynamic import while preserving source location",
+          "duration": 3.1309170000004087,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Three.js scene source policy"],
+          "fullName": "Three.js scene source policy emits executable JavaScript from TypeScript without module wrappers or deprecation diagnostics",
+          "status": "passed",
+          "title": "emits executable JavaScript from TypeScript without module wrappers or deprecation diagnostics",
+          "duration": 315.91320799999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Three.js scene source policy"],
+          "fullName": "Three.js scene source policy sanitizes runtime resource URLs and keeps line and column",
+          "status": "passed",
+          "title": "sanitizes runtime resource URLs and keeps line and column",
+          "duration": 7.866707999999562,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Three.js scene source policy"],
+          "fullName": "Three.js scene source policy transpiles durable TypeScript before starting the isolated preview worker",
+          "status": "passed",
+          "title": "transpiles durable TypeScript before starting the isolated preview worker",
+          "duration": 90.84241699999984,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Three.js Tiptap node"],
+          "fullName": "Three.js Tiptap node persists source, view mode and preview settings in the wire document",
+          "status": "passed",
+          "title": "persists source, view mode and preview settings in the wire document",
+          "duration": 267.2372919999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Three.js Tiptap node"],
+          "fullName": "Three.js Tiptap node parses and normalizes durable preview width from HTML",
+          "status": "passed",
+          "title": "parses and normalizes durable preview width from HTML",
+          "duration": 83.9149580000003,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Three.js Tiptap node"],
+          "fullName": "Three.js Tiptap node inserts a schema-valid block and refuses the command when read-only",
+          "status": "passed",
+          "title": "inserts a schema-valid block and refuses the command when read-only",
+          "duration": 25.38062500000069,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["authoring Three.js scene resize"],
+          "fullName": "authoring Three.js scene resize keeps native title select-all inside the input while the scene is selected",
+          "status": "passed",
+          "title": "keeps native title select-all inside the input while the scene is selected",
+          "duration": 479.15858300000036,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["authoring Three.js scene resize"],
+          "fullName": "authoring Three.js scene resize keeps runtime failures visible in the scene error UI",
+          "status": "passed",
+          "title": "keeps runtime failures visible in the scene error UI",
+          "duration": 60.5092080000004,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["authoring Three.js scene resize"],
+          "fullName": "authoring Three.js scene resize keeps Monaco edits draft-only until Apply updates source and preview",
+          "status": "passed",
+          "title": "keeps Monaco edits draft-only until Apply updates source and preview",
+          "duration": 678.4633750000003,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["authoring Three.js scene resize"],
+          "fullName": "authoring Three.js scene resize exits Monaco to the exact scene NodeSelection without changing source or mode",
+          "status": "passed",
+          "title": "exits Monaco to the exact scene NodeSelection without changing source or mode",
+          "duration": 184.70141599999988,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["authoring Three.js scene resize"],
+          "fullName": "authoring Three.js scene resize exposes accessible handles and persists keyboard resize or cancellation",
+          "status": "passed",
+          "title": "exposes accessible handles and persists keyboard resize or cancellation",
+          "duration": 173.81520900000032,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Three.js neutral authoring authority"],
+          "fullName": "Three.js neutral authoring authority fails closed for a target-locale editor",
+          "status": "passed",
+          "title": "fails closed for a target-locale editor",
+          "duration": 220.51425000000017,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["public Three.js scene interaction"],
+          "fullName": "public Three.js scene interaction auto-runs in isolation and keeps temporary edits out of the document",
+          "status": "passed",
+          "title": "auto-runs in isolation and keeps temporary edits out of the document",
+          "duration": 488.86666700000114,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773187831,
+      "endTime": 1791773190913.8667,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/editor/tiptap/three/ThreeSceneNode.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["ExternalVideoSelectionMenu"],
+          "fullName": "ExternalVideoSelectionMenu sends link, aspect ratio, and alignment commands through typed ports",
+          "status": "passed",
+          "title": "sends link, aspect ratio, and alignment commands through typed ports",
+          "duration": 277.311375,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["ExternalVideoSelectionMenu"],
+          "fullName": "ExternalVideoSelectionMenu bridges editor Tab to the first eligible action and exposes one toolbar tab stop",
+          "status": "passed",
+          "title": "bridges editor Tab to the first eligible action and exposes one toolbar tab stop",
+          "duration": 122.84966700000018,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773212395,
+      "endTime": 1791773212794.8496,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["MapSelectionMenu"],
+          "fullName": "MapSelectionMenu exposes place, alignment, caption, width, and delete commands without editor access",
+          "status": "passed",
+          "title": "exposes place, alignment, caption, width, and delete commands without editor access",
+          "duration": 435.5442499999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["MapSelectionMenu"],
+          "fullName": "MapSelectionMenu uses the shared toolbar navigation contract and preserves the editor selection on pointer input",
+          "status": "passed",
+          "title": "uses the shared toolbar navigation contract and preserves the editor selection on pointer input",
+          "duration": 148.29554099999996,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773207638,
+      "endTime": 1791773208221.2957,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/editor/tiptap/menus/map-external/MapSelectionMenu.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["map and external-video selection menu dismissal"],
+          "fullName": "map and external-video selection menu dismissal keeps the selected map closed after Escape and reopens it only after selection changes",
+          "status": "passed",
+          "title": "keeps the selected map closed after Escape and reopens it only after selection changes",
+          "duration": 280.84329100000014,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["map and external-video selection menu dismissal"],
+          "fullName": "map and external-video selection menu dismissal keeps the selected external video closed after Escape and reopens it only after selection changes",
+          "status": "passed",
+          "title": "keeps the selected external video closed after Escape and reopens it only after selection changes",
+          "duration": 107.42220800000041,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773211598,
+      "endTime": 1791773211986.422,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/editor/tiptap/menus/map-external/SelectionMenuDismissal.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["executable selection menu"],
+          "fullName": "executable selection menu uses compact shared chrome and keeps runtime/source commands on the executable surface",
+          "status": "passed",
+          "title": "uses compact shared chrome and keeps runtime/source commands on the executable surface",
+          "duration": 145.16104200000018,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["executable selection menu"],
+          "fullName": "executable selection menu keeps registry bindings editor-instance local and cleans the exact binding only",
+          "status": "passed",
+          "title": "keeps registry bindings editor-instance local and cleans the exact binding only",
+          "duration": 0.3324999999999818,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["executable selection menu"],
+          "fullName": "executable selection menu cancels the target mouse press before React Aria can bypass the toolbar selection guard",
+          "status": "passed",
+          "title": "cancels the target mouse press before React Aria can bypass the toolbar selection guard",
+          "duration": 64.81283400000007,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["executable selection menu"],
+          "fullName": "executable selection menu cycles actions with arrows, lets Tab leave, and Escape restores the editor callback",
+          "status": "passed",
+          "title": "cycles actions with arrows, lets Tab leave, and Escape restores the editor callback",
+          "duration": 166.81524999999988,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791773213733,
+      "endTime": 1791773214109.8152,
+      "status": "passed",
+      "message": "",
+      "name": "/Volumes/dev/dsub/geul-web/features/editor/tiptap/menus/executable/ExecutableSelectionMenu.test.tsx"
+    }
+  ]
+}

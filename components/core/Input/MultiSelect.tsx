@@ -1,388 +1,341 @@
-import {
-  cloneElement,
-  Fragment,
-  forwardRef,
-  isValidElement,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-  type ReactElement,
-} from 'react';
-import {
-  getParsedComboboxData,
-  MultiSelect as MantineMultiSelect,
-  Pill,
-  type ComboboxRenderPillInput,
-  type MultiSelectProps as MantineMultiSelectProps,
-} from '@mantine/core';
-import { useIsomorphicEffect, useMergedRef } from '@mantine/hooks';
-import { useCoreInputClassNames } from './useCoreInputClassNames';
+'use client';
 
-export interface MultiSelectProps extends MantineMultiSelectProps {
-  animate?: boolean;
-  /**
-   * Keeps selected values on one line while the dropdown is closed. Values that
-   * do not fit are represented by a non-removable `+N` summary. Opening the
-   * dropdown restores every selected value for editing.
-   */
+import { forwardRef, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  Button,
+  ComboBox,
+  ComboBoxValue,
+  Group,
+  Input,
+  InputContext,
+  useSlottedContext,
+  type InputProps,
+  ListBox,
+  ListBoxItem,
+  Popover,
+  Tag,
+  TagGroup,
+  TagList,
+} from 'react-aria-components';
+import {
+  useToolbarInputPresentation,
+  InputHelp,
+  InputLabel,
+  inputPresentation,
+  inputPopoverPresentation,
+  inputState,
+} from './InputParts';
+import {
+  inputAttributes,
+  flattenOptions,
+  type InputBaseProps,
+  type InputOptions,
+  type InputOption,
+} from './input-contract';
+import { ComboboxOpenBridge } from './ComboboxOpenBridge';
+import classes from './Input.module.css';
+import { useCoreInputLabels } from './input-labels';
+import { InputClearGlyph, InputOpenGlyph } from './InputGlyphs';
+
+export interface MultiSelectProps extends InputBaseProps {
+  data?: InputOptions;
+  value?: string[];
+  defaultValue?: string[];
+  onChange?: (value: string[]) => void;
+  placeholder?: string;
+  searchable?: boolean;
+  clearable?: boolean;
+  nothingFoundMessage?: ReactNode;
+  withPillsReorder?: boolean;
+  maxValues?: number;
+  hidePickedOptions?: boolean;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+  dropdownOpened?: boolean;
+  defaultDropdownOpened?: boolean;
+  onDropdownOpen?: () => void;
+  onDropdownClose?: () => void;
   collapseSelectedValuesToOneLine?: boolean;
-  /** Accessible label used for the `+N` summary. */
+  renderOption?: (input: { option: InputOption; checked: boolean }) => ReactNode;
   getCollapsedSummaryLabel?: (hiddenValueCount: number) => string;
 }
-
-interface PillMeasurements {
-  presentationKey: string;
-  summaryWidth: number;
-  widths: number[];
-}
-
-const EMPTY_MEASUREMENTS: PillMeasurements = {
-  presentationKey: '',
-  summaryWidth: 0,
-  widths: [],
-};
-
-function readElementWidth(element: Element) {
-  const rectWidth = element.getBoundingClientRect().width;
-  return rectWidth > 0 ? rectWidth : (element as HTMLElement).offsetWidth;
-}
-
-function readGap(element: HTMLElement) {
-  const styles = window.getComputedStyle(element);
-  const gap = Number.parseFloat(styles.columnGap || styles.gap);
-  return Number.isFinite(gap) ? gap : 0;
-}
-
-function getSelectedPillsPresentationKey(data: MantineMultiSelectProps['data'], selectedValues: string[]) {
-  const optionByValue = new Map<string, { disabled?: boolean; label: string }>();
-
-  for (const item of getParsedComboboxData(data)) {
-    const options = 'items' in item ? item.items : [item];
-    for (const option of options) {
-      optionByValue.set(String(option.value), {
-        disabled: option.disabled,
-        label: String(option.label),
-      });
+export const MultiSelect = forwardRef<HTMLInputElement, MultiSelectProps>((props, ref) => {
+  const presentation = useToolbarInputPresentation(props);
+  const labels = useCoreInputLabels();
+  const [uncontrolled, setValue] = useState(props.defaultValue ?? []);
+  const [opened, setOpened] = useState(props.defaultDropdownOpened ?? false);
+  const [dragValue, setDragValue] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [visible, setVisible] = useState<number | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLDivElement>(null);
+  const values = props.value ?? uncontrolled;
+  const currentSearch = props.searchValue ?? search;
+  const options = flattenOptions(props.data);
+  const currentOpen = props.dropdownOpened ?? opened;
+  const update = (next: string[]) => {
+    if (props.readOnly || props.disabled) {
+      return;
     }
-  }
-
-  return selectedValues
-    .map((value) => {
-      const option = optionByValue.get(value);
-      const label = option?.label ?? value;
-      return `${value.length}:${value}:${label.length}:${label}:${option?.disabled ? 1 : 0}`;
-    })
+    setValue(next);
+    props.onChange?.(next);
+  };
+  const move = (from: number, to: number) => {
+    if (
+      !props.withPillsReorder ||
+      props.disabled ||
+      props.readOnly ||
+      from < 0 ||
+      to < 0 ||
+      from >= values.length ||
+      to >= values.length ||
+      from === to
+    ) {
+      return;
+    }
+    const next = [...values];
+    const [item] = next.splice(from, 1);
+    next.splice(to, 0, item);
+    update(next);
+  };
+  const presentationKey = values
+    .map((value) => `${value}:${options.find((item) => item.value === value)?.label ?? value}`)
     .join('|');
-}
-
-export const MultiSelect = forwardRef<HTMLInputElement, MultiSelectProps>(
-  (
-    {
-      animate = true,
-      classNames,
-      collapseSelectedValuesToOneLine = false,
-      data,
-      defaultDropdownOpened,
-      defaultValue,
-      disabled,
-      dropdownOpened,
-      getCollapsedSummaryLabel = (hiddenValueCount) =>
-        `${hiddenValueCount} more selected ${hiddenValueCount === 1 ? 'value' : 'values'}`,
-      onChange,
-      onDropdownClose,
-      onDropdownOpen,
-      readOnly,
-      renderPill,
-      unstyled,
-      value,
-      ...props
-    },
-    ref,
-  ) => {
-    const inputRef = useRef<HTMLInputElement>(null);
-    const mergedRef = useMergedRef(ref, inputRef);
-    const measurementsRef = useRef<PillMeasurements>(EMPTY_MEASUREMENTS);
-    const [uncontrolledValue, setUncontrolledValue] = useState<string[]>(defaultValue ?? []);
-    const [uncontrolledDropdownOpen, setUncontrolledDropdownOpen] = useState(defaultDropdownOpened ?? false);
-    const [visiblePillCount, setVisiblePillCount] = useState<number | null>(null);
-    const isDropdownOpen = dropdownOpened ?? uncontrolledDropdownOpen;
-    const selectedValues = value ?? uncontrolledValue;
-    const selectedValuesKey = selectedValues.map((item) => `${item.length}:${item}`).join('|');
-    const selectedPillsPresentationKey = useMemo(
-      () => getSelectedPillsPresentationKey(data, selectedValues),
-      [data, selectedValues],
-    );
-
-    const mergedClassNames = useCoreInputClassNames(classNames, animate);
-
-    const updateVisiblePillCount = useCallback(() => {
-      if (!collapseSelectedValuesToOneLine || isDropdownOpen) {
+  useLayoutEffect(() => {
+    if (!props.collapseSelectedValuesToOneLine || currentOpen) {
+      setVisible(null);
+      return;
+    }
+    const measure = () => {
+      const list = listRef.current;
+      const source = measureRef.current;
+      if (!list || !source) {
         return;
       }
-
-      if (selectedValues.length === 0) {
-        setVisiblePillCount(0);
+      const pills = Array.from(source.querySelectorAll<HTMLElement>('[data-core-multiselect-selected-pill]'));
+      const summary = source.querySelector<HTMLElement>('[data-core-multiselect-summary-measure]');
+      const input = list.querySelector<HTMLInputElement>('input');
+      const reserve = props.searchable && input ? input.getBoundingClientRect().width || input.offsetWidth : 0;
+      const width = Math.max(0, (list.getBoundingClientRect().width || list.offsetWidth) - reserve);
+      if (!width) {
+        setVisible(values.length);
         return;
       }
-
-      const input = inputRef.current;
-      const pillsList = input?.parentElement;
-      if (!input || !pillsList) {
+      const gap = Number.parseFloat(getComputedStyle(list).gap) || 0;
+      const widths = pills.map((pill) => pill.getBoundingClientRect().width || pill.offsetWidth);
+      const total = widths.reduce((a, b) => a + b, 0) + gap * Math.max(0, widths.length - 1);
+      if (total <= width) {
+        setVisible(values.length);
         return;
       }
-
-      const pillsListWidth = readElementWidth(pillsList);
-      if (pillsListWidth <= 0) {
-        setVisiblePillCount(selectedValues.length);
-        return;
-      }
-
-      const renderedPills = Array.from(
-        pillsList.querySelectorAll<HTMLElement>('[data-core-multiselect-selected-pill]'),
-      );
-      const summaryMeasure =
-        pillsList.querySelector<HTMLElement>('[data-core-multiselect-summary-measure]') ??
-        pillsList.querySelector<HTMLElement>('[data-core-multiselect-summary]');
-
-      let measurements = measurementsRef.current;
-      if (renderedPills.length === selectedValues.length) {
-        measurements = {
-          presentationKey: selectedPillsPresentationKey,
-          summaryWidth: summaryMeasure ? readElementWidth(summaryMeasure) : 0,
-          widths: renderedPills.map(readElementWidth),
-        };
-        measurementsRef.current = measurements;
-      } else if (measurements.presentationKey !== selectedPillsPresentationKey) {
-        setVisiblePillCount(null);
-        return;
-      }
-
-      if (measurements.widths.length !== selectedValues.length) {
-        setVisiblePillCount(selectedValues.length);
-        return;
-      }
-
-      const gap = readGap(pillsList);
-      const inputStyles = window.getComputedStyle(input);
-      const inputMinimumWidth = input.dataset.type === 'hidden' ? 0 : Number.parseFloat(inputStyles.minWidth);
-      const reservedInputWidth =
-        input.dataset.type === 'hidden'
-          ? 0
-          : Number.isFinite(inputMinimumWidth)
-            ? inputMinimumWidth
-            : readElementWidth(input);
-      const availablePillWidth = Math.max(0, pillsListWidth - reservedInputWidth - (reservedInputWidth > 0 ? gap : 0));
-      const fullWidth =
-        measurements.widths.reduce((total, width) => total + width, 0) +
-        gap * Math.max(0, measurements.widths.length - 1);
-
-      if (fullWidth <= availablePillWidth) {
-        setVisiblePillCount((current) => (current === selectedValues.length ? current : selectedValues.length));
-        return;
-      }
-
-      const summaryWidth = measurements.summaryWidth || 1;
-      let nextVisiblePillCount = 0;
-      let occupiedWidth = summaryWidth;
-
-      for (const pillWidth of measurements.widths) {
-        const candidateWidth = occupiedWidth + gap + pillWidth;
-        if (candidateWidth > availablePillWidth) {
+      let used = summary?.getBoundingClientRect().width || summary?.offsetWidth || 1;
+      let count = 0;
+      for (const pillWidth of widths) {
+        if (used + gap + pillWidth > width) {
           break;
         }
-
-        occupiedWidth = candidateWidth;
-        nextVisiblePillCount += 1;
+        used += gap + pillWidth;
+        count++;
       }
-
-      setVisiblePillCount((current) => (current === nextVisiblePillCount ? current : nextVisiblePillCount));
-    }, [collapseSelectedValuesToOneLine, isDropdownOpen, selectedPillsPresentationKey, selectedValues.length]);
-
-    useIsomorphicEffect(() => {
-      if (!isDropdownOpen) {
-        setVisiblePillCount(null);
-      }
-    }, [isDropdownOpen]);
-
-    useIsomorphicEffect(() => {
-      if (!collapseSelectedValuesToOneLine || isDropdownOpen) {
-        return;
-      }
-
-      setVisiblePillCount(null);
-    }, [collapseSelectedValuesToOneLine, selectedPillsPresentationKey, selectedValuesKey]);
-
-    useIsomorphicEffect(() => {
-      updateVisiblePillCount();
-    }, [updateVisiblePillCount, visiblePillCount]);
-
-    useIsomorphicEffect(() => {
-      if (!collapseSelectedValuesToOneLine || isDropdownOpen || !inputRef.current) {
-        return;
-      }
-
-      const pillsList = inputRef.current.parentElement;
-      if (!pillsList || typeof ResizeObserver === 'undefined') {
-        return;
-      }
-
-      const observer = new ResizeObserver(() => {
-        updateVisiblePillCount();
-      });
-      observer.observe(pillsList);
-      pillsList
-        .querySelectorAll<HTMLElement>('[data-core-multiselect-selected-pill]')
-        .forEach((pill) => observer.observe(pill));
-
-      return () => observer.disconnect();
-    }, [collapseSelectedValuesToOneLine, isDropdownOpen, selectedValuesKey, updateVisiblePillCount, visiblePillCount]);
-
-    const handleChange = useCallback(
-      (nextValue: string[]) => {
-        if (value === undefined) {
-          setUncontrolledValue(nextValue);
+      setVisible(count);
+    };
+    measure();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    if (listRef.current) {
+      observer?.observe(listRef.current);
+    }
+    return () => observer?.disconnect();
+  }, [props.collapseSelectedValuesToOneLine, currentOpen, presentationKey, values.length, props.size, props.density]);
+  const shownValues = visible === null ? values : values.slice(0, visible);
+  const hiddenCount = values.length - shownValues.length;
+  const tagLabel = (value: string) => options.find((item) => item.value === value)?.label ?? value;
+  return (
+    <ComboBox
+      {...inputAttributes(props)}
+      {...inputState(props)}
+      {...inputPresentation(presentation)}
+      selectionMode="multiple"
+      value={values}
+      onChange={(keys) => {
+        const next = keys.map(String);
+        if (!props.maxValues || next.length <= props.maxValues) {
+          update(next);
         }
-        onChange?.(nextValue);
-      },
-      [onChange, value],
-    );
-
-    const handleDropdownOpen = useCallback(() => {
-      if (dropdownOpened === undefined) {
-        setUncontrolledDropdownOpen(true);
-      }
-      setVisiblePillCount(null);
-      onDropdownOpen?.();
-    }, [dropdownOpened, onDropdownOpen]);
-
-    const handleDropdownClose = useCallback(() => {
-      if (dropdownOpened === undefined) {
-        setUncontrolledDropdownOpen(false);
-      }
-      setVisiblePillCount(null);
-      onDropdownClose?.();
-    }, [dropdownOpened, onDropdownClose]);
-
-    const shouldCollapse =
-      collapseSelectedValuesToOneLine &&
-      !isDropdownOpen &&
-      visiblePillCount !== null &&
-      visiblePillCount < selectedValues.length;
-
-    const renderSelectedPill = useCallback(
-      (pillProps: ComboboxRenderPillInput<string>) => {
-        const pillValue = pillProps.value ?? '';
-        const pillIndex = selectedValues.indexOf(pillValue);
-        if (pillIndex === -1) {
-          return renderPill?.(pillProps) ?? pillProps.option?.label ?? pillValue;
-        }
-
-        if (shouldCollapse && pillIndex > visiblePillCount) {
-          return null;
-        }
-
-        if (shouldCollapse && pillIndex === visiblePillCount) {
-          const hiddenValueCount = selectedValues.length - visiblePillCount;
-          return (
-            <span data-core-multiselect-summary style={{ display: 'inline-flex', flex: '0 0 auto' }}>
-              <Pill aria-label={getCollapsedSummaryLabel(hiddenValueCount)}>+{hiddenValueCount}</Pill>
-            </span>
-          );
-        }
-
-        const measurementProps = {
-          'data-core-multiselect-selected-pill': true,
-          'data-core-multiselect-selected-pill-index': pillIndex,
-        };
-        let visibleContent: ReactElement;
-
-        if (renderPill) {
-          const customContent = renderPill(pillProps);
-          visibleContent =
-            isValidElement(customContent) && customContent.type !== Fragment ? (
-              cloneElement(customContent as ReactElement<Record<string, unknown>>, measurementProps)
-            ) : (
-              <span
-                {...measurementProps}
-                style={{
-                  display: 'inline-flex',
-                  flex: '0 0 auto',
-                  maxWidth: '100%',
-                }}
-              >
-                {customContent}
-              </span>
-            );
+      }}
+      items={options.filter(
+        (item) =>
+          (!props.hidePickedOptions || !values.includes(item.value)) &&
+          (!props.searchable ||
+            !currentSearch.trim() ||
+            item.label.toLocaleLowerCase().includes(currentSearch.trim().toLocaleLowerCase())),
+      )}
+      inputValue={currentSearch}
+      onInputChange={(text) => {
+        setSearch(text);
+        props.onSearchChange?.(text);
+      }}
+      menuTrigger="focus"
+      allowsEmptyCollection
+      onOpenChange={(open) => {
+        setOpened(open);
+        if (open) {
+          props.onDropdownOpen?.();
         } else {
-          visibleContent = (
-            <Pill
-              {...pillProps.reorderProps}
-              {...measurementProps}
-              disabled={disabled}
-              onRemove={pillProps.onRemove}
-              unstyled={unstyled}
-              withRemoveButton={!readOnly && !pillProps.option?.disabled}
-            >
-              {pillProps.option?.label ?? pillValue}
-            </Pill>
-          );
+          props.onDropdownClose?.();
         }
-
-        if (pillIndex !== 0) {
-          return visibleContent;
-        }
-
-        return (
-          <>
-            {visibleContent}
+      }}
+    >
+      <ComboboxOpenBridge opened={props.dropdownOpened ?? opened} />
+      <InputLabel {...props} />
+      <Group className={classes.wrapper}>
+        <div
+          ref={listRef}
+          className={classes.valueList}
+          data-core-multiselect-values
+          onKeyDownCapture={(event) => {
+            const pill = (event.target as HTMLElement).closest<HTMLElement>('[data-core-multiselect-visible-pill]');
+            if (pill && event.altKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+              event.preventDefault();
+              const from = Number(pill.dataset.coreMultiselectSelectedPillIndex);
+              move(from, from + (event.key === 'ArrowRight' ? 1 : -1));
+            }
+          }}
+          onDragStartCapture={(event) => {
+            const pill = (event.target as HTMLElement).closest<HTMLElement>('[data-core-multiselect-visible-pill]');
+            if (pill) {
+              setDragValue(values[Number(pill.dataset.coreMultiselectSelectedPillIndex)]);
+            }
+          }}
+          onDragOverCapture={(event) => {
+            if (dragValue !== null) {
+              event.preventDefault();
+            }
+          }}
+          onDropCapture={(event) => {
+            const pill = (event.target as HTMLElement).closest<HTMLElement>('[data-core-multiselect-visible-pill]');
+            if (pill && dragValue !== null) {
+              event.preventDefault();
+              move(values.indexOf(dragValue), Number(pill.dataset.coreMultiselectSelectedPillIndex));
+            }
+            setDragValue(null);
+          }}
+        >
+          <ComboBoxValue className={classes.tags} inert={currentOpen || undefined}>
+            {() =>
+              shownValues.length ? (
+                <TagGroup
+                  className={classes.tags}
+                  aria-label={typeof props.label === 'string' ? props.label : (props['aria-label'] ?? labels.options)}
+                  onRemove={(keys) => update(values.filter((value) => !keys.has(value)))}
+                >
+                  <TagList items={shownValues.map((value) => ({ id: value, label: tagLabel(value) }))}>
+                    {(item) => (
+                      <Tag
+                        id={item.id}
+                        textValue={item.label}
+                        className={classes.tag}
+                        data-core-multiselect-visible-pill
+                        data-core-multiselect-selected-pill-index={values.indexOf(item.id)}
+                        aria-keyshortcuts={props.withPillsReorder ? 'Alt+ArrowLeft Alt+ArrowRight' : undefined}
+                      >
+                        <span draggable={props.withPillsReorder && !props.disabled && !props.readOnly}>
+                          {item.label}
+                        </span>
+                        {!props.readOnly && !props.disabled ? (
+                          <Button slot="remove" className={classes.tagRemove}>
+                            <InputClearGlyph />
+                          </Button>
+                        ) : null}
+                      </Tag>
+                    )}
+                  </TagList>
+                </TagGroup>
+              ) : null
+            }
+          </ComboBoxValue>
+          {hiddenCount ? (
             <span
-              aria-hidden
-              data-core-multiselect-summary-measure
-              style={{
-                display: 'inline-flex',
-                pointerEvents: 'none',
-                position: 'absolute',
-                visibility: 'hidden',
-              }}
+              className={classes.tag}
+              data-core-multiselect-summary
+              aria-label={props.getCollapsedSummaryLabel?.(hiddenCount) ?? `+${hiddenCount}`}
             >
-              <Pill>+{selectedValues.length}</Pill>
+              +{hiddenCount}
             </span>
-          </>
-        );
-      },
-      [
-        disabled,
-        getCollapsedSummaryLabel,
-        readOnly,
-        renderPill,
-        selectedValues,
-        shouldCollapse,
-        unstyled,
-        visiblePillCount,
-      ],
-    );
-
-    return (
-      <MantineMultiSelect
-        ref={mergedRef}
-        classNames={mergedClassNames}
-        data={data}
-        defaultDropdownOpened={defaultDropdownOpened}
-        defaultValue={defaultValue}
-        disabled={disabled}
-        dropdownOpened={dropdownOpened}
-        onChange={handleChange}
-        onDropdownClose={handleDropdownClose}
-        onDropdownOpen={handleDropdownOpen}
-        readOnly={readOnly}
-        renderPill={collapseSelectedValuesToOneLine ? renderSelectedPill : renderPill}
-        unstyled={unstyled}
-        value={value}
-        {...props}
-      />
-    );
-  },
-);
-
+          ) : null}
+          <MultiSelectInput
+            ref={ref}
+            id={props.id}
+            aria-describedby={props['aria-describedby']}
+            data-type={props.searchable ? 'visible' : 'hidden'}
+            className={classes.input}
+            placeholder={values.length ? '' : props.placeholder}
+            readOnly={!props.searchable || props.readOnly}
+            onKeyDown={(event) => {
+              if (event.key === 'Backspace' && !currentSearch && values.length) {
+                update(values.slice(0, -1));
+              }
+              props.onKeyDown?.(event);
+            }}
+          />
+        </div>
+        {props.clearable && values.length ? (
+          <Button
+            slot={null}
+            className={classes.accessory}
+            aria-label={labels.clear}
+            onPress={() => update([])}
+            isDisabled={props.disabled || props.readOnly}
+          >
+            <InputClearGlyph />
+          </Button>
+        ) : null}
+        <Button className={classes.accessory}>
+          <InputOpenGlyph />
+        </Button>
+      </Group>
+      <div ref={measureRef} className={classes.measure} aria-hidden>
+        {values.map((value, index) => (
+          <span
+            key={value}
+            className={classes.tag}
+            data-core-multiselect-selected-pill
+            data-core-multiselect-selected-pill-index={index}
+          >
+            {tagLabel(value)}
+            <InputClearGlyph />
+          </span>
+        ))}
+        <span className={classes.tag} data-core-multiselect-summary-measure>
+          +{values.length}
+        </span>
+      </div>
+      <Popover {...inputPopoverPresentation(presentation)}>
+        <ListBox<InputOption> className={classes.list} renderEmptyState={() => props.nothingFoundMessage ?? null}>
+          {(item) => (
+            <ListBoxItem id={item.value} textValue={item.label} isDisabled={item.disabled} className={classes.option}>
+              {props.renderOption?.({ option: item, checked: values.includes(item.value) }) ?? item.label}
+            </ListBoxItem>
+          )}
+        </ListBox>
+      </Popover>
+      <InputHelp {...props} />
+    </ComboBox>
+  );
+});
 MultiSelect.displayName = 'MultiSelect';
+
+/** Multi-selection adds its own selected-value description. Keep external field
+ * guidance alongside it rather than replacing either relationship. */
+const MultiSelectInput = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
+  const context = useSlottedContext(InputContext);
+  const describedBy =
+    [
+      ...new Set(
+        [context?.['aria-describedby'], props['aria-describedby']]
+          .filter(Boolean)
+          .flatMap((value) => value?.split(/\s+/) ?? []),
+      ),
+    ].join(' ') || undefined;
+  return <Input {...props} ref={ref} aria-describedby={describedBy} />;
+});
+MultiSelectInput.displayName = 'MultiSelectInput';

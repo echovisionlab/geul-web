@@ -1,13 +1,16 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { Stack, Text } from '@mantine/core';
+
 import { DateTime } from '@/features/date-time/DateTime';
 import { normalizeEnumToken } from '@/lib/i18n/admin-labels';
 import type { UserFull } from '@/lib/types/user/model';
 import { InfoRow, InfoSection, StatusValue } from './shared';
 
-export function UserBanStateSection({ user }: { user: UserFull }) {
+export function UserBanStateSection({ user, actions }: { user: UserFull; actions?: ReactNode }) {
   const tPage = useTranslations('adminUserDetail');
   const tCommonLabels = useTranslations('common.labels');
   const tCommonStatuses = useTranslations('common.statuses');
@@ -21,9 +24,9 @@ export function UserBanStateSection({ user }: { user: UserFull }) {
         : (ban?.identity_state ?? tPage('auth.ban.unknownState'));
 
   return (
-    <InfoSection title={tPage('auth.ban.title')} description={tPage('auth.ban.description')}>
+    <InfoSection title={tPage('auth.ban.title')} description={tPage('auth.ban.description')} actions={actions}>
       {ban ? (
-        <Stack gap="xs">
+        <DsLayoutStack gap="xs">
           <InfoRow label={tPage('auth.ban.record')}>
             <StatusValue tone={ban.metadata_banned ? 'danger' : 'neutral'}>
               {ban.metadata_banned ? tPage('auth.ban.metadataBanned') : tPage('auth.ban.metadataClear')}
@@ -34,21 +37,19 @@ export function UserBanStateSection({ user }: { user: UserFull }) {
           </InfoRow>
           {ban.reason ? (
             <InfoRow label={tPage('alerts.reasonLabel')}>
-              <Text size="sm">{ban.reason}</Text>
+              <DsText size="sm">{ban.reason}</DsText>
             </InfoRow>
           ) : null}
           {ban.expires_at ? (
             <InfoRow label={tCommonLabels('duration')}>
-              <Text size="sm">
+              <DsText size="sm">
                 <DateTime value={ban.expires_at} display="dateTime" />
-              </Text>
+              </DsText>
             </InfoRow>
           ) : null}
-        </Stack>
+        </DsLayoutStack>
       ) : (
-        <Text size="sm" c="dimmed">
-          {tPage('auth.ban.unknownState')}
-        </Text>
+        <SupportingText tone="secondary">{tPage('auth.ban.unknownState')}</SupportingText>
       )}
     </InfoSection>
   );

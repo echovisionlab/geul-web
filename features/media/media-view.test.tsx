@@ -1,7 +1,8 @@
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { NextIntlClientProvider } from 'next-intl';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { resolveAudioViewModel } from '@/lib/media/audio-view-model';
 import { AudioMediaView } from './AudioMediaView';
 import { AttachmentMediaView } from './ui/AttachmentMediaView';
@@ -33,7 +34,7 @@ describe('media view components', () => {
           },
         }}
       >
-        <MantineProvider>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
           <AudioMediaView
             model={resolveAudioViewModel({
               fileId: 'audio-1',
@@ -46,7 +47,7 @@ describe('media view components', () => {
               processingStatus: 'completed',
             })}
           />
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
 

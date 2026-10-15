@@ -1,15 +1,16 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import enMessages from '@/messages/en.json';
 import { PostPermissionRevokedDialog } from './PostPermissionRevokedDialog';
 
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
@@ -48,14 +49,14 @@ function renderDialog(
   act(() => {
     root?.render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <MantineProvider env="test">
+        <DesignSystemProvider locale="en" forceColorScheme="light">
           <PostPermissionRevokedDialog
             opened
             postId="post-1"
             resolveDestination={resolveDestination}
             navigate={navigate}
           />
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
   });
@@ -82,7 +83,7 @@ describe('PostPermissionRevokedDialog', () => {
     expect(dialog?.querySelector<HTMLButtonElement>('button')?.disabled).toBe(false);
     expect(notifications.show).toHaveBeenCalledWith({
       message: 'Could not leave the editor. Try again.',
-      color: 'red',
+      tone: 'danger',
     });
   });
 });

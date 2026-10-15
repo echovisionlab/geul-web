@@ -15,7 +15,7 @@ vi.mock('@/lib/utils/upload-pipeline', () => ({
   prepareImageFileForPreview: prepareImageFileForPreviewMock,
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: { show: notificationShowMock },
 }));
 
@@ -98,6 +98,26 @@ describe('useImageUploadCrop', () => {
     expect(getCurrentHook().cropModalOpened).toBe(false);
   });
 
+  it('exposes preparation state and blocks duplicate selections until local preprocessing completes', async () => {
+    let resolvePreparation!: (file: File) => void;
+    prepareImageFileForPreviewMock.mockImplementation(
+      () =>
+        new Promise<File>((resolve) => {
+          resolvePreparation = resolve;
+        }),
+    );
+    act(() => root.render(<HookHarness onUpload={vi.fn()} />));
+    const source = new File(['source'], 'source.png', { type: 'image/png' });
+    act(() => getCurrentHook().handleFileDrop([source]));
+    expect(getCurrentHook().isPreparing).toBe(true);
+    expect(getCurrentHook().cropModalOpened).toBe(false);
+    act(() => getCurrentHook().handleFileDrop([source]));
+    expect(prepareImageFileForPreviewMock).toHaveBeenCalledOnce();
+    await act(async () => resolvePreparation(new File(['preview'], 'preview.webp', { type: 'image/webp' })));
+    expect(getCurrentHook().isPreparing).toBe(false);
+    expect(getCurrentHook().cropModalOpened).toBe(true);
+  });
+
   it('closes and clears an active crop session when cancelled', async () => {
     const previewFile = new File(['preview'], 'preview.webp', { type: 'image/webp' });
     prepareImageFileForPreviewMock.mockResolvedValue(previewFile);
@@ -120,7 +140,7 @@ describe('useImageUploadCrop', () => {
 
     expect(notificationShowMock).toHaveBeenCalledWith({
       message: 'Could not prepare image',
-      color: 'red',
+      tone: 'danger',
     });
     expect(getCurrentHook().tempImageSrc).toBeNull();
     expect(getCurrentHook().cropModalOpened).toBe(false);

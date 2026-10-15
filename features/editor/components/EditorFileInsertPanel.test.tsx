@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import enMessages from '@/messages/en.json';
@@ -22,13 +23,22 @@ afterEach(() => {
   container.remove();
 });
 
-function renderPanel(multiple: boolean, onFilesSelected: (files: File[]) => void) {
+function renderPanel(
+  multiple: boolean,
+  onFilesSelected: (files: File[]) => void,
+  presentation?: { showDescription?: boolean; showLibraryAction?: boolean },
+) {
   act(() => {
     root.render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <MantineProvider>
-          <EditorFileInsertPanel multiple={multiple} onFilesSelected={onFilesSelected} onOpenLibrary={vi.fn()} />
-        </MantineProvider>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
+          <EditorFileInsertPanel
+            multiple={multiple}
+            onFilesSelected={onFilesSelected}
+            onOpenLibrary={vi.fn()}
+            {...presentation}
+          />
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
   });
@@ -41,6 +51,22 @@ function selectFiles(input: HTMLInputElement, files: File[]) {
 }
 
 describe('EditorFileInsertPanel', () => {
+  it('keeps the actual native browse action when tabbed composition hides redundant guidance', () => {
+    const onFilesSelected = vi.fn();
+    renderPanel(true, onFilesSelected, { showDescription: false, showLibraryAction: false });
+    expect(container.textContent).not.toContain(enMessages.editorCommon.media.ingestDialog.unifiedDescription);
+    expect(container.querySelectorAll('button')).toHaveLength(1);
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]')!;
+    const openPicker = vi.spyOn(input, 'click').mockImplementation(() => {});
+    act(() => container.querySelector<HTMLButtonElement>('button')?.click());
+    expect(openPicker).toHaveBeenCalledOnce();
+    const file = new File(['image'], 'cover.png', { type: 'image/png' });
+    selectFiles(input, [file]);
+    expect(onFilesSelected).toHaveBeenCalledWith([file]);
+    expect(input.value).toBe('');
+    openPicker.mockRestore();
+  });
+
   it('delegates multi-file picking to FileButton and resets the native input', () => {
     const onFilesSelected = vi.fn();
     renderPanel(true, onFilesSelected);

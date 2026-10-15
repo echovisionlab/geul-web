@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
 vi.mock('@mantine/hooks', () => ({ useMediaQuery: () => false }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 vi.mock('@tanstack/react-query', () => ({
   useMutation: ({ mutationFn }: { mutationFn: (value: unknown) => Promise<unknown> }) => ({
     mutate: async (value: unknown, options?: { onSuccess?: (result: unknown) => void }) => {
@@ -85,27 +85,17 @@ vi.mock('@/components/core/Input', () => ({
     onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   }) => <input id={id} value={value} onChange={onChange} />,
 }));
-vi.mock('@mantine/core', () => ({
-  Box: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Divider: () => <hr />,
-  Group: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Stack: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Table: Object.assign(({ children }: { children: React.ReactNode }) => <table>{children}</table>, {
-    Thead: ({ children }: { children: React.ReactNode }) => <thead>{children}</thead>,
-    Tbody: ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>,
-    Tr: ({ children }: { children: React.ReactNode }) => <tr>{children}</tr>,
-    Th: ({ children }: { children?: React.ReactNode }) => <th>{children}</th>,
-    Td: ({ children }: { children?: React.ReactNode }) => <td>{children}</td>,
-  }),
-  Text: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
-}));
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
 
-function render(credits: ReleaseTrackItem['credits'], onCreditsChange = vi.fn()) {
+function render(
+  credits: ReleaseTrackItem['credits'],
+  onCreditsChange = vi.fn(),
+  onMutationStart?: () => string | void,
+) {
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
@@ -117,6 +107,7 @@ function render(credits: ReleaseTrackItem['credits'], onCreditsChange = vi.fn())
         trackId="track-1"
         credits={credits}
         onCreditsChange={onCreditsChange}
+        onMutationStart={onMutationStart}
       />,
     );
   });
@@ -158,7 +149,9 @@ describe('TrackCreditsEditorSection', () => {
         sort_order: 0,
       },
     ];
-    const onCreditsChange = render(credits);
+    const editorOrigin = '30000000-0000-4000-8000-000000000001';
+    const onMutationStart = vi.fn(() => editorOrigin);
+    const onCreditsChange = render(credits, vi.fn(), onMutationStart);
 
     await click(document.querySelector('[data-segment="text"]')!);
     const nameInput = document.getElementById('track-track-credit-name-track-1') as HTMLInputElement;
@@ -175,7 +168,9 @@ describe('TrackCreditsEditorSection', () => {
       'track-1',
       expect.arrayContaining([expect.objectContaining({ credited_name: 'New credit' })]),
       [expect.objectContaining({ id: 'credit-1', credited_name: 'Existing', credit_role: 'Writer' })],
+      editorOrigin,
     );
+    expect(onMutationStart).toHaveBeenCalledOnce();
     expect(onCreditsChange).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({ id: 'credit-1' }),

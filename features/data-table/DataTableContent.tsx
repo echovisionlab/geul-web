@@ -22,8 +22,18 @@ export interface DataTableContentProps {
 export function DataTableContent<T>({ reservedRowCount }: DataTableContentProps = {}) {
   const t = useTranslations('dataTable');
   const tCommonLabels = useTranslations('common.labels');
-  const { columns, result, loading, query, getRowKey, rowAction, onQueryChange, emptyMessage, selection } =
-    useDataTableContext<T>();
+  const {
+    columns,
+    accessibleLabel,
+    result,
+    loading,
+    query,
+    getRowKey,
+    rowAction,
+    onQueryChange,
+    emptyMessage,
+    selection,
+  } = useDataTableContext<T>();
   const containerRef = useRef<HTMLDivElement>(null);
   const [sortConfig, setSortConfig] = useState<DataTableSortFieldConfig[]>([]);
   const [maxSorts, setMaxSorts] = useState(DEFAULT_DATA_TABLE_MAX_SORTS);
@@ -90,6 +100,9 @@ export function DataTableContent<T>({ reservedRowCount }: DataTableContentProps 
         sortConfig,
         getSortAriaLabel: (columnLabel) => t('aria.sortBy', { label: columnLabel }),
         getSortPriorityLabel: (priority, total) => `${tCommonLabels('priority')} ${priority}/${total}`,
+        getSortDirectionLabel: (direction) =>
+          t(direction === 'asc' ? 'sort.aria.directionAscending' : 'sort.aria.directionDescending'),
+        actionColumnLabel: tCommonLabels('actions'),
         onSort: handleHeaderClick,
       }),
     [columns, currentSorts, handleHeaderClick, sortConfig, t, tCommonLabels],
@@ -98,6 +111,13 @@ export function DataTableContent<T>({ reservedRowCount }: DataTableContentProps 
   return (
     <DataTableView
       rootRef={containerRef}
+      accessibleLabel={accessibleLabel}
+      loadingMessage={t('aria.loadingMessage')}
+      resultMessage={
+        result
+          ? t('aria.resultSummary', { count: result.total, page: result.page, totalPages: result.totalPages })
+          : undefined
+      }
       columns={viewColumns}
       rows={result?.data ?? []}
       getRowKey={getRowKey}
@@ -109,11 +129,10 @@ export function DataTableContent<T>({ reservedRowCount }: DataTableContentProps 
         selection
           ? {
               ...selection,
-              selectAllRowsLabel: 'Select all rows',
+              selectAllRowsLabel: selection.selectAllRowsLabel ?? t('aria.selectAllRows'),
             }
           : undefined
       }
-      selectionCellVerticalAlign="top"
       reservedRowCount={reservedRowCount}
     />
   );

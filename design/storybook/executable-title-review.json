@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "reviewDate": "2026-10-12",
+  "timezone": "Asia/Seoul",
+  "status": "reviewed_snapshot",
+  "scope": "Executable title editing in real authoring node views and generated public Views. This is a scoped follow-up to the preceding full design-system review.",
+  "entry": "http://localhost:6010/?path=/story/feature-editor-executables--three",
+  "changes": [
+    "Compose Monaco isolation with Tiptap native control event handling in p5, Three.js and Shader node views.",
+    "Use the localized title fallback as an authoring placeholder; keep the stored empty title and public fallback semantics.",
+    "Preserve Shader or owning block-container NodeSelection during title attribute changes, retaining source and preview attributes.",
+    "Interpret omitted generated Shader channels as four existing unconfigured inputs; retain rejection of incomplete stage trees and explicit malformed channel counts."
+  ],
+  "checks": {
+    "sourceTests": {
+      "files": 8,
+      "passed": 113,
+      "failed": 0,
+      "workers": 2
+    },
+    "storyTests": {
+      "groups": 3,
+      "passed": 11,
+      "failed": 0,
+      "pending": 0,
+      "workers": 2,
+      "groupsCovered": [
+        "Feature/Editor/Executables",
+        "Feature/Editor/Public Block Comparison",
+        "Feature/Editor/Tiptap Playground"
+      ],
+      "scope": "Configured plays and axe in the final build; not a complete locale/theme/device matrix."
+    },
+    "typescript": "pass",
+    "ownedLint": "pass",
+    "format": "pass",
+    "generatedDocumentsAndOwnership": "pass"
+  },
+  "earlierStoryRuns": [
+    {
+      "passed": 10,
+      "failed": 1,
+      "reason": "Shader title typing lost the selected node and stopped partway through input. Resolved with selection-preserving attribute updates."
+    },
+    {
+      "passed": 10,
+      "failed": 1,
+      "reason": "Title typing passed; generated publication rejected a default Shader with omitted channels. Resolved at the generated public adapter."
+    }
+  ],
+  "browser": {
+    "engine": "Codex in-app browser",
+    "locale": "ko",
+    "theme": "ocean-light",
+    "scenario": "Shader: replace title with Korean text, switch to published preview, return to edit mode.",
+    "observations": {
+      "input": {
+        "focused": true,
+        "nodeKind": "shader",
+        "value": "밤하늘 셰이더"
+      },
+      "published": {
+        "invalid": false,
+        "kind": "shader",
+        "title": "밤하늘 셰이더"
+      },
+      "returned": {
+        "locale": "ko",
+        "nodeKind": "shader",
+        "preset": "ocean-light",
+        "value": "밤하늘 셰이더"
+      }
+    }
+  },
+  "build": {
+    "storybook": "10.5.8",
+    "command": "UI_KIT_MINIFY=0 storybook build --quiet --disable-telemetry",
+    "indexSha256": "cb73cacb0603e211bf3a437c3096ddc446a9d06ea72fabf10a54607417d33a34",
+    "sourceManifestHash": "7f87016047a8946d556998296719614d075565d32ec83e29bf6fea1f3a8ae6ee",
+    "note": "Local review build is unminified. Default build/CI minification settings remain unchanged. Webpack reports bundle-size warnings."
+  },
+  "sourceIdentity": {
+    "manifestScope": "Generated TS/TSX census, including tests; not every asset, stylesheet or dependency.",
+    "files": [
+      {
+        "path": "features/editor/tiptap/code-editor/source-editor-boundary.ts",
+        "sha256": "44c83c3e5b63075966746fad0d160f639c1407c76c2c868d72cb98794b7ab0ff"
+      },
+      {
+        "path": "features/editor/tiptap/code-editor/index.ts",
+        "sha256": "3e169ef31e55587b6adf2ab8a4ffb3ce6a839e780c1cf0c3e2545f05add604a2"
+      },
+      {
+        "path": "features/editor/tiptap/p5/p5-extension.tsx",
+        "sha256": "70ff809d3490aa89f6c029b81c5f06c2055e3e2bd6e803c94d31be412cca235a"
+      },
+      {
+        "path": "features/editor/tiptap/three/ThreeSceneNode.tsx",
+        "sha256": "0a069a9cd782625956726f85106842a1bfac8641e03864dbf4601ef5825d88da"
+      },
+      {
+        "path": "features/editor/tiptap/shader/ShaderNode.tsx",
+        "sha256": "67241f9cd7a5dda5af1a9625105cf405534006e05b5be70d97d452691961aafd"
+      },
+      {
+        "path": "features/executable/ExecutableRuntimeControls.tsx",
+        "sha256": "ba2e5f64c701cb102bd8805a1b0489eac653758724a63f6b93e73a264a6f6672"
+      },
+      {
+        "path": "features/page/PageView/blocks/GeneratedExecutableBlockView.tsx",
+        "sha256": "ac21740c9b605230f09d5b7114985fd1242424b77229c99be531e8a5a4aed812"
+      },
+      {
+        "path": "features/editor/tiptap/ExecutableRuntime.stories.tsx",
+        "sha256": "e7db6b0dc0e41a8cb20f09da93f2fad13b8cfe0b7d708c1c7a6fb9c2f307209b"
+      }
+    ]
+  },
+  "reports": [
+    {
+      "path": "design/storybook/review-results/executable-title-source-tests.json",
+      "sha256": "03d9c618184d0bd77214426f9b1fbe5b8cbada251064f55f3534814cbf205327"
+    },
+    {
+      "path": "design/storybook/review-results/executable-title-stories.json",
+      "sha256": "daa21d08083478223a79caa1db9f6e87cb8d631674f7168459eb74fca67fafb8"
+    },
+    {
+      "path": "design/storybook/review-results/executable-title-before-selection.json",
+      "sha256": "15b00da6d75c9ac3358d518be86c8d9cf62c6a2e16eff6e4746c185694800723"
+    },
+    {
+      "path": "design/storybook/review-results/executable-title-before-publication.json",
+      "sha256": "93147298ece23ee1185c6991633cd8ce6a169803414bd5cd457944988354237d"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "previews/documentation/executables-title-ocean-light-ko.png",
+      "sha256": "7484d76338219613b2ac7d12c846138bad39eeddc2becb2f9264a444635447bf"
+    }
+  ],
+  "boundaries": [
+    "The earlier 1,313-state full run precedes this source change; current execution covers the three stated story groups.",
+    "Browser and axe checks do not establish native VoiceOver/Orca task acceptance, backend persistence or deployment."
+  ],
+  "subsequentScopedRevision": {
+    "record": "design/storybook/interaction-review.json",
+    "scope": "Review corrections to shared tooltip placement, contextual toolbar density/edit focus, file browser inset, consent decisions and grip/date geometry. Earlier execution results apply only to their recorded snapshots."
+  },
+  "latestScopedRevision": {
+    "record": "design/storybook/compact-product-review.json",
+    "scope": "User review corrections to shared loading, dialog/bubble behavior, account controls, link forms, translation/identity, automatic file/history paging, image preparation, drag rendering, PostHero and cookie consent. Production owners and actual Storybook consumers change together.",
+    "note": "Earlier results retain their own snapshot identities and do not establish acceptance of later source."
+  }
+}

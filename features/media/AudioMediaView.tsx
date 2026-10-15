@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { Text } from '@/components/core/Typography';
 import type { AudioViewModel } from '@/lib/media/audio-view-model';
 import { AudioPlayer } from './AudioPlayer';
 import { MediaBlockHeader } from './ui/MediaBlockHeader';
@@ -44,7 +45,13 @@ export function AudioMediaView({
         <MediaBlockHeader
           headerClassName="audio-block__header"
           metaClassName="audio-block__meta"
-          title={titleContent || <span className="audio-block__title">{model.title}</span>}
+          title={
+            titleContent || (
+              <Text as="span" size="sm" weight="strong" truncate>
+                {model.title}
+              </Text>
+            )
+          }
           meta={
             model.sizeText ? (
               <MediaBlockMetaText className="audio-block__size">{model.sizeText}</MediaBlockMetaText>

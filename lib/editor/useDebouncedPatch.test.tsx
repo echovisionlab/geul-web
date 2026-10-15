@@ -3,6 +3,7 @@ import { act, StrictMode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { createDebouncedPatch } from './debounced-patch';
+import { resetActiveMemberForTests, syncActiveMember } from '@/lib/auth/active-member';
 import { useDebouncedPatch } from './useDebouncedPatch';
 import { flushAllEditorSaves, flushEditorSaves } from './editor-save-registry';
 import {
@@ -22,6 +23,8 @@ function Editor({ room, write }: { room: object; write: (patch: object) => Promi
 }
 beforeEach(() => {
   vi.useFakeTimers();
+  resetActiveMemberForTests();
+  syncActiveMember('member-a');
   host = document.createElement('div');
   root = createRoot(host);
 });
@@ -253,7 +256,8 @@ it('restores a pending patch across a same-room reconnect and persists the repla
   act(() => root.render(<ReconnectableEditor room={{ connection: 2 }} write={vi.fn()} />));
 
   const storedBeforeAck = JSON.parse(
-    window.sessionStorage.getItem(`geul:editor-save-recovery:v1:${encodeURIComponent(recoveryScope)}`) ?? 'null',
+    window.sessionStorage.getItem(`geul:editor-save-recovery:v2:member-a:${encodeURIComponent(recoveryScope)}`) ??
+      'null',
   );
   expect(
     storedBeforeAck.entries.filter(
@@ -326,7 +330,7 @@ it('restores only the exact inactive scope, document, and recovery key', async (
 it('preserves unknown recovery entry shapes without replaying them', async () => {
   const recoveryScope = 'client-room:legacy:en';
   const documentKey = 'client:legacy:en';
-  const storageKey = `geul:editor-save-recovery:v1:${encodeURIComponent(recoveryScope)}`;
+  const storageKey = `geul:editor-save-recovery:v2:member-a:${encodeURIComponent(recoveryScope)}`;
   const unknownEntry = { document: documentKey, patch: { title: 'untyped legacy' }, futureVersion: 2 };
   window.sessionStorage.setItem(
     storageKey,

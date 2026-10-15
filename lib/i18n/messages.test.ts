@@ -365,7 +365,7 @@ describe('getMessagesForLocale', () => {
     expect(messages.campaignAnalytics.title).toBe('キャンペーン分析');
     expect(messages.translationJobsPage.title).toBe('翻訳ジョブ');
     expect(messages.translationSettingsPage.title).toBe('翻訳設定');
-    expect(messages.translationPanel.actions.regenerateAll).toBe('Generate/regenerate all eligible locales');
+    expect(messages.translationPanel.actions.regenerateAll).toBe('対象となるすべてのロケールで生成/再生成');
     expect(messages.adminList.emailTemplates.detail.fields.layoutLabel).toBe('レイアウト');
     expect(messages.contentLanguageMenu.label).toBe('翻訳を表示');
 

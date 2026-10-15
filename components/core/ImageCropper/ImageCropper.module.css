@@ -1,0 +1,112 @@
+/* ReactCrop owns crop geometry and interaction. Core owns its overlay controls. */
+.content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  gap: var(--geul-spacing-md);
+}
+
+.content > :not(.stage) {
+  flex-shrink: 0;
+}
+
+.stage {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  justify-content: center;
+  height: 60dvh;
+  min-height: 0;
+  padding: var(--geul-spacing-xl);
+  container-type: size;
+}
+
+.cropper {
+  display: block;
+  max-width: 100%;
+  max-height: 100cqh;
+}
+
+.image {
+  max-width: 100cqw;
+  max-height: 100cqh;
+  width: auto;
+  height: auto;
+}
+
+.cropper.cropper :global(.ReactCrop__crop-selection) {
+  color: var(--geul-text-on-image);
+  border: var(--geul-border-thin) dashed var(--geul-text-on-image);
+  outline: none;
+  background-image: none;
+  box-shadow: 0 0 0 var(--geul-border-thin) var(--geul-paper-ink);
+  animation: none;
+}
+
+.cropper :global(.ReactCrop__crop-mask) > rect {
+  fill: var(--geul-overlay-dialog);
+  fill-opacity: 1;
+}
+
+.cropper :global(.ReactCrop__drag-handle) {
+  width: var(--geul-chrome-icon-size);
+  height: var(--geul-chrome-icon-size);
+  background: var(--geul-overlay-control);
+  border: var(--geul-border-thin) solid var(--geul-overlay-control-border);
+  border-radius: var(--geul-radius-square);
+  box-shadow: 0 0 0 var(--geul-border-thin) var(--geul-paper-ink);
+}
+
+.cropper :global(.ReactCrop__drag-handle):is(:hover, :focus-visible) {
+  background: var(--geul-overlay-strong);
+}
+
+.cropper.cropper :global(.ReactCrop__crop-selection):focus-visible,
+.cropper :global(.ReactCrop__drag-handle):focus-visible {
+  outline: var(--geul-border-focus) solid var(--geul-text-on-image);
+  outline-offset: var(--geul-border-focus);
+  box-shadow: 0 0 0 calc(var(--geul-border-focus) * 2) var(--geul-paper-ink);
+}
+
+.cropper.cropper :global(.ReactCrop__crop-selection):focus:not(:focus-visible),
+.cropper :global(.ReactCrop__drag-handle):focus:not(:focus-visible) {
+  outline: none;
+}
+
+.cropper :global(.ReactCrop__crop-selection)::after {
+  border-color: var(--geul-overlay-control-border);
+}
+
+.cropper :global(.ReactCrop__rule-of-thirds-vt)::before,
+.cropper :global(.ReactCrop__rule-of-thirds-vt)::after,
+.cropper :global(.ReactCrop__rule-of-thirds-hz)::before,
+.cropper :global(.ReactCrop__rule-of-thirds-hz)::after {
+  background: var(--geul-overlay-track);
+}
+
+.cropper:global(.ReactCrop--disabled) :global(.ReactCrop__crop-selection) {
+  opacity: var(--geul-opacity-disabled);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cropper.cropper :global(.ReactCrop__crop-selection) {
+    animation: none;
+    transition: none;
+  }
+}
+
+.cropper :global(.ReactCrop__drag-bar):is(:global(.ord-n), :global(.ord-s)) {
+  height: var(--geul-spacing-xs);
+}
+
+.cropper :global(.ReactCrop__drag-bar):is(:global(.ord-e), :global(.ord-w)) {
+  width: var(--geul-spacing-xs);
+}
+
+@media (pointer: coarse) {
+  .cropper :global(.ReactCrop__drag-handle) {
+    width: var(--geul-control-height-xs);
+    height: var(--geul-control-height-xs);
+  }
+}

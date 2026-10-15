@@ -365,6 +365,20 @@ describe('PageRenderer', () => {
     ]);
   });
 
+  it('applies the shared document presentation to generated rich text at root and inside columns', () => {
+    const copy = { id: 'copy', kind: 'rich-text' as const, settings: {}, props: {}, richText: [], columns: [] };
+    const columns = {
+      id: 'columns',
+      kind: 'columns' as const,
+      settings: {},
+      props: {},
+      richText: null,
+      columns: [{ id: 'column', ratio: 1, sections: [{ ...copy, id: 'nested-copy' }] }],
+    };
+    const html = renderToStaticMarkup(<GeneratedPageRenderer sections={[copy, columns]} />);
+    expect(html.match(/class="rich-text-content prose"/g)).toHaveLength(2);
+  });
+
   it('renders generated canonical Embed sections at root and inside Columns', () => {
     const props = {
       uri: 'https://embed.example/app',

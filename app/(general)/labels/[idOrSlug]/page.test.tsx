@@ -31,8 +31,8 @@ vi.mock('@/lib/api/server-client', () => ({
 vi.mock('@/lib/utils/language.server', () => ({ getUserLocale: vi.fn(async () => 'en') }));
 vi.mock('@/lib/utils/header.server', () => ({ getRequestHeaders: vi.fn(async () => new Headers()) }));
 vi.mock('@/lib/utils/url.server', () => ({ getBaseUrl: vi.fn(async () => 'https://example.test') }));
-vi.mock('@/features/label/AdminLabelDetailClient', () => ({
-  AdminLabelDetailClient: vi.fn(() => null),
+vi.mock('@/features/label/LazyAdminLabelDetailClient', () => ({
+  LazyAdminLabelDetailClient: vi.fn(() => null),
 }));
 vi.mock('./LabelPublicContent', () => ({ LabelPublicContent: mocks.labelPublicContent }));
 vi.mock('./LabelShareViewClient', () => ({ LabelShareViewClient: mocks.labelShareViewClient }));

@@ -70,6 +70,43 @@ function expectRejected(fixture: BoundaryFixture) {
 }
 
 describe('enforce-import-boundary', () => {
+  it('allows only reviewed pure presentation entries across Feature UI boundaries', () => {
+    expectAllowed({
+      boundary: 'feature-ui',
+      filePath: 'features/post/ui/ParticipantsView.tsx',
+      source: "import { ParticipantRow } from '@/features/participants/ParticipantRow'; export { ParticipantRow };",
+    });
+    expectRejected({
+      boundary: 'core',
+      filePath: 'components/core/Participant.tsx',
+      source: "import { ParticipantRow } from '@/features/participants/ParticipantRow'; export { ParticipantRow };",
+    });
+    expectAllowed({
+      boundary: 'feature-ui',
+      filePath: 'features/share/ui/ShareButtonView.tsx',
+      source:
+        "import { ConfirmationDialog } from '@/features/confirmation/ui/ConfirmationDialog'; export { ConfirmationDialog };",
+    });
+    for (const source of [
+      '@/features/confirmation',
+      '@/features/confirmation/confirmation-dialogs',
+      '@/features/confirmation/useBulkDeletion',
+      '@/features/participants',
+      '@/features/participants/useParticipants',
+    ]) {
+      expectRejected({
+        boundary: 'feature-ui',
+        filePath: 'features/share/ui/ShareButtonView.tsx',
+        source: `import { value } from '${source}'; export { value };`,
+      });
+    }
+    expectRejected({
+      boundary: 'core',
+      filePath: 'components/core/Modal/Fixture.tsx',
+      source:
+        "import { ConfirmationDialog } from '@/features/confirmation/ui/ConfirmationDialog'; export { ConfirmationDialog };",
+    });
+  });
   it('allows relative imports that stay inside each declared boundary', () => {
     expectAllowed({
       boundary: 'feature-ui',

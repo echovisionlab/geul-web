@@ -25,7 +25,7 @@ export function resolveWorkLifecycleControls(
           value: 'archived',
           label: labels.archived,
           actionLabel: labels.archived,
-          tone: 'warning',
+          tone: 'neutral',
         },
         {
           value: 'published',

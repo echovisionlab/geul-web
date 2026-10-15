@@ -1,6 +1,21 @@
 'use client';
+import { useReleaseEditorCanEdit } from './ReleaseEditorAccessContext';
+import { breakpointQuery } from '@/components/core/Layout/breakpoints';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
-import { useCallback, useEffect, useState } from 'react';
+import { HierarchyIndent } from '@/components/core/Hierarchy';
+import { ConfirmationDialog } from '@/features/confirmation';
+
+import { SectionCard, SectionHeader } from '@/components/core/Section';
+import { DisclosureRegion } from '@/components/core/Disclosure';
+
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+
+import { useCallback, useEffect, useId, useState } from 'react';
 import {
   closestCenter,
   DndContext,
@@ -14,24 +29,23 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { SortableSurface, ReorderRow, useSortableItem } from '@/components/core/Sortable';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
-import { IconChevronDown, IconGripVertical, IconX } from '@tabler/icons-react';
+import { IconChevronDown, IconChevronUp, IconGripVertical, IconX } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Collapse, Divider, Group, Progress, Stack, Table, Text } from '@mantine/core';
-import { TimePicker } from '@mantine/dates';
-import '@mantine/dates/styles.css';
+
+import { Table } from '@/components/core/Display';
+import { Progress } from '@/components/core/Progress';
+import { TimePicker, TextInput } from '@/components/core/Input';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { Button } from '@/components/core/Button';
+import { TextButton } from '@/components/core/TextButton';
 import { IconButton } from '@/components/core/IconButton';
-import { TextInput } from '@/components/core/Input';
-import { ConfirmModal } from '@/components/core/Modal';
-import { SectionCard, SectionHeader } from '@/components/core/Section';
+
 import { Tooltip } from '@/components/core/Tooltip';
 import { ConnectedFileDownloadPolicyEditor } from '@/features/media-download/ConnectedFileDownloadPolicyEditor';
 import { createTrackAction, deleteTrackAction, updateTrackAction } from '@/lib/actions/track';
@@ -56,6 +70,7 @@ import {
 } from './track-runtime';
 import { ReleaseTrackCreateView, secondsToTimePickerValue, timePickerValueToSeconds } from './ReleaseTrackCreateView';
 import { TrackCreditsEditorSection } from './TrackCreditsEditorSection';
+import { getUntrackedConfigurationWriteOrigin } from '@/lib/editor/editor-write-origin';
 import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
 import { useTrackOrderSave } from './useTrackOrderSave';
 
@@ -64,7 +79,7 @@ interface ReleaseTracksSectionProps {
   idPrefix?: string;
   tracks: ReleaseTrackItem[];
   onTracksChange: (tracks: ReleaseTrackItem[]) => void;
-  onMutationStart?: () => void;
+  onMutationStart?: () => string | void;
   onMutationSettled?: (succeeded: boolean) => void;
 }
 
@@ -105,9 +120,10 @@ export function ReleaseTracksSection({
   onMutationStart,
   onMutationSettled,
 }: ReleaseTracksSectionProps) {
+  const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.tracks');
-  const isMobile = useMediaQuery('(max-width: 48em)');
+  const isMobile = useMediaQuery(breakpointQuery('sm'));
   const nextTrackNumber = tracks.reduce((max, track) => Math.max(max, track.track_number), 0) + 1;
   // Add track modal
   const [addModalOpened, { open: openAddModal, close: closeAddModal }] = useDisclosure(false);
@@ -122,22 +138,48 @@ export function ReleaseTracksSection({
   const [deletingTrackId, setDeletingTrackId] = useState<string | null>(null);
 
   const createTrack = useMutation({
-    mutationFn: (data: { release_id: string; track_number: number; title: string; duration_seconds?: number }) =>
-      createTrackAction(data),
-    onMutate: () => onMutationStart?.(),
+    mutationFn: async (data: {
+      release_id: string;
+      track_number: number;
+      title: string;
+      duration_seconds?: number;
+    }) => {
+      const editorOrigin = onMutationStart?.() || getUntrackedConfigurationWriteOrigin(`release:${releaseId}`);
+      const result = await createTrackAction(data, editorOrigin);
+      if (result.data && !result.error) {
+        publishEditorEntityChange(`release:${releaseId}`, editorOrigin);
+      }
+      return result;
+    },
     onSettled: (result, error) => onMutationSettled?.(!error && Boolean(result?.data) && !result?.error),
   });
 
   const updateTrack = useMutation({
-    mutationFn: (data: { id: string; track_number?: number; title?: string; duration_seconds?: number | null }) =>
-      updateTrackAction(data.id, data),
-    onMutate: () => onMutationStart?.(),
+    mutationFn: async (data: {
+      id: string;
+      track_number?: number;
+      title?: string;
+      duration_seconds?: number | null;
+    }) => {
+      const editorOrigin = onMutationStart?.() || getUntrackedConfigurationWriteOrigin(`release:${releaseId}`);
+      const result = await updateTrackAction(data.id, data, editorOrigin);
+      if (result.success && !result.error) {
+        publishEditorEntityChange(`release:${releaseId}`, editorOrigin);
+      }
+      return result;
+    },
     onSettled: (result, error) => onMutationSettled?.(!error && Boolean(result?.success) && !result?.error),
   });
 
   const deleteTrack = useMutation({
-    mutationFn: (id: string) => deleteTrackAction(id),
-    onMutate: () => onMutationStart?.(),
+    mutationFn: async (id: string) => {
+      const editorOrigin = onMutationStart?.() || getUntrackedConfigurationWriteOrigin(`release:${releaseId}`);
+      const result = await deleteTrackAction(id, editorOrigin);
+      if (result.success && !result.error) {
+        publishEditorEntityChange(`release:${releaseId}`, editorOrigin);
+      }
+      return result;
+    },
     onSettled: (result, error) => onMutationSettled?.(!error && Boolean(result?.success) && !result?.error),
   });
 
@@ -149,6 +191,9 @@ export function ReleaseTracksSection({
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
+    if (!canEdit) {
+      return;
+    }
     const { active, over } = event;
     if (!over || active.id === over.id) {
       return;
@@ -167,6 +212,9 @@ export function ReleaseTracksSection({
   };
 
   const handleAddTrack = () => {
+    if (!canEdit) {
+      return;
+    }
     if (!newTrackTitle.trim()) {
       return;
     }
@@ -183,15 +231,14 @@ export function ReleaseTracksSection({
           if (result.error || !result.data) {
             notifications.show({
               message: result.error || t('messages.createFailed'),
-              color: 'red',
+              tone: 'danger',
             });
             return;
           }
           const newTrack = result.data;
-          publishEditorEntityChange(`release:${releaseId}`);
           notifications.show({
             message: tCommon('messages.itemCreated', { item: tCommon('entities.track') }),
-            color: 'green',
+            tone: 'positive',
           });
           // Add new track to collab state
           const newTrackItem: ReleaseTrackItem = {
@@ -223,6 +270,9 @@ export function ReleaseTracksSection({
   };
 
   const handleUpdateTrack = () => {
+    if (!canEdit) {
+      return;
+    }
     if (!expandedTrackId || !editTrackTitle.trim()) {
       return;
     }
@@ -238,13 +288,12 @@ export function ReleaseTracksSection({
       {
         onSuccess: (result) => {
           if (result.error) {
-            notifications.show({ message: result.error, color: 'red' });
+            notifications.show({ message: result.error, tone: 'danger' });
             return;
           }
-          publishEditorEntityChange(`release:${releaseId}`);
           notifications.show({
             message: tCommon('messages.itemUpdated', { item: tCommon('entities.track') }),
-            color: 'green',
+            tone: 'positive',
           });
           // Update track in collab state
           const updatedTracks = tracks.map((t) =>
@@ -268,6 +317,9 @@ export function ReleaseTracksSection({
   };
 
   const handleConfirmDeleteTrack = () => {
+    if (!canEdit) {
+      return;
+    }
     if (!deletingTrackId) {
       return;
     }
@@ -275,13 +327,12 @@ export function ReleaseTracksSection({
     deleteTrack.mutate(deletingTrackId, {
       onSuccess: (result) => {
         if (result.error) {
-          notifications.show({ message: result.error, color: 'red' });
+          notifications.show({ message: result.error, tone: 'danger' });
           return;
         }
-        publishEditorEntityChange(`release:${releaseId}`);
         notifications.show({
           message: tCommon('messages.itemDeleted', { item: tCommon('entities.track') }),
-          color: 'red',
+          tone: 'positive',
         });
         // Remove track from collab state
         onTracksChange(tracks.filter((t) => t.id !== deletingTrackId));
@@ -378,7 +429,7 @@ export function ReleaseTracksSection({
     <>
       <div id="release-tracks-section">
         <SectionCard>
-          <Stack>
+          <DsLayoutStack>
             <SectionHeader
               title={tCommon('entities.tracks')}
               actions={
@@ -400,15 +451,13 @@ export function ReleaseTracksSection({
             />
 
             {tracks.length === 0 ? (
-              <Text size="sm" c="dimmed">
-                {t('empty')}
-              </Text>
+              <SupportingText tone="secondary">{t('empty')}</SupportingText>
             ) : (
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={tracks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
                   {isMobile ? (
-                    <Stack gap={0}>
-                      {tracks.map((track, index) => (
+                    <DsLayoutStack gap="none">
+                      {tracks.map((track) => (
                         <SortableTrackListItem
                           key={track.id}
                           track={track}
@@ -420,19 +469,18 @@ export function ReleaseTracksSection({
                           editor={renderTrackEditor(track)}
                           idPrefix={idPrefix}
                           formatDuration={formatDuration}
-                          showDivider={index < tracks.length - 1}
                         />
                       ))}
-                    </Stack>
+                    </DsLayoutStack>
                   ) : (
-                    <Table>
+                    <Table density="compact">
                       <Table.Thead>
                         <Table.Tr>
-                          <Table.Th w={40} />
+                          <Table.Th />
                           <Table.Th>{tCommon('labels.title')}</Table.Th>
-                          <Table.Th w={80}>{tCommon('labels.length')}</Table.Th>
-                          <Table.Th w={104}>{tCommon('labels.status')}</Table.Th>
-                          <Table.Th w={132} style={{ textAlign: 'right' }}>
+                          <Table.Th width={80}>{tCommon('labels.length')}</Table.Th>
+                          <Table.Th width={104}>{tCommon('labels.status')}</Table.Th>
+                          <Table.Th width={132} align="end">
                             {tCommon('labels.actions')}
                           </Table.Th>
                         </Table.Tr>
@@ -458,16 +506,18 @@ export function ReleaseTracksSection({
                 </SortableContext>
               </DndContext>
             )}
-          </Stack>
+          </DsLayoutStack>
         </SectionCard>
       </div>
 
-      <ConfirmModal
+      <ConfirmationDialog
+        intent="delete"
         opened={deleteModalOpened}
         onClose={() => {
           setDeletingTrackId(null);
           closeDeleteModal();
         }}
+        confirmDisabled={!canEdit}
         onConfirm={handleConfirmDeleteTrack}
         title={tCommon('actions.delete')}
         message={t('deleteConfirm')}
@@ -571,6 +621,7 @@ function TrackAudioUploadButtonView({
   onPendingUploadCancelled,
   backendResumeState,
 }: TrackAudioUploadButtonViewProps) {
+  const canEdit = useReleaseEditorCanEdit();
   return (
     <TrackAudioUploader
       trackId={track.id}
@@ -589,6 +640,7 @@ function TrackAudioUploadButtonView({
       suppressedResumeIdentity={suppressedResumeIdentity}
       resumeStateOverride={backendResumeState}
       compact
+      disabled={!canEdit}
       mode="button-only"
     />
   );
@@ -597,80 +649,38 @@ function TrackAudioUploadButtonView({
 function TrackProgressDetails({ indicator }: { indicator: TrackUploadProgressIndicator }) {
   return (
     <>
-      <Group justify="space-between" gap="sm" wrap="nowrap">
-        <Text size="xs" c={indicator.color}>
+      <DsLayoutInline justify="between" gap="sm" wrap="nowrap">
+        <DsText size="xs" tone="accent">
           {indicator.label}
-        </Text>
+        </DsText>
         {indicator.progress != null ? (
-          <Text size="xs" c={indicator.color}>
+          <DsText size="xs" tone="accent">
             {indicator.progress}%
-          </Text>
+          </DsText>
         ) : null}
-      </Group>
-      <Progress value={indicator.progress ?? 0} size="xs" radius={0} color={indicator.color} />
+      </DsLayoutInline>
+      <Progress value={indicator.progress ?? 0} size="xs" tone="accent" aria-label={indicator.label} />
     </>
   );
 }
 
 function TrackResumeMessage({ indicator }: { indicator: TrackResumeIndicator }) {
   return (
-    <Text size="xs" c={indicator.color}>
+    <DsText size="xs" tone="warning">
       {indicator.label}
-    </Text>
+    </DsText>
   );
 }
 
-function useAnimatedEditorVisibility(expanded: boolean, editor?: React.ReactNode) {
-  const [shouldRenderEditor, setShouldRenderEditor] = useState(expanded);
-  const [collapseOpen, setCollapseOpen] = useState(expanded);
-  const [cachedEditor, setCachedEditor] = useState(editor);
-
-  useEffect(() => {
-    if (editor) {
-      setCachedEditor(editor);
-    }
-  }, [editor]);
-
-  useEffect(() => {
-    if (expanded) {
-      setShouldRenderEditor(true);
-      setCollapseOpen(false);
-
-      const frameId = window.requestAnimationFrame(() => {
-        setCollapseOpen(true);
-      });
-
-      return () => {
-        window.cancelAnimationFrame(frameId);
-      };
-    }
-
-    setCollapseOpen(false);
-
-    const timeoutId = window.setTimeout(() => {
-      setShouldRenderEditor(false);
-    }, 220);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [expanded]);
-
-  return { shouldRenderEditor, collapseOpen, cachedEditor };
+function useEditorVisibility(expanded: boolean, editor?: React.ReactNode) {
+  return { shouldRenderEditor: expanded, collapseOpen: expanded, cachedEditor: editor };
 }
 
 function TrackEditorSurface({ children }: { children: React.ReactNode }) {
   return (
-    <Box
-      px="sm"
-      py="sm"
-      style={{
-        backgroundColor: 'light-dark(var(--mantine-color-gray-0), rgb(255 255 255 / 0.02))',
-        borderRadius: 'var(--mantine-radius-xs)',
-      }}
-    >
+    <SectionCard appearance="muted" padding="sm" withBorder={false}>
       {children}
-    </Box>
+    </SectionCard>
   );
 }
 
@@ -678,13 +688,12 @@ function TrackDurationPicker({
   id,
   value,
   onChange,
-  style,
 }: {
   id?: string;
   value: number | '';
   onChange: (value: number | '') => void;
-  style?: React.CSSProperties;
 }) {
+  const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
 
   return (
@@ -692,13 +701,13 @@ function TrackDurationPicker({
       id={id}
       label={tCommon('labels.length')}
       value={secondsToTimePickerValue(value)}
+      disabled={!canEdit}
       onChange={(nextValue) => onChange(timePickerValueToSeconds(nextValue))}
       clearable
       withSeconds
       hoursInputLabel={tCommon('labels.hours')}
       minutesInputLabel={tCommon('labels.minutes')}
       secondsInputLabel={tCommon('labels.seconds')}
-      style={style}
     />
   );
 }
@@ -798,7 +807,7 @@ function useReleaseTrackUploadSurfaceState({
   };
 }
 
-function SortableTrackRow({
+export function SortableTrackRow({
   idPrefix,
   track,
   expanded,
@@ -809,10 +818,13 @@ function SortableTrackRow({
   formatDuration,
   editor,
 }: SortableTrackRowProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const canEdit = useReleaseEditorCanEdit();
+  const sortable = useSortableItem({
     id: track.id,
+    disabled: !canEdit,
   });
   const tCommon = useTranslations('common');
+  const tSort = useTranslations('dataTable.sort');
   const tMedia = useTranslations('editorCommon.media');
   const tTrackAudio = useTranslations('releaseEditor.tracks.audio');
   const tIngestDialog = useTranslations('editorCommon.media.ingestDialog');
@@ -834,31 +846,40 @@ function SortableTrackRow({
       resumeExpired: tTrackAudio('resumeExpired'),
     },
   });
-  const { shouldRenderEditor, collapseOpen, cachedEditor } = useAnimatedEditorVisibility(expanded, editor);
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
+  const editorPanelId = useId();
+  const { shouldRenderEditor, collapseOpen, cachedEditor } = useEditorVisibility(expanded, editor);
 
   return (
     <>
-      <Table.Tr id={`release-track-row-${track.id}`} ref={setNodeRef} style={style}>
+      <Table.Tr id={`release-track-row-${track.id}`} ref={sortable.setNodeRef} dragState={sortable.dragState}>
         <Table.Td>
-          <Box {...attributes} {...listeners} style={{ cursor: 'grab' }}>
-            <IconGripVertical size={14} color="gray" />
-          </Box>
+          <IconButton
+            emphasis="low"
+            interaction="drag-handle"
+            draggable={false}
+            {...sortable.handle}
+            disabled={!canEdit}
+            aria-label={tSort('aria.reorder', { label: track.title })}
+          >
+            <IconGripVertical aria-hidden />
+          </IconButton>
         </Table.Td>
         <Table.Td>
-          <Text size="sm" fw={500} style={{ cursor: 'pointer' }} onClick={onToggle}>
+          <Button
+            id={`${editorPanelId}-title`}
+            size="sm"
+            emphasis="low"
+            aria-expanded={expanded}
+            aria-controls={expanded ? editorPanelId : undefined}
+            onClick={onToggle}
+          >
             {track.title}
-          </Text>
+          </Button>
         </Table.Td>
         <Table.Td>
-          <Text size="sm" c="dimmed">
+          <DsText size="sm" tone="secondary">
             {formatDuration(effectiveTrack.duration_seconds)}
-          </Text>
+          </DsText>
         </Table.Td>
         <Table.Td>
           <TrackAudioStatusView
@@ -870,7 +891,7 @@ function SortableTrackRow({
           />
         </Table.Td>
         <Table.Td>
-          <Group gap={4} justify="flex-end" wrap="nowrap">
+          <DsLayoutInline gap="xxs" justify="end" wrap="nowrap" role="group" aria-labelledby={`${editorPanelId}-title`}>
             <TrackAudioUploadButtonView
               idPrefix={idPrefix}
               track={effectiveTrack}
@@ -884,64 +905,66 @@ function SortableTrackRow({
               <IconButton
                 tone="danger"
                 emphasis="low"
-                size="sm"
+                size="compact"
+                disabled={!canEdit}
                 onClick={onDelete}
                 aria-label={tCommon('actions.delete')}
+                aria-describedby={`${editorPanelId}-title`}
               >
                 <IconX size={14} />
               </IconButton>
             </Tooltip>
             <IconButton
               emphasis="low"
-              size="sm"
+              size="compact"
+              aria-expanded={expanded}
+              aria-controls={expanded ? editorPanelId : undefined}
+              aria-describedby={`${editorPanelId}-title`}
               onClick={onToggle}
               aria-label={expanded ? tCommon('actions.close') : tCommon('actions.edit')}
             >
-              <Box
-                component="span"
-                style={{
-                  display: 'inline-flex',
-                  transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 180ms ease',
-                }}
-              >
-                <IconChevronDown size={14} />
-              </Box>
+              {expanded ? <IconChevronUp aria-hidden /> : <IconChevronDown aria-hidden />}
             </IconButton>
-          </Group>
+          </DsLayoutInline>
         </Table.Td>
       </Table.Tr>
       {progressIndicator ? (
         <Table.Tr id={`release-track-progress-row-${track.id}`}>
           <Table.Td colSpan={5}>
-            <Stack gap={6} py="xs">
-              {resumeIndicator ? (
-                <TrackResumeMessage indicator={resumeIndicator} />
-              ) : (
-                <TrackProgressDetails indicator={progressIndicator} />
-              )}
-            </Stack>
+            <DsLayoutInset block="xs">
+              <DsLayoutStack gap="xxs">
+                {resumeIndicator ? (
+                  <TrackResumeMessage indicator={resumeIndicator} />
+                ) : (
+                  <TrackProgressDetails indicator={progressIndicator} />
+                )}
+              </DsLayoutStack>
+            </DsLayoutInset>
           </Table.Td>
         </Table.Tr>
       ) : resumeIndicator ? (
         <Table.Tr id={`release-track-resume-row-${track.id}`}>
           <Table.Td colSpan={5}>
-            <Stack gap={6} py="xs">
-              <Text size="xs" c={resumeIndicator.color}>
-                {resumeIndicator.label}
-              </Text>
-            </Stack>
+            <DsLayoutInset block="xs">
+              <DsLayoutStack gap="xxs">
+                <DsText size="xs" tone="warning">
+                  {resumeIndicator.label}
+                </DsText>
+              </DsLayoutStack>
+            </DsLayoutInset>
           </Table.Td>
         </Table.Tr>
       ) : null}
       {shouldRenderEditor && cachedEditor ? (
         <Table.Tr>
           <Table.Td colSpan={5}>
-            <Collapse expanded={collapseOpen} transitionDuration={220}>
-              <Box py="sm">
-                <TrackEditorSurface>{cachedEditor}</TrackEditorSurface>
-              </Box>
-            </Collapse>
+            <DisclosureRegion id={editorPanelId} labelledBy={`${editorPanelId}-title`} expanded={collapseOpen}>
+              <DsLayoutInset block="xxs">
+                <DsLayoutInset space="none">
+                  <TrackEditorSurface>{cachedEditor}</TrackEditorSurface>
+                </DsLayoutInset>
+              </DsLayoutInset>
+            </DisclosureRegion>
           </Table.Td>
         </Table.Tr>
       ) : null}
@@ -949,11 +972,9 @@ function SortableTrackRow({
   );
 }
 
-interface SortableTrackListItemProps extends SortableTrackRowProps {
-  showDivider: boolean;
-}
+type SortableTrackListItemProps = SortableTrackRowProps;
 
-function SortableTrackListItem({
+export function SortableTrackListItem({
   idPrefix,
   track,
   expanded,
@@ -963,9 +984,10 @@ function SortableTrackListItem({
   uploadProgress,
   formatDuration,
   editor,
-  showDivider,
 }: SortableTrackListItemProps) {
+  const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
+  const tSort = useTranslations('dataTable.sort');
   const tMedia = useTranslations('editorCommon.media');
   const tTrackAudio = useTranslations('releaseEditor.tracks.audio');
   const tIngestDialog = useTranslations('editorCommon.media.ingestDialog');
@@ -987,115 +1009,110 @@ function SortableTrackListItem({
       resumeExpired: tTrackAudio('resumeExpired'),
     },
   });
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const sortable = useSortableItem({
     id: track.id,
+    disabled: !canEdit,
   });
-  const { shouldRenderEditor, collapseOpen, cachedEditor } = useAnimatedEditorVisibility(expanded, editor);
+  const editorPanelId = useId();
+  const { shouldRenderEditor, collapseOpen, cachedEditor } = useEditorVisibility(expanded, editor);
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
+  const hasStatus = Boolean(
+    effectiveTrack.audio_attached ||
+    resolveReleaseTrackProcessingStatus(effectiveTrack.processing_status) ||
+    processingLifecycle ||
+    uploadProgress ||
+    progressIndicator ||
+    resumeIndicator,
+  );
   return (
-    <Box ref={setNodeRef} style={style} py="sm">
-      <Group align="flex-start" gap="sm" wrap="nowrap">
-        <Box {...attributes} {...listeners} style={{ cursor: 'grab', paddingTop: 2 }}>
-          <IconGripVertical size={14} color="gray" />
-        </Box>
-
-        <Stack gap="xs" style={{ flex: 1, minWidth: 0 }}>
-          <Group justify="space-between" align="flex-start" wrap="nowrap" gap="sm">
-            <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
-              <Text size="sm" fw={500} style={{ cursor: 'pointer' }} onClick={onToggle}>
-                {track.title}
-              </Text>
-            </Stack>
-            <Group gap={4} wrap="nowrap" align="center">
-              <Text size="sm" c="dimmed">
-                {formatDuration(effectiveTrack.duration_seconds)}
-              </Text>
-              <IconButton
-                emphasis="low"
-                size="sm"
-                onClick={onToggle}
-                aria-label={expanded ? tCommon('actions.close') : tCommon('actions.edit')}
-              >
-                <Box
-                  component="span"
-                  style={{
-                    display: 'inline-flex',
-                    transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                    transition: 'transform 180ms ease',
-                  }}
-                >
-                  <IconChevronDown size={14} />
-                </Box>
-              </IconButton>
-            </Group>
-          </Group>
-
-          <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
-            <Group gap="xs" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
-              <Text size="xs" c="dimmed">
-                {tCommon('labels.status')}
-              </Text>
-              <TrackAudioStatusView
-                idPrefix={idPrefix}
-                track={effectiveTrack}
-                uploadProgress={uploadProgress}
-                processingLifecycle={processingLifecycle}
-                suppressedResumeIdentity={suppressedResumeIdentity}
-              />
-            </Group>
-            <Group gap="xs" wrap="nowrap">
-              <TrackAudioUploadButtonView
-                idPrefix={idPrefix}
-                track={effectiveTrack}
-                processingLifecycle={processingLifecycle}
-                suppressedResumeIdentity={suppressedResumeIdentity}
-                onUploadProgressChange={onUploadProgressChange}
-                onPendingUploadCancelled={handlePendingUploadCancelled}
-                backendResumeState={backendResumeState}
-              />
-              <Tooltip label={tCommon('actions.delete')}>
-                <IconButton
-                  tone="danger"
-                  emphasis="low"
-                  size="sm"
-                  onClick={onDelete}
-                  aria-label={tCommon('actions.delete')}
-                >
-                  <IconX size={14} />
-                </IconButton>
-              </Tooltip>
-            </Group>
-          </Group>
+    <SortableSurface ref={sortable.setNodeRef} motion={sortable.motion}>
+      <ReorderRow
+        handle={
+          <IconButton
+            interaction="drag-handle"
+            draggable={false}
+            {...sortable.handle}
+            disabled={!canEdit}
+            aria-label={tSort('aria.reorder', { label: track.title })}
+          >
+            <IconGripVertical aria-hidden />
+          </IconButton>
+        }
+        actions={
+          <DsLayoutInline gap="none" wrap="nowrap" role="group" aria-labelledby={`${editorPanelId}-title`}>
+            <TrackAudioUploadButtonView
+              idPrefix={idPrefix}
+              track={effectiveTrack}
+              processingLifecycle={processingLifecycle}
+              suppressedResumeIdentity={suppressedResumeIdentity}
+              onUploadProgressChange={onUploadProgressChange}
+              onPendingUploadCancelled={handlePendingUploadCancelled}
+              backendResumeState={backendResumeState}
+            />
+            <IconButton
+              tone="danger"
+              disabled={!canEdit}
+              onClick={onDelete}
+              aria-label={tCommon('actions.delete')}
+              aria-describedby={`${editorPanelId}-title`}
+            >
+              <IconX aria-hidden />
+            </IconButton>
+            <IconButton
+              aria-expanded={expanded}
+              aria-controls={expanded ? editorPanelId : undefined}
+              aria-describedby={`${editorPanelId}-title`}
+              onClick={onToggle}
+              aria-label={expanded ? tCommon('actions.close') : tCommon('actions.edit')}
+            >
+              {expanded ? <IconChevronUp aria-hidden /> : <IconChevronDown aria-hidden />}
+            </IconButton>
+          </DsLayoutInline>
+        }
+      >
+        <DsLayoutInline gap="xxs" wrap="nowrap" justify="between">
+          <TextButton
+            id={`${editorPanelId}-title`}
+            size="xs"
+            aria-expanded={expanded}
+            aria-controls={expanded ? editorPanelId : undefined}
+            onClick={onToggle}
+          >
+            {track.title}
+          </TextButton>
+          <DsText size="xs" tone="secondary" shrink={false}>
+            {formatDuration(effectiveTrack.duration_seconds)}
+          </DsText>
+        </DsLayoutInline>
+      </ReorderRow>
+      <HierarchyIndent alignment="parent-label">
+        <DsLayoutStack gap="xxs">
+          {hasStatus ? (
+            <TrackAudioStatusView
+              idPrefix={idPrefix}
+              track={effectiveTrack}
+              uploadProgress={uploadProgress}
+              processingLifecycle={processingLifecycle}
+              suppressedResumeIdentity={suppressedResumeIdentity}
+            />
+          ) : null}
           {progressIndicator ? (
-            <Stack gap={6} pt={2}>
-              {resumeIndicator ? (
-                <TrackResumeMessage indicator={resumeIndicator} />
-              ) : (
-                <TrackProgressDetails indicator={progressIndicator} />
-              )}
-            </Stack>
-          ) : resumeIndicator ? (
-            <Stack gap={6} pt={2}>
+            resumeIndicator ? (
               <TrackResumeMessage indicator={resumeIndicator} />
-            </Stack>
+            ) : (
+              <TrackProgressDetails indicator={progressIndicator} />
+            )
+          ) : resumeIndicator ? (
+            <TrackResumeMessage indicator={resumeIndicator} />
           ) : null}
           {shouldRenderEditor && cachedEditor ? (
-            <Collapse expanded={collapseOpen} transitionDuration={220}>
-              <Box pt="xs">
-                <TrackEditorSurface>{cachedEditor}</TrackEditorSurface>
-              </Box>
-            </Collapse>
+            <DisclosureRegion id={editorPanelId} labelledBy={`${editorPanelId}-title`} expanded={collapseOpen}>
+              <TrackEditorSurface>{cachedEditor}</TrackEditorSurface>
+            </DisclosureRegion>
           ) : null}
-        </Stack>
-      </Group>
-      {showDivider ? <Divider mt="sm" /> : null}
-    </Box>
+        </DsLayoutStack>
+      </HierarchyIndent>
+    </SortableSurface>
   );
 }
 
@@ -1111,7 +1128,7 @@ interface TrackRowEditorPanelProps {
   onClose: () => void;
   isSaving: boolean;
   onCreditsChange: (credits: ReleaseTrackItem['credits']) => void;
-  onMutationStart?: () => void;
+  onMutationStart?: () => string | void;
   onMutationSettled?: (succeeded: boolean) => void;
 }
 
@@ -1130,35 +1147,42 @@ function TrackRowEditorPanel({
   onMutationStart,
   onMutationSettled,
 }: TrackRowEditorPanelProps) {
+  const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.tracks');
-  const isMobile = useMediaQuery('(max-width: 48em)');
+  const isMobile = useMediaQuery(breakpointQuery('sm'));
 
   return (
-    <Stack gap="md">
-      <Group align="flex-start" gap="sm" grow={isMobile} wrap={isMobile ? 'wrap' : 'nowrap'}>
-        <TextInput
-          id={idPrefix ? `${idPrefix}-edit-track-title-${track.id}` : undefined}
-          label={tCommon('labels.title')}
-          placeholder={t('placeholders.title')}
-          value={title}
-          onChange={(e) => onTitleChange(e.currentTarget.value)}
-          required
-          style={{ flex: 1, minWidth: isMobile ? '100%' : 0 }}
-        />
-        <TrackDurationPicker
-          id={idPrefix ? `${idPrefix}-edit-track-duration-${track.id}` : undefined}
-          value={durationSeconds}
-          onChange={onDurationChange}
-          style={{ width: isMobile ? '100%' : 180 }}
-        />
-      </Group>
+    <DsLayoutStack gap="md">
+      <DsLayoutInline align="start" gap="sm" grow={isMobile} wrap={isMobile ? 'wrap' : 'nowrap'}>
+        <div style={{ minWidth: isMobile ? '100%' : 0, flex: 1 }}>
+          <TextInput
+            grow
+            id={idPrefix ? `${idPrefix}-edit-track-title-${track.id}` : undefined}
+            label={tCommon('labels.title')}
+            placeholder={t('placeholders.title')}
+            disabled={!canEdit}
+            value={title}
+            onChange={(e) => onTitleChange(e.currentTarget.value)}
+            required
+          />
+        </div>
+        <div style={{ width: isMobile ? '100%' : 180 }}>
+          <TrackDurationPicker
+            id={idPrefix ? `${idPrefix}-edit-track-duration-${track.id}` : undefined}
+            value={durationSeconds}
+            onChange={onDurationChange}
+          />
+        </div>
+      </DsLayoutInline>
 
       {track.audio_original_file_id ? (
         <ConnectedFileDownloadPolicyEditor
           entityType={TranscodeEntityType.TRACK}
           entityId={track.id}
+          releaseId={releaseId}
           expectedFileId={track.audio_original_file_id}
+          readOnly={!canEdit}
           compact={false}
         />
       ) : null}
@@ -1173,14 +1197,14 @@ function TrackRowEditorPanel({
         onMutationSettled={onMutationSettled}
       />
 
-      <Group justify="flex-end">
+      <DsLayoutInline justify="end">
         <Button emphasis="low" onClick={onClose}>
           {tCommon('actions.close')}
         </Button>
-        <Button onClick={onSave} loading={isSaving} disabled={!title.trim()}>
+        <Button emphasis="medium" onClick={onSave} loading={isSaving} disabled={!canEdit || !title.trim()}>
           {tCommon('actions.save')}
         </Button>
-      </Group>
-    </Stack>
+      </DsLayoutInline>
+    </DsLayoutStack>
   );
 }

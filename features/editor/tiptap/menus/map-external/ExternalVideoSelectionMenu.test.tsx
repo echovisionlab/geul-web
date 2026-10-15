@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ExternalVideoSelectionMenu, type ExternalVideoSelectionMenuLabels } from './ExternalVideoSelectionMenu';
 
@@ -46,7 +47,7 @@ describe('ExternalVideoSelectionMenu', () => {
 
     act(() => {
       root.render(
-        <MantineProvider env="test">
+        <DesignSystemProvider forceColorScheme="light">
           <ExternalVideoSelectionMenu
             labels={labels}
             aspectRatio="16:9"
@@ -56,7 +57,7 @@ describe('ExternalVideoSelectionMenu', () => {
             onChangeAspectRatio={onChangeAspectRatio}
             onChangeAlignment={onChangeAlignment}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
@@ -81,7 +82,7 @@ describe('ExternalVideoSelectionMenu', () => {
     const onEscape = vi.fn();
     act(() => {
       root.render(
-        <MantineProvider env="test">
+        <DesignSystemProvider forceColorScheme="light">
           <ExternalVideoSelectionMenu
             labels={labels}
             aspectRatio="auto"
@@ -93,7 +94,7 @@ describe('ExternalVideoSelectionMenu', () => {
             onChangeAlignment={() => undefined}
             onEscape={onEscape}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 

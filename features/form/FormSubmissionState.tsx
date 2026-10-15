@@ -1,9 +1,12 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
+import { Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
 import { IconCheck } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Box, Center, Stack, Text, Title } from '@mantine/core';
+
 import { PageLoader } from '@/features/site/PageLoader';
+import { StatusIcon } from '@/components/core/Display';
 
 interface FormSubmissionPendingStateProps {
   minHeight?: number;
@@ -13,9 +16,11 @@ export function FormSubmissionPendingState({ minHeight = 240 }: FormSubmissionPe
   const tCommonStates = useTranslations('common.states');
 
   return (
-    <Box style={{ position: 'relative', minHeight }}>
-      <PageLoader message={tCommonStates('loading')} />
-    </Box>
+    <div style={{ position: 'relative', minHeight }}>
+      <DsLayoutInset space="none">
+        <PageLoader message={tCommonStates('loading')} />
+      </DsLayoutInset>
+    </div>
   );
 }
 
@@ -24,16 +29,20 @@ export function FormSubmissionSuccessState() {
   const tFormSuccess = useTranslations('formSuccessPage');
 
   return (
-    <Center>
-      <Stack gap="lg" align="center" ta="center">
-        <IconCheck size={48} color="var(--mantine-color-green-6)" />
+    <DsLayoutStack align="center" justify="center">
+      <DsLayoutStack gap="lg" align="center" textAlign="center">
+        <StatusIcon icon={IconCheck} tone="positive" size="lg" />
         <div>
-          <Title order={2}>{tFormSuccess('title')}</Title>
-          <Text c="dimmed" mt="xs">
-            {tCommonMessages('formSubmittedSuccessfully')}
-          </Text>
+          <DsHeading level={2} aria-level={1}>
+            {tFormSuccess('title')}
+          </DsHeading>
+          <DsLayoutInset blockStart="xs">
+            <DsText size="sm" tone="secondary">
+              {tCommonMessages('formSubmittedSuccessfully')}
+            </DsText>
+          </DsLayoutInset>
         </div>
-      </Stack>
-    </Center>
+      </DsLayoutStack>
+    </DsLayoutStack>
   );
 }

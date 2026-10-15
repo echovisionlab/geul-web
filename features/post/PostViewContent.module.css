@@ -1,18 +1,10 @@
-.heroLanguageMenu :global(button) {
-  color: #fff;
-  text-shadow: 0 1px 4px rgb(0 0 0 / 60%);
-}
-
-.heroLanguageMenu :global(button:hover) {
-  background-color: rgb(0 0 0 / 18%);
-  color: #fff;
-}
-
+/* The reading column (header, running text, series and comments) is owned by ContentChrome's reading
+   measure, the `.prose` measure in document-content.css and Core LayoutContainer `reading`. */
 .contentFlow {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: var(--mantine-spacing-md);
+  gap: var(--geul-spacing-md);
 }
 
 @media print {
@@ -20,7 +12,8 @@
     display: block;
   }
 
+  /* Same md rhythm as the screen flex gap, expressed as block margins for paged flow. */
   .contentFlow > * + * {
-    margin-top: 12pt;
+    margin-block-start: var(--geul-spacing-md);
   }
 }

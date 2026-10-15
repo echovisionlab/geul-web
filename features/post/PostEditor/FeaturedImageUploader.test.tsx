@@ -51,7 +51,7 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: { show: notificationShowMock },
 }));
 
@@ -158,10 +158,10 @@ describe('FeaturedImageUploader', () => {
 
     expect(setFeaturedImageActionMock).toHaveBeenCalledWith('post-1', 'post-file-id');
     expect(setFeaturedImageMock).toHaveBeenCalledWith('post-file-id', 'https://example.com/post-cover.jpg');
-    expect(notificationShowMock).toHaveBeenCalledWith({ message: 'updateFailed', color: 'red' });
+    expect(notificationShowMock).toHaveBeenCalledWith({ message: 'updateFailed', tone: 'danger' });
     expect(notificationShowMock).not.toHaveBeenCalledWith({
       message: 'featuredImageUpdated',
-      color: 'green',
+      tone: 'positive',
     });
   });
 
@@ -189,10 +189,10 @@ describe('FeaturedImageUploader', () => {
       await uploadPromise;
     });
 
-    expect(notificationShowMock).toHaveBeenCalledWith({ message: 'updateFailed', color: 'red' });
+    expect(notificationShowMock).toHaveBeenCalledWith({ message: 'updateFailed', tone: 'danger' });
     expect(notificationShowMock).not.toHaveBeenCalledWith({
       message: 'featuredImageUpdated',
-      color: 'green',
+      tone: 'positive',
     });
     expect(onOgGenerationRequested).not.toHaveBeenCalled();
   });

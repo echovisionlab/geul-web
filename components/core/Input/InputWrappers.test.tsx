@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { I18nProvider as DesignSystemProvider } from 'react-aria-components';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { MantineProvider, Stack } from '@mantine/core';
+import { LayoutStack as Stack } from '../Layout';
 import {
   Checkbox,
   ColorInput,
@@ -42,10 +43,30 @@ afterEach(() => {
 });
 
 function render(node: ReactNode) {
-  act(() => root.render(<MantineProvider>{node}</MantineProvider>));
+  act(() => root.render(<DesignSystemProvider>{node}</DesignSystemProvider>));
 }
 
 describe('Core input wrappers', () => {
+  it('names the password visibility command separately from the input', () => {
+    render(<PasswordInput aria-label="Account password" defaultValue="secret" />);
+    const toggle = host.querySelector<HTMLButtonElement>('button')!;
+    expect(toggle.getAttribute('aria-label')).toBe('Show password');
+    expect(toggle.textContent).toBe('');
+    expect(toggle.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
+    expect(toggle.querySelector('svg')).toHaveAttribute('focusable', 'false');
+    expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    act(() => toggle.focus());
+    act(() => toggle.click());
+    expect(toggle.getAttribute('aria-label')).toBe('Hide password');
+    expect(host.querySelector('input')?.getAttribute('aria-label')).toBe('Account password');
+    expect(host.querySelector('input')?.type).toBe('text');
+    expect(host.querySelector('input')?.value).toBe('secret');
+    expect(toggle.textContent).toBe('');
+    expect(toggle.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
+    expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    expect(toggle).toHaveFocus();
+  });
+
   it('forwards checkbox and switch semantics', () => {
     render(
       <Stack>
@@ -76,7 +97,7 @@ describe('Core input wrappers', () => {
 
     expect(inputValues).toContain('Example Studio');
     expect(inputValues).toContain('secret-value');
-    expect(inputValues).toContain('#228be6');
+    expect(inputValues.map((value) => value.toLowerCase())).toContain('#228be6');
     expect(document.querySelector('textarea')?.value).toBe('Field recording notes');
   });
 
@@ -117,6 +138,6 @@ describe('Core input wrappers', () => {
       ({ value }) => value === 'studio',
     );
     expect(nickname?.required).toBe(true);
-    expect(document.querySelector('.mantine-Loader-root')).not.toBeNull();
+    expect(document.querySelector('[aria-busy="true"]')).not.toBeNull();
   });
 });

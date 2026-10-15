@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ComponentProps } from 'react';
 import { create } from '@bufbuild/protobuf';
 import { Code, ConnectError } from '@connectrpc/connect';
@@ -12,7 +13,7 @@ import {
   type TranslationLocale,
 } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MantineProvider } from '@mantine/core';
+
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -59,11 +60,11 @@ vi.mock('@/lib/ai/document-client', () => ({
   mutateAIDocumentTargetTranslation: mocks.mutateTargetTranslation,
 }));
 
-vi.mock('@mantine/modals', () => ({
-  modals: { openConfirmModal: mocks.openConfirmModal },
+vi.mock('@/components/core/Modal/confirm-dialogs', () => ({
+  confirmDialogs: { open: mocks.openConfirmModal },
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: { show: mocks.notificationShow },
 }));
 
@@ -176,9 +177,9 @@ function renderPanel(options?: Partial<ComponentProps<typeof EntityTranslationsP
     root.render(
       <NextIntlClientProvider locale="ko" messages={koMessages}>
         <QueryClientProvider client={queryClient}>
-          <MantineProvider>
+          <DesignSystemProvider locale="ko" forceColorScheme="light">
             <EntityTranslationsPanel entityType="post" entityId="post-1" canManage collapsible={false} {...options} />
-          </MantineProvider>
+          </DesignSystemProvider>
         </QueryClientProvider>
       </NextIntlClientProvider>,
     );
@@ -236,7 +237,7 @@ describe('EntityTranslationsPanel API commands', () => {
       target: TARGET,
       locales: ['fr', 'ja'],
     });
-    expect(mocks.notificationShow).toHaveBeenCalledWith(expect.objectContaining({ color: 'blue' }));
+    expect(mocks.notificationShow).toHaveBeenCalledWith(expect.objectContaining({ tone: 'neutral' }));
   });
 
   it('flushes the Form save-registry key before regenerating translations', async () => {
@@ -257,7 +258,7 @@ describe('EntityTranslationsPanel API commands', () => {
     expect(mocks.persistNow).not.toHaveBeenCalled();
     expect(mocks.regenerateEntityTranslations).not.toHaveBeenCalled();
     expect(mocks.notificationShow).toHaveBeenCalledWith({
-      color: 'red',
+      tone: 'danger',
       message: koMessages.translationPanel.notifications.regenerateFailed,
     });
   });
@@ -272,8 +273,22 @@ describe('EntityTranslationsPanel API commands', () => {
     expect((document.getElementById('entity-translations-panel-regenerate-fr') as HTMLButtonElement).disabled).toBe(
       false,
     );
-    expect(document.getElementById('entity-translations-panel-regenerate-ja')?.textContent).toContain('생성');
+    expect(document.getElementById('entity-translations-panel-regenerate-ja')?.getAttribute('aria-label')).toContain(
+      '생성',
+    );
     expect(container.textContent).not.toContain('오래됨');
+    expect(container.querySelector('[data-testid="translation-locale-row-en"]')).toBeNull();
+    expect(container.querySelector('label[for]')?.textContent).toContain('원문 언어');
+    expect(container.querySelector('[data-testid="translation-locale-row-fr"]')?.textContent).not.toContain('기존');
+    expect(container.querySelector('[data-testid="translation-locale-row-fr"]')?.textContent).not.toMatch(/\bFR\b/);
+    expect(container.querySelector('[data-testid="translation-locale-row-ja"]')?.textContent).not.toMatch(/\bJA\b/);
+    expect([...container.querySelectorAll('option')].map((option) => option.textContent)).not.toContain('English (EN)');
+    expect(container.querySelector('[data-testid="translation-locale-row-fr"]')?.textContent).not.toContain(
+      '대상 문서가 아직 없습니다',
+    );
+    expect(container.querySelector('[data-testid="translation-locale-row-ja"]')?.textContent).toContain(
+      '대상 문서가 아직 없습니다',
+    );
     await click('entity-translations-panel-regenerate-fr');
     expect(mocks.regenerateEntityTranslations).toHaveBeenCalledWith({ target: TARGET, locales: ['fr'] });
   });
@@ -311,6 +326,8 @@ describe('EntityTranslationsPanel API commands', () => {
 
   it('opens an existing target locale editor route without mutating translation state', async () => {
     await renderReady({ canAdministerTranslations: false, canMutateTargets: false });
+    expect(container.querySelector<HTMLSelectElement>('select')?.disabled).toBe(true);
+    expect(container.querySelector<HTMLSelectElement>('select')?.value).toBe('en');
 
     await click('entity-translations-panel-preview-fr');
 
@@ -373,7 +390,7 @@ describe('EntityTranslationsPanel API commands', () => {
 
     expect(mocks.routerReplace).not.toHaveBeenCalled();
     expect(mocks.notificationShow).toHaveBeenCalledWith({
-      color: 'red',
+      tone: 'danger',
       message: koMessages.common.notifications.updateFailed,
     });
     expect(container.textContent).not.toContain('raw create detail');
@@ -390,7 +407,9 @@ describe('EntityTranslationsPanel API commands', () => {
 
     expect(mocks.openConfirmModal).toHaveBeenCalledTimes(1);
     const confirmation = mocks.openConfirmModal.mock.calls[0]?.[0];
-    const confirmationText = renderToStaticMarkup(<MantineProvider>{confirmation.children}</MantineProvider>);
+    const confirmationText = renderToStaticMarkup(
+      <DesignSystemProvider forceColorScheme="light">{confirmation.message}</DesignSystemProvider>,
+    );
     expect(confirmationText).toContain('원문 언어');
     await act(async () => confirmation.onConfirm());
     await settle();
@@ -424,7 +443,9 @@ describe('EntityTranslationsPanel API commands', () => {
       select.dispatchEvent(new Event('change', { bubbles: true }));
     });
     const confirmation = mocks.openConfirmModal.mock.calls[0]?.[0];
-    await act(async () => confirmation.onConfirm());
+    await act(async () => {
+      await expect(confirmation.onConfirm()).rejects.toThrow('Pending editor saves did not complete.');
+    });
     await settle();
 
     expect(mocks.flushEditorSaves).toHaveBeenCalledWith('post:post-1');
@@ -432,7 +453,7 @@ describe('EntityTranslationsPanel API commands', () => {
     expect(mocks.setEntitySourceLocale).not.toHaveBeenCalled();
     expect(mocks.routerReplace).not.toHaveBeenCalled();
     expect(mocks.notificationShow).toHaveBeenCalledWith({
-      color: 'red',
+      tone: 'danger',
       message: koMessages.translationPanel.notifications.sourceLocaleUpdateFailed,
     });
   });
@@ -444,11 +465,11 @@ describe('EntityTranslationsPanel API commands', () => {
     await renderReady();
 
     await click('entity-translations-panel-regenerate-fr');
-    expect(mocks.notificationShow).toHaveBeenCalledWith({ color: 'red', message: 'Forbidden' });
+    expect(mocks.notificationShow).toHaveBeenCalledWith({ tone: 'danger', message: 'Forbidden' });
 
     await click('entity-translations-panel-regenerate-fr');
     expect(mocks.notificationShow).toHaveBeenCalledWith({
-      color: 'red',
+      tone: 'danger',
       message: koMessages.translationPanel.notifications.regenerateFailed,
     });
     expect(container.textContent).not.toContain('secret upstream detail');

@@ -1,10 +1,10 @@
 'use client';
+import { SearchComboboxView, SearchInput, useInputCombobox } from '@/components/core/Input';
 
 import { useCallback, useState } from 'react';
-import { IconSearch } from '@tabler/icons-react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { useLocale, useTranslations } from 'next-intl';
-import { Combobox, InputBase, Loader, useCombobox } from '@mantine/core';
+import { Spinner as Loader } from '@/components/core/Display';
 import type { GooglePlaceSearchResult } from '@/lib/types/location/model';
 import { parseAddressComponents } from '@/lib/utils/address';
 
@@ -22,6 +22,7 @@ interface PlacesAutocompleteProps {
 
 export function PlacesAutocomplete({ onPlaceSelect, placeholder }: PlacesAutocompleteProps) {
   const locale = useLocale();
+  const tMap = useTranslations('searchCombobox');
   const tCommonPlaceholders = useTranslations('common.placeholders');
   const placesLib = useMapsLibrary('places');
 
@@ -29,9 +30,7 @@ export function PlacesAutocomplete({ onPlaceSelect, placeholder }: PlacesAutocom
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const combobox = useCombobox({
-    onDropdownClose: () => combobox.resetSelectedOption(),
-  });
+  const combobox = useInputCombobox();
 
   const searchPlaces = useCallback(
     async (input: string) => {
@@ -135,52 +134,38 @@ export function PlacesAutocomplete({ onPlaceSelect, placeholder }: PlacesAutocom
 
   if (!placesLib) {
     return (
-      <InputBase
-        leftSection={<IconSearch size={16} />}
+      <SearchInput
         placeholder={placeholder ?? tCommonPlaceholders('searchPlaces')}
         disabled
-        rightSection={<Loader size={16} />}
+        rightSection={<Loader size="xs" />}
       />
     );
   }
 
   return (
-    <Combobox store={combobox} onOptionSubmit={handleOptionSubmit}>
-      <Combobox.Target>
-        <InputBase
-          leftSection={<IconSearch size={16} />}
-          rightSection={loading ? <Loader size={16} /> : null}
-          placeholder={placeholder ?? tCommonPlaceholders('searchPlaces')}
-          value={value}
-          onChange={(e) => handleInputChange(e.currentTarget.value)}
-          onClick={() => {
-            if (suggestions.length > 0) {
-              combobox.openDropdown();
-            }
-          }}
-          onFocus={() => {
-            if (suggestions.length > 0) {
-              combobox.openDropdown();
-            }
-          }}
-          onBlur={() => combobox.closeDropdown()}
-        />
-      </Combobox.Target>
-
-      <Combobox.Dropdown hidden={suggestions.length === 0}>
-        <Combobox.Options>
-          {suggestions.map((suggestion) => (
-            <Combobox.Option key={suggestion.placeId} value={suggestion.placeId}>
-              <div>
-                <div style={{ fontWeight: 500 }}>{suggestion.mainText}</div>
-                <div style={{ fontSize: '0.85em', color: 'var(--mantine-color-dimmed)' }}>
-                  {suggestion.secondaryText}
-                </div>
-              </div>
-            </Combobox.Option>
-          ))}
-        </Combobox.Options>
-      </Combobox.Dropdown>
-    </Combobox>
+    <SearchComboboxView
+      combobox={combobox}
+      search={value}
+      onSearchChange={handleInputChange}
+      placeholder={placeholder ?? tCommonPlaceholders('searchPlaces')}
+      items={suggestions}
+      debouncedSearch={value}
+      minQueryLength={1}
+      isLoading={loading}
+      onSelect={(id) => {
+        void handleOptionSubmit(id);
+      }}
+      getItemId={(item) => item.placeId}
+      getItemText={(item) => [item.mainText, item.secondaryText].filter(Boolean).join(' ')}
+      renderItem={(item) => (
+        <div>
+          <strong>{item.mainText}</strong>
+          <div>{item.secondaryText}</div>
+        </div>
+      )}
+      minimumQueryMessage={tCommonPlaceholders('searchPlaces')}
+      noResultsMessage={tMap('noResults')}
+      leadingGlyph="search"
+    />
   );
 }

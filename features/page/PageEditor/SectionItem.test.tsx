@@ -1,15 +1,17 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import type { BlockSettingsSurfaceProps } from '../blocks/types';
 import type { SectionMeta } from './types';
 
 const pageEditorContext = vi.hoisted(() => ({
   updateLocalizedSectionProps: vi.fn(),
   updateSection: vi.fn(),
+  allowStructuralEdits: true,
 }));
 
 const mockRegistry = vi.hoisted(() => ({
@@ -45,6 +47,7 @@ vi.mock('@dnd-kit/sortable', () => ({
     attributes: {},
     listeners: {},
     setNodeRef: vi.fn(),
+    setActivatorNodeRef: vi.fn(),
     transform: null,
     transition: undefined,
     isDragging: false,
@@ -93,9 +96,9 @@ function renderSection(section: SectionMeta) {
 
   act(() => {
     root?.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <SectionItem section={section} onDelete={vi.fn()} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
 }
@@ -104,6 +107,7 @@ beforeEach(async () => {
   ({ SectionItem } = await import('./SectionItem'));
   pageEditorContext.updateLocalizedSectionProps.mockReset();
   pageEditorContext.updateSection.mockReset();
+  pageEditorContext.allowStructuralEdits = true;
   mockRegistry.getBlockDefinition.mockReturnValue({});
   mockRegistry.getBlockEditor.mockReturnValue(MockBlockEditor);
   container = null;
@@ -161,10 +165,8 @@ describe('SectionItem', () => {
 
     const toggle = container?.querySelector<HTMLButtonElement>('[data-page-section-toggle]');
     expect(toggle).toBeTruthy();
-
-    act(() => {
-      toggle?.click();
-    });
+    // Rich-text and columns bodies start expanded so the SSR-painted content stays visible.
+    expect(toggle?.getAttribute('aria-expanded')).toBe('true');
 
     const preview = container?.querySelector<HTMLElement>('[data-page-section-editor-preview]');
     expect(preview).toBeTruthy();
@@ -177,6 +179,35 @@ describe('SectionItem', () => {
     expect(preview?.style.marginLeft).toBe('auto');
     expect(preview?.style.marginRight).toBe('auto');
     expect(container?.querySelector('[data-testid="mock-block-editor"]')).toBeTruthy();
+  });
+
+  it('binds the sortable handle without enabling native browser dragging', () => {
+    renderSection({ id: 'section-handle', type: 'rich-text' });
+    const handle = container?.querySelector<HTMLButtonElement>('[data-page-section-drag-handle]');
+    expect(handle?.draggable).toBe(false);
+    expect(handle?.disabled).toBe(false);
+    expect(handle?.getAttribute('data-control-size')).toBe('compact');
+    const header = handle?.parentElement;
+    const controls = Array.from(header?.querySelectorAll('button') ?? []);
+    expect(controls[0]).toBe(handle);
+    expect(controls.at(-1)?.hasAttribute('data-page-section-toggle')).toBe(true);
+  });
+
+  it('disables structural actions while allowing section previews in translation mode', () => {
+    pageEditorContext.allowStructuralEdits = false;
+    renderSection({ id: 'section-translation', type: 'rich-text' });
+    expect(container?.querySelector<HTMLButtonElement>('[data-page-section-drag-handle]')?.disabled).toBe(true);
+    expect(container?.querySelector<HTMLButtonElement>('[aria-label^="sectionItem.actions.delete"]')?.disabled).toBe(
+      true,
+    );
+    expect(container?.querySelector('[data-page-section-settings]')).toBeFalsy();
+    const toggle = container?.querySelector<HTMLButtonElement>('[data-page-section-toggle]');
+    expect(toggle?.disabled).toBe(false);
+    // The rich-text preview starts expanded; collapsing it stays available in translation mode.
+    expect(container?.querySelector('[data-testid="mock-block-editor"]')).toBeTruthy();
+    act(() => toggle?.click());
+    expect(container?.querySelector('[data-testid="mock-block-editor"]')).toBeFalsy();
+    expect(pageEditorContext.updateSection).not.toHaveBeenCalled();
   });
 
   it('opens a block-specific settings workspace when one is registered', () => {

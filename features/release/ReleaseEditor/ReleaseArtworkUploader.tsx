@@ -1,10 +1,12 @@
 'use client';
+import { useReleaseEditorCanEdit } from './ReleaseEditorAccessContext';
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { deleteReleaseArtworkAction, setReleaseArtworkAction } from '@/lib/actions/release';
+import { getUntrackedConfigurationWriteOrigin } from '@/lib/editor/editor-write-origin';
 import { useUpload } from '@/lib/hooks/useUpload';
 import { UploadType } from '@/lib/types/upload/model';
 import { createClientLogger } from '@/lib/utils/client-logger';
@@ -24,16 +26,20 @@ export function ReleaseArtworkUploader({
   inputId,
   onArtworkChange,
 }: ReleaseArtworkUploaderProps) {
+  const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.artwork');
   const [uploadProgress, setUploadProgress] = useState(0);
 
   const { upload, isUploading } = useUpload(UploadType.RELEASE_ARTWORK);
   const setArtwork = useMutation({
-    mutationFn: (fileId: string) => setReleaseArtworkAction(releaseId, fileId),
+    mutationFn: (fileId: string) => {
+      const editorOrigin = getUntrackedConfigurationWriteOrigin(`release:${releaseId}`);
+      return setReleaseArtworkAction(releaseId, fileId, editorOrigin);
+    },
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       if (result.url) {
@@ -41,27 +47,33 @@ export function ReleaseArtworkUploader({
       }
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: t('label') }),
-        color: 'green',
+        tone: 'positive',
       });
     },
   });
 
   const removeArtwork = useMutation({
-    mutationFn: () => deleteReleaseArtworkAction(releaseId),
+    mutationFn: () => {
+      const editorOrigin = getUntrackedConfigurationWriteOrigin(`release:${releaseId}`);
+      return deleteReleaseArtworkAction(releaseId, editorOrigin);
+    },
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       onArtworkChange(null);
       notifications.show({
         message: tCommon('messages.itemRemoved', { item: t('label') }),
-        color: 'yellow',
+        tone: 'positive',
       });
     },
   });
 
   const handleUpload = async (croppedBlob: Blob) => {
+    if (!canEdit) {
+      return;
+    }
     setUploadProgress(0);
 
     try {
@@ -78,7 +90,7 @@ export function ReleaseArtworkUploader({
       });
       notifications.show({
         message: error instanceof Error ? error.message : tCommon('messages.uploadImageFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     } finally {
       setUploadProgress(0);
@@ -86,6 +98,9 @@ export function ReleaseArtworkUploader({
   };
 
   const handleRemove = () => {
+    if (!canEdit) {
+      return;
+    }
     removeArtwork.mutate();
   };
 

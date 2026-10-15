@@ -8,19 +8,11 @@ import {
   type CountryCode,
   type PhoneNumber as LibPhoneNumber,
 } from 'libphonenumber-js';
-import { z } from 'zod';
+import { phoneNumberDataFromUnknown, phoneNumberDataSchema, type PhoneNumberData } from './phone-number-data';
+import * as z from '@/lib/zod-mini';
 import { toCountryCode } from './schema';
 
-// =============================================================================
-// Zod Schema
-// =============================================================================
-
-export const phoneNumberDataSchema = z.object({
-  phone: z.string(),
-  countryCode: z.string(),
-});
-
-export type PhoneNumberData = z.infer<typeof phoneNumberDataSchema>;
+export { phoneNumberDataSchema, type PhoneNumberData };
 
 // =============================================================================
 // PhoneNumber Class
@@ -101,21 +93,24 @@ export class PhoneNumber implements PhoneNumberData {
       return value;
     }
 
-    const result = phoneNumberDataSchema.safeParse(value);
-    if (result.success) {
-      return new PhoneNumber(result.data.phone, result.data.countryCode);
-    }
-
-    if (typeof value === 'string') {
-      return new PhoneNumber(value, defaultCountry);
-    }
-
-    return new PhoneNumber('', defaultCountry);
+    const data = phoneNumberDataFromUnknown(value, defaultCountry);
+    return new PhoneNumber(data.phone, data.countryCode);
   }
 
   // =============================================================================
   // Zod Schema with Transform
   // =============================================================================
 
-  static schema = phoneNumberDataSchema.transform((data) => PhoneNumber.fromJSON(data));
+  static schema = z.pipe(
+    phoneNumberDataSchema,
+    z.transform((data: PhoneNumberData) => PhoneNumber.fromJSON(data)),
+  );
+}
+
+/**
+ * Extract PhoneNumber from unknown value. Loads `libphonenumber-js`; form code that only needs the
+ * value shape or an empty check uses `phone-number-data.ts`.
+ */
+export function extractPhoneValue(v: unknown, defaultCountry: string = 'US'): PhoneNumber {
+  return PhoneNumber.fromUnknown(v, defaultCountry);
 }

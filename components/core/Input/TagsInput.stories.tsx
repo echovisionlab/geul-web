@@ -9,7 +9,6 @@ const meta = {
   args: {
     label: 'Keywords',
     placeholder: 'Add a keyword',
-    w: 420,
   },
 } satisfies Meta<typeof TagsInput>;
 

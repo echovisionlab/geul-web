@@ -1,21 +1,8 @@
-import { forwardRef, type ComponentPropsWithoutRef } from 'react';
+import { useArgs } from 'storybook/preview-api';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { IconActivity, IconLayoutDashboard, IconSettings, IconUser, IconUsers, IconWorld } from '@tabler/icons-react';
 import { SideNavigation, type SideNavigationSection } from './SideNavigation';
-
-const StoryLink = forwardRef<HTMLAnchorElement, ComponentPropsWithoutRef<'a'>>(({ href, onClick, ...props }, ref) => (
-  <a
-    ref={ref}
-    {...props}
-    href={href}
-    onClick={(event) => {
-      event.preventDefault();
-      onClick?.(event);
-    }}
-  />
-));
-StoryLink.displayName = 'StoryLink';
 
 const sections: readonly SideNavigationSection[] = [
   {
@@ -23,7 +10,7 @@ const sections: readonly SideNavigationSection[] = [
     items: [
       {
         key: 'dashboard',
-        href: '/admin',
+        href: '#preview-admin',
         label: 'Dashboard',
         icon: <IconLayoutDashboard aria-hidden />,
         active: true,
@@ -37,13 +24,13 @@ const sections: readonly SideNavigationSection[] = [
     items: [
       {
         key: 'activity',
-        href: '/admin/activity',
+        href: '#preview-admin/activity',
         label: 'Activity',
         icon: <IconActivity aria-hidden />,
       },
       {
         key: 'site',
-        href: '/admin/site',
+        href: '#preview-admin/site',
         label: 'Site',
         icon: <IconWorld aria-hidden />,
       },
@@ -56,19 +43,19 @@ const sections: readonly SideNavigationSection[] = [
     items: [
       {
         key: 'users',
-        href: '/admin/users',
+        href: '#preview-admin/users',
         label: 'Users',
         icon: <IconUsers aria-hidden />,
       },
       {
         key: 'profile',
-        href: '/admin/profile',
+        href: '#preview-admin/profile',
         label: 'Profile',
         icon: <IconUser aria-hidden />,
       },
       {
         key: 'settings',
-        href: '/admin/settings',
+        href: '#preview-admin/settings',
         label: 'Settings',
         icon: <IconSettings aria-hidden />,
       },
@@ -87,9 +74,25 @@ function withActiveItem(itemKey: string, source = sections): readonly SideNaviga
 }
 
 const meta = {
-  title: 'Core/SideNavigation',
+  title: 'Core/Navigation/SideNavigation',
   component: SideNavigation,
   tags: ['side-navigation'],
+  render: function NavigationPreview(args) {
+    const [, updateArgs] = useArgs();
+    return (
+      <SideNavigation
+        {...args}
+        onToggleSection={(key) =>
+          updateArgs({
+            openSectionKeys: args.openSectionKeys.includes(key)
+              ? args.openSectionKeys.filter((item) => item !== key)
+              : [...args.openSectionKeys, key],
+          })
+        }
+        onSelectItem={(item) => updateArgs({ sections: withActiveItem(item.key, args.sections) })}
+      />
+    );
+  },
   parameters: {
     layout: 'centered',
   },
@@ -100,8 +103,8 @@ const meta = {
           width: args.mode === 'compact' ? 40 : 280,
           maxWidth: 'calc(100vw - 32px)',
           minHeight: 360,
-          border: '1px solid var(--mantine-color-default-border)',
-          background: 'var(--mantine-color-body)',
+          border: '1px solid var(--geul-border-default)',
+          background: 'var(--geul-background)',
         }}
       >
         <Story />
@@ -113,7 +116,6 @@ const meta = {
     sections,
     mode: 'expanded',
     openSectionKeys: ['workspace', 'management'],
-    linkComponent: StoryLink,
     onToggleSection: () => {},
     onSelectItem: () => {},
   },
@@ -151,14 +153,14 @@ const longLabelSections: readonly SideNavigationSection[] = [
     items: [
       {
         key: 'international-publication-settings',
-        href: '/admin/publishing/international-settings',
+        href: '#preview-admin/publishing/international-settings',
         label: 'International publication settings with an intentionally long label',
         icon: <IconWorld aria-hidden />,
         active: true,
       },
       {
         key: 'collaborator-permissions',
-        href: '/admin/publishing/collaborator-permissions',
+        href: '#preview-admin/publishing/collaborator-permissions',
         label: 'Collaborator permission management',
         icon: <IconUsers aria-hidden />,
       },

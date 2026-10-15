@@ -36,6 +36,10 @@ describe('media DOM builders', () => {
     expect(dom.querySelector('.audio-block__title')?.textContent).toBe('Birdsong');
     expect(dom.getAttribute('data-media-name')).toBe('Birdsong');
     expect(dom.querySelector('.media-block__caption')?.textContent).toBe('Dawn chorus recording');
+    expect(dom.querySelector('.media-block__caption')?.getAttribute('data-size')).toBe('xs');
+    expect(dom.querySelector('.media-block__caption')?.getAttribute('data-tone')).toBe('muted');
+    expect(dom.querySelector('.media-block__caption')?.getAttribute('style')).toBeNull();
+    expect(dom.querySelector('.audio-block__title')?.getAttribute('data-weight')).toBe('strong');
   });
 
   it('builds video markup with poster and hls attrs', () => {

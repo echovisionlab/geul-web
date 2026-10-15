@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { VideoPlayer } from './VideoPlayer';
 
 const { mockMountVideoJsPlayer, mockDisposeVideoJsPlayer } = vi.hoisted(() => ({
@@ -201,7 +202,7 @@ describe('VideoPlayer', () => {
 
     await act(async () => {
       root!.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <NextIntlClientProvider locale="en" messages={messages}>
             <VideoPlayer
               hlsSrc="https://cdn.example.com/master-1.m3u8"
@@ -209,7 +210,7 @@ describe('VideoPlayer', () => {
               poster="https://cdn.example.com/thumb-1.webp"
             />
           </NextIntlClientProvider>
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)));
     });
@@ -219,7 +220,7 @@ describe('VideoPlayer', () => {
 
     await act(async () => {
       root!.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <NextIntlClientProvider locale="en" messages={messages}>
             <VideoPlayer
               hlsSrc="https://cdn.example.com/master-2.m3u8"
@@ -227,7 +228,7 @@ describe('VideoPlayer', () => {
               poster="https://cdn.example.com/thumb-2.webp"
             />
           </NextIntlClientProvider>
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)));
     });
@@ -244,7 +245,7 @@ describe('VideoPlayer', () => {
 
     await act(async () => {
       root!.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <NextIntlClientProvider locale="en" messages={messages}>
             <VideoPlayer
               hlsSrc="https://cdn.example.com/master.m3u8"
@@ -252,7 +253,7 @@ describe('VideoPlayer', () => {
               poster="https://cdn.example.com/thumb.webp"
             />
           </NextIntlClientProvider>
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)));
     });
@@ -262,7 +263,7 @@ describe('VideoPlayer', () => {
 
     await act(async () => {
       root!.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <NextIntlClientProvider locale="en" messages={messages}>
             <VideoPlayer
               hlsSrc="https://cdn.example.com/master.m3u8"
@@ -270,7 +271,7 @@ describe('VideoPlayer', () => {
               poster="https://cdn.example.com/thumb.webp"
             />
           </NextIntlClientProvider>
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await Promise.resolve();
     });
@@ -305,7 +306,7 @@ describe('VideoPlayer', () => {
 
     await act(async () => {
       root!.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <NextIntlClientProvider locale="en" messages={messages}>
             <VideoPlayer
               src="https://cdn.example.com/original.mp4"
@@ -316,7 +317,7 @@ describe('VideoPlayer', () => {
               }
             />
           </NextIntlClientProvider>
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)));
     });
@@ -333,11 +334,11 @@ describe('VideoPlayer', () => {
     }
     await act(async () => {
       root!.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <NextIntlClientProvider locale="en" messages={messages}>
             <VideoPlayer {...props} />
           </NextIntlClientProvider>
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
   }
@@ -391,9 +392,11 @@ describe('VideoPlayer', () => {
 
   it('keeps native playback on import failure and retries on a later source', async () => {
     mockLoadVideoJsRuntime.mockRejectedValueOnce(new Error('chunk unavailable'));
-    await renderPlayer({ hlsSrc: '/master.m3u8', src: '/original.mp4' });
+    await renderPlayer({ hlsSrc: '/master.m3u8', src: '/original.mp4', name: 'session.mp4' });
     expect(host?.querySelector('video')?.getAttribute('src')).toBe('/original.mp4');
     expect(host?.querySelector('video')?.controls).toBe(true);
+    expect(host?.querySelector('video')?.getAttribute('aria-label')).toBe('session.mp4');
+    expect(host?.querySelector('[role="group"]')?.getAttribute('aria-label')).toBe('session.mp4');
     await renderPlayer({ src: '/next.mp4' });
     expect(mockMountVideoJsPlayer).toHaveBeenCalledTimes(1);
   });

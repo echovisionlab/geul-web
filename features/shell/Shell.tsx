@@ -1,215 +1,111 @@
-'use client';
-
-import { type ReactNode, useEffect } from 'react';
-import Link from '@/components/core/Navigation';
-import { usePathname, useSearchParams } from 'next/navigation';
+import type { ReactNode } from 'react';
+import { getTranslations } from 'next-intl/server';
 import type { MenuItem } from '@echovisionlab/geul-proto/public/manifest_pb.ts';
-import { useTranslations } from 'next-intl';
-import { useComputedColorScheme, useMantineColorScheme } from '@mantine/core';
-import { useDisclosure, useMounted, useOs } from '@mantine/hooks';
-import { openPostSpotlight } from '@/features/post/PostSpotlight/post-spotlight-trigger';
 import { PrintHeader } from '@/features/shell/PrintHeader';
 import { SiteLogo } from '@/features/site/SiteLogo';
-import { signOut, useSession } from '@/lib/auth/client';
-import { buildLoginRedirectHref } from '@/lib/auth/login-page';
+import { ServerSocialLinksDisplay } from '@/features/social-links/ServerSocialLinksDisplay';
 import type { UserDisplaySnapshot } from '@/lib/auth/user-display-cookie';
-import { useMenus, useSiteSettings, useSiteSocialLinks } from '@/lib/contexts/ManifestContext';
-import { COOKIE_CONSENT_OPEN_EVENT } from '@/lib/cookie-consent';
+import { getManifest } from '@/lib/queries/manifest';
 import { APP_VERSION_LABEL } from '@/lib/site-version';
-import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
-import { isMenuUrlActive, resolveMenuUrl } from '@/lib/utils/menu';
+import { DEFAULT_SITE_SETTINGS_VIEW } from '@/lib/types/site-setting/config';
+import { resolveMenuUrl } from '@/lib/utils/menu';
+import { getRequestLocaleContext } from '@/lib/utils/language.server';
 import { LanguageMenu } from './LanguageMenu';
-import { ShellView, type ShellViewNavigationItem, type ShellViewUser } from './ui/Shell';
+import { ShellRuntime } from './ShellRuntime';
+import { ShellLayout } from './ui/Shell/ShellLayout';
+import type { ShellViewNavigationItem } from './ui/Shell/shell-types';
 
 interface ShellProps {
   children: ReactNode;
-  initialMenus?: {
-    header?: MenuItem[];
-    secondary?: MenuItem[];
-    footer?: MenuItem[];
-  };
   initialUserSnapshot?: UserDisplaySnapshot | null;
 }
 
-function toNavigationItem(item: MenuItem, pathname: string): ShellViewNavigationItem {
-  const href = resolveMenuUrl(item);
-
+/** Current-route state is derived on the client (`ShellRuntime`), so the server leaves it unset. */
+function toNavigationItem(item: MenuItem): ShellViewNavigationItem {
   return {
     id: item.id,
     label: item.label,
-    href,
-    active: isMenuUrlActive(pathname, href),
+    href: resolveMenuUrl(item),
+    active: false,
     openInNewTab: item.openInNewTab ?? false,
-    children: (item.children ?? []).map((child) => toNavigationItem(child, pathname)),
+    children: (item.children ?? []).map(toNavigationItem),
   };
 }
 
-function buildShellUser(
-  sessionUser: {
-    nickname: string;
-    email: string | null;
-    image: string | null | undefined;
-  } | null,
-  sessionPending: boolean,
-  initialUserSnapshot: UserDisplaySnapshot | null | undefined,
-): ShellViewUser | null {
-  const user = sessionUser
-    ? {
-        kind: 'authenticated' as const,
-        name: sessionUser.nickname,
-        email: sessionUser.email,
-        image: sessionUser.image,
-      }
-    : sessionPending && initialUserSnapshot
-      ? {
-          kind: 'snapshot' as const,
-          name: initialUserSnapshot.name,
-          email: null,
-          image: initialUserSnapshot.image,
-        }
-      : null;
-
-  if (!user) {
-    return null;
-  }
-
-  return {
-    kind: user.kind,
-    name: user.name,
-    email: user.email,
-    imageUrls: {
-      compact: buildManagedImageUrl(user.image, MANAGED_IMAGE_PRESET.AVATAR_XS) ?? null,
-      mobile: buildManagedImageUrl(user.image, MANAGED_IMAGE_PRESET.AVATAR_SM) ?? null,
-      detail: buildManagedImageUrl(user.image, MANAGED_IMAGE_PRESET.AVATAR_MD) ?? null,
-    },
-  };
-}
-
-export function Shell({ children, initialMenus, initialUserSnapshot }: ShellProps) {
-  const tShell = useTranslations('shell');
-  const tCommon = useTranslations('common');
-  const tCommonActions = useTranslations('common.actions');
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [navigationOpened, { toggle: toggleNavigation, close: closeNavigation }] = useDisclosure();
-  const [userMenuOpened, { open: openUserMenu, close: closeUserMenu }] = useDisclosure();
-  const { toggleColorScheme } = useMantineColorScheme();
-  const computedColorScheme = useComputedColorScheme('light', { getInitialValueInEffect: false });
-  const mounted = useMounted();
-  const { data: session, isPending: isSessionPending } = useSession();
-  const os = useOs();
-  const modKey = os === 'macos' ? 'Cmd' : 'Ctrl';
-  const { settings } = useSiteSettings();
-  const menus = useMenus();
-  const socialLinks = useSiteSocialLinks();
-
-  const user = buildShellUser(
-    session?.onboarded ? session.user : null,
-    isSessionPending,
-    session?.onboarded === false ? null : initialUserSnapshot,
-  );
-  const headerItems = (initialMenus?.header ?? menus.header ?? []).map((item) =>
-    toNavigationItem(item as MenuItem, pathname),
-  );
-  const secondaryItems = (initialMenus?.secondary ?? menus.secondary ?? []).map((item) =>
-    toNavigationItem(item as MenuItem, pathname),
-  );
-  const footerItems = (initialMenus?.footer ?? menus.footer ?? []).map((item) =>
-    toNavigationItem(item as MenuItem, pathname),
-  );
-  const accountItems = (menus.avatarDropdown as MenuItem[]).map((item) => toNavigationItem(item, pathname));
-  const canViewChangelog = session?.user.role === 'admin' || session?.user.role === 'author';
+/**
+ * Public site shell. Header, navigation and footer render on the server from the request's manifest
+ * and messages; `ShellRuntime` and the islands in `ShellIslands` hydrate the interactive parts.
+ * Menus are already filtered by user role on the backend.
+ */
+export async function Shell({ children, initialUserSnapshot }: ShellProps) {
+  const { locale } = await getRequestLocaleContext();
+  const [manifest, tShell, tCommon, tCommonActions] = await Promise.all([
+    getManifest({ requestedLocale: locale }),
+    getTranslations('shell'),
+    getTranslations('common'),
+    getTranslations('common.actions'),
+  ]);
+  const settings = { ...DEFAULT_SITE_SETTINGS_VIEW, ...manifest.settings };
+  const menus = manifest.menus;
   const companyName = settings.company_name || settings.site_title;
-  const queryString = searchParams?.toString();
-  const currentPath = queryString ? `${pathname}?${queryString}` : pathname;
-
-  useEffect(() => {
-    closeNavigation();
-  }, [pathname, closeNavigation]);
-
-  const handleSignOut = () => {
-    closeUserMenu();
-    signOut();
-  };
-
-  const handleNavigate = () => {
-    closeNavigation();
-    closeUserMenu();
-  };
-
-  const openCookieSettings = () => {
-    window.dispatchEvent(new Event(COOKIE_CONSENT_OPEN_EVENT));
-  };
-
-  const themeMode = mounted ? computedColorScheme : null;
-  const themeTooltip =
-    themeMode === 'dark'
-      ? tCommon('theme.lightMode')
-      : themeMode === 'light'
-        ? tCommon('theme.darkMode')
-        : tCommonActions('toggleColorScheme');
-
   return (
-    <ShellView
-      loginHref={buildLoginRedirectHref(currentPath)}
-      navigationOpened={navigationOpened}
-      userMenuOpened={userMenuOpened}
-      themeMode={themeMode}
-      user={user}
-      headerItems={headerItems}
-      secondaryItems={secondaryItems}
-      footerItems={footerItems}
-      accountItems={accountItems}
-      footer={{
-        siteTitle: settings.site_title,
-        description: settings.meta_description || null,
-        copyright: `© ${new Date().getFullYear()} ${companyName}`,
-        taxId: settings.tax_id || null,
-        companyAddress: settings.company_address || null,
-        version: APP_VERSION_LABEL,
-        showChangelog: canViewChangelog,
-      }}
+    <ShellRuntime
+      initialUserSnapshot={initialUserSnapshot}
       labels={{
-        navigation: settings.site_title,
-        toggleNavigation: tCommonActions('toggleNavigation'),
-        close: tCommonActions('close'),
-        search: tShell('actions.search'),
-        searchTooltip: tShell('actions.searchTooltip', { shortcut: `${modKey}+K` }),
-        signIn: tShell('actions.signIn'),
-        account: tCommon('labels.account'),
-        logOut: tCommonActions('logOut'),
+        searchTooltipMac: tShell('actions.searchTooltip', { shortcut: 'Cmd+K' }),
+        searchTooltipOther: tShell('actions.searchTooltip', { shortcut: 'Ctrl+K' }),
+        lightMode: tCommon('theme.lightMode'),
+        darkMode: tCommon('theme.darkMode'),
         toggleColorScheme: tCommonActions('toggleColorScheme'),
-        themeTooltip,
-        cookieSettings: tShell('actions.cookieSettings'),
-        changelog: 'Changelog',
-        newsletter: tCommon('labels.newsletter'),
-        footerSiteInfo: tShell('footer.siteInfo'),
-        footerLinks: tShell('footer.links'),
-        footerSocialMedia: tShell('footer.socialMedia'),
+        signOutUnsavedTitle: tShell('signOutUnsaved.title'),
+        signOutUnsavedMessage: tShell('signOutUnsaved.message'),
+        signOutUnsavedConfirm: tShell('signOutUnsaved.confirm'),
+        cancel: tCommonActions('cancel'),
+        close: tCommonActions('close'),
       }}
-      events={{
-        onToggleNavigation: toggleNavigation,
-        onOpenUserMenu: openUserMenu,
-        onCloseUserMenu: closeUserMenu,
-        onSearch: openPostSpotlight,
-        onToggleColorScheme: toggleColorScheme,
-        onSignOut: handleSignOut,
-        onOpenCookieSettings: openCookieSettings,
-        onNavigate: handleNavigate,
-      }}
-      slots={{
-        logo: <SiteLogo height={16} />,
-        printHeader: <PrintHeader />,
-        printWatermark: <SiteLogo height={24} />,
-        languageDesktop: <LanguageMenu />,
-        languageMobile: <LanguageMenu />,
-        languageFooterDesktop: <LanguageMenu variant="text" textSize="xs" />,
-        languageFooterMobile: <LanguageMenu variant="text" textSize="xs" />,
-        socialLinks,
-      }}
-      linkComponent={Link}
     >
-      {children}
-    </ShellView>
+      <ShellLayout
+        headerItems={(menus?.header ?? []).map(toNavigationItem)}
+        secondaryItems={(menus?.secondary ?? []).map(toNavigationItem)}
+        footerItems={(menus?.footer ?? []).map(toNavigationItem)}
+        accountItems={(menus?.avatarDropdown ?? []).map(toNavigationItem)}
+        footer={{
+          siteTitle: settings.site_title,
+          description: settings.meta_description || null,
+          copyright: `© ${new Date().getFullYear()} ${companyName}`,
+          taxId: settings.tax_id || null,
+          companyAddress: settings.company_address || null,
+          version: APP_VERSION_LABEL,
+        }}
+        labels={{
+          navigation: settings.site_title,
+          toggleNavigation: tCommonActions('toggleNavigation'),
+          close: tCommonActions('close'),
+          search: tShell('actions.search'),
+          signIn: tShell('actions.signIn'),
+          account: tCommon('labels.account'),
+          logOut: tCommonActions('logOut'),
+          toggleColorScheme: tCommonActions('toggleColorScheme'),
+          cookieSettings: tShell('actions.cookieSettings'),
+          changelog: 'Changelog',
+          newsletter: tCommon('labels.newsletter'),
+          footerSiteInfo: tShell('footer.siteInfo'),
+          footerLinks: tShell('footer.links'),
+          footerSocialMedia: tShell('footer.socialMedia'),
+        }}
+        slots={{
+          logo: <SiteLogo height={16} />,
+          printHeader: <PrintHeader />,
+          printWatermark: <SiteLogo height={24} />,
+          languageDesktop: <LanguageMenu />,
+          languageMobile: <LanguageMenu />,
+          languageFooterDesktop: <LanguageMenu variant="text" textSize="xs" />,
+          languageFooterMobile: <LanguageMenu variant="text" textSize="xs" />,
+          socialLinks: <ServerSocialLinksDisplay links={settings.social_links} gap="sm" />,
+        }}
+      >
+        {children}
+      </ShellLayout>
+    </ShellRuntime>
   );
 }

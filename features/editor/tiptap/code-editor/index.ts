@@ -12,4 +12,7 @@ export {
   isMonacoSourceEditorEvent,
   isMonacoSourceEditorTarget,
   MONACO_SOURCE_EDITOR_SELECTOR,
+  withMonacoSourceEditorEvents,
 } from './source-editor-boundary';
+
+export type { SourceEditorDensity, SourceEditorBehaviorOptions } from './source-editor-presentation';

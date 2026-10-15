@@ -1,6 +1,14 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+import type { FileBrowserViewOptions } from './ui/file-browser-view-settings';
 
-import { type MouseEvent, type ReactNode } from 'react';
+import { MetadataPair } from '@/components/core/PublicMetadata';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+import { useId, type MouseEvent } from 'react';
 import {
   IconDots,
   IconDownload,
@@ -8,32 +16,35 @@ import {
   IconFolder,
   IconFolderOpen,
   IconFolderPlus,
-  IconLink,
-  IconLinkOff,
   IconPencil,
   IconTrash,
   IconUpload,
 } from '@tabler/icons-react';
 import { MediaProcessingStatus } from '@echovisionlab/geul-proto/common/media_pb.ts';
 import { FileDerivativeType, FileUsageDomain } from '@echovisionlab/geul-proto/secure/file_pb.ts';
-import { Box, Center, Group, Image, Loader, Paper, Stack, Text } from '@mantine/core';
+import { SectionCard } from '@/components/core/Section';
+import { SelectionEmptyState, SelectionViewport, SelectionMarquee } from '@/components/core/SelectionSurface';
+import { NearEndLoader, Spinner as Loader, type NearEndLoaderLabels } from '@/components/core/Display';
 import { Button } from '@/components/core/Button';
 import { DateTime } from '@/features/date-time/DateTime';
-import { DataTableView, type DataTableViewColumn } from '@/components/core/DataTable';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
 import { IconButton } from '@/components/core/IconButton';
-import { ContentModal } from '@/components/core/Modal';
+import { ContentModal, DialogActions } from '@/components/core/Modal';
 import { Progress } from '@/components/core/Progress';
 import { TextButton } from '@/components/core/TextButton';
-import { FilePreview, FileTypeIcon } from '@/features/media/FilePreview';
+import { FilePreview } from '@/features/media/FilePreview';
 import { PageLoader } from '@/features/site/PageLoader';
 import classes from './FileManagerView.module.css';
 import type { FileManagerFileView, FileManagerItemView, FileManagerUsageItemView } from './model';
 import { FileBrowserGridView } from './ui/FileBrowserGridView';
+import { fileBrowserListPresentation, fileBrowserSizeLabel as formatFileSize } from './file-browser-presentation';
+import { fileBrowserContentInset } from './ui/file-browser-layout';
+import { FileBrowserListView } from './ui/FileBrowserListView';
 import { FileBrowserHeader } from './ui/FileBrowserHeader';
 import { FileBrowserStatusBar } from './ui/FileBrowserStatusBar';
 import { FileBrowserTooltip } from './ui/FileBrowserTooltip';
 import { useFileManagerSelection } from './useFileManagerSelection';
+import { EmptyState } from '@/components/core/EmptyState';
 
 type FileManagerFileRow = FileManagerFileView;
 type FileManagerRow = FileManagerItemView;
@@ -50,6 +61,7 @@ export interface FileManagerViewLabels {
   title: string;
   description: string;
   root: string;
+  back: string;
   search: string;
   allTypes: string;
   images: string;
@@ -77,7 +89,9 @@ export interface FileManagerViewLabels {
   cancel: string;
   gridView: string;
   listView: string;
+  viewMode: string;
   loadMore: string;
+  pagination: NearEndLoaderLabels;
   name: string;
   type: string;
   size: string;
@@ -118,11 +132,14 @@ export interface FileManagerViewProps {
   loading?: boolean;
   searching?: boolean;
   hasMoreItems?: boolean;
+  itemsNextPageKey?: string;
   itemsLoadingMore?: boolean;
+  itemsLoadMoreError?: string | null;
   query: string;
   mimeTypePrefix: string;
   sort: string;
   viewMode: FileManagerViewMode;
+  viewOptions?: FileBrowserViewOptions;
   selectedItemIds: string[];
   detailFile?: FileManagerFileRow | null;
   detailUsages?: FileManagerUsageView[];
@@ -154,16 +171,7 @@ export interface FileManagerViewProps {
   onConfirmMoveHere: () => void;
   onCancelMove: () => void;
   onLoadMoreDetailUsages: () => void;
-  onLoadMoreItems: () => void;
-}
-
-function formatFileSize(bytes: number) {
-  if (!Number.isFinite(bytes) || bytes <= 0) {
-    return '0 B';
-  }
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
-  return `${(bytes / 1024 ** index).toFixed(index === 0 ? 0 : 1)} ${units[index]}`;
+  onLoadMoreItems: () => Promise<void>;
 }
 
 function itemLocation(item: FileManagerRow, rootLabel: string): string {
@@ -202,52 +210,8 @@ function usageDisplayLabel(usage: FileManagerUsageView, labels: FileManagerViewL
   return `${domain} · ${target}${location ? ` · ${location}` : ''}`;
 }
 
-function AdminOnlyMenuItem({
-  labels,
-  children,
-  icon,
-  tone,
-}: {
-  labels: FileManagerViewLabels;
-  children: ReactNode;
-  icon: ReactNode;
-  tone?: 'danger';
-}) {
-  return (
-    <FileBrowserTooltip label={labels.adminOnly}>
-      <DropdownMenu.Item disabled icon={icon} tone={tone}>
-        {children}
-      </DropdownMenu.Item>
-    </FileBrowserTooltip>
-  );
-}
-
 function stopItemActivation(event: MouseEvent<HTMLElement>) {
   event.stopPropagation();
-}
-
-function ItemThumbnail({ item }: { item: FileManagerRow }) {
-  const content =
-    item.kind === 'folder' ? (
-      <Center className={classes.folderPreview}>
-        <IconFolder size={24} stroke={1.15} aria-hidden />
-      </Center>
-    ) : item.thumbnailUrl || (item.inlineUrl && item.mimeType.startsWith('image/')) ? (
-      <Image
-        className={classes.thumbnailImage}
-        src={item.thumbnailUrl ?? item.inlineUrl}
-        alt=""
-        fit="cover"
-        h="100%"
-        w="100%"
-      />
-    ) : (
-      <Center className={classes.filePreview}>
-        <FileTypeIcon file={item} size={20} />
-      </Center>
-    );
-
-  return <Box className={classes.listThumbnail}>{content}</Box>;
 }
 
 function ItemActions({ item, props }: { item: FileManagerRow; props: FileManagerViewProps }) {
@@ -270,7 +234,7 @@ function ItemActions({ item, props }: { item: FileManagerRow; props: FileManager
       </DropdownMenu.Target>
       <DropdownMenu.Dropdown onMouseDown={stopItemActivation} onClick={stopItemActivation}>
         {file?.downloadUrl ? (
-          <DropdownMenu.Item component="a" href={file.downloadUrl} icon={<IconDownload size={16} />}>
+          <DropdownMenu.Item href={file.downloadUrl} icon={<IconDownload size={16} />}>
             {labels.download}
           </DropdownMenu.Item>
         ) : null}
@@ -300,18 +264,18 @@ function ItemActions({ item, props }: { item: FileManagerRow; props: FileManager
           </>
         ) : (
           <>
-            <AdminOnlyMenuItem labels={labels} icon={<IconPencil size={16} />}>
+            <DropdownMenu.Item disabled title={labels.adminOnly} icon={<IconPencil size={16} />}>
               {labels.rename}
-            </AdminOnlyMenuItem>
+            </DropdownMenu.Item>
             {item.kind === 'folder' ? (
               <>
-                <AdminOnlyMenuItem labels={labels} icon={<IconFolder size={16} />}>
+                <DropdownMenu.Item disabled title={labels.adminOnly} icon={<IconFolder size={16} />}>
                   {labels.move}
-                </AdminOnlyMenuItem>
+                </DropdownMenu.Item>
                 <DropdownMenu.Divider />
-                <AdminOnlyMenuItem labels={labels} tone="danger" icon={<IconTrash size={16} />}>
+                <DropdownMenu.Item disabled title={labels.adminOnly} tone="danger" icon={<IconTrash size={16} />}>
                   {labels.delete}
-                </AdminOnlyMenuItem>
+                </DropdownMenu.Item>
               </>
             ) : null}
           </>
@@ -323,6 +287,7 @@ function ItemActions({ item, props }: { item: FileManagerRow; props: FileManager
 
 export function FileManagerView(props: FileManagerViewProps) {
   const { labels } = props;
+  const moveDescriptionId = useId();
   const currentLocation = props.path.map((item) => item.name).join(' / ');
   const selection = useFileManagerSelection({
     items: props.items,
@@ -352,117 +317,16 @@ export function FileManagerView(props: FileManagerViewProps) {
       props.onSortChange(`${field}:${direction}`);
     },
   });
-  const listColumns: DataTableViewColumn<FileManagerRow>[] = [
-    {
-      key: 'icon',
-      header: '',
-      width: 40,
-      minWidth: 40,
-      renderCell: (item) => <ItemThumbnail item={item} />,
-    },
-    {
-      key: 'name',
-      header: labels.name,
-      minWidth: 180,
-      sort: sortColumn('name', labels.name, 'asc'),
-      renderCell: (item) => (
-        <Text fw={500} size="sm" truncate title={itemDisplayName(item)}>
-          {itemDisplayName(item)}
-        </Text>
-      ),
-    },
-    ...(props.searching
-      ? [
-          {
-            key: 'location',
-            header: labels.location,
-            minWidth: 220,
-            renderCell: (item: FileManagerRow) => (
-              <Text size="xs" c="dimmed" truncate>
-                {itemLocation(item, labels.root)}
-              </Text>
-            ),
-          },
-        ]
-      : []),
-    {
-      key: 'type',
-      header: labels.type,
-      minWidth: 130,
-      renderCell: (item) => (
-        <Text size="xs" c="dimmed" truncate>
-          {item.kind === 'folder' ? labels.folderType : item.mimeType}
-        </Text>
-      ),
-    },
-    {
-      key: 'size',
-      header: labels.size,
-      width: 90,
-      minWidth: 90,
-      sort: sortColumn('size', labels.size, 'desc'),
-      renderCell: (item) => (
-        <Text size="xs" c="dimmed" ta="right" truncate>
-          {item.kind === 'folder' ? '—' : formatFileSize(item.fileSize)}
-        </Text>
-      ),
-    },
-    {
-      key: 'created',
-      header: labels.uploadedAt,
-      width: 110,
-      minWidth: 110,
-      sort: sortColumn('created', labels.uploadedAt, 'desc'),
-      renderCell: (item) => (
-        <Text size="xs" c="dimmed" truncate>
-          <DateTime value={item.createdAt} fallback="—" />
-        </Text>
-      ),
-    },
-    {
-      key: 'member',
-      header: labels.uploadedBy,
-      minWidth: 120,
-      renderCell: (item) => (
-        <Text size="xs" c="dimmed" truncate>
-          {itemMemberName(item, labels)}
-        </Text>
-      ),
-    },
-    {
-      key: 'usages',
-      header: labels.usageStatus,
-      width: 64,
-      minWidth: 64,
-      renderCell: (item) => {
-        if (item.kind === 'folder') {
-          return (
-            <Text size="xs" c="dimmed">
-              —
-            </Text>
-          );
-        }
-        const inUse = item.usageCount > 0;
-        const status = inUse ? labels.inUse : labels.notInUse;
-        return (
-          <FileBrowserTooltip label={status}>
-            <Box
-              component="span"
-              c={inUse ? 'blue' : 'dimmed'}
-              role="img"
-              aria-label={status}
-              className={classes.usageStatus}
-            >
-              {inUse ? <IconLink size={16} /> : <IconLinkOff size={16} />}
-            </Box>
-          </FileBrowserTooltip>
-        );
-      },
-    },
-  ];
 
   return (
-    <Stack gap="lg" data-file-manager-view data-view={props.viewMode}>
+    <DsLayoutStack
+      gap="sm"
+      data-file-manager-view
+      data-view={props.viewMode}
+      role="region"
+      aria-label={labels.title}
+      aria-busy={props.loading || props.itemsLoadingMore || props.mutationLoading || false}
+    >
       <FileBrowserHeader
         labels={labels}
         path={props.path}
@@ -470,6 +334,7 @@ export function FileManagerView(props: FileManagerViewProps) {
         mimeTypePrefix={props.mimeTypePrefix}
         sort={props.sort}
         viewMode={props.viewMode}
+        viewOptions={props.viewOptions}
         searching={props.searching}
         canManage={props.role === 'admin'}
         batchActionsDisabled={!onlyFilesSelected}
@@ -486,63 +351,73 @@ export function FileManagerView(props: FileManagerViewProps) {
       />
 
       {props.uploadPercentage != null ? (
-        <Stack gap={4}>
-          <Text size="sm">{labels.uploadProgress(props.uploadPercentage)}</Text>
-          <Progress value={props.uploadPercentage} />
-        </Stack>
+        <DsLayoutStack gap="xxs">
+          <SupportingText tone="primary">{labels.uploadProgress(props.uploadPercentage)}</SupportingText>
+          <Progress value={props.uploadPercentage} aria-label={labels.upload} />
+        </DsLayoutStack>
       ) : null}
-      {props.error ? <Text c="red">{props.error}</Text> : null}
+      {props.error ? (
+        <DsText size="sm" tone="danger" role="alert">
+          {props.error}
+        </DsText>
+      ) : null}
 
       {props.movePendingLabel ? (
-        <Paper withBorder radius={0} p="sm" data-file-move-mode>
-          <Group justify="space-between" align="center">
-            <Stack gap={2}>
-              <Text fw={600}>{props.movePendingLabel}</Text>
-              <Text size="sm" c="dimmed">
+        <SectionCard
+          padding="sm"
+          data-file-move-mode
+          role="group"
+          aria-label={labels.move}
+          aria-describedby={moveDescriptionId}
+        >
+          <DsLayoutInline justify="between" align="center">
+            <DsLayoutStack gap="xxs">
+              <DsText weight="strong">{props.movePendingLabel}</DsText>
+              <SupportingText id={moveDescriptionId} tone="secondary" role="status" aria-atomic="true">
                 {labels.chooseDestination} · {currentLocation}
-              </Text>
-            </Stack>
-            <Group>
+              </SupportingText>
+            </DsLayoutStack>
+            <DsLayoutInline>
               <Button tone="neutral" emphasis="low" onClick={props.onCancelMove} disabled={props.mutationLoading}>
                 {labels.cancel}
               </Button>
               <Button onClick={props.onConfirmMoveHere} loading={props.mutationLoading}>
                 {labels.moveHere}
               </Button>
-            </Group>
-          </Group>
-        </Paper>
+            </DsLayoutInline>
+          </DsLayoutInline>
+        </SectionCard>
       ) : null}
 
       {props.loading ? (
-        <Box pos="relative" mih={320}>
+        <div style={{ position: 'relative', minHeight: 320 }}>
           <PageLoader height={320} minHeight={320} />
-        </Box>
+        </div>
       ) : props.folderNotFound ? (
-        <Paper withBorder radius={0} mih={260} p="xl" data-file-folder-not-found>
-          <Center h="100%" mih={210}>
-            <Stack align="center" gap="sm">
-              <IconFolder size={48} stroke={1.1} aria-hidden />
-              <Text c="dimmed">{labels.folderNotFound}</Text>
-              <Button tone="neutral" emphasis="low" onClick={props.onReturnToRoot}>
-                {labels.returnToRoot}
-              </Button>
-            </Stack>
-          </Center>
-        </Paper>
+        <SectionCard padding="xl" data-file-folder-not-found>
+          <SelectionEmptyState>
+            <EmptyState
+              inset="none"
+              icon={IconFolder}
+              title={labels.folderNotFound}
+              action={
+                <Button tone="neutral" emphasis="low" onClick={props.onReturnToRoot}>
+                  {labels.returnToRoot}
+                </Button>
+              }
+            />
+          </SelectionEmptyState>
+        </SectionCard>
       ) : props.items.length === 0 ? (
-        <Paper withBorder radius={0} mih={260} p="xl">
-          <Center h="100%" mih={210}>
-            <Stack align="center" gap="sm">
-              <IconFolder size={56} stroke={1.1} aria-hidden />
-              <Text c="dimmed">{labels.empty}</Text>
-            </Stack>
-          </Center>
-        </Paper>
+        <SectionCard padding="xl">
+          <SelectionEmptyState>
+            <EmptyState inset="none" icon={IconFolder} title={labels.empty} />
+          </SelectionEmptyState>
+        </SectionCard>
       ) : (
-        <Box
+        <SelectionViewport
+          inset="none"
           ref={selection.surfaceRef}
-          className={classes.viewerSurface}
           data-file-viewer-surface
           onClick={selection.clearSurfaceSelection}
           onContextMenu={selection.openSurfaceContextMenu}
@@ -551,88 +426,107 @@ export function FileManagerView(props: FileManagerViewProps) {
           onPointerUp={selection.finishMarquee}
           onPointerCancel={selection.finishMarquee}
         >
-          {props.viewMode === 'grid' ? (
-            <FileBrowserGridView
-              items={gridItems}
-              selectedItemIds={props.selectedItemIds}
-              renderActions={(gridItem) => {
-                const item = itemById.get(gridItem.id);
-                return item ? <ItemActions item={item} props={props} /> : null;
-              }}
-              onItemClick={(event, gridItem, index) => {
-                const item = itemById.get(gridItem.id);
-                if (item) {
-                  selection.selectItem(event, item, index);
-                }
-              }}
-              onItemDoubleClick={(_event, gridItem) => {
-                const item = itemById.get(gridItem.id);
-                if (item) {
-                  selection.activateItem(item);
-                }
-              }}
-              onItemContextMenu={(event, gridItem, index) => {
-                const item = itemById.get(gridItem.id);
-                if (item) {
-                  selection.openItemContextMenu(event, item, index);
-                }
-              }}
-              onItemKeyDown={(event, gridItem, index) => {
-                const item = itemById.get(gridItem.id);
-                if (item) {
-                  selection.handleItemKeyDown(event, item, index);
-                }
-              }}
-            />
-          ) : (
-            <Box className={classes.listView} data-file-viewer-list>
-              <DataTableView
-                rows={props.items}
-                columns={listColumns}
-                getRowKey={(item) => item.id}
-                emptyMessage={labels.empty}
-                highlightOnHover
-                selection={{
-                  selectedRowKeys: props.selectedItemIds,
-                  onSelectedRowKeysChange: selection.changeTableSelection,
-                  getRowLabel: (item) => labels.selectItem(itemDisplayName(item)),
-                  selectAllRowsLabel: labels.selectAll,
+          <DsLayoutInset
+            inline={fileBrowserContentInset}
+            block={props.viewMode === 'grid' ? 'xs' : 'none'}
+            data-file-browser-content-inset
+          >
+            {props.viewMode === 'grid' ? (
+              <FileBrowserGridView
+                label={props.labels.title}
+                columns={props.viewOptions?.value.columns}
+                iconSize={props.viewOptions?.value.iconSize}
+                spacing={props.viewOptions?.value.spacing}
+                items={gridItems}
+                selectedItemIds={props.selectedItemIds}
+                renderActions={(gridItem) => {
+                  const item = itemById.get(gridItem.id);
+                  return item ? <ItemActions item={item} props={props} /> : null;
                 }}
-                rowInteraction={{
-                  isSelected: (item) => props.selectedItemIds.includes(item.id),
-                  onClick: (event, item, index) => selection.selectItem(event, item, index),
-                  onDoubleClick: (_event, item) => selection.activateItem(item),
-                  onContextMenu: (event, item, index) => selection.openItemContextMenu(event, item, index),
-                  onKeyDown: (event, item, index) => selection.handleItemKeyDown(event, item, index),
+                onItemClick={(event, gridItem, index) => {
+                  const item = itemById.get(gridItem.id);
+                  if (item) {
+                    selection.selectItem(event, item, index);
+                  }
+                }}
+                onItemDoubleClick={(_event, gridItem) => {
+                  const item = itemById.get(gridItem.id);
+                  if (item) {
+                    selection.activateItem(item);
+                  }
+                }}
+                onItemContextMenu={(event, gridItem, index) => {
+                  const item = itemById.get(gridItem.id);
+                  if (item) {
+                    selection.openItemContextMenu(event, item, index);
+                  }
+                }}
+                onItemKeyDown={(event, gridItem, index) => {
+                  const item = itemById.get(gridItem.id);
+                  if (item) {
+                    selection.handleItemKeyDown(event, item, index);
+                  }
                 }}
               />
-            </Box>
-          )}
-          {marqueeRect ? (
-            <Box
-              className={classes.marquee}
-              style={{
-                left: marqueeRect.left,
-                top: marqueeRect.top,
-                width: marqueeRect.width,
-                height: marqueeRect.height,
-              }}
-              aria-hidden
-            />
-          ) : null}
-        </Box>
+            ) : (
+              <div className={classes.listView} data-file-viewer-list>
+                <FileBrowserListView
+                  accessibleLabel={`${labels.title} · ${labels.listView}`}
+                  labels={labels}
+                  getPresentation={(item) =>
+                    fileBrowserListPresentation(
+                      item,
+                      itemDisplayName(item),
+                      labels.folderType,
+                      props.searching ? itemLocation(item, labels.root) : undefined,
+                    )
+                  }
+                  showLocation={props.searching}
+                  nameSort={sortColumn('name', labels.name, 'asc')}
+                  sizeSort={sortColumn('size', labels.size, 'desc')}
+                  rows={props.items}
+                  getRowKey={(item) => item.id}
+                  emptyMessage={labels.empty}
+                  highlightOnHover
+                  selection={{
+                    selectedRowKeys: props.selectedItemIds,
+                    onSelectedRowKeysChange: (ids) => selection.changeTableSelection(ids, false),
+                    onRowSelectionClick: (event, item, index) => {
+                      if (event.shiftKey) {
+                        selection.selectItem(event, item, index);
+                      } else {
+                        selection.anchorItem(item);
+                      }
+                    },
+                    getRowLabel: (item) => labels.selectItem(itemDisplayName(item)),
+                    selectAllRowsLabel: labels.selectAll,
+                  }}
+                  rowInteraction={{
+                    isSelected: (item) => props.selectedItemIds.includes(item.id),
+                    onClick: (event, item, index) => selection.selectItem(event, item, index),
+                    onDoubleClick: (_event, item) => selection.activateItem(item),
+                    onContextMenu: (event, item, index) => selection.openItemContextMenu(event, item, index),
+                    onKeyDown: (event, item, index) => selection.handleItemKeyDown(event, item, index),
+                  }}
+                />
+              </div>
+            )}
+          </DsLayoutInset>
+          {marqueeRect ? <SelectionMarquee rect={marqueeRect} /> : null}
+        </SelectionViewport>
       )}
 
-      {props.hasMoreItems ? (
-        <Button
-          tone="neutral"
-          emphasis="low"
-          loading={props.itemsLoadingMore}
-          onClick={props.onLoadMoreItems}
-          style={{ alignSelf: 'center' }}
-        >
-          {labels.loadMore}
-        </Button>
+      {props.searching && !props.loading ? (
+        <DsLayoutInset inline={fileBrowserContentInset} block="none">
+          <NearEndLoader
+            pageKey={props.hasMoreItems ? (props.itemsNextPageKey ?? null) : null}
+            resetKey={JSON.stringify([props.query.trim(), props.mimeTypePrefix, props.sort, props.path])}
+            loading={props.itemsLoadingMore}
+            error={props.itemsLoadMoreError}
+            labels={labels.pagination}
+            onLoad={props.onLoadMoreItems}
+          />
+        </DsLayoutInset>
       ) : null}
 
       <FileBrowserStatusBar
@@ -656,7 +550,7 @@ export function FileManagerView(props: FileManagerViewProps) {
           placement="bottom-start"
         >
           <DropdownMenu.Target>
-            <Box className={classes.contextTarget} style={{ left: contextMenu.x, top: contextMenu.y }} aria-hidden />
+            <div className={classes.contextTarget} style={{ left: contextMenu.x, top: contextMenu.y }} aria-hidden />
           </DropdownMenu.Target>
           <DropdownMenu.Dropdown>
             {contextItem ? (
@@ -669,7 +563,6 @@ export function FileManagerView(props: FileManagerViewProps) {
                 </DropdownMenu.Item>
                 {contextItem.kind === 'file' && contextItem.downloadUrl ? (
                   <DropdownMenu.Item
-                    component="a"
                     href={contextItem.downloadUrl}
                     icon={<IconDownload size={16} />}
                     onClick={() => selection.setContextMenu(null)}
@@ -690,9 +583,9 @@ export function FileManagerView(props: FileManagerViewProps) {
                     {labels.rename}
                   </DropdownMenu.Item>
                 ) : props.role === 'author' && selectedItems.length === 1 ? (
-                  <AdminOnlyMenuItem labels={labels} icon={<IconPencil size={16} />}>
+                  <DropdownMenu.Item disabled title={labels.adminOnly} icon={<IconPencil size={16} />}>
                     {labels.rename}
-                  </AdminOnlyMenuItem>
+                  </DropdownMenu.Item>
                 ) : null}
                 {props.role === 'admin' && onlyFilesSelected ? (
                   <>
@@ -742,13 +635,13 @@ export function FileManagerView(props: FileManagerViewProps) {
                   </>
                 ) : props.role === 'author' && (onlyFilesSelected || selectedItems.length === 1) ? (
                   <>
-                    <AdminOnlyMenuItem labels={labels} icon={<IconFolder size={16} />}>
+                    <DropdownMenu.Item disabled title={labels.adminOnly} icon={<IconFolder size={16} />}>
                       {labels.move}
-                    </AdminOnlyMenuItem>
+                    </DropdownMenu.Item>
                     <DropdownMenu.Divider />
-                    <AdminOnlyMenuItem labels={labels} tone="danger" icon={<IconTrash size={16} />}>
+                    <DropdownMenu.Item disabled title={labels.adminOnly} tone="danger" icon={<IconTrash size={16} />}>
                       {labels.delete}
-                    </AdminOnlyMenuItem>
+                    </DropdownMenu.Item>
                   </>
                 ) : null}
               </>
@@ -774,9 +667,9 @@ export function FileManagerView(props: FileManagerViewProps) {
                     {labels.newFolder}
                   </DropdownMenu.Item>
                 ) : (
-                  <AdminOnlyMenuItem labels={labels} icon={<IconFolderPlus size={16} />}>
+                  <DropdownMenu.Item disabled title={labels.adminOnly} icon={<IconFolderPlus size={16} />}>
                     {labels.newFolder}
-                  </AdminOnlyMenuItem>
+                  </DropdownMenu.Item>
                 )}
               </>
             )}
@@ -793,64 +686,61 @@ export function FileManagerView(props: FileManagerViewProps) {
         centered
       >
         {props.detailFile ? (
-          <Stack gap="lg">
-            <Box mih={160} style={{ display: 'grid', placeItems: 'center' }}>
+          <DsLayoutStack gap="lg">
+            <SelectionEmptyState>
               <FilePreview file={props.detailFile} />
-            </Box>
-            <Stack gap="xs">
-              <Text>
-                <strong>{labels.type}:</strong> {props.detailFile.mimeType}
-              </Text>
-              <Text>
-                <strong>{labels.size}:</strong> {formatFileSize(props.detailFile.fileSize)}
-              </Text>
-              <Text>
-                <strong>{labels.uploadedBy}:</strong> {itemMemberName(props.detailFile, labels)}
-              </Text>
-              <Text>
-                <strong>{labels.uploadedAt}:</strong> <DateTime value={props.detailFile.createdAt} fallback="—" />
-              </Text>
-            </Stack>
+            </SelectionEmptyState>
+            <DsLayoutStack gap="xs">
+              <MetadataPair label={`${labels.type}:`}>{props.detailFile.mimeType}</MetadataPair>
+              <MetadataPair label={`${labels.size}:`}>{formatFileSize(props.detailFile.fileSize)}</MetadataPair>
+              <MetadataPair label={`${labels.uploadedBy}:`}>{itemMemberName(props.detailFile, labels)}</MetadataPair>
+              <MetadataPair label={`${labels.uploadedAt}:`}>
+                <DateTime value={props.detailFile.createdAt} fallback="—" />
+              </MetadataPair>
+            </DsLayoutStack>
             {props.detailUsages && props.detailUsages.length > 0 ? (
-              <Stack gap="xs">
-                <Text fw={600}>{labels.usages}</Text>
+              <DsLayoutStack gap="xs">
+                <DsText weight="strong">{labels.usages}</DsText>
                 {props.detailUsages.map((usage, index) => (
-                  <Box key={`${usage.domain}-${usage.entityId}-${usage.slot}-${usage.blockId ?? ''}-${index}`}>
+                  <div key={`${usage.domain}-${usage.entityId}-${usage.slot}-${usage.blockId ?? ''}-${index}`}>
                     {usage.link ? (
                       <TextButton href={usage.link} appearance="accent" size="sm">
                         {usageDisplayLabel(usage, labels)}
                       </TextButton>
                     ) : (
-                      <Text size="sm">{usageDisplayLabel(usage, labels)}</Text>
+                      <DsText size="sm">{usageDisplayLabel(usage, labels)}</DsText>
                     )}
-                  </Box>
+                  </div>
                 ))}
                 {props.hasMoreDetailUsages ? (
-                  <Button
-                    tone="neutral"
-                    emphasis="low"
-                    onClick={props.onLoadMoreDetailUsages}
-                    loading={props.detailLoading}
-                  >
-                    {labels.loadMore}
-                  </Button>
+                  <DsLayoutInline justify="center" gap="none">
+                    <Button
+                      tone="neutral"
+                      emphasis="low"
+                      onClick={props.onLoadMoreDetailUsages}
+                      loading={props.detailLoading}
+                    >
+                      {labels.loadMore}
+                    </Button>
+                  </DsLayoutInline>
                 ) : null}
-              </Stack>
+              </DsLayoutStack>
             ) : props.detailLoading ? (
-              <Center py="md">
-                <Loader size="sm" aria-label={labels.usages} />
-              </Center>
+              <DsLayoutInset block="md">
+                <DsLayoutStack align="center" justify="center">
+                  <Loader size="sm" aria-label={labels.usages} />
+                </DsLayoutStack>
+              </DsLayoutInset>
             ) : (
-              <Stack gap={4}>
-                <Text fw={600}>{labels.usages}</Text>
-                <Text size="sm" c="dimmed">
+              <MetadataPair label={labels.usages} layout="stacked">
+                <SupportingText tone="secondary">
                   {props.detailFile.usageCount > 0 ? labels.inUse : labels.notInUse}
-                </Text>
-              </Stack>
+                </SupportingText>
+              </MetadataPair>
             )}
             {props.detailFile.generatedOutputs && props.detailFile.generatedOutputs.length > 0 ? (
-              <Stack gap="xs">
-                <Text fw={600}>{labels.generatedOutputs}</Text>
+              <DsLayoutStack gap="xs">
+                <DsText weight="strong">{labels.generatedOutputs}</DsText>
                 {props.detailFile.generatedOutputs.map((output) => {
                   const label = labels.generatedOutputTypes[output.type] ?? String(output.type);
                   const status = labels.processingStatuses[output.status] ?? String(output.status);
@@ -859,21 +749,23 @@ export function FileManagerView(props: FileManagerViewProps) {
                       {label} · {status}
                     </TextButton>
                   ) : (
-                    <Text key={output.id} size="sm">
+                    <DsText key={output.id} size="sm">
                       {label} · {status}
-                    </Text>
+                    </DsText>
                   );
                 })}
-              </Stack>
+              </DsLayoutStack>
             ) : null}
             {props.detailFile.downloadUrl ? (
-              <Button component="a" href={props.detailFile.downloadUrl} leftSection={<IconDownload size={18} />}>
-                {labels.download}
-              </Button>
+              <DialogActions>
+                <Button href={props.detailFile.downloadUrl} leftSection={<IconDownload size={18} />}>
+                  {labels.download}
+                </Button>
+              </DialogActions>
             ) : null}
-          </Stack>
+          </DsLayoutStack>
         ) : null}
       </ContentModal>
-    </Stack>
+    </DsLayoutStack>
   );
 }

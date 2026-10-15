@@ -3,7 +3,7 @@
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { ImageUploadCropController } from '@/features/upload/ImageUploadCropController';
 import { useImageAssetUpload } from '@/features/upload/useImageAssetUpload';
 import { removePageFeaturedImageAction, setPageFeaturedImageAction } from '@/lib/actions/page';
@@ -34,14 +34,14 @@ export function PageFeaturedImageUploader({
     mutationFn: (fileId: string) => setPageFeaturedImageAction(pageId, fileId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       onImageUrlChange(result.imageUrl ?? null);
       if (result.ogGenerationRunId) {
         onOgGenerationRequested?.(result.ogGenerationRunId);
       }
-      notifications.show({ message: tCommonNotifications('featuredImageUpdated'), color: 'green' });
+      notifications.show({ message: tCommonNotifications('featuredImageUpdated'), tone: 'positive' });
     },
   });
 
@@ -49,7 +49,7 @@ export function PageFeaturedImageUploader({
     mutationFn: () => removePageFeaturedImageAction(pageId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       onImageUrlChange(null);
@@ -58,7 +58,7 @@ export function PageFeaturedImageUploader({
       }
       notifications.show({
         message: tCommonNotifications('featuredImageRemoved'),
-        color: 'yellow',
+        tone: 'positive',
       });
     },
   });

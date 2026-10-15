@@ -1,22 +1,46 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutStack as DsLayoutStack,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
 
-import { useState } from 'react';
+import { SearchComboboxView, useInputCombobox } from '@/components/core/Input';
+
+import { useEffect, useId, useRef, useState } from 'react';
 import { IconUserPlus, IconX } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Avatar, Combobox, Group, InputBase, Loader, Modal, ScrollArea, Stack, Text, useCombobox } from '@mantine/core';
+
+import { Avatar, Spinner as Loader, ScrollArea } from '@/components/core/Display';
+import { ContentModal } from '@/components/core/Modal';
 import { useDebouncedValue } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { IconButton } from '@/components/core/IconButton';
 import { addSeriesManagerAction, removeSeriesManagerAction } from '@/lib/actions/series';
 import { listSeriesManagers, searchSeriesManagerCandidates } from '@/lib/queries/series-browser';
 import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
+
+export interface SeriesManagerBindings {
+  add: typeof addSeriesManagerAction;
+  remove: typeof removeSeriesManagerAction;
+  list: typeof listSeriesManagers;
+  search: typeof searchSeriesManagerCandidates;
+}
+const defaultBindings: SeriesManagerBindings = {
+  add: addSeriesManagerAction,
+  remove: removeSeriesManagerAction,
+  list: listSeriesManagers,
+  search: searchSeriesManagerCandidates,
+};
 
 interface SeriesManagersModalProps {
   seriesId: string;
   opened: boolean;
   onClose: () => void;
   canManageManagers: boolean;
+  bindings?: SeriesManagerBindings;
 }
 
 interface SeriesManager {
@@ -31,17 +55,25 @@ interface SearchMember {
   avatarUrl: string | null;
 }
 
-export function SeriesManagersModal({ seriesId, opened, onClose, canManageManagers }: SeriesManagersModalProps) {
+export function SeriesManagersModal({
+  seriesId,
+  opened,
+  onClose,
+  canManageManagers,
+  bindings = defaultBindings,
+}: SeriesManagersModalProps) {
+  const viewId = useId();
+  const pendingRemoval = useRef<string | null>(null);
+  const tModalActions = useTranslations('common.actions');
   const t = useTranslations('seriesMembers');
   const tActions = useTranslations('common.actions');
+  const tCommonStates = useTranslations('common.states');
   const tCommonMessages = useTranslations('common.messages');
   const tCommonPlaceholders = useTranslations('common.placeholders');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch] = useDebouncedValue(searchQuery, 300);
 
-  const combobox = useCombobox({
-    onDropdownClose: () => combobox.resetSelectedOption(),
-  });
+  const combobox = useInputCombobox();
 
   const queryClient = useQueryClient();
 
@@ -51,7 +83,7 @@ export function SeriesManagersModal({ seriesId, opened, onClose, canManageManage
     isLoading: managersLoading,
   } = useQuery<SeriesManager[]>({
     queryKey: ['series', seriesId, 'managers'],
-    queryFn: () => listSeriesManagers(seriesId),
+    queryFn: () => bindings.list(seriesId),
     enabled: opened,
     staleTime: 0,
     refetchOnMount: 'always',
@@ -60,141 +92,147 @@ export function SeriesManagersModal({ seriesId, opened, onClose, canManageManage
   const managerIds = managers.map((m) => m.memberId);
   const { data: searchResults = [], isFetching: searchFetching } = useQuery<SearchMember[]>({
     queryKey: ['series', seriesId, 'manager-search', debouncedSearch, managerIds],
-    queryFn: () => searchSeriesManagerCandidates(debouncedSearch, managerIds),
+    queryFn: () => bindings.search(debouncedSearch, managerIds),
     enabled: opened && canManageManagers && !managersError && debouncedSearch.length >= 2,
   });
 
   const addManager = useMutation({
-    mutationFn: (memberId: string) => addSeriesManagerAction(seriesId, memberId),
+    mutationFn: (memberId: string) => bindings.add(seriesId, memberId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: t('notifications.addFailed'), color: 'red' });
+        notifications.show({ message: t('notifications.addFailed'), tone: 'danger' });
         return;
       }
-      notifications.show({ message: t('notifications.added'), color: 'green' });
+      notifications.show({ message: t('notifications.added'), tone: 'positive' });
       void queryClient.invalidateQueries({ queryKey: ['series', seriesId, 'managers'] });
       setSearchQuery('');
       combobox.closeDropdown();
     },
     onError: () => {
-      notifications.show({ message: t('notifications.addFailed'), color: 'red' });
+      notifications.show({ message: t('notifications.addFailed'), tone: 'danger' });
     },
   });
 
   const removeManager = useMutation({
-    mutationFn: (memberId: string) => removeSeriesManagerAction(seriesId, memberId),
+    mutationFn: (memberId: string) => bindings.remove(seriesId, memberId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: t('notifications.removeFailed'), color: 'red' });
+        notifications.show({ message: t('notifications.removeFailed'), tone: 'danger' });
         return;
       }
-      notifications.show({ message: t('notifications.removed'), color: 'yellow' });
+      notifications.show({ message: t('notifications.removed'), tone: 'positive' });
       void queryClient.invalidateQueries({ queryKey: ['series', seriesId, 'managers'] });
     },
     onError: () => {
-      notifications.show({ message: t('notifications.removeFailed'), color: 'red' });
+      notifications.show({ message: t('notifications.removeFailed'), tone: 'danger' });
     },
   });
 
+  useEffect(() => {
+    const removedId = pendingRemoval.current;
+    if (removedId && !managers.some((manager) => manager.memberId === removedId)) {
+      pendingRemoval.current = null;
+      document.getElementById(`${viewId}-search`)?.focus();
+    }
+  }, [managers, viewId]);
+
   const renderManagerRow = (manager: SeriesManager) => (
-    <Group key={manager.memberId} justify="space-between">
-      <Group gap="sm">
-        <Avatar src={buildManagedImageUrl(manager.avatarUrl, MANAGED_IMAGE_PRESET.AVATAR_SM)} size="sm" radius="xl">
-          {manager.nickname.charAt(0).toUpperCase()}
-        </Avatar>
+    <DsLayoutInline key={manager.memberId} role="listitem" justify="between">
+      <DsLayoutInline gap="sm">
+        <Avatar
+          src={buildManagedImageUrl(manager.avatarUrl, MANAGED_IMAGE_PRESET.AVATAR_SM)}
+          size="sm"
+          shape="circle"
+          name={manager.nickname}
+        />
         <div>
-          <Text size="sm">{manager.nickname}</Text>
+          <DsText id={`${viewId}-manager-${manager.memberId}`} size="sm">
+            {manager.nickname}
+          </DsText>
         </div>
-      </Group>
+      </DsLayoutInline>
       {canManageManagers && (
         <IconButton
           tone="danger"
           emphasis="low"
           size="sm"
           aria-label={tActions('remove')}
-          onClick={() => removeManager.mutate(manager.memberId)}
+          aria-describedby={`${viewId}-manager-${manager.memberId}`}
+          onClick={() => {
+            pendingRemoval.current = manager.memberId;
+            removeManager.mutate(manager.memberId);
+          }}
           loading={removeManager.isPending}
         >
           <IconX size={14} />
         </IconButton>
       )}
-    </Group>
+    </DsLayoutInline>
   );
 
   return (
-    <Modal
+    <ContentModal
       opened={opened}
       onClose={onClose}
       title={t('title', { count: managersError ? '—' : managers.length })}
-      size="md"
+      size="standard"
+      closeLabel={tModalActions('close')}
     >
       {canManageManagers && !managersError && (
-        <Stack gap="xs" mb="md">
-          <Combobox store={combobox} onOptionSubmit={(memberId) => addManager.mutate(memberId)}>
-            <Combobox.Target>
-              <InputBase
-                placeholder={tCommonPlaceholders('searchByName')}
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.currentTarget.value);
-                  combobox.openDropdown();
-                }}
-                onFocus={() => {
-                  if (searchQuery.length >= 2) {
-                    combobox.openDropdown();
-                  }
-                }}
-                rightSection={searchFetching ? <Loader size={16} /> : null}
-                leftSection={<IconUserPlus size={16} />}
-              />
-            </Combobox.Target>
-            <Combobox.Dropdown>
-              <Combobox.Options>
-                {searchResults.length === 0 ? (
-                  <Combobox.Empty>
-                    {debouncedSearch.length < 2
-                      ? tCommonMessages('typeAtLeast2Characters')
-                      : tCommonMessages('noUsersFound')}
-                  </Combobox.Empty>
-                ) : (
-                  searchResults.map((member) => (
-                    <Combobox.Option key={member.id} value={member.id}>
-                      <Group gap="sm">
-                        <Avatar
-                          src={buildManagedImageUrl(member.avatarUrl, MANAGED_IMAGE_PRESET.AVATAR_SM)}
-                          size="sm"
-                          radius="xl"
-                        >
-                          {member.nickname.charAt(0).toUpperCase()}
-                        </Avatar>
-                        <div>
-                          <Text size="sm">{member.nickname}</Text>
-                        </div>
-                      </Group>
-                    </Combobox.Option>
-                  ))
-                )}
-              </Combobox.Options>
-            </Combobox.Dropdown>
-          </Combobox>
-        </Stack>
+        <DsLayoutInset blockEnd="md">
+          <DsLayoutStack gap="xs">
+            <SearchComboboxView
+              inputId={`${viewId}-search`}
+              combobox={combobox}
+              search={searchQuery}
+              onSearchChange={setSearchQuery}
+              placeholder={tCommonPlaceholders('searchByName')}
+              items={searchResults}
+              debouncedSearch={debouncedSearch}
+              isLoading={searchFetching}
+              onSelect={(memberId) => addManager.mutate(memberId)}
+              getItemId={(item) => item.id}
+              getItemText={(item) => item.nickname}
+              renderItem={(member) => (
+                <DsLayoutInline gap="sm">
+                  <Avatar
+                    src={buildManagedImageUrl(member.avatarUrl, MANAGED_IMAGE_PRESET.AVATAR_SM)}
+                    size="sm"
+                    shape="circle"
+                    name={member.nickname}
+                  />
+                  <DsText size="sm">{member.nickname}</DsText>
+                </DsLayoutInline>
+              )}
+              minimumQueryMessage={tCommonMessages('typeAtLeast2Characters')}
+              noResultsMessage={tCommonMessages('noUsersFound')}
+              leftSection={<IconUserPlus size={16} />}
+            />
+          </DsLayoutStack>
+        </DsLayoutInset>
       )}
 
       {managersLoading ? (
-        <Group justify="center" py="md">
-          <Loader size="sm" />
-        </Group>
+        <DsLayoutInset block="md">
+          <DsLayoutInline justify="center" role="status" aria-label={tCommonStates('loading')}>
+            <Loader size="sm" />
+          </DsLayoutInline>
+        </DsLayoutInset>
       ) : managersError ? (
-        <Text c="red" size="sm" role="alert">
+        <SupportingText tone="danger" role="alert">
           {t('states.loadFailed')}
-        </Text>
+        </SupportingText>
       ) : managers.length <= 5 ? (
-        <Stack gap="xs">{managers.map(renderManagerRow)}</Stack>
+        <DsLayoutStack role="list" aria-label={t('title', { count: managers.length })} gap="xs">
+          {managers.map(renderManagerRow)}
+        </DsLayoutStack>
       ) : (
-        <ScrollArea.Autosize mah={320}>
-          <Stack gap="xs">{managers.map(renderManagerRow)}</Stack>
+        <ScrollArea.Autosize size="large">
+          <DsLayoutStack role="list" aria-label={t('title', { count: managers.length })} gap="xs">
+            {managers.map(renderManagerRow)}
+          </DsLayoutStack>
         </ScrollArea.Autosize>
       )}
-    </Modal>
+    </ContentModal>
   );
 }

@@ -1,5 +1,11 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
 import { useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -7,23 +13,23 @@ import {
   type TranslationEntry,
   type TranslationLocale,
 } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
-import { IconLanguage, IconPlayerPause, IconRefresh, IconSparkles, IconTrash } from '@tabler/icons-react';
+import { IconEye, IconPencil, IconPlayerPause, IconRefresh, IconSparkles, IconTrash } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Group, Loader, Stack, Text } from '@mantine/core';
+
+import { Spinner as Loader } from '@/components/core/Display';
 import { useMounted } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
-import { modals } from '@mantine/modals';
-import { badgeToneFromColor, LabelBadge } from '@/components/core/Badge';
-import { Button } from '@/components/core/Button';
+import { notifications } from '@/components/core/Notification';
+import { confirmationDialogs } from '@/features/confirmation';
+import { LabelBadge } from '@/components/core/Badge';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
-import { SectionCard } from '@/components/core/Section';
+import { ToolbarCommand } from '@/components/core/Section';
+import { Field } from '@/components/core/Field';
+import { TranslationLocaleRow } from './TranslationLocaleRow';
 import { TranslationLocaleControl } from '@/features/translation/TranslationLocaleControl';
 import { TranslationPanelSectionCard } from '@/features/translation/TranslationPanelSectionCard';
 import {
-  getTranslationEntryPresenceColor,
   getTranslationEntryPresenceKey,
-  getTranslationEntryPresenceLabel,
   getTranslationJobBadgeLabel,
 } from '@/features/translation/translation-entry-status';
 import {
@@ -53,6 +59,8 @@ import {
 import { toDate } from '@/lib/utils/proto';
 import { getTranslationActionErrorMessage } from '@/lib/translation/action-error';
 import { buildActiveEditLocaleHref } from './useActiveEditLocale';
+import { useOptionalTranslationServices } from './TranslationServicesContext';
+import { useTranslationActionFocus } from './useTranslationActionFocus';
 
 type SupportedTranslationEntityType =
   | 'campaign'
@@ -114,10 +122,6 @@ export function EntityTranslationsPanel({
   const tCommonStates = useTranslations('common.states');
   const tCommonNotifications = useTranslations('common.notifications');
   const tJobs = useTranslations('translationJobsPage');
-  const translationEntryPresenceLabels = {
-    existing: t('statuses.existing'),
-    missing: t('statuses.missing'),
-  };
   const translationJobStatusLabels = {
     unknown: tCommonStates('unknown'),
   };
@@ -127,6 +131,8 @@ export function EntityTranslationsPanel({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const runtimeContext = useOptionalEditorRuntimeContext();
+  const services = useOptionalTranslationServices();
+  const { commandRef, rememberCommand } = useTranslationActionFocus();
   const getSharedStatusLabel = useSharedTranslationStatusLabel();
 
   const { translationClient, target, localesQuery, entriesQuery, jobsQuery, refreshEntries, refreshJobs } =
@@ -165,12 +171,12 @@ export function EntityTranslationsPanel({
   const cancelJob = useMutation({
     mutationFn: async (jobId: string) => translationClient.cancelTranslationJob({ jobId }),
     onSuccess: async () => {
-      notifications.show({ color: 'green', message: tJobs('notifications.cancelled') });
+      notifications.show({ tone: 'positive', message: tJobs('notifications.cancelled') });
       await refreshJobs();
     },
     onError: (error) => {
       notifications.show({
-        color: 'red',
+        tone: 'danger',
         message: getTranslationActionErrorMessage(error, tJobs('notifications.cancelFailed')),
       });
     },
@@ -271,6 +277,10 @@ export function EntityTranslationsPanel({
   });
 
   const handleEditOpen = (localeCode: string) => {
+    if (services?.openLocale) {
+      services.openLocale(localeCode);
+      return;
+    }
     if (!pathname) {
       return;
     }
@@ -282,7 +292,7 @@ export function EntityTranslationsPanel({
       if (!canMutateTargets) {
         throw new Error('Missing target creation is unavailable.');
       }
-      await mutateAIDocumentTargetTranslation({
+      await (services?.mutateTarget ?? mutateAIDocumentTargetTranslation)({
         target: { type: aiTargetTypeByTranslationEntity[entityType], id: entityId, locale: localeCode },
         action: 'create',
       });
@@ -293,7 +303,7 @@ export function EntityTranslationsPanel({
     },
     onError: (error) => {
       notifications.show({
-        color: 'red',
+        tone: 'danger',
         message: getTranslationActionErrorMessage(error, tCommonNotifications('updateFailed')),
       });
     },
@@ -303,7 +313,7 @@ export function EntityTranslationsPanel({
       if (!canMutateTargets) {
         throw new Error('Target translation deletion is unavailable.');
       }
-      await mutateAIDocumentTargetTranslation({
+      await (services?.mutateTarget ?? mutateAIDocumentTargetTranslation)({
         target: { type: aiTargetTypeByTranslationEntity[entityType], id: entityId, locale: localeCode },
         action: 'delete',
       });
@@ -317,19 +327,23 @@ export function EntityTranslationsPanel({
     },
     onError: (error) => {
       notifications.show({
-        color: 'red',
+        tone: 'danger',
         message: getTranslationActionErrorMessage(error, tCommonNotifications('updateFailed')),
       });
     },
   });
 
   const openDeleteTargetConfirm = (localeCode: string) => {
-    modals.openConfirmModal({
+    confirmationDialogs.open({
       title: tCommonActions('delete'),
-      labels: { cancel: tCommonActions('cancel'), confirm: tCommonActions('delete') },
-      confirmProps: { color: 'red' },
-      children: <Text size="sm">{getLocaleDisplayLabel(localeCode)}</Text>,
-      onConfirm: () => deleteTarget.mutate(localeCode),
+      cancelLabel: tCommonActions('cancel'),
+      confirmLabel: tCommonActions('delete'),
+      closeLabel: tCommonActions('cancel'),
+      intent: 'delete',
+      message: <DsText size="sm">{getLocaleDisplayLabel(localeCode)}</DsText>,
+      onConfirm: async () => {
+        await deleteTarget.mutateAsync(localeCode);
+      },
     });
   };
 
@@ -351,53 +365,57 @@ export function EntityTranslationsPanel({
       toggleId="entity-translations-panel-toggle"
       persistentActions={
         headerActionsReady && canAdministerTranslations ? (
-          <Button
+          <ToolbarCommand
+            presentation="icon"
+            label={t('actions.regenerateAll')}
             id="entity-translations-panel-regenerate-all"
-            size="xs"
+            ref={commandRef('all')}
             emphasis="medium"
-            leftSection={<IconSparkles size={14} />}
-            onClick={() => regenerateTranslations.mutate(eligibleTargetLocales)}
+            icon={<IconSparkles size="1em" />}
+            onClick={(event) => {
+              rememberCommand(event.currentTarget, 'all');
+              regenerateTranslations.mutate(eligibleTargetLocales);
+            }}
             loading={regenerateTranslations.isPending}
             disabled={generationUnavailable || !sourceLocale || eligibleTargetLocales.length === 0}
-          >
-            {t('actions.regenerateAll')}
-          </Button>
+          />
         ) : null
       }
     >
-      <Stack gap="md">
+      <DsLayoutStack gap="md">
         {isLoading ? (
-          <Group justify="center" py="md">
-            <Loader size="sm" />
-          </Group>
+          <DsLayoutInset block="md" role="status" aria-label={tCommonStates('loading')}>
+            <DsLayoutInline justify="center">
+              <Loader size="sm" />
+            </DsLayoutInline>
+          </DsLayoutInset>
         ) : hasError ? (
-          <Text c="red" size="sm">
+          <SupportingText tone="danger" role="alert">
             {getTranslationActionErrorMessage(localesQuery.error ?? entriesQuery.error, t('states.loadFailed'))}
-          </Text>
+          </SupportingText>
         ) : (
-          <Stack gap="md">
-            {canAdministerTranslations ? (
+          <DsLayoutStack gap="md">
+            <Field layout="inline" label={t('sourceLocale.label')} description={t('sourceLocale.description')}>
               <TranslationLocaleControl
                 variant="native-select"
-                label={t('sourceLocale.label')}
-                description={t('sourceLocale.description')}
                 value={sourceLocale ?? ''}
                 options={localeOptions}
                 sourceLocale={sourceLocale}
                 onChange={(locale) => {
-                  if (setSourceLocale.isPending) {
+                  if (!canAdministerTranslations || setSourceLocale.isPending) {
                     return;
                   }
                   openSourceLocaleConfirm(locale);
                 }}
-                leftSection={<IconLanguage size={16} />}
+                density="compact"
+                readOnly={!canAdministerTranslations}
                 disabled={setSourceLocale.isPending}
               />
-            ) : null}
+            </Field>
 
-            <Stack gap="sm">
+            <DsLayoutStack gap="sm">
               {translationStatusSummary.queued > 0 || translationStatusSummary.running > 0 ? (
-                <Group gap="xs" wrap="wrap">
+                <DsLayoutInline gap="xs" wrap="wrap">
                   {translationStatusSummary.queued > 0 ? (
                     <LabelBadge tone={getTranslationJobDisplayStatusTone(TranslationJobStatus.QUEUED)}>
                       {tCommonStatuses('queued')} {translationStatusSummary.queued}
@@ -408,150 +426,159 @@ export function EntityTranslationsPanel({
                       {tCommonStatuses('running')} {translationStatusSummary.running}
                     </LabelBadge>
                   ) : null}
-                </Group>
+                </DsLayoutInline>
               ) : null}
 
-              {localeDefinitions.map((definition: TranslationLocale) => {
-                const entry = entryByLocale.get(definition.code);
-                const activeJob = activeJobByLocale.get(definition.code);
-                const activeJobRecord = activeJobRecordByLocale.get(definition.code);
-                const presenceKey = getTranslationEntryPresenceKey(entry);
-                const updatedAtValue = entry?.updatedAt ? toDate(entry.updatedAt) : undefined;
-                const updatedAt = updatedAtValue ? dateTime.dateTime(updatedAtValue) : null;
-                const hasActiveJob = activeJobRecord != null;
-                const canCancelJob = activeJobRecord != null;
-                const canAuthorTarget = canMutateTargets;
-                const targetActionId = canAuthorTarget ? 'edit' : 'preview';
+              {localeDefinitions
+                .filter((definition: TranslationLocale) => definition.code !== sourceLocale)
+                .map((definition: TranslationLocale) => {
+                  const entry = entryByLocale.get(definition.code);
+                  const activeJob = activeJobByLocale.get(definition.code);
+                  const activeJobRecord = activeJobRecordByLocale.get(definition.code);
+                  const presenceKey = getTranslationEntryPresenceKey(entry);
+                  const updatedAtValue = entry?.updatedAt ? toDate(entry.updatedAt) : undefined;
+                  const updatedAt = updatedAtValue ? dateTime.dateTime(updatedAtValue) : null;
+                  const hasActiveJob = activeJobRecord != null;
+                  const canCancelJob = activeJobRecord != null;
+                  const canAuthorTarget = canMutateTargets;
+                  const targetActionId = canAuthorTarget ? 'edit' : 'preview';
 
-                return (
-                  <SectionCard key={definition.code} p="sm">
-                    <Stack gap="sm">
-                      <Group justify="space-between" align="flex-start" wrap="wrap">
-                        <Stack gap={4}>
-                          <Group gap="xs" wrap="wrap">
-                            <Text fw={600} size="sm">
-                              {getLocaleDisplayLabel(definition.code)}
-                            </Text>
-                            <Text size="xs" c="dimmed">
-                              {definition.code}
-                            </Text>
-                            {definition.code !== sourceLocale ? (
-                              <LabelBadge tone={badgeToneFromColor(getTranslationEntryPresenceColor(presenceKey))}>
-                                {getTranslationEntryPresenceLabel(presenceKey, translationEntryPresenceLabels)}
-                              </LabelBadge>
-                            ) : null}
-                            {activeJob &&
-                            definition.code !== sourceLocale &&
-                            shouldShowTranslationJobStatusBadge(activeJob.status) ? (
-                              <LabelBadge tone={getTranslationJobDisplayStatusTone(activeJob.status)}>
-                                {(() => {
-                                  const jobStatusKey = getTranslationJobDisplayStatusKey(activeJob.status);
-                                  return getTranslationJobBadgeLabel(
-                                    jobStatusKey,
-                                    getSharedStatusLabel,
-                                    translationJobStatusLabels,
-                                  );
-                                })()}
-                              </LabelBadge>
-                            ) : null}
-                          </Group>
-                          <Text size="xs" c="dimmed">
-                            {definition.code === sourceLocale
-                              ? t('states.sourceEditorHint')
-                              : updatedAt
-                                ? t('states.updatedAt', { date: updatedAt })
-                                : t('states.missingTarget')}
-                          </Text>
-                        </Stack>
-
-                        <Group gap="xs">
-                          {definition.code !== sourceLocale ? (
-                            <>
-                              <Button
-                                id={`entity-translations-panel-${targetActionId}-${definition.code}`}
-                                size="xs"
-                                emphasis="low"
-                                onClick={() => {
-                                  if (entry || !canMutateTargets) {
-                                    handleEditOpen(definition.code);
-                                    return;
-                                  }
-                                  createMissingTarget.mutate(definition.code);
-                                }}
-                                loading={
-                                  createMissingTarget.isPending && createMissingTarget.variables === definition.code
-                                }
-                                disabled={createMissingTarget.isPending}
-                              >
-                                {canAuthorTarget ? tCommonActions('edit') : tCommonLabels('preview')}
-                              </Button>
-                              {entry && canMutateTargets ? (
-                                <Button
-                                  id={`entity-translations-panel-delete-${definition.code}`}
-                                  size="xs"
-                                  tone="danger"
-                                  emphasis="low"
-                                  leftSection={<IconTrash size={14} />}
-                                  onClick={() => openDeleteTargetConfirm(definition.code)}
-                                  loading={deleteTarget.isPending && deleteTarget.variables === definition.code}
-                                  disabled={deleteTarget.isPending}
-                                >
-                                  {tCommonActions('delete')}
-                                </Button>
-                              ) : null}
-                              {canAdministerTranslations ? (
-                                <>
-                                  {canCancelJob ? (
-                                    <Button
-                                      id={`entity-translations-panel-cancel-${definition.code}`}
-                                      size="xs"
-                                      tone="danger"
-                                      emphasis="low"
-                                      leftSection={<IconPlayerPause size={14} />}
-                                      onClick={() => cancelJob.mutate(activeJobRecord.id)}
-                                      loading={cancelJob.isPending && cancelJob.variables === activeJobRecord.id}
-                                    >
-                                      {tCommonActions('cancel')}
-                                    </Button>
-                                  ) : null}
-                                  <Button
-                                    id={`entity-translations-panel-regenerate-${definition.code}`}
-                                    size="xs"
-                                    emphasis="medium"
-                                    aria-label={t(
-                                      presenceKey === 'missing'
-                                        ? 'actions.generateLocaleAria'
-                                        : 'actions.regenerateLocaleAria',
-                                      { locale: getLocaleDisplayLabel(definition.code) },
-                                    )}
-                                    leftSection={
-                                      presenceKey === 'missing' ? <IconSparkles size={14} /> : <IconRefresh size={14} />
-                                    }
-                                    onClick={() => regenerateTranslations.mutate([definition.code])}
-                                    loading={
-                                      regenerateTranslations.isPending &&
-                                      regenerateTranslations.variables?.[0] === definition.code
-                                    }
-                                    disabled={generationUnavailable || hasActiveJob}
-                                  >
-                                    {t(
-                                      presenceKey === 'missing' ? 'actions.generateLocale' : 'actions.regenerateLocale',
-                                    )}
-                                  </Button>
-                                </>
-                              ) : null}
-                            </>
+                  return (
+                    <TranslationLocaleRow
+                      key={definition.code}
+                      announceChanges
+                      name={getLocaleDisplayLabel(definition.code)}
+                      code={definition.code}
+                      description={
+                        definition.code === sourceLocale
+                          ? t('states.sourceEditorHint')
+                          : updatedAt
+                            ? t('states.updatedAt', { date: updatedAt })
+                            : entry
+                              ? null
+                              : t('states.missingTarget')
+                      }
+                      actionsLabel={`${tCommonLabels('actions')}: ${getLocaleDisplayLabel(definition.code)}`}
+                      badges={
+                        <>
+                          {activeJob &&
+                          definition.code !== sourceLocale &&
+                          shouldShowTranslationJobStatusBadge(activeJob.status) ? (
+                            <LabelBadge tone={getTranslationJobDisplayStatusTone(activeJob.status)}>
+                              {(() => {
+                                const jobStatusKey = getTranslationJobDisplayStatusKey(activeJob.status);
+                                return getTranslationJobBadgeLabel(
+                                  jobStatusKey,
+                                  getSharedStatusLabel,
+                                  translationJobStatusLabels,
+                                );
+                              })()}
+                            </LabelBadge>
                           ) : null}
-                        </Group>
-                      </Group>
-                    </Stack>
-                  </SectionCard>
-                );
-              })}
-            </Stack>
-          </Stack>
+                        </>
+                      }
+                      actions={
+                        definition.code !== sourceLocale ? (
+                          <>
+                            <ToolbarCommand
+                              id={`entity-translations-panel-${targetActionId}-${definition.code}`}
+                              presentation="icon"
+                              emphasis="low"
+                              onClick={() => {
+                                if (entry || !canMutateTargets) {
+                                  handleEditOpen(definition.code);
+                                  return;
+                                }
+                                createMissingTarget.mutate(definition.code);
+                              }}
+                              loading={
+                                createMissingTarget.isPending && createMissingTarget.variables === definition.code
+                              }
+                              disabled={createMissingTarget.isPending}
+                              label={canAuthorTarget ? tCommonActions('edit') : tCommonLabels('preview')}
+                              aria-label={`${canAuthorTarget ? tCommonActions('edit') : tCommonLabels('preview')}: ${getLocaleDisplayLabel(definition.code)}`}
+                              icon={canAuthorTarget ? <IconPencil size="1em" /> : <IconEye size="1em" />}
+                            />
+                            {entry && canMutateTargets ? (
+                              <ToolbarCommand
+                                id={`entity-translations-panel-delete-${definition.code}`}
+                                presentation="icon"
+                                tone="danger"
+                                emphasis="low"
+                                icon={<IconTrash size="1em" />}
+                                onClick={() => openDeleteTargetConfirm(definition.code)}
+                                loading={deleteTarget.isPending && deleteTarget.variables === definition.code}
+                                disabled={deleteTarget.isPending}
+                                label={tCommonActions('delete')}
+                                aria-label={`${tCommonActions('delete')}: ${getLocaleDisplayLabel(definition.code)}`}
+                              />
+                            ) : null}
+                            {canAdministerTranslations ? (
+                              <>
+                                {canCancelJob ? (
+                                  <ToolbarCommand
+                                    id={`entity-translations-panel-cancel-${definition.code}`}
+                                    ref={commandRef(`cancel-${definition.code}`)}
+                                    presentation="icon"
+                                    tone="danger"
+                                    emphasis="low"
+                                    icon={<IconPlayerPause size="1em" />}
+                                    onClick={(event) => {
+                                      rememberCommand(
+                                        event.currentTarget,
+                                        `generate-${definition.code}`,
+                                        `cancel-${definition.code}`,
+                                      );
+                                      cancelJob.mutate(activeJobRecord.id);
+                                    }}
+                                    loading={cancelJob.isPending && cancelJob.variables === activeJobRecord.id}
+                                    label={tCommonActions('cancel')}
+                                    aria-label={`${tCommonActions('cancel')}: ${getLocaleDisplayLabel(definition.code)}`}
+                                  />
+                                ) : null}
+                                <ToolbarCommand
+                                  id={`entity-translations-panel-regenerate-${definition.code}`}
+                                  ref={commandRef(`generate-${definition.code}`)}
+                                  presentation="icon"
+                                  emphasis="medium"
+                                  aria-label={t(
+                                    presenceKey === 'missing'
+                                      ? 'actions.generateLocaleAria'
+                                      : 'actions.regenerateLocaleAria',
+                                    { locale: getLocaleDisplayLabel(definition.code) },
+                                  )}
+                                  icon={
+                                    presenceKey === 'missing' ? <IconSparkles size="1em" /> : <IconRefresh size="1em" />
+                                  }
+                                  onClick={(event) => {
+                                    rememberCommand(
+                                      event.currentTarget,
+                                      `generate-${definition.code}`,
+                                      `cancel-${definition.code}`,
+                                    );
+                                    regenerateTranslations.mutate([definition.code]);
+                                  }}
+                                  loading={
+                                    regenerateTranslations.isPending &&
+                                    regenerateTranslations.variables?.[0] === definition.code
+                                  }
+                                  disabled={generationUnavailable || hasActiveJob}
+                                  label={t(
+                                    presenceKey === 'missing' ? 'actions.generateLocale' : 'actions.regenerateLocale',
+                                  )}
+                                />
+                              </>
+                            ) : null}
+                          </>
+                        ) : null
+                      }
+                    />
+                  );
+                })}
+            </DsLayoutStack>
+          </DsLayoutStack>
         )}
-      </Stack>
+      </DsLayoutStack>
     </TranslationPanelSectionCard>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { EditorPermissionRevokedDialog } from '@/features/editor/EditorPermissionRevokedDialog';
 import {
   navigateAfterPostPermissionRevoked,
@@ -29,7 +29,7 @@ export function PostPermissionRevokedDialog({
     const navigated = await navigateAfterPostPermissionRevoked(postId, resolveDestination, navigate);
     if (!navigated) {
       setLoading(false);
-      notifications.show({ message: t('permissionRevokedNavigationFailed'), color: 'red' });
+      notifications.show({ message: t('permissionRevokedNavigationFailed'), tone: 'danger' });
     }
   };
 

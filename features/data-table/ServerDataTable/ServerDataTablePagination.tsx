@@ -41,6 +41,7 @@ export async function ServerDataTablePagination({
       totalPages={result.totalPages}
       getPageUrl={(page) => buildPaginationUrl(namespace, searchParams, page, basePath)}
       labels={{
+        navigation: t('navigation'),
         firstPage: t('firstPage'),
         previousPage: t('previousPage'),
         page: (page) => t('page', { page }),

@@ -1,16 +1,21 @@
 'use client';
+import { SectionCard as DsSectionCard, SectionCard } from '@/components/core/Section';
+import { Text as DsText } from '@/components/core/Typography';
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import {
   closestCenter,
   CollisionDetection,
   DndContext,
   DragEndEvent,
-  DragOverlay,
-  DragStartEvent,
   getFirstCollision,
   pointerWithin,
   useDroppable,
@@ -19,13 +24,13 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { IconPlus, IconUserPlus } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Avatar, Box, Divider, Group, Loader, Paper, Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
-import { LabelBadge } from '@/components/core/Badge';
+
+import { Avatar, Separator as Divider, Spinner as Loader } from '@/components/core/Display';
+import { notifications } from '@/components/core/Notification';
 import { Button } from '@/components/core/Button';
 import { Select, TextInput, SegmentedControl } from '@/components/core/Input';
 import { SearchCombobox } from '@/features/search/SearchCombobox';
-import { SectionCard } from '@/components/core/Section';
+
 import {
   addWorkCreditAction,
   createWorkCreditGroupAction,
@@ -42,8 +47,9 @@ import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/
 import { useSearchCombobox } from '@/lib/hooks/useSearchCombobox';
 import { useSortableSensors } from '@/lib/hooks/useSortableSensors';
 import { searchMembers } from '@/lib/queries/user-browser';
-import type { CreditOrderItem, FlatDisplayItem } from '@/lib/types/work/credit';
+import type { CreditOrderItem } from '@/lib/types/work/credit';
 import { WorkCreditSaveCoordinator } from './credits/work-credit-save-coordinator';
+import { useAuthoritativeConfiguration } from '@/lib/editor/useAuthoritativeConfiguration';
 import {
   buildFlatList,
   creditMoveIntentFromDropPlan,
@@ -80,22 +86,20 @@ function UngroupedDropZone({ label }: { label: string }) {
     data: { type: 'ungrouped', groupId: null },
   });
 
-  const style = {
-    borderRadius: 'var(--mantine-radius-sm)',
-    border: '2px dashed var(--mantine-color-dimmed)',
-    backgroundColor: isOver ? 'var(--mantine-color-blue-light)' : 'var(--mantine-color-default)',
-    minHeight: 40,
-    padding: 'var(--mantine-spacing-md) var(--mantine-spacing-sm)',
-    marginTop: 'var(--mantine-spacing-sm)',
-    transition: 'background-color 150ms ease',
-  };
-
   return (
-    <Box ref={setNodeRef} style={style}>
-      <Text size="xs" c="dimmed" ta="center">
-        {label}
-      </Text>
-    </Box>
+    <DsLayoutInset blockStart="sm">
+      <DsSectionCard
+        ref={setNodeRef}
+        padding="sm"
+        withBorder
+        appearance="muted"
+        state={isOver ? 'drop-target' : 'default'}
+      >
+        <DsText size="xs" tone="secondary" align="center">
+          {label}
+        </DsText>
+      </DsSectionCard>
+    </DsLayoutInset>
   );
 }
 
@@ -109,17 +113,16 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
   const tCommon = useTranslations('common');
   const tCommonActions = useTranslations('common.actions');
   const tCommonMessages = useTranslations('common.messages');
-  const tCommonStates = useTranslations('common.states');
   const [newGroupName, setNewGroupName] = useState('');
   const [searchType, setSearchType] = useState<'artist' | 'member' | 'name'>('artist');
   const [creditRole, setCreditRole] = useState('');
   const [creditName, setCreditName] = useState('');
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const addFormId = useId();
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [deletingGroupId, setDeletingGroupId] = useState<string | null>(null);
   const [updatingRoleId, setUpdatingRoleId] = useState<string | null>(null);
-  const [activeItem, setActiveItem] = useState<FlatDisplayItem | null>(null);
 
   const { search, setSearch, debouncedSearch, combobox, isEnabled, reset } = useSearchCombobox();
   const sensors = useSortableSensors();
@@ -131,8 +134,25 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
   const pendingMoveCountRef = useRef(0);
   const moveQueueRef = useRef(Promise.resolve());
   const creditSaveCoordinatorRef = useRef<WorkCreditSaveCoordinator | null>(null);
-  const [pendingMoveCount, setPendingMoveCount] = useState(0);
-  const [creditGroupOverrides, setCreditGroupOverrides] = useState<Record<string, string | null>>({});
+  const [, setPendingMoveCount] = useState(0);
+  const creditConfiguration = useAuthoritativeConfiguration<{
+    data: Awaited<ReturnType<typeof getWorkGroupsWithCreditsAction>> | undefined;
+    order: CreditOrderItem[];
+    groupOverrides: Record<string, string | null>;
+  }>({
+    document: `work:${workId}`,
+    initialConfiguration: { data: undefined, order: creditOrder, groupOverrides: {} },
+    onAdopt: (patch) => {
+      if (patch.order) {
+        creditOrderRef.current = patch.order;
+        setCreditOrder(patch.order);
+      }
+      if (patch.groupOverrides) {
+        creditGroupOverridesRef.current = patch.groupOverrides;
+      }
+    },
+  });
+  const { data, groupOverrides: creditGroupOverrides } = creditConfiguration.getConfiguration();
   const creditGroupOverridesRef = useRef<Record<string, string | null>>({});
 
   const queryClient = useQueryClient();
@@ -147,26 +167,32 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
       coordinator.dispose();
     };
   }, [workId]);
-  const trackCreditOperation = useCallback(<T,>(operation: () => Promise<T>, isSuccessful: (value: T) => boolean) => {
-    const coordinator = creditSaveCoordinatorRef.current;
-    if (coordinator) {
-      return coordinator.track(operation, isSuccessful);
-    }
-    try {
-      return Promise.resolve(operation()).then(
-        (value) => {
-          try {
-            return isSuccessful(value);
-          } catch {
-            return false;
-          }
-        },
-        () => false,
-      );
-    } catch {
-      return Promise.resolve(false);
-    }
-  }, []);
+  const trackCreditOperation = useCallback(
+    <T,>(operation: () => Promise<T>, isSuccessful: (value: T) => boolean) => {
+      if (!canEdit) {
+        return Promise.resolve(false);
+      }
+      const coordinator = creditSaveCoordinatorRef.current;
+      if (coordinator) {
+        return coordinator.track(operation, isSuccessful);
+      }
+      try {
+        return Promise.resolve(operation()).then(
+          (value) => {
+            try {
+              return isSuccessful(value);
+            } catch {
+              return false;
+            }
+          },
+          () => false,
+        );
+      } catch {
+        return Promise.resolve(false);
+      }
+    },
+    [canEdit],
+  );
   const trackCreditMutation = useCallback(
     <T extends { error?: string }>(operation: () => Promise<T>) =>
       trackCreditOperation(operation, (result) => !result.error),
@@ -175,14 +201,17 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
   const setLocalCreditOrder = useCallback(
     (order: CreditOrderItem[]) => {
       creditOrderRef.current = order;
-      setCreditOrder(order);
+      creditConfiguration.edit({ order });
     },
-    [setCreditOrder],
+    [creditConfiguration],
   );
-  const setLocalCreditGroupOverrides = useCallback((overrides: Record<string, string | null>) => {
-    creditGroupOverridesRef.current = overrides;
-    setCreditGroupOverrides(overrides);
-  }, []);
+  const setLocalCreditGroupOverrides = useCallback(
+    (overrides: Record<string, string | null>) => {
+      creditGroupOverridesRef.current = overrides;
+      creditConfiguration.edit({ groupOverrides: overrides });
+    },
+    [creditConfiguration],
+  );
   const announceCreditsChange = useCallback(() => {
     publishEditorEntityChange(`work:${workId}`);
   }, [workId]);
@@ -198,13 +227,26 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
     }
   }, [creditsVersion, creditsQueryKey, queryClient]);
 
-  useEditorEntityChanges(`work:${workId}`, () => {
-    void queryClient.invalidateQueries({ queryKey: creditsQueryKey });
-  });
+  useEditorEntityChanges(
+    `work:${workId}`,
+    () => {
+      void queryClient.invalidateQueries({ queryKey: creditsQueryKey });
+    },
+    undefined,
+    undefined,
+    creditConfiguration.captureOwnChange,
+  );
 
-  const { data, isLoading } = useQuery({
+  const { isLoading } = useQuery({
     queryKey: creditsQueryKey,
-    queryFn: () => getWorkGroupsWithCreditsAction(workId),
+    queryFn: async () => {
+      const read = creditConfiguration.beginRead();
+      const result = await getWorkGroupsWithCreditsAction(workId);
+      if (!result.error) {
+        creditConfiguration.adoptRead(read, { data: result, order: result.order, groupOverrides: {} });
+      }
+      return result;
+    },
   });
 
   // Transform API response to match expected types
@@ -250,13 +292,6 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
 
   const flatList = useMemo(() => buildFlatList(creditOrder, groups, ungrouped), [creditOrder, groups, ungrouped]);
 
-  useEffect(() => {
-    if (!isLoading && data && !data.error && pendingMoveCount === 0 && pendingMoveCountRef.current === 0) {
-      setLocalCreditOrder(data.order);
-      setLocalCreditGroupOverrides({});
-    }
-  }, [isLoading, data, pendingMoveCount, setLocalCreditOrder, setLocalCreditGroupOverrides]);
-
   const artistResultsQuery = useQuery({
     queryKey: ['work', 'searchArtistsForCredit', workId, debouncedSearch],
     queryFn: () => searchArtistsForCreditAction(workId, debouncedSearch).then(unwrapQueryResult),
@@ -279,14 +314,31 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
   }>;
   const searchFetching = searchType === 'artist' ? artistSearchFetching : userSearchFetching;
 
+  const writeCreditMutation = async <T extends { error?: string }>(operation: (origin: string) => Promise<T>) => {
+    const write = creditConfiguration.beginWrite(['data']);
+    try {
+      const result = await operation(write.origin);
+      if (result.error) {
+        write.fail();
+      } else {
+        write.acknowledge({}, { authoritative: false });
+      }
+      return result;
+    } catch (error) {
+      write.fail();
+      throw error;
+    }
+  };
+
   const createGroup = useMutation({
-    mutationFn: (name: string) => createWorkCreditGroupAction({ workId, name }),
+    mutationFn: (name: string) =>
+      writeCreditMutation((origin) => createWorkCreditGroupAction({ workId, name }, origin)),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: t('notifications.groupCreated'), color: 'green' });
+      notifications.show({ message: t('notifications.groupCreated'), tone: 'positive' });
       queryClient.invalidateQueries({ queryKey: ['work', 'groupsWithCredits', workId] });
       announceCreditsChange();
       incrementCreditsVersion();
@@ -296,10 +348,10 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
 
   const updateGroup = useMutation({
     mutationFn: ({ groupId, name }: { groupId: string; name: string }) =>
-      updateWorkCreditGroupAction(groupId, { name }),
+      writeCreditMutation((origin) => updateWorkCreditGroupAction(groupId, { name }, origin)),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['work', 'groupsWithCredits', workId] });
@@ -309,16 +361,16 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
   });
 
   const deleteGroup = useMutation({
-    mutationFn: (groupId: string) => deleteWorkCreditGroupAction(groupId),
+    mutationFn: (groupId: string) => writeCreditMutation((origin) => deleteWorkCreditGroupAction(groupId, origin)),
     onMutate: (groupId) => {
       setDeletingGroupId(groupId);
     },
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: t('notifications.groupDeleted'), color: 'yellow' });
+      notifications.show({ message: t('notifications.groupDeleted'), tone: 'positive' });
       queryClient.invalidateQueries({ queryKey: ['work', 'groupsWithCredits', workId] });
       announceCreditsChange();
       incrementCreditsVersion();
@@ -335,13 +387,13 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
       memberId?: string;
       name?: string;
       creditRole?: string | null;
-    }) => addWorkCreditAction({ workId, ...data }),
+    }) => writeCreditMutation((origin) => addWorkCreditAction({ workId, ...data }, origin)),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: t('notifications.creditAdded'), color: 'green' });
+      notifications.show({ message: t('notifications.creditAdded'), tone: 'positive' });
       queryClient.invalidateQueries({ queryKey: ['work', 'groupsWithCredits', workId] });
       announceCreditsChange();
       incrementCreditsVersion();
@@ -351,16 +403,16 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
   });
 
   const removeCredit = useMutation({
-    mutationFn: (creditId: string) => removeWorkCreditAction(creditId),
+    mutationFn: (creditId: string) => writeCreditMutation((origin) => removeWorkCreditAction(creditId, origin)),
     onMutate: (creditId) => {
       setRemovingId(creditId);
     },
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: t('notifications.creditRemoved'), color: 'yellow' });
+      notifications.show({ message: t('notifications.creditRemoved'), tone: 'positive' });
       queryClient.invalidateQueries({ queryKey: ['work', 'groupsWithCredits', workId] });
       announceCreditsChange();
       incrementCreditsVersion();
@@ -372,10 +424,10 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
 
   const updateCredit = useMutation({
     mutationFn: (data: { creditId: string; creditRole?: string | null }) =>
-      updateWorkCreditAction(data.creditId, { creditRole: data.creditRole }),
+      writeCreditMutation((origin) => updateWorkCreditAction(data.creditId, { creditRole: data.creditRole }, origin)),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['work', 'groupsWithCredits', workId] });
@@ -408,10 +460,9 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
           nextGroups[entry.id] = entry.groupId ?? null;
         }
       }
-      setLocalCreditOrder(nextOrder);
-      setLocalCreditGroupOverrides(nextGroups);
+      return { order: nextOrder, groupOverrides: nextGroups };
     },
-    [setLocalCreditGroupOverrides, setLocalCreditOrder],
+    [],
   );
 
   const enqueueMoveIntent = useCallback(
@@ -433,25 +484,32 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
         });
       }
 
+      const write = creditConfiguration.beginWrite(['data', 'order', 'groupOverrides']);
       const run = moveQueueRef.current.then(async () => {
-        const result = await moveWorkCreditItemAction(workId, intent);
+        const result = await moveWorkCreditItemAction(workId, intent, write.origin);
         if (result.error || !result.order) {
-          notifications.show({ message: result.error ?? tCommon('notifications.saveFailed'), color: 'red' });
+          write.fail();
+          if (sequence === moveSequenceRef.current) {
+            creditConfiguration.discard(['order', 'groupOverrides']);
+          }
+          notifications.show({ message: result.error ?? tCommon('notifications.saveFailed'), tone: 'danger' });
           void queryClient.invalidateQueries({ queryKey: creditsQueryKey });
           return false;
         }
+        write.acknowledge(adoptMoveOrder(result.order), { authoritative: false });
         announceCreditsChange();
         incrementCreditsVersion();
-        if (sequence === moveSequenceRef.current) {
-          adoptMoveOrder(result.order);
-        }
         return true;
       });
       const queuedRun = run
         .catch((error: unknown) => {
+          write.fail();
+          if (sequence === moveSequenceRef.current) {
+            creditConfiguration.discard(['order', 'groupOverrides']);
+          }
           notifications.show({
             message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
-            color: 'red',
+            tone: 'danger',
           });
           void queryClient.invalidateQueries({ queryKey: creditsQueryKey });
           return false;
@@ -470,6 +528,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
       adoptMoveOrder,
       announceCreditsChange,
       creditsQueryKey,
+      creditConfiguration,
       incrementCreditsVersion,
       queryClient,
       setLocalCreditGroupOverrides,
@@ -480,20 +539,10 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
     ],
   );
 
-  const handleDragStart = useCallback(
-    (event: DragStartEvent) => {
-      const { active } = event;
-      const item = flatList.find((i) => getItemId(i) === active.id);
-      setActiveItem(item ?? null);
-    },
-    [flatList],
-  );
-
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
-      setActiveItem(null);
       const { active, over } = event;
-      if (!over || !active.data.current) {
+      if (!canEdit || !over || !active.data.current) {
         return;
       }
 
@@ -514,7 +563,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
       }
       enqueueMoveIntent(intent, plan.order, plan.groupChange);
     },
-    [enqueueMoveIntent, flatList],
+    [canEdit, enqueueMoveIntent, flatList],
   );
 
   const handleAddCredit = (id: string) => {
@@ -561,35 +610,51 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
   const showLoadingSpinner = isLoading && creditOrder.length === 0;
 
   return (
-    <SectionCard withBorder p="md">
+    <SectionCard withBorder padding="md">
       <QueryErrorAlert queries={[userResultsQuery, artistResultsQuery]} />
-      <Group justify="space-between" mb="sm">
-        <Text size="sm" fw={500}>
-          {tCommon('entities.credits')}
-        </Text>
-        {canEdit && (
-          <Button
-            size="xs"
-            emphasis="medium"
-            leftSection={<IconPlus size={14} />}
-            onClick={() => setShowAddForm(!showAddForm)}
-          >
-            {showAddForm ? tCommonActions('hide') : tCommonActions('add')}
-          </Button>
-        )}
-      </Group>
+      <DsLayoutInset blockEnd="sm">
+        <DsLayoutInline justify="between">
+          <DsText size="sm" weight="medium">
+            {tCommon('entities.credits')}
+          </DsText>
+          {canEdit && (
+            <Button
+              size="xs"
+              emphasis="medium"
+              leftSection={<IconPlus size={14} />}
+              onClick={() => setShowAddForm(!showAddForm)}
+              aria-expanded={showAddForm}
+              aria-controls={showAddForm ? addFormId : undefined}
+            >
+              {showAddForm ? tCommonActions('hide') : tCommonActions('add')}
+            </Button>
+          )}
+        </DsLayoutInline>
+      </DsLayoutInset>
 
       {canEdit && showAddForm && (
-        <Paper p="sm" mb="sm" bg="var(--mantine-color-default)" radius="sm">
-          <Stack gap="xs">
-            <Group gap="xs">
+        <DsSectionCard
+          id={addFormId}
+          padding="sm"
+          appearance="muted"
+          role="group"
+          aria-label={tCommon('entities.credits')}
+        >
+          <DsLayoutStack gap="xs">
+            <DsLayoutInline gap="xs">
               <TextInput
-                flex={1}
+                grow
                 size="xs"
+                aria-label={t('fields.newGroupName')}
                 placeholder={t('fields.newGroupName')}
                 value={newGroupName}
                 onChange={(e) => setNewGroupName(e.currentTarget.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleCreateGroup()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                    e.preventDefault();
+                    handleCreateGroup();
+                  }
+                }}
               />
               <Button
                 size="xs"
@@ -600,13 +665,14 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
               >
                 {t('actions.createGroup')}
               </Button>
-            </Group>
+            </DsLayoutInline>
 
             <Divider label={t('divider')} labelPosition="center" />
 
-            <Group gap="xs">
+            <DsLayoutInline gap="xs">
               <SegmentedControl
                 size="xs"
+                aria-label={tCommon('entities.credit')}
                 value={searchType}
                 onChange={(val) => {
                   setSearchType(val as 'artist' | 'member' | 'name');
@@ -619,34 +685,44 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
                   { label: tCommon('labels.name'), value: 'name' },
                 ]}
               />
-              <TextInput
-                size="xs"
-                placeholder={t('fields.rolePlaceholder')}
-                value={creditRole}
-                onChange={(e) => setCreditRole(e.currentTarget.value)}
-                w={120}
-              />
-              {groups.length > 0 && (
-                <Select
-                  size="xs"
-                  w={120}
-                  placeholder={t('fields.groupPlaceholder')}
-                  value={selectedGroupId ?? ''}
-                  onChange={(val) => setSelectedGroupId(val || null)}
-                  data={groupSelectData}
-                  clearable
-                />
-              )}
-            </Group>
-            {searchType === 'name' ? (
-              <Group gap="xs">
+              <div style={{ width: 120 }}>
                 <TextInput
-                  flex={1}
                   size="xs"
+                  aria-label={tCommon('labels.role')}
+                  placeholder={t('fields.rolePlaceholder')}
+                  value={creditRole}
+                  onChange={(e) => setCreditRole(e.currentTarget.value)}
+                />
+              </div>
+              {groups.length > 0 && (
+                <div style={{ width: 120 }}>
+                  <Select
+                    size="xs"
+                    aria-label={t('fields.groupPlaceholder')}
+                    placeholder={t('fields.groupPlaceholder')}
+                    value={selectedGroupId ?? ''}
+                    onChange={(val) => setSelectedGroupId(val || null)}
+                    data={groupSelectData}
+                    clearable
+                  />
+                </div>
+              )}
+            </DsLayoutInline>
+            {searchType === 'name' ? (
+              <DsLayoutInline gap="xs">
+                <TextInput
+                  grow
+                  size="xs"
+                  aria-label={tCommon('labels.name')}
                   placeholder={t('fields.creditNamePlaceholder')}
                   value={creditName}
                   onChange={(e) => setCreditName(e.currentTarget.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddByName()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                      e.preventDefault();
+                      handleAddByName();
+                    }
+                  }}
                   leftSection={<IconUserPlus size={14} />}
                 />
                 <Button
@@ -658,7 +734,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
                 >
                   {tCommonActions('add')}
                 </Button>
-              </Group>
+              </DsLayoutInline>
             ) : (
               <SearchCombobox
                 combobox={combobox}
@@ -671,31 +747,37 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
                 debouncedSearch={debouncedSearch}
                 onSelect={handleAddCredit}
                 getItemId={(item) => item.id}
+                getItemText={(item) => item.name ?? ''}
                 emptyMessage={
                   searchType === 'member' ? tCommonMessages('noUsersFound') : t(`emptyResults.${searchType}`)
                 }
                 renderItem={(item) => (
-                  <Group gap="sm">
-                    <Avatar src={searchType === 'artist' ? item.imageUrl : item.image} size="xs" radius="xl">
-                      {item.name?.charAt(0)}
-                    </Avatar>
-                    <Text size="xs">{item.name}</Text>
-                  </Group>
+                  <DsLayoutInline gap="sm">
+                    <Avatar
+                      src={searchType === 'artist' ? item.imageUrl : item.image}
+                      size="xs"
+                      shape="circle"
+                      name={item.name}
+                    />
+                    <DsText size="xs">{item.name}</DsText>
+                  </DsLayoutInline>
                 )}
               />
             )}
-          </Stack>
-        </Paper>
+          </DsLayoutStack>
+        </DsSectionCard>
       )}
 
       {showLoadingSpinner && (
-        <Group justify="center" py="md">
-          <Loader size="sm" />
-        </Group>
+        <DsLayoutInset block="md">
+          <DsLayoutInline justify="center">
+            <Loader size="sm" />
+          </DsLayoutInline>
+        </DsLayoutInset>
       )}
 
       {showSkeleton && (
-        <Stack gap={0}>
+        <DsLayoutStack gap="none">
           {creditOrder.map((item, index) =>
             item.type === 'group' ? (
               <CreditGroupHeaderSkeleton key={`skeleton-group-${index}`} />
@@ -703,24 +785,21 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
               <CreditSkeleton key={`skeleton-credit-${index}`} />
             ),
           )}
-        </Stack>
+        </DsLayoutStack>
       )}
 
       {showEmptyState && (
-        <Text size="xs" c="dimmed" ta="center" py="sm">
-          {t('empty')}
-        </Text>
+        <DsLayoutInset block="sm">
+          <DsText size="xs" tone="secondary" align="center">
+            {t('empty')}
+          </DsText>
+        </DsLayoutInset>
       )}
 
       {!isLoading && flatList.length > 0 && (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={customCollisionDetection}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
+        <DndContext sensors={sensors} collisionDetection={customCollisionDetection} onDragEnd={handleDragEnd}>
           <SortableContext items={flatList.map(getItemId)} strategy={verticalListSortingStrategy}>
-            <Stack gap={0}>
+            <DsLayoutStack gap="none">
               {flatList.map((item) =>
                 item.type === 'group' ? (
                   <SortableCreditGroupHeader
@@ -753,47 +832,8 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
 
               {/* Ungrouped drop zone - shown when there are groups */}
               {groups.length > 0 && <UngroupedDropZone label={t('ungroupedDrop')} />}
-            </Stack>
+            </DsLayoutStack>
           </SortableContext>
-
-          <DragOverlay>
-            {activeItem?.type === 'credit' && (
-              <Group
-                gap="xs"
-                py={4}
-                px="xs"
-                style={{
-                  backgroundColor: 'var(--mantine-color-body)',
-                  borderRadius: 'var(--mantine-radius-sm)',
-                  boxShadow: 'var(--mantine-shadow-sm)',
-                }}
-              >
-                <Avatar
-                  src={activeItem.credit.artist?.imageUrl || activeItem.credit.member?.image || null}
-                  size="xs"
-                  radius="xl"
-                >
-                  {(
-                    activeItem.credit.artist?.name ||
-                    activeItem.credit.member?.name ||
-                    activeItem.credit.name ||
-                    t('states.unknownInitial')
-                  ).charAt(0)}
-                </Avatar>
-                <Text size="xs">
-                  {activeItem.credit.artist?.name ||
-                    activeItem.credit.member?.name ||
-                    activeItem.credit.name ||
-                    tCommonStates('unknown')}
-                </Text>
-                {(activeItem.credit.artist || activeItem.credit.member) && (
-                  <LabelBadge size="xs" tone="accent">
-                    {activeItem.credit.artist ? tCommon('entities.artist') : tCommon('entities.member')}
-                  </LabelBadge>
-                )}
-              </Group>
-            )}
-          </DragOverlay>
         </DndContext>
       )}
     </SectionCard>

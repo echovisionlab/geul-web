@@ -1,14 +1,15 @@
 'use client';
+import { ImageChrome, Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
+import { LayoutInline as DsLayoutInline, LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 
+import { MediaImage } from '@/components/core/MediaImage';
 import type { ReactNode } from 'react';
-import Link from '@/components/core/Navigation';
 import { IconMarkdown, IconPencil } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Box, Group, Image, Stack, Text, Title } from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
+
 import { IconButton } from '@/components/core/IconButton';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
-import { Tooltip } from '@/components/core/Tooltip';
+import { OnDemandTooltip as Tooltip } from '@/components/core/Tooltip/OnDemandTooltip';
 import { LocationPlaceMetadataRows } from '@/features/location/LocationPlaceMetadataRows';
 import { UserInlineLinks } from '@/features/user/UserInlineLinks';
 import {
@@ -65,24 +66,26 @@ interface PostHeaderPost {
 interface PostHeaderProps {
   post: PostHeaderPost;
   onExport: (format: 'markdown' | 'pdf') => void;
-  reserveLanguageMenuSpace?: boolean;
+  /** Interface-language content locale menu; shares the header action row instead of floating over it. */
+  languageControl?: ReactNode;
 }
 
-export function PostHeader({ post, onExport, reserveLanguageMenuSpace = false }: PostHeaderProps) {
+export function PostHeader({ post, onExport, languageControl }: PostHeaderProps) {
   const dateTime = useDateTimeFormatter();
   const t = useTranslations('postHeader');
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
   const tCommonStates = useTranslations('common.states');
   const tFeaturedImage = useTranslations('featuredImage');
-  const isMobile = useMediaQuery('(max-width: 48em)');
   const unknownUserLabel = tCommon('states.unknown');
-  const renderDetailRow = (label: string, value: string | null, options?: { valueColor?: string }) =>
+  const inverse = !!post.featuredImageUrl;
+
+  const renderDetailRow = (label: string, value: string | null) =>
     value ? (
       <PublicMetadataRow label={label}>
-        <Text size="sm" component="span" c={options?.valueColor ?? 'inherit'}>
+        <DsText size="sm" as="span" tone="inherit">
           {value}
-        </Text>
+        </DsText>
       </PublicMetadataRow>
     ) : null;
 
@@ -96,287 +99,160 @@ export function PostHeader({ post, onExport, reserveLanguageMenuSpace = false }:
     }
 
     return (
-      <Text key={key} size="sm" component="span">
+      <DsText key={key} size="sm" as="span" tone="inherit">
         {name}
-      </Text>
+      </DsText>
     );
   };
 
-  const renderCollaboratorLinks = (collaborators: Collaborator[]) =>
-    collaborators.flatMap((user, index) => {
-      const displayName = user.name || unknownUserLabel;
-      const nodes: ReactNode[] = [];
-
-      if (index > 0) {
-        nodes.push(
-          <Text key={`separator-${user.id}`} size="sm" component="span" c="inherit">
-            ,
-          </Text>,
-        );
-      }
-
-      nodes.push(
-        <PublicMetadataLink key={user.id} href={`/user/${user.id}`} ariaLabel={displayName}>
-          {displayName}
-        </PublicMetadataLink>,
-      );
-
-      return nodes;
-    });
-
-  const actionButtons = (
-    <Group
-      gap="xs"
-      className={`print-hide ${reserveLanguageMenuSpace && post.featuredImageUrl ? classes.actionsWithLanguage : ''}`}
-    >
-      {post.canEdit && (
-        <Tooltip label={tCommon('actions.edit')}>
+  const actions = (
+    <div className="print-hide">
+      <DsLayoutInline gap="xs" align="center" wrap="nowrap">
+        {post.canEdit && (
+          <Tooltip label={tCommon('actions.edit')}>
+            <IconButton
+              size="sm"
+              tone="neutral"
+              emphasis="low"
+              href={`/posts/${post.id}?edit=true`}
+              aria-label={t('actions.editPost')}
+            >
+              <IconPencil size={16} />
+            </IconButton>
+          </Tooltip>
+        )}
+        <Tooltip label={tCommon('actions.markdown')}>
           <IconButton
             size="sm"
             tone="neutral"
             emphasis="low"
-            component={Link}
-            href={`/posts/${post.id}?edit=true`}
-            aria-label={t('actions.editPost')}
+            aria-label={t('actions.exportMarkdown')}
+            onClick={() => onExport('markdown')}
           >
-            <IconPencil size={16} />
+            <IconMarkdown size={16} />
           </IconButton>
         </Tooltip>
+        {languageControl}
+      </DsLayoutInline>
+    </div>
+  );
+
+  const title = post.title || tCommon('states.untitled');
+
+  // Plain and hero headers present the same metadata rows; only the tone follows the surface.
+  const metadata = (
+    <PublicMetadataRows tone={inverse ? 'inverse' : 'default'}>
+      <PublicMetadataRow label={tCommon('labels.authors')} valueAlign="center">
+        {post.authors.length > 0 ? (
+          <UserInlineLinks
+            users={post.authors}
+            unknownLabel={unknownUserLabel}
+            avatarSize="sm"
+            textSize="sm"
+            textColor={inverse ? 'inverse' : undefined}
+            separator="slash"
+          />
+        ) : (
+          <DsText size="sm" as="span" tone={inverse ? 'inverse' : 'secondary'}>
+            {tCommonStates('anonymous')}
+          </DsText>
+        )}
+      </PublicMetadataRow>
+      {post.collaborators.length > 0 && (
+        <PublicMetadataRow label={tCommon('labels.collaborators')}>
+          <PublicMetadataValueGroup separator="slash">
+            {post.collaborators.map((user) => {
+              const displayName = user.name || unknownUserLabel;
+              return (
+                <PublicMetadataLink key={user.id} href={`/user/${user.id}`} ariaLabel={displayName}>
+                  {displayName}
+                </PublicMetadataLink>
+              );
+            })}
+          </PublicMetadataValueGroup>
+        </PublicMetadataRow>
       )}
-      <Tooltip label={tCommon('actions.markdown')}>
-        <IconButton
-          size="sm"
-          tone="neutral"
-          emphasis="low"
-          aria-label={t('actions.exportMarkdown')}
-          onClick={() => onExport('markdown')}
-        >
-          <IconMarkdown size={16} />
-        </IconButton>
-      </Tooltip>
-    </Group>
+      {post.publishedAt &&
+        post.updatedAt &&
+        post.updatedAt !== post.publishedAt &&
+        renderDetailRow(tCommon('labels.updated'), dateTime.dateTime(post.updatedAt))}
+      {!post.publishedAt &&
+        post.updatedAt &&
+        renderDetailRow(tCommon('labels.lastEdited'), dateTime.dateTime(post.updatedAt))}
+      {post.locationPlace && (
+        <LocationPlaceMetadataRows
+          place={post.locationPlace}
+          labelColor={inverse ? 'inverse-secondary' : undefined}
+          valueColor={inverse ? 'inverse' : undefined}
+          textSize="sm"
+          coordinateVisibility="desktop"
+        />
+      )}
+      {post.categories && post.categories.length > 0 && (
+        <PublicMetadataRow label={tCommonEntities('categories')}>
+          <PublicMetadataValueGroup separator="slash">
+            {post.categories.map((category) =>
+              renderMetaLink(
+                category.id,
+                category.name,
+                category.slug ? `/category/${encodeURIComponent(category.slug)}` : undefined,
+              ),
+            )}
+          </PublicMetadataValueGroup>
+        </PublicMetadataRow>
+      )}
+      {post.tags && post.tags.length > 0 && (
+        <PublicMetadataRow label={tCommonEntities('tags')}>
+          <PublicMetadataValueGroup separator="slash">
+            {post.tags.map((tag) =>
+              renderMetaLink(tag.id, tag.name, tag.slug ? `/tag/${encodeURIComponent(tag.slug)}` : undefined),
+            )}
+          </PublicMetadataValueGroup>
+        </PublicMetadataRow>
+      )}
+    </PublicMetadataRows>
   );
 
   // Hero Header with Featured Image
   if (post.featuredImageUrl) {
     return (
-      <Box
-        className={classes.hero}
-        style={{
-          position: 'relative',
-          overflow: 'hidden',
-          marginLeft: 'calc(-1 * var(--mantine-spacing-md))',
-          marginRight: 'calc(-1 * var(--mantine-spacing-md))',
-          marginTop: 'calc(-1 * var(--mantine-spacing-md))',
-        }}
-      >
-        {/* Background image */}
-        <Image
-          className={classes.heroImage}
-          src={buildManagedImageUrl(post.featuredImageUrl, MANAGED_IMAGE_PRESET.HERO_IMAGE)}
-          alt={post.title || tFeaturedImage('alt')}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-          }}
-        />
-
-        {/* Gradient overlay */}
-        <Box
-          className={classes.heroOverlay}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.3) 100%)',
-          }}
-        />
-
-        {/* Content overlay */}
-        <Stack
-          className={classes.heroContent}
-          gap="md"
-          style={{
-            padding: 'var(--mantine-spacing-xl)',
-            justifyContent: isMobile ? 'space-between' : 'flex-end',
-            color: 'white',
-            minHeight: 'inherit',
-            position: 'relative',
-            zIndex: 1,
-          }}
-        >
-          {isMobile ? (
-            <Group justify="flex-end" className="print-hide">
-              {actionButtons}
-            </Group>
-          ) : (
-            <Box
-              style={{
-                position: 'absolute',
-                top: 'var(--mantine-spacing-md)',
-                right: 'var(--mantine-spacing-md)',
-              }}
-            >
-              {actionButtons}
-            </Box>
-          )}
-
-          {/* Title */}
-          <Stack className={classes.titleStack} gap="xs">
-            <Title
-              className={classes.heroTitle}
-              order={1}
-              style={{
-                color: 'white',
-                fontWeight: 700,
-                fontSize: isMobile ? '1.75rem' : '2rem',
-                lineHeight: 1.05,
-              }}
-            >
-              {post.title || tCommon('states.untitled')}
-            </Title>
-          </Stack>
-
-          {/* Meta Info */}
-          <PublicMetadataRows className={classes.heroMetadata} tone="inverse">
-            <PublicMetadataRow label={tCommon('labels.authors')} valueAlign="center">
-              {post.authors.length > 0 ? (
-                <UserInlineLinks
-                  users={post.authors}
-                  unknownLabel={unknownUserLabel}
-                  avatarSize={24}
-                  avatarBorderColor="rgba(255, 255, 255, 0.72)"
-                  textSize="sm"
-                  textColor="rgba(255, 255, 255, 0.88)"
-                  separator="slash"
-                />
-              ) : (
-                <Text size="sm" component="span" c="rgba(255,255,255,0.88)">
-                  {tCommonStates('anonymous')}
-                </Text>
-              )}
-            </PublicMetadataRow>
-            {post.publishedAt &&
-              post.updatedAt &&
-              post.updatedAt !== post.publishedAt &&
-              renderDetailRow(tCommon('labels.updated'), dateTime.dateTime(post.updatedAt), {
-                valueColor: 'rgba(255,255,255,0.88)',
-              })}
-            {!post.publishedAt &&
-              post.updatedAt &&
-              renderDetailRow(tCommon('labels.lastEdited'), dateTime.dateTime(post.updatedAt), {
-                valueColor: 'rgba(255,255,255,0.88)',
-              })}
-            {post.locationPlace && (
-              <LocationPlaceMetadataRows
-                place={post.locationPlace}
-                labelColor="rgba(255,255,255,0.72)"
-                valueColor="rgba(255,255,255,0.88)"
-                textSize="sm"
-                coordinateVisibility="desktop"
-              />
-            )}
-            {post.categories && post.categories.length > 0 && (
-              <PublicMetadataRow label={tCommonEntities('categories')}>
-                <PublicMetadataValueGroup>
-                  {post.categories.map((category) =>
-                    renderMetaLink(
-                      category.id,
-                      category.name,
-                      category.slug ? `/category/${encodeURIComponent(category.slug)}` : undefined,
-                    ),
-                  )}
-                </PublicMetadataValueGroup>
-              </PublicMetadataRow>
-            )}
-            {post.tags && post.tags.length > 0 && (
-              <PublicMetadataRow label={tCommonEntities('tags')}>
-                <PublicMetadataValueGroup>
-                  {post.tags.map((tag) =>
-                    renderMetaLink(tag.id, tag.name, tag.slug ? `/tag/${encodeURIComponent(tag.slug)}` : undefined),
-                  )}
-                </PublicMetadataValueGroup>
-              </PublicMetadataRow>
-            )}
-          </PublicMetadataRows>
-        </Stack>
-      </Box>
+      <div className={classes.hero} data-post-hero>
+        <div className={classes.heroImage}>
+          <MediaImage
+            fill
+            src={buildManagedImageUrl(post.featuredImageUrl, MANAGED_IMAGE_PRESET.HERO_IMAGE)}
+            alt={post.title || tFeaturedImage('alt')}
+          />
+        </div>
+        <ImageChrome placement="cover" shade="header" aria-hidden />
+        <div className={classes.heroContent}>
+          <div className={classes.heroActions}>
+            <ImageChrome>{actions}</ImageChrome>
+          </div>
+          {/* Public detail title → metadata: xs + the rows' own xs offset = 16px, as in the plain header. */}
+          <ImageChrome inset="md" gap="xs">
+            <DsHeading contrast="image" tone="inverse" level={1} scale="title" wrap="anywhere">
+              {title}
+            </DsHeading>
+            {metadata}
+          </ImageChrome>
+        </div>
+      </div>
     );
   }
 
   // Standard Header without Featured Image
   return (
-    <>
-      <Group
-        justify="space-between"
-        align="flex-start"
-        className={reserveLanguageMenuSpace ? classes.headerWithLanguage : undefined}
-      >
-        <Stack gap="xs" style={{ flex: 1 }}>
-          <Title order={1} style={{ fontWeight: 700, fontSize: '1.5rem' }}>
-            {post.title || tCommon('states.untitled')}
-          </Title>
-        </Stack>
-        {actionButtons}
-      </Group>
-
-      {/* Meta Info */}
-      <PublicMetadataRows>
-        <PublicMetadataRow label={tCommon('labels.authors')} valueAlign="center">
-          {post.authors.length > 0 ? (
-            <UserInlineLinks
-              users={post.authors}
-              unknownLabel={unknownUserLabel}
-              avatarSize={24}
-              textSize="sm"
-              separator="slash"
-            />
-          ) : (
-            <Text size="sm" component="span" c="dimmed">
-              {tCommonStates('anonymous')}
-            </Text>
-          )}
-        </PublicMetadataRow>
-        {post.collaborators.length > 0 && (
-          <PublicMetadataRow label={tCommon('labels.collaborators')}>
-            <PublicMetadataValueGroup>{renderCollaboratorLinks(post.collaborators)}</PublicMetadataValueGroup>
-          </PublicMetadataRow>
-        )}
-        {post.publishedAt &&
-          post.updatedAt &&
-          post.updatedAt !== post.publishedAt &&
-          renderDetailRow(tCommon('labels.updated'), dateTime.dateTime(post.updatedAt))}
-        {!post.publishedAt &&
-          post.updatedAt &&
-          renderDetailRow(tCommon('labels.lastEdited'), dateTime.dateTime(post.updatedAt))}
-        {post.locationPlace && (
-          <LocationPlaceMetadataRows place={post.locationPlace} textSize="sm" coordinateVisibility="desktop" />
-        )}
-        {post.categories && post.categories.length > 0 && (
-          <PublicMetadataRow label={tCommonEntities('categories')}>
-            <PublicMetadataValueGroup>
-              {post.categories.map((category) =>
-                renderMetaLink(
-                  category.id,
-                  category.name,
-                  category.slug ? `/category/${encodeURIComponent(category.slug)}` : undefined,
-                ),
-              )}
-            </PublicMetadataValueGroup>
-          </PublicMetadataRow>
-        )}
-        {post.tags && post.tags.length > 0 && (
-          <PublicMetadataRow label={tCommonEntities('tags')}>
-            <PublicMetadataValueGroup>
-              {post.tags.map((tag) =>
-                renderMetaLink(tag.id, tag.name, tag.slug ? `/tag/${encodeURIComponent(tag.slug)}` : undefined),
-              )}
-            </PublicMetadataValueGroup>
-          </PublicMetadataRow>
-        )}
-      </PublicMetadataRows>
-    </>
+    <DsLayoutStack gap="xs">
+      <DsLayoutInline justify="between" align="start" wrap="nowrap">
+        <DsLayoutStack flexible>
+          <DsHeading level={1} scale="title" wrap="anywhere">
+            {title}
+          </DsHeading>
+        </DsLayoutStack>
+        <div className={classes.titleActions}>{actions}</div>
+      </DsLayoutInline>
+      {metadata}
+    </DsLayoutStack>
   );
 }

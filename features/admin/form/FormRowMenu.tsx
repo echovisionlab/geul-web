@@ -39,7 +39,7 @@ export function FormRowMenu({ form, basePath: _basePath = '/admin/forms', canDel
       label: tCommon('actions.delete'),
       icon: <IconTrash size={16} />,
       onClick: () => openDelete(form),
-      color: 'red',
+      tone: 'danger',
     });
   }
 

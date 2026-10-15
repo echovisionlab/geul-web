@@ -26,6 +26,7 @@ describe('data table content view model', () => {
       currentSorts: [{ field: 'display_name', direction: 'desc' }],
       sortConfig: [{ field: 'display_name', label: 'Name' }],
       getSortAriaLabel: (label) => `Sort by ${label}`,
+      actionColumnLabel: 'Actions',
       onSort,
     });
 
@@ -43,13 +44,14 @@ describe('data table content view model', () => {
     expect(viewColumns[0]?.renderCell({ displayName: 'Alpha', count: 2 })).toBe('Alpha');
     expect(viewColumns[1]?.renderCell({ displayName: 'Alpha', count: 2 })).toBe('#2');
     expect(viewColumns[1]?.sort).toBeUndefined();
-    expect(viewColumns[2]).toMatchObject({ kind: 'action', header: '' });
+    expect(viewColumns[2]).toMatchObject({ kind: 'action', header: '', accessibleLabel: 'Actions' });
+    expect(viewColumns[0]?.accessibleLabel).toBeUndefined();
 
     viewColumns[0]?.sort?.onToggle();
     expect(onSort).toHaveBeenCalledWith('display_name');
   });
 
-  it('describes each active multi-sort priority in the mapped view model', () => {
+  it('describes each active multi-sort priority and localized direction in the mapped view model', () => {
     const viewColumns = createDataTableViewColumns<Row>({
       columns: [
         { key: 'displayName', header: 'Name', accessor: 'displayName' },
@@ -65,19 +67,37 @@ describe('data table content view model', () => {
       ],
       getSortAriaLabel: (label) => `Sort by ${label}`,
       getSortPriorityLabel: (priority, total) => `Priority ${priority}/${total}`,
+      getSortDirectionLabel: (direction) => (direction === 'asc' ? 'Currently ascending' : 'Currently descending'),
       onSort: vi.fn(),
     });
 
     expect(viewColumns[0]?.sort).toMatchObject({
       direction: 'desc',
       order: 1,
-      description: 'Priority 1/2',
+      description: 'Priority 1/2. Currently descending',
     });
     expect(viewColumns[1]?.sort).toMatchObject({
       direction: 'asc',
       order: 2,
-      description: 'Priority 2/2',
+      description: 'Priority 2/2. Currently ascending',
     });
+  });
+
+  it('preserves explicit accessible names for image and action headers without changing visible copy', () => {
+    const viewColumns = createDataTableViewColumns<Row>({
+      columns: [
+        { key: 'image', header: '', accessibleLabel: 'Image', cell: () => null, width: 72 },
+        { key: 'actions', header: '', accessibleLabel: 'Row commands', kind: 'action', cell: () => 'Open' },
+      ],
+      currentSorts: [],
+      sortConfig: [],
+      getSortAriaLabel: (label) => `Sort by ${label}`,
+      actionColumnLabel: 'Actions',
+      onSort: vi.fn(),
+    });
+
+    expect(viewColumns[0]).toMatchObject({ key: 'image', header: '', accessibleLabel: 'Image', width: 72 });
+    expect(viewColumns[1]).toMatchObject({ key: 'actions', header: '', accessibleLabel: 'Row commands' });
   });
 
   it('parses sibling sort configuration defensively', () => {

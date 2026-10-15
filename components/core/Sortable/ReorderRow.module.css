@@ -1,0 +1,23 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: var(--geul-spacing-xxs);
+  min-width: 0;
+  min-height: max(var(--geul-control-height-compact), var(--geul-interaction-minimum));
+}
+
+.root[data-geul-reorder-indent='parent-label'] {
+  margin-inline-start: var(--geul-hierarchy-reorder-step);
+}
+
+.handle,
+.actions {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+}

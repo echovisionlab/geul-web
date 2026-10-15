@@ -1,6 +1,10 @@
-import type { HTMLAttributes, ReactNode } from 'react';
+import { SupportingText } from '@/components/core/Typography';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+
+import type { ReactNode } from 'react';
 import { IconPaperclip } from '@tabler/icons-react';
-import { Loader, Stack, Text } from '@mantine/core';
+
+import { Spinner as Loader } from '@/components/core/Display';
 import { UploadPlaceholder } from '@/components/core/ImageUpload';
 import { EditorMediaBlockFrame } from '@/features/editor/ui/EditorMediaBlockShell';
 
@@ -13,7 +17,6 @@ export interface FileBlockViewProps {
   loadingLabel: string;
   isDropActive?: boolean;
   onActivate?: () => void;
-  emptyInteractionProps?: HTMLAttributes<HTMLDivElement>;
   emptyInteractive?: boolean;
   imageView?: ReactNode;
   audioView?: ReactNode;
@@ -52,7 +55,6 @@ export function FileBlockView({
   loadingLabel,
   isDropActive = false,
   onActivate,
-  emptyInteractionProps,
   emptyInteractive = true,
   imageView,
   audioView,
@@ -75,50 +77,30 @@ export function FileBlockView({
   if (kind === 'loading') {
     return (
       <EditorMediaBlockFrame widthPercent={100} allowResize={false} suppressStaticTextSelection>
-        <Stack align="center" justify="center" gap="xs" mih={88}>
-          <Loader size="sm" />
-          <Text c="dimmed" size="sm">
-            {loadingLabel}
-          </Text>
-        </Stack>
+        <div style={{ minHeight: 88 }}>
+          <DsLayoutStack align="center" justify="center" gap="xs">
+            <Loader size="sm" />
+            <SupportingText tone="secondary">{loadingLabel}</SupportingText>
+          </DsLayoutStack>
+        </div>
       </EditorMediaBlockFrame>
     );
   }
 
-  const { onKeyDown, ...interactionProps } = emptyInteractionProps ?? {};
   return (
     <EditorMediaBlockFrame widthPercent={100} allowResize={false} suppressStaticTextSelection>
-      <div
-        className="attachment-block attachment-block--empty"
-        contentEditable={false}
-        {...interactionProps}
-        onClick={emptyInteractive ? onActivate : undefined}
-        onKeyDown={
-          emptyInteractive
-            ? (event) => {
-                onKeyDown?.(event);
-                if (!event.defaultPrevented && (event.key === 'Enter' || event.key === ' ')) {
-                  event.preventDefault();
-                  onActivate?.();
-                }
-              }
-            : undefined
-        }
-        role={emptyInteractive ? 'button' : undefined}
-        tabIndex={emptyInteractive ? 0 : undefined}
-        aria-disabled={emptyInteractive ? undefined : true}
-      >
-        <Stack gap="xs" style={{ width: '100%' }}>
+      <div className="attachment-block attachment-block--empty" contentEditable={false}>
+        <DsLayoutStack gap="xs" fill="inline">
           <UploadPlaceholder
             icon={<IconPaperclip size={24} stroke={1.5} />}
             title={emptyTitle}
             description={emptyDescription}
             minHeight={88}
-            radius={0}
             interactive={emptyInteractive}
             dropActive={isDropActive}
+            onPress={onActivate}
           />
-        </Stack>
+        </DsLayoutStack>
       </div>
     </EditorMediaBlockFrame>
   );

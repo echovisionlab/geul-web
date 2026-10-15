@@ -1,7 +1,6 @@
 'use client';
 
 import type { CSSProperties } from 'react';
-import { Box } from '@mantine/core';
 
 export interface ThemedAssetImageViewProps {
   src: string | null;
@@ -18,8 +17,7 @@ export function ThemedAssetImageView({ src, alt, width, height, className, style
   }
 
   return (
-    <Box
-      component="img"
+    <img
       src={src}
       alt={alt}
       width={width}

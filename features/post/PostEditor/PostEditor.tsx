@@ -1,14 +1,22 @@
 'use client';
 
+import type { EditorSnapshot } from '@/features/editor/editor-snapshot';
+
+import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
+
+import { DocumentEditorPanels } from '@/features/authoring/DocumentEditorPanels';
+import { SectionCard, SectionHeader } from '@/components/core/Section';
+
+import { LayoutStack as DsLayoutStack, LayoutGrid as DsLayoutGrid } from '@/components/core/Layout';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PostAction } from '@echovisionlab/geul-proto/secure/post_pb.ts';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { SimpleGrid, Stack, Text } from '@mantine/core';
+
 import { Checkbox } from '@/components/core/Input';
 import { useDisclosure, useWindowEvent } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { useEditorPermissionRevocation } from '@/features/editor/useEditorPermissionRevocation';
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
 import { OgImagePreview } from '@/features/metadata/OgImagePreview';
@@ -66,9 +74,11 @@ import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata'
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
 
 interface PostEditorProps {
+  initialSnapshot?: EditorSnapshot;
   postId: string;
   currentMemberId: string;
   initialTitle: string;
+  initialSourceLocale?: string | null;
   initialSummary: string | null;
   initialSlug: string | null;
   initialStatus: PostStatus;
@@ -111,7 +121,9 @@ export function PostEditor(props: PostEditorProps) {
     <PostMetaProvider
       key={props.postId}
       postId={props.postId}
+      initialSourceLocale={props.initialSourceLocale}
       initialMeta={initialMeta}
+      initialSnapshot={props.initialSnapshot}
       initialSlug={props.initialSlug}
       initialFeaturedImageUrl={props.initialFeaturedImageUrl}
     >
@@ -122,7 +134,8 @@ export function PostEditor(props: PostEditorProps) {
   );
 }
 
-function PostEditorContent({
+function usePostEditorViewModel({
+  initialSnapshot,
   postId,
   currentMemberId,
   initialTitle,
@@ -164,28 +177,6 @@ function PostEditorContent({
   const [versionHistoryOpened, { open: openVersionHistory, close: closeVersionHistory }] = useDisclosure(false);
   const [createPlaceOpened, { open: openCreatePlace, close: closeCreatePlace }] = useDisclosure(false);
 
-  const lifecycle = usePostLifecycle({
-    postId,
-    initialStatus,
-    initialScheduledAt,
-    initialScheduledTimeZone,
-    allowedActions: initialAllowedActions,
-    openSchedule,
-    closeSchedule,
-  });
-  const { status, scheduledAt, scheduledTimeZone } = lifecycle;
-  const {
-    canEdit,
-    canSchedule,
-    canDelete,
-    canAddAuthor,
-    canRemoveAuthor,
-    canManageCollaborators,
-    canViewVersions,
-    canRestoreVersion,
-    canManageShareLinks,
-  } = lifecycle.permissions;
-
   const {
     setSourceTitle,
     setSourceSummary,
@@ -207,6 +198,31 @@ function PostEditorContent({
     roomLocale,
     localeSession,
   } = usePostMeta();
+  const permissionRevocation = useEditorPermissionRevocation(provider, 'post', postId);
+  const lifecycle = usePostLifecycle({
+    postId,
+    initialStatus,
+    initialScheduledAt,
+    initialScheduledTimeZone,
+    allowedActions: permissionRevocation.blocked
+      ? initialAllowedActions.filter((action) => action === PostAction.VIEW_VERSIONS)
+      : initialAllowedActions,
+    openSchedule,
+    closeSchedule,
+  });
+  const { status, scheduledAt, scheduledTimeZone } = lifecycle;
+  const {
+    canEdit,
+    canSchedule,
+    canDelete,
+    canAddAuthor,
+    canRemoveAuthor,
+    canManageCollaborators,
+    canViewVersions,
+    canRestoreVersion,
+    canManageShareLinks,
+  } = lifecycle.permissions;
+
   const { activeEditLocale } = localeSession;
   const canEditTranslationSource = canEdit;
   const ogRegenerationLocale = normalizeOgRegenerationLocale(activeEditLocale.activeLocale);
@@ -247,14 +263,11 @@ function PostEditorContent({
     setMapPlaceId(configuration.mapPlaceId);
     setLayout(configuration.documentLayout);
   }, [postConfigUpdate.configuration, setCommentsEnabled, setLayout, setSlug, slug]);
-  const permissionRevocation = useEditorPermissionRevocation(provider, 'post', postId);
   const blockRoomController = usePostBlockRoomController(currentDoc, roomLocale);
   const editorSession =
-    currentProvider && blockRoomController && currentIsSynced
-      ? { provider: currentProvider, controller: blockRoomController }
-      : null;
+    currentProvider && blockRoomController ? { provider: currentProvider, controller: blockRoomController } : null;
   const isEditorReady = editorSession !== null;
-  const canMutateContent = canEdit && !permissionRevocation.blocked;
+  const canMutateContent = initialSnapshot?.editable !== false && canEdit && !permissionRevocation.blocked;
 
   // Track the durable server-side OG generation for the active target.
   const ogImage = useOgImage({
@@ -290,16 +303,16 @@ function PostEditorContent({
     mutationFn: (request: { locale: string; targetKey: string }) => regeneratePostOgImageAction(postId, request.locale),
     onSuccess: (result, request) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tCommon('notifications.ogGenerationRequested'), color: 'blue' });
+      notifications.show({ message: tCommon('notifications.ogGenerationRequested'), tone: 'neutral' });
       ogImage.trackRequestedGeneration(result.generationId, request.targetKey);
     },
     onError: (error) => {
       notifications.show({
         message: error instanceof Error ? error.message : tCommon('notifications.ogRegenerationFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
@@ -322,7 +335,7 @@ function PostEditorContent({
       if (result.error || !result.data?.id) {
         notifications.show({
           message: result.error || tCommon('notifications.createPlaceFailed'),
-          color: 'red',
+          tone: 'danger',
         });
         return;
       }
@@ -334,13 +347,13 @@ function PostEditorContent({
       closeCreatePlace();
       notifications.show({
         message: tCommon('notifications.placeCreatedAndLinked'),
-        color: 'green',
+        tone: 'positive',
       });
     },
     onError: (error) => {
       notifications.show({
         message: error instanceof Error ? error.message : tCommon('notifications.createPlaceFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
@@ -458,18 +471,24 @@ function PostEditorContent({
       if (result.error || !result.markdown) {
         notifications.show({
           message: result.error || tCommonNotifications('exportFailed'),
-          color: 'red',
+          tone: 'danger',
         });
         return;
       }
       downloadMarkdown(displayedTitle || tCommon('states.untitled'), result.markdown);
     } catch {
-      notifications.show({ message: tCommonNotifications('exportFailed'), color: 'red' });
+      notifications.show({ message: tCommonNotifications('exportFailed'), tone: 'danger' });
     }
   };
 
-  const displayedTitle = roomLocale ? residentTitle : activeEditLocale.displayTitle;
-  const displayedSummary = roomLocale ? residentSummary : activeEditLocale.displaySummary;
+  const matchingSnapshot =
+    initialSnapshot && (!activeEditLocale.activeLocale || initialSnapshot.locale === activeEditLocale.activeLocale)
+      ? initialSnapshot
+      : undefined;
+  const displayedTitle =
+    roomLocale && isSynced ? residentTitle : (matchingSnapshot?.title ?? activeEditLocale.displayTitle);
+  const displayedSummary =
+    roomLocale && isSynced ? residentSummary : (matchingSnapshot?.summary ?? activeEditLocale.displaySummary);
   const hasLocaleRoomMutationAuthority = localeSession.hasRoomMutationAuthority({
     sourceLocale: bootstrap?.sourceLocale ?? null,
     locale: bootstrap?.locale ?? null,
@@ -481,13 +500,19 @@ function PostEditorContent({
     ? canEditTranslationSource
     : activeEditLocale.canEditActiveLocale;
   const currentLocaleCanEdit =
-    canEdit && currentLocalePermission && hasLocaleRoomMutationAuthority && !permissionRevocation.blocked;
+    initialSnapshot?.editable !== false &&
+    canEdit &&
+    currentLocalePermission &&
+    hasLocaleRoomMutationAuthority &&
+    !permissionRevocation.blocked;
   const hasLocaleEditPermission = activeEditLocale.isSourceLocaleReady ? currentLocaleCanEdit : false;
   const canEditLocaleDocument = isLocaleDocumentEditable({
     activeLocale: roomLocale,
     shouldUseLocaleDocument,
     canEditActiveLocale: hasLocaleEditPermission,
     isSynced: currentIsSynced,
+
+    isReady: Boolean(doc),
   });
   const canMutateSourceDocument = canEditLocaleDocument && activeEditLocale.isSourceLocale;
   const handleScopedLocaleTitleChange = useCallback(
@@ -525,269 +550,504 @@ function PostEditorContent({
     hasLiveRow: activeEditLocale.hasLiveRow,
     isEditorReady,
   });
+  return {
+    ...(initialSnapshot ? { initialSnapshot } : {}),
+    currentProvider,
+    postId,
+    protocol,
+    isZenMode,
+    displayedTitle,
+    canEditLocaleDocument,
+    handleScopedLocaleTitleChange,
+    status,
+    lifecycle: {
+      statusOptions: lifecycle.statusOptions,
+      isChanging: lifecycle.isChanging,
+      changeStatus: lifecycle.changeStatus,
+      deletePost: { isPending: lifecycle.deletePost.isPending, mutate: lifecycle.deletePost.mutate },
+      schedule: { mutate: lifecycle.schedule.mutate, isPending: lifecycle.schedule.isPending },
+    },
+    currentIsConnected,
+    currentIsSynced,
+    activeEditLocale,
+    scheduledAt,
+    scheduledTimeZone,
+    handleBack,
+    canDelete,
+    canViewVersions,
+    openVersionHistory,
+    hasParticipantActions,
+    openParticipants,
+    canSchedule,
+    openSchedule,
+    handleExportMarkdown,
+    setIsZenMode,
+    showEditorChrome,
+    baseUrl,
+    slug,
+    slugMgmt: {
+      isAvailable: slugMgmt.isAvailable,
+      error: slugMgmt.error,
+      isChecking: slugMgmt.isChecking,
+      handleChange: slugMgmt.handleChange,
+      handleBlur: slugMgmt.handleBlur,
+    },
+    postConfigUpdate: { isPending: postConfigUpdate.isPending },
+    canMutateSourceDocument,
+    canManageShareLinks,
+    t,
+    shareLinks,
+    canMutateContent,
+    ogImage: {
+      src: ogImage.src,
+      isRegenerating: ogImage.isRegenerating,
+      status: ogImage.status,
+      error: ogImage.error,
+      targetKey: ogImage.targetKey,
+      trackLatest: ogImage.trackLatest,
+    },
+    ogRegenerationLocale,
+    regenerateOgImage: { isPending: regenerateOgImage.isPending, mutate: regenerateOgImage.mutate },
+    tCommonLabels,
+    commentsEnabled,
+    handleCommentsEnabledChange,
+    layout,
+    handleLayoutChange,
+    tLayout,
+    displayedSummary,
+    editorAiTarget,
+    currentDoc,
+    currentMemberId,
+    userName,
+    handleScopedLocaleSummaryChange,
+    canonicalOrigin,
+    siteName,
+    featuredImageUrl,
+    canEditSharedTaxonomy,
+    isAdmin,
+    categories,
+    tags,
+    initialSeriesId,
+    initialSeriesOrder,
+    series,
+    permissionRevocation: {
+      revoke: permissionRevocation.revoke,
+      revoked: permissionRevocation.revoked,
+      sessionExpired: permissionRevocation.sessionExpired,
+    },
+    mapPlaceId,
+    handleMapPlaceChange,
+    handleCreatePlaceStart,
+    bodyMode,
+    editorSession,
+    tCommon,
+    bodyPreviewLoading,
+    participantsOpened,
+    closeParticipants,
+    canAddAuthor,
+    canRemoveAuthor,
+    canManageCollaborators,
+    versionHistoryOpened,
+    closeVersionHistory,
+    canRestoreCurrentVersion,
+    reloadCanonical,
+    scheduleOpened,
+    closeSchedule,
+    createPlaceOpened,
+    closeCreatePlace,
+    handleCreatePlaceSubmit,
+    createPlace: { isPending: createPlace.isPending },
+    createPlaceInitialName,
+  };
+}
+
+function PostEditorContent(props: PostEditorProps) {
+  return <PostEditorView model={usePostEditorViewModel(props)} />;
+}
+
+export type PostEditorViewModel = ReturnType<typeof usePostEditorViewModel>;
+
+/** Complete production editor composition; controllers supply data and commands. */
+export function PostEditorView({ model }: { model: PostEditorViewModel }) {
+  const {
+    currentProvider,
+    postId,
+    protocol,
+    isZenMode,
+    displayedTitle,
+    canEditLocaleDocument,
+    handleScopedLocaleTitleChange,
+    status,
+    lifecycle,
+    currentIsConnected,
+    currentIsSynced,
+    activeEditLocale,
+    scheduledAt,
+    scheduledTimeZone,
+    handleBack,
+    canDelete,
+    canViewVersions,
+    openVersionHistory,
+    hasParticipantActions,
+    openParticipants,
+    canSchedule,
+    openSchedule,
+    handleExportMarkdown,
+    setIsZenMode,
+    showEditorChrome,
+    baseUrl,
+    slug,
+    slugMgmt,
+    postConfigUpdate,
+    canMutateSourceDocument,
+    canManageShareLinks,
+    t,
+    shareLinks,
+    canMutateContent,
+    ogImage,
+    ogRegenerationLocale,
+    regenerateOgImage,
+    tCommonLabels,
+    commentsEnabled,
+    handleCommentsEnabledChange,
+    layout,
+    handleLayoutChange,
+    tLayout,
+    displayedSummary,
+    editorAiTarget,
+    currentDoc,
+    currentMemberId,
+    userName,
+    handleScopedLocaleSummaryChange,
+    canonicalOrigin,
+    siteName,
+    featuredImageUrl,
+    canEditSharedTaxonomy,
+    isAdmin,
+    categories,
+    tags,
+    initialSeriesId,
+    initialSeriesOrder,
+    series,
+    permissionRevocation,
+    mapPlaceId,
+    handleMapPlaceChange,
+    handleCreatePlaceStart,
+    bodyMode,
+    editorSession,
+    tCommon,
+    bodyPreviewLoading,
+    participantsOpened,
+    closeParticipants,
+    canAddAuthor,
+    canRemoveAuthor,
+    canManageCollaborators,
+    versionHistoryOpened,
+    closeVersionHistory,
+    canRestoreCurrentVersion,
+    reloadCanonical,
+    scheduleOpened,
+    closeSchedule,
+    createPlaceOpened,
+    closeCreatePlace,
+    handleCreatePlaceSubmit,
+    createPlace,
+    createPlaceInitialName,
+  } = model;
   return (
     <EditorRuntimeProvider provider={currentProvider} entityType="post" entityId={postId} blockRoomProtocol={protocol}>
-      <Stack
-        mih="100%"
-        gap="xs"
-        style={
-          isZenMode
-            ? {
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                // Keep zen layer above page content but below portal popovers/modals.
-                zIndex: 150,
-                background: 'var(--mantine-color-body)',
-                padding: '1rem',
-                overflow: 'auto',
-              }
-            : undefined
-        }
-      >
-        <PostEditorHeaderSection
-          postId={postId}
-          title={displayedTitle}
-          canEditTitle={canEditLocaleDocument}
-          onTitleChange={handleScopedLocaleTitleChange}
-          status={status}
-          statusOptions={lifecycle.statusOptions}
-          isConnected={currentIsConnected}
-          isSynced={currentIsSynced}
-          isStatusChanging={lifecycle.isChanging}
-          isDeleting={lifecycle.deletePost.isPending}
-          isZenMode={isZenMode}
-          controls={<EditorActiveLocaleControl state={activeEditLocale} hidden={isZenMode} />}
-          scheduledAt={scheduledAt}
-          scheduledTimeZone={scheduledTimeZone}
-          onBack={handleBack}
-          onStatusChange={lifecycle.statusOptions.length > 1 ? lifecycle.changeStatus : undefined}
-          onDelete={canDelete ? () => lifecycle.deletePost.mutate() : undefined}
-          onOpenVersionHistory={canViewVersions ? openVersionHistory : undefined}
-          onOpenParticipants={hasParticipantActions ? openParticipants : undefined}
-          onReschedule={status === 'scheduled' && canSchedule ? openSchedule : undefined}
-          onExportMarkdown={handleExportMarkdown}
-          onToggleZenMode={() => setIsZenMode((current) => !current)}
-        />
+      <div style={{ minHeight: '100%' }}>
+        <div
+          style={{
+            ...(isZenMode
+              ? {
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  // Keep zen layer above page content but below portal popovers/modals.
+                  zIndex: 'var(--geul-layer-sticky)',
 
-        {/* URL Section */}
-        {showEditorChrome && (
-          <UrlSection
-            baseUrl={baseUrl}
-            entityType="post"
-            entityId={postId}
-            slug={toSlugInputValue(slug)}
-            isAvailable={slugMgmt.isAvailable}
-            idPrefix={`post-${postId}`}
-            error={slugMgmt.error}
-            saving={slugMgmt.isChecking || postConfigUpdate.isPending}
-            disabled={!canMutateSourceDocument}
-            onChange={slugMgmt.handleChange}
-            onBlur={slugMgmt.handleBlur}
-          />
-        )}
-
-        {/* Share Links */}
-        {showEditorChrome && canManageShareLinks && (
-          <ShareLinkSection
-            entityType="post"
-            entityId={postId}
-            description={t('shareLinksDescription')}
-            disabled={!canManageShareLinks || !canMutateSourceDocument}
-            initialData={shareLinks}
-          />
-        )}
-
-        {showEditorChrome && (
-          <EntityTranslationsPanel
-            entityType="post"
-            entityId={postId}
-            canManage={canMutateContent}
-            canAdministerTranslations={canMutateContent}
-            canMutateTargets={canMutateContent}
-          />
-        )}
-
-        {/* OG Image & Featured Image */}
-        {showEditorChrome && (
-          <MediaPreviewGrid>
-            <OgImagePreview
-              src={ogImage.src}
-              canRegenerate={canMutateContent && activeEditLocale.hasLiveRow && ogRegenerationLocale !== null}
-              isRegenerating={regenerateOgImage.isPending || ogImage.isRegenerating}
-              generationStatus={ogImage.status}
-              generationError={ogImage.error}
-              onRegenerate={() => {
-                if (ogRegenerationLocale) {
-                  regenerateOgImage.mutate({
-                    locale: ogRegenerationLocale,
-                    targetKey: ogImage.targetKey,
-                  });
+                  overflow: 'auto',
                 }
-              }}
-            />
-            <FeaturedImageUploader
-              postId={postId}
-              idPrefix={`post-${postId}-featured-image`}
-              canEdit={canMutateSourceDocument}
-              onOgGenerationRequested={() => void ogImage.trackLatest()}
-            />
-          </MediaPreviewGrid>
-        )}
-
-        {/* Options */}
-        {showEditorChrome && (
-          <Stack gap={4}>
-            <Text size="xs" c="dimmed">
-              {tCommonLabels('options')}
-            </Text>
-            <Checkbox
-              id={`post-${postId}-comments-enabled`}
-              label={t('allowComments')}
-              checked={commentsEnabled}
-              onChange={(e) => handleCommentsEnabledChange(e.currentTarget.checked)}
-              disabled={!canMutateSourceDocument}
-              size="sm"
-            />
-            <ContentLayoutField
-              value={layout}
-              onChange={handleLayoutChange}
-              disabled={!canMutateSourceDocument}
-              labels={{
-                contentHeight: tLayout('contentHeight'),
-                content: tLayout('content'),
-                viewport: tLayout('viewport'),
-                pageChrome: tLayout('chrome'),
-                footer: tLayout('footer'),
-                flow: tLayout('flow'),
-                pinned: tLayout('pinned'),
-              }}
-            />
-          </Stack>
-        )}
-
-        {showEditorChrome && (
-          <Stack gap="md">
-            <SummaryFieldCard
-              entityType="post"
-              entityId={postId}
-              title={displayedTitle}
-              summary={displayedSummary}
-              summaryReadOnly={!canEditLocaleDocument}
-              hideAiActions={!editorAiTarget}
-              aiTarget={editorAiTarget}
-              provider={activeEditLocale.isSourceLocaleReady ? currentProvider : null}
-              doc={activeEditLocale.isSourceLocaleReady ? currentDoc : null}
-              currentMemberId={currentMemberId}
-              currentMemberDisplayName={userName}
-              onSummaryChange={canEditLocaleDocument ? handleScopedLocaleSummaryChange : undefined}
-            />
-            <MetadataPanel
-              title={displayedTitle}
-              summary={displayedSummary}
-              routePath={`/posts/${slug || postId}`}
-              canonicalOrigin={canonicalOrigin}
-              siteName={siteName}
-              defaultImageUrl={featuredImageUrl}
-              defaultSchemaType="Article"
-            />
-          </Stack>
-        )}
-
-        {/* Selectors */}
-        {showEditorChrome && (
-          <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }}>
-            <CategorySelector
-              postId={postId}
-              canEdit={canEditSharedTaxonomy}
-              isAdmin={isAdmin}
-              categories={categories}
-            />
-            <TagSelector postId={postId} canEdit={canEditSharedTaxonomy} isAdmin={isAdmin} tags={tags} />
-            <SeriesSelector
-              postId={postId}
-              idPrefix={`post-${postId}-series`}
-              initialSeriesId={initialSeriesId}
-              initialSeriesOrder={initialSeriesOrder}
-              canEdit={canMutateSourceDocument}
-              isAdmin={isAdmin}
-              series={series}
-              onPostPermissionRevoked={permissionRevocation.revoke}
-            />
-            <Stack gap={4}>
-              <LocationSelector
-                value={mapPlaceId}
-                idPrefix={`post-${postId}-location`}
-                onChange={handleMapPlaceChange}
-                onCreateNew={handleCreatePlaceStart}
-                canEdit={canMutateSourceDocument}
-              />
-            </Stack>
-          </SimpleGrid>
-        )}
-
-        <PostEditorBody
-          bodyMode={bodyMode}
-          session={editorSession}
-          postId={postId}
-          userName={userName}
-          editable={canEditLocaleDocument}
-          showLabel={showEditorChrome}
-          bodyLabel={tCommon('labels.body')}
-          activeLocale={activeEditLocale.activeLocale}
-          activeLocaleLabel={activeEditLocale.activeLocaleLabel}
-          hasLiveRow={activeEditLocale.hasLiveRow}
-          contentPreview={activeEditLocale.contentPreview}
-          previewLoading={bodyPreviewLoading}
-          isSourceLocale={activeEditLocale.isSourceLocale}
-        />
-
-        <PostParticipantsDialog
-          postId={postId}
-          opened={participantsOpened}
-          onClose={closeParticipants}
-          canAddAuthor={canAddAuthor}
-          canRemoveAuthor={canRemoveAuthor}
-          canManageCollaborators={canManageCollaborators}
-        />
-
-        {/* Version History */}
-        <VersionHistoryDrawer
-          entityType="post"
-          entityId={postId}
-          opened={versionHistoryOpened}
-          onClose={closeVersionHistory}
-          currentSourceLocale={activeEditLocale.sourceLocale}
-          canRestore={canRestoreCurrentVersion}
-          onRestored={async () => {
-            reloadCanonical();
-            await ogImage.trackLatest();
+              : undefined),
           }}
-        />
+        >
+          <SectionCard appearance="surface" padding={isZenMode ? 'md' : 'none'}>
+            <DsLayoutStack gap="xs">
+              <PostEditorHeaderSection
+                postId={postId}
+                title={displayedTitle}
+                canEditTitle={canEditLocaleDocument}
+                onTitleChange={handleScopedLocaleTitleChange}
+                status={status}
+                statusOptions={lifecycle.statusOptions}
+                isConnected={currentIsConnected}
+                isSynced={currentIsSynced}
+                isStatusChanging={lifecycle.isChanging}
+                isDeleting={lifecycle.deletePost.isPending}
+                isZenMode={isZenMode}
+                controls={<EditorActiveLocaleControl state={activeEditLocale} hidden={isZenMode} />}
+                scheduledAt={scheduledAt}
+                scheduledTimeZone={scheduledTimeZone}
+                onBack={handleBack}
+                onStatusChange={lifecycle.statusOptions.length > 1 ? lifecycle.changeStatus : undefined}
+                onDelete={canDelete ? () => lifecycle.deletePost.mutate() : undefined}
+                onOpenVersionHistory={canViewVersions ? openVersionHistory : undefined}
+                onOpenParticipants={hasParticipantActions ? openParticipants : undefined}
+                onReschedule={status === 'scheduled' && canSchedule ? openSchedule : undefined}
+                onExportMarkdown={handleExportMarkdown}
+                onToggleZenMode={() => setIsZenMode((current) => !current)}
+              />
 
-        <PostScheduleDialog
-          opened={scheduleOpened}
-          onClose={closeSchedule}
-          onSubmit={(schedule) => lifecycle.schedule.mutate(schedule)}
-          initialInstant={scheduledAt}
-          initialTimeZone={scheduledTimeZone}
-          loading={lifecycle.schedule.isPending}
-        />
+              <DocumentEditorPanels
+                focused={!showEditorChrome}
+                settings={
+                  <>
+                    {/* URL Section */}
+                    {showEditorChrome && (
+                      <UrlSection
+                        baseUrl={baseUrl}
+                        entityType="post"
+                        entityId={postId}
+                        slug={toSlugInputValue(slug)}
+                        isAvailable={slugMgmt.isAvailable}
+                        idPrefix={`post-${postId}`}
+                        error={slugMgmt.error}
+                        saving={slugMgmt.isChecking || postConfigUpdate.isPending}
+                        disabled={!canMutateSourceDocument}
+                        onChange={slugMgmt.handleChange}
+                        onBlur={slugMgmt.handleBlur}
+                      />
+                    )}
 
-        <PostPermissionRevokedDialog opened={permissionRevocation.revoked} postId={postId} />
+                    {/* Share Links */}
+                    {showEditorChrome && canManageShareLinks && (
+                      <AuthoringExtension kind="sharing">
+                        <ShareLinkSection
+                          entityType="post"
+                          entityId={postId}
+                          description={t('shareLinksDescription')}
+                          disabled={!canManageShareLinks || !canMutateSourceDocument}
+                          initialData={shareLinks}
+                        />
+                      </AuthoringExtension>
+                    )}
 
-        <PostSessionExpiredDialog opened={permissionRevocation.sessionExpired} />
+                    {showEditorChrome && (
+                      <AuthoringExtension kind="translations">
+                        <EntityTranslationsPanel
+                          entityType="post"
+                          entityId={postId}
+                          canManage={canMutateContent}
+                          canAdministerTranslations={canMutateContent}
+                          canMutateTargets={canMutateContent}
+                        />
+                      </AuthoringExtension>
+                    )}
 
-        <CreatePlaceModal
-          opened={createPlaceOpened}
-          onClose={closeCreatePlace}
-          onSubmit={handleCreatePlaceSubmit}
-          isPending={createPlace.isPending}
-          initialName={createPlaceInitialName}
-        />
-      </Stack>
+                    {/* OG Image & Featured Image */}
+                    {showEditorChrome && (
+                      <SectionCard padding={{ base: 'none', sm: 'md' }}>
+                        <MediaPreviewGrid>
+                          <OgImagePreview
+                            src={ogImage.src}
+                            canRegenerate={
+                              canMutateContent && activeEditLocale.hasLiveRow && ogRegenerationLocale !== null
+                            }
+                            isRegenerating={regenerateOgImage.isPending || ogImage.isRegenerating}
+                            generationStatus={ogImage.status}
+                            generationError={ogImage.error}
+                            onRegenerate={() => {
+                              if (ogRegenerationLocale) {
+                                regenerateOgImage.mutate({
+                                  locale: ogRegenerationLocale,
+                                  targetKey: ogImage.targetKey,
+                                });
+                              }
+                            }}
+                          />
+                          <AuthoringExtension kind="uploads">
+                            <FeaturedImageUploader
+                              postId={postId}
+                              idPrefix={`post-${postId}-featured-image`}
+                              canEdit={canMutateSourceDocument}
+                              onOgGenerationRequested={() => void ogImage.trackLatest()}
+                            />
+                          </AuthoringExtension>
+                        </MediaPreviewGrid>
+                      </SectionCard>
+                    )}
+
+                    {/* Options */}
+                    {showEditorChrome && (
+                      <SectionCard padding={{ base: 'none', sm: 'md' }}>
+                        <DsLayoutStack gap="md">
+                          <SectionHeader title={tCommonLabels('options')} />
+                          <Checkbox
+                            id={`post-${postId}-comments-enabled`}
+                            label={t('allowComments')}
+                            checked={commentsEnabled}
+                            onChange={(e) => handleCommentsEnabledChange(e.currentTarget.checked)}
+                            disabled={!canMutateSourceDocument}
+                            size="sm"
+                          />
+                          <ContentLayoutField
+                            value={layout}
+                            onChange={handleLayoutChange}
+                            disabled={!canMutateSourceDocument}
+                            labels={{
+                              contentHeight: tLayout('contentHeight'),
+                              content: tLayout('content'),
+                              viewport: tLayout('viewport'),
+                              pageChrome: tLayout('chrome'),
+                              footer: tLayout('footer'),
+                              flow: tLayout('flow'),
+                              pinned: tLayout('pinned'),
+                            }}
+                          />
+                        </DsLayoutStack>
+                      </SectionCard>
+                    )}
+
+                    {showEditorChrome && (
+                      <DsLayoutStack gap={{ base: 'xl', sm: 'md' }}>
+                        <SummaryFieldCard
+                          entityType="post"
+                          entityId={postId}
+                          title={displayedTitle}
+                          summary={displayedSummary}
+                          summaryReadOnly={!canEditLocaleDocument}
+                          hideAiActions={!editorAiTarget}
+                          aiTarget={editorAiTarget}
+                          provider={activeEditLocale.isSourceLocaleReady ? currentProvider : null}
+                          doc={activeEditLocale.isSourceLocaleReady ? currentDoc : null}
+                          currentMemberId={currentMemberId}
+                          currentMemberDisplayName={userName}
+                          onSummaryChange={canEditLocaleDocument ? handleScopedLocaleSummaryChange : undefined}
+                        />
+                        <MetadataPanel
+                          title={displayedTitle}
+                          summary={displayedSummary}
+                          routePath={`/posts/${slug || postId}`}
+                          canonicalOrigin={canonicalOrigin}
+                          siteName={siteName}
+                          defaultImageUrl={featuredImageUrl}
+                          defaultSchemaType="Article"
+                        />
+                      </DsLayoutStack>
+                    )}
+
+                    {/* Selectors */}
+                    {showEditorChrome && (
+                      <DsLayoutGrid columns={{ base: 1, sm: 2, lg: 4 }}>
+                        <AuthoringExtension kind="relations">
+                          <CategorySelector
+                            postId={postId}
+                            canEdit={canEditSharedTaxonomy}
+                            isAdmin={isAdmin}
+                            categories={categories}
+                          />
+                        </AuthoringExtension>
+                        <AuthoringExtension kind="relations">
+                          <TagSelector postId={postId} canEdit={canEditSharedTaxonomy} isAdmin={isAdmin} tags={tags} />
+                        </AuthoringExtension>
+                        <AuthoringExtension kind="relations">
+                          <SeriesSelector
+                            postId={postId}
+                            idPrefix={`post-${postId}-series`}
+                            initialSeriesId={initialSeriesId}
+                            initialSeriesOrder={initialSeriesOrder}
+                            canEdit={canMutateSourceDocument}
+                            isAdmin={isAdmin}
+                            series={series}
+                            onPostPermissionRevoked={permissionRevocation.revoke}
+                          />
+                        </AuthoringExtension>
+                        <DsLayoutStack gap="xxs">
+                          <AuthoringExtension kind="relations">
+                            <LocationSelector
+                              value={mapPlaceId}
+                              idPrefix={`post-${postId}-location`}
+                              onChange={handleMapPlaceChange}
+                              onCreateNew={handleCreatePlaceStart}
+                              canEdit={canMutateSourceDocument}
+                            />
+                          </AuthoringExtension>
+                        </DsLayoutStack>
+                      </DsLayoutGrid>
+                    )}
+                  </>
+                }
+              >
+                <PostEditorBody
+                  snapshot={model.initialSnapshot}
+                  roomReady={editorSession !== null}
+                  bodyMode={bodyMode}
+                  session={editorSession}
+                  postId={postId}
+                  userName={userName}
+                  editable={canEditLocaleDocument}
+                  showLabel={false}
+                  bodyLabel={tCommon('labels.body')}
+                  activeLocale={activeEditLocale.activeLocale}
+                  activeLocaleLabel={activeEditLocale.activeLocaleLabel}
+                  hasLiveRow={activeEditLocale.hasLiveRow}
+                  contentPreview={activeEditLocale.contentPreview}
+                  previewLoading={bodyPreviewLoading}
+                  isSourceLocale={activeEditLocale.isSourceLocale}
+                />
+              </DocumentEditorPanels>
+
+              <PostParticipantsDialog
+                postId={postId}
+                opened={participantsOpened}
+                onClose={closeParticipants}
+                canAddAuthor={canAddAuthor}
+                canRemoveAuthor={canRemoveAuthor}
+                canManageCollaborators={canManageCollaborators}
+              />
+
+              {/* Version History */}
+              <VersionHistoryDrawer
+                entityType="post"
+                entityId={postId}
+                opened={versionHistoryOpened}
+                onClose={closeVersionHistory}
+                currentSourceLocale={activeEditLocale.sourceLocale}
+                canRestore={canRestoreCurrentVersion}
+                onRestored={async () => {
+                  reloadCanonical();
+                  await ogImage.trackLatest();
+                }}
+              />
+
+              <PostScheduleDialog
+                opened={scheduleOpened}
+                readOnly={!canSchedule}
+                onClose={closeSchedule}
+                onSubmit={(schedule) => lifecycle.schedule.mutate(schedule)}
+                initialInstant={scheduledAt}
+                initialTimeZone={scheduledTimeZone}
+                loading={lifecycle.schedule.isPending}
+              />
+
+              <PostPermissionRevokedDialog opened={permissionRevocation.revoked} postId={postId} />
+
+              <PostSessionExpiredDialog opened={permissionRevocation.sessionExpired} />
+
+              <CreatePlaceModal
+                opened={createPlaceOpened}
+                onClose={closeCreatePlace}
+                onSubmit={handleCreatePlaceSubmit}
+                isPending={createPlace.isPending}
+                initialName={createPlaceInitialName}
+              />
+            </DsLayoutStack>
+          </SectionCard>
+        </div>
+      </div>
     </EditorRuntimeProvider>
   );
 }

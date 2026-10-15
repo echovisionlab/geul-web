@@ -1,12 +1,14 @@
-import { Stack, Text } from '@mantine/core';
-import { modals } from '@mantine/modals';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+
+import { confirmationDialogs } from '@/features/confirmation';
 
 interface TranslationDeleteConfirmOptions {
   title: string;
   cancelLabel: string;
   confirmLabel: string;
   description: string;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
 }
 
 export function openTranslationDeleteConfirm({
@@ -16,14 +18,16 @@ export function openTranslationDeleteConfirm({
   description,
   onConfirm,
 }: TranslationDeleteConfirmOptions): void {
-  modals.openConfirmModal({
+  confirmationDialogs.open({
     title,
-    labels: { cancel: cancelLabel, confirm: confirmLabel },
-    confirmProps: { color: 'red' },
-    children: (
-      <Stack gap="xs">
-        <Text size="sm">{description}</Text>
-      </Stack>
+    cancelLabel,
+    confirmLabel,
+    closeLabel: cancelLabel,
+    intent: 'delete',
+    message: (
+      <DsLayoutStack gap="xs">
+        <DsText>{description}</DsText>
+      </DsLayoutStack>
     ),
     onConfirm,
   });

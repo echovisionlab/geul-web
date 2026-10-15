@@ -18,6 +18,7 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
   ({ defaultCountry, defaultValue, onPhoneChange, onFocus, onBlur, showErrorText = true, ...inputProps }, ref) => {
     const t = useTranslations('phoneInput');
     const tCommonPlaceholders = useTranslations('common.placeholders');
+    const tCommonLabels = useTranslations('common.labels');
     const { countries, countryCode, setCountryCode, value, setValue, placeholder } = usePhoneInput({
       defaultCountry,
       defaultValue,
@@ -64,6 +65,7 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
         value={value}
         phonePlaceholder={placeholder}
         labels={{
+          countryName: tCommonLabels('country'),
           searchPlaceholder: tCommonPlaceholders('search'),
           noResults: t('noResults'),
         }}

@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BlockSelectionTarget } from '@/components/core/SelectionSurface';
+import { TextButton } from '@/components/core/TextButton';
 import { ExternalVideoView, type ExternalVideoViewProps } from '@/features/media/ExternalVideoView';
 import type { StandaloneExternalVideoLink } from '@/features/media/standalone-external-video';
 import { EditorMediaBlockFrame } from './ui/EditorMediaBlockShell';
@@ -211,9 +213,9 @@ export function ExternalVideoEditorPreview({
   if (mode === 'link') {
     return editable ? (
       <div className={classes.linkMode} data-external-video-link-mode>
-        <button type="button" className={classes.action} onClick={onShowPreview}>
+        <TextButton size="xs" onClick={onShowPreview}>
           {labels.showPreview}
-        </button>
+        </TextButton>
       </div>
     ) : null;
   }
@@ -240,10 +242,9 @@ export function ExternalVideoEditorPreview({
       >
         <VideoView url={video.url} title={video.title} aspectRatio={video.aspectRatio} className={classes.player} />
         {editable && !selected ? (
-          <button
-            type="button"
-            className={classes.selectionShield}
-            aria-label={video.title}
+          <BlockSelectionTarget
+            pointer="capture"
+            label={video.title}
             onMouseDown={(event) => {
               if (!canSelect()) {
                 return;

@@ -1,6 +1,9 @@
 'use client';
 
-import { Group, Stack, Text } from '@mantine/core';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+import { useId } from 'react';
+
 import { NumberInput } from '@/components/core/Input';
 
 export type RotationAxis = 'x' | 'y' | 'z';
@@ -45,23 +48,26 @@ export function RotationAxisInputs({
   testId,
   onChange,
 }: RotationAxisInputsProps) {
+  const labelId = useId();
+  const descriptionId = useId();
   return (
-    <Stack gap={6} data-testid={testId}>
+    <DsLayoutStack gap="xxs" data-testid={testId} role="group" aria-labelledby={labelId}>
       <div>
-        <Text size="xs" fw={500}>
+        <DsText id={labelId} size="xs" weight="medium">
           {label}
-        </Text>
+        </DsText>
         {description ? (
-          <Text size="xs" c="dimmed">
+          <DsText id={descriptionId} size="xs" tone="secondary">
             {description}
-          </Text>
+          </DsText>
         ) : null}
       </div>
-      <Group grow align="flex-start" gap="xs" wrap="nowrap">
+      <DsLayoutInline grow align="start" gap="xs" wrap="nowrap">
         {AXES.map((axis) => (
           <NumberInput
             key={axis}
             aria-label={`${label} ${axis.toUpperCase()}`}
+            aria-describedby={description ? descriptionId : undefined}
             label={axis.toUpperCase()}
             value={values[axis] ?? ''}
             placeholder={placeholders?.[axis]}
@@ -70,11 +76,10 @@ export function RotationAxisInputs({
             step={step}
             decimalScale={2}
             suffix={suffix}
-            size="xs"
             onChange={(value) => onChange(axis, normalizeValue(value))}
           />
         ))}
-      </Group>
-    </Stack>
+      </DsLayoutInline>
+    </DsLayoutStack>
   );
 }

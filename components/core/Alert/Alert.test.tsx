@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { I18nProvider as DesignSystemProvider } from 'react-aria-components';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { Alert } from './Alert';
 
 let container: HTMLDivElement;
@@ -22,7 +23,7 @@ afterEach(() => {
 
 function renderAlert(node: React.ReactNode): HTMLElement {
   act(() => {
-    root.render(<MantineProvider>{node}</MantineProvider>);
+    root.render(<DesignSystemProvider>{node}</DesignSystemProvider>);
   });
 
   const alert = container.querySelector<HTMLElement>('[role="alert"]');
@@ -33,21 +34,22 @@ function renderAlert(node: React.ReactNode): HTMLElement {
 }
 
 describe('Alert', () => {
-  it('renders title and content with the default semantic info treatment', () => {
+  it('renders title and content with the default neutral notice treatment', () => {
     const alert = renderAlert(<Alert title="Heads up">Review the latest changes.</Alert>);
 
     expect(alert.textContent).toContain('Heads up');
     expect(alert.textContent).toContain('Review the latest changes.');
-    expect(alert.getAttribute('data-tone')).toBe('accent');
+    expect(alert.getAttribute('data-tone')).toBe('neutral');
     expect(alert.getAttribute('data-prominence')).toBe('standard');
-    expect(alert.getAttribute('data-variant')).toBe('light');
+    expect(alert.hasAttribute('data-variant')).toBe(false);
   });
 
-  it('maps semantic danger tone to the controlled Mantine treatment', () => {
+  it('preserves negative feedback semantics for the shared themed presentation', () => {
     const alert = renderAlert(<Alert tone="danger">Unable to save.</Alert>);
 
     expect(alert.getAttribute('data-tone')).toBe('danger');
-    expect(alert.style.getPropertyValue('--alert-color')).toContain('red');
+    expect(alert.textContent).toContain('Unable to save.');
+    expect(alert.hasAttribute('style')).toBe(false);
   });
 
   it('supports strong semantic prominence without exposing a raw variant', () => {
@@ -57,7 +59,8 @@ describe('Alert', () => {
       </Alert>,
     );
 
-    expect(alert.getAttribute('data-variant')).toBe('filled');
+    expect(alert.getAttribute('data-tone')).toBe('warning');
+    expect(alert.hasAttribute('data-variant')).toBe(false);
     expect(alert.getAttribute('data-prominence')).toBe('strong');
   });
 

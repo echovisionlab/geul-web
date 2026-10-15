@@ -1,9 +1,12 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import Link from '@/components/core/Navigation';
 import { useTranslations } from 'next-intl';
-import { Avatar, Group, Stack, Text } from '@mantine/core';
-import { statusToneFromColor, StatusBadge } from '@/components/core/Badge';
+
+import { Avatar } from '@/components/core/Display';
+import { StatusBadge, type StatusTone } from '@/components/core/Badge';
 import { DateTime } from '@/features/date-time/DateTime';
 import { TextButton } from '@/components/core/TextButton';
 import {
@@ -19,10 +22,10 @@ import { buildEntityEditHref } from '@/lib/utils/entity-edit-route';
 import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
 import { PostRowMenu } from './PostRowMenu';
 
-const STATUS_COLORS: Record<string, string> = {
-  draft: 'yellow',
-  published: 'green',
-  archived: 'gray',
+const STATUS_TONES: Record<string, StatusTone> = {
+  draft: 'neutral',
+  published: 'positive',
+  archived: 'neutral',
 };
 
 interface PostRow {
@@ -64,16 +67,16 @@ function getColumns(
       key: 'title',
       header: labels.title,
       cell: (row) => (
-        <Stack gap={2}>
+        <DsLayoutStack gap="xxs">
           <TextButton href={buildEntityEditHref(`/posts/${row.id}`, {})} size="sm" weight="medium" appearance="accent">
             {row.title || labels.untitled}
           </TextButton>
           {row.slug && (
-            <Text size="xs" c="dimmed">
+            <DsText size="xs" tone="secondary">
               /{row.slug}
-            </Text>
+            </DsText>
           )}
-        </Stack>
+        </DsLayoutStack>
       ),
     },
     {
@@ -82,33 +85,28 @@ function getColumns(
       cell: (row) => {
         if (!row.author) {
           return (
-            <Text size="sm" c="dimmed">
+            <DsText size="sm" tone="secondary">
               -
-            </Text>
+            </DsText>
           );
         }
 
         const authorHref = buildAuthorProfileHref(row.author.id);
 
         return (
-          <Group gap="xs" wrap="nowrap">
-            <Link
-              href={authorHref}
-              style={{ display: 'inline-flex', textDecoration: 'none' }}
-              aria-label={getViewProfileLabel(row.author.name || labels.user)}
-            >
+          <DsLayoutInline gap="xs" wrap="nowrap">
+            <Link href={authorHref} appearance="quiet" aria-label={getViewProfileLabel(row.author.name || labels.user)}>
               <Avatar
                 src={buildManagedImageUrl(row.author.avatarUrl, MANAGED_IMAGE_PRESET.AVATAR_SM)}
                 size="sm"
-                radius="xl"
-              >
-                {row.author.name?.charAt(0).toUpperCase()}
-              </Avatar>
+                shape="circle"
+                name={row.author.name}
+              />
             </Link>
             <TextButton href={authorHref} size="sm" weight="medium" appearance="accent">
               {row.author.name || labels.unknownAuthor}
             </TextButton>
-          </Group>
+          </DsLayoutInline>
         );
       },
     },
@@ -116,7 +114,7 @@ function getColumns(
       key: 'status',
       header: labels.status,
       cell: (row) => (
-        <StatusBadge tone={statusToneFromColor(STATUS_COLORS[normalizeEnumToken(row.status)] || 'blue')} size="sm">
+        <StatusBadge tone={STATUS_TONES[normalizeEnumToken(row.status)] ?? 'neutral'} size="sm">
           {normalizeEnumToken(row.status) === 'published'
             ? labels.published
             : normalizeEnumToken(row.status) === 'archived'
@@ -131,18 +129,18 @@ function getColumns(
       key: 'createdAt',
       header: labels.created,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.createdAt} />
-        </Text>
+        </DsText>
       ),
     },
     {
       key: 'updatedAt',
       header: labels.updated,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.updatedAt} />
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -156,13 +154,20 @@ function getColumns(
 }
 
 interface PostsTableContentProps {
+  deleteAction?: typeof deletePostAdminAction;
   result: PaginatedQueryResult<PostRow>;
   filterFields: FilterFieldConfig[];
   sortFields: SortFieldConfig[];
   searchPlaceholder: string;
 }
 
-export function PostsTableContent({ result, filterFields, sortFields, searchPlaceholder }: PostsTableContentProps) {
+export function PostsTableContent({
+  result,
+  filterFields,
+  sortFields,
+  searchPlaceholder,
+  deleteAction = deletePostAdminAction,
+}: PostsTableContentProps) {
   const tCommon = useTranslations('common');
   const tCommonAria = useTranslations('common.aria');
   const columns = getColumns(
@@ -194,7 +199,7 @@ export function PostsTableContent({ result, filterFields, sortFields, searchPlac
       sortFields={sortFields}
       bulkDelete={{
         entityLabel: tCommon('entities.posts'),
-        deleteAction: deletePostAdminAction,
+        deleteAction,
         getRowLabel: (row) => row.title || row.slug || row.id,
       }}
     />

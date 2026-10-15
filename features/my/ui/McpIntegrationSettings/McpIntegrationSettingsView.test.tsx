@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
+import { DesignSystemTestProvider as DesignSystemProvider } from '@/test/TestProviders';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { McpIntegrationSettingsView } from './McpIntegrationSettingsView';
 
@@ -26,7 +27,7 @@ describe('McpIntegrationSettingsView', () => {
   it('shows the canonical Remote MCP endpoint with OAuth as the default connection', () => {
     act(() => {
       root.render(
-        <MantineProvider env="test">
+        <DesignSystemProvider forceColorScheme="light">
           <McpIntegrationSettingsView
             endpoint="https://site.example/mcp"
             setupGuideUrl="https://site.example/guides/remote-mcp.md"
@@ -37,7 +38,7 @@ describe('McpIntegrationSettingsView', () => {
               openGuide: 'Open setup guide',
             }}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
@@ -45,6 +46,14 @@ describe('McpIntegrationSettingsView', () => {
     expect(document.body.textContent).toContain('OAuth 2.1');
     expect(document.body.textContent).toContain('browser sign-in and consent');
     expect(document.body.textContent).toContain('https://site.example/mcp');
+    const endpoint = container.querySelector('[role="definition"]')!;
+    expect(endpoint).toHaveAccessibleName('Endpoint');
+    expect(endpoint).toHaveTextContent('https://site.example/mcp');
+    const term = document.getElementById(endpoint.getAttribute('aria-labelledby')!)!;
+    expect(term).toHaveAttribute('role', 'term');
+    expect(term).toHaveTextContent('Endpoint');
+    expect(term.firstElementChild?.tagName).toBe('SPAN');
+    expect(term.firstElementChild).not.toHaveAttribute('aria-hidden');
     expect(document.body.textContent).not.toContain('Bearer');
     expect(document.querySelector('button')).toBeNull();
     expect(document.querySelector('a')?.getAttribute('href')).toBe('https://site.example/guides/remote-mcp.md');

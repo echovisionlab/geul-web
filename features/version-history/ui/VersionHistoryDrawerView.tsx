@@ -1,11 +1,19 @@
 'use client';
+import { SupportingText, Text as DsText, VisuallyHidden } from '@/components/core/Typography';
+import { ConfirmationDialog } from '@/features/confirmation/ui/ConfirmationDialog';
 
-import { IconHistory } from '@tabler/icons-react';
-import { Group, Loader, ScrollArea, Stack, Text, Timeline } from '@mantine/core';
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutStack as DsLayoutStack,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+
+import { Spinner as Loader, NearEndLoader } from '@/components/core/Display';
 import { Button } from '@/components/core/Button';
 import { Drawer } from '@/components/core/Drawer';
-import { ConfirmModal } from '@/components/core/Modal';
-import { Tooltip } from '@/components/core/Tooltip';
+import { Alert } from '@/components/core/Alert';
+
+import { useId } from 'react';
 
 export interface VersionHistoryItemViewModel {
   id: string;
@@ -13,6 +21,7 @@ export interface VersionHistoryItemViewModel {
   versionLabel: string;
   title: string;
   sourceLocaleLabel: string;
+  createdAt: string;
   createdAtLabel: string;
   createdAtTooltip?: string;
   contributorLabel: string;
@@ -27,6 +36,10 @@ export interface VersionHistoryDrawerViewLabels {
   restoreTitle: string;
   restoreBody: string;
   cancel: string;
+  loadMore: string;
+  loadFailed: string;
+  end: string;
+  retry: string;
 }
 
 export interface VersionHistoryDrawerViewProps {
@@ -35,6 +48,15 @@ export interface VersionHistoryDrawerViewProps {
   versions: readonly VersionHistoryItemViewModel[];
   labels: VersionHistoryDrawerViewLabels;
   loading: boolean;
+  error: string | null;
+  onRetry: () => Promise<void>;
+  pagination: {
+    contextKey: string;
+    nextPage: number | null;
+    loading: boolean;
+    error: string | null;
+    onLoad: () => Promise<void>;
+  };
   restoring: boolean;
   canRestore: boolean;
   selectedVersionId: string | null;
@@ -50,6 +72,9 @@ export function VersionHistoryDrawerView({
   versions,
   labels,
   loading,
+  error,
+  onRetry,
+  pagination,
   restoring,
   canRestore,
   selectedVersionId,
@@ -58,6 +83,7 @@ export function VersionHistoryDrawerView({
   onCloseRestoreConfirmation,
   onRestore,
 }: VersionHistoryDrawerViewProps) {
+  const historyId = useId();
   return (
     <>
       <Drawer
@@ -65,64 +91,108 @@ export function VersionHistoryDrawerView({
         onClose={onClose}
         placement="right"
         size="compact"
+        density="compact"
         closeLabel={labels.close}
-        title={
-          <Group gap="xs">
-            <IconHistory size={18} />
-            <Text fw={600}>{labels.title}</Text>
-          </Group>
-        }
+        title={labels.title}
       >
-        <Stack gap="md" h="100%">
+        <DsLayoutStack gap="sm">
           {loading ? (
-            <Stack align="center" py="xl">
-              <Loader size="sm" aria-label={labels.loading} />
-            </Stack>
+            <DsLayoutInset block="xl">
+              <DsLayoutStack align="center">
+                <Loader size="sm" aria-label={labels.loading} />
+              </DsLayoutStack>
+            </DsLayoutInset>
+          ) : error && versions.length === 0 ? (
+            <Alert tone="danger" title={error}>
+              <Button onClick={() => void onRetry()} size="compact">
+                {labels.retry}
+              </Button>
+            </Alert>
           ) : versions.length === 0 ? (
-            <Text size="sm" c="dimmed" ta="center" py="xl">
-              {labels.empty}
-            </Text>
+            <DsLayoutInset block="xl">
+              <SupportingText tone="secondary" align="center">
+                {labels.empty}
+              </SupportingText>
+            </DsLayoutInset>
           ) : (
-            <ScrollArea flex={1} style={{ minHeight: 0 }}>
-              <Timeline active={0} bulletSize={24} lineWidth={2}>
+            <>
+              <DsLayoutStack gap="sm" role="list" aria-label={labels.title}>
                 {versions.map((version) => (
-                  <Timeline.Item key={version.id} title={version.versionLabel}>
-                    <Stack gap={2}>
-                      <Text size="sm" lineClamp={1}>
+                  <DsLayoutInline
+                    key={version.id}
+                    gap="xs"
+                    align="start"
+                    wrap="nowrap"
+                    role="listitem"
+                    aria-labelledby={`${historyId}-${version.id}-title ${historyId}-${version.id}`}
+                  >
+                    <DsLayoutStack gap="xxs" flexible shrink>
+                      <DsText id={`${historyId}-${version.id}-title`} size="sm" weight="strong" lines={1}>
                         {version.title}
-                      </Text>
-                      <Text size="xs" c="dimmed">
-                        {version.sourceLocaleLabel}
-                      </Text>
-                      <Group gap="xs">
-                        <Tooltip label={version.createdAtTooltip ?? ''} disabled={!version.createdAtTooltip}>
-                          <Text size="xs" c="dimmed">
+                      </DsText>
+                      <DsLayoutInline gap="xs" wrap="wrap">
+                        <DsText id={`${historyId}-${version.id}`} size="xs" tone="secondary">
+                          {version.versionLabel}
+                        </DsText>
+                        <DsText id={`${historyId}-${version.id}-locale`} size="xs" tone="secondary">
+                          {version.sourceLocaleLabel}
+                        </DsText>
+                        <DsText as="span" size="xs" tone="secondary" title={version.createdAtTooltip}>
+                          <time
+                            dateTime={version.createdAt}
+                            aria-describedby={version.createdAtTooltip ? `${historyId}-${version.id}-time` : undefined}
+                          >
                             {version.createdAtLabel}
-                          </Text>
-                        </Tooltip>
-                        <Text size="xs" c="dimmed">
-                          {version.contributorLabel}
-                        </Text>
-                      </Group>
-                      <Button
-                        emphasis="low"
-                        size="xs"
-                        onClick={() => onSelectVersion(version.id)}
-                        disabled={!canRestore}
-                        style={{ alignSelf: 'flex-start' }}
-                      >
-                        {labels.restore}
-                      </Button>
-                    </Stack>
-                  </Timeline.Item>
+                          </time>
+                          {version.createdAtTooltip ? (
+                            <VisuallyHidden id={`${historyId}-${version.id}-time`}>
+                              {version.createdAtTooltip}
+                            </VisuallyHidden>
+                          ) : null}
+                        </DsText>
+                      </DsLayoutInline>
+                      <DsText size="xs" tone="secondary">
+                        {version.contributorLabel}
+                      </DsText>
+                    </DsLayoutStack>
+                    <Button
+                      emphasis="medium"
+                      size="xs"
+                      onClick={() => onSelectVersion(version.id)}
+                      disabled={!canRestore}
+                      aria-describedby={[
+                        `${historyId}-${version.id}`,
+                        `${historyId}-${version.id}-title`,
+                        `${historyId}-${version.id}-locale`,
+                        ...(version.createdAtTooltip ? [`${historyId}-${version.id}-time`] : []),
+                      ].join(' ')}
+                    >
+                      {labels.restore}
+                    </Button>
+                  </DsLayoutInline>
                 ))}
-              </Timeline>
-            </ScrollArea>
+              </DsLayoutStack>
+              <NearEndLoader
+                pageKey={pagination.nextPage === null ? null : String(pagination.nextPage)}
+                resetKey={pagination.contextKey}
+                loading={pagination.loading}
+                error={pagination.error}
+                onLoad={pagination.onLoad}
+                labels={{
+                  load: labels.loadMore,
+                  loading: labels.loading,
+                  end: labels.end,
+                  retry: labels.retry,
+                  failed: labels.loadFailed,
+                }}
+              />
+            </>
           )}
-        </Stack>
+        </DsLayoutStack>
       </Drawer>
 
-      <ConfirmModal
+      <ConfirmationDialog
+        intent="restore"
         opened={restoreConfirmationOpened}
         onClose={onCloseRestoreConfirmation}
         onConfirm={onRestore}
@@ -131,7 +201,6 @@ export function VersionHistoryDrawerView({
         confirmLabel={labels.restore}
         cancelLabel={labels.cancel}
         closeLabel={labels.close}
-        confirmTone="accent"
         loading={restoring}
         confirmDisabled={!canRestore || !selectedVersionId}
         centered

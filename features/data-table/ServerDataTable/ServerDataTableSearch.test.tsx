@@ -17,11 +17,7 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => searchParams,
 }));
 vi.mock('next-intl', () => ({ useTranslations: () => () => 'Search' }));
-vi.mock('@mantine/core', () => ({
-  Box: ({ children, ref }: { children: ReactNode; ref: ComponentProps<'div'>['ref'] }) => (
-    <div ref={ref}>{children}</div>
-  ),
-}));
+
 vi.mock('@/components/core/Input/TextInput', () => ({
   TextInput: ({ leftSection: _leftSection, ref, ...props }: ComponentProps<'input'> & { leftSection: ReactNode }) => {
     mocks.onChange = props.onChange as typeof mocks.onChange;

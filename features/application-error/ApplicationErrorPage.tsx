@@ -1,26 +1,30 @@
 'use client';
 
-import type { SupportedLocale } from '@/lib/i18n/locale';
 import type { ErrorPageAction } from '@/components/core/ErrorPage/ErrorPageView';
 import { ErrorPageView } from './ErrorPageView';
-import { canRetryErrorStatus, getErrorPageContent } from './error-status';
+import { useErrorPageMessages } from './error-page-messages';
+import { canRetryErrorStatus, getErrorPageContent, type ErrorPageMessages } from './error-status';
 
 export interface ApplicationErrorPageProps {
   status: number;
-  locale?: SupportedLocale;
   homeHref?: string;
   onRetry?: () => void;
   fullScreen?: boolean;
 }
 
-export function ApplicationErrorPage({
+export interface ApplicationErrorPageViewProps extends ApplicationErrorPageProps {
+  messages: ErrorPageMessages;
+}
+
+/** Error surface with explicit copy, for the provider-free root fallback. */
+export function ApplicationErrorPageView({
   status,
-  locale,
+  messages,
   homeHref = '/',
   onRetry,
   fullScreen,
-}: ApplicationErrorPageProps) {
-  const content = getErrorPageContent(status, locale);
+}: ApplicationErrorPageViewProps) {
+  const content = getErrorPageContent(status, messages);
   const actions: ErrorPageAction[] = [];
   if (status === 401) {
     actions.push({ label: content.login, href: '/login' });
@@ -29,4 +33,9 @@ export function ApplicationErrorPage({
   }
   actions.push({ label: content.goHome, href: homeHref });
   return <ErrorPageView code={content.code} title={content.title} actions={actions} fullScreen={fullScreen} />;
+}
+
+/** Error surface inside the root layout, in the active locale of its message catalogue. */
+export function ApplicationErrorPage(props: ApplicationErrorPageProps) {
+  return <ApplicationErrorPageView {...props} messages={useErrorPageMessages()} />;
 }

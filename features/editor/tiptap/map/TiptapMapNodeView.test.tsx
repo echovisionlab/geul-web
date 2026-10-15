@@ -59,11 +59,7 @@ vi.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries: vi.fn() }),
 }));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@mantine/core', () => ({
-  Box: ({ children, ...props }: HTMLAttributes<HTMLDivElement>) => <div {...props}>{children}</div>,
-  Stack: ({ children, ...props }: HTMLAttributes<HTMLDivElement>) => <div {...props}>{children}</div>,
-  Text: ({ children, ...props }: HTMLAttributes<HTMLDivElement>) => <div {...props}>{children}</div>,
-}));
+
 vi.mock('@mantine/hooks', () => ({ useDisclosure: () => [false, { open: openPlacesModal, close: vi.fn() }] }));
 vi.mock('@/components/core/Input', () => ({
   TextInput: ({ classNames, ...props }: HTMLAttributes<HTMLInputElement> & { classNames?: { input?: string } }) => (
@@ -78,7 +74,7 @@ vi.mock('@/features/map/MapLibreMapEditor', () => ({
     interactive,
     onConfigChange,
     onManagePlaces,
-    levaProps,
+    settingsPanel,
   }: {
     config: {
       draggable: boolean;
@@ -90,7 +86,7 @@ vi.mock('@/features/map/MapLibreMapEditor', () => ({
     interactive: boolean;
     onConfigChange: (patch: { zoom?: number; draggable?: boolean }) => void;
     onManagePlaces?: () => void;
-    levaProps?: { hidden?: boolean };
+    settingsPanel?: { hidden?: boolean };
   }) => {
     mapEditorSpy.props = { config, interactive };
     return (
@@ -98,7 +94,7 @@ vi.mock('@/features/map/MapLibreMapEditor', () => ({
         data-map-place-count={places.length}
         data-interactive={interactive}
         data-has-place-management={Boolean(onManagePlaces)}
-        data-leva-hidden={levaProps?.hidden}
+        data-settings-hidden={settingsPanel?.hidden}
         data-config-draggable={config.draggable}
         data-config-zoomable={config.zoomable}
         data-config-rotatable={config.rotatable}
@@ -421,7 +417,7 @@ describe('TiptapMapNodeView', () => {
     );
 
     expect(container?.querySelector('[data-interactive="true"]')).toBeTruthy();
-    expect(container?.querySelector('[data-leva-hidden="true"]')).toBeTruthy();
+    expect(container?.querySelector('[data-settings-hidden="true"]')).toBeTruthy();
     expect(container?.querySelector('[data-has-place-management="false"]')).toBeTruthy();
     expect(container?.querySelector('[data-map-frame][data-allow-resize="false"]')).toBeTruthy();
     expect(container?.querySelector('[data-map-config-change]')).toBeTruthy();
@@ -458,7 +454,7 @@ describe('TiptapMapNodeView', () => {
     );
 
     expect(container?.querySelector('[data-interactive="true"]')).toBeTruthy();
-    expect(container?.querySelector('[data-leva-hidden="true"]')).toBeTruthy();
+    expect(container?.querySelector('[data-settings-hidden="true"]')).toBeTruthy();
     expect(container?.querySelector('[data-map-frame][data-allow-resize="false"]')).toBeTruthy();
     expect(container?.querySelector('[data-testid="tiptap-map-caption"]')).toBeNull();
     expect(container?.querySelector('input')).toBeNull();

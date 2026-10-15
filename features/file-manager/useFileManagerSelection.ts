@@ -26,12 +26,15 @@ interface Options {
   onSelectedItemIdsChange: (ids: string[]) => void;
   onOpenFolder: (folder: Extract<FileManagerRow, { kind: 'folder' }>) => void;
   onOpenFile: (file: FileManagerFileView) => void;
+  isItemSelectable?: (item: FileManagerRow) => boolean;
+  getItemKey?: (item: FileManagerRow) => string;
 }
 
 function intersects(a: DOMRect, b: { left: number; right: number; top: number; bottom: number }) {
   return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
 }
 
+const interactiveSelector = 'button, input, select, textarea, label, a, [role=button]';
 const itemSelector = '[data-file-viewer-item], [data-datatable-desktop-row], [data-datatable-mobile-row]';
 
 export function useFileManagerSelection({
@@ -40,9 +43,11 @@ export function useFileManagerSelection({
   onSelectedItemIdsChange,
   onOpenFolder,
   onOpenFile,
+  isItemSelectable = () => true,
+  getItemKey = (item) => item.id,
 }: Options) {
   const surfaceRef = useRef<HTMLDivElement>(null);
-  const selectionAnchorRef = useRef<number | null>(null);
+  const selectionAnchorRef = useRef<string | null>(null);
   const suppressSurfaceClickRef = useRef(false);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [marquee, setMarquee] = useState<MarqueeState | null>(null);
@@ -68,12 +73,24 @@ export function useFileManagerSelection({
     }
   };
 
-  const selectItem = (event: MouseEvent<HTMLElement>, item: FileManagerRow, index: number) => {
-    const additive = event.metaKey || event.ctrlKey;
-    if (event.shiftKey && selectionAnchorRef.current != null) {
-      const start = Math.min(selectionAnchorRef.current, index);
-      const end = Math.max(selectionAnchorRef.current, index);
-      const rangeIds = items.slice(start, end + 1).map((candidate) => candidate.id);
+  const selectItem = (
+    event: Pick<MouseEvent<HTMLElement>, 'metaKey' | 'ctrlKey' | 'shiftKey'> & { nativeEvent?: Event },
+    item: FileManagerRow,
+    index: number,
+  ) => {
+    if (!isItemSelectable(item)) {
+      return;
+    }
+    const anchorIndex = items.findIndex((candidate) => candidate.id === selectionAnchorRef.current);
+    const touch = (event.nativeEvent as globalThis.PointerEvent | undefined)?.pointerType === 'touch';
+    const additive = event.metaKey || event.ctrlKey || touch;
+    if (event.shiftKey && anchorIndex !== -1) {
+      const start = Math.min(anchorIndex, index);
+      const end = Math.max(anchorIndex, index);
+      const rangeIds = items
+        .slice(start, end + 1)
+        .filter(isItemSelectable)
+        .map((candidate) => candidate.id);
       onSelectedItemIdsChange(additive ? [...new Set([...selectedItemIds, ...rangeIds])] : rangeIds);
       return;
     }
@@ -86,14 +103,14 @@ export function useFileManagerSelection({
     } else {
       onSelectedItemIdsChange([item.id]);
     }
-    selectionAnchorRef.current = index;
+    selectionAnchorRef.current = item.id;
   };
 
-  const openItemContextMenuAt = (item: FileManagerRow, index: number, x: number, y: number) => {
+  const openItemContextMenuAt = (item: FileManagerRow, _index: number, x: number, y: number) => {
     if (!selectedItemIds.includes(item.id)) {
       onSelectedItemIdsChange([item.id]);
     }
-    selectionAnchorRef.current = index;
+    selectionAnchorRef.current = item.id;
     setContextMenu({ x, y, itemId: item.id });
   };
 
@@ -106,6 +123,9 @@ export function useFileManagerSelection({
   const activateItem = (item: FileManagerRow) => (item.kind === 'folder' ? onOpenFolder(item) : onOpenFile(item));
 
   const handleItemKeyDown = (event: KeyboardEvent<HTMLElement>, item: FileManagerRow, index: number) => {
+    if (event.target !== event.currentTarget && (event.target as HTMLElement).closest(interactiveSelector)) {
+      return;
+    }
     if (event.key === 'Enter') {
       event.preventDefault();
       activateItem(item);
@@ -113,12 +133,7 @@ export function useFileManagerSelection({
     }
     if (event.key === ' ') {
       event.preventDefault();
-      if (item.kind === 'file') {
-        onOpenFile(item);
-      } else {
-        onSelectedItemIdsChange([item.id]);
-        selectionAnchorRef.current = index;
-      }
+      selectItem({ ctrlKey: true, metaKey: false, shiftKey: event.shiftKey }, item, index);
       return;
     }
     if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
@@ -137,7 +152,11 @@ export function useFileManagerSelection({
   };
 
   const startMarquee = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0 || (event.target as HTMLElement).closest(itemSelector)) {
+    if (
+      event.pointerType === 'touch' ||
+      event.button !== 0 ||
+      (event.target as HTMLElement).closest(`${itemSelector}, ${interactiveSelector}`)
+    ) {
       return;
     }
     const surface = surfaceRef.current;
@@ -156,10 +175,10 @@ export function useFileManagerSelection({
       startClientY: event.clientY,
       startLocalX: event.clientX - bounds.left,
       startLocalY: event.clientY - bounds.top,
-      additiveIds: event.metaKey || event.ctrlKey ? selectedItemIds : [],
+      additiveIds: event.metaKey || event.ctrlKey || event.shiftKey ? selectedItemIds : [],
     });
     setMarqueeRect({ left: event.clientX - bounds.left, top: event.clientY - bounds.top, width: 0, height: 0 });
-    if (!event.metaKey && !event.ctrlKey) {
+    if (!event.metaKey && !event.ctrlKey && !event.shiftKey) {
       onSelectedItemIdsChange([]);
     }
   };
@@ -189,10 +208,14 @@ export function useFileManagerSelection({
       top: Math.min(marquee.startClientY, event.clientY),
       bottom: Math.max(marquee.startClientY, event.clientY),
     };
+    const selectableByKey = new Map(items.filter(isItemSelectable).map((item) => [getItemKey(item), item.id]));
     const hitIds = Array.from(surface.querySelectorAll<HTMLElement>(itemSelector))
       .filter((node) => intersects(node.getBoundingClientRect(), clientRect))
       .map((node) => node.dataset.fileViewerItem ?? node.dataset.datatableDesktopRow ?? node.dataset.datatableMobileRow)
-      .filter((id): id is string => Boolean(id));
+      .flatMap((key) => {
+        const id = key ? selectableByKey.get(key) : undefined;
+        return id ? [id] : [];
+      });
     onSelectedItemIdsChange([...new Set([...marquee.additiveIds, ...hitIds])]);
   };
 
@@ -211,7 +234,7 @@ export function useFileManagerSelection({
   };
 
   const clearSurfaceSelection = (event: MouseEvent<HTMLDivElement>) => {
-    if ((event.target as HTMLElement).closest(itemSelector)) {
+    if ((event.target as HTMLElement).closest(`${itemSelector}, ${interactiveSelector}`)) {
       return;
     }
     releaseSurfaceFocus();
@@ -230,9 +253,15 @@ export function useFileManagerSelection({
     }
   };
 
-  const changeTableSelection = (ids: string[]) => {
+  const anchorItem = (item: FileManagerRow) => {
+    selectionAnchorRef.current = item.id;
+  };
+
+  const changeTableSelection = (ids: string[], updateAnchor = true) => {
     onSelectedItemIdsChange(ids);
-    selectionAnchorRef.current = ids.length ? items.findIndex((item) => item.id === ids.at(-1)) : null;
+    if (updateAnchor) {
+      selectionAnchorRef.current = ids.at(-1) ?? null;
+    }
   };
 
   return {
@@ -254,5 +283,6 @@ export function useFileManagerSelection({
     clearSurfaceSelection,
     openContextItem,
     changeTableSelection,
+    anchorItem,
   };
 }

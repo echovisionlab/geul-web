@@ -19,6 +19,8 @@ import {
 } from '@echovisionlab/geul-common/collaboration/menu';
 import { DOCUMENT_ROOM_SNAPSHOT_KEYS, DOCUMENT_ROOM_SNAPSHOT_MAP_NAME } from '@/lib/collab/document-room-snapshot';
 import { flushEditorSaves, hasPendingEditorSaves } from '@/lib/editor/editor-save-registry';
+import { captureDocumentRoomSnapshot, type MenuDocumentRoomIntentSnapshot } from '@/lib/collab/document-room-intent';
+import * as documentRoomJournalStore from '@/lib/collab/document-room-journal-store';
 import { useFormEditorCollaboration } from './useFormEditorCollaboration';
 import { useHocuspocusConnection } from './useHocuspocusConnection';
 
@@ -39,6 +41,7 @@ const providerState = vi.hoisted(() => ({
     };
     destroy: ReturnType<typeof vi.fn>;
     disconnect: ReturnType<typeof vi.fn>;
+    connect: ReturnType<typeof vi.fn>;
     emit: (event: string, payload?: unknown) => void;
   }>,
 }));
@@ -226,7 +229,9 @@ describe('useHocuspocusConnection request identity', () => {
 
     const first = providerState.instances[0]!;
     act(() => {
-      first.emit('stateless', { payload: JSON.stringify({ kind: 'reload_required' }) });
+      first.emit('stateless', {
+        payload: JSON.stringify({ v: 3, kind: 'room.reload', reloadReason: 'external_update' }),
+      });
     });
 
     expect(first.disconnect).toHaveBeenCalledOnce();
@@ -247,7 +252,9 @@ describe('useHocuspocusConnection request identity', () => {
 
     const first = providerState.instances[0]!;
     act(() => {
-      first.emit('stateless', { payload: JSON.stringify({ kind: 'reload_required' }) });
+      first.emit('stateless', {
+        payload: JSON.stringify({ v: 3, kind: 'room.reload', reloadReason: 'external_update' }),
+      });
     });
 
     const second = providerState.instances[1]!;
@@ -280,7 +287,11 @@ describe('useHocuspocusConnection request identity', () => {
     act(() => latestFormEditor?.setField('title', 'Local title'));
     expect(hasPendingEditorSaves(`form:${entityId}`)).toBe(true);
 
-    act(() => first.emit('stateless', { payload: JSON.stringify({ kind: 'reload_required' }) }));
+    act(() =>
+      first.emit('stateless', {
+        payload: JSON.stringify({ v: 3, kind: 'room.reload', reloadReason: 'external_update' }),
+      }),
+    );
     const second = providerState.instances[1]!;
     const peerSchema = {
       id: 'schema-1',
@@ -330,7 +341,11 @@ describe('useHocuspocusConnection request identity', () => {
     act(() => latestFormEditor?.setField('title', 'Local target title'));
     expect(hasPendingEditorSaves(`form:${entityId}`)).toBe(true);
 
-    act(() => first.emit('stateless', { payload: JSON.stringify({ kind: 'reload_required' }) }));
+    act(() =>
+      first.emit('stateless', {
+        payload: JSON.stringify({ v: 3, kind: 'room.reload', reloadReason: 'external_update' }),
+      }),
+    );
     const second = providerState.instances[1]!;
     seedFormRoom(second.configuration.document, 'ko', null, schema, nextDocumentRevision);
     act(() => second.configuration.onSynced?.());
@@ -376,7 +391,11 @@ describe('useHocuspocusConnection request identity', () => {
     });
 
     const first = providerState.instances[0]!;
-    act(() => first.emit('stateless', { payload: JSON.stringify({ kind: 'reload_required' }) }));
+    act(() =>
+      first.emit('stateless', {
+        payload: JSON.stringify({ v: 3, kind: 'room.reload', reloadReason: 'external_update' }),
+      }),
+    );
 
     const second = providerState.instances[1]!;
     expect(first.disconnect).toHaveBeenCalledOnce();
@@ -386,7 +405,7 @@ describe('useHocuspocusConnection request identity', () => {
     expect(snapshots.at(-1)?.connection.provider).toBe(second);
   });
 
-  it('rebuilds an exact document room when authentication reports reload_required', async () => {
+  it('rebuilds an exact document room on an epoch mismatch', async () => {
     const documentName = `email-layout:${entityId}:ko`;
     await act(async () => {
       root?.render(<ReloadHarness documentName={documentName} />);
@@ -394,7 +413,11 @@ describe('useHocuspocusConnection request identity', () => {
     });
 
     const first = providerState.instances[0]!;
-    act(() => first.configuration.onAuthenticationFailed?.({ reason: 'reload_required' }));
+    act(() =>
+      first.emit('stateless', {
+        payload: JSON.stringify({ v: 3, kind: 'room.reload', reloadReason: 'epoch_mismatch' }),
+      }),
+    );
 
     expect(first.disconnect).toHaveBeenCalledOnce();
     expect(providerState.instances).toHaveLength(2);
@@ -416,7 +439,11 @@ describe('useHocuspocusConnection request identity', () => {
     act(() => setMenuLocaleLabel(first.configuration.document, 'item-a', 'Local label'));
     expect(hasPendingEditorSaves(`menu:${entityId}`)).toBe(true);
 
-    act(() => first.emit('stateless', { payload: JSON.stringify({ kind: 'reload_required' }) }));
+    act(() =>
+      first.emit('stateless', {
+        payload: JSON.stringify({ v: 3, kind: 'room.reload', reloadReason: 'external_update' }),
+      }),
+    );
     const second = providerState.instances[1]!;
     await act(async () => {
       expect(await flushEditorSaves(`menu:${entityId}`)).toBe(false);
@@ -434,6 +461,234 @@ describe('useHocuspocusConnection request identity', () => {
     expect(hasPendingEditorSaves(`menu:${entityId}`)).toBe(false);
     expect(persistNowMock).toHaveBeenCalledOnce();
   });
+
+  it('adopts and persists unsaved intents a closed tab of this member left for the room', async () => {
+    const documentName = `menu:${entityId}:ko`;
+    const menuItem = { id: 'item-a', label: 'Source label', linkType: 'external', url: 'https://example.com' };
+    const scratch = new Y.Doc();
+    seedMenuRoom(scratch, 'ko', [menuItem]);
+    const before = captureDocumentRoomSnapshot(documentName, scratch)!;
+    setMenuLocaleLabel(scratch, 'item-a', 'Adopted label');
+    const after = captureDocumentRoomSnapshot(documentName, scratch)!;
+    scratch.destroy();
+    const claimOrphans = vi.fn(async () => ({ changes: [{ before, after }], recovery: null, records: 1 }));
+    const journal = vi.spyOn(documentRoomJournalStore, 'getDocumentRoomJournalStore').mockReturnValue({
+      tabId: 'tab',
+      writeChanges: vi.fn(),
+      writeRecovery: vi.fn(),
+      claimOrphans,
+      clearMember: vi.fn(),
+      flush: async () => {},
+      isSettled: () => true,
+      prune: async () => {},
+      dispose: vi.fn(),
+    });
+    try {
+      await act(async () => {
+        root?.render(<ReloadHarness documentName={documentName} />);
+        await Promise.resolve();
+      });
+      const first = providerState.instances[0]!;
+      seedMenuRoom(first.configuration.document, 'ko', [menuItem]);
+      await act(async () => {
+        first.configuration.onSynced?.();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+      expect(claimOrphans).toHaveBeenCalledWith({ documentName });
+      // The synced room flushes adopted intents at once: replay, persist, acknowledge.
+      await act(async () => {
+        expect(await flushEditorSaves(`menu:${entityId}`)).toBe(true);
+      });
+      const persisted = captureDocumentRoomSnapshot(
+        documentName,
+        first.configuration.document,
+      ) as MenuDocumentRoomIntentSnapshot | null;
+      expect(persisted?.requestedLabels['item-a']).toBe('Adopted label');
+      expect(persistNowMock).toHaveBeenCalledOnce();
+      expect(hasPendingEditorSaves(`menu:${entityId}`)).toBe(false);
+    } finally {
+      journal.mockRestore();
+    }
+  });
+
+  it('parks unsaved intents instead of sending them once the room is downgraded to view', async () => {
+    const documentName = `menu:${entityId}:fr`;
+    await act(async () => {
+      root?.render(<ReloadHarness documentName={documentName} />);
+      await Promise.resolve();
+    });
+    const first = providerState.instances[0]!;
+    const menuItem = { id: 'item-a', label: 'Source label', linkType: 'external', url: 'https://example.com' };
+    seedMenuRoom(first.configuration.document, 'fr', [menuItem]);
+    act(() => first.configuration.onSynced?.());
+    act(() => setMenuLocaleLabel(first.configuration.document, 'item-a', 'Local label'));
+    expect(hasPendingEditorSaves(`menu:${entityId}`)).toBe(true);
+
+    act(() =>
+      first.emit('stateless', { payload: JSON.stringify({ v: 3, kind: 'room.access_changed', access: 'view' }) }),
+    );
+    expect(hasPendingEditorSaves(`menu:${entityId}`)).toBe(false);
+    await act(async () => {
+      expect(await flushEditorSaves(`menu:${entityId}`)).toBe(true);
+    });
+    expect(persistNowMock).not.toHaveBeenCalled();
+    // Kept for a room reopened with edit access.
+    const journal = await import('@/lib/collab/document-room-intent-journal');
+    expect(journal.hasDocumentRoomIntents(documentName, null)).toBe(true);
+  });
+
+  it('starts parked when the room admits a viewer read-only', async () => {
+    const documentName = `menu:${entityId}:de`;
+    await act(async () => {
+      root?.render(<ReloadHarness documentName={documentName} />);
+      await Promise.resolve();
+    });
+    const first = providerState.instances[0]!;
+    act(() =>
+      first.emit('stateless', { payload: JSON.stringify({ v: 3, kind: 'room.access_changed', access: 'view' }) }),
+    );
+    const { getProviderAccessLevel } = await import('@/lib/collab/provider-control-state');
+    expect(getProviderAccessLevel(first)).toBe('view');
+  });
+
+  it('saves parked intents again when a readmission reports edit access', async () => {
+    const documentName = `menu:${entityId}:it`;
+    await act(async () => {
+      root?.render(<ReloadHarness documentName={documentName} />);
+      await Promise.resolve();
+    });
+    const first = providerState.instances[0]!;
+    const menuItem = { id: 'item-a', label: 'Source label', linkType: 'external', url: 'https://example.com' };
+    seedMenuRoom(first.configuration.document, 'it', [menuItem]);
+    act(() => first.configuration.onSynced?.());
+    act(() => setMenuLocaleLabel(first.configuration.document, 'item-a', 'Parked label'));
+    const access = (level: 'view' | 'edit') =>
+      act(() =>
+        first.emit('stateless', { payload: JSON.stringify({ v: 3, kind: 'room.access_changed', access: level }) }),
+      );
+    access('view');
+    expect(hasPendingEditorSaves(`menu:${entityId}`)).toBe(false);
+    access('edit');
+    expect(hasPendingEditorSaves(`menu:${entityId}`)).toBe(true);
+    // Granted edit while open: a fresh sync re-sends what the read-only room dropped. connect()
+    // before the close event would be a no-op on the still-open socket.
+    expect(first.disconnect).toHaveBeenCalledOnce();
+    expect(first.connect).not.toHaveBeenCalled();
+    act(() => first.emit('disconnect'));
+    expect(first.connect).toHaveBeenCalledOnce();
+    act(() => first.emit('disconnect'));
+    expect(first.connect).toHaveBeenCalledOnce();
+    await act(async () => {
+      expect(await flushEditorSaves(`menu:${entityId}`)).toBe(true);
+    });
+    expect(persistNowMock).toHaveBeenCalledOnce();
+  });
+
+  it('reports an access change made while the provider was replaced', async () => {
+    const { subscribeToProviderAccessLevel } = await import('@/lib/collab/provider-control-state');
+    const changes: Array<{ access: string; provider: object; changed: boolean }> = [];
+    const unsubscribe = subscribeToProviderAccessLevel((access, provider, changed) =>
+      changes.push({ access, provider, changed }),
+    );
+    try {
+      const documentName = `menu:${entityId}:es`;
+      await act(async () => {
+        root?.render(<ReloadHarness documentName={documentName} />);
+        await Promise.resolve();
+      });
+      const first = providerState.instances[0]!;
+      const access = (instance: typeof first, level: 'view' | 'edit') =>
+        act(() =>
+          instance.emit('stateless', { payload: JSON.stringify({ v: 3, kind: 'room.access_changed', access: level }) }),
+        );
+      access(first, 'view');
+      expect(changes).toEqual([{ access: 'view', provider: first, changed: false }]);
+      act(() =>
+        first.emit('stateless', {
+          payload: JSON.stringify({ v: 3, kind: 'room.reload', reloadReason: 'external_update' }),
+        }),
+      );
+      const second = providerState.instances[1]!;
+      // The replacement starts at `edit`; the room's previous level makes this an upgrade.
+      access(second, 'edit');
+      expect(changes.at(-1)).toEqual({ access: 'edit', provider: second, changed: true });
+      access(second, 'edit');
+      expect(changes).toHaveLength(2);
+    } finally {
+      unsubscribe();
+    }
+  });
+
+  it.each(['permission_revoked', 'session_expired'] as const)(
+    'ends access and drops a pending readmission when a readmission is refused: %s',
+    async (reason) => {
+      const documentName = `menu:${entityId}:pt`;
+      await act(async () => {
+        root?.render(<ReloadHarness documentName={documentName} />);
+        await Promise.resolve();
+      });
+      const first = providerState.instances[0]!;
+      act(() => first.configuration.onSynced?.());
+      const access = (level: 'view' | 'edit') =>
+        act(() =>
+          first.emit('stateless', { payload: JSON.stringify({ v: 3, kind: 'room.access_changed', access: level }) }),
+        );
+      access('view');
+      access('edit');
+      act(() => first.configuration.onAuthenticationFailed?.({ reason }));
+      act(() => first.emit('disconnect'));
+      expect(first.connect).not.toHaveBeenCalled();
+      const { getProviderAccessEnded } = await import('@/lib/collab/provider-control-state');
+      expect(getProviderAccessEnded(first)).toBe(reason);
+    },
+  );
+
+  it('does not reconnect a provider waiting for a deferred canonical reload', async () => {
+    const documentName = `map-theme:${entityId}:und`;
+    const onReloadRequired = vi.fn();
+    await act(async () => {
+      root?.render(<ReloadHarness documentName={documentName} onReloadRequired={onReloadRequired} />);
+      await Promise.resolve();
+    });
+    const first = providerState.instances[0]!;
+    act(() =>
+      first.emit('stateless', {
+        payload: JSON.stringify({ v: 3, kind: 'room.reload', reloadReason: 'external_update' }),
+      }),
+    );
+    expect(onReloadRequired).toHaveBeenCalledOnce();
+    act(() => window.dispatchEvent(new Event('online')));
+    expect(first.connect).not.toHaveBeenCalled();
+  });
+
+  it.each(['service_stopping', 'authorization_unavailable'])(
+    'keeps the room and retries a temporarily refused admission: %s',
+    async (reason) => {
+      vi.useFakeTimers();
+      try {
+        const documentName = `menu:${entityId}:nl`;
+        await act(async () => {
+          root?.render(<ReloadHarness documentName={documentName} />);
+          await Promise.resolve();
+        });
+        const first = providerState.instances[0]!;
+        act(() => first.configuration.onAuthenticationFailed?.({ reason }));
+        const { getProviderAccessEnded } = await import('@/lib/collab/provider-control-state');
+        expect(getProviderAccessEnded(first)).toBeUndefined();
+        expect(first.disconnect).not.toHaveBeenCalled();
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(1_000);
+        });
+        // The retry reopens the socket so the room authenticates again.
+        expect(first.disconnect).toHaveBeenCalledOnce();
+        act(() => first.emit('disconnect'));
+        expect(first.connect).toHaveBeenCalledOnce();
+        expect(providerState.instances).toHaveLength(1);
+      } finally {
+        vi.useRealTimers();
+      }
+    },
+  );
 
   it('does not journal local authoring changes before the first provider sync', async () => {
     const documentName = `menu:${entityId}:ko`;
@@ -494,7 +749,11 @@ describe('useHocuspocusConnection request identity', () => {
       await Promise.resolve();
     });
     const nonTheme = providerState.instances[0]!;
-    act(() => nonTheme.emit('stateless', { payload: JSON.stringify({ kind: 'reload_required' }) }));
+    act(() =>
+      nonTheme.emit('stateless', {
+        payload: JSON.stringify({ v: 3, kind: 'room.reload', reloadReason: 'external_update' }),
+      }),
+    );
     expect(onReloadRequired).not.toHaveBeenCalled();
     expect(nonTheme.disconnect).not.toHaveBeenCalled();
     expect(snapshots.at(-1)?.connection.reloadCanonical()).toBe(false);
@@ -513,10 +772,40 @@ describe('useHocuspocusConnection request identity', () => {
     const themeProvider = providerState.instances.at(-1)!;
     act(() => {
       themeProvider.configuration.onAuthenticationFailed?.({ reason: 'permission_denied' });
-      themeProvider.emit('stateless', { payload: JSON.stringify({ kind: 'reload_required' }) });
+      themeProvider.emit('stateless', {
+        payload: JSON.stringify({ v: 3, kind: 'room.reload', reloadReason: 'external_update' }),
+      });
     });
 
     expect(onReloadRequired).not.toHaveBeenCalled();
     expect(providerState.instances).toHaveLength(2);
   });
+});
+
+it('clears document-room semantic intents only on covering room.persisted for the active room', async () => {
+  await act(async () => {
+    root?.render(<FormEditorHarness locale="en" />);
+    await Promise.resolve();
+  });
+  const resident = providerState.instances[0]!;
+  seedFormRoom(resident.configuration.document, 'en', 'Server form', { id: 'schema-1', steps: [] });
+  act(() => resident.configuration.onSynced?.());
+  act(() => latestFormEditor?.setField('title', 'Local form'));
+  expect(hasPendingEditorSaves(`form:${entityId}`)).toBe(true);
+  const document = resident.configuration.document;
+  const send = (stateVector: string) =>
+    resident.emit('stateless', {
+      payload: JSON.stringify({
+        v: 3,
+        kind: 'room.persisted',
+        documentName: resident.configuration.name,
+        stateVector,
+        deleted: Object.fromEntries(Y.decodeUpdate(Y.encodeStateAsUpdate(document)).ds.clients),
+      }),
+    });
+  act(() => send('AA=='));
+  expect(hasPendingEditorSaves(`form:${entityId}`)).toBe(true);
+  act(() => send(Buffer.from(Y.encodeStateVector(document)).toString('base64')));
+  expect(hasPendingEditorSaves(`form:${entityId}`)).toBe(false);
+  expect(persistNowMock).not.toHaveBeenCalled();
 });

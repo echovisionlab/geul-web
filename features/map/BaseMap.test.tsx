@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { BaseMap } from './BaseMap';
 
 const mocks = vi.hoisted(() => ({
@@ -108,9 +109,9 @@ afterEach(() => {
 function renderMap(props: Partial<React.ComponentProps<typeof BaseMap>> = {}) {
   act(() => {
     root?.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <BaseMap center={{ lat: 37, lng: 127 }} {...props} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
 }

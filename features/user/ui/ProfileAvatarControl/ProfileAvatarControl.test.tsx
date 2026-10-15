@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemTestProvider as DesignSystemProvider } from '@/test/TestProviders';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { ProfileAvatarControl, type ProfileAvatarControlProps } from './ProfileAvatarControl';
 
 vi.mock('@/components/core/ImageCropper', () => ({
@@ -40,9 +41,9 @@ let root: Root;
 function renderControl(props: Partial<ProfileAvatarControlProps> = {}) {
   act(() => {
     root.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <ProfileAvatarControl {...baseProps} {...props} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
 }
@@ -81,6 +82,10 @@ describe('ProfileAvatarControl', () => {
     expect(container.querySelector('img')?.getAttribute('src')).toBe('/asset/avatar-id/avatar.webp');
     const remove = container.querySelector<HTMLButtonElement>('button[aria-label="Remove profile image"]');
     expect(remove).not.toBeNull();
+    expect(remove).toHaveAttribute('data-control-size', 'compact');
+    expect(remove).toHaveAttribute('data-tone', 'danger');
+    expect(remove).toHaveAttribute('data-emphasis', 'strong');
+    expect(remove?.querySelector('svg')).toHaveAttribute('viewBox', '0 0 24 24');
 
     await act(async () => remove?.click());
     expect(onRemove).toHaveBeenCalledOnce();
@@ -94,7 +99,7 @@ describe('ProfileAvatarControl', () => {
     });
 
     const input = container.querySelector<HTMLInputElement>('input[type="file"]');
-    const file = new File(['bad'], 'bad.txt', { type: 'text/plain' });
+    const file = new File(['bad'], 'bad.png', { type: 'image/png' });
     Object.defineProperty(input, 'files', { value: [file], configurable: true });
     act(() => input?.dispatchEvent(new Event('change', { bubbles: true })));
 
@@ -111,7 +116,13 @@ describe('ProfileAvatarControl', () => {
     Object.defineProperty(input, 'files', { value: [file], configurable: true });
     act(() => input?.dispatchEvent(new Event('change', { bubbles: true })));
 
-    const completeCrop = container.querySelector<HTMLButtonElement>('[data-testid="complete-crop"]');
+    // The cropper is loaded on demand after a file is chosen.
+    const completeCrop = await vi.waitFor(async () => {
+      await act(async () => {});
+      const button = container.querySelector<HTMLButtonElement>('[data-testid="complete-crop"]');
+      expect(button).not.toBeNull();
+      return button;
+    });
     await act(async () => completeCrop?.click());
 
     expect(onSave).toHaveBeenCalledOnce();
@@ -122,7 +133,7 @@ describe('ProfileAvatarControl', () => {
   it('uses controller-provided preprocessing before opening the cropper', async () => {
     const prepared = new File(['webp'], 'avatar.webp', { type: 'image/webp' });
     const prepareFile = vi.fn(async () => prepared);
-    renderControl({ prepareFile });
+    renderControl({ prepareFile, accept: ['image/heic'] });
 
     const input = container.querySelector<HTMLInputElement>('input[type="file"]');
     const source = new File(['heic'], 'avatar.heic', { type: 'image/heic' });

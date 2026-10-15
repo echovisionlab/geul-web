@@ -1,13 +1,18 @@
 'use client';
 
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+
+import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
+
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Heading as DsHeading, Text as DsText, VisuallyHidden } from '@/components/core/Typography';
 import { useCallback, useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Divider, Group, Stack, Text, Title } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
-import '@mantine/dates/styles.css';
-import { notifications } from '@mantine/notifications';
-import { MultiSelect, NumberInput, PasswordInput, Switch } from '@/components/core/Input';
+
+import { DateInput, MultiSelect, NumberInput, PasswordInput, Switch } from '@/components/core/Input';
+import { notifications } from '@/components/core/Notification';
+
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
 import { SectionCard } from '@/components/core/Section';
 import { OgImagePreview } from '@/features/metadata/OgImagePreview';
@@ -25,13 +30,23 @@ import { getUploadSelectionMimeTypes, UPLOAD_CONFIGS } from '@/lib/constants/upl
 import { useFormEditorContext } from '@/lib/contexts/FormEditorContext';
 import { useFormTranslationContext } from '@/features/form/FormTranslationContext';
 import { useOgGenerationLookupSignal } from '@/lib/hooks/useOgGenerationLookupSignal';
-import { useOgImage } from '@/lib/hooks/useOgImage';
+import { useOgImage, type OgImageReadBindings } from '@/lib/hooks/useOgImage';
 import { useSlugManagement } from '@/lib/hooks/useSlugManagement';
 import { useUpload } from '@/lib/hooks/useUpload';
 import type { UserRole } from '@/lib/types/user/model';
 import { UploadType } from '@/lib/types/upload/model';
 
+export interface FormSettingsBindings {
+  update?: typeof updateFormAction;
+  setFeaturedImage?: typeof setFormFeaturedImageAction;
+  removeFeaturedImage?: typeof removeFormFeaturedImageAction;
+  regenerateOgImage?: typeof regenerateFormOgImageAction;
+  ogRead?: OgImageReadBindings;
+  checkSlug?: Parameters<typeof useSlugManagement>[0]['checkAvailability'];
+  upload?: ReturnType<typeof useUpload>['upload'];
+}
 interface FormSettingsContentProps {
+  bindings?: FormSettingsBindings;
   formId: string;
   baseUrl: string;
   initialSlug: string;
@@ -63,6 +78,7 @@ export function FormSettingsContent({
   initialOgImageUrl,
   initialFeaturedImageUrl,
   initialHasPassword,
+  bindings,
 }: FormSettingsContentProps) {
   const t = useTranslations('formAdmin');
   const tCommon = useTranslations('common');
@@ -71,6 +87,7 @@ export function FormSettingsContent({
   const tCommonNotifications = useTranslations('common.notifications');
   const { fields, isSynced, provider, ogGenerationLookup } = useFormEditorContext();
   const { activeEditLocale } = useFormTranslationContext();
+  const canEdit = useEditorAccessLevel(provider) === 'edit';
   const [slug, setSlug] = useState(initialSlug);
   const [isPublic, setIsPublic] = useState(initialIsPublic);
   const [opensAt, setOpensAt] = useState<Date | null>(initialOpensAt ? new Date(initialOpensAt) : null);
@@ -83,28 +100,36 @@ export function FormSettingsContent({
   const [passwordDirty, setPasswordDirty] = useState(false);
   const [featuredImageUrl, setFeaturedImageUrl] = useState<string | null>(initialFeaturedImageUrl);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadPending, setUploadPending] = useState(false);
+  const [saveAnnouncement, setSaveAnnouncement] = useState('');
   const ogImage = useOgImage({
     entityType: 'form',
     entityId: formId,
+    readBindings: bindings?.ogRead,
     initialOgImageUrl: activeEditLocale.isSourceLocale ? initialOgImageUrl : activeEditLocale.displayOgImageUrl,
     locale: activeEditLocale.hasLiveRow ? activeEditLocale.activeLocale : null,
     provider,
   });
   useOgGenerationLookupSignal(activeEditLocale.ogGenerationRun, activeEditLocale.activeLocale, ogImage.trackLatest);
   useOgGenerationLookupSignal(ogGenerationLookup, activeEditLocale.activeLocale, ogImage.trackLatest);
-  const { upload, isUploading } = useUpload(UploadType.FORM_FEATURED_IMAGE);
+  const uploadController = useUpload(UploadType.FORM_FEATURED_IMAGE);
+  const upload = bindings?.upload ?? uploadController.upload;
+  const isUploading = uploadPending || uploadController.isUploading;
 
   const saveSettings = useMutation({
-    mutationFn: (input: UpdateFormInput) => updateFormAction(formId, input),
+    mutationFn: (input: UpdateFormInput) => (bindings?.update ?? updateFormAction)(formId, input),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
+        return;
       }
+      setSaveAnnouncement(tCommonNotifications('saveSuccess'));
     },
+    onMutate: () => setSaveAnnouncement(''),
     onError: (error) => {
       notifications.show({
         message: error instanceof Error ? error.message : tCommonNotifications('updateFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
@@ -113,15 +138,23 @@ export function FormSettingsContent({
     entityType: 'form',
     entityId: formId,
     slug,
+    checkAvailability: bindings?.checkSlug,
     onSlugChange: setSlug,
     onSave: (nextSlug) => saveSettings.mutateAsync({ slug: nextSlug || null, isPublic: nextSlug ? isPublic : false }),
   });
   const { updateFromTitle } = slugMgmt;
   useEffect(() => {
-    if (isSynced && activeEditLocale.isSourceLocale && activeEditLocale.canEditActiveLocale) {
+    if (canEdit && isSynced && activeEditLocale.isSourceLocale && activeEditLocale.canEditActiveLocale) {
       updateFromTitle(fields.title);
     }
-  }, [activeEditLocale.canEditActiveLocale, activeEditLocale.isSourceLocale, fields.title, isSynced, updateFromTitle]);
+  }, [
+    canEdit,
+    activeEditLocale.canEditActiveLocale,
+    activeEditLocale.isSourceLocale,
+    fields.title,
+    isSynced,
+    updateFromTitle,
+  ]);
 
   const {
     error: slugError,
@@ -148,49 +181,51 @@ export function FormSettingsContent({
   const isUserRole = (value: string): value is UserRole => ['admin', 'author', 'user'].includes(value);
 
   const setFeaturedImage = useMutation({
-    mutationFn: (fileId: string) => setFormFeaturedImageAction(formId, fileId),
+    mutationFn: (fileId: string) => (bindings?.setFeaturedImage ?? setFormFeaturedImageAction)(formId, fileId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       setFeaturedImageUrl(result.imageUrl ?? null);
       if (result.ogGenerationRunId) {
         void ogImage.trackLatest();
       }
-      notifications.show({ message: tCommonNotifications('featuredImageUpdated'), color: 'green' });
+      notifications.show({ message: tCommonNotifications('featuredImageUpdated'), tone: 'positive' });
     },
   });
 
   const removeFeaturedImage = useMutation({
-    mutationFn: () => removeFormFeaturedImageAction(formId),
+    mutationFn: () => (bindings?.removeFeaturedImage ?? removeFormFeaturedImageAction)(formId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       setFeaturedImageUrl(null);
       if (result.ogGenerationRunId) {
         void ogImage.trackLatest();
       }
-      notifications.show({ message: tCommonNotifications('featuredImageRemoved'), color: 'yellow' });
+      notifications.show({ message: tCommonNotifications('featuredImageRemoved'), tone: 'warning' });
     },
   });
 
   const regenerateOgImage = useMutation({
-    mutationFn: (request: { locale: string; targetKey: string }) => regenerateFormOgImageAction(formId, request.locale),
+    mutationFn: (request: { locale: string; targetKey: string }) =>
+      (bindings?.regenerateOgImage ?? regenerateFormOgImageAction)(formId, request.locale),
     onSuccess: (result, request) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       ogImage.trackRequestedGeneration(result.generationId, request.targetKey);
-      notifications.show({ message: tCommonNotifications('ogGenerationRequested'), color: 'blue' });
+      notifications.show({ message: tCommonNotifications('ogGenerationRequested'), tone: 'neutral' });
     },
   });
 
   const handleFeaturedImageUpload = async (croppedBlob: Blob) => {
     setUploadProgress(0);
+    setUploadPending(true);
     try {
       const { fileId } = await upload(croppedBlob, {
         entityId: formId,
@@ -201,18 +236,22 @@ export function FormSettingsContent({
     } catch (error) {
       notifications.show({
         message: error instanceof Error ? error.message : tCommonNotifications('uploadFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     } finally {
+      setUploadPending(false);
       setUploadProgress(0);
     }
   };
 
   return (
-    <Stack>
-      <SectionCard p="lg">
-        <Stack gap="md">
-          <Title order={4}>{t('settings.urlPublic.title')}</Title>
+    <DsLayoutStack>
+      <VisuallyHidden role="status" aria-live="polite" aria-atomic="true">
+        {saveAnnouncement}
+      </VisuallyHidden>
+      <SectionCard padding="lg">
+        <DsLayoutStack gap="md">
+          <DsHeading level={4}>{t('settings.urlPublic.title')}</DsHeading>
           <UrlSection
             baseUrl={baseUrl}
             entityType="form"
@@ -221,10 +260,11 @@ export function FormSettingsContent({
             isAvailable={slugMgmt.isAvailable}
             error={slugError}
             saving={isSlugChecking || saveSettings.isPending}
+            disabled={!canEdit}
             onChange={handleSlugChange}
             onBlur={handleSlugBlur}
           />
-          <Group gap="sm">
+          <DsLayoutInline gap="sm">
             <Switch
               checked={isPublic}
               onChange={(event) => {
@@ -233,26 +273,26 @@ export function FormSettingsContent({
                 saveSettings.mutate({ isPublic: next });
               }}
               label={t('settings.urlPublic.allowPublic')}
-              disabled={!slug}
+              disabled={!canEdit || !slug}
             />
-            <Text size="xs" c="dimmed">
+            <DsText size="xs" tone="secondary">
               {!slug
                 ? t('settings.urlPublic.setSlugFirst')
                 : isPublic
                   ? t('settings.urlPublic.directUrlEnabled')
                   : t('settings.urlPublic.embedOnly')}
-            </Text>
-          </Group>
-        </Stack>
+            </DsText>
+          </DsLayoutInline>
+        </DsLayoutStack>
       </SectionCard>
 
-      <SectionCard p="lg">
-        <Stack gap="md">
-          <Title order={4}>{t('settings.media.title')}</Title>
+      <SectionCard padding="lg">
+        <DsLayoutStack gap="md">
+          <DsHeading level={4}>{t('settings.media.title')}</DsHeading>
           <MediaPreviewGrid>
             <OgImagePreview
               src={ogImage.src}
-              canRegenerate={activeEditLocale.hasLiveRow && Boolean(activeEditLocale.activeLocale)}
+              canRegenerate={canEdit && activeEditLocale.hasLiveRow && Boolean(activeEditLocale.activeLocale)}
               isRegenerating={regenerateOgImage.isPending || ogImage.isRegenerating}
               generationStatus={ogImage.status}
               generationError={ogImage.error}
@@ -264,7 +304,7 @@ export function FormSettingsContent({
             />
             <ImageUploadCropController
               imageUrl={featuredImageUrl}
-              canEdit
+              canEdit={canEdit}
               isUploading={isUploading}
               uploadProgress={uploadProgress}
               isRemoving={removeFeaturedImage.isPending}
@@ -275,28 +315,33 @@ export function FormSettingsContent({
               maxSize={formFeaturedImageConfig.maxSize}
             />
           </MediaPreviewGrid>
-        </Stack>
+        </DsLayoutStack>
       </SectionCard>
 
-      <ShareLinkSection
-        entityType="form"
-        entityId={formId}
-        title={t('settings.previewLinks.title')}
-        description={t('settings.previewLinks.description')}
-        disabled={!slug}
-      />
-      <ShareLinkSection
-        entityType="form-dashboard"
-        entityId={formId}
-        title={t('settings.dashboardLinks.title')}
-        description={t('settings.dashboardLinks.description')}
-        disabled={!slug}
-      />
+      <AuthoringExtension kind="sharing">
+        <ShareLinkSection
+          entityType="form"
+          entityId={formId}
+          title={t('settings.previewLinks.title')}
+          description={t('settings.previewLinks.description')}
+          disabled={!canEdit || !slug}
+        />
+      </AuthoringExtension>
+      <AuthoringExtension kind="sharing">
+        <ShareLinkSection
+          entityType="form-dashboard"
+          entityId={formId}
+          title={t('settings.dashboardLinks.title')}
+          description={t('settings.dashboardLinks.description')}
+          disabled={!canEdit || !slug}
+        />
+      </AuthoringExtension>
 
-      <SectionCard p="lg">
-        <Stack gap="md">
-          <Title order={4}>{t('settings.access.title')}</Title>
+      <SectionCard padding="lg">
+        <DsLayoutStack gap="md">
+          <DsHeading level={4}>{t('settings.access.title')}</DsHeading>
           <PasswordInput
+            disabled={!canEdit}
             label={t('settings.access.passwordLabel')}
             description={t('settings.access.passwordDescription')}
             placeholder={initialHasPassword ? '••••••••' : tCommonPlaceholders('password')}
@@ -306,7 +351,7 @@ export function FormSettingsContent({
               setPasswordDirty(true);
             }}
             onBlur={() => {
-              if (!passwordDirty) {
+              if (!canEdit || !passwordDirty) {
                 return;
               }
               saveSettings.mutate({ password });
@@ -314,6 +359,7 @@ export function FormSettingsContent({
             }}
           />
           <DateInput
+            disabled={!canEdit}
             label={t('settings.access.opensAtLabel')}
             description={t('settings.access.opensAtDescription')}
             placeholder={t('settings.access.selectDatePlaceholder')}
@@ -326,6 +372,7 @@ export function FormSettingsContent({
             clearable
           />
           <DateInput
+            disabled={!canEdit}
             label={t('settings.access.closesAtLabel')}
             description={t('settings.access.closesAtDescription')}
             placeholder={t('settings.access.selectDatePlaceholder')}
@@ -338,6 +385,7 @@ export function FormSettingsContent({
             clearable
           />
           <NumberInput
+            disabled={!canEdit}
             label={t('settings.access.maxSubmissionsLabel')}
             description={t('settings.access.maxSubmissionsDescription')}
             placeholder={t('settings.access.noLimit')}
@@ -349,9 +397,14 @@ export function FormSettingsContent({
             }}
             min={1}
           />
-          <Divider my="sm" />
-          <Title order={5}>{t('settings.authRules.title')}</Title>
+        </DsLayoutStack>
+      </SectionCard>
+
+      <SectionCard padding="lg">
+        <DsLayoutStack gap="md">
+          <DsHeading level={4}>{t('settings.authRules.title')}</DsHeading>
           <Switch
+            disabled={!canEdit}
             label={t('settings.authRules.requireAuthLabel')}
             description={t('settings.authRules.requireAuthDescription')}
             checked={requireAuth}
@@ -370,6 +423,7 @@ export function FormSettingsContent({
           {requireAuth ? (
             <>
               <MultiSelect
+                disabled={!canEdit}
                 label={t('settings.authRules.allowedRolesLabel')}
                 description={t('settings.authRules.allowedRolesDescription')}
                 placeholder={tCommonPlaceholders('selectRoles')}
@@ -383,6 +437,7 @@ export function FormSettingsContent({
                 clearable
               />
               <Switch
+                disabled={!canEdit}
                 label={t('settings.authRules.allowDuplicateLabel')}
                 description={t('settings.authRules.allowDuplicateDescription')}
                 checked={allowDuplicateSubmission}
@@ -394,8 +449,8 @@ export function FormSettingsContent({
               />
             </>
           ) : null}
-        </Stack>
+        </DsLayoutStack>
       </SectionCard>
-    </Stack>
+    </DsLayoutStack>
   );
 }

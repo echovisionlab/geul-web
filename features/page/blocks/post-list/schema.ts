@@ -1,4 +1,5 @@
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
+import { collectionSizeSchema } from '../list-shared';
 
 /**
  * Boolean stored as string for Yjs serialization compatibility.
@@ -10,29 +11,30 @@ const booleanString = z.enum(['true', 'false']);
  */
 export const postListSchema = z.object({
   // Layout
-  layout: z.enum(['grid', 'list', 'cards', 'minimal', 'carousel']).default('grid'),
-  columns: z.string().default('3'),
+  layout: z._default(z.enum(['grid', 'list', 'cards', 'minimal', 'carousel']), 'grid'),
+  itemSize: collectionSizeSchema,
+  columns: z._default(z.string(), '3'),
 
   // Filters
-  categoryIds: z.string().default(''),
-  tagIds: z.string().default(''),
-  authorIds: z.string().default(''),
-  seriesId: z.string().default(''), // single series filter
+  categoryIds: z._default(z.string(), ''),
+  tagIds: z._default(z.string(), ''),
+  authorIds: z._default(z.string(), ''),
+  seriesId: z._default(z.string(), ''), // single series filter
 
   // Sorting & Pagination
-  sortBy: z.enum(['published_at', 'updated_at', 'title']).default('published_at'),
-  sortOrder: z.enum(['asc', 'desc']).default('desc'),
-  limit: z.string().default('6'),
-  showPagination: booleanString.default('false'),
+  sortBy: z._default(z.enum(['published_at', 'updated_at', 'title']), 'published_at'),
+  sortOrder: z._default(z.enum(['asc', 'desc']), 'desc'),
+  limit: z._default(z.string(), '6'),
+  showPagination: z._default(booleanString, 'false'),
 
   // Display Options
-  showFeaturedImage: booleanString.default('true'),
-  showMeta: booleanString.default('true'),
-  imageAspectRatio: z.enum(['16:9', '4:3', '1:1', 'auto']).default('16:9'),
+  showFeaturedImage: z._default(booleanString, 'true'),
+  showMeta: z._default(booleanString, 'true'),
+  imageAspectRatio: z._default(z.enum(['16:9', '4:3', '1:1', 'auto']), '16:9'),
 
   // Carousel Options
-  carouselLoop: booleanString.default('true'),
-  carouselIndicators: booleanString.default('true'),
+  carouselLoop: z._default(booleanString, 'true'),
+  carouselIndicators: z._default(booleanString, 'true'),
 });
 
 export type PostListProps = z.infer<typeof postListSchema>;

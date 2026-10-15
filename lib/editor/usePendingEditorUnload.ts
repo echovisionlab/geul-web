@@ -1,14 +1,31 @@
 'use client';
 
 import { useEffect } from 'react';
-import { hasPendingEditorSaves, subscribeToEditorSaveState } from './editor-save-registry';
+import {
+  hasParkedEditsAtRisk,
+  hasPendingEditorSaves,
+  hasRejectedEditorSaves,
+  subscribeToEditorSaveState,
+} from './editor-save-registry';
 
-/** Warns before a browser unload while any registered save is still awaiting acknowledgement. */
+let unloadGuardSuspended = false;
+
+/**
+ * Lets this page unload without the unsaved-edits prompt: the caller has made every unsaved edit
+ * durable (journals and tab backups) or the editor chose to discard them. Lasts for the page.
+ */
+export function suspendEditorUnloadGuard(): void {
+  unloadGuardSuspended = true;
+}
+
+/** Warns before a browser unload while any registered save awaits acknowledgement or review. */
 export function usePendingEditorUnload(document?: string) {
   useEffect(() => {
     const ownerWindow = window;
+    const hasUnsaved = () =>
+      hasPendingEditorSaves(document) || hasRejectedEditorSaves(document) || hasParkedEditsAtRisk(document);
     const beforeUnload = (event: BeforeUnloadEvent) => {
-      if (!hasPendingEditorSaves(document)) {
+      if (unloadGuardSuspended || !hasUnsaved()) {
         return;
       }
       event.preventDefault();
@@ -16,7 +33,7 @@ export function usePendingEditorUnload(document?: string) {
     };
     let listening = false;
     const updateListener = () => {
-      const shouldListen = hasPendingEditorSaves(document);
+      const shouldListen = hasUnsaved();
       if (shouldListen === listening) {
         return;
       }

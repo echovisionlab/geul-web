@@ -25,7 +25,7 @@ describe('ProgramEventEditor collaboration runtime', () => {
   });
 
   it('keeps locale-owned title editing separate from source-only Event mutations', () => {
-    expect(source).toContain("const canEditEvent = allowedActions.includes('edit');");
+    expect(source).toContain("const canEditEvent = allowedActions.includes('edit') && accessLevel === 'edit';");
     expect(source).toContain('const canEditNeutral = canEditCurrentLocale && activeEditLocale.isSourceLocale;');
     expect(source).toContain('const canEditTitle = canEditCurrentLocale && blockRoom.isSynced;');
     expect(source).toContain('if (!roomLocale || !canEditTitle)');

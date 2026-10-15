@@ -4,24 +4,11 @@
 }
 
 .frame {
-  background: var(--mantine-color-body);
+  background: var(--geul-background);
 }
 
 .editor {
   width: 100%;
-}
-
-.selector {
-  position: absolute;
-  z-index: 2;
-  inset: 0;
-  pointer-events: none;
-  border: 0;
-  background: transparent;
-}
-
-.selector:focus-visible {
-  outline: none;
 }
 
 .content {

@@ -1,6 +1,8 @@
 :root {
   --font-family-sans: 'Noto Sans', 'Noto Color Emoji';
-  --font-mono: 'Noto Sans Mono', 'Noto Color Emoji', monospace;
+  --font-mono:
+    'Noto Sans Mono', ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', 'Noto Color Emoji',
+    monospace;
 }
 
 html[data-font-profile='korean'] {

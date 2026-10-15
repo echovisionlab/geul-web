@@ -1,3 +1,4 @@
+import { primitiveTokens } from '@/components/core/design-tokens';
 import { resolveEmbedUrl } from '@/features/page/blocks/embed/policy';
 import { fromJson, type JsonValue } from '@bufbuild/protobuf';
 import {
@@ -291,11 +292,25 @@ function serializeSceneCopyUnit(unit: ImmersiveSceneUnit): string {
 }
 
 function serializeSceneVisualPatch(unitId: string, patch: Partial<ImmersiveSceneUnit>): string {
-  return serializeSceneVisualUnit({ id: unitId, mesh: 'sphere', color: '#000000', title: '', text: '', ...patch });
+  return serializeSceneVisualUnit({
+    id: unitId,
+    mesh: 'sphere',
+    color: primitiveTokens.colors.black,
+    title: '',
+    text: '',
+    ...patch,
+  });
 }
 
 function serializeSceneCopyPatch(unitId: string, patch: Partial<ImmersiveSceneUnit>): string {
-  return serializeSceneCopyUnit({ id: unitId, mesh: 'sphere', color: '#000000', title: '', text: '', ...patch });
+  return serializeSceneCopyUnit({
+    id: unitId,
+    mesh: 'sphere',
+    color: primitiveTokens.colors.black,
+    title: '',
+    text: '',
+    ...patch,
+  });
 }
 
 function columnPayload(section: SectionMeta): JsonObject {

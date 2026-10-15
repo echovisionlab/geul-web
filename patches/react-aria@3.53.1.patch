@@ -1,0 +1,177 @@
+diff --git a/dist/private/live-announcer/LiveAnnouncer.cjs b/dist/private/live-announcer/LiveAnnouncer.cjs
+index 9875ec59c1e0219c3f6ecf64c610621e5c16e873..0dde51ef5384f293af2d3534bb0b02fb09441e57 100644
+--- a/dist/private/live-announcer/LiveAnnouncer.cjs
++++ b/dist/private/live-announcer/LiveAnnouncer.cjs
+@@ -1,3 +1,4 @@
++var $geul$computeAccessibleName = require('dom-accessibility-api').computeAccessibleName;
+ 
+ function $parcel$export(e, n, v, s) {
+   Object.defineProperty(e, n, {get: v, set: s, enumerable: true, configurable: true});
+@@ -21,6 +22,7 @@ let $74b2c5b1e7ea9589$var$liveAnnouncer = null;
+ function $74b2c5b1e7ea9589$export$a9b970dcc4ae71a9(message, assertiveness = 'assertive', timeout = $74b2c5b1e7ea9589$var$LIVEREGION_TIMEOUT_DELAY) {
+     if (!$74b2c5b1e7ea9589$var$liveAnnouncer) {
+         $74b2c5b1e7ea9589$var$liveAnnouncer = new $74b2c5b1e7ea9589$var$LiveAnnouncer();
++        message = $74b2c5b1e7ea9589$var$liveAnnouncer.snapshot(message);
+         // wait for the live announcer regions to be added to the dom, then announce
+         // otherwise Safari won't announce the message if it's added too quickly
+         // found most times less than 100ms were not consistent when announcing with Safari
+@@ -32,7 +34,7 @@ function $74b2c5b1e7ea9589$export$a9b970dcc4ae71a9(message, assertiveness = 'ass
+             if ($74b2c5b1e7ea9589$var$liveAnnouncer?.isAttached()) $74b2c5b1e7ea9589$var$liveAnnouncer?.announce(message, assertiveness, timeout);
+         }, 100);
+         else $74b2c5b1e7ea9589$var$liveAnnouncer.announce(message, assertiveness, timeout);
+-    } else $74b2c5b1e7ea9589$var$liveAnnouncer.announce(message, assertiveness, timeout);
++    } else $74b2c5b1e7ea9589$var$liveAnnouncer.announce($74b2c5b1e7ea9589$var$liveAnnouncer.snapshot(message), assertiveness, timeout);
+ }
+ function $74b2c5b1e7ea9589$export$d10ae4f68404609a(assertiveness) {
+     if ($74b2c5b1e7ea9589$var$liveAnnouncer) $74b2c5b1e7ea9589$var$liveAnnouncer.clear(assertiveness);
+@@ -77,6 +79,20 @@ class $74b2c5b1e7ea9589$var$LiveAnnouncer {
+             document.body.prepend(this.node);
+         }
+     }
++    snapshot(message) {
++        if (typeof message !== 'object' || !this.node) return message;
++        // Resolve referenced names while their source elements are still mounted.
++        // The probe is outside the live logs and never becomes an announcement.
++        let probe = document.createElement('div');
++        probe.setAttribute('role', 'img');
++        probe.setAttribute('aria-labelledby', message['aria-labelledby']);
++        this.node.appendChild(probe);
++        try {
++            return {'aria-label': $geul$computeAccessibleName(probe)};
++        } finally {
++            probe.remove();
++        }
++    }
+     isAttached() {
+         return this.node?.isConnected;
+     }
+@@ -96,9 +112,9 @@ class $74b2c5b1e7ea9589$var$LiveAnnouncer {
+         if (!this.node) return;
+         let node = document.createElement('div');
+         if (typeof message === 'object') {
+-            // To read an aria-labelledby, the element must have an appropriate role, such as img.
++            // Keep the computed name independent of the lifetime of its source elements.
+             node.setAttribute('role', 'img');
+-            node.setAttribute('aria-labelledby', message['aria-labelledby']);
++            node.setAttribute('aria-label', message['aria-label']);
+         } else node.textContent = message;
+         if (assertiveness === 'assertive') this.assertiveLog?.appendChild(node);
+         else this.politeLog?.appendChild(node);
+diff --git a/dist/private/live-announcer/LiveAnnouncer.js b/dist/private/live-announcer/LiveAnnouncer.js
+index 8f0994d6cd3acf68bb314bf7e6fc5c055f19c6f6..52b58e4f85a4d18fe1b17d318c6f993165a0b3d7 100644
+--- a/dist/private/live-announcer/LiveAnnouncer.js
++++ b/dist/private/live-announcer/LiveAnnouncer.js
+@@ -1,3 +1,4 @@
++import {computeAccessibleName as $geul$computeAccessibleName} from 'dom-accessibility-api';
+ /*
+  * Copyright 2020 Adobe. All rights reserved.
+  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
+@@ -13,6 +14,7 @@ let $a53edfcc12185fd0$var$liveAnnouncer = null;
+ function $a53edfcc12185fd0$export$a9b970dcc4ae71a9(message, assertiveness = 'assertive', timeout = $a53edfcc12185fd0$var$LIVEREGION_TIMEOUT_DELAY) {
+     if (!$a53edfcc12185fd0$var$liveAnnouncer) {
+         $a53edfcc12185fd0$var$liveAnnouncer = new $a53edfcc12185fd0$var$LiveAnnouncer();
++        message = $a53edfcc12185fd0$var$liveAnnouncer.snapshot(message);
+         // wait for the live announcer regions to be added to the dom, then announce
+         // otherwise Safari won't announce the message if it's added too quickly
+         // found most times less than 100ms were not consistent when announcing with Safari
+@@ -24,7 +26,7 @@ function $a53edfcc12185fd0$export$a9b970dcc4ae71a9(message, assertiveness = 'ass
+             if ($a53edfcc12185fd0$var$liveAnnouncer === null || $a53edfcc12185fd0$var$liveAnnouncer === void 0 ? void 0 : $a53edfcc12185fd0$var$liveAnnouncer.isAttached()) $a53edfcc12185fd0$var$liveAnnouncer === null || $a53edfcc12185fd0$var$liveAnnouncer === void 0 ? void 0 : $a53edfcc12185fd0$var$liveAnnouncer.announce(message, assertiveness, timeout);
+         }, 100);
+         else $a53edfcc12185fd0$var$liveAnnouncer.announce(message, assertiveness, timeout);
+-    } else $a53edfcc12185fd0$var$liveAnnouncer.announce(message, assertiveness, timeout);
++    } else $a53edfcc12185fd0$var$liveAnnouncer.announce($a53edfcc12185fd0$var$liveAnnouncer.snapshot(message), assertiveness, timeout);
+ }
+ function $a53edfcc12185fd0$export$d10ae4f68404609a(assertiveness) {
+     if ($a53edfcc12185fd0$var$liveAnnouncer) $a53edfcc12185fd0$var$liveAnnouncer.clear(assertiveness);
+@@ -42,6 +44,20 @@ function $a53edfcc12185fd0$export$d8686216b8b81b2f() {
+ // is simple enough to implement without React, so that's what we do here.
+ // See this discussion for more details: https://github.com/reactwg/react-18/discussions/125#discussioncomment-2382638
+ class $a53edfcc12185fd0$var$LiveAnnouncer {
++    snapshot(message) {
++        if (typeof message !== 'object' || !this.node) return message;
++        // Resolve referenced names while their source elements are still mounted.
++        // The probe is outside the live logs and never becomes an announcement.
++        let probe = document.createElement('div');
++        probe.setAttribute('role', 'img');
++        probe.setAttribute('aria-labelledby', message['aria-labelledby']);
++        this.node.appendChild(probe);
++        try {
++            return {'aria-label': $geul$computeAccessibleName(probe)};
++        } finally {
++            probe.remove();
++        }
++    }
+     isAttached() {
+         var _this_node;
+         return (_this_node = this.node) === null || _this_node === void 0 ? void 0 : _this_node.isConnected;
+@@ -63,9 +79,9 @@ class $a53edfcc12185fd0$var$LiveAnnouncer {
+         if (!this.node) return;
+         let node = document.createElement('div');
+         if (typeof message === 'object') {
+-            // To read an aria-labelledby, the element must have an appropriate role, such as img.
++            // Keep the computed name independent of the lifetime of its source elements.
+             node.setAttribute('role', 'img');
+-            node.setAttribute('aria-labelledby', message['aria-labelledby']);
++            node.setAttribute('aria-label', message['aria-label']);
+         } else node.textContent = message;
+         if (assertiveness === 'assertive') (_this_assertiveLog = this.assertiveLog) === null || _this_assertiveLog === void 0 ? void 0 : _this_assertiveLog.appendChild(node);
+         else (_this_politeLog = this.politeLog) === null || _this_politeLog === void 0 ? void 0 : _this_politeLog.appendChild(node);
+diff --git a/dist/private/live-announcer/LiveAnnouncer.mjs b/dist/private/live-announcer/LiveAnnouncer.mjs
+index 3ac1d43b6d80394356dcd03114d4f7f69fbcb8da..78fd751a37e1457d33f5ec50890b3a15dffd2397 100644
+--- a/dist/private/live-announcer/LiveAnnouncer.mjs
++++ b/dist/private/live-announcer/LiveAnnouncer.mjs
+@@ -1,3 +1,4 @@
++import {computeAccessibleName as $geul$computeAccessibleName} from 'dom-accessibility-api';
+ /*
+  * Copyright 2020 Adobe. All rights reserved.
+  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
+@@ -13,6 +14,7 @@ let $a46cf152bb926da5$var$liveAnnouncer = null;
+ function $a46cf152bb926da5$export$a9b970dcc4ae71a9(message, assertiveness = 'assertive', timeout = $a46cf152bb926da5$var$LIVEREGION_TIMEOUT_DELAY) {
+     if (!$a46cf152bb926da5$var$liveAnnouncer) {
+         $a46cf152bb926da5$var$liveAnnouncer = new $a46cf152bb926da5$var$LiveAnnouncer();
++        message = $a46cf152bb926da5$var$liveAnnouncer.snapshot(message);
+         // wait for the live announcer regions to be added to the dom, then announce
+         // otherwise Safari won't announce the message if it's added too quickly
+         // found most times less than 100ms were not consistent when announcing with Safari
+@@ -24,7 +26,7 @@ function $a46cf152bb926da5$export$a9b970dcc4ae71a9(message, assertiveness = 'ass
+             if ($a46cf152bb926da5$var$liveAnnouncer?.isAttached()) $a46cf152bb926da5$var$liveAnnouncer?.announce(message, assertiveness, timeout);
+         }, 100);
+         else $a46cf152bb926da5$var$liveAnnouncer.announce(message, assertiveness, timeout);
+-    } else $a46cf152bb926da5$var$liveAnnouncer.announce(message, assertiveness, timeout);
++    } else $a46cf152bb926da5$var$liveAnnouncer.announce($a46cf152bb926da5$var$liveAnnouncer.snapshot(message), assertiveness, timeout);
+ }
+ function $a46cf152bb926da5$export$d10ae4f68404609a(assertiveness) {
+     if ($a46cf152bb926da5$var$liveAnnouncer) $a46cf152bb926da5$var$liveAnnouncer.clear(assertiveness);
+@@ -69,6 +71,20 @@ class $a46cf152bb926da5$var$LiveAnnouncer {
+             document.body.prepend(this.node);
+         }
+     }
++    snapshot(message) {
++        if (typeof message !== 'object' || !this.node) return message;
++        // Resolve referenced names while their source elements are still mounted.
++        // The probe is outside the live logs and never becomes an announcement.
++        let probe = document.createElement('div');
++        probe.setAttribute('role', 'img');
++        probe.setAttribute('aria-labelledby', message['aria-labelledby']);
++        this.node.appendChild(probe);
++        try {
++            return {'aria-label': $geul$computeAccessibleName(probe)};
++        } finally {
++            probe.remove();
++        }
++    }
+     isAttached() {
+         return this.node?.isConnected;
+     }
+@@ -88,9 +104,9 @@ class $a46cf152bb926da5$var$LiveAnnouncer {
+         if (!this.node) return;
+         let node = document.createElement('div');
+         if (typeof message === 'object') {
+-            // To read an aria-labelledby, the element must have an appropriate role, such as img.
++            // Keep the computed name independent of the lifetime of its source elements.
+             node.setAttribute('role', 'img');
+-            node.setAttribute('aria-labelledby', message['aria-labelledby']);
++            node.setAttribute('aria-label', message['aria-label']);
+         } else node.textContent = message;
+         if (assertiveness === 'assertive') this.assertiveLog?.appendChild(node);
+         else this.politeLog?.appendChild(node);

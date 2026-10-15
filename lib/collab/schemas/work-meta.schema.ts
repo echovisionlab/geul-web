@@ -1,5 +1,6 @@
 import { WORK_JSON_KEYS, workCollabFieldsSchema } from '@echovisionlab/geul-common/collaboration/work';
 import { z } from 'zod';
+import * as zm from '@/lib/zod-mini';
 
 // WorkType enum schema
 export const WorkTypeSchema = z.enum(['music_project', 'portfolio', 'article', 'contribution']);
@@ -14,22 +15,26 @@ function getCurrentPeriod() {
 
 const DEFAULT_PERIOD = getCurrentPeriod();
 
-export const WorkMetaSchema = workCollabFieldsSchema.safeExtend({ type: WorkTypeSchema.optional() }).required({
-  title: true,
-  slug: true,
-  type: true,
-  year: true,
-  month: true,
-  untilYear: true,
-  untilMonth: true,
-  isPresent: true,
-  summary: true,
-  metadata: true,
-  featured: true,
-  creditsVersion: true,
-  creditOrder: true,
-  clients: true,
-});
+// Common schemas are zod/mini types; derive from them with the functional API.
+export const WorkMetaSchema = zm.required(
+  zm.safeExtend(workCollabFieldsSchema, { type: zm.optional(WorkTypeSchema) }),
+  {
+    title: true,
+    slug: true,
+    type: true,
+    year: true,
+    month: true,
+    untilYear: true,
+    untilMonth: true,
+    isPresent: true,
+    summary: true,
+    metadata: true,
+    featured: true,
+    creditsVersion: true,
+    creditOrder: true,
+    clients: true,
+  },
+);
 
 export type WorkType = z.infer<typeof WorkTypeSchema>;
 export type WorkMeta = z.infer<typeof WorkMetaSchema>;

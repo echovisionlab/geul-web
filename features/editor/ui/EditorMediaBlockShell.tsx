@@ -2,11 +2,36 @@
 
 import type { FocusEventHandler, KeyboardEventHandler, PointerEventHandler, ReactNode, RefObject } from 'react';
 import { ResizeHandle } from '@/components/core/ResizeHandle';
+import { BlockSelectionTarget } from '@/components/core/SelectionSurface';
+import { TextInput } from '@/components/core/Input';
+import { TextButton } from '@/components/core/TextButton';
+import { Text } from '@/components/core/Typography';
 import classes from './EditorMediaBlockShell.module.css';
 import { preventNativeBlockDrag } from './preventNativeBlockDrag';
 
 function joinClassNames(...values: Array<string | undefined>) {
   return values.filter(Boolean).join(' ');
+}
+
+/** Keyboard selection target for blocks whose authored source has its own editing controls. */
+export function EditorMediaBlockSelector({
+  label,
+  enabled,
+  onSelect,
+}: {
+  label: string;
+  enabled: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <BlockSelectionTarget
+      label={label}
+      tabIndex={enabled ? 0 : -1}
+      data-editor-block-selector=""
+      onFocus={onSelect}
+      onClick={onSelect}
+    />
+  );
 }
 
 interface EditorMediaBlockFrameProps {
@@ -77,7 +102,8 @@ export function EditorMediaBlockFrame({
     >
       {allowResize ? (
         <ResizeHandle
-          className={classes.resizeHandle}
+          placement="media-edge"
+          visibility={isSelected || isResizing ? 'active' : 'on-interaction'}
           direction="left"
           value={widthPercent}
           min={resizeMin}
@@ -92,7 +118,8 @@ export function EditorMediaBlockFrame({
       {isResizing ? <div className={classes.dragShield} data-resize-drag-shield /> : null}
       {allowResize ? (
         <ResizeHandle
-          className={classes.resizeHandle}
+          placement="media-edge"
+          visibility={isSelected || isResizing ? 'active' : 'on-interaction'}
           direction="right"
           value={widthPercent}
           min={resizeMin}
@@ -108,8 +135,8 @@ export function EditorMediaBlockFrame({
 }
 
 interface EditableMediaCaptionProps {
-  className: string;
-  inputClassName: string;
+  /** Accessible name of the caption field. */
+  label: string;
   value: string;
   isEditing: boolean;
   isEditable: boolean;
@@ -122,9 +149,9 @@ interface EditableMediaCaptionProps {
   onKeyDown: KeyboardEventHandler<HTMLInputElement>;
 }
 
+/** Media captions use Core caption-role text entry; the block owns only the edit lifecycle. */
 export function EditableMediaCaption({
-  className,
-  inputClassName,
+  label,
   value,
   isEditing,
   isEditable,
@@ -138,28 +165,35 @@ export function EditableMediaCaption({
 }: EditableMediaCaptionProps) {
   if (isEditing) {
     return (
-      <input
+      <TextInput
         ref={inputRef}
-        className={inputClassName}
+        aria-label={label}
+        appearance="bare"
+        textRole="caption"
+        density="compact"
         value={value}
         onChange={(event) => onChange(event.currentTarget.value)}
         onBlur={onBlur}
         onKeyDown={onKeyDown}
         placeholder={placeholder}
         autoFocus
-        data-editor-media-caption
+        data-editor-media-caption=""
       />
     );
   }
 
-  if (!value && !isEditable) {
-    return null;
+  if (!isEditable) {
+    return value ? (
+      <Text size="xs" tone="muted">
+        {value}
+      </Text>
+    ) : null;
   }
 
+  // Starting an edit is a real command, reachable from the keyboard; its visible caption is its name.
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-    <div className={className} onClick={isEditable ? onActivate : undefined}>
+    <TextButton appearance="muted" size="sm" onClick={onActivate}>
       {value || emptyLabel}
-    </div>
+    </TextButton>
   );
 }

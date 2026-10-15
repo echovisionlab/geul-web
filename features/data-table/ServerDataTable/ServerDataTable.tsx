@@ -35,8 +35,10 @@
  * ```
  */
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import type { ReactNode } from 'react';
-import { Stack } from '@mantine/core';
+
+import { TableFocusRecovery } from '../TableFocusRecovery';
 import { ServerDataTableContent } from './ServerDataTableContent';
 import { ServerDataTableMultiFilter } from './ServerDataTableMultiFilter';
 import { ServerDataTableMultiSort } from './ServerDataTableMultiSort';
@@ -51,6 +53,7 @@ export type { PaginatedQueryResult } from '@/lib/types/repository/result';
 export interface ServerDataTableProps {
   /** Unique namespace for URL params - used for data attribute */
   namespace: string;
+  accessibleLabel?: string;
   /** Child components */
   children?: ReactNode;
 }
@@ -60,11 +63,12 @@ export interface ServerDataTableProps {
  * Simple wrapper that provides consistent styling.
  * Sub-components receive their props directly for explicit data flow.
  */
-function ServerDataTableRoot({ namespace, children }: ServerDataTableProps) {
+function ServerDataTableRoot({ namespace, accessibleLabel, children }: ServerDataTableProps) {
   return (
-    <Stack gap="md" data-datatable-root data-namespace={namespace}>
+    <DsLayoutStack gap="md" data-datatable-root data-namespace={namespace} data-accessible-label={accessibleLabel}>
+      <TableFocusRecovery />
       {children}
-    </Stack>
+    </DsLayoutStack>
   );
 }
 

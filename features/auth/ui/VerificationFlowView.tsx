@@ -1,10 +1,17 @@
 'use client';
 
-import { IconArrowLeft, IconMail } from '@tabler/icons-react';
-import { Stack, Text, Title } from '@mantine/core';
+import { useEffect, useId, useRef } from 'react';
+
+import { Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
+import {
+  LayoutContainer as DsLayoutContainer,
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+import { IconMail } from '@tabler/icons-react';
+
 import { Button } from '@/components/core/Button';
 import { TextInput } from '@/components/core/Input';
-import { SectionCard } from '@/components/core/Section';
 import {
   AuthCodeChallengeView,
   type AuthCodeChallengeLabels,
@@ -73,69 +80,108 @@ export function VerificationFlowView({
   submittingCode,
   timing,
 }: VerificationFlowViewProps) {
+  const viewRef = useRef<HTMLElement>(null);
+  const previousState = useRef(state);
+  const previousError = useRef(error);
+  const titleId = useId();
+  const descriptionId = useId();
+  const errorId = useId();
+  useEffect(() => {
+    if (previousState.current === state) {
+      return;
+    }
+    previousState.current = state;
+    const target = viewRef.current?.querySelector<HTMLElement>(
+      state === 'choose_email' || state === 'sent_email' ? 'input:not(:disabled), h1' : 'h1',
+    );
+    // Headings precede fields in DOM order; focus the usable field for an input step.
+    const input =
+      state === 'choose_email' || state === 'sent_email'
+        ? viewRef.current?.querySelector<HTMLElement>('input:not(:disabled)')
+        : null;
+    (input ?? target)?.focus();
+  }, [state]);
+  useEffect(() => {
+    if (requestingCode || submittingCode || checkingApplication) {
+      return;
+    }
+    const newError = error && previousError.current !== error;
+    previousError.current = error;
+    if (newError && !viewRef.current?.contains(document.activeElement)) {
+      viewRef.current?.querySelector<HTMLInputElement>('input:not(:disabled)')?.focus();
+    }
+  }, [checkingApplication, error, requestingCode, submittingCode]);
   return (
-    <SectionCard p="xl" maw={400} w="100%">
+    <DsLayoutContainer ref={viewRef} size="form" inset="none" role="group" aria-labelledby={titleId}>
       {state === 'choose_email' ? (
         <>
-          <Title order={2} ta="center" mb="md">
-            {labels.chooseTitle}
-          </Title>
-          <Text size="sm" c="dimmed" ta="center" mb="lg">
-            {labels.chooseDescription}
-          </Text>
+          <DsLayoutInset blockEnd="md">
+            <DsHeading id={titleId} tabIndex={-1} level={1} scale={2} align="center">
+              {labels.chooseTitle}
+            </DsHeading>
+          </DsLayoutInset>
+          <DsLayoutInset blockEnd="lg">
+            <DsText id={descriptionId} size="sm" tone="secondary" align="center">
+              {labels.chooseDescription}
+            </DsText>
+          </DsLayoutInset>
 
           <form
+            aria-labelledby={titleId}
+            aria-busy={requestingCode}
             onSubmit={(event) => {
               event.preventDefault();
               onRequestCode();
             }}
           >
-            <Stack gap="sm">
+            <DsLayoutStack gap="sm">
               <TextInput
                 label={labels.emailLabel}
                 type="email"
                 placeholder={labels.emailPlaceholder}
                 value={email}
                 onChange={(event) => onEmailChange(event.target.value)}
-                leftSection={<IconMail size={16} />}
+                leftSection={<IconMail size="1em" aria-hidden />}
                 required
+                autoComplete="email"
+                aria-describedby={[descriptionId, error ? errorId : null].filter(Boolean).join(' ')}
+                aria-invalid={Boolean(error)}
               />
               {error ? (
-                <Text size="sm" c="red" role="alert">
+                <DsText id={errorId} size="sm" tone="danger" role="alert">
                   {error}
-                </Text>
+                </DsText>
               ) : null}
-              <Button type="submit" fullWidth loading={requestingCode} disabled={!email.trim()}>
+              <Button type="submit" emphasis="strong" fullWidth loading={requestingCode} disabled={!email.trim()}>
                 {labels.chooseSubmit}
               </Button>
-              <Button
-                type="button"
-                tone="neutral"
-                emphasis="low"
-                leftSection={<IconArrowLeft size={16} />}
-                onClick={onBack}
-              >
+              <Button type="button" tone="neutral" emphasis="low" data-testid="verification-back" onClick={onBack}>
                 {labels.back}
               </Button>
-            </Stack>
+            </DsLayoutStack>
           </form>
         </>
       ) : null}
 
       {state === 'sent_email' ? (
         <>
-          <Title order={2} ta="center" mb="md">
-            {labels.sentTitle}
-          </Title>
-          <Text size="sm" c="dimmed" ta="center" mb="lg">
-            {labels.sentDescription}
-          </Text>
+          <DsLayoutInset blockEnd="md">
+            <DsHeading id={titleId} tabIndex={-1} level={1} scale={2} align="center">
+              {labels.sentTitle}
+            </DsHeading>
+          </DsLayoutInset>
+          <DsLayoutInset blockEnd="lg">
+            <DsText id={descriptionId} size="sm" tone="secondary" align="center">
+              {labels.sentDescription}
+            </DsText>
+          </DsLayoutInset>
 
-          <Stack gap="sm" align="center">
+          <DsLayoutStack gap="sm" align="center">
             <AuthCodeChallengeView
               autoFocus
               code={code}
               error={Boolean(error)}
+              aria-describedby={[descriptionId, error ? errorId : null].filter(Boolean).join(' ')}
               labels={labels.code}
               onCodeChange={onCodeChange}
               onResend={onResendCode}
@@ -147,51 +193,51 @@ export function VerificationFlowView({
               timing={timing}
             />
             {submittingCode ? (
-              <Text size="sm" c="dimmed">
+              <DsText size="sm" tone="secondary" role="status" aria-live="polite">
                 {labels.submittingCode}
-              </Text>
+              </DsText>
             ) : null}
             {error ? (
-              <Text size="sm" c="red" role="alert">
+              <DsText id={errorId} size="sm" tone="danger" role="alert">
                 {error}
-              </Text>
+              </DsText>
             ) : null}
-          </Stack>
+          </DsLayoutStack>
         </>
       ) : null}
 
       {state === 'passed' ? (
-        <Stack gap="md" align="center">
-          <Title order={2} ta="center">
+        <DsLayoutStack gap="md" align="center">
+          <DsHeading id={titleId} tabIndex={-1} level={1} scale={2} align="center">
             {labels.passedTitle}
-          </Title>
-          <Text size="sm" c="dimmed" ta="center">
+          </DsHeading>
+          <DsText size="sm" tone="secondary" align="center">
             {labels.passedDescription}
-          </Text>
-          <Button onClick={onPassed} fullWidth>
+          </DsText>
+          <Button onClick={onPassed} emphasis="strong" fullWidth>
             {labels.passedAction}
           </Button>
-        </Stack>
+        </DsLayoutStack>
       ) : null}
 
       {state === 'applying' ? (
-        <Stack gap="md" align="center">
-          <Title order={2} ta="center">
+        <DsLayoutStack gap="md" align="center">
+          <DsHeading id={titleId} tabIndex={-1} level={1} scale={2} align="center">
             {labels.applyingTitle}
-          </Title>
-          <Text size="sm" c="dimmed" ta="center">
+          </DsHeading>
+          <DsText size="sm" tone="secondary" align="center">
             {labels.applyingDescription}
-          </Text>
+          </DsText>
           {error ? (
-            <Text size="sm" c="red" role="alert" ta="center">
+            <DsText size="sm" tone="danger" role="alert" align="center">
               {error}
-            </Text>
+            </DsText>
           ) : null}
-          <Button onClick={onCheckApplied} loading={checkingApplication} fullWidth>
+          <Button onClick={onCheckApplied} emphasis="medium" loading={checkingApplication} fullWidth>
             {labels.applyingRetry}
           </Button>
-        </Stack>
+        </DsLayoutStack>
       ) : null}
-    </SectionCard>
+    </DsLayoutContainer>
   );
 }

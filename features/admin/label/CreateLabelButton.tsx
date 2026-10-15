@@ -4,11 +4,15 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconPlus } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { Button } from '@/components/core/Button';
 import { createLabelDraftAction } from '@/lib/actions/label';
 
-export function CreateLabelButton() {
+export interface CreateLabelButtonProps {
+  createAction?: typeof createLabelDraftAction;
+  onCreated?: (id: string) => void;
+}
+export function CreateLabelButton({ createAction = createLabelDraftAction, onCreated }: CreateLabelButtonProps = {}) {
   const tCommon = useTranslations('common');
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -17,12 +21,16 @@ export function CreateLabelButton() {
   const handleCreate = async () => {
     setLoading(true);
     try {
-      const result = await createLabelDraftAction();
+      const result = await createAction();
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       if (result.data) {
+        if (onCreated) {
+          onCreated(result.data.id);
+          return;
+        }
         const href = `/labels/${result.data.id}?edit=true`;
         startNavigation(() => {
           router.push(href);

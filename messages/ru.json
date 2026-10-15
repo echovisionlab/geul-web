@@ -1,6 +1,7 @@
 {
   "common": {
     "actions": {
+      "move": "Переместить",
       "save": "Сохранить",
       "saveChanges": "Сохранить изменения",
       "create": "Создать",
@@ -59,7 +60,7 @@
       "reply": "Ответить",
       "insertVariable": "Вставить переменную",
       "acceptAll": "Принять все",
-      "rejectNonEssential": "Отклонить несущественное",
+      "rejectNonEssential": "Отклонить",
       "savePreferences": "Сохранить настройки",
       "import": "Импорт",
       "export": "Экспорт",
@@ -107,7 +108,7 @@
       "emailPreview": "Предварительный просмотр электронной почты",
       "fromEmail": "Из электронной почты",
       "fromNameOptional": "От имени (необязательно)",
-      "availableVariables": "Доступные переменные ({count, plural, one {# переменная} other {# переменных}})",
+      "availableVariables": "Доступные переменные ({count, plural, one {# переменная} few {# переменные} many {# переменных} other {# переменной}})",
       "password": "Пароль",
       "recipients": "Получатели",
       "language": "Язык",
@@ -127,10 +128,7 @@
       "file": "Файл",
       "bio": "Био",
       "realName": "Настоящее имя",
-      "countryCode": "Код страны",
       "slug": "Слизень",
-      "slugAutoModeEnabled": "Автоматическая синхронизация с заголовком (нажмите, чтобы отключить)",
-      "slugAutoModeManual": "Ручной режим (нажмите, чтобы включить автоматическую синхронизацию)",
       "submissions": "Материалы",
       "public": "Общественный",
       "location": "Расположение",
@@ -162,7 +160,6 @@
       "logoLight": "Световой логотип",
       "logoDark": "Темный логотип",
       "joined": "Присоединился",
-      "subscribed": "Подписан",
       "featured": "Рекомендуемые",
       "order": "Заказать",
       "sortOrder": "Порядок сортировки",
@@ -177,7 +174,6 @@
       "minutes": "Минуты",
       "seconds": "Секунды",
       "time": "Время",
-      "generationInfo": "Информация о поколении",
       "body": "Тело",
       "content": "Содержание",
       "bodyPreview": "Предварительный просмотр тела",
@@ -280,6 +276,7 @@
     },
     "messages": {
       "noUsersFound": "Пользователи не найдены",
+      "noAuthorsFound": "Авторы не найдены.",
       "noVersionsFound": "Версии не найдены.",
       "typeAtLeast2Characters": "Введите не менее 2 символов",
       "itemCreated": "{item} создано",
@@ -294,25 +291,23 @@
       "removeImageFailed": "Не удалось удалить изображение",
       "deleteItemConfirm": "Вы уверены, что хотите удалить этот {item}? Это действие невозможно отменить.",
       "deleteNamedItemConfirm": "Вы уверены, что хотите удалить \"{name}\"? Это действие невозможно отменить.",
-      "confirmDeleteSelectedCount": "Вы уверены, что хотите удалить {count, plural, one {# выбранный элемент} other {# выбранный элемент}}? Это действие невозможно отменить.",
-      "deleteDraftVersionConfirm": "Вы уверены, что хотите удалить эту черновую версию?",
+      "confirmDeleteSelectedCount": "Вы уверены, что хотите удалить {count, plural, one {# выбранный элемент} few {# выбранных элемента} many {# выбранных элементов} other {# выбранного элемента}}? Это действие невозможно отменить.",
       "confirmDeleteNamedRich": "Вы уверены, что хотите удалить <strong>{name}</strong>?",
-      "activeCount": "{count} активен",
       "effectiveFromDate": "Вступает в силу с {date}",
       "noUpdateRecorded": "Обновления не записаны",
-      "exportedEmails": "Экспортировано {count, plural, one {# электронного письма} other {# электронного письма}}",
       "formSubmittedSuccessfully": "Ваш ответ успешно отправлен.",
       "userDate": "{user} · {date}",
       "scheduleActivationTitle": "Запланировать активацию",
       "scheduleActivationDescription": "Выберите, когда эта версия должна стать активной. Уведомления по электронной почте будут отправлены на все активные учетные записи по расписанию.",
       "scheduleActivationNotice": "При планировании всем активным учетным записям будут отправлены уведомления по электронной почте со ссылкой для предварительного просмотра.",
-      "translationDetailUnavailable": "Не удалось загрузить подробные данные перевода. Вы по-прежнему можете редактировать текущий общедоступный перевод.",
       "invalidConfirmationLinkFromEmail": "Неверная ссылка для подтверждения. Пожалуйста, используйте ссылку из письма с подтверждением.",
       "noPostsFound": "Посты не найдены.",
       "noWorksFound": "Работы не найдены.",
-      "urlCopiedToClipboard": "URL-адрес скопирован в буфер обмена",
       "failedToLoad": "Не удалось загрузить данные.",
-      "relatedItemsWillBeUnlinked": "Связанные элементы {count} будут отключены."
+      "relatedItemsWillBeUnlinked": "Связанные элементы {count} будут отключены.",
+      "noArtistsFound": "Художники не найдены.",
+      "noLabelsFound": "Этикетки не найдены.",
+      "noReleasesFound": "Выпусков не найдено."
     },
     "notifications": {
       "categoryCreated": "Категория создана",
@@ -334,7 +329,14 @@
       "ogRegenerationFailed": "Не удалось восстановить образ OG.",
       "testEmailSent": "Тестовое письмо отправлено",
       "saveSuccess": "Сохранено",
-      "saveFailed": "Не удалось сохранить"
+      "saveFailed": "Не удалось сохранить",
+      "saveRetrying": "Ваши изменения не сохранены на сервере. Повторяем попытку.",
+      "editsRestored": "Восстановленные правки возвращены в документ.",
+      "leaveWithRejectedEdits": {
+        "title": "Выйти без правок, которые не удалось сохранить?",
+        "message": "Сервер отклонил некоторые правки, поэтому они не были сохранены. Сначала скопируйте их из меню совместной работы или выйдите, отменив эти правки.",
+        "confirm": "Выйти и отменить правки"
+      }
     },
     "errors": {
       "generic": "Что-то пошло не так. Пожалуйста, попробуйте еще раз.",
@@ -372,8 +374,6 @@
       "testEmail": "test@email.com",
       "testEmailExample": "test@example.com",
       "noReplyEmail": "noreply@example.com",
-      "translationLiveRowMissing": "Для этой локали пока не существует общедоступного перевода. При сохранении здесь он будет создан немедленно.",
-      "translationBodyPreviewUnavailable": "Предварительный просмотр тела недоступен.",
       "selectDateAndTime": "Выберите дату и время",
       "streetAddress": "адрес улицы",
       "regionSubdivision": "Штат/Провинция"
@@ -408,12 +408,11 @@
       "generating": "Создание...",
       "true": "Правда",
       "false": "Ложь",
-      "loading": "Загрузка..."
+      "loading": "Загрузка...",
+      "toBeAnnounced": "будет объявлено позже"
     },
     "roles": {
       "admin": "Админ",
-      "editor": "Редактор",
-      "viewer": "Зритель",
       "author": "Автор",
       "user": "Пользователь"
     },
@@ -445,6 +444,11 @@
       "unsubscribed": "Отменил подписку",
       "subscribed": "Подписан",
       "onboardingPending": "Ожидается регистрация"
+    },
+    "motion": {
+      "pause": "Приостановить анимацию",
+      "resume": "Возобновить анимацию",
+      "readAllInformation": "Прочитать всю информацию о сцене"
     }
   },
   "shell": {
@@ -463,6 +467,11 @@
       "siteInfo": "Информация о сайте",
       "links": "Ссылки",
       "socialMedia": "Социальные сети"
+    },
+    "signOutUnsaved": {
+      "title": "Выйти из учётной записи с несохранёнными правками?",
+      "message": "Некоторые правки не сохранены на сервере. При выходе из учётной записи они будут удалены с этого устройства.",
+      "confirm": "Выйти и отменить правки"
     }
   },
   "adminShell": {
@@ -511,7 +520,7 @@
       "descriptionPlaceholder": "Описание категории (необязательно)",
       "updated": "Категория обновлена",
       "deleted": "Категория удалена",
-      "deleteWarning": "Эту категорию используют {count, plural, one {# сообщений} other {# сообщений}}. Они будут исключены из этой категории."
+      "deleteWarning": "Эта категория используется в {count, plural, one {# сообщении} few {# сообщениях} many {# сообщениях} other {# сообщения}}. Они будут исключены из этой категории."
     },
     "tags": {
       "empty": "Теги не найдены.",
@@ -520,7 +529,7 @@
       "deleteTitle": "Удалить тег",
       "namePlaceholder": "Имя тега",
       "updated": "Тег обновлен",
-      "deleteWarning": "Этот тег используется {count, plural, one {# сообщений} other {# сообщений}}. Они будут без тегов."
+      "deleteWarning": "Этот тег используется в {count, plural, one {# сообщении} few {# сообщениях} many {# сообщениях} other {# сообщения}}. Они будут без тегов."
     },
     "genres": {
       "empty": "Жанры не найдены.",
@@ -532,7 +541,7 @@
       "created": "Жанр создан",
       "updated": "Жанр обновлен",
       "deleted": "Жанр удален",
-      "deleteWarning": "Этот жанр связан с {count, plural, one {# выпуска} other {# выпуска}}."
+      "deleteWarning": "Этот жанр связан с {count, plural, one {# выпуском} few {# выпусками} many {# выпусками} other {# выпуска}}."
     },
     "styles": {
       "empty": "Стили не найдены.",
@@ -544,7 +553,7 @@
       "created": "Стиль создан",
       "updated": "Стиль обновлен.",
       "deleted": "Стиль удален.",
-      "deleteWarning": "Этот стиль связан с {count, plural, one {# выпуска} other {# выпуска}}."
+      "deleteWarning": "Этот стиль связан с {count, plural, one {# выпуском} few {# выпусками} many {# выпусками} other {# выпуска}}."
     },
     "formats": {
       "empty": "Форматы не найдены.",
@@ -556,7 +565,7 @@
       "created": "Формат создан",
       "updated": "Формат обновлен",
       "deleted": "Формат удален",
-      "deleteWarning": "Этот формат связан с {count, plural, one {# выпуска} other {# выпуска}}."
+      "deleteWarning": "Этот формат связан с {count, plural, one {# выпуском} few {# выпусками} many {# выпусками} other {# выпуска}}."
     },
     "releases": {
       "empty": "Выпусков не найдено."
@@ -578,7 +587,7 @@
       "deleteConfirm": "Вы уверены, что хотите удалить эту кампанию?",
       "editAndSend": "Редактировать и отправить",
       "deleted": "Кампания удалена",
-      "recipients": "{count, plural, one {# получателя} other {# получателя}}",
+      "recipients": "{count, plural, one {# получатель} few {# получателя} many {# получателей} other {# получателя}}",
       "statuses": {
         "draft": "Черновик",
         "scheduled": "Запланировано",
@@ -616,7 +625,7 @@
         "createdBeforeLabel": "Создано раньше",
         "createdBeforePlaceholder": "Дата окончания",
         "estimateCount": "Оценить количество",
-        "estimatedRecipients": "~{count, plural, one {# получатель} other {# получателей}}",
+        "estimatedRecipients": "~{count, plural, one {# получатель} few {# получателя} many {# получателей} other {# получателя}}",
         "allUsersHelp": "Ориентирован на всех пользователей. Право на рассылку новостей выбирается каждой кампанией."
       },
       "types": {
@@ -639,7 +648,7 @@
       "createTitle": "Создать тег пользователя",
       "deleteTitle": "Удалить тег пользователя",
       "deleteConfirm": "Вы уверены, что хотите удалить тег пользователя {name}?",
-      "deleteAssignedWarning": "Этот тег назначен {count, plural, one {#пользователю} other {#пользователям}}. Они будут без тегов.",
+      "deleteAssignedWarning": "Этот тег назначен {count, plural, one {# пользователю} few {# пользователям} many {# пользователям} other {# пользователя}}. Они будут без тегов.",
       "namePlaceholder": "Имя пользовательского тега"
     },
     "terms": {
@@ -676,13 +685,13 @@
       "detail": {
         "backTooltip": "Вернуться к макетам электронной почты",
         "targetEditor": {
-          "title": "Translated text",
-          "description": "Edit only visible text and accessibility labels. HTML, CSS, links, and placeholders remain owned by the source layout.",
-          "empty": "This layout has no translatable text units.",
+          "title": "Переведённый текст",
+          "description": "Редактируйте только видимый текст и метки доступности. HTML, CSS, ссылки и заполнители остаются под управлением исходного макета.",
+          "empty": "В этом макете нет текстовых элементов для перевода.",
           "textUnit": "Text",
-          "sourceValue": "Source: {value}",
-          "translatedValue": "This locale provides its own value.",
-          "sourceFallback": "Using the source value.",
+          "sourceValue": "Источник: {value}",
+          "translatedValue": "Для этой локали задано собственное значение.",
+          "sourceFallback": "Используется исходное значение.",
           "useSource": "Use source"
         },
         "viewModes": {
@@ -931,7 +940,6 @@
     },
     "mapThemes": {
       "empty": "Темы карт не найдены.",
-      "notFound": "Тема карты не найдена.",
       "loadFailed": "Не удалось загрузить темы карты.",
       "defaultDisabled": "Это уже тема по умолчанию.",
       "deleteDisabled": {
@@ -939,9 +947,7 @@
         "last": "Последнюю тему карты удалить невозможно."
       },
       "reloadRequired": {
-        "title": "Требуется перезагрузка",
-        "message": "Эта тема была сохранена из более новой версии. Перезагрузите файл, прежде чем продолжить редактирование.",
-        "action": "Перезагрузить"
+        "title": "Требуется перезагрузка"
       },
       "variants": {
         "light": "Свет",
@@ -972,8 +978,7 @@
       },
       "editor": {
         "notifications": {
-          "defaultSet": "Тема установлена по умолчанию",
-          "variantRequired": "Требуется хотя бы один вариант (светлый или темный)."
+          "defaultSet": "Тема установлена по умолчанию"
         },
         "controls": {
           "map": {
@@ -1310,7 +1315,6 @@
     },
     "verification": {
       "loading": "Загрузка формы подтверждения...",
-      "redirecting": "Перенаправление...",
       "startOver": "Начать сначала",
       "errors": {
         "flowNotFound": "Поток проверки не найден или срок его действия истек",
@@ -1373,21 +1377,14 @@
   "featuredImage": {
     "label": "Рекомендуемое изображение",
     "alt": "Рекомендованное изображение",
-    "hint": "Нажмите на изображение, чтобы заменить",
     "cropTitle": "Обрезать избранное изображение",
-    "empty": {
-      "editable": "Перетащите или нажмите, чтобы загрузить ({ratio})",
-      "readOnly": "Нет изображения"
-    },
     "errors": {
       "fileRejected": "Файл отклонен",
       "fileTooLarge": "Файл слишком большой. Максимальный размер: {maxSize}",
       "invalidFileType": "Неверный тип файла"
     },
     "actions": {
-      "changeAria": "Изменить избранное изображение",
-      "removeAria": "Удалить избранное изображение",
-      "remove": "Удалить изображение"
+      "removeAria": "Удалить избранное изображение"
     }
   },
   "artistPage": {
@@ -1495,7 +1492,6 @@
       "slug": "художник-слизняк",
       "name": "Сценическое имя/имя исполнителя",
       "realName": "Юридическое название (необязательно)",
-      "countryCode": "например, США, КР, Япония",
       "labels": "Выберите ярлыки...",
       "parentArtist": "Выберите родителя-исполнителя..."
     },
@@ -1518,15 +1514,7 @@
     },
     "placeholders": {
       "name": "Название ярлыка",
-      "countryCode": "например, DE, США, КР",
       "parentLabel": "Выберите родительский ярлык (необязательно)"
-    }
-  },
-  "workCollaborators": {
-    "empty": "Соавторов пока нет",
-    "notifications": {
-      "added": "Соавтор добавлен",
-      "removed": "Соавтор удален"
     }
   },
   "comments": {
@@ -1537,7 +1525,7 @@
       "disabled": "Комментарии к этому посту отключены.",
       "loginPrompt": "<login>Войдите</login>, чтобы оставить комментарий",
       "loadMore": "Загрузить больше комментариев",
-      "loadMoreCount": "Загрузить {count, plural, one {еще # комментариев} other {еще # комментариев}}"
+      "loadMoreCount": "Загрузить {count, plural, one {еще # комментарий} few {еще # комментария} many {еще # комментариев} other {еще # комментария}}"
     },
     "form": {
       "placeholder": "Напишите комментарий...",
@@ -1563,10 +1551,10 @@
       },
       "actions": {
         "moreOptions": "Больше возможностей",
-        "showReplies": "Показать {count, plural, one {# ответа} other {# ответа}}",
-        "hideReplies": "Скрыть {count, plural, one {# ответа} other {# ответа}}",
-        "moreReplies": "(+{count, plural, one {еще #} other {еще #}})",
-        "loadMoreReplies": "Загрузите {count, plural, one {еще # ответа} other {еще # ответа}}"
+        "showReplies": "Показать {count, plural, one {# ответ} few {# ответа} many {# ответов} other {# ответа}}",
+        "hideReplies": "Скрыть {count, plural, one {# ответ} few {# ответа} many {# ответов} other {# ответа}}",
+        "moreReplies": "(+{count, plural, one {еще #} few {еще #} many {еще #} other {еще #}})",
+        "loadMoreReplies": "Загрузить {count, plural, one {еще # ответ} few {еще # ответа} many {еще # ответов} other {еще # ответа}}"
       },
       "notifications": {
         "updated": "Комментарий обновлен",
@@ -1584,17 +1572,6 @@
     },
     "credits": {
       "other": "Другой"
-    },
-    "music": {
-      "released": "Выпущено: {value}",
-      "spotify": "Спотифай",
-      "bandcamp": "Бандкамп",
-      "soundcloud": "Саундклауд",
-      "youtube": "Ютуб",
-      "openSpotify": "Открыть Spotify",
-      "openBandcamp": "Открыть Bandcamp",
-      "openSoundcloud": "Открыть SoundCloud",
-      "openYoutube": "Открыть YouTube"
     },
     "portfolio": {
       "tech": "Технология:"
@@ -1643,7 +1620,6 @@
     }
   },
   "cookieConsentCommon": {
-    "essentialLabel": "Основные файлы cookie (всегда активны)",
     "analyticsLabel": "Аналитические файлы cookie (Google Analytics)"
   },
   "nicknameField": {
@@ -1690,7 +1666,6 @@
       "failedToRevokeSession": "Не удалось отменить сеанс.",
       "failedToRevokeSessions": "Не удалось отменить сеансы.",
       "failedToRequestDeletion": "Не удалось запросить удаление аккаунта.",
-      "cannotUnlinkMessage": "У вас должен быть хотя бы один метод аутентификации",
       "connectedMessage": "Аккаунт {provider} успешно подключен.",
       "disconnectedMessage": "{provider} отключен.",
       "failedToUpdateMainEmail": "Не удалось обновить основной адрес электронной почты.",
@@ -1714,16 +1689,16 @@
       "consentDescription": "Этот клиент может читать и редактировать содержимое и управлять файлами в пределах текущих прав вашей учётной записи. Он может создавать, обновлять или удалять содержимое и изменять существующие вложения. Подключение не предоставляет учётной записи дополнительных прав.",
       "consentOfflineAccess": "Это подключение может продолжать работать после завершения текущего сеанса браузера, пока вы его не отзовёте.",
       "consentRevoke": "Вы можете отозвать это подключение в разделе {settings} → Remote MCP.",
-      "connectionsTitle": "Connected MCP clients",
-      "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
-      "connectionsEmpty": "No MCP clients are connected.",
-      "connectedAt": "Connected {date}",
+      "connectionsTitle": "Подключённые MCP-клиенты",
+      "connectionsDescription": "Эти разрешения OAuth не связаны с сеансами браузера. Отзыв разрешения отключает соответствующий MCP-клиент без выхода из вашей учётной записи.",
+      "connectionsEmpty": "Нет подключённых MCP-клиентов.",
+      "connectedAt": "Подключено {date}",
       "revoke": "Revoke",
-      "revokeTitle": "Revoke MCP access",
-      "revokeConfirmation": "Revoke MCP access for {client}? Its current token chain will stop working.",
-      "revokeSuccess": "MCP access was revoked.",
-      "revokeFailed": "Could not revoke MCP access.",
-      "loadFailed": "Could not load connected MCP clients."
+      "revokeTitle": "Отозвать доступ к MCP",
+      "revokeConfirmation": "Отозвать доступ к MCP для {client}? Его текущая цепочка токенов перестанет работать.",
+      "revokeSuccess": "Доступ к MCP отозван.",
+      "revokeFailed": "Не удалось отозвать доступ к MCP.",
+      "loadFailed": "Не удалось загрузить подключённые MCP-клиенты."
     },
     "personalAccessTokens": {
       "title": "Персональный токен доступа",
@@ -1751,8 +1726,6 @@
       "added": "Добавлен {date}",
       "lastMethod": "Прежде чем удалять этот ключ доступа, добавьте другой метод входа.",
       "removeNamed": "Удалить ключ доступа {name}",
-      "reauth": "Прежде чем менять ключи доступа, войдите в систему еще раз.",
-      "reauthAction": "Войдите снова",
       "errors": {
         "load": "Не удалось загрузить ключи доступа.",
         "remove": "Не удалось удалить этот ключ доступа.",
@@ -1789,21 +1762,11 @@
     "email": {
       "title": "Основной адрес электронной почты",
       "description": "Выберите подтвержденный адрес электронной почты, на который будут приходить уведомления и сообщения учетной записи.",
-      "addEmail": "Добавить адрес электронной почты",
       "canonical": "Основной адрес электронной почты",
-      "canonicalCannotRemove": "Прежде чем удалять этот адрес, выберите другой основной адрес электронной почты.",
       "setCanonical": "Установить как основной адрес электронной почты",
-      "noEmail": "Адрес электронной почты не указан",
-      "helper": "В качестве основного доступен только один подтвержденный адрес электронной почты.",
-      "selectLabel": "Основной адрес электронной почты",
       "changeAction": "Изменить основной адрес электронной почты",
       "sources": {
-        "current": "Текущий основной адрес электронной почты",
-        "emailCode": "электронная почта",
-        "pending": "Ожидается проверка"
-      },
-      "messages": {
-        "pendingVerification": "Для этого письма уже ожидается проверка. Вы можете повторно отправить письмо с подтверждением."
+        "emailCode": "электронная почта"
       },
       "mainEmailUpdated": "Основной адрес электронной почты обновлен.",
       "canonicalUpdated": "Основной адрес электронной почты обновлен."
@@ -1834,7 +1797,6 @@
   },
   "seriesDetail": {
     "slug": {
-      "autoDescription": "Автоматический режим: заголовок автоматически меняет поле обновления.",
       "manualDescription": "Ручной режим: метка остается фиксированной до тех пор, пока вы не отредактируете или не включите автоматический режим."
     },
     "notifications": {
@@ -1870,10 +1832,6 @@
     }
   },
   "works": {
-    "tabs": {
-      "editable": "Редактируемый"
-    },
-    "emptyEditable": "Вам не назначено ни одного редактируемого произведения.",
     "emptyCredits": "Авторизованных работ не обнаружено.",
     "columns": {
       "creditedAs": "Зачислено как",
@@ -1995,6 +1953,7 @@
         "patternPlaceholder": "например, ^[A-Z]{3}$",
         "customErrorMessage": "Пользовательское сообщение об ошибке",
         "optional": "Необязательный",
+        "dragValidator": "Перетащить правило проверки",
         "removeValidator": "Удалить валидатор"
       },
       "fieldTypes": {
@@ -2043,7 +2002,7 @@
       "newestFirst": "Сначала самые новые",
       "oldestFirst": "Сначала самый старый",
       "clearFilters": "Очистить фильтры",
-      "count": "{count, plural, one {# отправки} other {# отправки}}",
+      "count": "{count, plural, one {# отправка} few {# отправки} many {# отправок} other {# отправки}}",
       "filteredSuffix": "(отфильтровано)",
       "table": {
         "submitted": "Отправлено"
@@ -2062,10 +2021,6 @@
       }
     },
     "settings": {
-      "notifications": {
-        "managerAdded": "Добавлен менеджер форм",
-        "managerRemoved": "Менеджер форм удален."
-      },
       "urlPublic": {
         "title": "URL и публичный доступ",
         "allowPublic": "Разрешить доступ к общедоступным URL-адресам",
@@ -2085,13 +2040,7 @@
         "description": "Делитесь ссылками на панель мониторинга для просмотра статистики формы без доступа администратора."
       },
       "managers": {
-        "adminControls": "Административные элементы управления",
-        "readOnly": "Только чтение",
-        "description": "Менеджеры могут редактировать эту форму, просматривать отправленные материалы и управлять ссылками для общего доступа.",
-        "searchPlaceholder": "Поиск пользователей, чтобы добавить менеджера...",
-        "adminOnly": "Только администраторы могут добавлять или удалять менеджеров.",
-        "empty": "Менеджеры пока не назначены.",
-        "removeManager": "Удалить менеджера {name}"
+        "description": "Менеджеры могут редактировать эту форму, просматривать отправленные материалы и управлять ссылками для общего доступа."
       },
       "access": {
         "title": "Контроль доступа",
@@ -2120,20 +2069,26 @@
   "dataTable": {
     "aria": {
       "sortBy": "Сортировать по {label}",
-      "rowActions": "Действия для {label}"
+      "rowActions": "Действия для {label}",
+      "selectAllRows": "Выбрать все строки",
+      "selectRow": "Выбрать {label}",
+      "resultSummary": "{totalPages, plural, =0 {{count, plural, one {# результат} few {# результата} many {# результатов} other {# результата}}} other {{count, plural, one {# результат} few {# результата} many {# результатов} other {# результата}}, страница {page} из {totalPages}}}",
+      "loadingMessage": "Загрузка"
     },
     "sort": {
       "button": "Сортировать",
       "none": "Нет условий сортировки",
       "selectAbove": "Выберите поля выше",
       "selectFromLeft": "Выберите поля на левой панели",
-      "count": "{count, plural, one {# сортировки} other {# сортировки}}",
+      "count": "{count, plural, one {# сортировка} few {# сортировки} many {# сортировок} other {# сортировки}}",
       "aria": {
         "reorder": "Изменить порядок {label}",
         "moveUp": "Переместить {label} вверх",
         "moveDown": "Переместить {label} вниз",
         "toggleDirection": "Переключить направление сортировки для {label}",
-        "removeSort": "Удалить сортировку для {label}"
+        "removeSort": "Удалить сортировку для {label}",
+        "directionAscending": "Текущий порядок по возрастанию",
+        "directionDescending": "Текущий порядок по убыванию"
       }
     },
     "filter": {
@@ -2148,7 +2103,8 @@
       "drawerTitle": "Фильтр",
       "aria": {
         "backToFields": "Вернуться к полям фильтра",
-        "removeFilter": "Удалить фильтр для {label}"
+        "removeFilter": "Удалить фильтр для {label}",
+        "logic": "Объединение фильтров"
       },
       "operators": {
         "eq": "равно",
@@ -2181,7 +2137,8 @@
       "previousPage": "Предыдущая страница",
       "nextPage": "Следующая страница",
       "lastPage": "Последняя страница",
-      "page": "Страница {page}"
+      "page": "Страница {page}",
+      "navigation": "Навигация по страницам"
     }
   },
   "versionHistory": {
@@ -2191,9 +2148,11 @@
     "systemOrLegacy": "Система или более ранняя версия",
     "restore": "Восстановить",
     "restoreTitle": "Восстановить версию",
-    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document."
+    "restoreSameLocaleBody": "Восстановление источника v{version} ({locale}) изменит только исходный документ. Существующие документы переводов и задания перевода останутся без изменений, переводы не будут созданы автоматически. Продолжить?",
+    "restoreCrossLocaleBody": "Восстановление источника v{version} переключит исходную локаль с {currentLocale} на {selectedLocale} и изменит только указатель на источник. Существующие документы переводов и задания перевода останутся без изменений, переводы не будут созданы автоматически. Продолжить?",
+    "restoreFailed": "Не удалось восстановить исходный документ.",
+    "loadFailed": "Не удалось загрузить историю версий.",
+    "end": "Все версии загружены."
   },
   "shareLinks": {
     "title": "Поделиться ссылками",
@@ -2203,7 +2162,6 @@
     "createError": "Не удалось создать ссылку",
     "deleteSuccess": "Ссылка удалена",
     "deleteError": "Не удалось удалить ссылку",
-    "invalidUrl": "Неверный URL-адрес",
     "noLinks": "Ссылки не созданы",
     "showLess": "Показать меньше",
     "showMore": "Показать ещё {count}",
@@ -2218,21 +2176,9 @@
     "passwordPlaceholder": "Установите общий пароль",
     "maximumExpiration": "Срок действия ссылок может истекать в течение одного года.",
     "expirationInvalid": "Выберите срок действия в течение одного года.",
-    "bypassFormPassword": "Обход пароля формы",
-    "bypassFormPasswordDescription": "Если отключено, зрители должны будут ввести пароль формы.",
-    "bypassAuthentication": "Обход аутентификации",
-    "bypassAuthenticationDescription": "Если этот параметр включен, ссылка общего доступа пропускает шлюзы обязательной аутентификации.",
-    "bypassRoleChecks": "Обход проверок ролей",
-    "bypassRoleChecksDescription": "Если этот параметр включен, ссылка общего доступа пропускает шлюзы разрешенных ролей.",
     "policies": {
       "passwordProtected": "Защищено паролем",
-      "noPassword": "Нет пароля",
-      "passwordBypass": "Обход пароля",
-      "passwordRequired": "Требуется пароль",
-      "authBypass": "Обход аутентификации",
-      "authEnforced": "Проверка подлинности включена",
-      "roleBypass": "Обход ролей",
-      "roleEnforced": "Роль обязательна"
+      "noPassword": "Нет пароля"
     },
     "expirationBadge": {
       "expired": "Срок действия истек",
@@ -2264,7 +2210,9 @@
     "label": "Социальные ссылки",
     "addLink": "Добавить ссылку",
     "platformPlaceholder": "Платформа",
-    "valuePlaceholder": "URL-адрес или имя пользователя"
+    "valuePlaceholder": "URL-адрес или имя пользователя",
+    "reorderInstructions": "Используйте стрелки вверх и вниз, чтобы изменить положение этой ссылки.",
+    "positionChanged": "Ссылка перемещена на позицию {position} из {count}."
   },
   "termsPage": {
     "active": {
@@ -2424,7 +2372,6 @@
     }
   },
   "releasePage": {
-    "previewTitle": "Предварительный просмотр выпуска",
     "streaming": "Потоковое вещание",
     "metadata": {
       "fallbackDescription": "{title}",
@@ -2494,8 +2441,7 @@
         "title": "Добавить трек"
       },
       "placeholders": {
-        "title": "Название трека",
-        "durationSeconds": "например, 240"
+        "title": "Название трека"
       },
       "deleteConfirm": "Вы уверены, что хотите удалить этот трек?",
       "creditsModal": {
@@ -2517,8 +2463,7 @@
   "contentMetadata": {
     "preview": {
       "page": "Предварительный просмотр страницы",
-      "post": "Предварительный просмотр публикации",
-      "work": "Предварительный просмотр работы"
+      "post": "Предварительный просмотр публикации"
     }
   },
   "editorMetadata": {
@@ -2541,8 +2486,6 @@
   "postHeader": {
     "actions": {
       "editPost": "Редактировать сообщение",
-      "sharePost": "Поделиться публикацией",
-      "printPost": "Распечатать публикацию",
       "exportMarkdown": "Экспортировать публикацию в формате Markdown"
     }
   },
@@ -2551,7 +2494,6 @@
     "intro": "Мы используем основные файлы cookie для аутентификации и работы сайта, а также дополнительные аналитические файлы cookie для понимания использования сайта.",
     "learnMore": "См. нашу <privacy>Политику конфиденциальности</privacy> и <terms>Условия обслуживания</terms>.",
     "actions": {
-      "hidePreferences": "Скрыть настройки",
       "customize": "Настроить"
     }
   },
@@ -2569,7 +2511,6 @@
   },
   "locationSelector": {
     "placeholder": "Выберите местоположение...",
-    "clearSelection": "Очистить выбранное место",
     "emptySearch": "Поиск места на карте",
     "emptyResults": "Мест не найдено"
   },
@@ -2589,6 +2530,24 @@
       "sections": {
         "connection": "Связь"
       }
+    },
+    "saveState": {
+      "saved": "Сохранено",
+      "saving": "Сохранение…",
+      "offline": "Нет подключения · правки хранятся на этом устройстве",
+      "error": "Не удалось сохранить · повторная попытка…",
+      "rejected": "Некоторые правки не удалось сохранить",
+      "reload": "Переподключение · восстановление правок…"
+    },
+    "rejectedEdits": {
+      "open": "Просмотреть несохранённые правки",
+      "title": "Правки, которые не удалось сохранить",
+      "description": "Сервер отклонил эти правки, поэтому повторных попыток их сохранения не будет. Скопируйте всё нужное, затем отмените эти правки.",
+      "reason": "Причина: {reason}",
+      "copy": "Копировать",
+      "copied": "Скопировано",
+      "discard": "Отменить правки",
+      "empty": "Все правки сохранены."
     }
   },
   "urlSection": {
@@ -2602,9 +2561,6 @@
     "actions": {
       "copyId": "Копировать идентификатор",
       "copyUrl": "Копировать URL"
-    },
-    "notifications": {
-      "copied": "{label} скопировано"
     }
   },
   "formValidation": {
@@ -2644,7 +2600,7 @@
   },
   "ogImagePreview": {
     "alt": "Открыть предварительный просмотр графика",
-    "empty": "Изображение OG еще не создано",
+    "empty": "Нет OG-изображения",
     "actions": {
       "regenerate": "Восстановить изображение OG"
     },
@@ -2768,14 +2724,13 @@
     "scheduleModal": {
       "description": "Выберите дату и время для отправки этой кампании.",
       "dateLabel": "Запланированная дата и время",
-      "datePlaceholder": "Выберите дату и время",
       "previousMonth": "Предыдущий месяц",
       "nextMonth": "В следующем месяце",
       "audience": "Аудитория: {audience}",
       "allMatchingUsersWarning": "Включает соответствующих пользователей, которые отписались от информационных бюллетеней."
     },
     "notifications": {
-      "campaignSent": "Кампания отправлена {count, plural, one {# пользователю} other {# пользователю}}",
+      "campaignSent": "Кампания отправлена {count, plural, one {# пользователю} few {# пользователям} many {# пользователям} other {# пользователя}}",
       "campaignScheduled": "Кампания запланирована",
       "scheduleCancelled": "График кампании отменен"
     }
@@ -2858,7 +2813,6 @@
       "notFoundMessage": "Категории не найдены"
     },
     "seriesSelector": {
-      "searchPlaceholder": "Найдите или создайте...",
       "states": {
         "empty": "Серий нет",
         "select": "Выбрать серию...",
@@ -2871,14 +2825,12 @@
       },
       "notifications": {
         "assigned": "Сообщение отнесено к серии",
-        "reorderFailed": "Не удалось изменить порядок серий.",
         "createFailed": "Не удалось создать серию",
         "seriesUnavailable": "Эта серия больше не доступна для управления. Предыдущее задание сохранено.",
         "updateFailed": "Не удалось обновить серию сообщений. Предыдущее задание сохранено."
       }
     },
     "notifications": {
-      "slugUpdateFailed": "Не удалось обновить фрагмент.",
       "deleted": "Сообщение удалено",
       "published": "Сообщение опубликовано",
       "unpublished": "Сообщение неопубликовано",
@@ -3065,10 +3017,6 @@
     "pinned": "Закреплено"
   },
   "pageEditor": {
-    "localRecovery": {
-      "message": "Локальная копия изменений сохранена перед повторным подключением. Скачайте её перед перезагрузкой или выходом.",
-      "action": "Скачать копию для восстановления"
-    },
     "shareLinksDescription": "Ссылки предварительного просмотра для неопубликованных страниц",
     "showTitleOnPage": "Показать заголовок на странице",
     "slugValidation": {
@@ -3126,6 +3074,9 @@
       }
     },
     "columnsEditor": {
+      "labels": {
+        "ratio": "Соотношение столбцов"
+      },
       "badges": {
         "columnCount": "{count} столбцов"
       },
@@ -3150,20 +3101,18 @@
       "menuLabel": "Добавить раздел",
       "emptyColumn": "Пустой столбец — нажмите +, чтобы добавить контент",
       "actions": {
-        "addSectionToColumn": "Добавить раздел в столбец {index}",
-        "removeSectionFromColumn": "Удалить {section} из столбца {index}"
+        "addSectionToColumn": "Добавить раздел в столбец {index}"
       }
     },
     "notifications": {
       "published": "Страница опубликована",
       "unpublished": "Страница неопубликована",
       "deleted": "Страница удалена",
-      "slugUpdateFailed": "Не удалось обновить фрагмент страницы.",
-      "confirmSummaryFailed": "Не удалось подтвердить обновление сводки."
+      "slugUpdateFailed": "Не удалось обновить фрагмент страницы."
     },
     "mapEditor": {
       "title": "Карта",
-      "placeCount": "{count} {count, plural, one {place} other {places}}",
+      "placeCount": "{count} {count, plural, one {место} few {места} many {мест} other {места}}",
       "fullscreen": "Полноэкранный режим",
       "captionPlaceholder": "Добавьте необязательную подпись под картой...",
       "emptyState": "Места на карте пока не выбраны.",
@@ -3217,7 +3166,6 @@
         "content": "Содержание",
         "marqueeBehavior": "Поведение выделения",
         "scenePlayback": "Воспроизведение",
-        "sceneRender": "Рендерер",
         "sceneMotion": "Движение",
         "sceneUnits": "Единицы",
         "sceneSettings": "Сцена",
@@ -3234,7 +3182,6 @@
         "columns": "Столбцы",
         "infiniteLoop": "Бесконечный цикл",
         "showIndicators": "Показать индикаторы",
-        "showFeaturedImage": "Показать избранное изображение",
         "imageAspectRatio": "Соотношение сторон изображения",
         "showMeta": "Показать мета",
         "sortBy": "Сортировать по",
@@ -3253,7 +3200,6 @@
         "showImage": "Показать изображение",
         "selectForm": "Выберите форму",
         "showFormTitle": "Показать заголовок формы",
-        "showTitle": "Показать заголовок",
         "numberOfWorks": "Количество работ",
         "numberOfReleases": "Количество выпусков",
         "numberOfProgramEvents": "Количество событий",
@@ -3323,7 +3269,10 @@
         "textColorSource": "Цвет текста",
         "lightTextColor": "Светлый текст",
         "darkTextColorSource": "Темный текст",
-        "darkTextColor": "Темный цвет текста"
+        "darkTextColor": "Темный цвет текста",
+        "itemSize": "Размер элементов",
+        "showAvatar": "Показывать аватар",
+        "maxLabels": "Максимальное число лейблов"
       },
       "fieldLabels": {
         "year": "Год",
@@ -3334,11 +3283,7 @@
       },
       "badges": {
         "posts": "{count} сообщений",
-        "rows": "{count} строк",
-        "authors": "{count} авторов",
-        "artists": "{count} исполнителей",
-        "works": "{count} работает",
-        "releases": "{count} выпусков"
+        "rows": "{count} строк"
       },
       "placeholders": {
         "publishedByDefault": "Опубликовано по умолчанию",
@@ -3358,7 +3303,6 @@
           "auto": "Авто"
         },
         "sortBy": {
-          "dateAdded": "Дата добавления",
           "startDate": "Дата начала",
           "endDate": "Дата окончания",
           "publishedDate": "Дата публикации",
@@ -3367,9 +3311,7 @@
         },
         "sortOrder": {
           "newest": "Новейший",
-          "oldest": "Самый старый",
-          "azOldest": "А-Я / Самый старый",
-          "zaNewest": "Я-А / Новейшие"
+          "oldest": "Самый старый"
         },
         "mapPrimaryLabel": {
           "placeName": "Название места"
@@ -3443,6 +3385,11 @@
           "theme": "Следовать теме",
           "custom": "Пользовательский",
           "inherit": "Следуй за светом"
+        },
+        "itemSize": {
+          "s": "S · Компактный",
+          "m": "M · Стандартный",
+          "l": "L · Крупный"
         }
       },
       "actions": {
@@ -3453,8 +3400,6 @@
         "moveUnitUp": "Переместить объект вверх",
         "moveUnitDown": "Переместить объект вниз",
         "removeSceneUnit": "Удалить блок",
-        "expandSceneUnit": "Развернуть блок",
-        "collapseSceneUnit": "Свернуть блок",
         "replaceMesh": "Заменить GLB",
         "uploadMesh": "Загрузить GLB",
         "clearMeshAsset": "Очистить объект сетки",
@@ -3493,6 +3438,12 @@
         "meshOptimizationCancelled": "Отменено",
         "optimizedMeshCleanupFailed": "Ссылка на оптимизированный актив удалена, но очистка не удалась: {error}",
         "optimizedMeshCleanupFailedDefault": "Ссылка на оптимизированный актив удалена, но очистка не удалась."
+      },
+      "authorSelection": {
+        "maxSelected": "Можно выбрать до {count} авторов.",
+        "empty": "Авторы не выбраны. Этот блок будет пустым.",
+        "unavailable": "Этот автор больше недоступен.",
+        "unavailableWarning": "Недоступные авторы не отображаются на публичной странице. Удалите их или выберите замену."
       }
     },
     "embed": {
@@ -3545,8 +3496,6 @@
       "matchDescription": "Объедините выбранные группы ролей, тегов и подписки на рассылку.",
       "any": "Любая выбранная группа",
       "all": "Все выбранные группы",
-      "roles": "Роли",
-      "rolesDescription": "Достаточно любой из выбранных ролей.",
       "roleUser": "Участники",
       "memberDescription": "Только вошедшие в аккаунт участники могут просматривать эту страницу.",
       "authorDescription": "Участники с ролью автора.",
@@ -3574,17 +3523,27 @@
       "restrictedTitle": "У вас нет доступа к этой странице",
       "restrictedDescription": "Ваш аккаунт не соответствует условиям доступа к этой странице.",
       "signIn": "Войти"
+    },
+    "a11y": {
+      "sectionPosition": "{section} · {index}/{count}",
+      "dragInstructions": "Нажмите пробел, чтобы начать перемещение, затем измените положение стрелками. Нажмите пробел для подтверждения или Escape для отмены.",
+      "dragStart": "{section} · Переместить · В процессе · {index}/{count}",
+      "dragOver": "{section} · Переместить · {index}/{count}",
+      "dragEnd": "{section} · Переместить · Подтвердить · {index}/{count}",
+      "dragCancel": "{section} · Переместить · Отменено",
+      "sectionDeleted": "{section} удалено",
+      "sectionAdded": "{section} создано · {index}/{count}",
+      "columnsPosition": "{column} · {section} · {index}/{count}"
     }
   },
   "editorCommon": {
     "reloadRequired": {
       "title": "Требуется перезагрузка",
-      "message": "Более новая версия была сохранена, пока этот редактор был открыт. Перезагрузите файл, прежде чем продолжить редактирование.",
-      "action": "Перезагрузить"
+      "message": "Более новая версия была сохранена, пока этот редактор был открыт. Перезагрузите файл, прежде чем продолжить редактирование."
     },
     "permissionRevoked": {
-      "title": "Разрешение на редактирование отозвано",
-      "message": "У вас больше нет разрешения на редактирование этого контента. Изменения, внесенные после отзыва разрешения, не будут сохранены."
+      "title": "Доступ отозван",
+      "message": "У вас больше нет доступа к этому материалу. Несохранённые изменения остаются на этом устройстве."
     },
     "sessionExpired": {
       "title": "Срок сеанса истек",
@@ -3640,7 +3599,6 @@
         "mute": "Отключить звук",
         "unmute": "Включить звук",
         "volume": "Громкость звука",
-        "original": "Оригинал",
         "waveform": "Форма волны",
         "spectrogram": "Спектрограмма",
         "spectrogramAlt": "Аудио спектрограмма",
@@ -3657,10 +3615,8 @@
         "addItem": "Добавить {item}",
         "replaceItem": "Заменить {item}",
         "browse": "Просмотр файлов",
-        "or": "ИЛИ",
         "importFromUrl": "Импортировать из URL-адреса",
         "directVideoUrlHelp": "Только прямые URL-адреса видеофайлов. Для YouTube или Vimeo используйте внешнее видео.",
-        "confirm": "Встроить",
         "resumeAvailable": "Обнаружена прерванная загрузка",
         "resumeInstructionNamed": "Выберите {name} еще раз, чтобы продолжить загрузку с того места, где она была остановлена.",
         "backToUpload": "Загрузить файлы",
@@ -3756,11 +3712,8 @@
       }
     },
     "mapBlock": {
-      "clickToAddPlace": "Нажмите, чтобы добавить место",
       "captionPlaceholder": "Добавьте подпись...",
-      "clickToAddCaption": "Нажмите, чтобы добавить подпись",
-      "externalPlaceholder": "Карта: {count} {count, plural, one {place} other {places}}",
-      "viewOnGoogleMaps": "Посмотреть на Картах Google ({lat}, {lng})"
+      "clickToAddCaption": "Нажмите, чтобы добавить подпись"
     },
     "mapPlacesModal": {
       "title": "Управление местами",
@@ -3770,22 +3723,9 @@
       "centeredTitle": "Центрировано",
       "setAsCenterTitle": "Установить как центр"
     },
-    "blockAlign": {
-      "left": "Выровнять по левому краю",
-      "center": "По центру",
-      "right": "Выровнять по правому краю"
-    },
-    "mathInline": {
-      "clickToEdit": "Нажмите, чтобы изменить",
-      "convertToBlock": "Преобразовать в блок"
-    },
-    "mathInlineButton": {
-      "label": "Формула в строке"
-    },
     "editor": {
       "slashMenu": {
         "placeholder": "Введите '/' для команд",
-        "empty": "Нет элементов",
         "unavailable": "Недоступно",
         "groups": {
           "headings": "Заголовки",
@@ -3844,14 +3784,14 @@
           "quote": {
             "title": "Цитата",
             "subtext": "Цитата или отрывок",
-            "aliases": "quotation\nblockquote\nbq",
+            "aliases": "quotation\nblockquote\nbq\nцитата\nблок цитаты",
             "group": "Базовые блоки"
           },
           "callout": {
             "title": "Callout",
-            "subtext": "Highlight content with an icon",
-            "aliases": "callout\nnotice\ninfo\naside",
-            "group": "Basic blocks"
+            "subtext": "Выделите содержимое с помощью значка",
+            "aliases": "callout\nnotice\ninfo\naside\nвыноска\nпримечание\nинформация\nуведомление",
+            "group": "Базовые блоки"
           },
           "divider": {
             "title": "Разделитель",
@@ -3880,61 +3820,61 @@
           "mathBlock": {
             "title": "Математический блок",
             "subtext": "Отображение уравнения с помощью LaTeX",
-            "aliases": "math\nequation\nlatex\nformula",
+            "aliases": "math\nequation\nlatex\nformula\nматематика\nуравнение\nформула",
             "group": "Математика"
           },
           "inlineMath": {
             "title": "Формула в строке",
             "subtext": "Формула LaTeX в строке",
-            "aliases": "inline\ninline math\ninlinemath\nlatex\n$",
+            "aliases": "inline\ninline math\ninlinemath\nlatex\n$\nвстроенная формула\nформула в строке",
             "group": "В строке"
           },
           "map": {
             "title": "Карта",
             "subtext": "Вставка местоположения на карте",
-            "aliases": "map\nlocation\nplace\naddress",
+            "aliases": "map\nlocation\nplace\naddress\nкарта\nместоположение\nместо\nадрес",
             "group": "Встраиваемое"
           },
           "externalVideo": {
             "title": "Внешнее видео",
             "subtext": "Вставьте ссылку на YouTube или Vimeo",
-            "aliases": "external video\nyoutube\nvimeo\nembed",
+            "aliases": "external video\nyoutube\nvimeo\nembed\nвнешнее видео\nютуб\nвимео\nвставка",
             "group": "Встраиваемое"
           },
           "p5Sketch": {
             "title": "p5.js",
             "subtext": "Добавить интерактивный скетч p5.js",
-            "aliases": "p5\np5.js\nsketch\ncreative coding",
+            "aliases": "p5\np5.js\nsketch\ncreative coding\nскетч\nэскиз\nтворческое программирование",
             "group": "Встраиваемое"
           },
           "threeScene": {
             "title": "Three.js",
             "subtext": "Добавить интерактивную сцену Three.js",
-            "aliases": "three\nthree.js\n3d\nscene",
+            "aliases": "three\nthree.js\n3d\nscene\nтрёхмерный\nсцена",
             "group": "Встраиваемое"
           },
           "file": {
             "title": "Вложение",
             "subtext": "Прикрепите файл (PDF, DOC, ZIP и т. д.)",
-            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload",
+            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\nвложение\nфайл\nдокумент\nскачать",
             "group": "Медиа"
           },
           "aiAssistant": {
             "title": "ИИ-помощник",
             "subtext": "Напишите, улучшите или преобразуйте текст с помощью ИИ",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove",
+            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nии\nпомощник\nписать\nулучшить",
             "group": "ИИ"
           },
           "shader": {
             "title": "GLSL-шейдер",
             "subtext": "Добавить интерактивный GLSL-шейдер",
-            "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "aliases": "shader\nglsl\nfragment shader\nshadertoy\nшейдер\nфрагментный шейдер",
             "group": "Встраиваемое"
           },
           "mermaid": {
             "title": "Mermaid",
             "subtext": "Создать диаграмму из текста",
-            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence\nдиаграмма\nблок-схема\nпоследовательность",
             "group": "Встраиваемое"
           }
         }
@@ -3950,9 +3890,6 @@
         "alignLeft": "Выровнять по левому краю",
         "alignCenter": "По центру",
         "alignRight": "Выровнять по правому краю",
-        "alignJustify": "Выровнять по ширине",
-        "textColor": "Текст",
-        "backgroundColor": "Фон",
         "nest": "Сдвинуть вправо",
         "unnest": "Сдвинуть влево",
         "inlineMath": "Формула в строке",
@@ -3967,36 +3904,19 @@
         "urlPlaceholder": "Изменить URL"
       },
       "math": {
-        "inline": "Формула в строке",
-        "block": "Математический блок",
-        "clickToEdit": "Нажмите, чтобы изменить",
-        "convertToBlock": "Преобразовать в блок"
+        "selectBlock": "Выбрать математический блок",
+        "block": "Математический блок"
       },
       "file": {
-        "add": "Добавить {item}",
         "replace": "Заменить {item}",
-        "delete": "Удалить",
-        "download": "Скачать",
-        "caption": "Добавьте подпись...",
-        "upload": "Загрузить файлы",
-        "embed": "Встроить",
-        "urlPlaceholder": "Изменить URL"
+        "delete": "Удалить"
       },
       "resize": {
-        "image": "Изменить размер — Изображение",
-        "audio": "Изменить размер — Аудио",
-        "video": "Изменить размер — Видео",
-        "file": "Изменить размер — Вложение",
         "map": "Изменить размер — Карта",
-        "externalVideo": "Изменить размер — Внешнее видео",
-        "p5Sketch": "Изменить размер — p5.js",
-        "threeScene": "Изменить размер — Three.js",
-        "dragHandle": "Перетащите, чтобы изменить размер",
-        "shader": "Изменить размер — GLSL-шейдер"
+        "externalVideo": "Изменить размер — Внешнее видео"
       },
       "drag": {
         "openBlockMenu": "Открыть меню блока",
-        "addBlock": "Добавить блок",
         "delete": "Удалить",
         "colors": "Цвета"
       },
@@ -4028,7 +3948,6 @@
         "toggleHeaderColumn": "Заголовок столбца",
         "selectRow": "Выбрать строку",
         "selectColumn": "Выбрать столбец",
-        "selectCells": "Выбранные ячейки",
         "selectTable": "Выбрать таблицу",
         "deleteTable": "Удалить таблицу",
         "mergeCells": "Объединить ячейки",
@@ -4042,17 +3961,11 @@
         "unavailable": "Недоступно"
       },
       "map": {
-        "insert": "Карта",
-        "clickToAddPlace": "Нажмите, чтобы добавить место",
-        "captionPlaceholder": "Добавьте подпись...",
         "managePlaces": "Управление местами"
       },
       "embeds": {
         "map": "Карта",
-        "externalVideo": "Внешнее видео",
-        "p5Sketch": "p5.js",
-        "threeScene": "Three.js",
-        "shader": "GLSL-шейдер"
+        "externalVideo": "Внешнее видео"
       },
       "runtimeLabels": {
         "code": {
@@ -4139,13 +4052,14 @@
         }
       },
       "media": {
-        "browse": "Просмотр файлов",
-        "importFromUrl": "Импортировать из URL-адреса",
-        "embed": "Встроить",
-        "openLibrary": "Библиотека файлов",
-        "uploadFiles": "Загрузить файлы",
-        "selectFile": "Выберите файл"
+        "importFromUrl": "Импортировать из URL-адреса"
       }
+    },
+    "accessDowngraded": {
+      "message": "Ваш доступ изменён на просмотр. Редактирование отключено; ещё не сохранённые правки остаются на этом устройстве и будут сохранены, если вы снова получите доступ к редактированию."
+    },
+    "accessUpgraded": {
+      "message": "Вы снова можете редактировать. Изменения, сохранённые на устройстве в режиме только просмотра, сохраняются."
     }
   },
   "aiAssistant": {
@@ -4170,7 +4084,6 @@
       "brainstorm": "Мозговой штурм"
     },
     "sections": {
-      "original": "Оригинал",
       "result": "Результат ИИ"
     },
     "actions": {
@@ -4220,8 +4133,7 @@
       "pinClickable": "Пин кликабельный"
     },
     "themeOptions": {
-      "none": "Никто",
-      "systemSuffix": "(Система)"
+      "none": "Никто"
     },
     "scheme": {
       "auto": "Авто",
@@ -4237,13 +4149,7 @@
     "copyValueTitle": "Нажмите, чтобы скопировать значение {label}"
   },
   "postMembers": {
-    "removeAria": "Удалить {name}",
-    "roles": {
-      "owner": "Владелец"
-    },
-    "states": {
-      "memberFallback": "член"
-    }
+    "removeAria": "Удалить {name}"
   },
   "workCredits": {
     "divider": "или добавить кредит",
@@ -4276,9 +4182,6 @@
       "artist": "Художники не найдены",
       "name": "Имена не найдены"
     },
-    "states": {
-      "unknownInitial": "?"
-    },
     "notifications": {
       "groupCreated": "Группа создана",
       "groupDeleted": "Группа удалена",
@@ -4299,48 +4202,46 @@
     "resolvedMetadata": "Разрешенные метаданные"
   },
   "translationPanel": {
-    "description": "Review the source language and existing translation document for each locale.",
+    "description": "Просмотрите исходный язык и существующий документ перевода для каждой локали.",
     "actions": {
       "expand": "Расширять",
       "collapse": "Крах",
-      "regenerateAll": "Generate/regenerate all eligible locales",
+      "regenerateAll": "Создать/пересоздать переводы для всех подходящих локалей",
       "regenerateLocale": "Регенерировать",
       "regenerateLocaleAria": "Восстановить перевод {locale}",
       "generateLocale": "Generate",
-      "generateLocaleAria": "Generate {locale} translation"
+      "generateLocaleAria": "Создать перевод для {locale}"
     },
     "sourceLocale": {
       "label": "Исходный язык",
       "description": "Это исходный язык, используемый в качестве основы для переводов данного объекта.",
       "confirm": {
         "title": "Изменить исходный язык",
-        "description": "Changing the source language updates only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically.",
-        "detail": "{locale} becomes the language of the editable source document. Existing target documents and translation jobs remain unchanged.",
+        "description": "Изменение исходного языка обновляет только указатель на источник. Существующие документы переводов и задания перевода остаются без изменений, переводы не создаются автоматически.",
+        "detail": "{locale} станет языком редактируемого исходного документа. Существующие документы переводов и задания перевода останутся без изменений.",
         "confirm": "Изменить исходный язык"
       }
     },
     "activeEditLocale": {
-      "ariaLabel": "Switch content language. Current: {locale}",
+      "ariaLabel": "Переключить язык содержимого. Текущий: {locale}",
       "sourceOption": "{locale} (Источник)",
       "loading": "Загрузка языков...",
-      "missingDescription": "No {locale} target document exists yet. Generate it from the translations panel.",
+      "missingDescription": "Документ перевода для {locale} ещё не создан. Создайте его в панели переводов.",
       "bodyPreviewTitle": "{locale} предварительный просмотр тела",
-      "bodyPreviewDescription": "The existing translation document is shown with its structure and formatting.",
+      "bodyPreviewDescription": "Существующий документ перевода отображается с его структурой и форматированием.",
       "bodyPreviewEmpty": "Локализованного предварительного просмотра тела пока нет.",
-      "sharedStructureSectionDescription": "This section keeps shared layout or query settings from the source page; translated body content is read-only.",
+      "sharedStructureSectionDescription": "В этом разделе сохраняются общие настройки макета или запроса исходной страницы; переведённый основной текст доступен только для чтения.",
       "sectionFieldLabels": {
         "caption": "Подпись",
         "copyJson": "Копия сцены"
       }
     },
     "statuses": {
-      "missing": "Отсутствующий",
       "existing": "Existing"
     },
     "states": {
       "loadFailed": "Не удалось загрузить переводы.",
-      "missingTarget": "No target document yet.",
-      "sourceRow": "Эта локаль редактируется в главном редакторе исходного кода.",
+      "missingTarget": "Документ перевода ещё не создан.",
       "sourceEditorHint": "Отредактируйте исходный текст в главном редакторе.",
       "updatedAt": "Обновлен {date}"
     },
@@ -4353,64 +4254,29 @@
     }
   },
   "translationPanelMenu": {
-    "description": "Review source menu labels and existing translation documents.",
-    "sourceLocaleDescription": "The menu editor above owns structure, ordering, links, visibility, and source labels. Target translations below are read-only previews.",
-    "states": {
-      "sourcePreview": "Ярлыки исходного меню ({locale}): {labels}",
-      "sourceEditorHint": "Эти ярлыки берутся из редактора меню выше.",
-      "missingTarget": "No labels are saved for this locale yet.",
-      "noItems": "Ярлыков меню пока нет.",
-      "translationPreview": "Existing {locale} labels: {labels}"
-    },
+    "description": "Просмотрите исходные названия пунктов меню и существующие документы переводов.",
     "previewModal": {
-      "title": "{locale} menu translation preview",
-      "descriptions": {
-        "missing": "No public menu translation exists for this locale. The source is shown until an Admin generates it.",
-        "existing": "Shows the current public translated labels for this menu as read-only."
-      },
+      "title": "Предварительный просмотр перевода меню для {locale}",
       "fields": {
-        "linkType": "Link type",
-        "destination": "Destination",
-        "children": "Nested items",
-        "localizedLabelForLocale": "{locale} public label",
-        "sourceLabelForLocale": "{locale} source label",
-        "localizedLabelDescription": "The current translated label shown in public menus; it cannot be changed here.",
-        "sourceLabelDescription": "Comes from the source menu editor and cannot be changed here.",
-        "fixedLocaleLockedDescription": "This item is fixed to the {locale} label and is read-only."
-      },
-      "states": {
-        "detailUnavailable": "Detailed translated menu data could not be loaded.",
-        "noItems": "There are no menu items to preview."
+        "localizedLabelForLocale": "Публичное название для {locale}"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template.",
-      "sourceLocaleDescription": "Исходный шаблон управляет темой, основной копией и именами переменных времени выполнения.",
-      "states": {
-        "sourceEditorHint": "Отредактируйте исходный шаблон в главном редакторе.",
-        "noContent": "Переведенной темы или тела пока не существует."
-      }
+      "description": "Управляйте исходным языком и существующими документами переводов для этого шаблона электронной почты."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout.",
-      "sourceLocaleDescription": "Исходный макет управляет HTML-оболочкой и структурными именами заполнителей для рендеринга электронной почты.",
-      "states": {
-        "sourceEditorHint": "Отредактируйте исходный макет в главном редакторе.",
-        "noContent": "Переведенного HTML-макета пока не существует."
-      }
+      "description": "Управляйте исходным языком и существующими документами переводов для этого макета электронной почты."
     }
   },
   "localizationNotice": {
     "translated": {
-      "title": "Localized version",
-      "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
+      "title": "Локализованная версия",
+      "description": "Эта локализованная версия отображается на языке {displayed}; оригинал на языке {source} остаётся официальным источником."
     },
     "fallback": {
-      "title": "Резервный язык",
-      "english": "Запрошенный перевод {requested} недоступен, поэтому эта страница отображается в {displayed}.",
-      "source": "Запрошенный перевод {requested} недоступен, поэтому эта страница отображается в исходном виде {source}."
+      "title": "Резервный язык"
     },
     "actions": {
       "viewOriginal": "Посмотреть оригинал ({source})"
@@ -4430,17 +4296,16 @@
       "totalLocales": "Всего языков",
       "sourceEntities": "Исходные объекты",
       "activeJobs": "Вакансии в процессе",
-      "existingEntries": "Existing translations"
+      "existingEntries": "Существующие переводы"
     },
     "sections": {
-      "localeHealthTitle": "Translation state by locale",
-      "entityHealthTitle": "Translation state by entity type"
+      "localeHealthTitle": "Состояние переводов по локалям",
+      "entityHealthTitle": "Состояние переводов по типам объектов"
     },
     "columns": {
       "policy": "Политика",
-      "lastTargetUpdate": "Last target update",
+      "lastTargetUpdate": "Последнее обновление перевода",
       "entity": "Сущность",
-      "existing": "Existing translations",
       "sources": "Источники",
       "lastSourceUpdate": "Последнее обновление исходного кода"
     },
@@ -4475,7 +4340,7 @@
   },
   "translationSettingsPage": {
     "title": "Настройки перевода",
-    "description": "Manage the default source language and automatic translation providers. An Admin explicitly starts translation generation from each editor.",
+    "description": "Управляйте исходным языком по умолчанию и поставщиками автоматического перевода. Администратор явно запускает создание переводов в каждом редакторе.",
     "actions": {
       "jobs": "Вакансии",
       "save": "Сохранить настройки",
@@ -4485,8 +4350,8 @@
       "createProvider": "Создать поставщика"
     },
     "sections": {
-      "runtime": "Source defaults",
-      "runtimeDescription": "Set only the language used when a source language has not been established. Source changes never start translation generation automatically.",
+      "runtime": "Настройки источника по умолчанию",
+      "runtimeDescription": "Задайте только язык, используемый, когда исходный язык ещё не определён. Изменения источника никогда не запускают создание переводов автоматически.",
       "providers": "Поставщики переводов",
       "providersDescription": "Управляйте поставщиками машинного перевода. Генерация остается отключенной до тех пор, пока хотя бы один активный поставщик не получит действительные учетные данные."
     },
@@ -4496,10 +4361,10 @@
         "description": "Используется, когда исходный языковой стандарт еще не установлен и когда запрос не разрешается в поддерживаемый языковой стандарт контента."
       },
       "protectedTerms": {
-        "label": "Protected terms",
-        "description": "Exact case-sensitive spellings that translation generation must keep unchanged. No terms are learned or suggested automatically.",
-        "placeholder": "Add a protected term",
-        "examples": "Examples: Photoshop, React Native"
+        "label": "Защищённые термины",
+        "description": "Точные написания с учётом регистра, которые должны сохраняться при создании переводов. Термины не изучаются и не предлагаются автоматически.",
+        "placeholder": "Добавить защищённый термин",
+        "examples": "Примеры: Photoshop, React Native"
       },
       "providerName": {
         "label": "Имя провайдера"
@@ -4628,33 +4493,22 @@
       "summary": "Добавьте краткое изложение..."
     },
     "tooltips": {
-      "generatingNamed": "{name} генерирует сводку",
-      "applyingNamed": "{name} применяет сгенерированную сводку",
-      "readyNamed": "У {name} готово созданное резюме."
+      "generatingNamed": "{name} генерирует сводку"
     },
     "feedback": {
       "failedDefault": "Не удалось обработать создание сводки.",
-      "invalidJson": "Ответ AI не удалось проанализировать как сводный JSON.",
       "alreadyRunning": "Генерация сводки уже запущена.",
-      "applyingGenerated": "Применение сгенерированного резюме.",
-      "resetOlderSession": "Сбросьте устаревшее состояние сгенерированной сводки из более старого сеанса.",
-      "resetUnrestorable": "Сбросить устаревшее состояние сгенерированной сводки, которое невозможно восстановить.",
-      "missingJobPayload": "Генерация сводки не вернула полезные данные задания.",
       "missingSuggestionPayload": "Создание сводки завершено без полезных данных предложения.",
       "staleSuggestion": "Это предложение устарело. Восстановите или отклоните его перед подачей заявки.",
       "unableToApplyNow": "Сейчас невозможно применить созданную сводку.",
       "applyFailed": "Не удалось применить созданную сводку.",
       "applied": "Сгенерированное резюме применено.",
-      "appliedJobUnresolved": "Сводка применена, но задание ИИ не удалось решить автоматически.",
-      "dismissedJobUnresolved": "Сводное предложение было отклонено на местном уровне, но задание ИИ не удалось решить автоматически.",
-      "readyBeforeApplying": "Сначала примените или отклоните созданную сводку.",
       "readyToApply": "Сгенерированное резюме готово к применению."
     },
     "ready": {
       "title": "Сгенерированное резюме",
       "suggestedSummary": "Предлагаемое резюме",
       "anotherCollaborator": "Другой соавтор",
-      "anotherCollaboratorFallback": "У другого соавтора готово созданное резюме.",
       "anotherCollaboratorNamed": "У {name} готово созданное резюме."
     }
   },
@@ -4702,8 +4556,7 @@
       "roleUpdated": "Роль обновлена",
       "userBanned": "Пользователь заблокирован",
       "userUnbanned": "Пользователь разбанен",
-      "userDeleted": "Пользователь удален",
-      "userCreated": "Пользователь создан"
+      "userDeleted": "Пользователь удален"
     }
   },
   "adminUserDetail": {
@@ -4740,16 +4593,13 @@
       "userIdCopied": "Идентификатор пользователя скопирован.",
       "userIdCopyFailed": "Не удалось скопировать идентификатор пользователя.",
       "emailSuppressionReleased": "Подавление электронной почты отключено",
-      "mainEmailUpdated": "Основной адрес электронной почты обновлен.",
       "ssoProviderRemoved": "Поставщик системы единого входа удален."
     },
     "auth": {
       "emptyEmail": "Нет электронной почты",
       "delivery": {
         "title": "Электронная почта доставки",
-        "description": "Для рассылки, уведомлений и почты учетной записи используется выбранный основной адрес электронной почты.",
-        "changePlaceholder": "Выберите подтвержденный адрес электронной почты",
-        "changeHelp": "Изменение этого выбора сохраняется немедленно."
+        "description": "Для рассылки, уведомлений и почты учетной записи используется выбранный основной адрес электронной почты."
       },
       "providers": {
         "title": "Подключенные поставщики единого входа",
@@ -4758,7 +4608,6 @@
         "remove": "Удалить поставщика системы единого входа"
       },
       "sources": {
-        "current": "Текущий адрес электронной почты",
         "emailCode": "Вход по электронной почте"
       },
       "ban": {
@@ -4793,7 +4642,6 @@
         "noChanges": "Нет изменений для сохранения"
       },
       "validation": {
-        "invalidUrl": "Неверный формат URL",
         "invalidEmail": "Неверный формат электронной почты",
         "invalidHexColor": "Неверный шестнадцатеричный формат цвета.",
         "invalidGoogleAnalyticsId": "Неверный формат идентификатора Google Analytics."
@@ -5102,14 +4950,12 @@
   },
   "formSuccessPage": {
     "metadata": {
-      "fallbackTitle": "Форма отправлена",
       "title": "{formTitle} – отправлено"
     },
     "title": "Спасибо"
   },
   "formPasswordPage": {
     "metadata": {
-      "fallbackTitle": "Доступ к форме",
       "description": "Введите пароль для доступа к этой форме"
     },
     "title": "Защищено паролем",
@@ -5121,7 +4967,6 @@
   },
   "formDashboardPage": {
     "metadata": {
-      "fallbackTitle": "Форма панели управления",
       "title": "{formTitle} — Панель управления",
       "description": "Статистика и аналитика отправки форм"
     },
@@ -5131,7 +4976,28 @@
     "stats": {
       "total": "Общий"
     },
-    "fieldStatistics": "Полевая статистика"
+    "fieldStatistics": "Полевая статистика",
+    "charts": {
+      "donut": "Кольцевая",
+      "pie": "Круговая",
+      "bar-horizontal": "Горизонтальные столбцы",
+      "bar-vertical": "Вертикальные столбцы",
+      "radar": "Радарная",
+      "table": "Таблица",
+      "area": "Область",
+      "line": "Линия",
+      "histogram": "Гистограмма",
+      "noResponses": "Ответов пока нет",
+      "emptyValue": "(пусто)",
+      "min": "Минимум",
+      "max": "Максимум",
+      "avg": "Среднее",
+      "count": "Количество",
+      "date": "Дата",
+      "value": "Значение",
+      "range": "Диапазон",
+      "chartType": "Тип диаграммы"
+    }
   },
   "embeddedForm": {
     "states": {
@@ -5182,10 +5048,7 @@
       "locationMode": "Режим местоположения",
       "ticketUrl": "URL-адрес заявки",
       "streamUrl": "URL-адрес потока",
-      "externalUrl": "Внешний URL-адрес",
-      "participants": "Участники",
-      "textCredits": "Текстовые кредиты",
-      "textCreditsDescription": "Один кредит на строку. Использовать роль: имя, когда роль необходима."
+      "externalUrl": "Внешний URL-адрес"
     },
     "locationModes": {
       "mapPlace": "Место проведения",
@@ -5198,7 +5061,6 @@
       "tickets": "Билеты",
       "stream": "Транслировать",
       "link": "Связь",
-      "participants": "Участники",
       "empty": "События не найдены.",
       "date": "Дата",
       "credits": "Кредиты"
@@ -5215,152 +5077,14 @@
       "deleteMessage": "Этот тип событий можно удалить только в том случае, если ни одно событие его не использует."
     }
   },
-  "tools": {
-    "portadj": {
-      "metadataTitle": "PortaDJ",
-      "metadataDescription": "Воспроизводите и микшируйте локальные аудиофайлы в браузере на двух DJ-деках."
-    },
-    "youtubeAudio": {
-      "title": "Аудио с YouTube",
-      "urlLabel": "Ссылка на видео",
-      "urlPlaceholder": "https://…",
-      "resolve": "Загрузить аудио",
-      "resolving": "Загрузка аудио",
-      "clear": "Очистить источник",
-      "metadataTitle": "Аудио с YouTube",
-      "metadataDescription": "Преобразуйте аудио из авторизованного источника YouTube в браузере.",
-      "errors": {
-        "INTERNAL_ERROR": "Не удалось загрузить источник аудио. Повторите попытку.",
-        "INVALID_REQUEST": "Введите корректный URL видео YouTube.",
-        "INVALID_UPSTREAM_RESPONSE": "YouTube вернул неожиданный источник аудио. Попробуйте другое видео.",
-        "REQUEST_ABORTED": "Запрос отменён.",
-        "SOURCE_EXPIRED": "Срок действия этого источника аудио истёк. Загрузите URL повторно.",
-        "SOURCE_NOT_FOUND": "Этот источник аудио больше недоступен. Загрузите URL повторно.",
-        "UNAUTHORIZED": "Войдите снова, чтобы использовать этот инструмент.",
-        "UNSUPPORTED_VIDEO": "Это видео не предоставляет поддерживаемый источник аудио с конечной длительностью.",
-        "UPSTREAM_FAILURE": "Сейчас не удаётся загрузить аудио с YouTube. Повторите попытку."
-      }
-    },
-    "transcode": {
-      "title": "Аудио транскодер",
-      "targetIdle": "Ожидание",
-      "targetChecking": "Проверка",
-      "targetReady": "Готовый",
-      "targetError": "Недоступно",
-      "dropTitle": "Перетащите или выберите аудиофайлы",
-      "dropDescription": "До 10 файлов · Нет папок · Обрабатывается на этом устройстве",
-      "chooseFiles": "Выберите аудиофайлы",
-      "supportedFormatsLabel": "Поддерживаемые форматы",
-      "supportedFormats": "Поддерживаются: CAF, AIFF/AIFC, WAV, FLAC, MP3, AAC/M4A, Ogg/Opus и аудио в форматах MP4, MOV, MKV/WebM или TS. Проверено по файлам.",
-      "filesSelected": "Файлы",
-      "outputSettings": "Настройки вывода",
-      "outputSettingsHelper": "Каналы остаются неизменными. Автоматически выбирает совместимую скорость для каждого файла.",
-      "processingDetails": "Детали обработки",
-      "processingDetailsDescription": "Сбалансированная передискретизация. Целочисленный вывод сглаживается. Большие файлы WAV используют RF64.",
-      "format": "Формат",
-      "sampleRate": "Частота дискретизации",
-      "bitrate": "Битрейт",
-      "bitDepth": "Разрядность",
-      "bitDepthContainerEffective": "{containerBits}-битный контейнер / {effectiveBits}-битный эффективный",
-      "codec": "Кодек",
-      "sampleFormat": "Образец формата",
-      "float": "Плавать",
-      "integer": "Целочисленный PCM",
-      "constantBitrate": "ЦБ РФ",
-      "variableBitrate": "ВБР",
-      "sourcePcmFloat": "{bitDepth}-битное число с плавающей запятой",
-      "sourcePcmInteger": "{bitDepth}-битное целое число",
-      "sourcePcmSignedInteger": "{bitDepth}-битное целое число со знаком",
-      "sourcePcmUnsignedInteger": "{bitDepth}-битное целое число без знака",
-      "automatic": "Автоматический",
-      "preserveSource": "Сохранить источник",
-      "unavailable": "Недоступно",
-      "sampleRateAvailableFor": "{supported, number} из {total, number} файлов",
-      "sampleRateResetAutomatic": "Предыдущая частота дискретизации недействительна для этих настроек вывода. Частота дискретизации была изменена на автоматическую.",
-      "unknownAudio": "Аудио",
-      "channelCount": "{count, plural, one {# канала} other {# каналов}}",
-      "queue": "Очередь конвертации",
-      "convert": "Конвертировать",
-      "cancelAll": "Отменить все",
-      "clear": "Прозрачный",
-      "download": "Сохранить результат",
-      "downloadSource": "Сохранить оригинал",
-      "sourceDownloadExpired": "Срок действия источника истёк или он недоступен. Загрузите URL YouTube повторно.",
-      "sourceDownloadFailed": "Не удалось скачать оригинал. Проверьте соединение и загрузите источник повторно.",
-      "retry": "Повторить попытку",
-      "cancel": "Отмена",
-      "remove": "Удалить",
-      "sourceValue": "Источник ({value})",
-      "mono": "Мононуклеоз",
-      "stereo": "Стерео",
-      "targetWaitingForFiles": "Добавьте поддерживаемый аудиофайл, чтобы проверить выбранную цель вывода.",
-      "targetCheckingMessage": "Проверка того, поддерживает ли этот браузер выбранную цель вывода.",
-      "targetReadyMessage": "Выбранная цель вывода доступна в этом браузере.",
-      "targetAvailability": "Файлы {available, number} доступны для конвертации; {unavailable, number} останется недоступным с этими настройками.",
-      "engineLoading": "Загрузка аудиодвижка {asset}.",
-      "engineVerifying": "Проверка аудиосистемы {asset}.",
-      "engineLoadFailed": "Не удалось загрузить аудиосистему {asset}.",
-      "capacityExceeded": "Файлы {count, number} не были добавлены. Очередь может содержать до {max, number} файлов.",
-      "statusInspectionQueued": "Ожидание проверки",
-      "statusInspecting": "Проверка",
-      "statusReady": "Готовый",
-      "statusQueued": "В очереди",
-      "statusQueuedAvailability": "Файлы в очереди на преобразование: {converting, number}; {unavailable, number} остаются недоступными.",
-      "statusConverting": "Преобразование",
-      "statusConvertingAvailability": "Преобразование файлов {converting, number}; {unavailable, number} остаются недоступными.",
-      "statusComplete": "Полный",
-      "statusCompleteAvailability": "Преобразовано файлов: {converted, number}; {unavailable, number} остаются недоступными.",
-      "statusBatchResult": "Запуск завершен: {eligible, number} разрешено, попытка {attempted, number}, {succeeded, number} успешна, {failed, number} не удалась, {unavailable, number} недоступен.",
-      "statusUnsupported": "Не поддерживается",
-      "statusError": "Ошибка",
-      "statusCancelled": "Отменено",
-      "unsupportedInput": "Этот файл не является поддерживаемым аудиовходом.",
-      "unsupportedCodec": "Этот браузер не может декодировать аудиокодек в этом файле.",
-      "inspectionFailed": "Файл не удалось проверить. Попробуйте еще раз.",
-      "inspectionInconclusive": "Браузеру не удалось идентифицировать этот аудиофайл в пределах безопасного предела чтения. Попробуйте другой файл или формат.",
-      "outputUnsupported": "Выбранные настройки вывода не поддерживаются в этом браузере.",
-      "outputProbeFailed": "Поддержка вывода не может быть проверена. Попробуйте еще раз.",
-      "outputEngineUnavailable": "Не удалось запустить механизм выполнения для {preset}. Проверьте политику сети или активов и повторите попытку.",
-      "outputChannelsUnsupported": "Этот вывод поддерживает исходные каналы {minimum, number}–{maximum, number}, но этот файл имеет {actual, number}. Каналы сохраняются и не микшируются.",
-      "sourceInspectionMissing": "Не удалось определить количество исходных каналов или частоту дискретизации. Выберите файл с читаемыми аудиометаданными.",
-      "outputConfigurationUnavailable": "Выбранные настройки формата и кодирования не формируют доступную конфигурацию вывода.",
-      "preserveSourceRateUnsupported": "Источник сохранения не может использовать {sourceRate} для этого вывода. Разрешенные ставки: {allowed}.",
-      "sourceResamplingRateUnsupported": "Этот источник {sourceRate} находится за пределами диапазона передискретизации ({minimum}–{maximum}). Он может пройти только на совместимый выход.",
-      "targetResamplingRateUnsupported": "Выбранный целевой объект {targetRate} находится за пределами диапазона передискретизации ({minimum}–{maximum}).",
-      "automaticRateUnavailable": "Автоматически не удается выбрать действительную ставку для этого источника {sourceRate}. Разрешенные скорости вывода: {allowed}.",
-      "presetRateUnsupported": "Этот вывод не поддерживает {targetRate}. Разрешенные ставки: {allowed}.",
-      "conversionFailed": "Конвертация звука не удалась.",
-      "conversionStorageLimitExceeded": "Этот браузер не может хранить ожидаемый результат в локальном временном хранилище. Выберите меньший или сжатый формат или повторите попытку в браузере, поддерживающем локальный вывод большого размера.",
-      "conversionTargetSizeLimitExceeded": "Выбранный выходной формат не может представлять файл такого размера. Выберите другой формат или уменьшите частоту дискретизации, разрядность или количество каналов.",
-      "cancelledMessage": "Преобразование было отменено.",
-      "sourceSummary": "{container} · {sampleRate} · {channels} · {bitDepth}",
-      "outputSummary": "{preset} · {size}",
-      "progressLabel": "{phase} · {progress, number}%",
-      "phasePrepare": "Подготовка",
-      "phaseDecode": "Декодирование",
-      "phaseEncode": "Кодирование",
-      "phaseFinalize": "Завершение",
-      "bytes": "{count, number} байт",
-      "storageOpfs": "Частное хранилище браузера",
-      "storageMemory": "Память браузера",
-      "metadataTitle": "Аудио транскодер",
-      "metadataDescription": "Конвертируйте аудио в своем браузере. Файлы никогда не покидают ваше устройство.",
-      "notices": "Лицензии с открытым исходным кодом"
-    },
-    "hwp": {
-      "title": "Редактор HWP",
-      "metadataDescription": "Открывайте, редактируйте и сохраняйте документы HWP и HWPX в браузере.",
-      "description": "Используйте меню «Файл» редактора для открытия и сохранения файлов HWP или HWPX. Документы обрабатываются на этом устройстве без загрузки на сервер.",
-      "loading": "Загрузка редактора…",
-      "error": "Не удалось загрузить редактор. Попробуйте снова.",
-      "retry": "Попробовать снова",
-      "metadataTitle": "Редактор HWP"
-    }
-  },
   "myMetadata": {
     "description": "Страница {title} для вашей учетной записи на {siteName}."
   },
   "fileManager": {
+    "pagination": {
+      "end": "Конец результатов"
+    },
+    "selectionUnavailableDescription": "Этот файл нельзя добавить. Нажмите Enter для предварительного просмотра.",
     "title": "Файлы",
     "description": "Загружайте, систематизируйте, проверяйте и повторно используйте файлы на сайте.",
     "root": "Файлы",
@@ -5396,9 +5120,9 @@
     "selectAll": "Выбрать все элементы",
     "selectItem": "Выберите {name}",
     "sortBy": "Сортировать по {name}",
-    "selectedCount": "{count, plural, one {выбран # элемент} other {выбран # элемент}}",
-    "itemCount": "{count, plural, one {# элемент} other {# элемента}}",
-    "searchResultCount": "Найдено результатов: {count}",
+    "selectedCount": "{count, plural, one {выбран # элемент} few {выбрано # элемента} many {выбрано # элементов} other {выбрано # элемента}}",
+    "itemCount": "{count, plural, one {# элемент} few {# элемента} many {# элементов} other {# элемента}}",
+    "searchResultCount": "{count, plural, one {Найден # результат} few {Найдено # результата} many {Найдено # результатов} other {Найдено # результата}}",
     "uploadProgress": "Загрузка {percentage}%",
     "types": {
       "all": "Все типы",
@@ -5484,9 +5208,7 @@
       "move-files": {
         "title": "Переместить файлы"
       },
-      "targetFolderId": "Идентификатор целевой папки",
       "extensionSeparate": "Расширение .{extension} хранится отдельно.",
-      "rootWhenEmpty": "Оставьте пустым, чтобы перейти в корень.",
       "delete": {
         "title": "Удалить",
         "folder": "Удалить эту папку и все неиспользуемые файлы в ней?",
@@ -5496,14 +5218,26 @@
         "byDomain": "По домену: {summary}",
         "more": "и ещё {count}. Откройте сведения о файле, чтобы просмотреть полный список."
       }
+    },
+    "viewSettings": {
+      "title": "Настройки вида",
+      "iconSize": "Размер значков",
+      "spacing": "Расстояние между элементами",
+      "columns": "Столбцы",
+      "auto": "Автоматически",
+      "small": "Маленький",
+      "medium": "Средний",
+      "large": "Большой",
+      "compact": "Компактно",
+      "standard": "Стандартно",
+      "comfortable": "Просторно",
+      "reset": "Сбросить настройки вида"
     }
   },
   "fileDownloadAccess": {
     "editor": {
       "sectionTitle": "Доступ к скачиванию",
-      "sectionDescription": "Контролируйте, кто может скачать исходный файл.",
       "loading": "Загрузка доступа к скачиванию…",
-      "audienceLabel": "Скачать аудиторию",
       "audiences": {
         "disabled": {
           "label": "Неполноценный",
@@ -5522,15 +5256,10 @@
           "description": "Загрузить этот файл могут только пользователи из выбранных аудиторий."
         }
       },
-      "segmentsLabel": "Аудитории",
-      "segmentsDescription": "Выберите один или несколько существующих сегментов аудитории.",
-      "segmentsPlaceholder": "Выберите аудитории",
       "segmentsLoadError": "Политика загрузилась, но загрузить аудитории не удалось.",
       "segmentsEmpty": "Сегменты аудитории недоступны.",
       "restrictedWithoutAudience": "У этой ограниченной политики нет аудитории. Загрузка запрещена для всех, пока вы не выберете хотя бы одну аудиторию.",
-      "segmentRequiresSubscription": "{name} (требуется подписка на рассылку новостей)",
       "additionalSelected": "{count} ещё выбрано",
-      "loadMoreSegments": "Загрузить больше аудиторий",
       "loadError": "Не удалось загрузить доступ к загрузке.",
       "saveError": "Не удалось сохранить доступ к загрузке.",
       "fileRequired": "Сохраните файл перед настройкой доступа к загрузке."
@@ -5552,5 +5281,63 @@
     "empty": "Введите исходный текст диаграммы",
     "invalid": "Ошибка в диаграмме",
     "loading": "Отрисовка…"
+  },
+  "errorPage": {
+    "titles": {
+      "400": "Некорректный запрос",
+      "401": "Необходимо войти",
+      "403": "Доступ запрещён",
+      "404": "Страница не найдена",
+      "408": "Время ожидания запроса истекло",
+      "409": "Запрос конфликтует с текущим состоянием",
+      "410": "Эта страница больше недоступна",
+      "413": "Запрос слишком большой",
+      "422": "Не удалось обработать запрос",
+      "429": "Слишком много запросов",
+      "500": "Что-то пошло не так",
+      "501": "Этот запрос не поддерживается",
+      "502": "Ошибка связанного сервиса",
+      "503": "Сервис временно недоступен",
+      "504": "Время ожидания ответа сервиса истекло"
+    },
+    "actions": {
+      "goHome": "Иди домой",
+      "tryAgain": "Попробуйте еще раз",
+      "login": "Вернуться к входу"
+    }
+  },
+  "localBackups": {
+    "title": "Локальные резервные копии",
+    "description": "Несохранённые правки из закрытых вкладок на этом устройстве. Откройте редактор, чтобы восстановить их. Резервные копии хранятся 30 дней и удаляются при выходе из учётной записи.",
+    "empty": "Нет локальных резервных копий для восстановления. Правки в открытых вкладках здесь не отображаются.",
+    "unavailable": "Для локальных резервных копий на этом устройстве необходимы хранилище браузера и Web Locks.",
+    "loading": "Поиск локальных резервных копий…",
+    "error": "Не удалось выполнить действие. Обновите список и попробуйте снова.",
+    "refresh": "Обновить",
+    "lastChanged": "Последнее изменение: {time}",
+    "open": "Открыть редактор",
+    "discard": "Отменить правки",
+    "openLabel": "Открыть редактор: {kind} {id}, {locale}",
+    "discardLabel": "Отменить правки: {kind} {id}, {locale}",
+    "discardTitle": "Удалить локальную резервную копию?",
+    "discardDescription": "Эти несохранённые правки будут безвозвратно удалены с этого устройства. Сохранённое содержимое не изменится.",
+    "kinds": {
+      "post": "Пост",
+      "page": "Страница",
+      "work": "Работа",
+      "campaign": "Кампания",
+      "email-template": "Шаблон электронной почты",
+      "email-layout": "Макет электронной почты",
+      "terms-history": "Условия использования",
+      "privacy-history": "Политика конфиденциальности",
+      "artist": "Художник",
+      "release": "Релиз",
+      "label": "Этикетка",
+      "form": "Форма",
+      "map-theme": "Тема карты",
+      "program-event": "Событие",
+      "menu": "Меню",
+      "post-series": "Серия постов"
+    }
   }
 }

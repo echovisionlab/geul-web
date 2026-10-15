@@ -3,7 +3,7 @@ import { connection } from 'next/server';
 import { notFound, redirect } from 'next/navigation';
 import { ShareLinkEntityType } from '@echovisionlab/geul-proto/secure/share_link_pb.ts';
 import { getTranslations } from 'next-intl/server';
-import { AdminLabelDetailClient } from '@/features/label/AdminLabelDetailClient';
+import { LazyAdminLabelDetailClient } from '@/features/label/LazyAdminLabelDetailClient';
 import { createPublicShareLinkClient } from '@/lib/api/server-client';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { getLabelForEdit, getLabelPublic } from '@/lib/queries/label';
@@ -93,7 +93,7 @@ export default async function LabelViewPage({ params, searchParams }: Props) {
       redirect(`/labels/${encodeURIComponent(label.id)}${buildSearchSuffix(query)}`);
     }
     return (
-      <AdminLabelDetailClient
+      <LazyAdminLabelDetailClient
         id={label.id}
         label={label}
         baseUrl={await getBaseUrl()}

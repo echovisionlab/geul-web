@@ -28,7 +28,7 @@ export function ReleaseRowMenu({ release }: ReleaseRowMenuProps) {
           label: tCommon('actions.delete'),
           icon: <IconTrash size={16} />,
           onClick: () => openDelete(release),
-          color: 'red',
+          tone: 'danger',
         },
       ]}
     />

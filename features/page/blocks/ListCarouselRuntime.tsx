@@ -1,15 +1,20 @@
 'use client';
-
-import { Children } from 'react';
-import { Carousel, type CarouselProps } from '@mantine/carousel';
-import '@mantine/carousel/styles.css';
-
-export function ListCarouselRuntime({ children, ...props }: CarouselProps) {
+import { componentBindings } from '@/components/core/bindings';
+import { useTranslations } from 'next-intl';
+import { Carousel, type CarouselProps } from '@/components/core/Carousel';
+export type ListCarouselProps = Omit<CarouselProps, 'labels'>;
+export function ListCarouselRuntime(props: ListCarouselProps) {
+  const pagination = useTranslations('dataTable.pagination');
+  const common = useTranslations('common.labels');
   return (
-    <Carousel {...props}>
-      {Children.map(children, (child) => (
-        <Carousel.Slide>{child}</Carousel.Slide>
-      ))}
-    </Carousel>
+    <Carousel
+      {...componentBindings(props)}
+      labels={{
+        region: common('content'),
+        previous: pagination('previousPage'),
+        next: pagination('nextPage'),
+        slide: (page) => pagination('page', { page }),
+      }}
+    />
   );
 }

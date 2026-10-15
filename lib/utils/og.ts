@@ -1,4 +1,5 @@
 import { joinUrl } from '@/lib/utils/url';
+import { OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT } from '@/lib/constants/og-image';
 
 interface EntityOgMetadataInput {
   canonicalOrigin: string;
@@ -108,7 +109,7 @@ function buildEntityOgMetadata(params: EntityOgMetadataInput) {
       ...(ogImage && {
         images: [
           params.ogImageUrl?.trim() && params.includeOgImageDimensions !== false
-            ? { url: ogImage, width: 1200, height: 630 }
+            ? { url: ogImage, width: OG_IMAGE_WIDTH, height: OG_IMAGE_HEIGHT }
             : { url: ogImage },
         ],
       }),

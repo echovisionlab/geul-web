@@ -21,9 +21,9 @@ vi.mock('next/navigation', () => ({
   usePathname: () => mocks.pathname,
 }));
 
-vi.mock('@mantine/core', () => ({
+vi.mock('@/lib/providers/DesignSystemProvider', () => ({
   useComputedColorScheme: () => 'light',
-  useMantineColorScheme: () => ({ toggleColorScheme: mocks.toggleColorScheme }),
+  useColorScheme: () => ({ computedColorScheme: 'light', toggleColorScheme: mocks.toggleColorScheme }),
 }));
 
 vi.mock('@mantine/hooks', () => ({

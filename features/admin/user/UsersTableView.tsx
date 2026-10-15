@@ -1,9 +1,12 @@
 'use client';
 
+import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { Avatar, Group, Text } from '@mantine/core';
-import { badgeToneFromColor, LabelBadge, StatusBadge } from '@/components/core/Badge';
+
+import { Avatar } from '@/components/core/Display';
+import { LabelBadge, StatusBadge } from '@/components/core/Badge';
 import { DateTime } from '@/features/date-time/DateTime';
 import { TextButton } from '@/components/core/TextButton';
 import {
@@ -37,8 +40,10 @@ function getStatusTone(status: string): 'positive' | 'danger' | 'warning' | 'neu
       return 'warning';
     case 'deleted':
       return 'neutral';
-    default:
+    case 'active':
       return 'positive';
+    default:
+      return 'neutral';
   }
 }
 
@@ -70,15 +75,13 @@ function getColumns(
       width: 140,
       minWidth: 140,
       cell: (row) => (
-        <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+        <DsLayoutInline gap="sm" wrap="nowrap">
           <Avatar
             src={buildManagedImageUrl(row.image, MANAGED_IMAGE_PRESET.AVATAR_SM)}
             size="sm"
-            radius="xl"
-            style={{ flexShrink: 0 }}
-          >
-            {row.nickname.charAt(0).toUpperCase()}
-          </Avatar>
+            shape="circle"
+            name={row.nickname}
+          />
           <TextButton
             href={`/admin/users/${row.id}`}
             size="sm"
@@ -86,11 +89,10 @@ function getColumns(
             appearance="default"
             nowrap
             title={row.nickname}
-            style={{ minWidth: 0, maxWidth: 92, overflow: 'hidden', textOverflow: 'ellipsis' }}
           >
             {row.nickname}
           </TextButton>
-        </Group>
+        </DsLayoutInline>
       ),
     },
     {
@@ -99,14 +101,11 @@ function getColumns(
       width: 130,
       minWidth: 130,
       cell: (row) => (
-        <Text
-          size="sm"
-          c="dimmed"
-          title={row.email ?? undefined}
-          style={{ maxWidth: 106, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-        >
-          {row.email || '-'}
-        </Text>
+        <div style={{ maxWidth: 106, overflow: 'hidden' }}>
+          <DsText truncate nowrap size="sm" tone="secondary" title={row.email ?? undefined}>
+            {row.email || '-'}
+          </DsText>
+        </div>
       ),
     },
     {
@@ -115,16 +114,7 @@ function getColumns(
       width: 82,
       minWidth: 82,
       cell: (row) => (
-        <LabelBadge
-          tone={badgeToneFromColor(
-            normalizeEnumToken(row.role) === 'admin'
-              ? 'red'
-              : normalizeEnumToken(row.role) === 'author'
-                ? 'violet'
-                : 'blue',
-          )}
-          size="sm"
-        >
+        <LabelBadge tone="neutral" size="sm">
           {normalizeEnumToken(row.role) === 'admin'
             ? labels.roles.admin
             : normalizeEnumToken(row.role) === 'author'
@@ -141,7 +131,7 @@ function getColumns(
       width: 180,
       minWidth: 180,
       cell: (row) => (
-        <Group gap={4} wrap="wrap">
+        <DsLayoutInline gap="xxs" wrap="wrap">
           <StatusBadge tone={getStatusTone(row.status)} size="sm">
             {normalizeEnumToken(row.status) === 'banned'
               ? labels.statuses.banned
@@ -154,11 +144,11 @@ function getColumns(
                     : row.status}
           </StatusBadge>
           {!row.onboarded ? (
-            <StatusBadge tone="warning" size="sm">
+            <StatusBadge tone="neutral" size="sm">
               {labels.statuses.onboardingPending}
             </StatusBadge>
           ) : null}
-        </Group>
+        </DsLayoutInline>
       ),
     },
     {
@@ -182,9 +172,9 @@ function getColumns(
       width: 85,
       minWidth: 85,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.created_at} />
-        </Text>
+        </DsText>
       ),
     },
     {

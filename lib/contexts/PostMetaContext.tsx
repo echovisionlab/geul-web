@@ -11,7 +11,7 @@ import { useBlockRoomConnection, type BlockRoomConnection } from '@/lib/collab/u
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 
-interface PostMetaContextValue {
+export interface PostMetaContextValue {
   sourceTitle: string;
   sourceSummary: string;
   setSourceTitle: (title: string) => void;
@@ -43,9 +43,14 @@ interface PostMetaContextValue {
 }
 
 const PostMetaContext = createContext<PostMetaContextValue | null>(null);
+
+/** Same state contract for local composition previews and the connected provider. */
+export const PostMetaStateProvider = PostMetaContext.Provider;
 interface PostMetaProviderProps {
+  initialSnapshot?: import('@/features/editor/editor-snapshot').EditorSnapshot;
   postId: string;
   initialMeta: PostMeta;
+  initialSourceLocale?: string | null;
   initialSlug: string | null;
   initialFeaturedImageUrl: string | null;
   children: ReactNode;
@@ -54,6 +59,8 @@ interface PostMetaProviderProps {
 export function PostMetaProvider({
   postId,
   initialMeta,
+  initialSnapshot,
+  initialSourceLocale,
   initialSlug,
   initialFeaturedImageUrl,
   children,
@@ -82,12 +89,13 @@ export function PostMetaProvider({
 
   const localeSession = useLocaleDocumentSession({
     entityType: 'post',
+    initialSourceLocale,
     entityId: postId,
     sourceTitle,
     sourceSummary,
   });
   const { roomLocale } = localeSession;
-  const blockRoom = useBlockRoomConnection('post', postId, roomLocale);
+  const blockRoom = useBlockRoomConnection('post', postId, roomLocale, initialSnapshot);
   const {
     provider,
     doc,

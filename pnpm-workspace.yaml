@@ -21,6 +21,8 @@ minimumReleaseAgeExclude:
   - '@tabler/icons@3.49.0'
   - vite@8.3.3
   - mediabunny@1.61.3
+  - react-aria-components@1.22.1
+  - react-aria@3.53.1
 
 overrides:
   '@babel/core': 8.0.1
@@ -86,6 +88,9 @@ peerDependencyRules:
     - '@mantine/utils'
 
 packageExtensions:
+  'react-aria@3.53.1':
+    dependencies:
+      dom-accessibility-api: 0.6.3
   '@mantine/hooks@9.7.0':
     peerDependencies:
       react-dom: ^19.2.0
@@ -123,8 +128,8 @@ patchedDependencies:
   '@dnd-kit/sortable@10.0.0': patches/@dnd-kit__sortable@10.0.0.patch
   '@maplibre/maplibre-gl-style-spec@26.2.1': patches/@maplibre__maplibre-gl-style-spec@26.2.1.patch
   '@monaco-editor/react@4.7.0': patches/@monaco-editor__react@4.7.0.patch
-  '@stitches/react@1.2.8': patches/@stitches__react@1.2.8.patch
   '@types/dom-webcodecs@0.1.13': patches/@types__dom-webcodecs@0.1.13.patch
   ast-types@0.16.1: patches/ast-types@0.16.1.patch
   simple-icons@16.28.0: patches/simple-icons@16.28.0.patch
-  zustand@3.7.2: patches/zustand@3.7.2.patch
+  react-aria@3.53.1: patches/react-aria@3.53.1.patch
+  '@storybook/addon-docs@10.5.8': patches/@storybook__addon-docs@10.5.8.patch

@@ -1,4 +1,8 @@
+import { withFeatureLabels } from '@/stories/feature-localization';
 import type { Meta, StoryObj } from '@storybook/nextjs';
+import { createTranslator } from 'next-intl';
+import { expect, within } from 'storybook/test';
+import { DEFAULT_LOCALE, normalizeLocale } from '@/lib/i18n/locale';
 import { ListViewShell } from './ListViewShell';
 
 function ratioImage(width: number, height: number) {
@@ -8,6 +12,7 @@ function ratioImage(width: number, height: number) {
 const meta: Meta<typeof ListViewShell> = {
   title: 'Feature/Page/List Image Ratios',
   component: ListViewShell,
+  decorators: [withFeatureLabels({ project: (_args, t) => ({ emptyLabel: t('common.messages.noPostsFound') }) })],
   parameters: { layout: 'padded' },
   args: {
     items: [
@@ -31,3 +36,22 @@ export const SquareCrop: Story = { args: { imageAspectRatio: '1:1' } };
 export const ListOriginalRatios: Story = { args: { layout: 'list' } };
 export const CardsOriginalRatios: Story = { args: { layout: 'cards' } };
 export const CarouselOriginalRatios: Story = { args: { layout: 'carousel' } };
+
+export const MissingTitleSemantics: Story = {
+  args: { items: [{ id: 'untitled', href: '/untitled', title: null, imageUrl: null }], layout: 'list' },
+  tags: ['a11y-author'],
+  play: async ({ canvasElement, globals }) => {
+    const locale = normalizeLocale(globals.locale) ?? DEFAULT_LOCALE;
+    const { default: messages } = await import(`../../../messages/${locale}.json`);
+    const t = createTranslator({ locale, messages, namespace: 'common.states' });
+    const canvas = within(canvasElement);
+    const links = canvas.getAllByRole('link');
+    await expect(canvas.getByRole('list')).toBeVisible();
+    await expect(canvas.getAllByRole('listitem')).toHaveLength(1);
+    for (const link of links) {
+      await expect(link).toHaveAccessibleName(t('untitled'));
+      await expect(link).toHaveAttribute('href', '/untitled');
+      await expect(link.textContent).toBe('');
+    }
+  },
+};

@@ -221,16 +221,16 @@ export function resolveSceneTextColors(colorScheme: SceneColorScheme, config: Sc
 
   if (colorScheme === 'dark') {
     return {
-      root: 'var(--mantine-color-gray-0)',
-      title: 'var(--mantine-color-gray-0)',
-      body: 'var(--mantine-color-gray-3)',
+      root: 'var(--geul-text-inverse-primary)',
+      title: 'var(--geul-text-inverse-primary)',
+      body: 'var(--geul-text-inverse-secondary)',
     };
   }
 
   return {
-    root: 'var(--mantine-color-dark-9)',
-    title: 'var(--mantine-color-dark-9)',
-    body: 'var(--mantine-color-dark-6)',
+    root: 'var(--geul-paper-ink)',
+    title: 'var(--geul-paper-ink)',
+    body: 'var(--geul-paper-secondary)',
   };
 }
 

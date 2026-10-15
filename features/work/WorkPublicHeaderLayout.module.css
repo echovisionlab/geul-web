@@ -1,7 +1,7 @@
 .root {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  gap: var(--mantine-spacing-xl);
+  gap: var(--geul-spacing-xl);
   min-width: 0;
 }
 
@@ -16,7 +16,7 @@
   min-width: 0;
 }
 
-@media (max-width: 48em) {
+@media (width < $mantine-breakpoint-sm) {
   .root {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -29,8 +29,8 @@
     min-height: 62mm;
     margin-bottom: 8mm;
     overflow: hidden;
-    color: #fff;
-    background: #17282d;
+    color: var(--geul-text-on-image);
+    background: var(--geul-paper-image-background);
     break-inside: avoid;
     print-color-adjust: exact;
   }
@@ -39,7 +39,7 @@
     position: absolute;
     z-index: 1;
     inset: 0;
-    background: linear-gradient(90deg, rgb(4 13 16 / 88%) 0%, rgb(4 13 16 / 56%) 58%, rgb(4 13 16 / 24%) 100%);
+    background: var(--geul-paper-image-gradient);
     content: '';
     print-color-adjust: exact;
   }
@@ -68,7 +68,7 @@
 
   .content,
   .content :global(*) {
-    color: #fff !important;
-    border-color: rgb(255 255 255 / 58%) !important;
+    color: var(--geul-text-on-image) !important;
+    border-color: var(--geul-paper-image-border) !important;
   }
 }

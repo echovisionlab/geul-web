@@ -9,7 +9,17 @@ import { previewEmailLayout } from '@/lib/queries/email-layout';
 import type { EmailLayoutValidationError } from '@/lib/types/email-layout/validation';
 import { EmailLayoutPreviewView } from './EmailLayoutPreviewView';
 
+export interface EmailLayoutPreviewBindings {
+  content: typeof previewEmailLayoutContentAction;
+  saved: typeof previewEmailLayout;
+}
+const defaultBindings: EmailLayoutPreviewBindings = {
+  content: previewEmailLayoutContentAction,
+  saved: previewEmailLayout,
+};
+
 interface EmailLayoutPreviewProps {
+  bindings?: EmailLayoutPreviewBindings;
   layoutId?: string;
   htmlContent: string;
   refreshKey?: string;
@@ -25,6 +35,7 @@ export function EmailLayoutPreview({
   locale,
   sourceLocale,
   debounceMs = 500,
+  bindings = defaultBindings,
 }: EmailLayoutPreviewProps) {
   const tPreviewSample = useTranslations('adminList.emailLayouts.detail.previewSample');
   const [debouncedHtml] = useDebouncedValue(htmlContent, debounceMs);
@@ -56,13 +67,13 @@ export function EmailLayoutPreview({
       setIsLoading(true);
       try {
         if (useSavedLocalizedLayout && layoutId) {
-          const result = await previewEmailLayout(layoutId, sampleContent, requestedPreviewLocale);
+          const result = await bindings.saved(layoutId, sampleContent, requestedPreviewLocale);
           setPreviewHtml(result?.html ?? '');
           setErrors(result ? [] : [{ code: 'UNKNOWN_ERROR', message: '' }]);
           return;
         }
 
-        const result = await previewEmailLayoutContentAction(content, sampleContent, requestedPreviewLocale);
+        const result = await bindings.content(content, sampleContent, requestedPreviewLocale);
         setPreviewHtml(result.html);
         setErrors(result.errors);
       } catch {
@@ -72,7 +83,7 @@ export function EmailLayoutPreview({
         setIsLoading(false);
       }
     },
-    [layoutId, locale, sampleContent, sourceLocale],
+    [bindings, layoutId, locale, sampleContent, sourceLocale],
   );
 
   useEffect(() => {

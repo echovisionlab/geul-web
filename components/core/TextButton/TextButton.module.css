@@ -1,89 +1,65 @@
-.root {
-  appearance: none;
-  box-sizing: border-box;
-  margin: 0;
-  width: var(--text-button-width, fit-content);
-  max-width: var(--text-button-max-width, 100%);
-  min-height: var(--text-button-min-height, var(--_text-button-min-height, 0px));
-  padding-block: var(--text-button-padding-block, var(--_text-button-padding-block, 0px));
-  padding-inline: var(--text-button-padding-inline, var(--_text-button-padding-inline, 0px));
+.root[data-control-kind='text'] {
+  width: fit-content;
+  max-width: 100%;
   border: 0;
+  padding: 0;
   background: transparent;
-  color: var(--text-button-color, var(--_text-button-color));
-  font-family: inherit;
-  font-size: var(--text-button-font-size, var(--_text-button-font-size));
-  font-weight: var(--text-button-font-weight, var(--_text-button-font-weight));
-  line-height: var(--text-button-line-height, var(--_text-button-line-height));
   text-align: inherit;
-  text-decoration: none;
-  cursor: pointer;
-  transition:
-    color 100ms ease,
-    opacity 100ms ease;
-}
-
-.root[data-appearance='default'] {
-  --_text-button-color: var(--mantine-color-text);
-  --_text-button-hover-color: var(--mantine-color-anchor);
-}
-
-.root[data-appearance='muted'] {
-  --_text-button-color: var(--mantine-color-dimmed);
-  --_text-button-hover-color: var(--mantine-color-text);
-}
-
-.root[data-appearance='accent'] {
-  --_text-button-color: var(--mantine-color-anchor);
-  --_text-button-hover-color: var(--mantine-primary-color-filled-hover);
 }
 
 .root[data-size='xs'] {
-  --_text-button-font-size: var(--mantine-font-size-xs);
-  --_text-button-line-height: var(--mantine-line-height-xs);
+  font-size: var(--geul-font-size-xs);
+  line-height: var(--geul-line-height-xs);
 }
 
 .root[data-size='sm'] {
-  --_text-button-font-size: var(--mantine-font-size-sm);
-  --_text-button-line-height: var(--mantine-line-height-sm);
+  font-size: var(--geul-font-size-sm);
+  line-height: var(--geul-line-height-sm);
 }
 
 .root[data-size='md'] {
-  --_text-button-font-size: var(--mantine-font-size-md);
-  --_text-button-line-height: var(--mantine-line-height-md);
+  font-size: var(--geul-font-size-md);
+  line-height: var(--geul-line-height-md);
 }
 
 .root[data-control-size='xs'] {
-  --_text-button-min-height: 28px;
-  --_text-button-padding-block: 4px;
-  --_text-button-padding-inline: 0px;
+  padding-block: var(--geul-text-control-padding-xs);
 }
 
 .root[data-control-size='sm'] {
-  --_text-button-min-height: 32px;
-  --_text-button-padding-block: 6px;
-  --_text-button-padding-inline: 0px;
+  padding-block: var(--geul-text-control-padding-sm);
 }
 
 .root[data-control-size='md'] {
-  --_text-button-min-height: 36px;
-  --_text-button-padding-block: 8px;
-  --_text-button-padding-inline: 0px;
+  padding-block: var(--geul-text-control-padding-md);
 }
 
 .root[data-weight='regular'] {
-  --_text-button-font-weight: 400;
+  font-weight: var(--geul-font-weight-regular);
 }
 
 .root[data-weight='medium'] {
-  --_text-button-font-weight: 500;
+  font-weight: var(--geul-font-weight-medium);
 }
 
 .root[data-weight='semibold'] {
-  --_text-button-font-weight: 600;
+  font-weight: var(--geul-font-weight-strong);
 }
 
 .root[data-display='inline'] {
   display: inline;
+}
+
+/* Only prose navigation is an inline target. Commands and standalone links occupy
+ * the shared minimum in layout, so adjacent targets do not overlap. */
+.root:where(:not(a[data-display='inline'])) {
+  min-width: max(var(--geul-control-height-compact), var(--geul-interaction-minimum));
+  min-height: max(var(--geul-control-height-compact), var(--geul-interaction-minimum));
+}
+
+button.root[data-display='inline'] {
+  display: inline-flex;
+  align-items: center;
 }
 
 .root[data-display='inline-flex'] {
@@ -108,41 +84,103 @@
   white-space: nowrap;
 }
 
-.root:hover {
-  color: var(--text-button-hover-color, var(--_text-button-hover-color));
+.root[data-font='mono'] {
+  font-family: var(--font-mono, monospace);
+}
+
+.root[data-justify='between'] {
+  justify-content: space-between;
+}
+
+.root[data-justify='center'] {
+  justify-content: center;
+}
+
+.root[data-justify='end'] {
+  justify-content: flex-end;
+}
+
+.root[data-justify='start'] {
+  justify-content: flex-start;
+}
+
+.root[data-gap='none'] {
+  gap: 0;
+}
+
+.root[data-gap='xxs'] {
+  gap: var(--geul-spacing-xxs);
+}
+
+.root[data-gap='xs'] {
+  gap: var(--geul-spacing-xs);
+}
+
+.root[data-gap='sm'] {
+  gap: var(--geul-spacing-sm);
+}
+
+.root[data-density='chrome'] {
+  min-height: max(var(--_control-height, var(--geul-control-height-chrome)), var(--geul-interaction-minimum));
+  padding: var(--geul-spacing-xxs) var(--geul-spacing-xs);
+  font-size: var(--geul-chrome-font-size);
+  line-height: var(--geul-line-height-xs);
+  font-weight: var(--geul-font-weight-medium);
+}
+
+.root[data-geul-hierarchy-nested] {
+  --_text-hierarchy-inset: var(--_hierarchy-step, var(--geul-hierarchy-step));
+  margin-inline-start: var(--_text-hierarchy-inset);
+}
+
+.root[data-geul-hierarchy-nested][data-density='chrome'] {
+  --_text-hierarchy-inset: max(0px, calc(var(--_hierarchy-step, var(--geul-hierarchy-step)) - var(--geul-spacing-xs)));
+}
+
+.root[data-geul-hierarchy-nested][data-full-width] {
+  width: calc(100% - var(--_text-hierarchy-inset));
+}
+
+.root[data-control-kind='text'][data-density='chrome']:not([data-disabled]):is(:hover, [data-hovered]) {
+  background: var(--geul-surface-hover);
   text-decoration: none;
 }
 
-.root[data-appearance='accent']:not(:disabled):hover,
-.root[data-appearance='accent']:not(:disabled):focus-visible {
-  text-decoration: underline;
-  text-underline-offset: 2px;
+.root[data-selected] {
+  background: var(--geul-surface-muted);
+  color: var(--geul-text-primary);
 }
 
-.root:focus-visible {
-  outline: 2px solid var(--mantine-color-blue-filled);
-  outline-offset: 2px;
+.root[data-tone='primary'] {
+  color: var(--geul-text-primary);
 }
 
-.root:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.root[data-tone='secondary'] {
+  color: var(--geul-text-secondary);
 }
 
-.root:disabled:hover {
-  color: var(--text-button-color, var(--_text-button-color));
-  text-decoration: none;
+.root[data-tone='inverse'] {
+  color: var(--geul-text-inverse-primary);
 }
 
-@media (max-width: 47.9937em) {
-  .root[data-control-size='xs']:not([data-display='inline']) {
-    --_text-button-min-height: 32px;
-    --_text-button-padding-block: 6px;
-  }
+.root[data-tone='inherit'] {
+  color: inherit;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .root {
-    transition: none;
-  }
+/* Reorder labels share the compact target without adding a second label inset. */
+.root[data-control-size='compact'] {
+  min-height: max(var(--geul-control-height-compact), var(--geul-interaction-minimum));
+  padding: 0;
+}
+
+/* Indicator labels follow TextButton nowrap, rather than Control's one-line default. */
+.root .label {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+}
+
+.root[data-nowrap] .label {
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }

@@ -18,10 +18,11 @@ vi.mock('react-image-crop', async (importOriginal) => ({
   },
 }));
 
-vi.mock('@mantine/core', () => {
-  const Container = ({ children }: { children: ReactNode }) => <div>{children}</div>;
-  return { Box: Container, Group: Container, Loader: Container, Modal: Container, Stack: Container, Text: Container };
-});
+// Crop coordinate tests isolate the overlay portal; overlay focus/locking is tested by Core Modal.
+vi.mock('../Modal', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../Modal')>()),
+  ContentModal: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+}));
 
 vi.mock('../Button', () => ({
   Button: ({ children, onClick, disabled }: { children: ReactNode; onClick: () => void; disabled?: boolean }) => (
@@ -86,6 +87,67 @@ afterEach(() => {
 });
 
 describe('ImageCropper callback and export coordinates', () => {
+  it('uses separate localized crop control names, selection values and instructions without changing displayed actions', () => {
+    const ariaLabels = {
+      cropArea: '선택 영역',
+      nwDragHandle: '왼쪽 위',
+      nDragHandle: '위',
+      neDragHandle: '오른쪽 위',
+      eDragHandle: '오른쪽',
+      seDragHandle: '오른쪽 아래',
+      sDragHandle: '아래',
+      swDragHandle: '왼쪽 아래',
+      wDragHandle: '왼쪽',
+    };
+    act(() =>
+      root.render(
+        <ImageCropper
+          imageSrc="/test.png"
+          opened
+          onClose={() => {}}
+          onCrop={onCrop}
+          title="Crop"
+          labels={{ previewAlt: 'Preview', cancel: 'Cancel', confirm: 'Apply' }}
+          helpText="Visible help"
+          cropAccessibility={{
+            labels: ariaLabels,
+            instructions: 'Use arrow keys',
+            describeSelection: (value) =>
+              `x ${value.x}%, y ${value.y}%, width ${value.width}%, height ${value.height}%`,
+          }}
+        />,
+      ),
+    );
+    const crop = { unit: '%', x: 5, y: 10, width: 80, height: 60 } as const;
+    act(() => cropProps.onComplete?.({ ...crop, unit: 'px' }, crop));
+    expect(cropProps.ariaLabels).toEqual(ariaLabels);
+    expect(container.querySelector('[role="status"]')?.textContent).toBe('x 5%, y 10%, width 80%, height 60%');
+    const group = container.querySelector('[role="group"]')!;
+    const descriptions = group
+      .getAttribute('aria-describedby')!
+      .split(' ')
+      .map((id) => document.getElementById(id)?.textContent);
+    expect(descriptions).toEqual(['Visible help', 'Use arrow keys', 'x 5%, y 10%, width 80%, height 60%']);
+    expect([...container.querySelectorAll('button')].map((item) => item.textContent)).toEqual(['Cancel', 'Apply']);
+  });
+
+  it('locks crop interaction while encoding is being accepted and re-enables it when the consumer keeps the editor open', async () => {
+    let finish: (accepted: boolean) => void = () => {};
+    onCrop.mockReturnValue(
+      new Promise<boolean>((resolve) => {
+        finish = resolve;
+      }),
+    );
+    renderCropper('free');
+    expect(cropProps.disabled).toBe(false);
+    expect(cropProps.className).toBeTruthy();
+    const button = Array.from(container.querySelectorAll('button')).find((item) => item.textContent === 'Apply')!;
+    await act(async () => button.click());
+    expect(cropProps.disabled).toBe(true);
+    await act(async () => finish(false));
+    expect(cropProps.disabled).toBe(false);
+  });
+
   it('corrects displayed selection and raw keyboard completion, then exports the same natural region after resize', async () => {
     const image = renderCropper({ min: 9 / 16, max: 16 / 9 });
     const pixels: PixelCrop = { unit: 'px', x: 0, y: 450, width: 400, height: 25 };

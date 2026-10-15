@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { act, type ReactNode } from 'react';
+import { breakpointQuery } from '@/components/core/Layout/breakpoints';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MobileBlockTablePaginationScroll } from './MobileBlockTablePaginationScroll';
@@ -47,7 +48,7 @@ describe('MobileBlockTablePaginationScroll', () => {
       writable: true,
       value: (query: string) =>
         ({
-          matches: query === '(max-width: 768px)',
+          matches: query === breakpointQuery('sm'),
           media: query,
           onchange: null,
           addListener() {},

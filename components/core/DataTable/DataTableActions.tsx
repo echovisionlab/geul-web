@@ -1,12 +1,12 @@
 'use client';
 
+import { LayoutInline as DsLayoutInline } from '../Layout';
 import type { PropsWithChildren } from 'react';
-import { Group } from '@mantine/core';
 
 export function DataTableActions({ children }: PropsWithChildren) {
   return (
-    <Group gap="sm" wrap="nowrap">
+    <DsLayoutInline gap="action-group" wrap="wrap">
       {children}
-    </Group>
+    </DsLayoutInline>
   );
 }

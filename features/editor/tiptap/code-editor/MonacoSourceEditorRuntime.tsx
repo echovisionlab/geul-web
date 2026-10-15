@@ -1,9 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useColorScheme } from '@/lib/providers/DesignSystemProvider';
+import { themeIds } from '@/lib/theme/themes';
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Editor, { type Monaco, type OnMount } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
-import { useComputedColorScheme } from '@mantine/core';
+
 import { registerGlslLanguage } from './glsl-language';
 import type {
   MonacoSourceEditorProps,
@@ -13,34 +16,7 @@ import type {
 } from './MonacoSourceEditor';
 import './monaco-local';
 import classes from './MonacoSourceEditor.module.css';
-
-const SOURCE_EDITOR_OPTIONS: editor.IStandaloneEditorConstructionOptions = {
-  automaticLayout: true,
-  bracketPairColorization: { enabled: true, independentColorPoolPerBracketType: true },
-  cursorSmoothCaretAnimation: 'on',
-  detectIndentation: true,
-  folding: true,
-  fontFamily: 'var(--mantine-font-family-monospace)',
-  fontLigatures: true,
-  fontSize: 14,
-  formatOnPaste: true,
-  formatOnType: true,
-  glyphMargin: true,
-  guides: { bracketPairs: true, indentation: true },
-  insertSpaces: true,
-  lineNumbers: 'on',
-  minimap: { enabled: false },
-  padding: { top: 10, bottom: 10 },
-  quickSuggestions: { comments: false, other: true, strings: true },
-  renderValidationDecorations: 'on',
-  renderWhitespace: 'selection',
-  scrollBeyondLastLine: false,
-  smoothScrolling: true,
-  stickyScroll: { enabled: false },
-  tabSize: 2,
-  wordWrap: 'on',
-  wrappingIndent: 'indent',
-};
+import { sourceEditorOptions, sourceEditorTheme, sourceEditorThemeName } from './source-editor-presentation';
 
 const MARKER_SEVERITY: Record<SourceEditorMarkerSeverity, number> = {
   error: 8,
@@ -86,12 +62,33 @@ export function MonacoSourceEditorRuntime({
   modelPath,
   height = 320,
   editorOptions,
+  density = 'standard',
   loading,
   maxLength,
   markers = [],
   onMount,
 }: MonacoSourceEditorProps) {
-  const colorScheme = useComputedColorScheme();
+  const { themeId } = useColorScheme();
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [fontMetrics, setFontMetrics] = useState({ rootFontSize: 16, fontFamily: 'monospace' });
+  useEffect(() => {
+    const rootStyle = getComputedStyle(document.documentElement);
+    setFontMetrics({
+      rootFontSize: Number.parseFloat(rootStyle.fontSize) || 16,
+      fontFamily: rootStyle.getPropertyValue('--font-mono').trim() || 'monospace',
+    });
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReducedMotion(media.matches);
+    const update = () => setReducedMotion(media.matches);
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+  const handleBeforeMount = useCallback((monaco: Monaco) => {
+    registerGlslLanguage(monaco);
+    for (const id of themeIds) {
+      monaco.editor.defineTheme(sourceEditorThemeName(id), sourceEditorTheme(id));
+    }
+  }, []);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Monaco | null>(null);
   const acceptedValueRef = useRef(value);
@@ -154,8 +151,8 @@ export function MonacoSourceEditorRuntime({
       const cleanup = onMount?.(editorInstance, monaco);
       consumerCleanupRef.current = typeof cleanup === 'function' ? cleanup : null;
 
-      // Only shared history shortcuts are replaced. Navigation, selection,
-      // indentation and editing remain native Monaco commands.
+      // Shared history and source-boundary shortcuts belong to this adapter.
+      // Navigation, selection, indentation and editing remain native Monaco commands.
       if (onUndo) {
         editorInstance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyZ, onUndo);
       }
@@ -166,14 +163,15 @@ export function MonacoSourceEditorRuntime({
       if (onApply) {
         editorInstance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, onApply);
       }
-      const escapeDisposable = editorInstance.onKeyDown((event) => {
-        if (event.keyCode !== monaco.KeyCode.Escape || !onEscape) {
-          return;
-        }
-        event.preventDefault();
-        event.stopPropagation();
-        onEscape();
-      });
+      if (onEscape) {
+        // Monaco owns cancellation inside its completion, find, rename and
+        // snippet UI. Exit the containing source block only after those close.
+        editorInstance.addCommand(
+          monaco.KeyCode.Escape,
+          onEscape,
+          'editorTextFocus && !suggestWidgetVisible && !findWidgetVisible && !renameInputVisible && !parameterHintsVisible && !inSnippetMode',
+        );
+      }
 
       const editorDom = editorInstance.getDomNode();
       const routeHistoryInput = (event: Event) => {
@@ -193,7 +191,6 @@ export function MonacoSourceEditorRuntime({
       // isolate Monaco events through their stopEvent contract instead.
       editorDom?.addEventListener('beforeinput', routeHistoryInput, true);
       internalCleanupRef.current = () => {
-        escapeDisposable.dispose();
         editorDom?.removeEventListener('beforeinput', routeHistoryInput, true);
       };
       editorInstance.onDidDispose(clearMountedResources);
@@ -247,16 +244,15 @@ export function MonacoSourceEditorRuntime({
       value={value}
       language={language}
       path={resolvedPath}
-      theme={colorScheme === 'dark' ? 'vs-dark' : 'light'}
+      theme={sourceEditorThemeName(themeId)}
       height={height}
       keepCurrentModel={false}
       saveViewState={false}
-      beforeMount={registerGlslLanguage}
+      beforeMount={handleBeforeMount}
       onMount={handleMount}
       onChange={handleChange}
       options={{
-        ...SOURCE_EDITOR_OPTIONS,
-        ...editorOptions,
+        ...sourceEditorOptions({ density, reducedMotion, ...fontMetrics, behavior: editorOptions }),
         ariaLabel,
         domReadOnly: readOnly,
         readOnly,

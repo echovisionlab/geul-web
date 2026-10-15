@@ -1,6 +1,7 @@
 {
   "common": {
     "actions": {
+      "move": "Mover",
       "save": "Guardar",
       "saveChanges": "Guardar cambios",
       "create": "crear",
@@ -59,7 +60,7 @@
       "reply": "Responder",
       "insertVariable": "Insertar variable",
       "acceptAll": "aceptar todo",
-      "rejectNonEssential": "Rechazar lo no esencial",
+      "rejectNonEssential": "Rechazar",
       "savePreferences": "Guardar preferencias",
       "import": "Importar",
       "export": "Exportar",
@@ -107,7 +108,7 @@
       "emailPreview": "Vista previa de correo electrónico",
       "fromEmail": "Desde correo electrónico",
       "fromNameOptional": "De nombre (opcional)",
-      "availableVariables": "Variables disponibles ({count, plural, one {# variable} other {# variables}})",
+      "availableVariables": "Variables disponibles ({count, plural, one {# variable} many {# variables} other {# variables}})",
       "password": "Contraseña",
       "recipients": "Destinatarios",
       "language": "Idioma",
@@ -127,10 +128,7 @@
       "file": "Archivo",
       "bio": "Biografía",
       "realName": "nombre real",
-      "countryCode": "código de país",
       "slug": "babosa",
-      "slugAutoModeEnabled": "Sincronización automática con título (haga clic para desactivar)",
-      "slugAutoModeManual": "Modo manual (haga clic para habilitar la sincronización automática)",
       "submissions": "Envíos",
       "public": "Público",
       "location": "Ubicación",
@@ -162,7 +160,6 @@
       "logoLight": "Logotipo ligero",
       "logoDark": "Logotipo oscuro",
       "joined": "Se unió",
-      "subscribed": "suscrito",
       "featured": "Destacado",
       "order": "Orden",
       "sortOrder": "orden de clasificación",
@@ -177,7 +174,6 @@
       "minutes": "Minutos",
       "seconds": "Segundos",
       "time": "tiempo",
-      "generationInfo": "información de generación",
       "body": "cuerpo",
       "content": "Contenido",
       "bodyPreview": "vista previa del cuerpo",
@@ -280,6 +276,7 @@
     },
     "messages": {
       "noUsersFound": "No se encontraron usuarios",
+      "noAuthorsFound": "No se encontraron autores.",
       "noVersionsFound": "No se encontraron versiones.",
       "typeAtLeast2Characters": "Escribe al menos 2 caracteres",
       "itemCreated": "{item} creado",
@@ -294,25 +291,23 @@
       "removeImageFailed": "No se pudo eliminar la imagen",
       "deleteItemConfirm": "¿Está seguro de que desea eliminar este {item}? Esta acción no se puede deshacer.",
       "deleteNamedItemConfirm": "¿Está seguro de que desea eliminar \"{name}\"? Esta acción no se puede deshacer.",
-      "confirmDeleteSelectedCount": "¿Está seguro de que desea eliminar {count, plural, one {# elemento seleccionado} other {# elementos seleccionados}}? Esta acción no se puede deshacer.",
-      "deleteDraftVersionConfirm": "¿Está seguro de que desea eliminar esta versión borrador?",
+      "confirmDeleteSelectedCount": "¿Está seguro de que desea eliminar {count, plural, one {# elemento seleccionado} many {# elementos seleccionados} other {# elementos seleccionados}}? Esta acción no se puede deshacer.",
       "confirmDeleteNamedRich": "¿Está seguro de que desea eliminar <strong>{name}</strong>?",
-      "activeCount": "{count} activo",
       "effectiveFromDate": "En vigor desde {date}",
       "noUpdateRecorded": "No se registró ninguna actualización",
-      "exportedEmails": "Exportado {count, plural, one {# correo electrónico} other {# correos electrónicos}}",
       "formSubmittedSuccessfully": "Su respuesta ha sido enviada exitosamente.",
       "userDate": "{user} · {date}",
       "scheduleActivationTitle": "Programar activación",
       "scheduleActivationDescription": "Seleccione cuándo debe activarse esta versión. Los correos electrónicos de notificación se enviarán a todas las cuentas activas cuando esté programado.",
       "scheduleActivationNotice": "La programación enviará correos electrónicos de notificación a todas las cuentas activas con un enlace de vista previa.",
-      "translationDetailUnavailable": "No se pudieron cargar datos de traducción detallados. Aún puedes editar la traducción pública actual.",
       "invalidConfirmationLinkFromEmail": "Enlace de confirmación no válido. Utilice el enlace de su correo electrónico de confirmación.",
       "noPostsFound": "No se encontraron publicaciones.",
       "noWorksFound": "No se encontraron obras.",
-      "urlCopiedToClipboard": "URL copiada al portapapeles",
       "failedToLoad": "No se pudieron cargar los datos.",
-      "relatedItemsWillBeUnlinked": "Se desvincularán {count} elementos relacionados."
+      "relatedItemsWillBeUnlinked": "Se desvincularán {count} elementos relacionados.",
+      "noArtistsFound": "No se encontraron artistas.",
+      "noLabelsFound": "No se encontraron etiquetas.",
+      "noReleasesFound": "No se encontraron lanzamientos."
     },
     "notifications": {
       "categoryCreated": "Categoría creada",
@@ -334,7 +329,14 @@
       "ogRegenerationFailed": "No se pudo regenerar la imagen OG",
       "testEmailSent": "Correo electrónico de prueba enviado",
       "saveSuccess": "Guardado",
-      "saveFailed": "No se pudo guardar"
+      "saveFailed": "No se pudo guardar",
+      "saveRetrying": "Tus cambios no se han guardado en el servidor. Estamos reintentando guardarlos.",
+      "editsRestored": "Se han restaurado los cambios recuperados.",
+      "leaveWithRejectedEdits": {
+        "title": "¿Salir sin los cambios que no se pudieron guardar?",
+        "message": "El servidor rechazó algunos cambios y no se guardaron. Cópialos primero desde el menú de colaboración o sal y descártalos.",
+        "confirm": "Salir y descartar"
+      }
     },
     "errors": {
       "generic": "Algo salió mal. Por favor inténtalo de nuevo.",
@@ -372,8 +374,6 @@
       "testEmail": "prueba@correo electrónico.com",
       "testEmailExample": "prueba@ejemplo.com",
       "noReplyEmail": "noreply@ejemplo.com",
-      "translationLiveRowMissing": "Aún no existe una traducción pública para esta ubicación. Guardar aquí creará uno inmediatamente.",
-      "translationBodyPreviewUnavailable": "La vista previa del cuerpo no está disponible.",
       "selectDateAndTime": "Selecciona fecha y hora",
       "streetAddress": "dirección postal",
       "regionSubdivision": "Estado/Provincia"
@@ -408,12 +408,11 @@
       "generating": "Generando...",
       "true": "Verdadero",
       "false": "Falso",
-      "loading": "Cargando..."
+      "loading": "Cargando...",
+      "toBeAnnounced": "por confirmar"
     },
     "roles": {
       "admin": "administrador",
-      "editor": "Redactor",
-      "viewer": "Visor",
       "author": "Autor",
       "user": "Usuario"
     },
@@ -445,6 +444,11 @@
       "unsubscribed": "Cancelar suscripción",
       "subscribed": "suscrito",
       "onboardingPending": "Incorporación pendiente"
+    },
+    "motion": {
+      "pause": "Pausar la animación",
+      "resume": "Reanudar la animación",
+      "readAllInformation": "Leer toda la información de la escena"
     }
   },
   "shell": {
@@ -463,6 +467,11 @@
       "siteInfo": "Información del sitio",
       "links": "Enlaces",
       "socialMedia": "redes sociales"
+    },
+    "signOutUnsaved": {
+      "title": "¿Cerrar sesión con cambios sin guardar?",
+      "message": "Algunos cambios no se han guardado en el servidor. Al cerrar sesión, se eliminan de este dispositivo.",
+      "confirm": "Cerrar sesión y descartar"
     }
   },
   "adminShell": {
@@ -511,7 +520,7 @@
       "descriptionPlaceholder": "Descripción de la categoría (opcional)",
       "updated": "Categoría actualizada",
       "deleted": "Categoría eliminada",
-      "deleteWarning": "Esta categoría es utilizada por {count, plural, one {# publicación} other {# publicaciones}}. Serán dados de baja de esta categoría."
+      "deleteWarning": "Esta categoría es utilizada por {count, plural, one {# publicación} many {# publicaciones} other {# publicaciones}}. Serán dados de baja de esta categoría."
     },
     "tags": {
       "empty": "No se encontraron etiquetas.",
@@ -520,7 +529,7 @@
       "deleteTitle": "Eliminar etiqueta",
       "namePlaceholder": "Nombre de etiqueta",
       "updated": "Etiqueta actualizada",
-      "deleteWarning": "Esta etiqueta es utilizada por {count, plural, one {# publicación} other {# publicaciones}}. No estarán etiquetados."
+      "deleteWarning": "Esta etiqueta es utilizada por {count, plural, one {# publicación} many {# publicaciones} other {# publicaciones}}. No estarán etiquetados."
     },
     "genres": {
       "empty": "No se encontraron géneros.",
@@ -532,7 +541,7 @@
       "created": "Género creado",
       "updated": "Género actualizado",
       "deleted": "Género eliminado",
-      "deleteWarning": "Este género está asociado con {count, plural, one {# lanzamiento} other {# lanzamientos}}."
+      "deleteWarning": "Este género está asociado con {count, plural, one {# lanzamiento} many {# lanzamientos} other {# lanzamientos}}."
     },
     "styles": {
       "empty": "No se encontraron estilos.",
@@ -544,7 +553,7 @@
       "created": "Estilo creado",
       "updated": "Estilo actualizado",
       "deleted": "Estilo eliminado",
-      "deleteWarning": "Este estilo está asociado con {count, plural, one {# lanzamiento} other {# lanzamientos}}."
+      "deleteWarning": "Este estilo está asociado con {count, plural, one {# lanzamiento} many {# lanzamientos} other {# lanzamientos}}."
     },
     "formats": {
       "empty": "No se encontraron formatos.",
@@ -556,7 +565,7 @@
       "created": "Formato creado",
       "updated": "Formato actualizado",
       "deleted": "Formato eliminado",
-      "deleteWarning": "Este formato está asociado con {count, plural, one {# lanzamiento} other {# lanzamientos}}."
+      "deleteWarning": "Este formato está asociado con {count, plural, one {# lanzamiento} many {# lanzamientos} other {# lanzamientos}}."
     },
     "releases": {
       "empty": "No se encontraron lanzamientos."
@@ -578,7 +587,7 @@
       "deleteConfirm": "¿Está seguro de que desea eliminar esta campaña?",
       "editAndSend": "Editar y enviar",
       "deleted": "Campaña eliminada",
-      "recipients": "{count, plural, one {# destinatario} other {# destinatarios}}",
+      "recipients": "{count, plural, one {# destinatario} many {# destinatarios} other {# destinatarios}}",
       "statuses": {
         "draft": "Borrador",
         "scheduled": "Programado",
@@ -616,7 +625,7 @@
         "createdBeforeLabel": "Creado antes",
         "createdBeforePlaceholder": "Fecha de finalización",
         "estimateCount": "Recuento estimado",
-        "estimatedRecipients": "~{count, plural, one {# destinatario} other {# destinatarios}}",
+        "estimatedRecipients": "~{count, plural, one {# destinatario} many {# destinatarios} other {# destinatarios}}",
         "allUsersHelp": "Se dirige a todos los usuarios. La elegibilidad para el boletín la elige cada campaña."
       },
       "types": {
@@ -639,7 +648,7 @@
       "createTitle": "Crear etiqueta de usuario",
       "deleteTitle": "Eliminar etiqueta de usuario",
       "deleteConfirm": "¿Está seguro de que desea eliminar {name} etiqueta de usuario?",
-      "deleteAssignedWarning": "Esta etiqueta está asignada a {count, plural, one {# usuario} other {# usuarios}}. No estarán etiquetados.",
+      "deleteAssignedWarning": "Esta etiqueta está asignada a {count, plural, one {# usuario} many {# usuarios} other {# usuarios}}. No estarán etiquetados.",
       "namePlaceholder": "Nombre de etiqueta de usuario"
     },
     "terms": {
@@ -676,13 +685,13 @@
       "detail": {
         "backTooltip": "Volver a diseños de correo electrónico",
         "targetEditor": {
-          "title": "Translated text",
-          "description": "Edit only visible text and accessibility labels. HTML, CSS, links, and placeholders remain owned by the source layout.",
-          "empty": "This layout has no translatable text units.",
+          "title": "Texto traducido",
+          "description": "Edita solo el texto visible y las etiquetas de accesibilidad. El HTML, el CSS, los enlaces y los marcadores de posición siguen definidos por el diseño de origen.",
+          "empty": "Este diseño no contiene unidades de texto traducibles.",
           "textUnit": "Text",
-          "sourceValue": "Source: {value}",
-          "translatedValue": "This locale provides its own value.",
-          "sourceFallback": "Using the source value.",
+          "sourceValue": "Origen: {value}",
+          "translatedValue": "Esta configuración regional proporciona su propio valor.",
+          "sourceFallback": "Se está utilizando el valor de origen.",
           "useSource": "Use source"
         },
         "viewModes": {
@@ -931,7 +940,6 @@
     },
     "mapThemes": {
       "empty": "No se encontraron temas de mapas.",
-      "notFound": "Tema del mapa no encontrado.",
       "loadFailed": "No se pudieron cargar los temas del mapa.",
       "defaultDisabled": "Este ya es el tema predeterminado.",
       "deleteDisabled": {
@@ -939,9 +947,7 @@
         "last": "El último tema del mapa no se puede eliminar."
       },
       "reloadRequired": {
-        "title": "Se requiere recarga",
-        "message": "Este tema se guardó de una revisión más reciente. Vuelva a cargar antes de continuar editando.",
-        "action": "Recargar"
+        "title": "Se requiere recarga"
       },
       "variants": {
         "light": "Luz",
@@ -972,8 +978,7 @@
       },
       "editor": {
         "notifications": {
-          "defaultSet": "Tema configurado como predeterminado",
-          "variantRequired": "Se requiere al menos una variante (clara u oscura)"
+          "defaultSet": "Tema configurado como predeterminado"
         },
         "controls": {
           "map": {
@@ -1310,7 +1315,6 @@
     },
     "verification": {
       "loading": "Cargando formulario de verificación...",
-      "redirecting": "Redirigiendo...",
       "startOver": "Empezar de nuevo",
       "errors": {
         "flowNotFound": "Flujo de verificación no encontrado o caducado",
@@ -1373,21 +1377,14 @@
   "featuredImage": {
     "label": "Imagen destacada",
     "alt": "Imagen destacada",
-    "hint": "Haga clic en la imagen para reemplazar",
     "cropTitle": "Recortar imagen destacada",
-    "empty": {
-      "editable": "Suelte o haga clic para cargar ({ratio})",
-      "readOnly": "Sin imagen"
-    },
     "errors": {
       "fileRejected": "Archivo rechazado",
       "fileTooLarge": "Archivo demasiado grande. Tamaño máximo: {maxSize}",
       "invalidFileType": "Tipo de archivo no válido"
     },
     "actions": {
-      "changeAria": "Cambiar imagen destacada",
-      "removeAria": "Eliminar imagen destacada",
-      "remove": "Quitar imagen"
+      "removeAria": "Eliminar imagen destacada"
     }
   },
   "artistPage": {
@@ -1495,7 +1492,6 @@
       "slug": "babosa-artista",
       "name": "Nombre artístico/nombre del artista",
       "realName": "Nombre legal (opcional)",
-      "countryCode": "por ejemplo, EE. UU., KR, JP",
       "labels": "Seleccionar etiquetas...",
       "parentArtist": "Seleccione un artista principal..."
     },
@@ -1518,15 +1514,7 @@
     },
     "placeholders": {
       "name": "Nombre de la etiqueta",
-      "countryCode": "por ejemplo, DE, EE. UU., KR",
       "parentLabel": "Seleccionar etiqueta principal (opcional)"
-    }
-  },
-  "workCollaborators": {
-    "empty": "Aún no hay colaboradores",
-    "notifications": {
-      "added": "Colaborador añadido",
-      "removed": "Colaborador eliminado"
     }
   },
   "comments": {
@@ -1537,7 +1525,7 @@
       "disabled": "Los comentarios están deshabilitados para esta publicación.",
       "loginPrompt": "<login>Inicia sesión</login> para dejar un comentario",
       "loadMore": "Cargar más comentarios",
-      "loadMoreCount": "Cargar {count, plural, one {# comentario más} other {# comentarios más}}"
+      "loadMoreCount": "Cargar {count, plural, one {# comentario más} many {# comentarios más} other {# comentarios más}}"
     },
     "form": {
       "placeholder": "Escribe un comentario...",
@@ -1563,10 +1551,10 @@
       },
       "actions": {
         "moreOptions": "Más opciones",
-        "showReplies": "Mostrar {count, plural, one {# respuesta} other {# respuestas}}",
-        "hideReplies": "Ocultar {count, plural, one {# respuesta} other {# respuestas}}",
-        "moreReplies": "(+{count, plural, one {# más} other {# más}})",
-        "loadMoreReplies": "Cargar {count, plural, one {# respuesta más} other {# respuestas más}}"
+        "showReplies": "Mostrar {count, plural, one {# respuesta} many {# respuestas} other {# respuestas}}",
+        "hideReplies": "Ocultar {count, plural, one {# respuesta} many {# respuestas} other {# respuestas}}",
+        "moreReplies": "(+{count, plural, one {# más} many {# más} other {# más}})",
+        "loadMoreReplies": "Cargar {count, plural, one {# respuesta más} many {# respuestas más} other {# respuestas más}}"
       },
       "notifications": {
         "updated": "Comentario actualizado",
@@ -1584,17 +1572,6 @@
     },
     "credits": {
       "other": "Otro"
-    },
-    "music": {
-      "released": "Publicado: {value}",
-      "spotify": "Spotify",
-      "bandcamp": "Campamento de banda",
-      "soundcloud": "Nube de sonido",
-      "youtube": "YouTube",
-      "openSpotify": "Abrir Spotify",
-      "openBandcamp": "Campamento de banda abierto",
-      "openSoundcloud": "Abrir SoundCloud",
-      "openYoutube": "abrir youtube"
     },
     "portfolio": {
       "tech": "Tecnología:"
@@ -1643,7 +1620,6 @@
     }
   },
   "cookieConsentCommon": {
-    "essentialLabel": "Cookies esenciales (siempre activas)",
     "analyticsLabel": "Cookies de análisis (Google Analytics)"
   },
   "nicknameField": {
@@ -1690,7 +1666,6 @@
       "failedToRevokeSession": "No se pudo revocar la sesión",
       "failedToRevokeSessions": "No se pudieron revocar sesiones",
       "failedToRequestDeletion": "No se pudo solicitar la eliminación de la cuenta",
-      "cannotUnlinkMessage": "Debes tener al menos un método de autenticación.",
       "connectedMessage": "{provider} cuenta conectada correctamente.",
       "disconnectedMessage": "{provider} ha sido desconectado.",
       "failedToUpdateMainEmail": "No se pudo actualizar el correo electrónico principal",
@@ -1714,16 +1689,16 @@
       "consentDescription": "Este cliente puede leer y editar contenido y administrar archivos dentro de los permisos actuales de tu cuenta. Puede crear, actualizar o eliminar contenido y modificar los archivos adjuntos existentes. La conexión no otorga permisos adicionales a la cuenta.",
       "consentOfflineAccess": "Esta conexión puede continuar después de que termine tu sesión actual del navegador, hasta que la revoques.",
       "consentRevoke": "Puedes revocar esta conexión en {settings} → Remote MCP.",
-      "connectionsTitle": "Connected MCP clients",
-      "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
-      "connectionsEmpty": "No MCP clients are connected.",
-      "connectedAt": "Connected {date}",
+      "connectionsTitle": "Clientes MCP conectados",
+      "connectionsDescription": "Estas autorizaciones de OAuth son independientes de las sesiones del navegador. Revocar una desconecta ese cliente MCP sin cerrar tu sesión.",
+      "connectionsEmpty": "No hay clientes MCP conectados.",
+      "connectedAt": "Conectado {date}",
       "revoke": "Revoke",
-      "revokeTitle": "Revoke MCP access",
-      "revokeConfirmation": "Revoke MCP access for {client}? Its current token chain will stop working.",
-      "revokeSuccess": "MCP access was revoked.",
-      "revokeFailed": "Could not revoke MCP access.",
-      "loadFailed": "Could not load connected MCP clients."
+      "revokeTitle": "Revocar acceso MCP",
+      "revokeConfirmation": "¿Revocar el acceso MCP de {client}? Su cadena de tokens actual dejará de funcionar.",
+      "revokeSuccess": "Se ha revocado el acceso MCP.",
+      "revokeFailed": "No se pudo revocar el acceso MCP.",
+      "loadFailed": "No se pudieron cargar los clientes MCP conectados."
     },
     "personalAccessTokens": {
       "title": "Token de acceso personal",
@@ -1751,8 +1726,6 @@
       "added": "Añadido {date}",
       "lastMethod": "Agregue otro método de inicio de sesión antes de eliminar esta clave de acceso.",
       "removeNamed": "Eliminar clave de acceso {name}",
-      "reauth": "Inicie sesión nuevamente antes de cambiar las claves de acceso.",
-      "reauthAction": "Iniciar sesión nuevamente",
       "errors": {
         "load": "No se pudieron cargar las claves de acceso.",
         "remove": "No se pudo eliminar esta clave de acceso.",
@@ -1789,21 +1762,11 @@
     "email": {
       "title": "correo electrónico principal",
       "description": "Elija el correo electrónico verificado que recibirá avisos y mensajes de cuenta.",
-      "addEmail": "Agregar correo electrónico",
       "canonical": "correo electrónico principal",
-      "canonicalCannotRemove": "Elija otro correo electrónico principal antes de eliminar esta dirección.",
       "setCanonical": "Establecer como correo electrónico principal",
-      "noEmail": "No hay correo electrónico configurado",
-      "helper": "Solo hay un correo electrónico verificado disponible como correo electrónico principal.",
-      "selectLabel": "correo electrónico principal",
       "changeAction": "Cambiar correo electrónico principal",
       "sources": {
-        "current": "Correo electrónico principal actual",
-        "emailCode": "Correo electrónico",
-        "pending": "Pendiente de verificación"
-      },
-      "messages": {
-        "pendingVerification": "La verificación ya está pendiente para este correo electrónico. Puede reenviar el correo electrónico de verificación."
+        "emailCode": "Correo electrónico"
       },
       "mainEmailUpdated": "Correo electrónico principal actualizado.",
       "canonicalUpdated": "Correo electrónico principal actualizado."
@@ -1834,7 +1797,6 @@
   },
   "seriesDetail": {
     "slug": {
-      "autoDescription": "Modo automático: los cambios de título actualizan el slug automáticamente.",
       "manualDescription": "Modo manual: el slug permanece fijo hasta que edites o vuelvas a habilitar el modo automático."
     },
     "notifications": {
@@ -1870,10 +1832,6 @@
     }
   },
   "works": {
-    "tabs": {
-      "editable": "Editable"
-    },
-    "emptyEditable": "No se te han asignado trabajos editables.",
     "emptyCredits": "No se encontraron obras acreditadas.",
     "columns": {
       "creditedAs": "Acreditado como",
@@ -1995,6 +1953,7 @@
         "patternPlaceholder": "por ejemplo, ^[A-Z]{3}$",
         "customErrorMessage": "Mensaje de error personalizado",
         "optional": "Opcional",
+        "dragValidator": "Arrastrar regla de validación",
         "removeValidator": "Eliminar validador"
       },
       "fieldTypes": {
@@ -2043,7 +2002,7 @@
       "newestFirst": "Lo nuevo primero",
       "oldestFirst": "El más viejo primero",
       "clearFilters": "Limpiar filtros",
-      "count": "{count, plural, one {# envío} other {# envíos}}",
+      "count": "{count, plural, one {# envío} many {# envíos} other {# envíos}}",
       "filteredSuffix": "(filtrado)",
       "table": {
         "submitted": "Enviado"
@@ -2062,10 +2021,6 @@
       }
     },
     "settings": {
-      "notifications": {
-        "managerAdded": "Administrador de formularios agregado",
-        "managerRemoved": "Administrador de formularios eliminado"
-      },
       "urlPublic": {
         "title": "URL y acceso público",
         "allowPublic": "Permitir acceso a URL pública",
@@ -2085,13 +2040,7 @@
         "description": "Comparta enlaces al panel para ver estadísticas del formulario sin acceso de administrador"
       },
       "managers": {
-        "adminControls": "Controles administrativos",
-        "readOnly": "Sólo lectura",
-        "description": "Los administradores pueden editar este formulario, ver envíos y administrar enlaces para compartir.",
-        "searchPlaceholder": "Buscar usuarios para agregar administrador...",
-        "adminOnly": "Sólo los administradores pueden agregar o eliminar administradores.",
-        "empty": "Aún no hay gerentes asignados.",
-        "removeManager": "Eliminar administrador {name}"
+        "description": "Los administradores pueden editar este formulario, ver envíos y administrar enlaces para compartir."
       },
       "access": {
         "title": "Control de acceso",
@@ -2120,20 +2069,26 @@
   "dataTable": {
     "aria": {
       "sortBy": "Ordenar por {label}",
-      "rowActions": "Acciones para {label}"
+      "rowActions": "Acciones para {label}",
+      "selectAllRows": "Seleccionar todas las filas",
+      "selectRow": "Seleccionar {label}",
+      "resultSummary": "{totalPages, plural, =0 {{count, plural, one {# resultado} many {# resultados} other {# resultados}}} other {{count, plural, one {# resultado} many {# resultados} other {# resultados}}, página {page} de {totalPages}}}",
+      "loadingMessage": "Cargando"
     },
     "sort": {
       "button": "ordenar",
       "none": "Sin condiciones de clasificación",
       "selectAbove": "Seleccionar campos arriba",
       "selectFromLeft": "Seleccionar campos del panel izquierdo",
-      "count": "{count, plural, one {# clasificación} other {# clasificación}}",
+      "count": "{count, plural, one {# clasificación} many {# clasificaciones} other {# clasificaciones}}",
       "aria": {
         "reorder": "Reordenar {label}",
         "moveUp": "Mover {label} hacia arriba",
         "moveDown": "Mover {label} hacia abajo",
         "toggleDirection": "Alternar dirección de clasificación para {label}",
-        "removeSort": "Eliminar clasificación para {label}"
+        "removeSort": "Eliminar clasificación para {label}",
+        "directionAscending": "Orden ascendente actual",
+        "directionDescending": "Orden descendente actual"
       }
     },
     "filter": {
@@ -2148,7 +2103,8 @@
       "drawerTitle": "Filtrar",
       "aria": {
         "backToFields": "Volver a filtrar campos",
-        "removeFilter": "Eliminar filtro para {label}"
+        "removeFilter": "Eliminar filtro para {label}",
+        "logic": "Combinación de filtros"
       },
       "operators": {
         "eq": "es igual",
@@ -2181,7 +2137,8 @@
       "previousPage": "Pagina anterior",
       "nextPage": "Página siguiente",
       "lastPage": "Última página",
-      "page": "Página {page}"
+      "page": "Página {page}",
+      "navigation": "Navegación de páginas"
     }
   },
   "versionHistory": {
@@ -2191,9 +2148,11 @@
     "systemOrLegacy": "Sistema o versión anterior",
     "restore": "Restaurar",
     "restoreTitle": "Restaurar versión",
-    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document."
+    "restoreSameLocaleBody": "Restaurar el origen v{version} ({locale}) solo modifica el documento de origen. Los documentos de destino y los trabajos de traducción existentes permanecen sin cambios, y las traducciones no se generan automáticamente. ¿Continuar?",
+    "restoreCrossLocaleBody": "Restaurar el origen v{version} cambia la configuración regional de origen de {currentLocale} a {selectedLocale} y solo modifica la referencia al origen. Los documentos de destino y los trabajos de traducción existentes permanecen sin cambios, y las traducciones no se generan automáticamente. ¿Continuar?",
+    "restoreFailed": "No se pudo restaurar el documento de origen.",
+    "loadFailed": "No se pudo cargar el historial de versiones.",
+    "end": "Se han cargado todas las versiones."
   },
   "shareLinks": {
     "title": "Compartir enlaces",
@@ -2203,7 +2162,6 @@
     "createError": "No se pudo crear el enlace",
     "deleteSuccess": "Enlace eliminado",
     "deleteError": "No se pudo eliminar el enlace",
-    "invalidUrl": "URL no válida",
     "noLinks": "No se crearon enlaces",
     "showLess": "Mostrar menos",
     "showMore": "Mostrar {count} más",
@@ -2218,21 +2176,9 @@
     "passwordPlaceholder": "Establecer una contraseña para compartir",
     "maximumExpiration": "Los enlaces para compartir pueden caducar hasta dentro de un año.",
     "expirationInvalid": "Elija un vencimiento dentro de un año.",
-    "bypassFormPassword": "Omitir contraseña del formulario",
-    "bypassFormPasswordDescription": "Si está deshabilitado, los espectadores deben ingresar la contraseña del formulario.",
-    "bypassAuthentication": "Omitir autenticación",
-    "bypassAuthenticationDescription": "Si está habilitado, el enlace para compartir omite las puertas de autenticación requerida",
-    "bypassRoleChecks": "Omitir comprobaciones de roles",
-    "bypassRoleChecksDescription": "Si está habilitado, el enlace para compartir omite las puertas de roles permitidos",
     "policies": {
       "passwordProtected": "Protegido con contraseña",
-      "noPassword": "Sin contraseña",
-      "passwordBypass": "Omisión de contraseña",
-      "passwordRequired": "Se requiere contraseña",
-      "authBypass": "Omisión de autenticación",
-      "authEnforced": "Autenticación aplicada",
-      "roleBypass": "Omisión de roles",
-      "roleEnforced": "Rol aplicado"
+      "noPassword": "Sin contraseña"
     },
     "expirationBadge": {
       "expired": "Caducado",
@@ -2264,7 +2210,9 @@
     "label": "Enlaces sociales",
     "addLink": "Agregar enlace",
     "platformPlaceholder": "Plataforma",
-    "valuePlaceholder": "URL o nombre de usuario"
+    "valuePlaceholder": "URL o nombre de usuario",
+    "reorderInstructions": "Usa las flechas arriba y abajo para cambiar la posición de este enlace.",
+    "positionChanged": "Enlace movido a la posición {position} de {count}."
   },
   "termsPage": {
     "active": {
@@ -2424,7 +2372,6 @@
     }
   },
   "releasePage": {
-    "previewTitle": "Vista previa de la versión",
     "streaming": "Transmisión",
     "metadata": {
       "fallbackDescription": "{title}",
@@ -2494,8 +2441,7 @@
         "title": "Añadir pista"
       },
       "placeholders": {
-        "title": "Título de la pista",
-        "durationSeconds": "por ejemplo, 240"
+        "title": "Título de la pista"
       },
       "deleteConfirm": "¿Estás seguro de que quieres eliminar esta pista?",
       "creditsModal": {
@@ -2517,8 +2463,7 @@
   "contentMetadata": {
     "preview": {
       "page": "Vista previa de página",
-      "post": "Vista previa de la publicación",
-      "work": "Vista previa del trabajo"
+      "post": "Vista previa de la publicación"
     }
   },
   "editorMetadata": {
@@ -2541,8 +2486,6 @@
   "postHeader": {
     "actions": {
       "editPost": "Editar publicación",
-      "sharePost": "Compartir publicación",
-      "printPost": "Imprimir publicación",
       "exportMarkdown": "Exportar publicación como Markdown"
     }
   },
@@ -2551,7 +2494,6 @@
     "intro": "Utilizamos cookies esenciales para la autenticación y el funcionamiento del sitio, y cookies analíticas opcionales para comprender el uso del sitio.",
     "learnMore": "Consulte nuestra <privacy>Política de privacidad</privacy> y <terms>Términos de servicio</terms>.",
     "actions": {
-      "hidePreferences": "Ocultar preferencias",
       "customize": "Personalizar"
     }
   },
@@ -2569,7 +2511,6 @@
   },
   "locationSelector": {
     "placeholder": "Seleccione ubicación...",
-    "clearSelection": "Borrar lugar seleccionado",
     "emptySearch": "Buscar un lugar en el mapa",
     "emptyResults": "No se encontraron lugares"
   },
@@ -2589,6 +2530,24 @@
       "sections": {
         "connection": "Conexión"
       }
+    },
+    "saveState": {
+      "saved": "Guardado",
+      "saving": "Guardando…",
+      "offline": "Sin conexión · cambios conservados en este dispositivo",
+      "error": "Error al guardar · reintentando…",
+      "rejected": "No se pudieron guardar algunos cambios",
+      "reload": "Reconectando · restaurando cambios…"
+    },
+    "rejectedEdits": {
+      "open": "Revisar cambios sin guardar",
+      "title": "Cambios que no se pudieron guardar",
+      "description": "El servidor rechazó estos cambios, por lo que no se volverá a intentar guardarlos. Copia lo que necesites y después descártalos.",
+      "reason": "Motivo: {reason}",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "discard": "Descartar",
+      "empty": "Se han guardado todos los cambios."
     }
   },
   "urlSection": {
@@ -2602,9 +2561,6 @@
     "actions": {
       "copyId": "Copiar identificación",
       "copyUrl": "Copiar URL"
-    },
-    "notifications": {
-      "copied": "{label} copiado"
     }
   },
   "formValidation": {
@@ -2644,7 +2600,7 @@
   },
   "ogImagePreview": {
     "alt": "Vista previa de gráfico abierto",
-    "empty": "Imagen OG aún no generada",
+    "empty": "Sin imagen OG",
     "actions": {
       "regenerate": "Regenerar imagen OG"
     },
@@ -2768,14 +2724,13 @@
     "scheduleModal": {
       "description": "Elija una fecha y hora para enviar esta campaña.",
       "dateLabel": "Fecha y hora previstas",
-      "datePlaceholder": "Elige fecha y hora",
       "previousMonth": "Mes anterior",
       "nextMonth": "Mes próximo",
       "audience": "Audiencia: {audience}",
       "allMatchingUsersWarning": "Incluye usuarios coincidentes que se han dado de baja de los boletines."
     },
     "notifications": {
-      "campaignSent": "Campaña enviada a {count, plural, one {# usuario} other {# usuarios}}",
+      "campaignSent": "Campaña enviada a {count, plural, one {# usuario} many {# usuarios} other {# usuarios}}",
       "campaignScheduled": "Campaña programada",
       "scheduleCancelled": "Calendario de campaña cancelado"
     }
@@ -2858,7 +2813,6 @@
       "notFoundMessage": "No se encontraron categorías"
     },
     "seriesSelector": {
-      "searchPlaceholder": "Buscar o crear...",
       "states": {
         "empty": "No hay series disponibles",
         "select": "Seleccionar serie...",
@@ -2871,14 +2825,12 @@
       },
       "notifications": {
         "assigned": "Publicación asignada a la serie.",
-        "reorderFailed": "No se pudo reordenar la serie",
         "createFailed": "No se pudo crear la serie.",
         "seriesUnavailable": "Esa serie ya no está disponible para administrar. Se mantuvo la asignación anterior.",
         "updateFailed": "No se pudo actualizar la serie de publicaciones. Se mantuvo la asignación anterior."
       }
     },
     "notifications": {
-      "slugUpdateFailed": "No se pudo actualizar la babosa",
       "deleted": "Publicación eliminada",
       "published": "Publicación publicada",
       "unpublished": "Publicación inédita",
@@ -3065,10 +3017,6 @@
     "pinned": "Fijado"
   },
   "pageEditor": {
-    "localRecovery": {
-      "message": "Se conservó una copia local de tus cambios antes de reconectar. Descárgala antes de recargar o salir.",
-      "action": "Descargar copia de recuperación"
-    },
     "shareLinksDescription": "Vista previa de enlaces para páginas no publicadas",
     "showTitleOnPage": "Mostrar título en la página",
     "slugValidation": {
@@ -3126,6 +3074,9 @@
       }
     },
     "columnsEditor": {
+      "labels": {
+        "ratio": "Proporción de columnas"
+      },
       "badges": {
         "columnCount": "{count} columnas"
       },
@@ -3150,20 +3101,18 @@
       "menuLabel": "Agregar sección",
       "emptyColumn": "Columna vacía: haga clic en + para agregar contenido",
       "actions": {
-        "addSectionToColumn": "Agregar sección a la columna {index}",
-        "removeSectionFromColumn": "Eliminar {section} de la columna {index}"
+        "addSectionToColumn": "Agregar sección a la columna {index}"
       }
     },
     "notifications": {
       "published": "Página publicada",
       "unpublished": "Página no publicada",
       "deleted": "Página eliminada",
-      "slugUpdateFailed": "No se pudo actualizar el slug de la página",
-      "confirmSummaryFailed": "No se pudo confirmar la actualización del resumen."
+      "slugUpdateFailed": "No se pudo actualizar el slug de la página"
     },
     "mapEditor": {
       "title": "Mapa",
-      "placeCount": "{count} {count, plural, one {place} other {places}}",
+      "placeCount": "{count} {count, plural, one {lugar} many {lugares} other {lugares}}",
       "fullscreen": "Pantalla completa",
       "captionPlaceholder": "Agregue un título opcional debajo del mapa...",
       "emptyState": "Aún no se han seleccionado lugares en el mapa.",
@@ -3217,7 +3166,6 @@
         "content": "Contenido",
         "marqueeBehavior": "Comportamiento de marquesina",
         "scenePlayback": "Reproducción",
-        "sceneRender": "renderizador",
         "sceneMotion": "movimiento",
         "sceneUnits": "Unidades",
         "sceneSettings": "escena",
@@ -3234,7 +3182,6 @@
         "columns": "columnas",
         "infiniteLoop": "bucle infinito",
         "showIndicators": "Mostrar indicadores",
-        "showFeaturedImage": "Mostrar imagen destacada",
         "imageAspectRatio": "Relación de aspecto de la imagen",
         "showMeta": "Mostrar meta",
         "sortBy": "Ordenar por",
@@ -3253,7 +3200,6 @@
         "showImage": "Mostrar imagen",
         "selectForm": "Seleccionar formulario",
         "showFormTitle": "Mostrar título del formulario",
-        "showTitle": "Mostrar título",
         "numberOfWorks": "Número de obras",
         "numberOfReleases": "Número de lanzamientos",
         "numberOfProgramEvents": "Número de eventos",
@@ -3323,7 +3269,10 @@
         "textColorSource": "Color del texto",
         "lightTextColor": "Texto claro",
         "darkTextColorSource": "texto oscuro",
-        "darkTextColor": "Color de texto oscuro"
+        "darkTextColor": "Color de texto oscuro",
+        "itemSize": "Tamaño de los elementos",
+        "showAvatar": "Mostrar avatar",
+        "maxLabels": "Máximo de sellos"
       },
       "fieldLabels": {
         "year": "Año",
@@ -3334,11 +3283,7 @@
       },
       "badges": {
         "posts": "{count} publicaciones",
-        "rows": "{count} filas",
-        "authors": "{count} autores",
-        "artists": "{count} artistas",
-        "works": "{count} funciona",
-        "releases": "{count} lanzamientos"
+        "rows": "{count} filas"
       },
       "placeholders": {
         "publishedByDefault": "Publicado por defecto",
@@ -3358,7 +3303,6 @@
           "auto": "Automático"
         },
         "sortBy": {
-          "dateAdded": "Fecha agregada",
           "startDate": "Fecha de inicio",
           "endDate": "Fecha de finalización",
           "publishedDate": "Fecha de publicación",
@@ -3367,9 +3311,7 @@
         },
         "sortOrder": {
           "newest": "Lo más nuevo",
-          "oldest": "más antiguo",
-          "azOldest": "A-Z / Más antiguo",
-          "zaNewest": "Z-A / Más nuevo"
+          "oldest": "más antiguo"
         },
         "mapPrimaryLabel": {
           "placeName": "Topónimo"
@@ -3443,6 +3385,11 @@
           "theme": "Seguir tema",
           "custom": "personalizado",
           "inherit": "seguir la luz"
+        },
+        "itemSize": {
+          "s": "S · Compacto",
+          "m": "M · Estándar",
+          "l": "L · Grande"
         }
       },
       "actions": {
@@ -3453,8 +3400,6 @@
         "moveUnitUp": "Mover unidad hacia arriba",
         "moveUnitDown": "Mover la unidad hacia abajo",
         "removeSceneUnit": "Quitar unidad",
-        "expandSceneUnit": "Ampliar unidad",
-        "collapseSceneUnit": "Unidad de colapso",
         "replaceMesh": "Reemplazar GLB",
         "uploadMesh": "Subir GLB",
         "clearMeshAsset": "Activo de malla transparente",
@@ -3493,6 +3438,12 @@
         "meshOptimizationCancelled": "Cancelado",
         "optimizedMeshCleanupFailed": "Se eliminó la referencia de recursos optimizada, pero falló la limpieza: {error}",
         "optimizedMeshCleanupFailedDefault": "Se eliminó la referencia de activos optimizada, pero falló la limpieza"
+      },
+      "authorSelection": {
+        "maxSelected": "Se pueden seleccionar hasta {count} autores.",
+        "empty": "No hay autores seleccionados. Este bloque estará vacío.",
+        "unavailable": "Este autor ya no está disponible.",
+        "unavailableWarning": "Los autores no disponibles no aparecen en la página pública. Elimínalos o selecciona un reemplazo."
       }
     },
     "embed": {
@@ -3545,8 +3496,6 @@
       "matchDescription": "Combina los grupos seleccionados de roles, etiquetas y boletín.",
       "any": "Cualquier grupo seleccionado",
       "all": "Todos los grupos seleccionados",
-      "roles": "Roles",
-      "rolesDescription": "Basta con tener cualquiera de los roles seleccionados.",
       "roleUser": "Miembros",
       "memberDescription": "Solo los miembros que hayan iniciado sesión pueden ver esta página.",
       "authorDescription": "Miembros con el rol de autor.",
@@ -3574,17 +3523,27 @@
       "restrictedTitle": "No tienes acceso a esta página",
       "restrictedDescription": "Tu cuenta no cumple las condiciones de acceso a esta página.",
       "signIn": "Iniciar sesión"
+    },
+    "a11y": {
+      "sectionPosition": "{section} · {index}/{count}",
+      "dragInstructions": "Pulsa Espacio para empezar a mover y las flechas para cambiar la posición. Pulsa Espacio para confirmar o Escape para cancelar.",
+      "dragStart": "{section} · Mover · En progreso · {index}/{count}",
+      "dragOver": "{section} · Mover · {index}/{count}",
+      "dragEnd": "{section} · Mover · Confirmar · {index}/{count}",
+      "dragCancel": "{section} · Mover · Cancelado",
+      "sectionDeleted": "{section} eliminado",
+      "sectionAdded": "{section} creado · {index}/{count}",
+      "columnsPosition": "{column} · {section} · {index}/{count}"
     }
   },
   "editorCommon": {
     "reloadRequired": {
       "title": "Se requiere recarga",
-      "message": "Se guardó una versión más reciente mientras este editor estaba abierto. Vuelva a cargar antes de continuar editando.",
-      "action": "Recargar"
+      "message": "Se guardó una versión más reciente mientras este editor estaba abierto. Vuelva a cargar antes de continuar editando."
     },
     "permissionRevoked": {
-      "title": "Permiso de edición revocado",
-      "message": "Ya no tienes permiso para editar este contenido. Los cambios realizados después de que se revocó el permiso no se guardarán."
+      "title": "Acceso retirado",
+      "message": "Ya no tienes acceso a este contenido. Los cambios que aún no se guardaron se conservan en este dispositivo."
     },
     "sessionExpired": {
       "title": "La sesión expiró",
@@ -3640,7 +3599,6 @@
         "mute": "Silenciar audio",
         "unmute": "Activar audio",
         "volume": "Volumen de audio",
-        "original": "Original",
         "waveform": "Forma de onda",
         "spectrogram": "espectrograma",
         "spectrogramAlt": "espectrograma de audio",
@@ -3657,10 +3615,8 @@
         "addItem": "Agregar {item}",
         "replaceItem": "Reemplazar {item}",
         "browse": "Explorar archivos",
-        "or": "O",
         "importFromUrl": "Importar desde URL",
         "directVideoUrlHelp": "Solo URL de archivos de vídeo directos. Para YouTube o Vimeo, utilice vídeo externo.",
-        "confirm": "Empotrar",
         "resumeAvailable": "Se encontró una carga interrumpida",
         "resumeInstructionNamed": "Seleccione {name} nuevamente para continuar la carga desde donde se detuvo.",
         "backToUpload": "Subir archivos",
@@ -3756,11 +3712,8 @@
       }
     },
     "mapBlock": {
-      "clickToAddPlace": "Haga clic para agregar lugar",
       "captionPlaceholder": "Añade un título...",
-      "clickToAddCaption": "Haga clic para agregar título",
-      "externalPlaceholder": "Mapa: {count} {count, plural, one {place} other {places}}",
-      "viewOnGoogleMaps": "Ver en Google Maps ({lat}, {lng})"
+      "clickToAddCaption": "Haga clic para agregar título"
     },
     "mapPlacesModal": {
       "title": "Administrar lugares",
@@ -3770,22 +3723,9 @@
       "centeredTitle": "Centrado",
       "setAsCenterTitle": "Establecer como centro"
     },
-    "blockAlign": {
-      "left": "Alinear a la izquierda",
-      "center": "Alinear centro",
-      "right": "Alinear a la derecha"
-    },
-    "mathInline": {
-      "clickToEdit": "Haga clic para editar",
-      "convertToBlock": "Convertir a bloque"
-    },
-    "mathInlineButton": {
-      "label": "matemáticas en línea"
-    },
     "editor": {
       "slashMenu": {
         "placeholder": "Escribe '/' para ver comandos",
-        "empty": "No hay elementos",
         "unavailable": "No disponible",
         "groups": {
           "headings": "Encabezados",
@@ -3844,14 +3784,14 @@
           "quote": {
             "title": "Cita",
             "subtext": "Cita o extracto",
-            "aliases": "quotation\nblockquote\nbq",
+            "aliases": "quotation\nblockquote\nbq\ncita\ncita en bloque",
             "group": "Bloques básicos"
           },
           "callout": {
             "title": "Callout",
-            "subtext": "Highlight content with an icon",
-            "aliases": "callout\nnotice\ninfo\naside",
-            "group": "Basic blocks"
+            "subtext": "Destaca contenido con un icono",
+            "aliases": "callout\nnotice\ninfo\naside\naviso\ninformación\nnota",
+            "group": "Bloques básicos"
           },
           "divider": {
             "title": "Divisor",
@@ -3880,61 +3820,61 @@
           "mathBlock": {
             "title": "Bloque matemático",
             "subtext": "Mostrar ecuación con LaTeX",
-            "aliases": "math\nequation\nlatex\nformula",
+            "aliases": "math\nequation\nlatex\nformula\nmatemáticas\necuación\nfórmula",
             "group": "Matemáticas"
           },
           "inlineMath": {
             "title": "Matemáticas en línea",
             "subtext": "Fórmula LaTeX en línea",
-            "aliases": "inline\ninline math\ninlinemath\nlatex\n$",
+            "aliases": "inline\ninline math\ninlinemath\nlatex\n$\nen línea\nmatemáticas en línea",
             "group": "En línea"
           },
           "map": {
             "title": "Mapa",
             "subtext": "Insertar una ubicación en el mapa",
-            "aliases": "map\nlocation\nplace\naddress",
+            "aliases": "map\nlocation\nplace\naddress\nmapa\nubicación\nlugar\ndirección",
             "group": "Incrustaciones"
           },
           "externalVideo": {
             "title": "Vídeo externo",
             "subtext": "Insertar un enlace de YouTube o Vimeo",
-            "aliases": "external video\nyoutube\nvimeo\nembed",
+            "aliases": "external video\nyoutube\nvimeo\nembed\nvídeo externo\nvideo externo\nincrustar",
             "group": "Incrustaciones"
           },
           "p5Sketch": {
             "title": "p5.js",
             "subtext": "Agregar un boceto interactivo de p5.js",
-            "aliases": "p5\np5.js\nsketch\ncreative coding",
+            "aliases": "p5\np5.js\nsketch\ncreative coding\nboceto\nprogramación creativa",
             "group": "Incrustaciones"
           },
           "threeScene": {
             "title": "Three.js",
             "subtext": "Agregar una escena interactiva de Three.js",
-            "aliases": "three\nthree.js\n3d\nscene",
+            "aliases": "three\nthree.js\n3d\nscene\nescena\ntridimensional",
             "group": "Incrustaciones"
           },
           "file": {
             "title": "Adjunto",
             "subtext": "Adjunte un archivo (PDF, DOC, ZIP, etc.)",
-            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload",
+            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\nadjunto\narchivo\ndocumento\ndescargar",
             "group": "Multimedia"
           },
           "aiAssistant": {
             "title": "Asistente de IA",
             "subtext": "Escribe, mejora o transforma texto con IA",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove",
+            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nia\nasistente\nescribir\nmejorar",
             "group": "IA"
           },
           "shader": {
             "title": "Shader GLSL",
             "subtext": "Agrega un shader GLSL interactivo",
-            "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "aliases": "shader\nglsl\nfragment shader\nshadertoy\nsombreador\nsombreador de fragmentos",
             "group": "Incrustaciones"
           },
           "mermaid": {
             "title": "Mermaid",
             "subtext": "Crear un diagrama a partir de texto",
-            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence\ndiagrama\ndiagrama de flujo\nsecuencia",
             "group": "Incrustaciones"
           }
         }
@@ -3950,9 +3890,6 @@
         "alignLeft": "Alinear a la izquierda",
         "alignCenter": "Centrar",
         "alignRight": "Alinear a la derecha",
-        "alignJustify": "Justificar texto",
-        "textColor": "Texto",
-        "backgroundColor": "Fondo",
         "nest": "Anidar bloque",
         "unnest": "Desanidar bloque",
         "inlineMath": "Matemáticas en línea",
@@ -3967,36 +3904,19 @@
         "urlPlaceholder": "Editar URL"
       },
       "math": {
-        "inline": "Matemáticas en línea",
-        "block": "Bloque matemático",
-        "clickToEdit": "Haga clic para editar",
-        "convertToBlock": "Convertir a bloque"
+        "selectBlock": "Seleccionar bloque matemático",
+        "block": "Bloque matemático"
       },
       "file": {
-        "add": "Agregar {item}",
         "replace": "Reemplazar {item}",
-        "delete": "Eliminar",
-        "download": "Descargar",
-        "caption": "Añade un título...",
-        "upload": "Subir archivos",
-        "embed": "Insertar",
-        "urlPlaceholder": "Editar URL"
+        "delete": "Eliminar"
       },
       "resize": {
-        "image": "Cambiar tamaño — Imagen",
-        "audio": "Cambiar tamaño — Audio",
-        "video": "Cambiar tamaño — Vídeo",
-        "file": "Cambiar tamaño — Adjunto",
         "map": "Cambiar tamaño — Mapa",
-        "externalVideo": "Cambiar tamaño — Vídeo externo",
-        "p5Sketch": "Cambiar tamaño — p5.js",
-        "threeScene": "Cambiar tamaño — Three.js",
-        "dragHandle": "Arrastra para cambiar el tamaño",
-        "shader": "Cambiar tamaño — Shader GLSL"
+        "externalVideo": "Cambiar tamaño — Vídeo externo"
       },
       "drag": {
         "openBlockMenu": "Abrir menú de bloque",
-        "addBlock": "Agregar bloque",
         "delete": "Eliminar",
         "colors": "Colores"
       },
@@ -4028,7 +3948,6 @@
         "toggleHeaderColumn": "Columna de encabezado",
         "selectRow": "Seleccionar fila",
         "selectColumn": "Seleccionar columna",
-        "selectCells": "Celdas seleccionadas",
         "selectTable": "Seleccionar tabla",
         "deleteTable": "Eliminar tabla",
         "mergeCells": "Combinar celdas",
@@ -4042,17 +3961,11 @@
         "unavailable": "No disponible"
       },
       "map": {
-        "insert": "Mapa",
-        "clickToAddPlace": "Haga clic para agregar lugar",
-        "captionPlaceholder": "Añade un título...",
         "managePlaces": "Administrar lugares"
       },
       "embeds": {
         "map": "Mapa",
-        "externalVideo": "Vídeo externo",
-        "p5Sketch": "p5.js",
-        "threeScene": "Three.js",
-        "shader": "Shader GLSL"
+        "externalVideo": "Vídeo externo"
       },
       "runtimeLabels": {
         "code": {
@@ -4139,13 +4052,14 @@
         }
       },
       "media": {
-        "browse": "Explorar archivos",
-        "importFromUrl": "Importar desde URL",
-        "embed": "Insertar",
-        "openLibrary": "Biblioteca de archivos",
-        "uploadFiles": "Subir archivos",
-        "selectFile": "Selecciona un archivo"
+        "importFromUrl": "Importar desde URL"
       }
+    },
+    "accessDowngraded": {
+      "message": "Tu acceso ha cambiado a solo lectura. La edición está desactivada; los cambios aún sin guardar permanecen en este dispositivo y se guardarán si recuperas el permiso de edición."
+    },
+    "accessUpgraded": {
+      "message": "Puedes volver a editar. Se están guardando los cambios conservados mientras solo podías ver."
     }
   },
   "aiAssistant": {
@@ -4170,7 +4084,6 @@
       "brainstorm": "Idea genial"
     },
     "sections": {
-      "original": "Original",
       "result": "Resultado de IA"
     },
     "actions": {
@@ -4220,8 +4133,7 @@
       "pinClickable": "Pin en el que se puede hacer clic"
     },
     "themeOptions": {
-      "none": "Ninguno",
-      "systemSuffix": "(Sistema)"
+      "none": "Ninguno"
     },
     "scheme": {
       "auto": "Automático",
@@ -4237,13 +4149,7 @@
     "copyValueTitle": "Haga clic para copiar el valor {label}"
   },
   "postMembers": {
-    "removeAria": "Eliminar {name}",
-    "roles": {
-      "owner": "Dueño"
-    },
-    "states": {
-      "memberFallback": "miembro"
-    }
+    "removeAria": "Eliminar {name}"
   },
   "workCredits": {
     "divider": "o agregar crédito",
@@ -4276,9 +4182,6 @@
       "artist": "No se encontraron artistas",
       "name": "No se encontraron nombres"
     },
-    "states": {
-      "unknownInitial": "?"
-    },
     "notifications": {
       "groupCreated": "Grupo creado",
       "groupDeleted": "Grupo eliminado",
@@ -4299,48 +4202,46 @@
     "resolvedMetadata": "Metadatos resueltos"
   },
   "translationPanel": {
-    "description": "Review the source language and existing translation document for each locale.",
+    "description": "Revisa el idioma de origen y el documento de traducción existente para cada configuración regional.",
     "actions": {
       "expand": "Expandir",
       "collapse": "Colapsar",
-      "regenerateAll": "Generate/regenerate all eligible locales",
+      "regenerateAll": "Generar/regenerar todas las configuraciones regionales aptas",
       "regenerateLocale": "Regenerado",
       "regenerateLocaleAria": "Regenerar traducción {locale}",
       "generateLocale": "Generate",
-      "generateLocaleAria": "Generate {locale} translation"
+      "generateLocaleAria": "Generar traducción en {locale}"
     },
     "sourceLocale": {
       "label": "Idioma de origen",
       "description": "Este es el idioma de origen utilizado como base para las traducciones de esta entidad.",
       "confirm": {
         "title": "Cambiar idioma de origen",
-        "description": "Changing the source language updates only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically.",
-        "detail": "{locale} becomes the language of the editable source document. Existing target documents and translation jobs remain unchanged.",
+        "description": "Cambiar el idioma de origen solo actualiza la referencia al origen. Los documentos de destino y los trabajos de traducción existentes permanecen sin cambios, y las traducciones no se generan automáticamente.",
+        "detail": "{locale} pasa a ser el idioma del documento de origen editable. Los documentos de destino y los trabajos de traducción existentes permanecen sin cambios.",
         "confirm": "Cambiar idioma de origen"
       }
     },
     "activeEditLocale": {
-      "ariaLabel": "Switch content language. Current: {locale}",
+      "ariaLabel": "Cambiar idioma del contenido. Actual: {locale}",
       "sourceOption": "{locale} (Fuente)",
       "loading": "Cargando idiomas...",
-      "missingDescription": "No {locale} target document exists yet. Generate it from the translations panel.",
+      "missingDescription": "Todavía no existe un documento de destino en {locale}. Genéralo desde el panel de traducciones.",
       "bodyPreviewTitle": "{locale} vista previa del cuerpo",
-      "bodyPreviewDescription": "The existing translation document is shown with its structure and formatting.",
+      "bodyPreviewDescription": "El documento de traducción existente se muestra con su estructura y formato.",
       "bodyPreviewEmpty": "Aún no hay vista previa del cuerpo localizado.",
-      "sharedStructureSectionDescription": "This section keeps shared layout or query settings from the source page; translated body content is read-only.",
+      "sharedStructureSectionDescription": "Esta sección conserva los ajustes de diseño o consulta compartidos de la página de origen; el contenido traducido del cuerpo es de solo lectura.",
       "sectionFieldLabels": {
         "caption": "Subtítulo",
         "copyJson": "Copia de escena"
       }
     },
     "statuses": {
-      "missing": "Desaparecido",
       "existing": "Existing"
     },
     "states": {
       "loadFailed": "No se pudieron cargar las traducciones.",
-      "missingTarget": "No target document yet.",
-      "sourceRow": "Esta configuración regional se edita en el editor de código fuente principal.",
+      "missingTarget": "Todavía no hay un documento de destino.",
       "sourceEditorHint": "Edite el texto original en el editor principal.",
       "updatedAt": "Actualizado {date}"
     },
@@ -4353,64 +4254,29 @@
     }
   },
   "translationPanelMenu": {
-    "description": "Review source menu labels and existing translation documents.",
-    "sourceLocaleDescription": "The menu editor above owns structure, ordering, links, visibility, and source labels. Target translations below are read-only previews.",
-    "states": {
-      "sourcePreview": "Etiquetas del menú fuente ({locale}): {labels}",
-      "sourceEditorHint": "Estas etiquetas provienen del editor de menú de arriba.",
-      "missingTarget": "No labels are saved for this locale yet.",
-      "noItems": "Aún no hay etiquetas de menú para mostrar.",
-      "translationPreview": "Existing {locale} labels: {labels}"
-    },
+    "description": "Revisa las etiquetas del menú de origen y los documentos de traducción existentes.",
     "previewModal": {
-      "title": "{locale} menu translation preview",
-      "descriptions": {
-        "missing": "No public menu translation exists for this locale. The source is shown until an Admin generates it.",
-        "existing": "Shows the current public translated labels for this menu as read-only."
-      },
+      "title": "Vista previa de la traducción del menú en {locale}",
       "fields": {
-        "linkType": "Link type",
-        "destination": "Destination",
-        "children": "Nested items",
-        "localizedLabelForLocale": "{locale} public label",
-        "sourceLabelForLocale": "{locale} source label",
-        "localizedLabelDescription": "The current translated label shown in public menus; it cannot be changed here.",
-        "sourceLabelDescription": "Comes from the source menu editor and cannot be changed here.",
-        "fixedLocaleLockedDescription": "This item is fixed to the {locale} label and is read-only."
-      },
-      "states": {
-        "detailUnavailable": "Detailed translated menu data could not be loaded.",
-        "noItems": "There are no menu items to preview."
+        "localizedLabelForLocale": "Etiqueta pública en {locale}"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template.",
-      "sourceLocaleDescription": "La plantilla de origen controla el asunto, el cuerpo del texto y los nombres de las variables de tiempo de ejecución.",
-      "states": {
-        "sourceEditorHint": "Edite la plantilla fuente en el editor principal.",
-        "noContent": "Aún no existe ningún tema ni cuerpo traducido."
-      }
+      "description": "Gestiona el idioma de origen y los documentos de traducción existentes para esta plantilla de correo electrónico."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout.",
-      "sourceLocaleDescription": "El diseño de origen controla el HTML contenedor y los nombres de marcadores de posición estructurales para la representación de correo electrónico.",
-      "states": {
-        "sourceEditorHint": "Edite el diseño fuente en el editor principal.",
-        "noContent": "Aún no existe ningún HTML de diseño traducido."
-      }
+      "description": "Gestiona el idioma de origen y los documentos de traducción existentes para este diseño de correo electrónico."
     }
   },
   "localizationNotice": {
     "translated": {
-      "title": "Localized version",
-      "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
+      "title": "Versión localizada",
+      "description": "Esta versión localizada se muestra en {displayed}; el original en {source} sigue siendo la versión de referencia."
     },
     "fallback": {
-      "title": "Idioma alternativo",
-      "english": "La traducción {requested} solicitada no está disponible, por lo que esta página se muestra en {displayed}.",
-      "source": "La traducción solicitada de {requested} no está disponible, por lo que esta página se muestra en el original {source}."
+      "title": "Idioma alternativo"
     },
     "actions": {
       "viewOriginal": "Ver original ({source})"
@@ -4430,17 +4296,16 @@
       "totalLocales": "Locales totales",
       "sourceEntities": "Entidades fuente",
       "activeJobs": "Trabajos en curso",
-      "existingEntries": "Existing translations"
+      "existingEntries": "Traducciones existentes"
     },
     "sections": {
-      "localeHealthTitle": "Translation state by locale",
-      "entityHealthTitle": "Translation state by entity type"
+      "localeHealthTitle": "Estado de traducción por configuración regional",
+      "entityHealthTitle": "Estado de traducción por tipo de entidad"
     },
     "columns": {
       "policy": "Política",
-      "lastTargetUpdate": "Last target update",
+      "lastTargetUpdate": "Última actualización del destino",
       "entity": "entidad",
-      "existing": "Existing translations",
       "sources": "Fuentes",
       "lastSourceUpdate": "Última actualización de fuente"
     },
@@ -4475,7 +4340,7 @@
   },
   "translationSettingsPage": {
     "title": "Configuración de traducción",
-    "description": "Manage the default source language and automatic translation providers. An Admin explicitly starts translation generation from each editor.",
+    "description": "Gestiona el idioma de origen predeterminado y los proveedores de traducción automática. Un administrador inicia explícitamente la generación de traducciones desde cada editor.",
     "actions": {
       "jobs": "Empleos",
       "save": "Guardar configuración",
@@ -4485,8 +4350,8 @@
       "createProvider": "Crear proveedor"
     },
     "sections": {
-      "runtime": "Source defaults",
-      "runtimeDescription": "Set only the language used when a source language has not been established. Source changes never start translation generation automatically.",
+      "runtime": "Valores predeterminados de origen",
+      "runtimeDescription": "Establece únicamente el idioma que se utiliza cuando no se ha definido un idioma de origen. Los cambios en el origen nunca inician automáticamente la generación de traducciones.",
       "providers": "Proveedores de traducción",
       "providersDescription": "Gestionar proveedores de traducción automática. La generación permanece deshabilitada hasta que al menos un proveedor activo tenga credenciales válidas."
     },
@@ -4496,10 +4361,10 @@
         "description": "Se utiliza cuando aún no se ha establecido una configuración regional de origen y cuando una solicitud no se resuelve en una configuración regional de contenido compatible."
       },
       "protectedTerms": {
-        "label": "Protected terms",
-        "description": "Exact case-sensitive spellings that translation generation must keep unchanged. No terms are learned or suggested automatically.",
-        "placeholder": "Add a protected term",
-        "examples": "Examples: Photoshop, React Native"
+        "label": "Términos protegidos",
+        "description": "Grafías exactas, con distinción entre mayúsculas y minúsculas, que deben conservarse al generar traducciones. No se aprenden ni se sugieren términos automáticamente.",
+        "placeholder": "Agregar un término protegido",
+        "examples": "Ejemplos: Photoshop, React Native"
       },
       "providerName": {
         "label": "Nombre del proveedor"
@@ -4628,33 +4493,22 @@
       "summary": "Añade un resumen conciso..."
     },
     "tooltips": {
-      "generatingNamed": "{name} está generando un resumen",
-      "applyingNamed": "{name} está aplicando el resumen generado",
-      "readyNamed": "{name} tiene listo un resumen generado"
+      "generatingNamed": "{name} está generando un resumen"
     },
     "feedback": {
       "failedDefault": "No se pudo procesar la generación del resumen.",
-      "invalidJson": "La respuesta de IA no se pudo analizar como resumen JSON.",
       "alreadyRunning": "La generación de resumen ya se está ejecutando.",
-      "applyingGenerated": "Aplicando resumen generado.",
-      "resetOlderSession": "Restablecer un estado obsoleto de resumen generado de una sesión anterior.",
-      "resetUnrestorable": "Restablecer un estado de resumen generado obsoleto que no se pudo restaurar.",
-      "missingJobPayload": "La generación de resumen no devolvió una carga útil del trabajo.",
       "missingSuggestionPayload": "La generación de resumen se completó sin una carga útil de sugerencia.",
       "staleSuggestion": "Esta sugerencia está obsoleta. Regenerarlo o descartarlo antes de aplicarlo.",
       "unableToApplyNow": "No se puede aplicar el resumen generado en este momento.",
       "applyFailed": "No se pudo aplicar el resumen generado.",
       "applied": "Resumen generado aplicado.",
-      "appliedJobUnresolved": "Se aplicó el resumen, pero el trabajo de IA no se pudo resolver automáticamente.",
-      "dismissedJobUnresolved": "La sugerencia de resumen se descartó localmente, pero el trabajo de IA no se pudo resolver automáticamente.",
-      "readyBeforeApplying": "Aplique o descarte el resumen generado primero.",
       "readyToApply": "El resumen generado está listo para aplicar."
     },
     "ready": {
       "title": "Resumen generado",
       "suggestedSummary": "Resumen sugerido",
       "anotherCollaborator": "Otro colaborador",
-      "anotherCollaboratorFallback": "Otro colaborador tiene listo un resumen generado.",
       "anotherCollaboratorNamed": "{name} tiene listo un resumen generado."
     }
   },
@@ -4702,8 +4556,7 @@
       "roleUpdated": "Rol actualizado",
       "userBanned": "Usuario baneado",
       "userUnbanned": "Usuario no baneado",
-      "userDeleted": "Usuario eliminado",
-      "userCreated": "Usuario creado"
+      "userDeleted": "Usuario eliminado"
     }
   },
   "adminUserDetail": {
@@ -4740,16 +4593,13 @@
       "userIdCopied": "ID de usuario copiado",
       "userIdCopyFailed": "No se pudo copiar la ID de usuario",
       "emailSuppressionReleased": "Lanzada la supresión de correo electrónico",
-      "mainEmailUpdated": "Correo electrónico principal actualizado",
       "ssoProviderRemoved": "Proveedor de SSO eliminado"
     },
     "auth": {
       "emptyEmail": "Sin correo electrónico",
       "delivery": {
         "title": "Correo electrónico de entrega",
-        "description": "El correo de campaña, notificación y cuenta utiliza el correo electrónico principal seleccionado.",
-        "changePlaceholder": "Seleccione un correo electrónico verificado",
-        "changeHelp": "Cambiar esta selección se guarda inmediatamente."
+        "description": "El correo de campaña, notificación y cuenta utiliza el correo electrónico principal seleccionado."
       },
       "providers": {
         "title": "Proveedores de SSO conectados",
@@ -4758,7 +4608,6 @@
         "remove": "Eliminar proveedor de SSO"
       },
       "sources": {
-        "current": "Correo electrónico actual",
         "emailCode": "Inicio de sesión por correo electrónico"
       },
       "ban": {
@@ -4793,7 +4642,6 @@
         "noChanges": "No hay cambios para guardar"
       },
       "validation": {
-        "invalidUrl": "Formato de URL no válido",
         "invalidEmail": "Formato de correo electrónico no válido",
         "invalidHexColor": "Formato de color hexadecimal no válido",
         "invalidGoogleAnalyticsId": "Formato de ID de Google Analytics no válido"
@@ -5102,14 +4950,12 @@
   },
   "formSuccessPage": {
     "metadata": {
-      "fallbackTitle": "Formulario enviado",
       "title": "{formTitle} - Enviado"
     },
     "title": "Gracias"
   },
   "formPasswordPage": {
     "metadata": {
-      "fallbackTitle": "Acceso al formulario",
       "description": "Introduce tu contraseña para acceder a este formulario"
     },
     "title": "Protegido con contraseña",
@@ -5121,7 +4967,6 @@
   },
   "formDashboardPage": {
     "metadata": {
-      "fallbackTitle": "Panel de formulario",
       "title": "{formTitle} - Panel de control",
       "description": "Estadísticas y análisis de envío de formularios"
     },
@@ -5131,7 +4976,28 @@
     "stats": {
       "total": "Total"
     },
-    "fieldStatistics": "Estadísticas de campo"
+    "fieldStatistics": "Estadísticas de campo",
+    "charts": {
+      "donut": "Anillo",
+      "pie": "Circular",
+      "bar-horizontal": "Barras horizontales",
+      "bar-vertical": "Barras verticales",
+      "radar": "Radar",
+      "table": "Tabla",
+      "area": "Área",
+      "line": "Línea",
+      "histogram": "Histograma",
+      "noResponses": "Aún no hay respuestas",
+      "emptyValue": "(vacío)",
+      "min": "Mínimo",
+      "max": "Máximo",
+      "avg": "Promedio",
+      "count": "Cantidad",
+      "date": "Fecha",
+      "value": "Valor",
+      "range": "Intervalo",
+      "chartType": "Tipo de gráfico"
+    }
   },
   "embeddedForm": {
     "states": {
@@ -5182,10 +5048,7 @@
       "locationMode": "Modo de ubicación",
       "ticketUrl": "URL del billete",
       "streamUrl": "URL de transmisión",
-      "externalUrl": "URL externa",
-      "participants": "Participantes",
-      "textCredits": "Créditos de texto",
-      "textCreditsDescription": "Un crédito por línea. Usar rol: nombre cuando se necesita un rol."
+      "externalUrl": "URL externa"
     },
     "locationModes": {
       "mapPlace": "Evento",
@@ -5198,7 +5061,6 @@
       "tickets": "Entradas",
       "stream": "Arroyo",
       "link": "Enlace",
-      "participants": "Participantes",
       "empty": "No se encontraron eventos.",
       "date": "Fecha",
       "credits": "Créditos"
@@ -5215,152 +5077,14 @@
       "deleteMessage": "Este tipo de evento se puede eliminar solo cuando ningún evento lo utiliza."
     }
   },
-  "tools": {
-    "portadj": {
-      "metadataTitle": "PortaDJ",
-      "metadataDescription": "Reproduce y mezcla archivos de audio locales en tu navegador con dos decks de DJ."
-    },
-    "youtubeAudio": {
-      "title": "Audio de YouTube",
-      "urlLabel": "Enlace del video",
-      "urlPlaceholder": "https://…",
-      "resolve": "Cargar audio",
-      "resolving": "Cargando audio",
-      "clear": "Borrar fuente",
-      "metadataTitle": "Audio de YouTube",
-      "metadataDescription": "Convierte audio de una fuente de YouTube autenticada en tu navegador.",
-      "errors": {
-        "INTERNAL_ERROR": "No se pudo cargar la fuente de audio. Inténtalo de nuevo.",
-        "INVALID_REQUEST": "Ingresa una URL válida de un video de YouTube.",
-        "INVALID_UPSTREAM_RESPONSE": "YouTube devolvió una fuente de audio inesperada. Prueba con otro video.",
-        "REQUEST_ABORTED": "La solicitud se canceló.",
-        "SOURCE_EXPIRED": "Esta fuente de audio venció. Vuelve a cargar la URL.",
-        "SOURCE_NOT_FOUND": "Esta fuente de audio ya no está disponible. Vuelve a cargar la URL.",
-        "UNAUTHORIZED": "Vuelve a iniciar sesión para usar esta herramienta.",
-        "UNSUPPORTED_VIDEO": "Este video no ofrece una fuente de audio compatible y de duración limitada.",
-        "UPSTREAM_FAILURE": "No se puede cargar el audio de YouTube en este momento. Inténtalo de nuevo."
-      }
-    },
-    "transcode": {
-      "title": "Transcodificador de audio",
-      "targetIdle": "esperando",
-      "targetChecking": "De cheques",
-      "targetReady": "Listo",
-      "targetError": "Indisponible",
-      "dropTitle": "Suelta o elige archivos de audio",
-      "dropDescription": "Hasta 10 archivos · Sin carpetas · Procesado en este dispositivo",
-      "chooseFiles": "Elige archivos de audio",
-      "supportedFormatsLabel": "Formatos soportados",
-      "supportedFormats": "Compatible con: CAF, AIFF/AIFC, WAV, FLAC, MP3, AAC/M4A, Ogg/Opus y audio en MP4, MOV, MKV/WebM o TS. Comprobado por archivo.",
-      "filesSelected": "Archivos",
-      "outputSettings": "Configuración de salida",
-      "outputSettingsHelper": "Los canales permanecen sin cambios. Automático selecciona una tarifa compatible por archivo.",
-      "processingDetails": "Detalles de procesamiento",
-      "processingDetailsDescription": "Remuestreo equilibrado. La salida de números enteros está interpolada. Los archivos WAV grandes utilizan RF64.",
-      "format": "Formato",
-      "sampleRate": "Frecuencia de muestreo",
-      "bitrate": "tasa de bits",
-      "bitDepth": "Profundidad de bits",
-      "bitDepthContainerEffective": "Contenedor de {containerBits} bits / {effectiveBits} bits efectivos",
-      "codec": "Códec",
-      "sampleFormat": "Formato de muestra",
-      "float": "Flotar",
-      "integer": "PCM entero",
-      "constantBitrate": "CBR",
-      "variableBitrate": "VBR",
-      "sourcePcmFloat": "{bitDepth} bits flotantes",
-      "sourcePcmInteger": "{bitDepth}-bit entero",
-      "sourcePcmSignedInteger": "{bitDepth}-bit entero con signo",
-      "sourcePcmUnsignedInteger": "{bitDepth}-bit entero sin signo",
-      "automatic": "Automático",
-      "preserveSource": "Preservar la fuente",
-      "unavailable": "Indisponible",
-      "sampleRateAvailableFor": "{supported, number} de {total, number} archivos",
-      "sampleRateResetAutomatic": "La frecuencia de muestreo anterior no es válida para estas configuraciones de salida. La frecuencia de muestreo se cambió a Automática.",
-      "unknownAudio": "Audio",
-      "channelCount": "{count, plural, one {# canal} other {# canales}}",
-      "queue": "Cola de conversión",
-      "convert": "Convertir",
-      "cancelAll": "Cancelar todo",
-      "clear": "Claro",
-      "download": "Guardar convertido",
-      "downloadSource": "Guardar original",
-      "sourceDownloadExpired": "La fuente ha caducado o no está disponible. Vuelve a cargar la URL de YouTube.",
-      "sourceDownloadFailed": "No se pudo descargar el original. Comprueba la conexión y vuelve a cargar la fuente.",
-      "retry": "Rever",
-      "cancel": "Cancelar",
-      "remove": "Quitar",
-      "sourceValue": "Fuente ({value})",
-      "mono": "Mononucleosis infecciosa",
-      "stereo": "Estéreo",
-      "targetWaitingForFiles": "Agregue un archivo de audio compatible para verificar el destino de salida seleccionado.",
-      "targetCheckingMessage": "Comprobando si este navegador admite el destino de salida seleccionado.",
-      "targetReadyMessage": "El destino de salida seleccionado está disponible en este navegador.",
-      "targetAvailability": "{available, number} archivos están disponibles para conversión; {unavailable, number} no está disponible con esta configuración.",
-      "engineLoading": "Cargando el motor de audio {asset}.",
-      "engineVerifying": "Verificando el motor de audio {asset}.",
-      "engineLoadFailed": "No se pudo cargar el motor de audio {asset}.",
-      "capacityExceeded": "No se agregaron {count, number} archivos. La cola puede contener hasta {max, number} archivos.",
-      "statusInspectionQueued": "Esperando inspección",
-      "statusInspecting": "inspeccionando",
-      "statusReady": "Listo",
-      "statusQueued": "En cola",
-      "statusQueuedAvailability": "{converting, number} archivos en cola para conversión; {unavailable, number} siguen sin estar disponibles.",
-      "statusConverting": "Mudado",
-      "statusConvertingAvailability": "Convirtiendo archivos {converting, number}; {unavailable, number} siguen sin estar disponibles.",
-      "statusComplete": "Completo",
-      "statusCompleteAvailability": "{converted, number} archivos convertidos; {unavailable, number} siguen sin estar disponibles.",
-      "statusBatchResult": "Ejecución finalizada: {eligible, number} elegible, {attempted, number} intentado, {succeeded, number} exitoso, {failed, number} fallido, {unavailable, number} no disponible.",
-      "statusUnsupported": "No compatible",
-      "statusError": "error",
-      "statusCancelled": "Cancelado",
-      "unsupportedInput": "Este archivo no es una entrada de audio compatible.",
-      "unsupportedCodec": "Este navegador no puede decodificar el códec de audio de este archivo.",
-      "inspectionFailed": "No se pudo inspeccionar el archivo. Intentar otra vez.",
-      "inspectionInconclusive": "El navegador no pudo identificar este audio dentro del límite de lectura segura. Pruebe con otro archivo o formato.",
-      "outputUnsupported": "La configuración de salida seleccionada no es compatible con este navegador.",
-      "outputProbeFailed": "No se pudo comprobar el soporte de salida. Intentar otra vez.",
-      "outputEngineUnavailable": "No se pudo iniciar el motor de ejecución para {preset}. Verifique la política de red o de activos y vuelva a intentarlo.",
-      "outputChannelsUnsupported": "Esta salida admite {minimum, number}–{maximum, number} canales de origen, pero este archivo tiene {actual, number}. Los canales se conservan y no se mezclan.",
-      "sourceInspectionMissing": "No se pudo identificar el recuento de canales de origen o la frecuencia de muestreo. Elija un archivo con metadatos de audio legibles.",
-      "outputConfigurationUnavailable": "El formato seleccionado y la configuración de codificación no forman una configuración de salida disponible.",
-      "preserveSourceRateUnsupported": "Preservar fuente no puede usar {sourceRate} para esta salida. Tarifas permitidas: {allowed}.",
-      "sourceResamplingRateUnsupported": "Esta fuente {sourceRate} está fuera del rango de remuestreo ({minimum}–{maximum}). Sólo puede pasar a una salida compatible.",
-      "targetResamplingRateUnsupported": "El objetivo {targetRate} seleccionado está fuera del rango de remuestreo ({minimum}–{maximum}).",
-      "automaticRateUnavailable": "Automático no puede elegir una tarifa válida para esta fuente {sourceRate}. Tasas de salida permitidas: {allowed}.",
-      "presetRateUnsupported": "Esta salida no admite {targetRate}. Tarifas permitidas: {allowed}.",
-      "conversionFailed": "La conversión de audio falló.",
-      "conversionStorageLimitExceeded": "Este navegador no puede almacenar el resultado esperado en el almacenamiento temporal local. Elija un formato más pequeño o comprimido, o vuelva a intentarlo en un navegador que admita salidas locales de gran tamaño.",
-      "conversionTargetSizeLimitExceeded": "El formato de salida seleccionado no puede representar un archivo de este tamaño. Elija otro formato o reduzca la frecuencia de muestreo, la profundidad de bits o el número de canales.",
-      "cancelledMessage": "La conversión fue cancelada.",
-      "sourceSummary": "{container} · {sampleRate} · {channels} · {bitDepth}",
-      "outputSummary": "{preset} · {size}",
-      "progressLabel": "{phase} · {progress, number}%",
-      "phasePrepare": "Preparante",
-      "phaseDecode": "Descodificación",
-      "phaseEncode": "Codificación",
-      "phaseFinalize": "Finalizando",
-      "bytes": "{count, number} bytes",
-      "storageOpfs": "Almacenamiento privado del navegador",
-      "storageMemory": "Memoria del navegador",
-      "metadataTitle": "Transcodificador de audio",
-      "metadataDescription": "Convierte audio en tu navegador. Los archivos nunca salen de su dispositivo.",
-      "notices": "Licencias de código abierto"
-    },
-    "hwp": {
-      "title": "Editor HWP",
-      "metadataDescription": "Abre, edita y guarda documentos HWP y HWPX en tu navegador.",
-      "description": "Usa el menú Archivo del editor para abrir y guardar archivos HWP o HWPX. Los documentos se procesan en este dispositivo sin subirlos.",
-      "loading": "Cargando editor…",
-      "error": "No se pudo cargar el editor. Inténtalo de nuevo.",
-      "retry": "Reintentar",
-      "metadataTitle": "Editor HWP"
-    }
-  },
   "myMetadata": {
     "description": "{title} página para su cuenta en {siteName}."
   },
   "fileManager": {
+    "pagination": {
+      "end": "Fin de los resultados"
+    },
+    "selectionUnavailableDescription": "Este archivo no se puede agregar. Presiona Enter para obtener una vista previa.",
     "title": "Archivos",
     "description": "Cargue, organice, inspeccione y reutilice archivos en todo el sitio.",
     "root": "Archivos",
@@ -5396,9 +5120,9 @@
     "selectAll": "Seleccionar todos los artículos",
     "selectItem": "Seleccione {name}",
     "sortBy": "Ordenar por {name}",
-    "selectedCount": "{count, plural, one {# elemento seleccionado} other {# elementos seleccionados}}",
-    "itemCount": "{count, plural, one {# elemento} other {# elementos}}",
-    "searchResultCount": "Se encontraron {count} resultados",
+    "selectedCount": "{count, plural, one {# elemento seleccionado} many {# elementos seleccionados} other {# elementos seleccionados}}",
+    "itemCount": "{count, plural, one {# elemento} many {# elementos} other {# elementos}}",
+    "searchResultCount": "{count, plural, one {Se encontró # resultado} many {Se encontraron # resultados} other {Se encontraron # resultados}}",
     "uploadProgress": "Subiendo {percentage}%",
     "types": {
       "all": "Todos los tipos",
@@ -5484,9 +5208,7 @@
       "move-files": {
         "title": "Mover archivos"
       },
-      "targetFolderId": "ID de la carpeta de destino",
       "extensionSeparate": "La extensión .{extension} se mantiene por separado.",
-      "rootWhenEmpty": "Déjelo vacío para pasar a la raíz.",
       "delete": {
         "title": "Eliminar",
         "folder": "¿Eliminar esta carpeta y todos los archivos no utilizados que se encuentran debajo de ella?",
@@ -5496,14 +5218,26 @@
         "byDomain": "Por dominio: {summary}",
         "more": "y {count} más. Abra los detalles del archivo para revisar la lista completa."
       }
+    },
+    "viewSettings": {
+      "title": "Ajustes de vista",
+      "iconSize": "Tamaño de iconos",
+      "spacing": "Espacio entre elementos",
+      "columns": "Columnas",
+      "auto": "Automático",
+      "small": "Pequeño",
+      "medium": "Mediano",
+      "large": "Grande",
+      "compact": "Compacto",
+      "standard": "Estándar",
+      "comfortable": "Amplio",
+      "reset": "Restablecer vista"
     }
   },
   "fileDownloadAccess": {
     "editor": {
       "sectionTitle": "Acceso de descarga",
-      "sectionDescription": "Controla quién puede descargar el archivo original.",
       "loading": "Cargando acceso de descarga…",
-      "audienceLabel": "Descargar audiencia",
       "audiences": {
         "disabled": {
           "label": "Desactivado",
@@ -5522,15 +5256,10 @@
           "description": "Solo los usuarios de las audiencias seleccionadas pueden descargar este archivo."
         }
       },
-      "segmentsLabel": "Audiencias",
-      "segmentsDescription": "Seleccione uno o más segmentos de audiencia existentes.",
-      "segmentsPlaceholder": "Seleccionar audiencias",
       "segmentsLoadError": "La política se cargó, pero no se pudieron cargar las audiencias.",
       "segmentsEmpty": "No hay segmentos de audiencia disponibles.",
       "restrictedWithoutAudience": "Esta política restringida no tiene audiencia. Las descargas se niegan a todos hasta que seleccione al menos una audiencia.",
-      "segmentRequiresSubscription": "{name} (se requiere suscripción al boletín)",
       "additionalSelected": "{count} más seleccionados",
-      "loadMoreSegments": "Cargar más audiencias",
       "loadError": "No se pudo cargar el acceso de descarga.",
       "saveError": "No se pudo guardar el acceso de descarga.",
       "fileRequired": "Guarde el archivo antes de configurar el acceso a la descarga."
@@ -5552,5 +5281,63 @@
     "empty": "Ingresa el código del diagrama",
     "invalid": "Diagrama no válido",
     "loading": "Generando…"
+  },
+  "errorPage": {
+    "titles": {
+      "400": "Solicitud no válida",
+      "401": "Debes iniciar sesión",
+      "403": "Acceso denegado",
+      "404": "Página no encontrada",
+      "408": "La solicitud agotó el tiempo de espera",
+      "409": "La solicitud entra en conflicto con el estado actual",
+      "410": "Esta página ya no está disponible",
+      "413": "La solicitud es demasiado grande",
+      "422": "No se puede procesar la solicitud",
+      "429": "Demasiadas solicitudes",
+      "500": "algo salió mal",
+      "501": "Esta solicitud no es compatible",
+      "502": "Falló un servicio externo",
+      "503": "Servicio temporalmente no disponible",
+      "504": "La respuesta del servicio agotó el tiempo de espera"
+    },
+    "actions": {
+      "goHome": "Ir a casa",
+      "tryAgain": "Inténtalo de nuevo",
+      "login": "Volver a iniciar sesión"
+    }
+  },
+  "localBackups": {
+    "title": "Copias de seguridad locales",
+    "description": "Cambios sin guardar de pestañas cerradas en este dispositivo. Abre el editor para recuperarlos. Las copias caducan a los 30 días y se eliminan al cerrar sesión.",
+    "empty": "No hay copias de seguridad locales que recuperar. Los cambios de las pestañas abiertas no se muestran aquí.",
+    "unavailable": "Las copias de seguridad locales requieren almacenamiento del navegador y Web Locks en este dispositivo.",
+    "loading": "Buscando copias de seguridad locales…",
+    "error": "No se pudo completar esta acción. Actualiza la lista e inténtalo de nuevo.",
+    "refresh": "Actualizar",
+    "lastChanged": "Último cambio {time}",
+    "open": "Abrir editor",
+    "discard": "Descartar",
+    "openLabel": "Abrir editor: {kind} {id}, {locale}",
+    "discardLabel": "Descartar: {kind} {id}, {locale}",
+    "discardTitle": "¿Descartar la copia de seguridad local?",
+    "discardDescription": "Estos cambios sin guardar se eliminarán permanentemente de este dispositivo. El contenido guardado no se verá afectado.",
+    "kinds": {
+      "post": "Publicación",
+      "page": "Página",
+      "work": "Trabajo",
+      "campaign": "Campaña",
+      "email-template": "Plantilla de correo electrónico",
+      "email-layout": "Diseño de correo electrónico",
+      "terms-history": "Términos",
+      "privacy-history": "Política de privacidad",
+      "artist": "Artista",
+      "release": "Lanzamiento",
+      "label": "Etiqueta",
+      "form": "Formulario",
+      "map-theme": "Tema del mapa",
+      "program-event": "Evento",
+      "menu": "Menú",
+      "post-series": "Serie de publicaciones"
+    }
   }
 }

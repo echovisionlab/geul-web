@@ -1,5 +1,6 @@
-import { siGithub } from 'simple-icons';
 import { useLocale } from 'next-intl';
+// Catalog-free identity marks keep the social-link platform catalog out of the login route.
+import { SocialIdentityIcon } from '@/components/core/Social/SocialIdentityIcon';
 import type { AuthProvider } from '@/features/auth/providers';
 import { getKratosCsrfToken, type KratosBrowserFlow } from './kratos-flow';
 import { AuthActionButton } from './ui/AuthActionButton';
@@ -8,18 +9,6 @@ const PROVIDERS = ['google', 'github'] as const satisfies readonly AuthProvider[
 
 export function serializeAuthTransientPayload(locale: string): string {
   return JSON.stringify({ preferred_locale: locale.trim() });
-}
-
-function ProviderLogo({ provider }: { provider: AuthProvider }) {
-  if (provider === 'google') {
-    return <img src="/providers/google-g-logo.svg" alt="" width={18} height={18} aria-hidden="true" />;
-  }
-
-  return (
-    <svg viewBox="0 0 24 24" width={16} height={16} aria-hidden="true" focusable="false">
-      <path d={siGithub.path} fill="currentColor" />
-    </svg>
-  );
 }
 
 export function getAvailableAuthProviders(flow: KratosBrowserFlow): AuthProvider[] {
@@ -58,7 +47,7 @@ export function SocialAuthButtons({
       <input type="hidden" name="transient_payload" value={serializeAuthTransientPayload(locale)} />
       <AuthActionButton
         type="submit"
-        leftSection={<ProviderLogo provider={provider} />}
+        leftSection={<SocialIdentityIcon platform={provider} colorMode="brand" size="md" />}
         tone="neutral"
         emphasis="medium"
         disabled={disabled && submittingProvider !== provider}

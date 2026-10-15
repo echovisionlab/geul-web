@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import type { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { useUpload } from '@/lib/hooks/useUpload';
 import type { UploadType } from '@/lib/types/upload/model';
 import { createClientLogger } from '@/lib/utils/client-logger';
@@ -37,7 +37,7 @@ export function useImageAssetUpload({
     async (blob: Blob) => {
       setUploadProgress(0);
       if (!enabled) {
-        notifications.show({ message: disabledMessage, color: 'red' });
+        notifications.show({ message: disabledMessage, tone: 'danger' });
         return;
       }
 
@@ -55,7 +55,7 @@ export function useImageAssetUpload({
         });
         notifications.show({
           message: error instanceof Error ? error.message : uploadFailedMessage,
-          color: 'red',
+          tone: 'danger',
         });
       } finally {
         setUploadProgress(0);

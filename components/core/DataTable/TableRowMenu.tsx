@@ -1,7 +1,6 @@
 'use client';
 
-import type { MouseEvent, ReactNode } from 'react';
-import Link from '../Navigation';
+import { Fragment, type MouseEvent, type ReactNode } from 'react';
 import { IconDots } from '@tabler/icons-react';
 import { DropdownMenu } from '../DropdownMenu';
 import { IconButton } from '../IconButton';
@@ -15,7 +14,8 @@ export interface TableRowMenuItem {
   onClick?: () => void;
   /** Link href - if provided, item will be rendered as a Link */
   href?: string;
-  color?: string;
+  /** Core action tone; `danger` marks the destructive group, separated by a divider. */
+  tone?: ControlTone;
   disabled?: boolean;
 }
 
@@ -24,25 +24,6 @@ export interface TableRowMenuProps {
   items: TableRowMenuItem[];
   /** Required aria-label for the menu trigger button */
   'aria-label': string;
-}
-
-function resolveItemTone(color: string | undefined): ControlTone | undefined {
-  switch (color) {
-    case 'red':
-      return 'danger';
-    case 'orange':
-    case 'yellow':
-      return 'warning';
-    case 'green':
-    case 'teal':
-      return 'positive';
-    case 'blue':
-      return 'accent';
-    case 'gray':
-      return 'neutral';
-    default:
-      return undefined;
-  }
 }
 
 export function TableRowMenu({ items, 'aria-label': ariaLabel }: TableRowMenuProps) {
@@ -54,30 +35,26 @@ export function TableRowMenu({ items, 'aria-label': ariaLabel }: TableRowMenuPro
     event.stopPropagation();
   };
 
-  // Find index of first destructive item (red color) for divider
-  const destructiveIndex = items.findIndex((item) => item.color === 'red');
+  // The first destructive item starts a divided group.
+  const destructiveIndex = items.findIndex((item) => item.tone === 'danger');
 
   return (
     <DropdownMenu>
       <DropdownMenu.Target>
         <IconButton emphasis="low" aria-label={ariaLabel} onMouseDown={stopRowClick} onClick={stopRowClick}>
-          <IconDots size={16} />
+          <IconDots />
         </IconButton>
       </DropdownMenu.Target>
       <DropdownMenu.Dropdown onMouseDown={stopRowClick} onClick={stopRowClick}>
         {items.map((item, index) => (
-          <div key={item.label}>
+          <Fragment key={item.label}>
             {index === destructiveIndex && destructiveIndex > 0 && <DropdownMenu.Divider />}
             {item.href ? (
               <DropdownMenu.Item
-                component={Link}
                 href={item.href}
                 icon={item.icon}
-                onClick={(event) => {
-                  stopRowClick(event);
-                  item.onClick?.();
-                }}
-                tone={resolveItemTone(item.color)}
+                onClick={item.onClick}
+                tone={item.tone}
                 disabled={item.disabled}
                 aria-label={item.label}
               >
@@ -86,18 +63,15 @@ export function TableRowMenu({ items, 'aria-label': ariaLabel }: TableRowMenuPro
             ) : (
               <DropdownMenu.Item
                 icon={item.icon}
-                onClick={(event) => {
-                  stopRowClick(event);
-                  item.onClick?.();
-                }}
-                tone={resolveItemTone(item.color)}
+                onClick={item.onClick}
+                tone={item.tone}
                 disabled={item.disabled}
                 aria-label={item.label}
               >
                 {item.label}
               </DropdownMenu.Item>
             )}
-          </div>
+          </Fragment>
         ))}
       </DropdownMenu.Dropdown>
     </DropdownMenu>

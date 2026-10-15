@@ -9,7 +9,6 @@ const meta = {
   args: {
     label: 'Language',
     data: ['English', 'Korean', 'Japanese'],
-    w: 360,
   },
 } satisfies Meta<typeof NativeSelect>;
 

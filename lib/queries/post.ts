@@ -1,3 +1,5 @@
+import { postSnapshotContent } from './editor-snapshot';
+import type { EditorSnapshot } from '@/features/editor/editor-snapshot';
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { create } from '@bufbuild/protobuf';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
@@ -417,6 +419,7 @@ export async function getPostForEdit(idOrSlug: string) {
     return {
       id: post.id,
       title: post.title,
+      sourceLocale: post.sourceLocale,
       slug: post.slug,
       summary: post.summary,
       status: protoStatusToString(post.status),
@@ -469,5 +472,30 @@ export async function getPostAllowedActions(postId: string): Promise<PostAction[
       return [];
     }
     throw err;
+  }
+}
+
+export async function getPostEditorSnapshot(postId: string, locale: string): Promise<EditorSnapshot | null> {
+  try {
+    const response = await (await createPostClient()).getPostEditorDocument({ postId, locale });
+    return {
+      locale: response.locale,
+      sourceLocale: response.sourceLocale,
+      localeExists: response.localeExists,
+      document: response.document,
+      documentRevision: response.documentRevision,
+      targetRevision: response.targetRevision,
+      editable: response.editable,
+      title: response.title ?? '',
+      summary: response.summary ?? '',
+      blockMedia: response.blockMedia,
+      blocks: response.document ? materializeLocalizedRichTextTree(response.document) : undefined,
+      content: response.document ? postSnapshotContent(response.document) : undefined,
+    };
+  } catch (error) {
+    if (isConnectErrorCode(error, Code.NotFound, Code.PermissionDenied)) {
+      return null;
+    }
+    throw error;
   }
 }

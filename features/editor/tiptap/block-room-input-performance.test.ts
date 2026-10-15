@@ -7,7 +7,10 @@ import {
   LocalizedRichTextDocumentSchema,
   LocalizedPageDocumentSchema,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
-import { hydrateCanonicalBlockRoom } from '@echovisionlab/geul-common/collaboration/block-room-codec';
+import {
+  getBlockRoomCollaborativeText,
+  hydrateCanonicalBlockRoom,
+} from '@echovisionlab/geul-common/collaboration/block-room-codec';
 import * as Y from 'yjs';
 import { afterAll, expect, it } from 'vitest';
 import { writeFileSync } from 'node:fs';
@@ -171,3 +174,70 @@ it('measures Page observer fanout with a fixed total of 500 paragraphs', () => {
     room.destroy();
   }
 }, 60000);
+
+it('measures remote peer edits projected into the Post editor', () => {
+  for (const n of [100, 500, 1000]) {
+    for (const mode of ['observer only', 'editor projection'] as const) {
+      const room = new Y.Doc();
+      hydrateCanonicalBlockRoom(
+        room,
+        'post',
+        'en',
+        fromJson(LocalizedRichTextDocumentSchema, {
+          blockCatalogFingerprint: contentBlockCatalogFingerprint,
+          profile: 'RICH_TEXT_PROFILE_POST',
+          locale: 'en',
+          base: { nodes: nodes(0, n) },
+          localeOverlay: { locale: 'en', blocks: overlays(0, n) },
+        } as JsonValue),
+        [],
+      );
+      const peer = new Y.Doc();
+      Y.applyUpdate(peer, Y.encodeStateAsUpdate(room));
+      const bridge = createBlockRoomProseMirrorBridge({ document: room, documentType: 'post', locale: 'en' });
+      const controller = createPostBlockRoomTiptapController(bridge);
+      const editor =
+        mode === 'editor projection'
+          ? new Editor({
+              element: document.createElement('div'),
+              extensions: [...createTiptapWireExtensions(), controller.extension],
+              content: controller.initialContent,
+            })
+          : null;
+      const disconnect = editor ? controller.connect(editor) : bridge.observe(() => undefined);
+      // Edit a middle paragraph so a whole-document diff cannot stop at the first block.
+      const target = id(Math.floor(n / 2));
+      const text = getBlockRoomCollaborativeText(peer, {
+        id: target,
+        family: 'rich_text',
+        locale: true,
+        path: 'content[0].text.text',
+      });
+      const samples: number[] = [];
+      for (let i = 0; i < 25; i++) {
+        const before = Y.encodeStateVector(room);
+        peer.transact(() => text.insert(0, 'x'), 'peer');
+        const update = Y.encodeStateAsUpdate(peer, before);
+        const start = performance.now();
+        Y.applyUpdate(room, update, 'remote-provider');
+        if (i >= 5) {
+          samples.push(performance.now() - start);
+        }
+      }
+      if (editor) {
+        expect(editor.getText()).toContain(`${'x'.repeat(25)}${'a'.repeat(80)}`);
+      }
+      results.push({
+        path: `Post remote ${mode}`,
+        paragraphs: n,
+        samples: samples.length,
+        ...stats(samples),
+        projection: { ...controller.projectionStats },
+      });
+      disconnect();
+      editor?.destroy();
+      room.destroy();
+      peer.destroy();
+    }
+  }
+}, 120000);

@@ -1,15 +1,24 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
-import { useMemo, useState } from 'react';
+import {
+  LayoutInset as AppLayoutInset,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+
+import { useId, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from '@/components/core/Navigation';
-import { IconFilter, IconSearch } from '@tabler/icons-react';
+import { IconFilter } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Box, Divider, Group, Stack, Text } from '@mantine/core';
+
 import { LabelBadge } from '@/components/core/Badge';
 import { IconButton } from '@/components/core/IconButton';
-import { TextInput } from '@/components/core/Input';
-import { DropdownMenu } from '@/components/core/DropdownMenu';
+import { SearchInput } from '@/components/core/Input';
+// View pages load menu code on first interaction.
+import { OnDemandDropdownMenu as DropdownMenu } from '@/components/core/DropdownMenu/OnDemandDropdownMenu';
 import { WORK_TYPES, type WorkType } from '@/lib/types/work/model';
 import classes from './page.module.css';
 
@@ -30,6 +39,7 @@ export function ArtistWorkSection({ works }: WorksSectionProps) {
   const tCommonEntities = useTranslations('common.entities');
   const tCommonPlaceholders = useTranslations('common.placeholders');
   const tWorkTypes = useTranslations('works.types');
+  const sectionId = useId();
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
 
@@ -57,54 +67,61 @@ export function ArtistWorkSection({ works }: WorksSectionProps) {
   };
 
   return (
-    <Box>
-      <Group justify="space-between" align="center" mb="xs">
-        <Text className={classes.sectionHeader} mb={0}>
-          {tCommonEntities('works')}
-        </Text>
-        <Group gap="xs">
-          <TextInput
-            placeholder={tCommonPlaceholders('search')}
-            size="xs"
-            leftSection={<IconSearch size={14} />}
-            value={search}
-            onChange={(e) => setSearch(e.currentTarget.value)}
-            style={{ width: 160 }}
-          />
-          <DropdownMenu placement="bottom-end" arrow>
-            <DropdownMenu.Target>
-              <IconButton
-                emphasis={typeFilter ? 'strong' : 'low'}
-                size="sm"
-                tone="neutral"
-                aria-label="Filter works by type"
-              >
-                <IconFilter size={16} />
-              </IconButton>
-            </DropdownMenu.Target>
-            <DropdownMenu.Dropdown>
-              <DropdownMenu.Item onClick={() => setTypeFilter(null)} selected={!typeFilter}>
-                {t('allTypes')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Divider />
-              {WORK_TYPES.map((type) => (
-                <DropdownMenu.Item key={type} onClick={() => setTypeFilter(type)} selected={typeFilter === type}>
-                  {getWorkTypeLabel(type)}
+    <div>
+      <DsLayoutInset blockEnd="xs">
+        <DsLayoutInline justify="between" align="center">
+          <AppLayoutInset blockEnd="sm">
+            <DsText size="sm" font="mono" weight="medium" tone="muted" role="heading" aria-level={2} id={sectionId}>
+              {tCommonEntities('works')}
+            </DsText>
+          </AppLayoutInset>
+          <DsLayoutInline gap="xs">
+            <div style={{ width: 160 }}>
+              <SearchInput
+                aria-label={tCommonPlaceholders('search')}
+                aria-describedby={sectionId}
+                placeholder={tCommonPlaceholders('search')}
+                size="xs"
+                value={search}
+                onChange={(e) => setSearch(e.currentTarget.value)}
+              />
+            </div>
+            <DropdownMenu placement="bottom-end" arrow>
+              <DropdownMenu.Target>
+                <IconButton
+                  emphasis={typeFilter ? 'medium' : 'low'}
+                  size="sm"
+                  tone="neutral"
+                  aria-label="Filter works by type"
+                >
+                  <IconFilter size={16} />
+                </IconButton>
+              </DropdownMenu.Target>
+              <DropdownMenu.Dropdown>
+                <DropdownMenu.Item onClick={() => setTypeFilter(null)} selected={!typeFilter}>
+                  {t('allTypes')}
                 </DropdownMenu.Item>
-              ))}
-            </DropdownMenu.Dropdown>
-          </DropdownMenu>
-        </Group>
-      </Group>
-      <Divider mb="md" />
-      <Stack gap={0}>
+                <DropdownMenu.Divider />
+                {WORK_TYPES.map((type) => (
+                  <DropdownMenu.Item key={type} onClick={() => setTypeFilter(type)} selected={typeFilter === type}>
+                    {getWorkTypeLabel(type)}
+                  </DropdownMenu.Item>
+                ))}
+              </DropdownMenu.Dropdown>
+            </DropdownMenu>
+          </DsLayoutInline>
+        </DsLayoutInline>
+      </DsLayoutInset>
+
+      <DsLayoutStack gap="none">
         {filteredWorks.map((work, index) => {
           const imageUrl = work.featured_image_url;
           return (
             <Link
               key={work.id}
               href={`/works/${work.slug || work.id}`}
-              className={classes.workRow}
+              appearance="row"
+              separator={index === 0 ? 'none' : 'start'}
               data-first={index === 0 || undefined}
             >
               <div className={classes.workThumb}>
@@ -117,26 +134,26 @@ export function ArtistWorkSection({ works }: WorksSectionProps) {
                     style={{ objectFit: 'cover' }}
                   />
                 ) : (
-                  <Text size="sm" fw={600} c="dimmed">
+                  <DsText size="sm" weight="strong" tone="secondary">
                     {(work.title || '?').charAt(0).toUpperCase()}
-                  </Text>
+                  </DsText>
                 )}
               </div>
-              <Text size="sm" fw={500} lineClamp={1} style={{ flex: 1 }}>
+              <DsText size="sm" weight="medium" lines={1} flexible>
                 {work.title}
-              </Text>
-              <LabelBadge appearance="soft" size="xs" style={{ flexShrink: 0 }}>
-                {getWorkTypeLabel(work.type)}
-              </LabelBadge>
+              </DsText>
+              <LabelBadge appearance="soft">{getWorkTypeLabel(work.type)}</LabelBadge>
             </Link>
           );
         })}
         {filteredWorks.length === 0 && (
-          <Text size="sm" c="dimmed" ta="center" py="md">
-            {t('empty')}
-          </Text>
+          <DsLayoutInset block="md">
+            <SupportingText tone="secondary" align="center">
+              {t('empty')}
+            </SupportingText>
+          </DsLayoutInset>
         )}
-      </Stack>
-    </Box>
+      </DsLayoutStack>
+    </div>
   );
 }

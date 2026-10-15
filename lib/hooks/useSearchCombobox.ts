@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useCombobox } from '@mantine/core';
+import { useInputCombobox } from '@/components/core/Input';
 import { useDebouncedValue } from '@mantine/hooks';
 
 export interface UseSearchComboboxOptions {
@@ -15,9 +15,7 @@ export function useSearchCombobox(options?: UseSearchComboboxOptions) {
   const [search, setSearch] = useState('');
   const [debouncedSearch] = useDebouncedValue(search, debounceMs);
 
-  const combobox = useCombobox({
-    onDropdownClose: () => combobox.resetSelectedOption(),
-  });
+  const combobox = useInputCombobox();
 
   const isEnabled = debouncedSearch.length >= minQueryLength;
 

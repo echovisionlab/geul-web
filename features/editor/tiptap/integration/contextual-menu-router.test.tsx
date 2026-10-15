@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { Editor } from '@tiptap/core';
 import { TextSelection } from '@tiptap/pm/state';
 import { CellSelection } from '@tiptap/pm/tables';
@@ -93,9 +94,9 @@ describe('Tiptap contextual menu router table selection boundary', () => {
     const root = createRoot(container);
     await act(async () => {
       root.render(
-        <MantineProvider env="test">
+        <DesignSystemProvider forceColorScheme="light">
           <TiptapContextualMenuRouter editor={mounted.editor} selectionLabels={selectionLabels} />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await refresh();
     });
@@ -182,13 +183,13 @@ describe('Tiptap contextual menu router table selection boundary', () => {
 
     await act(async () => {
       root.render(
-        <MantineProvider env="test">
+        <DesignSystemProvider forceColorScheme="light">
           <TiptapContextualMenuRouter
             editor={mounted.editor}
             selectionLabels={selectionLabels}
             allowTableMenu={false}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await refresh();
     });

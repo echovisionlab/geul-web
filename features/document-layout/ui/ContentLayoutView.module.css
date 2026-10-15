@@ -1,15 +1,16 @@
 .root {
-  --content-controls-space: 4.5rem;
+  --_document-layout-controls-space: 4.5rem;
 
   position: relative;
   width: 100%;
   min-width: 0;
 }
 
+/* Document controls end at the document box: left of (LTR) the space a table of contents reserves. */
 .controls {
   position: absolute;
   inset-block-start: 0;
-  inset-inline-end: 0;
+  inset-inline-end: var(--_table-of-contents-inset-end, 0px);
   z-index: 6;
 }
 
@@ -38,14 +39,21 @@
   min-width: 0;
 }
 
+/* The layout owns the document chrome → body relationship for every consumer: one shared gap
+   after a flow or pinned title/hero, on screen and paper alike. */
 .flowChrome {
   position: relative;
   z-index: 1;
+  margin-block-end: var(--geul-spacing-md);
+}
+
+.pinnedChrome + .body {
+  padding-block-start: var(--geul-spacing-md);
 }
 
 @media print {
   .root {
-    --content-controls-space: 0px;
+    --_document-layout-controls-space: 0px;
   }
 
   .root,

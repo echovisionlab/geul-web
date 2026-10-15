@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import enMessages from '@/messages/en.json';
 import { EditorSessionExpiredDialog } from './EditorSessionExpiredDialog';
 
@@ -41,9 +42,9 @@ describe('EditorSessionExpiredDialog', () => {
     act(() => {
       root.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider env="test">
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <EditorSessionExpiredDialog opened={false} onConfirm={vi.fn()} />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -51,14 +52,14 @@ describe('EditorSessionExpiredDialog', () => {
     expect(document.body.querySelector('[role="alertdialog"]')).toBeNull();
   });
 
-  it('renders a localized non-dismissible login action', () => {
+  it('renders a localized non-dismissible login action', async () => {
     const onConfirm = vi.fn();
     act(() => {
       root.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <MantineProvider env="test">
+          <DesignSystemProvider locale="en" forceColorScheme="light">
             <EditorSessionExpiredDialog opened onConfirm={onConfirm} />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });
@@ -69,6 +70,7 @@ describe('EditorSessionExpiredDialog', () => {
     expect(dialog?.querySelectorAll('button')).toHaveLength(1);
 
     act(() => dialog?.querySelector<HTMLButtonElement>('button')?.click());
-    expect(onConfirm).toHaveBeenCalledOnce();
+    // Unsaved edits are written to this device before leaving for sign-in.
+    await vi.waitFor(() => expect(onConfirm).toHaveBeenCalledOnce());
   });
 });

@@ -1,82 +1,71 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { saveFailureFromAction } from '@/lib/editor/save-failure';
+import { useCallback } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useDebouncedCallback } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { updateCampaignNameAction } from '@/lib/actions/campaign';
+import type { CampaignFields } from '@/lib/collab/schemas/campaign-fields.schema';
+import type { AuthoritativeConfiguration } from '@/lib/editor/useAuthoritativeConfiguration';
+import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
+import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
 
 const TITLE_DEBOUNCE_MS = 500;
 
-interface CampaignNameSource {
-  name: string;
-  subject?: string;
-}
+export type CampaignEditorConfiguration = CampaignFields & { name: string };
 
 interface Options {
   campaignId: string;
-  campaign: CampaignNameSource | null | undefined;
+  configuration: AuthoritativeConfiguration<CampaignEditorConfiguration>;
+  refetchConfiguration: () => Promise<void>;
   editable: boolean;
 }
 
-export function useCampaignName({ campaignId, campaign, editable }: Options) {
+export function useCampaignName({ campaignId, configuration, refetchConfiguration, editable }: Options) {
   const queryClient = useQueryClient();
-  const [name, setName] = useState('');
-
-  useEffect(() => {
-    if (campaign) {
-      setName(campaign.name || campaign.subject || '');
-    }
-  }, [campaign]);
-
   const updateName = useMutation({
-    mutationFn: (nextName: string) => updateCampaignNameAction(campaignId, nextName),
-    onSuccess: (result) => {
-      if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
-        setName(campaign?.name ?? '');
-        void queryClient.invalidateQueries({ queryKey: ['campaigns', campaignId] });
-        void queryClient.invalidateQueries({ queryKey: ['campaigns'] });
-        return;
-      }
-
-      if (result.name !== undefined) {
-        setName(result.name);
-        queryClient.setQueryData<CampaignNameSource | null | undefined>(['campaigns', campaignId], (current) =>
-          current ? { ...current, name: result.name! } : current,
+    mutationFn: (request: { name: string; origin: string }) =>
+      updateCampaignNameAction(campaignId, request.name, request.origin),
+  });
+  const persistDebounced = useDebouncedPatch({
+    document: `campaign:${campaignId}`,
+    scope: campaignId,
+    // Lets a later page (after sign-in) restore an unsaved name from this tab's backup.
+    recoveryKey: 'campaign-name',
+    delay: TITLE_DEBOUNCE_MS,
+    write: async (patch: { name: string }) => {
+      const write = configuration.beginWrite(patch);
+      try {
+        const result = await updateName.mutateAsync({ name: patch.name.trim(), origin: write.origin });
+        if (result.error) {
+          throw saveFailureFromAction({ error: result.error, errorCode: result.errorCode });
+        }
+        const adopted = write.acknowledge(
+          { name: result.name ?? patch.name.trim() },
+          { authoritative: result.name !== undefined },
         );
+        publishEditorEntityChange(`campaign:${campaignId}`, write.origin);
         void queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+        if (!adopted || result.name === undefined) {
+          // A failed refresh must not retry an already committed name write.
+          await refetchConfiguration().catch(() => undefined);
+        }
+      } catch (error) {
+        write.fail();
+        notifications.show({ message: error instanceof Error ? error.message : String(error), tone: 'danger' });
+        throw error;
       }
-    },
-    onError: (error) => {
-      notifications.show({ message: error.message, color: 'red' });
-      setName(campaign?.name ?? '');
-      void queryClient.invalidateQueries({ queryKey: ['campaigns', campaignId] });
-      void queryClient.invalidateQueries({ queryKey: ['campaigns'] });
     },
   });
-
-  const persistDebounced = useDebouncedCallback(
-    (value: string) => {
-      const normalizedName = value.trim();
-      if (!editable || normalizedName === '' || normalizedName === (campaign?.name.trim() ?? '')) {
-        return;
-      }
-      updateName.mutate(normalizedName);
-    },
-    { delay: TITLE_DEBOUNCE_MS, flushOnUnmount: true },
-  );
-
   const changeName = useCallback(
     (value: string) => {
       if (!editable) {
         return;
       }
-      setName(value);
-      persistDebounced(value);
+      configuration.setDraft('name', value);
+      persistDebounced({ name: value });
     },
-    [editable, persistDebounced],
+    [configuration, editable, persistDebounced],
   );
-
-  return { name, changeName, pending: updateName.isPending };
+  return { name: configuration.getConfiguration().name, changeName, pending: updateName.isPending };
 }

@@ -1,7 +1,10 @@
 'use client';
+import { SupportingText } from '@/components/core/Typography';
+
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 
 import { IconMail, IconMailOff } from '@tabler/icons-react';
-import { Stack, Text } from '@mantine/core';
+
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
 
@@ -39,7 +42,7 @@ export function SettingsFormView({
   const StatusIcon = subscribed ? IconMail : IconMailOff;
 
   return (
-    <Stack gap="lg" data-subscription-state={subscribed ? 'subscribed' : 'unsubscribed'}>
+    <DsLayoutStack gap="lg" data-subscription-state={subscribed ? 'subscribed' : 'unsubscribed'}>
       <Alert
         icon={<StatusIcon size={16} aria-hidden />}
         tone={subscribed ? 'positive' : 'neutral'}
@@ -55,25 +58,20 @@ export function SettingsFormView({
         </Alert>
       ) : null}
 
+      <SupportingText tone="secondary">{labels.footer}</SupportingText>
+
       <Button
         type="button"
-        tone={subscribed ? 'neutral' : 'accent'}
+        tone="neutral"
         emphasis={subscribed ? 'medium' : 'strong'}
         leftSection={subscribed ? <IconMailOff size={16} aria-hidden /> : <IconMail size={16} aria-hidden />}
         onClick={() => events.onSubscriptionChange(!subscribed)}
         loading={pending}
         disabled={disabled}
-        styles={{
-          root: { height: 'auto', minHeight: 'var(--button-height)', paddingBlock: 8 },
-          label: { whiteSpace: 'normal', overflow: 'visible', lineHeight: 1.35, textAlign: 'center' },
-        }}
+        labelWrap="wrap"
       >
         {subscribed ? labels.unsubscribe : labels.subscribe}
       </Button>
-
-      <Text size="sm" c="dimmed">
-        {labels.footer}
-      </Text>
-    </Stack>
+    </DsLayoutStack>
   );
 }

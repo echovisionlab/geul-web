@@ -1,21 +1,19 @@
 'use client';
+import { SupportingText } from '@/components/core/Typography';
+import { LayoutInset as DsLayoutInset, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import dynamic from 'next/dynamic';
-import { Group, Pagination, SimpleGrid, Skeleton, Stack, Text } from '@mantine/core';
-import { ContentCard, ContentCardSection } from '@/components/core/Section';
+import { Pagination } from '@/components/core/Display';
 import { listPublishedPosts } from '@/lib/queries/post-browser';
-import { getSlideSize } from '../constants';
 import type { BlockViewProps } from '../types';
 import { parsePostListProps } from './schema';
 import { PostListViewClient } from './ViewClient';
-
-const ListCarousel = dynamic(() => import('../ListCarouselRuntime').then((module) => module.ListCarouselRuntime));
-
+import { PostListSkeleton } from './Skeleton';
 export function PostListView({ props }: BlockViewProps) {
+  const tPagination = useTranslations('dataTable.pagination');
   const p = parsePostListProps(props);
-
   // Parse durable props stored as strings
   const categoryIds = p.categoryIds ? p.categoryIds.split(',').filter(Boolean) : undefined;
   const tagIds = p.tagIds ? p.tagIds.split(',').filter(Boolean) : undefined;
@@ -30,7 +28,6 @@ export function PostListView({ props }: BlockViewProps) {
   const carouselLoop = p.carouselLoop !== 'false';
   const carouselIndicators = p.carouselIndicators !== 'false';
   const [page, setPage] = useState(1);
-
   const { data, isLoading } = useQuery({
     queryKey: [
       'posts',
@@ -49,50 +46,31 @@ export function PostListView({ props }: BlockViewProps) {
         offset: showPagination ? (page - 1) * limit : 0,
       }),
   });
-
   if (isLoading) {
-    const skeletonCards = Array.from({ length: limit }).map((_, i) => (
-      <ContentCard key={i} padding={0} radius={0} withBorder={false} style={{ background: 'transparent' }}>
-        <ContentCardSection style={{ aspectRatio: '16/9' }}>
-          <Skeleton height="100%" />
-        </ContentCardSection>
-        <Stack gap={8} mt={8}>
-          <Skeleton height={20} width="80%" />
-          <Skeleton height={14} width="60%" />
-        </Stack>
-      </ContentCard>
-    ));
-
-    if (layout === 'carousel') {
-      const slideSize = getSlideSize(columns);
-      return (
-        <ListCarousel
-          slideSize={{ base: '100%', sm: columns === 1 ? '100%' : '50%', md: slideSize }}
-          slideGap="md"
-          emblaOptions={{ loop: carouselLoop }}
-          withIndicators={carouselIndicators}
-          className="post-list-block"
-        >
-          {skeletonCards}
-        </ListCarousel>
-      );
-    }
-
     return (
-      <SimpleGrid cols={{ base: 1, sm: 2, md: columns }} spacing="lg" className="post-list-block">
-        {skeletonCards}
-      </SimpleGrid>
+      <PostListSkeleton
+        columns={columns}
+        limit={limit}
+        layout={layout}
+        itemSize={p.itemSize}
+        showImage={p.showFeaturedImage !== 'false'}
+        imageAspectRatio={p.imageAspectRatio}
+        carouselLoop={carouselLoop}
+        carouselIndicators={carouselIndicators}
+      />
     );
   }
-
   if (!data?.posts?.length) {
     return (
-      <Text c="dimmed" ta="center" py="xl" className="post-list-block">
-        No posts found
-      </Text>
+      <div className="post-list-block">
+        <DsLayoutInset block="xl">
+          <SupportingText tone="secondary" align="center">
+            No posts found
+          </SupportingText>
+        </DsLayoutInset>
+      </div>
     );
   }
-
   const content = (
     <PostListViewClient
       posts={data.posts.map((post) => ({
@@ -120,14 +98,24 @@ export function PostListView({ props }: BlockViewProps) {
       parsedProps={p}
     />
   );
-
   return (
     <>
       {content}
       {showPagination && data.pagination.total > limit ? (
-        <Group justify="center" mt="md">
-          <Pagination total={Math.ceil(data.pagination.total / limit)} value={page} onChange={setPage} />
-        </Group>
+        <DsLayoutInset blockStart="md">
+          <DsLayoutInline justify="center">
+            <Pagination
+              total={Math.ceil(data.pagination.total / limit)}
+              value={page}
+              onChange={setPage}
+              labels={{
+                previousPage: tPagination('previousPage'),
+                nextPage: tPagination('nextPage'),
+                page: (page) => tPagination('page', { page }),
+              }}
+            />
+          </DsLayoutInline>
+        </DsLayoutInset>
       ) : null}
     </>
   );

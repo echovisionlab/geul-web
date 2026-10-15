@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { LocaleProvider } from '@/lib/providers/LocaleProvider';
 import type { ColumnDef } from '@/lib/types/common/data-table';
 import type { PaginatedQueryResult } from '@/lib/types/repository/result';
@@ -36,7 +37,7 @@ vi.mock('next-intl', () => ({
   },
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: {
     show: vi.fn(),
   },
@@ -196,9 +197,9 @@ function render(node: React.ReactNode) {
 
   act(() => {
     root?.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <LocaleProvider locale="ko">{node}</LocaleProvider>
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
 }
@@ -350,7 +351,7 @@ describe('ServerDataTableSelectableSection', () => {
     expect(deleteAction).toHaveBeenNthCalledWith(2, 'row-2');
     expect(notifications.show).toHaveBeenCalledWith({
       message: 'Second row failed',
-      color: 'red',
+      tone: 'danger',
     });
     expect(refreshMock).toHaveBeenCalledTimes(1);
     expect(document.body.textContent).not.toContain('2개 선택');
@@ -406,7 +407,7 @@ describe('ServerDataTableSelectableSection', () => {
 
     expect(notifications.show).toHaveBeenCalledWith({
       message: 'First row failed',
-      color: 'red',
+      tone: 'danger',
     });
     expect(refreshMock).not.toHaveBeenCalled();
     expect(document.body.textContent).toContain('2개 선택');

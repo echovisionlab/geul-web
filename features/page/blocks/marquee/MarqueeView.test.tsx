@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { TestProviders } from '@/test/TestProviders';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { MarqueeView } from './MarqueeView';
 import {
   MARQUEE_DEFAULT_ITEM_HEIGHT,
@@ -30,12 +31,17 @@ const baseOptions = {
 
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
+let reduceMotion = false;
+
+beforeEach(() => {
+  reduceMotion = false;
+});
 
 beforeAll(() => {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: vi.fn().mockImplementation((query: string) => ({
-      matches: false,
+      matches: query === '(prefers-reduced-motion: reduce)' && reduceMotion,
       media: query,
       onchange: null,
       addListener: vi.fn(),
@@ -63,9 +69,9 @@ function renderMarqueeView(items: Parameters<typeof MarqueeView>[0]['items']) {
 
   act(() => {
     root?.render(
-      <MantineProvider>
+      <TestProviders>
         <MarqueeView items={items} options={baseOptions} />
-      </MantineProvider>,
+      </TestProviders>,
     );
   });
 }
@@ -111,9 +117,9 @@ function setElementRect(element: Element, rect: Pick<DOMRect, 'width' | 'height'
 describe('MarqueeView', () => {
   it('marks the marquee as a full-width page block', () => {
     const html = renderToStaticMarkup(
-      <MantineProvider>
+      <TestProviders>
         <MarqueeView items={[{ id: 'text-1', text: 'Full width item' }]} options={baseOptions} />
-      </MantineProvider>,
+      </TestProviders>,
     );
 
     expect(html).toContain('class="');
@@ -123,7 +129,7 @@ describe('MarqueeView', () => {
 
   it('applies render variants through data attributes and CSS variables', () => {
     const html = renderToStaticMarkup(
-      <MantineProvider>
+      <TestProviders>
         <MarqueeView
           items={[{ id: 'text-1', text: 'Variant item' }]}
           options={{
@@ -136,15 +142,15 @@ describe('MarqueeView', () => {
             speedPxPerSecond: 8,
           }}
         />
-      </MantineProvider>,
+      </TestProviders>,
     );
 
     expect(html).toContain('data-direction="right"');
     expect(html).toContain('data-pause-on-hover="false"');
     expect(html).toContain('data-logo-scale="fill-height"');
-    expect(html).toContain('--marquee-gap:16px');
-    expect(html).toContain('--marquee-item-height:22px');
-    expect(html).toContain('--marquee-text-size:14px');
+    expect(html).toContain('--_marquee-gap:16px');
+    expect(html).toContain('--_marquee-item-height:22px');
+    expect(html).toContain('--_marquee-text-size:14px');
   });
 
   it('bounds lane group repetition for sparse items without unbounded item cloning', () => {
@@ -170,9 +176,9 @@ describe('MarqueeView', () => {
 
   it('renders text-only items without link affordance when href is absent', () => {
     const html = renderToStaticMarkup(
-      <MantineProvider>
+      <TestProviders>
         <MarqueeView items={[{ id: 'text-1', text: 'No link item' }]} options={baseOptions} />
-      </MantineProvider>,
+      </TestProviders>,
     );
 
     expect(html).toContain('No link item');
@@ -181,7 +187,7 @@ describe('MarqueeView', () => {
 
   it('renders entity links with marquee-level target policy', () => {
     const html = renderToStaticMarkup(
-      <MantineProvider>
+      <TestProviders>
         <MarqueeView
           items={[
             {
@@ -193,7 +199,7 @@ describe('MarqueeView', () => {
           ]}
           options={{ ...baseOptions, linkTarget: 'new-tab' }}
         />
-      </MantineProvider>,
+      </TestProviders>,
     );
 
     expect(html).toContain('href="https://client.example.com"');
@@ -260,16 +266,70 @@ describe('MarqueeView', () => {
 
   it('hides missing-logo items when configured to require logos', () => {
     const html = renderToStaticMarkup(
-      <MantineProvider>
+      <TestProviders>
         <MarqueeView
           items={[{ id: 'client-1', text: 'Missing logo' }]}
           options={{ ...baseOptions, fallbackMode: 'hide' }}
           emptyLabel="No marquee items"
         />
-      </MantineProvider>,
+      </TestProviders>,
     );
 
     expect(html).toContain('No marquee items');
     expect(html).not.toContain('Missing logo');
+  });
+});
+
+describe('Marquee reading and focus order', () => {
+  it('exposes one copy of each item and makes measured or repeated visual clones inert', () => {
+    renderMarqueeView([
+      { id: 'one', text: 'First label', href: '/first' },
+      { id: 'two', text: 'Second label', href: '/second' },
+    ]);
+    const links = [...container!.querySelectorAll<HTMLAnchorElement>('a')];
+    const semanticLinks = links.filter((link) => !link.closest('[aria-hidden="true"]'));
+    expect(semanticLinks.map((link) => link.textContent)).toEqual(['First label', 'Second label']);
+    expect(semanticLinks.map((link) => link.getAttribute('href'))).toEqual(['/first', '/second']);
+    for (const duplicate of links.filter((link) => link.closest('[aria-hidden="true"]'))) {
+      expect(duplicate.closest('[inert]')).not.toBeNull();
+    }
+  });
+});
+
+describe('Marquee motion control', () => {
+  const items = Array.from({ length: 12 }, (_, index) => ({
+    id: `item-${index}`,
+    text: `Readable item ${index + 1}`,
+    href: `/items/${index + 1}`,
+  }));
+
+  it('keeps a persistent pause while exposing every item once and preserves the animated lane for resume', () => {
+    renderMarqueeView(items);
+    const button = container!.querySelector('button')!;
+    const track = container!.querySelector('[data-block-type="marquee"] > div:not([inert])')!;
+    expect(button.textContent).toBe('Pause animation');
+    act(() => button.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+    expect(button.textContent).toBe('Resume animation');
+    expect(container!.querySelector('[data-static="true"]')).not.toBeNull();
+    expect(track.isConnected).toBe(true);
+    const staticLinks = [...container!.querySelectorAll('[data-marquee-static-items] a')];
+    expect(staticLinks.map((link) => link.textContent)).toEqual(items.map((item) => item.text));
+    expect(staticLinks.map((link) => link.getAttribute('href'))).toEqual(items.map((item) => item.href));
+    act(() => button.dispatchEvent(new FocusEvent('blur', { bubbles: true })));
+    expect(container!.querySelector('[data-static="true"]')).not.toBeNull();
+    act(() => button.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+    expect(button.textContent).toBe('Pause animation');
+    expect(track.isConnected).toBe(true);
+    expect(container!.querySelector('[data-marquee-static-items]')).toBeNull();
+  });
+
+  it('provides all items statically by default when motion is reduced', () => {
+    reduceMotion = true;
+    renderMarqueeView(items);
+    expect(container!.querySelector('[data-static="true"]')).not.toBeNull();
+    expect(container!.querySelector('button')).toBeNull();
+    expect(container!.querySelectorAll('[data-marquee-static-items] a')).toHaveLength(items.length);
+    const semanticLinks = [...container!.querySelectorAll('a')].filter((link) => !link.closest('[aria-hidden="true"]'));
+    expect(semanticLinks).toHaveLength(items.length);
   });
 });

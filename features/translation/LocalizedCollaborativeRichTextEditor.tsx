@@ -1,10 +1,12 @@
 'use client';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
+import { useProviderAccessEnded } from '@/lib/collab/useProviderAccessEnded';
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
 import type { Editor } from '@tiptap/core';
-import { Box } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+
+import { notifications } from '@/components/core/Notification';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { useTranslations } from 'next-intl';
@@ -13,6 +15,7 @@ import { MediaFilePanel } from '@/features/editor/components/MediaFilePanel';
 import { MediaIngestDialog, type MediaIngestDialogCloseReason } from '@/features/editor/components/MediaIngestDialog';
 import { MediaIngestOverlay } from '@/features/editor/components/MediaIngestOverlay';
 import { EditorMediaIngestProvider } from '@/features/editor/contexts/EditorMediaIngestContext';
+import { useOptionalEditorMediaServices } from '@/features/editor/contexts/EditorMediaServicesContext';
 import { EditorAuthoringModeProvider, type EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { MapInsertModal } from '@/features/editor/MapInsertModal';
 import { useEntityMediaSurface } from '@/features/editor/hooks/useEntityMediaSurface';
@@ -42,6 +45,8 @@ import { getMapPlacesByIdsAction } from '@/lib/actions/map-place';
 import { listMapThemesAction, resolveMapThemeAction } from '@/lib/actions/map-theme';
 
 interface LocalizedCollaborativeRichTextEditorSharedProps {
+  accessibleLabel?: string;
+  contentLanguage?: string;
   provider: HocuspocusProvider;
   userName: string;
   editable?: boolean;
@@ -76,6 +81,8 @@ function loadMapPlacesByIds(ids: readonly string[]) {
 }
 
 function LocalizedCollaborativeRichTextEditorSurface({
+  accessibleLabel,
+  contentLanguage,
   provider,
   blockRoomController,
   userName,
@@ -89,7 +96,11 @@ function LocalizedCollaborativeRichTextEditorSurface({
   if (!provider.awareness) {
     throw new Error('Typed Block-room editor requires provider awareness.');
   }
-  const mediaRuntimeStore = useMemo(() => createEditorMediaRuntimeStore(), []);
+  const mediaServices = useOptionalEditorMediaServices();
+  const mediaRuntimeStore = useMemo(
+    () => mediaServices?.createRuntimeStore() ?? createEditorMediaRuntimeStore(),
+    [mediaServices],
+  );
   const tEditorCommon = useTranslations('editorCommon');
   const tMedia = useTranslations('editorCommon.media');
   const tCommonNotifications = useTranslations('common.notifications');
@@ -115,7 +126,9 @@ function LocalizedCollaborativeRichTextEditorSurface({
     }),
     [userName],
   );
-  const canEditLocalized = editable;
+  const accessEnded = useProviderAccessEnded(provider);
+  const accessLevel = useEditorAccessLevel(provider);
+  const canEditLocalized = editable && !accessEnded && accessLevel === 'edit';
   const canEditNeutral =
     canEditLocalized && allowNeutralBlockEdits && allowStructuralEdits && Boolean(entityId) && entityType != null;
   const authoringMode = useMemo<EditorAuthoringMode>(
@@ -172,7 +185,7 @@ function LocalizedCollaborativeRichTextEditorSurface({
               ? tCommonNotifications('uploadFailed')
               : message,
         }),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
@@ -303,8 +316,8 @@ function LocalizedCollaborativeRichTextEditorSurface({
         Boolean(localizedMediaPort && selectLibraryFilesAtBlock(localizedMediaPort, referenceBlockId, files))
       }
     >
-      <Box
-        pos="relative"
+      <div
+        style={{ position: 'relative' }}
         data-editor-engine="tiptap"
         data-localized-user={userName}
         onDragOverCapture={handleEditorFileDragOver}
@@ -319,12 +332,15 @@ function LocalizedCollaborativeRichTextEditorSurface({
         ) : uploadProgress ? (
           <MediaIngestOverlay
             title={tMedia('statuses.uploading')}
+            accessibleLabel={`${uploadProgress.name}: ${tMedia('statuses.uploading')}`}
             percentage={uploadProgress.percentage}
             detail={uploadLifecycleLabel}
           />
         ) : null}
         <EditorAuthoringModeProvider value={authoringMode}>
           <TiptapEditor
+            accessibleLabel={accessibleLabel}
+            contentLanguage={contentLanguage}
             blockRoomController={blockRoomController}
             awareness={provider.awareness}
             localUser={collaborationUser}
@@ -346,6 +362,7 @@ function LocalizedCollaborativeRichTextEditorSurface({
         {canEditNeutral && activeFileDialog?.kind === 'insert' && localizedMediaPort ? (
           <MediaIngestDialog
             opened
+            libraryDataSource={mediaServices?.library}
             editor={localizedMediaPort}
             selectedBlock={{ id: activeFileDialog.session.context.targetBlockId, type: 'file', props: {} }}
             blockType="file"
@@ -372,7 +389,7 @@ function LocalizedCollaborativeRichTextEditorSurface({
         {canEditNeutral ? (
           <MapInsertModal opened={pendingMapInsert !== null} onClose={closeMapInsert} onPlaceSelect={selectMapPlace} />
         ) : null}
-      </Box>
+      </div>
     </EditorMediaIngestProvider>
   );
 }

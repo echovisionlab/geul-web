@@ -4,3 +4,7 @@ export { DEFAULT_DOCUMENT_LAYOUT, documentLayoutSchema } from './types';
 export type { DocumentLayout } from './types';
 export { ContentChrome } from './ui/ContentChrome';
 export type { ContentChromeProps } from './ui/ContentChrome';
+export { DocumentHeadingScope, useDocumentHeadingParentLevel } from './ui/DocumentHeadingScope';
+export type { DocumentHeadingScopeProps } from './ui/DocumentHeadingScope';
+export { DOCUMENT_TITLE_HEADING_LEVEL, documentHeadingTag } from './ui/document-heading-level';
+export type { DocumentHeadingParentLevel, DocumentHeadingTag } from './ui/document-heading-level';

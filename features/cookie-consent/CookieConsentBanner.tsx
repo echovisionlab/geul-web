@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState, useTransition } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useWindowEvent } from '@mantine/hooks';
@@ -137,6 +137,8 @@ function parseLearnMoreSegments(message: string): CookieConsentLearnMoreSegment[
 }
 
 export function CookieConsentBanner() {
+  const openOrigin = useRef<HTMLElement | null>(null);
+  const [openRequestRevision, setOpenRequestRevision] = useState(0);
   const t = useTranslations('cookieConsentBanner');
   const tCookieConsentCommon = useTranslations('cookieConsentCommon');
   const tCommon = useTranslations('common.actions');
@@ -145,8 +147,6 @@ export function CookieConsentBanner() {
   const [isHydrated, setIsHydrated] = useState(false);
   const [isBannerOpen, setIsBannerOpen] = useState(false);
   const [requiresRenewal, setRequiresRenewal] = useState(false);
-  const [showPreferences, setShowPreferences] = useState(false);
-  const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
   const [, startTransition] = useTransition();
 
   const syncFromCookie = useCallback(() => {
@@ -154,16 +154,12 @@ export function CookieConsentBanner() {
     if (consent) {
       const currentConsent = isCookieConsentCurrent(consent);
       setRequiresRenewal(!currentConsent);
-      setAnalyticsEnabled(consent.analytics);
-      setShowPreferences(!currentConsent);
       setIsBannerOpen(!currentConsent);
     } else {
       if (isSessionPending || session?.user?.id) {
         return;
       }
       setRequiresRenewal(false);
-      setAnalyticsEnabled(false);
-      setShowPreferences(false);
       setIsBannerOpen(true);
     }
   }, [isSessionPending, session?.user?.id]);
@@ -188,8 +184,6 @@ export function CookieConsentBanner() {
       if (cancelled || !preferences) {
         if (!cancelled) {
           setRequiresRenewal(false);
-          setAnalyticsEnabled(false);
-          setShowPreferences(false);
           setIsBannerOpen(true);
         }
         return;
@@ -204,18 +198,27 @@ export function CookieConsentBanner() {
   }, [isSessionPending, session?.user?.id]);
 
   useWindowEvent(COOKIE_CONSENT_OPEN_EVENT, () => {
+    openOrigin.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setOpenRequestRevision((revision) => revision + 1);
     setIsBannerOpen(true);
-    setShowPreferences(true);
   });
+
+  useEffect(() => {
+    if (isBannerOpen && openOrigin.current) {
+      document.getElementById('cookie-consent-reject-non-essential')?.focus();
+    }
+  }, [isBannerOpen, openRequestRevision]);
 
   const saveConsent = (analytics: boolean) => {
     const preferences = buildCookieConsentPreferences(analytics);
     writeConsentCookie(preferences);
     emitConsentChange(preferences);
     setRequiresRenewal(false);
-    setAnalyticsEnabled(analytics);
-    setShowPreferences(false);
     setIsBannerOpen(false);
+    if (openOrigin.current?.isConnected) {
+      openOrigin.current.focus();
+    }
+    openOrigin.current = null;
 
     if (session?.user?.id) {
       startTransition(() => {
@@ -238,18 +241,12 @@ export function CookieConsentBanner() {
   const model: CookieConsentBannerViewModel = {
     isOpen: isBannerOpen,
     requiresRenewal,
-    showPreferences,
-    analyticsEnabled,
     labels: {
       renewalNotice: t('renewalNotice'),
       intro: t('intro'),
       rejectNonEssential: tCommon('rejectNonEssential'),
-      hidePreferences: t('actions.hidePreferences'),
-      customize: t('actions.customize'),
-      acceptAll: tCommon('acceptAll'),
-      essential: tCookieConsentCommon('essentialLabel'),
       analytics: tCookieConsentCommon('analyticsLabel'),
-      savePreferences: tCommon('savePreferences'),
+      acceptAll: tCommon('acceptAll'),
     },
     learnMore: parseLearnMoreSegments(typeof rawLearnMore === 'string' ? rawLearnMore : ''),
   };
@@ -258,10 +255,7 @@ export function CookieConsentBanner() {
     <CookieConsentBannerView
       model={model}
       onRejectNonEssential={() => saveConsent(false)}
-      onTogglePreferences={() => setShowPreferences((value) => !value)}
       onAcceptAll={() => saveConsent(true)}
-      onAnalyticsChange={setAnalyticsEnabled}
-      onSavePreferences={() => saveConsent(analyticsEnabled)}
     />
   );
 }

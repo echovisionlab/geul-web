@@ -63,14 +63,14 @@ export function TiptapExecutableSelectionBubbleMenu({
     ({ editor: current }: { editor: Editor }) => {
       const currentSelected = resolveSelectedExecutableBlock(current);
       return (
-        !menu.isDismissed && current.isEditable && Boolean(currentSelected && registry?.get(currentSelected.blockId))
+        !menu.isSuppressed && current.isEditable && Boolean(currentSelected && registry?.get(currentSelected.blockId))
       );
     },
-    [menu.isDismissed, registry],
+    [menu.isSuppressed, registry],
   );
   const selected = resolveSelectedExecutableBlock(editor);
   const binding = selected && registry ? registry.get(selected.blockId) : undefined;
-  if (menu.isDismissed || !editor.isEditable || !binding || !selected) {
+  if (menu.isSuppressed || !editor.isEditable || !binding || !selected) {
     return null;
   }
   return (

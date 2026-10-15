@@ -1,4 +1,5 @@
 'use client';
+import { breakpointQuery } from '@/components/core/Layout/breakpoints';
 
 import { ImageUploadCropController } from '@/features/upload/ImageUploadCropController';
 import { useFeaturedImageCommands } from '@/features/upload/useFeaturedImageCommands';
@@ -32,7 +33,7 @@ export function WorkFeaturedImageUploader({
     setImageAction: (fileId) => setWorkFeaturedImageAction(workId, fileId),
     removeImageAction: () => removeWorkFeaturedImageAction(workId),
     onOgGenerationRequested,
-    enabled: isCollaborationReady,
+    enabled: canEdit && isCollaborationReady,
   });
 
   return (
@@ -45,7 +46,7 @@ export function WorkFeaturedImageUploader({
       isRemoving={commands.isRemoving}
       onUpload={commands.handleUpload}
       onRemove={commands.handleRemove}
-      sizes="(min-width: 62em) 50vw, 100vw"
+      sizes={`${breakpointQuery('md', 'at-least')} 50vw, 100vw`}
       acceptMimeTypes={getUploadSelectionMimeTypes(UploadType.WORK_FEATURED_IMAGE)}
       maxSize={workFeaturedImageConfig.maxSize}
     />

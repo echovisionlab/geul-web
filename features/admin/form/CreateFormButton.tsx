@@ -4,15 +4,21 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconPlus } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { Button } from '@/components/core/Button';
 import { createFormAction } from '@/lib/actions/form';
 
 interface CreateFormButtonProps {
   basePath?: string;
+  createAction?: typeof createFormAction;
+  navigate?: (href: string) => void;
 }
 
-export function CreateFormButton({ basePath: _basePath = '/admin/forms' }: CreateFormButtonProps) {
+export function CreateFormButton({
+  basePath: _basePath = '/admin/forms',
+  createAction = createFormAction,
+  navigate,
+}: CreateFormButtonProps) {
   const tCommon = useTranslations('common');
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -21,15 +27,15 @@ export function CreateFormButton({ basePath: _basePath = '/admin/forms' }: Creat
   const handleCreate = async () => {
     setLoading(true);
     try {
-      const result = await createFormAction('Untitled Form');
+      const result = await createAction('Untitled Form');
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       if (result.data) {
         const href = `/forms/${encodeURIComponent(result.data.id)}?edit=true`;
         startNavigation(() => {
-          router.push(href);
+          (navigate ?? router.push)(href);
         });
       }
     } finally {

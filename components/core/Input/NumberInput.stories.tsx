@@ -10,7 +10,6 @@ const meta = {
     label: 'Display order',
     placeholder: 'Enter an order',
     min: 0,
-    w: 320,
   },
 } satisfies Meta<typeof NumberInput>;
 
@@ -25,3 +24,5 @@ export const Error: Story = {
   args: { error: 'Enter a value between 1 and 10' },
 };
 export const Disabled: Story = { args: { defaultValue: 3, disabled: true } };
+export const ReadOnly: Story = { args: { defaultValue: 3, readOnly: true } };
+export const WithoutControls: Story = { args: { defaultValue: 3, hideControls: true } };

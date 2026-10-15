@@ -1,1 +1,7 @@
-export { ResizeHandle, type ResizeHandleDirection, type ResizeHandleProps } from './ResizeHandle';
+export {
+  ResizeHandle,
+  type ResizeHandleDirection,
+  type ResizeHandleProps,
+  type ResizeHandlePlacement,
+  type ResizeHandleVisibility,
+} from './ResizeHandle';

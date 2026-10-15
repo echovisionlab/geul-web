@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Server DataTable Search - Client Component for debounced search.
  *
@@ -5,15 +7,17 @@
  * It handles debounced search input and updates the URL via router.push.
  */
 
-'use client';
-
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useEffect, useRef, useState, useTransition } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { IconSearch } from '@tabler/icons-react';
+import {
+  useServerTablePathname as usePathname,
+  useServerTableRouter as useRouter,
+  useServerTableSearchParams as useSearchParams,
+} from './ServerDataTableNavigation';
 import { useTranslations } from 'next-intl';
-import { Box } from '@mantine/core';
+
 import { useDebouncedValue } from '@mantine/hooks';
-import { TextInput } from '@/components/core/Input/TextInput';
+import { SearchInput } from '@/components/core/Input/SearchInput';
 import { buildSearchUrl, parseTableQuery } from '@/lib/utils/table-url';
 
 export interface ServerDataTableSearchProps {
@@ -102,17 +106,16 @@ export function ServerDataTableSearch({ namespace, placeholder, debounceMs = 300
   }, [isPending]);
 
   return (
-    <Box ref={rootRef} style={{ flex: 1, maxWidth: 400 }}>
-      <TextInput
+    <DsLayoutStack flexible ref={rootRef} gap="none">
+      <SearchInput
         ref={inputRef}
         placeholder={effectivePlaceholder}
-        leftSection={<IconSearch size={16} />}
         value={search}
         onChange={(e) => setSearch(e.currentTarget.value)}
         onFocus={handleFocus}
         onBlur={handleBlur}
         aria-label={effectivePlaceholder}
       />
-    </Box>
+    </DsLayoutStack>
   );
 }

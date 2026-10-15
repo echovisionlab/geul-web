@@ -1,8 +1,7 @@
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getTranslations } from 'next-intl/server';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import { CreateTagButton, TagModalProvider, TagModals, TagsTableContent } from '@/features/admin/tag';
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
+import { TagsPageView } from '@/features/admin/tag/TagsPageView';
 import { listTagsAdminAction } from '@/lib/actions/tag';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
@@ -47,23 +46,13 @@ export default async function AdminTagsPage({ searchParams }: PageProps) {
   );
 
   return (
-    <TagModalProvider>
-      <AdminPageHeader
-        title={tagsLabel}
-        items={[{ key: 'create-tag', type: 'custom', content: <CreateTagButton /> }]}
-      />
-
-      <ServerDataTable namespace="tags">
-        <TagsTableContent
-          result={result}
-          searchPlaceholder={searchPlaceholder}
-          filterFields={filterFields}
-          sortFields={sortFields}
-        />
-        <ServerDataTable.Pagination namespace="tags" result={result} searchParams={params} />
-      </ServerDataTable>
-
-      <TagModals />
-    </TagModalProvider>
+    <TagsPageView
+      title={tagsLabel}
+      result={result}
+      filterFields={filterFields}
+      sortFields={sortFields}
+      searchPlaceholder={searchPlaceholder}
+      searchParams={params.toString()}
+    />
   );
 }

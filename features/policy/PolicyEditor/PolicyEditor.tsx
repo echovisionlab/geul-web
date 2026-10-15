@@ -1,5 +1,6 @@
 'use client';
 
+import { DEFAULT_SITE_BRAND_COLOR } from '@/lib/theme/site-brand';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import type { RichTextBlockRoomTiptapController } from '@/features/editor/tiptap/block-room-tiptap-controller';
 import {
@@ -24,7 +25,7 @@ export function PolicyEditor({
   provider,
   blockRoomController,
   userName = 'Admin',
-  userColor = '#b02d23',
+  userColor = DEFAULT_SITE_BRAND_COLOR,
   readOnly = false,
   structureLocked = false,
   onEditorReady,

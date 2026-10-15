@@ -1,13 +1,17 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+import { ConfirmationDialog } from '@/features/confirmation';
 
+import { LayoutStack as DsLayoutStack, LayoutInset as DsLayoutInset, LayoutInset } from '@/components/core/Layout';
+
+import { notifications } from '@/components/core/Notification';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
 import { useTranslations } from 'next-intl';
-import { Loader, Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+import { Spinner as Loader } from '@/components/core/Display';
 import { Select, TextInput } from '@/components/core/Input';
-import { ConfirmModal, FormModal } from '@/components/core/Modal';
+import { FormModal } from '@/components/core/Modal';
 import {
   createSegmentAction,
   archiveSegmentAction,
@@ -19,23 +23,19 @@ import {
 import { buildSegmentConfig, createEmptyConfig, type SegmentConfigState } from './SegmentConfig';
 import { SegmentConfigFields } from './SegmentConfigFields';
 import { useSegmentModal } from './SegmentModalContext';
-
 type SegmentEditConfig = SegmentConfigState;
-
 interface SegmentEditBaseline {
   name: string;
   description: string;
   segmentType: SegmentType;
   config: SegmentEditConfig;
 }
-
 interface SegmentEditDraft {
   name: string;
   description: string;
   segmentType: string;
   config: SegmentEditConfig;
 }
-
 function segmentConfigState(config: {
   memberTagIds: string[];
   accountRoles: string[];
@@ -49,11 +49,9 @@ function segmentConfigState(config: {
     createdBefore: config.createdBefore ?? '',
   };
 }
-
 function sameStringSet(left: string[], right: string[]): boolean {
   return left.length === right.length && left.every((value) => right.includes(value));
 }
-
 function mergePendingStringSet(canonical: string[], submitted: string[], latest: string[]): string[] {
   const merged = new Set(canonical);
   const submittedSet = new Set(submitted);
@@ -70,7 +68,6 @@ function mergePendingStringSet(canonical: string[], submitted: string[], latest:
   }
   return Array.from(merged);
 }
-
 function rebasePendingConfig(
   canonical: SegmentEditConfig,
   submitted: SegmentEditConfig,
@@ -83,7 +80,6 @@ function rebasePendingConfig(
     createdBefore: latest.createdBefore === submitted.createdBefore ? canonical.createdBefore : latest.createdBefore,
   };
 }
-
 function sameSegmentEditDraft(left: SegmentEditDraft, right: SegmentEditDraft): boolean {
   return (
     left.name === right.name &&
@@ -95,15 +91,32 @@ function sameSegmentEditDraft(left: SegmentEditDraft, right: SegmentEditDraft): 
     left.config.createdBefore === right.config.createdBefore
   );
 }
-
-export function SegmentModals() {
+export interface SegmentModalsBindings {
+  createSegmentAction: typeof createSegmentAction;
+  archiveSegmentAction: typeof archiveSegmentAction;
+  estimateSegmentCountAction: typeof estimateSegmentCountAction;
+  getSegmentAction: typeof getSegmentAction;
+  restoreSegmentAction: typeof restoreSegmentAction;
+  updateSegmentAction: typeof updateSegmentAction;
+}
+const defaultBindings: SegmentModalsBindings = {
+  createSegmentAction,
+  archiveSegmentAction,
+  estimateSegmentCountAction,
+  getSegmentAction,
+  restoreSegmentAction,
+  updateSegmentAction,
+};
+export function SegmentModals({
+  bindings = defaultBindings,
+  refresh,
+}: { bindings?: SegmentModalsBindings; refresh?: () => void } = {}) {
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
   const tPage = useTranslations('adminList.audienceSegments');
   const router = useRouter();
   const { lifecycleSegment, lifecycleAction, closeLifecycle, isCreateOpen, closeCreate, editingSegmentId, closeEdit } =
     useSegmentModal();
-
   // Create modal state
   const [createName, setCreateName] = useState('');
   const [createDescription, setCreateDescription] = useState('');
@@ -112,7 +125,6 @@ export function SegmentModals() {
   const [createLoading, setCreateLoading] = useState(false);
   const [createEstimatedCount, setCreateEstimatedCount] = useState<number | null>(null);
   const [createEstimateLoading, setCreateEstimateLoading] = useState(false);
-
   // Edit modal state
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
@@ -123,7 +135,6 @@ export function SegmentModals() {
   const [editEstimatedCount, setEditEstimatedCount] = useState<number | null>(null);
   const [editEstimateLoading, setEditEstimateLoading] = useState(false);
   const [editBaseline, setEditBaseline] = useState<SegmentEditBaseline | null>(null);
-
   const [lifecycleLoading, setLifecycleLoading] = useState(false);
   const editingSegmentIdRef = useRef(editingSegmentId);
   editingSegmentIdRef.current = editingSegmentId;
@@ -144,7 +155,6 @@ export function SegmentModals() {
     { value: String(SegmentType.MEMBER_TAGS), label: tCommonEntities('userTags') },
     { value: String(SegmentType.MEMBERS_BY_FILTER), label: tPage('types.usersByFilter') },
   ];
-
   // Reset create modal
   useEffect(() => {
     if (!isCreateOpen) {
@@ -155,14 +165,12 @@ export function SegmentModals() {
       setCreateEstimatedCount(null);
     }
   }, [isCreateOpen]);
-
   // Reset config when create type changes
   const handleCreateTypeChange = useCallback((value: string | null) => {
     setCreateType(value);
     setCreateConfig(createEmptyConfig());
     setCreateEstimatedCount(null);
   }, []);
-
   // Load segment data for edit
   useEffect(() => {
     let isCurrentRequest = true;
@@ -179,7 +187,8 @@ export function SegmentModals() {
     }
     setEditLoading(false);
     setEditFetchLoading(true);
-    getSegmentAction(editingSegmentId)
+    bindings
+      .getSegmentAction(editingSegmentId)
       .then((result) => {
         if (!isCurrentRequest) {
           return;
@@ -199,7 +208,7 @@ export function SegmentModals() {
           setEditEstimatedCount(result.data.estimatedCount);
         } else {
           setEditBaseline(null);
-          notifications.show({ message: result.error ?? tPage('loading'), color: 'red' });
+          notifications.show({ message: result.error ?? tPage('loading'), tone: 'danger' });
           closeEdit();
         }
       })
@@ -212,7 +221,6 @@ export function SegmentModals() {
       isCurrentRequest = false;
     };
   }, [editingSegmentId, closeEdit]);
-
   // Reset config when edit type changes
   const handleEditTypeChange = useCallback(
     (value: string | null) => {
@@ -225,7 +233,6 @@ export function SegmentModals() {
     },
     [editType],
   );
-
   const handleEstimate = useCallback(
     async (
       type: string | null,
@@ -239,12 +246,12 @@ export function SegmentModals() {
       setLoading(true);
       try {
         const segmentType = Number(type) as SegmentType;
-        const result = await estimateSegmentCountAction({
+        const result = await bindings.estimateSegmentCountAction({
           segmentType,
           config: buildSegmentConfig(segmentType, config),
         });
         if (result.error) {
-          notifications.show({ message: result.error, color: 'red' });
+          notifications.show({ message: result.error, tone: 'danger' });
         } else {
           setCount(result.count ?? null);
         }
@@ -254,7 +261,6 @@ export function SegmentModals() {
     },
     [],
   );
-
   const handleCreate = async () => {
     if (!createType) {
       return;
@@ -262,24 +268,23 @@ export function SegmentModals() {
     setCreateLoading(true);
     try {
       const segmentType = Number(createType) as SegmentType;
-      const result = await createSegmentAction({
+      const result = await bindings.createSegmentAction({
         name: createName,
         description: createDescription || undefined,
         segmentType,
         config: buildSegmentConfig(segmentType, createConfig),
       });
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tPage('created'), color: 'green' });
+      notifications.show({ message: tPage('created'), tone: 'positive' });
       closeCreate();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setCreateLoading(false);
     }
   };
-
   const handleUpdate = async () => {
     if (!editingSegmentId || !editType || !editBaseline) {
       return;
@@ -299,7 +304,7 @@ export function SegmentModals() {
     const segmentType = Number(editType) as SegmentType;
     setEditLoading(true);
     try {
-      const input: Parameters<typeof updateSegmentAction>[0] = {
+      const input: Parameters<typeof bindings.updateSegmentAction>[0] = {
         id: segmentId,
         config: buildSegmentConfig(segmentType, submittedDraft.config),
         observed: {
@@ -316,19 +321,17 @@ export function SegmentModals() {
       if (segmentType !== baseline.segmentType) {
         input.segmentType = segmentType;
       }
-
-      const result = await updateSegmentAction(input);
+      const result = await bindings.updateSegmentAction(input);
       if (editingSegmentIdRef.current !== segmentId) {
         if (result.data) {
-          router.refresh();
+          (refresh ?? router.refresh)();
         }
         return;
       }
       if (result.error || !result.data) {
-        notifications.show({ message: result.error ?? tPage('loading'), color: 'red' });
+        notifications.show({ message: result.error ?? tPage('loading'), tone: 'danger' });
         return;
       }
-
       const canonicalConfig = segmentConfigState(result.data.config);
       const canonicalDraft: SegmentEditDraft = {
         name: result.data.name,
@@ -357,8 +360,8 @@ export function SegmentModals() {
           ? latestDraft.config
           : rebasePendingConfig(canonicalConfig, submittedDraft.config, latestDraft.config),
       );
-      notifications.show({ message: tPage('updated'), color: 'green' });
-      router.refresh();
+      notifications.show({ message: tPage('updated'), tone: 'positive' });
+      (refresh ?? router.refresh)();
       if (!hasPendingTyping) {
         closeEdit();
       }
@@ -368,7 +371,6 @@ export function SegmentModals() {
       }
     }
   };
-
   const handleLifecycleChange = async () => {
     if (!lifecycleSegment || !lifecycleAction) {
       return;
@@ -377,23 +379,22 @@ export function SegmentModals() {
     try {
       const result =
         lifecycleAction === 'archive'
-          ? await archiveSegmentAction(lifecycleSegment.id)
-          : await restoreSegmentAction(lifecycleSegment.id);
+          ? await bindings.archiveSegmentAction(lifecycleSegment.id)
+          : await bindings.restoreSegmentAction(lifecycleSegment.id);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       notifications.show({
         message: tPage(lifecycleAction === 'archive' ? 'archived' : 'restored'),
-        color: lifecycleAction === 'archive' ? 'yellow' : 'green',
+        tone: 'positive',
       });
       closeLifecycle();
-      router.refresh();
+      (refresh ?? router.refresh)();
     } finally {
       setLifecycleLoading(false);
     }
   };
-
   return (
     <>
       {/* Create Modal */}
@@ -415,22 +416,24 @@ export function SegmentModals() {
           onChange={(e) => setCreateName(e.currentTarget.value)}
           required
         />
-        <TextInput
-          label={tCommon('labels.description')}
-          placeholder={tCommon('placeholders.optionalDescription')}
-          value={createDescription}
-          onChange={(e) => setCreateDescription(e.currentTarget.value)}
-          mt="sm"
-        />
-        <Select
-          label={tCommon('labels.type')}
-          placeholder={tPage('typePlaceholder')}
-          data={segmentTypeOptions}
-          value={createType}
-          onChange={handleCreateTypeChange}
-          required
-          mt="sm"
-        />
+        <LayoutInset space="none" blockStart="sm">
+          <TextInput
+            label={tCommon('labels.description')}
+            placeholder={tCommon('placeholders.optionalDescription')}
+            value={createDescription}
+            onChange={(e) => setCreateDescription(e.currentTarget.value)}
+          />
+        </LayoutInset>
+        <LayoutInset space="none" blockStart="sm">
+          <Select
+            label={tCommon('labels.type')}
+            placeholder={tPage('typePlaceholder')}
+            data={segmentTypeOptions}
+            value={createType}
+            onChange={handleCreateTypeChange}
+            required
+          />
+        </LayoutInset>
         <SegmentConfigFields
           segmentType={createType ? (Number(createType) as SegmentType) : null}
           config={createConfig}
@@ -454,12 +457,12 @@ export function SegmentModals() {
         submitDisabled={!editName.trim() || !editType || editFetchLoading}
       >
         {editFetchLoading ? (
-          <Stack align="center" py="xl">
-            <Loader size="sm" />
-            <Text size="sm" c="dimmed">
-              {tPage('loading')}
-            </Text>
-          </Stack>
+          <DsLayoutInset block="xl">
+            <DsLayoutStack align="center">
+              <Loader size="sm" />
+              <SupportingText tone="secondary">{tPage('loading')}</SupportingText>
+            </DsLayoutStack>
+          </DsLayoutInset>
         ) : (
           <>
             <TextInput
@@ -469,22 +472,24 @@ export function SegmentModals() {
               onChange={(e) => setEditName(e.currentTarget.value)}
               required
             />
-            <TextInput
-              label={tCommon('labels.description')}
-              placeholder={tCommon('placeholders.optionalDescription')}
-              value={editDescription}
-              onChange={(e) => setEditDescription(e.currentTarget.value)}
-              mt="sm"
-            />
-            <Select
-              label={tCommon('labels.type')}
-              placeholder={tPage('typePlaceholder')}
-              data={segmentTypeOptions}
-              value={editType}
-              onChange={handleEditTypeChange}
-              required
-              mt="sm"
-            />
+            <LayoutInset space="none" blockStart="sm">
+              <TextInput
+                label={tCommon('labels.description')}
+                placeholder={tCommon('placeholders.optionalDescription')}
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.currentTarget.value)}
+              />
+            </LayoutInset>
+            <LayoutInset space="none" blockStart="sm">
+              <Select
+                label={tCommon('labels.type')}
+                placeholder={tPage('typePlaceholder')}
+                data={segmentTypeOptions}
+                value={editType}
+                onChange={handleEditTypeChange}
+                required
+              />
+            </LayoutInset>
             <SegmentConfigFields
               segmentType={editType ? (Number(editType) as SegmentType) : null}
               config={editConfig}
@@ -498,25 +503,25 @@ export function SegmentModals() {
       </FormModal>
 
       {/* Archive / restore modal */}
-      <ConfirmModal
+      <ConfirmationDialog
+        intent={lifecycleAction === 'archive' ? 'archive' : 'restore'}
         opened={!!lifecycleSegment && !!lifecycleAction}
         onClose={closeLifecycle}
         onConfirm={handleLifecycleChange}
         title={tPage(lifecycleAction === 'restore' ? 'restoreTitle' : 'archiveTitle')}
         message={
-          <Text>
+          <DsText>
             {tPage(lifecycleAction === 'restore' ? 'restoreConfirm' : 'archiveConfirm', {
               name: lifecycleSegment?.name ?? '',
               campaigns: lifecycleSegment?.campaign_count ?? 0,
               runs: lifecycleSegment?.delivery_run_count ?? 0,
               files: lifecycleSegment?.download_policy_reference_count ?? 0,
             })}
-          </Text>
+          </DsText>
         }
         confirmLabel={tPage(lifecycleAction === 'restore' ? 'restore' : 'archive')}
         cancelLabel={tCommon('actions.cancel')}
         closeLabel={tCommon('actions.close')}
-        confirmTone={lifecycleAction === 'archive' ? 'warning' : 'positive'}
         loading={lifecycleLoading}
       />
     </>

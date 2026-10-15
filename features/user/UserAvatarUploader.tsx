@@ -3,7 +3,7 @@
 import { useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import type { ImageUploadRejection } from '@/components/core/ImageUpload';
 import {
   deleteAvatarAction,
@@ -21,6 +21,7 @@ import {
   validateUserAvatarSelection,
 } from './profile-avatar-upload-policy';
 import { ProfileAvatarControl } from './ui/ProfileAvatarControl/ProfileAvatarControl';
+import { useImageCropAccessibility } from '@/lib/i18n/useImageCropAccessibility';
 
 export interface UserAvatarUploaderProps {
   memberId: string;
@@ -43,6 +44,7 @@ export function UserAvatarUploader({
   const t = useTranslations('userAvatar');
   const tCommon = useTranslations('common');
   const tCommonMessages = useTranslations('common.messages');
+  const cropAccessibility = useImageCropAccessibility(t('cropTitle'));
   const { upload } = useUpload(UploadType.USER_AVATAR);
   const { updateMemberSummary } = useSession();
   const setOwnAvatar = useMutation({
@@ -76,12 +78,12 @@ export function UserAvatarUploader({
         }
         const savedUrl = 'url' in result ? result.url : undefined;
         await onImageChange?.(('member' in result ? result.member?.avatarUrl : savedUrl) ?? url);
-        notifications.show({ message: t('updated'), color: 'green' });
+        notifications.show({ message: t('updated'), tone: 'positive' });
         return true;
       } catch (error) {
         notifications.show({
           message: error instanceof Error ? error.message : tCommonMessages('uploadImageFailed'),
-          color: 'red',
+          tone: 'danger',
         });
         return false;
       }
@@ -112,12 +114,12 @@ export function UserAvatarUploader({
         updateMemberSummary(result.member);
       }
       await onImageChange?.(null);
-      notifications.show({ message: t('removed'), color: 'green' });
+      notifications.show({ message: t('removed'), tone: 'positive' });
       return true;
     } catch (error) {
       notifications.show({
         message: error instanceof Error ? error.message : tCommonMessages('removeImageFailed'),
-        color: 'red',
+        tone: 'danger',
       });
       return false;
     }
@@ -133,7 +135,7 @@ export function UserAvatarUploader({
   ]);
 
   const showValidationError = useCallback((message: string) => {
-    notifications.show({ message, color: 'red' });
+    notifications.show({ message, tone: 'danger' });
   }, []);
 
   const handleRejected = useCallback(
@@ -154,6 +156,7 @@ export function UserAvatarUploader({
       size={size}
       accept={userAvatarSelectionAccept}
       maxSize={userAvatarSelectionMaxSize}
+      cropAccessibility={cropAccessibility}
       labels={{
         alt,
         upload: tCommon('actions.uploadItem', { item: t('label') }),

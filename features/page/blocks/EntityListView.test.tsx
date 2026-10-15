@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type AnchorHTMLAttributes, type HTMLAttributes, type ImgHTMLAttributes, type ReactNode } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { EntityListView } from './EntityListView';
 import type { ListViewLayout } from './ListViewShell';
 
@@ -49,7 +50,7 @@ vi.mock('next/dynamic', async () => {
   return { default: () => ListCarouselRuntime };
 });
 
-vi.mock('@mantine/carousel', () => {
+vi.mock('@/components/core/Carousel', () => {
   const Carousel = ({
     children,
     withControls,
@@ -128,7 +129,7 @@ describe('EntityListView', () => {
     (layout) => {
       act(() => {
         root?.render(
-          <MantineProvider>
+          <DesignSystemProvider forceColorScheme="light">
             <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
               <EntityListView
                 items={[{ id: 'one', href: '/one', title: 'One', imageUrl: 'https://example.com/landscape.jpg' }]}
@@ -142,11 +143,11 @@ describe('EntityListView', () => {
                 carouselIndicators={false}
               />
             </NextIntlClientProvider>
-          </MantineProvider>,
+          </DesignSystemProvider>,
         );
       });
       const image = container?.querySelector<HTMLImageElement>('img[src="https://example.com/landscape.jpg"]');
-      const frame = image?.parentElement?.tagName === 'A' ? image.parentElement.parentElement : image?.parentElement;
+      const frame = image?.closest<HTMLElement>('[style*="aspect-ratio"]');
       expect(frame?.style.aspectRatio).toBe('1 / 1');
       expect(image?.style.objectFit).toBe('cover');
     },
@@ -163,7 +164,7 @@ describe('EntityListView', () => {
       }));
       act(() => {
         root?.render(
-          <MantineProvider>
+          <DesignSystemProvider forceColorScheme="light">
             <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
               <EntityListView
                 items={items}
@@ -177,18 +178,18 @@ describe('EntityListView', () => {
                 carouselIndicators={false}
               />
             </NextIntlClientProvider>
-          </MantineProvider>,
+          </DesignSystemProvider>,
         );
       });
       for (const item of items) {
         const image = container?.querySelector<HTMLImageElement>(`img[src="${item.imageUrl}"]`);
-        const frame = image?.parentElement?.tagName === 'A' ? image.parentElement.parentElement : image?.parentElement;
+        const frame = image?.closest<HTMLElement>('[style*="aspect-ratio"]');
         expect(frame?.style.aspectRatio).toBe('auto');
         expect(image?.style.width).toBe('100%');
         expect(image?.style.height).toBe('auto');
         expect(image?.style.position).not.toBe('absolute');
         if (image?.parentElement?.tagName === 'A') {
-          expect(image.parentElement.style.position).toBe('relative');
+          expect(image.parentElement.getAttribute('data-media-position')).toBe('flow');
           expect(image.parentElement.getAttribute('href')).toBe(item.href);
         }
       }
@@ -206,7 +207,7 @@ describe('EntityListView', () => {
 
     act(() => {
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
             <EntityListView
               items={items}
@@ -219,13 +220,42 @@ describe('EntityListView', () => {
               carouselIndicators
             />
           </NextIntlClientProvider>
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
     const heroSlide = document.querySelector('[data-hero-carousel-slide]');
     expect(heroSlide).not.toBeNull();
     expect(heroSlide?.querySelector('img[src="https://example.com/artist.jpg"]')).not.toBeNull();
+  });
+
+  it.each([true, false])('honors image=%s and hidden indicators in one-column carousels', (showImage) => {
+    act(() => {
+      root?.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
+            <EntityListView
+              items={[
+                { id: 'one', href: '/one', title: 'One', imageUrl: 'https://example.com/one.jpg' },
+                { id: 'two', href: '/two', title: 'Two', imageUrl: 'https://example.com/two.jpg' },
+              ]}
+              className="option-test"
+              emptyLabel="Empty"
+              layout="carousel"
+              columns={1}
+              showImage={showImage}
+              carouselLoop={false}
+              carouselIndicators={false}
+            />
+          </NextIntlClientProvider>
+        </DesignSystemProvider>,
+      );
+    });
+    expect(container?.querySelector('[data-with-indicators="false"]')).not.toBeNull();
+    expect(Boolean(container?.querySelector('[data-hero-carousel-slide]'))).toBe(showImage);
+    expect(Boolean(container?.querySelector('img'))).toBe(showImage);
+    expect(container?.querySelector('a[href="/one"]')).not.toBeNull();
+    expect(container?.querySelector('a[href="/two"]')).not.toBeNull();
   });
 
   it('links grid media to the entity href', () => {
@@ -240,7 +270,7 @@ describe('EntityListView', () => {
 
     act(() => {
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
             <EntityListView
               items={items}
@@ -253,7 +283,7 @@ describe('EntityListView', () => {
               carouselIndicators
             />
           </NextIntlClientProvider>
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
@@ -282,7 +312,7 @@ describe('EntityListView', () => {
 
       act(() => {
         root?.render(
-          <MantineProvider>
+          <DesignSystemProvider forceColorScheme="light">
             <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
               <EntityListView
                 items={items}
@@ -295,7 +325,7 @@ describe('EntityListView', () => {
                 carouselIndicators
               />
             </NextIntlClientProvider>
-          </MantineProvider>,
+          </DesignSystemProvider>,
         );
       });
 
@@ -325,7 +355,7 @@ describe('EntityListView', () => {
 
       act(() => {
         root?.render(
-          <MantineProvider>
+          <DesignSystemProvider forceColorScheme="light">
             <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
               <EntityListView
                 items={items}
@@ -338,15 +368,15 @@ describe('EntityListView', () => {
                 carouselIndicators
               />
             </NextIntlClientProvider>
-          </MantineProvider>,
+          </DesignSystemProvider>,
         );
       });
 
       const image = document.querySelector<HTMLImageElement>('img[src="https://example.com/label.svg"]');
-      const frame = image?.closest('a')?.parentElement ?? image?.parentElement;
+      const frame = image?.closest('[data-backdrop]');
 
       expect(image).not.toBeNull();
-      expect(frame?.style.backgroundColor).toBe('transparent');
+      expect(frame?.getAttribute('data-backdrop')).toBe('transparent');
     },
   );
 });

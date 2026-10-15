@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Editor } from '@tiptap/core';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { Fragment, Schema, Slice } from '@tiptap/pm/model';
 import { NodeSelection, TextSelection } from '@tiptap/pm/state';
-import { MantineProvider } from '@mantine/core';
+
 import { fromJson, type JsonValue } from '@bufbuild/protobuf';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import {
@@ -14,13 +15,18 @@ import {
   RichTextProfile,
   type LocalizedRichTextDocument,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import { hydrateCanonicalBlockRoom } from '@echovisionlab/geul-common/collaboration/block-room-codec';
 import { createBlockRoomProseMirrorBridge } from '../block-room-prosemirror-bridge';
 import { createPostBlockRoomTiptapController } from '../block-room-tiptap-controller';
 import { createTiptapWireExtensions } from '../wire-schema';
-import { TiptapMathInput, normalizeMathFragment, withTiptapMathExtensions } from './index';
+import { loadMathRenderer, TiptapMathInput, normalizeMathFragment, withTiptapMathExtensions } from './index';
+
+// KaTeX loads on demand; these tests assert the rendered state.
+beforeAll(async () => {
+  await loadMathRenderer();
+});
 
 function block(id: string, content: Record<string, unknown>) {
   return { type: 'blockContainer', attrs: { id }, content: [content] };
@@ -336,9 +342,9 @@ describe('Tiptap math runtime', () => {
       });
       editorRef.current = instance;
       return (
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <EditorContent editor={instance} />
-        </MantineProvider>
+        </DesignSystemProvider>
       );
     }
     const container = document.createElement('div');
@@ -447,9 +453,9 @@ describe('Tiptap math runtime', () => {
       });
       editorRef.current = instance;
       return (
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <EditorContent editor={instance} />
-        </MantineProvider>
+        </DesignSystemProvider>
       );
     }
 
@@ -547,9 +553,9 @@ describe('Tiptap math runtime', () => {
       });
       editorRef.current = instance;
       return (
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <EditorContent editor={instance} />
-        </MantineProvider>
+        </DesignSystemProvider>
       );
     }
     const container = document.createElement('div');
@@ -574,38 +580,82 @@ describe('Tiptap math runtime', () => {
     container.remove();
   });
 
-  it('selects block math as one outer boundary instead of directly opening a source textarea', async () => {
-    const editorRef: { current: Editor | null } = { current: null };
-    function Harness() {
-      const instance = useEditor({
-        immediatelyRender: false,
-        extensions: withTiptapMathExtensions(createTiptapWireExtensions()),
-        content: {
-          type: 'doc',
-          content: [{ type: 'blockGroup', content: [block('target', { type: 'math', attrs: { latex: 'x^2' } })] }],
-        },
+  it.each(['Select math block', '수식 블록 선택'])(
+    'keeps structured math outside its named selection action (%s)',
+    async (selectBlockLabel) => {
+      const editorRef: { current: Editor | null } = { current: null };
+      function Harness() {
+        const instance = useEditor({
+          immediatelyRender: false,
+          extensions: withTiptapMathExtensions(createTiptapWireExtensions(), { selectBlockLabel }),
+          content: {
+            type: 'doc',
+            content: [
+              { type: 'blockGroup', content: [block('target', { type: 'math', attrs: { latex: '\\frac{x}{y}' } })] },
+            ],
+          },
+        });
+        editorRef.current = instance;
+        return <EditorContent editor={instance} />;
+      }
+      const container = document.createElement('div');
+      document.body.append(container);
+      const root = createRoot(container);
+      await act(async () => root.render(<Harness />));
+      const editor = editorRef.current;
+      expect(editor).not.toBeNull();
+      const before = editor!.state.doc.toJSON();
+      const blockView = container.querySelector<HTMLElement>('[data-math-block]');
+      expect(blockView).not.toBeNull();
+      const math = blockView!.querySelector('math')!;
+      const action = blockView!.querySelector<HTMLButtonElement>('button')!;
+      expect(math.querySelector('mfrac')).not.toBeNull();
+      expect(math.closest('button, [role="button"], [aria-hidden="true"]')).toBeNull();
+      expect(blockView!.hasAttribute('role')).toBe(false);
+      expect(blockView!.hasAttribute('aria-label')).toBe(false);
+      expect(blockView!.hasAttribute('tabindex')).toBe(false);
+      expect(action).toHaveAccessibleName(selectBlockLabel);
+      expect(action.querySelector('math')).toBeNull();
+      const scroll = blockView!.querySelector<HTMLElement>('[data-math-scroll]')!;
+      expect(scroll).toHaveAttribute('data-scrollbars', 'x');
+      expect(scroll).toHaveAttribute('tabindex', '0');
+      expect(scroll.contains(math)).toBe(true);
+      expect(scroll.contains(action)).toBe(false);
+      expect(scroll.hasAttribute('aria-label')).toBe(false);
+      const selectionBeforeScroll = editor!.state.selection.toJSON();
+      await act(async () => {
+        scroll.focus();
+        const arrow = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true });
+        expect(scroll.dispatchEvent(arrow)).toBe(true);
+        expect(arrow.defaultPrevented).toBe(false);
       });
-      editorRef.current = instance;
-      return <EditorContent editor={instance} />;
-    }
-    const container = document.createElement('div');
-    document.body.append(container);
-    const root = createRoot(container);
-    await act(async () => root.render(<Harness />));
-    const editor = editorRef.current;
-    expect(editor).not.toBeNull();
-    const before = editor!.state.doc.toJSON();
-    const blockView = container.querySelector<HTMLElement>('[data-math-block]');
-    expect(blockView).not.toBeNull();
+      expect(scroll).toHaveFocus();
+      expect(editor!.state.selection.toJSON()).toEqual(selectionBeforeScroll);
+      expect(editor!.state.doc.toJSON()).toEqual(before);
 
-    await act(async () => blockView?.click());
+      await act(async () => blockView?.click());
 
-    expect(editor!.state.selection).toBeInstanceOf(NodeSelection);
-    expect((editor!.state.selection as NodeSelection).node.type.name).toBe('math');
-    expect(blockView?.dataset.selected).toBe('true');
-    expect(blockView?.querySelector('textarea')).toBeNull();
-    expect(editor!.state.doc.toJSON()).toEqual(before);
-    await act(async () => root.unmount());
-    container.remove();
-  });
+      expect(editor!.state.selection).toBeInstanceOf(NodeSelection);
+      expect((editor!.state.selection as NodeSelection).node.type.name).toBe('math');
+      expect(blockView?.dataset.selected).toBe('true');
+      expect(blockView?.querySelector('textarea')).toBeNull();
+      expect(editor!.state.doc.toJSON()).toEqual(before);
+      for (const key of ['Enter', ' ']) {
+        await act(async () => {
+          editor!.commands.setNodeSelection(findNodePosition(editor!, 'blockContainer'));
+          action.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+        });
+        expect((editor!.state.selection as NodeSelection).node.type.name).toBe('math');
+        expect(editor!.state.doc.toJSON()).toEqual(before);
+      }
+      await act(async () => editor!.setEditable(false));
+      expect(blockView!.querySelector('button')).toBeNull();
+      expect(blockView!.querySelector('math mfrac')).not.toBeNull();
+      expect(blockView!.querySelector('[data-math-scroll]')).toHaveAttribute('tabindex', '0');
+      await act(async () => editor!.setEditable(true));
+      expect(blockView!.querySelector('button')).toHaveAccessibleName(selectBlockLabel);
+      await act(async () => root.unmount());
+      container.remove();
+    },
+  );
 });

@@ -15,9 +15,14 @@ import {
 } from '@/lib/media/shared';
 import { fetchWaveformData, type WaveformPeaks } from '@/lib/media/waveform-sidecar';
 import { mountWaveSurferPlayer } from '@/lib/media/wavesurfer-player';
-import './ui/MediaPlayer.css';
-import './ui/AudioPlayer.css';
-import './ui/VideoPlayer.css';
+import { updateNativeRangeValue } from '@/components/core/Input/native-range';
+import {
+  applyAudioMediaPresentation,
+  applyAudioSeekPresentation,
+  applyVideoFramePresentation,
+  resolveMediaSeekKey,
+} from '@/components/core/MediaControls';
+import { applyVisuallyHiddenPresentation } from '@/components/core/Typography/dom-text';
 
 interface MediaBlockHydratorProps {
   containerRef: RefObject<HTMLElement | null>;
@@ -30,6 +35,7 @@ interface HydrationEntry {
 }
 
 const HYDRATED_SIGNATURE_ATTR = 'data-media-hydrated-signature';
+let nextAudioStatusId = 0;
 
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -68,6 +74,21 @@ function buildAudioSignature(audio: HTMLAudioElement, block: HTMLElement | null)
 }
 
 function hydrateVideo(video: HTMLVideoElement, messages: VideoJsMessages) {
+  const frame = video.closest<HTMLElement>('.video-player-container');
+  const mediaBlock = video.closest<HTMLElement>('.video-block-html, .video-block');
+  const mediaName =
+    mediaBlock?.getAttribute('data-media-name') ||
+    mediaBlock?.querySelector('.video-block__title')?.textContent ||
+    messages.regionLabel;
+  video.setAttribute('aria-label', mediaName);
+  if (frame) {
+    frame.setAttribute('role', 'group');
+    frame.setAttribute('aria-label', mediaName);
+  }
+  const playerMessages = { ...messages, regionLabel: mediaName };
+  if (frame) {
+    applyVideoFramePresentation(frame);
+  }
   const block = video.closest<HTMLElement>('.video-block-html, .video-block');
   const { hlsSrc, originalUrl, posterUrl } = resolveHydratedVideoSources({
     block,
@@ -96,7 +117,7 @@ function hydrateVideo(video: HTMLVideoElement, messages: VideoJsMessages) {
         hlsSrc,
         src: originalUrl,
         poster: posterUrl,
-        messages,
+        messages: playerMessages,
       });
       dispose = () => runtime.disposeVideoJsPlayer(player || undefined);
     })
@@ -121,19 +142,63 @@ function hydrateAudio(
     pause: string;
     mute: string;
     unmute: string;
+    volume: string;
+    download: string;
+    seek: string;
+    failed: string;
   },
 ) {
   const block = audio.closest<HTMLElement>('.audio-block-html, .audio-block');
   const player = block?.querySelector<HTMLElement>('.audio-player[data-audio-player]');
+  if (player) {
+    applyAudioMediaPresentation(player);
+    player.setAttribute('role', 'group');
+    player.setAttribute(
+      'aria-label',
+      block?.getAttribute('data-media-name') ||
+        block?.querySelector('.audio-block__title')?.textContent ||
+        messages.play,
+    );
+  }
+  const playbackStatus = player
+    ? (player.querySelector<HTMLElement>('[data-audio-player-status]') ?? document.createElement('span'))
+    : null;
+  if (playbackStatus && player) {
+    playbackStatus.id ||= `audio-playback-status-${++nextAudioStatusId}`;
+    playbackStatus.setAttribute('data-audio-player-status', 'true');
+    playbackStatus.setAttribute('role', 'status');
+    playbackStatus.setAttribute('aria-live', 'polite');
+    playbackStatus.setAttribute('aria-atomic', 'true');
+    applyVisuallyHiddenPresentation(playbackStatus);
+    if (!playbackStatus.parentElement) {
+      player.appendChild(playbackStatus);
+    }
+  }
   const toggle = player?.querySelector<HTMLButtonElement>('[data-audio-player-toggle]');
+  const playbackReady = toggle ? !toggle.disabled : true;
   const mute = player?.querySelector<HTMLButtonElement>('[data-audio-player-mute]');
   const volumeInput = player?.querySelector<HTMLInputElement>('[data-audio-player-volume]');
+  volumeInput?.setAttribute('aria-label', messages.volume);
+  player?.querySelectorAll<HTMLElement>('[data-audio-player-download]').forEach((link) => {
+    link.setAttribute('aria-label', messages.download);
+    link.setAttribute('title', messages.download);
+  });
   const currentTimeEl = player?.querySelector<HTMLElement>('[data-audio-player-current-time]');
   const durationEl = player?.querySelector<HTMLElement>('[data-audio-player-duration]');
-  const track = player?.querySelector<HTMLButtonElement>('[data-audio-player-track]');
+  const track = player?.querySelector<HTMLElement>('[data-audio-player-track], .audio-player__wave-frame');
+  let renderedTime = 0;
+  let seekInput = track
+    ? applyAudioSeekPresentation(track, {
+        label: messages.seek,
+        currentTime: 0,
+        duration: parseFloat(block?.getAttribute('data-duration') || '0') || 0,
+        disabled: !playbackReady,
+      })
+    : null;
   const trackFill = player?.querySelector<HTMLElement>('[data-audio-player-track-fill]');
   const trackThumb = player?.querySelector<HTMLElement>('[data-audio-player-track-thumb]');
   const waveContainer = player?.querySelector<HTMLElement>('[data-audio-player-wave]');
+  waveContainer?.setAttribute('aria-hidden', 'true');
   const waveformUrl = normalizeHydrationUrl(block?.getAttribute('data-waveform-url'));
   const { playbackUrl, hlsSrc } = resolveHydratedAudioSources({
     block,
@@ -149,6 +214,7 @@ function hydrateAudio(
 
   let mountedWaveSurfer: Awaited<ReturnType<typeof mountWaveSurferPlayer>> = null;
   let cancelled = false;
+  let playbackHasError = false;
   let lastAudibleVolume = audio.volume > 0 ? audio.volume : 1;
   let playbackFrameId: number | null = null;
   const fallbackDuration = parseFloat(block?.getAttribute('data-duration') || '0') || 0;
@@ -163,10 +229,37 @@ function hydrateAudio(
   };
 
   const renderPlayer = (nextTime = audio.currentTime, nextDuration = resolveDuration()) => {
-    const duration = nextDuration > 0 ? nextDuration : 0;
+    const duration = Number.isFinite(nextDuration) && nextDuration > 0 ? nextDuration : 0;
     const currentTime = clampMediaTime(nextTime, duration);
     const progress = resolvePlaybackProgress(currentTime, duration);
     const playbackProgress = `${progress * 100}%`;
+    if (playbackStatus) {
+      const message = playbackHasError ? messages.failed : '';
+      if (playbackStatus.textContent !== message) {
+        playbackStatus.textContent = message;
+      }
+      const descriptions = (player?.getAttribute('aria-describedby') || '')
+        .split(/\s+/)
+        .filter((id) => id && id !== playbackStatus.id);
+      if (playbackHasError) {
+        descriptions.push(playbackStatus.id);
+      }
+      if (descriptions.length) {
+        player?.setAttribute('aria-describedby', descriptions.join(' '));
+      } else {
+        player?.removeAttribute('aria-describedby');
+      }
+    }
+    renderedTime = currentTime;
+    if (track) {
+      seekInput = applyAudioSeekPresentation(track, {
+        label: messages.seek,
+        currentTime,
+        duration,
+        disabled: playbackHasError || !playbackReady,
+        describedBy: playbackHasError && playbackStatus ? playbackStatus.id : undefined,
+      });
+    }
     if (trackFill) {
       trackFill.style.width = playbackProgress;
     }
@@ -180,7 +273,6 @@ function hydrateAudio(
       durationEl.textContent = duration > 0 ? formatTime(duration) : '--:--';
     }
     if (player) {
-      player.style.setProperty('--audio-playback-progress', playbackProgress);
       player.setAttribute('data-audio-player-playing', audio.paused ? 'false' : 'true');
       player.setAttribute(
         'data-audio-player-ready',
@@ -189,6 +281,7 @@ function hydrateAudio(
     }
     if (toggle) {
       toggle.setAttribute('aria-label', audio.paused ? messages.play : messages.pause);
+      toggle.disabled = playbackHasError || !playbackReady;
     }
     if (mute) {
       mute.setAttribute('data-muted', audio.muted || audio.volume === 0 ? 'true' : 'false');
@@ -196,8 +289,7 @@ function hydrateAudio(
     }
     if (volumeInput) {
       const volumeValue = audio.muted ? 0 : audio.volume;
-      volumeInput.value = `${volumeValue}`;
-      volumeInput.style.setProperty('--audio-volume-progress', `${Math.max(0, Math.min(1, volumeValue)) * 100}%`);
+      updateNativeRangeValue(volumeInput, volumeValue);
     }
     if (audio.volume > 0) {
       lastAudibleVolume = audio.volume;
@@ -278,7 +370,7 @@ function hydrateAudio(
 
   const seekToTime = (nextTime: number) => {
     const duration = resolveDuration();
-    if (!(duration > 0)) {
+    if (playbackHasError || !playbackReady || !Number.isFinite(duration) || !(duration > 0)) {
       return;
     }
 
@@ -295,7 +387,7 @@ function hydrateAudio(
     if (!track) {
       return;
     }
-    const duration = mountedWaveSurfer?.getDuration() || audio.duration || 0;
+    const duration = resolveDuration();
     const nextTime = resolveSeekTimeFromClientX(track, event.clientX, duration);
     if (nextTime === null) {
       return;
@@ -304,7 +396,11 @@ function hydrateAudio(
   };
 
   const handleToggleClick = () => {
-    if (!normalizeHydrationUrl(audio.getAttribute('src'))) {
+    if (
+      playbackHasError ||
+      !playbackReady ||
+      (!normalizeHydrationUrl(audio.getAttribute('src')) && !playbackUrl && !hlsSrc)
+    ) {
       return;
     }
     if (audio.paused) {
@@ -312,6 +408,29 @@ function hydrateAudio(
       return;
     }
     audio.pause();
+  };
+
+  const handleSeekKeyDown = (event: KeyboardEvent) => {
+    const result = resolveMediaSeekKey(event.key, renderedTime, resolveDuration());
+    if (!result) {
+      return;
+    }
+    event.preventDefault();
+    if (result.kind === 'seek') {
+      seekToTime(result.time);
+    } else {
+      handleToggleClick();
+    }
+  };
+  const handleSeekInput = () => {
+    if (seekInput) {
+      seekToTime(Number(seekInput.value));
+    }
+  };
+  const handleMediaError = () => {
+    playbackHasError = true;
+    stopPlaybackClock();
+    renderPlayer();
   };
 
   const handleMuteClick = () => {
@@ -340,6 +459,7 @@ function hydrateAudio(
   };
 
   const handleLoadedMetadata = () => {
+    playbackHasError = false;
     renderPlayer();
   };
 
@@ -367,6 +487,7 @@ function hydrateAudio(
   };
 
   renderPlayer();
+  audio.addEventListener('error', handleMediaError);
   audio.addEventListener('loadedmetadata', handleLoadedMetadata);
   audio.addEventListener('timeupdate', handleTimeUpdate);
   audio.addEventListener('seeking', handleSeeking);
@@ -379,11 +500,14 @@ function hydrateAudio(
   volumeInput?.addEventListener('input', handleVolumeInput);
   volumeInput?.addEventListener('change', handleVolumeInput);
   track?.addEventListener('click', handleTrackClick);
+  seekInput?.addEventListener('keydown', handleSeekKeyDown);
+  seekInput?.addEventListener('input', handleSeekInput);
 
   return () => {
     cancelled = true;
     stopPlaybackClock();
     mountedWaveSurfer?.destroy();
+    audio.removeEventListener('error', handleMediaError);
     audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
     audio.removeEventListener('timeupdate', handleTimeUpdate);
     audio.removeEventListener('seeking', handleSeeking);
@@ -396,6 +520,8 @@ function hydrateAudio(
     volumeInput?.removeEventListener('input', handleVolumeInput);
     volumeInput?.removeEventListener('change', handleVolumeInput);
     track?.removeEventListener('click', handleTrackClick);
+    seekInput?.removeEventListener('keydown', handleSeekKeyDown);
+    seekInput?.removeEventListener('input', handleSeekInput);
   };
 }
 
@@ -480,6 +606,10 @@ export function MediaBlockHydrator({ containerRef, contentKey }: MediaBlockHydra
             pause: tMedia('audioPlayer.pause'),
             mute: tMedia('audioPlayer.mute'),
             unmute: tMedia('audioPlayer.unmute'),
+            volume: tMedia('audioPlayer.volume'),
+            download: tMedia('audioPlayer.download'),
+            seek: tMedia('audioPlayer.seekPlayback'),
+            failed: tMedia('statuses.failed'),
           }) || (() => {});
         audio.setAttribute(HYDRATED_SIGNATURE_ATTR, signature);
         player?.setAttribute(HYDRATED_SIGNATURE_ATTR, signature);

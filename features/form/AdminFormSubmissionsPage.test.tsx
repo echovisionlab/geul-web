@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { notifyManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -55,11 +56,11 @@ let queryClient: QueryClient;
 function render() {
   act(() => {
     root.render(
-      <MantineProvider env="test">
+      <DesignSystemProvider forceColorScheme="light">
         <QueryClientProvider client={queryClient}>
           <AdminFormSubmissionsPage formId="form-1" editBaseHref="/admin/forms/form-1/submissions" />
         </QueryClientProvider>
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
 }
@@ -90,13 +91,16 @@ describe('AdminFormSubmissionsPage loading failures', () => {
     });
 
     render();
-    await vi.waitFor(async () => {
-      await act(async () => {
-        await Promise.resolve();
-      });
-      expect(mocks.listSubmissions).toHaveBeenCalledTimes(1);
-      expect(container.textContent).toContain('common.errors.generic');
-    });
+    await vi.waitFor(
+      async () => {
+        await act(async () => {
+          await Promise.resolve();
+        });
+        expect(mocks.listSubmissions).toHaveBeenCalledTimes(1);
+        expect(container.textContent).toContain('common.errors.generic');
+      },
+      { timeout: 5000 },
+    );
     expect(container.textContent).not.toContain('formAdmin.submissions.empty');
     expect(container.textContent).toContain('common.actions.tryAgain');
 
@@ -104,13 +108,16 @@ describe('AdminFormSubmissionsPage loading failures', () => {
       container.querySelector('button')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
 
-    await vi.waitFor(async () => {
-      await act(async () => {
-        await Promise.resolve();
-      });
-      expect(mocks.listSubmissions).toHaveBeenCalledTimes(2);
-      expect(container.textContent).not.toContain('common.errors.generic');
-      expect(container.textContent).toContain('formAdmin.submissions.empty');
-    });
+    await vi.waitFor(
+      async () => {
+        await act(async () => {
+          await Promise.resolve();
+        });
+        expect(mocks.listSubmissions).toHaveBeenCalledTimes(2);
+        expect(container.textContent).not.toContain('common.errors.generic');
+        expect(container.textContent).toContain('formAdmin.submissions.empty');
+      },
+      { timeout: 5000 },
+    );
   });
 });

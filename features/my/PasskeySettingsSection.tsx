@@ -1,10 +1,13 @@
 'use client';
+import { SupportingText, Text as DsText, VisuallyHidden } from '@/components/core/Typography';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { IconKey, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Box, Group, Stack, Text } from '@mantine/core';
+
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
@@ -61,6 +64,7 @@ export interface PasskeySettingsViewProps {
 
 interface PasskeySettingsSectionProps {
   subjectId: string;
+  requestFlow?: typeof requestSettingsFlow;
   hasRecoverableAuthenticationMethod?: boolean;
   onCredentialCountChange?: (count: number) => void;
 }
@@ -104,66 +108,83 @@ export function PasskeySettingsView({
   const t = useTranslations('security.passkeys');
   const tCommonActions = useTranslations('common.actions');
   const dateTime = useDateTimeFormatter();
+  const scopeId = useId();
 
   return (
-    <>
-      <SectionHeader title={t('title')} description={t('description')} />
+    <DsLayoutStack gap="md">
+      <SectionHeader
+        title={
+          <span role="heading" aria-level={2}>
+            {t('title')}
+          </span>
+        }
+        description={t('description')}
+      />
 
-      <Stack gap="sm" data-testid="security-passkeys-section">
+      <DsLayoutStack gap="sm" data-testid="security-passkeys-section">
         {error ? (
           <Alert tone="danger">
-            <Text size="sm">{error}</Text>
+            <DsText size="sm">{error}</DsText>
           </Alert>
         ) : null}
 
         {loading ? (
-          <SectionCard p="sm">
-            <Text size="sm" c="dimmed">
+          <SectionCard appearance="plain" padding="sm">
+            <SupportingText tone="secondary" role="status">
               {t('loading')}
-            </Text>
+            </SupportingText>
           </SectionCard>
         ) : passkeys.length > 0 ? (
           passkeys.map((passkey) => (
-            <SectionCard key={passkey.id} p="sm">
-              <Group justify="space-between" wrap="nowrap">
-                <Group gap="sm" wrap="nowrap">
+            <SectionCard
+              appearance="plain"
+              key={passkey.id}
+              padding="sm"
+              role="group"
+              aria-labelledby={`${scopeId}-${passkey.id}-name`}
+              aria-describedby={passkey.disabled ? `${scopeId}-${passkey.id}-reason` : undefined}
+            >
+              <DsLayoutInline justify="between" wrap="nowrap">
+                <DsLayoutInline gap="sm" wrap="nowrap">
                   <IconKey size={22} aria-hidden />
-                  <Box>
-                    <Text size="sm" fw={600}>
+                  <div>
+                    <DsText id={`${scopeId}-${passkey.id}-name`} size="sm" weight="strong">
                       {passkey.displayName}
-                    </Text>
+                    </DsText>
                     {passkey.addedAt ? (
-                      <Text size="xs" c="dimmed">
+                      <DsText size="xs" tone="secondary">
                         {t('added', {
                           date: dateTime.date(passkey.addedAt, { dateStyle: 'medium' }),
                         })}
-                      </Text>
+                      </DsText>
                     ) : null}
-                  </Box>
-                </Group>
+                  </div>
+                </DsLayoutInline>
                 <Tooltip label={passkey.disabled ? t('lastMethod') : tCommonActions('remove')} withArrow>
                   <span>
                     <IconButton
                       tone="danger"
                       emphasis="low"
                       aria-label={t('removeNamed', { name: passkey.displayName })}
+                      aria-describedby={passkey.disabled ? `${scopeId}-${passkey.id}-reason` : undefined}
                       disabled={passkey.disabled}
                       loading={removingId === passkey.id}
                       onClick={() => onRemove(passkey)}
                       data-testid={`security-remove-passkey-${passkey.id}`}
                     >
-                      <IconTrash size={17} />
+                      <IconTrash size={17} aria-hidden />
                     </IconButton>
                   </span>
                 </Tooltip>
-              </Group>
+              </DsLayoutInline>
+              {passkey.disabled ? (
+                <VisuallyHidden id={`${scopeId}-${passkey.id}-reason`}>{t('lastMethod')}</VisuallyHidden>
+              ) : null}
             </SectionCard>
           ))
         ) : (
-          <SectionCard p="sm">
-            <Text size="sm" c="dimmed">
-              {t('empty')}
-            </Text>
+          <SectionCard appearance="plain" padding="sm">
+            <SupportingText tone="secondary">{t('empty')}</SupportingText>
           </SectionCard>
         )}
 
@@ -176,7 +197,7 @@ export function PasskeySettingsView({
             <Button
               type="button"
               emphasis="medium"
-              leftSection={<IconPlus size={16} />}
+              leftSection={<IconPlus size={16} aria-hidden />}
               onClick={onAdd}
               disabled={!registrationReady}
               loading={!registrationReady}
@@ -187,13 +208,14 @@ export function PasskeySettingsView({
             </Button>
           </form>
         ) : null}
-      </Stack>
-    </>
+      </DsLayoutStack>
+    </DsLayoutStack>
   );
 }
 
 export function PasskeySettingsSection({
   subjectId,
+  requestFlow = requestSettingsFlow,
   hasRecoverableAuthenticationMethod = true,
   onCredentialCountChange,
 }: PasskeySettingsSectionProps) {
@@ -227,7 +249,7 @@ export function PasskeySettingsSection({
     setLoading(true);
     setError(null);
     try {
-      const next = await requestSettingsFlow({ returnTo: '/my/security' });
+      const next = await requestFlow({ returnTo: '/my/security' });
       setRegistrationReady(false);
       setFlow(next.flow);
       if (hasSettingsFlowError(next.flow)) {
@@ -242,7 +264,7 @@ export function PasskeySettingsSection({
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [t, requestFlow]);
 
   useEffect(() => {
     void loadFlow();
@@ -313,7 +335,7 @@ export function PasskeySettingsSection({
     setRegistrationRequested(true);
     setError(null);
     try {
-      const next = await requestSettingsFlow({ returnTo: '/my/security' });
+      const next = await requestFlow({ returnTo: '/my/security' });
       setFlow(next.flow);
     } catch (cause) {
       setRegistrationRequested(false);

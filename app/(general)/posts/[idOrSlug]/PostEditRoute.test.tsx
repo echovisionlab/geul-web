@@ -5,6 +5,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
   getPostForEdit: vi.fn(),
+  getPostEditorSnapshot: vi.fn(async (_id: string, locale: string) => ({
+    locale,
+    documentRevision: 'ssr-revision',
+    editable: false,
+  })),
   redirect: vi.fn((href: string) => {
     throw new Error(`redirect:${href}`);
   }),
@@ -37,7 +42,10 @@ vi.mock('@/lib/queries/manifest', () => ({
   getManageSiteContext: vi.fn(async () => ({ canonicalOrigin: 'https://example.test', siteName: 'Geul' })),
   getSettings: vi.fn(),
 }));
-vi.mock('@/lib/queries/post', () => ({ getPostForEdit: mocks.getPostForEdit }));
+vi.mock('@/lib/queries/post', () => ({
+  getPostForEdit: mocks.getPostForEdit,
+  getPostEditorSnapshot: mocks.getPostEditorSnapshot,
+}));
 vi.mock('@/lib/queries/series', () => ({
   listMySeries: vi.fn(async () => []),
   listSeriesSimple: vi.fn(async () => []),
@@ -64,6 +72,7 @@ const post = {
   tags: [],
   featuredImageUrl: null,
   commentsEnabled: true,
+  sourceLocale: 'ko',
   documentLayout: { contentHeight: 'content', pageChrome: 'flow', footer: 'flow' },
   seriesId: null,
   seriesOrder: null,
@@ -102,7 +111,9 @@ describe('Post edit query route', () => {
   it('mounts the collaboration editor for an archived Author in read-only mode', async () => {
     mocks.getPostForEdit.mockResolvedValue({ ...post, status: 'archived', allowedActions: [] });
 
-    const html = renderToStaticMarkup(await renderPostEditRoute(POST_ID, { edit: 'true' }));
+    const editor = await renderPostEditRoute(POST_ID, { edit: 'true' });
+    expect(editor.props.initialSourceLocale).toBe('ko');
+    const html = renderToStaticMarkup(editor);
 
     expect(html).toContain(`editor:${POST_ID}:view`);
   });
@@ -111,7 +122,9 @@ describe('Post edit query route', () => {
     mocks.getSession.mockResolvedValue({ user: { id: 'member-1', nickname: 'Admin', role: 'admin' } });
     mocks.getPostForEdit.mockResolvedValue({ ...post, status: 'archived' });
 
-    const html = renderToStaticMarkup(await renderPostEditRoute(POST_ID, { edit: 'true' }));
+    const editor = await renderPostEditRoute(POST_ID, { edit: 'true' });
+    expect(editor.props.initialSourceLocale).toBe('ko');
+    const html = renderToStaticMarkup(editor);
 
     expect(html).toContain(`editor:${POST_ID}:edit`);
   });
@@ -124,10 +137,24 @@ describe('Post edit query route', () => {
   });
 
   it('renders the existing editor for its immutable ID', async () => {
-    const html = renderToStaticMarkup(await renderPostEditRoute(POST_ID, { edit: 'true' }));
+    const editor = await renderPostEditRoute(POST_ID, { edit: 'true' });
+    expect(editor.props.initialSourceLocale).toBe('ko');
+    const html = renderToStaticMarkup(editor);
 
     expect(html).toContain(`editor:${POST_ID}`);
     expect(html).toContain(post.configurationRevision);
     expect(mocks.getPostForEdit).toHaveBeenCalledWith(POST_ID);
+  });
+});
+
+it('requests the exact initial edit locale and passes the authorized snapshot to the lazy editor', async () => {
+  mocks.getSession.mockResolvedValue({ user: { id: 'member-1', nickname: 'Member', role: 'author' } });
+  mocks.getPostForEdit.mockResolvedValue(post);
+  const route = await renderPostEditRoute(POST_ID, { edit: 'true', lang: 'en' });
+  expect(mocks.getPostEditorSnapshot).toHaveBeenCalledWith(POST_ID, 'en');
+  expect(route.props.initialSnapshot).toMatchObject({
+    locale: 'en',
+    documentRevision: 'ssr-revision',
+    editable: false,
   });
 });

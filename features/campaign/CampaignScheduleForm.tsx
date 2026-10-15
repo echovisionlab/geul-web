@@ -1,7 +1,10 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 
 import { IconAlertCircle, IconCalendar } from '@tabler/icons-react';
-import { Divider, Group, Stack, Text } from '@mantine/core';
+
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
 import { DateTimeInput, type DateTimeValue } from '@/components/core/Input/DateTimeInput';
@@ -28,6 +31,7 @@ interface CampaignScheduleFormProps {
   includesUnsubscribedUsers: boolean;
   labels: CampaignScheduleFormLabels;
   loading?: boolean;
+  disabled?: boolean;
   onChange: (value: DateTimeValue) => void;
   onCancel: () => void;
   onSchedule: () => void;
@@ -41,6 +45,7 @@ export function CampaignScheduleForm({
   includesUnsubscribedUsers,
   labels,
   loading = false,
+  disabled = false,
   onChange,
   onCancel,
   onSchedule,
@@ -48,11 +53,10 @@ export function CampaignScheduleForm({
   const complete = Boolean(value.date && value.time);
 
   return (
-    <Stack>
-      <Text size="sm" c="dimmed">
-        {labels.description}
-      </Text>
+    <DsLayoutStack>
+      <SupportingText tone="secondary">{labels.description}</SupportingText>
       <DateTimeInput
+        disabled={disabled}
         locale={locale}
         dateLabel={labels.date}
         timeLabel={labels.time}
@@ -65,27 +69,27 @@ export function CampaignScheduleForm({
         onChange={onChange}
         required
       />
-      <Text size="sm">{labels.audience.replace('{audience}', audience)}</Text>
+      <DsText size="sm">{labels.audience.replace('{audience}', audience)}</DsText>
       {includesUnsubscribedUsers ? (
         <Alert icon={<IconAlertCircle size={16} />} tone="warning">
           {labels.allMatchingUsersWarning}
         </Alert>
       ) : null}
-      <Divider />
-      <Group justify="flex-end">
+      <DsLayoutInline justify="end">
         <Button emphasis="low" onClick={onCancel}>
           {labels.cancel}
         </Button>
         <Button
-          tone="accent"
+          emphasis="medium"
+          tone="neutral"
           onClick={onSchedule}
           loading={loading}
-          disabled={!complete}
+          disabled={disabled || !complete}
           leftSection={<IconCalendar size={16} />}
         >
           {labels.schedule}
         </Button>
-      </Group>
-    </Stack>
+      </DsLayoutInline>
+    </DsLayoutStack>
   );
 }

@@ -1,6 +1,8 @@
 'use client';
 
-import { Anchor, Text } from '@mantine/core';
+import { Text as DsText } from '@/components/core/Typography';
+
+import { NavigationLink as Anchor } from '@/components/core/Navigation';
 import { ThemedAssetImage } from '@/features/media/ThemedAssetImage';
 
 export interface ClientPublicMarkProps {
@@ -35,13 +37,7 @@ export function ClientPublicMark({
       />
     );
     return website ? (
-      <Anchor
-        href={website}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={name}
-        style={{ display: 'inline-flex' }}
-      >
+      <Anchor href={website} target="_blank" rel="noopener noreferrer" aria-label={name} appearance="block">
         {logo}
       </Anchor>
     ) : (
@@ -54,8 +50,8 @@ export function ClientPublicMark({
       {name}
     </Anchor>
   ) : (
-    <Text size="sm" component="span">
+    <DsText size="sm" as="span">
       {name}
-    </Text>
+    </DsText>
   );
 }

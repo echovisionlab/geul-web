@@ -1,6 +1,11 @@
 import mantine from 'eslint-config-mantine';
 import { defineConfig } from 'eslint/config';
 import { importBoundaryPlugin } from './eslint-rules/enforce-import-boundary.mjs';
+import { responsiveOwnershipPlugin } from './eslint-rules/responsive-ownership.mjs';
+import { designTokensPlugin } from './eslint-rules/design-tokens.mjs';
+import { frameworkOwnershipPlugin } from './eslint-rules/framework-ownership.mjs';
+import { layoutOwnershipPlugin } from './eslint-rules/layout-ownership.mjs';
+import { affordancePlacementPlugin } from './eslint-rules/affordance-placement.mjs';
 
 const restrictedCoreImportPatterns = [
   '@/features',
@@ -73,6 +78,18 @@ export default defineConfig(
   {
     plugins: {
       boundaries: importBoundaryPlugin,
+      'design-tokens': designTokensPlugin,
+      'responsive-ownership': responsiveOwnershipPlugin,
+      'layout-ownership': layoutOwnershipPlugin,
+      'framework-ownership': frameworkOwnershipPlugin,
+      'affordance-placement': affordancePlacementPlugin,
+    },
+    rules: {
+      'design-tokens/no-new-literals': 'error',
+      'responsive-ownership/no-escape': 'error',
+      'layout-ownership/no-escape': 'error',
+      'framework-ownership/no-escape': 'error',
+      'affordance-placement/placement': 'error',
     },
   },
   {
@@ -231,6 +248,8 @@ export default defineConfig(
   },
   {
     files: ['components/core/**/*.tsx', 'components/core/**/*.ts'],
+    // Story adapters resolve toolbar context; production Core continues to accept labels through props.
+    ignores: ['**/*.stories.ts', '**/*.stories.tsx', '**/*.story.ts', '**/*.story.tsx'],
     rules: {
       'boundaries/enforce-import-boundary': ['error', { boundary: 'core' }],
       'no-restricted-imports': [
@@ -250,6 +269,7 @@ export default defineConfig(
   },
   {
     files: ['features/**/ui/**/*.tsx', 'features/**/ui/**/*.ts'],
+    ignores: ['**/*.stories.ts', '**/*.stories.tsx', '**/*.story.ts', '**/*.story.tsx'],
     rules: {
       'boundaries/enforce-import-boundary': ['error', { boundary: 'feature-ui' }],
       'no-restricted-imports': [
@@ -292,9 +312,14 @@ export default defineConfig(
                 'Feature UI must not import domain contracts. Map them to serializable view models in a controller.',
             },
             {
-              group: ['@/app', '@/app/**', '@/features', '@/features/**', '@/hooks', '@/hooks/**', '@/lib', '@/lib/**'],
+              group: ['@/app', '@/app/**', '@/hooks', '@/hooks/**', '@/lib', '@/lib/**'],
               message:
                 'Feature UI must be a pure Core composition. Keep controllers and application hooks outside ui/, and pass domain state and events through props.',
+            },
+            {
+              regex: '^@/features(?:$|/(?!(?:confirmation/ui/ConfirmationDialog|participants/ParticipantRow)$))',
+              message:
+                'Feature UI may consume the reviewed pure confirmation and participant presentation entries, not Feature controllers, hooks or barrels.',
             },
           ],
         },

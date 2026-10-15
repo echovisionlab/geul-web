@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import type { OgGenerationUiStatus } from '@/lib/types/og-generation';
+import { OG_IMAGE_CSS_ASPECT_RATIO } from '@/lib/constants/og-image';
 import { OgImagePreviewView, type OgImagePreviewViewModel } from './ui/OgImagePreviewView';
 
 interface OgImagePreviewProps {
@@ -21,7 +22,7 @@ export function OgImagePreview({
   generationStatus,
   generationError,
   onRegenerate,
-  sizes = '(min-width: 62em) 25vw, (min-width: 48em) 50vw, 100vw',
+  sizes = '50vw',
 }: OgImagePreviewProps) {
   const t = useTranslations('ogImagePreview');
   const tCommonLabels = useTranslations('common.labels');
@@ -33,6 +34,7 @@ export function OgImagePreview({
   const model: OgImagePreviewViewModel = {
     src,
     sizes,
+    aspectRatio: OG_IMAGE_CSS_ASPECT_RATIO,
     headerLabel: tCommonLabels('ogImage'),
     imageAlt: t('alt'),
     emptyLabel: t('empty'),

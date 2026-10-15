@@ -141,14 +141,16 @@ function GeneratedSectionContent({
       );
     case 'rich-text':
       return (
-        section.richText?.map((block) => (
-          <GeneratedRichTextBlockView
-            key={block.id}
-            block={block}
-            requestedLocale={requestedLocale}
-            allowStandaloneExternalVideo
-          />
-        )) ?? null
+        <div className="rich-text-content prose">
+          {section.richText?.map((block) => (
+            <GeneratedRichTextBlockView
+              key={block.id}
+              block={block}
+              requestedLocale={requestedLocale}
+              allowStandaloneExternalVideo
+            />
+          ))}
+        </div>
       );
     case 'columns': {
       const gap = Number(props.gap ?? 24);

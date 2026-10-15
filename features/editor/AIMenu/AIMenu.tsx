@@ -1,5 +1,12 @@
 'use client';
 
+import { SectionCard as EditorDsSectionCard } from '@/components/core/Section';
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   IconAbc,
@@ -7,6 +14,7 @@ import {
   IconBulb,
   IconCheck,
   IconFileText,
+  IconGripVertical,
   IconLanguage,
   IconPencil,
   IconPlayerPlay,
@@ -20,8 +28,9 @@ import {
   type AIEditorDocumentToolApprovalRequired,
 } from '@echovisionlab/geul-proto/secure/ai_pb.ts';
 import { useTranslations } from 'next-intl';
-import { Divider, FloatingWindow, Group, Loader, Paper, ScrollArea, Stack, Text } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+import { FloatingPanel } from '@/components/core/FloatingPanel';
+import { Spinner as Loader, ScrollArea } from '@/components/core/Display';
+import { notifications } from '@/components/core/Notification';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { TextInput } from '@/components/core/Input';
@@ -36,7 +45,8 @@ import type { AIEditorContext } from '@/lib/editor/ai-support';
 import styles from './AIMenu.module.css';
 
 const AI_FLOATING_WINDOW_DRAG_HANDLE_CLASS = 'ai-assistant-floating-drag-handle';
-const AI_FLOATING_WINDOW_EXCLUDE_SELECTOR = 'button,input,textarea,select,a,[contenteditable="true"]';
+const AI_FLOATING_WINDOW_EXCLUDE_SELECTOR =
+  'button:not([data-ai-floating-drag-handle]),input,textarea,select,a,[contenteditable="true"]';
 
 type AIMenuState = 'input' | 'streaming' | 'approval' | 'resolving' | 'completed' | 'error';
 
@@ -224,7 +234,7 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
       notifications.show({
         title: t('notifications.applyFailedTitle'),
         message: t('notifications.applyFailedMessage'),
-        color: 'red',
+        tone: 'danger',
       });
     }
   }, [approval, t]);
@@ -280,180 +290,201 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
   const showInput = menuState === 'input' || menuState === 'streaming';
 
   return (
-    <Stack gap="xs" p="xs" style={{ width: 360 }}>
-      <Group
-        className={dragHandleClassName}
-        gap="xs"
-        justify="space-between"
-        style={{ cursor: dragHandleClassName ? 'grab' : 'default' }}
-      >
-        <Group gap="xs">
-          <IconSparkles size={16} color="var(--mantine-color-violet-6)" />
-          <Text size="sm" fw={500}>
-            {t('title')}
-          </Text>
-          <Text size="xs" c="dimmed">
-            ({context.mode === 'modify' ? t('modes.modify') : t('modes.generate')})
-          </Text>
-        </Group>
-        <IconButton size="xs" emphasis="low" aria-label={t('actions.close')} onClick={onClose}>
-          <IconX size={14} />
-        </IconButton>
-      </Group>
-
-      {showInput ? (
-        <>
-          <TextInput
-            ref={inputRef}
-            placeholder={placeholder}
-            value={customPrompt}
-            onChange={(event) => setCustomPrompt(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                handleCustomPrompt();
-              }
-            }}
-            size="sm"
-            disabled={menuState === 'streaming'}
-            rightSection={
-              menuState === 'streaming' ? (
-                <Loader size="xs" />
-              ) : (
-                <IconButton
-                  size="sm"
-                  emphasis="low"
-                  aria-label={t('actions.submitPrompt')}
-                  onClick={handleCustomPrompt}
-                  disabled={!customPrompt.trim()}
-                >
-                  <IconArrowRight size={14} />
+    <div style={{ width: 360, maxWidth: '100%' }}>
+      <DsLayoutInset space="xs">
+        <DsLayoutStack gap="xs">
+          <div style={{ cursor: dragHandleClassName ? 'grab' : 'default' }}>
+            <div className={dragHandleClassName}>
+              <DsLayoutInline gap="xs" justify="between">
+                <DsLayoutInline gap="xxs">
+                  {dragHandleClassName && (
+                    <IconButton
+                      emphasis="low"
+                      interaction="drag-handle"
+                      draggable={false}
+                      data-ai-floating-drag-handle
+                      aria-label={tCommonActions('move')}
+                      aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight"
+                    >
+                      <IconGripVertical aria-hidden />
+                    </IconButton>
+                  )}
+                  <IconSparkles size={16} color="var(--geul-action-primary)" />
+                  <DsText size="sm" weight="medium">
+                    {t('title')}
+                  </DsText>
+                  <DsText size="xs" tone="secondary">
+                    ({context.mode === 'modify' ? t('modes.modify') : t('modes.generate')})
+                  </DsText>
+                </DsLayoutInline>
+                <IconButton size="compact" emphasis="low" aria-label={t('actions.close')} onClick={onClose}>
+                  <IconX size={14} />
                 </IconButton>
-              )
-            }
-          />
-          {menuState === 'input' ? (
+              </DsLayoutInline>
+            </div>
+          </div>
+
+          {showInput ? (
             <>
-              <Divider label={t('quickActions.title')} labelPosition="center" />
-              <Group gap={4} wrap="wrap">
-                {menuItems.map((item) => (
-                  <Button
-                    key={item.action}
-                    size="xs"
-                    emphasis="medium"
-                    leftSection={item.icon}
-                    onClick={() => void startTurn(item.action)}
-                  >
-                    {item.label}
-                  </Button>
-                ))}
-              </Group>
+              <TextInput
+                ref={inputRef}
+                placeholder={placeholder}
+                value={customPrompt}
+                onChange={(event) => setCustomPrompt(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    handleCustomPrompt();
+                  }
+                }}
+                size="sm"
+                disabled={menuState === 'streaming'}
+                rightSection={
+                  menuState === 'streaming' ? (
+                    <Loader size="xs" />
+                  ) : (
+                    <IconButton
+                      size="compact"
+                      emphasis="low"
+                      aria-label={t('actions.submitPrompt')}
+                      onClick={handleCustomPrompt}
+                      disabled={!customPrompt.trim()}
+                    >
+                      <IconArrowRight size={14} />
+                    </IconButton>
+                  )
+                }
+              />
+              {menuState === 'input' ? (
+                <>
+                  <DsText size="xs" weight="medium" tone="secondary">
+                    {t('quickActions.title')}
+                  </DsText>
+                  <DsLayoutInline gap="xxs" wrap="wrap">
+                    {menuItems.map((item) => (
+                      <Button
+                        key={item.action}
+                        size="xs"
+                        emphasis="medium"
+                        leftSection={item.icon}
+                        onClick={() => void startTurn(item.action)}
+                      >
+                        {item.label}
+                      </Button>
+                    ))}
+                  </DsLayoutInline>
+                </>
+              ) : null}
+              {assistantText ? (
+                <DsText size="sm" aria-live="polite">
+                  {assistantText}
+                </DsText>
+              ) : null}
+              {menuState === 'streaming' ? (
+                <Button
+                  size="xs"
+                  tone="danger"
+                  emphasis="medium"
+                  onClick={() => void handleStop()}
+                  leftSection={<IconX size={14} />}
+                  fullWidth
+                >
+                  {t('actions.stop')}
+                </Button>
+              ) : null}
             </>
           ) : null}
-          {assistantText ? (
-            <Text size="sm" aria-live="polite">
-              {assistantText}
-            </Text>
-          ) : null}
-          {menuState === 'streaming' ? (
-            <Button
-              size="xs"
-              tone="danger"
-              emphasis="medium"
-              onClick={() => void handleStop()}
-              leftSection={<IconX size={14} />}
-              fullWidth
-            >
-              {t('actions.stop')}
-            </Button>
-          ) : null}
-        </>
-      ) : null}
 
-      {(menuState === 'approval' || menuState === 'resolving') && approval?.mutation ? (
-        <>
-          <Paper p="xs" withBorder>
-            <Text size="xs" c="green" fw={500} mb={4}>
-              {t('sections.result')}
-            </Text>
-            {assistantText ? <Text size="sm">{assistantText}</Text> : null}
-            {approval.summary ? (
-              <Text size="sm" mb="xs">
-                {approval.summary}
-              </Text>
-            ) : null}
-            <ScrollArea.Autosize mah={180}>
-              <Stack gap={4}>
-                {proposalOperations(approval.mutation).map((operation, index) => (
-                  <Text key={index} size="sm" className={styles.previewContent}>
-                    {describeAIDocumentOperation(operation)}
-                  </Text>
-                ))}
-              </Stack>
-            </ScrollArea.Autosize>
-          </Paper>
-          <Group gap="xs" grow>
-            <Button
-              size="sm"
-              tone="neutral"
-              emphasis="medium"
-              onClick={() => void handleDeny()}
-              leftSection={<IconX size={14} />}
-              disabled={menuState === 'resolving'}
-            >
-              {t('actions.reject')}
-            </Button>
-            <Button
-              size="sm"
-              tone="positive"
-              emphasis="strong"
-              onClick={() => void handleApprove()}
-              leftSection={menuState === 'resolving' ? <Loader size="xs" /> : <IconCheck size={14} />}
-              disabled={menuState === 'resolving'}
-            >
-              {context.mode === 'modify' ? t('actions.accept') : t('actions.insert')}
-            </Button>
-          </Group>
-        </>
-      ) : null}
-
-      {menuState === 'completed' ? (
-        <>
-          {assistantText ? (
-            <Paper p="xs" withBorder>
-              <Text size="sm">{assistantText}</Text>
-            </Paper>
+          {(menuState === 'approval' || menuState === 'resolving') && approval?.mutation ? (
+            <>
+              <EditorDsSectionCard padding="xs" withBorder>
+                <DsLayoutInset blockEnd="xxs">
+                  <DsText size="xs" tone="positive" weight="medium">
+                    {t('sections.result')}
+                  </DsText>
+                </DsLayoutInset>
+                {assistantText ? <DsText size="sm">{assistantText}</DsText> : null}
+                {approval.summary ? (
+                  <DsLayoutInset blockEnd="xs">
+                    <DsText size="sm">{approval.summary}</DsText>
+                  </DsLayoutInset>
+                ) : null}
+                <ScrollArea.Autosize size="compact">
+                  <DsLayoutStack gap="xxs">
+                    {proposalOperations(approval.mutation).map((operation, index) => (
+                      <div key={index} className={styles.previewContent}>
+                        <DsText size="sm">{describeAIDocumentOperation(operation)}</DsText>
+                      </div>
+                    ))}
+                  </DsLayoutStack>
+                </ScrollArea.Autosize>
+              </EditorDsSectionCard>
+              <DsLayoutInline gap="xs" grow>
+                <Button
+                  size="sm"
+                  tone="neutral"
+                  emphasis="medium"
+                  onClick={() => void handleDeny()}
+                  leftSection={<IconX size={14} />}
+                  disabled={menuState === 'resolving'}
+                >
+                  {t('actions.reject')}
+                </Button>
+                <Button
+                  size="sm"
+                  tone="positive"
+                  emphasis="medium"
+                  onClick={() => void handleApprove()}
+                  leftSection={menuState === 'resolving' ? <Loader size="xs" /> : <IconCheck size={14} />}
+                  disabled={menuState === 'resolving'}
+                >
+                  {context.mode === 'modify' ? t('actions.accept') : t('actions.insert')}
+                </Button>
+              </DsLayoutInline>
+            </>
           ) : null}
-          <Button size="sm" emphasis="medium" onClick={onClose}>
-            {tCommonActions('close')}
-          </Button>
-        </>
-      ) : null}
 
-      {menuState === 'error' ? (
-        <>
-          <Paper p="xs" withBorder>
-            <Text size="xs" c="red" fw={500} mb={4}>
-              {t('sections.result')}
-            </Text>
-            <Text size="sm">{error?.message || t('errors.generic')}</Text>
-          </Paper>
-          <Group gap="xs">
-            <Button size="xs" emphasis="medium" onClick={onClose}>
-              {tCommonActions('close')}
-            </Button>
-            <Button
-              size="xs"
-              emphasis="medium"
-              onClick={() => void handleRetry()}
-              leftSection={<IconRefresh size={14} />}
-            >
-              {t('actions.retry')}
-            </Button>
-          </Group>
-        </>
-      ) : null}
-    </Stack>
+          {menuState === 'completed' ? (
+            <>
+              {assistantText ? (
+                <EditorDsSectionCard padding="xs" withBorder>
+                  <DsText size="sm">{assistantText}</DsText>
+                </EditorDsSectionCard>
+              ) : null}
+              <Button size="sm" emphasis="medium" onClick={onClose}>
+                {tCommonActions('close')}
+              </Button>
+            </>
+          ) : null}
+
+          {menuState === 'error' ? (
+            <>
+              <EditorDsSectionCard padding="xs" withBorder>
+                <DsLayoutInset blockEnd="xxs">
+                  <DsText size="xs" tone="danger" weight="medium">
+                    {t('sections.result')}
+                  </DsText>
+                </DsLayoutInset>
+                <DsText size="sm">{error?.message || t('errors.generic')}</DsText>
+              </EditorDsSectionCard>
+              <DsLayoutInline gap="xs">
+                <Button size="xs" emphasis="medium" onClick={onClose}>
+                  {tCommonActions('close')}
+                </Button>
+                <Button
+                  size="xs"
+                  emphasis="medium"
+                  onClick={() => void handleRetry()}
+                  leftSection={<IconRefresh size={14} />}
+                >
+                  {t('actions.retry')}
+                </Button>
+              </DsLayoutInline>
+            </>
+          ) : null}
+        </DsLayoutStack>
+      </DsLayoutInset>
+    </div>
   );
 }
 
@@ -468,6 +499,7 @@ interface AIAssistantProps {
 
 export function AIAssistant({ client, initialContext, initialAction, position, onClose, target }: AIAssistantProps) {
   const menuRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations('aiAssistant');
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -490,18 +522,13 @@ export function AIAssistant({ client, initialContext, initialAction, position, o
   }, [onClose]);
 
   return (
-    <FloatingWindow
+    <FloatingPanel
+      label={t('title')}
       ref={menuRef}
       initialPosition={position}
       dragHandleSelector={`.${AI_FLOATING_WINDOW_DRAG_HANDLE_CLASS}`}
       excludeDragHandleSelector={AI_FLOATING_WINDOW_EXCLUDE_SELECTOR}
       constrainToViewport
-      constrainOffset={8}
-      zIndex={1000}
-      shadow="md"
-      radius={0}
-      withBorder
-      p={0}
     >
       <AIMenu
         client={client}
@@ -511,6 +538,6 @@ export function AIAssistant({ client, initialContext, initialAction, position, o
         dragHandleClassName={AI_FLOATING_WINDOW_DRAG_HANDLE_CLASS}
         initialAction={initialAction}
       />
-    </FloatingWindow>
+    </FloatingPanel>
   );
 }

@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/lib/hooks/useUpload', () => ({
   useUpload: () => ({ upload: mocks.upload, isUploading: false }),
 }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: mocks.notification } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: mocks.notification } }));
 vi.mock('@/lib/utils/client-logger', () => ({
   createClientLogger: () => ({ error: mocks.loggerError }),
 }));
@@ -96,7 +96,7 @@ describe('useImageAssetUpload', () => {
     });
 
     expect(mocks.upload).not.toHaveBeenCalled();
-    expect(mocks.notification).toHaveBeenCalledWith({ message: 'Not ready', color: 'red' });
+    expect(mocks.notification).toHaveBeenCalledWith({ message: 'Not ready', tone: 'danger' });
   });
 
   it('logs upload failures and chooses the useful error message', async () => {
@@ -110,7 +110,7 @@ describe('useImageAssetUpload', () => {
 
     expect(mocks.loggerError).toHaveBeenNthCalledWith(1, 'Upload error', { error: 'Network failed' });
     expect(mocks.loggerError).toHaveBeenNthCalledWith(2, 'Upload error', { error: 'unknown' });
-    expect(mocks.notification).toHaveBeenNthCalledWith(1, { message: 'Network failed', color: 'red' });
-    expect(mocks.notification).toHaveBeenNthCalledWith(2, { message: 'Upload failed', color: 'red' });
+    expect(mocks.notification).toHaveBeenNthCalledWith(1, { message: 'Network failed', tone: 'danger' });
+    expect(mocks.notification).toHaveBeenNthCalledWith(2, { message: 'Upload failed', tone: 'danger' });
   });
 });

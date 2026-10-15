@@ -1,58 +1,85 @@
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Heading as DsHeading } from '@/components/core/Typography';
 import type { Meta, StoryObj } from '@storybook/nextjs';
-import { Box, Divider, Stack, Title } from '@mantine/core';
+import { expect, within } from 'storybook/test';
+
 import { ManifestProvider } from '@/lib/contexts/ManifestContext';
 import { DEFAULT_SITE_SETTINGS_VIEW } from '@/lib/types/site-setting/config';
 import { usePersonalAccessTokenLabels } from './usePersonalAccessTokenLabels';
-import { LocaleProvider } from '@/lib/providers/LocaleProvider';
-import { McpOAuthGrantSettings } from './McpOAuthGrantSettings';
+import { useTranslations } from 'next-intl';
 import { McpIntegrationSettingsView } from './ui/McpIntegrationSettings';
 import { PersonalAccessTokenSettingsView } from './ui/PersonalAccessTokenSettings';
+import { useState } from 'react';
+import type {
+  PersonalAccessTokenViewModel,
+  PersonalAccessTokenSecretViewModel,
+} from './ui/PersonalAccessTokenSettings/PersonalAccessTokenSettingsView';
 
-function McpAndApiAccessContent() {
+function McpAndApiAccessContent({ showSecret = false }: { showSecret?: boolean }) {
   const labels = usePersonalAccessTokenLabels();
+  const t = useTranslations();
+  const [secret, setSecret] = useState<PersonalAccessTokenSecretViewModel | null>(
+    showSecret ? { value: 'storybook-example-only-not-a-credential' } : null,
+  );
+  const [token, setToken] = useState<PersonalAccessTokenViewModel | null>(
+    showSecret ? { id: 'local-preview', createdAtLabel: '2026-10-11', canRegenerate: true } : null,
+  );
+  const createToken = async () => {
+    setToken({ id: crypto.randomUUID(), createdAtLabel: '2026-10-11', canRegenerate: true });
+    setSecret({ value: `storybook-example-only-${crypto.randomUUID()}` });
+    return true;
+  };
   return (
-    <LocaleProvider locale="ko">
-      <Box w={760} maw="calc(100vw - 2rem)" mx="auto" py="xl">
-        <Stack gap="lg">
-          <Title order={2}>설정</Title>
+    <>
+      <div
+        style={{
+          width: 760,
+          maxWidth: '100%',
+          marginInline: 'auto',
+          paddingBlock: 'var(--geul-spacing-xl)',
+        }}
+      >
+        <DsLayoutStack gap="xl">
+          <DsHeading level={2}>{t('common.labels.settings')}</DsHeading>
 
           <PersonalAccessTokenSettingsView
-            token={null}
+            token={token}
             labels={labels}
-            onCreate={async () => false}
-            onRegenerate={async () => false}
-            onDelete={async () => false}
-            onCopySecret={() => {}}
-            onCloseSecret={() => {}}
+            secret={secret}
+            onCreate={createToken}
+            onRegenerate={createToken}
+            onDelete={async () => {
+              setToken(null);
+              setSecret(null);
+              return true;
+            }}
+            onCopySecret={(value) => void navigator.clipboard.writeText(value)}
+            onCloseSecret={() => setSecret(null)}
           />
-
-          <Divider />
 
           <McpIntegrationSettingsView
             endpoint="https://site.example.invalid/mcp"
-            setupGuideUrl="https://site.example.invalid/guides/remote-mcp.md"
+            setupGuideUrl="/fixtures/remote-mcp-preview.md"
             labels={{
               title: 'Remote MCP',
-              description:
-                '호환되는 AI 클라이언트에 이 엔드포인트를 연결하세요. 로그인과 동의를 위해 브라우저가 열립니다.',
-              endpoint: 'URL',
-              openGuide: '설치 가이드 열기',
+              description: t('security.mcpIntegration.description'),
+              endpoint: t('common.labels.url'),
+              openGuide: t('common.actions.openInNewTab'),
             }}
           />
-
-          <McpOAuthGrantSettings
-            initialGrants={[
-              { id: 'codex-desktop', clientName: 'Codex', connectedAt: '2026-08-27T10:25:00Z' },
-              { id: 'chatgpt', clientName: 'ChatGPT', connectedAt: '2026-08-26T06:10:00Z' },
-            ]}
-          />
-        </Stack>
-      </Box>
-    </LocaleProvider>
+        </DsLayoutStack>
+      </div>
+    </>
   );
 }
 
-function McpAndApiAccessPreview({ siteName = 'DSUB' }: { siteName?: string }) {
+function McpAndApiAccessPreview({
+  siteName = 'DSUB',
+  showSecret = false,
+}: {
+  siteName?: string;
+  showSecret?: boolean;
+}) {
   return (
     <ManifestProvider
       manifest={{
@@ -65,7 +92,7 @@ function McpAndApiAccessPreview({ siteName = 'DSUB' }: { siteName?: string }) {
         menus: { $typeName: 'api.open.v1.Menus', header: [], secondary: [], footer: [], avatarDropdown: [] },
       }}
     >
-      <McpAndApiAccessContent />
+      <McpAndApiAccessContent showSecret={showSecret} />
     </ManifestProvider>
   );
 }
@@ -73,8 +100,15 @@ function McpAndApiAccessPreview({ siteName = 'DSUB' }: { siteName?: string }) {
 const meta = {
   title: 'Feature/My/MCP and API Access',
   component: McpAndApiAccessPreview,
-  parameters: { layout: 'fullscreen' },
-  globals: { locale: 'ko' },
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      description: {
+        component:
+          'The endpoint remains a named term/definition pair for screen readers. Its URL label is visually hidden because the displayed address identifies the value. The full endpoint and guide destination are preserved.',
+      },
+    },
+  },
   args: { siteName: 'DSUB' },
   argTypes: { siteName: { control: 'text' } },
 } satisfies Meta<typeof McpAndApiAccessPreview>;
@@ -82,10 +116,23 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const AuthorOrAdmin: Story = {};
+export const AuthorOrAdmin: Story = {
+  play: async ({ canvasElement }) => {
+    const section = canvasElement.querySelector<HTMLElement>('[data-testid="settings-mcp-integration"]')!;
+    const endpoint = within(section).getByRole('definition');
+    await expect(endpoint).toHaveAccessibleName();
+    await expect(endpoint).toHaveTextContent('https://site.example.invalid/mcp');
+    const label = section.querySelector<HTMLElement>('[role="term"] > span')!;
+    await expect(label.textContent?.trim()).toBeTruthy();
+    await expect(getComputedStyle(label).position).toBe('absolute');
+    await expect(label.getBoundingClientRect().width).toBeLessThanOrEqual(1);
+    await expect(label.getBoundingClientRect().height).toBeLessThanOrEqual(1);
+  },
+};
 
 export const CustomSiteName: Story = { args: { siteName: 'Example Studio' } };
+export const OneTimeValue: Story = { args: { showSecret: true } };
 
 export const NarrowViewport: Story = {
-  parameters: { viewport: { defaultViewport: 'mobile1' } },
+  globals: { viewport: { value: 'phone', isRotated: false } },
 };

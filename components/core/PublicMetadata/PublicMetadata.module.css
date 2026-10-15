@@ -1,27 +1,66 @@
 .rows {
-  margin-top: var(--mantine-spacing-xs);
+  margin-top: var(--geul-spacing-xs);
   display: grid;
   grid-template-columns: minmax(88px, max-content) minmax(0, 1fr);
-  gap: 8px var(--mantine-spacing-sm);
+  gap: var(--geul-spacing-xs) var(--geul-spacing-sm);
   align-items: baseline;
+}
+
+.pair {
+  display: flex;
+  align-items: baseline;
+  gap: var(--geul-spacing-xxs);
+  min-width: 0;
+  font-size: var(--geul-font-size-sm);
+  line-height: var(--geul-line-height-sm);
 }
 
 .row {
   display: contents;
 }
 
+.pair[data-size='xs'] {
+  font-size: var(--geul-font-size-xs);
+  line-height: var(--geul-line-height-xs);
+}
+
+.pair[data-size='md'] {
+  font-size: var(--geul-font-size-md);
+  line-height: var(--geul-line-height-md);
+}
+
+.pair[data-layout='stacked'] {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.pairLabel {
+  color: var(--geul-text-secondary);
+}
+
+.pairValue {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Core typography inside a metadata value consumes the pair's shared scale. */
+.pair[data-size] [data-core-typography='text'] {
+  font-size: inherit;
+  line-height: inherit;
+}
+
 .label {
   grid-column: 1;
   min-width: 0;
-  font-family: var(--font-mono);
+  color: var(--geul-text-secondary);
 }
 
 .rows[data-tone='inverse'] .label {
-  color: rgb(255 255 255 / 72%) !important;
+  color: var(--geul-text-inverse-secondary) !important;
 }
 
 .rows[data-tone='inverse'] .value {
-  color: rgb(255 255 255 / 88%);
+  color: var(--geul-text-inverse-primary);
 }
 
 .value,
@@ -32,43 +71,39 @@
 
 .value {
   grid-column: 2;
-  font-size: var(--mantine-font-size-sm);
-  line-height: var(--mantine-line-height-sm);
 }
 
-.value[data-align='center'] {
+/* A centered value (avatar identities) centers its label too, so both text lines share one axis. */
+:is(.label, .value)[data-align='center'] {
   align-self: center;
 }
 
+.externalIndicator {
+  inline-size: var(--geul-font-size-xs);
+  block-size: var(--geul-font-size-xs);
+  margin-inline-start: var(--geul-spacing-xxs);
+  vertical-align: middle;
+}
+
 .valueGroup {
-  row-gap: 4px;
+  row-gap: var(--geul-spacing-xxs);
 }
 
-.link {
+.separator {
   color: inherit;
-  font-size: var(--mantine-font-size-sm);
-  line-height: var(--mantine-line-height-sm);
-  text-decoration: none;
-  transition: color 140ms ease;
 }
 
-.link:hover,
-.link:focus-visible {
-  color: var(--mantine-primary-color-filled);
-  text-decoration: none;
-}
-
-@media (max-width: 47.999em) {
+@media (width < $mantine-breakpoint-sm) {
   .rows {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--geul-spacing-xs);
   }
 
   .row {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0.15rem;
+    gap: var(--geul-spacing-xxs);
   }
 
   .label,

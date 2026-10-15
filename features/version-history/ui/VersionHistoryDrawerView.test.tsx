@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemTestProvider as DesignSystemProvider } from '@/test/TestProviders';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import {
   VersionHistoryDrawerView,
   type VersionHistoryDrawerViewLabels,
@@ -19,6 +20,10 @@ const labels: VersionHistoryDrawerViewLabels = {
   restoreTitle: 'Restore version',
   restoreBody: 'Restoring to v2 will replace the current state. Continue?',
   cancel: 'Cancel',
+  loadMore: 'Continue',
+  loadFailed: 'Could not load version history.',
+  end: 'All versions loaded.',
+  retry: 'Try again',
 };
 
 const versions = [
@@ -28,6 +33,7 @@ const versions = [
     versionLabel: 'v2',
     title: 'Edited title',
     sourceLocaleLabel: 'Locale: en',
+    createdAt: '2026-07-20T10:00:00Z',
     createdAtLabel: '2 minutes ago',
     createdAtTooltip: 'July 20, 2026 at 10:00',
     contributorLabel: 'by Mina and user-2',
@@ -50,6 +56,9 @@ function renderView(overrides: Partial<VersionHistoryDrawerViewProps> = {}) {
     versions,
     labels,
     loading: false,
+    error: null,
+    onRetry: vi.fn(async () => {}),
+    pagination: { contextKey: 'work:one', nextPage: null, loading: false, error: null, onLoad: vi.fn(async () => {}) },
     restoring: false,
     canRestore: true,
     selectedVersionId: null,
@@ -62,9 +71,9 @@ function renderView(overrides: Partial<VersionHistoryDrawerViewProps> = {}) {
 
   act(() => {
     root.render(
-      <MantineProvider env="test">
+      <DesignSystemProvider forceColorScheme="light">
         <VersionHistoryDrawerView {...props} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
 
@@ -108,6 +117,7 @@ afterEach(() => {
   act(() => root.unmount());
   container.remove();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe('VersionHistoryDrawerView', () => {
@@ -119,6 +129,21 @@ describe('VersionHistoryDrawerView', () => {
     expect(document.body.textContent).toContain('Locale: en');
     expect(document.body.textContent).toContain('2 minutes ago');
     expect(document.body.textContent).toContain('by Mina and user-2');
+    const restore = getButtonByText(document.body, 'Restore');
+    expect(restore.textContent).toBe('Restore');
+    const describedBy = restore.getAttribute('aria-describedby')?.split(' ') ?? [];
+    expect(describedBy.map((id) => document.getElementById(id)?.textContent)).toEqual([
+      'v2',
+      'Edited title',
+      'Locale: en',
+      'July 20, 2026 at 10:00',
+    ]);
+    const row = document.body.querySelector('[role="listitem"]');
+    expect(row).toHaveAccessibleName('Edited title v2');
+    const timestamp = row!.querySelector('time')!;
+    expect(timestamp).toHaveAttribute('datetime', versions[0]!.createdAt);
+    expect(timestamp).toHaveAccessibleDescription(versions[0]!.createdAtTooltip);
+    expect(timestamp.hasAttribute('tabindex')).toBe(false);
 
     act(() => getButtonByText(document.body, 'Restore').click());
 
@@ -164,5 +189,57 @@ describe('VersionHistoryDrawerView', () => {
     expect(restoreButton.disabled).toBe(true);
     act(() => restoreButton.click());
     expect(props.onSelectVersion).not.toHaveBeenCalled();
+  });
+
+  it('reports an initial list failure with explicit retry instead of an empty history', async () => {
+    const onRetry = vi.fn(async () => {});
+    renderView({ versions: [], error: labels.loadFailed, onRetry });
+    expect(document.body.querySelector('[role="alert"]')).toHaveTextContent(labels.loadFailed);
+    expect(document.body.textContent).not.toContain(labels.empty);
+    await act(async () => getButtonByText(document.body, labels.retry).click());
+    expect(onRetry).toHaveBeenCalledOnce();
+  });
+
+  it('uses the Core near-end trigger to load another page while keeping existing history visible', async () => {
+    let notify: (() => void) | undefined;
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        constructor(callback: IntersectionObserverCallback) {
+          notify = () =>
+            callback([{ isIntersecting: true } as IntersectionObserverEntry], this as unknown as IntersectionObserver);
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
+    const onLoad = vi.fn(async () => {});
+    const pagination = { contextKey: 'work:one', nextPage: 2, loading: false, error: null, onLoad };
+    renderView({ pagination });
+    expect(notify).toBeDefined();
+    await act(async () => {
+      notify!();
+      notify!();
+    });
+    expect(onLoad).toHaveBeenCalledOnce();
+    expect(document.body.querySelector('[role="listitem"]')).toHaveTextContent('Edited title');
+    renderView({ pagination: { ...pagination, loading: true } });
+    expect(document.body.querySelector('[data-near-end-loader] [role="status"]')).toHaveTextContent(labels.loading);
+    expect(document.body.querySelector('[role="listitem"]')).toHaveTextContent('Edited title');
+    renderView({ pagination: { ...pagination, nextPage: null } });
+    expect(document.body.querySelector('[data-near-end-loader]')).toHaveTextContent(labels.end);
+    expect(document.body.querySelector('[data-near-end-loader] button')).toBeNull();
+  });
+
+  it('keeps earlier rows on a page failure and delegates a bounded retry to the same page', async () => {
+    const onLoad = vi.fn(async () => {});
+    renderView({
+      error: labels.loadFailed,
+      pagination: { contextKey: 'work:one', nextPage: 2, loading: false, error: labels.loadFailed, onLoad },
+    });
+    expect(document.body.querySelector('[role="listitem"]')).toHaveTextContent('Edited title');
+    expect(document.body.querySelector('[data-near-end-loader] [role="alert"]')).toHaveTextContent(labels.loadFailed);
+    await act(async () => getButtonByText(document.body, labels.retry).click());
+    expect(onLoad).toHaveBeenCalledOnce();
   });
 });

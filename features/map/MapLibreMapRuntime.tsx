@@ -1,9 +1,12 @@
 'use client';
 
+import { MapNavigation } from '@/components/core/MapNavigation';
+
+import { useComputedColorScheme } from '@/lib/providers/DesignSystemProvider';
+
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { setWorkerUrl, type Map as MapLibreMapInstance } from 'maplibre-gl';
-import MapView, { Layer, Marker, NavigationControl, Source } from 'react-map-gl/maplibre';
-import { useComputedColorScheme } from '@mantine/core';
+import MapView, { Layer, Marker, Source } from 'react-map-gl/maplibre';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -37,7 +40,7 @@ import {
   shouldBlockMapKeyboardEvent,
   syncTouchZoomRotateRotation,
 } from './utils';
-import { DIRECTIONS_BACKDROP_Z_INDEX, DIRECTIONS_MODAL_Z_INDEX, getPlaceMarkerZIndex } from './utils/hover-order';
+import { getPlaceMarkerZIndex } from './utils/hover-order';
 import type { BaseMapStyleConfig } from './utils/style-builder';
 
 configureMapLibreWorker(setWorkerUrl);
@@ -49,6 +52,7 @@ interface MapLibreMapRuntimeLabels {
   zoomOut: string;
   resetNorth: string;
   directions: string;
+  closeDirections: string;
   printPreview: string;
 }
 
@@ -100,7 +104,7 @@ function getZoomCenterBehavior({
   if (typeof MouseEvent !== 'undefined' && originalEvent instanceof MouseEvent) {
     const target = originalEvent.target;
     if (target instanceof Element) {
-      if (target.closest('.maplibregl-ctrl-zoom-in, .maplibregl-ctrl-zoom-out')) {
+      if (target.closest('[data-map-command="zoom-in"], [data-map-command="zoom-out"]')) {
         return 'preserve-center';
       }
     }
@@ -153,7 +157,7 @@ export function MapLibreMapRuntime({
   loadingSurface,
   onLoadingStageChange,
 }: MapLibreMapRuntimeProps) {
-  const colorScheme = useComputedColorScheme('light');
+  const colorScheme = useComputedColorScheme();
   const mapRef = useRef<MapLibreMapInstance | null>(null);
   const mapStyleControllerRef = useRef<MapStyleController | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -293,19 +297,6 @@ export function MapLibreMapRuntime({
         markerElement.setAttribute('aria-label', markerLabel);
       }
     });
-
-    const setControlLabel = (selector: string, label: string) => {
-      const element = container.querySelector<HTMLElement>(selector);
-      if (!element) {
-        return;
-      }
-      element.setAttribute('aria-label', label);
-      element.setAttribute('title', label);
-    };
-
-    setControlLabel('.maplibregl-ctrl-zoom-in', labels.zoomIn);
-    setControlLabel('.maplibregl-ctrl-zoom-out', labels.zoomOut);
-    setControlLabel('.maplibregl-ctrl-compass', labels.resetNorth);
   }, [isReady, labels, places]);
 
   const {
@@ -714,7 +705,34 @@ export function MapLibreMapRuntime({
           onMouseMove={renderClusterSource ? handleClusteredMapHover : undefined}
           onMouseLeave={renderClusterSource ? handleClusteredMapLeave : undefined}
         >
-          {(showNavigation ?? zoomable) && <NavigationControl position={zoomPosition} />}
+          {(showNavigation ?? zoomable) && (
+            <MapNavigation
+              position={zoomPosition}
+              labels={{
+                group: labels.map,
+                zoomIn: labels.zoomIn,
+                zoomOut: labels.zoomOut,
+                resetNorth: labels.resetNorth,
+              }}
+              zoomInDisabled={effectiveZoom >= zoomBounds.maxZoom}
+              zoomOutDisabled={effectiveZoom <= zoomBounds.minZoom}
+              onZoomIn={(event) =>
+                mapRef.current?.zoomIn({ duration: instantTransitions ? 0 : 300 }, { originalEvent: event.nativeEvent })
+              }
+              onZoomOut={(event) =>
+                mapRef.current?.zoomOut(
+                  { duration: instantTransitions ? 0 : 300 },
+                  { originalEvent: event.nativeEvent },
+                )
+              }
+              onResetNorth={(event) =>
+                mapRef.current?.resetNorth(
+                  { duration: instantTransitions ? 0 : 300 },
+                  { originalEvent: event.nativeEvent },
+                )
+              }
+            />
+          )}
 
           {renderClusterSource ? (
             <Source id={clusterSourceId} type="geojson" data={sourceData}>
@@ -782,9 +800,8 @@ export function MapLibreMapRuntime({
         setActivePlaceId(null);
       }}
       onSelectProvider={handleSelectProvider}
-      backdropZIndex={DIRECTIONS_BACKDROP_Z_INDEX}
-      modalZIndex={DIRECTIONS_MODAL_Z_INDEX}
       printImageUrl={printImageUrl}
+      closeDirectionsLabel={labels.closeDirections}
       printPreviewAlt={labels.printPreview}
     />
   );

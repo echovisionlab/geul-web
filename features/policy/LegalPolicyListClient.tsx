@@ -1,14 +1,17 @@
 'use client';
+import { Text as DsText } from '@/components/core/Typography';
+
+import { ConfirmationDialog } from '@/features/confirmation';
 
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconDots, IconEdit, IconFileText, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Group, Modal, Stack, Text } from '@mantine/core';
+
 import { useDisclosure } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
-import { statusToneFromColor, StatusBadge } from '@/components/core/Badge';
+import { notifications } from '@/components/core/Notification';
+import { StatusBadge } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
@@ -21,6 +24,7 @@ import type { SortFieldConfig } from '@/features/data-table/DataTableMultiSort';
 import { normalizeEnumToken } from '@/lib/i18n/admin-labels';
 import type { ColumnDef } from '@/lib/types/common/data-table';
 import type { PaginatedQuery } from '@/lib/types/common/query';
+import { EmptyState } from '@/components/core/EmptyState';
 
 export interface LegalPolicyListItem {
   id: string;
@@ -91,6 +95,7 @@ export function LegalPolicyListClient({
   deleteVersion,
   searchPlaceholder,
 }: LegalPolicyListClientProps) {
+  const tModalActions = useTranslations('common.actions');
   const router = useRouter();
   const queryClient = useQueryClient();
   const requestDateTime = useDateTimeFormatter();
@@ -122,12 +127,12 @@ export function LegalPolicyListClient({
     mutationFn: createVersion,
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       notifications.show({
         message: tCommon('messages.itemCreated', { item: tCommon('labels.version') }),
-        color: 'green',
+        tone: 'positive',
       });
       queryClient.invalidateQueries({ queryKey: [policy] });
       if (result.data) {
@@ -141,12 +146,12 @@ export function LegalPolicyListClient({
       deleteVersion(id, expectedRevision),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       notifications.show({
         message: tCommon('messages.itemDeleted', { item: tCommon('labels.version') }),
-        color: 'red',
+        tone: 'positive',
       });
       setVersions((current) => current.filter((version) => version.id !== selectedVersion?.id));
       closeDeleteModal();
@@ -179,9 +184,9 @@ export function LegalPolicyListClient({
       key: 'version',
       header: tCommon('labels.version'),
       cell: (row) => (
-        <Text size="sm" fw={500}>
+        <DsText size="sm" weight="medium">
           v{row.version}
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -197,7 +202,10 @@ export function LegalPolicyListClient({
       key: 'status',
       header: tCommon('labels.status'),
       cell: (row) => (
-        <StatusBadge tone={statusToneFromColor(status.getColor(row.status))} size="sm">
+        <StatusBadge
+          tone={row.status === status.active ? 'positive' : status.isScheduled(row.status) ? 'accent' : 'neutral'}
+          size="sm"
+        >
           {translatePolicyStatus(row.status, policyStatusLabels)}
         </StatusBadge>
       ),
@@ -206,7 +214,7 @@ export function LegalPolicyListClient({
       key: 'effectiveFrom',
       header: tCommon('labels.effectiveFrom'),
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           {status.isDraft(row.status) || !row.effectiveFrom
             ? '-'
             : requestDateTime.dateTime(row.effectiveFrom, {
@@ -216,14 +224,14 @@ export function LegalPolicyListClient({
                 hour: '2-digit',
                 minute: '2-digit',
               })}
-        </Text>
+        </DsText>
       ),
     },
     {
       key: 'createdAt',
       header: tCommon('labels.created'),
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           {row.createdAt
             ? requestDateTime.dateTime(row.createdAt, {
                 year: 'numeric',
@@ -233,7 +241,7 @@ export function LegalPolicyListClient({
                 minute: '2-digit',
               })
             : '-'}
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -302,18 +310,20 @@ export function LegalPolicyListClient({
       />
 
       {result.total === 0 && !query.search && !query.filters?.length ? (
-        <Stack align="center" py="xl">
-          <IconFileText size={48} opacity={0.3} />
-          <Text c="dimmed">{tCommon('messages.noVersionsFound')}</Text>
-          <Button
-            emphasis="medium"
-            onClick={() => createMutation.mutate()}
-            loading={createPending}
-            disabled={createPending}
-          >
-            {tCommonActions('createFirstVersion')}
-          </Button>
-        </Stack>
+        <EmptyState
+          icon={IconFileText}
+          title={tCommon('messages.noVersionsFound')}
+          action={
+            <Button
+              emphasis="medium"
+              onClick={() => createMutation.mutate()}
+              loading={createPending}
+              disabled={createPending}
+            >
+              {tCommonActions('createFirstVersion')}
+            </Button>
+          }
+        />
       ) : (
         <DataTableSelectableSection
           columns={columns}
@@ -342,26 +352,25 @@ export function LegalPolicyListClient({
         />
       )}
 
-      <Modal opened={deleteModalOpened} onClose={closeDeleteModal} title={tCommon('actions.deleteVersion')}>
-        <Stack>
-          <Text>{tCommon('messages.deleteItemConfirm', { item: entityLabel })}</Text>
-          <Group justify="flex-end">
-            <Button emphasis="low" onClick={closeDeleteModal}>
-              {tCommon('actions.cancel')}
-            </Button>
-            <Button
-              tone="danger"
-              onClick={() =>
-                selectedVersion &&
-                deleteMutation.mutate({ id: selectedVersion.id, expectedRevision: selectedVersion.revision })
-              }
-              loading={deleteMutation.isPending}
-            >
-              {tCommon('actions.delete')}
-            </Button>
-          </Group>
-        </Stack>
-      </Modal>
+      <ConfirmationDialog
+        intent="delete"
+        opened={deleteModalOpened}
+        onClose={closeDeleteModal}
+        onConfirm={() =>
+          selectedVersion &&
+          deleteMutation.mutate({ id: selectedVersion.id, expectedRevision: selectedVersion.revision })
+        }
+        title={tCommon('actions.deleteVersion')}
+        confirmLabel={tCommon('actions.delete')}
+        cancelLabel={tCommon('actions.cancel')}
+        closeLabel={tModalActions('close')}
+        loading={deleteMutation.isPending}
+        message={
+          <>
+            <DsText>{tCommon('messages.deleteItemConfirm', { item: entityLabel })}</DsText>
+          </>
+        }
+      />
     </>
   );
 }

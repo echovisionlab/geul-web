@@ -222,9 +222,10 @@ export async function createEmailTemplateAction(data: {
 export async function updateEmailTemplateLayoutAction(
   id: string,
   layoutId: string | null,
+  editorOrigin?: string,
 ): Promise<{ success?: boolean; error?: string }> {
   try {
-    const client = await createEmailTemplateClient();
+    const client = await createEmailTemplateClient(editorOrigin);
     await client.updateEmailTemplate({
       id,
       layoutId: layoutId ?? '',

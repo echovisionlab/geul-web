@@ -1,8 +1,7 @@
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getTranslations } from 'next-intl/server';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import { CreateStyleButton, StyleModalProvider, StyleModals, StylesTableContent } from '@/features/admin/style';
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
+import { StylesPageView } from '@/features/admin/style/StylesPageView';
 import { listStylesAdminAction } from '@/lib/actions/style';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
@@ -52,23 +51,13 @@ export default async function AdminStylesPage({ searchParams }: PageProps) {
   };
 
   return (
-    <StyleModalProvider>
-      <AdminPageHeader
-        title={stylesLabel}
-        items={[{ key: 'create-style', type: 'custom', content: <CreateStyleButton /> }]}
-      />
-
-      <ServerDataTable namespace="styles">
-        <StylesTableContent
-          result={result}
-          searchPlaceholder={searchPlaceholder}
-          filterFields={filterFields}
-          sortFields={sortFields}
-        />
-        <ServerDataTable.Pagination namespace="styles" result={result} searchParams={params} />
-      </ServerDataTable>
-
-      <StyleModals />
-    </StyleModalProvider>
+    <StylesPageView
+      title={stylesLabel}
+      result={result}
+      filterFields={filterFields}
+      sortFields={sortFields}
+      searchPlaceholder={searchPlaceholder}
+      searchParams={params.toString()}
+    />
   );
 }

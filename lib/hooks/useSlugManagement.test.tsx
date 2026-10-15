@@ -80,12 +80,14 @@ function TestHarness({
   initialEntityId = 'page-1',
   onSave,
   debounceMs,
+  checkAvailability,
 }: {
   initialSlug: string;
   entityType?: Parameters<typeof useSlugManagement>[0]['entityType'];
   initialEntityId?: string;
   onSave: (slug: string) => void | Promise<unknown>;
   debounceMs?: number;
+  checkAvailability?: Parameters<typeof useSlugManagement>[0]['checkAvailability'];
 }) {
   const [slug, setSlug] = useState(initialSlug);
   const [entityId, setEntityId] = useState(initialEntityId);
@@ -98,6 +100,7 @@ function TestHarness({
     onSlugChange: setSlug,
     onSave,
     debounceMs,
+    checkAvailability,
   });
 
   latestHook = slugMgmt;
@@ -165,6 +168,18 @@ function changeEntityId(entityId: string) {
 }
 
 describe('useSlugManagement', () => {
+  it('uses the local availability transport for a blur without calling the production registry', async () => {
+    const checkAvailability = vi.fn(async () => ({ available: true }));
+    const onSave = vi.fn();
+    renderHarness(<TestHarness initialSlug="old-slug" onSave={onSave} checkAvailability={checkAvailability} />);
+    await flushUpdates();
+    changeInput('local-slug');
+    blurInput();
+    await flushUpdates();
+    expect(checkAvailability).toHaveBeenCalledWith('local-slug', 'page-1');
+    expect(checkPageSlugAvailable).not.toHaveBeenCalled();
+    expect(onSave).toHaveBeenCalledWith('local-slug');
+  });
   it.each([
     { debounceMs: 300, checks: 5, label: 'explicit 300ms' },
     { debounceMs: undefined, checks: 1, label: 'default 1000ms' },

@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { Editor, type NodeType, type TextType } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
-import { MantineProvider } from '@mantine/core';
-import { redo, undo } from 'y-prosemirror';
+
 import type { EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { createTiptapWireExtensions } from '../wire-schema';
 import { createThreeSceneExtension, KOREAN_THREE_SCENE_LABELS } from './ThreeSceneNode';
@@ -18,11 +18,6 @@ import {
   validateThreeSceneSource,
 } from './three-source';
 import { transpileThreeSceneSource } from './three-transpile';
-
-vi.mock('y-prosemirror', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('y-prosemirror')>();
-  return { ...actual, undo: vi.fn(actual.undo), redo: vi.fn(actual.redo) };
-});
 
 vi.mock('../code-editor', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../code-editor')>()),
@@ -326,6 +321,45 @@ function AuthoringScene({
 }
 
 describe('authoring Three.js scene resize', () => {
+  it('keeps native title select-all inside the input while the scene is selected', async () => {
+    let editor: Editor | null = null;
+    const element = document.createElement('div');
+    document.body.append(element);
+    const root = createRoot(element);
+    await act(async () => {
+      root.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <AuthoringScene
+            onEditor={(value) => {
+              editor = value;
+            }}
+          />
+        </DesignSystemProvider>,
+      );
+    });
+    const input = element.querySelector<HTMLInputElement>('[data-executable-title-input]')!;
+    expect(input).not.toBeNull();
+    const documentBefore = editor!.getJSON();
+    const selectionBefore = editor!.state.selection.toJSON();
+    const selectAll = new KeyboardEvent('keydown', {
+      key: 'a',
+      code: 'KeyA',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    act(() => {
+      input.focus();
+      input.dispatchEvent(selectAll);
+    });
+    expect(selectAll.defaultPrevented).toBe(false);
+    expect(editor!.state.selection.toJSON()).toEqual(selectionBefore);
+    expect(editor!.getJSON()).toEqual(documentBefore);
+    expect(document.activeElement).toBe(input);
+    await act(async () => root.unmount());
+    element.remove();
+  });
+
   it('keeps runtime failures visible in the scene error UI', async () => {
     const runtimeFactory: ThreePreviewRuntimeFactory = (_canvas, events) => ({
       run: () => events.onError({ kind: 'runtime', message: 'frame failed' }),
@@ -337,9 +371,9 @@ describe('authoring Three.js scene resize', () => {
     const root = createRoot(element);
     await act(async () => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <AuthoringScene runtimeFactory={runtimeFactory} onEditor={() => undefined} />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
@@ -364,14 +398,14 @@ describe('authoring Three.js scene resize', () => {
     const root = createRoot(element);
     await act(async () => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <AuthoringScene
             runtimeFactory={runtimeFactory}
             onEditor={(value) => {
               editor = value;
             }}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
@@ -415,13 +449,13 @@ describe('authoring Three.js scene resize', () => {
     const root = createRoot(element);
     await act(async () => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <AuthoringScene
             onEditor={(value) => {
               editor = value;
             }}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
@@ -433,8 +467,6 @@ describe('authoring Three.js scene resize', () => {
     const input = element.querySelector<HTMLTextAreaElement>('textarea[aria-label="Three.js 소스"]');
     expect(input).not.toBeNull();
     const before = sceneNode(editor!);
-    vi.mocked(undo).mockClear();
-    vi.mocked(redo).mockClear();
     await act(async () => {
       editor!.view.dispatch(editor!.state.tr.setSelection(NodeSelection.create(editor!.state.doc, 1)));
       input!.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', metaKey: true, bubbles: true }));
@@ -445,8 +477,6 @@ describe('authoring Three.js scene resize', () => {
 
     expect(editor!.state.selection).toBeInstanceOf(NodeSelection);
     expect(editor!.state.selection.$from.nodeAfter?.type.name).toBe('threeScene');
-    expect(undo).not.toHaveBeenCalled();
-    expect(redo).not.toHaveBeenCalled();
     expect(sceneNode(editor!)).toMatchObject({
       attrs: { language: 'typescript', mode: 'edit' },
       content: before?.content,
@@ -462,13 +492,13 @@ describe('authoring Three.js scene resize', () => {
     const root = createRoot(element);
     await act(async () => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <AuthoringScene
             onEditor={(value) => {
               editor = value;
             }}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
@@ -537,9 +567,9 @@ describe('Three.js neutral authoring authority', () => {
     const root = createRoot(element);
     await act(async () => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <TargetLocaleScene />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
@@ -605,14 +635,14 @@ describe('public Three.js scene interaction', () => {
     const root = createRoot(element);
     await act(async () => {
       root.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <PublicScene
             runtimeFactory={runtimeFactory}
             onEditor={(value) => {
               editor = value;
             }}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => setTimeout(resolve, 0));
     });

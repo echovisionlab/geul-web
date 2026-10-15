@@ -1,7 +1,7 @@
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px;
-  gap: var(--mantine-spacing-lg);
+  gap: var(--geul-spacing-lg);
   align-items: start;
   max-width: 1320px;
   margin-inline: auto;
@@ -12,7 +12,7 @@
   min-width: 0;
 }
 
-@media (max-width: 62em) {
+@media (width < $mantine-breakpoint-md) {
   .layout {
     grid-template-columns: minmax(0, 1fr);
   }

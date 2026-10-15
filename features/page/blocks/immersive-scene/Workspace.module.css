@@ -24,18 +24,18 @@
   min-width: 0;
   min-height: 0;
   flex-direction: column;
-  border-left: 1px solid var(--mantine-color-default-border);
-  background: var(--mantine-color-body);
+  border-left: 1px solid var(--geul-border-default);
+  background: var(--geul-background);
 }
 
-@container (max-width: 62rem) {
+@container (width < $mantine-breakpoint-md) {
   .workspace {
     grid-template-rows: minmax(320px, 42dvh) minmax(0, 1fr);
     grid-template-columns: minmax(0, 1fr);
   }
 
   .inspector {
-    border-top: 1px solid var(--mantine-color-default-border);
+    border-top: 1px solid var(--geul-border-default);
     border-left: 0;
   }
 }

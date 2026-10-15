@@ -1,13 +1,17 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+import { ConfirmationDialog } from '@/features/confirmation';
 
-import { useState } from 'react';
-import { Group, Stack, Text } from '@mantine/core';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+
+import { useId, useState } from 'react';
+
 import { IconPlugConnected } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
-import { ConfirmModal } from '@/components/core/Modal';
+
 import { SectionCard, SectionHeader } from '@/components/core/Section';
 import type { McpOAuthGrant } from '@/features/auth/hydra-mcp-oauth';
 import { revokeMyMcpOAuthGrant } from '@/features/my/mcp-oauth-grant-actions';
@@ -15,14 +19,20 @@ import { useLocale } from '@/lib/providers/LocaleProvider';
 
 interface McpOAuthGrantSettingsProps {
   initialGrants: McpOAuthGrant[];
+  revokeAction?: typeof revokeMyMcpOAuthGrant;
   initialLoadFailed?: boolean;
 }
 
-export function McpOAuthGrantSettings({ initialGrants, initialLoadFailed = false }: McpOAuthGrantSettingsProps) {
+export function McpOAuthGrantSettings({
+  initialGrants,
+  initialLoadFailed = false,
+  revokeAction = revokeMyMcpOAuthGrant,
+}: McpOAuthGrantSettingsProps) {
   const t = useTranslations('security.mcpIntegration');
   const tCommonActions = useTranslations('common.actions');
   const tCommonStates = useTranslations('common.states');
   const locale = useLocale();
+  const scopeId = useId();
   const [grants, setGrants] = useState(initialGrants);
   const [selected, setSelected] = useState<McpOAuthGrant | null>(null);
   const [revokingId, setRevokingId] = useState<string | null>(null);
@@ -33,46 +43,60 @@ export function McpOAuthGrantSettings({ initialGrants, initialLoadFailed = false
     }
     setRevokingId(selected.id);
     try {
-      const result = await revokeMyMcpOAuthGrant(selected.id);
+      const result = await revokeAction(selected.id);
       if (!result.success) {
-        notifications.show({ color: 'red', message: t('revokeFailed') });
+        notifications.show({ tone: 'danger', message: t('revokeFailed') });
         return;
       }
       setGrants((current) => current.filter((grant) => grant.id !== selected.id));
       setSelected(null);
-      notifications.show({ color: 'green', message: t('revokeSuccess') });
+      notifications.show({ tone: 'positive', message: t('revokeSuccess') });
     } catch {
-      notifications.show({ color: 'red', message: t('revokeFailed') });
+      notifications.show({ tone: 'danger', message: t('revokeFailed') });
     } finally {
       setRevokingId(null);
     }
   };
 
   return (
-    <Stack gap="sm" data-testid="settings-mcp-oauth-grants">
-      <SectionHeader title={t('connectionsTitle')} description={t('connectionsDescription')} />
+    <DsLayoutStack gap="md" data-testid="settings-mcp-oauth-grants">
+      <SectionHeader
+        title={
+          <span role="heading" aria-level={2}>
+            {t('connectionsTitle')}
+          </span>
+        }
+        description={t('connectionsDescription')}
+      />
       {initialLoadFailed ? (
         <Alert tone="danger">
-          <Text size="sm">{t('loadFailed')}</Text>
+          <DsText size="sm" tone="secondary">
+            {t('loadFailed')}
+          </DsText>
         </Alert>
       ) : grants.length === 0 ? (
-        <SectionCard>
-          <Group gap="sm">
+        <SectionCard appearance="plain">
+          <DsLayoutInline gap="sm">
             <IconPlugConnected size={18} aria-hidden />
-            <Text size="sm" c="dimmed">
-              {t('connectionsEmpty')}
-            </Text>
-          </Group>
+            <SupportingText tone="secondary">{t('connectionsEmpty')}</SupportingText>
+          </DsLayoutInline>
         </SectionCard>
       ) : (
         grants.map((grant) => (
-          <SectionCard key={grant.id} p="sm" data-testid={`settings-mcp-oauth-grant-${grant.id}`}>
-            <Group justify="space-between" align="center" wrap="wrap">
-              <Stack gap={2}>
-                <Text size="sm" fw={500}>
+          <SectionCard
+            appearance="plain"
+            key={grant.id}
+            padding="sm"
+            data-testid={`settings-mcp-oauth-grant-${grant.id}`}
+            role="group"
+            aria-labelledby={`${scopeId}-${grant.id}`}
+          >
+            <DsLayoutInline justify="between" align="center" wrap="wrap">
+              <DsLayoutStack gap="xxs">
+                <DsText id={`${scopeId}-${grant.id}`} size="sm" weight="medium">
                   {grant.clientName}
-                </Text>
-                <Text size="xs" c="dimmed">
+                </DsText>
+                <DsText size="xs" tone="secondary">
                   {grant.connectedAt
                     ? t('connectedAt', {
                         date: new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(
@@ -80,23 +104,25 @@ export function McpOAuthGrantSettings({ initialGrants, initialLoadFailed = false
                         ),
                       })
                     : tCommonStates('unknown')}
-                </Text>
-              </Stack>
+                </DsText>
+              </DsLayoutStack>
               <Button
                 size="xs"
                 tone="danger"
-                emphasis="outline"
+                emphasis="medium"
                 onClick={() => setSelected(grant)}
                 disabled={revokingId !== null}
+                aria-describedby={`${scopeId}-${grant.id}`}
               >
                 {t('revoke')}
               </Button>
-            </Group>
+            </DsLayoutInline>
           </SectionCard>
         ))
       )}
 
-      <ConfirmModal
+      <ConfirmationDialog
+        intent="revoke"
         opened={selected !== null}
         onClose={() => {
           if (!revokingId) {
@@ -109,9 +135,8 @@ export function McpOAuthGrantSettings({ initialGrants, initialLoadFailed = false
         confirmLabel={t('revoke')}
         cancelLabel={tCommonActions('cancel')}
         closeLabel={tCommonActions('close')}
-        confirmTone="danger"
         loading={revokingId !== null}
       />
-    </Stack>
+    </DsLayoutStack>
   );
 }

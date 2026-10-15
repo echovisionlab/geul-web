@@ -12,6 +12,26 @@ function printRules(path: string): string {
 }
 
 describe('public document print surfaces', () => {
+  it('removes fixed-chrome offsets from every frame kind and prints on paper in every theme', () => {
+    const frame = printRules('components/core/ApplicationFrame/ApplicationFrame.module.css');
+    const variables = printRules('lib/styles/variables.css');
+    const print = read('lib/styles/print.css');
+
+    expect(frame).toMatch(/\.root\[data-frame-kind\] \.main\s*\{[^}]*margin:\s*0;[^}]*padding:\s*0;/su);
+    expect(variables).toMatch(/html\[data-geul-theme\] body\s*\{[^}]*var\(--geul-paper-background\) !important/su);
+    // Image-backed (inverse) headings keep their contrast; every other heading prints in paper ink.
+    expect(print).toContain(":is(h1, h2, h3, h4, h5, h6):not([data-tone='inverse'])");
+  });
+
+  it('separates document chrome from the body once, in the shared layout', () => {
+    const layout = read('features/document-layout/ui/ContentLayoutView.module.css');
+    const post = read('features/post/PostViewContent.tsx');
+
+    expect(layout).toMatch(/\.flowChrome\s*\{[^}]*margin-block-end:\s*var\(--geul-spacing-md\);/su);
+    expect(layout).toMatch(/\.pinnedChrome \+ \.body\s*\{[^}]*padding-block-start:\s*var\(--geul-spacing-md\);/su);
+    expect(post).not.toContain('blockStart=');
+  });
+
   it('resets Page sections, pinned layouts, and columns to paged block flow', () => {
     const layout = printRules('features/document-layout/ui/ContentLayoutView.module.css');
     const page = printRules('features/page/PageView/BlockRenderer.module.css');

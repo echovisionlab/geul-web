@@ -1,14 +1,16 @@
 'use client';
 
+import { getProviderAccessLevel } from '@/lib/collab/provider-control-state';
+import { SaveParkedError } from './save-failure';
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import { notifications } from '@mantine/notifications';
 import { useTranslations } from 'next-intl';
 import { BlockRoomMetadataError } from '@/lib/collab/block-room-metadata';
 import type { BlockRoomConnection } from '@/lib/collab/useBlockRoomConnection';
 import { mergeMetadataPatches } from './merge-metadata-patches';
 import { useDebouncedPatch } from './useDebouncedPatch';
 
-type MetadataConnection = Pick<BlockRoomConnection, 'protocol' | 'bootstrap' | 'acceptEpochAck' | 'reloadCanonical'>;
+type MetadataConnection = Pick<BlockRoomConnection, 'protocol' | 'bootstrap' | 'acceptEpochAck' | 'reloadCanonical'> &
+  Partial<Pick<BlockRoomConnection, 'provider'>>;
 type Protocol = NonNullable<MetadataConnection['protocol']>;
 type EpochAck = Parameters<MetadataConnection['acceptEpochAck']>[0];
 
@@ -53,6 +55,10 @@ export function useDebouncedRoomMetadata<T extends object>({
     delay,
     write: async (patch: T) => {
       const activeProtocol = currentProtocol.current;
+      // A room downgraded to view keeps the fields for a page reopened with edit access.
+      if (getProviderAccessLevel(currentWriter.current.connection.provider) === 'view') {
+        throw new SaveParkedError();
+      }
       try {
         const active = currentWriter.current;
         if (!activeProtocol || !active.connection.bootstrap) {
@@ -72,13 +78,17 @@ export function useDebouncedRoomMetadata<T extends object>({
         if (error instanceof BlockRoomMetadataError && error.reloadRequired) {
           currentWriter.current.connection.reloadCanonical();
         }
-        notifications.show({ message: error instanceof Error ? error.message : t('saveFailed'), color: 'red' });
+        // The shared save registry announces the first failure and clears it on recovery.
         throw error;
       }
     },
   });
   useEffect(() => {
     const flushPending = () => {
+      // A ready room with edit access also takes back fields parked while it was read-only.
+      if (queue.hasParked() && getProviderAccessLevel(currentWriter.current.connection.provider) === 'edit') {
+        queue.resumeParked();
+      }
       if (queue.hasPending()) {
         void queue.flush();
       }

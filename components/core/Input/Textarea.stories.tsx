@@ -10,7 +10,6 @@ const meta = {
     label: 'Description',
     placeholder: 'Enter a description',
     minRows: 4,
-    w: 420,
   },
 } satisfies Meta<typeof Textarea>;
 
@@ -35,4 +34,8 @@ export const Autosize: Story = {
 };
 export const Disabled: Story = {
   args: { defaultValue: 'Read-only description', disabled: true },
+};
+
+export const Code: Story = {
+  args: { label: 'Source', textRole: 'code', defaultValue: 'const enabled = true;\nreturn enabled;' },
 };

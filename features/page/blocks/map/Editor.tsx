@@ -1,12 +1,21 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useCallback, useMemo } from 'react';
-import { IconArrowsMaximize, IconFocus2, IconMap, IconSettings, IconTrash, IconX } from '@tabler/icons-react';
+import { IconArrowsMaximize, IconMap, IconSettings, IconX } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Group, Modal, Stack, Text } from '@mantine/core';
+
+import { ContentModal } from '@/components/core/Modal';
 import { useDisclosure } from '@mantine/hooks';
 import { LabelBadge } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
@@ -17,6 +26,7 @@ import { PlacesManageModal } from '@/features/place/PlacesManageModal';
 import type { MapRendererPlace } from '@/features/map/types';
 import { MapLibreMapEditor } from '@/features/map/MapLibreMapEditor';
 import { MapPlaceSelect } from '@/features/place/MapPlaceSelect';
+import { PlaceListRow, isPlaceAtCenter } from '@/features/place/PlaceListRow';
 import type { CreatePlaceFormState } from '@/features/place/CreatePlaceModal';
 import { getMapPlacesByIdsAction } from '@/lib/actions/map-place';
 import { listMapThemesAction, resolveMapThemeAction } from '@/lib/actions/map-theme';
@@ -86,6 +96,7 @@ function buildEditorMapViewConfig(
 }
 
 function MapSettingsForm({ props, isExpanded = true, updateSharedProps, updateLocalizedProps }: MapSettingsFormProps) {
+  const tModalActions = useTranslations('common.actions');
   const t = useTranslations('pageEditor.mapEditor');
   const tCommonActions = useTranslations('common.actions');
   const tCommonEntities = useTranslations('common.entities');
@@ -267,136 +278,110 @@ function MapSettingsForm({ props, isExpanded = true, updateSharedProps, updateLo
   );
 
   return (
-    <Box>
+    <div>
       <QueryErrorAlert queries={[selectedPlacesDataQuery]} />
       {/* Header */}
-      <Group gap="xs" mb="md" justify="space-between">
-        <Group gap="xs">
-          <IconMap size={18} />
-          <Text size="sm" fw={500}>
-            {t('title')}
-          </Text>
-          {places.length > 0 && <LabelBadge size="sm">{t('placeCount', { count: places.length })}</LabelBadge>}
-        </Group>
-        <Group gap={4}>
-          <Button emphasis="low" size="sm" leftSection={<IconSettings size={14} />} onClick={openPlacesModal}>
-            {tMapControls('managePlaces')}
-          </Button>
-          <IconButton emphasis="low" size="sm" onClick={openFullscreen} label={t('fullscreen')} title={t('fullscreen')}>
-            <IconArrowsMaximize size={16} />
-          </IconButton>
-        </Group>
-      </Group>
+      <DsLayoutInset blockEnd="md">
+        <DsLayoutInline gap="xs" justify="between">
+          <DsLayoutInline gap="xs">
+            <IconMap size={18} />
+            <DsText size="sm" weight="medium">
+              {t('title')}
+            </DsText>
+            {places.length > 0 && <LabelBadge size="sm">{t('placeCount', { count: places.length })}</LabelBadge>}
+          </DsLayoutInline>
+          <DsLayoutInline gap="xxs">
+            <Button emphasis="low" size="sm" leftSection={<IconSettings size={14} />} onClick={openPlacesModal}>
+              {tMapControls('managePlaces')}
+            </Button>
+            <IconButton
+              emphasis="low"
+              size="sm"
+              onClick={openFullscreen}
+              label={t('fullscreen')}
+              title={t('fullscreen')}
+            >
+              <IconArrowsMaximize size={16} />
+            </IconButton>
+          </DsLayoutInline>
+        </DsLayoutInline>
+      </DsLayoutInset>
 
-      <Stack gap="sm" mb="md">
-        <MapPlaceSelect
-          value={null}
-          onChange={handleSelectPlace}
-          placeholder={tCommonPlaceholders('searchPlaces')}
-          label={tCommonEntities('mapPlaces')}
-        />
+      <DsLayoutInset blockEnd="md">
+        <DsLayoutStack gap="md">
+          <MapPlaceSelect
+            value={null}
+            onChange={handleSelectPlace}
+            placeholder={tCommonPlaceholders('searchPlaces')}
+            label={tCommonEntities('mapPlaces')}
+          />
 
-        <Textarea
-          label={tCommonLabels('caption')}
-          placeholder={t('captionPlaceholder')}
-          minRows={2}
-          autosize
-          value={props.caption || ''}
-          onChange={(event) =>
-            updateLocalizedProps({
-              caption: event.currentTarget.value,
-            })
-          }
-        />
+          <Textarea
+            label={tCommonLabels('caption')}
+            placeholder={t('captionPlaceholder')}
+            minRows={2}
+            autosize
+            value={props.caption || ''}
+            onChange={(event) =>
+              updateLocalizedProps({
+                caption: event.currentTarget.value,
+              })
+            }
+          />
 
-        {places.length === 0 ? (
-          <Text size="xs" c="dimmed">
-            {t('emptyState')}
-          </Text>
-        ) : (
-          <Stack gap="xs">
-            {places.map((place) => {
-              const isCenter =
-                Math.abs(place.coordinate.lat - effectiveConfig.center.lat) < 0.0001 &&
-                Math.abs(place.coordinate.lng - effectiveConfig.center.lng) < 0.0001;
-
-              return (
-                <Group key={place.id} gap="xs" justify="space-between">
-                  <Box style={{ flex: 1, minWidth: 0 }}>
-                    <Group gap={4}>
-                      <Text size="sm" fw={500} truncate style={{ flex: 1 }}>
-                        {place.name}
-                      </Text>
-                      {isCenter ? (
-                        <LabelBadge size="xs" tone="accent">
-                          {t('centerBadge')}
-                        </LabelBadge>
-                      ) : null}
-                    </Group>
-                    <Text size="xs" c="dimmed" truncate>
-                      {place.address}
-                    </Text>
-                  </Box>
-                  <Group gap={4}>
-                    <IconButton
-                      emphasis={isCenter ? 'strong' : 'low'}
-                      tone="accent"
-                      size="sm"
-                      onClick={() => handleCenterOnPlace(place)}
-                      label={isCenter ? t('centeredTitle') : t('setAsCenterTitle')}
-                      title={isCenter ? t('centeredTitle') : t('setAsCenterTitle')}
-                    >
-                      <IconFocus2 size={14} />
-                    </IconButton>
-                    <IconButton
-                      tone="danger"
-                      emphasis="low"
-                      size="sm"
-                      onClick={() => handleRemovePlace(place.id)}
-                      label={tCommonActions('remove')}
-                      title={tCommonActions('remove')}
-                    >
-                      <IconTrash size={14} />
-                    </IconButton>
-                  </Group>
-                </Group>
-              );
-            })}
-          </Stack>
-        )}
-      </Stack>
+          {places.length === 0 ? (
+            <DsText size="xs" tone="secondary">
+              {t('emptyState')}
+            </DsText>
+          ) : (
+            <DsLayoutStack gap="xs">
+              {places.map((place) => (
+                <PlaceListRow
+                  key={place.id}
+                  place={place}
+                  isCenter={isPlaceAtCenter(place, effectiveConfig.center)}
+                  labels={{
+                    centerBadge: t('centerBadge'),
+                    centered: t('centeredTitle'),
+                    setAsCenter: t('setAsCenterTitle'),
+                    remove: tCommonActions('remove'),
+                  }}
+                  onCenter={handleCenterOnPlace}
+                  onRemove={handleRemovePlace}
+                />
+              ))}
+            </DsLayoutStack>
+          )}
+        </DsLayoutStack>
+      </DsLayoutInset>
 
       {/* Map with Leva controls (floating) - hide when fullscreen modal is open */}
       {!fullscreenOpened && (
-        <Box
-          style={{
-            borderRadius: 'var(--mantine-radius-md)',
-            overflow: 'hidden',
-          }}
-        >
-          <MapLibreMapEditor
-            places={rendererPlaces}
-            config={effectiveConfig}
-            onConfigChange={handleConfigChange}
-            resolveTheme={resolveMapThemeAction}
-            onManagePlaces={openPlacesModal}
-            themes={themes}
-            height="300px"
-            levaProps={{ floating: true, hidden: !isExpanded }}
-          />
-        </Box>
+        <div style={{ overflow: 'hidden' }}>
+          <DsLayoutInset space="none">
+            <MapLibreMapEditor
+              places={rendererPlaces}
+              config={effectiveConfig}
+              onConfigChange={handleConfigChange}
+              resolveTheme={resolveMapThemeAction}
+              onManagePlaces={openPlacesModal}
+              themes={themes}
+              height="300px"
+              settingsPanel={{ placement: 'map-corner', hidden: !isExpanded }}
+            />
+          </DsLayoutInset>
+        </div>
       )}
 
       {/* Fullscreen Map Modal */}
-      <Modal
+      <ContentModal
         opened={fullscreenOpened}
         onClose={closeFullscreen}
-        fullScreen
-        withCloseButton={false}
-        padding={0}
-        styles={{ body: { height: '100%' } }}
+        closeLabel={tModalActions('close')}
+        size="workspace"
+        title={t('title')}
       >
-        <Box h="100dvh">
+        <div style={{ height: '100%' }}>
           <MapLibreMapEditor
             places={rendererPlaces}
             config={effectiveConfig}
@@ -405,20 +390,20 @@ function MapSettingsForm({ props, isExpanded = true, updateSharedProps, updateLo
             onManagePlaces={openPlacesModal}
             themes={themes}
             height="100%"
-            levaProps={{ floating: true }}
+            settingsPanel={{ placement: 'map-corner' }}
           />
           <IconButton
-            emphasis="strong"
+            emphasis="medium"
             size="md"
             onClick={closeFullscreen}
-            style={{ position: 'absolute', top: 16, left: 16, zIndex: 210 }}
+            placement="overlay-start"
             label={tCommonActions('close')}
             title={tCommonActions('close')}
           >
             <IconX size={18} />
           </IconButton>
-        </Box>
-      </Modal>
+        </div>
+      </ContentModal>
 
       {/* Places Management Modal */}
       <PlacesManageModal
@@ -432,7 +417,7 @@ function MapSettingsForm({ props, isExpanded = true, updateSharedProps, updateLo
         onCreatePlace={handleCreatePlace}
         isCreating={createPlace.isPending}
       />
-    </Box>
+    </div>
   );
 }
 
@@ -517,23 +502,29 @@ export function MapCanvasPreview({ props }: BlockCanvasPreviewProps<MapProps>) {
 
   if (places.length === 0) {
     return (
-      <Box py="xl" ta="center">
-        <Text c="dimmed" size="sm">
-          {t('emptyState')}
-        </Text>
-      </Box>
+      <DsLayoutInset block="xl">
+        <DsLayoutInset textAlign="center" space="none">
+          <SupportingText tone="secondary">{t('emptyState')}</SupportingText>
+        </DsLayoutInset>
+      </DsLayoutInset>
     );
   }
 
   return (
-    <Box>
+    <div>
       <QueryErrorAlert queries={[selectedPlacesDataQueryLoad]} />
       <MapViewEmbedded config={mapViewConfig} blockAlignment={blockAlignment} />
       {caption ? (
-        <Text size="sm" c="dimmed" mt="xs" ta={blockAlignment}>
-          {caption}
-        </Text>
+        <DsLayoutInset blockStart="xs">
+          <DsText
+            size="xs"
+            tone="muted"
+            align={blockAlignment === 'left' ? 'start' : blockAlignment === 'right' ? 'end' : blockAlignment}
+          >
+            {caption}
+          </DsText>
+        </DsLayoutInset>
       ) : null}
-    </Box>
+    </div>
   );
 }

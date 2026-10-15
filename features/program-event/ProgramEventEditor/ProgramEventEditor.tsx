@@ -1,17 +1,36 @@
 'use client';
 
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+
+import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
+
+import { Text as DsText } from '@/components/core/Typography';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutGrid as DsLayoutGrid,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+import {
+  useInputCombobox,
+  DateTimePicker,
+  MultiSelect,
+  Select,
+  TextInput,
+  Checkbox,
+  NumberInput,
+} from '@/components/core/Input';
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Combobox, Group, InputBase, Loader, SimpleGrid, Stack, Text, useCombobox } from '@mantine/core';
-import { DateTimePicker } from '@mantine/dates';
-import '@mantine/dates/styles.css';
+
 import { useDisclosure } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { EditorHeader } from '@/features/editor/EditorHeader';
-import { MultiSelect, Select, TextInput, Checkbox, NumberInput } from '@/components/core/Input';
+
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
 import { PageLoader } from '@/features/site/PageLoader';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
@@ -113,7 +132,7 @@ interface ProgramEventEditorProps {
   siteName: string;
 }
 
-export function ProgramEventEditor({
+function useProgramEventEditorViewModel({
   eventId,
   currentMemberId: _currentMemberId,
   userName,
@@ -221,9 +240,7 @@ export function ProgramEventEditor({
   const [posterMedia, setPosterMedia] = useState(initialPosterMedia);
   const [createPlaceInitialName, setCreatePlaceInitialName] = useState('');
   const [createPlaceOpened, { open: openCreatePlace, close: closeCreatePlace }] = useDisclosure(false);
-  const typeCombobox = useCombobox({
-    onDropdownClose: () => typeCombobox.resetSelectedOption(),
-  });
+  const typeCombobox = useInputCombobox();
 
   const localeSession = useLocaleDocumentSession({
     entityType: 'program_event',
@@ -234,8 +251,9 @@ export function ProgramEventEditor({
   });
   const { activeEditLocale, roomLocale } = localeSession;
   const { shouldUseLocaleDocument } = localeSession.mode;
-  const canEditEvent = allowedActions.includes('edit');
   const blockRoom = useRichTextBlockRoomEditor('program-event', eventId, roomLocale);
+  const accessLevel = useEditorAccessLevel(blockRoom.provider);
+  const canEditEvent = allowedActions.includes('edit') && accessLevel === 'edit';
   const hasLocaleRoomMutationAuthority = localeSession.hasRoomMutationAuthority({
     sourceLocale: blockRoom.bootstrap?.sourceLocale ?? null,
     locale: blockRoom.bootstrap?.locale ?? null,
@@ -378,7 +396,7 @@ export function ProgramEventEditor({
       if (result.error || !result.data) {
         notifications.show({
           message: result.error ?? tCommon('notifications.saveFailed'),
-          color: 'red',
+          tone: 'danger',
         });
         return;
       }
@@ -396,7 +414,7 @@ export function ProgramEventEditor({
       queueNeutralPatch({ typeId: nextType.id });
       setTypeSearch('');
       typeCombobox.closeDropdown();
-      notifications.show({ message: tCommon('notifications.saveSuccess'), color: 'green' });
+      notifications.show({ message: tCommon('notifications.saveSuccess'), tone: 'positive' });
     },
   });
   const createPlace = useMutation({
@@ -413,7 +431,7 @@ export function ProgramEventEditor({
       if (result.error || !result.data?.id) {
         notifications.show({
           message: result.error || tCommon('notifications.createPlaceFailed'),
-          color: 'red',
+          tone: 'danger',
         });
         return;
       }
@@ -430,7 +448,7 @@ export function ProgramEventEditor({
       const write = neutralConfiguration.beginWrite(data);
       try {
         await requireActionSuccess(
-          saveEditableEvent({ ...data, ...(Object.keys(observed).length ? { observed } : {}) }),
+          saveEditableEvent({ ...data, ...(Object.keys(observed).length ? { observed } : {}) }, write.origin),
         );
       } catch (error) {
         write.fail();
@@ -533,7 +551,7 @@ export function ProgramEventEditor({
         .catch((error: unknown) => {
           notifications.show({
             message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
-            color: 'red',
+            tone: 'danger',
           });
         })
         .finally(() => pendingAuxiliaryWritesRef.current.delete(tracked));
@@ -547,7 +565,7 @@ export function ProgramEventEditor({
     }
     const saved = await flushEditorSaves(`program_event:${eventId}`);
     if (!saved) {
-      notifications.show({ message: tCommon('notifications.saveFailed'), color: 'red' });
+      notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' });
     }
     return saved;
   }, [eventId, tCommon]);
@@ -637,9 +655,7 @@ export function ProgramEventEditor({
     label: option.name,
   }));
   const canEditTranslationSource = canEditEvent;
-  const editorReady = Boolean(
-    roomLocale && blockRoom.provider && blockRoom.doc && blockRoom.controller && blockRoom.isSynced,
-  );
+  const editorReady = Boolean(roomLocale && blockRoom.provider && blockRoom.doc && blockRoom.controller);
   const primaryPosterUrl = posterMedia.find((item) => item.isPrimary)?.url ?? posterMedia[0]?.url ?? initialPosterUrl;
   const routePath = `/events/${slug || eventId}`;
   const showLocationSelector = locationMode === 'map_place' || locationMode === 'hybrid';
@@ -665,9 +681,212 @@ export function ProgramEventEditor({
     typeCombobox.closeDropdown();
   };
 
+  return {
+    blockRoom: {
+      provider: blockRoom.provider,
+      protocol: blockRoom.protocol,
+      isConnected: blockRoom.isConnected,
+      isSynced: blockRoom.isSynced,
+      controller: blockRoom.controller,
+    },
+    eventId,
+    displayedTitle,
+    canEditTitle,
+    handleTitleChange,
+    tCommon,
+    status,
+    lifecycle: {
+      statusOptions: lifecycle.statusOptions,
+      canDelete: lifecycle.canDelete,
+      isStatusChanging: lifecycle.isStatusChanging,
+      deleteEvent: { isPending: lifecycle.deleteEvent.isPending },
+    },
+    handleBack,
+    handleStatusChange,
+    handleDelete,
+    activeEditLocale,
+    posterMedia,
+    canEditNeutral,
+    setPosterMedia,
+    displayedSummary,
+    routePath,
+    canonicalOrigin,
+    siteName,
+    primaryPosterUrl,
+    baseUrl,
+    slug,
+    setSlug,
+    queueNeutralPatch,
+    shouldUseLocaleDocument,
+    canEditCurrentLocale,
+    canEditTranslationSource,
+    handleSummaryChange,
+    canEditEvent,
+    tProgramEventAdmin,
+    tCommonLabels,
+    typeId,
+    typeCombobox: {
+      dropdownOpened: typeCombobox.dropdownOpened,
+      openDropdown: typeCombobox.openDropdown,
+      closeDropdown: typeCombobox.closeDropdown,
+    },
+    typeSearch,
+    selectedType,
+    setTypeSearch,
+    tCommonEntities,
+    createType: { isPending: createType.isPending },
+    handleTypeSelect,
+    filteredTypes,
+    canCreateType,
+    seriesSelectData,
+    seriesId,
+    setSeriesId,
+    seriesOrder,
+    setSeriesOrder,
+    timezoneSelectData,
+    timezone,
+    setTimezone,
+    startsAtInput,
+    setStartsAt,
+    endsAtInput,
+    setEndsAt,
+    allDay,
+    setAllDay,
+    locationMode,
+    setLocationMode,
+    showLocationSelector,
+    mapPlaceId,
+    setMapPlaceId,
+    setCreatePlaceInitialName,
+    openCreatePlace,
+    ticketUrl,
+    setTicketUrl,
+    streamUrl,
+    setStreamUrl,
+    externalUrl,
+    setExternalUrl,
+    artistSelectData,
+    artistIds,
+    setArtistIds,
+    relationBaselineRef,
+    labelSelectData,
+    labelIds,
+    setLabelIds,
+    clientSelectData,
+    clientIds,
+    setClientIds,
+    initialCredits,
+    editorReady,
+    roomLocale,
+    userName,
+    createPlaceOpened,
+    closeCreatePlace,
+    trackAuxiliaryWrite,
+    createPlace: { mutateAsync: createPlace.mutateAsync, isPending: createPlace.isPending },
+    createPlaceInitialName,
+  };
+}
+
+export function ProgramEventEditor(props: ProgramEventEditorProps) {
+  return <ProgramEventEditorView model={useProgramEventEditorViewModel(props)} />;
+}
+
+export type ProgramEventEditorViewModel = ReturnType<typeof useProgramEventEditorViewModel>;
+
+/** Complete production editor composition; controllers supply data and commands. */
+export function ProgramEventEditorView({ model }: { model: ProgramEventEditorViewModel }) {
+  const {
+    blockRoom,
+    eventId,
+    displayedTitle,
+    canEditTitle,
+    handleTitleChange,
+    tCommon,
+    status,
+    lifecycle,
+    handleBack,
+    handleStatusChange,
+    handleDelete,
+    activeEditLocale,
+    posterMedia,
+    canEditNeutral,
+    setPosterMedia,
+    displayedSummary,
+    routePath,
+    canonicalOrigin,
+    siteName,
+    primaryPosterUrl,
+    baseUrl,
+    slug,
+    setSlug,
+    queueNeutralPatch,
+    shouldUseLocaleDocument,
+    canEditCurrentLocale,
+    canEditTranslationSource,
+    handleSummaryChange,
+    canEditEvent,
+    tProgramEventAdmin,
+    tCommonLabels,
+    typeId,
+    typeCombobox,
+    typeSearch,
+    selectedType,
+    setTypeSearch,
+    tCommonEntities,
+    createType,
+    handleTypeSelect,
+    filteredTypes,
+    canCreateType,
+    seriesSelectData,
+    seriesId,
+    setSeriesId,
+    seriesOrder,
+    setSeriesOrder,
+    timezoneSelectData,
+    timezone,
+    setTimezone,
+    startsAtInput,
+    setStartsAt,
+    endsAtInput,
+    setEndsAt,
+    allDay,
+    setAllDay,
+    locationMode,
+    setLocationMode,
+    showLocationSelector,
+    mapPlaceId,
+    setMapPlaceId,
+    setCreatePlaceInitialName,
+    openCreatePlace,
+    ticketUrl,
+    setTicketUrl,
+    streamUrl,
+    setStreamUrl,
+    externalUrl,
+    setExternalUrl,
+    artistSelectData,
+    artistIds,
+    setArtistIds,
+    relationBaselineRef,
+    labelSelectData,
+    labelIds,
+    setLabelIds,
+    clientSelectData,
+    clientIds,
+    setClientIds,
+    initialCredits,
+    editorReady,
+    roomLocale,
+    userName,
+    createPlaceOpened,
+    closeCreatePlace,
+    trackAuxiliaryWrite,
+    createPlace,
+    createPlaceInitialName,
+  } = model;
   const editor = (
     <MapPlaceActionProvider createMapPlaceForBlock={createMapPlaceForBlockWithBrowserClient}>
-      <Stack h="100%" gap="md">
+      <DsLayoutStack fill="block" gap="md">
         <EditorHeader
           title={displayedTitle}
           onTitleChange={canEditTitle ? handleTitleChange : undefined}
@@ -684,12 +903,12 @@ export function ProgramEventEditor({
           deleteConfirmation={{
             title: tCommon('actions.delete'),
             message: (
-              <Text>
+              <DsText>
                 {tCommon.rich('messages.confirmDeleteNamedRich', {
                   name: displayedTitle || tCommon('states.untitled'),
                   strong: (chunks) => <strong>{chunks}</strong>,
                 })}
-              </Text>
+              </DsText>
             ),
           }}
           isStatusChanging={lifecycle.isStatusChanging}
@@ -700,13 +919,15 @@ export function ProgramEventEditor({
         />
 
         <MediaPreviewGrid>
-          <ProgramEventPosterUploader
-            eventId={eventId}
-            media={posterMedia}
-            idPrefix={`program-event-${eventId}-poster`}
-            canEdit={canEditNeutral}
-            onMediaChange={setPosterMedia}
-          />
+          <AuthoringExtension kind="uploads">
+            <ProgramEventPosterUploader
+              eventId={eventId}
+              media={posterMedia}
+              idPrefix={`program-event-${eventId}-poster`}
+              canEdit={canEditNeutral}
+              onMediaChange={setPosterMedia}
+            />
+          </AuthoringExtension>
           <MetadataPanel
             title={displayedTitle}
             summary={displayedSummary}
@@ -746,68 +967,47 @@ export function ProgramEventEditor({
           onSummaryChange={shouldUseLocaleDocument ? handleSummaryChange : undefined}
         />
 
-        <EntityTranslationsPanel entityType="program_event" entityId={eventId} canManage={canEditEvent} />
+        <AuthoringExtension kind="translations">
+          <EntityTranslationsPanel
+            entityType="program_event"
+            entityId={eventId}
+            canManage
+            canAdministerTranslations={canEditEvent}
+            canMutateTargets={canEditEvent}
+          />
+        </AuthoringExtension>
 
         <SectionCard>
-          <Stack gap="md">
+          <DsLayoutStack gap="md">
             <SectionHeader title={tProgramEventAdmin('editor.details')} />
-            <SimpleGrid cols={{ base: 1, md: 2 }}>
-              <Combobox
-                store={typeCombobox}
-                onOptionSubmit={handleTypeSelect}
-                withinPortal={false}
+            <DsLayoutGrid columns={{ base: 1, md: 2 }}>
+              <Select
+                label={tCommonLabels('type')}
+                searchable
                 disabled={!canEditNeutral}
-              >
-                <Combobox.DropdownTarget>
-                  <InputBase
-                    component="button"
-                    type="button"
-                    pointer
-                    label={tCommonLabels('type')}
-                    onClick={() => {
-                      if (canEditNeutral) {
-                        typeCombobox.toggleDropdown();
-                      }
-                    }}
-                    rightSection={createType.isPending ? <Loader size={16} /> : null}
-                    disabled={!canEditNeutral}
-                  >
-                    {selectedType ? (
-                      <Text size="sm">{selectedType.name}</Text>
-                    ) : (
-                      <Text size="sm" c="dimmed">
-                        {tCommon('actions.searchItems', {
-                          items: tCommonEntities('programEventTypes').toLowerCase(),
-                        })}
-                      </Text>
-                    )}
-                  </InputBase>
-                </Combobox.DropdownTarget>
-                <Combobox.Dropdown>
-                  <Combobox.Search
-                    value={typeSearch}
-                    onChange={(event) => setTypeSearch(event.currentTarget.value)}
-                    placeholder={tCommon('actions.searchItems', {
-                      items: tCommonEntities('programEventTypes').toLowerCase(),
-                    })}
-                  />
-                  <Combobox.Options>
-                    {filteredTypes.map((option) => (
-                      <Combobox.Option key={option.id} value={option.id} active={option.id === typeId}>
-                        <Text size="sm">{option.name}</Text>
-                      </Combobox.Option>
-                    ))}
-                    {canCreateType && (
-                      <Combobox.Option value="$create">
-                        {tCommon('actions.createNamed', { name: typeSearch.trim() })}
-                      </Combobox.Option>
-                    )}
-                    {filteredTypes.length === 0 && !canCreateType && (
-                      <Combobox.Empty>{tCommon('states.none')}</Combobox.Empty>
-                    )}
-                  </Combobox.Options>
-                </Combobox.Dropdown>
-              </Combobox>
+                value={typeId}
+                searchValue={typeCombobox.dropdownOpened ? typeSearch : (selectedType?.name ?? '')}
+                onSearchChange={setTypeSearch}
+                dropdownOpened={typeCombobox.dropdownOpened}
+                onDropdownOpen={typeCombobox.openDropdown}
+                onDropdownClose={typeCombobox.closeDropdown}
+                placeholder={tCommon('actions.searchItems', {
+                  items: tCommonEntities('programEventTypes').toLowerCase(),
+                })}
+                aria-busy={createType.isPending || undefined}
+                onChange={(id) => {
+                  if (id) {
+                    handleTypeSelect(id);
+                  }
+                }}
+                data={[
+                  ...filteredTypes.map((option) => ({ value: option.id, label: option.name })),
+                  ...(canCreateType
+                    ? [{ value: '$create', label: tCommon('actions.createNamed', { name: typeSearch.trim() }) }]
+                    : []),
+                ]}
+                nothingFoundMessage={tCommon('states.none')}
+              />
               <Select
                 label={tProgramEventAdmin('editor.series')}
                 data={seriesSelectData}
@@ -860,7 +1060,7 @@ export function ProgramEventEditor({
                   } catch {
                     notifications.show({
                       message: tCommon('notifications.saveFailed'),
-                      color: 'red',
+                      tone: 'danger',
                     });
                   }
                 }}
@@ -878,14 +1078,14 @@ export function ProgramEventEditor({
                   } catch {
                     notifications.show({
                       message: tCommon('notifications.saveFailed'),
-                      color: 'red',
+                      tone: 'danger',
                     });
                   }
                 }}
                 disabled={!canEditNeutral}
               />
-            </SimpleGrid>
-            <Group>
+            </DsLayoutGrid>
+            <DsLayoutInline>
               <Checkbox
                 label={tProgramEventAdmin('editor.allDay')}
                 checked={allDay}
@@ -895,8 +1095,8 @@ export function ProgramEventEditor({
                 }}
                 disabled={!canEditNeutral}
               />
-            </Group>
-            <SimpleGrid cols={{ base: 1, md: 2 }}>
+            </DsLayoutInline>
+            <DsLayoutGrid columns={{ base: 1, md: 2 }}>
               <Select
                 label={tProgramEventAdmin('editor.locationMode')}
                 data={[
@@ -913,7 +1113,7 @@ export function ProgramEventEditor({
                 }}
                 disabled={!canEditNeutral}
               />
-            </SimpleGrid>
+            </DsLayoutGrid>
             {showLocationSelector ? (
               <LocationSelector
                 value={mapPlaceId}
@@ -932,7 +1132,7 @@ export function ProgramEventEditor({
                 }}
               />
             ) : null}
-            <SimpleGrid cols={{ base: 1, md: 3 }}>
+            <DsLayoutGrid columns={{ base: 1, md: 3 }}>
               <TextInput
                 label={tProgramEventAdmin('editor.ticketUrl')}
                 value={ticketUrl}
@@ -963,13 +1163,13 @@ export function ProgramEventEditor({
                 }}
                 disabled={!canEditNeutral}
               />
-            </SimpleGrid>
-          </Stack>
+            </DsLayoutGrid>
+          </DsLayoutStack>
         </SectionCard>
 
         <SectionCard>
-          <Stack gap="md">
-            <SimpleGrid cols={{ base: 1, md: 3 }}>
+          <DsLayoutStack gap="md">
+            <DsLayoutGrid columns={{ base: 1, md: 3 }}>
               <MultiSelect
                 label={tCommonEntities('artists')}
                 data={artistSelectData}
@@ -1030,43 +1230,51 @@ export function ProgramEventEditor({
                 searchable
                 disabled={!canEditNeutral}
               />
-            </SimpleGrid>
-          </Stack>
+            </DsLayoutGrid>
+          </DsLayoutStack>
         </SectionCard>
 
-        <ProgramEventCreditsSection eventId={eventId} canEdit={canEditNeutral} initialCredits={initialCredits} />
+        <AuthoringExtension kind="relations">
+          <ProgramEventCreditsSection eventId={eventId} canEdit={canEditNeutral} initialCredits={initialCredits} />
+        </AuthoringExtension>
 
-        <SectionCard withBorder p="md" flex={1} style={{ minHeight: 360, display: 'flex', flexDirection: 'column' }}>
-          <Text size="sm" fw={500} mb="xs">
-            {tCommonLabels('body')}
-          </Text>
-          <Box flex={1} pos="relative">
-            {editorReady ? (
-              <Box id={getEditorBodyReadyId('program_event', eventId)} h="100%">
-                <LocalizedRichTextFragmentEditor
-                  key={`program-event-${eventId}-${roomLocale}`}
-                  provider={blockRoom.provider!}
-                  blockRoomController={blockRoom.controller!}
-                  userName={userName}
-                  editable={canEditCurrentLocale}
-                  entityId={eventId}
-                  entityType={TranscodeEntityType.PROGRAM_EVENT}
-                  allowNeutralBlockEdits={activeEditLocale.isSourceLocale}
-                  allowStructuralEdits={activeEditLocale.isSourceLocale}
-                  aiTarget={
-                    canEditCurrentLocale && activeEditLocale.activeLocale
-                      ? { type: 'program-event', id: eventId, locale: activeEditLocale.activeLocale }
-                      : undefined
-                  }
-                />
-              </Box>
-            ) : (
-              <Box id={getEditorBodyLoadingId('program_event', eventId)}>
-                <PageLoader size="sm" minHeight={300} />
-              </Box>
-            )}
-          </Box>
-        </SectionCard>
+        <div style={{ ...{ minHeight: 360, display: 'flex', flexDirection: 'column' }, flex: 1 }}>
+          <SectionCard layout="stack" grow withBorder padding="md">
+            <DsLayoutInset blockEnd="xs">
+              <DsText size="sm" weight="medium">
+                {tCommonLabels('body')}
+              </DsText>
+            </DsLayoutInset>
+            <div style={{ position: 'relative' }}>
+              <DsLayoutInset flexible space="none">
+                {editorReady ? (
+                  <div style={{ height: '100%' }} id={getEditorBodyReadyId('program_event', eventId)}>
+                    <LocalizedRichTextFragmentEditor
+                      key={`program-event-${eventId}-${roomLocale}`}
+                      provider={blockRoom.provider!}
+                      blockRoomController={blockRoom.controller!}
+                      userName={userName}
+                      editable={canEditCurrentLocale}
+                      entityId={eventId}
+                      entityType={TranscodeEntityType.PROGRAM_EVENT}
+                      allowNeutralBlockEdits={activeEditLocale.isSourceLocale}
+                      allowStructuralEdits={activeEditLocale.isSourceLocale}
+                      aiTarget={
+                        canEditCurrentLocale && activeEditLocale.activeLocale
+                          ? { type: 'program-event', id: eventId, locale: activeEditLocale.activeLocale }
+                          : undefined
+                      }
+                    />
+                  </div>
+                ) : (
+                  <div id={getEditorBodyLoadingId('program_event', eventId)}>
+                    <PageLoader size="sm" minHeight={300} />
+                  </div>
+                )}
+              </DsLayoutInset>
+            </div>
+          </SectionCard>
+        </div>
 
         <CreatePlaceModal
           opened={createPlaceOpened}
@@ -1079,10 +1287,9 @@ export function ProgramEventEditor({
           isPending={createPlace.isPending}
           initialName={createPlaceInitialName}
         />
-      </Stack>
+      </DsLayoutStack>
     </MapPlaceActionProvider>
   );
-
   return (
     <EditorRuntimeProvider
       provider={blockRoom.provider}

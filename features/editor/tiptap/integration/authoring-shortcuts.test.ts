@@ -2,10 +2,10 @@
 
 import { Editor } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { createTiptapWireExtensions } from '../wire-schema';
-import { createAuthoringShortcutGuard } from './authoring-shortcuts';
+import { createAuthoringShortcutGuard, openCurrentBlockMenu } from './authoring-shortcuts';
 
 const mounted: Array<{ editor: Editor; element: HTMLElement }> = [];
 const neutralMode: EditorAuthoringMode = {
@@ -81,6 +81,41 @@ afterEach(() => {
 });
 
 describe('authoring shortcut neutral structure guard', () => {
+  it.each(['F10', 'ContextMenu'])(
+    'opens the current block menu with %s without mutating source or selection',
+    (key) => {
+      const { editor, positions } = createEditor();
+      const position = positions.get('paragraph')!;
+      editor.commands.setTextSelection(position + 2);
+      const blockDom = editor.view.nodeDOM(position) as HTMLElement;
+      const handle = document.createElement('button');
+      handle.dataset.testid = 'tiptap-block-drag-handle';
+      handle.dataset.dragHandle = '';
+      handle.tabIndex = -1;
+      handle.contentEditable = 'false';
+      blockDom.prepend(handle);
+      const open = vi.fn();
+      handle.addEventListener('click', open);
+      const selection = editor.state.selection.toJSON();
+      const content = editor.state.doc.toJSON();
+      const event = new KeyboardEvent('keydown', { key, shiftKey: key === 'F10', bubbles: true, cancelable: true });
+      editor.view.dom.dispatchEvent(event);
+      expect(event.defaultPrevented).toBe(true);
+      expect(handle).toHaveFocus();
+      expect(open).toHaveBeenCalledOnce();
+      expect(editor.state.selection.toJSON()).toEqual(selection);
+      expect(editor.state.doc.toJSON()).toEqual(content);
+    },
+  );
+
+  it('does not claim an unavailable block menu or an editor that is read-only', () => {
+    const { editor, positions } = createEditor();
+    editor.commands.setTextSelection(positions.get('paragraph')! + 2);
+    expect(openCurrentBlockMenu(editor)).toBe(false);
+    editor.setEditable(false);
+    expect(openCurrentBlockMenu(editor)).toBe(false);
+  });
+
   it('consumes Code NodeSelection move without changing its locale document', () => {
     const { editor, positions } = createEditor();
     const codePosition = (positions.get('code') ?? -1) + 1;

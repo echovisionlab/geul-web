@@ -1,18 +1,25 @@
-import { z } from 'zod';
-import { booleanString, imageAspectRatioSchema, listLayoutSchema, sortOrderSchema } from '../list-shared';
+import * as z from '@/lib/zod-mini';
+import {
+  collectionSizeSchema,
+  booleanString,
+  imageAspectRatioSchema,
+  listLayoutSchema,
+  sortOrderSchema,
+} from '../list-shared';
 
 export const labelListSchema = z.object({
-  layout: listLayoutSchema.default('grid'),
-  columns: z.string().default('3'),
-  sortBy: z.enum(['name', 'published_at']).default('name'),
-  sortOrder: sortOrderSchema.default('asc'),
-  limit: z.string().default('12'),
-  showPagination: booleanString.default('false'),
-  showImage: booleanString.default('true'),
-  showMeta: booleanString.default('true'),
-  imageAspectRatio: imageAspectRatioSchema.default('1:1'),
-  carouselLoop: booleanString.default('true'),
-  carouselIndicators: booleanString.default('true'),
+  layout: z._default(listLayoutSchema, 'grid'),
+  itemSize: collectionSizeSchema,
+  columns: z._default(z.string(), '3'),
+  sortBy: z._default(z.enum(['name', 'published_at']), 'name'),
+  sortOrder: z._default(sortOrderSchema, 'asc'),
+  limit: z._default(z.string(), '12'),
+  showPagination: z._default(booleanString, 'false'),
+  showImage: z._default(booleanString, 'true'),
+  showMeta: z._default(booleanString, 'true'),
+  imageAspectRatio: z._default(imageAspectRatioSchema, '1:1'),
+  carouselLoop: z._default(booleanString, 'true'),
+  carouselIndicators: z._default(booleanString, 'true'),
 });
 
 export type LabelListProps = z.infer<typeof labelListSchema>;

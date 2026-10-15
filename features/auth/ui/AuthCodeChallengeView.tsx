@@ -1,9 +1,11 @@
 'use client';
 
-import { Stack, Text } from '@mantine/core';
+import { useId } from 'react';
+import { Text as DsText, VisuallyHidden } from '@/components/core/Typography';
+import { LayoutInline as DsLayoutInline, LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+
 import { Button } from '@/components/core/Button';
 import { PinInput } from '@/components/core/Input';
-import { TextButton } from '@/components/core/TextButton';
 
 export interface AuthCodeTimingViewModel {
   expiresInSeconds: number | null;
@@ -26,6 +28,8 @@ export interface AuthCodeChallengeViewProps {
   autoFocus?: boolean;
   code: string;
   error?: boolean;
+  'aria-describedby'?: string;
+  'aria-invalid'?: boolean;
   labels: AuthCodeChallengeLabels;
   onCodeChange: (code: string) => void;
   onResend: () => void;
@@ -49,6 +53,8 @@ export function AuthCodeChallengeView({
   autoFocus = false,
   code,
   error = false,
+  'aria-describedby': describedBy,
+  'aria-invalid': invalid = error,
   labels,
   onCodeChange,
   onResend,
@@ -64,14 +70,19 @@ export function AuthCodeChallengeView({
   const flowExpired = timing?.flowExpiresInSeconds === 0;
   const challengeDisabled = submitting || codeExpired || flowExpired;
   const resendInSeconds = timing?.resendInSeconds ?? 0;
+  const expiryId = useId();
+  const hasExpiry = flowExpired || codeExpired || timing?.expiresInSeconds != null;
 
   return (
-    <Stack gap="md">
+    <DsLayoutStack gap="md" role="group" aria-label={labels.codeAriaLabel} aria-busy={submitting}>
       <PinInput
+        align="center"
         ariaLabel={labels.codeAriaLabel}
+        aria-describedby={[describedBy, hasExpiry ? expiryId : null].filter(Boolean).join(' ') || undefined}
         autoFocus={autoFocus}
         data-testid={pinTestId}
         error={error}
+        aria-invalid={invalid}
         length={6}
         inputMode="numeric"
         oneTimeCode
@@ -80,51 +91,57 @@ export function AuthCodeChallengeView({
         onChange={onCodeChange}
         onComplete={onSubmit}
         disabled={challengeDisabled}
-        style={{ alignSelf: 'center' }}
       />
       {showSubmitButton ? (
-        <Button
-          fullWidth
-          onClick={() => onSubmit(code)}
-          loading={submitting}
-          disabled={challengeDisabled || code.length !== 6}
-        >
-          {labels.submit}
-        </Button>
+        <DsLayoutInline justify="center">
+          <Button
+            emphasis="medium"
+            onClick={() => onSubmit(code)}
+            loading={submitting}
+            disabled={challengeDisabled || code.length !== 6}
+          >
+            {labels.submit}
+          </Button>
+        </DsLayoutInline>
       ) : null}
-      <Stack gap={4} align="center">
-        <Text
-          role="timer"
-          aria-live="polite"
-          size="sm"
-          c={codeExpired || flowExpired ? 'red' : 'dimmed'}
-          mih="1.5em"
-          data-testid="auth-code-expiry"
-        >
-          {flowExpired
-            ? labels.flowExpired
-            : timing?.expiresInSeconds == null
-              ? '\u00a0'
+      <DsLayoutStack gap="xxs" align="center">
+        {hasExpiry ? (
+          <DsText
+            id={expiryId}
+            role="timer"
+            aria-live="off"
+            size="sm"
+            tone={codeExpired || flowExpired ? 'danger' : 'secondary'}
+            data-testid="auth-code-expiry"
+          >
+            {flowExpired
+              ? labels.flowExpired
               : codeExpired
                 ? labels.codeExpired
-                : labels.codeExpiresIn(formatDuration(timing.expiresInSeconds))}
-        </Text>
-        <TextButton
-          type="button"
-          size="sm"
-          appearance="muted"
-          onClick={onResend}
-          disabled={submitting || flowExpired || resendInSeconds > 0}
-          data-testid="auth-code-resend"
-        >
-          {resendInSeconds > 0 ? labels.resendIn(formatDuration(resendInSeconds)) : labels.resend}
-        </TextButton>
-        {showStartOver && onStartOver ? (
-          <TextButton type="button" size="sm" appearance="muted" onClick={onStartOver} disabled={submitting}>
-            {labels.startOver}
-          </TextButton>
+                : labels.codeExpiresIn(formatDuration(timing?.expiresInSeconds ?? 0))}
+          </DsText>
         ) : null}
-      </Stack>
-    </Stack>
+        <DsLayoutInline justify="center" gap="xs" wrap="wrap">
+          <Button
+            type="button"
+            size="sm"
+            emphasis="medium"
+            onClick={onResend}
+            disabled={submitting || flowExpired || resendInSeconds > 0}
+            data-testid="auth-code-resend"
+          >
+            {resendInSeconds > 0 ? labels.resendIn(formatDuration(resendInSeconds)) : labels.resend}
+          </Button>
+          {showStartOver && onStartOver ? (
+            <Button type="button" size="sm" emphasis="low" onClick={onStartOver} disabled={submitting}>
+              {labels.startOver}
+            </Button>
+          ) : null}
+        </DsLayoutInline>
+      </DsLayoutStack>
+      <VisuallyHidden role="status" aria-live="polite" aria-atomic="true">
+        {flowExpired ? labels.flowExpired : codeExpired ? labels.codeExpired : ''}
+      </VisuallyHidden>
+    </DsLayoutStack>
   );
 }

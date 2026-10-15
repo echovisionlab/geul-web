@@ -1,9 +1,10 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useCallback, useRef, useSyncExternalStore, type ReactNode } from 'react';
 import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
+
 import { Alert } from '@/components/core/Alert';
 import { useOptionalEditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { ConnectedMediaDownloadPolicyPanel } from '@/features/editor/components/ConnectedMediaDownloadPolicyPanel';
@@ -19,6 +20,7 @@ import { FileBlockMetadataFields } from '@/features/editor/ui/FileBlockMetadataF
 import { AudioMediaView } from '@/features/media/AudioMediaView';
 import { VideoMediaView } from '@/features/media/VideoMediaView';
 import { AttachmentMediaView } from '@/features/media/ui/AttachmentMediaView';
+import { MissingMediaView } from '@/features/media/ui/MissingMediaView';
 import { ImageMediaView } from '@/features/media/ui/ImageMediaView';
 import { resolveAudioViewModel } from '@/lib/media/audio-view-model';
 import { formatMediaSize } from '@/lib/media/shared';
@@ -61,6 +63,7 @@ function TiptapFileBlockNodeView({
   const tCommon = useTranslations('common');
   const tCommonLabels = useTranslations('common.labels');
   const tMedia = useTranslations('editorCommon.media');
+  const tMissing = useTranslations('mediaCommon.missing');
   const durableAttributes = node.attrs as FileNodeAttributes;
   const fileId = readString(durableAttributes, 'fileId');
   const blockId = getParentBlockId({ editor, getPos });
@@ -127,23 +130,40 @@ function TiptapFileBlockNodeView({
   const processingProgress = Math.max(0, Math.min(100, Number(readString(attributes, 'processingProgress')) || 0));
 
   let content: ReactNode;
-  if (!hasSource) {
+  const attachment = durableAttributes.attachment as { missingAttachment?: { mediaKind?: string | number } } | null;
+  if (attachment?.missingAttachment) {
+    const mediaKind = attachment.missingAttachment.mediaKind;
+    const missingKind =
+      mediaKind === 'image' || mediaKind === 1
+        ? 'image'
+        : mediaKind === 'video' || mediaKind === 3
+          ? 'video'
+          : mediaKind === 'audio' || mediaKind === 2
+            ? 'audio'
+            : 'file';
+    content = (
+      <EditorMediaBlockFrame {...frameProps}>
+        <MissingMediaView kind={missingKind} message={tMissing(`${missingKind}Deleted`)} caption={caption} />
+      </EditorMediaBlockFrame>
+    );
+  } else if (!hasSource) {
     content = (
       <Alert tone="danger" title={tMedia('statuses.failed')}>
-        <Text size="sm">Invalid File block</Text>
+        <DsText size="sm">Invalid File block</DsText>
       </Alert>
     );
   } else if (processingStatus === 'failed') {
     content = (
       <Alert tone="danger" title={tMedia('statuses.failed')}>
-        <Text size="sm">{tMedia('statuses.failed')}</Text>
+        <DsText size="sm">{tMedia('statuses.failed')}</DsText>
       </Alert>
     );
   } else if (processingStatus && processingStatus !== 'ready' && processingStatus !== 'completed') {
     content = (
       <MediaProcessingSurface
         label={tMedia('statuses.processing')}
-        color="blue"
+        accessibleLabel={name}
+        tone="accent"
         progress={processingProgress}
         pending
         minHeight={mimeType.startsWith('image/') || mimeType.startsWith('video/') ? 132 : 88}

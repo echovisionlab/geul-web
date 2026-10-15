@@ -1,7 +1,16 @@
 import { Extension, type Editor, type JSONContent } from '@tiptap/core';
+import { markLocalAuthorOrigin } from '@/lib/collab/local-author-origin';
+import * as Y from 'yjs';
+import { TextSelection } from '@tiptap/pm/state';
+import { relativeBlockPoint, resolveRelativeBlockPoint } from './block-room-text-positions';
+import { roomLocaleRole } from '@echovisionlab/geul-common/collaboration/block-room-codec';
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import type { LocalizedRichTextDocument } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
-import type { BlockRoomProseMirrorBridge, ProseMirrorBlockDescriptor } from './block-room-prosemirror-bridge';
+import {
+  createBlockRoomProseMirrorBridge,
+  type BlockRoomProseMirrorBridge,
+  type ProseMirrorBlockDescriptor,
+} from './block-room-prosemirror-bridge';
 import {
   contentBlockProfileForRichTextProfile,
   profileSupportsParagraphExternalVideo,
@@ -12,6 +21,7 @@ import { planTiptapStructure, type PreviousTiptapBlock } from './block-room-tipt
 import { richTextProseMirrorAdapterForProtoCase } from './block-room-prosemirror-registry';
 import { createTiptapEditorGeneration, type TiptapEditorGeneration } from './editor-generation';
 import {
+  stopCapturingBlockRoomUndo,
   attachBlockRoomEditor,
   attachBlockRoomLocalUndoOrigin,
   redoBlockRoom,
@@ -19,6 +29,29 @@ import {
 } from '@/lib/collab/interactive-mutation-undo';
 
 /** Post-first Tiptap controller backed only by typed Block-room mutations. */
+
+/**
+ * The mounted ProseMirror view, or null. Tiptap throws on `editor.view` before the view mounts
+ * (`immediatelyRender: false`) and after it is torn down, which happens while a locale switch
+ * replaces the editor; the controller must observe both states without throwing.
+ */
+function mountedView(editor: Editor | null | undefined): Editor['view'] | null {
+  if (!editor || editor.isDestroyed) {
+    return null;
+  }
+  try {
+    const view = editor.view;
+    // Before mount Tiptap returns a proxy whose mount-dependent members throw; `dom` proves a view.
+    return view.dom && !view.isDestroyed ? view : null;
+  } catch {
+    return null;
+  }
+}
+
+function isComposing(editor: Editor | null | undefined): boolean {
+  return mountedView(editor)?.composing === true;
+}
+
 export class PostBlockRoomTiptapController {
   readonly #bridge: BlockRoomProseMirrorBridge;
   readonly #paragraphExternalVideo: boolean;
@@ -28,6 +61,11 @@ export class PostBlockRoomTiptapController {
   #editorGeneration: TiptapEditorGeneration | null = null;
   #previousDescriptors: readonly ProseMirrorBlockDescriptor[];
 
+  #composition: PostBlockRoomTiptapController | null = null;
+  #pendingIds = new Set<string>();
+  #pendingFull = false;
+  readonly projectionStats = { incremental: 0, full: 0, projectedBlocks: 0, buffered: 0 };
+
   readonly extension: Extension;
 
   constructor(bridge: BlockRoomProseMirrorBridge) {
@@ -35,15 +73,27 @@ export class PostBlockRoomTiptapController {
     const profile = contentBlockProfileForRichTextProfile(bridge.richTextProfile);
     this.#paragraphExternalVideo = profile ? profileSupportsParagraphExternalVideo(profile) : false;
     this.#previousDescriptors = bridge.readBlocks();
+    if (typeof bridge.transactionOrigin === 'object' && bridge.transactionOrigin !== null) {
+      markLocalAuthorOrigin(bridge.transactionOrigin);
+    }
     const applyTransaction = (before: ProseMirrorNode, after: ProseMirrorNode) => {
       if (this.#applyingRoom) {
         return;
       }
-      const changed = changedPayloadContainers(before, after);
-      if (changed !== null && this.#applyPayloadChanges(changed)) {
+      const editor = this.#editorGeneration?.current();
+      if (isComposing(editor)) {
+        this.#startComposition();
+      }
+      if (this.#composition) {
+        const shadow = this.#composition;
+        shadow.#applyEditorChange(before, after);
+        const update = Y.encodeStateAsUpdate(shadow.#bridge.document, Y.encodeStateVector(this.#bridge.document));
+        // Composition edits are the author's own; the origin is registered as local author intent
+        // because Yjs reports every applyUpdate transaction as remote.
+        Y.applyUpdate(this.#bridge.document, update, this.#bridge.transactionOrigin);
         return;
       }
-      this.#applyDocument(after.toJSON());
+      this.#applyEditorChange(before, after);
     };
     this.extension = Extension.create({
       name: 'postBlockRoom',
@@ -72,6 +122,14 @@ export class PostBlockRoomTiptapController {
     return this.#paragraphExternalVideo;
   }
 
+  get canChangeStructure(): boolean {
+    return roomLocaleRole(this.#bridge.document) === 'source';
+  }
+
+  get locale(): string {
+    return this.#bridge.locale;
+  }
+
   get connected(): boolean {
     return this.#connected;
   }
@@ -98,7 +156,67 @@ export class PostBlockRoomTiptapController {
       () => editorGeneration.current()?.isEditable === true,
     );
     let active = true;
-    const unsubscribe = this.#bridge.observe((blocks) => {
+    let flushTimer: ReturnType<typeof setTimeout> | undefined;
+    const startComposition = () => this.#startComposition();
+    const beforeRoomTransaction = () => {
+      if (isComposing(editorGeneration.current())) {
+        this.#startComposition();
+      }
+    };
+    this.#bridge.document.on('beforeTransaction', beforeRoomTransaction);
+    const endComposition = () => {
+      clearTimeout(flushTimer);
+      // Run after ProseMirror's compositionend DOM observer microtask.
+      flushTimer = setTimeout(() => {
+        const current = editorGeneration.current();
+        if (!active || !current || isComposing(current)) {
+          return;
+        }
+        const selection = this.#composition
+          ? captureRelativeSelection(current, this.#composition.#bridge.document)
+          : null;
+        if (this.#composition) {
+          this.#composition.#bridge.document.destroy();
+        }
+        this.#composition = null;
+        const ids = this.#pendingFull ? null : this.#pendingIds;
+        this.#projectRemote(current, this.#previousDescriptors, ids, selection);
+        this.#pendingIds = new Set();
+        this.#pendingFull = false;
+        stopCapturingBlockRoomUndo(this.#bridge.document);
+      }, 0);
+    };
+    // Composition listeners follow the view's lifetime: attach on mount, detach on unmount.
+    let compositionDom: HTMLElement | null = null;
+    const attachCompositionListeners = () => {
+      const dom = mountedView(editor)?.dom ?? null;
+      if (!dom || dom === compositionDom) {
+        return;
+      }
+      detachCompositionListeners();
+      compositionDom = dom;
+      dom.addEventListener('compositionstart', startComposition);
+      dom.addEventListener('compositionend', endComposition);
+    };
+    const detachCompositionListeners = () => {
+      compositionDom?.removeEventListener('compositionstart', startComposition);
+      compositionDom?.removeEventListener('compositionend', endComposition);
+      compositionDom = null;
+    };
+    const flushPendingAfterMount = () => {
+      const current = editorGeneration.current();
+      if (!active || !current || !this.#pendingFull || this.#composition || !mountedView(current)) {
+        return;
+      }
+      this.#pendingFull = false;
+      this.#pendingIds = new Set();
+      this.#projectRemote(current, this.#previousDescriptors, null);
+    };
+    attachCompositionListeners();
+    editor.on('mount', attachCompositionListeners);
+    editor.on('mount', flushPendingAfterMount);
+    editor.on('unmount', detachCompositionListeners);
+    const unsubscribe = this.#bridge.observeChanges((blocks, ids) => {
       if (blocks.length === 0 && this.#previousDescriptors.length > 0) {
         this.#emptyParagraphId = null;
       }
@@ -106,34 +224,42 @@ export class PostBlockRoomTiptapController {
       if (!active || this.#applyingRoom || this.#editorGeneration !== editorGeneration) {
         return;
       }
-      const currentEditor = editorGeneration.current();
-      if (!currentEditor) {
+      const current = editorGeneration.current();
+      // Tiptap reports an unmounted editor as destroyed; queue until it mounts (a real destroy
+      // disconnects this controller, which drops the queue).
+      if (!current || !mountedView(current)) {
+        // No view yet (or it is being replaced): project the whole room once it mounts.
+        this.#pendingFull = true;
         return;
       }
-      // Project remote edits before another local transaction can read stale
-      // ProseMirror content and turn unseen text into a deletion.
-      this.#applyingRoom = true;
-      try {
-        const document = currentEditor.schema.nodeFromJSON(this.#projectDocument(blocks));
-        if (!currentEditor.state.doc.eq(document)) {
-          const from = currentEditor.state.doc.content.findDiffStart(document.content);
-          const ends = currentEditor.state.doc.content.findDiffEnd(document.content);
-          if (from === null || ends === null) {
-            throw new Error('Failed to locate the changed Block-room projection range.');
+      if (isComposing(current) || this.#composition) {
+        // compositionstart snapshots before any remote changes enter the room.
+        this.projectionStats.buffered += 1;
+        if (ids === null) {
+          this.#pendingFull = true;
+        } else {
+          for (const id of ids) {
+            this.#pendingIds.add(id);
           }
-          currentEditor.view.dispatch(
-            currentEditor.state.tr
-              .replace(from, ends.a, document.slice(from, ends.b))
-              .setMeta('addToHistory', false)
-              .setMeta('blockRoomProjection', true),
-          );
         }
-      } finally {
-        this.#applyingRoom = false;
+        return;
       }
+      this.#projectRemote(current, blocks, ids);
     });
     return () => {
       active = false;
+      clearTimeout(flushTimer);
+      this.#bridge.document.off('beforeTransaction', beforeRoomTransaction);
+      editor.off('mount', attachCompositionListeners);
+      editor.off('mount', flushPendingAfterMount);
+      editor.off('unmount', detachCompositionListeners);
+      detachCompositionListeners();
+      if (this.#composition) {
+        this.#composition.#bridge.document.destroy();
+      }
+      this.#composition = null;
+      this.#pendingIds.clear();
+      this.#pendingFull = false;
       detachEditor();
       detachUndoOrigin();
       unsubscribe();
@@ -142,6 +268,130 @@ export class PostBlockRoomTiptapController {
         this.#editorGeneration = null;
       }
     };
+  }
+
+  #startComposition(): void {
+    if (this.#composition) {
+      return;
+    }
+    stopCapturingBlockRoomUndo(this.#bridge.document);
+    const document = new Y.Doc();
+    Y.applyUpdate(document, Y.encodeStateAsUpdate(this.#bridge.document));
+    this.#composition = new PostBlockRoomTiptapController(
+      createBlockRoomProseMirrorBridge({
+        document,
+        documentType: this.#bridge.documentType,
+        locale: this.locale,
+        pageSectionId: this.#bridge.pageSectionId,
+        createId: () => this.#bridge.createBlockIdentity(),
+      }),
+    );
+  }
+
+  #applyEditorChange(before: ProseMirrorNode, after: ProseMirrorNode): void {
+    const changed = changedPayloadContainers(before, after);
+    if (changed !== null && this.#applyPayloadChanges(changed)) {
+      return;
+    }
+    this.#applyDocument(after.toJSON());
+  }
+
+  #projectRemote(
+    editor: Editor,
+    blocks: readonly ProseMirrorBlockDescriptor[],
+    ids: ReadonlySet<string> | null,
+    selection: RelativeSelection | null = null,
+  ): void {
+    this.#applyingRoom = true;
+    try {
+      let tr = editor.state.tr;
+      let localized = ids !== null;
+      if (ids !== null) {
+        const descriptors = findDescriptors(blocks, ids);
+        const ranges: { from: number; node: ProseMirrorNode; next: ProseMirrorNode }[] = [];
+        editor.state.doc.descendants((node, position) => {
+          if (node.type.name !== 'blockContainer' || !ids.has(node.attrs.id)) {
+            return true;
+          }
+          const descriptor = descriptors.get(node.attrs.id);
+          if (!descriptor || !node.firstChild) {
+            localized = false;
+            return false;
+          }
+          const projected = editor.schema.nodeFromJSON(
+            documentToTiptap([{ ...descriptor, children: [] }], this.#projectionOptions()),
+          );
+          const next = projected.firstChild!.firstChild!.firstChild!;
+          ranges.push({ from: position + 1, node: node.firstChild, next });
+          return true;
+        });
+        if (ranges.length !== ids.size) {
+          localized = false;
+        }
+        if (localized) {
+          this.projectionStats.incremental += 1;
+          this.projectionStats.projectedBlocks += ranges.length;
+          for (const range of ranges.sort((a, b) => b.from - a.from)) {
+            if (range.node.eq(range.next)) {
+              continue;
+            }
+            // Diff inside this payload, preserving selection and unchanged DOM.
+            const start = range.node.content.findDiffStart(range.next.content);
+            const end = range.node.content.findDiffEnd(range.next.content);
+            if (range.node.sameMarkup(range.next) && start !== null && end !== null) {
+              const overlap = start - Math.min(end.a, end.b);
+              const oldEnd = end.a + Math.max(0, overlap);
+              const newEnd = end.b + Math.max(0, overlap);
+              tr = tr.replace(range.from + 1 + start, range.from + 1 + oldEnd, range.next.slice(start, newEnd));
+            } else {
+              tr = tr.replaceWith(range.from, range.from + range.node.nodeSize, range.next);
+            }
+          }
+        }
+      }
+      if (!localized) {
+        this.projectionStats.full += 1;
+        const next = editor.schema.nodeFromJSON(this.#projectDocument(blocks));
+        const start = tr.doc.content.findDiffStart(next.content);
+        const end = tr.doc.content.findDiffEnd(next.content);
+        if (start !== null && end !== null) {
+          const overlap = Math.max(0, start - Math.min(end.a, end.b));
+          tr = tr.replace(start, end.a + overlap, next.slice(start, end.b + overlap));
+        }
+      }
+      if (selection) {
+        const resolve = (point: RelativeSelection['anchor']): number | null => {
+          let found: number | null = null;
+          tr.doc.descendants((node, pos) => {
+            if (node.type.name !== 'blockContainer' || node.attrs.id !== point.id) {
+              return true;
+            }
+            const offset = resolveRelativeBlockPoint(this.#bridge.document, point.id, node, point.relative);
+            if (offset !== null) {
+              found = pos + 1 + offset;
+            }
+            return false;
+          });
+          return found;
+        };
+        const anchor = resolve(selection.anchor);
+        const head = resolve(selection.head);
+        if (anchor !== null && head !== null) {
+          tr.setSelection(TextSelection.create(tr.doc, anchor, head));
+        }
+      }
+      const view = mountedView(editor);
+      if (tr.docChanged && view) {
+        view.dispatch(
+          tr
+            .setMeta('addToHistory', false)
+            .setMeta('blockRoomProjection', true)
+            .setMeta('blockRoomChangedIds', localized ? ids : null),
+        );
+      }
+    } finally {
+      this.#applyingRoom = false;
+    }
   }
 
   #applyPayloadChanges(containers: readonly ProseMirrorNode[]): boolean {
@@ -264,6 +514,31 @@ export class PostBlockRoomTiptapController {
       this.#projectionOptions(),
     );
   }
+}
+
+interface RelativeSelection {
+  anchor: { id: string; relative: number[] };
+  head: { id: string; relative: number[] };
+}
+
+function captureRelativeSelection(editor: Editor, document: Y.Doc): RelativeSelection | null {
+  if (!(editor.state.selection instanceof TextSelection)) {
+    return null;
+  }
+  const point = (position: typeof editor.state.selection.$anchor) => {
+    for (let depth = position.depth; depth > 0; depth--) {
+      const node = position.node(depth);
+      if (node.type.name !== 'blockContainer') {
+        continue;
+      }
+      const relative = relativeBlockPoint(document, node.attrs.id, node, position.pos - position.before(depth) - 1);
+      return relative ? { id: String(node.attrs.id), relative } : null;
+    }
+    return null;
+  };
+  const anchor = point(editor.state.selection.$anchor);
+  const head = point(editor.state.selection.$head);
+  return anchor && head ? { anchor, head } : null;
 }
 
 /** null means topology changed and the full structural diff is required. */

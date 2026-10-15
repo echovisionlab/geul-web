@@ -1,8 +1,21 @@
 'use client';
 
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+
+import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
+import { SupportingText, Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
+import { ConfirmationDialog } from '@/features/confirmation';
+
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+} from '@/components/core/Layout';
+
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   closestCenter,
   DndContext,
@@ -11,19 +24,20 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DndContextProps,
 } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { IconEdit, IconMenu2, IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconEdit, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Divider, Group, Modal, Paper, Stack, Text, Title } from '@mantine/core';
+import { SelectionRow } from '@/components/core/SelectionSurface';
 import { useDisclosure } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { LabelBadge } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { Select, TextInput, Checkbox } from '@/components/core/Input';
-import { ConfirmModal } from '@/components/core/Modal';
+import { ContentModal, DialogActions } from '@/components/core/Modal';
 import { PageLoader } from '@/features/site/PageLoader';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
 import { EntityTranslationsPanel } from '@/features/translation/EntityTranslationsPanel';
@@ -59,13 +73,15 @@ import { isMenuItemLabelApplicableToLocale } from '@/features/translation/menu-t
 
 const supportedLocaleOptions = getSupportedLocaleOptions();
 
-export function AdminMenusPage() {
+function useAdminMenusPageModel() {
+  const tModalActions = useTranslations('common.actions');
   const tCommon = useTranslations('common');
   const tPage = useTranslations('adminList.menus');
   const queryClient = useQueryClient();
 
   // Menu states
-  const [selectedMenuId, setSelectedMenuId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const [selectedMenuId, setSelectedMenuId] = useState<string | null>(() => searchParams.get('menu'));
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
 
   // Menu modal states
@@ -114,8 +130,10 @@ export function AdminMenusPage() {
   });
   const { activeEditLocale, roomLocale } = localeSession;
   const menuRoom = useMenuCollaboration(selectedMenuId ?? '', roomLocale);
+  const accessLevel = useEditorAccessLevel(menuRoom.provider);
   const roomState = menuRoom.roomState;
   const canEditCurrentCopy =
+    accessLevel === 'edit' &&
     menuRoom.isSynced &&
     activeEditLocale.canEditActiveLocale &&
     activeEditLocale.hasLiveRow &&
@@ -151,10 +169,10 @@ export function AdminMenusPage() {
     mutationFn: (name: string) => createMenuAction(name),
     onSuccess: async (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tPage('created'), color: 'green' });
+      notifications.show({ message: tPage('created'), tone: 'positive' });
       await invalidateMenuEditorQueries(queryClient);
       if (result.data) {
         setSelectedMenuId(result.data.id);
@@ -167,10 +185,10 @@ export function AdminMenusPage() {
     mutationFn: (id: string) => deleteMenuAction(id),
     onSuccess: async (result, id) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      notifications.show({ message: tPage('deleted'), color: 'red' });
+      notifications.show({ message: tPage('deleted'), tone: 'positive' });
       await invalidateMenuEditorQueries(queryClient, id);
       if (selectedMenuId === id) {
         setSelectedMenuId(null);
@@ -183,7 +201,7 @@ export function AdminMenusPage() {
 
   // DnD sensors
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
@@ -313,53 +331,245 @@ export function AdminMenusPage() {
 
   const isSaving = createMenu.isPending;
 
+  return {
+    kind: 'ready' as const,
+    menuRoom,
+    selectedMenuId,
+    menusQuery,
+    selectedMenuFailure,
+    targetsQuery,
+    selectedMenuQuery,
+    tPage,
+    handleCreateMenu,
+    tCommon,
+    menusLoading,
+    menus,
+    setSelectedMenuId,
+    handleEditMenu,
+    canEditStructure,
+    handleDeleteMenu,
+    selectedMenuLoading,
+    roomState,
+    selectedMenu,
+    activeEditLocale,
+    effectiveSourceLocale,
+    openCreateItemModal,
+    selectedMenuAuthoringLocked,
+    menuItems,
+    canEditRoom: accessLevel === 'edit',
+    canEditCurrentCopy,
+    sensors,
+    handleDragEnd,
+    handleUpdateItem,
+    handleDeleteItem,
+    handleUpdateChild,
+    handleDeleteChild,
+    menuModalOpened,
+    closeMenuModal,
+    editingMenuId,
+    tModalActions,
+    menuName,
+    setMenuName,
+    handleSaveMenu,
+    isSaving,
+    itemModalOpened,
+    closeItemModal,
+    creatingForParentId,
+    formLabel,
+    setFormLabel,
+    formLabelOwnedBySource,
+    formLinkType,
+    setFormLinkType,
+    setFormTargetId,
+    formUrl,
+    setFormUrl,
+    formTargetId,
+    formTargetSelectData,
+    formOpenInNewTab,
+    setFormOpenInNewTab,
+    formLocalizationMode,
+    setFormLocalizationMode,
+    setFormFixedLocale,
+    formFixedLocale,
+    formVisibility,
+    setFormVisibility,
+    handleSaveItem,
+    canSaveFormItem,
+    deleteMenuOpened,
+    closeDeleteMenuModal,
+    deletingMenu,
+    deleteMenu,
+  };
+}
+
+type AdminMenusPageControllerModel = ReturnType<typeof useAdminMenusPageModel>;
+type AdminMenusPageReadyModel = Extract<AdminMenusPageControllerModel, { kind: 'ready' }>;
+export type AdminMenusPageViewModel =
+  | Exclude<AdminMenusPageControllerModel, { kind: 'ready' }>
+  | (Omit<
+      AdminMenusPageReadyModel,
+      | 'menuRoom'
+      | 'menusQuery'
+      | 'selectedMenuFailure'
+      | 'targetsQuery'
+      | 'selectedMenuQuery'
+      | 'roomState'
+      | 'selectedMenu'
+      | 'deleteMenu'
+    > & {
+      menuRoom:
+        | Pick<NonNullable<AdminMenusPageReadyModel['menuRoom']>, 'provider' | 'setLabel' | 'useSourceLabel'>
+        | Extract<AdminMenusPageReadyModel['menuRoom'], null | undefined>;
+      menusQuery: import('react').ComponentProps<typeof QueryErrorAlert>['queries'][number];
+      selectedMenuFailure: import('react').ComponentProps<typeof QueryErrorAlert>['queries'][number];
+      targetsQuery: import('react').ComponentProps<typeof QueryErrorAlert>['queries'][number];
+      selectedMenuQuery: import('react').ComponentProps<typeof QueryErrorAlert>['queries'][number];
+      roomState:
+        | Pick<NonNullable<AdminMenusPageReadyModel['roomState']>, 'name' | 'locale' | 'requestedLabels'>
+        | Extract<AdminMenusPageReadyModel['roomState'], null | undefined>;
+      selectedMenu: Pick<NonNullable<AdminMenusPageReadyModel['selectedMenu']>, 'name'> | null | undefined;
+      deleteMenu:
+        | Pick<NonNullable<AdminMenusPageReadyModel['deleteMenu']>, 'mutate' | 'isPending'>
+        | Extract<AdminMenusPageReadyModel['deleteMenu'], null | undefined>;
+    });
+export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }) {
+  const tReorder = useTranslations('pageEditor.a11y');
+  const {
+    menuRoom,
+    selectedMenuId,
+    menusQuery,
+    selectedMenuFailure,
+    targetsQuery,
+    selectedMenuQuery,
+    tPage,
+    handleCreateMenu,
+    tCommon,
+    menusLoading,
+    menus,
+    setSelectedMenuId,
+    handleEditMenu,
+    canEditStructure,
+    handleDeleteMenu,
+    selectedMenuLoading,
+    roomState,
+    selectedMenu,
+    activeEditLocale,
+    effectiveSourceLocale,
+    openCreateItemModal,
+    selectedMenuAuthoringLocked,
+    menuItems,
+    canEditRoom,
+    canEditCurrentCopy,
+    sensors,
+    handleDragEnd,
+    handleUpdateItem,
+    handleDeleteItem,
+    handleUpdateChild,
+    handleDeleteChild,
+    menuModalOpened,
+    closeMenuModal,
+    editingMenuId,
+    tModalActions,
+    menuName,
+    setMenuName,
+    handleSaveMenu,
+    isSaving,
+    itemModalOpened,
+    closeItemModal,
+    creatingForParentId,
+    formLabel,
+    setFormLabel,
+    formLabelOwnedBySource,
+    formLinkType,
+    setFormLinkType,
+    setFormTargetId,
+    formUrl,
+    setFormUrl,
+    formTargetId,
+    formTargetSelectData,
+    formOpenInNewTab,
+    setFormOpenInNewTab,
+    formLocalizationMode,
+    setFormLocalizationMode,
+    setFormFixedLocale,
+    formFixedLocale,
+    formVisibility,
+    setFormVisibility,
+    handleSaveItem,
+    canSaveFormItem,
+    deleteMenuOpened,
+    closeDeleteMenuModal,
+    deletingMenu,
+    deleteMenu,
+  } = model;
+  const describePosition = (id: string | number, targetId: string | number = id) => {
+    const item = menuItems.find((entry) => entry.id === String(id));
+    const index = menuItems.findIndex((entry) => entry.id === String(targetId));
+    if (!item || index < 0) {
+      return null;
+    }
+    return {
+      section: `${selectedMenu?.name ?? tCommon('entities.menus')} · ${item.label}`,
+      index: index + 1,
+      count: menuItems.length,
+    };
+  };
+  const reorderAccessibility: NonNullable<DndContextProps['accessibility']> = {
+    screenReaderInstructions: { draggable: tReorder('dragInstructions') },
+    announcements: {
+      onDragStart: ({ active }) => {
+        const position = describePosition(active.id);
+        return position ? tReorder('dragStart', position) : undefined;
+      },
+      onDragOver: ({ active, over }) => {
+        const position = over ? describePosition(active.id, over.id) : null;
+        return position ? tReorder('dragOver', position) : undefined;
+      },
+      onDragEnd: ({ active, over }) => {
+        const position = describePosition(active.id, over?.id ?? active.id);
+        return position ? tReorder(over ? 'dragEnd' : 'dragCancel', position) : undefined;
+      },
+      onDragCancel: ({ active }) => {
+        const position = describePosition(active.id);
+        return position ? tReorder('dragCancel', position) : undefined;
+      },
+    },
+  };
   return (
     <EditorRuntimeProvider provider={menuRoom.provider} entityType="menu" entityId={selectedMenuId ?? ''}>
-      <Stack>
+      <DsLayoutStack gap="xs">
         <QueryErrorAlert queries={[menusQuery, selectedMenuFailure, targetsQuery, selectedMenuQuery]} />
-        <Group justify="space-between">
-          <Title order={2}>{tPage('title')}</Title>
+        <DsLayoutInline justify="between">
+          <DsHeading level={2}>{tPage('title')}</DsHeading>
           <Button tone="neutral" emphasis="medium" onClick={handleCreateMenu} leftSection={<IconPlus size={16} />}>
             {tPage('createMenu')}
           </Button>
-        </Group>
+        </DsLayoutInline>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--mantine-spacing-lg)' }}>
+        <DsLayoutStack gap="xs">
           {/* Menu List */}
-          <SectionCard>
+          <SectionCard padding="xxs" border="none" appearance="plain" layout="stack">
             <SectionHeader title={tCommon('entities.menus')} />
             {menusQuery.isError ? null : menusLoading ? (
               <PageLoader />
             ) : !menus || menus.length === 0 ? (
-              <Text size="sm" c="dimmed">
+              <SupportingText role="status" tone="secondary">
                 {tPage('empty')}
-              </Text>
+              </SupportingText>
             ) : (
-              <Stack gap="xs">
+              <DsLayoutStack gap="none">
                 {menus.map((menu) => (
-                  <Paper
+                  <SelectionRow
+                    density="compact"
                     key={menu.id}
-                    p="sm"
-                    withBorder
-                    style={{
-                      cursor: 'pointer',
-                      backgroundColor: selectedMenuId === menu.id ? 'var(--mantine-color-blue-light)' : undefined,
-                    }}
-                    onClick={() => setSelectedMenuId(menu.id)}
-                  >
-                    <Group justify="space-between" wrap="nowrap">
-                      <Group gap="xs" wrap="nowrap" style={{ flex: 1, overflow: 'hidden' }}>
-                        <IconMenu2 size={16} />
-                        <Text size="sm" truncate>
-                          {menu.name}
-                        </Text>
-                        <LabelBadge size="xs">{menu.items.length}</LabelBadge>
-                      </Group>
-                      <Group gap={4}>
+                    selected={selectedMenuId === menu.id}
+                    onAction={() => setSelectedMenuId(menu.id)}
+                    trailing={
+                      <DsLayoutInline gap="none" wrap="nowrap">
                         <IconButton
-                          emphasis="low"
-                          size="sm"
-                          aria-label={tCommon('actions.edit')}
+                          emphasis="medium"
+                          size="chrome"
+                          aria-label={`${tCommon('actions.edit')} ${menu.name}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleEditMenu(menu.id, menu.name);
@@ -371,8 +581,9 @@ export function AdminMenusPage() {
                         <IconButton
                           tone="danger"
                           emphasis="low"
-                          size="sm"
-                          aria-label={tCommon('actions.delete')}
+                          size="chrome"
+                          disabled={selectedMenuId === menu.id && !canEditRoom}
+                          aria-label={`${tCommon('actions.delete')} ${menu.name}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteMenu(menu.id);
@@ -380,44 +591,48 @@ export function AdminMenusPage() {
                         >
                           <IconTrash size={14} />
                         </IconButton>
-                      </Group>
-                    </Group>
-                  </Paper>
+                      </DsLayoutInline>
+                    }
+                  >
+                    <DsLayoutInline gap="xxs" wrap="nowrap">
+                      <DsText size="xs" truncate>
+                        {menu.name}
+                      </DsText>
+                      <LabelBadge>{menu.items.length}</LabelBadge>
+                    </DsLayoutInline>
+                  </SelectionRow>
                 ))}
-              </Stack>
+              </DsLayoutStack>
             )}
           </SectionCard>
 
           {/* Menu Items Editor */}
-          <SectionCard>
+          <SectionCard padding="xxs" border="none" appearance="plain" layout="stack">
             {selectedMenuFailure.isError ? null : !selectedMenuId ? (
-              <Stack align="center" justify="center" h={300}>
-                <IconMenu2 size={48} color="gray" />
-                <Text c="dimmed">{tPage('selectPrompt')}</Text>
-              </Stack>
+              <SupportingText tone="secondary">{tPage('selectPrompt')}</SupportingText>
             ) : selectedMenuLoading ? (
               <PageLoader />
             ) : (
-              <>
+              <DsLayoutStack gap="xs">
                 <SectionHeader
                   title={roomState?.name ?? selectedMenu?.name ?? tPage('itemsTitle')}
                   actions={
-                    <Group gap="xs">
+                    <DsLayoutInline gap="xs">
                       {activeEditLocale.isControlVisible ? (
                         <TranslationLocaleControl
-                          variant="select"
+                          variant="menu"
+                          buttonSize="compact"
                           value={activeEditLocale.activeLocale}
                           options={activeEditLocale.localeOptions}
                           sourceLocale={effectiveSourceLocale}
                           onChange={(value) => value && activeEditLocale.setActiveLocale(value)}
-                          style={{ width: 220 }}
                         />
                       ) : null}
                       {activeEditLocale.isSourceLocale ? (
                         <Button
                           tone="neutral"
                           emphasis="medium"
-                          size="sm"
+                          size="compact"
                           onClick={() => openCreateItemModal()}
                           leftSection={<IconPlus size={14} />}
                           disabled={selectedMenuAuthoringLocked}
@@ -425,11 +640,9 @@ export function AdminMenusPage() {
                           {tPage('addItem')}
                         </Button>
                       ) : null}
-                    </Group>
+                    </DsLayoutInline>
                   }
                 />
-
-                <Divider mb="md" />
 
                 {!activeEditLocale.isSourceLocale && roomState?.locale ? (
                   <MenuTargetItemsEditor
@@ -441,72 +654,101 @@ export function AdminMenusPage() {
                     onUseSource={menuRoom.useSourceLabel}
                   />
                 ) : menuItems.length === 0 ? (
-                  <SectionCard p="xl" ta="center">
-                    <Text c="dimmed">{tPage('noItems')}</Text>
-                  </SectionCard>
+                  <div style={{ textAlign: 'center' }}>
+                    <DsLayoutInset space="xs">
+                      <SupportingText tone="secondary">{tPage('noItems')}</SupportingText>
+                    </DsLayoutInset>
+                  </div>
                 ) : (
-                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                    accessibility={reorderAccessibility}
+                  >
                     <SortableContext items={menuItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-                      {menuItems.map((item) => (
-                        <SortableMenuItem
-                          key={item.id}
-                          item={item}
-                          sourceLocale={effectiveSourceLocale}
-                          onUpdate={handleUpdateItem}
-                          onDelete={handleDeleteItem}
-                          onAddChild={openCreateItemModal}
-                          onUpdateChild={handleUpdateChild}
-                          onDeleteChild={handleDeleteChild}
-                          allowChildren
-                          editable={!selectedMenuAuthoringLocked}
-                        />
-                      ))}
+                      <DsLayoutStack
+                        gap="none"
+                        role="group"
+                        aria-label={selectedMenu?.name ?? tCommon('entities.menus')}
+                      >
+                        {menuItems.map((item) => (
+                          <SortableMenuItem
+                            key={item.id}
+                            item={item}
+                            sourceLocale={effectiveSourceLocale}
+                            onUpdate={handleUpdateItem}
+                            onDelete={handleDeleteItem}
+                            onAddChild={openCreateItemModal}
+                            onUpdateChild={handleUpdateChild}
+                            onDeleteChild={handleDeleteChild}
+                            allowChildren
+                            editable={!selectedMenuAuthoringLocked}
+                          />
+                        ))}
+                      </DsLayoutStack>
                     </SortableContext>
                   </DndContext>
                 )}
-              </>
+              </DsLayoutStack>
             )}
           </SectionCard>
 
           {selectedMenuId && selectedMenu ? (
-            <EntityTranslationsPanel entityType="menu" entityId={selectedMenuId} canManage />
+            <AuthoringExtension kind="translations">
+              <EntityTranslationsPanel
+                entityType="menu"
+                entityId={selectedMenuId}
+                canManage
+                canAdministerTranslations={canEditRoom}
+                canMutateTargets={canEditRoom}
+              />
+            </AuthoringExtension>
           ) : null}
-        </div>
+        </DsLayoutStack>
 
         {/* Menu Name Modal */}
-        <Modal
+        <ContentModal
           opened={menuModalOpened}
           onClose={closeMenuModal}
           title={editingMenuId ? tPage('editMenuTitle') : tPage('createMenu')}
+          closeLabel={tModalActions('close')}
         >
-          <Stack>
+          <DsLayoutStack>
             <TextInput
               label={tPage('menuNameLabel')}
               placeholder={tPage('menuNamePlaceholder')}
+              disabled={Boolean(editingMenuId) && selectedMenuAuthoringLocked}
               value={menuName}
               onChange={(e) => setMenuName(e.currentTarget.value)}
               required
             />
-            <Group justify="flex-end">
+            <DialogActions>
               <Button emphasis="low" onClick={closeMenuModal}>
                 {tCommon('actions.cancel')}
               </Button>
-              <Button onClick={handleSaveMenu} loading={isSaving} disabled={!menuName.trim()}>
+              <Button
+                emphasis="strong"
+                onClick={handleSaveMenu}
+                loading={isSaving}
+                disabled={!menuName.trim() || (Boolean(editingMenuId) && selectedMenuAuthoringLocked)}
+              >
                 {editingMenuId
                   ? tCommon('actions.save')
                   : tCommon('actions.createItem', { item: tCommon('entities.menu') })}
               </Button>
-            </Group>
-          </Stack>
-        </Modal>
+            </DialogActions>
+          </DsLayoutStack>
+        </ContentModal>
 
         {/* Add Item Modal */}
-        <Modal
+        <ContentModal
           opened={itemModalOpened}
           onClose={closeItemModal}
           title={creatingForParentId ? tPage('addSubmenuItemTitle') : tPage('addMenuItemTitle')}
+          closeLabel={tModalActions('close')}
         >
-          <Stack>
+          <DsLayoutStack>
             <TextInput
               label={tPage('sourceLabel')}
               placeholder={tPage('labelPlaceholder')}
@@ -562,7 +804,7 @@ export function AdminMenusPage() {
               disabled={selectedMenuAuthoringLocked}
             />
 
-            <Group grow align="flex-start">
+            <DsLayoutInline grow align="start">
               <Select
                 label={tPage('labelLanguageMode')}
                 value={formLocalizationMode}
@@ -590,14 +832,12 @@ export function AdminMenusPage() {
                   disabled={selectedMenuAuthoringLocked}
                 />
               ) : null}
-            </Group>
-            <Text size="xs" c="dimmed">
+            </DsLayoutInline>
+            <DsText size="xs" tone="secondary">
               {formLocalizationMode === 'fixed_locale'
                 ? tPage('labelLanguageFixedLocaleDescription')
                 : tPage('labelLanguageTranslatedDescription')}
-            </Text>
-
-            <Divider my="xs" />
+            </DsText>
 
             <VisibilityEditor
               value={formVisibility}
@@ -605,36 +845,47 @@ export function AdminMenusPage() {
               disabled={selectedMenuAuthoringLocked}
             />
 
-            <Group justify="flex-end">
+            <DialogActions>
               <Button emphasis="low" onClick={closeItemModal}>
                 {tCommon('actions.cancel')}
               </Button>
-              <Button onClick={handleSaveItem} disabled={!canSaveFormItem || selectedMenuAuthoringLocked}>
+              <Button
+                emphasis="strong"
+                onClick={handleSaveItem}
+                disabled={!canSaveFormItem || selectedMenuAuthoringLocked}
+              >
                 {tCommon('actions.add')}
               </Button>
-            </Group>
-          </Stack>
-        </Modal>
+            </DialogActions>
+          </DsLayoutStack>
+        </ContentModal>
 
-        <ConfirmModal
+        <ConfirmationDialog
+          intent="delete"
           opened={deleteMenuOpened}
           onClose={closeDeleteMenuModal}
-          onConfirm={() => deletingMenu && deleteMenu.mutate(deletingMenu.id)}
+          confirmDisabled={!canEditRoom && deletingMenu?.id === selectedMenuId}
+          onConfirm={() =>
+            deletingMenu && (deletingMenu.id !== selectedMenuId || canEditRoom) && deleteMenu.mutate(deletingMenu.id)
+          }
           title={tCommon('actions.delete')}
           message={
-            <Text>
+            <DsText>
               {tCommon.rich('messages.confirmDeleteNamedRich', {
                 name: deletingMenu?.name ?? tCommon('entities.menu'),
                 strong: (chunks) => <strong>{chunks}</strong>,
               })}
-            </Text>
+            </DsText>
           }
           confirmLabel={tCommon('actions.delete')}
           cancelLabel={tCommon('actions.cancel')}
           closeLabel={tCommon('actions.close')}
           loading={deleteMenu.isPending}
         />
-      </Stack>
+      </DsLayoutStack>
     </EditorRuntimeProvider>
   );
+}
+export function AdminMenusPage(...args: Parameters<typeof useAdminMenusPageModel>) {
+  return <AdminMenusPageView model={useAdminMenusPageModel(...args)} />;
 }

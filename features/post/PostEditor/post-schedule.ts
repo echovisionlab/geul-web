@@ -1,4 +1,5 @@
-import { getZonedDateTimeParts, zonedDateTimePartsToInstant } from '@/lib/utils/zoned-date-time';
+import type { DateTimeValue } from '@/components/core/Input/DateTimeInput';
+import { getZonedDateTimeParts, zonedDateTimeInputToInstant } from '@/lib/utils/zoned-date-time';
 
 export interface PostScheduleResolution {
   instant: Date;
@@ -17,21 +18,22 @@ export function getIanaTimeZoneOptions(preferredTimeZone = 'UTC'): { value: stri
   }));
 }
 
-export function instantToScheduleInput(instant: Date, timeZone: string): Date {
+/** Keep wall-clock values independent of the browser's own time zone and DST transitions. */
+export function instantToScheduleInput(instant: Date, timeZone: string): DateTimeValue {
   const parts = getZonedDateTimeParts(instant, timeZone);
-  return new Date(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, 0, 0);
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return {
+    date: `${String(parts.year).padStart(4, '0')}-${pad(parts.month)}-${pad(parts.day)}`,
+    time: `${pad(parts.hour)}:${pad(parts.minute)}`,
+  };
 }
 
-export function resolvePostSchedule(localDate: Date, timeZone: string, locale: string): PostScheduleResolution {
-  const desired = {
-    year: localDate.getFullYear(),
-    month: localDate.getMonth() + 1,
-    day: localDate.getDate(),
-    hour: localDate.getHours(),
-    minute: localDate.getMinutes(),
-    second: 0,
-  };
-  const candidate = zonedDateTimePartsToInstant(desired, timeZone);
+export function resolvePostSchedule(
+  localDate: DateTimeValue,
+  timeZone: string,
+  locale: string,
+): PostScheduleResolution {
+  const candidate = zonedDateTimeInputToInstant(`${localDate.date}T${localDate.time}`, timeZone);
 
   return {
     instant: candidate,

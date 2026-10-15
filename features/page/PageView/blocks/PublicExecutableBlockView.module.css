@@ -3,15 +3,10 @@
   width: 100%;
   overflow: hidden;
   margin: 0;
-  padding: 0;
-  color: var(--mantine-color-text);
-  border: 1px solid var(--mantine-color-default-border);
-  background: var(--mantine-color-body);
 }
 
 .root.root {
   margin: 0;
-  padding: 0;
 }
 
 .body {
@@ -19,26 +14,19 @@
   max-width: 100%;
 }
 
-.header {
-  min-height: var(--chrome-row-height, 36px);
-  padding: 6px 8px;
-  border-bottom: 1px solid var(--mantine-color-default-border);
-  background: var(--mantine-color-default-hover);
-}
-
 .body {
   padding: 0;
 }
 
 .controls {
-  padding: 4px 8px;
+  padding: var(--geul-spacing-xxs) var(--geul-spacing-xs);
 }
 
 .preview {
   position: relative;
   min-height: 180px;
   overflow: hidden;
-  background: var(--mantine-color-dark-9, #101113);
+  background: var(--geul-canvas-dark);
 }
 
 .runtime,
@@ -57,18 +45,18 @@
 @media print {
   .root {
     overflow: visible;
-    color: #111;
-    border-color: #b5b5b5;
-    background: #fff;
+    color: var(--geul-paper-text);
+    border-color: var(--geul-paper-border);
+    background: var(--geul-paper-background);
     break-inside: auto;
   }
 
   .header {
     min-height: 0;
     padding: 6pt 8pt;
-    color: #111;
-    border-color: #b5b5b5;
-    background: #f3f3f3;
+    color: var(--geul-paper-text);
+    border-color: var(--geul-paper-border);
+    background: var(--geul-paper-control);
     break-after: avoid;
   }
 
@@ -95,17 +83,17 @@
   }
 
   .printShaderStage + .printShaderStage {
-    border-top: 1px solid #b5b5b5;
+    border-top: 1px solid var(--geul-paper-border);
   }
 
   .printShaderFilename {
     padding: 4pt 8pt;
     margin: 0;
-    color: #444 !important;
-    background: #eceff3;
-    font-family: var(--mantine-font-family-monospace);
-    font-size: 8pt !important;
-    line-height: 1.3 !important;
+    color: var(--geul-paper-caption) !important;
+    background: var(--geul-paper-code);
+    font-family: var(--font-mono);
+    font-size: var(--geul-font-size-xs) !important;
+    line-height: var(--geul-line-height-xs) !important;
     break-after: avoid;
   }
 }
@@ -116,7 +104,7 @@
   touch-action: none;
 }
 
-@media (max-width: 48em) {
+@media (width < $mantine-breakpoint-sm) {
   .header {
     align-items: flex-start;
   }

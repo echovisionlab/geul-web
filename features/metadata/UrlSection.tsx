@@ -2,7 +2,6 @@
 
 import { useTranslations } from 'next-intl';
 import type { TextInputProps } from '@/components/core/Input';
-import { useCopyToClipboard } from '@/lib/hooks/useCopyToClipboard';
 import { UrlSectionView, type UrlSectionViewLabels } from './ui/UrlSectionView';
 
 export type UrlEntityType =
@@ -24,13 +23,13 @@ export interface UrlSectionProps {
 }
 
 const ENTITY_PATH_MAP: Record<UrlEntityType, string> = {
-  post: 'post',
+  post: 'posts',
   page: '',
-  work: 'work',
+  work: 'works',
   form: 'forms',
-  label: 'label',
-  artist: 'artist',
-  release: 'release',
+  label: 'labels',
+  artist: 'artists',
+  release: 'releases',
   program_event: 'events',
   program_event_series: 'event-series',
 };
@@ -39,7 +38,6 @@ export function UrlSection({ baseUrl, entityType, entityId, slug, ...viewProps }
   const t = useTranslations('urlSection');
   const tCommonActions = useTranslations('common.actions');
   const tCommonLabels = useTranslations('common.labels');
-  const { copy } = useCopyToClipboard();
   const siteOrigin = baseUrl.replace(/\/$/, '');
   const basePath = ENTITY_PATH_MAP[entityType];
   const publicUrlById = basePath ? `${siteOrigin}/${basePath}/${entityId}` : `${siteOrigin}/${entityId}`;
@@ -53,11 +51,8 @@ export function UrlSection({ baseUrl, entityType, entityId, slug, ...viewProps }
     publicUrl: t('fields.publicUrl'),
     copyId: t('actions.copyId'),
     copyUrl: t('actions.copyUrl'),
+    copied: tCommonActions('copied'),
     openInNewTab: tCommonActions('openInNewTab'),
-  };
-
-  const handleCopy = (text: string, label: string) => {
-    copy(text, { successMessage: t('notifications.copied', { label }) });
   };
 
   return (
@@ -68,8 +63,6 @@ export function UrlSection({ baseUrl, entityType, entityId, slug, ...viewProps }
       publicUrlById={publicUrlById}
       publicUrlBySlug={publicUrlBySlug}
       labels={labels}
-      onCopyId={() => handleCopy(entityId, labels.id)}
-      onCopyUrl={(url) => handleCopy(url, labels.title)}
     />
   );
 }

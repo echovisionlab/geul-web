@@ -1,0 +1,61 @@
+.root {
+  display: contents;
+}
+
+.root[data-visible-from] {
+  display: none;
+}
+
+@media (width >= $mantine-breakpoint-xs) {
+  .root[data-visible-from='xs'] {
+    display: contents;
+  }
+
+  .root[data-hidden-from='xs'] {
+    display: none;
+  }
+}
+
+@media (width >= $mantine-breakpoint-sm) {
+  .root[data-visible-from='sm'] {
+    display: contents;
+  }
+
+  .root[data-hidden-from='sm'] {
+    display: none;
+  }
+}
+
+@media (width >= $mantine-breakpoint-md) {
+  .root[data-visible-from='md'] {
+    display: contents;
+  }
+
+  .root[data-hidden-from='md'] {
+    display: none;
+  }
+}
+
+@media (width >= $mantine-breakpoint-lg) {
+  .root[data-visible-from='lg'] {
+    display: contents;
+  }
+
+  .root[data-hidden-from='lg'] {
+    display: none;
+  }
+}
+
+@media (width >= $mantine-breakpoint-xl) {
+  .root[data-visible-from='xl'] {
+    display: contents;
+  }
+
+  .root[data-hidden-from='xl'] {
+    display: none;
+  }
+}
+
+.root[hidden] {
+  display: none !important;
+}

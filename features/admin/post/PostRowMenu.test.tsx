@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: mocks.refresh }) }));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: mocks.showNotification } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: mocks.showNotification } }));
 vi.mock('@/lib/actions/post', () => ({ republishPostAction: mocks.republish }));
 vi.mock('./PostModalContext', () => ({ usePostModal: () => ({ openDelete: vi.fn() }) }));
 vi.mock('@/components/core/DataTable', () => ({

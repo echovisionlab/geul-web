@@ -1,4 +1,4 @@
-import { MantineProvider } from '@mantine/core';
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { renderToString } from 'react-dom/server';
 import { expect, it, vi } from 'vitest';
 import { LoginContent } from './LoginContent';
@@ -30,7 +30,7 @@ vi.mock('@/lib/public-runtime-config', () => ({
 it('renders a login flow during server-side rendering without a browser global', () => {
   expect(() =>
     renderToString(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <LoginContent
           transport={{
             actionUrl: vi.fn(),
@@ -39,7 +39,7 @@ it('renders a login flow during server-side rendering without a browser global',
             submit: vi.fn(),
           }}
         />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     ),
   ).not.toThrow();
 });

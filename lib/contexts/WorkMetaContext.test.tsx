@@ -1,19 +1,20 @@
 // @vitest-environment jsdom
 
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
-import { updateWorkFieldsAction } from '@/lib/actions/work';
+import { getWorkConfigurationAction, updateWorkFieldsAction } from '@/lib/actions/work';
 import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import {
   flushEditorSaves,
   getPendingEditorPatch,
   hasPendingEditorSaves,
   registerEditorSave,
 } from '@/lib/editor/editor-save-registry';
-import { useWorkMeta, WorkMetaProvider, type WorkMeta } from './WorkMetaContext';
+import { useWorkMeta, WorkMetaProvider, type WorkMeta, type WorkEditorConfiguration } from './WorkMetaContext';
 
 const workId = '11111111-1111-4111-8111-111111111111';
 let mockDoc: Y.Doc;
@@ -21,19 +22,21 @@ let container: HTMLDivElement;
 let root: Root;
 let latest: ReturnType<typeof useWorkMeta> | null = null;
 const protocol = vi.hoisted(() => ({ updateMetadata: vi.fn(), getSnapshot: vi.fn() }));
+const { provider } = vi.hoisted(() => ({ provider: {} }));
 
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 
 vi.mock('@/lib/actions/work', () => ({
   updateWorkFieldsAction: vi.fn().mockResolvedValue({ success: true }),
+  getWorkConfigurationAction: vi.fn(),
 }));
 
 vi.mock('@/lib/editor/editor-entity-changes', () => ({ publishEditorEntityChange: vi.fn() }));
 
 vi.mock('@/lib/collab/useBlockRoomConnection', () => ({
   useBlockRoomConnection: () => ({
-    provider: null,
+    provider,
     doc: mockDoc,
     bootstrap: {
       revision: '22222222-2222-4222-8222-222222222222',
@@ -85,7 +88,12 @@ function Reader() {
   return null;
 }
 
-function renderProvider(imageUrl: string | null = null, meta: WorkMeta = initialMeta) {
+let serverConfiguration: WorkEditorConfiguration;
+function configurationFor(meta: WorkMeta, imageUrl: string | null = null): WorkEditorConfiguration {
+  return { ...meta, mapPlaceId: null, featuredImageUrl: imageUrl };
+}
+function renderProvider(imageUrl: string | null = null, meta: WorkMeta = initialMeta, serverMeta: WorkMeta = meta) {
+  serverConfiguration = configurationFor(serverMeta, imageUrl);
   act(() => {
     root.render(
       <WorkMetaProvider workId={workId} initialMeta={meta} initialFeaturedImageUrl={imageUrl}>
@@ -96,7 +104,11 @@ function renderProvider(imageUrl: string | null = null, meta: WorkMeta = initial
 }
 
 beforeEach(() => {
+  setProviderAccessLevel(provider, 'edit');
   vi.clearAllMocks();
+  vi.mocked(getWorkConfigurationAction)
+    .mockReset()
+    .mockImplementation(async () => ({ data: serverConfiguration }));
   mockDoc = new Y.Doc();
   container = document.createElement('div');
   document.body.appendChild(container);
@@ -111,6 +123,36 @@ afterEach(() => {
 });
 
 describe('WorkMetaProvider', () => {
+  it('follows refreshed server permission and room access without replacing its document', async () => {
+    setProviderAccessLevel(provider, 'view');
+    const render = (canEdit: boolean) =>
+      act(() =>
+        root.render(
+          <WorkMetaProvider workId={workId} initialMeta={initialMeta} initialFeaturedImageUrl={null} canEdit={canEdit}>
+            <Reader />
+          </WorkMetaProvider>,
+        ),
+      );
+    render(false);
+    const document = latest?.doc;
+    act(() => latest?.setType('article'));
+    expect(latest?.type).toBe('portfolio');
+    act(() => setProviderAccessLevel(provider, 'edit'));
+    act(() => latest?.setType('article'));
+    expect(latest?.type).toBe('portfolio');
+    render(true);
+    act(() => latest?.setType('article'));
+    expect(latest?.type).toBe('article');
+    act(() => setProviderAccessLevel(provider, 'view'));
+    act(() => {
+      latest?.setType('portfolio');
+      latest?.setClients(['denied']);
+    });
+    expect(latest?.type).toBe('article');
+    expect(updateWorkFieldsAction).not.toHaveBeenCalled();
+    expect(latest?.doc).toBe(document);
+    await act(async () => Promise.resolve());
+  });
   it('keeps global fields local while exposing the one resident Block Y.Doc', () => {
     renderProvider('https://example.com/cover.jpg');
 
@@ -130,14 +172,18 @@ describe('WorkMetaProvider', () => {
     await act(async () => Promise.resolve());
 
     expect(latest?.clients).toEqual(['client-2', 'client-1']);
-    expect(updateWorkFieldsAction).toHaveBeenCalledWith(workId, {
-      clients: ['client-2', 'client-1'],
-      observedClients: [],
-    });
-    expect(publishEditorEntityChange).toHaveBeenCalledWith(`work:${workId}`);
+    expect(updateWorkFieldsAction).toHaveBeenCalledWith(
+      workId,
+      {
+        clients: ['client-2', 'client-1'],
+        observedClients: [],
+      },
+      expect.any(String),
+    );
+    expect(publishEditorEntityChange).toHaveBeenCalledWith(`work:${workId}`, expect.any(String));
   });
 
-  it('adopts refreshed route fields while retaining local credit state', () => {
+  it('reloads neutral route fields through the authorized action while retaining local credit state', async () => {
     renderProvider();
     act(() => {
       latest?.setCreditOrder([{ type: 'group', id: 'group-1' }]);
@@ -151,6 +197,7 @@ describe('WorkMetaProvider', () => {
       clients: ['peer-client'],
     };
     renderProvider(null, refreshed);
+    await act(async () => Promise.resolve());
 
     expect(latest?.title).toBe('Peer title');
     expect(latest?.year).toBe(2025);
@@ -159,7 +206,7 @@ describe('WorkMetaProvider', () => {
     expect(latest?.creditOrder).toEqual([{ type: 'group', id: 'group-1' }]);
   });
 
-  it('protects locally pending fields while adopting unrelated refreshed fields', () => {
+  it('protects locally pending fields while adopting unrelated refreshed fields', async () => {
     renderProvider();
     act(() => {
       latest?.setTitle('Local title');
@@ -185,12 +232,114 @@ describe('WorkMetaProvider', () => {
       clients: ['peer-client'],
     });
 
+    await act(async () => Promise.resolve());
     expect(latest?.metadata).toEqual({ localKey: 'local draft' });
     expect(latest?.title).toBe('Local title');
     expect(latest?.summary).toBe('Local summary');
     expect(latest?.year).toBe(2025);
     expect(latest?.clients).toEqual(['peer-client']);
     unregister();
+  });
+
+  it('preserves a newer local field edit when an earlier canonical write completes', () => {
+    renderProvider();
+    act(() => latest?.setMetadata({ description: 'First edit' }));
+    const write = latest!.configuration!.beginWrite(['metadata']);
+    act(() => latest?.setMetadata({ description: 'Second edit' }));
+    act(() => write.acknowledge({ metadata: { description: 'First edit', peer: 'Canonical peer value' } }));
+
+    expect(latest?.metadata).toEqual({ description: 'Second edit' });
+    expect(latest?.configuration?.getCanonical().metadata).toEqual({
+      description: 'First edit',
+      peer: 'Canonical peer value',
+    });
+  });
+
+  it('ignores an authorized read started before the latest configuration write acknowledgement', async () => {
+    renderProvider();
+    let finishRead!: (result: Awaited<ReturnType<typeof getWorkConfigurationAction>>) => void;
+    vi.mocked(getWorkConfigurationAction).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finishRead = resolve;
+        }),
+    );
+    act(() => latest?.setMetadata({ local: 'Edited' }));
+    const write = latest!.configuration!.beginWrite(['metadata']);
+    let refresh!: Promise<boolean>;
+    act(() => {
+      refresh = latest!.refreshConfiguration!();
+    });
+    act(() => write.acknowledge({ metadata: { local: 'Edited', peer: 'Canonical' } }));
+    await act(async () => {
+      finishRead({ data: configurationFor({ ...initialMeta, metadata: { peer: 'Old read' } }) });
+      await expect(refresh).resolves.toBe(false);
+    });
+    expect(latest?.metadata).toEqual({ local: 'Edited', peer: 'Canonical' });
+  });
+
+  it('reloads unsolicited stale route props instead of replacing settled canonical settings', async () => {
+    renderProvider();
+    act(() => latest?.setMetadata({ local: 'Edited' }));
+    const write = latest!.configuration!.beginWrite(['metadata']);
+    act(() => write.acknowledge({ metadata: { local: 'Edited', peer: 'Canonical' } }));
+    renderProvider(
+      null,
+      { ...initialMeta, metadata: { peer: 'Stale route props' } },
+      {
+        ...initialMeta,
+        metadata: { local: 'Edited', peer: 'Fresh API' },
+      },
+    );
+    expect(latest?.metadata).toEqual({ local: 'Edited', peer: 'Canonical' });
+    await act(async () => Promise.resolve());
+    expect(latest?.metadata).toEqual({ local: 'Edited', peer: 'Fresh API' });
+    expect(getWorkConfigurationAction).toHaveBeenCalledWith(workId);
+  });
+
+  it('keeps the acknowledged client merge baseline while reloading stale route props', async () => {
+    vi.mocked(updateWorkFieldsAction)
+      .mockResolvedValueOnce({ success: true, clients: ['a', 'b'] })
+      .mockResolvedValueOnce({ success: true, clients: ['a'] });
+    renderProvider(null, { ...initialMeta, clients: ['a'] });
+    await act(async () => latest?.setClients(['a', 'b']));
+    renderProvider(null, { ...initialMeta, clients: ['a'] }, { ...initialMeta, clients: ['a', 'b'] });
+    expect(latest?.clients).toEqual(['a', 'b']);
+    await act(async () => Promise.resolve());
+
+    await act(async () => latest?.setClients(['a']));
+    expect(updateWorkFieldsAction).toHaveBeenLastCalledWith(
+      workId,
+      { clients: ['a'], observedClients: ['a', 'b'] },
+      expect.any(String),
+    );
+    expect(latest?.clients).toEqual(['a']);
+  });
+
+  it('retains a newer authorized client baseline when an older save response arrives late', async () => {
+    let finishWrite!: (result: Awaited<ReturnType<typeof updateWorkFieldsAction>>) => void;
+    vi.mocked(updateWorkFieldsAction).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finishWrite = resolve;
+        }),
+    );
+    renderProvider();
+    await act(async () => latest?.setClients(['local-a']));
+    serverConfiguration = configurationFor({ ...initialMeta, clients: ['peer-b'] });
+    await act(async () => {
+      await latest?.refreshConfiguration?.();
+    });
+    expect(latest?.clients).toEqual(['local-a']);
+    await act(async () => finishWrite({ success: true, clients: ['local-a'] }));
+    expect(latest?.clients).toEqual(['peer-b']);
+
+    await act(async () => latest?.setClients(['peer-b', 'local-c']));
+    expect(updateWorkFieldsAction).toHaveBeenLastCalledWith(
+      workId,
+      { clients: ['peer-b', 'local-c'], observedClients: ['peer-b'] },
+      expect.any(String),
+    );
   });
 
   it('keeps featured-image presentation ephemeral and rejects stale setters', () => {
@@ -220,7 +369,7 @@ describe('client save failures', () => {
     expect(hasPendingEditorSaves(`work:${workId}`)).toBe(true);
     expect(getPendingEditorPatch(`work:${workId}`)).toEqual({ clients: ['unsaved'] });
     expect(notifications.show).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'permission denied', color: 'red' }),
+      expect.objectContaining({ message: 'permission denied', tone: 'danger' }),
     );
     await expect(flushEditorSaves(`work:${workId}`)).resolves.toBe(true);
     expect(latest?.clients).toEqual(['unsaved']);
@@ -298,22 +447,33 @@ describe('client save failures', () => {
       metadata: { peerKey: 'peer value' },
       clients: ['server-client'],
     });
+    await act(async () => Promise.resolve());
     expect(updateWorkFieldsAction).toHaveBeenCalledTimes(1);
     expect(latest?.clients).toEqual(['unsaved']);
     expect(latest?.metadata).toEqual({ peerKey: 'peer value' });
     expect(latest?.year).toBe(2025);
-    expect(updateWorkFieldsAction).toHaveBeenNthCalledWith(1, workId, {
-      clients: ['saved'],
-      observedClients: [],
-    });
+    expect(updateWorkFieldsAction).toHaveBeenNthCalledWith(
+      1,
+      workId,
+      {
+        clients: ['saved'],
+        observedClients: [],
+      },
+      expect.any(String),
+    );
     await act(async () => {
       finishFirst({ success: true, clients: ['saved', 'peer-client'] });
     });
     expect(updateWorkFieldsAction).toHaveBeenCalledTimes(2);
-    expect(updateWorkFieldsAction).toHaveBeenNthCalledWith(2, workId, {
-      clients: ['peer-client', 'unsaved'],
-      observedClients: ['saved', 'peer-client'],
-    });
+    expect(updateWorkFieldsAction).toHaveBeenNthCalledWith(
+      2,
+      workId,
+      {
+        clients: ['server-client', 'unsaved'],
+        observedClients: ['server-client'],
+      },
+      expect.any(String),
+    );
     expect(latest?.clients).toEqual(['unsaved']);
     await act(async () => {
       finishSecond({ error: 'offline' });

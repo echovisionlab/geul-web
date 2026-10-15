@@ -1,5 +1,6 @@
 'use client';
 
+import { primitiveTokens } from '@/components/core/design-tokens';
 import {
   EmailTiptapEditor,
   type EmailCampaignTiptapEditorHandle,
@@ -11,6 +12,8 @@ interface CampaignEditorProps {
   campaignId: string;
   provider: CollaborationAwarenessProvider;
   blockRoomController: RichTextBlockRoomTiptapController;
+  accessibleLabel?: string;
+  contentLanguage?: string;
   userName?: string;
   userColor?: string;
   editable?: boolean;
@@ -22,8 +25,10 @@ interface CampaignEditorProps {
 export function CampaignEditor({
   provider,
   blockRoomController,
+  accessibleLabel,
+  contentLanguage,
   userName = 'Anonymous',
-  userColor = '#3b82f6',
+  userColor = primitiveTokens.colors.annotation,
   editable = true,
   structureLocked = false,
   onEditorReady,
@@ -35,6 +40,8 @@ export function CampaignEditor({
   }
   return (
     <EmailTiptapEditor
+      accessibleLabel={accessibleLabel}
+      contentLanguage={contentLanguage}
       blockRoomController={blockRoomController}
       awareness={awareness}
       userName={userName}

@@ -14,6 +14,8 @@ const DEFAULT_FALLBACK_SCALE = 0.85;
 const MIN_REENCODE_DIMENSION = 512;
 
 interface ConvertToWebPOptions {
+  /** Reject failed decoding/encoding instead of falling back to the original. */
+  strict?: boolean;
   maxDimension?: number;
   maxBytes?: number;
   quality?: number;
@@ -133,6 +135,7 @@ async function renderBitmapToWebP(bitmap: ImageBitmap, width: number, height: nu
  */
 export async function convertToWebP(file: File, options: ConvertToWebPOptions = {}): Promise<File> {
   const {
+    strict = false,
     maxDimension = MAX_DIMENSION,
     maxBytes,
     quality: initialQuality = DEFAULT_QUALITY,
@@ -202,6 +205,10 @@ export async function convertToWebP(file: File, options: ConvertToWebPOptions = 
     if (heicInput) {
       const detail = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to decode HEIC or HEIF image: ${detail}`);
+    }
+    if (strict) {
+      const detail = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to prepare image: ${detail}`);
     }
     return file;
   } finally {

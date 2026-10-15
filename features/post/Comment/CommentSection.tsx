@@ -1,36 +1,53 @@
 'use client';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useCallback, useState } from 'react';
-import { PostStatus } from '@echovisionlab/geul-proto/public/post_pb.ts';
-import { IconAlertCircle, IconChevronDown } from '@tabler/icons-react';
+import type { PostStatus } from '@echovisionlab/geul-proto/public/post_pb.ts';
+import { PUBLIC_POST_STATUS } from '@/features/post/post-wire-values';
+import { IconAlertCircle } from '@tabler/icons-react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Anchor, Box, Divider, rem, Stack, Text, Title } from '@mantine/core';
+import { NavigationLink as Anchor } from '@/components/core/Navigation';
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
 import { PageLoader } from '@/features/site/PageLoader';
 import { listCommentsAction, type CommentNode } from '@/lib/actions/comment';
-import { useSession } from '@/lib/auth/client';
+import { useSessionContext } from '@/lib/providers/SessionProvider';
+import type { SessionData } from '@/lib/session-data';
 import { CommentForm } from './CommentForm';
 import { CommentItem } from './CommentItem';
 
 interface CommentSectionProps {
+  listAction?: typeof listCommentsAction;
+  sessionSnapshot?: SessionData | null;
   postId: string;
   commentsEnabled: boolean;
   status: PostStatus;
   canModerate?: boolean;
 }
 
-export function CommentSection({ postId, commentsEnabled, status, canModerate = false }: CommentSectionProps) {
+export function CommentSection({
+  postId,
+  commentsEnabled,
+  status,
+  canModerate = false,
+  listAction = listCommentsAction,
+  sessionSnapshot,
+}: CommentSectionProps) {
   const t = useTranslations('comments.section');
   const tCommonLabels = useTranslations('common.labels');
-  const { data: session } = useSession();
+  const sessionContext = useSessionContext();
+  if (sessionSnapshot === undefined && !sessionContext) {
+    throw new Error('useSession must be used within a SessionProvider');
+  }
+  const session = sessionSnapshot === undefined ? sessionContext?.data : sessionSnapshot;
   const [localComments, setLocalComments] = useState<CommentNode[]>([]);
 
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ['comment', 'list', postId],
-    queryFn: ({ pageParam }) => listCommentsAction(postId, { cursor: pageParam }).then(unwrapQueryResult),
+    queryFn: ({ pageParam }) => listAction(postId, { cursor: pageParam }).then(unwrapQueryResult),
     getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.nextCursor : undefined),
     initialPageParam: undefined as string | undefined,
   });
@@ -46,23 +63,19 @@ export function CommentSection({ postId, commentsEnabled, status, canModerate = 
     }
   }, []);
 
-  const canComment = commentsEnabled && status === PostStatus.PUBLISHED;
+  const canComment = commentsEnabled && status === PUBLIC_POST_STATUS.PUBLISHED;
 
   if (isLoading) {
     return (
-      <Box pos="relative" mih={200}>
+      <div style={{ position: 'relative', minHeight: 200 }}>
         <PageLoader message={t('loading')} />
-      </Box>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Alert
-        icon={<IconAlertCircle style={{ width: rem(16), height: rem(16) }} />}
-        title={tCommonLabels('error')}
-        tone="danger"
-      >
+      <Alert icon={<IconAlertCircle size={16} />} title={tCommonLabels('error')} tone="danger">
         {t('loadFailed')}
       </Alert>
     );
@@ -72,38 +85,36 @@ export function CommentSection({ postId, commentsEnabled, status, canModerate = 
   const remainingCount = totalCount - displayedComments.length;
 
   return (
-    <Stack gap="lg">
-      <Divider />
-
-      <Title order={3}>
+    <DsLayoutStack gap="lg">
+      <DsHeading level={3}>
         {t('title')}{' '}
         {totalCount > 0 && (
-          <Text component="span" c="dimmed" size="lg">
+          <DsText as="span" tone="secondary" size="lg">
             ({totalCount})
-          </Text>
+          </DsText>
         )}
-      </Title>
+      </DsHeading>
 
       {!canComment ? (
-        <Text c="dimmed" size="sm">
+        <DsText tone="secondary" size="sm">
           {t('disabled')}
-        </Text>
+        </DsText>
       ) : session?.user ? (
         <CommentForm postId={postId} onSuccess={handleNewComment} />
       ) : (
-        <Text c="dimmed" size="sm">
+        <DsText tone="secondary" size="sm">
           {t.rich('loginPrompt', {
             login: (chunks) => (
-              <Anchor href="/login" underline="hover">
+              <Anchor href="/login" appearance="quiet">
                 {chunks}
               </Anchor>
             ),
           })}
-        </Text>
+        </DsText>
       )}
 
       {displayedComments.length > 0 && (
-        <Stack gap="md">
+        <DsLayoutStack gap="md">
           {displayedComments.map((comment) => (
             <CommentItem
               key={comment.id}
@@ -119,15 +130,14 @@ export function CommentSection({ postId, commentsEnabled, status, canModerate = 
               tone="neutral"
               emphasis="low"
               fullWidth
-              leftSection={<IconChevronDown size={16} />}
               onClick={() => fetchNextPage()}
               loading={isFetchingNextPage}
             >
               {remainingCount > 0 ? t('loadMoreCount', { count: remainingCount }) : t('loadMore')}
             </Button>
           )}
-        </Stack>
+        </DsLayoutStack>
       )}
-    </Stack>
+    </DsLayoutStack>
   );
 }

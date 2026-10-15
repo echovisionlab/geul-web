@@ -1,5 +1,6 @@
 'use client';
 
+import { liveNodeView } from '@/features/editor/tiptap/live-node-view';
 import { useCallback, useMemo, type ComponentType } from 'react';
 import type { Editor } from '@tiptap/core';
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
@@ -564,13 +565,15 @@ export function createTiptapExternalVideoExtension(options: TiptapExternalVideoO
     },
     addNodeView() {
       const nodeOptions = this.options;
-      return ReactNodeViewRenderer((props) => (
-        <TiptapExternalVideoNodeView
-          {...props}
-          labels={requireExternalVideoLabels(nodeOptions.labels, 'TiptapExternalVideoOptions.labels')}
-          videoView={nodeOptions.videoView}
-        />
-      ));
+      return ReactNodeViewRenderer(
+        liveNodeView(this.name, nodeOptions, (props, current) => (
+          <TiptapExternalVideoNodeView
+            {...props}
+            labels={requireExternalVideoLabels(current.labels, 'TiptapExternalVideoOptions.labels')}
+            videoView={current.videoView}
+          />
+        )),
+      );
     },
     addProseMirrorPlugins() {
       return [

@@ -1,7 +1,7 @@
 'use server';
 import { queryResult, type QueryResult } from '@/lib/api/query-result';
 
-import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
+import { connectErrorCode, isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { timestampDate, timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
@@ -282,19 +282,22 @@ export async function createCampaignAction(
 export async function updateCampaignNameAction(
   id: string,
   name: string,
-): Promise<{ name?: string; changed?: boolean; error?: string }> {
+  editorOrigin?: string,
+): Promise<{ name?: string; changed?: boolean; error?: string; errorCode?: Code }> {
   try {
-    const client = await createCampaignClient();
+    const client = await createCampaignClient(editorOrigin);
     const response = await client.updateCampaignName({ id, name });
     revalidatePath('/admin/campaigns');
     revalidatePath(`/campaigns/${id}`);
     return { name: response.name, changed: response.changed };
   } catch (err) {
+    // The code lets the editor's save queue tell a refused name from a transient failure.
+    const errorCode = connectErrorCode(err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
+      return { error: 'Unauthorized', errorCode };
     }
     logger.error('Failed to update campaign name', { error: err });
-    return { error: err instanceof Error ? err.message : 'Failed to update campaign name' };
+    return { error: err instanceof Error ? err.message : 'Failed to update campaign name', errorCode };
   }
 }
 
@@ -321,9 +324,10 @@ export type CampaignConfigurationPatch =
 export async function updateCampaignConfigurationAction(
   id: string,
   configuration: CampaignConfigurationPatch,
+  editorOrigin?: string,
 ): Promise<{ changed?: boolean; error?: string }> {
   try {
-    const client = await createCampaignClient();
+    const client = await createCampaignClient(editorOrigin);
     const patch = {
       ...(configuration.targetMode !== undefined
         ? {

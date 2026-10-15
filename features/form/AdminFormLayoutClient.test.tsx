@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { useOptionalEditorRuntimeContext } from '@/lib/contexts/EditorRuntimeContext';
 import { AdminFormLayoutClient } from './AdminFormLayoutClient';
 
@@ -66,7 +68,9 @@ vi.mock('next-intl', () => ({
   },
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/lib/editor/collaborative-document-save', () => ({ registerCollaborativeDocumentSave: () => () => {} }));
+
+vi.mock('@/components/core/Notification', () => ({
   notifications: {
     show: vi.fn(),
   },
@@ -151,7 +155,7 @@ function render(node: React.ReactNode) {
   act(() => {
     root?.render(
       <QueryClientProvider client={queryClient}>
-        <MantineProvider>{node}</MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>
       </QueryClientProvider>,
     );
   });
@@ -223,6 +227,26 @@ afterEach(() => {
 });
 
 describe('AdminFormLayoutClient', () => {
+  it('upgrades and downgrades form header controls without replacing its content', () => {
+    const provider = { on: vi.fn(), off: vi.fn() };
+    setProviderAccessLevel(provider, 'view');
+    mockFormEditorContext = { ...mockFormEditorContext, provider };
+    render(
+      <AdminFormLayoutClient formId="form-1">
+        <p data-testid="form-body">Readable form</p>
+      </AdminFormLayoutClient>,
+    );
+    const body = container?.querySelector('[data-testid="form-body"]');
+    expect(container?.querySelector('[data-testid="editor-title-disabled"]')?.textContent).toBe('true');
+    act(() => setProviderAccessLevel(provider, 'edit'));
+    expect(container?.querySelector('[data-testid="editor-title-disabled"]')?.textContent).toBe('false');
+    expect(container?.querySelector('[data-testid="form-body"]')).toBe(body);
+    act(() => setProviderAccessLevel(provider, 'view'));
+    expect(container?.querySelector('[data-testid="editor-title-disabled"]')?.textContent).toBe('true');
+    expect(container?.querySelector('[data-testid="editor-status-enabled"]')?.textContent).toBe('false');
+    expect(container?.querySelector('[data-testid="editor-delete-enabled"]')?.textContent).toBe('false');
+    expect(container?.querySelector('[data-testid="form-body"]')).toBe(body);
+  });
   it('exposes the active form collaboration runtime to nested translation panels', () => {
     render(
       <AdminFormLayoutClient formId="form-1">
@@ -239,16 +263,16 @@ describe('AdminFormLayoutClient', () => {
 
     render(<AdminFormLayoutClient formId="form-1">Body</AdminFormLayoutClient>);
 
-    const builderTab = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.textContent?.trim() === 'Builder',
+    const settingsTab = Array.from(document.querySelectorAll('[role="tab"]')).find(
+      (tab) => tab.textContent?.trim() === 'Settings',
     );
-    expect(builderTab).not.toBeNull();
+    expect(settingsTab).toBeDefined();
 
     act(() => {
-      builderTab?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      settingsTab?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
 
-    expect(pushMock).toHaveBeenCalledWith('/forms/form-1?lang=ko&foo=bar&edit=true&tab=builder');
+    expect(pushMock).toHaveBeenCalledWith('/forms/form-1?lang=ko&foo=bar&edit=true&tab=settings');
   });
 
   it('updates the source form title through collaboration without mixing DB settings into Yjs', async () => {

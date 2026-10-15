@@ -3,7 +3,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+import { I18nProvider } from 'react-aria-components';
 import { ImageUploadCropField, type ImageUploadCropFieldProps } from './ImageUploadCropField';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -55,9 +55,9 @@ let root: Root;
 function renderField(overrides: Partial<ImageUploadCropFieldProps> = {}) {
   act(() => {
     root.render(
-      <MantineProvider>
+      <I18nProvider locale="en">
         <ImageUploadCropField {...baseProps} {...overrides} />
-      </MantineProvider>,
+      </I18nProvider>,
     );
   });
 }
@@ -79,6 +79,15 @@ describe('ImageUploadCropField', () => {
     renderField({ imageUrl: '/featured.webp' });
     const preview = container.querySelector<HTMLImageElement>('img');
     expect(preview?.parentElement?.style.aspectRatio).toBe(`${16 / 9} / 1`);
+  });
+
+  it('keeps a supplied social-card ratio without a minimum height or letterboxing', () => {
+    renderField({ imageUrl: '/featured.webp', aspectRatio: 1200 / 630 });
+    const preview = container.querySelector<HTMLImageElement>('img');
+    expect(preview?.parentElement?.style.aspectRatio).toBe(`${1200 / 630} / 1`);
+    expect(preview?.parentElement?.style.minHeight).toBe('');
+    expect(preview?.style.objectFit).toBe('cover');
+    expect(preview?.style.position).toBe('absolute');
   });
 
   it('renders injected copy and forwards file-selection intent', () => {
@@ -103,5 +112,22 @@ describe('ImageUploadCropField', () => {
     renderField({ canEdit: true, loading: true, progress: 62 });
     expect(container.textContent).toContain('Uploading image');
     expect(container.textContent).toContain('62%');
+  });
+
+  it('keeps file constraints available through the compact upload information control', () => {
+    renderField({
+      labels: {
+        ...labels,
+        emptyDescription: '1200×630\n1.91:1',
+        constraints: 'PNG or JPEG · 10 MB maximum',
+        constraintsLabel: 'Upload details',
+      },
+    });
+    expect(container.textContent).toContain('1.91:1');
+    expect(container.querySelector('[data-compact]')?.textContent).not.toContain('Upload cover image');
+    const details = container.querySelector<HTMLButtonElement>('[aria-label="Upload details"]');
+    expect(details).not.toBeNull();
+    act(() => details?.click());
+    expect(document.body.textContent).toContain('PNG or JPEG · 10 MB maximum');
   });
 });

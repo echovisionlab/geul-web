@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 import { formSchemaZod } from '@/lib/types/form/schema';
 
 // =============================================================================

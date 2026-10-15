@@ -1,33 +1,56 @@
 'use client';
 
-import { IconCloud, IconCloudOff } from '@tabler/icons-react';
+import { IconCloud, IconCloudOff, IconCloudExclamation, IconCloudX, IconRefresh } from '@tabler/icons-react';
+import { resolveTransportSaveState, type EditorSaveState } from './save-state';
 import { Tooltip } from '../Tooltip';
+import classes from './EditorHeaderView.module.css';
 
-export interface CollabSyncStatusIndicatorProps {
-  isConnected: boolean;
-  isSynced: boolean;
+export type CollabSyncStatusIndicatorProps = (
+  | {
+      /** Durable state supplied by the editor save model. */
+      state: EditorSaveState;
+      isConnected?: never;
+      isSynced?: never;
+    }
+  | {
+      /** Compatibility for transport-only rooms. Block rooms must supply state. */
+      state?: never;
+      isConnected: boolean;
+      isSynced: boolean;
+    }
+) & {
   label: string;
-  size?: number;
   withTooltip?: boolean;
-}
+};
 
-export function CollabSyncStatusIndicator({
-  isConnected,
-  isSynced,
-  label,
-  size = 16,
-  withTooltip = true,
-}: CollabSyncStatusIndicatorProps) {
-  const status = isConnected ? (isSynced ? 'synced' : 'syncing') : 'offline';
-  const color = isConnected
-    ? isSynced
-      ? 'var(--mantine-color-green-6)'
-      : 'var(--mantine-color-yellow-6)'
-    : 'var(--mantine-color-gray-5)';
+export function CollabSyncStatusIndicator(props: CollabSyncStatusIndicatorProps) {
+  if (Object.hasOwn(props, 'size')) {
+    throw new RangeError('Collaboration indicator size is owned by Core');
+  }
+  const { label, withTooltip = true } = props;
+  const status = props.state ?? resolveTransportSaveState(props.isConnected, props.isSynced);
+  const color =
+    status === 'saved'
+      ? 'var(--geul-status-positive)'
+      : status === 'error' || status === 'rejected'
+        ? 'var(--geul-status-danger)'
+        : status === 'offline'
+          ? 'var(--geul-text-muted)'
+          : 'var(--geul-status-warning)';
+  const Icon =
+    status === 'offline'
+      ? IconCloudOff
+      : status === 'error'
+        ? IconCloudExclamation
+        : status === 'rejected'
+          ? IconCloudX
+          : status === 'reload'
+            ? IconRefresh
+            : IconCloud;
 
   const content = (
-    <span data-collab-status={status} aria-label={label}>
-      {isConnected ? <IconCloud size={size} color={color} /> : <IconCloudOff size={size} color={color} />}
+    <span className={classes.syncIndicator} data-collab-status={status} role="img" aria-label={label}>
+      <Icon size="1em" color={color} aria-hidden />
     </span>
   );
 

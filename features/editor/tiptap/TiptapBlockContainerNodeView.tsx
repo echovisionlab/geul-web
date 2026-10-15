@@ -1,8 +1,15 @@
 'use client';
 
+import { liveNodeView } from '@/features/editor/tiptap/live-node-view';
 import { useCallback, useMemo, useState } from 'react';
-import { NodeViewContent, NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from '@tiptap/react';
-import { Selection } from '@tiptap/pm/state';
+import {
+  NodeViewContent,
+  NodeViewWrapper,
+  ReactNodeViewRenderer,
+  useEditorState,
+  type NodeViewProps,
+} from '@tiptap/react';
+import { NodeSelection, Selection, TextSelection } from '@tiptap/pm/state';
 import { useTranslations } from 'next-intl';
 import { EmojiPickerPanel } from '@/components/core/EmojiPicker';
 import { IconButton } from '@/components/core/IconButton';
@@ -15,10 +22,11 @@ import {
   type TiptapBlockMenuLabels,
 } from './TiptapBlockMenu';
 import { WireBlockContainer } from './wire-schema';
-import { tiptapEmojiPickerItems } from './emoji';
+import { loadTiptapEmojiData, tiptapEmojiPickerItems, useTiptapEmojiData } from './emoji';
 import { useExactTiptapNodeSelection } from './useExactTiptapNodeSelection';
 import { useTiptapEditorEditable } from './useTiptapEditorEditable';
 import classes from './TiptapBlockContainerNodeView.module.css';
+import { ReorderGutter } from '@/components/core/Sortable';
 
 function normalizeBlockColor(value: unknown): TiptapBlockColor {
   return TIPTAP_BLOCK_COLORS.includes(value as TiptapBlockColor) ? (value as TiptapBlockColor) : 'default';
@@ -149,8 +157,17 @@ function TiptapBlockContainerNodeView({
   const t = useTranslations('editorCommon.editor');
   const emoji = useTranslations('editorCommon.editor.slashMenu.items.emoji');
   const searchCombobox = useTranslations('searchCombobox');
-  const [iconPickerOpened, setIconPickerOpened] = useState(false);
+  const textSelected = useEditorState({
+    editor,
+    selector: ({ editor: current }) =>
+      current.state.selection instanceof TextSelection && !current.state.selection.empty,
+  });
+  const [iconPickerRequested, setIconPickerRequested] = useState(false);
+  const emojiData = useTiptapEmojiData();
+  // The Emoji data loads when the picker is requested; the popover opens once its items exist.
+  const iconPickerOpened = iconPickerRequested && emojiData !== null;
   const [iconQuery, setIconQuery] = useState('');
+  const [dragging, setDragging] = useState(false);
   const labels: TiptapBlockMenuLabels = useMemo(
     () => ({
       open: t('drag.openBlockMenu'),
@@ -184,8 +201,8 @@ function TiptapBlockContainerNodeView({
   const calloutIcon = content?.type.name === 'callout' ? String(content.attrs.icon ?? '💡') : undefined;
   const showCalloutIconPicker = canEditNeutral && calloutIcon !== undefined;
   const iconPickerItems = useMemo(
-    () => (iconPickerOpened ? tiptapEmojiPickerItems(iconQuery) : []),
-    [iconPickerOpened, iconQuery],
+    () => (iconPickerOpened && emojiData ? tiptapEmojiPickerItems(emojiData, iconQuery) : []),
+    [emojiData, iconPickerOpened, iconQuery],
   );
   const deleteBlock = useCallback(() => {
     if (editor.isEditable && authoringMode) {
@@ -227,73 +244,83 @@ function TiptapBlockContainerNodeView({
       data-selected={authoringSelected || undefined}
       draggable={false}
     >
-      {canEditNeutral ? (
-        <div className={classes.handle} contentEditable={false}>
-          <TiptapBlockMenu
-            labels={labels}
-            canSetTextColor={canSetTextColor}
-            canSetBackgroundColor={canSetBackgroundColor}
-            textColor={normalizeBlockColor(content?.attrs.textColor)}
-            backgroundColor={normalizeBlockColor(content?.attrs.backgroundColor)}
-            canDelete={canDelete}
-            onDelete={deleteBlock}
-            onTextColorChange={setTextColor}
-            onBackgroundColorChange={setBackgroundColor}
-          />
-        </div>
-      ) : null}
-      {showCalloutIconPicker ? (
-        <div className={classes.calloutIconPicker} contentEditable={false}>
-          <Popover
-            open={iconPickerOpened}
-            onOpenChange={(opened) => {
-              setIconPickerOpened(opened);
-              if (!opened) {
-                setIconQuery('');
-              }
-            }}
-            placement="bottom-start"
-            size="compact"
-            portal
-          >
-            <Popover.Target>
-              <IconButton
-                label={emoji('title')}
-                title={emoji('title')}
-                tone="neutral"
-                emphasis="low"
-                size="sm"
-                data-testid="tiptap-callout-icon-picker"
-                onClick={() => setIconPickerOpened((opened) => !opened)}
-              >
-                <span aria-hidden>{calloutIcon}</span>
-              </IconButton>
-            </Popover.Target>
-            <Popover.Dropdown padding="compact" role="dialog" data-testid="tiptap-callout-icon-popover">
-              <EmojiPickerPanel
-                title={emoji('title')}
-                searchPlaceholder={emoji('subtext')}
-                noResults={searchCombobox('noResults')}
-                query={iconQuery}
-                items={iconPickerItems}
-                onQueryChange={setIconQuery}
-                onSelect={(item) => {
-                  setIconPickerOpened(false);
-                  setIconQuery('');
-                  setCalloutIcon(item.value);
-                }}
-              />
-            </Popover.Dropdown>
-          </Popover>
-        </div>
-      ) : null}
-      <NodeViewContent
-        className={classes.content}
-        data-bg-color={
-          content?.type.name === 'callout' ? normalizeBlockColor(content.attrs.backgroundColor) : undefined
+      <ReorderGutter
+        visibility={dragging ? 'active' : 'on-interaction'}
+        handle={
+          canEditNeutral && !textSelected ? (
+            <TiptapBlockMenu
+              labels={labels}
+              canSetTextColor={canSetTextColor}
+              canSetBackgroundColor={canSetBackgroundColor}
+              textColor={normalizeBlockColor(content?.attrs.textColor)}
+              backgroundColor={normalizeBlockColor(content?.attrs.backgroundColor)}
+              canDelete={canDelete}
+              onDelete={deleteBlock}
+              onTextColorChange={setTextColor}
+              onBackgroundColorChange={setBackgroundColor}
+              onDraggingChange={setDragging}
+            />
+          ) : undefined
         }
-        data-text-color={content?.type.name === 'callout' ? normalizeBlockColor(content.attrs.textColor) : undefined}
-      />
+      >
+        {showCalloutIconPicker ? (
+          <div className={classes.calloutIconPicker} contentEditable={false}>
+            <Popover
+              open={iconPickerOpened}
+              onOpenChange={(opened) => {
+                setIconPickerRequested(opened);
+                if (!opened) {
+                  setIconQuery('');
+                } else if (!emojiData) {
+                  loadTiptapEmojiData().catch(() => setIconPickerRequested(false));
+                }
+              }}
+              placement="bottom-start"
+              size="compact"
+              portal
+            >
+              <Popover.Target>
+                <IconButton
+                  label={emoji('title')}
+                  title={emoji('title')}
+                  tone="neutral"
+                  emphasis="low"
+                  size="sm"
+                  data-testid="tiptap-callout-icon-picker"
+                >
+                  <span className={classes.calloutPickerGlyph} aria-hidden>
+                    {calloutIcon}
+                  </span>
+                </IconButton>
+              </Popover.Target>
+              <Popover.Dropdown padding="compact" role="dialog" data-testid="tiptap-callout-icon-popover">
+                <EmojiPickerPanel
+                  density="compact"
+                  title={emoji('title')}
+                  searchPlaceholder={emoji('subtext')}
+                  noResults={searchCombobox('noResults')}
+                  query={iconQuery}
+                  items={iconPickerItems}
+                  onQueryChange={setIconQuery}
+                  onSelect={(item) => {
+                    setIconPickerRequested(false);
+                    setIconQuery('');
+                    setCalloutIcon(item.value);
+                  }}
+                />
+              </Popover.Dropdown>
+            </Popover>
+          </div>
+        ) : null}
+        <NodeViewContent
+          className={classes.content}
+          data-content-kind={content?.type.name}
+          data-bg-color={
+            content?.type.name === 'callout' ? normalizeBlockColor(content.attrs.backgroundColor) : undefined
+          }
+          data-text-color={content?.type.name === 'callout' ? normalizeBlockColor(content.attrs.textColor) : undefined}
+        />
+      </ReorderGutter>
     </NodeViewWrapper>
   );
 }
@@ -314,9 +341,47 @@ export function createTiptapBlockContainer(authoringMode: EditorAuthoringMode | 
     },
     addNodeView() {
       const options = this.options;
-      return ReactNodeViewRenderer((props) => (
-        <TiptapBlockContainerNodeView {...props} authoringMode={options.authoringMode} />
-      ));
+      const render = ReactNodeViewRenderer(
+        liveNodeView(this.name, options, (props, current) => (
+          <TiptapBlockContainerNodeView {...props} authoringMode={current.authoringMode} />
+        )),
+      );
+      return (props) => {
+        const view = render(props);
+        if (!view.dom) {
+          return view;
+        }
+        const stopEvent = view.stopEvent?.bind(view);
+        view.stopEvent = (event) => {
+          const target = event.target instanceof Element ? event.target : null;
+          const handle = target?.closest('[data-drag-handle]');
+          // Tiptap treats BUTTON mousedown as an input event before enabling its
+          // drag path. Forward this handle's drag events to ProseMirror, which serializes
+          // the whole block and performs the native move on drop.
+          if (
+            props.editor.isEditable &&
+            options.authoringMode?.allowNeutralBlockEdits &&
+            handle &&
+            view.dom.contains(handle) &&
+            !view.contentDOM?.contains(handle) &&
+            event.type.startsWith('drag')
+          ) {
+            // The editor's native listener can run before the React portal's
+            // onDragStart. Select this block before ProseMirror reads the payload.
+            if (event.type === 'dragstart') {
+              const position = props.getPos();
+              if (typeof position === 'number') {
+                props.editor.view.dispatch(
+                  props.editor.state.tr.setSelection(NodeSelection.create(props.editor.state.doc, position)),
+                );
+              }
+            }
+            return false;
+          }
+          return stopEvent?.(event) ?? false;
+        };
+        return view;
+      };
     },
   });
 }

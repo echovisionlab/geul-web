@@ -2,13 +2,13 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { BlockRoomMetadataError } from '@/lib/collab/block-room-metadata';
 import type { BlockRoomConnection } from '@/lib/collab/useBlockRoomConnection';
 import { useDebouncedRoomMetadata } from './useDebouncedRoomMetadata';
 
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 
 type Connection = Pick<BlockRoomConnection, 'protocol' | 'bootstrap' | 'acceptEpochAck' | 'reloadCanonical'>;
 type Ack = Parameters<Connection['acceptEpochAck']>[0];
@@ -46,7 +46,7 @@ it('reports failure and retains metadata for a retry before allowing a locale ch
     expect(await edit.flush()).toBe(false);
   });
   expect(room.acceptEpochAck).not.toHaveBeenCalled();
-  expect(notifications.show).toHaveBeenCalledWith({ message: 'permission denied', color: 'red' });
+  expect(notifications.show).not.toHaveBeenCalled();
   await act(async () => {
     expect(await edit.flush()).toBe(true);
   });

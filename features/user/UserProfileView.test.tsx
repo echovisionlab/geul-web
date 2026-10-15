@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UserProfileViewProps as UserProfileFeatureViewProps } from '@/features/user/ui/UserProfile';
+import { prepareSocialLinksDisplay } from '@/features/social-links/prepare-social-links-display';
 import { LocaleProvider } from '@/lib/providers/LocaleProvider';
 import enMessages from '@/messages/en.json';
 import { UserProfileView, type UserProfileViewUser } from './UserProfileView';
@@ -27,7 +28,7 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ back: mocks.back, push: mocks.push, refresh: mocks.refresh }),
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: { show: mocks.showNotification },
 }));
 
@@ -89,7 +90,7 @@ function renderController(user: UserProfileViewUser = baseUser) {
       <QueryClientProvider client={queryClient}>
         <NextIntlClientProvider locale="en" messages={enMessages}>
           <LocaleProvider locale="en">
-            <UserProfileView user={user} />
+            <UserProfileView user={user} socialLinkEntries={prepareSocialLinksDisplay(user.social_links ?? {})} />
           </LocaleProvider>
         </NextIntlClientProvider>
       </QueryClientProvider>,
@@ -125,6 +126,7 @@ describe('UserProfileView controller', () => {
         href: 'https://instagram.com/example-studio',
         label: 'Instagram',
         platform: 'instagram',
+        glyph: expect.objectContaining({ platform: 'instagram', path: expect.any(String) }),
       }),
     ]);
     expect(viewProps().labels.back).toBe('Back');
@@ -150,7 +152,7 @@ describe('UserProfileView controller', () => {
     expect(mocks.updateUser).toHaveBeenCalledWith('user-1', { role: 'admin' });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['user', 'profile', 'user-1'] });
     expect(mocks.refresh).toHaveBeenCalledOnce();
-    expect(mocks.showNotification).toHaveBeenCalledWith({ message: 'Role updated', color: 'green' });
+    expect(mocks.showNotification).toHaveBeenCalledWith({ message: 'Role updated', tone: 'positive' });
   });
 
   it('keeps a failed ban modal open and passes its service error to the UI', async () => {
@@ -169,7 +171,7 @@ describe('UserProfileView controller', () => {
     expect(viewProps().dialogs.ban.error).toBe('Ban failed at the service');
     expect(mocks.showNotification).toHaveBeenCalledWith({
       message: 'Ban failed at the service',
-      color: 'red',
+      tone: 'danger',
     });
   });
 

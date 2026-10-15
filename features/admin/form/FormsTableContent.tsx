@@ -1,7 +1,8 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
+
 import { LabelBadge, StatusBadge } from '@/components/core/Badge';
 import { TextButton } from '@/components/core/TextButton';
 import {
@@ -46,16 +47,16 @@ function getColumns(
       key: 'slug',
       header: tCommonLabels('slug'),
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           {row.slug ? `/${row.slug}` : '-'}
-        </Text>
+        </DsText>
       ),
     },
     {
       key: 'status',
       header: tCommonLabels('status'),
       cell: (row) => (
-        <StatusBadge appearance={row.status === 'draft' ? 'outline' : 'soft'} size="sm">
+        <StatusBadge tone={row.status === 'published' ? 'positive' : 'neutral'} size="sm">
           {row.status === 'draft' ? tCommon('statuses.draft') : tCommon('statuses.published')}
         </StatusBadge>
       ),
@@ -69,9 +70,9 @@ function getColumns(
       key: 'created',
       header: tCommonLabels('created'),
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.createdAt} />
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -91,6 +92,7 @@ interface FormsTableContentProps {
   sortFields: ServerDataTableSelectableSectionProps<FormRow>['sortFields'];
   basePath?: string;
   canDelete?: boolean;
+  deleteAction?: typeof deleteFormAction;
 }
 
 export function FormsTableContent({
@@ -100,6 +102,7 @@ export function FormsTableContent({
   sortFields,
   basePath: _basePath = '/admin/forms',
   canDelete = true,
+  deleteAction = deleteFormAction,
 }: FormsTableContentProps) {
   const t = useTranslations('forms');
   const tCommon = useTranslations('common');
@@ -121,7 +124,7 @@ export function FormsTableContent({
         canDelete
           ? {
               entityLabel: tCommonEntities('forms'),
-              deleteAction: deleteFormAction,
+              deleteAction,
               getRowLabel: (row) => row.title || row.slug || row.id,
             }
           : undefined

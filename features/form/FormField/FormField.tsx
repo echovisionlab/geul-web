@@ -1,28 +1,32 @@
 'use client';
 
 import { useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import type { FieldValue } from '@/lib/types/form/guards';
 import type { FormFieldSchema } from '@/lib/types/form/schema';
 import { CheckboxField } from './fields/CheckboxField';
 import { DateField } from './fields/DateField';
 import { MultiSelectField } from './fields/MultiSelectField';
 import { NumberField } from './fields/NumberField';
-import { PhoneField } from './fields/PhoneField';
 import { SelectField } from './fields/SelectField';
 import { SwitchField } from './fields/SwitchField';
 import { TextareaField } from './fields/TextareaField';
 import { TextField } from './fields/TextField';
+import { loadPhoneField } from './load-phone-field';
 import { useFormField } from './useFormField';
+
+const PhoneField = dynamic(() => loadPhoneField().then((module) => module.PhoneField));
 
 export interface FormFieldProps {
   field: FormFieldSchema;
+  disabled?: boolean;
   phoneDefaultCountry?: string | null;
   value: FieldValue | undefined;
-  onChange: (value: FieldValue) => void;
+  onChange: (value: FieldValue | undefined) => void;
   onValidityChange: (isValid: boolean | null) => void;
 }
 
-export function FormField({ field, phoneDefaultCountry, value, onChange, onValidityChange }: FormFieldProps) {
+export function FormField({ field, disabled, phoneDefaultCountry, value, onChange, onValidityChange }: FormFieldProps) {
   const { isRequired, setFocused, displayError } = useFormField({
     field,
     value,
@@ -38,6 +42,7 @@ export function FormField({ field, phoneDefaultCountry, value, onChange, onValid
       return (
         <TextField
           field={field}
+          disabled={disabled}
           value={value}
           onChange={onChange}
           onFocus={onFocus}
@@ -51,6 +56,7 @@ export function FormField({ field, phoneDefaultCountry, value, onChange, onValid
       return (
         <PhoneField
           field={field}
+          disabled={disabled}
           defaultCountry={phoneDefaultCountry}
           value={value}
           onChange={onChange}
@@ -65,6 +71,7 @@ export function FormField({ field, phoneDefaultCountry, value, onChange, onValid
       return (
         <TextareaField
           field={field}
+          disabled={disabled}
           value={value}
           onChange={onChange}
           onFocus={onFocus}
@@ -78,6 +85,7 @@ export function FormField({ field, phoneDefaultCountry, value, onChange, onValid
       return (
         <NumberField
           field={field}
+          disabled={disabled}
           value={value}
           onChange={onChange}
           onFocus={onFocus}
@@ -91,6 +99,7 @@ export function FormField({ field, phoneDefaultCountry, value, onChange, onValid
       return (
         <SelectField
           field={field}
+          disabled={disabled}
           value={value}
           onChange={onChange}
           onFocus={onFocus}
@@ -104,6 +113,7 @@ export function FormField({ field, phoneDefaultCountry, value, onChange, onValid
       return (
         <MultiSelectField
           field={field}
+          disabled={disabled}
           value={value}
           onChange={onChange}
           onFocus={onFocus}
@@ -117,6 +127,7 @@ export function FormField({ field, phoneDefaultCountry, value, onChange, onValid
       return (
         <CheckboxField
           field={field}
+          disabled={disabled}
           value={value}
           onChange={onChange}
           onFocus={onFocus}
@@ -127,12 +138,24 @@ export function FormField({ field, phoneDefaultCountry, value, onChange, onValid
       );
 
     case 'switch':
-      return <SwitchField field={field} value={value} onChange={onChange} onFocus={onFocus} onBlur={onBlur} />;
+      return (
+        <SwitchField
+          field={field}
+          disabled={disabled}
+          value={value}
+          onChange={onChange}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          error={displayError}
+          isRequired={isRequired}
+        />
+      );
 
     case 'date':
       return (
         <DateField
           field={field}
+          disabled={disabled}
           value={value}
           onChange={onChange}
           onFocus={onFocus}

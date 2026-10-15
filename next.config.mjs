@@ -29,6 +29,8 @@ export default withNextIntl(
       '/*': ['./node_modules/@swc/helpers/**/*'],
     },
     reactStrictMode: false,
+    // Opt-in for bundle attribution only (scripts/performance/next-client-build.mjs build-sourcemaps).
+    productionBrowserSourceMaps: process.env.GEUL_BUNDLE_SOURCEMAPS === '1',
     transpilePackages: [
       '@echovisionlab/geul-common',
       '@echovisionlab/geul-event',

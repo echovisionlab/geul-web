@@ -1,7 +1,8 @@
 'use client';
+import { SupportingText } from '@/components/core/Typography';
 
 import { useEffect, useRef, useState } from 'react';
-import { Text } from '@mantine/core';
+
 import { Button } from '@/components/core/Button';
 import { loadToolModule, type MountedTool, type ToolContext } from './loadToolModule';
 import classes from './EmbedFrame.module.css';
@@ -82,13 +83,13 @@ export function ToolModule({
           {activateLabel}
         </Button>
       ) : status === 'loading' ? (
-        <Text role="status" aria-live="polite" c="dimmed" size="sm">
+        <SupportingText role="status" aria-live="polite" tone="secondary">
           {loadingLabel}
-        </Text>
+        </SupportingText>
       ) : status === 'error' ? (
-        <Text role="alert" c="dimmed" size="sm">
+        <SupportingText role="alert" tone="secondary">
           {errorLabel}
-        </Text>
+        </SupportingText>
       ) : null}
     </div>
   );

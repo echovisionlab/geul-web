@@ -98,7 +98,7 @@ describe('usePageEditorCollaboration', () => {
     expect(getHook().doc).toBe(mockDoc);
     expect(getHook().isConnected).toBe(true);
     expect(getHook().isSynced).toBe(true);
-    expect(useBlockRoomConnection).toHaveBeenCalledWith('page', pageId, 'ko');
+    expect(useBlockRoomConnection).toHaveBeenCalledWith('page', pageId, 'ko', undefined);
     expect(mockDoc.share.has('page-fields')).toBe(false);
   });
 });

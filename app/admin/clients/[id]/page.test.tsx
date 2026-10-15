@@ -36,11 +36,8 @@ vi.mock('@tanstack/react-query', () => ({
   }),
   useQueryClient: () => ({ invalidateQueries: mocks.invalidateQueries }),
 }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
-vi.mock('@mantine/core', () => ({
-  Group: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  Stack: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-}));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
+
 vi.mock('@/components/core/Button', () => ({
   Button: ({ children, onClick, disabled }: { children: ReactNode; onClick?: () => void; disabled?: boolean }) => (
     <button type="button" onClick={onClick} disabled={disabled}>

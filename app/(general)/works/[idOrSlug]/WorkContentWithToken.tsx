@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { DraftModeAlert } from '@/features/draft-mode/DraftModeAlert';
 import { toWorkViewModel } from '@/features/work/work-view-model';
 import { getWorkViewWithShareToken } from '@/lib/queries/work';
+import { prepareWorkMusicLinks } from './work-music-links';
 import { WorkViewClient } from './WorkViewClient';
 
 interface Props {
@@ -37,6 +38,7 @@ export async function WorkContentWithToken({ idOrSlug, token, password, requeste
         requestedLocale={requestedLocale}
         shareToken={token}
         sharePassword={password}
+        musicLinkEntries={prepareWorkMusicLinks(transformedWork)}
       />
     </>
   );

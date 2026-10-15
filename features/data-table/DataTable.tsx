@@ -1,7 +1,8 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useMemo, type ReactNode } from 'react';
-import { Stack } from '@mantine/core';
+
 import {
   DataTableActions,
   DataTableToolbar,
@@ -11,6 +12,7 @@ import {
 import type { ColumnDef } from '@/lib/types/common/data-table';
 import type { PaginatedQuery } from '@/lib/types/common/query';
 import type { PaginatedQueryResult } from '@/lib/types/repository/result';
+import { TableFocusRecovery } from './TableFocusRecovery';
 import { DataTableContent } from './DataTableContent';
 import { DataTableMultiFilter } from './DataTableMultiFilter';
 import { DataTableMultiSort } from './DataTableMultiSort';
@@ -22,6 +24,7 @@ export { useDataTableContext } from './DataTableContext';
 
 interface DataTableProps<T> {
   columns: ColumnDef<T>[];
+  accessibleLabel?: string;
   result: PaginatedQueryResult<T> | undefined;
   loading?: boolean;
   query: PaginatedQuery;
@@ -29,12 +32,13 @@ interface DataTableProps<T> {
   rowAction?: DataTableViewRowAction<T>;
   onQueryChange: (query: PaginatedQuery) => void;
   emptyMessage?: string;
-  selection?: DataTableRowSelectionState<T>;
+  selection?: DataTableRowSelectionState<T> & { selectAllRowsLabel?: string };
   children?: ReactNode;
 }
 
 function DataTableRoot<T>({
   columns,
+  accessibleLabel,
   result,
   loading = false,
   query,
@@ -48,6 +52,7 @@ function DataTableRoot<T>({
   const contextValue = useMemo(
     () => ({
       columns,
+      accessibleLabel,
       result,
       loading,
       query,
@@ -57,14 +62,15 @@ function DataTableRoot<T>({
       emptyMessage,
       selection,
     }),
-    [columns, result, loading, query, getRowKey, rowAction, onQueryChange, emptyMessage, selection],
+    [columns, accessibleLabel, result, loading, query, getRowKey, rowAction, onQueryChange, emptyMessage, selection],
   );
 
   return (
     <DataTableContextProvider value={contextValue}>
-      <Stack gap="md" data-datatable-root>
+      <DsLayoutStack gap="md" data-datatable-root aria-busy={loading || undefined}>
+        <TableFocusRecovery />
         {children}
-      </Stack>
+      </DsLayoutStack>
     </DataTableContextProvider>
   );
 }

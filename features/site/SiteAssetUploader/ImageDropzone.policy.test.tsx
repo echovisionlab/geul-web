@@ -21,7 +21,7 @@ const { notificationShowMock, getViewProps, setViewProps } = vi.hoisted(() => {
   };
 });
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: { show: notificationShowMock },
 }));
 
@@ -83,7 +83,7 @@ describe('ImageDropzone rejection policy', () => {
     expect(onDrop).not.toHaveBeenCalled();
     expect(notificationShowMock).toHaveBeenCalledWith({
       message: 'File too small. Minimum size: 1 KB',
-      color: 'red',
+      tone: 'danger',
     });
 
     act(() =>
@@ -96,7 +96,7 @@ describe('ImageDropzone rejection policy', () => {
     );
     expect(notificationShowMock).toHaveBeenLastCalledWith({
       message: 'File too large. Maximum size: 2 KB',
-      color: 'red',
+      tone: 'danger',
     });
 
     const validFile = new File(['x'.repeat(1500)], 'valid.png', { type: 'image/png' });

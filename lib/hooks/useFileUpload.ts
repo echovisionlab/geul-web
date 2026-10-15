@@ -19,7 +19,7 @@ import {
   prepareClientMediaUploadAction,
   recoverCompletedUploadAction,
 } from '../actions/file.ts';
-import { useOptionalEditorRuntimeContext } from '@/lib/contexts/EditorRuntimeContext';
+import { useOptionalEditorRuntimeContext } from '@/lib/contexts/editor-runtime-context-value';
 import {
   UploadPausedError,
   type DownloadFromUrlOptions,

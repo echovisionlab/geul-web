@@ -1,8 +1,9 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
-import { statusToneFromColor, StatusBadge } from '@/components/core/Badge';
+
+import { StatusBadge, type StatusTone } from '@/components/core/Badge';
 import { DateTime } from '@/features/date-time/DateTime';
 import { TextButton } from '@/components/core/TextButton';
 import {
@@ -15,9 +16,9 @@ import { buildPageEditPath } from '@/lib/utils/page-route';
 import type { ColumnDef } from '@/lib/types/common/data-table';
 import { PageRowMenu } from './PageRowMenu';
 
-const STATUS_COLORS: Record<string, string> = {
-  draft: 'yellow',
-  published: 'green',
+const STATUS_TONES: Record<string, StatusTone> = {
+  draft: 'neutral',
+  published: 'positive',
 };
 
 interface PageRow {
@@ -53,16 +54,16 @@ function getColumns(labels: {
       key: 'slug',
       header: labels.slug,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           {row.slug ? `/${row.slug}` : '-'}
-        </Text>
+        </DsText>
       ),
     },
     {
       key: 'status',
       header: labels.status,
       cell: (row) => (
-        <StatusBadge tone={statusToneFromColor(STATUS_COLORS[normalizeEnumToken(row.status)] || 'gray')} size="sm">
+        <StatusBadge tone={STATUS_TONES[normalizeEnumToken(row.status)] ?? 'neutral'} size="sm">
           {normalizeEnumToken(row.status) === 'published'
             ? labels.published
             : normalizeEnumToken(row.status) === 'draft'
@@ -75,18 +76,18 @@ function getColumns(labels: {
       key: 'createdAt',
       header: labels.created,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.createdAt} />
-        </Text>
+        </DsText>
       ),
     },
     {
       key: 'updatedAt',
       header: labels.updated,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.updatedAt} />
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -100,13 +101,20 @@ function getColumns(labels: {
 }
 
 interface PagesTableContentProps {
+  deleteAction?: typeof deletePageAdminAction;
   result: ServerDataTableSelectableSectionProps<PageRow>['result'];
   searchPlaceholder: string;
   filterFields: ServerDataTableSelectableSectionProps<PageRow>['filterFields'];
   sortFields: ServerDataTableSelectableSectionProps<PageRow>['sortFields'];
 }
 
-export function PagesTableContent({ result, searchPlaceholder, filterFields, sortFields }: PagesTableContentProps) {
+export function PagesTableContent({
+  result,
+  searchPlaceholder,
+  filterFields,
+  sortFields,
+  deleteAction = deletePageAdminAction,
+}: PagesTableContentProps) {
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
   const tAdmin = useTranslations('adminList');
@@ -133,7 +141,7 @@ export function PagesTableContent({ result, searchPlaceholder, filterFields, sor
       sortFields={sortFields}
       bulkDelete={{
         entityLabel: tCommonEntities('pages'),
-        deleteAction: deletePageAdminAction,
+        deleteAction,
         getRowLabel: (row) => row.title || row.slug || row.id,
       }}
     />

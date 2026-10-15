@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 // This domain-free indicator is covered at the Core boundary.
 
+import { I18nProvider as DesignSystemProvider } from 'react-aria-components';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
-import { CollabSyncStatusIndicator } from './CollabSyncStatusIndicator';
+
+import { CollabSyncStatusIndicator, type CollabSyncStatusIndicatorProps } from './CollabSyncStatusIndicator';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -43,9 +44,9 @@ describe('CollabSyncStatusIndicator', () => {
 
     act(() => {
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider>
           <CollabSyncStatusIndicator isConnected={false} isSynced={false} label="Offline" />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
@@ -53,6 +54,7 @@ describe('CollabSyncStatusIndicator', () => {
 
     expect(indicator).not.toBeNull();
     expect(indicator?.getAttribute('aria-label')).toBe('Offline');
+    expect(indicator?.getAttribute('role')).toBe('img');
   });
 
   it('renders syncing state without a tooltip wrapper when disabled', () => {
@@ -62,15 +64,39 @@ describe('CollabSyncStatusIndicator', () => {
 
     act(() => {
       root?.render(
-        <MantineProvider>
-          <CollabSyncStatusIndicator isConnected isSynced={false} label="Syncing..." withTooltip={false} size={20} />
-        </MantineProvider>,
+        <DesignSystemProvider>
+          <CollabSyncStatusIndicator isConnected isSynced={false} label="Syncing..." withTooltip={false} />
+        </DesignSystemProvider>,
       );
     });
 
-    const indicator = document.querySelector('[data-collab-status="syncing"]');
+    const indicator = document.querySelector('[data-collab-status="saving"]');
 
     expect(indicator).not.toBeNull();
     expect(indicator?.getAttribute('aria-label')).toBe('Syncing...');
+  });
+
+  it.each(['saved', 'saving', 'offline', 'error', 'reload'] as const)(
+    'exposes durable %s state with its accessible label',
+    (state) => {
+      container = document.createElement('div');
+      document.body.appendChild(container);
+      root = createRoot(container);
+      act(() =>
+        root?.render(<CollabSyncStatusIndicator state={state} label={`Save state: ${state}`} withTooltip={false} />),
+      );
+      expect(container.querySelector('[role="img"]')?.getAttribute('data-collab-status')).toBe(state);
+      expect(container.querySelector('[role="img"]')?.getAttribute('aria-label')).toBe(`Save state: ${state}`);
+    },
+  );
+
+  it('rejects runtime dimensions from untyped consumers', () => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+    const props = { isConnected: true, isSynced: true, label: 'Synced', size: 20 };
+    expect(() =>
+      act(() => root?.render(<CollabSyncStatusIndicator {...(props as CollabSyncStatusIndicatorProps)} />)),
+    ).toThrow('Collaboration indicator size is owned by Core');
   });
 });

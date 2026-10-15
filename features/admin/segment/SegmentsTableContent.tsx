@@ -1,7 +1,8 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
-import { Text } from '@mantine/core';
+
 import { LabelBadge } from '@/components/core/Badge';
 import { DateTime } from '@/features/date-time/DateTime';
 import {
@@ -30,9 +31,9 @@ function getColumns(
       key: 'name',
       header: labels.name,
       cell: (row) => (
-        <Text size="sm" fw={500}>
+        <DsText size="sm" weight="medium">
           {row.name}
-        </Text>
+        </DsText>
       ),
     },
     {
@@ -53,18 +54,18 @@ function getColumns(
       key: 'estimatedCount',
       header: labels.estimatedCount,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           {row.estimated_count != null ? row.estimated_count.toLocaleString(locale) : '-'}
-        </Text>
+        </DsText>
       ),
     },
     {
       key: 'createdAt',
       header: labels.created,
       cell: (row) => (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           <DateTime value={row.created_at} />
-        </Text>
+        </DsText>
       ),
     },
     {

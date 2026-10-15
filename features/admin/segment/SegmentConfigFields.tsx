@@ -1,29 +1,25 @@
 'use client';
+import { SupportingText } from '@/components/core/Typography';
+import {
+  LayoutStack as DsLayoutStack,
+  LayoutInset as DsLayoutInset,
+  LayoutInline as DsLayoutInline,
+} from '@/components/core/Layout';
+
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useEffect, useState } from 'react';
 import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
 import { IconUsers } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { z } from 'zod';
-import { Group, Stack, Text } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
-import '@mantine/dates/styles.css';
+
+import { DateInput, MultiSelect } from '@/components/core/Input';
 import { LabelBadge } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
-import { MultiSelect } from '@/components/core/Input';
+
 import { listAllUserTagsAction } from '@/lib/actions/user-tag';
 import { SEGMENT_ROLE_OPTIONS, type SegmentConfigState } from './SegmentConfig';
-
-const dateToISO = z.coerce.date().transform((d) => d.toISOString());
-
-function coerceDateValue(value: unknown): string {
-  if (!value) {
-    return '';
-  }
-  const result = dateToISO.safeParse(value);
-  return result.success ? result.data : '';
-}
+import { coerceDateValue } from './segment-date';
 
 interface SegmentConfigFieldsProps {
   segmentType: SegmentType | null;
@@ -69,76 +65,74 @@ export function SegmentConfigFields({
   }
 
   return (
-    <Stack gap="sm" mt="sm">
-      {segmentType === SegmentType.ALL_MEMBERS && (
-        <Text size="sm" c="dimmed">
-          {tPage('config.allUsersHelp')}
-        </Text>
-      )}
+    <DsLayoutInset blockStart="sm">
+      <DsLayoutStack gap="sm">
+        {segmentType === SegmentType.ALL_MEMBERS && (
+          <SupportingText tone="secondary">{tPage('config.allUsersHelp')}</SupportingText>
+        )}
 
-      {segmentType === SegmentType.MEMBER_TAGS && (
-        <MultiSelect
-          label={tCommonEntities('userTags')}
-          placeholder={tagsLoading ? tCommon('states.loadingTags') : tPage('config.userTagsPlaceholderSelect')}
-          data={userTags}
-          value={config.memberTagIds}
-          onChange={(value) => onConfigChange({ ...config, memberTagIds: value })}
-          disabled={tagsLoading}
-          searchable
-          clearable
-        />
-      )}
-
-      {segmentType === SegmentType.MEMBERS_BY_FILTER && (
-        <>
+        {segmentType === SegmentType.MEMBER_TAGS && (
           <MultiSelect
-            label={tPage('config.rolesLabel')}
-            placeholder={tCommon('placeholders.selectRoles')}
-            data={roleOptions}
-            value={config.accountRoles}
-            onChange={(value) => onConfigChange({ ...config, accountRoles: value })}
+            label={tCommonEntities('userTags')}
+            placeholder={tagsLoading ? tCommon('states.loadingTags') : tPage('config.userTagsPlaceholderSelect')}
+            data={userTags}
+            value={config.memberTagIds}
+            onChange={(value) => onConfigChange({ ...config, memberTagIds: value })}
+            disabled={tagsLoading}
             searchable
             clearable
           />
-          <Group grow>
-            <DateInput
-              label={tPage('config.createdAfterLabel')}
-              placeholder={tPage('config.createdAfterPlaceholder')}
-              value={config.createdAfter ? new Date(config.createdAfter) : null}
-              valueFormat="YYYY-MM-DD"
-              onChange={(date) => onConfigChange({ ...config, createdAfter: coerceDateValue(date) })}
-              clearable
-            />
-            <DateInput
-              label={tPage('config.createdBeforeLabel')}
-              placeholder={tPage('config.createdBeforePlaceholder')}
-              value={config.createdBefore ? new Date(config.createdBefore) : null}
-              valueFormat="YYYY-MM-DD"
-              onChange={(date) => onConfigChange({ ...config, createdBefore: coerceDateValue(date) })}
-              clearable
-            />
-          </Group>
-        </>
-      )}
-
-      <Group>
-        <Button
-          emphasis="medium"
-          size="xs"
-          leftSection={<IconUsers size={14} />}
-          onClick={onEstimate}
-          loading={estimateLoading}
-        >
-          {tPage('config.estimateCount')}
-        </Button>
-        {estimatedCount !== null && (
-          <LabelBadge size="lg">
-            {tPage('config.estimatedRecipients', {
-              count: estimatedCount.toLocaleString(),
-            })}
-          </LabelBadge>
         )}
-      </Group>
-    </Stack>
+
+        {segmentType === SegmentType.MEMBERS_BY_FILTER && (
+          <>
+            <MultiSelect
+              label={tPage('config.rolesLabel')}
+              placeholder={tCommon('placeholders.selectRoles')}
+              data={roleOptions}
+              value={config.accountRoles}
+              onChange={(value) => onConfigChange({ ...config, accountRoles: value })}
+              searchable
+              clearable
+            />
+            <DsLayoutInline grow>
+              <DateInput
+                label={tPage('config.createdAfterLabel')}
+                placeholder={tPage('config.createdAfterPlaceholder')}
+                value={config.createdAfter ? new Date(config.createdAfter) : null}
+                onChange={(date) => onConfigChange({ ...config, createdAfter: coerceDateValue(date) })}
+                clearable
+              />
+              <DateInput
+                label={tPage('config.createdBeforeLabel')}
+                placeholder={tPage('config.createdBeforePlaceholder')}
+                value={config.createdBefore ? new Date(config.createdBefore) : null}
+                onChange={(date) => onConfigChange({ ...config, createdBefore: coerceDateValue(date) })}
+                clearable
+              />
+            </DsLayoutInline>
+          </>
+        )}
+
+        <DsLayoutInline>
+          <Button
+            emphasis="medium"
+            size="xs"
+            leftSection={<IconUsers size={14} />}
+            onClick={onEstimate}
+            loading={estimateLoading}
+          >
+            {tPage('config.estimateCount')}
+          </Button>
+          {estimatedCount !== null && (
+            <LabelBadge size="lg">
+              {tPage('config.estimatedRecipients', {
+                count: estimatedCount.toLocaleString(),
+              })}
+            </LabelBadge>
+          )}
+        </DsLayoutInline>
+      </DsLayoutStack>
+    </DsLayoutInset>
   );
 }

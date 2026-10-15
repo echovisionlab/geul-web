@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { fromJson, type JsonValue } from '@bufbuild/protobuf';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import {
@@ -101,20 +102,22 @@ describe('EmailTiptapEditor profile', () => {
     window.document.body.append(host);
     root = createRoot(host);
 
-    await act(async () => {
+    const render = (editable: boolean, contentLanguage = 'en', accessibleLabel = 'Campaign body') =>
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <EmailTiptapEditor
             blockRoomController={controller}
             awareness={awareness!}
             userName="Editor"
             userColor="#3b82f6"
-            editable={false}
+            accessibleLabel={accessibleLabel}
+            contentLanguage={contentLanguage}
+            editable={editable}
             onEditorReady={onEditorReady}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
-    });
+    await act(async () => render(false));
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 2));
     });
@@ -123,7 +126,25 @@ describe('EmailTiptapEditor profile', () => {
     expect(handle).toBeDefined();
     expect(handle.getText()).toContain('Email body');
     expect(controller.connected).toBe(true);
-    expect(host.querySelector('[data-testid="email-campaign-tiptap-editor-content"]')).not.toBeNull();
+    const surface = host.querySelector('[data-testid="email-campaign-tiptap-editor-content"]')!;
+    expect(surface).toHaveAttribute('role', 'document');
+    expect(surface).toHaveAttribute('aria-label', 'Campaign body');
+    expect(surface).toHaveAttribute('lang', 'en');
+    expect(surface).not.toHaveAttribute('aria-multiline');
+    expect(surface).toHaveAttribute('contenteditable', 'false');
+
+    await act(async () => render(true, 'ko', '캠페인 본문'));
+    expect(surface).toHaveAttribute('role', 'textbox');
+    expect(surface).toHaveAttribute('aria-label', '캠페인 본문');
+    expect(surface).toHaveAttribute('aria-multiline', 'true');
+    expect(surface).toHaveAttribute('lang', 'ko');
+    expect(surface).toHaveAttribute('contenteditable', 'true');
+    expect(handle.getText()).toContain('Email body');
+
+    await act(async () => render(false));
+    expect(surface).toHaveAttribute('role', 'document');
+    expect(surface).not.toHaveAttribute('aria-multiline');
+    expect(surface).toHaveAttribute('contenteditable', 'false');
   });
 
   it('formats variables and preserves placeholder links for email previews', () => {

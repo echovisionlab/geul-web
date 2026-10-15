@@ -4,12 +4,15 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconPlus } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { Button } from '@/components/core/Button';
 import { createProgramEventAction } from '@/lib/actions/program-event';
 import { useRequestTimeZone } from '@/lib/providers/RequestTimeZoneProvider';
 
-export function CreateProgramEventButton() {
+export function CreateProgramEventButton({
+  createAction = createProgramEventAction,
+  navigate,
+}: { createAction?: typeof createProgramEventAction; navigate?: (href: string) => void } = {}) {
   const router = useRouter();
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
@@ -19,15 +22,15 @@ export function CreateProgramEventButton() {
   const handleCreate = async () => {
     setLoading(true);
     try {
-      const result = await createProgramEventAction(requestTimeZone);
+      const result = await createAction(requestTimeZone);
       if (result.error || !result.data) {
         notifications.show({
           message: result.error ?? tCommon('notifications.saveFailed'),
-          color: 'red',
+          tone: 'danger',
         });
         return;
       }
-      router.push(`/events/${result.data.id}?edit=true`);
+      (navigate ?? router.push)(`/events/${result.data.id}?edit=true`);
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,8 @@
 'use client';
 
-import { Code, Group, Stack, Text } from '@mantine/core';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText, VisuallyHidden } from '@/components/core/Typography';
+import { MetadataPair } from '@/components/core/PublicMetadata';
 import { IconPlugConnected } from '@tabler/icons-react';
 import { LabelBadge } from '@/components/core/Badge';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
@@ -19,36 +21,37 @@ interface McpIntegrationSettingsViewProps {
 
 export function McpIntegrationSettingsView({ endpoint, setupGuideUrl, labels }: McpIntegrationSettingsViewProps) {
   return (
-    <Stack gap="sm" data-testid="settings-mcp-integration">
+    <DsLayoutStack gap="md" data-testid="settings-mcp-integration">
       <SectionHeader
-        title={labels.title}
+        title={
+          <span role="heading" aria-level={2}>
+            {labels.title}
+          </span>
+        }
         description={
-          <Stack gap={2}>
+          <DsLayoutStack gap="xxs">
             <span>{labels.description}</span>
             <TextButton href={setupGuideUrl} target="_blank" rel="noreferrer" size="xs" appearance="accent">
               {labels.openGuide}
             </TextButton>
-          </Stack>
+          </DsLayoutStack>
         }
       />
-      <SectionCard p="sm">
-        <Stack gap="sm">
-          <Group gap="xs">
+      <SectionCard appearance="plain" padding="none">
+        <DsLayoutStack gap="sm">
+          <DsLayoutInline gap="xs">
             <IconPlugConnected size={18} aria-hidden />
             <LabelBadge tone="neutral" appearance="outline">
               OAuth 2.1
             </LabelBadge>
-          </Group>
-          <Stack gap={4}>
-            <Text size="xs" c="dimmed">
-              {labels.endpoint}
-            </Text>
-            <Code block style={{ overflowWrap: 'anywhere', whiteSpace: 'pre-wrap', userSelect: 'all' }}>
+          </DsLayoutInline>
+          <MetadataPair label={<VisuallyHidden>{labels.endpoint}</VisuallyHidden>} layout="stacked">
+            <DsText size="sm" font="mono" wrap="anywhere">
               {endpoint}
-            </Code>
-          </Stack>
-        </Stack>
+            </DsText>
+          </MetadataPair>
+        </DsLayoutStack>
       </SectionCard>
-    </Stack>
+    </DsLayoutStack>
   );
 }

@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { INITIAL_MAP_THEME_LIGHT_CONFIG } from '@/lib/types/map-theme/schema';
 import { MapLibreMap } from './MapLibreMap';
 
@@ -24,6 +25,9 @@ const mocks = vi.hoisted(() => ({
     getCenter: vi.fn(() => ({ lat: 37, lng: 127 })),
     getContainer: vi.fn(() => mocks.container),
     getZoom: vi.fn(() => 12),
+    zoomIn: vi.fn(),
+    zoomOut: vi.fn(),
+    resetNorth: vi.fn(),
     loaded: vi.fn(() => true),
     areTilesLoaded: vi.fn(() => true),
     isStyleLoaded: vi.fn(() => mocks.styleLoaded),
@@ -113,7 +117,6 @@ vi.mock('react-map-gl/maplibre', () => ({
   },
   Layer: (props: { id: string }) => <div data-layer={props.id} />,
   Marker: ({ children, longitude, latitude }: any) => <div data-marker={`${longitude},${latitude}`}>{children}</div>,
-  NavigationControl: ({ position }: { position: string }) => <div data-navigation={position} />,
   Source: ({ children, id }: { children: React.ReactNode; id: string }) => <div data-source={id}>{children}</div>,
 }));
 
@@ -231,7 +234,7 @@ describe('MapLibreMap', () => {
     const renderMap = async ({ rotatable, zoomable }: { rotatable: boolean; zoomable: boolean }) => {
       await act(async () => {
         root?.render(
-          <MantineProvider>
+          <DesignSystemProvider forceColorScheme="light">
             <MapLibreMap
               places={[]}
               center={{ lat: 37.5, lng: 127.1 }}
@@ -242,7 +245,7 @@ describe('MapLibreMap', () => {
               rotatable={rotatable}
               tiltable={false}
             />
-          </MantineProvider>,
+          </DesignSystemProvider>,
         );
       });
 
@@ -283,7 +286,7 @@ describe('MapLibreMap', () => {
   it('filters only disallowed MapLibre keyboard capabilities at the runtime container', async () => {
     await act(async () => {
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <MapLibreMap
             places={[]}
             center={{ lat: 37.5, lng: 127.1 }}
@@ -294,7 +297,7 @@ describe('MapLibreMap', () => {
             rotatable={false}
             tiltable
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
@@ -329,7 +332,7 @@ describe('MapLibreMap', () => {
   it('passes an injected map style to the MapLibre runtime', async () => {
     await act(async () => {
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <MapLibreMap
             places={[]}
             center={{ lat: 37.5, lng: 127.1 }}
@@ -348,7 +351,7 @@ describe('MapLibreMap', () => {
               ],
             }}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 
@@ -363,9 +366,9 @@ describe('MapLibreMap', () => {
     const render = async (themeConfig: typeof initialTheme) => {
       await act(async () => {
         root?.render(
-          <MantineProvider>
+          <DesignSystemProvider forceColorScheme="light">
             <MapLibreMap places={[]} center={{ lat: 37.5, lng: 127.1 }} zoom={12} themeConfig={themeConfig} />
-          </MantineProvider>,
+          </DesignSystemProvider>,
         );
       });
     };
@@ -412,7 +415,7 @@ describe('MapLibreMap', () => {
 
     await act(async () => {
       root?.render(
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <MapLibreMap
             places={[
               {
@@ -463,12 +466,20 @@ describe('MapLibreMap', () => {
               showPoiLabels: false,
             }}
           />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
       await new Promise((resolve) => window.setTimeout(resolve, 0));
     });
 
-    expect(document.querySelector('[data-navigation="bottom-right"]')).not.toBeNull();
+    expect(document.querySelector('[data-geul-map-position="bottom-right"]')).not.toBeNull();
+    act(() => {
+      document.querySelector<HTMLButtonElement>('[data-map-command="zoom-in"]')?.click();
+      document.querySelector<HTMLButtonElement>('[data-map-command="zoom-out"]')?.click();
+      document.querySelector<HTMLButtonElement>('[data-map-command="reset-north"]')?.click();
+    });
+    expect(mocks.mapRef.zoomIn).toHaveBeenCalledWith({ duration: 300 }, { originalEvent: expect.any(MouseEvent) });
+    expect(mocks.mapRef.zoomOut).toHaveBeenCalledWith({ duration: 300 }, { originalEvent: expect.any(MouseEvent) });
+    expect(mocks.mapRef.resetNorth).toHaveBeenCalledWith({ duration: 300 }, { originalEvent: expect.any(MouseEvent) });
     expect(document.body.textContent).toContain('Studio');
     expect(document.body.textContent).toContain('OpenMapTiles');
 

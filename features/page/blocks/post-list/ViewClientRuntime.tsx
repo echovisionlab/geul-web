@@ -1,37 +1,49 @@
 'use client';
-
-import { Group, Text } from '@mantine/core';
+import { useTranslations } from 'next-intl';
+import { getCollectionMetrics } from '@/components/core/Collection/collection-contract';
+import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { DateTime } from '@/features/date-time/DateTime';
 import { ListViewShell } from '../ListViewShell';
 import { PostAuthorLinks } from './PostAuthorLinks';
 import { PostMetaLinks } from './PostMetaLinks';
 import type { PostListProps } from './schema';
-import classes from './PostListCard.module.css';
-
 interface PostListPost {
   id: string;
   slug: string | null;
   title: string | null;
   featured_image_url: string | null;
   published_at: string | null;
-  authors: { id: string; name: string | null; image: string | null }[];
-  categories: { id: string; name: string; slug: string | null }[];
-  tags: { id: string; name: string; slug: string | null }[];
+  authors: {
+    id: string;
+    name: string | null;
+    image: string | null;
+  }[];
+  categories: {
+    id: string;
+    name: string;
+    slug: string | null;
+  }[];
+  tags: {
+    id: string;
+    name: string;
+    slug: string | null;
+  }[];
 }
-
 export interface PostListViewClientProps {
   posts: PostListPost[];
   parsedProps: PostListProps;
 }
-
 export function PostListViewClient({ posts, parsedProps: p }: PostListViewClientProps) {
+  const tCommon = useTranslations('common');
+  const metrics = getCollectionMetrics(p.itemSize);
   const layout = p.layout || 'grid';
   const columns = parseInt(p.columns || '3', 10);
   const showFeaturedImage = p.showFeaturedImage !== 'false';
   const showMeta = p.showMeta !== 'false';
   const carouselLoop = p.carouselLoop !== 'false';
   const carouselIndicators = p.carouselIndicators !== 'false';
-  const unknownAuthorLabel = 'Unknown';
+  const unknownAuthorLabel = tCommon('states.unknownAuthor');
   const toCategoryMetaItems = (post: PostListPost) =>
     post.categories.map((category) => ({
       id: `category-${category.id}`,
@@ -54,40 +66,45 @@ export function PostListViewClient({ posts, parsedProps: p }: PostListViewClient
   const renderCardMeta = (post: PostListPost) => (
     <>
       {post.authors?.length > 0 ? (
-        <Group gap={3} wrap="wrap" align="center">
-          <PostAuthorLinks authors={post.authors} unknownLabel={unknownAuthorLabel} maxVisibleAuthors={2} />
-        </Group>
+        <DsLayoutInline gap="xxs" wrap="wrap" align="center">
+          <PostAuthorLinks
+            authors={post.authors}
+            unknownLabel={unknownAuthorLabel}
+            textSize={metrics.metaSize}
+            maxVisibleAuthors={2}
+          />
+        </DsLayoutInline>
       ) : null}
       {post.categories.length > 0 ? (
-        <Group gap={3} wrap="wrap" align="center">
-          <Text size="xs" c="dimmed">
-            Category:
-          </Text>
-          <PostMetaLinks items={toCategoryMetaItems(post)} separatorColor="var(--mantine-color-dimmed)" />
-        </Group>
+        <DsLayoutInline gap="xxs" wrap="wrap" align="center">
+          <DsText size={metrics.metaSize} tone="secondary">
+            {tCommon('entities.category')}:
+          </DsText>
+          <PostMetaLinks items={toCategoryMetaItems(post)} separatorTone="secondary" textSize={metrics.metaSize} />
+        </DsLayoutInline>
       ) : null}
       {post.tags.length > 0 ? (
-        <Group gap={3} wrap="wrap" align="center">
-          <Text size="xs" c="dimmed">
-            Tag:
-          </Text>
-          <PostMetaLinks items={toTagMetaItems(post)} separatorColor="var(--mantine-color-dimmed)" />
-        </Group>
+        <DsLayoutInline gap="xxs" wrap="wrap" align="center">
+          <DsText size={metrics.metaSize} tone="secondary">
+            {tCommon('entities.tag')}:
+          </DsText>
+          <PostMetaLinks items={toTagMetaItems(post)} separatorTone="secondary" textSize={metrics.metaSize} />
+        </DsLayoutInline>
       ) : null}
       {post.published_at ? (
-        <Text size="xs" c="dimmed">
+        <DsText size={metrics.metaSize} tone="secondary">
           <DateTime value={post.published_at} />
-        </Text>
+        </DsText>
       ) : null}
     </>
   );
-
   return (
     <ListViewShell
       items={items}
       className="post-list-block"
-      emptyLabel="No posts found"
+      emptyLabel={tCommon('messages.noPostsFound')}
       layout={layout}
+      itemSize={p.itemSize}
       columns={columns}
       showImage={showFeaturedImage}
       carouselLoop={carouselLoop}
@@ -97,18 +114,23 @@ export function PostListViewClient({ posts, parsedProps: p }: PostListViewClient
         showMeta
           ? (post) =>
               post.authors?.length > 0 ? (
-                <Group gap={6} wrap="wrap" align="center">
-                  <PostAuthorLinks authors={post.authors} unknownLabel={unknownAuthorLabel} maxVisibleAuthors={2} />
+                <DsLayoutInline gap="xxs" wrap="wrap" align="center">
+                  <PostAuthorLinks
+                    authors={post.authors}
+                    unknownLabel={unknownAuthorLabel}
+                    textSize={metrics.metaSize}
+                    maxVisibleAuthors={2}
+                  />
                   {post.published_at ? (
-                    <Text size="xs" c="dimmed">
+                    <DsText size={metrics.metaSize} tone="secondary">
                       <DateTime value={post.published_at} />
-                    </Text>
+                    </DsText>
                   ) : null}
-                </Group>
+                </DsLayoutInline>
               ) : post.published_at ? (
-                <Text size="xs" c="dimmed">
+                <DsText size={metrics.metaSize} tone="secondary">
                   <DateTime value={post.published_at} />
-                </Text>
+                </DsText>
               ) : null
           : undefined
       }
@@ -116,9 +138,9 @@ export function PostListViewClient({ posts, parsedProps: p }: PostListViewClient
         showMeta
           ? (post) =>
               post.published_at ? (
-                <Text size="xs" c="dimmed">
+                <DsText size={metrics.metaSize} tone="secondary">
                   <DateTime value={post.published_at} />
-                </Text>
+                </DsText>
               ) : null
           : undefined
       }
@@ -127,44 +149,43 @@ export function PostListViewClient({ posts, parsedProps: p }: PostListViewClient
       renderCarouselCardMeta={
         showMeta
           ? (post) => (
-              <Group gap="xs" wrap="wrap">
+              <DsLayoutInline gap="xs" wrap="wrap">
                 {post.authors?.length > 0 ? (
-                  <PostAuthorLinks authors={post.authors} unknownLabel={unknownAuthorLabel} />
+                  <PostAuthorLinks
+                    authors={post.authors}
+                    unknownLabel={unknownAuthorLabel}
+                    textSize={metrics.metaSize}
+                  />
                 ) : null}
                 {post.published_at ? (
-                  <Text size="xs" c="dimmed">
+                  <DsText size={metrics.metaSize} tone="secondary">
                     <DateTime value={post.published_at} />
-                  </Text>
+                  </DsText>
                 ) : null}
-              </Group>
+              </DsLayoutInline>
             )
           : undefined
       }
       renderHeroMeta={
         showMeta
           ? (post, { mobile }) => (
-              <Group gap="md" align="center" wrap="wrap" className={classes.heroMetaRow}>
+              <DsLayoutInline gap="md" align="center" wrap="wrap">
                 {post.authors?.length > 0 ? (
                   <PostAuthorLinks
                     authors={post.authors}
                     unknownLabel={unknownAuthorLabel}
                     textSize={mobile ? 'xs' : 'sm'}
-                    textColor="rgba(255,255,255,0.8)"
-                    avatarSize={24}
-                    avatarBorderColor="white"
+                    textColor="inverse"
+                    avatarSize="sm"
                     maxVisibleAuthors={mobile ? 1 : 2}
                   />
                 ) : null}
                 {post.published_at ? (
-                  <Text
-                    size={mobile ? 'xs' : 'sm'}
-                    style={{ color: 'rgba(255,255,255,0.8)' }}
-                    className={classes.heroMetaText}
-                  >
+                  <DsText contrast="image" tone="inverse" size={mobile ? 'xs' : 'sm'}>
                     <DateTime value={post.published_at} />
-                  </Text>
+                  </DsText>
                 ) : null}
-              </Group>
+              </DsLayoutInline>
             )
           : undefined
       }

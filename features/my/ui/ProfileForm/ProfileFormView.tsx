@@ -1,15 +1,18 @@
 'use client';
 
-import { useEffect, useRef, useState, type DragEvent, type KeyboardEvent } from 'react';
-import { IconCheck, IconCopy, IconGripVertical, IconPlus, IconTrash } from '@tabler/icons-react';
-import { Group, Stack, Text } from '@mantine/core';
+import { fieldBindings } from '@/components/core/bindings';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText, VisuallyHidden } from '@/components/core/Typography';
+import { useEffect, useId, useRef, useState, type DragEvent, type KeyboardEvent } from 'react';
+import { IconGripVertical, IconPlus, IconTrash } from '@tabler/icons-react';
+import { CopyButton } from '@/components/core/CopyButton';
+
 import { useForm } from '@mantine/form';
 import { Button } from '@/components/core/Button';
 import { Field } from '@/components/core/Field';
 import { IconButton } from '@/components/core/IconButton';
 import { Select, Textarea, TextInput, ValidatingTextInput, type TextValidationStatus } from '@/components/core/Input';
-import { Tooltip } from '@/components/core/Tooltip';
-import classes from './ProfileFormView.module.css';
+import { ReorderRow } from '@/components/core/Sortable';
 
 const BIO_MAX_LENGTH = 500;
 const DEFAULT_MAX_SOCIAL_LINKS = 20;
@@ -60,6 +63,8 @@ export interface ProfileFormViewLabels {
   socialValue: string;
   removeSocialLink: (position: number) => string;
   reorderSocialLink: (position: number) => string;
+  reorderInstructions: string;
+  positionChanged: (position: number, count: number) => string;
   submit: string;
 }
 
@@ -72,7 +77,6 @@ export interface ProfileFormViewErrors {
 }
 
 export interface ProfileFormViewEvents {
-  onCopyUid: () => void;
   onNicknameChange: (value: string) => void;
   onNormalizeSocialLink: (platform: string, value: string) => string;
   onSubmit: (values: ProfileFormValues, changedFields: ProfileFormChangedFields) => void;
@@ -86,7 +90,6 @@ export interface ProfileFormViewProps {
   pending?: boolean;
   savedRevision?: number;
   disabled?: boolean;
-  copied?: boolean;
   errors?: ProfileFormViewErrors;
   nicknameValidation?: { status: TextValidationStatus; message?: string | null };
   events: ProfileFormViewEvents;
@@ -102,13 +105,18 @@ export function ProfileFormView({
   pending = false,
   savedRevision = 0,
   disabled = false,
-  copied = false,
   errors = {},
   nicknameValidation = { status: 'idle' },
   events,
   maxSocialLinks = DEFAULT_MAX_SOCIAL_LINKS,
 }: ProfileFormViewProps) {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [reorderAnnouncement, setReorderAnnouncement] = useState('');
+  const viewRef = useRef<HTMLElement>(null);
+  const pendingFocus = useRef<{ key: string; control: 'input' | 'handle' | 'remove' } | 'add' | null>(null);
+  const socialHeadingId = useId();
+  const reorderInstructionsId = useId();
+  const submitId = useId();
   const newLinkIdRef = useRef(0);
   const savedRevisionRef = useRef(savedRevision);
   const savedInitialValuesRef = useRef<ProfileFormInitialValues | null>(null);
@@ -125,6 +133,23 @@ export function ProfileFormView({
   formRef.current = form;
   const onNicknameChangeRef = useRef(events.onNicknameChange);
   onNicknameChangeRef.current = events.onNicknameChange;
+  useEffect(() => {
+    const target = pendingFocus.current;
+    if (!target) {
+      return;
+    }
+    pendingFocus.current = null;
+    if (target === 'add') {
+      viewRef.current?.querySelector<HTMLElement>('[data-social-link-add]')?.focus();
+      return;
+    }
+    const row = [...(viewRef.current?.querySelectorAll<HTMLElement>('[data-social-link-row]') ?? [])].find(
+      (element) => element.dataset.socialLinkRow === target.key,
+    );
+    row
+      ?.querySelector<HTMLElement>(target.control === 'input' ? 'input' : `[data-social-link-${target.control}]`)
+      ?.focus();
+  }, [form.values.socialLinks]);
 
   useEffect(() => {
     const currentForm = formRef.current;
@@ -169,10 +194,13 @@ export function ProfileFormView({
 
     const key = `new-${newLinkIdRef.current}`;
     newLinkIdRef.current += 1;
+    pendingFocus.current = { key, control: 'input' };
     setSocialLinks([...form.values.socialLinks, { key, platform: '', value: '' }]);
   };
 
   const removeSocialLink = (index: number) => {
+    const next = form.values.socialLinks[index + 1] ?? form.values.socialLinks[index - 1];
+    pendingFocus.current = next ? { key: next.key, control: 'remove' } : 'add';
     setSocialLinks(form.values.socialLinks.filter((_, itemIndex) => itemIndex !== index));
   };
 
@@ -203,7 +231,7 @@ export function ProfileFormView({
     setSocialLinks(links);
   };
 
-  const handleDragOver = (event: DragEvent<HTMLDivElement>, targetIndex: number) => {
+  const handleDragOver = (event: DragEvent<HTMLElement>, targetIndex: number) => {
     event.preventDefault();
     if (draggedIndex === null || draggedIndex === targetIndex) {
       return;
@@ -213,40 +241,41 @@ export function ProfileFormView({
     setDraggedIndex(targetIndex);
   };
 
-  const handleReorderKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+  const handleReorderKeyDown = (event: KeyboardEvent<HTMLElement>, index: number) => {
     if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') {
       return;
     }
 
     event.preventDefault();
-    moveSocialLink(index, event.key === 'ArrowUp' ? index - 1 : index + 1);
+    const targetIndex = event.key === 'ArrowUp' ? index - 1 : index + 1;
+    const link = form.values.socialLinks[index];
+    if (link && targetIndex >= 0 && targetIndex < form.values.socialLinks.length) {
+      pendingFocus.current = { key: link.key, control: 'handle' };
+      setReorderAnnouncement(labels.positionChanged(targetIndex + 1, form.values.socialLinks.length));
+      moveSocialLink(index, targetIndex);
+    }
   };
 
   return (
-    <Stack gap="md">
+    <DsLayoutStack ref={viewRef} gap="md">
       <TextInput
         id="profile-uid"
         label={labels.uid}
         value={initialValues.uid}
         disabled
-        rightSectionPointerEvents="all"
         rightSection={
-          <Tooltip label={copied ? labels.copiedUid : labels.copyUid} withArrow position="right">
-            <IconButton
-              type="button"
-              tone={copied ? 'positive' : 'neutral'}
-              emphasis="low"
-              aria-label={copied ? labels.copiedUid : labels.copyUid}
-              onClick={events.onCopyUid}
-              disabled={disabled}
-            >
-              {copied ? <IconCheck size={16} aria-hidden /> : <IconCopy size={16} aria-hidden />}
-            </IconButton>
-          </Tooltip>
+          <CopyButton
+            value={initialValues.uid}
+            label={labels.copyUid}
+            copiedLabel={labels.copiedUid}
+            disabled={disabled}
+          />
         }
       />
 
       <form
+        aria-busy={pending}
+        aria-labelledby={submitId}
         onSubmit={form.onSubmit((values) =>
           events.onSubmit(values, {
             nickname: form.isDirty('nickname'),
@@ -256,7 +285,7 @@ export function ProfileFormView({
           }),
         )}
       >
-        <Stack>
+        <DsLayoutStack>
           <ValidatingTextInput
             id="profile-nickname"
             label={labels.nickname}
@@ -270,6 +299,7 @@ export function ProfileFormView({
             required
             disabled={formDisabled}
             status={nicknameValidation.status}
+            statusLabel={nicknameValidation.message || undefined}
             description={
               nicknameValidation.status === 'checking' || nicknameValidation.status === 'valid'
                 ? nicknameValidation.message || undefined
@@ -290,9 +320,9 @@ export function ProfileFormView({
                 htmlFor="profile-bio"
                 error={errors.bio}
                 actions={
-                  <Text size="xs" c="dimmed">
+                  <DsText size="xs" tone="secondary">
                     {form.values.bio.length}/{BIO_MAX_LENGTH}
-                  </Text>
+                  </DsText>
                 }
               >
                 <Textarea
@@ -303,7 +333,7 @@ export function ProfileFormView({
                   maxRows={6}
                   maxLength={BIO_MAX_LENGTH}
                   autosize
-                  {...form.getInputProps('bio')}
+                  {...fieldBindings(form.getInputProps('bio'))}
                   disabled={formDisabled}
                 />
               </Field>
@@ -313,121 +343,142 @@ export function ProfileFormView({
                   id="profile-website"
                   aria-label={labels.website}
                   placeholder={labels.websitePlaceholder}
-                  {...form.getInputProps('website')}
+                  {...fieldBindings(form.getInputProps('website'))}
                   disabled={formDisabled}
                 />
               </Field>
 
-              <Stack gap="xs">
-                <Group justify="space-between" align="center" wrap="nowrap">
-                  <Text size="sm" fw={500}>
+              <DsLayoutStack gap="xs" role="group" aria-labelledby={socialHeadingId}>
+                <DsLayoutInline justify="between" align="center" wrap="nowrap">
+                  <DsText id={socialHeadingId} size="sm" weight="medium">
                     {labels.socialLinks}
-                  </Text>
+                  </DsText>
                   <Button
                     type="button"
                     size="xs"
-                    tone="accent"
+                    tone="neutral"
                     emphasis="medium"
                     leftSection={<IconPlus size={14} aria-hidden />}
                     onClick={addSocialLink}
+                    data-social-link-add
                     disabled={formDisabled || form.values.socialLinks.length >= maxSocialLinks}
                   >
                     {labels.addSocialLink}
                   </Button>
-                </Group>
+                </DsLayoutInline>
 
                 {form.values.socialLinks.map((link, index) => {
                   const platformOption = platformOptions.find((option) => option.value === link.platform);
 
                   return (
-                    <div
+                    <ReorderRow
+                      role="group"
+                      aria-label={`${labels.socialLinks} ${index + 1}`}
                       key={link.key}
-                      className={classes.socialLinkRow}
                       data-social-link-row={link.key}
                       data-dragging={draggedIndex === index || undefined}
                       onDragOver={(event) => handleDragOver(event, index)}
+
+                      handle={
+                        <IconButton
+                          type="button"
+                          interaction="drag-handle"
+                          tone="neutral"
+                          emphasis="low"
+                          aria-label={labels.reorderSocialLink(index + 1)}
+                          aria-describedby={reorderInstructionsId}
+                          aria-keyshortcuts="ArrowUp ArrowDown"
+                          data-social-link-handle
+                          draggable={!formDisabled}
+                          disabled={formDisabled}
+                          onDragStart={(event) => {
+                            event.dataTransfer.effectAllowed = 'move';
+                            setDraggedIndex(index);
+                          }}
+                          onDragEnd={() => setDraggedIndex(null)}
+                          onKeyDown={(event) => handleReorderKeyDown(event, index)}
+                        >
+                          <IconGripVertical aria-hidden />
+                        </IconButton>
+                      }
+                      actions={
+                        <IconButton
+                          type="button"
+                          tone="danger"
+                          emphasis="low"
+                          aria-label={labels.removeSocialLink(index + 1)}
+                          data-social-link-remove
+                          onClick={() => removeSocialLink(index)}
+                          disabled={formDisabled}
+                        >
+                          <IconTrash size={16} aria-hidden />
+                        </IconButton>
+                      }
                     >
-                      <IconButton
-                        type="button"
-                        className={classes.dragHandle}
-                        tone="neutral"
-                        emphasis="low"
-                        aria-label={labels.reorderSocialLink(index + 1)}
-                        draggable={!formDisabled}
-                        disabled={formDisabled}
-                        onDragStart={(event) => {
-                          event.dataTransfer.effectAllowed = 'move';
-                          setDraggedIndex(index);
-                        }}
-                        onDragEnd={() => setDraggedIndex(null)}
-                        onKeyDown={(event) => handleReorderKeyDown(event, index)}
-                      >
-                        <IconGripVertical size={16} aria-hidden />
-                      </IconButton>
+                      <DsLayoutInline gap="xxs" direction={{ base: 'column', sm: 'row' }} align="stretch" wrap="nowrap">
+                        <Select
+                          size="xs"
+                          id={`profile-social-platform-${index}`}
+                          aria-label={labels.socialPlatform}
+                          placeholder={labels.socialPlatform}
+                          data={platformOptions.map(({ value, label }) => ({ value, label }))}
+                          value={link.platform || null}
+                          onChange={(value) => updateSocialLink(index, 'platform', value ?? '')}
+                          searchable
+                          disabled={formDisabled}
+                        />
 
-                      <Select
-                        className={classes.platformInput}
-                        id={`profile-social-platform-${index}`}
-                        aria-label={labels.socialPlatform}
-                        placeholder={labels.socialPlatform}
-                        data={platformOptions.map(({ value, label }) => ({ value, label }))}
-                        value={link.platform || null}
-                        onChange={(value) => updateSocialLink(index, 'platform', value ?? '')}
-                        searchable
-                        disabled={formDisabled}
-                      />
-
-                      <TextInput
-                        className={classes.valueInput}
-                        id={`profile-social-value-${index}`}
-                        aria-label={labels.socialValue}
-                        placeholder={platformOption?.placeholder ?? labels.socialValue}
-                        value={link.value}
-                        onChange={(event) => updateSocialLink(index, 'value', event.currentTarget.value)}
-                        onBlur={() => {
-                          const normalizedValue = events.onNormalizeSocialLink(link.platform, link.value);
-                          if (normalizedValue !== link.value) {
-                            updateSocialLink(index, 'value', normalizedValue);
-                          }
-                        }}
-                        disabled={formDisabled}
-                      />
-
-                      <IconButton
-                        type="button"
-                        className={classes.removeButton}
-                        tone="danger"
-                        emphasis="low"
-                        aria-label={labels.removeSocialLink(index + 1)}
-                        onClick={() => removeSocialLink(index)}
-                        disabled={formDisabled}
-                      >
-                        <IconTrash size={16} aria-hidden />
-                      </IconButton>
-                    </div>
+                        <TextInput
+                          size="xs"
+                          id={`profile-social-value-${index}`}
+                          aria-label={labels.socialValue}
+                          placeholder={platformOption?.placeholder ?? labels.socialValue}
+                          value={link.value}
+                          onChange={(event) => updateSocialLink(index, 'value', event.currentTarget.value)}
+                          onBlur={() => {
+                            const normalizedValue = events.onNormalizeSocialLink(link.platform, link.value);
+                            if (normalizedValue !== link.value) {
+                              updateSocialLink(index, 'value', normalizedValue);
+                            }
+                          }}
+                          disabled={formDisabled}
+                        />
+                      </DsLayoutInline>
+                    </ReorderRow>
                   );
                 })}
 
                 {errors.socialLinks ? (
-                  <Text size="xs" c="red" role="alert">
+                  <DsText size="xs" tone="danger" role="alert">
                     {errors.socialLinks}
-                  </Text>
+                  </DsText>
                 ) : null}
-              </Stack>
+                <VisuallyHidden id={reorderInstructionsId}>{labels.reorderInstructions}</VisuallyHidden>
+                <VisuallyHidden role="status" aria-live="polite" aria-atomic="true">
+                  {reorderAnnouncement}
+                </VisuallyHidden>
+              </DsLayoutStack>
             </>
           ) : null}
 
           {errors.form ? (
-            <Text size="sm" c="red" role="alert" aria-live="polite">
+            <DsText size="sm" tone="danger" role="alert" aria-live="polite">
               {errors.form}
-            </Text>
+            </DsText>
           ) : null}
 
-          <Button type="submit" tone="accent" emphasis="strong" loading={pending} disabled={formDisabled}>
+          <Button
+            id={submitId}
+            type="submit"
+            tone="neutral"
+            emphasis="medium"
+            loading={pending}
+            disabled={formDisabled}
+          >
             {labels.submit}
           </Button>
-        </Stack>
+        </DsLayoutStack>
       </form>
-    </Stack>
+    </DsLayoutStack>
   );
 }

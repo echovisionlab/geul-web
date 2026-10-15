@@ -1,4 +1,6 @@
 import { EDITOR_TOOLBAR_SHORTCUTS, EditorToolbarShortcutText } from '@/features/editor/toolbars/EditorToolbarTooltip';
+import { Disclosure } from '@/components/core/Disclosure';
+import { Text } from '@/components/core/Typography';
 import type { ShaderChannel, ShaderStage } from './shader-program';
 import {
   SHADER_AVAILABLE_INPUTS,
@@ -20,23 +22,33 @@ export function ShaderAvailableInputs({
   const entryPoint = shaderStageEntryPoint(stage);
   const inputs = [...SHADER_AVAILABLE_INPUTS, ...shaderChannelApiItems(channels)];
   return (
-    <details className={classes.reference} data-testid="shader-available-inputs">
-      <summary className={classes.summary}>
-        <span>{labels.availableInputs}</span>
-        <span className={classes.hint}>
-          {labels.apiHint} · <EditorToolbarShortcutText shortcut={EDITOR_TOOLBAR_SHORTCUTS.suggestions} />
-        </span>
-      </summary>
-      <div className={classes.body}>
-        <code className={classes.entry}>{entryPoint ?? labels.sharedStage}</code>
-        {inputs.map((input) => (
-          <div key={input.name} className={classes.row}>
-            <code className={classes.name}>{input.name}</code>
-            <code className={classes.type}>{input.type}</code>
-            <code className={classes.notation}>{input.notation}</code>
-          </div>
-        ))}
-      </div>
-    </details>
+    <div data-testid="shader-available-inputs">
+      <Disclosure
+        density="compact"
+        contentIndent="small"
+        withDivider={false}
+        label={
+          <>
+            <Text as="span" size="xs" weight="medium">
+              {labels.availableInputs}
+            </Text>
+            <Text as="span" size="xs" tone="secondary" font="mono" truncate>
+              {labels.apiHint} · <EditorToolbarShortcutText shortcut={EDITOR_TOOLBAR_SHORTCUTS.suggestions} />
+            </Text>
+          </>
+        }
+      >
+        <div className={classes.body}>
+          <code className={classes.entry}>{entryPoint ?? labels.sharedStage}</code>
+          {inputs.map((input) => (
+            <div key={input.name} className={classes.row}>
+              <code className={classes.name}>{input.name}</code>
+              <code className={classes.type}>{input.type}</code>
+              <code className={classes.notation}>{input.notation}</code>
+            </div>
+          ))}
+        </div>
+      </Disclosure>
+    </div>
   );
 }

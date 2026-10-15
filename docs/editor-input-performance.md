@@ -43,7 +43,7 @@ EDITOR_PERFORMANCE_REPORT=/tmp/editor-input-results.json pnpm exec vitest run fe
 Without the report environment variable, these tests only verify fixture correctness
 and observer routing. CI does not enforce wall-clock timing thresholds.
 
-The 2026-09-30 comparison uses Node 24.19.0, Vitest 4.1.10, jsdom, and the published
+The fixed fixture uses Node 24.19.0, Vitest 4.1.10, jsdom, and the published
 Common dependency. Every paragraph initially has 80 characters; one character is
 inserted into the first paragraph repeatedly. Initialization is outside timing,
 and the first five edits are warm-up. Post samples 20 edits per size. Page samples
@@ -62,38 +62,7 @@ input serialization; it does not make all processing independent of document siz
 Server sync authorization still copies and validates resident documents and needs
 separate profiling before any change to that security boundary.
 
-## 2026-09-30 before/after results
-
-The baseline input source is commit `fddc328`, identical in the measured controller,
-bridge, and Page sections paths to main release `f11d214` (v0.2.1). The optimized run
-uses the same fixtures, Node, dependencies, sample counts, insertion position, and
-warm-up. The routing assertion changes from one callback per subscriber to exactly
-one callback per edit; it is outside the timed region. No other test/build workload
-was running during the final measurement.
-
-| Fixture                           | Before median (ms) | After median (ms) | Reduction | Before / after p95 (ms) |
-| --------------------------------- | -----------------: | ----------------: | --------: | ----------------------: |
-| Post 100 paragraphs               |               5.95 |              3.70 |     37.8% |             6.81 / 4.35 |
-| Post 500 paragraphs               |              26.87 |             15.20 |     43.4% |           28.59 / 16.86 |
-| Post 1000 paragraphs              |              55.01 |             30.35 |     44.8% |           56.50 / 31.67 |
-| Page 500 paragraphs / 1 sections  |              35.11 |             15.42 |     56.1% |           37.55 / 25.46 |
-| Page 500 paragraphs / 5 sections  |              84.47 |             15.33 |     81.9% |           87.60 / 16.90 |
-| Page 500 paragraphs / 20 sections |             277.21 |             15.68 |     94.3% |          313.38 / 17.65 |
-
-Page observer callbacks per edit change from 2 / 6 / 21 for 1 / 5 / 20 sections to
-1 / 1 / 1. Only the affected rich-text bridge is notified, and the Page sections
-projection is not rebuilt for body typing. Each case verifies successful edits and
-subscriber delivery; absolute timing is recorded, not asserted.
-
-Root validation: 14 focused integration files / 172 tests, plus the performance
-fixtures (2 tests), cover typed payload mutation, nested input, empty blocks,
-reorder/deletion, heading conversion, tables, executable source, source/target
-locale authority, collaboration projection, pending remote edits, plugin-appended
-transactions, undo/redo, Page context/body integration, observer fanout, and
-unsubscribe/reconnect. TypeScript, changed-path ESLint, Prettier, and diff whitespace checks passed
-before commit. Full build and suite execution remain CI release gates.
-
-## Concurrent inline edit integrity (2026-10-01)
+## Concurrent inline edit integrity
 
 Inline text and marks reconcile on existing Y.Text handles. Whole and partial
 format changes no longer delete and recreate the concurrently edited text.
@@ -115,39 +84,7 @@ Web and Collab use Block-room protocol version 2. A version mismatch requests
 reload before bootstrap application or write admission. Deploy the Collab reader
 before the Web writer; the canonical protobuf and storage schema stay unchanged.
 
-The first inline integrity implementation added projection overhead. The final
-projection decodes inline content, table rows, and cell content once, preserving
-all existing malformed-payload validation. Preliminary local measurements are
-kept as diagnostics; the final published-dependency comparison follows below.
-
-### Final published-package comparison
-
-Three alternating before/after runs use the identical fixture, dependencies,
-sample counts, and warm-up above. Baseline is Web v0.2.2's controller/bridge/diff
-with published Common v0.2.1; after uses this change with published Common v0.2.3.
-Proto/event v0.2.1, Node, and Yjs remain fixed. No other local tests or builds ran.
-The table reports the median of each run's median and p95, not a pooled percentile.
-Raw audit artifacts are `editor-integrity-final-{before,after}-{1,2,3}-20261001.json`.
-
-| Fixture                           | Before median (ms) | After median (ms) | Median change | Before / after p95 (ms) |
-| --------------------------------- | -----------------: | ----------------: | ------------: | ----------------------: |
-| Post 100 paragraphs               |               3.73 |              3.59 |         -3.8% |             4.36 / 4.75 |
-| Post 500 paragraphs               |              14.68 |             14.69 |         +0.1% |           16.47 / 16.50 |
-| Post 1000 paragraphs              |              30.61 |             29.38 |         -4.0% |           35.45 / 30.15 |
-| Page 500 paragraphs / 1 section   |              16.75 |             14.93 |        -10.9% |           17.92 / 26.49 |
-| Page 500 paragraphs / 5 sections  |              15.72 |             15.13 |         -3.8% |           17.41 / 16.68 |
-| Page 500 paragraphs / 20 sections |              15.48 |             15.35 |         -0.8% |           16.71 / 17.38 |
-
-Notifications remain exactly one per edit in all Page fixtures. This establishes
-that the integrity fixes and projection fast path retain the previous performance
-work; the small differences and noisy tails do not establish a production browser
-latency improvement. Post 500 is effectively unchanged, and Page one-section p95
-is higher. There are no browser INP, paint, network, or persistence measurements.
-The first Common v0.2.2 projection cost is retained in separate diagnostic runs;
-removing duplicate decoding, unchanged-style normalization, and unused payload
-allocation removes that extra work in v0.2.3.
-
-## Responsibility refactor comparison 2026 10 01
+## Controller planner measurement
 
 The structural controller now creates a pure ordered plan before its room
 transaction; the controller still owns connection lifetime, synchronous remote
@@ -176,6 +113,98 @@ Page notifications remain exactly one per edit. Small median differences in both
 directions do not establish a speed improvement; they provide a focused check
 that the responsibility changes retain previous input performance. This fixture
 does not measure structural edit latency, browser INP, paint, network, persistence,
-immersive scene GPU use or production memory. Raw records are
-`code-quality-performance-{before,after}-{1,2,3}-20261001.json` and the comparison
-JSON in the DSUB workspace.
+immersive scene GPU use or production memory. Use the report environment variable above to capture comparable current runs.
+
+## Incremental remote projection and composition (2026-10-14)
+
+The editor bridge consumes Common's Yjs transaction change set, which indexes
+`baseNodes`, `baseOrder`, `localeOverlay`, and `localePresence` event paths/keys.
+Payload-only notifications decode the affected base nodes and formatted locale
+Y.Text runs, retaining unchanged descriptors. The controller constructs PM nodes
+only for those payloads and applies their minimal ranges in descending order in
+one transaction. Unknown changes, metadata/layout, ordering, insertion/deletion,
+and changed placement retain the full projection fallback. Public `readBlocks()`
+still returns a fresh full snapshot. `controller.projectionStats` reports
+`incremental`, `full`, `projectedBlocks`, and `buffered` notification counts.
+
+Composition takes a temporary Y.Doc replica at `compositionstart`. Local PM edits
+continue into that replica and immediately merge their Yjs updates into the live
+room with the existing local undo origin. The replica deliberately does not receive
+remote updates, so a composing DOM cannot overwrite unseen remote text. After the
+compositionend DOM-observer microtask, the merged live state is projected once;
+relative Y.Text anchors restore the caret. Undo capture is separated at composition
+boundaries; remote origins remain untracked. The temporary replica is destroyed
+on flush/disconnect. Starting composition copies the resident room (O(document));
+this is a correctness tradeoff, not a claim of constant-time IME startup.
+
+Presence adds optional encoded `relative` bytes to each existing `{blockId, offset}`
+point. Existing peers continue reading the offset; new peers resolve Y.Text-relative
+anchors. Non-text selections retain block offsets. Invalid/deleted relative anchors
+are omitted rather than snapping to an unrelated text handle. Awareness updates
+replace decorations only for changed clients; local transactions map existing
+ones, and remote payload projections refresh clients in touched blocks.
+
+The editor instance now survives authoring authority, translated labels and runtime
+callback changes. NodeView portals receive current options through React context;
+commands read live authoring refs. Room/provider/schema changes still recreate it.
+Plain-text Markdown paste uses the already installed synchronous `react-markdown`
+CommonMark pipeline with `remark-gfm`; no package was added. It supports schema
+headings (levels 1–3), nested lists/tasks, quotes, fenced code, inline marks/links,
+dividers and tables. HTML clipboard data keeps the existing paste route. Code
+contexts and target-locale/structure-locked rooms do not perform Markdown conversion.
+
+### Same-fixture measurements
+
+Node 24.21.0, Vitest 5.0.3, jsdom, Common 0.5.0. The retained remote benchmark
+applies peer Yjs updates to the middle paragraph, excludes initialization and five
+warm-ups, and samples 20 updates. Baseline was captured before implementation;
+after was captured with this change. The machine had concurrent work, so these
+single-run timings are descriptive and do not establish production latency or
+reliable tail-percentile improvements.
+
+| Fixture                           | Before median / p95 (ms) | After median / p95 (ms) |
+| --------------------------------- | -----------------------: | ----------------------: |
+| Remote Post, 100 paragraphs       |              3.52 / 5.58 |             1.16 / 3.10 |
+| Remote Post, 500 paragraphs       |            16.30 / 21.65 |           9.24 / 129.41 |
+| Remote Post, 1000 paragraphs      |            31.87 / 32.84 |           10.66 / 16.11 |
+| Local Post input, 100 paragraphs  |              3.63 / 6.49 |             1.71 / 2.94 |
+| Local Post input, 500 paragraphs  |            15.21 / 17.15 |           27.49 / 68.33 |
+| Local Post input, 1000 paragraphs |            30.63 / 32.22 |            9.01 / 14.53 |
+
+All 75 remote editor updates (including warm-ups) used incremental projection:
+75 payloads projected, **0 full fallbacks**. Structural parity tests separately
+exercise the fallback. Page observer medians for 1/5/20 sections changed from
+14.47/14.33/15.18 ms to 24.14/29.25/21.36 ms in this loaded run; notifications
+remained one per edit. Shared Common indexing, order lookups and PM position scans
+still depend on document size. The change avoids whole-document JSON/PM rebuilding;
+it does not remove every O(document) operation.
+
+Reproduce with the report command above. Controller tests cover same/other-block
+Korean composition, undo/redo, and full-projection parity after nested text,
+formatting, attributes, movement and deletion. Presence tests cover legacy peers,
+relative cursor movement without an awareness resend, and malformed cursor input.
+Editor-lifetime tests cover authority/label changes during active composition.
+
+### Verification for this working-tree change
+
+- `pnpm exec vitest run features/editor --maxWorkers 2`: 136 files, 836 tests
+  passed. After the final review fixes, the focused controller, presence,
+  text-position, Markdown and editor-lifetime run passed 43 tests in five files.
+- ESLint passed on touched files. Prettier was limited to touched files.
+- `pnpm typecheck` still reports the parallel task's locale-message type mismatch
+  at `features/page/PageEditor/PageBlockSettingsSurface.test.tsx:50`; no errors
+  remain in this change's files.
+- Both requested Storybook commands were attempted separately:
+  `pnpm exec test-storybook --index-json --url http://127.0.0.1:6010 --maxWorkers 2 -- --testPathPatterns 'feature-editor-*'`
+  and the same command with `'pages-editors-*'`. Neither could reach Storybook.
+  Starting Storybook failed because the sandbox disallows listening on a local
+  port. No Storybook or production visual verification is claimed; Computer Use
+  also denied access to Firefox.
+- The mandated Astra review found cursor identity/empty-cell mapping and Markdown
+  content-preservation issues. Those were fixed and regression-tested; the final
+  focused review reported no additional actionable findings.
+
+Cross-task integration: owned editor tests were updated for the parallel task's
+`saved`/`saving` indicator states and provider `synced` subscription. No files owned
+by that task were edited. The remaining Page test type error requires coordination
+with that task before the combined tree can pass typecheck.

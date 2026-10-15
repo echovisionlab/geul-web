@@ -1,10 +1,16 @@
 'use client';
 
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useCallback, useMemo, useState } from 'react';
 import { IconForms } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Group, Stack, Text } from '@mantine/core';
+
 import { useDebouncedValue } from '@mantine/hooks';
 import { LabelBadge } from '@/components/core/Badge';
 import { Select, Switch } from '@/components/core/Input';
@@ -85,17 +91,19 @@ function FormSettingsForm({ props, updateProps }: FormSettingsFormProps) {
   );
 
   return (
-    <Box data-page-block-editor="form">
+    <div data-page-block-editor="form">
       {/* Header */}
-      <Group gap="xs" mb="md">
-        <IconForms size={18} />
-        <Text size="sm" fw={500}>
-          {tPageEditor('sectionTypes.form')}
-        </Text>
-        {selectedForm && <LabelBadge size="sm">{selectedForm.title}</LabelBadge>}
-      </Group>
+      <DsLayoutInset blockEnd="md">
+        <DsLayoutInline gap="xs">
+          <IconForms size={18} />
+          <DsText size="sm" weight="medium">
+            {tPageEditor('sectionTypes.form')}
+          </DsText>
+          {selectedForm && <LabelBadge size="sm">{selectedForm.title}</LabelBadge>}
+        </DsLayoutInline>
+      </DsLayoutInset>
 
-      <Stack gap="sm">
+      <DsLayoutStack gap="md">
         {/* Form Selection */}
         <Select
           label={tPageEditor('blockEditor.labels.selectForm')}
@@ -107,22 +115,22 @@ function FormSettingsForm({ props, updateProps }: FormSettingsFormProps) {
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
           nothingFoundMessage={isLoading ? tCommonStates('loading') : tForms('empty')}
-          size="xs"
         />
 
         {/* Display Options */}
-        <Text size="xs" c="dimmed" fw={500} mt="xs">
-          {tPageEditor('blockEditor.sections.displayOptions')}
-        </Text>
+        <DsLayoutInset blockStart="xs">
+          <DsText size="xs" tone="secondary" weight="medium">
+            {tPageEditor('blockEditor.sections.displayOptions')}
+          </DsText>
+        </DsLayoutInset>
 
         <Switch
           label={tPageEditor('blockEditor.labels.showFormTitle')}
           checked={showTitle === 'true'}
           onChange={(e) => updateProp('showTitle', e.currentTarget.checked ? 'true' : 'false')}
-          size="sm"
         />
-      </Stack>
-    </Box>
+      </DsLayoutStack>
+    </div>
   );
 }
 

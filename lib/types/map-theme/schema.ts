@@ -1,9 +1,3 @@
-import { z } from 'zod';
-import {
-  MapThemeDocumentMetaSchema,
-  MapThemeDocumentSettingsSchema,
-  MapThemeDocumentVariantSchema,
-} from '@echovisionlab/geul-common/collaboration/map-theme';
 import type { ResolvedThemeConfig, ThemeSettings, ThemeVariant } from './model';
 
 /**
@@ -82,15 +76,3 @@ export const INITIAL_MAP_THEME_LIGHT_CONFIG: ResolvedThemeConfig = {
   ...initialLightVariantColors,
   ...DEFAULT_THEME_SETTINGS,
 };
-
-/**
- * Create theme input schema
- */
-export const createMapThemeInputSchema = z
-  .object({
-    name: MapThemeDocumentMetaSchema.shape.name,
-    settings: MapThemeDocumentSettingsSchema,
-    lightVariant: MapThemeDocumentVariantSchema.extend({ scheme: z.literal('light') }).strict(),
-    darkVariant: MapThemeDocumentVariantSchema.extend({ scheme: z.literal('dark') }).strict(),
-  })
-  .strict();

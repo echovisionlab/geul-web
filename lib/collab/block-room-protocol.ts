@@ -1,117 +1,33 @@
-import { z } from 'zod';
+import {
+  encodeMessage,
+  parseServerMessage,
+  type MetadataUpdate,
+  type MetadataAck,
+  type MetadataOperation,
+  type RoomRevision,
+  type DurabilityCoverage,
+  type AccessEndedReason,
+  type AccessLevel,
+} from '@echovisionlab/geul-common/collaboration/protocol';
+import type { EditorSnapshot } from '@/features/editor/editor-snapshot';
+import { createLogger } from '@/lib/utils/logger';
+import { UnretryableSaveError } from '@/lib/editor/save-failure';
 import * as Y from 'yjs';
 import {
   applyBlockRoomBootstrap,
   parseBlockRoomBootstrap,
-  targetRevisionSchema,
   type BlockRoomBootstrap,
   type BlockRoomDocumentType,
 } from '@/lib/collab/block-room-bootstrap';
 
-const metadataUpdateSchema = z
-  .object({
-    operation: z.enum(['locale', 'document', 'page_layout']),
-    values: z.record(z.string(), z.unknown()),
-    sequence: z.number().int().positive(),
-  })
-  .strict();
-
-const metadataAckSchema = z
-  .object({
-    documentRevision: z.string().uuid(),
-    targetRevision: targetRevisionSchema.optional(),
-    changed: z.boolean(),
-    sourceChanged: z.boolean(),
-    changedLocales: z.array(z.string()),
-    locale: z.string().trim().min(1),
-    metadataUpdate: metadataUpdateSchema,
-  })
-  .strict();
-
-const persistedSchema = z
-  .object({
-    kind: z.literal('block_room.persisted'),
-    protocolVersion: z.literal(2),
-    documentName: z.string().min(1),
-    stateVector: z.string().min(1),
-    deleted: z.record(
-      z.string().regex(/^\d+$/u),
-      z.array(z.object({ clock: z.number().int().nonnegative(), len: z.number().int().positive() }).strict()),
-    ),
-  })
-  .strict();
-
 export interface BlockRoomPersistedState {
   stateVector: Uint8Array;
-  deleted: Record<string, Array<{ clock: number; len: number }>>;
+  deleted: DurabilityCoverage['deleted'];
 }
-
-const readySchema = z
-  .object({
-    kind: z.literal('block_room.ready'),
-    protocolVersion: z.literal(2),
-    bootstrapChallenge: z.string().trim().min(1),
-  })
-  .strict();
-
-const metadataResultSchema = z
-  .object({
-    kind: z.literal('block_room.metadata_result'),
-    protocolVersion: z.literal(2),
-    requestId: z.string().uuid(),
-    ok: z.boolean(),
-    ack: z.unknown().optional(),
-    error: z.string().optional(),
-  })
-  .strict();
-
-const metadataChangedSchema = z
-  .object({
-    kind: z.literal('block_room.metadata_changed'),
-    protocolVersion: z.literal(2),
-    documentName: z.string().min(1),
-    ack: metadataAckSchema,
-  })
-  .strict();
-
-const snapshotSchema = z
-  .object({
-    documentRevision: z.string().uuid(),
-    targetRevision: targetRevisionSchema.optional(),
-    sourceLocale: z.string().trim().min(1),
-    locale: z.string().trim().min(1),
-    localeExists: z.boolean(),
-  })
-  .strict();
-
-const snapshotResultSchema = z
-  .object({
-    kind: z.literal('block_room.snapshot_result'),
-    protocolVersion: z.literal(2),
-    requestId: z.string().uuid(),
-    ok: z.boolean(),
-    snapshot: z.unknown().optional(),
-    error: z.string().optional(),
-  })
-  .strict();
-
-const reloadSchema = z
-  .object({
-    kind: z.literal('reload_required'),
-    reason: z.literal('reload_required'),
-  })
-  .strict();
-
-export type BlockRoomMetadataUpdate = z.infer<typeof metadataUpdateSchema>;
-export type BlockRoomMetadataAck = z.infer<typeof metadataAckSchema>;
-export interface BlockRoomSnapshot {
-  documentRevision: string;
-  targetRevision?: string;
-  sourceLocale: string;
-  locale: string;
-  localeExists: boolean;
-}
-export type BlockRoomMetadataOperation = 'locale' | 'document' | 'page_layout';
+export type BlockRoomMetadataUpdate = MetadataUpdate;
+export type BlockRoomMetadataAck = MetadataAck;
+export type BlockRoomSnapshot = RoomRevision;
+export type BlockRoomMetadataOperation = MetadataOperation;
 
 export class BlockRoomProtocolError extends Error {
   constructor(
@@ -159,7 +75,13 @@ interface BlockRoomProtocolClientOptions {
   setResumeToken: (token: string) => void;
   onBootstrap: (bootstrap: BlockRoomBootstrap) => void;
   onReady: () => void;
-  onReloadRequired: () => void;
+  initialSnapshot?: EditorSnapshot;
+  onAccessEnded?: (reason: AccessEndedReason) => void;
+  /** The room's access level changed while it stays open (room.access_changed). */
+  onAccessChanged?: (access: AccessLevel) => void;
+  onReloadRequired: (reason?: string, reloadReason?: string) => void;
+  /** A bootstrap that omitted the body did not match the snapshot this client offered. */
+  onOmittedBodyRejected?: () => void;
 }
 
 function stateVectorIncludes(actualBytes: Uint8Array, expectedBytes: Uint8Array): boolean {
@@ -173,15 +95,8 @@ function stateVectorIncludes(actualBytes: Uint8Array, expectedBytes: Uint8Array)
   return true;
 }
 
-function parseJson(payload: string): unknown {
-  try {
-    return JSON.parse(payload) as unknown;
-  } catch {
-    return undefined;
-  }
-}
-
 export class BlockRoomProtocolClient implements BlockRoomProtocolTransport {
+  private bootstrapStateVector: Uint8Array | null = null;
   private bootstrap: BlockRoomBootstrap | null = null;
   private providerSynced = false;
   private ackSent = false;
@@ -207,142 +122,171 @@ export class BlockRoomProtocolClient implements BlockRoomProtocolTransport {
   }
 
   handleStateless(payload: string): boolean {
-    const raw = parseJson(payload);
-    if (reloadSchema.safeParse(raw).success) {
-      this.options.onReloadRequired();
-      return true;
+    try {
+      return this.routeStateless(payload);
+    } catch (error) {
+      void createLogger('block-room').warn('Ignoring invalid collaboration message', {
+        data: { error: String(error) },
+      });
+      return false;
     }
-    if (raw && typeof raw === 'object' && (raw as { kind?: unknown }).kind === 'block_room.bootstrap') {
-      try {
-        const bootstrap = parseBlockRoomBootstrap(
-          raw,
-          this.options.documentType,
-          this.options.entityId,
-          this.options.locale,
-        );
-        const validationDocument = applyBlockRoomBootstrap(bootstrap);
-        validationDocument.destroy();
-        this.bootstrap = bootstrap;
-        this.options.onBootstrap(bootstrap);
-        for (const listener of this.metadataListeners) {
-          this.emitBootstrapMetadata(listener);
+  }
+
+  private routeStateless(payload: string): boolean {
+    if (this.destroyed) {
+      return false;
+    }
+    const parsed = parseServerMessage(payload);
+    if (!parsed.ok) {
+      void createLogger('block-room').warn('Ignoring collaboration message', { data: { ...parsed } });
+      if (parsed.reason === 'invalid_shape') {
+        const requests =
+          parsed.kind === 'room.metadata_result'
+            ? this.pending
+            : parsed.kind === 'room.revision_result'
+              ? this.pendingSnapshots
+              : null;
+        if (requests?.size) {
+          for (const request of requests.values()) {
+            clearTimeout(request.timeout);
+            request.cleanupAbort?.();
+            request.reject(new BlockRoomProtocolError('Collaboration result failed validation.', true));
+          }
+          requests.clear();
+          this.options.onReloadRequired(undefined, 'state_mismatch');
         }
-        this.ackBootstrapWhenReady();
-      } catch {
-        this.options.onReloadRequired();
       }
-      return true;
+      return false;
     }
-    const ready = readySchema.safeParse(raw);
-    if (ready.success) {
-      if (!this.ackSent || !this.bootstrap || ready.data.bootstrapChallenge !== this.bootstrap.bootstrapChallenge) {
-        this.options.onReloadRequired();
+    const message = parsed.message;
+    switch (message.kind) {
+      case 'room.reload':
+        this.options.onReloadRequired(undefined, message.reloadReason);
+        return true;
+      case 'room.access_changed':
+        this.options.onAccessChanged?.(message.access);
+        return true;
+      case 'room.access_ended':
+        this.ready = false;
+        this.destroy();
+        this.options.onAccessEnded?.(message.reason);
+        return true;
+      case 'room.bootstrap': {
+        try {
+          const bootstrap = parseBlockRoomBootstrap(
+            message,
+            this.options.documentType,
+            this.options.entityId,
+            this.options.locale,
+            this.options.initialSnapshot,
+          );
+          const validationDocument = applyBlockRoomBootstrap(bootstrap);
+          try {
+            this.bootstrapStateVector = Y.encodeStateVector(validationDocument);
+          } finally {
+            validationDocument.destroy();
+          }
+          this.bootstrap = bootstrap;
+          this.options.onBootstrap(bootstrap);
+          for (const listener of this.metadataListeners) {
+            this.emitBootstrapMetadata(listener);
+          }
+          this.ackBootstrapWhenReady();
+        } catch {
+          if (message.document === undefined) {
+            this.options.onOmittedBodyRejected?.();
+          }
+          this.options.onReloadRequired(undefined, 'state_mismatch');
+        }
         return true;
       }
-      this.ready = true;
-      this.options.setResumeToken(this.bootstrap.bootstrapChallenge);
-      this.options.onReady();
-      for (const listener of this.readyListeners) {
-        listener();
-      }
-      return true;
-    }
-    const persisted = persistedSchema.safeParse(raw);
-    if (persisted.success) {
-      if (this.ready && persisted.data.documentName === this.bootstrap?.documentName) {
-        try {
-          const bytes = Uint8Array.from(atob(persisted.data.stateVector), (character) => character.charCodeAt(0));
+      case 'room.ready':
+        if (!this.ackSent || !this.bootstrap || message.bootstrapChallenge !== this.bootstrap.bootstrapChallenge) {
+          this.options.onReloadRequired(undefined, 'state_mismatch');
+          return true;
+        }
+        this.ready = true;
+        this.options.setResumeToken(this.bootstrap.bootstrapChallenge);
+        this.options.onReady();
+        for (const listener of this.readyListeners) {
+          listener();
+        }
+        return true;
+      case 'room.persisted':
+        if (this.ready && message.documentName === this.bootstrap?.documentName) {
+          const bytes = Uint8Array.from(atob(message.stateVector), (character) => character.charCodeAt(0));
           Y.decodeStateVector(bytes);
           for (const listener of this.persistedListeners) {
-            listener({ stateVector: bytes, deleted: persisted.data.deleted });
+            listener({ stateVector: bytes, deleted: message.deleted });
           }
-        } catch {
-          /* Ignore malformed durability hints; they must never acknowledge local edits. */
         }
-      }
-      return true;
-    }
-    const metadataChanged = metadataChangedSchema.safeParse(raw);
-    if (metadataChanged.success) {
-      if (metadataChanged.data.documentName === this.bootstrap?.documentName) {
-        this.applyMetadataAck(metadataChanged.data.ack);
-      }
-      return true;
-    }
-    const result = metadataResultSchema.safeParse(raw);
-    if (!result.success) {
-      const snapshotResult = snapshotResultSchema.safeParse(raw);
-      if (!snapshotResult.success) {
-        return false;
-      }
-      const pendingSnapshot = this.pendingSnapshots.get(snapshotResult.data.requestId);
-      if (!pendingSnapshot) {
+        return true;
+      case 'room.metadata_changed':
+        if (message.documentName === this.bootstrap?.documentName) {
+          this.applyMetadataAck(message.ack);
+        }
+        return true;
+      case 'room.metadata_result': {
+        const pending = this.pending.get(message.requestId);
+        if (!pending) {
+          return true;
+        }
+        this.pending.delete(message.requestId);
+        clearTimeout(pending.timeout);
+        pending.cleanupAbort?.();
+        if (!message.ok) {
+          pending.reject(
+            message.error.retryable === false && !message.error.reloadReason
+              ? new UnretryableSaveError(message.error.message ?? message.error.code, message.error.code)
+              : new BlockRoomProtocolError(message.error.message ?? message.error.code, !!message.error.reloadReason),
+          );
+          if (message.error.reloadReason) {
+            this.options.onReloadRequired(undefined, message.error.reloadReason);
+          }
+        } else {
+          pending.resolve(message.ack);
+          this.applyMetadataAck(message.ack);
+        }
         return true;
       }
-      this.pendingSnapshots.delete(snapshotResult.data.requestId);
-      clearTimeout(pendingSnapshot.timeout);
-      pendingSnapshot.cleanupAbort?.();
-      if (!snapshotResult.data.ok) {
-        pendingSnapshot.reject(
-          new BlockRoomProtocolError(
-            `Block-room snapshot failed: ${snapshotResult.data.error ?? 'unknown_error'}.`,
-            snapshotResult.data.error === 'reload_required',
-          ),
-        );
-        if (snapshotResult.data.error === 'reload_required') {
-          this.options.onReloadRequired();
+      case 'room.revision_result': {
+        const pending = this.pendingSnapshots.get(message.requestId);
+        if (!pending) {
+          return true;
         }
-      } else {
-        const snapshot = snapshotSchema.safeParse(snapshotResult.data.snapshot);
-        const bootstrap = this.bootstrap;
-        if (!snapshot.success || !bootstrap) {
-          pendingSnapshot.reject(new BlockRoomProtocolError('Block-room snapshot failed validation.', true));
-          this.options.onReloadRequired();
+        this.pendingSnapshots.delete(message.requestId);
+        clearTimeout(pending.timeout);
+        pending.cleanupAbort?.();
+        if (!message.ok) {
+          pending.reject(
+            new BlockRoomProtocolError(message.error.message ?? message.error.code, !!message.error.reloadReason),
+          );
+          if (message.error.reloadReason) {
+            this.options.onReloadRequired(undefined, message.error.reloadReason);
+          }
         } else {
-          const isExactRoom =
-            snapshot.data.sourceLocale === bootstrap.sourceLocale && snapshot.data.locale === bootstrap.locale;
-          const isSourceRoom = snapshot.data.locale === snapshot.data.sourceLocale;
-          const hasRevisionParity = isSourceRoom
-            ? snapshot.data.localeExists && snapshot.data.targetRevision === undefined
-            : snapshot.data.localeExists === (snapshot.data.targetRevision !== undefined);
-          if (!isExactRoom || !hasRevisionParity) {
-            pendingSnapshot.reject(new BlockRoomProtocolError('Block-room snapshot failed validation.', true));
-            this.options.onReloadRequired();
+          const revision = message.revision;
+          const bootstrap = this.bootstrap;
+          const source = revision.locale === revision.sourceLocale;
+          if (
+            !bootstrap ||
+            revision.sourceLocale !== bootstrap.sourceLocale ||
+            revision.locale !== bootstrap.locale ||
+            (source
+              ? !revision.localeExists || revision.targetRevision !== undefined
+              : revision.localeExists !== (revision.targetRevision !== undefined))
+          ) {
+            pending.reject(new BlockRoomProtocolError('Block-room revision failed validation.', true));
+            this.options.onReloadRequired(undefined, 'state_mismatch');
           } else {
-            pendingSnapshot.resolve(snapshot.data);
+            pending.resolve(revision);
           }
         }
+        return true;
       }
-      return true;
+      default:
+        return false;
     }
-    const pending = this.pending.get(result.data.requestId);
-    if (!pending) {
-      return true;
-    }
-    this.pending.delete(result.data.requestId);
-    clearTimeout(pending.timeout);
-    pending.cleanupAbort?.();
-    if (!result.data.ok) {
-      pending.reject(
-        new BlockRoomProtocolError(
-          `Block-room metadata failed: ${result.data.error ?? 'unknown_error'}.`,
-          result.data.error === 'reload_required',
-        ),
-      );
-      if (result.data.error === 'reload_required') {
-        this.options.onReloadRequired();
-      }
-      return true;
-    }
-    const ack = metadataAckSchema.safeParse(result.data.ack);
-    if (!ack.success) {
-      pending.reject(new BlockRoomProtocolError('Block-room metadata ACK failed validation.', true));
-      this.options.onReloadRequired();
-      return true;
-    }
-    this.applyMetadataAck(ack.data);
-    pending.resolve(ack.data);
-    return true;
   }
 
   subscribeReady = (listener: () => void): (() => void) => {
@@ -470,9 +414,8 @@ export class BlockRoomProtocolClient implements BlockRoomProtocolTransport {
       }
       this.pending.set(requestId, request);
       this.options.sendStateless(
-        JSON.stringify({
-          kind: 'block_room.metadata',
-          protocolVersion: 2,
+        encodeMessage({
+          kind: 'room.metadata',
           requestId,
           operation,
           payload,
@@ -506,9 +449,8 @@ export class BlockRoomProtocolClient implements BlockRoomProtocolTransport {
       }
       this.pendingSnapshots.set(requestId, request);
       this.options.sendStateless(
-        JSON.stringify({
-          kind: 'block_room.snapshot',
-          protocolVersion: 2,
+        encodeMessage({
+          kind: 'room.revision',
           requestId,
         }),
       );
@@ -538,21 +480,17 @@ export class BlockRoomProtocolClient implements BlockRoomProtocolTransport {
     if (this.destroyed || this.ackSent || !this.providerSynced || !this.bootstrap) {
       return;
     }
-    const expected = new Y.Doc();
-    try {
-      Y.applyUpdate(expected, this.bootstrap.yjsBootstrapUpdate);
-      if (!stateVectorIncludes(Y.encodeStateVector(this.options.document), Y.encodeStateVector(expected))) {
-        this.options.onReloadRequired();
-        return;
-      }
-    } finally {
-      expected.destroy();
+    if (
+      !this.bootstrapStateVector ||
+      !stateVectorIncludes(Y.encodeStateVector(this.options.document), this.bootstrapStateVector)
+    ) {
+      this.options.onReloadRequired(undefined, 'state_mismatch');
+      return;
     }
     this.ackSent = true;
     this.options.sendStateless(
-      JSON.stringify({
-        kind: 'block_room.bootstrap_ack',
-        protocolVersion: 2,
+      encodeMessage({
+        kind: 'room.bootstrap_ack',
         challenge: this.bootstrap.bootstrapChallenge,
         stateVector: this.encodeBase64(Y.encodeStateVector(this.options.document)),
       }),

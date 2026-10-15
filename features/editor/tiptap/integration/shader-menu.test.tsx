@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { Editor } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
 import { describe, expect, it, vi } from 'vitest';
@@ -113,9 +114,9 @@ describe('Shader selection menu integration', () => {
     const root = createRoot(container);
     await act(async () => {
       root.render(
-        <MantineProvider env="test">
+        <DesignSystemProvider forceColorScheme="light">
           <TiptapExecutableSelectionBubbleMenu editor={mounted.editor} registry={registry} />
-        </MantineProvider>,
+        </DesignSystemProvider>,
       );
     });
 

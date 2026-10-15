@@ -1,7 +1,7 @@
 'use server';
 import { queryResult, unwrapQueryResult } from '@/lib/api/query-result';
 
-import { isConnectErrorCode } from '@/lib/api/connect-error';
+import { connectErrorCode, isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { create, type JsonObject } from '@bufbuild/protobuf';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
@@ -286,9 +286,12 @@ export async function deleteWorkAction(id: string): Promise<{ success?: boolean;
 
 // === Status Actions ===
 
-export async function publishWorkAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function publishWorkAction(
+  id: string,
+  editorOrigin?: string,
+): Promise<{ success?: boolean; error?: string }> {
   try {
-    const client = await createWorkClient();
+    const client = await createWorkClient(editorOrigin);
     await client.publishWork({ id });
     revalidatePath('/admin/works');
     revalidatePath(`/works/${id}`);
@@ -304,9 +307,12 @@ export async function publishWorkAction(id: string): Promise<{ success?: boolean
   }
 }
 
-export async function unpublishWorkAction(id: string): Promise<{ success?: boolean; error?: string }> {
+export async function unpublishWorkAction(
+  id: string,
+  editorOrigin?: string,
+): Promise<{ success?: boolean; error?: string }> {
   try {
-    const client = await createWorkClient();
+    const client = await createWorkClient(editorOrigin);
     await client.unpublishWork({ id });
     revalidatePath('/admin/works');
     revalidatePath(`/works/${id}`);
@@ -324,12 +330,39 @@ export async function unpublishWorkAction(id: string): Promise<{ success?: boole
 
 // === Slug Actions ===
 
+/** Neutral editor settings read through the same authorized Manage Work RPC as the edit route. */
+export async function getWorkConfigurationAction(id: string) {
+  try {
+    const client = await createWorkClient();
+    const work = await client.getWork({ id });
+    return {
+      data: {
+        slug: work.slug ?? null,
+        type: workTypeToString(work.type),
+        year: work.year,
+        month: work.month,
+        untilYear: work.untilYear ?? null,
+        untilMonth: work.untilMonth ?? null,
+        isPresent: work.isPresent,
+        metadata: (work.metadata as Record<string, unknown> | undefined) ?? {},
+        featured: work.featured,
+        clients: (work.clients ?? []).map((client) => client.id),
+        mapPlaceId: work.mapPlaceId ?? null,
+        featuredImageUrl: work.featuredImageAsset?.url ?? null,
+      },
+    };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : 'Failed to load work settings' };
+  }
+}
+
 export async function updateWorkSlugAction(
   id: string,
   slug: string | null,
+  editorOrigin?: string,
 ): Promise<{ success?: boolean; slug?: string | null; error?: string }> {
   try {
-    const client = await createWorkClient();
+    const client = await createWorkClient(editorOrigin);
     await client.updateWork({
       id,
       slug: toSlugInputValue(slug),
@@ -348,9 +381,10 @@ export async function updateWorkAction(
   data: {
     mapPlaceId?: string | null;
   },
+  editorOrigin?: string,
 ): Promise<{ success?: boolean; error?: string }> {
   try {
-    const client = await createWorkClient();
+    const client = await createWorkClient(editorOrigin);
     const request: { id: string; mapPlaceId?: string } = { id };
     if ('mapPlaceId' in data) {
       request.mapPlaceId = data.mapPlaceId ?? '';
@@ -381,9 +415,16 @@ export async function updateWorkFieldsAction(
     untilMonth?: number | null;
     isPresent?: boolean;
   },
-): Promise<{ success?: boolean; metadata?: Record<string, unknown>; clients?: string[]; error?: string }> {
+  editorOrigin?: string,
+): Promise<{
+  success?: boolean;
+  metadata?: Record<string, unknown>;
+  clients?: string[];
+  error?: string;
+  errorCode?: Code;
+}> {
   try {
-    const client = await createWorkClient();
+    const client = await createWorkClient(editorOrigin);
     const response = await client.updateWork({
       id,
       type: data.type === undefined ? undefined : stringToWorkType(data.type),
@@ -409,7 +450,11 @@ export async function updateWorkFieldsAction(
       ...(response.clients ? { clients: response.clients.map((client) => client.id) } : {}),
     };
   } catch (error) {
-    return { error: error instanceof Error ? error.message : 'Failed to update work fields' };
+    // The code lets the editor's save queue tell a refused change from a transient failure.
+    return {
+      error: error instanceof Error ? error.message : 'Failed to update work fields',
+      errorCode: connectErrorCode(error),
+    };
   }
 }
 
@@ -502,6 +547,7 @@ export async function getWorkGroupsWithCreditsAction(workId: string) {
 export async function moveWorkCreditItemAction(
   workId: string,
   intent: WorkCreditMoveIntent,
+  editorOrigin?: string,
 ): Promise<{ success?: boolean; changed?: boolean; order?: WorkCreditOrderEntry[]; error?: string }> {
   const protoKind = (kind: WorkCreditMoveAnchor['kind']) =>
     kind === 'group' ? WorkCreditItemKind.GROUP : WorkCreditItemKind.CREDIT;
@@ -509,7 +555,7 @@ export async function moveWorkCreditItemAction(
     anchor ? { kind: protoKind(anchor.kind), id: anchor.id } : undefined;
 
   try {
-    const client = await createWorkClient();
+    const client = await createWorkClient(editorOrigin);
     const response = await client.moveWorkCreditItem({
       workId,
       kind: protoKind(intent.kind),
@@ -541,16 +587,19 @@ export async function moveWorkCreditItemAction(
   }
 }
 
-export async function addWorkCreditAction(data: {
-  workId: string;
-  groupId?: string | null;
-  artistId?: string;
-  memberId?: string;
-  name?: string;
-  creditRole?: string | null;
-}): Promise<{ success?: boolean; creditId?: string; error?: string }> {
+export async function addWorkCreditAction(
+  data: {
+    workId: string;
+    groupId?: string | null;
+    artistId?: string;
+    memberId?: string;
+    name?: string;
+    creditRole?: string | null;
+  },
+  editorOrigin?: string,
+): Promise<{ success?: boolean; creditId?: string; error?: string }> {
   try {
-    const client = await createWorkClient();
+    const client = await createWorkClient(editorOrigin);
     const credit = await client.addWorkCredit({
       workId: data.workId,
       groupId: data.groupId ?? undefined,
@@ -574,9 +623,10 @@ export async function addWorkCreditAction(data: {
 export async function updateWorkCreditAction(
   creditId: string,
   data: { groupId?: string | null; creditRole?: string | null },
+  editorOrigin?: string,
 ): Promise<{ success?: boolean; error?: string }> {
   try {
-    const client = await createWorkClient();
+    const client = await createWorkClient(editorOrigin);
     await client.updateWorkCredit({
       creditId,
       groupId: data.groupId === null ? '' : data.groupId,
@@ -594,9 +644,12 @@ export async function updateWorkCreditAction(
   }
 }
 
-export async function removeWorkCreditAction(creditId: string): Promise<{ success?: boolean; error?: string }> {
+export async function removeWorkCreditAction(
+  creditId: string,
+  editorOrigin?: string,
+): Promise<{ success?: boolean; error?: string }> {
   try {
-    const client = await createWorkClient();
+    const client = await createWorkClient(editorOrigin);
     await client.deleteWorkCredit({ creditId });
     return { success: true };
   } catch (err) {
@@ -625,12 +678,15 @@ export async function regenerateWorkOgImageAction(
   return { success: true, runId: result.runId, generationId: result.generationIds?.[0] };
 }
 
-export async function createWorkCreditGroupAction(_data: {
-  workId: string;
-  name: string;
-}): Promise<{ success?: boolean; group?: { id: string; name: string }; error?: string }> {
+export async function createWorkCreditGroupAction(
+  _data: {
+    workId: string;
+    name: string;
+  },
+  editorOrigin?: string,
+): Promise<{ success?: boolean; group?: { id: string; name: string }; error?: string }> {
   try {
-    const client = await createWorkClient();
+    const client = await createWorkClient(editorOrigin);
     const group = await client.createWorkCreditGroup({
       workId: _data.workId,
       name: _data.name,
@@ -659,9 +715,10 @@ export async function createWorkCreditGroupAction(_data: {
 export async function updateWorkCreditGroupAction(
   groupId: string,
   data: { name?: string },
+  editorOrigin?: string,
 ): Promise<{ success?: boolean; error?: string }> {
   try {
-    const client = await createWorkClient();
+    const client = await createWorkClient(editorOrigin);
     await client.updateWorkCreditGroup({
       groupId,
       name: data.name,
@@ -681,9 +738,12 @@ export async function updateWorkCreditGroupAction(
   }
 }
 
-export async function deleteWorkCreditGroupAction(groupId: string): Promise<{ success?: boolean; error?: string }> {
+export async function deleteWorkCreditGroupAction(
+  groupId: string,
+  editorOrigin?: string,
+): Promise<{ success?: boolean; error?: string }> {
   try {
-    const client = await createWorkClient();
+    const client = await createWorkClient(editorOrigin);
     await client.deleteWorkCreditGroup({ groupId });
     return { success: true };
   } catch (err) {

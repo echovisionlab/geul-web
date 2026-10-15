@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { FormBuilder } from './FormBuilder';
 
 const buildFormMock = vi.fn();
@@ -52,13 +53,14 @@ vi.mock('@mantine/hooks', () => ({
   useMediaQuery: () => false,
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: {
     show: vi.fn(),
   },
 }));
 
 vi.mock('@/components/core/Sortable', () => ({
+  verticalKeyboardCoordinates: () => undefined,
   SortableGroups: ({ groups, renderGroup, renderItem }: any) => (
     <div data-testid="sortable-groups">
       {groups.map((group: any) => (
@@ -156,9 +158,9 @@ function render(mode: 'full' | 'translation' | 'readOnly') {
 
   act(() => {
     root?.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <FormBuilder schema={baseSchema} mode={mode} title="Localized form" />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
 }
@@ -184,7 +186,21 @@ describe('FormBuilder', () => {
     expect(document.body.textContent).not.toContain('Add step');
     expect(document.querySelector('[aria-label^="Remove step"]')).toBeNull();
     expect(document.querySelector('[aria-label^="Remove field"]')).toBeNull();
+    expect(document.querySelector('[data-interaction="drag-handle"]')).toBeNull();
     expect(document.body.textContent).not.toContain('Add field');
+  });
+
+  it('puts editing controls before the preview in keyboard and reading order', () => {
+    render('full');
+
+    const editor = document.querySelector('[data-testid="sortable-groups"]');
+    const preview = document.querySelector('[data-testid="form-preview"]');
+    expect(editor).not.toBeNull();
+    expect(preview).not.toBeNull();
+    expect(editor!.compareDocumentPosition(preview!)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(
+      Array.from(container!.querySelectorAll<HTMLElement>('[style]')).some((element) => Boolean(element.style.order)),
+    ).toBe(false);
   });
 
   it('shows structure editing controls in full mode', () => {
@@ -192,5 +208,6 @@ describe('FormBuilder', () => {
 
     expect(document.body.textContent).toContain('Add step');
     expect(document.querySelector('[aria-label^="Remove step"]')).not.toBeNull();
+    expect(document.querySelectorAll('[data-interaction="drag-handle"]')).toHaveLength(2);
   });
 });

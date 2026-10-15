@@ -3,7 +3,7 @@
 import { Editor, Node, type JSONContent } from '@tiptap/core';
 import type { JsonValue } from '@bufbuild/protobuf';
 import { MissingAttachmentMediaKind } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import type { ProseMirrorBlockDescriptor } from './block-room-prosemirror-bridge';
 import {
   documentToTiptap,
@@ -16,7 +16,12 @@ import {
 import { richTextProseMirrorAdapterForProtoCase } from './block-room-prosemirror-registry';
 import { SHADER_STAGE_DEFINITIONS } from './shader/shader-program';
 import { createTiptapWireExtensions } from './wire-schema';
-import { geulTiptapEmojis } from './emoji/emoji-extension';
+import { geulTiptapEmojis } from './emoji/emoji-data';
+import { loadTiptapEmojiData } from './emoji/emoji-runtime';
+
+beforeAll(async () => {
+  await loadTiptapEmojiData();
+});
 
 function executableWireExtensions() {
   const stages = SHADER_STAGE_DEFINITIONS.map(([, name]) =>

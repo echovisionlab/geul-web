@@ -7,7 +7,7 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--mantine-spacing-lg);
+  gap: var(--geul-spacing-lg);
   align-items: start;
 }
 
@@ -16,31 +16,25 @@
 }
 
 .heading {
-  padding-block: var(--mantine-spacing-xs);
-  border-block-end: 1px solid var(--mantine-color-default-border);
-  color: var(--mantine-color-dimmed);
-  font-size: var(--mantine-font-size-xs);
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  padding-block: var(--geul-spacing-xs);
+  border-block-end: var(--geul-border-thin) solid var(--geul-border-default);
+  color: var(--geul-text-muted);
+  font-size: var(--geul-font-size-xs);
+  font-weight: var(--geul-font-weight-strong);
+  letter-spacing: var(--geul-letter-spacing-caps);
   text-transform: uppercase;
 }
 
 .surface {
   min-width: 0;
-  padding-block: var(--mantine-spacing-md);
+  padding-block: var(--geul-spacing-md);
 }
 
 .publicSurface {
   overflow: hidden;
 }
 
-/* The comparison isolates document styling from the authoring canvas chrome. */
-.authoringEditor :global(.ProseMirror) {
-  min-height: 0;
-  padding: 0;
-}
-
-@media (max-width: 62em) {
+@media (width < $mantine-breakpoint-md) {
   .grid {
     grid-template-columns: minmax(0, 1fr);
   }

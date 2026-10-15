@@ -1,6 +1,7 @@
 {
   "common": {
     "actions": {
+      "move": "Di chuyển",
       "save": "Lưu",
       "saveChanges": "Lưu thay đổi",
       "create": "Tạo",
@@ -59,7 +60,7 @@
       "reply": "trả lời",
       "insertVariable": "Chèn biến",
       "acceptAll": "Chấp nhận tất cả",
-      "rejectNonEssential": "Từ chối không cần thiết",
+      "rejectNonEssential": "Từ chối",
       "savePreferences": "Lưu tùy chọn",
       "import": "Nhập khẩu",
       "export": "Xuất khẩu",
@@ -127,10 +128,7 @@
       "file": "tập tin",
       "bio": "Tiểu sử",
       "realName": "Tên thật",
-      "countryCode": "Mã quốc gia",
       "slug": "sên",
-      "slugAutoModeEnabled": "Tự động đồng bộ với tiêu đề (nhấp để tắt)",
-      "slugAutoModeManual": "Chế độ thủ công (nhấp để bật tự động đồng bộ hóa)",
       "submissions": "bài nộp",
       "public": "công khai",
       "location": "Vị trí",
@@ -162,7 +160,6 @@
       "logoLight": "Logo ánh sáng",
       "logoDark": "Biểu trưng tối",
       "joined": "Đã tham gia",
-      "subscribed": "Đã đăng ký",
       "featured": "Nổi bật",
       "order": "Đặt hàng",
       "sortOrder": "Sắp xếp thứ tự",
@@ -177,7 +174,6 @@
       "minutes": "Phút",
       "seconds": "Giây",
       "time": "thời gian",
-      "generationInfo": "Thông tin thế hệ",
       "body": "Thân hình",
       "content": "Nội dung",
       "bodyPreview": "Xem trước nội dung",
@@ -280,6 +276,7 @@
     },
     "messages": {
       "noUsersFound": "Không tìm thấy người dùng nào",
+      "noAuthorsFound": "Không tìm thấy tác giả.",
       "noVersionsFound": "Không tìm thấy phiên bản nào.",
       "typeAtLeast2Characters": "Nhập ít nhất 2 ký tự",
       "itemCreated": "Đã tạo {item}",
@@ -295,24 +292,22 @@
       "deleteItemConfirm": "Bạn có chắc chắn muốn xóa {item} này không? Không thể hoàn tác hành động này.",
       "deleteNamedItemConfirm": "Bạn có chắc chắn muốn xóa \"{name}\" không? Không thể hoàn tác hành động này.",
       "confirmDeleteSelectedCount": "Bạn có chắc chắn muốn xóa {count, plural, one {# mục đã chọn} other {# mục đã chọn}} không? Không thể hoàn tác hành động này.",
-      "deleteDraftVersionConfirm": "Bạn có chắc chắn muốn xóa phiên bản nháp này không?",
       "confirmDeleteNamedRich": "Bạn có chắc chắn muốn xóa <strong>{name}</strong> không?",
-      "activeCount": "{count} đang hoạt động",
       "effectiveFromDate": "Có hiệu lực từ {date}",
       "noUpdateRecorded": "Không có bản cập nhật nào được ghi lại",
-      "exportedEmails": "Đã xuất {count, plural, one {# email} other {# email}}",
       "formSubmittedSuccessfully": "Phản hồi của bạn đã được gửi thành công.",
       "userDate": "{user} · {date}",
       "scheduleActivationTitle": "Lên lịch kích hoạt",
       "scheduleActivationDescription": "Chọn thời điểm phiên bản này sẽ hoạt động. Email thông báo sẽ được gửi đến tất cả các tài khoản đang hoạt động khi được lên lịch.",
       "scheduleActivationNotice": "Lập kế hoạch sẽ gửi email thông báo đến tất cả các tài khoản đang hoạt động kèm theo liên kết xem trước.",
-      "translationDetailUnavailable": "Không thể tải dữ liệu bản dịch chi tiết. Bạn vẫn có thể chỉnh sửa bản dịch công khai hiện tại.",
       "invalidConfirmationLinkFromEmail": "Liên kết xác nhận không hợp lệ. Vui lòng sử dụng liên kết từ email xác nhận của bạn.",
       "noPostsFound": "Không tìm thấy bài viết nào",
       "noWorksFound": "Không tìm thấy tác phẩm nào",
-      "urlCopiedToClipboard": "Đã sao chép URL vào bảng nhớ tạm",
       "failedToLoad": "Không thể tải dữ liệu.",
-      "relatedItemsWillBeUnlinked": "{count} mục liên quan sẽ bị hủy liên kết."
+      "relatedItemsWillBeUnlinked": "{count} mục liên quan sẽ bị hủy liên kết.",
+      "noArtistsFound": "Không tìm thấy nghệ sĩ nào.",
+      "noLabelsFound": "Không tìm thấy nhãn.",
+      "noReleasesFound": "Không tìm thấy bản phát hành nào."
     },
     "notifications": {
       "categoryCreated": "Đã tạo danh mục",
@@ -334,7 +329,14 @@
       "ogRegenerationFailed": "Không thể tạo lại hình ảnh OG",
       "testEmailSent": "Đã gửi email kiểm tra",
       "saveSuccess": "Đã lưu",
-      "saveFailed": "Không lưu được"
+      "saveFailed": "Không lưu được",
+      "saveRetrying": "Các thay đổi của bạn chưa được lưu lên máy chủ. Chúng tôi đang thử lại.",
+      "editsRestored": "Đã khôi phục các chỉnh sửa được lấy lại.",
+      "leaveWithRejectedEdits": {
+        "title": "Rời đi mà không giữ các chỉnh sửa không thể lưu?",
+        "message": "Máy chủ đã từ chối một số chỉnh sửa nên chúng chưa được lưu. Hãy sao chép chúng từ menu cộng tác trước, hoặc rời đi và bỏ các chỉnh sửa này.",
+        "confirm": "Rời đi và bỏ chỉnh sửa"
+      }
     },
     "errors": {
       "generic": "Đã xảy ra lỗi. Vui lòng thử lại.",
@@ -372,8 +374,6 @@
       "testEmail": "test@email.com",
       "testEmailExample": "test@example.com",
       "noReplyEmail": "noreply@example.com",
-      "translationLiveRowMissing": "Chưa có bản dịch công khai nào cho ngôn ngữ này. Lưu ở đây sẽ tạo một cái ngay lập tức.",
-      "translationBodyPreviewUnavailable": "Bản xem trước nội dung không có sẵn.",
       "selectDateAndTime": "Chọn ngày và giờ",
       "streetAddress": "Địa chỉ đường phố",
       "regionSubdivision": "Tiểu bang/Tỉnh"
@@ -408,12 +408,11 @@
       "generating": "Đang tạo...",
       "true": "đúng",
       "false": "sai",
-      "loading": "Đang tải..."
+      "loading": "Đang tải...",
+      "toBeAnnounced": "TBA"
     },
     "roles": {
       "admin": "Quản trị viên",
-      "editor": "Biên tập viên",
-      "viewer": "Người xem",
       "author": "tác giả",
       "user": "người dùng"
     },
@@ -445,6 +444,11 @@
       "unsubscribed": "Hủy đăng ký",
       "subscribed": "Đã đăng ký",
       "onboardingPending": "Đang chờ giới thiệu"
+    },
+    "motion": {
+      "pause": "Tạm dừng chuyển động",
+      "resume": "Tiếp tục chuyển động",
+      "readAllInformation": "Đọc toàn bộ thông tin của cảnh"
     }
   },
   "shell": {
@@ -463,6 +467,11 @@
       "siteInfo": "Thông tin trang web",
       "links": "Liên kết",
       "socialMedia": "Truyền thông xã hội"
+    },
+    "signOutUnsaved": {
+      "title": "Đăng xuất khi có chỉnh sửa chưa lưu?",
+      "message": "Một số chỉnh sửa chưa được lưu lên máy chủ. Đăng xuất sẽ xóa chúng khỏi thiết bị này.",
+      "confirm": "Đăng xuất và bỏ chỉnh sửa"
     }
   },
   "adminShell": {
@@ -676,13 +685,13 @@
       "detail": {
         "backTooltip": "Quay lại bố cục email",
         "targetEditor": {
-          "title": "Translated text",
-          "description": "Edit only visible text and accessibility labels. HTML, CSS, links, and placeholders remain owned by the source layout.",
-          "empty": "This layout has no translatable text units.",
+          "title": "Văn bản đã dịch",
+          "description": "Chỉ chỉnh sửa văn bản hiển thị và nhãn hỗ trợ tiếp cận. HTML, CSS, liên kết và phần giữ chỗ vẫn do bố cục nguồn quản lý.",
+          "empty": "Bố cục này không có đơn vị văn bản nào có thể dịch.",
           "textUnit": "Text",
-          "sourceValue": "Source: {value}",
-          "translatedValue": "This locale provides its own value.",
-          "sourceFallback": "Using the source value.",
+          "sourceValue": "Nguồn: {value}",
+          "translatedValue": "Ngôn ngữ này có giá trị riêng.",
+          "sourceFallback": "Đang dùng giá trị nguồn.",
           "useSource": "Use source"
         },
         "viewModes": {
@@ -931,7 +940,6 @@
     },
     "mapThemes": {
       "empty": "Không tìm thấy chủ đề bản đồ.",
-      "notFound": "Không tìm thấy chủ đề bản đồ.",
       "loadFailed": "Không tải được chủ đề bản đồ.",
       "defaultDisabled": "Đây đã là chủ đề mặc định.",
       "deleteDisabled": {
@@ -939,9 +947,7 @@
         "last": "Không thể xóa chủ đề bản đồ cuối cùng."
       },
       "reloadRequired": {
-        "title": "Yêu cầu tải lại",
-        "message": "Chủ đề này đã được lưu từ bản sửa đổi mới hơn. Tải lại trước khi tiếp tục chỉnh sửa.",
-        "action": "Tải lại"
+        "title": "Yêu cầu tải lại"
       },
       "variants": {
         "light": "Ánh sáng",
@@ -972,8 +978,7 @@
       },
       "editor": {
         "notifications": {
-          "defaultSet": "Chủ đề được đặt làm mặc định",
-          "variantRequired": "Cần có ít nhất một biến thể (sáng hoặc tối)"
+          "defaultSet": "Chủ đề được đặt làm mặc định"
         },
         "controls": {
           "map": {
@@ -1310,7 +1315,6 @@
     },
     "verification": {
       "loading": "Đang tải biểu mẫu xác minh...",
-      "redirecting": "Đang chuyển hướng...",
       "startOver": "Bắt đầu lại",
       "errors": {
         "flowNotFound": "Luồng xác minh không được tìm thấy hoặc đã hết hạn",
@@ -1373,21 +1377,14 @@
   "featuredImage": {
     "label": "Hình ảnh nổi bật",
     "alt": "Hình ảnh nổi bật",
-    "hint": "Bấm vào hình ảnh để thay thế",
     "cropTitle": "Cắt hình ảnh nổi bật",
-    "empty": {
-      "editable": "Thả hoặc nhấp để tải lên ({ratio})",
-      "readOnly": "Không có hình ảnh"
-    },
     "errors": {
       "fileRejected": "Tệp bị từ chối",
       "fileTooLarge": "Tệp quá lớn. Kích thước tối đa: {maxSize}",
       "invalidFileType": "Loại tệp không hợp lệ"
     },
     "actions": {
-      "changeAria": "Thay đổi hình ảnh đặc trưng",
-      "removeAria": "Xóa hình ảnh nổi bật",
-      "remove": "Xóa hình ảnh"
+      "removeAria": "Xóa hình ảnh nổi bật"
     }
   },
   "artistPage": {
@@ -1495,7 +1492,6 @@
       "slug": "nghệ sĩ sên",
       "name": "Tên sân khấu/tên nghệ sĩ",
       "realName": "Tên pháp lý (tùy chọn)",
-      "countryCode": "ví dụ: Hoa Kỳ, Hàn Quốc, Nhật Bản",
       "labels": "Chọn nhãn...",
       "parentArtist": "Chọn nghệ sĩ gốc..."
     },
@@ -1518,15 +1514,7 @@
     },
     "placeholders": {
       "name": "Tên nhãn",
-      "countryCode": "ví dụ: DE, US, KR",
       "parentLabel": "Chọn nhãn gốc (tùy chọn)"
-    }
-  },
-  "workCollaborators": {
-    "empty": "Chưa có cộng tác viên",
-    "notifications": {
-      "added": "Đã thêm cộng tác viên",
-      "removed": "Đã xóa cộng tác viên"
     }
   },
   "comments": {
@@ -1585,17 +1573,6 @@
     "credits": {
       "other": "Khác"
     },
-    "music": {
-      "released": "Đã phát hành: {value}",
-      "spotify": "Spotify",
-      "bandcamp": "Bandcamp",
-      "soundcloud": "SoundCloud",
-      "youtube": "YouTube",
-      "openSpotify": "Mở Spotify",
-      "openBandcamp": "Bandcamp mở",
-      "openSoundcloud": "Mở SoundCloud",
-      "openYoutube": "Mở YouTube"
-    },
     "portfolio": {
       "tech": "Công nghệ:"
     },
@@ -1643,7 +1620,6 @@
     }
   },
   "cookieConsentCommon": {
-    "essentialLabel": "Cookie thiết yếu (luôn hoạt động)",
     "analyticsLabel": "Cookie phân tích (Google Analytics)"
   },
   "nicknameField": {
@@ -1690,7 +1666,6 @@
       "failedToRevokeSession": "Không thể thu hồi phiên",
       "failedToRevokeSessions": "Không thể thu hồi phiên",
       "failedToRequestDeletion": "Không thể yêu cầu xóa tài khoản",
-      "cannotUnlinkMessage": "Bạn phải có ít nhất một phương thức xác thực",
       "connectedMessage": "Tài khoản {provider} đã được kết nối thành công.",
       "disconnectedMessage": "{provider} đã bị ngắt kết nối.",
       "failedToUpdateMainEmail": "Không cập nhật được email chính",
@@ -1714,16 +1689,16 @@
       "consentDescription": "Ứng dụng khách này có thể đọc và chỉnh sửa nội dung, cũng như quản lý tệp trong phạm vi quyền hiện có của tài khoản bạn. Ứng dụng có thể tạo, cập nhật hoặc xóa nội dung và thay đổi tệp đính kèm hiện có. Việc kết nối không cấp thêm quyền cho tài khoản.",
       "consentOfflineAccess": "Kết nối này có thể tiếp tục sau khi phiên trình duyệt hiện tại kết thúc, cho đến khi bạn thu hồi.",
       "consentRevoke": "Bạn có thể thu hồi kết nối này tại {settings} → Remote MCP.",
-      "connectionsTitle": "Connected MCP clients",
-      "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
-      "connectionsEmpty": "No MCP clients are connected.",
-      "connectedAt": "Connected {date}",
+      "connectionsTitle": "Ứng dụng khách MCP đã kết nối",
+      "connectionsDescription": "Các quyền OAuth này độc lập với phiên trình duyệt. Thu hồi một quyền sẽ ngắt kết nối ứng dụng khách MCP tương ứng mà không đăng xuất bạn.",
+      "connectionsEmpty": "Không có ứng dụng khách MCP nào được kết nối.",
+      "connectedAt": "Đã kết nối {date}",
       "revoke": "Revoke",
-      "revokeTitle": "Revoke MCP access",
-      "revokeConfirmation": "Revoke MCP access for {client}? Its current token chain will stop working.",
-      "revokeSuccess": "MCP access was revoked.",
-      "revokeFailed": "Could not revoke MCP access.",
-      "loadFailed": "Could not load connected MCP clients."
+      "revokeTitle": "Thu hồi quyền truy cập MCP",
+      "revokeConfirmation": "Thu hồi quyền truy cập MCP của {client}? Chuỗi mã thông báo hiện tại của ứng dụng này sẽ ngừng hoạt động.",
+      "revokeSuccess": "Đã thu hồi quyền truy cập MCP.",
+      "revokeFailed": "Không thể thu hồi quyền truy cập MCP.",
+      "loadFailed": "Không thể tải các ứng dụng khách MCP đã kết nối."
     },
     "personalAccessTokens": {
       "title": "Mã truy cập cá nhân",
@@ -1751,8 +1726,6 @@
       "added": "Đã thêm {date}",
       "lastMethod": "Thêm một phương thức đăng nhập khác trước khi xóa mật mã này.",
       "removeNamed": "Xóa mật mã {name}",
-      "reauth": "Đăng nhập lại trước khi thay đổi mật mã.",
-      "reauthAction": "Đăng nhập lại",
       "errors": {
         "load": "Không thể tải mật mã.",
         "remove": "Không thể xóa mật mã này.",
@@ -1789,21 +1762,11 @@
     "email": {
       "title": "Email chính",
       "description": "Chọn email đã xác minh sẽ nhận được thông báo và tin nhắn tài khoản.",
-      "addEmail": "Thêm email",
       "canonical": "Email chính",
-      "canonicalCannotRemove": "Chọn một email chính khác trước khi xóa địa chỉ này.",
       "setCanonical": "Đặt làm email chính",
-      "noEmail": "Chưa đặt email",
-      "helper": "Chỉ có một email được xác minh có sẵn làm email chính.",
-      "selectLabel": "Email chính",
       "changeAction": "Thay đổi email chính",
       "sources": {
-        "current": "Email chính hiện tại",
-        "emailCode": "Email",
-        "pending": "Đang chờ xác minh"
-      },
-      "messages": {
-        "pendingVerification": "Việc xác minh đang chờ xử lý cho email này. Bạn có thể gửi lại email xác minh."
+        "emailCode": "Email"
       },
       "mainEmailUpdated": "Đã cập nhật email chính.",
       "canonicalUpdated": "Đã cập nhật email chính."
@@ -1834,7 +1797,6 @@
   },
   "seriesDetail": {
     "slug": {
-      "autoDescription": "Chế độ tự động: thay đổi tiêu đề cập nhật slug tự động.",
       "manualDescription": "Chế độ thủ công: sên vẫn cố định cho đến khi bạn chỉnh sửa hoặc bật lại chế độ tự động."
     },
     "notifications": {
@@ -1870,10 +1832,6 @@
     }
   },
   "works": {
-    "tabs": {
-      "editable": "Có thể chỉnh sửa"
-    },
-    "emptyEditable": "Không có tác phẩm có thể chỉnh sửa nào được giao cho bạn.",
     "emptyCredits": "Không có tác phẩm được ghi nhận được tìm thấy.",
     "columns": {
       "creditedAs": "Được ghi nhận là",
@@ -1995,6 +1953,7 @@
         "patternPlaceholder": "ví dụ: ^[A-Z]{3}$",
         "customErrorMessage": "Thông báo lỗi tùy chỉnh",
         "optional": "Không bắt buộc",
+        "dragValidator": "Kéo quy tắc xác thực",
         "removeValidator": "Xóa trình xác thực"
       },
       "fieldTypes": {
@@ -2062,10 +2021,6 @@
       }
     },
     "settings": {
-      "notifications": {
-        "managerAdded": "Đã thêm trình quản lý biểu mẫu",
-        "managerRemoved": "Đã xóa trình quản lý biểu mẫu"
-      },
       "urlPublic": {
         "title": "URL & quyền truy cập công khai",
         "allowPublic": "Cho phép truy cập URL công khai",
@@ -2085,13 +2040,7 @@
         "description": "Chia sẻ liên kết trang tổng quan để xem thống kê biểu mẫu mà không cần quyền truy cập của quản trị viên"
       },
       "managers": {
-        "adminControls": "Kiểm soát của quản trị viên",
-        "readOnly": "Chỉ đọc",
-        "description": "Người quản lý có thể chỉnh sửa biểu mẫu này, xem nội dung gửi và quản lý liên kết chia sẻ.",
-        "searchPlaceholder": "Tìm kiếm người dùng để thêm người quản lý...",
-        "adminOnly": "Chỉ quản trị viên mới có thể thêm hoặc xóa người quản lý.",
-        "empty": "Chưa có người quản lý nào được chỉ định.",
-        "removeManager": "Xóa người quản lý {name}"
+        "description": "Người quản lý có thể chỉnh sửa biểu mẫu này, xem nội dung gửi và quản lý liên kết chia sẻ."
       },
       "access": {
         "title": "Kiểm soát truy cập",
@@ -2120,7 +2069,11 @@
   "dataTable": {
     "aria": {
       "sortBy": "Sắp xếp theo {label}",
-      "rowActions": "Hành động dành cho {label}"
+      "rowActions": "Hành động dành cho {label}",
+      "selectAllRows": "Chọn tất cả các hàng",
+      "selectRow": "Chọn {label}",
+      "resultSummary": "{totalPages, plural, =0 {{count} kết quả} other {{count} kết quả, trang {page} trên {totalPages}}}",
+      "loadingMessage": "Đang tải"
     },
     "sort": {
       "button": "Sắp xếp",
@@ -2133,7 +2086,9 @@
         "moveUp": "Di chuyển {label} lên",
         "moveDown": "Di chuyển {label} xuống",
         "toggleDirection": "Chuyển đổi hướng sắp xếp cho {label}",
-        "removeSort": "Xóa sắp xếp cho {label}"
+        "removeSort": "Xóa sắp xếp cho {label}",
+        "directionAscending": "Hiện đang tăng dần",
+        "directionDescending": "Hiện đang giảm dần"
       }
     },
     "filter": {
@@ -2148,7 +2103,8 @@
       "drawerTitle": "Lọc",
       "aria": {
         "backToFields": "Quay lại trường lọc",
-        "removeFilter": "Xóa bộ lọc cho {label}"
+        "removeFilter": "Xóa bộ lọc cho {label}",
+        "logic": "Kết hợp bộ lọc"
       },
       "operators": {
         "eq": "bằng",
@@ -2181,7 +2137,8 @@
       "previousPage": "Trang trước",
       "nextPage": "Trang tiếp theo",
       "lastPage": "Trang cuối cùng",
-      "page": "Trang {page}"
+      "page": "Trang {page}",
+      "navigation": "Điều hướng trang"
     }
   },
   "versionHistory": {
@@ -2191,9 +2148,11 @@
     "systemOrLegacy": "Hệ thống hoặc phiên bản cũ hơn",
     "restore": "Khôi phục",
     "restoreTitle": "Khôi phục phiên bản",
-    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document."
+    "restoreSameLocaleBody": "Khôi phục nguồn v{version} ({locale}) chỉ thay đổi tài liệu nguồn. Các tài liệu đích và tác vụ dịch hiện có không thay đổi, và bản dịch không được tạo tự động. Tiếp tục?",
+    "restoreCrossLocaleBody": "Khôi phục nguồn v{version} sẽ chuyển ngôn ngữ nguồn từ {currentLocale} sang {selectedLocale} và chỉ thay đổi con trỏ nguồn. Các tài liệu đích và tác vụ dịch hiện có không thay đổi, và bản dịch không được tạo tự động. Tiếp tục?",
+    "restoreFailed": "Không thể khôi phục tài liệu nguồn.",
+    "loadFailed": "Không thể tải lịch sử phiên bản.",
+    "end": "Đã tải tất cả phiên bản."
   },
   "shareLinks": {
     "title": "Chia sẻ liên kết",
@@ -2203,7 +2162,6 @@
     "createError": "Không tạo được liên kết",
     "deleteSuccess": "Đã xóa liên kết",
     "deleteError": "Không thể xóa liên kết",
-    "invalidUrl": "URL không hợp lệ",
     "noLinks": "Không có liên kết nào được tạo",
     "showLess": "Hiển thị ít hơn",
     "showMore": "Hiển thị thêm {count}",
@@ -2218,21 +2176,9 @@
     "passwordPlaceholder": "Đặt mật khẩu chia sẻ",
     "maximumExpiration": "Liên kết chia sẻ có thể hết hạn tối đa một năm kể từ bây giờ.",
     "expirationInvalid": "Chọn thời hạn hết hạn trong vòng một năm.",
-    "bypassFormPassword": "Bỏ qua mật khẩu biểu mẫu",
-    "bypassFormPasswordDescription": "Nếu bị tắt, người xem phải nhập mật khẩu biểu mẫu",
-    "bypassAuthentication": "Bỏ qua xác thực",
-    "bypassAuthenticationDescription": "Nếu được bật, liên kết chia sẻ sẽ bỏ qua cổng xác thực yêu cầu",
-    "bypassRoleChecks": "Bỏ qua kiểm tra vai trò",
-    "bypassRoleChecksDescription": "Nếu được bật, liên kết chia sẻ sẽ bỏ qua các cổng vai trò được phép",
     "policies": {
       "passwordProtected": "Mật khẩu được bảo vệ",
-      "noPassword": "Không có mật khẩu",
-      "passwordBypass": "Bỏ qua mật khẩu",
-      "passwordRequired": "Yêu cầu mật khẩu",
-      "authBypass": "Bỏ qua xác thực",
-      "authEnforced": "Đã thực thi xác thực",
-      "roleBypass": "Bỏ qua vai trò",
-      "roleEnforced": "Vai trò được thực thi"
+      "noPassword": "Không có mật khẩu"
     },
     "expirationBadge": {
       "expired": "Đã hết hạn",
@@ -2264,7 +2210,9 @@
     "label": "Liên kết xã hội",
     "addLink": "Thêm liên kết",
     "platformPlaceholder": "Nền tảng",
-    "valuePlaceholder": "URL hoặc tên người dùng"
+    "valuePlaceholder": "URL hoặc tên người dùng",
+    "reorderInstructions": "Dùng phím mũi tên lên và xuống để thay đổi vị trí của liên kết này.",
+    "positionChanged": "Đã chuyển liên kết đến vị trí {position} trên {count}."
   },
   "termsPage": {
     "active": {
@@ -2424,7 +2372,6 @@
     }
   },
   "releasePage": {
-    "previewTitle": "Xem trước bản phát hành",
     "streaming": "Truyền phát",
     "metadata": {
       "fallbackDescription": "{title}",
@@ -2494,8 +2441,7 @@
         "title": "Thêm bản nhạc"
       },
       "placeholders": {
-        "title": "Tiêu đề bản nhạc",
-        "durationSeconds": "ví dụ: 240"
+        "title": "Tiêu đề bản nhạc"
       },
       "deleteConfirm": "Bạn có chắc chắn muốn xóa bản nhạc này không?",
       "creditsModal": {
@@ -2517,8 +2463,7 @@
   "contentMetadata": {
     "preview": {
       "page": "Xem trước trang",
-      "post": "Xem trước bài đăng",
-      "work": "Xem trước công việc"
+      "post": "Xem trước bài đăng"
     }
   },
   "editorMetadata": {
@@ -2541,8 +2486,6 @@
   "postHeader": {
     "actions": {
       "editPost": "Chỉnh sửa bài đăng",
-      "sharePost": "Chia sẻ bài đăng",
-      "printPost": "In bài đăng",
       "exportMarkdown": "Xuất bài đăng dưới dạng Markdown"
     }
   },
@@ -2551,7 +2494,6 @@
     "intro": "Chúng tôi sử dụng các cookie cần thiết để xác thực và vận hành trang web cũng như các cookie phân tích tùy chọn để hiểu cách sử dụng trang web.",
     "learnMore": "Xem <privacy>Chính sách quyền riêng tư</privacy> và <terms>Điều khoản dịch vụ</terms> của chúng tôi.",
     "actions": {
-      "hidePreferences": "Ẩn tùy chọn",
       "customize": "Tùy chỉnh"
     }
   },
@@ -2569,7 +2511,6 @@
   },
   "locationSelector": {
     "placeholder": "Chọn vị trí...",
-    "clearSelection": "Xóa địa điểm đã chọn",
     "emptySearch": "Tìm kiếm địa điểm trên bản đồ",
     "emptyResults": "Không tìm thấy địa điểm nào"
   },
@@ -2589,6 +2530,24 @@
       "sections": {
         "connection": "Sự liên quan"
       }
+    },
+    "saveState": {
+      "saved": "Đã lưu",
+      "saving": "Đang lưu…",
+      "offline": "Ngoại tuyến · chỉnh sửa được giữ trên thiết bị này",
+      "error": "Không lưu được · đang thử lại…",
+      "rejected": "Một số chỉnh sửa không thể lưu",
+      "reload": "Đang kết nối lại · đang khôi phục chỉnh sửa…"
+    },
+    "rejectedEdits": {
+      "open": "Xem lại các chỉnh sửa chưa lưu",
+      "title": "Các chỉnh sửa không thể lưu",
+      "description": "Máy chủ đã từ chối các chỉnh sửa này nên hệ thống sẽ không thử lưu lại. Hãy sao chép những gì bạn cần, rồi bỏ các chỉnh sửa này.",
+      "reason": "Lý do: {reason}",
+      "copy": "Sao chép",
+      "copied": "Đã sao chép",
+      "discard": "Bỏ chỉnh sửa",
+      "empty": "Đã lưu tất cả chỉnh sửa."
     }
   },
   "urlSection": {
@@ -2602,9 +2561,6 @@
     "actions": {
       "copyId": "Sao chép giấy tờ tùy thân",
       "copyUrl": "Sao chép URL"
-    },
-    "notifications": {
-      "copied": "Đã sao chép {label}"
     }
   },
   "formValidation": {
@@ -2644,7 +2600,7 @@
   },
   "ogImagePreview": {
     "alt": "Mở bản xem trước biểu đồ",
-    "empty": "Hình ảnh OG chưa được tạo",
+    "empty": "Chưa có ảnh OG",
     "actions": {
       "regenerate": "Tái tạo hình ảnh OG"
     },
@@ -2768,7 +2724,6 @@
     "scheduleModal": {
       "description": "Chọn ngày và giờ để gửi chiến dịch này.",
       "dateLabel": "Ngày và giờ dự kiến",
-      "datePlaceholder": "Chọn ngày và giờ",
       "previousMonth": "Tháng trước",
       "nextMonth": "Tháng tiếp theo",
       "audience": "Khán giả: {audience}",
@@ -2858,7 +2813,6 @@
       "notFoundMessage": "Không tìm thấy danh mục nào"
     },
     "seriesSelector": {
-      "searchPlaceholder": "Tìm kiếm hoặc tạo...",
       "states": {
         "empty": "Không có sẵn bộ truyện nào",
         "select": "Chọn loạt...",
@@ -2871,14 +2825,12 @@
       },
       "notifications": {
         "assigned": "Bài đăng được gán cho loạt bài",
-        "reorderFailed": "Không thể sắp xếp lại bộ sách",
         "createFailed": "Không thể tạo chuỗi",
         "seriesUnavailable": "Chuỗi đó không còn có sẵn để quản lý nữa. Nhiệm vụ trước đó đã được giữ lại.",
         "updateFailed": "Không thể cập nhật loạt bài đăng. Nhiệm vụ trước đó đã được giữ lại."
       }
     },
     "notifications": {
-      "slugUpdateFailed": "Không thể cập nhật sên",
       "deleted": "Đã xóa bài đăng",
       "published": "Bài đăng đã xuất bản",
       "unpublished": "Bài đăng chưa được xuất bản",
@@ -3065,10 +3017,6 @@
     "pinned": "Đã ghim"
   },
   "pageEditor": {
-    "localRecovery": {
-      "message": "Bản chỉnh sửa cục bộ đã được giữ lại trước khi kết nối lại. Hãy tải xuống trước khi tải lại trang hoặc rời đi.",
-      "action": "Tải bản sao khôi phục"
-    },
     "shareLinksDescription": "Xem trước liên kết cho các trang chưa được xuất bản",
     "showTitleOnPage": "Hiển thị tiêu đề trên trang",
     "slugValidation": {
@@ -3126,6 +3074,9 @@
       }
     },
     "columnsEditor": {
+      "labels": {
+        "ratio": "Tỷ lệ cột"
+      },
       "badges": {
         "columnCount": "{count} cột"
       },
@@ -3150,20 +3101,18 @@
       "menuLabel": "Thêm phần",
       "emptyColumn": "Cột trống - nhấp vào + để thêm nội dung",
       "actions": {
-        "addSectionToColumn": "Thêm phần vào cột {index}",
-        "removeSectionFromColumn": "Xóa {section} khỏi cột {index}"
+        "addSectionToColumn": "Thêm phần vào cột {index}"
       }
     },
     "notifications": {
       "published": "Trang được xuất bản",
       "unpublished": "Trang chưa được xuất bản",
       "deleted": "Trang đã bị xóa",
-      "slugUpdateFailed": "Không thể cập nhật sên trang",
-      "confirmSummaryFailed": "Không thể xác nhận cập nhật tóm tắt."
+      "slugUpdateFailed": "Không thể cập nhật sên trang"
     },
     "mapEditor": {
       "title": "Bản đồ",
-      "placeCount": "{count} {count, plural, one {place} other {places}}",
+      "placeCount": "{count} {count, plural, one {địa điểm} other {địa điểm}}",
       "fullscreen": "Toàn màn hình",
       "captionPlaceholder": "Thêm chú thích tùy chọn bên dưới bản đồ...",
       "emptyState": "Chưa có địa điểm nào trên bản đồ được chọn.",
@@ -3217,7 +3166,6 @@
         "content": "Nội dung",
         "marqueeBehavior": "hành vi Marquee",
         "scenePlayback": "Phát lại",
-        "sceneRender": "Trình kết xuất",
         "sceneMotion": "chuyển động",
         "sceneUnits": "Đơn vị",
         "sceneSettings": "Cảnh",
@@ -3234,7 +3182,6 @@
         "columns": "Cột",
         "infiniteLoop": "Vòng lặp vô hạn",
         "showIndicators": "Hiển thị chỉ báo",
-        "showFeaturedImage": "Hiển thị hình ảnh nổi bật",
         "imageAspectRatio": "Tỷ lệ khung hình hình ảnh",
         "showMeta": "Hiển thị meta",
         "sortBy": "Sắp xếp theo",
@@ -3253,7 +3200,6 @@
         "showImage": "Hiển thị hình ảnh",
         "selectForm": "Chọn biểu mẫu",
         "showFormTitle": "Hiển thị tiêu đề biểu mẫu",
-        "showTitle": "Hiển thị tiêu đề",
         "numberOfWorks": "Số lượng tác phẩm",
         "numberOfReleases": "Số lượng phát hành",
         "numberOfProgramEvents": "Số sự kiện",
@@ -3323,7 +3269,10 @@
         "textColorSource": "Màu văn bản",
         "lightTextColor": "Văn bản nhẹ",
         "darkTextColorSource": "Văn bản tối",
-        "darkTextColor": "Màu văn bản tối"
+        "darkTextColor": "Màu văn bản tối",
+        "itemSize": "Kích thước mục",
+        "showAvatar": "Hiển thị ảnh đại diện",
+        "maxLabels": "Số hãng đĩa tối đa"
       },
       "fieldLabels": {
         "year": "Năm",
@@ -3334,11 +3283,7 @@
       },
       "badges": {
         "posts": "{count} bài đăng",
-        "rows": "{count} hàng",
-        "authors": "{count} tác giả",
-        "artists": "{count} nghệ sĩ",
-        "works": "{count} hoạt động",
-        "releases": "Bản phát hành {count}"
+        "rows": "{count} hàng"
       },
       "placeholders": {
         "publishedByDefault": "Được xuất bản theo mặc định",
@@ -3358,7 +3303,6 @@
           "auto": "Tự động"
         },
         "sortBy": {
-          "dateAdded": "Ngày thêm",
           "startDate": "Ngày bắt đầu",
           "endDate": "Ngày kết thúc",
           "publishedDate": "Ngày xuất bản",
@@ -3367,9 +3311,7 @@
         },
         "sortOrder": {
           "newest": "Mới nhất",
-          "oldest": "Cũ nhất",
-          "azOldest": "A-Z / Cũ nhất",
-          "zaNewest": "Z-A / Mới nhất"
+          "oldest": "Cũ nhất"
         },
         "mapPrimaryLabel": {
           "placeName": "Tên địa điểm"
@@ -3443,6 +3385,11 @@
           "theme": "Theo dõi chủ đề",
           "custom": "tùy chỉnh",
           "inherit": "Đi theo ánh sáng"
+        },
+        "itemSize": {
+          "s": "S · Gọn",
+          "m": "M · Tiêu chuẩn",
+          "l": "L · Lớn"
         }
       },
       "actions": {
@@ -3453,8 +3400,6 @@
         "moveUnitUp": "Di chuyển đơn vị lên",
         "moveUnitDown": "Di chuyển đơn vị xuống",
         "removeSceneUnit": "Xóa đơn vị",
-        "expandSceneUnit": "Mở rộng đơn vị",
-        "collapseSceneUnit": "Thu gọn đơn vị",
         "replaceMesh": "Thay thế GLB",
         "uploadMesh": "Tải GLB lên",
         "clearMeshAsset": "Xóa tài sản lưới",
@@ -3493,6 +3438,12 @@
         "meshOptimizationCancelled": "Đã hủy",
         "optimizedMeshCleanupFailed": "Đã xóa tham chiếu nội dung được tối ưu hóa nhưng việc dọn dẹp không thành công: {error}",
         "optimizedMeshCleanupFailedDefault": "Đã xóa tham chiếu nội dung được tối ưu hóa nhưng việc dọn dẹp không thành công"
+      },
+      "authorSelection": {
+        "maxSelected": "Có thể chọn tối đa {count} tác giả.",
+        "empty": "Chưa chọn tác giả. Khối này sẽ trống.",
+        "unavailable": "Tác giả này không còn khả dụng.",
+        "unavailableWarning": "Tác giả không còn khả dụng sẽ không xuất hiện trên trang công khai. Hãy xóa hoặc chọn người thay thế."
       }
     },
     "embed": {
@@ -3545,8 +3496,6 @@
       "matchDescription": "Kết hợp các nhóm vai trò, thẻ và bản tin đã chọn.",
       "any": "Bất kỳ nhóm nào đã chọn",
       "all": "Tất cả các nhóm đã chọn",
-      "roles": "Vai trò",
-      "rolesDescription": "Chỉ cần có một trong các vai trò đã chọn.",
       "roleUser": "Thành viên",
       "memberDescription": "Chỉ thành viên đã đăng nhập mới có thể xem trang này.",
       "authorDescription": "Thành viên có vai trò tác giả.",
@@ -3574,17 +3523,27 @@
       "restrictedTitle": "Bạn không có quyền truy cập trang này",
       "restrictedDescription": "Tài khoản của bạn không đáp ứng điều kiện truy cập trang này.",
       "signIn": "Đăng nhập"
+    },
+    "a11y": {
+      "sectionPosition": "{section} · {index}/{count}",
+      "dragInstructions": "Nhấn phím cách để bắt đầu di chuyển, rồi dùng các phím mũi tên để đổi vị trí. Nhấn phím cách để xác nhận hoặc Escape để hủy.",
+      "dragStart": "{section} · Di chuyển · Đang tiến hành · {index}/{count}",
+      "dragOver": "{section} · Di chuyển · {index}/{count}",
+      "dragEnd": "{section} · Di chuyển · Xác nhận · {index}/{count}",
+      "dragCancel": "{section} · Di chuyển · Đã hủy",
+      "sectionDeleted": "Đã xóa {section}",
+      "sectionAdded": "Đã tạo {section} · {index}/{count}",
+      "columnsPosition": "{column} · {section} · {index}/{count}"
     }
   },
   "editorCommon": {
     "reloadRequired": {
       "title": "Yêu cầu tải lại",
-      "message": "Một phiên bản mới hơn đã được lưu trong khi trình chỉnh sửa này đang mở. Tải lại trước khi tiếp tục chỉnh sửa.",
-      "action": "Tải lại"
+      "message": "Một phiên bản mới hơn đã được lưu trong khi trình chỉnh sửa này đang mở. Tải lại trước khi tiếp tục chỉnh sửa."
     },
     "permissionRevoked": {
-      "title": "Quyền chỉnh sửa bị thu hồi",
-      "message": "Bạn không còn có quyền chỉnh sửa nội dung này. Những thay đổi được thực hiện sau khi quyền bị thu hồi sẽ không được lưu."
+      "title": "Đã xóa quyền truy cập",
+      "message": "Bạn không còn quyền truy cập nội dung này. Các thay đổi chưa lưu vẫn được giữ trên thiết bị này."
     },
     "sessionExpired": {
       "title": "Phiên đã hết hạn",
@@ -3640,7 +3599,6 @@
         "mute": "Tắt tiếng âm thanh",
         "unmute": "Bật tiếng âm thanh",
         "volume": "Âm lượng âm thanh",
-        "original": "Nguyên bản",
         "waveform": "Dạng sóng",
         "spectrogram": "quang phổ",
         "spectrogramAlt": "Phổ âm thanh",
@@ -3657,10 +3615,8 @@
         "addItem": "Thêm {item}",
         "replaceItem": "Thay thế {item}",
         "browse": "Duyệt tập tin",
-        "or": "HOẶC",
         "importFromUrl": "Nhập từ URL",
         "directVideoUrlHelp": "Chỉ URL tệp video trực tiếp. Đối với YouTube hoặc Vimeo, hãy sử dụng Video bên ngoài.",
-        "confirm": "Nhúng",
         "resumeAvailable": "Đã tìm thấy quá trình tải lên bị gián đoạn",
         "resumeInstructionNamed": "Chọn lại {name} để tiếp tục tải lên từ nơi đã dừng.",
         "backToUpload": "Tải tệp lên",
@@ -3756,11 +3712,8 @@
       }
     },
     "mapBlock": {
-      "clickToAddPlace": "Bấm để thêm địa điểm",
       "captionPlaceholder": "Thêm chú thích...",
-      "clickToAddCaption": "Bấm để thêm chú thích",
-      "externalPlaceholder": "Bản đồ: {count} {count, plural, one {place} other {places}}",
-      "viewOnGoogleMaps": "Xem trên Google Maps ({lat}, {lng})"
+      "clickToAddCaption": "Bấm để thêm chú thích"
     },
     "mapPlacesModal": {
       "title": "Quản lý địa điểm",
@@ -3770,22 +3723,9 @@
       "centeredTitle": "Căn giữa",
       "setAsCenterTitle": "Đặt làm trung tâm"
     },
-    "blockAlign": {
-      "left": "Căn trái",
-      "center": "Căn giữa",
-      "right": "Căn phải"
-    },
-    "mathInline": {
-      "clickToEdit": "Bấm để chỉnh sửa",
-      "convertToBlock": "Chuyển đổi thành khối"
-    },
-    "mathInlineButton": {
-      "label": "Toán nội tuyến"
-    },
     "editor": {
       "slashMenu": {
         "placeholder": "Nhập '/' để xem lệnh",
-        "empty": "Không có mục nào",
         "unavailable": "Không khả dụng",
         "groups": {
           "headings": "Tiêu đề",
@@ -3844,14 +3784,14 @@
           "quote": {
             "title": "Trích dẫn",
             "subtext": "Trích dẫn hoặc đoạn trích",
-            "aliases": "quotation\nblockquote\nbq",
+            "aliases": "quotation\nblockquote\nbq\ntrích dẫn\nkhối trích dẫn",
             "group": "Khối cơ bản"
           },
           "callout": {
             "title": "Callout",
-            "subtext": "Highlight content with an icon",
-            "aliases": "callout\nnotice\ninfo\naside",
-            "group": "Basic blocks"
+            "subtext": "Làm nổi bật nội dung bằng biểu tượng",
+            "aliases": "callout\nnotice\ninfo\naside\nchú thích\nthông báo\nthông tin\nghi chú",
+            "group": "Khối cơ bản"
           },
           "divider": {
             "title": "Phân cách",
@@ -3880,61 +3820,61 @@
           "mathBlock": {
             "title": "Khối toán",
             "subtext": "Hiển thị phương trình bằng LaTeX",
-            "aliases": "math\nequation\nlatex\nformula",
+            "aliases": "math\nequation\nlatex\nformula\ntoán\nphương trình\ncông thức",
             "group": "Toán học"
           },
           "inlineMath": {
             "title": "Toán nội tuyến",
             "subtext": "Công thức LaTeX nội tuyến",
-            "aliases": "inline\ninline math\ninlinemath\nlatex\n$",
+            "aliases": "inline\ninline math\ninlinemath\nlatex\n$\nnội tuyến\ncông thức nội tuyến\ntoán trong dòng",
             "group": "Nội tuyến"
           },
           "map": {
             "title": "Bản đồ",
             "subtext": "Chèn vị trí bản đồ",
-            "aliases": "map\nlocation\nplace\naddress",
+            "aliases": "map\nlocation\nplace\naddress\nbản đồ\nvị trí\nđịa điểm\nđịa chỉ",
             "group": "Nhúng"
           },
           "externalVideo": {
             "title": "Video bên ngoài",
             "subtext": "Chèn liên kết YouTube hoặc Vimeo",
-            "aliases": "external video\nyoutube\nvimeo\nembed",
+            "aliases": "external video\nyoutube\nvimeo\nembed\nvideo bên ngoài\nnhúng",
             "group": "Nhúng"
           },
           "p5Sketch": {
             "title": "p5.js",
             "subtext": "Thêm bản phác thảo p5.js tương tác",
-            "aliases": "p5\np5.js\nsketch\ncreative coding",
+            "aliases": "p5\np5.js\nsketch\ncreative coding\nphác thảo\nlập trình sáng tạo",
             "group": "Nhúng"
           },
           "threeScene": {
             "title": "Three.js",
             "subtext": "Thêm cảnh Three.js tương tác",
-            "aliases": "three\nthree.js\n3d\nscene",
+            "aliases": "three\nthree.js\n3d\nscene\nba chiều\ncảnh",
             "group": "Nhúng"
           },
           "file": {
             "title": "Tệp đính kèm",
             "subtext": "Đính kèm tệp (PDF, DOC, ZIP, v.v.)",
-            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload",
+            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\ntệp đính kèm\ntệp\ntập tin\ntài liệu\ntải xuống",
             "group": "Đa phương tiện"
           },
           "aiAssistant": {
             "title": "Trợ lý AI",
             "subtext": "Viết, cải thiện hoặc chuyển đổi văn bản bằng AI",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove",
+            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\ntrí tuệ nhân tạo\ntrợ lý\nviết\ncải thiện",
             "group": "AI"
           },
           "shader": {
             "title": "Shader GLSL",
             "subtext": "Thêm shader GLSL tương tác",
-            "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "aliases": "shader\nglsl\nfragment shader\nshadertoy\nbộ đổ bóng\nđổ bóng mảnh",
             "group": "Nhúng"
           },
           "mermaid": {
             "title": "Mermaid",
             "subtext": "Tạo sơ đồ từ văn bản",
-            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence\nsơ đồ\nlưu đồ\ntrình tự",
             "group": "Nhúng"
           }
         }
@@ -3950,9 +3890,6 @@
         "alignLeft": "Căn trái",
         "alignCenter": "Căn giữa",
         "alignRight": "Căn phải",
-        "alignJustify": "Căn đều văn bản",
-        "textColor": "Chữ",
-        "backgroundColor": "Nền",
         "nest": "Lồng khối",
         "unnest": "Bỏ lồng khối",
         "inlineMath": "Toán nội tuyến",
@@ -3967,36 +3904,19 @@
         "urlPlaceholder": "Chỉnh sửa URL"
       },
       "math": {
-        "inline": "Toán nội tuyến",
-        "block": "Khối toán",
-        "clickToEdit": "Bấm để chỉnh sửa",
-        "convertToBlock": "Chuyển đổi thành khối"
+        "selectBlock": "Chọn khối công thức toán",
+        "block": "Khối toán"
       },
       "file": {
-        "add": "Thêm {item}",
         "replace": "Thay thế {item}",
-        "delete": "Xóa",
-        "download": "Tải xuống",
-        "caption": "Thêm chú thích...",
-        "upload": "Tải tệp lên",
-        "embed": "Nhúng",
-        "urlPlaceholder": "Chỉnh sửa URL"
+        "delete": "Xóa"
       },
       "resize": {
-        "image": "Đổi kích thước — Hình ảnh",
-        "audio": "Đổi kích thước — Âm thanh",
-        "video": "Đổi kích thước — Video",
-        "file": "Đổi kích thước — Tệp đính kèm",
         "map": "Đổi kích thước — Bản đồ",
-        "externalVideo": "Đổi kích thước — Video bên ngoài",
-        "p5Sketch": "Đổi kích thước — p5.js",
-        "threeScene": "Đổi kích thước — Three.js",
-        "dragHandle": "Kéo để đổi kích thước",
-        "shader": "Thay đổi kích thước — Shader GLSL"
+        "externalVideo": "Đổi kích thước — Video bên ngoài"
       },
       "drag": {
         "openBlockMenu": "Mở trình đơn khối",
-        "addBlock": "Thêm khối",
         "delete": "Xóa",
         "colors": "Màu sắc"
       },
@@ -4028,7 +3948,6 @@
         "toggleHeaderColumn": "Tiêu đề cột",
         "selectRow": "Chọn hàng",
         "selectColumn": "Chọn cột",
-        "selectCells": "Các ô đã chọn",
         "selectTable": "Chọn bảng",
         "deleteTable": "Xóa bảng",
         "mergeCells": "Gộp ô",
@@ -4042,17 +3961,11 @@
         "unavailable": "Không khả dụng"
       },
       "map": {
-        "insert": "Bản đồ",
-        "clickToAddPlace": "Bấm để thêm địa điểm",
-        "captionPlaceholder": "Thêm chú thích...",
         "managePlaces": "Quản lý địa điểm"
       },
       "embeds": {
         "map": "Bản đồ",
-        "externalVideo": "Video bên ngoài",
-        "p5Sketch": "p5.js",
-        "threeScene": "Three.js",
-        "shader": "Shader GLSL"
+        "externalVideo": "Video bên ngoài"
       },
       "runtimeLabels": {
         "code": {
@@ -4139,13 +4052,14 @@
         }
       },
       "media": {
-        "browse": "Duyệt tập tin",
-        "importFromUrl": "Nhập từ URL",
-        "embed": "Nhúng",
-        "openLibrary": "Thư viện tệp",
-        "uploadFiles": "Tải tệp lên",
-        "selectFile": "Chọn một tệp"
+        "importFromUrl": "Nhập từ URL"
       }
+    },
+    "accessDowngraded": {
+      "message": "Quyền truy cập của bạn đã chuyển sang chỉ xem. Chức năng chỉnh sửa đã tắt; các chỉnh sửa chưa được lưu vẫn ở trên thiết bị này và sẽ được lưu nếu bạn có lại quyền chỉnh sửa."
+    },
+    "accessUpgraded": {
+      "message": "Bạn có thể chỉnh sửa lại. Các thay đổi được giữ trong lúc chỉ có quyền xem đang được lưu."
     }
   },
   "aiAssistant": {
@@ -4170,7 +4084,6 @@
       "brainstorm": "Động não"
     },
     "sections": {
-      "original": "Nguyên bản",
       "result": "Kết quả AI"
     },
     "actions": {
@@ -4220,8 +4133,7 @@
       "pinClickable": "Ghim có thể nhấp"
     },
     "themeOptions": {
-      "none": "Không có",
-      "systemSuffix": "(Hệ thống)"
+      "none": "Không có"
     },
     "scheme": {
       "auto": "Tự động",
@@ -4237,13 +4149,7 @@
     "copyValueTitle": "Nhấp để sao chép giá trị {label}"
   },
   "postMembers": {
-    "removeAria": "Xóa {name}",
-    "roles": {
-      "owner": "Người sở hữu"
-    },
-    "states": {
-      "memberFallback": "thành viên"
-    }
+    "removeAria": "Xóa {name}"
   },
   "workCredits": {
     "divider": "hoặc thêm tín dụng",
@@ -4276,9 +4182,6 @@
       "artist": "Không tìm thấy nghệ sĩ nào",
       "name": "Không tìm thấy tên"
     },
-    "states": {
-      "unknownInitial": "?"
-    },
     "notifications": {
       "groupCreated": "Đã tạo nhóm",
       "groupDeleted": "Đã xóa nhóm",
@@ -4299,48 +4202,46 @@
     "resolvedMetadata": "Siêu dữ liệu đã được giải quyết"
   },
   "translationPanel": {
-    "description": "Review the source language and existing translation document for each locale.",
+    "description": "Xem lại ngôn ngữ nguồn và tài liệu bản dịch hiện có cho từng ngôn ngữ.",
     "actions": {
       "expand": "Mở rộng",
       "collapse": "Sụp đổ",
-      "regenerateAll": "Generate/regenerate all eligible locales",
+      "regenerateAll": "Tạo/tạo lại bản dịch cho tất cả ngôn ngữ đủ điều kiện",
       "regenerateLocale": "tái sinh",
       "regenerateLocaleAria": "Tạo lại bản dịch {locale}",
       "generateLocale": "Generate",
-      "generateLocaleAria": "Generate {locale} translation"
+      "generateLocaleAria": "Tạo bản dịch {locale}"
     },
     "sourceLocale": {
       "label": "Ngôn ngữ nguồn",
       "description": "Đây là ngôn ngữ nguồn được sử dụng làm cơ sở cho các bản dịch của thực thể này.",
       "confirm": {
         "title": "Thay đổi ngôn ngữ nguồn",
-        "description": "Changing the source language updates only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically.",
-        "detail": "{locale} becomes the language of the editable source document. Existing target documents and translation jobs remain unchanged.",
+        "description": "Thay đổi ngôn ngữ nguồn chỉ cập nhật con trỏ nguồn. Các tài liệu đích và tác vụ dịch hiện có không thay đổi, và bản dịch không được tạo tự động.",
+        "detail": "{locale} trở thành ngôn ngữ của tài liệu nguồn có thể chỉnh sửa. Các tài liệu đích và tác vụ dịch hiện có không thay đổi.",
         "confirm": "Thay đổi ngôn ngữ nguồn"
       }
     },
     "activeEditLocale": {
-      "ariaLabel": "Switch content language. Current: {locale}",
+      "ariaLabel": "Chuyển ngôn ngữ nội dung. Hiện tại: {locale}",
       "sourceOption": "{locale} (Nguồn)",
       "loading": "Đang tải ngôn ngữ...",
-      "missingDescription": "No {locale} target document exists yet. Generate it from the translations panel.",
+      "missingDescription": "Chưa có tài liệu đích {locale}. Hãy tạo từ bảng bản dịch.",
       "bodyPreviewTitle": "Xem trước nội dung {locale}",
-      "bodyPreviewDescription": "The existing translation document is shown with its structure and formatting.",
+      "bodyPreviewDescription": "Tài liệu bản dịch hiện có được hiển thị cùng cấu trúc và định dạng của nó.",
       "bodyPreviewEmpty": "Chưa có bản xem trước nội dung được bản địa hóa.",
-      "sharedStructureSectionDescription": "This section keeps shared layout or query settings from the source page; translated body content is read-only.",
+      "sharedStructureSectionDescription": "Phần này giữ các cài đặt bố cục hoặc truy vấn dùng chung từ trang nguồn; nội dung văn bản đã dịch chỉ có thể đọc.",
       "sectionFieldLabels": {
         "caption": "Đầu đề",
         "copyJson": "Sao chép cảnh"
       }
     },
     "statuses": {
-      "missing": "Mất tích",
       "existing": "Existing"
     },
     "states": {
       "loadFailed": "Không tải được bản dịch.",
-      "missingTarget": "No target document yet.",
-      "sourceRow": "Ngôn ngữ này được chỉnh sửa trong trình chỉnh sửa nguồn chính.",
+      "missingTarget": "Chưa có tài liệu đích.",
       "sourceEditorHint": "Chỉnh sửa văn bản gốc trong trình chỉnh sửa chính.",
       "updatedAt": "Đã cập nhật {date}"
     },
@@ -4353,64 +4254,29 @@
     }
   },
   "translationPanelMenu": {
-    "description": "Review source menu labels and existing translation documents.",
-    "sourceLocaleDescription": "The menu editor above owns structure, ordering, links, visibility, and source labels. Target translations below are read-only previews.",
-    "states": {
-      "sourcePreview": "Nhãn menu nguồn ({locale}): {labels}",
-      "sourceEditorHint": "Các nhãn này đến từ trình chỉnh sửa menu ở trên.",
-      "missingTarget": "No labels are saved for this locale yet.",
-      "noItems": "Chưa có nhãn menu nào để hiển thị.",
-      "translationPreview": "Existing {locale} labels: {labels}"
-    },
+    "description": "Xem lại nhãn menu nguồn và các tài liệu bản dịch hiện có.",
     "previewModal": {
-      "title": "{locale} menu translation preview",
-      "descriptions": {
-        "missing": "No public menu translation exists for this locale. The source is shown until an Admin generates it.",
-        "existing": "Shows the current public translated labels for this menu as read-only."
-      },
+      "title": "Xem trước bản dịch menu {locale}",
       "fields": {
-        "linkType": "Link type",
-        "destination": "Destination",
-        "children": "Nested items",
-        "localizedLabelForLocale": "{locale} public label",
-        "sourceLabelForLocale": "{locale} source label",
-        "localizedLabelDescription": "The current translated label shown in public menus; it cannot be changed here.",
-        "sourceLabelDescription": "Comes from the source menu editor and cannot be changed here.",
-        "fixedLocaleLockedDescription": "This item is fixed to the {locale} label and is read-only."
-      },
-      "states": {
-        "detailUnavailable": "Detailed translated menu data could not be loaded.",
-        "noItems": "There are no menu items to preview."
+        "localizedLabelForLocale": "Nhãn công khai {locale}"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template.",
-      "sourceLocaleDescription": "Mẫu nguồn kiểm soát chủ đề, nội dung và tên biến thời gian chạy.",
-      "states": {
-        "sourceEditorHint": "Chỉnh sửa mẫu nguồn trong trình chỉnh sửa chính.",
-        "noContent": "Chưa có chủ đề hoặc nội dung dịch nào tồn tại."
-      }
+      "description": "Quản lý ngôn ngữ nguồn và các tài liệu bản dịch hiện có cho mẫu email này."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout.",
-      "sourceLocaleDescription": "Bố cục nguồn kiểm soát HTML của trình bao bọc và tên giữ chỗ cấu trúc để hiển thị email.",
-      "states": {
-        "sourceEditorHint": "Chỉnh sửa bố cục nguồn trong trình chỉnh sửa chính.",
-        "noContent": "Chưa có HTML bố cục đã dịch nào tồn tại."
-      }
+      "description": "Quản lý ngôn ngữ nguồn và các tài liệu bản dịch hiện có cho bố cục email này."
     }
   },
   "localizationNotice": {
     "translated": {
-      "title": "Localized version",
-      "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
+      "title": "Phiên bản bản địa hóa",
+      "description": "Phiên bản bản địa hóa này được hiển thị bằng {displayed}; bản gốc bằng {source} vẫn là căn cứ chính thức."
     },
     "fallback": {
-      "title": "Ngôn ngữ dự phòng",
-      "english": "Bản dịch {requested} được yêu cầu không có sẵn nên trang này được hiển thị trong {displayed}.",
-      "source": "Bản dịch {requested} được yêu cầu không có sẵn nên trang này được hiển thị trong bản gốc {source}."
+      "title": "Ngôn ngữ dự phòng"
     },
     "actions": {
       "viewOriginal": "Xem bản gốc ({source})"
@@ -4430,17 +4296,16 @@
       "totalLocales": "Tổng số miền địa phương",
       "sourceEntities": "Thực thể nguồn",
       "activeJobs": "Công việc đang tiến hành",
-      "existingEntries": "Existing translations"
+      "existingEntries": "Bản dịch hiện có"
     },
     "sections": {
-      "localeHealthTitle": "Translation state by locale",
-      "entityHealthTitle": "Translation state by entity type"
+      "localeHealthTitle": "Trạng thái bản dịch theo ngôn ngữ",
+      "entityHealthTitle": "Trạng thái bản dịch theo loại thực thể"
     },
     "columns": {
       "policy": "Chính sách",
-      "lastTargetUpdate": "Last target update",
+      "lastTargetUpdate": "Cập nhật bản dịch lần cuối",
       "entity": "Thực thể",
-      "existing": "Existing translations",
       "sources": "Nguồn",
       "lastSourceUpdate": "Cập nhật nguồn cuối cùng"
     },
@@ -4475,7 +4340,7 @@
   },
   "translationSettingsPage": {
     "title": "Cài đặt dịch",
-    "description": "Manage the default source language and automatic translation providers. An Admin explicitly starts translation generation from each editor.",
+    "description": "Quản lý ngôn ngữ nguồn mặc định và các nhà cung cấp dịch tự động. Quản trị viên chủ động bắt đầu tạo bản dịch từ mỗi trình chỉnh sửa.",
     "actions": {
       "jobs": "Việc làm",
       "save": "Lưu cài đặt",
@@ -4485,8 +4350,8 @@
       "createProvider": "Tạo nhà cung cấp"
     },
     "sections": {
-      "runtime": "Source defaults",
-      "runtimeDescription": "Set only the language used when a source language has not been established. Source changes never start translation generation automatically.",
+      "runtime": "Mặc định cho nguồn",
+      "runtimeDescription": "Chỉ đặt ngôn ngữ được dùng khi ngôn ngữ nguồn chưa được xác định. Thay đổi nguồn không bao giờ tự động bắt đầu tạo bản dịch.",
       "providers": "Nhà cung cấp dịch thuật",
       "providersDescription": "Quản lý nhà cung cấp dịch máy. Thế hệ vẫn bị vô hiệu hóa cho đến khi có ít nhất một nhà cung cấp đang hoạt động có thông tin xác thực hợp lệ."
     },
@@ -4496,10 +4361,10 @@
         "description": "Được sử dụng khi ngôn ngữ nguồn chưa được đặt và khi yêu cầu không được giải quyết thành ngôn ngữ nội dung được hỗ trợ."
       },
       "protectedTerms": {
-        "label": "Protected terms",
-        "description": "Exact case-sensitive spellings that translation generation must keep unchanged. No terms are learned or suggested automatically.",
-        "placeholder": "Add a protected term",
-        "examples": "Examples: Photoshop, React Native"
+        "label": "Thuật ngữ được bảo vệ",
+        "description": "Cách viết chính xác có phân biệt chữ hoa và chữ thường mà quá trình tạo bản dịch phải giữ nguyên. Hệ thống không tự động học hoặc đề xuất thuật ngữ.",
+        "placeholder": "Thêm thuật ngữ được bảo vệ",
+        "examples": "Ví dụ: Photoshop, React Native"
       },
       "providerName": {
         "label": "Tên nhà cung cấp"
@@ -4628,33 +4493,22 @@
       "summary": "Thêm một bản tóm tắt ngắn gọn..."
     },
     "tooltips": {
-      "generatingNamed": "{name} đang tạo bản tóm tắt",
-      "applyingNamed": "{name} đang áp dụng bản tóm tắt đã tạo",
-      "readyNamed": "{name} đã có bản tóm tắt được tạo sẵn"
+      "generatingNamed": "{name} đang tạo bản tóm tắt"
     },
     "feedback": {
       "failedDefault": "Không thể xử lý việc tạo bản tóm tắt.",
-      "invalidJson": "Không thể phân tích cú pháp phản hồi AI dưới dạng JSON tóm tắt.",
       "alreadyRunning": "Việc tạo bản tóm tắt đang chạy.",
-      "applyingGenerated": "Áp dụng bản tóm tắt được tạo ra.",
-      "resetOlderSession": "Đặt lại trạng thái tóm tắt được tạo cũ từ phiên cũ hơn.",
-      "resetUnrestorable": "Đặt lại trạng thái tóm tắt được tạo cũ không thể khôi phục được.",
-      "missingJobPayload": "Việc tạo tóm tắt không trả về khối lượng công việc.",
       "missingSuggestionPayload": "Việc tạo tóm tắt đã hoàn tất mà không có tải trọng đề xuất.",
       "staleSuggestion": "Đề xuất này đã cũ. Tạo lại hoặc loại bỏ nó trước khi áp dụng.",
       "unableToApplyNow": "Không thể áp dụng bản tóm tắt đã tạo ngay bây giờ.",
       "applyFailed": "Không thể áp dụng bản tóm tắt đã tạo.",
       "applied": "Đã áp dụng bản tóm tắt đã tạo.",
-      "appliedJobUnresolved": "Đã áp dụng bản tóm tắt nhưng công việc AI không thể được giải quyết tự động.",
-      "dismissedJobUnresolved": "Đề xuất tóm tắt đã bị loại bỏ cục bộ nhưng công việc AI không thể được giải quyết tự động.",
-      "readyBeforeApplying": "Áp dụng hoặc loại bỏ bản tóm tắt được tạo trước tiên.",
       "readyToApply": "Bản tóm tắt đã tạo đã sẵn sàng để áp dụng."
     },
     "ready": {
       "title": "Đã tạo bản tóm tắt",
       "suggestedSummary": "Tóm tắt được đề xuất",
       "anotherCollaborator": "Cộng tác viên khác",
-      "anotherCollaboratorFallback": "Một cộng tác viên khác đã có bản tóm tắt được tạo sẵn.",
       "anotherCollaboratorNamed": "{name} đã có bản tóm tắt được tạo sẵn."
     }
   },
@@ -4702,8 +4556,7 @@
       "roleUpdated": "Đã cập nhật vai trò",
       "userBanned": "Người dùng bị cấm",
       "userUnbanned": "Đã bỏ cấm người dùng",
-      "userDeleted": "Người dùng đã xóa",
-      "userCreated": "Người dùng đã tạo"
+      "userDeleted": "Người dùng đã xóa"
     }
   },
   "adminUserDetail": {
@@ -4740,16 +4593,13 @@
       "userIdCopied": "Đã sao chép ID người dùng",
       "userIdCopyFailed": "Không sao chép được ID người dùng",
       "emailSuppressionReleased": "Việc ngăn chặn email được phát hành",
-      "mainEmailUpdated": "Đã cập nhật email chính",
       "ssoProviderRemoved": "Đã xóa nhà cung cấp SSO"
     },
     "auth": {
       "emptyEmail": "Không có email",
       "delivery": {
         "title": "Email giao hàng",
-        "description": "Thư chiến dịch, thông báo và tài khoản sử dụng email chính đã chọn.",
-        "changePlaceholder": "Chọn một email đã được xác minh",
-        "changeHelp": "Thay đổi lựa chọn này sẽ lưu ngay lập tức."
+        "description": "Thư chiến dịch, thông báo và tài khoản sử dụng email chính đã chọn."
       },
       "providers": {
         "title": "Nhà cung cấp SSO được kết nối",
@@ -4758,7 +4608,6 @@
         "remove": "Xóa nhà cung cấp SSO"
       },
       "sources": {
-        "current": "Email hiện tại",
         "emailCode": "Đăng nhập email"
       },
       "ban": {
@@ -4793,7 +4642,6 @@
         "noChanges": "Không có thay đổi nào để lưu"
       },
       "validation": {
-        "invalidUrl": "Định dạng URL không hợp lệ",
         "invalidEmail": "Định dạng email không hợp lệ",
         "invalidHexColor": "Định dạng màu hex không hợp lệ",
         "invalidGoogleAnalyticsId": "Định dạng ID Google Analytics không hợp lệ"
@@ -5102,14 +4950,12 @@
   },
   "formSuccessPage": {
     "metadata": {
-      "fallbackTitle": "Đã gửi biểu mẫu",
       "title": "{formTitle} - Đã gửi"
     },
     "title": "Cảm ơn"
   },
   "formPasswordPage": {
     "metadata": {
-      "fallbackTitle": "Quyền truy cập biểu mẫu",
       "description": "Nhập mật khẩu để truy cập biểu mẫu này"
     },
     "title": "Mật khẩu được bảo vệ",
@@ -5121,7 +4967,6 @@
   },
   "formDashboardPage": {
     "metadata": {
-      "fallbackTitle": "Trang tổng quan về biểu mẫu",
       "title": "{formTitle} - Trang tổng quan",
       "description": "Thống kê và phân tích gửi biểu mẫu"
     },
@@ -5131,7 +4976,28 @@
     "stats": {
       "total": "Tổng cộng"
     },
-    "fieldStatistics": "Thống kê hiện trường"
+    "fieldStatistics": "Thống kê hiện trường",
+    "charts": {
+      "donut": "Vành khuyên",
+      "pie": "Tròn",
+      "bar-horizontal": "Thanh ngang",
+      "bar-vertical": "Cột dọc",
+      "radar": "Radar",
+      "table": "Bảng",
+      "area": "Miền",
+      "line": "Đường",
+      "histogram": "Biểu đồ tần suất",
+      "noResponses": "Chưa có phản hồi",
+      "emptyValue": "(trống)",
+      "min": "Nhỏ nhất",
+      "max": "Lớn nhất",
+      "avg": "Trung bình",
+      "count": "Số lượng",
+      "date": "Ngày",
+      "value": "Giá trị",
+      "range": "Khoảng",
+      "chartType": "Loại biểu đồ"
+    }
   },
   "embeddedForm": {
     "states": {
@@ -5182,10 +5048,7 @@
       "locationMode": "Chế độ vị trí",
       "ticketUrl": "URL vé",
       "streamUrl": "URL luồng",
-      "externalUrl": "URL bên ngoài",
-      "participants": "Người tham gia",
-      "textCredits": "tín dụng văn bản",
-      "textCreditsDescription": "Một tín dụng trên mỗi dòng. Sử dụng Vai trò: Đặt tên khi cần một vai trò."
+      "externalUrl": "URL bên ngoài"
     },
     "locationModes": {
       "mapPlace": "Địa điểm",
@@ -5198,7 +5061,6 @@
       "tickets": "Vé",
       "stream": "Suối",
       "link": "liên kết",
-      "participants": "Người tham gia",
       "empty": "Không tìm thấy sự kiện nào.",
       "date": "Ngày",
       "credits": "Tín dụng"
@@ -5215,152 +5077,14 @@
       "deleteMessage": "Loại sự kiện này chỉ có thể bị xóa khi không có sự kiện nào sử dụng nó."
     }
   },
-  "tools": {
-    "portadj": {
-      "metadataTitle": "PortaDJ",
-      "metadataDescription": "Phát và trộn các tệp âm thanh trên thiết bị trong trình duyệt bằng hai bàn DJ."
-    },
-    "youtubeAudio": {
-      "title": "Âm thanh YouTube",
-      "urlLabel": "Liên kết video",
-      "urlPlaceholder": "https://…",
-      "resolve": "Tải âm thanh",
-      "resolving": "Đang tải âm thanh",
-      "clear": "Xóa nguồn",
-      "metadataTitle": "Âm thanh YouTube",
-      "metadataDescription": "Chuyển đổi âm thanh từ nguồn YouTube đã xác thực trong trình duyệt của bạn.",
-      "errors": {
-        "INTERNAL_ERROR": "Không thể tải nguồn âm thanh. Hãy thử lại.",
-        "INVALID_REQUEST": "Nhập URL video YouTube hợp lệ.",
-        "INVALID_UPSTREAM_RESPONSE": "YouTube trả về nguồn âm thanh không mong đợi. Hãy thử video khác.",
-        "REQUEST_ABORTED": "Yêu cầu đã bị hủy.",
-        "SOURCE_EXPIRED": "Nguồn âm thanh này đã hết hạn. Hãy tải lại URL.",
-        "SOURCE_NOT_FOUND": "Nguồn âm thanh này không còn khả dụng. Hãy tải lại URL.",
-        "UNAUTHORIZED": "Đăng nhập lại để sử dụng công cụ này.",
-        "UNSUPPORTED_VIDEO": "Video này không cung cấp nguồn âm thanh hữu hạn được hỗ trợ.",
-        "UPSTREAM_FAILURE": "Hiện không thể tải âm thanh YouTube. Hãy thử lại."
-      }
-    },
-    "transcode": {
-      "title": "Bộ chuyển mã âm thanh",
-      "targetIdle": "Đang chờ",
-      "targetChecking": "Kiểm tra",
-      "targetReady": "Sẵn sàng",
-      "targetError": "Không có sẵn",
-      "dropTitle": "Thả hoặc chọn tệp âm thanh",
-      "dropDescription": "Tối đa 10 tệp · Không có thư mục · Đã xử lý trên thiết bị này",
-      "chooseFiles": "Chọn tập tin âm thanh",
-      "supportedFormatsLabel": "Các định dạng được hỗ trợ",
-      "supportedFormats": "Được hỗ trợ: CAF, AIFF/AIFC, WAV, FLAC, MP3, AAC/M4A, Ogg/Opus và âm thanh ở định dạng MP4, MOV, MKV/WebM hoặc TS. Đã kiểm tra trên mỗi tập tin.",
-      "filesSelected": "Tập tin",
-      "outputSettings": "Cài đặt đầu ra",
-      "outputSettingsHelper": "Các kênh không thay đổi. Tự động chọn tỷ lệ tương thích cho mỗi tệp.",
-      "processingDetails": "Xử lý chi tiết",
-      "processingDetailsDescription": "Lấy mẫu lại cân bằng. Đầu ra số nguyên được hòa sắc. Các tệp WAV lớn sử dụng RF64.",
-      "format": "định dạng",
-      "sampleRate": "Tỷ lệ mẫu",
-      "bitrate": "Tốc độ bit",
-      "bitDepth": "Độ sâu bit",
-      "bitDepthContainerEffective": "Vùng chứa {containerBits}-bit / {effectiveBits}-bit có hiệu lực",
-      "codec": "Bộ giải mã",
-      "sampleFormat": "Định dạng mẫu",
-      "float": "Trôi nổi",
-      "integer": "PCM số nguyên",
-      "constantBitrate": "CBR",
-      "variableBitrate": "VBR",
-      "sourcePcmFloat": "{bitDepth}-bit nổi",
-      "sourcePcmInteger": "Số nguyên {bitDepth}-bit",
-      "sourcePcmSignedInteger": "Số nguyên có dấu {bitDepth}-bit",
-      "sourcePcmUnsignedInteger": "{bitDepth}-bit số nguyên không dấu",
-      "automatic": "Tự động",
-      "preserveSource": "Bảo toàn nguồn",
-      "unavailable": "Không có sẵn",
-      "sampleRateAvailableFor": "{supported, number} trong số {total, number} tệp",
-      "sampleRateResetAutomatic": "Tốc độ mẫu trước đó không hợp lệ cho các cài đặt đầu ra này. Tỷ lệ mẫu đã được thay đổi thành Tự động.",
-      "unknownAudio": "Âm thanh",
-      "channelCount": "{count, plural, one {# kênh} other {# kênh}}",
-      "queue": "Hàng đợi chuyển đổi",
-      "convert": "Chuyển thành",
-      "cancelAll": "Hủy tất cả",
-      "clear": "Thông thoáng",
-      "download": "Lưu bản chuyển đổi",
-      "downloadSource": "Lưu bản gốc",
-      "sourceDownloadExpired": "Nguồn đã hết hạn hoặc không khả dụng. Hãy tải lại URL YouTube.",
-      "sourceDownloadFailed": "Không thể tải bản gốc. Hãy kiểm tra kết nối và tải lại nguồn.",
-      "retry": "Thử lại",
-      "cancel": "Hủy bỏ",
-      "remove": "Xóa",
-      "sourceValue": "Nguồn ({value})",
-      "mono": "Bệnh tăng bạch cầu đơn nhân",
-      "stereo": "Âm thanh nổi",
-      "targetWaitingForFiles": "Thêm tệp âm thanh được hỗ trợ để kiểm tra mục tiêu đầu ra đã chọn.",
-      "targetCheckingMessage": "Kiểm tra xem trình duyệt này có hỗ trợ mục tiêu đầu ra đã chọn hay không.",
-      "targetReadyMessage": "Mục tiêu đầu ra đã chọn có sẵn trong trình duyệt này.",
-      "targetAvailability": "Tệp {available, number} có sẵn để chuyển đổi; {unavailable, number} vẫn không khả dụng với các cài đặt này.",
-      "engineLoading": "Đang tải công cụ âm thanh {asset}.",
-      "engineVerifying": "Đang xác minh công cụ âm thanh {asset}.",
-      "engineLoadFailed": "Không thể tải công cụ âm thanh {asset}.",
-      "capacityExceeded": "Tệp {count, number} chưa được thêm vào. Hàng đợi có thể chứa tối đa tệp {max, number}.",
-      "statusInspectionQueued": "Đang chờ kiểm tra",
-      "statusInspecting": "Kiểm tra",
-      "statusReady": "Sẵn sàng",
-      "statusQueued": "Đã xếp hàng",
-      "statusQueuedAvailability": "Đã xếp hàng đợi các tệp {converting, number} để chuyển đổi; {unavailable, number} vẫn không khả dụng.",
-      "statusConverting": "Chuyển đổi",
-      "statusConvertingAvailability": "Chuyển đổi tệp {converting, number}; {unavailable, number} vẫn không khả dụng.",
-      "statusComplete": "Hoàn thành",
-      "statusCompleteAvailability": "Đã chuyển đổi tệp {converted, number}; {unavailable, number} vẫn không khả dụng.",
-      "statusBatchResult": "Chạy xong: {eligible, number} đủ điều kiện, {attempted, number} đã thử, {succeeded, number} đã thành công, {failed, number} không thành công, {unavailable, number} không khả dụng.",
-      "statusUnsupported": "Không được hỗ trợ",
-      "statusError": "Lỗi",
-      "statusCancelled": "Đã hủy",
-      "unsupportedInput": "Tệp này không phải là đầu vào âm thanh được hỗ trợ.",
-      "unsupportedCodec": "Trình duyệt này không thể giải mã codec âm thanh trong tệp này.",
-      "inspectionFailed": "Không thể kiểm tra tập tin. Hãy thử lại.",
-      "inspectionInconclusive": "Trình duyệt không thể xác định âm thanh này trong giới hạn đọc an toàn. Hãy thử một tệp hoặc định dạng khác.",
-      "outputUnsupported": "Cài đặt đầu ra đã chọn không được hỗ trợ trong trình duyệt này.",
-      "outputProbeFailed": "Không thể kiểm tra hỗ trợ đầu ra. Hãy thử lại.",
-      "outputEngineUnavailable": "Không thể khởi động công cụ thời gian chạy cho {preset}. Hãy kiểm tra chính sách mạng hoặc nội dung rồi thử lại.",
-      "outputChannelsUnsupported": "Đầu ra này hỗ trợ các kênh nguồn {minimum, number}–{maximum, number}, nhưng tệp này có {actual, number}. Các kênh được bảo toàn và không bị trộn lẫn.",
-      "sourceInspectionMissing": "Không thể xác định được số lượng kênh nguồn hoặc tốc độ mẫu. Chọn một tệp có siêu dữ liệu âm thanh có thể đọc được.",
-      "outputConfigurationUnavailable": "Cài đặt định dạng và mã hóa đã chọn không tạo thành cấu hình đầu ra khả dụng.",
-      "preserveSourceRateUnsupported": "Nguồn bảo toàn không thể sử dụng {sourceRate} cho đầu ra này. Mức giá cho phép: {allowed}.",
-      "sourceResamplingRateUnsupported": "Nguồn {sourceRate} này nằm ngoài phạm vi lấy mẫu lại ({minimum}–{maximum}). Nó chỉ có thể đi qua một đầu ra tương thích.",
-      "targetResamplingRateUnsupported": "Mục tiêu {targetRate} đã chọn nằm ngoài phạm vi lấy mẫu lại ({minimum}–{maximum}).",
-      "automaticRateUnavailable": "Tự động không thể chọn mức giá hợp lệ cho nguồn {sourceRate} này. Tốc độ đầu ra được phép: {allowed}.",
-      "presetRateUnsupported": "Đầu ra này không hỗ trợ {targetRate}. Mức giá cho phép: {allowed}.",
-      "conversionFailed": "Việc chuyển đổi âm thanh không thành công.",
-      "conversionStorageLimitExceeded": "Trình duyệt này không thể giữ kết quả đầu ra dự kiến trong bộ nhớ tạm thời cục bộ. Chọn định dạng nhỏ hơn hoặc nén hoặc thử lại trong trình duyệt hỗ trợ đầu ra cục bộ lớn.",
-      "conversionTargetSizeLimitExceeded": "Định dạng đầu ra đã chọn không thể đại diện cho một tệp lớn như vậy. Chọn định dạng khác hoặc giảm tốc độ mẫu, độ sâu bit hoặc số lượng kênh.",
-      "cancelledMessage": "Việc chuyển đổi đã bị hủy bỏ.",
-      "sourceSummary": "{container} · {sampleRate} · {channels} · {bitDepth}",
-      "outputSummary": "{preset} · {size}",
-      "progressLabel": "{phase} · {progress, number}%",
-      "phasePrepare": "Chuẩn bị",
-      "phaseDecode": "Giải mã",
-      "phaseEncode": "Mã hóa",
-      "phaseFinalize": "Đang hoàn thiện",
-      "bytes": "{count, number} byte",
-      "storageOpfs": "Lưu trữ trình duyệt riêng tư",
-      "storageMemory": "Bộ nhớ trình duyệt",
-      "metadataTitle": "Bộ chuyển mã âm thanh",
-      "metadataDescription": "Chuyển đổi âm thanh trong trình duyệt của bạn. Các tập tin không bao giờ rời khỏi thiết bị của bạn.",
-      "notices": "Giấy phép nguồn mở"
-    },
-    "hwp": {
-      "title": "Trình soạn thảo HWP",
-      "metadataDescription": "Mở, chỉnh sửa và lưu tài liệu HWP và HWPX trong trình duyệt.",
-      "description": "Dùng menu Tệp của trình soạn thảo để mở và lưu tệp HWP hoặc HWPX. Tài liệu được xử lý trên thiết bị này mà không tải lên máy chủ.",
-      "loading": "Đang tải trình soạn thảo…",
-      "error": "Không thể tải trình soạn thảo. Vui lòng thử lại.",
-      "retry": "Thử lại",
-      "metadataTitle": "Trình soạn thảo HWP"
-    }
-  },
   "myMetadata": {
     "description": "Trang {title} cho tài khoản của bạn trên {siteName}."
   },
   "fileManager": {
+    "pagination": {
+      "end": "Hết kết quả"
+    },
+    "selectionUnavailableDescription": "Không thể thêm tệp này. Nhấn Enter để xem trước.",
     "title": "Tập tin",
     "description": "Tải lên, sắp xếp, kiểm tra và sử dụng lại các tệp trên trang web.",
     "root": "Tập tin",
@@ -5484,9 +5208,7 @@
       "move-files": {
         "title": "Di chuyển tập tin"
       },
-      "targetFolderId": "ID thư mục đích",
       "extensionSeparate": "Phần mở rộng .{extension} được giữ riêng.",
-      "rootWhenEmpty": "Để trống để di chuyển đến thư mục gốc.",
       "delete": {
         "title": "Xóa",
         "folder": "Xóa thư mục này và tất cả các tập tin không sử dụng bên dưới nó?",
@@ -5496,14 +5218,26 @@
         "byDomain": "Theo miền: {summary}",
         "more": "và {count} khác. Mở chi tiết tập tin để xem lại danh sách đầy đủ."
       }
+    },
+    "viewSettings": {
+      "title": "Cài đặt chế độ xem",
+      "iconSize": "Kích thước biểu tượng",
+      "spacing": "Khoảng cách mục",
+      "columns": "Số cột",
+      "auto": "Tự động",
+      "small": "Nhỏ",
+      "medium": "Vừa",
+      "large": "Lớn",
+      "compact": "Gọn",
+      "standard": "Tiêu chuẩn",
+      "comfortable": "Rộng",
+      "reset": "Đặt lại chế độ xem"
     }
   },
   "fileDownloadAccess": {
     "editor": {
       "sectionTitle": "Quyền truy cập tải xuống",
-      "sectionDescription": "Kiểm soát ai có thể tải xuống tệp gốc.",
       "loading": "Đang tải quyền truy cập tải xuống…",
-      "audienceLabel": "Tải xuống khán giả",
       "audiences": {
         "disabled": {
           "label": "Tàn tật",
@@ -5522,15 +5256,10 @@
           "description": "Chỉ những người dùng trong đối tượng đã chọn mới có thể tải xuống tệp này."
         }
       },
-      "segmentsLabel": "Khán giả",
-      "segmentsDescription": "Chọn một hoặc nhiều Phân khúc đối tượng hiện có.",
-      "segmentsPlaceholder": "Chọn đối tượng",
       "segmentsLoadError": "Đã tải chính sách nhưng không thể tải đối tượng.",
       "segmentsEmpty": "Không có phân khúc Đối tượng nào khả dụng.",
       "restrictedWithoutAudience": "Chính sách hạn chế này không có Đối tượng. Tải xuống bị từ chối đối với mọi người cho đến khi bạn chọn ít nhất một Đối tượng.",
-      "segmentRequiresSubscription": "{name} (yêu cầu đăng ký bản tin)",
       "additionalSelected": "Đã chọn thêm {count}",
-      "loadMoreSegments": "Tải thêm đối tượng",
       "loadError": "Không thể tải quyền truy cập tải xuống.",
       "saveError": "Không thể lưu quyền truy cập tải xuống.",
       "fileRequired": "Lưu tệp trước khi định cấu hình quyền truy cập tải xuống."
@@ -5552,5 +5281,63 @@
     "empty": "Nhập mã nguồn sơ đồ",
     "invalid": "Sơ đồ không hợp lệ",
     "loading": "Đang vẽ…"
+  },
+  "errorPage": {
+    "titles": {
+      "400": "Yêu cầu không hợp lệ",
+      "401": "Cần đăng nhập",
+      "403": "Không có quyền truy cập",
+      "404": "Không tìm thấy trang",
+      "408": "Yêu cầu đã hết thời gian chờ",
+      "409": "Yêu cầu xung đột với trạng thái hiện tại",
+      "410": "Trang này không còn khả dụng",
+      "413": "Yêu cầu quá lớn",
+      "422": "Không thể xử lý yêu cầu",
+      "429": "Quá nhiều yêu cầu",
+      "500": "Đã xảy ra lỗi",
+      "501": "Yêu cầu này không được hỗ trợ",
+      "502": "Dịch vụ liên quan gặp lỗi",
+      "503": "Dịch vụ tạm thời không khả dụng",
+      "504": "Phản hồi dịch vụ đã hết thời gian chờ"
+    },
+    "actions": {
+      "goHome": "Về nhà",
+      "tryAgain": "Thử lại",
+      "login": "Quay lại đăng nhập"
+    }
+  },
+  "localBackups": {
+    "title": "Bản sao lưu cục bộ",
+    "description": "Các chỉnh sửa chưa lưu từ những thẻ đã đóng trên thiết bị này. Mở trình chỉnh sửa để khôi phục chúng. Bản sao lưu hết hạn sau 30 ngày và bị xóa khi bạn đăng xuất.",
+    "empty": "Không có bản sao lưu cục bộ để khôi phục. Các chỉnh sửa trong thẻ đang mở không được liệt kê ở đây.",
+    "unavailable": "Bản sao lưu cục bộ cần bộ nhớ trình duyệt và Web Locks trên thiết bị này.",
+    "loading": "Đang tìm bản sao lưu cục bộ…",
+    "error": "Không thể hoàn tất thao tác này. Làm mới danh sách và thử lại.",
+    "refresh": "Làm mới",
+    "lastChanged": "Thay đổi lần cuối {time}",
+    "open": "Mở trình chỉnh sửa",
+    "discard": "Bỏ chỉnh sửa",
+    "openLabel": "Mở trình chỉnh sửa: {kind} {id}, {locale}",
+    "discardLabel": "Bỏ chỉnh sửa: {kind} {id}, {locale}",
+    "discardTitle": "Xóa bản sao lưu cục bộ?",
+    "discardDescription": "Các chỉnh sửa chưa lưu này sẽ bị xóa vĩnh viễn khỏi thiết bị này. Nội dung đã lưu không bị ảnh hưởng.",
+    "kinds": {
+      "post": "Bài viết",
+      "page": "Trang",
+      "work": "Tác phẩm",
+      "campaign": "Chiến dịch",
+      "email-template": "Mẫu email",
+      "email-layout": "Bố cục email",
+      "terms-history": "Điều khoản dịch vụ",
+      "privacy-history": "Chính sách bảo mật",
+      "artist": "Nghệ sĩ",
+      "release": "Bản phát hành",
+      "label": "Nhãn",
+      "form": "Biểu mẫu",
+      "map-theme": "Chủ đề bản đồ",
+      "program-event": "Sự kiện",
+      "menu": "Menu",
+      "post-series": "Loạt bài viết"
+    }
   }
 }

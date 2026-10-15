@@ -3,7 +3,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+import { I18nProvider } from 'react-aria-components';
 import { ImageUploadField, type ImageUploadFieldProps } from './ImageUploadField';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -41,9 +41,9 @@ const baseProps: ImageUploadFieldProps = {
 function renderField(props: Partial<ImageUploadFieldProps> = {}) {
   act(() => {
     root.render(
-      <MantineProvider>
+      <I18nProvider locale="en">
         <ImageUploadField {...baseProps} {...props} />
-      </MantineProvider>,
+      </I18nProvider>,
     );
   });
 }
@@ -106,7 +106,7 @@ describe('ImageUploadField', () => {
 
     expect(dropzone?.style.width).toBe('100%');
     expect(dropzone?.style.maxWidth).toBe('360px');
-    expect(dropzone?.getAttribute('aria-label')).toBe('Upload logo');
+    expect(dropzone?.querySelector('[aria-label="Upload logo"]')?.getAttribute('aria-label')).toBe('Upload logo');
     expect(dropzoneInput?.getAttribute('aria-label')).toBe('Upload logo');
     expect(placeholder?.style.width).toBe('100%');
     expect(placeholder?.style.maxWidth).toBe('360px');
@@ -183,6 +183,8 @@ describe('ImageUploadField', () => {
       container.querySelector<HTMLInputElement>('#change-logo-dropzone input[type="file"]')?.getAttribute('aria-label'),
     ).toBe('Change logo');
     expect(container.textContent).toContain('Click the image to replace');
+    expect(container.querySelector('button[aria-label="Remove logo"]')).toHaveAttribute('data-emphasis', 'medium');
+    expect(container.querySelector('button[aria-label="Remove logo"]')).toHaveAttribute('data-control-size', 'xs');
 
     act(() => {
       container.querySelector<HTMLButtonElement>('button[aria-label="Remove logo"]')?.click();

@@ -1,9 +1,9 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Box } from '@mantine/core';
+import { useTranslations } from 'next-intl';
+
 import { SegmentedControl } from '@/components/core/Input';
-import { Tooltip } from '@/components/core/Tooltip';
 
 export interface IconViewModeOption<T extends string> {
   value: T;
@@ -17,48 +17,15 @@ interface IconViewModeControlProps<T extends string> {
   onChange: (value: T) => void;
 }
 
+/** Exclusive editor view modes use Core SegmentedControl icon options. */
 export function IconViewModeControl<T extends string>({ value, options, onChange }: IconViewModeControlProps<T>) {
+  const tActions = useTranslations('common.actions');
   return (
     <SegmentedControl
+      aria-label={tActions('view')}
       value={value}
       onChange={(nextValue) => onChange(nextValue as T)}
-      styles={{
-        label: {
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingInline: '0.625rem',
-        },
-        innerLabel: {
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: 18,
-          lineHeight: 1,
-        },
-      }}
-      data={options.map((option) => ({
-        value: option.value,
-        label: (
-          <Tooltip label={option.tooltip} withArrow openDelay={120}>
-            <Box
-              component="span"
-              style={{
-                width: 18,
-                height: 18,
-                lineHeight: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                verticalAlign: 'middle',
-              }}
-              aria-label={option.tooltip}
-            >
-              {option.icon}
-            </Box>
-          </Tooltip>
-        ),
-      }))}
+      data={options.map((option) => ({ value: option.value, icon: option.icon, accessibleLabel: option.tooltip }))}
     />
   );
 }

@@ -1,10 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { Group, Stack } from '@mantine/core';
+import { SectionCard as ExecutableSurface } from '@/components/core/Section';
+import { LayoutInset as ExecutableInset, LayoutStack as EditorDsLayoutStack } from '@/components/core/Layout';
+import { Tabs } from '@/components/core/Tabs';
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react';
+
 import { useTranslations } from 'next-intl';
 import { Alert } from '@/components/core/Alert';
-import { Button } from '@/components/core/Button';
 import { MonacoSourceEditor, type SourceEditorLanguage } from '@/features/editor/tiptap/code-editor';
 import { PrintCodeSource } from '@/features/editor/tiptap/code/PrintCodeSource';
 import {
@@ -274,7 +276,7 @@ function RuntimeSurface({
       {...(type === 'shader' ? {} : { 'data-status': status })}
     >
       {type === 'p5Sketch' ? (
-        <div ref={mountRef} className={classes.runtime} aria-label={labels.preview} style={{ height }} />
+        <div ref={mountRef} className={classes.runtime} role="group" aria-label={labels.preview} style={{ height }} />
       ) : type === 'shader' ? (
         active ? (
           <ShaderPublicPreview
@@ -407,6 +409,8 @@ export function PublicExecutableBlockView(props: PublicExecutableBlockViewProps)
   const hasDeviceCapabilities = capabilities.length > 0;
   const [mode, setMode] = useState<PublicExecutableMode>('preview');
   const [activeShaderStage, setActiveShaderStage] = useState<ShaderStage>('image');
+  const shaderSourceId = useId();
+  const shaderSourcePanelId = `${shaderSourceId}-panel`;
   const [shaderAudioEnabled, setShaderAudioEnabled] = useState(false);
   const [temporarySources, setTemporarySources] = useState<PublicExecutableSources>({
     source: originalSource,
@@ -527,156 +531,179 @@ export function PublicExecutableBlockView(props: PublicExecutableBlockViewProps)
       data-editor-mode="public"
       style={style}
     >
-      <div className={classes.header}>
-        <ExecutableBlockTitle title={title} fallback={labels.title} editable={false} />
-      </div>
-      <Stack className={classes.body} gap={0}>
-        {showPreview ? (
-          <RuntimeSurface
-            key={`${type}-${revision}`}
-            active={running}
-            audioEnabled={shaderAudioEnabled}
-            factories={factories}
-            height={previewHeight}
-            revision={revision}
-            sources={previewSources}
-            type={type}
-            labels={labels}
-            onError={setError}
-            onRuntime={setRuntime}
-            resolveAsset={resolveAsset}
-            capabilities={capabilities}
-            onInactive={markInactive}
-          />
-        ) : null}
-        <div className={classes.printSource} data-executable-print-source={type}>
-          {type === 'shader' ? (
-            SHADER_STAGE_DEFINITIONS.map(([stage, , filename]) => {
-              const source = originalShaderProgram?.sources[stage] ?? '';
-              return source ? (
-                <section key={stage} className={classes.printShaderStage} data-print-shader-stage={stage}>
-                  <h3 className={classes.printShaderFilename}>{filename}</h3>
-                  <PrintCodeSource language="glsl" source={source} />
-                </section>
-              ) : null;
-            })
-          ) : (
-            <PrintCodeSource language={language} source={originalSource} />
-          )}
+      <ExecutableSurface padding="none" withBorder clip>
+        <div className={classes.header}>
+          <ExecutableSurface padding="none" appearance="muted" border="block-end">
+            <ExecutableInset block="xxs" inline="xs">
+              <ExecutableBlockTitle title={title} fallback={labels.title} editable={false} />
+            </ExecutableInset>
+          </ExecutableSurface>
         </div>
-        {runtimeError ? (
-          <Alert className={classes.runtimeError} tone="danger" title={labels.error}>
-            {formatError(runtimeError)}
-          </Alert>
-        ) : null}
-        <ExecutableRuntimeControls
-          className={classes.controls}
-          type={type}
-          labels={labels}
-          running={running}
-          onRun={restart}
-          onStop={stop}
-          onRestart={restart}
-          capabilityControl={
-            type === 'p5Sketch' ? (
-              <P5CapabilityControl capabilities={capabilities} editable={false} labels={labels} />
-            ) : undefined
-          }
-          sourceControl={{ label: labels.source, expanded: codeVisible, onClick: toggleSource }}
-          onResetOriginal={codeVisible ? resetOriginal : undefined}
-          copyControl={codeVisible ? { label: copied ? labels.copied : labels.copy, onClick: copySource } : undefined}
-          applyControl={
-            codeVisible
-              ? {
-                  label: labels.apply,
-                  disabled:
-                    type === 'shader'
-                      ? temporarySources.shaderProgram?.sources[activeShaderStage] ===
-                        previewSources.shaderProgram?.sources[activeShaderStage]
-                      : temporarySources.source === previewSources.source,
-                  onClick: applyDraft,
+        <div className={classes.body}>
+          <EditorDsLayoutStack gap="none">
+            {showPreview ? (
+              <RuntimeSurface
+                key={`${type}-${revision}`}
+                active={running}
+                audioEnabled={shaderAudioEnabled}
+                factories={factories}
+                height={previewHeight}
+                revision={revision}
+                sources={previewSources}
+                type={type}
+                labels={labels}
+                onError={setError}
+                onRuntime={setRuntime}
+                resolveAsset={resolveAsset}
+                capabilities={capabilities}
+                onInactive={markInactive}
+              />
+            ) : null}
+            <div className={classes.printSource} data-executable-print-source={type}>
+              {type === 'shader' ? (
+                SHADER_STAGE_DEFINITIONS.map(([stage, , filename]) => {
+                  const source = originalShaderProgram?.sources[stage] ?? '';
+                  return source ? (
+                    <section key={stage} className={classes.printShaderStage} data-print-shader-stage={stage}>
+                      <h3 className={classes.printShaderFilename}>{filename}</h3>
+                      <PrintCodeSource language="glsl" source={source} />
+                    </section>
+                  ) : null;
+                })
+              ) : (
+                <PrintCodeSource language={language} source={originalSource} />
+              )}
+            </div>
+            {runtimeError ? (
+              <div className={classes.runtimeError}>
+                <Alert tone="danger" title={labels.error}>
+                  {formatError(runtimeError)}
+                </Alert>
+              </div>
+            ) : null}
+            <ExecutableInset block="xxs" inline="xs">
+              <ExecutableRuntimeControls
+                type={type}
+                labels={labels}
+                running={running}
+                onRun={restart}
+                onStop={stop}
+                onRestart={restart}
+                capabilityControl={
+                  type === 'p5Sketch' ? (
+                    <P5CapabilityControl capabilities={capabilities} editable={false} labels={labels} />
+                  ) : undefined
                 }
-              : undefined
-          }
-          audioControl={
-            type === 'shader' && sources.shaderProgram?.sources.sound
-              ? {
-                  label: commonLabels('audio'),
-                  pressed: shaderAudioEnabled,
-                  onClick: () => {
-                    const nextEnabled = !shaderAudioEnabled;
-                    if (nextEnabled && runtimeRef.current && 'enableAudio' in runtimeRef.current) {
-                      runtimeRef.current.enableAudio();
-                    }
-                    setShaderAudioEnabled(nextEnabled);
-                    setRevision((value) => value + 1);
-                  },
+                sourceControl={{ label: labels.source, expanded: codeVisible, onClick: toggleSource }}
+                onResetOriginal={codeVisible ? resetOriginal : undefined}
+                copyControl={
+                  codeVisible ? { label: copied ? labels.copied : labels.copy, onClick: copySource } : undefined
                 }
-              : undefined
-          }
-        />
-        {codeVisible && type !== 'shader' ? (
-          <Stack className={classes.sourcePanel} gap={0}>
-            <MonacoSourceEditor
-              value={temporarySources.source}
-              onChange={(value) => setTemporarySources((current) => ({ ...current, source: value }))}
-              onApply={applyDraft}
-              language={language}
-              ariaLabel={labels.sourceInput}
-              modelPath={`public/${type}/${encodeURIComponent(blockId)}.${language === 'glsl' ? 'glsl' : language === 'typescript' ? 'ts' : 'js'}`}
-              height={Math.max(240, previewHeight)}
-              maxLength={100_000}
-            />
-          </Stack>
-        ) : null}
-        {codeVisible && type === 'shader' ? (
-          <Stack className={classes.sourcePanel} gap={0} data-shader-source-editors>
-            <Group gap={4} role="tablist" aria-label={labels.sourceInput} wrap="wrap">
-              {SHADER_STAGE_DEFINITIONS.map(([stage, , filename]) => (
-                <Button
-                  key={stage}
-                  role="tab"
-                  aria-selected={activeShaderStage === stage}
-                  size="compact-xs"
-                  tone="neutral"
-                  emphasis={activeShaderStage === stage ? 'strong' : 'low'}
-                  onClick={() => setActiveShaderStage(stage)}
-                >
-                  {filename}
-                </Button>
-              ))}
-            </Group>
-            {temporarySources.shaderProgram
-              ? (() => {
-                  const filename = SHADER_STAGE_DEFINITIONS.find(([stage]) => stage === activeShaderStage)![2];
-                  const channels =
-                    activeShaderStage === 'common' || activeShaderStage === 'vertex'
-                      ? []
-                      : (temporarySources.shaderProgram.channels[activeShaderStage as ShaderChannelStage] ?? []);
-                  return (
-                    <>
-                      <ShaderAvailableInputs stage={activeShaderStage} channels={channels} labels={labels} />
-                      <MonacoSourceEditor
-                        key={activeShaderStage}
-                        value={temporarySources.shaderProgram.sources[activeShaderStage]}
-                        onChange={(value) =>
-                          setTemporarySources((current) => updateShaderSource(current, activeShaderStage, value))
-                        }
-                        onApply={applyDraft}
-                        language="glsl"
-                        ariaLabel={`${labels.sourceInput} — ${filename}`}
-                        modelPath={`public/${type}/${encodeURIComponent(blockId)}/${filename}`}
-                        height={Math.max(240, previewHeight)}
-                        maxLength={100_000}
-                        onMount={installShaderInputMonacoApi}
-                      />
-                    </>
-                  );
-                })()
-              : null}
-          </Stack>
-        ) : null}
-      </Stack>
+                applyControl={
+                  codeVisible
+                    ? {
+                        label: labels.apply,
+                        disabled:
+                          type === 'shader'
+                            ? temporarySources.shaderProgram?.sources[activeShaderStage] ===
+                              previewSources.shaderProgram?.sources[activeShaderStage]
+                            : temporarySources.source === previewSources.source,
+                        onClick: applyDraft,
+                      }
+                    : undefined
+                }
+                audioControl={
+                  type === 'shader' && sources.shaderProgram?.sources.sound
+                    ? {
+                        label: commonLabels('audio'),
+                        pressed: shaderAudioEnabled,
+                        onClick: () => {
+                          const nextEnabled = !shaderAudioEnabled;
+                          if (nextEnabled && runtimeRef.current && 'enableAudio' in runtimeRef.current) {
+                            runtimeRef.current.enableAudio();
+                          }
+                          setShaderAudioEnabled(nextEnabled);
+                          setRevision((value) => value + 1);
+                        },
+                      }
+                    : undefined
+                }
+              />
+            </ExecutableInset>
+            {codeVisible && type !== 'shader' ? (
+              <div className={classes.sourcePanel}>
+                <EditorDsLayoutStack gap="none">
+                  <MonacoSourceEditor
+                    value={temporarySources.source}
+                    onChange={(value) => setTemporarySources((current) => ({ ...current, source: value }))}
+                    onApply={applyDraft}
+                    language={language}
+                    ariaLabel={labels.sourceInput}
+                    modelPath={`public/${type}/${encodeURIComponent(blockId)}.${language === 'glsl' ? 'glsl' : language === 'typescript' ? 'ts' : 'js'}`}
+                    height={Math.max(240, previewHeight)}
+                    maxLength={100_000}
+                  />
+                </EditorDsLayoutStack>
+              </div>
+            ) : null}
+            {codeVisible && type === 'shader' ? (
+              <div className={classes.sourcePanel} data-shader-source-editors>
+                <EditorDsLayoutStack gap="none">
+                  <Tabs
+                    value={activeShaderStage}
+                    onChange={(stage) => stage && setActiveShaderStage(stage as ShaderStage)}
+                  >
+                    <Tabs.List aria-label={labels.sourceInput}>
+                      {SHADER_STAGE_DEFINITIONS.map(([stage, , filename]) => (
+                        <Tabs.Tab
+                          key={stage}
+                          value={stage}
+                          externalPanel={{ id: shaderSourcePanelId, tabId: `${shaderSourceId}-${stage}` }}
+                        >
+                          {filename}
+                        </Tabs.Tab>
+                      ))}
+                    </Tabs.List>
+                  </Tabs>
+                  {temporarySources.shaderProgram
+                    ? (() => {
+                        const filename = SHADER_STAGE_DEFINITIONS.find(([stage]) => stage === activeShaderStage)![2];
+                        const channels =
+                          activeShaderStage === 'common' || activeShaderStage === 'vertex'
+                            ? []
+                            : (temporarySources.shaderProgram.channels[activeShaderStage as ShaderChannelStage] ?? []);
+                        return (
+                          <EditorDsLayoutStack
+                            gap="none"
+                            id={shaderSourcePanelId}
+                            role="tabpanel"
+                            aria-labelledby={`${shaderSourceId}-${activeShaderStage}`}
+                          >
+                            <ShaderAvailableInputs stage={activeShaderStage} channels={channels} labels={labels} />
+                            <MonacoSourceEditor
+                              key={activeShaderStage}
+                              value={temporarySources.shaderProgram.sources[activeShaderStage]}
+                              onChange={(value) =>
+                                setTemporarySources((current) => updateShaderSource(current, activeShaderStage, value))
+                              }
+                              onApply={applyDraft}
+                              language="glsl"
+                              ariaLabel={`${labels.sourceInput} — ${filename}`}
+                              modelPath={`public/${type}/${encodeURIComponent(blockId)}/${filename}`}
+                              height={Math.max(240, previewHeight)}
+                              maxLength={100_000}
+                              onMount={installShaderInputMonacoApi}
+                            />
+                          </EditorDsLayoutStack>
+                        );
+                      })()
+                    : null}
+                </EditorDsLayoutStack>
+              </div>
+            ) : null}
+          </EditorDsLayoutStack>
+        </div>
+      </ExecutableSurface>
     </figure>
   );
 }

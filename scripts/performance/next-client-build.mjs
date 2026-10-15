@@ -6,7 +6,9 @@ import { spawnSync } from 'node:child_process';
 // dotenv itself, so avoiding the project's dotenv-cli alone is insufficient.
 const root = resolve(process.argv[2] || '.');
 const mode = process.argv[3] || 'build';
-if (!['build', 'analyze'].includes(mode)) throw new Error('Expected build or analyze');
+// build-sourcemaps: same build plus client source maps, for route-first-load-modules.mjs attribution.
+if (!['build', 'build-sourcemaps', 'analyze'].includes(mode))
+  throw new Error('Expected build, build-sourcemaps or analyze');
 if (readdirSync(root).some((name) => name === '.env' || (name.startsWith('.env.') && name !== '.env.example'))) {
   throw new Error('Use a secret-free isolated snapshot without dotenv files');
 }
@@ -14,7 +16,7 @@ const result = spawnSync(
   process.execPath,
   [
     resolve(root, 'node_modules/next/dist/bin/next'),
-    ...(mode === 'build' ? ['build'] : ['experimental-analyze', '--output']),
+    ...(mode === 'analyze' ? ['experimental-analyze', '--output'] : ['build']),
   ],
   {
     cwd: root,
@@ -35,6 +37,7 @@ const result = spawnSync(
       DRAFT_SECRET: 'build-time-placeholder-secret123',
       ENCRYPTION_SECRET: 'build-time-placeholder-secret123',
       HOST: 'localhost',
+      ...(mode === 'build-sourcemaps' ? { GEUL_BUNDLE_SOURCEMAPS: '1' } : {}),
     },
   },
 );

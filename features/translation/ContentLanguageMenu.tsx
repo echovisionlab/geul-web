@@ -1,14 +1,15 @@
 'use client';
 
-import Link from '@/components/core/Navigation';
+import { formatLocaleCode } from '@/components/core/Typography/locale-code';
+
 import { useTranslations } from 'next-intl';
 import { useMounted } from '@mantine/hooks';
-import { Button } from '@/components/core/Button';
-import { DropdownMenu } from '@/components/core/DropdownMenu';
-import { Tooltip } from '@/components/core/Tooltip';
+import { Button, type ButtonProps } from '@/components/core/Button';
+// Public pages: the menu and hint surfaces load on first hover/focus/press (same markup and behaviour).
+import { OnDemandDropdownMenu as DropdownMenu } from '@/components/core/DropdownMenu/OnDemandDropdownMenu';
+import { OnDemandTooltip as Tooltip } from '@/components/core/Tooltip/OnDemandTooltip';
 import { getSupportedLocaleOptions, normalizeLocale, type SupportedLocale } from '@/lib/i18n/locale';
 import { buildContentLanguageHref } from '@/lib/translation/content-language';
-import classes from './ContentLanguageMenu.module.css';
 
 interface LocalizationInfoLike {
   displayedLocale?: string | null;
@@ -23,6 +24,7 @@ interface ContentLanguageMenuProps {
   localizationInfo?: LocalizationInfoLike | null;
   includeSourceOption?: boolean;
   withinPortal?: boolean;
+  contrast?: ButtonProps['contrast'];
   onRequestedLocaleChange?: (locale: SupportedLocale) => void;
 }
 
@@ -33,6 +35,7 @@ export function ContentLanguageMenu({
   localizationInfo,
   includeSourceOption = true,
   withinPortal = true,
+  contrast,
   onRequestedLocaleChange,
 }: ContentLanguageMenuProps) {
   const t = useTranslations('contentLanguageMenu');
@@ -63,28 +66,30 @@ export function ContentLanguageMenu({
       ? supportedLocaleOptions.filter((option) => normalizedAvailableLocales.includes(option.value))
       : supportedLocaleOptions;
   const sourceSelected = includeSourceOption && displayedLocale === sourceLocale;
-  const sourceLabel = supportedLocaleOptions.find((option) => option.value === sourceLocale)?.label ?? sourceLocale;
+  const sourceLabel =
+    supportedLocaleOptions.find((option) => option.value === sourceLocale)?.label ?? formatLocaleCode(sourceLocale);
   const buttonLabel =
-    supportedLocaleOptions.find((option) => option.value === displayedLocale)?.label ?? displayedLocale;
+    supportedLocaleOptions.find((option) => option.value === displayedLocale)?.label ??
+    formatLocaleCode(displayedLocale);
 
   return (
     <DropdownMenu size="wide" placement="bottom-end" portal={withinPortal}>
       <Tooltip label={buttonLabel} events={{ hover: true, focus: true, touch: false }}>
         <DropdownMenu.Target>
           <Button
+            contrast={contrast}
+            indicator="menu"
             size="xs"
             tone="neutral"
             emphasis="low"
-            px={6}
-            className="print-hide"
-            style={{ flexShrink: 0 }}
+            printVisibility="hidden"
             aria-label={t('ariaLabel', { locale: buttonLabel })}
           >
-            {displayedLocale.toUpperCase()}
+            {buttonLabel}
           </Button>
         </DropdownMenu.Target>
       </Tooltip>
-      <DropdownMenu.Dropdown className={classes.dropdown}>
+      <DropdownMenu.Dropdown>
         {includeSourceOption ? (
           <>
             <DropdownMenu.Label>{tCommonLabels('source')}</DropdownMenu.Label>
@@ -94,7 +99,6 @@ export function ContentLanguageMenu({
               </DropdownMenu.Item>
             ) : (
               <DropdownMenu.Item
-                component={Link}
                 href={buildContentLanguageHref(pathname, query, {
                   requestedLocale: sourceLocale,
                 })}
@@ -122,7 +126,6 @@ export function ContentLanguageMenu({
             ) : (
               <DropdownMenu.Item
                 key={option.value}
-                component={Link}
                 href={buildContentLanguageHref(pathname, query, {
                   requestedLocale: option.value,
                 })}

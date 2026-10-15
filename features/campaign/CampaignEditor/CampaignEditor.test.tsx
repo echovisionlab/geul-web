@@ -39,6 +39,8 @@ describe('CampaignEditor', () => {
       root?.render(
         <CampaignEditor
           campaignId="campaign-1"
+          accessibleLabel="Campaign content"
+          contentLanguage="ko"
           provider={provider as never}
           blockRoomController={controller as never}
         />,
@@ -47,6 +49,8 @@ describe('CampaignEditor', () => {
 
     expect(container.querySelector('[data-testid="campaign-tiptap-editor"]')).not.toBeNull();
     expect(profileProps[0]?.blockRoomController).toBe(controller);
+    expect(profileProps[0]?.accessibleLabel).toBe('Campaign content');
+    expect(profileProps[0]?.contentLanguage).toBe('ko');
     expect(profileProps[0]).not.toHaveProperty('fragment');
   });
 

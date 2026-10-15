@@ -22,3 +22,14 @@ export const Missing: Story = {
     src: null,
   },
 };
+
+export const MissingXL: Story = {
+  args: { src: null, size: 'xl', height: undefined, fallbackText: 'Example Studio' },
+};
+export const Unconfigured: Story = {
+  args: { src: null, size: 'xl', height: undefined, fallbackText: null },
+};
+
+export const UnavailableAsset: Story = {
+  args: { src: '/storybook/media/unavailable-site-logo.svg', size: 'xl', fallbackText: 'Example Studio' },
+};

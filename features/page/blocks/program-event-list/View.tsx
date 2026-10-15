@@ -1,17 +1,17 @@
 'use client';
-
+import { LayoutInline as DsLayoutInline, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
+import { useTranslations, useLocale } from 'next-intl';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useLocale } from 'next-intl';
-import { Group, Pagination } from '@mantine/core';
+import { Pagination } from '@/components/core/Display';
 import { listProgramEventsForBlockBrowser } from '@/lib/queries/program-event-browser';
 import { parseBooleanProp, parseIntegerProp, splitCsv } from '../list-view-utils';
 import { ListBlockSkeleton } from '../ListBlockSkeleton';
 import type { BlockViewProps } from '../types';
 import { parseProgramEventListProps } from './schema';
 import { ProgramEventListViewClient } from './ViewClient';
-
 export function ProgramEventListView({ props }: BlockViewProps) {
+  const tPagination = useTranslations('dataTable.pagination');
   const locale = useLocale();
   const p = parseProgramEventListProps(props);
   const [page, setPage] = useState(1);
@@ -20,7 +20,6 @@ export function ProgramEventListView({ props }: BlockViewProps) {
   const showPagination = parseBooleanProp(p.showPagination, false);
   const typeIds = splitCsv(p.typeIds);
   const offset = showPagination ? (page - 1) * limit : 0;
-
   const { data, isLoading } = useQuery({
     queryKey: [
       'program-events',
@@ -48,7 +47,6 @@ export function ProgramEventListView({ props }: BlockViewProps) {
         requestedLocale: locale,
       }),
   });
-
   if (isLoading || !data) {
     return (
       <ListBlockSkeleton
@@ -56,19 +54,32 @@ export function ProgramEventListView({ props }: BlockViewProps) {
         columns={columns}
         limit={limit}
         layout={p.layout}
+        itemSize={p.itemSize}
+        showImage={p.showImage !== 'false'}
+        imageAspectRatio={p.imageAspectRatio}
         carouselLoop={p.carouselLoop !== 'false'}
         carouselIndicators={p.carouselIndicators !== 'false'}
       />
     );
   }
-
   return (
     <>
       <ProgramEventListViewClient events={data.events} parsedProps={p} locale={locale} />
       {showPagination && data.pagination.total > limit ? (
-        <Group justify="center" mt="md">
-          <Pagination total={Math.ceil(data.pagination.total / limit)} value={page} onChange={setPage} />
-        </Group>
+        <DsLayoutInset blockStart="md">
+          <DsLayoutInline justify="center">
+            <Pagination
+              total={Math.ceil(data.pagination.total / limit)}
+              value={page}
+              onChange={setPage}
+              labels={{
+                previousPage: tPagination('previousPage'),
+                nextPage: tPagination('nextPage'),
+                page: (page) => tPagination('page', { page }),
+              }}
+            />
+          </DsLayoutInline>
+        </DsLayoutInset>
       ) : null}
     </>
   );

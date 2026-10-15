@@ -1,5 +1,6 @@
 'use client';
 
+import { componentBindings } from '@/components/core/bindings';
 import { useTranslations } from 'next-intl';
 import { SearchComboboxView, type SearchComboboxViewProps } from '@/components/core/Input';
 
@@ -15,7 +16,7 @@ export function SearchCombobox<T>(props: SearchComboboxProps<T>) {
 
   return (
     <SearchComboboxView
-      {...props}
+      {...componentBindings(props)}
       minimumQueryMessage={t('typeAtLeast', { count: minimumQueryLength })}
       noResultsMessage={t('noResults')}
     />

@@ -1,19 +1,27 @@
 'use client';
 
+import { SectionCard as DsSectionCard, SectionCard, SectionHeader } from '@/components/core/Section';
+import {
+  LayoutInline as DsLayoutInline,
+  LayoutInset as DsLayoutInset,
+  LayoutStack as DsLayoutStack,
+} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { IconExternalLink, IconGripVertical, IconPlus, IconSearch, IconX } from '@tabler/icons-react';
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableSurface, useSortableItem } from '@/components/core/Sortable';
+import { IconExternalLink, IconGripVertical, IconPlus, IconX } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Group, Loader, Paper, Stack, Text } from '@mantine/core';
+
+import { Spinner as Loader } from '@/components/core/Display';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { SearchCombobox } from '@/features/search/SearchCombobox';
-import { SectionCard, SectionHeader } from '@/components/core/Section';
+
 import { ThemedAssetImage } from '@/features/media/ThemedAssetImage';
 import { useWorkMeta } from '@/lib/contexts/WorkMetaContext';
 import { useSearchCombobox } from '@/lib/hooks/useSearchCombobox';
@@ -46,7 +54,7 @@ interface SortableClientProps {
   removeAriaLabel: string;
 }
 
-function SortableClient({
+export function SortableClient({
   clientId,
   client,
   canEdit,
@@ -57,103 +65,106 @@ function SortableClient({
   removeAriaLabel,
 }: SortableClientProps) {
   const tCommonStates = useTranslations('common.states');
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const sortable = useSortableItem({
     id: clientId,
     disabled: !canEdit,
   });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
   if (isLoading || !client) {
     return (
-      <Group
-        ref={setNodeRef}
-        gap="xs"
-        justify="space-between"
-        py={4}
-        px="xs"
-        style={{ borderRadius: 'var(--mantine-radius-sm)', ...style }}
-      >
-        <Group gap="xs">
-          {canEdit && (
-            <IconButton emphasis="low" size="xs" style={{ cursor: 'grab' }} aria-label={reorderAriaLabel}>
-              <IconGripVertical size={14} />
-            </IconButton>
-          )}
-          <Loader size="xs" />
-          <Text size="xs" c="dimmed">
-            {tCommonStates('loading')}
-          </Text>
-        </Group>
-      </Group>
+      <SortableSurface ref={sortable.setNodeRef} motion={sortable.motion}>
+        <DsSectionCard
+          padding="none"
+          border="none"
+          appearance="plain"
+          state={sortable.isDragging ? 'dragging' : 'default'}
+        >
+          <DsLayoutInline gap="xxs" justify="between">
+            <DsLayoutInline gap="xxs">
+              {canEdit && (
+                <IconButton
+                  ref={sortable.handle.ref}
+                  emphasis="low"
+                  interaction="drag-handle"
+                  draggable={false}
+                  aria-label={reorderAriaLabel}
+                  disabled
+                >
+                  <IconGripVertical aria-hidden />
+                </IconButton>
+              )}
+              <Loader size="xs" />
+              <DsText size="xs" tone="secondary">
+                {tCommonStates('loading')}
+              </DsText>
+            </DsLayoutInline>
+          </DsLayoutInline>
+        </DsSectionCard>
+      </SortableSurface>
     );
   }
 
   return (
-    <Group
-      ref={setNodeRef}
-      gap="xs"
-      justify="space-between"
-      py={4}
-      px="xs"
-      style={{ borderRadius: 'var(--mantine-radius-sm)', ...style }}
-    >
-      <Group gap="xs">
-        {canEdit && (
-          <IconButton
-            emphasis="low"
-            size="xs"
-            style={{ cursor: 'grab' }}
-            {...attributes}
-            {...listeners}
-            aria-label={reorderAriaLabel}
-          >
-            <IconGripVertical size={14} />
-          </IconButton>
-        )}
-        {client.logoUrl || client.logoLightUrl || client.logoDarkUrl ? (
-          <ThemedAssetImage
-            fallbackUrl={client.logoUrl}
-            lightUrl={client.logoLightUrl}
-            darkUrl={client.logoDarkUrl}
-            alt={client.name}
-            width={64}
-            height={16}
-            style={{ height: 16, maxWidth: 64 }}
-          />
-        ) : null}
-        <Text size="xs">{client.name}</Text>
-        {client.website && (
-          <IconButton
-            component="a"
-            href={client.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            tone="neutral"
-            emphasis="low"
-            size="xs"
-            aria-label={openWebsiteAriaLabel}
-          >
-            <IconExternalLink size={12} />
-          </IconButton>
-        )}
-      </Group>
-      {canEdit && (
-        <IconButton
-          tone="danger"
-          emphasis="low"
-          size="xs"
-          onClick={() => onRemove(client.id)}
-          aria-label={removeAriaLabel}
-        >
-          <IconX size={12} />
-        </IconButton>
-      )}
-    </Group>
+    <SortableSurface ref={sortable.setNodeRef} motion={sortable.motion}>
+      <DsSectionCard
+        padding="none"
+        border="none"
+        appearance="plain"
+        state={sortable.isDragging ? 'dragging' : 'default'}
+      >
+        <DsLayoutInline gap="xxs" justify="between">
+          <DsLayoutInline gap="xxs">
+            {canEdit && (
+              <IconButton
+                emphasis="low"
+                interaction="drag-handle"
+                draggable={false}
+                {...sortable.handle}
+                aria-label={reorderAriaLabel}
+              >
+                <IconGripVertical aria-hidden />
+              </IconButton>
+            )}
+            {client.logoUrl || client.logoLightUrl || client.logoDarkUrl ? (
+              <ThemedAssetImage
+                fallbackUrl={client.logoUrl}
+                lightUrl={client.logoLightUrl}
+                darkUrl={client.logoDarkUrl}
+                alt={client.name}
+                width={64}
+                height={16}
+                style={{ height: 16, maxWidth: 64 }}
+              />
+            ) : null}
+            <DsText size="xs">{client.name}</DsText>
+            {client.website && (
+              <IconButton
+                href={client.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                tone="neutral"
+                emphasis="low"
+                size="compact"
+                aria-label={openWebsiteAriaLabel}
+              >
+                <IconExternalLink size={12} />
+              </IconButton>
+            )}
+          </DsLayoutInline>
+          {canEdit && (
+            <IconButton
+              tone="danger"
+              emphasis="low"
+              size="compact"
+              onClick={() => onRemove(client.id)}
+              aria-label={removeAriaLabel}
+            >
+              <IconX size={12} />
+            </IconButton>
+          )}
+        </DsLayoutInline>
+      </DsSectionCard>
+    </SortableSurface>
   );
 }
 
@@ -300,9 +311,11 @@ export function WorkClientsSection({ workId: _workId, canEdit, initialClientDeta
   if (!isSynced) {
     return (
       <SectionCard>
-        <Group justify="center" py="md">
-          <Loader size="sm" />
-        </Group>
+        <DsLayoutInset block="md">
+          <DsLayoutInline justify="center">
+            <Loader size="sm" />
+          </DsLayoutInline>
+        </DsLayoutInset>
       </SectionCard>
     );
   }
@@ -327,18 +340,19 @@ export function WorkClientsSection({ workId: _workId, canEdit, initialClientDeta
       />
 
       {canEdit && showAddForm && (
-        <Paper p="sm" mb="sm" bg="var(--mantine-color-default)" radius="sm">
+        <DsSectionCard padding="sm" appearance="muted">
           <SearchCombobox
             combobox={combobox}
             search={search}
             onSearchChange={setSearch}
             placeholder={tCommonPlaceholders('searchClients')}
-            leftSection={<IconSearch size={14} />}
+            leadingGlyph="search"
             items={filteredSearchResults}
             isLoading={searchFetching}
             debouncedSearch={debouncedSearch}
             onSelect={handleAddClient}
             getItemId={(client: { id: string }) => client.id}
+            getItemText={(client) => client.name}
             emptyMessage={t('search.empty')}
             renderItem={(client: {
               id: string;
@@ -348,7 +362,7 @@ export function WorkClientsSection({ workId: _workId, canEdit, initialClientDeta
               logoDarkUrl?: string | null;
               logo_url?: string | null;
             }) => (
-              <Group gap="xs">
+              <DsLayoutInline gap="xxs">
                 {client.logoUrl || client.logoLightUrl || client.logoDarkUrl || client.logo_url ? (
                   <ThemedAssetImage
                     fallbackUrl={client.logoUrl || client.logo_url || null}
@@ -360,21 +374,23 @@ export function WorkClientsSection({ workId: _workId, canEdit, initialClientDeta
                     style={{ height: 16, maxWidth: 64 }}
                   />
                 ) : null}
-                <Text size="xs">{client.name}</Text>
-              </Group>
+                <DsText size="xs">{client.name}</DsText>
+              </DsLayoutInline>
             )}
           />
-        </Paper>
+        </DsSectionCard>
       )}
 
       {clientsWithDetails.length === 0 ? (
-        <Text size="xs" c="dimmed" ta="center" py="sm">
-          {t('empty')}
-        </Text>
+        <DsLayoutInset block="sm">
+          <DsText size="xs" tone="secondary" align="center">
+            {t('empty')}
+          </DsText>
+        </DsLayoutInset>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={clients} strategy={verticalListSortingStrategy}>
-            <Stack gap={0}>
+            <DsLayoutStack gap="none">
               {clientsWithDetails.map(({ clientId, details, isLoading }) => (
                 <SortableClient
                   key={clientId}
@@ -388,7 +404,7 @@ export function WorkClientsSection({ workId: _workId, canEdit, initialClientDeta
                   removeAriaLabel={t('actions.removeClient')}
                 />
               ))}
-            </Stack>
+            </DsLayoutStack>
           </SortableContext>
         </DndContext>
       )}

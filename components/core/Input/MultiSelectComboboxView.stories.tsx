@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
+import { useArgs } from 'storybook/preview-api';
 import { MultiSelectComboboxView, type MultiSelectItem } from './MultiSelectComboboxView';
 
 interface ExampleItem extends MultiSelectItem {
@@ -12,7 +13,36 @@ const options: ExampleItem[] = [
 const meta = {
   title: 'Core/Input/MultiSelectComboboxView',
   component: MultiSelectComboboxView<ExampleItem>,
-  parameters: { layout: 'centered' },
+  parameters: {
+    layout: 'centered',
+    docs: {
+      description: {
+        component:
+          'Interactive local selection, removal and creation. Changes update the story controls; no taxonomy is persisted.',
+      },
+    },
+  },
+  render: function SelectionPreview(args) {
+    const [, updateArgs] = useArgs();
+    return (
+      <MultiSelectComboboxView
+        {...args}
+        onSelect={(item) => {
+          updateArgs({ selectedItems: [...args.selectedItems, item] });
+          args.onSelect(item);
+        }}
+        onDeselect={(item) => {
+          updateArgs({ selectedItems: args.selectedItems.filter((selected) => selected.id !== item.id) });
+          args.onDeselect(item);
+        }}
+        onCreate={(name) => {
+          const item: ExampleItem = { id: `created-${name}`, name, description: 'Created in this preview' };
+          updateArgs({ options: [...args.options, item], selectedItems: [...args.selectedItems, item] });
+          args.onCreate?.(name);
+        }}
+      />
+    );
+  },
   args: {
     label: 'Genres',
     placeholder: 'Select genres',

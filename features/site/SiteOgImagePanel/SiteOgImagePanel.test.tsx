@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { SITE_OG_TARGET_ID } from '@/lib/og-generation-targets';
 import { SiteOgImagePanel } from './SiteOgImagePanel';
 
@@ -21,7 +22,7 @@ let root: Root | null = null;
 let queryClient: QueryClient | null = null;
 
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 vi.mock('@/components/core/MediaPreviewGrid', () => ({
   MediaPreviewGrid: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
@@ -80,9 +81,9 @@ beforeEach(() => {
   act(() => {
     root?.render(
       <QueryClientProvider client={queryClient!}>
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <SiteOgImagePanel currentBackgroundUrl={null} />
-        </MantineProvider>
+        </DesignSystemProvider>
       </QueryClientProvider>,
     );
   });
@@ -141,9 +142,9 @@ describe('SiteOgImagePanel', () => {
     act(() => {
       root?.render(
         <QueryClientProvider client={queryClient!}>
-          <MantineProvider>
+          <DesignSystemProvider forceColorScheme="light">
             <SiteOgImagePanel currentBackgroundUrl={null} automaticGenerationRunId="settings-run" />
-          </MantineProvider>
+          </DesignSystemProvider>
         </QueryClientProvider>,
       );
     });
@@ -167,9 +168,9 @@ describe('SiteOgImagePanel', () => {
     act(() => {
       root?.render(
         <QueryClientProvider client={queryClient!}>
-          <MantineProvider>
+          <DesignSystemProvider forceColorScheme="light">
             <SiteOgImagePanel currentBackgroundUrl={null} />
-          </MantineProvider>
+          </DesignSystemProvider>
         </QueryClientProvider>,
       );
     });

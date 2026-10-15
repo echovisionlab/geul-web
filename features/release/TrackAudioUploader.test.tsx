@@ -6,7 +6,7 @@ import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.
 import { UploadSessionStatus } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { abortUploadAction, findMultipartUploadCandidateAction } from '@/lib/actions/file';
 import { UploadType } from '@/lib/types/upload/model';
 import { rememberUploadSession } from '@/lib/upload/upload-session-store';
@@ -75,7 +75,7 @@ vi.mock('@/lib/actions/file', () => ({
   findMultipartUploadCandidateAction: vi.fn(),
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: {
     show: vi.fn(),
   },
@@ -671,7 +671,10 @@ describe('TrackAudioUploader', () => {
       await Promise.resolve();
     });
 
-    expect(notifications.show).toHaveBeenCalledWith({ message: 'Audio uploaded, processing started', color: 'green' });
+    expect(notifications.show).toHaveBeenCalledWith({
+      message: 'Audio uploaded, processing started',
+      tone: 'positive',
+    });
     expect(onPendingUploadCancelled).not.toHaveBeenCalled();
     expect(document.querySelector(ids.cancelButtonSelector)).toBeNull();
     expect(onUploadProgressChange).toHaveBeenLastCalledWith(ids.trackId, {
@@ -768,7 +771,10 @@ describe('TrackAudioUploader', () => {
 
     expect(uploadHookMocks.upload).toHaveBeenCalledTimes(2);
     expect(onPendingUploadCancelled).not.toHaveBeenCalled();
-    expect(notifications.show).toHaveBeenCalledWith({ message: 'Audio uploaded, processing started', color: 'green' });
+    expect(notifications.show).toHaveBeenCalledWith({
+      message: 'Audio uploaded, processing started',
+      tone: 'positive',
+    });
     expect(document.querySelector(ids.cancelButtonSelector)).toBeNull();
   });
 
@@ -838,7 +844,7 @@ describe('TrackAudioUploader', () => {
 
     expect(notifications.show).toHaveBeenCalledWith(
       expect.objectContaining({
-        color: 'red',
+        tone: 'danger',
       }),
     );
   });

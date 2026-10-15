@@ -6,6 +6,7 @@ import { getSiteMetadataDocument } from '@/lib/queries/metadata';
 import {
   getProgramEventSeriesView,
   listProgramEventsForSeries,
+  listProgramEventTypeOptions,
   type PublicProgramEventListItem,
 } from '@/lib/queries/program-event';
 import { resolveContentRequestedLocale } from '@/lib/translation/content-language';
@@ -79,7 +80,7 @@ export default async function ProgramEventSeriesPage({ params, searchParams }: P
     return renderPageRouteFallback(['event-series', idOrSlug], query);
   }
 
-  const [site, tCommonEntities, eventResult] = await Promise.all([
+  const [site, tCommonEntities, eventResult, typeOptions] = await Promise.all([
     getSiteMetadataDocument(),
     getTranslations('common.entities'),
     listProgramEventsForSeries({
@@ -87,6 +88,11 @@ export default async function ProgramEventSeriesPage({ params, searchParams }: P
       limit: EVENT_SERIES_EVENTS_PAGE_SIZE,
       requestedLocale,
     }),
+    // Filter options for the events table; on failure the table fetches them in the browser as before.
+    listProgramEventTypeOptions(requestedLocale).then(
+      (options) => ({ options, updatedAt: Date.now() }),
+      () => undefined,
+    ),
   ]);
 
   const pathname = `/event-series/${series.slug || series.id}`;
@@ -109,6 +115,8 @@ export default async function ProgramEventSeriesPage({ params, searchParams }: P
       >
         <EventSeriesEventsTable
           seriesId={series.id}
+          initialTypeOptions={typeOptions?.options}
+          initialTypeOptionsUpdatedAt={typeOptions?.updatedAt}
           initialEvents={eventResult.events.map(toEventSeriesTableItem)}
           initialPagination={eventResult.pagination}
           pageSize={EVENT_SERIES_EVENTS_PAGE_SIZE}

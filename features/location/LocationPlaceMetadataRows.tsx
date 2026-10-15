@@ -1,40 +1,35 @@
 'use client';
-
+import { Text as DsText, type TextTone } from '@/components/core/Typography';
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { Box, Text, type TextProps } from '@mantine/core';
-import { PublicMetadataRow } from '@/components/core/PublicMetadata';
+import { LayoutVisibility } from '@/components/core/Layout';
+import { PublicMetadataRow, type MetadataTextSize } from '@/components/core/PublicMetadata';
 import { formatLocationPlace, type LocationPlaceSummary } from '@/lib/utils/location-place';
 import { LocationPlaceMenu } from './LocationPlaceMenu';
-
 export type CoordinateVisibilityMode = 'always' | 'desktop' | 'never';
-
 interface LocationPlaceMetadataRowsProps {
   place: LocationPlaceSummary;
-  labelColor?: string;
-  valueColor?: string;
-  textSize?: TextProps['size'];
+  labelColor?: TextTone;
+  valueColor?: TextTone;
+  textSize?: MetadataTextSize;
   coordinateVisibility?: CoordinateVisibilityMode;
 }
-
 interface MetadataRowProps {
   label: string;
   value: ReactNode;
-  labelColor: string;
-  textSize: TextProps['size'];
+  labelColor: TextTone;
+  textSize: MetadataTextSize;
 }
-
 function MetadataRow({ label, value, labelColor, textSize }: MetadataRowProps) {
   return (
-    <PublicMetadataRow label={label} labelColor={labelColor} labelSize={textSize}>
+    <PublicMetadataRow label={label} labelColor={labelColor} size={textSize}>
       {value}
     </PublicMetadataRow>
   );
 }
-
 export function LocationPlaceMetadataRows({
   place,
-  labelColor = 'dimmed',
+  labelColor = 'secondary',
   valueColor = 'inherit',
   textSize = 'sm',
   coordinateVisibility = 'always',
@@ -42,36 +37,27 @@ export function LocationPlaceMetadataRows({
   const tCommon = useTranslations('common');
   const formattedPlace = formatLocationPlace(place);
   const locationName = formattedPlace.name || tCommon('labels.coordinates');
-
   const renderCoordinateRow = (label: string, value: string) => {
     if (coordinateVisibility === 'never') {
       return null;
     }
-
     const row = (
       <MetadataRow
         label={label}
         labelColor={labelColor}
         textSize={textSize}
         value={
-          <Text size={textSize} c={valueColor} style={{ overflowWrap: 'anywhere' }}>
+          <DsText size={textSize} tone={valueColor} wrap="anywhere">
             {value}
-          </Text>
+          </DsText>
         }
       />
     );
-
     if (coordinateVisibility === 'desktop') {
-      return (
-        <Box visibleFrom="sm" style={{ display: 'contents' }}>
-          {row}
-        </Box>
-      );
+      return <LayoutVisibility visibleFrom="sm">{row}</LayoutVisibility>;
     }
-
     return row;
   };
-
   return (
     <>
       <MetadataRow

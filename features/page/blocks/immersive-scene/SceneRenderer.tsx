@@ -1,9 +1,16 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { primitiveTokens } from '@/components/core/design-tokens';
+import { Button } from '@/components/core/Button';
+import { Disclosure } from '@/components/core/Disclosure';
+import { ScrollArea } from '@/components/core/Display';
+import { LayoutInline, LayoutStack } from '@/components/core/Layout';
+import { Heading } from '@/components/core/Typography';
+import { useComputedColorScheme } from '@/lib/providers/DesignSystemProvider';
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useTranslations } from 'next-intl';
 import type { ParticlesEngine, TextureSequence } from '@echovisionlab/ionian';
 import type * as Three from 'three';
-import { Box, Title, useComputedColorScheme } from '@mantine/core';
 import { useReducedMotion } from '@mantine/hooks';
 import { toCdnUrl } from '@/lib/utils/file-url';
 import { createClientLogger } from '@/lib/utils/client-logger';
@@ -277,11 +284,15 @@ export function resolveScrollProgress(element: HTMLElement, scrollRoot: HTMLElem
 }
 
 export function ImmersiveSceneRenderer({ config, preview = false, progress }: ImmersiveSceneRendererProps) {
+  const t = useTranslations('common.motion');
+  const viewportId = useId();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const engineRef = useRef<ParticlesEngine | null>(null);
-  const renderFrameRef = useRef<(() => void) | null>(null);
+  const renderFrameRef = useRef<((timestamp?: number) => void) | null>(null);
   const progressRef = useRef(0);
+  const autoplayClockRef = useRef<AutoplayClockState>({ elapsedSeconds: 0, lastFrameTimestamp: null });
+  const motionStoppedRef = useRef(false);
   const particleBrightnessRef = useRef(1.25);
   const rotationControlsRef = useRef({
     enabled: true,
@@ -297,7 +308,11 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
     radius: 0.45,
   });
   const reducedMotion = useReducedMotion();
-  const computedColorScheme = useComputedColorScheme('light');
+  const [paused, setPaused] = useState(false);
+  const [informationOpened, setInformationOpened] = useState<boolean | null>(null);
+  const showInformation = informationOpened ?? Boolean(reducedMotion);
+  const motionStopped = paused || Boolean(reducedMotion);
+  const computedColorScheme = useComputedColorScheme();
   const [rendererStatus, setRendererStatus] = useState<RendererStatus>('idle');
   const [assetStatus, setAssetStatus] = useState<RendererAssetStatus>({
     mesh: 'idle',
@@ -307,6 +322,7 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
   const [autoplayTextSegmentProgress, setAutoplayTextSegmentProgress] = useState(0);
 
   const units = config.units;
+  const informationUnits = units.filter((unit) => unit.title.trim() || unit.text.trim() || unit.attribution?.trim());
   const latestUnitsRef = useRef(units);
   const isStatic = units.length <= 1;
   const textureSize = Number(config.textureSize);
@@ -345,7 +361,7 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
   const usesAutoplayTimeline = playback === 'autoplay' && progress === undefined && !reducedMotion && !isStatic;
   const activeUnit = resolveActiveUnit(units, visualProgress, loop);
   const activeTexture = activeUnit ? resolveThemedUnitTexture(activeUnit, colorScheme) : null;
-  const activeColor = activeTexture?.color ?? '#ffffff';
+  const activeColor = activeTexture?.color ?? primitiveTokens.colors.white;
 
   const unitSignature = useMemo(() => resolveRendererUnitSignature(units), [units]);
   const meshOffsetYSignature = useMemo(() => resolveMeshOffsetYSignature(units), [units]);
@@ -353,6 +369,17 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
     () => units.map((unit) => parseOptionalNumber(unit.holdSeconds, { min: 0.2, max: 60 })),
     [units],
   );
+
+  useEffect(() => {
+    motionStoppedRef.current = motionStopped;
+    const enabled = hoverEnabled && !motionStopped;
+    hoverControlsRef.current = { enabled, radius: hoverRepelRadius };
+    engineRef.current?.setMaxRepelDistance(enabled ? hoverRepelRadius : 0);
+    engineRef.current?.useIntersect(enabled);
+    if (motionStopped) {
+      engineRef.current?.setPointerPosition({ x: 2, y: 2 });
+    }
+  }, [hoverEnabled, hoverRepelRadius, motionStopped]);
 
   useEffect(() => {
     latestUnitsRef.current = units;
@@ -382,8 +409,8 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
     }
     if (engineRef.current) {
       updateParticleBrightness(engineRef.current, particleBrightness);
-      engineRef.current.setMaxRepelDistance(hoverEnabled ? hoverRepelRadius : 0);
-      engineRef.current.useIntersect(hoverEnabled);
+      engineRef.current.setMaxRepelDistance(hoverEnabled && !motionStopped ? hoverRepelRadius : 0);
+      engineRef.current.useIntersect(hoverEnabled && !motionStopped);
     }
     if (reducedMotion) {
       renderFrameRef.current?.();
@@ -392,6 +419,7 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
     hoverEnabled,
     hoverRepelRadius,
     isScrollScene,
+    motionStopped,
     particleBrightness,
     reducedMotion,
     rotationEnabled,
@@ -408,24 +436,17 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
   ]);
 
   useEffect(() => {
-    hoverControlsRef.current = {
-      enabled: hoverEnabled,
-      radius: hoverRepelRadius,
-    };
-  }, [hoverEnabled, hoverRepelRadius]);
-
-  useEffect(() => {
     const nextProgress = resolvePlaybackProgress(progress ?? 0, config.transition);
     progressRef.current = nextProgress;
     setVisualProgress(nextProgress);
     setAutoplayTextSegmentProgress(0);
-    if (reducedMotion) {
-      renderFrameRef.current?.();
-    }
-  }, [config.transition, progress, reducedMotion]);
+    autoplayClockRef.current = { elapsedSeconds: 0, lastFrameTimestamp: null };
+    renderFrameRef.current?.();
+  }, [config.playback, config.transition, progress, units.length]);
 
   useEffect(() => {
-    if (progress !== undefined || reducedMotion || isStatic) {
+    if (progress !== undefined || motionStopped || isStatic) {
+      autoplayClockRef.current.lastFrameTimestamp = null;
       return;
     }
 
@@ -461,21 +482,14 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
       };
     }
 
-    let clockState: AutoplayClockState = {
-      elapsedSeconds: 0,
-      lastFrameTimestamp: null,
-    };
     const resetFrameTimestamp = () => {
-      clockState = {
-        ...clockState,
-        lastFrameTimestamp: null,
-      };
+      autoplayClockRef.current.lastFrameTimestamp = null;
     };
     const isPageHidden = () => typeof document !== 'undefined' && document.hidden;
     const tick = (timestamp: number) => {
-      clockState = resolveAutoplayClockState(clockState, timestamp, isPageHidden());
+      autoplayClockRef.current = resolveAutoplayClockState(autoplayClockRef.current, timestamp, isPageHidden());
       const timeline = resolveAutoplayTimelineState({
-        elapsedSeconds: clockState.elapsedSeconds,
+        elapsedSeconds: autoplayClockRef.current.elapsedSeconds,
         unitCount: units.length,
         unitHoldSeconds,
         unitHoldSecondsByIndex,
@@ -497,6 +511,7 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
     window.addEventListener('pagehide', resetFrameTimestamp);
     return () => {
       window.cancelAnimationFrame(frameId);
+      autoplayClockRef.current.lastFrameTimestamp = null;
       document.removeEventListener('visibilitychange', resetFrameTimestamp);
       window.removeEventListener('pagehide', resetFrameTimestamp);
     };
@@ -504,9 +519,9 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
     config.transition,
     isStatic,
     loop,
+    motionStopped,
     playback,
     progress,
-    reducedMotion,
     unitGapSeconds,
     unitHoldSeconds,
     unitHoldSecondsByIndex,
@@ -520,7 +535,6 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
     }
 
     let disposed = false;
-    let frameId = 0;
     let resizeObserver: ResizeObserver | null = null;
     let cleanup: (() => void) | null = null;
     const rendererUnits = units;
@@ -563,9 +577,6 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
         });
         engineRef.current = engine;
         cleanup = () => {
-          if (frameId !== 0) {
-            window.cancelAnimationFrame(frameId);
-          }
           resizeObserver?.disconnect();
           if (engineRef.current === engine) {
             engineRef.current = null;
@@ -654,7 +665,7 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
         const pointerNdc = new THREE.Vector2();
         const updatePointerPosition = (event: PointerEvent) => {
           const controls = hoverControlsRef.current;
-          if (!controls.enabled) {
+          if (!controls.enabled || motionStoppedRef.current) {
             return;
           }
           const parent = canvas.parentElement;
@@ -667,15 +678,9 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
             -(((event.clientY - rect.top) / rect.height) * 2 - 1),
           );
           engine.setPointerPosition(pointerNdc);
-          if (reducedMotion) {
-            renderFrameRef.current?.();
-          }
         };
         const clearPointerPosition = () => {
           engine.setPointerPosition({ x: 2, y: 2 });
-          if (reducedMotion) {
-            renderFrameRef.current?.();
-          }
         };
         canvas.addEventListener('pointermove', updatePointerPosition);
         canvas.addEventListener('pointerleave', clearPointerPosition);
@@ -689,11 +694,15 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
         })(cleanup);
 
         let appliedParticleSize = particleGeometryScale;
+        let elapsedTime = 0;
+        let wasStopped = true;
         accumulatedTimeRotationRef.current = { ...ZERO_ROTATION_VECTOR };
         const renderFrame = (timestamp?: number) => {
           timer.update(timestamp);
-          const deltaTime = timer.getDelta();
-          const elapsedTime = timer.getElapsed();
+          const stopped = motionStoppedRef.current;
+          const deltaTime = stopped || wasStopped ? 0 : timer.getDelta();
+          wasStopped = stopped;
+          elapsedTime += deltaTime;
           const rotationControls = rotationControlsRef.current;
           updateParticleBrightness(engine, particleBrightnessRef.current);
           engine.setOverallProgress(progressRef.current, false);
@@ -705,12 +714,19 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
             rotationControls.initialRotation,
           );
           let dynamicRotation = { ...ZERO_ROTATION_VECTOR };
-          if (rotationControls.enabled && !reducedMotion) {
-            accumulatedTimeRotationRef.current = advanceRotation(
-              accumulatedTimeRotationRef.current,
-              resolveRotationSpeedAtProgress(latestUnitsRef.current, progressRef.current, loop, rotationControls.speed),
-              deltaTime,
-            );
+          if (rotationControls.enabled) {
+            if (!stopped) {
+              accumulatedTimeRotationRef.current = advanceRotation(
+                accumulatedTimeRotationRef.current,
+                resolveRotationSpeedAtProgress(
+                  latestUnitsRef.current,
+                  progressRef.current,
+                  loop,
+                  rotationControls.speed,
+                ),
+                deltaTime,
+              );
+            }
             const scrollRotation =
               rotationControls.scrollEnabled && rotationControls.isScrollScene
                 ? resolveScrollRotationAtProgress(
@@ -741,15 +757,7 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
         };
         renderFrameRef.current = renderFrame;
 
-        if (reducedMotion) {
-          renderFrame();
-        } else {
-          const animate = (timestamp: number) => {
-            renderFrame(timestamp);
-            frameId = window.requestAnimationFrame(animate);
-          };
-          frameId = window.requestAnimationFrame(animate);
-        }
+        renderFrame();
 
         if (!disposed) {
           setAssetStatus({
@@ -774,22 +782,29 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
       disposed = true;
       cleanup?.();
     };
-  }, [
-    backgroundColor,
-    backgroundEnabled,
-    colorScheme,
-    loop,
-    particleSize,
-    preview,
-    reducedMotion,
-    textureSize,
-    unitSignature,
-  ]);
+  }, [backgroundColor, backgroundEnabled, colorScheme, loop, particleSize, preview, textureSize, unitSignature]);
 
-  const heightMode = preview ? 'preview' : isScrollScene ? 'scroll' : 'intrinsic';
+  useEffect(() => {
+    if (rendererStatus !== 'ready') {
+      return;
+    }
+    renderFrameRef.current?.();
+    if (motionStopped) {
+      return;
+    }
+    let frameId = 0;
+    const animate = (timestamp: number) => {
+      renderFrameRef.current?.(timestamp);
+      frameId = window.requestAnimationFrame(animate);
+    };
+    frameId = window.requestAnimationFrame(animate);
+    return () => window.cancelAnimationFrame(frameId);
+  }, [motionStopped, rendererStatus]);
+
+  const heightMode = preview ? 'preview' : isScrollScene && !reducedMotion ? 'scroll' : 'intrinsic';
   const rootStyle = {
-    '--immersive-scene-intrinsic-height': `${minHeightPx}px`,
-    '--immersive-scene-scroll-document-height': `${heightVh}vh`,
+    '--_immersive-scene-intrinsic-height': `${minHeightPx}px`,
+    '--_immersive-scene-scroll-document-height': `${heightVh}vh`,
     background: backgroundEnabled ? backgroundColor : 'transparent',
     color: textColors.root,
   } as CSSProperties;
@@ -797,166 +812,219 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
   const segmentProgress =
     units.length <= 1 ? 0 : usesAutoplayTimeline ? autoplayTextSegmentProgress : visualProgress * segmentCount;
 
-  return (
-    <Box
-      ref={rootRef}
-      className={classes.root}
-      data-immersive-scene
-      data-playback={isStatic ? 'static' : playback}
-      data-color-scheme={colorScheme}
-      data-background-enabled={backgroundEnabled ? 'true' : 'false'}
-      data-renderer-status={rendererStatus}
-      data-mesh-asset-status={assetStatus.mesh}
-      data-texture-asset-status={assetStatus.texture}
-      data-particle-count={`${textureSize}x${textureSize}`}
-      data-default-particle-size={particleSize}
-      data-particle-brightness={particleBrightness}
-      data-rotation-enabled={rotationEnabled ? 'true' : 'false'}
-      data-rotation-x={config.rotationX}
-      data-rotation-y={config.rotationY}
-      data-rotation-z={config.rotationZ}
-      data-rotation-speed-x={rotationSpeed.x}
-      data-rotation-speed-y={rotationSpeed.y}
-      data-rotation-speed-z={rotationSpeed.z}
-      data-scroll-rotation-enabled={scrollRotationEnabled ? 'true' : 'false'}
-      data-scroll-rotation-turns-x={scrollRotationTurns.x}
-      data-scroll-rotation-turns-y={scrollRotationTurns.y}
-      data-scroll-rotation-turns-z={scrollRotationTurns.z}
-      data-hover-enabled={hoverEnabled ? 'true' : 'false'}
-      data-hover-repel-radius={hoverRepelRadius}
-      data-height-mode={heightMode}
-      data-scroll-owner="document"
-      data-preview={preview ? 'true' : 'false'}
-      style={rootStyle}
-    >
-      <Box className={classes.viewport} data-immersive-scene-viewport>
-        <Box
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `radial-gradient(circle at 50% 38%, ${activeColor}55 0 1px, transparent 1.2px), radial-gradient(circle at 48% 48%, ${activeColor}26 0 1px, transparent 1.4px)`,
-            backgroundSize: '7px 7px, 13px 13px',
-            opacity: backgroundEnabled ? (rendererStatus === 'ready' ? 0.2 : 0.7) : 0,
-            transform: `scale(${1 + visualProgress * 0.08})`,
-            transition: reducedMotion ? undefined : 'opacity 240ms ease, transform 600ms ease',
-          }}
-        />
-        <canvas
-          ref={canvasRef}
-          aria-hidden="true"
-          data-immersive-scene-canvas
-          style={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            opacity: rendererStatus === 'ready' ? 1 : 0,
-            transition: reducedMotion ? undefined : 'opacity 240ms ease',
-          }}
-        />
-        <Box
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'grid',
-            placeItems: 'center',
-            pointerEvents: 'none',
-            padding: preview ? '32px' : 'clamp(32px, 7vw, 96px)',
-            textAlign: 'center',
-          }}
-        >
-          {units.map((unit, index) => {
-            const { opacity } = resolveUnitPresentation(segmentProgress, index, units.length, transitionWindow, loop);
-            return (
-              <Box
-                key={unit.id}
-                data-immersive-scene-unit={unit.id}
-                aria-hidden={opacity < 0.5}
-                style={{
-                  gridArea: '1 / 1',
-                  maxWidth: preview ? 520 : 820,
-                  opacity,
-                  transition: reducedMotion || usesAutoplayTimeline ? undefined : 'opacity 220ms ease',
-                }}
-              >
-                {unit.title ? (
-                  <Title
-                    order={preview ? 3 : 2}
-                    style={{
-                      color: textColors.title,
-                      fontWeight: 800,
-                      letterSpacing: 0,
-                      fontSize: preview ? 28 : 'clamp(40px, 7vw, 92px)',
-                      lineHeight: 1,
-                    }}
-                  >
-                    {unit.title}
-                  </Title>
-                ) : null}
-                {unit.text ? (
-                  <Box
-                    mt={preview ? 'sm' : 'xl'}
-                    style={{
-                      color: textColors.body,
-                      fontSize: preview ? 'var(--mantine-font-size-sm)' : 'var(--mantine-font-size-xl)',
-                    }}
-                  >
-                    <ImmersiveSceneDescriptionView>{unit.text}</ImmersiveSceneDescriptionView>
-                  </Box>
-                ) : null}
-              </Box>
-            );
-          })}
-        </Box>
-        <Box
-          data-immersive-scene-attribution-layer
-          style={{
-            position: 'absolute',
-            insetInlineEnd: preview ? 16 : 'clamp(16px, 2.5vw, 32px)',
-            insetBlockEnd: preview ? 16 : 'max(clamp(16px, 2.5vw, 32px), env(safe-area-inset-bottom))',
-            zIndex: 2,
-            display: 'grid',
-            width: 'max-content',
-            maxWidth: preview ? 'min(260px, calc(100% - 32px))' : 'min(28rem, calc(100% - 32px))',
-            textAlign: 'end',
-            pointerEvents: 'none',
-          }}
-        >
-          {units.map((unit, index) => {
-            const attribution = unit.attribution?.trim();
-            if (!attribution) {
-              return null;
+  const content = (
+    <LayoutStack gap="xs">
+      {!reducedMotion ? (
+        <LayoutInline>
+          <Button aria-controls={viewportId} onClick={() => setPaused((current) => !current)}>
+            {t(paused ? 'resume' : 'pause')}
+          </Button>
+        </LayoutInline>
+      ) : null}
+      {informationUnits.length > 0 ? (
+        <Disclosure
+          label={t('readAllInformation')}
+          opened={showInformation}
+          onChange={(opened) => {
+            setInformationOpened(opened);
+            if (opened) {
+              setPaused(true);
             }
+          }}
+          contentIndent="none"
+          headingLevel={2}
+        >
+          <LayoutStack gap="lg">
+            {informationUnits.map((unit) => (
+              <LayoutStack as="section" key={unit.id} gap="xs" data-immersive-scene-information-unit={unit.id}>
+                {unit.title ? (
+                  <Heading level={3} scale={5}>
+                    {unit.title}
+                  </Heading>
+                ) : null}
+                {unit.text ? <ImmersiveSceneDescriptionView>{unit.text}</ImmersiveSceneDescriptionView> : null}
+                {unit.attribution ? (
+                  <div role="note">
+                    <ImmersiveSceneDescriptionView>{unit.attribution}</ImmersiveSceneDescriptionView>
+                  </div>
+                ) : null}
+              </LayoutStack>
+            ))}
+          </LayoutStack>
+        </Disclosure>
+      ) : null}
+      <div
+        id={viewportId}
+        ref={rootRef}
+        className={classes.root}
+        data-immersive-scene
+        data-motion-paused={motionStopped ? 'true' : 'false'}
+        data-progress={visualProgress}
+        data-playback={isStatic ? 'static' : playback}
+        data-color-scheme={colorScheme}
+        data-background-enabled={backgroundEnabled ? 'true' : 'false'}
+        data-renderer-status={rendererStatus}
+        data-mesh-asset-status={assetStatus.mesh}
+        data-texture-asset-status={assetStatus.texture}
+        data-particle-count={`${textureSize}x${textureSize}`}
+        data-default-particle-size={particleSize}
+        data-particle-brightness={particleBrightness}
+        data-rotation-enabled={rotationEnabled ? 'true' : 'false'}
+        data-rotation-x={config.rotationX}
+        data-rotation-y={config.rotationY}
+        data-rotation-z={config.rotationZ}
+        data-rotation-speed-x={rotationSpeed.x}
+        data-rotation-speed-y={rotationSpeed.y}
+        data-rotation-speed-z={rotationSpeed.z}
+        data-scroll-rotation-enabled={scrollRotationEnabled ? 'true' : 'false'}
+        data-scroll-rotation-turns-x={scrollRotationTurns.x}
+        data-scroll-rotation-turns-y={scrollRotationTurns.y}
+        data-scroll-rotation-turns-z={scrollRotationTurns.z}
+        data-hover-enabled={hoverEnabled ? 'true' : 'false'}
+        data-hover-repel-radius={hoverRepelRadius}
+        data-height-mode={heightMode}
+        data-scroll-owner="document"
+        data-preview={preview ? 'true' : 'false'}
+        style={rootStyle}
+      >
+        <div className={classes.viewport} data-immersive-scene-viewport>
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `radial-gradient(circle at 50% 38%, ${activeColor}55 0 1px, transparent 1.2px), radial-gradient(circle at 48% 48%, ${activeColor}26 0 1px, transparent 1.4px)`,
+              backgroundSize: '7px 7px, 13px 13px',
+              opacity: backgroundEnabled ? (rendererStatus === 'ready' ? 0.2 : 0.7) : 0,
+              transform: `scale(${1 + visualProgress * 0.08})`,
+              transition: motionStopped ? undefined : 'opacity 240ms ease, transform 600ms ease',
+            }}
+          />
+          <canvas
+            ref={canvasRef}
+            aria-hidden="true"
+            data-immersive-scene-canvas
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              opacity: rendererStatus === 'ready' ? 1 : 0,
+              transition: motionStopped ? undefined : 'opacity 240ms ease',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'grid',
+              placeItems: 'center',
+              pointerEvents: 'none',
+              padding: preview ? '32px' : 'clamp(32px, 7vw, 96px)',
+              textAlign: 'center',
+            }}
+          >
+            {units.map((unit, index) => {
+              const { opacity } = resolveUnitPresentation(segmentProgress, index, units.length, transitionWindow, loop);
+              return (
+                <div
+                  key={unit.id}
+                  data-immersive-scene-unit={unit.id}
+                  aria-hidden={showInformation || opacity < 0.5}
+                  inert={showInformation || opacity < 0.5 || undefined}
+                  style={{
+                    gridArea: '1 / 1',
+                    maxWidth: preview ? 520 : 820,
+                    opacity,
+                    transition: motionStopped || usesAutoplayTimeline ? undefined : 'opacity 220ms ease',
+                  }}
+                >
+                  {unit.title ? (
+                    <h2
+                      style={{
+                        margin: 0,
+                        fontFamily: 'var(--font-family-sans), sans-serif',
+                        color: textColors.title,
+                        fontWeight: 800,
+                        letterSpacing: 0,
+                        fontSize: preview ? 28 : 'clamp(40px, 7vw, 92px)',
+                        lineHeight: 1,
+                      }}
+                    >
+                      {unit.title}
+                    </h2>
+                  ) : null}
+                  {unit.text ? (
+                    <div
+                      style={{
+                        color: textColors.body,
+                        marginBlockStart: preview ? 'var(--geul-spacing-sm)' : 'var(--geul-spacing-xl)',
+                        fontSize: preview ? 'var(--geul-font-size-sm)' : 'var(--geul-font-size-xl)',
+                      }}
+                    >
+                      <ImmersiveSceneDescriptionView>{unit.text}</ImmersiveSceneDescriptionView>
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+          <div
+            data-immersive-scene-attribution-layer
+            style={{
+              position: 'absolute',
+              insetInlineEnd: preview ? 16 : 'clamp(16px, 2.5vw, 32px)',
+              insetBlockEnd: preview ? 16 : 'max(clamp(16px, 2.5vw, 32px), env(safe-area-inset-bottom))',
+              zIndex: 2,
+              display: 'grid',
+              width: 'max-content',
+              maxWidth: preview ? 'min(260px, calc(100% - 32px))' : 'min(28rem, calc(100% - 32px))',
+              textAlign: 'end',
+              pointerEvents: 'none',
+            }}
+          >
+            {units.map((unit, index) => {
+              const attribution = unit.attribution?.trim();
+              if (!attribution) {
+                return null;
+              }
 
-            const { opacity } = resolveUnitPresentation(segmentProgress, index, units.length, transitionWindow, loop);
-            const isInteractive = opacity >= 0.5;
-            return (
-              <Box
-                key={unit.id}
-                role="note"
-                data-immersive-scene-unit-attribution={unit.id}
-                aria-hidden={!isInteractive}
-                inert={isInteractive ? undefined : true}
-                style={{
-                  gridArea: '1 / 1',
-                  minWidth: 0,
-                  padding: preview ? '6px 8px' : 'clamp(6px, 1vw, 10px) clamp(8px, 1.25vw, 12px)',
-                  borderRadius: 6,
-                  color: textColors.body,
-                  background: `color-mix(in srgb, ${backgroundColor} 62%, transparent)`,
-                  backdropFilter: 'blur(10px)',
-                  opacity,
-                  pointerEvents: isInteractive ? 'auto' : 'none',
-                  transition: reducedMotion || usesAutoplayTimeline ? undefined : 'opacity 220ms ease',
-                }}
-              >
-                <ImmersiveSceneDescriptionView variant="attribution">{attribution}</ImmersiveSceneDescriptionView>
-              </Box>
-            );
-          })}
-        </Box>
-      </Box>
-    </Box>
+              const { opacity } = resolveUnitPresentation(segmentProgress, index, units.length, transitionWindow, loop);
+              const isInteractive = !showInformation && opacity >= 0.5;
+              return (
+                <div
+                  key={unit.id}
+                  role="note"
+                  data-immersive-scene-unit-attribution={unit.id}
+                  aria-hidden={!isInteractive}
+                  inert={isInteractive ? undefined : true}
+                  style={{
+                    gridArea: '1 / 1',
+                    minWidth: 0,
+                    padding: preview ? '6px 8px' : 'clamp(6px, 1vw, 10px) clamp(8px, 1.25vw, 12px)',
+                    borderRadius: 6,
+                    color: textColors.body,
+                    background: `color-mix(in srgb, ${backgroundColor} 62%, transparent)`,
+                    backdropFilter: 'blur(10px)',
+                    opacity,
+                    pointerEvents: isInteractive ? 'auto' : 'none',
+                    transition: motionStopped || usesAutoplayTimeline ? undefined : 'opacity 220ms ease',
+                  }}
+                >
+                  <ImmersiveSceneDescriptionView variant="attribution">{attribution}</ImmersiveSceneDescriptionView>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </LayoutStack>
+  );
+  return preview ? (
+    <ScrollArea size="fill" role="region" aria-label={t('readAllInformation')}>
+      {content}
+    </ScrollArea>
+  ) : (
+    content
   );
 }

@@ -1,14 +1,20 @@
+// Mantine's light-dark transform expands through these mixins. Project them
+// through the same theme attribute used by the shared provider and token CSS.
+const themeMixins = {};
+for (const scheme of ['light', 'dark']) {
+  themeMixins[scheme] = { [`[data-geul-theme='${scheme}'] &`]: { '@mixin-content': {} } };
+  themeMixins[`${scheme}-root`] = { [`&[data-geul-theme='${scheme}']`]: { '@mixin-content': {} } };
+  themeMixins[`where-${scheme}`] = { [`:where([data-geul-theme='${scheme}']) &`]: { '@mixin-content': {} } };
+  themeMixins[`where-${scheme}-root`] = {
+    [`&:where(:root[data-geul-theme='${scheme}'])`]: { '@mixin-content': {} },
+  };
+}
+
 module.exports = {
   plugins: {
-    'postcss-preset-mantine': {},
+    'postcss-preset-mantine': { mixins: themeMixins },
     'postcss-simple-vars': {
-      variables: {
-        'mantine-breakpoint-xs': '36em',
-        'mantine-breakpoint-sm': '48em',
-        'mantine-breakpoint-md': '62em',
-        'mantine-breakpoint-lg': '75em',
-        'mantine-breakpoint-xl': '88em',
-      },
+      variables: require('./lib/styles/design-breakpoints.json'),
     },
   },
 };

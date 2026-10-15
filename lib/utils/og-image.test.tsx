@@ -17,6 +17,8 @@ describe('OG image template', () => {
     };
 
     expect(info.channels).toBe(3);
+    expect(info.width).toBe(1200);
+    expect(info.height).toBe(630);
     expect(pixel(0, 0)).toEqual([18, 52, 86]);
     expect(pixel(600, 315)).toEqual([18, 52, 86]);
     expect(pixel(1199, 629)).toEqual([18, 52, 86]);

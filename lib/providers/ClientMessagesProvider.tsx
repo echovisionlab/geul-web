@@ -3,11 +3,19 @@
 import { Suspense, useEffect, useState, type ComponentProps, type ReactNode } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { NextIntlClientProvider, useTranslations } from 'next-intl';
-import { MantineProvider } from '@mantine/core';
+import { Alert } from '@/components/core/Alert';
+import { Button } from '@/components/core/Button';
+import { LayoutContainer, LayoutInset, LayoutStack } from '@/components/core/Layout';
 import { PageLoaderView } from '@/components/core/LoadingSurface';
 import { DEFAULT_LOCALE, normalizeLocale, type SupportedLocale } from '@/lib/i18n/locale';
-import { isReducedCatalogueRoute, type ClientMessages } from '@/lib/i18n/client-messages';
+import type { ClientMessages } from '@/lib/i18n/client-messages';
+import {
+  coversClientMessageScope,
+  resolveClientMessageScope,
+  type ClientMessageCoverage,
+} from '@/lib/i18n/client-message-scope';
 import { loadClientMessagesForLocale } from '@/lib/i18n/client-message-loaders';
+import { useSessionContext } from '@/lib/providers/SessionProvider';
 
 type NextIntlProviderProps = ComponentProps<typeof NextIntlClientProvider>;
 type ProviderOptions = Omit<NextIntlProviderProps, 'children' | 'locale' | 'messages'>;
@@ -15,7 +23,11 @@ type ProviderOptions = Omit<NextIntlProviderProps, 'children' | 'locale' | 'mess
 export interface ClientMessagesProviderProps extends ProviderOptions {
   locale: string;
   messages?: Partial<ClientMessages>;
-  reducedCatalogue: boolean;
+  /**
+   * Route scopes whose client components `messages` can serve (`clientMessageCoverage`), or
+   * `'all'` for the complete catalogue. Navigation to another scope loads the complete catalogue.
+   */
+  messageCoverage: ClientMessageCoverage;
   loaderImageSrc?: string | null;
   loaderImageUnoptimized?: boolean;
   children: ReactNode;
@@ -41,7 +53,7 @@ function IntlBoundary({ locale, messages, options, children }: IntlBoundaryProps
   );
 }
 
-function CatalogueLoadingFallback({
+export function CatalogueLoadingFallback({
   loaderImageSrc,
   loaderImageUnoptimized,
 }: Pick<ClientMessagesProviderProps, 'loaderImageSrc' | 'loaderImageUnoptimized'>) {
@@ -49,36 +61,40 @@ function CatalogueLoadingFallback({
   const loadingMessage = t('loading');
 
   return (
-    <MantineProvider>
-      <PageLoaderView
-        height="100dvh"
-        minHeight={0}
-        imageSrc={loaderImageSrc}
-        imageUnoptimized={loaderImageUnoptimized}
-        imageAlt={loadingMessage}
-      />
-    </MantineProvider>
+    <PageLoaderView
+      height="100dvh"
+      minHeight={0}
+      imageSrc={loaderImageSrc}
+      imageUnoptimized={loaderImageUnoptimized}
+      imageAlt={loadingMessage}
+    />
   );
 }
 
-function CatalogueLoadError({ onRetry }: { onRetry: () => void }) {
+export function CatalogueLoadError({ onRetry }: { onRetry: () => void }) {
   const tErrors = useTranslations('common.errors');
   const tActions = useTranslations('common.actions');
 
   return (
-    <div role="alert">
-      <p>{tErrors('generic')}</p>
-      <button type="button" onClick={onRetry}>
-        {tActions('tryAgain')}
-      </button>
-    </div>
+    <LayoutContainer size="compact" inset="md">
+      <LayoutInset block="xl" inline="none">
+        <Alert tone="danger">
+          <LayoutStack gap="md" align="start">
+            <span>{tErrors('generic')}</span>
+            <Button type="button" tone="neutral" emphasis="medium" onClick={onRetry}>
+              {tActions('tryAgain')}
+            </Button>
+          </LayoutStack>
+        </Alert>
+      </LayoutInset>
+    </LayoutContainer>
   );
 }
 
 function ClientMessagesProviderContent({
   locale: requestedLocale,
   messages,
-  reducedCatalogue,
+  messageCoverage,
   loaderImageSrc,
   loaderImageUnoptimized,
   children,
@@ -90,7 +106,12 @@ function ClientMessagesProviderContent({
   const pathWithSearch = pathname ? `${pathname}${search ? `?${search}` : ''}` : '';
   const locale = requestedLocale || DEFAULT_LOCALE;
   const supportedLocale = normalizeLocale(locale) ?? DEFAULT_LOCALE;
-  const requiresFullCatalogue = reducedCatalogue && !isReducedCatalogueRoute(pathWithSearch);
+  const scopedCatalogue = messageCoverage !== 'all';
+  const requiresFullCatalogue = !coversClientMessageScope(messageCoverage, resolveClientMessageScope(pathWithSearch));
+  // Signed-in users are the ones who move between route groups (editing, /my, /admin). Load the
+  // complete catalogue (a cacheable chunk) when the browser is idle so that navigation does not
+  // wait for it; anonymous visitors keep the scoped catalogue only.
+  const signedIn = Boolean(useSessionContext()?.data);
 
   const [fullCatalogues, setFullCatalogues] = useState<Partial<Record<SupportedLocale, ClientMessages>>>({});
   const [failedLocales, setFailedLocales] = useState<Partial<Record<SupportedLocale, boolean>>>({});
@@ -98,6 +119,33 @@ function ClientMessagesProviderContent({
   const fullMessages = fullCatalogues[supportedLocale];
   const retryToken = retryTokens[supportedLocale] ?? 0;
   const failed = Boolean(failedLocales[supportedLocale]);
+
+  useEffect(() => {
+    if (!scopedCatalogue || !signedIn || requiresFullCatalogue || fullMessages) {
+      return;
+    }
+    let active = true;
+    const prefetch = () => {
+      void loadClientMessagesForLocale(supportedLocale).then(
+        (loadedMessages) => {
+          if (active) {
+            setFullCatalogues((current) => ({ ...current, [supportedLocale]: loadedMessages }));
+          }
+        },
+        () => undefined, // a later navigation retries with visible error handling
+      );
+    };
+    const idle = typeof window.requestIdleCallback === 'function';
+    const handle = idle ? window.requestIdleCallback(prefetch, { timeout: 5000 }) : window.setTimeout(prefetch, 2000);
+    return () => {
+      active = false;
+      if (idle) {
+        window.cancelIdleCallback(handle);
+      } else {
+        window.clearTimeout(handle);
+      }
+    };
+  }, [fullMessages, requiresFullCatalogue, scopedCatalogue, signedIn, supportedLocale]);
 
   useEffect(() => {
     if (!requiresFullCatalogue || fullMessages) {
@@ -131,7 +179,7 @@ function ClientMessagesProviderContent({
     setRetryTokens((current) => ({ ...current, [supportedLocale]: (current[supportedLocale] ?? 0) + 1 }));
   };
 
-  const selectedMessages = !reducedCatalogue && messages ? messages : (fullMessages ?? messages);
+  const selectedMessages = !scopedCatalogue && messages ? messages : (fullMessages ?? messages);
   let content = children;
   if (requiresFullCatalogue && !fullMessages) {
     content = failed ? (
@@ -149,7 +197,7 @@ function ClientMessagesProviderContent({
 }
 
 export function ClientMessagesProvider(props: ClientMessagesProviderProps) {
-  const { locale, messages, reducedCatalogue, loaderImageSrc, loaderImageUnoptimized, children, ...options } = props;
+  const { locale, messages, messageCoverage, loaderImageSrc, loaderImageUnoptimized, children, ...options } = props;
 
   return (
     <Suspense
@@ -162,7 +210,7 @@ export function ClientMessagesProvider(props: ClientMessagesProviderProps) {
       <ClientMessagesProviderContent
         locale={locale}
         messages={messages}
-        reducedCatalogue={reducedCatalogue}
+        messageCoverage={messageCoverage}
         loaderImageSrc={loaderImageSrc}
         loaderImageUnoptimized={loaderImageUnoptimized}
         {...options}

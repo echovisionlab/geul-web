@@ -7,13 +7,16 @@ import { PageLoader } from '@/features/site/PageLoader';
 import { unsubscribeNewsletterAction } from '@/lib/actions/newsletter';
 import { UnsubscribeView, type UnsubscribeViewStatus } from './UnsubscribeView';
 
-export function UnsubscribeContent() {
+export function UnsubscribeContent({
+  token: tokenOverride,
+  unsubscribeAction = unsubscribeNewsletterAction,
+}: { token?: string | null; unsubscribeAction?: typeof unsubscribeNewsletterAction } = {}) {
   const searchParams = useSearchParams();
-  const token = searchParams.get('token');
+  const token = tokenOverride === undefined ? searchParams.get('token') : tokenOverride;
   const [status, setStatus] = useState<'loading' | UnsubscribeViewStatus>('loading');
 
   const { mutate: requestUnsubscribe } = useMutation({
-    mutationFn: (data: { token: string }) => unsubscribeNewsletterAction(data.token),
+    mutationFn: (data: { token: string }) => unsubscribeAction(data.token),
     onSuccess: (data) => setStatus(data.success ? 'success' : 'error'),
     onError: () => setStatus('error'),
   });

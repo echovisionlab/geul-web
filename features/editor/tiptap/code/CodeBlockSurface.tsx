@@ -1,12 +1,16 @@
 'use client';
 
-import { IconChevronDown, IconCopy } from '@tabler/icons-react';
+import { IconCopy } from '@tabler/icons-react';
 import type { Monaco } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import { Button } from '@/components/core/Button';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
 import { IconButton } from '@/components/core/IconButton';
 import { Tooltip } from '@/components/core/Tooltip';
+import { TextInput } from '@/components/core/Input';
+import { LayoutInline } from '@/components/core/Layout';
+import { SectionCard, ToolbarSurface } from '@/components/core/Section';
+import { Text } from '@/components/core/Typography';
 import { MonacoSourceEditor, type SourceEditorChange } from '../code-editor';
 import { PrintCodeSource } from './PrintCodeSource';
 import classes from './CodeBlockSurface.module.css';
@@ -66,90 +70,104 @@ export function CodeBlockSurface({
 
   return (
     <div className={classes.root} data-code-block-surface="">
-      <div className={classes.header} data-code-block-control="">
-        <span className={classes.printTitle}>{visibleTitle}</span>
-        {titleEditable ? (
-          <input
-            className={classes.titleInput}
-            aria-label={titleLabel}
-            value={title}
-            placeholder={fallbackTitle}
-            onChange={(event) => onTitleChange?.(event.currentTarget.value)}
-          />
-        ) : (
-          <span className={classes.title}>{visibleTitle}</span>
-        )}
-        <div className={classes.meta}>
-          {languageLabel && languageValue && languageOptions && onLanguageChange ? (
-            <DropdownMenu size="compact" placement="bottom-end">
-              <DropdownMenu.Target>
-                <Button
-                  type="button"
-                  className={classes.languageButton}
-                  size="compact-xs"
-                  tone="neutral"
-                  emphasis="low"
-                  rightSection={<IconChevronDown size={12} aria-hidden />}
-                  aria-label={`${languageLabel}: ${languageName}`}
-                  data-testid="code-block-language"
-                >
-                  {languageName}
-                </Button>
-              </DropdownMenu.Target>
-              <DropdownMenu.Dropdown>
-                {languageOptions.map((option) => (
-                  <DropdownMenu.Item
-                    key={option.value}
-                    selected={option.value === languageValue}
-                    onClick={() => onLanguageChange(option.value)}
+      <SectionCard padding="none" border="all" appearance="plain">
+        <div className={classes.header} data-code-block-control="">
+          <ToolbarSurface label={titleLabel} appearance="embedded" width="full" density="compact">
+            <span className={classes.printTitle}>{visibleTitle}</span>
+            <LayoutInline grow flexible>
+              {titleEditable ? (
+                <TextInput
+                  size="xs"
+                  density="compact"
+                  grow
+                  aria-label={titleLabel}
+                  value={title}
+                  placeholder={fallbackTitle}
+                  onChange={(event) => onTitleChange?.(event.currentTarget.value)}
+                />
+              ) : (
+                <span className={classes.title}>
+                  <Text size="xs" truncate>
+                    {visibleTitle}
+                  </Text>
+                </span>
+              )}
+            </LayoutInline>
+            <LayoutInline gap="xxs" shrink={false}>
+              {languageLabel && languageValue && languageOptions && onLanguageChange ? (
+                <DropdownMenu size="compact" placement="bottom-end">
+                  <DropdownMenu.Target>
+                    <Button
+                      type="button"
+                      size="compact"
+                      tone="neutral"
+                      emphasis="low"
+                      indicator="menu"
+                      aria-label={`${languageLabel}: ${languageName}`}
+                      data-testid="code-block-language"
+                    >
+                      {languageName}
+                    </Button>
+                  </DropdownMenu.Target>
+                  <DropdownMenu.Dropdown>
+                    {languageOptions.map((option) => (
+                      <DropdownMenu.Item
+                        key={option.value}
+                        selected={option.value === languageValue}
+                        onClick={() => onLanguageChange(option.value)}
+                      >
+                        {option.label}
+                      </DropdownMenu.Item>
+                    ))}
+                  </DropdownMenu.Dropdown>
+                </DropdownMenu>
+              ) : (
+                <span className={classes.language}>
+                  <Text size="xs" tone="secondary">
+                    {languageName}
+                  </Text>
+                </span>
+              )}
+              <span className={classes.copyAction}>
+                <Tooltip label={copyLabel} withArrow>
+                  <IconButton
+                    label={copyLabel}
+                    title={copyLabel}
+                    size="xs"
+                    tone="neutral"
+                    emphasis="low"
+                    onClick={() => void navigator.clipboard.writeText(source)}
                   >
-                    {option.label}
-                  </DropdownMenu.Item>
-                ))}
-              </DropdownMenu.Dropdown>
-            </DropdownMenu>
-          ) : (
-            <span className={classes.language}>{languageName}</span>
-          )}
-          <span className={classes.copyAction}>
-            <Tooltip label={copyLabel} withArrow>
-              <IconButton
-                label={copyLabel}
-                title={copyLabel}
-                size="sm"
-                tone="neutral"
-                emphasis="low"
-                onClick={() => void navigator.clipboard.writeText(source)}
-              >
-                <IconCopy size={16} aria-hidden />
-              </IconButton>
-            </Tooltip>
-          </span>
+                    <IconCopy size={16} aria-hidden />
+                  </IconButton>
+                </Tooltip>
+              </span>
+            </LayoutInline>
+          </ToolbarSurface>
         </div>
-      </div>
-      <div className={classes.editor}>
-        <MonacoSourceEditor
-          value={source}
-          onChange={sourceReadOnly ? undefined : onSourceChange}
-          onUndo={sourceReadOnly ? undefined : onUndo}
-          onRedo={sourceReadOnly ? undefined : onRedo}
-          onEscape={onEscape}
-          language={monacoLanguage}
-          readOnly={sourceReadOnly}
-          ariaLabel={`${visibleTitle} — ${sourceLabel}`}
-          modelPath={modelPath}
-          height={codeBlockEditorHeight(source)}
-          bordered={false}
-          editorOptions={{
-            lineDecorationsWidth: 16,
-            renderValidationDecorations: sourceReadOnly ? 'off' : 'on',
-          }}
-          onMount={onMount}
-        />
-      </div>
-      <div className={classes.printSource} data-code-block-print-source="">
-        <PrintCodeSource language={languageValue || monacoLanguage} source={source} />
-      </div>
+        <div className={classes.editor}>
+          <MonacoSourceEditor
+            value={source}
+            onChange={sourceReadOnly ? undefined : onSourceChange}
+            onUndo={sourceReadOnly ? undefined : onUndo}
+            onRedo={sourceReadOnly ? undefined : onRedo}
+            onEscape={onEscape}
+            language={monacoLanguage}
+            readOnly={sourceReadOnly}
+            ariaLabel={`${visibleTitle} — ${sourceLabel}`}
+            modelPath={modelPath}
+            height={codeBlockEditorHeight(source)}
+            bordered={false}
+            editorOptions={{
+              renderValidationDecorations: sourceReadOnly ? 'off' : 'on',
+            }}
+            onMount={onMount}
+          />
+        </div>
+        <div className={classes.printSource} data-code-block-print-source="">
+          <PrintCodeSource language={languageValue || monacoLanguage} source={source} />
+        </div>
+      </SectionCard>
     </div>
   );
 }

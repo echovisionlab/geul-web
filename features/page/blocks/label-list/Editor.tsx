@@ -11,11 +11,12 @@ import type { LabelListProps } from './schema';
 import { LabelListView } from './View';
 
 interface LabelListSettingsFormProps {
+  readOnly?: boolean;
   props: Partial<LabelListProps>;
   updateProps: (props: Record<string, unknown>) => void;
 }
 
-function LabelListSettingsForm({ props, updateProps }: LabelListSettingsFormProps) {
+function LabelListSettingsForm({ props, updateProps, readOnly = false }: LabelListSettingsFormProps) {
   const tPageEditor = useTranslations('pageEditor');
   const tCommonLabels = useTranslations('common.labels');
 
@@ -33,9 +34,12 @@ function LabelListSettingsForm({ props, updateProps }: LabelListSettingsFormProp
 
   const updateProp = useCallback(
     (key: string, value: string) => {
+      if (readOnly) {
+        return;
+      }
       updateProps({ [key]: value });
     },
-    [updateProps],
+    [readOnly, updateProps],
   );
 
   const sortByOptions = [
@@ -48,9 +52,11 @@ function LabelListSettingsForm({ props, updateProps }: LabelListSettingsFormProp
 
   return (
     <ListBlockEditorBase
+      readOnly={readOnly}
       editorType="label-list"
-      limitLabel="Max labels"
+      limitLabel={tPageEditor('blockEditor.labels.maxLabels')}
       layout={layout}
+      itemSize={props.itemSize}
       columns={columns}
       limit={limit}
       maxLimit={24}
@@ -66,10 +72,10 @@ function LabelListSettingsForm({ props, updateProps }: LabelListSettingsFormProp
       carouselIndicators={carouselIndicators}
       extraDisplayOptions={
         <Switch
+          disabled={readOnly}
           label={tPageEditor('blockEditor.labels.showMeta')}
           checked={showMeta === 'true'}
           onChange={(event) => updateProp('showMeta', event.currentTarget.checked ? 'true' : 'false')}
-          size="sm"
         />
       }
       onUpdate={updateProp}
@@ -77,20 +83,29 @@ function LabelListSettingsForm({ props, updateProps }: LabelListSettingsFormProp
   );
 }
 
-export function LabelListSettingsEditor({ props, updateSharedProps }: BlockSettingsEditorProps<LabelListProps>) {
-  return <LabelListSettingsForm props={props} updateProps={updateSharedProps} />;
+export function LabelListSettingsEditor({
+  props,
+  updateSharedProps,
+  allowSharedEdits,
+}: BlockSettingsEditorProps<LabelListProps>) {
+  return <LabelListSettingsForm props={props} updateProps={updateSharedProps} readOnly={allowSharedEdits === false} />;
 }
 
 export function LabelListEditor({ sectionId, props }: BlockEditorProps<LabelListProps>) {
-  const { updateSection } = usePageEditor();
+  const { updateSection, editable, allowStructuralEdits } = usePageEditor();
   const updateProps = useCallback(
     (nextProps: Record<string, unknown>) => {
+      if (!editable || !allowStructuralEdits) {
+        return;
+      }
       updateSection(sectionId, { props: nextProps });
     },
-    [sectionId, updateSection],
+    [sectionId, updateSection, editable, allowStructuralEdits],
   );
 
-  return <LabelListSettingsForm props={props} updateProps={updateProps} />;
+  return (
+    <LabelListSettingsForm props={props} updateProps={updateProps} readOnly={!editable || !allowStructuralEdits} />
+  );
 }
 
 export function LabelListCanvasPreview({ sectionId, props }: BlockCanvasPreviewProps<LabelListProps>) {

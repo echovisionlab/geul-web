@@ -1,11 +1,12 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack, LayoutGrid as DsLayoutGrid } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { SimpleGrid, Stack, Text } from '@mantine/core';
-import { MonthPickerInput, type DateValue } from '@mantine/dates';
-import '@mantine/dates/styles.css';
-import { TextInput, NativeSelect, Switch, TagsInput } from '@/components/core/Input';
+
+import { MonthPickerInput, type DateValue, TextInput, NativeSelect, Switch, TagsInput } from '@/components/core/Input';
+
 import { SectionCard, SectionHeader } from '@/components/core/Section';
 import { WORK_TYPE_LABELS, WORK_TYPES, WorkType } from '@/lib/types/work/model';
 import { normalizeStringList, STRING_LIST_SPLIT_CHARS } from './stringList';
@@ -45,20 +46,10 @@ function toMonthDate(year: number, month: number): DateValue {
   if (!year || !month) {
     return null;
   }
-  return new Date(year, month - 1, 1);
+  return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-01`;
 }
 
 function parseMonthValue(value: DateValue): { year: number; month: number } | null {
-  if (value instanceof Date) {
-    if (Number.isNaN(value.getTime())) {
-      return null;
-    }
-    return {
-      year: value.getFullYear(),
-      month: value.getMonth() + 1,
-    };
-  }
-
   if (typeof value === 'string' && value.length > 0) {
     const isoMatch = value.match(/^(\d{4})-(\d{2})/);
     if (isoMatch) {
@@ -177,9 +168,9 @@ export function WorkMetaForm({
   return (
     <fieldset disabled={disabled} style={{ border: 0, margin: 0, minWidth: 0, padding: 0 }}>
       <SectionCard>
-        <Stack gap="md">
+        <DsLayoutStack gap="md">
           <SectionHeader title={t('sections.workDetails')} />
-          <SimpleGrid cols={{ base: 1, sm: 2 }}>
+          <DsLayoutGrid columns={{ base: 1, sm: 2 }}>
             <NativeSelect
               id={`work-${workId}-type`}
               label={tCommonLabels('type')}
@@ -199,7 +190,6 @@ export function WorkMetaForm({
               placeholder={t('placeholders.selectYearMonth')}
               value={toMonthDate(year, month)}
               onChange={handlePeriodChange}
-              valueFormat="YYYY.MM"
               clearable={false}
             />
             <MonthPickerInput
@@ -209,11 +199,10 @@ export function WorkMetaForm({
               placeholder={isPresent ? t('placeholders.untilDisabled') : t('placeholders.selectYearMonth')}
               value={untilYear && untilMonth ? toMonthDate(untilYear, untilMonth) : null}
               onChange={handleUntilChange}
-              valueFormat="YYYY.MM"
               clearable={false}
               disabled={isPresent}
             />
-          </SimpleGrid>
+          </DsLayoutGrid>
 
           <Switch
             id={`work-${workId}-is-present`}
@@ -240,7 +229,7 @@ export function WorkMetaForm({
           {type === 'contribution' && (
             <ContributionFields workId={workId} metadata={metadata} onChange={handleMetadataChange} />
           )}
-        </Stack>
+        </DsLayoutStack>
       </SectionCard>
     </fieldset>
   );
@@ -258,11 +247,11 @@ function MusicProjectFields({
   const t = useTranslations('workEditor.metaForm.musicProject');
   const tCommonLabels = useTranslations('common.labels');
   return (
-    <Stack gap="sm">
-      <Text size="xs" c="dimmed" fw={500}>
+    <DsLayoutStack gap="sm">
+      <DsText size="xs" tone="secondary" weight="medium">
         {t('title')}
-      </Text>
-      <SimpleGrid cols={{ base: 1, sm: 2 }}>
+      </DsText>
+      <DsLayoutGrid columns={{ base: 1, sm: 2 }}>
         <TextInput
           id={`work-${workId}-release-date`}
           label={tCommonLabels('releaseDate')}
@@ -298,8 +287,8 @@ function MusicProjectFields({
           value={(metadata.youtubeUrl as string) || ''}
           onChange={(e) => onChange({ youtubeUrl: e.currentTarget.value })}
         />
-      </SimpleGrid>
-    </Stack>
+      </DsLayoutGrid>
+    </DsLayoutStack>
   );
 }
 
@@ -321,12 +310,12 @@ function PortfolioFields({
   }, [metadata.technologies]);
 
   return (
-    <Stack gap="sm">
-      <Text size="xs" c="dimmed" fw={500}>
+    <DsLayoutStack gap="sm">
+      <DsText size="xs" tone="secondary" weight="medium">
         {t('title')}
-      </Text>
+      </DsText>
 
-      <SimpleGrid cols={{ base: 1, sm: 2 }}>
+      <DsLayoutGrid columns={{ base: 1, sm: 2 }}>
         <TextInput
           id={`work-${workId}-project-url`}
           label={t('fields.projectUrl')}
@@ -334,7 +323,7 @@ function PortfolioFields({
           value={(metadata.projectUrl as string) || ''}
           onChange={(e) => onChange({ projectUrl: e.currentTarget.value })}
         />
-      </SimpleGrid>
+      </DsLayoutGrid>
       <TagsInput
         id={`work-${workId}-technologies`}
         label={t('fields.technologies')}
@@ -347,7 +336,7 @@ function PortfolioFields({
           })
         }
       />
-    </Stack>
+    </DsLayoutStack>
   );
 }
 
@@ -363,11 +352,11 @@ function ArticleFields({
   const t = useTranslations('workEditor.metaForm.article');
   const tCommonPlaceholders = useTranslations('common.placeholders');
   return (
-    <Stack gap="sm">
-      <Text size="xs" c="dimmed" fw={500}>
+    <DsLayoutStack gap="sm">
+      <DsText size="xs" tone="secondary" weight="medium">
         {t('title')}
-      </Text>
-      <SimpleGrid cols={{ base: 1, sm: 2 }}>
+      </DsText>
+      <DsLayoutGrid columns={{ base: 1, sm: 2 }}>
         <TextInput
           id={`work-${workId}-external-url`}
           label={t('fields.externalUrl')}
@@ -389,8 +378,8 @@ function ArticleFields({
           value={(metadata.publishedDate as string) || ''}
           onChange={(e) => onChange({ publishedDate: e.currentTarget.value })}
         />
-      </SimpleGrid>
-    </Stack>
+      </DsLayoutGrid>
+    </DsLayoutStack>
   );
 }
 
@@ -407,11 +396,11 @@ function ContributionFields({
   const tCommonLabels = useTranslations('common.labels');
   const tCommonPlaceholders = useTranslations('common.placeholders');
   return (
-    <Stack gap="sm">
-      <Text size="xs" c="dimmed" fw={500}>
+    <DsLayoutStack gap="sm">
+      <DsText size="xs" tone="secondary" weight="medium">
         {t('title')}
-      </Text>
-      <SimpleGrid cols={{ base: 1, sm: 2 }}>
+      </DsText>
+      <DsLayoutGrid columns={{ base: 1, sm: 2 }}>
         <TextInput
           id={`work-${workId}-project-name`}
           label={t('fields.projectName')}
@@ -433,7 +422,7 @@ function ContributionFields({
           value={(metadata.url as string) || ''}
           onChange={(e) => onChange({ url: e.currentTarget.value })}
         />
-      </SimpleGrid>
-    </Stack>
+      </DsLayoutGrid>
+    </DsLayoutStack>
   );
 }

@@ -35,14 +35,27 @@ const config: StorybookConfig = {
     disableTelemetry: true,
     enableCrashReports: false,
   },
-  stories: ['../components/**/*.(stories|story).@(js|jsx|ts|tsx)', '../features/**/*.(stories|story).@(js|jsx|ts|tsx)'],
+  stories: [
+    '../components/**/*.(stories|story).@(js|jsx|ts|tsx)',
+    '../features/**/*.(stories|story).@(js|jsx|ts|tsx)',
+    '../stories/**/*.(stories|story).@(js|jsx|ts|tsx)',
+  ],
   staticDirs: [
     { from: '../tests/fixtures/media', to: '/storybook/media' },
     { from: '../lib/assets/fonts', to: '/storybook/fonts' },
     { from: '../public/providers', to: '/providers' },
     { from: '../public/fixtures', to: '/fixtures' },
+    { from: '../public/storybook-fixtures', to: '/storybook-fixtures' },
+    { from: '../docs', to: '/ui-kit-docs' },
+    { from: '../design/storybook', to: '/design-system-review' },
   ],
-  addons: ['@storybook/addon-themes', 'storybook-addon-pseudo-states'],
+  addons: [
+    '@storybook/addon-docs',
+    '@storybook/addon-themes',
+    'storybook-addon-pseudo-states',
+    '@storybook/addon-a11y',
+  ],
+  docs: { defaultName: 'Documentation' },
   // Stories define their controls explicitly; automatic prop extraction only
   // scans application modules that are not rendered as Storybook docs.
   typescript: {
@@ -54,11 +67,18 @@ const config: StorybookConfig = {
   },
   webpackFinal: async (webpackConfig) => {
     await prepareThreeRuntime();
+    // Local review builds keep the same modules and runtime while avoiding a
+    // long minification pass between UI edits. CI/default builds stay minified.
+    if (process.env.UI_KIT_MINIFY === '0') {
+      webpackConfig.optimization ??= {};
+      webpackConfig.optimization.minimize = false;
+    }
     webpackConfig.module ??= { rules: [] };
     webpackConfig.module.rules ??= [];
     webpackConfig.resolve ??= {};
     webpackConfig.resolve.alias = {
       ...webpackConfig.resolve.alias,
+      '@': fileURLToPath(new URL('../', import.meta.url)),
       three$: fileURLToPath(new URL('../lib/three/three-cdn-module.generated.mjs', import.meta.url)),
       ...(localContractRoots
         ? {

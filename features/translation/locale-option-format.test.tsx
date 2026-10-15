@@ -118,4 +118,23 @@ describe('locale-option-format', () => {
     expect(latestLabel).toBe('日本語');
     expect(latestData).toEqual([{ value: 'ja', label: '日本語' }]);
   });
+  it('removes duplicate visible code suffixes while preserving qualified names and submitted values', () => {
+    render(
+      <HookProbe
+        option={{ value: 'pt_BR', label: 'Português (Brasil) (PT-BR)' }}
+        options={[
+          { value: 'pt_BR', label: 'Português (Brasil) (PT-BR)' },
+          { value: 'en', label: 'English (en)' },
+          { value: 'zh-CN', label: '简体中文 (zh-CN)' },
+        ]}
+        sourceLocale="pt-BR"
+      />,
+    );
+    expect(latestLabel).toBe('Português (Brasil) (원문)');
+    expect(latestData).toEqual([
+      { value: 'pt_BR', label: 'Português (Brasil) (원문)' },
+      { value: 'en', label: 'English' },
+      { value: 'zh-CN', label: '简体中文' },
+    ]);
+  });
 });

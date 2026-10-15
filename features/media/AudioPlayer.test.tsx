@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { AudioPlayer } from './AudioPlayer';
 
 const setMountedWaveTime = vi.fn();
@@ -88,6 +89,7 @@ function renderAudioPlayer(props: Partial<React.ComponentProps<typeof AudioPlaye
           },
           editorCommon: {
             media: {
+              statuses: { failed: '실패' },
               audioPlayer: {
                 play: '재생',
                 pause: '일시정지',
@@ -105,15 +107,68 @@ function renderAudioPlayer(props: Partial<React.ComponentProps<typeof AudioPlaye
           },
         }}
       >
-        <MantineProvider>
+        <DesignSystemProvider locale="ko" forceColorScheme="light">
           <AudioPlayer src="https://cdn.example.com/master.m3u8" duration={100} waveform={[0.1, 0.4, 0.8]} {...props} />
-        </MantineProvider>
+        </DesignSystemProvider>
       </NextIntlClientProvider>,
     );
   });
 }
 
 describe('AudioPlayer', () => {
+  it('exposes an independently named player and an operable position slider without changing clock text', async () => {
+    renderAudioPlayer({ name: 'field-recording.wav' });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    const group = document.querySelector('[data-audio-player="true"]');
+    expect(group?.getAttribute('role')).toBe('group');
+    expect(group?.getAttribute('aria-label')).toBe('field-recording.wav');
+    const slider = group?.querySelector<HTMLInputElement>('input[type="range"][aria-label="재생 위치 이동"]');
+    expect(slider?.max).toBe('100');
+    expect(slider?.value).toBe('0');
+    act(() => slider?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
+    expect(setMountedWaveTime).toHaveBeenLastCalledWith(5);
+    expect(slider?.value).toBe('5');
+    expect(slider?.getAttribute('aria-valuetext')).toBe('0:05 / 1:40');
+    act(() => slider?.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true })));
+    expect(setMountedWaveTime).toHaveBeenLastCalledWith(100);
+    act(() => slider?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true })));
+    expect(setMountedWaveTime).toHaveBeenLastCalledWith(0);
+    expect(group?.querySelector('[data-audio-player-current-time]')?.textContent).toBe('0:00');
+  });
+
+  it('disables unavailable seeking and stops exposing a failed source as playable', async () => {
+    renderAudioPlayer({ src: '', isReady: false });
+    const slider = document.querySelector<HTMLInputElement>('input[type="range"][aria-label="재생 위치 이동"]');
+    expect(slider?.disabled).toBe(true);
+    act(() => slider?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
+    expect(setMountedWaveTime).not.toHaveBeenCalled();
+  });
+
+  it('disables transport after a native playback error', () => {
+    renderAudioPlayer();
+    const audio = document.querySelector('audio');
+    act(() => audio?.dispatchEvent(new Event('error')));
+    expect(document.querySelector<HTMLButtonElement>('[data-audio-player-toggle]')?.disabled).toBe(true);
+    const status = document.querySelector('[role="status"]');
+    expect(status?.textContent).toBe('실패');
+    expect(status?.className).toContain('visuallyHidden');
+    expect(document.querySelector('[data-audio-player]')?.getAttribute('aria-describedby')).toBe(status?.id);
+    expect(
+      document
+        .querySelector<HTMLInputElement>('input[type="range"][aria-label="재생 위치 이동"]')
+        ?.getAttribute('aria-describedby'),
+    ).toBe(status?.id);
+    expect(document.querySelector<HTMLInputElement>('input[type="range"][aria-label="재생 위치 이동"]')?.disabled).toBe(
+      true,
+    );
+    act(() => audio?.dispatchEvent(new Event('loadedmetadata')));
+    expect(status?.textContent).toBe('');
+    expect(document.querySelector('[data-audio-player]')?.hasAttribute('aria-describedby')).toBe(false);
+    expect(document.querySelector<HTMLButtonElement>('[data-audio-player-toggle]')?.disabled).toBe(false);
+  });
+
   it('updates the playback progress from the shared audio clock', () => {
     renderAudioPlayer();
 
@@ -180,9 +235,9 @@ describe('AudioPlayer', () => {
             },
           }}
         >
-          <MantineProvider>
+          <DesignSystemProvider locale="ko" forceColorScheme="light">
             <AudioPlayer src="https://cdn.example.com/master.m3u8" duration={100} />
-          </MantineProvider>
+          </DesignSystemProvider>
         </NextIntlClientProvider>,
       );
     });

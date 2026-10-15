@@ -1,15 +1,17 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Heading as DsHeading } from '@/components/core/Typography';
 import { IconCalendar } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Group, Stack, Title } from '@mantine/core';
+
 import type { LocalizedRichTextBlock } from '@/features/editor/contract/localized-rich-text';
 import { Alert } from '@/components/core/Alert';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
 import { LegalDocumentMetadata } from '@/features/policy/LegalDocumentMetadata';
 import { PrintButton } from '@/features/print/PrintButton';
 import type { PublicLocalizationInfoLike } from '@/lib/queries/localized-public';
-import { LegalRichTextContent } from './LegalRichTextContent';
+import { LegalDocumentLayout } from './LegalDocumentLayout';
 import { LegalTranslationNotice } from './LegalTranslationNotice';
 import classes from './LegalDocumentView.module.css';
 
@@ -28,34 +30,48 @@ export function LegalShareDocumentView({ document, pathname }: { document: Legal
   const tLegalPage = useTranslations('legalPageCommon');
 
   return (
-    <Stack gap="md" className={classes.document} data-legal-document={document.entityType}>
-      <LegalTranslationNotice pathname={pathname} localizationInfo={document.localizationInfo} />
-      {document.effectiveFrom && !document.effectiveUntil ? (
-        <Alert icon={<IconCalendar size={16} />} tone="accent" className={classes.notice}>
-          {tLegalPage('preview.upcomingAlert', {
-            date: dateTime.date(document.effectiveFrom, {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            }),
-          })}
-        </Alert>
-      ) : null}
-      <Group justify="space-between" align="flex-start" className={classes.header}>
-        <Stack gap="xs" className={classes.title}>
-          <Title order={1}>{document.title}</Title>
-          <LegalDocumentMetadata
-            version={document.version}
-            effectiveFrom={document.effectiveFrom}
-            effectiveUntil={document.effectiveUntil}
-          />
-        </Stack>
-        <PrintButton />
-      </Group>
-      <LegalRichTextContent
-        blocks={document.content}
-        className={`prose ${document.entityType}-content ${classes.content}`}
-      />
-    </Stack>
+    <LegalDocumentLayout
+      data-legal-document={document.entityType}
+      blocks={document.content}
+      requestedLocale={document.localizationInfo?.requestedLocale}
+      contentLocale={document.localizationInfo?.displayedLocale || document.localizationInfo?.sourceLocale}
+      contentClassName={`prose ${document.entityType}-content ${classes.content}`}
+      empty={null}
+      header={
+        <DsLayoutStack printFlow="stack" gap="md">
+          <LegalTranslationNotice pathname={pathname} localizationInfo={document.localizationInfo} />
+          {document.effectiveFrom && !document.effectiveUntil ? (
+            <div className={classes.notice}>
+              <Alert icon={<IconCalendar size={16} />} tone="accent">
+                {tLegalPage('preview.upcomingAlert', {
+                  date: dateTime.date(document.effectiveFrom, {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  }),
+                })}
+              </Alert>
+            </div>
+          ) : null}
+          <DsLayoutInline printFlow="stack" justify="between" align="start">
+            <DsLayoutStack gap="xs">
+              <DsHeading
+                level={1}
+                scale="title"
+                lang={document.localizationInfo?.displayedLocale || document.localizationInfo?.sourceLocale}
+              >
+                {document.title}
+              </DsHeading>
+              <LegalDocumentMetadata
+                version={document.version}
+                effectiveFrom={document.effectiveFrom}
+                effectiveUntil={document.effectiveUntil}
+              />
+            </DsLayoutStack>
+            <PrintButton />
+          </DsLayoutInline>
+        </DsLayoutStack>
+      }
+    />
   );
 }

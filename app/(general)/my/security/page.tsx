@@ -1,7 +1,9 @@
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
 import { connection } from 'next/server';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { Stack, Text, Title } from '@mantine/core';
+
 import { Alert } from '@/components/core/Alert';
 import { buildLoginBrowserUrl } from '@/features/auth/login-redirect';
 import {
@@ -9,7 +11,7 @@ import {
   PASSKEY_SECURITY_CONTINUATION_PARAM,
   isSecuritySessionFresh,
 } from '@/features/auth/security-reauthentication';
-import { SecurityForm } from '@/features/my/SecurityForm';
+import { MySecurityPageView } from '@/features/my/MySecurityPageView';
 import { getMySecurityAction } from '@/lib/actions/identity';
 import { getMemberId } from '@/lib/utils/session.server';
 
@@ -70,12 +72,12 @@ export default async function MySecurityPage({ searchParams }: PageProps) {
 
   if (security.error) {
     return (
-      <Stack>
-        <Title order={2}>{tCommonLabels('security')}</Title>
+      <DsLayoutStack>
+        <DsHeading level={2}>{tCommonLabels('security')}</DsHeading>
         <Alert tone="danger">
-          <Text size="sm">{tSecurityNotifications('failedToLoad')}</Text>
+          <DsText size="sm">{tSecurityNotifications('failedToLoad')}</DsText>
         </Alert>
-      </Stack>
+      </DsLayoutStack>
     );
   }
 
@@ -84,19 +86,16 @@ export default async function MySecurityPage({ searchParams }: PageProps) {
   }
 
   return (
-    <Stack>
-      <Title order={2}>{tCommonLabels('security')}</Title>
-      <SecurityForm
-        subjectId={memberId}
-        initialSessions={security.sessions}
-        initialProviders={security.providers}
-        initialCanonicalEmail={security.canonicalEmail}
-        initialEmailCodeAvailable={security.emailCodeAvailable}
-        initialPasskeyCount={security.passkeyCount}
-        initialFlowId={initialFlowId}
-        initialLinkProviderParam={initialLinkProviderParam}
-        initialUnlinkProviderParam={initialUnlinkProviderParam}
-      />
-    </Stack>
+    <MySecurityPageView
+      subjectId={memberId}
+      initialSessions={security.sessions}
+      initialProviders={security.providers}
+      initialCanonicalEmail={security.canonicalEmail}
+      initialEmailCodeAvailable={security.emailCodeAvailable}
+      initialPasskeyCount={security.passkeyCount}
+      initialFlowId={initialFlowId}
+      initialLinkProviderParam={initialLinkProviderParam}
+      initialUnlinkProviderParam={initialUnlinkProviderParam}
+    />
   );
 }

@@ -1,14 +1,16 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, type ComponentProps } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { LogoCropper } from '@/features/site/LogoCropper/LogoCropper';
 import { deleteClientLogoAction, setClientLogoAction, type ThemeAssetVariantName } from '@/lib/actions/client';
 import { useUpload } from '@/lib/hooks/useUpload';
 import { UploadType } from '@/lib/types/upload/model';
 
 export interface ClientLogoUploaderProps {
+  uploadAction?: ComponentProps<typeof LogoCropper>['onUpload'];
+  deleteAction?: ComponentProps<typeof LogoCropper>['onDelete'];
   /** Client ID to upload logo for */
   clientId: string;
   /** Current logo URL */
@@ -50,6 +52,8 @@ export function ClientLogoUploader({
   size = 120,
   label = 'Logo',
   onImageChange,
+  uploadAction,
+  deleteAction,
 }: ClientLogoUploaderProps) {
   // Unified upload hook for file storage
   const { upload } = useUpload(UploadType.CLIENT_LOGO);
@@ -79,7 +83,7 @@ export function ClientLogoUploader({
       // Link file to client
       const result = await setLogo.mutateAsync({ clientId, fileId });
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         throw new Error(result.error);
       }
 
@@ -91,7 +95,7 @@ export function ClientLogoUploader({
   const handleDelete = useCallback(async () => {
     const result = await deleteLogo.mutateAsync({ clientId });
     if (result.error) {
-      notifications.show({ message: result.error, color: 'red' });
+      notifications.show({ message: result.error, tone: 'danger' });
       throw new Error(result.error);
     }
     return result;
@@ -110,8 +114,8 @@ export function ClientLogoUploader({
       name={name}
       size={size}
       label={label}
-      onUpload={handleUpload}
-      onDelete={handleDelete}
+      onUpload={uploadAction ?? handleUpload}
+      onDelete={deleteAction ?? handleDelete}
       onImageChange={handleImageChange}
     />
   );

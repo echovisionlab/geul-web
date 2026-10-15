@@ -25,7 +25,7 @@ vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 
 let latest: ReturnType<typeof useProgramEventLifecycle> | null = null;
 let root: Root | null = null;
@@ -83,7 +83,7 @@ describe('useProgramEventLifecycle action authority', () => {
     act(() => root?.render(<Harness allowedActions={['edit', 'publish', 'delete']} />));
 
     await act(async () => {
-      await latest?.saveEditableEvent({ title: 'allowed' });
+      await latest?.saveEditableEvent({ title: 'allowed' }, '10000000-0000-4000-8000-000000000001');
       latest?.changeStatus('published');
       latest?.changeStatus('archived');
       latest?.deleteEvent.mutate();
@@ -91,7 +91,10 @@ describe('useProgramEventLifecycle action authority', () => {
 
     const [update, publish, archive, remove] = mutationState.mutates;
     expect(update).not.toHaveBeenCalled();
-    expect(mutationState.mutateAsynces[0]).toHaveBeenCalledWith({ title: 'allowed' });
+    expect(mutationState.mutateAsynces[0]).toHaveBeenCalledWith({
+      data: { title: 'allowed' },
+      editorOrigin: '10000000-0000-4000-8000-000000000001',
+    });
     expect(publish).toHaveBeenCalledOnce();
     expect(archive).not.toHaveBeenCalled();
     expect(remove).toHaveBeenCalledOnce();

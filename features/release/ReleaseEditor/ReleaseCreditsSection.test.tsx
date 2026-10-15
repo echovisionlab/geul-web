@@ -3,7 +3,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import type { ReleaseCreditItem } from '@/lib/types/release/model';
 import { TestProviders } from '@/test/TestProviders';
 import { ReleaseCreditsSection } from './ReleaseCreditsSection';
@@ -43,7 +43,7 @@ vi.mock('@dnd-kit/sortable', () => ({
 
 vi.mock('@dnd-kit/utilities', () => ({
   CSS: {
-    Transform: {
+    Translate: {
       toString: () => '',
     },
   },
@@ -74,49 +74,7 @@ vi.mock('@tanstack/react-query', () => ({
   }),
 }));
 
-vi.mock('@mantine/core', async () => {
-  const actual = await vi.importActual<typeof import('@mantine/core')>('@mantine/core');
-  const reactDom = await vi.importActual<typeof import('react-dom')>('react-dom');
-  return {
-    ...actual,
-    Modal: ({ opened, title, children }: { opened: boolean; title?: React.ReactNode; children: React.ReactNode }) =>
-      opened
-        ? reactDom.createPortal(
-            <div data-testid="modal">
-              <div>{title}</div>
-              {children}
-            </div>,
-            document.body,
-          )
-        : null,
-    SegmentedControl: ({
-      id,
-      value,
-      onChange,
-      data,
-    }: {
-      id?: string;
-      value: string;
-      onChange?: (value: string) => void;
-      data: Array<{ value: string; label: React.ReactNode }>;
-    }) => (
-      <div id={id}>
-        {data.map((item) => (
-          <button
-            key={item.value}
-            type="button"
-            data-active={item.value === value ? 'true' : 'false'}
-            onClick={() => onChange?.(item.value)}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-    ),
-  };
-});
-
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: {
     show: vi.fn(),
   },
@@ -376,6 +334,7 @@ describe('ReleaseCreditsSection', () => {
         canEdit
         canEditNotes
         onCreditsChange={onCreditsChange}
+        onMutationStart={() => 'test-editor-origin'}
         onCreditNoteChange={onCreditNoteChange}
       />,
     );
@@ -427,6 +386,7 @@ describe('ReleaseCreditsSection', () => {
       ],
       [],
       undefined,
+      'test-editor-origin',
     );
     expect(onCreditNoteChange).toHaveBeenCalledWith('credit-new', 'Refers to Blue Circuit and Midnight Radio');
     expect(notifications.show).toHaveBeenCalled();
@@ -459,11 +419,12 @@ describe('ReleaseCreditsSection', () => {
         canEdit
         canEditNotes
         onCreditsChange={onCreditsChange}
+        onMutationStart={() => 'test-editor-origin'}
         onCreditNoteChange={onCreditNoteChange}
       />,
     );
 
-    await clickElement(findLastButtonByText('Edit'));
+    await clickElement(document.querySelector('button[aria-label="Edit"]'));
 
     const noteInput = document.getElementById('release-credits-note-credit-1') as HTMLTextAreaElement | null;
     expect(noteInput).not.toBeNull();
@@ -501,6 +462,7 @@ describe('ReleaseCreditsSection', () => {
         canEdit
         canEditNotes
         onCreditsChange={onCreditsChange}
+        onMutationStart={() => 'test-editor-origin'}
         onCreditNoteChange={onCreditNoteChange}
       />,
     );
@@ -523,6 +485,7 @@ describe('ReleaseCreditsSection', () => {
         },
       ],
       undefined,
+      'test-editor-origin',
     );
     expect(onCreditNoteChange).toHaveBeenCalledWith('credit-1', '');
   });
@@ -554,6 +517,7 @@ describe('ReleaseCreditsSection', () => {
         canEdit={false}
         canEditNotes={false}
         onCreditsChange={onCreditsChange}
+        onMutationStart={() => 'test-editor-origin'}
         onCreditNoteChange={onCreditNoteChange}
       />,
     );

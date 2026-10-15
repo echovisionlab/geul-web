@@ -4,7 +4,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { getUntrackedConfigurationWriteOrigin } from '@/lib/editor/editor-write-origin';
+import { notifications } from '@/components/core/Notification';
 import type { StatusOption } from '@/features/editor/EditorHeader';
 import {
   archiveProgramEventAction,
@@ -34,36 +35,38 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
   const canArchive = allowed.has('archive');
   const canDelete = allowed.has('delete');
   const update = useMutation({
-    mutationFn: (data: ProgramEventUpdate) => updateProgramEventAction(eventId, data),
+    mutationFn: ({ data, editorOrigin }: { data: ProgramEventUpdate; editorOrigin?: string }) =>
+      updateProgramEventAction(eventId, data, editorOrigin),
     onSuccess: (result) => {
       if ('error' in result && result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
       }
     },
     onError: (error) => {
       notifications.show({
         message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
 
   const saveEditableEvent = useCallback(
-    (data: ProgramEventUpdate) => {
+    (data: ProgramEventUpdate, editorOrigin?: string) => {
       if (!canEdit) {
         return Promise.resolve({ error: tCommon('notifications.saveFailed') });
       }
-      return update.mutateAsync(data);
+      return update.mutateAsync({ data, editorOrigin });
     },
     [canEdit, tCommon, update],
   );
   const isEditable = useCallback(() => canEdit, [canEdit]);
 
   const publish = useMutation({
-    mutationFn: () => publishProgramEventAction(eventId),
+    mutationFn: () =>
+      publishProgramEventAction(eventId, getUntrackedConfigurationWriteOrigin(`program_event:${eventId}`)),
     onSuccess: (result) => {
       if ('error' in result && result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       setStatus('published');
@@ -71,20 +74,21 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
         message: tCommon('messages.itemPublished', {
           item: tCommonEntities('programEvent').toLowerCase(),
         }),
-        color: 'green',
+        tone: 'positive',
       });
     },
   });
 
   const archive = useMutation({
-    mutationFn: () => archiveProgramEventAction(eventId),
+    mutationFn: () =>
+      archiveProgramEventAction(eventId, getUntrackedConfigurationWriteOrigin(`program_event:${eventId}`)),
     onSuccess: (result) => {
       if ('error' in result && result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       setStatus('archived');
-      notifications.show({ message: tCommon('statuses.archived'), color: 'orange' });
+      notifications.show({ message: tCommon('statuses.archived'), tone: 'positive' });
     },
   });
 
@@ -92,7 +96,7 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
     mutationFn: () => deleteProgramEventAction(eventId),
     onSuccess: (result) => {
       if ('error' in result && result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       router.push('/admin/events');
@@ -106,7 +110,7 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
           value: 'archived',
           label: tCommon('statuses.archived'),
           actionLabel: tCommon('statuses.archived'),
-          tone: 'warning',
+          tone: 'neutral',
         },
         ...(canPublish
           ? [
@@ -134,7 +138,7 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
                 value: 'archived',
                 label: tCommon('statuses.archived'),
                 actionLabel: tCommon('statuses.archived'),
-                tone: 'warning',
+                tone: 'neutral',
               } satisfies StatusOption<ProgramEventStatusValue>,
             ]
           : []),

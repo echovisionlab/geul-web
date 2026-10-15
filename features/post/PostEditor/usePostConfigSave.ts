@@ -1,24 +1,18 @@
 'use client';
 
+import { saveFailureFromAction } from '@/lib/editor/save-failure';
 import { Code } from '@connectrpc/connect';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { useRef, useState } from 'react';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { getPostConfigurationAction, updatePostAction } from '@/lib/actions/post';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
+import { useAuthoritativeConfiguration } from '@/lib/editor/useAuthoritativeConfiguration';
 import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
 import type { PostConfigurationSnapshot } from '@/lib/types/post/model';
 import { isValidUuid } from '@/lib/utils/validation';
 import type { PostConfigPatch } from './post-config-save';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
-
-interface ResidentConfiguration {
-  postId: string;
-  configuration: PostConfigurationSnapshot;
-  generation: number;
-  observationGeneration: number;
-}
 
 type PostConfigUpdate = Parameters<typeof updatePostAction>[1];
 
@@ -57,38 +51,30 @@ function patchChangesConfiguration(patch: PostConfigPatch, configuration: PostCo
   );
 }
 
-function overlayPendingPatch(
-  configuration: PostConfigurationSnapshot,
-  patch: PostConfigPatch | null,
-): PostConfigurationSnapshot {
-  if (!patch) {
-    return configuration;
-  }
+type FlatPostConfiguration = PostConfigPatch & { configurationRevision: string };
+function flatten(configuration: PostConfigurationSnapshot): FlatPostConfiguration {
   return {
-    ...configuration,
-    ...(patch.slug === undefined ? {} : { slug: patch.slug || null }),
-    ...(patch.commentsEnabled === undefined ? {} : { commentsEnabled: patch.commentsEnabled }),
-    ...(patch.mapPlaceId === undefined ? {} : { mapPlaceId: patch.mapPlaceId || null }),
-    documentLayout: {
-      ...configuration.documentLayout,
-      ...(patch.layoutContentHeight === undefined ? {} : { contentHeight: patch.layoutContentHeight }),
-      ...(patch.layoutPageChrome === undefined ? {} : { pageChrome: patch.layoutPageChrome }),
-      ...(patch.layoutFooter === undefined ? {} : { footer: patch.layoutFooter }),
-    },
+    configurationRevision: configuration.configurationRevision,
+    slug: configuration.slug ?? '',
+    commentsEnabled: configuration.commentsEnabled,
+    mapPlaceId: configuration.mapPlaceId ?? '',
+    layoutContentHeight: configuration.documentLayout.contentHeight,
+    layoutPageChrome: configuration.documentLayout.pageChrome,
+    layoutFooter: configuration.documentLayout.footer,
   };
 }
-
-function mergePostConfigPatches(
-  earlier: PostConfigPatch | null,
-  later: PostConfigPatch | null,
-): PostConfigPatch | null {
-  if (!earlier) {
-    return later;
-  }
-  if (!later) {
-    return earlier;
-  }
-  return { ...earlier, ...later };
+function expand(configuration: FlatPostConfiguration): PostConfigurationSnapshot {
+  return {
+    configurationRevision: configuration.configurationRevision,
+    slug: configuration.slug || null,
+    commentsEnabled: configuration.commentsEnabled!,
+    mapPlaceId: configuration.mapPlaceId || null,
+    documentLayout: {
+      contentHeight: configuration.layoutContentHeight!,
+      pageChrome: configuration.layoutPageChrome!,
+      footer: configuration.layoutFooter!,
+    },
+  };
 }
 
 function configConflict(errorCode?: Code | string): boolean {
@@ -102,197 +88,119 @@ export function usePostConfigSave(
   provider?: HocuspocusProvider | null,
 ) {
   const tCommonNotifications = useTranslations('common.notifications');
-  const [, setSnapshotVersion] = useState(0);
-  const pendingPatchReader = useRef<() => PostConfigPatch | null>(() => null);
-  const adoptSnapshot = useRef<(snapshot: PostConfigurationSnapshot, preserve?: PostConfigPatch | null) => void>(
-    () => {},
-  );
-  const localIntentSequence = useRef(0);
-  const latestLocalIntent = useRef(new Map<keyof PostConfigPatch, { sequence: number; value: unknown }>());
-  const resident = useRef<ResidentConfiguration>({
-    postId,
-    configuration: initialConfiguration,
-    generation: 0,
-    observationGeneration: 0,
+  const controller = useAuthoritativeConfiguration({
+    document: `post:${postId}`,
+    initialConfiguration: flatten(initialConfiguration),
   });
-
-  if (resident.current.postId !== postId) {
-    resident.current = {
-      postId,
-      configuration: initialConfiguration,
-      generation: resident.current.generation + 1,
-      observationGeneration: 0,
-    };
-  }
+  const refresh = async () => {
+    const read = controller.beginRead();
+    const result = await getPostConfigurationAction(postId);
+    if (!result.ok) {
+      throw new Error(result.error);
+    }
+    if (isValidUuid(result.configuration.configurationRevision)) {
+      controller.adoptRead(read, flatten(result.configuration));
+    }
+  };
 
   const mutation = useMutation({
-    mutationFn: async (request: {
-      targetPostId: string;
-      residentGeneration: number;
-      intentSequence: number;
-      patch: PostConfigPatch;
-      baseConfiguration: PostConfigurationSnapshot;
-    }) => {
-      const isCurrent = () =>
-        resident.current.postId === request.targetPostId && resident.current.generation === request.residentGeneration;
-
-      let observationGeneration = resident.current.observationGeneration;
-      let result = await updatePostAction(
-        request.targetPostId,
-        buildPostConfigUpdate(request.patch, request.baseConfiguration),
-        request.baseConfiguration.configurationRevision,
-      );
-
-      if (!isCurrent()) {
+    mutationFn: async (patch: PostConfigPatch) => {
+      const write = controller.beginWrite(patch);
+      const base = expand(controller.getCanonical());
+      try {
+        let result = await updatePostAction(
+          postId,
+          buildPostConfigUpdate(patch, base),
+          base.configurationRevision,
+          write.origin,
+        );
+        if (!result.ok && configConflict(result.errorCode)) {
+          if (!controller.isActive()) {
+            throw saveFailureFromAction(result);
+          }
+          const read = controller.beginRead();
+          const latestResult = await getPostConfigurationAction(postId);
+          if (!controller.isActive()) {
+            throw new Error('The Post changed before its settings could be reconciled');
+          }
+          if (!latestResult.ok) {
+            throw saveFailureFromAction(latestResult);
+          }
+          const latest = latestResult.configuration;
+          if (!isValidUuid(latest.configurationRevision)) {
+            throw new Error(tCommonNotifications('updateFailed'));
+          }
+          controller.adoptRead(read, flatten(latest));
+          write.rebase();
+          if (!patchChangesConfiguration(patch, latest)) {
+            write.acknowledge(flatten(latest), { full: true });
+            return;
+          }
+          result = await updatePostAction(
+            postId,
+            buildPostConfigUpdate(patch, latest),
+            latest.configurationRevision,
+            write.origin,
+          );
+        }
         if (!result.ok) {
-          throw new Error(result.error);
+          throw saveFailureFromAction(result);
         }
-        publishEditorEntityChange(`post:${request.targetPostId}`);
-        return;
-      }
-
-      if (!result.ok && configConflict(result.errorCode)) {
-        const latestResult = await getPostConfigurationAction(request.targetPostId);
-        if (!isCurrent()) {
-          throw new Error('The Post changed before its settings could be reconciled');
-        }
-        if (!latestResult.ok) {
-          throw new Error(latestResult.error);
-        }
-
-        const latest = latestResult.configuration;
-        if (!isValidUuid(latest.configurationRevision)) {
+        const configuration = result.configuration;
+        if (!configuration || !isValidUuid(configuration.configurationRevision)) {
           throw new Error(tCommonNotifications('updateFailed'));
         }
-
-        adoptSnapshot.current(
-          latest,
-          mergePostConfigPatches(request.patch, getLocalIntentAfter(request.intentSequence)),
-        );
-        observationGeneration = resident.current.observationGeneration;
-        if (!patchChangesConfiguration(request.patch, latest)) {
-          return;
+        const adopted = write.acknowledge(flatten(configuration), { full: true });
+        publishEditorEntityChange(`post:${postId}`, write.origin);
+        if (!adopted && controller.isActive()) {
+          // The write already committed. A failed follow-up read must not requeue its old intent.
+          await refresh().catch((error: unknown) => {
+            notifications.show({
+              message: error instanceof Error ? error.message : tCommonNotifications('updateFailed'),
+              tone: 'danger',
+            });
+          });
         }
-
-        result = await updatePostAction(
-          request.targetPostId,
-          buildPostConfigUpdate(request.patch, latest),
-          latest.configurationRevision,
-        );
-        if (!isCurrent()) {
-          if (!result.ok) {
-            throw new Error(result.error);
-          }
-          publishEditorEntityChange(`post:${request.targetPostId}`);
-          return;
-        }
-        if (!result.ok) {
-          // Keep the sparse intent in the editor queue. The queue can retry with
-          // backoff; a second conflict must not turn into a reload gate.
-          throw new Error(result.error);
-        }
-      } else if (!result.ok) {
-        throw new Error(result.error);
-      }
-
-      const configuration = result.configuration;
-      if (!configuration || !isValidUuid(configuration.configurationRevision)) {
-        throw new Error(tCommonNotifications('updateFailed'));
-      }
-      publishEditorEntityChange(`post:${request.targetPostId}`);
-      if (isCurrent()) {
-        if (resident.current.observationGeneration === observationGeneration) {
-          adoptSnapshot.current(configuration, getLocalIntentAfter(request.intentSequence));
-        } else {
-          // A peer snapshot arrived while this request was in flight. Read once
-          // more so an older acknowledgement cannot move the resident revision back.
-          const latestResult = await getPostConfigurationAction(request.targetPostId);
-          if (isCurrent() && latestResult.ok && isValidUuid(latestResult.configuration.configurationRevision)) {
-            adoptSnapshot.current(latestResult.configuration, getLocalIntentAfter(request.intentSequence));
-          }
-        }
+      } catch (error) {
+        write.fail();
+        throw error;
       }
     },
     onError: (error) => {
       notifications.show({
         message: error instanceof Error ? error.message : tCommonNotifications('updateFailed'),
-        color: 'red',
+        tone: 'danger',
       });
     },
   });
 
-  const queuePostId = postId;
-  const queueResident = resident.current;
   const save = useDebouncedPatch<PostConfigPatch>({
     document: `post:${postId}`,
     recoveryScope: `post:${postId}:configuration`,
     recoveryKey: 'post-configuration',
-    scope: postId,
+    scope: controller,
     delay: 500,
     retry: true,
-    write: (patch) => {
-      const current = resident.current;
-      if (current !== queueResident || current.postId !== queuePostId) {
-        throw new Error('The Post changed before its settings were saved');
-      }
-      return mutation.mutateAsync({
-        targetPostId: queuePostId,
-        residentGeneration: queueResident.generation,
-        intentSequence: localIntentSequence.current,
-        patch,
-        baseConfiguration: current.configuration,
-      });
-    },
+    write: (patch) => mutation.mutateAsync(patch),
   });
-
-  pendingPatchReader.current = save.getPendingPatch;
-  const getLocalIntentAfter = (sequence: number): PostConfigPatch | null => {
-    const patch: PostConfigPatch = {};
-    for (const [field, intent] of latestLocalIntent.current) {
-      if (intent.sequence > sequence) {
-        (patch as Record<string, unknown>)[field] = intent.value;
-      }
-    }
-    return Object.keys(patch).length > 0 ? patch : null;
-  };
-
-  adoptSnapshot.current = (snapshot, preserve) => {
-    const current = resident.current;
-    current.configuration = overlayPendingPatch(
-      snapshot,
-      preserve === undefined ? pendingPatchReader.current() : preserve,
-    );
-    current.observationGeneration += 1;
-    setSnapshotVersion((version) => version + 1);
-  };
 
   useEditorEntityChanges(
     `post:${postId}`,
     () => {
-      void (async () => {
-        const result = await getPostConfigurationAction(postId);
-        if (!result.ok) {
-          notifications.show({ message: result.error, color: 'red' });
-          return;
-        }
-        if (isValidUuid(result.configuration.configurationRevision) && resident.current.postId === postId) {
-          adoptSnapshot.current(result.configuration);
-        }
-      })().catch((error: unknown) => {
+      void refresh().catch((error: unknown) => {
         notifications.show({
           message: error instanceof Error ? error.message : tCommonNotifications('updateFailed'),
-          color: 'red',
+          tone: 'danger',
         });
       });
     },
     provider,
+    undefined,
+    controller.captureOwnChange,
   );
 
   const enqueue = (patch: PostConfigPatch) => {
-    const sequence = ++localIntentSequence.current;
-    for (const [field, value] of Object.entries(patch) as [keyof PostConfigPatch, unknown][]) {
-      latestLocalIntent.current.set(field, { sequence, value });
-    }
+    controller.edit(patch);
     save(patch);
   };
 
@@ -305,7 +213,7 @@ export function usePostConfigSave(
     // Configuration conflicts are retried in-place; only source/body revision
     // conflicts use the blocking reload dialog.
     conflict: false,
-    configurationRevision: resident.current.configuration.configurationRevision,
-    configuration: resident.current.configuration,
+    configurationRevision: controller.getCanonical().configurationRevision,
+    configuration: expand(controller.getConfiguration()),
   });
 }

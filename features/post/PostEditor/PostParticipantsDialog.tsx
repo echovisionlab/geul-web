@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { useDebouncedValue } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import {
   addPostAuthorAction,
   addPostCollaboratorAction,
@@ -67,12 +67,12 @@ export function PostParticipantsDialog({
       role === 'author' ? addPostAuthorAction(postId, memberId) : addPostCollaboratorAction(postId, memberId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       void invalidate();
       setSearchQuery('');
-      notifications.show({ message: t('notifications.added'), color: 'green' });
+      notifications.show({ message: t('notifications.added'), tone: 'positive' });
     },
   });
   const removeParticipant = useMutation({
@@ -80,11 +80,11 @@ export function PostParticipantsDialog({
       role === 'author' ? removePostAuthorAction(postId, memberId) : removePostCollaboratorAction(postId, memberId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       void invalidate();
-      notifications.show({ message: t('notifications.removed'), color: 'yellow' });
+      notifications.show({ message: t('notifications.removed'), tone: 'positive' });
     },
   });
   const changeParticipantRole = useMutation({
@@ -92,11 +92,11 @@ export function PostParticipantsDialog({
       role === 'author' ? addPostAuthorAction(postId, memberId) : addPostCollaboratorAction(postId, memberId),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       void invalidate();
-      notifications.show({ message: t('notifications.roleChanged'), color: 'green' });
+      notifications.show({ message: t('notifications.roleChanged'), tone: 'positive' });
     },
   });
 

@@ -1,13 +1,13 @@
 'use client';
 
-import { startTransition, useMemo } from 'react';
+import { startTransition, useId, useMemo, useState } from 'react';
+import { VisuallyHidden } from '@/components/core/Typography';
 import { useRouter } from 'next/navigation';
 import { IconLanguage } from '@tabler/icons-react';
-import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { IconButton, type IconButtonProps } from '@/components/core/IconButton';
-import { DropdownMenu } from '@/components/core/DropdownMenu';
+import { OnDemandDropdownMenu as DropdownMenu } from '@/components/core/DropdownMenu/OnDemandDropdownMenu';
 import { TextButton, type TextButtonSize } from '@/components/core/TextButton';
 import { updatePreferredLocaleAction } from '@/lib/actions/user-preference';
 import { useSession } from '@/lib/auth/client';
@@ -21,41 +21,43 @@ interface LanguageMenuProps {
   textSize?: TextButtonSize;
 }
 
-export function LanguageMenu({ variant = 'icon', size = 32, textSize = 'xs' }: LanguageMenuProps) {
+export function LanguageMenu({ variant = 'icon', size = 'chrome', textSize = 'xs' }: LanguageMenuProps) {
+  const descriptionId = useId();
   const router = useRouter();
   const tShell = useTranslations('shell');
   const currentLocale = useLocale();
   const { data: session, isPending } = useSession();
   const localeOptions = useMemo(() => getSupportedLocaleOptions(), []);
 
-  const updateLocaleMutation = useMutation({
-    mutationFn: async (nextLocale: SupportedLocale) => {
+  // One request at a time; the controls stay disabled until it settles (shell chrome does not load React Query).
+  const [updatingLocale, setUpdatingLocale] = useState(false);
+  const updateLocale = async (nextLocale: SupportedLocale) => {
+    setUpdatingLocale(true);
+    try {
+      let resolvedLocale = nextLocale;
       if (session?.user?.id) {
         const result = await updatePreferredLocaleAction(nextLocale);
         if (!result.success || !result.preferred_locale) {
           throw new Error(result.error ?? 'Failed to update language preference');
         }
-
-        return result.preferred_locale as SupportedLocale;
+        resolvedLocale = result.preferred_locale as SupportedLocale;
+      } else {
+        writeLocaleCookie(nextLocale);
       }
-
-      writeLocaleCookie(nextLocale);
-      return nextLocale;
-    },
-    onSuccess: (nextLocale) => {
-      writeLocaleCookie(nextLocale);
+      writeLocaleCookie(resolvedLocale);
       startTransition(() => {
         router.refresh();
       });
-    },
-    onError: (error) => {
+    } catch (error) {
       notifications.show({
-        color: 'red',
+        tone: 'danger',
         title: tShell('language.errorTitle'),
         message: error instanceof Error ? error.message : tShell('language.errorMessage'),
       });
-    },
-  });
+    } finally {
+      setUpdatingLocale(false);
+    }
+  };
 
   const currentLocaleLabel = localeOptions.find((option) => option.value === currentLocale)?.label ?? currentLocale;
 
@@ -64,11 +66,11 @@ export function LanguageMenu({ variant = 'icon', size = 32, textSize = 'xs' }: L
       {localeOptions.map((option) => (
         <DropdownMenu.Item
           key={option.value}
-          disabled={isPending || updateLocaleMutation.isPending}
+          disabled={isPending || updatingLocale}
           selected={option.value === currentLocale}
           onClick={() => {
-            if (option.value !== currentLocale) {
-              updateLocaleMutation.mutate(option.value);
+            if (option.value !== currentLocale && !updatingLocale) {
+              void updateLocale(option.value);
             }
           }}
         >
@@ -87,10 +89,13 @@ export function LanguageMenu({ variant = 'icon', size = 32, textSize = 'xs' }: L
             appearance="muted"
             size={textSize}
             controlSize="xs"
-            aria-label={tShell('actions.language')}
-            disabled={isPending || updateLocaleMutation.isPending}
+            indicator="menu"
+            aria-label={currentLocaleLabel}
+            aria-describedby={descriptionId}
+            disabled={isPending || updatingLocale}
           >
             {currentLocaleLabel}
+            <VisuallyHidden id={descriptionId}>{tShell('actions.language')}</VisuallyHidden>
           </TextButton>
         </DropdownMenu.Target>
         {dropdown}
@@ -105,7 +110,7 @@ export function LanguageMenu({ variant = 'icon', size = 32, textSize = 'xs' }: L
           size={size}
           aria-label={tShell('actions.language')}
           title={tShell('actions.language')}
-          disabled={isPending || updateLocaleMutation.isPending}
+          disabled={isPending || updatingLocale}
         >
           <IconLanguage size={16} />
         </IconButton>

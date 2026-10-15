@@ -11,6 +11,31 @@ type RoomJournal = Map<string, JournalEntry[]>;
 const journals = new Map<string, RoomJournal>();
 const documentIds = new WeakMap<object, number>();
 let nextDocumentId = 0;
+/** Source of intents adopted from another tab or session: they always need replay. */
+const ADOPTED_DOCUMENT_ID = -1;
+
+export type DocumentRoomIntentJournalListener = (documentName: string, changes: DocumentRoomIntentChange[]) => void;
+const journalListeners = new Set<DocumentRoomIntentJournalListener>();
+
+/** Observes every journal mutation with the room's full remaining journal (the durable mirror). */
+export function subscribeDocumentRoomIntentJournal(listener: DocumentRoomIntentJournalListener): () => void {
+  journalListeners.add(listener);
+  return () => {
+    journalListeners.delete(listener);
+  };
+}
+
+function emitJournalChange(documentName: string): void {
+  if (!journalListeners.size) {
+    return;
+  }
+  const changes = [...(journals.get(documentName)?.values() ?? [])].flatMap((entries) =>
+    entries.map(({ change }) => cloneChange(change)),
+  );
+  for (const listener of journalListeners) {
+    listener(documentName, changes);
+  }
+}
 
 export interface DocumentRoomIntentBatch {
   changes: DocumentRoomIntentChange[];
@@ -84,7 +109,42 @@ export function recordDocumentRoomIntent(
     sourceDocumentId: getDocumentRoomIntentDocumentId(sourceDocument),
   });
   journal.set(key, entries);
+  emitJournalChange(documentName);
   return true;
+}
+
+/**
+ * Adds intents adopted from a closed tab or an earlier session. They are older than every intent
+ * this page recorded, so they go first: replay applies them before this page's own edits, and a
+ * newer local value always wins. Each keeps its own source/locale authority.
+ */
+export function appendDocumentRoomIntents(documentName: string, changes: readonly DocumentRoomIntentChange[]): number {
+  const adopted = new Map<string, JournalEntry[]>();
+  for (const change of changes) {
+    const { before, after } = change;
+    if (
+      before.documentName !== documentName ||
+      after.documentName !== documentName ||
+      !hasSameAuthority(before, after)
+    ) {
+      continue;
+    }
+    const key = authorityKey(before);
+    const entries = adopted.get(key) ?? [];
+    entries.push({ change: cloneChange(change), key: changeKey(change), sourceDocumentId: ADOPTED_DOCUMENT_ID });
+    adopted.set(key, entries);
+  }
+  if (!adopted.size) {
+    return 0;
+  }
+  const journal = getRoomJournal(documentName, true)!;
+  let appended = 0;
+  for (const [key, entries] of adopted) {
+    journal.set(key, [...entries, ...(journal.get(key) ?? [])]);
+    appended += entries.length;
+  }
+  emitJournalChange(documentName);
+  return appended;
 }
 
 /** Return only changes that belong to this exact canonical source/locale scope. */
@@ -159,5 +219,6 @@ export function acknowledgeDocumentRoomIntents(
   if (journal.size === 0) {
     journals.delete(documentName);
   }
+  emitJournalChange(documentName);
   return true;
 }

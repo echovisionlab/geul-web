@@ -41,7 +41,7 @@ vi.mock('next-intl', () => ({
   useTranslations: (namespace: string) => (key: string) => `${namespace}.${key}`,
 }));
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: { show: mocks.notificationsShow },
 }));
 
@@ -136,7 +136,7 @@ describe('SettingsForm controller', () => {
     expect(mocks.notificationsShow).toHaveBeenLastCalledWith({
       title: 'settings.newsletter.subscribedTitle',
       message: 'Subscription enabled.',
-      color: 'green',
+      tone: 'positive',
       icon: expect.any(Object),
     });
 
@@ -147,7 +147,7 @@ describe('SettingsForm controller', () => {
     expect(mocks.notificationsShow).toHaveBeenLastCalledWith({
       title: 'common.statuses.unsubscribed',
       message: 'Subscription disabled.',
-      color: 'blue',
+      tone: 'positive',
     });
   });
 
@@ -162,7 +162,7 @@ describe('SettingsForm controller', () => {
     expect(mocks.notificationsShow).toHaveBeenLastCalledWith({
       title: 'common.labels.error',
       message: 'Returned failure.',
-      color: 'red',
+      tone: 'danger',
     });
 
     act(() => getMutationOptions().onError(new Error('Thrown failure.')));
@@ -171,7 +171,7 @@ describe('SettingsForm controller', () => {
     expect(mocks.notificationsShow).toHaveBeenLastCalledWith({
       title: 'common.labels.error',
       message: 'Thrown failure.',
-      color: 'red',
+      tone: 'danger',
     });
   });
 });

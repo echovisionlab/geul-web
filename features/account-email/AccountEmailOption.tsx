@@ -1,8 +1,11 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
+import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 import { IconChevronDown } from '@tabler/icons-react';
-import { siGithub } from 'simple-icons';
-import { Box, Group, Text } from '@mantine/core';
+// Catalog-free identity marks keep the social-link platform catalog out of account routes.
+import { SocialIdentityIcon } from '@/components/core/Social/SocialIdentityIcon';
+import type { SocialIconSize } from '@/components/core/Social';
 
 export interface AccountEmailOptionSource {
   key: string;
@@ -11,29 +14,13 @@ export interface AccountEmailOptionSource {
   provider?: string | null;
 }
 
-function ProviderLogo({ provider, size = 16 }: { provider: string; size?: number }) {
+/** Maps a stored provider id onto the Core identity icon; unknown providers have no mark. */
+function ProviderLogo({ provider, size = 'md' }: { provider: string; size?: SocialIconSize }) {
   const normalized = provider.trim().toLowerCase();
-
-  if (normalized === 'google') {
-    return <img src="/providers/google-g-logo.svg" alt="" width={size} height={size} aria-hidden="true" />;
+  if (normalized !== 'google' && normalized !== 'github') {
+    return null;
   }
-
-  if (normalized === 'github') {
-    return (
-      <svg
-        viewBox="0 0 24 24"
-        width={size}
-        height={size}
-        aria-hidden="true"
-        focusable="false"
-        style={{ display: 'block' }}
-      >
-        <path d={siGithub.path} fill="currentColor" />
-      </svg>
-    );
-  }
-
-  return null;
+  return <SocialIdentityIcon platform={normalized} colorMode="brand" size={size} />;
 }
 
 export function AccountEmailOptionContent({
@@ -46,63 +33,62 @@ export function AccountEmailOptionContent({
   status?: string;
 }) {
   return (
-    <Group justify="space-between" gap="md" wrap="nowrap" style={{ width: '100%' }}>
-      <Group gap="xs" wrap="nowrap" style={{ minWidth: 0 }}>
-        <Text span truncate size="sm">
+    <DsLayoutInline justify="between" gap="md" wrap="nowrap" fill="inline">
+      <DsLayoutInline gap="xs" wrap="nowrap">
+        <DsText as="span" truncate size="sm">
           {email}
-        </Text>
+        </DsText>
         {status ? (
-          <Text span size="xs" c="dimmed" style={{ flexShrink: 0 }}>
+          <DsText as="span" size="xs" tone="secondary" shrink={false}>
             {status}
-          </Text>
+          </DsText>
         ) : null}
-      </Group>
-      <Group gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
+      </DsLayoutInline>
+      <DsLayoutInline gap="xs" wrap="nowrap" shrink={false}>
         {sources.map((source) => (
-          <Group key={source.key} gap={4} wrap="nowrap">
+          <DsLayoutInline key={source.key} gap="xxs" wrap="nowrap">
             {source.kind === 'provider' && source.provider ? (
-              <Box
-                c="dimmed"
-                role="img"
-                aria-label={source.label}
-                title={source.label}
-                style={{ display: 'flex', alignItems: 'center' }}
-              >
-                <ProviderLogo provider={source.provider} size={14} />
-              </Box>
+              <DsText align="center" tone="secondary" role="img" aria-label={source.label} title={source.label}>
+                <ProviderLogo provider={source.provider} size="sm" />
+              </DsText>
             ) : (
-              <Text span size="xs" c="dimmed">
+              <DsText as="span" size="xs" tone="secondary">
                 {source.label}
-              </Text>
+              </DsText>
             )}
-          </Group>
+          </DsLayoutInline>
         ))}
-      </Group>
-    </Group>
+      </DsLayoutInline>
+    </DsLayoutInline>
   );
 }
 
 export function AccountEmailSelectRightSection({ sources }: { sources: AccountEmailOptionSource[] }) {
   const source = sources[0];
   return (
-    <Group gap="xs" wrap="nowrap" justify="flex-end" style={{ width: '100%' }}>
-      {source?.kind === 'provider' && source.provider ? (
-        <Box
-          c="dimmed"
-          role="img"
-          aria-label={source.label}
-          title={source.label}
-          style={{ display: 'flex', alignItems: 'center' }}
-        >
-          <ProviderLogo provider={source.provider} size={14} />
-        </Box>
-      ) : source ? (
-        <Text span size="xs" c="dimmed" truncate>
-          {source.label}
-        </Text>
-      ) : null}
-      <IconChevronDown size={14} color="var(--mantine-color-dimmed)" />
-    </Group>
+    <div
+      style={{
+        width: getAccountEmailSelectRightSectionWidth(sources),
+        maxWidth: '100%',
+        minWidth: 0,
+        pointerEvents: 'none',
+      }}
+    >
+      <DsLayoutInline gap="xs" wrap="nowrap" justify="end" fill="inline">
+        {source?.kind === 'provider' && source.provider ? (
+          <DsText align="center" tone="secondary" role="img" aria-label={source.label} title={source.label}>
+            <ProviderLogo provider={source.provider} size="sm" />
+          </DsText>
+        ) : source ? (
+          <DsText as="span" size="xs" tone="secondary" truncate>
+            {source.label}
+          </DsText>
+        ) : null}
+        <DsText as="span" tone="secondary">
+          <IconChevronDown aria-hidden />
+        </DsText>
+      </DsLayoutInline>
+    </div>
   );
 }
 

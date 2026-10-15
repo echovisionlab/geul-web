@@ -1,16 +1,6 @@
 'use client';
 
-import {
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type MouseEvent,
-  type PointerEvent,
-  type ReactNode,
-} from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { Editor } from '@tiptap/core';
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import { NodeSelection } from '@tiptap/pm/state';
@@ -30,13 +20,14 @@ import {
   type Icon,
 } from '@tabler/icons-react';
 import { useLocale, useTranslations, type Messages } from 'next-intl';
-import { IconButton } from '@/components/core/IconButton';
+import { Separator } from '@/components/core/Display';
 import { TextInput } from '@/components/core/Input';
-import {
-  EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS,
-  EditorToolbarTooltip,
-  type EditorToolbarShortcutHint,
-} from '@/features/editor/toolbars/EditorToolbarTooltip';
+import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { ToolbarSurface } from '@/components/core/Section';
+import { VisuallyHidden } from '@/components/core/Typography';
+import { useRenderedMath } from './math/math-render-runtime';
+import { EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS } from '@/features/editor/toolbars/EditorToolbarTooltip';
+import { EditorToolbarAction as Action } from '@/features/editor/toolbars/EditorToolbarAction';
 import { setCurrentBlockAlignment, type TextAlignment } from './block-commands';
 import {
   createTiptapSlashCatalog,
@@ -64,7 +55,7 @@ import {
   useSelectionToolbarEditorTabBridge,
   useSelectionToolbarNavigation,
 } from './menus/useSelectionToolbarNavigation';
-import classes from './TiptapAuthoringControls.module.css';
+import { CommandSuggestions } from '@/components/core/CommandPalette';
 
 export type TiptapAuthoringCapability = ReviewedSlashCapability;
 export type TiptapAuthoringCapabilities = ReviewedSlashCapabilities;
@@ -87,10 +78,6 @@ interface SlashMenuState extends SlashRange {
   left: number;
   top: number;
 }
-
-type SlashMenuStyle = CSSProperties & {
-  '--tiptap-slash-menu-left': string;
-};
 
 function callbackWorkflows(callbacks: TiptapAuthoringControlsCallbacks): TiptapSlashWorkflowCallbacks {
   return {
@@ -244,44 +231,6 @@ function canBridgeNodeMenu(editor: Editor, nodeName: SelectedNodeName): boolean 
 const shouldShowFileBubbleMenu = shouldShowNodeMenu('file');
 const shouldShowMathBubbleMenu = shouldShowNodeMenu('math');
 
-function preserveSelection(event: MouseEvent | PointerEvent) {
-  event.preventDefault();
-}
-
-function Action({
-  label,
-  children,
-  onClick,
-  active = false,
-  testId,
-  shortcut,
-}: {
-  label: string;
-  children: ReactNode;
-  onClick: () => void;
-  active?: boolean;
-  testId?: string;
-  shortcut?: EditorToolbarShortcutHint;
-}) {
-  return (
-    <EditorToolbarTooltip label={label} shortcut={shortcut}>
-      <IconButton
-        label={label}
-        tone={active ? 'accent' : 'neutral'}
-        emphasis={active ? 'medium' : 'low'}
-        size="sm"
-        data-selection-toolbar-action=""
-        data-testid={testId}
-        onMouseDown={preserveSelection}
-        onPointerDown={preserveSelection}
-        onClick={onClick}
-      >
-        {children}
-      </IconButton>
-    </EditorToolbarTooltip>
-  );
-}
-
 function AlignmentActions({ editor }: { editor: Editor }) {
   const t = useTranslations('editorCommon.editor.formatting');
   const selection = editor.state.selection;
@@ -292,20 +241,24 @@ function AlignmentActions({ editor }: { editor: Editor }) {
     ['right', IconAlignRight, t('alignRight')],
   ];
   return (
-    <div className="tiptap-editor__bubble-menu-group" role="group" aria-label={t('alignment')}>
-      {actions.map(([value, IconComponent, label]) => (
-        <Action
-          key={value}
-          label={label}
-          shortcut={EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS}
-          active={current === value}
-          testId={`tiptap-toolbar-align-${value}`}
-          onClick={() => setCurrentBlockAlignment(editor, value)}
-        >
-          <IconComponent size={16} />
-        </Action>
-      ))}
-    </div>
+    <>
+      <Separator orientation="vertical" aria-hidden />
+      <DsLayoutInline gap="xxs" wrap="nowrap" role="group" aria-label={t('alignment')}>
+        {actions.map(([value, IconComponent, label]) => (
+          <Action
+            key={value}
+            label={label}
+            shortcut={EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS}
+            pressed={current === value}
+            testId={`tiptap-toolbar-align-${value}`}
+            onClick={() => setCurrentBlockAlignment(editor, value)}
+          >
+            <IconComponent size={16} />
+          </Action>
+        ))}
+      </DsLayoutInline>
+      <Separator orientation="vertical" aria-hidden />
+    </>
   );
 }
 
@@ -352,39 +305,41 @@ function FileBubbleMenu({ editor, onFileActivate }: { editor: Editor; onFileActi
       shouldShow={shouldShowFileBubbleMenu}
       options={bubbleOptions}
     >
-      <div
+      <ToolbarSurface
         ref={navigation.toolbarRef}
-        className="tiptap-editor__context-menu"
+        density="compact"
+        wrap="nowrap"
         data-testid="tiptap-file-menu"
-        role="toolbar"
-        aria-label={`${t('replace', { item: '' }).trim()}, ${formatting('alignment')}, ${actions('remove')}`}
+        label={`${t('replace', { item: '' }).trim()}, ${formatting('alignment')}, ${actions('remove')}`}
         onKeyDownCapture={navigation.onToolbarKeyDown}
         onFocusCapture={navigation.onToolbarFocusCapture}
       >
-        <Action
-          label={t('replace', { item: '' }).trim()}
-          testId="tiptap-file-replace"
-          onClick={() => {
-            const current = editor.state.selection;
-            if (isSelectedNode(current, 'file')) {
-              const blockId = String(current.$from.parent.attrs.id ?? '');
-              if (blockId) {
-                onFileActivate?.(blockId);
+        <DsLayoutInline gap="xxs" wrap="nowrap">
+          <Action
+            label={t('replace', { item: '' }).trim()}
+            testId="tiptap-file-replace"
+            onClick={() => {
+              const current = editor.state.selection;
+              if (isSelectedNode(current, 'file')) {
+                const blockId = String(current.$from.parent.attrs.id ?? '');
+                if (blockId) {
+                  onFileActivate?.(blockId);
+                }
               }
-            }
-          }}
-        >
-          <IconComponent size={16} />
-        </Action>
-        <AlignmentActions editor={editor} />
-        <Action
-          label={actions('remove')}
-          testId="tiptap-file-delete"
-          onClick={() => editor.chain().focus().deleteSelection().run()}
-        >
-          <IconTrash size={16} />
-        </Action>
-      </div>
+            }}
+          >
+            <IconComponent size={16} />
+          </Action>
+          <AlignmentActions editor={editor} />
+          <Action
+            label={actions('remove')}
+            testId="tiptap-file-delete"
+            onClick={() => editor.chain().focus().deleteSelection().run()}
+          >
+            <IconTrash size={16} />
+          </Action>
+        </DsLayoutInline>
+      </ToolbarSurface>
     </BubbleMenu>
   );
 }
@@ -395,6 +350,8 @@ function MathBubbleMenu({ editor }: { editor: Editor }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
+  const errorId = useId();
+  const draftError = useRenderedMath(draft, true, editing)?.error ?? null;
   const selection = editor.state.selection;
   const selected = isSelectedNode(selection, 'math');
   const menu = useTiptapBubbleMenu(editor, 'tiptap-math-menu');
@@ -446,64 +403,73 @@ function MathBubbleMenu({ editor }: { editor: Editor }) {
       shouldShow={shouldShowMathBubbleMenu}
       options={bubbleOptions}
     >
-      <div
+      <ToolbarSurface
         ref={navigation.toolbarRef}
-        className="tiptap-editor__context-menu"
+        density="compact"
+        wrap="nowrap"
         data-testid="tiptap-math-menu"
-        role="toolbar"
-        aria-label={math('block')}
+        label={math('block')}
         onKeyDownCapture={navigation.onToolbarKeyDown}
         onFocusCapture={navigation.onToolbarFocusCapture}
       >
-        {editing ? (
-          <>
-            <TextInput
-              ref={inputRef}
-              aria-label={editLabel}
-              value={draft}
-              onChange={(event) => setDraft(event.currentTarget.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Escape') {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  cancel();
-                  menu.hide();
-                } else if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  save();
-                }
-              }}
-            />
-            <Action label={actions('save')} testId="tiptap-math-save" onClick={save}>
-              <IconCheck size={16} />
-            </Action>
-            <Action label={actions('cancel')} testId="tiptap-math-cancel" onClick={cancel}>
-              <IconX size={16} />
-            </Action>
-          </>
-        ) : (
-          <>
-            <Action
-              label={editLabel}
-              testId="tiptap-math-edit"
-              onClick={() => {
-                setDraft(source);
-                setEditing(true);
-              }}
-            >
-              <IconMathFunction size={16} />
-            </Action>
-            <Action
-              label={actions('delete')}
-              testId="tiptap-math-delete"
-              onClick={() => editor.chain().focus().deleteSelection().run()}
-            >
-              <IconTrash size={16} />
-            </Action>
-          </>
-        )}
-      </div>
+        <DsLayoutInline gap="xxs" wrap="nowrap">
+          {editing ? (
+            <>
+              <TextInput
+                ref={inputRef}
+                aria-label={math('block')}
+                aria-invalid={Boolean(draftError) || undefined}
+                aria-describedby={draftError ? errorId : undefined}
+                aria-keyshortcuts="Control+Enter Meta+Enter Escape"
+                value={draft}
+                onChange={(event) => setDraft(event.currentTarget.value)}
+                onKeyDown={(event) => {
+                  if (event.nativeEvent.isComposing) {
+                    return;
+                  }
+                  if (event.key === 'Escape') {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    cancel();
+                    menu.hide();
+                  } else if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    save();
+                  }
+                }}
+              />
+              {draftError ? <VisuallyHidden id={errorId}>{draftError}</VisuallyHidden> : null}
+              <Action label={actions('save')} testId="tiptap-math-save" onClick={save}>
+                <IconCheck size={16} />
+              </Action>
+              <Action label={actions('cancel')} testId="tiptap-math-cancel" onClick={cancel}>
+                <IconX size={16} />
+              </Action>
+            </>
+          ) : (
+            <>
+              <Action
+                label={editLabel}
+                testId="tiptap-math-edit"
+                onClick={() => {
+                  setDraft(source);
+                  setEditing(true);
+                }}
+              >
+                <IconMathFunction size={16} />
+              </Action>
+              <Action
+                label={actions('delete')}
+                testId="tiptap-math-delete"
+                onClick={() => editor.chain().focus().deleteSelection().run()}
+              >
+                <IconTrash size={16} />
+              </Action>
+            </>
+          )}
+        </DsLayoutInline>
+      </ToolbarSurface>
     </BubbleMenu>
   );
 }
@@ -727,23 +693,16 @@ export function TiptapAuthoringControls({
     return catalog.filter((item) => item.capability === undefined || capabilities[item.capability] !== false);
   }, [callbacks, capabilities, messages]);
   const menuId = useId();
-  const activeOptionRef = useRef<HTMLButtonElement>(null);
+
   const [, setRevision] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
   const [dismissedSignature, setDismissedSignature] = useState<string>();
   const detected = getSlashMenuState(editor);
   const signature = detected ? `${detected.from}:${detected.to}:${detected.query}` : undefined;
   const slashState = signature === dismissedSignature ? null : detected;
-  const slashMenuStyle = slashState
-    ? ({
-        '--tiptap-slash-menu-left': `${slashState.left}px`,
-        top: slashState.top,
-      } satisfies SlashMenuStyle)
-    : undefined;
   const visibleItems = slashState ? filterTiptapSlashCatalog(items, slashState.query, locale) : [];
   const selectableItems = selectableTiptapSlashItems(visibleItems);
   const activeItem = selectableItems[activeIndex] ?? selectableItems[0];
-  const activeOptionId = activeItem ? `${menuId}-${activeItem.key}` : undefined;
 
   useEffect(() => {
     const refresh = () => setRevision((revision) => revision + 1);
@@ -762,37 +721,11 @@ export function TiptapAuthoringControls({
       setDismissedSignature(undefined);
     }
   }, [dismissedSignature, signature]);
-  useEffect(() => {
-    activeOptionRef.current?.scrollIntoView?.({ block: 'nearest' });
-  }, [activeOptionId]);
-  useEffect(() => {
-    if (editor.isDestroyed) {
-      return undefined;
-    }
-    const element = editor.view.dom;
-    if (!slashState || !activeOptionId) {
-      element.removeAttribute('aria-activedescendant');
-      element.removeAttribute('aria-controls');
-      return;
-    }
-    element.setAttribute('aria-activedescendant', activeOptionId);
-    element.setAttribute('aria-controls', menuId);
-    return () => {
-      if (element.getAttribute('aria-controls') === menuId) {
-        element.removeAttribute('aria-activedescendant');
-        element.removeAttribute('aria-controls');
-      }
-    };
-  }, [activeOptionId, editor, menuId, slashState]);
-
   const choose = (item: TiptapSlashItem) => {
     if (!slashState) {
       return;
     }
     const result = executeTiptapSlashItem({ editor, item, range: slashState, callbacks });
-    // Delegated pickers own no document mutation until their explicit success
-    // path. Dismiss this exact trigger immediately so their surface cannot
-    // overlap the slash menu; a query change clears the dismissal naturally.
     if (result.status === 'delegated' && signature) {
       setDismissedSignature(signature);
     }
@@ -841,43 +774,34 @@ export function TiptapAuthoringControls({
       <MathBubbleMenu editor={editor} />
       <FileBubbleMenu editor={editor} onFileActivate={onFileActivate} />
       {slashState && visibleItems.length > 0 ? (
-        <div
+        <CommandSuggestions
           id={menuId}
-          className={classes.slashMenu}
+          density="compact"
+          showGroupLabels={slashState.query.trim() === ''}
+          label={messages.placeholder}
           data-testid="tiptap-slash-menu"
-          role="listbox"
-          aria-label={messages.placeholder}
-          style={slashMenuStyle}
-        >
-          {visibleItems.map((item, index) => {
+          inputElement={editor.view.dom}
+          position={{ left: slashState.left, top: slashState.top }}
+          activeId={activeItem?.key}
+          items={visibleItems.map((item) => {
             const IconComponent = item.icon;
-            const showGroup = index === 0 || visibleItems[index - 1]?.group !== item.group;
-            return (
-              <div key={item.key} role="presentation">
-                {showGroup ? <div className={classes.slashMenuGroup}>{item.group}</div> : null}
-                <button
-                  id={`${menuId}-${item.key}`}
-                  ref={item.key === activeItem?.key ? activeOptionRef : undefined}
-                  type="button"
-                  role="option"
-                  aria-selected={item.key === activeItem?.key}
-                  aria-disabled={!item.enabled}
-                  disabled={!item.enabled}
-                  className={classes.slashMenuItem}
-                  data-testid={`tiptap-slash-item-${item.key}`}
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => choose(item)}
-                >
-                  <IconComponent size={18} aria-hidden />
-                  <span>
-                    <strong>{item.title}</strong>
-                    <small>{item.unavailableReason ?? item.subtext}</small>
-                  </span>
-                </button>
-              </div>
-            );
+            return {
+              id: item.key,
+              testId: `tiptap-slash-item-${item.key}`,
+              label: item.title,
+              description: item.unavailableReason ?? item.subtext,
+              group: item.group,
+              disabled: !item.enabled,
+              icon: <IconComponent aria-hidden />,
+            };
           })}
-        </div>
+          onSelect={(key) => {
+            const item = visibleItems.find((entry) => entry.key === key);
+            if (item) {
+              choose(item);
+            }
+          }}
+        />
       ) : null}
       <TiptapEmojiPicker
         opened={emojiContext !== undefined}

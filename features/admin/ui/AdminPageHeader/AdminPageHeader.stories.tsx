@@ -1,3 +1,5 @@
+import { navigatePreview } from '@/stories/shared/preview-navigation';
+import { withFeatureLabels } from '@/stories/feature-localization';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { IconPlus } from '@tabler/icons-react';
 
@@ -6,10 +8,30 @@ import { AdminPageHeader } from './AdminPageHeader';
 const meta: Meta<typeof AdminPageHeader> = {
   title: 'Feature/Admin/AdminPageHeader',
   component: AdminPageHeader,
+  render: function InteractiveStory(args) {
+    return (
+      <AdminPageHeader
+        {...args}
+        items={args.items
+          ?.filter((item) => item.key === 'create')
+          .map((item) => ({ ...item, onClick: () => navigatePreview('/admin/posts/new') }))}
+      />
+    );
+  },
+  decorators: [
+    withFeatureLabels({
+      project: (args, t) => ({
+        title: t('common.entities.posts'),
+        items: (args.items as { key: string; label?: string }[] | undefined)?.map((item) => ({
+          ...item,
+          label: item.key === 'create' ? t('posts.createTooltip') : t('common.actions.openInNewTab'),
+        })),
+      }),
+    }),
+  ],
   parameters: { layout: 'padded' },
   args: {
     title: 'Posts',
-    description: 'Manage published and draft posts.',
   },
 };
 

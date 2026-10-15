@@ -8,13 +8,19 @@ import { MediaIngestDialog } from './MediaIngestDialog';
 
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
 
-vi.mock('@mantine/core', () => ({
-  Stack: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-}));
-
 vi.mock('@/components/core/Modal', () => ({
-  ContentModal: ({ children, onClose }: { children: ReactNode; onClose: () => void }) => (
-    <div>
+  ContentModal: ({
+    children,
+    onClose,
+    size,
+    density,
+  }: {
+    children: ReactNode;
+    onClose: () => void;
+    size: string;
+    density: string;
+  }) => (
+    <div data-modal-size={size} data-modal-density={density}>
       <button data-testid="cancel" onClick={onClose} type="button">
         Cancel
       </button>
@@ -22,13 +28,6 @@ vi.mock('@/components/core/Modal', () => ({
     </div>
   ),
 }));
-
-vi.mock('@/components/core/Tabs', () => {
-  const Tabs = ({ children }: { children: ReactNode }) => <div>{children}</div>;
-  Tabs.List = ({ children }: { children: ReactNode }) => <div>{children}</div>;
-  Tabs.Tab = ({ children }: { children: ReactNode }) => <div>{children}</div>;
-  return { Tabs };
-});
 
 vi.mock('@/features/editor/components/EditorFileInsertPanel', () => ({
   EditorFileInsertPanel: ({
@@ -114,6 +113,23 @@ afterEach(() => {
 });
 
 describe('MediaIngestDialog close authority', () => {
+  it('starts in compact upload size and expands only the actual library tab', () => {
+    renderDialog({ onClose: vi.fn() });
+    expect(container?.querySelector('[data-modal-size="compact"][data-modal-density="compact"]')).not.toBeNull();
+    expect(container?.querySelector('[data-testid="select-library"]')).toBeNull();
+    const libraryTab = [...(container?.querySelectorAll<HTMLElement>('[role="tab"]') ?? [])].find(
+      (tab) => tab.textContent === 'ingestDialog.openLibrary',
+    );
+    act(() => libraryTab?.click());
+    expect(container?.querySelector('[data-modal-size="wide"]')).not.toBeNull();
+    expect(container?.querySelector('[data-testid="select-library"]')).not.toBeNull();
+    const uploadTab = [...(container?.querySelectorAll<HTMLElement>('[role="tab"]') ?? [])].find(
+      (tab) => tab.textContent === 'ingestDialog.backToUpload',
+    );
+    act(() => uploadTab?.click());
+    expect(container?.querySelector('[data-modal-size="compact"]')).not.toBeNull();
+    expect(container?.querySelector('[data-testid="select-library"]')).toBeNull();
+  });
   it('reports an explicit cancellation from modal close', () => {
     const onClose = vi.fn();
     renderDialog({ onClose });
@@ -142,7 +158,13 @@ describe('MediaIngestDialog close authority', () => {
       onSelectLibraryFiles: () => order.push('library'),
     });
 
-    click('open-library');
+    const libraryTab = [...(container?.querySelectorAll<HTMLElement>('[role="tab"]') ?? [])].find(
+      (tab) => tab.textContent === 'ingestDialog.openLibrary',
+    );
+    if (!libraryTab) {
+      throw new Error('Missing library tab');
+    }
+    act(() => libraryTab.click());
     click('select-library');
 
     expect(order).toEqual(['close:committed', 'library']);

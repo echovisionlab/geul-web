@@ -1,0 +1,75 @@
+.frame {
+  position: relative;
+  min-width: 0;
+}
+
+.body {
+  position: relative;
+  min-width: 0;
+}
+
+.root {
+  display: flex;
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: calc(
+    -1 * (max(var(--geul-control-height-compact), var(--geul-interaction-minimum)) + var(--geul-spacing-xxs))
+  );
+  width: max(var(--geul-control-height-compact), var(--geul-interaction-minimum));
+  transform: translateY(-50%);
+  z-index: var(--geul-layer-popup);
+  opacity: 0;
+  pointer-events: auto;
+  transition: opacity var(--geul-motion-fast) var(--geul-motion-easing);
+}
+
+.root > * {
+  pointer-events: none;
+}
+
+:hover > .root,
+.root:has(:focus-visible),
+.root:has([aria-expanded='true']),
+.root[data-geul-reorder-gutter='active'] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+:hover > .root > *,
+.root:has(:focus-visible) > *,
+.root:has([aria-expanded='true']) > *,
+.root[data-geul-reorder-gutter='active'] > * {
+  pointer-events: auto;
+}
+
+/* The deepest active editor block owns the shared gutter. */
+:hover:has(:hover > .root) > .root {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    transition: none;
+  }
+}
+
+/* Touch places the handle in a real leading track instead of outside the viewport. */
+@media (any-pointer: coarse) {
+  .frame:has(> .root) {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: var(--geul-spacing-xxs);
+  }
+
+  .frame > .root {
+    position: static;
+    align-self: start;
+    transform: none;
+    opacity: 1;
+  }
+
+  .frame > .root > * {
+    pointer-events: auto;
+  }
+}

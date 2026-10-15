@@ -1,8 +1,10 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
-
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import {
   closestCenter,
   DndContext,
@@ -16,16 +18,16 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { IconGripVertical, IconPlus, IconX } from '@tabler/icons-react';
+import { useSortableItem } from '@/components/core/Sortable';
+import { IconGripVertical, IconPencil, IconPlus, IconX } from '@tabler/icons-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Box, Group, Modal, Stack, Table, Text } from '@mantine/core';
+import { Table } from '@/components/core/Display';
+import { ContentModal, DialogActions } from '@/components/core/Modal';
 import { useDisclosure } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { Select, Textarea, TextInput, SegmentedControl } from '@/components/core/Input';
@@ -35,7 +37,6 @@ import { setReleaseCreditsAction } from '@/lib/actions/release';
 import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
 import { listUsersAdminAction } from '@/lib/actions/user';
 import type { CreditTargetType, ReleaseCreditItem } from '@/lib/types/release/model';
-
 interface ReleaseCreditsSectionProps {
   releaseId: string;
   idPrefix?: string;
@@ -45,10 +46,9 @@ interface ReleaseCreditsSectionProps {
   canEditNotes: boolean;
   onCreditsChange: (credits: ReleaseCreditItem[]) => void;
   onCreditNoteChange: (creditId: string, note: string) => void;
-  onMutationStart?: () => void;
+  onMutationStart?: () => string | void;
   onMutationSettled?: (succeeded: boolean) => void;
 }
-
 export function ReleaseCreditsSection({
   releaseId,
   idPrefix,
@@ -61,6 +61,7 @@ export function ReleaseCreditsSection({
   onMutationStart,
   onMutationSettled,
 }: ReleaseCreditsSectionProps) {
+  const tModalActions = useTranslations('common.actions');
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.credits');
   const [addModalOpened, { open: openAddModal, close: closeAddModal }] = useDisclosure(false);
@@ -70,7 +71,6 @@ export function ReleaseCreditsSection({
   const [creditedName, setCreditedName] = useState('');
   const [creditRole, setCreditRole] = useState('');
   const [creditNote, setCreditNote] = useState('');
-
   const allArtistsQuery = useQuery({
     queryKey: ['artist', 'list'],
     queryFn: () => listArtistsAction().then(unwrapQueryResult),
@@ -81,9 +81,8 @@ export function ReleaseCreditsSection({
     queryFn: () => listUsersAdminAction({}).then(unwrapQueryResult),
   });
   const { data: allMembers } = allMembersQuery;
-
   const setCredits = useMutation({
-    mutationFn: (mutation: {
+    mutationFn: async (mutation: {
       credits: {
         id?: string;
         artistId?: string | null;
@@ -92,44 +91,55 @@ export function ReleaseCreditsSection({
         creditRole?: string | null;
         sortOrder: number;
       }[];
-      orderIntent?: { itemId: string; previousItemId?: string; nextItemId?: string };
-    }) =>
-      setReleaseCreditsAction(
-        releaseId,
-        mutation.credits,
-        credits.map((credit, sortOrder) => ({
-          id: credit.id,
-          artistId: credit.artist_id,
-          memberId: credit.member_id,
-          creditedName: credit.credited_name,
-          creditRole: credit.credit_role,
-          sortOrder,
-        })),
-        mutation.orderIntent,
-      ),
-    onMutate: () => onMutationStart?.(),
+      orderIntent?: {
+        itemId: string;
+        previousItemId?: string;
+        nextItemId?: string;
+      };
+    }) => {
+      const editorOrigin = onMutationStart?.() ?? undefined;
+      return {
+        ...(await setReleaseCreditsAction(
+          releaseId,
+          mutation.credits,
+          credits.map((credit, sortOrder) => ({
+            id: credit.id,
+            artistId: credit.artist_id,
+            memberId: credit.member_id,
+            creditedName: credit.credited_name,
+            creditRole: credit.credit_role,
+            sortOrder,
+          })),
+          mutation.orderIntent,
+          editorOrigin,
+        )),
+        editorOrigin,
+      };
+    },
     onSettled: (result, error) => onMutationSettled?.(!error && !result?.error),
     onSuccess: (result) => {
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      publishEditorEntityChange(`release:${releaseId}`);
+      publishEditorEntityChange(`release:${releaseId}`, result.editorOrigin);
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: tCommon('entities.credits') }),
-        color: 'green',
+        tone: 'positive',
       });
     },
   });
-
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
-
   const persistCredits = (
     nextCredits: ReleaseCreditItem[],
-    orderIntent?: { itemId: string; previousItemId?: string; nextItemId?: string },
+    orderIntent?: {
+      itemId: string;
+      previousItemId?: string;
+      nextItemId?: string;
+    },
   ) => {
     if (!canEdit) {
       return;
@@ -151,7 +161,6 @@ export function ReleaseCreditsSection({
       orderIntent,
     });
   };
-
   const handleDragEnd = (event: DragEndEvent) => {
     if (!canEdit) {
       return;
@@ -160,10 +169,8 @@ export function ReleaseCreditsSection({
     if (!over || active.id === over.id) {
       return;
     }
-
     const oldIndex = credits.findIndex((c) => c.id === active.id);
     const newIndex = credits.findIndex((c) => c.id === over.id);
-
     if (oldIndex !== -1 && newIndex !== -1) {
       const reordered = arrayMove(credits, oldIndex, newIndex);
       const movedIndex = reordered.findIndex((credit) => credit.id === active.id);
@@ -174,7 +181,6 @@ export function ReleaseCreditsSection({
       });
     }
   };
-
   const handleAdd = () => {
     if (!canEdit) {
       return;
@@ -189,23 +195,19 @@ export function ReleaseCreditsSection({
     if (creditType === 'text' && !creditedName.trim()) {
       return;
     }
-
     // Build new credit based on type
     let newCredit: ReleaseCreditItem;
-
     if (creditType === 'artist') {
       const artist = allArtists?.find((a) => a.id === selectedArtistId);
       if (!artist) {
         return;
       }
-
       // Check for duplicates
       const isDuplicate = credits.some((c) => c.artist_id === selectedArtistId && c.credit_role === creditRole);
       if (isDuplicate) {
-        notifications.show({ message: t('duplicate'), color: 'yellow' });
+        notifications.show({ message: t('duplicate'), tone: 'warning' });
         return;
       }
-
       newCredit = {
         id: crypto.randomUUID(),
         credit_type: 'artist',
@@ -223,14 +225,12 @@ export function ReleaseCreditsSection({
       if (!member) {
         return;
       }
-
       // Check for duplicates
       const isDuplicate = credits.some((c) => c.member_id === selectedMemberId && c.credit_role === creditRole);
       if (isDuplicate) {
-        notifications.show({ message: t('duplicate'), color: 'yellow' });
+        notifications.show({ message: t('duplicate'), tone: 'warning' });
         return;
       }
-
       newCredit = {
         id: crypto.randomUUID(),
         credit_type: 'member',
@@ -258,16 +258,13 @@ export function ReleaseCreditsSection({
         sort_order: credits.length,
       };
     }
-
     const newCredits = [...credits, newCredit];
     persistCredits(newCredits);
     if (canEditNotes && creditNote.trim()) {
       onCreditNoteChange(newCredit.id, creditNote.trim());
     }
-
     resetModalState();
   };
-
   const resetModalState = () => {
     closeAddModal();
     setCreditType('artist');
@@ -277,7 +274,6 @@ export function ReleaseCreditsSection({
     setCreditRole('');
     setCreditNote('');
   };
-
   const handleRemove = (creditId: string) => {
     if (!canEdit) {
       return;
@@ -285,7 +281,6 @@ export function ReleaseCreditsSection({
     persistCredits(credits.filter((credit) => credit.id !== creditId));
     onCreditNoteChange(creditId, '');
   };
-
   // Helper to get display name based on credit type
   const getCreditDisplayName = (credit: ReleaseCreditItem): string => {
     if (credit.credit_type === 'artist' && credit.artist_name) {
@@ -299,11 +294,10 @@ export function ReleaseCreditsSection({
     }
     return tCommon('states.unknown');
   };
-
   return (
     <SectionCard>
       <QueryErrorAlert queries={[allArtistsQuery, allMembersQuery]} />
-      <Stack>
+      <DsLayoutStack>
         <SectionHeader
           title={tCommon('entities.credits')}
           actions={
@@ -321,20 +315,18 @@ export function ReleaseCreditsSection({
         />
 
         {credits.length === 0 ? (
-          <Text size="sm" c="dimmed">
-            {t('empty')}
-          </Text>
+          <SupportingText tone="secondary">{t('empty')}</SupportingText>
         ) : (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={credits.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-              <Table>
+              <Table density="compact">
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th w={40} />
+                    <Table.Th />
                     <Table.Th>{tCommon('labels.name')}</Table.Th>
                     <Table.Th>{tCommon('labels.role')}</Table.Th>
                     <Table.Th>{t('fields.noteOptional')}</Table.Th>
-                    <Table.Th w={50} />
+                    <Table.Th />
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -356,14 +348,15 @@ export function ReleaseCreditsSection({
             </SortableContext>
           </DndContext>
         )}
-      </Stack>
+      </DsLayoutStack>
 
-      <Modal
+      <ContentModal
         opened={addModalOpened}
         onClose={resetModalState}
         title={tCommon('actions.addItem', { item: tCommon('entities.credit') })}
+        closeLabel={tModalActions('close')}
       >
-        <Stack>
+        <DsLayoutStack>
           <SegmentedControl
             id={idPrefix ? `${idPrefix}-type` : undefined}
             value={creditType}
@@ -442,11 +435,13 @@ export function ReleaseCreditsSection({
             minRows={2}
             disabled={!canEdit || !canEditNotes}
           />
-          <Group justify="flex-end">
+          <DialogActions>
             <Button emphasis="low" onClick={resetModalState}>
               {tCommon('actions.cancel')}
             </Button>
             <Button
+              tone="neutral"
+              emphasis="strong"
               onClick={handleAdd}
               disabled={
                 !canEdit ||
@@ -457,13 +452,12 @@ export function ReleaseCreditsSection({
             >
               {tCommon('actions.add')}
             </Button>
-          </Group>
-        </Stack>
-      </Modal>
+          </DialogActions>
+        </DsLayoutStack>
+      </ContentModal>
     </SectionCard>
   );
 }
-
 // Sortable credit row component
 interface SortableCreditRowProps {
   idPrefix?: string;
@@ -475,8 +469,7 @@ interface SortableCreditRowProps {
   onNoteChange: (note: string) => void;
   getCreditDisplayName: (credit: ReleaseCreditItem) => string;
 }
-
-function SortableCreditRow({
+export function SortableCreditRow({
   idPrefix,
   credit,
   note,
@@ -486,59 +479,68 @@ function SortableCreditRow({
   onNoteChange,
   getCreditDisplayName,
 }: SortableCreditRowProps) {
+  const tModalActions = useTranslations('common.actions');
   const tCommon = useTranslations('common');
+  const tSort = useTranslations('dataTable.sort');
   const t = useTranslations('releaseEditor.credits');
   const [noteModalOpened, setNoteModalOpened] = useState(false);
   const [localNote, setLocalNote] = useState(note);
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const creditNameId = useId();
+  const sortable = useSortableItem({
     id: credit.id,
     disabled: !canEdit,
   });
-
   useEffect(() => {
     setLocalNote(note);
   }, [note]);
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
   return (
     <>
-      <Table.Tr ref={setNodeRef} style={style}>
+      <Table.Tr ref={sortable.setNodeRef} dragState={sortable.dragState}>
         <Table.Td>
-          <Box {...attributes} {...listeners} style={{ cursor: canEdit ? 'grab' : 'default' }}>
-            <IconGripVertical size={14} color="gray" />
-          </Box>
+          <IconButton
+            emphasis="low"
+            interaction="drag-handle"
+            draggable={false}
+            {...sortable.handle}
+            aria-label={tSort('aria.reorder', { label: getCreditDisplayName(credit) })}
+            disabled={!canEdit}
+          >
+            <IconGripVertical aria-hidden />
+          </IconButton>
         </Table.Td>
         <Table.Td>
-          <Text size="sm">{getCreditDisplayName(credit)}</Text>
+          <DsText id={creditNameId} size="sm">
+            {getCreditDisplayName(credit)}
+          </DsText>
         </Table.Td>
         <Table.Td>
-          <Text size="sm" c="dimmed">
+          <DsText size="sm" tone="secondary">
             {credit.credit_role || '-'}
-          </Text>
+          </DsText>
         </Table.Td>
         <Table.Td>
-          <Group gap={4}>
-            <Text size="sm" c={note ? undefined : 'dimmed'} lineClamp={1}>
+          <DsLayoutInline gap="xxs" wrap="nowrap">
+            <DsText size="sm" tone={note ? undefined : 'secondary'} lines={1}>
               {note || '-'}
-            </Text>
+            </DsText>
             {canEditNote ? (
-              <Button emphasis="low" size="xs" onClick={() => setNoteModalOpened(true)}>
-                {tCommon('actions.edit')}
-              </Button>
+              <IconButton
+                aria-label={tCommon('actions.edit')}
+                aria-describedby={creditNameId}
+                onClick={() => setNoteModalOpened(true)}
+              >
+                <IconPencil aria-hidden />
+              </IconButton>
             ) : null}
-          </Group>
+          </DsLayoutInline>
         </Table.Td>
         <Table.Td>
           <IconButton
             tone="danger"
             emphasis="low"
-            size="sm"
+            size="compact"
             aria-label={tCommon('actions.remove')}
+            aria-describedby={creditNameId}
             onClick={onRemove}
             disabled={!canEdit}
           >
@@ -547,15 +549,17 @@ function SortableCreditRow({
         </Table.Td>
       </Table.Tr>
 
-      <Modal
+      <ContentModal
         opened={noteModalOpened}
         onClose={() => setNoteModalOpened(false)}
         title={t('fields.noteOptional')}
-        size="sm"
+        size="compact"
         centered
+        closeLabel={tModalActions('close')}
       >
-        <Stack>
+        <DsLayoutStack>
           <Textarea
+            aria-describedby={creditNameId}
             id={idPrefix ? `${idPrefix}-note-${credit.id}` : undefined}
             label={t('fields.noteOptional')}
             placeholder={t('placeholders.note')}
@@ -566,11 +570,12 @@ function SortableCreditRow({
             disabled={!canEditNote}
             autoFocus
           />
-          <Group justify="flex-end">
+          <DialogActions>
             <Button emphasis="low" onClick={() => setNoteModalOpened(false)}>
               {tCommon('actions.cancel')}
             </Button>
             <Button
+              emphasis="strong"
               onClick={() => {
                 onNoteChange(localNote);
                 setNoteModalOpened(false);
@@ -579,9 +584,9 @@ function SortableCreditRow({
             >
               {tCommon('actions.save')}
             </Button>
-          </Group>
-        </Stack>
-      </Modal>
+          </DialogActions>
+        </DsLayoutStack>
+      </ContentModal>
     </>
   );
 }

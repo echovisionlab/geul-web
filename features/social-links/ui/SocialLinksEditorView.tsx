@@ -1,14 +1,17 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useState } from 'react';
 import { IconGripVertical, IconPlus } from '@tabler/icons-react';
-import { Group, Stack, Text } from '@mantine/core';
+
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import type { SocialPlatform } from '@/components/core/Social';
 import { Tooltip } from '@/components/core/Tooltip';
 import { SocialLinkInputView, type SocialLinkInputViewLabels, type SocialPlatformOption } from './SocialLinkInputView';
-import classes from './SocialLinksEditor.module.css';
+import { SectionCard } from '@/components/core/Section';
+import { ReorderRow } from '@/components/core/Sortable';
 
 export interface SocialLinkEditorItemViewModel {
   key: string;
@@ -60,16 +63,16 @@ export function SocialLinksEditorView({
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   return (
-    <Stack gap="xs">
-      <Group justify="space-between">
-        <Text size="sm" fw={500}>
+    <DsLayoutStack gap="xxs">
+      <DsLayoutInline justify="between">
+        <DsText size="sm" weight="medium">
           {label ?? labels.fieldLabel}
-        </Text>
+        </DsText>
         {addButtonMode === 'icon' ? (
           <Tooltip label={labels.addLink}>
             <IconButton
               id={idPrefix ? `${idPrefix}-add` : undefined}
-              size="sm"
+              size="compact"
               onClick={onAddLink}
               disabled={disabled || !canAddMore}
               aria-label={labels.addLink}
@@ -89,54 +92,67 @@ export function SocialLinksEditorView({
             {labels.addLink}
           </Button>
         )}
-      </Group>
+      </DsLayoutInline>
       {items.map((link, index) => (
-        <Group
+        <SectionCard
           key={link.key || index}
-          gap="xs"
-          wrap="nowrap"
-          className={classes.row}
-          data-dragging={draggedIndex === index || undefined}
-          onDragOver={(event) => {
-            event.preventDefault();
-            if (draggedIndex !== null && draggedIndex !== index) {
-              onMoveLink(draggedIndex, index);
-              setDraggedIndex(index);
-            }
-          }}
+          padding="none"
+          border="none"
+          appearance="plain"
+          state={draggedIndex === index ? 'dragging' : 'default'}
         >
-          <div
-            className={classes.dragHandle}
-            draggable={!disabled}
-            role="button"
-            tabIndex={disabled ? -1 : 0}
-            aria-label={labels.reorderLink}
-            onDragStart={(event) => {
-              event.dataTransfer.effectAllowed = 'move';
-              setDraggedIndex(index);
+          <ReorderRow
+            data-dragging={draggedIndex === index || undefined}
+            onDragOver={(event) => {
+              event.preventDefault();
+              if (draggedIndex !== null && draggedIndex !== index) {
+                onMoveLink(draggedIndex, index);
+                setDraggedIndex(index);
+              }
             }}
-            onDragEnd={() => setDraggedIndex(null)}
+
+            handle={
+              <IconButton
+                interaction="drag-handle"
+                disabled={disabled}
+                draggable={!disabled}
+                aria-label={labels.reorderLink}
+                onDragStart={(event) => {
+                  event.dataTransfer.effectAllowed = 'move';
+                  setDraggedIndex(index);
+                }}
+                onDragEnd={() => setDraggedIndex(null)}
+                onKeyDown={(event) => {
+                  const next = event.key === 'ArrowUp' ? index - 1 : event.key === 'ArrowDown' ? index + 1 : index;
+                  if (!disabled && next !== index && next >= 0 && next < items.length) {
+                    event.preventDefault();
+                    onMoveLink(index, next);
+                  }
+                }}
+              >
+                <IconGripVertical aria-hidden />
+              </IconButton>
+            }
           >
-            <IconGripVertical size={16} />
-          </div>
-          <SocialLinkInputView
-            platformId={idPrefix ? `${idPrefix}-platform-${index}` : undefined}
-            valueId={idPrefix ? `${idPrefix}-value-${index}` : undefined}
-            removeButtonId={idPrefix ? `${idPrefix}-remove-${index}` : undefined}
-            platform={link.platform}
-            value={link.value}
-            platformOptions={platformOptions}
-            selectedPlatform={link.selectedPlatform}
-            selectedValuePlaceholder={link.selectedValuePlaceholder}
-            labels={labels}
-            onPlatformChange={(platform) => onPlatformChange(index, platform)}
-            onValueChange={(value) => onValueChange(index, value)}
-            onValueBlur={() => onValueBlur(index)}
-            onRemove={() => onRemoveLink(index)}
-            disabled={disabled}
-          />
-        </Group>
+            <SocialLinkInputView
+              platformId={idPrefix ? `${idPrefix}-platform-${index}` : undefined}
+              valueId={idPrefix ? `${idPrefix}-value-${index}` : undefined}
+              removeButtonId={idPrefix ? `${idPrefix}-remove-${index}` : undefined}
+              platform={link.platform}
+              value={link.value}
+              platformOptions={platformOptions}
+              selectedPlatform={link.selectedPlatform}
+              selectedValuePlaceholder={link.selectedValuePlaceholder}
+              labels={labels}
+              onPlatformChange={(platform) => onPlatformChange(index, platform)}
+              onValueChange={(value) => onValueChange(index, value)}
+              onValueBlur={() => onValueBlur(index)}
+              onRemove={() => onRemoveLink(index)}
+              disabled={disabled}
+            />
+          </ReorderRow>
+        </SectionCard>
       ))}
-    </Stack>
+    </DsLayoutStack>
   );
 }

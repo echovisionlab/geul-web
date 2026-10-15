@@ -3,10 +3,10 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import { useCopyToClipboard } from './useCopyToClipboard';
 
-vi.mock('@mantine/notifications', () => ({
+vi.mock('@/components/core/Notification', () => ({
   notifications: {
     show: vi.fn(),
   },
@@ -75,7 +75,7 @@ describe('useCopyToClipboard', () => {
     expect(writeText).toHaveBeenCalledWith('copy-value');
     expect(notifications.show).toHaveBeenCalledWith({
       message: 'Copied',
-      color: 'blue',
+      tone: 'neutral',
     });
   });
 
@@ -101,7 +101,7 @@ describe('useCopyToClipboard', () => {
 
     expect(notifications.show).toHaveBeenCalledWith({
       message: 'Copy failed',
-      color: 'red',
+      tone: 'danger',
     });
   });
 });

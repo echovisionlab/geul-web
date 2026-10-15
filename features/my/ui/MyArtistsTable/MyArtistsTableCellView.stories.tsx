@@ -1,16 +1,29 @@
+import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { withFeatureLabels } from '@/stories/feature-localization';
 import type { Meta, StoryObj } from '@storybook/nextjs';
-import { Box, Group } from '@mantine/core';
+
 import { MyArtistsTableCellView } from './MyArtistsTableCellView';
 
 const meta: Meta<typeof MyArtistsTableCellView> = {
-  title: 'Feature/My/ArtistsTable/Cell',
+  title: 'Feature/My/Cell',
   component: MyArtistsTableCellView,
   parameters: { layout: 'padded' },
   decorators: [
+    withFeatureLabels({
+      project: (args, t, locale) => ({
+        row: {
+          ...(args.row as Record<string, unknown>),
+          statusLabel: t('common.labels.published'),
+          createdLabel: new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).format(
+            new Date('2026-07-04T00:00:00Z'),
+          ),
+        },
+      }),
+    }),
     (Story) => (
-      <Box maw={480}>
+      <div style={{ maxWidth: 480 }}>
         <Story />
-      </Box>
+      </div>
     ),
   ],
   args: {
@@ -20,9 +33,9 @@ const meta: Meta<typeof MyArtistsTableCellView> = {
       name: 'Mina Park',
       slugLabel: '/mina-park',
       imageUrl: null,
-      avatarFallback: 'M',
       href: '/artists/artist-mina?edit=true',
       statusLabel: 'Published',
+      statusTone: 'positive',
       createdLabel: 'Jul 4, 2026',
     },
   },
@@ -47,7 +60,7 @@ export const Created: Story = {
 
 export const LongName: Story = {
   render: (args) => (
-    <Group wrap="nowrap">
+    <DsLayoutInline wrap="nowrap">
       <MyArtistsTableCellView {...args} cell="avatar" />
       <MyArtistsTableCellView
         {...args}
@@ -58,6 +71,6 @@ export const LongName: Story = {
           slugLabel: '/international-collective-for-long-duration-electroacoustic-field-recording-and-spatial-research',
         }}
       />
-    </Group>
+    </DsLayoutInline>
   ),
 };

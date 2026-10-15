@@ -1,5 +1,7 @@
 'use client';
 
+import { formatLocaleCode } from '@/components/core/Typography/locale-code';
+
 import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { getSupportedLocaleOptions, normalizeLocale } from '@/lib/i18n/locale';
@@ -33,9 +35,12 @@ export function useTranslationLocaleLabels(
     (code: string) => {
       const normalizedLocale = normalizeLocale(code);
       if (!normalizedLocale) {
-        return code;
+        return formatLocaleCode(code);
       }
-      return supportedLocaleOptions.find((option) => option.value === normalizedLocale)?.label ?? normalizedLocale;
+      return (
+        supportedLocaleOptions.find((option) => option.value === normalizedLocale)?.label ??
+        formatLocaleCode(normalizedLocale)
+      );
     },
     [supportedLocaleOptions],
   );
@@ -45,7 +50,7 @@ export function useTranslationLocaleLabels(
     );
     return [...new Set(codes)].map((code) => ({
       value: code,
-      label: `${getLocaleDisplayLabel(code)} (${code})`,
+      label: getLocaleDisplayLabel(code),
       isSource: code === sourceLocale,
     }));
   }, [getLocaleDisplayLabel, localeDefinitions, sourceLocale]);

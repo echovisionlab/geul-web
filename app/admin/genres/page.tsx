@@ -1,8 +1,7 @@
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getTranslations } from 'next-intl/server';
-import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
-import { ServerDataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
-import { CreateGenreButton, GenreModalProvider, GenreModals, GenresTableContent } from '@/features/admin/genre';
+import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
+import { GenresPageView } from '@/features/admin/genre/GenresPageView';
 import { listGenresAdminAction } from '@/lib/actions/genre';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
@@ -45,23 +44,13 @@ export default async function AdminGenresPage({ searchParams }: PageProps) {
   }).then(unwrapQueryResult);
 
   return (
-    <GenreModalProvider>
-      <AdminPageHeader
-        title={genresLabel}
-        items={[{ key: 'create-genre', type: 'custom', content: <CreateGenreButton /> }]}
-      />
-
-      <ServerDataTable namespace="genres">
-        <GenresTableContent
-          result={result}
-          searchPlaceholder={searchPlaceholder}
-          filterFields={filterFields}
-          sortFields={sortFields}
-        />
-        <ServerDataTable.Pagination namespace="genres" result={result} searchParams={params} />
-      </ServerDataTable>
-
-      <GenreModals />
-    </GenreModalProvider>
+    <GenresPageView
+      title={genresLabel}
+      result={result}
+      filterFields={filterFields}
+      sortFields={sortFields}
+      searchPlaceholder={searchPlaceholder}
+      searchParams={params.toString()}
+    />
   );
 }

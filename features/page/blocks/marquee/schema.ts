@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from '@/lib/zod-mini';
 import { booleanString } from '../list-shared';
 
 const marqueeDirectionSchema = z.enum(['left', 'right']);
@@ -12,23 +12,23 @@ const marqueeLogoScaleSchema = z.enum(['contain', 'fill-height']);
 const marqueeFallbackModeSchema = z.enum(['name', 'hide']);
 
 export const marqueeCommonSchema = z.object({
-  direction: marqueeDirectionSchema.default('left'),
-  speed: marqueeSpeedSchema.default('normal'),
-  speedPxPerSecond: z.string().optional(),
-  itemHeight: marqueeItemHeightSchema.default('md'),
-  itemHeightPx: z.string().optional(),
-  gap: marqueeGapSchema.default('lg'),
-  pauseOnHover: booleanString.default('true'),
-  linkTarget: marqueeLinkTargetSchema.default('same-tab'),
+  direction: z._default(marqueeDirectionSchema, 'left'),
+  speed: z._default(marqueeSpeedSchema, 'normal'),
+  speedPxPerSecond: z.optional(z.string()),
+  itemHeight: z._default(marqueeItemHeightSchema, 'md'),
+  itemHeightPx: z.optional(z.string()),
+  gap: z._default(marqueeGapSchema, 'lg'),
+  pauseOnHover: z._default(booleanString, 'true'),
+  linkTarget: z._default(marqueeLinkTargetSchema, 'same-tab'),
 });
 
-export const marqueeEntitySchema = marqueeCommonSchema.extend({
-  source: marqueeSourceSchema.default('all'),
-  ids: z.string().default(''),
-  linkMode: marqueeLinkModeSchema.default('entity'),
-  logoScale: marqueeLogoScaleSchema.default('contain'),
-  fallbackMode: marqueeFallbackModeSchema.default('name'),
-  limit: z.string().default('24'),
+export const marqueeEntitySchema = z.extend(marqueeCommonSchema, {
+  source: z._default(marqueeSourceSchema, 'all'),
+  ids: z._default(z.string(), ''),
+  linkMode: z._default(marqueeLinkModeSchema, 'entity'),
+  logoScale: z._default(marqueeLogoScaleSchema, 'contain'),
+  fallbackMode: z._default(marqueeFallbackModeSchema, 'name'),
+  limit: z._default(z.string(), '24'),
 });
 
 export interface MarqueeTextItem {

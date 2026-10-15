@@ -1,10 +1,13 @@
 'use client';
+import { breakpointQuery } from '@/components/core/Layout/breakpoints';
+
+import { useComputedColorScheme } from '@/lib/providers/DesignSystemProvider';
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import type * as maplibregl from 'maplibre-gl';
 import { useTranslations } from 'next-intl';
-import { useComputedColorScheme } from '@mantine/core';
+
 import { Alert } from '@/components/core/Alert';
 import type { MapRendererProps, MapServerFeatureSource, MapViewportSnapshot } from '@/features/map/types';
 import { PageLoader } from '@/features/site/PageLoader';
@@ -66,7 +69,7 @@ export function MapViewEmbedded({
   caption,
 }: MapViewEmbeddedProps) {
   const t = useTranslations('mapView');
-  const computedColorScheme = useComputedColorScheme('light');
+  const computedColorScheme = useComputedColorScheme();
   const currentLocale = useLocale();
   const [isMobileViewport, setIsMobileViewport] = useState(false);
 
@@ -75,7 +78,7 @@ export function MapViewEmbedded({
       return;
     }
 
-    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    const mediaQuery = window.matchMedia(breakpointQuery('sm'));
     const handleChange = (event?: MediaQueryListEvent) => {
       setIsMobileViewport(event ? event.matches : mediaQuery.matches);
     };
@@ -140,15 +143,20 @@ export function MapViewEmbedded({
     return null;
   }
 
-  if (themeResolution.isLoading) {
-    return <MapEmbeddedLoader />;
-  }
-
-  if (themeResolution.isError || !themeConfig) {
+  if (themeResolution.isLoading || themeResolution.isError || !themeConfig) {
     return (
-      <Alert role="alert" tone="danger">
-        {t('themeUnavailable')}
-      </Alert>
+      <div style={containerStyle}>
+        <div style={{ width: '100%', aspectRatio: getAspectRatioValue(config.aspectRatio), overflow: 'hidden' }}>
+          {themeResolution.isLoading ? (
+            <MapEmbeddedLoader />
+          ) : (
+            <Alert role="alert" tone="danger">
+              {t('themeUnavailable')}
+            </Alert>
+          )}
+        </div>
+        {caption}
+      </div>
     );
   }
 

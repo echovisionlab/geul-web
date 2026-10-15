@@ -132,6 +132,8 @@ export function createDataTableViewColumns<T>({
   sortDisabled = false,
   getSortAriaLabel,
   getSortPriorityLabel,
+  getSortDirectionLabel,
+  actionColumnLabel,
   onSort,
 }: {
   columns: ColumnDef<T>[];
@@ -140,6 +142,8 @@ export function createDataTableViewColumns<T>({
   sortDisabled?: boolean;
   getSortAriaLabel: (columnLabel: string) => string;
   getSortPriorityLabel?: (priority: number, total: number) => string;
+  getSortDirectionLabel?: (direction: SortSpec['direction']) => string;
+  actionColumnLabel?: string;
   onSort: (field: string) => void;
 }): DataTableViewColumn<T>[] {
   const sortMetaMap = new Map(
@@ -153,6 +157,8 @@ export function createDataTableViewColumns<T>({
     return {
       key: column.key,
       header: column.header,
+      accessibleLabel:
+        column.accessibleLabel ?? (column.kind === 'action' && !column.header.trim() ? actionColumnLabel : undefined),
       width: column.width,
       minWidth: column.minWidth,
       kind: column.kind,
@@ -163,8 +169,14 @@ export function createDataTableViewColumns<T>({
             direction: sortMeta?.direction,
             order: sortMeta?.order,
             showOrder: sortMetaMap.size > 1,
-            description:
-              sortMeta && sortMetaMap.size > 1 ? getSortPriorityLabel?.(sortMeta.order, sortMetaMap.size) : undefined,
+            description: sortMeta
+              ? [
+                  sortMetaMap.size > 1 ? getSortPriorityLabel?.(sortMeta.order, sortMetaMap.size) : undefined,
+                  getSortDirectionLabel?.(sortMeta.direction),
+                ]
+                  .filter(Boolean)
+                  .join('. ') || undefined
+              : undefined,
             disabled: sortDisabled,
             onToggle: () => onSort(sortField),
           }

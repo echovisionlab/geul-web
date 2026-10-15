@@ -21,7 +21,8 @@ vi.mock('wavesurfer.js', () => ({
 
 afterEach(() => {
   document.body.innerHTML = '';
-  document.documentElement.removeAttribute('data-mantine-color-scheme');
+  document.documentElement.removeAttribute('data-geul-theme');
+  vi.restoreAllMocks();
   createSpy.mockClear();
   setOptionsSpy.mockClear();
   destroySpy.mockClear();
@@ -31,9 +32,9 @@ describe('mountWaveSurferPlayer', () => {
   it('re-applies colors when the host style changes after mount', async () => {
     const player = document.createElement('div');
     player.setAttribute('data-audio-player', 'true');
-    player.style.setProperty('--audio-wave-color', 'rgb(10 20 30)');
-    player.style.setProperty('--audio-progress-color', 'rgb(40 50 60)');
-    player.style.setProperty('--audio-cursor-color', 'rgb(70 80 90)');
+    player.style.setProperty('--geul-wave-muted', 'rgb(10 20 30)');
+    player.style.setProperty('--geul-action-primary', 'rgb(40 50 60)');
+    player.style.setProperty('--geul-wave-cursor', 'rgb(70 80 90)');
 
     const container = document.createElement('div');
     const audio = document.createElement('audio');
@@ -50,9 +51,9 @@ describe('mountWaveSurferPlayer', () => {
 
     expect(mounted).not.toBeNull();
 
-    player.style.setProperty('--audio-wave-color', 'rgb(100 110 120)');
-    player.style.setProperty('--audio-progress-color', 'rgb(130 140 150)');
-    player.style.setProperty('--audio-cursor-color', 'rgb(160 170 180)');
+    player.style.setProperty('--geul-wave-muted', 'rgb(100 110 120)');
+    player.style.setProperty('--geul-action-primary', 'rgb(130 140 150)');
+    player.style.setProperty('--geul-wave-cursor', 'rgb(160 170 180)');
 
     await Promise.resolve();
 
@@ -64,6 +65,40 @@ describe('mountWaveSurferPlayer', () => {
 
     mounted?.destroy();
     expect(destroySpy).toHaveBeenCalled();
+  });
+
+  it('redraws on the shared theme attribute and disconnects the observer on teardown', async () => {
+    const player = document.createElement('div');
+    player.setAttribute('data-audio-player', 'true');
+    const container = document.createElement('div');
+    player.append(container);
+    document.body.append(player);
+    const computedStyle = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element) => {
+      const style = computedStyle(element);
+      const property = style.getPropertyValue.bind(style);
+      vi.spyOn(style, 'getPropertyValue').mockImplementation((name) => {
+        if (name === '--geul-wave-muted') {
+          return document.documentElement.dataset.geulTheme === 'dark' ? 'rgb(200 210 220)' : 'rgb(10 20 30)';
+        }
+        return property(name);
+      });
+      return style;
+    });
+    const mounted = await mountWaveSurferPlayer({
+      audio: document.createElement('audio'),
+      container,
+      src: 'https://cdn.example.com/audio.mp3',
+    });
+    expect(createSpy).toHaveBeenCalledWith(expect.objectContaining({ waveColor: 'rgb(10 20 30)' }));
+    document.documentElement.dataset.geulTheme = 'dark';
+    await Promise.resolve();
+    expect(setOptionsSpy).toHaveBeenLastCalledWith(expect.objectContaining({ waveColor: 'rgb(200 210 220)' }));
+    const callsBeforeDestroy = setOptionsSpy.mock.calls.length;
+    mounted?.destroy();
+    document.documentElement.dataset.geulTheme = 'light';
+    await Promise.resolve();
+    expect(setOptionsSpy).toHaveBeenCalledTimes(callsBeforeDestroy);
   });
 
   it('creates a waveform player from the audio url even without precomputed peaks', async () => {

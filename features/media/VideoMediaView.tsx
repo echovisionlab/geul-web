@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Text } from '@/components/core/Typography';
 import type { VideoViewModel } from '@/lib/media/video-view-model';
 import { VideoPlayer } from './VideoPlayer';
 import { MediaBlockHeader } from './ui/MediaBlockHeader';
@@ -44,7 +45,13 @@ export function VideoMediaView({
         <MediaBlockHeader
           headerClassName="video-block__header"
           metaClassName="video-block__meta"
-          title={titleContent || <span className="video-block__title">{model.title}</span>}
+          title={
+            titleContent || (
+              <Text as="span" size="sm" weight="strong" truncate>
+                {model.title}
+              </Text>
+            )
+          }
           meta={
             model.sizeText ? (
               <MediaBlockMetaText className="video-block__size">{model.sizeText}</MediaBlockMetaText>
@@ -58,6 +65,7 @@ export function VideoMediaView({
     >
       {beforePlayer}
       <VideoPlayer
+        name={model.title}
         hlsSrc={model.hlsUrl}
         src={model.playbackUrl}
         poster={model.posterUrl}

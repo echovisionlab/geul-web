@@ -1,27 +1,11 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import { Text } from '@/components/core/Typography';
+import { LayoutInset } from '@/components/core/Layout';
 import './MediaBlockShell.css';
 
 function joinClassNames(...values: Array<string | undefined>) {
   return values.filter(Boolean).join(' ');
 }
-
-const MEDIA_BLOCK_CAPTION_STYLE: CSSProperties = {
-  marginTop: '0.5rem',
-  fontSize: '0.6875rem',
-  lineHeight: 1.4,
-  color: 'var(--mantine-color-dimmed)',
-  textAlign: 'left',
-  display: 'block',
-  width: '100%',
-  minHeight: '20px',
-};
-
-const MEDIA_BLOCK_META_STYLE: CSSProperties = {
-  fontSize: '0.6875rem',
-  lineHeight: 1.2,
-  color: 'var(--mantine-color-dimmed)',
-  textAlign: 'left',
-};
 
 interface MediaBlockShellProps {
   as?: 'div' | 'figure';
@@ -76,8 +60,12 @@ export function MediaBlockCaption({ className, children }: MediaBlockCaptionProp
   }
 
   return (
-    <div className={joinClassNames('media-block__caption', className)} style={MEDIA_BLOCK_CAPTION_STYLE}>
-      {children}
+    <div className={joinClassNames('media-block__caption', className)}>
+      <LayoutInset blockStart="xs">
+        <Text size="xs" tone="muted">
+          {children}
+        </Text>
+      </LayoutInset>
     </div>
   );
 }
@@ -88,8 +76,10 @@ export function MediaBlockMetaText({ className, children }: MediaBlockMetaTextPr
   }
 
   return (
-    <span className={className} style={MEDIA_BLOCK_META_STYLE}>
-      {children}
+    <span className={className}>
+      <Text as="span" size="xs" tone="muted">
+        {children}
+      </Text>
     </span>
   );
 }

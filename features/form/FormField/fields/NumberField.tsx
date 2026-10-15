@@ -1,28 +1,39 @@
 'use client';
 
+import { Text as DsText } from '@/components/core/Typography';
 import { useState } from 'react';
-import { Box, Text } from '@mantine/core';
+
 import { TextInput } from '@/components/core/Input';
 import type { FormFieldSchemaNumber } from '@/lib/types/form/schema';
 import { parseMarkdown } from '@/lib/utils/parse-markdown';
 import { FieldFooter } from '../FieldFooter';
-import { inputStyles } from '../styles';
 import { getFieldLabel, getFieldLimits } from '../utils';
 import { getFormatError, parseNumber } from './numberUtils';
 
 export interface NumberFieldProps {
   field: FormFieldSchemaNumber;
   value: unknown;
-  onChange: (value: number) => void;
+  disabled?: boolean;
+  onChange: (value: number | undefined) => void;
   onFocus: () => void;
   onBlur: () => void;
   error?: string;
   isRequired: boolean;
 }
 
-export function NumberField({ field, value, onChange, onFocus, onBlur, error, isRequired }: NumberFieldProps) {
+export function NumberField({
+  field,
+  disabled,
+  value,
+  onChange,
+  onFocus,
+  onBlur,
+  error,
+  isRequired,
+}: NumberFieldProps) {
   const inputId = `field-${field.id}`;
   const errorId = `${inputId}-error`;
+  const hintId = `${inputId}-hint`;
   const descriptionId = field.description ? `${inputId}-description` : undefined;
 
   // Display value as string for text input
@@ -40,13 +51,10 @@ export function NumberField({ field, value, onChange, onFocus, onBlur, error, is
     const raw = e.currentTarget.value;
     setDisplayValue(raw);
 
-    // Parse and notify parent for validation (skip empty/partial input)
-    if (raw !== '' && raw !== '-' && !getFormatError(raw, config)) {
-      const parsed = parseNumber(raw, config);
-      if (parsed !== null) {
-        onChange(parsed);
-      }
-    }
+    // A cleared/invalid input must not leave the previous valid number
+    // in the submitted record while the displayed value says otherwise.
+    const parsed = raw !== '' && raw !== '-' && !getFormatError(raw, config) ? parseNumber(raw, config) : null;
+    onChange(parsed ?? undefined);
   };
 
   const handleBlur = () => {
@@ -80,34 +88,43 @@ export function NumberField({ field, value, onChange, onFocus, onBlur, error, is
   }
 
   return (
-    <Box>
+    <div>
       <TextInput
+        disabled={disabled}
         id={inputId}
         label={parseMarkdown(getFieldLabel(field))}
-        description={field.description ? parseMarkdown(field.description) : undefined}
+        required={isRequired}
+        description={field.description ? <span id={descriptionId}>{parseMarkdown(field.description)}</span> : undefined}
         placeholder={field.placeholder}
         value={displayValue}
         onChange={handleChange}
         onFocus={onFocus}
         onBlur={handleBlur}
         error={Boolean(displayError)}
-        withAsterisk={isRequired}
         inputMode={isInteger ? 'numeric' : 'decimal'}
-        styles={inputStyles}
-        aria-describedby={[descriptionId, displayError ? errorId : undefined].filter(Boolean).join(' ') || undefined}
+        aria-describedby={
+          [
+            descriptionId,
+            showRange || isInteger || field.numberType === 'float' ? hintId : undefined,
+            displayError ? errorId : undefined,
+          ]
+            .filter(Boolean)
+            .join(' ') || undefined
+        }
         aria-invalid={displayError ? true : undefined}
       />
       <FieldFooter
+        rightId={hintId}
         error={displayError}
         errorId={errorId}
         right={
           hints.length > 0 ? (
-            <Text size="xs" c="dimmed" ta="right" style={{ whiteSpace: 'nowrap' }}>
+            <DsText size="xs" tone="secondary" align="end" nowrap>
               {hints.join(' · ')}
-            </Text>
+            </DsText>
           ) : null
         }
       />
-    </Box>
+    </div>
   );
 }

@@ -1,163 +1,111 @@
-import * as z from 'zod/mini';
-import en from 'zod/v4/locales/en.js';
-
-// Match Classic Zod's default locale so validation messages remain unchanged.
-z.config(en());
-
-const urlWithoutTrailingSlash = z.pipe(
-  z.url(),
-  z.transform((url) => url.replace(/\/+$/, '')),
-);
-const optionalUrlWithoutTrailingSlash = z.pipe(
-  z.optional(z.url()),
-  z.transform((url) => url?.replace(/\/+$/, '')),
-);
-const optionalString = z.pipe(
-  z.optional(z.string()),
-  z.transform((value) => {
-    const trimmed = value?.trim();
-    return trimmed ? trimmed : undefined;
-  }),
-);
-const positiveInteger = z.coerce.number().check(z.int(), z.gt(0));
-const optionalPositiveInteger = z.pipe(
-  z.optional(z.union([z.string(), z.number()])),
-  z.transform((value) => {
-    if (value == null) {
-      return undefined;
-    }
-    const parsed = positiveInteger.safeParse(value);
-    return parsed.success ? parsed.data : undefined;
-  }),
-);
-
-const DEFAULT_EDITOR_IMAGE_MAX_SIZE_BYTES = 30 * 1024 * 1024;
-const DEFAULT_AUTH_CODE_LIFESPAN_SECONDS = 15 * 60;
-const DEFAULT_AUTH_CODE_RESEND_COOLDOWN_SECONDS = 60;
-
-const publicRuntimeConfigSchema = z.object({
-  cdnUrl: urlWithoutTrailingSlash,
-  apiUrl: urlWithoutTrailingSlash,
-  p5RunnerUrl: optionalUrlWithoutTrailingSlash,
-  googleMapsApiKey: optionalString,
-  editorImageMaxSizeBytes: positiveInteger,
-  authCodeLifespanSeconds: positiveInteger,
-  authCodeResendCooldownSeconds: positiveInteger,
-});
-
-export type PublicRuntimeConfig = z.infer<typeof publicRuntimeConfigSchema>;
-
-declare global {
-  interface Window {
-    __GEUL_RUNTIME_CONFIG__?: PublicRuntimeConfig;
-  }
+/**
+ * Public runtime settings shared by server and browser code. Validation lives in
+ * `public-runtime-config.server.ts`; this module only decodes values that the server already
+ * validated and projected into `<html data-geul-*>`, so it ships no schema library to clients.
+ */
+export interface PublicRuntimeConfig {
+  cdnUrl: string;
+  apiUrl: string;
+  p5RunnerUrl: string | undefined;
+  googleMapsApiKey: string | undefined;
+  editorImageMaxSizeBytes: number;
+  authCodeLifespanSeconds: number;
+  authCodeResendCooldownSeconds: number;
 }
 
-const defaultPublicRuntimeConfig: PublicRuntimeConfig = {
+/** Development and test fallbacks. Production browsers must receive the server projection. */
+const developmentPublicRuntimeConfig: PublicRuntimeConfig = {
   cdnUrl: 'http://localhost:8081',
   apiUrl: 'http://localhost:8000',
   p5RunnerUrl: undefined,
   googleMapsApiKey: undefined,
-  editorImageMaxSizeBytes: DEFAULT_EDITOR_IMAGE_MAX_SIZE_BYTES,
-  authCodeLifespanSeconds: DEFAULT_AUTH_CODE_LIFESPAN_SECONDS,
-  authCodeResendCooldownSeconds: DEFAULT_AUTH_CODE_RESEND_COOLDOWN_SECONDS,
+  editorImageMaxSizeBytes: 30 * 1024 * 1024,
+  authCodeLifespanSeconds: 15 * 60,
+  authCodeResendCooldownSeconds: 60,
 };
 
-function envValue(...candidates: Array<string | undefined>): string | undefined {
-  for (const candidate of candidates) {
-    const trimmed = candidate?.trim();
-    if (trimmed) {
-      return trimmed;
-    }
-  }
-  return undefined;
-}
-
-function parseRuntimeConfig(raw: {
+interface RawPublicRuntimeConfig {
   cdnUrl?: string;
   apiUrl?: string;
   p5RunnerUrl?: string;
   googleMapsApiKey?: string;
-  editorImageMaxSizeBytes?: string | number;
-  authCodeLifespanSeconds?: string | number;
-  authCodeResendCooldownSeconds?: string | number;
-}): PublicRuntimeConfig {
-  return publicRuntimeConfigSchema.parse({
-    cdnUrl: raw.cdnUrl ?? defaultPublicRuntimeConfig.cdnUrl,
-    apiUrl: raw.apiUrl ?? defaultPublicRuntimeConfig.apiUrl,
-    p5RunnerUrl: raw.p5RunnerUrl,
-    googleMapsApiKey: raw.googleMapsApiKey,
-    editorImageMaxSizeBytes:
-      optionalPositiveInteger.parse(raw.editorImageMaxSizeBytes) ?? defaultPublicRuntimeConfig.editorImageMaxSizeBytes,
-    authCodeLifespanSeconds:
-      optionalPositiveInteger.parse(raw.authCodeLifespanSeconds) ?? defaultPublicRuntimeConfig.authCodeLifespanSeconds,
-    authCodeResendCooldownSeconds:
-      optionalPositiveInteger.parse(raw.authCodeResendCooldownSeconds) ??
-      defaultPublicRuntimeConfig.authCodeResendCooldownSeconds,
+  editorImageMaxSizeBytes?: string;
+  authCodeLifespanSeconds?: string;
+  authCodeResendCooldownSeconds?: string;
+}
+
+function optionalText(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+function withoutTrailingSlash(value: string | undefined): string | undefined {
+  return optionalText(value)?.replace(/\/+$/, '');
+}
+
+function positiveInteger(value: string | undefined, fallback: number): number {
+  const text = optionalText(value);
+  const parsed = text === undefined ? Number.NaN : Number(text);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function decodePublicRuntimeConfig(raw: RawPublicRuntimeConfig): PublicRuntimeConfig {
+  const defaults = developmentPublicRuntimeConfig;
+  return {
+    cdnUrl: withoutTrailingSlash(raw.cdnUrl) ?? defaults.cdnUrl,
+    apiUrl: withoutTrailingSlash(raw.apiUrl) ?? defaults.apiUrl,
+    p5RunnerUrl: withoutTrailingSlash(raw.p5RunnerUrl),
+    googleMapsApiKey: optionalText(raw.googleMapsApiKey),
+    editorImageMaxSizeBytes: positiveInteger(raw.editorImageMaxSizeBytes, defaults.editorImageMaxSizeBytes),
+    authCodeLifespanSeconds: positiveInteger(raw.authCodeLifespanSeconds, defaults.authCodeLifespanSeconds),
+    authCodeResendCooldownSeconds: positiveInteger(
+      raw.authCodeResendCooldownSeconds,
+      defaults.authCodeResendCooldownSeconds,
+    ),
+  };
+}
+
+/** Normalized environment values; the server module validates this same projection. */
+export function readPublicRuntimeEnvironment(): PublicRuntimeConfig {
+  return decodePublicRuntimeConfig({
+    cdnUrl: process.env.PUBLIC_CDN_URL,
+    apiUrl: process.env.PUBLIC_API_URL,
+    p5RunnerUrl: process.env.PUBLIC_P5_RUNNER_URL,
+    googleMapsApiKey: process.env.PUBLIC_GOOGLE_MAPS_API_KEY,
+    editorImageMaxSizeBytes: process.env.PUBLIC_EDITOR_IMAGE_MAX_SIZE_BYTES,
+    authCodeLifespanSeconds: process.env.AUTH_CODE_LIFESPAN_SECONDS,
+    authCodeResendCooldownSeconds: process.env.AUTH_CODE_RESEND_COOLDOWN_SECONDS,
   });
 }
 
-export function getServerPublicRuntimeConfig(): PublicRuntimeConfig {
-  return parseRuntimeConfig({
-    cdnUrl: envValue(process.env.PUBLIC_CDN_URL),
-    apiUrl: envValue(process.env.PUBLIC_API_URL),
-    p5RunnerUrl: envValue(process.env.PUBLIC_P5_RUNNER_URL),
-    googleMapsApiKey: envValue(process.env.PUBLIC_GOOGLE_MAPS_API_KEY),
-    editorImageMaxSizeBytes: envValue(process.env.PUBLIC_EDITOR_IMAGE_MAX_SIZE_BYTES),
-    authCodeLifespanSeconds: envValue(process.env.AUTH_CODE_LIFESPAN_SECONDS),
-    authCodeResendCooldownSeconds: envValue(process.env.AUTH_CODE_RESEND_COOLDOWN_SECONDS),
-  });
-}
+let cachedBrowserConfig: PublicRuntimeConfig | null = null;
 
-let cachedClientRuntimeConfig: PublicRuntimeConfig | null = null;
-
-function readRuntimeConfigFromDataset(): PublicRuntimeConfig | null {
-  if (typeof document === 'undefined') {
-    return null;
+function readBrowserRuntimeConfig(): PublicRuntimeConfig {
+  if (cachedBrowserConfig) {
+    return cachedBrowserConfig;
   }
-
-  const root = document.documentElement;
-  const cdnUrl = root.dataset.geulCdnUrl;
-  const apiUrl = root.dataset.geulApiUrl;
-
-  if (!cdnUrl || !apiUrl) {
-    return null;
+  const dataset = document.documentElement.dataset;
+  if (!dataset.geulCdnUrl || !dataset.geulApiUrl) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Geul public runtime config is missing from <html data-geul-*>; render under the root layout.');
+    }
+    // Development documents without the root layout (tests, Storybook without fixtures) use local services.
+    return developmentPublicRuntimeConfig;
   }
-
-  return parseRuntimeConfig({
-    cdnUrl,
-    apiUrl,
-    p5RunnerUrl: root.dataset.geulP5RunnerUrl,
-    googleMapsApiKey: root.dataset.geulGoogleMapsApiKey,
-    editorImageMaxSizeBytes: root.dataset.geulEditorImageMaxSizeBytes,
-    authCodeLifespanSeconds: root.dataset.geulAuthCodeLifespanSeconds,
-    authCodeResendCooldownSeconds: root.dataset.geulAuthCodeResendCooldownSeconds,
+  cachedBrowserConfig = decodePublicRuntimeConfig({
+    cdnUrl: dataset.geulCdnUrl,
+    apiUrl: dataset.geulApiUrl,
+    p5RunnerUrl: dataset.geulP5RunnerUrl,
+    googleMapsApiKey: dataset.geulGoogleMapsApiKey,
+    editorImageMaxSizeBytes: dataset.geulEditorImageMaxSizeBytes,
+    authCodeLifespanSeconds: dataset.geulAuthCodeLifespanSeconds,
+    authCodeResendCooldownSeconds: dataset.geulAuthCodeResendCooldownSeconds,
   });
+  return cachedBrowserConfig;
 }
 
 function getPublicRuntimeConfig(): PublicRuntimeConfig {
-  if (typeof window === 'undefined') {
-    return getServerPublicRuntimeConfig();
-  }
-
-  if (cachedClientRuntimeConfig) {
-    return cachedClientRuntimeConfig;
-  }
-
-  const datasetRuntimeConfig = readRuntimeConfigFromDataset();
-  if (datasetRuntimeConfig) {
-    cachedClientRuntimeConfig = datasetRuntimeConfig;
-    return cachedClientRuntimeConfig;
-  }
-
-  const injectedRuntimeConfig = window.__GEUL_RUNTIME_CONFIG__;
-  if (!injectedRuntimeConfig) {
-    cachedClientRuntimeConfig = parseRuntimeConfig(defaultPublicRuntimeConfig);
-    return cachedClientRuntimeConfig;
-  }
-
-  cachedClientRuntimeConfig = parseRuntimeConfig(injectedRuntimeConfig);
-  return cachedClientRuntimeConfig;
+  return typeof window === 'undefined' ? readPublicRuntimeEnvironment() : readBrowserRuntimeConfig();
 }
 
 export function getPublicAuthUrl(): string {

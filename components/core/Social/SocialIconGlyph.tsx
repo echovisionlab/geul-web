@@ -1,59 +1,75 @@
-import type { CSSProperties, SVGProps } from 'react';
+import type { CSSProperties } from 'react';
+import { primitiveTokens } from '../design-tokens';
+import { presentationAttributes, type PresentationProps } from '../presentation-contract';
 import type { SocialPlatform } from './platforms';
 import classes from './SocialIcon.module.css';
 
 export type SocialIconColorMode = 'currentColor' | 'brand' | 'hoverBrand';
+export type SocialIconSize = keyof typeof primitiveTokens.fontSize;
 
-export interface SocialIconGlyphProps extends Omit<
-  SVGProps<SVGSVGElement>,
-  'aria-hidden' | 'aria-label' | 'aria-labelledby' | 'children' | 'color' | 'focusable' | 'height' | 'role' | 'width'
-> {
-  platform: SocialPlatform;
-  path: string;
-  light: string;
-  dark?: string;
-  size?: number | string;
+declare const preparedSocialIcon: unique symbol;
+
+/**
+ * Serializable platform glyph produced only by Core `prepareSocialIcon(platform)`.
+ * Its brand colors come from the Core platform registry; consumers cannot supply CSS colors.
+ */
+export interface PreparedSocialIcon {
+  readonly platform: SocialPlatform;
+  readonly path: string;
+  readonly light: string;
+  readonly dark?: string;
+  readonly [preparedSocialIcon]: true;
+}
+
+export interface SocialIconGlyphProps extends Omit<PresentationProps, 'children'> {
+  children?: never;
+  width?: never;
+  height?: never;
+  fill?: never;
+  stroke?: never;
+  strokeWidth?: never;
+  /** Prepared on the server (or wherever the platform catalog is loaded) by `prepareSocialIcon`. */
+  icon: PreparedSocialIcon;
+  size?: SocialIconSize;
   colorMode?: SocialIconColorMode;
   label?: string;
 }
 
 type SocialIconStyle = CSSProperties & {
-  '--social-icon-brand-light': string;
-  '--social-icon-brand-dark': string;
+  '--_social-brand-light': string;
+  '--_social-brand-dark': string;
 };
 
 /** Render a prepared social SVG without loading a platform icon catalog. */
 export function SocialIconGlyph({
-  platform,
-  path,
-  light,
-  dark,
-  size = 24,
+  icon: { platform, path, light, dark },
+  size = 'lg',
   colorMode = 'currentColor',
   label,
-  className,
-  style,
   ...props
 }: SocialIconGlyphProps) {
+  const dimension = primitiveTokens.fontSize[size];
+  if (!Object.hasOwn(primitiveTokens.fontSize, size)) {
+    throw new RangeError('Social icons require a registered type scale size.');
+  }
   const iconStyle: SocialIconStyle = {
-    '--social-icon-brand-light': light,
-    '--social-icon-brand-dark': dark ?? light,
-    ...style,
+    '--_social-brand-light': light,
+    '--_social-brand-dark': dark ?? light,
   };
 
   return (
     <svg
-      {...props}
+      {...presentationAttributes(props)}
       role={label ? 'img' : undefined}
       aria-label={label}
       aria-hidden={label ? undefined : true}
       focusable="false"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
+      width={dimension}
+      height={dimension}
       fill="currentColor"
-      className={[classes.icon, className].filter(Boolean).join(' ')}
+      className={classes.icon}
       style={iconStyle}
       data-social-platform={platform}
       data-color-mode={colorMode}

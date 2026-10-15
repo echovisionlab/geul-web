@@ -1,5 +1,6 @@
 import { Code, ConnectError } from '@connectrpc/connect';
 import { create } from '@bufbuild/protobuf';
+import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { DocumentContentHeight, DocumentRegionPlacement } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import { RichTextDocumentSchema, RichTextProfile } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
@@ -56,6 +57,49 @@ vi.mock('@/lib/actions/share-link', () => ({
 }));
 
 describe('post actions', () => {
+  it('forwards a scheduling origin as transport metadata alongside schedule intent', async () => {
+    const origin = '40000000-0000-4000-8000-000000000002';
+    await expect(
+      actions.schedulePostAction('post-1', new Date('2026-10-15T00:00:00Z'), 'Asia/Seoul', origin),
+    ).resolves.toEqual({ ok: true, success: true });
+    expect(mocks.createPostClient).toHaveBeenCalledWith(origin);
+    expect(postClient.schedulePost).toHaveBeenCalledWith({
+      id: 'post-1',
+      scheduledAt: timestampFromDate(new Date('2026-10-15T00:00:00Z')),
+      scheduledTimeZone: 'Asia/Seoul',
+    });
+  });
+
+  it.each([
+    'publishPostAction',
+    'unpublishPostAction',
+    'archivePostAction',
+    'cancelPostScheduleAction',
+    'republishPostAction',
+  ] as const)('forwards lifecycle origin for %s', async (action) => {
+    const origin = '40000000-0000-4000-8000-000000000001';
+    await expect(actions[action]('entity-1', origin)).resolves.toEqual({ ok: true, success: true });
+    expect(mocks.createPostClient).toHaveBeenCalledWith(origin);
+  });
+
+  it('forwards the editor origin for configuration writes while preserving the revision guard', async () => {
+    const origin = '20000000-0000-4000-8000-000000000001';
+    const result = await actions.updatePostAction(
+      'post-1',
+      { commentsEnabled: false },
+      initialConfigurationRevision,
+      origin,
+    );
+
+    expect(result.ok).toBe(true);
+    expect(mocks.createPostClient).toHaveBeenCalledWith(origin);
+    expect(postClient.updatePost).toHaveBeenCalledWith({
+      id: 'post-1',
+      expectedConfigurationRevision: initialConfigurationRevision,
+      commentsEnabled: false,
+    });
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.createPostClient.mockResolvedValue(postClient);

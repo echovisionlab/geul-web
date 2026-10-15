@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, describe, expect, it } from 'vitest';
 import { ClientPublicMark, type ClientPublicMarkProps } from './ClientPublicMark';
 
@@ -22,9 +23,9 @@ function renderMark(props: ClientPublicMarkProps) {
   root = createRoot(host);
   act(() => {
     root?.render(
-      <MantineProvider>
+      <DesignSystemProvider forceColorScheme="light">
         <ClientPublicMark {...props} />
-      </MantineProvider>,
+      </DesignSystemProvider>,
     );
   });
   return host;

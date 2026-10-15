@@ -1,5 +1,7 @@
 'use client';
 
+import { createMarkdownPasteExtension } from './markdown-paste';
+import { EditorRuntimeOptions } from './live-node-view';
 import {
   memo,
   useEffect,
@@ -12,7 +14,7 @@ import {
 } from 'react';
 import type { Editor } from '@tiptap/core';
 import { EditorContent, useEditor } from '@tiptap/react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import type { Awareness } from 'y-protocols/awareness';
 import {
   useOptionalEditorAuthoringMode,
@@ -34,7 +36,7 @@ import {
 } from './external-video';
 import { ExternalVideoInsertDialog } from '@/features/editor/ExternalVideoInsertDialog';
 import { replaceParagraphWithExternalVideoLink } from '@/features/editor/external-video-insert';
-import { TranslationStructureLockExtension } from '@/lib/editor/extensions/TranslationStructureLockExtension';
+import { createLiveTranslationStructureLock } from './live-translation-structure-lock';
 import type { TiptapAnyExtension } from '@/lib/editor/extensions/tiptap';
 import type { EditorMediaRuntimeStore } from '@/features/editor/lib/editor-media-runtime-store';
 import type { RichTextBlockRoomTiptapController } from './block-room-tiptap-controller';
@@ -104,6 +106,10 @@ interface TiptapEditorAIOptions {
 }
 
 interface TiptapEditorSharedProps {
+  /** Persistent name for the editable document, independent of its current text. */
+  accessibleLabel?: string;
+  /** Language of the authored document; it may differ from the interface locale. */
+  contentLanguage?: string;
   editable?: boolean;
   onFileActivate?: TiptapAuthoringControlsCallbacks['onFileActivate'];
   mediaRuntimeStore?: EditorMediaRuntimeStore;
@@ -137,14 +143,14 @@ interface TiptapEditorCollaborationBinding {
 export type TiptapEditorProps = TiptapEditorSharedProps & TiptapEditorCollaborationBinding;
 
 type PaginationCssProperties = CSSProperties & {
-  '--page-width': string;
-  '--page-height': string;
-  '--page-margin-top': string;
-  '--page-margin-right': string;
-  '--page-margin-bottom': string;
-  '--page-margin-left': string;
-  '--page-gap': string;
-  '--pages-height': string;
+  '--_editor-page-width': string;
+  '--_editor-page-height': string;
+  '--_editor-page-margin-top': string;
+  '--_editor-page-margin-right': string;
+  '--_editor-page-margin-bottom': string;
+  '--_editor-page-margin-left': string;
+  '--_editor-page-gap': string;
+  '--_editor-pages-height': string;
 };
 
 const IsolatedEditorContent = memo(({ editor }: { editor: Editor | null }) => {
@@ -153,14 +159,14 @@ const IsolatedEditorContent = memo(({ editor }: { editor: Editor | null }) => {
 
 function paginationCssProperties(layout: PaginationLayout): PaginationCssProperties {
   return {
-    '--page-width': `${layout.width}px`,
-    '--page-height': `${layout.height}px`,
-    '--page-margin-top': `${layout.marginTop}px`,
-    '--page-margin-right': `${layout.marginRight}px`,
-    '--page-margin-bottom': `${layout.marginBottom}px`,
-    '--page-margin-left': `${layout.marginLeft}px`,
-    '--page-gap': `${layout.gap}px`,
-    '--pages-height': `${layout.height}px`,
+    '--_editor-page-width': `${layout.width}px`,
+    '--_editor-page-height': `${layout.height}px`,
+    '--_editor-page-margin-top': `${layout.marginTop}px`,
+    '--_editor-page-margin-right': `${layout.marginRight}px`,
+    '--_editor-page-margin-bottom': `${layout.marginBottom}px`,
+    '--_editor-page-margin-left': `${layout.marginLeft}px`,
+    '--_editor-page-gap': `${layout.gap}px`,
+    '--_editor-pages-height': `${layout.height}px`,
   };
 }
 
@@ -216,6 +222,7 @@ function EditorChrome({
   const selectionLabels = useMemo<SelectionBubbleMenuLabels>(
     () => ({
       menu: editorMessages('formatting.blockType'),
+      more: commonLabels('options'),
       blockType: editorMessages('formatting.blockType'),
       blockTypes: {
         paragraph: editorMessages('slashMenu.items.paragraph.title'),
@@ -275,7 +282,7 @@ function EditorChrome({
       inlineMath: editorMessages('formatting.inlineMath'),
       ai: editorMessages('formatting.ai'),
     }),
-    [commonActions, editorMessages],
+    [commonActions, commonLabels, editorMessages],
   );
   const callbacks = useMemo<TiptapAuthoringControlsCallbacks>(
     () => ({
@@ -406,6 +413,8 @@ function EditorChrome({
 }
 
 export function TiptapEditor({
+  accessibleLabel,
+  contentLanguage,
   blockRoomController,
   awareness,
   localUser,
@@ -427,13 +436,27 @@ export function TiptapEditor({
   onEditorReady,
   authoringCapabilities,
 }: TiptapEditorProps) {
+  const interfaceLocale = useLocale();
   const paginationLayout = resolvePaginationLayout(pagination);
   const authoringMode = useOptionalEditorAuthoringMode();
   const runtimeLabels = useTranslations('editorCommon.editor.runtimeLabels');
   const commonActions = useTranslations('common.actions');
   const commonLabels = useTranslations('common.labels');
+  const editorAttributes = useMemo(
+    () => ({
+      class: classes.content,
+      'data-testid': 'tiptap-editor-content',
+      role: editable ? 'textbox' : 'document',
+      'aria-label': accessibleLabel ?? commonLabels('content'),
+      ...(editable ? { 'aria-multiline': 'true' } : {}),
+      ...(editable && authoringMode?.allowNeutralBlockEdits ? { 'aria-keyshortcuts': 'Shift+F10 ContextMenu' } : {}),
+      lang: contentLanguage ?? blockRoomController.locale ?? interfaceLocale,
+    }),
+    [accessibleLabel, authoringMode, blockRoomController, commonLabels, contentLanguage, editable, interfaceLocale],
+  );
   const searchCombobox = useTranslations('searchCombobox');
   const editorMessages = useTranslations('editorCommon.editor');
+  const selectMathBlockLabel = editorMessages('math.selectBlock');
   const codeBlockLabels = useMemo<CodeBlockSelectionMenuLabels>(
     () => ({
       menu: editorMessages('slashMenu.items.codeBlock.title'),
@@ -576,8 +599,28 @@ export function TiptapEditor({
     }),
     [commonActions, editorMessages],
   );
+  const authoringModeRef = useRef(authoringMode);
+  authoringModeRef.current = authoringMode;
+  const liveAuthoringMode = useMemo(
+    () => ({
+      get allowNeutralBlockEdits() {
+        return authoringModeRef.current?.allowNeutralBlockEdits === true;
+      },
+      get allowLocalizedBlockEdits() {
+        return authoringModeRef.current?.allowLocalizedBlockEdits === true;
+      },
+      applyNeutralBlockProps: (id: string, props: Record<string, unknown>) =>
+        authoringModeRef.current?.applyNeutralBlockProps?.(id, props),
+      deleteNeutralBlock: (id: string) => authoringModeRef.current?.deleteNeutralBlock?.(id),
+    }),
+    [],
+  );
+  const localUserRef = useRef(localUser);
+  localUserRef.current = localUser;
   const onFileActivateRef = useRef(onFileActivate);
   onFileActivateRef.current = onFileActivate;
+  const structureLockedRef = useRef(structureLocked);
+  structureLockedRef.current = structureLocked;
   const extensions = useMemo(() => {
     const fileNode = createTiptapFileNode({
       onActivate: (blockId) => onFileActivateRef.current?.(blockId),
@@ -598,51 +641,61 @@ export function TiptapEditor({
       selectionMenuRegistry: mapSelectionRegistry,
     };
     return [
-      ...withTiptapMathExtensions([
-        ...createTiptapWireExtensions({
-          blockContainerNode: createTiptapBlockContainer(authoringMode),
-          codeBlockNode: createTiptapCodeBlock(authoringMode, codeBlockLabels),
-          externalVideoNode:
-            effectiveExternalVideo === false ? undefined : createTiptapExternalVideoExtension(effectiveExternalVideo),
-          fileNode,
-          mapNode: createTiptapMapNode(effectiveMapOptions),
-        }).filter((extension) => !['table', 'tableRow', 'tableCell', 'tableHeader'].includes(extension.name)),
-        ...createTiptapTableExtensions(),
-      ]),
-      createMermaidExtension({ authoringMode }),
+      ...withTiptapMathExtensions(
+        [
+          ...createTiptapWireExtensions({
+            blockContainerNode: createTiptapBlockContainer(liveAuthoringMode),
+            codeBlockNode: createTiptapCodeBlock(liveAuthoringMode, codeBlockLabels),
+            externalVideoNode:
+              effectiveExternalVideo === false ? undefined : createTiptapExternalVideoExtension(effectiveExternalVideo),
+            fileNode,
+            mapNode: createTiptapMapNode(effectiveMapOptions),
+          }).filter((extension) => !['table', 'tableRow', 'tableCell', 'tableHeader'].includes(extension.name)),
+          ...createTiptapTableExtensions(),
+        ],
+        { selectBlockLabel: selectMathBlockLabel },
+      ),
+      createMermaidExtension({ authoringMode: liveAuthoringMode }),
       createP5SketchExtension({
         labels: p5Labels,
-        authoringMode,
+        authoringMode: liveAuthoringMode,
         autoRunReadOnly: autoRunReadOnlyExecutables,
         selectionMenuRegistry: executableSelectionRegistry,
         selectionMenuLabels: executableSelectionLabels,
       }),
       createThreeSceneExtension({
         labels: threeLabels,
-        authoringMode,
+        authoringMode: liveAuthoringMode,
         autoRunReadOnly: autoRunReadOnlyExecutables,
         selectionMenuRegistry: executableSelectionRegistry,
         selectionMenuLabels: executableSelectionLabels,
       }),
       createShaderExtension({
         labels: shaderLabels,
-        authoringMode,
+        authoringMode: liveAuthoringMode,
         autoRunReadOnly: autoRunReadOnlyExecutables,
         selectionMenuRegistry: executableSelectionRegistry,
         selectionMenuLabels: executableSelectionLabels,
         filePicker: shaderFilePicker,
         resolveAsset: resolveShaderAsset,
       }),
+      createMarkdownPasteExtension(
+        () =>
+          blockRoomController.canChangeStructure &&
+          liveAuthoringMode.allowNeutralBlockEdits &&
+          !structureLockedRef.current,
+      ),
       BlockBoundaryNavigation,
-      createAuthoringShortcutGuard(authoringMode),
-      ...(structureLocked ? [TranslationStructureLockExtension] : []),
+      createAuthoringShortcutGuard(liveAuthoringMode),
+      createLiveTranslationStructureLock(() => structureLockedRef.current),
       ...additionalExtensions,
       createTiptapPaginationExtension(),
       blockRoomController.extension,
-      createBlockRoomPresenceExtension(awareness, localUser),
+      createBlockRoomPresenceExtension(awareness, localUser, () => localUserRef.current),
     ];
   }, [
     authoringMode,
+    liveAuthoringMode,
     additionalExtensions,
     autoRunReadOnlyExecutables,
     awareness,
@@ -651,6 +704,7 @@ export function TiptapEditor({
     executableSelectionLabels,
     executableSelectionRegistry,
     codeBlockLabels,
+    selectMathBlockLabel,
     localUser,
     map,
     mediaRuntimeStore,
@@ -658,7 +712,6 @@ export function TiptapEditor({
     p5Labels,
     shaderLabels,
     shaderFilePicker,
-    structureLocked,
     resolveShaderAsset,
     threeLabels,
   ]);
@@ -670,13 +723,14 @@ export function TiptapEditor({
       immediatelyRender: false,
       shouldRerenderOnTransaction: false,
       editorProps: {
-        attributes: {
-          class: classes.content,
-          'data-testid': 'tiptap-editor-content',
-        },
+        attributes: editorAttributes,
       },
     },
-    [extensions],
+    [blockRoomController, awareness, additionalExtensions, mediaRuntimeStore, effectiveExternalVideo === false],
+  );
+  const runtimeOptions = useMemo(
+    () => new Map(extensions.map((extension) => [extension.name, { ...extension.options, authoringMode }])),
+    [extensions, authoringMode],
   );
   useRegisterEditorAuthoringMode(editor, authoringMode ?? DENIED_AUTHORING_MODE);
 
@@ -695,8 +749,9 @@ export function TiptapEditor({
   useEffect(() => {
     if (editor && !editor.isDestroyed) {
       editor.setEditable(editable);
+      editor.setOptions({ editorProps: { ...editor.options.editorProps, attributes: editorAttributes } });
     }
-  }, [editable, editor]);
+  }, [editable, editor, editorAttributes]);
 
   useEffect(() => {
     if (!editor) {
@@ -732,8 +787,6 @@ export function TiptapEditor({
     }
     const element = leadRef.current;
     const update = () => {
-      const height = paginationLayout.enabled && element ? element.getBoundingClientRect().height : 0;
-      root.style.setProperty('--pagination-lead-height', `${height}px`);
       if (!editor.isDestroyed) {
         editor.view.dispatch(editor.state.tr.setMeta('addToHistory', false));
       }
@@ -789,7 +842,9 @@ export function TiptapEditor({
                 {paginationLead}
               </div>
             ) : null}
-            <IsolatedEditorContent editor={editor} />
+            <EditorRuntimeOptions.Provider value={runtimeOptions}>
+              <IsolatedEditorContent editor={editor} />
+            </EditorRuntimeOptions.Provider>
             {paginationLayout.enabled ? (
               <div
                 className={classes.finalPageFooter}

@@ -159,9 +159,12 @@ export async function getReleaseEditorRelationsAction(releaseId: string): Promis
   }
 }
 
-export async function publishReleaseAction(id: string): Promise<ActionResult<{ success: true }>> {
+export async function publishReleaseAction(
+  id: string,
+  editorOrigin?: string,
+): Promise<ActionResult<{ success: true }>> {
   try {
-    const client = await createReleaseClient();
+    const client = await createReleaseClient(editorOrigin);
     await client.publishRelease({ id });
     revalidatePath('/admin/releases');
     return actionSuccess({ success: true });
@@ -170,9 +173,12 @@ export async function publishReleaseAction(id: string): Promise<ActionResult<{ s
   }
 }
 
-export async function unpublishReleaseAction(id: string): Promise<ActionResult<{ success: true }>> {
+export async function unpublishReleaseAction(
+  id: string,
+  editorOrigin?: string,
+): Promise<ActionResult<{ success: true }>> {
   try {
-    const client = await createReleaseClient();
+    const client = await createReleaseClient(editorOrigin);
     await client.unpublishRelease({ id });
     revalidatePath('/admin/releases');
     return actionSuccess({ success: true });
@@ -184,9 +190,10 @@ export async function unpublishReleaseAction(id: string): Promise<ActionResult<{
 export async function updateReleaseSlugAction(
   id: string,
   slug: string | null,
+  editorOrigin?: string,
 ): Promise<ActionResult<{ success: true; slug: string | null }>> {
   try {
-    const client = await createReleaseClient();
+    const client = await createReleaseClient(editorOrigin);
     await client.updateRelease({
       id,
       slug: toSlugInputValue(slug),
@@ -207,9 +214,10 @@ export async function updateReleaseFieldsAction(
     bandcampUrl?: string | null;
     youtubeMusicUrl?: string | null;
   },
+  editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
   try {
-    const client = await createReleaseClient();
+    const client = await createReleaseClient(editorOrigin);
     await client.updateRelease({
       id,
       type: data.type === undefined ? undefined : stringToReleaseType(data.type),
@@ -236,9 +244,10 @@ export async function updateReleaseFieldsAction(
 export async function setReleaseArtworkAction(
   releaseId: string,
   fileId: string,
+  editorOrigin?: string,
 ): Promise<ActionResult<{ url?: string }>> {
   try {
-    const client = await createReleaseClient();
+    const client = await createReleaseClient(editorOrigin);
     const response = await client.setReleaseArtwork({ releaseId, fileId });
     return actionSuccess({ url: response.artworkAsset?.url });
   } catch (err) {
@@ -249,9 +258,12 @@ export async function setReleaseArtworkAction(
   }
 }
 
-export async function deleteReleaseArtworkAction(releaseId: string): Promise<ActionResult<{ success: true }>> {
+export async function deleteReleaseArtworkAction(
+  releaseId: string,
+  editorOrigin?: string,
+): Promise<ActionResult<{ success: true }>> {
   try {
-    const client = await createReleaseClient();
+    const client = await createReleaseClient(editorOrigin);
     await client.deleteReleaseArtwork({ releaseId });
     return actionSuccess({ success: true });
   } catch (err) {
@@ -267,12 +279,13 @@ export async function setReleaseLabelsAction(
   labels: { labelId: string; catalogNumber?: string; sortOrder: number }[],
   observedLabels: { labelId: string; catalogNumber?: string; sortOrder: number }[],
   orderIntent?: { itemId: string; previousItemId?: string; nextItemId?: string },
+  editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
   if (!Array.isArray(observedLabels)) {
     return actionFailure('An observed label snapshot is required', Code.InvalidArgument);
   }
   try {
-    const client = await createReleaseClient();
+    const client = await createReleaseClient(editorOrigin);
     await client.setReleaseLabels({
       releaseId,
       labels: labels.map((l) => ({
@@ -299,12 +312,13 @@ export async function setReleaseGenresAction(
   releaseId: string,
   genreIds: string[],
   observedIds: string[],
+  editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
   if (!Array.isArray(observedIds)) {
     return actionFailure('An observed genre snapshot is required', Code.InvalidArgument);
   }
   try {
-    const client = await createReleaseClient();
+    const client = await createReleaseClient(editorOrigin);
     await client.setReleaseGenres({
       releaseId,
       genreIds,
@@ -321,12 +335,13 @@ export async function setReleaseArtistsAction(
   artists: { artistId: string; sortOrder: number }[],
   observedArtists: { artistId: string; sortOrder: number }[],
   orderIntent?: { itemId: string; previousItemId?: string; nextItemId?: string },
+  editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
   if (!Array.isArray(observedArtists)) {
     return actionFailure('An observed artist snapshot is required', Code.InvalidArgument);
   }
   try {
-    const client = await createReleaseClient();
+    const client = await createReleaseClient(editorOrigin);
     await client.setReleaseArtists({
       releaseId,
       artists: artists.map((artist) => ({
@@ -351,12 +366,13 @@ export async function setReleaseCategoriesAction(
   releaseId: string,
   categoryIds: string[],
   observedIds: string[],
+  editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
   if (!Array.isArray(observedIds)) {
     return actionFailure('An observed category snapshot is required', Code.InvalidArgument);
   }
   try {
-    const client = await createReleaseClient();
+    const client = await createReleaseClient(editorOrigin);
     await client.setReleaseCategories({
       releaseId,
       categoryIds,
@@ -372,12 +388,13 @@ export async function setReleaseStylesAction(
   releaseId: string,
   styleIds: string[],
   observedIds: string[],
+  editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
   if (!Array.isArray(observedIds)) {
     return actionFailure('An observed style snapshot is required', Code.InvalidArgument);
   }
   try {
-    const client = await createReleaseClient();
+    const client = await createReleaseClient(editorOrigin);
     await client.setReleaseStyles({
       releaseId,
       styleIds,
@@ -393,12 +410,13 @@ export async function setReleaseFormatsAction(
   releaseId: string,
   formats: { formatId: string; formatDescription?: string }[],
   observedFormats: { formatId: string; formatDescription?: string }[],
+  editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
   if (!Array.isArray(observedFormats)) {
     return actionFailure('An observed format snapshot is required', Code.InvalidArgument);
   }
   try {
-    const client = await createReleaseClient();
+    const client = await createReleaseClient(editorOrigin);
     await client.setReleaseFormats({
       releaseId,
       formats: formats.map((f) => ({
@@ -437,12 +455,13 @@ export async function setReleaseCreditsAction(
     sortOrder: number;
   }[],
   orderIntent?: { itemId: string; previousItemId?: string; nextItemId?: string },
+  editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
   if (!Array.isArray(observedCredits)) {
     return actionFailure('An observed credit snapshot is required', Code.InvalidArgument);
   }
   try {
-    const client = await createReleaseClient();
+    const client = await createReleaseClient(editorOrigin);
     await client.setReleaseCredits({
       releaseId,
       credits: credits.map((c) => ({

@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
+import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
-import { MantineProvider } from '@mantine/core';
+
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ImmersiveSceneDescriptionEditor } from './DescriptionEditor';
 
@@ -29,9 +31,18 @@ describe('ImmersiveSceneDescriptionEditor', () => {
 
       await act(async () => {
         root?.render(
-          <MantineProvider>
-            <ImmersiveSceneDescriptionEditor label={variant} value="Scene copy" onChange={vi.fn()} variant={variant} />
-          </MantineProvider>,
+          <NextIntlClientProvider locale="en" timeZone="UTC" messages={{}}>
+            <DesignSystemProvider forceColorScheme="light">
+              <ImmersiveSceneDescriptionEditor
+                label={variant}
+                description="Scene text supports Markdown."
+                value="Scene copy"
+                onChange={vi.fn()}
+                variant={variant}
+                contentLanguage="ko"
+              />
+            </DesignSystemProvider>
+          </NextIntlClientProvider>,
         );
       });
 
@@ -41,6 +52,14 @@ describe('ImmersiveSceneDescriptionEditor', () => {
       );
       expect(host.querySelector('[data-testid="immersive-scene-description-toolbar"]')).toBeNull();
       expect(host.querySelector('button')).toBeNull();
+      const editor = host.querySelector('[data-testid="immersive-scene-description-content"]');
+      expect(editor).toHaveAttribute('role', 'textbox');
+      expect(editor).toHaveAccessibleName(variant);
+      expect(editor).toHaveAttribute('lang', 'ko');
+      expect(editor).toHaveAccessibleDescription('Scene text supports Markdown.');
+      expect(editor?.id).toBeTruthy();
+      expect(host.querySelector('label')).toHaveAttribute('for', editor?.id);
+      expect(host.querySelectorAll(`[id="${editor?.id}"]`)).toHaveLength(1);
     },
   );
 });

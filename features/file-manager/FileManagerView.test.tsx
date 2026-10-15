@@ -5,7 +5,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MediaProcessingStatus } from '@echovisionlab/geul-proto/common/media_pb.ts';
 import { FileDerivativeType, FileUsageDomain } from '@echovisionlab/geul-proto/secure/file_pb.ts';
-import { MantineProvider } from '@mantine/core';
+import { I18nProvider } from 'react-aria-components';
 import { FileManagerView, type FileManagerViewLabels, type FileManagerViewProps } from './FileManagerView';
 import type { FileManagerFileView, FileManagerItemView, FileManagerUsageItemView } from './model';
 
@@ -46,6 +46,7 @@ const labels: FileManagerViewLabels = {
   title: 'Files',
   description: 'Site file library',
   root: 'Files',
+  back: 'Back',
   search: 'Search',
   allTypes: 'All types',
   images: 'Images',
@@ -73,7 +74,15 @@ const labels: FileManagerViewLabels = {
   cancel: 'Cancel',
   gridView: 'Grid view',
   listView: 'List view',
+  viewMode: 'View',
   loadMore: 'Load more',
+  pagination: {
+    load: 'Load more',
+    loading: 'Loading',
+    end: 'End of results',
+    retry: 'Try again',
+    failed: 'Load failed',
+  },
   name: 'Name',
   type: 'Type',
   size: 'Size',
@@ -174,7 +183,7 @@ function renderView(
 ) {
   act(() => {
     root?.render(
-      <MantineProvider>
+      <I18nProvider locale="en">
         <FileManagerView
           labels={labels}
           role={role}
@@ -212,12 +221,91 @@ function renderView(
           onLoadMoreItems={vi.fn()}
           {...overrides}
         />
-      </MantineProvider>,
+      </I18nProvider>,
     );
   });
 }
 
 describe('FileManagerView', () => {
+  it('keeps mobile list commands named and preserves modifier selection, Space and Enter on the native trigger', () => {
+    const selected = vi.fn();
+    const openFile = vi.fn();
+    renderView('admin', selected, vi.fn(), 'list', ['folder-1'], undefined, undefined, { onOpenFile: openFile });
+    const row = host!.querySelector<HTMLElement>('[data-datatable-mobile-row="file-1"]')!;
+    const trigger = row.querySelector<HTMLButtonElement>('[data-datatable-row-interaction-control]')!;
+    const rowName = document.getElementById(row.getAttribute('aria-labelledby')!)!;
+    expect(row.getAttribute('role')).toBe('group');
+    expect(trigger.getAttribute('aria-labelledby')).toBe(rowName.id);
+    expect(rowName.textContent).toBe('cover.jpg');
+    expect(trigger.contains(row.querySelector('input'))).toBe(false);
+    act(() => trigger.focus());
+    expect(document.activeElement).toBe(trigger);
+    act(() => trigger.dispatchEvent(new MouseEvent('click', { ctrlKey: true, bubbles: true })));
+    expect(selected).toHaveBeenLastCalledWith(['folder-1', 'file-1']);
+    const space = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
+    act(() => trigger.dispatchEvent(space));
+    expect(space.defaultPrevented).toBe(true);
+    expect(selected).toHaveBeenLastCalledWith(['folder-1', 'file-1']);
+    expect(openFile).not.toHaveBeenCalled();
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+    act(() => trigger.dispatchEvent(enter));
+    expect(enter.defaultPrevented).toBe(true);
+    expect(openFile).toHaveBeenCalledExactlyOnceWith(rows[1]);
+    act(() => row.querySelector<HTMLInputElement>('input')!.click());
+    expect(openFile).toHaveBeenCalledTimes(1);
+  });
+
+  it('supports keyboard focus traversal, selection and activation as separate commands', () => {
+    const selected = vi.fn();
+    const openFile = vi.fn();
+    renderView('admin', selected, vi.fn(), 'grid', ['folder-1'], undefined, undefined, { onOpenFile: openFile });
+    const folder = host?.querySelector<HTMLElement>('[data-file-viewer-item="folder-1"]');
+    const file = host?.querySelector<HTMLElement>('[data-file-viewer-item="file-1"]');
+    expect(host?.querySelector('[data-file-viewer-grid]')?.getAttribute('role')).toBe('grid');
+    expect(file?.getAttribute('role')).toBe('row');
+    expect(file?.querySelector('[role="gridcell"] button')).not.toBeNull();
+    act(() => folder?.focus());
+    act(() => folder?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
+    expect(document.activeElement).toBe(file);
+    act(() => file?.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true })));
+    expect(selected).toHaveBeenLastCalledWith(['folder-1', 'file-1']);
+    expect(openFile).not.toHaveBeenCalled();
+    act(() => file?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })));
+    expect(openFile).toHaveBeenCalledWith(rows[1]);
+    act(() => file?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true })));
+    expect(document.activeElement).toBe(folder);
+  });
+
+  it('names the file workspace, exposes asynchronous failure and keeps the upload progress name stable', () => {
+    renderView('author', vi.fn(), vi.fn(), 'grid', [], undefined, undefined, {
+      error: 'Upload failed',
+      uploadPercentage: 42,
+      mutationLoading: true,
+    });
+    const workspace = host?.querySelector('[data-file-manager-view]');
+    expect(workspace?.getAttribute('role')).toBe('region');
+    expect(workspace?.getAttribute('aria-label')).toBe('Files');
+    expect(workspace?.getAttribute('aria-busy')).toBe('true');
+    expect(host?.querySelector('[role="alert"]')?.textContent).toBe('Upload failed');
+    expect(host?.querySelector('[role="progressbar"]')?.getAttribute('aria-label')).toBe('Upload');
+    expect(host?.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow')).toBe('42');
+    expect(host?.textContent).toContain('Uploading 42%');
+  });
+
+  it('separates move command names from the destination description', () => {
+    renderView('admin', vi.fn(), vi.fn(), 'grid', [], undefined, undefined, {
+      movePendingLabel: 'Move selected files',
+    });
+    const group = host?.querySelector('[data-file-move-mode]');
+    const descriptionId = group?.getAttribute('aria-describedby');
+    expect(group?.getAttribute('role')).toBe('group');
+    expect(group?.getAttribute('aria-label')).toBe('Move');
+    const description = descriptionId ? document.getElementById(descriptionId) : null;
+    expect(description?.getAttribute('role')).toBe('status');
+    expect(description?.textContent).toBe('Open the destination folder · Files');
+    expect([...group!.querySelectorAll('button')].map((button) => button.textContent)).toEqual(['Cancel', 'Move here']);
+  });
+
   it('contains the configured GIF in the 320px file-list loading surface without a visible generic message', () => {
     renderView('author', vi.fn(), vi.fn(), 'grid', [], undefined, undefined, { loading: true });
     const status = host?.querySelector<HTMLElement>('[role="status"]');
@@ -228,7 +316,7 @@ describe('FileManagerView', () => {
     expect(status?.style.minHeight).toBe('320px');
     expect(status?.style.height).toBe('320px');
     expect(status?.parentElement?.style.position).toBe('relative');
-    expect(status?.parentElement?.style.minHeight).toBe('calc(20rem * var(--mantine-scale))');
+    expect(status?.parentElement?.style.minHeight).toBe('320px');
     expect(status?.textContent).toBe('');
   });
 
@@ -296,7 +384,9 @@ describe('FileManagerView', () => {
     act(() => file?.dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true })));
     expect(onSelectedItemIdsChange).toHaveBeenLastCalledWith(['folder-1', 'file-1']);
 
-    document.querySelector<HTMLButtonElement>('button[aria-label="List view"]')?.click();
+    const viewMode = document.querySelector('[role="radiogroup"][aria-label="View"]');
+    expect(viewMode?.querySelector('input[aria-label="Grid view"]')).toHaveProperty('checked', true);
+    act(() => viewMode?.querySelector<HTMLInputElement>('input[aria-label="List view"]')?.click());
     expect(onViewModeChange).toHaveBeenCalledWith('list');
   });
 
@@ -320,12 +410,21 @@ describe('FileManagerView', () => {
 
     expect(document.querySelector('[data-file-viewer-grid]')).toBeNull();
     expect(document.querySelector('[data-file-viewer-list] table')).not.toBeNull();
+    expect(host?.querySelector('[data-file-manager-view]')?.getAttribute('aria-label')).toBe('Files');
+    expect(host?.querySelector('[data-file-viewer-list] [role="region"]')?.getAttribute('aria-label')).toBe(
+      'Files · List view',
+    );
+    const landmarkNames = Array.from(host!.querySelectorAll('[role="region"]'), (region) =>
+      region.getAttribute('aria-label'),
+    );
+    expect(new Set(landmarkNames).size).toBe(landmarkNames.length);
     expect(document.querySelector('input[aria-label="Select all items"]')).not.toBeNull();
     expect(document.querySelector('input[aria-label="Select cover.jpg"]')).not.toBeNull();
     expect(document.querySelector('button[aria-label="Sort by Name"]')).not.toBeNull();
     expect(document.querySelector('button[aria-label="Sort by Size"]')).not.toBeNull();
-    expect(document.querySelector('button[aria-label="Sort by Date"]')).not.toBeNull();
-    expect(document.querySelector('[role="img"][aria-label="In use"]')).not.toBeNull();
+    expect(document.querySelector('[data-mobile-layout="inline"]')).not.toBeNull();
+    expect(document.querySelector('thead')?.textContent).toBe('Name↑TypeSize');
+    expect(document.querySelector('[data-datatable-mobile-row="file-1"]')?.textContent).not.toContain('image/jpeg');
     expect(document.body.textContent).not.toContain('10+ (11)');
     expect(document.querySelector('button[aria-label="Move"]')?.hasAttribute('disabled')).toBe(false);
     expect(document.body.textContent).toContain('1 items selected');

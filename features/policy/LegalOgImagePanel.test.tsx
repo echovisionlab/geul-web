@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import type { OgGenerationRunSignal } from '@/lib/types/og-generation';
 import { LegalOgImagePanel } from './LegalOgImagePanel';
 
@@ -23,7 +24,7 @@ let queryClient: QueryClient | null = null;
 
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
 
-vi.mock('@mantine/notifications', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 
 vi.mock('@/features/metadata/OgImagePreview', () => ({
   OgImagePreview: ({
@@ -121,7 +122,7 @@ function renderPanel(
   act(() => {
     root?.render(
       <QueryClientProvider client={queryClient!}>
-        <MantineProvider>
+        <DesignSystemProvider forceColorScheme="light">
           <LegalOgImagePanel
             entityType={entityType}
             locale={locale}
@@ -129,7 +130,7 @@ function renderPanel(
             sourceTitleGeneration={sourceTitleGeneration}
             translationGenerationRun={translationGenerationRun}
           />
-        </MantineProvider>
+        </DesignSystemProvider>
       </QueryClientProvider>,
     );
   });
@@ -226,9 +227,9 @@ describe('LegalOgImagePanel', () => {
     act(() => {
       root?.render(
         <QueryClientProvider client={queryClient!}>
-          <MantineProvider>
+          <DesignSystemProvider forceColorScheme="light">
             <LegalOgImagePanel entityType="privacy" locale="ko" currentBackgroundUrl={null} />
-          </MantineProvider>
+          </DesignSystemProvider>
         </QueryClientProvider>,
       );
     });

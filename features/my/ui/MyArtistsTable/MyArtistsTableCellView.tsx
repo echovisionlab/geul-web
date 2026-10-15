@@ -1,5 +1,8 @@
-import { Avatar, Stack, Text } from '@mantine/core';
-import { StatusBadge } from '@/components/core/Badge';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+
+import { Avatar } from '@/components/core/Display';
+import { StatusBadge, type StatusBadgeTone } from '@/components/core/Badge';
 import { TextButton } from '@/components/core/TextButton';
 
 export interface MyArtistsTableRowViewModel {
@@ -7,9 +10,9 @@ export interface MyArtistsTableRowViewModel {
   name: string;
   slugLabel: string | null;
   imageUrl: string | null;
-  avatarFallback: string;
   href: string;
   statusLabel: string;
+  statusTone: StatusBadgeTone;
   createdLabel: string;
 }
 
@@ -24,41 +27,31 @@ export interface MyArtistsTableCellViewProps {
 export function MyArtistsTableCellView({ cell, row }: MyArtistsTableCellViewProps) {
   switch (cell) {
     case 'avatar':
-      return (
-        <Avatar src={row.imageUrl} alt={row.name} size="sm" radius="xl">
-          {row.avatarFallback}
-        </Avatar>
-      );
+      return <Avatar src={row.imageUrl} alt={row.name} size="sm" shape="circle" name={row.name} />;
     case 'name':
       return (
-        <Stack gap={2} style={{ minWidth: 0 }}>
-          <TextButton
-            href={row.href}
-            size="sm"
-            weight="medium"
-            appearance="accent"
-            style={{ overflowWrap: 'anywhere' }}
-          >
+        <DsLayoutStack gap="xxs">
+          <TextButton href={row.href} size="sm" weight="medium" appearance="accent">
             {row.name}
           </TextButton>
           {row.slugLabel ? (
-            <Text size="xs" c="dimmed" style={{ overflowWrap: 'anywhere' }}>
+            <DsText size="xs" tone="secondary" wrap="anywhere">
               {row.slugLabel}
-            </Text>
+            </DsText>
           ) : null}
-        </Stack>
+        </DsLayoutStack>
       );
     case 'status':
       return (
-        <StatusBadge tone="neutral" appearance="outline" size="sm">
+        <StatusBadge tone={row.statusTone} appearance="outline" size="sm">
           {row.statusLabel}
         </StatusBadge>
       );
     case 'created':
       return (
-        <Text size="sm" c="dimmed">
+        <DsText size="sm" tone="secondary">
           {row.createdLabel}
-        </Text>
+        </DsText>
       );
   }
 }

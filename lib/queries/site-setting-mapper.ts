@@ -1,3 +1,4 @@
+import { DEFAULT_SITE_BRAND_COLOR } from '@/lib/theme/site-brand';
 import type { AllSettings } from '@echovisionlab/geul-proto/secure/site_setting_pb.ts';
 import type { OgImageConfigs, SiteSettingsView } from '@/lib/types/site-setting/config';
 import { assetRefUrl, themedAssetRefUrl } from '@/lib/utils/asset-ref';
@@ -31,7 +32,7 @@ export function fromProtoAllSettings(proto: AllSettings): SiteSettingsView {
     site_og_background_url: assetRefUrl(pub?.siteOgBackgroundAsset),
     privacy_og_background_url: assetRefUrl(pub?.privacyOgBackgroundAsset),
     terms_og_background_url: assetRefUrl(pub?.termsOgBackgroundAsset),
-    primary_color: pub?.primaryColor ?? '#b02d23',
+    primary_color: pub?.primaryColor ?? DEFAULT_SITE_BRAND_COLOR,
     default_comments_enabled: pub?.defaultCommentsEnabled ?? true,
     homepage_page_id: pub?.homepagePageId ?? null,
     menu_header_id: pub?.menuHeaderId ?? null,

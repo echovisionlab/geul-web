@@ -1,0 +1,44 @@
+.document {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+  line-height: var(--geul-line-height-md);
+}
+
+.document :is(h1, h2, h3, h4) {
+  line-height: var(--geul-heading-line-height);
+  margin-block: var(--geul-spacing-xl) var(--geul-spacing-md);
+}
+
+.document p,
+.document ul,
+.document ol {
+  margin-block: var(--geul-spacing-md);
+}
+
+.document a {
+  color: var(--geul-action-primary);
+}
+
+.document pre,
+.tableScroll {
+  display: block;
+  max-inline-size: 100%;
+  overflow: auto;
+}
+
+.document pre {
+  background: var(--geul-surface-muted);
+  padding: var(--geul-spacing-md);
+}
+
+.document table {
+  border-collapse: collapse;
+}
+
+.document :is(th, td) {
+  min-inline-size: calc(var(--geul-spacing-lg) * 6);
+  padding: var(--geul-spacing-xs);
+  border-bottom: var(--geul-border-thin) solid var(--geul-border-default);
+  text-align: start;
+  vertical-align: top;
+}

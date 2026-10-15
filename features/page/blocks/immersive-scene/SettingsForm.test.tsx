@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode, useState } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MantineProvider } from '@mantine/core';
+
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { MESH_OPTIMIZATION_METHOD_DRACO } from '@/lib/types/mesh-optimization';
 import { ImmersiveSceneSettingsForm, type ImmersiveSceneUploadControls } from './SettingsForm';
@@ -114,7 +115,7 @@ function render(node: ReactNode) {
   root = createRoot(container);
 
   act(() => {
-    root?.render(<MantineProvider>{node}</MantineProvider>);
+    root?.render(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>);
   });
 }
 
@@ -235,7 +236,11 @@ function findInputByLabelText(text: string) {
 }
 
 async function pressSlider(label: string, key = 'ArrowRight') {
-  const slider = document.querySelector<HTMLElement>(`[role="slider"][aria-label="${label}"]`);
+  const slider =
+    document.querySelector<HTMLInputElement>(`input[type="range"][aria-label="${label}"]`) ??
+    document
+      .querySelector<HTMLElement>(`[aria-label="${label}"]`)
+      ?.querySelector<HTMLInputElement>('input[type="range"]');
   expect(slider).toBeTruthy();
   await act(async () => {
     slider?.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
@@ -247,12 +252,14 @@ async function changeNumberInput(label: string, value: string) {
   const input = document.querySelector<HTMLInputElement>(`input[aria-label="${label}"]`);
   expect(input).toBeTruthy();
   await act(async () => {
+    input!.focus();
     const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
     valueSetter?.call(input, value);
     input?.dispatchEvent(new Event('input', { bubbles: true }));
     input?.dispatchEvent(new Event('change', { bubbles: true }));
     await Promise.resolve();
   });
+  await act(async () => input!.blur());
 }
 
 async function waitForButtonByText(text: string) {
@@ -297,7 +304,7 @@ function createUploadControls(overrides: Partial<ImmersiveSceneUploadControls> =
 }
 
 function findButtonByText(text: string) {
-  return [...document.querySelectorAll<HTMLButtonElement>('button')].find((button) =>
+  return [...document.querySelectorAll<HTMLElement>('button, [role="tab"]')].find((button) =>
     button.textContent?.includes(text),
   );
 }
@@ -309,10 +316,12 @@ function findButtonByAriaLabel(label: string) {
 async function changeInputValue(input: HTMLInputElement, value: string) {
   const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
   await act(async () => {
+    input.focus();
     setter?.call(input, value);
     input.dispatchEvent(new Event('input', { bubbles: true }));
     await Promise.resolve();
   });
+  await act(async () => input.blur());
 }
 
 async function changeTextareaValue(input: HTMLTextAreaElement, value: string) {
@@ -426,7 +435,7 @@ describe('ImmersiveSceneSettingsForm', () => {
     const decimalMutation = updateSharedProps.mock.calls.at(-1)?.[0][
       IMMERSIVE_SCENE_UNIT_MUTATION_PROP
     ] as ImmersiveSceneUnitMutation;
-    expect(decimalMutation).toEqual({ kind: 'patch', unitId: 'unit-1', patch: { particleSize: '4.0' } });
+    expect(decimalMutation).toEqual({ kind: 'patch', unitId: 'unit-1', patch: { particleSize: '4' } });
 
     await act(async () => {
       openingButton?.click();
@@ -470,9 +479,9 @@ describe('ImmersiveSceneSettingsForm', () => {
     });
 
     const offsetControl = document.querySelector('[data-testid="immersive-scene-mesh-offset-y-unit-2"]');
-    const slider = offsetControl?.querySelector<HTMLElement>('[role="slider"]');
+    const slider = offsetControl?.querySelector<HTMLInputElement>('input[type="range"]');
     expect(offsetControl?.textContent).toContain('blockEditor.labels.meshOffsetY');
-    expect(slider?.getAttribute('aria-valuenow')).toBe('0');
+    expect((slider as HTMLInputElement)?.value).toBe('0');
     expect(document.querySelector('[data-testid="immersive-scene-mesh-offset-y-value-unit-2"]')?.textContent).toBe(
       '0.0',
     );
@@ -516,9 +525,9 @@ describe('ImmersiveSceneSettingsForm', () => {
     });
 
     const slider = document.querySelector<HTMLElement>(
-      '[data-testid="immersive-scene-mesh-offset-y-unit-1"] [role="slider"]',
+      '[data-testid="immersive-scene-mesh-offset-y-unit-1"] input[type="range"]',
     );
-    expect(slider?.getAttribute('aria-valuenow')).toBe('0.1');
+    expect((slider as HTMLInputElement)?.value).toBe('0.1');
 
     await act(async () => {
       slider?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
@@ -695,6 +704,35 @@ describe('ImmersiveSceneSettingsForm', () => {
       direction: 1,
     });
     expect(updateLocalizedProps).not.toHaveBeenCalled();
+  });
+
+  it('reorders the clicked unit even when a different unit is open', async () => {
+    const updateSharedProps = vi.fn();
+    render(
+      <ImmersiveSceneSettingsForm
+        sectionId="section-1"
+        pageId="page-1"
+        props={{
+          unitsJson: JSON.stringify([
+            { id: 'unit-1', name: 'Opening', mesh: 'sphere', color: '#ffffff' },
+            { id: 'unit-2', name: 'Middle', mesh: 'cone', color: '#111111' },
+            { id: 'unit-3', name: 'Finale', mesh: 'cone', color: '#111111' },
+          ]),
+        }}
+        updateSharedProps={updateSharedProps}
+        updateLocalizedProps={vi.fn()}
+        uploadControls={createUploadControls()}
+      />,
+    );
+    await flushEffects();
+    await openUnit('Opening');
+    const moveButtons = document.querySelectorAll<HTMLButtonElement>('[aria-label="blockEditor.actions.moveUnitUp"]');
+    await clickElement(moveButtons[2]);
+    expect(updateSharedProps.mock.calls.at(-1)?.[0][IMMERSIVE_SCENE_UNIT_MUTATION_PROP]).toEqual({
+      kind: 'move',
+      unitId: 'unit-3',
+      direction: -1,
+    });
   });
 
   it('reports upload progress, cancels each uploader, and accepts the same mesh file again', async () => {
@@ -1131,7 +1169,8 @@ describe('ImmersiveSceneSettingsForm', () => {
       'input[aria-label="blockEditor.labels.scrollRotationAxes Z"]',
     );
 
-    expect(rotationX?.value).toBe('25°');
+    expect(rotationX?.value).toBe('25');
+    expect(rotationX?.closest('[data-geul-input]')?.textContent).toContain('°');
     expect(rotationX?.placeholder).toBe('10');
     expect(rotationY?.value).toBe('');
     expect(rotationY?.placeholder).toBe('-15');
@@ -1323,9 +1362,9 @@ describe('ImmersiveSceneSettingsForm', () => {
     expect(selected?.textContent).toContain('optimized-file.glb');
 
     const slider = document.querySelector(
-      '[data-testid="immersive-scene-mesh-optimization-target-ratio-unit-1"] [role="slider"]',
+      '[data-testid="immersive-scene-mesh-optimization-target-ratio-unit-1"] input[type="range"]',
     );
-    expect(slider?.getAttribute('aria-valuenow')).toBe('1');
+    expect((slider as HTMLInputElement)?.value).toBe('1');
     expect(findButtonByText('blockEditor.actions.useOptimizedMesh')).toBeUndefined();
   });
 });

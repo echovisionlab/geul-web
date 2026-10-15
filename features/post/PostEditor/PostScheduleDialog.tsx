@@ -1,15 +1,12 @@
 'use client';
 
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { Stack, Text } from '@mantine/core';
+
 import { FormModal } from '@/components/core/Modal';
-import {
-  DateTimeInput,
-  dateTimeValueToDate,
-  dateToDateTimeValue,
-  type DateTimeValue,
-} from '@/components/core/Input/DateTimeInput';
+import { DateTimeInput, type DateTimeValue } from '@/components/core/Input/DateTimeInput';
 import { Select } from '@/components/core/Input';
 import {
   getIanaTimeZoneOptions,
@@ -26,15 +23,14 @@ export interface PostScheduleDialogProps {
   initialInstant?: string | null;
   initialTimeZone?: string | null;
   loading?: boolean;
+  readOnly?: boolean;
 }
 
 function initialLocalDate(instant: string | null | undefined, timeZone: string): DateTimeValue {
   if (instant) {
-    return dateToDateTimeValue(instantToScheduleInput(new Date(instant), timeZone));
+    return instantToScheduleInput(new Date(instant), timeZone);
   }
-  const date = new Date(Date.now() + 60 * 60 * 1000);
-  date.setSeconds(0, 0);
-  return dateToDateTimeValue(date);
+  return instantToScheduleInput(new Date(Date.now() + 60 * 60 * 1000), timeZone);
 }
 
 export function PostScheduleDialog({
@@ -44,6 +40,7 @@ export function PostScheduleDialog({
   initialInstant,
   initialTimeZone,
   loading = false,
+  readOnly = false,
 }: PostScheduleDialogProps) {
   const locale = useLocale();
   const t = useTranslations('postEditor.schedule');
@@ -67,12 +64,11 @@ export function PostScheduleDialog({
   }, [initialInstant, initialTimeZone, opened, requestTimeZone]);
 
   const resolution = useMemo(() => {
-    const localWallTime = dateTimeValueToDate(localDate);
-    if (!localWallTime || !timeZone) {
+    if (!localDate.date || !localDate.time || !timeZone) {
       return null;
     }
     try {
-      const value = resolvePostSchedule(localWallTime, timeZone, locale);
+      const value = resolvePostSchedule(localDate, timeZone, locale);
       return value.instant.getTime() > Date.now() ? value : null;
     } catch {
       return null;
@@ -80,13 +76,15 @@ export function PostScheduleDialog({
   }, [localDate, locale, timeZone]);
 
   const handleSubmit = () => {
-    const localWallTime = dateTimeValueToDate(localDate);
-    if (!localWallTime || !timeZone) {
+    if (readOnly) {
+      return;
+    }
+    if (!localDate.date || !localDate.time || !timeZone) {
       setError(t('required'));
       return;
     }
     try {
-      const value = resolvePostSchedule(localWallTime, timeZone, locale);
+      const value = resolvePostSchedule(localDate, timeZone, locale);
       if (value.instant.getTime() <= Date.now()) {
         setError(t('futureRequired'));
         return;
@@ -108,11 +106,12 @@ export function PostScheduleDialog({
       cancelLabel={tActions('cancel')}
       closeLabel={tActions('close')}
       loading={loading}
-      submitDisabled={!resolution}
+      submitDisabled={readOnly || !resolution}
       size="standard"
     >
-      <Stack gap="sm">
+      <DsLayoutStack gap="sm">
         <DateTimeInput
+          disabled={readOnly}
           locale={locale}
           nextLabel={t('nextPeriod')}
           previousLabel={t('previousPeriod')}
@@ -125,11 +124,12 @@ export function PostScheduleDialog({
             setLocalDate(value);
             setError(null);
           }}
-          minDate={dateToDateTimeValue(new Date())}
+          minDate={instantToScheduleInput(new Date(Date.now()), timeZone)}
           error={error}
           required
         />
         <Select
+          disabled={readOnly}
           label={t('timeZone')}
           value={timeZone}
           onChange={(value) => {
@@ -143,17 +143,17 @@ export function PostScheduleDialog({
           allowDeselect={false}
         />
         {resolution ? (
-          <Stack gap={2} data-testid="post-schedule-resolution">
-            <Text size="sm">{t('result', { value: resolution.localLabel })}</Text>
-            <Text size="xs" c="dimmed" ff="monospace">
+          <DsLayoutStack gap="xxs" data-testid="post-schedule-resolution">
+            <DsText size="sm">{t('result', { value: resolution.localLabel })}</DsText>
+            <DsText size="xs" tone="secondary" font="mono">
               {t('utcInstant', { value: resolution.utcLabel })}
-            </Text>
-            <Text size="xs" c="dimmed">
+            </DsText>
+            <DsText size="xs" tone="secondary">
               {t('dstNotice')}
-            </Text>
-          </Stack>
+            </DsText>
+          </DsLayoutStack>
         ) : null}
-      </Stack>
+      </DsLayoutStack>
     </FormModal>
   );
 }

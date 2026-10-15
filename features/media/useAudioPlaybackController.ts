@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { normalizeHydrationUrl } from '@echovisionlab/geul-common/media/hydration';
-import { clampMediaTime, resolveSeekTimeFromClientX } from '@/lib/media/shared';
+import { clampMediaTime } from '@/lib/media/shared';
 import { fetchWaveformData, type WaveformPeaks } from '@/lib/media/waveform-sidecar';
 import { mountWaveSurferPlayer, type MountedWaveSurferPlayer } from '@/lib/media/wavesurfer-player';
 
@@ -53,6 +53,7 @@ export function useAudioPlaybackController({
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(1);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [playbackHasError, setPlaybackHasError] = useState(false);
   const [isWaveReady, setIsWaveReady] = useState(false);
   const [waveHasError, setWaveHasError] = useState(false);
   const [resolvedWaveform, setResolvedWaveform] = useState<WaveformPeaks | undefined>(waveform);
@@ -60,6 +61,7 @@ export function useAudioPlaybackController({
   const [displayCurrentTime, setDisplayCurrentTime] = useState(0);
 
   const markPlaybackUnavailable = useCallback(() => {
+    setPlaybackHasError(true);
     setIsPlaying(false);
     setIsLoaded(false);
   }, []);
@@ -70,6 +72,7 @@ export function useAudioPlaybackController({
 
   useEffect(() => {
     setWaveHasError(false);
+    setPlaybackHasError(false);
     setIsWaveReady(false);
     if (!safeSrc && !safeHlsSrc) {
       setIsLoaded(false);
@@ -197,7 +200,10 @@ export function useAudioPlaybackController({
     if (!audio) {
       return;
     }
-    const synchronize = () => {
+    const synchronize = (event?: Event) => {
+      if (event?.type === 'loadedmetadata') {
+        setPlaybackHasError(false);
+      }
       setDuration(audio.duration || initialDuration || 0);
       setCurrentTime(audio.currentTime || 0);
       setIsPlaying(!audio.paused);
@@ -222,9 +228,10 @@ export function useAudioPlaybackController({
     };
   }, [initialDuration, safeHlsSrc, safeSrc]);
 
-  const resolvedDuration = duration || initialDuration || 0;
+  const availableDuration = duration || initialDuration || 0;
+  const resolvedDuration = Number.isFinite(availableDuration) ? Math.max(0, availableDuration) : 0;
   const hasPlayableMedia = Boolean(safeHlsSrc || safeSrc);
-  const canPlay = isReady && hasPlayableMedia && (isLoaded || hasPlayableMedia) && !waveHasError;
+  const canPlay = isReady && hasPlayableMedia && (isLoaded || hasPlayableMedia) && !waveHasError && !playbackHasError;
   const synchronizeDisplayTime = useCallback(
     (nextTime: number, mediaDuration = resolvedDuration) => {
       setDisplayCurrentTime(clampMediaTime(nextTime, mediaDuration));
@@ -281,28 +288,6 @@ export function useAudioPlaybackController({
     [resolvedDuration, synchronizeDisplayTime],
   );
 
-  const handleTrackClick = useCallback(
-    (event: React.MouseEvent<HTMLElement>) => {
-      if (!canPlay || resolvedDuration <= 0) {
-        return;
-      }
-      const nextTime = resolveSeekTimeFromClientX(event.currentTarget, event.clientX, resolvedDuration);
-      if (nextTime !== null) {
-        seek(nextTime);
-      }
-    },
-    [canPlay, resolvedDuration, seek],
-  );
-  const handleTrackKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLElement>) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        togglePlay();
-      }
-    },
-    [togglePlay],
-  );
-
   const applyVolume = useCallback((nextVolume: number) => {
     const clamped = clampProgress(nextVolume);
     const nextMuted = clamped <= 0.001;
@@ -331,6 +316,7 @@ export function useAudioPlaybackController({
     safeSrc,
     safeHlsSrc,
     canPlay,
+    playbackHasError: playbackHasError || waveHasError,
     hasPlayableMedia,
     isPlaying,
     isMuted,
@@ -340,9 +326,9 @@ export function useAudioPlaybackController({
     isWaveReady,
     showWaveLoading: hasPlayableMedia && !isWaveReady && !waveHasError,
     handleAudioError: markPlaybackUnavailable,
-    handleTrackClick,
-    handleTrackKeyDown,
+    seek,
     handleVolumeChange,
+    applyVolume,
     togglePlay,
     toggleMute,
   };

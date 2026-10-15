@@ -1,4 +1,5 @@
 'use client';
+import { useReleaseEditorCanEdit } from './ReleaseEditorAccessContext';
 
 import { useTranslations } from 'next-intl';
 import { ImageUploadCropController } from '@/features/upload/ImageUploadCropController';
@@ -26,18 +27,20 @@ export function ReleaseArtworkView({
   onUpload,
   onRemove,
 }: ReleaseArtworkViewProps) {
+  const canEdit = useReleaseEditorCanEdit();
   const t = useTranslations('releaseEditor.artwork');
 
   return (
     <ImageUploadCropController
       imageUrl={artworkUrl}
       idPrefix={inputId}
-      canEdit
+      canEdit={canEdit}
       isUploading={isUploading}
       uploadProgress={uploadProgress}
       isRemoving={isRemoving}
       onUpload={onUpload}
       onRemove={onRemove}
+      uploadType={UploadType.RELEASE_ARTWORK}
       aspectRatio={1}
       previewWidth={180}
       previewMaxWidth="min(100%, 180px)"

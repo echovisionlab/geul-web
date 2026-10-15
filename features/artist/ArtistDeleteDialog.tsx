@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@/components/core/Notification';
 import {
   ArtistDeleteDialogView,
   type ArtistDeletePreviewViewModel,
@@ -70,7 +70,7 @@ export function ArtistDeleteDialog({
     try {
       const result = await deleteAction(artist.id, preview.revision);
       if (result.error) {
-        notifications.show({ message: result.error, color: 'red' });
+        notifications.show({ message: result.error, tone: 'danger' });
         setPreviewLoading(true);
         const refreshed = await loadPreview(artist.id);
         setPreview(refreshed.data ?? null);
@@ -80,7 +80,7 @@ export function ArtistDeleteDialog({
       }
       notifications.show({
         message: tCommon('messages.itemDeleted', { item: tCommon('entities.artist') }),
-        color: 'red',
+        tone: 'positive',
       });
       onDeleted();
     } finally {

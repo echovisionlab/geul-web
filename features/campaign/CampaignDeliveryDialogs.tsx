@@ -1,11 +1,14 @@
 'use client';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 
 import { IconAlertCircle, IconSend } from '@tabler/icons-react';
-import { Divider, Group, Stack, Text } from '@mantine/core';
+
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
 import { TextInput, type DateTimeValue } from '@/components/core/Input';
-import { ContentModal } from '@/components/core/Modal';
+import { ContentModal, DialogActions } from '@/components/core/Modal';
 import { CampaignScheduleForm } from './CampaignScheduleForm';
 import { TranslationLocaleControl } from '@/features/translation/TranslationLocaleControl';
 import type { TranslationLocaleSelectOption } from '@/features/translation/locale-option-format';
@@ -79,13 +82,20 @@ interface ScheduleDialogProps {
 }
 
 interface Props {
+  readOnly?: boolean;
   commonLabels: CommonLabels;
   testDialog: TestDialogProps;
   sendDialog: SendDialogProps;
   scheduleDialog: ScheduleDialogProps;
 }
 
-export function CampaignDeliveryDialogs({ commonLabels, testDialog, sendDialog, scheduleDialog }: Props) {
+export function CampaignDeliveryDialogs({
+  commonLabels,
+  testDialog,
+  sendDialog,
+  scheduleDialog,
+  readOnly = false,
+}: Props) {
   return (
     <>
       <ContentModal
@@ -95,11 +105,10 @@ export function CampaignDeliveryDialogs({ commonLabels, testDialog, sendDialog, 
         closeLabel={commonLabels.close}
         size="standard"
       >
-        <Stack>
-          <Text size="sm" c="dimmed">
-            {testDialog.labels.description}
-          </Text>
+        <DsLayoutStack>
+          <SupportingText tone="secondary">{testDialog.labels.description}</SupportingText>
           <TextInput
+            disabled={readOnly}
             label={testDialog.labels.email}
             placeholder={testDialog.labels.emailPlaceholder}
             value={testDialog.email}
@@ -107,6 +116,7 @@ export function CampaignDeliveryDialogs({ commonLabels, testDialog, sendDialog, 
             type="email"
           />
           <TranslationLocaleControl
+            disabled={readOnly}
             variant="select"
             label={commonLabels.language}
             value={testDialog.locale}
@@ -114,15 +124,20 @@ export function CampaignDeliveryDialogs({ commonLabels, testDialog, sendDialog, 
             sourceLocale={testDialog.sourceLocale}
             onChange={(value) => testDialog.onLocaleChange(value ?? testDialog.selectedLocale)}
           />
-          <Group justify="flex-end">
+          <DialogActions>
             <Button emphasis="low" onClick={testDialog.onClose}>
               {commonLabels.cancel}
             </Button>
-            <Button onClick={testDialog.onSend} loading={testDialog.pending} disabled={!testDialog.email}>
+            <Button
+              emphasis="strong"
+              onClick={testDialog.onSend}
+              loading={testDialog.pending}
+              disabled={readOnly || !testDialog.email}
+            >
               {testDialog.labels.send}
             </Button>
-          </Group>
-        </Stack>
+          </DialogActions>
+        </DsLayoutStack>
       </ContentModal>
 
       <ContentModal
@@ -132,31 +147,32 @@ export function CampaignDeliveryDialogs({ commonLabels, testDialog, sendDialog, 
         closeLabel={commonLabels.close}
         size="standard"
       >
-        <Stack>
+        <DsLayoutStack>
           <Alert icon={<IconAlertCircle size={16} />} tone="warning">
             {sendDialog.labels.warning}
           </Alert>
-          <Text size="sm">{sendDialog.labels.subject}</Text>
+          <DsText>{sendDialog.labels.subject}</DsText>
           {sendDialog.includesUnsubscribedUsers ? (
             <Alert icon={<IconAlertCircle size={16} />} tone="warning">
               {sendDialog.labels.allMatchingUsersWarning}
             </Alert>
           ) : null}
-          <Divider />
-          <Group justify="flex-end">
+          <DialogActions>
             <Button emphasis="low" onClick={sendDialog.onClose}>
               {commonLabels.cancel}
             </Button>
             <Button
+              emphasis="strong"
               tone="positive"
+              disabled={readOnly}
               onClick={sendDialog.onSend}
               loading={sendDialog.pending}
               leftSection={<IconSend size={16} />}
             >
               {sendDialog.labels.send}
             </Button>
-          </Group>
-        </Stack>
+          </DialogActions>
+        </DsLayoutStack>
       </ContentModal>
 
       <ContentModal
@@ -185,6 +201,7 @@ export function CampaignDeliveryDialogs({ commonLabels, testDialog, sendDialog, 
             cancel: commonLabels.cancel,
             schedule: scheduleDialog.labels.schedule,
           }}
+          disabled={readOnly}
           loading={scheduleDialog.pending}
           onChange={scheduleDialog.onChange}
           onCancel={scheduleDialog.onClose}

@@ -213,16 +213,15 @@ describe('upload-pipeline', () => {
       expect(result.valid).toBe(true);
     });
 
-    it('rejects managed raster selections above the original-file limit', () => {
-      const result = validateUploadSelectionFile(
-        makeFile('avatar.jpg', 'image/jpeg', 20 * 1024 * 1024 + 1),
-        UploadType.USER_AVATAR,
-      );
-
-      expect(result.valid).toBe(false);
-      if (!result.valid) {
-        expect(result.error).toContain('File too large');
-      }
+    it('accepts oversized managed originals for local normalization rather than enforcing a source byte cap', () => {
+      expect(
+        validateUploadSelectionFile(makeFile('avatar.jpg', 'image/jpeg', 80 * 1024 * 1024), UploadType.USER_AVATAR)
+          .valid,
+      ).toBe(true);
+      expect(
+        validateUploadSelectionFile(makeFile('og.jpg', 'image/jpeg', 80 * 1024 * 1024), UploadType.SITE_OG_BACKGROUND)
+          .valid,
+      ).toBe(true);
     });
 
     it('allows prepared managed raster files up to the final upload tolerance', () => {
@@ -232,18 +231,6 @@ describe('upload-pipeline', () => {
       );
 
       expect(result.valid).toBe(true);
-    });
-
-    it('applies managed raster selection rules to site OG backgrounds', () => {
-      const result = validateUploadSelectionFile(
-        makeFile('og.jpg', 'image/jpeg', 20 * 1024 * 1024 + 1),
-        UploadType.SITE_OG_BACKGROUND,
-      );
-
-      expect(result.valid).toBe(false);
-      if (!result.valid) {
-        expect(result.error).toContain('File too large');
-      }
     });
 
     it('rejects prepared managed raster files above the final upload tolerance', () => {
@@ -261,7 +248,7 @@ describe('upload-pipeline', () => {
     it('still rejects oversized non-normalized uploads', () => {
       const result = validateUploadSelectionFile(
         makeFile('logo.png', 'image/png', 6 * 1024 * 1024),
-        UploadType.LABEL_IMAGE,
+        UploadType.SITE_LOGO,
       );
 
       expect(result.valid).toBe(false);
@@ -362,6 +349,34 @@ describe('upload-pipeline', () => {
       expect(mockConvertToWebP).toHaveBeenCalledTimes(1);
       expect(result.file.type).toBe('image/webp');
       expect(result.mimeType).toBe('image/webp');
+    });
+
+    it('normalizes a large raster before crop with strict processing and validates the prepared output', async () => {
+      const source = makeFile('artwork.png', 'image/png', 80 * 1024 * 1024);
+      const prepared = new File(['prepared'], 'artwork.webp', { type: 'image/webp' });
+      mockConvertToWebP.mockResolvedValueOnce(prepared);
+      await expect(prepareImageFileForPreview(source, UploadType.RELEASE_ARTWORK)).resolves.toBe(prepared);
+      expect(mockConvertToWebP).toHaveBeenCalledWith(
+        source,
+        expect.objectContaining({ maxDimension: 4096, maxBytes: 30 * 1024 * 1024, strict: true }),
+      );
+    });
+
+    it('uses the smaller target limit when normalizing a logo instead of the shared raster tolerance', async () => {
+      const source = makeFile('logo.png', 'image/png', 80 * 1024 * 1024);
+      mockConvertToWebP.mockResolvedValueOnce(new File(['prepared'], 'logo.webp', { type: 'image/webp' }));
+      await prepareImageFileForPreview(source, UploadType.CLIENT_LOGO);
+      expect(mockConvertToWebP).toHaveBeenCalledWith(
+        source,
+        expect.objectContaining({ maxBytes: 5 * 1024 * 1024, strict: true }),
+      );
+    });
+
+    it('rejects prepared output still above the target limit before crop opens', async () => {
+      mockConvertToWebP.mockResolvedValueOnce(makeFile('artwork.webp', 'image/webp', 30 * 1024 * 1024 + 1));
+      await expect(
+        prepareImageFileForPreview(makeFile('artwork.png', 'image/png', 80 * 1024 * 1024), UploadType.RELEASE_ARTWORK),
+      ).rejects.toThrow('File too large');
     });
 
     it('decodes HEIC before opening a browser preview', async () => {
