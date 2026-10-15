@@ -24,7 +24,7 @@ export const getPublicLegalPagePresentation = cache(async (kind: 'privacy' | 'te
     snapshot,
     title: snapshot?.policy?.title?.trim() || tEntities(kind),
     description:
-      truncateForDescription(content ? localizedRichTextPlainText(content) : null) ||
+      truncateForDescription(content ? localizedRichTextPlainText(content, site.siteVariables) : null) ||
       t('description', { siteName: site.siteTitle || 'Site' }),
   };
 });

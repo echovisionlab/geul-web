@@ -3876,6 +3876,12 @@
             "subtext": "텍스트로 다이어그램 만들기",
             "aliases": "mermaid\ndiagram\nflowchart\nsequence\n다이어그램\n순서도\n시퀀스",
             "group": "임베드"
+          },
+          "siteVariable": {
+            "title": "사이트 변수",
+            "subtext": "사이트 설정의 값을 삽입합니다",
+            "group": "인라인",
+            "aliases": "site\nvariable\n사이트 변수"
           }
         }
       },
@@ -4053,6 +4059,25 @@
       },
       "media": {
         "importFromUrl": "URL에서 가져오기"
+      },
+      "siteVariables": {
+        "title": "사이트 변수",
+        "description": "사이트 설정의 값을 삽입합니다",
+        "search": "사이트 변수 검색",
+        "site": "사이트",
+        "contact": "연락처",
+        "change": "변수 변경",
+        "linked": "이 값에 링크 연결",
+        "convert": "텍스트로 변환",
+        "unset": "미설정",
+        "source": "사이트 설정에서 가져옴",
+        "inspect": "변수 살펴보기",
+        "siteTitle": "사이트 이름",
+        "siteUrl": "사이트 URL",
+        "companyName": "회사 이름",
+        "legalEmail": "법무 이메일",
+        "supportEmail": "지원 이메일",
+        "privacyEmail": "개인정보 이메일"
       }
     },
     "accessDowngraded": {

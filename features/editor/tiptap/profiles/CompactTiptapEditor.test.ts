@@ -45,6 +45,7 @@ describe('CompactTiptapEditor profile', () => {
       'doc',
       'hardBreak',
       'paragraph',
+      'siteVariable',
       'text',
     ]);
     expect(Object.keys(tiptapSchema.marks).sort()).toEqual([

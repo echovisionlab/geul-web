@@ -13,6 +13,14 @@ import type { LocalizedRichTextBlock } from '@/features/editor/contract/localize
 import { ContentBlockMediaRuntimeProvider } from '@/features/media/ContentBlockMediaRuntimeContext';
 import { DocumentHeadingScope } from '@/features/document-layout/ui/DocumentHeadingScope';
 import type { DocumentHeadingParentLevel } from '@/features/document-layout/ui/document-heading-level';
+import { ManifestProvider } from '@/lib/contexts/ManifestContext';
+import { siteVariableManifest } from '@/features/editor/tiptap/site-variables/site-variable.story-fixtures';
+import {
+  resolvedSiteVariableLinkLabel,
+  siteVariableLinkBlock,
+  siteVariableHrefCases,
+  siteVariableHrefBlock,
+} from '@/test/site-variable-link';
 import enMessages from '@/messages/en.json';
 import { GeneratedRichTextBlockView } from './GeneratedRichTextBlockView';
 
@@ -27,16 +35,19 @@ vi.mock('next/dynamic', async () => {
 async function renderGeneratedStream(
   block: LocalizedRichTextBlock,
   headingParentLevel: DocumentHeadingParentLevel = 0,
+  manifest = siteVariableManifest,
 ): Promise<string> {
   const stream = await renderToReadableStream(
     <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
-      <DesignSystemProvider locale="en" forceColorScheme="light">
-        <ContentBlockMediaRuntimeProvider items={[]}>
-          <DocumentHeadingScope parentLevel={headingParentLevel}>
-            <GeneratedRichTextBlockView block={block} />
-          </DocumentHeadingScope>
-        </ContentBlockMediaRuntimeProvider>
-      </DesignSystemProvider>
+      <ManifestProvider manifest={manifest}>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
+          <ContentBlockMediaRuntimeProvider items={[]}>
+            <DocumentHeadingScope parentLevel={headingParentLevel}>
+              <GeneratedRichTextBlockView block={block} />
+            </DocumentHeadingScope>
+          </ContentBlockMediaRuntimeProvider>
+        </DesignSystemProvider>
+      </ManifestProvider>
     </NextIntlClientProvider>,
   );
   await stream.allReady;
@@ -53,6 +64,55 @@ async function renderGeneratedStream(
 }
 
 describe('GeneratedRichTextBlockView lazy SSR', () => {
+  it.each(siteVariableHrefCases)('SSR resolves href: $name', async ({ source, expected, settings }) => {
+    const html = await renderGeneratedStream(siteVariableHrefBlock(source), 0, {
+      ...siteVariableManifest,
+      settings: { ...siteVariableManifest.settings, ...settings },
+    });
+    expect(html).toContain('<strong>Contact</strong>');
+    if (expected) {
+      expect(html).toContain(`href="${expected}"`);
+    } else {
+      expect(html).not.toContain('<a ');
+    }
+  });
+
+  it('SSR resolves the six exact link-label tokens through the lazy reader', async () => {
+    const html = await renderGeneratedStream(siteVariableLinkBlock);
+    expect(html).toContain(`href="/tools/hwp"`);
+    expect(html).toContain(`<strong>${resolvedSiteVariableLinkLabel}</strong>`);
+  });
+
+  it('SSR resolves variables and links from the manifest, escapes values and omits empty anchors', async () => {
+    const html = await renderGeneratedStream(
+      {
+        id: 'variables',
+        kind: 'paragraph',
+        base: { props: {} },
+        children: [],
+        locale: {
+          props: {},
+          content: [
+            { value: { case: 'siteVariable', value: { key: 'site.title', styles: { bold: true } } } },
+            { value: { case: 'siteVariable', value: { key: 'contact.supportEmail', linked: true } } },
+            { value: { case: 'siteVariable', value: { key: 'contact.legalEmail', linked: true } } },
+          ],
+        },
+      } as unknown as LocalizedRichTextBlock,
+      0,
+      {
+        ...siteVariableManifest,
+        settings: { ...siteVariableManifest.settings, site_title: 'Raw & <sector>', legal_email: '' },
+      },
+    );
+    expect(html).toContain('<strong>Raw &amp; &lt;sector&gt;</strong>');
+    expect(html).toContain('href="mailto:support@example.com"');
+    expect(html).not.toContain('mailto:legal');
+    expect(html).not.toContain('data-site-variable');
+    expect(html).not.toContain('{{');
+    expect(html).not.toContain('<button');
+  });
+
   it('server-renders authored headings below the document title with the authored level and id', async () => {
     const heading: LocalizedRichTextBlock = {
       id: 'scope',

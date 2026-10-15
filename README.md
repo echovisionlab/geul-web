@@ -41,7 +41,7 @@ Unreleased sibling contracts (`../geul-event-contracts`, `../geul-common`,
 sibling checkout with a pnpm `link:` override.
 
 The production image is published by the release workflow as
-`registry.dsub.io/echovisionlab/geul-web:<tag>`.
+`registry.rawsector.com/echovisionlab/geul-web:<tag>`.
 
 This standalone repository uses Geul-namespaced browser, storage, runtime, and
 wire identifiers. Deployments provide their public and service URLs through the
@@ -90,4 +90,4 @@ Read-only nested blocks render mutation-free canvas previews where available;
 column topology controls require current structural editing authority.
 
 Licensed under the PolyForm Noncommercial 1.0.0. Copyright 2026 Echo Vision
-Lab. Author: state303 <state303@dsub.io>.
+Lab. Author: state303 <state303@rawsector.com>.

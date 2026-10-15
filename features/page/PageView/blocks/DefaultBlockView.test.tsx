@@ -12,11 +12,66 @@ import {
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { ContentBlockMediaRuntimeProvider } from '@/features/media/ContentBlockMediaRuntimeContext';
 import { PageMediaDeliveryProvider } from '@/features/page/PageMediaDeliveryContext';
+import { ManifestProvider } from '@/lib/contexts/ManifestContext';
+import { siteVariableManifest } from '@/features/editor/tiptap/site-variables/site-variable.story-fixtures';
+import { siteVariableLinkLabel, resolvedSiteVariableLinkLabel, siteVariableHrefCases } from '@/test/site-variable-link';
 import enMessages from '@/messages/en.json';
 import type { Block, InlineContent } from '@/lib/types/page-content';
 import { DefaultBlockView, resolveShaderMediaAsset, resolveUnifiedFileViewKind } from './DefaultBlockView';
 
 describe('DefaultBlockView', () => {
+  it.each(siteVariableHrefCases)('resolves legacy href: $name', ({ source, expected, settings }) => {
+    const html = renderToStaticMarkup(
+      <ManifestProvider
+        manifest={{ ...siteVariableManifest, settings: { ...siteVariableManifest.settings, ...settings } }}
+      >
+        <DefaultBlockView
+          block={{
+            id: 'href',
+            type: 'paragraph',
+            props: {},
+            children: [],
+            content: [
+              { type: 'link', href: source, content: [{ type: 'text', text: 'Contact', styles: { bold: true } }] },
+            ],
+          }}
+        />
+      </ManifestProvider>,
+    );
+    expect(html).toContain('<strong>Contact</strong>');
+    if (expected) {
+      expect(html).toContain(`href="${expected}"`);
+    } else {
+      expect(html).not.toContain('<a ');
+    }
+  });
+
+  it('resolves the six exact tokens in legacy link labels while preserving href and styles', () => {
+    const html = renderToStaticMarkup(
+      <ManifestProvider manifest={siteVariableManifest}>
+        <DefaultBlockView
+          block={{
+            id: 'legacy-variable-link',
+            type: 'paragraph',
+            props: {},
+            children: [],
+            content: [
+              { type: 'text', text: '{{site.title}}' },
+              {
+                type: 'link',
+                href: '/tools/hwp',
+                content: [{ type: 'text', text: siteVariableLinkLabel, styles: { bold: true } }],
+              },
+            ],
+          }}
+        />
+      </ManifestProvider>,
+    );
+    expect(html).toContain('href="/tools/hwp"');
+    expect(html).toContain(`<strong>${resolvedSiteVariableLinkLabel}</strong>`);
+    expect(html).toContain('<span>{{site.title}}</span>');
+  });
+
   beforeAll(async () => {
     await Loadable.preloadAll();
   });

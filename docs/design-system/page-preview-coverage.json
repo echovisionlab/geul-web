@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "182b987bc0175e0ffa5dbcaa90676e4224dce976a4984170dfda7fc65364fcbc",
+  "sourceManifestHash": "e1f2b3abb14c7a8883dbb3c908451be1ab48b43171efcfd9597e2467e8cf7113",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
@@ -195,6 +195,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -306,6 +308,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -663,6 +666,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -860,6 +865,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -1308,6 +1314,16 @@
             "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -2230,6 +2246,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -2343,6 +2361,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -2727,6 +2746,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -2926,6 +2947,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -3307,6 +3329,16 @@
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts",
             "features/editor/tiptap/profiles/CompactTiptapEditor.tsx"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -3713,6 +3745,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -3824,6 +3858,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -4182,6 +4217,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -4379,6 +4416,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -4787,6 +4825,16 @@
           ]
         },
         {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
+          ]
+        },
+        {
           "file": "features/editor/toolbars/EditorColorStyleButton.stories.tsx",
           "title": "Feature/Editor/Color Palette",
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
@@ -5171,6 +5219,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -5282,6 +5332,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -5642,6 +5693,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -5839,6 +5892,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -6165,6 +6219,16 @@
             "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -6629,6 +6693,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -6740,6 +6806,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -7111,6 +7178,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -7308,6 +7377,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -7673,6 +7743,16 @@
             "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -8459,6 +8539,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -8570,6 +8652,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -8935,6 +9018,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -9132,6 +9217,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -9496,6 +9582,16 @@
             "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -9946,6 +10042,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -10059,6 +10157,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -10431,6 +10530,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -10630,6 +10731,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -11011,6 +11113,16 @@
             "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -11409,6 +11521,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -11520,6 +11634,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -11878,6 +11993,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -12075,6 +12192,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -12480,6 +12598,16 @@
             "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -12940,6 +13068,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -13061,6 +13191,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -13436,6 +13567,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -13644,6 +13777,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -14032,6 +14166,16 @@
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts",
             "features/editor/tiptap/profiles/CompactTiptapEditor.tsx"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -14443,6 +14587,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -14554,6 +14700,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -14912,6 +15059,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -15109,6 +15258,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -15514,6 +15664,16 @@
             "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -17756,6 +17916,7 @@
         "features/page/PageView/blocks/GeneratedRichTextBlockViewRuntime.tsx",
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockSkeleton.tsx",
         "features/page/blocks/ListCarouselRuntime.tsx",
@@ -17998,6 +18159,7 @@
         "features/page/PageView/blocks/GeneratedRichTextViewUtils.ts",
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockSkeleton.tsx",
         "features/page/blocks/ListCarouselRuntime.tsx",
@@ -18270,6 +18432,11 @@
             "features/editor/tiptap/code-editor/MonacoSourceEditor.tsx",
             "features/editor/tiptap/code-editor/source-editor-presentation.ts"
           ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": ["features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"]
         },
         {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
@@ -18679,6 +18846,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -18792,6 +18961,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -19179,6 +19349,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -19378,6 +19550,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -19922,6 +20095,16 @@
           ]
         },
         {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
+          ]
+        },
+        {
           "file": "features/editor/toolbars/EditorColorStyleButton.stories.tsx",
           "title": "Feature/Editor/Color Palette",
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
@@ -20307,6 +20490,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -20418,6 +20603,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -20776,6 +20962,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -20973,6 +21161,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -21381,6 +21570,16 @@
           ]
         },
         {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
+          ]
+        },
+        {
           "file": "features/editor/toolbars/EditorColorStyleButton.stories.tsx",
           "title": "Feature/Editor/Color Palette",
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
@@ -21752,6 +21951,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -21806,6 +22007,7 @@
         "features/page/PageView/blocks/GeneratedRichTextBlockViewRuntime.tsx",
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/map/View.tsx",
         "features/page/blocks/map/ViewRuntime.tsx",
         "features/place/CreatePlaceModal.tsx",
@@ -21980,6 +22182,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -22089,6 +22293,7 @@
         "features/page/PageView/blocks/GeneratedRichTextViewUtils.ts",
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/map/View.tsx",
         "features/page/blocks/map/ViewRuntime.tsx",
         "features/place/CreatePlaceModal.tsx",
@@ -22262,6 +22467,16 @@
             "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -22551,6 +22766,7 @@
         "features/page/PageView/blocks/GeneratedRichTextBlockViewRuntime.tsx",
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/map/View.tsx",
         "features/page/blocks/map/ViewRuntime.tsx",
         "features/policy/LegalDocumentLayout.tsx",
@@ -22671,6 +22887,7 @@
         "features/page/PageView/blocks/GeneratedRichTextViewUtils.ts",
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/map/View.tsx",
         "features/page/blocks/map/ViewRuntime.tsx",
         "features/policy/LegalDocumentLayout.tsx",
@@ -22785,6 +23002,11 @@
             "features/editor/tiptap/code-editor/MonacoSourceEditor.tsx",
             "features/editor/tiptap/code-editor/source-editor-presentation.ts"
           ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": ["features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"]
         },
         {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
@@ -22987,6 +23209,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -23099,6 +23323,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -23486,6 +23711,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -23684,6 +23911,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -24090,6 +24318,16 @@
           ]
         },
         {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
+          ]
+        },
+        {
           "file": "features/editor/toolbars/EditorColorStyleButton.stories.tsx",
           "title": "Feature/Editor/Color Palette",
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
@@ -24488,6 +24726,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -24599,6 +24839,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -24957,6 +25198,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -25154,6 +25397,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -25562,6 +25806,16 @@
           ]
         },
         {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
+          ]
+        },
+        {
           "file": "features/editor/toolbars/EditorColorStyleButton.stories.tsx",
           "title": "Feature/Editor/Color Palette",
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
@@ -25945,6 +26199,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -26056,6 +26312,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -26416,6 +26673,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -26613,6 +26872,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -26927,6 +27187,16 @@
             "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -27581,6 +27851,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -27635,6 +27907,7 @@
         "features/page/PageView/blocks/GeneratedRichTextBlockViewRuntime.tsx",
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/map/View.tsx",
         "features/page/blocks/map/ViewRuntime.tsx",
         "features/place/CreatePlaceModal.tsx",
@@ -27809,6 +28082,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -27918,6 +28193,7 @@
         "features/page/PageView/blocks/GeneratedRichTextViewUtils.ts",
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/map/View.tsx",
         "features/page/blocks/map/ViewRuntime.tsx",
         "features/place/CreatePlaceModal.tsx",
@@ -28091,6 +28367,16 @@
             "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -28380,6 +28666,7 @@
         "features/page/PageView/blocks/GeneratedRichTextBlockViewRuntime.tsx",
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/map/View.tsx",
         "features/page/blocks/map/ViewRuntime.tsx",
         "features/policy/LegalDocumentLayout.tsx",
@@ -28500,6 +28787,7 @@
         "features/page/PageView/blocks/GeneratedRichTextViewUtils.ts",
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/map/View.tsx",
         "features/page/blocks/map/ViewRuntime.tsx",
         "features/policy/LegalDocumentLayout.tsx",
@@ -28614,6 +28902,11 @@
             "features/editor/tiptap/code-editor/MonacoSourceEditor.tsx",
             "features/editor/tiptap/code-editor/source-editor-presentation.ts"
           ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": ["features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"]
         },
         {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
@@ -29308,6 +29601,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -29423,6 +29718,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -29808,6 +30104,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -30009,6 +30307,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -30399,6 +30698,16 @@
             "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -30805,6 +31114,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -30916,6 +31227,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -31274,6 +31586,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -31471,6 +31785,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -31876,6 +32191,16 @@
             "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -32700,6 +33025,8 @@
         "features/editor/tiptap/code-editor/MonacoSourceEditorRuntime.tsx",
         "features/editor/tiptap/emoji/TiptapEmojiPicker.tsx",
         "features/editor/tiptap/profiles/EmailTiptapEditor.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/toolbars/EditorToolbarAction.tsx",
         "features/editor/toolbars/EditorToolbarTooltip.tsx",
         "features/site/PageLoader/PageLoader.tsx",
@@ -32781,6 +33108,8 @@
         "features/editor/tiptap/profiles/EmailTiptapEditor.tsx",
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -34111,6 +34440,8 @@
         "features/editor/tiptap/code-editor/MonacoSourceEditorRuntime.tsx",
         "features/editor/tiptap/emoji/TiptapEmojiPicker.tsx",
         "features/editor/tiptap/profiles/EmailTiptapEditor.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/toolbars/EditorToolbarAction.tsx",
         "features/editor/toolbars/EditorToolbarTooltip.tsx",
         "features/email/EmailTemplateEditor/EmailTemplateEditor.tsx",
@@ -34183,6 +34514,8 @@
         "features/editor/tiptap/profiles/EmailTiptapEditor.tsx",
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -41340,6 +41673,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -41505,6 +41840,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -41631,6 +41968,11 @@
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts"
           ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": ["features/editor/EditorAuthoringMode.tsx", "features/editor/tiptap/TiptapEditor.tsx"]
         },
         {
           "file": "features/editor/toolbars/EditorColorStyleButton.stories.tsx",
@@ -41867,6 +42209,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -41980,6 +42324,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -42341,6 +42686,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -42541,6 +42888,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -42909,6 +43257,16 @@
             "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -43371,6 +43729,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -43499,6 +43859,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -43860,6 +44221,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -44078,6 +44441,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -44516,6 +44880,16 @@
           ]
         },
         {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
+          ]
+        },
+        {
           "file": "features/editor/toolbars/EditorColorStyleButton.stories.tsx",
           "title": "Feature/Editor/Color Palette",
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
@@ -44921,6 +45295,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -45033,6 +45409,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -45394,6 +45771,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -45592,6 +45971,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -45960,6 +46340,16 @@
             "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -46351,6 +46741,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -46463,6 +46855,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -46824,6 +47217,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -47022,6 +47417,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -47402,6 +47798,16 @@
             "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -47793,6 +48199,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -47904,6 +48312,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -48262,6 +48671,8 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -48459,6 +48870,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -48857,6 +49269,16 @@
             "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
             "features/editor/tiptap/block-room-prosemirror-bridge.ts",
             "features/editor/tiptap/block-room-tiptap-controller.ts"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/EditorAuthoringMode.tsx",
+            "features/editor/contract/localized-rich-text.ts",
+            "features/editor/tiptap/TiptapEditor.tsx",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {
@@ -49500,6 +49922,7 @@
         "features/page/PageView/blocks/GeneratedRichTextBlockViewRuntime.tsx",
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockSkeleton.tsx",
         "features/page/blocks/ListCarouselRuntime.tsx",
@@ -49779,6 +50202,7 @@
         "features/page/PageView/blocks/GeneratedRichTextViewUtils.ts",
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockSkeleton.tsx",
         "features/page/blocks/ListCarouselRuntime.tsx",
@@ -49988,6 +50412,14 @@
           "matchingOwners": [
             "features/editor/tiptap/code-editor/MonacoSourceEditor.tsx",
             "features/editor/tiptap/code-editor/source-editor-presentation.ts"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+          "title": "Feature/Editor/Site Variables",
+          "matchingOwners": [
+            "features/editor/contract/localized-rich-text.ts",
+            "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"
           ]
         },
         {

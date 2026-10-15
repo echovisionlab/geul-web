@@ -1,10 +1,10 @@
 'use client';
 
+import { PublicSiteVariable, PublicSiteVariableLink, PublicSiteVariableText } from './PublicSiteVariable';
 import dynamic from 'next/dynamic';
 import { useId, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
-import { normalizeRichTextHref } from '@echovisionlab/geul-common/editor/link-normalization';
 import { hasAttachedFileId } from '@echovisionlab/geul-common/media/block-schemas';
 import {
   ContentBlockDownloadAction,
@@ -254,6 +254,17 @@ function renderInlineContent(content: InlineContent[] | undefined): React.ReactN
   }
 
   return content.map((item, index) => {
+    if (item.type === 'siteVariable') {
+      return (
+        <PublicSiteVariable
+          key={index}
+          variableKey={String(item.props?.key ?? '')}
+          linked={item.props?.linked === true}
+        >
+          {(value) => renderInlineContent([{ type: 'text', text: value, styles: item.styles }])}
+        </PublicSiteVariable>
+      );
+    }
     if (item.type === 'text') {
       let element: React.ReactNode = renderTextWithSoftBreaks(item.text || '', `text-${index}`);
 
@@ -294,15 +305,20 @@ function renderInlineContent(content: InlineContent[] | undefined): React.ReactN
     }
 
     if (item.type === 'link') {
-      const href = normalizeRichTextHref(getInlineHref(item) ?? '');
-      if (!href) {
-        return renderInlineContent(item.content);
-      }
-
+      const href = getInlineHref(item) ?? '';
+      const children = item.content?.map((text, textIndex) =>
+        text.type === 'text' ? (
+          <PublicSiteVariableText key={textIndex} text={text.text ?? ''}>
+            {(value) => renderInlineContent([{ ...text, text: value }])}
+          </PublicSiteVariableText>
+        ) : (
+          renderInlineContent([text])
+        ),
+      );
       return (
-        <a key={index} href={href} target="_blank" rel="noopener noreferrer">
-          {renderInlineContent(item.content)}
-        </a>
+        <PublicSiteVariableLink key={index} href={href} target="_blank" rel="noopener noreferrer">
+          {children}
+        </PublicSiteVariableLink>
       );
     }
 
@@ -317,6 +333,9 @@ function renderInlineContent(content: InlineContent[] | undefined): React.ReactN
 function hasReadableInlineContent(content: InlineContent[] | undefined): boolean {
   return (
     content?.some((item) => {
+      if (item.type === 'siteVariable') {
+        return true;
+      }
       if (item.type === 'text') {
         return Boolean(item.text?.trim());
       }

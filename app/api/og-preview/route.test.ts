@@ -15,10 +15,10 @@ vi.mock('@/lib/utils/og-image', async () => ({
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.session.mockResolvedValue({ user: { role: 'admin' } });
-  mocks.settings.mockResolvedValue({ site_title: 'DSUB' });
+  mocks.settings.mockResolvedValue({ site_title: 'Rawsector' });
   mocks.home.mockResolvedValue(Buffer.from('image'));
 });
-const request = (body: string) => new NextRequest('https://www.dsub.io/api/og-preview', { method: 'POST', body });
+const request = (body: string) => new NextRequest('https://www.rawsector.com/api/og-preview', { method: 'POST', body });
 describe('OG preview HTTP boundary', () => {
   it.each(['bad JSON', 'null', '[]', '{}', '{"type":"invalid"}', '{"type":"home","config":{}}'])(
     'rejects %s with 400 before rendering',

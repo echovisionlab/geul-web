@@ -1,8 +1,27 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
+import { ManifestProvider } from '@/lib/contexts/ManifestContext';
+import { siteVariableManifest } from '@/features/editor/tiptap/site-variables/site-variable.story-fixtures';
+import { siteVariableHrefCases } from '@/test/site-variable-link';
 import { ImmersiveSceneDescriptionView } from './DescriptionView';
 
 describe('ImmersiveSceneDescriptionView', () => {
+  it.each(siteVariableHrefCases)('resolves Markdown href once: $name', ({ source, expected, settings }) => {
+    const html = renderToStaticMarkup(
+      <ManifestProvider
+        manifest={{ ...siteVariableManifest, settings: { ...siteVariableManifest.settings, ...settings } }}
+      >
+        <ImmersiveSceneDescriptionView>{`[Contact](${source})`}</ImmersiveSceneDescriptionView>
+      </ManifestProvider>,
+    );
+    expect(html).toContain('Contact');
+    if (expected) {
+      expect(html).toContain(`href="${expected.replaceAll('{', '%7B').replaceAll('}', '%7D')}"`);
+    } else {
+      expect(html).not.toContain('<a ');
+    }
+  });
+
   it('renders headings, links, lists, emphasis, and authored line breaks', () => {
     const html = renderToStaticMarkup(
       <ImmersiveSceneDescriptionView>

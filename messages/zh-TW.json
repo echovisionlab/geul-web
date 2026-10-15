@@ -3876,6 +3876,12 @@
             "subtext": "用文字建立圖表",
             "aliases": "mermaid\ndiagram\nflowchart\nsequence\n圖表\n流程圖\n時序圖",
             "group": "嵌入"
+          },
+          "siteVariable": {
+            "title": "網站變數",
+            "subtext": "插入網站設定中的值",
+            "group": "行內",
+            "aliases": "site\nvariable\n網站變數"
           }
         }
       },
@@ -4053,6 +4059,25 @@
       },
       "media": {
         "importFromUrl": "從 URL 匯入"
+      },
+      "siteVariables": {
+        "title": "網站變數",
+        "description": "插入網站設定中的值",
+        "search": "搜尋網站變數",
+        "site": "網站",
+        "contact": "聯絡方式",
+        "change": "變更變數",
+        "linked": "連結至此值",
+        "convert": "轉換為文字",
+        "unset": "未設定",
+        "source": "來自網站設定",
+        "inspect": "檢視變數",
+        "siteTitle": "網站名稱",
+        "siteUrl": "網站 URL",
+        "companyName": "公司名稱",
+        "legalEmail": "法律事務信箱",
+        "supportEmail": "支援信箱",
+        "privacyEmail": "隱私事務信箱"
       }
     },
     "accessDowngraded": {

@@ -1,4 +1,10 @@
-import { fromJson } from '@bufbuild/protobuf';
+import {
+  siteVariableDocument,
+  siteVariableManifest,
+} from '@/features/editor/tiptap/site-variables/site-variable.story-fixtures';
+import { siteVariableLink, siteVariableHrefCases, siteVariableHrefBlock } from '@/test/site-variable-link';
+import { siteVariableContext } from '@/lib/site-variables';
+import { create, fromJson } from '@bufbuild/protobuf';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import {
   RichTextDocumentSchema,
@@ -9,6 +15,85 @@ import { describe, expect, it } from 'vitest';
 import { generatedRichTextDocumentMarkdown } from './generated-rich-text-markdown';
 
 describe('generatedRichTextDocumentMarkdown', () => {
+  it.each(siteVariableHrefCases)('exports resolved href: $name', ({ source, expected, settings }) => {
+    const localized = siteVariableDocument();
+    const paragraph = localized.localeOverlay!.blocks[0]!.value;
+    if (paragraph.case !== 'paragraph') {
+      throw new Error('Expected paragraph');
+    }
+    const block = siteVariableHrefBlock(source);
+    if (block.kind !== 'paragraph') {
+      throw new Error('Expected paragraph');
+    }
+    paragraph.value.content = block.locale.content;
+    const document = create(RichTextDocumentSchema, {
+      profile: localized.profile,
+      blockCatalogFingerprint: localized.blockCatalogFingerprint,
+      sourceLocale: localized.locale,
+      base: localized.base,
+      localeOverlays: [localized.localeOverlay!],
+    });
+    expect(
+      generatedRichTextDocumentMarkdown(
+        document,
+        'post',
+        siteVariableContext({ ...siteVariableManifest.settings, ...settings }),
+      ),
+    ).toBe(expected ? `[**Contact**](${expected})\n` : '**Contact**\n');
+  });
+
+  it('resolves the six exact migrated link-label tokens, preserving styles and href', () => {
+    const localized = siteVariableDocument();
+    const paragraph = localized.localeOverlay!.blocks[0]!.value;
+    if (paragraph.case !== 'paragraph') {
+      throw new Error('Expected a paragraph fixture.');
+    }
+    paragraph.value.content = [siteVariableLink];
+    const document = create(RichTextDocumentSchema, {
+      profile: localized.profile,
+      blockCatalogFingerprint: localized.blockCatalogFingerprint,
+      sourceLocale: localized.locale,
+      base: localized.base,
+      localeOverlays: [localized.localeOverlay!],
+    });
+    const context = siteVariableContext(siteVariableManifest.settings);
+    expect(generatedRichTextDocumentMarkdown(document, 'post', context)).toBe(
+      '[**Rawsector \\| https://www.rawsector.com/tools/hwp \\| Example Studio Ltd. \\| legal@example.com \\| support@example.com \\| privacy@example.com \\| {{Site.title}} {{site.unknown}} {{ site.title }} {site.title}**](/tools/hwp)\n',
+    );
+    expect(
+      generatedRichTextDocumentMarkdown(document, 'post', {
+        ...context,
+        siteTitle: '[unsafe] *title* &copy; {{site.url}}',
+        legalEmail: '',
+      }),
+    ).toContain('\\[unsafe\\] \\*title\\* \\&copy; {{site.url}}');
+    expect(generatedRichTextDocumentMarkdown(document, 'post', { ...context, legalEmail: '' })).toContain(
+      'Example Studio Ltd. \\|  \\| support@example.com',
+    );
+    expect(() => generatedRichTextDocumentMarkdown(document, 'post')).toThrow('Site variable context is required');
+  });
+
+  it('exports variable values and contact anchors with a caller-supplied settings snapshot', () => {
+    const localized = siteVariableDocument();
+    const document = create(RichTextDocumentSchema, {
+      profile: localized.profile,
+      blockCatalogFingerprint: localized.blockCatalogFingerprint,
+      sourceLocale: localized.locale,
+      base: localized.base,
+      localeOverlays: [localized.localeOverlay!],
+    });
+    expect(
+      generatedRichTextDocumentMarkdown(document, 'post', siteVariableContext(siteVariableManifest.settings)),
+    ).toBe('Welcome to Rawsector. For help, write to [support@example.com](mailto:support@example.com).\n');
+    expect(
+      generatedRichTextDocumentMarkdown(document, 'post', {
+        ...siteVariableContext(siteVariableManifest.settings),
+        siteTitle: '[unsafe] *title* &copy; | value',
+      }),
+    ).toContain('\\[unsafe\\] \\*title\\* \\&copy; \\| value');
+    expect(() => generatedRichTextDocumentMarkdown(document, 'post')).toThrow('Site variable context is required');
+  });
+
   it('exports the canonical source locale and nested generated Blocks', () => {
     const parentId = '019cd0f1-b8e3-7b27-9b6a-53d6ddd83d69';
     const childId = '019cd0f1-b8e3-7b27-9b6a-53d6ddd83d70';

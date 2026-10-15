@@ -74,7 +74,7 @@ function McpAndApiAccessContent({ showSecret = false }: { showSecret?: boolean }
 }
 
 function McpAndApiAccessPreview({
-  siteName = 'DSUB',
+  siteName = 'Rawsector',
   showSecret = false,
 }: {
   siteName?: string;
@@ -109,7 +109,7 @@ const meta = {
       },
     },
   },
-  args: { siteName: 'DSUB' },
+  args: { siteName: 'Rawsector' },
   argTypes: { siteName: { control: 'text' } },
 } satisfies Meta<typeof McpAndApiAccessPreview>;
 

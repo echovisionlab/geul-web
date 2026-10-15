@@ -3876,6 +3876,12 @@
             "subtext": "Tạo sơ đồ từ văn bản",
             "aliases": "mermaid\ndiagram\nflowchart\nsequence\nsơ đồ\nlưu đồ\ntrình tự",
             "group": "Nhúng"
+          },
+          "siteVariable": {
+            "title": "Biến trang web",
+            "subtext": "Chèn giá trị từ cài đặt trang web",
+            "group": "Nội tuyến",
+            "aliases": "site\nvariable\nBiến trang web"
           }
         }
       },
@@ -4053,6 +4059,25 @@
       },
       "media": {
         "importFromUrl": "Nhập từ URL"
+      },
+      "siteVariables": {
+        "title": "Biến trang web",
+        "description": "Chèn giá trị từ cài đặt trang web",
+        "search": "Tìm biến trang web",
+        "site": "Trang web",
+        "contact": "Liên hệ",
+        "change": "Đổi biến",
+        "linked": "Liên kết đến giá trị này",
+        "convert": "Chuyển thành văn bản",
+        "unset": "Chưa đặt",
+        "source": "Từ cài đặt trang web",
+        "inspect": "Kiểm tra biến",
+        "siteTitle": "Tên trang web",
+        "siteUrl": "URL trang web",
+        "companyName": "Tên công ty",
+        "legalEmail": "Email pháp lý",
+        "supportEmail": "Email hỗ trợ",
+        "privacyEmail": "Email quyền riêng tư"
       }
     },
     "accessDowngraded": {

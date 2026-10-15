@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "1e667cf2bf7917a7e69d9d670a2f012d314113cf8f815fadc6d1600f1f3456c5",
+  "manifestHash": "5542403b2bb760272e73173fd210ec543e94569a8ce7851aa4340644ca3f5340",
   "counts": {
-    "sourceFiles": 3742,
-    "productionSourceFiles": 2273,
-    "componentFiles": 897,
-    "coreFamilies": 56,
+    "sourceFiles": 3752,
+    "productionSourceFiles": 2280,
+    "componentFiles": 901,
+    "coreFamilies": 57,
     "featureDomains": 53,
-    "storyFiles": 255,
-    "storyVariants": 1438,
+    "storyFiles": 256,
+    "storyVariants": 1444,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -499,6 +499,7 @@
     "components/core/ImageUpload/UploadPlaceholder.tsx",
     "components/core/ImageUpload/file-drag.ts",
     "components/core/ImageUpload/index.ts",
+    "components/core/InlineReference/InlineReference.tsx",
     "components/core/Input/Checkbox.stories.tsx",
     "components/core/Input/Checkbox.tsx",
     "components/core/Input/Choice.type-test.tsx",
@@ -1573,6 +1574,11 @@
     "features/editor/tiptap/shader/shader-source.ts",
     "features/editor/tiptap/shader/shader-worker-protocol.test.ts",
     "features/editor/tiptap/shader/shader-worker-protocol.ts",
+    "features/editor/tiptap/site-variables/SiteVariable.test.tsx",
+    "features/editor/tiptap/site-variables/SiteVariable.tsx",
+    "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
+    "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+    "features/editor/tiptap/site-variables/site-variable.story-fixtures.ts",
     "features/editor/tiptap/slash/catalog.test.ts",
     "features/editor/tiptap/slash/catalog.ts",
     "features/editor/tiptap/slash/execute.test.ts",
@@ -2079,6 +2085,7 @@
     "features/page/PageView/blocks/PublicHeadingOutline.test.tsx",
     "features/page/PageView/blocks/PublicRichTextBlockView.test.tsx",
     "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+    "features/page/PageView/blocks/PublicSiteVariable.tsx",
     "features/page/PageView/blocks/PublicTextAccessibility.test.tsx",
     "features/page/blocks/CarouselSkeleton.loading.test.tsx",
     "features/page/blocks/CollectionBlocks.stories.tsx",
@@ -3305,6 +3312,7 @@
     "lib/queries/site-setting-mapper.test.ts",
     "lib/queries/site-setting-mapper.ts",
     "lib/queries/site-setting.ts",
+    "lib/queries/site-variable-text.server.ts",
     "lib/queries/sitemap.ts",
     "lib/queries/taxonomy.ts",
     "lib/queries/terms-browser.ts",
@@ -3324,6 +3332,8 @@
     "lib/server/version-history.ts",
     "lib/session-data.test.ts",
     "lib/session-data.ts",
+    "lib/site-variables.test.ts",
+    "lib/site-variables.ts",
     "lib/site-version.ts",
     "lib/styles/font-stylesheet.test.ts",
     "lib/styles/font-stylesheet.ts",
@@ -4432,6 +4442,7 @@
         "features/editor/tiptap/code/CodeBlockSurface.tsx",
         "features/editor/tiptap/menus/SelectionBubbleMenu.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
         "features/file-manager/FileManagerView.tsx",
         "features/file-manager/ui/FileBrowserViewSettings.tsx",
         "features/form/AdminFormSubmissionsPage.tsx",
@@ -4562,6 +4573,7 @@
         "features/editor/EditorSnapshotHandoff.stories.tsx",
         "features/editor/components/EditorFileLibraryPickerView.stories.tsx",
         "features/editor/tiptap/TiptapPlayground.stories.tsx",
+        "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
         "features/map/ui/MapLibreMapView.stories.tsx",
         "features/media/ui/AttachmentSurface.stories.tsx",
         "features/version-history/ui/VersionHistoryDrawerView.stories.tsx",
@@ -9678,6 +9690,81 @@
       ]
     },
     {
+      "file": "components/core/InlineReference/InlineReference.tsx",
+      "owner": "Core/InlineReference",
+      "exports": [
+        {
+          "name": "InlineReference",
+          "kind": "value"
+        }
+      ],
+      "classification": "core",
+      "propsEvidence": [
+        {
+          "name": "InlineReferenceProps",
+          "extends": ["extends ClosedVisualProps"],
+          "properties": [
+            {
+              "name": "children",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "selected",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "unset",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "label",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "description",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "tabIndex",
+              "optional": true,
+              "type": "number"
+            },
+            {
+              "name": "onClick",
+              "optional": true,
+              "type": "ButtonHTMLAttributes<HTMLButtonElement>['onClick']"
+            },
+            {
+              "name": "onMouseDown",
+              "optional": true,
+              "type": "ButtonHTMLAttributes<HTMLButtonElement>['onMouseDown']"
+            },
+            {
+              "name": "onKeyDown",
+              "optional": true,
+              "type": "ButtonHTMLAttributes<HTMLButtonElement>['onKeyDown']"
+            },
+            {
+              "name": "'aria-describedby'",
+              "optional": true,
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/editor/tiptap/site-variables/SiteVariable.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["IconVariable", "bdi", "button"]
+    },
+    {
       "file": "components/core/Input/Checkbox.tsx",
       "owner": "Core/Input",
       "exports": [
@@ -9755,6 +9842,7 @@
         "features/data-table/MultiSortView.tsx",
         "features/editor/tiptap/p5/P5CapabilityControl.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
         "features/form/FormBuilder/FieldEditor.tsx",
         "features/form/FormBuilder/StepEditor.tsx",
         "features/form/FormField/fields/CheckboxField.tsx",
@@ -11913,6 +12001,8 @@
         "features/campaign/CampaignRecipientScopeControl.tsx",
         "features/campaign/CampaignTargetControl.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/file-manager/ui/FileBrowserSortFilterControls.tsx",
         "features/form/AdminFormSubmissionsPage.tsx",
         "features/form/FormBuilder/ConditionEditor.tsx",
@@ -13032,6 +13122,8 @@
         "features/editor/tiptap/p5/P5CapabilityStoryPreview.tsx",
         "features/editor/tiptap/p5/P5SketchNodeView.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -13342,6 +13434,7 @@
         "features/editor/components/EditorFileLibraryPickerView.stories.tsx",
         "features/editor/tiptap/TiptapPlayground.stories.tsx",
         "features/editor/tiptap/code-editor/MonacoSourceEditor.stories.tsx",
+        "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
         "features/editor/toolbars/EditorColorStyleButton.stories.tsx",
         "features/form/FormDashboard/FieldStatsChart.stories.tsx",
         "features/media/ui/AttachmentSurface.stories.tsx",
@@ -15673,6 +15766,7 @@
         "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
         "features/editor/tiptap/menus/SelectionBubbleMenu.tsx",
         "features/editor/tiptap/p5/P5CapabilityControl.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
         "features/editor/toolbars/EditorToolbarAction.tsx",
         "features/file-manager/ui/FileBrowserViewSettings.tsx",
         "features/page/PageEditor/SectionItemView.tsx",
@@ -18795,6 +18889,7 @@
         "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "features/changelog/ChangelogPageView.tsx",
         "features/editor/tiptap/TiptapAuthoringControls.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
         "features/form/AdminFormSubmissionsPage.tsx",
         "features/form/FormField/fields/SwitchField.tsx",
         "features/form/FormRenderer.tsx",
@@ -18902,6 +18997,8 @@
         "features/data-table/MultiSortView.tsx",
         "features/editor/MapInsertModal.tsx",
         "features/editor/blocks/FileBlock/FileBlockView.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/file-manager/FileManagerView.tsx",
         "features/form/AdminFormSubmissionsPage.tsx",
         "features/form/FormDashboard/FieldStatsChart.tsx",
@@ -33819,7 +33916,10 @@
         "features/editor/tiptap/TiptapEditor-lifetime.test.tsx",
         "features/editor/tiptap/menus/selection-bubble-authority.test.tsx"
       ],
-      "stories": ["features/editor/tiptap/TiptapPublicBlockComparison.stories.tsx"],
+      "stories": [
+        "features/editor/tiptap/TiptapPublicBlockComparison.stories.tsx",
+        "features/editor/tiptap/site-variables/SiteVariables.stories.tsx"
+      ],
       "composedJsx": ["EditorAuthoringModeContext.Provider"]
     },
     {
@@ -35698,6 +35798,7 @@
         "IconX",
         "MathBubbleMenu",
         "Separator",
+        "SiteVariablePicker",
         "TextInput",
         "TiptapEmojiPicker",
         "ToolbarSurface",
@@ -36129,7 +36230,10 @@
       ],
       "catalogAdapters": ["stories/shared/EditorRuntimePreview.tsx"],
       "tests": ["features/editor/tiptap/TiptapEditor-lifetime.test.tsx"],
-      "stories": ["features/editor/tiptap/TiptapPublicBlockComparison.stories.tsx"],
+      "stories": [
+        "features/editor/tiptap/TiptapPublicBlockComparison.stories.tsx",
+        "features/editor/tiptap/site-variables/SiteVariables.stories.tsx"
+      ],
       "composedJsx": [
         "CodeBlockSelectionMenu",
         "EditorChrome",
@@ -39360,6 +39464,57 @@
       "tests": ["features/editor/tiptap/shader/ShaderNode.test.tsx"],
       "stories": [],
       "composedJsx": ["Alert", "ExecutableRuntimeStatus", "ShaderPreviewSurface", "canvas", "div"]
+    },
+    {
+      "file": "features/editor/tiptap/site-variables/SiteVariable.tsx",
+      "owner": "Feature/editor",
+      "exports": [
+        {
+          "name": "SiteVariable",
+          "kind": "value"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "features/editor/tiptap/profiles/CompactTiptapEditor.tsx",
+        "features/editor/tiptap/wire-schema.ts"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": [
+        "Button",
+        "Checkbox",
+        "InlineReference",
+        "LayoutStack",
+        "NodeViewWrapper",
+        "Popover",
+        "Popover.Dropdown",
+        "Popover.Target",
+        "Select",
+        "SupportingText",
+        "VisuallyHidden"
+      ]
+    },
+    {
+      "file": "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
+      "owner": "Feature/editor",
+      "exports": [
+        {
+          "name": "SiteVariablePicker",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/editor/tiptap/TiptapAuthoringControls.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["LayoutStack", "Select", "SupportingText", "bdi", "div", "span"]
     },
     {
       "file": "features/editor/tiptap/table/TiptapTableMenu.tsx",
@@ -53803,6 +53958,7 @@
         "ParagraphBlock",
         "PublicDocumentBlock",
         "PublicListItem",
+        "PublicSiteVariable",
         "QuoteBlock",
         "TableBlock",
         "Tag",
@@ -54102,7 +54258,10 @@
         "features/page/PageView/blocks/GeneratedRichTextBlockView.boundaries.test.tsx",
         "features/page/PageView/blocks/GeneratedRichTextBlockView.ssr.test.tsx"
       ],
-      "stories": ["features/editor/tiptap/TiptapPublicBlockComparison.stories.tsx"],
+      "stories": [
+        "features/editor/tiptap/TiptapPublicBlockComparison.stories.tsx",
+        "features/editor/tiptap/site-variables/SiteVariables.stories.tsx"
+      ],
       "composedJsx": ["RuntimeView"]
     },
     {
@@ -54142,6 +54301,7 @@
         "List",
         "PublicDocumentBlock",
         "PublicListItem",
+        "PublicSiteVariable",
         "a",
         "aside",
         "blockquote",
@@ -54503,6 +54663,27 @@
       "tests": ["features/page/PageView/blocks/PublicRichTextBlockView.test.tsx"],
       "stories": [],
       "composedJsx": ["DefaultBlockView", "PublicDocumentBlock", "VideoView"]
+    },
+    {
+      "file": "features/page/PageView/blocks/PublicSiteVariable.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "PublicSiteVariable",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "features/page/PageView/blocks/DefaultBlockView.tsx",
+        "features/page/PageView/blocks/GeneratedRichTextBlockViewRuntime.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["a"]
     },
     {
       "file": "features/page/blocks/CollectionSizeControl.tsx",
@@ -73666,6 +73847,11 @@
       ]
     },
     {
+      "owner": "Core/InlineReference",
+      "components": ["components/core/InlineReference/InlineReference.tsx"],
+      "stories": []
+    },
+    {
       "owner": "Core/Input",
       "components": [
         "components/core/Input/Checkbox.tsx",
@@ -75088,6 +75274,9 @@
         "features/editor/tiptap/shader/shader-program.ts",
         "features/editor/tiptap/shader/shader-source.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
+        "features/editor/tiptap/site-variables/site-variable.story-fixtures.ts",
         "features/editor/tiptap/slash/catalog.ts",
         "features/editor/tiptap/slash/execute.ts",
         "features/editor/tiptap/slash/index.ts",
@@ -75192,6 +75381,8 @@
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
+        "features/editor/tiptap/site-variables/SiteVariable.tsx",
+        "features/editor/tiptap/site-variables/SiteVariablePicker.tsx",
         "features/editor/tiptap/table/TiptapTableMenu.tsx",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -75215,6 +75406,7 @@
         "features/editor/tiptap/code-editor/MonacoSourceEditor.stories.tsx",
         "features/editor/tiptap/menus/EditorMenus.stories.tsx",
         "features/editor/tiptap/profiles/CompactTiptapEditor.stories.tsx",
+        "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
         "features/editor/toolbars/EditorColorStyleButton.stories.tsx"
       ],
       "tests": [
@@ -75339,6 +75531,7 @@
         "features/editor/tiptap/shader/shader-program.test.ts",
         "features/editor/tiptap/shader/shader-source.test.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.test.ts",
+        "features/editor/tiptap/site-variables/SiteVariable.test.tsx",
         "features/editor/tiptap/slash/catalog.test.ts",
         "features/editor/tiptap/slash/execute.test.ts",
         "features/editor/tiptap/slash/navigation.test.ts",
@@ -76102,6 +76295,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -76325,6 +76519,7 @@
         "features/page/PageView/blocks/PublicDocumentBlock.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
+        "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -81779,6 +81974,54 @@
         "features/editor/tiptap/block-room-prosemirror-bridge.ts",
         "features/editor/tiptap/block-room-tiptap-controller.ts",
         "features/editor/tiptap/profiles/CompactTiptapEditor.tsx"
+      ]
+    },
+    {
+      "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
+      "title": "Feature/Editor/Site Variables",
+      "component": "Preview",
+      "variants": [
+        {
+          "name": "Paragraph",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-editor-site-variables--paragraph"
+        },
+        {
+          "name": "DarkParagraph",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-editor-site-variables--dark-paragraph"
+        },
+        {
+          "name": "PickerOpen",
+          "args": "{ query: true }",
+          "preview": "http://localhost:6010/?path=/story/feature-editor-site-variables--picker-open"
+        },
+        {
+          "name": "Inspector",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-editor-site-variables--inspector"
+        },
+        {
+          "name": "LinkedContact",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-editor-site-variables--linked-contact"
+        },
+        {
+          "name": "PublicReader",
+          "args": "{ reader: true }",
+          "preview": "http://localhost:6010/?path=/story/feature-editor-site-variables--public-reader"
+        }
+      ],
+      "importedSources": [
+        "components/core/Button/index.ts",
+        "components/core/Layout/index.ts",
+        "features/editor/EditorAuthoringMode.tsx",
+        "features/editor/contract/localized-rich-text.ts",
+        "features/editor/tiptap/TiptapEditor.tsx",
+        "features/editor/tiptap/TiptapPlayground.story-fixtures.ts",
+        "features/editor/tiptap/site-variables/site-variable.story-fixtures.ts",
+        "features/page/PageView/blocks/GeneratedRichTextBlockView.tsx",
+        "lib/contexts/ManifestContext.tsx"
       ]
     },
     {

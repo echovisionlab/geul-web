@@ -1,20 +1,34 @@
+import { isSiteVariableKey } from '@echovisionlab/geul-proto/content/block_catalog.ts';
+import { resolveSiteVariable, type SiteVariableContext } from '@echovisionlab/geul-common/site-variables';
 import type { RichTextInline, RichTextStyledText } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
+import { resolveSiteVariableTokens } from '@/lib/site-variables';
 import type { LocalizedRichTextBlock } from './localized-rich-text';
 
-function styled(values: readonly RichTextStyledText[]): string {
-  return values.map((value) => value.text).join('');
+function styled(values: readonly RichTextStyledText[], context?: SiteVariableContext): string {
+  return values.map((value) => resolveSiteVariableTokens(value.text, context)).join('');
 }
 
-export function localizedRichTextInlinePlainText(values: readonly RichTextInline[]): string {
+export function localizedRichTextInlinePlainText(
+  values: readonly RichTextInline[],
+  context?: SiteVariableContext,
+): string {
   return values
     .map((value) => {
       switch (value.value.case) {
         case 'text':
           return value.value.value.text;
+        case 'siteVariable':
+          if (!context) {
+            throw new Error('Site variable context is required for plain-text output.');
+          }
+          if (!isSiteVariableKey(value.value.value.key)) {
+            throw new Error('Unknown site variable.');
+          }
+          return resolveSiteVariable(value.value.value.key, context);
         case 'hardBreak':
           return '\n';
         case 'link':
-          return styled(value.value.value.content);
+          return styled(value.value.value.content, context);
         case 'mathInline':
           return value.value.value.source;
         case undefined:
@@ -26,7 +40,10 @@ export function localizedRichTextInlinePlainText(values: readonly RichTextInline
     .join('');
 }
 
-export function localizedRichTextPlainText(blocks: readonly LocalizedRichTextBlock[]): string {
+export function localizedRichTextPlainText(
+  blocks: readonly LocalizedRichTextBlock[],
+  context?: SiteVariableContext,
+): string {
   const text = (block: LocalizedRichTextBlock): string => {
     let own = '';
     switch (block.kind) {
@@ -37,7 +54,7 @@ export function localizedRichTextPlainText(blocks: readonly LocalizedRichTextBlo
       case 'check-list-item':
       case 'quote':
       case 'callout':
-        own = localizedRichTextInlinePlainText(block.locale.content);
+        own = localizedRichTextInlinePlainText(block.locale.content, context);
         break;
       case 'code-block':
         own = block.locale.content;
@@ -45,7 +62,7 @@ export function localizedRichTextPlainText(blocks: readonly LocalizedRichTextBlo
       case 'table':
         own =
           block.locale.content?.rows
-            .flatMap((row) => row.cells.map((cell) => localizedRichTextInlinePlainText(cell.content)))
+            .flatMap((row) => row.cells.map((cell) => localizedRichTextInlinePlainText(cell.content, context)))
             .join(' ') ?? '';
         break;
       case 'mermaid':

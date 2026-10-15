@@ -3876,6 +3876,12 @@
             "subtext": "Criar um diagrama a partir de texto",
             "aliases": "mermaid\ndiagram\nflowchart\nsequence\ndiagrama\nfluxograma\nsequência",
             "group": "Incorporações"
+          },
+          "siteVariable": {
+            "title": "Variável do site",
+            "subtext": "Inserir um valor das definições do site",
+            "group": "Em linha",
+            "aliases": "site\nvariable\nVariável do site"
           }
         }
       },
@@ -4053,6 +4059,25 @@
       },
       "media": {
         "importFromUrl": "Importar do URL"
+      },
+      "siteVariables": {
+        "title": "Variável do site",
+        "description": "Inserir um valor das definições do site",
+        "search": "Pesquisar variáveis do site",
+        "site": "Site",
+        "contact": "Contacto",
+        "change": "Alterar variável",
+        "linked": "Ligar a este valor",
+        "convert": "Converter em texto",
+        "unset": "Não definido",
+        "source": "Das definições do site",
+        "inspect": "Inspecionar variável",
+        "siteTitle": "Nome do site",
+        "siteUrl": "URL do site",
+        "companyName": "Nome da empresa",
+        "legalEmail": "E-mail jurídico",
+        "supportEmail": "E-mail de apoio",
+        "privacyEmail": "E-mail de privacidade"
       }
     },
     "accessDowngraded": {

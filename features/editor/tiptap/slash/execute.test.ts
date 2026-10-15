@@ -7,7 +7,7 @@ import { createTiptapWireExtensions } from '../wire-schema';
 import { geulTiptapEmojis } from '../emoji/emoji-data';
 import { loadTiptapEmojiData } from '../emoji/emoji-runtime';
 import { createTiptapSlashCatalog } from './catalog';
-import { applyTiptapSlashEmoji, executeTiptapSlashItem } from './execute';
+import { applyTiptapSlashSiteVariable, applyTiptapSlashEmoji, executeTiptapSlashItem } from './execute';
 import type { TiptapSlashCapabilities, TiptapSlashMenuMessages, TiptapSlashRange } from './types';
 
 beforeAll(async () => {
@@ -38,6 +38,7 @@ const slashMessages = {
     codeBlock: splitItemAliases(serializedSlashMessages.items.codeBlock),
     table: splitItemAliases(serializedSlashMessages.items.table),
     emoji: splitItemAliases(serializedSlashMessages.items.emoji),
+    siteVariable: splitItemAliases(serializedSlashMessages.items.siteVariable),
     mathBlock: splitItemAliases(serializedSlashMessages.items.mathBlock),
     inlineMath: splitItemAliases(serializedSlashMessages.items.inlineMath),
     map: splitItemAliases(serializedSlashMessages.items.map),
@@ -108,6 +109,42 @@ function item(key: string, capabilities: TiptapSlashCapabilities = {}) {
 }
 
 describe('Tiptap slash execution', () => {
+  it('opens the variable picker without a document change and inserts one atom at the exact slash range', () => {
+    const mounted = mountEditor('Before /site');
+    let context: Parameters<typeof applyTiptapSlashSiteVariable>[1] | undefined;
+    const callbacks = {
+      siteVariable: (value: Parameters<typeof applyTiptapSlashSiteVariable>[1]) => {
+        context = value;
+      },
+    };
+    const option = requiredItem(
+      createTiptapSlashCatalog(slashMessages, { capabilities: { siteVariable: true }, callbacks }),
+      'site-variable',
+    );
+    const before = mounted.editor.getJSON();
+    const changed = vi.fn();
+    mounted.editor.on('update', changed);
+    expect(
+      executeTiptapSlashItem({
+        editor: mounted.editor,
+        item: option,
+        range: { ...mounted.range, from: mounted.range.to - '/site'.length },
+        callbacks,
+      }).status,
+    ).toBe('delegated');
+    expect(mounted.editor.getJSON()).toEqual(before);
+    expect(changed).not.toHaveBeenCalled();
+    expect(applyTiptapSlashSiteVariable(mounted.editor, context!, 'site.title')).toBe(true);
+    expect(changed).toHaveBeenCalledTimes(1);
+    const paragraph = mounted.editor.state.doc.child(0).child(0).child(0);
+    expect(paragraph.childCount).toBe(2);
+    expect(paragraph.firstChild?.text).toBe('Before ');
+    expect(paragraph.lastChild?.type.name).toBe('siteVariable');
+    expect(mounted.editor.state.selection.from).toBe(mounted.range.from + 'Before '.length + 1);
+    expect(applyTiptapSlashSiteVariable(mounted.editor, context!, 'site.title')).toBe(false);
+    mounted.destroy();
+  });
+
   it('converts the current Paragraph into a writable Callout body in one transaction', () => {
     const mounted = mountEditor('/callout');
     const onTransaction = vi.fn();

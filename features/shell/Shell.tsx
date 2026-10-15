@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import type { SiteVariableContext } from '@echovisionlab/geul-common/site-variables';
+import { resolveSiteVariableHref, siteVariableContext } from '@/lib/site-variables';
 import { getTranslations } from 'next-intl/server';
 import type { MenuItem } from '@echovisionlab/geul-proto/public/manifest_pb.ts';
 import { PrintHeader } from '@/features/shell/PrintHeader';
@@ -21,14 +23,14 @@ interface ShellProps {
 }
 
 /** Current-route state is derived on the client (`ShellRuntime`), so the server leaves it unset. */
-function toNavigationItem(item: MenuItem): ShellViewNavigationItem {
+function toNavigationItem(item: MenuItem, variables: SiteVariableContext): ShellViewNavigationItem {
   return {
     id: item.id,
     label: item.label,
-    href: resolveMenuUrl(item),
+    href: resolveSiteVariableHref(resolveMenuUrl(item), variables) ?? '',
     active: false,
     openInNewTab: item.openInNewTab ?? false,
-    children: (item.children ?? []).map(toNavigationItem),
+    children: (item.children ?? []).map((item) => toNavigationItem(item, variables)),
   };
 }
 
@@ -47,6 +49,7 @@ export async function Shell({ children, initialUserSnapshot }: ShellProps) {
   ]);
   const settings = { ...DEFAULT_SITE_SETTINGS_VIEW, ...manifest.settings };
   const menus = manifest.menus;
+  const variables = siteVariableContext(settings);
   const companyName = settings.company_name || settings.site_title;
   return (
     <ShellRuntime
@@ -65,10 +68,10 @@ export async function Shell({ children, initialUserSnapshot }: ShellProps) {
       }}
     >
       <ShellLayout
-        headerItems={(menus?.header ?? []).map(toNavigationItem)}
-        secondaryItems={(menus?.secondary ?? []).map(toNavigationItem)}
-        footerItems={(menus?.footer ?? []).map(toNavigationItem)}
-        accountItems={(menus?.avatarDropdown ?? []).map(toNavigationItem)}
+        headerItems={(menus?.header ?? []).map((item) => toNavigationItem(item, variables))}
+        secondaryItems={(menus?.secondary ?? []).map((item) => toNavigationItem(item, variables))}
+        footerItems={(menus?.footer ?? []).map((item) => toNavigationItem(item, variables))}
+        accountItems={(menus?.avatarDropdown ?? []).map((item) => toNavigationItem(item, variables))}
         footer={{
           siteTitle: settings.site_title,
           description: settings.meta_description || null,

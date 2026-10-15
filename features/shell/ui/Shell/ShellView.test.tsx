@@ -137,6 +137,24 @@ function renderView(overrides: Partial<ShellViewProps> = {}, children?: ReactNod
 }
 
 describe('ShellView', () => {
+  it('retains labels without links for rejected destinations throughout the shell', () => {
+    renderView({
+      user: authenticatedUser,
+      navigationOpened: true,
+      userMenuOpened: true,
+      headerItems: [navItem('bad-header', 'Rejected header', '')],
+      secondaryItems: [navItem('bad-secondary', 'Rejected secondary', '')],
+      footerItems: [navItem('bad-footer', 'Rejected footer', '')],
+      accountItems: [navItem('bad-account', 'Rejected account', '')],
+    });
+    const text = document.body.textContent;
+    for (const label of ['Rejected header', 'Rejected secondary', 'Rejected footer', 'Rejected account']) {
+      expect(text).toContain(label);
+      expect(Array.from(document.body.querySelectorAll('a')).some((link) => link.textContent === label)).toBe(false);
+    }
+    expect(document.body.querySelector('a[href=""]')).toBeNull();
+  });
+
   it('keeps the home link named and focusable when the logo slot has no image', () => {
     renderView({ slots: { ...defaultProps.slots, logo: null } });
     const home = container.querySelector<HTMLAnchorElement>('header a[href="/"][data-appearance="block"]');

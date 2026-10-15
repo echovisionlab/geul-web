@@ -3876,6 +3876,12 @@
             "subtext": "用文本创建图表",
             "aliases": "mermaid\ndiagram\nflowchart\nsequence\n图表\n流程图\n时序图",
             "group": "嵌入"
+          },
+          "siteVariable": {
+            "title": "站点变量",
+            "subtext": "插入站点设置中的值",
+            "group": "行内",
+            "aliases": "site\nvariable\n站点变量"
           }
         }
       },
@@ -4053,6 +4059,25 @@
       },
       "media": {
         "importFromUrl": "从 URL 导入"
+      },
+      "siteVariables": {
+        "title": "站点变量",
+        "description": "插入站点设置中的值",
+        "search": "搜索站点变量",
+        "site": "站点",
+        "contact": "联系方式",
+        "change": "更改变量",
+        "linked": "链接到此值",
+        "convert": "转换为文本",
+        "unset": "未设置",
+        "source": "来自站点设置",
+        "inspect": "查看变量",
+        "siteTitle": "站点名称",
+        "siteUrl": "站点 URL",
+        "companyName": "公司名称",
+        "legalEmail": "法律事务邮箱",
+        "supportEmail": "支持邮箱",
+        "privacyEmail": "隐私事务邮箱"
       }
     },
     "accessDowngraded": {

@@ -310,7 +310,7 @@ describe('settings passkey display name', () => {
     };
     const source = JSON.stringify(original);
     for (const [title, expectedName] of [
-      ['DSUB', 'DSUB'],
+      ['Rawsector', 'Rawsector'],
       [' Example Studio ', 'Example Studio'],
       ['', 'Site'],
     ]) {
@@ -332,6 +332,6 @@ describe('settings passkey display name', () => {
     '{"publicKey":{"rp":{"id":"site.example"}}}',
   ])('leaves unsupported creation data unchanged: %s', async (source) => {
     const { getSettingsPasskeyCreateData } = await import('./settings-flow');
-    expect(getSettingsPasskeyCreateData(source, 'DSUB')).toBe(source);
+    expect(getSettingsPasskeyCreateData(source, 'Rawsector')).toBe(source);
   });
 });

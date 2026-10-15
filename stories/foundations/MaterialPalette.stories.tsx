@@ -56,7 +56,7 @@ function MaterialPalettePreview() {
       description="Palette grades are materials. Semantic theme roles determine readable UI use; a palette family does not by itself assign an action or status meaning."
     >
       <LayoutInline justify="between" align="center">
-        <SiteLogoView src="/storybook/media/dsub-logo.svg" alt="DSUB" height={32} />
+        <SiteLogoView src="/storybook/media/rawsector-logo.svg" alt="Rawsector" height={32} />
         <Text size="xs" tone="secondary">
           {activeTheme.label} · brand {primitiveTokens.colors.brand}
         </Text>

@@ -1,3 +1,5 @@
+import { getPublicSettings } from '@/lib/queries/manifest';
+import { siteVariableManifest } from '@/features/editor/tiptap/site-variables/site-variable.story-fixtures';
 import { PageAccessReason } from '@echovisionlab/geul-proto/common/page_access_pb.ts';
 import { fromJson } from '@bufbuild/protobuf';
 import { Code, ConnectError } from '@connectrpc/connect';
@@ -24,6 +26,8 @@ const protoDocumentLayout = {
   pageChrome: DocumentRegionPlacement.PINNED,
   footer: DocumentRegionPlacement.FLOW,
 };
+
+vi.mock('@/lib/queries/manifest', () => ({ getPublicSettings: vi.fn() }));
 
 vi.mock('@/lib/api/server-client', () => ({
   createPageClient: vi.fn(),
@@ -83,6 +87,7 @@ function localizedPageDocument(locale = 'ko', id = sectionId) {
 
 describe('public page queries', () => {
   beforeEach(() => {
+    vi.mocked(getPublicSettings).mockReset();
     getAdminPageRpcMock.mockReset();
     getPublicPageRpcMock.mockReset();
     vi.mocked(createPageClient).mockReset();
@@ -94,6 +99,25 @@ describe('public page queries', () => {
     vi.mocked(createPublicPageClientWithAuth).mockResolvedValue({
       get: getPublicPageRpcMock,
     } as unknown as Awaited<ReturnType<typeof createPublicPageClientWithAuth>>);
+  });
+
+  it('preserves API-resolved summaries for public and shared pages while keeping management templates raw', async () => {
+    vi.mocked(getPublicSettings).mockResolvedValue({
+      ...siteVariableManifest.settings,
+      company_name: '{{site.title}}',
+    });
+    const summary = 'About {{site.companyName}}';
+    const resolvedSummary = 'About {{site.title}}';
+    getPublicPageRpcMock.mockResolvedValue({
+      page: { id: 'page-1', title: 'About', summary: resolvedSummary },
+      blockMedia: [],
+    });
+    getAdminPageRpcMock.mockResolvedValue({ id: 'page-1', title: 'About', summary });
+
+    expect((await getPageView('about', { requestedLocale: 'en' }))?.summary).toBe(resolvedSummary);
+    expect((await getPageViewWithToken('about', 'share-token', 'en'))?.summary).toBe(resolvedSummary);
+    expect(getPublicSettings).not.toHaveBeenCalled();
+    expect((await getPage('about'))?.summary).toBe(summary);
   });
 
   it('materializes the generated localized Page document and Block media', async () => {

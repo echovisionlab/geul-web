@@ -1,8 +1,22 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
+import { ManifestProvider } from '@/lib/contexts/ManifestContext';
+import { siteVariableManifest } from '@/features/editor/tiptap/site-variables/site-variable.story-fixtures';
+import { siteVariableHrefCases } from '@/test/site-variable-link';
 import { ExternalVideoView } from './ExternalVideoView';
 
 describe('ExternalVideoView', () => {
+  it.each(siteVariableHrefCases)('resolves authored fallback href: $name', ({ source, expected, settings }) => {
+    const html = renderToStaticMarkup(
+      <ManifestProvider
+        manifest={{ ...siteVariableManifest, settings: { ...siteVariableManifest.settings, ...settings } }}
+      >
+        <ExternalVideoView url={source} title="Contact" />
+      </ManifestProvider>,
+    );
+    expect(html).toBe(expected ? `<a href="${expected}">Contact</a>` : '<span>Contact</span>');
+  });
+
   it('renders a non-autoplay iframe and keeps the original link', () => {
     const html = renderToStaticMarkup(<ExternalVideoView url="https://youtu.be/dQw4w9WgXcQ" title="Watch the video" />);
     expect(html).toContain('autoplay=0');

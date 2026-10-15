@@ -48,6 +48,7 @@ const messages: TiptapSlashMenuMessages = {
     codeBlock: slashItem('codeBlock'),
     table: slashItem('table'),
     emoji: slashItem('emoji'),
+    siteVariable: slashItem('siteVariable'),
     mathBlock: slashItem('mathBlock'),
     inlineMath: slashItem('inlineMath'),
     map: slashItem('map'),

@@ -42,6 +42,7 @@ const POLICY_NODE_NAMES = new Set([
   'tableParagraph',
   'text',
   'hardBreak',
+  'siteVariable',
 ]);
 
 const POLICY_MARK_NAMES = new Set([

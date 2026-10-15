@@ -446,6 +446,8 @@ function generatedInlineText(values: readonly RichTextInline[]): string {
         switch (inline.value.case) {
           case 'text':
             return inline.value.value.text;
+          case 'siteVariable':
+            return `{{${inline.value.value.key}}}`;
           case 'hardBreak':
             return ' ';
           case 'link':

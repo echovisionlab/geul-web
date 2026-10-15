@@ -1,3 +1,5 @@
+import { type SiteVariableContext } from '@echovisionlab/geul-common/site-variables';
+import { siteVariableContext } from '@/lib/site-variables';
 import { throwQueryError } from '@/lib/api/query-error';
 import {
   getPublicArtistResponse,
@@ -28,7 +30,13 @@ import { getPublicPostResponse } from '@/lib/queries/post-public.server';
 
 const logger = createLogger('metadata-queries');
 
+// Public Page.Get and Post/Work.Get/List summaries and Manifest.Get metaDescription
+// are already resolved by geul-api (also with auth/share tokens or source locales).
+// For metadata, Web resolves only site-variable nodes/link-label templates in the
+// raw artist/label/release rich-text documents returned by their public Get APIs.
+
 export interface SiteMetadataDocument {
+  siteVariables?: SiteVariableContext;
   siteTitle: string;
   siteDescription: string | null;
   canonicalOrigin: string;
@@ -292,6 +300,7 @@ const getSiteMetadataDocumentCached = cache(async (requestedLocale: string | nul
     const { settings } = manifest;
 
     return {
+      siteVariables: siteVariableContext(settings),
       siteTitle: settings.site_title,
       siteDescription: normalizeOptionalString(settings.meta_description),
       canonicalOrigin: normalizeCanonicalOrigin(settings.site_origin),
@@ -646,7 +655,7 @@ const getArtistMetadataDocumentCached = cache(
         kind: 'artist',
         id: artist.id,
         name: artist.name,
-        bio: localizedRichTextPlainText(content) || null,
+        bio: localizedRichTextPlainText(content, site.siteVariables) || null,
         slug,
         imageUrl: artist.imageAsset?.url ?? null,
         ogImageUrl: artist.ogAsset?.url ?? null,
@@ -767,7 +776,7 @@ const getLabelMetadataDocumentCached = cache(
         kind: 'label',
         id: label.id,
         name: label.name,
-        description: localizedRichTextPlainText(content) || null,
+        description: localizedRichTextPlainText(content, site.siteVariables) || null,
         slug,
         imageUrl: themedAssetRefUrl(label.imageLightAsset, label.imageDarkAsset),
         ogImageUrl: label.ogAsset?.url ?? null,
@@ -832,7 +841,7 @@ const getReleaseMetadataDocumentCached = cache(
         kind: 'release',
         id: release.id,
         title: release.title,
-        description: localizedRichTextPlainText(content) || null,
+        description: localizedRichTextPlainText(content, site.siteVariables) || null,
         slug,
         type: release.type === 1 ? 'album' : release.type === 2 ? 'ep' : release.type === 3 ? 'single' : 'compilation',
         artworkUrl: release.artworkAsset?.url ?? null,

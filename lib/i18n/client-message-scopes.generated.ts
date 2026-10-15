@@ -144,6 +144,7 @@ export const CLIENT_MESSAGE_SCOPE_PATHS: Record<ClientMessageScope, readonly str
     'editorCommon.editor.file',
     'editorCommon.editor.formatting',
     'editorCommon.editor.math',
+    'editorCommon.editor.siteVariables',
     'editorCommon.editor.slashMenu',
     'editorCommon.media',
     'editorCommon.permissionRevoked',

@@ -1,4 +1,7 @@
 'use server';
+
+import { getSettings } from '@/lib/queries/manifest';
+import { siteVariableContext } from '@/lib/site-variables';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { connectActionErrorCode, isConnectError } from '@/lib/api/connect-error';
@@ -375,7 +378,7 @@ async function getGeneratedPostMarkdown(postId: string): Promise<{ title: string
   const { generatedRichTextDocumentMarkdown } = await import('@/lib/convert/generated-rich-text-markdown');
   return {
     title: post.title,
-    markdown: generatedRichTextDocumentMarkdown(post.document, post.id),
+    markdown: generatedRichTextDocumentMarkdown(post.document, post.id, siteVariableContext(await getSettings())),
   };
 }
 

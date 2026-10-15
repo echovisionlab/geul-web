@@ -98,6 +98,55 @@ function paragraphPositionByText(editor: Editor, text: string): number {
 }
 
 describe('Block-room Tiptap codec', () => {
+  it.each(['mailto:{{contact.legalEmail}}', '{{site.url}}/about'])(
+    'keeps authored token hrefs through Tiptap: %s',
+    (href) => {
+      const content: JsonValue[] = [{ link: { href, content: [{ text: 'Contact', styles: {} }] } }];
+      const editor = new Editor({
+        extensions: createTiptapWireExtensions(),
+        content: documentToTiptap([
+          descriptor('paragraph', '10000000-0000-4000-8000-000000000403', { props: {} }, { props: {}, content }),
+        ]),
+      });
+      try {
+        expect(JSON.stringify(editor.getJSON())).toContain(href);
+        expect(splitPayload(parseDocument(editor.getJSON())[0]!).locale.content).toEqual(content);
+      } finally {
+        editor.destroy();
+      }
+    },
+  );
+
+  it('round-trips distinct equal variable atoms, styles and linked contacts without resolved values', () => {
+    const content: JsonValue[] = [
+      { text: { text: 'Hello ', styles: {} } },
+      { siteVariable: { key: 'site.title', linked: false, styles: { bold: true } } },
+      { siteVariable: { key: 'site.title', linked: false, styles: {} } },
+      { siteVariable: { key: 'contact.supportEmail', linked: true, styles: { italic: true } } },
+    ];
+    const input = documentToTiptap([
+      descriptor('paragraph', '10000000-0000-4000-8000-000000000401', { props: {} }, { props: {}, content }),
+    ]);
+    const editor = new Editor({ extensions: createTiptapWireExtensions(), content: input });
+    try {
+      expect(splitPayload(parseDocument(editor.getJSON())[0]!).locale.content).toEqual(content);
+      expect(editor.state.doc.child(0).child(0).child(0).childCount).toBe(4);
+      expect(JSON.stringify(editor.getJSON())).not.toContain('Rawsector');
+      expect(() =>
+        documentToTiptap([
+          descriptor(
+            'paragraph',
+            '10000000-0000-4000-8000-000000000401',
+            { props: {} },
+            { props: {}, content: [{ siteVariable: { key: 'site.unknown' } }] },
+          ),
+        ]),
+      ).toThrow('Invalid site variable');
+    } finally {
+      editor.destroy();
+    }
+  });
+
   it('round-trips a Callout body with durable nested Blocks', () => {
     const child = descriptor(
       'paragraph',

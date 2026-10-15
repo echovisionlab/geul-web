@@ -23,6 +23,7 @@ import {
 } from './block-commands';
 import { inlineEditorColorStyle } from './editor-color-presentation';
 import { EmptyParagraphRangeSelection } from './integration/empty-paragraph-range-selection';
+import { SiteVariable } from './site-variables/SiteVariable';
 import { GeulTiptapEmoji } from './emoji/emoji-extension';
 import { BlockMixedSelectionExtension } from './integration/block-mixed-selection';
 import { selectionTouchesInlineMath } from './math/math-selection';
@@ -503,6 +504,7 @@ export function createTiptapWireExtensions(options: TiptapWireSchemaOptions = {}
     WireTableRow,
     WireText,
     WireHardBreak,
+    SiteVariable,
     WireMathInline,
     GeulTiptapEmoji,
     WireBold,

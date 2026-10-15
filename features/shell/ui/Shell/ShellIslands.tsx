@@ -65,6 +65,9 @@ export function ShellLink({
   rel,
 }: ShellLinkProps) {
   const { events } = useShellState();
+  if (!href) {
+    return <span>{children}</span>;
+  }
   return (
     <TextButton
       href={href}
@@ -261,17 +264,21 @@ export function ShellAccountDesktop({ items, labels }: { items: ShellViewNavigat
           <UserSummary user={user} size="detail" />
         </OnDemandDropdownMenu.Label>
         <OnDemandDropdownMenu.Divider />
-        {items.map((item) => (
-          <OnDemandDropdownMenu.Item
-            key={item.id}
-            href={item.href}
-            target={linkTarget(item)}
-            rel={linkRel(item)}
-            onClick={() => events.onNavigate(item.href)}
-          >
-            {item.label}
-          </OnDemandDropdownMenu.Item>
-        ))}
+        {items.map((item) =>
+          item.href ? (
+            <OnDemandDropdownMenu.Item
+              key={item.id}
+              href={item.href}
+              target={linkTarget(item)}
+              rel={linkRel(item)}
+              onClick={() => events.onNavigate(item.href)}
+            >
+              {item.label}
+            </OnDemandDropdownMenu.Item>
+          ) : (
+            <span key={item.id}>{item.label}</span>
+          ),
+        )}
         {items.length > 0 ? <OnDemandDropdownMenu.Divider /> : null}
         <OnDemandDropdownMenu.Item icon={<IconLogout size={16} aria-hidden />} tone="danger" onClick={events.onSignOut}>
           {labels.logOut}
@@ -344,23 +351,30 @@ export function ShellDesktopNavigation({ items, label }: { items: ShellViewNavig
                 </TextButton>
               </OnDemandDropdownMenu.Target>
               <OnDemandDropdownMenu.Dropdown>
-                {item.children.map((child) => (
-                  <OnDemandDropdownMenu.Item
-                    key={child.id}
-                    href={child.href}
-                    target={linkTarget(child)}
-                    rel={linkRel(child)}
-                    aria-current={isItemActive(child) ? 'page' : undefined}
-                    onClick={() => events.onNavigate(child.href)}
-                  >
-                    {child.label}
-                  </OnDemandDropdownMenu.Item>
-                ))}
+                {item.children.map((child) =>
+                  child.href ? (
+                    <OnDemandDropdownMenu.Item
+                      key={child.id}
+                      href={child.href}
+                      target={linkTarget(child)}
+                      rel={linkRel(child)}
+                      aria-current={isItemActive(child) ? 'page' : undefined}
+                      onClick={() => events.onNavigate(child.href)}
+                    >
+                      {child.label}
+                    </OnDemandDropdownMenu.Item>
+                  ) : (
+                    <span key={child.id}>{child.label}</span>
+                  ),
+                )}
               </OnDemandDropdownMenu.Dropdown>
             </OnDemandDropdownMenu>
           );
         }
 
+        if (!item.href) {
+          return <span key={item.id}>{item.label}</span>;
+        }
         return (
           <TextButton
             key={item.id}
@@ -401,21 +415,25 @@ function AccountMenuContent({
       <Divider />
       <DsLayoutInset space="xxs">
         <DsLayoutStack gap="none">
-          {items.map((item) => (
-            <TextButton
-              key={item.id}
-              href={item.href}
-              density="chrome"
-              display="flex"
-              fullWidth
-              justify="start"
-              target={linkTarget(item)}
-              rel={linkRel(item)}
-              onNavigate={() => events.onNavigate(item.href)}
-            >
-              <DsText size="xs">{item.label}</DsText>
-            </TextButton>
-          ))}
+          {items.map((item) =>
+            item.href ? (
+              <TextButton
+                key={item.id}
+                href={item.href}
+                density="chrome"
+                display="flex"
+                fullWidth
+                justify="start"
+                target={linkTarget(item)}
+                rel={linkRel(item)}
+                onNavigate={() => events.onNavigate(item.href)}
+              >
+                <DsText size="xs">{item.label}</DsText>
+              </TextButton>
+            ) : (
+              <span key={item.id}>{item.label}</span>
+            ),
+          )}
           {items.length > 0 ? <Divider spaceBefore="xs" spaceAfter="xs" /> : null}
           <Button
             type="button"

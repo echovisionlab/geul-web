@@ -1,9 +1,11 @@
 'use client';
 
+import { PublicSiteVariable, PublicSiteVariableLink, PublicSiteVariableText } from './PublicSiteVariable';
+import { useSiteSettings } from '@/lib/contexts/ManifestContext';
+import { siteVariableContext } from '@/lib/site-variables';
 import dynamic from 'next/dynamic';
 import { useId, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { normalizeRichTextHref } from '@echovisionlab/geul-common/editor/link-normalization';
 import type { RichTextInline, RichTextStyledText } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import type { LocalizedRichTextBlock } from '@/features/editor/contract/localized-rich-text';
 import { localizedRichTextInlinePlainText } from '@/features/editor/contract/localized-rich-text-text';
@@ -49,7 +51,7 @@ const GeneratedMermaidBlockView = dynamic<{ block: GeneratedRichTextBlock<'merma
   import('./GeneratedMermaidBlockView').then((module) => module.GeneratedMermaidBlockView),
 );
 
-function styledText(item: RichTextStyledText, key: string): ReactNode {
+function styledText(item: Pick<RichTextStyledText, 'text' | 'styles'>, key: string): ReactNode {
   let value: ReactNode = item.text;
   const styles = item.styles;
   if (styles?.bold) {
@@ -81,19 +83,34 @@ function inlineContent(content: readonly RichTextInline[]): ReactNode {
     switch (item.value.case) {
       case 'text':
         return styledText(item.value.value, `text-${index}`);
+      case 'siteVariable':
+        return (
+          <PublicSiteVariable
+            key={`variable-${index}`}
+            variableKey={item.value.value.key}
+            linked={item.value.value.linked}
+          >
+            {(value) =>
+              styledText(
+                { text: value, styles: item.value.case === 'siteVariable' ? item.value.value.styles : undefined },
+                `value-${index}`,
+              )
+            }
+          </PublicSiteVariable>
+        );
       case 'hardBreak':
         return <br key={`break-${index}`} />;
       case 'link': {
-        const href = normalizeRichTextHref(item.value.value.href);
-        const children = item.value.value.content.map((text, textIndex) =>
-          styledText(text, `link-${index}-${textIndex}`),
-        );
-        return href ? (
-          <a key={`link-${index}`} href={href} target="_blank" rel="noopener noreferrer">
+        const href = item.value.value.href;
+        const children = item.value.value.content.map((text, textIndex) => (
+          <PublicSiteVariableText key={`link-${index}-${textIndex}`} text={text.text}>
+            {(value) => styledText({ ...text, text: value }, `link-${index}-${textIndex}`)}
+          </PublicSiteVariableText>
+        ));
+        return (
+          <PublicSiteVariableLink key={`link-${index}`} href={href} target="_blank" rel="noopener noreferrer">
             {children}
-          </a>
-        ) : (
-          <span key={`link-${index}`}>{children}</span>
+          </PublicSiteVariableLink>
         );
       }
       case 'mathInline':
@@ -187,6 +204,8 @@ function GeneratedRichTextBlockContent({
   nested,
 }: GeneratedRichTextBlockViewProps & { nested?: ReactNode }) {
   const contentId = useId();
+  const { settings } = useSiteSettings();
+  const variables = siteVariableContext(settings);
   const headingParentLevel = useDocumentHeadingParentLevel();
   switch (block.kind) {
     case 'paragraph':
@@ -202,7 +221,7 @@ function GeneratedRichTextBlockContent({
       // The element follows the page outline (below the document title); size and depth stay authored.
       const Heading = documentHeadingTag(level, headingParentLevel);
       const content = inlineContent(block.locale.content);
-      if (!localizedRichTextInlinePlainText(block.locale.content).trim()) {
+      if (!localizedRichTextInlinePlainText(block.locale.content, variables).trim()) {
         return null;
       }
       return (
@@ -233,7 +252,7 @@ function GeneratedRichTextBlockContent({
     }
     case 'check-list-item': {
       const content = inlineContent(block.locale.content);
-      const hasTask = Boolean(localizedRichTextInlinePlainText(block.locale.content).trim());
+      const hasTask = Boolean(localizedRichTextInlinePlainText(block.locale.content, variables).trim());
       return (
         <div
           className="check-list-item"

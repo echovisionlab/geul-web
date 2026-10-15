@@ -44,6 +44,8 @@ import {
   type TiptapSlashRange as ReviewedSlashRange,
   type TiptapSlashWorkflowCallbacks,
 } from './slash';
+import { SiteVariablePicker } from './site-variables/SiteVariablePicker';
+import { applyTiptapSlashSiteVariable } from './slash/execute';
 import { TiptapEmojiPicker } from './emoji';
 import {
   createDelegatedWorkflow,
@@ -111,6 +113,7 @@ function buildSlashMenuMessages(messages: Messages['editorCommon']['editor']['sl
       codeBlock: { ...messages.items.codeBlock, aliases: splitSlashAliases(messages.items.codeBlock.aliases) },
       table: { ...messages.items.table, aliases: splitSlashAliases(messages.items.table.aliases) },
       emoji: { ...messages.items.emoji, aliases: splitSlashAliases(messages.items.emoji.aliases) },
+      siteVariable: { ...messages.items.siteVariable, aliases: splitSlashAliases(messages.items.siteVariable.aliases) },
       mathBlock: { ...messages.items.mathBlock, aliases: splitSlashAliases(messages.items.mathBlock.aliases) },
       inlineMath: { ...messages.items.inlineMath, aliases: splitSlashAliases(messages.items.inlineMath.aliases) },
       map: { ...messages.items.map, aliases: splitSlashAliases(messages.items.map.aliases) },
@@ -493,6 +496,7 @@ export function TiptapAuthoringControls({
   const slash = useTranslations('editorCommon.editor.slashMenu');
   const commonActions = useTranslations('common.actions');
   const searchCombobox = useTranslations('searchCombobox');
+  const [variableContext, setVariableContext] = useState<TiptapSlashActionContext>();
   const [emojiContext, setEmojiContext] = useState<TiptapSlashActionContext>();
   const messages = useMemo<TiptapSlashMenuMessages>(
     () => ({
@@ -582,6 +586,12 @@ export function TiptapAuthoringControls({
           aliases: slash('items.table.aliases').split('\n'),
           group: slash('items.table.group'),
         },
+        siteVariable: {
+          title: slash('items.siteVariable.title'),
+          subtext: slash('items.siteVariable.subtext'),
+          aliases: slash('items.siteVariable.aliases').split('\n'),
+          group: slash('items.siteVariable.group'),
+        },
         emoji: {
           title: slash('items.emoji.title'),
           subtext: slash('items.emoji.subtext'),
@@ -667,6 +677,7 @@ export function TiptapAuthoringControls({
       three: createImmediateNodeWorkflow(editor, 'threeScene'),
       shader: createImmediateNodeWorkflow(editor, 'shader'),
       emoji: (context) => setEmojiContext(context),
+      siteVariable: (context) => setVariableContext(context),
     }),
     [
       editor,
@@ -678,10 +689,12 @@ export function TiptapAuthoringControls({
       onTableActivate,
     ],
   );
+  const siteVariableAvailable = Boolean(editor.schema.nodes.siteVariable) && !editor.isActive('codeBlock');
   const items = useMemo(() => {
     const catalog = createTiptapSlashCatalog(messages, {
       capabilities: {
         emoji: capabilities.emoji !== false,
+        siteVariable: siteVariableAvailable,
         mermaid: capabilities.mermaid !== false,
         p5: capabilities.p5 !== false,
         shader: capabilities.shader !== false,
@@ -691,7 +704,7 @@ export function TiptapAuthoringControls({
       callbacks,
     });
     return catalog.filter((item) => item.capability === undefined || capabilities[item.capability] !== false);
-  }, [callbacks, capabilities, messages]);
+  }, [callbacks, capabilities, messages, siteVariableAvailable]);
   const menuId = useId();
 
   const [, setRevision] = useState(0);
@@ -800,6 +813,27 @@ export function TiptapAuthoringControls({
             if (item) {
               choose(item);
             }
+          }}
+        />
+      ) : null}
+      {variableContext ? (
+        <SiteVariablePicker
+          position={(() => {
+            const coords = editor.view.coordsAtPos(variableContext.range.from);
+            const root = editor.view.dom.closest('.tiptap-editor')?.getBoundingClientRect();
+            return {
+              left: Math.max(8, coords.left - (root?.left ?? 0)),
+              top: Math.max(8, coords.bottom - (root?.top ?? 0)),
+            };
+          })()}
+          onClose={() => {
+            setVariableContext(undefined);
+            editor.view.focus();
+          }}
+          onSelect={(key) => {
+            applyTiptapSlashSiteVariable(editor, variableContext, key);
+            setVariableContext(undefined);
+            editor.view.focus();
           }}
         />
       ) : null}
