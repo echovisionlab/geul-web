@@ -298,8 +298,14 @@ describe('useVersionHistoryQuery', () => {
 
   it('isolates caches by entity type and ID and aborts an unmounted active request', async () => {
     let pendingSignal: AbortSignal | undefined;
+    // The Page response waits for the test, so the empty state before it is observable on any machine.
+    let releasePage!: () => void;
+    const pageReleased = new Promise<void>((resolve) => (releasePage = resolve));
     const fetchMock = vi.fn(async (input: RequestInfo, init?: RequestInit) => {
       const path = new URL(String(input), 'http://localhost').pathname;
+      if (path === '/api/version-history/page/same') {
+        await pageReleased;
+      }
       if (path.endsWith('/pending')) {
         pendingSignal = init?.signal ?? undefined;
         return new Promise<Response>((_resolve, reject) => {
@@ -314,6 +320,7 @@ describe('useVersionHistoryQuery', () => {
     await waitFor(() => expect(current.versions[0]?.id).toBe('/api/version-history/work/same'));
     await renderQuery({ entityType: 'page', entityId: 'same' });
     expect(current.versions).toEqual([]);
+    releasePage();
     await waitFor(() => expect(current.versions[0]?.id).toBe('/api/version-history/page/same'));
     await renderQuery({ entityType: 'work', entityId: 'other' });
     await waitFor(() => expect(current.versions[0]?.id).toBe('/api/version-history/work/other'));
