@@ -1904,6 +1904,7 @@
         "Consumer: features/auth/ui/AuthCodeChallengeView.tsx",
         "Consumer: features/auth/ui/LoginStatusView.tsx",
         "Consumer: features/auth/ui/VerificationFlowView.tsx",
+        "Consumer: features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "Consumer: features/campaign/CampaignDeliveryDialogs.tsx",
         "Consumer: features/campaign/CampaignScheduleForm.tsx",
         "Consumer: features/data-table/MultiFilterEditorView.tsx",
@@ -1936,6 +1937,7 @@
         "Consumer: features/menu/MenuTargetItemsEditor.tsx",
         "Consumer: features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "Consumer: features/my/LanguagePreferenceSettings.tsx",
+        "Consumer: features/my/LocalBackupsView.tsx",
         "Consumer: features/my/McpOAuthGrantSettings.tsx",
         "Consumer: features/my/PasskeySettingsSection.tsx",
         "Consumer: features/my/SecurityForm.tsx",
@@ -2132,6 +2134,7 @@
         "Use onCopyError to give recovery feedback (for example a danger notification) when the clipboard is unavailable or denied. Do not add a second success toast; the in-place check and status announcement are the single success treatment.",
         "Use a labeled Button instead when the copy command is a primary dialog action that needs visible text.",
         "Consumer: features/admin/user/UserProfileFormSection.tsx",
+        "Consumer: features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "Consumer: features/metadata/ui/UrlSectionView.tsx",
         "Consumer: features/my/ui/ProfileForm/ProfileFormView.tsx",
         "Consumer: features/share/ui/ShareLinkSectionView.tsx"
@@ -11309,6 +11312,7 @@
         "Consumer: features/media/ui/MissingMediaView.tsx",
         "Consumer: features/my/CookieConsentSettings.tsx",
         "Consumer: features/my/LanguagePreferenceSettings.tsx",
+        "Consumer: features/my/LocalBackupsView.tsx",
         "Consumer: features/my/McpOAuthGrantSettings.tsx",
         "Consumer: features/my/MySecurityPageView.tsx",
         "Consumer: features/my/PasskeySettingsSection.tsx",
@@ -11461,6 +11465,7 @@
         "Consumer: features/admin/mail-adapter/MailAdaptersPage.tsx",
         "Consumer: features/editor/components/EditorFileLibraryPickerView.tsx",
         "Consumer: features/file-manager/FileManagerView.tsx",
+        "Consumer: features/my/LocalBackupsView.tsx",
         "Consumer: features/policy/LegalPolicyHistoryClient.tsx",
         "Consumer: features/policy/LegalPolicyListClient.tsx"
       ],
@@ -46225,7 +46230,8 @@
       "title": "Core/Layout/EditorHeader",
       "sourceFiles": [
         "components/core/EditorHeader/EditorHeaderView.stories.tsx",
-        "components/core/EditorHeader/EditorHeaderView.tsx"
+        "components/core/EditorHeader/EditorHeaderView.tsx",
+        "components/core/EditorHeader/save-state.ts"
       ],
       "tokenReferences": [
         {
@@ -46293,6 +46299,12 @@
           "type": "(state: { opened: boolean; onClose: () => void; onConfirm: () => void; loading: boolean; }) => ReactNode",
           "required": false
         },
+        {
+          "name": "saveState",
+          "type": "'saved' | 'saving' | 'offline' | 'error' | 'rejected' | 'reload'",
+          "required": false,
+          "description": "Overrides transport status for rooms with durable acknowledgements."
+        },
         { "name": "status", "type": "TStatus", "required": false },
         { "name": "statusOptions", "type": "StatusOption<TStatus>[]", "required": false },
         { "name": "titleDisabled", "type": "boolean", "required": false },
@@ -46303,7 +46315,13 @@
         { "id": "core-layout-editorheader--default", "name": "Default" },
         { "id": "core-layout-editorheader--editable-with-collaboration", "name": "Editable With Collaboration" },
         { "id": "core-layout-editorheader--destructive", "name": "Destructive" },
-        { "id": "core-layout-editorheader--phone-actions", "name": "Phone Actions" }
+        { "id": "core-layout-editorheader--phone-actions", "name": "Phone Actions" },
+        { "id": "core-layout-editorheader--saved", "name": "Saved" },
+        { "id": "core-layout-editorheader--saving", "name": "Saving" },
+        { "id": "core-layout-editorheader--offline", "name": "Offline" },
+        { "id": "core-layout-editorheader--error", "name": "Error" },
+        { "id": "core-layout-editorheader--rejected", "name": "Rejected" },
+        { "id": "core-layout-editorheader--reload", "name": "Reload" }
       ],
       "usage": [
         "Connect save, cancel, status and navigation callbacks to editor state. Use compact rules rather than shrinking icons independently.",
@@ -47720,6 +47738,7 @@
         "Consumer: features/auth/ui/LoginStatusView.tsx",
         "Consumer: features/auth/ui/VerificationFlowView.tsx",
         "Consumer: features/authoring/DocumentEditorPanels.tsx",
+        "Consumer: features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "Consumer: features/campaign/CampaignAnalyticsPage.tsx",
         "Consumer: features/campaign/CampaignDeliveryDialogs.tsx",
         "Consumer: features/campaign/CampaignEditPage.tsx",
@@ -47815,6 +47834,7 @@
         "Consumer: features/metadata/ui/UrlSectionView.tsx",
         "Consumer: features/my/CookieConsentSettings.tsx",
         "Consumer: features/my/LanguagePreferenceSettings.tsx",
+        "Consumer: features/my/LocalBackupsView.tsx",
         "Consumer: features/my/McpOAuthGrantSettings.tsx",
         "Consumer: features/my/MyArtistsDataTable.tsx",
         "Consumer: features/my/MyPostsPageView.tsx",
@@ -47835,10 +47855,11 @@
         "Consumer: features/my/ui/SettingsForm/SettingsFormView.tsx",
         "Consumer: features/navigation/SitemapPageView.tsx",
         "Consumer: features/newsletter/UnsubscribeView.tsx",
-        "Consumer: features/page/PageEditor/LocalizedCollaborativePageBodyEditor.tsx",
+        "Consumer: features/page/PageEditor/LocalizedPageBodyView.tsx",
         "Consumer: features/page/PageEditor/PageAccessSettings.tsx",
         "Consumer: features/page/PageEditor/PageBlockSettingsSurface.tsx",
         "Consumer: features/page/PageEditor/PageEditor.tsx",
+        "Consumer: features/page/PageEditor/PageEditorSnapshot.tsx",
         "Consumer: features/page/PageEditor/PageSectionPreinsertDialog.tsx",
         "Consumer: features/page/PageEditor/SectionItemView.tsx",
         "Consumer: features/page/PageEditor/SectionList.tsx",
@@ -48520,6 +48541,7 @@
         "Consumer: features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "Consumer: features/metadata/ui/OgGenerationRunProgressView.tsx",
         "Consumer: features/metadata/ui/UrlSectionView.tsx",
+        "Consumer: features/my/LocalBackupsView.tsx",
         "Consumer: features/my/McpOAuthGrantSettings.tsx",
         "Consumer: features/my/MySeriesPageView.tsx",
         "Consumer: features/my/MySettingsPageView.tsx",
@@ -52588,16 +52610,48 @@
       ],
       "tokenReferences": [
         {
+          "name": "--geul-background",
+          "registered": true,
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 23, "property": "background" }],
+          "definitions": [
+            { "file": "lib/styles/design-tokens.css", "line": 150, "value": "#f2f1eb", "context": ":root" },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 240,
+              "value": "#161918",
+              "context": "@media (prefers-color-scheme: dark) → html:not([data-geul-theme='light'])"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 324,
+              "value": "#f2f1eb",
+              "context": "[data-geul-theme='light']"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 407,
+              "value": "#161918",
+              "context": "[data-geul-theme='dark']"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 492,
+              "value": "#f2f1eb",
+              "context": "@media print → :root,\n  [data-geul-theme]"
+            }
+          ]
+        },
+        {
           "name": "--geul-border-default",
           "registered": true,
           "sources": [
             { "file": "components/core/DropdownMenu/DropdownMenu.module.css", "line": 126, "property": "border-top" },
             { "file": "components/core/DropdownMenu/DropdownMenu.module.css", "line": 131, "property": "stroke" },
-            { "file": "components/core/Overlay.module.css", "line": 31, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 74, "property": "border-bottom" },
-            { "file": "components/core/Overlay.module.css", "line": 179, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 234, "property": "stroke" },
-            { "file": "components/core/Overlay.module.css", "line": 330, "property": "border-inline-start" }
+            { "file": "components/core/Overlay.module.css", "line": 36, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 79, "property": "border-bottom" },
+            { "file": "components/core/Overlay.module.css", "line": 184, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 239, "property": "stroke" },
+            { "file": "components/core/Overlay.module.css", "line": 335, "property": "border-inline-start" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 161, "value": "#bbb7aa", "context": ":root" },
@@ -52637,8 +52691,8 @@
               "line": 52,
               "property": "outline-offset"
             },
-            { "file": "components/core/Overlay.module.css", "line": 93, "property": "outline" },
-            { "file": "components/core/Overlay.module.css", "line": 94, "property": "outline-offset" }
+            { "file": "components/core/Overlay.module.css", "line": 98, "property": "outline" },
+            { "file": "components/core/Overlay.module.css", "line": 99, "property": "outline-offset" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 121, "value": "2px", "context": ":root" }]
         },
@@ -52682,11 +52736,11 @@
           "sources": [
             { "file": "components/core/DropdownMenu/DropdownMenu.module.css", "line": 35, "property": "border" },
             { "file": "components/core/DropdownMenu/DropdownMenu.module.css", "line": 126, "property": "border-top" },
-            { "file": "components/core/Overlay.module.css", "line": 31, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 74, "property": "border-bottom" },
-            { "file": "components/core/Overlay.module.css", "line": 179, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 235, "property": "stroke-width" },
-            { "file": "components/core/Overlay.module.css", "line": 330, "property": "border-inline-start" }
+            { "file": "components/core/Overlay.module.css", "line": 36, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 79, "property": "border-bottom" },
+            { "file": "components/core/Overlay.module.css", "line": 184, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 240, "property": "stroke-width" },
+            { "file": "components/core/Overlay.module.css", "line": 335, "property": "border-inline-start" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 120, "value": "1px", "context": ":root" }]
         },
@@ -52726,7 +52780,7 @@
           "registered": true,
           "sources": [
             { "file": "components/core/DropdownMenu/DropdownMenu.module.css", "line": 51, "property": "outline" },
-            { "file": "components/core/Overlay.module.css", "line": 93, "property": "outline" }
+            { "file": "components/core/Overlay.module.css", "line": 98, "property": "outline" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 182, "value": "#242622", "context": ":root" },
@@ -52759,7 +52813,7 @@
         {
           "name": "--geul-font-size-md",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 80, "property": "font-size" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 85, "property": "font-size" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 85, "value": "1rem", "context": ":root" },
             {
@@ -52773,7 +52827,7 @@
         {
           "name": "--geul-font-size-sm",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 104, "property": "font-size" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 109, "property": "font-size" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 84, "value": "0.875rem", "context": ":root" },
             { "file": "lib/styles/design-tokens.css", "line": 588, "value": "9pt", "context": "@media print → :root" }
@@ -52784,8 +52838,8 @@
           "registered": true,
           "sources": [
             { "file": "components/core/DropdownMenu/DropdownMenu.module.css", "line": 39, "property": "font-size" },
-            { "file": "components/core/Overlay.module.css", "line": 223, "property": "font-size" },
-            { "file": "components/core/Overlay.module.css", "line": 325, "property": "font-size" }
+            { "file": "components/core/Overlay.module.css", "line": 228, "property": "font-size" },
+            { "file": "components/core/Overlay.module.css", "line": 330, "property": "font-size" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 83, "value": "0.75rem", "context": ":root" },
@@ -52798,8 +52852,8 @@
           "sources": [
             { "file": "components/core/DropdownMenu/DropdownMenu.module.css", "line": 56, "property": "font-weight" },
             { "file": "components/core/DropdownMenu/DropdownMenu.module.css", "line": 120, "property": "font-weight" },
-            { "file": "components/core/Overlay.module.css", "line": 81, "property": "font-weight" },
-            { "file": "components/core/Overlay.module.css", "line": 318, "property": "font-weight" }
+            { "file": "components/core/Overlay.module.css", "line": 86, "property": "font-weight" },
+            { "file": "components/core/Overlay.module.css", "line": 323, "property": "font-weight" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 89, "value": "500", "context": ":root" }]
         },
@@ -52808,7 +52862,7 @@
           "registered": true,
           "sources": [
             { "file": "components/core/DropdownMenu/DropdownMenu.module.css", "line": 41, "property": "font-weight" },
-            { "file": "components/core/Overlay.module.css", "line": 326, "property": "font-weight" }
+            { "file": "components/core/Overlay.module.css", "line": 331, "property": "font-weight" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 88, "value": "400", "context": ":root" }]
         },
@@ -52831,7 +52885,7 @@
         {
           "name": "--geul-line-height-md",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 82, "property": "line-height" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 87, "property": "line-height" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 102, "value": "1.55", "context": ":root" },
             { "file": "lib/styles/design-tokens.css", "line": 596, "value": "1.5", "context": "@media print → :root" }
@@ -52840,7 +52894,7 @@
         {
           "name": "--geul-line-height-sm",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 105, "property": "line-height" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 110, "property": "line-height" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 101, "value": "1.45", "context": ":root" }]
         },
         {
@@ -52849,8 +52903,8 @@
           "sources": [
             { "file": "components/core/DropdownMenu/DropdownMenu.module.css", "line": 40, "property": "line-height" },
             { "file": "components/core/DropdownMenu/DropdownMenu.module.css", "line": 119, "property": "line-height" },
-            { "file": "components/core/Overlay.module.css", "line": 224, "property": "line-height" },
-            { "file": "components/core/Overlay.module.css", "line": 327, "property": "line-height" }
+            { "file": "components/core/Overlay.module.css", "line": 229, "property": "line-height" },
+            { "file": "components/core/Overlay.module.css", "line": 332, "property": "line-height" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 100, "value": "1.4", "context": ":root" }]
         },
@@ -52858,8 +52912,8 @@
           "name": "--geul-motion-easing",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 241, "property": "animation" },
-            { "file": "components/core/Overlay.module.css", "line": 247, "property": "animation" }
+            { "file": "components/core/Overlay.module.css", "line": 246, "property": "animation" },
+            { "file": "components/core/Overlay.module.css", "line": 252, "property": "animation" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 137, "value": "ease-out", "context": ":root" }
@@ -52869,8 +52923,8 @@
           "name": "--geul-motion-fast",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 241, "property": "animation" },
-            { "file": "components/core/Overlay.module.css", "line": 247, "property": "animation" }
+            { "file": "components/core/Overlay.module.css", "line": 246, "property": "animation" },
+            { "file": "components/core/Overlay.module.css", "line": 252, "property": "animation" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 133, "value": "100ms", "context": ":root" }]
         },
@@ -52887,9 +52941,9 @@
           "registered": true,
           "sources": [
             { "file": "components/core/DropdownMenu/DropdownMenu.module.css", "line": 36, "property": "border-radius" },
-            { "file": "components/core/Overlay.module.css", "line": 32, "property": "border-radius" },
-            { "file": "components/core/Overlay.module.css", "line": 182, "property": "border-radius" },
-            { "file": "components/core/Overlay.module.css", "line": 331, "property": "border-radius" }
+            { "file": "components/core/Overlay.module.css", "line": 37, "property": "border-radius" },
+            { "file": "components/core/Overlay.module.css", "line": 187, "property": "border-radius" },
+            { "file": "components/core/Overlay.module.css", "line": 336, "property": "border-radius" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 118, "value": "0", "context": ":root" }]
         },
@@ -52897,8 +52951,8 @@
           "name": "--geul-shadow-panel",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 33, "property": "box-shadow" },
-            { "file": "components/core/Overlay.module.css", "line": 183, "property": "box-shadow" }
+            { "file": "components/core/Overlay.module.css", "line": 38, "property": "box-shadow" },
+            { "file": "components/core/Overlay.module.css", "line": 188, "property": "box-shadow" }
           ],
           "definitions": [
             {
@@ -52913,9 +52967,9 @@
           "name": "--geul-spacing-md",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 73, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 88, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 209, "property": "padding" }
+            { "file": "components/core/Overlay.module.css", "line": 78, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 93, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 214, "property": "padding" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 60, "value": "0.75rem", "context": ":root" }
@@ -52925,11 +52979,11 @@
           "name": "--geul-spacing-sm",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 72, "property": "gap" },
-            { "file": "components/core/Overlay.module.css", "line": 271, "property": "--_overlay-inset-top" },
-            { "file": "components/core/Overlay.module.css", "line": 272, "property": "--_overlay-inset-right" },
-            { "file": "components/core/Overlay.module.css", "line": 273, "property": "--_overlay-inset-bottom" },
-            { "file": "components/core/Overlay.module.css", "line": 274, "property": "--_overlay-inset-left" }
+            { "file": "components/core/Overlay.module.css", "line": 77, "property": "gap" },
+            { "file": "components/core/Overlay.module.css", "line": 276, "property": "--_overlay-inset-top" },
+            { "file": "components/core/Overlay.module.css", "line": 277, "property": "--_overlay-inset-right" },
+            { "file": "components/core/Overlay.module.css", "line": 278, "property": "--_overlay-inset-bottom" },
+            { "file": "components/core/Overlay.module.css", "line": 279, "property": "--_overlay-inset-left" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 59, "value": "0.625rem", "context": ":root" }
@@ -52945,8 +52999,8 @@
             { "file": "components/core/Overlay.module.css", "line": 3, "property": "--_overlay-inset-right" },
             { "file": "components/core/Overlay.module.css", "line": 4, "property": "--_overlay-inset-bottom" },
             { "file": "components/core/Overlay.module.css", "line": 5, "property": "--_overlay-inset-left" },
-            { "file": "components/core/Overlay.module.css", "line": 50, "property": "width" },
-            { "file": "components/core/Overlay.module.css", "line": 178, "property": "max-width" }
+            { "file": "components/core/Overlay.module.css", "line": 55, "property": "width" },
+            { "file": "components/core/Overlay.module.css", "line": 183, "property": "max-width" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 62, "value": "1.5rem", "context": ":root" }]
         },
@@ -52954,11 +53008,11 @@
           "name": "--geul-spacing-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 100, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 218, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 222, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 312, "property": "gap" },
-            { "file": "components/core/Overlay.module.css", "line": 322, "property": "padding-inline-start" }
+            { "file": "components/core/Overlay.module.css", "line": 105, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 223, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 227, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 317, "property": "gap" },
+            { "file": "components/core/Overlay.module.css", "line": 327, "property": "padding-inline-start" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 58, "value": "0.5rem", "context": ":root" }]
         },
@@ -52971,7 +53025,7 @@
             { "file": "components/core/DropdownMenu/DropdownMenu.module.css", "line": 34, "property": "gap" },
             { "file": "components/core/DropdownMenu/DropdownMenu.module.css", "line": 116, "property": "padding" },
             { "file": "components/core/DropdownMenu/DropdownMenu.module.css", "line": 124, "property": "margin" },
-            { "file": "components/core/Overlay.module.css", "line": 222, "property": "padding" }
+            { "file": "components/core/Overlay.module.css", "line": 227, "property": "padding" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 57, "value": "0.25rem", "context": ":root" }
@@ -53118,9 +53172,9 @@
           "registered": true,
           "sources": [
             { "file": "components/core/DropdownMenu/DropdownMenu.module.css", "line": 130, "property": "fill" },
-            { "file": "components/core/Overlay.module.css", "line": 30, "property": "background" },
-            { "file": "components/core/Overlay.module.css", "line": 180, "property": "background" },
-            { "file": "components/core/Overlay.module.css", "line": 233, "property": "fill" }
+            { "file": "components/core/Overlay.module.css", "line": 35, "property": "background" },
+            { "file": "components/core/Overlay.module.css", "line": 185, "property": "background" },
+            { "file": "components/core/Overlay.module.css", "line": 238, "property": "fill" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 154, "value": "#faf9f5", "context": ":root" },
@@ -53222,8 +53276,8 @@
           "name": "--geul-text-primary",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 29, "property": "color" },
-            { "file": "components/core/Overlay.module.css", "line": 181, "property": "color" }
+            { "file": "components/core/Overlay.module.css", "line": 34, "property": "color" },
+            { "file": "components/core/Overlay.module.css", "line": 186, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 158, "value": "#242622", "context": ":root" },
@@ -53258,7 +53312,7 @@
           "registered": true,
           "sources": [
             { "file": "components/core/DropdownMenu/DropdownMenu.module.css", "line": 117, "property": "color" },
-            { "file": "components/core/Overlay.module.css", "line": 323, "property": "color" }
+            { "file": "components/core/Overlay.module.css", "line": 328, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 159, "value": "#45443d", "context": ":root" },
@@ -56388,6 +56442,13 @@
         { "name": "onAction", "type": "() => void", "required": true },
         { "name": "opened", "type": "boolean", "required": true },
         { "name": "title", "type": "string", "required": true },
+        {
+          "name": "backdrop",
+          "type": "'dim' | 'obscure'",
+          "required": false,
+          "description": "`obscure` hides the page behind the dialog completely (access to it ended).",
+          "defaultValue": "'dim'"
+        },
         { "name": "level", "type": "'info' | 'warning' | 'danger'", "required": false, "defaultValue": "'info'" },
         { "name": "loading", "type": "boolean", "required": false, "defaultValue": "false" },
         { "name": "size", "type": "'compact' | 'standard'", "required": false, "defaultValue": "'standard'" },
@@ -56600,14 +56661,46 @@
       ],
       "tokenReferences": [
         {
+          "name": "--geul-background",
+          "registered": true,
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 23, "property": "background" }],
+          "definitions": [
+            { "file": "lib/styles/design-tokens.css", "line": 150, "value": "#f2f1eb", "context": ":root" },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 240,
+              "value": "#161918",
+              "context": "@media (prefers-color-scheme: dark) → html:not([data-geul-theme='light'])"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 324,
+              "value": "#f2f1eb",
+              "context": "[data-geul-theme='light']"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 407,
+              "value": "#161918",
+              "context": "[data-geul-theme='dark']"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 492,
+              "value": "#f2f1eb",
+              "context": "@media print → :root,\n  [data-geul-theme]"
+            }
+          ]
+        },
+        {
           "name": "--geul-border-default",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 31, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 74, "property": "border-bottom" },
-            { "file": "components/core/Overlay.module.css", "line": 179, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 234, "property": "stroke" },
-            { "file": "components/core/Overlay.module.css", "line": 330, "property": "border-inline-start" }
+            { "file": "components/core/Overlay.module.css", "line": 36, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 79, "property": "border-bottom" },
+            { "file": "components/core/Overlay.module.css", "line": 184, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 239, "property": "stroke" },
+            { "file": "components/core/Overlay.module.css", "line": 335, "property": "border-inline-start" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 161, "value": "#bbb7aa", "context": ":root" },
@@ -56641,8 +56734,8 @@
           "name": "--geul-border-focus",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 93, "property": "outline" },
-            { "file": "components/core/Overlay.module.css", "line": 94, "property": "outline-offset" }
+            { "file": "components/core/Overlay.module.css", "line": 98, "property": "outline" },
+            { "file": "components/core/Overlay.module.css", "line": 99, "property": "outline-offset" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 121, "value": "2px", "context": ":root" }]
         },
@@ -56650,18 +56743,18 @@
           "name": "--geul-border-thin",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 31, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 74, "property": "border-bottom" },
-            { "file": "components/core/Overlay.module.css", "line": 179, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 235, "property": "stroke-width" },
-            { "file": "components/core/Overlay.module.css", "line": 330, "property": "border-inline-start" }
+            { "file": "components/core/Overlay.module.css", "line": 36, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 79, "property": "border-bottom" },
+            { "file": "components/core/Overlay.module.css", "line": 184, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 240, "property": "stroke-width" },
+            { "file": "components/core/Overlay.module.css", "line": 335, "property": "border-inline-start" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 120, "value": "1px", "context": ":root" }]
         },
         {
           "name": "--geul-focus",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 93, "property": "outline" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 98, "property": "outline" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 182, "value": "#242622", "context": ":root" },
             {
@@ -56693,7 +56786,7 @@
         {
           "name": "--geul-font-size-md",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 80, "property": "font-size" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 85, "property": "font-size" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 85, "value": "1rem", "context": ":root" },
             {
@@ -56707,7 +56800,7 @@
         {
           "name": "--geul-font-size-sm",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 104, "property": "font-size" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 109, "property": "font-size" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 84, "value": "0.875rem", "context": ":root" },
             { "file": "lib/styles/design-tokens.css", "line": 588, "value": "9pt", "context": "@media print → :root" }
@@ -56717,8 +56810,8 @@
           "name": "--geul-font-size-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 223, "property": "font-size" },
-            { "file": "components/core/Overlay.module.css", "line": 325, "property": "font-size" }
+            { "file": "components/core/Overlay.module.css", "line": 228, "property": "font-size" },
+            { "file": "components/core/Overlay.module.css", "line": 330, "property": "font-size" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 83, "value": "0.75rem", "context": ":root" },
@@ -56729,21 +56822,21 @@
           "name": "--geul-font-weight-medium",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 81, "property": "font-weight" },
-            { "file": "components/core/Overlay.module.css", "line": 318, "property": "font-weight" }
+            { "file": "components/core/Overlay.module.css", "line": 86, "property": "font-weight" },
+            { "file": "components/core/Overlay.module.css", "line": 323, "property": "font-weight" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 89, "value": "500", "context": ":root" }]
         },
         {
           "name": "--geul-font-weight-regular",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 326, "property": "font-weight" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 331, "property": "font-weight" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 88, "value": "400", "context": ":root" }]
         },
         {
           "name": "--geul-line-height-md",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 82, "property": "line-height" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 87, "property": "line-height" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 102, "value": "1.55", "context": ":root" },
             { "file": "lib/styles/design-tokens.css", "line": 596, "value": "1.5", "context": "@media print → :root" }
@@ -56752,15 +56845,15 @@
         {
           "name": "--geul-line-height-sm",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 105, "property": "line-height" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 110, "property": "line-height" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 101, "value": "1.45", "context": ":root" }]
         },
         {
           "name": "--geul-line-height-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 224, "property": "line-height" },
-            { "file": "components/core/Overlay.module.css", "line": 327, "property": "line-height" }
+            { "file": "components/core/Overlay.module.css", "line": 229, "property": "line-height" },
+            { "file": "components/core/Overlay.module.css", "line": 332, "property": "line-height" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 100, "value": "1.4", "context": ":root" }]
         },
@@ -56768,8 +56861,8 @@
           "name": "--geul-motion-easing",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 241, "property": "animation" },
-            { "file": "components/core/Overlay.module.css", "line": 247, "property": "animation" }
+            { "file": "components/core/Overlay.module.css", "line": 246, "property": "animation" },
+            { "file": "components/core/Overlay.module.css", "line": 252, "property": "animation" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 137, "value": "ease-out", "context": ":root" }
@@ -56779,8 +56872,8 @@
           "name": "--geul-motion-fast",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 241, "property": "animation" },
-            { "file": "components/core/Overlay.module.css", "line": 247, "property": "animation" }
+            { "file": "components/core/Overlay.module.css", "line": 246, "property": "animation" },
+            { "file": "components/core/Overlay.module.css", "line": 252, "property": "animation" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 133, "value": "100ms", "context": ":root" }]
         },
@@ -56796,9 +56889,9 @@
           "name": "--geul-radius-square",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 32, "property": "border-radius" },
-            { "file": "components/core/Overlay.module.css", "line": 182, "property": "border-radius" },
-            { "file": "components/core/Overlay.module.css", "line": 331, "property": "border-radius" }
+            { "file": "components/core/Overlay.module.css", "line": 37, "property": "border-radius" },
+            { "file": "components/core/Overlay.module.css", "line": 187, "property": "border-radius" },
+            { "file": "components/core/Overlay.module.css", "line": 336, "property": "border-radius" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 118, "value": "0", "context": ":root" }]
         },
@@ -56806,8 +56899,8 @@
           "name": "--geul-shadow-panel",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 33, "property": "box-shadow" },
-            { "file": "components/core/Overlay.module.css", "line": 183, "property": "box-shadow" }
+            { "file": "components/core/Overlay.module.css", "line": 38, "property": "box-shadow" },
+            { "file": "components/core/Overlay.module.css", "line": 188, "property": "box-shadow" }
           ],
           "definitions": [
             {
@@ -56822,9 +56915,9 @@
           "name": "--geul-spacing-md",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 73, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 88, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 209, "property": "padding" }
+            { "file": "components/core/Overlay.module.css", "line": 78, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 93, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 214, "property": "padding" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 60, "value": "0.75rem", "context": ":root" }
@@ -56834,11 +56927,11 @@
           "name": "--geul-spacing-sm",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 72, "property": "gap" },
-            { "file": "components/core/Overlay.module.css", "line": 271, "property": "--_overlay-inset-top" },
-            { "file": "components/core/Overlay.module.css", "line": 272, "property": "--_overlay-inset-right" },
-            { "file": "components/core/Overlay.module.css", "line": 273, "property": "--_overlay-inset-bottom" },
-            { "file": "components/core/Overlay.module.css", "line": 274, "property": "--_overlay-inset-left" }
+            { "file": "components/core/Overlay.module.css", "line": 77, "property": "gap" },
+            { "file": "components/core/Overlay.module.css", "line": 276, "property": "--_overlay-inset-top" },
+            { "file": "components/core/Overlay.module.css", "line": 277, "property": "--_overlay-inset-right" },
+            { "file": "components/core/Overlay.module.css", "line": 278, "property": "--_overlay-inset-bottom" },
+            { "file": "components/core/Overlay.module.css", "line": 279, "property": "--_overlay-inset-left" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 59, "value": "0.625rem", "context": ":root" }
@@ -56852,8 +56945,8 @@
             { "file": "components/core/Overlay.module.css", "line": 3, "property": "--_overlay-inset-right" },
             { "file": "components/core/Overlay.module.css", "line": 4, "property": "--_overlay-inset-bottom" },
             { "file": "components/core/Overlay.module.css", "line": 5, "property": "--_overlay-inset-left" },
-            { "file": "components/core/Overlay.module.css", "line": 50, "property": "width" },
-            { "file": "components/core/Overlay.module.css", "line": 178, "property": "max-width" }
+            { "file": "components/core/Overlay.module.css", "line": 55, "property": "width" },
+            { "file": "components/core/Overlay.module.css", "line": 183, "property": "max-width" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 62, "value": "1.5rem", "context": ":root" }]
         },
@@ -56861,18 +56954,18 @@
           "name": "--geul-spacing-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 100, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 218, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 222, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 312, "property": "gap" },
-            { "file": "components/core/Overlay.module.css", "line": 322, "property": "padding-inline-start" }
+            { "file": "components/core/Overlay.module.css", "line": 105, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 223, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 227, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 317, "property": "gap" },
+            { "file": "components/core/Overlay.module.css", "line": 327, "property": "padding-inline-start" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 58, "value": "0.5rem", "context": ":root" }]
         },
         {
           "name": "--geul-spacing-xxs",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 222, "property": "padding" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 227, "property": "padding" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 57, "value": "0.25rem", "context": ":root" }
           ]
@@ -56881,9 +56974,9 @@
           "name": "--geul-surface",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 30, "property": "background" },
-            { "file": "components/core/Overlay.module.css", "line": 180, "property": "background" },
-            { "file": "components/core/Overlay.module.css", "line": 233, "property": "fill" }
+            { "file": "components/core/Overlay.module.css", "line": 35, "property": "background" },
+            { "file": "components/core/Overlay.module.css", "line": 185, "property": "background" },
+            { "file": "components/core/Overlay.module.css", "line": 238, "property": "fill" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 154, "value": "#faf9f5", "context": ":root" },
@@ -56917,8 +57010,8 @@
           "name": "--geul-text-primary",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 29, "property": "color" },
-            { "file": "components/core/Overlay.module.css", "line": 181, "property": "color" }
+            { "file": "components/core/Overlay.module.css", "line": 34, "property": "color" },
+            { "file": "components/core/Overlay.module.css", "line": 186, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 158, "value": "#242622", "context": ":root" },
@@ -56951,7 +57044,7 @@
         {
           "name": "--geul-text-secondary",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 323, "property": "color" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 328, "property": "color" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 159, "value": "#45443d", "context": ":root" },
             {
@@ -57095,6 +57188,7 @@
         "Consumer: features/admin/program-event/ProgramEventTypeManager.tsx",
         "Consumer: features/admin/user/AdminUserEditPage.tsx",
         "Consumer: features/artist/ArtistEditor/ArtistParticipantsDialog.tsx",
+        "Consumer: features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "Consumer: features/campaign/CampaignDeliveryDialogs.tsx",
         "Consumer: features/editor/ExternalVideoInsertDialog.tsx",
         "Consumer: features/editor/MapInsertModal.tsx",
@@ -57237,6 +57331,7 @@
         "Consumer: features/admin/mail-adapter/MailAdaptersPage.tsx",
         "Consumer: features/admin/program-event/ProgramEventTypeManager.tsx",
         "Consumer: features/admin/user/AdminUserEditPage.tsx",
+        "Consumer: features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "Consumer: features/campaign/CampaignDeliveryDialogs.tsx",
         "Consumer: features/editor/ExternalVideoInsertDialog.tsx",
         "Consumer: features/editor/components/EditorFileInsertView.tsx",
@@ -57275,14 +57370,46 @@
       ],
       "tokenReferences": [
         {
+          "name": "--geul-background",
+          "registered": true,
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 23, "property": "background" }],
+          "definitions": [
+            { "file": "lib/styles/design-tokens.css", "line": 150, "value": "#f2f1eb", "context": ":root" },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 240,
+              "value": "#161918",
+              "context": "@media (prefers-color-scheme: dark) → html:not([data-geul-theme='light'])"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 324,
+              "value": "#f2f1eb",
+              "context": "[data-geul-theme='light']"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 407,
+              "value": "#161918",
+              "context": "[data-geul-theme='dark']"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 492,
+              "value": "#f2f1eb",
+              "context": "@media print → :root,\n  [data-geul-theme]"
+            }
+          ]
+        },
+        {
           "name": "--geul-border-default",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 31, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 74, "property": "border-bottom" },
-            { "file": "components/core/Overlay.module.css", "line": 179, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 234, "property": "stroke" },
-            { "file": "components/core/Overlay.module.css", "line": 330, "property": "border-inline-start" }
+            { "file": "components/core/Overlay.module.css", "line": 36, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 79, "property": "border-bottom" },
+            { "file": "components/core/Overlay.module.css", "line": 184, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 239, "property": "stroke" },
+            { "file": "components/core/Overlay.module.css", "line": 335, "property": "border-inline-start" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 161, "value": "#bbb7aa", "context": ":root" },
@@ -57316,8 +57443,8 @@
           "name": "--geul-border-focus",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 93, "property": "outline" },
-            { "file": "components/core/Overlay.module.css", "line": 94, "property": "outline-offset" }
+            { "file": "components/core/Overlay.module.css", "line": 98, "property": "outline" },
+            { "file": "components/core/Overlay.module.css", "line": 99, "property": "outline-offset" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 121, "value": "2px", "context": ":root" }]
         },
@@ -57325,18 +57452,18 @@
           "name": "--geul-border-thin",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 31, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 74, "property": "border-bottom" },
-            { "file": "components/core/Overlay.module.css", "line": 179, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 235, "property": "stroke-width" },
-            { "file": "components/core/Overlay.module.css", "line": 330, "property": "border-inline-start" }
+            { "file": "components/core/Overlay.module.css", "line": 36, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 79, "property": "border-bottom" },
+            { "file": "components/core/Overlay.module.css", "line": 184, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 240, "property": "stroke-width" },
+            { "file": "components/core/Overlay.module.css", "line": 335, "property": "border-inline-start" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 120, "value": "1px", "context": ":root" }]
         },
         {
           "name": "--geul-focus",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 93, "property": "outline" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 98, "property": "outline" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 182, "value": "#242622", "context": ":root" },
             {
@@ -57368,7 +57495,7 @@
         {
           "name": "--geul-font-size-md",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 80, "property": "font-size" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 85, "property": "font-size" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 85, "value": "1rem", "context": ":root" },
             {
@@ -57382,7 +57509,7 @@
         {
           "name": "--geul-font-size-sm",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 104, "property": "font-size" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 109, "property": "font-size" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 84, "value": "0.875rem", "context": ":root" },
             { "file": "lib/styles/design-tokens.css", "line": 588, "value": "9pt", "context": "@media print → :root" }
@@ -57392,8 +57519,8 @@
           "name": "--geul-font-size-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 223, "property": "font-size" },
-            { "file": "components/core/Overlay.module.css", "line": 325, "property": "font-size" }
+            { "file": "components/core/Overlay.module.css", "line": 228, "property": "font-size" },
+            { "file": "components/core/Overlay.module.css", "line": 330, "property": "font-size" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 83, "value": "0.75rem", "context": ":root" },
@@ -57404,21 +57531,21 @@
           "name": "--geul-font-weight-medium",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 81, "property": "font-weight" },
-            { "file": "components/core/Overlay.module.css", "line": 318, "property": "font-weight" }
+            { "file": "components/core/Overlay.module.css", "line": 86, "property": "font-weight" },
+            { "file": "components/core/Overlay.module.css", "line": 323, "property": "font-weight" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 89, "value": "500", "context": ":root" }]
         },
         {
           "name": "--geul-font-weight-regular",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 326, "property": "font-weight" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 331, "property": "font-weight" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 88, "value": "400", "context": ":root" }]
         },
         {
           "name": "--geul-line-height-md",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 82, "property": "line-height" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 87, "property": "line-height" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 102, "value": "1.55", "context": ":root" },
             { "file": "lib/styles/design-tokens.css", "line": 596, "value": "1.5", "context": "@media print → :root" }
@@ -57427,15 +57554,15 @@
         {
           "name": "--geul-line-height-sm",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 105, "property": "line-height" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 110, "property": "line-height" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 101, "value": "1.45", "context": ":root" }]
         },
         {
           "name": "--geul-line-height-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 224, "property": "line-height" },
-            { "file": "components/core/Overlay.module.css", "line": 327, "property": "line-height" }
+            { "file": "components/core/Overlay.module.css", "line": 229, "property": "line-height" },
+            { "file": "components/core/Overlay.module.css", "line": 332, "property": "line-height" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 100, "value": "1.4", "context": ":root" }]
         },
@@ -57443,8 +57570,8 @@
           "name": "--geul-motion-easing",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 241, "property": "animation" },
-            { "file": "components/core/Overlay.module.css", "line": 247, "property": "animation" }
+            { "file": "components/core/Overlay.module.css", "line": 246, "property": "animation" },
+            { "file": "components/core/Overlay.module.css", "line": 252, "property": "animation" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 137, "value": "ease-out", "context": ":root" }
@@ -57454,8 +57581,8 @@
           "name": "--geul-motion-fast",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 241, "property": "animation" },
-            { "file": "components/core/Overlay.module.css", "line": 247, "property": "animation" }
+            { "file": "components/core/Overlay.module.css", "line": 246, "property": "animation" },
+            { "file": "components/core/Overlay.module.css", "line": 252, "property": "animation" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 133, "value": "100ms", "context": ":root" }]
         },
@@ -57471,9 +57598,9 @@
           "name": "--geul-radius-square",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 32, "property": "border-radius" },
-            { "file": "components/core/Overlay.module.css", "line": 182, "property": "border-radius" },
-            { "file": "components/core/Overlay.module.css", "line": 331, "property": "border-radius" }
+            { "file": "components/core/Overlay.module.css", "line": 37, "property": "border-radius" },
+            { "file": "components/core/Overlay.module.css", "line": 187, "property": "border-radius" },
+            { "file": "components/core/Overlay.module.css", "line": 336, "property": "border-radius" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 118, "value": "0", "context": ":root" }]
         },
@@ -57481,8 +57608,8 @@
           "name": "--geul-shadow-panel",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 33, "property": "box-shadow" },
-            { "file": "components/core/Overlay.module.css", "line": 183, "property": "box-shadow" }
+            { "file": "components/core/Overlay.module.css", "line": 38, "property": "box-shadow" },
+            { "file": "components/core/Overlay.module.css", "line": 188, "property": "box-shadow" }
           ],
           "definitions": [
             {
@@ -57497,9 +57624,9 @@
           "name": "--geul-spacing-md",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 73, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 88, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 209, "property": "padding" }
+            { "file": "components/core/Overlay.module.css", "line": 78, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 93, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 214, "property": "padding" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 60, "value": "0.75rem", "context": ":root" }
@@ -57509,11 +57636,11 @@
           "name": "--geul-spacing-sm",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 72, "property": "gap" },
-            { "file": "components/core/Overlay.module.css", "line": 271, "property": "--_overlay-inset-top" },
-            { "file": "components/core/Overlay.module.css", "line": 272, "property": "--_overlay-inset-right" },
-            { "file": "components/core/Overlay.module.css", "line": 273, "property": "--_overlay-inset-bottom" },
-            { "file": "components/core/Overlay.module.css", "line": 274, "property": "--_overlay-inset-left" }
+            { "file": "components/core/Overlay.module.css", "line": 77, "property": "gap" },
+            { "file": "components/core/Overlay.module.css", "line": 276, "property": "--_overlay-inset-top" },
+            { "file": "components/core/Overlay.module.css", "line": 277, "property": "--_overlay-inset-right" },
+            { "file": "components/core/Overlay.module.css", "line": 278, "property": "--_overlay-inset-bottom" },
+            { "file": "components/core/Overlay.module.css", "line": 279, "property": "--_overlay-inset-left" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 59, "value": "0.625rem", "context": ":root" }
@@ -57527,8 +57654,8 @@
             { "file": "components/core/Overlay.module.css", "line": 3, "property": "--_overlay-inset-right" },
             { "file": "components/core/Overlay.module.css", "line": 4, "property": "--_overlay-inset-bottom" },
             { "file": "components/core/Overlay.module.css", "line": 5, "property": "--_overlay-inset-left" },
-            { "file": "components/core/Overlay.module.css", "line": 50, "property": "width" },
-            { "file": "components/core/Overlay.module.css", "line": 178, "property": "max-width" }
+            { "file": "components/core/Overlay.module.css", "line": 55, "property": "width" },
+            { "file": "components/core/Overlay.module.css", "line": 183, "property": "max-width" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 62, "value": "1.5rem", "context": ":root" }]
         },
@@ -57536,18 +57663,18 @@
           "name": "--geul-spacing-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 100, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 218, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 222, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 312, "property": "gap" },
-            { "file": "components/core/Overlay.module.css", "line": 322, "property": "padding-inline-start" }
+            { "file": "components/core/Overlay.module.css", "line": 105, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 223, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 227, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 317, "property": "gap" },
+            { "file": "components/core/Overlay.module.css", "line": 327, "property": "padding-inline-start" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 58, "value": "0.5rem", "context": ":root" }]
         },
         {
           "name": "--geul-spacing-xxs",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 222, "property": "padding" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 227, "property": "padding" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 57, "value": "0.25rem", "context": ":root" }
           ]
@@ -57556,9 +57683,9 @@
           "name": "--geul-surface",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 30, "property": "background" },
-            { "file": "components/core/Overlay.module.css", "line": 180, "property": "background" },
-            { "file": "components/core/Overlay.module.css", "line": 233, "property": "fill" }
+            { "file": "components/core/Overlay.module.css", "line": 35, "property": "background" },
+            { "file": "components/core/Overlay.module.css", "line": 185, "property": "background" },
+            { "file": "components/core/Overlay.module.css", "line": 238, "property": "fill" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 154, "value": "#faf9f5", "context": ":root" },
@@ -57592,8 +57719,8 @@
           "name": "--geul-text-primary",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 29, "property": "color" },
-            { "file": "components/core/Overlay.module.css", "line": 181, "property": "color" }
+            { "file": "components/core/Overlay.module.css", "line": 34, "property": "color" },
+            { "file": "components/core/Overlay.module.css", "line": 186, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 158, "value": "#242622", "context": ":root" },
@@ -57626,7 +57753,7 @@
         {
           "name": "--geul-text-secondary",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 323, "property": "color" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 328, "property": "color" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 159, "value": "#45443d", "context": ":root" },
             {
@@ -58167,14 +58294,46 @@
       ],
       "tokenReferences": [
         {
+          "name": "--geul-background",
+          "registered": true,
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 23, "property": "background" }],
+          "definitions": [
+            { "file": "lib/styles/design-tokens.css", "line": 150, "value": "#f2f1eb", "context": ":root" },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 240,
+              "value": "#161918",
+              "context": "@media (prefers-color-scheme: dark) → html:not([data-geul-theme='light'])"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 324,
+              "value": "#f2f1eb",
+              "context": "[data-geul-theme='light']"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 407,
+              "value": "#161918",
+              "context": "[data-geul-theme='dark']"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 492,
+              "value": "#f2f1eb",
+              "context": "@media print → :root,\n  [data-geul-theme]"
+            }
+          ]
+        },
+        {
           "name": "--geul-border-default",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 31, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 74, "property": "border-bottom" },
-            { "file": "components/core/Overlay.module.css", "line": 179, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 234, "property": "stroke" },
-            { "file": "components/core/Overlay.module.css", "line": 330, "property": "border-inline-start" }
+            { "file": "components/core/Overlay.module.css", "line": 36, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 79, "property": "border-bottom" },
+            { "file": "components/core/Overlay.module.css", "line": 184, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 239, "property": "stroke" },
+            { "file": "components/core/Overlay.module.css", "line": 335, "property": "border-inline-start" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 161, "value": "#bbb7aa", "context": ":root" },
@@ -58208,8 +58367,8 @@
           "name": "--geul-border-focus",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 93, "property": "outline" },
-            { "file": "components/core/Overlay.module.css", "line": 94, "property": "outline-offset" }
+            { "file": "components/core/Overlay.module.css", "line": 98, "property": "outline" },
+            { "file": "components/core/Overlay.module.css", "line": 99, "property": "outline-offset" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 121, "value": "2px", "context": ":root" }]
         },
@@ -58217,18 +58376,18 @@
           "name": "--geul-border-thin",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 31, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 74, "property": "border-bottom" },
-            { "file": "components/core/Overlay.module.css", "line": 179, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 235, "property": "stroke-width" },
-            { "file": "components/core/Overlay.module.css", "line": 330, "property": "border-inline-start" }
+            { "file": "components/core/Overlay.module.css", "line": 36, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 79, "property": "border-bottom" },
+            { "file": "components/core/Overlay.module.css", "line": 184, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 240, "property": "stroke-width" },
+            { "file": "components/core/Overlay.module.css", "line": 335, "property": "border-inline-start" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 120, "value": "1px", "context": ":root" }]
         },
         {
           "name": "--geul-focus",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 93, "property": "outline" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 98, "property": "outline" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 182, "value": "#242622", "context": ":root" },
             {
@@ -58260,7 +58419,7 @@
         {
           "name": "--geul-font-size-md",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 80, "property": "font-size" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 85, "property": "font-size" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 85, "value": "1rem", "context": ":root" },
             {
@@ -58274,7 +58433,7 @@
         {
           "name": "--geul-font-size-sm",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 104, "property": "font-size" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 109, "property": "font-size" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 84, "value": "0.875rem", "context": ":root" },
             { "file": "lib/styles/design-tokens.css", "line": 588, "value": "9pt", "context": "@media print → :root" }
@@ -58284,8 +58443,8 @@
           "name": "--geul-font-size-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 223, "property": "font-size" },
-            { "file": "components/core/Overlay.module.css", "line": 325, "property": "font-size" }
+            { "file": "components/core/Overlay.module.css", "line": 228, "property": "font-size" },
+            { "file": "components/core/Overlay.module.css", "line": 330, "property": "font-size" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 83, "value": "0.75rem", "context": ":root" },
@@ -58296,21 +58455,21 @@
           "name": "--geul-font-weight-medium",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 81, "property": "font-weight" },
-            { "file": "components/core/Overlay.module.css", "line": 318, "property": "font-weight" }
+            { "file": "components/core/Overlay.module.css", "line": 86, "property": "font-weight" },
+            { "file": "components/core/Overlay.module.css", "line": 323, "property": "font-weight" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 89, "value": "500", "context": ":root" }]
         },
         {
           "name": "--geul-font-weight-regular",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 326, "property": "font-weight" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 331, "property": "font-weight" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 88, "value": "400", "context": ":root" }]
         },
         {
           "name": "--geul-line-height-md",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 82, "property": "line-height" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 87, "property": "line-height" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 102, "value": "1.55", "context": ":root" },
             { "file": "lib/styles/design-tokens.css", "line": 596, "value": "1.5", "context": "@media print → :root" }
@@ -58319,15 +58478,15 @@
         {
           "name": "--geul-line-height-sm",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 105, "property": "line-height" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 110, "property": "line-height" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 101, "value": "1.45", "context": ":root" }]
         },
         {
           "name": "--geul-line-height-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 224, "property": "line-height" },
-            { "file": "components/core/Overlay.module.css", "line": 327, "property": "line-height" }
+            { "file": "components/core/Overlay.module.css", "line": 229, "property": "line-height" },
+            { "file": "components/core/Overlay.module.css", "line": 332, "property": "line-height" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 100, "value": "1.4", "context": ":root" }]
         },
@@ -58335,8 +58494,8 @@
           "name": "--geul-motion-easing",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 241, "property": "animation" },
-            { "file": "components/core/Overlay.module.css", "line": 247, "property": "animation" }
+            { "file": "components/core/Overlay.module.css", "line": 246, "property": "animation" },
+            { "file": "components/core/Overlay.module.css", "line": 252, "property": "animation" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 137, "value": "ease-out", "context": ":root" }
@@ -58346,8 +58505,8 @@
           "name": "--geul-motion-fast",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 241, "property": "animation" },
-            { "file": "components/core/Overlay.module.css", "line": 247, "property": "animation" }
+            { "file": "components/core/Overlay.module.css", "line": 246, "property": "animation" },
+            { "file": "components/core/Overlay.module.css", "line": 252, "property": "animation" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 133, "value": "100ms", "context": ":root" }]
         },
@@ -58363,9 +58522,9 @@
           "name": "--geul-radius-square",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 32, "property": "border-radius" },
-            { "file": "components/core/Overlay.module.css", "line": 182, "property": "border-radius" },
-            { "file": "components/core/Overlay.module.css", "line": 331, "property": "border-radius" }
+            { "file": "components/core/Overlay.module.css", "line": 37, "property": "border-radius" },
+            { "file": "components/core/Overlay.module.css", "line": 187, "property": "border-radius" },
+            { "file": "components/core/Overlay.module.css", "line": 336, "property": "border-radius" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 118, "value": "0", "context": ":root" }]
         },
@@ -58373,8 +58532,8 @@
           "name": "--geul-shadow-panel",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 33, "property": "box-shadow" },
-            { "file": "components/core/Overlay.module.css", "line": 183, "property": "box-shadow" }
+            { "file": "components/core/Overlay.module.css", "line": 38, "property": "box-shadow" },
+            { "file": "components/core/Overlay.module.css", "line": 188, "property": "box-shadow" }
           ],
           "definitions": [
             {
@@ -58389,9 +58548,9 @@
           "name": "--geul-spacing-md",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 73, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 88, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 209, "property": "padding" }
+            { "file": "components/core/Overlay.module.css", "line": 78, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 93, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 214, "property": "padding" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 60, "value": "0.75rem", "context": ":root" }
@@ -58401,11 +58560,11 @@
           "name": "--geul-spacing-sm",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 72, "property": "gap" },
-            { "file": "components/core/Overlay.module.css", "line": 271, "property": "--_overlay-inset-top" },
-            { "file": "components/core/Overlay.module.css", "line": 272, "property": "--_overlay-inset-right" },
-            { "file": "components/core/Overlay.module.css", "line": 273, "property": "--_overlay-inset-bottom" },
-            { "file": "components/core/Overlay.module.css", "line": 274, "property": "--_overlay-inset-left" }
+            { "file": "components/core/Overlay.module.css", "line": 77, "property": "gap" },
+            { "file": "components/core/Overlay.module.css", "line": 276, "property": "--_overlay-inset-top" },
+            { "file": "components/core/Overlay.module.css", "line": 277, "property": "--_overlay-inset-right" },
+            { "file": "components/core/Overlay.module.css", "line": 278, "property": "--_overlay-inset-bottom" },
+            { "file": "components/core/Overlay.module.css", "line": 279, "property": "--_overlay-inset-left" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 59, "value": "0.625rem", "context": ":root" }
@@ -58419,8 +58578,8 @@
             { "file": "components/core/Overlay.module.css", "line": 3, "property": "--_overlay-inset-right" },
             { "file": "components/core/Overlay.module.css", "line": 4, "property": "--_overlay-inset-bottom" },
             { "file": "components/core/Overlay.module.css", "line": 5, "property": "--_overlay-inset-left" },
-            { "file": "components/core/Overlay.module.css", "line": 50, "property": "width" },
-            { "file": "components/core/Overlay.module.css", "line": 178, "property": "max-width" }
+            { "file": "components/core/Overlay.module.css", "line": 55, "property": "width" },
+            { "file": "components/core/Overlay.module.css", "line": 183, "property": "max-width" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 62, "value": "1.5rem", "context": ":root" }]
         },
@@ -58428,18 +58587,18 @@
           "name": "--geul-spacing-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 100, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 218, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 222, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 312, "property": "gap" },
-            { "file": "components/core/Overlay.module.css", "line": 322, "property": "padding-inline-start" }
+            { "file": "components/core/Overlay.module.css", "line": 105, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 223, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 227, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 317, "property": "gap" },
+            { "file": "components/core/Overlay.module.css", "line": 327, "property": "padding-inline-start" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 58, "value": "0.5rem", "context": ":root" }]
         },
         {
           "name": "--geul-spacing-xxs",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 222, "property": "padding" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 227, "property": "padding" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 57, "value": "0.25rem", "context": ":root" }
           ]
@@ -58448,9 +58607,9 @@
           "name": "--geul-surface",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 30, "property": "background" },
-            { "file": "components/core/Overlay.module.css", "line": 180, "property": "background" },
-            { "file": "components/core/Overlay.module.css", "line": 233, "property": "fill" }
+            { "file": "components/core/Overlay.module.css", "line": 35, "property": "background" },
+            { "file": "components/core/Overlay.module.css", "line": 185, "property": "background" },
+            { "file": "components/core/Overlay.module.css", "line": 238, "property": "fill" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 154, "value": "#faf9f5", "context": ":root" },
@@ -58484,8 +58643,8 @@
           "name": "--geul-text-primary",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 29, "property": "color" },
-            { "file": "components/core/Overlay.module.css", "line": 181, "property": "color" }
+            { "file": "components/core/Overlay.module.css", "line": 34, "property": "color" },
+            { "file": "components/core/Overlay.module.css", "line": 186, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 158, "value": "#242622", "context": ":root" },
@@ -58518,7 +58677,7 @@
         {
           "name": "--geul-text-secondary",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 323, "property": "color" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 328, "property": "color" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 159, "value": "#45443d", "context": ":root" },
             {
@@ -58791,14 +58950,46 @@
       ],
       "tokenReferences": [
         {
+          "name": "--geul-background",
+          "registered": true,
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 23, "property": "background" }],
+          "definitions": [
+            { "file": "lib/styles/design-tokens.css", "line": 150, "value": "#f2f1eb", "context": ":root" },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 240,
+              "value": "#161918",
+              "context": "@media (prefers-color-scheme: dark) → html:not([data-geul-theme='light'])"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 324,
+              "value": "#f2f1eb",
+              "context": "[data-geul-theme='light']"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 407,
+              "value": "#161918",
+              "context": "[data-geul-theme='dark']"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 492,
+              "value": "#f2f1eb",
+              "context": "@media print → :root,\n  [data-geul-theme]"
+            }
+          ]
+        },
+        {
           "name": "--geul-border-default",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 31, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 74, "property": "border-bottom" },
-            { "file": "components/core/Overlay.module.css", "line": 179, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 234, "property": "stroke" },
-            { "file": "components/core/Overlay.module.css", "line": 330, "property": "border-inline-start" }
+            { "file": "components/core/Overlay.module.css", "line": 36, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 79, "property": "border-bottom" },
+            { "file": "components/core/Overlay.module.css", "line": 184, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 239, "property": "stroke" },
+            { "file": "components/core/Overlay.module.css", "line": 335, "property": "border-inline-start" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 161, "value": "#bbb7aa", "context": ":root" },
@@ -58832,8 +59023,8 @@
           "name": "--geul-border-focus",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 93, "property": "outline" },
-            { "file": "components/core/Overlay.module.css", "line": 94, "property": "outline-offset" }
+            { "file": "components/core/Overlay.module.css", "line": 98, "property": "outline" },
+            { "file": "components/core/Overlay.module.css", "line": 99, "property": "outline-offset" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 121, "value": "2px", "context": ":root" }]
         },
@@ -58841,18 +59032,18 @@
           "name": "--geul-border-thin",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 31, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 74, "property": "border-bottom" },
-            { "file": "components/core/Overlay.module.css", "line": 179, "property": "border" },
-            { "file": "components/core/Overlay.module.css", "line": 235, "property": "stroke-width" },
-            { "file": "components/core/Overlay.module.css", "line": 330, "property": "border-inline-start" }
+            { "file": "components/core/Overlay.module.css", "line": 36, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 79, "property": "border-bottom" },
+            { "file": "components/core/Overlay.module.css", "line": 184, "property": "border" },
+            { "file": "components/core/Overlay.module.css", "line": 240, "property": "stroke-width" },
+            { "file": "components/core/Overlay.module.css", "line": 335, "property": "border-inline-start" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 120, "value": "1px", "context": ":root" }]
         },
         {
           "name": "--geul-focus",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 93, "property": "outline" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 98, "property": "outline" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 182, "value": "#242622", "context": ":root" },
             {
@@ -58884,7 +59075,7 @@
         {
           "name": "--geul-font-size-md",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 80, "property": "font-size" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 85, "property": "font-size" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 85, "value": "1rem", "context": ":root" },
             {
@@ -58898,7 +59089,7 @@
         {
           "name": "--geul-font-size-sm",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 104, "property": "font-size" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 109, "property": "font-size" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 84, "value": "0.875rem", "context": ":root" },
             { "file": "lib/styles/design-tokens.css", "line": 588, "value": "9pt", "context": "@media print → :root" }
@@ -58908,8 +59099,8 @@
           "name": "--geul-font-size-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 223, "property": "font-size" },
-            { "file": "components/core/Overlay.module.css", "line": 325, "property": "font-size" }
+            { "file": "components/core/Overlay.module.css", "line": 228, "property": "font-size" },
+            { "file": "components/core/Overlay.module.css", "line": 330, "property": "font-size" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 83, "value": "0.75rem", "context": ":root" },
@@ -58920,21 +59111,21 @@
           "name": "--geul-font-weight-medium",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 81, "property": "font-weight" },
-            { "file": "components/core/Overlay.module.css", "line": 318, "property": "font-weight" }
+            { "file": "components/core/Overlay.module.css", "line": 86, "property": "font-weight" },
+            { "file": "components/core/Overlay.module.css", "line": 323, "property": "font-weight" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 89, "value": "500", "context": ":root" }]
         },
         {
           "name": "--geul-font-weight-regular",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 326, "property": "font-weight" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 331, "property": "font-weight" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 88, "value": "400", "context": ":root" }]
         },
         {
           "name": "--geul-line-height-md",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 82, "property": "line-height" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 87, "property": "line-height" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 102, "value": "1.55", "context": ":root" },
             { "file": "lib/styles/design-tokens.css", "line": 596, "value": "1.5", "context": "@media print → :root" }
@@ -58943,15 +59134,15 @@
         {
           "name": "--geul-line-height-sm",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 105, "property": "line-height" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 110, "property": "line-height" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 101, "value": "1.45", "context": ":root" }]
         },
         {
           "name": "--geul-line-height-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 224, "property": "line-height" },
-            { "file": "components/core/Overlay.module.css", "line": 327, "property": "line-height" }
+            { "file": "components/core/Overlay.module.css", "line": 229, "property": "line-height" },
+            { "file": "components/core/Overlay.module.css", "line": 332, "property": "line-height" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 100, "value": "1.4", "context": ":root" }]
         },
@@ -58959,8 +59150,8 @@
           "name": "--geul-motion-easing",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 241, "property": "animation" },
-            { "file": "components/core/Overlay.module.css", "line": 247, "property": "animation" }
+            { "file": "components/core/Overlay.module.css", "line": 246, "property": "animation" },
+            { "file": "components/core/Overlay.module.css", "line": 252, "property": "animation" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 137, "value": "ease-out", "context": ":root" }
@@ -58970,8 +59161,8 @@
           "name": "--geul-motion-fast",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 241, "property": "animation" },
-            { "file": "components/core/Overlay.module.css", "line": 247, "property": "animation" }
+            { "file": "components/core/Overlay.module.css", "line": 246, "property": "animation" },
+            { "file": "components/core/Overlay.module.css", "line": 252, "property": "animation" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 133, "value": "100ms", "context": ":root" }]
         },
@@ -58987,9 +59178,9 @@
           "name": "--geul-radius-square",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 32, "property": "border-radius" },
-            { "file": "components/core/Overlay.module.css", "line": 182, "property": "border-radius" },
-            { "file": "components/core/Overlay.module.css", "line": 331, "property": "border-radius" }
+            { "file": "components/core/Overlay.module.css", "line": 37, "property": "border-radius" },
+            { "file": "components/core/Overlay.module.css", "line": 187, "property": "border-radius" },
+            { "file": "components/core/Overlay.module.css", "line": 336, "property": "border-radius" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 118, "value": "0", "context": ":root" }]
         },
@@ -58997,8 +59188,8 @@
           "name": "--geul-shadow-panel",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 33, "property": "box-shadow" },
-            { "file": "components/core/Overlay.module.css", "line": 183, "property": "box-shadow" }
+            { "file": "components/core/Overlay.module.css", "line": 38, "property": "box-shadow" },
+            { "file": "components/core/Overlay.module.css", "line": 188, "property": "box-shadow" }
           ],
           "definitions": [
             {
@@ -59013,9 +59204,9 @@
           "name": "--geul-spacing-md",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 73, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 88, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 209, "property": "padding" }
+            { "file": "components/core/Overlay.module.css", "line": 78, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 93, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 214, "property": "padding" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 60, "value": "0.75rem", "context": ":root" }
@@ -59025,11 +59216,11 @@
           "name": "--geul-spacing-sm",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 72, "property": "gap" },
-            { "file": "components/core/Overlay.module.css", "line": 271, "property": "--_overlay-inset-top" },
-            { "file": "components/core/Overlay.module.css", "line": 272, "property": "--_overlay-inset-right" },
-            { "file": "components/core/Overlay.module.css", "line": 273, "property": "--_overlay-inset-bottom" },
-            { "file": "components/core/Overlay.module.css", "line": 274, "property": "--_overlay-inset-left" }
+            { "file": "components/core/Overlay.module.css", "line": 77, "property": "gap" },
+            { "file": "components/core/Overlay.module.css", "line": 276, "property": "--_overlay-inset-top" },
+            { "file": "components/core/Overlay.module.css", "line": 277, "property": "--_overlay-inset-right" },
+            { "file": "components/core/Overlay.module.css", "line": 278, "property": "--_overlay-inset-bottom" },
+            { "file": "components/core/Overlay.module.css", "line": 279, "property": "--_overlay-inset-left" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 59, "value": "0.625rem", "context": ":root" }
@@ -59043,8 +59234,8 @@
             { "file": "components/core/Overlay.module.css", "line": 3, "property": "--_overlay-inset-right" },
             { "file": "components/core/Overlay.module.css", "line": 4, "property": "--_overlay-inset-bottom" },
             { "file": "components/core/Overlay.module.css", "line": 5, "property": "--_overlay-inset-left" },
-            { "file": "components/core/Overlay.module.css", "line": 50, "property": "width" },
-            { "file": "components/core/Overlay.module.css", "line": 178, "property": "max-width" }
+            { "file": "components/core/Overlay.module.css", "line": 55, "property": "width" },
+            { "file": "components/core/Overlay.module.css", "line": 183, "property": "max-width" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 62, "value": "1.5rem", "context": ":root" }]
         },
@@ -59052,18 +59243,18 @@
           "name": "--geul-spacing-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 100, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 218, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 222, "property": "padding" },
-            { "file": "components/core/Overlay.module.css", "line": 312, "property": "gap" },
-            { "file": "components/core/Overlay.module.css", "line": 322, "property": "padding-inline-start" }
+            { "file": "components/core/Overlay.module.css", "line": 105, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 223, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 227, "property": "padding" },
+            { "file": "components/core/Overlay.module.css", "line": 317, "property": "gap" },
+            { "file": "components/core/Overlay.module.css", "line": 327, "property": "padding-inline-start" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 58, "value": "0.5rem", "context": ":root" }]
         },
         {
           "name": "--geul-spacing-xxs",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 222, "property": "padding" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 227, "property": "padding" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 57, "value": "0.25rem", "context": ":root" }
           ]
@@ -59072,9 +59263,9 @@
           "name": "--geul-surface",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 30, "property": "background" },
-            { "file": "components/core/Overlay.module.css", "line": 180, "property": "background" },
-            { "file": "components/core/Overlay.module.css", "line": 233, "property": "fill" }
+            { "file": "components/core/Overlay.module.css", "line": 35, "property": "background" },
+            { "file": "components/core/Overlay.module.css", "line": 185, "property": "background" },
+            { "file": "components/core/Overlay.module.css", "line": 238, "property": "fill" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 154, "value": "#faf9f5", "context": ":root" },
@@ -59108,8 +59299,8 @@
           "name": "--geul-text-primary",
           "registered": true,
           "sources": [
-            { "file": "components/core/Overlay.module.css", "line": 29, "property": "color" },
-            { "file": "components/core/Overlay.module.css", "line": 181, "property": "color" }
+            { "file": "components/core/Overlay.module.css", "line": 34, "property": "color" },
+            { "file": "components/core/Overlay.module.css", "line": 186, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 158, "value": "#242622", "context": ":root" },
@@ -59142,7 +59333,7 @@
         {
           "name": "--geul-text-secondary",
           "registered": true,
-          "sources": [{ "file": "components/core/Overlay.module.css", "line": 323, "property": "color" }],
+          "sources": [{ "file": "components/core/Overlay.module.css", "line": 328, "property": "color" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 159, "value": "#45443d", "context": ":root" },
             {
@@ -59413,6 +59604,7 @@
       ],
       "usage": [
         "Supply actual locale values. Distinguish user-facing language names from technical identifiers.",
+        "Consumer: features/my/LocalBackupsView.tsx",
         "Consumer: features/translation/admin/TranslationJobsPage.tsx",
         "Consumer: features/translation/admin/TranslationOverviewPage.tsx"
       ],
@@ -60168,6 +60360,7 @@
         "Consumer: features/admin/user/auth/UserSsoProvidersSection.tsx",
         "Consumer: features/artist/ArtistEditor/ArtistDetailEditor.tsx",
         "Consumer: features/artist/ArtistEditor/ArtistParticipantsDialog.tsx",
+        "Consumer: features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "Consumer: features/campaign/CampaignAnalyticsPage.tsx",
         "Consumer: features/campaign/CampaignDeliveryDialogs.tsx",
         "Consumer: features/campaign/CampaignEditPage.tsx",
@@ -60198,7 +60391,7 @@
         "Consumer: features/my/ui/PersonalAccessTokenSettings/PersonalAccessTokenSettingsView.tsx",
         "Consumer: features/my/ui/SettingsForm/SettingsFormView.tsx",
         "Consumer: features/navigation/SitemapPageView.tsx",
-        "Consumer: features/page/PageEditor/LocalizedCollaborativePageBodyEditor.tsx",
+        "Consumer: features/page/PageEditor/LocalizedPageBodyView.tsx",
         "Consumer: features/page/PageEditor/PageAccessSettings.tsx",
         "Consumer: features/page/blocks/ListViewShell.tsx",
         "Consumer: features/page/blocks/author-list/View.tsx",
@@ -61144,6 +61337,7 @@
         "Consumer: features/auth/ui/AuthCodeChallengeView.tsx",
         "Consumer: features/auth/ui/LoginStatusView.tsx",
         "Consumer: features/auth/ui/VerificationFlowView.tsx",
+        "Consumer: features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "Consumer: features/campaign/CampaignAnalyticsPage.tsx",
         "Consumer: features/campaign/CampaignDeliveryDialogs.tsx",
         "Consumer: features/campaign/CampaignScheduleForm.tsx",
@@ -61217,6 +61411,7 @@
         "Consumer: features/metadata/ui/OgGenerationRunProgressView.tsx",
         "Consumer: features/metadata/ui/OgImagePreviewView.tsx",
         "Consumer: features/my/CookieConsentSettings.tsx",
+        "Consumer: features/my/LocalBackupsView.tsx",
         "Consumer: features/my/McpOAuthGrantSettings.tsx",
         "Consumer: features/my/MyArtistsDataTable.tsx",
         "Consumer: features/my/MyPostsPageView.tsx",
@@ -61236,7 +61431,7 @@
         "Consumer: features/my/ui/SessionManagement/SessionManagementView.tsx",
         "Consumer: features/navigation/SitemapPageView.tsx",
         "Consumer: features/newsletter/UnsubscribeView.tsx",
-        "Consumer: features/page/PageEditor/LocalizedCollaborativePageBodyEditor.tsx",
+        "Consumer: features/page/PageEditor/LocalizedPageBodyView.tsx",
         "Consumer: features/page/PageEditor/PageAccessSettings.tsx",
         "Consumer: features/page/PageEditor/PageEditor.tsx",
         "Consumer: features/page/PageEditor/SectionItemView.tsx",
@@ -61828,6 +62023,7 @@
         "Consumer: features/admin/artist/ArtistDeleteDialogView.tsx",
         "Consumer: features/admin/label/LabelRowMenu.tsx",
         "Consumer: features/auth/ui/AuthCodeChallengeView.tsx",
+        "Consumer: features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "Consumer: features/changelog/ChangelogPageView.tsx",
         "Consumer: features/editor/tiptap/TiptapAuthoringControls.tsx",
         "Consumer: features/form/AdminFormSubmissionsPage.tsx",

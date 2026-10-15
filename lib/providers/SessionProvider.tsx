@@ -2,6 +2,9 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { SESSION_INVALIDATED_EVENT } from '@/lib/auth/session-events';
+import { isPageMember, isSigningOutHere, subscribeSignedOutMembers, syncActiveMember } from '@/lib/auth/active-member';
+import { suspendEditorUnloadGuard } from '@/lib/editor/usePendingEditorUnload';
+import { prepareToLeaveWithDurableEdits } from '@/lib/editor/leave-with-durable-edits';
 import { clearUserDisplaySnapshotCookie, writeUserDisplaySnapshotCookie } from '@/lib/auth/user-display-cookie';
 import type { SessionData } from '@/lib/session-data';
 import { buildNicknameOnboardingHref, NICKNAME_ONBOARDING_PATH } from '@/lib/auth/onboarding-redirect';
@@ -57,6 +60,31 @@ export function SessionProvider({
   initialData?: SessionData | null;
 }) {
   const [data, setData] = useState<SessionData | null>(initialData ?? null);
+  // Unsaved-edit journals and backups belong to the signed-in member (see active-member). Synced
+  // during render so editors below see it before their first journal write. A lost session keeps
+  // the member; another member in this page means a reload.
+  const memberSync = data?.user.id ? syncActiveMember(data.user.id) : 'unchanged';
+  const memberSwitched = memberSync === 'switched';
+  // The member signed out in another tab: every editor writer and replay of this page must stop
+  // now (its unsaved edits were deleted from this device by that sign-out).
+  useEffect(
+    () =>
+      subscribeSignedOutMembers((memberId) => {
+        if (isSigningOutHere() || !isPageMember(memberId)) {
+          return;
+        }
+        suspendEditorUnloadGuard();
+        window.location.reload();
+      }),
+    [],
+  );
+  useEffect(() => {
+    if (!memberSwitched) {
+      return;
+    }
+    // Keep the previous member's edits on this device for their next sign-in, then drop this page.
+    void prepareToLeaveWithDurableEdits().finally(() => window.location.reload());
+  }, [memberSwitched]);
   const [isPending, setIsPending] = useState(initialData === undefined);
   const [error, setError] = useState<Error | null>(null);
   const requestSequenceRef = useRef(0);
@@ -250,7 +278,9 @@ export function SessionProvider({
     [data, isPending, error, refetch, updateMemberSummary, completeOnboarding],
   );
 
-  return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
+  // During a member switch nothing below may run: an editor would send the previous member's
+  // in-memory edits with the new member's session before the reload.
+  return <SessionContext.Provider value={value}>{memberSwitched ? null : children}</SessionContext.Provider>;
 }
 
 export function useSessionContext(): SessionContextValue | null {

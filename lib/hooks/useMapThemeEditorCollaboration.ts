@@ -1,5 +1,6 @@
 'use client';
 
+import { getProviderAccessEnded, getProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CollaborativeDocumentType, createDocumentName } from '@echovisionlab/geul-common/collaboration/document';
 import {
@@ -319,42 +320,66 @@ export function useMapThemeEditorCollaboration(
   const setName = useCallback(
     (value: string) => {
       const parsedName = MapThemeDocumentMetaSchema.shape.name.safeParse(value);
-      if (providerSynced && isDocumentReady && parsedName.success) {
+      if (
+        !getProviderAccessEnded(provider) &&
+        getProviderAccessLevel(provider) === 'edit' &&
+        providerSynced &&
+        isDocumentReady &&
+        parsedName.success
+      ) {
         updateIntentField(fieldIntentsRef.current, parsedName.data, canonicalSnapshotRef.current?.name);
         metaMapRef.current?.set('name', parsedName.data);
       }
     },
-    [isDocumentReady, providerSynced],
+    [isDocumentReady, providerSynced, provider],
   );
 
   const updateSettings = useCallback(
     (values: Partial<MapThemeDocumentSettings>) => {
-      if (providerSynced && isDocumentReady && Object.keys(values).length > 0) {
+      if (
+        !getProviderAccessEnded(provider) &&
+        getProviderAccessLevel(provider) === 'edit' &&
+        providerSynced &&
+        isDocumentReady &&
+        Object.keys(values).length > 0
+      ) {
         updateIntentFields(fieldIntentsRef.current.settings, canonicalSnapshotRef.current?.settings, values);
         settingsMapRef.current?.setMany(values);
       }
     },
-    [isDocumentReady, providerSynced],
+    [isDocumentReady, providerSynced, provider],
   );
 
   const updateLightVariant = useCallback(
     (values: Partial<MapThemeDocumentVariant>) => {
-      if (providerSynced && isDocumentReady && Object.keys(values).length > 0) {
+      if (
+        !getProviderAccessEnded(provider) &&
+        getProviderAccessLevel(provider) === 'edit' &&
+        providerSynced &&
+        isDocumentReady &&
+        Object.keys(values).length > 0
+      ) {
         updateIntentFields(fieldIntentsRef.current.lightVariant, canonicalSnapshotRef.current?.lightVariant, values);
         lightVariantMapRef.current?.setMany(values);
       }
     },
-    [isDocumentReady, providerSynced],
+    [isDocumentReady, providerSynced, provider],
   );
 
   const updateDarkVariant = useCallback(
     (values: Partial<MapThemeDocumentVariant>) => {
-      if (providerSynced && isDocumentReady && Object.keys(values).length > 0) {
+      if (
+        !getProviderAccessEnded(provider) &&
+        getProviderAccessLevel(provider) === 'edit' &&
+        providerSynced &&
+        isDocumentReady &&
+        Object.keys(values).length > 0
+      ) {
         updateIntentFields(fieldIntentsRef.current.darkVariant, canonicalSnapshotRef.current?.darkVariant, values);
         darkVariantMapRef.current?.setMany(values);
       }
     },
-    [isDocumentReady, providerSynced],
+    [isDocumentReady, providerSynced, provider],
   );
 
   return {

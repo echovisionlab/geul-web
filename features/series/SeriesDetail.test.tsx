@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import '@testing-library/jest-dom/vitest';
 
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
@@ -239,6 +240,29 @@ describe('SeriesDetail post ordering', () => {
       }),
     );
   }
+
+  it('upgrades and downgrades title, lifecycle and ordering in place', async () => {
+    const provider = {};
+    setProviderAccessLevel(provider, 'view');
+    mocks.usePostSeriesCollaboration.mockReturnValue({ ...mocks.usePostSeriesCollaboration(), provider });
+    await renderSeries();
+    const panel = container.querySelector('[data-testid="series-translations-panel"]');
+    const titleBefore = mocks.editorHeader.mock.lastCall?.[0];
+    expect(titleBefore.titleDisabled).toBe(true);
+    act(() => setProviderAccessLevel(provider, 'edit'));
+    expect(mocks.editorHeader.mock.lastCall?.[0].titleDisabled).toBe(false);
+    expect(mocks.editorHeader.mock.lastCall?.[0].onStatusChange).toBeTypeOf('function');
+    expect(container.querySelector('[data-testid="series-translations-panel"]')).toBe(panel);
+    act(() => setProviderAccessLevel(provider, 'view'));
+    const header = mocks.editorHeader.mock.lastCall?.[0];
+    expect(header.titleDisabled).toBe(true);
+    expect(header.onStatusChange).toBeUndefined();
+    expect(container.querySelector('[data-testid="series-translations-panel"]')).toBe(panel);
+    expect(panel?.getAttribute('data-can-administer')).toBe('false');
+    expect(
+      [...container.querySelectorAll('button[aria-label]')].every((button) => (button as HTMLButtonElement).disabled),
+    ).toBe(true);
+  });
 
   it('waits for registered room and slug saves before navigating back', async () => {
     let finishRoom!: () => void;

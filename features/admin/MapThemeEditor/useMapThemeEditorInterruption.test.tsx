@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -34,13 +35,38 @@ function createProvider() {
 }
 
 describe('useMapThemeEditorInterruption', () => {
+  it('blocks mutations while preserving content and the connection on a view downgrade', () => {
+    const provider = createProvider();
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    function Probe() {
+      const access = useMapThemeEditorInterruption(provider as never, 'theme-1');
+      return (
+        <div>
+          <p>Readable map theme</p>
+          <button type="button" disabled={access.blocked}>
+            Edit
+          </button>
+          <output>{access.interruption}</output>
+        </div>
+      );
+    }
+    act(() => root.render(<Probe />));
+    const content = container.querySelector('p');
+    act(() => setProviderAccessLevel(provider, 'view'));
+    expect(container.querySelector('button')?.disabled).toBe(true);
+    expect(container.querySelector('p')).toBe(content);
+    expect(container.querySelector('output')?.textContent).toBe('');
+    expect(provider.disconnect).not.toHaveBeenCalled();
+    act(() => root.unmount());
+  });
   it.each([
     {
-      payload: { kind: 'permission_revoked', reason: 'permission_revoked' },
+      payload: { v: 3, kind: 'room.access_ended', reason: 'permission_revoked' },
       expectedInterruption: 'permission_revoked',
     },
     {
-      payload: { kind: 'session_expired', reason: 'session_expired' },
+      payload: { v: 3, kind: 'room.access_ended', reason: 'session_expired' },
       expectedInterruption: 'session_expired',
     },
   ] as const)(

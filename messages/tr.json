@@ -329,7 +329,14 @@
       "ogRegenerationFailed": "OG görüntüsü yeniden oluşturulamadı",
       "testEmailSent": "Test e-postası gönderildi",
       "saveSuccess": "Kaydedildi",
-      "saveFailed": "Kaydedilemedi"
+      "saveFailed": "Kaydedilemedi",
+      "saveRetrying": "Değişiklikleriniz sunucuya kaydedilmedi. Yeniden deniyoruz.",
+      "editsRestored": "Kurtarılan düzenlemeler geri yüklendi.",
+      "leaveWithRejectedEdits": {
+        "title": "Kaydedilemeyen düzenlemeler olmadan çıkılsın mı?",
+        "message": "Sunucu bazı düzenlemeleri reddettiği için bunlar kaydedilmedi. Önce iş birliği menüsünden kopyalayın veya çıkıp bu düzenlemeleri atın.",
+        "confirm": "Çık ve düzenlemeleri at"
+      }
     },
     "errors": {
       "generic": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
@@ -460,6 +467,11 @@
       "siteInfo": "Site bilgileri",
       "links": "Bağlantılar",
       "socialMedia": "Sosyal medya"
+    },
+    "signOutUnsaved": {
+      "title": "Kaydedilmemiş düzenlemeler varken oturum kapatılsın mı?",
+      "message": "Bazı düzenlemeler sunucuya kaydedilmedi. Oturumu kapatmak bunları bu cihazdan siler.",
+      "confirm": "Oturumu kapat ve düzenlemeleri at"
     }
   },
   "adminShell": {
@@ -673,13 +685,13 @@
       "detail": {
         "backTooltip": "E-posta düzenlerine geri dön",
         "targetEditor": {
-          "title": "Translated text",
-          "description": "Edit only visible text and accessibility labels. HTML, CSS, links, and placeholders remain owned by the source layout.",
-          "empty": "This layout has no translatable text units.",
+          "title": "Çevrilmiş metin",
+          "description": "Yalnızca görünür metni ve erişilebilirlik etiketlerini düzenleyin. HTML, CSS, bağlantılar ve yer tutucular kaynak düzen tarafından yönetilmeye devam eder.",
+          "empty": "Bu düzende çevrilebilir metin birimi yok.",
           "textUnit": "Text",
-          "sourceValue": "Source: {value}",
-          "translatedValue": "This locale provides its own value.",
-          "sourceFallback": "Using the source value.",
+          "sourceValue": "Kaynak: {value}",
+          "translatedValue": "Bu yerel ayar kendi değerini sağlar.",
+          "sourceFallback": "Kaynak değer kullanılıyor.",
           "useSource": "Use source"
         },
         "viewModes": {
@@ -1677,16 +1689,16 @@
       "consentDescription": "Bu istemci, hesabınızın mevcut izinleri kapsamında içerikleri okuyup düzenleyebilir ve dosyaları yönetebilir. İçerik oluşturabilir, güncelleyebilir veya silebilir ve mevcut dosya eklerini değiştirebilir. Bağlantı, hesaba ek izinler vermez.",
       "consentOfflineAccess": "Bu bağlantı, mevcut tarayıcı oturumunuz sona erdikten sonra siz iptal edene kadar devam edebilir.",
       "consentRevoke": "Bu bağlantıyı {settings} → Remote MCP bölümünden iptal edebilirsiniz.",
-      "connectionsTitle": "Connected MCP clients",
-      "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
-      "connectionsEmpty": "No MCP clients are connected.",
-      "connectedAt": "Connected {date}",
+      "connectionsTitle": "Bağlı MCP istemcileri",
+      "connectionsDescription": "Bu OAuth izinleri tarayıcı oturumlarından ayrıdır. Birini iptal etmek, oturumunuzu kapatmadan ilgili MCP istemcisinin bağlantısını keser.",
+      "connectionsEmpty": "Bağlı MCP istemcisi yok.",
+      "connectedAt": "Bağlanma tarihi: {date}",
       "revoke": "Revoke",
-      "revokeTitle": "Revoke MCP access",
-      "revokeConfirmation": "Revoke MCP access for {client}? Its current token chain will stop working.",
-      "revokeSuccess": "MCP access was revoked.",
-      "revokeFailed": "Could not revoke MCP access.",
-      "loadFailed": "Could not load connected MCP clients."
+      "revokeTitle": "MCP erişimini iptal et",
+      "revokeConfirmation": "{client} için MCP erişimi iptal edilsin mi? Mevcut belirteç zinciri çalışmayı durduracak.",
+      "revokeSuccess": "MCP erişimi iptal edildi.",
+      "revokeFailed": "MCP erişimi iptal edilemedi.",
+      "loadFailed": "Bağlı MCP istemcileri yüklenemedi."
     },
     "personalAccessTokens": {
       "title": "Kişisel erişim belirteci",
@@ -2136,9 +2148,9 @@
     "systemOrLegacy": "Sistem veya önceki sürüm",
     "restore": "Eski haline getirmek",
     "restoreTitle": "Sürümü geri yükle",
-    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document.",
+    "restoreSameLocaleBody": "Kaynak v{version} ({locale}) geri yüklendiğinde yalnızca kaynak belge değişir. Mevcut hedef belgeler ve çeviri işleri değişmez; çeviriler otomatik olarak oluşturulmaz. Devam edilsin mi?",
+    "restoreCrossLocaleBody": "Kaynak v{version} geri yüklendiğinde kaynak yerel ayarı {currentLocale} yerine {selectedLocale} olur ve yalnızca kaynak işaretçisi değişir. Mevcut hedef belgeler ve çeviri işleri değişmez; çeviriler otomatik olarak oluşturulmaz. Devam edilsin mi?",
+    "restoreFailed": "Kaynak belge geri yüklenemedi.",
     "loadFailed": "Sürüm geçmişi yüklenemedi.",
     "end": "Tüm sürümler yüklendi."
   },
@@ -2518,6 +2530,24 @@
       "sections": {
         "connection": "Bağlantı"
       }
+    },
+    "saveState": {
+      "saved": "Kaydedildi",
+      "saving": "Kaydediliyor…",
+      "offline": "Çevrimdışı · düzenlemeler bu cihazda saklanıyor",
+      "error": "Kaydedilemedi · yeniden deneniyor…",
+      "rejected": "Bazı düzenlemeler kaydedilemedi",
+      "reload": "Yeniden bağlanılıyor · düzenlemeler geri yükleniyor…"
+    },
+    "rejectedEdits": {
+      "open": "Kaydedilmemiş düzenlemeleri incele",
+      "title": "Kaydedilemeyen düzenlemeler",
+      "description": "Sunucu bu düzenlemeleri reddettiği için kaydetme işlemi yeniden denenmeyecek. İhtiyacınız olanları kopyalayın, ardından düzenlemeleri atın.",
+      "reason": "Neden: {reason}",
+      "copy": "Kopyala",
+      "copied": "Kopyalandı",
+      "discard": "Düzenlemeleri at",
+      "empty": "Tüm düzenlemeler kaydedildi."
     }
   },
   "urlSection": {
@@ -3512,8 +3542,8 @@
       "message": "Bu düzenleyici açıkken daha yeni bir sürüm kaydedildi. Düzenlemeye devam etmeden önce yeniden yükleyin."
     },
     "permissionRevoked": {
-      "title": "Düzenleme izni iptal edildi",
-      "message": "Artık bu içeriği düzenleme izniniz yok. İzin iptal edildikten sonra yapılan değişiklikler kaydedilmeyecektir."
+      "title": "Erişim kaldırıldı",
+      "message": "Artık bu içeriğe erişiminiz yok. Henüz kaydedilmemiş değişiklikler bu cihazda saklanır."
     },
     "sessionExpired": {
       "title": "Oturumun süresi doldu",
@@ -3759,9 +3789,9 @@
           },
           "callout": {
             "title": "Callout",
-            "subtext": "Highlight content with an icon",
-            "aliases": "callout\nnotice\ninfo\naside",
-            "group": "Basic blocks"
+            "subtext": "İçeriği bir simgeyle vurgulayın",
+            "aliases": "callout\nnotice\ninfo\naside\naçıklama\nuyarı\nbilgi\nnot",
+            "group": "Temel bloklar"
           },
           "divider": {
             "title": "Ayırıcı",
@@ -3790,61 +3820,61 @@
           "mathBlock": {
             "title": "Matematik bloğu",
             "subtext": "LaTeX ile denklemi görüntüleme",
-            "aliases": "math\nequation\nlatex\nformula",
+            "aliases": "math\nequation\nlatex\nformula\nmatematik\ndenklem\nformül",
             "group": "Matematik"
           },
           "inlineMath": {
             "title": "Satır içi matematik",
             "subtext": "Satır içi LaTeX formülü",
-            "aliases": "inline\ninline math\ninlinemath\nlatex\n$",
+            "aliases": "inline\ninline math\ninlinemath\nlatex\n$\nsatır içi\nsatır içi matematik\nsatır içi formül",
             "group": "Satır içi"
           },
           "map": {
             "title": "Harita",
             "subtext": "Harita konumu ekleyin",
-            "aliases": "map\nlocation\nplace\naddress",
+            "aliases": "map\nlocation\nplace\naddress\nharita\nkonum\nyer\nadres",
             "group": "Gömülenler"
           },
           "externalVideo": {
             "title": "Harici video",
             "subtext": "YouTube veya Vimeo bağlantısı ekleyin",
-            "aliases": "external video\nyoutube\nvimeo\nembed",
+            "aliases": "external video\nyoutube\nvimeo\nembed\nharici video\ngöm\nyerleştir",
             "group": "Gömülenler"
           },
           "p5Sketch": {
             "title": "p5.js",
             "subtext": "Etkileşimli p5.js eskizi ekle",
-            "aliases": "p5\np5.js\nsketch\ncreative coding",
+            "aliases": "p5\np5.js\nsketch\ncreative coding\neskiz\nyaratıcı kodlama",
             "group": "Gömülenler"
           },
           "threeScene": {
             "title": "Three.js",
             "subtext": "Etkileşimli Three.js sahnesi ekle",
-            "aliases": "three\nthree.js\n3d\nscene",
+            "aliases": "three\nthree.js\n3d\nscene\nüç boyutlu\nsahne",
             "group": "Gömülenler"
           },
           "file": {
             "title": "Dosya eki",
             "subtext": "Bir dosya ekleyin (PDF, DOC, ZIP vb.)",
-            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload",
+            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\nek\ndosya\nbelge\nindir",
             "group": "Medya"
           },
           "aiAssistant": {
             "title": "Yapay zekâ asistanı",
             "subtext": "Yapay zekayla metin yazın, iyileştirin veya dönüştürün",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove",
+            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nyapay zekâ\nasistan\nyaz\niyileştir",
             "group": "Yapay zekâ"
           },
           "shader": {
             "title": "GLSL gölgelendiricisi",
             "subtext": "Etkileşimli bir GLSL gölgelendiricisi ekleyin",
-            "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "aliases": "shader\nglsl\nfragment shader\nshadertoy\ngölgelendirici\nparça gölgelendirici",
             "group": "Gömülenler"
           },
           "mermaid": {
             "title": "Mermaid",
             "subtext": "Metinden diyagram oluştur",
-            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence\ndiyagram\nakış şeması\nsıralama",
             "group": "Gömülenler"
           }
         }
@@ -4024,6 +4054,12 @@
       "media": {
         "importFromUrl": "URL'den içe aktar"
       }
+    },
+    "accessDowngraded": {
+      "message": "Erişiminiz yalnızca görüntüleme olarak değişti. Düzenleme kapalı; henüz kaydedilmemiş düzenlemeler bu cihazda kalır ve yeniden düzenleme erişimi alırsanız kaydedilir."
+    },
+    "accessUpgraded": {
+      "message": "Yeniden düzenleyebilirsiniz. Yalnızca görüntüleme sırasında saklanan değişiklikler kaydediliyor."
     }
   },
   "aiAssistant": {
@@ -4166,35 +4202,35 @@
     "resolvedMetadata": "Çözümlenmiş Meta Veriler"
   },
   "translationPanel": {
-    "description": "Review the source language and existing translation document for each locale.",
+    "description": "Her yerel ayarın kaynak dilini ve mevcut çeviri belgesini inceleyin.",
     "actions": {
       "expand": "Genişletmek",
       "collapse": "Yıkılmak",
-      "regenerateAll": "Generate/regenerate all eligible locales",
+      "regenerateAll": "Uygun tüm yerel ayarlar için çeviri oluştur/yeniden oluştur",
       "regenerateLocale": "Yenile",
       "regenerateLocaleAria": "{locale} çevirisini yeniden oluştur",
       "generateLocale": "Generate",
-      "generateLocaleAria": "Generate {locale} translation"
+      "generateLocaleAria": "{locale} çevirisini oluştur"
     },
     "sourceLocale": {
       "label": "Kaynak dil",
       "description": "Bu, bu varlığın çevirileri için temel olarak kullanılan kaynak dildir.",
       "confirm": {
         "title": "Kaynak dili değiştir",
-        "description": "Changing the source language updates only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically.",
-        "detail": "{locale} becomes the language of the editable source document. Existing target documents and translation jobs remain unchanged.",
+        "description": "Kaynak dili değiştirmek yalnızca kaynak işaretçisini günceller. Mevcut hedef belgeler ve çeviri işleri değişmez; çeviriler otomatik olarak oluşturulmaz.",
+        "detail": "{locale}, düzenlenebilir kaynak belgenin dili olur. Mevcut hedef belgeler ve çeviri işleri değişmez.",
         "confirm": "Kaynak dili değiştir"
       }
     },
     "activeEditLocale": {
-      "ariaLabel": "Switch content language. Current: {locale}",
+      "ariaLabel": "İçerik dilini değiştir. Mevcut: {locale}",
       "sourceOption": "{locale} (Kaynak)",
       "loading": "Diller yükleniyor...",
-      "missingDescription": "No {locale} target document exists yet. Generate it from the translations panel.",
+      "missingDescription": "Henüz {locale} hedef belgesi yok. Çeviriler panelinden oluşturun.",
       "bodyPreviewTitle": "{locale} gövde önizlemesi",
-      "bodyPreviewDescription": "The existing translation document is shown with its structure and formatting.",
+      "bodyPreviewDescription": "Mevcut çeviri belgesi, yapısı ve biçimlendirmesiyle gösterilir.",
       "bodyPreviewEmpty": "Henüz yerelleştirilmiş gövde önizlemesi yok.",
-      "sharedStructureSectionDescription": "This section keeps shared layout or query settings from the source page; translated body content is read-only.",
+      "sharedStructureSectionDescription": "Bu bölüm, kaynak sayfanın ortak düzen veya sorgu ayarlarını korur; çevrilmiş gövde içeriği salt okunurdur.",
       "sectionFieldLabels": {
         "caption": "Altyazı",
         "copyJson": "Sahne kopyası"
@@ -4205,7 +4241,7 @@
     },
     "states": {
       "loadFailed": "Çeviriler yüklenemedi.",
-      "missingTarget": "No target document yet.",
+      "missingTarget": "Henüz hedef belge yok.",
       "sourceEditorHint": "Orijinal metni ana düzenleyicide düzenleyin.",
       "updatedAt": "{date} güncellendi"
     },
@@ -4218,26 +4254,26 @@
     }
   },
   "translationPanelMenu": {
-    "description": "Review source menu labels and existing translation documents.",
+    "description": "Kaynak menü etiketlerini ve mevcut çeviri belgelerini inceleyin.",
     "previewModal": {
-      "title": "{locale} menu translation preview",
+      "title": "{locale} menü çevirisi önizlemesi",
       "fields": {
-        "localizedLabelForLocale": "{locale} public label"
+        "localizedLabelForLocale": "{locale} için herkese açık etiket"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template."
+      "description": "Bu e-posta şablonunun kaynak dilini ve mevcut çeviri belgelerini yönetin."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout."
+      "description": "Bu e-posta düzeninin kaynak dilini ve mevcut çeviri belgelerini yönetin."
     }
   },
   "localizationNotice": {
     "translated": {
-      "title": "Localized version",
-      "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
+      "title": "Yerelleştirilmiş sürüm",
+      "description": "Bu yerelleştirilmiş sürüm {displayed} dilinde gösterilir; {source} dilindeki özgün metin esas alınır."
     },
     "fallback": {
       "title": "Geri dönüş dili"
@@ -4260,15 +4296,15 @@
       "totalLocales": "Toplam yerel ayarlar",
       "sourceEntities": "Kaynak varlıklar",
       "activeJobs": "Devam eden işler",
-      "existingEntries": "Existing translations"
+      "existingEntries": "Mevcut çeviriler"
     },
     "sections": {
-      "localeHealthTitle": "Translation state by locale",
-      "entityHealthTitle": "Translation state by entity type"
+      "localeHealthTitle": "Yerel ayara göre çeviri durumu",
+      "entityHealthTitle": "Varlık türüne göre çeviri durumu"
     },
     "columns": {
       "policy": "Politika",
-      "lastTargetUpdate": "Last target update",
+      "lastTargetUpdate": "Son çeviri güncellemesi",
       "entity": "Varlık",
       "sources": "Kaynaklar",
       "lastSourceUpdate": "Son kaynak güncellemesi"
@@ -4304,7 +4340,7 @@
   },
   "translationSettingsPage": {
     "title": "Çeviri ayarları",
-    "description": "Manage the default source language and automatic translation providers. An Admin explicitly starts translation generation from each editor.",
+    "description": "Varsayılan kaynak dili ve otomatik çeviri sağlayıcılarını yönetin. Yönetici, her düzenleyiciden çeviri oluşturmayı açıkça başlatır.",
     "actions": {
       "jobs": "İşler",
       "save": "Ayarları kaydet",
@@ -4314,8 +4350,8 @@
       "createProvider": "Sağlayıcı oluştur"
     },
     "sections": {
-      "runtime": "Source defaults",
-      "runtimeDescription": "Set only the language used when a source language has not been established. Source changes never start translation generation automatically.",
+      "runtime": "Kaynak varsayılanları",
+      "runtimeDescription": "Yalnızca kaynak dil henüz belirlenmemişken kullanılacak dili ayarlayın. Kaynak değişiklikleri çeviri oluşturmayı hiçbir zaman otomatik olarak başlatmaz.",
       "providers": "Çeviri sağlayıcıları",
       "providersDescription": "Makine çevirisi sağlayıcılarını yönetin. En az bir aktif sağlayıcı geçerli kimlik bilgilerine sahip olana kadar oluşturma devre dışı kalır."
     },
@@ -4325,10 +4361,10 @@
         "description": "Kaynak yerel ayarı henüz ayarlanmadığında ve bir istek desteklenen içerik yerel ayarına çözümlenmediğinde kullanılır."
       },
       "protectedTerms": {
-        "label": "Protected terms",
-        "description": "Exact case-sensitive spellings that translation generation must keep unchanged. No terms are learned or suggested automatically.",
-        "placeholder": "Add a protected term",
-        "examples": "Examples: Photoshop, React Native"
+        "label": "Korunan terimler",
+        "description": "Çeviri oluşturulurken değişmeden korunması gereken, büyük/küçük harfe duyarlı tam yazımlar. Terimler otomatik olarak öğrenilmez veya önerilmez.",
+        "placeholder": "Korunan terim ekle",
+        "examples": "Örnekler: Photoshop, React Native"
       },
       "providerName": {
         "label": "Sağlayıcı adı"
@@ -5268,6 +5304,40 @@
       "goHome": "Eve git",
       "tryAgain": "Tekrar dene",
       "login": "Girişe Geri Dön"
+    }
+  },
+  "localBackups": {
+    "title": "Yerel yedekler",
+    "description": "Bu cihazdaki kapatılmış sekmelerden kalan kaydedilmemiş düzenlemeler. Kurtarmak için düzenleyiciyi açın. Yedekler 30 gün sonra geçerliliğini yitirir ve oturumu kapattığınızda silinir.",
+    "empty": "Kurtarılacak yerel yedek yok. Açık sekmelerdeki düzenlemeler burada listelenmez.",
+    "unavailable": "Yerel yedekler için bu cihazda tarayıcı depolaması ve Web Locks gerekir.",
+    "loading": "Yerel yedekler aranıyor…",
+    "error": "Bu işlem tamamlanamadı. Listeyi yenileyip tekrar deneyin.",
+    "refresh": "Yenile",
+    "lastChanged": "Son değişiklik: {time}",
+    "open": "Düzenleyiciyi aç",
+    "discard": "Düzenlemeleri at",
+    "openLabel": "Düzenleyiciyi aç: {kind} {id}, {locale}",
+    "discardLabel": "Düzenlemeleri at: {kind} {id}, {locale}",
+    "discardTitle": "Yerel yedek silinsin mi?",
+    "discardDescription": "Bu kaydedilmemiş düzenlemeler bu cihazdan kalıcı olarak silinecek. Kaydedilmiş içerik etkilenmez.",
+    "kinds": {
+      "post": "Gönderi",
+      "page": "Sayfa",
+      "work": "Eser",
+      "campaign": "Kampanya",
+      "email-template": "E-posta Şablonu",
+      "email-layout": "E-posta Düzeni",
+      "terms-history": "Hizmet Şartları",
+      "privacy-history": "Gizlilik Politikası",
+      "artist": "Sanatçı",
+      "release": "Sürüm",
+      "label": "Etiket",
+      "form": "Form",
+      "map-theme": "Harita Teması",
+      "program-event": "Etkinlik",
+      "menu": "Menü",
+      "post-series": "Gönderi Serisi"
     }
   }
 }

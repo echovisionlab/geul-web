@@ -214,7 +214,6 @@ packageExtensionsChecksum: sha256-7UPk/C5BhtdWJGyCl//dJkm/ak820Cq17O4dgCUCoRY=
 patchedDependencies:
   '@dnd-kit/core@6.3.1': 7f2b26e2e301147e605d7d5c4ffc29420ea2ea7b4e15d9050134544f666799f4
   '@dnd-kit/sortable@10.0.0': bf2c240c1811d4a480bff9946f39add5ba31797fc245fb6815b6bb934abee093
-  '@echovisionlab/geul-proto@0.5.0': 13bbf42d7cec29d841cbc8bb092b78e2e5d37376d72306f905a49d6a695cfdea
   '@maplibre/maplibre-gl-style-spec@26.2.1': a622db78955bd08d08aaeb124f3f79b2e98a7302e3ba0c35f88480209e81772e
   '@monaco-editor/react@4.7.0': c090a8f38590d6ecfda94e2ad89d1d87d7888bdc45a1e28428d227f724fe8812
   '@storybook/addon-docs@10.5.8': 089b933d8377238ffcfa50792208c3bb13eeb7afaa90852f418dd09e69d87917
@@ -250,14 +249,14 @@ importers:
         specifier: 0.2.1
         version: 0.2.1
       '@echovisionlab/geul-common':
-        specifier: 0.5.0
-        version: 0.5.0(yjs@13.6.33)
+        specifier: 0.6.1
+        version: 0.6.1(yjs@13.6.33)
       '@echovisionlab/geul-event':
-        specifier: 0.5.0
-        version: 0.5.0(@echovisionlab/geul-proto@0.5.0(patch_hash=13bbf42d7cec29d841cbc8bb092b78e2e5d37376d72306f905a49d6a695cfdea))
+        specifier: 0.6.0
+        version: 0.6.0(@echovisionlab/geul-proto@0.6.0)
       '@echovisionlab/geul-proto':
-        specifier: 0.5.0
-        version: 0.5.0(patch_hash=13bbf42d7cec29d841cbc8bb092b78e2e5d37376d72306f905a49d6a695cfdea)
+        specifier: 0.6.0
+        version: 0.6.0
       '@echovisionlab/geul-telemetry':
         specifier: 0.2.0
         version: 0.2.0
@@ -1422,19 +1421,19 @@ packages:
     resolution: {integrity: sha512-SbtEssiGAEHyBmVONl2hVz+0hKUkoaGbj4bblyGdmBkHF1cprfgSUH/ZqRoRutPkESJqlb1ft9/GkiD/T6EBqg==}
     engines: {node: 24.21.0}
 
-  '@echovisionlab/geul-common@0.5.0':
-    resolution: {integrity: sha512-+lM3R21nzLD6T0IlCxv8ybwaTCC7rEQugUJs69jkqSgeP8Yj08KOlwdFOjTUZ/hyOCF2I0t2yOEypJ78JTLq+A==}
+  '@echovisionlab/geul-common@0.6.1':
+    resolution: {integrity: sha512-/fKidbvEBCxz1OjZuqH53v7YKbGvdizxK75MRFg6envX9NJ3dhZ8ZI/qwkdBA1DPzemVVkcPBwWiRfmVFhl7Nw==}
     engines: {node: 24.21.0}
     peerDependencies:
       yjs: ^13.6.33
 
-  '@echovisionlab/geul-event@0.5.0':
-    resolution: {integrity: sha512-F3pKnYBodpi5g/nYpHGM1c2lD+HLxpVf5+mCmWrBog7cBRHFLdic6LOy32bVW1ax7PSZKfR2FGdsAopCvJFKJA==}
+  '@echovisionlab/geul-event@0.6.0':
+    resolution: {integrity: sha512-MGjJbZ3UPkj9YAoPMB4O36yItWqaxHZQQroL1q6qKKkcIPwZUEn70dOlaA34lHsC4kVl9ww7Dd5DQ9AjnJ1/sg==}
     peerDependencies:
-      '@echovisionlab/geul-proto': ^0.5.0
+      '@echovisionlab/geul-proto': ^0.6.0
 
-  '@echovisionlab/geul-proto@0.5.0':
-    resolution: {integrity: sha512-/W0lCEDtrUizmW7vOlSDtkpQrYzoI2fVfMiNZ/Om9E4+v7tWzjXyYW7OqrO4jDlYwnvUEni+OYk5puCyWjSz4Q==}
+  '@echovisionlab/geul-proto@0.6.0':
+    resolution: {integrity: sha512-K3T5xvpYtJCBBI4kA8Ik47EQv8QgpBmldqwTUbeC2Hyn/1SD3xTLc2VuzFL12XuK5ucnYZJxGYl5wHms1jakkQ==}
 
   '@echovisionlab/geul-telemetry@0.2.0':
     resolution: {integrity: sha512-V0jBpcqCNwfThM2L3VdZWat1TEkf8H5fg1tZXbQ/lFnNWcYrUrg6/OMte54mzfUT+zKmZj8M0TrmZncrbyPaoQ==}
@@ -10032,20 +10031,20 @@ snapshots:
     dependencies:
       mediabunny: 1.61.3
 
-  '@echovisionlab/geul-common@0.5.0(yjs@13.6.33)':
+  '@echovisionlab/geul-common@0.6.1(yjs@13.6.33)':
     dependencies:
       '@bufbuild/protobuf': 2.16.0
-      '@echovisionlab/geul-proto': 0.5.0(patch_hash=13bbf42d7cec29d841cbc8bb092b78e2e5d37376d72306f905a49d6a695cfdea)
+      '@echovisionlab/geul-proto': 0.6.0
       diff: 9.0.0
       yjs: 13.6.33
       zod: 4.6.5
 
-  '@echovisionlab/geul-event@0.5.0(@echovisionlab/geul-proto@0.5.0(patch_hash=13bbf42d7cec29d841cbc8bb092b78e2e5d37376d72306f905a49d6a695cfdea))':
+  '@echovisionlab/geul-event@0.6.0(@echovisionlab/geul-proto@0.6.0)':
     dependencies:
       '@bufbuild/protobuf': 2.16.0
-      '@echovisionlab/geul-proto': 0.5.0(patch_hash=13bbf42d7cec29d841cbc8bb092b78e2e5d37376d72306f905a49d6a695cfdea)
+      '@echovisionlab/geul-proto': 0.6.0
 
-  '@echovisionlab/geul-proto@0.5.0(patch_hash=13bbf42d7cec29d841cbc8bb092b78e2e5d37376d72306f905a49d6a695cfdea)':
+  '@echovisionlab/geul-proto@0.6.0':
     dependencies:
       '@bufbuild/protobuf': 2.16.0
 

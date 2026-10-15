@@ -8,14 +8,14 @@ import { afterEach, expect, it, vi } from 'vitest';
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 afterEach(() => {
-  vi.doUnmock('@echovisionlab/geul-common/collaboration/runtime-events');
+  vi.doUnmock('@/lib/collab/runtime-event-parser');
   vi.useRealTimers();
 });
 
 it('asks every runtime event subscriber to resync when the event parser cannot load', async () => {
   vi.resetModules();
   // The parser chunk is unreachable (for example, removed by a deployment).
-  vi.doMock('@echovisionlab/geul-common/collaboration/runtime-events', () => {
+  vi.doMock('@/lib/collab/runtime-event-parser', () => {
     throw new Error('Failed to fetch dynamically imported module');
   });
   vi.useFakeTimers();

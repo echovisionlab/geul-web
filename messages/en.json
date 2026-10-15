@@ -329,7 +329,14 @@
       "ogRegenerationFailed": "Failed to regenerate OG image",
       "testEmailSent": "Test email sent",
       "saveSuccess": "Saved",
-      "saveFailed": "Failed to save"
+      "saveFailed": "Failed to save",
+      "saveRetrying": "Your changes have not been saved to the server. We are retrying.",
+      "editsRestored": "Recovered edits have been restored.",
+      "leaveWithRejectedEdits": {
+        "title": "Leave without the edits that couldn't be saved?",
+        "message": "The server refused some edits, so they were not saved. Copy them from the collaboration menu first, or leave and discard them.",
+        "confirm": "Leave and discard"
+      }
     },
     "errors": {
       "generic": "Something went wrong. Please try again.",
@@ -460,6 +467,11 @@
       "siteInfo": "Site information",
       "links": "Links",
       "socialMedia": "Social media"
+    },
+    "signOutUnsaved": {
+      "title": "Sign out with unsaved edits?",
+      "message": "Some edits have not been saved to the server. Signing out deletes them from this device.",
+      "confirm": "Sign out and discard"
     }
   },
   "adminShell": {
@@ -2518,6 +2530,24 @@
       "sections": {
         "connection": "Connection"
       }
+    },
+    "saveState": {
+      "saved": "Saved",
+      "saving": "Saving…",
+      "offline": "Offline · edits kept on this device",
+      "error": "Save failed · retrying…",
+      "rejected": "Some edits couldn't be saved",
+      "reload": "Reconnecting · restoring edits…"
+    },
+    "rejectedEdits": {
+      "open": "Review unsaved edits",
+      "title": "Edits that couldn't be saved",
+      "description": "The server refused these edits, so they will not be retried. Copy anything you need, then discard them.",
+      "reason": "Reason: {reason}",
+      "copy": "Copy",
+      "copied": "Copied",
+      "discard": "Discard",
+      "empty": "Every edit has been saved."
     }
   },
   "urlSection": {
@@ -3512,8 +3542,8 @@
       "message": "A newer version was saved while this editor was open. Reload before continuing to edit."
     },
     "permissionRevoked": {
-      "title": "Editing permission revoked",
-      "message": "You no longer have permission to edit this content. Changes made after permission was revoked will not be saved."
+      "title": "Access removed",
+      "message": "You no longer have access to this content. Edits not saved yet stay on this device."
     },
     "sessionExpired": {
       "title": "Session expired",
@@ -4024,6 +4054,12 @@
       "media": {
         "importFromUrl": "Import from URL"
       }
+    },
+    "accessDowngraded": {
+      "message": "Your access changed to view only. Editing is off; edits not saved yet stay on this device and are saved if you get edit access again."
+    },
+    "accessUpgraded": {
+      "message": "You can edit again. Edits kept while you could only view are being saved."
     }
   },
   "aiAssistant": {
@@ -5268,6 +5304,40 @@
       "goHome": "Go home",
       "tryAgain": "Try again",
       "login": "Back to Login"
+    }
+  },
+  "localBackups": {
+    "title": "Local backups",
+    "description": "Unsaved edits from closed tabs on this device. Open the editor to recover them. Backups expire after 30 days and are removed when you sign out.",
+    "empty": "No local backups to recover. Edits in open tabs are not listed here.",
+    "unavailable": "Local backups require browser storage and Web Locks on this device.",
+    "loading": "Looking for local backups…",
+    "error": "Could not complete this action. Refresh the list and try again.",
+    "refresh": "Refresh",
+    "lastChanged": "Last changed {time}",
+    "open": "Open editor",
+    "discard": "Discard",
+    "openLabel": "Open editor: {kind} {id}, {locale}",
+    "discardLabel": "Discard: {kind} {id}, {locale}",
+    "discardTitle": "Discard local backup?",
+    "discardDescription": "These unsaved edits will be permanently removed from this device. Saved content is unaffected.",
+    "kinds": {
+      "post": "Post",
+      "page": "Page",
+      "work": "Work",
+      "campaign": "Campaign",
+      "email-template": "Email template",
+      "email-layout": "Email layout",
+      "terms-history": "Terms",
+      "privacy-history": "Privacy policy",
+      "artist": "Artist",
+      "release": "Release",
+      "label": "Label",
+      "form": "Form",
+      "map-theme": "Map theme",
+      "program-event": "Event",
+      "menu": "Menu",
+      "post-series": "Post series"
     }
   }
 }

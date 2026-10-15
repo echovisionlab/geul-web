@@ -1,5 +1,6 @@
 'use client';
 
+import { liveNodeView } from '@/features/editor/tiptap/live-node-view';
 import { SectionCard as ExecutableSurface } from '@/components/core/Section';
 import {
   LayoutInset as ExecutableInset,
@@ -761,7 +762,9 @@ export function createThreeSceneExtension(options: ThreeSceneOptions = {}): Exte
     },
     addNodeView() {
       return withMonacoSourceEditorEvents(
-        ReactNodeViewRenderer((props) => <ThreeSceneNodeView {...props} {...this.options} />),
+        ReactNodeViewRenderer(
+          liveNodeView(this.name, this.options, (props, current) => <ThreeSceneNodeView {...props} {...current} />),
+        ),
       );
     },
     addCommands() {

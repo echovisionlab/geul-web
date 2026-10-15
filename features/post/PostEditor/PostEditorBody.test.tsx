@@ -153,3 +153,28 @@ describe('PostEditorBody', () => {
     );
   });
 });
+
+it('keeps an RPC-denied snapshot read-only even if a caller supplies editable', async () => {
+  await act(async () =>
+    root?.render(
+      <DesignSystemProvider forceColorScheme="light">
+        <PostEditorBody
+          {...baseProps}
+          bodyMode="locale-editor"
+          session={editorSession}
+          roomReady
+          snapshot={{
+            locale: 'ko',
+            sourceLocale: 'ko',
+            localeExists: true,
+            documentRevision: 'revision-A',
+            editable: false,
+            title: '',
+            summary: '',
+          }}
+        />
+      </DesignSystemProvider>,
+    ),
+  );
+  expect(localizedEditorMock).toHaveBeenLastCalledWith(expect.objectContaining({ editable: false }));
+});

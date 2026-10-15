@@ -1,6 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDebouncedPatch } from './debounced-patch';
 import { requireActionSuccess } from './require-action-success';
+import { Code } from '@connectrpc/connect';
+import { SaveParkedError, UnretryableSaveError } from './save-failure';
+import {
+  getRejectedEditorSaves,
+  hasRejectedEditorSaves,
+  hasUnsavedEditorEdits,
+  registerEditorSave,
+} from './editor-save-registry';
+import { resolveEditorSaveState } from './editor-save-state';
 
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
@@ -145,4 +154,106 @@ it('automatically retries failed intent and cancels retries on disposal', async 
   queue.deactivateRecovery();
   await vi.advanceTimersByTimeAsync(30_000);
   expect(failed).toHaveBeenCalledOnce();
+});
+
+describe('refused editor patches', () => {
+  it('stops retrying a refused patch, keeps it for review and still saves newer edits', async () => {
+    type Patch = { slug?: string; title?: string };
+    const write = vi
+      .fn<(patch: Patch) => Promise<void>>()
+      .mockRejectedValueOnce(new UnretryableSaveError('Slug is taken', 'AlreadyExists'))
+      .mockResolvedValue(undefined);
+    const queue = createDebouncedPatch<Patch>(100, 'post:refused', 'post:refused', undefined, true);
+    const unregister = registerEditorSave('post:refused', queue);
+    try {
+      queue.enqueue({ slug: 'taken' }, write);
+      await vi.advanceTimersByTimeAsync(100);
+      expect(write).toHaveBeenCalledOnce();
+      expect(queue.hasPending()).toBe(false);
+      expect(queue.hasFailure()).toBe(false);
+      expect(queue.getRejected()).toMatchObject({
+        patch: { slug: 'taken' },
+        reason: 'AlreadyExists',
+        message: 'Slug is taken',
+      });
+      expect(hasRejectedEditorSaves('post:refused')).toBe(true);
+      expect(
+        resolveEditorSaveState({ phase: 'synced', hasUnsavedEdits: false, hasFailure: false, hasRejected: true }),
+      ).toBe('rejected');
+
+      // No automatic retry of the refused value, even long after.
+      await vi.advanceTimersByTimeAsync(60_000);
+      expect(write).toHaveBeenCalledOnce();
+
+      // A newer edit is saved normally, and leaving still reports the refused one as unsaved.
+      queue.enqueue({ title: 'new title' }, write);
+      expect(await queue.flush()).toBe(false);
+      expect(write).toHaveBeenLastCalledWith({ title: 'new title' });
+
+      getRejectedEditorSaves('post:refused')[0]!.discard();
+      expect(queue.getRejected()).toBeNull();
+      expect(await queue.flush()).toBe(true);
+    } finally {
+      unregister();
+    }
+  });
+
+  it('classifies server action failures by their Connect code', async () => {
+    await expect(
+      requireActionSuccess(Promise.resolve({ error: 'denied', errorCode: Code.PermissionDenied })),
+    ).rejects.toMatchObject({ name: 'UnretryableSaveError', reason: 'PermissionDenied' });
+    const transient = await requireActionSuccess(Promise.resolve({ error: 'busy', errorCode: Code.Unavailable })).catch(
+      (error: unknown) => error,
+    );
+    expect(transient).toBeInstanceOf(Error);
+    expect(transient).not.toBeInstanceOf(UnretryableSaveError);
+  });
+});
+
+describe('parked editor patches', () => {
+  it('keeps fields of a read-only room with their backup, sends nothing more and counts them as unsaved', async () => {
+    type Patch = { name?: string };
+    const write = vi.fn<(patch: Patch) => Promise<void>>().mockRejectedValue(new SaveParkedError());
+    const queue = createDebouncedPatch<Patch>(100, 'form:parked', 'form:parked', undefined, true, 'form-schema');
+    const unregister = registerEditorSave('form:parked', queue);
+    try {
+      queue.enqueue({ name: 'draft' }, write);
+      await vi.advanceTimersByTimeAsync(100);
+      expect(write).toHaveBeenCalledOnce();
+      expect(queue.hasPending()).toBe(false);
+      expect(queue.hasParked()).toBe(true);
+      expect(queue.hasFailure()).toBe(false);
+      expect(queue.getRejected()).toBeNull();
+      expect(queue.getPendingPatch()).toEqual({ name: 'draft' });
+      expect(hasUnsavedEditorEdits('form:parked')).toBe(true);
+      await vi.advanceTimersByTimeAsync(60_000);
+      expect(write).toHaveBeenCalledOnce();
+      expect(await queue.flush()).toBe(true);
+    } finally {
+      unregister();
+    }
+  });
+
+  it('counts parked fields as durable only when their backup was written, and resumes them on edit access', async () => {
+    type Patch = { name?: string };
+    let parked = true;
+    const write = vi.fn<(patch: Patch) => Promise<void>>(async () => {
+      if (parked) {
+        throw new SaveParkedError();
+      }
+    });
+    // No recovery key: the backup cannot be restored by a later page.
+    const memoryOnly = createDebouncedPatch<Patch>(100, 'form:memory', null, undefined, true);
+    memoryOnly.enqueue({ name: 'draft' }, write);
+    await vi.advanceTimersByTimeAsync(100);
+    expect(memoryOnly.hasParked()).toBe(true);
+    expect(memoryOnly.isDurable()).toBe(false);
+
+    parked = false;
+    memoryOnly.resumeParked();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(write).toHaveBeenLastCalledWith({ name: 'draft' });
+    expect(memoryOnly.hasParked()).toBe(false);
+    expect(memoryOnly.hasPending()).toBe(false);
+  });
 });

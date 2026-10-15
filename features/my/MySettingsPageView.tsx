@@ -9,6 +9,8 @@ import { LanguagePreferenceSettings } from '@/features/my/LanguagePreferenceSett
 import { McpOAuthGrantSettings } from '@/features/my/McpOAuthGrantSettings';
 import { PersonalAccessTokenSettings } from '@/features/my/PersonalAccessTokenSettings';
 import { SettingsForm } from '@/features/my/SettingsForm';
+import { LocalBackups } from '@/features/my/LocalBackups';
+import { LocalBackupsView, type LocalBackupsViewProps } from '@/features/my/LocalBackupsView';
 import { McpIntegrationSettingsView } from '@/features/my/ui/McpIntegrationSettings';
 interface Props {
   email: string | null;
@@ -32,6 +34,7 @@ interface Props {
   };
   tokenBindings?: ComponentProps<typeof PersonalAccessTokenSettings>['bindings'];
   revokeGrant?: ComponentProps<typeof McpOAuthGrantSettings>['revokeAction'];
+  localBackups?: LocalBackupsViewProps;
 }
 export function MySettingsPageView({
   email,
@@ -50,6 +53,7 @@ export function MySettingsPageView({
   preferences,
   tokenBindings,
   revokeGrant,
+  localBackups,
 }: Props) {
   const t = useTranslations('settings.page');
   const tSecurity = useTranslations('security');
@@ -61,6 +65,8 @@ export function MySettingsPageView({
       <DsHeading level={1} scale={2}>
         {tCommonLabels('settings')}
       </DsHeading>
+
+      {localBackups ? <LocalBackupsView {...localBackups} /> : <LocalBackups />}
 
       <DsSectionCard padding="none" appearance="plain" withBorder={false}>
         <DsLayoutStack gap="md">

@@ -1,3 +1,5 @@
+import { pageSnapshotSections } from './editor-snapshot';
+import type { EditorSnapshot } from '@/features/editor/editor-snapshot';
 import { throwQueryError } from '@/lib/api/query-error';
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
@@ -150,6 +152,7 @@ export async function getPage(idOrSlug: string) {
 
     return {
       id: page.id,
+      sourceLocale: page.sourceLocale,
       title: page.title,
       summary: page.summary ?? null,
       slug: page.slug ?? null,
@@ -286,4 +289,29 @@ export async function getPageViewWithToken(
 ) {
   const access = await getPageAccessViewWithToken(idOrSlug, token, requestedLocale, sharePassword);
   return access?.reason === 'allowed' ? access.page : null;
+}
+
+export async function getPageEditorSnapshot(pageId: string, locale: string) {
+  try {
+    const response = await (await createPageClient()).getPageEditorDocument({ pageId, locale });
+    const snapshot: EditorSnapshot = {
+      locale: response.locale,
+      sourceLocale: response.sourceLocale,
+      localeExists: response.localeExists,
+      document: response.document,
+      documentRevision: response.documentRevision,
+      targetRevision: response.targetRevision,
+      editable: response.editable,
+      title: response.title ?? '',
+      summary: response.summary ?? '',
+      blockMedia: response.blockMedia,
+      sections: response.document ? pageSnapshotSections(response.document) : undefined,
+    };
+    return { snapshot, documentLayout: mapProtoDocumentLayout(response.documentLayout) };
+  } catch (error) {
+    if (isConnectErrorCode(error, Code.NotFound, Code.PermissionDenied)) {
+      return null;
+    }
+    throw error;
+  }
 }

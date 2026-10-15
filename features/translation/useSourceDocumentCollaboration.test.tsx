@@ -10,6 +10,9 @@ import {
 } from '@echovisionlab/geul-common/collaboration/email-layout';
 import * as Y from 'yjs';
 import { useEmailLayoutCollaboration } from './useSourceDocumentCollaboration';
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
+
+const { provider } = vi.hoisted(() => ({ provider: {} }));
 
 const layoutId = '11111111-1111-4111-8111-111111111111';
 const unit: EmailLayoutUnit = {
@@ -27,7 +30,7 @@ let container: HTMLDivElement | null = null;
 
 vi.mock('@/lib/hooks/useHocuspocusConnection', () => ({
   useHocuspocusConnection: () => ({
-    provider: null,
+    provider,
     doc: mockDoc,
     isConnected: true,
     isSynced: true,
@@ -56,6 +59,7 @@ function hook() {
 }
 
 beforeEach(() => {
+  setProviderAccessLevel(provider, 'edit');
   mockDoc = hydrateEmailLayoutCanonicalRoom({
     sourceLocale: 'en',
     locale: 'ko',
@@ -75,6 +79,27 @@ afterEach(() => {
 });
 
 describe('useEmailLayoutCollaboration', () => {
+  it('upgrades and downgrades retained target setters on the same room', () => {
+    setProviderAccessLevel(provider, 'view');
+    renderHook('ko');
+    const setTarget = hook().setTargetValue;
+    const fallback = hook().useSourceFallback;
+    act(() => setTarget(unit.handle, 'Denied'));
+    expect(hook().targetUnits[0].value).toBe('Source value');
+    act(() => {
+      setProviderAccessLevel(provider, 'edit');
+      setTarget(unit.handle, 'Editable');
+    });
+    expect(hook().targetUnits[0].value).toBe('Editable');
+    act(() => {
+      setProviderAccessLevel(provider, 'view');
+      setTarget(unit.handle, 'Denied again');
+      fallback(unit.handle);
+    });
+    expect(hook().targetUnits[0].value).toBe('Editable');
+    expect(hook().doc).toBe(mockDoc);
+    expect(hook().setTargetValue).toBe(setTarget);
+  });
   it('edits sparse target values and restores source fallback through the canonical map', async () => {
     renderHook('ko');
     await flush();

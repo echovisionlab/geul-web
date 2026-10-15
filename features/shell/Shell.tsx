@@ -57,6 +57,11 @@ export async function Shell({ children, initialUserSnapshot }: ShellProps) {
         lightMode: tCommon('theme.lightMode'),
         darkMode: tCommon('theme.darkMode'),
         toggleColorScheme: tCommonActions('toggleColorScheme'),
+        signOutUnsavedTitle: tShell('signOutUnsaved.title'),
+        signOutUnsavedMessage: tShell('signOutUnsaved.message'),
+        signOutUnsavedConfirm: tShell('signOutUnsaved.confirm'),
+        cancel: tCommonActions('cancel'),
+        close: tCommonActions('close'),
       }}
     >
       <ShellLayout

@@ -69,6 +69,7 @@ import { AccountService } from '@echovisionlab/geul-proto/secure/account_pb.ts';
 import { MemberService } from '@echovisionlab/geul-proto/secure/member_pb.ts';
 import { WorkService } from '@echovisionlab/geul-proto/secure/work_pb.ts';
 import { forwardIncomingRequestMetadataHeaders } from '@/lib/api/request-metadata-headers';
+import { parseEditorWriteToken } from '@/lib/editor/editor-write-token';
 import { buildCookieHeader } from '@/lib/auth/session-cookie';
 import { getApiUrl } from '@/lib/env';
 import { getRequestHeaders } from '@/lib/utils/header.server';
@@ -101,7 +102,11 @@ const getServerCookieHeader = cache(async (): Promise<string> => {
 
 // Create transport for server-side requests (SSR, Server Components)
 // Forwards session cookies to the Go API for Kratos auth
-async function createServerTransport(options?: { acceptLanguageOverride?: string | null; authOptional?: boolean }) {
+async function createServerTransport(options?: {
+  acceptLanguageOverride?: string | null;
+  authOptional?: boolean;
+  editorOrigin?: string;
+}) {
   const cookieHeader = await getServerCookieHeader();
   const headersList = await getRequestHeaders();
   const acceptLanguage = options?.acceptLanguageOverride ?? headersList.get('accept-language');
@@ -109,6 +114,13 @@ async function createServerTransport(options?: { acceptLanguageOverride?: string
   const buildHeaders = (initHeaders: HeadersInit | undefined, includeCookie: boolean) => {
     const headers = new Headers(initHeaders);
     forwardIncomingRequestMetadataHeaders(headers, headersList);
+    if (options?.editorOrigin) {
+      const { origin, expectedMember } = parseEditorWriteToken(options.editorOrigin);
+      headers.set('Geul-Client-Origin', origin);
+      if (expectedMember) {
+        headers.set('Geul-Expected-Member', expectedMember);
+      }
+    }
     if (includeCookie && cookieHeader) {
       headers.set('Cookie', cookieHeader);
     } else {
@@ -302,16 +314,16 @@ export async function createArtistClient() {
   return createClient(ArtistService, await createServerTransport());
 }
 
-export async function createFileClient() {
-  return createClient(FileService, await createServerTransport());
+export async function createFileClient(editorOrigin?: string) {
+  return createClient(FileService, await createServerTransport({ editorOrigin }));
 }
 
 export async function createLabelClient() {
   return createClient(LabelService, await createServerTransport());
 }
 
-export async function createReleaseClient() {
-  return createClient(ReleaseService, await createServerTransport());
+export async function createReleaseClient(editorOrigin?: string) {
+  return createClient(ReleaseService, await createServerTransport({ editorOrigin }));
 }
 
 export async function createMemberClient() {
@@ -322,8 +334,8 @@ export async function createAccountClient() {
   return createClient(AccountService, await createServerTransport());
 }
 
-export async function createWorkClient() {
-  return createClient(WorkService, await createServerTransport());
+export async function createWorkClient(editorOrigin?: string) {
+  return createClient(WorkService, await createServerTransport({ editorOrigin }));
 }
 
 export async function createCategoryClient() {
@@ -338,16 +350,16 @@ export async function createMenuClient() {
   return createClient(MenuService, await createServerTransport());
 }
 
-export async function createPageClient() {
-  return createClient(PageService, await createServerTransport());
+export async function createPageClient(editorOrigin?: string) {
+  return createClient(PageService, await createServerTransport({ editorOrigin }));
 }
 
-export async function createPostClient() {
-  return createClient(PostService, await createServerTransport());
+export async function createPostClient(editorOrigin?: string) {
+  return createClient(PostService, await createServerTransport({ editorOrigin }));
 }
 
-export async function createProgramEventClient() {
-  return createClient(ProgramEventService, await createServerTransport());
+export async function createProgramEventClient(editorOrigin?: string) {
+  return createClient(ProgramEventService, await createServerTransport({ editorOrigin }));
 }
 
 export async function createProgramEventSeriesClient() {
@@ -394,8 +406,8 @@ export async function createMapPlaceClient() {
   return createClient(MapPlaceService, await createServerTransport());
 }
 
-export async function createTrackClient() {
-  return createClient(TrackService, await createServerTransport());
+export async function createTrackClient(editorOrigin?: string) {
+  return createClient(TrackService, await createServerTransport({ editorOrigin }));
 }
 
 export async function createTranslationClient() {
@@ -406,12 +418,12 @@ export async function createMapThemeClient() {
   return createClient(MapThemeService, await createServerTransport());
 }
 
-export async function createEmailTemplateClient() {
-  return createClient(EmailTemplateService, await createServerTransport());
+export async function createEmailTemplateClient(editorOrigin?: string) {
+  return createClient(EmailTemplateService, await createServerTransport({ editorOrigin }));
 }
 
-export async function createEmailLayoutClient() {
-  return createClient(EmailLayoutService, await createServerTransport());
+export async function createEmailLayoutClient(editorOrigin?: string) {
+  return createClient(EmailLayoutService, await createServerTransport({ editorOrigin }));
 }
 
 export async function createEmailSuppressionClient() {
@@ -422,8 +434,8 @@ export async function createCommentClient() {
   return createClient(CommentService, await createServerTransport());
 }
 
-export async function createCampaignClient() {
-  return createClient(CampaignService, await createServerTransport());
+export async function createCampaignClient(editorOrigin?: string) {
+  return createClient(CampaignService, await createServerTransport({ editorOrigin }));
 }
 
 export async function createSiteSettingClient() {

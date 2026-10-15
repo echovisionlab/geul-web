@@ -3,15 +3,13 @@ import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { connection } from 'next/server';
 import { notFound, redirect } from 'next/navigation';
-import { TranslationEntityType } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
 import { getTranslations } from 'next-intl/server';
 import { LazyPageEditor } from '@/features/page/PageEditor/LazyPageEditor';
-import { createTranslationClient } from '@/lib/api/server-client';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { getManageSiteContext } from '@/lib/queries/manifest';
 import { getPageMetadataDocument, getSiteMetadataDocument } from '@/lib/queries/metadata';
 import { PageRestrictedAccess } from '@/features/page/PageRestrictedAccess';
-import { getPage, getPageAccessView } from '@/lib/queries/page';
+import { getPage, getPageEditorSnapshot, getPageAccessView } from '@/lib/queries/page';
 import { readContentLocaleOverride, resolveContentRequestedLocale } from '@/lib/translation/content-language';
 import {
   applyContentMetadataSeo,
@@ -44,35 +42,6 @@ function joinPageSlug(segments: string[]): string {
 function isEditRequest(query: Record<string, string | string[] | undefined>): boolean {
   const edit = query.edit;
   return (Array.isArray(edit) ? edit[0] : edit) === 'true';
-}
-
-async function getInitialPageTranslationState(pageId: string, requestedLocale: string | null) {
-  try {
-    const response = await (
-      await createTranslationClient()
-    ).listEntityTranslations({
-      target: { entityType: TranslationEntityType.PAGE, entityId: pageId },
-    });
-    const requestedEntry =
-      requestedLocale && requestedLocale !== response.sourceLocale
-        ? response.entries.find((entry) => entry.locale === requestedLocale)
-        : undefined;
-    return {
-      sourceLocale: response.sourceLocale,
-      requestedLocale,
-      requestedLocaleHasEntry: Boolean(requestedEntry),
-      requestedLocaleTitle: requestedEntry?.title ?? null,
-      requestedLocaleSummary: requestedEntry?.summary ?? null,
-    };
-  } catch {
-    return {
-      sourceLocale: null,
-      requestedLocale,
-      requestedLocaleHasEntry: false,
-      requestedLocaleTitle: null,
-      requestedLocaleSummary: null,
-    };
-  }
 }
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
@@ -175,29 +144,34 @@ export default async function PublicPageView({ params, searchParams }: Props) {
     }
 
     const requestedLocale = readContentLocaleOverride(query);
-    const [baseUrl, site, initialTranslationState] = await Promise.all([
+    const [baseUrl, site, editorDocument] = await Promise.all([
       getBaseUrl(),
       getManageSiteContext(),
-      getInitialPageTranslationState(page.id, requestedLocale),
+      getPageEditorSnapshot(page.id, requestedLocale ?? page.sourceLocale),
     ]);
+
+    if (!editorDocument) {
+      notFound();
+    }
 
     return (
       <LazyPageEditor
+        initialSnapshot={editorDocument.snapshot}
         pageId={page.id}
         currentMemberId={session.user.id}
         canManageTranslations={session.user.role === 'admin'}
         initialTitle={page.title}
         initialSummary={page.summary}
-        initialSourceLocale={initialTranslationState.sourceLocale}
-        initialRequestedLocale={initialTranslationState.requestedLocale}
-        initialRequestedLocaleHasEntry={initialTranslationState.requestedLocaleHasEntry}
-        initialRequestedLocaleTitle={initialTranslationState.requestedLocaleTitle}
-        initialRequestedLocaleSummary={initialTranslationState.requestedLocaleSummary}
+        initialSourceLocale={editorDocument.snapshot.sourceLocale}
+        initialRequestedLocale={requestedLocale}
+        initialRequestedLocaleHasEntry={editorDocument.snapshot.localeExists}
+        initialRequestedLocaleTitle={editorDocument.snapshot.title}
+        initialRequestedLocaleSummary={editorDocument.snapshot.summary}
         initialSlug={page.slug ?? null}
         initialStatus={page.status}
         initialShowTitle={page.showTitle}
         initialAccessPolicy={page.accessPolicy}
-        initialDocumentLayout={page.documentLayout}
+        initialDocumentLayout={editorDocument.documentLayout}
         initialFeaturedImageUrl={page.featuredImageUrl ?? null}
         initialOgImageUrl={page.ogImageUrl ?? null}
         userName={session.user.nickname}

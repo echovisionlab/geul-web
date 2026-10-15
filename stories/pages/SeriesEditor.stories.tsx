@@ -81,6 +81,7 @@ function Preview({
     displayedTitle: title,
     handleTitleChange: setTitle,
     tCommon,
+    canEdit: connected,
     canEditCurrentCopy: connected,
     activeEditLocale: localEditLocale(locale, setLocale),
     status,

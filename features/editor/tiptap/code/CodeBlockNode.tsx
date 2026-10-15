@@ -1,9 +1,9 @@
 'use client';
 
+import { liveNodeView } from '@/features/editor/tiptap/live-node-view';
 import { useCallback, useRef } from 'react';
 import { NodeSelection } from '@tiptap/pm/state';
 import { NodeViewContent, NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from '@tiptap/react';
-import { redo, undo } from 'y-prosemirror';
 import type { EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { useBlockResize } from '@/features/editor/hooks/useBlockResize';
 import { EditorMediaBlockFrame, EditorMediaBlockSelector } from '@/features/editor/ui/EditorMediaBlockShell';
@@ -243,8 +243,8 @@ function CodeBlockNodeView({
               canEditNeutral ? (nextLanguage) => updateAttributes({ language: nextLanguage }) : undefined
             }
             onSourceChange={updateSource}
-            onUndo={() => undoBlockRoomEditor(editor) || undo(editor.state)}
-            onRedo={() => redoBlockRoomEditor(editor) || redo(editor.state)}
+            onUndo={() => undoBlockRoomEditor(editor)}
+            onRedo={() => redoBlockRoomEditor(editor)}
             onEscape={exitSourceEditor}
             modelPath={codeEditorModelPath(editor, blockId, language.fileExtension)}
             onMount={registerSourceEditor}
@@ -285,7 +285,9 @@ export function createTiptapCodeBlock(
     addNodeView() {
       const options = this.options;
       return ReactNodeViewRenderer(
-        (props) => <CodeBlockNodeView {...props} authoringMode={options.authoringMode} labels={options.labels} />,
+        liveNodeView(this.name, options, (props, current) => (
+          <CodeBlockNodeView {...props} authoringMode={current.authoringMode} labels={current.labels} />
+        )),
         {
           stopEvent: ({ event }) =>
             isMonacoSourceEditorEvent(event) ||

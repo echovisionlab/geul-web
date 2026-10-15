@@ -66,8 +66,10 @@ describe('PageEditorInterruptionDialogs', () => {
     expect(navigate).toHaveBeenCalledWith('/about');
   });
 
-  it('preserves the exact editor URL when the session expires', () => {
+  it('preserves the exact editor URL when the session expires', async () => {
     const { navigate } = renderDialogs({ interruption: 'session_expired' });
-    expect(navigate).toHaveBeenCalledWith('/login?redirect=%2Fabout%3Fedit%3Dtrue%26locale%3Dko%23body');
+    await vi.waitFor(() =>
+      expect(navigate).toHaveBeenCalledWith('/login?redirect=%2Fabout%3Fedit%3Dtrue%26locale%3Dko%23body'),
+    );
   });
 });

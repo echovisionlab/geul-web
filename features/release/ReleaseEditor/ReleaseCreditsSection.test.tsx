@@ -334,6 +334,7 @@ describe('ReleaseCreditsSection', () => {
         canEdit
         canEditNotes
         onCreditsChange={onCreditsChange}
+        onMutationStart={() => 'test-editor-origin'}
         onCreditNoteChange={onCreditNoteChange}
       />,
     );
@@ -385,6 +386,7 @@ describe('ReleaseCreditsSection', () => {
       ],
       [],
       undefined,
+      'test-editor-origin',
     );
     expect(onCreditNoteChange).toHaveBeenCalledWith('credit-new', 'Refers to Blue Circuit and Midnight Radio');
     expect(notifications.show).toHaveBeenCalled();
@@ -417,6 +419,7 @@ describe('ReleaseCreditsSection', () => {
         canEdit
         canEditNotes
         onCreditsChange={onCreditsChange}
+        onMutationStart={() => 'test-editor-origin'}
         onCreditNoteChange={onCreditNoteChange}
       />,
     );
@@ -459,6 +462,7 @@ describe('ReleaseCreditsSection', () => {
         canEdit
         canEditNotes
         onCreditsChange={onCreditsChange}
+        onMutationStart={() => 'test-editor-origin'}
         onCreditNoteChange={onCreditNoteChange}
       />,
     );
@@ -481,6 +485,7 @@ describe('ReleaseCreditsSection', () => {
         },
       ],
       undefined,
+      'test-editor-origin',
     );
     expect(onCreditNoteChange).toHaveBeenCalledWith('credit-1', '');
   });
@@ -512,6 +517,7 @@ describe('ReleaseCreditsSection', () => {
         canEdit={false}
         canEditNotes={false}
         onCreditsChange={onCreditsChange}
+        onMutationStart={() => 'test-editor-origin'}
         onCreditNoteChange={onCreditNoteChange}
       />,
     );

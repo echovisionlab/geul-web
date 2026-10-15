@@ -173,6 +173,9 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
   });
 
   const handleAddCredit = (id: string) => {
+    if (!canEdit) {
+      return;
+    }
     if (searchType === 'artist') {
       addCredit.mutate({ artistId: id });
       return;
@@ -181,6 +184,9 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
   };
 
   const handleAddByName = () => {
+    if (!canEdit) {
+      return;
+    }
     const name = creditName.trim();
     if (!name) {
       return;
@@ -189,11 +195,17 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
   };
 
   const handleEditRole = (creditId: string, nextRole: string | null) => {
+    if (!canEdit) {
+      return;
+    }
     setUpdatingRoleId(creditId);
     updateCredit.mutate({ creditId, creditRole: nextRole });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
+    if (!canEdit) {
+      return;
+    }
     const { active, over } = event;
     if (!over || active.id === over.id) {
       return;

@@ -66,15 +66,13 @@ describe('EditorPermissionRevokedDialog', () => {
     expect(dialog?.getAttribute('aria-labelledby')).toBeTruthy();
     expect(dialog?.getAttribute('aria-describedby')).toBeTruthy();
     expect(dialog?.closest<HTMLElement>('[data-level]')?.dataset.level).toBe('warning');
-    expect(dialog?.textContent).toContain('Editing permission revoked');
+    expect(dialog?.textContent).toContain('Access removed');
     expect(dialog?.querySelectorAll('button')).toHaveLength(1);
     const confirm = dialog?.querySelector<HTMLButtonElement>('button');
     expect(confirm?.dataset.tone).toBe('warning');
     expect(confirm?.dataset.emphasis).toBe('strong');
     expect(dialog?.contains(document.activeElement)).toBe(true);
-    expect(document.getElementById(dialog!.getAttribute('aria-labelledby')!)?.textContent).toBe(
-      'Editing permission revoked',
-    );
+    expect(document.getElementById(dialog!.getAttribute('aria-labelledby')!)?.textContent).toBe('Access removed');
     expect(document.getElementById(dialog!.getAttribute('aria-describedby')!)?.textContent).toBe(
       enMessages.editorCommon.permissionRevoked.message,
     );

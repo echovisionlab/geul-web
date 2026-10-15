@@ -17,6 +17,7 @@ export function SectionItem({ section, onDelete, editable = true, positionDescri
   const { updateLocalizedSectionProps, updateSection, allowStructuralEdits } = usePageEditor();
   return (
     <SectionItemView
+      initialExpanded={section.type === 'rich-text' || section.type === 'columns' ? true : undefined}
       section={section}
       positionDescription={positionDescription}
       onDelete={onDelete}

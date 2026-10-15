@@ -1,5 +1,6 @@
 'use client';
 
+import { liveNodeView } from '@/features/editor/tiptap/live-node-view';
 import { Text as EditorDsText } from '@/components/core/Typography';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from '@tiptap/react';
@@ -474,7 +475,9 @@ export function createTiptapMapNode(options: TiptapMapNodeOptions = {}) {
     },
     addNodeView() {
       const nodeOptions = this.options;
-      return ReactNodeViewRenderer((props) => <TiptapMapNodeView {...props} {...nodeOptions} />);
+      return ReactNodeViewRenderer(
+        liveNodeView(this.name, nodeOptions, (props, current) => <TiptapMapNodeView {...props} {...current} />),
+      );
     },
   });
 }

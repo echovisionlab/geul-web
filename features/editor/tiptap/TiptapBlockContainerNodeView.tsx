@@ -1,5 +1,6 @@
 'use client';
 
+import { liveNodeView } from '@/features/editor/tiptap/live-node-view';
 import { useCallback, useMemo, useState } from 'react';
 import {
   NodeViewContent,
@@ -340,9 +341,11 @@ export function createTiptapBlockContainer(authoringMode: EditorAuthoringMode | 
     },
     addNodeView() {
       const options = this.options;
-      const render = ReactNodeViewRenderer((props) => (
-        <TiptapBlockContainerNodeView {...props} authoringMode={options.authoringMode} />
-      ));
+      const render = ReactNodeViewRenderer(
+        liveNodeView(this.name, options, (props, current) => (
+          <TiptapBlockContainerNodeView {...props} authoringMode={current.authoringMode} />
+        )),
+      );
       return (props) => {
         const view = render(props);
         if (!view.dom) {

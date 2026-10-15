@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
@@ -66,6 +67,8 @@ vi.mock('next-intl', () => ({
     });
   },
 }));
+
+vi.mock('@/lib/editor/collaborative-document-save', () => ({ registerCollaborativeDocumentSave: () => () => {} }));
 
 vi.mock('@/components/core/Notification', () => ({
   notifications: {
@@ -224,6 +227,26 @@ afterEach(() => {
 });
 
 describe('AdminFormLayoutClient', () => {
+  it('upgrades and downgrades form header controls without replacing its content', () => {
+    const provider = { on: vi.fn(), off: vi.fn() };
+    setProviderAccessLevel(provider, 'view');
+    mockFormEditorContext = { ...mockFormEditorContext, provider };
+    render(
+      <AdminFormLayoutClient formId="form-1">
+        <p data-testid="form-body">Readable form</p>
+      </AdminFormLayoutClient>,
+    );
+    const body = container?.querySelector('[data-testid="form-body"]');
+    expect(container?.querySelector('[data-testid="editor-title-disabled"]')?.textContent).toBe('true');
+    act(() => setProviderAccessLevel(provider, 'edit'));
+    expect(container?.querySelector('[data-testid="editor-title-disabled"]')?.textContent).toBe('false');
+    expect(container?.querySelector('[data-testid="form-body"]')).toBe(body);
+    act(() => setProviderAccessLevel(provider, 'view'));
+    expect(container?.querySelector('[data-testid="editor-title-disabled"]')?.textContent).toBe('true');
+    expect(container?.querySelector('[data-testid="editor-status-enabled"]')?.textContent).toBe('false');
+    expect(container?.querySelector('[data-testid="editor-delete-enabled"]')?.textContent).toBe('false');
+    expect(container?.querySelector('[data-testid="form-body"]')).toBe(body);
+  });
   it('exposes the active form collaboration runtime to nested translation panels', () => {
     render(
       <AdminFormLayoutClient formId="form-1">

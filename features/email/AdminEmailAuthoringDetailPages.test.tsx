@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
@@ -53,6 +54,8 @@ const api = vi.hoisted(() => ({
 }));
 
 const localeRoom = vi.hoisted(() => ({
+  provider: {},
+  editorProps: vi.fn(),
   activeLocale: 'en',
   sourceLocale: 'en',
   isSourceLocale: true,
@@ -169,7 +172,7 @@ vi.mock('@/features/translation/useActiveEditLocale', () => ({
 
 vi.mock('@/lib/collab/useBlockRoomConnection', () => ({
   useBlockRoomConnection: () => ({
-    provider: {},
+    provider: localeRoom.provider,
     doc: { clientID: 7 },
     bootstrap: {
       sourceLocale: localeRoom.sourceLocale,
@@ -199,7 +202,7 @@ vi.mock('@/features/editor/hooks/useBlockRoomTiptapController', () => ({
 
 vi.mock('@/features/translation/useSourceDocumentCollaboration', () => ({
   useEmailLayoutCollaboration: () => ({
-    provider: {},
+    provider: localeRoom.provider,
     doc: { clientID: 8 },
     isConnected: true,
     isSynced: localeRoom.isSynced,
@@ -244,7 +247,8 @@ vi.mock('@/features/admin/IconViewModeControl', () => ({
 }));
 
 vi.mock('@/features/admin/email-layout/EmailLayoutEditor', () => ({
-  EmailLayoutEditor: ({ initialContent }: { initialContent: string }) => {
+  EmailLayoutEditor: ({ initialContent, editable }: { initialContent: string; editable?: boolean }) => {
+    localeRoom.editorProps({ editable });
     localeRoom.layoutInitialContent.push(initialContent);
     return <div data-testid="layout-editor" />;
   },
@@ -261,7 +265,9 @@ vi.mock('@/features/admin/email-layout/EmailLayoutPreview', () => ({
 }));
 
 vi.mock('@/features/email/EmailTemplateEditor/EmailTemplateEditor', () => ({
-  EmailTemplateEditor: () => <div data-testid="template-editor" />,
+  EmailTemplateEditor: ({ editable }: { editable?: boolean }) => (
+    <div data-testid="template-editor" data-editable={String(editable)} />
+  ),
 }));
 
 vi.mock('@/features/translation/EmailEntityTranslationsPanel', () => ({
@@ -373,6 +379,7 @@ function notifySaveStateChanged() {
 }
 
 beforeEach(() => {
+  setProviderAccessLevel(localeRoom.provider, 'edit');
   vi.clearAllMocks();
   localeRoom.activeLocale = 'en';
   localeRoom.sourceLocale = 'en';
@@ -449,7 +456,7 @@ describe('email authoring detail pages', () => {
     expect(document.body.textContent?.toLowerCase()).not.toMatch(/archive|restore|include archived/);
   });
 
-  it('keeps an existing empty target subject empty and read-only before exact room sync', async () => {
+  it('keeps an admitted target subject editable and empty while transport is disconnected', async () => {
     routeId = TEMPLATE_ID;
     localeRoom.activeLocale = 'ko';
     localeRoom.isSourceLocale = false;
@@ -462,7 +469,7 @@ describe('email authoring detail pages', () => {
 
     const subject = findInputByLabelText('common.labels.subject');
     expect(subject.value).toBe('');
-    expect(subject.disabled).toBe(true);
+    expect(subject.disabled).toBe(false);
   });
 
   it('uses the stable-unit target editor without mounting the source HTML editor', async () => {
@@ -605,8 +612,9 @@ describe('email authoring detail pages', () => {
     act(() => option.click());
     await flush();
 
-    expect(api.updateEmailTemplateLayoutAction).toHaveBeenCalledWith(TEMPLATE_ID, LAYOUT_ID);
-    expect(api.publishEditorEntityChange).toHaveBeenCalledWith(`email_template:${TEMPLATE_ID}`);
+    expect(api.updateEmailTemplateLayoutAction).toHaveBeenCalledWith(TEMPLATE_ID, LAYOUT_ID, expect.any(String));
+    const origin = api.updateEmailTemplateLayoutAction.mock.calls[0]?.[2];
+    expect(api.publishEditorEntityChange).toHaveBeenCalledWith(`email_template:${TEMPLATE_ID}`, origin);
   });
 
   it('refetches full email template metadata when an entity change hint arrives', async () => {
@@ -633,4 +641,43 @@ describe('email authoring detail pages', () => {
     expect(api.getEmailTemplateAction).toHaveBeenCalledTimes(2);
     expect(findInputByLabelText('adminList.emailTemplates.detail.fields.layoutLabel').value).toBe('Custom layout');
   });
+});
+
+it('upgrades and downgrades HTML, name and key without replacing the layout body', async () => {
+  routeId = LAYOUT_ID;
+  setProviderAccessLevel(localeRoom.provider, 'view');
+  renderPage(<EmailLayoutEditPage />);
+  await flush();
+  expect(container?.querySelector('[data-testid="layout-editor"]')).not.toBeNull();
+  const body = container?.querySelector('[data-testid="layout-editor"]');
+  expect(localeRoom.editorProps.mock.lastCall?.[0].editable).toBe(false);
+  act(() => setProviderAccessLevel(localeRoom.provider, 'edit'));
+  expect(localeRoom.editorProps.mock.lastCall?.[0].editable).toBe(true);
+  expect(container?.querySelector('[data-testid="layout-editor"]')).toBe(body);
+  expect(findInputByLabelText('common.labels.key').disabled).toBe(false);
+  act(() => setProviderAccessLevel(localeRoom.provider, 'view'));
+  expect(localeRoom.editorProps.mock.lastCall?.[0].editable).toBe(false);
+  expect(container?.querySelector('[data-testid="layout-editor"]')).toBe(body);
+  expect(findInputByLabelText('common.labels.key').disabled).toBe(true);
+});
+
+it('upgrades and downgrades subject and layout while retaining the template body', async () => {
+  routeId = TEMPLATE_ID;
+  setProviderAccessLevel(localeRoom.provider, 'view');
+  renderPage(<EmailTemplateEditPage />);
+  await flush();
+  expect(findInputByLabelText('common.labels.subject').disabled).toBe(true);
+  const subject = findInputByLabelText('common.labels.subject');
+  const body = container?.querySelector('[data-testid="template-editor"]');
+  expect(body?.getAttribute('data-editable')).toBe('false');
+  act(() => setProviderAccessLevel(localeRoom.provider, 'edit'));
+  expect(subject.disabled).toBe(false);
+  expect(findInputByLabelText('adminList.emailTemplates.detail.fields.layoutLabel').disabled).toBe(false);
+  expect(container?.querySelector('[data-testid="template-editor"]')).toBe(body);
+  expect(body?.getAttribute('data-editable')).toBe('true');
+  act(() => setProviderAccessLevel(localeRoom.provider, 'view'));
+  expect(subject.disabled).toBe(true);
+  expect(container?.querySelector('[data-testid="template-editor"]')).toBe(body);
+  expect(body?.getAttribute('data-editable')).toBe('false');
+  expect(findInputByLabelText('adminList.emailTemplates.detail.fields.layoutLabel').disabled).toBe(true);
 });

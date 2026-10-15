@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -190,6 +191,43 @@ afterEach(() => {
 });
 
 describe('useMapThemeEditorCollaboration', () => {
+  it('upgrades and downgrades retained name, settings and variant setters without replacing the room', () => {
+    const provider = connection.provider!;
+    setProviderAccessLevel(provider, 'view');
+    renderProbe();
+    syncCurrentDocument();
+    const editor = result.current!;
+    const edit = () => {
+      editor.setName('Editable');
+      editor.updateSettings({ calloutScale: 1.35 });
+      editor.updateLightVariant({ backgroundColor: '#123456' });
+      editor.updateDarkVariant({ backgroundColor: '#654321' });
+    };
+    act(edit);
+    expect(result.current?.name).toBe('Canonical theme');
+    act(() => {
+      setProviderAccessLevel(provider, 'edit');
+      edit();
+    });
+    expect(result.current?.name).toBe('Editable');
+    expect(result.current?.settings.calloutScale).toBe(1.35);
+    expect(result.current?.lightVariant.backgroundColor).toBe('#123456');
+    expect(result.current?.darkVariant.backgroundColor).toBe('#654321');
+    act(() => {
+      setProviderAccessLevel(provider, 'view');
+      editor.setName('Denied');
+      editor.updateSettings({ calloutScale: 2 });
+      editor.updateLightVariant({ backgroundColor: '#ffffff' });
+      editor.updateDarkVariant({ backgroundColor: '#ffffff' });
+    });
+    expect(result.current?.name).toBe('Editable');
+    expect(result.current?.settings.calloutScale).toBe(1.35);
+    expect(result.current?.lightVariant.backgroundColor).toBe('#123456');
+    expect(result.current?.darkVariant.backgroundColor).toBe('#654321');
+    expect(result.current?.doc).toBe(editor.doc);
+    expect(result.current?.setName).toBe(editor.setName);
+  });
+
   it('never seeds a Y.Map from stale manage GET state and enables mutations only after server sync', () => {
     const doc = connection.doc!;
     const meta = createMapThemeMetaMap(doc);

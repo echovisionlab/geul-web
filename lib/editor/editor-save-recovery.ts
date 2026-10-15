@@ -1,6 +1,8 @@
 'use client';
 
-const STORAGE_PREFIX = 'geul:editor-save-recovery:v1:';
+import { getActiveMember, subscribeSignedOutMembers } from '@/lib/auth/active-member';
+
+const STORAGE_PREFIX = 'geul:editor-save-recovery:v2:';
 
 export interface EditorSaveRecoveryEntry {
   id: string;
@@ -38,6 +40,36 @@ const claimedQueueIds = new Map<string, string>();
 const memoryRecoveries = new Map<string, Map<string, StoredEntry>>();
 const latestPersistedAtByScope = new Map<string, number>();
 
+/**
+ * Drops every unsaved-field backup `memberId` left in this tab. Sign-out keeps the tab, and the
+ * tab's backups must not outlive the member's session on this device.
+ */
+export function clearEditorSaveRecoveriesForMember(memberId: string): void {
+  memoryRecoveries.clear();
+  latestPersistedAtByScope.clear();
+  claimedQueueIds.clear();
+  let storage: Storage | null = null;
+  try {
+    storage = typeof window === 'undefined' ? null : window.sessionStorage;
+  } catch {
+    storage = null;
+  }
+  if (!storage) {
+    return;
+  }
+  try {
+    const prefix = memberPrefix(memberId);
+    const keys = Array.from({ length: storage.length }, (_, index) => storage.key(index)).filter(
+      (key): key is string => key?.startsWith(prefix) ?? false,
+    );
+    for (const key of keys) {
+      storage.removeItem(key);
+    }
+  } catch {
+    // Storage that cannot be read cannot leak to the next account either.
+  }
+}
+
 export function activateEditorSaveRecoveryQueue(queueId: string) {
   activeQueueIds.add(queueId);
 }
@@ -55,7 +87,14 @@ function releaseEditorSaveRecoveryClaims(ownerQueueId: string) {
   }
 }
 
+/**
+ * Backups are durable only under the active member, keyed by member: another member signing in
+ * to this tab never sees them. Without an active member they stay in memory.
+ */
 function getStorage(): Storage | null {
+  if (!getActiveMember()) {
+    return null;
+  }
   try {
     return typeof window === 'undefined' ? null : window.sessionStorage;
   } catch {
@@ -63,8 +102,17 @@ function getStorage(): Storage | null {
   }
 }
 
+function memberPrefix(memberId: string): string {
+  return `${STORAGE_PREFIX}${encodeURIComponent(memberId)}:`;
+}
+
 function storageKey(scope: string) {
-  return `${STORAGE_PREFIX}${encodeURIComponent(scope)}`;
+  return `${memberPrefix(getActiveMember() ?? '')}${encodeURIComponent(scope)}`;
+}
+
+// A member signed out here or in another tab: this tab drops their backups.
+if (typeof window !== 'undefined') {
+  subscribeSignedOutMembers(clearEditorSaveRecoveriesForMember);
 }
 
 function parseSessionRecovery(scope: string): StoredRecovery | null {
@@ -186,14 +234,18 @@ export function persistEditorSaveRecoveryEntry(
     const stored = parseStoredRecovery(scope) ?? { version: 1 as const, scope, entries: [] };
     const entries = stored.entries.filter((item) => item.queueId !== queueId);
     entries.push(safeEntry);
-    if (storage) {
-      const sessionStored = parseSessionRecovery(scope);
-      // Keep malformed/unknown envelopes intact. The in-memory copy remains usable for this session.
-      const rawSession = storage.getItem(storageKey(scope));
-      if (!rawSession || sessionStored) {
-        storage.setItem(storageKey(scope), serializedRecovery(scope, entries, sessionStored?.opaqueEntries));
-      }
+    // True only when this payload reached session storage: a memory-only copy does not survive
+    // leaving the page, so it must not count as durable.
+    if (!storage) {
+      return false;
     }
+    const sessionStored = parseSessionRecovery(scope);
+    // Keep malformed/unknown envelopes intact. The in-memory copy remains usable for this session.
+    const rawSession = storage.getItem(storageKey(scope));
+    if (rawSession && !sessionStored) {
+      return false;
+    }
+    storage.setItem(storageKey(scope), serializedRecovery(scope, entries, sessionStored?.opaqueEntries));
     return true;
   } catch {
     return false;

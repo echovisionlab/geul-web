@@ -258,6 +258,7 @@ describe('ReleaseArtistsSection', () => {
         idPrefix="release-artists"
         artists={[]}
         onArtistsChange={onArtistsChange}
+        onMutationStart={() => 'test-editor-origin'}
       />,
     );
 
@@ -283,6 +284,7 @@ describe('ReleaseArtistsSection', () => {
       [{ artistId: 'artist-1', sortOrder: 0 }],
       [],
       undefined,
+      'test-editor-origin',
     );
     expect(notifications.show).toHaveBeenCalled();
   });
@@ -304,7 +306,14 @@ describe('ReleaseArtistsSection', () => {
       },
     ];
 
-    render(<ReleaseArtistsSection releaseId="release-1" artists={artists} onArtistsChange={onArtistsChange} />);
+    render(
+      <ReleaseArtistsSection
+        releaseId="release-1"
+        artists={artists}
+        onArtistsChange={onArtistsChange}
+        onMutationStart={() => 'test-editor-origin'}
+      />,
+    );
 
     act(() => {
       latestDragEndHandler?.({
@@ -343,6 +352,7 @@ describe('ReleaseArtistsSection', () => {
         previousItemId: undefined,
         nextItemId: 'artist-1',
       },
+      'test-editor-origin',
     );
   });
 });

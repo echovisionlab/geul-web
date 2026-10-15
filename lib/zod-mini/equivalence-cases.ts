@@ -552,8 +552,8 @@ function bootstrapPayload(overrides: Record<string, unknown>): Record<string, un
   const update = Y.encodeStateAsUpdate(source);
   source.destroy();
   return {
-    kind: 'block_room.bootstrap',
-    protocolVersion: 2,
+    kind: 'room.bootstrap',
+    v: 3,
     bootstrapChallenge: 'challenge-1',
     documentName: `post:${UUID}:${locale}`,
     documentType: 'post',
@@ -578,7 +578,7 @@ function bootstrapPayload(overrides: Record<string, unknown>): Record<string, un
 const BOOTSTRAP_OVERRIDES: Record<string, unknown>[] = [
   {},
   { extra: true },
-  { protocolVersion: 1 },
+  { v: 1 },
   { bootstrapChallenge: '   ' },
   { documentType: 'unknown' },
   { documentRevision: 'not-a-uuid' },

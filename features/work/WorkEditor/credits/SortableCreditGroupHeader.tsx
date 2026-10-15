@@ -66,6 +66,9 @@ export function SortableCreditGroupHeader({
   );
 
   const handleSaveEdit = () => {
+    if (!canEdit) {
+      return;
+    }
     if (editName.trim() && editName !== group.name) {
       onEdit(group.id, editName.trim());
     }
@@ -119,6 +122,7 @@ export function SortableCreditGroupHeader({
           {isEditing ? (
             <DsLayoutInline gap="none" wrap="nowrap">
               <TextInput
+                readOnly={!canEdit}
                 size="xs"
                 aria-label={t('fields.groupPlaceholder')}
                 value={editName}
@@ -140,7 +144,7 @@ export function SortableCreditGroupHeader({
                 }}
                 autoFocus
               />
-              <IconButton tone="positive" onClick={handleSaveEdit} aria-label={tCommon('save')}>
+              <IconButton tone="positive" disabled={!canEdit} onClick={handleSaveEdit} aria-label={tCommon('save')}>
                 <IconCheck aria-hidden />
               </IconButton>
               <IconButton

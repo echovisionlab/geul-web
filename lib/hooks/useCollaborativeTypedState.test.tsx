@@ -6,10 +6,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import type { TypedMetaMap } from '@/lib/collab/TypedMetaMap';
 import { useCollaborativeTypedState } from './useCollaborativeTypedState';
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
+
+const { provider } = vi.hoisted(() => ({ provider: {} }));
 
 vi.mock('./useHocuspocusConnection', () => ({
   useHocuspocusConnection: () => ({
-    provider: null,
+    provider,
     doc: null,
     isConnected: false,
     isSynced: false,
@@ -76,6 +79,26 @@ afterEach(() => {
 });
 
 describe('useCollaborativeTypedState', () => {
+  it('uses the current room access even in the setter retained by a mounted controller', () => {
+    setProviderAccessLevel(provider, 'view');
+    container = document.createElement('div');
+    root = createRoot(container);
+    act(() => root?.render(<TestHarness documentName="form:form-1:en" initialTitle="Initial" />));
+    const setTitle = latestSetTitle!;
+    act(() => setTitle('Denied'));
+    expect(latestState?.title).toBe('Initial');
+    act(() => {
+      setProviderAccessLevel(provider, 'edit');
+      setTitle('Editable');
+    });
+    expect(latestState?.title).toBe('Editable');
+    act(() => {
+      setProviderAccessLevel(provider, 'view');
+      setTitle('Denied again');
+    });
+    expect(latestState?.title).toBe('Editable');
+    setProviderAccessLevel(provider, 'edit');
+  });
   it('does not reset local state when normalize callbacks get a new identity on rerender', () => {
     container = document.createElement('div');
     document.body.appendChild(container);

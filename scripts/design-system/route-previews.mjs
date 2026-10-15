@@ -402,7 +402,15 @@ export const routePreviews = [
     variant: 'Settings',
     coverage: 'page-view',
     scope:
-      'Actual complete MySettingsPageView with language/newsletter/cookie/token/MCP sections and local preference callbacks. Server role/session projection, credentials and identity persistence are outside.',
+      'Actual complete MySettingsPageView with empty local backups, language/newsletter/cookie/token/MCP sections and local callbacks. Backup storage/navigation, server role/session projection, credentials and identity persistence are outside.',
+  },
+  {
+    route: '/my/settings',
+    storyTitle: 'Pages/Account/Full Pages',
+    variant: 'SettingsWithLocalBackups',
+    coverage: 'page-view',
+    scope:
+      'Actual MySettingsPageView placement with several orphan journal fixtures and local discard confirmation. Backup storage, liveness, editor navigation, server session/access and other settings persistence are outside.',
   },
   {
     route: '/series/[idOrSlug]',

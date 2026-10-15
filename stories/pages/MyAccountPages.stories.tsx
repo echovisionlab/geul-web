@@ -9,15 +9,19 @@ import { createLocalTokenBindings } from './fixtures/personal-access-tokens';
 import { SessionProvider } from '@/lib/providers/SessionProvider';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { accountAccessibilityLabels } from './AccountAccessibility';
+import { localBackupEntries } from './fixtures/local-backups';
 export function MyAccountPagesPreview({
   surface = 'profile',
   role = 'author',
   state = 'ready',
+  backups = false,
 }: {
   surface?: 'profile' | 'security' | 'settings';
   role?: 'author' | 'user';
   state?: 'ready' | 'failed' | 'pending';
+  backups?: boolean;
 }) {
+  const [backupEntries, setBackupEntries] = useState(backups ? localBackupEntries : []);
   const [tokenBindings] = useState(() => createLocalTokenBindings(state === 'failed'));
   const [client] = useState(() => new QueryClient({ defaultOptions: { queries: { retry: false } } }));
   const failed = state === 'failed';
@@ -87,6 +91,15 @@ export function MyAccountPagesPreview({
             />
           ) : (
             <MySettingsPageView
+              localBackups={{
+                entries: backupEntries,
+                loading: state === 'pending',
+                error: failed,
+                onRefresh: () => {},
+                onOpen: () => {},
+                onDiscard: async (entry) =>
+                  setBackupEntries((current) => current.filter((item) => item.id !== entry.id)),
+              }}
               email="june@example.com"
               preferredLocale="ko"
               subscribed
@@ -128,14 +141,16 @@ const meta = {
   excludeStories: ['MyAccountPagesPreview'],
   component: MyAccountPagesPreview,
   args: { surface: 'profile', role: 'author', state: 'ready' },
-  render: (args) => <MyAccountPagesPreview key={`${args.surface}:${args.role}:${args.state}`} {...args} />,
+  render: (args) => (
+    <MyAccountPagesPreview key={`${args.surface}:${args.role}:${args.state}:${args.backups}`} {...args} />
+  ),
   parameters: {
     layout: 'fullscreen',
     nextjs: { appDirectory: true, navigation: { pathname: '/my/profile', query: {} } },
     docs: {
       description: {
         component:
-          'Complete production MyProfilePageView, MySecurityPageView and MySettingsPageView compositions, original preference/profile/security controllers and typed local callbacks. Server session freshness/role projection, OAuth/passkey ceremonies, identity persistence and credential issuance are outside. Token creation, regeneration and deletion update local rows and preview-only secrets that cannot authenticate.',
+          'Complete production MyProfilePageView, MySecurityPageView and MySettingsPageView compositions, original preference/profile/security controllers and typed local callbacks. Local backup fixtures replace IndexedDB/liveness and editor navigation; discard changes fixture rows only. Server session freshness/role projection, OAuth/passkey ceremonies, identity persistence and credential issuance are outside. Token creation, regeneration and deletion update local rows and preview-only secrets that cannot authenticate.',
       },
     },
   },
@@ -157,6 +172,7 @@ export const Settings: Story = {
   parameters: { nextjs: { navigation: { pathname: '/my/settings', query: {} } } },
 };
 export const BasicSettings: Story = { args: { surface: 'settings', role: 'user' } };
+export const SettingsWithLocalBackups: Story = { args: { surface: 'settings', backups: true } };
 export const SettingsFailed: Story = { args: { surface: 'settings', state: 'failed' } };
 export const Phone: Story = { globals: { viewport: { value: 'phone', isRotated: false } } };
 

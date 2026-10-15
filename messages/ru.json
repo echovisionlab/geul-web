@@ -329,7 +329,14 @@
       "ogRegenerationFailed": "Не удалось восстановить образ OG.",
       "testEmailSent": "Тестовое письмо отправлено",
       "saveSuccess": "Сохранено",
-      "saveFailed": "Не удалось сохранить"
+      "saveFailed": "Не удалось сохранить",
+      "saveRetrying": "Ваши изменения не сохранены на сервере. Повторяем попытку.",
+      "editsRestored": "Восстановленные правки возвращены в документ.",
+      "leaveWithRejectedEdits": {
+        "title": "Выйти без правок, которые не удалось сохранить?",
+        "message": "Сервер отклонил некоторые правки, поэтому они не были сохранены. Сначала скопируйте их из меню совместной работы или выйдите, отменив эти правки.",
+        "confirm": "Выйти и отменить правки"
+      }
     },
     "errors": {
       "generic": "Что-то пошло не так. Пожалуйста, попробуйте еще раз.",
@@ -460,6 +467,11 @@
       "siteInfo": "Информация о сайте",
       "links": "Ссылки",
       "socialMedia": "Социальные сети"
+    },
+    "signOutUnsaved": {
+      "title": "Выйти из учётной записи с несохранёнными правками?",
+      "message": "Некоторые правки не сохранены на сервере. При выходе из учётной записи они будут удалены с этого устройства.",
+      "confirm": "Выйти и отменить правки"
     }
   },
   "adminShell": {
@@ -673,13 +685,13 @@
       "detail": {
         "backTooltip": "Вернуться к макетам электронной почты",
         "targetEditor": {
-          "title": "Translated text",
-          "description": "Edit only visible text and accessibility labels. HTML, CSS, links, and placeholders remain owned by the source layout.",
-          "empty": "This layout has no translatable text units.",
+          "title": "Переведённый текст",
+          "description": "Редактируйте только видимый текст и метки доступности. HTML, CSS, ссылки и заполнители остаются под управлением исходного макета.",
+          "empty": "В этом макете нет текстовых элементов для перевода.",
           "textUnit": "Text",
-          "sourceValue": "Source: {value}",
-          "translatedValue": "This locale provides its own value.",
-          "sourceFallback": "Using the source value.",
+          "sourceValue": "Источник: {value}",
+          "translatedValue": "Для этой локали задано собственное значение.",
+          "sourceFallback": "Используется исходное значение.",
           "useSource": "Use source"
         },
         "viewModes": {
@@ -1677,16 +1689,16 @@
       "consentDescription": "Этот клиент может читать и редактировать содержимое и управлять файлами в пределах текущих прав вашей учётной записи. Он может создавать, обновлять или удалять содержимое и изменять существующие вложения. Подключение не предоставляет учётной записи дополнительных прав.",
       "consentOfflineAccess": "Это подключение может продолжать работать после завершения текущего сеанса браузера, пока вы его не отзовёте.",
       "consentRevoke": "Вы можете отозвать это подключение в разделе {settings} → Remote MCP.",
-      "connectionsTitle": "Connected MCP clients",
-      "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
-      "connectionsEmpty": "No MCP clients are connected.",
-      "connectedAt": "Connected {date}",
+      "connectionsTitle": "Подключённые MCP-клиенты",
+      "connectionsDescription": "Эти разрешения OAuth не связаны с сеансами браузера. Отзыв разрешения отключает соответствующий MCP-клиент без выхода из вашей учётной записи.",
+      "connectionsEmpty": "Нет подключённых MCP-клиентов.",
+      "connectedAt": "Подключено {date}",
       "revoke": "Revoke",
-      "revokeTitle": "Revoke MCP access",
-      "revokeConfirmation": "Revoke MCP access for {client}? Its current token chain will stop working.",
-      "revokeSuccess": "MCP access was revoked.",
-      "revokeFailed": "Could not revoke MCP access.",
-      "loadFailed": "Could not load connected MCP clients."
+      "revokeTitle": "Отозвать доступ к MCP",
+      "revokeConfirmation": "Отозвать доступ к MCP для {client}? Его текущая цепочка токенов перестанет работать.",
+      "revokeSuccess": "Доступ к MCP отозван.",
+      "revokeFailed": "Не удалось отозвать доступ к MCP.",
+      "loadFailed": "Не удалось загрузить подключённые MCP-клиенты."
     },
     "personalAccessTokens": {
       "title": "Персональный токен доступа",
@@ -2136,9 +2148,9 @@
     "systemOrLegacy": "Система или более ранняя версия",
     "restore": "Восстановить",
     "restoreTitle": "Восстановить версию",
-    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document.",
+    "restoreSameLocaleBody": "Восстановление источника v{version} ({locale}) изменит только исходный документ. Существующие документы переводов и задания перевода останутся без изменений, переводы не будут созданы автоматически. Продолжить?",
+    "restoreCrossLocaleBody": "Восстановление источника v{version} переключит исходную локаль с {currentLocale} на {selectedLocale} и изменит только указатель на источник. Существующие документы переводов и задания перевода останутся без изменений, переводы не будут созданы автоматически. Продолжить?",
+    "restoreFailed": "Не удалось восстановить исходный документ.",
     "loadFailed": "Не удалось загрузить историю версий.",
     "end": "Все версии загружены."
   },
@@ -2518,6 +2530,24 @@
       "sections": {
         "connection": "Связь"
       }
+    },
+    "saveState": {
+      "saved": "Сохранено",
+      "saving": "Сохранение…",
+      "offline": "Нет подключения · правки хранятся на этом устройстве",
+      "error": "Не удалось сохранить · повторная попытка…",
+      "rejected": "Некоторые правки не удалось сохранить",
+      "reload": "Переподключение · восстановление правок…"
+    },
+    "rejectedEdits": {
+      "open": "Просмотреть несохранённые правки",
+      "title": "Правки, которые не удалось сохранить",
+      "description": "Сервер отклонил эти правки, поэтому повторных попыток их сохранения не будет. Скопируйте всё нужное, затем отмените эти правки.",
+      "reason": "Причина: {reason}",
+      "copy": "Копировать",
+      "copied": "Скопировано",
+      "discard": "Отменить правки",
+      "empty": "Все правки сохранены."
     }
   },
   "urlSection": {
@@ -3512,8 +3542,8 @@
       "message": "Более новая версия была сохранена, пока этот редактор был открыт. Перезагрузите файл, прежде чем продолжить редактирование."
     },
     "permissionRevoked": {
-      "title": "Разрешение на редактирование отозвано",
-      "message": "У вас больше нет разрешения на редактирование этого контента. Изменения, внесенные после отзыва разрешения, не будут сохранены."
+      "title": "Доступ отозван",
+      "message": "У вас больше нет доступа к этому материалу. Несохранённые изменения остаются на этом устройстве."
     },
     "sessionExpired": {
       "title": "Срок сеанса истек",
@@ -3754,14 +3784,14 @@
           "quote": {
             "title": "Цитата",
             "subtext": "Цитата или отрывок",
-            "aliases": "quotation\nblockquote\nbq",
+            "aliases": "quotation\nblockquote\nbq\nцитата\nблок цитаты",
             "group": "Базовые блоки"
           },
           "callout": {
             "title": "Callout",
-            "subtext": "Highlight content with an icon",
-            "aliases": "callout\nnotice\ninfo\naside",
-            "group": "Basic blocks"
+            "subtext": "Выделите содержимое с помощью значка",
+            "aliases": "callout\nnotice\ninfo\naside\nвыноска\nпримечание\nинформация\nуведомление",
+            "group": "Базовые блоки"
           },
           "divider": {
             "title": "Разделитель",
@@ -3790,61 +3820,61 @@
           "mathBlock": {
             "title": "Математический блок",
             "subtext": "Отображение уравнения с помощью LaTeX",
-            "aliases": "math\nequation\nlatex\nformula",
+            "aliases": "math\nequation\nlatex\nformula\nматематика\nуравнение\nформула",
             "group": "Математика"
           },
           "inlineMath": {
             "title": "Формула в строке",
             "subtext": "Формула LaTeX в строке",
-            "aliases": "inline\ninline math\ninlinemath\nlatex\n$",
+            "aliases": "inline\ninline math\ninlinemath\nlatex\n$\nвстроенная формула\nформула в строке",
             "group": "В строке"
           },
           "map": {
             "title": "Карта",
             "subtext": "Вставка местоположения на карте",
-            "aliases": "map\nlocation\nplace\naddress",
+            "aliases": "map\nlocation\nplace\naddress\nкарта\nместоположение\nместо\nадрес",
             "group": "Встраиваемое"
           },
           "externalVideo": {
             "title": "Внешнее видео",
             "subtext": "Вставьте ссылку на YouTube или Vimeo",
-            "aliases": "external video\nyoutube\nvimeo\nembed",
+            "aliases": "external video\nyoutube\nvimeo\nembed\nвнешнее видео\nютуб\nвимео\nвставка",
             "group": "Встраиваемое"
           },
           "p5Sketch": {
             "title": "p5.js",
             "subtext": "Добавить интерактивный скетч p5.js",
-            "aliases": "p5\np5.js\nsketch\ncreative coding",
+            "aliases": "p5\np5.js\nsketch\ncreative coding\nскетч\nэскиз\nтворческое программирование",
             "group": "Встраиваемое"
           },
           "threeScene": {
             "title": "Three.js",
             "subtext": "Добавить интерактивную сцену Three.js",
-            "aliases": "three\nthree.js\n3d\nscene",
+            "aliases": "three\nthree.js\n3d\nscene\nтрёхмерный\nсцена",
             "group": "Встраиваемое"
           },
           "file": {
             "title": "Вложение",
             "subtext": "Прикрепите файл (PDF, DOC, ZIP и т. д.)",
-            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload",
+            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\nвложение\nфайл\nдокумент\nскачать",
             "group": "Медиа"
           },
           "aiAssistant": {
             "title": "ИИ-помощник",
             "subtext": "Напишите, улучшите или преобразуйте текст с помощью ИИ",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove",
+            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nии\nпомощник\nписать\nулучшить",
             "group": "ИИ"
           },
           "shader": {
             "title": "GLSL-шейдер",
             "subtext": "Добавить интерактивный GLSL-шейдер",
-            "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "aliases": "shader\nglsl\nfragment shader\nshadertoy\nшейдер\nфрагментный шейдер",
             "group": "Встраиваемое"
           },
           "mermaid": {
             "title": "Mermaid",
             "subtext": "Создать диаграмму из текста",
-            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence\nдиаграмма\nблок-схема\nпоследовательность",
             "group": "Встраиваемое"
           }
         }
@@ -4024,6 +4054,12 @@
       "media": {
         "importFromUrl": "Импортировать из URL-адреса"
       }
+    },
+    "accessDowngraded": {
+      "message": "Ваш доступ изменён на просмотр. Редактирование отключено; ещё не сохранённые правки остаются на этом устройстве и будут сохранены, если вы снова получите доступ к редактированию."
+    },
+    "accessUpgraded": {
+      "message": "Вы снова можете редактировать. Изменения, сохранённые на устройстве в режиме только просмотра, сохраняются."
     }
   },
   "aiAssistant": {
@@ -4166,35 +4202,35 @@
     "resolvedMetadata": "Разрешенные метаданные"
   },
   "translationPanel": {
-    "description": "Review the source language and existing translation document for each locale.",
+    "description": "Просмотрите исходный язык и существующий документ перевода для каждой локали.",
     "actions": {
       "expand": "Расширять",
       "collapse": "Крах",
-      "regenerateAll": "Generate/regenerate all eligible locales",
+      "regenerateAll": "Создать/пересоздать переводы для всех подходящих локалей",
       "regenerateLocale": "Регенерировать",
       "regenerateLocaleAria": "Восстановить перевод {locale}",
       "generateLocale": "Generate",
-      "generateLocaleAria": "Generate {locale} translation"
+      "generateLocaleAria": "Создать перевод для {locale}"
     },
     "sourceLocale": {
       "label": "Исходный язык",
       "description": "Это исходный язык, используемый в качестве основы для переводов данного объекта.",
       "confirm": {
         "title": "Изменить исходный язык",
-        "description": "Changing the source language updates only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically.",
-        "detail": "{locale} becomes the language of the editable source document. Existing target documents and translation jobs remain unchanged.",
+        "description": "Изменение исходного языка обновляет только указатель на источник. Существующие документы переводов и задания перевода остаются без изменений, переводы не создаются автоматически.",
+        "detail": "{locale} станет языком редактируемого исходного документа. Существующие документы переводов и задания перевода останутся без изменений.",
         "confirm": "Изменить исходный язык"
       }
     },
     "activeEditLocale": {
-      "ariaLabel": "Switch content language. Current: {locale}",
+      "ariaLabel": "Переключить язык содержимого. Текущий: {locale}",
       "sourceOption": "{locale} (Источник)",
       "loading": "Загрузка языков...",
-      "missingDescription": "No {locale} target document exists yet. Generate it from the translations panel.",
+      "missingDescription": "Документ перевода для {locale} ещё не создан. Создайте его в панели переводов.",
       "bodyPreviewTitle": "{locale} предварительный просмотр тела",
-      "bodyPreviewDescription": "The existing translation document is shown with its structure and formatting.",
+      "bodyPreviewDescription": "Существующий документ перевода отображается с его структурой и форматированием.",
       "bodyPreviewEmpty": "Локализованного предварительного просмотра тела пока нет.",
-      "sharedStructureSectionDescription": "This section keeps shared layout or query settings from the source page; translated body content is read-only.",
+      "sharedStructureSectionDescription": "В этом разделе сохраняются общие настройки макета или запроса исходной страницы; переведённый основной текст доступен только для чтения.",
       "sectionFieldLabels": {
         "caption": "Подпись",
         "copyJson": "Копия сцены"
@@ -4205,7 +4241,7 @@
     },
     "states": {
       "loadFailed": "Не удалось загрузить переводы.",
-      "missingTarget": "No target document yet.",
+      "missingTarget": "Документ перевода ещё не создан.",
       "sourceEditorHint": "Отредактируйте исходный текст в главном редакторе.",
       "updatedAt": "Обновлен {date}"
     },
@@ -4218,26 +4254,26 @@
     }
   },
   "translationPanelMenu": {
-    "description": "Review source menu labels and existing translation documents.",
+    "description": "Просмотрите исходные названия пунктов меню и существующие документы переводов.",
     "previewModal": {
-      "title": "{locale} menu translation preview",
+      "title": "Предварительный просмотр перевода меню для {locale}",
       "fields": {
-        "localizedLabelForLocale": "{locale} public label"
+        "localizedLabelForLocale": "Публичное название для {locale}"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template."
+      "description": "Управляйте исходным языком и существующими документами переводов для этого шаблона электронной почты."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout."
+      "description": "Управляйте исходным языком и существующими документами переводов для этого макета электронной почты."
     }
   },
   "localizationNotice": {
     "translated": {
-      "title": "Localized version",
-      "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
+      "title": "Локализованная версия",
+      "description": "Эта локализованная версия отображается на языке {displayed}; оригинал на языке {source} остаётся официальным источником."
     },
     "fallback": {
       "title": "Резервный язык"
@@ -4260,15 +4296,15 @@
       "totalLocales": "Всего языков",
       "sourceEntities": "Исходные объекты",
       "activeJobs": "Вакансии в процессе",
-      "existingEntries": "Existing translations"
+      "existingEntries": "Существующие переводы"
     },
     "sections": {
-      "localeHealthTitle": "Translation state by locale",
-      "entityHealthTitle": "Translation state by entity type"
+      "localeHealthTitle": "Состояние переводов по локалям",
+      "entityHealthTitle": "Состояние переводов по типам объектов"
     },
     "columns": {
       "policy": "Политика",
-      "lastTargetUpdate": "Last target update",
+      "lastTargetUpdate": "Последнее обновление перевода",
       "entity": "Сущность",
       "sources": "Источники",
       "lastSourceUpdate": "Последнее обновление исходного кода"
@@ -4304,7 +4340,7 @@
   },
   "translationSettingsPage": {
     "title": "Настройки перевода",
-    "description": "Manage the default source language and automatic translation providers. An Admin explicitly starts translation generation from each editor.",
+    "description": "Управляйте исходным языком по умолчанию и поставщиками автоматического перевода. Администратор явно запускает создание переводов в каждом редакторе.",
     "actions": {
       "jobs": "Вакансии",
       "save": "Сохранить настройки",
@@ -4314,8 +4350,8 @@
       "createProvider": "Создать поставщика"
     },
     "sections": {
-      "runtime": "Source defaults",
-      "runtimeDescription": "Set only the language used when a source language has not been established. Source changes never start translation generation automatically.",
+      "runtime": "Настройки источника по умолчанию",
+      "runtimeDescription": "Задайте только язык, используемый, когда исходный язык ещё не определён. Изменения источника никогда не запускают создание переводов автоматически.",
       "providers": "Поставщики переводов",
       "providersDescription": "Управляйте поставщиками машинного перевода. Генерация остается отключенной до тех пор, пока хотя бы один активный поставщик не получит действительные учетные данные."
     },
@@ -4325,10 +4361,10 @@
         "description": "Используется, когда исходный языковой стандарт еще не установлен и когда запрос не разрешается в поддерживаемый языковой стандарт контента."
       },
       "protectedTerms": {
-        "label": "Protected terms",
-        "description": "Exact case-sensitive spellings that translation generation must keep unchanged. No terms are learned or suggested automatically.",
-        "placeholder": "Add a protected term",
-        "examples": "Examples: Photoshop, React Native"
+        "label": "Защищённые термины",
+        "description": "Точные написания с учётом регистра, которые должны сохраняться при создании переводов. Термины не изучаются и не предлагаются автоматически.",
+        "placeholder": "Добавить защищённый термин",
+        "examples": "Примеры: Photoshop, React Native"
       },
       "providerName": {
         "label": "Имя провайдера"
@@ -5268,6 +5304,40 @@
       "goHome": "Иди домой",
       "tryAgain": "Попробуйте еще раз",
       "login": "Вернуться к входу"
+    }
+  },
+  "localBackups": {
+    "title": "Локальные резервные копии",
+    "description": "Несохранённые правки из закрытых вкладок на этом устройстве. Откройте редактор, чтобы восстановить их. Резервные копии хранятся 30 дней и удаляются при выходе из учётной записи.",
+    "empty": "Нет локальных резервных копий для восстановления. Правки в открытых вкладках здесь не отображаются.",
+    "unavailable": "Для локальных резервных копий на этом устройстве необходимы хранилище браузера и Web Locks.",
+    "loading": "Поиск локальных резервных копий…",
+    "error": "Не удалось выполнить действие. Обновите список и попробуйте снова.",
+    "refresh": "Обновить",
+    "lastChanged": "Последнее изменение: {time}",
+    "open": "Открыть редактор",
+    "discard": "Отменить правки",
+    "openLabel": "Открыть редактор: {kind} {id}, {locale}",
+    "discardLabel": "Отменить правки: {kind} {id}, {locale}",
+    "discardTitle": "Удалить локальную резервную копию?",
+    "discardDescription": "Эти несохранённые правки будут безвозвратно удалены с этого устройства. Сохранённое содержимое не изменится.",
+    "kinds": {
+      "post": "Пост",
+      "page": "Страница",
+      "work": "Работа",
+      "campaign": "Кампания",
+      "email-template": "Шаблон электронной почты",
+      "email-layout": "Макет электронной почты",
+      "terms-history": "Условия использования",
+      "privacy-history": "Политика конфиденциальности",
+      "artist": "Художник",
+      "release": "Релиз",
+      "label": "Этикетка",
+      "form": "Форма",
+      "map-theme": "Тема карты",
+      "program-event": "Событие",
+      "menu": "Меню",
+      "post-series": "Серия постов"
     }
   }
 }

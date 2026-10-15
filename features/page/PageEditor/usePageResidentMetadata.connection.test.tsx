@@ -39,15 +39,30 @@ const providerState = vi.hoisted(() => ({
     };
     destroy: ReturnType<typeof vi.fn>;
     sendStateless: ReturnType<typeof vi.fn>;
+    flushPendingUpdates: ReturnType<typeof vi.fn>;
     setConfiguration: ReturnType<typeof vi.fn>;
   }>,
 }));
 
 vi.mock('@hocuspocus/provider', () => ({
+  MessageType: { Sync: 0, Awareness: 1 },
   HocuspocusProvider: class MockHocuspocusProvider {
     readonly configuration: (typeof providerState.instances)[number]['configuration'];
     destroy = vi.fn();
     sendStateless = vi.fn();
+    readonly listeners = new Map<string, Set<(event: unknown) => void>>();
+    on = vi.fn((event: string, listener: (event: unknown) => void) => {
+      this.listeners.set(event, (this.listeners.get(event) ?? new Set()).add(listener));
+    });
+    off = vi.fn((event: string, listener: (event: unknown) => void) => {
+      this.listeners.get(event)?.delete(listener);
+    });
+    // Like the real provider, sending buffered document updates emits an outgoing Sync message.
+    flushPendingUpdates = vi.fn(() => {
+      for (const listener of this.listeners.get('outgoingMessage') ?? []) {
+        listener({ message: { type: 0 } });
+      }
+    });
     setConfiguration = vi.fn((next: { token?: string; websocketProvider?: object }) =>
       Object.assign(this.configuration, next),
     );
@@ -91,8 +106,8 @@ function bootstrapMessage(challenge = 'challenge-1') {
   return {
     update,
     payload: JSON.stringify({
-      kind: 'block_room.bootstrap',
-      protocolVersion: 2,
+      kind: 'room.bootstrap',
+      v: 3,
       bootstrapChallenge: challenge,
       documentName: `page:${entityId}:ko`,
       documentType: 'page',
@@ -173,8 +188,8 @@ function sendReady(instance: (typeof providerState.instances)[number], challenge
   act(() =>
     instance.configuration.onStateless?.({
       payload: JSON.stringify({
-        kind: 'block_room.ready',
-        protocolVersion: 2,
+        kind: 'room.ready',
+        v: 3,
         bootstrapChallenge: challenge,
       }),
     }),
@@ -184,7 +199,7 @@ function sendReady(instance: (typeof providerState.instances)[number], challenge
 function admit(instance = providerState.instances.at(-1)!, challenge = 'challenge-1') {
   const bootstrap = sendBootstrap(instance, challenge);
   syncBootstrap(instance, bootstrap);
-  expect(instance.sendStateless).toHaveBeenCalledWith(expect.stringContaining('block_room.bootstrap_ack'));
+  expect(instance.sendStateless).toHaveBeenCalledWith(expect.stringContaining('room.bootstrap_ack'));
   sendReady(instance, challenge);
 }
 
@@ -198,8 +213,8 @@ function sendMetadataUpdate(
   act(() =>
     instance.configuration.onStateless?.({
       payload: JSON.stringify({
-        kind: 'block_room.metadata_changed',
-        protocolVersion: 2,
+        kind: 'room.metadata_changed',
+        v: 3,
         documentName: `page:${entityId}:ko`,
         ack: {
           documentRevision,

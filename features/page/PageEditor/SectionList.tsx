@@ -126,7 +126,7 @@ export function SectionList() {
   );
 
   return (
-    <DsLayoutStack gap="md" ref={listRef}>
+    <DsLayoutStack gap="md" ref={listRef} data-page-body-mounted>
       <VisuallyHidden role="status" aria-live="polite" aria-atomic="true">
         {announcement}
       </VisuallyHidden>

@@ -38,7 +38,7 @@ afterEach(() => {
 });
 
 describe('PostSessionExpiredDialog', () => {
-  it('starts login with the exact editor URL as return target', () => {
+  it('starts login with the exact editor URL as return target', async () => {
     const navigate = vi.fn();
     act(() => {
       root.render(
@@ -54,6 +54,8 @@ describe('PostSessionExpiredDialog', () => {
       document.body.querySelector<HTMLButtonElement>('[role="alertdialog"] button')?.click();
     });
 
-    expect(navigate).toHaveBeenCalledWith('/login?redirect=%2Fposts%2Fpost-1%3Fedit%3Dtrue%26locale%3Dko%23body');
+    await vi.waitFor(() =>
+      expect(navigate).toHaveBeenCalledWith('/login?redirect=%2Fposts%2Fpost-1%3Fedit%3Dtrue%26locale%3Dko%23body'),
+    );
   });
 });

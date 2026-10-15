@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
+import { getUntrackedConfigurationWriteOrigin } from '@/lib/editor/editor-write-origin';
 import { notifications } from '@/components/core/Notification';
 import { deleteWorkAction, publishWorkAction, unpublishWorkAction } from '@/lib/actions/work';
 import { resolveWorkLifecycleControls, type WorkEditorStatus } from './work-lifecycle-controls';
@@ -25,7 +26,7 @@ export function useWorkLifecycle({ workId, initialStatus, canEdit, isAdmin, onDe
   const [status, setStatus] = useState<WorkEditorStatus>(() => normalizeStatus(initialStatus));
 
   const publish = useMutation({
-    mutationFn: () => publishWorkAction(workId),
+    mutationFn: () => publishWorkAction(workId, getUntrackedConfigurationWriteOrigin(`work:${workId}`)),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
@@ -41,7 +42,7 @@ export function useWorkLifecycle({ workId, initialStatus, canEdit, isAdmin, onDe
   });
 
   const unpublish = useMutation({
-    mutationFn: () => unpublishWorkAction(workId),
+    mutationFn: () => unpublishWorkAction(workId, getUntrackedConfigurationWriteOrigin(`work:${workId}`)),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });

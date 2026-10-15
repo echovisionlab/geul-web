@@ -57,9 +57,10 @@ export async function updateEmailLayoutAction(
     name?: string;
     key?: string;
   },
+  editorOrigin?: string,
 ): Promise<{ success?: boolean } & EmailLayoutActionError> {
   try {
-    const client = await createEmailLayoutClient();
+    const client = await createEmailLayoutClient(editorOrigin);
     await client.updateEmailLayout({
       id,
       name: data.name,

@@ -22,6 +22,7 @@ import type { OgGenerationLookupSignal, OgGenerationRunSignal } from '@/lib/type
 
 interface LegalOgImagePanelProps {
   entityType: LegalOgEntityType;
+  canEdit?: boolean;
   locale: string;
   currentBackgroundUrl: string | null;
   sourceTitleGeneration?: OgGenerationLookupSignal | null;
@@ -34,6 +35,7 @@ function assetTypeForEntity(entityType: LegalOgEntityType) {
 
 export function LegalOgImagePanel({
   entityType,
+  canEdit = true,
   locale,
   currentBackgroundUrl,
   sourceTitleGeneration,
@@ -84,13 +86,14 @@ export function LegalOgImagePanel({
         <MediaPreviewGrid>
           <OgImagePreview
             src={ogImage.src}
-            canRegenerate
+            canRegenerate={canEdit}
             isRegenerating={regenerate.isPending || ogImage.isRegenerating}
             generationStatus={ogImage.status}
             generationError={ogImage.error}
             onRegenerate={() => regenerate.mutate({ locale, targetKey: ogImage.targetKey })}
           />
           <SiteOgBackgroundUploader
+            canEdit={canEdit}
             type={assetTypeForEntity(entityType)}
             currentUrl={currentBackgroundUrl}
             onSuccess={(runId) => {

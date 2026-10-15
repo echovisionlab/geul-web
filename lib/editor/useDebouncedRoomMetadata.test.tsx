@@ -46,7 +46,7 @@ it('reports failure and retains metadata for a retry before allowing a locale ch
     expect(await edit.flush()).toBe(false);
   });
   expect(room.acceptEpochAck).not.toHaveBeenCalled();
-  expect(notifications.show).toHaveBeenCalledWith({ message: 'permission denied', tone: 'danger' });
+  expect(notifications.show).not.toHaveBeenCalled();
   await act(async () => {
     expect(await edit.flush()).toBe(true);
   });

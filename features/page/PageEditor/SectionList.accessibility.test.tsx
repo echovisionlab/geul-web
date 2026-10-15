@@ -97,11 +97,15 @@ describe('Page section structural accessibility', () => {
     await renderSections(1);
     const section = host!.querySelector<HTMLElement>('[data-page-section-id]')!;
     const toggle = section.querySelector<HTMLButtonElement>('[data-page-section-toggle]')!;
-    act(() => toggle.click());
+    // Rich-text sections start expanded (their SSR body stays visible through the editor handoff).
     const panel = host!.querySelector(`#${toggle.getAttribute('aria-controls')}`)!;
     expect(panel).toHaveAccessibleName('Rich Text · 1/1');
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
     expect(toggle).toHaveAccessibleName('Collapse Rich Text section');
+    expect(section).toHaveAccessibleName('Rich Text');
+    act(() => toggle.click());
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveAccessibleName('Expand Rich Text section');
     expect(section).toHaveAccessibleName('Rich Text');
   });
 });

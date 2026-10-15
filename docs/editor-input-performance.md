@@ -114,3 +114,97 @@ directions do not establish a speed improvement; they provide a focused check
 that the responsibility changes retain previous input performance. This fixture
 does not measure structural edit latency, browser INP, paint, network, persistence,
 immersive scene GPU use or production memory. Use the report environment variable above to capture comparable current runs.
+
+## Incremental remote projection and composition (2026-10-14)
+
+The editor bridge consumes Common's Yjs transaction change set, which indexes
+`baseNodes`, `baseOrder`, `localeOverlay`, and `localePresence` event paths/keys.
+Payload-only notifications decode the affected base nodes and formatted locale
+Y.Text runs, retaining unchanged descriptors. The controller constructs PM nodes
+only for those payloads and applies their minimal ranges in descending order in
+one transaction. Unknown changes, metadata/layout, ordering, insertion/deletion,
+and changed placement retain the full projection fallback. Public `readBlocks()`
+still returns a fresh full snapshot. `controller.projectionStats` reports
+`incremental`, `full`, `projectedBlocks`, and `buffered` notification counts.
+
+Composition takes a temporary Y.Doc replica at `compositionstart`. Local PM edits
+continue into that replica and immediately merge their Yjs updates into the live
+room with the existing local undo origin. The replica deliberately does not receive
+remote updates, so a composing DOM cannot overwrite unseen remote text. After the
+compositionend DOM-observer microtask, the merged live state is projected once;
+relative Y.Text anchors restore the caret. Undo capture is separated at composition
+boundaries; remote origins remain untracked. The temporary replica is destroyed
+on flush/disconnect. Starting composition copies the resident room (O(document));
+this is a correctness tradeoff, not a claim of constant-time IME startup.
+
+Presence adds optional encoded `relative` bytes to each existing `{blockId, offset}`
+point. Existing peers continue reading the offset; new peers resolve Y.Text-relative
+anchors. Non-text selections retain block offsets. Invalid/deleted relative anchors
+are omitted rather than snapping to an unrelated text handle. Awareness updates
+replace decorations only for changed clients; local transactions map existing
+ones, and remote payload projections refresh clients in touched blocks.
+
+The editor instance now survives authoring authority, translated labels and runtime
+callback changes. NodeView portals receive current options through React context;
+commands read live authoring refs. Room/provider/schema changes still recreate it.
+Plain-text Markdown paste uses the already installed synchronous `react-markdown`
+CommonMark pipeline with `remark-gfm`; no package was added. It supports schema
+headings (levels 1–3), nested lists/tasks, quotes, fenced code, inline marks/links,
+dividers and tables. HTML clipboard data keeps the existing paste route. Code
+contexts and target-locale/structure-locked rooms do not perform Markdown conversion.
+
+### Same-fixture measurements
+
+Node 24.21.0, Vitest 5.0.3, jsdom, Common 0.5.0. The retained remote benchmark
+applies peer Yjs updates to the middle paragraph, excludes initialization and five
+warm-ups, and samples 20 updates. Baseline was captured before implementation;
+after was captured with this change. The machine had concurrent work, so these
+single-run timings are descriptive and do not establish production latency or
+reliable tail-percentile improvements.
+
+| Fixture                           | Before median / p95 (ms) | After median / p95 (ms) |
+| --------------------------------- | -----------------------: | ----------------------: |
+| Remote Post, 100 paragraphs       |              3.52 / 5.58 |             1.16 / 3.10 |
+| Remote Post, 500 paragraphs       |            16.30 / 21.65 |           9.24 / 129.41 |
+| Remote Post, 1000 paragraphs      |            31.87 / 32.84 |           10.66 / 16.11 |
+| Local Post input, 100 paragraphs  |              3.63 / 6.49 |             1.71 / 2.94 |
+| Local Post input, 500 paragraphs  |            15.21 / 17.15 |           27.49 / 68.33 |
+| Local Post input, 1000 paragraphs |            30.63 / 32.22 |            9.01 / 14.53 |
+
+All 75 remote editor updates (including warm-ups) used incremental projection:
+75 payloads projected, **0 full fallbacks**. Structural parity tests separately
+exercise the fallback. Page observer medians for 1/5/20 sections changed from
+14.47/14.33/15.18 ms to 24.14/29.25/21.36 ms in this loaded run; notifications
+remained one per edit. Shared Common indexing, order lookups and PM position scans
+still depend on document size. The change avoids whole-document JSON/PM rebuilding;
+it does not remove every O(document) operation.
+
+Reproduce with the report command above. Controller tests cover same/other-block
+Korean composition, undo/redo, and full-projection parity after nested text,
+formatting, attributes, movement and deletion. Presence tests cover legacy peers,
+relative cursor movement without an awareness resend, and malformed cursor input.
+Editor-lifetime tests cover authority/label changes during active composition.
+
+### Verification for this working-tree change
+
+- `pnpm exec vitest run features/editor --maxWorkers 2`: 136 files, 836 tests
+  passed. After the final review fixes, the focused controller, presence,
+  text-position, Markdown and editor-lifetime run passed 43 tests in five files.
+- ESLint passed on touched files. Prettier was limited to touched files.
+- `pnpm typecheck` still reports the parallel task's locale-message type mismatch
+  at `features/page/PageEditor/PageBlockSettingsSurface.test.tsx:50`; no errors
+  remain in this change's files.
+- Both requested Storybook commands were attempted separately:
+  `pnpm exec test-storybook --index-json --url http://127.0.0.1:6010 --maxWorkers 2 -- --testPathPatterns 'feature-editor-*'`
+  and the same command with `'pages-editors-*'`. Neither could reach Storybook.
+  Starting Storybook failed because the sandbox disallows listening on a local
+  port. No Storybook or production visual verification is claimed; Computer Use
+  also denied access to Firefox.
+- The mandated Astra review found cursor identity/empty-cell mapping and Markdown
+  content-preservation issues. Those were fixed and regression-tested; the final
+  focused review reported no additional actionable findings.
+
+Cross-task integration: owned editor tests were updated for the parallel task's
+`saved`/`saving` indicator states and provider `synced` subscription. No files owned
+by that task were edited. The remaining Page test type error requires coordination
+with that task before the combined tree can pass typecheck.

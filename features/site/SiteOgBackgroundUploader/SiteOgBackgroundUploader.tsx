@@ -17,13 +17,20 @@ export type SiteOgBackgroundAssetType = Extract<
 >;
 
 interface SiteOgBackgroundUploaderProps {
+  canEdit?: boolean;
   type: SiteOgBackgroundAssetType;
   currentUrl: string | null;
   onSuccess?: (ogGenerationRunId?: string) => void;
   bindings?: SiteAssetBindings;
 }
 
-export function SiteOgBackgroundUploader({ type, currentUrl, onSuccess, bindings }: SiteOgBackgroundUploaderProps) {
+export function SiteOgBackgroundUploader({
+  type,
+  currentUrl,
+  onSuccess,
+  bindings,
+  canEdit = true,
+}: SiteOgBackgroundUploaderProps) {
   const t = useTranslations('adminSettings.site');
   const tCommonNotifications = useTranslations('common.notifications');
   const uploadType = SITE_ASSET_TO_UPLOAD_TYPE[type];
@@ -74,6 +81,9 @@ export function SiteOgBackgroundUploader({ type, currentUrl, onSuccess, bindings
   });
 
   const handleUpload = async (blob: Blob) => {
+    if (!canEdit) {
+      return;
+    }
     setUploadProgress(0);
 
     try {
@@ -97,12 +107,16 @@ export function SiteOgBackgroundUploader({ type, currentUrl, onSuccess, bindings
   return (
     <ImageUploadCropController
       imageUrl={imageUrl}
-      canEdit
+      canEdit={canEdit}
       isUploading={isUploading}
       uploadProgress={uploadProgress}
       isRemoving={deleteAsset.isPending}
       onUpload={handleUpload}
-      onRemove={() => deleteAsset.mutate()}
+      onRemove={() => {
+        if (canEdit) {
+          deleteAsset.mutate();
+        }
+      }}
       label={label}
       acceptMimeTypes={getUploadSelectionMimeTypes(uploadType)}
       maxSize={config.maxSize}

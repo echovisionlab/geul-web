@@ -33,7 +33,7 @@ export function WorkFeaturedImageUploader({
     setImageAction: (fileId) => setWorkFeaturedImageAction(workId, fileId),
     removeImageAction: () => removeWorkFeaturedImageAction(workId),
     onOgGenerationRequested,
-    enabled: isCollaborationReady,
+    enabled: canEdit && isCollaborationReady,
   });
 
   return (

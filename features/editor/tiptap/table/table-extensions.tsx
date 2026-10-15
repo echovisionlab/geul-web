@@ -1,18 +1,12 @@
 'use client';
 
-import {
-  Extension,
-  mergeAttributes,
-  type Attribute,
-  type Editor,
-  type Extensions,
-  type NodeViewRendererProps,
-} from '@tiptap/core';
+import { type Editor, type Extensions, type NodeViewRendererProps } from '@tiptap/core';
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import { Selection } from '@tiptap/pm/state';
 import { CellSelection, columnResizingPluginKey, TableMap, TableView } from '@tiptap/pm/tables';
 import type { ViewMutationRecord } from '@tiptap/pm/view';
-import { WireTable, WireTableCell, WireTableHeader, WireTableRow } from '../wire-schema';
+import { WireTable } from '../wire-schema';
+import { createTiptapTablePresentationExtensions } from './table-presentation';
 import { createTableCommandExtension, type TableExtensionOptions } from './table-commands';
 import { TABLE_DEFAULT_COLUMN_WIDTH_PX, TABLE_MIN_COLUMN_WIDTH_PX } from './table-constants';
 import {
@@ -22,74 +16,6 @@ import {
   startTableResize,
 } from './percentage-column-resizing';
 import classes from './TiptapTable.module.css';
-
-const tableColors = new Set(['default', 'gray', 'brown', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink']);
-const tableAlignments = new Set(['left', 'center', 'right']);
-
-function parseTableInteger(value: string | null, fallback: number): number {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
-}
-
-function parseColwidth(value: string | null): number[] | null {
-  if (!value) {
-    return null;
-  }
-  const widths = value.split(',').map((item) => Number(item.trim()));
-  return widths.length > 0 && widths.every((width) => Number.isFinite(width) && width > 0) ? widths : null;
-}
-
-function tableCellAttributes(): Record<string, Attribute> {
-  return {
-    id: {
-      default: null,
-      rendered: false,
-    },
-    textColor: {
-      default: 'default',
-      parseHTML: (element) => {
-        const value = element.getAttribute('data-text-color');
-        return value && tableColors.has(value) ? value : 'default';
-      },
-      renderHTML: ({ textColor }) => (textColor === 'default' ? {} : { 'data-text-color': textColor }),
-    },
-    backgroundColor: {
-      default: 'default',
-      parseHTML: (element) => {
-        const value = element.getAttribute('data-background-color');
-        return value && tableColors.has(value) ? value : 'default';
-      },
-      renderHTML: ({ backgroundColor }) =>
-        backgroundColor === 'default' ? {} : { 'data-background-color': backgroundColor },
-    },
-    textAlignment: {
-      default: 'left',
-      parseHTML: (element) => {
-        const value = element.getAttribute('data-text-alignment');
-        return value && tableAlignments.has(value) ? value : 'left';
-      },
-      renderHTML: ({ textAlignment }) => (textAlignment === 'left' ? {} : { 'data-text-alignment': textAlignment }),
-    },
-    colspan: {
-      default: 1,
-      parseHTML: (element) => parseTableInteger(element.getAttribute('colspan'), 1),
-      renderHTML: ({ colspan }) => (colspan === 1 ? {} : { colspan }),
-    },
-    rowspan: {
-      default: 1,
-      parseHTML: (element) => parseTableInteger(element.getAttribute('rowspan'), 1),
-      renderHTML: ({ rowspan }) => (rowspan === 1 ? {} : { rowspan }),
-    },
-    colwidth: {
-      default: null,
-      // ProseMirror's historical DOM used data-colwidth; accept the older
-      // plain colwidth form too, then always emit canonical data-colwidth.
-      parseHTML: (element) => parseColwidth(element.getAttribute('data-colwidth') ?? element.getAttribute('colwidth')),
-      renderHTML: ({ colwidth }) =>
-        Array.isArray(colwidth) && colwidth.length > 0 ? { 'data-colwidth': colwidth.join(',') } : {},
-    },
-  };
-}
 
 class TableNodeView extends TableView {
   private readonly editor: Editor;
@@ -279,41 +205,14 @@ class TableNodeView extends TableView {
  * survive because the replacement keeps the same names and JSON shape.
  */
 export function createTiptapTableExtensions(options: TableExtensionOptions = {}): Extensions {
-  const TableSchema = Extension.create({
-    name: 'tableSchema',
-    extendNodeSchema(extension) {
-      const tableRoles: Record<string, string> = {
-        table: 'table',
-        tableRow: 'row',
-        tableCell: 'cell',
-        tableHeader: 'header_cell',
-      };
-      const tableRole = tableRoles[extension.name];
-      return tableRole ? { tableRole } : {};
-    },
-  });
   const Table = WireTable.extend({
     addNodeView() {
       return (props) => new TableNodeView(props);
     },
   });
-  const TableRow = WireTableRow.extend({});
-  const TableCell = WireTableCell.extend({
-    addAttributes() {
-      return tableCellAttributes();
-    },
-    renderHTML({ HTMLAttributes }) {
-      return ['td', mergeAttributes(HTMLAttributes, { class: classes.cell }), 0];
-    },
-  });
-  const TableHeader = WireTableHeader.extend({
-    addAttributes() {
-      return tableCellAttributes();
-    },
-    renderHTML({ HTMLAttributes }) {
-      return ['th', mergeAttributes(HTMLAttributes, { class: classes.cell }), 0];
-    },
-  });
-
-  return [Table, TableRow, TableHeader, TableCell, TableSchema, createTableCommandExtension(options)];
+  return [
+    Table,
+    ...createTiptapTablePresentationExtensions().filter((extension) => extension.name !== 'table'),
+    createTableCommandExtension(options),
+  ];
 }

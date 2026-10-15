@@ -102,6 +102,19 @@ afterEach(() => {
 });
 
 describe('ImageUploadCropController rejection policy', () => {
+  it('rejects crop completion and file selection if editing stops while mounted', () => {
+    renderController();
+    const field = container.querySelector('[data-testid="image-upload-crop-field"]');
+    renderController({ canEdit: false });
+    const props = getRenderedCropFieldProps();
+    expect(props.canEdit).toBe(false);
+    expect(props.cropOpened).toBe(false);
+    props.onFileSelect(new File(['image'], 'image.png', { type: 'image/png' }));
+    props.onCrop(new Blob(['cropped']));
+    expect(handleFileDropMock).not.toHaveBeenCalled();
+    expect(handleCropCompleteMock).not.toHaveBeenCalled();
+    expect(container.querySelector('[data-testid="image-upload-crop-field"]')).toBe(field);
+  });
   it.each([
     ['too-large', 'featuredImage.errors.fileTooLarge'],
     ['invalid-type', 'featuredImage.errors.invalidFileType'],

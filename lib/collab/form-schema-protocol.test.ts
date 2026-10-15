@@ -1,11 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
-  FORM_SCHEMA_PATCH_ACK_KIND,
-  FORM_SCHEMA_PATCH_KIND,
-  FORM_SCHEMA_PROTOCOL_VERSION,
+  FormSchemaPatchFailedError,
   FormSchemaPatchRejectedError,
   requestFormSchemaPatch,
 } from './form-schema-protocol';
+import { UnretryableSaveError } from '@/lib/editor/save-failure';
 
 const documentName = 'form:11111111-1111-4111-8111-111111111111:en';
 
@@ -15,6 +14,7 @@ function providerMock(name = documentName) {
     configuration: { name },
     hasUnsyncedChanges: false,
     forceSync: vi.fn(),
+    flushPendingUpdates: vi.fn(),
     sendStateless: vi.fn(),
     on: vi.fn((event: string, listener: (payload: unknown) => void) => {
       const registered = listeners.get(event) ?? new Set();
@@ -34,7 +34,7 @@ function providerMock(name = documentName) {
   return provider;
 }
 
-function patch(requestId = 'form-patch:1') {
+function patch(requestId = '11111111-1111-4111-8111-111111111111') {
   return {
     requestId,
     documentName,
@@ -46,21 +46,48 @@ function patch(requestId = 'form-patch:1') {
 afterEach(() => vi.useRealTimers());
 
 describe('requestFormSchemaPatch', () => {
+  it('rejects a patch above the server bound without sending it', async () => {
+    const provider = providerMock();
+    const oversized = { ...patch(), nextSchema: { id: 'schema', text: 'x'.repeat(1024 * 1024) } };
+    await expect(requestFormSchemaPatch(provider as never, oversized)).rejects.toBeInstanceOf(
+      FormSchemaPatchRejectedError,
+    );
+    expect(provider.sendStateless).not.toHaveBeenCalled();
+  });
+
+  it('settles from a server rejection of a request it could not parse', async () => {
+    const provider = providerMock();
+    const pending = requestFormSchemaPatch(provider as never, patch());
+    await Promise.resolve();
+    provider.emit('stateless', {
+      payload: JSON.stringify({
+        v: 3,
+        kind: 'form.schema.patch_result',
+        requestId: patch().requestId,
+        ok: false,
+        error: { code: 'too_large' },
+      }),
+    });
+    await expect(pending).rejects.toThrow('too_large');
+  });
+
   it('sends the active-room patch and resolves only its canonical ACK', async () => {
     const provider = providerMock();
     const pending = requestFormSchemaPatch(provider as never, patch());
     await Promise.resolve();
     const payload = JSON.parse(provider.sendStateless.mock.calls[0]![0] as string);
     expect(payload).toEqual({
-      kind: FORM_SCHEMA_PATCH_KIND,
-      protocolVersion: FORM_SCHEMA_PROTOCOL_VERSION,
-      ...patch(),
+      kind: 'form.schema.patch',
+      v: 3,
+      requestId: patch().requestId,
+      previousSchema: patch().previousSchema,
+      nextSchema: patch().nextSchema,
     });
 
     provider.emit('stateless', {
       payload: JSON.stringify({
-        kind: FORM_SCHEMA_PATCH_ACK_KIND,
-        protocolVersion: FORM_SCHEMA_PROTOCOL_VERSION,
+        kind: 'form.schema.patch_result',
+        v: 3,
         requestId: 'other',
         ok: true,
         canonicalSchema: { id: 'wrong', steps: [] },
@@ -68,8 +95,8 @@ describe('requestFormSchemaPatch', () => {
     });
     provider.emit('stateless', {
       payload: JSON.stringify({
-        kind: FORM_SCHEMA_PATCH_ACK_KIND,
-        protocolVersion: FORM_SCHEMA_PROTOCOL_VERSION,
+        kind: 'form.schema.patch_result',
+        v: 3,
         requestId: patch().requestId,
         documentName: 'form:other:ko',
         ok: true,
@@ -78,10 +105,9 @@ describe('requestFormSchemaPatch', () => {
     });
     provider.emit('stateless', {
       payload: JSON.stringify({
-        kind: FORM_SCHEMA_PATCH_ACK_KIND,
-        protocolVersion: FORM_SCHEMA_PROTOCOL_VERSION,
+        kind: 'form.schema.patch_result',
+        v: 3,
         requestId: patch().requestId,
-        documentName,
         ok: true,
         canonicalSchema: { id: 'schema', steps: [{ id: 'canonical', fields: [] }] },
       }),
@@ -107,10 +133,9 @@ describe('requestFormSchemaPatch', () => {
     expect(provider.sendStateless).toHaveBeenCalledOnce();
     provider.emit('stateless', {
       payload: JSON.stringify({
-        kind: FORM_SCHEMA_PATCH_ACK_KIND,
-        protocolVersion: FORM_SCHEMA_PROTOCOL_VERSION,
+        kind: 'form.schema.patch_result',
+        v: 3,
         requestId: patch().requestId,
-        documentName,
         ok: true,
         canonicalSchema: patch().nextSchema,
       }),
@@ -118,38 +143,43 @@ describe('requestFormSchemaPatch', () => {
     await expect(pending).resolves.toEqual(patch().nextSchema);
   });
 
-  it('preserves typed server rejection reasons for save-queue retry/recovery', async () => {
-    const provider = providerMock();
-    const pending = requestFormSchemaPatch(provider as never, patch());
-    await Promise.resolve();
-    provider.emit('stateless', {
-      payload: JSON.stringify({
-        kind: FORM_SCHEMA_PATCH_ACK_KIND,
-        protocolVersion: FORM_SCHEMA_PROTOCOL_VERSION,
-        requestId: patch().requestId,
-        documentName,
-        ok: false,
-        error: 'document_revision_changed',
-      }),
-    });
-    await expect(pending).rejects.toBeInstanceOf(FormSchemaPatchRejectedError);
-    await expect(pending).rejects.toMatchObject({
-      reason: 'document_revision_changed',
-    });
-  });
+  it.each([
+    [{ code: 'document_revision_changed' }, FormSchemaPatchFailedError, false],
+    [{ code: 'schema_invalid', retryable: false }, FormSchemaPatchRejectedError, true],
+  ] as const)(
+    'preserves the typed server reason %o and whether the save queue may retry it',
+    async (error, ErrorType, unretryable) => {
+      const provider = providerMock();
+      const pending = requestFormSchemaPatch(provider as never, patch());
+      await Promise.resolve();
+      provider.emit('stateless', {
+        payload: JSON.stringify({
+          kind: 'form.schema.patch_result',
+          v: 3,
+          requestId: patch().requestId,
+          ok: false,
+          error,
+        }),
+      });
+      const failure = await pending.catch((reason: unknown) => reason);
+      expect(failure).toBeInstanceOf(ErrorType);
+      expect(failure).toMatchObject({ reason: error.code });
+      expect(failure instanceof UnretryableSaveError).toBe(unretryable);
+    },
+  );
 
   it('rejects an in-flight request immediately when the canonical room must reload', async () => {
     vi.useFakeTimers();
     const provider = providerMock();
     const pending = requestFormSchemaPatch(provider as never, patch());
     const rejection = expect(pending).rejects.toMatchObject({
-      name: 'FormSchemaPatchRejectedError',
-      reason: 'reload_required',
+      name: 'FormSchemaPatchFailedError',
+      reason: 'external_update',
     });
     await Promise.resolve();
 
     provider.emit('stateless', {
-      payload: JSON.stringify({ kind: 'reload_required', reason: 'reload_required' }),
+      payload: JSON.stringify({ v: 3, kind: 'room.reload', reloadReason: 'external_update' }),
     });
 
     await rejection;

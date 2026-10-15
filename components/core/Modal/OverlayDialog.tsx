@@ -28,6 +28,8 @@ interface OverlayDialogSharedProps extends OverlayPresentationProps {
   placement?: 'left' | 'right' | 'bottom';
   mobileOnly?: boolean;
   level?: 'info' | 'warning' | 'danger';
+  /** `obscure` hides the page behind the dialog completely: content the viewer may no longer see. */
+  backdrop?: 'dim' | 'obscure';
 }
 export type OverlayDialogProps = OverlayDialogSharedProps &
   ({ role?: 'dialog'; descriptionId?: string } | { role: 'alertdialog'; descriptionId: string });
@@ -103,6 +105,7 @@ export const OverlayDialog = forwardRef<HTMLDivElement, OverlayDialogProps>(
       placement,
       mobileOnly = false,
       level,
+      backdrop = 'dim',
     },
     ref,
   ) => {
@@ -130,6 +133,7 @@ export const OverlayDialog = forwardRef<HTMLDivElement, OverlayDialogProps>(
         data-centered={centered || undefined}
         data-size={size}
         data-mobile-only={mobileOnly || undefined}
+        data-backdrop={backdrop === 'obscure' ? 'obscure' : undefined}
       >
         <Modal
           ref={ref}

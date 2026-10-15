@@ -329,7 +329,14 @@
       "ogRegenerationFailed": "No se pudo regenerar la imagen OG",
       "testEmailSent": "Correo electrónico de prueba enviado",
       "saveSuccess": "Guardado",
-      "saveFailed": "No se pudo guardar"
+      "saveFailed": "No se pudo guardar",
+      "saveRetrying": "Tus cambios no se han guardado en el servidor. Estamos reintentando guardarlos.",
+      "editsRestored": "Se han restaurado los cambios recuperados.",
+      "leaveWithRejectedEdits": {
+        "title": "¿Salir sin los cambios que no se pudieron guardar?",
+        "message": "El servidor rechazó algunos cambios y no se guardaron. Cópialos primero desde el menú de colaboración o sal y descártalos.",
+        "confirm": "Salir y descartar"
+      }
     },
     "errors": {
       "generic": "Algo salió mal. Por favor inténtalo de nuevo.",
@@ -460,6 +467,11 @@
       "siteInfo": "Información del sitio",
       "links": "Enlaces",
       "socialMedia": "redes sociales"
+    },
+    "signOutUnsaved": {
+      "title": "¿Cerrar sesión con cambios sin guardar?",
+      "message": "Algunos cambios no se han guardado en el servidor. Al cerrar sesión, se eliminan de este dispositivo.",
+      "confirm": "Cerrar sesión y descartar"
     }
   },
   "adminShell": {
@@ -673,13 +685,13 @@
       "detail": {
         "backTooltip": "Volver a diseños de correo electrónico",
         "targetEditor": {
-          "title": "Translated text",
-          "description": "Edit only visible text and accessibility labels. HTML, CSS, links, and placeholders remain owned by the source layout.",
-          "empty": "This layout has no translatable text units.",
+          "title": "Texto traducido",
+          "description": "Edita solo el texto visible y las etiquetas de accesibilidad. El HTML, el CSS, los enlaces y los marcadores de posición siguen definidos por el diseño de origen.",
+          "empty": "Este diseño no contiene unidades de texto traducibles.",
           "textUnit": "Text",
-          "sourceValue": "Source: {value}",
-          "translatedValue": "This locale provides its own value.",
-          "sourceFallback": "Using the source value.",
+          "sourceValue": "Origen: {value}",
+          "translatedValue": "Esta configuración regional proporciona su propio valor.",
+          "sourceFallback": "Se está utilizando el valor de origen.",
           "useSource": "Use source"
         },
         "viewModes": {
@@ -1677,16 +1689,16 @@
       "consentDescription": "Este cliente puede leer y editar contenido y administrar archivos dentro de los permisos actuales de tu cuenta. Puede crear, actualizar o eliminar contenido y modificar los archivos adjuntos existentes. La conexión no otorga permisos adicionales a la cuenta.",
       "consentOfflineAccess": "Esta conexión puede continuar después de que termine tu sesión actual del navegador, hasta que la revoques.",
       "consentRevoke": "Puedes revocar esta conexión en {settings} → Remote MCP.",
-      "connectionsTitle": "Connected MCP clients",
-      "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
-      "connectionsEmpty": "No MCP clients are connected.",
-      "connectedAt": "Connected {date}",
+      "connectionsTitle": "Clientes MCP conectados",
+      "connectionsDescription": "Estas autorizaciones de OAuth son independientes de las sesiones del navegador. Revocar una desconecta ese cliente MCP sin cerrar tu sesión.",
+      "connectionsEmpty": "No hay clientes MCP conectados.",
+      "connectedAt": "Conectado {date}",
       "revoke": "Revoke",
-      "revokeTitle": "Revoke MCP access",
-      "revokeConfirmation": "Revoke MCP access for {client}? Its current token chain will stop working.",
-      "revokeSuccess": "MCP access was revoked.",
-      "revokeFailed": "Could not revoke MCP access.",
-      "loadFailed": "Could not load connected MCP clients."
+      "revokeTitle": "Revocar acceso MCP",
+      "revokeConfirmation": "¿Revocar el acceso MCP de {client}? Su cadena de tokens actual dejará de funcionar.",
+      "revokeSuccess": "Se ha revocado el acceso MCP.",
+      "revokeFailed": "No se pudo revocar el acceso MCP.",
+      "loadFailed": "No se pudieron cargar los clientes MCP conectados."
     },
     "personalAccessTokens": {
       "title": "Token de acceso personal",
@@ -2136,9 +2148,9 @@
     "systemOrLegacy": "Sistema o versión anterior",
     "restore": "Restaurar",
     "restoreTitle": "Restaurar versión",
-    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document.",
+    "restoreSameLocaleBody": "Restaurar el origen v{version} ({locale}) solo modifica el documento de origen. Los documentos de destino y los trabajos de traducción existentes permanecen sin cambios, y las traducciones no se generan automáticamente. ¿Continuar?",
+    "restoreCrossLocaleBody": "Restaurar el origen v{version} cambia la configuración regional de origen de {currentLocale} a {selectedLocale} y solo modifica la referencia al origen. Los documentos de destino y los trabajos de traducción existentes permanecen sin cambios, y las traducciones no se generan automáticamente. ¿Continuar?",
+    "restoreFailed": "No se pudo restaurar el documento de origen.",
     "loadFailed": "No se pudo cargar el historial de versiones.",
     "end": "Se han cargado todas las versiones."
   },
@@ -2518,6 +2530,24 @@
       "sections": {
         "connection": "Conexión"
       }
+    },
+    "saveState": {
+      "saved": "Guardado",
+      "saving": "Guardando…",
+      "offline": "Sin conexión · cambios conservados en este dispositivo",
+      "error": "Error al guardar · reintentando…",
+      "rejected": "No se pudieron guardar algunos cambios",
+      "reload": "Reconectando · restaurando cambios…"
+    },
+    "rejectedEdits": {
+      "open": "Revisar cambios sin guardar",
+      "title": "Cambios que no se pudieron guardar",
+      "description": "El servidor rechazó estos cambios, por lo que no se volverá a intentar guardarlos. Copia lo que necesites y después descártalos.",
+      "reason": "Motivo: {reason}",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "discard": "Descartar",
+      "empty": "Se han guardado todos los cambios."
     }
   },
   "urlSection": {
@@ -3512,8 +3542,8 @@
       "message": "Se guardó una versión más reciente mientras este editor estaba abierto. Vuelva a cargar antes de continuar editando."
     },
     "permissionRevoked": {
-      "title": "Permiso de edición revocado",
-      "message": "Ya no tienes permiso para editar este contenido. Los cambios realizados después de que se revocó el permiso no se guardarán."
+      "title": "Acceso retirado",
+      "message": "Ya no tienes acceso a este contenido. Los cambios que aún no se guardaron se conservan en este dispositivo."
     },
     "sessionExpired": {
       "title": "La sesión expiró",
@@ -3754,14 +3784,14 @@
           "quote": {
             "title": "Cita",
             "subtext": "Cita o extracto",
-            "aliases": "quotation\nblockquote\nbq",
+            "aliases": "quotation\nblockquote\nbq\ncita\ncita en bloque",
             "group": "Bloques básicos"
           },
           "callout": {
             "title": "Callout",
-            "subtext": "Highlight content with an icon",
-            "aliases": "callout\nnotice\ninfo\naside",
-            "group": "Basic blocks"
+            "subtext": "Destaca contenido con un icono",
+            "aliases": "callout\nnotice\ninfo\naside\naviso\ninformación\nnota",
+            "group": "Bloques básicos"
           },
           "divider": {
             "title": "Divisor",
@@ -3790,61 +3820,61 @@
           "mathBlock": {
             "title": "Bloque matemático",
             "subtext": "Mostrar ecuación con LaTeX",
-            "aliases": "math\nequation\nlatex\nformula",
+            "aliases": "math\nequation\nlatex\nformula\nmatemáticas\necuación\nfórmula",
             "group": "Matemáticas"
           },
           "inlineMath": {
             "title": "Matemáticas en línea",
             "subtext": "Fórmula LaTeX en línea",
-            "aliases": "inline\ninline math\ninlinemath\nlatex\n$",
+            "aliases": "inline\ninline math\ninlinemath\nlatex\n$\nen línea\nmatemáticas en línea",
             "group": "En línea"
           },
           "map": {
             "title": "Mapa",
             "subtext": "Insertar una ubicación en el mapa",
-            "aliases": "map\nlocation\nplace\naddress",
+            "aliases": "map\nlocation\nplace\naddress\nmapa\nubicación\nlugar\ndirección",
             "group": "Incrustaciones"
           },
           "externalVideo": {
             "title": "Vídeo externo",
             "subtext": "Insertar un enlace de YouTube o Vimeo",
-            "aliases": "external video\nyoutube\nvimeo\nembed",
+            "aliases": "external video\nyoutube\nvimeo\nembed\nvídeo externo\nvideo externo\nincrustar",
             "group": "Incrustaciones"
           },
           "p5Sketch": {
             "title": "p5.js",
             "subtext": "Agregar un boceto interactivo de p5.js",
-            "aliases": "p5\np5.js\nsketch\ncreative coding",
+            "aliases": "p5\np5.js\nsketch\ncreative coding\nboceto\nprogramación creativa",
             "group": "Incrustaciones"
           },
           "threeScene": {
             "title": "Three.js",
             "subtext": "Agregar una escena interactiva de Three.js",
-            "aliases": "three\nthree.js\n3d\nscene",
+            "aliases": "three\nthree.js\n3d\nscene\nescena\ntridimensional",
             "group": "Incrustaciones"
           },
           "file": {
             "title": "Adjunto",
             "subtext": "Adjunte un archivo (PDF, DOC, ZIP, etc.)",
-            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload",
+            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\nadjunto\narchivo\ndocumento\ndescargar",
             "group": "Multimedia"
           },
           "aiAssistant": {
             "title": "Asistente de IA",
             "subtext": "Escribe, mejora o transforma texto con IA",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove",
+            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nia\nasistente\nescribir\nmejorar",
             "group": "IA"
           },
           "shader": {
             "title": "Shader GLSL",
             "subtext": "Agrega un shader GLSL interactivo",
-            "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "aliases": "shader\nglsl\nfragment shader\nshadertoy\nsombreador\nsombreador de fragmentos",
             "group": "Incrustaciones"
           },
           "mermaid": {
             "title": "Mermaid",
             "subtext": "Crear un diagrama a partir de texto",
-            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence\ndiagrama\ndiagrama de flujo\nsecuencia",
             "group": "Incrustaciones"
           }
         }
@@ -4024,6 +4054,12 @@
       "media": {
         "importFromUrl": "Importar desde URL"
       }
+    },
+    "accessDowngraded": {
+      "message": "Tu acceso ha cambiado a solo lectura. La edición está desactivada; los cambios aún sin guardar permanecen en este dispositivo y se guardarán si recuperas el permiso de edición."
+    },
+    "accessUpgraded": {
+      "message": "Puedes volver a editar. Se están guardando los cambios conservados mientras solo podías ver."
     }
   },
   "aiAssistant": {
@@ -4166,35 +4202,35 @@
     "resolvedMetadata": "Metadatos resueltos"
   },
   "translationPanel": {
-    "description": "Review the source language and existing translation document for each locale.",
+    "description": "Revisa el idioma de origen y el documento de traducción existente para cada configuración regional.",
     "actions": {
       "expand": "Expandir",
       "collapse": "Colapsar",
-      "regenerateAll": "Generate/regenerate all eligible locales",
+      "regenerateAll": "Generar/regenerar todas las configuraciones regionales aptas",
       "regenerateLocale": "Regenerado",
       "regenerateLocaleAria": "Regenerar traducción {locale}",
       "generateLocale": "Generate",
-      "generateLocaleAria": "Generate {locale} translation"
+      "generateLocaleAria": "Generar traducción en {locale}"
     },
     "sourceLocale": {
       "label": "Idioma de origen",
       "description": "Este es el idioma de origen utilizado como base para las traducciones de esta entidad.",
       "confirm": {
         "title": "Cambiar idioma de origen",
-        "description": "Changing the source language updates only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically.",
-        "detail": "{locale} becomes the language of the editable source document. Existing target documents and translation jobs remain unchanged.",
+        "description": "Cambiar el idioma de origen solo actualiza la referencia al origen. Los documentos de destino y los trabajos de traducción existentes permanecen sin cambios, y las traducciones no se generan automáticamente.",
+        "detail": "{locale} pasa a ser el idioma del documento de origen editable. Los documentos de destino y los trabajos de traducción existentes permanecen sin cambios.",
         "confirm": "Cambiar idioma de origen"
       }
     },
     "activeEditLocale": {
-      "ariaLabel": "Switch content language. Current: {locale}",
+      "ariaLabel": "Cambiar idioma del contenido. Actual: {locale}",
       "sourceOption": "{locale} (Fuente)",
       "loading": "Cargando idiomas...",
-      "missingDescription": "No {locale} target document exists yet. Generate it from the translations panel.",
+      "missingDescription": "Todavía no existe un documento de destino en {locale}. Genéralo desde el panel de traducciones.",
       "bodyPreviewTitle": "{locale} vista previa del cuerpo",
-      "bodyPreviewDescription": "The existing translation document is shown with its structure and formatting.",
+      "bodyPreviewDescription": "El documento de traducción existente se muestra con su estructura y formato.",
       "bodyPreviewEmpty": "Aún no hay vista previa del cuerpo localizado.",
-      "sharedStructureSectionDescription": "This section keeps shared layout or query settings from the source page; translated body content is read-only.",
+      "sharedStructureSectionDescription": "Esta sección conserva los ajustes de diseño o consulta compartidos de la página de origen; el contenido traducido del cuerpo es de solo lectura.",
       "sectionFieldLabels": {
         "caption": "Subtítulo",
         "copyJson": "Copia de escena"
@@ -4205,7 +4241,7 @@
     },
     "states": {
       "loadFailed": "No se pudieron cargar las traducciones.",
-      "missingTarget": "No target document yet.",
+      "missingTarget": "Todavía no hay un documento de destino.",
       "sourceEditorHint": "Edite el texto original en el editor principal.",
       "updatedAt": "Actualizado {date}"
     },
@@ -4218,26 +4254,26 @@
     }
   },
   "translationPanelMenu": {
-    "description": "Review source menu labels and existing translation documents.",
+    "description": "Revisa las etiquetas del menú de origen y los documentos de traducción existentes.",
     "previewModal": {
-      "title": "{locale} menu translation preview",
+      "title": "Vista previa de la traducción del menú en {locale}",
       "fields": {
-        "localizedLabelForLocale": "{locale} public label"
+        "localizedLabelForLocale": "Etiqueta pública en {locale}"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template."
+      "description": "Gestiona el idioma de origen y los documentos de traducción existentes para esta plantilla de correo electrónico."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout."
+      "description": "Gestiona el idioma de origen y los documentos de traducción existentes para este diseño de correo electrónico."
     }
   },
   "localizationNotice": {
     "translated": {
-      "title": "Localized version",
-      "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
+      "title": "Versión localizada",
+      "description": "Esta versión localizada se muestra en {displayed}; el original en {source} sigue siendo la versión de referencia."
     },
     "fallback": {
       "title": "Idioma alternativo"
@@ -4260,15 +4296,15 @@
       "totalLocales": "Locales totales",
       "sourceEntities": "Entidades fuente",
       "activeJobs": "Trabajos en curso",
-      "existingEntries": "Existing translations"
+      "existingEntries": "Traducciones existentes"
     },
     "sections": {
-      "localeHealthTitle": "Translation state by locale",
-      "entityHealthTitle": "Translation state by entity type"
+      "localeHealthTitle": "Estado de traducción por configuración regional",
+      "entityHealthTitle": "Estado de traducción por tipo de entidad"
     },
     "columns": {
       "policy": "Política",
-      "lastTargetUpdate": "Last target update",
+      "lastTargetUpdate": "Última actualización del destino",
       "entity": "entidad",
       "sources": "Fuentes",
       "lastSourceUpdate": "Última actualización de fuente"
@@ -4304,7 +4340,7 @@
   },
   "translationSettingsPage": {
     "title": "Configuración de traducción",
-    "description": "Manage the default source language and automatic translation providers. An Admin explicitly starts translation generation from each editor.",
+    "description": "Gestiona el idioma de origen predeterminado y los proveedores de traducción automática. Un administrador inicia explícitamente la generación de traducciones desde cada editor.",
     "actions": {
       "jobs": "Empleos",
       "save": "Guardar configuración",
@@ -4314,8 +4350,8 @@
       "createProvider": "Crear proveedor"
     },
     "sections": {
-      "runtime": "Source defaults",
-      "runtimeDescription": "Set only the language used when a source language has not been established. Source changes never start translation generation automatically.",
+      "runtime": "Valores predeterminados de origen",
+      "runtimeDescription": "Establece únicamente el idioma que se utiliza cuando no se ha definido un idioma de origen. Los cambios en el origen nunca inician automáticamente la generación de traducciones.",
       "providers": "Proveedores de traducción",
       "providersDescription": "Gestionar proveedores de traducción automática. La generación permanece deshabilitada hasta que al menos un proveedor activo tenga credenciales válidas."
     },
@@ -4325,10 +4361,10 @@
         "description": "Se utiliza cuando aún no se ha establecido una configuración regional de origen y cuando una solicitud no se resuelve en una configuración regional de contenido compatible."
       },
       "protectedTerms": {
-        "label": "Protected terms",
-        "description": "Exact case-sensitive spellings that translation generation must keep unchanged. No terms are learned or suggested automatically.",
-        "placeholder": "Add a protected term",
-        "examples": "Examples: Photoshop, React Native"
+        "label": "Términos protegidos",
+        "description": "Grafías exactas, con distinción entre mayúsculas y minúsculas, que deben conservarse al generar traducciones. No se aprenden ni se sugieren términos automáticamente.",
+        "placeholder": "Agregar un término protegido",
+        "examples": "Ejemplos: Photoshop, React Native"
       },
       "providerName": {
         "label": "Nombre del proveedor"
@@ -5268,6 +5304,40 @@
       "goHome": "Ir a casa",
       "tryAgain": "Inténtalo de nuevo",
       "login": "Volver a iniciar sesión"
+    }
+  },
+  "localBackups": {
+    "title": "Copias de seguridad locales",
+    "description": "Cambios sin guardar de pestañas cerradas en este dispositivo. Abre el editor para recuperarlos. Las copias caducan a los 30 días y se eliminan al cerrar sesión.",
+    "empty": "No hay copias de seguridad locales que recuperar. Los cambios de las pestañas abiertas no se muestran aquí.",
+    "unavailable": "Las copias de seguridad locales requieren almacenamiento del navegador y Web Locks en este dispositivo.",
+    "loading": "Buscando copias de seguridad locales…",
+    "error": "No se pudo completar esta acción. Actualiza la lista e inténtalo de nuevo.",
+    "refresh": "Actualizar",
+    "lastChanged": "Último cambio {time}",
+    "open": "Abrir editor",
+    "discard": "Descartar",
+    "openLabel": "Abrir editor: {kind} {id}, {locale}",
+    "discardLabel": "Descartar: {kind} {id}, {locale}",
+    "discardTitle": "¿Descartar la copia de seguridad local?",
+    "discardDescription": "Estos cambios sin guardar se eliminarán permanentemente de este dispositivo. El contenido guardado no se verá afectado.",
+    "kinds": {
+      "post": "Publicación",
+      "page": "Página",
+      "work": "Trabajo",
+      "campaign": "Campaña",
+      "email-template": "Plantilla de correo electrónico",
+      "email-layout": "Diseño de correo electrónico",
+      "terms-history": "Términos",
+      "privacy-history": "Política de privacidad",
+      "artist": "Artista",
+      "release": "Lanzamiento",
+      "label": "Etiqueta",
+      "form": "Formulario",
+      "map-theme": "Tema del mapa",
+      "program-event": "Evento",
+      "menu": "Menú",
+      "post-series": "Serie de publicaciones"
     }
   }
 }

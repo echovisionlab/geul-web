@@ -46,7 +46,7 @@ interface ReleaseCreditsSectionProps {
   canEditNotes: boolean;
   onCreditsChange: (credits: ReleaseCreditItem[]) => void;
   onCreditNoteChange: (creditId: string, note: string) => void;
-  onMutationStart?: () => void;
+  onMutationStart?: () => string | void;
   onMutationSettled?: (succeeded: boolean) => void;
 }
 export function ReleaseCreditsSection({
@@ -82,7 +82,7 @@ export function ReleaseCreditsSection({
   });
   const { data: allMembers } = allMembersQuery;
   const setCredits = useMutation({
-    mutationFn: (mutation: {
+    mutationFn: async (mutation: {
       credits: {
         id?: string;
         artistId?: string | null;
@@ -96,28 +96,33 @@ export function ReleaseCreditsSection({
         previousItemId?: string;
         nextItemId?: string;
       };
-    }) =>
-      setReleaseCreditsAction(
-        releaseId,
-        mutation.credits,
-        credits.map((credit, sortOrder) => ({
-          id: credit.id,
-          artistId: credit.artist_id,
-          memberId: credit.member_id,
-          creditedName: credit.credited_name,
-          creditRole: credit.credit_role,
-          sortOrder,
-        })),
-        mutation.orderIntent,
-      ),
-    onMutate: () => onMutationStart?.(),
+    }) => {
+      const editorOrigin = onMutationStart?.() ?? undefined;
+      return {
+        ...(await setReleaseCreditsAction(
+          releaseId,
+          mutation.credits,
+          credits.map((credit, sortOrder) => ({
+            id: credit.id,
+            artistId: credit.artist_id,
+            memberId: credit.member_id,
+            creditedName: credit.credited_name,
+            creditRole: credit.credit_role,
+            sortOrder,
+          })),
+          mutation.orderIntent,
+          editorOrigin,
+        )),
+        editorOrigin,
+      };
+    },
     onSettled: (result, error) => onMutationSettled?.(!error && !result?.error),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      publishEditorEntityChange(`release:${releaseId}`);
+      publishEditorEntityChange(`release:${releaseId}`, result.editorOrigin);
       notifications.show({
         message: tCommon('messages.itemUpdated', { item: tCommon('entities.credits') }),
         tone: 'positive',

@@ -1,4 +1,4 @@
-import { EntityTranslationsPanel } from '@/features/translation/EntityTranslationsPanel';
+import { FormTranslationsPanel } from '@/features/form/FormTranslationsPanel';
 
 interface AdminFormTranslationsPageProps {
   params: Promise<{ id: string }>;
@@ -7,5 +7,5 @@ interface AdminFormTranslationsPageProps {
 export default async function AdminFormTranslationsPage({ params }: AdminFormTranslationsPageProps) {
   const { id } = await params;
 
-  return <EntityTranslationsPanel entityType="form" entityId={id} collapsible={false} />;
+  return <FormTranslationsPanel formId={id} />;
 }

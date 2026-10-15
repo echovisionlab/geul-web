@@ -1,7 +1,9 @@
 'use client';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
+import { useProviderAccessEnded } from '@/lib/collab/useProviderAccessEnded';
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
 import type { Editor } from '@tiptap/core';
 
 import { notifications } from '@/components/core/Notification';
@@ -124,7 +126,9 @@ function LocalizedCollaborativeRichTextEditorSurface({
     }),
     [userName],
   );
-  const canEditLocalized = editable;
+  const accessEnded = useProviderAccessEnded(provider);
+  const accessLevel = useEditorAccessLevel(provider);
+  const canEditLocalized = editable && !accessEnded && accessLevel === 'edit';
   const canEditNeutral =
     canEditLocalized && allowNeutralBlockEdits && allowStructuralEdits && Boolean(entityId) && entityType != null;
   const authoringMode = useMemo<EditorAuthoringMode>(

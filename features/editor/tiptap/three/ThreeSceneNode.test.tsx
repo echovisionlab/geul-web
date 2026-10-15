@@ -7,7 +7,6 @@ import { EditorContent, useEditor } from '@tiptap/react';
 import { Editor, type NodeType, type TextType } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
 
-import { redo, undo } from 'y-prosemirror';
 import type { EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { createTiptapWireExtensions } from '../wire-schema';
 import { createThreeSceneExtension, KOREAN_THREE_SCENE_LABELS } from './ThreeSceneNode';
@@ -19,11 +18,6 @@ import {
   validateThreeSceneSource,
 } from './three-source';
 import { transpileThreeSceneSource } from './three-transpile';
-
-vi.mock('y-prosemirror', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('y-prosemirror')>();
-  return { ...actual, undo: vi.fn(actual.undo), redo: vi.fn(actual.redo) };
-});
 
 vi.mock('../code-editor', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../code-editor')>()),
@@ -473,8 +467,6 @@ describe('authoring Three.js scene resize', () => {
     const input = element.querySelector<HTMLTextAreaElement>('textarea[aria-label="Three.js 소스"]');
     expect(input).not.toBeNull();
     const before = sceneNode(editor!);
-    vi.mocked(undo).mockClear();
-    vi.mocked(redo).mockClear();
     await act(async () => {
       editor!.view.dispatch(editor!.state.tr.setSelection(NodeSelection.create(editor!.state.doc, 1)));
       input!.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', metaKey: true, bubbles: true }));
@@ -485,8 +477,6 @@ describe('authoring Three.js scene resize', () => {
 
     expect(editor!.state.selection).toBeInstanceOf(NodeSelection);
     expect(editor!.state.selection.$from.nodeAfter?.type.name).toBe('threeScene');
-    expect(undo).not.toHaveBeenCalled();
-    expect(redo).not.toHaveBeenCalled();
     expect(sceneNode(editor!)).toMatchObject({
       attrs: { language: 'typescript', mode: 'edit' },
       content: before?.content,

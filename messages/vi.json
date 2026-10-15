@@ -329,7 +329,14 @@
       "ogRegenerationFailed": "Không thể tạo lại hình ảnh OG",
       "testEmailSent": "Đã gửi email kiểm tra",
       "saveSuccess": "Đã lưu",
-      "saveFailed": "Không lưu được"
+      "saveFailed": "Không lưu được",
+      "saveRetrying": "Các thay đổi của bạn chưa được lưu lên máy chủ. Chúng tôi đang thử lại.",
+      "editsRestored": "Đã khôi phục các chỉnh sửa được lấy lại.",
+      "leaveWithRejectedEdits": {
+        "title": "Rời đi mà không giữ các chỉnh sửa không thể lưu?",
+        "message": "Máy chủ đã từ chối một số chỉnh sửa nên chúng chưa được lưu. Hãy sao chép chúng từ menu cộng tác trước, hoặc rời đi và bỏ các chỉnh sửa này.",
+        "confirm": "Rời đi và bỏ chỉnh sửa"
+      }
     },
     "errors": {
       "generic": "Đã xảy ra lỗi. Vui lòng thử lại.",
@@ -460,6 +467,11 @@
       "siteInfo": "Thông tin trang web",
       "links": "Liên kết",
       "socialMedia": "Truyền thông xã hội"
+    },
+    "signOutUnsaved": {
+      "title": "Đăng xuất khi có chỉnh sửa chưa lưu?",
+      "message": "Một số chỉnh sửa chưa được lưu lên máy chủ. Đăng xuất sẽ xóa chúng khỏi thiết bị này.",
+      "confirm": "Đăng xuất và bỏ chỉnh sửa"
     }
   },
   "adminShell": {
@@ -673,13 +685,13 @@
       "detail": {
         "backTooltip": "Quay lại bố cục email",
         "targetEditor": {
-          "title": "Translated text",
-          "description": "Edit only visible text and accessibility labels. HTML, CSS, links, and placeholders remain owned by the source layout.",
-          "empty": "This layout has no translatable text units.",
+          "title": "Văn bản đã dịch",
+          "description": "Chỉ chỉnh sửa văn bản hiển thị và nhãn hỗ trợ tiếp cận. HTML, CSS, liên kết và phần giữ chỗ vẫn do bố cục nguồn quản lý.",
+          "empty": "Bố cục này không có đơn vị văn bản nào có thể dịch.",
           "textUnit": "Text",
-          "sourceValue": "Source: {value}",
-          "translatedValue": "This locale provides its own value.",
-          "sourceFallback": "Using the source value.",
+          "sourceValue": "Nguồn: {value}",
+          "translatedValue": "Ngôn ngữ này có giá trị riêng.",
+          "sourceFallback": "Đang dùng giá trị nguồn.",
           "useSource": "Use source"
         },
         "viewModes": {
@@ -1677,16 +1689,16 @@
       "consentDescription": "Ứng dụng khách này có thể đọc và chỉnh sửa nội dung, cũng như quản lý tệp trong phạm vi quyền hiện có của tài khoản bạn. Ứng dụng có thể tạo, cập nhật hoặc xóa nội dung và thay đổi tệp đính kèm hiện có. Việc kết nối không cấp thêm quyền cho tài khoản.",
       "consentOfflineAccess": "Kết nối này có thể tiếp tục sau khi phiên trình duyệt hiện tại kết thúc, cho đến khi bạn thu hồi.",
       "consentRevoke": "Bạn có thể thu hồi kết nối này tại {settings} → Remote MCP.",
-      "connectionsTitle": "Connected MCP clients",
-      "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
-      "connectionsEmpty": "No MCP clients are connected.",
-      "connectedAt": "Connected {date}",
+      "connectionsTitle": "Ứng dụng khách MCP đã kết nối",
+      "connectionsDescription": "Các quyền OAuth này độc lập với phiên trình duyệt. Thu hồi một quyền sẽ ngắt kết nối ứng dụng khách MCP tương ứng mà không đăng xuất bạn.",
+      "connectionsEmpty": "Không có ứng dụng khách MCP nào được kết nối.",
+      "connectedAt": "Đã kết nối {date}",
       "revoke": "Revoke",
-      "revokeTitle": "Revoke MCP access",
-      "revokeConfirmation": "Revoke MCP access for {client}? Its current token chain will stop working.",
-      "revokeSuccess": "MCP access was revoked.",
-      "revokeFailed": "Could not revoke MCP access.",
-      "loadFailed": "Could not load connected MCP clients."
+      "revokeTitle": "Thu hồi quyền truy cập MCP",
+      "revokeConfirmation": "Thu hồi quyền truy cập MCP của {client}? Chuỗi mã thông báo hiện tại của ứng dụng này sẽ ngừng hoạt động.",
+      "revokeSuccess": "Đã thu hồi quyền truy cập MCP.",
+      "revokeFailed": "Không thể thu hồi quyền truy cập MCP.",
+      "loadFailed": "Không thể tải các ứng dụng khách MCP đã kết nối."
     },
     "personalAccessTokens": {
       "title": "Mã truy cập cá nhân",
@@ -2136,9 +2148,9 @@
     "systemOrLegacy": "Hệ thống hoặc phiên bản cũ hơn",
     "restore": "Khôi phục",
     "restoreTitle": "Khôi phục phiên bản",
-    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document.",
+    "restoreSameLocaleBody": "Khôi phục nguồn v{version} ({locale}) chỉ thay đổi tài liệu nguồn. Các tài liệu đích và tác vụ dịch hiện có không thay đổi, và bản dịch không được tạo tự động. Tiếp tục?",
+    "restoreCrossLocaleBody": "Khôi phục nguồn v{version} sẽ chuyển ngôn ngữ nguồn từ {currentLocale} sang {selectedLocale} và chỉ thay đổi con trỏ nguồn. Các tài liệu đích và tác vụ dịch hiện có không thay đổi, và bản dịch không được tạo tự động. Tiếp tục?",
+    "restoreFailed": "Không thể khôi phục tài liệu nguồn.",
     "loadFailed": "Không thể tải lịch sử phiên bản.",
     "end": "Đã tải tất cả phiên bản."
   },
@@ -2518,6 +2530,24 @@
       "sections": {
         "connection": "Sự liên quan"
       }
+    },
+    "saveState": {
+      "saved": "Đã lưu",
+      "saving": "Đang lưu…",
+      "offline": "Ngoại tuyến · chỉnh sửa được giữ trên thiết bị này",
+      "error": "Không lưu được · đang thử lại…",
+      "rejected": "Một số chỉnh sửa không thể lưu",
+      "reload": "Đang kết nối lại · đang khôi phục chỉnh sửa…"
+    },
+    "rejectedEdits": {
+      "open": "Xem lại các chỉnh sửa chưa lưu",
+      "title": "Các chỉnh sửa không thể lưu",
+      "description": "Máy chủ đã từ chối các chỉnh sửa này nên hệ thống sẽ không thử lưu lại. Hãy sao chép những gì bạn cần, rồi bỏ các chỉnh sửa này.",
+      "reason": "Lý do: {reason}",
+      "copy": "Sao chép",
+      "copied": "Đã sao chép",
+      "discard": "Bỏ chỉnh sửa",
+      "empty": "Đã lưu tất cả chỉnh sửa."
     }
   },
   "urlSection": {
@@ -3082,7 +3112,7 @@
     },
     "mapEditor": {
       "title": "Bản đồ",
-      "placeCount": "{count} {count, plural, one {place} other {places}}",
+      "placeCount": "{count} {count, plural, one {địa điểm} other {địa điểm}}",
       "fullscreen": "Toàn màn hình",
       "captionPlaceholder": "Thêm chú thích tùy chọn bên dưới bản đồ...",
       "emptyState": "Chưa có địa điểm nào trên bản đồ được chọn.",
@@ -3512,8 +3542,8 @@
       "message": "Một phiên bản mới hơn đã được lưu trong khi trình chỉnh sửa này đang mở. Tải lại trước khi tiếp tục chỉnh sửa."
     },
     "permissionRevoked": {
-      "title": "Quyền chỉnh sửa bị thu hồi",
-      "message": "Bạn không còn có quyền chỉnh sửa nội dung này. Những thay đổi được thực hiện sau khi quyền bị thu hồi sẽ không được lưu."
+      "title": "Đã xóa quyền truy cập",
+      "message": "Bạn không còn quyền truy cập nội dung này. Các thay đổi chưa lưu vẫn được giữ trên thiết bị này."
     },
     "sessionExpired": {
       "title": "Phiên đã hết hạn",
@@ -3754,14 +3784,14 @@
           "quote": {
             "title": "Trích dẫn",
             "subtext": "Trích dẫn hoặc đoạn trích",
-            "aliases": "quotation\nblockquote\nbq",
+            "aliases": "quotation\nblockquote\nbq\ntrích dẫn\nkhối trích dẫn",
             "group": "Khối cơ bản"
           },
           "callout": {
             "title": "Callout",
-            "subtext": "Highlight content with an icon",
-            "aliases": "callout\nnotice\ninfo\naside",
-            "group": "Basic blocks"
+            "subtext": "Làm nổi bật nội dung bằng biểu tượng",
+            "aliases": "callout\nnotice\ninfo\naside\nchú thích\nthông báo\nthông tin\nghi chú",
+            "group": "Khối cơ bản"
           },
           "divider": {
             "title": "Phân cách",
@@ -3790,61 +3820,61 @@
           "mathBlock": {
             "title": "Khối toán",
             "subtext": "Hiển thị phương trình bằng LaTeX",
-            "aliases": "math\nequation\nlatex\nformula",
+            "aliases": "math\nequation\nlatex\nformula\ntoán\nphương trình\ncông thức",
             "group": "Toán học"
           },
           "inlineMath": {
             "title": "Toán nội tuyến",
             "subtext": "Công thức LaTeX nội tuyến",
-            "aliases": "inline\ninline math\ninlinemath\nlatex\n$",
+            "aliases": "inline\ninline math\ninlinemath\nlatex\n$\nnội tuyến\ncông thức nội tuyến\ntoán trong dòng",
             "group": "Nội tuyến"
           },
           "map": {
             "title": "Bản đồ",
             "subtext": "Chèn vị trí bản đồ",
-            "aliases": "map\nlocation\nplace\naddress",
+            "aliases": "map\nlocation\nplace\naddress\nbản đồ\nvị trí\nđịa điểm\nđịa chỉ",
             "group": "Nhúng"
           },
           "externalVideo": {
             "title": "Video bên ngoài",
             "subtext": "Chèn liên kết YouTube hoặc Vimeo",
-            "aliases": "external video\nyoutube\nvimeo\nembed",
+            "aliases": "external video\nyoutube\nvimeo\nembed\nvideo bên ngoài\nnhúng",
             "group": "Nhúng"
           },
           "p5Sketch": {
             "title": "p5.js",
             "subtext": "Thêm bản phác thảo p5.js tương tác",
-            "aliases": "p5\np5.js\nsketch\ncreative coding",
+            "aliases": "p5\np5.js\nsketch\ncreative coding\nphác thảo\nlập trình sáng tạo",
             "group": "Nhúng"
           },
           "threeScene": {
             "title": "Three.js",
             "subtext": "Thêm cảnh Three.js tương tác",
-            "aliases": "three\nthree.js\n3d\nscene",
+            "aliases": "three\nthree.js\n3d\nscene\nba chiều\ncảnh",
             "group": "Nhúng"
           },
           "file": {
             "title": "Tệp đính kèm",
             "subtext": "Đính kèm tệp (PDF, DOC, ZIP, v.v.)",
-            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload",
+            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\ntệp đính kèm\ntệp\ntập tin\ntài liệu\ntải xuống",
             "group": "Đa phương tiện"
           },
           "aiAssistant": {
             "title": "Trợ lý AI",
             "subtext": "Viết, cải thiện hoặc chuyển đổi văn bản bằng AI",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove",
+            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\ntrí tuệ nhân tạo\ntrợ lý\nviết\ncải thiện",
             "group": "AI"
           },
           "shader": {
             "title": "Shader GLSL",
             "subtext": "Thêm shader GLSL tương tác",
-            "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "aliases": "shader\nglsl\nfragment shader\nshadertoy\nbộ đổ bóng\nđổ bóng mảnh",
             "group": "Nhúng"
           },
           "mermaid": {
             "title": "Mermaid",
             "subtext": "Tạo sơ đồ từ văn bản",
-            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence\nsơ đồ\nlưu đồ\ntrình tự",
             "group": "Nhúng"
           }
         }
@@ -4024,6 +4054,12 @@
       "media": {
         "importFromUrl": "Nhập từ URL"
       }
+    },
+    "accessDowngraded": {
+      "message": "Quyền truy cập của bạn đã chuyển sang chỉ xem. Chức năng chỉnh sửa đã tắt; các chỉnh sửa chưa được lưu vẫn ở trên thiết bị này và sẽ được lưu nếu bạn có lại quyền chỉnh sửa."
+    },
+    "accessUpgraded": {
+      "message": "Bạn có thể chỉnh sửa lại. Các thay đổi được giữ trong lúc chỉ có quyền xem đang được lưu."
     }
   },
   "aiAssistant": {
@@ -4166,35 +4202,35 @@
     "resolvedMetadata": "Siêu dữ liệu đã được giải quyết"
   },
   "translationPanel": {
-    "description": "Review the source language and existing translation document for each locale.",
+    "description": "Xem lại ngôn ngữ nguồn và tài liệu bản dịch hiện có cho từng ngôn ngữ.",
     "actions": {
       "expand": "Mở rộng",
       "collapse": "Sụp đổ",
-      "regenerateAll": "Generate/regenerate all eligible locales",
+      "regenerateAll": "Tạo/tạo lại bản dịch cho tất cả ngôn ngữ đủ điều kiện",
       "regenerateLocale": "tái sinh",
       "regenerateLocaleAria": "Tạo lại bản dịch {locale}",
       "generateLocale": "Generate",
-      "generateLocaleAria": "Generate {locale} translation"
+      "generateLocaleAria": "Tạo bản dịch {locale}"
     },
     "sourceLocale": {
       "label": "Ngôn ngữ nguồn",
       "description": "Đây là ngôn ngữ nguồn được sử dụng làm cơ sở cho các bản dịch của thực thể này.",
       "confirm": {
         "title": "Thay đổi ngôn ngữ nguồn",
-        "description": "Changing the source language updates only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically.",
-        "detail": "{locale} becomes the language of the editable source document. Existing target documents and translation jobs remain unchanged.",
+        "description": "Thay đổi ngôn ngữ nguồn chỉ cập nhật con trỏ nguồn. Các tài liệu đích và tác vụ dịch hiện có không thay đổi, và bản dịch không được tạo tự động.",
+        "detail": "{locale} trở thành ngôn ngữ của tài liệu nguồn có thể chỉnh sửa. Các tài liệu đích và tác vụ dịch hiện có không thay đổi.",
         "confirm": "Thay đổi ngôn ngữ nguồn"
       }
     },
     "activeEditLocale": {
-      "ariaLabel": "Switch content language. Current: {locale}",
+      "ariaLabel": "Chuyển ngôn ngữ nội dung. Hiện tại: {locale}",
       "sourceOption": "{locale} (Nguồn)",
       "loading": "Đang tải ngôn ngữ...",
-      "missingDescription": "No {locale} target document exists yet. Generate it from the translations panel.",
+      "missingDescription": "Chưa có tài liệu đích {locale}. Hãy tạo từ bảng bản dịch.",
       "bodyPreviewTitle": "Xem trước nội dung {locale}",
-      "bodyPreviewDescription": "The existing translation document is shown with its structure and formatting.",
+      "bodyPreviewDescription": "Tài liệu bản dịch hiện có được hiển thị cùng cấu trúc và định dạng của nó.",
       "bodyPreviewEmpty": "Chưa có bản xem trước nội dung được bản địa hóa.",
-      "sharedStructureSectionDescription": "This section keeps shared layout or query settings from the source page; translated body content is read-only.",
+      "sharedStructureSectionDescription": "Phần này giữ các cài đặt bố cục hoặc truy vấn dùng chung từ trang nguồn; nội dung văn bản đã dịch chỉ có thể đọc.",
       "sectionFieldLabels": {
         "caption": "Đầu đề",
         "copyJson": "Sao chép cảnh"
@@ -4205,7 +4241,7 @@
     },
     "states": {
       "loadFailed": "Không tải được bản dịch.",
-      "missingTarget": "No target document yet.",
+      "missingTarget": "Chưa có tài liệu đích.",
       "sourceEditorHint": "Chỉnh sửa văn bản gốc trong trình chỉnh sửa chính.",
       "updatedAt": "Đã cập nhật {date}"
     },
@@ -4218,26 +4254,26 @@
     }
   },
   "translationPanelMenu": {
-    "description": "Review source menu labels and existing translation documents.",
+    "description": "Xem lại nhãn menu nguồn và các tài liệu bản dịch hiện có.",
     "previewModal": {
-      "title": "{locale} menu translation preview",
+      "title": "Xem trước bản dịch menu {locale}",
       "fields": {
-        "localizedLabelForLocale": "{locale} public label"
+        "localizedLabelForLocale": "Nhãn công khai {locale}"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template."
+      "description": "Quản lý ngôn ngữ nguồn và các tài liệu bản dịch hiện có cho mẫu email này."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout."
+      "description": "Quản lý ngôn ngữ nguồn và các tài liệu bản dịch hiện có cho bố cục email này."
     }
   },
   "localizationNotice": {
     "translated": {
-      "title": "Localized version",
-      "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
+      "title": "Phiên bản bản địa hóa",
+      "description": "Phiên bản bản địa hóa này được hiển thị bằng {displayed}; bản gốc bằng {source} vẫn là căn cứ chính thức."
     },
     "fallback": {
       "title": "Ngôn ngữ dự phòng"
@@ -4260,15 +4296,15 @@
       "totalLocales": "Tổng số miền địa phương",
       "sourceEntities": "Thực thể nguồn",
       "activeJobs": "Công việc đang tiến hành",
-      "existingEntries": "Existing translations"
+      "existingEntries": "Bản dịch hiện có"
     },
     "sections": {
-      "localeHealthTitle": "Translation state by locale",
-      "entityHealthTitle": "Translation state by entity type"
+      "localeHealthTitle": "Trạng thái bản dịch theo ngôn ngữ",
+      "entityHealthTitle": "Trạng thái bản dịch theo loại thực thể"
     },
     "columns": {
       "policy": "Chính sách",
-      "lastTargetUpdate": "Last target update",
+      "lastTargetUpdate": "Cập nhật bản dịch lần cuối",
       "entity": "Thực thể",
       "sources": "Nguồn",
       "lastSourceUpdate": "Cập nhật nguồn cuối cùng"
@@ -4304,7 +4340,7 @@
   },
   "translationSettingsPage": {
     "title": "Cài đặt dịch",
-    "description": "Manage the default source language and automatic translation providers. An Admin explicitly starts translation generation from each editor.",
+    "description": "Quản lý ngôn ngữ nguồn mặc định và các nhà cung cấp dịch tự động. Quản trị viên chủ động bắt đầu tạo bản dịch từ mỗi trình chỉnh sửa.",
     "actions": {
       "jobs": "Việc làm",
       "save": "Lưu cài đặt",
@@ -4314,8 +4350,8 @@
       "createProvider": "Tạo nhà cung cấp"
     },
     "sections": {
-      "runtime": "Source defaults",
-      "runtimeDescription": "Set only the language used when a source language has not been established. Source changes never start translation generation automatically.",
+      "runtime": "Mặc định cho nguồn",
+      "runtimeDescription": "Chỉ đặt ngôn ngữ được dùng khi ngôn ngữ nguồn chưa được xác định. Thay đổi nguồn không bao giờ tự động bắt đầu tạo bản dịch.",
       "providers": "Nhà cung cấp dịch thuật",
       "providersDescription": "Quản lý nhà cung cấp dịch máy. Thế hệ vẫn bị vô hiệu hóa cho đến khi có ít nhất một nhà cung cấp đang hoạt động có thông tin xác thực hợp lệ."
     },
@@ -4325,10 +4361,10 @@
         "description": "Được sử dụng khi ngôn ngữ nguồn chưa được đặt và khi yêu cầu không được giải quyết thành ngôn ngữ nội dung được hỗ trợ."
       },
       "protectedTerms": {
-        "label": "Protected terms",
-        "description": "Exact case-sensitive spellings that translation generation must keep unchanged. No terms are learned or suggested automatically.",
-        "placeholder": "Add a protected term",
-        "examples": "Examples: Photoshop, React Native"
+        "label": "Thuật ngữ được bảo vệ",
+        "description": "Cách viết chính xác có phân biệt chữ hoa và chữ thường mà quá trình tạo bản dịch phải giữ nguyên. Hệ thống không tự động học hoặc đề xuất thuật ngữ.",
+        "placeholder": "Thêm thuật ngữ được bảo vệ",
+        "examples": "Ví dụ: Photoshop, React Native"
       },
       "providerName": {
         "label": "Tên nhà cung cấp"
@@ -5268,6 +5304,40 @@
       "goHome": "Về nhà",
       "tryAgain": "Thử lại",
       "login": "Quay lại đăng nhập"
+    }
+  },
+  "localBackups": {
+    "title": "Bản sao lưu cục bộ",
+    "description": "Các chỉnh sửa chưa lưu từ những thẻ đã đóng trên thiết bị này. Mở trình chỉnh sửa để khôi phục chúng. Bản sao lưu hết hạn sau 30 ngày và bị xóa khi bạn đăng xuất.",
+    "empty": "Không có bản sao lưu cục bộ để khôi phục. Các chỉnh sửa trong thẻ đang mở không được liệt kê ở đây.",
+    "unavailable": "Bản sao lưu cục bộ cần bộ nhớ trình duyệt và Web Locks trên thiết bị này.",
+    "loading": "Đang tìm bản sao lưu cục bộ…",
+    "error": "Không thể hoàn tất thao tác này. Làm mới danh sách và thử lại.",
+    "refresh": "Làm mới",
+    "lastChanged": "Thay đổi lần cuối {time}",
+    "open": "Mở trình chỉnh sửa",
+    "discard": "Bỏ chỉnh sửa",
+    "openLabel": "Mở trình chỉnh sửa: {kind} {id}, {locale}",
+    "discardLabel": "Bỏ chỉnh sửa: {kind} {id}, {locale}",
+    "discardTitle": "Xóa bản sao lưu cục bộ?",
+    "discardDescription": "Các chỉnh sửa chưa lưu này sẽ bị xóa vĩnh viễn khỏi thiết bị này. Nội dung đã lưu không bị ảnh hưởng.",
+    "kinds": {
+      "post": "Bài viết",
+      "page": "Trang",
+      "work": "Tác phẩm",
+      "campaign": "Chiến dịch",
+      "email-template": "Mẫu email",
+      "email-layout": "Bố cục email",
+      "terms-history": "Điều khoản dịch vụ",
+      "privacy-history": "Chính sách bảo mật",
+      "artist": "Nghệ sĩ",
+      "release": "Bản phát hành",
+      "label": "Nhãn",
+      "form": "Biểu mẫu",
+      "map-theme": "Chủ đề bản đồ",
+      "program-event": "Sự kiện",
+      "menu": "Menu",
+      "post-series": "Loạt bài viết"
     }
   }
 }

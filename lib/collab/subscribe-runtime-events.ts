@@ -1,6 +1,7 @@
 'use client';
 
 import type { EditorRuntimeEvent, RuntimeEntityType } from '@echovisionlab/geul-common/collaboration/runtime-events';
+import { createLogger } from '@/lib/utils/logger';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 
 export interface EditorRuntimeEventSubscriptionOptions {
@@ -26,14 +27,20 @@ let runtimeEventParser: RuntimeEventParser | null = null;
 let runtimeEventParserLoad: Promise<RuntimeEventParser> | null = null;
 
 /**
- * Common's runtime-event parser validates with classic zod, which cannot be tree-shaken (about
- * 87 kB gzip). It loads when the first provider subscription starts, not with every route that can
+ * The shared control-plane parser loads when the first provider subscription starts, not with every route that can
  * upload a file (`/my/*`, admin pages without a collaboration provider).
  */
 function loadRuntimeEventParser(): Promise<RuntimeEventParser> {
-  runtimeEventParserLoad ??= import('@echovisionlab/geul-common/collaboration/runtime-events').then(
+  runtimeEventParserLoad ??= import('@/lib/collab/runtime-event-parser').then(
     (module) => {
-      runtimeEventParser = module.parseEditorRuntimeEventMessage;
+      runtimeEventParser = (payload) => {
+        const parsed = module.parseServerMessage(payload);
+        if (!parsed.ok) {
+          void createLogger('runtime-events').warn('Ignoring collaboration message', { data: { ...parsed } });
+          return null;
+        }
+        return parsed.message.kind === 'runtime.event' ? parsed.message.event : null;
+      };
       return runtimeEventParser;
     },
     (error: unknown) => {
@@ -82,7 +89,11 @@ export function subscribeToProviderRuntimeEvents(
       }
     }
 
-    onEvent(event);
+    try {
+      onEvent(event);
+    } catch (error) {
+      void createLogger('runtime-events').warn('Runtime event listener failed', { data: { error: String(error) } });
+    }
   };
 
   const flushPending = (parse: RuntimeEventParser) => {

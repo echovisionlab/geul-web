@@ -138,6 +138,15 @@ async function mountEditor(props: MonacoSourceEditorProps, themeId: ThemeId = 'l
   }
   return {
     input,
+    async rerender(nextProps: MonacoSourceEditorProps) {
+      await act(async () =>
+        root.render(
+          <DesignSystemProvider forceTheme={themeId}>
+            <MonacoSourceEditor {...nextProps} />
+          </DesignSystemProvider>,
+        ),
+      );
+    },
     async unmount() {
       await act(async () => root.unmount());
       host.remove();
@@ -442,4 +451,30 @@ describe('MonacoSourceEditor', () => {
     await mounted.unmount();
     outer.remove();
   });
+});
+
+it('updates HTML readOnly in both directions without replacing the Monaco editor', async () => {
+  const onMount = vi.fn();
+  const props = {
+    value: '<main>Body</main>',
+    language: 'html',
+    ariaLabel: 'HTML',
+    modelPath: 'email-layout.html',
+    onMount,
+  };
+  const mounted = await mountEditor({ ...props, readOnly: true });
+  try {
+    expect(mounted.input.readOnly).toBe(true);
+    const editor = onMount.mock.calls[0]?.[0];
+    expect(editor).toBeDefined();
+    await mounted.rerender({ ...props, readOnly: false });
+    expect(mounted.input.readOnly).toBe(false);
+    await mounted.rerender({ ...props, readOnly: true });
+    expect(mounted.input.readOnly).toBe(true);
+    expect(onMount).toHaveBeenCalledTimes(1);
+    expect(onMount.mock.calls[0]?.[0]).toBe(editor);
+    expect(mounted.input.isConnected).toBe(true);
+  } finally {
+    await mounted.unmount();
+  }
 });

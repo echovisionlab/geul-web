@@ -91,7 +91,11 @@ vi.mock('@/components/core/Input', () => ({
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
 
-function render(credits: ReleaseTrackItem['credits'], onCreditsChange = vi.fn()) {
+function render(
+  credits: ReleaseTrackItem['credits'],
+  onCreditsChange = vi.fn(),
+  onMutationStart?: () => string | void,
+) {
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
@@ -103,6 +107,7 @@ function render(credits: ReleaseTrackItem['credits'], onCreditsChange = vi.fn())
         trackId="track-1"
         credits={credits}
         onCreditsChange={onCreditsChange}
+        onMutationStart={onMutationStart}
       />,
     );
   });
@@ -144,7 +149,9 @@ describe('TrackCreditsEditorSection', () => {
         sort_order: 0,
       },
     ];
-    const onCreditsChange = render(credits);
+    const editorOrigin = '30000000-0000-4000-8000-000000000001';
+    const onMutationStart = vi.fn(() => editorOrigin);
+    const onCreditsChange = render(credits, vi.fn(), onMutationStart);
 
     await click(document.querySelector('[data-segment="text"]')!);
     const nameInput = document.getElementById('track-track-credit-name-track-1') as HTMLInputElement;
@@ -161,7 +168,9 @@ describe('TrackCreditsEditorSection', () => {
       'track-1',
       expect.arrayContaining([expect.objectContaining({ credited_name: 'New credit' })]),
       [expect.objectContaining({ id: 'credit-1', credited_name: 'Existing', credit_role: 'Writer' })],
+      editorOrigin,
     );
+    expect(onMutationStart).toHaveBeenCalledOnce();
     expect(onCreditsChange).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({ id: 'credit-1' }),

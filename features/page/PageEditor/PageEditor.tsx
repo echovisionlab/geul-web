@@ -1,4 +1,7 @@
 'use client';
+import type { EditorSnapshot } from '@/features/editor/editor-snapshot';
+import { EditorSnapshotHandoff } from '@/features/editor/EditorSnapshotHandoff';
+import { PageEditorSnapshot } from './PageEditorSnapshot';
 
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
 
@@ -75,6 +78,7 @@ import { requireBlockRoomDurabilityProtocol } from '@/lib/collab/block-room-dura
 import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 
 interface PageEditorProps {
+  initialSnapshot?: EditorSnapshot;
   pageId: string;
   currentMemberId: string;
   canManageTranslations: boolean;
@@ -140,6 +144,7 @@ function mergePageLayoutPatches(pending: PageLayoutPatch, next: PageLayoutPatch)
 }
 
 function usePageEditorViewModel({
+  initialSnapshot,
   pageId,
   currentMemberId,
   canManageTranslations,
@@ -200,7 +205,7 @@ function usePageEditorViewModel({
   const ogRegenerationLocale = normalizeOgRegenerationLocale(activeEditLocale.activeLocale);
   const { shouldUseLocaleDocument } = localeSession.mode;
   const { provider, doc, bootstrap, protocol, isConnected, isSynced, reloadCanonical, acceptEpochAck } =
-    usePageEditorCollaboration(pageId, roomLocale);
+    usePageEditorCollaboration(pageId, roomLocale, initialSnapshot);
   const durabilityProtocol = useMemo(
     () => (protocol ? requireBlockRoomDurabilityProtocol(protocol) : null),
     [protocol],
@@ -247,7 +252,7 @@ function usePageEditorViewModel({
     }
   });
   const permissionRevocation = useEditorPermissionRevocation(provider, 'page', pageId);
-  const canMutate = !permissionRevocation.blocked;
+  const canMutate = initialSnapshot?.editable !== false && !permissionRevocation.blocked;
   const hasLocaleRoomMutationAuthority = localeSession.hasRoomMutationAuthority({
     sourceLocale: bootstrap?.sourceLocale ?? null,
     locale: bootstrap?.locale ?? null,
@@ -262,6 +267,8 @@ function usePageEditorViewModel({
     shouldUseLocaleDocument,
     canEditActiveLocale: currentLocaleCanEdit,
     isSynced,
+
+    isReady: Boolean(doc),
   });
   const canEditNeutral = canEditLocaleDocument && activeEditLocale.isSourceLocale;
   const accessTags = useQuery({
@@ -290,7 +297,7 @@ function usePageEditorViewModel({
     mutationFn: async () => {
       const write = beginFieldWrite('status');
       try {
-        const result = await publishPageAction(pageId);
+        const result = await publishPageAction(pageId, write.origin);
         if (result.ok) {
           write.acknowledge(result.status);
         } else {
@@ -315,7 +322,7 @@ function usePageEditorViewModel({
     mutationFn: async () => {
       const write = beginFieldWrite('status');
       try {
-        const result = await unpublishPageAction(pageId);
+        const result = await unpublishPageAction(pageId, write.origin);
         if (result.ok) {
           write.acknowledge(result.status);
         } else {
@@ -391,9 +398,9 @@ function usePageEditorViewModel({
 
   const updateSlug = useMutation({
     mutationFn: async (nextSlug: string | null) => {
-      const write = beginFieldWrite('slug');
+      const write = beginFieldWrite('slug', nextSlug);
       try {
-        const result = await updatePageSlugAction(pageId, nextSlug);
+        const result = await updatePageSlugAction(pageId, nextSlug, write.origin);
         if (result.ok) {
           write.acknowledge(result.slug);
         } else {
@@ -559,6 +566,7 @@ function usePageEditorViewModel({
   const displayedSummary = roomLocale && isSynced ? residentSummary : activeEditLocale.displaySummary;
 
   return {
+    ...(initialSnapshot ? { initialSnapshot } : {}),
     currentTextProvider,
     pageId,
     protocol,
@@ -703,7 +711,6 @@ export function PageEditorView({ model }: { model: PageEditorViewModel }) {
     regenerateOgImage,
     setFeaturedImageUrl,
     durabilityProtocol,
-    isSynced,
     versionHistoryOpened,
     closeVersionHistory,
     reloadCanonical,
@@ -924,39 +931,61 @@ export function PageEditorView({ model }: { model: PageEditorViewModel }) {
           <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
             <SectionCard layout="stack" grow padding={{ base: 'none', sm: 'md' }}>
               <DsLayoutStack flexible>
-                {provider && doc && durabilityProtocol && isSynced && roomLocale ? (
-                  <MapPlaceActionProvider createMapPlaceForBlock={createMapPlaceForBlockWithBrowserClient}>
-                    <PageEditorProvider
-                      doc={doc}
-                      provider={provider}
-                      protocol={durabilityProtocol}
-                      locale={roomLocale}
-                      userName={userName}
-                      pageId={pageId}
-                      editable={canEditLocaleDocument}
-                      allowStructuralEdits={canEditNeutral}
-                    >
-                      <ScrollArea id={getEditorBodyReadyId('page', pageId)} grow>
-                        {activeEditLocale.isSourceLocale ? (
-                          <SectionList />
-                        ) : (
-                          <LocalizedCollaborativePageBodyEditor
-                            fallbackText={tCommon('states.none')}
-                            editable={canEditLocaleDocument}
-                          />
-                        )}
-                      </ScrollArea>
-                    </PageEditorProvider>
-                  </MapPlaceActionProvider>
-                ) : (
-                  <div style={{ minHeight: 200 }}>
-                    <DsLayoutStack id={getEditorBodyLoadingId('page', pageId)} justify="center">
-                      <DsText size="sm" tone="secondary">
-                        {tCommon('labels.body')}
-                      </DsText>
-                    </DsLayoutStack>
-                  </div>
-                )}
+                <ScrollArea id={getEditorBodyReadyId('page', pageId)} grow>
+                  <EditorSnapshotHandoff
+                    key={activeEditLocale.activeLocale ?? model.initialSnapshot?.locale ?? 'source'}
+                    page
+                    ready={Boolean(provider && doc && durabilityProtocol && roomLocale)}
+                    editable={canEditLocaleDocument}
+                    snapshot={
+                      model.initialSnapshot &&
+                      (!activeEditLocale.activeLocale ||
+                        activeEditLocale.activeLocale === model.initialSnapshot.locale) ? (
+                        <PageEditorSnapshot snapshot={model.initialSnapshot} />
+                      ) : (
+                        <div style={{ minHeight: 200 }}>
+                          <DsLayoutStack id={getEditorBodyLoadingId('page', pageId)} justify="center">
+                            <DsText size="sm" tone="secondary">
+                              {tCommon('labels.body')}
+                            </DsText>
+                          </DsLayoutStack>
+                        </div>
+                      )
+                    }
+                  >
+                    {provider && doc && durabilityProtocol && roomLocale ? (
+                      <MapPlaceActionProvider createMapPlaceForBlock={createMapPlaceForBlockWithBrowserClient}>
+                        <PageEditorProvider
+                          doc={doc}
+                          provider={provider}
+                          protocol={durabilityProtocol}
+                          locale={roomLocale}
+                          userName={userName}
+                          pageId={pageId}
+                          editable={canEditLocaleDocument}
+                          allowStructuralEdits={canEditNeutral}
+                        >
+                          {activeEditLocale.isSourceLocale ? (
+                            <SectionList />
+                          ) : (
+                            <LocalizedCollaborativePageBodyEditor
+                              fallbackText={tCommon('states.none')}
+                              editable={canEditLocaleDocument}
+                            />
+                          )}
+                        </PageEditorProvider>
+                      </MapPlaceActionProvider>
+                    ) : (
+                      <div style={{ minHeight: 200 }}>
+                        <DsLayoutStack id={getEditorBodyLoadingId('page', pageId)} justify="center">
+                          <DsText size="sm" tone="secondary">
+                            {tCommon('labels.body')}
+                          </DsText>
+                        </DsLayoutStack>
+                      </div>
+                    )}
+                  </EditorSnapshotHandoff>
+                </ScrollArea>
               </DsLayoutStack>
             </SectionCard>
           </div>

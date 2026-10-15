@@ -23,14 +23,24 @@ const initial = [track('one', 1), track('two', 2), track('three', 3)];
 let root: Root, client: QueryClient;
 let save: ReturnType<typeof useTrackOrderSave>;
 let current: ReleaseTrackItem[];
+const onMutationStart = vi.fn<() => string>();
+const onMutationSettled = vi.fn();
+const editorOrigin = '30000000-0000-4000-8000-000000000002';
 function Editor() {
   const [tracks, setTracks] = useState(initial);
   current = tracks;
-  save = useTrackOrderSave({ releaseId: 'release', tracks, onTracksChange: setTracks });
+  save = useTrackOrderSave({
+    releaseId: 'release',
+    tracks,
+    onTracksChange: setTracks,
+    onMutationStart,
+    onMutationSettled,
+  });
   return null;
 }
 beforeEach(() => {
   vi.resetAllMocks();
+  onMutationStart.mockReturnValue(editorOrigin);
   root = createRoot(document.createElement('div'));
   client = new QueryClient({ defaultOptions: { mutations: { retry: false, gcTime: 0 } } });
   act(() =>
@@ -65,11 +75,17 @@ it('serializes rapid reorders and restores the last acknowledged order after a l
     save(second);
   });
   expect(reorderTracksAction).toHaveBeenCalledTimes(1);
+  expect(reorderTracksAction).toHaveBeenNthCalledWith(1, ['two', 'one', 'three'], editorOrigin);
+  expect(onMutationStart).toHaveBeenCalledOnce();
   expect(current.map((item) => item.id)).toEqual(['three', 'two', 'one']);
   await act(async () => {
     finish({ success: true });
   });
   expect(reorderTracksAction).toHaveBeenCalledTimes(2);
+  expect(reorderTracksAction).toHaveBeenNthCalledWith(2, ['three', 'two', 'one'], editorOrigin);
+  expect(onMutationStart).toHaveBeenCalledTimes(2);
+  expect(onMutationSettled).toHaveBeenNthCalledWith(1, true);
+  expect(onMutationSettled).toHaveBeenNthCalledWith(2, false);
   expect(current).toEqual(first);
 });
 

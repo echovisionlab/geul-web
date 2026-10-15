@@ -2,7 +2,20 @@ import { ClientService as PublicClientService } from '@echovisionlab/geul-proto/
 import { ManifestService } from '@echovisionlab/geul-proto/public/manifest_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { REQUEST_ID_HEADER } from '@/lib/observability/request-correlation';
-import { createManifestClient, createPublicClientClientWithAuth, createPublicManifestClient } from './server-client';
+import {
+  createCampaignClient,
+  createEmailTemplateClient,
+  createFileClient,
+  createManifestClient,
+  createPageClient,
+  createPostClient,
+  createProgramEventClient,
+  createPublicClientClientWithAuth,
+  createPublicManifestClient,
+  createReleaseClient,
+  createWorkClient,
+  createTrackClient,
+} from './server-client';
 
 type TestTransport = {
   options: {
@@ -209,5 +222,42 @@ describe('manifest clients', () => {
     const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
     expect(headers.has(REQUEST_ID_HEADER)).toBe(false);
     expect(headers.has('Cookie')).toBe(false);
+  });
+});
+
+describe('editor write origin', () => {
+  it.each([
+    createPostClient,
+    createPageClient,
+    createProgramEventClient,
+    createWorkClient,
+    createTrackClient,
+    createReleaseClient,
+    createCampaignClient,
+    createEmailTemplateClient,
+    createFileClient,
+  ])('forwards the explicit origin for %s without using the incoming origin', async (createSecureClient) => {
+    getRequestHeadersMock.mockResolvedValue(new Headers({ 'Geul-Client-Origin': 'another-tab' }));
+    fetchMock.mockResolvedValue(new Response(null, { status: 200 }));
+
+    await createSecureClient('10000000-0000-4000-8000-000000000001');
+    const transport = createClientMock.mock.calls[0]?.[1] as TestTransport;
+    await transport.options.fetch('https://api.example.test/configuration', { method: 'POST' });
+
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get('Geul-Client-Origin')).toBe('10000000-0000-4000-8000-000000000001');
+    expect(headers.get('Cookie')).toBe('site_session=validated');
+  });
+
+  it('does not borrow an incoming origin for callers that omit it', async () => {
+    getRequestHeadersMock.mockResolvedValue(new Headers({ 'Geul-Client-Origin': 'another-tab' }));
+    fetchMock.mockResolvedValue(new Response(null, { status: 200 }));
+
+    await createPostClient();
+    const transport = createClientMock.mock.calls[0]?.[1] as TestTransport;
+    await transport.options.fetch('https://api.example.test/configuration', { method: 'POST' });
+
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.has('Geul-Client-Origin')).toBe(false);
   });
 });

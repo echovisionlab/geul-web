@@ -97,6 +97,7 @@ function Preview({
     displayedTitle: fields.title,
     titleChangeHandler: local.canEdit ? (value) => setField('title', value) : undefined,
     tCommon: local.tCommon,
+    canEditTranslationSource: local.canEdit,
     titleDisabled: !local.canEdit,
     status,
     statusOptions: [

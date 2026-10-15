@@ -1,3 +1,4 @@
+import { encodeMessage, parseClientMessage } from '@echovisionlab/geul-common/collaboration/protocol';
 import { fromJson } from '@bufbuild/protobuf';
 import { HocuspocusProvider, HocuspocusProviderWebsocket } from '@hocuspocus/provider';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
@@ -22,7 +23,17 @@ import { createDefaultSection } from '@/features/page/PageEditor/types';
 /** Production codec/controller/provider with a disconnected transport. All acknowledgements stay in memory. */
 class LocalProvider extends HocuspocusProvider {
   acknowledgePersist(requestId: string) {
-    this.emit('stateless', { payload: JSON.stringify({ kind: 'persist.now.ack', requestId, ok: true }) });
+    this.emit('stateless', {
+      payload: encodeMessage({
+        kind: 'room.flush_result',
+        requestId,
+        ok: true,
+        persisted: {
+          stateVector: btoa(String.fromCharCode(...Y.encodeStateVector(this.document))),
+          deleted: Object.fromEntries(Y.decodeUpdate(Y.encodeStateAsUpdate(this.document)).ds.clients),
+        },
+      }),
+    });
   }
 }
 export function localDocumentRoom(
@@ -86,7 +97,12 @@ export function localDocumentRoom(
     sections.insert(createDefaultSection('rich-text'), { index: 0 });
   }
   const websocket = new HocuspocusProviderWebsocket({ url: 'ws://localhost/storybook-local-room', autoConnect: false });
-  const provider = new LocalProvider({ websocketProvider: websocket, name: `storybook:${entity}:${locale}`, document });
+  const provider = new LocalProvider({
+    websocketProvider: websocket,
+    name: `storybook:${entity}:${locale}`,
+    document,
+    flushDelay: 50,
+  });
   const listeners = new Set<(state: BlockRoomDurabilityState) => void>();
   let persisted: BlockRoomDurabilityState = { stateVector: Y.encodeStateVector(document), deleted: {} };
   const acknowledge = () => {
@@ -96,8 +112,9 @@ export function localDocumentRoom(
   };
   provider.forceSync = acknowledge;
   provider.sendStateless = (payload) => {
-    const request = JSON.parse(payload);
-    if (request.kind === 'persist.now.request') {
+    const parsed = parseClientMessage(payload);
+    if (parsed.ok && parsed.message.kind === 'room.flush') {
+      const request = parsed.message;
       queueMicrotask(() => {
         acknowledge();
         provider.acknowledgePersist(request.requestId);

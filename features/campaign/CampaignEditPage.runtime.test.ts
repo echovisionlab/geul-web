@@ -27,14 +27,14 @@ describe('Campaign locale subject wiring', () => {
     expect(source).toContain('setResidentSubject(values.subject)');
     expect(source).toMatch(/useEditorEntityChanges\(\s*`campaign:\$\{campaignId\}`[\s\S]*?currentProvider,/);
     expect(source).toContain('publishEditorEntityChange(`campaign:');
-    expect(source).toContain("pending.has('recipientScope') ? current.recipientScope : source.recipientScope");
+    expect(source).toContain('configuration.beginWrite(keys)');
 
     const peerSubjectHandler = source.slice(
       source.indexOf('useBlockRoomMetadataUpdates'),
       source.indexOf('const currentSubject'),
     );
     expect(peerSubjectHandler).not.toContain('debouncedSubjectUpdate');
-    expect(source).toContain('if (result.data) {\n      adoptCampaignFields(result.data);');
+    expect(source).toContain('configuration.adoptRead(read, campaignConfiguration(campaign))');
 
     const deliveryPreflight = source.slice(
       source.indexOf('const persistEditableCampaignBeforeDelivery'),
@@ -76,7 +76,9 @@ describe('Campaign locale subject wiring', () => {
     expect(layoutHandler).toContain('layoutId: value');
     expect(layoutHandler).not.toContain('targetMode:');
     expect(layoutHandler).not.toContain('recipientScope:');
-    expect(recipientHandler).toContain('updateCampaignConfigurationAction(campaignId, { recipientScope })');
+    expect(recipientHandler).toContain(
+      'updateCampaignConfigurationAction(campaignId, { recipientScope }, request.origin)',
+    );
     expect(recipientHandler).not.toContain('targetMode:');
     expect(recipientHandler).not.toContain('layoutId:');
   });

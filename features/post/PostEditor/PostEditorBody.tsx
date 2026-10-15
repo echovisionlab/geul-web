@@ -1,4 +1,8 @@
 'use client';
+import { ContentBlockMediaRuntimeProvider } from '@/features/media/ContentBlockMediaRuntimeContext';
+import type { EditorSnapshot } from '@/features/editor/editor-snapshot';
+import { TiptapSnapshot } from '@/features/editor/tiptap/TiptapSnapshot';
+import { EditorSnapshotHandoff } from '@/features/editor/EditorSnapshotHandoff';
 import { LayoutInset as DsLayoutInset, LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { Text as DsText } from '@/components/core/Typography';
 import type { ReactNode } from 'react';
@@ -15,6 +19,8 @@ interface PostEditorSession {
   controller: PostBlockRoomTiptapController;
 }
 interface PostEditorBodyProps {
+  snapshot?: EditorSnapshot;
+  roomReady?: boolean;
   bodyMode: PostEditorBodyMode;
   session: PostEditorSession | null;
   postId: string;
@@ -63,6 +69,8 @@ function ScopedLocaleBoundary({
   );
 }
 export function PostEditorBody({
+  snapshot,
+  roomReady,
   bodyMode,
   session,
   postId,
@@ -77,6 +85,7 @@ export function PostEditorBody({
   previewLoading,
   isSourceLocale,
 }: PostEditorBodyProps) {
+  const canEditBody = editable && snapshot?.editable !== false;
   let content: ReactNode;
   switch (bodyMode) {
     case 'missing-target-fallback': {
@@ -125,7 +134,7 @@ export function PostEditorBody({
             provider={session.provider}
             blockRoomController={session.controller}
             userName={userName}
-            editable={editable}
+            editable={canEditBody}
             entityId={postId}
             entityType={TranscodeEntityType.POST}
             allowNeutralBlockEdits={isSourceLocale}
@@ -148,7 +157,27 @@ export function PostEditorBody({
           {bodyLabel}
         </DsText>
       ) : null}
-      {content}
+      {snapshot?.content && (!activeLocale || snapshot.locale === activeLocale) ? (
+        <EditorSnapshotHandoff
+          key={snapshot.locale}
+          ready={Boolean(roomReady && session)}
+          editable={canEditBody}
+          snapshot={
+            <ContentBlockMediaRuntimeProvider items={snapshot.blockMedia ?? []}>
+              <TiptapSnapshot
+                content={snapshot.content}
+                blocks={snapshot.blocks}
+                locale={snapshot.locale}
+                label={bodyLabel}
+              />
+            </ContentBlockMediaRuntimeProvider>
+          }
+        >
+          {content}
+        </EditorSnapshotHandoff>
+      ) : (
+        content
+      )}
     </DsLayoutStack>
   );
 }

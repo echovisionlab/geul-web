@@ -1,4 +1,5 @@
 import { notifyEditorSaveStateChanged } from './editor-save-registry';
+import { isUnretryableSaveFailure, SaveParkedError } from './save-failure';
 import {
   activateEditorSaveRecoveryQueue,
   claimEditorSaveRecoveryEntries,
@@ -9,6 +10,15 @@ import {
 } from './editor-save-recovery';
 
 export type PatchWriter<T> = (patch: T) => void | Promise<void>;
+
+/** Fields the server refused for good, kept for the editor to review, copy or discard. */
+export interface RejectedPatch<T> {
+  patch: T;
+  /** Server reason for the latest refusal (see UnretryableSaveError). */
+  reason: string;
+  message: string;
+  rejectedAt: number;
+}
 
 type PendingPatch<T> = { patch: T; write: PatchWriter<T> };
 
@@ -26,20 +36,29 @@ function createQueueId(): string {
   return `${Date.now().toString(36)}-${queueCounter.toString(36)}`;
 }
 
-/** One document/room's delayed field updates. Failed fields remain available for retry. */
+/**
+ * One document/room's delayed field updates. Transiently failed fields remain queued for retry;
+ * fields the server refused for good move to `rejected` and are never sent again on their own.
+ */
 class DebouncedPatchQueue<T extends object> {
   private pending?: PendingPatch<T>;
+  private rejected?: RejectedPatch<T>;
+  /** The room is read-only: pending fields wait for edit access instead of being sent. */
+  private parked = false;
   private inFlight?: PendingPatch<T>;
   private timer?: ReturnType<typeof setTimeout>;
   private activeSave?: Promise<boolean>;
   private generation = 0;
   private retries = 0;
+  private failed = false;
   private activated = true;
   private recoveryScope: string | null;
   private readonly recoveryKey?: string;
   private readonly recoveredQueueIds = new Set<string>();
   private recoveredIntent = false;
   private lastRecoveryTimestamp = 0;
+  /** The latest pending fields reached this tab's backup storage. */
+  private recoveryDurable = true;
   private readonly recoveryQueueId = createQueueId();
 
   constructor(
@@ -83,6 +102,7 @@ class DebouncedPatchQueue<T extends object> {
   };
 
   enqueue(patch: T, write: PatchWriter<T>) {
+    this.parked = false;
     this.pending = { patch: this.pending ? this.merge(this.pending.patch, patch) : patch, write };
     this.retries = 0;
     this.clearTimer();
@@ -94,7 +114,45 @@ class DebouncedPatchQueue<T extends object> {
     }, this.delay);
   }
 
-  hasPending = () => Boolean(this.pending || this.inFlight || this.activeSave);
+  hasPending = () => !this.parked && Boolean(this.pending || this.inFlight || this.activeSave);
+  hasParked = () => this.parked && Boolean(this.pending);
+  // Durable only where a later page can restore it: written to session storage under a recovery key.
+  // Pending or parked fields are durable only when their backup was written under a recovery key.
+  isDurable = () =>
+    !this.rejected &&
+    (!(this.pending || this.inFlight || this.activeSave) || (this.recoveryDurable && this.recoveryKey !== undefined));
+
+  /** Edit access is back on a ready room: send parked fields again. */
+  resumeParked = () => {
+    if (!this.parked) {
+      return;
+    }
+    this.parked = false;
+    notifyEditorSaveStateChanged(this.document);
+    void this.savePending(true);
+  };
+  hasFailure = () => this.failed && this.hasPending();
+
+  /** A copy of the refused fields, or null. Reading it neither retries nor discards them. */
+  getRejected = (): RejectedPatch<T> | null => {
+    if (!this.rejected) {
+      return null;
+    }
+    try {
+      return JSON.parse(JSON.stringify(this.rejected)) as RejectedPatch<T>;
+    } catch {
+      return null;
+    }
+  };
+
+  /** The editor chose to drop the refused fields. */
+  discardRejected = () => {
+    if (!this.rejected) {
+      return;
+    }
+    this.rejected = undefined;
+    notifyEditorSaveStateChanged(this.document);
+  };
 
   getRecoveryIdentity = (): EditorSaveRecoveryIdentity => ({
     scope: this.recoveryScope,
@@ -121,7 +179,8 @@ class DebouncedPatchQueue<T extends object> {
         return false;
       }
     }
-    return true;
+    // Refused fields are not saved; leaving must not pretend they were.
+    return !this.rejected;
   };
 
   cancel = () => {
@@ -171,6 +230,7 @@ class DebouncedPatchQueue<T extends object> {
       this.inFlight = undefined;
       if (saved) {
         this.retries = 0;
+        this.failed = false;
         if (this.pending) {
           this.persistRecovery();
         } else {
@@ -189,10 +249,9 @@ class DebouncedPatchQueue<T extends object> {
       (this.automaticRetry || this.recoveredIntent) &&
       this.activated &&
       this.pending &&
-      this.retries < 8 &&
       this.timer === undefined
     ) {
-      const retryDelay = Math.min(30_000, 1_000 * 2 ** this.retries++);
+      const retryDelay = Math.min(30_000, 1_000 * 2 ** Math.min(this.retries++, 5));
       this.timer = setTimeout(() => {
         this.timer = undefined;
         void this.savePending();
@@ -206,8 +265,32 @@ class DebouncedPatchQueue<T extends object> {
     try {
       await batch.write(batch.patch);
       return true;
-    } catch {
+    } catch (error) {
+      if (generation === this.generation && error instanceof SaveParkedError) {
+        // Not refused and not failed: kept with its recovery backup, sent after edit access returns.
+        this.parked = true;
+        this.pending = {
+          patch: this.pending ? this.merge(batch.patch, this.pending.patch) : batch.patch,
+          write: this.pending?.write ?? batch.write,
+        };
+        this.inFlight = undefined;
+        this.persistRecovery();
+        return true;
+      }
+      if (generation === this.generation && isUnretryableSaveFailure(error)) {
+        // Retrying cannot succeed. Newer edits of the same fields stay queued and are sent as
+        // usual; the refused values become a backup only.
+        this.rejected = {
+          patch: this.rejected ? this.merge(this.rejected.patch, batch.patch) : batch.patch,
+          reason: error.reason,
+          message: error.message,
+          rejectedAt: Date.now(),
+        };
+        // Handled: no retry is scheduled for it. Newer edits keep their own timer or flush.
+        return true;
+      }
       if (generation === this.generation) {
+        this.failed = true;
         // A newer value for the same field wins over the failed attempt.
         this.pending = {
           patch: this.pending ? this.merge(batch.patch, this.pending.patch) : batch.patch,
@@ -227,13 +310,13 @@ class DebouncedPatchQueue<T extends object> {
     }
     const updatedAt = Math.max(Date.now(), this.lastRecoveryTimestamp + 1);
     this.lastRecoveryTimestamp = updatedAt;
-    return persistEditorSaveRecoveryEntry(this.recoveryScope, this.recoveryQueueId, {
+    return (this.recoveryDurable = persistEditorSaveRecoveryEntry(this.recoveryScope, this.recoveryQueueId, {
       document: this.document,
       updatedAt,
       patch,
       ...(this.recoveryKey === undefined ? {} : { recoveryKey: this.recoveryKey }),
       ...(this.recoveredQueueIds.size ? { recoveredQueueIds: [...this.recoveredQueueIds] } : {}),
-    });
+    }));
   }
 
   private restoreRecovery(write: PatchWriter<T>) {

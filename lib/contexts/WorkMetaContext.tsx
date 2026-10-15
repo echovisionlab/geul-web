@@ -1,15 +1,23 @@
 'use client';
 
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+
+import { saveFailureFromAction } from '@/lib/editor/save-failure';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { notifications } from '@/components/core/Notification';
 import { useTranslations } from 'next-intl';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import type * as Y from 'yjs';
-import { updateWorkFieldsAction } from '@/lib/actions/work';
+import { getWorkConfigurationAction, updateWorkFieldsAction } from '@/lib/actions/work';
 import { type CreditOrderItem, type WorkMeta, type WorkType } from '@/lib/collab/work-meta';
 import { useBlockRoomConnection, type BlockRoomConnection } from '@/lib/collab/useBlockRoomConnection';
 import { useLocaleDocumentSession, type LocaleDocumentSession } from '@/features/translation/useLocaleDocumentSession';
 import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
+import {
+  useAuthoritativeConfiguration,
+  type AuthoritativeConfiguration,
+  type ConfigurationWrite,
+} from '@/lib/editor/useAuthoritativeConfiguration';
 import {
   getPendingEditorPatch,
   notifyEditorSaveStateChanged,
@@ -66,10 +74,13 @@ function mergeClientIntent(current: string[], observed: string[], desired: strin
   return reordered;
 }
 
+export type WorkEditorConfiguration = WorkMeta & { mapPlaceId: string | null; featuredImageUrl: string | null };
+
 interface PendingClientSave {
   request: number;
   observedAtSelection: string[];
   desiredClients: string[];
+  write: ConfigurationWrite<WorkEditorConfiguration>;
 }
 
 export interface WorkMetaContextValue extends WorkMeta {
@@ -98,6 +109,8 @@ export interface WorkMetaContextValue extends WorkMeta {
   reloadCanonical: BlockRoomConnection['reloadCanonical'];
   roomLocale: string | null;
   localeSession: LocaleDocumentSession;
+  configuration?: AuthoritativeConfiguration<WorkEditorConfiguration>;
+  refreshConfiguration?: () => Promise<boolean>;
 }
 
 const WorkMetaContext = createContext<WorkMetaContextValue | null>(null);
@@ -109,11 +122,15 @@ export function WorkMetaProvider({
   workId,
   initialMeta,
   initialFeaturedImageUrl,
+  initialMapPlaceId = null,
+  canEdit: serverCanEdit = true,
   children,
 }: {
   workId: string;
   initialMeta: WorkMeta;
   initialFeaturedImageUrl: string | null;
+  initialMapPlaceId?: string | null;
+  canEdit?: boolean;
   children: ReactNode;
 }) {
   const [state, setState] = useState<WorkMeta>(() => ({
@@ -121,6 +138,21 @@ export function WorkMetaProvider({
     metadata: sanitizeWorkMetadata(initialMeta.metadata),
   }));
   const [featuredImageUrl, setFeaturedImageUrl] = useState(initialFeaturedImageUrl);
+  const configuration = useAuthoritativeConfiguration<WorkEditorConfiguration>({
+    document: `work:${workId}`,
+    initialConfiguration: {
+      ...initialMeta,
+      metadata: sanitizeWorkMetadata(initialMeta.metadata),
+      mapPlaceId: initialMapPlaceId,
+      featuredImageUrl: initialFeaturedImageUrl,
+    },
+    onAdopt: (patch) => {
+      setState((current) => ({ ...current, ...patch }));
+      if (Object.hasOwn(patch, 'featuredImageUrl')) {
+        setFeaturedImageUrl(patch.featuredImageUrl ?? null);
+      }
+    },
+  });
   const aliveRef = useRef(false);
   useEffect(() => {
     aliveRef.current = true;
@@ -137,22 +169,82 @@ export function WorkMetaProvider({
   const { roomLocale } = localeSession;
   const connection = useBlockRoomConnection('work', workId, roomLocale);
   const { provider, doc, isConnected, isSynced, bootstrap, protocol, acceptEpochAck, reloadCanonical } = connection;
+  const accessLevel = useEditorAccessLevel(provider);
+  const canEdit = serverCanEdit && accessLevel === 'edit';
   const clientsWritesPending = useRef(0);
   const pendingClientSaves = useRef<PendingClientSave[]>([]);
   const activeClientSave = useRef<Promise<boolean> | null>(null);
-  const setField = useCallback(<K extends keyof WorkMeta>(key: K, value: WorkMeta[K]) => {
-    setState((current) => ({ ...current, [key]: value }));
-  }, []);
+  const setField = useCallback(
+    <K extends keyof WorkMeta>(key: K, value: WorkMeta[K]) => {
+      if (
+        ['slug', 'type', 'year', 'month', 'untilYear', 'untilMonth', 'isPresent', 'metadata', 'featured'].includes(key)
+      ) {
+        configuration.edit({ [key]: value } as Partial<WorkEditorConfiguration>);
+      } else {
+        setState((current) => ({ ...current, [key]: value }));
+      }
+    },
+    [configuration],
+  );
   const setPeriod = useCallback(
     (period: Pick<WorkMeta, 'year' | 'month' | 'untilYear' | 'untilMonth' | 'isPresent'>) => {
-      setState((current) => ({ ...current, ...period }));
+      if (canEdit) {
+        configuration.edit(period);
+      }
     },
-    [],
+    [canEdit, configuration],
   );
   const tCommon = useTranslations('common');
   const confirmedClients = useRef([...initialMeta.clients]);
   const visibleClients = useRef([...initialMeta.clients]);
   const clientsRequest = useRef(0);
+  const refreshConfiguration = useCallback(async () => {
+    const read = configuration.beginRead();
+    let result;
+    try {
+      result = await getWorkConfigurationAction(workId);
+    } catch {
+      return false;
+    }
+    if (!configuration.isActive() || !result.data) {
+      return false;
+    }
+    const {
+      slug,
+      type,
+      year,
+      month,
+      untilYear,
+      untilMonth,
+      isPresent,
+      featured,
+      clients,
+      mapPlaceId,
+      featuredImageUrl,
+    } = result.data;
+    const snapshot = {
+      slug,
+      type,
+      year,
+      month,
+      untilYear,
+      untilMonth,
+      isPresent,
+      featured,
+      clients,
+      mapPlaceId,
+      featuredImageUrl,
+      metadata: sanitizeWorkMetadata(result.data.metadata),
+    };
+    const adopted = configuration.adoptRead(read, snapshot);
+    if (adopted && !configuration.isDraft('clients') && clientsWritesPending.current === 0) {
+      confirmedClients.current = [...snapshot.clients];
+      visibleClients.current = [...snapshot.clients];
+    }
+    return adopted;
+  }, [configuration, workId]);
+  const routeSeeded = useRef(false);
+
   const drainClientSaves = useCallback((): Promise<boolean> => {
     if (activeClientSave.current) {
       return activeClientSave.current;
@@ -168,11 +260,22 @@ export function WorkMetaProvider({
           const observedClients = [...confirmedClients.current];
           const clientsToSave = mergeClientIntent(observedClients, pending.observedAtSelection, pending.desiredClients);
           try {
-            const result = await updateWorkFieldsAction(workId, { clients: clientsToSave, observedClients });
+            const result = await updateWorkFieldsAction(
+              workId,
+              { clients: clientsToSave, observedClients },
+              pending.write.origin,
+            );
             if (result.error) {
-              throw new Error(result.error);
+              throw saveFailureFromAction({ error: result.error, errorCode: result.errorCode });
             }
-            confirmedClients.current = [...(result.clients ?? clientsToSave)];
+            const acknowledged = pending.write.acknowledge(
+              { clients: [...(result.clients ?? clientsToSave)] },
+              { authoritative: result.clients !== undefined },
+            );
+            confirmedClients.current = [...configuration.getCanonical().clients];
+            if (!acknowledged) {
+              void refreshConfiguration();
+            }
             pendingClientSaves.current.shift();
             clientsWritesPending.current = Math.max(0, clientsWritesPending.current - 1);
             notifyEditorSaveStateChanged(`work:${workId}`);
@@ -184,7 +287,7 @@ export function WorkMetaProvider({
               visibleClients.current = [...confirmedClients.current];
               setField('clients', visibleClients.current);
             }
-            publishEditorEntityChange(`work:${workId}`);
+            publishEditorEntityChange(`work:${workId}`, pending.write.origin);
           } catch (error) {
             if (aliveRef.current) {
               notifications.show({
@@ -209,7 +312,7 @@ export function WorkMetaProvider({
     activeClientSave.current = operation;
     notifyEditorSaveStateChanged(`work:${workId}`);
     return operation;
-  }, [setField, tCommon, workId]);
+  }, [configuration, refreshConfiguration, setField, tCommon, workId]);
   const clientsEditorSave = useMemo(
     () => ({
       flush: drainClientSaves,
@@ -222,32 +325,26 @@ export function WorkMetaProvider({
   useEffect(() => {
     const pending = getPendingEditorPatch(`work:${workId}`);
     const hasPending = (field: string) => Object.hasOwn(pending, field);
-    const protectsClients = clientsWritesPending.current > 0;
+    // Route props do not carry read-start information. After the initial seed,
+    // neutral settings always reload through a ticket tied to the actual authorized RPC.
+    if (routeSeeded.current) {
+      void refreshConfiguration();
+    } else {
+      routeSeeded.current = true;
+    }
     setState((current) => ({
       ...current,
       title: hasPending('sourceTitle') ? current.title : initialMeta.title,
-      slug: hasPending('slug') ? current.slug : initialMeta.slug,
-      type: hasPending('type') ? current.type : initialMeta.type,
-      year: hasPending('year') ? current.year : initialMeta.year,
-      month: hasPending('month') ? current.month : initialMeta.month,
-      untilYear: hasPending('untilYear') ? current.untilYear : initialMeta.untilYear,
-      untilMonth: hasPending('untilMonth') ? current.untilMonth : initialMeta.untilMonth,
-      isPresent: hasPending('isPresent') ? current.isPresent : initialMeta.isPresent,
       summary: hasPending('summary') ? current.summary : initialMeta.summary,
-      metadata: hasPending('metadata') ? current.metadata : sanitizeWorkMetadata(initialMeta.metadata),
-      featured: hasPending('featured') ? current.featured : initialMeta.featured,
-      clients: protectsClients ? current.clients : [...initialMeta.clients],
       // The edit route does not provide current credit order/version; keep the owning
       // credits query's state across route refreshes.
       creditOrder: current.creditOrder,
       creditsVersion: current.creditsVersion,
     }));
-    if (!protectsClients) {
-      confirmedClients.current = [...initialMeta.clients];
-      visibleClients.current = [...initialMeta.clients];
-    }
-    setFeaturedImageUrl(initialFeaturedImageUrl);
   }, [
+    configuration,
+    refreshConfiguration,
+    initialMapPlaceId,
     initialFeaturedImageUrl,
     initialMeta.clients,
     initialMeta.featured,
@@ -265,43 +362,51 @@ export function WorkMetaProvider({
   ]);
   const setClients = useCallback(
     (clients: string[]) => {
+      if (!canEdit) {
+        return;
+      }
       const observedAtSelection = [...visibleClients.current];
       const desiredClients = [...clients];
       visibleClients.current = desiredClients;
-      setField('clients', desiredClients);
+      configuration.setDraft('clients', desiredClients);
+      const write = configuration.beginWrite(['clients']);
       clientsWritesPending.current += 1;
       const request = ++clientsRequest.current;
-      pendingClientSaves.current.push({ request, observedAtSelection, desiredClients });
+      pendingClientSaves.current.push({ request, observedAtSelection, desiredClients, write });
       notifyEditorSaveStateChanged(`work:${workId}`);
       void drainClientSaves();
     },
-    [drainClientSaves, setField, workId],
+    [canEdit, configuration, drainClientSaves, workId],
   );
   const setFeaturedImage = useCallback(
     (_fileId: string | null, url: string | null) => {
-      if (!aliveRef.current) {
+      if (!canEdit || !aliveRef.current) {
         return false;
       }
-      setFeaturedImageUrl(url);
+      configuration.edit({ featuredImageUrl: url });
+      const write = configuration.beginWrite(['featuredImageUrl']);
+      write.acknowledge({ featuredImageUrl: url }, { authoritative: false });
       return isConnected && isSynced;
     },
-    [isConnected, isSynced],
+    [canEdit, configuration, isConnected, isSynced],
   );
 
   const value = useMemo<WorkMetaContextValue>(
     () => ({
       ...state,
+      configuration,
+      refreshConfiguration,
       workId,
       featuredImageUrl,
-      setTitle: (title) => setField('title', title),
-      setSlug: (slug) => setField('slug', slug),
-      setType: (type) => setField('type', type),
-      setYear: (year) => setField('year', year),
-      setMonth: (month) => setField('month', month),
+      setTitle: (title) => canEdit && setField('title', title),
+      setSlug: (slug) => canEdit && setField('slug', slug),
+      setType: (type) => canEdit && setField('type', type),
+      setYear: (year) => canEdit && setField('year', year),
+      setMonth: (month) => canEdit && setField('month', month),
       setPeriod,
-      setSummary: (summary) => setField('summary', summary),
-      setMetadata: (metadata) => setField('metadata', sanitizeWorkMetadata(metadata)),
-      setFeatured: (featured) => setField('featured', featured),
+      setSummary: (summary) => canEdit && setField('summary', summary),
+      setMetadata: (metadata) => canEdit && setField('metadata', sanitizeWorkMetadata(metadata)),
+      setFeatured: (featured) => canEdit && setField('featured', featured),
       setFeaturedImage,
       incrementCreditsVersion: () => setField('creditsVersion', state.creditsVersion + 1),
       setCreditOrder: (order) => setField('creditOrder', order),
@@ -318,6 +423,9 @@ export function WorkMetaProvider({
       localeSession,
     }),
     [
+      canEdit,
+      configuration,
+      refreshConfiguration,
       acceptEpochAck,
       bootstrap,
       protocol,

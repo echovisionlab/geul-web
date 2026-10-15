@@ -1,5 +1,7 @@
 'use client';
 
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
 import { SupportingText, Text as DsText, VisuallyHidden } from '@/components/core/Typography';
 import {
@@ -125,10 +127,13 @@ function useSeriesDetailModel({ initialData, scope }: SeriesDetailProps) {
   });
   const { activeEditLocale, roomLocale } = localeSession;
   const collaboration = usePostSeriesCollaboration(seriesId, roomLocale);
+  const accessLevel = useEditorAccessLevel(collaboration.provider);
+  const canEdit = accessLevel === 'edit';
   const roomState = collaboration.roomState;
   const displayedTitle = roomState?.fields.title ?? activeEditLocale.displayTitle;
   const displayedDescription = roomState?.fields.summary ?? activeEditLocale.displaySummary;
   const canEditCurrentCopy =
+    canEdit &&
     collaboration.isSynced &&
     activeEditLocale.canEditActiveLocale &&
     activeEditLocale.hasLiveRow &&
@@ -423,6 +428,7 @@ function useSeriesDetailModel({ initialData, scope }: SeriesDetailProps) {
     displayedTitle,
     handleTitleChange,
     tCommon,
+    canEdit,
     canEditCurrentCopy,
     activeEditLocale,
     status,
@@ -534,6 +540,7 @@ export function SeriesDetailView({
     displayedTitle,
     handleTitleChange,
     tCommon,
+    canEdit,
     canEditCurrentCopy,
     activeEditLocale,
     status,
@@ -620,7 +627,7 @@ export function SeriesDetailView({
           isConnected={collaboration.isConnected}
           isSynced={collaboration.isSynced}
           onBack={handleBack}
-          onStatusChange={handleStatusChange}
+          onStatusChange={canEdit ? handleStatusChange : undefined}
           isStatusChanging={changeStatus.isPending}
           backTooltip={tCommon('actions.back')}
           controls={<EditorActiveLocaleControl state={activeEditLocale} />}
@@ -640,7 +647,9 @@ export function SeriesDetailView({
         <MediaPreviewGrid>
           <OgImagePreview
             src={ogImage.src}
-            canRegenerate={canRegenerateOg && activeEditLocale.hasLiveRow && Boolean(activeEditLocale.activeLocale)}
+            canRegenerate={
+              canEdit && canRegenerateOg && activeEditLocale.hasLiveRow && Boolean(activeEditLocale.activeLocale)
+            }
             isRegenerating={regenerateOgImage.isPending || ogImage.isRegenerating}
             generationStatus={ogImage.status}
             generationError={ogImage.error}
@@ -655,7 +664,7 @@ export function SeriesDetailView({
           />
           <ImageUploadCropController
             imageUrl={featuredImageUrl}
-            canEdit
+            canEdit={canEdit}
             isUploading={isUploading}
             uploadProgress={uploadProgress}
             isRemoving={removeFeaturedImage.isPending}
@@ -677,7 +686,7 @@ export function SeriesDetailView({
                 aria-labelledby={`${viewId}-slug`}
                 value={slug}
                 onChange={(e) => slugMgmt.handleChange(e.currentTarget.value)}
-                disabled={!activeEditLocale.isSourceLocale}
+                disabled={!canEdit || !activeEditLocale.isSourceLocale}
                 error={slugMgmt.error}
                 rightSection={
                   slugMgmt.isChecking ? (
@@ -702,7 +711,7 @@ export function SeriesDetailView({
               />
               {activeEditLocale.isSourceLocale && (
                 <DsLayoutInline justify="end">
-                  <Button onClick={handleSave} loading={updateSeries.isPending}>
+                  <Button disabled={!canEdit} onClick={handleSave} loading={updateSeries.isPending}>
                     {tActions('saveChanges')}
                   </Button>
                 </DsLayoutInline>
@@ -716,7 +725,8 @@ export function SeriesDetailView({
             entityType="post_series"
             entityId={seriesId}
             canManage
-            canAdministerTranslations={scope === 'admin'}
+            canMutateTargets={canEdit}
+            canAdministerTranslations={canEdit && scope === 'admin'}
           />
         </AuthoringExtension>
 
@@ -824,7 +834,7 @@ export function SeriesDetailView({
                               <IconButton
                                 size="sm"
                                 emphasis="low"
-                                disabled={isFirst || reorderPosts.isPending}
+                                disabled={!canEdit || isFirst || reorderPosts.isPending}
                                 onClick={() => {
                                   pendingReorder.current = { id: post.id, label: t('posts.actions.moveUp') };
                                   setOrderAnnouncement(
@@ -840,7 +850,7 @@ export function SeriesDetailView({
                               <IconButton
                                 size="sm"
                                 emphasis="low"
-                                disabled={isLast || reorderPosts.isPending}
+                                disabled={!canEdit || isLast || reorderPosts.isPending}
                                 onClick={() => {
                                   pendingReorder.current = { id: post.id, label: t('posts.actions.moveDown') };
                                   setOrderAnnouncement(
@@ -857,7 +867,7 @@ export function SeriesDetailView({
                                 size="sm"
                                 tone="danger"
                                 emphasis="low"
-                                disabled={unassignPost.isPending}
+                                disabled={!canEdit || unassignPost.isPending}
                                 onClick={() => {
                                   pendingRemoval.current = {
                                     id: post.id,
@@ -886,7 +896,7 @@ export function SeriesDetailView({
           seriesId={seriesId}
           opened={managersOpened}
           onClose={closeManagers}
-          canManageManagers={canManageManagers}
+          canManageManagers={canEdit && canManageManagers}
           bindings={managerBindings}
         />
       </DsLayoutStack>

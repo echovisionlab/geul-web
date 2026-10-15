@@ -20,6 +20,8 @@ export interface BlockingAlertDialogProps extends OverlayPresentationProps {
   level?: BlockingAlertDialogLevel;
   loading?: boolean;
   size?: BlockingAlertDialogSize;
+  /** `obscure` hides the page behind the dialog completely (access to it ended). */
+  backdrop?: 'dim' | 'obscure';
 }
 
 export function BlockingAlertDialog({
@@ -31,6 +33,7 @@ export function BlockingAlertDialog({
   level = 'info',
   loading = false,
   size = 'standard',
+  backdrop = 'dim',
 }: BlockingAlertDialogProps) {
   const descriptionId = useId();
   if (
@@ -51,6 +54,7 @@ export function BlockingAlertDialog({
       size={size}
       centered
       level={level}
+      backdrop={backdrop}
     >
       <LayoutStack gap="md">
         <div id={descriptionId}>{message}</div>

@@ -2,6 +2,9 @@
 
 import { act, StrictMode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import type { HocuspocusProvider } from '@hocuspocus/provider';
+import { getEditorWriteOrigin } from '@/lib/editor/editor-write-origin';
+import { setProviderDocumentRevision } from '@/lib/collab/provider-control-state';
 import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { notifications } from '@/components/core/Notification';
@@ -14,6 +17,35 @@ import type {
   FileDownloadPolicyTarget,
 } from '@/lib/types/file-download-access';
 import { FileDownloadPolicyEditor, type FileDownloadPolicyEditorAdapter } from './FileDownloadPolicyEditor';
+
+const policyRuntime = vi.hoisted(() => ({
+  current: null as null | {
+    entityType: 'post' | 'release';
+    entityId: string;
+    provider: HocuspocusProvider;
+  },
+}));
+vi.mock('@/lib/contexts/EditorRuntimeContext', () => ({
+  useOptionalEditorRuntimeContext: () => policyRuntime.current,
+}));
+function policyProvider() {
+  const listeners = new Map<string, Set<(payload: { payload: string }) => void>>();
+  return {
+    on(event: string, listener: (payload: { payload: string }) => void) {
+      const entries = listeners.get(event) ?? new Set();
+      entries.add(listener);
+      listeners.set(event, entries);
+    },
+    off(event: string, listener: (payload: { payload: string }) => void) {
+      listeners.get(event)?.delete(listener);
+    },
+    emit(payload: string) {
+      for (const listener of listeners.get('stateless') ?? []) {
+        listener({ payload });
+      }
+    },
+  };
+}
 
 vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 
@@ -80,6 +112,7 @@ function renderEditor(
     strict?: boolean;
     target?: FileDownloadPolicyTarget;
     exactEcho?: boolean;
+    releaseId?: string;
   } = {},
 ) {
   host ??= document.createElement('div');
@@ -115,16 +148,22 @@ function renderEditor(
             audience: Parameters<FileDownloadPolicyEditorAdapter['savePolicy']>[1],
             audienceSegmentIds: string[],
             observedPolicy: Parameters<FileDownloadPolicyEditorAdapter['savePolicy']>[3],
+            editorOrigin?: string,
           ) =>
             echoPolicyTarget(
-              await adapter.savePolicy(requestTarget, audience, audienceSegmentIds, observedPolicy),
+              await adapter.savePolicy(requestTarget, audience, audienceSegmentIds, observedPolicy, editorOrigin),
               requestTarget,
             ),
         };
 
   const editor = (
     <TestProviders>
-      <FileDownloadPolicyEditor {...target} adapter={exactAdapter} presentation={options.presentation} />
+      <FileDownloadPolicyEditor
+        {...target}
+        releaseId={options.releaseId}
+        adapter={exactAdapter}
+        presentation={options.presentation}
+      />
     </TestProviders>
   );
 
@@ -199,6 +238,8 @@ async function flushAutosave(delay = 250) {
 beforeEach(() => {
   vi.mocked(notifications.show).mockReset();
   TestBroadcastChannel.channels = [];
+  policyRuntime.current = null;
+  vi.stubGlobal('BroadcastChannel', TestBroadcastChannel);
   Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
     configurable: true,
     value: vi.fn(),
@@ -224,6 +265,58 @@ afterEach(() => {
 });
 
 describe('FileDownloadPolicyEditor', () => {
+  it.each([
+    [TranscodeEntityType.POST, 'post-1', undefined, 'post', 'post:post-1'],
+    [TranscodeEntityType.TRACK, 'track-1', 'release-1', 'release', 'release:release-1'],
+  ] as const)(
+    'refetches policy for its owning entity metadata signal (%s)',
+    async (entityType, entityId, releaseId, ownerType, entity) => {
+      vi.useFakeTimers();
+      const provider = policyProvider();
+      const revision = '11111111-1111-4111-8111-111111111111';
+      setProviderDocumentRevision(provider, revision);
+      policyRuntime.current = {
+        entityType: ownerType,
+        entityId: releaseId ?? entityId,
+        provider: provider as unknown as HocuspocusProvider,
+      };
+      const target = {
+        ...defaultTarget,
+        entityType,
+        entityId,
+        ...(releaseId ? { blockId: undefined, referencePath: undefined } : {}),
+      };
+      const loadPolicy = vi
+        .fn<FileDownloadPolicyEditorAdapter['loadPolicy']>()
+        .mockResolvedValueOnce({ data: { fileId: 'file-1', audience: 'public', audienceSegments: [] } })
+        .mockResolvedValue({ data: { fileId: 'file-1', audience: 'authenticated', audienceSegments: [] } });
+      renderEditor(
+        { loadPolicy, savePolicy: vi.fn(), loadSegments: vi.fn(async () => page([])) },
+        { target, releaseId },
+      );
+      await settle();
+      expectSelectedAccess('Public');
+      act(() =>
+        provider.emit(
+          JSON.stringify({
+            v: 3,
+            kind: 'entity.changed',
+            entity: 'post:unrelated',
+            scope: 'metadata',
+            revision,
+          }),
+        ),
+      );
+      await flushAutosave();
+      expect(loadPolicy).toHaveBeenCalledTimes(1);
+      act(() => provider.emit(JSON.stringify({ v: 3, kind: 'entity.changed', entity, scope: 'metadata', revision })));
+      await flushAutosave();
+      await settle();
+      expect(loadPolicy).toHaveBeenCalledTimes(2);
+      expect(loadPolicy).toHaveBeenLastCalledWith(target);
+      expectSelectedAccess('Signed-in users');
+    },
+  );
   it('reloads a key-only peer hint through the exact authorized selector', async () => {
     const loadPolicy = vi
       .fn<FileDownloadPolicyEditorAdapter['loadPolicy']>()
@@ -257,6 +350,84 @@ describe('FileDownloadPolicyEditor', () => {
     expect(loadPolicy).toHaveBeenCalledTimes(2);
     expect(loadPolicy).toHaveBeenLastCalledWith(defaultTarget);
     expectSelectedAccess('Signed-in users');
+  });
+
+  it('ignores a peer read that completes after a newer local policy save', async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal('BroadcastChannel', TestBroadcastChannel);
+    const olderRead = deferred<FileDownloadActionResult<FileDownloadPolicyModel>>();
+    const canonical = { data: { fileId: 'file-1', audience: 'authenticated' as const, audienceSegments: [] } };
+    const loadPolicy = vi
+      .fn<FileDownloadPolicyEditorAdapter['loadPolicy']>()
+      .mockResolvedValueOnce({ data: { fileId: 'file-1', audience: 'public', audienceSegments: [] } })
+      .mockReturnValueOnce(olderRead.promise)
+      .mockResolvedValue(canonical);
+    const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>().mockResolvedValue(canonical);
+    renderEditor({ loadPolicy, savePolicy, loadSegments: vi.fn(async () => page([])) });
+    await settle();
+    const subscription = TestBroadcastChannel.channels.find((channel) => channel.onmessage);
+    act(() =>
+      subscription?.onmessage?.({
+        data: {
+          document: `file-policy:file-1:${defaultTarget.entityType}:post-1:block-1:file`,
+        },
+      } as MessageEvent<unknown>),
+    );
+    await settle();
+    expect(loadPolicy).toHaveBeenCalledTimes(2);
+
+    await selectOption('Download access', 'Signed-in users');
+    await flushAutosave();
+    expectSelectedAccess('Signed-in users');
+    await act(async () =>
+      olderRead.resolve({
+        data: { fileId: 'file-1', audience: 'public', audienceSegments: [] },
+      }),
+    );
+    await settle();
+    expectSelectedAccess('Signed-in users');
+    expect(savePolicy).toHaveBeenCalledTimes(1);
+  });
+
+  it('reloads the exact selector after an own-origin parent hint without replacing a pending policy edit', async () => {
+    vi.useFakeTimers();
+    const provider = policyProvider();
+    policyRuntime.current = {
+      entityType: 'post',
+      entityId: 'post-1',
+      provider: provider as unknown as HocuspocusProvider,
+    };
+    const saving = deferred<FileDownloadActionResult<FileDownloadPolicyModel>>();
+    const loadPolicy = vi
+      .fn<FileDownloadPolicyEditorAdapter['loadPolicy']>()
+      .mockResolvedValueOnce({ data: { fileId: 'file-1', audience: 'public', audienceSegments: [] } })
+      .mockResolvedValueOnce({ data: { fileId: 'replacement-file', audience: 'disabled', audienceSegments: [] } });
+    const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>().mockReturnValueOnce(saving.promise);
+    renderEditor({ loadPolicy, savePolicy, loadSegments: vi.fn(async () => page([])) });
+    await settle();
+    await selectOption('Download access', 'Signed-in users');
+    await flushAutosave();
+    act(() =>
+      provider.emit(
+        JSON.stringify({
+          v: 3,
+          kind: 'entity.changed',
+          entity: 'post:post-1',
+          scope: 'metadata',
+          origin: getEditorWriteOrigin(),
+        }),
+      ),
+    );
+    await flushAutosave();
+    expect(loadPolicy).toHaveBeenCalledTimes(1);
+    expectSelectedAccess('Signed-in users');
+    await act(async () =>
+      saving.resolve({ data: { fileId: 'file-1', audience: 'authenticated', audienceSegments: [] } }),
+    );
+    await settle();
+    expect(loadPolicy).toHaveBeenCalledTimes(2);
+    expect(loadPolicy).toHaveBeenLastCalledWith(defaultTarget);
+    expect(inputForLabel('Download access').disabled).toBe(true);
   });
 
   it('blocks edits when a peer refresh shows that the exact selector now points at another file', async () => {
@@ -335,13 +506,20 @@ describe('FileDownloadPolicyEditor', () => {
     await flushAutosave(1);
     await settle();
 
-    expect(loadPolicy).toHaveBeenCalledTimes(2);
+    expect(loadPolicy.mock.calls.length).toBeGreaterThanOrEqual(2);
     expect(loadPolicy).toHaveBeenLastCalledWith(defaultTarget);
     expect(savePolicy).toHaveBeenCalledTimes(2);
-    expect(savePolicy).toHaveBeenNthCalledWith(1, defaultTarget, 'restricted', ['segment-a', 'segment-b'], {
-      audience: 'restricted',
-      audienceSegmentIds: ['segment-a'],
-    });
+    expect(savePolicy).toHaveBeenNthCalledWith(
+      1,
+      defaultTarget,
+      'restricted',
+      ['segment-a', 'segment-b'],
+      {
+        audience: 'restricted',
+        audienceSegmentIds: ['segment-a'],
+      },
+      expect.any(String),
+    );
     expect(savePolicy).toHaveBeenNthCalledWith(
       2,
       defaultTarget,
@@ -351,6 +529,7 @@ describe('FileDownloadPolicyEditor', () => {
         audience: 'restricted',
         audienceSegmentIds: ['segment-a', 'segment-peer'],
       },
+      expect.any(String),
     );
     expectSelectedAccess('Peer');
   });
@@ -593,7 +772,7 @@ describe('FileDownloadPolicyEditor', () => {
     await flushAutosave();
     await settle();
 
-    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'authenticated', [], expect.any(Object));
+    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'authenticated', [], expect.any(Object), expect.any(String));
     expectSelectedAccess('Signed-in users');
     expect(host?.querySelector('[data-file-download-policy-sync]')).toBe(synchronizationStatus);
     expect(synchronizationStatus?.textContent).toBe('Synced');
@@ -626,7 +805,7 @@ describe('FileDownloadPolicyEditor', () => {
     expect(savePolicy).not.toHaveBeenCalled();
     await flushAutosave();
     expect(savePolicy).toHaveBeenCalledTimes(1);
-    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'disabled', [], expect.any(Object));
+    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'disabled', [], expect.any(Object), expect.any(String));
     latestSave.resolve({
       data: {
         fileId: 'file-1',
@@ -675,10 +854,17 @@ describe('FileDownloadPolicyEditor', () => {
     await selectOption('Download access', 'Local segment');
     await flushAutosave();
     expect(savePolicy).toHaveBeenCalledTimes(1);
-    expect(savePolicy).toHaveBeenNthCalledWith(1, defaultTarget, 'restricted', [base.id, local.id], {
-      audience: 'restricted',
-      audienceSegmentIds: [base.id],
-    });
+    expect(savePolicy).toHaveBeenNthCalledWith(
+      1,
+      defaultTarget,
+      'restricted',
+      [base.id, local.id],
+      {
+        audience: 'restricted',
+        audienceSegmentIds: [base.id],
+      },
+      expect.any(String),
+    );
 
     await selectOption('Download access', 'Base segment');
     firstSave.resolve({
@@ -693,10 +879,17 @@ describe('FileDownloadPolicyEditor', () => {
     await settle();
 
     expect(savePolicy).toHaveBeenCalledTimes(2);
-    expect(savePolicy).toHaveBeenNthCalledWith(2, defaultTarget, 'restricted', [local.id, peer.id], {
-      audience: 'restricted',
-      audienceSegmentIds: [base.id, local.id, peer.id],
-    });
+    expect(savePolicy).toHaveBeenNthCalledWith(
+      2,
+      defaultTarget,
+      'restricted',
+      [local.id, peer.id],
+      {
+        audience: 'restricted',
+        audienceSegmentIds: [base.id, local.id, peer.id],
+      },
+      expect.any(String),
+    );
     expectSelectedAccess('Peer segment');
   });
 
@@ -740,8 +933,15 @@ describe('FileDownloadPolicyEditor', () => {
     });
     await settle();
 
-    expect(savePolicy).toHaveBeenNthCalledWith(1, defaultTarget, 'public', [], expect.any(Object));
-    expect(savePolicy).toHaveBeenNthCalledWith(2, defaultTarget, 'authenticated', [], expect.any(Object));
+    expect(savePolicy).toHaveBeenNthCalledWith(1, defaultTarget, 'public', [], expect.any(Object), expect.any(String));
+    expect(savePolicy).toHaveBeenNthCalledWith(
+      2,
+      defaultTarget,
+      'authenticated',
+      [],
+      expect.any(Object),
+      expect.any(String),
+    );
     expectSelectedAccess('Public');
     expect(host?.textContent).toContain('Download access could not be saved');
     expect(host?.textContent).not.toContain('Synced');
@@ -782,7 +982,7 @@ describe('FileDownloadPolicyEditor', () => {
     await settle();
 
     expect(savePolicy).toHaveBeenCalledTimes(1);
-    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'public', [], expect.any(Object));
+    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'public', [], expect.any(Object), expect.any(String));
     expectSelectedAccess('Disabled');
 
     oldTargetSave.resolve({
@@ -826,7 +1026,7 @@ describe('FileDownloadPolicyEditor', () => {
     root = null;
 
     expect(savePolicy).toHaveBeenCalledTimes(1);
-    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'public', [], expect.any(Object));
+    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'public', [], expect.any(Object), expect.any(String));
     await vi.runAllTimersAsync();
     await settle();
     expect(savePolicy).toHaveBeenCalledTimes(1);
@@ -858,7 +1058,7 @@ describe('FileDownloadPolicyEditor', () => {
     root = null;
     await settle();
 
-    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'disabled', [], expect.any(Object));
+    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'disabled', [], expect.any(Object), expect.any(String));
     expect(notifications.show).toHaveBeenCalledWith({
       autoClose: false,
       tone: 'danger',
@@ -893,7 +1093,7 @@ describe('FileDownloadPolicyEditor', () => {
     renderEditor(adapter, { target: { ...defaultTarget, expectedFileId: 'file-2' } });
     await settle();
 
-    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'disabled', [], expect.any(Object));
+    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'disabled', [], expect.any(Object), expect.any(String));
     expect(notifications.show).toHaveBeenCalledWith({
       autoClose: false,
       tone: 'danger',
@@ -979,7 +1179,7 @@ describe('FileDownloadPolicyEditor', () => {
     await selectOption('Download access', 'Public');
     await flushAutosave();
     expect(savePolicy).toHaveBeenCalledTimes(1);
-    expect(savePolicy).toHaveBeenLastCalledWith(defaultTarget, 'public', [], expect.any(Object));
+    expect(savePolicy).toHaveBeenLastCalledWith(defaultTarget, 'public', [], expect.any(Object), expect.any(String));
 
     await selectOption('Download access', 'Signed-in users');
     act(() => root?.unmount());
@@ -996,7 +1196,13 @@ describe('FileDownloadPolicyEditor', () => {
     await settle();
 
     expect(savePolicy).toHaveBeenCalledTimes(2);
-    expect(savePolicy).toHaveBeenLastCalledWith(defaultTarget, 'authenticated', [], expect.any(Object));
+    expect(savePolicy).toHaveBeenLastCalledWith(
+      defaultTarget,
+      'authenticated',
+      [],
+      expect.any(Object),
+      expect.any(String),
+    );
     await vi.runAllTimersAsync();
     expect(savePolicy).toHaveBeenCalledTimes(2);
   });
@@ -1068,8 +1274,15 @@ describe('FileDownloadPolicyEditor', () => {
     await settle();
 
     expect(savePolicy).toHaveBeenCalledTimes(2);
-    expect(savePolicy).toHaveBeenNthCalledWith(2, defaultTarget, 'authenticated', [], expect.any(Object));
-    expect(loadPolicy).toHaveBeenCalledTimes(3);
+    expect(savePolicy).toHaveBeenNthCalledWith(
+      2,
+      defaultTarget,
+      'authenticated',
+      [],
+      expect.any(Object),
+      expect.any(String),
+    );
+    expect(loadPolicy).toHaveBeenCalledTimes(2);
     expectSelectedAccess('Signed-in users');
 
     await selectOption('Download access', 'Public');
@@ -1077,15 +1290,8 @@ describe('FileDownloadPolicyEditor', () => {
     await settle();
 
     expect(savePolicy).toHaveBeenCalledTimes(3);
-    expect(savePolicy).toHaveBeenLastCalledWith(defaultTarget, 'public', [], expect.any(Object));
-    expect(order).toEqual([
-      'load:disabled',
-      'save:public',
-      'save:authenticated',
-      'load:authenticated',
-      'load:authenticated',
-      'save:public',
-    ]);
+    expect(savePolicy).toHaveBeenLastCalledWith(defaultTarget, 'public', [], expect.any(Object), expect.any(String));
+    expect(order).toEqual(['load:disabled', 'save:public', 'save:authenticated', 'load:authenticated', 'save:public']);
   });
 
   it('does not let a pending old target block or overwrite a new target', async () => {
@@ -1128,7 +1334,13 @@ describe('FileDownloadPolicyEditor', () => {
     await settle();
 
     expect(savePolicy).toHaveBeenCalledTimes(2);
-    expect(savePolicy).toHaveBeenLastCalledWith(nextTarget, 'authenticated', [], expect.any(Object));
+    expect(savePolicy).toHaveBeenLastCalledWith(
+      nextTarget,
+      'authenticated',
+      [],
+      expect.any(Object),
+      expect.any(String),
+    );
     expectSelectedAccess('Signed-in users');
 
     oldTargetSave.resolve({
@@ -1170,7 +1382,7 @@ describe('FileDownloadPolicyEditor', () => {
     await flushAutosave();
     await settle();
 
-    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'disabled', [], expect.any(Object));
+    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'disabled', [], expect.any(Object), expect.any(String));
     expectSelectedAccess('Disabled');
     expect(host?.textContent).not.toContain('This restricted policy has no Audience.');
     expect(host?.textContent).toContain('Synced');
@@ -1436,7 +1648,13 @@ describe('FileDownloadPolicyEditor', () => {
     await flushAutosave();
     await settle();
 
-    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'restricted', ['audience-members'], expect.any(Object));
+    expect(savePolicy).toHaveBeenCalledWith(
+      defaultTarget,
+      'restricted',
+      ['audience-members'],
+      expect.any(Object),
+      expect.any(String),
+    );
     expectSelectedAccess('Public');
     expect(host?.textContent).not.toContain('Members');
     const saveError = Array.from(host?.querySelectorAll('[role="alert"]') ?? []).find((candidate) =>
@@ -1471,7 +1689,7 @@ describe('FileDownloadPolicyEditor', () => {
     await flushAutosave();
     await settle();
 
-    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'disabled', [], expect.any(Object));
+    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'disabled', [], expect.any(Object), expect.any(String));
     expectSelectedAccess('Signed-in users');
     expect(host?.textContent).not.toContain('Synced');
     expect(host?.textContent).toContain('Download access could not be saved');

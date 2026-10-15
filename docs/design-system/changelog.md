@@ -5,6 +5,13 @@ The system is managed with the application source and has no separate package re
 The current application package version is `0.11.2`; that value alone does not establish deployment of the changes below.
 Git changes and application release records identify deployment.
 
+## 2026-10-14 · Durable editor save state
+
+- Core `EditorHeaderProps` adds `saveState: saved | saving | offline | error | reload` (optional for transport-only consumers). Core `CollabSyncStatusIndicator` adds a mutually exclusive `state` input and retains its required `label`, tooltip and fixed token size. No new visual tokens or layout variants.
+- Migration: block-room consumers use the authoring header, which supplies the durable model automatically from the runtime entity and save registry. Direct Core consumers pass `saveState` and matching `labels.syncStatus`; direct indicators pass `state` and `label`. Legacy `isConnected`/`isSynced` remains available for document rooms without durable ACKs and must not be mixed with indicator `state`.
+- `saved` requires no unacknowledged local edits; reconnect synchronization is `saving`, local offline editing is `offline`, persistence retry is `error`, and a canonical rebuild is `reload`. Core stories cover each state; labels originate in English with English fallbacks in translation bundles.
+- Verification: targeted automated coverage covers state priority, durable ACK/delete coverage, retry feedback, journal recovery and ownership, and retained editor sessions. Browser visual verification remains pending where Storybook cannot bind a local port. The existing Post screenshot was inspected for header geometry; it is not evidence for the changed stories.
+
 ## 2026-10-13 · Korean line breaking and review fixes
 
 - **Korean breaks lines at spaces.** `:lang(ko) { word-break: keep-all; overflow-wrap: anywhere }` in `base.css`: words (eojeol) no longer split at line ends in documents or UI; Japanese and Chinese keep breaking between characters; over-long words still wrap.

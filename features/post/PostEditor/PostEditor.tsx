@@ -1,5 +1,7 @@
 'use client';
 
+import type { EditorSnapshot } from '@/features/editor/editor-snapshot';
+
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
 
 import { DocumentEditorPanels } from '@/features/authoring/DocumentEditorPanels';
@@ -72,9 +74,11 @@ import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata'
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
 
 interface PostEditorProps {
+  initialSnapshot?: EditorSnapshot;
   postId: string;
   currentMemberId: string;
   initialTitle: string;
+  initialSourceLocale?: string | null;
   initialSummary: string | null;
   initialSlug: string | null;
   initialStatus: PostStatus;
@@ -117,7 +121,9 @@ export function PostEditor(props: PostEditorProps) {
     <PostMetaProvider
       key={props.postId}
       postId={props.postId}
+      initialSourceLocale={props.initialSourceLocale}
       initialMeta={initialMeta}
+      initialSnapshot={props.initialSnapshot}
       initialSlug={props.initialSlug}
       initialFeaturedImageUrl={props.initialFeaturedImageUrl}
     >
@@ -129,6 +135,7 @@ export function PostEditor(props: PostEditorProps) {
 }
 
 function usePostEditorViewModel({
+  initialSnapshot,
   postId,
   currentMemberId,
   initialTitle,
@@ -170,28 +177,6 @@ function usePostEditorViewModel({
   const [versionHistoryOpened, { open: openVersionHistory, close: closeVersionHistory }] = useDisclosure(false);
   const [createPlaceOpened, { open: openCreatePlace, close: closeCreatePlace }] = useDisclosure(false);
 
-  const lifecycle = usePostLifecycle({
-    postId,
-    initialStatus,
-    initialScheduledAt,
-    initialScheduledTimeZone,
-    allowedActions: initialAllowedActions,
-    openSchedule,
-    closeSchedule,
-  });
-  const { status, scheduledAt, scheduledTimeZone } = lifecycle;
-  const {
-    canEdit,
-    canSchedule,
-    canDelete,
-    canAddAuthor,
-    canRemoveAuthor,
-    canManageCollaborators,
-    canViewVersions,
-    canRestoreVersion,
-    canManageShareLinks,
-  } = lifecycle.permissions;
-
   const {
     setSourceTitle,
     setSourceSummary,
@@ -213,6 +198,31 @@ function usePostEditorViewModel({
     roomLocale,
     localeSession,
   } = usePostMeta();
+  const permissionRevocation = useEditorPermissionRevocation(provider, 'post', postId);
+  const lifecycle = usePostLifecycle({
+    postId,
+    initialStatus,
+    initialScheduledAt,
+    initialScheduledTimeZone,
+    allowedActions: permissionRevocation.blocked
+      ? initialAllowedActions.filter((action) => action === PostAction.VIEW_VERSIONS)
+      : initialAllowedActions,
+    openSchedule,
+    closeSchedule,
+  });
+  const { status, scheduledAt, scheduledTimeZone } = lifecycle;
+  const {
+    canEdit,
+    canSchedule,
+    canDelete,
+    canAddAuthor,
+    canRemoveAuthor,
+    canManageCollaborators,
+    canViewVersions,
+    canRestoreVersion,
+    canManageShareLinks,
+  } = lifecycle.permissions;
+
   const { activeEditLocale } = localeSession;
   const canEditTranslationSource = canEdit;
   const ogRegenerationLocale = normalizeOgRegenerationLocale(activeEditLocale.activeLocale);
@@ -253,14 +263,11 @@ function usePostEditorViewModel({
     setMapPlaceId(configuration.mapPlaceId);
     setLayout(configuration.documentLayout);
   }, [postConfigUpdate.configuration, setCommentsEnabled, setLayout, setSlug, slug]);
-  const permissionRevocation = useEditorPermissionRevocation(provider, 'post', postId);
   const blockRoomController = usePostBlockRoomController(currentDoc, roomLocale);
   const editorSession =
-    currentProvider && blockRoomController && currentIsSynced
-      ? { provider: currentProvider, controller: blockRoomController }
-      : null;
+    currentProvider && blockRoomController ? { provider: currentProvider, controller: blockRoomController } : null;
   const isEditorReady = editorSession !== null;
-  const canMutateContent = canEdit && !permissionRevocation.blocked;
+  const canMutateContent = initialSnapshot?.editable !== false && canEdit && !permissionRevocation.blocked;
 
   // Track the durable server-side OG generation for the active target.
   const ogImage = useOgImage({
@@ -474,8 +481,14 @@ function usePostEditorViewModel({
     }
   };
 
-  const displayedTitle = roomLocale ? residentTitle : activeEditLocale.displayTitle;
-  const displayedSummary = roomLocale ? residentSummary : activeEditLocale.displaySummary;
+  const matchingSnapshot =
+    initialSnapshot && (!activeEditLocale.activeLocale || initialSnapshot.locale === activeEditLocale.activeLocale)
+      ? initialSnapshot
+      : undefined;
+  const displayedTitle =
+    roomLocale && isSynced ? residentTitle : (matchingSnapshot?.title ?? activeEditLocale.displayTitle);
+  const displayedSummary =
+    roomLocale && isSynced ? residentSummary : (matchingSnapshot?.summary ?? activeEditLocale.displaySummary);
   const hasLocaleRoomMutationAuthority = localeSession.hasRoomMutationAuthority({
     sourceLocale: bootstrap?.sourceLocale ?? null,
     locale: bootstrap?.locale ?? null,
@@ -487,13 +500,19 @@ function usePostEditorViewModel({
     ? canEditTranslationSource
     : activeEditLocale.canEditActiveLocale;
   const currentLocaleCanEdit =
-    canEdit && currentLocalePermission && hasLocaleRoomMutationAuthority && !permissionRevocation.blocked;
+    initialSnapshot?.editable !== false &&
+    canEdit &&
+    currentLocalePermission &&
+    hasLocaleRoomMutationAuthority &&
+    !permissionRevocation.blocked;
   const hasLocaleEditPermission = activeEditLocale.isSourceLocaleReady ? currentLocaleCanEdit : false;
   const canEditLocaleDocument = isLocaleDocumentEditable({
     activeLocale: roomLocale,
     shouldUseLocaleDocument,
     canEditActiveLocale: hasLocaleEditPermission,
     isSynced: currentIsSynced,
+
+    isReady: Boolean(doc),
   });
   const canMutateSourceDocument = canEditLocaleDocument && activeEditLocale.isSourceLocale;
   const handleScopedLocaleTitleChange = useCallback(
@@ -532,6 +551,7 @@ function usePostEditorViewModel({
     isEditorReady,
   });
   return {
+    ...(initialSnapshot ? { initialSnapshot } : {}),
     currentProvider,
     postId,
     protocol,
@@ -962,6 +982,8 @@ export function PostEditorView({ model }: { model: PostEditorViewModel }) {
                 }
               >
                 <PostEditorBody
+                  snapshot={model.initialSnapshot}
+                  roomReady={editorSession !== null}
                   bodyMode={bodyMode}
                   session={editorSession}
                   postId={postId}
@@ -1003,6 +1025,7 @@ export function PostEditorView({ model }: { model: PostEditorViewModel }) {
 
               <PostScheduleDialog
                 opened={scheduleOpened}
+                readOnly={!canSchedule}
                 onClose={closeSchedule}
                 onSubmit={(schedule) => lifecycle.schedule.mutate(schedule)}
                 initialInstant={scheduledAt}

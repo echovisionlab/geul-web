@@ -132,7 +132,8 @@ describe('editor semantic color theme', () => {
 
   it('maps actual inline mark attributes and accepts all ten table colors', () => {
     const documentContent = read('../../lib/styles/document-content.css');
-    const tableExtensions = read('./tiptap/table/table-extensions.tsx');
+    // Table presentation (shared by the live editor and the SSR snapshot) owns the cell colour set.
+    const tableExtensions = read('./tiptap/table/table-presentation.ts');
 
     EDITOR_COLOR_VALUES.filter((color) => color !== 'default').forEach((color) => {
       expect(documentContent).toContain(

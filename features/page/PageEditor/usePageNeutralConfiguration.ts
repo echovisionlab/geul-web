@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { saveFailureFromAction } from '@/lib/editor/save-failure';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import {
   getPageNeutralConfigurationAction,
@@ -10,6 +11,7 @@ import {
 import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
 import type { PageAccessPolicyValue } from '@/lib/types/page-access';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
+import { useAuthoritativeConfiguration } from '@/lib/editor/useAuthoritativeConfiguration';
 
 export interface PageNeutralConfiguration {
   slug: string | null;
@@ -20,22 +22,8 @@ export interface PageNeutralConfiguration {
 
 export type PageNeutralConfigurationField = keyof PageNeutralConfiguration;
 
-interface PageNeutralScope {
-  readonly pageId: string;
-  canonical: PageNeutralConfiguration;
-  requestGeneration: number;
-  drafts: Map<PageNeutralConfigurationField, unknown>;
-  draftVersions: Map<PageNeutralConfigurationField, number>;
-  pendingWrites: Map<PageNeutralConfigurationField, Set<symbol>>;
-  showTitleFailureReported: boolean;
-}
-
-interface PageNeutralConfigurationState {
-  scope: PageNeutralScope;
-  configuration: PageNeutralConfiguration;
-}
-
 interface PageNeutralWrite<K extends PageNeutralConfigurationField> {
+  origin: string;
   acknowledge: (value: PageNeutralConfiguration[K]) => void;
   fail: (refresh?: boolean) => void;
 }
@@ -51,24 +39,6 @@ export interface UsePageNeutralConfigurationOptions {
   delay?: number;
 }
 
-const FIELDS: readonly PageNeutralConfigurationField[] = ['slug', 'showTitle', 'status', 'accessPolicy'];
-
-function sameFieldValue(field: PageNeutralConfigurationField, left: unknown, right: unknown): boolean {
-  return field === 'accessPolicy' ? JSON.stringify(left) === JSON.stringify(right) : Object.is(left, right);
-}
-
-function createPageNeutralScope(pageId: string, initialConfiguration: PageNeutralConfiguration): PageNeutralScope {
-  return {
-    pageId,
-    canonical: initialConfiguration,
-    requestGeneration: 0,
-    drafts: new Map(),
-    draftVersions: new Map(),
-    pendingWrites: new Map(),
-    showTitleFailureReported: false,
-  };
-}
-
 export function usePageNeutralConfiguration({
   pageId,
   initialConfiguration,
@@ -79,180 +49,85 @@ export function usePageNeutralConfiguration({
   onShowTitleSaveError,
   delay = 500,
 }: UsePageNeutralConfigurationOptions) {
-  const scope = useMemo(() => createPageNeutralScope(pageId, initialConfiguration), [pageId]);
-  const [state, setState] = useState<PageNeutralConfigurationState>({ scope, configuration: initialConfiguration });
-  const configuration = state.scope === scope ? state.configuration : initialConfiguration;
-  const activeScopeRef = useRef(scope);
-  activeScopeRef.current = scope;
-  const previousScopeRef = useRef(scope);
+  const document = `page:${pageId}`;
+  const controller = useAuthoritativeConfiguration({ document, initialConfiguration });
+  const activeController = useRef<typeof controller | null>(controller);
+  activeController.current = controller;
+  const scope = useMemo(() => ({ pageId, showTitleFailureReported: false }), [pageId]);
+  const configuration = controller.getConfiguration();
 
   const refresh = useCallback(async () => {
-    const requestedScope = scope;
-    if (activeScopeRef.current !== requestedScope) {
+    if (activeController.current !== controller) {
       return;
     }
-    const generation = ++requestedScope.requestGeneration;
+    const read = controller.beginRead();
     try {
-      const result = await loadConfiguration(requestedScope.pageId);
-      if (!result.ok || activeScopeRef.current !== requestedScope || requestedScope.requestGeneration !== generation) {
-        return;
+      const result = await loadConfiguration(pageId);
+      if (result.ok && activeController.current === controller) {
+        controller.adoptRead(read, {
+          slug: result.slug,
+          showTitle: result.showTitle,
+          status: result.status,
+          accessPolicy: result.accessPolicy,
+        });
       }
-
-      const canonical: PageNeutralConfiguration = {
-        slug: result.slug,
-        showTitle: result.showTitle,
-        status: result.status,
-        accessPolicy: result.accessPolicy,
-      };
-      requestedScope.canonical = canonical;
-      setState((current) => {
-        if (activeScopeRef.current !== requestedScope) {
-          return current;
-        }
-        const local = current.scope === requestedScope ? current.configuration : initialConfiguration;
-        let next = { ...local };
-        for (const field of FIELDS) {
-          const pending = requestedScope.pendingWrites.get(field);
-          if (pending?.size) {
-            continue;
-          }
-          if (
-            !requestedScope.drafts.has(field) ||
-            sameFieldValue(field, requestedScope.drafts.get(field), canonical[field])
-          ) {
-            requestedScope.drafts.delete(field);
-            next = { ...next, [field]: canonical[field] };
-          }
-        }
-        return { scope: requestedScope, configuration: next };
-      });
     } catch {
       // A later exact-identity hint can retry this authorized read.
     }
-  }, [initialConfiguration, loadConfiguration, scope]);
+  }, [controller, loadConfiguration, pageId]);
 
-  useEditorEntityChanges(`page:${scope.pageId}`, () => void refresh(), provider);
+  useEditorEntityChanges(document, () => void refresh(), provider, undefined, controller.captureOwnChange);
 
   useEffect(() => {
-    if (previousScopeRef.current !== scope) {
-      previousScopeRef.current = scope;
-      setState({ scope, configuration: initialConfiguration });
-    }
-
+    activeController.current = controller;
     void refresh();
     return () => {
-      if (activeScopeRef.current === scope) {
-        scope.requestGeneration += 1;
+      controller.beginRead();
+      if (activeController.current === controller) {
+        activeController.current = null;
       }
     };
-  }, [initialConfiguration, refresh, scope]);
+  }, [controller, refresh]);
 
   const setDraft = useCallback(
     <K extends PageNeutralConfigurationField>(field: K, value: PageNeutralConfiguration[K]) => {
-      if (activeScopeRef.current !== scope) {
-        return;
+      if (activeController.current === controller) {
+        controller.setDraft(field, value);
       }
-      const canonical = scope.canonical;
-      if (sameFieldValue(field, value, canonical[field])) {
-        scope.drafts.delete(field);
-      } else {
-        scope.drafts.set(field, value);
-      }
-      scope.draftVersions.set(field, (scope.draftVersions.get(field) ?? 0) + 1);
-      setState((current) => {
-        const local = current.scope === scope ? current.configuration : initialConfiguration;
-        return {
-          scope,
-          configuration: { ...local, [field]: value },
-        };
-      });
     },
-    [initialConfiguration, scope],
+    [controller],
   );
 
-  const isDraft = useCallback((field: PageNeutralConfigurationField) => scope.drafts.has(field), [scope]);
-
+  const isDraft = controller.isDraft;
   const beginFieldWrite = useCallback(
-    <K extends PageNeutralConfigurationField>(field: K): PageNeutralWrite<K> => {
-      const requestScope = scope;
-      if (activeScopeRef.current !== requestScope) {
-        let finished = false;
-        return {
-          acknowledge: () => {
-            if (!finished) {
-              finished = true;
-              publishEditorEntityChange(`page:${requestScope.pageId}`);
-            }
-          },
-          fail: () => {
-            finished = true;
-          },
-        };
-      }
-      const token = Symbol(field);
-      const draftVersion = requestScope.draftVersions.get(field) ?? 0;
-      const requests = requestScope.pendingWrites.get(field) ?? new Set<symbol>();
-      requests.add(token);
-      requestScope.pendingWrites.set(field, requests);
-      let finished = false;
-
-      const finish = () => {
-        if (finished) {
-          return;
-        }
-        finished = true;
-        if (activeScopeRef.current !== requestScope) {
-          return;
-        }
-        const activeRequests = requestScope.pendingWrites.get(field);
-        activeRequests?.delete(token);
-        if (activeRequests?.size === 0) {
-          requestScope.pendingWrites.delete(field);
-        }
-      };
-
+    <K extends PageNeutralConfigurationField>(field: K, value?: PageNeutralConfiguration[K]): PageNeutralWrite<K> => {
+      const write = controller.beginWrite(
+        value === undefined ? [field] : ({ [field]: value } as Partial<PageNeutralConfiguration>),
+      );
       return {
+        origin: write.origin,
         acknowledge: (value) => {
-          finish();
-          if (activeScopeRef.current !== requestScope) {
-            publishEditorEntityChange(`page:${requestScope.pageId}`);
-            return;
+          if (!write.acknowledge({ [field]: value } as Partial<PageNeutralConfiguration>)) {
+            void refresh();
           }
-          requestScope.canonical = { ...requestScope.canonical, [field]: value };
-          if ((requestScope.draftVersions.get(field) ?? 0) === draftVersion) {
-            requestScope.drafts.delete(field);
-          }
-          setState((current) => {
-            if (activeScopeRef.current !== requestScope || current.scope !== requestScope) {
-              return current;
-            }
-            const local = current.configuration;
-            const stillPending = Boolean(requestScope.pendingWrites.get(field)?.size);
-            const shouldAdopt = !stillPending && !requestScope.drafts.has(field);
-            return {
-              scope: requestScope,
-              configuration: shouldAdopt ? { ...local, [field]: value } : local,
-            };
-          });
-          publishEditorEntityChange(`page:${requestScope.pageId}`);
-          void refresh();
+          publishEditorEntityChange(document, write.origin);
         },
         fail: (shouldRefresh = true) => {
-          finish();
-          if (shouldRefresh && activeScopeRef.current === requestScope) {
+          write.fail();
+          if (shouldRefresh) {
             void refresh();
           }
         },
       };
     },
-    [refresh, scope],
+    [controller, document, refresh],
   );
 
   const saveAccess = useCallback(
     async (value: PageAccessPolicyValue) => {
-      const write = beginFieldWrite('accessPolicy');
+      const write = beginFieldWrite('accessPolicy', controller.isDraft('accessPolicy') ? value : undefined);
       try {
-        const result = await saveAccessPolicy(scope.pageId, value);
+        const result = await saveAccessPolicy(scope.pageId, value, write.origin);
         if (result.ok) {
           write.acknowledge(result.accessPolicy);
         } else {
@@ -264,16 +139,16 @@ export function usePageNeutralConfiguration({
         throw error;
       }
     },
-    [beginFieldWrite, saveAccessPolicy, scope],
+    [beginFieldWrite, controller, saveAccessPolicy, scope],
   );
 
   const writeShowTitle = useCallback(
     async ({ value }: { value: boolean }) => {
-      const write = beginFieldWrite('showTitle');
+      const write = beginFieldWrite('showTitle', value);
       try {
-        const result = await saveShowTitle(scope.pageId, value);
+        const result = await saveShowTitle(scope.pageId, value, write.origin);
         if (!result.ok) {
-          throw new Error(result.error);
+          throw saveFailureFromAction(result);
         }
         write.acknowledge(result.showTitle);
         scope.showTitleFailureReported = false;

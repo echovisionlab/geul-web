@@ -1,8 +1,10 @@
 'use client';
 
+import { EditorRuntimeOptions } from '../live-node-view';
 import {
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
+  useContext,
   useCallback,
   useId,
 } from 'react';
@@ -177,7 +179,9 @@ function TiptapMathInlineNodeView(props: NodeViewProps) {
 function TiptapMathBlockNodeView(props: NodeViewProps) {
   const source = String(props.node.attrs.latex ?? '');
   const editable = useTiptapEditorEditable(props.editor);
-  const selectBlockLabel = props.extension.options.selectBlockLabel as string;
+  const current = useContext(EditorRuntimeOptions).get(props.extension.name) as
+    { selectBlockLabel?: string } | undefined;
+  const selectBlockLabel = (current?.selectBlockLabel ?? props.extension.options.selectBlockLabel) as string;
   const exactNodeSelected = useExactTiptapNodeSelection(props);
   const select = useCallback(() => {
     selectNode(props);

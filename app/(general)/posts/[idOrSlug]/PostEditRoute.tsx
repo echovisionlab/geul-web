@@ -1,3 +1,4 @@
+import { readContentLocaleOverride } from '@/lib/translation/content-language';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
@@ -9,7 +10,7 @@ import { listPostShareLinksAction } from '@/lib/actions/post';
 import { listTagsAction } from '@/lib/actions/tag';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { getManageSiteContext, getSettings } from '@/lib/queries/manifest';
-import { getPostForEdit } from '@/lib/queries/post';
+import { getPostForEdit, getPostEditorSnapshot } from '@/lib/queries/post';
 import { listMySeries, listSeriesSimple } from '@/lib/queries/series';
 import type { ShareLink } from '@/lib/types/share-link/model';
 import { buildEntityEditHref } from '@/lib/utils/entity-edit-route';
@@ -54,7 +55,7 @@ export async function renderPostEditRoute(idOrSlug: string, query: SearchParamRe
   }
 
   const isAdmin = session.user.role === 'admin';
-  const [allCategories, allTags, seriesList, shareLinkData, baseUrl, site] = await Promise.all([
+  const [allCategories, allTags, seriesList, shareLinkData, baseUrl, site, snapshot] = await Promise.all([
     listCategoriesAction().then(unwrapQueryResult),
     listTagsAction().then(unwrapQueryResult),
     isAdmin ? listSeriesSimple() : listMySeries(),
@@ -63,7 +64,12 @@ export async function renderPostEditRoute(idOrSlug: string, query: SearchParamRe
       : Promise.resolve([]),
     getBaseUrl(),
     getManageSiteContext(),
+    getPostEditorSnapshot(post.id, readContentLocaleOverride(query) ?? post.sourceLocale),
   ]);
+
+  if (!snapshot) {
+    notFound();
+  }
 
   const shareLinks: ShareLink<'post'>[] = shareLinkData.map((link) => ({
     id: link.id,
@@ -95,9 +101,11 @@ export async function renderPostEditRoute(idOrSlug: string, query: SearchParamRe
 
   return (
     <LazyPostEditor
+      initialSnapshot={snapshot}
       postId={post.id}
       currentMemberId={session.user.id}
       initialTitle={post.title}
+      initialSourceLocale={post.sourceLocale}
       initialSummary={post.summary ?? null}
       initialSlug={post.slug ?? null}
       initialStatus={post.status}

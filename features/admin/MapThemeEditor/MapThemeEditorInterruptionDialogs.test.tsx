@@ -64,9 +64,13 @@ describe('MapThemeEditorInterruptionDialogs', () => {
     expect(navigate).toHaveBeenCalledWith('/');
   });
 
-  it('starts login with the exact current page as return target', () => {
+  it('starts login with the exact current page as return target', async () => {
     const { navigate } = renderDialogs({ interruption: 'session_expired' });
-    expect(navigate).toHaveBeenCalledWith('/login?redirect=%2Fadmin%2Fmap%2Fthemes%2Ftheme-1%3Flocale%3Dko%23palette');
+    await vi.waitFor(() =>
+      expect(navigate).toHaveBeenCalledWith(
+        '/login?redirect=%2Fadmin%2Fmap%2Fthemes%2Ftheme-1%3Flocale%3Dko%23palette',
+      ),
+    );
   });
 
   it('shows no blocking dialog without an access interruption', () => {

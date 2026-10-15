@@ -1,5 +1,7 @@
 'use client';
 
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
 import Link from '@/components/core/Navigation';
 import { SupportingText, Text as DsText, Heading as DsHeading } from '@/components/core/Typography';
@@ -99,7 +101,8 @@ function useLegalPolicyEditorViewModel({
   const policyData = initialPolicy;
   const isEditable =
     canEdit && (strategy.status.isEditable(policyData.status) || strategy.status.isArchived(policyData.status));
-  const [viewMode, setViewMode] = useState<string>(() => (isEditable ? 'edit' : 'preview'));
+  const [selectedViewMode, setViewMode] = useState<string | null>(null);
+  const viewMode = selectedViewMode ?? (isEditable ? 'edit' : 'preview');
   const [title, setTitle] = useState<string>(initialPolicy.title);
   const [effectiveFrom, setEffectiveFrom] = useState<Date | null>(null);
   const [previewHtml, setPreviewHtml] = useState<string>('');
@@ -125,6 +128,7 @@ function useLegalPolicyEditorViewModel({
   const blockRoom = useBlockRoomConnection(documentType, policyId, roomLocale);
   const blockRoomController = useRichTextBlockRoomController(documentType, blockRoom.doc, roomLocale);
   const currentProvider = blockRoom.provider;
+  const canMutate = useEditorAccessLevel(currentProvider) === 'edit' && isEditable;
   const currentIsConnected = blockRoom.isConnected;
   const currentIsSynced = blockRoom.isSynced;
   const editorSession =
@@ -144,12 +148,6 @@ function useLegalPolicyEditorViewModel({
     setPreviewHtml('');
     setPolicyEditorError(null);
   }, [activeEditLocale.activeLocale]);
-
-  useEffect(() => {
-    if (!isEditable) {
-      setViewMode('preview');
-    }
-  }, [isEditable]);
 
   const debouncedTitleUpdate = useDebouncedRoomMetadata({
     connection: blockRoom,
@@ -218,7 +216,7 @@ function useLegalPolicyEditorViewModel({
 
   const handleDisplayedTitleChange = useCallback(
     (value: string) => {
-      if (!roomLocale) {
+      if (!canMutate || !roomLocale) {
         return;
       }
       setResidentTitle(value);
@@ -233,6 +231,7 @@ function useLegalPolicyEditorViewModel({
       activeEditLocale.sourceLocale,
       announceSourceTitleGeneration,
       debouncedTitleUpdate,
+      canMutate,
       roomLocale,
     ],
   );
@@ -252,6 +251,9 @@ function useLegalPolicyEditorViewModel({
   };
 
   const handleSchedule = () => {
+    if (!canMutate) {
+      return;
+    }
     if (!effectiveFrom) {
       notifications.show({
         message: tLegalEditorCommon('notifications.selectEffectiveDate'),
@@ -266,13 +268,13 @@ function useLegalPolicyEditorViewModel({
     window.print();
   };
 
-  const canSchedule = isEditable && strategy.status.isDraft(policyData.status);
-  const canCancelSchedule = isEditable && strategy.status.isScheduled(policyData.status);
+  const canSchedule = canMutate && strategy.status.isDraft(policyData.status);
+  const canCancelSchedule = canMutate && strategy.status.isScheduled(policyData.status);
   const canActivateNow =
-    isEditable && (strategy.status.isDraft(policyData.status) || strategy.status.isScheduled(policyData.status));
-  const canDelete = isEditable;
+    canMutate && (strategy.status.isDraft(policyData.status) || strategy.status.isScheduled(policyData.status));
+  const canDelete = canMutate;
   const canEditCurrentLocale =
-    isEditable &&
+    canMutate &&
     activeEditLocale.canEditActiveLocale &&
     localeMode.shouldUseLocaleDocument &&
     localeSession.hasRoomMutationAuthority({
@@ -282,7 +284,7 @@ function useLegalPolicyEditorViewModel({
       documentRevision: blockRoom.bootstrap?.documentRevision ?? null,
       targetRevision: blockRoom.bootstrap?.targetRevision,
     }) &&
-    blockRoom.isSynced;
+    Boolean(blockRoom.doc);
   const canEditDisplayedTitle = canEditCurrentLocale;
   const activePreviewHtml = previewHtml;
   const canonicalPreviewBlocks = useMemo(() => {
@@ -348,7 +350,7 @@ function useLegalPolicyEditorViewModel({
     openCancelModal,
     canActivateNow,
     openActivateModal,
-    isEditable,
+    isEditable: canMutate,
     regenerateHtmlMutation: { isPending: regenerateHtmlMutation.isPending, mutate: regenerateHtmlMutation.mutate },
     handleExport,
     tLegalEditorCommon,
@@ -612,19 +614,26 @@ export function LegalPolicyEditorView({ model }: { model: LegalPolicyEditorViewM
         )}
 
         <AuthoringExtension kind="translations">
-          <EntityTranslationsPanel entityType={strategy.entityType} entityId={policyId} canManage={isEditable} />
+          <EntityTranslationsPanel
+            entityType={strategy.entityType}
+            entityId={policyId}
+            canManage
+            canAdministerTranslations={isEditable}
+            canMutateTargets={isEditable}
+          />
         </AuthoringExtension>
 
         {policyEditorError ? <Alert tone="danger">{policyEditorError}</Alert> : null}
 
         {strategy.status.isScheduled(policyData.status) ? (
           <AuthoringExtension kind="sharing">
-            <ShareLinkSection entityType={strategy.entityType} entityId={policyId} />
+            <ShareLinkSection entityType={strategy.entityType} entityId={policyId} disabled={!isEditable} />
           </AuthoringExtension>
         ) : null}
 
         {activeEditLocale.activeLocale && activeEditLocale.hasLiveRow ? (
           <LegalOgImagePanel
+            canEdit={isEditable}
             entityType={strategy.entityType}
             locale={activeEditLocale.activeLocale}
             currentBackgroundUrl={ogBackgroundUrl}
@@ -655,8 +664,8 @@ export function LegalPolicyEditorView({ model }: { model: LegalPolicyEditorViewM
           />
         </div>
 
-        {viewMode === 'edit' ? (
-          editorSession ? (
+        <div hidden={viewMode !== 'edit'}>
+          {editorSession ? (
             <PolicyEditor
               provider={editorSession.provider}
               blockRoomController={editorSession.controller}
@@ -673,8 +682,9 @@ export function LegalPolicyEditorView({ model }: { model: LegalPolicyEditorViewM
                 </SupportingText>
               </DsLayoutInset>
             </DsLayoutInset>
-          )
-        ) : (
+          )}
+        </div>
+        {viewMode === 'preview' ? (
           <DsLayoutStack flexible gap="xs">
             <SectionCard padding="none" grow layout="stack" clip>
               <ScrollArea grow inset="xl">
@@ -755,7 +765,7 @@ export function LegalPolicyEditorView({ model }: { model: LegalPolicyEditorViewM
               </ScrollArea>
             </SectionCard>
           </DsLayoutStack>
-        )}
+        ) : null}
 
         <ContentModal
           opened={scheduleModalOpened}
@@ -766,6 +776,7 @@ export function LegalPolicyEditorView({ model }: { model: LegalPolicyEditorViewM
           <DsLayoutStack>
             <SupportingText tone="secondary">{tCommonMessages('scheduleActivationDescription')}</SupportingText>
             <DateTimePicker
+              disabled={!isEditable}
               label={tLabels('effectiveDate')}
               placeholder={tCommonPlaceholders('selectDateAndTime')}
               value={effectiveFrom}
@@ -783,7 +794,7 @@ export function LegalPolicyEditorView({ model }: { model: LegalPolicyEditorViewM
                 emphasis="strong"
                 onClick={handleSchedule}
                 loading={scheduleMutation.isPending}
-                disabled={!effectiveFrom}
+                disabled={!isEditable || !effectiveFrom}
               >
                 {tActions('schedule')}
               </Button>
@@ -807,7 +818,12 @@ export function LegalPolicyEditorView({ model }: { model: LegalPolicyEditorViewM
               <Button
                 emphasis="strong"
                 tone="warning"
-                onClick={() => cancelScheduleMutation.mutate()}
+                disabled={!isEditable}
+                onClick={() => {
+                  if (isEditable) {
+                    cancelScheduleMutation.mutate();
+                  }
+                }}
                 loading={cancelScheduleMutation.isPending}
               >
                 {tActions('cancelSchedule')}
@@ -834,7 +850,12 @@ export function LegalPolicyEditorView({ model }: { model: LegalPolicyEditorViewM
               <Button
                 emphasis="strong"
                 tone="positive"
-                onClick={() => activateNowMutation.mutate()}
+                disabled={!isEditable}
+                onClick={() => {
+                  if (isEditable) {
+                    activateNowMutation.mutate();
+                  }
+                }}
                 loading={activateNowMutation.isPending}
               >
                 {tActions('activateNow')}
@@ -847,7 +868,12 @@ export function LegalPolicyEditorView({ model }: { model: LegalPolicyEditorViewM
           intent="delete"
           opened={deleteModalOpened}
           onClose={closeDeleteModal}
-          onConfirm={() => deleteMutation.mutate()}
+          confirmDisabled={!isEditable}
+          onConfirm={() => {
+            if (isEditable) {
+              deleteMutation.mutate();
+            }
+          }}
           title={tActions('deleteVersion')}
           confirmLabel={tActions('delete')}
           cancelLabel={tActions('cancel')}

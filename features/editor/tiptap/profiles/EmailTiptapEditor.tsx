@@ -13,7 +13,7 @@ import { createBlockRoomPresenceExtension } from '../block-room-presence';
 import type { RichTextBlockRoomTiptapController } from '../block-room-tiptap-controller';
 import { TiptapAuthoringControls } from '../TiptapAuthoringControls';
 import { createTiptapWireExtensions } from '../wire-schema';
-import { TranslationStructureLockExtension } from '@/lib/editor/extensions/TranslationStructureLockExtension';
+import { createLiveTranslationStructureLock } from '../live-translation-structure-lock';
 import classes from '../TiptapEditor.module.css';
 
 /**
@@ -47,7 +47,7 @@ function createHandle(editor: Editor): EmailCampaignTiptapEditorHandle {
     getText: () => editor.getText(),
     insertVariable: (variable) => {
       const value = normalizeEmailCampaignVariable(variable);
-      if (value) {
+      if (value && editor.isEditable) {
         editor.chain().focus().insertContent(value).run();
       }
     },
@@ -139,14 +139,18 @@ function EmailTiptapEditorRuntime({
   const changeCallbackRef = useRef(onContentChange);
   readyCallbackRef.current = onEditorReady;
   changeCallbackRef.current = onContentChange;
+  const structureLockedRef = useRef(structureLocked);
+  structureLockedRef.current = structureLocked;
+  const localUserRef = useRef({ name: userName, color: userColor });
+  localUserRef.current = { name: userName, color: userColor };
   const extensions = useMemo(
     () => [
       ...createTiptapWireExtensions(),
-      ...(structureLocked ? [TranslationStructureLockExtension] : []),
+      createLiveTranslationStructureLock(() => structureLockedRef.current),
       blockRoomController.extension,
-      createBlockRoomPresenceExtension(awareness, { name: userName, color: userColor }),
+      createBlockRoomPresenceExtension(awareness, localUserRef.current, () => localUserRef.current),
     ],
-    [awareness, blockRoomController, structureLocked, userColor, userName],
+    [awareness, blockRoomController],
   );
   const editor = useEditor(
     {
@@ -185,7 +189,7 @@ function EmailTiptapEditorRuntime({
   return (
     <div className={[classes.editor, 'tiptap-editor', className].filter(Boolean).join(' ')} data-editor-engine="tiptap">
       {editable ? <VariableInserter availableVariables={availableVariables} onInsert={handle.insertVariable} /> : null}
-      <TiptapAuthoringControls editor={editor} />
+      {editable && !structureLocked ? <TiptapAuthoringControls editor={editor} /> : null}
       <IsolatedEditorContent editor={editor} />
     </div>
   );

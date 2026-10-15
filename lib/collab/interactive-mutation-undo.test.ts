@@ -15,11 +15,11 @@ const FIRST_MUTATION = '019cd2ae-5c67-7fe7-9671-62fc1e9cba83';
 const SECOND_MUTATION = '019cd2ae-5c67-7fe7-9671-62fc1e9cba84';
 
 function markerBegin(mutationId = FIRST_MUTATION): string {
-  return JSON.stringify({ kind: 'interactive_mutation.begin', mutationId });
+  return JSON.stringify({ v: 3, kind: 'interactive_mutation.begin', mutationId });
 }
 
 function markerEnd(outcome: 'accepted' | 'aborted', mutationId = FIRST_MUTATION): string {
-  return JSON.stringify({ kind: 'interactive_mutation.end', mutationId, outcome });
+  return JSON.stringify({ v: 3, kind: 'interactive_mutation.end', mutationId, outcome });
 }
 
 describe('interactive mutation room undo', () => {
@@ -143,7 +143,9 @@ describe('interactive mutation room undo', () => {
     const text = document.getText('body');
 
     registration.handleStateless('{');
-    registration.handleStateless(JSON.stringify({ kind: 'interactive_mutation.begin', mutationId: 'not-a-uuid' }));
+    registration.handleStateless(
+      JSON.stringify({ v: 3, kind: 'interactive_mutation.begin', mutationId: 'not-a-uuid' }),
+    );
     document.transact(() => text.insert(0, 'unmarked'), provider);
     registration.handleStateless(markerBegin());
     registration.handleStateless(markerEnd('accepted', SECOND_MUTATION));

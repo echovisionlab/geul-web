@@ -1,5 +1,7 @@
 'use client';
 
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
 
 import { Text as DsText } from '@/components/core/Typography';
@@ -249,8 +251,9 @@ function useProgramEventEditorViewModel({
   });
   const { activeEditLocale, roomLocale } = localeSession;
   const { shouldUseLocaleDocument } = localeSession.mode;
-  const canEditEvent = allowedActions.includes('edit');
   const blockRoom = useRichTextBlockRoomEditor('program-event', eventId, roomLocale);
+  const accessLevel = useEditorAccessLevel(blockRoom.provider);
+  const canEditEvent = allowedActions.includes('edit') && accessLevel === 'edit';
   const hasLocaleRoomMutationAuthority = localeSession.hasRoomMutationAuthority({
     sourceLocale: blockRoom.bootstrap?.sourceLocale ?? null,
     locale: blockRoom.bootstrap?.locale ?? null,
@@ -445,7 +448,7 @@ function useProgramEventEditorViewModel({
       const write = neutralConfiguration.beginWrite(data);
       try {
         await requireActionSuccess(
-          saveEditableEvent({ ...data, ...(Object.keys(observed).length ? { observed } : {}) }),
+          saveEditableEvent({ ...data, ...(Object.keys(observed).length ? { observed } : {}) }, write.origin),
         );
       } catch (error) {
         write.fail();
@@ -652,9 +655,7 @@ function useProgramEventEditorViewModel({
     label: option.name,
   }));
   const canEditTranslationSource = canEditEvent;
-  const editorReady = Boolean(
-    roomLocale && blockRoom.provider && blockRoom.doc && blockRoom.controller && blockRoom.isSynced,
-  );
+  const editorReady = Boolean(roomLocale && blockRoom.provider && blockRoom.doc && blockRoom.controller);
   const primaryPosterUrl = posterMedia.find((item) => item.isPrimary)?.url ?? posterMedia[0]?.url ?? initialPosterUrl;
   const routePath = `/events/${slug || eventId}`;
   const showLocationSelector = locationMode === 'map_place' || locationMode === 'hybrid';
@@ -967,7 +968,13 @@ export function ProgramEventEditorView({ model }: { model: ProgramEventEditorVie
         />
 
         <AuthoringExtension kind="translations">
-          <EntityTranslationsPanel entityType="program_event" entityId={eventId} canManage={canEditEvent} />
+          <EntityTranslationsPanel
+            entityType="program_event"
+            entityId={eventId}
+            canManage
+            canAdministerTranslations={canEditEvent}
+            canMutateTargets={canEditEvent}
+          />
         </AuthoringExtension>
 
         <SectionCard>

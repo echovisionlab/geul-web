@@ -18,6 +18,11 @@
   align-items: center;
 }
 
+/* Access to the page ended: nothing behind the dialog may stay readable. */
+.backdrop[data-backdrop='obscure'] {
+  background: var(--geul-background);
+}
+
 .panel {
   display: flex;
   flex-direction: column;

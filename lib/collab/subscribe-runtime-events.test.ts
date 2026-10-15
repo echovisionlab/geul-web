@@ -25,7 +25,10 @@ function createProvider() {
     handlers,
     emit: (payload: unknown) => {
       for (const handler of handlers) {
-        handler({ payload: typeof payload === 'string' ? payload : JSON.stringify(payload) });
+        handler({
+          payload:
+            typeof payload === 'string' ? payload : JSON.stringify({ v: 3, kind: 'runtime.event', event: payload }),
+        });
       }
     },
   };
@@ -55,7 +58,7 @@ async function freshModule() {
   return import('./subscribe-runtime-events');
 }
 
-const RUNTIME_EVENTS_MODULE = '@echovisionlab/geul-common/collaboration/runtime-events';
+const RUNTIME_EVENTS_MODULE = '@/lib/collab/runtime-event-parser';
 
 /** Makes the parser chunk request fail while `failing()` is true (an unreachable chunk). */
 function mockParserChunk(failing: () => boolean) {

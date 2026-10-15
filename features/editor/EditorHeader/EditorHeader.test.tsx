@@ -319,7 +319,7 @@ describe('EditorHeader', () => {
       />,
     );
 
-    expect(document.querySelector('[data-collab-status="synced"]')).not.toBeNull();
+    expect(document.querySelector('[data-collab-status="saved"]')).not.toBeNull();
     expect(document.body.textContent).toContain('Published');
     expect(document.body.textContent).toContain('Unpublish');
     expect(document.body.textContent).not.toContain('Change Status');
@@ -353,7 +353,7 @@ describe('EditorHeader', () => {
 
     expect(document.body.textContent).toContain('Untitled');
     expect(document.body.textContent).toContain('Preview');
-    expect(document.querySelector('[data-collab-status="syncing"]')).not.toBeNull();
+    expect(document.querySelector('[data-collab-status="saving"]')).not.toBeNull();
 
     await clickElement(
       Array.from(document.querySelectorAll('button')).find((button) => button.textContent?.includes('Change Status')),
@@ -405,7 +405,7 @@ describe('EditorHeader', () => {
 
     expect(document.querySelector('h1')?.textContent).toBe('Contact form');
     expect(document.body.textContent).toContain('Draft');
-    expect(document.querySelector('[data-collab-status="synced"]')).not.toBeNull();
+    expect(document.querySelector('[data-collab-status="saved"]')).not.toBeNull();
     expect(document.body.textContent).toContain('Locale control');
     expect(document.body.textContent).toContain('Preview');
 

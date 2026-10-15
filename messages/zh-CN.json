@@ -329,7 +329,14 @@
       "ogRegenerationFailed": "重新生成 OG 图像失败",
       "testEmailSent": "测试邮件已发送",
       "saveSuccess": "已保存",
-      "saveFailed": "保存失败"
+      "saveFailed": "保存失败",
+      "saveRetrying": "您的更改尚未保存到服务器。正在重试。",
+      "editsRestored": "已恢复找回的编辑内容。",
+      "leaveWithRejectedEdits": {
+        "title": "要留下无法保存的编辑内容并离开吗?",
+        "message": "服务器拒绝了部分编辑，因此这些内容未保存。请先从协作菜单复制，或离开并丢弃这些内容。",
+        "confirm": "离开并丢弃"
+      }
     },
     "errors": {
       "generic": "出了点问题。请重试。",
@@ -460,6 +467,11 @@
       "siteInfo": "站点信息",
       "links": "链接",
       "socialMedia": "社交媒体"
+    },
+    "signOutUnsaved": {
+      "title": "有未保存的编辑内容，仍要登出吗?",
+      "message": "部分编辑内容尚未保存到服务器。登出会从此设备上删除这些内容。",
+      "confirm": "登出并丢弃"
     }
   },
   "adminShell": {
@@ -673,13 +685,13 @@
       "detail": {
         "backTooltip": "返回电子邮件布局",
         "targetEditor": {
-          "title": "Translated text",
-          "description": "Edit only visible text and accessibility labels. HTML, CSS, links, and placeholders remain owned by the source layout.",
-          "empty": "This layout has no translatable text units.",
+          "title": "翻译文本",
+          "description": "仅编辑可见文本和无障碍标签。HTML、CSS、链接和占位符仍由源布局管理。",
+          "empty": "此布局没有可翻译的文本单元。",
           "textUnit": "Text",
-          "sourceValue": "Source: {value}",
-          "translatedValue": "This locale provides its own value.",
-          "sourceFallback": "Using the source value.",
+          "sourceValue": "原文: {value}",
+          "translatedValue": "此语言环境提供了自己的值。",
+          "sourceFallback": "正在使用原文值。",
           "useSource": "Use source"
         },
         "viewModes": {
@@ -1095,12 +1107,12 @@
       "fixedLocaleItemBadge": "固定：{locale}"
     },
     "emailEvents": {
-      "title": "Email Delivery",
-      "description": "Database email event logs have been removed. Delivery status is tracked through delivery runs, suppressions, structured logs, and metrics.",
-      "databaseLogsRemovedTitle": "Database event log removed",
-      "databaseLogsRemovedDescription": "The old email_event table is no longer used for operational mail logs. Campaign and legal notice analytics use delivery recipient state instead.",
-      "dashboardTitle": "Use observability dashboards",
-      "dashboardDescription": "Provider acceptance, worker failures, and delivery-run health should be monitored in Grafana/Loki/Mimir."
+      "title": "邮件投递",
+      "description": "已移除数据库邮件事件日志。投递状态通过投递运行、投递抑制、结构化日志和指标进行跟踪。",
+      "databaseLogsRemovedTitle": "已移除数据库事件日志",
+      "databaseLogsRemovedDescription": "旧的email_event表不再用于运营邮件日志。活动和法律通知的分析改用投递收件人状态。",
+      "dashboardTitle": "使用可观测性仪表板",
+      "dashboardDescription": "应在Grafana/Loki/Mimir中监控提供商接收情况、工作进程故障和投递运行状态。"
     },
     "clientsDetail": {
       "newTitle": "新客户",
@@ -1162,8 +1174,8 @@
           "description": "确认您的 {siteName} 帐户已恢复"
         },
         "verification": {
-          "title": "Verify Email",
-          "description": "Verify your email address on {siteName}"
+          "title": "验证邮箱",
+          "description": "在{siteName}上验证您的邮箱地址"
         }
       }
     },
@@ -1302,34 +1314,34 @@
       }
     },
     "verification": {
-      "loading": "Loading verification form...",
-      "startOver": "Start over",
+      "loading": "正在加载验证表单...",
+      "startOver": "重新开始",
       "errors": {
-        "flowNotFound": "Verification flow not found or expired",
-        "submit": "Failed to verify email",
-        "submitRetry": "Failed to verify email. Please try again.",
-        "emailRequired": "Enter the email address to verify.",
-        "sendVerificationEmail": "Failed to send verification email",
-        "cooldown": "Please wait {seconds} seconds before requesting another verification email.",
-        "alreadyExists": "This email is already registered.",
-        "currentVerified": "This email is already verified on this account.",
-        "invalidEmail": "Enter a valid email address."
+        "flowNotFound": "验证流程不存在或已过期",
+        "submit": "邮箱验证失败",
+        "submitRetry": "邮箱验证失败。请重试。",
+        "emailRequired": "输入要验证的邮箱地址。",
+        "sendVerificationEmail": "发送验证邮件失败",
+        "cooldown": "请等待{seconds}秒后再请求验证邮件。",
+        "alreadyExists": "此邮箱已注册。",
+        "currentVerified": "此邮箱已在此账户中通过验证。",
+        "invalidEmail": "输入有效的邮箱地址。"
       },
       "chooseMethod": {
-        "title": "Verify email",
-        "description": "Enter your email address and we will send you a verification code.",
-        "submit": "Send verification code"
+        "title": "验证邮箱",
+        "description": "输入您的邮箱地址，我们会向您发送验证码。",
+        "submit": "发送验证码"
       },
       "sentEmail": {
-        "description": "Enter the verification code from your email to continue.",
-        "codeLabel": "Verification code",
-        "submitting": "Checking code...",
+        "description": "输入邮件中的验证码以继续。",
+        "codeLabel": "验证码",
+        "submitting": "正在检查验证码...",
         "resend": "发送新验证码"
       },
       "passedChallenge": {
-        "title": "Email verified",
-        "description": "Your email address has been verified.",
-        "action": "Back to security settings"
+        "title": "邮箱已验证",
+        "description": "您的邮箱地址已通过验证。",
+        "action": "返回安全设置"
       },
       "applying": {
         "checkAgain": "再次检查",
@@ -1728,16 +1740,16 @@
       "consentDescription": "此客户端可以在您现有的账户权限范围内读取和编辑内容以及管理文件。它可以创建、更新或删除内容，并更改现有附件。连接不会授予任何额外的账户权限。",
       "consentOfflineAccess": "当前浏览器会话结束后，此连接仍可继续，直到您撤销它。",
       "consentRevoke": "您可以在{settings} → Remote MCP中撤销此连接。",
-      "connectionsTitle": "Connected MCP clients",
-      "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
-      "connectionsEmpty": "No MCP clients are connected.",
-      "connectedAt": "Connected {date}",
+      "connectionsTitle": "已连接的MCP客户端",
+      "connectionsDescription": "这些OAuth授权与浏览器会话相互独立。撤销其中一项会断开相应MCP客户端的连接，而不会让您登出。",
+      "connectionsEmpty": "没有已连接的MCP客户端。",
+      "connectedAt": "连接时间 {date}",
       "revoke": "Revoke",
-      "revokeTitle": "Revoke MCP access",
-      "revokeConfirmation": "Revoke MCP access for {client}? Its current token chain will stop working.",
-      "revokeSuccess": "MCP access was revoked.",
-      "revokeFailed": "Could not revoke MCP access.",
-      "loadFailed": "Could not load connected MCP clients."
+      "revokeTitle": "撤销MCP访问权限",
+      "revokeConfirmation": "撤销{client}的MCP访问权限吗? 其当前令牌链将失效。",
+      "revokeSuccess": "已撤销MCP访问权限。",
+      "revokeFailed": "无法撤销MCP访问权限。",
+      "loadFailed": "无法加载已连接的MCP客户端。"
     },
     "personalAccessTokens": {
       "title": "个人访问令牌",
@@ -2136,9 +2148,9 @@
     "systemOrLegacy": "系统或早期版本",
     "restore": "恢复",
     "restoreTitle": "恢复版本",
-    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document.",
+    "restoreSameLocaleBody": "恢复源文档v{version} ({locale})仅更改源文档。现有目标文档和翻译作业保持不变，且不会自动生成翻译。是否继续?",
+    "restoreCrossLocaleBody": "恢复源文档v{version}会将源语言环境从{currentLocale}切换为{selectedLocale}，并仅更改源指针。现有目标文档和翻译作业保持不变，且不会自动生成翻译。是否继续?",
+    "restoreFailed": "恢复源文档失败。",
     "loadFailed": "无法加载版本历史记录。",
     "end": "已加载所有版本。"
   },
@@ -2444,7 +2456,7 @@
         "ready": "音频已就绪",
         "uploadTooltip": "上传音频文件",
         "uploaded": "音频已上传，处理已开始",
-        "resumeExpired": "Upload session expired. Start a fresh upload."
+        "resumeExpired": "上传会话已过期。请重新开始上传。"
       }
     }
   },
@@ -2518,6 +2530,24 @@
       "sections": {
         "connection": "连接"
       }
+    },
+    "saveState": {
+      "saved": "已保存",
+      "saving": "正在保存…",
+      "offline": "离线 · 编辑内容已保留在此设备上",
+      "error": "保存失败 · 正在重试…",
+      "rejected": "部分编辑内容无法保存",
+      "reload": "正在重新连接 · 正在恢复编辑内容…"
+    },
+    "rejectedEdits": {
+      "open": "查看未保存的编辑内容",
+      "title": "无法保存的编辑内容",
+      "description": "服务器已拒绝这些编辑，因此不会重试。请复制需要的内容，然后丢弃这些编辑。",
+      "reason": "原因: {reason}",
+      "copy": "复制",
+      "copied": "已复制",
+      "discard": "丢弃",
+      "empty": "所有编辑内容均已保存。"
     }
   },
   "urlSection": {
@@ -2534,33 +2564,33 @@
     }
   },
   "formValidation": {
-    "required": "This field is required",
-    "invalidUrl": "Please enter a valid URL",
-    "invalidFormat": "Invalid format",
-    "invalidEmail": "Please enter a valid email",
-    "invalidPhoneNumber": "Invalid phone number",
-    "stringGt": "Must be more than {threshold} characters",
-    "stringGte": "Minimum {threshold} characters",
-    "stringLt": "Must be less than {threshold} characters",
-    "stringLte": "Maximum {threshold} characters",
-    "stringEq": "Must be exactly {threshold} characters",
-    "numberGt": "Must be greater than {threshold}",
-    "numberGte": "Minimum value is {threshold}",
-    "numberLt": "Must be less than {threshold}",
-    "numberLte": "Maximum value is {threshold}",
-    "numberEq": "Must be exactly {threshold}",
-    "arrayGt": "Select more than {threshold}",
-    "arrayGte": "Select at least {threshold}",
-    "arrayLt": "Select less than {threshold}",
-    "arrayLte": "Select at most {threshold}",
-    "arrayEq": "Select exactly {threshold}",
-    "dateMin": "Date must be on or after {date}",
-    "dateMax": "Date must be on or before {date}",
-    "futureDate": "Date must be in the future",
-    "pastDate": "Date must be in the past",
-    "weekdayOnly": "Please select a weekday",
-    "minAge": "Must be at least {age} years old",
-    "maxAge": "Must be at most {age} years old"
+    "required": "此字段为必填项",
+    "invalidUrl": "请输入有效的URL",
+    "invalidFormat": "格式无效",
+    "invalidEmail": "请输入有效的邮箱地址",
+    "invalidPhoneNumber": "电话号码无效",
+    "stringGt": "必须超过{threshold}个字符",
+    "stringGte": "至少需要{threshold}个字符",
+    "stringLt": "必须少于{threshold}个字符",
+    "stringLte": "最多允许{threshold}个字符",
+    "stringEq": "必须恰好为{threshold}个字符",
+    "numberGt": "必须大于{threshold}",
+    "numberGte": "最小值为{threshold}",
+    "numberLt": "必须小于{threshold}",
+    "numberLte": "最大值为{threshold}",
+    "numberEq": "必须恰好为{threshold}",
+    "arrayGt": "请选择超过{threshold}项",
+    "arrayGte": "请至少选择{threshold}项",
+    "arrayLt": "请选择少于{threshold}项",
+    "arrayLte": "请最多选择{threshold}项",
+    "arrayEq": "请选择恰好{threshold}项",
+    "dateMin": "日期不得早于{date}",
+    "dateMax": "日期不得晚于{date}",
+    "futureDate": "日期必须是未来的日期",
+    "pastDate": "日期必须是过去的日期",
+    "weekdayOnly": "请选择工作日",
+    "minAge": "年龄不得低于{age}岁",
+    "maxAge": "年龄不得超过{age}岁"
   },
   "phoneInput": {
     "noResults": "未找到结果"
@@ -3188,21 +3218,21 @@
         "fallbackMode": "缺少 Logo 时",
         "marqueeItemText": "文本",
         "marqueeItemHref": "链接 URL",
-        "scrollHeight": "Scroll height",
-        "sceneHeight": "Scene height",
-        "unitHoldSeconds": "Unit hold",
+        "scrollHeight": "滚动高度",
+        "sceneHeight": "场景高度",
+        "unitHoldSeconds": "单元停留时间",
         "unitGapSeconds": "Unit gap",
-        "unitHoldOverrideSeconds": "Hold override",
+        "unitHoldOverrideSeconds": "覆盖停留时间",
         "loop": "Loop",
         "colorScheme": "Theme",
-        "backgroundColor": "Light background",
-        "darkBackgroundColor": "Dark background",
+        "backgroundColor": "浅色模式背景",
+        "darkBackgroundColor": "深色模式背景",
         "backgroundEnabled": "场景背景",
-        "textureSize": "Particle count",
-        "particleSize": "Particle size",
-        "particleBrightness": "Light particle brightness",
-        "darkParticleBrightness": "Dark particle brightness",
-        "transitionWindow": "Text blend",
+        "textureSize": "粒子数量",
+        "particleSize": "粒子大小",
+        "particleBrightness": "浅色模式粒子亮度",
+        "darkParticleBrightness": "深色模式粒子亮度",
+        "transitionWindow": "文字混合",
         "transition": "Transition",
         "rotationEnabled": "旋转动画",
         "scrollRotationEnabled": "添加滚动旋转",
@@ -3212,34 +3242,34 @@
         "hoverEnabled": "指针交互",
         "hoverRepelRadius": "悬停半径",
         "sceneUnit": "Unit",
-        "sceneUnitName": "Unit name",
+        "sceneUnitName": "单元名称",
         "unitAttribution": "单元署名",
-        "meshSource": "Mesh source",
-        "fallbackMesh": "Built-in mesh",
+        "meshSource": "网格来源",
+        "fallbackMesh": "内置网格",
         "mesh": "Mesh",
-        "meshObjectName": "Mesh object",
+        "meshObjectName": "网格对象",
         "meshScale": "网格缩放",
         "meshOffsetY": "网格高度偏移",
-        "meshUploadProgress": "Mesh upload progress",
-        "textureSource": "Light texture",
-        "fallbackColor": "Light color",
-        "color": "Light color",
-        "lightTextureUploadProgress": "Light texture upload progress",
-        "darkTextureSource": "Dark texture",
-        "darkFallbackColor": "Dark color",
-        "darkColor": "Dark color",
-        "darkTextureUploadProgress": "Dark texture upload progress",
+        "meshUploadProgress": "网格上传进度",
+        "textureSource": "浅色模式纹理",
+        "fallbackColor": "浅色模式颜色",
+        "color": "浅色模式颜色",
+        "lightTextureUploadProgress": "浅色模式纹理上传进度",
+        "darkTextureSource": "深色模式纹理",
+        "darkFallbackColor": "深色模式颜色",
+        "darkColor": "深色模式颜色",
+        "darkTextureUploadProgress": "深色模式纹理上传进度",
         "title": "Title",
         "description": "描述",
         "meshOptimization": "GLB optimization",
-        "meshOptimizationTargetRatio": "Target mesh ratio",
-        "selectedOptimizedMesh": "Selected compressed GLB",
-        "optimizedMeshSize": "Compressed size",
+        "meshOptimizationTargetRatio": "目标网格比例",
+        "selectedOptimizedMesh": "所选压缩GLB",
+        "optimizedMeshSize": "压缩后大小",
         "meshOptimizationTriangles": "Triangles",
-        "textColorSource": "Text color",
-        "lightTextColor": "Light text",
-        "darkTextColorSource": "Dark text",
-        "darkTextColor": "Dark text color",
+        "textColorSource": "文字颜色",
+        "lightTextColor": "浅色模式文字",
+        "darkTextColorSource": "深色模式文字",
+        "darkTextColor": "深色模式文字颜色",
         "itemSize": "项目大小",
         "showAvatar": "显示头像",
         "maxLabels": "厂牌数量上限"
@@ -3341,7 +3371,7 @@
         "textureSource": {
           "color": "Color",
           "image": "Image",
-          "inherit": "Follow light"
+          "inherit": "跟随浅色模式"
         },
         "playback": {
           "scroll": "Scroll",
@@ -3352,9 +3382,9 @@
           "linear": "Linear"
         },
         "textColorSource": {
-          "theme": "Follow theme",
+          "theme": "跟随主题",
           "custom": "Custom",
-          "inherit": "Follow light"
+          "inherit": "跟随浅色模式"
         },
         "itemSize": {
           "s": "S · 紧凑",
@@ -3367,25 +3397,25 @@
         "removeMarqueeItem": "移除项目",
         "moveMarqueeItem": "调整项目顺序",
         "addSceneUnit": "Add unit",
-        "moveUnitUp": "Move unit up",
-        "moveUnitDown": "Move unit down",
-        "removeSceneUnit": "Remove unit",
+        "moveUnitUp": "上移单元",
+        "moveUnitDown": "下移单元",
+        "removeSceneUnit": "移除单元",
         "replaceMesh": "Replace GLB",
         "uploadMesh": "Upload GLB",
-        "clearMeshAsset": "Clear mesh asset",
-        "cancelMeshUpload": "Cancel GLB upload",
-        "replaceTexture": "Replace light texture",
-        "uploadTexture": "Upload light texture",
-        "clearTextureAsset": "Clear texture",
-        "cancelTextureUpload": "Cancel light texture upload",
-        "replaceDarkTexture": "Replace dark texture",
-        "uploadDarkTexture": "Upload dark texture",
-        "clearDarkTextureAsset": "Clear dark texture",
-        "cancelDarkTextureUpload": "Cancel dark texture upload",
+        "clearMeshAsset": "清除网格资源",
+        "cancelMeshUpload": "取消上传GLB",
+        "replaceTexture": "替换浅色模式纹理",
+        "uploadTexture": "上传浅色模式纹理",
+        "clearTextureAsset": "清除纹理",
+        "cancelTextureUpload": "取消上传浅色模式纹理",
+        "replaceDarkTexture": "替换深色模式纹理",
+        "uploadDarkTexture": "上传深色模式纹理",
+        "clearDarkTextureAsset": "清除深色模式纹理",
+        "cancelDarkTextureUpload": "取消上传深色模式纹理",
         "generateOptimizedMesh": "Compress GLB",
         "useOptimizedMesh": "Use compressed GLB",
         "clearOptimizedMesh": "Use original GLB",
-        "deleteOptimizedMeshCandidate": "Delete compressed GLB"
+        "deleteOptimizedMeshCandidate": "删除压缩GLB"
       },
       "descriptions": {
         "marqueeTextItems": "逐项添加文本。",
@@ -3396,18 +3426,18 @@
         "marqueeItems": "尚无项目。"
       },
       "status": {
-        "meshOptimizationQueued": "GLB optimization queued.",
-        "meshOptimizationGenerated": "Optimized GLB generated.",
-        "meshOptimizationSelected": "Optimized GLB selected.",
-        "meshOptimizationCleared": "Original GLB selected.",
-        "meshOptimizationDeleted": "Compressed GLB deleted.",
-        "meshOptimizationDeleteFailed": "Compressed GLB could not be deleted.",
+        "meshOptimizationQueued": "GLB优化已加入队列。",
+        "meshOptimizationGenerated": "已生成优化后的GLB。",
+        "meshOptimizationSelected": "已选择优化后的GLB。",
+        "meshOptimizationCleared": "已选择原始GLB。",
+        "meshOptimizationDeleted": "已删除压缩GLB。",
+        "meshOptimizationDeleteFailed": "无法删除压缩GLB。",
         "meshOptimizationPending": "Queued",
         "meshOptimizationProcessing": "Processing",
         "meshOptimizationFailed": "Failed",
         "meshOptimizationCancelled": "Cancelled",
-        "optimizedMeshCleanupFailed": "Optimized asset reference removed, but cleanup failed: {error}",
-        "optimizedMeshCleanupFailedDefault": "Optimized asset reference removed, but cleanup failed"
+        "optimizedMeshCleanupFailed": "已移除优化资源的引用，但清理失败: {error}",
+        "optimizedMeshCleanupFailedDefault": "已移除优化资源的引用，但清理失败"
       },
       "authorSelection": {
         "maxSelected": "最多可选择 {count} 位作者。",
@@ -3512,8 +3542,8 @@
       "message": "编辑器打开期间已保存更新版本。请重新加载后再继续编辑。"
     },
     "permissionRevoked": {
-      "title": "编辑权限已被撤销",
-      "message": "你已无权编辑此内容。权限撤销后所做的更改不会被保存。"
+      "title": "访问权限已移除",
+      "message": "你已无法访问此内容。尚未保存的更改会保留在此设备上。"
     },
     "sessionExpired": {
       "title": "会话已过期",
@@ -3587,8 +3617,8 @@
         "browse": "选择文件",
         "importFromUrl": "从 URL 导入",
         "directVideoUrlHelp": "仅支持视频文件直链。对于 YouTube 或 Vimeo，请使用“外部视频”。",
-        "resumeAvailable": "Interrupted upload found",
-        "resumeInstructionNamed": "Select {name} again to continue the upload from where it stopped.",
+        "resumeAvailable": "发现中断的上传",
+        "resumeInstructionNamed": "再次选择{name}，即可从中断处继续上传。",
         "backToUpload": "上传文件",
         "openLibrary": "文件库",
         "unifiedDescription": "上传文件或从文件库中选择。",
@@ -3623,7 +3653,7 @@
           "done": "完成",
           "reset": "重置",
           "live": "直播",
-          "playingInPictureInPicture": "Playing in picture-in-picture",
+          "playingInPictureInPicture": "正在画中画模式下播放",
           "videoPlayerLoading": "正在加载视频播放器。",
           "currentTime": "当前时间",
           "duration": "时长",
@@ -3651,7 +3681,7 @@
           "raised": "浮雕",
           "depressed": "压低",
           "uniform": "均匀",
-          "dropShadow": "Drop shadow",
+          "dropShadow": "投影",
           "proportionalSansSerif": "比例无细体",
           "monospaceSansSerif": "单间隔无细体",
           "proportionalSerif": "比例细体",
@@ -3754,14 +3784,14 @@
           "quote": {
             "title": "引用",
             "subtext": "引用或摘录",
-            "aliases": "quotation\nblockquote\nbq",
+            "aliases": "quotation\nblockquote\nbq\n引用\n引文",
             "group": "基础"
           },
           "callout": {
             "title": "Callout",
-            "subtext": "Highlight content with an icon",
-            "aliases": "callout\nnotice\ninfo\naside",
-            "group": "Basic blocks"
+            "subtext": "用图标突出显示内容",
+            "aliases": "callout\nnotice\ninfo\naside\n提示框\n通知\n信息\n旁注",
+            "group": "基础块"
           },
           "divider": {
             "title": "分隔线",
@@ -3790,61 +3820,61 @@
           "mathBlock": {
             "title": "数学块",
             "subtext": "使用 LaTeX 显示公式",
-            "aliases": "math\nequation\nlatex\nformula",
+            "aliases": "math\nequation\nlatex\nformula\n数学\n公式\n方程",
             "group": "数学"
           },
           "inlineMath": {
             "title": "行内数学",
             "subtext": "行内 LaTeX 公式",
-            "aliases": "inline\ninline math\ninlinemath\nlatex\n$",
+            "aliases": "inline\ninline math\ninlinemath\nlatex\n$\n行内\n行内公式\n公式",
             "group": "行内"
           },
           "map": {
             "title": "地图",
             "subtext": "插入地图位置",
-            "aliases": "map\nlocation\nplace\naddress",
+            "aliases": "map\nlocation\nplace\naddress\n地图\n位置\n地点\n地址",
             "group": "嵌入"
           },
           "externalVideo": {
             "title": "外部视频",
             "subtext": "插入 YouTube 或 Vimeo 链接",
-            "aliases": "external video\nyoutube\nvimeo\nembed",
+            "aliases": "external video\nyoutube\nvimeo\nembed\n外部视频\n嵌入",
             "group": "嵌入"
           },
           "p5Sketch": {
             "title": "p5.js",
             "subtext": "添加交互式 p5.js 草图",
-            "aliases": "p5\np5.js\nsketch\ncreative coding",
+            "aliases": "p5\np5.js\nsketch\ncreative coding\n草图\n创意编程",
             "group": "嵌入"
           },
           "threeScene": {
             "title": "Three.js",
             "subtext": "添加交互式 Three.js 场景",
-            "aliases": "three\nthree.js\n3d\nscene",
+            "aliases": "three\nthree.js\n3d\nscene\n三维\n场景",
             "group": "嵌入"
           },
           "file": {
             "title": "附件",
             "subtext": "附加文件（PDF、DOC、ZIP 等）",
-            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload",
+            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\n附件\n文件\n文档\n下载",
             "group": "媒体"
           },
           "aiAssistant": {
             "title": "AI 助手",
             "subtext": "使用 AI 写作、改写或转换文本",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove",
+            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\n人工智能\n助手\n写作\n改进",
             "group": "AI"
           },
           "shader": {
             "title": "GLSL 着色器",
             "subtext": "添加交互式 GLSL 着色器",
-            "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "aliases": "shader\nglsl\nfragment shader\nshadertoy\n着色器\n片段着色器",
             "group": "嵌入"
           },
           "mermaid": {
             "title": "Mermaid",
             "subtext": "用文本创建图表",
-            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence\n图表\n流程图\n时序图",
             "group": "嵌入"
           }
         }
@@ -4024,6 +4054,12 @@
       "media": {
         "importFromUrl": "从 URL 导入"
       }
+    },
+    "accessDowngraded": {
+      "message": "您的权限已变为仅查看，编辑已关闭。尚未保存的编辑内容会保留在此设备上，并在您重新获得编辑权限后保存。"
+    },
+    "accessUpgraded": {
+      "message": "你可以再次编辑。仅可查看期间保留的更改正在保存。"
     }
   },
   "aiAssistant": {
@@ -4166,38 +4202,38 @@
     "resolvedMetadata": "解析后的元数据"
   },
   "translationPanel": {
-    "description": "Review the source language and existing translation document for each locale.",
+    "description": "查看源语言和各语言环境的现有翻译文档。",
     "actions": {
       "expand": "扩张",
       "collapse": "坍塌",
-      "regenerateAll": "Generate/regenerate all eligible locales",
+      "regenerateAll": "生成/重新生成所有符合条件的语言环境的翻译",
       "regenerateLocale": "再生",
       "regenerateLocaleAria": "重新生成 {locale} 翻译",
       "generateLocale": "Generate",
-      "generateLocaleAria": "Generate {locale} translation"
+      "generateLocaleAria": "生成{locale}翻译"
     },
     "sourceLocale": {
       "label": "源语言",
       "description": "这是用作该实体翻译基础的源语言",
       "confirm": {
         "title": "更改源语言",
-        "description": "Changing the source language updates only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically.",
-        "detail": "{locale} becomes the language of the editable source document. Existing target documents and translation jobs remain unchanged.",
+        "description": "更改源语言仅更新源指针。现有目标文档和翻译作业保持不变，且不会自动生成翻译。",
+        "detail": "{locale}将成为可编辑源文档的语言。现有目标文档和翻译作业保持不变。",
         "confirm": "更改并重新翻译"
       }
     },
     "activeEditLocale": {
-      "ariaLabel": "Switch content language. Current: {locale}",
+      "ariaLabel": "切换内容语言。当前: {locale}",
       "sourceOption": "{locale}（来源）",
       "loading": "正在加载语言...",
-      "missingDescription": "No {locale} target document exists yet. Generate it from the translations panel.",
+      "missingDescription": "尚无{locale}目标文档。请从翻译面板生成。",
       "bodyPreviewTitle": "{locale} 身体预览",
-      "bodyPreviewDescription": "The existing translation document is shown with its structure and formatting.",
+      "bodyPreviewDescription": "保留结构和格式显示现有翻译文档。",
       "bodyPreviewEmpty": "还没有本地化的身体预览",
-      "sharedStructureSectionDescription": "This section keeps shared layout or query settings from the source page; translated body content is read-only.",
+      "sharedStructureSectionDescription": "此部分保留源页面的共享布局或查询设置，翻译后的正文为只读。",
       "sectionFieldLabels": {
         "caption": "标题",
-        "copyJson": "Scene copy"
+        "copyJson": "场景文案"
       }
     },
     "statuses": {
@@ -4205,7 +4241,7 @@
     },
     "states": {
       "loadFailed": "无法加载翻译",
-      "missingTarget": "No target document yet.",
+      "missingTarget": "尚无目标文档。",
       "sourceEditorHint": "在主编辑器中编辑原始文本",
       "updatedAt": "更新了{date}"
     },
@@ -4218,26 +4254,26 @@
     }
   },
   "translationPanelMenu": {
-    "description": "Review source menu labels and existing translation documents.",
+    "description": "查看源菜单标签和现有翻译文档。",
     "previewModal": {
-      "title": "{locale} menu translation preview",
+      "title": "{locale}菜单翻译预览",
       "fields": {
-        "localizedLabelForLocale": "{locale} public label"
+        "localizedLabelForLocale": "{locale}公开标签"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template."
+      "description": "管理此电子邮件模板的源语言和现有翻译文档。"
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout."
+      "description": "管理此电子邮件布局的源语言和现有翻译文档。"
     }
   },
   "localizationNotice": {
     "translated": {
-      "title": "Localized version",
-      "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
+      "title": "本地化版本",
+      "description": "此本地化版本以{displayed}显示，{source}原文仍具有权威性。"
     },
     "fallback": {
       "title": "后备语言"
@@ -4260,15 +4296,15 @@
       "totalLocales": "语言环境总数",
       "sourceEntities": "源实体数",
       "activeJobs": "进行中的作业",
-      "existingEntries": "Existing translations"
+      "existingEntries": "现有翻译"
     },
     "sections": {
-      "localeHealthTitle": "Translation state by locale",
-      "entityHealthTitle": "Translation state by entity type"
+      "localeHealthTitle": "按语言环境查看翻译状态",
+      "entityHealthTitle": "按实体类型查看翻译状态"
     },
     "columns": {
       "policy": "政策",
-      "lastTargetUpdate": "Last target update",
+      "lastTargetUpdate": "目标文档最后更新",
       "entity": "实体",
       "sources": "来源",
       "lastSourceUpdate": "上次源更新"
@@ -4304,7 +4340,7 @@
   },
   "translationSettingsPage": {
     "title": "翻译设置",
-    "description": "Manage the default source language and automatic translation providers. An Admin explicitly starts translation generation from each editor.",
+    "description": "管理默认源语言和自动翻译提供商。管理员在各编辑器中明确启动翻译生成。",
     "actions": {
       "jobs": "作业",
       "save": "保存设置",
@@ -4314,8 +4350,8 @@
       "createProvider": "创建提供商"
     },
     "sections": {
-      "runtime": "Source defaults",
-      "runtimeDescription": "Set only the language used when a source language has not been established. Source changes never start translation generation automatically.",
+      "runtime": "源默认设置",
+      "runtimeDescription": "仅设置尚未确定源语言时使用的语言。更改源内容绝不会自动启动翻译生成。",
       "providers": "翻译提供商",
       "providersDescription": "管理机器翻译提供商。至少有一个启用且凭证有效的提供商后，翻译生成才会启用。"
     },
@@ -4325,10 +4361,10 @@
         "description": "当尚未设置源语言环境，或请求未解析到受支持的内容语言环境时使用"
       },
       "protectedTerms": {
-        "label": "Protected terms",
-        "description": "Exact case-sensitive spellings that translation generation must keep unchanged. No terms are learned or suggested automatically.",
-        "placeholder": "Add a protected term",
-        "examples": "Examples: Photoshop, React Native"
+        "label": "受保护术语",
+        "description": "翻译生成时必须保持不变的准确拼写，区分大小写。不会自动学习或建议任何术语。",
+        "placeholder": "添加受保护术语",
+        "examples": "示例: Photoshop, React Native"
       },
       "providerName": {
         "label": "提供商名称"
@@ -5268,6 +5304,40 @@
       "goHome": "返回首页",
       "tryAgain": "重试",
       "login": "返回登录"
+    }
+  },
+  "localBackups": {
+    "title": "本地备份",
+    "description": "此设备上已关闭标签页中未保存的编辑内容。打开编辑器即可恢复。备份会在30天后过期，登出时会被移除。",
+    "empty": "没有可恢复的本地备份。打开的标签页中的编辑内容不会在此列出。",
+    "unavailable": "本地备份需要此设备上的浏览器存储和Web Locks支持。",
+    "loading": "正在查找本地备份…",
+    "error": "无法完成此操作。请刷新列表后重试。",
+    "refresh": "刷新",
+    "lastChanged": "最后更改 {time}",
+    "open": "打开编辑器",
+    "discard": "丢弃",
+    "openLabel": "打开编辑器: {kind} {id}, {locale}",
+    "discardLabel": "丢弃: {kind} {id}, {locale}",
+    "discardTitle": "丢弃本地备份吗?",
+    "discardDescription": "这些未保存的编辑内容将从此设备上永久移除。已保存的内容不受影响。",
+    "kinds": {
+      "post": "文章",
+      "page": "页面",
+      "work": "作品",
+      "campaign": "活动",
+      "email-template": "电子邮件模板",
+      "email-layout": "电子邮件布局",
+      "terms-history": "服务条款",
+      "privacy-history": "隐私政策",
+      "artist": "艺术家",
+      "release": "发行",
+      "label": "厂牌",
+      "form": "表单",
+      "map-theme": "地图主题",
+      "program-event": "活动",
+      "menu": "菜单",
+      "post-series": "文章系列"
     }
   }
 }

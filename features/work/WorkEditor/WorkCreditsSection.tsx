@@ -49,6 +49,7 @@ import { useSortableSensors } from '@/lib/hooks/useSortableSensors';
 import { searchMembers } from '@/lib/queries/user-browser';
 import type { CreditOrderItem } from '@/lib/types/work/credit';
 import { WorkCreditSaveCoordinator } from './credits/work-credit-save-coordinator';
+import { useAuthoritativeConfiguration } from '@/lib/editor/useAuthoritativeConfiguration';
 import {
   buildFlatList,
   creditMoveIntentFromDropPlan,
@@ -133,8 +134,25 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
   const pendingMoveCountRef = useRef(0);
   const moveQueueRef = useRef(Promise.resolve());
   const creditSaveCoordinatorRef = useRef<WorkCreditSaveCoordinator | null>(null);
-  const [pendingMoveCount, setPendingMoveCount] = useState(0);
-  const [creditGroupOverrides, setCreditGroupOverrides] = useState<Record<string, string | null>>({});
+  const [, setPendingMoveCount] = useState(0);
+  const creditConfiguration = useAuthoritativeConfiguration<{
+    data: Awaited<ReturnType<typeof getWorkGroupsWithCreditsAction>> | undefined;
+    order: CreditOrderItem[];
+    groupOverrides: Record<string, string | null>;
+  }>({
+    document: `work:${workId}`,
+    initialConfiguration: { data: undefined, order: creditOrder, groupOverrides: {} },
+    onAdopt: (patch) => {
+      if (patch.order) {
+        creditOrderRef.current = patch.order;
+        setCreditOrder(patch.order);
+      }
+      if (patch.groupOverrides) {
+        creditGroupOverridesRef.current = patch.groupOverrides;
+      }
+    },
+  });
+  const { data, groupOverrides: creditGroupOverrides } = creditConfiguration.getConfiguration();
   const creditGroupOverridesRef = useRef<Record<string, string | null>>({});
 
   const queryClient = useQueryClient();
@@ -149,26 +167,32 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
       coordinator.dispose();
     };
   }, [workId]);
-  const trackCreditOperation = useCallback(<T,>(operation: () => Promise<T>, isSuccessful: (value: T) => boolean) => {
-    const coordinator = creditSaveCoordinatorRef.current;
-    if (coordinator) {
-      return coordinator.track(operation, isSuccessful);
-    }
-    try {
-      return Promise.resolve(operation()).then(
-        (value) => {
-          try {
-            return isSuccessful(value);
-          } catch {
-            return false;
-          }
-        },
-        () => false,
-      );
-    } catch {
-      return Promise.resolve(false);
-    }
-  }, []);
+  const trackCreditOperation = useCallback(
+    <T,>(operation: () => Promise<T>, isSuccessful: (value: T) => boolean) => {
+      if (!canEdit) {
+        return Promise.resolve(false);
+      }
+      const coordinator = creditSaveCoordinatorRef.current;
+      if (coordinator) {
+        return coordinator.track(operation, isSuccessful);
+      }
+      try {
+        return Promise.resolve(operation()).then(
+          (value) => {
+            try {
+              return isSuccessful(value);
+            } catch {
+              return false;
+            }
+          },
+          () => false,
+        );
+      } catch {
+        return Promise.resolve(false);
+      }
+    },
+    [canEdit],
+  );
   const trackCreditMutation = useCallback(
     <T extends { error?: string }>(operation: () => Promise<T>) =>
       trackCreditOperation(operation, (result) => !result.error),
@@ -177,14 +201,17 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
   const setLocalCreditOrder = useCallback(
     (order: CreditOrderItem[]) => {
       creditOrderRef.current = order;
-      setCreditOrder(order);
+      creditConfiguration.edit({ order });
     },
-    [setCreditOrder],
+    [creditConfiguration],
   );
-  const setLocalCreditGroupOverrides = useCallback((overrides: Record<string, string | null>) => {
-    creditGroupOverridesRef.current = overrides;
-    setCreditGroupOverrides(overrides);
-  }, []);
+  const setLocalCreditGroupOverrides = useCallback(
+    (overrides: Record<string, string | null>) => {
+      creditGroupOverridesRef.current = overrides;
+      creditConfiguration.edit({ groupOverrides: overrides });
+    },
+    [creditConfiguration],
+  );
   const announceCreditsChange = useCallback(() => {
     publishEditorEntityChange(`work:${workId}`);
   }, [workId]);
@@ -200,13 +227,26 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
     }
   }, [creditsVersion, creditsQueryKey, queryClient]);
 
-  useEditorEntityChanges(`work:${workId}`, () => {
-    void queryClient.invalidateQueries({ queryKey: creditsQueryKey });
-  });
+  useEditorEntityChanges(
+    `work:${workId}`,
+    () => {
+      void queryClient.invalidateQueries({ queryKey: creditsQueryKey });
+    },
+    undefined,
+    undefined,
+    creditConfiguration.captureOwnChange,
+  );
 
-  const { data, isLoading } = useQuery({
+  const { isLoading } = useQuery({
     queryKey: creditsQueryKey,
-    queryFn: () => getWorkGroupsWithCreditsAction(workId),
+    queryFn: async () => {
+      const read = creditConfiguration.beginRead();
+      const result = await getWorkGroupsWithCreditsAction(workId);
+      if (!result.error) {
+        creditConfiguration.adoptRead(read, { data: result, order: result.order, groupOverrides: {} });
+      }
+      return result;
+    },
   });
 
   // Transform API response to match expected types
@@ -252,13 +292,6 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
 
   const flatList = useMemo(() => buildFlatList(creditOrder, groups, ungrouped), [creditOrder, groups, ungrouped]);
 
-  useEffect(() => {
-    if (!isLoading && data && !data.error && pendingMoveCount === 0 && pendingMoveCountRef.current === 0) {
-      setLocalCreditOrder(data.order);
-      setLocalCreditGroupOverrides({});
-    }
-  }, [isLoading, data, pendingMoveCount, setLocalCreditOrder, setLocalCreditGroupOverrides]);
-
   const artistResultsQuery = useQuery({
     queryKey: ['work', 'searchArtistsForCredit', workId, debouncedSearch],
     queryFn: () => searchArtistsForCreditAction(workId, debouncedSearch).then(unwrapQueryResult),
@@ -281,8 +314,25 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
   }>;
   const searchFetching = searchType === 'artist' ? artistSearchFetching : userSearchFetching;
 
+  const writeCreditMutation = async <T extends { error?: string }>(operation: (origin: string) => Promise<T>) => {
+    const write = creditConfiguration.beginWrite(['data']);
+    try {
+      const result = await operation(write.origin);
+      if (result.error) {
+        write.fail();
+      } else {
+        write.acknowledge({}, { authoritative: false });
+      }
+      return result;
+    } catch (error) {
+      write.fail();
+      throw error;
+    }
+  };
+
   const createGroup = useMutation({
-    mutationFn: (name: string) => createWorkCreditGroupAction({ workId, name }),
+    mutationFn: (name: string) =>
+      writeCreditMutation((origin) => createWorkCreditGroupAction({ workId, name }, origin)),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
@@ -298,7 +348,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
 
   const updateGroup = useMutation({
     mutationFn: ({ groupId, name }: { groupId: string; name: string }) =>
-      updateWorkCreditGroupAction(groupId, { name }),
+      writeCreditMutation((origin) => updateWorkCreditGroupAction(groupId, { name }, origin)),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
@@ -311,7 +361,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
   });
 
   const deleteGroup = useMutation({
-    mutationFn: (groupId: string) => deleteWorkCreditGroupAction(groupId),
+    mutationFn: (groupId: string) => writeCreditMutation((origin) => deleteWorkCreditGroupAction(groupId, origin)),
     onMutate: (groupId) => {
       setDeletingGroupId(groupId);
     },
@@ -337,7 +387,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
       memberId?: string;
       name?: string;
       creditRole?: string | null;
-    }) => addWorkCreditAction({ workId, ...data }),
+    }) => writeCreditMutation((origin) => addWorkCreditAction({ workId, ...data }, origin)),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
@@ -353,7 +403,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
   });
 
   const removeCredit = useMutation({
-    mutationFn: (creditId: string) => removeWorkCreditAction(creditId),
+    mutationFn: (creditId: string) => writeCreditMutation((origin) => removeWorkCreditAction(creditId, origin)),
     onMutate: (creditId) => {
       setRemovingId(creditId);
     },
@@ -374,7 +424,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
 
   const updateCredit = useMutation({
     mutationFn: (data: { creditId: string; creditRole?: string | null }) =>
-      updateWorkCreditAction(data.creditId, { creditRole: data.creditRole }),
+      writeCreditMutation((origin) => updateWorkCreditAction(data.creditId, { creditRole: data.creditRole }, origin)),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
@@ -410,10 +460,9 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
           nextGroups[entry.id] = entry.groupId ?? null;
         }
       }
-      setLocalCreditOrder(nextOrder);
-      setLocalCreditGroupOverrides(nextGroups);
+      return { order: nextOrder, groupOverrides: nextGroups };
     },
-    [setLocalCreditGroupOverrides, setLocalCreditOrder],
+    [],
   );
 
   const enqueueMoveIntent = useCallback(
@@ -435,22 +484,29 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
         });
       }
 
+      const write = creditConfiguration.beginWrite(['data', 'order', 'groupOverrides']);
       const run = moveQueueRef.current.then(async () => {
-        const result = await moveWorkCreditItemAction(workId, intent);
+        const result = await moveWorkCreditItemAction(workId, intent, write.origin);
         if (result.error || !result.order) {
+          write.fail();
+          if (sequence === moveSequenceRef.current) {
+            creditConfiguration.discard(['order', 'groupOverrides']);
+          }
           notifications.show({ message: result.error ?? tCommon('notifications.saveFailed'), tone: 'danger' });
           void queryClient.invalidateQueries({ queryKey: creditsQueryKey });
           return false;
         }
+        write.acknowledge(adoptMoveOrder(result.order), { authoritative: false });
         announceCreditsChange();
         incrementCreditsVersion();
-        if (sequence === moveSequenceRef.current) {
-          adoptMoveOrder(result.order);
-        }
         return true;
       });
       const queuedRun = run
         .catch((error: unknown) => {
+          write.fail();
+          if (sequence === moveSequenceRef.current) {
+            creditConfiguration.discard(['order', 'groupOverrides']);
+          }
           notifications.show({
             message: error instanceof Error ? error.message : tCommon('notifications.saveFailed'),
             tone: 'danger',
@@ -472,6 +528,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
       adoptMoveOrder,
       announceCreditsChange,
       creditsQueryKey,
+      creditConfiguration,
       incrementCreditsVersion,
       queryClient,
       setLocalCreditGroupOverrides,
@@ -485,7 +542,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event;
-      if (!over || !active.data.current) {
+      if (!canEdit || !over || !active.data.current) {
         return;
       }
 
@@ -506,7 +563,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
       }
       enqueueMoveIntent(intent, plan.order, plan.groupChange);
     },
-    [enqueueMoveIntent, flatList],
+    [canEdit, enqueueMoveIntent, flatList],
   );
 
   const handleAddCredit = (id: string) => {

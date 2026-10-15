@@ -1,4 +1,5 @@
 'use client';
+import { resolveTransportSaveState, type EditorSaveState } from './save-state';
 import { breakpointQuery } from '../Layout/breakpoints';
 import { SupportingText, Heading } from '../Typography';
 import { LayoutInset as DsLayoutInset, LayoutInline as DsLayoutInline, LayoutStack as DsLayoutStack } from '../Layout';
@@ -51,6 +52,8 @@ export interface EditorHeaderProps<TStatus extends string = string> {
   titleInputId?: string;
   titlePlaceholder?: string;
   titleDisabled?: boolean;
+  /** Overrides transport status for rooms with durable acknowledgements. */
+  saveState?: EditorSaveState;
   isConnected: boolean;
   isSynced: boolean;
   hideConnectionStatus?: boolean;
@@ -113,6 +116,7 @@ export function EditorHeaderView<TStatus extends string = string>({
   statusOptions,
   isConnected,
   isSynced,
+  saveState,
   hideConnectionStatus,
   onBack,
   onStatusChange,
@@ -158,7 +162,10 @@ export function EditorHeaderView<TStatus extends string = string>({
         <LabelBadge tone={currentOption?.tone ?? 'neutral'}>{currentOption?.label ?? status}</LabelBadge>
       )}
       {!hideConnectionStatus && (
-        <CollabSyncStatusIndicator isConnected={isConnected} isSynced={isSynced} label={labels.syncStatus} />
+        <CollabSyncStatusIndicator
+          state={saveState ?? resolveTransportSaveState(isConnected, isSynced)}
+          label={labels.syncStatus}
+        />
       )}
     </>
   ) : null;
@@ -271,8 +278,7 @@ export function EditorHeaderView<TStatus extends string = string>({
               loading={Boolean(hasStatus && !hideStatus && isStatusChanging)}
               leftSection={
                 <CollabSyncStatusIndicator
-                  isConnected={isConnected}
-                  isSynced={isSynced}
+                  state={saveState ?? resolveTransportSaveState(isConnected, isSynced)}
                   label={labels.syncStatus}
                   withTooltip={false}
                 />
@@ -290,8 +296,7 @@ export function EditorHeaderView<TStatus extends string = string>({
             <DsLayoutInset inline="sm" block="xxs" data-testid="editor-header-collab-connection">
               <DsLayoutInline gap="xs" wrap="nowrap">
                 <CollabSyncStatusIndicator
-                  isConnected={isConnected}
-                  isSynced={isSynced}
+                  state={saveState ?? resolveTransportSaveState(isConnected, isSynced)}
                   label={labels.syncStatus}
                   withTooltip={false}
                 />

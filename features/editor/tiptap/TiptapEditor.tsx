@@ -1,5 +1,7 @@
 'use client';
 
+import { createMarkdownPasteExtension } from './markdown-paste';
+import { EditorRuntimeOptions } from './live-node-view';
 import {
   memo,
   useEffect,
@@ -34,7 +36,7 @@ import {
 } from './external-video';
 import { ExternalVideoInsertDialog } from '@/features/editor/ExternalVideoInsertDialog';
 import { replaceParagraphWithExternalVideoLink } from '@/features/editor/external-video-insert';
-import { TranslationStructureLockExtension } from '@/lib/editor/extensions/TranslationStructureLockExtension';
+import { createLiveTranslationStructureLock } from './live-translation-structure-lock';
 import type { TiptapAnyExtension } from '@/lib/editor/extensions/tiptap';
 import type { EditorMediaRuntimeStore } from '@/features/editor/lib/editor-media-runtime-store';
 import type { RichTextBlockRoomTiptapController } from './block-room-tiptap-controller';
@@ -597,8 +599,28 @@ export function TiptapEditor({
     }),
     [commonActions, editorMessages],
   );
+  const authoringModeRef = useRef(authoringMode);
+  authoringModeRef.current = authoringMode;
+  const liveAuthoringMode = useMemo(
+    () => ({
+      get allowNeutralBlockEdits() {
+        return authoringModeRef.current?.allowNeutralBlockEdits === true;
+      },
+      get allowLocalizedBlockEdits() {
+        return authoringModeRef.current?.allowLocalizedBlockEdits === true;
+      },
+      applyNeutralBlockProps: (id: string, props: Record<string, unknown>) =>
+        authoringModeRef.current?.applyNeutralBlockProps?.(id, props),
+      deleteNeutralBlock: (id: string) => authoringModeRef.current?.deleteNeutralBlock?.(id),
+    }),
+    [],
+  );
+  const localUserRef = useRef(localUser);
+  localUserRef.current = localUser;
   const onFileActivateRef = useRef(onFileActivate);
   onFileActivateRef.current = onFileActivate;
+  const structureLockedRef = useRef(structureLocked);
+  structureLockedRef.current = structureLocked;
   const extensions = useMemo(() => {
     const fileNode = createTiptapFileNode({
       onActivate: (blockId) => onFileActivateRef.current?.(blockId),
@@ -622,8 +644,8 @@ export function TiptapEditor({
       ...withTiptapMathExtensions(
         [
           ...createTiptapWireExtensions({
-            blockContainerNode: createTiptapBlockContainer(authoringMode),
-            codeBlockNode: createTiptapCodeBlock(authoringMode, codeBlockLabels),
+            blockContainerNode: createTiptapBlockContainer(liveAuthoringMode),
+            codeBlockNode: createTiptapCodeBlock(liveAuthoringMode, codeBlockLabels),
             externalVideoNode:
               effectiveExternalVideo === false ? undefined : createTiptapExternalVideoExtension(effectiveExternalVideo),
             fileNode,
@@ -633,40 +655,47 @@ export function TiptapEditor({
         ],
         { selectBlockLabel: selectMathBlockLabel },
       ),
-      createMermaidExtension({ authoringMode }),
+      createMermaidExtension({ authoringMode: liveAuthoringMode }),
       createP5SketchExtension({
         labels: p5Labels,
-        authoringMode,
+        authoringMode: liveAuthoringMode,
         autoRunReadOnly: autoRunReadOnlyExecutables,
         selectionMenuRegistry: executableSelectionRegistry,
         selectionMenuLabels: executableSelectionLabels,
       }),
       createThreeSceneExtension({
         labels: threeLabels,
-        authoringMode,
+        authoringMode: liveAuthoringMode,
         autoRunReadOnly: autoRunReadOnlyExecutables,
         selectionMenuRegistry: executableSelectionRegistry,
         selectionMenuLabels: executableSelectionLabels,
       }),
       createShaderExtension({
         labels: shaderLabels,
-        authoringMode,
+        authoringMode: liveAuthoringMode,
         autoRunReadOnly: autoRunReadOnlyExecutables,
         selectionMenuRegistry: executableSelectionRegistry,
         selectionMenuLabels: executableSelectionLabels,
         filePicker: shaderFilePicker,
         resolveAsset: resolveShaderAsset,
       }),
+      createMarkdownPasteExtension(
+        () =>
+          blockRoomController.canChangeStructure &&
+          liveAuthoringMode.allowNeutralBlockEdits &&
+          !structureLockedRef.current,
+      ),
       BlockBoundaryNavigation,
-      createAuthoringShortcutGuard(authoringMode),
-      ...(structureLocked ? [TranslationStructureLockExtension] : []),
+      createAuthoringShortcutGuard(liveAuthoringMode),
+      createLiveTranslationStructureLock(() => structureLockedRef.current),
       ...additionalExtensions,
       createTiptapPaginationExtension(),
       blockRoomController.extension,
-      createBlockRoomPresenceExtension(awareness, localUser),
+      createBlockRoomPresenceExtension(awareness, localUser, () => localUserRef.current),
     ];
   }, [
     authoringMode,
+    liveAuthoringMode,
     additionalExtensions,
     autoRunReadOnlyExecutables,
     awareness,
@@ -683,7 +712,6 @@ export function TiptapEditor({
     p5Labels,
     shaderLabels,
     shaderFilePicker,
-    structureLocked,
     resolveShaderAsset,
     threeLabels,
   ]);
@@ -698,7 +726,11 @@ export function TiptapEditor({
         attributes: editorAttributes,
       },
     },
-    [extensions],
+    [blockRoomController, awareness, additionalExtensions, mediaRuntimeStore, effectiveExternalVideo === false],
+  );
+  const runtimeOptions = useMemo(
+    () => new Map(extensions.map((extension) => [extension.name, { ...extension.options, authoringMode }])),
+    [extensions, authoringMode],
   );
   useRegisterEditorAuthoringMode(editor, authoringMode ?? DENIED_AUTHORING_MODE);
 
@@ -810,7 +842,9 @@ export function TiptapEditor({
                 {paginationLead}
               </div>
             ) : null}
-            <IsolatedEditorContent editor={editor} />
+            <EditorRuntimeOptions.Provider value={runtimeOptions}>
+              <IsolatedEditorContent editor={editor} />
+            </EditorRuntimeOptions.Provider>
             {paginationLayout.enabled ? (
               <div
                 className={classes.finalPageFooter}

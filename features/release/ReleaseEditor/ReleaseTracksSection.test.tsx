@@ -1,4 +1,7 @@
 // @vitest-environment jsdom
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+import { ReleaseEditorAccessProvider } from './ReleaseEditorAccessContext';
 
 import { act } from 'react';
 import { randomTestUuid } from '@echovisionlab/geul-common/test/random-id';
@@ -342,6 +345,44 @@ beforeEach(() => {
 });
 
 describe('ReleaseTracksSection', () => {
+  it('upgrades and downgrades add, audio and drag controls on the same track table', () => {
+    const provider = {};
+    const onTracksChange = vi.fn();
+    const tracks: ReleaseTrackItem[] = ['track-1', 'track-2'].map((id, index) => ({
+      id,
+      title: id,
+      track_number: index + 1,
+      duration_seconds: 90,
+      audio_attached: false,
+      processing_status: null,
+      credits: [],
+    }));
+    function Editor() {
+      const canEdit = useEditorAccessLevel(provider) === 'edit';
+      return (
+        <ReleaseEditorAccessProvider value={canEdit}>
+          <ReleaseTracksSection releaseId="release-1" tracks={tracks} onTracksChange={onTracksChange} />
+        </ReleaseEditorAccessProvider>
+      );
+    }
+    setProviderAccessLevel(provider, 'view');
+    render(<Editor />);
+    const table = document.querySelector('table');
+    const add = document.querySelector('#release-track-add-action button') as HTMLButtonElement;
+    expect(add.disabled).toBe(true);
+    act(() => setProviderAccessLevel(provider, 'edit'));
+    expect(add.disabled).toBe(false);
+    expect(latestTrackAudioUploaderProps['track-1:button-only'].disabled).toBe(false);
+    expect(document.querySelector('table')).toBe(table);
+    act(() => setProviderAccessLevel(provider, 'view'));
+    expect(document.querySelector('table')).toBe(table);
+    expect(table?.textContent).toContain('track-1');
+    expect(add.disabled).toBe(true);
+    expect(latestTrackAudioUploaderProps['track-1:button-only'].disabled).toBe(true);
+    act(() => latestDragEndHandler?.({ active: { id: 'track-2' }, over: { id: 'track-1' } }));
+    expect(onTracksChange).not.toHaveBeenCalled();
+    expect(reorderTracksActionMock).not.toHaveBeenCalled();
+  });
   it('passes failed processing state to the mobile uploader status view', () => {
     setMobileViewport(true);
     const trackId = randomTestUuid();
@@ -658,7 +699,7 @@ describe('ReleaseTracksSection', () => {
       expect.objectContaining({ id: 'track-2', track_number: 1 }),
       expect.objectContaining({ id: 'track-1', track_number: 2 }),
     ]);
-    expect(reorderTracksActionMock).toHaveBeenCalledWith(['track-2', 'track-1']);
+    expect(reorderTracksActionMock).toHaveBeenCalledWith(['track-2', 'track-1'], expect.any(String));
   });
 
   it('restores saved track order and reports a rejected reorder', async () => {
@@ -768,7 +809,7 @@ describe('ReleaseTracksSection', () => {
     );
     await clickElement(confirmButton);
 
-    expect(deleteTrackActionMock).toHaveBeenCalledWith('track-1');
+    expect(deleteTrackActionMock).toHaveBeenCalledWith('track-1', expect.any(String));
     expect(onTracksChange).toHaveBeenCalledWith([]);
   });
 

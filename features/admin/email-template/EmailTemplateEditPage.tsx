@@ -1,5 +1,7 @@
 'use client';
 
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+
 import { describeEmailTemplateVariable } from './email-template-variable-description';
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
@@ -52,6 +54,7 @@ import { persistCollaborativeDocumentNow } from '@/lib/collab/persist-now';
 import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
+import { useAuthoritativeConfiguration } from '@/lib/editor/useAuthoritativeConfiguration';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 import { buildEmailPreviewSrcDoc } from '@/lib/email/preview-document';
 import { resolveSystemEmailEventKey } from '@/lib/i18n/email-template';
@@ -83,8 +86,16 @@ function useEmailTemplateEditPageModel() {
 
   const [viewMode, setViewMode] = useState<ViewMode>('split');
   const [layoutId, setLayoutId] = useState<string | null>(null);
-  const pendingLayoutRequestCountRef = useRef(0);
-  const layoutRequestSequenceRef = useRef(0);
+  const configuration = useAuthoritativeConfiguration({
+    document: `email_template:${templateId}`,
+    initialConfiguration: { layoutId: null as string | null },
+    onAdopt: (patch) => {
+      if (Object.hasOwn(patch, 'layoutId')) {
+        setLayoutId(patch.layoutId ?? null);
+      }
+    },
+  });
+  const initialConfigurationRead = useMemo(() => configuration.beginRead(), [configuration]);
   const [testEmail, setTestEmail] = useState('');
   const [testLocale, setTestLocale] = useState<string>(() => normalizeLocale(currentLocale) ?? 'en');
   const [variablesExpanded, setVariablesExpanded] = useState(false);
@@ -137,14 +148,24 @@ function useEmailTemplateEditPageModel() {
   );
   const templateQuery = useQuery({
     queryKey: ['emailTemplates', templateId],
-    queryFn: () => getEmailTemplateAction(templateId),
+    queryFn: async () => {
+      const read = configuration.beginRead();
+      const template = await getEmailTemplateAction(templateId);
+      if (template) {
+        configuration.adoptRead(read, { layoutId: template.layoutId ?? null });
+      }
+      return template;
+    },
   });
   const { data: template, isLoading, refetch: refetchTemplate } = templateQuery;
   useEffect(() => {
-    if (template && pendingLayoutRequestCountRef.current === 0) {
-      setLayoutId(template.layoutId ?? null);
+    if (template) {
+      configuration.adoptRead(initialConfigurationRead, { layoutId: template.layoutId ?? null });
     }
-  }, [template]);
+  }, [configuration, initialConfigurationRead, template]);
+  const refetchLayout = useCallback(async () => {
+    await refetchTemplate();
+  }, [refetchTemplate]);
 
   const { data: layouts, isError: layoutsLoadError } = useQuery({
     queryKey: ['emailLayouts', 'simple'],
@@ -167,14 +188,14 @@ function useEmailTemplateEditPageModel() {
   useEditorEntityChanges(
     `email_template:${templateId}`,
     () => {
-      void refetchTemplate();
+      void refetchLayout();
     },
     currentProvider,
+    undefined,
+    configuration.captureOwnChange,
   );
   const editorSession =
-    currentProvider && blockRoomController && isSynced
-      ? { provider: currentProvider, controller: blockRoomController }
-      : null;
+    currentProvider && blockRoomController ? { provider: currentProvider, controller: blockRoomController } : null;
   const activeEditorLocale =
     normalizeLocale(activeEditLocale.activeLocale) ?? normalizeLocale(activeEditLocale.sourceLocale) ?? 'en';
   const previewSrcDoc = useMemo(
@@ -198,7 +219,7 @@ function useEmailTemplateEditPageModel() {
     }
   });
   const currentSubject = roomLocale ? residentSubject : (template?.subject ?? '');
-  const canEditTranslationSource = true;
+  const canEditTranslationSource = useEditorAccessLevel(provider) === 'edit';
   const hasLocaleRoomMutationAuthority = localeSession.hasRoomMutationAuthority({
     sourceLocale: bootstrap?.sourceLocale ?? null,
     locale: bootstrap?.locale ?? null,
@@ -209,7 +230,7 @@ function useEmailTemplateEditPageModel() {
   const canEditLocalizedSubject = canEditLocaleDocumentField({
     hasPermission: canEditTranslationSource && activeEditLocale.canEditActiveLocale && hasLocaleRoomMutationAuthority,
     shouldUseLocaleDocument: localeMode.shouldUseLocaleDocument,
-    isLocaleDocumentSynced: isSynced,
+    isLocaleDocumentSynced: Boolean(doc),
   });
 
   useEffect(() => {
@@ -224,8 +245,8 @@ function useEmailTemplateEditPageModel() {
   }, [activeEditLocale.sourceLocale, activeEditorLocale, currentSubject, layoutId, template, templateId]);
 
   const updateLayout = useMutation({
-    mutationFn: (data: { id: string; layoutId: string | null }) =>
-      updateEmailTemplateLayoutAction(data.id, data.layoutId),
+    mutationFn: (data: { id: string; layoutId: string | null; origin: string }) =>
+      updateEmailTemplateLayoutAction(data.id, data.layoutId, data.origin),
   });
 
   const sendTest = useMutation({
@@ -347,7 +368,7 @@ function useEmailTemplateEditPageModel() {
   );
 
   const handleSendTest = () => {
-    if (!testEmail) {
+    if (!canEditTranslationSource || !testEmail) {
       return;
     }
     void (async () => {
@@ -408,52 +429,50 @@ function useEmailTemplateEditPageModel() {
 
   const handleLayoutChange = useCallback(
     (value: string | null) => {
-      if (layoutId === value) {
+      if (!canEditTranslationSource || layoutId === value) {
         return;
       }
-      const previousLayoutId = layoutId;
-      const requestId = ++layoutRequestSequenceRef.current;
-      pendingLayoutRequestCountRef.current += 1;
+      const write = configuration.beginWrite(['layoutId']);
       setLayoutId(value);
-      updateLayout.mutate(
-        { id: templateId, layoutId: value },
-        {
-          onSuccess: (result) => {
-            if (!result.success) {
-              if (requestId === layoutRequestSequenceRef.current) {
-                setLayoutId(previousLayoutId);
-              }
-              notifications.show({
-                message: result.error || tEmailTemplates('detail.notifications.updateLayoutFailed'),
-                tone: 'danger',
-              });
-            } else {
-              publishEditorEntityChange(`email_template:${templateId}`);
-            }
-          },
-          onError: (error) => {
-            if (requestId === layoutRequestSequenceRef.current) {
-              setLayoutId(previousLayoutId);
-            }
-            notifications.show({ message: error.message, tone: 'danger' });
-          },
-          onSettled: async () => {
-            pendingLayoutRequestCountRef.current = Math.max(0, pendingLayoutRequestCountRef.current - 1);
-            if (pendingLayoutRequestCountRef.current === 0) {
-              const result = await refetchTemplate();
-              if (pendingLayoutRequestCountRef.current === 0 && result.data) {
-                setLayoutId(result.data.layoutId ?? null);
-              }
-            }
-          },
-        },
-      );
+      void (async () => {
+        try {
+          const result = await updateLayout.mutateAsync({ id: templateId, layoutId: value, origin: write.origin });
+          if (!result.success) {
+            notifications.show({
+              message: result.error || tEmailTemplates('detail.notifications.updateLayoutFailed'),
+              tone: 'danger',
+            });
+            return;
+          }
+          write.acknowledge({ layoutId: value }, { authoritative: false });
+          publishEditorEntityChange(`email_template:${templateId}`, write.origin);
+        } catch (error) {
+          notifications.show({
+            message:
+              error instanceof Error ? error.message : tEmailTemplates('detail.notifications.updateLayoutFailed'),
+            tone: 'danger',
+          });
+        } finally {
+          write.fail();
+          await refetchLayout();
+        }
+      })();
       if (showPreview) {
         setIsPreviewLoading(true);
         void schedulePreviewRefresh();
       }
     },
-    [layoutId, refetchTemplate, schedulePreviewRefresh, showPreview, tEmailTemplates, templateId, updateLayout],
+    [
+      canEditTranslationSource,
+      configuration,
+      layoutId,
+      refetchLayout,
+      schedulePreviewRefresh,
+      showPreview,
+      tEmailTemplates,
+      templateId,
+      updateLayout,
+    ],
   );
 
   useEffect(() => {
@@ -522,6 +541,7 @@ function useEmailTemplateEditPageModel() {
     tCommonLabels,
     currentSubject,
     handleSubjectChange,
+    canEditTranslationSource,
     canEditLocalizedSubject,
     layouts,
     layoutId,
@@ -599,6 +619,7 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
     tCommonLabels,
     currentSubject,
     handleSubjectChange,
+    canEditTranslationSource,
     canEditLocalizedSubject,
     layouts,
     layoutId,
@@ -659,6 +680,7 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
           actionItems={[
             {
               key: 'send-test',
+              disabled: !canEditTranslationSource,
               label: tCommonActions('sendTest'),
               icon: <IconTestPipe size={16} />,
               onClick: openTestModal,
@@ -702,7 +724,7 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
               searchable
               nothingFoundMessage={tEmailTemplates('detail.fields.noLayouts')}
               error={layoutsLoadError ? tCommonStates('notAvailable') : undefined}
-              disabled={layoutsLoadError || updateLayout.isPending}
+              disabled={!canEditTranslationSource || layoutsLoadError || updateLayout.isPending}
             />
           </div>
           {activeEditLocale.isControlVisible ? (
@@ -851,7 +873,12 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
         </div>
 
         <AuthoringExtension kind="translations">
-          <EntityTranslationsPanel entityType="email_template" entityId={templateId} />
+          <EntityTranslationsPanel
+            entityType="email_template"
+            entityId={templateId}
+            canAdministerTranslations={canEditTranslationSource}
+            canMutateTargets={canEditTranslationSource}
+          />
         </AuthoringExtension>
 
         {/* Test Email Modal */}
@@ -867,6 +894,7 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
             <TextInput
               grow
               placeholder={tCommonPlaceholders('testEmailExample')}
+              disabled={!canEditTranslationSource}
               value={testEmail}
               onChange={(e) => setTestEmail(e.currentTarget.value)}
               type="email"
@@ -875,6 +903,7 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
               variant="select"
               label={tEmailTemplates('detail.modals.test.localeLabel')}
               description={tEmailTemplates('detail.modals.test.localeHelp')}
+              disabled={!canEditTranslationSource}
               value={testLocale}
               options={supportedLocaleOptions}
               sourceLocale={activeEditLocale.sourceLocale}
@@ -885,7 +914,12 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
               <Button emphasis="low" onClick={closeTestModal}>
                 {tCommonActions('cancel')}
               </Button>
-              <Button emphasis="strong" onClick={handleSendTest} loading={sendTest.isPending} disabled={!testEmail}>
+              <Button
+                emphasis="strong"
+                onClick={handleSendTest}
+                loading={sendTest.isPending}
+                disabled={!canEditTranslationSource || !testEmail}
+              >
                 {tCommonActions('sendTest')}
               </Button>
             </DialogActions>

@@ -14,6 +14,8 @@ import type { BlockRoomDurabilityProtocol, BlockRoomDurabilityState } from '@/li
 import { usePendingEditorUnload } from '@/lib/editor/usePendingEditorUnload';
 import { createBlockRoomProseMirrorBridge } from '@/features/editor/tiptap/block-room-prosemirror-bridge';
 import { PageEditorProvider, usePageEditor } from './PageEditorContext';
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
 
 const { persistCollaborativeDocumentNow } = vi.hoisted(() => ({
   persistCollaborativeDocumentNow: vi.fn<() => Promise<void>>(),
@@ -41,6 +43,9 @@ const provider = {
   get document() {
     return roomDocument;
   },
+  // The save tracker subscribes to provider sync events; this room never emits any.
+  on() {},
+  off() {},
 } as unknown as HocuspocusProvider;
 const SECTION_ID = '019cce25-dbc0-7d12-9f1f-735b1a6c6b14';
 const RICH_TEXT_BLOCK_ID = '019cce25-dbc0-7d12-9f1f-735b1a6c6b15';
@@ -227,6 +232,44 @@ afterEach(() => {
 });
 
 describe('typed resident Page editor context', () => {
+  it('upgrades a false snapshot permission and downgrades on the same section controller', async () => {
+    function Surface({ snapshot }: { snapshot: { editable: boolean } }) {
+      const access = useEditorAccessLevel(provider);
+      const editable = snapshot.editable && access === 'edit';
+      return (
+        <PageEditorProvider
+          doc={roomDocument}
+          provider={provider}
+          protocol={protocol}
+          locale="ko"
+          userName="tester"
+          pageId="page-1"
+          editable={editable}
+          allowStructuralEdits={editable}
+        >
+          <Harness />
+        </PageEditorProvider>
+      );
+    }
+    setProviderAccessLevel(provider, 'view');
+    act(() => root.render(<Surface snapshot={{ editable: false }} />));
+    const controller = context().controller;
+    expect(context().addSection('rich-text')).toBeNull();
+    act(() => setProviderAccessLevel(provider, 'edit'));
+    expect(context().editable).toBe(false);
+    act(() => root.render(<Surface snapshot={{ editable: true }} />));
+    act(() => {
+      expect(context().addSection('rich-text')).not.toBeNull();
+    });
+    await flush();
+    expect(context().controller).toBe(controller);
+    const sections = context().sections;
+    act(() => setProviderAccessLevel(provider, 'view'));
+    expect(context().addSection('rich-text')).toBeNull();
+    expect(context().sections).toBe(sections);
+    expect(context().controller).toBe(controller);
+    setProviderAccessLevel(provider, 'edit');
+  });
   it('inserts shared structure and the exact locale overlay into one resident source room', async () => {
     render();
     act(() => {

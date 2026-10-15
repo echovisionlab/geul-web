@@ -52,6 +52,9 @@ export function SortableCreditRow({
   const displayImage = credit.artist?.imageUrl || credit.member?.image || null;
   const creditType: 'artist' | 'member' | 'name' = credit.artist ? 'artist' : credit.member ? 'member' : 'name';
   const handleSaveRole = () => {
+    if (!canEdit) {
+      return;
+    }
     const newRole = editRole.trim() || null;
     if (newRole !== credit.creditRole) {
       onEditRole(credit.id, newRole);
@@ -119,6 +122,7 @@ export function SortableCreditRow({
           {isEditing ? (
             <DsLayoutInline gap="none" wrap="nowrap">
               <TextInput
+                readOnly={!canEdit}
                 size="xs"
                 aria-label={tCommon('labels.role')}
                 aria-describedby={creditNameId}
@@ -143,6 +147,7 @@ export function SortableCreditRow({
               />
               <IconButton
                 tone="positive"
+                disabled={!canEdit}
                 onClick={handleSaveRole}
                 loading={isUpdating}
                 aria-label={t('actions.saveEdit')}

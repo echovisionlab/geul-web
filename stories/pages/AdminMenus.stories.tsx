@@ -153,6 +153,7 @@ function Preview({ state = 'ready' }: { state?: 'ready' | 'empty' | 'failed' | '
     openCreateItemModal,
     selectedMenuAuthoringLocked: locale !== 'ko',
     menuItems,
+    canEditRoom: true,
     canEditCurrentCopy: true,
     sensors,
     handleDragEnd: ({ active, over }) => {

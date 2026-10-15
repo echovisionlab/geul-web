@@ -109,7 +109,7 @@ function useLabelEditorViewModel({ id, label, baseUrl, backHref = '/admin/labels
   const { provider, doc, bootstrap, protocol, isConnected, isSynced } = blockRoom;
   const blockRoomController = useRichTextBlockRoomController('label', doc, roomLocale);
   const permissionRevocation = useEditorPermissionRevocation(provider, 'label', id);
-  const canMutate = !permissionRevocation.blocked;
+  const canMutate = allowedActions.has(LabelAction.EDIT) && !permissionRevocation.blocked;
   const hasLocaleRoomMutationAuthority = localeSession.hasRoomMutationAuthority({
     sourceLocale: bootstrap?.sourceLocale ?? null,
     locale: bootstrap?.locale ?? null,
@@ -346,14 +346,14 @@ function useLabelEditorViewModel({ id, label, baseUrl, backHref = '/admin/labels
     shouldUseLocaleDocument,
     canEditActiveLocale: currentLocaleCanEdit,
     isSynced: currentIsSynced,
+
+    isReady: Boolean(doc),
   });
   const editorSession =
-    currentProvider && blockRoomController && currentIsSynced
-      ? { provider: currentProvider, controller: blockRoomController }
-      : null;
+    currentProvider && blockRoomController ? { provider: currentProvider, controller: blockRoomController } : null;
   const localizedDescriptionSession = editorSession;
   const displayedName = roomLocale ? residentName : activeEditLocale.displayTitle;
-  if (activeEditLocale.isLoading || (roomLocale && (!provider || !doc || !isSynced))) {
+  if (activeEditLocale.isLoading || (roomLocale && (!provider || !doc))) {
     return <PageLoader />;
   }
 

@@ -139,7 +139,10 @@ export const KeyboardSectionAuthoring: Story = {
     const columnsLabel = t('sectionTypes.columns');
     const title = await canvas.findByRole('textbox', { name: common('labels.title') });
     const first = await canvas.findByRole('group', { name: textLabel });
-    const toggle = within(first).getByRole('button', { name: t('sectionItem.actions.expand', { section: textLabel }) });
+    // Rich-text and columns sections start expanded so their SSR body stays visible through the handoff.
+    const toggle = within(first).getByRole('button', {
+      name: t('sectionItem.actions.collapse', { section: textLabel }),
+    });
     await step(
       'Section names, positions and disclosure relationships preserve the authored reading order',
       async () => {
@@ -147,11 +150,16 @@ export const KeyboardSectionAuthoring: Story = {
           t('a11y.sectionPosition', { section: textLabel, index: 1, count: 1 }),
         );
         await expect(Boolean(title.compareDocumentPosition(first) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
-        await keyboardReach(canvasElement, toggle);
-        await userEvent.keyboard('{Enter}');
         await expect(toggle).toHaveAttribute('aria-expanded', 'true');
         const panel = canvasElement.ownerDocument.getElementById(toggle.getAttribute('aria-controls')!);
         await expect(panel).toHaveAccessibleName(t('a11y.sectionPosition', { section: textLabel, index: 1, count: 1 }));
+        // The disclosure still collapses and reopens from the keyboard.
+        await keyboardReach(canvasElement, toggle);
+        await userEvent.keyboard('{Enter}');
+        await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+        await expect(toggle).toHaveAccessibleName(t('sectionItem.actions.expand', { section: textLabel }));
+        await userEvent.keyboard('{Enter}');
+        await expect(toggle).toHaveAttribute('aria-expanded', 'true');
       },
     );
     await step('Author adds a column section and receives focus at its structural control', async () => {
@@ -164,7 +172,7 @@ export const KeyboardSectionAuthoring: Story = {
       await userEvent.keyboard('{ArrowDown}{Enter}');
       const columns = await canvas.findByRole('group', { name: columnsLabel });
       const columnToggle = within(columns).getByRole('button', {
-        name: t('sectionItem.actions.expand', { section: columnsLabel }),
+        name: t('sectionItem.actions.collapse', { section: columnsLabel }),
       });
       // SectionList restores structural focus on the frame after the section commit.
       await waitFor(() => expect(columnToggle).toHaveFocus());

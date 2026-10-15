@@ -15,7 +15,9 @@ const connectedAdapter: FileDownloadPolicyEditorAdapter = {
 };
 
 interface ConnectedFileDownloadPolicyEditorProps extends FileDownloadPolicyTarget {
+  releaseId?: string;
   compact?: boolean;
+  readOnly?: boolean;
 }
 
 export function ConnectedFileDownloadPolicyEditor(props: ConnectedFileDownloadPolicyEditorProps) {

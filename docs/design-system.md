@@ -155,6 +155,18 @@ review also covers phone widths, light/dark, localized text and keyboard editing
 
 ## Control language
 
+Core `EditorHeader.saveState` accepts `saved`, `saving`, `offline`, `error`, and `reload`.
+The authoring header resolves this from the room phase and registered pending saves; a connected
+socket alone never means a block-room edit is durable. `CollabSyncStatusIndicator` accepts
+`state` with a required localized `label`; its transport-only compatibility props cannot be mixed
+with `state`. Saved uses the existing positive token, saving/rebuilding warning, errors danger,
+and offline muted. Its Core-owned size, tooltip placement and header layout are unchanged.
+The icon has an accessible name, while a single shared notification announces failure and
+recovery of local edits. Avoid a live announcement for every keystroke. Stories under
+`Core/Layout/EditorHeader` exercise every state and its tooltip. Post, Page, Work, Artist,
+Label, Release, Program Event, Campaign, legal policy and email-template editors consume the
+same authoring adapter. See the [save-state migration](design-system/changelog.md#2026-10-14--durable-editor-save-state).
+
 Core `CollabSyncStatusIndicator` uses the same `chrome-icon-size` as command glyphs.
 Its wrapper owns inline-flex centering and a zero line-height; glyph baselines do not decide
 its position. Numeric `size` overrides are rejected by TypeScript and at runtime. EditorHeader
@@ -673,3 +685,25 @@ these with local CSS or direct framework imports. The framework ownership check 
 `nativeControlOwners` in `scripts/design-system/framework-policy.mjs` names the remaining reviewed exceptions.
 
 Collection and table controls share Core `ToolbarLayout`; `SelectionToolbar` and both DataTable toolbar adapters consume it. Search/filter inputs inherit compact density. Table selection geometry is Core-owned. See [tables and toolbars](./design-system/tables-and-toolbars.md).
+
+### Local backups in account settings
+
+`/my/settings` places `features/my/LocalBackups` immediately after the page heading. The section
+belongs with account preferences because journals belong to the signed-in member on this device;
+the empty state also makes retention and recovery discoverable. `LocalBackupsView` composes Core
+SectionCard, Layout, Heading/Text/LocaleCode, EmptyState, Alert and Button. Final discard uses the
+shared ConfirmationDialog's danger/strong treatment and Core DialogActions. No Core contract,
+token, custom styling or new control variant is introduced.
+
+`Feature/My/Local Backups` covers empty, several entries, confirmation/discard, failed lookup,
+unavailable storage and phone states. Use the locale/theme toolbar for Korean and dark inspection.
+`Pages/Account/Full Pages/Settings With Local
+Backups` places the same production View in the complete settings page. Fixtures replace storage
+and navigation; they never replay or delete real journals. The browser owner uses existing Web Locks
+and rechecks the member/owner before deletion. Editor navigation retains the journal locale and
+leaves adoption/replay to each room's existing claimOrphans path.
+
+The coordinated local-backup/download-policy change is uncommitted. Its validation logs and
+screenshot plan live in `.artifacts/design-system/reviews/local-backups/`. Storybook, production
+visual inspection and the Notion Local Backups reference could not be inspected in the restricted
+execution environment; this is pending visual review, not design approval.

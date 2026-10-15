@@ -136,7 +136,7 @@ function useArtistDetailEditorViewModel({ id, artist, baseUrl }: ArtistDetailEdi
   const { provider, doc, bootstrap, protocol, isConnected, isSynced } = blockRoom;
   const blockRoomController = useRichTextBlockRoomController('artist', doc, roomLocale);
   const permissionRevocation = useEditorPermissionRevocation(provider, 'artist', id);
-  const canMutate = !permissionRevocation.blocked;
+  const canMutate = allowedActions.has(ArtistAction.EDIT) && !permissionRevocation.blocked;
   const hasLocaleRoomMutationAuthority = localeSession.hasRoomMutationAuthority({
     sourceLocale: bootstrap?.sourceLocale ?? null,
     locale: bootstrap?.locale ?? null,
@@ -395,7 +395,7 @@ function useArtistDetailEditorViewModel({ id, artist, baseUrl }: ArtistDetailEdi
 
   const slugError = slugMgmt.error;
 
-  if (activeEditLocale.isLoading || (roomLocale && (!isSynced || !provider || !doc))) {
+  if (activeEditLocale.isLoading || (roomLocale && (!provider || !doc))) {
     return <PageLoader />;
   }
 
@@ -411,11 +411,11 @@ function useArtistDetailEditorViewModel({ id, artist, baseUrl }: ArtistDetailEdi
     shouldUseLocaleDocument,
     canEditActiveLocale: currentLocaleCanEdit,
     isSynced: currentIsSynced,
+
+    isReady: Boolean(doc),
   });
   const editorSession =
-    currentProvider && blockRoomController && currentIsSynced
-      ? { provider: currentProvider, controller: blockRoomController }
-      : null;
+    currentProvider && blockRoomController ? { provider: currentProvider, controller: blockRoomController } : null;
   const localizedBioSession = editorSession;
   const displayedName = roomLocale ? residentName : activeEditLocale.displayTitle;
   const artistStatusOptions: StatusOption<ArtistEditorStatus>[] = [

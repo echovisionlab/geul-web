@@ -120,6 +120,15 @@ const posterMedia = [
 ];
 
 describe('program event actions', () => {
+  it.each(['publishProgramEventAction', 'archiveProgramEventAction'] as const)(
+    'forwards lifecycle origin for %s',
+    async (action) => {
+      const origin = '40000000-0000-4000-8000-000000000001';
+      await expect(actions[action]('entity-1', origin)).resolves.toEqual({ success: true });
+      expect(mocks.createProgramEventClient).toHaveBeenCalledWith(origin);
+    },
+  );
+
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(Date, 'now').mockReturnValue(1000);

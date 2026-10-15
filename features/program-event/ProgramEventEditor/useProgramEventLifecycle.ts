@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
+import { getUntrackedConfigurationWriteOrigin } from '@/lib/editor/editor-write-origin';
 import { notifications } from '@/components/core/Notification';
 import type { StatusOption } from '@/features/editor/EditorHeader';
 import {
@@ -34,7 +35,8 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
   const canArchive = allowed.has('archive');
   const canDelete = allowed.has('delete');
   const update = useMutation({
-    mutationFn: (data: ProgramEventUpdate) => updateProgramEventAction(eventId, data),
+    mutationFn: ({ data, editorOrigin }: { data: ProgramEventUpdate; editorOrigin?: string }) =>
+      updateProgramEventAction(eventId, data, editorOrigin),
     onSuccess: (result) => {
       if ('error' in result && result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
@@ -49,18 +51,19 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
   });
 
   const saveEditableEvent = useCallback(
-    (data: ProgramEventUpdate) => {
+    (data: ProgramEventUpdate, editorOrigin?: string) => {
       if (!canEdit) {
         return Promise.resolve({ error: tCommon('notifications.saveFailed') });
       }
-      return update.mutateAsync(data);
+      return update.mutateAsync({ data, editorOrigin });
     },
     [canEdit, tCommon, update],
   );
   const isEditable = useCallback(() => canEdit, [canEdit]);
 
   const publish = useMutation({
-    mutationFn: () => publishProgramEventAction(eventId),
+    mutationFn: () =>
+      publishProgramEventAction(eventId, getUntrackedConfigurationWriteOrigin(`program_event:${eventId}`)),
     onSuccess: (result) => {
       if ('error' in result && result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
@@ -77,7 +80,8 @@ export function useProgramEventLifecycle({ eventId, initialStatus, allowedAction
   });
 
   const archive = useMutation({
-    mutationFn: () => archiveProgramEventAction(eventId),
+    mutationFn: () =>
+      archiveProgramEventAction(eventId, getUntrackedConfigurationWriteOrigin(`program_event:${eventId}`)),
     onSuccess: (result) => {
       if ('error' in result && result.error) {
         notifications.show({ message: result.error, tone: 'danger' });

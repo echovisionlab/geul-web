@@ -262,7 +262,7 @@ export function SummaryFieldCard({
   const handleApplySuggestion = useCallback(async () => {
     const turn = turnRef.current;
     const generationId = generationRef.current;
-    if (!turn || !approval || !generationId || !collaborativeAi.isRequester) {
+    if (summaryReadOnly || !turn || !approval || !generationId || !collaborativeAi.isRequester) {
       return;
     }
     if (!collaborativeAi.markApplying(generationId)) {
@@ -277,12 +277,12 @@ export function SummaryFieldCard({
       setFeedback({ color: 'red', message });
       notifications.show({ message, tone: 'danger' });
     }
-  }, [approval, collaborativeAi, t]);
+  }, [summaryReadOnly, approval, collaborativeAi, t]);
 
   const handleDismissSuggestion = useCallback(async () => {
     const turn = turnRef.current;
     const generationId = generationRef.current;
-    if (!turn || !approval || !generationId || !collaborativeAi.isRequester) {
+    if (summaryReadOnly || !turn || !approval || !generationId || !collaborativeAi.isRequester) {
       return;
     }
     dismissedRef.current = true;
@@ -295,7 +295,7 @@ export function SummaryFieldCard({
       clearTurnState(generationId);
       setFeedback(null);
     }
-  }, [approval, clearTurnState, collaborativeAi.isRequester]);
+  }, [summaryReadOnly, approval, clearTurnState, collaborativeAi.isRequester]);
 
   const generateIcon =
     collaborativeAi.sharedState.status === 'generating' || collaborativeAi.sharedState.status === 'applying' ? (
@@ -378,7 +378,7 @@ export function SummaryFieldCard({
                 <Button
                   id={`${entityType}-${entityId}-apply-ai-metadata`}
                   leftSection={<IconCircleCheck size={16} />}
-                  disabled={collaborativeAi.sharedState.status === 'applying'}
+                  disabled={summaryReadOnly || collaborativeAi.sharedState.status === 'applying'}
                   onClick={() => void handleApplySuggestion()}
                 >
                   {t('actions.apply')}
@@ -387,7 +387,7 @@ export function SummaryFieldCard({
                   id={`${entityType}-${entityId}-dismiss-ai-metadata`}
                   tone="neutral"
                   emphasis="medium"
-                  disabled={collaborativeAi.sharedState.status === 'applying'}
+                  disabled={summaryReadOnly || collaborativeAi.sharedState.status === 'applying'}
                   onClick={() => void handleDismissSuggestion()}
                 >
                   {tCommonActions('dismiss')}

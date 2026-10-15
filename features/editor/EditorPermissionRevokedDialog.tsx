@@ -27,6 +27,8 @@ export function EditorPermissionRevokedDialog({
       level="warning"
       loading={loading}
       size="compact"
+      // Access to the page ended: its content must not stay readable behind the dialog.
+      backdrop="obscure"
     />
   );
 }

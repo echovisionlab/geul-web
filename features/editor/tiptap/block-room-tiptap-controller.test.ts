@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { Editor, Extension, Node, type JSONContent } from '@tiptap/core';
+import { isLocalAuthorTransaction } from '@/lib/collab/local-author-origin';
 import { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import { NodeSelection, Plugin } from '@tiptap/pm/state';
 import { fromJson, toJson, type JsonValue } from '@bufbuild/protobuf';
@@ -382,8 +383,8 @@ function currentDurabilityState(document: Y.Doc): BlockRoomDurabilityState {
 function createReadyPostProtocol(document: Y.Doc, entityId: string): BlockRoomProtocolClient {
   const source = postDocument();
   const payload = JSON.stringify({
-    kind: 'block_room.bootstrap',
-    protocolVersion: 2,
+    kind: 'room.bootstrap',
+    v: 3,
     bootstrapChallenge: 'post-save-boundary',
     documentName: `post:${entityId}:ko`,
     documentType: 'post',
@@ -417,8 +418,8 @@ function createReadyPostProtocol(document: Y.Doc, entityId: string): BlockRoomPr
   protocol.handleProviderSynced();
   protocol.handleStateless(
     JSON.stringify({
-      kind: 'block_room.ready',
-      protocolVersion: 2,
+      kind: 'room.ready',
+      v: 3,
       bootstrapChallenge: 'post-save-boundary',
     }),
   );
@@ -428,8 +429,8 @@ function createReadyPostProtocol(document: Y.Doc, entityId: string): BlockRoomPr
 function persistedMessage(documentName: string, document: Y.Doc): string {
   const state = currentDurabilityState(document);
   return JSON.stringify({
-    kind: 'block_room.persisted',
-    protocolVersion: 2,
+    kind: 'room.persisted',
+    v: 3,
     documentName,
     stateVector: Buffer.from(state.stateVector).toString('base64'),
     deleted: state.deleted,
@@ -998,7 +999,7 @@ describe('PostBlockRoomTiptapController', () => {
     Y.applyUpdate(serverRoom, bootstrapUpdate);
     const initialPersistedState = currentDurabilityState(serverRoom);
     const protocol = createReadyPostProtocol(bRoom, entityId);
-    const provider = { document: bRoom } as unknown as HocuspocusProvider;
+    const provider = { document: bRoom, on: vi.fn(), off: vi.fn() } as unknown as HocuspocusProvider;
     const tracker = createCollaborativeDocumentSaveTracker(provider, { kind: 'block-room', protocol });
     const unregisterSave = tracker.register(`post:${entityId}`);
     const bBridge = createBlockRoomProseMirrorBridge({ document: bRoom, documentType: 'post', locale: 'ko' });
@@ -1087,8 +1088,8 @@ describe('PostBlockRoomTiptapController', () => {
     expect(persistNow).toHaveBeenCalledOnce();
     protocol.handleStateless(
       JSON.stringify({
-        kind: 'block_room.persisted',
-        protocolVersion: 2,
+        kind: 'room.persisted',
+        v: 3,
         documentName,
         stateVector: Buffer.from(initialPersistedState.stateVector).toString('base64'),
         deleted: initialPersistedState.deleted,
@@ -1341,6 +1342,151 @@ describe('incremental Block-room input boundaries', () => {
       disconnect();
       editor.destroy();
       room.destroy();
+    }
+  });
+});
+
+describe('remote projection and composition', () => {
+  it.each([0, 2])(
+    'merges Korean composition with a concurrent edit in block %s and undoes only local input',
+    async (remoteIndex) => {
+      const f = performanceBoundaryFixture();
+      const peer = new Y.Doc();
+      Y.applyUpdate(peer, Y.encodeStateAsUpdate(f.room));
+      let projections = 0;
+      f.editor.on('transaction', ({ transaction }) => {
+        if (transaction.getMeta('blockRoomProjection')) {
+          projections++;
+        }
+      });
+      try {
+        f.editor.commands.setTextSelection(f.position(f.ids[0]!) + 2);
+        f.editor.view.dom.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+        f.editor.view.dispatch(f.editor.state.tr.insertText('ㅎ'));
+        expect(f.text(f.ids[0]!)).toContain('ㅎ');
+        const text = getBlockRoomCollaborativeText(peer, {
+          id: f.ids[remoteIndex]!,
+          family: 'rich_text',
+          locale: true,
+          path: 'content[0].text.text',
+        });
+        peer.transact(() => text.insert(0, 'REMOTE'), 'peer');
+        Y.applyUpdate(f.room, Y.encodeStateAsUpdate(peer), 'peer');
+        expect(projections).toBe(0);
+        const at = f.editor.state.selection.from;
+        f.editor.view.dispatch(f.editor.state.tr.insertText('한', at - 1, at));
+        expect(f.text(f.ids[0]!)).toContain('한');
+        expect(f.text(f.ids[remoteIndex]!)).toContain('REMOTE');
+        f.editor.view.dom.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+        await vi.waitFor(() => expect(projections).toBe(1));
+        const full = createPostBlockRoomTiptapController(f.bridge).initialContent;
+        expect(f.editor.state.doc.eq(f.editor.schema.nodeFromJSON(full))).toBe(true);
+        expect(undoBlockRoom(f.room)).toBe(true);
+        expect(f.text(f.ids[0]!)).not.toContain('한');
+        expect(f.text(f.ids[remoteIndex]!)).toContain('REMOTE');
+        expect(redoBlockRoom(f.room)).toBe(true);
+        expect(f.text(f.ids[0]!)).toContain('한');
+      } finally {
+        peer.destroy();
+        f.cleanup();
+      }
+    },
+  );
+
+  it('connects before the view mounts, then attaches and projects remote changes on mount', () => {
+    const room = new Y.Doc();
+    hydrateCanonicalBlockRoom(room, 'post', 'ko', postDocument(), []);
+    const bridge = createBlockRoomProseMirrorBridge({ document: room, documentType: 'post', locale: 'ko' });
+    const controller = createPostBlockRoomTiptapController(bridge);
+    const editor = new Editor({
+      element: null,
+      extensions: [...createTiptapWireExtensions(), controller.extension],
+      content: controller.initialContent,
+    });
+    let disconnect: (() => void) | undefined;
+    try {
+      expect(() => {
+        disconnect = controller.connect(editor);
+      }).not.toThrow();
+      const peer = new Y.Doc();
+      Y.applyUpdate(peer, Y.encodeStateAsUpdate(room));
+      const id = bridge.readBlocks()[0]!.id;
+      peer.transact(
+        () =>
+          getBlockRoomCollaborativeText(peer, {
+            id,
+            family: 'rich_text',
+            locale: true,
+            path: 'content[0].text.text',
+          }).insert(0, 'REMOTE'),
+        'peer',
+      );
+      expect(() => Y.applyUpdate(room, Y.encodeStateAsUpdate(peer), 'peer')).not.toThrow();
+      editor.mount(document.createElement('div'));
+      expect(editor.getText()).toContain('REMOTE');
+      peer.destroy();
+    } finally {
+      disconnect?.();
+      editor.destroy();
+      room.destroy();
+    }
+  });
+
+  it('reports composition edits as local author intent for the journal and save tracker', () => {
+    const f = performanceBoundaryFixture();
+    const authored: boolean[] = [];
+    const listener = (transaction: Y.Transaction) => {
+      if (transaction.changed.size > 0) {
+        authored.push(isLocalAuthorTransaction(transaction));
+      }
+    };
+    f.room.on('afterTransaction', listener);
+    try {
+      f.editor.commands.setTextSelection(f.position(f.ids[0]!) + 2);
+      f.editor.view.dom.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+      f.editor.view.dispatch(f.editor.state.tr.insertText('ㅎ'));
+      const at = f.editor.state.selection.from;
+      f.editor.view.dispatch(f.editor.state.tr.insertText('한', at - 1, at));
+      expect(f.text(f.ids[0]!)).toContain('한');
+      expect(authored.length).toBeGreaterThan(0);
+      expect(authored.every(Boolean)).toBe(true);
+    } finally {
+      f.room.off('afterTransaction', listener);
+      f.cleanup();
+    }
+  });
+
+  it.each([false, true])('matches full projection for text, marks, attributes and structure (nested=%s)', (nested) => {
+    const f = performanceBoundaryFixture(nested);
+    const parity = () =>
+      expect(
+        f.editor.state.doc.eq(
+          f.editor.schema.nodeFromJSON(createPostBlockRoomTiptapController(f.bridge).initialContent),
+        ),
+      ).toBe(true);
+    try {
+      const text = getBlockRoomCollaborativeText(f.room, {
+        id: f.ids[1]!,
+        family: 'rich_text',
+        locale: true,
+        path: 'content[0].text.text',
+      });
+      f.room.transact(() => {
+        text.insert(2, '한😀');
+        text.format(1, 3, { bold: true });
+      }, 'peer');
+      parity();
+      f.bridge.setAtomicValue({ blockId: f.ids[1]!, scope: 'base', path: 'props.textAlignment' }, 2);
+      parity();
+      expect(f.controller.projectionStats.full).toBe(0);
+      expect(f.controller.projectionStats.projectedBlocks).toBe(2);
+      f.bridge.moveBlock(f.ids[2]!, { index: 0 });
+      parity();
+      expect(f.controller.projectionStats.full).toBe(1);
+      f.bridge.deleteBlock(f.ids[1]!);
+      parity();
+    } finally {
+      f.cleanup();
     }
   });
 });

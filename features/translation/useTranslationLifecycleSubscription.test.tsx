@@ -64,7 +64,7 @@ class FakeProvider {
   }
 
   emitStateless(event: unknown) {
-    const payload = JSON.stringify(event);
+    const payload = JSON.stringify({ v: 3, kind: 'runtime.event', event });
 
     for (const handler of this.handlers.get('stateless') ?? []) {
       handler({ payload });

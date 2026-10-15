@@ -102,6 +102,7 @@ function Preview({ state = 'ready' }: { state?: 'ready' | 'pending' | 'failed' |
     handleCancelSchedule: () => feedback(() => setStatus('draft')),
     tLabels,
     handleSubjectChange: setSubject,
+    isEditable: canMutate,
     canEditLocalizedSubject: canMutate,
     activeEditLocale: localEditLocale(locale, setLocale),
     handleActiveLocaleChange: (value) => value && setLocale(value),
@@ -172,7 +173,14 @@ function Preview({ state = 'ready' }: { state?: 'ready' | 'pending' | 'failed' |
         setStatus('scheduled');
         setScheduleModal(false);
       }),
-    accessInterruption: { blocked: false, interruption: null, revoked: false, sessionExpired: false, revoke: () => {} },
+    accessInterruption: {
+      viewOnly: false,
+      blocked: false,
+      interruption: null,
+      revoked: false,
+      sessionExpired: false,
+      revoke: () => {},
+    },
   };
   return (
     <QueryClientProvider client={client}>

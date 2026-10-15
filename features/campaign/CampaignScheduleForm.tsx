@@ -31,6 +31,7 @@ interface CampaignScheduleFormProps {
   includesUnsubscribedUsers: boolean;
   labels: CampaignScheduleFormLabels;
   loading?: boolean;
+  disabled?: boolean;
   onChange: (value: DateTimeValue) => void;
   onCancel: () => void;
   onSchedule: () => void;
@@ -44,6 +45,7 @@ export function CampaignScheduleForm({
   includesUnsubscribedUsers,
   labels,
   loading = false,
+  disabled = false,
   onChange,
   onCancel,
   onSchedule,
@@ -54,6 +56,7 @@ export function CampaignScheduleForm({
     <DsLayoutStack>
       <SupportingText tone="secondary">{labels.description}</SupportingText>
       <DateTimeInput
+        disabled={disabled}
         locale={locale}
         dateLabel={labels.date}
         timeLabel={labels.time}
@@ -81,7 +84,7 @@ export function CampaignScheduleForm({
           tone="neutral"
           onClick={onSchedule}
           loading={loading}
-          disabled={!complete}
+          disabled={disabled || !complete}
           leftSection={<IconCalendar size={16} />}
         >
           {labels.schedule}

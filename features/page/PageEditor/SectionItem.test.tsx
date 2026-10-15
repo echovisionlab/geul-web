@@ -165,10 +165,8 @@ describe('SectionItem', () => {
 
     const toggle = container?.querySelector<HTMLButtonElement>('[data-page-section-toggle]');
     expect(toggle).toBeTruthy();
-
-    act(() => {
-      toggle?.click();
-    });
+    // Rich-text and columns bodies start expanded so the SSR-painted content stays visible.
+    expect(toggle?.getAttribute('aria-expanded')).toBe('true');
 
     const preview = container?.querySelector<HTMLElement>('[data-page-section-editor-preview]');
     expect(preview).toBeTruthy();
@@ -205,8 +203,10 @@ describe('SectionItem', () => {
     expect(container?.querySelector('[data-page-section-settings]')).toBeFalsy();
     const toggle = container?.querySelector<HTMLButtonElement>('[data-page-section-toggle]');
     expect(toggle?.disabled).toBe(false);
-    act(() => toggle?.click());
+    // The rich-text preview starts expanded; collapsing it stays available in translation mode.
     expect(container?.querySelector('[data-testid="mock-block-editor"]')).toBeTruthy();
+    act(() => toggle?.click());
+    expect(container?.querySelector('[data-testid="mock-block-editor"]')).toBeFalsy();
     expect(pageEditorContext.updateSection).not.toHaveBeenCalled();
   });
 

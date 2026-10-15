@@ -14,6 +14,12 @@ import {
   type EditorRuntimeEventSubscriptionOptions,
 } from '@/lib/collab/subscribe-runtime-events';
 import { EditorRuntimeContext } from './editor-runtime-context-value';
+import { getBlockRoomJournalStore } from '@/lib/collab/block-room-journal-store';
+import { getProviderAccessLevel } from '@/lib/collab/provider-control-state';
+import { getDocumentRoomJournalStore } from '@/lib/collab/document-room-journal-store';
+
+/** Document rooms whose semantic intents are journaled (see document-room-intent). */
+const JOURNALED_DOCUMENT_ROOMS: ReadonlySet<string> = new Set(['form', 'menu', 'series', 'email_layout']);
 
 export { useOptionalEditorRuntimeContext } from './editor-runtime-context-value';
 export type { EditorRuntimeContextValue } from './editor-runtime-context-value';
@@ -63,9 +69,23 @@ export function EditorRuntimeProvider({
     if (!provider || ['page', 'menu', 'series', 'email_layout'].includes(entityType)) {
       return;
     }
+    // Block rooms and journaled document rooms keep unsaved edits on this device; others in memory.
+    // A room downgraded to view parks them until it is reopened with edit access.
+    const isParked = () => getProviderAccessLevel(provider) === 'view';
     const persistence = blockRoomProtocol
-      ? { kind: 'block-room' as const, protocol: requireBlockRoomDurabilityProtocol(blockRoomProtocol) }
-      : { kind: 'persist-now' as const };
+      ? {
+          kind: 'block-room' as const,
+          protocol: requireBlockRoomDurabilityProtocol(blockRoomProtocol),
+          isDurable: () => getBlockRoomJournalStore()?.isSettled() ?? false,
+          isParked,
+        }
+      : JOURNALED_DOCUMENT_ROOMS.has(entityType)
+        ? {
+            kind: 'persist-now' as const,
+            isDurable: () => getDocumentRoomJournalStore()?.isSettled() ?? false,
+            isParked,
+          }
+        : { kind: 'persist-now' as const, isParked };
     return registerCollaborativeDocumentSave(provider, `${entityType}:${entityId}`, persistence);
   }, [blockRoomProtocol, entityId, entityType, provider]);
   const getContributorMemberIds = useCallback(() => {

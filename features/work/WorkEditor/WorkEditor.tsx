@@ -1,5 +1,7 @@
 'use client';
 
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
 
 import { DocumentEditorPanels } from '@/features/authoring/DocumentEditorPanels';
@@ -60,6 +62,7 @@ import { useWorkLifecycle } from './useWorkLifecycle';
 import { requireActionSuccess } from '@/lib/editor/require-action-success';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
+import { useAuthoritativeConfiguration } from '@/lib/editor/useAuthoritativeConfiguration';
 
 interface ClientDetails {
   id: string;
@@ -138,6 +141,8 @@ export function WorkEditor(props: WorkEditorProps) {
       workId={props.workId}
       initialMeta={initialMeta}
       initialFeaturedImageUrl={props.initialFeaturedImageUrl}
+      initialMapPlaceId={props.initialMapPlaceId}
+      canEdit={props.canEdit}
     >
       <MapPlaceActionProvider createMapPlaceForBlock={createMapPlaceForBlockWithBrowserClient}>
         <WorkEditorContent {...props} />
@@ -189,13 +194,18 @@ function useWorkEditorViewModel({
   }, [flushPendingSaves, navigateBack]);
   const lifecycle = useWorkLifecycle({ workId, initialStatus, canEdit, isAdmin, onDeleted: navigateBack });
   const { status } = lifecycle;
-  const canEditWork = lifecycle.canEdit;
-  const [mapPlaceId, setMapPlaceId] = useState<string | null>(initialMapPlaceId);
+  const mapConfiguration = useAuthoritativeConfiguration({
+    document: `work:${workId}`,
+    initialConfiguration: { mapPlaceId: initialMapPlaceId },
+  });
+
   const [createPlaceOpened, setCreatePlaceOpened] = useState(false);
   const [createPlaceInitialName, setCreatePlaceInitialName] = useState('');
   const [versionHistoryOpened, setVersionHistoryOpened] = useState(false);
 
   const {
+    configuration,
+    refreshConfiguration,
     slug,
     type,
     year,
@@ -224,8 +234,23 @@ function useWorkEditorViewModel({
     roomLocale,
     localeSession,
   } = useWorkMeta();
+  const mapPlaceId = configuration
+    ? configuration.getConfiguration().mapPlaceId
+    : mapConfiguration.getConfiguration().mapPlaceId;
+  const setMapPlaceId = (mapPlaceId: string | null) => (configuration ?? mapConfiguration).edit({ mapPlaceId });
   const currentProvider = provider;
-  useEditorEntityChanges(`work:${workId}`, () => router.refresh(), currentProvider);
+  const accessLevel = useEditorAccessLevel(provider);
+  const canEditWork = lifecycle.canEdit && accessLevel === 'edit';
+  useEditorEntityChanges(
+    `work:${workId}`,
+    () => {
+      void refreshConfiguration?.();
+      router.refresh();
+    },
+    currentProvider,
+    undefined,
+    configuration?.captureOwnChange,
+  );
   const handleStatusChange = useCallback(
     async (nextStatus: Parameters<typeof lifecycle.changeStatus>[0]) => {
       if (await flushPendingSaves()) {
@@ -241,10 +266,10 @@ function useWorkEditorViewModel({
   }, [flushPendingSaves, lifecycle.deleteWork.mutate]);
   const observedMetadataRef = useRef(metadata);
   useEffect(() => {
-    if (!Object.hasOwn(getPendingEditorPatch(`work:${workId}`), 'metadata')) {
+    if (!configuration && !Object.hasOwn(getPendingEditorPatch(`work:${workId}`), 'metadata')) {
       observedMetadataRef.current = structuredClone(initialMetadata);
     }
-  }, [initialMetadata, workId]);
+  }, [configuration, initialMetadata, workId]);
   const { activeEditLocale } = localeSession;
   const canEditTranslationSource = canEditWork;
   const hasLocaleRoomMutationAuthority = localeSession.hasRoomMutationAuthority({
@@ -298,7 +323,22 @@ function useWorkEditorViewModel({
   });
 
   const updateSlug = useMutation({
-    mutationFn: (slug: string | null) => updateWorkSlugAction(workId, slug),
+    mutationFn: async (slug: string | null) => {
+      const write = configuration?.beginWrite({ slug });
+      try {
+        const result = await updateWorkSlugAction(workId, slug, write?.origin);
+        if (result.error) {
+          write?.fail();
+        } else {
+          write?.acknowledge({ slug: result.slug ?? slug }, { authoritative: false });
+          void refreshConfiguration?.();
+        }
+        return result;
+      } catch (error) {
+        write?.fail();
+        throw error;
+      }
+    },
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
@@ -307,22 +347,23 @@ function useWorkEditorViewModel({
   });
 
   const updateWork = useMutation({
-    mutationFn: (data: { mapPlaceId?: string | null }) => updateWorkAction(workId, data),
-    onSuccess: (result) => {
-      if (result.error) {
-        notifications.show({ message: result.error, tone: 'danger' });
+    mutationFn: async (data: { mapPlaceId?: string | null }) => {
+      const write = (configuration ?? mapConfiguration).beginWrite(data);
+      try {
+        const result = await updateWorkAction(workId, data, write.origin);
+        if (result.error) {
+          write.fail();
+        } else {
+          write.acknowledge(data, { authoritative: false });
+          void refreshConfiguration?.();
+          publishEditorEntityChange(`work:${workId}`, write?.origin);
+        }
+        return result;
+      } catch (error) {
+        write.fail();
+        throw error;
       }
     },
-    onError: (error) => {
-      notifications.show({
-        message: error instanceof Error ? error.message : t('notifications.updateFailed'),
-        tone: 'danger',
-      });
-    },
-  });
-
-  const updateWorkFields = useMutation({
-    mutationFn: (data: Parameters<typeof updateWorkFieldsAction>[1]) => updateWorkFieldsAction(workId, data),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
@@ -428,12 +469,31 @@ function useWorkEditorViewModel({
   });
   const debouncedWorkFieldsUpdate = useDebouncedPatch({
     write: async (update: WorkFieldsUpdate) => {
-      const result = await updateWorkFields.mutateAsync(update);
-      await requireActionSuccess(Promise.resolve(result));
+      const { observedMetadata: _observedMetadata, observedClients: _observedClients, ...patch } = update;
+      void _observedMetadata;
+      void _observedClients;
+      const write = configuration?.beginWrite(patch as Partial<WorkMeta>);
+      let result;
+      try {
+        result = await updateWorkFieldsAction(workId, update, write?.origin);
+        await requireActionSuccess(Promise.resolve(result));
+        write?.acknowledge(
+          { ...patch, ...(result.metadata ? { metadata: result.metadata } : {}) } as Partial<WorkMeta>,
+          { authoritative: Object.keys(patch).every((field) => field === 'metadata') && result.metadata !== undefined },
+        );
+      } catch (error) {
+        write?.fail();
+        notifications.show({
+          message: error instanceof Error ? error.message : t('notifications.updateFailed'),
+          tone: 'danger',
+        });
+        throw error;
+      }
       if (update.metadata !== undefined) {
         observedMetadataRef.current = structuredClone(result.metadata ?? update.metadata);
       }
-      publishEditorEntityChange(`work:${workId}`);
+      publishEditorEntityChange(`work:${workId}`, write?.origin);
+      void refreshConfiguration?.();
     },
     delay: 500,
     scope: workId,
@@ -511,7 +571,9 @@ function useWorkEditorViewModel({
       if (updates.metadata !== undefined) {
         setMetadata(updates.metadata);
         durableUpdate.metadata = updates.metadata;
-        durableUpdate.observedMetadata = structuredClone(observedMetadataRef.current);
+        durableUpdate.observedMetadata = structuredClone(
+          configuration?.getCanonical().metadata ?? observedMetadataRef.current,
+        );
       }
       if (updates.featured !== undefined) {
         setFeatured(updates.featured);
@@ -519,7 +581,7 @@ function useWorkEditorViewModel({
       }
       debouncedWorkFieldsUpdate(durableUpdate);
     },
-    [canEditNeutral, debouncedWorkFieldsUpdate, setFeatured, setMetadata, setPeriod, setType],
+    [canEditNeutral, configuration, debouncedWorkFieldsUpdate, setFeatured, setMetadata, setPeriod, setType],
   );
 
   const handleSummaryChange = useCallback(
@@ -818,7 +880,7 @@ export function WorkEditorView({ model }: { model: WorkEditorViewModel }) {
                 <EntityTranslationsPanel
                   entityType="work"
                   entityId={workId}
-                  canManage={canEditWork}
+                  canManage
                   canAdministerTranslations={isAdmin && canEditWork}
                   canMutateTargets={canEditWork}
                 />
@@ -899,7 +961,7 @@ export function WorkEditorView({ model }: { model: WorkEditorViewModel }) {
             <SectionCard layout="stack" grow padding={{ base: 'none', sm: 'md' }}>
               <div style={{ position: 'relative' }}>
                 <DsLayoutInset flexible space="none">
-                  {currentProvider && blockRoomController && currentIsSynced ? (
+                  {currentProvider && blockRoomController ? (
                     <div style={{ height: '100%' }} id={getEditorBodyReadyId('work', workId)}>
                       <LocalizedRichTextFragmentEditor
                         key={`work-${workId}-${roomLocale ?? 'source'}`}

@@ -1,5 +1,8 @@
 'use client';
 
+import { getEditorWriteToken } from '@/lib/editor/editor-write-origin';
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
@@ -166,7 +169,7 @@ function useEmailLayoutEditPageModel() {
       JSON.stringify(layoutRoom.targetUnits.map((unit) => [unit.handle, unit.localeValuePresent, unit.value] as const)),
     [layoutRoom.targetUnits],
   );
-  const canEditTranslationSource = true;
+  const canEditTranslationSource = useEditorAccessLevel(currentProvider) === 'edit';
   const canEditCurrentLocale = canEditTranslationSource && activeEditLocale.canEditActiveLocale && isSynced;
 
   useEffect(() => {
@@ -196,7 +199,9 @@ function useEmailLayoutEditPageModel() {
   }, [layout]);
 
   const updateLayoutMutation = useMutation({
-    mutationFn: (data: { key?: string; name?: string }) => updateEmailLayoutAction(layoutId, data),
+    // Bound to the member whose edit this is: a write flushed after an account switch is refused.
+    mutationFn: (data: { key?: string; name?: string }) =>
+      updateEmailLayoutAction(layoutId, data, getEditorWriteToken()),
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: emailLayoutErrorMessage(result), tone: 'danger' });
@@ -229,18 +234,24 @@ function useEmailLayoutEditPageModel() {
 
   const handleTitleChange = useCallback(
     (value: string) => {
+      if (!canEditTranslationSource) {
+        return;
+      }
       setTitle(value);
       saveTitleDebounced(value);
     },
-    [saveTitleDebounced],
+    [canEditTranslationSource, saveTitleDebounced],
   );
 
   const handleKeyChange = useCallback(
     (value: string) => {
+      if (!canEditTranslationSource) {
+        return;
+      }
       setKey(value);
       saveKeyDebounced(value);
     },
-    [saveKeyDebounced],
+    [canEditTranslationSource, saveKeyDebounced],
   );
 
   const handleActiveLocaleChange = useCallback(
@@ -295,6 +306,7 @@ function useEmailLayoutEditPageModel() {
     showEditor,
     currentDoc,
     roomLocale,
+    canEditTranslationSource,
     canEditCurrentLocale,
     layout,
     setHtmlContent,
@@ -359,6 +371,7 @@ export function EmailLayoutEditPageView({
     showEditor,
     currentDoc,
     roomLocale,
+    canEditTranslationSource,
     canEditCurrentLocale,
     layout,
     setHtmlContent,
@@ -374,8 +387,8 @@ export function EmailLayoutEditPageView({
       <DsLayoutStack flexible gap="md">
         <EditorHeader
           title={title}
-          onTitleChange={activeEditLocale.isSourceLocale ? handleTitleChange : undefined}
-          titleDisabled={!activeEditLocale.isSourceLocale}
+          onTitleChange={canEditTranslationSource && activeEditLocale.isSourceLocale ? handleTitleChange : undefined}
+          titleDisabled={!canEditTranslationSource || !activeEditLocale.isSourceLocale}
           isConnected={isConnected}
           isSynced={isSynced}
           onBack={() => router.push('/admin/email-layouts')}
@@ -389,7 +402,7 @@ export function EmailLayoutEditPageView({
               label={tCommon('labels.key')}
               value={key}
               onChange={(e) => handleKeyChange(e.currentTarget.value)}
-              disabled={!activeEditLocale.isSourceLocale}
+              disabled={!canEditTranslationSource || !activeEditLocale.isSourceLocale}
             />
           </div>
           {activeEditLocale.isControlVisible ? (
@@ -504,7 +517,7 @@ export function EmailLayoutEditPageView({
         </div>
 
         <AuthoringExtension kind="translations">
-          <EmailEntityTranslationsPanel entityId={layoutId} />
+          <EmailEntityTranslationsPanel entityId={layoutId} canEdit={canEditTranslationSource} />
         </AuthoringExtension>
       </DsLayoutStack>
     </EditorRuntimeProvider>

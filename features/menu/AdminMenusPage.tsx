@@ -1,5 +1,7 @@
 'use client';
 
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
 import { SupportingText, Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
 import { ConfirmationDialog } from '@/features/confirmation';
@@ -13,6 +15,7 @@ import {
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   closestCenter,
   DndContext,
@@ -77,7 +80,8 @@ function useAdminMenusPageModel() {
   const queryClient = useQueryClient();
 
   // Menu states
-  const [selectedMenuId, setSelectedMenuId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const [selectedMenuId, setSelectedMenuId] = useState<string | null>(() => searchParams.get('menu'));
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
 
   // Menu modal states
@@ -126,8 +130,10 @@ function useAdminMenusPageModel() {
   });
   const { activeEditLocale, roomLocale } = localeSession;
   const menuRoom = useMenuCollaboration(selectedMenuId ?? '', roomLocale);
+  const accessLevel = useEditorAccessLevel(menuRoom.provider);
   const roomState = menuRoom.roomState;
   const canEditCurrentCopy =
+    accessLevel === 'edit' &&
     menuRoom.isSynced &&
     activeEditLocale.canEditActiveLocale &&
     activeEditLocale.hasLiveRow &&
@@ -350,6 +356,7 @@ function useAdminMenusPageModel() {
     openCreateItemModal,
     selectedMenuAuthoringLocked,
     menuItems,
+    canEditRoom: accessLevel === 'edit',
     canEditCurrentCopy,
     sensors,
     handleDragEnd,
@@ -451,6 +458,7 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
     openCreateItemModal,
     selectedMenuAuthoringLocked,
     menuItems,
+    canEditRoom,
     canEditCurrentCopy,
     sensors,
     handleDragEnd,
@@ -574,6 +582,7 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
                           tone="danger"
                           emphasis="low"
                           size="chrome"
+                          disabled={selectedMenuId === menu.id && !canEditRoom}
                           aria-label={`${tCommon('actions.delete')} ${menu.name}`}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -687,7 +696,13 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
 
           {selectedMenuId && selectedMenu ? (
             <AuthoringExtension kind="translations">
-              <EntityTranslationsPanel entityType="menu" entityId={selectedMenuId} canManage />
+              <EntityTranslationsPanel
+                entityType="menu"
+                entityId={selectedMenuId}
+                canManage
+                canAdministerTranslations={canEditRoom}
+                canMutateTargets={canEditRoom}
+              />
             </AuthoringExtension>
           ) : null}
         </DsLayoutStack>
@@ -703,6 +718,7 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
             <TextInput
               label={tPage('menuNameLabel')}
               placeholder={tPage('menuNamePlaceholder')}
+              disabled={Boolean(editingMenuId) && selectedMenuAuthoringLocked}
               value={menuName}
               onChange={(e) => setMenuName(e.currentTarget.value)}
               required
@@ -711,7 +727,12 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
               <Button emphasis="low" onClick={closeMenuModal}>
                 {tCommon('actions.cancel')}
               </Button>
-              <Button emphasis="strong" onClick={handleSaveMenu} loading={isSaving} disabled={!menuName.trim()}>
+              <Button
+                emphasis="strong"
+                onClick={handleSaveMenu}
+                loading={isSaving}
+                disabled={!menuName.trim() || (Boolean(editingMenuId) && selectedMenuAuthoringLocked)}
+              >
                 {editingMenuId
                   ? tCommon('actions.save')
                   : tCommon('actions.createItem', { item: tCommon('entities.menu') })}
@@ -843,7 +864,10 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
           intent="delete"
           opened={deleteMenuOpened}
           onClose={closeDeleteMenuModal}
-          onConfirm={() => deletingMenu && deleteMenu.mutate(deletingMenu.id)}
+          confirmDisabled={!canEditRoom && deletingMenu?.id === selectedMenuId}
+          onConfirm={() =>
+            deletingMenu && (deletingMenu.id !== selectedMenuId || canEditRoom) && deleteMenu.mutate(deletingMenu.id)
+          }
           title={tCommon('actions.delete')}
           message={
             <DsText>

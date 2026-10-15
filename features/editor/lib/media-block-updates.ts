@@ -2,8 +2,6 @@
 
 import type { Editor as TiptapEditor } from '@tiptap/core';
 import { fileBlockPropSchema } from '@echovisionlab/geul-common/media/block-schemas';
-import { absolutePositionToRelativePosition, relativePositionToAbsolutePosition, ySyncPluginKey } from 'y-prosemirror';
-import { decodeRelativePosition, encodeRelativePosition, type Doc, type XmlFragment } from 'yjs';
 import { isBlockId } from '@/lib/editor/block-id';
 import { createTiptapEditorGeneration } from '@/features/editor/tiptap/editor-generation';
 import {
@@ -55,59 +53,6 @@ interface TiptapBlockEntry {
   id: string;
   position: number;
   node: { nodeSize: number; firstChild: { type: { name: string }; attrs: Record<string, unknown> } | null };
-}
-
-type ProseMirrorMapping = Parameters<typeof absolutePositionToRelativePosition>[2];
-
-interface YPositionSyncState {
-  binding: { mapping: ProseMirrorMapping };
-  doc: Doc;
-  type: XmlFragment;
-}
-
-function getYPositionSyncState(editor: TiptapEditor): YPositionSyncState | null {
-  const state: unknown = ySyncPluginKey.getState(editor.state);
-  if (!state || typeof state !== 'object') {
-    return null;
-  }
-  const candidate = state as Partial<YPositionSyncState>;
-  if (!candidate.doc || !candidate.type || !candidate.binding?.mapping) {
-    return null;
-  }
-  return candidate as YPositionSyncState;
-}
-
-function captureYRelativeInsertPosition(
-  editor: TiptapEditor,
-  referenceBlockId: string,
-  absolutePosition: number,
-): InsertPosition | null {
-  const syncState = getYPositionSyncState(editor);
-  if (!syncState) {
-    return null;
-  }
-  const relativePosition = absolutePositionToRelativePosition(
-    absolutePosition,
-    syncState.type,
-    syncState.binding.mapping,
-  );
-  return {
-    referenceBlockId,
-    encodedRelativePosition: encodeRelativePosition(relativePosition),
-  };
-}
-
-function resolveYRelativeInsertPosition(editor: TiptapEditor, encodedRelativePosition: Uint8Array): number | null {
-  const syncState = getYPositionSyncState(editor);
-  if (!syncState) {
-    return null;
-  }
-  return relativePositionToAbsolutePosition(
-    syncState.doc,
-    syncState.type,
-    decodeRelativePosition(encodedRelativePosition),
-    syncState.binding.mapping,
-  );
 }
 
 function findTiptapBlock(editor: TiptapEditor, blockId: string): TiptapBlockEntry | null {
@@ -199,7 +144,7 @@ export function selectDurableEditorFileProps(props: Record<string, unknown>): Re
 
 export function canResolveTiptapInsertPosition(editor: TiptapEditor, position: InsertPosition): boolean {
   if (position.encodedRelativePosition) {
-    return resolveYRelativeInsertPosition(editor, position.encodedRelativePosition) !== null;
+    return false;
   }
   return findTiptapBlock(editor, position.referenceBlockId) !== null;
 }
@@ -301,7 +246,7 @@ export function createTiptapEditorMediaCommandPort(
       const container = blockContainer.create({ id: block.id }, content);
       let insertPosition: number | null = null;
       if (savedPosition?.encodedRelativePosition) {
-        insertPosition = resolveYRelativeInsertPosition(currentEditor, savedPosition.encodedRelativePosition);
+        return { ok: false, reason: 'missing_reference' };
       } else if (savedPosition) {
         const reference = findTiptapBlock(currentEditor, savedPosition.referenceBlockId);
         insertPosition = reference ? reference.position + reference.node.nodeSize : null;
@@ -332,15 +277,7 @@ export function createTiptapEditorMediaCommandPort(
       const reference = referenceBlockId
         ? findTiptapBlock(currentEditor, referenceBlockId)
         : (findCurrentTiptapBlock(currentEditor) ?? findLastTiptapBlock(currentEditor));
-      return reference
-        ? (captureYRelativeInsertPosition(
-            currentEditor,
-            reference.id,
-            reference.position + reference.node.nodeSize,
-          ) ?? {
-            referenceBlockId: reference.id,
-          })
-        : null;
+      return reference ? { referenceBlockId: reference.id } : null;
     },
     applyNeutralBlockProps: options.applyNeutralBlockProps
       ? (blockId, props) => {

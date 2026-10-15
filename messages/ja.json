@@ -329,7 +329,14 @@
       "ogRegenerationFailed": "OG画像の再生成に失敗しました",
       "testEmailSent": "テストメールを送信しました",
       "saveSuccess": "保存しました",
-      "saveFailed": "保存に失敗しました"
+      "saveFailed": "保存に失敗しました",
+      "saveRetrying": "変更はまだサーバーに保存されていません。再試行しています。",
+      "editsRestored": "復旧した変更を復元しました。",
+      "leaveWithRejectedEdits": {
+        "title": "保存できなかった変更を残して退出しますか?",
+        "message": "サーバーが一部の変更を拒否したため、保存されませんでした。まず共同編集メニューからコピーするか、変更を破棄して退出してください。",
+        "confirm": "変更を破棄して退出"
+      }
     },
     "errors": {
       "generic": "問題が発生しました。もう一度お試しください。",
@@ -460,6 +467,11 @@
       "siteInfo": "サイト情報",
       "links": "リンク",
       "socialMedia": "ソーシャルメディア"
+    },
+    "signOutUnsaved": {
+      "title": "未保存の変更がある状態でログアウトしますか?",
+      "message": "一部の変更はサーバーに保存されていません。ログアウトすると、このデバイスから削除されます。",
+      "confirm": "変更を破棄してログアウト"
     }
   },
   "adminShell": {
@@ -666,20 +678,20 @@
         "htmlContentDescription": "メール本文を挿入する位置に content プレースホルダーを含める必要があります"
       },
       "placeholders": {
-        "key": "e.g., default-layout",
-        "name": "e.g., Default Layout",
+        "key": "例: default-layout",
+        "name": "例: Default Layout",
         "htmlContent": "content プレースホルダーを含む HTML テンプレート"
       },
       "detail": {
         "backTooltip": "メールレイアウトに戻る",
         "targetEditor": {
-          "title": "Translated text",
-          "description": "Edit only visible text and accessibility labels. HTML, CSS, links, and placeholders remain owned by the source layout.",
-          "empty": "This layout has no translatable text units.",
+          "title": "翻訳テキスト",
+          "description": "表示テキストとアクセシビリティラベルのみ編集できます。HTML、CSS、リンク、プレースホルダーは原文レイアウトで管理されます。",
+          "empty": "このレイアウトには翻訳可能なテキスト単位がありません。",
           "textUnit": "Text",
-          "sourceValue": "Source: {value}",
-          "translatedValue": "This locale provides its own value.",
-          "sourceFallback": "Using the source value.",
+          "sourceValue": "原文: {value}",
+          "translatedValue": "このロケールでは独自の値を使用しています。",
+          "sourceFallback": "原文の値を使用しています。",
           "useSource": "Use source"
         },
         "viewModes": {
@@ -759,9 +771,9 @@
         "keyDescription": "一意の識別子です（小文字、数字、アンダースコアを使用可能）"
       },
       "placeholders": {
-        "key": "e.g., welcome-email",
-        "name": "e.g., Welcome Email",
-        "subject": "e.g., Welcome to your site",
+        "key": "例: welcome-email",
+        "name": "例: Welcome Email",
+        "subject": "例: Welcome to your site",
         "description": "このテンプレートが使われる場面の簡単な説明"
       },
       "badges": {
@@ -1072,7 +1084,7 @@
       "noItems": "メニュー項目がありません。「項目を追加」をクリックして開始してください",
       "editMenuTitle": "メニューを編集",
       "menuNameLabel": "メニュー名",
-      "menuNamePlaceholder": "e.g., Main Navigation, Footer Links",
+      "menuNamePlaceholder": "例: Main Navigation, Footer Links",
       "addMenuItemTitle": "メニュー項目を追加",
       "addSubmenuItemTitle": "サブメニュー項目を追加",
       "labelPlaceholder": "メニュー項目ラベル",
@@ -1081,7 +1093,7 @@
       "labelLanguageTranslated": "翻訳を使う",
       "labelLanguageFixedLocale": "特定の言語に固定",
       "customUrl": "カスタム URL",
-      "urlPlaceholder": "https://... or /path",
+      "urlPlaceholder": "https://... または /path",
       "selectTarget": "リンク先を選択",
       "targetPlaceholder": "選択...",
       "noTargets": "項目が見つかりません",
@@ -1095,12 +1107,12 @@
       "fixedLocaleItemBadge": "{locale} 固定"
     },
     "emailEvents": {
-      "title": "Email Delivery",
-      "description": "Database email event logs have been removed. Delivery status is tracked through delivery runs, suppressions, structured logs, and metrics.",
-      "databaseLogsRemovedTitle": "Database event log removed",
-      "databaseLogsRemovedDescription": "The old email_event table is no longer used for operational mail logs. Campaign and legal notice analytics use delivery recipient state instead.",
-      "dashboardTitle": "Use observability dashboards",
-      "dashboardDescription": "Provider acceptance, worker failures, and delivery-run health should be monitored in Grafana/Loki/Mimir."
+      "title": "メール配信",
+      "description": "データベースのメールイベントログは廃止しました。配信状態は配信実行、配信抑止、構造化ログ、メトリクスで追跡します。",
+      "databaseLogsRemovedTitle": "データベースのイベントログを廃止しました",
+      "databaseLogsRemovedDescription": "従来のemail_eventテーブルは運用メールログには使用しません。キャンペーンと法的通知の分析には、代わりに配信先の状態を使用します。",
+      "dashboardTitle": "可観測性ダッシュボードを使用",
+      "dashboardDescription": "プロバイダーによる受け付け、ワーカーの障害、配信実行の状態はGrafana/Loki/Mimirで監視してください。"
     },
     "clientsDetail": {
       "newTitle": "新しいクライアント",
@@ -1162,8 +1174,8 @@
           "description": "{siteName}アカウント復旧を確認"
         },
         "verification": {
-          "title": "Verify Email",
-          "description": "Verify your email address on {siteName}"
+          "title": "メール認証",
+          "description": "{siteName}でメールアドレスを認証します"
         }
       }
     },
@@ -1302,34 +1314,34 @@
       }
     },
     "verification": {
-      "loading": "Loading verification form...",
-      "startOver": "Start over",
+      "loading": "認証フォームを読み込み中...",
+      "startOver": "最初からやり直す",
       "errors": {
-        "flowNotFound": "Verification flow not found or expired",
-        "submit": "Failed to verify email",
-        "submitRetry": "Failed to verify email. Please try again.",
-        "emailRequired": "Enter the email address to verify.",
-        "sendVerificationEmail": "Failed to send verification email",
-        "cooldown": "Please wait {seconds} seconds before requesting another verification email.",
-        "alreadyExists": "This email is already registered.",
-        "currentVerified": "This email is already verified on this account.",
-        "invalidEmail": "Enter a valid email address."
+        "flowNotFound": "認証フローが見つからないか、有効期限が切れています",
+        "submit": "メール認証に失敗しました",
+        "submitRetry": "メール認証に失敗しました。もう一度お試しください。",
+        "emailRequired": "認証するメールアドレスを入力してください。",
+        "sendVerificationEmail": "認証メールの送信に失敗しました",
+        "cooldown": "次の認証メールをリクエストするまで{seconds}秒お待ちください。",
+        "alreadyExists": "このメールアドレスはすでに登録されています。",
+        "currentVerified": "このメールアドレスはこのアカウントですでに認証されています。",
+        "invalidEmail": "有効なメールアドレスを入力してください。"
       },
       "chooseMethod": {
-        "title": "Verify email",
-        "description": "Enter your email address and we will send you a verification code.",
-        "submit": "Send verification code"
+        "title": "メール認証",
+        "description": "メールアドレスを入力すると、認証コードを送信します。",
+        "submit": "認証コードを送信"
       },
       "sentEmail": {
-        "description": "Enter the verification code from your email to continue.",
-        "codeLabel": "Verification code",
-        "submitting": "Checking code...",
+        "description": "メールに記載された認証コードを入力して続行してください。",
+        "codeLabel": "認証コード",
+        "submitting": "コードを確認中...",
         "resend": "新しいコードを送信"
       },
       "passedChallenge": {
-        "title": "Email verified",
-        "description": "Your email address has been verified.",
-        "action": "Back to security settings"
+        "title": "メール認証完了",
+        "description": "メールアドレスの認証が完了しました。",
+        "action": "セキュリティ設定に戻る"
       },
       "applying": {
         "checkAgain": "もう一度確認",
@@ -1728,16 +1740,16 @@
       "consentDescription": "このクライアントは、現在のアカウント権限の範囲でコンテンツの閲覧・編集とファイルの管理ができます。コンテンツの作成・更新・削除や既存の添付ファイルの変更ができます。接続によってアカウントに追加の権限が付与されることはありません。",
       "consentOfflineAccess": "この接続は、現在のブラウザーセッションが終了した後も、取り消すまで継続できます。",
       "consentRevoke": "{settings} → Remote MCPでこの接続を取り消せます。",
-      "connectionsTitle": "Connected MCP clients",
-      "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
-      "connectionsEmpty": "No MCP clients are connected.",
-      "connectedAt": "Connected {date}",
+      "connectionsTitle": "接続中のMCPクライアント",
+      "connectionsDescription": "これらのOAuth認可はブラウザーセッションとは別です。認可を取り消すと、ログアウトせずにそのMCPクライアントの接続を解除できます。",
+      "connectionsEmpty": "接続中のMCPクライアントはありません。",
+      "connectedAt": "接続日時 {date}",
       "revoke": "Revoke",
-      "revokeTitle": "Revoke MCP access",
-      "revokeConfirmation": "Revoke MCP access for {client}? Its current token chain will stop working.",
-      "revokeSuccess": "MCP access was revoked.",
-      "revokeFailed": "Could not revoke MCP access.",
-      "loadFailed": "Could not load connected MCP clients."
+      "revokeTitle": "MCPアクセスを取り消す",
+      "revokeConfirmation": "{client}のMCPアクセスを取り消しますか? 現在のトークンチェーンは使用できなくなります。",
+      "revokeSuccess": "MCPアクセスを取り消しました。",
+      "revokeFailed": "MCPアクセスを取り消せませんでした。",
+      "loadFailed": "接続中のMCPクライアントを読み込めませんでした。"
     },
     "personalAccessTokens": {
       "title": "個人アクセストークン",
@@ -2136,9 +2148,9 @@
     "systemOrLegacy": "システムまたは以前のバージョン",
     "restore": "復元",
     "restoreTitle": "バージョンを復元",
-    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document.",
+    "restoreSameLocaleBody": "原文v{version} ({locale})を復元すると、原文文書のみ変更されます。既存の翻訳先文書と翻訳ジョブは変更されず、翻訳は自動生成されません。続行しますか?",
+    "restoreCrossLocaleBody": "原文v{version}を復元すると、原文ロケールが{currentLocale}から{selectedLocale}に切り替わり、原文の参照先のみ変更されます。既存の翻訳先文書と翻訳ジョブは変更されず、翻訳は自動生成されません。続行しますか?",
+    "restoreFailed": "原文文書の復元に失敗しました。",
     "loadFailed": "バージョン履歴を読み込めませんでした。",
     "end": "すべてのバージョンを読み込みました。"
   },
@@ -2444,7 +2456,7 @@
         "ready": "音声の準備ができました",
         "uploadTooltip": "音声ファイルをアップロード",
         "uploaded": "音声をアップロードし、処理を開始しました",
-        "resumeExpired": "Upload session expired. Start a fresh upload."
+        "resumeExpired": "アップロードセッションの有効期限が切れました。新たにアップロードを開始してください。"
       }
     }
   },
@@ -2518,6 +2530,24 @@
       "sections": {
         "connection": "接続"
       }
+    },
+    "saveState": {
+      "saved": "保存済み",
+      "saving": "保存中…",
+      "offline": "オフライン · 変更はこのデバイスに保持されています",
+      "error": "保存失敗 · 再試行中…",
+      "rejected": "一部の変更を保存できませんでした",
+      "reload": "再接続中 · 変更を復元中…"
+    },
+    "rejectedEdits": {
+      "open": "未保存の変更を確認",
+      "title": "保存できなかった変更",
+      "description": "サーバーがこれらの変更を拒否したため、再試行されません。必要な内容をコピーしてから破棄してください。",
+      "reason": "理由: {reason}",
+      "copy": "コピー",
+      "copied": "コピー済み",
+      "discard": "破棄",
+      "empty": "すべての変更が保存されています。"
     }
   },
   "urlSection": {
@@ -2534,33 +2564,33 @@
     }
   },
   "formValidation": {
-    "required": "This field is required",
-    "invalidUrl": "Please enter a valid URL",
-    "invalidFormat": "Invalid format",
-    "invalidEmail": "Please enter a valid email",
-    "invalidPhoneNumber": "Invalid phone number",
-    "stringGt": "Must be more than {threshold} characters",
-    "stringGte": "Minimum {threshold} characters",
-    "stringLt": "Must be less than {threshold} characters",
-    "stringLte": "Maximum {threshold} characters",
-    "stringEq": "Must be exactly {threshold} characters",
-    "numberGt": "Must be greater than {threshold}",
-    "numberGte": "Minimum value is {threshold}",
-    "numberLt": "Must be less than {threshold}",
-    "numberLte": "Maximum value is {threshold}",
-    "numberEq": "Must be exactly {threshold}",
-    "arrayGt": "Select more than {threshold}",
-    "arrayGte": "Select at least {threshold}",
-    "arrayLt": "Select less than {threshold}",
-    "arrayLte": "Select at most {threshold}",
-    "arrayEq": "Select exactly {threshold}",
-    "dateMin": "Date must be on or after {date}",
-    "dateMax": "Date must be on or before {date}",
-    "futureDate": "Date must be in the future",
-    "pastDate": "Date must be in the past",
-    "weekdayOnly": "Please select a weekday",
-    "minAge": "Must be at least {age} years old",
-    "maxAge": "Must be at most {age} years old"
+    "required": "この項目は必須です",
+    "invalidUrl": "有効なURLを入力してください",
+    "invalidFormat": "形式が無効です",
+    "invalidEmail": "有効なメールアドレスを入力してください",
+    "invalidPhoneNumber": "電話番号が無効です",
+    "stringGt": "{threshold}文字より多く入力してください",
+    "stringGte": "{threshold}文字以上入力してください",
+    "stringLt": "{threshold}文字未満で入力してください",
+    "stringLte": "{threshold}文字以内で入力してください",
+    "stringEq": "{threshold}文字ちょうど入力してください",
+    "numberGt": "{threshold}より大きい値を指定してください",
+    "numberGte": "最小値は{threshold}です",
+    "numberLt": "{threshold}より小さい値を指定してください",
+    "numberLte": "最大値は{threshold}です",
+    "numberEq": "{threshold}と同じ値を指定してください",
+    "arrayGt": "{threshold}個より多く選択してください",
+    "arrayGte": "{threshold}個以上選択してください",
+    "arrayLt": "{threshold}個未満を選択してください",
+    "arrayLte": "{threshold}個以下を選択してください",
+    "arrayEq": "{threshold}個ちょうど選択してください",
+    "dateMin": "{date}以降の日付を指定してください",
+    "dateMax": "{date}以前の日付を指定してください",
+    "futureDate": "未来の日付を指定してください",
+    "pastDate": "過去の日付を指定してください",
+    "weekdayOnly": "平日を選択してください",
+    "minAge": "{age}歳以上である必要があります",
+    "maxAge": "{age}歳以下である必要があります"
   },
   "phoneInput": {
     "noResults": "結果がありません"
@@ -3188,21 +3218,21 @@
         "fallbackMode": "ロゴなし",
         "marqueeItemText": "テキスト",
         "marqueeItemHref": "リンクURL",
-        "scrollHeight": "Scroll height",
-        "sceneHeight": "Scene height",
-        "unitHoldSeconds": "Unit hold",
+        "scrollHeight": "スクロールの高さ",
+        "sceneHeight": "シーンの高さ",
+        "unitHoldSeconds": "ユニットの保持時間",
         "unitGapSeconds": "Unit gap",
-        "unitHoldOverrideSeconds": "Hold override",
+        "unitHoldOverrideSeconds": "保持時間の上書き",
         "loop": "Loop",
         "colorScheme": "Theme",
-        "backgroundColor": "Light background",
-        "darkBackgroundColor": "Dark background",
+        "backgroundColor": "ライトモードの背景",
+        "darkBackgroundColor": "ダークモードの背景",
         "backgroundEnabled": "シーン背景",
-        "textureSize": "Particle count",
-        "particleSize": "Particle size",
-        "particleBrightness": "Light particle brightness",
-        "darkParticleBrightness": "Dark particle brightness",
-        "transitionWindow": "Text blend",
+        "textureSize": "パーティクル数",
+        "particleSize": "パーティクルサイズ",
+        "particleBrightness": "ライトモードのパーティクルの明るさ",
+        "darkParticleBrightness": "ダークモードのパーティクルの明るさ",
+        "transitionWindow": "テキストブレンド",
         "transition": "Transition",
         "rotationEnabled": "回転をアニメーション",
         "scrollRotationEnabled": "スクロール回転を追加",
@@ -3212,34 +3242,34 @@
         "hoverEnabled": "ポインター操作",
         "hoverRepelRadius": "ホバー半径",
         "sceneUnit": "Unit",
-        "sceneUnitName": "Unit name",
+        "sceneUnitName": "ユニット名",
         "unitAttribution": "ユニットの帰属表示",
-        "meshSource": "Mesh source",
-        "fallbackMesh": "Built-in mesh",
+        "meshSource": "メッシュソース",
+        "fallbackMesh": "内蔵メッシュ",
         "mesh": "Mesh",
-        "meshObjectName": "Mesh object",
+        "meshObjectName": "メッシュオブジェクト",
         "meshScale": "メッシュのスケール",
         "meshOffsetY": "メッシュの高さオフセット",
-        "meshUploadProgress": "Mesh upload progress",
-        "textureSource": "Light texture",
-        "fallbackColor": "Light color",
-        "color": "Light color",
-        "lightTextureUploadProgress": "Light texture upload progress",
-        "darkTextureSource": "Dark texture",
-        "darkFallbackColor": "Dark color",
-        "darkColor": "Dark color",
-        "darkTextureUploadProgress": "Dark texture upload progress",
+        "meshUploadProgress": "メッシュのアップロード進捗",
+        "textureSource": "ライトモードのテクスチャ",
+        "fallbackColor": "ライトモードの色",
+        "color": "ライトモードの色",
+        "lightTextureUploadProgress": "ライトモードのテクスチャのアップロード進捗",
+        "darkTextureSource": "ダークモードのテクスチャ",
+        "darkFallbackColor": "ダークモードの色",
+        "darkColor": "ダークモードの色",
+        "darkTextureUploadProgress": "ダークモードのテクスチャのアップロード進捗",
         "title": "Title",
         "description": "説明",
         "meshOptimization": "GLB optimization",
-        "meshOptimizationTargetRatio": "Target mesh ratio",
-        "selectedOptimizedMesh": "Selected compressed GLB",
-        "optimizedMeshSize": "Compressed size",
+        "meshOptimizationTargetRatio": "メッシュの目標比率",
+        "selectedOptimizedMesh": "選択した圧縮GLB",
+        "optimizedMeshSize": "圧縮後のサイズ",
         "meshOptimizationTriangles": "Triangles",
-        "textColorSource": "Text color",
-        "lightTextColor": "Light text",
-        "darkTextColorSource": "Dark text",
-        "darkTextColor": "Dark text color",
+        "textColorSource": "文字色",
+        "lightTextColor": "ライトモードの文字",
+        "darkTextColorSource": "ダークモードの文字",
+        "darkTextColor": "ダークモードの文字色",
         "itemSize": "項目サイズ",
         "showAvatar": "アバターを表示",
         "maxLabels": "レーベルの最大数"
@@ -3341,7 +3371,7 @@
         "textureSource": {
           "color": "Color",
           "image": "Image",
-          "inherit": "Follow light"
+          "inherit": "ライトモードに合わせる"
         },
         "playback": {
           "scroll": "Scroll",
@@ -3352,9 +3382,9 @@
           "linear": "Linear"
         },
         "textColorSource": {
-          "theme": "Follow theme",
+          "theme": "テーマに合わせる",
           "custom": "Custom",
-          "inherit": "Follow light"
+          "inherit": "ライトモードに合わせる"
         },
         "itemSize": {
           "s": "S · コンパクト",
@@ -3367,25 +3397,25 @@
         "removeMarqueeItem": "アイテムを削除",
         "moveMarqueeItem": "アイテムを並べ替え",
         "addSceneUnit": "Add unit",
-        "moveUnitUp": "Move unit up",
-        "moveUnitDown": "Move unit down",
-        "removeSceneUnit": "Remove unit",
+        "moveUnitUp": "ユニットを上に移動",
+        "moveUnitDown": "ユニットを下に移動",
+        "removeSceneUnit": "ユニットを削除",
         "replaceMesh": "Replace GLB",
         "uploadMesh": "Upload GLB",
-        "clearMeshAsset": "Clear mesh asset",
-        "cancelMeshUpload": "Cancel GLB upload",
-        "replaceTexture": "Replace light texture",
-        "uploadTexture": "Upload light texture",
-        "clearTextureAsset": "Clear texture",
-        "cancelTextureUpload": "Cancel light texture upload",
-        "replaceDarkTexture": "Replace dark texture",
-        "uploadDarkTexture": "Upload dark texture",
-        "clearDarkTextureAsset": "Clear dark texture",
-        "cancelDarkTextureUpload": "Cancel dark texture upload",
+        "clearMeshAsset": "メッシュアセットをクリア",
+        "cancelMeshUpload": "GLBのアップロードをキャンセル",
+        "replaceTexture": "ライトモードのテクスチャを置換",
+        "uploadTexture": "ライトモードのテクスチャをアップロード",
+        "clearTextureAsset": "テクスチャをクリア",
+        "cancelTextureUpload": "ライトモードのテクスチャのアップロードをキャンセル",
+        "replaceDarkTexture": "ダークモードのテクスチャを置換",
+        "uploadDarkTexture": "ダークモードのテクスチャをアップロード",
+        "clearDarkTextureAsset": "ダークモードのテクスチャをクリア",
+        "cancelDarkTextureUpload": "ダークモードのテクスチャのアップロードをキャンセル",
         "generateOptimizedMesh": "Compress GLB",
         "useOptimizedMesh": "Use compressed GLB",
         "clearOptimizedMesh": "Use original GLB",
-        "deleteOptimizedMeshCandidate": "Delete compressed GLB"
+        "deleteOptimizedMeshCandidate": "圧縮GLBを削除"
       },
       "descriptions": {
         "marqueeTextItems": "テキストアイテムを1つずつ追加します。",
@@ -3396,18 +3426,18 @@
         "marqueeItems": "アイテムはまだありません。"
       },
       "status": {
-        "meshOptimizationQueued": "GLB optimization queued.",
-        "meshOptimizationGenerated": "Optimized GLB generated.",
-        "meshOptimizationSelected": "Optimized GLB selected.",
-        "meshOptimizationCleared": "Original GLB selected.",
-        "meshOptimizationDeleted": "Compressed GLB deleted.",
-        "meshOptimizationDeleteFailed": "Compressed GLB could not be deleted.",
+        "meshOptimizationQueued": "GLBの最適化をキューに追加しました。",
+        "meshOptimizationGenerated": "最適化したGLBを生成しました。",
+        "meshOptimizationSelected": "最適化したGLBを選択しました。",
+        "meshOptimizationCleared": "元のGLBを選択しました。",
+        "meshOptimizationDeleted": "圧縮GLBを削除しました。",
+        "meshOptimizationDeleteFailed": "圧縮GLBを削除できませんでした。",
         "meshOptimizationPending": "Queued",
         "meshOptimizationProcessing": "Processing",
         "meshOptimizationFailed": "Failed",
         "meshOptimizationCancelled": "Cancelled",
-        "optimizedMeshCleanupFailed": "Optimized asset reference removed, but cleanup failed: {error}",
-        "optimizedMeshCleanupFailedDefault": "Optimized asset reference removed, but cleanup failed"
+        "optimizedMeshCleanupFailed": "最適化したアセットの参照を削除しましたが、クリーンアップに失敗しました: {error}",
+        "optimizedMeshCleanupFailedDefault": "最適化したアセットの参照を削除しましたが、クリーンアップに失敗しました"
       },
       "authorSelection": {
         "maxSelected": "著者は最大{count}人まで選択できます。",
@@ -3512,8 +3542,8 @@
       "message": "このエディターを開いている間に新しいバージョンが保存されました。編集を続ける前に再読み込みしてください。"
     },
     "permissionRevoked": {
-      "title": "編集権限が取り消されました",
-      "message": "このコンテンツを編集する権限がなくなりました。権限の取り消し後に行った変更は保存されません。"
+      "title": "アクセス権が削除されました",
+      "message": "このコンテンツにはもうアクセスできません。未保存の変更はこのデバイスに保持されます。"
     },
     "sessionExpired": {
       "title": "セッションの有効期限が切れました",
@@ -3587,8 +3617,8 @@
         "browse": "ファイルを選択",
         "importFromUrl": "URLからインポート",
         "directVideoUrlHelp": "動画ファイルの直接 URL のみ使用できます。YouTube または Vimeo には「外部動画」を使用してください。",
-        "resumeAvailable": "Interrupted upload found",
-        "resumeInstructionNamed": "Select {name} again to continue the upload from where it stopped.",
+        "resumeAvailable": "中断したアップロードが見つかりました",
+        "resumeInstructionNamed": "{name}を再度選択すると、中断したところからアップロードを再開できます。",
         "backToUpload": "ファイルをアップロード",
         "openLibrary": "ファイルライブラリ",
         "unifiedDescription": "ファイルをアップロードするか、ライブラリから選択してください。",
@@ -3623,7 +3653,7 @@
           "done": "終了",
           "reset": "リセット",
           "live": "ライブ",
-          "playingInPictureInPicture": "Playing in picture-in-picture",
+          "playingInPictureInPicture": "ピクチャーインピクチャーで再生中",
           "videoPlayerLoading": "動画プレーヤーを読み込み中です。",
           "currentTime": "現在の時間",
           "duration": "長さ",
@@ -3754,14 +3784,14 @@
           "quote": {
             "title": "引用",
             "subtext": "引用または抜粋",
-            "aliases": "quotation\nblockquote\nbq",
+            "aliases": "quotation\nblockquote\nbq\n引用\n引用文",
             "group": "基本ブロック"
           },
           "callout": {
             "title": "Callout",
-            "subtext": "Highlight content with an icon",
-            "aliases": "callout\nnotice\ninfo\naside",
-            "group": "Basic blocks"
+            "subtext": "アイコンで内容を強調",
+            "aliases": "callout\nnotice\ninfo\naside\nコールアウト\n通知\n情報\n補足",
+            "group": "基本ブロック"
           },
           "divider": {
             "title": "区切り",
@@ -3790,61 +3820,61 @@
           "mathBlock": {
             "title": "数式ブロック",
             "subtext": "LaTeX で数式を表示",
-            "aliases": "math\nequation\nlatex\nformula",
+            "aliases": "math\nequation\nlatex\nformula\n数学\n数式\n方程式",
             "group": "数式"
           },
           "inlineMath": {
             "title": "インライン数式",
             "subtext": "文中に LaTeX 数式を挿入",
-            "aliases": "inline\ninline math\ninlinemath\nlatex\n$",
+            "aliases": "inline\ninline math\ninlinemath\nlatex\n$\nインライン\nインライン数式\n数式",
             "group": "インライン"
           },
           "map": {
             "title": "地図",
             "subtext": "地図上の場所を挿入",
-            "aliases": "map\nlocation\nplace\naddress",
+            "aliases": "map\nlocation\nplace\naddress\n地図\n位置\n場所\n住所",
             "group": "埋め込み"
           },
           "externalVideo": {
             "title": "外部動画",
             "subtext": "YouTube または Vimeo のリンクを挿入",
-            "aliases": "external video\nyoutube\nvimeo\nembed",
+            "aliases": "external video\nyoutube\nvimeo\nembed\n外部動画\nユーチューブ\n埋め込み",
             "group": "埋め込み"
           },
           "p5Sketch": {
             "title": "p5.js",
             "subtext": "インタラクティブな p5.js スケッチを追加",
-            "aliases": "p5\np5.js\nsketch\ncreative coding",
+            "aliases": "p5\np5.js\nsketch\ncreative coding\nスケッチ\nクリエイティブコーディング",
             "group": "埋め込み"
           },
           "threeScene": {
             "title": "Three.js",
             "subtext": "インタラクティブな Three.js シーンを追加",
-            "aliases": "three\nthree.js\n3d\nscene",
+            "aliases": "three\nthree.js\n3d\nscene\n立体\nシーン\n3次元",
             "group": "埋め込み"
           },
           "file": {
             "title": "添付ファイル",
             "subtext": "ファイル（PDF、DOC、ZIP など）を添付",
-            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload",
+            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\n添付\nファイル\n文書\nダウンロード",
             "group": "メディア"
           },
           "aiAssistant": {
             "title": "AIアシスタント",
             "subtext": "AI で文章を作成、改善、変換",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove",
+            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nアシスタント\n執筆\n改善\n人工知能",
             "group": "AI"
           },
           "shader": {
             "title": "GLSLシェーダー",
             "subtext": "インタラクティブなGLSLシェーダーを追加します",
-            "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "aliases": "shader\nglsl\nfragment shader\nshadertoy\nシェーダー\nフラグメントシェーダー",
             "group": "埋め込み"
           },
           "mermaid": {
             "title": "Mermaid",
             "subtext": "テキストから図を作成",
-            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence\n図\nダイアグラム\nフローチャート\nシーケンス",
             "group": "埋め込み"
           }
         }
@@ -4024,6 +4054,12 @@
       "media": {
         "importFromUrl": "URLからインポート"
       }
+    },
+    "accessDowngraded": {
+      "message": "アクセス権が閲覧のみに変更されました。編集は無効です。未保存の変更はこのデバイスに保持され、編集権限を再び取得すると保存されます。"
+    },
+    "accessUpgraded": {
+      "message": "再び編集できるようになりました。閲覧のみの間に保持された変更を保存しています。"
     }
   },
   "aiAssistant": {
@@ -4166,38 +4202,38 @@
     "resolvedMetadata": "解決済みメタデータ"
   },
   "translationPanel": {
-    "description": "Review the source language and existing translation document for each locale.",
+    "description": "原文言語と各ロケールの既存の翻訳文書を確認します。",
     "actions": {
       "expand": "展開",
       "collapse": "折りたたむ",
-      "regenerateAll": "Generate/regenerate all eligible locales",
+      "regenerateAll": "対象となるすべてのロケールで生成/再生成",
       "regenerateLocale": "再生成",
       "regenerateLocaleAria": "{locale} の翻訳を再生成",
       "generateLocale": "Generate",
-      "generateLocaleAria": "Generate {locale} translation"
+      "generateLocaleAria": "{locale}の翻訳を生成"
     },
     "sourceLocale": {
       "label": "原文言語",
       "description": "このエンティティの翻訳の基準となる原文言語です",
       "confirm": {
         "title": "原文言語を変更",
-        "description": "Changing the source language updates only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically.",
-        "detail": "{locale} becomes the language of the editable source document. Existing target documents and translation jobs remain unchanged.",
+        "description": "原文言語を変更すると、原文の参照先のみ更新されます。既存の翻訳先文書と翻訳ジョブは変更されず、翻訳は自動生成されません。",
+        "detail": "{locale}が編集可能な原文文書の言語になります。既存の翻訳先文書と翻訳ジョブは変更されません。",
         "confirm": "変更して再翻訳"
       }
     },
     "activeEditLocale": {
-      "ariaLabel": "Switch content language. Current: {locale}",
+      "ariaLabel": "コンテンツの言語を切り替えます。現在: {locale}",
       "sourceOption": "{locale}（原文）",
       "loading": "言語を読み込み中...",
-      "missingDescription": "No {locale} target document exists yet. Generate it from the translations panel.",
+      "missingDescription": "{locale}の翻訳先文書はまだありません。翻訳パネルから生成してください。",
       "bodyPreviewTitle": "{locale} 本文プレビュー",
-      "bodyPreviewDescription": "The existing translation document is shown with its structure and formatting.",
+      "bodyPreviewDescription": "既存の翻訳文書を構造と書式を保持して表示します。",
       "bodyPreviewEmpty": "本文プレビューはまだありません",
-      "sharedStructureSectionDescription": "This section keeps shared layout or query settings from the source page; translated body content is read-only.",
+      "sharedStructureSectionDescription": "このセクションでは原文ページの共有レイアウトやクエリ設定を保持します。翻訳された本文は読み取り専用です。",
       "sectionFieldLabels": {
         "caption": "キャプション",
-        "copyJson": "Scene copy"
+        "copyJson": "シーンの文言"
       }
     },
     "statuses": {
@@ -4205,7 +4241,7 @@
     },
     "states": {
       "loadFailed": "翻訳の読み込みに失敗しました",
-      "missingTarget": "No target document yet.",
+      "missingTarget": "翻訳先文書はまだありません。",
       "sourceEditorHint": "原文はメインエディタで編集してください",
       "updatedAt": "{date} に更新"
     },
@@ -4218,26 +4254,26 @@
     }
   },
   "translationPanelMenu": {
-    "description": "Review source menu labels and existing translation documents.",
+    "description": "原文のメニューラベルと既存の翻訳文書を確認します。",
     "previewModal": {
-      "title": "{locale} menu translation preview",
+      "title": "{locale}のメニュー翻訳プレビュー",
       "fields": {
-        "localizedLabelForLocale": "{locale} public label"
+        "localizedLabelForLocale": "{locale}の公開ラベル"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template."
+      "description": "このメールテンプレートの原文言語と既存の翻訳文書を管理します。"
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout."
+      "description": "このメールレイアウトの原文言語と既存の翻訳文書を管理します。"
     }
   },
   "localizationNotice": {
     "translated": {
-      "title": "Localized version",
-      "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
+      "title": "翻訳版",
+      "description": "この翻訳版は{displayed}で表示されています。{source}の原文が優先されます。"
     },
     "fallback": {
       "title": "代替言語"
@@ -4260,15 +4296,15 @@
       "totalLocales": "総ロケール数",
       "sourceEntities": "原文エンティティ数",
       "activeJobs": "進行中のジョブ",
-      "existingEntries": "Existing translations"
+      "existingEntries": "既存の翻訳"
     },
     "sections": {
-      "localeHealthTitle": "Translation state by locale",
-      "entityHealthTitle": "Translation state by entity type"
+      "localeHealthTitle": "ロケール別の翻訳状態",
+      "entityHealthTitle": "エンティティタイプ別の翻訳状態"
     },
     "columns": {
       "policy": "ポリシー",
-      "lastTargetUpdate": "Last target update",
+      "lastTargetUpdate": "翻訳先の最終更新",
       "entity": "エンティティ",
       "sources": "原文数",
       "lastSourceUpdate": "最終原文更新"
@@ -4304,7 +4340,7 @@
   },
   "translationSettingsPage": {
     "title": "翻訳設定",
-    "description": "Manage the default source language and automatic translation providers. An Admin explicitly starts translation generation from each editor.",
+    "description": "デフォルトの原文言語と自動翻訳プロバイダーを管理します。管理者が各エディターから翻訳の生成を明示的に開始します。",
     "actions": {
       "jobs": "ジョブ",
       "save": "設定を保存",
@@ -4314,8 +4350,8 @@
       "createProvider": "プロバイダーを作成"
     },
     "sections": {
-      "runtime": "Source defaults",
-      "runtimeDescription": "Set only the language used when a source language has not been established. Source changes never start translation generation automatically.",
+      "runtime": "原文のデフォルト設定",
+      "runtimeDescription": "原文言語が未設定の場合に使用する言語のみ設定します。原文を変更しても、翻訳の生成は自動的に開始されません。",
       "providers": "翻訳プロバイダー",
       "providersDescription": "機械翻訳プロバイダーを管理します。有効な認証情報を持つアクティブなプロバイダーが少なくとも1つ必要です。"
     },
@@ -4325,10 +4361,10 @@
         "description": "原文ロケールがまだ設定されていない場合や、リクエストがサポート対象のコンテンツロケールに解決されない場合に使われます"
       },
       "protectedTerms": {
-        "label": "Protected terms",
-        "description": "Exact case-sensitive spellings that translation generation must keep unchanged. No terms are learned or suggested automatically.",
-        "placeholder": "Add a protected term",
-        "examples": "Examples: Photoshop, React Native"
+        "label": "保護用語",
+        "description": "翻訳の生成時にそのまま保持する、大文字と小文字を区別した正確な表記です。用語の自動学習や自動提案は行いません。",
+        "placeholder": "保護用語を追加",
+        "examples": "例: Photoshop, React Native"
       },
       "providerName": {
         "label": "プロバイダー名"
@@ -4350,7 +4386,7 @@
         "descriptionEdit": "保存済みのキーを保持する場合は空欄にします。"
       },
       "deeplApiBaseUrl": {
-        "label": "DeepL API base URL",
+        "label": "DeepL APIベースURL",
         "description": "プロキシや専用エンドポイントを使う場合以外は既定値を使用します。"
       },
       "llmPreset": {
@@ -5268,6 +5304,40 @@
       "goHome": "ホームへ移動",
       "tryAgain": "再試行",
       "login": "ログインに戻る"
+    }
+  },
+  "localBackups": {
+    "title": "ローカルバックアップ",
+    "description": "このデバイスで閉じたタブの未保存の変更です。エディターを開くと復元できます。バックアップは30日後に期限切れとなり、ログアウトすると削除されます。",
+    "empty": "復元できるローカルバックアップはありません。開いているタブの変更はここには表示されません。",
+    "unavailable": "ローカルバックアップには、このデバイスのブラウザーストレージとWeb Locksが必要です。",
+    "loading": "ローカルバックアップを検索中…",
+    "error": "操作を完了できませんでした。一覧を更新して、もう一度お試しください。",
+    "refresh": "更新",
+    "lastChanged": "最終変更 {time}",
+    "open": "エディターを開く",
+    "discard": "破棄",
+    "openLabel": "エディターを開く: {kind} {id}, {locale}",
+    "discardLabel": "破棄: {kind} {id}, {locale}",
+    "discardTitle": "ローカルバックアップを破棄しますか?",
+    "discardDescription": "これらの未保存の変更はこのデバイスから完全に削除されます。保存済みのコンテンツには影響しません。",
+    "kinds": {
+      "post": "投稿",
+      "page": "ページ",
+      "work": "作品",
+      "campaign": "キャンペーン",
+      "email-template": "メールテンプレート",
+      "email-layout": "メールレイアウト",
+      "terms-history": "利用規約",
+      "privacy-history": "プライバシーポリシー",
+      "artist": "アーティスト",
+      "release": "リリース",
+      "label": "レーベル",
+      "form": "フォーム",
+      "map-theme": "地図テーマ",
+      "program-event": "イベント",
+      "menu": "メニュー",
+      "post-series": "投稿シリーズ"
     }
   }
 }

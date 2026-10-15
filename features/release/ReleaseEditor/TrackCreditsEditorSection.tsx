@@ -1,4 +1,5 @@
 'use client';
+import { useReleaseEditorCanEdit } from './ReleaseEditorAccessContext';
 import { breakpointQuery } from '@/components/core/Layout/breakpoints';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
@@ -24,6 +25,7 @@ import { IconButton } from '@/components/core/IconButton';
 import { SegmentedControl, Select, TextInput } from '@/components/core/Input';
 import { listArtistsAction } from '@/lib/actions/artist';
 import { setTrackCreditsAction } from '@/lib/actions/track';
+import { getUntrackedConfigurationWriteOrigin } from '@/lib/editor/editor-write-origin';
 import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
 import { listUsersAdminAction } from '@/lib/actions/user';
 import type { ReleaseTrackItem } from '@/lib/collab/schemas/release-fields.schema';
@@ -36,7 +38,7 @@ interface TrackCreditsEditorSectionProps {
   trackId: string;
   credits: ReleaseTrackItem['credits'];
   onCreditsChange: (credits: ReleaseTrackItem['credits']) => void;
-  onMutationStart?: () => void;
+  onMutationStart?: () => string | void;
   onMutationSettled?: (succeeded: boolean) => void;
 }
 
@@ -49,6 +51,7 @@ export function TrackCreditsEditorSection({
   onMutationStart,
   onMutationSettled,
 }: TrackCreditsEditorSectionProps) {
+  const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
   const tTracks = useTranslations('releaseEditor.tracks');
   const tCredits = useTranslations('releaseEditor.credits');
@@ -72,9 +75,19 @@ export function TrackCreditsEditorSection({
   const allMembers = (members?.data ?? []).map((member) => ({ id: member.id, name: member.nickname }));
 
   const setCredits = useMutation({
-    mutationFn: (nextCredits: ReleaseTrackItem['credits']) =>
-      setTrackCreditsAction(trackId, toTrackCreditMutationInput(nextCredits), toTrackCreditMutationInput(credits)),
-    onMutate: () => onMutationStart?.(),
+    mutationFn: async (nextCredits: ReleaseTrackItem['credits']) => {
+      const editorOrigin = onMutationStart?.() || getUntrackedConfigurationWriteOrigin(`release:${releaseId}`);
+      const result = await setTrackCreditsAction(
+        trackId,
+        toTrackCreditMutationInput(nextCredits),
+        toTrackCreditMutationInput(credits),
+        editorOrigin,
+      );
+      if (result.success && !result.error) {
+        publishEditorEntityChange(`release:${releaseId}`, editorOrigin);
+      }
+      return result;
+    },
     onSettled: (result, error) => onMutationSettled?.(!error && Boolean(result?.success) && !result?.error),
   });
 
@@ -93,7 +106,6 @@ export function TrackCreditsEditorSection({
           notifications.show({ message: result.error, tone: 'danger' });
           return;
         }
-        publishEditorEntityChange(`release:${releaseId}`);
         notifications.show({ message: successMessage, tone: 'positive' });
         onCreditsChange(nextCredits);
         onSuccess?.();
@@ -102,6 +114,9 @@ export function TrackCreditsEditorSection({
   };
 
   const handleAddCredit = () => {
+    if (!canEdit) {
+      return;
+    }
     let newCredit: ReleaseTrackItem['credits'][number] | null = null;
 
     if (creditType === 'artist' && selectedArtistId) {
@@ -172,6 +187,9 @@ export function TrackCreditsEditorSection({
   };
 
   const handleRemoveCredit = (creditId: string) => {
+    if (!canEdit) {
+      return;
+    }
     persistCredits(
       credits.filter((credit) => credit.id !== creditId),
       tCommon('messages.itemRemoved', { item: tCommon('entities.credit') }),
@@ -191,6 +209,7 @@ export function TrackCreditsEditorSection({
 
   const removeButton = (credit: ReleaseTrackItem['credits'][number]) => (
     <IconButton
+      disabled={!canEdit}
       tone="danger"
       emphasis="low"
       size="sm"
@@ -265,6 +284,7 @@ export function TrackCreditsEditorSection({
           {tCommon('actions.addItem', { item: tCommon('entities.credit') })}
         </DsText>
         <SegmentedControl
+          disabled={!canEdit}
           aria-label={tCommon('entities.credit')}
           id={idPrefix ? `${idPrefix}-track-credit-type-${trackId}` : undefined}
           value={creditType}
@@ -280,6 +300,7 @@ export function TrackCreditsEditorSection({
         <DsLayoutStack gap="sm">
           {creditType === 'artist' ? (
             <Select
+              disabled={!canEdit}
               aria-label={tCommon('entities.artist')}
               id={idPrefix ? `${idPrefix}-track-credit-artist-${trackId}` : undefined}
               placeholder={tCredits('placeholders.selectArtist')}
@@ -292,6 +313,7 @@ export function TrackCreditsEditorSection({
           ) : null}
           {creditType === 'member' ? (
             <Select
+              disabled={!canEdit}
               aria-label={tCommon('entities.member')}
               id={idPrefix ? `${idPrefix}-track-credit-member-${trackId}` : undefined}
               placeholder={tCredits('placeholders.selectUser')}
@@ -304,6 +326,7 @@ export function TrackCreditsEditorSection({
           ) : null}
           {creditType === 'text' ? (
             <TextInput
+              disabled={!canEdit}
               aria-label={tCommon('labels.name')}
               id={idPrefix ? `${idPrefix}-track-credit-name-${trackId}` : undefined}
               placeholder={tCredits('placeholders.creditedName')}
@@ -313,6 +336,7 @@ export function TrackCreditsEditorSection({
             />
           ) : null}
           <TextInput
+            disabled={!canEdit}
             aria-label={tCommon('labels.role')}
             id={idPrefix ? `${idPrefix}-track-credit-role-${trackId}` : undefined}
             placeholder={tCredits('placeholders.role')}
@@ -326,7 +350,7 @@ export function TrackCreditsEditorSection({
             emphasis="medium"
             size="sm"
             onClick={handleAddCredit}
-            disabled={isAddDisabled}
+            disabled={!canEdit || isAddDisabled}
             loading={setCredits.isPending}
           >
             {tCommon('actions.add')}

@@ -98,3 +98,24 @@ describe('isLocaleDocumentEditable', () => {
     expect(isLocaleDocumentEditable(editableInput)).toBe(true);
   });
 });
+
+it('retains admitted local editability during a transient disconnect', () => {
+  expect(
+    isLocaleDocumentEditable({
+      activeLocale: 'en',
+      shouldUseLocaleDocument: true,
+      canEditActiveLocale: true,
+      isSynced: false,
+      isReady: true,
+    }),
+  ).toBe(true);
+  expect(
+    isLocaleDocumentEditable({
+      activeLocale: 'en',
+      shouldUseLocaleDocument: true,
+      canEditActiveLocale: false,
+      isSynced: false,
+      isReady: true,
+    }),
+  ).toBe(false);
+});

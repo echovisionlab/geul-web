@@ -32,9 +32,67 @@ export interface BlockRoomIntentChange {
 export interface BlockRoomIntentAcknowledgement extends BlockRoomDurabilityState {}
 
 const intentJournals = new Map<string, BlockRoomIntentChange[]>();
+/**
+ * Leading entries of each journal that later intents must not merge into. An entry is sealed once
+ * the server may hold it, so an intent it received stays separate from one it did not: a rebuild
+ * then keeps the held entry as is and rebases only the rest. Sealing only stops merging, so
+ * sealing more than necessary is always safe.
+ */
+const sealedEntries = new Map<string, number>();
+
+function sealAll(key: string): void {
+  const length = intentJournals.get(key)?.length ?? 0;
+  if (length) {
+    sealedEntries.set(key, length);
+  } else {
+    sealedEntries.delete(key);
+  }
+}
+
+/** Marks every current intent as possibly received by the server (its sync was acknowledged). */
+export function sealBlockRoomIntents(scope: BlockRoomIntentScope): void {
+  sealAll(scopeKey(scope));
+}
+
+export type BlockRoomIntentJournalListener = (scope: BlockRoomIntentScope, changes: BlockRoomIntentChange[]) => void;
+
+const journalListeners = new Set<BlockRoomIntentJournalListener>();
 
 function scopeKey(scope: BlockRoomIntentScope): string {
+  return blockRoomIntentScopeKey(scope);
+}
+
+/** Stable identity of one journal; the source locale is part of it so role transitions never mix intents. */
+export function blockRoomIntentScopeKey(scope: BlockRoomIntentScope): string {
   return [scope.documentType, scope.entityId, scope.locale, scope.sourceLocale].join('\u0000');
+}
+
+function emitJournalChange(scope: BlockRoomIntentScope): void {
+  if (journalListeners.size === 0) {
+    return;
+  }
+  const changes = getBlockRoomIntentChanges(scope);
+  const normalizedScope: BlockRoomIntentScope = {
+    documentType: scope.documentType,
+    entityId: scope.entityId,
+    locale: scope.locale,
+    sourceLocale: scope.sourceLocale,
+  };
+  for (const listener of journalListeners) {
+    listener(normalizedScope, changes);
+  }
+}
+
+/** Observes every journal mutation, e.g. to mirror it into durable browser storage. */
+export function subscribeBlockRoomIntentJournal(listener: BlockRoomIntentJournalListener): () => void {
+  journalListeners.add(listener);
+  return () => {
+    journalListeners.delete(listener);
+  };
+}
+
+export function hasBlockRoomIntentChanges(scope: BlockRoomIntentScope): boolean {
+  return (intentJournals.get(scopeKey(scope))?.length ?? 0) > 0;
 }
 
 function cloneSnapshot(snapshot: CanonicalBlockRoomSnapshot): CanonicalBlockRoomSnapshot {
@@ -104,7 +162,7 @@ export function recordBlockRoomIntent(scope: BlockRoomIntentScope, change: Block
   }
   const key = scopeKey(scope);
   const journal = intentJournals.get(key) ?? [];
-  const previous = journal.at(-1);
+  const previous = journal.length > (sealedEntries.get(key) ?? 0) ? journal.at(-1) : undefined;
   if (previous && sameCanonicalBody(scope.documentType, previous.after, change.before)) {
     journal[journal.length - 1] = cloneChange({
       before: previous.before,
@@ -116,7 +174,27 @@ export function recordBlockRoomIntent(scope: BlockRoomIntentScope, change: Block
     journal.push(cloneChange(change));
   }
   intentJournals.set(key, journal);
+  emitJournalChange(scope);
   return true;
+}
+
+/**
+ * Adds intents recovered from another tab or an earlier session after this
+ * tab's own intents. They are replayed semantically, so stale Yjs stamps are
+ * replaced by the next replay of the scope.
+ */
+export function appendBlockRoomIntentChanges(
+  scope: BlockRoomIntentScope,
+  changes: readonly BlockRoomIntentChange[],
+): void {
+  const recorded = changes.filter((change) => blockRoomIntentChangesCanonicalBody(scope, change));
+  if (!recorded.length) {
+    return;
+  }
+  const key = scopeKey(scope);
+  intentJournals.set(key, [...(intentJournals.get(key) ?? []), ...recorded.map(cloneChange)]);
+  sealAll(key);
+  emitJournalChange(scope);
 }
 
 export function getBlockRoomIntentChanges(scope: BlockRoomIntentScope): BlockRoomIntentChange[] {
@@ -130,10 +208,16 @@ export function replaceBlockRoomIntentChanges(
 ): void {
   const key = scopeKey(scope);
   if (!changes.length) {
-    intentJournals.delete(key);
+    sealedEntries.delete(key);
+    const existed = intentJournals.delete(key);
+    if (existed) {
+      emitJournalChange(scope);
+    }
     return;
   }
   intentJournals.set(key, changes.map(cloneChange));
+  sealAll(key);
+  emitJournalChange(scope);
 }
 
 /**
@@ -154,9 +238,18 @@ export function acknowledgeBlockRoomIntents(
   } else {
     intentJournals.delete(key);
   }
+  if (acknowledged > 0) {
+    sealAll(key);
+  }
+  if (acknowledged > 0) {
+    emitJournalChange(scope);
+  }
   return { acknowledged, pending: pending.length };
 }
 
 export function clearBlockRoomIntentChanges(scope: BlockRoomIntentScope): void {
-  intentJournals.delete(scopeKey(scope));
+  sealedEntries.delete(scopeKey(scope));
+  if (intentJournals.delete(scopeKey(scope))) {
+    emitJournalChange(scope);
+  }
 }

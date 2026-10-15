@@ -5,6 +5,8 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { useDisclosure, useMounted, useOs } from '@mantine/hooks';
 import { openPostSpotlight, preloadPostSpotlight } from '@/features/post/PostSpotlight/post-spotlight-trigger';
 import { signOut, useSession } from '@/lib/auth/client';
+import { confirmationDialogs } from '@/features/confirmation/confirmation-dialogs';
+import { settleEditsBeforeSignOut } from '@/lib/editor/settle-edits-before-sign-out';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import type { UserDisplaySnapshot } from '@/lib/auth/user-display-cookie';
 import { COOKIE_CONSENT_OPEN_EVENT } from '@/lib/cookie-consent';
@@ -21,6 +23,11 @@ export interface ShellRuntimeLabels {
   lightMode: string;
   darkMode: string;
   toggleColorScheme: string;
+  signOutUnsavedTitle: string;
+  signOutUnsavedMessage: string;
+  signOutUnsavedConfirm: string;
+  cancel: string;
+  close: string;
 }
 
 function buildShellUser(
@@ -119,7 +126,22 @@ export function ShellRuntime({
       onToggleColorScheme: toggleColorScheme,
       onSignOut: () => {
         closeUserMenu();
-        signOut();
+        void settleEditsBeforeSignOut().then((settled) => {
+          if (settled) {
+            signOut();
+            return;
+          }
+          // Signing out now deletes unsaved edits from this device; ask first.
+          confirmationDialogs.open({
+            intent: 'discard',
+            title: labels.signOutUnsavedTitle,
+            message: labels.signOutUnsavedMessage,
+            confirmLabel: labels.signOutUnsavedConfirm,
+            cancelLabel: labels.cancel,
+            closeLabel: labels.close,
+            onConfirm: signOut,
+          });
+        });
       },
       onOpenCookieSettings: () => {
         window.dispatchEvent(new Event(COOKIE_CONSENT_OPEN_EVENT));

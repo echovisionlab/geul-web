@@ -1,5 +1,7 @@
 'use client';
 
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { Text as DsText } from '@/components/core/Typography';
 import { type ReactElement, useCallback, useState, type ReactNode } from 'react';
@@ -40,7 +42,7 @@ function useFormLayoutViewModel({ children, formId, initialStatus }: FormLayoutC
   const { activeEditLocale } = useFormTranslationContext();
   const shouldUseLocaleDocument =
     Boolean(activeEditLocale.activeLocale) && (activeEditLocale.isSourceLocale || activeEditLocale.hasLiveRow);
-  const canEditTranslationSource = true;
+  const canEditTranslationSource = useEditorAccessLevel(provider) === 'edit';
   const canEditCurrentLocale =
     canEditTranslationSource && activeEditLocale.canEditActiveLocale && shouldUseLocaleDocument && isSynced;
 
@@ -135,6 +137,7 @@ function useFormLayoutViewModel({ children, formId, initialStatus }: FormLayoutC
     displayedTitle,
     titleChangeHandler,
     tCommon,
+    canEditTranslationSource,
     titleDisabled,
     status,
     statusOptions,
@@ -168,6 +171,7 @@ export function FormLayoutView({ model }: { model: FormLayoutViewModel }) {
     displayedTitle,
     titleChangeHandler,
     tCommon,
+    canEditTranslationSource,
     titleDisabled,
     status,
     statusOptions,
@@ -198,9 +202,9 @@ export function FormLayoutView({ model }: { model: FormLayoutViewModel }) {
           isSynced={currentIsSynced}
           onBack={() => router.push(formsListPath)}
           backTooltip={t('navigation.backToForms')}
-          onStatusChange={(nextStatus) => updateStatus.mutate(nextStatus)}
+          onStatusChange={canEditTranslationSource ? (nextStatus) => updateStatus.mutate(nextStatus) : undefined}
           isStatusChanging={updateStatus.isPending}
-          onDelete={() => deleteForm.mutate()}
+          onDelete={canEditTranslationSource ? () => deleteForm.mutate() : undefined}
           deleteConfirmation={{
             title: tCommon('actions.delete'),
             message: (

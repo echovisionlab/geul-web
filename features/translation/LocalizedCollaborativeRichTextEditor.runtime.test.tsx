@@ -12,6 +12,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { act, type ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
+import { endProviderAccess } from '@/lib/collab/provider-control-state';
 import { BlockRoomProtocolClient } from '@/lib/collab/block-room-protocol';
 import { hasPendingEditorSaves } from '@/lib/editor/editor-save-registry';
 import { EditorRuntimeProvider, useOptionalEditorRuntimeContext } from '@/lib/contexts/EditorRuntimeContext';
@@ -31,9 +32,12 @@ vi.mock('@/features/editor/tiptap/TiptapEditor', async () => {
   const React = await import('react');
   const { useOptionalEditorRuntimeContext } = await import('@/lib/contexts/EditorRuntimeContext');
   return {
-    TiptapEditor: () => {
+    TiptapEditor: ({ editable }: { editable: boolean }) => {
       observeRuntime(useOptionalEditorRuntimeContext());
-      return React.createElement('div', { 'data-testid': 'localized-rich-text-surface' });
+      return React.createElement('div', {
+        'data-testid': 'localized-rich-text-surface',
+        'data-editable': String(editable),
+      });
     },
   };
 });
@@ -89,8 +93,8 @@ function createBootstrapPayload() {
   return {
     update,
     payload: JSON.stringify({
-      kind: 'block_room.bootstrap',
-      protocolVersion: 2,
+      kind: 'room.bootstrap',
+      v: 3,
       bootstrapChallenge: challenge,
       documentName,
       documentType: 'post',
@@ -115,8 +119,8 @@ function createBootstrapPayload() {
 function persistedMessage(document: Y.Doc): string {
   const update = Y.decodeUpdate(Y.encodeStateAsUpdate(document));
   return JSON.stringify({
-    kind: 'block_room.persisted',
-    protocolVersion: 2,
+    kind: 'room.persisted',
+    v: 3,
     documentName,
     stateVector: Buffer.from(Y.encodeStateVector(document)).toString('base64'),
     deleted: Object.fromEntries(update.ds.clients),
@@ -143,9 +147,7 @@ async function renderEditor() {
   protocol.handleStateless(bootstrap.payload);
   Y.applyUpdate(fixture.provider.document, bootstrap.update);
   protocol.handleProviderSynced();
-  protocol.handleStateless(
-    JSON.stringify({ kind: 'block_room.ready', protocolVersion: 2, bootstrapChallenge: challenge }),
-  );
+  protocol.handleStateless(JSON.stringify({ kind: 'room.ready', v: 3, bootstrapChallenge: challenge }));
 
   host = document.createElement('div');
   document.body.appendChild(host);
@@ -205,8 +207,8 @@ describe('localized editor runtime inheritance', () => {
 
     protocol!.handleStateless(
       JSON.stringify({
-        kind: 'block_room.persisted',
-        protocolVersion: 2,
+        kind: 'room.persisted',
+        v: 3,
         documentName,
         stateVector: Buffer.from(staleStateVector).toString('base64'),
         deleted: {},
@@ -220,15 +222,15 @@ describe('localized editor runtime inheritance', () => {
     const snapshotPromise = runtime!.getBlockRoomSnapshot();
     const requestPayload = sendStateless!.mock.calls
       .map(([payload]) => JSON.parse(payload) as Record<string, unknown>)
-      .find((message) => message.kind === 'block_room.snapshot');
+      .find((message) => message.kind === 'room.revision');
     expect(requestPayload?.requestId).toEqual(expect.any(String));
     protocol!.handleStateless(
       JSON.stringify({
-        kind: 'block_room.snapshot_result',
-        protocolVersion: 2,
+        kind: 'room.revision_result',
+        v: 3,
         requestId: requestPayload!.requestId,
         ok: true,
-        snapshot: { documentRevision: revision, sourceLocale: 'ko', locale: 'ko', localeExists: true },
+        revision: { documentRevision: revision, sourceLocale: 'ko', locale: 'ko', localeExists: true },
       }),
     );
     await expect(snapshotPromise).resolves.toEqual({
@@ -239,3 +241,17 @@ describe('localized editor runtime inheritance', () => {
     });
   });
 });
+
+it.each(['permission_revoked', 'session_expired'] as const)(
+  'stops authoring the retained document after access end: %s',
+  async (reason) => {
+    await renderEditor();
+    expect(host?.querySelector('[data-editable]')?.getAttribute('data-editable')).toBe('true');
+    const document = fixture!.provider.document;
+    document.getMap('local-authoring').set('body', 'Unpersisted local intent');
+    act(() => endProviderAccess(fixture!.provider, reason));
+    expect(host?.querySelector('[data-editable]')?.getAttribute('data-editable')).toBe('false');
+    expect(hasPendingEditorSaves(`post:${entityId}`)).toBe(true);
+    expect(document.getMap('local-authoring').get('body')).toBe('Unpersisted local intent');
+  },
+);

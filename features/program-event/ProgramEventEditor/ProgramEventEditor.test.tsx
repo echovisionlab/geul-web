@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
@@ -10,6 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => {
   const subscribeMetadata = vi.fn();
   return {
+    provider: { on: vi.fn(), off: vi.fn() },
     archiveEvent: vi.fn(),
     back: vi.fn(),
     deleteEvent: vi.fn(),
@@ -46,12 +48,14 @@ vi.mock('next-intl', () => ({
 vi.mock('@/components/core/Notification', () => ({ notifications: { show: mocks.notification } }));
 vi.mock('@/features/editor/EditorHeader', () => ({
   EditorHeader: ({
+    titleDisabled,
     onBack,
     onTitleChange,
     onStatusChange,
     onDelete,
     title,
   }: {
+    titleDisabled?: boolean;
     onBack?: () => void;
     onTitleChange?: (value: string) => void;
     onStatusChange?: (status: 'published' | 'archived') => void;
@@ -61,6 +65,7 @@ vi.mock('@/features/editor/EditorHeader', () => ({
     <div>
       <div data-testid="event-title">{title}</div>
       <input
+        disabled={titleDisabled}
         data-testid="event-title-input"
         value={title}
         onChange={(event) => onTitleChange?.(event.currentTarget.value)}
@@ -169,7 +174,7 @@ vi.mock('@/features/editor/hooks/useRichTextBlockRoomEditor', () => ({
     isConnected: true,
     isSynced: true,
     protocol: mocks.protocol,
-    provider: null,
+    provider: mocks.provider,
     reloadCanonical: vi.fn(),
   }),
 }));
@@ -205,7 +210,9 @@ let container: HTMLDivElement;
 let root: Root;
 let queryClient: QueryClient;
 
-function renderEditor() {
+function renderEditor(
+  allowedActions: React.ComponentProps<typeof ProgramEventEditor>['allowedActions'] = ['edit', 'publish', 'delete'],
+) {
   root.render(
     <QueryClientProvider client={queryClient}>
       <DesignSystemProvider forceColorScheme="light">
@@ -236,7 +243,7 @@ function renderEditor() {
           initialLabels={[{ id: 'label-old', role: 'support', sortOrder: 2 }]}
           initialClients={[{ id: 'client-old', role: 'host', sortOrder: 8 }]}
           initialCredits={[]}
-          allowedActions={['edit', 'publish', 'delete']}
+          allowedActions={allowedActions}
           typeOptions={[{ id: 'type-1', name: 'Type' }]}
           seriesOptions={[]}
           canManageTaxonomy={false}
@@ -260,6 +267,7 @@ function setInputValue(element: HTMLInputElement | HTMLTextAreaElement, value: s
 }
 
 beforeEach(() => {
+  setProviderAccessLevel(mocks.provider, 'edit');
   vi.clearAllMocks();
   queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
   mocks.activeLocale = 'en';
@@ -312,6 +320,24 @@ afterEach(() => {
 });
 
 describe('ProgramEventEditor relation saves and navigation', () => {
+  it('upgrades and downgrades title and lifecycle without replacing event content', async () => {
+    setProviderAccessLevel(mocks.provider, 'view');
+    await act(async () => renderEditor([]));
+    const title = container.querySelector('[data-testid="event-title-input"]') as HTMLInputElement;
+    const summary = container.querySelector('[data-testid="event-summary"]');
+    expect(title.disabled).toBe(true);
+    act(() => setProviderAccessLevel(mocks.provider, 'edit'));
+    expect(title.disabled).toBe(true);
+    await act(async () => renderEditor(['edit', 'publish', 'delete']));
+    expect(title.disabled).toBe(false);
+    expect(container.querySelector('[data-testid="publish"]')).not.toBeNull();
+    expect(container.querySelector('[data-testid="event-summary"]')).toBe(summary);
+    act(() => setProviderAccessLevel(mocks.provider, 'view'));
+    expect(title.disabled).toBe(true);
+    expect(container.querySelector('[data-testid="event-summary"]')).toBe(summary);
+    expect(container.querySelector('[data-testid="publish"]')).toBeNull();
+    expect(container.querySelector('[data-testid="delete"]')).toBeNull();
+  });
   it('adopts committed peer title and summary updates from the active room', async () => {
     await act(async () => renderEditor());
     await vi.waitFor(() => expect(mocks.subscribeMetadata).toHaveBeenCalledOnce());
@@ -445,10 +471,14 @@ describe('ProgramEventEditor relation saves and navigation', () => {
     act(() => container.querySelector<HTMLButtonElement>('[data-testid="relation-artists"]')?.click());
     act(() => container.querySelector<HTMLButtonElement>('[data-testid="back"]')?.click());
     await vi.waitFor(() =>
-      expect(mocks.updateEvent).toHaveBeenCalledWith(eventId, {
-        artists: [{ id: 'artists-next', sortOrder: 0 }],
-        observed: { artists: [{ id: 'artist-old', role: 'performer', sortOrder: 4 }] },
-      }),
+      expect(mocks.updateEvent).toHaveBeenCalledWith(
+        eventId,
+        {
+          artists: [{ id: 'artists-next', sortOrder: 0 }],
+          observed: { artists: [{ id: 'artist-old', role: 'performer', sortOrder: 4 }] },
+        },
+        expect.any(String),
+      ),
     );
     expect(mocks.back).not.toHaveBeenCalled();
 
@@ -469,7 +499,9 @@ describe('ProgramEventEditor relation saves and navigation', () => {
 
     act(() => container.querySelector<HTMLButtonElement>('[data-testid="slug-change"]')?.click());
     act(() => container.querySelector<HTMLButtonElement>('[data-testid="back"]')?.click());
-    await vi.waitFor(() => expect(mocks.updateEvent).toHaveBeenCalledWith(eventId, { slug: 'next-slug' }));
+    await vi.waitFor(() =>
+      expect(mocks.updateEvent).toHaveBeenCalledWith(eventId, { slug: 'next-slug' }, expect.any(String)),
+    );
     expect(mocks.back).not.toHaveBeenCalled();
 
     await act(async () => {
@@ -487,14 +519,18 @@ describe('ProgramEventEditor relation saves and navigation', () => {
     act(() => container.querySelector<HTMLButtonElement>('[data-testid="back"]')?.click());
 
     await vi.waitFor(() => expect(mocks.updateEvent).toHaveBeenCalledOnce());
-    expect(mocks.updateEvent).toHaveBeenCalledWith(eventId, {
-      artists: [{ id: 'artists-latest', sortOrder: 0 }],
-      labels: [{ id: 'labels-next', sortOrder: 0 }],
-      observed: {
-        artists: [{ id: 'artist-old', role: 'performer', sortOrder: 4 }],
-        labels: [{ id: 'label-old', role: 'support', sortOrder: 2 }],
+    expect(mocks.updateEvent).toHaveBeenCalledWith(
+      eventId,
+      {
+        artists: [{ id: 'artists-latest', sortOrder: 0 }],
+        labels: [{ id: 'labels-next', sortOrder: 0 }],
+        observed: {
+          artists: [{ id: 'artist-old', role: 'performer', sortOrder: 4 }],
+          labels: [{ id: 'label-old', role: 'support', sortOrder: 2 }],
+        },
       },
-    });
+      expect.any(String),
+    );
     expect(mocks.back).toHaveBeenCalledOnce();
   });
 

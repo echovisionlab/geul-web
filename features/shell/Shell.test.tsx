@@ -9,6 +9,8 @@ const mocks = vi.hoisted(() => ({
   pathname: '/work',
   search: '',
   signOut: vi.fn(),
+  settled: true,
+  confirm: vi.fn(),
   toggleColorScheme: vi.fn(),
   openSearch: vi.fn(),
   preloadSearch: vi.fn(),
@@ -46,6 +48,12 @@ vi.mock('@mantine/hooks', async () => {
 vi.mock('@/features/post/PostSpotlight/post-spotlight-trigger', () => ({
   openPostSpotlight: mocks.openSearch,
   preloadPostSpotlight: mocks.preloadSearch,
+}));
+vi.mock('@/lib/editor/settle-edits-before-sign-out', () => ({
+  settleEditsBeforeSignOut: async () => mocks.settled,
+}));
+vi.mock('@/features/confirmation/confirmation-dialogs', () => ({
+  confirmationDialogs: { open: mocks.confirm },
 }));
 vi.mock('@/lib/auth/client', () => ({
   signOut: mocks.signOut,
@@ -101,6 +109,11 @@ const labels = {
   lightMode: 'Light mode',
   darkMode: 'Dark mode',
   toggleColorScheme: 'Toggle color scheme',
+  signOutUnsavedTitle: 'Sign out with unsaved edits?',
+  signOutUnsavedMessage: 'Signing out deletes them from this device.',
+  signOutUnsavedConfirm: 'Sign out and discard',
+  cancel: 'Cancel',
+  close: 'Close',
 };
 
 function Probe() {
@@ -191,15 +204,33 @@ describe('ShellRuntime client state', () => {
     expect(state().isItemActive(about)).toBe(true);
   });
 
-  it('hands logout to the full-page auth redirect', () => {
+  it('hands logout to the full-page auth redirect once every edit is saved', async () => {
+    mocks.settled = true;
+    mocks.signOut.mockClear();
     renderRuntime();
     act(() => state().events.onOpenUserMenu());
     expect(state().userMenuOpened).toBe(true);
 
-    act(() => state().events.onSignOut());
+    await act(async () => state().events.onSignOut());
 
     expect(mocks.signOut).toHaveBeenCalledOnce();
+    expect(mocks.confirm).not.toHaveBeenCalled();
     expect(state().userMenuOpened).toBe(false);
+  });
+
+  it('asks before signing out would delete unsaved edits from this device', async () => {
+    mocks.settled = false;
+    mocks.signOut.mockClear();
+    mocks.confirm.mockClear();
+    renderRuntime();
+
+    await act(async () => state().events.onSignOut());
+
+    expect(mocks.signOut).not.toHaveBeenCalled();
+    expect(mocks.confirm).toHaveBeenCalledWith(
+      expect.objectContaining({ intent: 'discard', title: labels.signOutUnsavedTitle, onConfirm: mocks.signOut }),
+    );
+    mocks.settled = true;
   });
 
   it('shows the cookie snapshot while the session resolves, then the session user and role-gated links', () => {
@@ -231,6 +262,11 @@ describe('Shell server composition', () => {
       lightMode: 'common.theme.lightMode',
       darkMode: 'common.theme.darkMode',
       toggleColorScheme: 'common.actions.toggleColorScheme',
+      signOutUnsavedTitle: 'shell.signOutUnsaved.title',
+      signOutUnsavedMessage: 'shell.signOutUnsaved.message',
+      signOutUnsavedConfirm: 'shell.signOutUnsaved.confirm',
+      cancel: 'common.actions.cancel',
+      close: 'common.actions.close',
     });
     const layout = element.props.children;
     expect(layout.type).toBe(ShellLayout);

@@ -28,6 +28,7 @@ function createProviderMock() {
   return {
     configuration: { name: '' },
     hasUnsyncedChanges: false,
+    flushPendingUpdates: vi.fn(),
     forceSync: vi.fn(),
     sendStateless: vi.fn((_payload: string) => undefined),
     on: vi.fn((event: string, listener: (event: unknown) => void) => {
@@ -246,7 +247,7 @@ describe('useFormEditorCollaboration', () => {
       updatedAt: Date.now(),
       recoveryKey: 'form-schema',
       patch: {
-        requestId: 'form-schema:recovered',
+        requestId: '22222222-2222-4222-8222-222222222222',
         documentName: roomName,
         previousSchema: sourceFields.schema,
         nextSchema: next,
@@ -276,10 +277,9 @@ describe('useFormEditorCollaboration', () => {
       mockDoc.getMap('form-fields').set('schema', JSON.stringify(next));
       mockProvider.emit('stateless', {
         payload: JSON.stringify({
-          kind: 'form.schema.patch.ack',
-          protocolVersion: 1,
+          kind: 'form.schema.patch_result',
+          v: 3,
           requestId: message.requestId,
-          documentName: roomName,
           ok: true,
           canonicalSchema: next,
         }),
@@ -334,7 +334,6 @@ describe('useFormEditorCollaboration', () => {
     };
     expect(message).toMatchObject({
       kind: 'form.schema.patch',
-      documentName: `form:${formId}:en`,
       previousSchema: peerCanonicalSchema,
       nextSchema: expectedCanonical,
     });
@@ -344,10 +343,9 @@ describe('useFormEditorCollaboration', () => {
       mockDoc.getMap('form-fields').set('schema', JSON.stringify(expectedCanonical));
       mockProvider.emit('stateless', {
         payload: JSON.stringify({
-          kind: 'form.schema.patch.ack',
-          protocolVersion: 1,
+          kind: 'form.schema.patch_result',
+          v: 3,
           requestId: message.requestId,
-          documentName: `form:${formId}:en`,
           ok: true,
           canonicalSchema: expectedCanonical,
         }),
@@ -378,11 +376,11 @@ describe('useFormEditorCollaboration', () => {
     expect(oldProvider.sendStateless).toHaveBeenCalledOnce();
     act(() => {
       oldProvider.emit('stateless', {
-        payload: JSON.stringify({ kind: 'reload_required', reason: 'reload_required' }),
+        payload: JSON.stringify({ v: 3, kind: 'room.reload', reloadReason: 'external_update' }),
       });
     });
     await flushUpdates();
-    expect(oldProvider.listeners.get('stateless')).toHaveLength(0);
+    expect(oldProvider.listeners.get('stateless')).toHaveLength(1); // Only the canonical schema subscription remains.
 
     const peerCanonicalSchema = {
       id: 'schema-1',
@@ -419,7 +417,6 @@ describe('useFormEditorCollaboration', () => {
     };
     expect(message).toMatchObject({
       kind: 'form.schema.patch',
-      documentName: `form:${formId}:en`,
       previousSchema: peerCanonicalSchema,
       nextSchema: expectedCanonical,
     });
@@ -429,10 +426,9 @@ describe('useFormEditorCollaboration', () => {
       mockDoc.getMap('form-fields').set('schema', JSON.stringify(expectedCanonical));
       mockProvider.emit('stateless', {
         payload: JSON.stringify({
-          kind: 'form.schema.patch.ack',
-          protocolVersion: 1,
+          kind: 'form.schema.patch_result',
+          v: 3,
           requestId: message.requestId,
-          documentName: `form:${formId}:en`,
           ok: true,
           canonicalSchema: expectedCanonical,
         }),
@@ -468,7 +464,6 @@ describe('useFormEditorCollaboration', () => {
     const message = JSON.parse(mockProvider.sendStateless.mock.calls[0]![0] as string);
     expect(message).toMatchObject({
       kind: 'form.schema.patch',
-      documentName,
       previousSchema: previous,
       nextSchema: next,
     });
@@ -478,10 +473,9 @@ describe('useFormEditorCollaboration', () => {
       mockDoc.getMap('form-fields').set('schema', JSON.stringify(next));
       mockProvider.emit('stateless', {
         payload: JSON.stringify({
-          kind: 'form.schema.patch.ack',
-          protocolVersion: 1,
+          kind: 'form.schema.patch_result',
+          v: 3,
           requestId: message.requestId,
-          documentName,
           ok: true,
           canonicalSchema: next,
         }),
@@ -515,12 +509,11 @@ describe('useFormEditorCollaboration', () => {
     act(() => {
       mockProvider.emit('stateless', {
         payload: JSON.stringify({
-          kind: 'form.schema.patch.ack',
-          protocolVersion: 1,
+          kind: 'form.schema.patch_result',
+          v: 3,
           requestId: message.requestId,
-          documentName,
           ok: false,
-          error: 'target_revision_changed',
+          error: { code: 'target_revision_changed' },
         }),
       });
     });
@@ -563,10 +556,9 @@ describe('useFormEditorCollaboration', () => {
       mockDoc.getMap('form-fields').set('schema', JSON.stringify(firstCanonical));
       mockProvider.emit('stateless', {
         payload: JSON.stringify({
-          kind: 'form.schema.patch.ack',
-          protocolVersion: 1,
+          kind: 'form.schema.patch_result',
+          v: 3,
           requestId: firstMessage.requestId,
-          documentName,
           ok: true,
           canonicalSchema: firstCanonical,
         }),
@@ -588,10 +580,9 @@ describe('useFormEditorCollaboration', () => {
       mockDoc.getMap('form-fields').set('schema', JSON.stringify(expectedSecondCanonical));
       mockProvider.emit('stateless', {
         payload: JSON.stringify({
-          kind: 'form.schema.patch.ack',
-          protocolVersion: 1,
+          kind: 'form.schema.patch_result',
+          v: 3,
           requestId: secondMessage.requestId,
-          documentName,
           ok: true,
           canonicalSchema: expectedSecondCanonical,
         }),
@@ -604,4 +595,24 @@ describe('useFormEditorCollaboration', () => {
     expect(flushResult).toBe(true);
     expect(getHook().fields.schema).toEqual(expectedSecondCanonical);
   });
+});
+
+it('applies validated form.schema.changed pushes for the active room and retains queued schema intent', async () => {
+  renderHarness('en');
+  await flushUpdates();
+  const changed = { id: 'schema-1', steps: [{ id: 'peer', title: 'Peer step', fields: [] }] };
+  const push = (canonicalSchema: unknown, name = documentName) =>
+    mockProvider.emit('stateless', {
+      payload: JSON.stringify({ v: 3, kind: 'form.schema.changed', documentName: name, canonicalSchema }),
+    });
+  act(() => push(changed, `form:${formId}:ko`));
+  expect(getHook().fields.schema).toEqual(sourceFields.schema);
+  act(() => push({ id: 3, steps: [] }));
+  expect(getHook().fields.schema).toEqual(sourceFields.schema);
+  act(() => push(changed));
+  expect(getHook().fields.schema).toEqual(changed);
+  const local = { ...changed, steps: [{ id: 'local', title: 'Local step', fields: [] }] };
+  act(() => getHook().setField('schema', local));
+  act(() => push(sourceFields.schema));
+  expect(getHook().fields.schema).toEqual(local);
 });

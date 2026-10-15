@@ -9,6 +9,9 @@ import { AuthoringExtensionsProvider } from '@/features/authoring/AuthoringExten
 import { TranslationServicesProvider } from '@/features/translation/TranslationServicesContext';
 import { EditorMediaServicesProvider } from '@/features/editor/contexts/EditorMediaServicesContext';
 import { AppNotificationRegion } from '@/lib/providers/AppNotificationRegion';
+import { EditorNavigationProvider } from '@/lib/providers/EditorNavigationProvider';
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import { authorTranslationFixture, type AuthorTranslationState } from './fixtures/author-translations';
 import { authorMediaFixture, type AuthorMediaState } from './fixtures/author-media';
 import { PostEditorView, type PostEditorViewModel } from '@/features/post/PostEditor/PostEditor';
@@ -16,6 +19,8 @@ import { PostMetaStateProvider, type PostMetaContextValue } from '@/lib/contexts
 import { PageLoader } from '@/features/site/PageLoader';
 import { DocumentEditorFrame, editorPageParameters, editorStateArgTypes } from './fixtures/DocumentEditorFrame';
 import { useDocumentEditor, noop, pending, type EditorPreviewState } from './fixtures/use-document-editor';
+// The room provider of the access scenario stories, for their play functions.
+let accessScenarioProvider: object | null = null;
 const previewOgImage = `data:image/svg+xml;charset=utf-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><rect width="1200" height="630" fill="#202020"/><text x="80" y="330" fill="white" font-family="sans-serif" font-size="72">Post editor preview</text><text x="960" y="560" fill="#b02d23" font-family="sans-serif" font-weight="bold" font-size="64">DSUB</text></svg>')}`;
 function Preview({
   state = 'ready',
@@ -23,8 +28,11 @@ function Preview({
   withImages = false,
   translationState = 'ready',
   mediaState = 'ready',
+  followRoomAccess = false,
 }: {
   state?: EditorPreviewState;
+  /** Edit authority follows the room's reported access level (room.access_changed), as in PostEditor. */
+  followRoomAccess?: boolean;
   zen?: boolean;
   withImages?: boolean;
   translationState?: AuthorTranslationState;
@@ -32,6 +40,11 @@ function Preview({
 }) {
   const local = useDocumentEditor('post', state),
     t = useTranslations('postEditor');
+  const roomAccess = useEditorAccessLevel(local.room?.provider);
+  const canEdit = local.canEdit && (!followRoomAccess || roomAccess === 'edit');
+  useEffect(() => {
+    accessScenarioProvider = followRoomAccess ? (local.room?.provider ?? null) : null;
+  }, [followRoomAccess, local.room?.provider]);
   const translation = useMemo(() => authorTranslationFixture(translationState), [translationState]);
   const media = useMemo(() => authorMediaFixture(mediaState), [mediaState]);
   useEffect(() => translation.seed(local.client), [translation, local.client]);
@@ -80,7 +93,7 @@ function Preview({
     postId: 'local-post',
     isZenMode,
     displayedTitle: local.title,
-    canEditLocaleDocument: local.canEdit,
+    canEditLocaleDocument: canEdit,
     handleScopedLocaleTitleChange: local.setTitle,
     status,
     lifecycle: {
@@ -117,12 +130,12 @@ function Preview({
     scheduledAt,
     scheduledTimeZone,
     handleBack: async () => goBackPreview(),
-    canDelete: local.canEdit,
+    canDelete: canEdit,
     canViewVersions: false,
     openVersionHistory: () => local.setVersionsOpened(true),
     hasParticipantActions: false,
     openParticipants: () => setParticipantsOpened(true),
-    canSchedule: local.canEdit,
+    canSchedule: canEdit,
     openSchedule: () => setScheduleOpened(true),
     handleExportMarkdown: async () =>
       downloadMarkdown(local.title, `# ${local.title}\n\n${local.room?.controller?.getText() ?? ''}`),
@@ -132,11 +145,11 @@ function Preview({
     slug: local.slug,
     slugMgmt: local.slugMgmt,
     postConfigUpdate: pending,
-    canMutateSourceDocument: local.canEdit && local.locale === 'ko',
+    canMutateSourceDocument: canEdit && local.locale === 'ko',
     canManageShareLinks: false,
     t,
     shareLinks: [],
-    canMutateContent: local.canEdit,
+    canMutateContent: canEdit,
     ogImage: withImages ? { ...local.ogImage, src: previewOgImage, status: 'ready' } : local.ogImage,
     ogRegenerationLocale: local.locale,
     regenerateOgImage: local.regenerateOgImage,
@@ -152,7 +165,7 @@ function Preview({
     ...local.identity,
     handleScopedLocaleSummaryChange: local.setSummary,
     featuredImageUrl: local.featuredImageUrl ?? (withImages ? '/storybook/media/video-poster.jpg' : null),
-    canEditSharedTaxonomy: local.canEdit && local.locale === 'ko',
+    canEditSharedTaxonomy: canEdit && local.locale === 'ko',
     isAdmin: false,
     categories: [],
     tags: [],
@@ -192,7 +205,13 @@ function Preview({
         <TranslationServicesProvider services={translationServices}>
           <EditorMediaServicesProvider services={media}>
             <PostMetaStateProvider value={meta}>
-              <PostEditorView model={model} />
+              {followRoomAccess ? (
+                <EditorNavigationProvider>
+                  <PostEditorView model={model} />
+                </EditorNavigationProvider>
+              ) : (
+                <PostEditorView model={model} />
+              )}
               <AppNotificationRegion />
             </PostMetaStateProvider>
           </EditorMediaServicesProvider>
@@ -332,6 +351,43 @@ export const ReadOnly: Story = {
       await expect(canvas.queryByRole('textbox', { name: t('labels.body') })).not.toBeInTheDocument();
       await expect(canvas.queryByRole('textbox', { name: t('labels.title') })).not.toBeInTheDocument();
     });
+  },
+};
+async function changeRoomAccess(access: 'view' | 'edit') {
+  const provider = await waitFor(() => {
+    expect(accessScenarioProvider).not.toBeNull();
+    return accessScenarioProvider!;
+  });
+  setProviderAccessLevel(provider, access);
+}
+/** Downgraded to view while open: the body turns read-only in place and a notice explains why. */
+export const DowngradedInPlace: Story = {
+  args: { followRoomAccess: true },
+  play: async ({ canvasElement, globals, step }) => {
+    const canvas = within(canvasElement);
+    const page = within(canvasElement.ownerDocument.body);
+    const t = await scenarioTranslations(globals);
+    await canvas.findByRole('textbox', { name: t('common.labels.body') });
+    await step('The room reports view access', () => changeRoomAccess('view'));
+    await expect(await page.findByText(t('editorCommon.accessDowngraded.message'))).toBeInTheDocument();
+    const body = await canvas.findByRole('document', { name: t('common.labels.body') });
+    await expect(body).toHaveAttribute('contenteditable', 'false');
+  },
+};
+/** Granted edit access while open: the same editor becomes editable without a reload. */
+export const UpgradedInPlace: Story = {
+  args: { followRoomAccess: true },
+  play: async ({ canvasElement, globals, step }) => {
+    const canvas = within(canvasElement);
+    const page = within(canvasElement.ownerDocument.body);
+    const t = await scenarioTranslations(globals);
+    await canvas.findByRole('textbox', { name: t('common.labels.body') });
+    await step('The room reports view access', () => changeRoomAccess('view'));
+    await canvas.findByRole('document', { name: t('common.labels.body') });
+    await step('The room reports edit access again', () => changeRoomAccess('edit'));
+    await expect(await page.findByText(t('editorCommon.accessUpgraded.message'))).toBeInTheDocument();
+    const body = await canvas.findByRole('textbox', { name: t('common.labels.body') });
+    await expect(body).toHaveAttribute('contenteditable', 'true');
   },
 };
 export const Phone: Story = { globals: { viewport: { value: 'phone', isRotated: false } } };

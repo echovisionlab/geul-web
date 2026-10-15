@@ -52,7 +52,7 @@ describe('EditorSessionExpiredDialog', () => {
     expect(document.body.querySelector('[role="alertdialog"]')).toBeNull();
   });
 
-  it('renders a localized non-dismissible login action', () => {
+  it('renders a localized non-dismissible login action', async () => {
     const onConfirm = vi.fn();
     act(() => {
       root.render(
@@ -70,6 +70,7 @@ describe('EditorSessionExpiredDialog', () => {
     expect(dialog?.querySelectorAll('button')).toHaveLength(1);
 
     act(() => dialog?.querySelector<HTMLButtonElement>('button')?.click());
-    expect(onConfirm).toHaveBeenCalledOnce();
+    // Unsaved edits are written to this device before leaving for sign-in.
+    await vi.waitFor(() => expect(onConfirm).toHaveBeenCalledOnce());
   });
 });

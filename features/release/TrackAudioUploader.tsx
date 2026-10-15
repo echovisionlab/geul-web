@@ -79,6 +79,7 @@ function createLocalizedMediaStatusLabels(tMedia: (key: MediaStatusMessageKey) =
 
 interface TrackAudioUploaderProps {
   trackId: string;
+  disabled?: boolean;
   audioOriginalFileId?: string | null;
   inputId?: string;
   processingStatus: ReleaseTrackProcessingStatus | null;
@@ -103,6 +104,7 @@ interface TrackAudioUploaderProps {
 
 export function TrackAudioUploader({
   trackId,
+  disabled = false,
   audioOriginalFileId = '',
   inputId,
   processingStatus,
@@ -550,6 +552,9 @@ export function TrackAudioUploader({
   };
 
   const handleFileSelect = (files: File[]) => {
+    if (disabled) {
+      return;
+    }
     if (files[0]) {
       void handleUpload(files[0]);
     }
@@ -694,13 +699,18 @@ export function TrackAudioUploader({
     <div id={uploadButtonWrapperId}>
       <Tooltip label={resumeInstruction ?? t('uploadTooltip')}>
         <span>
-          <FilePicker id={inputId} accept={ACCEPT_TRACK_AUDIO} disabled={isBusy} onChange={handleFileSelect}>
+          <FilePicker
+            id={inputId}
+            accept={ACCEPT_TRACK_AUDIO}
+            disabled={disabled || isBusy}
+            onChange={handleFileSelect}
+          >
             {(onBrowse) => (
               <IconButton
                 id={uploadButtonId}
                 size={compact ? 'sm' : 'md'}
                 loading={isBusy}
-                disabled={isBusy}
+                disabled={disabled || isBusy}
                 onClick={onBrowse}
                 aria-label={t('uploadTooltip')}
               >
@@ -722,10 +732,12 @@ export function TrackAudioUploader({
           tone={isPendingExpired ? 'warning' : 'neutral'}
           emphasis="low"
           loading={cancelPendingUpload.isPending}
-          disabled={isFinalizingOperation}
+          disabled={disabled || isFinalizingOperation}
           title={isFinalizingOperation ? mediaStatusLabels.stage.finalizing : undefined}
           onClick={() => {
-            void cancelPendingUpload.mutateAsync();
+            if (!disabled) {
+              void cancelPendingUpload.mutateAsync();
+            }
           }}
           aria-label={tCommon('actions.cancel')}
         >

@@ -1,4 +1,5 @@
 'use client';
+import { useReleaseEditorCanEdit } from './ReleaseEditorAccessContext';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 
@@ -49,6 +50,7 @@ interface ReleaseArtistsSectionViewProps {
 }
 export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange }: ReleaseArtistsSectionViewProps) {
   const tModalActions = useTranslations('common.actions');
+  const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.artists');
   const [opened, { open, close }] = useDisclosure(false);
@@ -70,13 +72,16 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
       nextItemId?: string;
     },
   ) => {
+    if (!canEdit) {
+      return;
+    }
     onChange(
       nextArtists.map((artist, index) => ({ ...artist, sort_order: index })),
       orderIntent,
     );
   };
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
-    if (!over || active.id === over.id) {
+    if (!canEdit || !over || active.id === over.id) {
       return;
     }
     const oldIndex = artists.findIndex((artist) => artist.artist_id === active.id);
@@ -118,6 +123,7 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
               emphasis="medium"
               size="xs"
               leftSection={<IconPlus size={14} />}
+              disabled={!canEdit}
               onClick={open}
             >
               {tCommon('actions.addItem', { item: tCommon('entities.artist') })}
@@ -156,6 +162,7 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
       <ContentModal opened={opened} onClose={closeModal} title={t('modal.title')} closeLabel={tModalActions('close')}>
         <DsLayoutStack>
           <Select
+            disabled={!canEdit}
             id={idPrefix ? `${idPrefix}-select` : undefined}
             label={tCommon('entities.artist')}
             placeholder={t('placeholders.selectArtist')}
@@ -168,7 +175,7 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
             <Button emphasis="low" onClick={closeModal}>
               {tCommon('actions.cancel')}
             </Button>
-            <Button tone="neutral" emphasis="strong" onClick={handleAdd} disabled={!selectedArtistId}>
+            <Button tone="neutral" emphasis="strong" onClick={handleAdd} disabled={!canEdit || !selectedArtistId}>
               {tCommon('actions.add')}
             </Button>
           </DialogActions>
@@ -179,10 +186,12 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
 }
 export function SortableArtistRow({ artist, onRemove }: { artist: ReleaseArtistItem; onRemove: () => void }) {
   const artistNameId = useId();
+  const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
   const tSort = useTranslations('dataTable.sort');
   const sortable = useSortableItem({
     id: artist.artist_id,
+    disabled: !canEdit,
   });
   return (
     <Table.Tr ref={sortable.setNodeRef} dragState={sortable.dragState}>
@@ -192,6 +201,7 @@ export function SortableArtistRow({ artist, onRemove }: { artist: ReleaseArtistI
           interaction="drag-handle"
           draggable={false}
           {...sortable.handle}
+          disabled={!canEdit}
           aria-label={tSort('aria.reorder', { label: artist.artist_name })}
         >
           <IconGripVertical aria-hidden />
@@ -209,6 +219,7 @@ export function SortableArtistRow({ artist, onRemove }: { artist: ReleaseArtistI
           size="compact"
           aria-label={tCommon('actions.remove')}
           aria-describedby={artistNameId}
+          disabled={!canEdit}
           onClick={onRemove}
         >
           <IconX size={14} />

@@ -329,7 +329,14 @@
       "ogRegenerationFailed": "Gagal membuat ulang gambar OG",
       "testEmailSent": "Email percobaan terkirim",
       "saveSuccess": "Disimpan",
-      "saveFailed": "Gagal menyimpan"
+      "saveFailed": "Gagal menyimpan",
+      "saveRetrying": "Perubahan Anda belum tersimpan di server. Kami sedang mencoba kembali.",
+      "editsRestored": "Suntingan yang dipulihkan telah dikembalikan.",
+      "leaveWithRejectedEdits": {
+        "title": "Keluar tanpa suntingan yang tidak dapat disimpan?",
+        "message": "Server menolak beberapa suntingan sehingga tidak tersimpan. Salin suntingan tersebut dari menu kolaborasi terlebih dahulu, atau keluar dan buang suntingan tersebut.",
+        "confirm": "Keluar dan buang"
+      }
     },
     "errors": {
       "generic": "Ada yang tidak beres. Silakan coba lagi.",
@@ -460,6 +467,11 @@
       "siteInfo": "Informasi situs",
       "links": "Tautan",
       "socialMedia": "media sosial"
+    },
+    "signOutUnsaved": {
+      "title": "Keluar dari akun dengan suntingan yang belum tersimpan?",
+      "message": "Beberapa suntingan belum tersimpan di server. Keluar dari akun akan menghapusnya dari perangkat ini.",
+      "confirm": "Keluar dari akun dan buang"
     }
   },
   "adminShell": {
@@ -673,13 +685,13 @@
       "detail": {
         "backTooltip": "Kembali ke tata letak email",
         "targetEditor": {
-          "title": "Translated text",
-          "description": "Edit only visible text and accessibility labels. HTML, CSS, links, and placeholders remain owned by the source layout.",
-          "empty": "This layout has no translatable text units.",
+          "title": "Teks terjemahan",
+          "description": "Sunting hanya teks yang terlihat dan label aksesibilitas. HTML, CSS, tautan, dan placeholder tetap ditentukan oleh tata letak sumber.",
+          "empty": "Tata letak ini tidak memiliki unit teks yang dapat diterjemahkan.",
           "textUnit": "Text",
-          "sourceValue": "Source: {value}",
-          "translatedValue": "This locale provides its own value.",
-          "sourceFallback": "Using the source value.",
+          "sourceValue": "Sumber: {value}",
+          "translatedValue": "Lokal ini menyediakan nilainya sendiri.",
+          "sourceFallback": "Menggunakan nilai sumber.",
           "useSource": "Use source"
         },
         "viewModes": {
@@ -1677,16 +1689,16 @@
       "consentDescription": "Klien ini dapat membaca dan mengedit konten serta mengelola file sesuai izin akun Anda saat ini. Klien dapat membuat, memperbarui, atau menghapus konten dan mengubah lampiran file yang sudah ada. Koneksi tidak memberikan izin tambahan pada akun.",
       "consentOfflineAccess": "Koneksi ini dapat berlanjut setelah sesi browser Anda saat ini berakhir, hingga Anda mencabutnya.",
       "consentRevoke": "Anda dapat mencabut koneksi ini di {settings} → Remote MCP.",
-      "connectionsTitle": "Connected MCP clients",
-      "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
-      "connectionsEmpty": "No MCP clients are connected.",
-      "connectedAt": "Connected {date}",
+      "connectionsTitle": "Klien MCP yang terhubung",
+      "connectionsDescription": "Otorisasi OAuth ini terpisah dari sesi browser. Mencabut salah satunya akan memutus koneksi klien MCP tersebut tanpa mengeluarkan Anda dari akun.",
+      "connectionsEmpty": "Tidak ada klien MCP yang terhubung.",
+      "connectedAt": "Terhubung {date}",
       "revoke": "Revoke",
-      "revokeTitle": "Revoke MCP access",
-      "revokeConfirmation": "Revoke MCP access for {client}? Its current token chain will stop working.",
-      "revokeSuccess": "MCP access was revoked.",
-      "revokeFailed": "Could not revoke MCP access.",
-      "loadFailed": "Could not load connected MCP clients."
+      "revokeTitle": "Cabut akses MCP",
+      "revokeConfirmation": "Cabut akses MCP untuk {client}? Rantai tokennya saat ini akan berhenti berfungsi.",
+      "revokeSuccess": "Akses MCP telah dicabut.",
+      "revokeFailed": "Tidak dapat mencabut akses MCP.",
+      "loadFailed": "Tidak dapat memuat klien MCP yang terhubung."
     },
     "personalAccessTokens": {
       "title": "Token akses pribadi",
@@ -2136,9 +2148,9 @@
     "systemOrLegacy": "Sistem atau versi sebelumnya",
     "restore": "Memulihkan",
     "restoreTitle": "Pulihkan versi",
-    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document.",
+    "restoreSameLocaleBody": "Memulihkan sumber v{version} ({locale}) hanya mengubah dokumen sumber. Dokumen target dan pekerjaan terjemahan yang sudah ada tetap tidak berubah, dan terjemahan tidak dibuat secara otomatis. Lanjutkan?",
+    "restoreCrossLocaleBody": "Memulihkan sumber v{version} mengubah lokal sumber dari {currentLocale} ke {selectedLocale} dan hanya mengubah penunjuk sumber. Dokumen target dan pekerjaan terjemahan yang sudah ada tetap tidak berubah, dan terjemahan tidak dibuat secara otomatis. Lanjutkan?",
+    "restoreFailed": "Gagal memulihkan dokumen sumber.",
     "loadFailed": "Riwayat versi tidak dapat dimuat.",
     "end": "Semua versi telah dimuat."
   },
@@ -2518,6 +2530,24 @@
       "sections": {
         "connection": "Koneksi"
       }
+    },
+    "saveState": {
+      "saved": "Tersimpan",
+      "saving": "Menyimpan…",
+      "offline": "Offline · suntingan disimpan di perangkat ini",
+      "error": "Gagal menyimpan · mencoba kembali…",
+      "rejected": "Beberapa suntingan tidak dapat disimpan",
+      "reload": "Menghubungkan kembali · memulihkan suntingan…"
+    },
+    "rejectedEdits": {
+      "open": "Tinjau suntingan yang belum tersimpan",
+      "title": "Suntingan yang tidak dapat disimpan",
+      "description": "Server menolak suntingan ini sehingga penyimpanannya tidak akan dicoba lagi. Salin yang Anda perlukan, lalu buang suntingan tersebut.",
+      "reason": "Alasan: {reason}",
+      "copy": "Salin",
+      "copied": "Disalin",
+      "discard": "Buang",
+      "empty": "Semua suntingan telah tersimpan."
     }
   },
   "urlSection": {
@@ -3082,7 +3112,7 @@
     },
     "mapEditor": {
       "title": "Peta",
-      "placeCount": "{count} {count, plural, one {place} other {places}}",
+      "placeCount": "{count} {count, plural, one {tempat} other {tempat}}",
       "fullscreen": "Layar penuh",
       "captionPlaceholder": "Tambahkan keterangan opsional di bawah peta...",
       "emptyState": "Belum ada tempat di peta yang dipilih.",
@@ -3512,8 +3542,8 @@
       "message": "Versi yang lebih baru telah disimpan saat editor ini dibuka. Muat ulang sebelum melanjutkan mengedit."
     },
     "permissionRevoked": {
-      "title": "Izin mengedit dicabut",
-      "message": "Anda tidak lagi memiliki izin untuk mengedit konten ini. Perubahan yang dilakukan setelah izin dicabut tidak akan disimpan."
+      "title": "Akses dihapus",
+      "message": "Anda tidak lagi memiliki akses ke konten ini. Perubahan yang belum disimpan tetap ada di perangkat ini."
     },
     "sessionExpired": {
       "title": "Sesi berakhir",
@@ -3653,7 +3683,7 @@
           "uniform": "Seragam",
           "dropShadow": "Jatuhkan bayangan",
           "proportionalSansSerif": "Sans-Serif Proporsional",
-          "monospaceSansSerif": "Monospace Sans-Serif",
+          "monospaceSansSerif": "Sans-Serif Monospasi",
           "proportionalSerif": "Serif Proporsional",
           "monospaceSerif": "Serif Monoruang",
           "casual": "Kasual",
@@ -3759,9 +3789,9 @@
           },
           "callout": {
             "title": "Callout",
-            "subtext": "Highlight content with an icon",
-            "aliases": "callout\nnotice\ninfo\naside",
-            "group": "Basic blocks"
+            "subtext": "Sorot konten dengan ikon",
+            "aliases": "callout\nnotice\ninfo\naside\npemberitahuan\ninformasi\ncatatan",
+            "group": "Blok dasar"
           },
           "divider": {
             "title": "Pemisah",
@@ -3790,61 +3820,61 @@
           "mathBlock": {
             "title": "Blok Matematika",
             "subtext": "Tampilkan persamaan dengan LaTeX",
-            "aliases": "math\nequation\nlatex\nformula",
+            "aliases": "math\nequation\nlatex\nformula\nmatematika\npersamaan\nrumus",
             "group": "Matematika"
           },
           "inlineMath": {
             "title": "Matematika Sebaris",
             "subtext": "Rumus LaTeX sebaris",
-            "aliases": "inline\ninline math\ninlinemath\nlatex\n$",
+            "aliases": "inline\ninline math\ninlinemath\nlatex\n$\nsebaris\nmatematika sebaris",
             "group": "Sebaris"
           },
           "map": {
             "title": "Peta",
             "subtext": "Masukkan lokasi peta",
-            "aliases": "map\nlocation\nplace\naddress",
+            "aliases": "map\nlocation\nplace\naddress\npeta\nlokasi\ntempat\nalamat",
             "group": "Sematan"
           },
           "externalVideo": {
             "title": "Video eksternal",
             "subtext": "Masukkan tautan YouTube atau Vimeo",
-            "aliases": "external video\nyoutube\nvimeo\nembed",
+            "aliases": "external video\nyoutube\nvimeo\nembed\nvideo eksternal\nsematkan\nsematan",
             "group": "Sematan"
           },
           "p5Sketch": {
             "title": "p5.js",
             "subtext": "Tambahkan sketsa p5.js interaktif",
-            "aliases": "p5\np5.js\nsketch\ncreative coding",
+            "aliases": "p5\np5.js\nsketch\ncreative coding\nsketsa\npemrograman kreatif",
             "group": "Sematan"
           },
           "threeScene": {
             "title": "Three.js",
             "subtext": "Tambahkan adegan Three.js interaktif",
-            "aliases": "three\nthree.js\n3d\nscene",
+            "aliases": "three\nthree.js\n3d\nscene\nadegan\ntiga dimensi",
             "group": "Sematan"
           },
           "file": {
             "title": "Lampiran",
             "subtext": "Lampirkan file (PDF, DOC, ZIP, dll.)",
-            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload",
+            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\nlampiran\nberkas\ndokumen\nunduh",
             "group": "Media"
           },
           "aiAssistant": {
             "title": "Asisten AI",
             "subtext": "Tulis, tingkatkan, atau ubah teks dengan AI",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove",
+            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nasisten\ntulis\nmenulis\ntingkatkan",
             "group": "AI"
           },
           "shader": {
             "title": "Shader GLSL",
             "subtext": "Tambahkan shader GLSL interaktif",
-            "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "aliases": "shader\nglsl\nfragment shader\nshadertoy\npewarna\nshader fragmen",
             "group": "Sematan"
           },
           "mermaid": {
             "title": "Mermaid",
             "subtext": "Buat diagram dari teks",
-            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence\ndiagram alur\nbagan alur\nurutan",
             "group": "Sematan"
           }
         }
@@ -4024,6 +4054,12 @@
       "media": {
         "importFromUrl": "Impor dari URL"
       }
+    },
+    "accessDowngraded": {
+      "message": "Akses Anda berubah menjadi hanya lihat. Penyuntingan dinonaktifkan; suntingan yang belum tersimpan tetap ada di perangkat ini dan akan disimpan jika Anda mendapatkan kembali akses penyuntingan."
+    },
+    "accessUpgraded": {
+      "message": "Anda dapat mengedit lagi. Perubahan yang disimpan selama Anda hanya dapat melihat sedang disimpan."
     }
   },
   "aiAssistant": {
@@ -4166,35 +4202,35 @@
     "resolvedMetadata": "Metadata Terselesaikan"
   },
   "translationPanel": {
-    "description": "Review the source language and existing translation document for each locale.",
+    "description": "Tinjau bahasa sumber dan dokumen terjemahan yang sudah ada untuk setiap lokal.",
     "actions": {
       "expand": "Memperluas",
       "collapse": "Runtuh",
-      "regenerateAll": "Generate/regenerate all eligible locales",
+      "regenerateAll": "Buat/buat ulang semua lokal yang memenuhi syarat",
       "regenerateLocale": "Diperbarui",
       "regenerateLocaleAria": "Buat ulang terjemahan {locale}",
       "generateLocale": "Generate",
-      "generateLocaleAria": "Generate {locale} translation"
+      "generateLocaleAria": "Buat terjemahan {locale}"
     },
     "sourceLocale": {
       "label": "Bahasa sumber",
       "description": "Ini adalah bahasa sumber yang digunakan sebagai dasar terjemahan entitas ini.",
       "confirm": {
         "title": "Ubah bahasa sumber",
-        "description": "Changing the source language updates only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically.",
-        "detail": "{locale} becomes the language of the editable source document. Existing target documents and translation jobs remain unchanged.",
+        "description": "Mengubah bahasa sumber hanya memperbarui penunjuk sumber. Dokumen target dan pekerjaan terjemahan yang sudah ada tetap tidak berubah, dan terjemahan tidak dibuat secara otomatis.",
+        "detail": "{locale} menjadi bahasa dokumen sumber yang dapat disunting. Dokumen target dan pekerjaan terjemahan yang sudah ada tetap tidak berubah.",
         "confirm": "Ubah bahasa sumber"
       }
     },
     "activeEditLocale": {
-      "ariaLabel": "Switch content language. Current: {locale}",
+      "ariaLabel": "Ubah bahasa konten. Saat ini: {locale}",
       "sourceOption": "{locale} (Sumber)",
       "loading": "Memuat bahasa...",
-      "missingDescription": "No {locale} target document exists yet. Generate it from the translations panel.",
+      "missingDescription": "Belum ada dokumen target {locale}. Buat dari panel terjemahan.",
       "bodyPreviewTitle": "{locale} pratinjau isi",
-      "bodyPreviewDescription": "The existing translation document is shown with its structure and formatting.",
+      "bodyPreviewDescription": "Dokumen terjemahan yang sudah ada ditampilkan dengan struktur dan pemformatannya.",
       "bodyPreviewEmpty": "Belum ada pratinjau isi yang dilokalkan.",
-      "sharedStructureSectionDescription": "This section keeps shared layout or query settings from the source page; translated body content is read-only.",
+      "sharedStructureSectionDescription": "Bagian ini mempertahankan pengaturan tata letak atau kueri bersama dari halaman sumber; konten isi terjemahan hanya dapat dibaca.",
       "sectionFieldLabels": {
         "caption": "Keterangan",
         "copyJson": "Salinan adegan"
@@ -4205,7 +4241,7 @@
     },
     "states": {
       "loadFailed": "Gagal memuat terjemahan.",
-      "missingTarget": "No target document yet.",
+      "missingTarget": "Belum ada dokumen target.",
       "sourceEditorHint": "Edit teks asli di editor utama.",
       "updatedAt": "Diperbarui {date}"
     },
@@ -4218,26 +4254,26 @@
     }
   },
   "translationPanelMenu": {
-    "description": "Review source menu labels and existing translation documents.",
+    "description": "Tinjau label menu sumber dan dokumen terjemahan yang sudah ada.",
     "previewModal": {
-      "title": "{locale} menu translation preview",
+      "title": "Pratinjau terjemahan menu {locale}",
       "fields": {
-        "localizedLabelForLocale": "{locale} public label"
+        "localizedLabelForLocale": "Label publik {locale}"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template."
+      "description": "Kelola bahasa sumber dan dokumen terjemahan yang sudah ada untuk templat email ini."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout."
+      "description": "Kelola bahasa sumber dan dokumen terjemahan yang sudah ada untuk tata letak email ini."
     }
   },
   "localizationNotice": {
     "translated": {
-      "title": "Localized version",
-      "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
+      "title": "Versi lokal",
+      "description": "Versi lokal ini ditampilkan dalam {displayed}; versi asli dalam {source} tetap menjadi acuan resmi."
     },
     "fallback": {
       "title": "Bahasa pengganti"
@@ -4260,15 +4296,15 @@
       "totalLocales": "Total lokal",
       "sourceEntities": "Entitas sumber",
       "activeJobs": "Pekerjaan sedang berlangsung",
-      "existingEntries": "Existing translations"
+      "existingEntries": "Terjemahan yang sudah ada"
     },
     "sections": {
-      "localeHealthTitle": "Translation state by locale",
-      "entityHealthTitle": "Translation state by entity type"
+      "localeHealthTitle": "Status terjemahan menurut lokal",
+      "entityHealthTitle": "Status terjemahan menurut jenis entitas"
     },
     "columns": {
       "policy": "Kebijakan",
-      "lastTargetUpdate": "Last target update",
+      "lastTargetUpdate": "Pembaruan target terakhir",
       "entity": "Entitas",
       "sources": "Sumber",
       "lastSourceUpdate": "Pembaruan sumber terakhir"
@@ -4304,7 +4340,7 @@
   },
   "translationSettingsPage": {
     "title": "Pengaturan terjemahan",
-    "description": "Manage the default source language and automatic translation providers. An Admin explicitly starts translation generation from each editor.",
+    "description": "Kelola bahasa sumber bawaan dan penyedia terjemahan otomatis. Administrator secara eksplisit memulai pembuatan terjemahan dari setiap editor.",
     "actions": {
       "jobs": "Pekerjaan",
       "save": "Simpan pengaturan",
@@ -4314,8 +4350,8 @@
       "createProvider": "Buat penyedia"
     },
     "sections": {
-      "runtime": "Source defaults",
-      "runtimeDescription": "Set only the language used when a source language has not been established. Source changes never start translation generation automatically.",
+      "runtime": "Pengaturan bawaan sumber",
+      "runtimeDescription": "Tetapkan hanya bahasa yang digunakan ketika bahasa sumber belum ditetapkan. Perubahan sumber tidak pernah memulai pembuatan terjemahan secara otomatis.",
       "providers": "Penyedia terjemahan",
       "providersDescription": "Kelola penyedia terjemahan mesin. Pembuatan tetap dinonaktifkan hingga setidaknya satu penyedia aktif memiliki kredensial yang valid."
     },
@@ -4325,10 +4361,10 @@
         "description": "Digunakan ketika lokal sumber belum ditetapkan dan ketika permintaan tidak diselesaikan ke lokal konten yang didukung."
       },
       "protectedTerms": {
-        "label": "Protected terms",
-        "description": "Exact case-sensitive spellings that translation generation must keep unchanged. No terms are learned or suggested automatically.",
-        "placeholder": "Add a protected term",
-        "examples": "Examples: Photoshop, React Native"
+        "label": "Istilah yang dilindungi",
+        "description": "Ejaan persis yang peka terhadap huruf besar dan kecil yang harus dipertahankan saat membuat terjemahan. Tidak ada istilah yang dipelajari atau disarankan secara otomatis.",
+        "placeholder": "Tambahkan istilah yang dilindungi",
+        "examples": "Contoh: Photoshop, React Native"
       },
       "providerName": {
         "label": "Nama penyedia"
@@ -5268,6 +5304,40 @@
       "goHome": "Pulang",
       "tryAgain": "Coba lagi",
       "login": "Kembali ke Masuk"
+    }
+  },
+  "localBackups": {
+    "title": "Cadangan lokal",
+    "description": "Suntingan yang belum tersimpan dari tab yang ditutup di perangkat ini. Buka editor untuk memulihkannya. Cadangan kedaluwarsa setelah 30 hari dan dihapus saat Anda keluar dari akun.",
+    "empty": "Tidak ada cadangan lokal untuk dipulihkan. Suntingan di tab yang masih terbuka tidak ditampilkan di sini.",
+    "unavailable": "Cadangan lokal memerlukan penyimpanan browser dan Web Locks di perangkat ini.",
+    "loading": "Mencari cadangan lokal…",
+    "error": "Tidak dapat menyelesaikan tindakan ini. Muat ulang daftar dan coba lagi.",
+    "refresh": "Muat ulang",
+    "lastChanged": "Terakhir diubah {time}",
+    "open": "Buka editor",
+    "discard": "Buang",
+    "openLabel": "Buka editor: {kind} {id}, {locale}",
+    "discardLabel": "Buang: {kind} {id}, {locale}",
+    "discardTitle": "Buang cadangan lokal?",
+    "discardDescription": "Suntingan yang belum tersimpan ini akan dihapus secara permanen dari perangkat ini. Konten yang sudah tersimpan tidak terpengaruh.",
+    "kinds": {
+      "post": "Postingan",
+      "page": "Halaman",
+      "work": "Pekerjaan",
+      "campaign": "Kampanye",
+      "email-template": "Templat email",
+      "email-layout": "Tata letak email",
+      "terms-history": "Ketentuan",
+      "privacy-history": "Kebijakan privasi",
+      "artist": "Artis",
+      "release": "Rilis",
+      "label": "Label",
+      "form": "Formulir",
+      "map-theme": "Tema peta",
+      "program-event": "Acara",
+      "menu": "Menu",
+      "post-series": "Rangkaian postingan"
     }
   }
 }

@@ -9,6 +9,9 @@ import {
 } from '@echovisionlab/geul-common/collaboration/post-series';
 import * as Y from 'yjs';
 import { usePostSeriesCollaboration } from './usePostSeriesCollaboration';
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
+
+const { provider } = vi.hoisted(() => ({ provider: {} }));
 
 const seriesId = '11111111-1111-4111-8111-111111111111';
 let mockDoc: Y.Doc;
@@ -18,7 +21,7 @@ let container: HTMLDivElement | null = null;
 
 vi.mock('@/lib/hooks/useHocuspocusConnection', () => ({
   useHocuspocusConnection: () => ({
-    provider: null,
+    provider,
     doc: mockDoc,
     isConnected: true,
     isSynced: true,
@@ -47,6 +50,7 @@ function hook() {
 }
 
 beforeEach(() => {
+  setProviderAccessLevel(provider, 'edit');
   mockDoc = hydratePostSeriesCanonicalRoom({
     sourceLocale: 'en',
     locale: 'ko',
@@ -66,6 +70,25 @@ afterEach(() => {
 });
 
 describe('usePostSeriesCollaboration', () => {
+  it('uses current access in the retained locale-field setter without replacing the room', () => {
+    setProviderAccessLevel(provider, 'view');
+    renderHook('ko');
+    const setField = hook().setField;
+    act(() => setField('title', 'Denied'));
+    expect(hook().roomState?.fields.title).toBe('');
+    act(() => {
+      setProviderAccessLevel(provider, 'edit');
+      setField('title', 'Editable');
+    });
+    expect(hook().roomState?.fields.title).toBe('Editable');
+    act(() => {
+      setProviderAccessLevel(provider, 'view');
+      setField('title', 'Denied again');
+    });
+    expect(hook().roomState?.fields.title).toBe('Editable');
+    expect(hook().doc).toBe(mockDoc);
+    expect(hook().setField).toBe(setField);
+  });
   it('materializes source fallback and preserves explicit empty target fields', async () => {
     renderHook('ko');
     await flush();

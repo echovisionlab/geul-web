@@ -1,4 +1,4 @@
-import { equals, fromJson, type JsonValue } from '@bufbuild/protobuf';
+import { equals, fromJson, toBinary, type JsonValue } from '@bufbuild/protobuf';
 import {
   blockRoomPresentLocaleValues,
   materializeCanonicalBlockRoom,
@@ -12,7 +12,16 @@ import {
   type LocalizedRichTextDocument,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { AIDocumentFieldTargetSchema, type AIDocumentFieldTarget } from '@echovisionlab/geul-proto/secure/ai_pb.ts';
-import * as z from '@/lib/zod-mini';
+import {
+  bootstrapSchema,
+  documentBodyDigest,
+  KNOWN_DOCUMENT_DIGEST_PARAM,
+  KNOWN_DOCUMENT_REVISION_PARAM,
+  type BootstrapMessage,
+  type LocaleMetadata,
+} from '@echovisionlab/geul-common/collaboration/protocol';
+import type { EditorSnapshot } from '@/features/editor/editor-snapshot';
+export { targetRevisionSchema } from '@echovisionlab/geul-common/collaboration/protocol';
 import * as Y from 'yjs';
 
 export type { BlockRoomDocumentType };
@@ -35,41 +44,6 @@ export function createBlockRoomDocumentName(type: BlockRoomDocumentType, entityI
   return createDocumentName(collaborativeDocumentTypes[type], entityId, locale);
 }
 
-const documentTypeSchema = z.enum([
-  'post',
-  'page',
-  'work',
-  'program-event',
-  'artist',
-  'label',
-  'release',
-  'campaign',
-  'email-template',
-  'terms-history',
-  'privacy-history',
-]);
-const nonEmptyStringSchema = z.string().check(z.trim(), z.minLength(1));
-const uuidSchema = z.string().check(z.uuid());
-export const targetRevisionSchema = z
-  .string()
-  .check(z.refine((value) => value.trim().length > 0, 'Target revision must be a nonblank opaque token.'));
-const base64Schema = z.string().check(z.regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u));
-const localeMetadataSchema = z.strictObject({
-  locale: nonEmptyStringSchema,
-  title: z.optional(z.string()),
-  summary: z.optional(z.string()),
-  subject: z.optional(z.string()),
-  creditNotes: z.optional(
-    z.array(
-      z.strictObject({
-        creditId: nonEmptyStringSchema,
-        note: z.string(),
-      }),
-    ),
-  ),
-});
-type LocaleMetadata = z.infer<typeof localeMetadataSchema>;
-
 function localeMetadataEquals(left: LocaleMetadata, right: LocaleMetadata): boolean {
   return (
     left.locale === right.locale &&
@@ -85,59 +59,14 @@ function localeMetadataEquals(left: LocaleMetadata, right: LocaleMetadata): bool
   );
 }
 
-const bootstrapEnvelopeSchema = z.strictObject({
-  kind: z.literal('block_room.bootstrap'),
-  protocolVersion: z.literal(2),
-  bootstrapChallenge: nonEmptyStringSchema,
-  documentName: nonEmptyStringSchema,
-  documentType: documentTypeSchema,
-  document: z.unknown(),
-  documentRevision: uuidSchema,
-  sourceLocale: nonEmptyStringSchema,
-  locale: nonEmptyStringSchema,
-  localeExists: z.boolean(),
-  targetRevision: z.optional(targetRevisionSchema),
-  presentLocaleValues: z.array(z.unknown()),
-  sourceMetadata: localeMetadataSchema,
-  documentMetadata: z.record(z.string(), z.unknown()),
-  metadataSequence: z.number().check(z.int(), z.nonnegative()),
-  localeMetadata: z.optional(localeMetadataSchema),
-  blockCatalogFingerprint: nonEmptyStringSchema,
-  serverInstanceId: nonEmptyStringSchema,
-  roomEpoch: uuidSchema,
-  yjsBootstrapUpdate: base64Schema,
-});
-
-interface BlockRoomBootstrapBase {
-  documentName: string;
-  documentRevision: string;
-  sourceLocale: string;
-  locale: string;
-  localeExists: boolean;
-  targetRevision?: string;
+/** Decoded domain payload; every envelope field is inherited from Common. */
+type BlockRoomBootstrapBase = Omit<
+  BootstrapMessage,
+  'v' | 'kind' | 'documentType' | 'document' | 'presentLocaleValues' | 'yjsBootstrapUpdate'
+> & {
   presentLocaleValues: readonly AIDocumentFieldTarget[];
-  sourceMetadata: {
-    locale: string;
-    title?: string;
-    summary?: string;
-    subject?: string;
-    creditNotes?: readonly { creditId: string; note: string }[];
-  };
-  localeMetadata?: {
-    locale: string;
-    title?: string;
-    summary?: string;
-    subject?: string;
-    creditNotes?: readonly { creditId: string; note: string }[];
-  };
-  documentMetadata: Record<string, unknown>;
-  metadataSequence: number;
-  blockCatalogFingerprint: string;
-  serverInstanceId: string;
-  roomEpoch: string;
-  bootstrapChallenge: string;
   yjsBootstrapUpdate: Uint8Array;
-}
+};
 
 export type BlockRoomBootstrap =
   | (BlockRoomBootstrapBase & { documentType: 'page'; document: LocalizedPageDocument })
@@ -167,13 +96,40 @@ function decodeBase64(value: string): Uint8Array {
   }
 }
 
+const knownDocumentQueries = new WeakMap<object, string>();
+
+/**
+ * Connection query naming the typed body already rendered for `locale`, so collab can omit it
+ * from `room.bootstrap`. Empty when the snapshot holds no body for this room.
+ */
+export function knownDocumentQuery(snapshot: EditorSnapshot | undefined, locale: string): string {
+  const body = snapshot?.locale === locale ? snapshot.document : undefined;
+  if (!snapshot || !body) {
+    return '';
+  }
+  let query = knownDocumentQueries.get(body);
+  if (query === undefined) {
+    const bytes =
+      body.$typeName === 'api.content.v1.LocalizedPageDocument'
+        ? toBinary(LocalizedPageDocumentSchema, body)
+        : toBinary(LocalizedRichTextDocumentSchema, body);
+    query = new URLSearchParams({
+      [KNOWN_DOCUMENT_REVISION_PARAM]: snapshot.documentRevision,
+      [KNOWN_DOCUMENT_DIGEST_PARAM]: documentBodyDigest(bytes),
+    }).toString();
+    knownDocumentQueries.set(body, query);
+  }
+  return `?${query}`;
+}
+
 export function parseBlockRoomBootstrap(
   raw: unknown,
   type: BlockRoomDocumentType,
   entityId: string,
   locale: string,
+  snapshot?: EditorSnapshot,
 ): BlockRoomBootstrap {
-  const parsed = bootstrapEnvelopeSchema.safeParse(raw);
+  const parsed = bootstrapSchema.safeParse(raw);
   if (!parsed.success) {
     throw new BlockRoomBootstrapError('Collaboration bootstrap response failed validation.');
   }
@@ -209,10 +165,22 @@ export function parseBlockRoomBootstrap(
   } catch {
     throw new BlockRoomBootstrapError('Collaboration bootstrap locale presence failed validation.');
   }
+  if (
+    envelope.document === undefined &&
+    (!snapshot?.document ||
+      snapshot.locale !== locale ||
+      snapshot.documentRevision !== envelope.documentRevision ||
+      snapshot.document.$typeName !==
+        (type === 'page' ? 'api.content.v1.LocalizedPageDocument' : 'api.content.v1.LocalizedRichTextDocument'))
+  ) {
+    throw new BlockRoomBootstrapError('Omitted bootstrap document requires a matching SSR snapshot.');
+  }
   const document =
-    envelope.documentType === 'page'
-      ? fromJson(LocalizedPageDocumentSchema, documentJson, { ignoreUnknownFields: false })
-      : fromJson(LocalizedRichTextDocumentSchema, documentJson, { ignoreUnknownFields: false });
+    envelope.document === undefined
+      ? snapshot!.document!
+      : envelope.documentType === 'page'
+        ? fromJson(LocalizedPageDocumentSchema, documentJson, { ignoreUnknownFields: false })
+        : fromJson(LocalizedRichTextDocumentSchema, documentJson, { ignoreUnknownFields: false });
   if (document.blockCatalogFingerprint !== envelope.blockCatalogFingerprint) {
     throw new BlockRoomBootstrapError('Collaboration bootstrap catalog fingerprint mismatch.');
   }

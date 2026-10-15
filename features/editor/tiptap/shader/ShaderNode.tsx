@@ -1,4 +1,5 @@
 'use client';
+import { liveNodeView } from '@/features/editor/tiptap/live-node-view';
 import { Tabs } from '@/components/core/Tabs';
 
 import { SectionCard as ExecutableSurface } from '@/components/core/Section';
@@ -1160,7 +1161,9 @@ export function createShaderExtension(options: ShaderOptions = {}): Extensions[n
     },
     addNodeView() {
       return withMonacoSourceEditorEvents(
-        ReactNodeViewRenderer((props) => <ShaderNodeView {...props} {...this.options} />),
+        ReactNodeViewRenderer(
+          liveNodeView(this.name, this.options, (props, current) => <ShaderNodeView {...props} {...current} />),
+        ),
         (event) =>
           event.target instanceof Element && event.target.closest('[data-testid="shader-available-inputs"]') !== null,
       );

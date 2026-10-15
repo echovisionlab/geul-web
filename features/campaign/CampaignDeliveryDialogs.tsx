@@ -82,13 +82,20 @@ interface ScheduleDialogProps {
 }
 
 interface Props {
+  readOnly?: boolean;
   commonLabels: CommonLabels;
   testDialog: TestDialogProps;
   sendDialog: SendDialogProps;
   scheduleDialog: ScheduleDialogProps;
 }
 
-export function CampaignDeliveryDialogs({ commonLabels, testDialog, sendDialog, scheduleDialog }: Props) {
+export function CampaignDeliveryDialogs({
+  commonLabels,
+  testDialog,
+  sendDialog,
+  scheduleDialog,
+  readOnly = false,
+}: Props) {
   return (
     <>
       <ContentModal
@@ -101,6 +108,7 @@ export function CampaignDeliveryDialogs({ commonLabels, testDialog, sendDialog, 
         <DsLayoutStack>
           <SupportingText tone="secondary">{testDialog.labels.description}</SupportingText>
           <TextInput
+            disabled={readOnly}
             label={testDialog.labels.email}
             placeholder={testDialog.labels.emailPlaceholder}
             value={testDialog.email}
@@ -108,6 +116,7 @@ export function CampaignDeliveryDialogs({ commonLabels, testDialog, sendDialog, 
             type="email"
           />
           <TranslationLocaleControl
+            disabled={readOnly}
             variant="select"
             label={commonLabels.language}
             value={testDialog.locale}
@@ -123,7 +132,7 @@ export function CampaignDeliveryDialogs({ commonLabels, testDialog, sendDialog, 
               emphasis="strong"
               onClick={testDialog.onSend}
               loading={testDialog.pending}
-              disabled={!testDialog.email}
+              disabled={readOnly || !testDialog.email}
             >
               {testDialog.labels.send}
             </Button>
@@ -155,6 +164,7 @@ export function CampaignDeliveryDialogs({ commonLabels, testDialog, sendDialog, 
             <Button
               emphasis="strong"
               tone="positive"
+              disabled={readOnly}
               onClick={sendDialog.onSend}
               loading={sendDialog.pending}
               leftSection={<IconSend size={16} />}
@@ -191,6 +201,7 @@ export function CampaignDeliveryDialogs({ commonLabels, testDialog, sendDialog, 
             cancel: commonLabels.cancel,
             schedule: scheduleDialog.labels.schedule,
           }}
+          disabled={readOnly}
           loading={scheduleDialog.pending}
           onChange={scheduleDialog.onChange}
           onCancel={scheduleDialog.onClose}

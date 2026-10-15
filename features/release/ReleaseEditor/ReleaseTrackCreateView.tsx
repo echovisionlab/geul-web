@@ -1,4 +1,5 @@
 'use client';
+import { useReleaseEditorCanEdit } from './ReleaseEditorAccessContext';
 
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { IconPlus } from '@tabler/icons-react';
@@ -34,6 +35,7 @@ export function ReleaseTrackCreateView({
   onSubmit,
 }: ReleaseTrackCreateViewProps) {
   const tModalActions = useTranslations('common.actions');
+  const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.tracks');
 
@@ -44,6 +46,7 @@ export function ReleaseTrackCreateView({
         emphasis="medium"
         size="xs"
         leftSection={<IconPlus size={14} />}
+        disabled={!canEdit}
         onClick={onOpen}
       >
         {tCommon('actions.addItem', { item: tCommon('entities.track') })}
@@ -52,6 +55,7 @@ export function ReleaseTrackCreateView({
       <ContentModal opened={opened} onClose={onClose} title={t('addModal.title')} closeLabel={tModalActions('close')}>
         <DsLayoutStack>
           <TextInput
+            disabled={!canEdit}
             id={idPrefix ? `${idPrefix}-title-input` : 'release-track-add-title-input'}
             label={tCommon('labels.title')}
             placeholder={t('placeholders.title')}
@@ -60,6 +64,7 @@ export function ReleaseTrackCreateView({
             required
           />
           <TimePicker
+            disabled={!canEdit}
             id={idPrefix ? `${idPrefix}-duration` : undefined}
             label={tCommon('labels.length')}
             value={secondsToTimePickerValue(durationSeconds)}
@@ -74,7 +79,7 @@ export function ReleaseTrackCreateView({
             <Button emphasis="low" onClick={onClose}>
               {tCommon('actions.cancel')}
             </Button>
-            <Button emphasis="strong" onClick={onSubmit} loading={isCreating} disabled={!title.trim()}>
+            <Button emphasis="strong" onClick={onSubmit} loading={isCreating} disabled={!canEdit || !title.trim()}>
               {tCommon('actions.add')}
             </Button>
           </DialogActions>

@@ -1,5 +1,7 @@
 'use client';
 
+import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
+
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
 
 import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
@@ -85,6 +87,7 @@ export function FormSettingsContent({
   const tCommonNotifications = useTranslations('common.notifications');
   const { fields, isSynced, provider, ogGenerationLookup } = useFormEditorContext();
   const { activeEditLocale } = useFormTranslationContext();
+  const canEdit = useEditorAccessLevel(provider) === 'edit';
   const [slug, setSlug] = useState(initialSlug);
   const [isPublic, setIsPublic] = useState(initialIsPublic);
   const [opensAt, setOpensAt] = useState<Date | null>(initialOpensAt ? new Date(initialOpensAt) : null);
@@ -141,10 +144,17 @@ export function FormSettingsContent({
   });
   const { updateFromTitle } = slugMgmt;
   useEffect(() => {
-    if (isSynced && activeEditLocale.isSourceLocale && activeEditLocale.canEditActiveLocale) {
+    if (canEdit && isSynced && activeEditLocale.isSourceLocale && activeEditLocale.canEditActiveLocale) {
       updateFromTitle(fields.title);
     }
-  }, [activeEditLocale.canEditActiveLocale, activeEditLocale.isSourceLocale, fields.title, isSynced, updateFromTitle]);
+  }, [
+    canEdit,
+    activeEditLocale.canEditActiveLocale,
+    activeEditLocale.isSourceLocale,
+    fields.title,
+    isSynced,
+    updateFromTitle,
+  ]);
 
   const {
     error: slugError,
@@ -250,6 +260,7 @@ export function FormSettingsContent({
             isAvailable={slugMgmt.isAvailable}
             error={slugError}
             saving={isSlugChecking || saveSettings.isPending}
+            disabled={!canEdit}
             onChange={handleSlugChange}
             onBlur={handleSlugBlur}
           />
@@ -262,7 +273,7 @@ export function FormSettingsContent({
                 saveSettings.mutate({ isPublic: next });
               }}
               label={t('settings.urlPublic.allowPublic')}
-              disabled={!slug}
+              disabled={!canEdit || !slug}
             />
             <DsText size="xs" tone="secondary">
               {!slug
@@ -281,7 +292,7 @@ export function FormSettingsContent({
           <MediaPreviewGrid>
             <OgImagePreview
               src={ogImage.src}
-              canRegenerate={activeEditLocale.hasLiveRow && Boolean(activeEditLocale.activeLocale)}
+              canRegenerate={canEdit && activeEditLocale.hasLiveRow && Boolean(activeEditLocale.activeLocale)}
               isRegenerating={regenerateOgImage.isPending || ogImage.isRegenerating}
               generationStatus={ogImage.status}
               generationError={ogImage.error}
@@ -293,7 +304,7 @@ export function FormSettingsContent({
             />
             <ImageUploadCropController
               imageUrl={featuredImageUrl}
-              canEdit
+              canEdit={canEdit}
               isUploading={isUploading}
               uploadProgress={uploadProgress}
               isRemoving={removeFeaturedImage.isPending}
@@ -313,7 +324,7 @@ export function FormSettingsContent({
           entityId={formId}
           title={t('settings.previewLinks.title')}
           description={t('settings.previewLinks.description')}
-          disabled={!slug}
+          disabled={!canEdit || !slug}
         />
       </AuthoringExtension>
       <AuthoringExtension kind="sharing">
@@ -322,7 +333,7 @@ export function FormSettingsContent({
           entityId={formId}
           title={t('settings.dashboardLinks.title')}
           description={t('settings.dashboardLinks.description')}
-          disabled={!slug}
+          disabled={!canEdit || !slug}
         />
       </AuthoringExtension>
 
@@ -330,6 +341,7 @@ export function FormSettingsContent({
         <DsLayoutStack gap="md">
           <DsHeading level={4}>{t('settings.access.title')}</DsHeading>
           <PasswordInput
+            disabled={!canEdit}
             label={t('settings.access.passwordLabel')}
             description={t('settings.access.passwordDescription')}
             placeholder={initialHasPassword ? '••••••••' : tCommonPlaceholders('password')}
@@ -339,7 +351,7 @@ export function FormSettingsContent({
               setPasswordDirty(true);
             }}
             onBlur={() => {
-              if (!passwordDirty) {
+              if (!canEdit || !passwordDirty) {
                 return;
               }
               saveSettings.mutate({ password });
@@ -347,6 +359,7 @@ export function FormSettingsContent({
             }}
           />
           <DateInput
+            disabled={!canEdit}
             label={t('settings.access.opensAtLabel')}
             description={t('settings.access.opensAtDescription')}
             placeholder={t('settings.access.selectDatePlaceholder')}
@@ -359,6 +372,7 @@ export function FormSettingsContent({
             clearable
           />
           <DateInput
+            disabled={!canEdit}
             label={t('settings.access.closesAtLabel')}
             description={t('settings.access.closesAtDescription')}
             placeholder={t('settings.access.selectDatePlaceholder')}
@@ -371,6 +385,7 @@ export function FormSettingsContent({
             clearable
           />
           <NumberInput
+            disabled={!canEdit}
             label={t('settings.access.maxSubmissionsLabel')}
             description={t('settings.access.maxSubmissionsDescription')}
             placeholder={t('settings.access.noLimit')}
@@ -389,6 +404,7 @@ export function FormSettingsContent({
         <DsLayoutStack gap="md">
           <DsHeading level={4}>{t('settings.authRules.title')}</DsHeading>
           <Switch
+            disabled={!canEdit}
             label={t('settings.authRules.requireAuthLabel')}
             description={t('settings.authRules.requireAuthDescription')}
             checked={requireAuth}
@@ -407,6 +423,7 @@ export function FormSettingsContent({
           {requireAuth ? (
             <>
               <MultiSelect
+                disabled={!canEdit}
                 label={t('settings.authRules.allowedRolesLabel')}
                 description={t('settings.authRules.allowedRolesDescription')}
                 placeholder={tCommonPlaceholders('selectRoles')}
@@ -420,6 +437,7 @@ export function FormSettingsContent({
                 clearable
               />
               <Switch
+                disabled={!canEdit}
                 label={t('settings.authRules.allowDuplicateLabel')}
                 description={t('settings.authRules.allowDuplicateDescription')}
                 checked={allowDuplicateSubmission}

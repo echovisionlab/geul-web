@@ -329,7 +329,14 @@
       "ogRegenerationFailed": "فشلت إعادة توليد صورة OG",
       "testEmailSent": "تم إرسال بريد الاختبار",
       "saveSuccess": "تم الحفظ",
-      "saveFailed": "فشل الحفظ"
+      "saveFailed": "فشل الحفظ",
+      "saveRetrying": "لم تُحفظ تغييراتك على الخادم. جارٍ إعادة المحاولة.",
+      "editsRestored": "تمت استعادة التعديلات المسترجعة.",
+      "leaveWithRejectedEdits": {
+        "title": "هل تريد المغادرة دون التعديلات التي تعذر حفظها؟",
+        "message": "رفض الخادم بعض التعديلات، لذا لم تُحفظ. انسخها أولاً من قائمة التعاون، أو غادر وتخلّ عنها.",
+        "confirm": "المغادرة والتخلي عن التعديلات"
+      }
     },
     "errors": {
       "generic": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
@@ -460,6 +467,11 @@
       "siteInfo": "معلومات الموقع",
       "links": "الروابط",
       "socialMedia": "وسائل التواصل الاجتماعي"
+    },
+    "signOutUnsaved": {
+      "title": "هل تريد تسجيل الخروج مع وجود تعديلات غير محفوظة؟",
+      "message": "لم تُحفظ بعض التعديلات على الخادم. يؤدي تسجيل الخروج إلى حذفها من هذا الجهاز.",
+      "confirm": "تسجيل الخروج والتخلي عن التعديلات"
     }
   },
   "adminShell": {
@@ -500,8 +512,8 @@
   },
   "localizationNotice": {
     "translated": {
-      "title": "Localized version",
-      "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
+      "title": "نسخة مترجمة",
+      "description": "تُعرض هذه النسخة المترجمة بلغة {displayed}؛ وتبقى النسخة الأصلية بلغة {source} هي المرجع المعتمد."
     },
     "fallback": {
       "title": "لغة بديلة"
@@ -553,8 +565,8 @@
           "description": "تأكيد استعادة حسابك في {siteName}"
         },
         "verification": {
-          "title": "Verify Email",
-          "description": "Verify your email address on {siteName}"
+          "title": "التحقق من البريد الإلكتروني",
+          "description": "تحقق من عنوان بريدك الإلكتروني على {siteName}"
         }
       }
     },
@@ -693,34 +705,34 @@
       }
     },
     "verification": {
-      "loading": "Loading verification form...",
-      "startOver": "Start over",
+      "loading": "جارٍ تحميل نموذج التحقق...",
+      "startOver": "البدء من جديد",
       "errors": {
-        "flowNotFound": "Verification flow not found or expired",
-        "submit": "Failed to verify email",
-        "submitRetry": "Failed to verify email. Please try again.",
-        "emailRequired": "Enter the email address to verify.",
-        "sendVerificationEmail": "Failed to send verification email",
-        "cooldown": "Please wait {seconds} seconds before requesting another verification email.",
-        "alreadyExists": "This email is already registered.",
-        "currentVerified": "This email is already verified on this account.",
-        "invalidEmail": "Enter a valid email address."
+        "flowNotFound": "لم يتم العثور على عملية التحقق أو انتهت صلاحيتها",
+        "submit": "فشل التحقق من البريد الإلكتروني",
+        "submitRetry": "فشل التحقق من البريد الإلكتروني. حاول مرة أخرى.",
+        "emailRequired": "أدخل عنوان البريد الإلكتروني الذي تريد التحقق منه.",
+        "sendVerificationEmail": "فشل إرسال بريد التحقق",
+        "cooldown": "يرجى الانتظار {seconds} ثانية قبل طلب بريد تحقق آخر.",
+        "alreadyExists": "هذا البريد الإلكتروني مسجل بالفعل.",
+        "currentVerified": "تم التحقق من هذا البريد الإلكتروني بالفعل في هذا الحساب.",
+        "invalidEmail": "أدخل عنوان بريد إلكتروني صالحًا."
       },
       "chooseMethod": {
-        "title": "Verify email",
-        "description": "Enter your email address and we will send you a verification code.",
-        "submit": "Send verification code"
+        "title": "التحقق من البريد الإلكتروني",
+        "description": "أدخل عنوان بريدك الإلكتروني وسنرسل إليك رمز تحقق.",
+        "submit": "إرسال رمز التحقق"
       },
       "sentEmail": {
-        "description": "Enter the verification code from your email to continue.",
-        "codeLabel": "Verification code",
-        "submitting": "Checking code...",
+        "description": "أدخل رمز التحقق الوارد في بريدك الإلكتروني للمتابعة.",
+        "codeLabel": "رمز التحقق",
+        "submitting": "جارٍ التحقق من الرمز...",
         "resend": "إرسال رمز جديد"
       },
       "passedChallenge": {
-        "title": "Email verified",
-        "description": "Your email address has been verified.",
-        "action": "Back to security settings"
+        "title": "تم التحقق من البريد الإلكتروني",
+        "description": "تم التحقق من عنوان بريدك الإلكتروني.",
+        "action": "العودة إلى إعدادات الأمان"
       },
       "applying": {
         "checkAgain": "تحقق مرة أخرى",
@@ -901,16 +913,16 @@
       "consentDescription": "يمكن لهذا العميل قراءة المحتوى وتعديله وإدارة الملفات ضمن صلاحيات حسابك الحالية. ويمكنه إنشاء المحتوى أو تحديثه أو حذفه وتغيير المرفقات الموجودة. لا يمنح الاتصال أي صلاحيات إضافية للحساب.",
       "consentOfflineAccess": "يمكن أن يستمر هذا الاتصال بعد انتهاء جلسة المتصفح الحالية إلى أن تلغيه.",
       "consentRevoke": "يمكنك إلغاء هذا الاتصال من {settings} → Remote MCP.",
-      "connectionsTitle": "Connected MCP clients",
-      "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
-      "connectionsEmpty": "No MCP clients are connected.",
-      "connectedAt": "Connected {date}",
+      "connectionsTitle": "البرامج العميلة المتصلة عبر MCP",
+      "connectionsDescription": "أذونات OAuth هذه مستقلة عن جلسات المتصفح. يؤدي إلغاء أحدها إلى قطع اتصال عميل MCP المعني دون تسجيل خروجك.",
+      "connectionsEmpty": "لا توجد برامج عميلة متصلة عبر MCP.",
+      "connectedAt": "تم الاتصال {date}",
       "revoke": "Revoke",
-      "revokeTitle": "Revoke MCP access",
-      "revokeConfirmation": "Revoke MCP access for {client}? Its current token chain will stop working.",
-      "revokeSuccess": "MCP access was revoked.",
-      "revokeFailed": "Could not revoke MCP access.",
-      "loadFailed": "Could not load connected MCP clients."
+      "revokeTitle": "إلغاء صلاحية الوصول عبر MCP",
+      "revokeConfirmation": "هل تريد إلغاء صلاحية وصول {client} عبر MCP؟ ستتوقف سلسلة رموز الوصول الحالية الخاصة به عن العمل.",
+      "revokeSuccess": "تم إلغاء صلاحية الوصول عبر MCP.",
+      "revokeFailed": "تعذر إلغاء صلاحية الوصول عبر MCP.",
+      "loadFailed": "تعذر تحميل البرامج العميلة المتصلة عبر MCP."
     },
     "personalAccessTokens": {
       "title": "رمز الوصول الشخصي",
@@ -1147,13 +1159,13 @@
       "detail": {
         "backTooltip": "العودة إلى تخطيطات البريد الإلكتروني",
         "targetEditor": {
-          "title": "Translated text",
-          "description": "Edit only visible text and accessibility labels. HTML, CSS, links, and placeholders remain owned by the source layout.",
-          "empty": "This layout has no translatable text units.",
+          "title": "النص المترجم",
+          "description": "عدّل النص الظاهر وتسميات إمكانية الوصول فقط. يبقى HTML وCSS والروابط والعناصر النائبة تحت تحكم التخطيط المصدر.",
+          "empty": "لا يحتوي هذا التخطيط على وحدات نصية قابلة للترجمة.",
           "textUnit": "Text",
-          "sourceValue": "Source: {value}",
-          "translatedValue": "This locale provides its own value.",
-          "sourceFallback": "Using the source value.",
+          "sourceValue": "المصدر: {value}",
+          "translatedValue": "توفر هذه اللغة قيمتها الخاصة.",
+          "sourceFallback": "تُستخدم قيمة المصدر.",
           "useSource": "Use source"
         },
         "viewModes": {
@@ -1569,12 +1581,12 @@
       "fixedLocaleItemBadge": "ثابت: {locale}"
     },
     "emailEvents": {
-      "title": "Email Delivery",
-      "description": "Database email event logs have been removed. Delivery status is tracked through delivery runs, suppressions, structured logs, and metrics.",
-      "databaseLogsRemovedTitle": "Database event log removed",
-      "databaseLogsRemovedDescription": "The old email_event table is no longer used for operational mail logs. Campaign and legal notice analytics use delivery recipient state instead.",
-      "dashboardTitle": "Use observability dashboards",
-      "dashboardDescription": "Provider acceptance, worker failures, and delivery-run health should be monitored in Grafana/Loki/Mimir."
+      "title": "تسليم البريد الإلكتروني",
+      "description": "تمت إزالة سجلات أحداث البريد الإلكتروني من قاعدة البيانات. تُتابَع حالة التسليم من خلال عمليات التسليم وقوائم منع الإرسال والسجلات المهيكلة والمقاييس.",
+      "databaseLogsRemovedTitle": "تمت إزالة سجل الأحداث من قاعدة البيانات",
+      "databaseLogsRemovedDescription": "لم يعد جدول email_event القديم يُستخدم للسجلات التشغيلية للبريد. تستخدم تحليلات الحملات والإشعارات القانونية حالة مستلمي الرسائل بدلاً منه.",
+      "dashboardTitle": "استخدم لوحات مراقبة النظام",
+      "dashboardDescription": "ينبغي مراقبة قبول مزوّد الخدمة للرسائل وإخفاقات العمليات العاملة وحالة عمليات التسليم في Grafana/Loki/Mimir."
     },
     "clientsDetail": {
       "newTitle": "عميل جديد",
@@ -1585,38 +1597,38 @@
     }
   },
   "translationPanel": {
-    "description": "Review the source language and existing translation document for each locale.",
+    "description": "راجع لغة المصدر ومستند الترجمة الموجود لكل لغة.",
     "actions": {
       "expand": "توسيع",
       "collapse": "طي",
-      "regenerateAll": "Generate/regenerate all eligible locales",
+      "regenerateAll": "توليد/إعادة توليد الترجمات لجميع اللغات المؤهلة",
       "regenerateLocale": "إعادة توليد",
       "regenerateLocaleAria": "إعادة توليد ترجمة {locale}",
       "generateLocale": "Generate",
-      "generateLocaleAria": "Generate {locale} translation"
+      "generateLocaleAria": "توليد ترجمة بلغة {locale}"
     },
     "sourceLocale": {
       "label": "لغة المصدر",
       "description": "هذه هي لغة المصدر المستخدمة كأساس لترجمات هذا الكيان",
       "confirm": {
         "title": "تغيير لغة المصدر",
-        "description": "Changing the source language updates only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically.",
-        "detail": "{locale} becomes the language of the editable source document. Existing target documents and translation jobs remain unchanged.",
+        "description": "يؤدي تغيير لغة المصدر إلى تحديث مؤشر المصدر فقط. تبقى مستندات الترجمة ومهام الترجمة الموجودة دون تغيير، ولا تُولّد الترجمات تلقائيًا.",
+        "detail": "تصبح {locale} لغة المستند المصدر القابل للتعديل. تبقى مستندات الترجمة ومهام الترجمة الموجودة دون تغيير.",
         "confirm": "التغيير وإعادة الترجمة"
       }
     },
     "activeEditLocale": {
-      "ariaLabel": "Switch content language. Current: {locale}",
+      "ariaLabel": "تبديل لغة المحتوى. الحالية: {locale}",
       "sourceOption": "{locale} (المصدر)",
       "loading": "جارٍ تحميل اللغات...",
-      "missingDescription": "No {locale} target document exists yet. Generate it from the translations panel.",
+      "missingDescription": "لا يوجد مستند ترجمة بلغة {locale} بعد. ولّده من لوحة الترجمات.",
       "bodyPreviewTitle": "معاينة نص {locale}",
-      "bodyPreviewDescription": "The existing translation document is shown with its structure and formatting.",
+      "bodyPreviewDescription": "يُعرض مستند الترجمة الموجود مع بنيته وتنسيقه.",
       "bodyPreviewEmpty": "لا توجد معاينة للنص بعد",
-      "sharedStructureSectionDescription": "This section keeps shared layout or query settings from the source page; translated body content is read-only.",
+      "sharedStructureSectionDescription": "يحتفظ هذا القسم بإعدادات التخطيط أو الاستعلام المشتركة من الصفحة المصدر؛ محتوى النص المترجم للقراءة فقط.",
       "sectionFieldLabels": {
         "caption": "التسمية التوضيحية",
-        "copyJson": "Scene copy"
+        "copyJson": "نص المشهد"
       }
     },
     "statuses": {
@@ -1624,7 +1636,7 @@
     },
     "states": {
       "loadFailed": "فشل تحميل الترجمات",
-      "missingTarget": "No target document yet.",
+      "missingTarget": "لا يوجد مستند ترجمة بعد.",
       "sourceEditorHint": "عدّل النص الأصلي في المحرر الرئيسي",
       "updatedAt": "تم التحديث {date}"
     },
@@ -1637,20 +1649,20 @@
     }
   },
   "translationPanelMenu": {
-    "description": "Review source menu labels and existing translation documents.",
+    "description": "راجع تسميات القائمة المصدر ومستندات الترجمة الموجودة.",
     "previewModal": {
-      "title": "{locale} menu translation preview",
+      "title": "معاينة ترجمة القائمة بلغة {locale}",
       "fields": {
-        "localizedLabelForLocale": "{locale} public label"
+        "localizedLabelForLocale": "التسمية العامة بلغة {locale}"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template."
+      "description": "أدر لغة المصدر ومستندات الترجمة الموجودة لهذا القالب للبريد الإلكتروني."
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout."
+      "description": "أدر لغة المصدر ومستندات الترجمة الموجودة لهذا التخطيط للبريد الإلكتروني."
     }
   },
   "translationOverviewPage": {
@@ -1662,15 +1674,15 @@
       "totalLocales": "إجمالي اللغات المحلية",
       "sourceEntities": "عناصر المصدر",
       "activeJobs": "المهام قيد التنفيذ",
-      "existingEntries": "Existing translations"
+      "existingEntries": "الترجمات الموجودة"
     },
     "sections": {
-      "localeHealthTitle": "Translation state by locale",
-      "entityHealthTitle": "Translation state by entity type"
+      "localeHealthTitle": "حالة الترجمة حسب اللغة",
+      "entityHealthTitle": "حالة الترجمة حسب نوع الكيان"
     },
     "columns": {
       "policy": "السياسة",
-      "lastTargetUpdate": "Last target update",
+      "lastTargetUpdate": "آخر تحديث للترجمة",
       "entity": "الكيان",
       "sources": "المصادر",
       "lastSourceUpdate": "آخر تحديث للمصدر"
@@ -1706,7 +1718,7 @@
   },
   "translationSettingsPage": {
     "title": "إعدادات الترجمة",
-    "description": "Manage the default source language and automatic translation providers. An Admin explicitly starts translation generation from each editor.",
+    "description": "أدر لغة المصدر الافتراضية ومزوّدي الترجمة الآلية. يبدأ المسؤول توليد الترجمات صراحةً من كل محرر.",
     "actions": {
       "jobs": "المهام",
       "save": "حفظ الإعدادات",
@@ -1716,8 +1728,8 @@
       "createProvider": "إنشاء مزود"
     },
     "sections": {
-      "runtime": "Source defaults",
-      "runtimeDescription": "Set only the language used when a source language has not been established. Source changes never start translation generation automatically.",
+      "runtime": "إعدادات المصدر الافتراضية",
+      "runtimeDescription": "حدد فقط اللغة المستخدمة عندما لا تكون لغة المصدر قد حُددت بعد. لا تؤدي تغييرات المصدر مطلقًا إلى بدء توليد الترجمة تلقائيًا.",
       "providers": "مزودو الترجمة",
       "providersDescription": "إدارة مزودي الترجمة الآلية. يبقى التوليد معطلا حتى يوجد مزود نشط واحد على الأقل ببيانات اعتماد صالحة."
     },
@@ -1727,10 +1739,10 @@
         "description": "تُستخدم عندما لم يتم تعيين لغة مصدر بعد وعندما لا يطابق الطلب لغة محتوى مدعومة"
       },
       "protectedTerms": {
-        "label": "Protected terms",
-        "description": "Exact case-sensitive spellings that translation generation must keep unchanged. No terms are learned or suggested automatically.",
-        "placeholder": "Add a protected term",
-        "examples": "Examples: Photoshop, React Native"
+        "label": "مصطلحات محمية",
+        "description": "صيغ كتابية دقيقة وحساسة لحالة الأحرف يجب أن تبقى دون تغيير عند توليد الترجمة. لا تُتعلّم المصطلحات ولا تُقترح تلقائيًا.",
+        "placeholder": "إضافة مصطلح محمي",
+        "examples": "أمثلة: Photoshop, React Native"
       },
       "providerName": {
         "label": "اسم المزود"
@@ -1760,39 +1772,39 @@
       },
       "llmApiKey": {
         "label": "LLM API key",
-        "descriptionEdit": "Leave blank to keep the stored key."
+        "descriptionEdit": "اتركه فارغًا للاحتفاظ بالمفتاح المخزّن."
       },
       "llmApiBaseUrl": {
         "label": "LLM API base URL",
-        "description": "Required for OpenAI-compatible endpoints; leave blank for Gemini."
+        "description": "مطلوب لنقاط النهاية المتوافقة مع OpenAI؛ اتركه فارغًا لـ Gemini."
       },
       "llmModel": {
         "label": "Model",
-        "description": "Model ID used for translation generation."
+        "description": "معرّف النموذج المستخدم لتوليد الترجمة."
       },
       "llmInputPrice": {
-        "label": "Input USD / 1M tokens",
-        "description": "Optional estimate used for provider comparison and cost planning."
+        "label": "الإدخال USD / 1M رمز",
+        "description": "تقدير اختياري يُستخدم لمقارنة المزوّدين وتخطيط التكاليف."
       },
       "llmOutputPrice": {
-        "label": "Output USD / 1M tokens",
-        "description": "Optional estimate used for provider comparison and cost planning."
+        "label": "الإخراج USD / 1M رمز",
+        "description": "تقدير اختياري يُستخدم لمقارنة المزوّدين وتخطيط التكاليف."
       },
       "llmMaxContextTokens": {
-        "label": "Max context tokens",
-        "description": "Optional routing hint for large translation batches."
+        "label": "الحد الأقصى لرموز السياق",
+        "description": "إرشاد اختياري للتوجيه عند معالجة دفعات ترجمة كبيرة."
       },
       "llmMaxOutputTokens": {
-        "label": "Max output tokens",
-        "description": "Optional per-request cap passed to compatible providers."
+        "label": "الحد الأقصى لرموز الإخراج",
+        "description": "حد اختياري لكل طلب يُمرّر إلى المزوّدين المتوافقين."
       },
       "llmTemperature": {
         "label": "Temperature",
-        "description": "Lower values make structured translation output more deterministic."
+        "description": "تجعل القيم المنخفضة مخرجات الترجمة المهيكلة أكثر حتمية."
       },
       "llmSupportsJsonMode": {
-        "label": "Structured JSON mode",
-        "description": "Enable when the provider supports JSON schema or JSON mode responses."
+        "label": "وضع JSON المهيكل",
+        "description": "فعّله عندما يدعم المزوّد مخطط JSON أو استجابات وضع JSON."
       }
     },
     "states": {
@@ -1826,8 +1838,8 @@
     "validation": {
       "providerNameRequired": "اسم المزود مطلوب.",
       "providerApiKeyRequired": "يتطلب هذا المزود مفتاح API.",
-      "providerModelRequired": "A model is required for LLM providers.",
-      "providerBaseUrlRequired": "An API base URL is required for OpenAI-compatible LLM providers."
+      "providerModelRequired": "يلزم نموذج لمزوّدي LLM.",
+      "providerBaseUrlRequired": "يلزم رابط URL أساسي لواجهة API لمزوّدي LLM المتوافقين مع OpenAI."
     },
     "modal": {
       "createProviderTitle": "إنشاء مزود ترجمة",
@@ -1838,7 +1850,7 @@
     },
     "llmPresets": {
       "gemini": "Gemini",
-      "openaiCompatible": "OpenAI-compatible"
+      "openaiCompatible": "متوافق مع OpenAI"
     }
   },
   "metadataPanel": {
@@ -2134,7 +2146,7 @@
             "placeholder": "AKIA..."
           },
           "secretAccessKey": {
-            "label": "Secret Access Key",
+            "label": "مفتاح الوصول السري",
             "placeholder": "أدخل Secret Access Key",
             "descriptionEdit": "مطلوب عند حفظ تغييرات إعداد SES"
           },
@@ -2613,9 +2625,9 @@
     "systemOrLegacy": "النظام أو إصدار سابق",
     "restore": "استعادة",
     "restoreTitle": "استعادة الإصدار",
-    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document.",
+    "restoreSameLocaleBody": "تؤدي استعادة المصدر v{version} ({locale}) إلى تغيير المستند المصدر فقط. تبقى مستندات الترجمة ومهام الترجمة الموجودة دون تغيير، ولا تُولّد الترجمات تلقائيًا. هل تريد المتابعة؟",
+    "restoreCrossLocaleBody": "تؤدي استعادة المصدر v{version} إلى تبديل لغة المصدر من {currentLocale} إلى {selectedLocale} وتغيير مؤشر المصدر فقط. تبقى مستندات الترجمة ومهام الترجمة الموجودة دون تغيير، ولا تُولّد الترجمات تلقائيًا. هل تريد المتابعة؟",
+    "restoreFailed": "فشلت استعادة المستند المصدر.",
     "loadFailed": "تعذر تحميل سجل الإصدارات.",
     "end": "تم تحميل جميع الإصدارات."
   },
@@ -3252,8 +3264,8 @@
       "message": "تم حفظ إصدار أحدث أثناء فتح هذا المحرر. أعد التحميل قبل متابعة التحرير."
     },
     "permissionRevoked": {
-      "title": "تم سحب إذن التحرير",
-      "message": "لم يعد لديك إذن لتحرير هذا المحتوى. لن يتم حفظ التغييرات التي أُجريت بعد سحب الإذن."
+      "title": "تمت إزالة الوصول",
+      "message": "لم يعد لديك وصول إلى هذا المحتوى. تبقى التعديلات غير المحفوظة على هذا الجهاز."
     },
     "sessionExpired": {
       "title": "انتهت صلاحية الجلسة",
@@ -3348,7 +3360,7 @@
           "done": "تم",
           "reset": "إعادة الضبط",
           "live": "مباشر",
-          "playingInPictureInPicture": "Playing in picture-in-picture",
+          "playingInPictureInPicture": "جارٍ التشغيل في وضع صورة داخل صورة",
           "videoPlayerLoading": "جارٍ تحميل مشغل الفيديو.",
           "currentTime": "الوقت الحالي",
           "duration": "المدة",
@@ -3377,13 +3389,13 @@
           "depressed": "منخفض",
           "uniform": "منتظم",
           "dropShadow": "الظل",
-          "proportionalSansSerif": "Proportional Sans-Serif",
-          "monospaceSansSerif": "Monospace Sans-Serif",
-          "proportionalSerif": "Proportional Serif",
-          "monospaceSerif": "Monospace Serif",
+          "proportionalSansSerif": "خط متناسب العرض بلا زوائد",
+          "monospaceSansSerif": "خط ثابت العرض بلا زوائد",
+          "proportionalSerif": "خط متناسب العرض بزوائد",
+          "monospaceSerif": "خط ثابت العرض بزوائد",
           "casual": "Casual",
           "script": "Script",
-          "smallCaps": "Small Caps",
+          "smallCaps": "أحرف كبيرة مصغرة",
           "white": "أبيض",
           "black": "أسود",
           "red": "أحمر",
@@ -3411,8 +3423,8 @@
         "browse": "اختيار الملفات",
         "importFromUrl": "استيراد من رابط",
         "directVideoUrlHelp": "روابط ملفات الفيديو المباشرة فقط. بالنسبة إلى YouTube أو Vimeo، استخدم الفيديو الخارجي.",
-        "resumeAvailable": "Interrupted upload found",
-        "resumeInstructionNamed": "Select {name} again to continue the upload from where it stopped.",
+        "resumeAvailable": "تم العثور على رفع متوقف",
+        "resumeInstructionNamed": "حدد {name} مجددًا لمتابعة الرفع من حيث توقف.",
         "backToUpload": "رفع الملفات",
         "openLibrary": "مكتبة الملفات",
         "unifiedDescription": "ارفع الملفات أو اخترها من المكتبة.",
@@ -3494,14 +3506,14 @@
           "quote": {
             "title": "اقتباس",
             "subtext": "اقتباس أو مقتطف",
-            "aliases": "quotation\nblockquote\nbq",
+            "aliases": "quotation\nblockquote\nbq\nاقتباس\nكتلة اقتباس",
             "group": "الكتل الأساسية"
           },
           "callout": {
             "title": "Callout",
-            "subtext": "Highlight content with an icon",
-            "aliases": "callout\nnotice\ninfo\naside",
-            "group": "Basic blocks"
+            "subtext": "إبراز المحتوى بأيقونة",
+            "aliases": "callout\nnotice\ninfo\naside\nتنبيه\nملاحظة\nمعلومات",
+            "group": "الكتل الأساسية"
           },
           "divider": {
             "title": "فاصل",
@@ -3530,61 +3542,61 @@
           "mathBlock": {
             "title": "كتلة رياضية",
             "subtext": "عرض معادلة باستخدام LaTeX",
-            "aliases": "math\nequation\nlatex\nformula",
+            "aliases": "math\nequation\nlatex\nformula\nرياضيات\nمعادلة\nصيغة",
             "group": "الرياضيات"
           },
           "inlineMath": {
             "title": "رياضيات مضمنة",
             "subtext": "صيغة LaTeX مضمنة",
-            "aliases": "inline\ninline math\ninlinemath\nlatex\n$",
+            "aliases": "inline\ninline math\ninlinemath\nlatex\n$\nرياضيات ضمن السطر\nمعادلة ضمن السطر",
             "group": "مضمن"
           },
           "map": {
             "title": "خريطة",
             "subtext": "إدراج موقع على الخريطة",
-            "aliases": "map\nlocation\nplace\naddress",
+            "aliases": "map\nlocation\nplace\naddress\nخريطة\nموقع\nمكان\nعنوان",
             "group": "التضمينات"
           },
           "externalVideo": {
             "title": "فيديو خارجي",
             "subtext": "إدراج رابط YouTube أو Vimeo",
-            "aliases": "external video\nyoutube\nvimeo\nembed",
+            "aliases": "external video\nyoutube\nvimeo\nembed\nفيديو خارجي\nيوتيوب\nفيميو\nتضمين",
             "group": "التضمينات"
           },
           "p5Sketch": {
             "title": "p5.js",
             "subtext": "إضافة رسم p5.js تفاعلي",
-            "aliases": "p5\np5.js\nsketch\ncreative coding",
+            "aliases": "p5\np5.js\nsketch\ncreative coding\nرسم\nبرمجة إبداعية",
             "group": "التضمينات"
           },
           "threeScene": {
             "title": "Three.js",
             "subtext": "إضافة مشهد Three.js تفاعلي",
-            "aliases": "three\nthree.js\n3d\nscene",
+            "aliases": "three\nthree.js\n3d\nscene\nثلاثي الأبعاد\nمشهد",
             "group": "التضمينات"
           },
           "file": {
             "title": "مرفق",
             "subtext": "إرفاق ملف (PDF، DOC، ZIP، إلخ)",
-            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload",
+            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\nمرفق\nملف\nمستند\nتنزيل",
             "group": "الوسائط"
           },
           "aiAssistant": {
             "title": "مساعد الذكاء الاصطناعي",
             "subtext": "اكتب أو حسّن أو حوّل النص باستخدام الذكاء الاصطناعي",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove",
+            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nذكاء اصطناعي\nمساعد\nكتابة\nتحسين",
             "group": "الذكاء الاصطناعي"
           },
           "shader": {
             "title": "تظليل GLSL",
             "subtext": "أضف تظليل GLSL تفاعليًا",
-            "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "aliases": "shader\nglsl\nfragment shader\nshadertoy\nتظليل\nمظلّل\nمظلّل الأجزاء",
             "group": "التضمينات"
           },
           "mermaid": {
             "title": "Mermaid",
             "subtext": "إنشاء مخطط من النص",
-            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence\nمخطط\nمخطط انسيابي\nتسلسل",
             "group": "التضمينات"
           }
         }
@@ -3764,6 +3776,12 @@
       "media": {
         "importFromUrl": "استيراد من رابط"
       }
+    },
+    "accessDowngraded": {
+      "message": "تغيرت صلاحيتك إلى العرض فقط. تم إيقاف التعديل؛ تبقى التعديلات التي لم تُحفظ بعد على هذا الجهاز وتُحفظ إذا استعدت صلاحية التعديل."
+    },
+    "accessUpgraded": {
+      "message": "يمكنك التعديل مرة أخرى. يجري حفظ التعديلات المحتفظ بها أثناء الوصول للعرض فقط."
     }
   },
   "editorHeader": {
@@ -3777,6 +3795,24 @@
       "sections": {
         "connection": "الاتصال"
       }
+    },
+    "saveState": {
+      "saved": "تم الحفظ",
+      "saving": "جارٍ الحفظ…",
+      "offline": "غير متصل · التعديلات محفوظة على هذا الجهاز",
+      "error": "فشل الحفظ · جارٍ إعادة المحاولة…",
+      "rejected": "تعذر حفظ بعض التعديلات",
+      "reload": "جارٍ إعادة الاتصال · جارٍ استعادة التعديلات…"
+    },
+    "rejectedEdits": {
+      "open": "مراجعة التعديلات غير المحفوظة",
+      "title": "تعديلات تعذر حفظها",
+      "description": "رفض الخادم هذه التعديلات، لذا لن تُعاد محاولة حفظها. انسخ ما تحتاجه، ثم تخلّ عنها.",
+      "reason": "السبب: {reason}",
+      "copy": "نسخ",
+      "copied": "تم النسخ",
+      "discard": "التخلي عن التعديلات",
+      "empty": "تم حفظ جميع التعديلات."
     }
   },
   "editorMetadata": {
@@ -4178,21 +4214,21 @@
         "fallbackMode": "عند غياب الشعار",
         "marqueeItemText": "النص",
         "marqueeItemHref": "رابط URL",
-        "scrollHeight": "Scroll height",
-        "sceneHeight": "Scene height",
-        "unitHoldSeconds": "Unit hold",
+        "scrollHeight": "ارتفاع التمرير",
+        "sceneHeight": "ارتفاع المشهد",
+        "unitHoldSeconds": "مدة ثبات الوحدة",
         "unitGapSeconds": "Unit gap",
-        "unitHoldOverrideSeconds": "Hold override",
+        "unitHoldOverrideSeconds": "تجاوز مدة الثبات",
         "loop": "Loop",
         "colorScheme": "Theme",
-        "backgroundColor": "Light background",
-        "darkBackgroundColor": "Dark background",
+        "backgroundColor": "الخلفية الفاتحة",
+        "darkBackgroundColor": "الخلفية الداكنة",
         "backgroundEnabled": "خلفية المشهد",
-        "textureSize": "Particle count",
-        "particleSize": "Particle size",
-        "particleBrightness": "Light particle brightness",
-        "darkParticleBrightness": "Dark particle brightness",
-        "transitionWindow": "Text blend",
+        "textureSize": "عدد الجسيمات",
+        "particleSize": "حجم الجسيمات",
+        "particleBrightness": "سطوع الجسيمات في الوضع الفاتح",
+        "darkParticleBrightness": "سطوع الجسيمات في الوضع الداكن",
+        "transitionWindow": "مزج النص",
         "transition": "Transition",
         "rotationEnabled": "تحريك الدوران",
         "scrollRotationEnabled": "إضافة دوران عند التمرير",
@@ -4202,34 +4238,34 @@
         "hoverEnabled": "تفاعل المؤشر",
         "hoverRepelRadius": "نصف قطر التحويم",
         "sceneUnit": "Unit",
-        "sceneUnitName": "Unit name",
+        "sceneUnitName": "اسم الوحدة",
         "unitAttribution": "نَسب الوحدة",
-        "meshSource": "Mesh source",
-        "fallbackMesh": "Built-in mesh",
+        "meshSource": "مصدر الشبكة المجسمة",
+        "fallbackMesh": "شبكة مجسمة مدمجة",
         "mesh": "Mesh",
-        "meshObjectName": "Mesh object",
+        "meshObjectName": "كائن الشبكة المجسمة",
         "meshScale": "مقياس المجسم",
         "meshOffsetY": "الإزاحة الرأسية للمجسم",
-        "meshUploadProgress": "Mesh upload progress",
-        "textureSource": "Light texture",
-        "fallbackColor": "Light color",
-        "color": "Light color",
-        "lightTextureUploadProgress": "Light texture upload progress",
-        "darkTextureSource": "Dark texture",
-        "darkFallbackColor": "Dark color",
-        "darkColor": "Dark color",
-        "darkTextureUploadProgress": "Dark texture upload progress",
+        "meshUploadProgress": "تقدم رفع الشبكة المجسمة",
+        "textureSource": "الخامة الفاتحة",
+        "fallbackColor": "اللون الفاتح",
+        "color": "اللون الفاتح",
+        "lightTextureUploadProgress": "تقدم رفع الخامة الفاتحة",
+        "darkTextureSource": "الخامة الداكنة",
+        "darkFallbackColor": "اللون الداكن",
+        "darkColor": "اللون الداكن",
+        "darkTextureUploadProgress": "تقدم رفع الخامة الداكنة",
         "title": "Title",
         "description": "الوصف",
         "meshOptimization": "GLB optimization",
-        "meshOptimizationTargetRatio": "Target mesh ratio",
-        "selectedOptimizedMesh": "Selected compressed GLB",
-        "optimizedMeshSize": "Compressed size",
+        "meshOptimizationTargetRatio": "النسبة المستهدفة للشبكة المجسمة",
+        "selectedOptimizedMesh": "GLB المضغوط المحدد",
+        "optimizedMeshSize": "الحجم المضغوط",
         "meshOptimizationTriangles": "Triangles",
-        "textColorSource": "Text color",
-        "lightTextColor": "Light text",
-        "darkTextColorSource": "Dark text",
-        "darkTextColor": "Dark text color",
+        "textColorSource": "لون النص",
+        "lightTextColor": "النص في الوضع الفاتح",
+        "darkTextColorSource": "النص في الوضع الداكن",
+        "darkTextColor": "لون النص في الوضع الداكن",
         "itemSize": "حجم العناصر",
         "showAvatar": "إظهار الصورة الشخصية",
         "maxLabels": "الحد الأقصى لشركات الإنتاج"
@@ -4331,7 +4367,7 @@
         "textureSource": {
           "color": "Color",
           "image": "Image",
-          "inherit": "Follow light"
+          "inherit": "اتباع الوضع الفاتح"
         },
         "playback": {
           "scroll": "Scroll",
@@ -4342,9 +4378,9 @@
           "linear": "Linear"
         },
         "textColorSource": {
-          "theme": "Follow theme",
+          "theme": "اتباع السمة",
           "custom": "Custom",
-          "inherit": "Follow light"
+          "inherit": "اتباع الوضع الفاتح"
         },
         "itemSize": {
           "s": "S · مضغوط",
@@ -4357,25 +4393,25 @@
         "removeMarqueeItem": "إزالة العنصر",
         "moveMarqueeItem": "تغيير ترتيب العنصر",
         "addSceneUnit": "Add unit",
-        "moveUnitUp": "Move unit up",
-        "moveUnitDown": "Move unit down",
-        "removeSceneUnit": "Remove unit",
+        "moveUnitUp": "نقل الوحدة لأعلى",
+        "moveUnitDown": "نقل الوحدة لأسفل",
+        "removeSceneUnit": "إزالة الوحدة",
         "replaceMesh": "Replace GLB",
         "uploadMesh": "Upload GLB",
-        "clearMeshAsset": "Clear mesh asset",
-        "cancelMeshUpload": "Cancel GLB upload",
-        "replaceTexture": "Replace light texture",
-        "uploadTexture": "Upload light texture",
-        "clearTextureAsset": "Clear texture",
-        "cancelTextureUpload": "Cancel light texture upload",
-        "replaceDarkTexture": "Replace dark texture",
-        "uploadDarkTexture": "Upload dark texture",
-        "clearDarkTextureAsset": "Clear dark texture",
-        "cancelDarkTextureUpload": "Cancel dark texture upload",
+        "clearMeshAsset": "إزالة أصل الشبكة المجسمة",
+        "cancelMeshUpload": "إلغاء رفع GLB",
+        "replaceTexture": "استبدال الخامة الفاتحة",
+        "uploadTexture": "رفع الخامة الفاتحة",
+        "clearTextureAsset": "إزالة الخامة",
+        "cancelTextureUpload": "إلغاء رفع الخامة الفاتحة",
+        "replaceDarkTexture": "استبدال الخامة الداكنة",
+        "uploadDarkTexture": "رفع الخامة الداكنة",
+        "clearDarkTextureAsset": "إزالة الخامة الداكنة",
+        "cancelDarkTextureUpload": "إلغاء رفع الخامة الداكنة",
         "generateOptimizedMesh": "Compress GLB",
         "useOptimizedMesh": "Use compressed GLB",
         "clearOptimizedMesh": "Use original GLB",
-        "deleteOptimizedMeshCandidate": "Delete compressed GLB"
+        "deleteOptimizedMeshCandidate": "حذف GLB المضغوط"
       },
       "descriptions": {
         "marqueeTextItems": "أضف عناصر النص واحدًا تلو الآخر.",
@@ -4386,18 +4422,18 @@
         "marqueeItems": "لا توجد عناصر بعد."
       },
       "status": {
-        "meshOptimizationQueued": "GLB optimization queued.",
-        "meshOptimizationGenerated": "Optimized GLB generated.",
-        "meshOptimizationSelected": "Optimized GLB selected.",
-        "meshOptimizationCleared": "Original GLB selected.",
-        "meshOptimizationDeleted": "Compressed GLB deleted.",
-        "meshOptimizationDeleteFailed": "Compressed GLB could not be deleted.",
+        "meshOptimizationQueued": "تمت إضافة تحسين GLB إلى قائمة الانتظار.",
+        "meshOptimizationGenerated": "تم توليد GLB المحسّن.",
+        "meshOptimizationSelected": "تم تحديد GLB المحسّن.",
+        "meshOptimizationCleared": "تم تحديد GLB الأصلي.",
+        "meshOptimizationDeleted": "تم حذف GLB المضغوط.",
+        "meshOptimizationDeleteFailed": "تعذر حذف GLB المضغوط.",
         "meshOptimizationPending": "Queued",
         "meshOptimizationProcessing": "Processing",
         "meshOptimizationFailed": "Failed",
         "meshOptimizationCancelled": "Cancelled",
-        "optimizedMeshCleanupFailed": "Optimized asset reference removed, but cleanup failed: {error}",
-        "optimizedMeshCleanupFailedDefault": "Optimized asset reference removed, but cleanup failed"
+        "optimizedMeshCleanupFailed": "تمت إزالة مرجع الأصل المحسّن، لكن فشلت عملية التنظيف: {error}",
+        "optimizedMeshCleanupFailedDefault": "تمت إزالة مرجع الأصل المحسّن، لكن فشلت عملية التنظيف"
       },
       "authorSelection": {
         "maxSelected": "يمكن اختيار ما يصل إلى {count} مؤلفًا.",
@@ -4497,33 +4533,33 @@
     }
   },
   "formValidation": {
-    "required": "This field is required",
-    "invalidUrl": "Please enter a valid URL",
-    "invalidFormat": "Invalid format",
-    "invalidEmail": "Please enter a valid email",
-    "invalidPhoneNumber": "Invalid phone number",
-    "stringGt": "Must be more than {threshold} characters",
-    "stringGte": "Minimum {threshold} characters",
-    "stringLt": "Must be less than {threshold} characters",
-    "stringLte": "Maximum {threshold} characters",
-    "stringEq": "Must be exactly {threshold} characters",
-    "numberGt": "Must be greater than {threshold}",
-    "numberGte": "Minimum value is {threshold}",
-    "numberLt": "Must be less than {threshold}",
-    "numberLte": "Maximum value is {threshold}",
-    "numberEq": "Must be exactly {threshold}",
-    "arrayGt": "Select more than {threshold}",
-    "arrayGte": "Select at least {threshold}",
-    "arrayLt": "Select less than {threshold}",
-    "arrayLte": "Select at most {threshold}",
-    "arrayEq": "Select exactly {threshold}",
-    "dateMin": "Date must be on or after {date}",
-    "dateMax": "Date must be on or before {date}",
-    "futureDate": "Date must be in the future",
-    "pastDate": "Date must be in the past",
-    "weekdayOnly": "Please select a weekday",
-    "minAge": "Must be at least {age} years old",
-    "maxAge": "Must be at most {age} years old"
+    "required": "هذا الحقل مطلوب",
+    "invalidUrl": "يرجى إدخال رابط URL صالح",
+    "invalidFormat": "صيغة غير صالحة",
+    "invalidEmail": "يرجى إدخال بريد إلكتروني صالح",
+    "invalidPhoneNumber": "رقم هاتف غير صالح",
+    "stringGt": "يجب أن يزيد النص عن {threshold} حرفًا",
+    "stringGte": "الحد الأدنى {threshold} حرفًا",
+    "stringLt": "يجب أن يقل النص عن {threshold} حرفًا",
+    "stringLte": "الحد الأقصى {threshold} حرفًا",
+    "stringEq": "يجب أن يكون النص {threshold} حرفًا بالضبط",
+    "numberGt": "يجب أن تكون القيمة أكبر من {threshold}",
+    "numberGte": "الحد الأدنى للقيمة هو {threshold}",
+    "numberLt": "يجب أن تكون القيمة أقل من {threshold}",
+    "numberLte": "الحد الأقصى للقيمة هو {threshold}",
+    "numberEq": "يجب أن تكون القيمة {threshold} بالضبط",
+    "arrayGt": "حدد أكثر من {threshold}",
+    "arrayGte": "حدد {threshold} على الأقل",
+    "arrayLt": "حدد أقل من {threshold}",
+    "arrayLte": "حدد {threshold} على الأكثر",
+    "arrayEq": "حدد {threshold} بالضبط",
+    "dateMin": "يجب أن يكون التاريخ في {date} أو بعده",
+    "dateMax": "يجب أن يكون التاريخ في {date} أو قبله",
+    "futureDate": "يجب أن يكون التاريخ في المستقبل",
+    "pastDate": "يجب أن يكون التاريخ في الماضي",
+    "weekdayOnly": "يرجى تحديد يوم عمل",
+    "minAge": "يجب ألا يقل العمر عن {age} سنة",
+    "maxAge": "يجب ألا يتجاوز العمر {age} سنة"
   },
   "phoneInput": {
     "noResults": "لا توجد نتائج"
@@ -4716,7 +4752,7 @@
         "ready": "الصوت جاهز",
         "uploadTooltip": "رفع ملف صوتي",
         "uploaded": "تم رفع الصوت وبدأت المعالجة",
-        "resumeExpired": "Upload session expired. Start a fresh upload."
+        "resumeExpired": "انتهت صلاحية جلسة الرفع. ابدأ عملية رفع جديدة."
       }
     },
     "artists": {
@@ -5268,6 +5304,40 @@
       "goHome": "العودة إلى الصفحة الرئيسية",
       "tryAgain": "حاول مرة أخرى",
       "login": "العودة إلى تسجيل الدخول"
+    }
+  },
+  "localBackups": {
+    "title": "النسخ الاحتياطية المحلية",
+    "description": "تعديلات غير محفوظة من علامات تبويب مغلقة على هذا الجهاز. افتح المحرر لاستعادتها. تنتهي صلاحية النسخ الاحتياطية بعد 30 يومًا وتُحذف عند تسجيل الخروج.",
+    "empty": "لا توجد نسخ احتياطية محلية لاستعادتها. لا تظهر هنا التعديلات في علامات التبويب المفتوحة.",
+    "unavailable": "تتطلب النسخ الاحتياطية المحلية تخزين المتصفح وWeb Locks على هذا الجهاز.",
+    "loading": "جارٍ البحث عن نسخ احتياطية محلية…",
+    "error": "تعذر إكمال هذا الإجراء. حدّث القائمة وحاول مرة أخرى.",
+    "refresh": "تحديث",
+    "lastChanged": "آخر تغيير {time}",
+    "open": "فتح المحرر",
+    "discard": "التخلي عن التعديلات",
+    "openLabel": "فتح المحرر: {kind} {id}, {locale}",
+    "discardLabel": "التخلي عن التعديلات: {kind} {id}, {locale}",
+    "discardTitle": "هل تريد حذف النسخة الاحتياطية المحلية؟",
+    "discardDescription": "ستُحذف هذه التعديلات غير المحفوظة نهائيًا من هذا الجهاز. لن يتأثر المحتوى المحفوظ.",
+    "kinds": {
+      "post": "منشور",
+      "page": "صفحة",
+      "work": "عمل",
+      "campaign": "حملة",
+      "email-template": "قالب بريد إلكتروني",
+      "email-layout": "تخطيط بريد إلكتروني",
+      "terms-history": "شروط الخدمة",
+      "privacy-history": "سياسة الخصوصية",
+      "artist": "فنان",
+      "release": "إصدار",
+      "label": "تسمية",
+      "form": "نموذج",
+      "map-theme": "سمة خريطة",
+      "program-event": "حدث",
+      "menu": "قائمة",
+      "post-series": "سلسلة منشورات"
     }
   }
 }

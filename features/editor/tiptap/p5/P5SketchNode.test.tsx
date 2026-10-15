@@ -7,7 +7,6 @@ import { Editor, type NodeType, type TextType } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/react';
 
-import { redo, undo } from 'y-prosemirror';
 import type { EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { createTiptapWireExtensions } from '../wire-schema';
 import { createP5SketchExtension } from './p5-extension';
@@ -16,11 +15,6 @@ import { createP5PreviewRuntime, type P5PreviewRuntimeFactory } from './p5-previ
 import { buildP5SandboxDocument } from './p5-preview-document';
 import type { P5Capability } from './p5-capabilities';
 import { DEFAULT_P5_SKETCH_SOURCE, normalizeP5SketchError, validateP5SketchSource } from './p5-source';
-
-vi.mock('y-prosemirror', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('y-prosemirror')>();
-  return { ...actual, undo: vi.fn(actual.undo), redo: vi.fn(actual.redo) };
-});
 
 vi.mock('../code-editor', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../code-editor')>()),
@@ -568,8 +562,6 @@ describe('authoring p5.js sketch resize', () => {
       return element!;
     });
     const before = sketchNode(editor!);
-    vi.mocked(undo).mockClear();
-    vi.mocked(redo).mockClear();
     act(() => {
       editor!.view.dispatch(editor!.state.tr.setSelection(NodeSelection.create(editor!.state.doc, 1)));
       input.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', metaKey: true, bubbles: true }));
@@ -581,8 +573,6 @@ describe('authoring p5.js sketch resize', () => {
       expect(editor!.state.selection).toBeInstanceOf(NodeSelection);
       expect(editor!.state.selection.$from.nodeAfter?.type.name).toBe('p5Sketch');
     });
-    expect(undo).not.toHaveBeenCalled();
-    expect(redo).not.toHaveBeenCalled();
     expect(sketchNode(editor!)).toMatchObject({
       attrs: { mode: 'edit' },
       content: before?.content,

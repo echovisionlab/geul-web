@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { PostAction } from '@echovisionlab/geul-proto/secure/post_pb.ts';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
+import { getUntrackedConfigurationWriteOrigin } from '@/lib/editor/editor-write-origin';
 import { notifications } from '@/components/core/Notification';
 import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 import type { StatusOption } from '@/features/editor/EditorHeader';
@@ -126,7 +127,8 @@ export function usePostLifecycle({
   );
 
   const publish = useMutation({
-    mutationFn: () => runAfterEditorSave(() => publishPostAction(postId)),
+    mutationFn: () =>
+      runAfterEditorSave(() => publishPostAction(postId, getUntrackedConfigurationWriteOrigin(`post:${postId}`))),
     onSuccess: (result) => {
       if (!result) {
         return;
@@ -143,7 +145,8 @@ export function usePostLifecycle({
     },
   });
   const unpublish = useMutation({
-    mutationFn: () => runAfterEditorSave(() => unpublishPostAction(postId)),
+    mutationFn: () =>
+      runAfterEditorSave(() => unpublishPostAction(postId, getUntrackedConfigurationWriteOrigin(`post:${postId}`))),
     onSuccess: (result) => {
       if (!result) {
         return;
@@ -158,7 +161,8 @@ export function usePostLifecycle({
     },
   });
   const archive = useMutation({
-    mutationFn: () => runAfterEditorSave(() => archivePostAction(postId)),
+    mutationFn: () =>
+      runAfterEditorSave(() => archivePostAction(postId, getUntrackedConfigurationWriteOrigin(`post:${postId}`))),
     onSuccess: (result) => {
       if (!result) {
         return;
@@ -174,7 +178,14 @@ export function usePostLifecycle({
   });
   const schedule = useMutation({
     mutationFn: (resolution: PostScheduleResolution) =>
-      runAfterEditorSave(() => schedulePostAction(postId, resolution.instant, resolution.timeZone)),
+      runAfterEditorSave(() =>
+        schedulePostAction(
+          postId,
+          resolution.instant,
+          resolution.timeZone,
+          getUntrackedConfigurationWriteOrigin(`post:${postId}`),
+        ),
+      ),
     onSuccess: (result, resolution) => {
       if (!result) {
         return;
@@ -192,7 +203,10 @@ export function usePostLifecycle({
     },
   });
   const cancelSchedule = useMutation({
-    mutationFn: () => runAfterEditorSave(() => cancelPostScheduleAction(postId)),
+    mutationFn: () =>
+      runAfterEditorSave(() =>
+        cancelPostScheduleAction(postId, getUntrackedConfigurationWriteOrigin(`post:${postId}`)),
+      ),
     onSuccess: (result) => {
       if (!result) {
         return;
@@ -209,7 +223,8 @@ export function usePostLifecycle({
     },
   });
   const republish = useMutation({
-    mutationFn: () => runAfterEditorSave(() => republishPostAction(postId)),
+    mutationFn: () =>
+      runAfterEditorSave(() => republishPostAction(postId, getUntrackedConfigurationWriteOrigin(`post:${postId}`))),
     onSuccess: (result) => {
       if (!result) {
         return;

@@ -1,4 +1,5 @@
 'use client';
+import { useReleaseEditorCanEdit } from './ReleaseEditorAccessContext';
 import { breakpointQuery } from '@/components/core/Layout/breakpoints';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
@@ -69,6 +70,7 @@ import {
 } from './track-runtime';
 import { ReleaseTrackCreateView, secondsToTimePickerValue, timePickerValueToSeconds } from './ReleaseTrackCreateView';
 import { TrackCreditsEditorSection } from './TrackCreditsEditorSection';
+import { getUntrackedConfigurationWriteOrigin } from '@/lib/editor/editor-write-origin';
 import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
 import { useTrackOrderSave } from './useTrackOrderSave';
 
@@ -77,7 +79,7 @@ interface ReleaseTracksSectionProps {
   idPrefix?: string;
   tracks: ReleaseTrackItem[];
   onTracksChange: (tracks: ReleaseTrackItem[]) => void;
-  onMutationStart?: () => void;
+  onMutationStart?: () => string | void;
   onMutationSettled?: (succeeded: boolean) => void;
 }
 
@@ -118,6 +120,7 @@ export function ReleaseTracksSection({
   onMutationStart,
   onMutationSettled,
 }: ReleaseTracksSectionProps) {
+  const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.tracks');
   const isMobile = useMediaQuery(breakpointQuery('sm'));
@@ -135,22 +138,48 @@ export function ReleaseTracksSection({
   const [deletingTrackId, setDeletingTrackId] = useState<string | null>(null);
 
   const createTrack = useMutation({
-    mutationFn: (data: { release_id: string; track_number: number; title: string; duration_seconds?: number }) =>
-      createTrackAction(data),
-    onMutate: () => onMutationStart?.(),
+    mutationFn: async (data: {
+      release_id: string;
+      track_number: number;
+      title: string;
+      duration_seconds?: number;
+    }) => {
+      const editorOrigin = onMutationStart?.() || getUntrackedConfigurationWriteOrigin(`release:${releaseId}`);
+      const result = await createTrackAction(data, editorOrigin);
+      if (result.data && !result.error) {
+        publishEditorEntityChange(`release:${releaseId}`, editorOrigin);
+      }
+      return result;
+    },
     onSettled: (result, error) => onMutationSettled?.(!error && Boolean(result?.data) && !result?.error),
   });
 
   const updateTrack = useMutation({
-    mutationFn: (data: { id: string; track_number?: number; title?: string; duration_seconds?: number | null }) =>
-      updateTrackAction(data.id, data),
-    onMutate: () => onMutationStart?.(),
+    mutationFn: async (data: {
+      id: string;
+      track_number?: number;
+      title?: string;
+      duration_seconds?: number | null;
+    }) => {
+      const editorOrigin = onMutationStart?.() || getUntrackedConfigurationWriteOrigin(`release:${releaseId}`);
+      const result = await updateTrackAction(data.id, data, editorOrigin);
+      if (result.success && !result.error) {
+        publishEditorEntityChange(`release:${releaseId}`, editorOrigin);
+      }
+      return result;
+    },
     onSettled: (result, error) => onMutationSettled?.(!error && Boolean(result?.success) && !result?.error),
   });
 
   const deleteTrack = useMutation({
-    mutationFn: (id: string) => deleteTrackAction(id),
-    onMutate: () => onMutationStart?.(),
+    mutationFn: async (id: string) => {
+      const editorOrigin = onMutationStart?.() || getUntrackedConfigurationWriteOrigin(`release:${releaseId}`);
+      const result = await deleteTrackAction(id, editorOrigin);
+      if (result.success && !result.error) {
+        publishEditorEntityChange(`release:${releaseId}`, editorOrigin);
+      }
+      return result;
+    },
     onSettled: (result, error) => onMutationSettled?.(!error && Boolean(result?.success) && !result?.error),
   });
 
@@ -162,6 +191,9 @@ export function ReleaseTracksSection({
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
+    if (!canEdit) {
+      return;
+    }
     const { active, over } = event;
     if (!over || active.id === over.id) {
       return;
@@ -180,6 +212,9 @@ export function ReleaseTracksSection({
   };
 
   const handleAddTrack = () => {
+    if (!canEdit) {
+      return;
+    }
     if (!newTrackTitle.trim()) {
       return;
     }
@@ -201,7 +236,6 @@ export function ReleaseTracksSection({
             return;
           }
           const newTrack = result.data;
-          publishEditorEntityChange(`release:${releaseId}`);
           notifications.show({
             message: tCommon('messages.itemCreated', { item: tCommon('entities.track') }),
             tone: 'positive',
@@ -236,6 +270,9 @@ export function ReleaseTracksSection({
   };
 
   const handleUpdateTrack = () => {
+    if (!canEdit) {
+      return;
+    }
     if (!expandedTrackId || !editTrackTitle.trim()) {
       return;
     }
@@ -254,7 +291,6 @@ export function ReleaseTracksSection({
             notifications.show({ message: result.error, tone: 'danger' });
             return;
           }
-          publishEditorEntityChange(`release:${releaseId}`);
           notifications.show({
             message: tCommon('messages.itemUpdated', { item: tCommon('entities.track') }),
             tone: 'positive',
@@ -281,6 +317,9 @@ export function ReleaseTracksSection({
   };
 
   const handleConfirmDeleteTrack = () => {
+    if (!canEdit) {
+      return;
+    }
     if (!deletingTrackId) {
       return;
     }
@@ -291,7 +330,6 @@ export function ReleaseTracksSection({
           notifications.show({ message: result.error, tone: 'danger' });
           return;
         }
-        publishEditorEntityChange(`release:${releaseId}`);
         notifications.show({
           message: tCommon('messages.itemDeleted', { item: tCommon('entities.track') }),
           tone: 'positive',
@@ -479,6 +517,7 @@ export function ReleaseTracksSection({
           setDeletingTrackId(null);
           closeDeleteModal();
         }}
+        confirmDisabled={!canEdit}
         onConfirm={handleConfirmDeleteTrack}
         title={tCommon('actions.delete')}
         message={t('deleteConfirm')}
@@ -582,6 +621,7 @@ function TrackAudioUploadButtonView({
   onPendingUploadCancelled,
   backendResumeState,
 }: TrackAudioUploadButtonViewProps) {
+  const canEdit = useReleaseEditorCanEdit();
   return (
     <TrackAudioUploader
       trackId={track.id}
@@ -600,6 +640,7 @@ function TrackAudioUploadButtonView({
       suppressedResumeIdentity={suppressedResumeIdentity}
       resumeStateOverride={backendResumeState}
       compact
+      disabled={!canEdit}
       mode="button-only"
     />
   );
@@ -652,6 +693,7 @@ function TrackDurationPicker({
   value: number | '';
   onChange: (value: number | '') => void;
 }) {
+  const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
 
   return (
@@ -659,6 +701,7 @@ function TrackDurationPicker({
       id={id}
       label={tCommon('labels.length')}
       value={secondsToTimePickerValue(value)}
+      disabled={!canEdit}
       onChange={(nextValue) => onChange(timePickerValueToSeconds(nextValue))}
       clearable
       withSeconds
@@ -775,8 +818,10 @@ export function SortableTrackRow({
   formatDuration,
   editor,
 }: SortableTrackRowProps) {
+  const canEdit = useReleaseEditorCanEdit();
   const sortable = useSortableItem({
     id: track.id,
+    disabled: !canEdit,
   });
   const tCommon = useTranslations('common');
   const tSort = useTranslations('dataTable.sort');
@@ -813,6 +858,7 @@ export function SortableTrackRow({
             interaction="drag-handle"
             draggable={false}
             {...sortable.handle}
+            disabled={!canEdit}
             aria-label={tSort('aria.reorder', { label: track.title })}
           >
             <IconGripVertical aria-hidden />
@@ -860,6 +906,7 @@ export function SortableTrackRow({
                 tone="danger"
                 emphasis="low"
                 size="compact"
+                disabled={!canEdit}
                 onClick={onDelete}
                 aria-label={tCommon('actions.delete')}
                 aria-describedby={`${editorPanelId}-title`}
@@ -938,6 +985,7 @@ export function SortableTrackListItem({
   formatDuration,
   editor,
 }: SortableTrackListItemProps) {
+  const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
   const tSort = useTranslations('dataTable.sort');
   const tMedia = useTranslations('editorCommon.media');
@@ -963,6 +1011,7 @@ export function SortableTrackListItem({
   });
   const sortable = useSortableItem({
     id: track.id,
+    disabled: !canEdit,
   });
   const editorPanelId = useId();
   const { shouldRenderEditor, collapseOpen, cachedEditor } = useEditorVisibility(expanded, editor);
@@ -983,6 +1032,7 @@ export function SortableTrackListItem({
             interaction="drag-handle"
             draggable={false}
             {...sortable.handle}
+            disabled={!canEdit}
             aria-label={tSort('aria.reorder', { label: track.title })}
           >
             <IconGripVertical aria-hidden />
@@ -1001,6 +1051,7 @@ export function SortableTrackListItem({
             />
             <IconButton
               tone="danger"
+              disabled={!canEdit}
               onClick={onDelete}
               aria-label={tCommon('actions.delete')}
               aria-describedby={`${editorPanelId}-title`}
@@ -1077,7 +1128,7 @@ interface TrackRowEditorPanelProps {
   onClose: () => void;
   isSaving: boolean;
   onCreditsChange: (credits: ReleaseTrackItem['credits']) => void;
-  onMutationStart?: () => void;
+  onMutationStart?: () => string | void;
   onMutationSettled?: (succeeded: boolean) => void;
 }
 
@@ -1096,6 +1147,7 @@ function TrackRowEditorPanel({
   onMutationStart,
   onMutationSettled,
 }: TrackRowEditorPanelProps) {
+  const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.tracks');
   const isMobile = useMediaQuery(breakpointQuery('sm'));
@@ -1109,6 +1161,7 @@ function TrackRowEditorPanel({
             id={idPrefix ? `${idPrefix}-edit-track-title-${track.id}` : undefined}
             label={tCommon('labels.title')}
             placeholder={t('placeholders.title')}
+            disabled={!canEdit}
             value={title}
             onChange={(e) => onTitleChange(e.currentTarget.value)}
             required
@@ -1127,7 +1180,9 @@ function TrackRowEditorPanel({
         <ConnectedFileDownloadPolicyEditor
           entityType={TranscodeEntityType.TRACK}
           entityId={track.id}
+          releaseId={releaseId}
           expectedFileId={track.audio_original_file_id}
+          readOnly={!canEdit}
           compact={false}
         />
       ) : null}
@@ -1146,7 +1201,7 @@ function TrackRowEditorPanel({
         <Button emphasis="low" onClick={onClose}>
           {tCommon('actions.close')}
         </Button>
-        <Button emphasis="medium" onClick={onSave} loading={isSaving} disabled={!title.trim()}>
+        <Button emphasis="medium" onClick={onSave} loading={isSaving} disabled={!canEdit || !title.trim()}>
           {tCommon('actions.save')}
         </Button>
       </DsLayoutInline>

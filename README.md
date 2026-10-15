@@ -14,7 +14,17 @@ pnpm prepare:p5-runtime
 pnpm dev
 ```
 
-Run the focused checks before submitting a change:
+While working, check only what the working tree changed (typecheck, ESLint and
+Stylelint on changed files, `i18n:check` when messages changed, Vitest for related
+tests, and the Storybook test-runner for affected stories against `pnpm storybook`):
+
+```sh
+pnpm verify:changed              # all of the above; --no-storybook / --base <ref>
+pnpm test:changed                # Vitest for related tests only
+pnpm storybook:test:changed      # affected stories only (--dry-run lists them)
+```
+
+Run the full checks before submitting a change:
 
 ```sh
 pnpm lint
@@ -23,6 +33,12 @@ pnpm typecheck
 pnpm test
 pnpm build
 ```
+
+Unreleased sibling contracts (`../geul-event-contracts`, `../geul-common`,
+`../geul-telemetry`) are consumed with `LOCAL_CONTRACTS=1` and the
+`*:local-contracts` scripts (`typecheck`, `test`, `storybook`, `build`);
+`LOCAL_CONTRACTS=1 pnpm verify:changed` uses them too. Never point a dependency at a
+sibling checkout with a pnpm `link:` override.
 
 The production image is published by the release workflow as
 `registry.dsub.io/echovisionlab/geul-web:<tag>`.

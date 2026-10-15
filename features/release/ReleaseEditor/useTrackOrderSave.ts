@@ -7,6 +7,7 @@ import { notifications } from '@/components/core/Notification';
 import { reorderTracksAction } from '@/lib/actions/track';
 import type { ReleaseTrackItem } from '@/lib/collab/schemas/release-fields.schema';
 import { requireActionSuccess } from '@/lib/editor/require-action-success';
+import { getUntrackedConfigurationWriteOrigin } from '@/lib/editor/editor-write-origin';
 import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
 
 export function restoreTrackOrder(tracks: ReleaseTrackItem[], savedOrder: string[]): ReleaseTrackItem[] {
@@ -28,7 +29,7 @@ export function useTrackOrderSave({
   releaseId: string;
   tracks: ReleaseTrackItem[];
   onTracksChange: (tracks: ReleaseTrackItem[]) => void;
-  onMutationStart?: () => void;
+  onMutationStart?: () => string | void;
   onMutationSettled?: (succeeded: boolean) => void;
 }) {
   const t = useTranslations('common.notifications');
@@ -36,13 +37,15 @@ export function useTrackOrderSave({
   const latestRequest = useRef(0);
   const save = useMutation({
     scope: { id: `release-track-order:${releaseId}` },
-    mutationFn: (request: { trackIds: string[]; version: number }) =>
-      requireActionSuccess(reorderTracksAction(request.trackIds)),
-    onMutate: () => onMutationStart?.(),
+    mutationFn: async (request: { trackIds: string[]; version: number }) => {
+      const editorOrigin = onMutationStart?.() || getUntrackedConfigurationWriteOrigin(`release:${releaseId}`);
+      const result = await requireActionSuccess(reorderTracksAction(request.trackIds, editorOrigin));
+      publishEditorEntityChange(`release:${releaseId}`, editorOrigin);
+      return result;
+    },
     onSettled: (_result, error) => onMutationSettled?.(!error),
     onSuccess: (_result, request) => {
       confirmedOrder.current = request.trackIds;
-      publishEditorEntityChange(`release:${releaseId}`);
     },
     onError: (error, request) => {
       if (request.version === latestRequest.current) {

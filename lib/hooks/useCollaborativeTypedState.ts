@@ -1,5 +1,6 @@
 'use client';
 
+import { getProviderAccessEnded, getProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import type * as Y from 'yjs';
@@ -106,6 +107,9 @@ export function useCollaborativeTypedState<TSchema extends ZodObjectSchema>({
     connectionKey,
   });
 
+  const providerRef = useRef(provider);
+  providerRef.current = provider;
+
   const metaMap = useMemo(() => {
     return doc ? createMap(doc) : null;
   }, [createMap, doc]);
@@ -162,11 +166,17 @@ export function useCollaborativeTypedState<TSchema extends ZodObjectSchema>({
   }, [buildBaseState, metaMap]);
 
   const setField = useCallback(<K extends SchemaKey<TSchema>>(key: K, value: SchemaState<TSchema>[K]) => {
+    if (getProviderAccessEnded(providerRef.current) || getProviderAccessLevel(providerRef.current) === 'view') {
+      return;
+    }
     setState((prev) => ({ ...prev, [key]: value }));
     metaMapRef.current?.set(key, value);
   }, []);
 
   const setFields = useCallback((values: Partial<SchemaState<TSchema>>) => {
+    if (getProviderAccessEnded(providerRef.current) || getProviderAccessLevel(providerRef.current) === 'view') {
+      return;
+    }
     setState((prev) => ({ ...prev, ...values }));
     metaMapRef.current?.setMany(values);
   }, []);

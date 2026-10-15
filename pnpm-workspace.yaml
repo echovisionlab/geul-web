@@ -131,6 +131,5 @@ patchedDependencies:
   '@types/dom-webcodecs@0.1.13': patches/@types__dom-webcodecs@0.1.13.patch
   ast-types@0.16.1: patches/ast-types@0.16.1.patch
   simple-icons@16.28.0: patches/simple-icons@16.28.0.patch
-  '@echovisionlab/geul-proto@0.5.0': patches/@echovisionlab__geul-proto@0.5.0.patch
   react-aria@3.53.1: patches/react-aria@3.53.1.patch
   '@storybook/addon-docs@10.5.8': patches/@storybook__addon-docs@10.5.8.patch

@@ -54,10 +54,12 @@ async function renderSchedule({
   initialInstant = '2026-10-18T08:30:00.000Z',
   initialTimeZone = 'Asia/Seoul',
   requestTimeZone = 'UTC',
+  readOnly = false,
 }: {
   initialInstant?: string | null;
   initialTimeZone?: string | null;
   requestTimeZone?: string;
+  readOnly?: boolean;
 } = {}) {
   const onSubmit = vi.fn<PostScheduleDialogProps['onSubmit']>();
   await act(async () => {
@@ -67,6 +69,7 @@ async function renderSchedule({
           <RequestTimeZoneProvider timeZone={requestTimeZone}>
             <PostScheduleDialog
               opened
+              readOnly={readOnly}
               onClose={vi.fn()}
               onSubmit={onSubmit}
               initialInstant={initialInstant}
@@ -93,6 +96,24 @@ async function submitSchedule() {
 }
 
 describe('PostScheduleDialog', () => {
+  it('upgrades and downgrades an open scheduling dialog without replacing its fields', async () => {
+    const denied = await renderSchedule({ readOnly: true });
+    const field = getDialog().querySelector('input');
+    expect(field?.disabled).toBe(true);
+    await submitSchedule();
+    expect(denied).not.toHaveBeenCalled();
+    const allowed = await renderSchedule({ readOnly: false });
+    expect(getDialog().querySelector('input')).toBe(field);
+    expect(field?.disabled).toBe(false);
+    await submitSchedule();
+    expect(allowed).toHaveBeenCalledOnce();
+    const downgraded = await renderSchedule({ readOnly: true });
+    expect(getDialog().querySelector('input')).toBe(field);
+    expect(field?.disabled).toBe(true);
+    await submitSchedule();
+    expect(downgraded).not.toHaveBeenCalled();
+  });
+
   it('restores the saved IANA zone and submits the same UTC instant', async () => {
     const onSubmit = await renderSchedule();
     const dialog = getDialog();

@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import * as Y from 'yjs';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { persistCollaborativeDocumentNow } from './persist-now';
 
@@ -10,7 +11,9 @@ function providerFixture() {
     }
   };
   const provider = {
+    document: new Y.Doc(),
     hasUnsyncedChanges: true,
+    flushPendingUpdates: vi.fn(),
     forceSync: vi.fn(),
     on: (name: string, listener: (event: { payload?: string }) => void) => {
       const group = listeners.get(name) ?? new Set();
@@ -23,7 +26,20 @@ function providerFixture() {
   const ack = (ok = true) => {
     const request = JSON.parse(provider.sendStateless.mock.calls.at(-1)![0]);
     emit('stateless', {
-      payload: JSON.stringify({ kind: 'persist.now.ack', requestId: request.requestId, ok, error: 'save rejected' }),
+      payload: JSON.stringify({
+        v: 3,
+        kind: 'room.flush_result',
+        requestId: request.requestId,
+        ok,
+        ...(ok
+          ? {
+              persisted: {
+                stateVector: Buffer.from(Y.encodeStateVector(provider.document)).toString('base64'),
+                deleted: {},
+              },
+            }
+          : { error: { code: 'save_rejected', message: 'save rejected' } }),
+      }),
     });
   };
   return {
@@ -97,4 +113,61 @@ describe('persistCollaborativeDocumentNow', () => {
     expect(provider.sendStateless).not.toHaveBeenCalled();
     expect([...listeners.values()].every((group) => group.size === 0)).toBe(true);
   });
+});
+
+it('drains the data buffer again before room.flush and requires coverage of edits made during sync', async () => {
+  const { provider, emit, persist } = providerFixture();
+  const writes: string[] = [];
+  let buffered = true;
+  provider.flushPendingUpdates.mockImplementation(() => {
+    if (buffered) {
+      writes.push('update');
+    }
+    buffered = false;
+  });
+  provider.sendStateless.mockImplementation(() => {
+    writes.push('room.flush');
+  });
+  const saving = persist();
+  provider.document.getText('body').insert(0, 'new edit');
+  buffered = true;
+  provider.hasUnsyncedChanges = false;
+  emit('synced');
+  await Promise.resolve();
+  expect(writes).toEqual(['update', 'update', 'room.flush']);
+  const request = JSON.parse(provider.sendStateless.mock.calls[0]![0]);
+  const rejected = expect(saving).rejects.toThrow('did not cover local edits');
+  emit('stateless', {
+    payload: JSON.stringify({
+      v: 3,
+      kind: 'room.flush_result',
+      requestId: request.requestId,
+      ok: true,
+      persisted: { stateVector: 'AA==', deleted: {} },
+    }),
+  });
+  await rejected;
+  provider.document.destroy();
+});
+
+it('requires durable coverage of deletions as well as client clocks', async () => {
+  const { provider, emit, persist } = providerFixture();
+  provider.document.getText('body').insert(0, 'delete me');
+  provider.document.getText('body').delete(0, 9);
+  provider.hasUnsyncedChanges = false;
+  const saving = persist();
+  await Promise.resolve();
+  const request = JSON.parse(provider.sendStateless.mock.calls[0]![0]);
+  const rejected = expect(saving).rejects.toThrow('did not cover local edits');
+  emit('stateless', {
+    payload: JSON.stringify({
+      v: 3,
+      kind: 'room.flush_result',
+      requestId: request.requestId,
+      ok: true,
+      persisted: { stateVector: Buffer.from(Y.encodeStateVector(provider.document)).toString('base64'), deleted: {} },
+    }),
+  });
+  await rejected;
+  provider.document.destroy();
 });

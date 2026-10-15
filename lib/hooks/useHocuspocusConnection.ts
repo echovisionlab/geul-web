@@ -1,12 +1,34 @@
 'use client';
 
+import { blockRoomDurabilityStateCovers } from '@/lib/collab/block-room-durability';
+import {
+  accessEndedReasonFromAuthenticationFailure,
+  endProviderAccess,
+  getProviderAccessLevel,
+  reportRoomAccessLevel,
+} from '@/lib/collab/provider-control-state';
+import {
+  type AccessLevel,
+  isAdmissionRetryReason,
+  parseServerMessage,
+} from '@echovisionlab/geul-common/collaboration/protocol';
+import {
+  COLLAB_FLUSH_DELAY_MS,
+  flushHocuspocusUpdatesOnPageHide,
+  createAdmissionRetry,
+  reconnectHocuspocusProvider,
+} from '@/lib/collab/hocuspocus-provider';
+import { createLogger } from '@/lib/utils/logger';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { CollaborativeDocumentType, parseDocumentName } from '@echovisionlab/geul-common/collaboration/document';
 import * as Y from 'yjs';
 import { captureDocumentRoomSnapshot, replayDocumentRoomChanges } from '@/lib/collab/document-room-intent';
+import { getDocumentRoomJournalStore } from '@/lib/collab/document-room-journal-store';
+import { getActiveMember } from '@/lib/auth/active-member';
 import {
   acknowledgeDocumentRoomIntents,
+  appendDocumentRoomIntents,
   getDocumentRoomIntentBatch,
   hasDocumentRoomIntents,
   recordDocumentRoomIntent,
@@ -16,7 +38,11 @@ import {
   createCollaborativeDocumentReplayOrigin,
   isCollaborativeDocumentReplayOrigin,
 } from '@/lib/editor/collaborative-document-save';
-import { notifyEditorSaveStateChanged, registerEditorSave } from '@/lib/editor/editor-save-registry';
+import {
+  notifyEditorSaveStateChanged,
+  registerEditorSave,
+  setEditorRoomPhase,
+} from '@/lib/editor/editor-save-registry';
 import { getPublicCollabUrl } from '@/lib/public-runtime-config';
 
 export interface HocuspocusConnectionOptions {
@@ -104,6 +130,8 @@ export function useHocuspocusConnection({
   const [isConnected, setIsConnected] = useState(false);
   const [isSynced, setIsSynced] = useState(false);
   const syncedDocumentsRef = useRef(new WeakSet<Y.Doc>());
+  // The room's last reported access, kept across provider generations (reportRoomAccessLevel).
+  const roomAccessRef = useRef<{ documentName: string; access: AccessLevel } | null>(null);
   const reloadPendingDocumentsRef = useRef(new WeakSet<Y.Doc>());
   const providerRef = useRef(provider);
   const docRef = useRef(doc);
@@ -158,56 +186,78 @@ export function useHocuspocusConnection({
     let cleanedUp = false;
     let terminalAuthFailure = false;
     let reloadRequested = false;
+    // The single pending readmission after edit access is granted while open.
+    let cancelReconnect = () => {};
     const reloadMode = getCanonicalReloadMode(documentName);
 
     const newDoc = new Y.Doc();
+    // Mirrors this room's intents to IndexedDB from the first local edit on.
+    const journalStore = getDocumentRoomJournalStore();
+    let orphansClaimed = false;
+    const adoptOrphanedIntents = () => {
+      if (orphansClaimed || !journalStore) {
+        return;
+      }
+      orphansClaimed = true;
+      const member = getActiveMember();
+      void journalStore.claimOrphans({ documentName }).then((claimed) => {
+        if (getActiveMember() !== member || !appendDocumentRoomIntents(documentName, claimed.changes)) {
+          return;
+        }
+        const saveKey = getDocumentRoomSaveKey(documentName);
+        if (saveKey) {
+          notifyEditorSaveStateChanged(saveKey);
+        }
+        scheduleDocumentRoomFlushRef.current();
+      });
+    };
     const providerConfig = {
       url,
       name: documentName,
       document: newDoc,
+      flushDelay: COLLAB_FLUSH_DELAY_MS,
       // Prevent infinite retry loops when endpoint/session is permanently invalid.
       maxAttempts: 20,
       onConnect: () => {
-        if (!cleanedUp) {
+        if (!cleanedUp && !terminalAuthFailure) {
           setIsConnected(true);
         }
       },
       onDisconnect: () => {
-        if (!cleanedUp) {
+        if (!cleanedUp && !terminalAuthFailure) {
           setIsConnected(false);
           setIsSynced(false);
         }
       },
       onSynced: () => {
-        if (!cleanedUp) {
+        if (!cleanedUp && !terminalAuthFailure) {
+          admissionRetry.reset();
           syncedDocumentsRef.current.add(newDoc);
           setIsSynced(true);
           onSyncedRef.current?.(newDoc);
+          // Unsaved intents a closed tab or an earlier session of this member left for the room.
+          adoptOrphanedIntents();
         }
       },
       onAuthenticationFailed: ({ reason }: { reason: string }) => {
         if (cleanedUp || terminalAuthFailure || reloadRequested) {
           return;
         }
-
-        if (reason === 'reload_required' && reloadMode !== null) {
-          const isMapTheme = reloadMode === 'map-theme';
-          if (!isMapTheme || onReloadRequiredRef.current) {
-            reloadRequested = true;
-            reloadPendingDocumentsRef.current.add(newDoc);
-            setIsConnected(false);
-            setIsSynced(false);
-            newProvider.disconnect();
-            if (isMapTheme) {
-              onReloadRequiredRef.current?.(reloadCanonicalRef.current);
-            } else {
-              reloadCanonicalRef.current();
-            }
-            return;
-          }
+        if (isAdmissionRetryReason(reason)) {
+          // Collab is restarting or authorization is unreachable: keep the room and retry.
+          setIsConnected(false);
+          setIsSynced(false);
+          admissionRetry.schedule();
+          return;
         }
 
         terminalAuthFailure = true;
+        admissionRetry.cancel();
+        cancelReconnect();
+        const ended = accessEndedReasonFromAuthenticationFailure(reason);
+        if (ended) {
+          endProviderAccess(newProvider, ended);
+        }
         setIsConnected(false);
         setIsSynced(false);
         newProvider.disconnect();
@@ -220,6 +270,7 @@ export function useHocuspocusConnection({
         const closeCode = event?.code;
         if (closeCode === 4401 || closeCode === 4403 || closeCode === 1008) {
           terminalAuthFailure = true;
+          admissionRetry.cancel();
           setIsConnected(false);
           setIsSynced(false);
           newProvider.disconnect();
@@ -228,42 +279,112 @@ export function useHocuspocusConnection({
     } as ConstructorParameters<typeof HocuspocusProvider>[0] & { maxAttempts: number };
 
     const newProvider = new HocuspocusProvider(providerConfig);
+    const admissionRetry = createAdmissionRetry(
+      newProvider,
+      () => !cleanedUp && !terminalAuthFailure && !reloadRequested,
+    );
+    const releasePageHideFlush = flushHocuspocusUpdatesOnPageHide(newProvider);
 
     const handleStateless = ({ payload }: { payload?: string }) => {
-      const isMapTheme = reloadMode === 'map-theme';
-      if (
-        cleanedUp ||
-        terminalAuthFailure ||
-        reloadRequested ||
-        reloadMode === null ||
-        (isMapTheme && !onReloadRequiredRef.current)
-      ) {
-        return;
-      }
       try {
-        const signal = JSON.parse(payload ?? '') as { kind?: unknown; reason?: unknown };
-        if (signal.kind !== 'reload_required' || (signal.reason !== undefined && signal.reason !== 'reload_required')) {
+        if (cleanedUp || terminalAuthFailure || reloadRequested) {
           return;
         }
-      } catch {
-        return;
-      }
+        const parsed = parseServerMessage(payload ?? '');
+        if (!parsed.ok) {
+          void createLogger('collaboration').warn('Ignoring collaboration message', { data: { ...parsed } });
+          return;
+        }
+        if (parsed.message.kind === 'room.persisted' && parsed.message.documentName === documentName) {
+          const snapshot = captureDocumentRoomSnapshot(documentName, newDoc);
+          const batch = getDocumentRoomIntentBatch(documentName, snapshot, newDoc);
+          const stateVector = Uint8Array.from(atob(parsed.message.stateVector), (character) => character.charCodeAt(0));
+          const expected = {
+            stateVector: Y.encodeStateVector(newDoc),
+            deleted: Object.fromEntries(Y.decodeUpdate(Y.encodeStateAsUpdate(newDoc)).ds.clients),
+          };
+          if (
+            !batch.requiresReplay &&
+            blockRoomDurabilityStateCovers({ stateVector, deleted: parsed.message.deleted }, expected)
+          ) {
+            acknowledgeDocumentRoomIntents(documentName, batch.changes);
+            const saveKey = getDocumentRoomSaveKey(documentName);
+            if (saveKey) {
+              notifyEditorSaveStateChanged(saveKey);
+            }
+          }
+          return;
+        }
+        if (parsed.message.kind === 'room.access_changed') {
+          // Downgraded to view: editing stops; unsaved intents stay parked in this member's journal.
+          // Sent on every admission, and while open when permission changes.
+          const { access } = parsed.message;
+          const upgraded = access === 'edit' && getProviderAccessLevel(newProvider) === 'view';
+          const remembered =
+            roomAccessRef.current?.documentName === documentName ? roomAccessRef.current.access : undefined;
+          roomAccessRef.current = { documentName, access };
+          reportRoomAccessLevel(newProvider, access, remembered);
+          if (upgraded && syncedDocumentsRef.current.has(newDoc)) {
+            // Updates the server dropped while read-only are re-sent by a fresh sync; parked
+            // intents follow through the room's flush.
+            cancelReconnect();
+            cancelReconnect = reconnectHocuspocusProvider(
+              newProvider,
+              () => !cleanedUp && !terminalAuthFailure && !reloadRequested,
+            );
+          }
+          const saveKey = getDocumentRoomSaveKey(documentName);
+          if (saveKey) {
+            notifyEditorSaveStateChanged(saveKey);
+          }
+          return;
+        }
+        if (parsed.message.kind === 'room.access_ended') {
+          terminalAuthFailure = true;
+          cancelReconnect();
+          admissionRetry.cancel();
+          endProviderAccess(newProvider, parsed.message.reason);
+          const saveKey = getDocumentRoomSaveKey(documentName);
+          if (saveKey) {
+            setEditorRoomPhase(saveKey, 'offline');
+          }
+          isSyncedRef.current = false;
+          setIsConnected(false);
+          setIsSynced(false);
+          newProvider.disconnect();
+          return;
+        }
+        const isMapTheme = reloadMode === 'map-theme';
+        if (
+          parsed.message.kind !== 'room.reload' ||
+          reloadMode === null ||
+          (isMapTheme && !onReloadRequiredRef.current)
+        ) {
+          return;
+        }
 
-      reloadRequested = true;
-      reloadPendingDocumentsRef.current.add(newDoc);
-      newProvider.disconnect();
-      if (isMapTheme) {
-        onReloadRequiredRef.current?.(reloadCanonicalRef.current);
-      } else {
-        // Form schema patches and document-room semantic intents replay only on
-        // a fresh, server-synced canonical provider.
-        reloadCanonicalRef.current();
+        reloadRequested = true;
+        cancelReconnect();
+        admissionRetry.cancel();
+        reloadPendingDocumentsRef.current.add(newDoc);
+        newProvider.disconnect();
+        if (isMapTheme) {
+          onReloadRequiredRef.current?.(reloadCanonicalRef.current);
+        } else {
+          // Form schema patches and document-room semantic intents replay only on
+          // a fresh, server-synced canonical provider.
+          reloadCanonicalRef.current();
+        }
+      } catch (error) {
+        void createLogger('collaboration').warn('Ignoring invalid collaboration message', {
+          data: { error: String(error) },
+        });
       }
     };
     newProvider.on('stateless', handleStateless);
 
     const reconnectIfRecoverable = () => {
-      if (cleanedUp || terminalAuthFailure) {
+      if (cleanedUp || terminalAuthFailure || reloadRequested) {
         return;
       }
 
@@ -285,9 +406,16 @@ export function useHocuspocusConnection({
 
     return () => {
       cleanedUp = true;
+      cancelReconnect();
+      admissionRetry.cancel();
       window.removeEventListener('online', reconnectIfRecoverable);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      releasePageHideFlush();
       newProvider.off('stateless', handleStateless);
+      const saveKey = getDocumentRoomSaveKey(documentName);
+      if (saveKey) {
+        setEditorRoomPhase(saveKey, null);
+      }
       newProvider.destroy();
       newDoc.destroy();
       setProvider(null);
@@ -390,6 +518,10 @@ export function useHocuspocusConnection({
         return Promise.resolve(false);
       }
 
+      if (getProviderAccessLevel(provider) === 'view') {
+        // Parked until edit access returns; nothing is sent from a read-only connection.
+        return Promise.resolve(true);
+      }
       const operation = (async () => {
         while (isCurrentProvider() && isSyncedRef.current) {
           const currentSnapshot = captureDocumentRoomSnapshot(documentName, doc);
@@ -415,6 +547,9 @@ export function useHocuspocusConnection({
             return false;
           }
           if (!acknowledgeDocumentRoomIntents(documentName, batch.changes)) {
+            if (!hasDocumentRoomIntents(documentName, captureDocumentRoomSnapshot(documentName, doc))) {
+              return true;
+            }
             scheduleRetry();
             return false;
           }
@@ -444,7 +579,15 @@ export function useHocuspocusConnection({
     flushDocumentRoomIntentsRef.current = flush;
 
     const unregister = registerEditorSave(documentRoomSaveKey, {
-      hasPending: () => hasDocumentRoomIntents(documentName, captureDocumentRoomSnapshot(documentName, doc)),
+      // A viewer cannot save: its intents are parked (kept on this device), not pending.
+      hasPending: () =>
+        getProviderAccessLevel(provider) !== 'view' &&
+        hasDocumentRoomIntents(documentName, captureDocumentRoomSnapshot(documentName, doc)),
+      hasParked: () =>
+        getProviderAccessLevel(provider) === 'view' &&
+        hasDocumentRoomIntents(documentName, captureDocumentRoomSnapshot(documentName, doc)),
+      // Intents are mirrored to the member's IndexedDB journal; durable once it settled.
+      isDurable: () => getDocumentRoomJournalStore()?.isSettled() ?? false,
       flush,
     });
 

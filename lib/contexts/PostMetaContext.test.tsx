@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { hasEditorSaveFailure } from '@/lib/editor/editor-save-registry';
 import { notifications } from '@/components/core/Notification';
 import { act, StrictMode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
@@ -163,7 +164,7 @@ afterEach(() => {
 describe('PostMetaProvider', () => {
   it('selects the exact source or existing target room and keeps a missing target on source fallback', async () => {
     await renderProvider();
-    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'ko');
+    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'ko', undefined);
 
     localeRoom.active = {
       activeLocale: 'en',
@@ -173,12 +174,12 @@ describe('PostMetaProvider', () => {
       hasLiveRow: true,
     };
     await renderProvider();
-    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'en');
+    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'en', undefined);
     expect(latest?.roomLocale).toBe('en');
 
     localeRoom.active = { ...localeRoom.active, activeLocale: 'ja', hasLiveRow: false };
     await renderProvider();
-    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'ko');
+    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'ko', undefined);
     expect(latest?.roomLocale).toBe('ko');
   });
 
@@ -190,7 +191,7 @@ describe('PostMetaProvider', () => {
 
     await renderProvider();
     expect(latest?.recoverySnapshot).toBe(koSnapshot);
-    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'ko');
+    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'ko', undefined);
 
     localeRoom.active = {
       activeLocale: 'en',
@@ -201,11 +202,16 @@ describe('PostMetaProvider', () => {
     };
     await renderProvider();
     expect(latest?.recoverySnapshot).toBe(enSnapshot);
-    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'en');
+    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'en', undefined);
 
     await renderProvider(false, '22222222-2222-4222-8222-222222222222');
     expect(latest?.recoverySnapshot).toBeNull();
-    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', '22222222-2222-4222-8222-222222222222', 'en');
+    expect(localeRoom.connect).toHaveBeenLastCalledWith(
+      'post',
+      '22222222-2222-4222-8222-222222222222',
+      'en',
+      undefined,
+    );
   });
 
   it('uses one resident Block Y.Doc and batches taxonomy metadata through CAS', async () => {
@@ -274,9 +280,8 @@ it('reports taxonomy failure and retries the retained fields together with the n
     latest?.setCategoryIds(['category-2']);
     await vi.advanceTimersByTimeAsync(250);
   });
-  expect(notifications.show).toHaveBeenCalledWith(
-    expect.objectContaining({ message: 'permission denied', tone: 'danger' }),
-  );
+  expect(notifications.show).not.toHaveBeenCalled();
+  expect(hasEditorSaveFailure(`post:${postId}`)).toBe(true);
   expect(acceptEpochAck).not.toHaveBeenCalled();
   await act(async () => {
     latest?.setTagIds(['tag-2']);
@@ -288,4 +293,5 @@ it('reports taxonomy failure and retries the retained fields together with the n
     observed: { categoryIds: ['category-1'], tagIds: ['tag-1'] },
   });
   expect(acceptEpochAck).toHaveBeenCalledOnce();
+  expect(hasEditorSaveFailure(`post:${postId}`)).toBe(false);
 });

@@ -1,3 +1,4 @@
+import { liveNodeView } from '@/features/editor/tiptap/live-node-view';
 import { mergeAttributes, Node, type CommandProps, type Extensions } from '@tiptap/core';
 import { ReactNodeViewRenderer } from '@tiptap/react';
 import { withMonacoSourceEditorEvents } from '../code-editor';
@@ -42,7 +43,9 @@ export function createP5SketchExtension(options: P5SketchOptions = {}): Extensio
     },
     addNodeView() {
       return withMonacoSourceEditorEvents(
-        ReactNodeViewRenderer((props) => <P5SketchNodeView {...props} {...this.options} />),
+        ReactNodeViewRenderer(
+          liveNodeView(this.name, this.options, (props, current) => <P5SketchNodeView {...props} {...current} />),
+        ),
       );
     },
     addCommands() {

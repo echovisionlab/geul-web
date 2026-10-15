@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 
 import { act, type ComponentProps } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
@@ -27,10 +28,12 @@ vi.mock('@/components/core/Notification', () => ({ notifications: { show: mocks.
 vi.mock('@tabler/icons-react', () => ({ IconHistory: () => null }));
 vi.mock('@/features/editor/EditorHeader', () => ({
   EditorHeader: ({
+    titleDisabled,
     onBack,
     onStatusChange,
     onDelete,
   }: {
+    titleDisabled?: boolean;
     onBack?: () => void | Promise<void>;
     onStatusChange?: (status: string) => void | Promise<void>;
     onDelete?: () => void | Promise<void>;
@@ -38,7 +41,7 @@ vi.mock('@/features/editor/EditorHeader', () => ({
     mocks.onBack = onBack ?? null;
     mocks.onStatusChange = onStatusChange ?? null;
     mocks.onDelete = onDelete ?? null;
-    return null;
+    return <header data-testid="work-header" data-readonly={String(titleDisabled)} />;
   },
 }));
 vi.mock('@/components/core/MediaPreviewGrid', () => ({ MediaPreviewGrid: 'div' }));
@@ -108,9 +111,9 @@ vi.mock('@/features/work/WorkEditor/WorkClientsSection', () => ({ WorkClientsSec
 vi.mock('@/features/work/WorkEditor/WorkFeaturedImageUploader', () => ({ WorkFeaturedImageUploader: () => null }));
 vi.mock('@/features/work/WorkEditor/WorkMetaForm', () => ({ WorkMetaForm: () => null }));
 vi.mock('@/features/work/WorkEditor/useWorkLifecycle', () => ({
-  useWorkLifecycle: () => ({
+  useWorkLifecycle: ({ canEdit }: { canEdit: boolean }) => ({
     status: 'draft',
-    canEdit: true,
+    canEdit,
     controls: { statusOptions: [], canDelete: true },
     changeStatus: mocks.lifecycleChangeStatus,
     deleteWork: { mutate: mocks.lifecycleDelete, isPending: false },
@@ -219,11 +222,30 @@ afterEach(() => {
   container.remove();
 });
 
-function renderWork(onBack?: () => void) {
-  act(() => root.render(<WorkEditor {...props} onBack={onBack} />));
+function renderWork(onBack?: () => void, canEdit: boolean = props.canEdit) {
+  act(() => root.render(<WorkEditor {...props} canEdit={canEdit} onBack={onBack} />));
 }
 
 describe('WorkEditor navigation save barriers', () => {
+  it('upgrades and downgrades the open work without replacing its content', () => {
+    const provider = {};
+    mocks.meta!.provider = provider;
+    setProviderAccessLevel(provider, 'view');
+    renderWork(undefined, false);
+    const header = container.querySelector('[data-testid="work-header"]');
+    expect(mocks.onStatusChange).toBeNull();
+    act(() => setProviderAccessLevel(provider, 'edit'));
+    expect(mocks.onStatusChange).toBeNull();
+    renderWork(undefined, true);
+    expect(header?.getAttribute('data-readonly')).toBe('false');
+    expect(container.querySelector('[data-testid="work-header"]')).toBe(header);
+    expect(mocks.onStatusChange).toBeTypeOf('function');
+    act(() => setProviderAccessLevel(provider, 'view'));
+    expect(mocks.onStatusChange).toBeNull();
+    expect(mocks.onDelete).toBeNull();
+    expect(header?.getAttribute('data-readonly')).toBe('true');
+    expect(container.querySelector('[data-testid="work-header"]')).toBe(header);
+  });
   it('waits for registered Work saves before navigating back', async () => {
     let resolveFlush: ((result: boolean) => void) | undefined;
     let pending = true;

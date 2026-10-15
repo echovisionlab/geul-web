@@ -1,3 +1,4 @@
+import { relativeBlockPoint, resolveRelativeBlockPoint } from './block-room-text-positions';
 import { primitiveTokens } from '@/components/core/design-tokens';
 import { Extension } from '@tiptap/core';
 import type { Node as ProseMirrorNode, ResolvedPos } from '@tiptap/pm/model';
@@ -13,6 +14,7 @@ const hexColor = /^#[0-9a-f]{6}$/i;
 interface BlockSelectionPoint {
   readonly blockId: string;
   readonly offset: number;
+  readonly relative?: number[];
 }
 
 interface BlockRoomCursor {
@@ -33,7 +35,7 @@ function normalizeUser(user: CollaborationUser): CollaborationUser {
   return { name, color: user.color.toLowerCase() };
 }
 
-function blockPoint(position: ResolvedPos): BlockSelectionPoint | null {
+function blockPoint(position: ResolvedPos, awareness: Awareness): BlockSelectionPoint | null {
   for (let depth = position.depth; depth > 0; depth -= 1) {
     const node = position.node(depth);
     if (node.type.name !== 'blockContainer' || typeof node.attrs.id !== 'string') {
@@ -43,6 +45,7 @@ function blockPoint(position: ResolvedPos): BlockSelectionPoint | null {
     return {
       blockId: node.attrs.id,
       offset: Math.min(Math.max(position.pos - start - 1, 0), node.content.size),
+      relative: relativeBlockPoint(awareness.doc, node.attrs.id, node, position.pos - start - 1),
     };
   }
   if (position.parent.type.name === 'blockGroup') {
@@ -58,7 +61,7 @@ function blockPoint(position: ResolvedPos): BlockSelectionPoint | null {
   return null;
 }
 
-function cursorForSelection(selection: Selection): BlockRoomCursor | null {
+function cursorForSelection(selection: Selection, awareness: Awareness): BlockRoomCursor | null {
   if (
     selection instanceof NodeSelection &&
     selection.node.type.name === 'blockContainer' &&
@@ -67,8 +70,8 @@ function cursorForSelection(selection: Selection): BlockRoomCursor | null {
     const point = { blockId: selection.node.attrs.id, offset: 0 };
     return { anchor: point, head: point };
   }
-  const anchor = blockPoint(selection.$anchor);
-  const head = blockPoint(selection.$head);
+  const anchor = blockPoint(selection.$anchor, awareness);
+  const head = blockPoint(selection.$head, awareness);
   return anchor && head ? { anchor, head } : null;
 }
 
@@ -83,8 +86,10 @@ function sameCursor(left: unknown, right: BlockRoomCursor | null): boolean {
   return (
     cursor.anchor?.blockId === right.anchor.blockId &&
     cursor.anchor.offset === right.anchor.offset &&
+    JSON.stringify(cursor.anchor.relative) === JSON.stringify(right.anchor.relative) &&
     cursor.head?.blockId === right.head.blockId &&
-    cursor.head.offset === right.head.offset
+    cursor.head.offset === right.head.offset &&
+    JSON.stringify(cursor.head.relative) === JSON.stringify(right.head.relative)
   );
 }
 
@@ -100,24 +105,44 @@ function blocksById(document: ProseMirrorNode): ReadonlyMap<string, BlockPositio
   return blocks;
 }
 
-function resolvePoint(blocks: ReadonlyMap<string, BlockPosition>, point: BlockSelectionPoint): number | null {
+function resolvePoint(
+  blocks: ReadonlyMap<string, BlockPosition>,
+  point: BlockSelectionPoint | undefined,
+  awareness: Awareness,
+): number | null {
+  if (!point || typeof point.blockId !== 'string') {
+    return null;
+  }
   const block = blocks.get(point.blockId);
   if (!block || !Number.isSafeInteger(point.offset)) {
     return null;
   }
+  if (point.relative !== undefined) {
+    const offset = resolveRelativeBlockPoint(awareness.doc, point.blockId, block.node, point.relative);
+    return offset === null ? null : block.position + 1 + offset;
+  }
   return block.position + 1 + Math.min(Math.max(point.offset, -1), block.node.content.size + 1);
 }
 
-function cursorDecorations(document: ProseMirrorNode, awareness: Awareness): DecorationSet {
-  const blocks = blocksById(document);
+function cursorDecorations(
+  document: ProseMirrorNode,
+  awareness: Awareness,
+  blocks: ReadonlyMap<string, BlockPosition>,
+  clients?: ReadonlySet<number>,
+): DecorationSet {
   const decorations: Decoration[] = [];
   for (const [clientId, state] of awareness.getStates()) {
-    if (clientId === awareness.clientID || !state?.geulBlockCursor || !state.user) {
+    if (
+      (clients && !clients.has(clientId)) ||
+      clientId === awareness.clientID ||
+      !state?.geulBlockCursor ||
+      !state.user
+    ) {
       continue;
     }
     const cursor = state.geulBlockCursor as BlockRoomCursor;
-    const anchor = resolvePoint(blocks, cursor.anchor);
-    const head = resolvePoint(blocks, cursor.head);
+    const anchor = resolvePoint(blocks, cursor.anchor, awareness);
+    const head = resolvePoint(blocks, cursor.head, awareness);
     if (anchor === null || head === null) {
       continue;
     }
@@ -128,10 +153,15 @@ function cursorDecorations(document: ProseMirrorNode, awareness: Awareness): Dec
     const name = typeof state.user.name === 'string' ? state.user.name : '';
     if (anchor !== head) {
       decorations.push(
-        Decoration.inline(Math.min(anchor, head), Math.max(anchor, head), {
-          class: 'block-room-selection',
-          style: `background-color: ${color}33`,
-        }),
+        Decoration.inline(
+          Math.min(anchor, head),
+          Math.max(anchor, head),
+          {
+            class: 'block-room-selection',
+            style: `background-color: ${color}33`,
+          },
+          { clientId },
+        ),
       );
     }
     decorations.push(
@@ -157,7 +187,7 @@ function cursorDecorations(document: ProseMirrorNode, awareness: Awareness): Dec
           return caret;
         },
         // A stable peer ID alone would reuse the old DOM when identity metadata changes.
-        { key: JSON.stringify(['block-room-cursor', clientId, color, name]), side: -1 },
+        { key: JSON.stringify(['block-room-cursor', clientId, color, name]), side: -1, clientId },
       ),
     );
   }
@@ -170,20 +200,60 @@ function documentNode(tag: string, className: string): HTMLElement {
   return element;
 }
 
-export function createBlockRoomPresenceExtension(awareness: Awareness, localUser: CollaborationUser) {
-  const user = normalizeUser(localUser);
+export function createBlockRoomPresenceExtension(
+  awareness: Awareness,
+  localUser: CollaborationUser,
+  readUser = () => localUser,
+) {
+  normalizeUser(localUser);
   return Extension.create({
     name: 'blockRoomPresence',
     addProseMirrorPlugins() {
+      let blocks: ReadonlyMap<string, BlockPosition>;
       return [
         new Plugin<DecorationSet>({
           key: presencePluginKey,
           state: {
-            init: (_, state) => cursorDecorations(state.doc, awareness),
-            apply: (transaction, decorations, _oldState, newState) =>
-              transaction.docChanged || transaction.getMeta(PRESENCE_META)
-                ? cursorDecorations(newState.doc, awareness)
-                : decorations.map(transaction.mapping, transaction.doc),
+            init: (_, state) => {
+              blocks = blocksById(state.doc);
+              return cursorDecorations(state.doc, awareness, blocks);
+            },
+            apply: (transaction, decorations) => {
+              const mapped = decorations.map(transaction.mapping, transaction.doc);
+              if (transaction.docChanged) {
+                blocks = blocksById(transaction.doc);
+                // Local edits precede the Yjs write; PM mapping is authoritative here.
+                if (!transaction.getMeta('blockRoomProjection')) {
+                  return mapped;
+                }
+                const changedIds = transaction.getMeta('blockRoomChangedIds') as ReadonlySet<string> | null;
+                if (!changedIds) {
+                  return cursorDecorations(transaction.doc, awareness, blocks);
+                }
+                const clients = new Set<number>();
+                for (const [id, state] of awareness.getStates()) {
+                  const cursor = state.geulBlockCursor as Partial<BlockRoomCursor> | undefined;
+                  if (
+                    cursor?.anchor &&
+                    cursor.head &&
+                    (changedIds.has(cursor.anchor.blockId) || changedIds.has(cursor.head.blockId))
+                  ) {
+                    clients.add(id);
+                  }
+                }
+                return mapped
+                  .remove(mapped.find(undefined, undefined, (spec) => clients.has(spec.clientId)))
+                  .add(transaction.doc, cursorDecorations(transaction.doc, awareness, blocks, clients).find());
+              }
+              const clients = transaction.getMeta(PRESENCE_META) as Set<number> | undefined;
+              if (!clients?.size) {
+                return mapped;
+              }
+              const removed = mapped.find(undefined, undefined, (spec) => clients.has(spec.clientId));
+              return mapped
+                .remove(removed)
+                .add(transaction.doc, cursorDecorations(transaction.doc, awareness, blocks, clients).find());
+            },
           },
           props: {
             decorations: (state) => presencePluginKey.getState(state) ?? null,
@@ -191,36 +261,83 @@ export function createBlockRoomPresenceExtension(awareness: Awareness, localUser
           view(view) {
             let publishTimer: ReturnType<typeof setTimeout> | null = null;
             let refreshTimer: ReturnType<typeof setTimeout> | null = null;
+            let publishDeadline = Infinity;
+            let lastCaretPublish = -Infinity;
+            let lastPassivePublish = -Infinity;
+            let unanchoredRetry = false;
+            let deferredPublish = false;
             const publishNow = () => {
-              const cursor = cursorForSelection(view.state.selection);
+              if (view.composing || view.isDestroyed) {
+                return;
+              }
+              const user = normalizeUser(readUser());
+              const cursor = cursorForSelection(view.state.selection, awareness);
               const state = awareness.getLocalState() ?? {};
               const currentUser = state.user as Partial<CollaborationUser> | undefined;
-              if (
-                currentUser?.name === user.name &&
-                currentUser.color === user.color &&
-                sameCursor(state.geulBlockCursor, cursor)
-              ) {
-                return;
-              }
-              awareness.setLocalState({ ...state, user, geulBlockCursor: cursor });
-            };
-            const publish = () => {
-              if (publishTimer !== null) {
-                return;
-              }
-              publishTimer = setTimeout(() => {
-                publishTimer = null;
-                if (!view.isDestroyed) {
-                  publishNow();
+              const userChanged = currentUser?.name !== user.name || currentUser.color !== user.color;
+              const cursorChanged = !sameCursor(state.geulBlockCursor, cursor);
+              const now = Date.now();
+              const publishUser = userChanged && now - lastPassivePublish >= 1000;
+              const publishCursor = cursorChanged && now - lastCaretPublish >= 100;
+              if (publishUser || publishCursor) {
+                if (publishUser) {
+                  lastPassivePublish = now;
                 }
-              }, 16);
-            };
-            const refreshNow = () => {
-              if (!view.isDestroyed) {
-                view.dispatch(view.state.tr.setMeta(PRESENCE_META, true).setMeta('addToHistory', false));
+                if (publishCursor) {
+                  lastCaretPublish = now;
+                }
+                awareness.setLocalState({
+                  ...state,
+                  user: publishUser ? user : state.user,
+                  geulBlockCursor: publishCursor ? cursor : state.geulBlockCursor,
+                });
+              }
+              const delays = [
+                ...(userChanged && !publishUser ? [lastPassivePublish + 1000 - now] : []),
+                ...(cursorChanged && !publishCursor ? [lastCaretPublish + 100 - now] : []),
+              ];
+              // A text point resolves against Yjs; until the edit reaches Yjs it carries only an
+              // absolute offset. Correct it once within the caret window rather than leave it.
+              const unanchored =
+                publishCursor &&
+                cursor !== null &&
+                !(view.state.selection instanceof NodeSelection) &&
+                (!cursor.anchor.relative || !cursor.head.relative);
+              if (unanchored && !unanchoredRetry) {
+                unanchoredRetry = true;
+                delays.push(100);
+              } else if (!unanchored) {
+                unanchoredRetry = false;
+              }
+              const deadline = delays.length ? now + Math.max(0, Math.min(...delays)) : Infinity;
+              if (deadline < publishDeadline) {
+                if (publishTimer !== null) {
+                  clearTimeout(publishTimer);
+                }
+                publishDeadline = deadline;
+                publishTimer = setTimeout(() => {
+                  publishTimer = null;
+                  publishDeadline = Infinity;
+                  publishNow();
+                }, deadline - now);
               }
             };
-            const refresh = () => {
+            // Only bring a pending deadline forward; never reset a fixed window.
+            const publish = () => publishNow();
+            const pendingClients = new Set<number>();
+            const refreshNow = () => {
+              if (!view.isDestroyed && !view.composing) {
+                const clients = new Set(pendingClients);
+                pendingClients.clear();
+                view.dispatch(view.state.tr.setMeta(PRESENCE_META, clients).setMeta('addToHistory', false));
+              }
+            };
+            const refresh = (change: { added: number[]; updated: number[]; removed: number[] }) => {
+              for (const id of [...change.added, ...change.updated, ...change.removed]) {
+                if (id !== awareness.clientID) {
+                  pendingClients.add(id);
+                }
+              }
               if (refreshTimer !== null) {
                 return;
               }
@@ -229,16 +346,50 @@ export function createBlockRoomPresenceExtension(awareness: Awareness, localUser
                 refreshNow();
               }, 16);
             };
+            let previousBlocks = blocks;
             publishNow();
             awareness.on('change', refresh);
             return {
-              update: publish,
+              update(_view, previousState) {
+                if (view.state.doc === previousState.doc) {
+                  publish();
+                } else if (!deferredPublish) {
+                  // Local edits reach Yjs in the same dispatch, after plugin views update.
+                  deferredPublish = true;
+                  queueMicrotask(() => {
+                    deferredPublish = false;
+                    if (!view.isDestroyed) {
+                      publish();
+                    }
+                  });
+                }
+                if (previousBlocks !== blocks) {
+                  // Local PM transactions reach Yjs after plugin view.update. Resolve
+                  // their affected anchors on the next tick, after that write commits.
+                  for (const [id, state] of awareness.getStates()) {
+                    const cursor = state.geulBlockCursor as Partial<BlockRoomCursor> | undefined;
+                    if (id === awareness.clientID || !cursor?.anchor || !cursor.head) {
+                      continue;
+                    }
+                    if (
+                      [cursor.anchor.blockId, cursor.head.blockId].some(
+                        (blockId) => previousBlocks.get(blockId)?.node !== blocks.get(blockId)?.node,
+                      )
+                    ) {
+                      pendingClients.add(id);
+                    }
+                  }
+                  previousBlocks = blocks;
+                }
+                if (pendingClients.size) {
+                  refresh({ added: [], updated: [], removed: [] });
+                }
+              },
               destroy() {
                 awareness.off('change', refresh);
                 if (publishTimer !== null) {
                   clearTimeout(publishTimer);
                   publishTimer = null;
-                  publishNow();
                 }
                 if (refreshTimer !== null) {
                   clearTimeout(refreshTimer);

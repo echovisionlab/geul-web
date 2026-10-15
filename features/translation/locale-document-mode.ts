@@ -20,6 +20,8 @@ export interface LocaleDocumentEditabilityInput {
   shouldUseLocaleDocument: boolean;
   canEditActiveLocale: boolean;
   isSynced: boolean;
+  /** An admitted local document remains editable during transport interruption. */
+  isReady?: boolean;
 }
 
 export function resolveLocaleDocumentMode({
@@ -60,6 +62,7 @@ export function isLocaleDocumentEditable({
   shouldUseLocaleDocument,
   canEditActiveLocale,
   isSynced,
+  isReady = isSynced,
 }: LocaleDocumentEditabilityInput): boolean {
   if (!activeLocale) {
     return false;
@@ -70,7 +73,7 @@ export function isLocaleDocumentEditable({
   if (!canEditActiveLocale) {
     return false;
   }
-  if (!isSynced) {
+  if (!isReady) {
     return false;
   }
   return true;

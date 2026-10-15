@@ -329,7 +329,14 @@
       "ogRegenerationFailed": "ไม่สามารถสร้างอิมเมจ OG ใหม่ได้",
       "testEmailSent": "ส่งอีเมลทดสอบแล้ว",
       "saveSuccess": "บันทึกแล้ว",
-      "saveFailed": "บันทึกไม่สำเร็จ"
+      "saveFailed": "บันทึกไม่สำเร็จ",
+      "saveRetrying": "การเปลี่ยนแปลงของคุณยังไม่ได้บันทึกไปยังเซิร์ฟเวอร์ กำลังลองใหม่",
+      "editsRestored": "กู้คืนการแก้ไขที่พบแล้ว",
+      "leaveWithRejectedEdits": {
+        "title": "ออกโดยไม่เก็บการแก้ไขที่บันทึกไม่ได้หรือไม่?",
+        "message": "เซิร์ฟเวอร์ปฏิเสธการแก้ไขบางส่วน จึงไม่ได้บันทึก โปรดคัดลอกจากเมนูการทำงานร่วมกันก่อน หรือออกและทิ้งการแก้ไขเหล่านั้น",
+        "confirm": "ออกและทิ้งการแก้ไข"
+      }
     },
     "errors": {
       "generic": "มีบางอย่างผิดพลาด โปรดลองอีกครั้ง",
@@ -460,6 +467,11 @@
       "siteInfo": "ข้อมูลไซต์",
       "links": "ลิงค์",
       "socialMedia": "โซเชียลมีเดีย"
+    },
+    "signOutUnsaved": {
+      "title": "ออกจากระบบทั้งที่มีการแก้ไขที่ยังไม่ได้บันทึกหรือไม่?",
+      "message": "การแก้ไขบางส่วนยังไม่ได้บันทึกไปยังเซิร์ฟเวอร์ การออกจากระบบจะลบการแก้ไขเหล่านั้นออกจากอุปกรณ์นี้",
+      "confirm": "ออกจากระบบและทิ้งการแก้ไข"
     }
   },
   "adminShell": {
@@ -673,13 +685,13 @@
       "detail": {
         "backTooltip": "กลับไปที่เค้าโครงอีเมล",
         "targetEditor": {
-          "title": "Translated text",
-          "description": "Edit only visible text and accessibility labels. HTML, CSS, links, and placeholders remain owned by the source layout.",
-          "empty": "This layout has no translatable text units.",
+          "title": "ข้อความที่แปล",
+          "description": "แก้ไขเฉพาะข้อความที่แสดงและป้ายกำกับสำหรับการช่วยการเข้าถึง HTML, CSS, ลิงก์ และตัวยึดตำแหน่งยังคงจัดการโดยเค้าโครงต้นฉบับ",
+          "empty": "เค้าโครงนี้ไม่มีหน่วยข้อความที่แปลได้",
           "textUnit": "Text",
-          "sourceValue": "Source: {value}",
-          "translatedValue": "This locale provides its own value.",
-          "sourceFallback": "Using the source value.",
+          "sourceValue": "ต้นฉบับ: {value}",
+          "translatedValue": "ภาษานี้ใช้ค่าของตนเอง",
+          "sourceFallback": "กำลังใช้ค่าจากต้นฉบับ",
           "useSource": "Use source"
         },
         "viewModes": {
@@ -1677,16 +1689,16 @@
       "consentDescription": "ไคลเอนต์นี้สามารถอ่านและแก้ไขเนื้อหา รวมถึงจัดการไฟล์ภายในสิทธิ์ปัจจุบันของบัญชีคุณได้ โดยสามารถสร้าง อัปเดต หรือลบเนื้อหา และเปลี่ยนไฟล์แนบที่มีอยู่ได้ การเชื่อมต่อจะไม่ให้สิทธิ์เพิ่มเติมแก่บัญชี",
       "consentOfflineAccess": "การเชื่อมต่อนี้สามารถทำงานต่อได้หลังจากเซสชันเบราว์เซอร์ปัจจุบันสิ้นสุดลง จนกว่าคุณจะเพิกถอน",
       "consentRevoke": "คุณสามารถเพิกถอนการเชื่อมต่อนี้ได้ที่ {settings} → Remote MCP",
-      "connectionsTitle": "Connected MCP clients",
-      "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
-      "connectionsEmpty": "No MCP clients are connected.",
-      "connectedAt": "Connected {date}",
+      "connectionsTitle": "ไคลเอนต์ MCP ที่เชื่อมต่อ",
+      "connectionsDescription": "การอนุญาต OAuth เหล่านี้แยกจากเซสชันเบราว์เซอร์ การเพิกถอนรายการใดจะตัดการเชื่อมต่อไคลเอนต์ MCP นั้น โดยไม่ทำให้คุณออกจากระบบ",
+      "connectionsEmpty": "ไม่มีไคลเอนต์ MCP ที่เชื่อมต่ออยู่",
+      "connectedAt": "เชื่อมต่อเมื่อ {date}",
       "revoke": "Revoke",
-      "revokeTitle": "Revoke MCP access",
-      "revokeConfirmation": "Revoke MCP access for {client}? Its current token chain will stop working.",
-      "revokeSuccess": "MCP access was revoked.",
-      "revokeFailed": "Could not revoke MCP access.",
-      "loadFailed": "Could not load connected MCP clients."
+      "revokeTitle": "เพิกถอนสิทธิ์เข้าถึง MCP",
+      "revokeConfirmation": "เพิกถอนสิทธิ์เข้าถึง MCP ของ {client} หรือไม่? ชุดโทเค็นปัจจุบันของไคลเอนต์นี้จะใช้งานไม่ได้",
+      "revokeSuccess": "เพิกถอนสิทธิ์เข้าถึง MCP แล้ว",
+      "revokeFailed": "ไม่สามารถเพิกถอนสิทธิ์เข้าถึง MCP ได้",
+      "loadFailed": "ไม่สามารถโหลดไคลเอนต์ MCP ที่เชื่อมต่อได้"
     },
     "personalAccessTokens": {
       "title": "โทเค็นการเข้าถึงส่วนบุคคล",
@@ -2136,9 +2148,9 @@
     "systemOrLegacy": "ระบบหรือเวอร์ชันก่อนหน้า",
     "restore": "คืนค่า",
     "restoreTitle": "คืนค่าเวอร์ชัน",
-    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreFailed": "Failed to restore the source document.",
+    "restoreSameLocaleBody": "การกู้คืนต้นฉบับ v{version} ({locale}) จะเปลี่ยนเฉพาะเอกสารต้นฉบับ เอกสารปลายทางและงานแปลที่มีอยู่จะไม่เปลี่ยนแปลง และจะไม่สร้างคำแปลโดยอัตโนมัติ ดำเนินการต่อหรือไม่?",
+    "restoreCrossLocaleBody": "การกู้คืนต้นฉบับ v{version} จะเปลี่ยนภาษาต้นฉบับจาก {currentLocale} เป็น {selectedLocale} และเปลี่ยนเฉพาะตัวชี้ต้นฉบับ เอกสารปลายทางและงานแปลที่มีอยู่จะไม่เปลี่ยนแปลง และจะไม่สร้างคำแปลโดยอัตโนมัติ ดำเนินการต่อหรือไม่?",
+    "restoreFailed": "ไม่สามารถกู้คืนเอกสารต้นฉบับได้",
     "loadFailed": "ไม่สามารถโหลดประวัติเวอร์ชันได้",
     "end": "โหลดทุกเวอร์ชันแล้ว"
   },
@@ -2518,6 +2530,24 @@
       "sections": {
         "connection": "การเชื่อมต่อ"
       }
+    },
+    "saveState": {
+      "saved": "บันทึกแล้ว",
+      "saving": "กำลังบันทึก…",
+      "offline": "ออฟไลน์ · เก็บการแก้ไขไว้ในอุปกรณ์นี้แล้ว",
+      "error": "บันทึกไม่สำเร็จ · กำลังลองใหม่…",
+      "rejected": "บันทึกการแก้ไขบางส่วนไม่ได้",
+      "reload": "กำลังเชื่อมต่อใหม่ · กำลังกู้คืนการแก้ไข…"
+    },
+    "rejectedEdits": {
+      "open": "ตรวจสอบการแก้ไขที่ยังไม่ได้บันทึก",
+      "title": "การแก้ไขที่บันทึกไม่ได้",
+      "description": "เซิร์ฟเวอร์ปฏิเสธการแก้ไขเหล่านี้ จึงจะไม่ลองใหม่ โปรดคัดลอกเนื้อหาที่ต้องการ แล้วทิ้งการแก้ไขเหล่านี้",
+      "reason": "เหตุผล: {reason}",
+      "copy": "คัดลอก",
+      "copied": "คัดลอกแล้ว",
+      "discard": "ทิ้ง",
+      "empty": "บันทึกการแก้ไขทั้งหมดแล้ว"
     }
   },
   "urlSection": {
@@ -3082,7 +3112,7 @@
     },
     "mapEditor": {
       "title": "แผนที่",
-      "placeCount": "{count} {count, plural, one {place} other {places}}",
+      "placeCount": "{count} {count, plural, one {สถานที่} other {สถานที่}}",
       "fullscreen": "เต็มจอ",
       "captionPlaceholder": "เพิ่มคำอธิบายใต้แผนที่...",
       "emptyState": "ยังไม่ได้เลือกสถานที่บนแผนที่",
@@ -3512,8 +3542,8 @@
       "message": "มีการบันทึกเวอร์ชันที่ใหม่กว่าในขณะที่เปิดโปรแกรมแก้ไขนี้ โหลดซ้ำก่อนที่จะแก้ไขต่อ"
     },
     "permissionRevoked": {
-      "title": "เพิกถอนสิทธิ์ในการแก้ไขแล้ว",
-      "message": "คุณไม่ได้รับอนุญาตให้แก้ไขเนื้อหานี้อีกต่อไป การเปลี่ยนแปลงที่ทำหลังจากการเพิกถอนการอนุญาตจะไม่ถูกบันทึก"
+      "title": "ถูกนำสิทธิ์การเข้าถึงออกแล้ว",
+      "message": "คุณไม่สามารถเข้าถึงเนื้อหานี้ได้อีกต่อไป การแก้ไขที่ยังไม่ได้บันทึกจะถูกเก็บไว้ในอุปกรณ์นี้"
     },
     "sessionExpired": {
       "title": "เซสชั่นหมดอายุแล้ว",
@@ -3759,9 +3789,9 @@
           },
           "callout": {
             "title": "Callout",
-            "subtext": "Highlight content with an icon",
-            "aliases": "callout\nnotice\ninfo\naside",
-            "group": "Basic blocks"
+            "subtext": "เน้นเนื้อหาด้วยไอคอน",
+            "aliases": "callout\nnotice\ninfo\naside\nกล่องเน้นข้อความ\nประกาศ\nข้อมูล\nหมายเหตุ",
+            "group": "บล็อกพื้นฐาน"
           },
           "divider": {
             "title": "เส้นแบ่ง",
@@ -3790,61 +3820,61 @@
           "mathBlock": {
             "title": "บล็อกคณิตศาสตร์",
             "subtext": "แสดงสมการด้วย LaTeX",
-            "aliases": "math\nequation\nlatex\nformula",
+            "aliases": "math\nequation\nlatex\nformula\nคณิตศาสตร์\nสมการ\nสูตร",
             "group": "คณิตศาสตร์"
           },
           "inlineMath": {
             "title": "คณิตศาสตร์อินไลน์",
             "subtext": "สูตร LaTeX แบบอินไลน์",
-            "aliases": "inline\ninline math\ninlinemath\nlatex\n$",
+            "aliases": "inline\ninline math\ninlinemath\nlatex\n$\nในบรรทัด\nสมการในบรรทัด\nสูตร",
             "group": "แบบอินไลน์"
           },
           "map": {
             "title": "แผนที่",
             "subtext": "แทรกตำแหน่งแผนที่",
-            "aliases": "map\nlocation\nplace\naddress",
+            "aliases": "map\nlocation\nplace\naddress\nแผนที่\nตำแหน่ง\nสถานที่\nที่อยู่",
             "group": "ฝัง"
           },
           "externalVideo": {
             "title": "วิดีโอภายนอก",
             "subtext": "แทรกลิงก์ YouTube หรือ Vimeo",
-            "aliases": "external video\nyoutube\nvimeo\nembed",
+            "aliases": "external video\nyoutube\nvimeo\nembed\nวิดีโอภายนอก\nฝัง",
             "group": "ฝัง"
           },
           "p5Sketch": {
             "title": "p5.js",
             "subtext": "เพิ่มสเก็ตช์ p5.js แบบโต้ตอบ",
-            "aliases": "p5\np5.js\nsketch\ncreative coding",
+            "aliases": "p5\np5.js\nsketch\ncreative coding\nสเก็ตช์\nการเขียนโค้ดสร้างสรรค์",
             "group": "ฝัง"
           },
           "threeScene": {
             "title": "Three.js",
             "subtext": "เพิ่มฉาก Three.js แบบโต้ตอบ",
-            "aliases": "three\nthree.js\n3d\nscene",
+            "aliases": "three\nthree.js\n3d\nscene\nสามมิติ\nฉาก",
             "group": "ฝัง"
           },
           "file": {
             "title": "เอกสารแนบ",
             "subtext": "แนบไฟล์ (PDF, DOC, ZIP ฯลฯ)",
-            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload",
+            "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\nเอกสารแนบ\nไฟล์\nเอกสาร\nดาวน์โหลด",
             "group": "สื่อ"
           },
           "aiAssistant": {
             "title": "ผู้ช่วยเอไอ",
             "subtext": "เขียน ปรับปรุง หรือแปลงข้อความด้วย AI",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove",
+            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nผู้ช่วย\nปัญญาประดิษฐ์\nเขียน\nปรับปรุง",
             "group": "AI"
           },
           "shader": {
             "title": "เชเดอร์ GLSL",
             "subtext": "เพิ่มเชเดอร์ GLSL แบบโต้ตอบ",
-            "aliases": "shader\nglsl\nfragment shader\nshadertoy",
+            "aliases": "shader\nglsl\nfragment shader\nshadertoy\nเชเดอร์\nแฟรกเมนต์เชเดอร์",
             "group": "ฝัง"
           },
           "mermaid": {
             "title": "Mermaid",
             "subtext": "สร้างไดอะแกรมจากข้อความ",
-            "aliases": "mermaid\ndiagram\nflowchart\nsequence",
+            "aliases": "mermaid\ndiagram\nflowchart\nsequence\nแผนภาพ\nผังงาน\nลำดับ",
             "group": "ฝัง"
           }
         }
@@ -4024,6 +4054,12 @@
       "media": {
         "importFromUrl": "นำเข้าจาก URL"
       }
+    },
+    "accessDowngraded": {
+      "message": "สิทธิ์ของคุณเปลี่ยนเป็นดูอย่างเดียวแล้ว จึงปิดการแก้ไข การแก้ไขที่ยังไม่ได้บันทึกจะอยู่ในอุปกรณ์นี้ และจะบันทึกเมื่อคุณได้รับสิทธิ์แก้ไขอีกครั้ง"
+    },
+    "accessUpgraded": {
+      "message": "คุณแก้ไขได้อีกครั้งแล้ว กำลังบันทึกการแก้ไขที่เก็บไว้ระหว่างที่ดูได้อย่างเดียว"
     }
   },
   "aiAssistant": {
@@ -4166,35 +4202,35 @@
     "resolvedMetadata": "ข้อมูลเมตาที่แก้ไขแล้ว"
   },
   "translationPanel": {
-    "description": "Review the source language and existing translation document for each locale.",
+    "description": "ตรวจสอบภาษาต้นฉบับและเอกสารแปลที่มีอยู่สำหรับแต่ละภาษา",
     "actions": {
       "expand": "ขยาย",
       "collapse": "ทรุด",
-      "regenerateAll": "Generate/regenerate all eligible locales",
+      "regenerateAll": "สร้าง/สร้างใหม่สำหรับทุกภาษาที่เข้าเกณฑ์",
       "regenerateLocale": "สร้างใหม่",
       "regenerateLocaleAria": "สร้างการแปล {locale} ใหม่",
       "generateLocale": "Generate",
-      "generateLocaleAria": "Generate {locale} translation"
+      "generateLocaleAria": "สร้างคำแปลภาษา {locale}"
     },
     "sourceLocale": {
       "label": "ภาษาต้นฉบับ",
       "description": "นี่คือภาษาต้นฉบับที่ใช้เป็นพื้นฐานสำหรับการแปลเอนทิตีนี้",
       "confirm": {
         "title": "เปลี่ยนภาษาต้นฉบับ",
-        "description": "Changing the source language updates only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically.",
-        "detail": "{locale} becomes the language of the editable source document. Existing target documents and translation jobs remain unchanged.",
+        "description": "การเปลี่ยนภาษาต้นฉบับจะอัปเดตเฉพาะตัวชี้ต้นฉบับ เอกสารปลายทางและงานแปลที่มีอยู่จะไม่เปลี่ยนแปลง และจะไม่สร้างคำแปลโดยอัตโนมัติ",
+        "detail": "{locale} จะกลายเป็นภาษาของเอกสารต้นฉบับที่แก้ไขได้ เอกสารปลายทางและงานแปลที่มีอยู่จะไม่เปลี่ยนแปลง",
         "confirm": "เปลี่ยนภาษาต้นฉบับ"
       }
     },
     "activeEditLocale": {
-      "ariaLabel": "Switch content language. Current: {locale}",
+      "ariaLabel": "เปลี่ยนภาษาเนื้อหา ปัจจุบัน: {locale}",
       "sourceOption": "{locale} (ที่มา)",
       "loading": "กำลังโหลดภาษา...",
-      "missingDescription": "No {locale} target document exists yet. Generate it from the translations panel.",
+      "missingDescription": "ยังไม่มีเอกสารปลายทางภาษา {locale} โปรดสร้างจากแผงการแปล",
       "bodyPreviewTitle": "ตัวอย่างเนื้อหา {locale}",
-      "bodyPreviewDescription": "The existing translation document is shown with its structure and formatting.",
+      "bodyPreviewDescription": "แสดงเอกสารแปลที่มีอยู่โดยคงโครงสร้างและการจัดรูปแบบไว้",
       "bodyPreviewEmpty": "ยังไม่มีการแสดงตัวอย่างเนื้อหาที่แปลเป็นภาษาท้องถิ่น",
-      "sharedStructureSectionDescription": "This section keeps shared layout or query settings from the source page; translated body content is read-only.",
+      "sharedStructureSectionDescription": "ส่วนนี้คงเค้าโครงหรือการตั้งค่าคิวรีที่ใช้ร่วมกันจากหน้าต้นฉบับไว้ เนื้อหาที่แปลแล้วอ่านได้อย่างเดียว",
       "sectionFieldLabels": {
         "caption": "คำบรรยายภาพ",
         "copyJson": "สำเนาฉาก"
@@ -4205,7 +4241,7 @@
     },
     "states": {
       "loadFailed": "โหลดคำแปลไม่สำเร็จ",
-      "missingTarget": "No target document yet.",
+      "missingTarget": "ยังไม่มีเอกสารปลายทาง",
       "sourceEditorHint": "แก้ไขข้อความต้นฉบับในตัวแก้ไขหลัก",
       "updatedAt": "อัปเดต {date}"
     },
@@ -4218,26 +4254,26 @@
     }
   },
   "translationPanelMenu": {
-    "description": "Review source menu labels and existing translation documents.",
+    "description": "ตรวจสอบป้ายกำกับเมนูต้นฉบับและเอกสารแปลที่มีอยู่",
     "previewModal": {
-      "title": "{locale} menu translation preview",
+      "title": "ตัวอย่างคำแปลเมนูภาษา {locale}",
       "fields": {
-        "localizedLabelForLocale": "{locale} public label"
+        "localizedLabelForLocale": "ป้ายกำกับสาธารณะภาษา {locale}"
       }
     }
   },
   "translationPanelEmail": {
     "template": {
-      "description": "Manage the source language and existing translation documents for this email template."
+      "description": "จัดการภาษาต้นฉบับและเอกสารแปลที่มีอยู่สำหรับเทมเพลตอีเมลนี้"
     },
     "layout": {
-      "description": "Manage the source language and existing translation documents for this email layout."
+      "description": "จัดการภาษาต้นฉบับและเอกสารแปลที่มีอยู่สำหรับเค้าโครงอีเมลนี้"
     }
   },
   "localizationNotice": {
     "translated": {
-      "title": "Localized version",
-      "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
+      "title": "ฉบับแปล",
+      "description": "ฉบับแปลนี้แสดงเป็น {displayed} โดยยังยึดต้นฉบับภาษา {source} เป็นหลัก"
     },
     "fallback": {
       "title": "ภาษาทางเลือก"
@@ -4260,15 +4296,15 @@
       "totalLocales": "สถานที่ทั้งหมด",
       "sourceEntities": "เอนทิตีต้นทาง",
       "activeJobs": "งานอยู่ระหว่างดำเนินการ",
-      "existingEntries": "Existing translations"
+      "existingEntries": "คำแปลที่มีอยู่"
     },
     "sections": {
-      "localeHealthTitle": "Translation state by locale",
-      "entityHealthTitle": "Translation state by entity type"
+      "localeHealthTitle": "สถานะการแปลตามภาษา",
+      "entityHealthTitle": "สถานะการแปลตามประเภทเอนทิตี"
     },
     "columns": {
       "policy": "นโยบาย",
-      "lastTargetUpdate": "Last target update",
+      "lastTargetUpdate": "อัปเดตเอกสารปลายทางล่าสุด",
       "entity": "เอนทิตี",
       "sources": "แหล่งที่มา",
       "lastSourceUpdate": "อัปเดตแหล่งที่มาล่าสุด"
@@ -4304,7 +4340,7 @@
   },
   "translationSettingsPage": {
     "title": "การตั้งค่าการแปล",
-    "description": "Manage the default source language and automatic translation providers. An Admin explicitly starts translation generation from each editor.",
+    "description": "จัดการภาษาต้นฉบับเริ่มต้นและผู้ให้บริการแปลอัตโนมัติ ผู้ดูแลระบบจะเป็นผู้เริ่มสร้างคำแปลจากตัวแก้ไขแต่ละตัว",
     "actions": {
       "jobs": "งาน",
       "save": "บันทึกการตั้งค่า",
@@ -4314,8 +4350,8 @@
       "createProvider": "สร้างผู้ให้บริการ"
     },
     "sections": {
-      "runtime": "Source defaults",
-      "runtimeDescription": "Set only the language used when a source language has not been established. Source changes never start translation generation automatically.",
+      "runtime": "ค่าเริ่มต้นของต้นฉบับ",
+      "runtimeDescription": "ตั้งค่าเฉพาะภาษาที่ใช้เมื่อยังไม่ได้กำหนดภาษาต้นฉบับ การเปลี่ยนต้นฉบับจะไม่เริ่มสร้างคำแปลโดยอัตโนมัติ",
       "providers": "ผู้ให้บริการแปล",
       "providersDescription": "จัดการผู้ให้บริการแปลภาษาด้วยเครื่อง การสร้างจะยังคงปิดใช้งานจนกว่าผู้ให้บริการที่ใช้งานอยู่อย่างน้อยหนึ่งรายจะมีข้อมูลรับรองที่ถูกต้อง"
     },
@@ -4325,10 +4361,10 @@
         "description": "ใช้เมื่อยังไม่ได้ตั้งค่าภาษาต้นทางและเมื่อคำขอไม่ได้รับการแก้ไขเป็นภาษาเนื้อหาที่รองรับ"
       },
       "protectedTerms": {
-        "label": "Protected terms",
-        "description": "Exact case-sensitive spellings that translation generation must keep unchanged. No terms are learned or suggested automatically.",
-        "placeholder": "Add a protected term",
-        "examples": "Examples: Photoshop, React Native"
+        "label": "คำที่ต้องคงไว้",
+        "description": "คำที่ต้องคงการสะกดไว้ทุกตัวเมื่อสร้างคำแปล โดยแยกตัวพิมพ์ใหญ่และเล็ก จะไม่มีการเรียนรู้หรือแนะนำคำโดยอัตโนมัติ",
+        "placeholder": "เพิ่มคำที่ต้องคงไว้",
+        "examples": "ตัวอย่าง: Photoshop, React Native"
       },
       "providerName": {
         "label": "ชื่อผู้ให้บริการ"
@@ -5268,6 +5304,40 @@
       "goHome": "กลับบ้าน",
       "tryAgain": "ลองอีกครั้ง",
       "login": "กลับไปที่เข้าสู่ระบบ"
+    }
+  },
+  "localBackups": {
+    "title": "ข้อมูลสำรองในเครื่อง",
+    "description": "การแก้ไขที่ยังไม่ได้บันทึกจากแท็บที่ปิดแล้วในอุปกรณ์นี้ เปิดตัวแก้ไขเพื่อกู้คืน ข้อมูลสำรองจะหมดอายุหลังจาก 30 วัน และจะถูกลบเมื่อออกจากระบบ",
+    "empty": "ไม่มีข้อมูลสำรองในเครื่องให้กู้คืน การแก้ไขในแท็บที่เปิดอยู่จะไม่แสดงที่นี่",
+    "unavailable": "ข้อมูลสำรองในเครื่องต้องใช้พื้นที่จัดเก็บของเบราว์เซอร์และ Web Locks ในอุปกรณ์นี้",
+    "loading": "กำลังค้นหาข้อมูลสำรองในเครื่อง…",
+    "error": "ไม่สามารถดำเนินการนี้ให้เสร็จได้ โปรดรีเฟรชรายการแล้วลองอีกครั้ง",
+    "refresh": "รีเฟรช",
+    "lastChanged": "แก้ไขล่าสุด {time}",
+    "open": "เปิดตัวแก้ไข",
+    "discard": "ทิ้ง",
+    "openLabel": "เปิดตัวแก้ไข: {kind} {id}, {locale}",
+    "discardLabel": "ทิ้ง: {kind} {id}, {locale}",
+    "discardTitle": "ทิ้งข้อมูลสำรองในเครื่องหรือไม่?",
+    "discardDescription": "การแก้ไขที่ยังไม่ได้บันทึกเหล่านี้จะถูกลบออกจากอุปกรณ์นี้อย่างถาวร เนื้อหาที่บันทึกแล้วจะไม่ได้รับผลกระทบ",
+    "kinds": {
+      "post": "โพสต์",
+      "page": "หน้า",
+      "work": "ผลงาน",
+      "campaign": "แคมเปญ",
+      "email-template": "เทมเพลตอีเมล",
+      "email-layout": "เค้าโครงอีเมล",
+      "terms-history": "ข้อกำหนดในการให้บริการ",
+      "privacy-history": "นโยบายความเป็นส่วนตัว",
+      "artist": "ศิลปิน",
+      "release": "รีลีส",
+      "label": "ป้ายกำกับ",
+      "form": "แบบฟอร์ม",
+      "map-theme": "ธีมแผนที่",
+      "program-event": "กิจกรรม",
+      "menu": "เมนู",
+      "post-series": "ซีรีส์โพสต์"
     }
   }
 }

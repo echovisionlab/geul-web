@@ -1,5 +1,6 @@
 'use client';
 
+import { primitiveTokens } from '@/components/core/design-tokens';
 import type { ClosedVisualProps } from '@/components/core/visual-contract';
 import { memo, useEffect, useMemo, useRef } from 'react';
 import { Extension, type Editor } from '@tiptap/core';
@@ -9,7 +10,7 @@ import { EditorContent, useEditor } from '@tiptap/react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { Awareness } from 'y-protocols/awareness';
 import { useRegisterEditorAuthoringMode, type EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
-import { TranslationStructureLockExtension } from '@/lib/editor/extensions/TranslationStructureLockExtension';
+import { createLiveTranslationStructureLock } from '../live-translation-structure-lock';
 import type { RichTextBlockRoomTiptapController } from '../block-room-tiptap-controller';
 import { createBlockRoomPresenceExtension } from '../block-room-presence';
 import { createAuthoringShortcutGuard } from '../integration/authoring-shortcuts';
@@ -43,7 +44,10 @@ IsolatedEditorContent.displayName = 'IsolatedEditorContent';
  * The profile-only schema deliberately matches the existing collaboration wire
  * shape, while accepting only the nodes and marks the bio schema allowed.
  */
-export function createCompactTiptapExtensions(placeholder: string, structureLocked = false) {
+export function createCompactTiptapExtensions(
+  placeholder: string | (() => string),
+  structureLocked: boolean | (() => boolean) = false,
+) {
   return [
     WireDocument,
     WireBlockGroup,
@@ -62,7 +66,7 @@ export function createCompactTiptapExtensions(placeholder: string, structureLock
     WireLink,
     TiptapKeyboardShortcuts,
     createCompactPlaceholderExtension(placeholder),
-    ...(structureLocked ? [TranslationStructureLockExtension] : []),
+    createLiveTranslationStructureLock(typeof structureLocked === 'function' ? structureLocked : () => structureLocked),
   ];
 }
 
@@ -73,7 +77,7 @@ export function resolveCompactEditorAuthoringMode(isEditable: boolean, structure
   };
 }
 
-function createCompactPlaceholderExtension(placeholder: string) {
+function createCompactPlaceholderExtension(placeholder: string | (() => string)) {
   return Extension.create({
     name: 'compactPlaceholder',
     addProseMirrorPlugins() {
@@ -87,7 +91,7 @@ function createCompactPlaceholderExtension(placeholder: string) {
                   decorations.push(
                     Decoration.node(position, position + node.nodeSize, {
                       class: classes.empty,
-                      'data-placeholder': placeholder,
+                      'data-placeholder': typeof placeholder === 'function' ? placeholder() : placeholder,
                     }),
                   );
                 }
@@ -154,16 +158,40 @@ export function CompactTiptapEditor({
     () => resolveCompactEditorAuthoringMode(isEditable, structureLocked),
     [isEditable, structureLocked],
   );
+  const liveOptions = useRef({ authoringMode, placeholder, structureLocked, userName, userColor });
+  liveOptions.current = { authoringMode, placeholder, structureLocked, userName, userColor };
+  const liveAuthoringMode = useMemo<EditorAuthoringMode>(
+    () => ({
+      get allowNeutralBlockEdits() {
+        return liveOptions.current.authoringMode.allowNeutralBlockEdits;
+      },
+      get allowLocalizedBlockEdits() {
+        return liveOptions.current.authoringMode.allowLocalizedBlockEdits;
+      },
+    }),
+    [],
+  );
   const extensions = useMemo(
     () => [
-      ...createCompactTiptapExtensions(placeholder, structureLocked),
-      createAuthoringShortcutGuard(authoringMode),
+      ...createCompactTiptapExtensions(
+        () => liveOptions.current.placeholder,
+        () => liveOptions.current.structureLocked,
+      ),
+      createAuthoringShortcutGuard(liveAuthoringMode),
       blockRoomController.extension,
-      ...(userName && userColor
-        ? [createBlockRoomPresenceExtension(awareness, { name: userName, color: userColor })]
-        : []),
+      createBlockRoomPresenceExtension(
+        awareness,
+        {
+          name: liveOptions.current.userName ?? 'Anonymous',
+          color: liveOptions.current.userColor ?? primitiveTokens.colors.annotation,
+        },
+        () => ({
+          name: liveOptions.current.userName ?? 'Anonymous',
+          color: liveOptions.current.userColor ?? primitiveTokens.colors.annotation,
+        }),
+      ),
     ],
-    [authoringMode, awareness, blockRoomController, placeholder, structureLocked, userColor, userName],
+    [awareness, blockRoomController, liveAuthoringMode],
   );
   const editor = useEditor(
     {

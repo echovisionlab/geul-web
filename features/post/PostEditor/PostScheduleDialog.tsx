@@ -23,6 +23,7 @@ export interface PostScheduleDialogProps {
   initialInstant?: string | null;
   initialTimeZone?: string | null;
   loading?: boolean;
+  readOnly?: boolean;
 }
 
 function initialLocalDate(instant: string | null | undefined, timeZone: string): DateTimeValue {
@@ -39,6 +40,7 @@ export function PostScheduleDialog({
   initialInstant,
   initialTimeZone,
   loading = false,
+  readOnly = false,
 }: PostScheduleDialogProps) {
   const locale = useLocale();
   const t = useTranslations('postEditor.schedule');
@@ -74,6 +76,9 @@ export function PostScheduleDialog({
   }, [localDate, locale, timeZone]);
 
   const handleSubmit = () => {
+    if (readOnly) {
+      return;
+    }
     if (!localDate.date || !localDate.time || !timeZone) {
       setError(t('required'));
       return;
@@ -101,11 +106,12 @@ export function PostScheduleDialog({
       cancelLabel={tActions('cancel')}
       closeLabel={tActions('close')}
       loading={loading}
-      submitDisabled={!resolution}
+      submitDisabled={readOnly || !resolution}
       size="standard"
     >
       <DsLayoutStack gap="sm">
         <DateTimeInput
+          disabled={readOnly}
           locale={locale}
           nextLabel={t('nextPeriod')}
           previousLabel={t('previousPeriod')}
@@ -123,6 +129,7 @@ export function PostScheduleDialog({
           required
         />
         <Select
+          disabled={readOnly}
           label={t('timeZone')}
           value={timeZone}
           onChange={(value) => {

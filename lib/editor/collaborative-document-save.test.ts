@@ -2,9 +2,10 @@ import * as Y from 'yjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { BlockRoomDurabilityProtocol, BlockRoomDurabilityState } from '@/lib/collab/block-room-durability';
 import { persistCollaborativeDocumentNow } from '@/lib/collab/persist-now';
-import { flushEditorSaves, hasPendingEditorSaves } from './editor-save-registry';
+import { flushEditorSaves, hasPendingEditorSaves, hasEditorSaveFailure } from './editor-save-registry';
 import { createHocuspocusProviderFixture } from '@/features/editor/hocuspocusProvider.test-fixture';
 import {
+  BLOCK_ROOM_ACK_WATCHDOG_MS,
   createCollaborativeDocumentSaveTracker,
   createCollaborativeDocumentReplayOrigin,
   registerCollaborativeDocumentSave,
@@ -379,6 +380,22 @@ describe('registerCollaborativeDocumentSave', () => {
     expect(persistNow).toHaveBeenCalledOnce();
   });
 
+  it('marks watchdog failures for UI feedback, retries, and clears failure only after a covering ACK', async () => {
+    vi.useFakeTimers();
+    const { document, provider, durability } = attachBlockRoomDocumentSave();
+    provider.synced = true;
+    persistNow.mockRejectedValueOnce(new Error('database down')).mockResolvedValue();
+    document.getMap('content').set('title', 'Local edit');
+    await vi.advanceTimersByTimeAsync(BLOCK_ROOM_ACK_WATCHDOG_MS);
+    expect(hasEditorSaveFailure('post:post-1')).toBe(true);
+    expect(hasPendingEditorSaves('post:post-1')).toBe(true);
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(persistNow).toHaveBeenCalledTimes(2);
+    durability.emit(currentDurabilityState(document));
+    expect(hasEditorSaveFailure('post:post-1')).toBe(false);
+    expect(hasPendingEditorSaves('post:post-1')).toBe(false);
+  });
+
   it('waits for a covering durable ACK when persist.now responds first', async () => {
     const { document, durability } = attachBlockRoomDocumentSave();
     persistNow.mockResolvedValue();
@@ -449,3 +466,20 @@ async function settlePromises() {
     await Promise.resolve();
   }
 }
+
+it('clears document-room pending saves on an exact covering room.persisted push', () => {
+  const { document, provider } = attachDocumentSave('form:form-1');
+  document.getMap('content').set('title', 'Local edit');
+  expect(hasPendingEditorSaves('form:form-1')).toBe(true);
+  const send = (stateVector: string, deleted = {}, documentName = provider.configuration.name) =>
+    provider.receiveStateless(JSON.stringify({ v: 3, kind: 'room.persisted', documentName, stateVector, deleted }));
+  send('AA==');
+  expect(hasPendingEditorSaves('form:form-1')).toBe(true);
+  const coverage = currentDurabilityState(document);
+  const vector = Buffer.from(coverage.stateVector).toString('base64');
+  send(vector, coverage.deleted, 'form:other:en');
+  expect(hasPendingEditorSaves('form:form-1')).toBe(true);
+  send(vector, coverage.deleted);
+  expect(hasPendingEditorSaves('form:form-1')).toBe(false);
+  expect(persistNow).not.toHaveBeenCalled();
+});

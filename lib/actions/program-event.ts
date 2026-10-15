@@ -322,9 +322,10 @@ export async function updateProgramEventAction(
       clients?: ProgramEventRelationInput[];
     };
   },
+  editorOrigin?: string,
 ): Promise<{ success?: boolean; error?: string }> {
   try {
-    const client = await createProgramEventClient();
+    const client = await createProgramEventClient(editorOrigin);
     await client.updateProgramEvent({
       id,
       slug: data.slug === undefined ? undefined : toSlugInputValue(data.slug),
@@ -458,9 +459,9 @@ export async function getProgramEventNeutralConfigurationAction(
   }
 }
 
-export async function publishProgramEventAction(id: string) {
+export async function publishProgramEventAction(id: string, editorOrigin?: string) {
   try {
-    const client = await createProgramEventClient();
+    const client = await createProgramEventClient(editorOrigin);
     await client.publishProgramEvent({ id });
     revalidatePath('/admin/events');
     revalidatePath(`/events/${id}`);
@@ -470,9 +471,9 @@ export async function publishProgramEventAction(id: string) {
   }
 }
 
-export async function archiveProgramEventAction(id: string) {
+export async function archiveProgramEventAction(id: string, editorOrigin?: string) {
   try {
-    const client = await createProgramEventClient();
+    const client = await createProgramEventClient(editorOrigin);
     await client.archiveProgramEvent({ id });
     revalidatePath('/admin/events');
     revalidatePath(`/events/${id}`);

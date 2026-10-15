@@ -1,69 +1,40 @@
 'use client';
 
+import { getProviderAccessEnded } from './provider-control-state';
+import { createLogger } from '@/lib/utils/logger';
+import { encodeMessage, parseServerMessage } from '@echovisionlab/geul-common/collaboration/protocol';
+import * as Y from 'yjs';
+import { blockRoomDurabilityStateCovers } from './block-room-durability';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
+import { waitForProviderSync } from './hocuspocus-provider';
 
 const COLLAB_PERSIST_NOW_TIMEOUT_MS = 8_000;
 const COLLAB_SYNC_TIMEOUT_MS = 2_500;
-
-function waitForProviderSync(provider: HocuspocusProvider, timeoutMs: number): Promise<void> {
-  if (!provider.hasUnsyncedChanges) {
-    return Promise.resolve();
-  }
-
-  return new Promise((resolve, reject) => {
-    let settled = false;
-    let timer: ReturnType<typeof setTimeout> | null = setTimeout(() => {
-      settled = true;
-      cleanup();
-      reject(new Error('collaborative document sync timed out'));
-    }, timeoutMs);
-
-    const maybeResolve = () => {
-      if (settled || provider.hasUnsyncedChanges) {
-        return;
-      }
-      settled = true;
-      cleanup();
-      resolve();
-    };
-
-    const handleSynced = () => {
-      maybeResolve();
-    };
-    const handleUnsyncedChanges = () => {
-      maybeResolve();
-    };
-
-    const cleanup = () => {
-      provider.off('synced', handleSynced);
-      provider.off('unsyncedChanges', handleUnsyncedChanges);
-      if (timer) {
-        clearTimeout(timer);
-        timer = null;
-      }
-    };
-
-    provider.on('synced', handleSynced);
-    provider.on('unsyncedChanges', handleUnsyncedChanges);
-    try {
-      provider.forceSync();
-      maybeResolve();
-    } catch (error) {
-      settled = true;
-      cleanup();
-      reject(error);
-    }
-  });
-}
 
 export async function persistCollaborativeDocumentNow(provider: HocuspocusProvider | null | undefined): Promise<void> {
   if (!provider) {
     throw new Error('collaborative document provider is unavailable');
   }
 
+  if (getProviderAccessEnded(provider)) {
+    throw new Error(getProviderAccessEnded(provider));
+  }
+  provider.flushPendingUpdates();
   await waitForProviderSync(provider, COLLAB_SYNC_TIMEOUT_MS);
 
-  const requestId = `persist-now:${Date.now()}:${Math.random().toString(36).slice(2)}`;
+  if (getProviderAccessEnded(provider)) {
+    throw new Error(getProviderAccessEnded(provider));
+  }
+  // sendStateless does not drain the provider's data-plane batching buffer. Capture the
+  // coverage and drain again in the same turn as room.flush, including edits made
+  // while awaiting sync. WebSocket ordering makes the server see the updates first.
+  const expected = {
+    stateVector: Y.encodeStateVector(provider.document),
+    deleted: Object.fromEntries(Y.decodeUpdate(Y.encodeStateAsUpdate(provider.document)).ds.clients),
+  };
+  provider.flushPendingUpdates();
+
+  const requestId = crypto.randomUUID();
   await new Promise<void>((resolve, reject) => {
     let timer: ReturnType<typeof setTimeout> | null = setTimeout(() => {
       cleanup();
@@ -76,27 +47,37 @@ export async function persistCollaborativeDocumentNow(provider: HocuspocusProvid
         return;
       }
 
-      let parsed: {
-        kind?: string;
-        requestId?: string;
-        ok?: boolean;
-        error?: string;
-      };
-      try {
-        parsed = JSON.parse(raw) as typeof parsed;
-      } catch {
+      const result = parseServerMessage(raw);
+      if (!result.ok) {
+        void createLogger('collaboration').warn('Ignoring collaboration message', { data: { ...result } });
         return;
       }
-      if (parsed.kind !== 'persist.now.ack' || parsed.requestId !== requestId) {
+      if (result.message.kind === 'room.reload' || result.message.kind === 'room.access_ended') {
+        cleanup();
+        reject(new Error(result.message.kind === 'room.reload' ? result.message.reloadReason : result.message.reason));
         return;
       }
-
+      if (result.message.kind !== 'room.flush_result' || result.message.requestId !== requestId) {
+        return;
+      }
+      const parsed = result.message;
       cleanup();
       if (parsed.ok) {
-        resolve();
+        try {
+          const stateVector = Uint8Array.from(atob(parsed.persisted.stateVector), (character) =>
+            character.charCodeAt(0),
+          );
+          if (!blockRoomDurabilityStateCovers({ stateVector, deleted: parsed.persisted.deleted }, expected)) {
+            reject(new Error('collaborative document flush did not cover local edits'));
+            return;
+          }
+          resolve();
+        } catch {
+          reject(new Error('invalid collaboration durability coverage'));
+        }
         return;
       }
-      reject(new Error(parsed.error || 'collaborative document persist failed'));
+      reject(new Error(parsed.error.message ?? parsed.error.code));
     };
 
     const cleanup = () => {
@@ -109,7 +90,7 @@ export async function persistCollaborativeDocumentNow(provider: HocuspocusProvid
 
     provider.on('stateless', handleStateless);
     try {
-      provider.sendStateless(JSON.stringify({ kind: 'persist.now.request', requestId }));
+      provider.sendStateless(encodeMessage({ kind: 'room.flush', requestId }));
     } catch (error) {
       cleanup();
       reject(error);

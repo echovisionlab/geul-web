@@ -70,11 +70,25 @@ describe('CollabSyncStatusIndicator', () => {
       );
     });
 
-    const indicator = document.querySelector('[data-collab-status="syncing"]');
+    const indicator = document.querySelector('[data-collab-status="saving"]');
 
     expect(indicator).not.toBeNull();
     expect(indicator?.getAttribute('aria-label')).toBe('Syncing...');
   });
+
+  it.each(['saved', 'saving', 'offline', 'error', 'reload'] as const)(
+    'exposes durable %s state with its accessible label',
+    (state) => {
+      container = document.createElement('div');
+      document.body.appendChild(container);
+      root = createRoot(container);
+      act(() =>
+        root?.render(<CollabSyncStatusIndicator state={state} label={`Save state: ${state}`} withTooltip={false} />),
+      );
+      expect(container.querySelector('[role="img"]')?.getAttribute('data-collab-status')).toBe(state);
+      expect(container.querySelector('[role="img"]')?.getAttribute('aria-label')).toBe(`Save state: ${state}`);
+    },
+  );
 
   it('rejects runtime dimensions from untyped consumers', () => {
     container = document.createElement('div');

@@ -94,7 +94,7 @@ export function ImageUploadCropController({
       cropAccessibility={cropAccessibility}
       imageUrl={imageUrl}
       cropImageSrc={tempImageSrc}
-      cropOpened={cropModalOpened}
+      cropOpened={canEdit && cropModalOpened}
       idPrefix={idPrefix}
       canEdit={canEdit}
       loading={isUploading || isPreparing}
@@ -120,10 +120,22 @@ export function ImageUploadCropController({
       previewWidth={previewWidth}
       previewMaxWidth={previewMaxWidth}
       previewMinHeight={previewMinHeight}
-      onFileSelect={(file) => handleFileDrop([file])}
+      onFileSelect={(file) => {
+        if (canEdit) {
+          handleFileDrop([file]);
+        }
+      }}
       onReject={handleReject}
-      onRemove={onRemove}
-      onCrop={handleCropComplete}
+      onRemove={() => {
+        if (canEdit) {
+          onRemove();
+        }
+      }}
+      onCrop={(blob) => {
+        if (canEdit) {
+          handleCropComplete(blob);
+        }
+      }}
       onCropClose={handleCropCancel}
     />
   );

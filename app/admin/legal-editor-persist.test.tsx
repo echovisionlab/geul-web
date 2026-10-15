@@ -1,5 +1,12 @@
 // @vitest-environment jsdom
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 
+import { create } from '@bufbuild/protobuf';
+import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
+import {
+  LocalizedRichTextDocumentSchema,
+  RichTextProfile,
+} from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { act, type ReactElement, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
@@ -154,7 +161,7 @@ vi.mock('@/lib/collab/useBlockRoomConnection', () => ({
     const sourceLocale = 'en';
     return {
       provider: mocks.provider,
-      doc: null,
+      doc: { clientID: 7 },
       bootstrap: {
         sourceLocale,
         locale,
@@ -200,7 +207,7 @@ vi.mock('@/lib/actions/terms', () => ({
 const variants = [
   {
     name: 'PrivacyEditor',
-    render: () => (
+    render: (canEdit = true) => (
       <PrivacyEditor
         initialPrivacy={{
           id: 'privacy-1',
@@ -214,7 +221,7 @@ const variants = [
           updatedAt: null,
         }}
         siteSettings={null}
-        canEdit
+        canEdit={canEdit}
       />
     ),
     schedule: mocks.schedulePrivacy,
@@ -223,7 +230,7 @@ const variants = [
   },
   {
     name: 'TermsEditor',
-    render: () => (
+    render: (canEdit = true) => (
       <TermsEditor
         initialTerms={{
           id: 'terms-1',
@@ -237,7 +244,7 @@ const variants = [
           updatedAt: null,
         }}
         siteSettings={null}
-        canEdit
+        canEdit={canEdit}
       />
     ),
     schedule: mocks.scheduleTerms,
@@ -246,7 +253,7 @@ const variants = [
   },
 ] satisfies Array<{
   name: string;
-  render: () => ReactElement;
+  render: (canEdit?: boolean) => ReactElement;
   schedule: ReturnType<typeof vi.fn>;
   activate: ReturnType<typeof vi.fn>;
   documentKey: string;
@@ -257,6 +264,7 @@ describe.each(variants)('$name persist-before-lifecycle boundary', (variant) => 
   let root: Root;
 
   beforeEach(() => {
+    setProviderAccessLevel(mocks.provider, 'edit');
     vi.clearAllMocks();
     mocks.activeLocaleOverride = null;
     mocks.richTextController.mockReturnValue(null);
@@ -289,6 +297,42 @@ describe.each(variants)('$name persist-before-lifecycle boundary', (variant) => 
   afterEach(() => {
     act(() => root.unmount());
     container.remove();
+  });
+
+  it('upgrades refreshed viewer props and downgrades without replacing the legal body', async () => {
+    mocks.richTextController.mockReturnValue({
+      extension: {},
+      initialContent: {},
+      getLocalizedDocumentSnapshot: () =>
+        create(LocalizedRichTextDocumentSchema, {
+          blockCatalogFingerprint: contentBlockCatalogFingerprint,
+          profile: RichTextProfile.POLICY,
+          locale: 'en',
+          base: { nodes: [] },
+          localeOverlay: { locale: 'en', blocks: [] },
+        }),
+    });
+    setProviderAccessLevel(mocks.provider, 'view');
+    // Mount the room body even while its preview is visible.
+    const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+    await act(async () =>
+      root.render(<QueryClientProvider client={queryClient}>{variant.render(false)}</QueryClientProvider>),
+    );
+    const body = container.querySelector('[data-testid="locale-policy-editor"]');
+    expect(body).not.toBeNull();
+    expect(mocks.policyEditor.mock.lastCall?.[0].readOnly).toBe(true);
+    act(() => setProviderAccessLevel(mocks.provider, 'edit'));
+    expect(mocks.policyEditor.mock.lastCall?.[0].readOnly).toBe(true);
+    await act(async () =>
+      root.render(<QueryClientProvider client={queryClient}>{variant.render(true)}</QueryClientProvider>),
+    );
+    expect(mocks.policyEditor.mock.lastCall?.[0].readOnly).toBe(false);
+    expect(container.querySelector('[data-testid="locale-policy-editor"]')).toBe(body);
+    act(() => setProviderAccessLevel(mocks.provider, 'view'));
+    expect(mocks.policyEditor.mock.lastCall?.[0].readOnly).toBe(true);
+    expect(container.querySelector('[data-testid="locale-policy-editor"]')).toBe(body);
+    expect(container.querySelector('[role="alertdialog"]')).toBeNull();
+    expect(container.querySelector('[data-testid="action-schedule"]')).toBeNull();
   });
 
   it('does not schedule when persist-now fails', async () => {
@@ -355,6 +399,7 @@ describe('LegalPolicyEditor target locale collaboration', () => {
   let root: Root;
 
   beforeEach(() => {
+    setProviderAccessLevel(mocks.provider, 'edit');
     vi.clearAllMocks();
     mocks.richTextController.mockReturnValue({ id: 'target-controller' });
     mocks.activeLocaleOverride = {
@@ -404,7 +449,11 @@ describe('LegalPolicyEditor target locale collaboration', () => {
   it('renders the existing target room as localized-editable with neutral structure locked', () => {
     expect(container.querySelector('[data-testid="target-api-preview"]')).toBeNull();
     expect(container.querySelector('[data-testid="locale-policy-editor"]')).not.toBeNull();
-    expect(mocks.richTextController).toHaveBeenCalledWith('terms-history', null, 'ko');
+    expect(mocks.richTextController).toHaveBeenCalledWith(
+      'terms-history',
+      expect.objectContaining({ clientID: 7 }),
+      'ko',
+    );
     expect(mocks.policyEditor).toHaveBeenCalledWith(
       expect.objectContaining({ readOnly: false, structureLocked: true }),
     );
@@ -417,6 +466,7 @@ describe('LegalPolicyEditor archived administration', () => {
   let root: Root;
 
   beforeEach(() => {
+    setProviderAccessLevel(mocks.provider, 'edit');
     vi.clearAllMocks();
     mocks.activeLocaleOverride = null;
     mocks.richTextController.mockReturnValue({ id: 'archived-source-controller' });

@@ -7,7 +7,14 @@ import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/conten
 import { LocalizedPageDocumentSchema } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { PageStatus as PublicPageStatus } from '@echovisionlab/geul-proto/public/page_pb.ts';
 import { createPageClient, createPublicPageClientWithAuth } from '@/lib/api/server-client';
-import { getPage, getPageAccessView, getPageAccessViewWithToken, getPageView, getPageViewWithToken } from './page';
+import {
+  getPageEditorSnapshot,
+  getPage,
+  getPageAccessView,
+  getPageAccessViewWithToken,
+  getPageView,
+  getPageViewWithToken,
+} from './page';
 
 const getPublicPageRpcMock = vi.fn();
 const getAdminPageRpcMock = vi.fn();
@@ -300,4 +307,30 @@ describe('public page queries', () => {
     expect(createPublicPageClientWithAuth).toHaveBeenNthCalledWith(1, 'en');
     expect(createPublicPageClientWithAuth).toHaveBeenNthCalledWith(2, 'ko');
   });
+});
+
+it('fetches an exact authorized Page snapshot with section bodies and document layout', async () => {
+  const rpc = vi.fn(async () => ({
+    document: localizedPageDocument(),
+    locale: 'ko',
+    sourceLocale: 'ko',
+    localeExists: true,
+    documentRevision: 'revision-A',
+    editable: false,
+    blockMedia: [],
+    documentLayout: protoDocumentLayout,
+  }));
+  vi.mocked(createPageClient).mockResolvedValue({ getPageEditorDocument: rpc } as unknown as Awaited<
+    ReturnType<typeof createPageClient>
+  >);
+  const result = await getPageEditorSnapshot('page-1', 'ko');
+  expect(rpc).toHaveBeenCalledWith({ pageId: 'page-1', locale: 'ko' });
+  expect(result?.snapshot).toMatchObject({
+    editable: false,
+    title: '',
+    summary: '',
+    documentRevision: 'revision-A',
+    sections: [{ id: sectionId, content: { type: 'doc' } }],
+  });
+  expect(result?.documentLayout.contentHeight).toBe('viewport');
 });

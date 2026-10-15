@@ -1,10 +1,12 @@
 'use client';
+import { useReleaseEditorCanEdit } from './ReleaseEditorAccessContext';
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { notifications } from '@/components/core/Notification';
 import { deleteReleaseArtworkAction, setReleaseArtworkAction } from '@/lib/actions/release';
+import { getUntrackedConfigurationWriteOrigin } from '@/lib/editor/editor-write-origin';
 import { useUpload } from '@/lib/hooks/useUpload';
 import { UploadType } from '@/lib/types/upload/model';
 import { createClientLogger } from '@/lib/utils/client-logger';
@@ -24,13 +26,17 @@ export function ReleaseArtworkUploader({
   inputId,
   onArtworkChange,
 }: ReleaseArtworkUploaderProps) {
+  const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
   const t = useTranslations('releaseEditor.artwork');
   const [uploadProgress, setUploadProgress] = useState(0);
 
   const { upload, isUploading } = useUpload(UploadType.RELEASE_ARTWORK);
   const setArtwork = useMutation({
-    mutationFn: (fileId: string) => setReleaseArtworkAction(releaseId, fileId),
+    mutationFn: (fileId: string) => {
+      const editorOrigin = getUntrackedConfigurationWriteOrigin(`release:${releaseId}`);
+      return setReleaseArtworkAction(releaseId, fileId, editorOrigin);
+    },
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
@@ -47,7 +53,10 @@ export function ReleaseArtworkUploader({
   });
 
   const removeArtwork = useMutation({
-    mutationFn: () => deleteReleaseArtworkAction(releaseId),
+    mutationFn: () => {
+      const editorOrigin = getUntrackedConfigurationWriteOrigin(`release:${releaseId}`);
+      return deleteReleaseArtworkAction(releaseId, editorOrigin);
+    },
     onSuccess: (result) => {
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
@@ -62,6 +71,9 @@ export function ReleaseArtworkUploader({
   });
 
   const handleUpload = async (croppedBlob: Blob) => {
+    if (!canEdit) {
+      return;
+    }
     setUploadProgress(0);
 
     try {
@@ -86,6 +98,9 @@ export function ReleaseArtworkUploader({
   };
 
   const handleRemove = () => {
+    if (!canEdit) {
+      return;
+    }
     removeArtwork.mutate();
   };
 

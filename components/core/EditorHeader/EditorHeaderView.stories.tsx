@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { useArgs, useState } from 'storybook/preview-api';
+import { expect, within, userEvent } from 'storybook/test';
 import { Button } from '../Button';
 
 import { EditorHeaderView, type EditorHeaderViewLabels } from './EditorHeaderView';
@@ -95,4 +96,43 @@ export const PhoneActions: Story = {
     labels: { ...labels, collabButton: 'Draft · Collaborative editing' },
     onDelete: () => {},
   },
+};
+
+const checkSaveStatus: Story['play'] = async ({ canvasElement, args }) => {
+  // The indicator names itself in the active locale, so find it by status, not by English text.
+  const indicator = within(canvasElement)
+    .getAllByRole('img')
+    .find((element) => element.getAttribute('data-collab-status') === args.saveState);
+  await expect(indicator).toBeDefined();
+  const name = indicator!.getAttribute('aria-label') ?? '';
+  await expect(name).not.toBe('');
+  // A real pointer arrives by moving; React Aria shows hover hints only after pointer modality.
+  await userEvent.pointer([{ target: canvasElement }, { target: indicator! }]);
+  await userEvent.hover(indicator!);
+  await expect(await within(document.body).findByRole('tooltip', {}, { timeout: 2000 })).toHaveTextContent(name);
+  await userEvent.unhover(indicator!);
+};
+export const Saved: Story = {
+  play: checkSaveStatus,
+  args: { saveState: 'saved', labels: { ...labels, syncStatus: 'Saved' } },
+};
+export const Saving: Story = {
+  play: checkSaveStatus,
+  args: { saveState: 'saving', labels: { ...labels, syncStatus: 'Saving…' } },
+};
+export const Offline: Story = {
+  play: checkSaveStatus,
+  args: { saveState: 'offline', labels: { ...labels, syncStatus: 'Offline · edits kept on this device' } },
+};
+export const Error: Story = {
+  play: checkSaveStatus,
+  args: { saveState: 'error', labels: { ...labels, syncStatus: 'Save failed · retrying…' } },
+};
+export const Rejected: Story = {
+  play: checkSaveStatus,
+  args: { saveState: 'rejected', labels: { ...labels, syncStatus: "Some edits couldn't be saved" } },
+};
+export const Reload: Story = {
+  play: checkSaveStatus,
+  args: { saveState: 'reload', labels: { ...labels, syncStatus: 'Reconnecting · restoring edits…' } },
 };

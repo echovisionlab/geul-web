@@ -2,7 +2,6 @@
 
 import { NodeViewContent, NodeViewWrapper, type NodeViewProps } from '@tiptap/react';
 import { BlockSelectionTarget } from '@/components/core/SelectionSurface';
-import { undo, redo, yUndoPluginKey } from 'y-prosemirror';
 import { undoBlockRoomEditor, redoBlockRoomEditor } from '@/lib/collab/interactive-mutation-undo';
 import { MermaidDiagram } from '@/features/mermaid/MermaidDiagram';
 import { MermaidEditor } from '@/features/mermaid/MermaidEditor';
@@ -58,14 +57,10 @@ export function MermaidNodeView({
             onTitleChange={canEditTitle ? (next) => updateAttributes({ title: next }) : undefined}
             onCaptionExit={() => focusParagraphAfterSelectedBlock(editor, canEditSource)}
             onUndo={() => {
-              if (!undoBlockRoomEditor(editor) && !editor.commands.undo?.() && yUndoPluginKey.getState(editor.state)) {
-                undo(editor.state);
-              }
+              undoBlockRoomEditor(editor);
             }}
             onRedo={() => {
-              if (!redoBlockRoomEditor(editor) && !editor.commands.redo?.() && yUndoPluginKey.getState(editor.state)) {
-                redo(editor.state);
-              }
+              redoBlockRoomEditor(editor);
             }}
             onEscape={() => {
               editor.commands.focus();

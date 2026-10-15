@@ -1,5 +1,8 @@
 // @vitest-environment jsdom
 
+import * as Y from 'yjs';
+import { PostAction } from '@echovisionlab/geul-proto/secure/post_pb.ts';
+import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import { act, type ComponentProps, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -15,6 +18,7 @@ const mocks = vi.hoisted(() => {
   const noOp = vi.fn();
   return {
     postMeta: null as unknown,
+    lifecycleOptions: vi.fn(),
     configUpdate: Object.assign(vi.fn(), {
       flush: vi.fn(async () => true),
       isPending: false,
@@ -74,9 +78,6 @@ vi.mock('@/lib/contexts/PostMetaContext', () => ({
   PostMetaProvider: ({ children }: { children: ReactNode }) => children,
   usePostMeta: () => mocks.postMeta,
 }));
-vi.mock('@/features/editor/useEditorPermissionRevocation', () => ({
-  useEditorPermissionRevocation: () => ({ blocked: false, revoked: false, sessionExpired: false, revoke: vi.fn() }),
-}));
 vi.mock('@/features/editor/hooks/useBlockRoomTiptapController', () => ({ usePostBlockRoomController: () => null }));
 vi.mock('@/features/editor/useEditorNavigation', () => ({
   useEditorNavigation: () => async (action: () => unknown) => action(),
@@ -103,7 +104,12 @@ vi.mock('@/lib/hooks/useSlugManagement', () => ({
   }),
 }));
 vi.mock('./usePostConfigSave', () => ({ usePostConfigSave: () => mocks.configUpdate }));
-vi.mock('./usePostLifecycle', () => ({ usePostLifecycle: () => mocks.lifecycle }));
+vi.mock('./usePostLifecycle', () => ({
+  usePostLifecycle: (options: { allowedActions: readonly PostAction[] }) => {
+    mocks.lifecycleOptions(options);
+    return mocks.lifecycle;
+  },
+}));
 vi.mock('./PostEditorHeaderSection', () => ({
   PostEditorHeaderSection: ({
     title,
@@ -194,8 +200,9 @@ function metadataPreview({ displayTitle, displaySummary, activeLocale }: Metadat
     layout: { contentHeight: 'content', pageChrome: 'flow', footer: 'flow' },
     setLayout: vi.fn(),
     featuredImageUrl: null,
-    provider: null,
-    doc: null,
+    provider: { on: vi.fn(), off: vi.fn(), disconnect: vi.fn() },
+    // An admitted room always has its document; editability follows the document, not transport sync.
+    doc: new Y.Doc(),
     isConnected: true,
     isSynced: true,
     bootstrap: {
@@ -267,9 +274,9 @@ const editorProps: ComponentProps<typeof PostEditor> = {
 let root: Root | null = null;
 let container: HTMLDivElement | null = null;
 
-async function renderEditor() {
+async function renderEditor(overrides: Partial<ComponentProps<typeof PostEditor>> = {}) {
   await act(async () => {
-    root?.render(<PostEditor {...editorProps} />);
+    root?.render(<PostEditor {...editorProps} {...overrides} />);
   });
 }
 
@@ -309,6 +316,37 @@ afterEach(() => {
 });
 
 describe('PostEditor translated metadata drafts', () => {
+  it('upgrades a viewer snapshot with refreshed permissions and locks the same controls on downgrade', async () => {
+    const provider = (mocks.postMeta as ReturnType<typeof metadataPreview>).provider;
+    const snapshot = {
+      locale: 'ko',
+      sourceLocale: 'en',
+      localeExists: true,
+      documentRevision: 'revision',
+      title: 'Title',
+      summary: '',
+      editable: false,
+    };
+    const actions = [PostAction.EDIT, PostAction.PUBLISH_NOW, PostAction.DELETE, PostAction.VIEW_VERSIONS];
+    setProviderAccessLevel(provider, 'view');
+    await renderEditor({ initialSnapshot: snapshot, initialAllowedActions: [] });
+    const title = container!.querySelector<HTMLInputElement>('[data-testid="title"]')!;
+    const summary = container!.querySelector<HTMLTextAreaElement>('[data-testid="summary"]')!;
+    expect(title.disabled).toBe(true);
+    act(() => setProviderAccessLevel(provider, 'edit'));
+    expect(title.disabled).toBe(true);
+    await renderEditor({ initialSnapshot: { ...snapshot, editable: true }, initialAllowedActions: actions });
+    expect(title.disabled).toBe(false);
+    expect(summary.readOnly).toBe(false);
+    expect(container!.querySelector('[data-testid="title"]')).toBe(title);
+    expect(mocks.lifecycleOptions.mock.lastCall?.[0].allowedActions).toEqual(actions);
+    act(() => setProviderAccessLevel(provider, 'view'));
+    expect(title.disabled).toBe(true);
+    expect(summary.readOnly).toBe(true);
+    expect(mocks.lifecycleOptions.mock.lastCall?.[0].allowedActions).toEqual([PostAction.VIEW_VERSIONS]);
+    expect(container!.querySelector('[data-testid="title"]')).toBe(title);
+  });
+
   it('shows recovered resident metadata instead of retaining the initial source fields', async () => {
     persistEditorSaveRecoveryEntry(`${postSaveDocument}:ko`, 'test-recovery', {
       document: postSaveDocument,

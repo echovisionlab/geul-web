@@ -165,6 +165,7 @@ export async function updateFileDownloadPolicyAction(
   audience: FileDownloadAudience,
   audienceSegmentIds: string[],
   observedPolicy: FileDownloadPolicyObservedState,
+  editorOrigin?: string,
 ): Promise<FileDownloadActionResult<FileDownloadPolicyModel>> {
   if (!isValidTarget(target)) {
     return { errorCode: 'invalidTarget' };
@@ -180,7 +181,7 @@ export async function updateFileDownloadPolicyAction(
   ).sort();
 
   try {
-    const client = await createFileClient();
+    const client = await createFileClient(editorOrigin);
     const response = await client.updateFileDownloadPolicy({
       ...target,
       expectedFileId: target.expectedFileId,

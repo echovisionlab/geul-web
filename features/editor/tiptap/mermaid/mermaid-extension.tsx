@@ -1,3 +1,4 @@
+import { liveNodeView } from '@/features/editor/tiptap/live-node-view';
 import { mergeAttributes, Node, type Extensions } from '@tiptap/core';
 import { ReactNodeViewRenderer } from '@tiptap/react';
 import type { EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
@@ -44,7 +45,9 @@ export function createMermaidExtension(options: MermaidNodeOptions = {}): Extens
     renderHTML: ({ HTMLAttributes }) => ['div', mergeAttributes(HTMLAttributes, { 'data-content-type': 'mermaid' }), 0],
     addNodeView() {
       return ReactNodeViewRenderer(
-        (props) => <MermaidNodeView {...props} authoringMode={this.options.authoringMode} />,
+        liveNodeView(this.name, this.options, (props, current) => (
+          <MermaidNodeView {...props} authoringMode={current.authoringMode} />
+        )),
         {
           stopEvent: ({ event }) =>
             isMonacoSourceEditorEvent(event) ||

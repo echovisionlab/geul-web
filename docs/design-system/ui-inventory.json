@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "ff2a0c26dbb84ef4f5b2eb041a4dcffe3a7c68bb42368aac3ca43a685c1939e9",
+  "manifestHash": "77844ca6dae7f85e4776f3854b2af4efc2cf5d835b89c091cccabb5e3ae9ce75",
   "counts": {
-    "sourceFiles": 3669,
-    "productionSourceFiles": 2233,
-    "componentFiles": 887,
+    "sourceFiles": 3740,
+    "productionSourceFiles": 2271,
+    "componentFiles": 897,
     "coreFamilies": 56,
     "featureDomains": 53,
-    "storyFiles": 251,
-    "storyVariants": 1415,
+    "storyFiles": 255,
+    "storyVariants": 1436,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -446,6 +446,7 @@
     "components/core/EditorHeader/EditorHeaderView.test.tsx",
     "components/core/EditorHeader/EditorHeaderView.tsx",
     "components/core/EditorHeader/index.ts",
+    "components/core/EditorHeader/save-state.ts",
     "components/core/EmojiPicker/EmojiPicker.stories.tsx",
     "components/core/EmojiPicker/EmojiPicker.test.tsx",
     "components/core/EmojiPicker/EmojiPicker.tsx",
@@ -927,6 +928,7 @@
     "features/admin/email-layout/EmailLayoutsPage.tsx",
     "features/admin/email-layout/action-error-message.test.ts",
     "features/admin/email-layout/action-error-message.ts",
+    "features/admin/email-template/EmailTemplateEditPage.configuration.test.tsx",
     "features/admin/email-template/EmailTemplateEditPage.tsx",
     "features/admin/email-template/EmailTemplatesPage.tsx",
     "features/admin/email-template/delete-error-message.test.ts",
@@ -1143,6 +1145,7 @@
     "features/authoring/DocumentEditorPanels.test.tsx",
     "features/authoring/DocumentEditorPanels.tsx",
     "features/authoring/EditorHeader/EditorHeader.tsx",
+    "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
     "features/authoring/EditorHeader/index.ts",
     "features/authoring/EditorHeader/status-options.ts",
     "features/campaign/CampaignAnalyticsPage.tsx",
@@ -1254,10 +1257,14 @@
     "features/editor/EditorPermissionRevokedDialog.tsx",
     "features/editor/EditorSessionExpiredDialog.test.tsx",
     "features/editor/EditorSessionExpiredDialog.tsx",
+    "features/editor/EditorSnapshotHandoff.stories.tsx",
+    "features/editor/EditorSnapshotHandoff.test.tsx",
+    "features/editor/EditorSnapshotHandoff.tsx",
     "features/editor/ExternalVideoEditorPreview.test.tsx",
     "features/editor/ExternalVideoEditorPreview.tsx",
     "features/editor/ExternalVideoInsertDialog.tsx",
     "features/editor/MapInsertModal.tsx",
+    "features/editor/access-query-invalidation.test.tsx",
     "features/editor/artist-label-peer-metadata.test.tsx",
     "features/editor/blocks/FileBlock/FileBlockView.interaction.test.tsx",
     "features/editor/blocks/FileBlock/FileBlockView.test.ts",
@@ -1299,6 +1306,7 @@
     "features/editor/contract/localized-rich-text.test.ts",
     "features/editor/contract/localized-rich-text.ts",
     "features/editor/editor-color-theme.test.ts",
+    "features/editor/editor-snapshot.ts",
     "features/editor/editorInterruptionSignal.ts",
     "features/editor/extensions/KeyboardShortcutsExtension.test.ts",
     "features/editor/extensions/KeyboardShortcutsExtension.ts",
@@ -1323,7 +1331,6 @@
     "features/editor/hooks/useEntityMediaSurface.ts",
     "features/editor/hooks/useMediaBlockDropTarget.test.tsx",
     "features/editor/hooks/useMediaBlockDropTarget.ts",
-    "features/editor/hooks/useNeutralBlockAuthoringMode.ts",
     "features/editor/hooks/useRichTextBlockRoomEditor.ts",
     "features/editor/hooks/useStableSuggestionMenuWidth.ts",
     "features/editor/lib/block-insert.integration.test.tsx",
@@ -1351,12 +1358,15 @@
     "features/editor/tiptap/TiptapBlockContainerNodeView.test.tsx",
     "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
     "features/editor/tiptap/TiptapBlockMenu.tsx",
+    "features/editor/tiptap/TiptapEditor-lifetime.test.tsx",
     "features/editor/tiptap/TiptapEditor.tsx",
     "features/editor/tiptap/TiptapFileBlockNodeView.test.tsx",
     "features/editor/tiptap/TiptapFileBlockNodeView.tsx",
     "features/editor/tiptap/TiptapPlayground.stories.tsx",
     "features/editor/tiptap/TiptapPlayground.story-fixtures.ts",
     "features/editor/tiptap/TiptapPublicBlockComparison.stories.tsx",
+    "features/editor/tiptap/TiptapSnapshot.test.tsx",
+    "features/editor/tiptap/TiptapSnapshot.tsx",
     "features/editor/tiptap/ai/TiptapAIAssistant.test.tsx",
     "features/editor/tiptap/ai/TiptapAIAssistant.tsx",
     "features/editor/tiptap/ai/TiptapAIController.tsx",
@@ -1369,12 +1379,15 @@
     "features/editor/tiptap/block-room-collaboration-integrity.test.ts",
     "features/editor/tiptap/block-room-external-video-codec.test.ts",
     "features/editor/tiptap/block-room-input-performance.test.ts",
+    "features/editor/tiptap/block-room-payload-projection.ts",
     "features/editor/tiptap/block-room-presence-types.ts",
     "features/editor/tiptap/block-room-presence.test.ts",
     "features/editor/tiptap/block-room-presence.ts",
     "features/editor/tiptap/block-room-prosemirror-bridge.test.ts",
     "features/editor/tiptap/block-room-prosemirror-bridge.ts",
     "features/editor/tiptap/block-room-prosemirror-registry.ts",
+    "features/editor/tiptap/block-room-text-positions.test.ts",
+    "features/editor/tiptap/block-room-text-positions.ts",
     "features/editor/tiptap/block-room-tiptap-codec.test.ts",
     "features/editor/tiptap/block-room-tiptap-codec.ts",
     "features/editor/tiptap/block-room-tiptap-controller.test.ts",
@@ -1454,11 +1467,15 @@
     "features/editor/tiptap/integration/shader-schema.test.ts",
     "features/editor/tiptap/integration/slash-workflows.test.ts",
     "features/editor/tiptap/integration/slash-workflows.ts",
+    "features/editor/tiptap/live-node-view.tsx",
+    "features/editor/tiptap/live-translation-structure-lock.ts",
     "features/editor/tiptap/map/TiptapMapNodeView.story-fixtures.test.ts",
     "features/editor/tiptap/map/TiptapMapNodeView.story-fixtures.ts",
     "features/editor/tiptap/map/TiptapMapNodeView.test.tsx",
     "features/editor/tiptap/map/TiptapMapNodeView.tsx",
     "features/editor/tiptap/map/index.ts",
+    "features/editor/tiptap/markdown-paste.test.ts",
+    "features/editor/tiptap/markdown-paste.ts",
     "features/editor/tiptap/math/TiptapMathNodeViews.tsx",
     "features/editor/tiptap/math/index.ts",
     "features/editor/tiptap/math/math-clipboard.ts",
@@ -1534,9 +1551,9 @@
     "features/editor/tiptap/profiles/EmailTiptapEditor.tsx",
     "features/editor/tiptap/profiles/PolicyTiptapEditor.test.tsx",
     "features/editor/tiptap/profiles/PolicyTiptapEditor.tsx",
+    "features/editor/tiptap/profiles/editor-access-transitions.test.tsx",
     "features/editor/tiptap/public-block-comparison-fixtures.test.ts",
     "features/editor/tiptap/public-block-comparison-fixtures.ts",
-    "features/editor/tiptap/server-wire-schema.ts",
     "features/editor/tiptap/shader/ShaderApiReference.tsx",
     "features/editor/tiptap/shader/ShaderNode.test.tsx",
     "features/editor/tiptap/shader/ShaderNode.tsx",
@@ -1569,6 +1586,7 @@
     "features/editor/tiptap/table/table-commands.ts",
     "features/editor/tiptap/table/table-constants.ts",
     "features/editor/tiptap/table/table-extensions.tsx",
+    "features/editor/tiptap/table/table-presentation.ts",
     "features/editor/tiptap/three/ThreeSceneNode.test.tsx",
     "features/editor/tiptap/three/ThreeSceneNode.tsx",
     "features/editor/tiptap/three/index.ts",
@@ -1605,6 +1623,8 @@
     "features/editor/ui/FileBlockMetadataFields.test.tsx",
     "features/editor/ui/FileBlockMetadataFields.tsx",
     "features/editor/ui/preventNativeBlockDrag.ts",
+    "features/editor/useEditorAccessLevel.test.tsx",
+    "features/editor/useEditorAccessLevel.ts",
     "features/editor/useEditorNavigation.test.tsx",
     "features/editor/useEditorNavigation.ts",
     "features/editor/useEditorPermissionRevocation.test.tsx",
@@ -1647,6 +1667,7 @@
     "features/form/AdminFormSubmissionsPage.test.tsx",
     "features/form/AdminFormSubmissionsPage.tsx",
     "features/form/FormAccessBoundary.tsx",
+    "features/form/FormAccessSurfaces.test.tsx",
     "features/form/FormBuilder/ConditionEditor.test.tsx",
     "features/form/FormBuilder/ConditionEditor.tsx",
     "features/form/FormBuilder/FieldEditor.tsx",
@@ -1694,6 +1715,7 @@
     "features/form/FormSuccessPageView.tsx",
     "features/form/FormTranslationContext.test.tsx",
     "features/form/FormTranslationContext.tsx",
+    "features/form/FormTranslationsPanel.tsx",
     "features/form/LazyFormEditRoute.tsx",
     "features/form/PhoneInput/PhoneInput.tsx",
     "features/form/PhoneInput/index.ts",
@@ -1851,6 +1873,7 @@
     "features/member/onboarding/NicknameOnboarding.tsx",
     "features/member/useNicknameValidation.test.tsx",
     "features/member/useNicknameValidation.ts",
+    "features/menu/AdminMenusPage.access.test.tsx",
     "features/menu/AdminMenusPage.tsx",
     "features/menu/MenuItemsEditor.test.tsx",
     "features/menu/MenuItemsEditor.tsx",
@@ -1894,6 +1917,10 @@
     "features/my/CookieConsentSettings.tsx",
     "features/my/LanguagePreferenceSettings.test.tsx",
     "features/my/LanguagePreferenceSettings.tsx",
+    "features/my/LocalBackups.stories.tsx",
+    "features/my/LocalBackups.test.tsx",
+    "features/my/LocalBackups.tsx",
+    "features/my/LocalBackupsView.tsx",
     "features/my/McpAndApiAccess.stories.tsx",
     "features/my/McpOAuthGrantSettings.test.tsx",
     "features/my/McpOAuthGrantSettings.tsx",
@@ -1958,6 +1985,7 @@
     "features/page/PageEditor/LazyPageEditor.tsx",
     "features/page/PageEditor/LocalizedCollaborativePageBodyEditor.test.tsx",
     "features/page/PageEditor/LocalizedCollaborativePageBodyEditor.tsx",
+    "features/page/PageEditor/LocalizedPageBodyView.tsx",
     "features/page/PageEditor/PageAccessSettings.stories.tsx",
     "features/page/PageEditor/PageAccessSettings.test.tsx",
     "features/page/PageEditor/PageAccessSettings.tsx",
@@ -1969,6 +1997,7 @@
     "features/page/PageEditor/PageEditorContext.tsx",
     "features/page/PageEditor/PageEditorInterruptionDialogs.test.tsx",
     "features/page/PageEditor/PageEditorInterruptionDialogs.tsx",
+    "features/page/PageEditor/PageEditorSnapshot.tsx",
     "features/page/PageEditor/PageFeaturedImageUploader.test.tsx",
     "features/page/PageEditor/PageFeaturedImageUploader.tsx",
     "features/page/PageEditor/PageSectionPreinsertDialog.tsx",
@@ -2357,6 +2386,7 @@
     "features/post/PostEditor/body-mode.ts",
     "features/post/PostEditor/collaboration-mode.test.ts",
     "features/post/PostEditor/collaboration-mode.ts",
+    "features/post/PostEditor/lifecycle-origins.test.tsx",
     "features/post/PostEditor/post-config-save.ts",
     "features/post/PostEditor/post-lifecycle-policy.test.ts",
     "features/post/PostEditor/post-lifecycle-policy.ts",
@@ -2418,12 +2448,15 @@
     "features/release/ReleaseEditor/ReleaseArtistsSection.test.tsx",
     "features/release/ReleaseEditor/ReleaseArtistsSection.tsx",
     "features/release/ReleaseEditor/ReleaseArtistsSectionView.tsx",
+    "features/release/ReleaseEditor/ReleaseArtworkUploader.test.tsx",
     "features/release/ReleaseEditor/ReleaseArtworkUploader.tsx",
     "features/release/ReleaseEditor/ReleaseArtworkView.tsx",
     "features/release/ReleaseEditor/ReleaseCreditsSection.test.tsx",
     "features/release/ReleaseEditor/ReleaseCreditsSection.tsx",
     "features/release/ReleaseEditor/ReleaseDescriptionEditor.tsx",
+    "features/release/ReleaseEditor/ReleaseEditor.configuration.test.tsx",
     "features/release/ReleaseEditor/ReleaseEditor.tsx",
+    "features/release/ReleaseEditor/ReleaseEditorAccessContext.tsx",
     "features/release/ReleaseEditor/ReleaseLabelsSection.tsx",
     "features/release/ReleaseEditor/ReleaseTagsSection.tsx",
     "features/release/ReleaseEditor/ReleaseTrackCreateView.tsx",
@@ -2641,6 +2674,7 @@
     "features/work/CreditList.tsx",
     "features/work/WorkEditor/LazyWorkEditor.tsx",
     "features/work/WorkEditor/WorkClientsSection.tsx",
+    "features/work/WorkEditor/WorkCreditsSection.test.tsx",
     "features/work/WorkEditor/WorkCreditsSection.tsx",
     "features/work/WorkEditor/WorkEditor.navigation.test.tsx",
     "features/work/WorkEditor/WorkEditor.tsx",
@@ -2747,6 +2781,7 @@
     "lib/actions/terms.ts",
     "lib/actions/track-credit-mapping.test.ts",
     "lib/actions/track-credit-mutation.ts",
+    "lib/actions/track.test.ts",
     "lib/actions/track.ts",
     "lib/actions/user-admin.test.ts",
     "lib/actions/user-preference.ts",
@@ -2816,6 +2851,10 @@
     "lib/api/server-client.ts",
     "lib/auth.test.ts",
     "lib/auth.ts",
+    "lib/auth/active-member.ssr.test.ts",
+    "lib/auth/active-member.test.ts",
+    "lib/auth/active-member.ts",
+    "lib/auth/client.sign-out.test.ts",
     "lib/auth/client.ts",
     "lib/auth/current-session.ts",
     "lib/auth/invalid-session-cookie.ts",
@@ -2842,6 +2881,7 @@
     "lib/collab/block-room-durability.ts",
     "lib/collab/block-room-intent-journal.test.ts",
     "lib/collab/block-room-intent-journal.ts",
+    "lib/collab/block-room-journal-store.ts",
     "lib/collab/block-room-metadata.test.ts",
     "lib/collab/block-room-metadata.ts",
     "lib/collab/block-room-observation.test.ts",
@@ -2855,6 +2895,7 @@
     "lib/collab/document-room-intent-journal.ts",
     "lib/collab/document-room-intent.test.ts",
     "lib/collab/document-room-intent.ts",
+    "lib/collab/document-room-journal-store.ts",
     "lib/collab/document-room-snapshot.test.ts",
     "lib/collab/document-room-snapshot.ts",
     "lib/collab/form-fields.ts",
@@ -2864,6 +2905,9 @@
     "lib/collab/hocuspocus-provider.ts",
     "lib/collab/interactive-mutation-undo.test.ts",
     "lib/collab/interactive-mutation-undo.ts",
+    "lib/collab/local-author-origin.ts",
+    "lib/collab/local-backups.test.ts",
+    "lib/collab/local-backups.ts",
     "lib/collab/map-theme-fields.ts",
     "lib/collab/metadata-ai.ts",
     "lib/collab/page-document-metadata.test.ts",
@@ -2872,6 +2916,11 @@
     "lib/collab/persist-now.ts",
     "lib/collab/post-meta.ts",
     "lib/collab/program-event-meta.ts",
+    "lib/collab/provider-control-state.ts",
+    "lib/collab/room-journal-store.test.ts",
+    "lib/collab/room-journal-store.ts",
+    "lib/collab/room-journal-titles.ts",
+    "lib/collab/runtime-event-parser.ts",
     "lib/collab/schemas/campaign-fields.schema.test.ts",
     "lib/collab/schemas/campaign-fields.schema.ts",
     "lib/collab/schemas/form-fields.schema.ts",
@@ -2884,6 +2933,7 @@
     "lib/collab/subscribe-runtime-events.ts",
     "lib/collab/useBlockRoomConnection.test.tsx",
     "lib/collab/useBlockRoomConnection.ts",
+    "lib/collab/useProviderAccessEnded.ts",
     "lib/collab/work-meta.ts",
     "lib/constants/countries.generated.ts",
     "lib/constants/og-image.ts",
@@ -2923,9 +2973,16 @@
     "lib/editor/debounced-patch.ts",
     "lib/editor/editor-entity-changes.test.tsx",
     "lib/editor/editor-entity-changes.ts",
+    "lib/editor/editor-save-recovery.member.test.ts",
     "lib/editor/editor-save-recovery.ts",
     "lib/editor/editor-save-registry.test.ts",
     "lib/editor/editor-save-registry.ts",
+    "lib/editor/editor-save-state.test.ts",
+    "lib/editor/editor-save-state.ts",
+    "lib/editor/editor-view-recovery.test.ts",
+    "lib/editor/editor-view-recovery.ts",
+    "lib/editor/editor-write-origin.ts",
+    "lib/editor/editor-write-token.ts",
     "lib/editor/extensions/ArrowConversionExtension.test.ts",
     "lib/editor/extensions/ArrowConversionExtension.ts",
     "lib/editor/extensions/TranslationStructureLockExtension.test.ts",
@@ -2933,19 +2990,27 @@
     "lib/editor/extensions/tiptap.ts",
     "lib/editor/external-video-paragraph-spec.test.ts",
     "lib/editor/external-video-paragraph-spec.ts",
+    "lib/editor/leave-with-durable-edits.test.ts",
+    "lib/editor/leave-with-durable-edits.ts",
     "lib/editor/merge-metadata-patches.test.ts",
     "lib/editor/merge-metadata-patches.ts",
     "lib/editor/require-action-success.ts",
+    "lib/editor/save-failure.ts",
     "lib/editor/schema.test.ts",
+    "lib/editor/settle-edits-before-sign-out.ts",
     "lib/editor/transcode-entity.ts",
+    "lib/editor/useAuthoritativeConfiguration.test.ts",
+    "lib/editor/useAuthoritativeConfiguration.ts",
     "lib/editor/useBlockRoomMetadataUpdates.test.tsx",
     "lib/editor/useBlockRoomMetadataUpdates.ts",
     "lib/editor/useDebouncedPatch.test.tsx",
     "lib/editor/useDebouncedPatch.ts",
     "lib/editor/useDebouncedRoomMetadata.test.tsx",
     "lib/editor/useDebouncedRoomMetadata.ts",
+    "lib/editor/useEditorSaveState.ts",
     "lib/editor/usePendingEditorUnload.test.tsx",
     "lib/editor/usePendingEditorUnload.ts",
+    "lib/editor/useRejectedEditorSaves.ts",
     "lib/email/preview-document.test.ts",
     "lib/email/preview-document.ts",
     "lib/env.test.ts",
@@ -3164,6 +3229,7 @@
     "lib/queries/detail-request-memoization.test.ts",
     "lib/queries/document-layout.test.ts",
     "lib/queries/document-layout.ts",
+    "lib/queries/editor-snapshot.ts",
     "lib/queries/email-layout.lifecycle.test.ts",
     "lib/queries/email-layout.ts",
     "lib/queries/file-download-browser.test.ts",
@@ -3445,6 +3511,8 @@
     "lib/utils/json-ld.test.ts",
     "lib/utils/json-ld.ts",
     "lib/utils/language.server.ts",
+    "lib/utils/local-backup-route.test.ts",
+    "lib/utils/local-backup-route.ts",
     "lib/utils/location-place.ts",
     "lib/utils/logger.ts",
     "lib/utils/managed-image-url.test.ts",
@@ -3535,8 +3603,10 @@
     "stories/feature-localization.tsx",
     "stories/features/CampaignDelivery.stories.tsx",
     "stories/features/CookieConsent.stories.tsx",
+    "stories/features/EditorAccessEnded.stories.tsx",
     "stories/features/FileDownloadPolicy.stories.tsx",
     "stories/features/PageMotion.stories.tsx",
+    "stories/features/RejectedEdits.stories.tsx",
     "stories/features/ReorderConsumers.stories.tsx",
     "stories/features/TranslationLocale.stories.tsx",
     "stories/features/source-editor-story-play.test.ts",
@@ -3645,6 +3715,7 @@
     "stories/pages/fixtures/form-share-links.ts",
     "stories/pages/fixtures/form-translations.ts",
     "stories/pages/fixtures/local-actions.test.ts",
+    "stories/pages/fixtures/local-backups.ts",
     "stories/pages/fixtures/local-og-preview.ts",
     "stories/pages/fixtures/mail-adapters.ts",
     "stories/pages/fixtures/operations-a11y.ts",
@@ -3785,6 +3856,7 @@
         "features/media/ui/MissingMediaView.tsx",
         "features/my/CookieConsentSettings.tsx",
         "features/my/LanguagePreferenceSettings.tsx",
+        "features/my/LocalBackupsView.tsx",
         "features/my/McpOAuthGrantSettings.tsx",
         "features/my/MySecurityPageView.tsx",
         "features/my/PasskeySettingsSection.tsx",
@@ -4344,6 +4416,7 @@
         "features/auth/ui/AuthCodeChallengeView.tsx",
         "features/auth/ui/LoginStatusView.tsx",
         "features/auth/ui/VerificationFlowView.tsx",
+        "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "features/campaign/CampaignDeliveryDialogs.tsx",
         "features/campaign/CampaignScheduleForm.tsx",
         "features/data-table/MultiFilterEditorView.tsx",
@@ -4376,6 +4449,7 @@
         "features/menu/MenuTargetItemsEditor.tsx",
         "features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "features/my/LanguagePreferenceSettings.tsx",
+        "features/my/LocalBackupsView.tsx",
         "features/my/McpOAuthGrantSettings.tsx",
         "features/my/PasskeySettingsSection.tsx",
         "features/my/SecurityForm.tsx",
@@ -4483,6 +4557,7 @@
         "components/core/Popover/Popover.stories.tsx",
         "components/core/Sortable/SortableGroups.stories.tsx",
         "features/confirmation/ConfirmationDialog.stories.tsx",
+        "features/editor/EditorSnapshotHandoff.stories.tsx",
         "features/editor/components/EditorFileLibraryPickerView.stories.tsx",
         "features/editor/tiptap/TiptapPlayground.stories.tsx",
         "features/map/ui/MapLibreMapView.stories.tsx",
@@ -4491,6 +4566,8 @@
         "stories/Accessibility.stories.tsx",
         "stories/compositions/SizeDensity.stories.tsx",
         "stories/design-system/UsageRules.stories.tsx",
+        "stories/features/EditorAccessEnded.stories.tsx",
+        "stories/features/RejectedEdits.stories.tsx",
         "stories/foundations/AccessibilityMotion.stories.tsx",
         "stories/foundations/SizeDensity.stories.tsx",
         "stories/foundations/Spacing.stories.tsx",
@@ -5070,6 +5147,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": [
         "features/admin/user/UserProfileFormSection.tsx",
+        "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "features/metadata/ui/UrlSectionView.tsx",
         "features/my/ui/ProfileForm/ProfileFormView.tsx",
         "features/share/ui/ShareLinkSectionView.tsx"
@@ -7459,40 +7537,18 @@
         }
       ],
       "classification": "core",
-      "propsEvidence": [
+      "propsEvidence": [],
+      "typeAliasEvidence": [
         {
           "name": "CollabSyncStatusIndicatorProps",
-          "extends": [],
-          "properties": [
-            {
-              "name": "isConnected",
-              "optional": false,
-              "type": "boolean"
-            },
-            {
-              "name": "isSynced",
-              "optional": false,
-              "type": "boolean"
-            },
-            {
-              "name": "label",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "withTooltip",
-              "optional": true,
-              "type": "boolean"
-            }
-          ]
+          "type": "( | { /** Durable state supplied by the editor save model. */ state: EditorSaveState; isConnected?: never; isSynced?: never; } | { /** Compatibility for transport-only rooms. Block rooms must supply state. */ state?: nev"
         }
       ],
-      "typeAliasEvidence": [],
       "productionConsumers": ["components/core/EditorHeader/EditorHeaderView.tsx"],
       "catalogAdapters": [],
       "tests": ["components/core/EditorHeader/CollabSyncStatusIndicator.test.tsx"],
       "stories": [],
-      "composedJsx": ["IconCloud", "IconCloudOff", "Tooltip", "span"]
+      "composedJsx": ["Icon", "Tooltip", "span"]
     },
     {
       "file": "components/core/EditorHeader/EditorHeaderView.tsx",
@@ -7651,6 +7707,11 @@
               "name": "titleDisabled",
               "optional": true,
               "type": "boolean"
+            },
+            {
+              "name": "saveState",
+              "optional": true,
+              "type": "EditorSaveState"
             },
             {
               "name": "isConnected",
@@ -8103,6 +8164,7 @@
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/editor/components/EditorFileLibraryPickerView.tsx",
         "features/file-manager/FileManagerView.tsx",
+        "features/my/LocalBackupsView.tsx",
         "features/policy/LegalPolicyHistoryClient.tsx",
         "features/policy/LegalPolicyListClient.tsx"
       ],
@@ -12929,6 +12991,7 @@
         "features/auth/ui/LoginStatusView.tsx",
         "features/auth/ui/VerificationFlowView.tsx",
         "features/authoring/DocumentEditorPanels.tsx",
+        "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "features/campaign/CampaignAnalyticsPage.tsx",
         "features/campaign/CampaignDeliveryDialogs.tsx",
         "features/campaign/CampaignEditPage.tsx",
@@ -13024,6 +13087,7 @@
         "features/metadata/ui/UrlSectionView.tsx",
         "features/my/CookieConsentSettings.tsx",
         "features/my/LanguagePreferenceSettings.tsx",
+        "features/my/LocalBackupsView.tsx",
         "features/my/McpOAuthGrantSettings.tsx",
         "features/my/MyArtistsDataTable.tsx",
         "features/my/MyPostsPageView.tsx",
@@ -13044,10 +13108,11 @@
         "features/my/ui/SettingsForm/SettingsFormView.tsx",
         "features/navigation/SitemapPageView.tsx",
         "features/newsletter/UnsubscribeView.tsx",
-        "features/page/PageEditor/LocalizedCollaborativePageBodyEditor.tsx",
+        "features/page/PageEditor/LocalizedPageBodyView.tsx",
         "features/page/PageEditor/PageAccessSettings.tsx",
         "features/page/PageEditor/PageBlockSettingsSurface.tsx",
         "features/page/PageEditor/PageEditor.tsx",
+        "features/page/PageEditor/PageEditorSnapshot.tsx",
         "features/page/PageEditor/PageSectionPreinsertDialog.tsx",
         "features/page/PageEditor/SectionItemView.tsx",
         "features/page/PageEditor/SectionList.tsx",
@@ -13278,6 +13343,7 @@
         "features/editor/toolbars/EditorColorStyleButton.stories.tsx",
         "features/form/FormDashboard/FieldStatsChart.stories.tsx",
         "features/media/ui/AttachmentSurface.stories.tsx",
+        "features/my/LocalBackups.stories.tsx",
         "features/my/McpAndApiAccess.stories.tsx",
         "features/my/ui/MyArtistsTable/MyArtistsTableCellView.stories.tsx",
         "features/page/PageEditor/PageAccessSettings.stories.tsx",
@@ -14160,6 +14226,11 @@
               "name": "size",
               "optional": true,
               "type": "BlockingAlertDialogSize"
+            },
+            {
+              "name": "backdrop",
+              "optional": true,
+              "type": "'dim' | 'obscure'"
             }
           ]
         }
@@ -14176,7 +14247,8 @@
       ],
       "productionConsumers": [
         "features/editor/EditorPermissionRevokedDialog.tsx",
-        "features/editor/EditorSessionExpiredDialog.tsx"
+        "features/editor/EditorSessionExpiredDialog.tsx",
+        "lib/providers/EditorNavigationProvider.tsx"
       ],
       "catalogAdapters": [],
       "tests": ["components/core/Modal/OverlayDialog.test.tsx"],
@@ -14406,6 +14478,7 @@
         "features/admin/program-event/ProgramEventTypeManager.tsx",
         "features/admin/user/AdminUserEditPage.tsx",
         "features/artist/ArtistEditor/ArtistParticipantsDialog.tsx",
+        "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "features/campaign/CampaignDeliveryDialogs.tsx",
         "features/editor/ExternalVideoInsertDialog.tsx",
         "features/editor/MapInsertModal.tsx",
@@ -14513,6 +14586,7 @@
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/program-event/ProgramEventTypeManager.tsx",
         "features/admin/user/AdminUserEditPage.tsx",
+        "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "features/campaign/CampaignDeliveryDialogs.tsx",
         "features/editor/ExternalVideoInsertDialog.tsx",
         "features/editor/components/EditorFileInsertView.tsx",
@@ -14740,6 +14814,11 @@
               "name": "level",
               "optional": true,
               "type": "'info' | 'warning' | 'danger'"
+            },
+            {
+              "name": "backdrop",
+              "optional": true,
+              "type": "'dim' | 'obscure'"
             }
           ]
         }
@@ -14811,7 +14890,7 @@
         "components/core/Modal/confirm-dialogs.on-demand.test.tsx",
         "components/core/Modal/confirm-dialogs.test.tsx"
       ],
-      "stories": ["components/core/Modal/ConfirmModal.stories.tsx"],
+      "stories": ["components/core/Modal/ConfirmModal.stories.tsx", "stories/features/EditorAccessEnded.stories.tsx"],
       "composedJsx": ["loaded.ConfirmDialogStack"]
     },
     {
@@ -16165,6 +16244,7 @@
         "features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "features/metadata/ui/OgGenerationRunProgressView.tsx",
         "features/metadata/ui/UrlSectionView.tsx",
+        "features/my/LocalBackupsView.tsx",
         "features/my/McpOAuthGrantSettings.tsx",
         "features/my/MySeriesPageView.tsx",
         "features/my/MySettingsPageView.tsx",
@@ -17378,7 +17458,10 @@
         }
       ],
       "typeAliasEvidence": [],
-      "productionConsumers": ["features/editor/tiptap/TiptapBlockContainerNodeView.tsx"],
+      "productionConsumers": [
+        "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
+        "features/editor/tiptap/TiptapSnapshot.tsx"
+      ],
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
@@ -18598,6 +18681,7 @@
       ],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "features/my/LocalBackupsView.tsx",
         "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx"
       ],
@@ -18706,6 +18790,7 @@
         "features/admin/artist/ArtistDeleteDialogView.tsx",
         "features/admin/label/LabelRowMenu.tsx",
         "features/auth/ui/AuthCodeChallengeView.tsx",
+        "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "features/changelog/ChangelogPageView.tsx",
         "features/editor/tiptap/TiptapAuthoringControls.tsx",
         "features/form/AdminFormSubmissionsPage.tsx",
@@ -18805,6 +18890,7 @@
         "features/admin/user/auth/UserSsoProvidersSection.tsx",
         "features/artist/ArtistEditor/ArtistDetailEditor.tsx",
         "features/artist/ArtistEditor/ArtistParticipantsDialog.tsx",
+        "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "features/campaign/CampaignAnalyticsPage.tsx",
         "features/campaign/CampaignDeliveryDialogs.tsx",
         "features/campaign/CampaignEditPage.tsx",
@@ -18835,7 +18921,7 @@
         "features/my/ui/PersonalAccessTokenSettings/PersonalAccessTokenSettingsView.tsx",
         "features/my/ui/SettingsForm/SettingsFormView.tsx",
         "features/navigation/SitemapPageView.tsx",
-        "features/page/PageEditor/LocalizedCollaborativePageBodyEditor.tsx",
+        "features/page/PageEditor/LocalizedPageBodyView.tsx",
         "features/page/PageEditor/PageAccessSettings.tsx",
         "features/page/blocks/ListViewShell.tsx",
         "features/page/blocks/author-list/View.tsx",
@@ -19160,6 +19246,7 @@
         "features/auth/ui/AuthCodeChallengeView.tsx",
         "features/auth/ui/LoginStatusView.tsx",
         "features/auth/ui/VerificationFlowView.tsx",
+        "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "features/campaign/CampaignAnalyticsPage.tsx",
         "features/campaign/CampaignDeliveryDialogs.tsx",
         "features/campaign/CampaignScheduleForm.tsx",
@@ -19233,6 +19320,7 @@
         "features/metadata/ui/OgGenerationRunProgressView.tsx",
         "features/metadata/ui/OgImagePreviewView.tsx",
         "features/my/CookieConsentSettings.tsx",
+        "features/my/LocalBackupsView.tsx",
         "features/my/McpOAuthGrantSettings.tsx",
         "features/my/MyArtistsDataTable.tsx",
         "features/my/MyPostsPageView.tsx",
@@ -19252,7 +19340,7 @@
         "features/my/ui/SessionManagement/SessionManagementView.tsx",
         "features/navigation/SitemapPageView.tsx",
         "features/newsletter/UnsubscribeView.tsx",
-        "features/page/PageEditor/LocalizedCollaborativePageBodyEditor.tsx",
+        "features/page/PageEditor/LocalizedPageBodyView.tsx",
         "features/page/PageEditor/PageAccessSettings.tsx",
         "features/page/PageEditor/PageEditor.tsx",
         "features/page/PageEditor/SectionItemView.tsx",
@@ -22384,7 +22472,10 @@
       ],
       "productionConsumers": [],
       "catalogAdapters": [],
-      "tests": ["features/email/AdminEmailAuthoringDetailPages.test.tsx"],
+      "tests": [
+        "features/admin/email-template/EmailTemplateEditPage.configuration.test.tsx",
+        "features/email/AdminEmailAuthoringDetailPages.test.tsx"
+      ],
       "stories": ["stories/pages/EmailEditors.stories.tsx"],
       "composedJsx": [
         "AuthoringExtension",
@@ -30118,7 +30209,57 @@
       "catalogAdapters": [],
       "tests": ["features/editor/EditorHeader/EditorHeader.test.tsx"],
       "stories": [],
-      "composedJsx": ["ConfirmationDialog", "EditorHeaderView"]
+      "composedJsx": ["ConfirmationDialog", "EditorHeaderView", "IconCloudX", "RejectedEditsDialog"]
+    },
+    {
+      "file": "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
+      "owner": "Feature/authoring",
+      "exports": [
+        {
+          "name": "RejectedEditsDialog",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "RejectedEditsDialogProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "opened",
+              "optional": false,
+              "type": "boolean"
+            },
+            {
+              "name": "onClose",
+              "optional": false,
+              "type": "() => void"
+            },
+            {
+              "name": "rejected",
+              "optional": false,
+              "type": "readonly RejectedEditorSave[]"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/authoring/EditorHeader/EditorHeader.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": ["stories/features/RejectedEdits.stories.tsx"],
+      "composedJsx": [
+        "Button",
+        "Code",
+        "ContentModal",
+        "CopyButton",
+        "DialogActions",
+        "DsLayoutInline",
+        "DsLayoutStack",
+        "DsText",
+        "SupportingText"
+      ]
     },
     {
       "file": "features/campaign/CampaignAnalyticsPage.tsx",
@@ -30392,6 +30533,11 @@
           "name": "Props",
           "extends": [],
           "properties": [
+            {
+              "name": "readOnly",
+              "optional": true,
+              "type": "boolean"
+            },
             {
               "name": "commonLabels",
               "optional": false,
@@ -30772,6 +30918,11 @@
               "type": "boolean"
             },
             {
+              "name": "disabled",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
               "name": "onChange",
               "optional": false,
               "type": "(value: DateTimeValue) => void"
@@ -31117,6 +31268,7 @@
         "features/form/AdminFormSubmissionsPage.tsx",
         "features/form/SubmissionDeleteButton.tsx",
         "features/menu/AdminMenusPage.tsx",
+        "features/my/LocalBackupsView.tsx",
         "features/my/McpOAuthGrantSettings.tsx",
         "features/my/ui/PersonalAccessTokenSettings/PersonalAccessTokenSettingsView.tsx",
         "features/place/PlaceEditor.tsx",
@@ -33662,6 +33814,7 @@
       "catalogAdapters": ["stories/shared/EditorMenusPreview.tsx", "stories/shared/EditorRuntimePreview.tsx"],
       "tests": [
         "features/editor/EditorAuthoringMode.test.tsx",
+        "features/editor/tiptap/TiptapEditor-lifetime.test.tsx",
         "features/editor/tiptap/menus/selection-bubble-authority.test.tsx"
       ],
       "stories": ["features/editor/tiptap/TiptapPublicBlockComparison.stories.tsx"],
@@ -33755,6 +33908,24 @@
       "tests": ["features/editor/EditorSessionExpiredDialog.test.tsx"],
       "stories": [],
       "composedJsx": ["BlockingAlertDialog"]
+    },
+    {
+      "file": "features/editor/EditorSnapshotHandoff.tsx",
+      "owner": "Feature/editor",
+      "exports": [
+        {
+          "name": "EditorSnapshotHandoff",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/page/PageEditor/PageEditor.tsx", "features/post/PostEditor/PostEditorBody.tsx"],
+      "catalogAdapters": [],
+      "tests": ["features/editor/EditorSnapshotHandoff.test.tsx"],
+      "stories": ["features/editor/EditorSnapshotHandoff.stories.tsx"],
+      "composedJsx": ["div"]
     },
     {
       "file": "features/editor/ExternalVideoEditorPreview.tsx",
@@ -35955,12 +36126,13 @@
         "features/translation/LocalizedCollaborativeRichTextEditor.tsx"
       ],
       "catalogAdapters": ["stories/shared/EditorRuntimePreview.tsx"],
-      "tests": [],
+      "tests": ["features/editor/tiptap/TiptapEditor-lifetime.test.tsx"],
       "stories": ["features/editor/tiptap/TiptapPublicBlockComparison.stories.tsx"],
       "composedJsx": [
         "CodeBlockSelectionMenu",
         "EditorChrome",
         "EditorContent",
+        "EditorRuntimeOptions.Provider",
         "ExecutableSelectionMenuRegistryProvider",
         "ExternalVideoInsertDialog",
         "IsolatedEditorContent",
@@ -35972,6 +36144,37 @@
         "TiptapMapSelectionBubbleMenu",
         "TiptapMapSelectionMenuRegistryProvider",
         "div"
+      ]
+    },
+    {
+      "file": "features/editor/tiptap/TiptapSnapshot.tsx",
+      "owner": "Feature/editor",
+      "exports": [
+        {
+          "name": "TiptapSnapshot",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "features/page/PageEditor/PageEditorSnapshot.tsx",
+        "features/post/PostEditor/PostEditorBody.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": ["features/editor/tiptap/TiptapSnapshot.test.tsx"],
+      "stories": ["features/editor/EditorSnapshotHandoff.stories.tsx"],
+      "composedJsx": [
+        "Fragment",
+        "GeneratedRichTextBlockView",
+        "ReorderGutter",
+        "br",
+        "col",
+        "colgroup",
+        "div",
+        "table",
+        "tbody"
       ]
     },
     {
@@ -36912,6 +37115,35 @@
       "tests": ["features/editor/tiptap/integration/contextual-menu-router.test.tsx"],
       "stories": [],
       "composedJsx": ["TiptapSelectionBubbleMenu", "TiptapTableMenu"]
+    },
+    {
+      "file": "features/editor/tiptap/live-node-view.tsx",
+      "owner": "Feature/editor",
+      "exports": [
+        {
+          "name": "EditorRuntimeOptions",
+          "kind": "value"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
+        "features/editor/tiptap/TiptapEditor.tsx",
+        "features/editor/tiptap/code/CodeBlockNode.tsx",
+        "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.tsx",
+        "features/editor/tiptap/map/TiptapMapNodeView.tsx",
+        "features/editor/tiptap/math/TiptapMathNodeViews.tsx",
+        "features/editor/tiptap/mermaid/mermaid-extension.tsx",
+        "features/editor/tiptap/p5/p5-extension.tsx",
+        "features/editor/tiptap/shader/ShaderNode.tsx",
+        "features/editor/tiptap/three/ThreeSceneNode.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": []
     },
     {
       "file": "features/editor/tiptap/map/TiptapMapNodeView.tsx",
@@ -38423,7 +38655,10 @@
         "features/release/ReleaseEditor/ReleaseDescriptionEditor.tsx"
       ],
       "catalogAdapters": [],
-      "tests": ["features/editor/tiptap/profiles/CompactTiptapEditor.test.ts"],
+      "tests": [
+        "features/editor/tiptap/profiles/CompactTiptapEditor.test.ts",
+        "features/editor/tiptap/profiles/editor-access-transitions.test.tsx"
+      ],
       "stories": ["features/editor/tiptap/profiles/CompactTiptapEditor.stories.tsx"],
       "composedJsx": ["EditorContent", "IsolatedEditorContent", "div"]
     },
@@ -38664,7 +38899,10 @@
         "features/email/EmailTemplateEditor/EmailTemplateEditor.tsx"
       ],
       "catalogAdapters": [],
-      "tests": ["features/editor/tiptap/profiles/EmailTiptapEditor.test.tsx"],
+      "tests": [
+        "features/editor/tiptap/profiles/EmailTiptapEditor.test.tsx",
+        "features/editor/tiptap/profiles/editor-access-transitions.test.tsx"
+      ],
       "stories": [],
       "composedJsx": [
         "DropdownMenu",
@@ -38759,7 +38997,10 @@
       ],
       "productionConsumers": ["features/policy/LegalPolicyEditor.tsx", "features/policy/PolicyEditor/PolicyEditor.tsx"],
       "catalogAdapters": [],
-      "tests": ["features/editor/tiptap/profiles/PolicyTiptapEditor.test.tsx"],
+      "tests": [
+        "features/editor/tiptap/profiles/PolicyTiptapEditor.test.tsx",
+        "features/editor/tiptap/profiles/editor-access-transitions.test.tsx"
+      ],
       "stories": ["stories/pages/LegalEditorsPage.stories.tsx"],
       "composedJsx": ["EditorAuthoringModeProvider", "TiptapEditor", "div"]
     },
@@ -44109,7 +44350,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": ["app/admin/forms/[id]/(edit)/settings/page.tsx", "features/form/FormEditRoute.tsx"],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/form/FormAccessSurfaces.test.tsx"],
       "stories": ["stories/pages/FormEditorPage.stories.tsx"],
       "composedJsx": [
         "AuthoringExtension",
@@ -44392,6 +44633,24 @@
       "tests": ["features/form/FormTranslationContext.test.tsx"],
       "stories": ["stories/pages/FormEditorPage.stories.tsx"],
       "composedJsx": ["FormTranslationContext.Provider"]
+    },
+    {
+      "file": "features/form/FormTranslationsPanel.tsx",
+      "owner": "Feature/form",
+      "exports": [
+        {
+          "name": "FormTranslationsPanel",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["app/admin/forms/[id]/(edit)/translations/page.tsx"],
+      "catalogAdapters": [],
+      "tests": ["features/form/FormAccessSurfaces.test.tsx"],
+      "stories": [],
+      "composedJsx": ["EntityTranslationsPanel"]
     },
     {
       "file": "features/form/LazyFormEditRoute.tsx",
@@ -46614,7 +46873,17 @@
           "extends": ["extends FileDownloadPolicyTarget"],
           "properties": [
             {
+              "name": "releaseId",
+              "optional": true,
+              "type": "string"
+            },
+            {
               "name": "compact",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "readOnly",
               "optional": true,
               "type": "boolean"
             }
@@ -46656,7 +46925,7 @@
             {
               "name": "savePolicy",
               "optional": false,
-              "type": "( target: FileDownloadPolicyTarget, audience: FileDownloadAudience, audienceSegmentIds: string[], observedPolicy: FileDownloadPolicyObservedState, ) => Promise<FileDownloadActionResult<FileDownloadPolicyModel>>"
+              "type": "( target: FileDownloadPolicyTarget, audience: FileDownloadAudience, audienceSegmentIds: string[], observedPolicy: FileDownloadPolicyObservedState, editorOrigin?: string, ) => Promise<FileDownloadActionResult<FileDownload"
             }
           ]
         },
@@ -46670,7 +46939,17 @@
               "type": "FileDownloadPolicyEditorAdapter"
             },
             {
+              "name": "releaseId",
+              "optional": true,
+              "type": "string"
+            },
+            {
               "name": "compact",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "readOnly",
               "optional": true,
               "type": "boolean"
             },
@@ -46972,10 +47251,12 @@
       "productionConsumers": [
         "app/(general)/events/[idOrSlug]/ProgramEventViewClient.tsx",
         "app/(general)/works/[idOrSlug]/WorkViewClient.tsx",
+        "features/page/PageEditor/PageEditorSnapshot.tsx",
         "features/page/PageView/PageContentView.tsx",
         "features/page/PageView/blocks/DefaultBlockView.tsx",
         "features/page/PageView/blocks/GeneratedFileBlockView.tsx",
         "features/page/blocks/immersive-scene/ViewRuntime.tsx",
+        "features/post/PostEditor/PostEditorBody.tsx",
         "features/post/PostViewContent.tsx"
       ],
       "catalogAdapters": [],
@@ -48231,7 +48512,7 @@
       ],
       "productionConsumers": ["app/admin/menus/page.tsx"],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/menu/AdminMenusPage.access.test.tsx"],
       "stories": ["stories/pages/AdminMenus.stories.tsx"],
       "composedJsx": [
         "AdminMenusPageView",
@@ -49510,6 +49791,100 @@
       "composedJsx": ["Alert", "Button", "DsLayoutStack", "IconCheck", "IconLanguage", "Select", "SupportingText"]
     },
     {
+      "file": "features/my/LocalBackups.tsx",
+      "owner": "Feature/my",
+      "exports": [
+        {
+          "name": "LocalBackups",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/my/MySettingsPageView.tsx"],
+      "catalogAdapters": [],
+      "tests": ["features/my/LocalBackups.test.tsx"],
+      "stories": [],
+      "composedJsx": ["LocalBackupsView"]
+    },
+    {
+      "file": "features/my/LocalBackupsView.tsx",
+      "owner": "Feature/my",
+      "exports": [
+        {
+          "name": "LocalBackupsView",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "LocalBackupsViewProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "entries",
+              "optional": false,
+              "type": "LocalBackup[]"
+            },
+            {
+              "name": "loading",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "unavailable",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "error",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "pendingId",
+              "optional": true,
+              "type": "string | null"
+            },
+            {
+              "name": "onRefresh",
+              "optional": false,
+              "type": "() => void"
+            },
+            {
+              "name": "onOpen",
+              "optional": false,
+              "type": "(entry: LocalBackup) => void"
+            },
+            {
+              "name": "onDiscard",
+              "optional": false,
+              "type": "(entry: LocalBackup) => Promise<void>"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/my/LocalBackups.tsx", "features/my/MySettingsPageView.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": ["features/my/LocalBackups.stories.tsx"],
+      "composedJsx": [
+        "Alert",
+        "Button",
+        "ConfirmationDialog",
+        "EmptyState",
+        "Heading",
+        "LayoutInline",
+        "LayoutStack",
+        "LocaleCode",
+        "SectionCard",
+        "Text"
+      ]
+    },
+    {
       "file": "features/my/McpOAuthGrantSettings.tsx",
       "owner": "Feature/my",
       "exports": [
@@ -50041,6 +50416,11 @@
               "name": "revokeGrant",
               "optional": true,
               "type": "ComponentProps<typeof McpOAuthGrantSettings>['revokeAction']"
+            },
+            {
+              "name": "localBackups",
+              "optional": true,
+              "type": "LocalBackupsViewProps"
             }
           ]
         }
@@ -50057,6 +50437,8 @@
         "DsSectionCard",
         "DsText",
         "LanguagePreferenceSettings",
+        "LocalBackups",
+        "LocalBackupsView",
         "McpIntegrationSettingsView",
         "McpOAuthGrantSettings",
         "PersonalAccessTokenSettings",
@@ -51974,39 +52356,34 @@
         }
       ],
       "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "LocalizedCollaborativePageBodyEditorProps",
-          "extends": [],
-          "properties": [
-            {
-              "name": "fallbackText",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "editable",
-              "optional": true,
-              "type": "boolean"
-            }
-          ]
-        }
-      ],
+      "propsEvidence": [],
       "typeAliasEvidence": [],
       "productionConsumers": ["features/page/PageEditor/PageEditor.tsx"],
       "catalogAdapters": [],
       "tests": ["features/page/PageEditor/LocalizedCollaborativePageBodyEditor.test.tsx"],
       "stories": [],
-      "composedJsx": [
-        "CollaborativePageSectionEditor",
-        "DsLayoutStack",
-        "DsText",
-        "LocalizedRichTextFragmentEditor",
-        "MapView",
-        "SectionLocalePropFields",
-        "SupportingText",
-        "div"
-      ]
+      "composedJsx": ["CollaborativeRichText", "LocalizedPageBodyView", "LocalizedRichTextFragmentEditor"]
+    },
+    {
+      "file": "features/page/PageEditor/LocalizedPageBodyView.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "LocalizedPageBodyView",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "features/page/PageEditor/LocalizedCollaborativePageBodyEditor.tsx",
+        "features/page/PageEditor/PageEditorSnapshot.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["LayoutStack", "MapView", "PageSectionLocalePropFields", "SupportingText", "Text", "div"]
     },
     {
       "file": "features/page/PageEditor/PageAccessSettings.tsx",
@@ -52154,6 +52531,11 @@
           "extends": [],
           "properties": [
             {
+              "name": "initialSnapshot",
+              "optional": true,
+              "type": "EditorSnapshot"
+            },
+            {
               "name": "pageId",
               "optional": false,
               "type": "string"
@@ -52298,6 +52680,7 @@
         "EditorActiveLocaleControl",
         "EditorHeader",
         "EditorRuntimeProvider",
+        "EditorSnapshotHandoff",
         "EntityTranslationsPanel",
         "IconHistory",
         "LocalizedCollaborativePageBodyEditor",
@@ -52308,6 +52691,7 @@
         "PageAccessSettings",
         "PageEditorInterruptionDialogs",
         "PageEditorProvider",
+        "PageEditorSnapshot",
         "PageEditorView",
         "PageFeaturedImageUploader",
         "QueryErrorAlert",
@@ -52551,6 +52935,38 @@
       "tests": ["features/page/PageEditor/PageEditorInterruptionDialogs.test.tsx"],
       "stories": [],
       "composedJsx": ["EditorPermissionRevokedDialog", "EditorSessionExpiredDialog"]
+    },
+    {
+      "file": "features/page/PageEditor/PageEditorSnapshot.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "PageEditorSnapshot",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "SnapshotSection",
+          "type": "NonNullable<EditorSnapshot['sections']>[number]"
+        }
+      ],
+      "productionConsumers": ["features/page/PageEditor/PageEditor.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": [
+        "CanvasPreview",
+        "ColumnsEditorView",
+        "ContentBlockMediaRuntimeProvider",
+        "LayoutStack",
+        "LocalizedPageBodyView",
+        "SectionContent",
+        "SectionItemView",
+        "TiptapSnapshot"
+      ]
     },
     {
       "file": "features/page/PageEditor/PageFeaturedImageUploader.tsx",
@@ -52803,6 +53219,7 @@
       ],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "features/page/PageEditor/PageEditorSnapshot.tsx",
         "features/page/PageEditor/SectionItem.tsx",
         "features/page/PageEditor/editors/ColumnsEditor.tsx"
       ],
@@ -53016,7 +53433,10 @@
         }
       ],
       "typeAliasEvidence": [],
-      "productionConsumers": ["features/page/blocks/columns/Editor.tsx"],
+      "productionConsumers": [
+        "features/page/PageEditor/PageEditorSnapshot.tsx",
+        "features/page/blocks/columns/Editor.tsx"
+      ],
       "catalogAdapters": [],
       "tests": ["features/page/PageEditor/editors/ColumnsEditor.test.tsx"],
       "stories": ["features/page/PageEditor/editors/ColumnsEditor.stories.tsx"],
@@ -53670,6 +54090,7 @@
         "app/(general)/labels/[idOrSlug]/LabelPublicView.tsx",
         "app/(general)/releases/[idOrSlug]/ReleasePublicView.tsx",
         "app/(general)/works/[idOrSlug]/WorkViewClient.tsx",
+        "features/editor/tiptap/TiptapSnapshot.tsx",
         "features/page/PageView/GeneratedPageRenderer.tsx",
         "features/policy/LegalRichTextContent.tsx",
         "features/post/PostViewContent.tsx"
@@ -57596,7 +58017,7 @@
       "propsEvidence": [],
       "typeAliasEvidence": [],
       "productionConsumers": [
-        "features/page/PageEditor/LocalizedCollaborativePageBodyEditor.tsx",
+        "features/page/PageEditor/LocalizedPageBodyView.tsx",
         "features/page/PageView/BlockRenderer.tsx",
         "features/page/PageView/GeneratedPageRenderer.tsx",
         "features/page/PageView/blocks/DefaultMapBlockView.tsx",
@@ -60804,6 +61225,11 @@
               "type": "LegalOgEntityType"
             },
             {
+              "name": "canEdit",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
               "name": "locale",
               "optional": false,
               "type": "string"
@@ -62091,6 +62517,11 @@
           "extends": [],
           "properties": [
             {
+              "name": "initialSnapshot",
+              "optional": true,
+              "type": "EditorSnapshot"
+            },
+            {
               "name": "postId",
               "optional": false,
               "type": "string"
@@ -62104,6 +62535,11 @@
               "name": "initialTitle",
               "optional": false,
               "type": "string"
+            },
+            {
+              "name": "initialSourceLocale",
+              "optional": true,
+              "type": "string | null"
             },
             {
               "name": "initialSummary",
@@ -62313,6 +62749,16 @@
           "extends": [],
           "properties": [
             {
+              "name": "snapshot",
+              "optional": true,
+              "type": "EditorSnapshot"
+            },
+            {
+              "name": "roomReady",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
               "name": "bodyMode",
               "optional": false,
               "type": "PostEditorBodyMode"
@@ -62387,13 +62833,16 @@
       "stories": [],
       "composedJsx": [
         "ActiveEditLocaleContentPreview",
+        "ContentBlockMediaRuntimeProvider",
         "DsLayoutInset",
         "DsLayoutStack",
         "DsText",
         "EditorLoading",
+        "EditorSnapshotHandoff",
         "LocalizedRichTextFragmentEditor",
         "PageLoader",
         "ScopedLocaleBoundary",
+        "TiptapSnapshot",
         "div"
       ]
     },
@@ -62658,6 +63107,11 @@
             },
             {
               "name": "loading",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "readOnly",
               "optional": true,
               "type": "boolean"
             }
@@ -64831,7 +65285,7 @@
             {
               "name": "onMutationStart",
               "optional": true,
-              "type": "() => void"
+              "type": "() => string | void"
             },
             {
               "name": "onMutationSettled",
@@ -64982,7 +65436,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": ["features/release/ReleaseEditor/ReleaseEditor.tsx"],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/release/ReleaseEditor/ReleaseArtworkUploader.test.tsx"],
       "stories": [],
       "composedJsx": ["ReleaseArtworkView"]
     },
@@ -65108,7 +65562,7 @@
             {
               "name": "onMutationStart",
               "optional": true,
-              "type": "() => void"
+              "type": "() => string | void"
             },
             {
               "name": "onMutationSettled",
@@ -65399,6 +65853,10 @@
       ],
       "typeAliasEvidence": [
         {
+          "name": "ReleaseEditorConfiguration",
+          "type": "ReleaseFields & { slug: string | null; status: ReleaseStatus }"
+        },
+        {
           "name": "ReleaseRelationField",
           "type": "'artists' | 'labels' | 'categories' | 'genres' | 'styles' | 'formats' | 'credits' | 'tracks'"
         },
@@ -65409,7 +65867,7 @@
       ],
       "productionConsumers": [],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/release/ReleaseEditor/ReleaseEditor.configuration.test.tsx"],
       "stories": ["stories/pages/ReleaseEditorPage.stories.tsx"],
       "composedJsx": [
         "ActiveEditLocaleContentPreview",
@@ -65428,6 +65886,7 @@
         "ReleaseArtworkUploader",
         "ReleaseCreditsSection",
         "ReleaseDescriptionEditor",
+        "ReleaseEditorAccessProvider",
         "ReleaseEditorView",
         "ReleaseLabelsSection",
         "ReleaseTagsSection",
@@ -65440,6 +65899,35 @@
         "UrlSection",
         "strong"
       ]
+    },
+    {
+      "file": "features/release/ReleaseEditor/ReleaseEditorAccessContext.tsx",
+      "owner": "Feature/release",
+      "exports": [
+        {
+          "name": "ReleaseEditorAccessProvider",
+          "kind": "value"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "features/release/ReleaseEditor/ReleaseArtistsSection.tsx",
+        "features/release/ReleaseEditor/ReleaseArtistsSectionView.tsx",
+        "features/release/ReleaseEditor/ReleaseArtworkUploader.tsx",
+        "features/release/ReleaseEditor/ReleaseArtworkView.tsx",
+        "features/release/ReleaseEditor/ReleaseEditor.tsx",
+        "features/release/ReleaseEditor/ReleaseLabelsSection.tsx",
+        "features/release/ReleaseEditor/ReleaseTagsSection.tsx",
+        "features/release/ReleaseEditor/ReleaseTrackCreateView.tsx",
+        "features/release/ReleaseEditor/ReleaseTracksSection.tsx",
+        "features/release/ReleaseEditor/TrackCreditsEditorSection.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": ["features/release/ReleaseEditor/ReleaseTracksSection.test.tsx"],
+      "stories": [],
+      "composedJsx": []
     },
     {
       "file": "features/release/ReleaseEditor/ReleaseLabelsSection.tsx",
@@ -65483,7 +65971,7 @@
             {
               "name": "onMutationStart",
               "optional": true,
-              "type": "() => void"
+              "type": "() => string | void"
             },
             {
               "name": "onMutationSettled",
@@ -65621,7 +66109,7 @@
             {
               "name": "onCategoriesMutationStart",
               "optional": true,
-              "type": "() => void"
+              "type": "() => string | void"
             },
             {
               "name": "onCategoriesMutationSettled",
@@ -65631,7 +66119,7 @@
             {
               "name": "onGenresMutationStart",
               "optional": true,
-              "type": "() => void"
+              "type": "() => string | void"
             },
             {
               "name": "onGenresMutationSettled",
@@ -65641,7 +66129,7 @@
             {
               "name": "onStylesMutationStart",
               "optional": true,
-              "type": "() => void"
+              "type": "() => string | void"
             },
             {
               "name": "onStylesMutationSettled",
@@ -65651,7 +66139,7 @@
             {
               "name": "onFormatsMutationStart",
               "optional": true,
-              "type": "() => void"
+              "type": "() => string | void"
             },
             {
               "name": "onFormatsMutationSettled",
@@ -65789,7 +66277,7 @@
             {
               "name": "onMutationStart",
               "optional": true,
-              "type": "() => void"
+              "type": "() => string | void"
             },
             {
               "name": "onMutationSettled",
@@ -65963,7 +66451,7 @@
             {
               "name": "onMutationStart",
               "optional": true,
-              "type": "() => void"
+              "type": "() => string | void"
             },
             {
               "name": "onMutationSettled",
@@ -66086,7 +66574,7 @@
             {
               "name": "onMutationStart",
               "optional": true,
-              "type": "() => void"
+              "type": "() => string | void"
             },
             {
               "name": "onMutationSettled",
@@ -66142,6 +66630,11 @@
               "name": "trackId",
               "optional": false,
               "type": "string"
+            },
+            {
+              "name": "disabled",
+              "optional": true,
+              "type": "boolean"
             },
             {
               "name": "audioOriginalFileId",
@@ -67471,6 +67964,31 @@
               "name": "toggleColorScheme",
               "optional": false,
               "type": "string"
+            },
+            {
+              "name": "signOutUnsavedTitle",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "signOutUnsavedMessage",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "signOutUnsavedConfirm",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "cancel",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "close",
+              "optional": false,
+              "type": "string"
             }
           ]
         }
@@ -68367,6 +68885,11 @@
           "name": "SiteOgBackgroundUploaderProps",
           "extends": [],
           "properties": [
+            {
+              "name": "canEdit",
+              "optional": true,
+              "type": "boolean"
+            },
             {
               "name": "type",
               "optional": false,
@@ -69537,6 +70060,11 @@
               "name": "canManage",
               "optional": true,
               "type": "boolean"
+            },
+            {
+              "name": "canEdit",
+              "optional": true,
+              "type": "boolean"
             }
           ]
         }
@@ -69603,11 +70131,11 @@
         }
       ],
       "productionConsumers": [
-        "app/admin/forms/[id]/(edit)/translations/page.tsx",
         "features/admin/email-template/EmailTemplateEditPage.tsx",
         "features/artist/ArtistEditor/ArtistDetailEditor.tsx",
         "features/campaign/CampaignEditPage.tsx",
         "features/form/FormEditRoute.tsx",
+        "features/form/FormTranslationsPanel.tsx",
         "features/label/AdminLabelDetailClient.tsx",
         "features/menu/AdminMenusPage.tsx",
         "features/page/PageEditor/PageEditor.tsx",
@@ -69871,7 +70399,7 @@
           "type": "(typeof PAGE_LOCALE_SECTION_PROP_KEYS)[number]"
         }
       ],
-      "productionConsumers": ["features/page/PageEditor/LocalizedCollaborativePageBodyEditor.tsx"],
+      "productionConsumers": ["features/page/PageEditor/LocalizedPageBodyView.tsx"],
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
@@ -72331,7 +72859,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": ["features/work/WorkEditor/WorkEditor.tsx"],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/work/WorkEditor/WorkCreditsSection.test.tsx"],
       "stories": [],
       "composedJsx": [
         "Avatar",
@@ -73898,6 +74426,7 @@
         "features/admin/cms-page/PageRowMenu.test.tsx",
         "features/admin/email-layout/EmailLayoutTargetEditor.test.tsx",
         "features/admin/email-layout/action-error-message.test.ts",
+        "features/admin/email-template/EmailTemplateEditPage.configuration.test.tsx",
         "features/admin/email-template/delete-error-message.test.ts",
         "features/admin/email-template/email-template-variable-description.test.ts",
         "features/admin/modal-context.test.tsx",
@@ -74100,13 +74629,15 @@
         "features/authoring/AuthoringExtensionsContext.tsx",
         "features/authoring/DocumentEditorPanels.tsx",
         "features/authoring/EditorHeader/EditorHeader.tsx",
+        "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "features/authoring/EditorHeader/index.ts",
         "features/authoring/EditorHeader/status-options.ts"
       ],
       "components": [
         "features/authoring/AuthoringExtensionsContext.tsx",
         "features/authoring/DocumentEditorPanels.tsx",
-        "features/authoring/EditorHeader/EditorHeader.tsx"
+        "features/authoring/EditorHeader/EditorHeader.tsx",
+        "features/authoring/EditorHeader/RejectedEditsDialog.tsx"
       ],
       "stories": [],
       "tests": [
@@ -74367,6 +74898,7 @@
         "features/editor/EditorHeader/index.ts",
         "features/editor/EditorPermissionRevokedDialog.tsx",
         "features/editor/EditorSessionExpiredDialog.tsx",
+        "features/editor/EditorSnapshotHandoff.tsx",
         "features/editor/ExternalVideoEditorPreview.tsx",
         "features/editor/ExternalVideoInsertDialog.tsx",
         "features/editor/MapInsertModal.tsx",
@@ -74393,6 +74925,7 @@
         "features/editor/contract/localized-rich-text-story-fixtures.ts",
         "features/editor/contract/localized-rich-text-text.ts",
         "features/editor/contract/localized-rich-text.ts",
+        "features/editor/editor-snapshot.ts",
         "features/editor/editorInterruptionSignal.ts",
         "features/editor/extensions/KeyboardShortcutsExtension.ts",
         "features/editor/extensions/map/MapBlock.tsx",
@@ -74407,7 +74940,6 @@
         "features/editor/hooks/useEditorMediaRuntimeBinding.ts",
         "features/editor/hooks/useEntityMediaSurface.ts",
         "features/editor/hooks/useMediaBlockDropTarget.ts",
-        "features/editor/hooks/useNeutralBlockAuthoringMode.ts",
         "features/editor/hooks/useRichTextBlockRoomEditor.ts",
         "features/editor/hooks/useStableSuggestionMenuWidth.ts",
         "features/editor/lib/block-insert.ts",
@@ -74428,15 +74960,18 @@
         "features/editor/tiptap/TiptapEditor.tsx",
         "features/editor/tiptap/TiptapFileBlockNodeView.tsx",
         "features/editor/tiptap/TiptapPlayground.story-fixtures.ts",
+        "features/editor/tiptap/TiptapSnapshot.tsx",
         "features/editor/tiptap/ai/TiptapAIAssistant.tsx",
         "features/editor/tiptap/ai/TiptapAIController.tsx",
         "features/editor/tiptap/ai/index.ts",
         "features/editor/tiptap/ai/tiptap-ai.ts",
         "features/editor/tiptap/block-commands.ts",
+        "features/editor/tiptap/block-room-payload-projection.ts",
         "features/editor/tiptap/block-room-presence-types.ts",
         "features/editor/tiptap/block-room-presence.ts",
         "features/editor/tiptap/block-room-prosemirror-bridge.ts",
         "features/editor/tiptap/block-room-prosemirror-registry.ts",
+        "features/editor/tiptap/block-room-text-positions.ts",
         "features/editor/tiptap/block-room-tiptap-codec.ts",
         "features/editor/tiptap/block-room-tiptap-controller.ts",
         "features/editor/tiptap/block-room-tiptap-diff.ts",
@@ -74482,9 +75017,12 @@
         "features/editor/tiptap/integration/file-block-workflow.ts",
         "features/editor/tiptap/integration/map-insert-workflow.ts",
         "features/editor/tiptap/integration/slash-workflows.ts",
+        "features/editor/tiptap/live-node-view.tsx",
+        "features/editor/tiptap/live-translation-structure-lock.ts",
         "features/editor/tiptap/map/TiptapMapNodeView.story-fixtures.ts",
         "features/editor/tiptap/map/TiptapMapNodeView.tsx",
         "features/editor/tiptap/map/index.ts",
+        "features/editor/tiptap/markdown-paste.ts",
         "features/editor/tiptap/math/TiptapMathNodeViews.tsx",
         "features/editor/tiptap/math/index.ts",
         "features/editor/tiptap/math/math-clipboard.ts",
@@ -74537,7 +75075,6 @@
         "features/editor/tiptap/profiles/EmailTiptapEditor.tsx",
         "features/editor/tiptap/profiles/PolicyTiptapEditor.tsx",
         "features/editor/tiptap/public-block-comparison-fixtures.ts",
-        "features/editor/tiptap/server-wire-schema.ts",
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
         "features/editor/tiptap/shader/ShaderPublicPreview.tsx",
@@ -74559,6 +75096,7 @@
         "features/editor/tiptap/table/table-commands.ts",
         "features/editor/tiptap/table/table-constants.ts",
         "features/editor/tiptap/table/table-extensions.tsx",
+        "features/editor/tiptap/table/table-presentation.ts",
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/editor/tiptap/three/index.ts",
         "features/editor/tiptap/three/three-preview-runtime.ts",
@@ -74581,6 +75119,7 @@
         "features/editor/ui/EditorMediaBlockShell.tsx",
         "features/editor/ui/FileBlockMetadataFields.tsx",
         "features/editor/ui/preventNativeBlockDrag.ts",
+        "features/editor/useEditorAccessLevel.ts",
         "features/editor/useEditorNavigation.ts",
         "features/editor/useEditorPermissionRevocation.ts"
       ],
@@ -74589,6 +75128,7 @@
         "features/editor/EditorAuthoringMode.tsx",
         "features/editor/EditorPermissionRevokedDialog.tsx",
         "features/editor/EditorSessionExpiredDialog.tsx",
+        "features/editor/EditorSnapshotHandoff.tsx",
         "features/editor/ExternalVideoEditorPreview.tsx",
         "features/editor/ExternalVideoInsertDialog.tsx",
         "features/editor/MapInsertModal.tsx",
@@ -74612,6 +75152,7 @@
         "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
         "features/editor/tiptap/TiptapBlockMenu.tsx",
         "features/editor/tiptap/TiptapEditor.tsx",
+        "features/editor/tiptap/TiptapSnapshot.tsx",
         "features/editor/tiptap/ai/TiptapAIAssistant.tsx",
         "features/editor/tiptap/ai/TiptapAIController.tsx",
         "features/editor/tiptap/code-editor/MonacoSourceEditor.tsx",
@@ -74622,6 +75163,7 @@
         "features/editor/tiptap/emoji/TiptapEmojiPicker.tsx",
         "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.tsx",
         "features/editor/tiptap/integration/contextual-menu-router.tsx",
+        "features/editor/tiptap/live-node-view.tsx",
         "features/editor/tiptap/map/TiptapMapNodeView.tsx",
         "features/editor/tiptap/math/TiptapMathNodeViews.tsx",
         "features/editor/tiptap/menus/SelectionBubbleMenu.tsx",
@@ -74661,6 +75203,7 @@
         "features/editor/ui/FileBlockMetadataFields.tsx"
       ],
       "stories": [
+        "features/editor/EditorSnapshotHandoff.stories.tsx",
         "features/editor/components/EditorFileInsert.stories.tsx",
         "features/editor/components/EditorFileLibraryPickerView.stories.tsx",
         "features/editor/tiptap/ExecutableRuntime.stories.tsx",
@@ -74677,7 +75220,9 @@
         "features/editor/EditorHeader/EditorHeader.test.tsx",
         "features/editor/EditorPermissionRevokedDialog.test.tsx",
         "features/editor/EditorSessionExpiredDialog.test.tsx",
+        "features/editor/EditorSnapshotHandoff.test.tsx",
         "features/editor/ExternalVideoEditorPreview.test.tsx",
+        "features/editor/access-query-invalidation.test.tsx",
         "features/editor/artist-label-peer-metadata.test.tsx",
         "features/editor/blocks/FileBlock/FileBlockView.interaction.test.tsx",
         "features/editor/blocks/FileBlock/FileBlockView.test.ts",
@@ -74713,7 +75258,9 @@
         "features/editor/slashMenuItems.test.ts",
         "features/editor/tiptap/TiptapAuthoringControls.test.tsx",
         "features/editor/tiptap/TiptapBlockContainerNodeView.test.tsx",
+        "features/editor/tiptap/TiptapEditor-lifetime.test.tsx",
         "features/editor/tiptap/TiptapFileBlockNodeView.test.tsx",
+        "features/editor/tiptap/TiptapSnapshot.test.tsx",
         "features/editor/tiptap/ai/TiptapAIAssistant.test.tsx",
         "features/editor/tiptap/ai/tiptap-ai.test.ts",
         "features/editor/tiptap/block-commands.test.ts",
@@ -74723,6 +75270,7 @@
         "features/editor/tiptap/block-room-input-performance.test.ts",
         "features/editor/tiptap/block-room-presence.test.ts",
         "features/editor/tiptap/block-room-prosemirror-bridge.test.ts",
+        "features/editor/tiptap/block-room-text-positions.test.ts",
         "features/editor/tiptap/block-room-tiptap-codec.test.ts",
         "features/editor/tiptap/block-room-tiptap-controller.test.ts",
         "features/editor/tiptap/block-room-tiptap-mutation-writer.test.ts",
@@ -74757,6 +75305,7 @@
         "features/editor/tiptap/integration/slash-workflows.test.ts",
         "features/editor/tiptap/map/TiptapMapNodeView.story-fixtures.test.ts",
         "features/editor/tiptap/map/TiptapMapNodeView.test.tsx",
+        "features/editor/tiptap/markdown-paste.test.ts",
         "features/editor/tiptap/math/math-render-runtime.test.tsx",
         "features/editor/tiptap/math/math-runtime.test.tsx",
         "features/editor/tiptap/menus/SelectionBubbleMenu.test.tsx",
@@ -74778,6 +75327,7 @@
         "features/editor/tiptap/profiles/ControlledTiptapEditor.test.tsx",
         "features/editor/tiptap/profiles/EmailTiptapEditor.test.tsx",
         "features/editor/tiptap/profiles/PolicyTiptapEditor.test.tsx",
+        "features/editor/tiptap/profiles/editor-access-transitions.test.tsx",
         "features/editor/tiptap/public-block-comparison-fixtures.test.ts",
         "features/editor/tiptap/shader/ShaderNode.test.tsx",
         "features/editor/tiptap/shader/shader-editor-api.test.ts",
@@ -74803,6 +75353,7 @@
         "features/editor/toolbars/color-style-utils.test.ts",
         "features/editor/ui/EditorMediaBlockShell.test.tsx",
         "features/editor/ui/FileBlockMetadataFields.test.tsx",
+        "features/editor/useEditorAccessLevel.test.tsx",
         "features/editor/useEditorNavigation.test.tsx",
         "features/editor/useEditorPermissionRevocation.test.tsx"
       ],
@@ -74924,6 +75475,7 @@
         "features/form/FormSubmissionState.tsx",
         "features/form/FormSuccessPageView.tsx",
         "features/form/FormTranslationContext.tsx",
+        "features/form/FormTranslationsPanel.tsx",
         "features/form/LazyFormEditRoute.tsx",
         "features/form/PhoneInput/PhoneInput.tsx",
         "features/form/PhoneInput/index.ts",
@@ -74971,6 +75523,7 @@
         "features/form/FormSubmissionState.tsx",
         "features/form/FormSuccessPageView.tsx",
         "features/form/FormTranslationContext.tsx",
+        "features/form/FormTranslationsPanel.tsx",
         "features/form/LazyFormEditRoute.tsx",
         "features/form/PhoneInput/PhoneInput.tsx",
         "features/form/PublicFormView.tsx",
@@ -74984,6 +75537,7 @@
       "tests": [
         "features/form/AdminFormLayoutClient.test.tsx",
         "features/form/AdminFormSubmissionsPage.test.tsx",
+        "features/form/FormAccessSurfaces.test.tsx",
         "features/form/FormBuilder/ConditionEditor.test.tsx",
         "features/form/FormBuilder/FormBuilder.test.tsx",
         "features/form/FormDashboard/FieldStatsChart.test.tsx",
@@ -75003,6 +75557,7 @@
       "directlyImportingRoutes": [
         "/admin/forms/[id]/builder",
         "/admin/forms/[id]/settings",
+        "/admin/forms/[id]/translations",
         "/admin/forms/[id]/submissions/[submissionId]",
         "/admin/forms/[id]/submissions",
         "/forms/[slug]/dashboard",
@@ -75272,6 +75827,7 @@
       ],
       "stories": [],
       "tests": [
+        "features/menu/AdminMenusPage.access.test.tsx",
         "features/menu/MenuItemsEditor.test.tsx",
         "features/menu/query-invalidation.test.ts",
         "features/menu/useMenuCollaboration.test.tsx"
@@ -75355,6 +75911,8 @@
       "sourceFiles": [
         "features/my/CookieConsentSettings.tsx",
         "features/my/LanguagePreferenceSettings.tsx",
+        "features/my/LocalBackups.tsx",
+        "features/my/LocalBackupsView.tsx",
         "features/my/McpOAuthGrantSettings.tsx",
         "features/my/MyArtistsDataTable.tsx",
         "features/my/MyArtistsTable.tsx",
@@ -75393,6 +75951,8 @@
       "components": [
         "features/my/CookieConsentSettings.tsx",
         "features/my/LanguagePreferenceSettings.tsx",
+        "features/my/LocalBackups.tsx",
+        "features/my/LocalBackupsView.tsx",
         "features/my/McpOAuthGrantSettings.tsx",
         "features/my/MyArtistsDataTable.tsx",
         "features/my/MyArtistsTable.tsx",
@@ -75419,6 +75979,7 @@
       "stories": [
         "features/my/AccountEmailSettingsView.stories.tsx",
         "features/my/ConnectedSocialAccountsView.stories.tsx",
+        "features/my/LocalBackups.stories.tsx",
         "features/my/McpAndApiAccess.stories.tsx",
         "features/my/SessionManagementView.stories.tsx",
         "features/my/ui/MyArtistsTable/MyArtistsTableCellView.stories.tsx",
@@ -75428,6 +75989,7 @@
       "tests": [
         "features/my/CookieConsentSettings.test.tsx",
         "features/my/LanguagePreferenceSettings.test.tsx",
+        "features/my/LocalBackups.test.tsx",
         "features/my/McpOAuthGrantSettings.test.tsx",
         "features/my/MyArtistsDataTable.test.tsx",
         "features/my/MyArtistsTable.test.tsx",
@@ -75480,11 +76042,13 @@
       "sourceFiles": [
         "features/page/PageEditor/LazyPageEditor.tsx",
         "features/page/PageEditor/LocalizedCollaborativePageBodyEditor.tsx",
+        "features/page/PageEditor/LocalizedPageBodyView.tsx",
         "features/page/PageEditor/PageAccessSettings.tsx",
         "features/page/PageEditor/PageBlockSettingsSurface.tsx",
         "features/page/PageEditor/PageEditor.tsx",
         "features/page/PageEditor/PageEditorContext.tsx",
         "features/page/PageEditor/PageEditorInterruptionDialogs.tsx",
+        "features/page/PageEditor/PageEditorSnapshot.tsx",
         "features/page/PageEditor/PageFeaturedImageUploader.tsx",
         "features/page/PageEditor/PageSectionPreinsertDialog.tsx",
         "features/page/PageEditor/SectionContent.tsx",
@@ -75718,11 +76282,13 @@
       "components": [
         "features/page/PageEditor/LazyPageEditor.tsx",
         "features/page/PageEditor/LocalizedCollaborativePageBodyEditor.tsx",
+        "features/page/PageEditor/LocalizedPageBodyView.tsx",
         "features/page/PageEditor/PageAccessSettings.tsx",
         "features/page/PageEditor/PageBlockSettingsSurface.tsx",
         "features/page/PageEditor/PageEditor.tsx",
         "features/page/PageEditor/PageEditorContext.tsx",
         "features/page/PageEditor/PageEditorInterruptionDialogs.tsx",
+        "features/page/PageEditor/PageEditorSnapshot.tsx",
         "features/page/PageEditor/PageFeaturedImageUploader.tsx",
         "features/page/PageEditor/PageSectionPreinsertDialog.tsx",
         "features/page/PageEditor/SectionContent.tsx",
@@ -76159,6 +76725,7 @@
         "features/post/PostEditor/SeriesSelector.test.tsx",
         "features/post/PostEditor/body-mode.test.ts",
         "features/post/PostEditor/collaboration-mode.test.ts",
+        "features/post/PostEditor/lifecycle-origins.test.tsx",
         "features/post/PostEditor/post-lifecycle-policy.test.ts",
         "features/post/PostEditor/post-permission-revocation.test.ts",
         "features/post/PostEditor/post-schedule.test.ts",
@@ -76236,6 +76803,7 @@
         "features/release/ReleaseEditor/ReleaseCreditsSection.tsx",
         "features/release/ReleaseEditor/ReleaseDescriptionEditor.tsx",
         "features/release/ReleaseEditor/ReleaseEditor.tsx",
+        "features/release/ReleaseEditor/ReleaseEditorAccessContext.tsx",
         "features/release/ReleaseEditor/ReleaseLabelsSection.tsx",
         "features/release/ReleaseEditor/ReleaseTagsSection.tsx",
         "features/release/ReleaseEditor/ReleaseTrackCreateView.tsx",
@@ -76258,6 +76826,7 @@
         "features/release/ReleaseEditor/ReleaseCreditsSection.tsx",
         "features/release/ReleaseEditor/ReleaseDescriptionEditor.tsx",
         "features/release/ReleaseEditor/ReleaseEditor.tsx",
+        "features/release/ReleaseEditor/ReleaseEditorAccessContext.tsx",
         "features/release/ReleaseEditor/ReleaseLabelsSection.tsx",
         "features/release/ReleaseEditor/ReleaseTagsSection.tsx",
         "features/release/ReleaseEditor/ReleaseTrackCreateView.tsx",
@@ -76268,7 +76837,9 @@
       "stories": [],
       "tests": [
         "features/release/ReleaseEditor/ReleaseArtistsSection.test.tsx",
+        "features/release/ReleaseEditor/ReleaseArtworkUploader.test.tsx",
         "features/release/ReleaseEditor/ReleaseCreditsSection.test.tsx",
+        "features/release/ReleaseEditor/ReleaseEditor.configuration.test.tsx",
         "features/release/ReleaseEditor/ReleaseTracksSection.test.tsx",
         "features/release/ReleaseEditor/TrackCreditsEditorSection.test.tsx",
         "features/release/ReleaseEditor/track-credit-mutation.test.ts",
@@ -76567,7 +77138,7 @@
         "features/translation/useTranslationActionFocus.test.tsx",
         "features/translation/useTranslationLifecycleSubscription.test.tsx"
       ],
-      "directlyImportingRoutes": ["/series/[idOrSlug]", "/admin/forms/[id]/translations"]
+      "directlyImportingRoutes": ["/series/[idOrSlug]"]
     },
     {
       "domain": "upload",
@@ -76700,6 +77271,7 @@
       ],
       "stories": [],
       "tests": [
+        "features/work/WorkEditor/WorkCreditsSection.test.tsx",
         "features/work/WorkEditor/WorkEditor.navigation.test.tsx",
         "features/work/WorkEditor/WorkFeaturedImageUploader.test.tsx",
         "features/work/WorkEditor/WorkMetaForm.test.tsx",
@@ -77533,6 +78105,36 @@
           "name": "PhoneActions",
           "args": "{ ...EditableWithCollaboration.args, labels: { ...labels, collabButton: 'Draft · Collaborative editing' }, onDelete: () => {}, }",
           "preview": "http://localhost:6010/?path=/story/core-layout-editorheader--phone-actions"
+        },
+        {
+          "name": "Saved",
+          "args": "{ saveState: 'saved', labels: { ...labels, syncStatus: 'Saved' } }",
+          "preview": "http://localhost:6010/?path=/story/core-layout-editorheader--saved"
+        },
+        {
+          "name": "Saving",
+          "args": "{ saveState: 'saving', labels: { ...labels, syncStatus: 'Saving…' } }",
+          "preview": "http://localhost:6010/?path=/story/core-layout-editorheader--saving"
+        },
+        {
+          "name": "Offline",
+          "args": "{ saveState: 'offline', labels: { ...labels, syncStatus: 'Offline · edits kept on this device' } }",
+          "preview": "http://localhost:6010/?path=/story/core-layout-editorheader--offline"
+        },
+        {
+          "name": "Error",
+          "args": "{ saveState: 'error', labels: { ...labels, syncStatus: 'Save failed · retrying…' } }",
+          "preview": "http://localhost:6010/?path=/story/core-layout-editorheader--error"
+        },
+        {
+          "name": "Rejected",
+          "args": "{ saveState: 'rejected', labels: { ...labels, syncStatus: \"Some edits couldn't be saved\" } }",
+          "preview": "http://localhost:6010/?path=/story/core-layout-editorheader--rejected"
+        },
+        {
+          "name": "Reload",
+          "args": "{ saveState: 'reload', labels: { ...labels, syncStatus: 'Reconnecting · restoring edits…' } }",
+          "preview": "http://localhost:6010/?path=/story/core-layout-editorheader--reload"
         }
       ],
       "importedSources": ["components/core/Button/index.ts", "components/core/EditorHeader/EditorHeaderView.tsx"]
@@ -80874,6 +81476,28 @@
       "importedSources": ["features/document-layout/ui/ContentLayoutFieldView.tsx", "stories/feature-localization.tsx"]
     },
     {
+      "file": "features/editor/EditorSnapshotHandoff.stories.tsx",
+      "title": "Feature/Editor/Snapshot Handoff",
+      "component": "Preview",
+      "variants": [
+        {
+          "name": "WaitingThenReady",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-editor-snapshot-handoff--waiting-then-ready"
+        },
+        {
+          "name": "ReadOnly",
+          "args": "{ editable: false }",
+          "preview": "http://localhost:6010/?path=/story/feature-editor-snapshot-handoff--read-only"
+        }
+      ],
+      "importedSources": [
+        "components/core/Button/index.ts",
+        "features/editor/EditorSnapshotHandoff.tsx",
+        "features/editor/tiptap/TiptapSnapshot.tsx"
+      ]
+    },
+    {
       "file": "features/editor/components/EditorFileInsert.stories.tsx",
       "title": "Feature/Editor/File Insertion",
       "component": "EditorRuntimePreview",
@@ -81630,6 +82254,48 @@
         "features/account-email/AccountEmailOption.tsx",
         "features/my/ui/ConnectedSocialAccounts/index.ts",
         "stories/feature-localization.tsx"
+      ]
+    },
+    {
+      "file": "features/my/LocalBackups.stories.tsx",
+      "title": "Feature/My/Local Backups",
+      "component": "Preview",
+      "variants": [
+        {
+          "name": "SeveralEntries",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-my-local-backups--several-entries"
+        },
+        {
+          "name": "Empty",
+          "args": "{ initialEntries: [] }",
+          "preview": "http://localhost:6010/?path=/story/feature-my-local-backups--empty"
+        },
+        {
+          "name": "Discard",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-my-local-backups--discard"
+        },
+        {
+          "name": "LoadFailed",
+          "args": "{ initialEntries: [], error: true }",
+          "preview": "http://localhost:6010/?path=/story/feature-my-local-backups--load-failed"
+        },
+        {
+          "name": "StorageUnavailable",
+          "args": "{ initialEntries: [], unavailable: true }",
+          "preview": "http://localhost:6010/?path=/story/feature-my-local-backups--storage-unavailable"
+        },
+        {
+          "name": "NarrowViewport",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-my-local-backups--narrow-viewport"
+        }
+      ],
+      "importedSources": [
+        "components/core/Layout/index.ts",
+        "features/my/LocalBackupsView.tsx",
+        "stories/pages/fixtures/local-backups.ts"
       ]
     },
     {
@@ -83045,6 +83711,41 @@
       ]
     },
     {
+      "file": "stories/features/EditorAccessEnded.stories.tsx",
+      "title": "Feature/Editor/Access Ended",
+      "component": "AccessEndedPreview",
+      "variants": [
+        {
+          "name": "SessionExpired",
+          "args": "{ reason: 'session_expired' }",
+          "preview": "http://localhost:6010/?path=/story/feature-editor-access-ended--session-expired"
+        },
+        {
+          "name": "PermissionRevoked",
+          "args": "{ reason: 'permission_revoked' }",
+          "preview": "http://localhost:6010/?path=/story/feature-editor-access-ended--permission-revoked"
+        },
+        {
+          "name": "SignOutUnsaved",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-editor-access-ended--sign-out-unsaved"
+        },
+        {
+          "name": "DowngradedToView",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-editor-access-ended--downgraded-to-view"
+        }
+      ],
+      "importedSources": [
+        "components/core/Button/index.ts",
+        "components/core/Modal/confirm-dialogs.tsx",
+        "features/confirmation/confirmation-dialogs.ts",
+        "lib/collab/provider-control-state.ts",
+        "lib/providers/AppNotificationRegion.tsx",
+        "lib/providers/EditorNavigationProvider.tsx"
+      ]
+    },
+    {
       "file": "stories/features/FileDownloadPolicy.stories.tsx",
       "title": "Feature/Media Download/Access Policy",
       "component": "DownloadPolicyPreview",
@@ -83108,6 +83809,24 @@
         "features/page/blocks/text-marquee/View.tsx",
         "stories/shared/PreviewFrame.tsx"
       ]
+    },
+    {
+      "file": "stories/features/RejectedEdits.stories.tsx",
+      "title": "Feature/Editor/Rejected Edits",
+      "component": "RejectedEditsPreview",
+      "variants": [
+        {
+          "name": "Review",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-editor-rejected-edits--review"
+        },
+        {
+          "name": "Empty",
+          "args": "{ entries: [] }",
+          "preview": "http://localhost:6010/?path=/story/feature-editor-rejected-edits--empty"
+        }
+      ],
+      "importedSources": ["components/core/Button/index.ts", "features/authoring/EditorHeader/RejectedEditsDialog.tsx"]
     },
     {
       "file": "stories/features/ReorderConsumers.stories.tsx",
@@ -85548,6 +86267,11 @@
           "preview": "http://localhost:6010/?path=/story/pages-account-full-pages--basic-settings"
         },
         {
+          "name": "SettingsWithLocalBackups",
+          "args": "{ surface: 'settings', backups: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-account-full-pages--settings-with-local-backups"
+        },
+        {
           "name": "SettingsFailed",
           "args": "{ surface: 'settings', state: 'failed' }",
           "preview": "http://localhost:6010/?path=/story/pages-account-full-pages--settings-failed"
@@ -85570,6 +86294,7 @@
         "features/my/MySettingsPageView.tsx",
         "lib/providers/SessionProvider.tsx",
         "stories/pages/AccountAccessibility.ts",
+        "stories/pages/fixtures/local-backups.ts",
         "stories/pages/fixtures/personal-access-tokens.ts"
       ]
     },
@@ -86917,10 +87642,6 @@
           "symbols": ["LazyPageEditor"]
         },
         {
-          "file": "lib/api/server-client.ts",
-          "symbols": ["createTranslationClient"]
-        },
-        {
           "file": "lib/auth/login-page.ts",
           "symbols": ["buildLoginRedirectHref"]
         },
@@ -86938,7 +87659,7 @@
         },
         {
           "file": "lib/queries/page.ts",
-          "symbols": ["getPage", "getPageAccessView"]
+          "symbols": ["getPage", "getPageEditorSnapshot", "getPageAccessView"]
         },
         {
           "file": "lib/translation/content-language.ts",
@@ -87003,13 +87724,11 @@
         "Suspense"
       ],
       "controllerEvidence": [
-        "(\n      await createTranslationClient()\n    ).listEntityTranslations",
-        "createTranslationClient",
         "getBaseUrl",
-        "getInitialPageTranslationState",
         "getManageSiteContext",
         "getPage",
         "getPageAccessView",
+        "getPageEditorSnapshot",
         "getPageMetadataDocument",
         "getSession",
         "getSiteMetadataDocument",
@@ -88370,9 +89089,18 @@
           "storyTitle": "Pages/Account/Full Pages",
           "variant": "Settings",
           "coverage": "page-view",
-          "scope": "Actual complete MySettingsPageView with language/newsletter/cookie/token/MCP sections and local preference callbacks. Server role/session projection, credentials and identity persistence are outside.",
+          "scope": "Actual complete MySettingsPageView with empty local backups, language/newsletter/cookie/token/MCP sections and local callbacks. Backup storage/navigation, server role/session projection, credentials and identity persistence are outside.",
           "file": "stories/pages/MyAccountPages.stories.tsx",
           "preview": "http://localhost:6010/?path=/story/pages-account-full-pages--settings"
+        },
+        {
+          "route": "/my/settings",
+          "storyTitle": "Pages/Account/Full Pages",
+          "variant": "SettingsWithLocalBackups",
+          "coverage": "page-view",
+          "scope": "Actual MySettingsPageView placement with several orphan journal fixtures and local discard confirmation. Backup storage, liveness, editor navigation, server session/access and other settings persistence are outside.",
+          "file": "stories/pages/MyAccountPages.stories.tsx",
+          "preview": "http://localhost:6010/?path=/story/pages-account-full-pages--settings-with-local-backups"
         }
       ]
     },
@@ -90691,15 +91419,15 @@
       "sourceKind": "renders JSX",
       "imports": [
         {
-          "file": "features/translation/EntityTranslationsPanel.tsx",
-          "symbols": ["EntityTranslationsPanel"]
+          "file": "features/form/FormTranslationsPanel.tsx",
+          "symbols": ["FormTranslationsPanel"]
         }
       ],
       "reexports": [],
-      "composedJsx": ["EntityTranslationsPanel"],
+      "composedJsx": ["FormTranslationsPanel"],
       "controllerEvidence": [],
       "inheritedLayouts": ["app/admin/forms/[id]/layout.tsx", "app/admin/layout.tsx", "app/layout.tsx"],
-      "directStoryImports": ["stories/pages/FormEditorPage.stories.tsx"],
+      "directStoryImports": [],
       "coverageNote": "Import relationship only; no route behavior, permission, interaction, or nested story coverage is inferred."
     },
     {
@@ -93130,7 +93858,14 @@
       "storyTitle": "Pages/Account/Full Pages",
       "variant": "Settings",
       "coverage": "page-view",
-      "scope": "Actual complete MySettingsPageView with language/newsletter/cookie/token/MCP sections and local preference callbacks. Server role/session projection, credentials and identity persistence are outside."
+      "scope": "Actual complete MySettingsPageView with empty local backups, language/newsletter/cookie/token/MCP sections and local callbacks. Backup storage/navigation, server role/session projection, credentials and identity persistence are outside."
+    },
+    {
+      "route": "/my/settings",
+      "storyTitle": "Pages/Account/Full Pages",
+      "variant": "SettingsWithLocalBackups",
+      "coverage": "page-view",
+      "scope": "Actual MySettingsPageView placement with several orphan journal fixtures and local discard confirmation. Backup storage, liveness, editor navigation, server session/access and other settings persistence are outside."
     },
     {
       "route": "/series/[idOrSlug]",
@@ -94874,6 +95609,16 @@
             {
               "exported": "StatusOption",
               "imported": "StatusOption",
+              "typeOnly": true
+            }
+          ]
+        },
+        {
+          "target": "components/core/EditorHeader/save-state.ts",
+          "symbols": [
+            {
+              "exported": "EditorSaveState",
+              "imported": "EditorSaveState",
               "typeOnly": true
             }
           ]
@@ -105908,6 +106653,21 @@
       ]
     },
     {
+      "file": "lib/collab/block-room-bootstrap.ts",
+      "reexports": [
+        {
+          "target": null,
+          "symbols": [
+            {
+              "exported": "targetRevisionSchema",
+              "imported": "targetRevisionSchema",
+              "typeOnly": false
+            }
+          ]
+        }
+      ]
+    },
+    {
       "file": "lib/collab/form-fields.ts",
       "reexports": [
         {
@@ -106058,6 +106818,21 @@
       ]
     },
     {
+      "file": "lib/collab/runtime-event-parser.ts",
+      "reexports": [
+        {
+          "target": null,
+          "symbols": [
+            {
+              "exported": "parseServerMessage",
+              "imported": "parseServerMessage",
+              "typeOnly": false
+            }
+          ]
+        }
+      ]
+    },
+    {
       "file": "lib/collab/work-meta.ts",
       "reexports": [
         {
@@ -106152,6 +106927,26 @@
               "exported": "WorkMeta",
               "imported": "WorkMeta",
               "typeOnly": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "lib/editor/editor-save-state.ts",
+      "reexports": [
+        {
+          "target": "components/core/EditorHeader/save-state.ts",
+          "symbols": [
+            {
+              "exported": "EditorSaveState",
+              "imported": "EditorSaveState",
+              "typeOnly": true
+            },
+            {
+              "exported": "resolveTransportSaveState",
+              "imported": "resolveTransportSaveState",
+              "typeOnly": false
             }
           ]
         }
