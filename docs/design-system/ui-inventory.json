@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "5adefa031cca271d2896029c6161d152a66aba05b51333877e4c53ab1124f037",
+  "manifestHash": "3f923f9b3dfaa7b48ebb7109ad4b1f20257413a41ce603a762b523900fea17a7",
   "counts": {
-    "sourceFiles": 3761,
-    "productionSourceFiles": 2282,
+    "sourceFiles": 3765,
+    "productionSourceFiles": 2284,
     "componentFiles": 901,
     "coreFamilies": 57,
     "featureDomains": 53,
@@ -1557,6 +1557,10 @@
     "features/editor/tiptap/profiles/PolicyTiptapEditor.test.tsx",
     "features/editor/tiptap/profiles/PolicyTiptapEditor.tsx",
     "features/editor/tiptap/profiles/editor-access-transitions.test.tsx",
+    "features/editor/tiptap/profiles/email-preview.test.ts",
+    "features/editor/tiptap/profiles/email-preview.ts",
+    "features/editor/tiptap/profiles/policy-document.test.ts",
+    "features/editor/tiptap/profiles/policy-document.ts",
     "features/editor/tiptap/profiles/profile-html.ts",
     "features/editor/tiptap/public-block-comparison-fixtures.test.ts",
     "features/editor/tiptap/public-block-comparison-fixtures.ts",
@@ -39099,7 +39103,7 @@
             {
               "name": "onEditorReady",
               "optional": true,
-              "type": "(editor: PolicyTiptapEditorInstance) => void"
+              "type": "(editor: PolicyTiptapEditorInstance | null) => void"
             },
             {
               "name": "onUnsupportedContent",
@@ -39115,13 +39119,13 @@
           "type": "Editor"
         }
       ],
-      "productionConsumers": ["features/policy/LegalPolicyEditor.tsx", "features/policy/PolicyEditor/PolicyEditor.tsx"],
+      "productionConsumers": ["features/policy/PolicyEditor/PolicyEditor.tsx"],
       "catalogAdapters": [],
       "tests": [
         "features/editor/tiptap/profiles/PolicyTiptapEditor.test.tsx",
         "features/editor/tiptap/profiles/editor-access-transitions.test.tsx"
       ],
-      "stories": ["stories/pages/LegalEditorsPage.stories.tsx"],
+      "stories": [],
       "composedJsx": ["EditorAuthoringModeProvider", "TiptapEditor", "div"]
     },
     {
@@ -62139,7 +62143,7 @@
             {
               "name": "onEditorReady",
               "optional": true,
-              "type": "(editor: PolicyEditorInstance) => void"
+              "type": "(editor: PolicyEditorInstance | null) => void"
             },
             {
               "name": "onUnsupportedContent",
@@ -75297,6 +75301,8 @@
         "features/editor/tiptap/profiles/ControlledTiptapEditor.tsx",
         "features/editor/tiptap/profiles/EmailTiptapEditor.tsx",
         "features/editor/tiptap/profiles/PolicyTiptapEditor.tsx",
+        "features/editor/tiptap/profiles/email-preview.ts",
+        "features/editor/tiptap/profiles/policy-document.ts",
         "features/editor/tiptap/profiles/profile-html.ts",
         "features/editor/tiptap/public-block-comparison-fixtures.ts",
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
@@ -75561,6 +75567,8 @@
         "features/editor/tiptap/profiles/EmailTiptapEditor.test.tsx",
         "features/editor/tiptap/profiles/PolicyTiptapEditor.test.tsx",
         "features/editor/tiptap/profiles/editor-access-transitions.test.tsx",
+        "features/editor/tiptap/profiles/email-preview.test.ts",
+        "features/editor/tiptap/profiles/policy-document.test.ts",
         "features/editor/tiptap/public-block-comparison-fixtures.test.ts",
         "features/editor/tiptap/shader/ShaderNode.test.tsx",
         "features/editor/tiptap/shader/shader-editor-api.test.ts",
@@ -86142,7 +86150,7 @@
       "importedSources": [
         "features/date-time/DateTime.tsx",
         "features/document-layout/ui/document-heading-level.ts",
-        "features/editor/tiptap/profiles/PolicyTiptapEditor.tsx",
+        "features/editor/tiptap/profiles/policy-document.ts",
         "features/policy/LegalPolicyEditor.tsx",
         "features/policy/PrivacyEditor.tsx",
         "features/policy/TermsEditor.tsx",
@@ -104349,6 +104357,46 @@
             {
               "exported": "buildP5SandboxDocument",
               "imported": "buildP5SandboxDocument",
+              "typeOnly": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "features/editor/tiptap/profiles/EmailTiptapEditor.tsx",
+      "reexports": [
+        {
+          "target": "features/editor/tiptap/profiles/email-preview.ts",
+          "symbols": [
+            {
+              "exported": "normalizeEmailCampaignPreviewHtml",
+              "imported": "normalizeEmailCampaignPreviewHtml",
+              "typeOnly": false
+            },
+            {
+              "exported": "normalizeEmailCampaignVariable",
+              "imported": "normalizeEmailCampaignVariable",
+              "typeOnly": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "features/editor/tiptap/profiles/PolicyTiptapEditor.tsx",
+      "reexports": [
+        {
+          "target": "features/editor/tiptap/profiles/policy-document.ts",
+          "symbols": [
+            {
+              "exported": "policyTiptapDocumentToHtml",
+              "imported": "policyTiptapDocumentToHtml",
+              "typeOnly": false
+            },
+            {
+              "exported": "validatePolicyTiptapDocument",
+              "imported": "validatePolicyTiptapDocument",
               "typeOnly": false
             }
           ]

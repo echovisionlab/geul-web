@@ -41,9 +41,15 @@ const POLICY_BLOCK_ID = '019cce25-dbc0-7d12-9f1f-735b1a6c6b13';
 
 let root: Root | null = null;
 let host: HTMLDivElement | null = null;
-let doc: Y.Doc | null = null;
-let awareness: Awareness | null = null;
 const mountedEditors = new Set<Editor>();
+const collaborationRooms = new Set<{ document: Y.Doc; awareness: Awareness }>();
+
+function createPolicyRoom() {
+  const document = new Y.Doc();
+  const room = { document, awareness: new Awareness(document) };
+  collaborationRooms.add(room);
+  return room;
+}
 
 afterEach(async () => {
   try {
@@ -54,13 +60,14 @@ afterEach(async () => {
       expect([...mountedEditors].every((editor) => editor.isDestroyed)).toBe(true);
     });
   } finally {
-    awareness?.destroy();
-    doc?.destroy();
+    for (const room of collaborationRooms) {
+      room.awareness.destroy();
+      room.document.destroy();
+    }
+    collaborationRooms.clear();
     host?.remove();
     root = null;
     host = null;
-    awareness = null;
-    doc = null;
     mountedEditors.clear();
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
@@ -103,8 +110,7 @@ function policyController(document: Y.Doc) {
 
 describe('PolicyTiptapEditor profile', () => {
   it('uses the shared Tiptap command surface with the policy capability profile', async () => {
-    doc = new Y.Doc();
-    awareness = new Awareness(doc);
+    const { document: doc, awareness } = createPolicyRoom();
     const onEditorReady = vi.fn();
     host = document.createElement('div');
     document.body.append(host);
@@ -114,8 +120,8 @@ describe('PolicyTiptapEditor profile', () => {
       root?.render(
         <DesignSystemProvider forceColorScheme="light">
           <PolicyTiptapEditor
-            blockRoomController={policyController(doc!)}
-            awareness={awareness!}
+            blockRoomController={policyController(doc)}
+            awareness={awareness}
             onEditorReady={onEditorReady}
           />
         </DesignSystemProvider>,
@@ -144,8 +150,7 @@ describe('PolicyTiptapEditor profile', () => {
   });
 
   it('emits an explicit error and rejects a transaction containing a disallowed node', async () => {
-    doc = new Y.Doc();
-    awareness = new Awareness(doc);
+    const { document: doc, awareness } = createPolicyRoom();
     const onEditorReady = vi.fn();
     const onUnsupportedContent = vi.fn();
     host = document.createElement('div');
@@ -156,8 +161,8 @@ describe('PolicyTiptapEditor profile', () => {
       root?.render(
         <DesignSystemProvider forceColorScheme="light">
           <PolicyTiptapEditor
-            blockRoomController={policyController(doc!)}
-            awareness={awareness!}
+            blockRoomController={policyController(doc)}
+            awareness={awareness}
             onEditorReady={onEditorReady}
             onUnsupportedContent={onUnsupportedContent}
           />
@@ -190,13 +195,14 @@ describe('PolicyTiptapEditor profile', () => {
 
     // A rebuilt canonical room supplies a new controller without remounting
     // this profile. The old room's error must not permanently block it.
-    const rebuiltController = policyController(doc!);
+    const rebuiltRoom = createPolicyRoom();
+    const rebuiltController = policyController(rebuiltRoom.document);
     await act(async () => {
       root?.render(
         <DesignSystemProvider forceColorScheme="light">
           <PolicyTiptapEditor
             blockRoomController={rebuiltController}
-            awareness={awareness!}
+            awareness={rebuiltRoom.awareness}
             onEditorReady={onEditorReady}
             onUnsupportedContent={onUnsupportedContent}
           />

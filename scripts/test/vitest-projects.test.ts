@@ -4,7 +4,6 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
 import { classifyTest, discoverTestProjects, literalTestGlob } from './vitest-projects';
 
@@ -18,7 +17,7 @@ afterEach(() => {
 
 describe('test project boundaries', () => {
   it('assigns the complete repository test collection to exactly one project', () => {
-    const root = fileURLToPath(new URL('../../', import.meta.url));
+    const root = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
     // Git provides an independent inventory, including new local test files. The
     // classifier must not silently narrow the former **/*.test.{ts,tsx} suite.
     const repositoryTests = execFileSync(

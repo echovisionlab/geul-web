@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "5adefa031cca271d2896029c6161d152a66aba05b51333877e4c53ab1124f037",
+  "sourceManifestHash": "3f923f9b3dfaa7b48ebb7109ad4b1f20257413a41ce603a762b523900fea17a7",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
   "counts": { "domains": 53, "componentFiles": 763, "jsxWithoutStoryRelationship": 47 },
   "domains": [
@@ -3093,7 +3093,7 @@
         {
           "file": "features/editor/tiptap/profiles/PolicyTiptapEditor.tsx",
           "hasJsx": true,
-          "directStories": ["Pages/Editors/Legal"],
+          "directStories": [],
           "relatedStories": ["Pages/Admin/Legal Policies", "Pages/Editors/Legal"]
         },
         {
