@@ -107,7 +107,7 @@ export function MapLibreMapView({
       aria-busy={!isReady}
       style={{ zIndex, position: 'relative', height, isolation: 'isolate' }}
     >
-      <DsLayoutInset ref={containerRef} fill="inline" space="none">
+      <DsLayoutInset ref={containerRef} fill="both" space="none">
         {mapSurface}
 
         {!isReady ? (

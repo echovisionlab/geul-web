@@ -4,7 +4,7 @@ Run `node scripts/design-system/inventory.mjs` to regenerate; `--check` fails wh
 
 Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.
 
-Source manifest SHA-256: `fc6f33c7fd91992bb96128621f664cdbf233a2e04860243d385be48b03e1ca62`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
+Source manifest SHA-256: `e56c8f6101e860dc087bce6e05937fff22cbc6fa5d03cc6be055d655fc0259ef`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
 
 ## Counts
 
