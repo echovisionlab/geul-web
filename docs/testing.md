@@ -154,12 +154,24 @@ Workflow concurrency groups PR and dispatch runs by workflow and branch
 (`${{ github.workflow }}-${{ github.head_ref || github.ref_name }}`) and sets
 `cancel-in-progress: true`. A newer run on that branch cancels its predecessor;
 different branches retain their own runs. There is no global test-job group
-that cancels unrelated PRs. On cancellation or final cleanup, the browser adapter
-sends SIGTERM to its detached Jest/worker/Chromium process group, waits up to two
-seconds for exit, then sends SIGKILL if the group remains. `finally` awaits this
-cleanup and closes the owned preview server. Per-story contexts also close on
-success or failure. This is the implemented cancellation contract; cancellation
-on the deployed runner still needs execution evidence.
+that cancels unrelated PRs. Pull requests to `main` have no path exclusion, so
+workflow and `.github/**` metadata changes also create a new run and enter that
+same-branch cancellation group. `Scope` still fast-skips heavy checks for the
+existing Release Please metadata-only PR case.
+
+On cancellation or final cleanup, the browser adapter sends SIGTERM to its
+detached Jest process group, including its Jest workers. It checks the group
+for up to two seconds and sends SIGKILL if it remains. `finally` awaits that
+signal/escalation routine and closes the owned preview server; completing the
+routine does not itself prove that every descendant has exited.
+
+Playwright 1.64 launches Chromium in a separate detached process group, so the
+Jest group signals do not cover Chromium. Normal Playwright parent cleanup and
+per-story context teardown own browser shutdown. The ARC ephemeral runner pod's
+deletion is the final containment boundary that terminates remaining job
+processes, including browsers. Cancellation evidence must distinguish group
+signal escalation, browser/context teardown and runner-pod removal. Those
+runtime observations remain to be recorded for the deployed runner.
 
 The artifact also contains the Go `cmd/email-preview-fixture` helper built from
 API revision `7155b62b9be580753f2187ec85fb2b8eed9dcd94`. The workflow requires a

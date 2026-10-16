@@ -56,6 +56,14 @@ while queued bodies remain under stream backpressure. The default concurrency
 is two; the isolated browser adapter passes its resolved worker limit. Renderer
 stderr and process environment are not returned to the browser.
 
+Job cancellation signals the detached Jest/worker group with SIGTERM and
+escalates to SIGKILL after a two-second grace period. That routine completes
+signal escalation rather than proving that all descendants have exited.
+Playwright 1.64 starts Chromium in a separate process group; normal Playwright
+parent cleanup and context teardown own its shutdown. Deletion of the ARC
+ephemeral runner pod is the final boundary that removes remaining browser and
+renderer processes. Actual cancellation and pod-removal evidence remain pending.
+
 ## Quote ownership and parity evidence
 
 The shared Go `NormalizeEmailContentHTML` applies email-safe inline defaults to

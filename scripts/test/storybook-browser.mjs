@@ -60,7 +60,8 @@ const stopChild = () => {
     }
   };
   shutdown = (async () => {
-    // The detached group includes Jest workers and Chromium, even if Jest exited.
+    // Bound Jest/worker shutdown. Playwright closes its separate browser groups
+    // during normal cleanup; the ephemeral ARC pod bounds forced-exit leftovers.
     if (!signalGroup('SIGTERM')) return;
     const deadline = Date.now() + 2000;
     while (Date.now() < deadline) {
